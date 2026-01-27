@@ -1,6 +1,6 @@
 <template>
   <div :class="['dingtalk-app', isDark ? 'dark' : '']">
-    <div class="flex h-screen bg-background-light dark:bg-background-dark overflow-hidden">
+    <div class="app-container">
       <!-- 新侧边导航 -->
       <ImSideNavNew
         :active-module="activeModule"
@@ -105,6 +105,15 @@ const settingsDefaultMenu = ref('account') // 设置对话框默认菜单
 
 const { connect, onMessage, isConnected } = useImWebSocket()
 
+// 窗口大小响应式处理
+const windowWidth = ref(window.innerWidth)
+const isSmallScreen = computed(() => windowWidth.value < 1024)
+const isMobileScreen = computed(() => windowWidth.value < 768)
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
 const handleSwitchModule = (module) => {
   if (module === 'profile') {
     showProfile.value = true
@@ -198,12 +207,32 @@ onMounted(async () => {
 
   // 添加键盘快捷键监听
   window.addEventListener('keydown', handleKeydown)
+
+  // 添加切换到聊天模块的事件监听
+  window.addEventListener('switch-to-chat', handleSwitchToChat)
+
+  // 添加窗口大小变化监听
+  window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
   // 移除键盘快捷键监听
   window.removeEventListener('keydown', handleKeydown)
+
+  // 移除切换到聊天模块的事件监听
+  window.removeEventListener('switch-to-chat', handleSwitchToChat)
+
+  // 移除窗口大小变化监听
+  window.removeEventListener('resize', handleResize)
 })
+
+// 处理从通讯录发起聊天的切换
+const handleSwitchToChat = (event) => {
+  const { conversationId } = event.detail
+  if (conversationId) {
+    activeModule.value = 'chat'
+  }
+}
 
 // 键盘快捷键处理
 const handleKeydown = (e) => {
@@ -219,6 +248,17 @@ const handleKeydown = (e) => {
 .dingtalk-app {
   width: 100%;
   height: 100%;
+}
+
+// ============================================================================
+// 应用容器 - 统一使用flex布局
+// ============================================================================
+.app-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--dt-bg-body);
 }
 
 // ============================================================================
@@ -276,6 +316,10 @@ const handleKeydown = (e) => {
 // ============================================================================
 // 暗色模式适配
 // ============================================================================
+.dark .app-container {
+  background: var(--dt-bg-body-dark);
+}
+
 .dark .main-content-area {
   background: var(--dt-bg-body-dark);
 }

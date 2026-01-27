@@ -10,29 +10,41 @@
         <span class="material-icons-outlined expand-icon">
           {{ rootExpanded ? 'arrow_drop_down' : 'arrow_right' }}
         </span>
-        <span class="node-label">RuoYi 科技</span>
+        <span class="node-label">组织架构</span>
+        <span v-if="loading" class="loading-icon"></span>
+      </div>
+
+      <!-- 加载状态 -->
+      <div v-if="loading" class="org-children loading-state">
+        <span class="loading-text">加载中...</span>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-else-if="departments.length === 0" class="org-children empty-state">
+        <span class="material-icons-outlined empty-icon">folder_off</span>
+        <span class="empty-text">暂无部门数据</span>
       </div>
 
       <!-- 子部门列表 -->
-      <div v-if="rootExpanded" class="org-children">
+      <div v-else-if="rootExpanded" class="org-children">
         <div
           v-for="dept in departments"
           :key="dept.id"
           class="dept-item"
+          :class="{ 'is-child': dept.isChild }"
         >
           <div
             class="org-node dept-node"
             :class="{
-              active: selectedDept?.id === dept.id,
-              clickable: dept.memberCount > 0
+              active: selectedDept?.id === dept.id
             }"
             @click="handleSelectDept(dept)"
           >
+            <span v-if="dept.isChild" class="child-indicator"></span>
             <span class="node-label">{{ dept.name }}</span>
-            <span v-if="dept.memberCount" class="member-badge">
+            <span v-if="dept.memberCount !== null && dept.memberCount !== undefined" class="member-badge">
               {{ dept.memberCount }}
             </span>
-            <span v-if="dept.locked" class="material-icons-outlined lock-icon">lock</span>
           </div>
         </div>
       </div>
@@ -41,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getOrgTree } from '@/api/im/organization'
 
 const props = defineProps({
@@ -51,44 +63,70 @@ const props = defineProps({
 const emit = defineEmits(['update:selectedDept', 'select'])
 
 const rootExpanded = ref(true)
-const departments = ref([
-  { id: 'all', name: '全公司', memberCount: null },
-  { id: 'ceo', name: '总经办', memberCount: null },
-  { id: 'product', name: '产品部', memberCount: 12 },
-  { id: 'tech', name: '技术部', memberCount: 28, locked: true },
-  { id: 'marketing', name: '市场部', memberCount: 15 },
-  { id: 'finance', name: '财务部', memberCount: 8 }
-])
+const loading = ref(false)
+const orgTreeData = ref([])
+
+// 展开第一级部门作为子部门列表
+const departments = computed(() => {
+  if (orgTreeData.value.length === 0) {
+    // 默认空列表
+    return []
+  }
+  // 扁平化第一级部门
+  const result = []
+  orgTreeData.value.forEach(dept => {
+    result.push(dept)
+    // 如果有子部门，也加入列表（可展开）
+    if (dept.children && dept.children.length > 0) {
+      dept.children.forEach(child => {
+        result.push({
+          ...child,
+          isChild: true,
+          parentId: dept.id
+        })
+      })
+    }
+  })
+  return result
+})
 
 const toggleRoot = () => {
   rootExpanded.value = !rootExpanded.value
 }
 
 const handleSelectDept = (dept) => {
-  if (dept.memberCount || dept.id === 'all') {
-    emit('update:selectedDept', dept)
-    emit('select', dept)
-  }
+  // 允许选择任何部门（memberCount可能为0但仍可查看）
+  emit('update:selectedDept', dept)
+  emit('select', dept)
 }
 
 const loadOrgTree = async () => {
+  loading.value = true
   try {
     const res = await getOrgTree()
     if (res.code === 200 && res.data) {
-      // 如果后端返回真实数据，使用真实数据
-      // departments.value = res.data
+      orgTreeData.value = res.data || []
     }
   } catch (e) {
-    console.error('Failed to load org tree:', e)
+    console.error('加载组织架构失败:', e)
+  } finally {
+    loading.value = false
   }
 }
 
 onMounted(() => {
   loadOrgTree()
 })
+
+// 暴露刷新方法
+defineExpose({
+  refresh: loadOrgTree
+})
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/design-tokens.scss';
+
 .org-tree-container {
   display: flex;
   flex-direction: column;
@@ -102,97 +140,166 @@ onMounted(() => {
 .org-node {
   display: flex;
   align-items: center;
-  padding: 6px 8px;
-  border-radius: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
-  color: #595959;
+  transition: all 0.2s var(--dt-ease-out);
+  color: var(--dt-text-secondary);
   position: relative;
+  font-size: 13px;
+
+  .dark & {
+    color: var(--dt-text-secondary-dark);
+  }
 }
 
 .root-node {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--dt-text-primary);
+
+  .dark & {
+    color: var(--dt-text-primary-dark);
+  }
 }
 
 .root-node:hover,
 .dept-node:hover {
-  background: #f5f5f5;
+  background: var(--dt-bg-hover);
+
+  .dark & {
+    background: var(--dt-bg-hover-dark);
+  }
 }
 
 .dept-node.active {
-  background: #e6f7ff;
-  color: #1677ff;
-  font-weight: 500;
-}
+  background: var(--dt-brand-lighter);
+  color: var(--dt-brand-color);
+  font-weight: 600;
 
-.dept-node.clickable {
-  cursor: pointer;
+  .dark & {
+    background: rgba(22, 119, 255, 0.15);
+    color: #60a5fa;
+  }
 }
 
 .expand-icon {
-  font-size: 20px;
+  font-size: 18px;
   margin-right: 4px;
-  color: #bfbfbf;
+  color: var(--dt-text-quaternary);
+  transition: transform 0.2s;
+
+  .dark & {
+    color: var(--dt-text-quaternary-dark);
+  }
+}
+
+.root-node.expanded .expand-icon {
+  transform: rotate(0deg);
+}
+
+.loading-icon {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  border: 2px solid var(--dt-border-color);
+  border-top-color: var(--dt-brand-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .node-label {
-  font-size: 14px;
+  font-size: 13px;
   flex: 1;
+}
+
+.child-indicator {
+  width: 4px;
+  height: 4px;
+  background: var(--dt-text-quaternary);
+  border-radius: 50%;
+  margin-right: 8px;
+
+  .dark & {
+    background: var(--dt-text-quaternary-dark);
+  }
+}
+
+.dept-item.is-child {
+  margin-left: 20px;
 }
 
 .member-badge {
   font-size: 10px;
-  background: #e6f7ff;
-  color: #1677ff;
+  background: var(--dt-brand-lighter);
+  color: var(--dt-brand-color);
   padding: 2px 6px;
   border-radius: 10px;
-  font-weight: 500;
-}
+  font-weight: 600;
+  margin-left: 6px;
 
-.lock-icon {
-  font-size: 12px;
-  color: #d9d9d9;
-  margin-left: 4px;
+  .dark & {
+    background: rgba(22, 119, 255, 0.15);
+    color: #60a5fa;
+  }
 }
 
 .org-children {
-  padding-left: 16px;
-  margin-left: 6px;
-  border-left: 1px solid #e6e6e6;
+  padding-left: 12px;
+  margin-left: 10px;
+  border-left: 1px dashed var(--dt-border-light);
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-top: 2px;
+  margin-top: 4px;
+
+  .dark & {
+    border-left-color: var(--dt-border-dark);
+  }
 }
 
-/* 暗色模式 */
-:deep(.dark) .org-node {
-  color: #cbd5e1;
+.org-children.loading-state,
+.org-children.empty-state {
+  padding: 16px 12px;
+  text-align: center;
+  border-left: none;
 }
 
-:deep(.dark) .org-node:hover {
-  background: rgba(51, 65, 85, 0.5);
+.loading-text {
+  font-size: 12px;
+  color: var(--dt-text-quaternary);
+
+  .dark & {
+    color: var(--dt-text-quaternary-dark);
+  }
 }
 
-:deep(.dark) .dept-node.active {
-  background: rgba(30, 58, 138, 0.3);
-  color: #60a5fa;
-}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 
-:deep(.dark) .expand-icon {
-  color: #64748b;
-}
+  .empty-icon {
+    font-size: 24px;
+    color: var(--dt-text-quaternary);
 
-:deep(.dark) .member-badge {
-  background: rgba(30, 58, 138, 0.3);
-  color: #60a5fa;
-}
+    .dark & {
+      color: var(--dt-text-quaternary-dark);
+    }
+  }
 
-:deep(.dark) .org-children {
-  border-left-color: #334155;
-}
+  .empty-text {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
 
-:deep(.dark) .lock-icon {
-  color: #475569;
+    .dark & {
+      color: var(--dt-text-tertiary-dark);
+    }
+  }
 }
 </style>

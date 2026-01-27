@@ -709,7 +709,7 @@ defineExpose({
   }
 
   :deep(.el-dialog) {
-    border-radius: var(--dt-radius-2xl);
+    border-radius: 8px;
     overflow: hidden;
   }
 }
@@ -761,7 +761,7 @@ defineExpose({
     gap: 4px;
     padding: 4px 12px;
     background: var(--dt-bg-body);
-    border-radius: 20px;
+    border-radius: 6px;
     font-size: 12px;
     color: var(--dt-text-secondary);
     margin-top: 8px;

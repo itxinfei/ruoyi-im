@@ -152,7 +152,7 @@ export default {
 
 .summary-content {
   background-color: #f5f7fa;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 16px;
 }
 

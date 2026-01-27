@@ -1,1017 +1,589 @@
 <template>
-  <div class="calendar-panel">
-    <!-- Main Content Area -->
-    <div class="calendar-main">
-      <header class="calendar-header">
-        <div class="header-left">
-          <div class="date-range">
-            <h2 class="range-title">{{ weekRangeString }}</h2>
-            <button class="expand-btn">
-              <span class="material-icons-outlined">expand_more</span>
-            </button>
-          </div>
+  <div class="calendar-pc-container">
+    <!-- 1. 左侧功能面板 (240px 固定) -->
+    <aside class="calendar-aside">
+      <div class="aside-top">
+        <el-button type="primary" class="create-btn" @click="handleAddSchedule">
+          <el-icon><Plus /></el-icon>
+          <span>新建日程</span>
+        </el-button>
+      </div>
 
-          <div class="nav-controls">
-            <button class="nav-btn" @click="previousWeek" title="上一周">
-               <span class="material-icons-outlined text-lg">chevron_left</span>
-            </button>
-            <button class="today-btn" @click="goToToday">今天</button>
-            <button class="nav-btn" @click="nextWeek" title="下一周">
-               <span class="material-icons-outlined text-lg">chevron_right</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="view-switcher">
-          <button
-            v-for="view in ['月', '周', '日', '日程']"
-            :key="view"
-            class="switch-btn"
-            :class="{ active: currentView === view }"
-            @click="currentView = view"
-          >
-            {{ view }}
-          </button>
-        </div>
-      </header>
-
-      <!-- Week View Grid -->
-      <div v-if="currentView === '周'" class="week-view">
-        <div class="week-header">
-          <div class="time-column-header"></div>
-          <div
-            v-for="(day, index) in weekHeaders"
-            :key="index"
-            class="day-header"
-            :class="{ 'is-today': isToday(day.date) }"
-          >
-            <div class="day-name">{{ day.name }}</div>
-            <div class="day-date">{{ day.date.getDate() }}</div>
-          </div>
-        </div>
-
-        <div class="grid-scroll-area">
-          <div class="time-grid">
-            <div class="grid-background">
-              <div class="time-row" v-for="hour in hours" :key="hour">
-                <span class="time-label">{{ formatHour(hour) }}</span>
-              </div>
+      <div class="aside-content scrollbar-none">
+        <!-- 迷你日历：PC端通常使用标准紧凑型 -->
+        <div class="mini-picker-wrapper">
+          <el-date-picker
+            v-model="currentDate"
+            type="date"
+            placeholder="选择日期"
+            format="YYYY-MM-DD"
+            class="hidden-input"
+            :teleported="false"
+            popper-class="pc-mini-popper"
+          />
+          <!-- 模拟一个更专业的迷你日历视图 -->
+          <div class="mini-cal-header">
+            <span class="year-month">{{ formatYearMonth(currentDate) }}</span>
+            <div class="nav-ops">
+              <el-icon @click="prevMonth"><ArrowLeft /></el-icon>
+              <el-icon @click="nextMonth"><ArrowRight /></el-icon>
             </div>
-
-            <div class="day-columns">
-              <div class="time-column-spacer"></div>
-              <div v-for="(day, index) in weekHeaders" :key="index" class="day-column" :class="{ 'is-today': isToday(day.date) }">
-                 <!-- Events -->
-                 <div
-                    v-for="event in getEventsForDay(day.date)"
-                    :key="event.id"
-                    class="event-block"
-                    :class="`event-${event.color}`"
-                    :style="getEventStyle(event)"
-                    @click.stop="handleEventClick(event)"
-                 >
-                   <div class="event-title">{{ event.title }}</div>
-                   <div class="event-time">{{ event.startTime }} - {{ event.endTime }}</div>
-                   <div v-if="event.location" class="event-location">{{ event.location }}</div>
-                 </div>
-
-                 <!-- Current Time Line -->
-                 <div v-if="isToday(day.date)" class="current-time-line" :style="{ top: currentTimeTop + 'px' }">
-                    <div class="dot"></div>
-                    <div class="line"></div>
-                 </div>
-              </div>
+          </div>
+          <div class="mini-cal-grid">
+            <div v-for="d in ['一','二','三','四','五','六','日']" :key="d" class="week-label">{{ d }}</div>
+            <div
+              v-for="(day, idx) in monthDays"
+              :key="idx"
+              class="day-cell"
+              :class="{ 
+                'not-current': !day.isCurrentMonth, 
+                'is-today': isToday(day.date),
+                'is-active': isSameDay(day.date, currentDate)
+              }"
+              @click="currentDate = day.date; selectedDate = day.date"
+            >
+              {{ day.date.getDate() }}
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Month View Grid -->
-      <div v-else-if="currentView === '月'" class="month-view">
-        <div class="month-grid-header">
-           <div v-for="day in ['一', '二', '三', '四', '五', '六', '日']" :key="day" class="weekday-label">
-             {{ day }}
-           </div>
-        </div>
-        <div class="month-grid">
-           <div
-             v-for="(day, index) in monthDays"
-             :key="index"
-             class="month-day-cell"
-             :class="{
-               'not-current-month': !day.isCurrentMonth,
-               'is-today': isToday(day.date),
-               'is-selected': isSameDay(day.date, selectedDate)
-             }"
-             @click="selectedDate = day.date"
-           >
-             <div class="cell-top">
-                <span class="day-num">{{ day.date.getDate() }}</span>
-                <span v-if="isToday(day.date)" class="today-label">今</span>
-             </div>
-             <div class="day-events">
-               <div
-                 v-for="event in getEventsForDay(day.date)"
-                 :key="event.id"
-                 class="mini-event"
-                 :class="`event-bg-${event.color}`"
-               >
-                 {{ event.title }}
-               </div>
-             </div>
-           </div>
-        </div>
-      </div>
+        <div class="divider"></div>
 
-      <div v-else class="view-placeholder">
-        暂未实现 {{ currentView }} 视图
-      </div>
-    </div>
-
-    <!-- Right Sidebar -->
-    <aside class="right-panel">
-      <div class="panel-header">
-        <div class="date-info">
-          <div>
-            <h3 class="date-title">{{ formatDate(selectedDate) }}</h3>
-            <p class="date-subtitle">{{ formatLunarDate(selectedDate) }}</p>
-          </div>
-          <div class="date-badge">
-            {{ selectedDate.getDate() }}
-          </div>
-        </div>
-
-        <button class="add-btn" @click="handleAddSchedule">
-          <span class="material-icons-outlined">add</span>
-          新建日程
-        </button>
-      </div>
-
-      <div class="panel-content">
-        <h4 class="section-title">今日日程</h4>
-
-        <div v-if="selectedDateEvents.length > 0" class="schedule-list">
-          <div
-            v-for="event in selectedDateEvents"
-            :key="event.id"
-            class="schedule-item"
-            @click="handleEventClick(event)"
-          >
-            <div class="timeline-indicator">
-              <div class="dot" :class="`dot-${event.color}`"></div>
-              <div class="line"></div>
-            </div>
-
-            <div class="event-card">
-              <div class="card-header">
-                <span class="card-title">{{ event.title }}</span>
-              </div>
-              <div class="card-time">
-                <span class="time-tag">{{ event.startTime }} - {{ event.endTime }}</span>
-              </div>
-
-              <div v-if="event.location" class="card-location">
-                <span class="material-icons-outlined text-[14px]">location_on</span>
-                {{ event.location }}
-              </div>
-
-              <div v-if="event.attendees && event.attendees.length" class="attendees">
-                <div
-                  v-for="(person, idx) in event.attendees.slice(0, 3)"
-                  :key="idx"
-                  class="avatar"
-                  :class="getAvatarClass(idx)"
-                >
-                  {{ person.name ? person.name[0] : person[0] }}
-                </div>
-                 <div v-if="event.attendees.length > 3" class="avatar more">
-                  +{{ event.attendees.length - 3 }}
-                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-else class="empty-state">
-          暂无日程
-        </div>
-
-        <div class="todos-section">
-          <h4 class="section-title">待办事项</h4>
-          <div v-for="todo in todos" :key="todo.id" class="todo-item">
-            <input type="checkbox" class="todo-checkbox" :checked="todo.completed"/>
-            <span class="todo-text">{{ todo.text }}</span>
+        <!-- 日历分类列表 -->
+        <div class="calendar-list">
+          <h4 class="list-title text-slate-400">日历列表</h4>
+          <div v-for="cat in calendarCategories" :key="cat.name" class="list-item">
+            <el-checkbox v-model="cat.enabled" />
+            <div class="color-dot" :style="{ backgroundColor: cat.hex }"></div>
+            <span class="name">{{ cat.name }}</span>
           </div>
         </div>
       </div>
     </aside>
+
+    <!-- 2. 主视图区域 -->
+    <main class="calendar-main">
+      <header class="main-header">
+        <div class="left-tools">
+          <h2 class="current-date-text">{{ viewTitle }}</h2>
+          <div class="btn-group">
+            <button class="tool-btn" @click="prev"><el-icon><ArrowLeft /></el-icon></button>
+            <button class="tool-btn text-sm px-3" @click="goToToday">今天</button>
+            <button class="tool-btn" @click="next"><el-icon><ArrowRight /></el-icon></button>
+          </div>
+        </div>
+
+        <div class="right-tools">
+          <div class="view-selector">
+            <div 
+              v-for="v in viewOptions" 
+              :key="v.key" 
+              class="view-tab"
+              :class="{ active: currentView === v.key }"
+              @click="currentView = v.key"
+            >
+              {{ v.label }}
+            </div>
+          </div>
+          <el-button circle link @click="loadEvents"><el-icon><Refresh /></el-icon></el-button>
+        </div>
+      </header>
+
+      <!-- 网格内容区 -->
+      <div class="view-content scrollbar-thin">
+        <!-- 月视图：PC端核心 -->
+        <div v-if="currentView === 'month'" class="pc-month-view">
+          <div class="grid-header">
+            <div v-for="d in ['周一','周二','周三','周四','周五','周六','周日']" :key="d" class="header-cell">{{ d }}</div>
+          </div>
+          <div class="grid-body">
+            <div
+              v-for="(day, idx) in monthDays"
+              :key="idx"
+              class="body-cell"
+              :class="{ 'not-curr': !day.isCurrentMonth, 'is-today': isToday(day.date), 'is-active': isSameDay(day.date, selectedDate) }"
+              @click="selectedDate = day.date"
+            >
+              <div class="cell-head">
+                <span class="day-num">{{ day.date.getDate() }}</span>
+                <span v-if="isToday(day.date)" class="today-mark">今天</span>
+              </div>
+              <div class="cell-events">
+                <div
+                  v-for="event in getEventsForDay(day.date).slice(0, 4)"
+                  :key="event.id"
+                  class="event-line"
+                  :class="[`line-${event.color}`]"
+                  @click.stop="handleEventDetail(event)"
+                >
+                  <span class="dot"></span>
+                  <span class="time">{{ event.startTime }}</span>
+                  <span class="title">{{ event.title }}</span>
+                </div>
+                <div v-if="getEventsForDay(day.date).length > 4" class="more-link">
+                  还有 {{ getEventsForDay(day.date).length - 4 }} 项...
+                </div>
+              </div>
+              <!-- 悬浮新增按钮 -->
+              <div class="add-hover-btn" @click.stop="handleGridClick(day.date, $event)">
+                <el-icon><Plus /></el-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 周视图：精细化时间轴 -->
+        <div v-else-if="currentView === 'week'" class="pc-week-view">
+          <div class="week-sticky-header">
+            <div class="time-col-head"></div>
+            <div v-for="day in weekHeaders" :key="day.date" class="day-col-head" :class="{ 'is-today': isToday(day.date) }">
+              <span class="name">{{ day.name }}</span>
+              <span class="date">{{ day.date.getDate() }}</span>
+            </div>
+          </div>
+          <div class="week-body-container">
+            <div class="time-axis">
+              <div v-for="hour in hours" :key="hour" class="hour-label">
+                {{ hour.toString().padStart(2, '0') }}:00
+              </div>
+            </div>
+            <div class="week-grid">
+              <div v-for="day in weekHeaders" :key="day.date" class="week-col" @click="handleGridClick(day.date, $event)">
+                <div v-for="h in 12" :key="h" class="hour-block"></div>
+                
+                <!-- 日程卡片 -->
+                <div
+                  v-for="event in getEventsForDay(day.date)"
+                  :key="event.id"
+                  class="pc-event-card"
+                  :class="[`card-${event.color}`]"
+                  :style="getEventStyle(event)"
+                  @click.stop="handleEventDetail(event)"
+                >
+                  <div class="card-inner">
+                    <div class="title">{{ event.title }}</div>
+                    <div class="time">{{ event.startTime }} - {{ event.endTime }}</div>
+                  </div>
+                </div>
+
+                <!-- 时间线 -->
+                <div v-if="isToday(day.date)" class="pc-now-line" :style="{ top: currentTimeTop + 'px' }">
+                  <div class="marker"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 3. 右侧详情 (可选收起) -->
+    <aside class="calendar-info-panel">
+      <div class="info-header">
+        <h3>日程概览</h3>
+        <p class="text-xs text-slate-400">{{ formatDateDisplay(selectedDate) }}</p>
+      </div>
+      
+      <div class="info-content scrollbar-thin">
+        <div v-if="selectedDateEvents.length > 0" class="agenda-list">
+          <div v-for="event in selectedDateEvents" :key="event.id" class="agenda-card" @click="handleEventDetail(event)">
+            <div class="color-bar" :style="{ backgroundColor: getHexColor(event.color) }"></div>
+            <div class="details">
+              <div class="t">{{ event.title }}</div>
+              <div class="m flex items-center gap-2">
+                <el-icon><Timer /></el-icon>{{ event.startTime }} - {{ event.endTime }}
+              </div>
+              <div v-if="event.location" class="m flex items-center gap-2">
+                <el-icon><Location /></el-icon>{{ event.location }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="empty-agenda">
+          <el-icon class="text-4xl text-slate-100 dark:text-slate-800 mb-2"><Calendar /></el-icon>
+          <p>今日暂无安排</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 弹窗部分保持一致 -->
+    <el-dialog v-model="showEventDetail" title="日程详情" width="420px" class="pc-dialog">
+      <div v-if="activeEvent" class="space-y-4">
+        <h3 class="text-lg font-bold border-l-4 pl-3" :style="{ borderColor: getHexColor(activeEvent.color) }">{{ activeEvent.title }}</h3>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded">
+            <p class="text-slate-400 mb-1">开始时间</p>
+            <p class="font-medium">{{ activeEvent.startTime }}</p>
+          </div>
+          <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded">
+            <p class="text-slate-400 mb-1">结束时间</p>
+            <p class="font-medium">{{ activeEvent.endTime }}</p>
+          </div>
+        </div>
+        <div v-if="activeEvent.location" class="flex items-center gap-2 text-sm text-slate-600">
+          <el-icon><Location /></el-icon> {{ activeEvent.location }}
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { Plus, ArrowLeft, ArrowRight, Refresh, Timer, Location, Calendar } from '@element-plus/icons-vue'
+import { getEventsByTimeRange } from '@/api/im/schedule'
 import { ElMessage } from 'element-plus'
-import { getEventsByTimeRange, createEvent, updateEvent, deleteEvent } from '@/api/im/schedule'
 
-// --- State ---
+// --- PC 状态 ---
 const currentDate = ref(new Date())
 const selectedDate = ref(new Date())
-const currentView = ref('周')
+const currentView = ref('month')
+const showEventDetail = ref(false)
+const activeEvent = ref(null)
+const allEvents = ref([])
 const currentTimeTop = ref(0)
-const loading = ref(false)
-let timer = null
 
-const todos = ref([
-  { id: 1, text: '审核 UI 设计稿', completed: false },
-  { id: 2, text: '回复客户邮件', completed: false }
+const viewOptions = [
+  { label: '月', key: 'month' },
+  { label: '周', key: 'week' },
+  { label: '日', key: 'day' }
+]
+
+const calendarCategories = ref([
+  { name: '工作日程', hex: '#1677ff', enabled: true },
+  { name: '会议安排', hex: '#722ed1', enabled: true },
+  { name: '个人生活', hex: '#52c41a', enabled: true }
 ])
 
-// 从API加载的日程事件
-const allEvents = ref([])
-
-// --- Helpers ---
 const hours = Array.from({ length: 13 }, (_, i) => i + 8) // 08:00 - 20:00
 const START_HOUR = 8
 const HOUR_HEIGHT = 80
-const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
-// 格式化日期为 yyyy-MM-dd HH:mm:ss
-const formatDateTime = (date, time = '00:00:00') => {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d} ${time}`
-}
-
-// 格式化日期为 yyyy-MM-dd
-const formatDateOnly = (date) => {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
-
-// 颜色映射：后端颜色 -> 前端颜色类
-const colorMap = {
-  'BLUE': 'blue',
-  'GREEN': 'emerald',
-  'ORANGE': 'orange',
-  'PURPLE': 'purple',
-  'RED': 'red',
-  'GRAY': 'slate',
-  'DEFAULT': 'blue'
-}
-
-// 加载日程数据
+// --- 逻辑与原代码保持同步并优化 ---
 const loadEvents = async () => {
-  loading.value = true
   try {
-    // 获取当前周的开始和结束时间
-    const curr = new Date(currentDate.value)
-    const day = curr.getDay()
-    const diff = curr.getDate() - day + (day === 0 ? -6 : 1)
-    const monday = new Date(curr.setDate(diff))
-
-    const startTime = new Date(monday)
-    startTime.setHours(0, 0, 0, 0)
-
-    const endTime = new Date(monday)
-    endTime.setDate(monday.getDate() + 6)
-    endTime.setHours(23, 59, 59, 999)
-
     const res = await getEventsByTimeRange(
-      formatDateTime(startTime, '00:00:00'),
-      formatDateTime(endTime, '23:59:59')
+      formatDateTime(getWeekStart(currentDate.value), '00:00:00'),
+      formatDateTime(getWeekEnd(currentDate.value), '23:59:59')
     )
-
     if (res.code === 200 && res.data) {
-      // 转换后端数据格式为前端需要的格式
-      allEvents.value = res.data.map(event => {
-        const startDate = new Date(event.startTime)
-        const endDate = new Date(event.endTime)
-
-        return {
-          id: event.id,
-          title: event.title,
-          startTime: `${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`,
-          endTime: `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`,
-          date: formatDateOnly(startDate),
-          color: colorMap[event.color?.toUpperCase()] || colorMap.DEFAULT,
-          location: event.location,
-          attendees: (event.participants || []).map(p => ({
-            name: p.nickname || p.username || '?'
-          })),
-          description: event.description
-        }
-      })
+      allEvents.value = res.data.map(e => ({
+        id: e.id, title: e.title,
+        startTime: formatTime(e.startTime), endTime: formatTime(e.endTime),
+        date: formatDateOnly(new Date(e.startTime)),
+        color: e.color?.toLowerCase() || 'blue',
+        location: e.location, description: e.description
+      }))
     }
-  } catch (error) {
-    console.error('加载日程失败:', error)
-    // 失败时使用空数组，不显示错误
-  } finally {
-    loading.value = false
-  }
+  } catch (e) { console.error('Load failed', e) }
 }
 
-// 监听当前日期变化，重新加载日程
-watch(currentDate, () => {
-  loadEvents()
-})
-
-// 初始化加载
-onMounted(() => {
-  loadEvents()
-  updateCurrentTime()
-  timer = setInterval(updateCurrentTime, 60000)
-})
+const formatYearMonth = (d) => `${d.getFullYear()}年${d.getMonth() + 1}月`
+const formatDateTime = (d, t) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${t}`
+const formatTime = (ts) => { const d = new Date(ts); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` }
+const formatDateOnly = (d) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`
+const getWeekStart = (d) => { const curr = new Date(d); const day = curr.getDay(); const diff = curr.getDate() - day + (day === 0 ? -6 : 1); return new Date(curr.setDate(diff)) }
+const getWeekEnd = (d) => { const s = getWeekStart(d); return new Date(s.getTime() + 6 * 86400000) }
 
 // --- Computed ---
+const viewTitle = computed(() => {
+  if (currentView.value === 'month') return formatYearMonth(currentDate.value)
+  const s = getWeekStart(currentDate.value), e = getWeekEnd(currentDate.value)
+  return `${s.getMonth()+1}月${s.getDate()}日 - ${e.getMonth()+1}月${e.getDate()}日`
+})
+
 const weekHeaders = computed(() => {
-  const curr = new Date(currentDate.value)
-  const day = curr.getDay()
-  const diff = curr.getDate() - day + (day === 0 ? -6 : 1) // Monday start
-
-  const monday = new Date(curr.setDate(diff))
-  const days = []
-
-  const displayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday)
-    d.setDate(monday.getDate() + i)
-    days.push({
-      name: displayNames[i],
-      date: d
-    })
-  }
-  return days
-})
-
-const weekRangeString = computed(() => {
-  if (!weekHeaders.value.length) return ''
-  const start = weekHeaders.value[0].date
-  const end = weekHeaders.value[6].date
-  return `${start.getFullYear()}年 ${start.getMonth() + 1}月${start.getDate()}日 - ${end.getMonth() + 1}月${end.getDate()}日`
-})
-
-const selectedDateEvents = computed(() => {
-  return allEvents.value.filter(event => {
-    const eDate = new Date(event.date)
-    const sDate = selectedDate.value
-    return eDate.getDate() === sDate.getDate() &&
-           eDate.getMonth() === sDate.getMonth() &&
-           eDate.getFullYear() === sDate.getFullYear()
-  })
+  const s = getWeekStart(currentDate.value)
+  const names = ['周一','周二','周三','周四','周五','周六','周日']
+  return Array.from({length:7}, (_, i) => ({ name: names[i], date: new Date(s.getTime() + i*86400000) }))
 })
 
 const monthDays = computed(() => {
-  const year = currentDate.value.getFullYear()
-  const month = currentDate.value.getMonth()
-
-  // First day of the month
-  const firstDay = new Date(year, month, 1)
-  // Day of week (0 is Sunday)
-  let startDay = firstDay.getDay()
-  // Monday start: Sun->7, Mon->1, Tue->2...
-  startDay = startDay === 0 ? 7 : startDay
-
+  const y = currentDate.value.getFullYear(), m = currentDate.value.getMonth()
+  const first = new Date(y, m, 1); let start = first.getDay(); start = start === 0 ? 7 : start
   const days = []
-
-  // Previous month padding
-  for (let i = startDay - 1; i > 0; i--) {
-    const d = new Date(year, month, 1 - i)
-    days.push({ date: d, isCurrentMonth: false })
-  }
-
-  // Current month days
-  const lastDay = new Date(year, month + 1, 0).getDate()
-  for (let i = 1; i <= lastDay; i++) {
-    const d = new Date(year, month, i)
-    days.push({ date: d, isCurrentMonth: true })
-  }
-
-  // Next month padding to fill 6 weeks (42 cells)
-  const remaining = 42 - days.length
-  for (let i = 1; i <= remaining; i++) {
-    const d = new Date(year, month + 1, i)
-    days.push({ date: d, isCurrentMonth: false })
-  }
-
+  for (let i = start - 1; i > 0; i--) days.push({ date: new Date(y, m, 1 - i), isCurrentMonth: false })
+  const last = new Date(y, m + 1, 0).getDate()
+  for (let i = 1; i <= last; i++) days.push({ date: new Date(y, m, i), isCurrentMonth: true })
+  while (days.length < 42) days.push({ date: new Date(y, m + 1, days.length - (last + start - 2)), isCurrentMonth: false })
   return days
 })
 
+const selectedDateEvents = computed(() => allEvents.value.filter(e => isSameDay(new Date(e.date), selectedDate.value)))
+
 // --- Methods ---
-const parseTime = (timeStr) => {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  return hours + minutes / 60;
-};
+const isToday = (d) => isSameDay(d, new Date())
+const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate()
+const getEventsForDay = (d) => allEvents.value.filter(e => isSameDay(new Date(e.date), d))
+const getEventStyle = (e) => {
+  const p = (t) => { const [h, m] = t.split(':').map(Number); return h + m/60 }
+  const s = p(e.startTime), end = p(e.endTime)
+  return { top: `${(s - START_HOUR) * 80}px`, height: `${(end - s) * 80}px` }
+}
+const getHexColor = (c) => ({ blue: '#1677ff', purple: '#722ed1', emerald: '#52c41a', orange: '#f97316', red: '#ff4d4f' }[c] || '#1677ff')
+const formatDateDisplay = (d) => `${d.getMonth()+1}月${d.getDate()}日 ${['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]}`
 
-const formatHour = (hour) => `${hour.toString().padStart(2, '0')}:00`
-
-const formatDate = (date) => `${monthNames[date.getMonth()]}${date.getDate()}日`
-
-const formatLunarDate = (date) => `${dayNames[date.getDay()]} · 农历Mock` // Shim
-
-const isToday = (date) => {
-  const today = new Date()
-  return date.getDate() === today.getDate() &&
-         date.getMonth() === today.getMonth() &&
-         date.getFullYear() === today.getFullYear()
+const updateTimeLine = () => {
+  const n = new Date(); currentTimeTop.value = (n.getHours() + n.getMinutes()/60 - START_HOUR) * 80
 }
 
-const isSameDay = (d1, d2) => {
-  return d1.getFullYear() === d2.getFullYear() &&
-         d1.getMonth() === d2.getMonth() &&
-         d1.getDate() === d2.getDate()
-}
+const prev = () => { const d = new Date(currentDate.value); if(currentView.value === 'month') d.setMonth(d.getMonth()-1); else d.setDate(d.getDate()-7); currentDate.value = d }
+const next = () => { const d = new Date(currentDate.value); if(currentView.value === 'month') d.setMonth(d.getMonth()+1); else d.setDate(d.getDate()+7); currentDate.value = d }
+const prevMonth = () => { currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth()-1)) }
+const nextMonth = () => { currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth()+1)) }
+const goToToday = () => { currentDate.value = new Date(); selectedDate.value = new Date() }
 
-const getEventsForDay = (date) => {
-  return allEvents.value.filter(event => {
-    const eventDate = new Date(event.date)
-    return eventDate.getDate() === date.getDate() &&
-           eventDate.getMonth() === date.getMonth() &&
-           eventDate.getFullYear() === date.getFullYear()
-  })
-}
+const handleEventDetail = (e) => { activeEvent.value = e; showEventDetail.value = true }
+const handleGridClick = (date, event) => { selectedDate.value = date; ElMessage.info('正在唤起快速创建...') }
+const handleAddSchedule = () => ElMessage.info('新建日程功能开发中...')
 
-const getEventStyle = (event) => {
-  const start = parseTime(event.startTime)
-  const end = parseTime(event.endTime)
-  const top = (start - START_HOUR) * HOUR_HEIGHT
-  const height = (end - start) * HOUR_HEIGHT
-  return { top: `${top}px`, height: `${height}px` }
-}
-
-const getAvatarClass = (index) => {
-  const colors = ['bg-blue', 'bg-orange', 'bg-slate']
-  return colors[index % colors.length]
-}
-
-const updateCurrentTime = () => {
-  const now = new Date()
-  const hours = now.getHours()
-  const minutes = now.getMinutes()
-  const timeVal = hours + minutes / 60
-  currentTimeTop.value = (timeVal - START_HOUR) * HOUR_HEIGHT
-}
-
-// Actions
-const previousWeek = () => {
-  const d = new Date(currentDate.value)
-  d.setDate(d.getDate() - 7)
-  currentDate.value = d
-}
-
-const nextWeek = () => {
-  const d = new Date(currentDate.value)
-  d.setDate(d.getDate() + 7)
-  currentDate.value = d
-}
-
-const goToToday = () => {
-  currentDate.value = new Date()
-  selectedDate.value = new Date()
-}
-
-const handleEventClick = (event) => {
-  selectedDate.value = new Date(event.date)
-}
-
-const handleAddSchedule = () => {
-  // TODO: 打开日程创建对话框
-  ElMessage.info('新建日程功能开发中...')
-}
-
-// Lifecycle (已移到前面)
-onUnmounted(() => {
-  if (timer) clearInterval(timer)
-})
+let timer = null
+onMounted(() => { loadEvents(); updateTimeLine(); timer = setInterval(updateTimeLine, 60000) })
+onUnmounted(() => clearInterval(timer))
+watch(currentDate, loadEvents)
 </script>
 
-<style lang="scss" scoped>
-/* Main Layout */
-.calendar-panel {
+<style scoped lang="scss">
+// ============================================================================
+// PC 桌面端全局容器
+// ============================================================================
+.calendar-pc-container {
   display: flex;
   height: 100%;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  background-color: var(--dt-bg-card);
+  background: #fff;
+  color: #334155;
+  .dark & { background: #0f172a; color: #cbd5e1; }
 }
 
-.calendar-main {
-  flex: 1;
+// ============================================================================
+// 左侧面板 - 规整、功能导向
+// ============================================================================
+.calendar-aside {
+  width: 240px;
+  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-}
+  background: #f8fafc;
+  .dark & { border-color: #1e293b; background: #0f172a; }
 
-/* Header */
-.calendar-header {
-  height: 64px;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--dt-border-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--dt-bg-card);
-  flex-shrink: 0;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.date-range {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.range-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--dt-text-primary);
-  margin: 0;
-}
-
-.expand-btn {
-  border: none;
-  background: transparent;
-  color: var(--dt-text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: color var(--dt-transition-fast);
-
-  &:hover { color: var(--dt-brand-color); }
-}
-
-.nav-controls {
-  display: flex;
-  align-items: center;
-  background-color: var(--dt-bg-body);
-  border-radius: var(--dt-radius-md);
-  padding: 2px;
-}
-
-.nav-btn {
-  padding: 4px;
-  border: none;
-  background: transparent;
-  color: var(--dt-text-secondary);
-  border-radius: var(--dt-radius-sm);
-  cursor: pointer;
-  display: flex;
-  align-items: centers;
-  transition: all var(--dt-transition-fast);
-
-  &:hover { background-color: var(--dt-bg-card); }
-}
-
-.today-btn {
-  padding: 2px 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--dt-text-secondary);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-
-.view-switcher {
-  display: flex;
-  background-color: var(--dt-bg-body);
-  padding: 4px;
-  border-radius: var(--dt-radius-md);
-}
-
-.switch-btn {
-  padding: 6px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--dt-text-secondary);
-  border: none;
-  background: transparent;
-  border-radius: var(--dt-radius-sm);
-  cursor: pointer;
-  transition: all var(--dt-transition-fast);
-
-  &.active {
-    background-color: var(--dt-bg-card);
-    color: var(--dt-brand-color);
-    box-shadow: var(--dt-shadow-1);
-    font-weight: 600;
-  }
-}
-
-.view-placeholder {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--dt-text-tertiary);
-  font-size: 16px;
-}
-
-/* Week View */
-.week-view {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--dt-bg-body);
-  overflow: hidden;
-  height: 100%;
-}
-
-.week-header {
-  display: flex;
-  border-bottom: 1px solid var(--dt-border-color);
-  background-color: var(--dt-bg-card);
-  flex-shrink: 0;
-}
-
-.time-column-header {
-  width: 60px;
-  border-right: 1px solid var(--dt-border-color);
-}
-
-.day-header {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 0;
-  border-right: 1px solid var(--dt-border-color);
-  transition: background-color var(--dt-transition-fast);
-
-  &:last-child { border-right: none; }
-
-  &.is-today {
-    background-color: var(--dt-brand-bg);
-    .day-name, .day-date { color: var(--dt-brand-color); }
-    .day-name { font-weight: 600; }
-    .day-date { font-weight: bold; }
-  }
-}
-
-.day-name {
-  font-size: 12px;
-  color: var(--dt-text-secondary);
-  margin-bottom: 4px;
-}
-
-.day-date {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-}
-
-.grid-scroll-area {
-  flex: 1;
-  overflow-y: auto;
-  position: relative;
-
-  &::-webkit-scrollbar { width: 6px; height: 6px; }
-  &::-webkit-scrollbar-thumb { background: var(--dt-border-color); border-radius: 10px; }
-}
-
-.time-grid {
-  position: relative;
-  min-height: 100%;
-}
-
-.grid-background {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.time-row {
-  height: 80px;
-  border-bottom: 1px solid var(--dt-border-light);
-  position: relative;
-  &:last-child { border-bottom: none; }
-}
-
-.time-label {
-  position: absolute;
-  top: -9px;
-  left: 8px;
-  font-size: 11px;
-  color: var(--dt-text-tertiary);
-  width: 50px;
-  text-align: right;
-  padding-right: 8px;
-}
-
-.day-columns {
-  position: relative;
-  display: flex;
-  height: 1040px;
-}
-
-.time-column-spacer {
-  width: 60px;
-  border-right: 1px solid var(--dt-border-color);
-  flex-shrink: 0;
-  background-color: var(--dt-bg-body);
-}
-
-.day-column {
-  flex: 1;
-  position: relative;
-  border-right: 1px solid var(--dt-border-light);
-
-  &:last-child { border-right: none; }
-}
-
-.event-block {
-  position: absolute;
-  left: 4px; right: 4px;
-  border-radius: var(--dt-radius-md);
-  padding: 8px;
-  font-size: 12px;
-  cursor: pointer;
-  border-left: 4px solid;
-  transition: all var(--dt-transition-fast);
-  overflow: hidden;
-  box-shadow: var(--dt-shadow-1);
-  z-index: 10;
-
-  &:hover {
-    z-index: 20;
-    opacity: 0.95;
-    box-shadow: var(--dt-shadow-float);
-    transform: translateY(-1px);
-  }
-}
-
-.event-title { font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.event-time { opacity: 0.9; margin-bottom: 2px; }
-.event-location { opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* Themes */
-.event-blue { background-color: var(--dt-brand-bg); border-left-color: var(--dt-brand-color); color: var(--dt-brand-color); }
-.event-orange { background-color: var(--dt-warning-bg); border-left-color: var(--dt-warning-color); color: var(--dt-warning-color); }
-.event-purple { background-color: #f3e8ff; border-left-color: #a855f7; color: #6b21a8; }
-.event-emerald { background-color: var(--dt-success-bg); border-left-color: var(--dt-success-color); color: var(--dt-success-color); }
-.event-slate { background-color: var(--dt-bg-body); border-left-color: var(--dt-text-tertiary); color: var(--dt-text-secondary); }
-
-.current-time-line {
-  position: absolute;
-  left: 0; right: 0;
-  display: flex; align-items: center;
-  z-index: 30; pointer-events: none;
-
-  .dot { width: 8px; height: 8px; border-radius: 50%; background-color: var(--dt-error-color); margin-left: -4px; }
-  .line { flex: 1; height: 2px; background-color: var(--dt-error-color); box-shadow: 0 0 8px var(--dt-error-color); }
-}
-
-/* Month View */
-.month-view {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--dt-bg-body);
-  overflow: hidden;
-}
-
-.month-grid-header {
-  display: flex;
-  background-color: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-color);
-
-  .weekday-label {
-    flex: 1;
-    padding: 10px 0;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--dt-text-secondary);
-  }
-}
-
-.month-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  background-color: var(--dt-border-color);
-  gap: 1px;
-  overflow: auto;
-}
-
-.month-day-cell {
-  background-color: var(--dt-bg-card);
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-height: 0;
-  cursor: pointer;
-  transition: background-color var(--dt-transition-fast);
-
-  &:hover { background-color: var(--dt-bg-hover); }
-
-  &.not-current-month {
-    background-color: var(--dt-bg-body);
-    .day-num { color: var(--dt-text-quaternary); }
+  .aside-top { padding: 20px; }
+  .create-btn {
+    @apply w-full !h-10 !rounded-md !font-bold flex items-center justify-center gap-2;
+    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.15);
   }
 
-  &.is-selected {
-    background-color: var(--dt-brand-bg);
+  .mini-picker-wrapper {
+    padding: 0 16px;
+    .mini-cal-header {
+      @apply flex items-center justify-between mb-3 px-2;
+      .year-month { font-size: 13px; font-weight: 800; color: #1e293b; .dark & { color: #f1f5f9; } }
+      .nav-ops { @apply flex gap-2 text-slate-400 cursor-pointer; i:hover { color: #1677ff; } }
+    }
+    .mini-cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      .week-label { @apply text-[10px] font-black text-slate-400 text-center py-1 uppercase; }
+      .day-cell {
+        @apply aspect-square flex items-center justify-center text-[11px] font-medium rounded cursor-pointer transition-all;
+        &:hover { background: #e2e8f0; .dark & { background: #1e293b; } }
+        &.not-current { @apply text-slate-300 dark:text-slate-700; }
+        &.is-today { @apply text-primary font-bold; }
+        &.is-active { @apply bg-primary text-white font-black shadow-md; }
+      }
+    }
   }
 
-  &.is-today {
-    .day-num {
-      color: var(--dt-brand-color);
-      font-weight: bold;
+  .divider { @apply h-px bg-slate-200 dark:bg-slate-800 my-6 mx-4; }
+
+  .calendar-list {
+    padding: 0 20px;
+    .list-title { @apply text-[10px] font-black uppercase tracking-widest mb-4; }
+    .list-item {
+      @apply flex items-center gap-3 mb-2 px-2 py-1.5 rounded cursor-pointer hover:bg-slate-200/50;
+      .color-dot { @apply w-2 h-2 rounded-full; }
+      .name { @apply text-sm font-medium text-slate-600 dark:text-slate-400; }
     }
   }
 }
 
-.cell-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-.day-num {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--dt-text-primary);
-}
-
-.today-label {
-  font-size: 11px;
-  background-color: var(--dt-brand-color);
-  color: #fff;
-  padding: 0 4px;
-  border-radius: var(--dt-radius-full);
-}
-
-.day-events {
+// ============================================================================
+// 主内容区 - 高密度网格
+// ============================================================================
+.calendar-main {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  overflow: hidden;
 }
 
-.mini-event {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: var(--dt-radius-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.main-header {
+  height: 56px;
+  padding: 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .dark & { border-color: #1e293b; }
 
-  &.event-bg-blue { background-color: var(--dt-brand-bg); color: var(--dt-brand-color); border-left: 2px solid var(--dt-brand-color); }
-  &.event-bg-orange { background-color: var(--dt-warning-bg); color: var(--dt-warning-color); border-left: 2px solid var(--dt-warning-color); }
-  &.event-bg-purple { background-color: #f3e8ff; color: #6b21a8; border-left: 2px solid #a855f7; }
-  &.event-bg-emerald { background-color: var(--dt-success-bg); color: var(--dt-success-color); border-left: 2px solid var(--dt-success-color); }
-  &.event-bg-slate { background-color: var(--dt-bg-body); color: var(--dt-text-secondary); border-left: 2px solid var(--dt-text-tertiary); }
-}
+  .left-tools {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    .current-date-text { font-size: 18px; font-weight: 800; color: #1e293b; .dark & { color: #f1f5f9; } }
+    .tool-btn {
+      @apply h-8 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center hover:bg-slate-50 transition-colors;
+      &:first-child { border-radius: 4px 0 0 4px; }
+      &:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+      &:nth-child(2) { border-left: none; }
+    }
+  }
 
-/* Right Sidebar */
-.right-panel {
-  width: 320px;
-  background-color: var(--dt-bg-card);
-  border-left: 1px solid var(--dt-border-color);
-  display: flex; flex-direction: column;
-  box-shadow: var(--dt-shadow-lg);
-  z-index: 10;
-}
-
-.panel-header {
-  padding: 24px;
-  border-bottom: 1px solid var(--dt-border-color);
-  background-color: var(--dt-bg-body);
-}
-
-.date-info {
-  display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;
-}
-
-.date-title { font-size: 20px; font-weight: 700; color: var(--dt-text-primary); margin: 0; }
-.date-subtitle { font-size: 14px; color: var(--dt-text-secondary); margin-top: 4px; }
-
-.date-badge {
-  display: flex; align-items: center; justify-content: center;
-  width: 48px; height: 48px;
-  background-color: var(--dt-brand-bg);
-  border-radius: var(--dt-radius-lg);
-  color: var(--dt-brand-color); font-weight: 700; font-size: 24px;
-}
-
-.add-btn {
-  width: 100%;
-  background-color: var(--dt-brand-color); color: #fff;
-  border: none; padding: 12px;
-  border-radius: var(--dt-radius-lg);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  font-weight: 500; cursor: pointer;
-  transition: all var(--dt-transition-fast);
-
-  &:hover {
-    background-color: var(--dt-brand-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+  .view-selector {
+    @apply flex bg-slate-100 dark:bg-slate-800 rounded-md p-1;
+    .view-tab {
+      @apply px-4 py-1 text-xs font-bold text-slate-500 cursor-pointer rounded transition-all;
+      &.active { @apply bg-white dark:bg-slate-700 text-primary shadow-sm; }
+    }
   }
 }
 
-.panel-content { flex: 1; overflow-y: auto; padding: 20px; }
+.view-content { flex: 1; overflow: hidden; position: relative; }
 
-.section-title {
-  font-size: 12px; font-weight: 700; color: var(--dt-text-tertiary);
-  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;
-}
+// PC 月视图网格
+.pc-month-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .grid-header {
+    @apply grid grid-cols-7 border-b border-slate-100 dark:border-slate-800;
+    .header-cell { @apply py-2 text-center text-[11px] font-black text-slate-400 uppercase; }
+  }
+  .grid-body {
+    @apply grid grid-cols-7 flex-1;
+    .body-cell {
+      @apply border-r border-b border-slate-100 dark:border-slate-800 p-2 flex flex-col relative transition-colors;
+      &:hover {
+        background: #f8fafc;
+        .dark & {
+          background: rgba(30, 41, 59, 0.3);
+        }
+        .add-hover-btn { opacity: 1; }
+      }
+      &.not-curr { background: #fafbfc; .dark & { background: #0f172a/50; } .day-num { opacity: 0.3; } }
+      &.is-active { background: rgba(22, 119, 255, 0.02); }
+      
+      .cell-head {
+        @apply flex justify-between items-start mb-1;
+        .day-num { @apply text-xs font-bold text-slate-500; }
+        .today-mark { @apply text-[10px] bg-primary text-white px-1.5 rounded-sm font-black; }
+      }
+      
+      .cell-events {
+        @apply space-y-1 overflow-hidden;
+        .event-line {
+          @apply text-[11px] py-0.5 px-1.5 rounded cursor-pointer flex items-center gap-1.5 transition-all;
+          .dot { @apply w-1.5 h-1.5 rounded-full flex-shrink-0; }
+          .time { @apply font-bold opacity-60 flex-shrink-0; }
+          .title { @apply truncate; }
+          
+          &.line-blue { @apply bg-blue-50 text-blue-600 dark:bg-blue-900/20; .dot { background: #3b82f6; } }
+          &.line-purple { @apply bg-purple-50 text-purple-600 dark:bg-purple-900/20; .dot { background: #a855f7; } }
+          &.line-emerald { @apply bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20; .dot { background: #10b981; } }
+          
+          &:hover { @apply brightness-95 scale-[1.02]; }
+        }
+        .more-link { @apply text-[10px] font-bold text-slate-400 pl-1 mt-1; }
+      }
 
-.schedule-item {
-  display: flex; gap: 16px; position: relative; padding-bottom: 32px;
-  &:last-child { padding-bottom: 0; }
-}
-
-.timeline-indicator {
-  display: flex; flex-direction: column; align-items: center;
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dot-blue { background-color: var(--dt-brand-color); box-shadow: 0 0 0 4px var(--dt-brand-bg); }
-  .dot-orange { background-color: var(--dt-warning-color); box-shadow: 0 0 0 4px var(--dt-warning-bg); }
-  .dot-purple { background-color: #a855f7; box-shadow: 0 0 0 4px #f3e8ff; }
-  .dot-emerald { background-color: var(--dt-success-color); box-shadow: 0 0 0 4px var(--dt-success-bg); }
-  .dot-slate { background-color: var(--dt-text-tertiary); box-shadow: 0 0 0 4px var(--dt-bg-body); }
-
-  .line { flex: 1; width: 2px; background-color: var(--dt-border-color); margin: 4px 0; }
-  .schedule-item:last-child .line { display: none; }
-}
-
-.event-card {
-  flex: 1;
-  background-color: var(--dt-brand-bg);
-  padding: 14px;
-  border-radius: var(--dt-radius-xl);
-  border: 1px solid var(--dt-brand-color);
-  cursor: pointer;
-  transition: all var(--dt-transition-fast);
-
-  &:hover {
-    box-shadow: var(--dt-shadow-float);
-    transform: translateY(-1px);
+      .add-hover-btn {
+        @apply absolute bottom-2 right-2 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center opacity-0 transition-opacity cursor-pointer shadow-lg;
+      }
+    }
   }
 }
 
-.card-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.card-title { font-weight: 700; font-size: 14px; color: var(--dt-text-primary); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.card-time { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.time-tag { font-size: 12px; font-weight: 700; color: var(--dt-brand-color); background-color: var(--dt-bg-card); padding: 2px 6px; border-radius: var(--dt-radius-sm); }
-.card-location { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dt-text-secondary); margin-bottom: 12px; }
-
-.attendees {
-  display: flex; padding-left: 4px;
-  .avatar {
-    width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; color: #fff; margin-left: -8px;
-    &:first-child { margin-left: 0; }
-    &.bg-blue { background-color: var(--dt-brand-color); }
-    &.bg-orange { background-color: var(--dt-warning-color); }
-    &.bg-slate { background-color: var(--dt-border-color); color: var(--dt-text-secondary); }
+// PC 周视图
+.pc-week-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .week-sticky-header {
+    @apply flex border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-20;
+    .time-col-head { width: 64px; }
+    .day-col-head {
+      @apply flex-1 py-3 flex flex-col items-center border-l border-slate-50 dark:border-slate-800;
+      .name { @apply text-[10px] font-black text-slate-400 uppercase; }
+      .date { @apply text-lg font-black text-slate-700 dark:text-slate-200; }
+      &.is-today { .name, .date { color: #1677ff; } background: rgba(22, 119, 255, 0.02); }
+    }
+  }
+  .week-body-container {
+    @apply flex relative h-[1040px];
+    .time-axis {
+      width: 64px;
+      .hour-label { @apply h-20 -mt-2 pr-3 text-right text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase; }
+    }
+    .week-grid {
+      @apply flex-1 flex border-t border-slate-100 dark:border-slate-800;
+      .week-col {
+        @apply flex-1 relative border-l border-slate-50 dark:border-slate-800;
+        .hour-block { @apply h-20 border-b border-slate-50 dark:border-slate-800/50; }
+        &:hover { background: rgba(22, 119, 255, 0.01); }
+      }
+    }
   }
 }
 
-.todos-section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--dt-border-light); }
-.todo-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer; &:hover .todo-text { color: var(--dt-brand-color); } }
-.todo-checkbox { width: 16px; height: 16px; border-radius: var(--dt-radius-sm); accent-color: var(--dt-brand-color); cursor: pointer; }
-.todo-text { font-size: 14px; color: var(--dt-text-secondary); transition: color var(--dt-transition-fast); }
-.empty-state { font-size: 14px; color: var(--dt-text-tertiary); text-align: center; padding: 20px 0; }
+.pc-event-card {
+  @apply absolute left-1 right-1 rounded p-2 text-[11px] font-medium cursor-pointer border-l-4 shadow-sm transition-all;
+  &:hover { @apply shadow-md z-30 scale-[1.01] brightness-105; }
+  &.card-blue { @apply bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30; }
+  &.card-purple { @apply bg-purple-50 border-purple-500 text-purple-700 dark:bg-purple-900/30; }
+  &.card-emerald { @apply bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-900/30; }
+}
 
-/* Dark Mode */
-.dark .calendar-panel { background-color: var(--dt-bg-card-dark); }
-.dark .calendar-header { background-color: var(--dt-bg-card-dark); border-bottom-color: var(--dt-border-dark); }
-.dark .range-title { color: var(--dt-text-primary-dark); }
-.dark .week-header { background-color: var(--dt-bg-card-dark); border-bottom-color: var(--dt-border-dark); }
-.dark .day-header { border-right-color: var(--dt-border-dark); }
-.dark .time-column-header { border-right-color: var(--dt-border-dark); }
-.dark .time-column-spacer { background-color: var(--dt-bg-body-dark); border-right-color: var(--dt-border-dark); }
-.dark .day-column { border-right-color: var(--dt-border-dark); }
-.dark .time-row { border-bottom-color: var(--dt-border-dark); }
-.dark .month-view { background-color: var(--dt-bg-body-dark); }
-.dark .month-grid-header { background-color: var(--dt-bg-card-dark); border-bottom-color: var(--dt-border-dark); }
-.dark .weekday-label { color: var(--dt-text-secondary-dark); }
-.dark .month-grid { background-color: var(--dt-border-dark); gap: 1px; }
-.dark .month-day-cell { background-color: var(--dt-bg-card-dark); }
-.dark .right-panel { background-color: var(--dt-bg-card-dark); border-left-color: var(--dt-border-dark); }
-.dark .panel-header { background-color: var(--dt-bg-body-dark); }
-.dark .date-title { color: var(--dt-text-primary-dark); }
-.dark .event-card { background-color: var(--dt-brand-bg-dark); border-color: var(--dt-brand-color); }
-.dark .nav-controls { background-color: var(--dt-bg-hover-dark); }
-.dark .view-switcher { background-color: var(--dt-bg-hover-dark); }
-.dark .time-label { color: var(--dt-text-tertiary-dark); }
-.dark .day-name { color: var(--dt-text-secondary-dark); }
-.dark .day-date { color: var(--dt-text-primary-dark); }
+.pc-now-line {
+  @apply absolute left-0 right-0 flex items-center z-10 pointer-events-none;
+  height: 2px; background: #ef4444;
+  .marker { @apply w-2 h-2 rounded-full bg-red-500 -ml-1 shadow-sm; }
+}
+
+// ============================================================================
+// 右侧概览面板
+// ============================================================================
+.calendar-info-panel {
+  width: 280px;
+  border-left: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  .dark & { border-color: #1e293b; background: #0f172a; }
+
+  .info-header { padding: 24px; border-bottom: 1px solid #f1f5f9; .dark & { border-color: #1e293b; } h3 { @apply text-lg font-black; } }
+  .info-content { flex: 1; padding: 20px; }
+  
+  .agenda-card {
+    @apply mb-4 p-3 rounded-lg border border-slate-100 dark:border-slate-800 flex gap-3 cursor-pointer hover:shadow-md transition-all;
+    .color-bar { @apply w-1 rounded-full flex-shrink-0; }
+    .details {
+      .t { @apply text-sm font-bold mb-1; }
+      .m { @apply text-[11px] text-slate-400; }
+    }
+  }
+}
+
+.empty-agenda { @apply h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-700 font-bold text-sm; }
+
+// ============================================================================
+// 通用工具
+// ============================================================================
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-slate-200 dark:bg-slate-800 rounded-full; }
+
+.pc-dialog {
+  :deep(.el-dialog__header) { @apply font-bold border-b border-slate-100 dark:border-slate-800 p-4; }
+  :deep(.el-dialog__body) { @apply p-6; }
+}
 </style>

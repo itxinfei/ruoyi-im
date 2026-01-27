@@ -216,7 +216,7 @@ watch(() => props.session?.id, () => {
 
 .group-info {
   display: flex; gap: 12px; align-items: center;
-  .avatar { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .avatar { border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
   .name { font-size: 16px; font-weight: 600; color: #1f2329; margin-bottom: 4px; }
   .id { font-size: 12px; color: #8f959e; }
 }
@@ -237,7 +237,7 @@ watch(() => props.session?.id, () => {
 }
 
 .announcement-card {
-  padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; color: #1f2329; line-height: 1.6;
+  padding: 12px; background: #f8fafc; border-radius: 6px; font-size: 13px; color: #1f2329; line-height: 1.6;
   &.empty { color: #8f959e; font-style: italic; }
 }
 
@@ -249,7 +249,7 @@ watch(() => props.session?.id, () => {
 
 .user-info {
   display: flex; flex-direction: column; align-items: center; gap: 16px;
-  .avatar-large { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .avatar-large { border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
   .user-main {
     text-align: center;
     .name-row {

@@ -148,7 +148,7 @@ const formattedTime = computed(() => {
     color: var(--dt-text-tertiary);
     font-size: 11px;
     padding: 3px 10px;
-    border-radius: var(--dt-radius-full);
+    border-radius: 4px;
   }
 }
 
@@ -195,7 +195,7 @@ const formattedTime = computed(() => {
   }
 
   .message-avatar {
-    border-radius: var(--dt-radius-md);
+    border-radius: 4px;
   }
 }
 
@@ -239,7 +239,7 @@ const formattedTime = computed(() => {
     gap: 2px;
     padding: 3px 6px;
     background: var(--dt-bg-card);
-    border-radius: var(--dt-radius-md);
+    border-radius: 6px;
     border: 1px solid var(--dt-border-light);
     box-shadow: var(--dt-shadow-2);
     backdrop-filter: blur(8px);
@@ -253,7 +253,7 @@ const formattedTime = computed(() => {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: var(--dt-radius-sm);
+      border-radius: 4px;
       font-size: 14px;
       transition: all var(--dt-transition-fast);
 

@@ -218,7 +218,7 @@ defineExpose({
   justify-content: center;
   padding: 8px 16px;
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 6px;
   min-height: 60px;
   .dark & {
     background: #1e293b;
@@ -233,7 +233,7 @@ defineExpose({
   border: none;
   background: var(--dt-brand-color, #1677ff);
   color: #fff;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
@@ -319,7 +319,7 @@ defineExpose({
     gap: 12px;
     padding: 12px;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 6px;
     border: 1px solid #e2e8f0;
     .dark & {
       background: #0f172a;

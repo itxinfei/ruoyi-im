@@ -166,7 +166,7 @@ const isMultiSelectModeActive = ref(false)
 
 const emit = defineEmits(['show-user'])
 
-const { onMessage, onTyping } = useImWebSocket()
+const { onMessage, onTyping, onMessageStatus } = useImWebSocket()
 
 // 输入状态用户列表（用于显示"xxx正在输入..."）
 const typingUsers = ref([])
@@ -1031,6 +1031,25 @@ onMounted(() => {
 
     handleTypingIndicator(data.userId, data.userName || data.senderName)
   })
+
+  // 监听消息状态更新（发送成功/失败）
+  onMessageStatus((data) => {
+    if (data.conversationId !== props.session?.id) return
+
+    const index = messages.value.findIndex(m => m.id === data.messageId)
+    if (index !== -1) {
+      // 映射后端状态到前端状态
+      const statusMap = {
+        'PENDING': 'sending',
+        'SENDING': 'sending',
+        'SENT': 'success',
+        'DELIVERED': 'success',
+        'READ': 'success',
+        'FAILED': 'failed'
+      }
+      messages.value[index].status = statusMap[data.sendStatus] || data.sendStatus
+    }
+  })
 })
 </script>
 
@@ -1045,6 +1064,9 @@ onMounted(() => {
   flex: 1;
   min-width: 0;
   background: var(--dt-bg-body);
+  position: relative;
+  z-index: 2; // 确保 ChatPanel 在 SessionPanel 之上
+
 
   &.is-dragging {
     background: #e6f7ff;
@@ -1067,7 +1089,8 @@ onMounted(() => {
 .main-container {
   display: flex;
   flex: 1;
-  height: 0;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -1076,6 +1099,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   background: var(--dt-bg-card);
 }
 
@@ -1141,7 +1165,7 @@ onMounted(() => {
     .el-button {
       font-size: 13px;
       font-weight: 500;
-      border-radius: var(--dt-radius-md);
+      border-radius: 4px;
       height: 32px;
       padding: 0 12px;
       display: inline-flex;

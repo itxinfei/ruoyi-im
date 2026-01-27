@@ -373,6 +373,8 @@ onUnmounted(() => {
   background: var(--dt-bg-card);
   height: 100%;
   animation: fadeIn 0.3s var(--dt-ease-out);
+  position: relative;
+  z-index: 1; // 确保在正常的 flex 流中
 }
 
 // ============================================================================
@@ -458,11 +460,11 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
-  height: 38px;
+  height: 34px;
   background: var(--dt-bg-body);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-full);
-  padding: 0 14px;
+  padding: 0 12px;
   transition: all var(--dt-transition-fast);
 
   &:focus-within {
@@ -568,7 +570,7 @@ onUnmounted(() => {
 .session-item {
   position: relative;
   display: flex;
-  padding: 10px 12px; // 钉钉风格：更紧凑的间距
+  padding: 12px; // 钉钉风格：统一间距
   cursor: pointer;
   gap: 10px;
   transition: all var(--dt-transition-fast);

@@ -76,28 +76,29 @@
               <!-- 账号安全 -->
               <section v-if="activeMenu === 'account'" class="space-y-6">
                 <div class="bg-gradient-to-br from-primary/5 to-transparent p-6 rounded-2xl border border-primary/10">
-                  <div class="flex items-start gap-6">
-                    <div class="relative">
-                      <el-avatar :size="80" :src="currentUser.avatar" class="ring-4 ring-white dark:ring-slate-800 shadow-xl" />
-                      <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-4 border-white dark:border-slate-800 rounded-full"></div>
-                    </div>
-                    <div class="flex-1 space-y-2">
-                      <h4 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ currentUser.nickname || currentUser.username }}</h4>
-                      <div class="flex flex-wrap gap-4 text-sm text-slate-500">
-                        <span class="flex items-center gap-1"><el-icon><User /></el-icon> UID: {{ currentUser.id }}</span>
-                        <span class="flex items-center gap-1"><el-icon><Message /></el-icon> {{ currentUser.email || '未绑定邮箱' }}</span>
+                    <div class="flex items-start gap-6">
+                      <div class="avatar-gradient-wrapper">
+                        <div class="avatar-gradient-border"></div>
+                        <el-avatar :size="80" :src="currentUser.avatar" class="avatar-inner" />
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-4 border-white dark:border-slate-800 rounded-full"></div>
                       </div>
-                      <div class="pt-2 flex gap-3">
-                        <el-button type="primary" size="default" round @click="handleEditProfile">
-                          <el-icon class="mr-1"><Edit /></el-icon>编辑资料
-                        </el-button>
-                        <el-button plain size="default" round @click="showChangePassword = true">
-                          <el-icon class="mr-1"><Lock /></el-icon>修改密码
-                        </el-button>
+                      <div class="flex-1 space-y-2">
+                        <h4 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ currentUser.nickname || currentUser.username }}</h4>
+                        <div class="flex flex-wrap gap-4 text-sm text-slate-500">
+                          <span class="flex items-center gap-1"><el-icon><User /></el-icon> UID: {{ currentUser.id }}</span>
+                          <span class="flex items-center gap-1"><el-icon><Message /></el-icon> {{ currentUser.email || '未绑定邮箱' }}</span>
+                        </div>
+                        <div class="pt-2 flex gap-3">
+                          <el-button type="primary" size="default" round @click="handleEditProfile">
+                            <el-icon class="mr-1"><Edit /></el-icon>编辑资料
+                          </el-button>
+                          <el-button plain size="default" round @click="showChangePassword = true">
+                            <el-icon class="mr-1"><Lock /></el-icon>修改密码
+                          </el-button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30">
@@ -906,6 +907,53 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 .expand-leave-from {
   opacity: 1;
   max-height: 300px;
+}
+
+// ============================================================================
+// 头像渐变旋转边框
+// ============================================================================
+.avatar-gradient-wrapper {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-gradient-border {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #1677ff, #4096ff, #52c41a, #1677ff);
+  animation: rotate-border 3s linear infinite;
+  z-index: 0;
+}
+
+.avatar-inner {
+  position: relative;
+  z-index: 1;
+  background: var(--dt-bg-card);
+  border-radius: 50%;
+  animation: counter-rotate 3s linear infinite;
+}
+
+@keyframes rotate-border {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes counter-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
 // ============================================================================

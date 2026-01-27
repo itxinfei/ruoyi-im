@@ -261,7 +261,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 6px;
   z-index: 101;
   max-height: 500px;
   display: flex;
@@ -304,7 +304,7 @@ onMounted(() => {
   align-items: center;
   padding: 4px 12px;
   background: #f2f3f5;
-  border-radius: 14px;
+  border-radius: 6px;
   font-size: 13px;
   color: #1f2329;
   max-width: 150px;

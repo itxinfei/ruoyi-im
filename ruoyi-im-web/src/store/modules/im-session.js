@@ -7,7 +7,8 @@ import {
   pinConversation,
   muteConversation,
   deleteConversation as apiDeleteConversation,
-  markConversationAsRead
+  markConversationAsRead,
+  getConversation
 } from '@/api/im'
 import { formatMessagePreviewFromObject } from '@/utils/message'
 
@@ -166,6 +167,34 @@ export default {
         await markConversationAsRead(session.id)
       } catch (e) {
         console.warn('标记已读失败', e)
+      }
+    },
+
+    // 根据ID选择会话（用于从通讯录发起聊天）
+    async selectSessionById({ commit, state, dispatch }, conversationId) {
+      // 先从现有列表中查找
+      let session = state.sessions.find(s => s.id === conversationId)
+
+      // 如果找不到，从API获取
+      if (!session) {
+        try {
+          const res = await getConversation(conversationId)
+          if (res.code === 200 && res.data) {
+            session = {
+              ...res.data,
+              lastMessage: res.data.lastMessage ? formatMessagePreviewFromObject(res.data.lastMessage) : '[暂无消息]'
+            }
+            // 添加到会话列表
+            commit('UPDATE_SESSION', session)
+          }
+        } catch (e) {
+          console.error('获取会话详情失败', e)
+          throw e
+        }
+      }
+
+      if (session) {
+        await dispatch('selectSession', session)
       }
     }
   }

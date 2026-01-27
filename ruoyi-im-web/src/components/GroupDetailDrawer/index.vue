@@ -236,7 +236,7 @@ const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
 
 <style scoped lang="scss">
 :deep(.group-detail-dialog) {
-  border-radius: 12px;
+  border-radius: 8px;
   .el-dialog__header { border-bottom: 1px solid #f2f3f5; padding: 16px 20px; }
   .el-dialog__body { padding: 0; }
 }
@@ -250,10 +250,10 @@ const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
   display: flex; justify-content: space-between; align-items: center;
   padding: 24px 20px; border-bottom: 1px solid #f2f3f5;
   .dark & { border-color: #334155; }
-  
+
   .hero-left {
     display: flex; align-items: center; gap: 16px;
-    :deep(.group-hero-avatar) { border-radius: 12px; }
+    :deep(.group-hero-avatar) { border-radius: 6px; }
     .hero-info {
       .group-name-text { font-size: 18px; font-weight: 600; margin: 0; color: #1f2329; .dark & { color: #f1f5f9; } }
       .member-tag { font-size: 12px; color: #8f959e; margin-top: 4px; display: inline-block; }
@@ -262,7 +262,7 @@ const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
 }
 
 .section-label {
-  display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; 
+  display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600;
   color: #1f2329; margin-bottom: 12px; .dark & { color: #e2e8f0; }
   .el-icon { color: #8f959e; }
   .count { color: #8f959e; font-weight: normal; font-size: 12px; }
@@ -272,7 +272,7 @@ const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
 .announcement-section {
   padding: 20px; border-bottom: 1px solid #f2f3f5; .dark & { border-color: #334155; }
   .announcement-card {
-    padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; color: #64748b; line-height: 1.6;
+    padding: 12px; background: #f8fafc; border-radius: 4px; font-size: 13px; color: #64748b; line-height: 1.6;
     .dark & { background: rgba(30, 41, 59, 0.5); }
     &.empty { color: #bbbfc4; font-style: italic; }
   }
@@ -287,13 +287,13 @@ const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
     .member-cell {
       display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
       position: relative;
-      :deep(.member-avatar-cell) { border-radius: 12px; transition: opacity 0.2s; }
+      :deep(.member-avatar-cell) { border-radius: 6px; transition: opacity 0.2s; }
       &:hover :deep(.member-avatar-cell) { opacity: 0.8; }
       .cell-name { font-size: 12px; color: #1f2329; text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; .dark & { color: #94a3b8; } }
-      
+
       &.add-btn {
         .cell-icon-wrap {
-          width: 40px; height: 40px; border: 1px dashed #dcdfe6; border-radius: 12px;
+          width: 40px; height: 40px; border: 1px dashed #dcdfe6; border-radius: 6px;
           display: flex; align-items: center; justify-content: center; color: #8f959e;
           &:hover { border-color: #1677ff; color: #1677ff; }
         }

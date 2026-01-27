@@ -184,7 +184,7 @@ const handleVideoCall = () => {
 
 <style scoped lang="scss">
 :deep(.user-detail-dialog) {
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
   padding: 0;
 
@@ -248,7 +248,7 @@ const handleVideoCall = () => {
 
     :deep(.profile-avatar) {
       border: 4px solid #fff;
-      border-radius: 18px;
+      border-radius: 6px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
       .dark & {

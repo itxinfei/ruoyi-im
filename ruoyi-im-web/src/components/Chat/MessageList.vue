@@ -90,6 +90,9 @@ import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
+// Element Plus 内置的图片预览组件
+import ElImageViewer from 'element-plus/es/components/image-viewer/index'
+
 const props = defineProps({
   messages: {
     type: Array,
@@ -114,6 +117,11 @@ const listRef = ref(null)
 const readUsersMap = ref({})
 const loadingReadUsers = ref({})
 const showScrollToBottom = ref(false)
+
+// 图片预览状态
+const showImageViewer = ref(false)
+const imagePreviewUrls = ref([])
+const initialPreviewIndex = ref(0)
 
 // 获取已读用户列表
 const fetchReadUsers = async (msg) => {
@@ -322,6 +330,7 @@ defineExpose({ scrollToBottom, maintainScroll })
   padding: 16px;
   background: var(--dt-bg-chat);
   position: relative;
+  min-height: 0; // 修复 flex 容器溢出问题
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -471,25 +480,27 @@ defineExpose({ scrollToBottom, maintainScroll })
 /* 全局样式用于气泡右键菜单 */
 .message-context-menu {
   padding: 4px 0 !important;
-  border-radius: var(--dt-radius-lg) !important;
-  box-shadow: var(--dt-shadow-float) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
   border: 1px solid var(--dt-border-light) !important;
   background: var(--dt-bg-card) !important;
+  min-width: 160px !important;
 
   .el-dropdown-menu__item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 20px !important;
+    gap: 10px;
+    padding: 9px 16px !important;
     font-size: 14px !important;
     color: var(--dt-text-primary) !important;
     min-width: 140px;
     transition: all var(--dt-transition-fast);
 
     .el-icon {
-      font-size: 18px;
+      font-size: 16px;
       color: var(--dt-text-secondary);
-      margin-right: 4px;
+      margin-right: 0;
+      flex-shrink: 0;
     }
 
     &:hover {

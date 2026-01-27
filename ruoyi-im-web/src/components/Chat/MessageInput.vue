@@ -155,7 +155,7 @@ const atMemberPickerRef = ref(null)
 const isVoiceMode = ref(false)
 
 // 钉钉风格高度逻辑
-const containerHeight = ref(200)
+const containerHeight = ref(160)
 const minHeight = 160
 const maxHeight = 600
 let isResizing = false
@@ -183,7 +183,7 @@ const stopResize = () => {
   document.removeEventListener('mouseup', stopResize)
 }
 
-const resetHeight = () => containerHeight.value = 200
+const resetHeight = () => containerHeight.value = 160
 
 const insertAt = (nickname) => {
   const atText = `@${nickname} `
@@ -393,6 +393,7 @@ onUnmounted(() => {
   border-top: 1px solid var(--dt-border-light);
   padding: 8px 16px 16px;
   transition: background var(--dt-transition-base);
+  z-index: 10; // 确保输入容器在正确的层级
 
   .dark & {
     border-top-color: var(--dt-border-dark);

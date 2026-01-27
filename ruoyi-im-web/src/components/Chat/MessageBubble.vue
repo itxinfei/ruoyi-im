@@ -472,7 +472,7 @@ onUnmounted(() => {
 .bubble {
   background: var(--dt-bubble-left-bg);
   padding: 10px 14px;
-  border-radius: 4px 16px 16px 16px;
+  border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
   font-size: 14px;
   word-break: break-word;
@@ -509,7 +509,7 @@ onUnmounted(() => {
   &.is-own {
     background: var(--dt-bubble-right-bg);
     color: #1f2329;
-    border-radius: 16px 4px 16px 16px;
+    border-radius: 4px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     border: none;
 
@@ -527,7 +527,7 @@ onUnmounted(() => {
     border-left: 3px solid #0089ff;
     padding: 8px 12px;
     margin-bottom: 8px;
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 4px 4px 0;
     font-size: 12px;
     color: #64748b;
     cursor: pointer;
@@ -623,13 +623,13 @@ onUnmounted(() => {
 
   &.IMAGE {
     padding: 4px;
-    border-radius: var(--dt-radius-lg);
+    border-radius: 4px;
     background: var(--dt-bg-card) !important;
     border: 1px solid var(--dt-border-light);
   }
   &.VIDEO {
     padding: 0;
-    border-radius: var(--dt-radius-lg);
+    border-radius: 4px;
     background: #000 !important;
   }
 }
@@ -637,7 +637,7 @@ onUnmounted(() => {
 .msg-image {
   max-width: 320px;
   max-height: 400px;
-  border-radius: 10px;
+  border-radius: 4px;
   display: block;
   cursor: zoom-in;
   transition: all 0.3s var(--dt-ease-out);
@@ -677,7 +677,7 @@ onUnmounted(() => {
   cursor: pointer;
   background: #f8fafc;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid #eef2f6;
   transition: all 0.2s var(--dt-ease-out);
   animation: fadeIn 0.3s var(--dt-ease-out);
@@ -749,7 +749,7 @@ onUnmounted(() => {
   max-width: 280px;
   padding: 12px 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s var(--dt-ease-out);
   animation: scaleIn 0.3s var(--dt-ease-bounce);

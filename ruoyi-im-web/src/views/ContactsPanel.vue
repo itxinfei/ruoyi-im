@@ -253,6 +253,65 @@
         <GroupsView ref="groupsViewRef" @select-group="handleGroupSelect" />
       </template>
 
+      <!-- 搜索结果视图 -->
+      <template v-else-if="view === 'search'">
+        <header class="main-header">
+          <div class="header-left">
+            <el-breadcrumb separator="/" class="header-breadcrumb">
+              <el-breadcrumb-item>
+                <span class="material-icons-outlined breadcrumb-icon">home</span>
+                通讯录
+              </el-breadcrumb-item>
+              <el-breadcrumb-item>搜索结果</el-breadcrumb-item>
+            </el-breadcrumb>
+            <div class="member-count">
+              <span class="material-icons-outlined count-icon">search</span>
+              {{ searchResults.length }} 条结果
+            </div>
+          </div>
+          <div class="header-right">
+            <el-tag type="info" size="small">"{{ searchQuery }}"</el-tag>
+          </div>
+        </header>
+
+        <div class="main-content search-content">
+          <div v-if="searching" v-loading="true" class="loading-wrapper"></div>
+          <div v-else-if="searchResults.length === 0" class="empty-state">
+            <span class="material-icons-outlined empty-icon">search_off</span>
+            <h3 class="empty-title">未找到结果</h3>
+            <p class="empty-text">试试其他关键词</p>
+          </div>
+          <div v-else class="search-results-list">
+            <div
+              v-for="result in searchResults"
+              :key="result.id"
+              class="search-result-item"
+              @click="handleMemberClick(result)"
+            >
+              <DingtalkAvatar
+                :name="result.name"
+                :user-id="result.id"
+                :size="44"
+                :src="result.avatar"
+              />
+              <div class="result-info">
+                <h5 class="result-name">
+                  {{ result.name }}
+                  <span v-if="result.department" class="result-dept">{{ result.department }}</span>
+                </h5>
+                <p class="result-desc">{{ result.position || '员工' }}</p>
+              </div>
+              <div class="result-online" :class="{ online: result.online }"></div>
+              <el-tooltip content="发消息" placement="top">
+                <button class="result-action-btn" @click.stop="handleChat(result)">
+                  <span class="material-icons-outlined">chat_bubble</span>
+                </button>
+              </el-tooltip>
+            </div>
+          </div>
+        </div>
+      </template>
+
       <!-- 默认空状态 -->
       <template v-else>
         <div class="empty-state-large">
@@ -285,11 +344,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { getFriendRequests, getGroupedFriendList } from '@/api/im/contact'
-import { getDepartmentMembers } from '@/api/im/organization'
+import { getDepartmentMembers, searchOrgMembers } from '@/api/im/organization'
 import { createConversation } from '@/api/im/conversation'
 import AddContactDialog from '@/components/Contacts/AddContactDialog.vue'
 import OrganizationTree from '@/components/Contacts/OrganizationTree.vue'
@@ -300,7 +360,8 @@ import GroupProfileDialog from '@/components/Contacts/GroupProfileDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const router = useRouter()
-const view = ref('friends') // friends | department | new-friends | groups
+const store = useStore()
+const view = ref('friends') // friends | department | new-friends | groups | search
 const selectedDept = ref(null)
 const searchQuery = ref('')
 const showAddDialog = ref(false)
@@ -308,6 +369,11 @@ const requestCount = ref(0)
 const friendCount = ref(0)
 const loadingFriends = ref(false)
 const groupedFriends = ref([])
+
+// 搜索相关状态
+const searchResults = ref([])
+const searching = ref(false)
+const searchView = ref('') // 'all' | 'members' | 'friends' | 'groups'
 
 // 详情弹窗控制
 const showUserDialog = ref(false)
@@ -348,10 +414,15 @@ const handleChat = async (member) => {
       targetId: member.id || member.userId
     })
     if (res.code === 200) {
-      // 切换到聊天面板
+      // 使用 Vuex 选择会话
+      const conversationId = res.data
+      await store.dispatch('im/session/selectSessionById', conversationId)
+
+      // 通知 MainPage 切换到聊天模块
       window.dispatchEvent(new CustomEvent('switch-to-chat', {
-        detail: { conversation: res.data }
+        detail: { conversationId }
       }))
+
       ElMessage.success('已发起聊天')
     }
   } catch (e) {
@@ -448,6 +519,62 @@ onMounted(() => {
   checkRequests()
   loadFriends()
 })
+
+// 搜索功能 - 防抖处理
+let searchTimer = null
+const SEARCH_DELAY = 300
+
+watch(searchQuery, (newVal) => {
+  clearTimeout(searchTimer)
+
+  if (!newVal || newVal.trim().length === 0) {
+    // 清空搜索，返回之前的视图
+    view.value = 'friends'
+    searchResults.value = []
+    return
+  }
+
+  searchTimer = setTimeout(() => {
+    performSearch(newVal.trim())
+  }, SEARCH_DELAY)
+})
+
+const performSearch = async (keyword) => {
+  if (!keyword) return
+
+  searching.value = true
+  view.value = 'search'
+  searchView.value = 'all'
+
+  try {
+    // 搜索组织成员
+    const res = await searchOrgMembers({ keyword })
+    if (res.code === 200) {
+      searchResults.value = (res.data || []).map(member => ({
+        ...member,
+        online: Math.random() > 0.5 // 模拟在线状态
+      }))
+    }
+  } catch (e) {
+    console.error('搜索失败', e)
+    ElMessage.error('搜索失败')
+  } finally {
+    searching.value = false
+  }
+}
+
+// 计算搜索结果分类
+const searchResultMembers = computed(() => {
+  return searchResults.value.filter(r => r.type === 'member')
+})
+
+const searchResultFriends = computed(() => {
+  return searchResults.value.filter(r => r.type === 'friend')
+})
+
+const searchResultGroups = computed(() => {
+  return searchResults.value.filter(r => r.type === 'group')
+})
 </script>
 
 <style scoped lang="scss">
@@ -469,7 +596,7 @@ onMounted(() => {
 // 左侧边栏 - 精致导航
 // ============================================================================
 .contacts-sidebar {
-  width: 280px;
+  width: 240px;
   background: var(--dt-bg-card);
   border-right: 1px solid var(--dt-border-light);
   display: flex;
@@ -508,7 +635,7 @@ onMounted(() => {
   color: var(--dt-brand-color);
   background: var(--dt-brand-lighter);
   border: none;
-  border-radius: 10px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -541,7 +668,7 @@ onMounted(() => {
       height: 36px;
       background: var(--dt-bg-body);
       border: 1px solid transparent;
-      border-radius: 10px;
+      border-radius: 6px;
       padding: 0 36px;
       font-size: 13px;
       color: var(--dt-text-primary);
@@ -557,79 +684,135 @@ onMounted(() => {
   }
 }
 
-// 侧边栏菜单
+// 侧边栏菜单 - 美化样式
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 0 10px;
+  overflow-x: hidden;
+  padding: 0 12px;
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  &:hover {
+    scrollbar-color: var(--dt-border-light) transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background: var(--dt-border-light);
+  }
 
   .quick-nav {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 24px;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding: 8px 0;
 
     .nav-item {
       position: relative;
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 14px;
-      border-radius: 12px;
+      padding: 11px 14px;
+      border-radius: 11px;
       cursor: pointer;
-      transition: all 0.2s var(--dt-ease-out);
+      transition: all 0.25s var(--dt-ease-out);
       color: var(--dt-text-secondary);
+      font-size: 14px;
+      font-weight: 500;
 
       .nav-indicator {
         position: absolute;
         left: 0;
-        width: 4px;
-        height: 18px;
+        width: 3px;
+        height: 20px;
         background: var(--dt-brand-color);
-        border-radius: 0 4px 4px 0;
+        border-radius: 0 3px 3px 0;
         opacity: 0;
-        transition: all 0.2s;
+        transform: scaleY(0.7);
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
 
       .nav-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        flex-shrink: 0;
+        transition: all 0.25s var(--dt-ease-out);
 
-        &.friends-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        &.new-friends-icon { background: linear-gradient(135deg, #10b981, #059669); }
-        &.groups-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .material-icons-outlined {
+          font-size: 18px;
+        }
+
+        &.friends-icon {
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        &.new-friends-icon {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        &.groups-icon {
+          background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
       }
 
-      .nav-label { font-size: 14px; font-weight: 500; }
+      .nav-label {
+        font-size: 14px;
+        font-weight: 500;
+        flex: 1;
+      }
 
       .nav-badge, .nav-count {
-        padding: 2px 8px;
+        padding: 3px 8px;
         background: var(--dt-error-color);
         color: #fff;
-        border-radius: 20px;
+        border-radius: 11px;
         font-size: 11px;
         font-weight: 700;
+        min-width: 20px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
       }
 
-      .nav-count { background: var(--dt-brand-color); }
+      .nav-count {
+        background: var(--dt-brand-color);
+        box-shadow: 0 2px 6px rgba(22, 119, 255, 0.25);
+      }
 
       &:hover {
         background: var(--dt-bg-hover);
         color: var(--dt-text-primary);
-        transform: translateX(4px);
+        transform: translateX(5px);
+
+        .nav-icon {
+          transform: scale(1.05);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
       }
 
       &.active {
         background: var(--dt-brand-lighter);
         color: var(--dt-brand-color);
-        .nav-indicator { opacity: 1; }
+        transform: translateX(3px);
+
+        .nav-indicator {
+          opacity: 1;
+          transform: scaleY(1);
+        }
+        .nav-icon {
+          box-shadow: 0 6px 16px rgba(22, 119, 255, 0.25);
+        }
       }
     }
   }
@@ -701,7 +884,7 @@ onMounted(() => {
   .preview-avatar {
     width: 32px;
     height: 32px;
-    border-radius: 10px;
+    border-radius: 6px;
     border: 2px solid #fff;
     color: #fff;
     display: flex;
@@ -732,7 +915,7 @@ onMounted(() => {
 
 .member-card {
   background: var(--dt-bg-card);
-  border-radius: 20px;
+  border-radius: 6px;
   padding: 24px 20px;
   border: 1px solid var(--dt-border-light);
   transition: all 0.3s var(--dt-ease-bounce);
@@ -750,7 +933,7 @@ onMounted(() => {
   }
 
   &:hover {
-    transform: translateY(-8px);
+    transform: translateY(-4px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.06);
     border-color: var(--dt-brand-lighter);
     &::before { opacity: 1; }
@@ -759,7 +942,7 @@ onMounted(() => {
 
   .member-avatar {
     margin: 0 auto 16px;
-    border-radius: 18px !important;
+    border-radius: 6px !important;
     box-shadow: 0 8px 16px rgba(0,0,0,0.08);
   }
 
@@ -777,7 +960,7 @@ onMounted(() => {
 
   .action-btn {
     width: 36px; height: 36px;
-    border-radius: 12px;
+    border-radius: 6px;
     background: var(--dt-brand-lighter);
     color: var(--dt-brand-color);
     border: none;
@@ -800,10 +983,10 @@ onMounted(() => {
 .friend-item {
   display: flex; align-items: center; gap: 16px;
   padding: 12px 20px;
-  border-radius: 16px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  &:hover { background: var(--dt-bg-body); transform: translateX(8px); }
+  &:hover { background: var(--dt-bg-body); transform: translateX(4px); }
 
   .friend-info {
     flex: 1;
@@ -833,5 +1016,117 @@ onMounted(() => {
   .member-card { background: #1e293b; border-color: #334155; }
   .friend-item:hover { background: #1e293b; }
   .nav-item:hover { background: #1e293b; }
+}
+
+// ============================================================================
+// 搜索结果样式
+// ============================================================================
+.search-content {
+  padding: 24px;
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  cursor: pointer;
+  transition: all 0.2s var(--dt-ease-out);
+
+  &:hover {
+    background: var(--dt-bg-hover);
+    border-color: var(--dt-brand-lighter);
+    transform: translateX(4px);
+
+    .result-action-btn {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .result-info {
+    flex: 1;
+    min-width: 0;
+
+    .result-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--dt-text-primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .result-dept {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--dt-text-tertiary);
+      background: var(--dt-bg-body);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .result-desc {
+      font-size: 13px;
+      color: var(--dt-text-tertiary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .result-online {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    flex-shrink: 0;
+
+    &.online {
+      background: #22c55e;
+      box-shadow: 0 0 12px #22c55e;
+      animation: pulse 2s infinite;
+    }
+  }
+
+  .result-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--dt-brand-lighter);
+    color: var(--dt-brand-color);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      background: var(--dt-brand-color);
+      color: #fff;
+      transform: scale(1.1);
+    }
+  }
+}
+
+.loading-wrapper {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

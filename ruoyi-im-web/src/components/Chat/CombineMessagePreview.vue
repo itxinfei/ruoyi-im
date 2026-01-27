@@ -134,7 +134,7 @@ const handleClick = () => {
 .combine-preview {
   width: 280px;
   background: #f5f5f5;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.2s ease;
