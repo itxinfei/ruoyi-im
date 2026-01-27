@@ -8,14 +8,16 @@ import com.ruoyi.im.dto.organization.ImDepartmentUpdateRequest;
 import com.ruoyi.im.service.ImOrganizationService;
 import com.ruoyi.im.vo.organization.ImDepartmentMemberVO;
 import com.ruoyi.im.vo.organization.ImDepartmentTreeVO;
+import com.ruoyi.im.vo.organization.ImDepartmentVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 组织架构控制器
@@ -29,8 +31,41 @@ import java.util.List;
 @Validated
 public class ImOrganizationController {
 
-    @Autowired
-    private ImOrganizationService imOrganizationService;
+    private final ImOrganizationService imOrganizationService;
+
+    public ImOrganizationController(ImOrganizationService imOrganizationService) {
+        this.imOrganizationService = imOrganizationService;
+    }
+
+    /**
+     * 将 Entity 转换为 VO
+     *
+     * @param department 部门实体
+     * @return 部门视图对象
+     */
+    private ImDepartmentVO toVO(ImDepartment department) {
+        if (department == null) {
+            return new ImDepartmentVO();
+        }
+        ImDepartmentVO vo = new ImDepartmentVO();
+        BeanUtils.copyProperties(department, vo);
+        return vo;
+    }
+
+    /**
+     * 批量将 Entity 转换为 VO
+     *
+     * @param list 部门实体列表
+     * @return 部门视图对象列表
+     */
+    private List<ImDepartmentVO> toVOList(List<ImDepartment> list) {
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+        return list.stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
+    }
 
     /**
      * 获取部门树形结构
@@ -54,9 +89,9 @@ public class ImOrganizationController {
      */
     @Operation(summary = "获取部门详情", description = "根据ID获取指定部门的详细信息")
     @GetMapping("/department/{departmentId}")
-    public Result<ImDepartment> getDepartmentById(@PathVariable Long departmentId) {
+    public Result<ImDepartmentVO> getDepartmentById(@PathVariable Long departmentId) {
         ImDepartment department = imOrganizationService.getDepartmentById(departmentId);
-        return Result.success(department);
+        return Result.success(toVO(department));
     }
 
     /**
@@ -168,9 +203,9 @@ public class ImOrganizationController {
      */
     @Operation(summary = "获取用户所属部门列表", description = "获取指定用户所属的所有部门")
     @GetMapping("/user/{userId}/departments")
-    public Result<List<ImDepartment>> getUserDepartments(@PathVariable Long userId) {
+    public Result<List<ImDepartmentVO>> getUserDepartments(@PathVariable Long userId) {
         List<ImDepartment> departments = imOrganizationService.getUserDepartments(userId);
-        return Result.success(departments);
+        return Result.success(toVOList(departments));
     }
 
     /**
@@ -182,8 +217,8 @@ public class ImOrganizationController {
      */
     @Operation(summary = "获取用户主部门", description = "获取用户的主部门信息")
     @GetMapping("/user/{userId}/primary-department")
-    public Result<ImDepartment> getUserPrimaryDepartment(@PathVariable Long userId) {
+    public Result<ImDepartmentVO> getUserPrimaryDepartment(@PathVariable Long userId) {
         ImDepartment department = imOrganizationService.getUserPrimaryDepartment(userId);
-        return Result.success(department);
+        return Result.success(toVO(department));
     }
 }

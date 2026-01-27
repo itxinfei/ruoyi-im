@@ -5,13 +5,16 @@ import com.ruoyi.im.domain.ImGroupAnnouncement;
 import com.ruoyi.im.dto.group.ImGroupAnnouncementCreateRequest;
 import com.ruoyi.im.service.ImGroupAnnouncementService;
 import com.ruoyi.im.util.SecurityUtils;
+import com.ruoyi.im.vo.group.ImGroupAnnouncementVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 群组公告控制器
@@ -32,6 +35,42 @@ public class ImGroupAnnouncementController {
      */
     public ImGroupAnnouncementController(ImGroupAnnouncementService groupAnnouncementService) {
         this.groupAnnouncementService = groupAnnouncementService;
+    }
+
+    /**
+     * 将 Entity 转换为 VO
+     *
+     * @param announcement 群组公告实体
+     * @return 群组公告视图对象
+     */
+    private ImGroupAnnouncementVO toVO(ImGroupAnnouncement announcement) {
+        if (announcement == null) {
+            return new ImGroupAnnouncementVO();
+        }
+        ImGroupAnnouncementVO vo = new ImGroupAnnouncementVO();
+        BeanUtils.copyProperties(announcement, vo);
+        // 计算是否已过期
+        if (announcement.getExpireTime() != null) {
+            vo.setIsExpired(LocalDateTime.now().isAfter(announcement.getExpireTime()));
+        } else {
+            vo.setIsExpired(false);
+        }
+        return vo;
+    }
+
+    /**
+     * 批量将 Entity 转换为 VO
+     *
+     * @param list 群组公告实体列表
+     * @return 群组公告视图对象列表
+     */
+    private List<ImGroupAnnouncementVO> toVOList(List<ImGroupAnnouncement> list) {
+        if (list == null || list.isEmpty()) {
+            return List.of();
+        }
+        return list.stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -72,11 +111,11 @@ public class ImGroupAnnouncementController {
      */
     @Operation(summary = "获取群组公告列表", description = "获取指定群组的所有公告")
     @GetMapping("/list/{groupId}")
-    public Result<List<ImGroupAnnouncement>> getAnnouncements(
+    public Result<List<ImGroupAnnouncementVO>> getAnnouncements(
             @PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImGroupAnnouncement> announcements = groupAnnouncementService.getAnnouncements(groupId, userId);
-        return Result.success(announcements);
+        return Result.success(toVOList(announcements));
     }
 
     /**
@@ -87,11 +126,11 @@ public class ImGroupAnnouncementController {
      */
     @Operation(summary = "获取有效公告列表", description = "获取未过期、未撤回的有效公告")
     @GetMapping("/valid/{groupId}")
-    public Result<List<ImGroupAnnouncement>> getValidAnnouncements(
+    public Result<List<ImGroupAnnouncementVO>> getValidAnnouncements(
             @PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImGroupAnnouncement> announcements = groupAnnouncementService.getValidAnnouncements(groupId, userId);
-        return Result.success(announcements);
+        return Result.success(toVOList(announcements));
     }
 
     /**
@@ -102,11 +141,11 @@ public class ImGroupAnnouncementController {
      */
     @Operation(summary = "获取置顶公告", description = "获取群组的所有置顶公告")
     @GetMapping("/pinned/{groupId}")
-    public Result<List<ImGroupAnnouncement>> getPinnedAnnouncements(
+    public Result<List<ImGroupAnnouncementVO>> getPinnedAnnouncements(
             @PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImGroupAnnouncement> announcements = groupAnnouncementService.getPinnedAnnouncements(groupId, userId);
-        return Result.success(announcements);
+        return Result.success(toVOList(announcements));
     }
 
     /**
@@ -117,11 +156,11 @@ public class ImGroupAnnouncementController {
      */
     @Operation(summary = "获取最新公告", description = "获取群组最新的一条有效公告")
     @GetMapping("/latest/{groupId}")
-    public Result<ImGroupAnnouncement> getLatestAnnouncement(
+    public Result<ImGroupAnnouncementVO> getLatestAnnouncement(
             @PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
         ImGroupAnnouncement announcement = groupAnnouncementService.getLatestAnnouncement(groupId, userId);
-        return Result.success(announcement);
+        return Result.success(toVO(announcement));
     }
 
     /**
