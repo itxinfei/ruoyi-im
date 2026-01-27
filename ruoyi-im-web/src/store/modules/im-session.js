@@ -124,7 +124,7 @@ export default {
 
           if (Object.keys(userStatusMap).length > 0) {
             // 使用 dispatch action 而不是跨模块 commit mutation，避免命名空间问题
-            dispatch('contact/batchUpdateUserStatus', userStatusMap, { root: true })
+            dispatch('im-contact/batchUpdateUserStatus', userStatusMap, { root: true })
           }
         }
       } finally {

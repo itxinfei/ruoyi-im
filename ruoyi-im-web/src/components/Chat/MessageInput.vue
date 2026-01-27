@@ -52,7 +52,7 @@
           </button>
         </el-tooltip>
 
-        <el-tooltip content="截图" placement="top">
+        <el-tooltip content="截图 (Ctrl+Alt+A)" placement="top">
           <button class="toolbar-btn" @click="handleScreenshot">
              <span class="material-icons-outlined">content_cut</span>
           </button>
@@ -149,6 +149,14 @@
       style="display: none"
       @change="handleVideoFileChange"
     />
+
+    <!-- 截图预览对话框 -->
+    <ScreenshotPreview
+      v-model="showScreenshotPreview"
+      :image-data="screenshotData"
+      @send="handleSendScreenshot"
+      @close="handleScreenshotPreviewClose"
+    />
   </div>
 </template>
 
@@ -158,9 +166,11 @@ import { useStore } from 'vuex'
 import { Close, ChatDotRound, Picture, FolderOpened, Phone, Clock, Microphone } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useImWebSocket } from '@/composables/useImWebSocket'
+import { captureScreenshot, isScreenshotSupported } from '@/utils/screenshot'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
+import ScreenshotPreview from './ScreenshotPreview.vue'
 
 const props = defineProps({
   session: Object,
@@ -169,7 +179,7 @@ const props = defineProps({
   editingMessage: Object
 })
 
-const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video'])
+const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-screenshot'])
 
 const store = useStore()
 const { sendMessage: wsSendMessage } = useImWebSocket()
@@ -186,6 +196,9 @@ const textareaRef = ref(null)
 const atMemberPickerRef = ref(null)
 const videoInputRef = ref(null)
 const isVoiceMode = ref(false)
+const showScreenshotPreview = ref(false)
+const screenshotData = ref(null)
+const isCapturing = ref(false)
 
 // 钉钉风格高度逻辑
 const containerHeight = ref(160)
@@ -224,7 +237,6 @@ const insertAt = (nickname) => {
   messageContent.value = messageContent.value.slice(0, pos) + atText + messageContent.value.slice(pos)
   nextTick(() => { textareaRef.value?.focus(); autoResize() })
 }
-defineExpose({ insertAt })
 
 const canSend = computed(() => messageContent.value.trim().length > 0)
 
@@ -368,7 +380,52 @@ const selectEmoji = (emoji) => {
   nextTick(() => { textareaRef.value?.focus(); autoResize() })
 }
 
-const handleScreenshot = () => ElMessage.info('正在启用系统截图...')
+const handleScreenshot = async () => {
+  // 检查浏览器支持
+  if (!isScreenshotSupported()) {
+    ElMessage.warning('您的浏览器不支持截图功能，请使用 Chrome 72+、Edge 79+ 或 Firefox 66+')
+    return
+  }
+
+  // 防止重复点击
+  if (isCapturing.value) return
+
+  isCapturing.value = true
+  ElMessage.info('请选择要截取的屏幕或窗口')
+
+  try {
+    // 捕获屏幕
+    const dataURL = await captureScreenshot({ cursor: 'never' })
+    screenshotData.value = dataURL
+    showScreenshotPreview.value = true
+  } catch (error) {
+    if (error.message !== '您取消了截图选择') {
+      console.error('截图失败:', error)
+      ElMessage.error(error.message || '截图失败')
+    }
+  } finally {
+    isCapturing.value = false
+  }
+}
+
+// 导出方法供父组件调用（必须在函数定义之后）
+defineExpose({ insertAt, triggerScreenshot: handleScreenshot })
+
+// 发送截图
+const handleSendScreenshot = async (blob) => {
+  const formData = new FormData()
+  formData.append('file', blob, 'screenshot.png')
+  emit('send-screenshot', formData)
+
+  showScreenshotPreview.value = false
+  screenshotData.value = null
+}
+
+// 关闭截图预览
+const handleScreenshotPreviewClose = () => {
+  showScreenshotPreview.value = false
+  screenshotData.value = null
+}
 
 const handleLocation = () => {
   // 获取用户位置

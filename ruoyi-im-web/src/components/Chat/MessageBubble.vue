@@ -8,8 +8,6 @@
       class="bubble"
       :class="[message.type, { 'is-own': message.isOwn, 'is-selected': isSelected, 'is-long-press': isLongPressing }]"
       @click="handleClick"
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
     >
       <!-- 引用消息区块 (如果该消息是回复某人的) -->
       <div v-if="message.replyTo" class="bubble-reply-ref" @click.stop="$emit('scroll-to', message.replyTo.id)">
@@ -235,22 +233,6 @@
           </div>
         </transition>
       </div>
-
-      <!-- 表情回复栏（悬停显示） -->
-      <transition name="reaction-bar">
-        <div v-if="showReactionBar" class="reaction-bar">
-          <button
-            v-for="emoji in quickEmojis"
-            :key="emoji.char"
-            class="reaction-btn"
-            :class="{ 'is-active': hasReacted(emoji.char) }"
-            @click.stop="handleReaction(emoji.char)"
-          >
-            <span class="emoji">{{ emoji.char }}</span>
-            <span v-if="emoji.count" class="count">{{ emoji.count }}</span>
-          </button>
-        </div>
-      </transition>
 
       <!-- 表情聚合显示 -->
       <div v-if="hasReactions" class="reaction-aggregate" @click="showReactionDetail = true">
@@ -634,34 +616,8 @@ const handleFileClick = async () => {
 // 表情回复相关
 // ============================================================================
 // 快捷表情列表（钉钉风格）
-const quickEmojis = [
-  { char: '👍', name: '赞', type: 'thumb_up' },
-  { char: '❤️', name: '爱心', type: 'heart' },
-  { char: '😂', name: '大笑', type: 'joy' },
-  { char: '😮', name: '哇', type: 'wow' },
-  { char: '😢', name: '难过', type: 'sad' },
-  { char: '👏', name: '鼓掌', type: 'clap' }
-]
-
-const showReactionBar = ref(false)
 const showReactionDetail = ref(false)
 const isReacting = ref(false)
-
-// 鼠标悬停显示表情栏
-let reactionBarTimer = null
-const handleMouseEnter = () => {
-  if (reactionBarTimer) clearTimeout(reactionBarTimer)
-  reactionBarTimer = setTimeout(() => {
-    showReactionBar.value = true
-  }, 300)
-}
-
-const handleMouseLeave = () => {
-  if (reactionBarTimer) clearTimeout(reactionBarTimer)
-  reactionBarTimer = setTimeout(() => {
-    showReactionBar.value = false
-  }, 200)
-}
 
 // 消息的表情回复数据
 const messageReactions = computed(() => {
@@ -746,12 +702,6 @@ const handleReaction = async (emoji) => {
 const toggleReaction = async (emoji) => {
   await handleReaction(emoji)
 }
-
-// 导出悬停处理给父组件使用
-defineExpose({
-  handleMouseEnter,
-  handleMouseLeave
-})
 
 // 语音消息相关
 const voiceAudioRef = ref(null)
@@ -1804,80 +1754,6 @@ onUnmounted(() => {
 }
 
 // ============================================================================
-// 表情回复栏
-// ============================================================================
-.reaction-bar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 8px;
-  padding: 6px 10px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  position: absolute;
-  left: 0;
-  z-index: 10;
-
-  .reaction-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    height: 36px;
-    padding: 0 4px;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s var(--dt-ease-out);
-    position: relative;
-
-    .emoji {
-      font-size: 20px;
-      line-height: 1;
-      transition: transform 0.2s var(--dt-ease-out);
-    }
-
-    .count {
-      font-size: 10px;
-      font-weight: 500;
-      color: #64748b;
-      margin-top: -2px;
-    }
-
-    &:hover {
-      background: var(--dt-brand-bg);
-
-      .emoji {
-        transform: scale(1.2);
-      }
-    }
-
-    &.is-active {
-      background: rgba(22, 119, 255, 0.1);
-
-      .emoji {
-        transform: scale(1);
-      }
-    }
-  }
-}
-
-// 表情栏过渡动画
-.reaction-bar-enter-active,
-.reaction-bar-leave-active {
-  transition: all 0.2s var(--dt-ease-out);
-}
-
-.reaction-bar-enter-from,
-.reaction-bar-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-
-// ============================================================================
 // 表情聚合显示
 // ============================================================================
 .reaction-aggregate {
@@ -1948,27 +1824,6 @@ onUnmounted(() => {
     .bubble-reply-ref { background: rgba(255, 255, 255, 0.05); color: #94a3b8; .ref-user { color: #f1f5f9; } }
   }
   .msg-file { background: #0f172a; border-color: #334155; .file-name { color: #f1f5f9; } }
-
-  // 表情回复栏 - 暗色模式
-  .reaction-bar {
-    background: #334155;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-
-    .reaction-btn {
-      background: transparent;
-      border-color: #475569;
-
-      &:hover {
-        background: rgba(22, 119, 255, 0.15);
-        border-color: #1677ff;
-      }
-
-      &.is-active {
-        background: rgba(22, 119, 255, 0.25);
-        border-color: #1677ff;
-      }
-    }
-  }
 
   // 表情聚合显示 - 暗色模式
   .reaction-aggregate {

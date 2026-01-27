@@ -62,6 +62,7 @@
             @upload-file="handleFileUpload"
             @upload-video="handleVideoUpload"
             @send-location="handleSendLocation"
+            @send-screenshot="handleScreenshotUpload"
           />
         </div>
 
@@ -117,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, h } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useStore } from 'vuex'
 import { Share, Collection, Delete } from '@element-plus/icons-vue'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
@@ -1012,6 +1013,60 @@ const handleImageUpload = async (payload) => {
   }
 }
 
+// 截图上传处理
+const handleScreenshotUpload = async (formData) => {
+  const file = formData.get('file')
+  if (!file) return
+
+  // 1. 乐观更新：立即显示截图
+  const blobUrl = URL.createObjectURL(file)
+  const tempId = `temp-screenshot-${Date.now()}`
+  const tempMsg = {
+    id: tempId,
+    type: 'IMAGE',
+    content: {
+      imageUrl: blobUrl
+    },
+    senderId: currentUser.value?.id,
+    senderName: currentUser.value?.nickName || '我',
+    senderAvatar: currentUser.value?.avatar,
+    timestamp: Date.now(),
+    isOwn: true,
+    status: 'uploading',
+    readCount: 0
+  }
+  messages.value.push(tempMsg)
+  msgListRef.value?.scrollToBottom()
+
+  try {
+    const res = await uploadImage(formData)
+    if (res.code === 200) {
+      const msg = await store.dispatch('im/message/sendMessage', {
+        sessionId: props.session.id,
+        type: 'IMAGE',
+        content: JSON.stringify({
+          fileId: res.data.id,
+          imageUrl: res.data.url
+        })
+      })
+
+      const index = messages.value.findIndex(m => m.id === tempId)
+      if (index !== -1) {
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+      }
+      URL.revokeObjectURL(blobUrl)
+    } else {
+      throw new Error(res.msg || 'Upload failed')
+    }
+  } catch (error) {
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      messages.value[index].status = 'failed'
+    }
+    ElMessage.error('截图发送失败')
+  }
+}
+
 // 视频上传处理
 const handleVideoUpload = async ({ file, url }) => {
   // 1. 乐观更新：立即显示视频消息
@@ -1179,6 +1234,24 @@ onMounted(() => {
       userAvatar: data.userAvatar,
       isAdd: data.isAdd !== false // 默认为添加
     })
+  })
+
+  // 键盘快捷键：Ctrl/Cmd + Alt + A 截图
+  const handleKeydown = (e) => {
+    // Ctrl/Cmd + Alt + A 触发截图
+    if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'a' || e.key === 'A')) {
+      e.preventDefault()
+      // 只在有会话时触发截图
+      if (props.session) {
+        messageInputRef.value?.triggerScreenshot?.()
+      }
+    }
+  }
+  window.addEventListener('keydown', handleKeydown)
+
+  // 清理函数（在组件卸载时调用）
+  onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeydown)
   })
 })
 </script>

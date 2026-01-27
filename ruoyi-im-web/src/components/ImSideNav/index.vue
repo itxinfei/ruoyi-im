@@ -171,8 +171,8 @@ const handleNavClick = (moduleKey) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 0;
-  gap: 2px;
+  padding: 8px 0;
+  gap: 4px;
   flex: 1;
   overflow-y: auto;
 }
@@ -183,18 +183,20 @@ const handleNavClick = (moduleKey) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
   }
 
   &.active {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   &.active::before {
@@ -204,23 +206,26 @@ const handleNavClick = (moduleKey) => {
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 24px;
+    height: 28px;
     background-color: #ffffff;
     border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
   }
 }
 
 .nav-icon {
-  font-size: 24px;
-  color: rgba(255, 255, 255, 0.8);
-  transition: all 0.2s ease;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 2px;
 }
 
 .nav-label {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1;
-  margin-top: 2px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 .nav-item:hover .nav-icon,
