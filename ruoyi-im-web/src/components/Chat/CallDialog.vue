@@ -639,9 +639,9 @@ const stopTimer = () => {
 const cleanup = () => {
   stopTimer()
 
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop())
-    localStream = null
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(track => track.stop())
+    mediaStream = null
   }
 
   if (peerConnection) {
