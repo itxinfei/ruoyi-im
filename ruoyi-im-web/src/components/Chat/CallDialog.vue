@@ -357,12 +357,12 @@ const startCall = async () => {
       } : false
     }
 
-    localStream = await navigator.mediaDevices.getUserMedia(constraints)
-    localStream.value = localStream
+    mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+    localStream.value = mediaStream
 
     // 显示本地视频
     if (localVideoRef.value) {
-      localVideoRef.value.srcObject = localStream
+      localVideoRef.value.srcObject = mediaStream
     }
 
     // 创建 WebRTC 连接
