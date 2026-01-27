@@ -2,6 +2,7 @@
  * IM 模块主 Store
  * 管理即时通讯的核心状态和子模块
  */
+import { getUserSettingsMap, updateUserSetting, batchUpdateUserSettings } from '@/api/im/user_setting'
 import session from './im-session'
 import message from './im-message'
 import contact from './im-contact'
@@ -44,6 +45,23 @@ export default {
       },
       shortcuts: {
         send: 'enter' // 'enter' | 'ctrl-enter'
+      },
+      // 新增：聊天设置
+      chat: {
+        fontSize: 'medium', // 'small' | 'medium' | 'large' | 'xlarge'
+        background: 'default', // 'default' | 'custom' | 'solid'
+        bubbleStyle: 'default', // 'default' | 'compact' | 'loose'
+        sendShortcut: 'enter' // 'enter' | 'ctrl-enter'
+      },
+      // 新增：文件管理
+      file: {
+        autoDownloadImage: true,
+        autoDownloadFile: false,
+        sizeWarning: true
+      },
+      // 新增：数据保留
+      data: {
+        keepOnLogout: true
       }
     }
   }),
@@ -65,7 +83,16 @@ export default {
     generalSettings: (state) => state.settings.general,
 
     // 快捷键设置
-    shortcutSettings: (state) => state.settings.shortcuts
+    shortcutSettings: (state) => state.settings.shortcuts,
+
+    // 聊天设置
+    chatSettings: (state) => state.settings.chat,
+
+    // 文件管理设置
+    fileSettings: (state) => state.settings.file,
+
+    // 数据保留设置
+    dataSettings: (state) => state.settings.data
   },
 
   mutations: {
@@ -97,6 +124,29 @@ export default {
       }
     },
 
+    // 从服务器加载设置并合并到本地
+    MERGE_SERVER_SETTINGS(state, serverSettings) {
+      // serverSettings 是键值对形式，如 { 'chat.fontSize': 'large' }
+      const merged = { ...state.settings }
+
+      for (const [key, value] of Object.entries(serverSettings)) {
+        const parts = key.split('.')
+        let current = merged
+
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!current[parts[i]]) {
+            current[parts[i]] = {}
+          }
+          current = current[parts[i]]
+        }
+
+        current[parts[parts.length - 1]] = value
+      }
+
+      state.settings = merged
+      localStorage.setItem('im-system-settings', JSON.stringify(merged))
+    },
+
     // 清空所有状态
     CLEAR_ALL_STATE(state) {
       state.currentUser = {
@@ -111,8 +161,75 @@ export default {
 
   actions: {
     // 初始化设置
-    initSettings({ commit }) {
+    async initSettings({ commit, dispatch }) {
       commit('LOAD_SETTINGS')
+      // 从服务器加载设置
+      try {
+        await dispatch('syncServerSettings')
+      } catch (e) {
+        console.warn('从服务器同步设置失败', e)
+      }
+    },
+
+    // 从服务器同步设置
+    async syncServerSettings({ commit }) {
+      const { data } = await getUserSettingsMap()
+      if (data && typeof data === 'object') {
+        commit('MERGE_SERVER_SETTINGS', data)
+      }
+    },
+
+    // 更新设置到服务器
+    async updateServerSetting({ dispatch }, { key, value, type }) {
+      try {
+        await updateUserSetting({
+          settingKey: key,
+          settingValue: String(value),
+          settingType: type
+        })
+      } catch (e) {
+        console.error('更新设置到服务器失败', e)
+        throw e
+      }
+    },
+
+    // 批量更新设置到服务器
+    async batchUpdateServerSettings({ dispatch }, settings) {
+      try {
+        await batchUpdateUserSettings(settings)
+      } catch (e) {
+        console.error('批量更新设置到服务器失败', e)
+        throw e
+      }
+    },
+
+    // 新增：更新聊天设置
+    updateChatSettings({ commit, dispatch }, settings) {
+      commit('UPDATE_SETTINGS', { chat: { ...settings } })
+      dispatch('batchUpdateServerSettings', {
+        'chat.fontSize': settings.fontSize,
+        'chat.background': settings.background,
+        'chat.bubbleStyle': settings.bubbleStyle,
+        'chat.sendShortcut': settings.sendShortcut
+      })
+    },
+
+    // 新增：更新文件管理设置
+    updateFileSettings({ commit, dispatch }, settings) {
+      commit('UPDATE_SETTINGS', { file: { ...settings } })
+      dispatch('batchUpdateServerSettings', {
+        'file.autoDownloadImage': String(settings.autoDownloadImage),
+        'file.autoDownloadFile': String(settings.autoDownloadFile),
+        'file.sizeWarning': String(settings.sizeWarning)
+      })
+    },
+
+    // 新增：更新数据保留设置
+    updateDataSettings({ commit, dispatch }, settings) {
+      commit('UPDATE_SETTINGS', { data: { ...settings } })
+      dispatch('batchUpdateServerSettings', {
+        'data.keepOnLogout': String(settings.keepOnLogout)
+      })
     },
 
     // 更新通知设置
@@ -146,7 +263,11 @@ export default {
     },
 
     // 登出 - 清空所有状态
-    logout({ commit }) {
+    logout({ commit, state }) {
+      // 根据设置决定是否清除本地数据
+      if (!state.settings.data?.keepOnLogout) {
+        localStorage.removeItem('im-system-settings')
+      }
       commit('CLEAR_ALL_STATE')
       commit('session/CLEAR_STATE', null, { root: true })
       commit('message/CLEAR_STATE', null, { root: true })
