@@ -42,17 +42,24 @@
       <!-- 主内容区域 -->
       <main class="settings-main">
         <header class="main-header">
-          <h2 class="header-title">{{ currentMenuLabel }}</h2>
-          <el-button class="close-btn" circle text @click="visible = false">
-            <el-icon><Close /></el-icon>
-          </el-button>
+          <div>
+            <h2 class="header-title">{{ currentMenuLabel }}</h2>
+            <div class="header-subtitle">{{ currentUser.name || '' }}</div>
+          </div>
+          <div class="header-actions">
+            <el-button class="mr-2" type="text" @click="resetToDefault">恢复默认</el-button>
+            <el-button class="mr-4" type="primary" @click="onSave">保存并关闭</el-button>
+            <el-button class="close-btn" circle text @click="visible = false">
+              <el-icon><Close /></el-icon>
+            </el-button>
+          </div>
         </header>
 
         <div class="main-content custom-scrollbar">
           <component 
             :is="currentComponent" 
             v-bind="componentProps"
-            v-on="componentEvents"
+            v-on="finalComponentEvents"
           />
         </div>
       </main>
@@ -85,6 +92,7 @@ import {
 const AccountSettings = defineAsyncComponent(() => import('../Settings/AccountSettings.vue'))
 const NotificationSettings = defineAsyncComponent(() => import('../Settings/NotificationSettings.vue'))
 const GeneralSettings = defineAsyncComponent(() => import('../Settings/GeneralSettings.vue'))
+const ThemeSettings = defineAsyncComponent(() => import('../Settings/ThemeSettings.vue'))
 const StorageSettings = defineAsyncComponent(() => import('../Settings/StorageSettings.vue'))
 const HelpSettings = defineAsyncComponent(() => import('../Settings/HelpSettings.vue'))
 const AboutSettings = defineAsyncComponent(() => import('../Settings/AboutSettings.vue'))
@@ -154,6 +162,7 @@ const componentMap = {
   account: AccountSettings,
   notification: NotificationSettings,
   general: GeneralSettings,
+  theme: ThemeSettings,
   storage: StorageSettings,
   help: HelpSettings,
   about: AboutSettings
@@ -225,14 +234,14 @@ const handleSettingsUpdate = (newSettings) => {
 }
 
 const saveSettings = () => {
-  // 如果需要持久化到后端，可以在这里调用 API
-  // 目前 store watcher 会处理 localStorage 持久化
-  
-  // 对于 modelValue update，由于我们是 update:modelValue，组件内部已经发射了新值
-  // 我们需要在父组件处理这个 payload，或者因为我们传的是 computed settings
-  // 如果子组件直接修改了副本并 emit 回来，我们需要 commit 到 store
-  
-  // 修正：componentEvents 中的 update:modelValue 需要具体的处理函数
+  // 主动保存：把当前 store 的设置写入本地（Vuex 已经会写 localStorage），并提示
+  try {
+    store.commit('im/UPDATE_SETTINGS', store.state.im.settings)
+    ElMessage.success('设置已保存')
+  } catch (e) {
+    console.error('保存设置失败', e)
+    ElMessage.error('保存失败')
+  }
 }
 
 // 修正 settings 更新逻辑
@@ -262,12 +271,35 @@ watch(activeMenu, () => {
 
 // 重写 computed events 以使用正确的 handler
 const finalComponentEvents = computed(() => {
-    const events = componentEvents.value
+    const events = { ...componentEvents.value }
     if (events['update:modelValue']) {
         events['update:modelValue'] = realHandleSettingsUpdate
     }
     return events
 })
+
+// 头部操作：重置为默认、保存并关闭等
+const resetToDefault = () => {
+  ElMessageBox.confirm('恢复默认设置将移除本地自定义项，是否继续？', '恢复默认', {
+    confirmButtonText: '恢复',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    try {
+      localStorage.removeItem('im-system-settings')
+      store.commit('im/LOAD_SETTINGS')
+      ElMessage.success('已恢复默认设置')
+    } catch (e) {
+      console.error(e)
+      ElMessage.error('恢复失败')
+    }
+  })
+}
+
+const onSave = () => {
+  saveSettings()
+  visible.value = false
+}
 
 // 缓存清理
 const handleClearCache = () => {

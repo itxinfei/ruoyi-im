@@ -209,33 +209,33 @@
   --dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   // ============================================================================
-  // 暗色模式变量 - 优化版（更明亮的暗色主题）
+  // 暗色模式变量 - 纯暗黑
   // ============================================================================
-  --dt-bg-body-dark: #2a2a3e;           // 主背景：更亮的蓝紫色
-  --dt-bg-sidebar-dark: #353552;        // 侧边栏：更亮的蓝紫色
-  --dt-bg-card-dark: #353552;           // 卡片背景
-  --dt-bg-input-dark: #3d3d5a;         // 输入框背景
-  --dt-bg-hover-dark: #454562;         // 悬停背景
+  --dt-bg-body-dark: #000000;           // 主背景：纯黑
+  --dt-bg-sidebar-dark: #0a0a0a;        // 侧边栏：接近纯黑
+  --dt-bg-card-dark: #0a0a0a;           // 卡片背景
+  --dt-bg-input-dark: #141414;         // 输入框背景
+  --dt-bg-hover-dark: #1a1a1a;         // 悬停背景
   --dt-bg-active-dark: rgba(22, 119, 255, 0.25);  // 激活状态
 
-  --dt-text-primary-dark: #ffffff;      // 主要文本：纯白色提高可读性
-  --dt-text-secondary-dark: #e8e8f0;   // 次要文本：浅灰白
-  --dt-text-tertiary-dark: #b8b8c8;    // 辅助文本
-  --dt-text-quaternary-dark: #888898;  // 占位符文本
-  --dt-text-disabled-dark: #686878;    // 禁用文本
+  --dt-text-primary-dark: #ffffff;      // 主要文本：纯白色
+  --dt-text-secondary-dark: #e5e5e5;   // 次要文本：浅灰白
+  --dt-text-tertiary-dark: #a0a0a0;    // 辅助文本
+  --dt-text-quaternary-dark: #707070;  // 占位符文本
+  --dt-text-disabled-dark: #505050;    // 禁用文本
 
-  --dt-border-dark: #4a4a6a;           // 边框颜色
-  --dt-border-light-dark: #3a3a5a;     // 浅色边框
+  --dt-border-dark: #2a2a2a;           // 边框颜色
+  --dt-border-light-dark: #1a1a1a;     // 浅色边框
 
   // Element Plus 暗色适配变量
-  --el-bg-color-dark: #353552;
-  --el-bg-color-overlay-dark: #2a2a3e;
+  --el-bg-color-dark: #0a0a0a;
+  --el-bg-color-overlay-dark: #000000;
   --el-text-color-primary-dark: #ffffff;
-  --el-text-color-regular-dark: #e8e8f0;
-  --el-border-color-dark: #4a4a6a;
-  --el-border-color-light-dark: #3a3a5a;
-  --el-fill-color-blank-dark: #3d3d5a;
-  --el-fill-color-light-dark: #353552;
+  --el-text-color-regular-dark: #e5e5e5;
+  --el-border-color-dark: #2a2a2a;
+  --el-border-color-light-dark: #1a1a1a;
+  --el-fill-color-blank-dark: #141414;
+  --el-fill-color-light-dark: #0a0a0a;
 
   // ============================================================================
   // 语义化颜色变量 (用于组件)
