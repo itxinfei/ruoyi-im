@@ -544,7 +544,6 @@ const menuPlacement = computed(() => {
 .call-buttons {
   display: flex;
   align-items: center;
-  background: var(--dt-bg-body);
   border-radius: var(--dt-radius-md);
   padding: 2px;
   margin: 0 4px;
@@ -1022,10 +1021,6 @@ const menuPlacement = computed(() => {
 
 .dark .online-indicator {
   border-color: var(--dt-bg-card-dark);
-}
-
-.dark .call-buttons {
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .dark :deep(.header-dropdown) {
