@@ -115,7 +115,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
-import { request } from '@/utils/request'
+import { request } from '@/api/request'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import {
   ChatDotRound, User, Grid, Cloudy, Calendar, CircleCheck,

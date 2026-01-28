@@ -191,36 +191,15 @@ export default {
       let updatedSession
 
       if (index !== -1) {
-        // 更新现有会话
-        updatedSession = { ...state.sessions[index], ...session }
-        state.sessions[index] = updatedSession
+        // 创建新数组触发响应式更新
+        const newSessions = [...state.sessions]
+        updatedSession = { ...newSessions[index], ...session }
+        newSessions[index] = updatedSession
+        state.sessions = newSessions
       } else {
-        // 添加新会话
         updatedSession = session
-        state.sessions.push(updatedSession)
+        state.sessions = [...state.sessions, session]
       }
-
-      // 如果更新了 lastMessageTime，将会话移到列表顶部（保持置顶会话在顶部）
-      if (session.lastMessageTime !== undefined) {
-        // 移除该会话
-        state.sessions = state.sessions.filter(s => s.id !== session.id)
-        // 重新插入，置顶会话保持在最前
-        const pinnedSessions = state.sessions.filter(s => s.isPinned).sort((a, b) => {
-          return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
-        })
-        const unpinnedSessions = state.sessions.filter(s => !s.isPinned).sort((a, b) => {
-          return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
-        })
-
-        if (updatedSession.isPinned) {
-          pinnedSessions.unshift(updatedSession)
-        } else {
-          unpinnedSessions.unshift(updatedSession)
-        }
-
-        state.sessions = [...pinnedSessions, ...unpinnedSessions]
-      }
-
       // 更新未读总数
       state.totalUnreadCount = state.sessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
     },
@@ -390,7 +369,10 @@ export default {
 
     // 清除草稿
     CLEAR_DRAFT(state, conversationId) {
-      delete state.drafts[conversationId]
+      // 创建新对象触发响应式更新
+      const newDrafts = { ...state.drafts }
+      delete newDrafts[conversationId]
+      state.drafts = newDrafts
     },
 
     // 清空所有草稿
@@ -403,12 +385,19 @@ export default {
     // 设置输入状态
     SET_TYPING(state, { conversationId, isTyping }) {
       if (isTyping) {
-        state.typingSessions[conversationId] = {
-          isTyping: true,
-          lastTypingTime: Date.now()
+        // 创建新对象触发响应式更新
+        state.typingSessions = {
+          ...state.typingSessions,
+          [conversationId]: {
+            isTyping: true,
+            lastTypingTime: Date.now()
+          }
         }
       } else {
-        delete state.typingSessions[conversationId]
+        // 创建新对象触发响应式更新
+        const newTypingSessions = { ...state.typingSessions }
+        delete newTypingSessions[conversationId]
+        state.typingSessions = newTypingSessions
       }
     },
 

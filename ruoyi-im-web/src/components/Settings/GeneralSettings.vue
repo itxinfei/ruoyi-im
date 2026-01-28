@@ -107,7 +107,7 @@
 <script setup>
 import { reactive, watch, ref, onMounted } from 'vue'
 import { Check, Picture, Upload, RefreshLeft } from '@element-plus/icons-vue'
-import { request } from '@/utils/request'
+import { request } from '@/api/request'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
