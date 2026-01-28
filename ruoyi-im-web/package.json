@@ -18,7 +18,8 @@
     "@element-plus/icons-vue": "^2.3.1",
     "dayjs": "^1.11.10",
     "@vueuse/core": "^11.0.0",
-    "v-viewer": "^3.0.11"
+    "v-viewer": "^3.0.11",
+    "js-web-screen-shot": "^1.9.9"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.2",

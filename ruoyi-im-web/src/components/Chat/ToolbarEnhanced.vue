@@ -649,6 +649,18 @@ const handleAiToggle = (enabled) => {
   }
 }
 
+const handleShowTodo = () => {
+  emit('tool-action', { type: 'todo' })
+}
+
+const handleShowCalendar = () => {
+  emit('tool-action', { type: 'calendar' })
+}
+
+const handleQuickReply = () => {
+  emit('tool-action', { type: 'quick-reply' })
+}
+
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
   emit('favorite-toggle', isFavorite.value)

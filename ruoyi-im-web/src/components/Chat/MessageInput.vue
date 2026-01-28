@@ -197,8 +197,8 @@
       @close="handleScreenshotPreviewClose"
     />
 
-    <!-- 自由截图组件 -->
-    <FreeScreenshot
+    <!-- 网页截图组件 (js-web-screen-shot) -->
+    <WebScreenshot
       :visible="showScreenshotGuide"
       @confirm="handleSendScreenshotFromGuide"
       @close="showScreenshotGuide = false"
@@ -225,7 +225,7 @@ import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
 import ScreenshotPreview from './ScreenshotPreview.vue'
-import FreeScreenshot from './FreeScreenshot.vue'
+import WebScreenshot from './WebScreenshot.vue'
 import CommandPalette from './CommandPalette.vue'
 import AiSmartReply from './AiSmartReply.vue'
 
