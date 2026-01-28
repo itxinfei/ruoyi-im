@@ -1,5 +1,8 @@
 @use './design-tokens.scss' as *;
 
+// ============================================================================
+// 基础图标样式
+// ============================================================================
 .material-icons-outlined,
 .material-icons {
   font-size: 20px;
@@ -11,6 +14,26 @@
   justify-content: center;
   flex-shrink: 0;
   vertical-align: middle;
+  user-select: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+// 禁止选中
+.material-icons-outlined,
+.material-icons {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  will-change: transform;
+}
+
+// ============================================================================
+// 尺寸变体
+// ============================================================================
+.material-icons-outlined.xxs,
+.material-icons.xxs {
+  font-size: 12px;
+  min-width: 12px;
+  height: 12px;
 }
 
 .material-icons-outlined.sm,
@@ -18,6 +41,13 @@
   font-size: 14px;
   min-width: 14px;
   height: 14px;
+}
+
+.material-icons-outlined.md,
+.material-icons.md {
+  font-size: 16px;
+  min-width: 16px;
+  height: 16px;
 }
 
 .material-icons-outlined.lg,
@@ -34,13 +64,16 @@
   height: 32px;
 }
 
-.material-icons-outlined.xxs,
-.material-icons.xxs {
-  font-size: 12px;
-  min-width: 12px;
-  height: 12px;
+.material-icons-outlined.xxl,
+.material-icons.xxl {
+  font-size: 48px;
+  min-width: 48px;
+  height: 48px;
 }
 
+// ============================================================================
+// 语义化图标类
+// ============================================================================
 .material-icons-outlined.title-icon,
 .material-icons.title-icon {
   font-size: 24px;
@@ -251,12 +284,41 @@
   opacity: 0.6;
 }
 
+.material-icons-outlined.info-icon,
+.material-icons.info-icon {
+  font-size: 48px;
+  min-width: 48px;
+  height: 48px;
+  color: var(--dt-info-color);
+  opacity: 0.6;
+}
+
+// ============================================================================
+// 动画效果
+// ============================================================================
 .material-icons-outlined.loading-icon,
 .material-icons.loading-icon {
-  font-size: 24px;
-  min-width: 24px;
-  height: 24px;
   animation: spin 1s linear infinite;
+}
+
+.material-icons-outlined.rotating,
+.material-icons.rotating {
+  animation: spin 2s linear infinite;
+}
+
+.material-icons-outlined.pulse,
+.material-icons.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.material-icons-outlined.bounce,
+.material-icons.bounce {
+  animation: bounce 0.5s ease;
+}
+
+.material-icons-outlined.shake,
+.material-icons.shake {
+  animation: shake 0.5s ease;
 }
 
 @keyframes spin {
@@ -268,6 +330,479 @@
   }
 }
 
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+// ============================================================================
+// 状态样式
+// ============================================================================
+.material-icons-outlined.primary,
+.material-icons.primary {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.success,
+.material-icons.success {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.warning,
+.material-icons.warning {
+  color: var(--dt-warning-color);
+}
+
+.material-icons-outlined.error,
+.material-icons.error {
+  color: var(--dt-error-color);
+}
+
+.material-icons-outlined.info,
+.material-icons.info {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.danger,
+.material-icons.danger {
+  color: var(--dt-error-color);
+}
+
+.material-icons-outlined.muted,
+.material-icons.muted {
+  opacity: 0.5;
+}
+
+.material-icons-outlined.disabled,
+.material-icons.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+// ============================================================================
+// 交互效果
+// ============================================================================
+.material-icons-outlined.clickable,
+.material-icons.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.material-icons-outlined.clickable:hover,
+.material-icons.clickable:hover {
+  transform: scale(1.1);
+  opacity: 0.8;
+}
+
+.material-icons-outlined.clickable:active,
+.material-icons.clickable:active {
+  transform: scale(0.95);
+}
+
+.material-icons-outlined.draggable,
+.material-icons.draggable {
+  cursor: grab;
+}
+
+.material-icons-outlined.draggable:active,
+.material-icons.draggable:active {
+  cursor: grabbing;
+}
+
+// ============================================================================
+// 颜色变体
+// ============================================================================
+.material-icons-outlined.text-primary,
+.material-icons.text-primary {
+  color: var(--dt-text-primary);
+}
+
+.material-icons-outlined.text-secondary,
+.material-icons.text-secondary {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.text-tertiary,
+.material-icons.text-tertiary {
+  color: var(--dt-text-tertiary);
+}
+
+.material-icons-outlined.text-quaternary,
+.material-icons.text-quaternary {
+  color: var(--dt-text-quaternary);
+}
+
+// ============================================================================
+// 特殊用途图标
+// ============================================================================
+.material-icons-outlined.star-icon,
+.material-icons.star-icon {
+  color: var(--dt-warning-color);
+}
+
+.material-icons-outlined.check-icon,
+.material-icons.check-icon {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.delete-icon,
+.material-icons.delete-icon {
+  color: var(--dt-error-color);
+}
+
+.material-icons-outlined.upload-icon,
+.material-icons.upload-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.download-icon,
+.material-icons.download-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.edit-icon,
+.material-icons.edit-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.share-icon,
+.material-icons.share-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.copy-icon,
+.material-icons.copy-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.link-icon,
+.material-icons.link-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.phone-icon,
+.material-icons.phone-icon {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.video-icon,
+.material-icons.video-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.email-icon,
+.material-icons.email-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.location-icon,
+.material-icons.location-icon {
+  color: var(--dt-error-color);
+}
+
+.material-icons-outlined.calendar-icon,
+.material-icons.calendar-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.time-icon,
+.material-icons.time-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.user-icon,
+.material-icons.user-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.group-icon,
+.material-icons.group-icon {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.folder-icon,
+.material-icons.folder-icon {
+  color: var(--dt-warning-color);
+}
+
+.material-icons-outlined.file-icon,
+.material-icons.file-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.image-icon,
+.material-icons.image-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.video-file-icon,
+.material-icons.video-file-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.audio-icon,
+.material-icons.audio-icon {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.archive-icon,
+.material-icons.archive-icon {
+  color: var(--dt-text-quaternary);
+}
+
+.material-icons-outlined.trash-icon,
+.material-icons.trash-icon {
+  color: var(--dt-error-color);
+}
+
+.material-icons-outlined.settings-icon,
+.material-icons.settings-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.help-icon,
+.material-icons.help-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.notification-icon,
+.material-icons.notification-icon {
+  color: var(--dt-warning-color);
+}
+
+.material-icons-outlined.message-icon,
+.material-icons.message-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.chat-icon,
+.material-icons.chat-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.favorite-icon,
+.material-icons.favorite-icon {
+  color: var(--dt-error-color);
+}
+
+.material-icons-outlined.bookmark-icon,
+.material-icons.bookmark-icon {
+  color: var(--dt-warning-color);
+}
+
+.material-icons-outlined.tag-icon,
+.material-icons.tag-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.category-icon,
+.material-icons.category-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.filter-icon,
+.material-icons.filter-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.sort-icon,
+.material-icons.sort-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.search-icon,
+.material-icons.search-icon {
+  color: var(--dt-text-quaternary);
+}
+
+.material-icons-outlined.close-icon,
+.material-icons.close-icon {
+  color: var(--dt-text-quaternary);
+}
+
+.material-icons-outlined.add-icon,
+.material-icons.add-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.remove-icon,
+.material-icons.remove-icon {
+  color: var(--dt-error-color);
+}
+
+.material-icons-outlined.expand-icon,
+.material-icons.expand-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.collapse-icon,
+.material-icons.collapse-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.refresh-icon,
+.material-icons.refresh-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.sync-icon,
+.material-icons.sync-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.cloud-icon,
+.material-icons.cloud-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.wifi-icon,
+.material-icons.wifi-icon {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.bluetooth-icon,
+.material-icons.bluetooth-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.battery-icon,
+.material-icons.battery-icon {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.volume-icon,
+.material-icons.volume-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.mic-icon,
+.material-icons.mic-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.camera-icon,
+.material-icons.camera-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.screen-icon,
+.material-icons.screen-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.keyboard-icon,
+.material-icons.keyboard-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.mouse-icon,
+.material-icons.mouse-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.printer-icon,
+.material-icons.printer-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.scanner-icon,
+.material-icons.scanner-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.security-icon,
+.material-icons.security-icon {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.lock-icon,
+.material-icons.lock-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.unlock-icon,
+.material-icons.unlock-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.key-icon,
+.material-icons.key-icon {
+  color: var(--dt-warning-color);
+}
+
+.material-icons-outlined.shield-icon,
+.material-icons.shield-icon {
+  color: var(--dt-success-color);
+}
+
+.material-icons-outlined.privacy-icon,
+.material-icons.privacy-icon {
+  color: var(--dt-error-color);
+}
+
+.material-icons-outlined.dashboard-icon,
+.material-icons.dashboard-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.analytics-icon,
+.material-icons.analytics-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.chart-icon,
+.material-icons.chart-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.graph-icon,
+.material-icons.graph-icon {
+  color: var(--dt-info-color);
+}
+
+.material-icons-outlined.report-icon,
+.material-icons.report-icon {
+  color: var(--dt-text-secondary);
+}
+
+.material-icons-outlined.insights-icon,
+.material-icons.insights-icon {
+  color: var(--dt-brand-color);
+}
+
+.material-icons-outlined.trend-icon,
+.material-icons.trend-icon {
+  color: var(--dt-success-color);
+}
+
+// ============================================================================
+// 响应式调整
+// ============================================================================
 @media (max-width: 767px) {
   .material-icons-outlined,
   .material-icons {
@@ -295,6 +830,13 @@
     font-size: 28px;
     min-width: 28px;
     height: 28px;
+  }
+
+  .material-icons-outlined.xxl,
+  .material-icons.xxl {
+    font-size: 40px;
+    min-width: 40px;
+    height: 40px;
   }
 
   .material-icons-outlined.logo-icon,
@@ -327,6 +869,13 @@
 
   .material-icons-outlined.warning-icon,
   .material-icons.warning-icon {
+    font-size: 40px;
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .material-icons-outlined.info-icon,
+  .material-icons.info-icon {
     font-size: 40px;
     min-width: 40px;
     height: 40px;

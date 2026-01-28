@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -265,6 +265,22 @@ watch(() => props.visible, (newVal) => {
     }, 300)
   }
 })
+
+// ESC 键处理
+const handleKeydown = (e) => {
+  if (e.key === 'Escape' && props.visible) {
+    handleClose()
+  }
+}
+
+// 添加和移除 ESC 键监听
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style scoped lang="scss">
@@ -279,8 +295,9 @@ watch(() => props.visible, (newVal) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.1);
   z-index: 9998;
+  cursor: default;
 }
 
 .fade-enter-active,

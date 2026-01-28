@@ -31,13 +31,13 @@
           </el-tooltip>
 
           <el-tooltip content="图片" placement="top">
-            <button class="toolbar-btn" @click="$emit('upload-image')">
+            <button class="toolbar-btn" @click="triggerImageUpload">
               <el-icon><Picture /></el-icon>
             </button>
           </el-tooltip>
 
           <el-tooltip content="文件" placement="top">
-            <button class="toolbar-btn" @click="$emit('upload-file')">
+            <button class="toolbar-btn" @click="triggerFileUpload">
               <el-icon><FolderOpened /></el-icon>
             </button>
           </el-tooltip>
@@ -197,10 +197,11 @@
       @close="handleScreenshotPreviewClose"
     />
 
-    <!-- 截图引导对话框 -->
-    <ScreenshotGuideDialog
-      v-model:visible="showScreenshotGuide"
-      @send="handleSendScreenshotFromGuide"
+    <!-- 自由截图组件 -->
+    <FreeScreenshot
+      :visible="showScreenshotGuide"
+      @confirm="handleSendScreenshotFromGuide"
+      @close="showScreenshotGuide = false"
     />
 
     <!-- AI 灵动回复面板 -->
@@ -224,7 +225,7 @@ import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
 import ScreenshotPreview from './ScreenshotPreview.vue'
-import ScreenshotGuideDialog from './ScreenshotGuideDialog.vue'
+import FreeScreenshot from './FreeScreenshot.vue'
 import CommandPalette from './CommandPalette.vue'
 import AiSmartReply from './AiSmartReply.vue'
 
@@ -343,7 +344,6 @@ const videoInputRef = ref(null)
 const isVoiceMode = ref(false)
 const showScreenshotPreview = ref(false)
 const screenshotData = ref(null)
-const isCapturing = ref(false)
 const showScreenshotGuide = ref(false)
 
 // AI 灵动回复状态
@@ -663,6 +663,7 @@ const toggleEmojiPicker = () => {
         y: rect.top - 285  // 输入框上方 (280px 弹窗高度 + 5px 间距)
       }
     }
+    showEmojiPicker.value = true
   } else {
     showEmojiPicker.value = false
   }
@@ -698,7 +699,7 @@ const handleSendScreenshot = async (blob) => {
   screenshotData.value = null
 }
 
-// 从截图引导对话框发送截图
+// 从自由截图组件发送截图
 const handleSendScreenshotFromGuide = async (dataURL) => {
   if (!dataURL) return
 
@@ -711,8 +712,6 @@ const handleSendScreenshotFromGuide = async (dataURL) => {
     const formData = new FormData()
     formData.append('file', blob, 'screenshot.png')
     emit('send-screenshot', formData)
-
-    showScreenshotGuide.value = false
   } catch (error) {
     console.error('发送截图失败:', error)
     ElMessage.error('发送截图失败')
@@ -757,6 +756,14 @@ const handleLocation = () => {
 
 const handleVideoUpload = () => {
   videoInputRef.value?.click()
+}
+
+const triggerImageUpload = () => {
+  imageInputRef.value?.click()
+}
+
+const triggerFileUpload = () => {
+  fileInputRef.value?.click()
 }
 
 const handleVideoFileChange = async () => {
