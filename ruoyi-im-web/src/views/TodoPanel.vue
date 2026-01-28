@@ -3,10 +3,15 @@
     <!-- 头部区域 -->
     <div class="panel-header">
       <div class="header-left">
-        <h2 class="panel-title">待办事项</h2>
-        <div class="title-badge">
-          <span class="material-icons-outlined badge-icon">task_alt</span>
-          <span class="badge-count">{{ todos.filter(t => !t.completed).length }}</span>
+        <div class="title-wrapper">
+          <h2 class="panel-title">待办事项</h2>
+          <div class="title-badge">
+            <div class="badge-icon-wrapper">
+              <span class="material-icons-outlined badge-icon">task_alt</span>
+              <div class="icon-glow"></div>
+            </div>
+            <span class="badge-count">{{ todos.filter(t => !t.completed).length }}</span>
+          </div>
         </div>
       </div>
       <button class="add-btn" @click="showAddDialog = true">
@@ -17,41 +22,61 @@
 
     <!-- 统计卡片 -->
     <div class="stats-row">
-      <div class="stat-card">
-        <span class="stat-icon stat-icon--total">
-          <span class="material-icons-outlined">list</span>
-        </span>
+      <div class="stat-card stat-card--total">
+        <div class="stat-icon-wrapper">
+          <span class="material-icons-outlined stat-icon">
+            <div class="icon-bg"></div>
+            list
+          </span>
+          <div class="icon-glow icon-glow--primary"></div>
+        </div>
         <div class="stat-info">
           <span class="stat-value">{{ todos.length }}</span>
           <span class="stat-label">全部待办</span>
         </div>
+        <div class="stat-decoration"></div>
       </div>
-      <div class="stat-card">
-        <span class="stat-icon stat-icon--pending">
-          <span class="material-icons-outlined">schedule</span>
-        </span>
+      <div class="stat-card stat-card--pending">
+        <div class="stat-icon-wrapper">
+          <span class="material-icons-outlined stat-icon">
+            <div class="icon-bg"></div>
+            schedule
+          </span>
+          <div class="icon-glow icon-glow--warning"></div>
+        </div>
         <div class="stat-info">
           <span class="stat-value">{{ todos.filter(t => !t.completed).length }}</span>
           <span class="stat-label">进行中</span>
         </div>
+        <div class="stat-decoration"></div>
       </div>
-      <div class="stat-card">
-        <span class="stat-icon stat-icon--high">
-          <span class="material-icons-outlined">priority_high</span>
-        </span>
+      <div class="stat-card stat-card--high">
+        <div class="stat-icon-wrapper">
+          <span class="material-icons-outlined stat-icon">
+            <div class="icon-bg"></div>
+            priority_high
+          </span>
+          <div class="icon-glow icon-glow--danger"></div>
+        </div>
         <div class="stat-info">
           <span class="stat-value">{{ todos.filter(t => t.priority === 'high' && !t.completed).length }}</span>
           <span class="stat-label">紧急</span>
         </div>
+        <div class="stat-decoration"></div>
       </div>
-      <div class="stat-card">
-        <span class="stat-icon stat-icon--done">
-          <span class="material-icons-outlined">check_circle</span>
-        </span>
+      <div class="stat-card stat-card--done">
+        <div class="stat-icon-wrapper">
+          <span class="material-icons-outlined stat-icon">
+            <div class="icon-bg"></div>
+            check_circle
+          </span>
+          <div class="icon-glow icon-glow--success"></div>
+        </div>
         <div class="stat-info">
           <span class="stat-value">{{ todos.filter(t => t.completed).length }}</span>
           <span class="stat-label">已完成</span>
         </div>
+        <div class="stat-decoration"></div>
       </div>
     </div>
 
@@ -67,19 +92,30 @@
         <span class="filter-tab-icon material-icons-outlined">{{ tab.icon }}</span>
         <span class="filter-tab-label">{{ tab.label }}</span>
         <span v-if="getCount(tab.key) > 0" class="tab-count">{{ getCount(tab.key) }}</span>
+        <div class="tab-indicator"></div>
       </button>
     </div>
 
     <!-- 内容区域 -->
     <div class="panel-content">
       <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
-        <span>加载中...</span>
+        <div class="loading-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-dot"></div>
+        </div>
+        <span class="loading-text">加载中...</span>
       </div>
 
       <div v-else-if="filteredTodos.length === 0" class="empty-state">
         <div class="empty-illustration">
-          <span class="material-icons-outlined">{{ emptyIcon }}</span>
+          <div class="empty-icon-wrapper">
+            <span class="material-icons-outlined empty-icon">{{ emptyIcon }}</span>
+            <div class="icon-rings">
+              <div class="ring"></div>
+              <div class="ring"></div>
+              <div class="ring"></div>
+            </div>
+          </div>
           <div class="empty-decoration"></div>
         </div>
         <h3 class="empty-title">{{ emptyTitle }}</h3>
@@ -91,58 +127,63 @@
       </div>
 
       <div v-else class="todo-list">
-        <div
-          v-for="todo in filteredTodos"
-          :key="todo.id"
-          class="todo-item"
-          :class="{
-            completed: todo.completed,
-            overdue: isOverdue(todo.dueDate),
-            [`priority-${todo.priority}`]: true
-          }"
-          @click="handleViewDetail(todo)"
-        >
-          <!-- 优先级指示条 -->
-          <div class="priority-indicator" :class="`priority-${todo.priority}`"></div>
+        <transition-group name="todo-item">
+          <div
+            v-for="todo in filteredTodos"
+            :key="todo.id"
+            class="todo-item"
+            :class="{
+              completed: todo.completed,
+              overdue: isOverdue(todo.dueDate),
+              [`priority-${todo.priority}`]: true
+            }"
+            @click="handleViewDetail(todo)"
+          >
+            <!-- 优先级指示条 -->
+            <div class="priority-indicator" :class="`priority-${todo.priority}`">
+              <div class="indicator-glow"></div>
+            </div>
 
-          <!-- 复选框 -->
-          <div class="todo-checkbox" @click.stop="toggleComplete(todo)">
-            <div class="checkbox-inner" :class="{ checked: todo.completed }">
-              <span v-if="todo.completed" class="material-icons-outlined check-icon">check</span>
+            <!-- 复选框 -->
+            <div class="todo-checkbox" @click.stop="toggleComplete(todo)">
+              <div class="checkbox-inner" :class="{ checked: todo.completed }">
+                <span v-if="todo.completed" class="material-icons-outlined check-icon">check</span>
+                <div class="checkbox-ripple"></div>
+              </div>
+            </div>
+
+            <!-- 内容 -->
+            <div class="todo-content">
+              <div class="todo-header">
+                <h4 class="todo-title">{{ todo.title }}</h4>
+                <span class="todo-priority-badge" :class="`priority-${todo.priority}`">
+                  {{ priorityText(todo.priority) }}
+                </span>
+              </div>
+              <p v-if="todo.content" class="todo-desc">{{ todo.content }}</p>
+              <div class="todo-meta">
+                <span class="todo-date" :class="{ overdue: isOverdue(todo.dueDate) }">
+                  <span class="material-icons-outlined date-icon">{{ dateIcon(todo.dueDate) }}</span>
+                  {{ formatDate(todo.dueDate) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="todo-actions" @click.stop>
+              <el-tooltip content="编辑" placement="top">
+                <button class="action-btn" @click="handleEdit(todo)">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+              </el-tooltip>
+              <el-tooltip content="删除" placement="top">
+                <button class="action-btn action-btn--danger" @click="deleteTodo(todo)">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              </el-tooltip>
             </div>
           </div>
-
-          <!-- 内容 -->
-          <div class="todo-content">
-            <div class="todo-header">
-              <h4 class="todo-title">{{ todo.title }}</h4>
-              <span class="todo-priority-badge" :class="`priority-${todo.priority}`">
-                {{ priorityText(todo.priority) }}
-              </span>
-            </div>
-            <p v-if="todo.content" class="todo-desc">{{ todo.content }}</p>
-            <div class="todo-meta">
-              <span class="todo-date" :class="{ overdue: isOverdue(todo.dueDate) }">
-                <span class="material-icons-outlined date-icon">{{ dateIcon(todo.dueDate) }}</span>
-                {{ formatDate(todo.dueDate) }}
-              </span>
-            </div>
-          </div>
-
-          <!-- 操作按钮 -->
-          <div class="todo-actions" @click.stop>
-            <el-tooltip content="编辑" placement="top">
-              <button class="action-btn" @click="handleEdit(todo)">
-                <span class="material-icons-outlined">edit</span>
-              </button>
-            </el-tooltip>
-            <el-tooltip content="删除" placement="top">
-              <button class="action-btn action-btn--danger" @click="deleteTodo(todo)">
-                <span class="material-icons-outlined">delete</span>
-              </button>
-            </el-tooltip>
-          </div>
-        </div>
+        </transition-group>
       </div>
     </div>
 
@@ -269,7 +310,8 @@ const dateIcon = (dueDate) => {
   const diff = new Date(dueDate) - new Date()
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
   if (days === 0) return 'today'
-  if (days <= 2) return 'event_available'
+  if (days === 1) return 'event_available'
+  if (days === -1) return 'event'
   return 'event'
 }
 
@@ -425,6 +467,7 @@ onMounted(() => {
   flex: 1;
   min-width: 0;
   background: var(--dt-bg-body);
+  position: relative;
 }
 
 // ============================================================================
@@ -434,67 +477,170 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-light);
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.06) 50%, transparent 50%);
+  }
 }
 
 .header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.title-wrapper {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .panel-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
   margin: 0;
+  letter-spacing: -0.5px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
+    transition: width 0.3s ease;
+  }
+
+  &:hover::before {
+    width: 100%;
+  }
 }
 
 .title-badge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: var(--dt-brand-bg);
-  border-radius: var(--dt-radius-full);
-}
+  gap: 8px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-hover) 100%);
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+  position: relative;
+  overflow: hidden;
 
-.badge-icon {
-  font-size: 14px;
-  color: var(--dt-brand-color);
-}
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 50%);
+    animation: shimmer 3s infinite;
+  }
 
-.badge-count {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--dt-brand-color);
+  @keyframes shimmer {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 100% 0;
+    }
+  }
+
+  .badge-icon-wrapper {
+    position: relative;
+  }
+
+  .badge-icon {
+    font-size: 16px;
+    color: var(--dt-brand-color);
+    position: relative;
+    z-index: 1;
+  }
+
+  .icon-glow {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: var(--dt-brand-color);
+    opacity: 0.2;
+    animation: iconPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes iconPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.2;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.3;
+    }
+  }
+
+  .badge-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dt-brand-color);
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .add-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 16px;
-  background: var(--dt-brand-color);
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
   color: #fff;
   border: none;
-  border-radius: var(--dt-radius-lg);
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 50%);
+    animation: shimmer 2s infinite;
+  }
 
   &:hover {
-    background: var(--dt-brand-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+    background: linear-gradient(135deg, var(--dt-brand-hover) 0%, #4096ff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.4);
   }
 
   &:active {
     transform: translateY(0);
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 100% 0;
+    }
   }
 }
 
@@ -502,77 +648,155 @@ onMounted(() => {
 // 统计卡片
 // ============================================================================
 .stats-row {
-  display: flex;
-  gap: 12px;
-  padding: 16px 24px;
-  background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-light);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.06) 50%, transparent 50%);
+  }
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
-  padding: 12px 16px;
-  background: var(--dt-bg-body);
-  border-radius: var(--dt-radius-lg);
-  transition: all var(--dt-transition-base);
+  gap: 14px;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
+    transition: opacity 0.3s;
+    opacity: 0;
+  }
 
   &:hover {
-    background: var(--dt-bg-card-hover);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .stat-icon-wrapper .stat-icon {
+      transform: scale(1.1);
+    }
+
+    .stat-decoration {
+      opacity: 1;
+    }
   }
-}
 
-.stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--dt-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  .stat-icon-wrapper {
+    position: relative;
+    flex-shrink: 0;
+  }
 
-  .material-icons-outlined {
-    font-size: 20px;
+  .stat-icon {
+    font-size: 22px;
     color: #fff;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  &--total {
-    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+  .icon-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.2;
   }
 
-  &--pending {
-    background: linear-gradient(135deg, #faad14 0%, #d48806 100%);
+  .icon-glow {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.3;
+    animation: statIconPulse 3s ease-in-out infinite;
   }
 
-  &--high {
-    background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%);
+  &--total .stat-icon {
+    color: #1677ff;
   }
 
-  &--done {
-    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+  &--pending .stat-icon {
+    color: #faad14;
   }
-}
 
-.stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+  &--high .stat-icon {
+    color: #f54a45;
+  }
 
-.stat-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--dt-text-primary);
-  line-height: 1;
-}
+  &--done .stat-icon {
+    color: #52c41a;
+  }
 
-.stat-label {
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
+  @keyframes statIconPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.15);
+      opacity: 0.5;
+    }
+  }
+
+  .stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: #8c8c8c;
+    font-weight: 500;
+  }
+
+  .stat-decoration {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle at top right, rgba(22, 119, 255, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    opacity: 0.6;
+  }
 }
 
 // ============================================================================
@@ -580,76 +804,96 @@ onMounted(() => {
 // ============================================================================
 .filter-tabs {
   display: flex;
-  padding: 12px 24px 0;
-  background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-light);
-  gap: 4px;
+  padding: 16px 28px 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 8px;
   flex-shrink: 0;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.06) 50%, transparent 50%);
+  }
 }
 
 .filter-tab {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 10px 16px;
   background: transparent;
   border: none;
-  border-radius: var(--dt-radius-lg) var(--dt-radius-lg) 0 0;
-  font-size: 13px;
-  color: var(--dt-text-secondary);
+  border-radius: 20px 20px 0 0;
+  font-size: 14px;
+  color: #666;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   margin-bottom: -1px;
 
+  .filter-tab-icon {
+    font-size: 18px;
+    transition: transform 0.3s;
+  }
+
+  .filter-tab-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .tab-count {
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.06);
+    color: #666;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .tab-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--dt-brand-color);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
   &:hover {
-    color: var(--dt-text-primary);
-    background: var(--dt-bg-body);
+    color: #1a1a1a;
+    background: rgba(0, 0, 0, 0.04);
+
+    .filter-tab-icon {
+      transform: translateY(-2px);
+    }
   }
 
   &.active {
     color: var(--dt-brand-color);
     background: #fff;
-    font-weight: 500;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--dt-brand-color);
+    .tab-count {
+      background: var(--dt-brand-bg);
+      color: var(--dt-brand-color);
+    }
+
+    .tab-indicator {
+      transform: scaleX(1);
     }
   }
-
-  .dark &.active {
-    background: var(--dt-bg-body-dark);
-  }
-}
-
-.filter-tab-icon {
-  font-size: 16px;
-}
-
-.filter-tab-label {
-  font-size: 13px;
-}
-
-.tab-count {
-  padding: 2px 7px;
-  background: var(--dt-brand-color);
-  color: #fff;
-  border-radius: var(--dt-radius-full);
-  font-size: 11px;
-  font-weight: 600;
-  min-width: 18px;
-  text-align: center;
-}
-
-.filter-tab:not(.active) .tab-count {
-  background: var(--dt-border-color);
-  color: var(--dt-text-tertiary);
 }
 
 // ============================================================================
@@ -657,8 +901,9 @@ onMounted(() => {
 // ============================================================================
 .panel-content {
   flex: 1;
-  padding: 20px 24px;
+  padding: 24px 28px;
   overflow-y: auto;
+  position: relative;
 }
 
 // ============================================================================
@@ -670,12 +915,55 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: var(--dt-text-tertiary);
-  gap: 12px;
+  gap: 16px;
+}
 
-  .el-icon {
-    font-size: 32px;
+.loading-spinner {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.spinner-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid rgba(22, 119, 255, 0.1);
+  border-top-color: var(--dt-brand-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--dt-brand-color);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
   }
+  50% {
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 1;
+  }
+}
+
+.loading-text {
+  font-size: 15px;
+  color: #999;
+  font-weight: 500;
 }
 
 .empty-state {
@@ -683,64 +971,139 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   text-align: center;
 }
 
 .empty-illustration {
   position: relative;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+}
 
-  .material-icons-outlined {
-    font-size: 80px;
-    color: var(--dt-border-color);
+.empty-icon-wrapper {
+  position: relative;
+}
+
+.empty-icon {
+  font-size: 96px;
+  color: #d9d9d9;
+  transition: all 0.3s;
+  position: relative;
+  z-index: 1;
+}
+
+.icon-rings {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring {
+  position: absolute;
+  border: 2px solid var(--dt-brand-color);
+  border-radius: 50%;
+  opacity: 0;
+  animation: ringPulse 2s ease-out infinite;
+
+  &:nth-child(1) {
+    width: 120px;
+    height: 120px;
+  }
+
+  &:nth-child(2) {
+    width: 160px;
+    height  : 160px;
+    animation-delay: 0.3s;
+  }
+
+  &:nth-child(3) {
+    width: 200px;
+    height: 200px;
+    animation-delay: 0.6s;
+  }
+}
+
+@keyframes ringPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
   }
 }
 
 .empty-decoration {
   position: absolute;
-  bottom: -8px;
+  bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 6px;
-  background: var(--dt-border-color);
-  border-radius: var(--dt-radius-full);
+  width: 80px;
+  height: 8px;
+  background: rgba(22, 119, 255, 0.1);
+  border-radius: 50%;
   opacity: 0.5;
 }
 
 .empty-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  color: var(--dt-text-primary);
-  margin: 0 0 8px 0;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
 }
 
 .empty-text {
-  font-size: 14px;
-  color: var(--dt-text-tertiary);
-  margin: 0 0 24px 0;
-  max-width: 280px;
+  font-size: 15px;
+  color: #999;
+  margin: 0 0 32px 0;
+  max-width: 320px;
+  line-height: 1.6;
 }
 
 .empty-action {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  background: var(--dt-brand-color);
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
   color: #fff;
   border: none;
-  border-radius: var(--dt-radius-lg);
-  font-size: 14px;
-  font-weight: 500;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 50%);
+    animation: shimmer 2s infinite;
+  }
 
   &:hover {
-    background: var(--dt-brand-hover);
+    background: linear-gradient(135deg, var(--dt-brand-hover) 0%, #4096ff 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.4);
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 100% 0;
+    }
   }
 }
 
@@ -751,40 +1114,82 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-bottom: 20px;
 }
 
 .todo-item {
   position: relative;
-  background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-lg);
-  padding: 16px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 20px;
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  box-shadow: var(--dt-shadow-card);
-  transition: all var(--dt-transition-base);
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.01) 100%);
+    transition: opacity 0.3s;
+    opacity: 0;
+  }
 
   &:hover {
-    box-shadow: var(--dt-shadow-card-hover);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
+    border-color: rgba(22, 119, 255, 0.1);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .todo-actions {
+      opacity: 1;
+    }
   }
 
   &.completed {
-    opacity: 0.6;
+    opacity: 0.5;
 
     .todo-title {
       text-decoration: line-through;
-      color: var(--dt-text-tertiary);
+      color: #999;
+    }
+
+    .priority-indicator {
+      opacity: 0.3;
     }
   }
 
   &.overdue {
+    border-color: rgba(245, 74, 69, 0.2);
+
     .priority-indicator {
-      background: var(--dt-error-color);
+      background: #f54a45;
     }
   }
+}
+
+// 动画
+.todo-item-enter-active,
+.todo-item-leave-active {
+  transition: all 0.3s ease;
+}
+
+.todo-item-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.todo-item-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 .priority-indicator {
@@ -793,17 +1198,38 @@ onMounted(() => {
   top: 0;
   bottom: 0;
   width: 4px;
+  border-radius: 0 4px 0 0;
 
   &.priority-high {
-    background: var(--dt-error-color);
+    background: #f54a45;
   }
 
   &.priority-medium {
-    background: var(--dt-warning-color);
+    background: #faad14;
   }
 
   &.priority-low {
-    background: var(--dt-success-color);
+    background: #52c41a;
+  }
+
+  .indicator-glow {
+    position: absolute;
+    inset: -4px;
+    background: currentColor;
+    border-radius: 4px;
+    opacity: 0.4;
+    animation: priorityPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes priorityPulse {
+    0%, 100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.5);
+    }
   }
 }
 
@@ -812,21 +1238,32 @@ onMounted(() => {
 // ============================================================================
 .todo-checkbox {
   flex-shrink: 0;
-  padding-top: 2px;
+  padding-top: 3px;
 }
 
 .checkbox-inner {
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--dt-border-color);
-  border-radius: var(--dt-radius-sm);
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--dt-transition-base);
-  background: var(--dt-bg-card);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fafafa;
+  position: relative;
+  overflow: hidden;
 
-  .todo-item:hover .todo-checkbox & {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.1) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .todo-item:hover .checkbox-inner & {
     border-color: var(--dt-brand-color);
   }
 
@@ -836,16 +1273,45 @@ onMounted(() => {
 
     .check-icon {
       color: #fff;
-      font-size: 16px;
-      animation: checkBounce 0.3s ease-out;
+      font-size: 18px;
+      animation: checkBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  .checkbox-ripple {
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    background: rgba(22, 119, 255, 0.3);
+    transform: scale(0);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &.checked .checkbox-ripple {
+    animation: rippleEffect 0.4s ease-out;
   }
 }
 
 @keyframes checkBounce {
   0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
+  50% { transform: scale(1.3); }
   100% { transform: scale(1); }
+}
+
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
 // ============================================================================
@@ -859,54 +1325,56 @@ onMounted(() => {
 .todo-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .todo-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--dt-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
   margin: 0;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: -0.3px;
 }
 
 .todo-priority-badge {
-  padding: 2px 8px;
-  border-radius: var(--dt-radius-sm);
-  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
 
   &.priority-high {
-    background: var(--dt-error-bg);
-    color: var(--dt-error-color);
+    background: #fff1f0;
+    color: #f54a45;
   }
 
   &.priority-medium {
-    background: var(--dt-warning-bg);
-    color: var(--dt-warning-color);
+    background: #fff7e6;
+    color: #faad14;
   }
 
   &.priority-low {
-    background: var(--dt-success-bg);
-    color: var(--dt-success-color);
+    background: #f6ffed;
+    color: #52c41a;
   }
 }
 
 .todo-desc {
-  font-size: 13px;
-  color: var(--dt-text-secondary);
-  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 10px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  line-height: 1.4;
+  line-height: 1.6;
+  letter-spacing: 0.2px;
 }
 
 .todo-meta {
@@ -919,16 +1387,17 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
 
   .date-icon {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   &.overdue {
-    color: var(--dt-error-color);
-    font-weight: 500;
+    color: #f54a45;
+    font-weight: 600;
   }
 }
 
@@ -937,41 +1406,38 @@ onMounted(() => {
 // ============================================================================
 .todo-actions {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   opacity: 0;
-  transition: opacity var(--dt-transition-base);
+  transition: opacity 0.3s;
   flex-shrink: 0;
 }
 
-.todo-item:hover .todo-actions {
-  opacity: 1;
-}
-
 .action-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--dt-radius-md);
-  background: var(--dt-bg-body);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f5f5f5;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
-  color: var(--dt-text-secondary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #666;
 
   &:hover {
     background: var(--dt-brand-bg);
     color: var(--dt-brand-color);
+    transform: scale(1.1);
   }
 
   &--danger:hover {
-    background: var(--dt-error-bg);
-    color: var(--dt-error-color);
+    background: #fff1f0;
+    color: #f54a45;
   }
 
   .material-icons-outlined {
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 
@@ -979,66 +1445,99 @@ onMounted(() => {
 // 暗色模式
 // ============================================================================
 .dark .todo-panel {
-  background: var(--dt-bg-body-dark);
+  background: #0a0e1a;
 }
 
 .dark .panel-header,
-.dark .filter-tabs {
-  background: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
+.dark .filter-tabs,
+.dark .stats-row {
+  background: #1a1f2e;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.dark .panel-title,
+.dark .panel-title {
+  color: #e8e8e8;
+}
+
+.dark .stat-card {
+  background: #1a1f2e;
+  border-color: rgba(255, 255, 255, 0.1);
+
+  &::before {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.03) 100%);
+  }
+}
+
 .dark .stat-value {
-  color: var(--dt-text-primary-dark);
+  color: #e8e8e8;
 }
 
-.dark .stat-label,
-.dark .filter-tab:not(.active),
-.dark .todo-desc,
-.dark .todo-date {
-  color: var(--dt-text-tertiary-dark);
+.dark .stat-label {
+  color: #888;
 }
 
 .dark .filter-tab {
-  color: var(--dt-text-secondary-dark);
+  color: #999;
+}
+
+.dark .filter-tab:hover {
+  color: #e8e8e8;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .filter-tab.active {
   color: var(--dt-brand-color);
+  background: #0d1d2d;
+}
+
+.dark .filter-tab.active .tab-count {
+  background: rgba(22, 119, 255, 0.15);
 }
 
 .dark .todo-item {
-  background: var(--dt-bg-card-dark);
+  background: #1a1f2e;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .dark .todo-title {
-  color: var(--dt-text-primary-dark);
+  color: #e8e8e8;
 }
 
-.dark .checkbox-inner {
-  background: var(--dt-bg-input-dark);
-  border-color: var(--dt-border-dark);
+.dark .todo-desc {
+  color: #999;
+}
+
+.dark .todo-date {
+  color: #888;
+}
+
+.dark .todo-checkbox {
+  background: #0d1d2d;
+  border-color: #3d3d3d;
 }
 
 .dark .action-btn {
-  background: var(--dt-bg-hover-dark);
-  color: var(--dt-text-secondary-dark);
+  background: #2d2d2d;
+  color: #999;
 }
 
-.dark .empty-illustration .material-icons-outlined {
-  color: var(--dt-border-dark);
+.dark .empty-state {
+  background: #0a0e1a;
+}
+
+.dark .empty-icon {
+  color: #3d3d3d;
 }
 
 .dark .empty-decoration {
-  background: var(--dt-border-dark);
+  background: rgba(22, 119, 255, 0.05);
 }
 
-.dark .stat-card {
-  background: var(--dt-bg-hover-dark);
+.dark .empty-title {
+  color: #e8e8e8;
 }
 
-.dark .filter-tab:hover {
-  background: var(--dt-bg-hover-dark);
+.dark .empty-text {
+  color: #888;
 }
 </style>

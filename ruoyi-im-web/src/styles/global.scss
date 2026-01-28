@@ -22,11 +22,31 @@ body {
   transition: background-color var(--dt-transition-base), color var(--dt-transition-base);
 }
 
-// 全局基础颜色过渡 (可选，有助于平滑切换)
+// ============================================================================
+// 全局布局保护样式
+// ============================================================================
+
+// 防止 flex 子项溢出
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.min-width-0 {
+  min-width: 0;
+}
+
+// 文本溢出处理
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 全局基础颜色过渡
 *,
 *::before,
 *::after {
-  // 但要注意不要影响性能和布局相关的 transition
+  // 注意：不要影响性能和布局相关的 transition
 }
 
 body {

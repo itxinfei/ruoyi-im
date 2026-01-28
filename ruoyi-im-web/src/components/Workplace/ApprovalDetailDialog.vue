@@ -4,6 +4,7 @@
     v-model="visible"
     width="600px"
     destroy-on-close
+    :close-on-click-modal="true"
     @close="handleClose"
   >
     <div v-loading="loading" class="approval-detail">

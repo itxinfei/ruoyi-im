@@ -406,8 +406,24 @@ const doDeleteGroup = async (groupName) => {
 // 右键菜单
 const showContactMenu = (event, contact) => {
   currentContactForMenu.value = contact
-  contextMenuX.value = event.clientX
-  contextMenuY.value = event.clientY
+  const menuWidth = 150
+  const menuHeight = 120
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+
+  let x = event.clientX
+  let y = event.clientY
+
+  if (x + menuWidth > viewportWidth) {
+    x = viewportWidth - menuWidth - 10
+  }
+
+  if (y + menuHeight > viewportHeight) {
+    y = viewportHeight - menuHeight - 10
+  }
+
+  contextMenuX.value = Math.max(10, x)
+  contextMenuY.value = Math.max(10, y)
   contextMenuVisible.value = true
 }
 

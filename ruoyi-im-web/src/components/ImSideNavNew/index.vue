@@ -124,14 +124,10 @@ const props = defineProps({
   activeModule: {
     type: String,
     default: 'chat'
-  },
-  collapsed: {
-    type: Boolean,
-    default: false
   }
 })
 
-const emit = defineEmits(['switch-module', 'toggle-collapse', 'open-search', 'open-settings'])
+const emit = defineEmits(['switch-module', 'open-search', 'open-settings'])
 const store = useStore()
 const { isDark, themeMode, toggleTheme } = useTheme()
 

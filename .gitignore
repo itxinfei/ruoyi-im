@@ -73,3 +73,7 @@ Thumbs.db
 sql/
 ruoyi-im-web/src/nul
 nul
+
+# 忽略环境变量配置文件（包含敏感信息）
+.env
+*.env.local

@@ -25,13 +25,37 @@
             @loadedmetadata="handleRemoteLoaded"
           ></video>
           <div v-if="!remoteStreamLoaded" class="video-placeholder">
-            <span class="material-icons-outlined">videocam_off</span>
-            <span>等待对方视频...</span>
+            <div class="placeholder-content">
+              <div class="avatar-ring">
+                <DingtalkAvatar
+                  v-if="session"
+                  :src="session.avatar"
+                  :name="session.name"
+                  :user-id="session.targetId || session.peerUserId"
+                  :size="64"
+                  shape="circle"
+                />
+              </div>
+              <span class="material-icons-outlined pulse-icon">videocam_off</span>
+              <span class="placeholder-text">等待对方视频...</span>
+            </div>
+          </div>
+          <!-- 通话质量指标 -->
+          <div class="quality-indicator" v-if="status === 'talking'">
+            <div class="quality-item">
+              <span class="material-icons-outlined">signal_cellular_alt</span>
+              <span class="quality-value">优质</span>
+            </div>
+            <div class="quality-item">
+              <span class="material-icons-outlined">network_check</span>
+              <span class="quality-value">{{ networkQuality }}ms</span>
+            </div>
           </div>
         </div>
 
         <!-- 本地视频（画中画） -->
         <div v-if="localStream" class="local-video" :class="{ minimized: localVideoMinimized }">
+          <div class="video-border"></div>
           <video
             ref="localVideoRef"
             autoplay
@@ -40,7 +64,16 @@
             @loadedmetadata="handleLocalLoaded"
           ></video>
           <div class="video-controls-overlay" @click="toggleLocalVideoMinimize">
-            <span class="material-icons-outlined">open_in_full</span>
+            <span class="material-icons-outlined">{{ localVideoMinimized ? 'open_in_full' : 'fullscreen_exit' }}</span>
+          </div>
+          <!-- 本地视频状态指示 -->
+          <div class="local-video-status">
+            <span v-if="isMuted" class="status-badge muted">
+              <span class="material-icons-outlined">mic_off</span>
+            </span>
+            <span v-if="isCameraOff" class="status-badge camera-off">
+              <span class="material-icons-outlined">videocam_off</span>
+            </span>
           </div>
         </div>
       </div>
@@ -102,6 +135,7 @@
       <div class="user-info">
         <!-- 群组使用图标，单聊使用钉钉风格头像 -->
         <div v-if="session?.type === 'GROUP'" class="call-avatar group-avatar">
+          <div class="avatar-background"></div>
           <span class="material-icons-outlined">groups</span>
         </div>
         <DingtalkAvatar
@@ -128,10 +162,12 @@
         <template v-if="status === 'calling' || status === 'incoming'">
           <div v-if="status === 'incoming'" class="incoming-actions">
             <button class="action-btn accept" @click="handleAccept">
+              <div class="btn-glow accept-glow"></div>
               <span class="material-icons-outlined">{{ isVideoCall ? 'videocam' : 'phone' }}</span>
               <span>接听</span>
             </button>
             <button class="action-btn reject" @click="handleReject">
+              <div class="btn-glow reject-glow"></div>
               <span class="material-icons-outlined">call_end</span>
               <span>挂断</span>
             </button>
@@ -142,6 +178,7 @@
               <div class="wave"></div>
               <div class="wave"></div>
             </div>
+            <div class="calling-text">正在呼叫...</div>
             <button class="action-btn reject" @click="handleCancel">
               <span class="material-icons-outlined">call_end</span>
               <span>取消</span>
@@ -152,7 +189,8 @@
         <!-- 连接中 -->
         <template v-else-if="status === 'connecting'">
           <div class="connecting-animation">
-            <div class="spinner"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-dot"></div>
             <p>正在连接...</p>
           </div>
         </template>
@@ -161,6 +199,9 @@
         <template v-else-if="status === 'talking' && !isVideoCall">
           <div class="talking-actions">
             <div class="duration">{{ formattedDuration }}</div>
+            <div class="voice-visualizer">
+              <div class="audio-bar" v-for="i in 20" :key="i"></div>
+            </div>
             <div class="voice-controls">
               <button
                 class="control-btn small"
@@ -203,6 +244,7 @@
           main: participant.isMain
         }"
       >
+        <div class="video-border"></div>
         <video
           :ref="`participantVideo_${participant.userId}`"
           autoplay
@@ -215,6 +257,7 @@
             <span class="material-icons-outlined">mic_off</span>
           </span>
         </div>
+        <div v-if="participant.isSpeaking" class="speaking-indicator"></div>
       </div>
     </div>
   </el-dialog>
@@ -240,6 +283,7 @@ const duration = ref(0)
 const callId = ref(null)
 const isGroupCall = ref(false)
 const participants = ref([])
+const networkQuality = ref(120) // 模拟网络延迟
 
 // 媒体状态
 const isMuted = ref(false)
@@ -254,6 +298,7 @@ const remoteStream = ref(null)
 // 定时器
 let durationTimer = null
 let callTimeoutTimer = null
+let networkQualityTimer = null
 
 // DOM 引用
 const localVideoRef = ref(null)
@@ -301,6 +346,14 @@ const rtcConfig = {
 let peerConnection = null
 let mediaStream = null
 
+// 模拟网络质量变化
+const updateNetworkQuality = () => {
+  networkQualityTimer = setInterval(() => {
+    // 模拟网络延迟在 80-150ms 之间波动
+    networkQuality.value = Math.floor(Math.random() * 70) + 80
+  }, 2000)
+}
+
 // 打开通话弹窗
 const open = async (options = {}) => {
   const {
@@ -345,6 +398,9 @@ const open = async (options = {}) => {
       }
     }, 30000)
   }
+
+  // 开始更新网络质量
+  updateNetworkQuality()
 }
 
 // 开始通话
@@ -637,6 +693,10 @@ const stopTimer = () => {
     clearTimeout(callTimeoutTimer)
     callTimeoutTimer = null
   }
+  if (networkQualityTimer) {
+    clearInterval(networkQualityTimer)
+    networkQualityTimer = null
+  }
 }
 
 // 清理资源
@@ -668,11 +728,11 @@ const handleClosed = () => {
 }
 
 const handleLocalLoaded = () => {
-  console.log('Local video loaded')
+  // 本地视频加载完成
 }
 
 const handleRemoteLoaded = () => {
-  console.log('Remote video loaded')
+  // 远端视频加载完成
 }
 
 // 监听 WebSocket 信令消息
@@ -709,8 +769,10 @@ defineExpose({
   }
 
   :deep(.el-dialog) {
-    border-radius: 8px;
+    border-radius: 16px;
     overflow: hidden;
+    background: transparent;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 }
 
@@ -719,7 +781,8 @@ defineExpose({
   flex-direction: column;
   align-items: center;
   gap: 32px;
-  padding: 40px 20px;
+  padding: 48px 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .user-info {
@@ -727,7 +790,13 @@ defineExpose({
 
   .call-avatar {
     margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    }
   }
 
   .group-avatar {
@@ -741,33 +810,51 @@ defineExpose({
     justify-content: center;
     font-size: 36px;
     margin: 0 auto 16px;
+    position: relative;
+    overflow: hidden;
+
+    .avatar-background {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 70%);
+    }
+
+    .material-icons-outlined {
+      position: relative;
+      z-index: 1;
+    }
   }
 
   .call-name {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
-    margin: 8px 0;
+    margin: 12px 0 8px;
     color: var(--dt-text-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .call-status {
-    font-size: 14px;
+    font-size: 16px;
     color: var(--dt-text-secondary);
+    font-weight: 500;
   }
 
   .call-type-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 12px;
-    background: var(--dt-bg-body);
-    border-radius: 6px;
-    font-size: 12px;
-    color: var(--dt-text-secondary);
-    margin-top: 8px;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    font-size: 14px;
+    color: var(--dt-brand-color);
+    font-weight: 500;
+    margin-top: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
     .material-icons-outlined {
-      font-size: 16px;
+      font-size: 18px;
     }
   }
 }
@@ -780,26 +867,59 @@ defineExpose({
 .calling-actions {
   display: flex;
   justify-content: center;
-  gap: 24px;
+  gap: 32px;
 }
 
 .talking-actions {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
   width: 100%;
 
   .duration {
-    font-size: 28px;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 700;
     font-family: 'SF Mono', 'Monaco', monospace;
     color: var(--dt-text-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .voice-visualizer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 40px;
+    width: 100%;
+    max-width: 300px;
+
+    .audio-bar {
+      width: 4px;
+      background: linear-gradient(180deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+      border-radius: 2px;
+      animation: audioWave 1s ease-in-out infinite;
+
+      @for $i from 1 through 20 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.05}s;
+        }
+      }
+    }
+  }
+
+  @keyframes audioWave {
+    0%, 100% {
+      height: 8px;
+    }
+    50% {
+      height: 32px;
+    }
   }
 
   .voice-controls {
     display: flex;
-    gap: 12px;
+    gap: 16px;
   }
 }
 
@@ -807,42 +927,68 @@ defineExpose({
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
 
   .wave {
-    width: 8px;
-    height: 40px;
-    background: var(--dt-brand-color);
-    border-radius: 4px;
-    animation: wave 1.2s infinite-in-out;
+    width: 12px;
+    height: 50px;
+    background: linear-gradient(180deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+    border-radius: 6px;
+    animation: wave 1.2s ease-in-out infinite;
+    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
 
-    &:nth-child(2) { animation-delay: 0.1s; }
-    &:nth-child(3) { animation-delay: 0.2s; }
+    &:nth-child(2) { animation-delay: 0.15s; }
+    &:nth-child(3) { animation-delay: 0.3s; }
+  }
+
+  .calling-text {
+    font-size: 16px;
+    color: var(--dt-text-secondary);
+    font-weight: 500;
+    animation: pulseText 2s ease-in-out infinite;
   }
 }
 
 @keyframes wave {
-  0%, 100% { transform: scaleY(0.4); }
-  50% { transform: scaleY(1); }
+  0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes pulseText {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 
 .connecting-animation {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--dt-border-color);
+  .spinner-ring {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(22, 119, 255, 0.1);
     border-top-color: var(--dt-brand-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(22, 119, 255, 0.2);
+  }
+
+  .spinner-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--dt-brand-color);
+    border-radius: 50%;
+    animation: dotPulse 1s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(22, 119, 255, 0.4);
   }
 
   p {
     color: var(--dt-text-secondary);
+    font-size: 16px;
+    font-weight: 500;
   }
 }
 
@@ -850,57 +996,114 @@ defineExpose({
   to { transform: rotate(360deg); }
 }
 
+@keyframes dotPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
 .action-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: none;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 50%;
-  padding: 16px;
-  min-width: 64px;
+  padding: 20px;
+  min-width: 80px;
+  position: relative;
+  overflow: hidden;
 
   &:hover {
-    transform: scale(1.05);
+    transform: scale(1.1) translateY(-2px);
+  }
+
+  &:active {
+    transform: scale(1.05) translateY(0);
+  }
+
+  .btn-glow {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 0;
+  }
+
+  &:hover .btn-glow {
+    opacity: 1;
+  }
+
+  .accept-glow {
+    background: radial-gradient(circle, rgba(82, 196, 26, 0.4) 0%, transparent 70%);
+    animation: glowPulse 1.5s ease-in-out infinite;
+  }
+
+  .reject-glow {
+    background: radial-gradient(circle, rgba(245, 74, 69, 0.4) 0%, transparent 70%);
+    animation: glowPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
   }
 
   .material-icons-outlined {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 24px;
+    font-size: 28px;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s;
   }
 
   span:not(.material-icons-outlined) {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--dt-text-secondary);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
   }
 
   &.accept .material-icons-outlined {
     background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
-    box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+    box-shadow: 0 8px 20px rgba(82, 196, 26, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
   }
 
   &.reject .material-icons-outlined {
     background: linear-gradient(135deg, #f54a45 0%, #ff7875 100%);
-    box-shadow: 0 4px 12px rgba(245, 74, 69, 0.3);
+    box-shadow: 0 8px 20px rgba(245, 74, 69, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
   }
 
   &.large {
-    padding: 20px;
-    min-width: 72px;
+    padding: 24px;
+    min-width: 88px;
 
     .material-icons-outlined {
-      width: 56px;
-      height: 56px;
-      font-size: 28px;
+      width: 64px;
+      height: 64px;
+      font-size: 32px;
     }
   }
 }
@@ -911,7 +1114,10 @@ defineExpose({
   display: flex;
   flex-direction: column;
   height: 600px;
-  background: #000;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
 }
 
 .video-area {
@@ -927,7 +1133,7 @@ defineExpose({
   width: 100%;
   height: 100%;
   position: relative;
-  background: #1a1a1a;
+  background: radial-gradient(circle at center, #1e3a5f 0%, #0a1628 100%);
 
   video {
     width: 100%;
@@ -937,17 +1143,94 @@ defineExpose({
 
   .video-placeholder {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    inset: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    color: #666;
+    justify-content: center;
 
-    .material-icons-outlined {
-      font-size: 48px;
+    .placeholder-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+
+      .avatar-ring {
+        position: relative;
+        padding: 4px;
+
+        &::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          border: 3px solid var(--dt-brand-color);
+          animation: ringPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes ringPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.2);
+            opacity: 0.5;
+          }
+        }
+      }
+
+      .pulse-icon {
+        font-size: 64px;
+        color: var(--dt-brand-color);
+        animation: iconPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes iconPulse {
+        0%, 100% {
+          opacity: 0.6;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+      }
+
+      .placeholder-text {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 500;
+      }
+    }
+  }
+
+  .quality-indicator {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    gap: 16px;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .quality-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255, 255, 255, 0.9);
+
+      .material-icons-outlined {
+        font-size: 18px;
+        color: #52c41a;
+      }
+
+      .quality-value {
+        font-size: 13px;
+        font-weight: 500;
+      }
     }
   }
 }
@@ -956,18 +1239,27 @@ defineExpose({
   position: absolute;
   bottom: 100px;
   right: 20px;
-  width: 180px;
-  height: 135px;
+  width: 200px;
+  height: 150px;
   background: #000;
-  border-radius: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
   &.minimized {
-    width: 120px;
-    height: 90px;
+    width: 140px;
+    height: 105px;
     bottom: 20px;
+  }
+
+  .video-border {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    pointer-events: none;
+    transition: all 0.3s;
   }
 
   video {
@@ -981,16 +1273,12 @@ defineExpose({
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
-    padding: 8px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    padding: 10px;
     display: flex;
     justify-content: flex-end;
     opacity: 0;
-    transition: opacity 0.2s;
-
-    &:hover {
-      opacity: 1;
-    }
+    transition: opacity 0.3s;
 
     .material-icons-outlined {
       color: #fff;
@@ -998,8 +1286,45 @@ defineExpose({
     }
   }
 
-  &:hover .video-controls-overlay {
-    opacity: 1;
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+
+    .video-border {
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .video-controls-overlay {
+      opacity: 1;
+    }
+  }
+
+  .local-video-status {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+
+    .status-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .material-icons-outlined {
+        font-size: 14px;
+        color: #ff4d4f;
+      }
+
+      &.camera-off .material-icons-outlined {
+        color: #ff7875;
+      }
+    }
   }
 }
 
@@ -1007,65 +1332,87 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 20px 32px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  backdrop-filter: blur(10px);
 
   .duration {
-    font-size: 16px;
+    font-size: 20px;
     color: #fff;
     font-family: 'SF Mono', 'Monaco', monospace;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .control-buttons {
     display: flex;
-    gap: 12px;
+    gap: 16px;
   }
 }
 
 .control-btn {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
   color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 
   .material-icons-outlined {
-    font-size: 24px;
+    font-size: 28px;
   }
 
   &:hover {
     background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.1);
+    transform: scale(1.15) translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &:active {
+    transform: scale(1.1) translateY(0);
   }
 
   &.active {
     background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
   }
 
   &.hangup {
-    background: #f54a45;
+    background: linear-gradient(135deg, #f54a45 0%, #ff7875 100%);
+    border: none;
+    box-shadow: 0 8px 24px rgba(245, 74, 69, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
 
     &:hover {
-      background: #ff7875;
+      background: linear-gradient(135deg, #ff7875 0%, #ff9a99 100%);
+      box-shadow: 0 12px 32px rgba(245, 74, 69, 0.5);
     }
   }
 
   &.sharing {
-    background: #1677ff;
+    background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+    border: none;
+    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: linear-gradient(135deg, #4096ff 0%, #69b1ff 100%);
+      box-shadow: 0 12px 32px rgba(22, 119, 255, 0.5);
+    }
   }
 
   &.small {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
 
     .material-icons-outlined {
-      font-size: 20px;
+      font-size: 24px;
     }
   }
 }
@@ -1074,34 +1421,32 @@ defineExpose({
 
 .group-video-grid {
   display: grid;
-  gap: 8px;
-  padding: 8px;
-  height: calc(600px - 80px);
-  background: #000;
+  gap: 12px;
+  padding: 12px;
+  height: calc(600px - 100px);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: 16px;
   overflow-y: auto;
+  overflow-x: hidden;
 
   // 根据参与者数量自适应布局
-  // 2人：上下布局
   &[data-count="2"] {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(2, 1fr);
   }
 
-  // 3-4人：2x2 网格
   &[data-count="3"],
   &[data-count="4"] {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
   }
 
-  // 5-6人：3x2 网格
   &[data-count="5"],
   &[data-count="6"] {
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
   }
 
-  // 7-9人：3x3 网格
   &[data-count="7"],
   &[data-count="8"],
   &[data-count="9"] {
@@ -1109,7 +1454,6 @@ defineExpose({
     grid-template-rows: repeat(3, 1fr);
   }
 
-  // 10+人：自适应填充
   &[data-count="10"],
   &[data-count="11"],
   &[data-count="12"] {
@@ -1120,24 +1464,50 @@ defineExpose({
 
 .video-tile {
   position: relative;
-  background: #1a1a1a;
-  border-radius: 8px;
+  background: #1a1a2e;
+  border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 16/9;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.main {
     grid-column: span 2;
     grid-row: span 2;
-    border: 2px solid var(--dt-brand-color);
+    border: 3px solid var(--dt-brand-color);
+    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.3);
+  }
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
   }
 
   &.speaking::after {
     content: '';
     position: absolute;
     inset: 0;
-    border: 2px solid #52c41a;
-    border-radius: 8px;
+    border: 3px solid #52c41a;
+    border-radius: 12px;
     pointer-events: none;
+    animation: speakingBorder 1s ease-in-out infinite;
+  }
+
+  @keyframes speakingBorder {
+    0%, 100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .video-border {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    pointer-events: none;
+    transition: all 0.3s;
   }
 
   video {
@@ -1148,21 +1518,48 @@ defineExpose({
 
   .participant-info {
     position: absolute;
-    bottom: 8px;
-    left: 8px;
+    bottom: 12px;
+    left: 12px;
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 4px;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: #fff;
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 500;
 
     .muted-icon {
       .material-icons-outlined {
-        font-size: 14px;
+        font-size: 16px;
+        color: #ff4d4f;
       }
+    }
+  }
+
+  .speaking-indicator {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 12px;
+    height: 12px;
+    background: #52c41a;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(82, 196, 26, 0.6);
+    animation: speakingDot 1s ease-in-out infinite;
+  }
+
+  @keyframes speakingDot {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 1;
     }
   }
 }
@@ -1184,41 +1581,64 @@ defineExpose({
   }
 
   .local-video {
-    width: 120px;
-    height: 90px;
+    width: 140px;
+    height: 105px;
     bottom: 80px;
     right: 12px;
 
     &.minimized {
-      width: 80px;
-      height: 60px;
+      width: 100px;
+      height: 75px;
     }
   }
 
   .call-controls {
-    padding: 12px 16px;
+    padding: 16px 20px;
 
     .duration {
-      font-size: 14px;
+      font-size: 18px;
     }
 
     .control-buttons {
-      gap: 8px;
+      gap: 12px;
     }
   }
 
   .control-btn {
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: 52px;
 
     &.small {
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
     }
   }
 
   .group-video-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+// ==================== 暗色模式适配 ====================
+
+@media (prefers-color-scheme: dark) {
+  .call-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  }
+
+  .user-info {
+    .call-name {
+      color: #fff;
+    }
+
+    .call-status {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .call-type-badge {
+      background: rgba(255, 255, 255, 0.1);
+      color: #4096ff;
+    }
   }
 }
 </style>

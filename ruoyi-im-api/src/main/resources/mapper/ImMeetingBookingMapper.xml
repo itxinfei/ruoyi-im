@@ -37,11 +37,11 @@
         SELECT b.*,
                r.room_name,
                r.location as room_location,
-               u.nick_name as booking_user_name,
+               u.nickname as booking_user_name,
                u.avatar as booking_user_avatar
         FROM im_meeting_booking b
         LEFT JOIN im_meeting_room r ON b.room_id = r.id
-        LEFT JOIN sys_user u ON b.booking_user_id = u.user_id
+        LEFT JOIN im_user u ON b.booking_user_id = u.id
         WHERE b.booking_user_id = #{userId}
           AND b.end_time &gt;= NOW()
         ORDER BY b.start_time ASC

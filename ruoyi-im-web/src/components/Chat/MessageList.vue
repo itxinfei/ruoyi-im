@@ -1,8 +1,17 @@
 <template>
   <div class="message-list" ref="listRef" @scroll="handleScroll">
-    <!-- 加载中状态 -->
-    <div v-if="loading" class="loading-wrapper">
-      <el-icon class="is-loading"><Loading /></el-icon>数据加载中...
+    <!-- 加载中状态 - 骨架屏 -->
+    <div v-if="loading" class="skeleton-wrapper">
+      <div v-for="i in 5" :key="i" class="message-skeleton">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-name"></div>
+          <div class="skeleton-bubble">
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- 空状态 -->
@@ -149,6 +158,54 @@ const showScrollToBottom = ref(false)
 // 图片预览状态
 const imagePreviewUrls = ref([])
 
+// ============================================================================
+// 性能优化：消息分页渲染
+// ============================================================================
+
+// 每页渲染的消息数量
+const PAGE_SIZE = 30
+// 当前渲染的页数
+const currentPage = ref(1)
+// 是否启用分页渲染（消息数超过阈值时启用）
+const ENABLE_PAGINATION_THRESHOLD = 50
+
+// 是否启用分页
+const isPaginationEnabled = computed(() => props.messages.length > ENABLE_PAGINATION_THRESHOLD)
+
+// 分页渲染的消息列表
+const paginatedMessages = computed(() => {
+  if (!isPaginationEnabled.value) {
+    return messagesWithDividers.value
+  }
+  // 始终渲染最后 N 条消息，避免一次性渲染全部
+  const startIndex = Math.max(0, messagesWithDividers.value.length - (currentPage.value * PAGE_SIZE))
+  return messagesWithDividers.value.slice(startIndex)
+})
+
+// 加载更多历史消息（向前加载）
+const loadMoreHistory = () => {
+  if (!isPaginationEnabled.value) return
+  const totalPages = Math.ceil(messagesWithDividers.value.length / PAGE_SIZE)
+  if (currentPage.value < totalPages) {
+    currentPage.value++
+  }
+}
+
+// 监听消息变化，重置分页
+watch(() => props.sessionId, () => {
+  currentPage.value = 1
+})
+
+// 监听新消息，如果是自己的消息则滚动到底部
+watch(() => props.messages.length, (newLength, oldLength) => {
+  if (newLength > oldLength) {
+    const newMessage = props.messages[props.messages.length - 1]
+    if (newMessage?.isOwn) {
+      scrollToBottom()
+    }
+  }
+})
+
 // 获取已读用户列表
 const fetchReadUsers = async (msg) => {
   if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) return
@@ -262,10 +319,9 @@ const formatTimeDivider = (timestamp) => {
   return `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
 }
 
-// 计算带时间分割线和合并的消息列表
+// 计算带时间分割线的消息列表
 const messagesWithDividers = computed(() => {
   const res = []
-  const MERGE_TIME_WINDOW = 3 * 60 * 1000 // 3分钟内的消息可以合并
 
   props.messages.forEach((msg, index) => {
     // 判断是否需要显示时间分割线
@@ -289,21 +345,7 @@ const messagesWithDividers = computed(() => {
       })
     }
 
-    // 判断消息是否应该与上一条合并
-    let isMerged = false
-    if (index > 0) {
-      const prevMsg = props.messages[index - 1]
-      const timeDiff = msg.timestamp - prevMsg.timestamp
-      // 合并条件：同一发送者、3分钟内、都不是系统消息
-      isMerged = prevMsg.senderId === msg.senderId &&
-                 timeDiff < MERGE_TIME_WINDOW &&
-                 !msg.isTimeDivider &&
-                 !prevMsg.isTimeDivider &&
-                 msg.type !== 'NOTICE' &&
-                 prevMsg.type !== 'NOTICE'
-    }
-
-    res.push({ ...msg, isMerged })
+    res.push({ ...msg, isMerged: false })
   })
   return res
 })
@@ -370,9 +412,6 @@ const handleReaction = (msg, reaction) => {
 // 处理表情回复（从 MessageBubble 组件触发）
 const handleAddReaction = (messageId, emoji, isAdded) => {
   // 表情回复已经在 MessageBubble 中处理了 API 调用
-  // 这里主要用于触发 WebSocket 广播或后续处理
-  console.log(`表情回复: ${emoji} ${isAdded ? '添加' : '取消'} 到消息 ${messageId}`)
-
   // 触发父组件事件，用于 WebSocket 广播
   emit('reaction-update', { messageId, emoji, isAdded })
 }
@@ -503,6 +542,75 @@ defineExpose({ scrollToBottom, maintainScroll })
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+// 骨架屏样式
+.skeleton-wrapper {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message-skeleton {
+  display: flex;
+  gap: 12px;
+  animation: fadeIn 0.5s var(--dt-ease-out) both;
+
+  &:nth-child(1) { animation-delay: 0ms; }
+  &:nth-child(2) { animation-delay: 100ms; }
+  &:nth-child(3) { animation-delay: 200ms; }
+  &:nth-child(4) { animation-delay: 300ms; }
+  &:nth-child(5) { animation-delay: 400ms; }
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--dt-radius-lg);
+  @include skeleton-loading;
+  flex-shrink: 0;
+}
+
+.skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 400px;
+}
+
+.skeleton-name {
+  width: 80px;
+  height: 14px;
+  border-radius: 4px;
+  @include skeleton-loading;
+}
+
+.skeleton-bubble {
+  padding: 10px 14px;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--dt-border-light);
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 3px;
+  @include skeleton-loading;
+  width: 100%;
+
+  &.long {
+    width: 80%;
+  }
 }
 
 .empty {

@@ -7,9 +7,9 @@
         :class="{ expanded: rootExpanded }"
         @click="toggleRoot"
       >
-        <span class="material-icons-outlined expand-icon">
-          {{ rootExpanded ? 'arrow_drop_down' : 'arrow_right' }}
-        </span>
+        <svg class="expand-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M10 17l5-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
         <span class="node-label">组织架构</span>
         <span v-if="loading" class="loading-icon"></span>
       </div>
@@ -21,7 +21,9 @@
 
       <!-- 空状态 -->
       <div v-else-if="departments.length === 0" class="org-children empty-state">
-        <span class="material-icons-outlined empty-icon">folder_off</span>
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
         <span class="empty-text">暂无部门数据</span>
       </div>
 
@@ -184,10 +186,12 @@ defineExpose({
 }
 
 .expand-icon {
-  font-size: 18px;
+  width: 16px;
+  height: 16px;
   margin-right: 4px;
   color: var(--dt-text-quaternary);
   transition: transform 0.2s;
+  transform: rotate(-90deg);
 
   .dark & {
     color: var(--dt-text-quaternary-dark);
@@ -285,8 +289,10 @@ defineExpose({
   gap: 8px;
 
   .empty-icon {
-    font-size: 24px;
+    width: 40px;
+    height: 40px;
     color: var(--dt-text-quaternary);
+    opacity: 0.3;
 
     .dark & {
       color: var(--dt-text-quaternary-dark);

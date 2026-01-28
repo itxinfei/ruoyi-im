@@ -553,12 +553,12 @@ watch(currentDate, loadEvents)
 // 右侧概览面板
 // ============================================================================
 .calendar-info-panel {
-  width: 280px;
-  border-left: 1px solid #e2e8f0;
+  width: var(--dt-session-panel-width);
+  border-left: 1px solid var(--dt-border-color);
   display: flex;
   flex-direction: column;
-  background: #fff;
-  .dark & { border-color: #1e293b; background: #0f172a; }
+  background: var(--dt-bg-card);
+  .dark & { border-color: var(--dt-border-dark); background: var(--dt-bg-card-dark); }
 
   .info-header { padding: 24px; border-bottom: 1px solid #f1f5f9; .dark & { border-color: #1e293b; } h3 { @apply text-lg font-black; } }
   .info-content { flex: 1; padding: 20px; }

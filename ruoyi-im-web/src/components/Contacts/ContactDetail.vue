@@ -90,10 +90,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { 
-  ChatDotRound, 
-  Star, 
-  StarFilled, 
+import {
+  ChatDotRound,
+  StarFilled,
   MoreFilled,
   Setting
 } from '@element-plus/icons-vue'

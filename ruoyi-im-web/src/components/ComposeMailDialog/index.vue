@@ -116,10 +116,19 @@
             class="attachment-upload"
             drag
           >
-            <div class="upload-area">
-              <span class="material-icons-outlined upload-icon">cloud_upload</span>
+            <div class="upload-area" :class="{ 'is-dragging': isDragging }">
+              <div class="upload-icon-wrapper">
+                <span class="material-icons-outlined upload-icon">cloud_upload</span>
+                <div class="icon-glow"></div>
+              </div>
               <div class="upload-text">点击或拖拽文件到此处上传</div>
               <div class="upload-tip">支持 doc、docx、xls、xlsx、pdf、jpg、png 等格式，单个文件不超过 10MB</div>
+              <div class="upload-types">
+                <div class="type-tag" v-for="(type, index) in supportedTypes" :key="index">
+                  <span class="material-icons-outlined">{{ type.icon }}</span>
+                  <span>{{ type.name }}</span>
+                </div>
+              </div>
             </div>
           </el-upload>
 
@@ -129,16 +138,33 @@
               v-for="file in uploadingFiles"
               :key="file.uid"
               class="upload-progress-item"
+              :class="{ 'uploading': file.percentage < 100, 'success': file.percentage === 100, 'error': file.status === 'exception' }"
             >
-              <div class="file-info">
-                <span class="material-icons-outlined file-icon">description</span>
-                <span class="file-name">{{ file.name }}</span>
-                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              <div class="file-header">
+                <div class="file-info">
+                  <span class="material-icons-outlined file-icon" :class="getFileIconClass(file.name)">
+                    {{ getFileIcon(file.name) }}
+                  </span>
+                  <span class="file-name">{{ file.name }}</span>
+                  <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                </div>
+                <div class="file-status">
+                  <span v-if="file.percentage < 100" class="status-text uploading">{{ file.percentage }}%</span>
+                  <span v-else-if="file.percentage === 100" class="status-text success">
+                    <span class="material-icons-outlined">check_circle</span>
+                    完成
+                  </span>
+                  <span v-else class="status-text error">
+                    <span class="material-icons-outlined">error</span>
+                    失败
+                  </span>
+                </div>
               </div>
               <el-progress
                 :percentage="file.percentage"
                 :status="file.status"
                 :stroke-width="4"
+                :show-text="false"
               />
             </div>
           </div>
@@ -150,18 +176,36 @@
               :key="index"
               class="attachment-item"
             >
-              <span class="material-icons-outlined attachment-icon">insert_drive_file</span>
-              <span class="attachment-name">{{ attachment.name }}</span>
-              <span class="attachment-size">{{ formatFileSize(attachment.size) }}</span>
-              <el-button
-                size="small"
-                :icon="Delete"
-                link
-                type="danger"
-                @click="removeAttachment(index)"
-              >
-                删除
-              </el-button>
+              <div class="attachment-icon-wrapper">
+                <span class="material-icons-outlined attachment-icon" :class="getFileIconClass(attachment.name)">
+                  {{ getFileIcon(attachment.name) }}
+                </span>
+              </div>
+              <div class="attachment-info">
+                <span class="attachment-name">{{ attachment.name }}</span>
+                <span class="attachment-size">{{ formatFileSize(attachment.size) }}</span>
+              </div>
+              <div class="attachment-actions">
+                <el-button
+                  size="small"
+                  :icon="Download"
+                  link
+                  @click="downloadAttachment(attachment)"
+                  title="下载"
+                >
+                  <span class="material-icons-outlined">download</span>
+                </el-button>
+                <el-button
+                  size="small"
+                  :icon="Delete"
+                  link
+                  type="danger"
+                  @click="removeAttachment(index)"
+                  title="删除"
+                >
+                  <span class="material-icons-outlined">delete</span>
+                </el-button>
+              </div>
             </div>
           </div>
         </div>
@@ -183,7 +227,7 @@
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete } from '@element-plus/icons-vue'
+import { Download, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { sendMail, saveDraft, searchUsers as searchUsersApi, uploadAttachment } from '@/api/im/mail'
 
@@ -209,6 +253,16 @@ const uploadFileList = ref([])
 const uploadingFiles = ref([])
 const userOptions = ref([])
 const userSearchLoading = ref(false)
+const isDragging = ref(false)
+
+// 支持的文件类型
+const supportedTypes = [
+  { name: 'Word', icon: 'description', ext: '.doc,.docx' },
+  { name: 'Excel', icon: 'table_chart', ext: '.xls,.xlsx' },
+  { name: 'PDF', icon: 'picture_as_pdf', ext: '.pdf' },
+  { name: '图片', icon: 'image', ext: '.jpg,.jpeg,.png,.gif,.bmp' },
+  { name: '压缩包', icon: 'folder_zip', ext: '.zip,.rar' }
+]
 
 // 上传地址
 const uploadUrl = computed(() => {
@@ -256,6 +310,74 @@ const rules = {
   content: [
     { required: true, message: '请输入邮件内容', trigger: 'blur' }
   ]
+}
+
+// 拖拽事件处理
+const handleDragEnter = (e) => {
+  e.preventDefault()
+  isDragging.value = true
+}
+
+const handleDragLeave = (e) => {
+  e.preventDefault()
+  isDragging.value = false
+}
+
+const handleDragOver = (e) => {
+  e.preventDefault()
+}
+
+const handleDrop = (e) => {
+  e.preventDefault()
+  isDragging.value = false
+}
+
+// 获取文件图标
+const getFileIcon = (fileName) => {
+  const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase()
+  const iconMap = {
+    '.doc': 'description',
+    '.docx': 'description',
+    '.xls': 'table_chart',
+    '.xlsx': 'table_chart',
+    '.ppt': 'slideshow',
+    '.pptx': 'slideshow',
+    '.pdf': 'picture_as_pdf',
+    '.jpg': 'image',
+    '.jpeg': 'image',
+    '.png': 'image',
+    '.gif': 'image',
+    '.bmp': 'image',
+    '.zip': 'folder_zip',
+    '.rar': 'folder_zip',
+    '.txt': 'description',
+    '.csv': 'table_chart'
+  }
+  return iconMap[ext] || 'insert_drive_file'
+}
+
+// 获取文件图标样式类
+const getFileIconClass = (fileName) => {
+  const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase()
+  const colorMap = {
+    '.doc': 'word-color',
+    '.docx': 'word-color',
+    '.xls': 'excel-color',
+    '.xlsx': 'excel-color',
+    '.ppt': 'powerpoint-color',
+    '.pptx': 'powerpoint-color',
+    '.pdf': 'pdf-color',
+    '.jpg': 'image-color',
+    '.jpeg': 'image-color',
+    '.png': 'image-color',
+    '.gif': 'image-color',
+    '.bmp': 'image-color',
+    '.zip': 'archive-color',
+    '.rar': 'archive-color',
+    '.txt': 'text-color',
+    '.csv': 'excel-color'
+  }
+  return colorMap[ext] || 'default-color'
 }
 
 // 搜索用户
@@ -310,7 +432,10 @@ const handleUploadProgress = (event, file) => {
 const handleUploadSuccess = (response, file) => {
   const uploadingFileIndex = uploadingFiles.value.findIndex(f => f.uid === file.uid)
   if (uploadingFileIndex > -1) {
-    uploadingFiles.value.splice(uploadingFileIndex, 1)
+    // 延迟移除，让用户看到完成状态
+    setTimeout(() => {
+      uploadingFiles.value.splice(uploadingFileIndex, 1)
+    }, 1500)
   }
 
   if (response.code === 200) {
@@ -333,7 +458,7 @@ const handleUploadError = (error, file) => {
     uploadingFiles.value[uploadingFileIndex].status = 'exception'
     setTimeout(() => {
       uploadingFiles.value.splice(uploadingFileIndex, 1)
-    }, 2000)
+    }, 3000)
   }
   console.error('上传失败', error)
   ElMessage.error(`${file.name} 上传失败`)
@@ -355,6 +480,16 @@ const handleExceed = () => {
 // 移除附件
 const removeAttachment = (index) => {
   form.attachments.splice(index, 1)
+}
+
+// 下载附件
+const downloadAttachment = (attachment) => {
+  if (attachment.url) {
+    const link = document.createElement('a')
+    link.href = attachment.url
+    link.download = attachment.name
+    link.click()
+  }
 }
 
 // 格式化文件大小
@@ -484,7 +619,7 @@ watch(visible, (val) => {
 <style scoped lang="scss">
 .compose-mail-dialog {
   :deep(.el-dialog__body) {
-    padding: 16px 24px;
+    padding: 20px 24px;
   }
 }
 
@@ -513,10 +648,17 @@ watch(visible, (val) => {
 
   :deep(.el-upload-dragger) {
     width: 100%;
-    padding: 20px;
-    border: 1px dashed var(--el-border-color);
-    border-radius: var(--el-border-radius-base);
-    background: var(--el-fill-color-light);
+    padding: 0;
+    border: 2px dashed var(--el-border-color);
+    border-radius: 12px;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &:hover {
+    .upload-area {
+      background: linear-gradient(135deg, rgba(22, 119, 255, 0.05) 0%, rgba(22, 119, 255, 0.02) 100%);
+    }
   }
 }
 
@@ -524,52 +666,182 @@ watch(visible, (val) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-}
+  gap: 12px;
+  padding: 32px 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
 
-.upload-icon {
-  font-size: 32px;
-  color: var(--el-color-primary);
-}
+  &.is-dragging {
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.1) 0%, rgba(22, 119, 255, 0.05) 100%);
+    border-color: var(--el-color-primary);
+    transform: scale(1.02);
 
-.upload-text {
-  font-size: 14px;
-  color: var(--el-text-color-primary);
-}
+    .upload-icon-wrapper {
+      transform: scale(1.1);
+    }
 
-.upload-tip {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
+    .upload-icon {
+      color: var(--el-color-primary);
+    }
+  }
+
+  .upload-icon-wrapper {
+    position: relative;
+    margin-bottom: 4px;
+  }
+
+  .upload-icon {
+    font-size: 48px;
+    color: var(--el-text-color-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+  }
+
+  .icon-glow {
+    position: absolute;
+    inset: -8px;
+    background: radial-gradient(circle, rgba(22, 119, 255, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: iconPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes iconPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0;
+    }
+  }
+
+  .upload-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--el-text-color-primary);
+    margin-bottom: 4px;
+  }
+
+  .upload-tip {
+    font-size: 13px;
+    color: var(--el-text-color-secondary);
+    margin-bottom: 12px;
+  }
+
+  .upload-types {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .type-tag {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: var(--el-fill-color-light);
+      border-radius: 16px;
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+      transition: all 0.3s;
+
+      &:hover {
+        background: var(--el-color-primary-light-9);
+        color: var(--el-color-primary);
+        transform: translateY(-2px);
+      }
+
+      .material-icons-outlined {
+        font-size: 14px;
+      }
+    }
+  }
 }
 
 .upload-progress-list {
-  margin-top: 12px;
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .upload-progress-item {
-  padding: 8px;
-  background: var(--el-fill-color-light);
-  border-radius: 4px;
+  padding: 12px 16px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 8px;
+  border: 1px solid var(--el-border-color-lighter);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+
+  &.uploading {
+    border-color: var(--el-color-primary-light-5);
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.03) 0%, rgba(22, 119, 255, 0.01) 100%);
+  }
+
+  &.success {
+    border-color: #52c41a;
+    background: linear-gradient(135deg, rgba(82, 196, 26, 0.05) 0%, rgba(82, 196, 26, 0.02) 100%);
+  }
+
+  &.error {
+    border-color: #f54a45;
+    background: linear-gradient(135deg, rgba(245, 74, 69, 0.05) 0%, rgba(245, 74, 69, 0.02) 100%);
+  }
+
+  .file-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
 
   .file-info {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
+    gap: 10px;
+    flex: 1;
   }
 
   .file-icon {
-    font-size: 20px;
+    font-size: 24px;
     color: var(--el-color-primary);
+
+    &.word-color {
+      color: #1890ff;
+    }
+
+    &.excel-color {
+      color: #52c41a;
+    }
+
+    &.powerpoint-color {
+      color: #faad14;
+    }
+
+    &.pdf-color {
+      color: #f5222d;
+    }
+
+    &.image-color {
+      color: #722ed1;
+    }
+
+    &.archive-color {
+      color: #fa8c16;
+    }
+
+    &.text-color {
+      color: #8c8c8c;
+    }
   }
 
   .file-name {
     flex: 1;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--el-text-color-primary);
+    font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -579,69 +851,252 @@ watch(visible, (val) => {
     font-size: 12px;
     color: var(--el-text-color-secondary);
   }
+
+  .file-status {
+    .status-text {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 500;
+
+      &.uploading {
+        color: var(--el-color-primary);
+      }
+
+      &.success {
+        color: #52c41a;
+      }
+
+      &.error {
+        color: #f54a45;
+      }
+
+      .material-icons-outlined {
+        font-size: 16px;
+      }
+    }
+  }
+
+  :deep(.el-progress-bar__outer) {
+    background-color: var(--el-fill-color);
+  }
+
+  :deep(.el-progress-bar__inner) {
+    transition: all 0.3s ease;
+  }
 }
 
 .attachment-list {
-  margin-top: 12px;
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .attachment-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 12px;
+  padding: 12px 16px;
   background: var(--el-fill-color-light);
-  border-radius: 4px;
-  transition: background var(--el-transition-duration);
+  border-radius: 8px;
+  border: 1px solid var(--el-border-color-lighter);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--el-color-primary) 0%, var(--el-color-primary-light-7) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
 
   &:hover {
     background: var(--el-fill-color);
+    border-color: var(--el-border-color);
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .attachment-actions {
+      opacity: 1;
+    }
   }
-}
 
-.attachment-icon {
-  font-size: 20px;
-  color: var(--el-color-primary);
-}
+  .attachment-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--el-fill-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 
-.attachment-name {
-  flex: 1;
-  font-size: 13px;
-  color: var(--el-text-color-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  .attachment-icon {
+    font-size: 24px;
+    color: var(--el-color-primary);
 
-.attachment-size {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  margin-right: 8px;
+    &.word-color {
+      color: #1890ff;
+    }
+
+    &.excel-color {
+      color: #52c41a;
+    }
+
+    &.powerpoint-color {
+      color: #faad14;
+    }
+
+    &.pdf-color {
+      color: #f5222d;
+    }
+
+    &.image-color {
+      color: #722ed1;
+    }
+
+    &.archive-color {
+      color: #fa8c16;
+    }
+
+    &.text-color {
+      color: #8c8c8c;
+    }
+
+    &.default-color {
+      color: var(--el-color-primary);
+    }
+  }
+
+  .attachment-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .attachment-name {
+    font-size: 14px;
+    color: var(--el-text-color-primary);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .attachment-size {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+
+  .attachment-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+
+    .el-button {
+      :deep(.material-icons-outlined) {
+        font-size: 18px;
+      }
+    }
+  }
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 12px;
 }
 
 /* 暗色模式 */
 .dark .attachment-upload {
   :deep(.el-upload-dragger) {
-    border-color: var(--dt-border-dark);
-    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: transparent;
+
+    &:hover {
+      .upload-area {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+      }
+    }
+  }
+}
+
+.dark .upload-area {
+  .upload-icon {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .upload-text {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .upload-tip {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .type-tag {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 
 .dark .upload-progress-item,
 .dark .attachment-item {
-  background: rgba(30, 41, 59, 0.5);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+
+  &.uploading {
+    border-color: rgba(64, 158, 255, 0.3);
+    background: linear-gradient(135deg, rgba(64, 158, 255, 0.05) 0%, rgba(64, 158, 255, 0.02) 100%);
+  }
+
+  &.success {
+    border-color: rgba(82, 196, 26, 0.3);
+    background: linear-gradient(135deg, rgba(82, 196, 26, 0.05) 0%, rgba(82, 196, 26, 0.02) 100%);
+  }
+
+  &.error {
+    border-color: rgba(245, 74, 69, 0.3);
+    background: linear-gradient(135deg, rgba(245, 74, 69, 0.05) 0%, rgba(245, 74, 69, 0.02) 100%);
+  }
 
   &:hover {
-    background: rgba(51, 65, 85, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
   }
+}
+
+.dark .attachment-icon-wrapper {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .file-name,
+.dark .attachment-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dark .file-size,
+.dark .attachment-size {
+  color: rgba(255, 255, 255, 0.5);
 }
 </style>

@@ -5,6 +5,7 @@
     width="400px"
     append-to-body
     destroy-on-close
+    :close-on-click-modal="true"
     class="change-password-dialog"
   >
     <el-form

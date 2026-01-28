@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -47,6 +44,7 @@ public class ImRedisUtil {
     private static final long ONLINE_STATUS_EXPIRE = 30; // 在线状态30分钟
 
     // ==================== ID生成 ====================
+
     /**
      * 生成消息ID
      */
@@ -62,6 +60,7 @@ public class ImRedisUtil {
     }
 
     // ==================== 用户信息缓存 ====================
+
     /**
      * 缓存用户信息
      */
@@ -114,6 +113,7 @@ public class ImRedisUtil {
     }
 
     // ==================== 会话信息缓存 ====================
+
     /**
      * 缓存会话信息
      */
@@ -148,6 +148,7 @@ public class ImRedisUtil {
     }
 
     // ==================== 未读数缓存 ====================
+
     /**
      * 缓存用户未读数
      */
@@ -224,6 +225,7 @@ public class ImRedisUtil {
     }
 
     // ==================== 在线状态管理 ====================
+
     /**
      * 添加在线用户 - 由WebSocket端点调用
      */
@@ -239,6 +241,9 @@ public class ImRedisUtil {
         String onlineTimeKey = buildKey(ONLINE_PREFIX, "time", String.valueOf(userId));
         redisTemplate.opsForValue().set(onlineTimeKey, System.currentTimeMillis(), ONLINE_STATUS_EXPIRE,
                 TimeUnit.MINUTES);
+
+        // 初始化心跳时间
+        updateHeartbeat(userId);
     }
 
     /**
@@ -254,6 +259,10 @@ public class ImRedisUtil {
         // 同时删除上线时间记录
         String onlineTimeKey = buildKey(ONLINE_PREFIX, "time", String.valueOf(userId));
         redisTemplate.delete(onlineTimeKey);
+
+        // 删除心跳时间记录
+        String heartbeatKey = buildKey(ONLINE_PREFIX, "heartbeat", String.valueOf(userId));
+        redisTemplate.delete(heartbeatKey);
     }
 
     /**
@@ -300,7 +309,173 @@ public class ImRedisUtil {
         return redisTemplate.opsForSet().size(onlineUsersKey);
     }
 
+    // ==================== WebSocket心跳管理 ====================
+    /**
+     * 心跳时间过期时间（2分钟）
+     */
+    private static final long HEARTBEAT_EXPIRE = 2;
+
+    /**
+     * 会话信息过期时间（24小时）
+     */
+    private static final long SESSION_INFO_EXPIRE = 24;
+
+    /**
+     * 更新用户心跳时间
+     *
+     * @param userId 用户ID
+     */
+    public void updateHeartbeat(Long userId) {
+        if (redisTemplate == null || userId == null) {
+            return;
+        }
+        String heartbeatKey = buildKey(ONLINE_PREFIX, "heartbeat", String.valueOf(userId));
+        redisTemplate.opsForValue().set(heartbeatKey, System.currentTimeMillis(), HEARTBEAT_EXPIRE, TimeUnit.MINUTES);
+        log.debug("更新用户心跳时间: userId={}", userId);
+    }
+
+    /**
+     * 获取用户最后心跳时间
+     *
+     * @param userId 用户ID
+     * @return 最后心跳时间戳（毫秒），如果不存在返回null
+     */
+    public Long getLastHeartbeat(Long userId) {
+        if (redisTemplate == null || userId == null) {
+            return null;
+        }
+        String heartbeatKey = buildKey(ONLINE_PREFIX, "heartbeat", String.valueOf(userId));
+        Object heartbeat = redisTemplate.opsForValue().get(heartbeatKey);
+        return heartbeat != null ? Long.parseLong(heartbeat.toString()) : null;
+    }
+
+    /**
+     * 检查用户心跳是否超时
+     *
+     * @param userId         用户ID
+     * @param timeoutSeconds 超时时间（秒）
+     * @return true表示心跳超时，false表示心跳正常
+     */
+    public boolean isHeartbeatTimeout(Long userId, long timeoutSeconds) {
+        Long lastHeartbeat = getLastHeartbeat(userId);
+        if (lastHeartbeat == null) {
+            return true;
+        }
+        long currentTime = System.currentTimeMillis();
+        long elapsedSeconds = (currentTime - lastHeartbeat) / 1000;
+        return elapsedSeconds > timeoutSeconds;
+    }
+
+    // ==================== WebSocket会话信息管理 ====================
+
+    /**
+     * 记录用户会话信息
+     *
+     * @param userId     用户ID
+     * @param serverId   服务器ID（支持集群部署）
+     * @param sessionId  WebSocket会话ID
+     * @param clientInfo 客户端信息（如IP地址、User-Agent等）
+     */
+    public void recordSessionInfo(Long userId, String serverId, String sessionId, String clientInfo) {
+        if (redisTemplate == null || userId == null) {
+            return;
+        }
+        String sessionKey = buildKey(ONLINE_PREFIX, "session", String.valueOf(userId));
+        Map<String, Object> sessionInfo = new java.util.HashMap<>();
+        sessionInfo.put("userId", userId);
+        sessionInfo.put("serverId", serverId);
+        sessionInfo.put("sessionId", sessionId);
+        sessionInfo.put("clientInfo", clientInfo);
+        sessionInfo.put("connectTime", System.currentTimeMillis());
+        sessionInfo.put("lastHeartbeat", System.currentTimeMillis());
+
+        redisTemplate.opsForValue().set(sessionKey, sessionInfo, SESSION_INFO_EXPIRE, TimeUnit.HOURS);
+        log.debug("记录用户会话信息: userId={}, serverId={}, sessionId={}", userId, serverId, sessionId);
+    }
+
+    /**
+     * 获取用户会话信息
+     *
+     * @param userId 用户ID
+     * @return 会话信息Map，如果不存在返回null
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getSessionInfo(Long userId) {
+        if (redisTemplate == null || userId == null) {
+            return null;
+        }
+        String sessionKey = buildKey(ONLINE_PREFIX, "session", String.valueOf(userId));
+        Object sessionInfo = redisTemplate.opsForValue().get(sessionKey);
+        return sessionInfo != null ? (Map<String, Object>) sessionInfo : null;
+    }
+
+    /**
+     * 删除用户会话信息
+     *
+     * @param userId 用户ID
+     */
+    public void removeSessionInfo(Long userId) {
+        if (redisTemplate == null || userId == null) {
+            return;
+        }
+        String sessionKey = buildKey(ONLINE_PREFIX, "session", String.valueOf(userId));
+        redisTemplate.delete(sessionKey);
+        log.debug("删除用户会话信息: userId={}", userId);
+    }
+
+    /**
+     * 记录断线信息
+     *
+     * @param userId         用户ID
+     * @param reason         断线原因
+     * @param disconnectTime 断线时间
+     */
+    public void recordDisconnectInfo(Long userId, String reason, Long disconnectTime) {
+        if (redisTemplate == null || userId == null) {
+            return;
+        }
+        String disconnectKey = buildKey(ONLINE_PREFIX, "disconnect", String.valueOf(userId));
+        Map<String, Object> disconnectInfo = new java.util.HashMap<>();
+        disconnectInfo.put("userId", userId);
+        disconnectInfo.put("reason", reason);
+        disconnectInfo.put("disconnectTime", disconnectTime != null ? disconnectTime : System.currentTimeMillis());
+
+        redisTemplate.opsForValue().set(disconnectKey, disconnectInfo, SESSION_INFO_EXPIRE, TimeUnit.HOURS);
+        log.debug("记录断线信息: userId={}, reason={}", userId, reason);
+    }
+
+    /**
+     * 获取断线信息
+     *
+     * @param userId 用户ID
+     * @return 断线信息Map，如果不存在返回null
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getDisconnectInfo(Long userId) {
+        if (redisTemplate == null || userId == null) {
+            return null;
+        }
+        String disconnectKey = buildKey(ONLINE_PREFIX, "disconnect", String.valueOf(userId));
+        Object disconnectInfo = redisTemplate.opsForValue().get(disconnectKey);
+        return disconnectInfo != null ? (Map<String, Object>) disconnectInfo : null;
+    }
+
+    /**
+     * 清除断线信息
+     *
+     * @param userId 用户ID
+     */
+    public void clearDisconnectInfo(Long userId) {
+        if (redisTemplate == null || userId == null) {
+            return;
+        }
+        String disconnectKey = buildKey(ONLINE_PREFIX, "disconnect", String.valueOf(userId));
+        redisTemplate.delete(disconnectKey);
+        log.debug("清除断线信息: userId={}", userId);
+    }
+
     // ==================== 离线消息 ====================
+
     /**
      * 缓存离线消息
      */
@@ -351,6 +526,7 @@ public class ImRedisUtil {
     }
 
     // ==================== 通用缓存方法 ====================
+
     /**
      * 设置缓存
      */
@@ -514,6 +690,7 @@ public class ImRedisUtil {
     }
 
     // ==================== 私有方法 ====================
+
     /**
      * 构建简单缓存Key
      */
@@ -537,10 +714,11 @@ public class ImRedisUtil {
     }
 
     // ==================== 有序集合操作 ====================
+
     /**
      * 向有序集合添加成员
      *
-     * @param key 有序集合的key
+     * @param key   有序集合的key
      * @param value 成员值
      * @param score 分数
      */
@@ -554,9 +732,9 @@ public class ImRedisUtil {
     /**
      * 获取有序集合指定范围内的成员（按分数降序）
      *
-     * @param key 有序集合的key
+     * @param key   有序集合的key
      * @param start 起始位置
-     * @param end 结束位置
+     * @param end   结束位置
      * @return 成员集合
      */
     public java.util.Set<String> zReverseRange(String key, long start, long end) {
@@ -578,9 +756,9 @@ public class ImRedisUtil {
     /**
      * 移除有序集合指定排名范围内的成员
      *
-     * @param key 有序集合的key
+     * @param key   有序集合的key
      * @param start 起始位置
-     * @param end 结束位置
+     * @param end   结束位置
      * @return 移除的成员数量
      */
     public Long zRemoveRange(String key, long start, long end) {

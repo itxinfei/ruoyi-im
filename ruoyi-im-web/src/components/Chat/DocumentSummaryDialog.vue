@@ -3,7 +3,7 @@
     v-model="visible"
     title="AI文档摘要"
     width="600px"
-    :close-on-click-modal="false"
+    :close-on-click-modal="true"
     @close="handleClose"
   >
     <el-form :model="form" label-width="100px">

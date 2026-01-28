@@ -22,64 +22,54 @@
     <!-- 工具栏 -->
     <div class="input-toolbar">
       <div class="toolbar-left">
-        <el-tooltip content="表情" placement="top">
-          <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="toggleEmojiPicker">
-            <el-icon><ChatDotRound /></el-icon>
-          </button>
-        </el-tooltip>
+        <!-- 媒体发送组 -->
+        <div class="toolbar-group">
+          <el-tooltip content="表情" placement="top">
+            <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="toggleEmojiPicker">
+              <el-icon><ChatDotRound /></el-icon>
+            </button>
+          </el-tooltip>
 
-        <el-tooltip content="图片" placement="top">
-          <button class="toolbar-btn" @click="$emit('upload-image')">
-            <el-icon><Picture /></el-icon>
-          </button>
-        </el-tooltip>
-        
-        <el-tooltip content="文件" placement="top">
-          <button class="toolbar-btn" @click="$emit('upload-file')">
-            <el-icon><FolderOpened /></el-icon>
-          </button>
-        </el-tooltip>
+          <el-tooltip content="图片" placement="top">
+            <button class="toolbar-btn" @click="$emit('upload-image')">
+              <el-icon><Picture /></el-icon>
+            </button>
+          </el-tooltip>
 
-        <el-tooltip content="视频" placement="top">
-          <button class="toolbar-btn" @click="handleVideoUpload">
-            <span class="material-icons-outlined">videocam</span>
-          </button>
-        </el-tooltip>
+          <el-tooltip content="文件" placement="top">
+            <button class="toolbar-btn" @click="$emit('upload-file')">
+              <el-icon><FolderOpened /></el-icon>
+            </button>
+          </el-tooltip>
 
-        <el-tooltip content="位置" placement="top">
-          <button class="toolbar-btn" @click="handleLocation">
-            <span class="material-icons-outlined">location_on</span>
-          </button>
-        </el-tooltip>
+          <el-tooltip content="视频" placement="top">
+            <button class="toolbar-btn" @click="handleVideoUpload">
+              <span class="material-icons-outlined">videocam</span>
+            </button>
+          </el-tooltip>
 
-        <el-tooltip content="截图 (Ctrl+Alt+A)" placement="top">
-          <button class="toolbar-btn" @click="handleScreenshot">
-             <span class="material-icons-outlined">content_cut</span>
-          </button>
-        </el-tooltip>
+          <el-tooltip content="截图 (Ctrl+Alt+A)" placement="top">
+            <button class="toolbar-btn" @click="handleScreenshot">
+              <span class="material-icons-outlined">content_cut</span>
+            </button>
+          </el-tooltip>
 
-        <el-tooltip v-if="session?.type === 'GROUP'" content="@成员" placement="top">
-          <button class="toolbar-btn" @click="handleAtMember">
-            <span class="material-icons-outlined">alternate_email</span>
-          </button>
-        </el-tooltip>
-
-        <el-divider direction="vertical" />
-
-        <el-tooltip content="语音通话" placement="top">
-          <button class="toolbar-btn" @click="$emit('start-call')">
-            <el-icon><Phone /></el-icon>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip content="按住说话" placement="top">
-          <button class="toolbar-btn" :class="{ active: isVoiceMode }" @click="toggleVoiceMode">
-            <el-icon><Microphone /></el-icon>
-          </button>
-        </el-tooltip>
+          <el-tooltip v-if="session?.type === 'GROUP'" content="@成员" placement="top">
+            <button class="toolbar-btn" @click="handleAtMember">
+              <span class="material-icons-outlined">alternate_email</span>
+            </button>
+          </el-tooltip>
+        </div>
       </div>
 
       <div class="toolbar-right">
+        <!-- AI 灵动回复 -->
+        <el-tooltip content="AI 灵动回复" placement="top">
+          <button class="toolbar-btn ai-reply-btn" @click="handleShowSmartReply">
+            <span class="material-icons-outlined">auto_awesome</span>
+          </button>
+        </el-tooltip>
+
         <el-button link class="history-btn">
           <el-icon><Clock /></el-icon> 聊天记录
         </el-button>
@@ -104,7 +94,14 @@
     </div>
 
     <!-- 输入核心区域 -->
-    <div class="input-area">
+    <div
+      class="input-area"
+      :class="{ 'is-drag-over': isDragOver }"
+      @dragenter="handleDragEnter"
+      @dragleave="handleDragLeave"
+      @dragover="handleDragOver"
+      @drop.prevent="handleDrop"
+    >
       <!-- 语音录制模式 -->
       <VoiceRecorder
         v-if="isVoiceMode"
@@ -122,24 +119,49 @@
         @input="handleInput"
         @keydown="handleKeydown"
         @paste="handlePaste"
-        @drop.prevent="handleDrop"
       ></textarea>
 
       <div class="input-footer" v-if="!isVoiceMode">
         <span class="hint-text">{{ sendShortcutHint }}</span>
-        <button
-          class="send-btn"
-          :class="{ active: canSend }"
-          :disabled="!canSend || sending"
-          @click="handleSend"
-        >
-          {{ sending ? '正在发送' : '发送' }}
-        </button>
+        <div class="footer-actions">
+          <!-- 语音输入切换按钮 -->
+          <el-tooltip content="按住说话" placement="top">
+            <button
+              class="footer-action-btn voice-btn"
+              :class="{ active: isVoiceMode }"
+              @click="toggleVoiceMode"
+            >
+              <el-icon><Microphone /></el-icon>
+            </button>
+          </el-tooltip>
+
+          <button
+            class="send-btn"
+            :class="{ active: canSend }"
+            :disabled="!canSend || sending"
+            @click="handleSend"
+          >
+            {{ sending ? '发送中' : '发送' }}
+          </button>
+        </div>
       </div>
     </div>
 
-    <EmojiPicker v-if="showEmojiPicker" @select="selectEmoji" ref="emojiPickerRef" />
+    <EmojiPicker
+      v-if="showEmojiPicker"
+      :position="emojiPickerPosition"
+      @select="selectEmoji"
+      @close="showEmojiPicker = false"
+    />
     <AtMemberPicker ref="atMemberPickerRef" :session-id="session?.id" @select="onAtSelect" />
+
+    <!-- 快捷命令面板 -->
+    <CommandPalette
+      :show="showCommandPalette"
+      :position="commandPalettePosition"
+      @close="showCommandPalette = false"
+      @select="handleCommandSelect"
+    />
 
     <!-- 隐藏的视频文件输入 -->
     <input
@@ -150,12 +172,43 @@
       @change="handleVideoFileChange"
     />
 
+    <!-- 隐藏的图片文件输入 -->
+    <input
+      type="file"
+      ref="imageInputRef"
+      accept="image/*"
+      style="display: none"
+      @change="handleImageFileChange"
+    />
+
+    <!-- 隐藏的文件输入 -->
+    <input
+      type="file"
+      ref="fileInputRef"
+      style="display: none"
+      @change="handleFileInputChange"
+    />
+
     <!-- 截图预览对话框 -->
     <ScreenshotPreview
       v-model="showScreenshotPreview"
       :image-data="screenshotData"
       @send="handleSendScreenshot"
       @close="handleScreenshotPreviewClose"
+    />
+
+    <!-- 截图引导对话框 -->
+    <ScreenshotGuideDialog
+      v-model:visible="showScreenshotGuide"
+      @send="handleSendScreenshotFromGuide"
+    />
+
+    <!-- AI 灵动回复面板 -->
+    <AiSmartReply
+      v-model:visible="showSmartReply"
+      :trigger-message="lastReceivedMessage"
+      :position="smartReplyPosition"
+      @select="handleSelectSmartReply"
     />
   </div>
 </template>
@@ -167,38 +220,216 @@ import { Close, ChatDotRound, Picture, FolderOpened, Phone, Clock, Microphone } 
 import { ElMessage } from 'element-plus'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { captureScreenshot, isScreenshotSupported } from '@/utils/screenshot'
-import EmojiPicker from '@/components/EmojiPicker/index.vue'
+import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
 import ScreenshotPreview from './ScreenshotPreview.vue'
+import ScreenshotGuideDialog from './ScreenshotGuideDialog.vue'
+import CommandPalette from './CommandPalette.vue'
+import AiSmartReply from './AiSmartReply.vue'
 
 const props = defineProps({
   session: Object,
   sending: Boolean,
   replyingMessage: Object,
-  editingMessage: Object
+  editingMessage: Object,
+  lastReceivedMessage: Object
 })
 
-const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-screenshot'])
+const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-screenshot', 'draft-change'])
 
 const store = useStore()
 const { sendMessage: wsSendMessage } = useImWebSocket()
 const currentUser = computed(() => store.getters['user/currentUser'])
 
 const messageContent = ref('')
+
+// ========== 草稿管理功能 ==========
+const DRAFT_STORAGE_KEY = 'im_message_drafts'
+const DRAFT_DEBOUNCE_TIME = 1000 // 1秒防抖
+let draftSaveTimer = null
+let currentConversationId = ref(null)
+
+// 获取所有草稿
+const getAllDrafts = () => {
+  try {
+    const data = localStorage.getItem(DRAFT_STORAGE_KEY)
+    return data ? JSON.parse(data) : {}
+  } catch (e) {
+    console.warn('读取草稿失败', e)
+    return {}
+  }
+}
+
+// 保存所有草稿
+const saveAllDrafts = (drafts) => {
+  try {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts))
+  } catch (e) {
+    console.warn('保存草稿失败', e)
+  }
+}
+
+// 获取指定会话的草稿
+const getDraft = (conversationId) => {
+  const drafts = getAllDrafts()
+  return drafts[conversationId] || null
+}
+
+// 保存草稿（防抖）
+const saveDraftDebounced = (conversationId, content) => {
+  if (draftSaveTimer) {
+    clearTimeout(draftSaveTimer)
+  }
+  draftSaveTimer = setTimeout(() => {
+    saveDraft(conversationId, content)
+  }, DRAFT_DEBOUNCE_TIME)
+}
+
+// 立即保存草稿
+const saveDraft = (conversationId, content) => {
+  if (!conversationId) return
+  const drafts = getAllDrafts()
+  drafts[conversationId] = {
+    content,
+    updateTime: Date.now()
+  }
+  saveAllDrafts(drafts)
+  // 通知父组件草稿状态变化
+  emit('draft-change', {
+    conversationId,
+    hasDraft: content.trim().length > 0,
+    preview: content.trim().slice(0, 50)
+  })
+}
+
+// 清除草稿
+const clearDraft = (conversationId) => {
+  if (!conversationId) return
+  const drafts = getAllDrafts()
+  delete drafts[conversationId]
+  saveAllDrafts(drafts)
+  emit('draft-change', {
+    conversationId,
+    hasDraft: false,
+    preview: ''
+  })
+}
+
+// 加载草稿
+const loadDraft = (conversationId) => {
+  if (!conversationId) return
+  const draft = getDraft(conversationId)
+  if (draft && draft.content) {
+    messageContent.value = draft.content
+    nextTick(() => autoResize())
+  } else {
+    messageContent.value = ''
+  }
+  currentConversationId.value = conversationId
+}
 const sendShortcutHint = computed(() => {
   const shortcut = store.state.im.settings.shortcuts.send
   return shortcut === 'ctrl-enter' ? '按 Ctrl + Enter 发送' : '按 Enter 发送'
 })
 
 const showEmojiPicker = ref(false)
+const emojiPickerPosition = ref({ x: 0, y: 0 })
 const textareaRef = ref(null)
 const atMemberPickerRef = ref(null)
+const imageInputRef = ref(null)
+const fileInputRef = ref(null)
 const videoInputRef = ref(null)
 const isVoiceMode = ref(false)
 const showScreenshotPreview = ref(false)
 const screenshotData = ref(null)
 const isCapturing = ref(false)
+const showScreenshotGuide = ref(false)
+
+// AI 灵动回复状态
+const showSmartReply = ref(false)
+const smartReplyPosition = ref({ x: 0, y: 0 })
+
+// ========== 快捷命令面板状态 ==========
+const showCommandPalette = ref(false)
+const commandPalettePosition = ref({ x: 0, y: 0 })
+
+// 在光标位置显示命令面板
+const showCommandPaletteAtCursor = () => {
+  const tx = textareaRef.value
+  if (!tx) return
+
+  // 获取 textarea 的位置
+  const rect = tx.getBoundingClientRect()
+
+  // 计算命令面板显示位置（在输入框上方）
+  commandPalettePosition.value = {
+    x: rect.left,
+    y: rect.top - 400 // 显示在输入框上方
+  }
+
+  showCommandPalette.value = true
+}
+
+// 处理命令选择
+const handleCommandSelect = (commandId) => {
+  // 移除输入框中的 /
+  const currentContent = messageContent.value
+  const cursorPos = textareaRef.value?.selectionStart || 0
+  let newContent = currentContent
+
+  // 找到 / 的位置并移除它
+  let slashPos = cursorPos - 1
+  while (slashPos >= 0 && currentContent[slashPos] !== '/') {
+    slashPos--
+  }
+
+  if (slashPos >= 0) {
+    newContent = currentContent.slice(0, slashPos) + currentContent.slice(cursorPos)
+    messageContent.value = newContent
+    nextTick(() => {
+      textareaRef.value?.focus()
+      autoResize()
+    })
+  }
+
+  // 根据命令类型执行相应操作
+  switch (commandId) {
+    case 'document':
+      // 触发文件上传
+      emit('upload-file')
+      break
+    case 'schedule':
+      ElMessage.info('日程功能开发中，敬请期待')
+      break
+    case 'meeting':
+      // 触发视频会议
+      emit('start-video')
+      break
+    case 'todo':
+      ElMessage.info('待办功能开发中，敬请期待')
+      break
+    case 'approval':
+      ElMessage.info('审批功能开发中，敬请期待')
+      break
+    case 'vote':
+      ElMessage.info('投票功能开发中，敬请期待')
+      break
+    case 'announcement':
+      ElMessage.info('公告功能开发中，敬请期待')
+      break
+    case 'checkin':
+      // 触发位置分享
+      handleLocation()
+      break
+    default:
+      ElMessage.info(`命令 ${commandId} 即将上线`)
+  }
+}
+
+// 拖拽上传状态
+const isDragOver = ref(false)
+let dragCounter = 0
 
 // 钉钉风格高度逻辑
 const containerHeight = ref(160)
@@ -251,8 +482,26 @@ const handleInput = () => {
   autoResize()
   emit('input', messageContent.value)
 
+  // 检查是否输入了 / 触发快捷命令
+  const value = messageContent.value
+  const cursorPos = textareaRef.value?.selectionStart || 0
+  const lastChar = value.charAt(cursorPos - 1)
+
+  // 如果输入了 / 且在消息开头或前面有空格，显示命令面板
+  if (lastChar === '/' && (cursorPos === 1 || value.charAt(cursorPos - 2) === ' ')) {
+    showCommandPaletteAtCursor()
+  } else if (showCommandPalette.value && !value.includes('/')) {
+    // 如果关闭了面板且不再有 /，隐藏面板
+    showCommandPalette.value = false
+  }
+
   // 发送输入状态（防抖）
   sendTypingIndicator()
+
+  // 保存草稿（防抖）
+  if (props.session?.id) {
+    saveDraftDebounced(props.session.id, messageContent.value)
+  }
 }
 
 // 输入状态防抖发送
@@ -325,13 +574,18 @@ const handleKeydown = (e) => {
 const handleSend = () => {
   const content = messageContent.value.trim()
   if (!content) return
-  
+
   if (props.editingMessage) {
     emit('edit-confirm', content)
   } else {
     emit('send', content)
   }
-  
+
+  // 清除草稿
+  if (props.session?.id) {
+    clearDraft(props.session.id)
+  }
+
   messageContent.value = ''
   nextTick(() => {
     if (textareaRef.value) textareaRef.value.style.height = 'auto'
@@ -361,7 +615,32 @@ const handlePaste = (e) => {
   }
 }
 
+const handleDragEnter = (e) => {
+  e.preventDefault()
+  dragCounter++
+  const files = e.dataTransfer?.files
+  if (files && files.length > 0) {
+    isDragOver.value = true
+  }
+}
+
+const handleDragLeave = (e) => {
+  dragCounter--
+  if (dragCounter <= 0) {
+    dragCounter = 0
+    isDragOver.value = false
+  }
+}
+
+const handleDragOver = (e) => {
+  e.preventDefault()
+}
+
 const handleDrop = (e) => {
+  e.preventDefault()
+  dragCounter = 0
+  isDragOver.value = false
+
   const files = e.dataTransfer?.files
   if (!files || files.length === 0) return
   for (const file of files) {
@@ -372,7 +651,22 @@ const handleDrop = (e) => {
   }
 }
 
-const toggleEmojiPicker = () => { showEmojiPicker.value = !showEmojiPicker.value }
+const toggleEmojiPicker = () => {
+  if (!showEmojiPicker.value) {
+    // 计算位置 - 在输入框上方显示
+    const inputArea = document.querySelector('.input-area')
+    if (inputArea) {
+      const rect = inputArea.getBoundingClientRect()
+      // 在输入框上方，emojiPicker 高度约 280px
+      emojiPickerPosition.value = {
+        x: Math.max(10, rect.left),
+        y: rect.top - 285  // 输入框上方 (280px 弹窗高度 + 5px 间距)
+      }
+    }
+  } else {
+    showEmojiPicker.value = false
+  }
+}
 const selectEmoji = (emoji) => { 
   const pos = textareaRef.value?.selectionStart || messageContent.value.length
   messageContent.value = messageContent.value.slice(0, pos) + emoji + messageContent.value.slice(pos)
@@ -387,25 +681,8 @@ const handleScreenshot = async () => {
     return
   }
 
-  // 防止重复点击
-  if (isCapturing.value) return
-
-  isCapturing.value = true
-  ElMessage.info('请选择要截取的屏幕或窗口')
-
-  try {
-    // 捕获屏幕
-    const dataURL = await captureScreenshot({ cursor: 'never' })
-    screenshotData.value = dataURL
-    showScreenshotPreview.value = true
-  } catch (error) {
-    if (error.message !== '您取消了截图选择') {
-      console.error('截图失败:', error)
-      ElMessage.error(error.message || '截图失败')
-    }
-  } finally {
-    isCapturing.value = false
-  }
+  // 显示截图引导对话框
+  showScreenshotGuide.value = true
 }
 
 // 导出方法供父组件调用（必须在函数定义之后）
@@ -419,6 +696,27 @@ const handleSendScreenshot = async (blob) => {
 
   showScreenshotPreview.value = false
   screenshotData.value = null
+}
+
+// 从截图引导对话框发送截图
+const handleSendScreenshotFromGuide = async (dataURL) => {
+  if (!dataURL) return
+
+  try {
+    // 将 dataURL 转换为 Blob
+    const response = await fetch(dataURL)
+    const blob = await response.blob()
+
+    // 发送截图
+    const formData = new FormData()
+    formData.append('file', blob, 'screenshot.png')
+    emit('send-screenshot', formData)
+
+    showScreenshotGuide.value = false
+  } catch (error) {
+    console.error('发送截图失败:', error)
+    ElMessage.error('发送截图失败')
+  }
 }
 
 // 关闭截图预览
@@ -484,6 +782,46 @@ const handleVideoFileChange = async () => {
   emit('upload-video', { file, url })
 }
 
+const handleImageFileChange = async () => {
+  const file = imageInputRef.value?.files?.[0]
+  if (!file) return
+
+  // 验证图片类型和大小
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+  const maxSize = 10 * 1024 * 1024 // 10MB
+
+  if (!validTypes.includes(file.type)) {
+    ElMessage.error('支持的图片格式：JPG、PNG、GIF、WebP、SVG')
+    return
+  }
+
+  if (file.size > maxSize) {
+    ElMessage.error('图片大小不能超过10MB')
+    return
+  }
+
+  emit('upload-image', file)
+  // 清空输入
+  imageInputRef.value.value = ''
+}
+
+const handleFileInputChange = async () => {
+  const file = fileInputRef.value?.files?.[0]
+  if (!file) return
+
+  // 验证文件大小
+  const maxSize = 100 * 1024 * 1024 // 100MB
+
+  if (file.size > maxSize) {
+    ElMessage.error('文件大小不能超过100MB')
+    return
+  }
+
+  emit('upload-file', file)
+  // 清空输入
+  fileInputRef.value.value = ''
+}
+
 const handleAtMember = () => {
   if (props.session?.type === 'GROUP') {
     atMemberPickerRef.value?.open(textareaRef.value.selectionStart || 0)
@@ -508,14 +846,65 @@ const handleSendVoice = ({ file, duration }) => {
   isVoiceMode.value = false
 }
 
+// 显示 AI 灵动回复面板
+const handleShowSmartReply = () => {
+  const inputArea = document.querySelector('.chat-input-container')
+  if (!inputArea) return
+
+  const rect = inputArea.getBoundingClientRect()
+  smartReplyPosition.value = {
+    x: rect.right - 360,
+    y: rect.top - 480
+  }
+  showSmartReply.value = true
+}
+
+// 选择 AI 灵动回复
+const handleSelectSmartReply = (replyText) => {
+  messageContent.value = replyText
+  nextTick(() => {
+    autoResize()
+    textareaRef.value?.focus()
+  })
+}
+
 // 监听回复消息，自动获取焦点
 watch(() => props.replyingMessage, (val) => {
   if (val) nextTick(() => textareaRef.value?.focus())
 })
 
+// 监听会话变化，加载草稿
+watch(() => props.session?.id, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    // 保存旧会话的草稿
+    if (oldId && messageContent.value.trim()) {
+      saveDraft(oldId, messageContent.value)
+    }
+    // 加载新会话的草稿
+    loadDraft(newId)
+  }
+}, { immediate: true })
+
 onMounted(() => {
   const saved = localStorage.getItem('im_input_height')
   if (saved) containerHeight.value = parseInt(saved)
+
+  // 注册全局截图快捷键 (Ctrl+Alt+A / Cmd+Shift+A)
+  const handleGlobalKeydown = (e) => {
+    // Windows: Ctrl+Alt+A, Mac: Cmd+Shift+A
+    const isWinShortcut = e.ctrlKey && e.altKey && e.key === 'a'
+    const isMacShortcut = e.metaKey && e.shiftKey && e.key === 'a'
+
+    if ((isWinShortcut || isMacShortcut) && !showEmojiPicker.value && !isVoiceMode.value) {
+      e.preventDefault()
+      handleScreenshot()
+    }
+  }
+
+  document.addEventListener('keydown', handleGlobalKeydown)
+
+  // 保存引用以便在 onUnmounted 中移除
+  window._messageInputKeydownHandler = handleGlobalKeydown
 })
 
 onUnmounted(() => {
@@ -523,6 +912,20 @@ onUnmounted(() => {
   if (typingTimer) {
     clearTimeout(typingTimer)
     typingTimer = null
+  }
+  // 清理草稿保存定时器
+  if (draftSaveTimer) {
+    clearTimeout(draftSaveTimer)
+    draftSaveTimer = null
+  }
+  // 保存当前草稿
+  if (currentConversationId.value && messageContent.value.trim()) {
+    saveDraft(currentConversationId.value, messageContent.value)
+  }
+  // 移除全局键盘事件监听
+  if (window._messageInputKeydownHandler) {
+    document.removeEventListener('keydown', window._messageInputKeydownHandler)
+    delete window._messageInputKeydownHandler
   }
 })
 </script>
@@ -723,68 +1126,221 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding-bottom: 12px;
+  gap: 12px;
 
   .toolbar-left {
     display: flex;
     align-items: center;
-    gap: 6px;
-  }
+    gap: 4px;
 
-  .toolbar-btn {
-    width: 36px;
-    height: 36px;
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: #3b4252; // 深灰色，确保在白色背景上清晰可见
-    border-radius: var(--dt-radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--dt-transition-fast);
-
-    &:hover {
-      background: var(--dt-bg-hover);
-      color: var(--dt-brand-color);
+    // 工具按钮分组
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      background: var(--dt-bg-input);
+      border-radius: var(--dt-radius-lg);
+      transition: all var(--dt-transition-fast);
     }
 
-    &:active {
-      transform: scale(0.95);
-    }
+    .toolbar-btn {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--dt-text-secondary);
+      border-radius: var(--dt-radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-    &.active {
-      color: var(--dt-brand-color);
-      background: var(--dt-brand-bg);
-    }
+      // 图标样式
+      .el-icon,
+      .material-icons-outlined {
+        font-size: 18px;
+        transition: transform 0.2s var(--dt-ease-out);
+      }
 
-    .dark & {
-      color: #bdc3c9; // 暗色模式下使用浅灰色，确保在深色背景上清晰可见
-
+      // 悬停效果
       &:hover {
-        background: var(--dt-bg-hover-dark);
+        background: var(--dt-brand-bg);
         color: var(--dt-brand-color);
+        transform: translateY(-1px);
+
+        .el-icon,
+        .material-icons-outlined {
+          transform: scale(1.1);
+        }
+
+        // 悬停时的光晕效果
+        &::after {
+          content: '';
+          position: absolute;
+          inset: -4px;
+          border-radius: var(--dt-radius-lg);
+          background: var(--dt-brand-color);
+          opacity: 0.1;
+          pointer-events: none;
+        }
+      }
+
+      // 点击效果
+      &:active {
+        transform: translateY(0) scale(0.95);
+      }
+
+      // 激活状态
+      &.active {
+        color: var(--dt-brand-color);
+        background: var(--dt-brand-bg);
+        box-shadow: inset 0 1px 2px rgba(22, 119, 255, 0.2);
+
+        &::before {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 16px;
+          height: 2px;
+          background: var(--dt-brand-color);
+          border-radius: 1px;
+        }
+      }
+
+      // AI 灵动回复按钮特殊样式
+      &.ai-reply-btn {
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.15) 100%);
+        color: #9333ea;
+
+        .material-icons-outlined {
+          background: linear-gradient(135deg, #9333ea, #7c3aed);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(147, 51, 234, 0.25) 100%);
+          color: #7c3aed;
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 4px 12px rgba(147, 51, 234, 0.25);
+
+          &::after {
+            opacity: 0.15;
+          }
+        }
+
+        // 添加呼吸动画效果
+        animation: aiPulse 3s ease-in-out infinite;
       }
     }
+
+    // 分隔线
+    .toolbar-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--dt-border-light);
+      margin: 0 6px;
+    }
   }
 
-  .el-divider--vertical {
-    height: 20px;
-    margin: 0 4px;
-    border-color: var(--dt-border-light);
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .history-btn {
     font-size: 13px;
     color: var(--dt-text-tertiary);
-    transition: color var(--dt-transition-fast);
+    transition: all var(--dt-transition-fast);
+    padding: 6px 12px;
+    border-radius: var(--dt-radius-md);
+    background: var(--dt-bg-input);
 
     &:hover {
       color: var(--dt-brand-color);
+      background: var(--dt-brand-bg);
+    }
+  }
+}
+
+// AI 按钮呼吸动画
+@keyframes aiPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(147, 51, 234, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.2);
+  }
+}
+
+// ============================================================================
+// 暗色模式
+// ============================================================================
+:global(.dark) {
+  .input-toolbar {
+    .toolbar-left {
+      .toolbar-group {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--dt-border-dark);
+      }
     }
 
-    .dark & {
-      color: var(--dt-text-tertiary-dark);
+    .toolbar-btn {
+      color: var(--dt-text-secondary-dark);
+
+      &:hover {
+        background: rgba(22, 119, 255, 0.15);
+        color: var(--dt-brand-color);
+
+        &::after {
+          opacity: 0.15;
+        }
+      }
+
+      &.active {
+        background: rgba(22, 119, 255, 0.15);
+        color: var(--dt-brand-color);
+      }
+
+      &.ai-reply-btn {
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0.1) 100%);
+        color: #c084fc;
+
+        .material-icons-outlined {
+          background: linear-gradient(135deg, #c084fc, #a78bfa);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(147, 51, 234, 0.25) 0%, rgba(147, 51, 234, 0.2) 100%);
+          color: #d8b4fe;
+          box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+        }
+      }
+    }
+
+    .toolbar-divider {
+      background: var(--dt-border-dark);
+    }
+  }
+
+  .history-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--dt-text-tertiary-dark);
+
+    &:hover {
+      background: rgba(22, 119, 255, 0.15);
+      color: var(--dt-brand-color);
     }
   }
 }
@@ -866,6 +1422,50 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  position: relative;
+  transition: all 0.2s ease;
+
+  // 拖拽上传状态
+  &.is-drag-over {
+    background: rgba(24, 144, 255, 0.04);
+    border-radius: var(--dt-radius-md);
+    box-shadow: inset 0 0 0 2px var(--dt-brand-color, #1890ff);
+
+    &::after {
+      content: '松开即可发送文件';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 20px;
+      background: var(--dt-brand-color, #1890ff);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.25);
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      animation: drop-pulse 1s ease-in-out infinite;
+    }
+
+    .message-input {
+      opacity: 0.3;
+    }
+  }
+}
+
+@keyframes drop-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
 }
 
 .message-input {
@@ -905,6 +1505,51 @@ onUnmounted(() => {
 
     .dark & {
       color: var(--dt-text-tertiary-dark);
+    }
+  }
+
+  .footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dt-bg-body);
+    border: 1px solid var(--dt-border-color);
+    border-radius: var(--dt-radius-md);
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+    transition: all var(--dt-transition-fast);
+
+    .el-icon {
+      font-size: 16px;
+    }
+
+    &:hover {
+      background: var(--dt-bg-hover);
+      color: var(--dt-brand-color);
+      border-color: var(--dt-brand-color);
+    }
+
+    &.active {
+      background: var(--dt-brand-color);
+      color: #fff;
+      border-color: var(--dt-brand-color);
+    }
+
+    .dark & {
+      background: var(--dt-bg-body-dark);
+      border-color: var(--dt-border-dark);
+
+      &:hover {
+        background: var(--dt-bg-hover-dark);
+      }
     }
   }
 
@@ -956,26 +1601,34 @@ onUnmounted(() => {
 
   .input-toolbar {
     padding-bottom: 8px;
+    gap: 8px;
 
     .toolbar-left {
-      gap: 4px;
+      gap: 2px;
 
-      .toolbar-btn {
-        width: 32px;
-        height: 32px;
+      .toolbar-group {
+        padding: 3px;
+        gap: 1px;
+      }
+    }
+
+    .toolbar-btn {
+      width: 28px;
+      height: 28px;
+
+      .el-icon,
+      .material-icons-outlined {
+        font-size: 16px;
       }
     }
 
     .history-btn {
       font-size: 12px;
+      padding: 4px 8px;
 
       .el-icon {
         display: none;
       }
-    }
-
-    .el-divider--vertical {
-      display: none;
     }
   }
 
@@ -1015,12 +1668,16 @@ onUnmounted(() => {
 @media (min-width: 480px) and (max-width: 767px) {
   .input-toolbar {
     .toolbar-left {
-      gap: 5px;
+      gap: 3px;
+
+      .toolbar-group {
+        padding: 3px 4px;
+      }
     }
 
     .toolbar-btn {
-      width: 34px;
-      height: 34px;
+      width: 30px;
+      height: 30px;
     }
   }
 
@@ -1037,8 +1694,8 @@ onUnmounted(() => {
 // 平板横屏 (768px - 1023px)
 @media (min-width: 768px) and (max-width: 1023px) {
   .toolbar-btn {
-    width: 35px;
-    height: 35px;
+    width: 34px;
+    height: 34px;
   }
 }
 </style>

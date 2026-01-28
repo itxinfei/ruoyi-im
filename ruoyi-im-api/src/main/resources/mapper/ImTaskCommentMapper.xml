@@ -19,12 +19,12 @@
 
     <select id="selectByTaskId" resultMap="BaseResultMap">
         SELECT c.*,
-               u.nick_name as user_nickname,
+               u.nickname as user_nickname,
                u.avatar as user_avatar,
-               ru.nick_name as reply_to_user_nickname
+               ru.nickname as reply_to_user_nickname
         FROM im_task_comment c
-        LEFT JOIN sys_user u ON c.user_id = u.user_id
-        LEFT JOIN sys_user ru ON c.reply_to_user_id = ru.user_id
+        LEFT JOIN im_user u ON c.user_id = u.id
+        LEFT JOIN im_user ru ON c.reply_to_user_id = ru.id
         WHERE c.task_id = #{taskId}
           AND c.is_deleted = 0
         ORDER BY c.create_time ASC

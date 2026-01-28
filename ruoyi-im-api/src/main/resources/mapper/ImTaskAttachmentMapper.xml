@@ -19,10 +19,10 @@
 
     <select id="selectByTaskId" resultMap="BaseResultMap">
         SELECT a.*,
-               u.nick_name as uploader_name,
+               u.nickname as uploader_name,
                u.avatar as uploader_avatar
         FROM im_task_attachment a
-        LEFT JOIN sys_user u ON a.upload_user_id = u.user_id
+        LEFT JOIN im_user u ON a.upload_user_id = u.id
         WHERE a.task_id = #{taskId}
         ORDER BY a.upload_time DESC
     </select>

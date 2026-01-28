@@ -3,7 +3,7 @@
     v-model="visible"
     title="群公告"
     width="600px"
-    :close-on-click-modal="false"
+    :close-on-click-modal="true"
     @close="handleClose"
   >
     <!-- 公告列表 -->

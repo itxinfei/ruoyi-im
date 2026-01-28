@@ -16,174 +16,157 @@
             type="text"
           />
         </div>
-        <button class="custom-btn">
-          <span class="material-icons-outlined">add</span>
-          自定义
-        </button>
+        <div class="header-buttons">
+          <button class="icon-btn" @click="toggleEditMode" :class="{ active: isEditMode }">
+            <span class="material-icons-outlined">{{ isEditMode ? 'lock' : 'lock_open' }}</span>
+            {{ isEditMode ? '完成' : '编辑' }}
+          </button>
+          <button class="custom-btn">
+            <span class="material-icons-outlined">add</span>
+            添加卡片
+          </button>
+        </div>
       </div>
     </header>
 
-    <!-- 主内容区 -->
+    <!-- Bento Grid 主内容区 -->
     <div class="workbench-content">
-      <!-- 常用应用 -->
-      <section class="apps-section common-section">
+      <!-- 快捷应用区域 -->
+      <section class="quick-apps-section">
         <div class="section-header">
           <h3 class="section-title">
             <span class="title-icon title-icon-primary">
               <span class="material-icons-outlined">apps</span>
             </span>
-            常用应用
+            快捷应用
           </h3>
-          <button class="manage-btn">
-            <span class="material-icons-outlined">settings</span>
-            管理
-          </button>
         </div>
-        <div class="apps-grid">
+        <div class="quick-apps-grid">
           <div
-            v-for="app in commonApps"
-            :key="app.key"
-            class="app-card common-app"
+            v-for="app in quickApps"
+            :key="app.id"
+            class="quick-app-item"
             @click="handleAppClick(app)"
           >
             <div class="app-icon" :class="app.iconClass">
               <span class="material-icons-outlined">{{ app.icon }}</span>
             </div>
             <span class="app-label">{{ app.label }}</span>
-            <span v-if="app.badge" class="app-badge">{{ app.badge > 99 ? '99+' : app.badge }}</span>
+          </div>
+          <div class="quick-app-item add-app" @click="handleAddApp">
+            <div class="app-icon add-icon">
+              <span class="material-icons-outlined">add</span>
+            </div>
+            <span class="app-label">添加</span>
           </div>
         </div>
       </section>
 
-      <!-- 内容网格：待办事项 + 公司公告 -->
-      <div class="content-grid">
-        <!-- 待办事项 -->
-        <div class="content-card todo-card">
-          <div class="card-header">
-            <h4 class="card-title">
-              <span class="material-icons-outlined card-icon">task_alt</span>
-              待办事项
-            </h4>
-            <a class="view-all-link" href="#" @click.prevent="handleViewAllTodos">查看全部</a>
-          </div>
-          <div v-loading="loadingTodos" class="card-body">
-            <div v-if="todos.length === 0" class="empty-state">
-              <span class="material-icons-outlined empty-icon">check_circle_outline</span>
-              <p class="empty-text">暂无待办事项</p>
-              <button class="empty-action" @click="handleAddTodo">
-                <span class="material-icons-outlined">add</span>
-                新建待办
-              </button>
-            </div>
-            <div v-else class="todo-list">
-              <div
-                v-for="todo in todos"
-                :key="todo.id"
-                class="todo-item"
-                :class="{ completed: todo.completed, overdue: isOverdue(todo.deadline) }"
-                @click="handleTodoClick(todo)"
-              >
-                <div class="todo-priority" :class="todo.priorityClass"></div>
-                <div class="todo-content">
-                  <p class="todo-title">{{ todo.title }}</p>
-                  <p class="todo-deadline">
-                    <span class="material-icons-outlined deadline-icon">schedule</span>
-                    {{ formatDate(todo.deadline) }}
-                  </p>
-                </div>
-                <button class="todo-complete-btn" @click.stop="handleTodoComplete(todo)">
-                  <span class="material-icons-outlined">check_circle_outline</span>
-                </button>
-              </div>
-            </div>
+      <!-- Bento Grid 布局 -->
+      <div class="bento-grid" :class="{ 'edit-mode': isEditMode }">
+        <div
+          v-for="card in visibleCards"
+          :key="card.id"
+          class="bento-card"
+          :class="[
+            `card-${card.type}`,
+            `card-size-${card.size || '1x1'}`,
+            { 'dragging': draggingCard === card.id }
+          ]"
+          :style="getCardStyle(card)"
+          draggable="isEditMode"
+          @dragstart="handleDragStart($event, card)"
+          @dragend="handleDragEnd"
+          @dragover="handleDragOver($event, card)"
+          @drop="handleDrop($event, card)"
+          @click="handleCardClick(card)"
+        >
+          <!-- 卡片内容组件 -->
+          <component :is="getCardComponent(card.type)" :card="card" :data="card.data" />
+
+          <!-- 编辑模式下的操作按钮 -->
+          <div v-if="isEditMode" class="card-actions">
+            <button class="action-btn" @click.stop="handleEditCard(card)" title="编辑">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+            <button class="action-btn danger" @click.stop="handleRemoveCard(card.id)" title="移除">
+              <span class="material-icons-outlined">close</span>
+            </button>
           </div>
         </div>
 
-        <!-- 公司公告 -->
-        <div class="content-card announcement-card">
-          <div class="card-header">
-            <h4 class="card-title">
-              <span class="material-icons-outlined card-icon">campaign</span>
-              公司公告
-            </h4>
-            <a class="view-all-link" href="#" @click.prevent="handleViewAllAnnouncements">更多</a>
-          </div>
-          <div v-loading="loadingAnnouncements" class="card-body">
-            <div v-if="announcements.length === 0" class="empty-state">
-              <span class="material-icons-outlined empty-icon">campaign</span>
-              <p class="empty-text">暂无公告</p>
-            </div>
-            <div v-else class="announcement-list">
-              <div
-                v-for="announcement in announcements"
-                :key="announcement.id"
-                class="announcement-item"
-                @click="handleAnnouncementClick(announcement)"
-              >
-                <span class="announcement-tag" :class="announcement.tagClass">
-                  {{ announcement.tag }}
-                </span>
-                <div class="announcement-content">
-                  <p class="announcement-title">{{ announcement.title }}</p>
-                  <span class="announcement-meta">
-                    <span class="material-icons-outlined meta-icon">business</span>
-                    {{ announcement.department }}
-                    <span class="divider">·</span>
-                    <span class="material-icons-outlined meta-icon">access_time</span>
-                    {{ announcement.time }}
-                  </span>
-                </div>
-              </div>
+        <!-- 空插槽提示 -->
+        <div v-if="visibleCards.length === 0" class="empty-grid">
+          <span class="material-icons-outlined empty-icon">dashboard_customize</span>
+          <p class="empty-text">暂无卡片，点击"添加卡片"开始定制你的工作台</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加卡片弹窗 -->
+    <el-dialog
+      v-model="showAddCardDialog"
+      title="添加卡片"
+      width="600px"
+      :close-on-click-modal="true"
+    >
+      <div class="add-card-dialog">
+        <div class="card-type-tabs">
+          <button
+            v-for="type in cardTypes"
+            :key="type.key"
+            class="type-tab"
+            :class="{ active: selectedCardType === type.key }"
+            @click="selectedCardType = type.key"
+          >
+            <span class="material-icons-outlined">{{ type.icon }}</span>
+            {{ type.label }}
+          </button>
+        </div>
+        <div class="card-templates">
+          <div
+            v-for="template in getCardTemplates(selectedCardType)"
+            :key="template.id"
+            class="template-item"
+            :class="{ selected: selectedTemplate === template.id }"
+            @click="selectedTemplate = template.id"
+          >
+            <div class="template-preview" :class="`preview-${template.size || '1x1'}`">
+              <span class="material-icons-outlined">{{ template.icon }}</span>
+              <span class="template-label">{{ template.label }}</span>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- 其它应用 -->
-      <section class="apps-section other-section">
-        <div class="section-header">
-          <h3 class="section-title">
-            <span class="title-icon title-icon-secondary">
-              <span class="material-icons-outlined">extension</span>
-            </span>
-            其它应用
-          </h3>
-        </div>
-        <div class="apps-grid apps-grid-sm">
-          <div
-            v-for="app in otherApps"
-            :key="app.key"
-            class="app-card other-app"
-            @click="handleAppClick(app)"
-          >
-            <div class="app-icon" :class="app.iconClass">
-              <span class="material-icons-outlined">{{ app.icon }}</span>
-            </div>
-            <span class="app-label">{{ app.label }}</span>
-          </div>
-          <div class="app-card add-app-card" @click="handleAddApp">
-            <div class="app-icon add-icon">
-              <span class="material-icons-outlined">add</span>
-            </div>
-            <span class="app-label">添加应用</span>
-          </div>
-        </div>
-      </section>
-    </div>
+      <template #footer>
+        <el-button @click="showAddCardDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleAddCard">确定添加</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, h } from 'vue'
 import { useStore } from 'vuex'
-import { getTodos, getAnnouncements } from '@/api/im/workbench'
 import { ElMessage } from 'element-plus'
 
 const store = useStore()
-const searchQuery = ref('')
-const loadingTodos = ref(false)
-const loadingAnnouncements = ref(false)
 
+// ============================================================================
+// 状态管理
+// ============================================================================
+const searchQuery = ref('')
+const isEditMode = ref(false)
+const draggingCard = ref(null)
+const dragOverCard = ref(null)
+const showAddCardDialog = ref(false)
+const selectedCardType = ref('data')
+const selectedTemplate = ref('')
+
+// ============================================================================
+// 用户信息
+// ============================================================================
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const displayName = computed(() => currentUser.value.nickname || currentUser.value.username || '开发者')
 
@@ -210,157 +193,514 @@ const currentDateText = computed(() => {
   return `${year}年${month}月${date}日 ${weekday}`
 })
 
-// 常用应用
-const commonApps = ref([
-  { key: 'attendance', label: '考勤打卡', icon: 'access_time', iconClass: 'icon-orange' },
-  { key: 'approval', label: '审批', icon: 'approval', iconClass: 'icon-blue' },
-  { key: 'report', label: '汇报', icon: 'assignment', iconClass: 'icon-green' },
-  { key: 'todo', label: '待办', icon: 'task_alt', iconClass: 'icon-purple', badge: 3 },
-  { key: 'announcement', label: '公告', icon: 'campaign', iconClass: 'icon-pink' }
+// ============================================================================
+// 快捷应用
+// ============================================================================
+const quickApps = ref([
+  { id: 'qa-1', label: '考勤', icon: 'access_time', iconClass: 'icon-orange', key: 'attendance' },
+  { id: 'qa-2', label: '审批', icon: 'approval', iconClass: 'icon-blue', key: 'approval' },
+  { id: 'qa-3', label: '汇报', icon: 'assignment', iconClass: 'icon-green', key: 'report' },
+  { id: 'qa-4', label: '待办', icon: 'task_alt', iconClass: 'icon-purple', key: 'todo', badge: 3 },
+  { id: 'qa-5', label: '公告', icon: 'campaign', iconClass: 'icon-pink', key: 'announcement' },
+  { id: 'qa-6', label: '会议', icon: 'videocam', iconClass: 'icon-cyan', key: 'meeting' },
+  { id: 'qa-7', label: '云盘', icon: 'folder_shared', iconClass: 'icon-indigo', key: 'cloud' },
+  { id: 'qa-8', label: '日程', icon: 'calendar_today', iconClass: 'icon-teal', key: 'calendar' }
 ])
 
-// 其它应用
-const otherApps = ref([
-  { key: 'expense', label: '报销', icon: 'receipt_long', iconClass: 'icon-teal' },
-  { key: 'cloud', label: '云盘', icon: 'folder_shared', iconClass: 'icon-indigo' },
-  { key: 'culture', label: '企业文化', icon: 'emoji_events', iconClass: 'icon-amber' },
-  { key: 'health', label: '健康申报', icon: 'health_and_safety', iconClass: 'icon-rose' },
-  { key: 'it', label: 'IT支持', icon: 'contact_support', iconClass: 'icon-cyan' },
-  { key: 'meeting', label: '会议', icon: 'meeting_room', iconClass: 'icon-lime' }
-])
+// ============================================================================
+// Bento Grid 卡片配置
+// ============================================================================
 
-// 待办事项
-const todos = ref([
+// 默认卡片布局
+const defaultCards = [
   {
-    id: 1,
-    title: '完成Q4季度产品规划文档',
-    deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    priorityClass: 'priority-high'
+    id: 'card-todo',
+    type: 'todo',
+    size: '1x2',
+    position: { row: 0, col: 0 },
+    data: { title: '待办事项', limit: 5 }
   },
   {
-    id: 2,
-    title: '新员工入职培训会议',
-    deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    priorityClass: 'priority-medium'
+    id: 'card-announcement',
+    type: 'announcement',
+    size: '1x2',
+    position: { row: 0, col: 1 },
+    data: { title: '公司公告', limit: 3 }
   },
   {
-    id: 3,
-    title: '审核前端团队代码合并请求',
-    deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-    priorityClass: 'priority-low'
+    id: 'card-schedule',
+    type: 'schedule',
+    size: '2x1',
+    position: { row: 1, col: 0 },
+    data: { title: '今日日程' }
+  },
+  {
+    id: 'card-stats',
+    type: 'stats',
+    size: '2x2',
+    position: { row: 2, col: 0 },
+    data: { title: '工作概览' }
+  },
+  {
+    id: 'card-approval',
+    type: 'approval',
+    size: '1x1',
+    position: { row: 4, col: 0 },
+    data: { title: '待审批' }
+  },
+  {
+    id: 'card-mail',
+    type: 'mail',
+    size: '1x1',
+    position: { row: 4, col: 1 },
+    data: { title: '未读邮件' }
   }
-])
+]
 
-// 公告
-const announcements = ref([
-  {
-    id: 1,
-    title: '关于国庆节放假安排的通知',
-    department: '人事行政部',
-    time: '2小时前',
-    tag: '重要',
-    tagClass: 'tag-important'
-  },
-  {
-    id: 2,
-    title: '2023年度员工体检预约开启',
-    department: '人事行政部',
-    time: '昨天',
-    tag: '通知',
-    tagClass: 'tag-notice'
+// 卡片数据
+const cards = ref([])
+
+// 从 localStorage 加载卡片配置
+const loadCardsFromStorage = () => {
+  const saved = localStorage.getItem('workbench-cards')
+  if (saved) {
+    try {
+      cards.value = JSON.parse(saved)
+    } catch (e) {
+      console.error('加载卡片配置失败', e)
+      cards.value = [...defaultCards]
+    }
+  } else {
+    cards.value = [...defaultCards]
   }
-])
+}
+
+// 保存卡片配置到 localStorage
+const saveCardsToStorage = () => {
+  localStorage.setItem('workbench-cards', JSON.stringify(cards.value))
+}
+
+// 可见卡片（按位置排序）
+const visibleCards = computed(() => {
+  return [...cards.value].sort((a, b) => {
+    const rowA = a.position?.row || 0
+    const rowB = b.position?.row || 0
+    const colA = a.position?.col || 0
+    const colB = b.position?.col || 0
+    if (rowA !== rowB) return rowA - rowB
+    return colA - colB
+  })
+})
+
+// ============================================================================
+// 卡片类型配置
+// ============================================================================
+const cardTypes = [
+  { key: 'data', label: '数据卡片', icon: 'analytics' },
+  { key: 'app', label: '应用卡片', icon: 'apps' },
+  { key: 'chart', label: '图表卡片', icon: 'bar_chart' },
+  { key: 'list', label: '列表卡片', icon: 'view_list' }
+]
+
+// 卡片模板
+const cardTemplates = {
+  data: [
+    { id: 'todo', label: '待办事项', icon: 'task_alt', size: '1x2' },
+    { id: 'announcement', label: '公司公告', icon: 'campaign', size: '1x2' },
+    { id: 'schedule', label: '日程安排', icon: 'calendar_today', size: '2x1' },
+    { id: 'approval', label: '待审批', icon: 'approval', size: '1x1' },
+    { id: 'mail', label: '未读邮件', icon: 'mail', size: '1x1' },
+    { id: 'stats', label: '工作概览', icon: 'analytics', size: '2x2' }
+  ],
+  app: [
+    { id: 'cloud-app', label: '云盘快捷', icon: 'folder_shared', size: '1x1' },
+    { id: 'meeting-app', label: '会议快捷', icon: 'videocam', size: '1x1' },
+    { id: 'doc-app', label: '文档协作', icon: 'description', size: '1x1' }
+  ],
+  chart: [
+    { id: 'weekly-chart', label: '周报统计', icon: 'show_chart', size: '2x2' },
+    { id: 'project-chart', label: '项目进度', icon: 'pie_chart', size: '2x1' }
+  ],
+  list: [
+    { id: 'recent-files', label: '最近文件', icon: 'recent_actors', size: '1x2' },
+    { id: 'team-activity', label: '团队动态', icon: 'groups', size: '1x2' }
+  ]
+}
+
+// 获取指定类型的卡片模板
+const getCardTemplates = (type) => {
+  return cardTemplates[type] || []
+}
+
+// ============================================================================
+// 卡片组件渲染
+// ============================================================================
+
+// 卡片样式
+const getCardStyle = (card) => {
+  return {
+    '--card-color': card.color || 'var(--dt-brand-color)',
+    '--card-bg': card.bgColor || 'var(--dt-brand-bg)'
+  }
+}
+
+// 获取卡片组件
+const getCardComponent = (type) => {
+  const components = {
+    todo: BentoTodoCard,
+    announcement: BentoAnnouncementCard,
+    schedule: BentoScheduleCard,
+    stats: BentoStatsCard,
+    approval: BentoApprovalCard,
+    mail: BentoMailCard,
+    'default': BentoDefaultCard
+  }
+  return components[type] || components.default
+}
+
+// ============================================================================
+// 卡片内容组件
+// ============================================================================
+
+// 待办卡片
+const BentoTodoCard = {
+  props: ['card', 'data'],
+  setup(props) {
+    const todos = ref([
+      { id: 1, title: '完成Q4季度产品规划文档', deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), priority: 'high' },
+      { id: 2, title: '新员工入职培训会议', deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), priority: 'medium' },
+      { id: 3, title: '审核前端团队代码合并请求', deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), priority: 'low' }
+    ])
+
+    const formatDate = (date) => {
+      const d = new Date(date)
+      const now = new Date()
+      const diff = d - now
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      if (days === 0) return '今天'
+      if (days === 1) return '明天'
+      return `${d.getMonth() + 1}月${d.getDate()}日`
+    }
+
+    return () => h('div', { class: 'bento-card-content todo-card-content' }, [
+      h('div', { class: 'card-header' }, [
+        h('h4', { class: 'card-title' }, [
+          h('span', { class: 'material-icons-outlined card-icon' }, 'task_alt'),
+          props.data?.title || '待办事项'
+        ]),
+        h('a', {
+          class: 'view-all-link',
+          href: '#',
+          onClick: (e) => {
+            e.preventDefault()
+            window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'todo' }))
+          }
+        }, '查看全部')
+      ]),
+      h('div', { class: 'todo-list' }, todos.value.slice(0, props.data?.limit || 5).map(todo =>
+        h('div', {
+          class: ['todo-item', `priority-${todo.priority}`],
+          key: todo.id,
+          onClick: () => ElMessage.info(`查看待办: ${todo.title}`)
+        }, [
+          h('span', { class: 'todo-dot' }),
+          h('div', { class: 'todo-content' }, [
+            h('p', { class: 'todo-title' }, todo.title),
+            h('span', { class: 'todo-deadline' }, [
+              h('span', { class: 'material-icons-outlined' }, 'schedule'),
+              formatDate(todo.deadline)
+            ])
+          ])
+        ])
+      ))
+    ])
+  }
+}
+
+// 公告卡片
+const BentoAnnouncementCard = {
+  props: ['card', 'data'],
+  setup(props) {
+    const announcements = ref([
+      { id: 1, title: '关于国庆节放假安排的通知', department: '人事行政部', time: '2小时前', tag: '重要' },
+      { id: 2, title: '2023年度员工体检预约开启', department: '人事行政部', time: '昨天', tag: '通知' },
+      { id: 3, title: '系统升级维护通知', department: '技术部', time: '3天前', tag: '通知' }
+    ])
+
+    return () => h('div', { class: 'bento-card-content announcement-card-content' }, [
+      h('div', { class: 'card-header' }, [
+        h('h4', { class: 'card-title' }, [
+          h('span', { class: 'material-icons-outlined card-icon' }, 'campaign'),
+          props.data?.title || '公司公告'
+        ]),
+        h('a', {
+          class: 'view-all-link',
+          href: '#',
+          onClick: (e) => {
+            e.preventDefault()
+            ElMessage.info('查看全部公告')
+          }
+        }, '更多')
+      ]),
+      h('div', { class: 'announcement-list' }, announcements.value.slice(0, props.data?.limit || 3).map(item =>
+        h('div', {
+          class: 'announcement-item',
+          key: item.id,
+          onClick: () => ElMessage.info(`查看公告: ${item.title}`)
+        }, [
+          h('span', { class: 'announcement-tag' }, item.tag),
+          h('div', { class: 'announcement-content' }, [
+            h('p', { class: 'announcement-title' }, item.title),
+            h('span', { class: 'announcement-meta' }, [
+              h('span', { class: 'material-icons-outlined' }, 'business'),
+              item.department,
+              ' · ',
+              h('span', { class: 'material-icons-outlined' }, 'access_time'),
+              item.time
+            ])
+          ])
+        ])
+      ))
+    ])
+  }
+}
+
+// 日程卡片
+const BentoScheduleCard = {
+  props: ['card', 'data'],
+  setup(props) {
+    const schedules = ref([
+      { id: 1, title: '产品需求评审会', time: '10:00-11:30', location: '会议室A' },
+      { id: 2, title: '与设计团队沟通', time: '14:00-15:00', location: '线上会议' },
+      { id: 3, title: '代码评审', time: '16:00-17:00', location: '会议室B' }
+    ])
+
+    return () => h('div', { class: 'bento-card-content schedule-card-content' }, [
+      h('div', { class: 'card-header' }, [
+        h('h4', { class: 'card-title' }, [
+          h('span', { class: 'material-icons-outlined card-icon' }, 'calendar_today'),
+          props.data?.title || '今日日程'
+        ])
+      ]),
+      h('div', { class: 'schedule-list' }, schedules.value.map(item =>
+        h('div', {
+          class: 'schedule-item',
+          key: item.id,
+          onClick: () => ElMessage.info(`查看日程: ${item.title}`)
+        }, [
+          h('div', { class: 'schedule-time' }, item.time),
+          h('div', { class: 'schedule-info' }, [
+            h('p', { class: 'schedule-title' }, item.title),
+            h('span', { class: 'schedule-location' }, [
+              h('span', { class: 'material-icons-outlined' }, 'place'),
+              item.location
+            ])
+          ])
+        ])
+      ))
+    ])
+  }
+}
+
+// 统计卡片
+const BentoStatsCard = {
+  props: ['card', 'data'],
+  setup(props) {
+    const stats = ref([
+      { label: '今日待办', value: 5, total: 12, unit: '项', color: '#1677ff' },
+      { label: '待审批', value: 3, total: null, unit: '项', color: '#52c41a' },
+      { label: '未读消息', value: 28, total: null, unit: '条', color: '#fa8c16' },
+      { label: '本周会议', value: 8, total: 15, unit: '场', color: '#722ed1' }
+    ])
+
+    return () => h('div', { class: 'bento-card-content stats-card-content' }, [
+      h('div', { class: 'card-header' }, [
+        h('h4', { class: 'card-title' }, [
+          h('span', { class: 'material-icons-outlined card-icon' }, 'analytics'),
+          props.data?.title || '工作概览'
+        ])
+      ]),
+      h('div', { class: 'stats-grid' }, stats.value.map(stat =>
+        h('div', {
+          class: 'stat-item',
+          key: stat.label,
+          style: { '--stat-color': stat.color }
+        }, [
+          h('div', { class: 'stat-value' }, [
+            h('span', { class: 'stat-number' }, stat.value),
+            h('span', { class: 'stat-unit' }, stat.unit),
+            stat.total !== null ? h('span', { class: 'stat-total' }, `/ ${stat.total}`) : null
+          ]),
+          h('div', { class: 'stat-label' }, stat.label)
+        ])
+      ))
+    ])
+  }
+}
+
+// 审批卡片
+const BentoApprovalCard = {
+  props: ['card', 'data'],
+  setup(props) {
+    return () => h('div', { class: 'bento-card-content approval-card-content' }, [
+      h('div', { class: 'card-header compact' }, [
+        h('span', { class: 'material-icons-outlined card-icon' }, 'approval'),
+        h('span', { class: 'card-title' }, props.data?.title || '待审批')
+      ]),
+      h('div', { class: 'card-value' }, '3'),
+      h('div', { class: 'card-action' }, [
+        h('span', { class: 'action-text' }, '立即处理'),
+        h('span', { class: 'material-icons-outlined' }, 'arrow_forward')
+      ])
+    ])
+  }
+}
+
+// 邮件卡片
+const BentoMailCard = {
+  props: ['card', 'data'],
+  setup(props) {
+    return () => h('div', { class: 'bento-card-content mail-card-content' }, [
+      h('div', { class: 'card-header compact' }, [
+        h('span', { class: 'material-icons-outlined card-icon' }, 'mail'),
+        h('span', { class: 'card-title' }, props.data?.title || '未读邮件')
+      ]),
+      h('div', { class: 'card-value' }, '12'),
+      h('div', { class: 'card-action' }, [
+        h('span', { class: 'action-text' }, '查看邮箱'),
+        h('span', { class: 'material-icons-outlined' }, 'arrow_forward')
+      ])
+    ])
+  }
+}
+
+// 默认卡片
+const BentoDefaultCard = {
+  props: ['card', 'data'],
+  setup(props) {
+    return () => h('div', { class: 'bento-card-content default-card-content' }, [
+      h('span', { class: 'material-icons-outlined card-icon-lg' }, 'dashboard_customize'),
+      h('p', { class: 'card-label' }, props.data?.title || '未命名卡片'),
+      h('p', { class: 'card-desc' }, '点击编辑配置卡片内容')
+    ])
+  }
+}
+
+// ============================================================================
+// 拖拽相关
+// ============================================================================
+const handleDragStart = (e, card) => {
+  draggingCard.value = card.id
+  e.dataTransfer.effectAllowed = 'move'
+  e.target.classList.add('dragging')
+}
+
+const handleDragEnd = (e) => {
+  draggingCard.value = null
+  dragOverCard.value = null
+  e.target.classList.remove('dragging')
+}
+
+const handleDragOver = (e, card) => {
+  e.preventDefault()
+  if (draggingCard.value && draggingCard.value !== card.id) {
+    dragOverCard.value = card.id
+  }
+}
+
+const handleDrop = (e, targetCard) => {
+  e.preventDefault()
+  if (!draggingCard.value || draggingCard.value === targetCard.id) return
+
+  // 交换卡片位置
+  const draggingIndex = cards.value.findIndex(c => c.id === draggingCard.value)
+  const targetIndex = cards.value.findIndex(c => c.id === targetCard.id)
+
+  if (draggingIndex !== -1 && targetIndex !== -1) {
+    const tempPos = { ...cards.value[draggingIndex].position }
+    cards.value[draggingIndex].position = { ...cards.value[targetIndex].position }
+    cards.value[targetIndex].position = tempPos
+    saveCardsToStorage()
+  }
+
+  draggingCard.value = null
+  dragOverCard.value = null
+}
+
+// ============================================================================
+// 交互处理
+// ============================================================================
+const toggleEditMode = () => {
+  isEditMode.value = !isEditMode.value
+}
+
+const handleCardClick = (card) => {
+  if (isEditMode.value) return
+  ElMessage.info(`点击卡片: ${card.data?.title || card.id}`)
+}
 
 const handleAppClick = (app) => {
   ElMessage.info(`打开应用: ${app.label}`)
 }
 
 const handleAddApp = () => {
-  ElMessage.info('添加应用')
+  showAddCardDialog.value = true
+  selectedCardType.value = 'app'
 }
 
-const handleTodoClick = (todo) => {
-  ElMessage.info(`查看待办: ${todo.title}`)
+const handleAddCard = () => {
+  if (!selectedTemplate.value) {
+    ElMessage.warning('请选择卡片模板')
+    return
+  }
+
+  const template = Object.values(cardTemplates).flat().find(t => t.id === selectedTemplate.value)
+  if (!template) return
+
+  // 计算新卡片位置
+  const maxRow = Math.max(...cards.value.map(c => c.position?.row || 0), 0)
+  const rowCards = cards.value.filter(c => c.position?.row === maxRow)
+  const newCol = rowCards.length > 0 ? Math.max(...rowCards.map(c => c.position?.col || 0)) + 1 : 0
+
+  const newCard = {
+    id: `card-${Date.now()}`,
+    type: template.id,
+    size: template.size,
+    position: { row: newCol > 1 ? maxRow + 1 : maxRow, col: newCol > 1 ? 0 : newCol },
+    data: { title: template.label }
+  }
+
+  cards.value.push(newCard)
+  saveCardsToStorage()
+  showAddCardDialog.value = false
+  selectedTemplate.value = ''
+  ElMessage.success('卡片添加成功')
 }
 
-const handleAddTodo = () => {
-  // 切换到待办面板
-  window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'todo' }))
+const handleEditCard = (card) => {
+  ElMessage.info(`编辑卡片: ${card.data?.title || card.id}`)
 }
 
-const handleTodoComplete = (todo) => {
-  ElMessage.success(`已完成: ${todo.title}`)
-  todos.value = todos.value.filter(t => t.id !== todo.id)
-}
-
-const handleAnnouncementClick = (announcement) => {
-  ElMessage.info(`查看公告: ${announcement.title}`)
-}
-
-const handleViewAllTodos = () => {
-  window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'todo' }))
-}
-
-const handleViewAllAnnouncements = () => {
-  ElMessage.info('查看全部公告')
-}
-
-const isOverdue = (dueDate) => {
-  if (!dueDate) return false
-  return new Date(dueDate) < new Date()
-}
-
-const formatDate = (date) => {
-  if (!date) return '无截止日期'
-  const d = new Date(date)
-  const now = new Date()
-  const diff = d - now
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-  if (days === 0) return '今天'
-  if (days === 1) return '明天'
-  if (days === -1) return '昨天'
-  if (days < -1) return `${Math.abs(days)}天前`
-  if (days <= 7) return `${days}天后`
-
-  return `${d.getMonth() + 1}月${d.getDate()}日`
-}
-
-const loadTodos = async () => {
-  loadingTodos.value = true
-  try {
-    const res = await getTodos()
-    if (res.code === 200) {
-      todos.value = res.data || []
-    }
-  } catch (e) {
-    console.error('加载待办失败', e)
-  } finally {
-    loadingTodos.value = false
+const handleRemoveCard = (cardId) => {
+  const index = cards.value.findIndex(c => c.id === cardId)
+  if (index !== -1) {
+    cards.value.splice(index, 1)
+    saveCardsToStorage()
+    ElMessage.success('卡片已移除')
   }
 }
 
-const loadAnnouncements = async () => {
-  loadingAnnouncements.value = true
-  try {
-    const res = await getAnnouncements()
-    if (res.code === 200) {
-      announcements.value = res.data || []
-    }
-  } catch (e) {
-    console.error('加载公告失败', e)
-  } finally {
-    loadingAnnouncements.value = false
-  }
-}
-
+// ============================================================================
+// 初始化
+// ============================================================================
 onMounted(() => {
-  loadTodos()
-  loadAnnouncements()
+  loadCardsFromStorage()
 })
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 // ============================================================================
 // 工作台面板容器
 // ============================================================================
@@ -380,7 +720,7 @@ onMounted(() => {
 .workbench-header {
   background: linear-gradient(135deg, #e6f4ff 0%, #f0f9ff 50%, #fff 100%);
   border-bottom: 1px solid var(--dt-border-light);
-  padding: 32px 40px;
+  padding: 24px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -407,7 +747,7 @@ onMounted(() => {
 }
 
 .greeting-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--dt-text-primary);
   margin: 0;
@@ -415,9 +755,9 @@ onMounted(() => {
 }
 
 .greeting-date {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--dt-text-secondary);
-  margin: 6px 0 0 0;
+  margin: 4px 0 0 0;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -427,9 +767,15 @@ onMounted(() => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   position: relative;
   z-index: 1;
+}
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .search-box {
@@ -441,59 +787,94 @@ onMounted(() => {
 .search-icon {
   position: absolute;
   left: 12px;
-  color: var(--dt-text-tertiary);
-  font-size: 20px;
+  color: var(--dt-text-quaternary);
+  font-size: 18px;
   pointer-events: none;
 }
 
 .search-input {
-  width: 280px;
-  height: 40px;
-  padding: 0 12px 0 40px;
-  background: #fff;
+  width: 100%;
+  max-width: 240px;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-color);
   border-radius: var(--dt-radius-lg);
   font-size: 14px;
   color: var(--dt-text-primary);
   outline: none;
   transition: all var(--dt-transition-base);
-  box-shadow: var(--dt-shadow-1);
+
+  &::placeholder {
+    color: var(--dt-text-quaternary);
+  }
+
+  &:hover {
+    border-color: var(--dt-border-input-hover);
+  }
+
+  &:focus {
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+  }
 }
 
-.search-input:hover {
-  border-color: var(--dt-border-input-hover);
-}
+.icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 36px;
+  background: var(--dt-bg-card);
+  color: var(--dt-text-secondary);
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-lg);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
 
-.search-input:focus {
-  border-color: var(--dt-brand-color);
-  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+  &:hover {
+    border-color: var(--dt-brand-color);
+    color: var(--dt-brand-color);
+    background: var(--dt-brand-bg);
+  }
+
+  &.active {
+    background: var(--dt-brand-color);
+    color: #fff;
+    border-color: var(--dt-brand-color);
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
 }
 
 .custom-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 20px;
-  height: 40px;
+  gap: 6px;
+  padding: 0 16px;
+  height: 36px;
   background: var(--dt-brand-color);
   color: #fff;
   border: none;
   border-radius: var(--dt-radius-lg);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--dt-transition-base);
-  box-shadow: var(--dt-shadow-2);
-}
 
-.custom-btn:hover {
-  background: var(--dt-brand-hover);
-  box-shadow: var(--dt-shadow-3);
-  transform: translateY(-1px);
-}
+  &:hover {
+    background: var(--dt-brand-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--dt-shadow-2);
+  }
 
-.custom-btn:active {
-  transform: translateY(0);
+  .material-icons-outlined {
+    font-size: 18px;
+  }
 }
 
 // ============================================================================
@@ -501,41 +882,53 @@ onMounted(() => {
 // ============================================================================
 .workbench-content {
   flex: 1;
-  padding: 24px 40px;
+  padding: 20px 32px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--dt-border-color);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--dt-text-quaternary);
+    }
+  }
 }
 
 // ============================================================================
-// 应用区块
+// 快捷应用区域
 // ============================================================================
-.apps-section {
+.quick-apps-section {
   position: relative;
-  z-index: 1;
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 18px;
+  gap: 8px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--dt-text-primary);
   margin: 0;
 }
 
 .title-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
@@ -547,327 +940,315 @@ onMounted(() => {
   color: var(--dt-brand-color);
 }
 
-.title-icon-secondary {
-  background: rgba(22, 119, 255, 0.06);
-  color: var(--dt-brand-color);
-}
-
 .title-icon .material-icons-outlined {
-  font-size: 18px;
+  font-size: 16px;
 }
 
-.manage-btn {
+.quick-apps-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
+}
+
+.quick-app-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
-  background: transparent;
-  border: 1px solid var(--dt-border-color);
-  border-radius: var(--dt-radius-md);
-  font-size: 13px;
-  color: var(--dt-text-secondary);
+  padding: 12px 8px;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: all var(--dt-transition-base);
-}
 
-.manage-btn:hover {
-  border-color: var(--dt-brand-color);
-  color: var(--dt-brand-color);
-  background: var(--dt-brand-bg);
-}
-
-.apps-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-}
-
-.apps-grid-sm {
-  grid-template-columns: repeat(6, 1fr);
-}
-
-@media (max-width: 1400px) {
-  .apps-grid {
-    grid-template-columns: repeat(4, 1fr);
+  &:hover {
+    border-color: var(--dt-brand-color);
+    transform: translateY(-2px);
+    box-shadow: var(--dt-shadow-2);
   }
 
-  .apps-grid-sm {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+  &.add-app {
+    background: transparent;
+    border: 1px dashed var(--dt-border-color);
 
-@media (max-width: 1024px) {
-  .workbench-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
+    .app-icon {
+      background: var(--dt-bg-input);
+      color: var(--dt-text-quaternary);
+    }
 
-  .apps-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+    .app-label {
+      color: var(--dt-text-quaternary);
+    }
 
-  .apps-grid-sm {
-    grid-template-columns: repeat(3, 1fr);
+    &:hover {
+      border-color: var(--dt-brand-color);
+      background: var(--dt-brand-bg);
+
+      .app-icon {
+        color: var(--dt-brand-color);
+      }
+    }
   }
 }
 
-@media (max-width: 768px) {
-  .workbench-header {
-    padding: 20px;
-  }
+.app-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--dt-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dt-transition-base);
 
-  .greeting-title {
+  .material-icons-outlined {
     font-size: 22px;
   }
 
-  .search-input {
-    width: 200px;
-  }
+  &.icon-orange { background: rgba(250, 140, 22, 0.1); color: #fa8c16; }
+  &.icon-blue { background: rgba(22, 119, 255, 0.1); color: #1677ff; }
+  &.icon-green { background: rgba(82, 196, 26, 0.1); color: #52c41a; }
+  &.icon-purple { background: rgba(114, 46, 209, 0.1); color: #722ed1; }
+  &.icon-pink { background: rgba(235, 47, 150, 0.1); color: #eb2f96; }
+  &.icon-cyan { background: rgba(13, 202, 240, 0.1); color: #13c2c2; }
+  &.icon-indigo { background: rgba(89, 78, 236, 0.1); color: #594efc; }
+  &.icon-teal { background: rgba(19, 180, 167, 0.1); color: #13c2c2; }
+}
 
-  .workbench-content {
-    padding: 16px 20px;
-  }
+.app-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dt-text-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
 
-  .apps-grid,
-  .apps-grid-sm {
-    grid-template-columns: repeat(2, 1fr);
-  }
+// ============================================================================
+// Bento Grid 布局
+// ============================================================================
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: start;
 
-  .custom-btn span:not(.material-icons-outlined) {
-    display: none;
+  &.edit-mode {
+    .bento-card {
+      cursor: move;
+
+      &:hover {
+        box-shadow: 0 0 0 2px var(--dt-brand-color);
+      }
+
+      &.dragging {
+        opacity: 0.5;
+        transform: scale(0.95);
+      }
+    }
   }
 }
 
 // ============================================================================
-// 应用卡片
+// Bento 卡片
 // ============================================================================
-.app-card {
+.bento-card {
   position: relative;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-xl);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  height: 120px;
-  cursor: pointer;
-  transition: all var(--dt-transition-slow);
-  box-shadow: var(--dt-shadow-card);
-}
-
-.app-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--dt-shadow-card-hover);
-  border-color: var(--dt-brand-color);
-}
-
-.app-card:active {
-  transform: translateY(-2px);
-}
-
-.app-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--dt-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
   transition: all var(--dt-transition-base);
-}
+  box-shadow: var(--dt-shadow-card);
 
-.app-card:hover .app-icon {
-  transform: scale(1.1) rotate(5deg);
-}
+  &:hover {
+    box-shadow: var(--dt-shadow-card-hover);
+  }
 
-.app-icon .material-icons-outlined {
-  font-size: 26px;
-}
+  // 卡片尺寸
+  &.card-size-1x1 {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
 
-.app-icon.icon-orange { background: #fff7e6; color: #fa8c16; }
-.app-icon.icon-blue { background: #e6f4ff; color: #1677ff; }
-.app-icon.icon-green { background: #f6ffed; color: #52c41a; }
-.app-icon.icon-purple { background: #f9f0ff; color: #722ed1; }
-.app-icon.icon-pink { background: #fff0f6; color: #eb2f96; }
-.app-icon.icon-teal { background: #e6fffa; color: #13c2c2; }
-.app-icon.icon-indigo { background: #eef0ff; color: #594efc; }
-.app-icon.icon-amber { background: #fffbe6; color: #faad14; }
-.app-icon.icon-rose { background: #fff1f0; color: #f74a5c; }
-.app-icon.icon-cyan { background: #e6fffe; color: #08bdb2; }
-.app-icon.icon-lime { background: #fcffe6; color: #a0d911; }
+  &.card-size-1x2 {
+    grid-column: span 1;
+    grid-row: span 2;
+  }
 
-.app-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--dt-text-primary);
-  text-align: center;
-}
+  &.card-size-2x1 {
+    grid-column: span 2;
+    grid-row: span 1;
+  }
 
-.app-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: var(--dt-error-color);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(255, 77, 79, 0.3);
-}
+  &.card-size-2x2 {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
 
-.add-app-card {
-  background: transparent;
-  border: 1px dashed var(--dt-border-color);
-  box-shadow: none;
-}
-
-.add-app-card:hover {
-  background: var(--dt-bg-card-hover);
-  border-color: var(--dt-brand-color);
-  box-shadow: var(--dt-shadow-2);
-}
-
-.add-app-card .app-icon {
-  background: var(--dt-bg-input);
-  color: var(--dt-text-tertiary);
-}
-
-.add-app-card .app-label {
-  color: var(--dt-text-tertiary);
-}
-
-// ============================================================================
-// 内容网格
-// ============================================================================
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-
-@media (max-width: 1024px) {
-  .content-grid {
-    grid-template-columns: 1fr;
+  &.card-size-2x3 {
+    grid-column: span 2;
+    grid-row: span 3;
   }
 }
 
-// ============================================================================
-// 内容卡片
-// ============================================================================
-.content-card {
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-xl);
-  box-shadow: var(--dt-shadow-card);
-  overflow: hidden;
+// 卡片内容
+.bento-card-content {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  transition: all var(--dt-transition-base);
-}
-
-.content-card:hover {
-  box-shadow: var(--dt-shadow-card-hover);
 }
 
 .card-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--dt-border-light);
+
+  &.compact {
+    padding: 12px 16px;
+
+    .card-title {
+      font-size: 14px;
+    }
+
+    .card-icon {
+      font-size: 18px;
+    }
+  }
 }
 
 .card-title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 16px;
+  gap: 8px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--dt-text-primary);
   margin: 0;
 }
 
 .card-icon {
-  font-size: 20px;
+  font-size: 18px;
   color: var(--dt-brand-color);
 }
 
+.card-icon-lg {
+  font-size: 48px;
+  color: var(--dt-text-quaternary);
+  margin-bottom: 8px;
+}
+
 .view-all-link {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--dt-text-link);
   text-decoration: none;
   transition: color var(--dt-transition-fast);
+
+  &:hover {
+    color: var(--dt-text-link-hover);
+  }
 }
 
-.view-all-link:hover {
-  color: var(--dt-text-link-hover);
+// 卡片操作按钮（编辑模式）
+.card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
 }
 
-.card-body {
-  flex: 1;
-  padding: 16px 24px;
-  min-height: 200px;
+.action-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-sm);
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+    border-color: var(--dt-brand-color);
+  }
+
+  &.danger:hover {
+    background: var(--dt-error-bg);
+    color: var(--dt-error-color);
+    border-color: var(--dt-error-color);
+  }
+
+  .material-icons-outlined {
+    font-size: 16px;
+  }
 }
 
 // ============================================================================
-// 待办列表
+// 待办卡片样式
 // ============================================================================
+.todo-card-content {
+  min-height: 280px;
+}
+
 .todo-list {
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .todo-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 10px 12px;
   background: var(--dt-bg-input);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-bg-card-hover);
+    border-color: var(--dt-brand-color);
+    transform: translateX(2px);
+  }
+
+  &.priority-high {
+    border-left: 3px solid #ff4d4f;
+  }
+
+  &.priority-medium {
+    border-left: 3px solid #faad14;
+  }
+
+  &.priority-low {
+    border-left: 3px solid var(--dt-brand-color);
+  }
 }
 
-.todo-item:hover {
-  background: var(--dt-bg-card-hover);
-  border-color: var(--dt-brand-color);
-  transform: translateX(2px);
-}
-
-.todo-item.completed {
-  opacity: 0.6;
-}
-
-.todo-item.completed .todo-title {
-  text-decoration: line-through;
-  color: var(--dt-text-tertiary);
-}
-
-.todo-item.overdue {
-  border-left: 3px solid var(--dt-error-color);
-}
-
-.todo-priority {
+.todo-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-}
 
-.priority-high { background: var(--dt-error-color); }
-.priority-medium { background: var(--dt-warning-color); }
-.priority-low { background: var(--dt-brand-color); }
+  .todo-item.priority-high & { background: #ff4d4f; }
+  .todo-item.priority-medium & { background: #faad14; }
+  .todo-item.priority-low & { background: var(--dt-brand-color); }
+}
 
 .todo-content {
   flex: 1;
@@ -875,10 +1256,10 @@ onMounted(() => {
 }
 
 .todo-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--dt-text-primary);
-  margin: 0 0 4px 0;
+  margin: 0 0 3px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -887,94 +1268,56 @@ onMounted(() => {
 .todo-deadline {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
+  gap: 3px;
+  font-size: 11px;
+  color: var(--dt-text-quaternary);
   margin: 0;
-}
 
-.deadline-icon {
-  font-size: 14px;
-}
-
-.todo-item.overdue .todo-deadline {
-  color: var(--dt-error-color);
-}
-
-.todo-complete-btn {
-  opacity: 0;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: var(--dt-radius-sm);
-  color: var(--dt-text-tertiary);
-  cursor: pointer;
-  transition: all var(--dt-transition-base);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.todo-item:hover .todo-complete-btn {
-  opacity: 1;
-}
-
-.todo-complete-btn:hover {
-  background: var(--dt-success-bg);
-  color: var(--dt-success-color);
-}
-
-.todo-complete-btn .material-icons-outlined {
-  font-size: 20px;
+  .material-icons-outlined {
+    font-size: 12px;
+  }
 }
 
 // ============================================================================
-// 公告列表
+// 公告卡片样式
 // ============================================================================
+.announcement-card-content {
+  min-height: 280px;
+}
+
 .announcement-list {
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .announcement-item {
   display: flex;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
   background: var(--dt-bg-input);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all var(--dt-transition-base);
-}
 
-.announcement-item:hover {
-  background: var(--dt-bg-card-hover);
-  border-color: var(--dt-info-border);
-  transform: translateX(2px);
+  &:hover {
+    background: var(--dt-bg-card-hover);
+    border-color: var(--dt-brand-color);
+    transform: translateX(2px);
+  }
 }
 
 .announcement-tag {
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 2px 6px;
+  font-size: 10px;
   font-weight: 600;
   border-radius: var(--dt-radius-sm);
   flex-shrink: 0;
   height: fit-content;
-}
-
-.tag-important {
-  background: var(--dt-error-bg);
-  color: var(--dt-error-color);
-  border: 1px solid var(--dt-error-border);
-}
-
-.tag-notice {
-  background: var(--dt-info-bg);
-  color: var(--dt-info-color);
-  border: 1px solid var(--dt-info-border);
+  background: var(--dt-brand-bg);
+  color: var(--dt-brand-color);
 }
 
 .announcement-content {
@@ -983,78 +1326,403 @@ onMounted(() => {
 }
 
 .announcement-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--dt-text-primary);
-  margin: 0 0 8px 0;
-  cursor: pointer;
+  margin: 0 0 6px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.announcement-title:hover {
-  color: var(--dt-brand-color);
-}
-
 .announcement-meta {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
+  gap: 4px;
+  font-size: 11px;
+  color: var(--dt-text-quaternary);
   flex-wrap: wrap;
-}
 
-.meta-icon {
-  font-size: 14px;
-}
-
-.divider {
-  color: var(--dt-border-color);
+  .material-icons-outlined {
+    font-size: 12px;
+  }
 }
 
 // ============================================================================
-// 空状态
+// 日程卡片样式
 // ============================================================================
-.empty-state {
+.schedule-card-content {
+  min-height: 180px;
+}
+
+.schedule-list {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--dt-bg-input);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-bg-card-hover);
+    border-color: var(--dt-brand-color);
+  }
+}
+
+.schedule-time {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dt-brand-color);
+  padding: 4px 8px;
+  background: var(--dt-brand-bg);
+  border-radius: var(--dt-radius-sm);
+}
+
+.schedule-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dt-text-primary);
+  margin: 0 0 3px 0;
+}
+
+.schedule-location {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--dt-text-quaternary);
+
+  .material-icons-outlined {
+    font-size: 12px;
+  }
+}
+
+// ============================================================================
+// 统计卡片样式
+// ============================================================================
+.stats-card-content {
+  min-height: 200px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 20px;
+}
+
+.stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 20px;
+  background: var(--dt-bg-input);
+  border-radius: var(--dt-radius-lg);
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--dt-shadow-2);
+  }
+
+  --stat-color: var(--dt-brand-color);
+}
+
+.stat-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--stat-color);
+  line-height: 1;
+}
+
+.stat-unit {
+  font-size: 13px;
+  color: var(--stat-color);
+}
+
+.stat-total {
+  font-size: 12px;
+  color: var(--dt-text-quaternary);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--dt-text-secondary);
+}
+
+// ============================================================================
+// 快捷卡片样式（审批、邮件）
+// ============================================================================
+.approval-card-content,
+.mail-card-content {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--dt-text-primary);
+  text-align: center;
+  padding: 20px 0;
+}
+
+.card-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  background: var(--dt-brand-bg);
+  color: var(--dt-brand-color);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-brand-color);
+    color: #fff;
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
+}
+
+// ============================================================================
+// 默认卡片样式
+// ============================================================================
+.default-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  padding: 24px;
+  text-align: center;
+}
+
+.card-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dt-text-primary);
+  margin: 8px 0 4px 0;
+}
+
+.card-desc {
+  font-size: 12px;
+  color: var(--dt-text-quaternary);
+  margin: 0;
+}
+
+// ============================================================================
+// 空网格状态
+// ============================================================================
+.empty-grid {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: var(--dt-bg-input);
+  border: 2px dashed var(--dt-border-color);
+  border-radius: var(--dt-radius-xl);
 }
 
 .empty-icon {
-  font-size: 56px;
-  color: var(--dt-border-color);
+  font-size: 48px;
+  color: var(--dt-text-quaternary);
   margin-bottom: 12px;
 }
 
 .empty-text {
   font-size: 14px;
-  color: var(--dt-text-tertiary);
-  margin: 0 0 16px 0;
+  color: var(--dt-text-quaternary);
+  margin: 0;
 }
 
-.empty-action {
+// ============================================================================
+// 添加卡片弹窗
+// ============================================================================
+.add-card-dialog {
+  padding: 8px 0;
+}
+
+.card-type-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--dt-border-light);
+}
+
+.type-tab {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: var(--dt-brand-color);
-  color: #fff;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
   border: none;
   border-radius: var(--dt-radius-md);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
+  color: var(--dt-text-secondary);
   cursor: pointer;
   transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-bg-hover);
+  }
+
+  &.active {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
 }
 
-.empty-action:hover {
-  background: var(--dt-brand-hover);
+.card-templates {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.template-item {
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &.selected .template-preview {
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 2px var(--dt-brand-bg);
+  }
+}
+
+.template-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  background: var(--dt-bg-input);
+  border: 2px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-lg);
+  transition: all var(--dt-transition-base);
+
+  &.preview-1x1 {
+    aspect-ratio: 1;
+  }
+
+  &.preview-1x2 {
+    aspect-ratio: 1/2;
+  }
+
+  &.preview-2x1 {
+    aspect-ratio: 2/1;
+  }
+
+  &.preview-2x2 {
+    aspect-ratio: 1;
+  }
+
+  .material-icons-outlined {
+    font-size: 28px;
+    color: var(--dt-brand-color);
+  }
+}
+
+.template-label {
+  font-size: 12px;
+  color: var(--dt-text-secondary);
+}
+
+// ============================================================================
+// 响应式
+// ============================================================================
+@media (max-width: 1200px) {
+  .quick-apps-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .workbench-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .greeting-title {
+    font-size: 20px;
+  }
+
+  .search-input {
+    max-width: 200px;
+  }
+
+  .workbench-content {
+    padding: 16px 20px;
+  }
+
+  .quick-apps-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-card {
+    &.card-size-2x1,
+    &.card-size-2x2,
+    &.card-size-2x3 {
+      grid-column: span 1;
+    }
+
+    &.card-size-1x2,
+    &.card-size-2x2,
+    &.card-size-2x3 {
+      grid-row: span 1;
+    }
+  }
 }
 
 // ============================================================================
@@ -1077,62 +1745,46 @@ onMounted(() => {
   color: var(--dt-text-secondary-dark);
 }
 
-.dark .search-input {
+.dark .search-input,
+.dark .icon-btn,
+.dark .custom-btn {
   background: var(--dt-bg-input-dark);
-  color: var(--dt-text-primary-dark);
   border-color: var(--dt-border-dark);
+  color: var(--dt-text-primary-dark);
 }
 
-.dark .app-card,
-.dark .content-card {
+.dark .icon-btn:hover,
+.dark .icon-btn.active {
+  background: var(--dt-brand-color);
+  border-color: var(--dt-brand-color);
+  color: #fff;
+}
+
+.dark .quick-apps-grid .quick-app-item {
   background: var(--dt-bg-card-dark);
   border-color: var(--dt-border-dark);
 }
 
-.dark .app-card:hover,
-.dark .content-card:hover {
-  background: var(--dt-bg-hover-dark);
-  border-color: var(--dt-brand-color);
-}
-
-.dark .app-label,
-.dark .card-title,
-.dark .todo-title,
-.dark .announcement-title {
-  color: var(--dt-text-primary-dark);
-}
-
-.dark .todo-deadline,
-.dark .announcement-meta {
-  color: var(--dt-text-tertiary-dark);
+.dark .bento-card {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 }
 
 .dark .todo-item,
-.dark .announcement-item {
+.dark .announcement-item,
+.dark .schedule-item {
   background: var(--dt-bg-input-dark);
   border-color: var(--dt-border-dark);
 }
 
 .dark .todo-item:hover,
-.dark .announcement-item:hover {
+.dark .announcement-item:hover,
+.dark .schedule-item:hover {
   background: var(--dt-bg-hover-dark);
 }
 
-.dark .add-app-card {
-  border-color: var(--dt-border-dark);
-}
-
-.dark .add-app-card .app-icon {
-  background: var(--dt-bg-card-dark);
-}
-
-.dark .manage-btn {
-  border-color: var(--dt-border-dark);
-  color: var(--dt-text-secondary-dark);
-}
-
-.dark .manage-btn:hover {
-  background: rgba(22, 119, 255, 0.1);
+.dark .stat-item {
+  background: var(--dt-bg-input-dark);
 }
 
 .dark .app-icon {
@@ -1144,10 +1796,7 @@ onMounted(() => {
 .dark .app-icon.icon-green { background: rgba(82, 196, 26, 0.15); color: #86efac; }
 .dark .app-icon.icon-purple { background: rgba(114, 46, 209, 0.15); color: #c084fc; }
 .dark .app-icon.icon-pink { background: rgba(235, 47, 150, 0.15); color: #f472b6; }
-.dark .app-icon.icon-teal { background: rgba(19, 180, 167, 0.15); color: #2dd4bf; }
+.dark .app-icon.icon-cyan { background: rgba(13, 202, 240, 0.15); color: #22d3ee; }
 .dark .app-icon.icon-indigo { background: rgba(89, 78, 236, 0.15); color: #818cf8; }
-.dark .app-icon.icon-amber { background: rgba(250, 162, 29, 0.15); color: #fbbf24; }
-.dark .app-icon.icon-rose { background: rgba(244, 114, 182, 0.15); color: #fb7185; }
-.dark .app-icon.icon-cyan { background: rgba(8, 189, 180, 0.15); color: #22d3ee; }
-.dark .app-icon.icon-lime { background: rgba(160, 217, 17, 0.15); color: #a3e635; }
+.dark .app-icon.icon-teal { background: rgba(19, 180, 167, 0.15); color: #2dd4bf; }
 </style>

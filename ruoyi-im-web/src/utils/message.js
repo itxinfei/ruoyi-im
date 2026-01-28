@@ -9,7 +9,7 @@
  * @returns {String} 格式化后的预览文本
  */
 export function formatMessagePreview(type, content) {
-    if (!content && type !== 'RECALLED') return '[空消息]'
+    if (!content && type !== 'RECALLED') return '[暂无消息]'
 
     switch (type) {
         case 'TEXT':
@@ -46,17 +46,50 @@ export function formatMessagePreview(type, content) {
             return content || '[系统消息]'
 
         default:
-            return type ? `[${type}]` : '[未知消息]'
+            // 如果type为空，尝试从content推断
+            if (!type && content) {
+                if (typeof content === 'string') {
+                    if (content.startsWith('http')) {
+                        // 可能是图片或文件URL
+                        if (/\.(jpg|jpeg|png|gif|webp)$/i.test(content)) return '[图片]'
+                        return '[文件]'
+                    }
+                    // 纯文本
+                    return content.length > 30 ? content.substring(0, 30) + '...' : content
+                }
+                // 对象类型
+                if (typeof content === 'object') {
+                    if (content.fileName || content.name) return `[文件] ${content.fileName || content.name}`
+                    if (content.imageUrl || content.fileUrl) return '[图片]'
+                }
+            }
+            return type ? `[${type}]` : '[消息]'
     }
 }
 
 /**
  * 根据消息对象格式化消息预览文本
- * @param {Object} message - 消息对象 (ImMessageVO)
+ * @param {Object|String} message - 消息对象 (ImMessageVO) 或已格式化的字符串
  * @returns {String} 格式化后的预览文本
  */
 export function formatMessagePreviewFromObject(message) {
     if (!message) return '[空消息]'
+    
+    // 如果已经是字符串（已格式化），直接返回
+    if (typeof message === 'string') {
+        // 过滤掉方括号包裹的类型标记，保留实际内容
+        const str = message.trim()
+        if (str.startsWith('[') && str.endsWith(']')) {
+            // 如果是纯类型标记如 [图片]、[文件] 等，直接返回
+            const content = str.slice(1, -1)
+            if (['图片', '文件', '视频', '语音', '位置', '系统消息', '空消息', '未知消息'].includes(content)) {
+                return str
+            }
+            // 如果是 [文件] xxx 格式，返回完整内容
+            return str
+        }
+        return str
+    }
     
     // 处理消息类型，兼容可能的字段名差异
     const type = message.type || message.messageType || message.message_type

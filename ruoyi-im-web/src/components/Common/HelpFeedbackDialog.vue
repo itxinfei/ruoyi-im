@@ -3,6 +3,7 @@
     v-model="visible"
     title=""
     width="800px"
+    :close-on-click-modal="true"
     class="help-feedback-dialog"
     destroy-on-close
     append-to-body
@@ -118,7 +119,7 @@
               </div>
               <div class="feature-card">
                 <div class="feature-icon-wrapper cloud-bg">
-                  <el-icon><Cloudy /></el-icon>
+                  <el-icon><Folder /></el-icon>
                 </div>
                 <div class="feature-content">
                   <h3>云盘存储</h3>
@@ -208,7 +209,7 @@ import {
   Service,
   Monitor,
   User,
-  Cloudy,
+  Folder,
   Warning,
   Message,
   Position

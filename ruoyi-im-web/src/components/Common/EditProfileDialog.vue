@@ -4,7 +4,7 @@
     title="编辑资料"
     width="500px"
     class="edit-profile-dialog"
-    :close-on-click-modal="false"
+    :close-on-click-modal="true"
     append-to-body
     destroy-on-close
     @closed="handleClosed"

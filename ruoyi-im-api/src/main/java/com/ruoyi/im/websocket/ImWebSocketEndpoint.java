@@ -124,6 +124,12 @@ public class ImWebSocketEndpoint {
         try {
             log.info("WebSocket 连接请求: sessionId={}", session.getId());
 
+            // 获取服务器ID（支持集群部署，可从配置文件或环境变量获取）
+            String serverId = System.getProperty("server.id", "default-server");
+
+            // 获取客户端信息
+            String clientInfo = buildClientInfo(session);
+
             Long userId = null;
             String queryString = session.getQueryString();
             String tokenValue = extractTokenFromQuery(queryString);
@@ -204,9 +210,13 @@ public class ImWebSocketEndpoint {
             // 同步更新Redis中的在线状态
             if (staticImRedisUtil != null) {
                 staticImRedisUtil.addOnlineUser(userId);
+                // 记录会话信息
+                staticImRedisUtil.recordSessionInfo(userId, serverId, session.getId(), clientInfo);
+                // 清除断线信息（如果有的话）
+                staticImRedisUtil.clearDisconnectInfo(userId);
             }
 
-            log.info("用户上线: userId={}, sessionId={}", userId, session.getId());
+            log.info("用户上线: userId={}, sessionId={}, serverId={}", userId, session.getId(), serverId);
 
             // 广播用户上线消息
             if (staticBroadcastService != null) {
@@ -303,7 +313,10 @@ public class ImWebSocketEndpoint {
                     handleReadReceipt(userId, payload);
                     break;
                 case "ping":
-                    // 处理心跳
+                    // 处理心跳并更新Redis中的心跳时间
+                    if (staticImRedisUtil != null) {
+                        staticImRedisUtil.updateHeartbeat(userId);
+                    }
                     sendMessage(session, buildStatusMessage("pong", userId, true));
                     break;
                 default:
@@ -346,6 +359,9 @@ public class ImWebSocketEndpoint {
                 // 同步更新Redis中的在线状态
                 if (staticImRedisUtil != null) {
                     staticImRedisUtil.removeOnlineUser(userId);
+                    staticImRedisUtil.removeSessionInfo(userId);
+                    // 记录断线信息
+                    staticImRedisUtil.recordDisconnectInfo(userId, "client_close", System.currentTimeMillis());
                 }
 
                 log.info("用户离线: userId={}, sessionId={}", userId, session.getId());
@@ -1005,6 +1021,27 @@ public class ImWebSocketEndpoint {
                     log.error("推送离线消息失败: userId={}", userId, e);
                 }
             });
+        }
+    }
+
+    /**
+     * 构建客户端信息
+     * 从Session中提取客户端IP、User-Agent等信息
+     *
+     * @param session WebSocket会话
+     * @return 客户端信息JSON字符串
+     */
+    private String buildClientInfo(Session session) {
+        try {
+            Map<String, Object> clientInfo = new HashMap<>();
+            clientInfo.put("sessionId", session.getId());
+            clientInfo.put("remoteAddress", session.getUserProperties().get("javax.websocket.endpoint.remoteAddress"));
+            clientInfo.put("userAgent", session.getUserProperties().get("http.userAgent"));
+            clientInfo.put("connectTime", System.currentTimeMillis());
+            return new ObjectMapper().writeValueAsString(clientInfo);
+        } catch (Exception e) {
+            log.warn("构建客户端信息失败: sessionId={}", session.getId(), e);
+            return "{}";
         }
     }
 }

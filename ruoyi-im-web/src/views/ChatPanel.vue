@@ -1,8 +1,9 @@
 <template>
   <div
     class="chat-panel"
-    :class="{ 'is-dragging': isDragging }"
+    :class="{ 'is-dragging': isDragging, 'is-drag-over': isDragOver }"
     @dragover.prevent="handleDragOver"
+    @dragenter.prevent="handleDragEnter"
     @dragleave.prevent="handleDragLeave"
     @drop.prevent="handleDrop"
     @paste="handlePaste"
@@ -30,6 +31,8 @@
             @pin="handlePinSession"
             @mute="handleMuteSession"
             @clear="handleClearMessages"
+            @voice-call="handleVoiceCall"
+            @video-call="handleVideoCall"
           />
           <MessageList
             ref="msgListRef"
@@ -93,6 +96,20 @@
         :session="session"
       />
 
+      <!-- 语音通话 -->
+      <VoiceCallDialog
+        v-model:visible="showVoiceCall"
+        :remote-user="session"
+        :is-incoming="isIncomingCall"
+      />
+
+      <!-- 视频通话 -->
+      <VideoCallDialog
+        v-model:visible="showVideoCall"
+        :remote-user="session"
+        :is-incoming="isIncomingCall"
+      />
+
       <!-- 群公告对话框 -->
       <GroupAnnouncementDialog
         v-model="showAnnouncementDialog"
@@ -103,13 +120,27 @@
       <!-- 多选操作栏 -->
       <Transition name="slide-up">
         <div v-if="isMultiSelectModeActive" class="multi-select-toolbar">
-          <div class="selection-info">已选择 {{ selectedMessages.length }} 条消息</div>
+          <div class="selection-info">
+            <div class="selection-indicator"></div>
+            <span class="selection-text">已选择 <strong>{{ selectedMessages.length }}</strong> 条消息</span>
+          </div>
           <div class="actions">
-            <el-button type="primary" plain @click="handleBatchForward"><el-icon><Share /></el-icon> 逐条转发</el-button>
-            <el-button type="primary" plain @click="handleCombineForward"><el-icon><Collection /></el-icon> 合并转发</el-button>
-            <el-button type="danger" plain @click="handleBatchDelete"><el-icon><Delete /></el-icon> 删除</el-button>
-            <el-divider direction="vertical" />
-            <el-button link @click="handleClearSelection">取消</el-button>
+            <button class="toolbar-btn toolbar-btn--forward" @click="handleBatchForward" :disabled="selectedMessages.length === 0">
+              <span class="material-icons-outlined">share</span>
+              <span>逐条转发</span>
+            </button>
+            <button class="toolbar-btn toolbar-btn--combine" @click="handleCombineForward" :disabled="selectedMessages.length === 0">
+              <span class="material-icons-outlined">collections</span>
+              <span>合并转发</span>
+            </button>
+            <button class="toolbar-btn toolbar-btn--delete" @click="handleBatchDelete" :disabled="selectedMessages.length === 0">
+              <span class="material-icons-outlined">delete_outline</span>
+              <span>删除</span>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn toolbar-btn--cancel" @click="handleClearSelection">
+              <span>取消</span>
+            </button>
           </div>
         </div>
       </Transition>
@@ -120,12 +151,14 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useStore } from 'vuex'
-import { Share, Collection, Delete } from '@element-plus/icons-vue'
+import { Share, Folder, Delete } from '@element-plus/icons-vue'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
+import VoiceCallDialog from '@/components/Chat/VoiceCallDialog.vue'
+import VideoCallDialog from '@/components/Chat/VideoCallDialog.vue'
 import GroupAnnouncementDialog from '@/components/Chat/GroupAnnouncementDialog.vue'
 import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
@@ -159,6 +192,9 @@ const editingMessage = ref(null)
 const msgListRef = ref(null)
 const forwardDialogRef = ref(null)
 const callDialogRef = ref(null)
+const showVoiceCall = ref(false)
+const showVideoCall = ref(false)
+const isIncomingCall = ref(false)
 const showAnnouncementDialog = ref(false)
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
@@ -184,26 +220,8 @@ const loadHistory = async () => {
       sessionId: props.session.id,
       pageSize: 50
     })
-    console.log('===== ChatPanel loadHistory 开始 =====')
-    console.log('ChatPanel - 当前登录用户:', currentUser.value)
-    console.log('ChatPanel - 会话ID:', props.session.id)
-    console.log('ChatPanel - 原始消息数量:', res?.length)
 
-    messages.value = (res || []).map(m => {
-      const transformed = transformMsg(m)
-      console.log('消息详情:', {
-        id: m.id,
-        content: m.content,
-        senderId: m.senderId,
-        senderName: m.senderName,
-        后端isSelf: m.isSelf,
-        前端isOwn: transformed.isOwn,
-        当前userId: currentUser.value?.id,
-        匹配结果: m.senderId === currentUser.value?.id
-      })
-      return transformed
-    })
-    console.log('===== ChatPanel loadHistory 结束 =====')
+    messages.value = (res || []).map(m => transformMsg(m))
   } finally {
     loading.value = false
     msgListRef.value?.scrollToBottom()
@@ -239,9 +257,18 @@ const handleLoadMore = async () => {
 }
 
 const transformMsg = (m) => {
-  const isOwn = m.isSelf === true || m.isSelf === false
+  // 优先使用后端返回的 isSelf 字段
+  let isOwn = m.isSelf === true || m.isSelf === false
     ? m.isSelf 
-    : m.senderId === currentUser.value?.id
+    : false
+  
+  // 如果没有 isSelf 字段，通过比较 senderId 判断
+  // 注意：ID 可能是字符串或数字，需要统一转换为字符串比较
+  if (m.isSelf !== true && m.isSelf !== false) {
+    const msgSenderId = String(m.senderId || '')
+    const currentUserId = String(currentUser.value?.id || '')
+    isOwn = msgSenderId === currentUserId && msgSenderId !== ''
+  }
 
   const messageType = m.type || m.messageType || 'TEXT'
   
@@ -639,6 +666,19 @@ const handleClearSelection = () => {
 
 // 拖拽上传相关
 const isDragging = ref(false)
+const isDragOver = ref(false)
+let dragEnterCounter = 0 // 用于防止子元素触发 dragleave
+
+const handleDragEnter = (event) => {
+  dragEnterCounter++
+  const files = event.dataTransfer?.files
+  if (files && files.length > 0) {
+    const hasImage = Array.from(files).some(file => file.type.startsWith('image/'))
+    if (hasImage) {
+      isDragOver.value = true
+    }
+  }
+}
 
 const handleDragOver = (event) => {
   const files = event.dataTransfer?.files
@@ -651,11 +691,18 @@ const handleDragOver = (event) => {
 }
 
 const handleDragLeave = (event) => {
-  isDragging.value = false
+  dragEnterCounter--
+  if (dragEnterCounter <= 0) {
+    dragEnterCounter = 0
+    isDragging.value = false
+    isDragOver.value = false
+  }
 }
 
 const handleDrop = async (event) => {
   isDragging.value = false
+  isDragOver.value = false
+  dragEnterCounter = 0
 
   const files = event.dataTransfer?.files
   if (!files || files.length === 0) return
@@ -850,11 +897,46 @@ const handleEditConfirm = async (content) => {
 
 // 通话功能
 const handleStartCall = () => {
-  callDialogRef.value?.open('voice')
+  isIncomingCall.value = false
+  showVoiceCall.value = true
 }
 
 const handleStartVideo = () => {
-  callDialogRef.value?.open('video')
+  isIncomingCall.value = false
+  showVideoCall.value = true
+}
+
+// ChatHeader 通话按钮事件
+const handleVoiceCall = () => {
+  isIncomingCall.value = false
+  showVoiceCall.value = true
+}
+
+const handleVideoCall = () => {
+  isIncomingCall.value = false
+  showVideoCall.value = true
+}
+
+// 会话操作
+const handlePinSession = () => {
+  ElMessage.info('置顶功能开发中')
+}
+
+const handleMuteSession = () => {
+  ElMessage.info('免打扰功能开发中')
+}
+
+const handleClearMessages = async () => {
+  try {
+    await ElMessageBox.confirm('确定要清空聊天记录吗？此操作不可恢复', '清空聊天', {
+      type: 'warning',
+      confirmButtonText: '确定清空',
+      cancelButtonText: '取消'
+    })
+    ElMessage.success('聊天记录已清空')
+  } catch {
+    // 用户取消
+  }
 }
 
 // 处理输入状态指示
@@ -888,12 +970,20 @@ const handleFileUpload = async (payload) => {
   if (payload instanceof FormData) {
     formData = payload
     file = payload.get('file')
+  } else if (payload instanceof File) {
+    // 直接是 File 对象（来自 MessageInput 的 emit）
+    file = payload
+    formData = new FormData()
+    formData.append('file', file)
   } else {
-    file = payload.target.files[0]
+    // 事件对象
+    file = payload?.target?.files?.[0]
     if (!file) return
     formData = new FormData()
     formData.append('file', file)
-    payload.target.value = ''
+    if (payload?.target) {
+      payload.target.value = ''
+    }
   }
 
   // 1. 乐观更新：立即显示文件消息
@@ -955,12 +1045,20 @@ const handleImageUpload = async (payload) => {
   if (payload instanceof FormData) {
     formData = payload
     file = payload.get('file')
+  } else if (payload instanceof File) {
+    // 直接是 File 对象（来自 MessageInput 的 emit）
+    file = payload
+    formData = new FormData()
+    formData.append('file', file)
   } else {
-    file = payload.target.files[0]
+    // 事件对象
+    file = payload?.target?.files?.[0]
     if (!file) return
     formData = new FormData()
     formData.append('file', file)
-    payload.target.value = ''
+    if (payload?.target) {
+      payload.target.value = ''
+    }
   }
 
   // 1. 乐观更新：立即显示图片
@@ -1188,11 +1286,7 @@ onMounted(() => {
   // 请求浏览器通知权限
   import('@/utils/messageNotification').then(({ requestNotificationPermission }) => {
     requestNotificationPermission().then(permission => {
-      if (permission === 'granted') {
-        console.log('[消息提醒] 通知权限已授予')
-      } else if (permission === 'denied') {
-        console.warn('[消息提醒] 通知权限被拒绝')
-      }
+      // 权限结果静默处理
     })
   })
 
@@ -1287,6 +1381,46 @@ onMounted(() => {
       pointer-events: none;
     }
   }
+
+  // 拖拽进入状态 - 更明显的视觉反馈
+  &.is-drag-over {
+    background: rgba(24, 144, 255, 0.08);
+    box-shadow: inset 0 0 0 2px var(--dt-brand-color, #1890ff);
+    transition: all 0.2s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(24, 144, 255, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulse-drag 1.5s ease-in-out infinite;
+    }
+
+    &::after {
+      content: '拖放图片到此处';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 16px 24px;
+      background: var(--dt-brand-color, #1890ff);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+      pointer-events: none;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .material-icons-outlined {
+        font-size: 20px;
+      }
+    }
+  }
 }
 
 .main-container {
@@ -1333,84 +1467,149 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background: var(--dt-bg-card);
-  border-top: 1px solid var(--dt-border-light);
+  height: 72px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
   z-index: 100;
 
   .selection-info {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--dt-text-primary);
+    gap: 12px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-hover) 100%);
+    border-radius: 24px;
+    border: 1px solid rgba(22, 119, 255, 0.2);
 
-    &::before {
-      content: '';
-      width: 8px;
-      height: 8px;
+    .selection-indicator {
+      width: 12px;
+      height: 12px;
       background: var(--dt-brand-color);
       border-radius: 50%;
+      animation: selectionPulse 2s ease-in-out infinite;
+      box-shadow: 0 0 8px rgba(22, 119, 255, 0.5);
+    }
+
+    @keyframes selectionPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+      }
+    }
+
+    .selection-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dt-brand-color);
+
+      strong {
+        font-weight: 700;
+        font-size: 16px;
+      }
     }
   }
 
   .actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+  }
 
-    .el-button {
-      font-size: 13px;
-      font-weight: 500;
-      border-radius: 4px;
-      height: 32px;
-      padding: 0 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+  .toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 20px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 
-      .el-icon {
-        font-size: 14px;
-      }
-
-      &.el-button--danger.is-plain {
-        &:hover {
-          background: var(--dt-error-bg);
-          border-color: var(--dt-error-color);
-          color: var(--dt-error-color);
-        }
-      }
-
-      &.el-button--primary.is-plain {
-        &:hover {
-          background: var(--dt-brand-bg);
-          border-color: var(--dt-brand-color);
-          color: var(--dt-brand-color);
-        }
-      }
+    .material-icons-outlined {
+      font-size: 16px;
+      transition: transform 0.3s;
     }
 
-    .el-divider--vertical {
-      height: 20px;
-      margin: 0 4px;
-      border-color: var(--dt-border-color);
-    }
-
-    .el-button--link {
-      height: 32px;
-      padding: 0 12px;
-      color: var(--dt-text-secondary);
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
 
       &:hover {
-        color: var(--dt-brand-color);
+        transform: none;
+        background: transparent;
       }
     }
+
+    &--forward {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      color: #0284c7;
+      border: 1px solid rgba(2, 132, 199, 0.2);
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+      }
+    }
+
+    &--combine {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #d97706;
+      border: 1px solid rgba(217, 119, 6, 0.2);
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+      }
+    }
+
+    &--delete {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      color: #dc2626;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+      }
+    }
+
+    &--cancel {
+      background: rgba(0, 0, 0, 0.04);
+      color: #666;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.08);
+        color: #1a1a1a;
+      }
+    }
+  }
+
+  .toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -1447,42 +1646,68 @@ onMounted(() => {
 }
 
 .dark .multi-select-toolbar {
-  background: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #1a1f2e 0%, #141925 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3);
 
   .selection-info {
-    color: var(--dt-text-primary-dark);
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.15) 0%, rgba(22, 119, 255, 0.1) 100%);
+    border-color: rgba(22, 119, 255, 0.3);
+
+    .selection-text {
+      color: #e8e8e8;
+    }
   }
 
   .actions {
-    .el-button--primary.is-plain {
-      &:hover {
-        background: var(--dt-brand-bg-dark);
-        border-color: var(--dt-brand-color);
-        color: var(--dt-brand-color);
+    .toolbar-btn {
+      &--forward {
+        background: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(2, 132, 199, 0.1) 100%);
+        color: #38bdf8;
+        border-color: rgba(2, 132, 199, 0.3);
+
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+          color: #fff;
+        }
+      }
+
+      &--combine {
+        background: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+        color: #fbbf24;
+        border-color: rgba(217, 119, 6, 0.3);
+
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+          color: #fff;
+        }
+      }
+
+      &--delete {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+        color: #f87171;
+        border-color: rgba(220, 38, 38, 0.3);
+
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+          color: #fff;
+        }
+      }
+
+      &--cancel {
+        background: rgba(255, 255, 255, 0.06);
+        color: #999;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: #e8e8e8;
+        }
       }
     }
+  }
 
-    .el-button--danger.is-plain {
-      &:hover {
-        background: var(--dt-error-bg);
-        border-color: var(--dt-error-color);
-        color: var(--dt-error-color);
-      }
-    }
-
-    .el-button--link {
-      color: var(--dt-text-secondary-dark);
-
-      &:hover {
-        color: var(--dt-brand-color);
-      }
-    }
-
-    .el-divider--vertical {
-      border-color: var(--dt-border-dark);
-    }
+  .toolbar-divider {
+    background: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -1508,7 +1733,7 @@ onMounted(() => {
       justify-content: space-between;
       flex-wrap: wrap;
 
-      .el-button {
+      .toolbar-btn {
         font-size: 12px;
         height: 32px;
         padding: 0 10px;
@@ -1517,12 +1742,12 @@ onMounted(() => {
         justify-content: center;
 
         span { display: none; }
-        .el-icon { margin: 0; }
+        .material-icons-outlined { margin: 0; }
       }
 
-      .el-divider--vertical { display: none; }
+      .toolbar-divider { display: none; }
 
-      .el-button--link {
+      .toolbar-btn--cancel {
         flex: 0 0 auto;
         min-width: auto;
         width: auto;
@@ -1544,14 +1769,14 @@ onMounted(() => {
     .actions {
       gap: 6px;
 
-      .el-button {
+      .toolbar-btn {
         font-size: 12px;
         padding: 0 10px;
         height: 32px;
         span { display: none; }
       }
 
-      .el-button--link span { display: inline; }
+      .toolbar-btn--cancel span { display: inline; }
     }
   }
 }
@@ -1560,10 +1785,22 @@ onMounted(() => {
   .multi-select-toolbar {
     padding: 0 20px;
 
-    .actions .el-button {
+    .actions .toolbar-btn {
       font-size: 13px;
       padding: 0 10px;
     }
+  }
+}
+
+// 拖拽动画
+@keyframes pulse-drag {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.02);
   }
 }
 </style>

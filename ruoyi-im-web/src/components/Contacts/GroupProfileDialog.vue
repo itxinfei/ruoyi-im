@@ -3,6 +3,7 @@
     v-model="visible"
     width="480px"
     :show-close="false"
+    :close-on-click-modal="true"
     class="group-profile-dialog"
     destroy-on-close
     append-to-body
@@ -20,9 +21,11 @@
             <p class="group-id">群 ID: {{ groupDetail.id }}</p>
           </div>
         </div>
-        <el-button class="close-btn" circle @click="handleClose">
-          <el-icon><Close /></el-icon>
-        </el-button>
+        <button class="close-btn" @click="handleClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
 
       <div class="group-content">
@@ -30,7 +33,9 @@
         <div class="section">
           <div class="section-title">
             <span>群成员 ({{ groupDetail.memberCount || members.length }})</span>
-            <el-icon class="arrow-icon"><ArrowRight /></el-icon>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </div>
           <div class="members-preview">
             <div v-for="m in members.slice(0, 7)" :key="m.id" class="member-item">
@@ -40,7 +45,11 @@
               <span class="m-name">{{ m.name }}</span>
             </div>
             <div class="member-item add-btn" @click="handleAddMember">
-              <div class="add-icon"><el-icon><Plus /></el-icon></div>
+              <div class="add-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
               <span class="m-name">添加</span>
             </div>
           </div>
@@ -97,7 +106,6 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { Close, Plus, ArrowRight } from '@element-plus/icons-vue'
 import { getGroup, getGroupMembers, dismissGroup, leaveGroup } from '@/api/im/group'
 import { createConversation } from '@/api/im/conversation'
 import { addTokenToUrl } from '@/utils/file'
@@ -219,7 +227,13 @@ watch(visible, (val) => {
     }
   }
   
-  .close-btn { color: #8f959e; border: none; background: transparent; &:hover { background: #f1f2f3; color: #1f2329; } }
+  .close-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    color: #8f959e; border: none; background: transparent; border-radius: 6px; cursor: pointer;
+    svg { width: 16px; height: 16px; }
+    &:hover { background: #f1f2f3; color: #1f2329; }
+  }
 }
 
 .group-content {
@@ -235,7 +249,11 @@ watch(visible, (val) => {
     font-weight: 600;
     color: #1f2329;
     margin: 16px 0 12px;
-    .arrow-icon { color: #8f959e; cursor: pointer; }
+
+    .arrow-icon {
+      width: 14px; height: 14px;
+      color: #8f959e; cursor: pointer;
+    }
   }
 
   .members-preview {
@@ -251,11 +269,13 @@ watch(visible, (val) => {
       cursor: pointer;
       .m-avatar { border: 1px solid #f0f0f0; }
       .m-name { font-size: 11px; color: #646a73; width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      
+
       &.add-btn {
         .add-icon {
           width: 36px; height: 36px; border-radius: 50%; border: 1px dashed #d9d9d9;
           display: flex; align-items: center; justify-content: center; color: #8f959e;
+
+          svg { width: 16px; height: 16px; }
           &:hover { border-color: #1677ff; color: #1677ff; }
         }
       }

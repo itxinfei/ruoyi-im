@@ -37,14 +37,14 @@
 
     <select id="selectTaskPage" resultMap="BaseResultMap">
         SELECT t.*,
-               c.nick_name as creator_name,
+               c.nickname as creator_name,
                c.avatar as creator_avatar,
-               a.nick_name as assignee_name,
+               a.nickname as assignee_name,
                a.avatar as assignee_avatar,
                d.dept_name as department_name
         FROM im_task t
-        LEFT JOIN sys_user c ON t.creator_id = c.user_id
-        LEFT JOIN sys_user a ON t.assignee_id = a.user_id
+        LEFT JOIN im_user c ON t.creator_id = c.id
+        LEFT JOIN im_user a ON t.assignee_id = a.id
         LEFT JOIN sys_dept d ON t.department_id = d.dept_id
         <where>
             <if test="req.keyword != null and req.keyword != ''">
@@ -126,11 +126,11 @@
 
     <select id="selectOverdueTasks" resultMap="BaseResultMap">
         SELECT t.*,
-               c.nick_name as creator_name,
-               a.nick_name as assignee_name
+               c.nickname as creator_name,
+               a.nickname as assignee_name
         FROM im_task t
-        LEFT JOIN sys_user c ON t.creator_id = c.user_id
-        LEFT JOIN sys_user a ON t.assignee_id = a.user_id
+        LEFT JOIN im_user c ON t.creator_id = c.id
+        LEFT JOIN im_user a ON t.assignee_id = a.id
         WHERE t.due_date &lt; #{currentDate}
           AND t.status != 'COMPLETED'
           AND t.status != 'CANCELLED'

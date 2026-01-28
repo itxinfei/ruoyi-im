@@ -18,9 +18,8 @@
         />
       </div>
 
-      <!-- 头像 (合并的消息不显示头像) -->
+      <!-- 头像 -->
       <div
-        v-if="!message.isMerged"
         class="avatar-container"
         @contextmenu.prevent="$emit('at', message)"
         @click="$emit('show-user', message.senderId)"
@@ -37,22 +36,10 @@
       </div>
 
       <div class="content-wrapper">
-        <!-- 发送者姓名 (合并的消息不显示姓名) -->
-        <div v-if="!message.isOwn && !message.isMerged" class="sender-name">{{ message.senderName }}</div>
+        <!-- 发送者姓名 -->
+        <div v-if="!message.isOwn" class="sender-name">{{ message.senderName }}</div>
 
         <div class="message-content-main">
-          <!-- 悬停快捷按钮区 (还原钉钉微交互) -->
-          <div class="message-actions-floating" v-if="message.type !== 'RECALLED'">
-            <div class="action-bar-min">
-               <el-tooltip content="回复" placement="top" :show-after="400">
-                  <button class="mini-btn" @click="$emit('reply', message)"><el-icon><ChatLineSquare /></el-icon></button>
-               </el-tooltip>
-               <el-tooltip content="点赞" placement="top" :show-after="400">
-                  <button class="mini-btn" @click="$emit('reaction', message, '👍')">👍</button>
-               </el-tooltip>
-            </div>
-          </div>
-
           <!-- 消息气泡内容插槽 -->
           <slot name="bubble"></slot>
         </div>
@@ -83,7 +70,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { ChatLineSquare, Loading, WarningFilled } from '@element-plus/icons-vue'
+import { Loading, WarningFilled } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const store = useStore()
@@ -126,26 +113,7 @@ const formattedTime = computed(() => {
     flex-direction: row-reverse;
   }
 
-  // 合并的消息样式
-  &.is-merged {
-    margin-bottom: 4px; // 减小消息间距
 
-    // 用占位符保持头像空间，使消息对齐
-    .avatar-container {
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    // 自己发送的合并消息
-    &.is-own .content-wrapper {
-      margin-right: 46px; // 头像宽度 + margin
-    }
-
-    // 别人发送的合并消息
-    &:not(.is-own) .content-wrapper {
-      margin-left: 46px; // 头像宽度 + margin
-    }
-  }
 }
 
 .time-divider {
@@ -228,60 +196,6 @@ const formattedTime = computed(() => {
 
 .message-content-main {
   position: relative;
-
-  &:hover .message-actions-floating {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.message-actions-floating {
-  position: absolute;
-  top: -28px;
-  left: 0;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: all var(--dt-transition-fast);
-  z-index: 10;
-
-  .action-bar-min {
-    display: flex;
-    gap: 2px;
-    padding: 3px 6px;
-    background: var(--dt-bg-card);
-    border-radius: 6px;
-    border: 1px solid var(--dt-border-light);
-    box-shadow: var(--dt-shadow-2);
-    backdrop-filter: blur(8px);
-
-    .mini-btn {
-      background: none;
-      border: none;
-      padding: 5px;
-      color: var(--dt-text-secondary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      font-size: 14px;
-      transition: all var(--dt-transition-fast);
-
-      &:hover {
-        background: var(--dt-bg-hover);
-        color: var(--dt-brand-color);
-      }
-
-      &:active {
-        transform: scale(0.95);
-      }
-    }
-  }
-}
-
-.is-own .message-actions-floating {
-  left: auto;
-  right: 0;
 }
 
 .message-footer {
@@ -323,16 +237,5 @@ const formattedTime = computed(() => {
 .time {
   color: var(--dt-text-quaternary);
   font-variant-numeric: tabular-nums;
-}
-
-:global(.dark) {
-  .message-actions-floating .action-bar-min {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-
-  .mini-btn:hover {
-    background: var(--dt-bg-hover-dark);
-  }
 }
 </style>

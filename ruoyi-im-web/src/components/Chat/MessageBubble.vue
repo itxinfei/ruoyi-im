@@ -5,9 +5,16 @@
     popper-class="message-context-menu"
   >
     <div
+      ref="bubbleRef"
       class="bubble"
       :class="[message.type, { 'is-own': message.isOwn, 'is-selected': isSelected, 'is-long-press': isLongPressing }]"
       @click="handleClick"
+      @touchstart="handleTouchStart"
+      @touchend="handleTouchEnd"
+      @touchcancel="handleTouchEnd"
+      @mousedown="handleMouseHold"
+      @mouseup="handleMouseRelease"
+      @mouseleave="handleMouseRelease"
     >
       <!-- 引用消息区块 (如果该消息是回复某人的) -->
       <div v-if="message.replyTo" class="bubble-reply-ref" @click.stop="$emit('scroll-to', message.replyTo.id)">
@@ -96,17 +103,64 @@
       <!-- 图片消息 - 点击触发预览 -->
       <div v-else-if="message.type === 'IMAGE' && parsedContent.imageUrl"
            class="image-wrapper"
+           :class="{ 'is-uploading': isUploading }"
            @click="handleImageClick">
         <img :src="parsedContent.imageUrl"
              class="msg-image"
              :alt="message.senderName + '的图片'"
              loading="lazy" />
+        <!-- 上传进度遮罩 -->
+        <div v-if="isUploading" class="image-upload-overlay">
+          <div class="upload-progress-ring">
+            <svg viewBox="0 0 36 36">
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.3)"
+                stroke-width="3"
+              />
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="#fff"
+                stroke-width="3"
+                stroke-dasharray="100"
+                stroke-dashoffset="25"
+                stroke-linecap="round"
+                class="image-upload-spinner"
+              />
+            </svg>
+          </div>
+          <span class="upload-text">上传中...</span>
+        </div>
       </div>
 
       <!-- 文件消息 -->
-      <div v-else-if="message.type === 'FILE'" class="msg-file" :class="{ 'is-downloading': isDownloading }" @click="handleFileClick">
+      <div v-else-if="message.type === 'FILE'" class="msg-file" :class="{ 'is-downloading': isDownloading, 'is-uploading': isUploading }" @click="handleFileClick">
         <div class="file-icon-wrapper">
           <el-icon><Document /></el-icon>
+          <!-- 上传进度圆环 -->
+          <div v-if="isUploading" class="file-upload-progress">
+            <svg viewBox="0 0 36 36">
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="rgba(22, 119, 255, 0.15)"
+                stroke-width="3"
+              />
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="var(--dt-brand-color)"
+                stroke-width="3"
+                stroke-dasharray="100"
+                stroke-dashoffset="25"
+                stroke-linecap="round"
+                class="upload-spinner"
+              />
+            </svg>
+          </div>
+          <!-- 下载进度圆环 -->
           <div v-if="isDownloading" class="file-download-progress">
             <svg viewBox="0 0 36 36">
               <path
@@ -129,7 +183,10 @@
         <div class="file-info">
           <span class="file-name">{{ parsedContent.fileName || '未知文件' }}</span>
           <span class="file-meta">
-            <template v-if="isDownloading">
+            <template v-if="isUploading">
+              上传中...
+            </template>
+            <template v-else-if="isDownloading">
               下载中 {{ downloadProgress }}%
             </template>
             <template v-else>
@@ -138,7 +195,7 @@
           </span>
         </div>
         <div class="file-action">
-          <el-icon v-if="!isDownloading"><Download /></el-icon>
+          <el-icon v-if="!isUploading && !isDownloading"><Download /></el-icon>
           <el-icon v-else class="is-spinning"><Loading /></el-icon>
         </div>
       </div>
@@ -151,7 +208,10 @@
       <!-- 语音消息 -->
       <div v-else-if="message.type === 'VOICE' || message.type === 'AUDIO'" class="msg-voice" @click="togglePlayVoice">
         <div class="voice-icon">
-          <el-icon><component :is="isVoicePlaying ? 'VideoPause' : 'VideoPlay'" /></el-icon>
+          <el-icon>
+            <VideoPause v-if="isVoicePlaying" />
+            <VideoPlay v-else />
+          </el-icon>
         </div>
         <div class="voice-waveform">
           <span
@@ -258,6 +318,10 @@
         <el-dropdown-item command="reply">
           <el-icon><ChatLineSquare /></el-icon> <span>回复</span>
         </el-dropdown-item>
+        <el-dropdown-item command="emoji" divided>
+          <span class="material-icons-outlined" style="font-size: 16px; color: #f5222d;">sentiment_satisfied_alt</span>
+          <span>表情表态</span>
+        </el-dropdown-item>
         <el-dropdown-item command="at" v-if="!message.isOwn && sessionType === 'GROUP'">
           <el-icon><InfoFilled /></el-icon> <span>@ 提及</span>
         </el-dropdown-item>
@@ -284,6 +348,15 @@
       </el-dropdown-menu>
     </template>
   </el-dropdown>
+
+  <!-- AI表情表态浮窗 -->
+  <AiEmojiReaction
+    :visible="showAiEmojiPanel"
+    :message="message"
+    :position="aiEmojiPosition"
+    @select="handleAiEmojiSelect"
+    @close="showAiEmojiPanel = false"
+  />
 </template>
 
 <script setup>
@@ -293,6 +366,7 @@ import { ElMessage } from 'element-plus'
 import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Loading, WarningFilled, VideoPlay, VideoPause, Download, Top } from '@element-plus/icons-vue'
 import CombineMessagePreview from './CombineMessagePreview.vue'
 import LinkCard from './LinkCard.vue'
+import AiEmojiReaction from './AiEmojiReaction.vue'
 import { extractLinksFromContent, formatLinkUrl } from '@/utils/file'
 
 const props = defineProps({
@@ -301,6 +375,18 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['command', 'preview', 'download', 'at', 'scroll-to', 'retry', 'toggle-reaction', 'add-reaction'])
+
+// ============================================================================
+// AI表情表态状态
+// ============================================================================
+const showAiEmojiPanel = ref(false)
+const aiEmojiPosition = ref({ x: 0, y: 0 })
+
+// 处理AI表情选择
+const handleAiEmojiSelect = (emoji) => {
+  emit('add-reaction', props.message.id, emoji, true)
+  ElMessage.success(`已添加表情: ${emoji}`)
+}
 
 const store = useStore()
 const selectedMessages = computed(() => store.state.im.message.selectedMessages)
@@ -338,6 +424,18 @@ const rangeSelection = () => {
 const handleCommand = (cmd) => {
   if (!cmd) return
   if (cmd === 'at') emit('at', props.message)
+  else if (cmd === 'emoji') {
+    // 显示AI表情面板
+    const bubble = bubbleRef.value
+    if (bubble) {
+      const rect = bubble.getBoundingClientRect()
+      aiEmojiPosition.value = {
+        x: rect.right + 10,
+        y: rect.top
+      }
+    }
+    showAiEmojiPanel.value = true
+  }
   else emit('command', cmd, props.message)
 }
 
@@ -345,17 +443,25 @@ const handleRetry = () => {
   emit('retry', props.message)
 }
 
-// 长按处理（移动端编辑入口）
+// 长按处理（AI表情表态入口）
 const LONG_PRESS_DURATION = 500 // 长按时长（毫秒）
 let longPressTimer = null
 const isLongPressing = ref(false)
+const bubbleRef = ref(null)
 
 const handleTouchStart = (e) => {
-  // 只对文本消息启用长按编辑
-  if (props.message.type !== 'TEXT' || !props.message.isOwn) return
-
+  // 所有消息类型都支持长按AI表情表态
   longPressTimer = setTimeout(() => {
     isLongPressing.value = true
+    // 计算面板显示位置
+    const rect = e.currentTarget?.getBoundingClientRect()
+    if (rect) {
+      aiEmojiPosition.value = {
+        x: rect.right + 10,
+        y: rect.top
+      }
+    }
+    showAiEmojiPanel.value = true
     // 触发触觉反馈（如果支持）
     if (navigator.vibrate) {
       navigator.vibrate(50)
@@ -369,12 +475,41 @@ const handleTouchEnd = (e) => {
     longPressTimer = null
   }
 
-  // 如果是长按结束，触发编辑
+  // 如果是长按结束且不是自己的消息，不触发编辑
   if (isLongPressing.value) {
     isLongPressing.value = false
-    e.preventDefault()
-    emit('command', 'edit', props.message)
+    // 如果是自己的文本消息且没有打开AI表情面板，触发编辑
+    if (props.message.type === 'TEXT' && props.message.isOwn && !showAiEmojiPanel.value) {
+      e.preventDefault()
+      emit('command', 'edit', props.message)
+    }
   }
+}
+
+// PC端右键长按模拟（可选）
+const handleMouseHold = (e) => {
+  // 只对非右键事件启用
+  if (e.button !== 0) return
+
+  longPressTimer = setTimeout(() => {
+    isLongPressing.value = true
+    const rect = e.currentTarget?.getBoundingClientRect()
+    if (rect) {
+      aiEmojiPosition.value = {
+        x: rect.right + 10,
+        y: rect.top
+      }
+    }
+    showAiEmojiPanel.value = true
+  }, LONG_PRESS_DURATION)
+}
+
+const handleMouseRelease = () => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+  isLongPressing.value = false
 }
 
 // 处理合并转发消息点击
@@ -560,6 +695,11 @@ const getFileName = (content) => {
 // 文件下载相关
 const isDownloading = ref(false)
 const downloadProgress = ref(0)
+
+// 文件上传相关
+const isUploading = computed(() => {
+  return props.message?.status === 'uploading' || props.message?.status === 'sending'
+})
 
 const handleFileClick = async () => {
   if (isDownloading.value) return
@@ -780,26 +920,27 @@ onUnmounted(() => {
 @use '@/styles/design-tokens.scss' as *;
 
 .bubble {
-  background: var(--dt-bubble-left-bg);
-  padding: 10px 14px;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  // 钉钉聊天气泡样式 - 精确复刻
+  background: var(--dt-bubble-left-bg);  // #FFFFFF
+  padding: 12px 16px;
+  border-radius: 8px 8px 8px 0;  // 左下角直角
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   font-size: 14px;
   word-break: break-word;
-  line-height: 1.6;
-  color: #1f2329;
+  line-height: 1.5;
+  color: var(--dt-text-primary);  // #000000
   position: relative;
   max-width: 520px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid #e2e8f0;
+  border: none;
   animation: messagePop 0.3s var(--dt-ease-bounce);
 
   @include hover-lift(-1px);
 
   &.is-selected {
-    border: 2px solid #1890ff;
-    background-color: #e6f7ff;
-    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+    border: 2px solid var(--dt-brand-color);
+    background-color: var(--dt-brand-bg);
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
     animation: pulse 0.3s var(--dt-ease-out);
   }
 
@@ -807,7 +948,7 @@ onUnmounted(() => {
   &.is-long-press {
     animation: longPressPulse 0.3s ease-in-out;
     border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.2);
+    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
   }
 
   @keyframes longPressPulse {
@@ -816,16 +957,26 @@ onUnmounted(() => {
     100% { transform: scale(1); }
   }
 
+  // 悬停时增强阴影
+  &:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  }
+
   &.is-own {
-    background: var(--dt-bubble-right-bg);
-    color: #1f2329;
-    border-radius: 4px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    background: var(--dt-bubble-right-bg);  // #E6F7FF
+    color: var(--dt-text-primary);  // #000000
+    border-radius: 8px 8px 0 8px;  // 右下角直角
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     border: none;
 
     &.is-selected {
-      border: 2px solid #1890ff;
-      background-color: #e6f7ff;
+      border: 2px solid var(--dt-brand-color);
+      background-color: var(--dt-brand-bg);
+      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+    }
+
+    &:hover {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
     }
   }
 
@@ -1246,6 +1397,62 @@ onUnmounted(() => {
   }
 }
 
+// 图片上传遮罩
+.image-wrapper.is-uploading {
+  position: relative;
+  pointer-events: none;
+
+  .msg-image {
+    opacity: 0.7;
+    filter: blur(2px);
+  }
+
+  .image-upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+    animation: fadeIn 0.3s var(--dt-ease-out);
+
+    .upload-progress-ring {
+      margin-bottom: 12px;
+
+      svg {
+        width: 48px;
+        height: 48px;
+        transform: rotate(-90deg);
+      }
+
+      .image-upload-spinner {
+        animation: uploadSpin 1.5s linear infinite;
+      }
+    }
+
+    .upload-text {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+@keyframes uploadSpin {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
 .message-status {
   display: flex;
   align-items: center;
@@ -1484,6 +1691,36 @@ onUnmounted(() => {
         width: 48px;
         height: 48px;
         transform: rotate(-90deg);
+      }
+    }
+
+    .file-upload-progress {
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 48px;
+        height: 48px;
+        transform: rotate(-90deg);
+      }
+
+      .upload-spinner {
+        animation: uploadSpin 1.5s linear infinite;
+      }
+
+      @keyframes uploadSpin {
+        0% {
+          stroke-dashoffset: 100;
+        }
+        100% {
+          stroke-dashoffset: 0;
+        }
       }
     }
   }

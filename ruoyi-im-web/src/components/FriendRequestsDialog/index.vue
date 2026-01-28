@@ -84,7 +84,7 @@
       v-model="visible"
       title="好友申请"
       width="600px"
-      :close-on-click-modal="false"
+      :close-on-click-modal="true"
       @close="handleClose"
     >
       <div v-loading="loading" class="requests-list">

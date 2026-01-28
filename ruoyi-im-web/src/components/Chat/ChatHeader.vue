@@ -46,29 +46,28 @@
       </div>
     </div>
     <div class="header-actions">
-      <!-- 多选模式按钮 -->
-      <el-tooltip :content="isMultiSelectMode ? '取消多选' : '多选消息'" placement="bottom">
-        <button class="action-btn" :class="{ active: isMultiSelectMode }" @click="handleToggleMultiSelect">
-          <span class="material-icons-outlined">{{ isMultiSelectMode ? 'close' : 'check_circle_outline' }}</span>
-        </button>
-      </el-tooltip>
-
       <!-- 通话按钮组 -->
       <div class="call-buttons">
         <el-tooltip content="语音通话" placement="bottom">
           <button class="action-btn call-btn voice-call" @click="handleVoiceCall">
-            <span class="material-icons-outlined">phone</span>
+            <div class="btn-icon-wrapper">
+              <span class="material-icons-outlined">phone</span>
+              <div class="icon-glow voice-glow"></div>
+            </div>
           </button>
         </el-tooltip>
         <el-tooltip content="视频通话" placement="bottom">
           <button class="action-btn call-btn video-call" @click="handleVideoCall">
-            <span class="material-icons-outlined">videocam</span>
+            <div class="btn-icon-wrapper">
+              <span class="material-icons-outlined">videocam</span>
+              <div class="icon-glow video-glow"></div>
+            </div>
           </button>
         </el-tooltip>
       </div>
 
       <!-- 更多菜单 -->
-      <el-dropdown trigger="click" @command="handleMenuCommand" placement="bottom-end">
+      <el-dropdown trigger="click" @command="handleMenuCommand" :placement="menuPlacement">
         <button class="action-btn more-btn">
           <span class="material-icons-outlined">more_horiz</span>
         </button>
@@ -85,6 +84,13 @@
             <el-dropdown-item command="files" class="menu-item">
               <span class="material-icons-outlined item-icon">folder_open</span>
               <span class="item-text">查看文件</span>
+            </el-dropdown-item>
+
+            <!-- 消息速读 -->
+            <el-dropdown-item command="summary" class="menu-item">
+              <span class="material-icons-outlined item-icon">auto_awesome</span>
+              <span class="item-text">消息速读</span>
+              <span class="item-shortcut">Ctrl+S</span>
             </el-dropdown-item>
 
             <!-- 群公告 -->
@@ -122,13 +128,6 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-
-      <!-- 详情按钮 -->
-      <el-tooltip content="详情" placement="bottom">
-        <button class="action-btn info-btn" @click="$emit('toggle-sidebar')">
-          <span class="material-icons-outlined">info</span>
-        </button>
-      </el-tooltip>
     </div>
 
     <!-- 用户详情抽屉 -->
@@ -139,6 +138,12 @@
       @voice-call="handleVoiceCall"
       @video-call="handleVideoCall"
     />
+
+    <!-- 消息速读弹窗 -->
+    <MessageSummary
+      v-model:visible="showSummary"
+      :session-id="session?.id"
+    />
   </div>
 </template>
 
@@ -148,6 +153,7 @@ import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import UserDetailDrawer from './UserDetailDrawer.vue'
+import MessageSummary from './MessageSummary.vue'
 
 const props = defineProps({
   session: {
@@ -164,23 +170,13 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'toggle-multi-select', 'clear-selection'])
-
-// 多选模式状态
-const isMultiSelectMode = ref(false)
-
-// 切换多选模式
-const handleToggleMultiSelect = () => {
-  isMultiSelectMode.value = !isMultiSelectMode.value
-  emit('toggle-multi-select', isMultiSelectMode.value)
-  if (!isMultiSelectMode.value) {
-    // 退出多选时，通知父组件清空选择
-    emit('clear-selection')
-  }
-}
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar'])
 
 // 用户详情抽屉显示状态
 const showUserDetail = ref(false)
+
+// 消息速读弹窗显示状态
+const showSummary = ref(false)
 
 // 获取在线状态
 const store = useStore()
@@ -232,6 +228,9 @@ const handleMenuCommand = (command) => {
     case 'files':
       emit('files', props.session)
       break
+    case 'summary':
+      showSummary.value = true
+      break
     case 'announcement':
       emit('announcement', props.session)
       break
@@ -246,6 +245,24 @@ const handleMenuCommand = (command) => {
       break
   }
 }
+
+// 计算菜单弹出位置，确保菜单不会超出视口
+const menuPlacement = computed(() => {
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+  const isSmallScreen = viewportWidth < 768
+  const isShortScreen = viewportHeight < 600
+  
+  if (isSmallScreen) {
+    return 'bottom-start'
+  }
+  
+  if (isShortScreen) {
+    return 'bottom-end'
+  }
+  
+  return 'bottom-end'
+})
 </script>
 
 <style scoped lang="scss">
@@ -552,16 +569,84 @@ const handleMenuCommand = (command) => {
 
   // 通话按钮特殊样式
   &.call-btn {
-    border-radius: var(--dt-radius-sm);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-    &.voice-call:hover {
-      color: #22c55e;
-      background: rgba(34, 197, 94, 0.1);
+    .btn-icon-wrapper {
+      position: relative;
+      z-index: 1;
     }
 
-    &.video-call:hover {
+    .icon-glow {
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    &.voice-call {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+
+      .voice-glow {
+        background: radial-gradient(circle, rgba(34, 197, 94, 0.3) 0%, transparent 70%);
+      }
+
+      &:hover {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: #fff;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+
+        .icon-glow {
+          opacity: 1;
+        }
+
+        .material-icons-outlined {
+          transform: scale(1.1);
+        }
+      }
+
+      &:active {
+        transform: translateY(0) scale(0.98);
+      }
+    }
+
+    &.video-call {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
       color: #3b82f6;
-      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+
+      .video-glow {
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+      }
+
+      &:hover {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: #fff;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+
+        .icon-glow {
+          opacity: 1;
+        }
+
+        .material-icons-outlined {
+          transform: scale(1.1);
+        }
+      }
+
+      &:active {
+        transform: translateY(0) scale(0.98);
+      }
     }
   }
 
@@ -589,9 +674,13 @@ const handleMenuCommand = (command) => {
 :deep(.header-dropdown) {
   padding: 6px;
   min-width: 200px;
+  max-width: 280px;
   border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.98);
+  animation: menuFadeIn 0.2s var(--dt-ease-out);
 
   .el-dropdown-menu__item {
     display: flex;
@@ -603,15 +692,21 @@ const handleMenuCommand = (command) => {
     border-radius: var(--dt-radius-md);
     transition: all 0.2s var(--dt-ease-out);
     margin: 2px 0;
+    position: relative;
+    overflow: hidden;
 
     .item-icon {
       font-size: 18px;
       color: var(--dt-text-secondary);
       transition: color 0.2s var(--dt-ease-out);
+      flex-shrink: 0;
     }
 
     .item-text {
       flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .item-shortcut {
@@ -621,6 +716,7 @@ const handleMenuCommand = (command) => {
       padding: 2px 6px;
       border-radius: 4px;
       font-family: monospace;
+      flex-shrink: 0;
     }
 
     .item-badge {
@@ -630,11 +726,14 @@ const handleMenuCommand = (command) => {
       padding: 2px 6px;
       border-radius: 10px;
       font-weight: 500;
+      flex-shrink: 0;
+      animation: badgePulse 2s ease-in-out infinite;
     }
 
     &:hover {
       background: var(--dt-brand-bg);
       color: var(--dt-brand-color);
+      transform: translateX(2px);
 
       .item-icon {
         color: var(--dt-brand-color);
@@ -665,6 +764,7 @@ const handleMenuCommand = (command) => {
       &:hover {
         background: var(--dt-error-bg);
         color: var(--dt-error-color);
+        transform: translateX(2px);
 
         .item-icon {
           color: var(--dt-error-color);
@@ -683,6 +783,30 @@ const handleMenuCommand = (command) => {
         background: var(--dt-border-light);
       }
     }
+  }
+}
+
+// 菜单淡入动画
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// 徽章脉冲动画
+@keyframes badgePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
   }
 }
 
@@ -717,6 +841,30 @@ const handleMenuCommand = (command) => {
     background: var(--dt-bg-hover-dark);
   }
 
+  &.call-btn {
+    &.voice-call {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);
+      color: #4ade80;
+      border-color: rgba(34, 197, 94, 0.3);
+
+      &:hover {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: #fff;
+      }
+    }
+
+    &.video-call {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.3);
+
+      &:hover {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: #fff;
+      }
+    }
+  }
+
   &.info-btn {
     color: var(--dt-brand-color);
     background: rgba(22, 119, 255, 0.15);
@@ -739,6 +887,8 @@ const handleMenuCommand = (command) => {
   background: var(--dt-bg-card-dark);
   border-color: var(--dt-border-dark);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  background: rgba(30, 41, 59, 0.98);
 
   .el-dropdown-menu__item {
     color: var(--dt-text-primary-dark);
@@ -754,6 +904,48 @@ const handleMenuCommand = (command) => {
 
     &:hover {
       background: rgba(22, 119, 255, 0.15);
+      color: var(--dt-brand-color);
+
+      .item-icon {
+        color: var(--dt-brand-color);
+      }
+
+      .item-shortcut {
+        background: rgba(22, 119, 255, 0.2);
+        color: var(--dt-brand-color);
+      }
+    }
+
+    &.is-active {
+      background: rgba(22, 119, 255, 0.15);
+      color: var(--dt-brand-color);
+
+      .item-icon {
+        color: var(--dt-brand-color);
+      }
+    }
+
+    &.danger-item {
+      color: #f87171;
+
+      .item-icon {
+        color: #f87171;
+      }
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+
+        .item-icon {
+          color: #f87171;
+        }
+      }
+    }
+
+    &.el-dropdown-menu__item--divided {
+      &::before {
+        background: var(--dt-border-dark);
+      }
     }
   }
 }

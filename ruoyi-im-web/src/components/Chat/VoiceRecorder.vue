@@ -39,6 +39,17 @@
         </div>
         <span class="duration">{{ formatTime(duration) }}</span>
       </div>
+
+      <!-- 语音转文字 -->
+      <VoiceToText
+        :message-id="`temp-${Date.now()}`"
+        :voice-url="audioUrl"
+        :duration="duration"
+        @transcribe="handleTranscribe"
+        @copy="handleCopyTranscript"
+        @reply="handleReplyTranscript"
+      />
+
       <div class="preview-actions">
         <button class="action-btn delete-btn" @click="deleteRecording">
           <el-icon><Delete /></el-icon> 删除
@@ -55,8 +66,9 @@
 import { ref, onUnmounted, watch } from 'vue'
 import { Microphone, Close, VideoPlay, VideoPause, Delete, Promotion } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import VoiceToText from './VoiceToText.vue'
 
-const emit = defineEmits(['send', 'cancel'])
+const emit = defineEmits(['send', 'cancel', 'transcribe'])
 
 const isRecording = ref(false)
 const isPlaying = ref(false)
@@ -64,6 +76,7 @@ const recordingTime = ref(0)
 const duration = ref(0)
 const audioUrl = ref(null)
 const playProgress = ref(0)
+const transcript = ref('')
 
 let mediaRecorder = null
 let audioChunks = []
@@ -179,10 +192,27 @@ const sendRecording = () => {
       const file = new File([blob], `voice_${Date.now()}.webm`, { type: 'audio/webm' })
       emit('send', {
         file,
-        duration: duration.value
+        duration: duration.value,
+        transcript: transcript.value // 如果有转写文本，一起发送
       })
       deleteRecording()
     })
+}
+
+// 处理转写完成
+const handleTranscribe = (result) => {
+  transcript.value = result.text
+  emit('transcribe', result)
+}
+
+// 复制转写文本
+const handleCopyTranscript = (text) => {
+  // 可以在这里添加额外处理
+}
+
+// 引用转写文本
+const handleReplyTranscript = (text) => {
+  // 可以在这里触发引用回复
 }
 
 // 格式化时间

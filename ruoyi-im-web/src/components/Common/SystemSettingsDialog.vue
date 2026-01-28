@@ -1,247 +1,97 @@
 <template>
   <el-dialog
     v-model="visible"
-    title=""
     :width="dialogWidth"
     class="system-settings-dialog"
     destroy-on-close
     append-to-body
     :fullscreen="isFullscreen"
+    :show-close="false"
+    :close-on-click-modal="true"
   >
-    <div class="settings-container">
-      <!-- 左侧导航 -->
-      <nav class="settings-nav">
-        <div class="nav-title">设置</div>
-        <div class="nav-list">
+    <div class="settings-layout">
+      <!-- 侧边导航栏 -->
+      <aside class="settings-sidebar">
+        <div class="sidebar-header">
+          <div class="app-brand">
+            <span class="brand-icon">S</span>
+          </div>
+        </div>
+        
+        <nav class="sidebar-nav">
           <div
             v-for="item in menuItems"
             :key="item.id"
             class="nav-item"
             :class="{ active: activeMenu === item.id }"
             @click="activeMenu = item.id"
+            :title="item.label"
           >
-            <span class="material-icons-outlined nav-icon">{{ item.icon }}</span>
+            <el-icon class="nav-icon"><component :is="item.icon" /></el-icon>
             <span class="nav-label">{{ item.label }}</span>
           </div>
-        </div>
-        <div class="nav-footer">
-          <div class="current-user" @click="handleEditProfile">
+        </nav>
+        
+        <div class="sidebar-footer">
+          <div class="user-avatar" @click="activeMenu = 'account'" :class="{ active: activeMenu === 'account' }">
             <el-avatar :size="32" :src="currentUser.avatar" />
-            <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
           </div>
         </div>
-      </nav>
+      </aside>
 
-      <!-- 右侧内容 -->
-      <main class="settings-content">
-        <header class="content-header">
-          <h2 class="content-title">{{ currentMenuLabel }}</h2>
-          <el-button class="close-btn" :icon="Close" circle @click="visible = false" />
+      <!-- 主内容区域 -->
+      <main class="settings-main">
+        <header class="main-header">
+          <h2 class="header-title">{{ currentMenuLabel }}</h2>
+          <el-button class="close-btn" circle text @click="visible = false">
+            <el-icon><Close /></el-icon>
+          </el-button>
         </header>
 
-        <div class="content-body">
-          <!-- 账号安全 -->
-          <section v-if="activeMenu === 'account'" class="setting-section">
-            <div class="profile-card">
-              <el-avatar :size="64" :src="currentUser.avatar" />
-              <div class="profile-info">
-                <h3 class="profile-name">{{ currentUser.nickname || currentUser.username }}</h3>
-                <p class="profile-detail">UID: {{ currentUser.id }}</p>
-                <p class="profile-detail">{{ currentUser.email || '未绑定邮箱' }}</p>
-              </div>
-              <el-button type="primary" @click="handleEditProfile">编辑资料</el-button>
-            </div>
-
-            <div class="setting-group">
-              <h4 class="group-title">安全设置</h4>
-              <div class="setting-list">
-                <div class="setting-row" @click="showChangePassword = true">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">修改密码</span>
-                    <span class="setting-row-desc">定期修改密码以保护账号安全</span>
-                  </div>
-                  <el-icon class="setting-row-arrow"><ArrowRight /></el-icon>
-                </div>
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">双重验证</span>
-                    <span class="setting-row-desc">未开启</span>
-                  </div>
-                  <el-button link type="primary">设置</el-button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 通知设置 -->
-          <section v-else-if="activeMenu === 'notification'" class="setting-section">
-            <div class="setting-group">
-              <h4 class="group-title">消息通知</h4>
-              <div class="setting-list">
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">桌面通知</span>
-                    <span class="setting-row-desc">收到新消息时显示通知</span>
-                  </div>
-                  <el-switch v-model="localSettings.notifications.enabled" @change="handleNotificationSettingChange" />
-                </div>
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">消息声音</span>
-                    <span class="setting-row-desc">新消息提示音</span>
-                  </div>
-                  <el-switch v-model="localSettings.notifications.sound" @change="handleNotificationSettingChange" />
-                </div>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <h4 class="group-title">快捷键</h4>
-              <div class="setting-list">
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">发送消息</span>
-                  </div>
-                  <el-select v-model="localSettings.shortcuts.send" size="small" style="width: 120px" @change="handleShortcutSettingChange">
-                    <el-option label="Enter" value="enter" />
-                    <el-option label="Ctrl+Enter" value="ctrl-enter" />
-                  </el-select>
-                </div>
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">截图</span>
-                    <span class="setting-row-desc">全局快捷键</span>
-                  </div>
-                  <kbd class="shortcut-key">Alt + A</kbd>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 通用设置 -->
-          <section v-else-if="activeMenu === 'general'" class="setting-section">
-            <div class="setting-group">
-              <h4 class="group-title">外观</h4>
-              <div class="setting-list">
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">主题模式</span>
-                  </div>
-                  <el-segmented v-model="localSettings.general.theme" :options="themeOptions" @change="handleGeneralSettingChange" />
-                </div>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <h4 class="group-title">语言</h4>
-              <div class="setting-list">
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">界面语言</span>
-                  </div>
-                  <el-select v-model="localSettings.general.language" size="small" style="width: 120px" @change="handleGeneralSettingChange">
-                    <el-option label="简体中文" value="zh-CN" />
-                    <el-option label="English" value="en-US" />
-                  </el-select>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 存储与数据 -->
-          <section v-else-if="activeMenu === 'storage'" class="setting-section">
-            <div class="setting-group">
-              <h4 class="group-title">缓存管理</h4>
-              <div class="setting-list">
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">本地缓存</span>
-                    <span class="setting-row-desc">{{ cacheSize }}</span>
-                  </div>
-                  <el-button type="danger" link @click="handleClearCache">清理</el-button>
-                </div>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <h4 class="group-title">数据</h4>
-              <div class="setting-list">
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">导出聊天记录</span>
-                    <span class="setting-row-desc">备份为 JSON 文件</span>
-                  </div>
-                  <el-button type="primary" link @click="handleExportChat">导出</el-button>
-                </div>
-                <div class="setting-row">
-                  <div class="setting-row-info">
-                    <span class="setting-row-label">退出保留数据</span>
-                  </div>
-                  <el-switch v-model="localSettings.data.keepOnLogout" @change="handleDataSettingChange" />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 帮助与反馈 -->
-          <section v-else-if="activeMenu === 'help'" class="setting-section">
-            <div class="setting-group">
-              <h4 class="group-title">常见问题</h4>
-              <div class="faq-list">
-                <div v-for="(faq, index) in faqs" :key="index" class="faq-item">
-                  <div class="faq-question" @click="faq.expanded = !faq.expanded">
-                    <span>{{ faq.question }}</span>
-                    <el-icon :class="{ 'is-expanded': faq.expanded }"><ArrowRight /></el-icon>
-                  </div>
-                  <div v-if="faq.expanded" class="faq-answer">{{ faq.answer }}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <h4 class="group-title">意见反馈</h4>
-              <el-form :model="feedbackForm" label-position="top" class="feedback-form">
-                <el-form-item label="问题类型">
-                  <el-radio-group v-model="feedbackForm.type" size="small">
-                    <el-radio-button value="feature">功能建议</el-radio-button>
-                    <el-radio-button value="bug">问题反馈</el-radio-button>
-                  </el-radio-group>
-                </el-form-item>
-                <el-form-item label="详细描述">
-                  <el-input v-model="feedbackForm.description" type="textarea" :rows="3" placeholder="请描述您的问题或建议..." />
-                </el-form-item>
-                <el-button type="primary" :loading="feedbackSubmitting" @click="handleSubmitFeedback">提交</el-button>
-              </el-form>
-            </div>
-          </section>
-
-          <!-- 关于 -->
-          <section v-else-if="activeMenu === 'about'" class="setting-section about-section">
-            <div class="app-logo">
-              <span class="logo-text">IM</span>
-            </div>
-            <h3 class="app-name">RuoYi IM</h3>
-            <p class="app-version">v4.1.0</p>
-            <el-button class="update-btn" @click="checkUpdate">检查更新</el-button>
-            <p class="app-copyright">© 2025 RuoYi-IM Team</p>
-          </section>
+        <div class="main-content custom-scrollbar">
+          <component 
+            :is="currentComponent" 
+            v-bind="componentProps"
+            v-on="componentEvents"
+          />
         </div>
       </main>
     </div>
 
+    <!-- 全局弹窗 -->
     <ChangePasswordDialog v-model="showChangePassword" />
     <EditProfileDialog v-model="showEditProfile" @success="handleProfileUpdate" />
+    <ThemeCustomizer v-model="showThemeCustomizer" @change="handleThemeChange" />
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, watch, reactive, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowRight, Close } from '@element-plus/icons-vue'
+import {
+  User,
+  Bell,
+  Setting,
+  Files,
+  QuestionFilled,
+  InfoFilled,
+  Close,
+  Brush
+} from '@element-plus/icons-vue'
+
+// 动态导入子组件
+const AccountSettings = defineAsyncComponent(() => import('../Settings/AccountSettings.vue'))
+const NotificationSettings = defineAsyncComponent(() => import('../Settings/NotificationSettings.vue'))
+const GeneralSettings = defineAsyncComponent(() => import('../Settings/GeneralSettings.vue'))
+const StorageSettings = defineAsyncComponent(() => import('../Settings/StorageSettings.vue'))
+const HelpSettings = defineAsyncComponent(() => import('../Settings/HelpSettings.vue'))
+const AboutSettings = defineAsyncComponent(() => import('../Settings/AboutSettings.vue'))
+
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
 import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
+import ThemeCustomizer from './ThemeCustomizer.vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -254,62 +104,109 @@ const store = useStore()
 const { setThemeMode, themeMode } = useTheme()
 
 const visible = ref(false)
+const activeMenu = ref('account')
 const showChangePassword = ref(false)
 const showEditProfile = ref(false)
-const activeMenu = ref('account')
+const showThemeCustomizer = ref(false)
 
+// 响应式布局
 const windowWidth = ref(window.innerWidth)
 const isMobile = computed(() => windowWidth.value < 768)
 const isFullscreen = computed(() => windowWidth.value < 640)
 
 const dialogWidth = computed(() => {
-  if (windowWidth.value < 768) return '95%'
+  if (windowWidth.value < 768) return '100%'
   if (windowWidth.value < 1024) return '800px'
   return '900px'
 })
 
-const themeOptions = [
-  { label: '浅色', value: 'light' },
-  { label: '深色', value: 'dark' },
-  { label: '跟随系统', value: 'auto' }
-]
+const sidebarWidth = computed(() => {
+  if (windowWidth.value < 768) return '64px'
+  if (windowWidth.value < 1024) return '180px'
+  return '220px'
+})
 
+const contentPadding = computed(() => {
+  if (windowWidth.value < 768) return '16px'
+  if (windowWidth.value < 1024) return '20px'
+  return '32px'
+})
+
+// 菜单配置
 const menuItems = [
-  { id: 'account', label: '账号', icon: 'person' },
-  { id: 'notification', label: '通知', icon: 'notifications' },
-  { id: 'general', label: '通用', icon: 'settings' },
-  { id: 'storage', label: '存储', icon: 'folder' },
-  { id: 'help', label: '帮助', icon: 'help_outline' },
-  { id: 'about', label: '关于', icon: 'info' }
+  { id: 'account', label: '账号与安全', icon: User },
+  { id: 'notification', label: '消息通知', icon: Bell },
+  { id: 'general', label: '通用设置', icon: Setting },
+  { id: 'theme', label: '主题定制', icon: Brush },
+  { id: 'storage', label: '存储管理', icon: Files },
+  { id: 'help', label: '帮助反馈', icon: QuestionFilled },
+  { id: 'about', label: '关于', icon: InfoFilled }
 ]
 
-const currentMenuLabel = computed(() => menuItems.find(i => i.id === activeMenu.value)?.label || '')
+const currentMenuLabel = computed(() => menuItems.find(i => i.id === activeMenu.value)?.label || '设置')
+
+// 数据源
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const settings = computed(() => store.state.im.settings)
-const localSettings = reactive(JSON.parse(JSON.stringify(settings.value)))
 
-// 初始化默认值
-if (!localSettings.chat) localSettings.chat = { fontSize: 'medium' }
-if (!localSettings.shortcuts) localSettings.shortcuts = { send: 'enter' }
-if (!localSettings.data) localSettings.data = { keepOnLogout: true }
+// 组件映射
+const componentMap = {
+  account: AccountSettings,
+  notification: NotificationSettings,
+  general: GeneralSettings,
+  storage: StorageSettings,
+  help: HelpSettings,
+  about: AboutSettings
+}
 
-const cacheSize = ref('0 MB')
-const feedbackSubmitting = ref(false)
-const feedbackForm = reactive({ type: 'feature', description: '' })
+const currentComponent = computed(() => componentMap[activeMenu.value])
 
-const faqs = reactive([
-  { question: '如何修改密码？', answer: '在账号页面点击"修改密码"按钮进行设置。', expanded: false },
-  { question: '如何设置消息免打扰？', answer: '在会话列表中右键点击会话，选择"消息免打扰"。', expanded: false },
-  { question: '聊天记录会保存多久？', answer: '默认永久保存，除非关闭"退出保留数据"或清理缓存。', expanded: false }
-])
-
-const handleResize = () => windowWidth.value = window.innerWidth
-onMounted(() => {
-  window.addEventListener('resize', handleResize)
-  calculateCacheSize()
+// 组件 Props
+const componentProps = computed(() => {
+  switch (activeMenu.value) {
+    case 'account':
+      return { user: currentUser.value }
+    case 'notification':
+      return { modelValue: settings.value }
+    case 'general':
+      return { modelValue: settings.value }
+    case 'storage':
+      return { modelValue: settings.value, cacheSize: cacheSize.value }
+    default:
+      return {}
+  }
 })
-onUnmounted(() => window.removeEventListener('resize', handleResize))
 
+// 组件事件
+const componentEvents = computed(() => {
+  const commonEvents = {
+    'update:modelValue': handleSettingsUpdate,
+    'change': saveSettings
+  }
+
+  switch (activeMenu.value) {
+    case 'account':
+      return {
+        'edit-profile': () => showEditProfile.value = true,
+        'change-password': () => showChangePassword.value = true
+      }
+    case 'theme':
+      return {
+        'open-theme': () => showThemeCustomizer.value = true
+      }
+    case 'storage':
+      return {
+        ...commonEvents,
+        'clear-cache': handleClearCache,
+        'export-chat': handleExportChat
+      }
+    default:
+      return commonEvents
+  }
+})
+
+// 缓存计算
+const cacheSize = ref('0 MB')
 const calculateCacheSize = () => {
   let total = 0
   for (let key in localStorage) {
@@ -318,14 +215,61 @@ const calculateCacheSize = () => {
   cacheSize.value = `${(total / 1024 / 1024).toFixed(2)} MB`
 }
 
-const handleEditProfile = () => showEditProfile.value = true
+// 业务逻辑处理
 const handleProfileUpdate = () => store.dispatch('user/getInfo')
 
-const handleNotificationSettingChange = () => store.dispatch('im/updateNotificationSettings', localSettings.notifications)
-const handleGeneralSettingChange = () => store.dispatch('im/updateGeneralSettings', localSettings.general)
-const handleShortcutSettingChange = () => store.dispatch('im/updateShortcutSettings', localSettings.shortcuts)
-const handleDataSettingChange = () => store.dispatch('im/updateDataSettings', localSettings.data)
+const handleSettingsUpdate = (newSettings) => {
+  // 实时更新 store (Vuex store is reactive, usually handled by mutations)
+  // 这里我们假设 newSettings 是完整的设置对象
+  // 实际上 store.commit 会触发 UI 更新
+}
 
+const saveSettings = () => {
+  // 如果需要持久化到后端，可以在这里调用 API
+  // 目前 store watcher 会处理 localStorage 持久化
+  
+  // 对于 modelValue update，由于我们是 update:modelValue，组件内部已经发射了新值
+  // 我们需要在父组件处理这个 payload，或者因为我们传的是 computed settings
+  // 如果子组件直接修改了副本并 emit 回来，我们需要 commit 到 store
+  
+  // 修正：componentEvents 中的 update:modelValue 需要具体的处理函数
+}
+
+// 修正 settings 更新逻辑
+// 子组件 emit 'update:modelValue' 时触发
+const updateSettingsMap = {
+  notification: (val) => store.dispatch('im/updateNotificationSettings', val.notifications),
+  general: (val) => store.dispatch('im/updateGeneralSettings', val.general),
+  storage: (val) => store.dispatch('im/updateDataSettings', val.data),
+}
+
+// 覆盖上面的 handleSettingsUpdate
+const realHandleSettingsUpdate = (newSettings) => {
+  if (updateSettingsMap[activeMenu.value]) {
+    updateSettingsMap[activeMenu.value](newSettings)
+  } else {
+    // Fallback: update whole settings if needed, or specific sections
+    // 我们的子组件返回的是整个 settings 结构副本
+    store.commit('im/UPDATE_SETTINGS', newSettings)
+  }
+}
+
+// 重新绑定事件
+watch(activeMenu, () => {
+    // 切换菜单时重新计算 cache
+    if (activeMenu.value === 'storage') calculateCacheSize()
+})
+
+// 重写 computed events 以使用正确的 handler
+const finalComponentEvents = computed(() => {
+    const events = componentEvents.value
+    if (events['update:modelValue']) {
+        events['update:modelValue'] = realHandleSettingsUpdate
+    }
+    return events
+})
+
+// 缓存清理
 const handleClearCache = () => {
   ElMessageBox.confirm('清理缓存将释放本地空间，但图片和文件需要重新下载。是否继续？', '清理缓存', {
     confirmButtonText: '确定',
@@ -339,6 +283,7 @@ const handleClearCache = () => {
   })
 }
 
+// 聊天导出
 const handleExportChat = () => {
   const dataStr = JSON.stringify(store.state.im.message?.messages || [], null, 2)
   const blob = new Blob([dataStr], { type: 'application/json' })
@@ -350,192 +295,230 @@ const handleExportChat = () => {
   ElMessage.success('备份已导出')
 }
 
-const checkUpdate = () => ElMessage.success('当前已是最新版本')
-
-const handleSubmitFeedback = async () => {
-  if (!feedbackForm.description.trim()) return ElMessage.warning('请输入描述内容')
-  feedbackSubmitting.value = true
-  await new Promise(r => setTimeout(r, 800))
-  ElMessage.success('提交成功')
-  feedbackForm.description = ''
-  feedbackSubmitting.value = false
+// 主题变更处理
+const handleThemeChange = (themeData) => {
+  // 可以在这里将主题数据保存到后端或 store
+  console.log('主题已变更:', themeData)
 }
 
-// 监听主题变化
-watch(() => localSettings.general.theme, (val) => {
-  if (val !== themeMode.value) setThemeMode(val)
-}, { immediate: true })
-
-// 监听设置变化同步到 store
-watch(localSettings, (newVal) => {
-  if (JSON.stringify(newVal) !== JSON.stringify(settings.value)) {
-    store.commit('im/UPDATE_SETTINGS', JSON.parse(JSON.stringify(newVal)))
-  }
-}, { deep: true })
-
-// 监听弹窗显示状态
+// 监听
 watch(() => props.modelValue, (val) => {
   visible.value = val
   if (val && props.defaultMenu) activeMenu.value = props.defaultMenu
+  if (val) calculateCacheSize()
 })
 watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
+watch(() => settings.value.general?.theme, (val) => {
+    if (val && val !== themeMode.value) setThemeMode(val)
+}, { immediate: true })
+
+onMounted(() => {
+  window.addEventListener('resize', () => {
+    windowWidth.value = window.innerWidth
+  })
+})
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/design-tokens.scss' as *;
-
-// ============================================================================
-// 对话框
-// ============================================================================
-.system-settings-dialog {
-  :deep(.el-dialog) {
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  :deep(.el-dialog__header) { display: none; }
-  :deep(.el-dialog__body) {
-    padding: 0;
-    height: 600px;
-    background: var(--dt-bg-card);
-  }
+// Dialog Styles Overlay
+:deep(.el-dialog) {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+  margin-top: 8vh !important;
+  background: transparent;
 }
 
-// ============================================================================
-// 容器
-// ============================================================================
-.settings-container {
+:deep(.el-dialog__header) {
+  display: none;
+}
+
+:deep(.el-dialog__body) {
+  padding: 0;
+  height: 640px;
+  background: var(--dt-bg-body);
+}
+
+.settings-layout {
   display: flex;
   height: 100%;
+  background: var(--dt-bg-body);
 }
 
-// ============================================================================
-// 左侧导航
-// ============================================================================
-.settings-nav {
-  width: 180px;
-  flex-shrink: 0;
+// Sidebar
+.settings-sidebar {
+  width: 220px;
+  background: var(--dt-bg-sidebar); // slightly darker/lighter than body
+  border-right: 1px solid var(--dt-border-light);
   display: flex;
   flex-direction: column;
-  background: #f5f5f5;
-  border-right: 1px solid var(--dt-border-light);
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+  position: relative;
+  
+  @media (max-width: 1024px) {
+    width: 180px;
+  }
+  
+  @media (max-width: 768px) {
+    width: 64px;
+  }
 
   .dark & {
-    background: #1e1e1e;
+    background: #181818;
     border-right-color: var(--dt-border-dark);
+  }
+  
+  // 添加滑动手势提示（移动端）
+  @media (max-width: 768px) {
+    &::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 40px;
+      background: var(--dt-brand-color);
+      border-radius: 2px;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+    }
+    
+    &:hover::after {
+      opacity: 0.8;
+    }
   }
 }
 
-.nav-title {
-  padding: 20px 16px 12px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
 }
 
-.nav-list {
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--dt-brand-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.sidebar-nav {
   flex: 1;
-  padding: 0 8px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
   height: 40px;
   padding: 0 12px;
-  margin: 2px 0;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   color: var(--dt-text-secondary);
-  font-size: 14px;
   transition: all 0.2s;
-
-  .nav-icon {
-    font-size: 18px;
-  }
-
-  .nav-label {
-    flex: 1;
-  }
-
+  
   &:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--dt-bg-hover);
     color: var(--dt-text-primary);
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.06);
-    }
   }
-
+  
   &.active {
-    background: #e6f4ff;
+    background: var(--dt-brand-color-light);
     color: var(--dt-brand-color);
-
-    .dark & {
-      background: rgba(22, 119, 255, 0.15);
+    font-weight: 500;
+    
+    .nav-icon {
+      color: var(--dt-brand-color);
     }
   }
 }
 
-.nav-footer {
-  padding: 12px;
-  border-top: 1px solid var(--dt-border-light);
+.nav-icon {
+  font-size: 18px;
+  margin-right: 12px;
+}
 
+.nav-label {
+  font-size: 14px;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--dt-border-light);
+  display: flex;
+  align-items: center;
+  
   .dark & {
     border-top-color: var(--dt-border-dark);
   }
 }
 
-.current-user {
+.user-avatar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px;
-  border-radius: 6px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.2s;
-
+  transition: all 0.2s;
+  
   &:hover {
-    background: rgba(0, 0, 0, 0.04);
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.06);
-    }
+    background: var(--dt-bg-hover);
   }
-
-  .user-name {
-    flex: 1;
-    font-size: 13px;
-    color: var(--dt-text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  
+  &.active {
+    box-shadow: 0 0 0 2px var(--dt-brand-color);
   }
 }
 
-// ============================================================================
-// 右侧内容
-// ============================================================================
-.settings-content {
+// Main Content
+.settings-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-width: 0;
+  background: var(--dt-bg-body);
 }
 
-.content-header {
+.main-header {
+  height: 64px;
+  padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
   border-bottom: 1px solid var(--dt-border-light);
-
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    padding: 0 16px;
+  }
+  
   .dark & {
     border-bottom-color: var(--dt-border-dark);
   }
 }
 
-.content-title {
+.header-title {
   font-size: 18px;
   font-weight: 600;
   color: var(--dt-text-primary);
@@ -543,323 +526,119 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 }
 
 .close-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
+  font-size: 20px;
   color: var(--dt-text-secondary);
-
+  
   &:hover {
-    background: var(--dt-bg-hover);
     color: var(--dt-text-primary);
+    background: var(--dt-bg-hover);
   }
 }
 
-.content-body {
+.main-content {
   flex: 1;
+  padding: 32px;
   overflow-y: auto;
-  padding: 20px 24px;
-
+  // 确保滚动区域正确
+  -webkit-overflow-scrolling: touch;
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+  
+  // 优化滚动条样式
   &::-webkit-scrollbar {
     width: 6px;
   }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
   &::-webkit-scrollbar-thumb {
-    background: var(--dt-border-color);
+    background-color: rgba(0, 0, 0, 0.2);
     border-radius: 3px;
-  }
-}
-
-// ============================================================================
-// 设置分组
-// ============================================================================
-.setting-section {
-  max-width: 600px;
-}
-
-.profile-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
-  margin-bottom: 20px;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-
-  .profile-info {
-    flex: 1;
-
-    .profile-name {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--dt-text-primary);
-      margin: 0 0 4px 0;
-    }
-
-    .profile-detail {
-      font-size: 13px;
-      color: var(--dt-text-tertiary);
-      margin: 0;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.3);
     }
   }
 }
 
-.setting-group {
-  margin-bottom: 24px;
-}
-
-.group-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--dt-text-quaternary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 8px 12px;
-}
-
-.setting-list {
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
-  overflow: hidden;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-}
-
-.setting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--dt-border-light);
-  cursor: pointer;
-  transition: background 0.2s;
-
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background: var(--dt-bg-hover);
-  }
-
-  .setting-row-info {
-    flex: 1;
-
-    .setting-row-label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--dt-text-primary);
-      margin-bottom: 2px;
-    }
-
-    .setting-row-desc {
-      font-size: 12px;
-      color: var(--dt-text-tertiary);
-    }
-  }
-
-  .setting-row-arrow {
-    color: var(--dt-text-quaternary);
-    transition: transform 0.2s;
-  }
-
-  &:hover .setting-row-arrow {
-    transform: translateX(2px);
-  }
-}
-
-// ============================================================================
-// FAQ
-// ============================================================================
-.faq-list {
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
-  overflow: hidden;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-}
-
-.faq-item {
-  border-bottom: 1px solid var(--dt-border-light);
-
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.faq-question {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--dt-text-primary);
-  transition: background 0.2s;
-
-  &:hover {
-    background: var(--dt-bg-hover);
-  }
-
-  .el-icon {
-    color: var(--dt-text-quaternary);
-    transition: transform 0.2s;
-
-    &.is-expanded {
-      transform: rotate(90deg);
-    }
-  }
-}
-
-.faq-answer {
-  padding: 0 16px 14px;
-  font-size: 13px;
-  color: var(--dt-text-secondary);
-  line-height: 1.6;
-}
-
-// ============================================================================
-// 反馈表单
-// ============================================================================
-.feedback-form {
-  padding: 16px;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-
-  :deep(.el-form-item) {
-    margin-bottom: 16px;
-  }
-
-  :deep(.el-form-item__label) {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--dt-text-quaternary);
-  }
-}
-
-// ============================================================================
-// 关于页面
-// ============================================================================
-.about-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 40px;
-  text-align: center;
-
-  .app-logo {
-    width: 80px;
-    height: 80px;
-    background: var(--dt-brand-color);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-
-    .logo-text {
-      font-size: 28px;
-      font-weight: 700;
-      color: #fff;
-    }
-  }
-
-  .app-name {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--dt-text-primary);
-    margin: 0 0 8px 0;
-  }
-
-  .app-version {
-    font-size: 13px;
-    color: var(--dt-text-tertiary);
-    margin: 0 0 20px 0;
-  }
-
-  .update-btn {
-    margin-bottom: 24px;
-  }
-
-  .app-copyright {
-    font-size: 12px;
-    color: var(--dt-text-quaternary);
-    margin: 0;
-  }
-}
-
-// ============================================================================
-// 快捷键显示
-// ============================================================================
-.shortcut-key {
-  display: inline-block;
-  padding: 4px 8px;
-  background: var(--dt-bg-body);
-  border: 1px solid var(--dt-border-color);
-  border-radius: 4px;
-  font-size: 12px;
-  font-family: monospace;
-  font-weight: 500;
-  color: var(--dt-text-secondary);
-}
-
-// ============================================================================
-// 分段控件
-// ============================================================================
-:deep(.el-segmented) {
-  --el-segmented-bg-color: var(--dt-bg-body);
-  --el-segmented-item-selected-bg-color: var(--dt-brand-color);
-  --el-segmented-item-selected-text-color: #fff;
-  --el-segmented-item-hover-bg-color: var(--dt-bg-hover);
-}
-
-// ============================================================================
-// 响应式
-// ============================================================================
+// 增强的移动端适配
 @media (max-width: 768px) {
-  .settings-nav {
-    display: none;
+  .settings-sidebar {
+    width: 64px; // Collapsed sidebar
+    
+    .sidebar-header {
+      justify-content: center;
+      padding: 0;
+      height: 56px; // 稍微减小高度
+    }
+    
+    .nav-item {
+      justify-content: center;
+      padding: 0;
+      height: 48px; // 增大触摸区域
+      
+      // 添加点击波纹效果
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+    
+    .nav-icon {
+      margin-right: 0;
+      font-size: 22px;
+    }
+    
+    .nav-label {
+      display: none;
+    }
+    
+    .sidebar-footer {
+      justify-content: center;
+      padding: 12px;
+    }
   }
-
-  .settings-container {
-    flex-direction: column;
+  
+  .main-header {
+    padding: 0 16px;
+    height: 56px; // 与侧边栏保持一致
+    
+    .header-title {
+      font-size: 16px;
+    }
   }
-
-  .content-header {
-    padding: 12px 16px;
-  }
-
-  .content-body {
+  
+  .main-content {
     padding: 16px;
+  }
+  
+  // 对话框全屏时的优化
+  :deep(.el-dialog) {
+    height: 100vh;
+    margin: 0 !important;
+    
+    .el-dialog__body {
+      height: 100vh;
+      padding: 0;
+    }
+  }
+}
+
+// 平板适配
+@media (min-width: 769px) and (max-width: 1024px) {
+  .settings-sidebar {
+    width: 180px;
+    
+    .nav-label {
+      font-size: 13px;
+    }
+  }
+  
+  .main-content {
+    padding: 24px;
   }
 }
 </style>

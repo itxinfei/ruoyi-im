@@ -35,11 +35,11 @@
 
     <select id="selectAnnouncementPage" resultMap="BaseResultMap">
         SELECT a.*,
-               u.nick_name as publisher_name,
+               u.nickname as publisher_name,
                u.avatar as publisher_avatar,
                d.dept_name as department_name
         FROM im_announcement a
-        LEFT JOIN sys_user u ON a.publisher_id = u.user_id
+        LEFT JOIN im_user u ON a.publisher_id = u.id
         LEFT JOIN sys_dept d ON a.department_id = d.dept_id
         <where>
             <if test="req.keyword != null and req.keyword != ''">
@@ -95,10 +95,10 @@
 
     <select id="selectPinnedAnnouncements" resultMap="BaseResultMap">
         SELECT a.*,
-               u.nick_name as publisher_name,
+               u.nickname as publisher_name,
                u.avatar as publisher_avatar
         FROM im_announcement a
-        LEFT JOIN sys_user u ON a.publisher_id = u.user_id
+        LEFT JOIN im_user u ON a.publisher_id = u.id
         WHERE a.is_pinned = 1
           AND a.status = 'PUBLISHED'
           AND (a.expiry_time IS NULL OR a.expiry_time &gt; NOW())
@@ -107,10 +107,10 @@
 
     <select id="selectLatestAnnouncements" resultMap="BaseResultMap">
         SELECT a.*,
-               u.nick_name as publisher_name,
+               u.nickname as publisher_name,
                u.avatar as publisher_avatar
         FROM im_announcement a
-        LEFT JOIN sys_user u ON a.publisher_id = u.user_id
+        LEFT JOIN im_user u ON a.publisher_id = u.id
         WHERE a.status = 'PUBLISHED'
           AND (a.expiry_time IS NULL OR a.expiry_time &gt; NOW())
         ORDER BY a.publish_time DESC

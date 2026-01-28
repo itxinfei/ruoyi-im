@@ -4,7 +4,7 @@
       v-model="visible"
       title="创建群组"
       width="600px"
-      :close-on-click-modal="false"
+      :close-on-click-modal="true"
       @close="handleClose"
     >
       <el-form

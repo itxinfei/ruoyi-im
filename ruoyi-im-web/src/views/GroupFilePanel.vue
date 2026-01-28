@@ -107,9 +107,30 @@
 
       <!-- 空状态 -->
       <div v-if="fileList.length === 0 && !loading" class="empty-state">
-        <el-empty description="暂无文件">
-          <el-button type="primary" @click="handleUpload">上传第一个文件</el-button>
-        </el-empty>
+        <div class="empty-illustration">
+          <div class="folder-icon">
+            <span class="material-icons-outlined">folder_open</span>
+          </div>
+          <div class="floating-icons">
+            <span class="icon icon-1 material-icons-outlined">image</span>
+            <span class="icon icon-2 material-icons-outlined">description</span>
+            <span class="icon icon-3 material-icons-outlined">video_file</span>
+          </div>
+        </div>
+        <h3 class="empty-title">群文件为空</h3>
+        <p class="empty-description">
+          {{ searchKeyword ? '没有找到匹配的文件' : '暂无群文件，上传文件与群成员共享' }}
+        </p>
+        <div v-if="!searchKeyword" class="empty-actions">
+          <el-button type="primary" @click="handleUpload">
+            <span class="material-icons-outlined">upload_file</span>
+            上传文件
+          </el-button>
+          <el-button @click="handleSelectCategory('全部')">
+            <span class="material-icons-outlined">refresh</span>
+            刷新列表
+          </el-button>
+        </div>
       </div>
 
       <!-- 加载状态 -->
@@ -370,7 +391,6 @@ const handleConfirmUpload = async () => {
 // 文件操作
 const handleFileClick = (file) => {
   // 可以打开预览
-  console.log('点击文件', file)
 }
 
 const handleFileCommand = async (command, file) => {
@@ -714,8 +734,118 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 300px;
+    min-height: 400px;
     color: var(--dt-text-tertiary);
+  }
+
+  // 空状态插画
+  .empty-illustration {
+    position: relative;
+    width: 160px;
+    height: 120px;
+    margin-bottom: 24px;
+  }
+
+  .folder-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(255, 107, 107, 0.25);
+
+    .material-icons-outlined {
+      font-size: 40px;
+      color: #fff;
+    }
+  }
+
+  .floating-icons {
+    position: absolute;
+    inset: 0;
+
+    .icon {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      animation: float 3s ease-in-out infinite;
+
+      .material-icons-outlined {
+        font-size: 20px;
+      }
+
+      &.icon-1 {
+        top: 8px;
+        left: 16px;
+        color: #1677ff;
+        animation-delay: 0s;
+      }
+
+      &.icon-2 {
+        top: 16px;
+        right: 12px;
+        color: #52c41a;
+        animation-delay: 0.5s;
+      }
+
+      &.icon-3 {
+        bottom: 8px;
+        right: 20px;
+        color: #722ed1;
+        animation-delay: 1s;
+      }
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  .empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin-bottom: 8px;
+  }
+
+  .empty-description {
+    font-size: 13px;
+    color: var(--dt-text-secondary);
+    margin-bottom: 24px;
+    max-width: 280px;
+    text-align: center;
+  }
+
+  .empty-actions {
+    display: flex;
+    gap: 12px;
+
+    .el-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .material-icons-outlined {
+        font-size: 18px;
+      }
+    }
   }
 
   .loading-state {

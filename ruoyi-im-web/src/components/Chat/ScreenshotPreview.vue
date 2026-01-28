@@ -3,7 +3,7 @@
     v-model="visible"
     title="截图预览"
     width="600px"
-    :close-on-click-modal="false"
+    :close-on-click-modal="true"
     :show-close="true"
     @close="handleClose"
     class="screenshot-preview-dialog"

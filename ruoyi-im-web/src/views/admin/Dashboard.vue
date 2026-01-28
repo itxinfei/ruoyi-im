@@ -176,7 +176,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { User, Star, ChatDotRound, ChatLineSquare } from '@element-plus/icons-vue'
+import { User, ChatDotRound, ChatLineSquare } from '@element-plus/icons-vue'
 import { getOverview, getUserStats, getMessageAdminStats } from '@/api/admin'
 
 const loading = ref(false)

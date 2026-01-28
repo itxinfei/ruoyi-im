@@ -4,11 +4,9 @@
       <!-- 新侧边导航 -->
       <ImSideNavNew
         :active-module="activeModule"
-        :collapsed="isSidebarCollapsed"
         @switch-module="handleSwitchModule"
         @open-search="showGlobalSearch = true"
         @open-settings="handleOpenSettings"
-        @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
       />
 
       <!-- 主内容区 -->
@@ -90,7 +88,6 @@ import GlobalSearchDialog from '@/components/Common/GlobalSearchDialog.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
-const isSidebarCollapsed = ref(false)
 const currentSession = computed(() => store.state.im.session?.currentSession || null)
 const { isDark } = useTheme()
 
@@ -284,8 +281,8 @@ const handleKeydown = (e) => {
 }
 
 .chat-layout > :first-child {
-  // SessionPanel
-  width: 280px;
+  // SessionPanel - 使用设计令牌变量
+  width: var(--dt-session-panel-width);
   flex-shrink: 0;
 }
 
@@ -310,7 +307,8 @@ const handleKeydown = (e) => {
 .main-content-area > :not(.chat-layout) {
   width: 100%;
   height: 100%;
-  display: block;
+  display: flex;
+  overflow: hidden;
 }
 
 // ============================================================================

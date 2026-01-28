@@ -1,64 +1,94 @@
 <template>
   <div class="ding-message-bubble" :class="`ding-${dingType}`">
+    <!-- 顶部装饰线 -->
+    <div class="ding-decoration-line"></div>
+
+    <!-- 头部区域 -->
     <div class="ding-header">
-      <div class="ding-icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
-          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          <circle cx="12" cy="12" r="3" fill="white"/>
-        </svg>
+      <div class="ding-icon-wrapper">
+        <div class="ding-icon" :class="`priority-${priority.toLowerCase()}`">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="3" fill="white"/>
+          </svg>
+        </div>
+        <div class="icon-glow" :class="`priority-${priority.toLowerCase()}`"></div>
       </div>
       <div class="ding-title">
-        <span class="ding-label">DING</span>
-        <span v-if="priority === 'URGENT'" class="priority-urgent">紧急</span>
-        <span v-else class="priority-normal">普通</span>
+        <div class="ding-label-wrapper">
+          <span class="ding-label">DING</span>
+          <div class="label-glow"></div>
+        </div>
+        <span v-if="priority === 'URGENT'" class="priority-badge priority-urgent">
+          <span class="priority-icon">⚡</span>
+          <span>紧急</span>
+          <div class="priority-pulse"></div>
+        </span>
+        <span v-else class="priority-badge priority-normal">
+          <span class="priority-icon">📢</span>
+          <span>普通</span>
+        </span>
         <span class="ding-type-label">{{ dingTypeLabel }}</span>
       </div>
     </div>
 
+    <!-- 内容区域 -->
     <div class="ding-content">
       {{ content }}
     </div>
 
+    <!-- 底部区域 -->
     <div class="ding-footer">
       <div class="read-status">
-        <span class="read-count">已读 {{ readCount }}/{{ sendCount }} 人</span>
-        <el-progress
-          :percentage="readPercentage"
-          :show-text="false"
-          :stroke-width="4"
-          :color="priority === 'URGENT' ? '#f56c6c' : '#409eff'"
-        />
+        <div class="read-info">
+          <span class="read-count">
+            <span class="read-icon">👁️</span>
+            已读 {{ readCount }}/{{ sendCount }} 人
+          </span>
+          <span class="read-percentage">{{ readPercentage }}%</span>
+        </div>
+        <div class="progress-wrapper">
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              :class="`priority-${priority.toLowerCase()}`"
+              :style="{ width: `${readPercentage}%` }"
+            >
+              <div class="progress-glow"></div>
+            </div>
+          </div>
+          <div class="progress-bg"></div>
+        </div>
       </div>
       <div class="ding-actions">
-        <el-button
+        <button
           v-if="!isRead && !isSender"
-          type="primary"
-          size="small"
+          class="action-btn action-btn--primary"
           @click="handleMarkAsRead"
         >
-          标记已读
-        </el-button>
-        <el-button
+          <span class="btn-icon">✓</span>
+          <span>标记已读</span>
+        </button>
+        <button
           v-if="isSender"
-          type="danger"
-          size="small"
-          plain
+          class="action-btn action-btn--danger"
           @click="handleCancel"
         >
-          取消DING
-        </el-button>
-        <el-button
-          size="small"
-          @click="handleViewDetail"
-        >
-          查看详情
-        </el-button>
+          <span class="btn-icon">✕</span>
+          <span>取消DING</span>
+        </button>
+        <button class="action-btn action-btn--default" @click="handleViewDetail">
+          <span class="btn-icon">📋</span>
+          <span>查看详情</span>
+        </button>
       </div>
     </div>
 
+    <!-- 过期时间 -->
     <div v-if="expireTime" class="ding-expire">
-      过期时间：{{ formatTime(expireTime) }}
+      <span class="expire-icon">⏰</span>
+      <span>过期时间：{{ formatTime(expireTime) }}</span>
     </div>
   </div>
 </template>
@@ -163,125 +193,520 @@ const handleViewDetail = () => {
 </script>
 
 <style lang="scss" scoped>
+// ============================================================================
+// 容器
+// ============================================================================
 .ding-message-bubble {
-  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
-  border: 1px solid #ffd6d6;
-  border-radius: 8px;
-  padding: 12px;
-  min-width: 280px;
-  max-width: 400px;
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  min-width: 300px;
+  max-width: 450px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
+    transition: opacity 0.3s;
+    opacity: 0;
+  }
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .ding-icon {
+      transform: scale(1.1) rotate(-5deg);
+    }
+  }
+
+  // 不同类型的渐变背景
   &.ding-APP {
-    background: linear-gradient(135deg, #e8f4ff 0%, #fff 100%);
-    border-color: #b3d8ff;
+    background: linear-gradient(135deg, #e8f4ff 0%, #f0f7ff 100%);
+    border-color: rgba(22, 119, 255, 0.2);
   }
 
   &.ding-SMS {
-    background: linear-gradient(135deg, #fff7e6 0%, #fff 100%);
-    border-color: #ffd591;
+    background: linear-gradient(135deg, #fff7e6 0%, #fff9ed 100%);
+    border-color: rgba(250, 173, 20, 0.2);
   }
 
   &.ding-CALL {
-    background: linear-gradient(135deg, #fff1f0 0%, #fff 100%);
-    border-color: #ffccc7;
+    background: linear-gradient(135deg, #fff1f0 0%, #fff5f3 100%);
+    border-color: rgba(245, 74, 69, 0.2);
+  }
+}
+
+// ============================================================================
+// 装饰线
+// ============================================================================
+.ding-decoration-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
+  opacity: 0.8;
+}
+
+// ============================================================================
+// 头部区域
+// ============================================================================
+.ding-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.ding-icon-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ding-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  svg {
+    width: 22px;
+    height: 22px;
   }
 
-  .ding-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+  &.priority-urgent {
+    background: linear-gradient(135deg, #f54a45 0%, #d32f2f 100%);
+    animation: urgentPulse 2s ease-in-out infinite;
+  }
 
-    .ding-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
+  &.priority-normal {
+    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+  }
 
-      svg {
-        width: 18px;
-        height: 18px;
-      }
+  @keyframes urgentPulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 4px 12px rgba(245, 74, 69, 0.3);
     }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(245, 74, 69, 0.5);
+    }
+  }
+}
 
-    .ding-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 500;
+.icon-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.3;
+  animation: iconGlowPulse 3s ease-in-out infinite;
+  z-index: 0;
 
-      .ding-label {
-        font-weight: 700;
-        font-size: 16px;
-        color: #ee5a6f;
-      }
+  &.priority-urgent {
+    background: #f54a45;
+    animation: urgentGlow 1.5s ease-in-out infinite;
+  }
 
-      .priority-urgent {
-        padding: 2px 8px;
-        background: #fef0f0;
-        color: #f56c6c;
-        border-radius: 4px;
-        font-size: 12px;
-      }
+  &.priority-normal {
+    background: #1677ff;
+  }
 
-      .priority-normal {
-        padding: 2px 8px;
-        background: #f0f9ff;
-        color: #409eff;
-        border-radius: 4px;
-        font-size: 12px;
-      }
-
-      .ding-type-label {
-        color: #909399;
-        font-size: 12px;
-      }
+  @keyframes iconGlowPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.5;
     }
   }
 
-  .ding-content {
-    color: #303133;
+  @keyframes urgentGlow {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.4;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0.6;
+    }
+  }
+}
+
+.ding-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.ding-label-wrapper {
+  position: relative;
+}
+
+.ding-label {
+  font-weight: 800;
+  font-size: 18px;
+  background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 1;
+}
+
+.label-glow {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(22, 119, 255, 0.3) 0%, transparent 100%);
+  border-radius: 2px;
+}
+
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+
+  .priority-icon {
     font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 12px;
-    white-space: pre-wrap;
-    word-break: break-word;
   }
 
-  .ding-footer {
-    .read-status {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+  &.priority-urgent {
+    background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%);
+    color: #f54a45;
+    border: 1px solid rgba(245, 74, 69, 0.2);
+  }
 
-      .read-count {
-        font-size: 12px;
-        color: #909399;
-        min-width: 100px;
-      }
+  &.priority-normal {
+    background: linear-gradient(135deg, #f0f9ff 0%, #bae7ff 100%);
+    color: #1677ff;
+    border: 1px solid rgba(22, 119, 255, 0.2);
+  }
 
-      .el-progress {
-        flex: 1;
-      }
+  .priority-pulse {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0.1;
+    animation: priorityBadgePulse 2s ease-in-out infinite;
+  }
+
+  &.priority-urgent .priority-pulse {
+    animation: urgentBadgePulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes priorityBadgePulse {
+    0%, 100% {
+      opacity: 0.1;
     }
-
-    .ding-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+    50% {
+      opacity: 0.2;
     }
   }
 
-  .ding-expire {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #909399;
+  @keyframes urgentBadgePulse {
+    0%, 100% {
+      opacity: 0.15;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.3;
+      transform: scale(1.05);
+    }
   }
+}
+
+.ding-type-label {
+  color: #999;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+// ============================================================================
+// 内容区域
+// ============================================================================
+.ding-content {
+  color: #1a1a1a;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 1;
+}
+
+// ============================================================================
+// 底部区域
+// ============================================================================
+.ding-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.read-status {
+  margin-bottom: 14px;
+}
+
+.read-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.read-count {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .read-icon {
+    font-size: 14px;
+  }
+}
+
+.read-percentage {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1677ff;
+}
+
+.progress-wrapper {
+  position: relative;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+
+  &.priority-urgent {
+    background: linear-gradient(90deg, #f54a45 0%, #ff7875 100%);
+  }
+
+  &.priority-normal {
+    background: linear-gradient(90deg, #1677ff 0%, #4096ff 100%);
+  }
+
+  .progress-glow {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 100%);
+    border-radius: 10px;
+    animation: progressShine 2s ease-in-out infinite;
+  }
+
+  @keyframes progressShine {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+  }
+}
+
+.ding-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  .btn-icon {
+    font-size: 14px;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    &::before {
+      opacity: 1;
+      animation: btnShimmer 2s infinite;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @keyframes btnShimmer {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 100% 0;
+    }
+  }
+
+  &--primary {
+    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+  }
+
+  &--danger {
+    background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%);
+    color: #f54a45;
+    border: 1px solid rgba(245, 74, 69, 0.2);
+  }
+
+  &--default {
+    background: rgba(0, 0, 0, 0.04);
+    color: #666;
+  }
+}
+
+// ============================================================================
+// 过期时间
+// ============================================================================
+.ding-expire {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .expire-icon {
+    font-size: 14px;
+  }
+}
+
+// ============================================================================
+// 暗色模式
+// ============================================================================
+.dark .ding-message-bubble {
+  background: linear-gradient(135deg, #1a1f2e 0%, #141925 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+
+  &::before {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.03) 100%);
+  }
+
+  &.ding-APP {
+    background: linear-gradient(135deg, #0d1d2d 0%, #0a1929 100%);
+    border-color: rgba(22, 119, 255, 0.2);
+  }
+
+  &.ding-SMS {
+    background: linear-gradient(135deg, #2d1f0f 0%, #25190a 100%);
+    border-color: rgba(250, 173, 20, 0.2);
+  }
+
+  &.ding-CALL {
+    background: linear-gradient(135deg, #2d1312 0%, #25100f 100%);
+    border-color: rgba(245, 74, 69, 0.2);
+  }
+}
+
+.dark .ding-content {
+  color: #e8e8e8;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .read-count {
+  color: #999;
+}
+
+.dark .progress-wrapper {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark .ding-expire {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #888;
+}
+
+.dark .action-btn--default {
+  background: rgba(255, 255, 255, 0.06);
+  color: #999;
 }
 </style>

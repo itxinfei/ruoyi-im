@@ -25,6 +25,10 @@
               <span class="material-icons-outlined item-icon">person_add</span>
               添加好友
             </el-dropdown-item>
+            <el-dropdown-item divided command="manageGroups">
+              <span class="material-icons-outlined item-icon">folder</span>
+              管理分组
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -58,78 +62,131 @@
       <!-- 骨架屏加载状态 -->
       <SkeletonLoader v-if="loading && sessions.length === 0" type="session" :count="5" />
 
-      <!-- 会话列表 -->
-      <TransitionGroup name="session-list">
+      <!-- 分组会话列表 -->
+      <template v-if="!loading">
         <div
-          v-for="session in sortedSessions"
-          :key="session.id"
-          class="session-item"
-          :class="{
-            active: isActiveSession(session),
-            pinned: session.isPinned,
-            unread: session.unreadCount > 0
-          }"
-          :style="{ animationDelay: `${getSessionIndex(session) * 50}ms` }"
-          @click="handleSessionClick(session)"
-          @contextmenu.prevent="handleContextMenu($event, session)"
+          v-for="groupItem in groupedSessions"
+          :key="groupItem.group.id"
+          class="session-group"
         >
-        <div class="avatar-wrapper">
-          <!-- 群组头像 -->
-          <template v-if="session.type === 'GROUP'">
-            <div class="session-avatar group-avatar">
-              <span class="material-icons-outlined">groups</span>
-            </div>
-          </template>
-          <!-- 单聊头像 -->
-          <DingtalkAvatar
-            v-else
-            :name="session.name"
-            :user-id="session.targetId"
-            :size="46"
-            shape="square"
-            custom-class="session-avatar"
-            @click="handleAvatarClick($event, session)"
-          />
-          <!-- 在线状态点 -->
-          <span
-            v-if="session.type === 'PRIVATE'"
-            class="status-dot"
-            :class="{ online: isUserOnline(session.targetId) }"
-          ></span>
-          <!-- 未读角标 -->
-          <span
-            v-if="session.unreadCount > 0"
-            class="unread-badge"
-            :class="{ 'badge-dot': session.isMuted }"
+          <!-- 分组标题 -->
+          <div
+            v-if="groupItem.group.name !== '全部消息' || customGroups.length > 0"
+            class="group-header"
+            @click="toggleGroupExpand(groupItem.group.id)"
           >
-            {{ session.isMuted ? '' : (session.unreadCount > 99 ? '99+' : session.unreadCount) }}
-          </span>
-          <!-- 置顶标记 -->
-          <span v-if="session.isPinned && !isActiveSession(session)" class="pin-indicator">
-            置顶
-          </span>
-        </div>
-
-        <div class="session-info">
-          <div class="session-header">
-            <div class="session-name-group">
-              <span class="session-name">{{ session.name }}</span>
-              <span v-if="session.isMuted" class="mute-icon">
-                <span class="material-icons-outlined">notifications_off</span>
+            <div class="group-title-row">
+              <span class="material-icons-outlined group-arrow">
+                {{ isGroupExpanded(groupItem.group.id) ? 'expand_more' : 'chevron_right' }}
               </span>
+              <span class="group-name">{{ groupItem.group.name }}</span>
+              <span class="group-count">({{ groupItem.sessions.length }})</span>
             </div>
-            <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
+            <!-- 分组操作按钮 -->
+            <div v-if="!groupItem.group.isSystem" class="group-actions" @click.stop>
+              <el-dropdown trigger="click" placement="bottom-end">
+                <span class="material-icons-outlined more-icon">more_horiz</span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item @click="handleRenameGroup(groupItem.group)">
+                      <span class="material-icons-outlined item-icon">edit</span>
+                      重命名
+                    </el-dropdown-item>
+                    <el-dropdown-item divided @click="handleDeleteGroup(groupItem.group)">
+                      <span class="material-icons-outlined item-icon danger">delete</span>
+                      删除分组
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </div>
-          <div class="session-preview">
-            <span v-if="session.hasMention" class="mention-tag">@</span>
-            <span v-if="session.lastSenderNickname && session.type === 'GROUP'" class="sender-name">
-              {{ session.lastSenderNickname }}:
-            </span>
-            <span class="preview-text">{{ session.lastMessage || '暂无消息' }}</span>
-          </div>
+
+          <!-- 分组内的会话列表 -->
+          <Transition name="group-expand">
+            <div v-show="isGroupExpanded(groupItem.group.id)" class="group-sessions">
+              <TransitionGroup name="session-list">
+                <div
+                  v-for="session in groupItem.sessions"
+                  :key="session.id"
+                  class="session-item"
+                  :class="{
+                    active: isActiveSession(session),
+                    pinned: session.isPinned,
+                    unread: session.unreadCount > 0
+                  }"
+                  @click="handleSessionClick(session)"
+                  @contextmenu.prevent="handleContextMenu($event, session)"
+                >
+                  <div class="avatar-wrapper">
+                    <!-- 群组头像 -->
+                    <template v-if="session.type === 'GROUP'">
+                      <div class="session-avatar group-avatar">
+                        <span class="material-icons-outlined">groups</span>
+                      </div>
+                    </template>
+                    <!-- 单聊头像 -->
+                    <DingtalkAvatar
+                      v-else
+                      :name="session.name"
+                      :user-id="session.targetId"
+                      :size="40"
+                      shape="square"
+                      custom-class="session-avatar"
+                      @click="handleAvatarClick($event, session)"
+                    />
+                    <!-- 在线状态点 -->
+                    <span
+                      v-if="session.type === 'PRIVATE'"
+                      class="status-dot"
+                      :class="{ online: isUserOnline(session.targetId) }"
+                    ></span>
+                    <!-- 未读角标 -->
+                    <span
+                      v-if="session.unreadCount > 0"
+                      class="unread-badge"
+                      :class="{ 'badge-dot': session.isMuted }"
+                    >
+                      {{ session.isMuted ? '' : (session.unreadCount > 99 ? '99+' : session.unreadCount) }}
+                    </span>
+                    <!-- 置顶标记 -->
+                    <span v-if="session.isPinned && !isActiveSession(session)" class="pin-indicator">
+                      置顶
+                    </span>
+                  </div>
+
+                  <div class="session-info">
+                    <div class="session-header">
+                      <div class="session-name-group">
+                        <span class="session-name">{{ session.name }}</span>
+                        <span v-if="session.isMuted" class="mute-icon">
+                          <span class="material-icons-outlined">notifications_off</span>
+                        </span>
+                        <!-- 草稿标识 -->
+                        <span v-if="hasDraft(session.id)" class="draft-badge">
+                          <span class="material-icons-outlined draft-icon">edit</span>
+                          草稿
+                        </span>
+                      </div>
+                      <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
+                    </div>
+                    <div class="session-preview">
+                      <span v-if="hasDraft(session.id)" class="draft-tag">[草稿]</span>
+                      <span v-else-if="session.hasMention" class="mention-tag">@</span>
+                      <span v-if="session.lastSenderNickname && session.type === 'GROUP' && !hasDraft(session.id)" class="sender-name">
+                        {{ session.lastSenderNickname }}:
+                      </span>
+                      <span class="preview-text">
+                        {{ hasDraft(session.id) ? getDraftPreview(session.id) : (session.lastMessage || '暂无消息') }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </TransitionGroup>
+            </div>
+          </Transition>
         </div>
-      </div>
-      </TransitionGroup>
+      </template>
 
       <!-- 空状态 -->
       <EmptyState
@@ -160,6 +217,39 @@
         {{ contextMenu.session?.isMuted ? '取消免打扰' : '消息免打扰' }}
       </div>
       <div class="menu-divider"></div>
+      <!-- 移动到分组子菜单 -->
+      <el-dropdown
+        v-if="!contextMenu.session?.isPinned"
+        trigger="hover"
+        placement="right"
+        @command="handleMoveSessionToGroup"
+      >
+        <div class="menu-item has-submenu">
+          <span class="material-icons-outlined item-icon">folder</span>
+          移动到分组
+          <span class="material-icons-outlined submenu-arrow">chevron_right</span>
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item
+              v-for="group in customGroups"
+              :key="group.id"
+              :command="group.id"
+            >
+              <span class="material-icons-outlined item-icon">folder</span>
+              {{ group.name }}
+            </el-dropdown-item>
+            <el-dropdown-item
+              v-if="customGroups.length === 0"
+              disabled
+            >
+              <span class="material-icons-outlined item-icon">info</span>
+              暂无自定义分组
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <div class="menu-divider" v-if="!contextMenu.session?.isPinned"></div>
       <div class="menu-item danger" @click="handleDeleteSession">
         <span class="material-icons-outlined item-icon">delete</span>
         删除会话
@@ -175,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
+import { ref, computed, onMounted, onUnmounted, reactive, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
@@ -198,9 +288,57 @@ const searchKeyword = ref('')
 const showCreateGroupDialog = ref(false)
 const showGlobalSearch = ref(false)
 
+// 分组管理相关状态
+const showGroupManageDialog = ref(false)
+const showNewGroupInput = ref(false)
+const newGroupName = ref('')
+const newGroupInputRef = ref(null)
+const expandedGroups = ref(new Set(['pinned', 'default']))
+
 const sessions = computed(() => store.state.im.session?.sessions || [])
 const loading = computed(() => store.state.im.session?.loading || false)
 const userStatus = computed(() => store.state.im.contact?.userStatus || {})
+
+// 分组会话列表
+const groupedSessions = computed(() => store.getters['im/session/groupedSessions'] || [])
+
+// 所有分组列表
+const allGroups = computed(() => store.getters['im/session/sortedGroups'] || [])
+
+// 非系统分组（可管理的分组）
+const customGroups = computed(() => allGroups.value.filter(g => !g.isSystem))
+
+// 草稿状态管理
+const DRAFT_STORAGE_KEY = 'im_message_drafts'
+
+// 从 localStorage 获取所有草稿
+const loadDraftsFromStorage = () => {
+  try {
+    const data = localStorage.getItem(DRAFT_STORAGE_KEY)
+    return data ? JSON.parse(data) : {}
+  } catch (e) {
+    return {}
+  }
+}
+
+// 响应式草稿数据
+const drafts = ref(loadDraftsFromStorage())
+
+// 定期刷新草稿状态（监听 localStorage 变化）
+let draftCheckInterval = null
+
+// 判断会话是否有草稿
+const hasDraft = (conversationId) => {
+  const draft = drafts.value[conversationId]
+  return draft && draft.content && draft.content.trim().length > 0
+}
+
+// 获取草稿预览文本
+const getDraftPreview = (conversationId) => {
+  const draft = drafts.value[conversationId]
+  if (!draft || !draft.content) return ''
+  return draft.content.trim().slice(0, 20)
+}
 
 // 判断用户是否在线
 const isUserOnline = (userId) => {
@@ -230,6 +368,8 @@ const handleCommand = (command) => {
     ElMessage.info('加入群组功能开发中')
   } else if (command === 'contacts') {
     ElMessage.info('添加好友功能开发中')
+  } else if (command === 'manageGroups') {
+    showGroupManageDialog.value = true
   }
 }
 
@@ -340,18 +480,130 @@ const handleDeleteSession = () => {
   }).catch(() => {})
 }
 
+// ========== 分组管理函数 ==========
+
+// 切换分组展开/收起
+const toggleGroupExpand = (groupId) => {
+  store.dispatch('im/session/toggleGroupExpand', groupId)
+  if (expandedGroups.value.has(groupId)) {
+    expandedGroups.value.delete(groupId)
+  } else {
+    expandedGroups.value.add(groupId)
+  }
+}
+
+// 判断分组是否展开
+const isGroupExpanded = (groupId) => {
+  const group = allGroups.value.find(g => g.id === groupId)
+  return group?.isExpanded ?? true
+}
+
+// 显示新建分组输入框
+const showCreateGroupInput = () => {
+  showNewGroupInput.value = true
+  nextTick(() => {
+    newGroupInputRef.value?.focus()
+  })
+}
+
+// 创建新分组
+const handleCreateGroup = () => {
+  const name = newGroupName.value.trim()
+  if (!name) {
+    ElMessage.warning('请输入分组名称')
+    return
+  }
+
+  // 检查重名
+  if (customGroups.value.some(g => g.name === name)) {
+    ElMessage.warning('分组名称已存在')
+    return
+  }
+
+  store.dispatch('im/session/createGroup', {
+    name,
+    order: allGroups.value.length
+  })
+
+  newGroupName.value = ''
+  showNewGroupInput.value = false
+  ElMessage.success('分组创建成功')
+}
+
+// 取消创建分组
+const cancelCreateGroup = () => {
+  newGroupName.value = ''
+  showNewGroupInput.value = false
+}
+
+// 重命名分组
+const handleRenameGroup = (group) => {
+  ElMessageBox.prompt('请输入新的分组名称', '重命名分组', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputValue: group.name,
+    inputPattern: /^.+$/,
+    inputErrorMessage: '分组名称不能为空'
+  }).then(({ value }) => {
+    store.dispatch('im/session/renameGroup', { groupId: group.id, name: value })
+    ElMessage.success('重命名成功')
+  }).catch(() => {})
+}
+
+// 删除分组
+const handleDeleteGroup = (group) => {
+  const sessionCount = groupedSessions.value
+    .find(item => item.group.id === group.id)
+    ?.sessions.length || 0
+
+  const message = sessionCount > 0
+    ? `确定要删除分组"${group.name}"吗？该分组下的 ${sessionCount} 个会话将移至"全部消息"。`
+    : `确定要删除分组"${group.name}"吗？`
+
+  ElMessageBox.confirm(message, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    store.dispatch('im/session/deleteGroup', group.id)
+    ElMessage.success('分组已删除')
+  }).catch(() => {})
+}
+
+// 移动会话到分组（右键菜单）
+const handleMoveSessionToGroup = (groupId) => {
+  if (!contextMenu.session) return
+  store.dispatch('im/session/moveConversationToGroup', {
+    conversationId: contextMenu.session.id,
+    groupId
+  })
+  ElMessage.success('已移动会话')
+  hideContextMenu()
+}
+
 // 排序后的会话列表
 const sortedSessions = computed(() => store.getters['im/session/sortedSessions'])
 
 onMounted(() => {
+  // 初始化分组数据
+  store.dispatch('im/session/initGroups')
   if (sessions.value.length === 0) {
     store.dispatch('im/session/loadSessions')
   }
   window.addEventListener('click', hideContextMenu)
+
+  // 定期刷新草稿状态（每秒检查一次）
+  draftCheckInterval = setInterval(() => {
+    drafts.value = loadDraftsFromStorage()
+  }, 1000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('click', hideContextMenu)
+  if (draftCheckInterval) {
+    clearInterval(draftCheckInterval)
+    draftCheckInterval = null
+  }
 })
 </script>
 
@@ -359,12 +611,12 @@ onUnmounted(() => {
 @use '@/styles/design-tokens.scss' as *;
 
 // ============================================================================
-// 容器
+// 容器 - 使用设计令牌变量
 // ============================================================================
 .session-panel {
   display: flex;
   flex-direction: column;
-  width: 280px;
+  width: var(--dt-session-panel-width);
   flex-shrink: 0;
   border-right: 1px solid var(--dt-border-light);
   background: var(--dt-bg-card);
@@ -593,10 +845,6 @@ onUnmounted(() => {
     &::before {
       height: 24px;
     }
-
-    .session-avatar {
-      transform: scale(1.02); // 减小缩放幅度
-    }
   }
 
   &.active {
@@ -658,8 +906,8 @@ onUnmounted(() => {
 }
 
 .session-avatar {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--dt-radius-lg);
   overflow: hidden;
   display: flex;
@@ -989,5 +1237,151 @@ onUnmounted(() => {
       color: var(--dt-text-secondary);
     }
   }
+}
+
+// ============================================================================
+// 分组样式
+// ============================================================================
+.session-group {
+  margin-bottom: 4px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--dt-transition-fast);
+  border-radius: var(--dt-radius-md);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+
+    .group-name {
+      color: var(--dt-text-primary);
+    }
+  }
+
+  .dark &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+.group-title-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.group-arrow {
+  font-size: 18px;
+  color: var(--dt-text-tertiary);
+  transition: transform var(--dt-transition-fast);
+}
+
+.group-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dt-text-secondary);
+  transition: color var(--dt-transition-fast);
+}
+
+.group-count {
+  font-size: 11px;
+  color: var(--dt-text-quaternary);
+  margin-left: 2px;
+}
+
+.group-actions {
+  opacity: 0;
+  transition: opacity var(--dt-transition-fast);
+}
+
+.group-header:hover .group-actions {
+  opacity: 1;
+}
+
+.more-icon {
+  font-size: 18px;
+  color: var(--dt-text-quaternary);
+  padding: 2px;
+  border-radius: var(--dt-radius-sm);
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--dt-text-secondary);
+  }
+}
+
+.group-sessions {
+  overflow: hidden;
+}
+
+// 分组展开/收起过渡动画
+.group-expand-enter-active,
+.group-expand-leave-active {
+  transition: all 0.25s var(--dt-ease-out);
+}
+
+.group-expand-enter-from,
+.group-expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.group-expand-enter-to,
+.group-expand-leave-from {
+  opacity: 1;
+  max-height: 1000px;
+}
+
+// 右键菜单子菜单样式
+.context-menu {
+  .has-submenu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .submenu-arrow {
+      font-size: 16px;
+      color: var(--dt-text-quaternary);
+      margin-left: auto;
+    }
+  }
+
+  :deep(.el-dropdown) {
+    width: 100%;
+  }
+}
+
+// ============================================================================
+// 草稿标识样式
+// ============================================================================
+.draft-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  background: rgba(103, 194, 58, 0.1);
+  color: var(--dt-success-color);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.draft-icon {
+  font-size: 11px;
+}
+
+.draft-tag {
+  color: var(--dt-success-color);
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
 }
 </style>

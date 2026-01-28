@@ -2,8 +2,9 @@
   <el-dialog
     v-model="visible"
     title="全局搜索"
-    width="800px"
+    :width="dialogWidth"
     :show-close="true"
+    :close-on-click-modal="true"
     class="classic-search-dialog"
     destroy-on-close
     append-to-body
@@ -34,7 +35,7 @@
 
       <div class="classic-body">
         <!-- 左侧分类：方正列表 -->
-        <div class="classic-aside">
+        <div class="classic-aside" :style="{ width: sidebarWidth }">
           <div
             v-for="cat in categories"
             :key="cat.key"
@@ -129,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { Search, Document, Loading, Timer, Close } from '@element-plus/icons-vue'
 import { globalSearch } from '@/api/im/globalSearch'
 import { ElMessage } from 'element-plus'
@@ -145,6 +146,27 @@ const searchResult = ref(null)
 const searching = ref(false)
 const searchInputRef = ref(null)
 const historyKeywords = ref(JSON.parse(localStorage.getItem('search_history') || '[]'))
+
+// 响应式尺寸
+const windowWidth = ref(window.innerWidth)
+
+const dialogWidth = computed(() => {
+  if (windowWidth.value < 576) return '95%'
+  if (windowWidth.value < 768) return '92%'
+  if (windowWidth.value < 992) return '850px'
+  return '900px'
+})
+
+const dialogHeight = computed(() => {
+  if (windowWidth.value < 576) return '80vh'
+  if (windowWidth.value < 768) return '85vh'
+  return '620px'
+})
+
+const sidebarWidth = computed(() => {
+  if (windowWidth.value < 768) return '120px'
+  return '160px'
+})
 
 const categories = [
   { label: '全部内容', key: 'ALL' },
@@ -266,6 +288,13 @@ const formatTime = (ts) => {
   if (d.toDateString() === now.toDateString()) return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0')
   return (d.getMonth() + 1) + '-' + d.getDate()
 }
+
+// 监听窗口大小变化
+onMounted(() => {
+  window.addEventListener('resize', () => {
+    windowWidth.value = window.innerWidth
+  })
+})
 </script>
 
 <style scoped lang="scss">
@@ -275,19 +304,52 @@ const formatTime = (ts) => {
 
   :deep(.el-dialog) {
     padding: 0;
-    border-radius: 4px;
+    border-radius: 12px;
     overflow: hidden;
     position: relative;
-    z-index: 3000; // 确保在最上层
+    z-index: 3000;
+    
+    // 移动端全屏优化
+    @media (max-width: 480px) {
+      border-radius: 0;
+      margin: 0 !important;
+      height: 100vh;
+      max-height: 100vh;
+    }
     
     .el-dialog__header {
       margin: 0;
-      padding: 12px 20px;
+      padding: 16px 20px;
       background: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
-      .el-dialog__title { font-size: 14px; font-weight: bold; }
+      .dark & { background: #1e293b; border-color: #334155; }
+      
+      .el-dialog__title { 
+        font-size: 16px; 
+        font-weight: 600;
+        color: #1e293b;
+        .dark & { color: #f1f5f9; }
+      }
+      
+      .el-dialog__headerbtn {
+        top: 16px;
+        right: 20px;
+        
+        .el-dialog__close {
+          color: #64748b;
+          font-size: 18px;
+          
+          &:hover {
+            color: #1e293b;
+            .dark & { color: #f1f5f9; }
+          }
+        }
+      }
     }
-    .el-dialog__body { padding: 0; }
+    
+    .el-dialog__body { 
+      padding: 0; 
+    }
   }
 }
 
@@ -297,14 +359,26 @@ const formatTime = (ts) => {
   height: 620px;
   background: #fff;
   .dark & { background: #0f172a; }
-  // 确保容器内所有点击事件正常
-  position: relative;
-  z-index: 10;
+  
+  // 移动端适配
+  @media (max-width: 576px) {
+    height: 80vh;
+  }
+  
+  @media (max-width: 768px) {
+    height: 85vh;
+  }
+  
+  @media (max-width: 480px) {
+    height: 100vh;
+    max-height: 100vh;
+  }
 }
 
 .classic-search-bar {
   padding: 16px 20px;
   border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
   .dark & { border-color: #1e293b; background: #1e293b; }
 
   .square-input {
@@ -312,21 +386,57 @@ const formatTime = (ts) => {
     :deep(input) {
       cursor: text !important;
       pointer-events: auto !important;
+      font-size: 14px;
+      padding: 0 12px;
     }
 
     :deep(.el-input__wrapper) {
-      border-radius: 2px;
-      box-shadow: none !important;
-      border: 1px solid #cbd5e1;
-      &.is-focus { border-color: #1677ff; }
-      .dark & { background: #0f172a; border-color: #334155; }
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px #e2e8f0;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        box-shadow: 0 0 0 1px #cbd5e1;
+      }
+      
+      &.is-focus { 
+        box-shadow: 0 0 0 2px #1677ff;
+        border-color: #1677ff; 
+      }
+      
+      .dark & { 
+        background: #0f172a; 
+        border-color: #334155;
+        box-shadow: 0 0 0 1px #334155;
+        
+        &:hover {
+          box-shadow: 0 0 0 1px #475569;
+        }
+      }
     }
     :deep(.el-input-group__append) {
       background: #1677ff;
       color: #fff;
       border: none;
-      border-radius: 0 2px 2px 0;
-      font-weight: bold;
+      border-radius: 0 8px 8px 0;
+      font-weight: 500;
+      padding: 0 16px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: #0958d9;
+      }
+    }
+  }
+  
+  // 移动端优化
+  @media (max-width: 480px) {
+    padding: 12px 16px;
+    
+    .square-input {
+      :deep(input) {
+        font-size: 16px; // 防止iOS缩放
+      }
     }
   }
 }
@@ -342,33 +452,83 @@ const formatTime = (ts) => {
   background: #f8fafc;
   border-right: 1px solid #e2e8f0;
   padding: 8px 0;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
   .dark & { background: #1e293b; border-color: #334155; }
+  
+  @media (max-width: 768px) {
+    width: 120px;
+  }
 
   .cat-tab {
-    padding: 12px 20px;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
     font-size: 13px;
     color: #64748b;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    position: relative;
 
-    &:hover { background: #f1f5f9; color: #1e293b; .dark & { background: #0f172a; color: #f1f5f9; } }
+    &:hover { 
+      background: #f1f5f9; 
+      color: #1e293b; 
+      .dark & { background: #0f172a; color: #f1f5f9; } 
+    }
     &.active {
       background: #fff;
       color: #1677ff;
-      font-weight: bold;
-      border-right: 2px solid #1677ff;
+      font-weight: 600;
+      border-right: 3px solid #1677ff;
+      box-shadow: inset 0 0 0 1px #e2e8f0;
       .dark & { background: #0f172a; }
     }
 
+    .label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .count-badge {
-      font-size: 10px;
+      font-size: 11px;
       background: #e2e8f0;
-      padding: 0 6px;
+      padding: 2px 6px;
       border-radius: 10px;
-      .dark & { background: #334155; }
+      font-weight: 500;
+      min-width: 20px;
+      text-align: center;
+      .dark & { background: #334155; color: #cbd5e1; }
+    }
+  }
+  
+  // 移动端适配
+  @media (max-width: 768px) {
+    width: 100px;
+    
+    .cat-tab {
+      padding: 10px 8px;
+      font-size: 12px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60px;
+      
+      .label {
+        font-size: 11px;
+        margin-bottom: 2px;
+        text-align: center;
+      }
+      
+      .count-badge {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        font-size: 10px;
+        padding: 1px 4px;
+      }
     }
   }
 }
@@ -391,11 +551,12 @@ const formatTime = (ts) => {
   .history-item {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 10px 12px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 13px;
     color: #475569;
+    transition: all 0.2s ease;
     .dark & { color: #cbd5e1; }
     &:hover {
       background: #f8fafc;
@@ -406,7 +567,18 @@ const formatTime = (ts) => {
       opacity: 0;
       font-size: 12px;
       padding: 4px;
-      &:hover { color: #ef4444; }
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      
+      // 移动端始终显示
+      @media (max-width: 768px) {
+        opacity: 1;
+      }
+      
+      &:hover { 
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444; 
+      }
     }
   }
 }
@@ -423,57 +595,160 @@ const formatTime = (ts) => {
       .dark & { background: #1e293b; border-color: #334155; color: #94a3b8; }
     }
 
-    .result-row {
-      padding: 12px 20px;
-      display: flex;
-      gap: 12px;
-      cursor: pointer;
-      border-bottom: 1px solid #f8fafc;
-      .dark & { border-color: #1e293b; }
-      &:hover { background: #f1f5f9; .dark & { background: #1e293b; } }
+     .result-row {
+       padding: 14px 20px;
+       display: flex;
+       gap: 12px;
+       cursor: pointer;
+       border-bottom: 1px solid #f8fafc;
+       transition: all 0.2s ease;
+       min-height: 58px; // 确保一致的高度
+       .dark & { border-color: #1e293b; }
+       &:hover { 
+         background: #f1f5f9; 
+         .dark & { background: #1e293b; } 
+         
+         // 添加轻微的缩放效果
+         transform: translateX(2px);
+       }
 
-      .avatar-box {
-        flex-shrink: 0;
-        .file-icon-bg {
-          width: 34px; height: 34px;
-          background: #eff6ff; color: #3b82f6;
-          display: flex; align-items: center; justify-content: center;
-          border-radius: 4px;
-        }
-      }
+       .avatar-box {
+         flex-shrink: 0;
+         width: 34px;
+         height: 34px;
+         
+         .file-icon-bg {
+           width: 34px; 
+           height: 34px;
+           background: #eff6ff; 
+           color: #3b82f6;
+           display: flex; 
+           align-items: center; 
+           justify-content: center;
+           border-radius: 6px;
+           font-size: 16px;
+         }
+       }
 
-      .info-box {
-        flex: 1; min-width: 0;
-        .info-top {
-          display: flex; justify-content: space-between; margin-bottom: 2px;
-          .name-text { font-size: 14px; font-weight: 500; color: #1e293b; .dark & { color: #f1f5f9; } }
-          .time-text { font-size: 11px; color: #94a3b8; }
-        }
-        .desc-text { font-size: 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      }
-    }
+       .info-box {
+         flex: 1; 
+         min-width: 0;
+         display: flex;
+         flex-direction: column;
+         justify-content: center;
+         
+         .info-top {
+           display: flex; 
+           justify-content: space-between; 
+           align-items: center;
+           margin-bottom: 4px;
+           
+           .name-text { 
+             font-size: 14px; 
+             font-weight: 500; 
+             color: #1e293b; 
+             .dark & { color: #f1f5f9; }
+           }
+           .time-text { 
+             font-size: 11px; 
+             color: #94a3b8;
+             flex-shrink: 0;
+             margin-left: 8px;
+           }
+         }
+         .desc-text { 
+           font-size: 12px; 
+           color: #64748b; 
+           overflow: hidden; 
+           text-overflow: ellipsis; 
+           white-space: nowrap;
+           line-height: 1.4;
+         }
+       }
+     }
+     
+     // 移动端优化
+     @media (max-width: 768px) {
+       .result-row {
+         padding: 12px 16px;
+         
+         &:active {
+           background: #e2e8f0;
+           transform: scale(0.98);
+         }
+       }
+     }
   }
 }
 
 .classic-footer {
-  padding: 8px 20px;
+  padding: 10px 20px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  align-items: center;
+  font-size: 12px;
   color: #94a3b8;
+  flex-shrink: 0;
   .dark & { background: #1e293b; border-color: #334155; }
+  
+  .flex {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
   kbd {
     background: #fff;
     border: 1px solid #e2e8f0;
-    padding: 1px 4px;
-    border-radius: 3px;
+    padding: 2px 6px;
+    border-radius: 4px;
     margin-right: 4px;
-    .dark & { background: #0f172a; border-color: #334155; }
+    font-family: monospace;
+    font-size: 11px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    
+    .dark & { 
+      background: #0f172a; 
+      border-color: #334155;
+      color: #cbd5e1;
+    }
+  }
+  
+  // 移动端隐藏快捷键提示
+  @media (max-width: 768px) {
+    .flex:first-child {
+      display: none;
+    }
+    
+    padding: 8px 16px;
+    justify-content: center;
   }
 }
 
-.scrollbar-thin::-webkit-scrollbar { width: 6px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; .dark & { background: #334155; } }
+.scrollbar-thin::-webkit-scrollbar { 
+  width: 6px; 
+}
+
+.scrollbar-thin::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb { 
+  background: #cbd5e1; 
+  border-radius: 3px; 
+  
+  &:hover {
+    background: #94a3b8;
+  }
+  
+  .dark & { 
+    background: #334155;
+    
+    &:hover {
+      background: #475569;
+    }
+  } 
+}
 </style>

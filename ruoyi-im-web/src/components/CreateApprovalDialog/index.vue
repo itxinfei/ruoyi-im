@@ -3,7 +3,7 @@
     v-model="visible"
     title="发起审批"
     width="600px"
-    :close-on-click-modal="false"
+    :close-on-click-modal="true"
     @close="handleClose"
   >
     <!-- 选择审批模板 -->

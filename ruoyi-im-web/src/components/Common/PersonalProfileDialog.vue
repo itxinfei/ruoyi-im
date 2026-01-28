@@ -1,8 +1,9 @@
 <template>
   <el-dialog
     v-model="visible"
-    width="360px"
+    :width="dialogWidth"
     :show-close="false"
+    :close-on-click-modal="true"
     class="dingtalk-desktop-profile"
     destroy-on-close
     append-to-body
@@ -36,7 +37,7 @@
             <span v-if="currentUser.sex === 1" class="material-icons-outlined text-blue-500 text-sm">male</span>
             <span v-else-if="currentUser.sex === 2" class="material-icons-outlined text-pink-500 text-sm">female</span>
           </div>
-          <p class="text-xs text-slate-400 mt-1 truncate">{{ currentUser.position || '暂无职位' }}</p>
+          <p class="text-xs text-slate-400 mt-1 truncate">{{ currentUser.position || currentUser.dept?.deptName || '暂无职位' }}</p>
           <div class="mt-2">
             <el-tag size="small" effect="plain" class="!border-slate-200 !text-slate-500 !bg-transparent cursor-pointer hover:!border-primary hover:!text-primary transition-colors" @click="handleStatusToggle">
               {{ statusLabel }}
@@ -60,26 +61,50 @@
       <div class="p-6 space-y-4">
         <div class="profile-info-row">
           <span class="label">部门</span>
-          <span class="value">{{ currentUser.departmentName || '未分配部门' }}</span>
+          <span class="value">{{ currentUser.dept?.deptName || currentUser.departmentName || '未分配部门' }}</span>
         </div>
         <div class="profile-info-row">
           <span class="label">工号</span>
           <span class="value">{{ currentUser.id }}</span>
         </div>
-        <div class="profile-info-row group cursor-pointer" @click="copyToClipboard(currentUser.mobile)">
+        <div 
+          class="profile-info-row group"
+          :class="{ 'cursor-pointer': currentUser.mobile, 'cursor-default': !currentUser.mobile }" 
+          @click="copyToClipboard(currentUser.mobile)"
+        >
           <span class="label">手机</span>
-          <span class="value text-primary font-medium">{{ currentUser.mobile || '-' }}</span>
-          <el-icon class="ml-1 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity"><CopyDocument /></el-icon>
+          <div class="value-container">
+            <span class="value text-primary font-medium">{{ currentUser.mobile || '-' }}</span>
+            <el-icon 
+              v-if="currentUser.mobile"
+              class="copy-icon text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" 
+              @click.stop="copyToClipboard(currentUser.mobile)"
+            >
+              <CopyDocument />
+            </el-icon>
+          </div>
         </div>
-        <div class="profile-info-row group cursor-pointer" @click="copyToClipboard(currentUser.email)">
+        <div 
+          class="profile-info-row group"
+          :class="{ 'cursor-pointer': currentUser.email, 'cursor-default': !currentUser.email }"
+          @click="copyToClipboard(currentUser.email)"
+        >
           <span class="label">邮箱</span>
-          <span class="value truncate">{{ currentUser.email || '-' }}</span>
-          <el-icon class="ml-1 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity"><CopyDocument /></el-icon>
+          <div class="value-container">
+            <span class="value truncate">{{ currentUser.email || '-' }}</span>
+            <el-icon 
+              v-if="currentUser.email"
+              class="copy-icon text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity"
+              @click.stop="copyToClipboard(currentUser.email)"
+            >
+              <CopyDocument />
+            </el-icon>
+          </div>
         </div>
       </div>
 
       <!-- 底部：操作按钮栏 -->
-      <div class="bg-slate-50/50 dark:bg-slate-800/50 p-4 px-6 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
+      <div class="action-bar">
         <div class="flex gap-2">
           <el-button type="primary" size="small" round @click="showEditDialog = true">
             <el-icon class="mr-1"><Edit /></el-icon>编辑资料
@@ -106,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import {
@@ -126,11 +151,34 @@ const emit = defineEmits(['update:modelValue'])
 
 const store = useStore()
 const router = useRouter()
+
 const visible = ref(false)
 const loading = ref(false)
 const showEditDialog = ref(false)
 const showChangePassword = ref(false)
 const userStatus = ref('online')
+
+// 响应式宽度
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
+
+const dialogWidth = computed(() => {
+  if (windowWidth.value < 576) return '95%'
+  if (windowWidth.value < 768) return '380px'
+  return '420px'
+})
+
+// 监听窗口大小变化
+onMounted(() => {
+  window.addEventListener('resize', () => {
+    windowWidth.value = window.innerWidth
+  })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', () => {
+    windowWidth.value = window.innerWidth
+  })
+})
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
@@ -149,14 +197,35 @@ const statusColor = computed(() => {
   return map[userStatus.value] || '#22c55e'
 })
 
-const copyToClipboard = (text) => {
+// 修复移动端复制功能
+const copyToClipboard = async (text) => {
   if (!text || text === '-' || text === '未填写') {
     ElMessage.warning('暂无内容可复制')
     return
   }
-  navigator.clipboard.writeText(text).then(() => {
-    ElMessage.success('已复制')
-  })
+  
+  try {
+    // 移动端优先使用现代API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text)
+      ElMessage.success('已复制')
+    } else {
+      // 兼容旧浏览器
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-999999px'
+      textArea.style.top = '-999999px'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      ElMessage.success('已复制')
+    }
+  } catch (error) {
+    ElMessage.error('复制失败，请手动复制')
+  }
 }
 
 const handleStatusToggle = () => {
@@ -201,35 +270,133 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 <style scoped lang="scss">
 .dingtalk-desktop-profile {
   :deep(.el-dialog) {
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
     padding: 0;
     border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    // 确保在小屏幕上不会超出视口
+    max-height: 90vh;
+    
+    // 移动端适配
+    @media (max-width: 480px) {
+      margin: 5vh auto !important;
+      max-height: 85vh;
+      border-radius: 16px;
+    }
   }
   :deep(.el-dialog__header) { display: none; }
-  :deep(.el-dialog__body) { padding: 0; }
+  :deep(.el-dialog__body) { 
+    padding: 0; 
+    // 确保内容可以滚动
+    max-height: 85vh;
+    overflow-y: auto;
+  }
 }
 
 .profile-info-row {
   display: flex;
   align-items: flex-start;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px 0;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   .label {
+    min-width: 60px;
     width: 60px;
-    color: #888;
+    color: #64748b;
     flex-shrink: 0;
-    .dark & { color: #64748b; }
+    font-weight: 500;
+    .dark & { color: #94a3b8; }
+  }
+
+  .value-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    gap: 8px;
   }
 
   .value {
-    color: #333;
+    color: #1e293b;
     flex: 1;
     min-width: 0;
     word-break: break-all;
-    .dark & { color: #cbd5e1; }
+    .dark & { color: #e2e8f0; }
+  }
+  
+  .copy-icon {
+    flex-shrink: 0;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: var(--el-bg-color-page);
+      color: var(--el-color-primary);
+    }
+  
+  // 移动端始终显示
+  @media (max-width: 768px) {
+    opacity: 1 !important;
+  }
+}
+
+.action-bar {
+  background: rgba(248, 250, 252, 0.8);
+  backdrop-filter: blur(8px);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  
+  .dark & {
+    background: rgba(30, 41, 59, 0.8);
+    border-top-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  // 移动端优化
+  @media (max-width: 480px) {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    
+    .flex {
+      justify-content: center;
+    }
+  }
+}
+
+// 移动端整体优化
+@media (max-width: 480px) {
+  .p-6 {
+    padding: 16px !important;
+  }
+  
+  .pb-4 {
+    padding-bottom: 12px !important;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 12px !important;
+  }
+}
+  
+  // 点击反馈
+  &:active {
+    background-color: var(--el-bg-color-page);
   }
 }
 </style>

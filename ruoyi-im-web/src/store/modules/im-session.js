@@ -12,6 +12,15 @@ import {
 } from '@/api/im'
 import { formatMessagePreviewFromObject } from '@/utils/message'
 
+// 默认分组配置
+const DEFAULT_GROUPS = [
+  { id: 'pinned', name: '置顶聊天', order: 0, isSystem: true, isExpanded: true },
+  { id: 'default', name: '全部消息', order: 1, isSystem: true, isExpanded: true }
+]
+
+const STORAGE_KEY_GROUPS = 'im-session-groups'
+const STORAGE_KEY_CONVERSATION_GROUP = 'im-conversation-group-map'
+
 export default {
   namespaced: true,
 
@@ -26,7 +35,13 @@ export default {
     totalUnreadCount: 0,
 
     // 加载状态
-    loading: false
+    loading: false,
+
+    // 分组列表
+    groups: [],
+
+    // 会话ID → 分组ID 映射
+    conversationGroupMap: {}
   }),
 
   getters: {
@@ -49,6 +64,66 @@ export default {
     // 根据 ID 获取会话
     sessionById: (state) => (id) => {
       return state.sessions.find(s => s.id === id)
+    },
+
+    // 排序后的分组列表
+    sortedGroups(state) {
+      return [...state.groups].sort((a, b) => a.order - b.order)
+    },
+
+    // 分组会话列表（含分组信息）
+    groupedSessions: (state, getters) => {
+      const sortedGroups = getters.sortedGroups
+      const sessionsByGroup = {}
+
+      // 初始化分组
+      sortedGroups.forEach(group => {
+        sessionsByGroup[group.id] = {
+          group,
+          sessions: []
+        }
+      })
+
+      // 分配会话到分组
+      state.sessions.forEach(session => {
+        // 置顶的会话优先进入置顶分组
+        if (session.isPinned) {
+          if (sessionsByGroup['pinned']) {
+            sessionsByGroup['pinned'].sessions.push(session)
+          }
+        } else {
+          // 根据映射表查找分组
+          const groupId = state.conversationGroupMap[session.id] || 'default'
+          if (sessionsByGroup[groupId]) {
+            sessionsByGroup[groupId].sessions.push(session)
+          } else {
+            // 如果分组不存在，放入默认分组
+            if (sessionsByGroup['default']) {
+              sessionsByGroup['default'].sessions.push(session)
+            }
+          }
+        }
+      })
+
+      // 对每个分组内的会话进行排序
+      Object.values(sessionsByGroup).forEach(item => {
+        item.sessions.sort((a, b) => {
+          return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
+        })
+      })
+
+      // 返回只包含有会话或展开的分组
+      return Object.values(sessionsByGroup).filter(item => {
+        const group = item.group
+        // 系统分组始终显示，自定义分组展开时或有会话时显示
+        return group.isSystem || group.isExpanded || item.sessions.length > 0
+      })
+    },
+
+    // 获取会话所属分组
+    sessionGroup: (state) => (conversationId) => {
+      const groupId = state.conversationGroupMap[conversationId]
+      return state.groups.find(g => g.id === groupId)
     }
   },
 
@@ -98,6 +173,126 @@ export default {
       state.sessions = []
       state.currentSession = null
       state.totalUnreadCount = 0
+    },
+
+    // ========== 分组相关 mutations ==========
+
+    // 设置分组列表
+    SET_GROUPS(state, groups) {
+      state.groups = groups
+      // 保存到本地存储
+      try {
+        localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(groups))
+      } catch (e) {
+        console.warn('保存分组失败', e)
+      }
+    },
+
+    // 添加分组
+    ADD_GROUP(state, group) {
+      state.groups.push(group)
+      try {
+        localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(state.groups))
+      } catch (e) {
+        console.warn('保存分组失败', e)
+      }
+    },
+
+    // 更新分组
+    UPDATE_GROUP(state, { groupId, updates }) {
+      const index = state.groups.findIndex(g => g.id === groupId)
+      if (index !== -1) {
+        state.groups[index] = { ...state.groups[index], ...updates }
+        try {
+          localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(state.groups))
+        } catch (e) {
+          console.warn('保存分组失败', e)
+        }
+      }
+    },
+
+    // 删除分组
+    DELETE_GROUP(state, groupId) {
+      const index = state.groups.findIndex(g => g.id === groupId)
+      if (index !== -1) {
+        state.groups.splice(index, 1)
+        // 将该分组下的会话移到默认分组
+        const newMap = { ...state.conversationGroupMap }
+        Object.keys(newMap).forEach(convId => {
+          if (newMap[convId] === groupId) {
+            delete newMap[convId]
+          }
+        })
+        state.conversationGroupMap = newMap
+        try {
+          localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(state.groups))
+          localStorage.setItem(STORAGE_KEY_CONVERSATION_GROUP, JSON.stringify(newMap))
+        } catch (e) {
+          console.warn('保存分组失败', e)
+        }
+      }
+    },
+
+    // 切换分组展开/收起
+    TOGGLE_GROUP_EXPAND(state, groupId) {
+      const group = state.groups.find(g => g.id === groupId)
+      if (group) {
+        group.isExpanded = !group.isExpanded
+        try {
+          localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(state.groups))
+        } catch (e) {
+          console.warn('保存分组状态失败', e)
+        }
+      }
+    },
+
+    // 设置会话所属分组
+    SET_CONVERSATION_GROUP(state, { conversationId, groupId }) {
+      state.conversationGroupMap = {
+        ...state.conversationGroupMap,
+        [conversationId]: groupId
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY_CONVERSATION_GROUP, JSON.stringify(state.conversationGroupMap))
+      } catch (e) {
+        console.warn('保存会话分组失败', e)
+      }
+    },
+
+    // 批量设置会话分组
+    BATCH_SET_CONVERSATION_GROUPS(state, mapping) {
+      state.conversationGroupMap = {
+        ...state.conversationGroupMap,
+        ...mapping
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY_CONVERSATION_GROUP, JSON.stringify(state.conversationGroupMap))
+      } catch (e) {
+        console.warn('保存会话分组失败', e)
+      }
+    },
+
+    // 加载分组数据
+    LOAD_GROUPS(state) {
+      try {
+        const groups = localStorage.getItem(STORAGE_KEY_GROUPS)
+        const map = localStorage.getItem(STORAGE_KEY_CONVERSATION_GROUP)
+
+        if (groups) {
+          state.groups = JSON.parse(groups)
+        } else {
+          // 初始化默认分组
+          state.groups = [...DEFAULT_GROUPS]
+        }
+
+        if (map) {
+          state.conversationGroupMap = JSON.parse(map)
+        }
+      } catch (e) {
+        console.warn('加载分组数据失败', e)
+        state.groups = [...DEFAULT_GROUPS]
+        state.conversationGroupMap = {}
+      }
     }
   },
 
@@ -124,7 +319,7 @@ export default {
 
           if (Object.keys(userStatusMap).length > 0) {
             // 使用 dispatch action 而不是跨模块 commit mutation，避免命名空间问题
-            dispatch('im-contact/batchUpdateUserStatus', userStatusMap, { root: true })
+            dispatch('im/contact/batchUpdateUserStatus', userStatusMap, { root: true })
           }
         }
       } finally {
@@ -196,6 +391,65 @@ export default {
       if (session) {
         await dispatch('selectSession', session)
       }
+    },
+
+    // ========== 分组相关 actions ==========
+
+    // 初始化分组数据
+    initGroups({ commit }) {
+      commit('LOAD_GROUPS')
+    },
+
+    // 创建分组
+    createGroup({ commit, state }, { name, order }) {
+      const id = `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const group = {
+        id,
+        name,
+        order: order ?? state.groups.length,
+        isSystem: false,
+        isExpanded: true
+      }
+      commit('ADD_GROUP', group)
+      return group
+    },
+
+    // 重命名分组
+    renameGroup({ commit }, { groupId, name }) {
+      commit('UPDATE_GROUP', { groupId, updates: { name } })
+    },
+
+    // 删除分组
+    deleteGroup({ commit }, groupId) {
+      commit('DELETE_GROUP', groupId)
+    },
+
+    // 切换分组展开/收起
+    toggleGroupExpand({ commit }, groupId) {
+      commit('TOGGLE_GROUP_EXPAND', groupId)
+    },
+
+    // 移动会话到分组
+    moveConversationToGroup({ commit }, { conversationId, groupId }) {
+      commit('SET_CONVERSATION_GROUP', { conversationId, groupId })
+    },
+
+    // 批量移动会话到分组
+    batchMoveConversationsToGroup({ commit }, { conversationIds, groupId }) {
+      const mapping = {}
+      conversationIds.forEach(id => {
+        mapping[id] = groupId
+      })
+      commit('BATCH_SET_CONVERSATION_GROUPS', mapping)
+    },
+
+    // 调整分组顺序
+    reorderGroups({ commit, state }, { groupIds }) {
+      const updatedGroups = groupIds.map((id, index) => {
+        const group = state.groups.find(g => g.id === id)
+        return { ...group, order: index }
+      })
+      commit('SET_GROUPS', updatedGroups)
     }
   }
 }

@@ -10,9 +10,17 @@
 export function addTokenToUrl(url) {
     if (!url) return ''
 
-    // 如果不是文件下载API，直接返回
-    if (!url.includes('/api/im/file/download')) {
-        return url
+    // 如果是完整的http/https URL且不是本域名，直接返回（外部资源）
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        try {
+            const urlObj = new URL(url)
+            // 如果是外部域名，直接返回
+            if (!urlObj.hostname.includes(window.location.hostname)) {
+                return url
+            }
+        } catch (e) {
+            return url
+        }
     }
 
     // 如果已经有token参数，直接返回
@@ -29,7 +37,7 @@ export function addTokenToUrl(url) {
 
     // 添加token参数
     const separator = url.includes('?') ? '&' : '?'
-    return `${separator}token=${token}`
+    return `${url}${separator}token=${token}`
 }
 
 /**

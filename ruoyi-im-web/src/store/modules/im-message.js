@@ -336,7 +336,7 @@ export default {
 
       commit('session/UPDATE_SESSION', {
         id: sessionId,
-        lastMessage: formatMessagePreview(message.type, message.content),
+        lastMessage: formatMessagePreviewFromObject(message) || '[新消息]',
         lastMessageTime: message.timestamp,
         lastMessageType: message.type,
         lastSenderNickname: message.senderName,

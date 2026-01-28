@@ -132,7 +132,7 @@
                gm.role,
                gm.is_muted,
                gm.joined_time,
-               u.nick_name as nickname,
+               u.nickname as nickname,
                u.avatar as avatar
         FROM im_group_member gm
         LEFT JOIN im_user u ON gm.user_id = u.id

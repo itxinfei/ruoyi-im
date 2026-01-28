@@ -15,10 +15,10 @@
 
     <select id="selectByAnnouncementId" resultMap="BaseResultMap">
         SELECT al.*,
-               u.nick_name as user_nickname,
+               u.nickname as user_nickname,
                u.avatar as user_avatar
         FROM im_announcement_like al
-        LEFT JOIN sys_user u ON al.user_id = u.user_id
+        LEFT JOIN im_user u ON al.user_id = u.id
         WHERE al.announcement_id = #{announcementId}
         ORDER BY al.like_time DESC
     </select>

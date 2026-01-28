@@ -25,25 +25,17 @@ service.interceptors.request.use(
     if (userInfo) {
       try {
         const user = JSON.parse(userInfo)
-        // 调试日志
-        console.log('请求拦截器 - 用户信息:', user)
         if (user.id) {
-          config.headers['userId'] = String(user.id) // 确保是字符串类型
-          console.log('请求拦截器 - 设置 userId header:', user.id, 'URL:', config.url)
-        } else {
-          console.warn('请求拦截器 - 用户信息中没有 id 字段:', user)
+          config.headers['userId'] = String(user.id)
         }
       } catch (e) {
-        console.warn('解析用户信息失败:', e)
+        // 解析失败，静默处理
       }
-    } else {
-      console.warn('请求拦截器 - localStorage 中没有 im_user_info')
     }
 
     return config
   },
   error => {
-    console.error('请求错误:', error)
     return Promise.reject(error)
   }
 )
@@ -75,13 +67,8 @@ service.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    console.error('响应错误:', error)
-
     if (error.response) {
       const { status, data } = error.response
-
-      // 打印更详细的错误信息
-      console.log('错误详情:', data)
 
       switch (status) {
         case 400:

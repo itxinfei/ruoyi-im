@@ -27,7 +27,7 @@
       title="上传进度"
       width="400px"
       :close-on-click-modal="false"
-      :show-close="false"
+      :show-close="true"
     >
       <div class="upload-progress">
         <div class="file-info">

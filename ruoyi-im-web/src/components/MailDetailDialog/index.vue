@@ -90,7 +90,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { ChatLineSquare, Share, Star, StarFilled, Delete, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { ChatLineSquare, Share, StarFilled, Delete, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { starMail, downloadAttachment as downloadAttachmentApi } from '@/api/im/mail'

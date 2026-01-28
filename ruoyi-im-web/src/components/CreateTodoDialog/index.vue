@@ -3,7 +3,7 @@
     v-model="visible"
     :title="isEdit ? '编辑待办' : '新建待办'"
     width="500px"
-    :close-on-click-modal="false"
+    :close-on-click-modal="true"
     @close="handleClose"
   >
     <el-form

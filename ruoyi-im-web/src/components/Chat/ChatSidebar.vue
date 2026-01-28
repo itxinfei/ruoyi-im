@@ -195,8 +195,13 @@ watch(() => props.session?.id, () => {
 
 <style scoped lang="scss">
 .chat-sidebar {
-  width: 280px; height: 100%; border-left: 1px solid #f0f0f0; background: #fff;
-  display: flex; flex-direction: column; flex-shrink: 0;
+  width: var(--dt-session-panel-width);
+  height: 100%;
+  border-left: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
 .sidebar-header {
