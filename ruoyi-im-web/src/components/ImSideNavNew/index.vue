@@ -228,9 +228,17 @@ function handleOpenSearch() {
 // ============================================================================
 .dingtalk-nav {
   width: 72px;
+  height: 100vh;
+  max-height: 100vh;
   background: var(--dt-bg-sidebar-gradient);
-  box-shadow: var(--dt-shadow-3);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 24px rgba(0, 0, 0, 0.12);
   animation: slideInLeft 0.4s var(--dt-ease-out);
+  overflow: hidden;
+  
+  // 移动端优化
+  @media (max-width: 768px) {
+    width: 64px;
+  }
 }
 
 .bg-nav-light {
@@ -345,13 +353,19 @@ function handleOpenSearch() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--dt-radius-lg);
+  border-radius: 12px;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.3s var(--dt-ease-out);
-  color: rgba(255, 255, 255, 0.85) !important; // 强制使用白色，防止登录后同步延迟导致的变色
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255, 255, 255, 0.85);
   animation: fadeInUp 0.4s var(--dt-ease-out) both;
+  
+  // 移动端优化
+  @media (max-width: 768px) {
+    width: 44px;
+    height: 44px;
+  }
 
   @for $i from 1 through 9 {
     &:nth-child(#{$i}) {
@@ -361,27 +375,30 @@ function handleOpenSearch() {
 }
 
 .nav-item:hover {
-  background: var(--dt-bg-sidebar-item-hover);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
-  transform: scale(1.08);
+  transform: scale(1.05);
+  backdrop-filter: blur(8px);
 }
 
 .nav-item-active {
-  background: var(--dt-bg-sidebar-item-active);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: pulse 0.3s var(--dt-ease-out);
+  backdrop-filter: blur(12px);
 }
 
 .nav-item-active::before {
   content: '';
   position: absolute;
-  left: -12px;
-  width: 4px;
-  height: 24px;
+  left: -8px;
+  width: 3px;
+  height: 20px;
   background: #fff;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 2px 2px 0;
   animation: slideInLeft 0.2s var(--dt-ease-out);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 .nav-item-icon {
@@ -440,24 +457,32 @@ function handleOpenSearch() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--dt-radius-lg);
+  border-radius: 12px;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.3s var(--dt-ease-out);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: rgba(255, 255, 255, 0.65);
   position: relative;
+  
+  // 移动端优化
+  @media (max-width: 768px) {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 .nav-item-action:hover {
-  background: var(--dt-bg-sidebar-item-hover);
+  background: rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.9);
-  transform: scale(1.08);
+  transform: scale(1.05);
+  backdrop-filter: blur(8px);
 }
 
 .nav-item-action.nav-item-active {
-  background: var(--dt-bg-sidebar-item-active);
+  background: rgba(255, 255, 255, 0.18);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .auto-badge {
@@ -490,21 +515,29 @@ function handleOpenSearch() {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.3s var(--dt-ease-out);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   animation: fadeInUp 0.6s var(--dt-ease-bounce) both;
+  
+  // 移动端优化
+  @media (max-width: 768px) {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 .nav-avatar:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+  backdrop-filter: blur(8px);
 }
 
 .nav-avatar-active {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
 }
 
 .nav-avatar :deep(.dingtalk-avatar) {

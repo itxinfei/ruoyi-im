@@ -932,27 +932,26 @@ onUnmounted(() => {
 @use '@/styles/design-tokens.scss' as *;
 
 .bubble {
-  // 钉钉聊天气泡样式 - 精确复刻
-  background: var(--dt-bubble-left-bg);  // #FFFFFF
-  padding: 8px 12px;
-  border-radius: 6px 6px 6px 0;  // 左下角直角
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
+  // ========================================
+  // 钉钉聊天气泡样式 - 一比一精确复刻
+  // ========================================
+  background: #FFFFFF;  // 钉钉左侧气泡：纯白背景
+  border: 1px solid #E4E7ED;  // 钉钉风格：浅灰边框
+  padding: 10px 12px;  // 钉钉标准内边距
+  border-radius: 8px 8px 8px 2px;  // 钉钉风格：左下角2px形成尾部效果
+  box-shadow: none;  // 钉钉风格：扁平无阴影
   font-size: 14px;
   word-break: break-word;
   line-height: 1.5;
-  color: var(--dt-text-primary);  // #000000
+  color: #303133;  // 钉钉标准文字色：深灰黑
   position: relative;
   max-width: 520px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   animation: messagePop 0.3s var(--dt-ease-bounce);
-
-  @include hover-lift(-1px);
 
   &.is-selected {
     border: 2px solid var(--dt-brand-color);
     background-color: var(--dt-brand-bg);
-    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
     animation: pulse 0.3s var(--dt-ease-out);
   }
 
@@ -960,35 +959,36 @@ onUnmounted(() => {
   &.is-long-press {
     animation: longPressPulse 0.3s ease-in-out;
     border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
   }
 
   @keyframes longPressPulse {
     0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+    50% { transform: scale(1.01); }
     100% { transform: scale(1); }
   }
 
-  // 悬停时增强阴影
+  // 钉钉风格：悬停不改变阴影，保持扁平
   &:hover {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    background: #FAFBFC;
   }
 
+  // ========================================
+  // 发送消息气泡（右侧）- 钉钉淡蓝风格
+  // ========================================
   &.is-own {
-    background: var(--dt-bubble-right-bg);  // #E6F7FF
-    color: var(--dt-text-primary);  // #000000
-    border-radius: 6px 6px 0 6px;  // 右下角直角
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
-    border: none;
+    background: #E8F4FF;  // 钉钉右侧气泡：淡蓝背景
+    color: #303133;  // 保持深色文字
+    border: none;  // 钉钉风格：右侧无边框
+    border-radius: 8px 8px 2px 8px;  // 钉钉风格：右下角2px形成尾部效果
+    box-shadow: none;  // 保持扁平
 
     &.is-selected {
       border: 2px solid var(--dt-brand-color);
-      background-color: var(--dt-brand-bg);
-      box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+      background-color: #D4EAFF;
     }
 
     &:hover {
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      background: #DBEEFF;
     }
   }
 

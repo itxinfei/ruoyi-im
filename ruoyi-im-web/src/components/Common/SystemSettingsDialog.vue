@@ -14,7 +14,7 @@
       <aside class="settings-sidebar">
         <div class="sidebar-header">
           <div class="app-brand">
-            <span class="brand-icon">S</span>
+            <span class="brand-text">设置</span>
           </div>
         </div>
         
@@ -33,8 +33,9 @@
         </nav>
         
         <div class="sidebar-footer">
-          <div class="user-avatar" @click="activeMenu = 'account'" :class="{ active: activeMenu === 'account' }">
-            <el-avatar :size="32" :src="currentUser.avatar" />
+          <div class="user-info" @click="activeMenu = 'account'" :class="{ active: activeMenu === 'account' }">
+            <el-avatar :size="36" :src="currentUser.avatar" />
+            <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
           </div>
         </div>
       </aside>
@@ -376,12 +377,16 @@ onMounted(() => {
 .settings-layout {
   display: flex;
   height: 100%;
+  width: 100%;
+  margin: 0; /* 去除外边距，方正布局 */
+  padding: 0;
+  box-sizing: border-box;
   background: var(--dt-bg-body);
 }
 
 // Sidebar
 .settings-sidebar {
-  width: 220px;
+  width: 260px;
   background: transparent;
   border-right: 1px solid transparent;
   display: flex;
@@ -395,51 +400,47 @@ onMounted(() => {
   height: 64px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 20px;
+  border-bottom: 1px solid transparent;
 }
 
 .app-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
 }
 
-.brand-icon {
-  width: 32px;
-  height: 32px;
-  background: var(--dt-brand-color);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 800;
+.brand-text {
   font-size: 18px;
+  font-weight: 700;
+  color: var(--dt-text-primary);
+  letter-spacing: -0.3px;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 8px 8px;
+  padding: 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   overflow-y: auto;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  height: 48px;
-  padding: 0 14px;
-  border-radius: 6px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
   cursor: pointer;
   color: var(--dt-text-secondary);
-  transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+  transition: all 0.16s ease;
   user-select: none;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .nav-item:hover {
-  background: rgba(var(--dt-brand-rgb, 29, 161, 242), 0.06);
+  background: var(--dt-bg-hover);
   color: var(--dt-text-primary);
 }
 
@@ -447,40 +448,55 @@ onMounted(() => {
   background: var(--dt-brand-color);
   color: #fff;
   font-weight: 600;
-  transform: translateX(2px);
 }
 
-.nav-item .nav-icon {
-  font-size: 18px;
-  margin-right: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.nav-icon {
+  font-size: 20px;
+  margin-right: 10px;
 }
 
 .nav-label {
-  font-size: 14px;
+  flex: 1;
 }
 
 .sidebar-footer {
-  padding: 12px 14px;
+  padding: 12px;
   border-top: 1px solid transparent;
   display: flex;
   align-items: center;
 }
 
-.user-avatar {
+.user-info {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.12s ease;
+  transition: background 0.16s ease;
+  width: calc(100% - 24px);
 }
 
-.user-avatar:hover { background: rgba(var(--dt-brand-rgb,29,161,242),0.06); }
+.user-info:hover {
+  background: var(--dt-bg-hover);
+}
+
+.user-info.active {
+  background: var(--dt-brand-color);
+  
+  .user-name {
+    color: #fff;
+  }
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dt-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 // Main Content
 .settings-main {
