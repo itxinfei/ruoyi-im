@@ -20,6 +20,7 @@ const DEFAULT_GROUPS = [
 
 const STORAGE_KEY_GROUPS = 'im-session-groups'
 const STORAGE_KEY_CONVERSATION_GROUP = 'im-conversation-group-map'
+const STORAGE_KEY_DRAFTS = 'im_message_drafts'
 
 export default {
   namespaced: true,
@@ -41,7 +42,13 @@ export default {
     groups: [],
 
     // 会话ID → 分组ID 映射
-    conversationGroupMap: {}
+    conversationGroupMap: {},
+
+    // 草稿状态 { conversationId: { content, timestamp } }
+    drafts: {},
+
+    // 输入状态 { conversationId: { isTyping, lastTypingTime } }
+    typingSessions: {}
   }),
 
   getters: {
@@ -124,6 +131,50 @@ export default {
     sessionGroup: (state) => (conversationId) => {
       const groupId = state.conversationGroupMap[conversationId]
       return state.groups.find(g => g.id === groupId)
+    },
+
+    // ========== 草稿相关 getters ==========
+
+    // 判断会话是否有草稿
+    hasDraft: (state) => (conversationId) => {
+      const draft = state.drafts[conversationId]
+      return draft && draft.content && draft.content.length > 0
+    },
+
+    // 获取草稿预览文本
+    getDraftPreview: (state) => (conversationId) => {
+      const draft = state.drafts[conversationId]
+      if (!draft || !draft.content) return ''
+      return draft.content.slice(0, 20)
+    },
+
+    // 获取草稿完整内容
+    getDraftContent: (state) => (conversationId) => {
+      const draft = state.drafts[conversationId]
+      return draft?.content || ''
+    },
+
+    // ========== 输入状态相关 getters ==========
+
+    // 判断会话是否正在输入
+    isTyping: (state) => (conversationId) => {
+      const typing = state.typingSessions[conversationId]
+      if (!typing) return false
+      
+      // 5秒后自动清除输入状态
+      if (Date.now() - typing.lastTypingTime > 5000) {
+        return false
+      }
+      
+      return typing.isTyping
+    },
+
+    // 获取所有正在输入的会话ID
+    getTypingSessionIds: (state) => {
+      return Object.keys(state.typingSessions).filter(conversationId => {
+        const typing = state.typingSessions[conversationId]
+        return typing && (Date.now() - typing.lastTypingTime <= 5000)
+      })
     }
   },
 
@@ -137,11 +188,39 @@ export default {
     // 更新单个会话
     UPDATE_SESSION(state, session) {
       const index = state.sessions.findIndex(s => s.id === session.id)
+      let updatedSession
+
       if (index !== -1) {
-        state.sessions[index] = { ...state.sessions[index], ...session }
+        // 更新现有会话
+        updatedSession = { ...state.sessions[index], ...session }
+        state.sessions[index] = updatedSession
       } else {
-        state.sessions.push(session)
+        // 添加新会话
+        updatedSession = session
+        state.sessions.push(updatedSession)
       }
+
+      // 如果更新了 lastMessageTime，将会话移到列表顶部（保持置顶会话在顶部）
+      if (session.lastMessageTime !== undefined) {
+        // 移除该会话
+        state.sessions = state.sessions.filter(s => s.id !== session.id)
+        // 重新插入，置顶会话保持在最前
+        const pinnedSessions = state.sessions.filter(s => s.isPinned).sort((a, b) => {
+          return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
+        })
+        const unpinnedSessions = state.sessions.filter(s => !s.isPinned).sort((a, b) => {
+          return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
+        })
+
+        if (updatedSession.isPinned) {
+          pinnedSessions.unshift(updatedSession)
+        } else {
+          unpinnedSessions.unshift(updatedSession)
+        }
+
+        state.sessions = [...pinnedSessions, ...unpinnedSessions]
+      }
+
       // 更新未读总数
       state.totalUnreadCount = state.sessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
     },
@@ -293,6 +372,49 @@ export default {
         state.groups = [...DEFAULT_GROUPS]
         state.conversationGroupMap = {}
       }
+    },
+
+    // ========== 草稿相关 mutations ==========
+
+    // 设置草稿
+    SET_DRAFT(state, { conversationId, content }) {
+      if (content && content.trim().length > 0) {
+        state.drafts[conversationId] = {
+          content: content.trim(),
+          timestamp: Date.now()
+        }
+      } else {
+        delete state.drafts[conversationId]
+      }
+    },
+
+    // 清除草稿
+    CLEAR_DRAFT(state, conversationId) {
+      delete state.drafts[conversationId]
+    },
+
+    // 清空所有草稿
+    CLEAR_ALL_DRAFTS(state) {
+      state.drafts = {}
+    },
+
+    // ========== 输入状态相关 mutations ==========
+
+    // 设置输入状态
+    SET_TYPING(state, { conversationId, isTyping }) {
+      if (isTyping) {
+        state.typingSessions[conversationId] = {
+          isTyping: true,
+          lastTypingTime: Date.now()
+        }
+      } else {
+        delete state.typingSessions[conversationId]
+      }
+    },
+
+    // 清除输入状态
+    CLEAR_TYPING(state, conversationId) {
+      delete state.typingSessions[conversationId]
     }
   },
 
@@ -450,6 +572,86 @@ export default {
         return { ...group, order: index }
       })
       commit('SET_GROUPS', updatedGroups)
+    },
+
+    // ========== 草稿相关 actions ==========
+
+    // 保存草稿
+    async saveDraft({ commit, state }, { conversationId, content }) {
+      commit('SET_DRAFT', { conversationId, content })
+      
+      // 同步到 localStorage（持久化）
+      try {
+        localStorage.setItem(STORAGE_KEY_DRAFTS, JSON.stringify(state.drafts))
+      } catch (e) {
+        console.warn('保存草稿到 localStorage 失败', e)
+      }
+    },
+
+    // 加载草稿
+    async loadDrafts({ commit }) {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY_DRAFTS)
+        if (data) {
+          const drafts = JSON.parse(data)
+          Object.entries(drafts).forEach(([conversationId, draft]) => {
+            commit('SET_DRAFT', { conversationId, content: draft.content })
+          })
+        }
+      } catch (e) {
+        console.warn('从 localStorage 加载草稿失败', e)
+      }
+    },
+
+    // 清除草稿
+    async clearDraft({ commit, state }, conversationId) {
+      commit('CLEAR_DRAFT', conversationId)
+      
+      // 同步到 localStorage
+      try {
+        localStorage.setItem(STORAGE_KEY_DRAFTS, JSON.stringify(state.drafts))
+      } catch (e) {
+        console.warn('清除草稿到 localStorage 失败', e)
+      }
+    },
+
+    // 清空所有草稿
+    async clearAllDrafts({ commit, state }) {
+      commit('CLEAR_ALL_DRAFTS')
+      
+      // 同步到 localStorage
+      try {
+        localStorage.setItem(STORAGE_KEY_DRAFTS, JSON.stringify(state.drafts))
+      } catch (e) {
+        console.warn('清空草稿到 localStorage 失败', e)
+      }
+    },
+
+    // ========== 输入状态相关 actions ==========
+
+    // 设置输入状态
+    setTyping({ commit }, { conversationId, isTyping }) {
+      commit('SET_TYPING', { conversationId, isTyping })
+    },
+
+    // 清除输入状态
+    clearTyping({ commit }, conversationId) {
+      commit('CLEAR_TYPING', conversationId)
+    },
+
+    // 定期清理过期的输入状态
+    startTypingCleanup({ state, commit }) {
+      const intervalId = setInterval(() => {
+        const now = Date.now()
+        Object.entries(state.typingSessions).forEach(([conversationId, typing]) => {
+          if (now - typing.lastTypingTime > 5000) {
+            commit('CLEAR_TYPING', conversationId)
+          }
+        })
+      }, 1000)
+      
+      // 保存 intervalId 以便清理
+      return intervalId
     }
   }
 }

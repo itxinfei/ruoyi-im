@@ -932,24 +932,94 @@ onUnmounted(() => {
   }
   
   .menu-item-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    width: 100%;
-    
-    .menu-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      color: white;
+      gap: 12px;
+      padding: 12px 16px;
+      width: 100%;
       
-      &.image-icon {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+      .menu-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+        
+        &.image-icon {
+          background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        &.doc-icon {
+          background: linear-gradient(135deg, #3b82f6, #1e40af);
+        }
+        
+        .format-icon {
+          background: linear-gradient(135deg, #f4f4f4, #e8e8e8);
+        }
+        
+        .priority-icon {
+          background: linear-gradient(135deg, #ff6b6b, #ff4444);
+        }
+        
+        .archive-icon {
+          background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        }
+        
+        .priority-icon {
+          background: linear-gradient(135deg, #ff6b6b, #ff4444);
+        }
+        
+        .note-icon {
+          background: linear-gradient(135deg, #909399, #60A5FA);
+        }
       }
+      
+      .menu-info {
+        flex: 1;
+        min-width: 0;
+        
+        .menu-title {
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--el-text-color-primary);
+          margin-bottom: 2px;
+        }
+        
+        .menu-desc {
+          font-size: 12px;
+          color: var(--el-text-color-secondary);
+        }
+      }
+      
+      .menu-control {
+        flex-shrink: 0;
+      }
+      
+      .menu-shortcut {
+        display: flex;
+        gap: 2px;
+        
+        kbd {
+          padding: 2px 6px;
+          background: var(--el-fill-color);
+          border: 1px solid var(--el-border-color);
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 11px;
+          color: var(--el-text-color-secondary);
+        }
+      }
+    }
+    
+    .menu-separator {
+      height: 1px;
+      background: var(--el-border-color-lighter);
+      margin: 4px 0;
+    }
+  }
       
       &.doc-icon {
         background: linear-gradient(135deg, #3b82f6, #1e40af);

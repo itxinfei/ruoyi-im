@@ -69,10 +69,6 @@
             <span class="material-icons-outlined">auto_awesome</span>
           </button>
         </el-tooltip>
-
-        <el-button link class="history-btn" @click="$emit('show-history')">
-          <el-icon><Clock /></el-icon> 聊天记录
-        </el-button>
       </div>
     </div>
 
@@ -217,7 +213,7 @@
 <script setup>
 import { ref, nextTick, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useStore } from 'vuex'
-import { Close, ChatDotRound, Picture, FolderOpened, Phone, Clock, Microphone } from '@element-plus/icons-vue'
+import { Close, ChatDotRound, Picture, FolderOpened, Phone, Microphone } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { captureScreenshot, isScreenshotSupported } from '@/utils/screenshot'
@@ -237,7 +233,7 @@ const props = defineProps({
   lastReceivedMessage: Object
 })
 
-const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-screenshot', 'draft-change', 'show-history'])
+const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-screenshot', 'draft-change'])
 
 const store = useStore()
 const { sendMessage: wsSendMessage } = useImWebSocket()
@@ -247,55 +243,13 @@ const messageContent = ref('')
 
 // ========== 草稿管理功能 ==========
 const DRAFT_STORAGE_KEY = 'im_message_drafts'
-const DRAFT_DEBOUNCE_TIME = 1000 // 1秒防抖
-let draftSaveTimer = null
 let currentConversationId = ref(null)
 
-// 获取所有草稿
-const getAllDrafts = () => {
-  try {
-    const data = localStorage.getItem(DRAFT_STORAGE_KEY)
-    return data ? JSON.parse(data) : {}
-  } catch (e) {
-    console.warn('读取草稿失败', e)
-    return {}
-  }
-}
-
-// 保存所有草稿
-const saveAllDrafts = (drafts) => {
-  try {
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts))
-  } catch (e) {
-    console.warn('保存草稿失败', e)
-  }
-}
-
-// 获取指定会话的草稿
-const getDraft = (conversationId) => {
-  const drafts = getAllDrafts()
-  return drafts[conversationId] || null
-}
-
-// 保存草稿（防抖）
-const saveDraftDebounced = (conversationId, content) => {
-  if (draftSaveTimer) {
-    clearTimeout(draftSaveTimer)
-  }
-  draftSaveTimer = setTimeout(() => {
-    saveDraft(conversationId, content)
-  }, DRAFT_DEBOUNCE_TIME)
-}
-
+// 使用 Vuex store 管理草稿
 // 立即保存草稿
 const saveDraft = (conversationId, content) => {
   if (!conversationId) return
-  const drafts = getAllDrafts()
-  drafts[conversationId] = {
-    content,
-    updateTime: Date.now()
-  }
-  saveAllDrafts(drafts)
+  store.dispatch('im/session/saveDraft', { conversationId, content })
   // 通知父组件草稿状态变化
   emit('draft-change', {
     conversationId,
@@ -307,9 +261,7 @@ const saveDraft = (conversationId, content) => {
 // 清除草稿
 const clearDraft = (conversationId) => {
   if (!conversationId) return
-  const drafts = getAllDrafts()
-  delete drafts[conversationId]
-  saveAllDrafts(drafts)
+  store.dispatch('im/session/clearDraft', conversationId)
   emit('draft-change', {
     conversationId,
     hasDraft: false,
@@ -320,9 +272,9 @@ const clearDraft = (conversationId) => {
 // 加载草稿
 const loadDraft = (conversationId) => {
   if (!conversationId) return
-  const draft = getDraft(conversationId)
-  if (draft && draft.content) {
-    messageContent.value = draft.content
+  const draftContent = store.getters['im/session/getDraftContent'](conversationId)
+  if (draftContent) {
+    messageContent.value = draftContent
     nextTick(() => autoResize())
   } else {
     messageContent.value = ''
@@ -498,9 +450,9 @@ const handleInput = () => {
   // 发送输入状态（防抖）
   sendTypingIndicator()
 
-  // 保存草稿（防抖）
+  // 立即保存草稿（不使用防抖）
   if (props.session?.id) {
-    saveDraftDebounced(props.session.id, messageContent.value)
+    saveDraft(props.session.id, messageContent.value)
   }
 }
 
@@ -892,9 +844,27 @@ watch(() => props.session?.id, (newId, oldId) => {
   }
 }, { immediate: true })
 
+// 监听输入内容变化，更新输入状态
+watch(messageContent, (newContent, oldContent) => {
+  if (newContent !== oldContent) {
+    // 更新输入状态
+    if (newContent.trim().length > 0) {
+      store.dispatch('im/session/setTyping', {
+        conversationId: props.session?.id,
+        isTyping: true
+      })
+    } else {
+      store.dispatch('im/session/clearTyping', props.session?.id)
+    }
+  }
+})
+
 onMounted(() => {
   const saved = localStorage.getItem('im_input_height')
   if (saved) containerHeight.value = parseInt(saved)
+
+  // 加载所有草稿
+  store.dispatch('im/session/loadDrafts')
 
   // 注册全局截图快捷键 (Ctrl+Alt+A / Cmd+Shift+A)
   const handleGlobalKeydown = (e) => {
@@ -920,14 +890,13 @@ onUnmounted(() => {
     clearTimeout(typingTimer)
     typingTimer = null
   }
-  // 清理草稿保存定时器
-  if (draftSaveTimer) {
-    clearTimeout(draftSaveTimer)
-    draftSaveTimer = null
-  }
   // 保存当前草稿
   if (currentConversationId.value && messageContent.value.trim()) {
     saveDraft(currentConversationId.value, messageContent.value)
+  }
+  // 清除输入状态
+  if (currentConversationId.value) {
+    store.dispatch('im/session/clearTyping', currentConversationId.value)
   }
   // 移除全局键盘事件监听
   if (window._messageInputKeydownHandler) {
@@ -1262,20 +1231,6 @@ onUnmounted(() => {
     align-items: center;
     gap: 8px;
   }
-
-  .history-btn {
-    font-size: 13px;
-    color: var(--dt-text-tertiary);
-    transition: all var(--dt-transition-fast);
-    padding: 6px 12px;
-    border-radius: var(--dt-radius-md);
-    background: var(--dt-bg-input);
-
-    &:hover {
-      color: var(--dt-brand-color);
-      background: var(--dt-brand-bg);
-    }
-  }
 }
 
 // AI 按钮呼吸动画
@@ -1338,16 +1293,6 @@ onUnmounted(() => {
 
     .toolbar-divider {
       background: var(--dt-border-dark);
-    }
-  }
-
-  .history-btn {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--dt-text-tertiary-dark);
-
-    &:hover {
-      background: rgba(22, 119, 255, 0.15);
-      color: var(--dt-brand-color);
     }
   }
 }
@@ -1626,15 +1571,6 @@ onUnmounted(() => {
       .el-icon,
       .material-icons-outlined {
         font-size: 16px;
-      }
-    }
-
-    .history-btn {
-      font-size: 12px;
-      padding: 4px 8px;
-
-      .el-icon {
-        display: none;
       }
     }
   }

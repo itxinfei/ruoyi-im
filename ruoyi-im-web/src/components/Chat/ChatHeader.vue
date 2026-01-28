@@ -73,6 +73,12 @@
         </button>
         <template #dropdown>
           <el-dropdown-menu class="header-dropdown">
+            <!-- 聊天记录 -->
+            <el-dropdown-item command="history" class="menu-item">
+              <span class="material-icons-outlined item-icon">history</span>
+              <span class="item-text">聊天记录</span>
+            </el-dropdown-item>
+
             <!-- 搜索 -->
             <el-dropdown-item command="search" class="menu-item">
               <span class="material-icons-outlined item-icon">search</span>
@@ -170,7 +176,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar'])
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar'])
 
 // 用户详情抽屉显示状态
 const showUserDetail = ref(false)
@@ -222,6 +228,9 @@ const handleVideoCall = () => {
 // 菜单命令处理
 const handleMenuCommand = (command) => {
   switch (command) {
+    case 'history':
+      emit('history', props.session)
+      break
     case 'search':
       emit('search', props.session)
       break
@@ -669,37 +678,76 @@ const menuPlacement = computed(() => {
 }
 
 // ============================================================================
-// 下拉菜单
+// 下拉菜单 - 现代化设计
 // ============================================================================
 :deep(.header-dropdown) {
-  padding: 6px;
-  min-width: 200px;
+  padding: 0;
+  min-width: 240px;
   max-width: 280px;
-  border-radius: var(--dt-radius-lg);
-  border: 1px solid var(--dt-border-light);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.98);
-  animation: menuFadeIn 0.2s var(--dt-ease-out);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 30px -5px rgba(0, 0, 0, 0.08),
+    0 20px 50px -10px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.95);
+  animation: menuSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+
+  // 顶部装饰条
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #1677ff 0%, #52c41a 50%, #ff4d4f 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
 
   .el-dropdown-menu__item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    font-size: 13px;
+    gap: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
     color: var(--dt-text-primary);
-    border-radius: var(--dt-radius-md);
-    transition: all 0.2s var(--dt-ease-out);
-    margin: 2px 0;
+    border-radius: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0;
     position: relative;
     overflow: hidden;
 
+    // 菜单项背景动画
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--dt-brand-color);
+      transform: scaleY(0);
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     .item-icon {
-      font-size: 18px;
-      color: var(--dt-text-secondary);
-      transition: color 0.2s var(--dt-ease-out);
+      font-size: 20px;
+      color: var(--dt-text-tertiary);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
     }
 
     .item-text {
@@ -707,50 +755,74 @@ const menuPlacement = computed(() => {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-weight: 500;
     }
 
     .item-shortcut {
       font-size: 11px;
-      color: var(--dt-text-tertiary);
-      background: var(--dt-bg-body);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
+      color: var(--dt-text-quaternary);
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.02) 100%);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      font-weight: 500;
       flex-shrink: 0;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      letter-spacing: 0.5px;
     }
 
     .item-badge {
-      background: var(--dt-error-color);
+      background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
       color: #fff;
       font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
       flex-shrink: 0;
       animation: badgePulse 2s ease-in-out infinite;
+      box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
     }
 
     &:hover {
-      background: var(--dt-brand-bg);
+      background: linear-gradient(90deg, rgba(22, 119, 255, 0.06) 0%, rgba(22, 119, 255, 0.02) 100%);
       color: var(--dt-brand-color);
-      transform: translateX(2px);
+      transform: translateX(4px);
+
+      &::before {
+        transform: scaleY(1);
+      }
 
       .item-icon {
         color: var(--dt-brand-color);
+        transform: scale(1.1);
       }
 
       .item-shortcut {
-        background: rgba(22, 119, 255, 0.1);
+        background: linear-gradient(135deg, rgba(22, 119, 255, 0.12) 0%, rgba(22, 119, 255, 0.06) 100%);
         color: var(--dt-brand-color);
+        border-color: rgba(22, 119, 255, 0.15);
+        transform: scale(1.05);
       }
     }
 
+    &:active {
+      transform: translateX(4px) scale(0.98);
+    }
+
     &.is-active {
-      background: var(--dt-brand-bg);
+      background: linear-gradient(90deg, rgba(22, 119, 255, 0.1) 0%, rgba(22, 119, 255, 0.03) 100%);
       color: var(--dt-brand-color);
+
+      &::before {
+        transform: scaleY(1);
+      }
 
       .item-icon {
         color: var(--dt-brand-color);
+      }
+
+      .item-text {
+        font-weight: 600;
       }
     }
 
@@ -761,36 +833,54 @@ const menuPlacement = computed(() => {
         color: var(--dt-error-color);
       }
 
+      &::before {
+        background: var(--dt-error-color);
+      }
+
       &:hover {
-        background: var(--dt-error-bg);
-        color: var(--dt-error-color);
-        transform: translateX(2px);
+        background: linear-gradient(90deg, rgba(255, 77, 79, 0.08) 0%, rgba(255, 77, 79, 0.02) 100%);
+        color: #d9363e;
+        transform: translateX(4px);
+
+        &::before {
+          transform: scaleY(1);
+        }
 
         .item-icon {
-          color: var(--dt-error-color);
+          color: #d9363e;
+          transform: scale(1.1);
         }
       }
     }
 
     // 分割线样式
     &.el-dropdown-menu__item--divided {
-      margin-top: 6px;
-      margin-bottom: 6px;
+      position: relative;
+      margin-top: 4px;
+      margin-bottom: 4px;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 52px;
+        right: 16px;
+        top: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.08) 50%, transparent 100%);
+      }
 
       &::before {
-        margin: 0;
-        height: 1px;
-        background: var(--dt-border-light);
+        display: none;
       }
     }
   }
 }
 
-// 菜单淡入动画
-@keyframes menuFadeIn {
+// 菜单滑入动画
+@keyframes menuSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-8px) scale(0.95);
+    transform: translateY(-12px) scale(0.92);
   }
   to {
     opacity: 1;
@@ -803,10 +893,12 @@ const menuPlacement = computed(() => {
   0%, 100% {
     opacity: 1;
     transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
   }
   50% {
-    opacity: 0.8;
-    transform: scale(1.05);
+    opacity: 0.85;
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(255, 77, 79, 0.5);
   }
 }
 
@@ -816,6 +908,15 @@ const menuPlacement = computed(() => {
 .dark .chat-header {
   background: var(--dt-bg-card-dark);
   border-color: var(--dt-border-dark);
+
+  &::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(22, 119, 255, 0.15) 50%,
+      transparent 100%
+    );
+  }
 }
 
 .dark .header-name {
@@ -884,26 +985,45 @@ const menuPlacement = computed(() => {
 }
 
 .dark :deep(.header-dropdown) {
-  background: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  background: rgba(30, 41, 59, 0.98);
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 10px 30px -5px rgba(0, 0, 0, 0.3),
+    0 20px 50px -10px rgba(0, 0, 0, 0.2);
+
+  &::before {
+    background: linear-gradient(90deg, #1677ff 0%, #52c41a 50%, #ff4d4f 100%);
+  }
 
   .el-dropdown-menu__item {
     color: var(--dt-text-primary-dark);
 
-    .item-icon {
-      color: var(--dt-text-secondary-dark);
+    &::before {
+      background: var(--dt-brand-color);
     }
 
-    .item-shortcut {
-      background: rgba(255, 255, 255, 0.1);
+    .item-icon {
       color: var(--dt-text-tertiary-dark);
     }
 
+    .item-text {
+      font-weight: 500;
+    }
+
+    .item-shortcut {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+      color: var(--dt-text-quaternary-dark);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .item-badge {
+      background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+      box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+    }
+
     &:hover {
-      background: rgba(22, 119, 255, 0.15);
+      background: linear-gradient(90deg, rgba(22, 119, 255, 0.15) 0%, rgba(22, 119, 255, 0.05) 100%);
       color: var(--dt-brand-color);
 
       .item-icon {
@@ -911,13 +1031,14 @@ const menuPlacement = computed(() => {
       }
 
       .item-shortcut {
-        background: rgba(22, 119, 255, 0.2);
+        background: linear-gradient(135deg, rgba(22, 119, 255, 0.2) 0%, rgba(22, 119, 255, 0.1) 100%);
         color: var(--dt-brand-color);
+        border-color: rgba(22, 119, 255, 0.25);
       }
     }
 
     &.is-active {
-      background: rgba(22, 119, 255, 0.15);
+      background: linear-gradient(90deg, rgba(22, 119, 255, 0.2) 0%, rgba(22, 119, 255, 0.08) 100%);
       color: var(--dt-brand-color);
 
       .item-icon {
@@ -932,8 +1053,12 @@ const menuPlacement = computed(() => {
         color: #f87171;
       }
 
+      &::before {
+        background: #ff4d4f;
+      }
+
       &:hover {
-        background: rgba(239, 68, 68, 0.15);
+        background: linear-gradient(90deg, rgba(255, 77, 79, 0.15) 0%, rgba(255, 77, 79, 0.05) 100%);
         color: #f87171;
 
         .item-icon {
@@ -943,8 +1068,114 @@ const menuPlacement = computed(() => {
     }
 
     &.el-dropdown-menu__item--divided {
-      &::before {
-        background: var(--dt-border-dark);
+      &::after {
+        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+      }
+    }
+  }
+}
+
+// ============================================================================
+// 响应式设计
+// ============================================================================
+@media (max-width: 768px) {
+  .chat-header {
+    padding: 0 12px;
+
+    .header-name {
+      font-size: 14px;
+    }
+
+    .meta-info {
+      font-size: 11px;
+    }
+  }
+
+  .header-left {
+    gap: 8px;
+    padding: 6px 8px 6px 6px;
+  }
+
+  .header-avatar {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .group-avatar {
+    width: 38px;
+    height: 38px;
+
+    .material-icons-outlined {
+      font-size: 20px;
+    }
+  }
+
+  .action-btn {
+    width: 34px;
+    height: 34px;
+
+    &.call-btn {
+      width: 36px;
+      height: 36px;
+    }
+
+    .material-icons-outlined {
+      font-size: 18px;
+    }
+  }
+
+  :deep(.header-dropdown) {
+    min-width: 200px;
+    max-width: 240px;
+
+    .el-dropdown-menu__item {
+      padding: 10px 14px;
+      font-size: 13px;
+      gap: 10px;
+
+      .item-icon {
+        font-size: 18px;
+        width: 22px;
+        height: 22px;
+      }
+
+      .item-shortcut {
+        display: none; // 移动端隐藏快捷键提示
+      }
+
+      &.el-dropdown-menu__item--divided {
+        &::after {
+          left: 46px;
+          right: 14px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-header {
+    padding: 0 8px;
+  }
+
+  .header-arrow {
+    display: none;
+  }
+
+  .call-buttons {
+    margin: 0 2px;
+    padding: 2px;
+  }
+
+  :deep(.header-dropdown) {
+    .el-dropdown-menu__item {
+      padding: 10px 12px;
+
+      &.el-dropdown-menu__item--divided {
+        &::after {
+          left: 42px;
+          right: 12px;
+        }
       }
     }
   }

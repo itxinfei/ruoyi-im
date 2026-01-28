@@ -5,9 +5,16 @@ import com.ruoyi.im.service.ImSystemConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 /**
@@ -23,6 +30,9 @@ public class ImSystemConfigAdminController {
 
     @Autowired
     private ImSystemConfigService configService;
+
+    @Value("${app.upload.path}")
+    private String uploadPath;
 
     @Operation(summary = "获取所有系统配置")
     @GetMapping("/all")
@@ -42,5 +52,50 @@ public class ImSystemConfigAdminController {
     public Result<Void> setRecallLimit(@RequestParam Integer minutes) {
         configService.setMessageRecallTimeLimit(minutes);
         return Result.success("设置成功");
+    }
+
+    @Operation(summary = "上传系统Logo")
+    @PostMapping("/logo")
+    public Result<String> uploadLogo(@RequestParam("file") MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                return Result.error("请选择文件");
+            }
+
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            if (!extension.toLowerCase().matches("\\.(png|jpg|jpeg|gif|svg|webp)")) {
+                return Result.error("只支持图片格式：png、jpg、jpeg、gif、svg、webp");
+            }
+
+            long maxSize = 2 * 1024 * 1024;
+            if (file.getSize() > maxSize) {
+                return Result.error("文件大小不能超过2MB");
+            }
+
+            String logoDir = uploadPath + "/logo";
+            Path logoPath = Paths.get(logoDir);
+            if (!Files.exists(logoPath)) {
+                Files.createDirectories(logoPath);
+            }
+
+            String fileName = "logo" + extension;
+            Path filePath = logoPath.resolve(fileName);
+            Files.write(filePath, file.getBytes());
+
+            String logoUrl = "/uploads/logo/" + fileName;
+            configService.updateSystemConfig("system.logo.url", logoUrl);
+
+            return Result.success(logoUrl, "上传成功");
+        } catch (IOException e) {
+            return Result.error("上传失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "获取系统Logo")
+    @GetMapping("/logo")
+    public Result<String> getLogo() {
+        String logoUrl = configService.getConfigValue("system.logo.url");
+        return Result.success(logoUrl);
     }
 }

@@ -230,7 +230,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         ImMessageVO vo = new ImMessageVO();
         BeanUtils.copyProperties(message, vo);
         vo.setContent(plainContent);
-        vo.setType(message.getMessageType());
+        vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
         vo.setIsSelf(true);
         vo.setSenderName(sender.getNickname());
         vo.setSenderAvatar(sender.getAvatar());
@@ -341,6 +341,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
             vo.setContent(decryptedContent);
+            vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
 
             // 从Map中获取发送者信息（避免重复查询）
             ImUser sender = userMap.get(message.getSenderId());
@@ -393,7 +394,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
         quotedMessage.setId(originalMessage.getId());
-        quotedMessage.setType(originalMessage.getMessageType());
+        quotedMessage.setType(originalMessage.getMessageType() != null ? originalMessage.getMessageType().toUpperCase() : "TEXT");
         quotedMessage.setSendTime(originalMessage.getCreateTime());
 
         // 从预加载的Map中获取发送者信息
@@ -772,7 +773,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             item.setId(message.getId());
             item.setConversationId(message.getConversationId());
             item.setSenderId(message.getSenderId());
-            item.setType(message.getMessageType());
+            item.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
             item.setSendTime(message.getCreateTime());
 
             // 解密消息内容

@@ -9,6 +9,8 @@
  * @returns {String} 格式化后的预览文本
  */
 export function formatMessagePreview(type, content) {
+    // 统一转为大写，兼容后端可能返回的小写类型
+    type = (type || '').toUpperCase()
     if (!content && type !== 'RECALLED') return '[暂无消息]'
 
     switch (type) {
@@ -74,7 +76,7 @@ export function formatMessagePreview(type, content) {
  */
 export function formatMessagePreviewFromObject(message) {
     if (!message) return '[空消息]'
-    
+
     // 如果已经是字符串（已格式化），直接返回
     if (typeof message === 'string') {
         // 过滤掉方括号包裹的类型标记，保留实际内容
@@ -91,8 +93,8 @@ export function formatMessagePreviewFromObject(message) {
         return str
     }
     
-    // 处理消息类型，兼容可能的字段名差异
-    const type = message.type || message.messageType || message.message_type
+    // 处理消息类型，兼容可能的字段名差异，并统一转为大写
+    const type = (message.type || message.messageType || message.message_type || '').toUpperCase()
     
     // 检查是否为撤回消息
     if (message.isRevoked === 1 || message.is_revoked === 1 || type === 'RECALLED') {

@@ -171,13 +171,17 @@
                       <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
                     </div>
                     <div class="session-preview">
-                      <span v-if="hasDraft(session.id)" class="draft-tag">[草稿]</span>
+                      <span v-if="isTyping(session.id)" class="typing-indicator">
+                        <span class="material-icons-outlined typing-icon">edit</span>
+                        正在输入...
+                      </span>
+                      <span v-else-if="hasDraft(session.id)" class="draft-tag">[草稿]</span>
                       <span v-else-if="session.hasMention" class="mention-tag">@</span>
-                      <span v-if="session.lastSenderNickname && session.type === 'GROUP' && !hasDraft(session.id)" class="sender-name">
+                      <span v-if="session.lastSenderNickname && session.type === 'GROUP' && !hasDraft(session.id) && !isTyping(session.id)" class="sender-name">
                         {{ session.lastSenderNickname }}:
                       </span>
                       <span class="preview-text">
-                        {{ hasDraft(session.id) ? getDraftPreview(session.id) : (session.lastMessage || '暂无消息') }}
+                        {{ isTyping(session.id) ? '' : (hasDraft(session.id) ? getDraftPreview(session.id) : (session.lastMessage || '暂无消息')) }}
                       </span>
                     </div>
                   </div>
@@ -308,36 +312,18 @@ const allGroups = computed(() => store.getters['im/session/sortedGroups'] || [])
 // 非系统分组（可管理的分组）
 const customGroups = computed(() => allGroups.value.filter(g => !g.isSystem))
 
-// 草稿状态管理
-const DRAFT_STORAGE_KEY = 'im_message_drafts'
-
-// 从 localStorage 获取所有草稿
-const loadDraftsFromStorage = () => {
-  try {
-    const data = localStorage.getItem(DRAFT_STORAGE_KEY)
-    return data ? JSON.parse(data) : {}
-  } catch (e) {
-    return {}
-  }
-}
-
-// 响应式草稿数据
-const drafts = ref(loadDraftsFromStorage())
-
-// 定期刷新草稿状态（监听 localStorage 变化）
-let draftCheckInterval = null
-
-// 判断会话是否有草稿
+// 草稿状态管理 - 使用 Vuex getters
 const hasDraft = (conversationId) => {
-  const draft = drafts.value[conversationId]
-  return draft && draft.content && draft.content.trim().length > 0
+  return store.getters['im/session/hasDraft'](conversationId)
 }
 
-// 获取草稿预览文本
 const getDraftPreview = (conversationId) => {
-  const draft = drafts.value[conversationId]
-  if (!draft || !draft.content) return ''
-  return draft.content.trim().slice(0, 20)
+  return store.getters['im/session/getDraftPreview'](conversationId)
+}
+
+// 输入状态 - 使用 Vuex getters
+const isTyping = (conversationId) => {
+  return store.getters['im/session/isTyping'](conversationId)
 }
 
 // 判断用户是否在线
@@ -428,16 +414,51 @@ const contextMenu = reactive({
   session: null
 })
 
-const contextMenuStyle = computed(() => ({
-  left: `${contextMenu.x}px`,
-  top: `${contextMenu.y}px`
-}))
+const contextMenuStyle = computed(() => {
+  if (!contextMenu.show) return {}
+  
+  // 获取菜单尺寸
+  const menuWidth = 200
+  const menuHeight = contextMenu.session?.isPinned ? 150 : 200
+  
+  // 获取会话列表容器
+  const sessionList = document.querySelector('.session-list')
+  if (!sessionList) return {}
+  
+  const rect = sessionList.getBoundingClientRect()
+  
+  // 计算居中位置
+  const centerX = rect.left + rect.width / 2
+  const centerY = rect.top + rect.height / 2
+  
+  // 计算菜单位置（居中）
+  let x = centerX - menuWidth / 2
+  let y = centerY - menuHeight / 2
+  
+  // 边界检测
+  const padding = 10
+  const maxX = window.innerWidth - menuWidth - padding
+  const maxY = window.innerHeight - menuHeight - padding
+  
+  x = Math.max(padding, Math.min(x, maxX))
+  y = Math.max(padding, Math.min(y, maxY))
+  
+  return {
+    left: `${x}px`,
+    top: `${y}px`
+  }
+})
 
 const handleContextMenu = (e, session) => {
+  e.preventDefault()
+  e.stopPropagation()
+  
   contextMenu.show = true
-  contextMenu.x = e.clientX
-  contextMenu.y = e.clientY
   contextMenu.session = session
+  
+  // 不使用鼠标位置，使用计算后的居中位置
+  contextMenu.x = 0
+  contextMenu.y = 0
 }
 
 const hideContextMenu = () => {
@@ -590,20 +611,15 @@ onMounted(() => {
   if (sessions.value.length === 0) {
     store.dispatch('im/session/loadSessions')
   }
+  // 加载草稿
+  store.dispatch('im/session/loadDrafts')
+  // 启动输入状态清理
+  store.dispatch('im/session/startTypingCleanup')
   window.addEventListener('click', hideContextMenu)
-
-  // 定期刷新草稿状态（每秒检查一次）
-  draftCheckInterval = setInterval(() => {
-    drafts.value = loadDraftsFromStorage()
-  }, 1000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('click', hideContextMenu)
-  if (draftCheckInterval) {
-    clearInterval(draftCheckInterval)
-    draftCheckInterval = null
-  }
 })
 </script>
 
@@ -1088,7 +1104,7 @@ onUnmounted(() => {
   min-width: 160px;
   z-index: 2000;
   border: 1px solid var(--dt-border-light);
-  animation: scaleIn 0.2s var(--dt-ease-out);
+  animation: menuFadeIn 0.2s var(--dt-ease-out);
 
   .menu-item {
     display: flex;
@@ -1383,5 +1399,41 @@ onUnmounted(() => {
   font-size: 11px;
   font-weight: 500;
   flex-shrink: 0;
+}
+
+// ============================================================================
+// 输入状态样式
+// ============================================================================
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--dt-brand-color);
+  font-weight: 500;
+  animation: typingPulse 1.5s ease-in-out infinite;
+  
+  .typing-icon {
+    font-size: 14px;
+  }
+}
+
+@keyframes typingPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+// ============================================================================
+// 动画定义
+// ============================================================================
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

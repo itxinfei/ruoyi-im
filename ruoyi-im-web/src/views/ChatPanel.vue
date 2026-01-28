@@ -27,7 +27,9 @@
             @toggle-multi-select="handleToggleMultiSelect"
             @clear-selection="handleClearSelection"
             @announcement="showAnnouncementDialog = true"
+            @history="handleShowHistory"
             @search="handleSearchMessages"
+            @files="handleShowFiles"
             @pin="handlePinSession"
             @mute="handleMuteSession"
             @clear="handleClearMessages"
@@ -66,7 +68,6 @@
             @upload-video="handleVideoUpload"
             @send-location="handleSendLocation"
             @send-screenshot="handleScreenshotUpload"
-            @show-history="handleShowHistory"
           />
         </div>
 
@@ -928,6 +929,16 @@ const handleVoiceCall = () => {
 const handleVideoCall = () => {
   isIncomingCall.value = false
   showVideoCall.value = true
+}
+
+// 查看文件
+const handleShowFiles = () => {
+  ElMessage.info('文件功能开发中')
+}
+
+// 搜索消息
+const handleSearchMessages = () => {
+  ElMessage.info('搜索功能开发中')
 }
 
 // 会话操作

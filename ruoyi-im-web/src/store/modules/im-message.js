@@ -206,8 +206,13 @@ export default {
       try {
         const res = await getMessages(sessionId, { lastId: lastMessageId, pageSize })
         if (res.code === 200 && res.data) {
+          // 规范化消息类型为大写
+          const normalized = res.data.map(msg => ({
+            ...msg,
+            type: (msg.type || '').toUpperCase()
+          }))
           // 后端返回是按时间倒序的 (newest first)，前端需要 newest at bottom
-          const transformed = res.data.reverse()
+          const transformed = normalized.reverse()
           if (isLoadMore) {
             commit('PREPEND_MESSAGES', { sessionId, messages: transformed })
           } else {
@@ -232,14 +237,19 @@ export default {
       })
 
       if (res.code === 200 && res.data) {
-        commit('ADD_MESSAGE', { sessionId, message: res.data })
+        // 规范化响应中的消息类型
+        const normalizedMessage = {
+          ...res.data,
+          type: (res.data.type || '').toUpperCase()
+        }
+        commit('ADD_MESSAGE', { sessionId, message: normalizedMessage })
         commit('session/UPDATE_SESSION', {
           id: sessionId,
-          lastMessage: formatMessagePreviewFromObject(res.data),
-          lastMessageTime: res.data.timestamp,
+          lastMessage: formatMessagePreviewFromObject(normalizedMessage),
+          lastMessageTime: normalizedMessage.timestamp,
           lastMessageType: type
         }, { root: true })
-        return res.data
+        return normalizedMessage
       }
       throw new Error('发送消息失败')
     },
@@ -323,6 +333,11 @@ export default {
       const sessionId = message.conversationId || message.sessionId
       if (!sessionId) return
 
+      // 规范化消息类型为大写（兼容后端可能返回的小写类型）
+      if (message.type) {
+        message.type = message.type.toUpperCase()
+      }
+
       // 添加消息到列表
       commit('ADD_MESSAGE', { sessionId, message })
 
@@ -337,7 +352,7 @@ export default {
       commit('session/UPDATE_SESSION', {
         id: sessionId,
         lastMessage: formatMessagePreviewFromObject(message) || '[新消息]',
-        lastMessageTime: message.timestamp,
+        lastMessageTime: message.timestamp || message.sendTime,
         lastMessageType: message.type,
         lastSenderNickname: message.senderName,
         unreadCount: isCurrentSession ? 0 : ((session?.unreadCount || 0) + 1),

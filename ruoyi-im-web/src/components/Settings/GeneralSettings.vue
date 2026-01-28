@@ -1,6 +1,36 @@
 <template>
   <div class="general-settings">
     <div class="setting-group">
+      <h3 class="group-title">品牌标识</h3>
+      <div class="logo-uploader">
+        <div class="logo-preview">
+          <img v-if="logoUrl" :src="logoUrl" class="logo-image" alt="Logo预览" />
+          <div v-else class="logo-placeholder">
+            <el-icon class="placeholder-icon"><Picture /></el-icon>
+            <span class="placeholder-text">暂无Logo</span>
+          </div>
+        </div>
+        <div class="logo-actions">
+          <el-upload
+            ref="uploadRef"
+            :show-file-list="false"
+            :before-upload="beforeUpload"
+            :http-request="handleUpload"
+            accept="image/*"
+            :limit="1"
+          >
+            <el-button type="primary" :loading="uploading">
+              <el-icon><Upload /></el-icon> 上传Logo
+            </el-button>
+          </el-upload>
+          <el-button v-if="logoUrl" @click="handleReset" :disabled="uploading">
+            <el-icon><RefreshLeft /></el-icon> 恢复默认
+          </el-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-group">
       <h3 class="group-title">外观</h3>
       <div class="theme-selector">
         <div 
@@ -75,8 +105,10 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
-import { Check } from '@element-plus/icons-vue'
+import { reactive, watch, ref, onMounted } from 'vue'
+import { Check, Picture, Upload, RefreshLeft } from '@element-plus/icons-vue'
+import { request } from '@/utils/request'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   modelValue: {
@@ -88,6 +120,69 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const localSettings = reactive(JSON.parse(JSON.stringify(props.modelValue)))
+
+const logoUrl = ref(null)
+const uploadRef = ref(null)
+const uploading = ref(false)
+
+onMounted(async () => {
+  try {
+    const res = await request.get('/api/admin/config/logo')
+    if (res.code === 200 && res.data) {
+      logoUrl.value = res.data
+    }
+  } catch (error) {
+    console.error('获取系统Logo失败:', error)
+  }
+})
+
+const beforeUpload = (file) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
+  
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过 2MB!')
+    return false
+  }
+  return true
+}
+
+const handleUpload = async (options) => {
+  const formData = new FormData()
+  formData.append('file', options.file)
+  
+  uploading.value = true
+  try {
+    const res = await request.post('/api/admin/config/logo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    if (res.code === 200) {
+      logoUrl.value = res.data
+      ElMessage.success('Logo上传成功')
+    }
+  } catch (error) {
+    ElMessage.error('上传失败: ' + (error.message || '未知错误'))
+  } finally {
+    uploading.value = false
+  }
+}
+
+const handleReset = async () => {
+  try {
+    await request.put('/api/admin/config/update', {
+      key: 'system.logo.url',
+      value: ''
+    })
+    logoUrl.value = null
+    ElMessage.success('已恢复默认Logo')
+  } catch (error) {
+    ElMessage.error('恢复失败: ' + (error.message || '未知错误'))
+  }
+}
 
 watch(() => props.modelValue, (newVal) => {
   if (JSON.stringify(newVal) !== JSON.stringify(localSettings)) {
@@ -121,6 +216,53 @@ const handleChange = () => {
   color: var(--dt-text-secondary);
   margin-bottom: 16px;
   padding-left: 4px;
+}
+
+.logo-uploader {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.logo-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  border: 2px dashed var(--dt-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dt-bg-card);
+  overflow: hidden;
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--dt-text-tertiary);
+
+  .placeholder-icon {
+    font-size: 32px;
+  }
+
+  .placeholder-text {
+    font-size: 12px;
+  }
+}
+
+.logo-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .theme-selector {

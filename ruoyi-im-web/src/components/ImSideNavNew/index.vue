@@ -12,7 +12,8 @@
     <!-- Logo 区域 -->
     <div class="nav-logo-wrapper">
       <div class="nav-logo">
-        <span class="nav-logo-text">IM</span>
+        <img v-if="logoUrl" :src="logoUrl" class="nav-logo-image" alt="Logo" />
+        <span v-else class="nav-logo-text">IM</span>
         <span class="nav-logo-badge" v-if="unreadCount > 0">
           {{ unreadCount > 99 ? '99+' : unreadCount }}
         </span>
@@ -111,9 +112,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
+import { request } from '@/utils/request'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import {
   ChatDotRound, User, Grid, Cloudy, Calendar, CircleCheck,
@@ -130,6 +132,19 @@ const props = defineProps({
 const emit = defineEmits(['switch-module', 'open-search', 'open-settings'])
 const store = useStore()
 const { isDark, themeMode, toggleTheme } = useTheme()
+
+const logoUrl = ref(null)
+
+onMounted(async () => {
+  try {
+    const res = await request.get('/api/admin/config/logo')
+    if (res.code === 200 && res.data) {
+      logoUrl.value = res.data
+    }
+  } catch (error) {
+    console.error('获取系统Logo失败:', error)
+  }
+})
 
 const themeIcon = computed(() => {
   // Element Plus 没有 MoonFilled，使用 Moon 和 Sunny 区分
@@ -265,6 +280,13 @@ function handleOpenSearch() {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.nav-logo-image {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .nav-logo-badge {
