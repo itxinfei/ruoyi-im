@@ -211,31 +211,31 @@
   // ============================================================================
   // 暗色模式变量 - 优化版（更明亮的暗色主题）
   // ============================================================================
-  --dt-bg-body-dark: #1a1a2e;           // 主背景：深蓝紫色，比纯黑更柔和
-  --dt-bg-sidebar-dark: #252542;        // 侧边栏：稍亮的深蓝紫
-  --dt-bg-card-dark: #252542;           // 卡片背景
-  --dt-bg-input-dark: #2d2d4a;         // 输入框背景
-  --dt-bg-hover-dark: #32325a;         // 悬停背景
-  --dt-bg-active-dark: rgba(22, 119, 255, 0.2);  // 激活状态
+  --dt-bg-body-dark: #2a2a3e;           // 主背景：更亮的蓝紫色
+  --dt-bg-sidebar-dark: #353552;        // 侧边栏：更亮的蓝紫色
+  --dt-bg-card-dark: #353552;           // 卡片背景
+  --dt-bg-input-dark: #3d3d5a;         // 输入框背景
+  --dt-bg-hover-dark: #454562;         // 悬停背景
+  --dt-bg-active-dark: rgba(22, 119, 255, 0.25);  // 激活状态
 
   --dt-text-primary-dark: #ffffff;      // 主要文本：纯白色提高可读性
-  --dt-text-secondary-dark: #e0e0e0;   // 次要文本：浅灰白
-  --dt-text-tertiary-dark: #b0b0c0;    // 辅助文本
-  --dt-text-quaternary-dark: #808090;  // 占位符文本
-  --dt-text-disabled-dark: #606070;    // 禁用文本
+  --dt-text-secondary-dark: #e8e8f0;   // 次要文本：浅灰白
+  --dt-text-tertiary-dark: #b8b8c8;    // 辅助文本
+  --dt-text-quaternary-dark: #888898;  // 占位符文本
+  --dt-text-disabled-dark: #686878;    // 禁用文本
 
-  --dt-border-dark: #3a3a5c;           // 边框颜色
-  --dt-border-light-dark: #2a2a45;     // 浅色边框
+  --dt-border-dark: #4a4a6a;           // 边框颜色
+  --dt-border-light-dark: #3a3a5a;     // 浅色边框
 
   // Element Plus 暗色适配变量
-  --el-bg-color-dark: #252542;
-  --el-bg-color-overlay-dark: #1a1a2e;
+  --el-bg-color-dark: #353552;
+  --el-bg-color-overlay-dark: #2a2a3e;
   --el-text-color-primary-dark: #ffffff;
-  --el-text-color-regular-dark: #e0e0e0;
-  --el-border-color-dark: #3a3a5c;
-  --el-border-color-light-dark: #2a2a45;
-  --el-fill-color-blank-dark: #2d2d4a;
-  --el-fill-color-light-dark: #252542;
+  --el-text-color-regular-dark: #e8e8f0;
+  --el-border-color-dark: #4a4a6a;
+  --el-border-color-light-dark: #3a3a5a;
+  --el-fill-color-blank-dark: #3d3d5a;
+  --el-fill-color-light-dark: #353552;
 
   // ============================================================================
   // 语义化颜色变量 (用于组件)

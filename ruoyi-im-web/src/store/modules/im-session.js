@@ -358,12 +358,17 @@ export default {
     // 设置草稿
     SET_DRAFT(state, { conversationId, content }) {
       if (content && content.trim().length > 0) {
-        state.drafts[conversationId] = {
-          content: content.trim(),
-          timestamp: Date.now()
+        state.drafts = {
+          ...state.drafts,
+          [conversationId]: {
+            content: content.trim(),
+            timestamp: Date.now()
+          }
         }
       } else {
-        delete state.drafts[conversationId]
+        const newDrafts = { ...state.drafts }
+        delete newDrafts[conversationId]
+        state.drafts = newDrafts
       }
     },
 
@@ -403,7 +408,10 @@ export default {
 
     // 清除输入状态
     CLEAR_TYPING(state, conversationId) {
-      delete state.typingSessions[conversationId]
+      // 创建新对象触发响应式更新
+      const newTypingSessions = { ...state.typingSessions }
+      delete newTypingSessions[conversationId]
+      state.typingSessions = newTypingSessions
     }
   },
 

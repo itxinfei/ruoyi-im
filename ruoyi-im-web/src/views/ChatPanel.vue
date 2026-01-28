@@ -19,12 +19,14 @@
     <template v-else>
       <div class="main-container">
         <!-- 左侧聊天主体 -->
-        <div class="chat-viewport">
+        <div class="chat-viewport" :class="{ 'with-pinned-panel': showPinnedPanel }">
           <ChatHeader
             :session="session"
             :typing-users="typingUsers"
+            :pinned-count="pinnedCount"
             @toggle-sidebar="handleToggleDetail"
             @toggle-multi-select="handleToggleMultiSelect"
+            @toggle-pinned="showPinnedPanel = !showPinnedPanel"
             @clear-selection="handleClearSelection"
             @announcement="showAnnouncementDialog = true"
             @history="handleShowHistory"
@@ -70,6 +72,17 @@
             @send-screenshot="handleScreenshotUpload"
           />
         </div>
+
+        <!-- 置顶消息面板 -->
+        <Transition name="slide-left">
+          <PinnedMessagesPanel
+            v-if="showPinnedPanel"
+            :messages="messages"
+            @close="showPinnedPanel = false"
+            @scroll-to-message="handleScrollToPinnedMessage"
+            @update="handlePinnedUpdate"
+          />
+        </Transition>
 
         <!-- 移除旧的侧边栏，改用全局弹窗 -->
       </div>
@@ -167,6 +180,7 @@ import { Share, Folder, Delete } from '@element-plus/icons-vue'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
+import PinnedMessagesPanel from '@/components/Chat/PinnedMessagesPanel.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import VoiceCallDialog from '@/components/Chat/VoiceCallDialog.vue'
@@ -216,6 +230,10 @@ const messageInputRef = ref(null)
 
 // 多选模式状态（由头部按钮触发，而非基于选中状态判断）
 const isMultiSelectModeActive = ref(false)
+
+// 置顶消息面板状态
+const showPinnedPanel = ref(false)
+const pinnedCount = computed(() => messages.value.filter(m => m.isPinned).length)
 
 const emit = defineEmits(['show-user'])
 
@@ -963,6 +981,21 @@ const handleClearMessages = async () => {
   }
 }
 
+// 滚动到置顶消息
+const handleScrollToPinnedMessage = (messageId) => {
+  if (msgListRef.value) {
+    msgListRef.value.scrollToMessage(messageId)
+  }
+}
+
+// 处理置顶状态更新
+const handlePinnedUpdate = ({ messageId, isPinned }) => {
+  const index = messages.value.findIndex(m => m.id === messageId)
+  if (index !== -1) {
+    messages.value[index].isPinned = isPinned
+  }
+}
+
 // 显示聊天记录
 const handleShowHistory = () => {
   showChatHistory.value = true
@@ -1481,6 +1514,27 @@ onMounted(() => {
   min-width: 0;
   min-height: 0;
   background: var(--dt-bg-card);
+  transition: all 0.3s var(--dt-ease-out);
+
+  &.with-pinned-panel {
+    flex: 0 0 calc(100% - 320px);
+  }
+}
+
+// 置顶面板滑入动画
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.3s var(--dt-ease-out);
+}
+
+.slide-left-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-left-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
 }
 
 // ============================================================================

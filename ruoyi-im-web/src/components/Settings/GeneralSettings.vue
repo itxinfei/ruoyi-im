@@ -1,6 +1,6 @@
 <template>
   <div class="general-settings">
-    <div class="setting-group">
+    <div v-if="isAdmin" class="setting-group">
       <h3 class="group-title">品牌标识</h3>
       <div class="logo-uploader">
         <div class="logo-preview">
@@ -105,9 +105,10 @@
 </template>
 
 <script setup>
-import { reactive, watch, ref, onMounted } from 'vue'
+import { reactive, watch, ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 import { Check, Picture, Upload, RefreshLeft } from '@element-plus/icons-vue'
-import { request } from '@/api/request'
+import request from '@/api/request'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
@@ -119,20 +120,27 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
+const store = useStore()
 const localSettings = reactive(JSON.parse(JSON.stringify(props.modelValue)))
+
+// 判断是否为管理员
+const isAdmin = computed(() => store.getters['user/isAdmin'])
 
 const logoUrl = ref(null)
 const uploadRef = ref(null)
 const uploading = ref(false)
 
 onMounted(async () => {
-  try {
-    const res = await request.get('/api/admin/config/logo')
-    if (res.code === 200 && res.data) {
-      logoUrl.value = res.data
+  // 只对管理员请求自定义logo
+  if (isAdmin.value) {
+    try {
+      const res = await request.get('/api/admin/config/logo')
+      if (res.code === 200 && res.data) {
+        logoUrl.value = res.data
+      }
+    } catch (error) {
+      console.error('获取系统Logo失败:', error)
     }
-  } catch (error) {
-    console.error('获取系统Logo失败:', error)
   }
 })
 

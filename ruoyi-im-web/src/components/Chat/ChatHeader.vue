@@ -66,6 +66,14 @@
         </el-tooltip>
       </div>
 
+      <!-- 置顶消息按钮 -->
+      <el-tooltip content="置顶消息" placement="bottom">
+        <button class="action-btn pin-btn" @click="handleTogglePinned">
+          <span class="material-icons-outlined">push_pin</span>
+          <span v-if="pinnedCount > 0" class="pin-badge">{{ pinnedCount }}</span>
+        </button>
+      </el-tooltip>
+
       <!-- 更多菜单 -->
       <el-dropdown trigger="click" @command="handleMenuCommand" :placement="menuPlacement">
         <button class="action-btn more-btn">
@@ -173,10 +181,14 @@ const props = defineProps({
   typingUsers: {
     type: Array,
     default: () => []
+  },
+  pinnedCount: {
+    type: Number,
+    default: 0
   }
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar'])
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'toggle-pinned'])
 
 // 用户详情抽屉显示状态
 const showUserDetail = ref(false)
@@ -253,6 +265,11 @@ const handleMenuCommand = (command) => {
       emit('clear', props.session)
       break
   }
+}
+
+// 切换置顶消息面板
+const handleTogglePinned = () => {
+  emit('toggle-pinned')
 }
 
 // 计算菜单弹出位置，确保菜单不会超出视口
@@ -662,6 +679,33 @@ const menuPlacement = computed(() => {
   // 更多按钮
   &.more-btn:hover {
     background: var(--dt-bg-hover);
+  }
+
+  // 置顶消息按钮
+  &.pin-btn {
+    position: relative;
+    color: var(--dt-text-secondary);
+
+    .pin-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      background: var(--dt-error-color);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &:hover {
+      color: var(--dt-brand-color);
+    }
   }
 
   // 详情按钮

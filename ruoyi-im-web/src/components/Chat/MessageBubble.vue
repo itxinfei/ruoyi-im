@@ -245,9 +245,14 @@
       </div>
 
       <!-- 撤回消息 -->
-      <div v-else-if="message.type === 'RECALLED'" class="msg-recalled">
-        <span class="material-icons-outlined">block</span>
-        <span>{{ message.isOwn ? '你撤回了一条消息' : `${message.senderName}撤回了一条消息` }}</span>
+      <div v-else-if="message.type === 'RECALLED'" class="msg-recalled" :class="{ 'is-own': message.isOwn }">
+        <span class="recall-icon material-icons-outlined">history</span>
+        <div class="recall-content">
+          <span class="recall-text">{{ message.isOwn ? '你撤回了一条消息' : `${message.senderName}撤回了一条消息` }}</span>
+          <span v-if="message.isOwn" class="recall-reedit" @click.stop="handleReEdit">
+            点击重新编辑
+          </span>
+        </div>
       </div>
 
       <!-- 合并转发消息 -->
@@ -374,7 +379,7 @@ const props = defineProps({
   sessionType: { type: String, default: 'PRIVATE' }
 })
 
-const emit = defineEmits(['command', 'preview', 'download', 'at', 'scroll-to', 'retry', 'toggle-reaction', 'add-reaction'])
+const emit = defineEmits(['command', 'preview', 'download', 'at', 'scroll-to', 'retry', 'toggle-reaction', 'add-reaction', 're-edit'])
 
 // ============================================================================
 // AI表情表态状态
@@ -515,6 +520,13 @@ const handleMouseRelease = () => {
 // 处理合并转发消息点击
 const handleClickCombine = (messages) => {
   emit('command', 'view-combine', { ...props.message, messages })
+}
+
+// 处理重新编辑撤回的消息
+const handleReEdit = () => {
+  if (props.message.isOwn && props.message.originalContent) {
+    emit('re-edit', { content: props.message.originalContent })
+  }
 }
 
 // 处理图片点击 - 触发预览
@@ -1808,14 +1820,52 @@ onUnmounted(() => {
   50% { transform: scale(1.05); }
 }
 
+// 撤回消息样式 - 钉钉风格
 .msg-recalled {
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: #8f959e;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--dt-bg-body);
+  border-radius: 8px;
   font-size: 13px;
-  font-style: italic;
   animation: fadeIn 0.3s var(--dt-ease-out);
+  max-width: 280px;
+
+  .recall-icon {
+    color: var(--dt-text-tertiary);
+    font-size: 16px;
+  }
+
+  .recall-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .recall-text {
+      color: var(--dt-text-secondary);
+    }
+
+    .recall-reedit {
+      color: var(--dt-brand-color);
+      cursor: pointer;
+      font-size: 12px;
+      transition: color var(--dt-transition-fast);
+
+      &:hover {
+        color: var(--dt-brand-hover);
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &.is-own {
+    background: rgba(255, 59, 48, 0.05);
+
+    .recall-icon {
+      color: #ff3b30;
+    }
+  }
 }
 
 .msg-system {

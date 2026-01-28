@@ -115,7 +115,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
-import { request } from '@/api/request'
+import request from '@/api/request'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import {
   ChatDotRound, User, Grid, Cloudy, Calendar, CircleCheck,
@@ -136,13 +136,16 @@ const { isDark, themeMode, toggleTheme } = useTheme()
 const logoUrl = ref(null)
 
 onMounted(async () => {
-  try {
-    const res = await request.get('/api/admin/config/logo')
-    if (res.code === 200 && res.data) {
-      logoUrl.value = res.data
+  // 只对管理员请求自定义logo
+  if (store.getters['user/isAdmin']) {
+    try {
+      const res = await request.get('/api/admin/config/logo')
+      if (res.code === 200 && res.data) {
+        logoUrl.value = res.data
+      }
+    } catch (error) {
+      console.error('获取系统Logo失败:', error)
     }
-  } catch (error) {
-    console.error('获取系统Logo失败:', error)
   }
 })
 

@@ -10,7 +10,7 @@
 
     <template v-else>
       <!-- 多选复选框 -->
-      <div v-if="multiSelectMode" class="checkbox-container">
+      <div v-if="multiSelectMode" class="checkbox-container" :class="{ 'is-merged': message.isMerged }">
         <el-checkbox
           :model-value="isSelected"
           @change="handleCheckboxChange"
@@ -18,9 +18,11 @@
         />
       </div>
 
-      <!-- 头像 -->
+      <!-- 头像 - 合并状态下隐藏 -->
       <div
+        v-show="!message.isMerged"
         class="avatar-container"
+        :class="{ 'is-merged': message.isMerged }"
         @contextmenu.prevent="$emit('at', message)"
         @click="$emit('show-user', message.senderId)"
         title="右键 @提及，左键查看资料"
@@ -35,9 +37,9 @@
         />
       </div>
 
-      <div class="content-wrapper">
-        <!-- 发送者姓名 -->
-        <div v-if="!message.isOwn" class="sender-name">{{ message.senderName }}</div>
+      <div class="content-wrapper" :class="{ 'is-merged': message.isMerged }">
+        <!-- 发送者姓名 - 合并状态下隐藏 -->
+        <div v-if="!message.isOwn && !message.isMerged" class="sender-name">{{ message.senderName }}</div>
 
         <div class="message-content-main">
           <!-- 消息气泡内容插槽 -->
@@ -138,6 +140,14 @@ const formattedTime = computed(() => {
   margin: 0 8px;
   flex-shrink: 0;
 
+  // 合并状态：隐藏但保持布局
+  &.is-merged {
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+    width: 0;
+  }
+
   :deep(.el-checkbox) {
     .el-checkbox__input.is-checked .el-checkbox__inner {
       background-color: var(--dt-brand-color);
@@ -175,12 +185,24 @@ const formattedTime = computed(() => {
   .message-avatar {
     border-radius: 4px;
   }
+
+  // 合并状态：隐藏但仍占据空间以保持对齐
+  &.is-merged {
+    visibility: hidden;
+    margin: 0;
+    width: 0;
+  }
 }
 
 .content-wrapper {
   max-width: 85%;
   display: flex;
   flex-direction: column;
+
+  // 合并状态：减少上边距让气泡更紧凑
+  &.is-merged {
+    margin-top: -8px;
+  }
 }
 
 .sender-name {

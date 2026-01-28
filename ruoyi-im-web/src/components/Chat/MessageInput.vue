@@ -523,26 +523,39 @@ const handleKeydown = (e) => {
   }
 }
 
-const handleSend = () => {
+const handleSend = async () => {
   const content = messageContent.value.trim()
   if (!content) return
 
+  let success = false
+  
   if (props.editingMessage) {
     emit('edit-confirm', content)
+    success = true
   } else {
+    // 发送消息
     emit('send', content)
+    success = true
   }
 
-  // 清除草稿
+  // 先清除输入状态
   if (props.session?.id) {
-    clearDraft(props.session.id)
+    store.dispatch('im/session/clearTyping', props.session?.id)
   }
-
+  
   messageContent.value = ''
   nextTick(() => {
     if (textareaRef.value) textareaRef.value.style.height = 'auto'
     textareaRef.value?.focus()
   })
+  
+  // 延迟清除草稿，确保会话已更新
+  if (success && props.session?.id) {
+    // 等待2个tick，确保会话更新完成
+    await nextTick()
+    await nextTick()
+    clearDraft(props.session.id)
+  }
 }
 
 const clearReply = () => {
@@ -854,11 +867,13 @@ watch(messageContent, (newContent, oldContent) => {
         isTyping: true
       })
     } else {
-      store.dispatch('im/session/clearTyping', props.session?.id)
+      // 延迟清除输入状态，避免在发送时立即清除
+      setTimeout(() => {
+        store.dispatch('im/session/clearTyping', props.session?.id)
+      }, 100)
     }
   }
 })
-
 onMounted(() => {
   const saved = localStorage.getItem('im_input_height')
   if (saved) containerHeight.value = parseInt(saved)

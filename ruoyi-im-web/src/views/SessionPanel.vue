@@ -171,17 +171,17 @@
                       <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
                     </div>
                     <div class="session-preview">
-                      <span v-if="isTyping(session.id)" class="typing-indicator">
+                      <span v-if="getSessionStatus(session) === 'typing'" class="typing-indicator">
                         <span class="material-icons-outlined typing-icon">edit</span>
                         正在输入...
                       </span>
-                      <span v-else-if="hasDraft(session.id)" class="draft-tag">[草稿]</span>
-                      <span v-else-if="session.hasMention" class="mention-tag">@</span>
-                      <span v-if="session.lastSenderNickname && session.type === 'GROUP' && !hasDraft(session.id) && !isTyping(session.id)" class="sender-name">
+                      <span v-else-if="getSessionStatus(session) === 'draft'" class="draft-tag">[草稿]</span>
+                      <span v-else-if="getSessionStatus(session) === 'mention'" class="mention-tag">@</span>
+                      <span v-if="session.lastSenderNickname && session.type === 'GROUP' && getSessionStatus(session) === 'normal'" class="sender-name">
                         {{ session.lastSenderNickname }}:
                       </span>
                       <span class="preview-text">
-                        {{ isTyping(session.id) ? '' : (hasDraft(session.id) ? getDraftPreview(session.id) : (session.lastMessage || '暂无消息')) }}
+                        {{ getSessionPreview(session) }}
                       </span>
                     </div>
                   </div>
@@ -324,6 +324,37 @@ const getDraftPreview = (conversationId) => {
 // 输入状态 - 使用 Vuex getters
 const isTyping = (conversationId) => {
   return store.getters['im/session/isTyping'](conversationId)
+}
+
+// 获取会话状态类型
+const getSessionStatus = (session) => {
+  if (isTyping(session.id)) {
+    return 'typing'
+  }
+  
+  if (hasDraft(session.id)) {
+    return 'draft'
+  }
+  
+  if (session.hasMention) {
+    return 'mention'
+  }
+  
+  return 'normal'
+}
+
+// 获取会话预览文本
+const getSessionPreview = (session) => {
+  // 优先级：输入状态 > 草稿 > 最新消息
+  if (isTyping(session.id)) {
+    return ''  // 输入状态不显示预览文本
+  }
+  
+  if (hasDraft(session.id)) {
+    return getDraftPreview(session.id)
+  }
+  
+  return session.lastMessage || '暂无消息'
 }
 
 // 判断用户是否在线

@@ -49,6 +49,7 @@
               @download="downloadFile"
               @retry="$emit('retry', $event)"
               @add-reaction="handleAddReaction"
+              @re-edit="handleReEdit"
             />
           </template>
 
@@ -108,16 +109,12 @@
       </div>
     </Transition>
 
-    <!-- 图片预览器（使用 v-viewer） -->
-    <div v-viewer class="image-viewer-container" style="display: none;">
-      <img
-        v-for="(url, index) in imagePreviewUrls"
-        :key="index"
-        :src="url"
-        :index="index"
-        style="display: none;"
-      />
-    </div>
+    <!-- 图片预览对话框 -->
+    <ImageViewerDialog
+      v-model="showImageViewer"
+      :images="viewerImages"
+      :initial-index="viewerInitialIndex"
+    />
   </div>
 </template>
 
@@ -128,6 +125,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
 import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
+import ImageViewerDialog from './ImageViewerDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
@@ -148,7 +146,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit'])
 
 const listRef = ref(null)
 const readUsersMap = ref({})
@@ -156,7 +154,9 @@ const loadingReadUsers = ref({})
 const showScrollToBottom = ref(false)
 
 // 图片预览状态
-const imagePreviewUrls = ref([])
+const showImageViewer = ref(false)
+const viewerImages = ref([])
+const viewerInitialIndex = ref(0)
 
 // ============================================================================
 // 性能优化：消息分页渲染
@@ -230,7 +230,7 @@ const unreadCount = (msg) => {
   return Math.max(0, msg.groupMemberCount - readCount)
 }
 
-// 图片预览 - 使用 v-viewer
+// 图片预览 - 使用 ImageViewerDialog
 const previewImage = (clickedUrl) => {
   // 收集会话中所有图片消息的 URL
   const imageUrls = []
@@ -262,25 +262,9 @@ const previewImage = (clickedUrl) => {
   })
 
   if (imageUrls.length > 0) {
-    imagePreviewUrls.value = imageUrls
-    // 使用 v-viewer 的 API 显示预览
-    nextTick(() => {
-      const viewerContainer = document.querySelector('.image-viewer-container')
-      if (viewerContainer) {
-        // 创建临时 img 元素来触发 viewer
-        const imgElements = viewerContainer.querySelectorAll('img')
-        if (imgElements[clickedIndex]) {
-          // 使用 v-viewer 的 show 方法
-          const viewer = viewerContainer.$viewer
-          if (viewer && viewer.show) {
-            viewer.show(clickedIndex)
-          } else {
-            // 备选方案：直接点击图片
-            imgElements[clickedIndex].click()
-          }
-        }
-      }
-    })
+    viewerImages.value = imageUrls
+    viewerInitialIndex.value = clickedIndex
+    showImageViewer.value = true
   } else {
     // 降级到新窗口打开
     window.open(clickedUrl, '_blank')
@@ -291,6 +275,12 @@ const previewImage = (clickedUrl) => {
 const downloadFile = (fileInfo) => {
   if (!fileInfo.fileUrl) return
   window.open(fileInfo.fileUrl, '_blank')
+}
+
+// 处理重新编辑撤回的消息
+const handleReEdit = ({ content }) => {
+  // 触发重新编辑事件，由父组件处理
+  emit('re-edit', content)
 }
 
 // 格式化时间分隔符文案
@@ -319,7 +309,38 @@ const formatTimeDivider = (timestamp) => {
   return `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
 }
 
-// 计算带时间分割线的消息列表
+// ============================================================================
+// 消息合并逻辑
+// ============================================================================
+
+// 判断两条消息是否可以合并显示（钉钉风格）
+// 规则：
+// 1. 同一发送者
+// 2. 时间间隔小于 2 分钟
+// 3. 非特殊消息类型（如撤回消息、系统消息等）
+const canMergeWith = (currentMsg, prevMsg) => {
+  if (!prevMsg) return false
+
+  // 必须是同一发送者
+  if (currentMsg.senderId !== prevMsg.senderId) return false
+
+  // 必须是同一消息归属（自己的/对方的）
+  if (currentMsg.isOwn !== prevMsg.isOwn) return false
+
+  // 时间间隔小于 2 分钟（120000ms）
+  const MERGE_TIME_THRESHOLD = 2 * 60 * 1000
+  const timeDiff = currentMsg.timestamp - prevMsg.timestamp
+  if (timeDiff > MERGE_TIME_THRESHOLD) return false
+
+  // 特殊消息类型不合并
+  const nonMergeableTypes = ['RECALLED', 'SYSTEM', 'NOTICE']
+  if (nonMergeableTypes.includes(currentMsg.type)) return false
+  if (nonMergeableTypes.includes(prevMsg.type)) return false
+
+  return true
+}
+
+// 计算带时间分割线和合并标记的消息列表
 const messagesWithDividers = computed(() => {
   const res = []
 
@@ -331,8 +352,8 @@ const messagesWithDividers = computed(() => {
     } else {
       const prevMsg = props.messages[index - 1]
       const timeDiff = msg.timestamp - prevMsg.timestamp
-      // 30分钟间隔或每10条消息显示一次时间
-      if (timeDiff > 30 * 60 * 1000 || index % 10 === 0) {
+      // 5分钟间隔显示时间分割线（钉钉风格）
+      if (timeDiff > 5 * 60 * 1000) {
         showDivider = true
       }
     }
@@ -345,7 +366,18 @@ const messagesWithDividers = computed(() => {
       })
     }
 
-    res.push({ ...msg, isMerged: false })
+    // 判断是否需要与上一条消息合并
+    let isMerged = false
+    if (index > 0) {
+      const prevMsg = props.messages[index - 1]
+      // 查找上一条非时间分割线的消息
+      const prevRealMsg = res[res.length - 1]
+      if (prevRealMsg && !prevRealMsg.isTimeDivider) {
+        isMerged = canMergeWith(msg, prevRealMsg)
+      }
+    }
+
+    res.push({ ...msg, isMerged })
   })
   return res
 })
@@ -496,7 +528,7 @@ onUnmounted(() => {
   if (observer.value) observer.value.disconnect()
 })
 
-defineExpose({ scrollToBottom, maintainScroll })
+defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 </script>
 
 <style scoped lang="scss">
@@ -635,76 +667,161 @@ defineExpose({ scrollToBottom, maintainScroll })
   }
 }
 
+// ============================================================================
+// 已读状态样式 - 钉钉风格
+// ============================================================================
 .read-status {
   font-size: 11px;
   cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
   .read { color: var(--dt-text-quaternary); }
   .unread { color: var(--dt-brand-color); }
   .read-count {
     color: var(--dt-brand-color);
     cursor: pointer;
-    transition: color var(--dt-transition-fast);
+    transition: all var(--dt-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: var(--dt-brand-bg);
 
-    &:hover { text-decoration: underline; }
+    &:hover {
+      background: var(--dt-brand-hover);
+      text-decoration: none;
+    }
+
+    // 添加小图标
+    &::before {
+      content: 'visibility';
+      font-family: 'Material Icons Outlined';
+      font-size: 12px;
+    }
+  }
+}
+
+// 钉钉风格已读状态
+.read-status-simple {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  transition: all var(--dt-transition-fast);
+
+  &.read {
+    color: var(--dt-text-quaternary);
+    background: var(--dt-bg-body);
+
+    &::before {
+      content: 'done_all';
+      font-family: 'Material Icons Outlined';
+      font-size: 12px;
+    }
+  }
+
+  &.unread {
+    color: var(--dt-brand-color);
+    background: var(--dt-brand-bg);
+
+    &::before {
+      content: 'visibility';
+      font-family: 'Material Icons Outlined';
+      font-size: 12px;
+    }
   }
 }
 
 .read-users-list {
+  // 钉钉风格已读详情弹窗
+  background: var(--dt-bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+
   .read-users-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px 8px;
+    padding: 16px 16px 12px;
     border-bottom: 1px solid var(--dt-border-lighter);
+    background: linear-gradient(180deg, var(--dt-bg-hover) 0%, var(--dt-bg-card) 100%);
 
     .read-title {
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--dt-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      &::before {
+        content: 'visibility';
+        font-family: 'Material Icons Outlined';
+        font-size: 16px;
+        color: var(--dt-success-color);
+      }
     }
 
     .read-count-badge {
       background: var(--dt-brand-color);
       color: #fff;
       font-size: 12px;
-      padding: 2px 8px;
-      border-radius: 10px;
+      padding: 4px 8px;
+      border-radius: 12px;
       min-width: 20px;
       text-align: center;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.3);
     }
   }
 
   .read-users-body {
-    max-height: 240px;
+    max-height: 280px;
     overflow-y: auto;
-    padding: 4px 0;
+    padding: 8px 0;
 
     &::-webkit-scrollbar {
-      width: 4px;
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
     }
 
     &::-webkit-scrollbar-thumb {
       background: var(--dt-border);
-      border-radius: 2px;
+      border-radius: 3px;
+
+      &:hover {
+        background: var(--dt-border-dark);
+      }
     }
 
     .read-user-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 16px;
+      padding: 10px 16px;
       font-size: 13px;
-      transition: background var(--dt-transition-fast);
+      transition: all var(--dt-transition-fast);
       cursor: default;
+      border-radius: 8px;
 
       &:hover {
         background: var(--dt-bg-hover);
+        transform: translateX(2px);
       }
 
       .user-name {
         color: var(--dt-text-primary);
         font-weight: 400;
+        flex: 1;
       }
     }
 
@@ -713,44 +830,39 @@ defineExpose({ scrollToBottom, maintainScroll })
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 32px 16px;
+      padding: 40px 16px;
       color: var(--dt-text-tertiary);
       gap: 8px;
 
       .el-icon {
-        font-size: 32px;
-        opacity: 0.5;
+        font-size: 36px;
+        opacity: 0.4;
       }
     }
   }
 
   .unread-users-footer {
-    padding: 8px 16px;
+    padding: 10px 16px;
     border-top: 1px solid var(--dt-border-lighter);
     color: var(--dt-text-secondary);
     font-size: 12px;
     text-align: center;
+    background: var(--dt-bg-hover);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    &::before {
+      content: 'schedule';
+      font-family: 'Material Icons Outlined';
+      font-size: 14px;
+      opacity: 0.6;
+    }
   }
 }
 
-.read-status-simple {
-  &.read {
-    color: var(--dt-text-quaternary);
-  }
-
-  &.unread {
-    color: var(--dt-brand-color);
-  }
-}
-
-.read-count.clickable {
-  cursor: pointer;
-  transition: color var(--dt-transition-fast);
-
-  &:hover {
-    color: var(--dt-brand-color);
-  }
-}
+// 移除重复的样式定义（已在上面 .read-status-simple 中定义）
 
 .scroll-to-bottom-btn {
   position: absolute;

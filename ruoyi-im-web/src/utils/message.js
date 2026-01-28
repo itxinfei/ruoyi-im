@@ -118,7 +118,7 @@ export function formatMessagePreviewFromObject(message) {
             case 'VOICE':
             case 'AUDIO': return '[语音]'
             case 'SYSTEM': return content || '[系统消息]'
-            default: return type ? `[${type}]` : '[未知消息]'
+            default: return type ? `[${type}]` : '[暂无消息]'
         }
     }
 
@@ -190,7 +190,7 @@ export function formatMessagePreviewFromObject(message) {
                 case 'VIDEO': return '[视频]'
                 case 'VOICE':
                 case 'AUDIO': return '[语音]'
-                default: return type || '[未知消息]'
+                default: return type || '[暂无消息]'
             }
     }
 }
