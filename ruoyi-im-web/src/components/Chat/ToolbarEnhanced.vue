@@ -67,58 +67,65 @@
             <el-icon><FolderOpened /></el-icon>
           </button>
           <template #dropdown>
-            <el-dropdown-menu class="enhanced-menu">
-              <el-dropdown-item command="image">
+              <el-dropdown-menu class="action-menu">
+                <el-dropdown-item command="screenshot">
+                  <div class="menu-item-content">
+                    <div class="menu-icon screenshot-icon">
+                      <el-icon><ScissorOne /></el-icon>
+                    </div>
+                    <div class="menu-info">
+                      <div class="menu-title">截图工具</div>
+                      <div class="menu-desc">快速截图并分享</div>
+                    </div>
+                  </div>
+                </el-dropdown-item>
+              <el-dropdown-item command="format">
+                  <div class="menu-item-content">
+                    <div class="menu-icon format-icon">
+                      <el-icon><Edit /></el-icon>
+                    </div>
+                    <div class="menu-info">
+                      <div class="menu-title">格式化文本</div>
+                      <div class="menu-desc">字体样式、颜色、大小等</div>
+                    </div>
+                  </div>
+                </el-dropdown-item>
+              <el-dropdown-item command="clock">
+                  <div class="menu-item-content">
+                    <div class="menu-icon">
+                      <el-icon><Timer /></el-icon>
+                    </div>
+                    <div class="menu-info">
+                      <div class="menu-title">发送时间</div>
+                      <div class="menu-desc">设置消息定时发送</div>
+                    </div>
+                  </div>
+                </el-dropdown-item>
+              <el-dropdown-item command="priority">
                 <div class="menu-item-content">
-                  <div class="menu-icon image-icon">
-                    <el-icon><Picture /></el-icon>
+                  <div class="menu-icon priority-icon">
+                    <el-icon><Flag /></el-icon>
+                    </div>
+                    <div class="menu-info">
+                      <div class="menu-title">重要标记</div>
+                      <div class="menu-desc">标记重要消息</div>
+                    </div>
                   </div>
-                  <div class="menu-info">
-                    <div class="menu-title">图片</div>
-                    <div class="menu-desc">上传JPG、PNG、GIF格式</div>
+                </el-dropdown-item>
+                <el-dropdown-item divided command="separator">
+                  <div class="menu-separator"></div>
+                </el-dropdown-item>
+                <el-dropdown-item command="archive">
+                  <div class="menu-item-content">
+                    <div class="menu-icon archive-icon">
+                      <el-icon><FolderOpened /></el-icon>
+                    </div>
+                    <div class="menu-info">
+                      <div class="menu-title">存档消息</div>
+                      <div class="menu-desc">归档历史聊天</div>
+                    </div>
                   </div>
-                </div>
-              </el-dropdown-item>
-              <el-dropdown-item command="document">
-                <div class="menu-item-content">
-                  <div class="menu-icon doc-icon">
-                    <el-icon><Document /></el-icon>
-                  </div>
-                  <div class="menu-info">
-                    <div class="menu-title">文档</div>
-                    <div class="menu-desc">Word、PDF、Excel等</div>
-                  </div>
-                </div>
-              </el-dropdown-item>
-
-              <el-dropdown-item divided command="cloud">
-                <div class="menu-item-content">
-                  <div class="menu-icon cloud-icon">
-                    <el-icon><Cloud /></el-icon>
-                  </div>
-                  <div class="menu-info">
-                    <div class="menu-title">云盘文件</div>
-                    <div class="menu-desc">从云盘选择文件</div>
-                  </div>
-                </div>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-
-
-                  <div class="menu-info">
-                    <div class="menu-title">截图</div>
-                    <div class="menu-desc">Ctrl+Alt+A</div>
-                  </div>
-                  <div class="menu-shortcut">
-                    <kbd>⌃</kbd><kbd>⌥</kbd><kbd>A</kbd>
-                  </div>
-                </div>
-              </el-dropdown-item>
-
-              <el-dropdown-item command="translate">
+                </el-dropdown-item>
                 <div class="menu-item-content">
                   <div class="menu-icon">
                     <el-icon><Switch /></el-icon>
@@ -548,29 +555,41 @@ const aiFeatures = computed(() => [
   {
     key: 'smart-reply',
     name: '智能回复',
-    desc: '根据上下文生成回复',
-    icon: 'ChatDotRound',
+    desc: '智能推荐回复',
+    icon: 'ChatLineSquare',
     hot: true
   },
   {
     key: 'content-create',
     name: '内容创作',
-    desc: '生成文章、文案',
-    icon: 'EditPen'
+    desc: '创作文章和文案',
+    icon: 'EditPen',
   },
   {
-    key: 'translation',
+    key: 'translate',
     name: '实时翻译',
-    desc: '多语言即时翻译',
+    desc: '多语言翻译',
     icon: 'Switch'
   },
   {
     key: 'summary',
-    name: '内容总结',
-    desc: '生成对话摘要',
+    name: '对话总结',
+    desc: '智能总结对话内容',
     icon: 'Document'
+  },
+  {
+    key: 'analyze',
+    name: '对话分析',
+    desc: '分析对话模式和主题',
+    icon: 'DataAnalysis'
+  },
+  {
+    key: 'compose',
+    name: '内容续写',
+    desc: '续写已有内容',
+    icon: 'Edit'
   }
-])
+]
 
 const recentTools = ref([])
 

@@ -66,6 +66,7 @@
             @upload-video="handleVideoUpload"
             @send-location="handleSendLocation"
             @send-screenshot="handleScreenshotUpload"
+            @show-history="handleShowHistory"
           />
         </div>
 
@@ -108,6 +109,16 @@
         v-model:visible="showVideoCall"
         :remote-user="session"
         :is-incoming="isIncomingCall"
+      />
+
+      <!-- 聊天记录面板 -->
+      <ChatHistoryPanel
+        :visible="showChatHistory"
+        :session-id="session?.id"
+        :messages="messages"
+        @close="showChatHistory = false"
+        @jump-to-message="handleJumpToMessage"
+        @clear-history="handleClearHistory"
       />
 
       <!-- 群公告对话框 -->
@@ -159,6 +170,7 @@ import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import VoiceCallDialog from '@/components/Chat/VoiceCallDialog.vue'
 import VideoCallDialog from '@/components/Chat/VideoCallDialog.vue'
+import ChatHistoryPanel from '@/components/Chat/ChatHistoryPanel.vue'
 import GroupAnnouncementDialog from '@/components/Chat/GroupAnnouncementDialog.vue'
 import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
@@ -194,6 +206,7 @@ const forwardDialogRef = ref(null)
 const callDialogRef = ref(null)
 const showVoiceCall = ref(false)
 const showVideoCall = ref(false)
+const showChatHistory = ref(false)
 const isIncomingCall = ref(false)
 const showAnnouncementDialog = ref(false)
 const fileInputRef = ref(null)
@@ -937,6 +950,25 @@ const handleClearMessages = async () => {
   } catch {
     // 用户取消
   }
+}
+
+// 显示聊天记录
+const handleShowHistory = () => {
+  showChatHistory.value = true
+}
+
+// 跳转到指定消息
+const handleJumpToMessage = (message) => {
+  // TODO: 实现滚动到指定消息
+  ElMessage.info('跳转功能开发中')
+  showChatHistory.value = false
+}
+
+// 清空历史记录
+const handleClearHistory = async () => {
+  // 清空当前会话的消息
+  messages.value = []
+  showChatHistory.value = false
 }
 
 // 处理输入状态指示

@@ -70,7 +70,7 @@
           </button>
         </el-tooltip>
 
-        <el-button link class="history-btn">
+        <el-button link class="history-btn" @click="$emit('show-history')">
           <el-icon><Clock /></el-icon> 聊天记录
         </el-button>
       </div>
@@ -237,7 +237,7 @@ const props = defineProps({
   lastReceivedMessage: Object
 })
 
-const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-screenshot', 'draft-change'])
+const emit = defineEmits(['send', 'send-voice', 'upload-image', 'upload-file', 'upload-video', 'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-screenshot', 'draft-change', 'show-history'])
 
 const store = useStore()
 const { sendMessage: wsSendMessage } = useImWebSocket()

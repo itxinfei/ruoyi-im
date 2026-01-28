@@ -1,30 +1,32 @@
 <template>
   <div class="voice-recorder">
-    <!-- 录音按钮 -->
+    <!-- 按住说话按钮 -->
     <button
       v-if="!isRecording && !audioUrl"
       class="record-btn"
-      @click="startRecording"
-      @touchstart.prevent="startRecording"
-      @touchend.prevent="stopRecording"
+      @mousedown.prevent="handleMouseDown"
+      @mouseup.prevent="handleMouseUp"
+      @mouseleave.prevent="handleMouseLeave"
+      @touchstart.prevent="handleTouchStart"
+      @touchend.prevent="handleTouchEnd"
     >
       <el-icon><Microphone /></el-icon>
       <span class="record-text">按住说话</span>
     </button>
 
-    <!-- 录音中 -->
+    <!-- 录音中 - 松开发送 -->
     <div v-else-if="isRecording" class="recording-state">
+      <div class="recording-hint">
+        <span class="hint-text">松开发送，上滑取消</span>
+      </div>
       <div class="recording-animation">
         <span class="wave" v-for="i in 3" :key="i"></span>
       </div>
       <span class="recording-time">{{ formatTime(recordingTime) }}</span>
-      <button class="cancel-btn" @click="cancelRecording">
-        <el-icon><Close /></el-icon>
-      </button>
     </div>
 
-    <!-- 录音完成，等待发送 -->
-    <div v-else-if="audioUrl" class="preview-state">
+    <!-- 录音完成预览（仅在上滑取消时显示） -->
+    <div v-else-if="audioUrl && showPreview" class="preview-state">
       <div class="audio-preview">
         <button class="play-btn" @click="togglePlay">
           <el-icon><component :is="isPlaying ? 'VideoPause' : 'VideoPlay'" /></el-icon>
@@ -77,12 +79,88 @@ const duration = ref(0)
 const audioUrl = ref(null)
 const playProgress = ref(0)
 const transcript = ref('')
+const showPreview = ref(false)
+const isCancelled = ref(false)
+const startY = ref(0)
 
 let mediaRecorder = null
 let audioChunks = []
 let recordingInterval = null
 let audioElement = null
 let progressInterval = null
+
+// 鼠标按下 - 开始录音
+const handleMouseDown = (e) => {
+  startY.value = e.clientY
+  isCancelled.value = false
+  showPreview.value = false
+  startRecording()
+}
+
+// 鼠标松开 - 停止录音并发送
+const handleMouseUp = () => {
+  if (isCancelled.value) {
+    // 如果已取消，显示预览
+    stopRecording()
+    showPreview.value = true
+  } else {
+    // 正常松开，直接发送
+    stopRecordingAndSend()
+  }
+}
+
+// 鼠标离开 - 取消发送
+const handleMouseLeave = () => {
+  if (isRecording.value) {
+    isCancelled.value = true
+  }
+}
+
+// 触摸开始
+const handleTouchStart = (e) => {
+  startY.value = e.touches[0].clientY
+  isCancelled.value = false
+  showPreview.value = false
+  startRecording()
+}
+
+// 触摸结束
+const handleTouchEnd = (e) => {
+  const endY = e.changedTouches[0].clientY
+  const diffY = startY.value - endY
+  
+  // 上滑超过 50px 视为取消
+  if (diffY > 50) {
+    isCancelled.value = true
+    stopRecording()
+    showPreview.value = true
+  } else {
+    stopRecordingAndSend()
+  }
+}
+
+// 停止录音并自动发送
+const stopRecordingAndSend = () => {
+  if (mediaRecorder && isRecording.value) {
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+      audioUrl.value = URL.createObjectURL(audioBlob)
+      duration.value = recordingTime.value
+      recordingTime.value = 0
+      isRecording.value = false
+      clearInterval(recordingInterval)
+      
+      // 停止所有音频轨道
+      mediaRecorder.stream.getTracks().forEach(track => track.stop())
+      
+      // 自动发送
+      setTimeout(() => {
+        sendRecording()
+      }, 100)
+    }
+    mediaRecorder.stop()
+  }
+}
 
 // 开始录音
 const startRecording = async () => {
@@ -124,12 +202,21 @@ const startRecording = async () => {
   }
 }
 
-// 停止录音
+// 停止录音（仅停止，不自动发送）
 const stopRecording = () => {
   if (mediaRecorder && isRecording.value) {
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+      audioUrl.value = URL.createObjectURL(audioBlob)
+      duration.value = recordingTime.value
+      recordingTime.value = 0
+      isRecording.value = false
+      clearInterval(recordingInterval)
+      
+      // 停止所有音频轨道
+      mediaRecorder.stream.getTracks().forEach(track => track.stop())
+    }
     mediaRecorder.stop()
-    isRecording.value = false
-    clearInterval(recordingInterval)
   }
 }
 
@@ -284,8 +371,22 @@ defineExpose({
 
 .recording-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  padding: 16px 24px;
+  background: rgba(255, 77, 79, 0.1);
+  border-radius: 12px;
+  border: 2px dashed #ff4d4f;
+  animation: recording-pulse 1.5s ease-in-out infinite;
+
+  .recording-hint {
+    .hint-text {
+      font-size: 13px;
+      color: #ff4d4f;
+      font-weight: 500;
+    }
+  }
 
   .recording-animation {
     display: flex;
@@ -451,6 +552,17 @@ defineExpose({
   }
   50% {
     height: 24px;
+  }
+}
+
+@keyframes recording-pulse {
+  0%, 100% {
+    border-color: #ff4d4f;
+    background: rgba(255, 77, 79, 0.1);
+  }
+  50% {
+    border-color: #ff7875;
+    background: rgba(255, 77, 79, 0.15);
   }
 }
 </style>
