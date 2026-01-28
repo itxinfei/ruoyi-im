@@ -134,8 +134,8 @@
     <!-- 用户详情弹窗 -->
     <UserProfileDialog
       v-model="showUserDetail"
-      :user-id="session?.targetId || session?.targetUserId"
-      @chat="handleSendMessage"
+      :session="session"
+      @send-message="handleSendMessage"
     />
 
     <!-- 聊天内搜索 -->

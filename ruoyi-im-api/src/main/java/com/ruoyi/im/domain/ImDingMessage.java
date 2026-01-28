@@ -56,13 +56,13 @@ public class ImDingMessage extends BaseEntity implements Serializable {
     private String dingType;
 
     /**
-     * 优先级
-     * URGENT：紧急
-     * NORMAL：普通
+     * 是否紧急
+     * 0：普通
+     * 1：紧急
      */
-    @Schema(description = "优先级：URGENT紧急/NORMAL普通")
-    @TableField("priority")
-    private String priority;
+    @Schema(description = "是否紧急：0否/1是")
+    @TableField("is_urgent")
+    private Integer isUrgent;
 
     /** DING内容 */
     @Schema(description = "DING内容")

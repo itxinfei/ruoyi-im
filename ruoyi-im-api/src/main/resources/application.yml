@@ -139,7 +139,7 @@ im:
 # 文件上传配置
 file:
   upload:
-    path: src/main/resources/uploads/
+    path: ./uploads/
     url-prefix: /api/im/file/download/
 
 # 日志配置

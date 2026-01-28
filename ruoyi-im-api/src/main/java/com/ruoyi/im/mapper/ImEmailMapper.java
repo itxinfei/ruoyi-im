@@ -79,4 +79,12 @@ public interface ImEmailMapper {
      * @return 邮件列表
      */
     List<ImEmail> searchEmailsByKeyword(@Param("userId") Long userId, @Param("keyword") String keyword);
+
+    /**
+     * 统计各文件夹邮件数量
+     *
+     * @param userId 用户ID
+     * @return 统计信息列表
+     */
+    java.util.List<java.util.Map<String, Object>> countByFolder(@Param("userId") Long userId);
 }

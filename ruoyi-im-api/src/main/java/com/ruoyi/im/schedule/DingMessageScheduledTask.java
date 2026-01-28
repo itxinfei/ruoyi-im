@@ -39,7 +39,7 @@ public class DingMessageScheduledTask {
                         ImDingMessage::getSenderId,
                         ImDingMessage::getContent,
                         ImDingMessage::getDingType,
-                        ImDingMessage::getPriority,
+                        ImDingMessage::getIsUrgent,
                         ImDingMessage::getStatus,
                         ImDingMessage::getExpireTime,
                         ImDingMessage::getCreateTime)

@@ -253,7 +253,7 @@ const loadMails = async () => {
         avatarColor: getRandomColor()
       }))
       totalCount.value = res.data?.total || res.data?.length || 0
-      updateFolderCounts()
+      await updateFolderCounts()
     } else {
       ElMessage.error(res.msg || '加载失败')
     }
@@ -308,11 +308,8 @@ const handleViewEmail = async (email) => {
       const res = await markAsRead(email.id)
       if (res.code === 200) {
         email.read = true
-        // 更新文件夹未读数
-        const folder = folders.value.find(f => f.key === activeFolder.value)
-        if (folder && folder.unreadCount > 0) {
-          folder.unreadCount--
-        }
+        // 重新获取未读数以保持数据一致性
+        await updateFolderCounts()
       }
     } catch (error) {
       console.error('标记已读失败', error)
@@ -363,7 +360,7 @@ const batchMarkRead = async () => {
       })
       ElMessage.success('已标记为已读')
       clearSelection()
-      updateFolderCounts()
+      await updateFolderCounts()
     }
   } catch (error) {
     console.error('批量标记已读失败', error)
@@ -384,7 +381,7 @@ const batchMarkUnread = async () => {
       })
       ElMessage.success('已标记为未读')
       clearSelection()
-      updateFolderCounts()
+      await updateFolderCounts()
     }
   } catch (error) {
     console.error('批量标记未读失败', error)
@@ -401,7 +398,7 @@ const handleBatchMove = async (targetFolder) => {
       emails.value = emails.value.filter(e => !selectedEmails.value.includes(e.id))
       ElMessage.success('移动成功')
       clearSelection()
-      updateFolderCounts()
+      await updateFolderCounts()
     } else {
       ElMessage.error(res.msg || '移动失败')
     }
@@ -424,7 +421,7 @@ const batchDelete = async () => {
       totalCount.value -= selectedEmails.value.length
       ElMessage.success('删除成功')
       clearSelection()
-      updateFolderCounts()
+      await updateFolderCounts()
     } else {
       ElMessage.error(res.msg || '删除失败')
     }
@@ -472,7 +469,7 @@ const handleDeleteEmail = async (email) => {
       ElMessage.success('删除成功')
       showDetailDialog.value = false
       selectedEmail.value = null
-      updateFolderCounts()
+      await updateFolderCounts()
     } else {
       ElMessage.error(res.msg || '删除失败')
     }

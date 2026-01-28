@@ -401,6 +401,15 @@ const searchUsers = async (query) => {
 
 // 上传前校验
 const beforeUpload = (file) => {
+  // 文件类型校验
+  const fileName = file.name.toLowerCase()
+  const allowedExtensions = ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.pdf', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.zip', '.rar', '.txt', '.csv']
+  const isAllowedType = allowedExtensions.some(ext => fileName.endsWith(ext))
+  if (!isAllowedType) {
+    ElMessage.error(`不支持的文件类型！允许的文件类型：${acceptTypes}`)
+    return false
+  }
+
   // 文件大小校验
   const isLt10M = file.size / 1024 / 1024 < 10
   if (!isLt10M) {

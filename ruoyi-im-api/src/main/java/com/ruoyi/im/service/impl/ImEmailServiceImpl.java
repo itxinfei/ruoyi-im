@@ -290,6 +290,39 @@ public class ImEmailServiceImpl implements ImEmailService {
         return emailMapper.searchEmailsByKeyword(userId, keyword.trim());
     }
 
+    @Override
+    public java.util.Map<String, java.util.Map<String, Object>> getFolderStats(Long userId) {
+        java.util.Map<String, java.util.Map<String, Object>> stats = new java.util.HashMap<>();
+
+        // 从数据库获取统计数据
+        java.util.List<java.util.Map<String, Object>> folderCounts = emailMapper.countByFolder(userId);
+
+        // 初始化所有文件夹
+        String[] folders = {"INBOX", "SENT", "DRAFTS", "STARRED", "TRASH"};
+        for (String folder : folders) {
+            java.util.Map<String, Object> folderStats = new java.util.HashMap<>();
+            folderStats.put("total", 0);
+            folderStats.put("unread", 0);
+            stats.put(folder, folderStats);
+        }
+
+        // 填充实际数据
+        for (java.util.Map<String, Object> row : folderCounts) {
+            String folder = (String) row.get("folder");
+            Integer total = ((Number) row.getOrDefault("total", 0)).intValue();
+            Integer unread = ((Number) row.getOrDefault("unread", 0)).intValue();
+
+            java.util.Map<String, Object> folderStats = stats.get(folder);
+            if (folderStats != null) {
+                folderStats.put("total", total);
+                folderStats.put("unread", unread);
+            }
+        }
+
+        log.info("获取文件夹统计: userId={}, stats={}", userId, stats);
+        return stats;
+    }
+
     /**
      * 构建回复邮件内容（包含原邮件引用）
      */

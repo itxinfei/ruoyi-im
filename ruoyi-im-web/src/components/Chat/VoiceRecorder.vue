@@ -1,30 +1,33 @@
 <template>
   <div class="voice-recorder">
-    <!-- 按住说话按钮 -->
+    <!-- 点击开始录音按钮 -->
     <button
       v-if="!isRecording"
       class="record-btn"
       :class="{ 'no-permission': !hasPermission }"
-      @mousedown.prevent="handleMouseDown"
-      @mouseup.prevent="handleMouseUp"
-      @mouseleave.prevent="handleMouseLeave"
-      @touchstart.prevent="handleTouchStart"
-      @touchend.prevent="handleTouchEnd"
+      @click="handleStartRecording"
     >
       <el-icon><Microphone /></el-icon>
-      <span class="record-text">{{ hasPermission ? '按住说话' : '点击开启麦克风权限' }}</span>
+      <span class="record-text">{{ hasPermission ? '点击开始录音' : '点击开启麦克风权限' }}</span>
     </button>
 
-    <!-- 录音中 - 松手结束 -->
-    <div v-else class="recording-state">
-      <div class="recording-hint">
-        <span class="hint-text">正在录音... 松手结束</span>
+    <!-- 录音中 - 点击停止 -->
+    <button v-else class="recording-btn" @click="handleStopRecording">
+      <div class="recording-content">
+        <div class="recording-left">
+          <div class="recording-animation">
+            <span class="wave" v-for="i in 3" :key="i"></span>
+          </div>
+          <span class="recording-time">{{ formatTime(recordingTime) }}</span>
+        </div>
+        <div class="recording-right">
+          <span class="stop-icon">
+            <span class="material-icons-outlined">stop</span>
+          </span>
+          <span class="stop-text">点击停止</span>
+        </div>
       </div>
-      <div class="recording-animation">
-        <span class="wave" v-for="i in 3" :key="i"></span>
-      </div>
-      <span class="recording-time">{{ formatTime(recordingTime) }}</span>
-    </div>
+    </button>
   </div>
 </template>
 
@@ -62,8 +65,8 @@ onMounted(() => {
   checkMicrophonePermission()
 })
 
-// 鼠标按下 - 开始录音
-const handleMouseDown = (e) => {
+// 点击开始录音
+const handleStartRecording = () => {
   if (!hasPermission.value) {
     ElMessage.warning({
       message: '请允许浏览器访问麦克风权限。在浏览器地址栏点击🔒图标，选择"允许"麦克风权限。',
@@ -76,45 +79,10 @@ const handleMouseDown = (e) => {
   startRecording()
 }
 
-// 鼠标松开 - 停止录音
-const handleMouseUp = () => {
+// 点击停止录音
+const handleStopRecording = () => {
   if (isRecording.value) {
     stopRecording()
-  }
-}
-
-// 鼠标离开 - 取消录音
-const handleMouseLeave = () => {
-  if (isRecording.value) {
-    cancelRecording()
-  }
-}
-
-// 触摸开始
-const handleTouchStart = (e) => {
-  if (!hasPermission.value) {
-    ElMessage.warning({
-      message: '请允许浏览器访问麦克风权限。在浏览器地址栏点击🔒图标，选择"允许"麦克风权限。',
-      duration: 6000,
-      showClose: true
-    })
-    return
-  }
-  
-  startRecording()
-}
-
-// 触摸结束
-const handleTouchEnd = (e) => {
-  const endY = e.changedTouches[0].clientY
-  
-  // 上滑超过 50px 视为取消
-  if (startY.value - endY > 50) {
-    cancelRecording()
-  } else {
-    if (isRecording.value) {
-      stopRecording()
-    }
   }
 }
 
@@ -276,23 +244,35 @@ onUnmounted(() => {
   }
 }
 
-.recording-state {
+.recording-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 16px 24px;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 24px;
   background: rgba(22, 119, 255, 0.1);
-  border-radius: 12px;
   border: 2px solid var(--dt-brand-color, #1677ff);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
   animation: recording-pulse 1.5s ease-in-out infinite;
 
-  .recording-hint {
-    .hint-text {
-      font-size: 13px;
-      color: var(--dt-brand-color, #1677ff);
-      font-weight: 500;
-    }
+  &:hover {
+    background: rgba(22, 119, 255, 0.15);
+  }
+
+  .recording-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+  }
+
+  .recording-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
 
   .recording-animation {
@@ -324,22 +304,30 @@ onUnmounted(() => {
     font-variant-numeric: tabular-nums;
   }
 
-  .cancel-btn {
+  .recording-right {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: #f2f3f5;
-    border-radius: 50%;
-    cursor: pointer;
-    color: #646a73;
-    transition: all 0.2s;
+    gap: 8px;
 
-    &:hover {
+    .stop-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
       background: #ff4d4f;
-      color: #fff;
+      border-radius: 50%;
+
+      .material-icons-outlined {
+        font-size: 16px;
+        color: #fff;
+      }
+    }
+
+    .stop-text {
+      font-size: 13px;
+      color: var(--dt-brand-color, #1677ff);
+      font-weight: 500;
     }
   }
 }

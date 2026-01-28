@@ -1,146 +1,94 @@
 <template>
   <el-dialog
     v-model="visible"
-    :width="420"
+    :width="640"
     class="user-profile-dialog"
-    :show-close="false"
+    :show-close="true"
     :close-on-click-modal="true"
     destroy-on-close
     append-to-body
   >
     <div v-if="loading" class="loading-state">
-      <el-skeleton :rows="4" animated />
+      <el-skeleton :rows="3" animated />
     </div>
 
     <div v-else-if="userInfo" class="dialog-content">
-      <!-- 关闭按钮 -->
-      <button class="close-btn" @click="handleClose">
-        <span class="material-icons-outlined">close</span>
-      </button>
-
-      <!-- 顶部区域 -->
-      <div class="top-section">
-        <div class="bg-decoration">
-          <div class="decoration-circle circle-1"></div>
-          <div class="decoration-circle circle-2"></div>
-        </div>
-
-        <!-- 头像 -->
-        <div class="avatar-container">
+      <!-- 左侧：基本信息区 -->
+      <div class="left-section">
+        <div class="avatar-wrapper">
           <DingtalkAvatar
             :src="userInfo?.avatar"
             :name="userName"
             :user-id="session?.targetId || session?.targetUserId"
-            :size="96"
+            :size="88"
             shape="circle"
-            custom-class="detail-avatar"
           />
-          <div v-if="userInfo.online !== undefined && userInfo.online" class="online-dot"></div>
+          <div v-if="userInfo.online" class="online-indicator"></div>
         </div>
 
-        <!-- 用户名和标签 -->
         <h3 class="user-name">{{ userName }}</h3>
-        <div class="user-tags">
-          <span v-if="userInfo.online !== undefined && userInfo.online" class="status-tag online">
-            <span class="material-icons-outlined status-icon">circle</span>
-            在线
-          </span>
-          <span v-else class="status-tag offline">
-            <span class="material-icons-outlined status-icon">radio_button_unchecked</span>
-            离线
-          </span>
+
+        <div class="status-badge" :class="{ online: userInfo.online, offline: !userInfo.online }">
+          <span class="dot"></span>
+          {{ userInfo.online ? '在线' : '离线' }}
         </div>
 
-        <!-- 职位信息 -->
-        <p class="user-position">
-          <span v-if="userInfo.position">{{ userInfo.position }}</span>
-          <span v-if="userInfo.department"> · {{ userInfo.department }}</span>
-          <span v-if="!userInfo.position && !userInfo.department" class="empty-hint">暂无职位信息</span>
-        </p>
+        <div class="user-extra">
+          <span v-if="userInfo.position" class="position">{{ userInfo.position }}</span>
+          <span v-if="userInfo.department" class="department">{{ userInfo.department }}</span>
+        </div>
       </div>
 
-      <!-- 快捷操作按钮 -->
-      <div class="quick-actions">
-        <button class="action-btn primary" @click="handleSendMessage">
-          <span class="material-icons-outlined">chat_bubble</span>
-          <span>发消息</span>
-        </button>
-        <button class="action-btn" @click="handleVoiceCall">
-          <span class="material-icons-outlined">phone_in_talk</span>
-        </button>
-        <button class="action-btn" @click="handleVideoCall">
-          <span class="material-icons-outlined">videocam</span>
-        </button>
-      </div>
+      <!-- 右侧：详细信息区 -->
+      <div class="right-section">
+        <!-- 信息列表 -->
+        <div class="info-list">
+          <div v-if="userInfo.mobile || userInfo.phone" class="info-row">
+            <span class="info-label">手机</span>
+            <span class="info-value">{{ userInfo.mobile || userInfo.phone }}</span>
+          </div>
+          <div v-if="userInfo.email" class="info-row">
+            <span class="info-label">邮箱</span>
+            <span class="info-value">{{ userInfo.email }}</span>
+          </div>
+          <div v-if="userInfo.username" class="info-row">
+            <span class="info-label">账号</span>
+            <span class="info-value">@{{ userInfo.username }}</span>
+          </div>
+          <div class="info-row full">
+            <span class="info-label">签名</span>
+            <span class="info-value signature">{{ userInfo.signature || '这个人很懒，什么都没留下～' }}</span>
+          </div>
+        </div>
 
-      <!-- 信息卡片 -->
-      <div class="info-cards">
-        <div class="info-card" v-if="userInfo.mobile || userInfo.phone">
-          <div class="card-icon">
+        <!-- 操作按钮组 -->
+        <div class="action-buttons">
+          <button class="action-btn primary" @click="handleSendMessage">
+            <span class="material-icons-outlined">chat_bubble</span>
+            发消息
+          </button>
+          <button class="action-btn" @click="handleVoiceCall">
             <span class="material-icons-outlined">phone</span>
-          </div>
-          <div class="card-content">
-            <span class="card-label">手机号码</span>
-            <span class="card-value">{{ userInfo.mobile || userInfo.phone || '未设置' }}</span>
-          </div>
+          </button>
+          <button class="action-btn" @click="handleVideoCall">
+            <span class="material-icons-outlined">videocam</span>
+          </button>
         </div>
 
-        <div class="info-card" v-if="userInfo.email">
-          <div class="card-icon">
-            <span class="material-icons-outlined">email</span>
-          </div>
-          <div class="card-content">
-            <span class="card-label">邮箱地址</span>
-            <span class="card-value email">{{ userInfo.email }}</span>
-          </div>
-        </div>
-
-        <div class="info-card" v-if="userInfo.username">
-          <div class="card-icon">
-            <span class="material-icons-outlined">alternate_email</span>
-          </div>
-          <div class="card-content">
-            <span class="card-label">用户名</span>
-            <span class="card-value">@{{ userInfo.username }}</span>
-          </div>
-        </div>
-
-        <div class="info-card full-width" v-if="userInfo.signature || !userInfo.signature">
-          <div class="card-icon">
-            <span class="material-icons-outlined">format_quote</span>
-          </div>
-          <div class="card-content">
-            <span class="card-label">个性签名</span>
-            <p class="card-value signature">{{ userInfo.signature || '这个人很懒，什么都没留下～' }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 更多操作 -->
-      <div class="more-actions">
-        <button class="more-action-item" @click="handleAddToFavorites">
-          <span class="material-icons-outlined action-icon">star_border</span>
-          <span>添加常用</span>
-        </button>
-        <button class="more-action-item" @click="handleSetRemark">
-          <span class="material-icons-outlined action-icon">edit</span>
-          <span>设置备注</span>
-        </button>
-        <button class="more-action-item" @click="handleViewHistory">
-          <span class="material-icons-outlined action-icon">history</span>
-          <span>聊天记录</span>
-        </button>
-        <button class="more-action-item" @click="handleSearchChat">
-          <span class="material-icons-outlined action-icon">search</span>
-          <span>搜索记录</span>
-        </button>
-      </div>
-
-      <!-- 底部 -->
-      <div class="bottom-section">
-        <div class="secure-badge">
-          <span class="material-icons-outlined">verified_user</span>
-          <span>端到端加密保护</span>
+        <!-- 更多操作 -->
+        <div class="more-actions">
+          <button class="more-btn" @click="handleAddToFavorites">
+            <span class="material-icons-outlined">star_border</span>
+            添加常用
+          </button>
+          <button class="more-btn" @click="handleSetRemark">
+            <span class="material-icons-outlined">edit</span>
+            设置备注
+          </button>
+          <button class="more-btn" @click="handleViewHistory">
+            <span class="material-icons-outlined">history</span>
+            聊天记录
+          </button>
         </div>
       </div>
     </div>
@@ -151,7 +99,7 @@
     v-model="showRemarkDialog"
     title="设置备注"
     width="380px"
-    :before-close="() => showRemarkDialog = false"
+    class="remark-dialog"
   >
     <el-input
       v-model="remarkInput"
@@ -186,12 +134,9 @@ const loading = ref(false)
 const showRemarkDialog = ref(false)
 const remarkInput = ref('')
 
-const isGroup = computed(() => props.session?.type === 'GROUP')
 const userName = computed(() => {
   if (!userInfo.value) return ''
-  return isGroup.value
-    ? userInfo.value.name
-    : userInfo.value.nickname || userInfo.value.username || '未知用户'
+  return userInfo.value.nickname || userInfo.value.username || '未知用户'
 })
 
 const loadUserInfo = async () => {
@@ -264,11 +209,6 @@ const handleViewHistory = () => {
   emit('history', props.session)
   handleClose()
 }
-
-const handleSearchChat = () => {
-  emit('search', props.session)
-  handleClose()
-}
 </script>
 
 <style scoped lang="scss">
@@ -276,147 +216,105 @@ const handleSearchChat = () => {
 
 :deep(.user-profile-dialog) {
   .el-dialog {
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
     overflow: hidden;
   }
 
   .el-dialog__header {
-    display: none;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--dt-border-light);
+    margin: 0;
+
+    .el-dialog__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--dt-text-primary);
+    }
+
+    .el-dialog__headerbtn {
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+
+      .el-dialog__close {
+        font-size: 18px;
+        color: var(--dt-text-secondary);
+      }
+    }
   }
 
   .el-dialog__body {
-    padding: 0;
+    padding: 24px;
   }
 }
 
 .loading-state {
-  padding: 40px 24px;
+  padding: 60px 40px;
 }
 
 .dialog-content {
-  background: var(--dt-bg-card);
-}
-
-.close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--dt-bg-hover);
-  border: none;
-  cursor: pointer;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  z-index: 10;
-
-  &:hover {
-    background: var(--dt-border);
-  }
-
-  .material-icons-outlined {
-    font-size: 18px;
-    color: var(--dt-text-secondary);
-  }
+  gap: 32px;
 }
 
-.top-section {
-  position: relative;
+// 左侧区域
+.left-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px 24px 24px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-  border-bottom: 1px solid var(--dt-border-light);
-}
+  width: 160px;
+  flex-shrink: 0;
+  padding-right: 24px;
+  border-right: 1px solid var(--dt-border-light);
 
-.bg-decoration {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  overflow: hidden;
-  pointer-events: none;
+  .avatar-wrapper {
+    position: relative;
+    margin-bottom: 16px;
 
-  .decoration-circle {
-    position: absolute;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
-
-    &.circle-1 {
-      width: 100px;
-      height: 100px;
-      top: -30px;
-      right: -30px;
-    }
-
-    &.circle-2 {
-      width: 70px;
-      height: 70px;
-      bottom: -15px;
-      left: -15px;
-      opacity: 0.6;
+    .online-indicator {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      background: #52c41a;
+      border: 3px solid #fff;
+      border-radius: 50%;
     }
   }
-}
 
-.avatar-container {
-  position: relative;
-  margin-bottom: 16px;
-
-  .detail-avatar {
-    border: 4px solid var(--dt-bg-card);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  .user-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin: 0 0 12px;
+    text-align: center;
+    word-break: break-word;
+    max-width: 100%;
   }
 
-  .online-dot {
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
-    width: 16px;
-    height: 16px;
-    background: #52c41a;
-    border: 3px solid var(--dt-bg-card);
-    border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.3);
-  }
-}
-
-.user-name {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  margin: 0 0 12px;
-  text-align: center;
-  word-break: break-word;
-}
-
-.user-tags {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 8px;
-
-  .status-tag {
+  .status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     padding: 4px 12px;
     border-radius: 16px;
     font-size: 12px;
-    font-weight: 500;
+    margin-bottom: 12px;
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
 
     &.online {
-      background: rgba(82, 196, 26, 0.15);
+      background: rgba(82, 196, 26, 0.1);
       color: #52c41a;
 
-      .status-icon {
-        font-size: 12px;
+      .dot {
+        background: #52c41a;
       }
     }
 
@@ -424,226 +322,167 @@ const handleSearchChat = () => {
       background: var(--dt-bg-body);
       color: var(--dt-text-tertiary);
 
-      .status-icon {
-        font-size: 12px;
+      .dot {
+        background: var(--dt-text-tertiary);
+      }
+    }
+  }
+
+  .user-extra {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--dt-text-secondary);
+    text-align: center;
+
+    .position, .department {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+// 右侧区域
+.right-section {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .info-row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--dt-border-light);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.full {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      width: 60px;
+      font-size: 13px;
+      color: var(--dt-text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .info-value {
+      flex: 1;
+      font-size: 14px;
+      color: var(--dt-text-primary);
+
+      &.signature {
+        font-style: italic;
+        color: var(--dt-text-secondary);
       }
     }
   }
 }
 
-.user-position {
-  font-size: 13px;
-  color: var(--dt-text-secondary);
-  margin: 0;
-  text-align: center;
-
-  .empty-hint {
-    color: var(--dt-text-tertiary);
-  }
-}
-
-.quick-actions {
+.action-buttons {
   display: flex;
-  gap: 12px;
-  padding: 0 24px 20px;
-  border-bottom: 1px solid var(--dt-border-light);
+  gap: 8px;
 
   .action-btn {
     flex: 1;
-    height: 44px;
-    border-radius: 12px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     background: var(--dt-bg-body);
     border: 1px solid var(--dt-border-light);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
     font-size: 14px;
-    font-weight: 500;
     color: var(--dt-text-primary);
+    transition: all 0.2s;
 
     .material-icons-outlined {
-      font-size: 20px;
+      font-size: 18px;
     }
 
     &.primary {
+      flex: 2;
       background: var(--dt-brand-color);
       border-color: var(--dt-brand-color);
       color: #fff;
-      flex: 2;
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+        opacity: 0.9;
       }
     }
 
     &:hover:not(.primary) {
-      background: var(--dt-brand-bg);
+      background: var(--dt-bg-hover);
       border-color: var(--dt-brand-color);
       color: var(--dt-brand-color);
     }
   }
 }
 
-.info-cards {
-  padding: 20px 24px;
-  overflow-y: auto;
-  max-height: 280px;
-
-  .info-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px;
-    background: var(--dt-bg-body);
-    border-radius: 12px;
-    margin-bottom: 12px;
-    transition: all 0.2s;
-
-    &:hover {
-      background: var(--dt-bg-hover);
-    }
-
-    &.full-width {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .card-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--dt-brand-bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-
-      .material-icons-outlined {
-        font-size: 18px;
-        color: var(--dt-brand-color);
-      }
-    }
-
-    .card-content {
-      flex: 1;
-      min-width: 0;
-
-      .card-label {
-        display: block;
-        font-size: 11px;
-        color: var(--dt-text-tertiary);
-        margin-bottom: 2px;
-      }
-
-      .card-value {
-        font-size: 13px;
-        color: var(--dt-text-primary);
-
-        &.email {
-          word-break: break-all;
-        }
-
-        &.signature {
-          font-style: italic;
-          color: var(--dt-text-secondary);
-          line-height: 1.5;
-          margin: 0;
-        }
-      }
-    }
-  }
-}
-
 .more-actions {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--dt-border-light);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 
-  .more-action-item {
+  .more-btn {
     display: flex;
     align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 12px;
+    gap: 6px;
+    padding: 8px 14px;
     background: transparent;
-    border: none;
+    border: 1px solid var(--dt-border-light);
     border-radius: 8px;
     cursor: pointer;
+    font-size: 13px;
+    color: var(--dt-text-secondary);
     transition: all 0.2s;
-    text-align: left;
-    font-size: 14px;
-    color: var(--dt-text-primary);
 
-    .action-icon {
-      font-size: 20px;
-      color: var(--dt-text-secondary);
+    .material-icons-outlined {
+      font-size: 16px;
     }
 
     &:hover {
       background: var(--dt-bg-hover);
-
-      .action-icon {
-        color: var(--dt-brand-color);
-      }
+      border-color: var(--dt-brand-color);
+      color: var(--dt-brand-color);
     }
   }
 }
 
-.bottom-section {
-  padding: 16px 24px;
-  background: var(--dt-bg-body);
+// 备注弹窗样式
+:deep(.remark-dialog) {
+  .el-input__wrapper {
+    box-shadow: 0 0 0 1px var(--dt-border-light) inset;
+    transition: box-shadow 0.2s;
 
-  .secure-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-
-    .material-icons-outlined {
-      font-size: 14px;
-      color: #52c41a;
+    &:hover {
+      box-shadow: 0 0 0 1px var(--dt-border) inset;
     }
 
-    font-size: 11px;
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--dt-brand-color) inset;
+    }
+  }
+
+  .el-input__count {
     color: var(--dt-text-tertiary);
-  }
-}
-
-.dark {
-  .top-section {
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.08) 0%, rgba(22, 119, 255, 0.03) 100%);
-  }
-
-  .bg-decoration .decoration-circle {
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.15) 0%, rgba(22, 119, 255, 0.1) 100%);
-  }
-
-  .user-name {
-    color: var(--dt-text-primary-dark);
-  }
-
-  .quick-actions .action-btn {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-
-    &:hover:not(.primary) {
-      background: var(--dt-bg-hover-dark);
-    }
-  }
-
-  .info-cards .info-card {
-    background: var(--dt-bg-card-dark);
-  }
-
-  .more-actions {
-    border-color: var(--dt-border-dark);
-  }
-
-  .bottom-section {
-    background: var(--dt-bg-card-dark);
   }
 }
 </style>

@@ -211,8 +211,8 @@ export default {
             ...msg,
             type: (msg.type || '').toUpperCase()
           }))
-          // 后端返回是按时间倒序的 (newest first)，前端需要 newest at bottom
-          const transformed = normalized.reverse()
+          // 后端已经按时间升序返回(oldest first, newest at bottom),无需反转
+          const transformed = normalized
           if (isLoadMore) {
             commit('PREPEND_MESSAGES', { sessionId, messages: transformed })
           } else {

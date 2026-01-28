@@ -182,6 +182,21 @@ public class ImEmailController {
     }
 
     /**
+     * 获取各文件夹邮件统计
+     */
+    @Operation(summary = "获取文件夹统计", description = "获取各文件夹的邮件数量统计")
+    @GetMapping("/folder-stats")
+    public Result<Map<String, Map<String, Object>>> getFolderStats() {
+        Long userId = SecurityUtils.getLoginUserId();
+        try {
+            Map<String, Map<String, Object>> stats = emailService.getFolderStats(userId);
+            return Result.success(stats);
+        } catch (Exception e) {
+            return Result.fail("获取失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 回复邮件
      */
     @Operation(summary = "回复邮件", description = "回复指定邮件")

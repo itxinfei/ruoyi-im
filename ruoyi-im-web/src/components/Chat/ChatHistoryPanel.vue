@@ -5,7 +5,10 @@
         <div class="chat-history-panel">
           <!-- 头部 -->
           <div class="history-header">
-            <h3>聊天记录</h3>
+            <div class="header-title">
+              <span class="material-icons-outlined">history</span>
+              <span>聊天记录</span>
+            </div>
             <button class="close-btn" @click="handleClose">
               <span class="material-icons-outlined">close</span>
             </button>
@@ -86,13 +89,18 @@
           </div>
 
           <!-- 底部操作 -->
-          <div class="history-footer">
-            <el-button size="small" @click="loadMore" :disabled="!hasMore">
-              加载更多
-            </el-button>
-            <el-button size="small" type="danger" plain @click="handleClearHistory">
-              清空记录
-            </el-button>
+          <div class="history-footer" v-if="filteredMessages.length > 0 || !loading">
+            <div class="footer-info">
+              <span class="record-count">共 {{ filteredMessages.length }} 条记录</span>
+            </div>
+            <div class="footer-actions">
+              <el-button size="small" @click="loadMore" :disabled="!hasMore || loading">
+                加载更多
+              </el-button>
+              <el-button size="small" @click="handleClose">
+                关闭
+              </el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -141,7 +149,6 @@ const filteredMessages = computed(() => {
 const groupedMessages = computed(() => {
   const groups = {}
   filteredMessages.value.forEach(msg => {
-    // 使用 sendTime 而不是 timestamp
     const date = new Date(msg.sendTime).toDateString()
     if (!groups[date]) {
       groups[date] = []
@@ -201,7 +208,6 @@ const loadHistoryMessages = async () => {
 
     if (response.code === 200 && response.data) {
       const newMessages = response.data.records || response.data || []
-      // 为每条消息添加 isOwn 标识
       const messagesWithOwner = newMessages.map(msg => ({
         ...msg,
         isOwn: msg.senderId === currentUserId.value
@@ -213,7 +219,6 @@ const loadHistoryMessages = async () => {
         historyMessages.value = [...historyMessages.value, ...messagesWithOwner]
       }
 
-      // 判断是否还有更多数据
       const totalCount = response.data.total || 0
       hasMore.value = historyMessages.value.length < totalCount
     }
@@ -227,7 +232,6 @@ const loadHistoryMessages = async () => {
 
 // 搜索处理
 const handleSearch = () => {
-  // 搜索时滚动到顶部
   nextTick(() => {
     if (listRef.value) {
       listRef.value.scrollTop = 0
@@ -247,11 +251,6 @@ const loadMore = async () => {
   await loadHistoryMessages()
 }
 
-// 清空历史
-const handleClearHistory = () => {
-  emit('clear-history')
-}
-
 // 关闭
 const handleClose = () => {
   emit('close')
@@ -260,7 +259,6 @@ const handleClose = () => {
 // 监听 visible 变化
 watch(() => props.visible, (val) => {
   if (val) {
-    // 打开面板时重置状态并加载消息
     searchKeyword.value = ''
     currentPage.value = 1
     historyMessages.value = []
@@ -272,43 +270,46 @@ watch(() => props.visible, (val) => {
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
 
+// 过渡动画
 .slide-enter-active,
 .slide-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slide-enter-from,
 .slide-leave-to {
-  opacity: 0;
+  .chat-history-panel {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 
-.slide-enter-from .chat-history-panel,
-.slide-leave-to .chat-history-panel {
-  transform: translateX(100%);
-}
-
+// 遮罩层
 .chat-history-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 2000;
   display: flex;
   justify-content: flex-end;
+  backdrop-filter: blur(4px);
 }
 
+// 面板
 .chat-history-panel {
-  width: 400px;
+  width: 420px;
   height: 100%;
   background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
 
   .dark & {
     background: var(--dt-bg-card-dark);
   }
 }
 
+// 头部
 .history-header {
   display: flex;
   align-items: center;
@@ -320,14 +321,21 @@ watch(() => props.visible, (val) => {
     border-bottom-color: var(--dt-border-dark);
   }
 
-  h3 {
-    margin: 0;
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 16px;
     font-weight: 600;
     color: var(--dt-text-primary);
 
+    .material-icons-outlined {
+      font-size: 20px;
+      color: var(--dt-text-secondary);
+    }
+
     .dark & {
-      color: var(--dt-text-primary-dark);
+      color: var(--dt-text-secondary-dark);
     }
   }
 
@@ -339,7 +347,7 @@ watch(() => props.visible, (val) => {
     justify-content: center;
     background: transparent;
     border: none;
-    border-radius: 50%;
+    border-radius: 8px;
     cursor: pointer;
     color: var(--dt-text-secondary);
     transition: all 0.2s;
@@ -347,11 +355,16 @@ watch(() => props.visible, (val) => {
     &:hover {
       background: var(--dt-bg-hover);
     }
+
+    .material-icons-outlined {
+      font-size: 20px;
+    }
   }
 }
 
+// 搜索
 .history-search {
-  padding: 16px 20px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--dt-border-light);
 
   .dark & {
@@ -360,19 +373,39 @@ watch(() => props.visible, (val) => {
 
   :deep(.el-input) {
     .el-input__wrapper {
-      border-radius: 20px;
+      border-radius: 8px;
+      padding: 4px 12px;
+      box-shadow: none;
+      border: 1px solid var(--dt-border-light);
+
+      &:hover {
+        border-color: var(--dt-border);
+      }
+
+      &.is-focus {
+        border-color: var(--dt-brand-color);
+      }
     }
 
     .el-input__prefix {
       color: var(--dt-text-tertiary);
+
+      .material-icons-outlined {
+        font-size: 18px;
+      }
+    }
+
+    .el-input__inner {
+      font-size: 14px;
     }
   }
 }
 
+// 列表
 .history-list {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 12px 16px;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -381,50 +414,60 @@ watch(() => props.visible, (val) => {
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
     border-radius: 3px;
+
+    &:hover {
+      background: var(--dt-text-tertiary);
+    }
   }
 }
 
+// 加载和空状态
 .loading-state,
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: var(--dt-text-tertiary);
   gap: 12px;
 
   .material-icons-outlined {
     font-size: 48px;
-    opacity: 0.5;
+    opacity: 0.4;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .el-icon {
+    font-size: 24px;
+    color: var(--dt-brand-color);
   }
 }
 
+// 日期分组
 .history-group {
-  margin-bottom: 20px;
+  margin-bottom: 4px;
 }
 
 .group-date {
-  position: sticky;
-  top: 0;
   padding: 8px 12px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   font-size: 12px;
   font-weight: 500;
   color: var(--dt-text-tertiary);
-  background: var(--dt-bg-card);
-  z-index: 1;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-  }
+  text-align: center;
 }
 
+// 消息项
 .history-item {
   display: flex;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 12px;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
 
@@ -436,15 +479,15 @@ watch(() => props.visible, (val) => {
     background: var(--dt-brand-bg);
 
     &:hover {
-      background: var(--dt-brand-bg);
-      filter: brightness(0.95);
+      background: var(--dt-brand-light);
     }
   }
 }
 
+// 头像
 .message-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -463,11 +506,12 @@ watch(() => props.visible, (val) => {
     justify-content: center;
     background: var(--dt-brand-color);
     color: #fff;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
   }
 }
 
+// 内容
 .message-content {
   flex: 1;
   min-width: 0;
@@ -478,25 +522,26 @@ watch(() => props.visible, (val) => {
   align-items: center;
   gap: 8px;
   margin-bottom: 4px;
-}
 
-.sender-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--dt-text-primary);
+  .sender-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
 
-  .dark & {
-    color: var(--dt-text-primary-dark);
+    .dark & {
+      color: var(--dt-text-primary-dark);
+    }
+  }
+
+  .message-time {
+    font-size: 11px;
+    color: var(--dt-text-tertiary);
+    margin-left: auto;
   }
 }
 
-.message-time {
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
-}
-
 .message-text {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--dt-text-secondary);
   word-break: break-all;
   line-height: 1.5;
@@ -506,20 +551,48 @@ watch(() => props.visible, (val) => {
   }
 
   .material-icons-outlined {
-    font-size: 16px;
+    font-size: 14px;
     vertical-align: middle;
-    margin-right: 4px;
+    margin-right: 3px;
+    color: var(--dt-text-tertiary);
   }
 }
 
+// 底部
 .history-footer {
-  display: flex;
-  gap: 12px;
-  padding: 16px 20px;
+  padding: 12px 20px;
   border-top: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-body);
 
   .dark & {
     border-top-color: var(--dt-border-dark);
+    background: var(--dt-bg-card-dark);
+  }
+
+  .footer-info {
+    margin-bottom: 12px;
+    text-align: center;
+
+    .record-count {
+      font-size: 12px;
+      color: var(--dt-text-tertiary);
+    }
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+
+    .el-button {
+      flex: 1;
+      border-radius: 6px;
+
+      &.el-button--small {
+        height: 28px;
+        font-size: 13px;
+      }
+    }
   }
 }
 </style>

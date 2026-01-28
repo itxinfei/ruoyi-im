@@ -92,7 +92,6 @@
       <GroupDetailDialog
         v-model="showGroupDetail"
         :group-id="session?.targetId"
-        @refresh="$emit('refresh-sessions')"
       />
 
       <!-- 隐藏的文件上传 input -->
@@ -430,7 +429,7 @@ const handleSendVoice = async ({ file, duration }) => {
     formData.append('file', file)
 
     const uploadRes = await uploadFile(formData)
-    const voiceUrl = uploadRes.url || uploadRes.data?.url
+    const voiceUrl = uploadRes.data?.fileUrl
 
     // 发送语音消息
     const msg = await store.dispatch('im/message/sendMessage', {

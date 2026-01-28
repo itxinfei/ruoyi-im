@@ -80,8 +80,8 @@
             :class="{ expanded: orgExpanded }"
             @click="toggleOrg"
           >
-            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M10 17l5-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
             <span class="item-text">组织架构</span>
           </div>
@@ -772,9 +772,6 @@ onMounted(() => {
   loadGroups()
   loadOrgTree()
 })
-
-loadFriends()
-loadGroups()
 </script>
 
 <style scoped lang="scss">
@@ -902,11 +899,13 @@ loadGroups()
 // 导航列表容器 - 这是核心问题所在
 // ============================================================================
 .nav-list {
-  flex: 1;
-  min-height: 0;
+  height: calc(100% - 60px);
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 
   // 滚动条样式
   &::-webkit-scrollbar {
@@ -937,17 +936,17 @@ loadGroups()
   gap: 8px;
   height: 32px;
   padding: 0 12px;
-  margin: 2px 8px;
   border-radius: 6px;
   cursor: pointer;
   color: #6b7280;
   font-size: 14px;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
   user-select: none;
 
   &:hover {
     background: #f3f4f6;
+    color: #374151;
   }
 
   &.active {
@@ -969,23 +968,7 @@ loadGroups()
   }
 }
 
-.dark .nav-item {
-  color: #9ca3af;
-
-  &:hover {
-    background: #404040;
-  }
-
-  &.active {
-    background: rgba(22, 119, 255, 0.2);
-    color: #60a5fa;
-
-    &::before {
-      background: #60a5fa;
-    }
-  }
-}
-
+// 暗色模式 - 必须用 !important 覆盖全局样式
 .dark .nav-item {
   color: #9ca3af !important;
 
@@ -995,7 +978,7 @@ loadGroups()
   }
 
   &.active {
-    background: rgba(22, 119, 255, 0.2);
+    background: rgba(22, 119, 255, 0.2) !important;
     color: #60a5fa !important;
 
     &::before {
@@ -1022,7 +1005,7 @@ loadGroups()
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: inherit !important;
+  color: inherit;
 }
 
 // 徽章
@@ -1082,12 +1065,13 @@ loadGroups()
   cursor: pointer;
   color: #6b7280;
   font-size: 14px;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
   user-select: none;
 
   &:hover {
     background: #f3f4f6;
+    color: #374151;
   }
 
   &.expanded {
@@ -1095,23 +1079,12 @@ loadGroups()
   }
 }
 
-.dark .org-root {
-  color: #9ca3af;
-
-  &:hover {
-    background: #404040;
-  }
-
-  &.expanded {
-    color: #e5e7eb;
-  }
-}
-
+// 暗色模式
 .dark .org-root {
   color: #9ca3af !important;
 
   &:hover {
-    background: #404040 !important;
+    background: #404040;
     color: #e5e7eb !important;
   }
 
@@ -1158,7 +1131,7 @@ loadGroups()
   cursor: pointer;
   color: #6b7280;
   font-size: 13px;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
   user-select: none;
 
@@ -1168,6 +1141,7 @@ loadGroups()
 
   &:hover {
     background: #f3f4f6;
+    color: #374151;
   }
 
   &.active {
@@ -1189,23 +1163,7 @@ loadGroups()
   }
 }
 
-.dark .org-item {
-  color: #9ca3af;
-
-  &:hover {
-    background: #404040;
-  }
-
-  &.active {
-    background: rgba(22, 119, 255, 0.2);
-    color: #60a5fa;
-
-    &::before {
-      background: #60a5fa;
-    }
-  }
-}
-
+// 暗色模式
 .dark .org-item {
   color: #9ca3af !important;
 
@@ -1215,7 +1173,7 @@ loadGroups()
   }
 
   &.active {
-    background: rgba(22, 119, 255, 0.2);
+    background: rgba(22, 119, 255, 0.2) !important;
     color: #60a5fa !important;
 
     &::before {

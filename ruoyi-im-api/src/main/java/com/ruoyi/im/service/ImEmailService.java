@@ -147,4 +147,12 @@ public interface ImEmailService {
      * @return 匹配的邮件列表
      */
     List<ImEmail> searchEmails(Long userId, String keyword);
+
+    /**
+     * 获取各文件夹邮件统计信息
+     *
+     * @param userId 用户ID
+     * @return 文件夹统计信息 Map<文件夹名, 统计数据>
+     */
+    java.util.Map<String, java.util.Map<String, Object>> getFolderStats(Long userId);
 }
