@@ -194,4 +194,12 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
      * @return 最后消息列表
      */
     List<ImMessage> selectLastMessagesByConversationIds(@Param("conversationIds") List<Long> conversationIds);
+
+    /**
+     * 删除会话的所有消息
+     *
+     * @param conversationId 会话ID
+     * @return 删除数量
+     */
+    int deleteByConversationId(@Param("conversationId") Long conversationId);
 }

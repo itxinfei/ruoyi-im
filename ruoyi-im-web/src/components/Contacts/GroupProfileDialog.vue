@@ -202,8 +202,28 @@ watch(visible, (val) => {
 </script>
 
 <style scoped lang="scss">
-.group-profile-dialog :deep(.el-dialog__header) { display: none; }
-.group-profile-dialog :deep(.el-dialog__body) { padding: 0; border-radius: 12px; overflow: hidden; }
+.group-profile-dialog {
+  :deep(.el-dialog) {
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: dialogFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  
+  :deep(.el-dialog__header) { display: none; }
+  :deep(.el-dialog__body) { padding: 0; border-radius: 16px; overflow: hidden; }
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
 
 .loading-state { height: 400px; display: flex; align-items: center; justify-content: center; }
 
@@ -214,25 +234,32 @@ watch(visible, (val) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: #f8fafc;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   
   .header-content {
     display: flex;
     gap: 16px;
     align-items: center;
-    .group-avatar { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .group-avatar { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     .group-meta {
-      .group-name { margin: 0; font-size: 18px; font-weight: 600; color: #1f2329; }
-      .group-id { margin: 4px 0 0; font-size: 12px; color: #8f959e; }
+      .group-name { margin: 0; font-size: 18px; font-weight: 600; color: #1f2329; letter-spacing: -0.01em; }
+      .group-id { margin: 4px 0 0; font-size: 12px; color: #64748b; }
     }
   }
   
   .close-btn {
-    width: 32px; height: 32px;
+    width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
-    color: #8f959e; border: none; background: transparent; border-radius: 6px; cursor: pointer;
-    svg { width: 16px; height: 16px; }
-    &:hover { background: #f1f2f3; color: #1f2329; }
+    color: #64748b; border: none; background: rgba(0,0,0,0.03); border-radius: 10px; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    svg { width: 18px; height: 18px; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    &:hover { 
+      background: rgba(0,0,0,0.08); 
+      color: #1f2329; 
+      transform: scale(1.05);
+      svg { transform: rotate(90deg); }
+    }
+    &:active { transform: scale(0.95); }
   }
 }
 

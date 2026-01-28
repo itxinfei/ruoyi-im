@@ -37,6 +37,7 @@
             @clear="handleClearMessages"
             @voice-call="handleVoiceCall"
             @video-call="handleVideoCall"
+            @scroll-to-message="handleScrollToMessage"
           />
           <MessageList
             ref="msgListRef"
@@ -142,6 +143,33 @@
         :can-manage="session?.type === 'GROUP' && session?.memberRole === 'ADMIN'"
       />
 
+      <!-- 搜索聊天记录面板 -->
+      <ChatSearchPanel
+        :visible="showSearchPanel"
+        :session-id="session?.id"
+        :messages="messages"
+        @close="showSearchPanel = false"
+        @jump-to-message="handleJumpToMessage"
+      />
+
+      <!-- 聊天内搜索弹窗 -->
+      <ChatSearch
+        v-model:visible="showChatSearch"
+        :messages="messages"
+        @select-message="handleScrollToMessage"
+      />
+
+      <!-- 查看文件面板 -->
+      <ChatFilesPanel
+        :visible="showFilesPanel"
+        :session-id="session?.id"
+        :messages="messages"
+        @close="showFilesPanel = false"
+        @open-file="handleOpenFile"
+        @download-file="handleDownloadFile"
+        @forward-file="handleForwardFile"
+      />
+
       <!-- 多选操作栏 -->
       <Transition name="slide-up">
         <div v-if="isMultiSelectModeActive" class="multi-select-toolbar">
@@ -189,9 +217,10 @@ import ChatHistoryPanel from '@/components/Chat/ChatHistoryPanel.vue'
 import GroupAnnouncementDialog from '@/components/Chat/GroupAnnouncementDialog.vue'
 import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
 import ChatSearchPanel from '@/components/Chat/ChatSearchPanel.vue'
+import ChatSearch from '@/components/Chat/ChatSearch.vue'
 import ChatFilesPanel from '@/components/Chat/ChatFilesPanel.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
-import { getMessages, batchForwardMessages, deleteMessage } from '@/api/im/message'
+import { getMessages, batchForwardMessages, deleteMessage, clearConversationMessages } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { addFavorite, removeFavorite } from '@/api/im/favorite'
 import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
@@ -226,6 +255,9 @@ const showVideoCall = ref(false)
 const showChatHistory = ref(false)
 const isIncomingCall = ref(false)
 const showAnnouncementDialog = ref(false)
+const showSearchPanel = ref(false)
+const showChatSearch = ref(false)
+const showFilesPanel = ref(false)
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
 const messageInputRef = ref(null)
@@ -953,12 +985,12 @@ const handleVideoCall = () => {
 
 // 查看文件
 const handleShowFiles = () => {
-  ElMessage.info('文件功能开发中')
+  showFilesPanel.value = true
 }
 
 // 搜索消息
 const handleSearchMessages = () => {
-  ElMessage.info('搜索功能开发中')
+  showChatSearch.value = true
 }
 
 // 会话操作
@@ -972,11 +1004,27 @@ const handleMuteSession = () => {
 
 const handleClearMessages = async () => {
   try {
-    await ElMessageBox.confirm('确定要清空聊天记录吗？此操作不可恢复', '清空聊天', {
-      type: 'warning',
-      confirmButtonText: '确定清空',
-      cancelButtonText: '取消'
-    })
+    await ElMessageBox.confirm(
+      `确定要清空与 ${session.value?.name} 的聊天记录吗？`,
+      '清空聊天记录',
+      {
+        type: 'warning',
+        confirmButtonText: '确定清空',
+        cancelButtonText: '取消',
+        confirmButtonClass: 'el-button--danger',
+        dangerouslyUseHTMLString: false
+      }
+    )
+
+    // 调用 API 清空消息
+    await clearConversationMessages(session.value?.id)
+
+    // 清空本地消息列表
+    messages.value = []
+
+    // 重置分页状态
+    noMore.value = false
+
     ElMessage.success('聊天记录已清空')
   } catch {
     // 用户取消
@@ -985,6 +1033,13 @@ const handleClearMessages = async () => {
 
 // 滚动到置顶消息
 const handleScrollToPinnedMessage = (messageId) => {
+  if (msgListRef.value) {
+    msgListRef.value.scrollToMessage(messageId)
+  }
+}
+
+// 处理搜索结果滚动
+const handleScrollToMessage = (messageId) => {
   if (msgListRef.value) {
     msgListRef.value.scrollToMessage(messageId)
   }
@@ -1005,9 +1060,44 @@ const handleShowHistory = () => {
 
 // 跳转到指定消息
 const handleJumpToMessage = (message) => {
-  // TODO: 实现滚动到指定消息
-  ElMessage.info('跳转功能开发中')
+  if (msgListRef.value) {
+    msgListRef.value.scrollToMessage(message.id || message.messageId)
+  }
+  showSearchPanel.value = false
   showChatHistory.value = false
+}
+
+// 打开文件
+const handleOpenFile = (file) => {
+  if (file.url) {
+    window.open(file.url, '_blank')
+  }
+}
+
+// 下载文件
+const handleDownloadFile = (file) => {
+  if (Array.isArray(file)) {
+    // 批量下载
+    ElMessage.info(`正在下载 ${file.length} 个文件...`)
+  } else {
+    if (file.url) {
+      const link = document.createElement('a')
+      link.href = file.url
+      link.download = file.name
+      link.target = '_blank'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      ElMessage.success('开始下载')
+    }
+  }
+}
+
+// 转发文件
+const handleForwardFile = (file) => {
+  if (forwardDialogRef.value) {
+    forwardDialogRef.value.open([{ type: 'FILE', content: JSON.stringify(file) }])
+  }
 }
 
 // 清空历史记录
@@ -1807,87 +1897,6 @@ onMounted(() => {
 
   .toolbar-divider {
     background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-// ============================================================================
-// 响应式布局
-// ============================================================================
-@media (max-width: 479px) {
-  .multi-select-toolbar {
-    height: auto;
-    min-height: 56px;
-    padding: 12px 16px;
-    flex-direction: column;
-    gap: 12px;
-
-    .selection-info {
-      width: 100%;
-      justify-content: center;
-      font-size: 13px;
-    }
-
-    .actions {
-      width: 100%;
-      justify-content: space-between;
-      flex-wrap: wrap;
-
-      .toolbar-btn {
-        font-size: 12px;
-        height: 32px;
-        padding: 0 10px;
-        flex: 1;
-        min-width: calc(50% - 4px);
-        justify-content: center;
-
-        span { display: none; }
-        .material-icons-outlined { margin: 0; }
-      }
-
-      .toolbar-divider { display: none; }
-
-      .toolbar-btn--cancel {
-        flex: 0 0 auto;
-        min-width: auto;
-        width: auto;
-        span { display: inline; }
-      }
-    }
-  }
-
-  .empty-placeholder { padding: 40px 16px; }
-}
-
-@media (min-width: 480px) and (max-width: 767px) {
-  .multi-select-toolbar {
-    padding: 0 16px;
-    height: 60px;
-
-    .selection-info { font-size: 13px; }
-
-    .actions {
-      gap: 6px;
-
-      .toolbar-btn {
-        font-size: 12px;
-        padding: 0 10px;
-        height: 32px;
-        span { display: none; }
-      }
-
-      .toolbar-btn--cancel span { display: inline; }
-    }
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .multi-select-toolbar {
-    padding: 0 20px;
-
-    .actions .toolbar-btn {
-      font-size: 13px;
-      padding: 0 10px;
-    }
   }
 }
 

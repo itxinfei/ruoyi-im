@@ -976,19 +976,20 @@ onUnmounted(() => {
   // 发送消息气泡（右侧）- 钉钉淡蓝风格
   // ========================================
   &.is-own {
-    background: #E8F4FF;  // 钉钉右侧气泡：淡蓝背景
+    background: #D4EAFF;  // 钉钉右侧气泡：淡蓝背景（加深一点更清晰）
     color: #303133;  // 保持深色文字
     border: none;  // 钉钉风格：右侧无边框
     border-radius: 8px 8px 2px 8px;  // 钉钉风格：右下角2px形成尾部效果
     box-shadow: none;  // 保持扁平
+    text-align: left;  // 钉钉风格：文本左对齐，气泡整体右对齐
 
     &.is-selected {
       border: 2px solid var(--dt-brand-color);
-      background-color: #D4EAFF;
+      background-color: #C4E0FF;
     }
 
     &:hover {
-      background: #DBEEFF;
+      background: #C4E0FF;
     }
   }
 
@@ -1368,7 +1369,6 @@ onUnmounted(() => {
     }
   }
 
-  &:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 
   &.IMAGE {
     padding: 4px;
@@ -2102,15 +2102,41 @@ onUnmounted(() => {
 }
 
 // ============================================================================
-// 暗色模式
+// 暗色模式 - 钉钉风格适配
 // ============================================================================
 :global(.dark) {
   .bubble {
-    background: #1e293b; color: #f1f5f9; border-color: #334155;
-    &.is-own { background: #1d4ed8; color: #fff; }
-    .bubble-reply-ref { background: rgba(255, 255, 255, 0.05); color: #94a3b8; .ref-user { color: #f1f5f9; } }
+    background: #1E293B;  // 钉钉暗色左侧气泡
+    color: #F1F5F9;
+    border-color: #334155;
+    border-radius: 8px 8px 8px 2px;  // 保持钉钉尾部效果
+
+    &.is-own {
+      background: #1E40AF;  // 钉钉暗色右侧气泡：深蓝
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px 8px 2px 8px;  // 保持钉钉尾部效果
+    }
+
+    &:hover {
+      background: #253344;
+    }
+
+    &.is-own:hover {
+      background: #1E3A8A;
+    }
+
+    .bubble-reply-ref {
+      background: rgba(255, 255, 255, 0.05);
+      color: #94A3B8;
+      .ref-user { color: #F1F5F9; }
+    }
   }
-  .msg-file { background: #0f172a; border-color: #334155; .file-name { color: #f1f5f9; } }
+  .msg-file {
+    background: #0F172A;
+    border-color: #334155;
+    .file-name { color: #F1F5F9; }
+  }
 
   // 表情聚合显示 - 暗色模式
   .reaction-aggregate {

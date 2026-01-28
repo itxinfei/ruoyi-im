@@ -55,18 +55,47 @@
             <span>邀请</span>
           </div>
 
-          <div v-for="member in members" :key="member.id" class="member-cell">
-            <DingtalkAvatar
-              :src="member.avatar"
-              :name="member.name"
-              :size="40"
-              shape="square"
-              custom-class="member-avatar-cell"
-            />
-            <span class="cell-name">{{ member.name }}</span>
-            <div v-if="member.role === 'OWNER'" class="role-flag owner">群主</div>
-            <div v-else-if="member.role === 'ADMIN'" class="role-flag admin">管理</div>
-          </div>
+          <!-- 成员列表（带左击菜单） -->
+          <el-dropdown
+            v-for="member in members"
+            :key="member.id"
+            trigger="click"
+            placement="right-start"
+            @command="handleMemberCommand"
+          >
+            <div class="member-cell">
+              <DingtalkAvatar
+                :src="member.avatar"
+                :name="member.name"
+                :size="40"
+                shape="square"
+                custom-class="member-avatar-cell"
+              />
+              <span class="cell-name">{{ member.name }}</span>
+              <div v-if="member.role === 'OWNER'" class="role-flag owner">群主</div>
+              <div v-else-if="member.role === 'ADMIN'" class="role-flag admin">管理</div>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu class="member-menu">
+                <el-dropdown-item :command="{ action: 'chat', member }">
+                  <span class="material-icons-outlined menu-icon">chat_bubble</span>
+                  发消息
+                </el-dropdown-item>
+                <el-dropdown-item :command="{ action: 'profile', member }">
+                  <span class="material-icons-outlined menu-icon">person</span>
+                  查看资料
+                </el-dropdown-item>
+                <el-dropdown-item divided :command="{ action: 'setAdmin', member }" v-if="isOwner && member.role !== 'OWNER'">
+                  <span class="material-icons-outlined menu-icon">{{ member.role === 'ADMIN' ? 'remove_moderator' : 'admin_panel_settings' }}</span>
+                  {{ member.role === 'ADMIN' ? '取消管理员' : '设为管理员' }}
+                </el-dropdown-item>
+                <el-dropdown-item divided :command="{ action: 'remove', member }" v-if="isOwnerOrAdmin && member.role !== 'OWNER'">
+                  <span class="material-icons-outlined menu-icon remove">person_remove</span>
+                  移除出群
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </div>
 
@@ -232,6 +261,64 @@ const handleLeave = () => {
 }
 
 const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
+
+// 处理成员菜单命令
+const handleMemberCommand = (command) => {
+  const { action, member } = command
+  switch (action) {
+    case 'chat':
+      // 发起私聊
+      ElMessage.info(`正在与 ${member.name} 聊天...`)
+      // TODO: 触发切换到私聊会话
+      break
+    case 'profile':
+      // 查看成员资料
+      ElMessage.info(`查看 ${member.name} 的资料...`)
+      // TODO: 打开成员资料弹窗
+      break
+    case 'setAdmin':
+      // 设置/取消管理员
+      handleToggleAdmin(member)
+      break
+    case 'remove':
+      // 移除出群
+      handleRemoveMember(member)
+      break
+  }
+}
+
+// 切换管理员状态
+const handleToggleAdmin = async (member) => {
+  const isSetAdmin = member.role !== 'ADMIN'
+  try {
+    await ElMessageBox.confirm(
+      `确定${isSetAdmin ? '设置' : '取消'} ${member.name} 为管理员吗？`,
+      isSetAdmin ? '设置管理员' : '取消管理员',
+      { type: 'warning' }
+    )
+    // TODO: 调用设置管理员 API
+    ElMessage.success(isSetAdmin ? '已设置为管理员' : '已取消管理员')
+    // 刷新成员列表
+    loadGroupDetail()
+  } catch {
+    // 用户取消
+  }
+}
+
+// 移除群成员
+const handleRemoveMember = async (member) => {
+  try {
+    await ElMessageBox.confirm(`确定将 ${member.name} 移除出群吗？`, '移除成员', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
+    })
+    // TODO: 调用移除成员 API
+    ElMessage.info('移除功能开发中...')
+  } catch {
+    // 用户取消
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -287,6 +374,8 @@ const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
     .member-cell {
       display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
       position: relative;
+      padding: 4px; border-radius: 6px; transition: background-color 0.2s;
+      &:hover { background: var(--dt-bg-hover, #f5f5f5); }
       :deep(.member-avatar-cell) { border-radius: 6px; transition: opacity 0.2s; }
       &:hover :deep(.member-avatar-cell) { opacity: 0.8; }
       .cell-name { font-size: 12px; color: #1f2329; text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; .dark & { color: #94a3b8; } }
@@ -304,6 +393,18 @@ const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
         position: absolute; top: -4px; right: -4px; font-size: 9px; padding: 1px 4px; border-radius: 4px; color: #fff;
         &.owner { background: #ff4d4f; }
         &.admin { background: #faad14; }
+      }
+    }
+
+    // 成员菜单样式
+    :deep(.member-menu) {
+      .el-dropdown-menu__item {
+        display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+        .menu-icon {
+          font-size: 18px; color: #646a73;
+          &.remove { color: #ff4d4f; }
+        }
+        &:hover .menu-icon { color: #1677ff; }
       }
     }
   }

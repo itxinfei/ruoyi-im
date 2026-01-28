@@ -162,4 +162,13 @@ public interface ImMessageService {
      * @return 统计数据Map
      */
     java.util.Map<String, Object> getMessageStats(java.time.LocalDateTime startTime, java.time.LocalDateTime endTime);
+
+    /**
+     * 清空会话聊天记录
+     * 删除指定会话中的所有消息
+     *
+     * @param conversationId 会话ID
+     * @param userId         当前用户ID
+     */
+    void clearConversationMessages(Long conversationId, Long userId);
 }

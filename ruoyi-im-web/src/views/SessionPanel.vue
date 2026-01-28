@@ -1197,7 +1197,7 @@ onUnmounted(() => {
 }
 
 .dark .add-btn {
-  color: #bdc3c9;
+  color: var(--dt-text-secondary-dark);
 
   &:hover {
     background: var(--dt-bg-hover-dark);

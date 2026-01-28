@@ -417,4 +417,27 @@ public class ImMessageController {
             return Result.fail("获取已读状态失败");
         }
     }
+
+    /**
+     * 清空会话聊天记录
+     * 删除指定会话中的所有消息
+     *
+     * @param conversationId 会话ID
+     * @return 操作结果
+     */
+    @Operation(summary = "清空会话聊天记录", description = "清空指定会话中的所有消息")
+    @DeleteMapping("/clear/{conversationId}")
+    public Result<Void> clearConversationMessages(@PathVariable Long conversationId) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            // 验证用户是否有权限访问该会话
+            imMessageService.clearConversationMessages(conversationId, userId);
+            log.info("清空会话聊天记录成功: conversationId={}, userId={}", conversationId, userId);
+            return Result.success("聊天记录已清空");
+        } catch (Exception e) {
+            log.error("清空会话聊天记录失败: conversationId={}, userId={}", conversationId, userId, e);
+            return Result.fail("清空聊天记录失败");
+        }
+    }
 }

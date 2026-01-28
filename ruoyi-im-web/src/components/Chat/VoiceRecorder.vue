@@ -4,6 +4,7 @@
     <button
       v-if="!isRecording && !audioUrl"
       class="record-btn"
+      :class="{ 'no-permission': !hasPermission }"
       @mousedown.prevent="handleMouseDown"
       @mouseup.prevent="handleMouseUp"
       @mouseleave.prevent="handleMouseLeave"
@@ -11,13 +12,13 @@
       @touchend.prevent="handleTouchEnd"
     >
       <el-icon><Microphone /></el-icon>
-      <span class="record-text">按住说话</span>
+      <span class="record-text">{{ hasPermission ? '按住说话' : '点击开启麦克风权限' }}</span>
     </button>
 
-    <!-- 录音中 - 松开发送 -->
+    <!-- 录音中 - 松手结束 -->
     <div v-else-if="isRecording" class="recording-state">
       <div class="recording-hint">
-        <span class="hint-text">松开发送，上滑取消</span>
+        <span class="hint-text">正在录音... 松手结束</span>
       </div>
       <div class="recording-animation">
         <span class="wave" v-for="i in 3" :key="i"></span>
@@ -25,7 +26,7 @@
       <span class="recording-time">{{ formatTime(recordingTime) }}</span>
     </div>
 
-    <!-- 录音完成预览（仅在上滑取消时显示） -->
+    <!-- 录音完成预览 -->
     <div v-else-if="audioUrl && showPreview" class="preview-state">
       <div class="audio-preview">
         <button class="play-btn" @click="togglePlay">
@@ -65,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted, watch } from 'vue'
+import { ref, onUnmounted, watch, onMounted } from 'vue'
 import { Microphone, Close, VideoPlay, VideoPause, Delete, Promotion } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import VoiceToText from './VoiceToText.vue'
@@ -82,6 +83,7 @@ const transcript = ref('')
 const showPreview = ref(false)
 const isCancelled = ref(false)
 const startY = ref(0)
+const hasPermission = ref(true)
 
 let mediaRecorder = null
 let audioChunks = []
@@ -89,35 +91,68 @@ let recordingInterval = null
 let audioElement = null
 let progressInterval = null
 
+// 检查麦克风权限
+const checkMicrophonePermission = async () => {
+  try {
+    const permissionStatus = await navigator.permissions.query({ name: 'microphone' })
+    hasPermission.value = permissionStatus.state === 'granted'
+    
+    permissionStatus.onchange = () => {
+      hasPermission.value = permissionStatus.state === 'granted'
+    }
+  } catch (error) {
+    console.log('无法检查麦克风权限状态:', error)
+  }
+}
+
+// 组件挂载时检查权限
+onMounted(() => {
+  checkMicrophonePermission()
+})
+
 // 鼠标按下 - 开始录音
 const handleMouseDown = (e) => {
+  if (!hasPermission.value) {
+    ElMessage.warning({
+      message: '请允许浏览器访问麦克风权限。在浏览器地址栏点击🔒图标，选择"允许"麦克风权限。',
+      duration: 6000,
+      showClose: true
+    })
+    return
+  }
+  
   startY.value = e.clientY
   isCancelled.value = false
   showPreview.value = false
   startRecording()
 }
 
-// 鼠标松开 - 停止录音并发送
+// 鼠标松开 - 停止录音
 const handleMouseUp = () => {
-  if (isCancelled.value) {
-    // 如果已取消，显示预览
+  if (isRecording.value) {
     stopRecording()
     showPreview.value = true
-  } else {
-    // 正常松开，直接发送
-    stopRecordingAndSend()
   }
 }
 
-// 鼠标离开 - 取消发送
+// 鼠标离开 - 取消录音
 const handleMouseLeave = () => {
   if (isRecording.value) {
-    isCancelled.value = true
+    cancelRecording()
   }
 }
 
 // 触摸开始
 const handleTouchStart = (e) => {
+  if (!hasPermission.value) {
+    ElMessage.warning({
+      message: '请允许浏览器访问麦克风权限。在浏览器地址栏点击🔒图标，选择"允许"麦克风权限。',
+      duration: 6000,
+      showClose: true
+    })
+    return
+  }
+  
   startY.value = e.touches[0].clientY
   isCancelled.value = false
   showPreview.value = false
@@ -131,34 +166,12 @@ const handleTouchEnd = (e) => {
   
   // 上滑超过 50px 视为取消
   if (diffY > 50) {
-    isCancelled.value = true
-    stopRecording()
-    showPreview.value = true
+    cancelRecording()
   } else {
-    stopRecordingAndSend()
-  }
-}
-
-// 停止录音并自动发送
-const stopRecordingAndSend = () => {
-  if (mediaRecorder && isRecording.value) {
-    mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
-      audioUrl.value = URL.createObjectURL(audioBlob)
-      duration.value = recordingTime.value
-      recordingTime.value = 0
-      isRecording.value = false
-      clearInterval(recordingInterval)
-      
-      // 停止所有音频轨道
-      mediaRecorder.stream.getTracks().forEach(track => track.stop())
-      
-      // 自动发送
-      setTimeout(() => {
-        sendRecording()
-      }, 100)
+    if (isRecording.value) {
+      stopRecording()
+      showPreview.value = true
     }
-    mediaRecorder.stop()
   }
 }
 
@@ -187,6 +200,7 @@ const startRecording = async () => {
 
     mediaRecorder.start()
     isRecording.value = true
+    hasPermission.value = true // 录音成功，更新权限状态
 
     // 开始计时
     recordingInterval = setInterval(() => {
@@ -197,8 +211,23 @@ const startRecording = async () => {
       }
     }, 1000)
   } catch (error) {
-    ElMessage.error('无法访问麦克风，请检查权限设置')
-    console.error('录音失败:', error)
+    let errorMessage = '无法访问麦克风'
+    
+    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+      errorMessage = '麦克风权限被拒绝，请在浏览器设置中允许访问麦克风'
+      hasPermission.value = false
+    } else if (error.name === 'NotFoundError') {
+      errorMessage = '未检测到麦克风设备，请检查设备连接'
+    } else if (error.name === 'NotReadableError') {
+      errorMessage = '麦克风被其他应用占用，请关闭其他应用后重试'
+    }
+    
+    ElMessage.error({
+      message: errorMessage,
+      duration: 5000,
+      showClose: true
+    })
+    console.error('录音失败:', error.name, error.message)
   }
 }
 
@@ -364,6 +393,16 @@ defineExpose({
     transform: scale(0.98);
   }
 
+  &.no-permission {
+    background: #ff4d4f;
+    cursor: help;
+    
+    &:hover {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   .el-icon {
     font-size: 20px;
   }
@@ -375,15 +414,15 @@ defineExpose({
   align-items: center;
   gap: 12px;
   padding: 16px 24px;
-  background: rgba(255, 77, 79, 0.1);
+  background: rgba(22, 119, 255, 0.1);
   border-radius: 12px;
-  border: 2px dashed #ff4d4f;
+  border: 2px solid var(--dt-brand-color, #1677ff);
   animation: recording-pulse 1.5s ease-in-out infinite;
 
   .recording-hint {
     .hint-text {
       font-size: 13px;
-      color: #ff4d4f;
+      color: var(--dt-brand-color, #1677ff);
       font-weight: 500;
     }
   }
@@ -396,7 +435,7 @@ defineExpose({
     .wave {
       width: 4px;
       height: 16px;
-      background: #ff4d4f;
+      background: var(--dt-brand-color, #1677ff);
       border-radius: 2px;
       animation: wave 1.2s ease-in-out infinite;
 
@@ -413,7 +452,7 @@ defineExpose({
   .recording-time {
     font-size: 16px;
     font-weight: 600;
-    color: #ff4d4f;
+    color: var(--dt-brand-color, #1677ff);
     font-variant-numeric: tabular-nums;
   }
 
@@ -557,12 +596,12 @@ defineExpose({
 
 @keyframes recording-pulse {
   0%, 100% {
-    border-color: #ff4d4f;
-    background: rgba(255, 77, 79, 0.1);
+    border-color: var(--dt-brand-color, #1677ff);
+    background: rgba(22, 119, 255, 0.1);
   }
   50% {
-    border-color: #ff7875;
-    background: rgba(255, 77, 79, 0.15);
+    border-color: rgba(22, 119, 255, 0.7);
+    background: rgba(22, 119, 255, 0.15);
   }
 }
 </style>

@@ -205,6 +205,11 @@ const formattedTime = computed(() => {
   }
 }
 
+// 自己的消息：气泡右对齐，紧靠头像（钉钉风格）
+.is-own .content-wrapper {
+  align-items: flex-end;
+}
+
 .sender-name {
   font-size: 12px;
   color: var(--dt-text-secondary);

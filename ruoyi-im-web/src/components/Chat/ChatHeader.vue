@@ -100,13 +100,6 @@
               <span class="item-text">查看文件</span>
             </el-dropdown-item>
 
-            <!-- 消息速读 -->
-            <el-dropdown-item command="summary" class="menu-item">
-              <span class="material-icons-outlined item-icon">auto_awesome</span>
-              <span class="item-text">消息速读</span>
-              <span class="item-shortcut">Ctrl+S</span>
-            </el-dropdown-item>
-
             <!-- 群公告 -->
             <el-dropdown-item v-if="session?.type === 'GROUP'" command="announcement" class="menu-item">
               <span class="material-icons-outlined item-icon">campaign</span>
@@ -153,10 +146,12 @@
       @video-call="handleVideoCall"
     />
 
-    <!-- 消息速读弹窗 -->
-    <MessageSummary
-      v-model:visible="showSummary"
-      :session-id="session?.id"
+    <!-- 聊天内搜索 -->
+    <ChatSearch
+      v-model:visible="showSearch"
+      :messages="messages"
+      @select-message="handleSelectSearchResult"
+      @close="showSearch = false"
     />
   </div>
 </template>
@@ -167,7 +162,7 @@ import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import UserDetailDrawer from './UserDetailDrawer.vue'
-import MessageSummary from './MessageSummary.vue'
+import ChatSearch from './ChatSearch.vue'
 
 const props = defineProps({
   session: {
@@ -188,13 +183,13 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'toggle-pinned'])
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'toggle-pinned', 'scroll-to-message'])
 
 // 用户详情抽屉显示状态
 const showUserDetail = ref(false)
 
-// 消息速读弹窗显示状态
-const showSummary = ref(false)
+// 聊天内搜索显示状态
+const showSearch = ref(false)
 
 // 获取在线状态
 const store = useStore()
@@ -244,13 +239,10 @@ const handleMenuCommand = (command) => {
       emit('history', props.session)
       break
     case 'search':
-      emit('search', props.session)
+      showSearch.value = true
       break
     case 'files':
       emit('files', props.session)
-      break
-    case 'summary':
-      showSummary.value = true
       break
     case 'announcement':
       emit('announcement', props.session)
@@ -267,6 +259,11 @@ const handleMenuCommand = (command) => {
   }
 }
 
+// 处理搜索结果选择
+const handleSelectSearchResult = (messageId) => {
+  emit('scroll-to-message', messageId)
+}
+
 // 切换置顶消息面板
 const handleTogglePinned = () => {
   emit('toggle-pinned')
@@ -278,15 +275,15 @@ const menuPlacement = computed(() => {
   const viewportHeight = window.innerHeight
   const isSmallScreen = viewportWidth < 768
   const isShortScreen = viewportHeight < 600
-  
+
   if (isSmallScreen) {
     return 'bottom-start'
   }
-  
+
   if (isShortScreen) {
     return 'bottom-end'
   }
-  
+
   return 'bottom-end'
 })
 </script>

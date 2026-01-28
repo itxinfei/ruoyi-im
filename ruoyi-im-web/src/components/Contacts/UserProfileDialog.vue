@@ -121,17 +121,7 @@ const visible = ref(false)
 const loading = ref(false)
 const userDetail = ref(null)
 
-const windowWidth = ref(window.innerWidth)
-const isMobile = computed(() => windowWidth.value < 480)
-const dialogWidth = computed(() => {
-  if (windowWidth.value < 480) return '100%'
-  if (windowWidth.value < 768) return '360px'
-  return '400px'
-})
-
-const handleResize = () => windowWidth.value = window.innerWidth
-onMounted(() => window.addEventListener('resize', handleResize))
-onUnmounted(() => window.removeEventListener('resize', handleResize))
+const dialogWidth = computed(() => '400px')
 
 const handleClose = () => emit('update:modelValue', false)
 
@@ -197,7 +187,27 @@ watch(visible, (val) => {
 
 .user-profile-dialog {
   :deep(.el-dialog) {
-    border-radius: 12px;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: dialogFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    
+    .el-dialog__body {
+      padding: 0;
+    }
+  }
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
   }
   :deep(.el-dialog__header) {
     display: none;
@@ -235,28 +245,47 @@ watch(visible, (val) => {
 
 .close-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.03);
   border: none;
   color: var(--dt-text-secondary);
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
 
   svg {
     width: 18px;
     height: 18px;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &:hover {
-    background: var(--dt-bg-hover);
+    background: rgba(0, 0, 0, 0.08);
     color: var(--dt-text-primary);
+    transform: scale(1.05);
+    
+    svg {
+      transform: rotate(90deg);
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  .dark & {
+    background: rgba(255, 255, 255, 0.05);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 

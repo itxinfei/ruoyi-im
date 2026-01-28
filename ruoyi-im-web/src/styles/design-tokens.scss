@@ -48,9 +48,10 @@
   --dt-bg-mask: rgba(0, 0, 0, 0.6);
 
   // === DingTalk Special (钉钉特殊颜色) ===
-  --dt-bubble-left-bg: #ffffff;              // 接收消息背景
-  --dt-bubble-right-bg: #1677ff15;          // 发送消息背景（钉钉淡蓝）
-  --dt-bubble-right-bg-hover: #1677ff25;    // 发送消息悬停
+  --dt-bubble-left-bg: #FFFFFF;              // 接收消息背景（钉钉纯白）
+  --dt-bubble-left-border: #E4E7ED;          // 接收消息边框（钉钉浅灰）
+  --dt-bubble-right-bg: #E8F4FF;             // 发送消息背景（钉钉淡蓝）
+  --dt-bubble-right-bg-hover: #DBEEFF;       // 发送消息悬停（钉钉淡蓝加深）
   --dt-unread-color: #1677ff;
   --dt-read-color: #8c8c8c;
   --dt-mention-bg: rgba(22, 119, 255, 0.1);
@@ -209,33 +210,33 @@
   --dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   // ============================================================================
-  // 暗色模式变量 - 纯暗黑
+  // 暗色模式变量 - 现代暗色
   // ============================================================================
-  --dt-bg-body-dark: #000000;           // 主背景：纯黑
-  --dt-bg-sidebar-dark: #0a0a0a;        // 侧边栏：接近纯黑
-  --dt-bg-card-dark: #0a0a0a;           // 卡片背景
-  --dt-bg-input-dark: #141414;         // 输入框背景
-  --dt-bg-hover-dark: #1a1a1a;         // 悬停背景
-  --dt-bg-active-dark: rgba(22, 119, 255, 0.25);  // 激活状态
+  --dt-bg-body-dark: #0f172a;           // 主背景：Slate 900
+  --dt-bg-sidebar-dark: #1e293b;        // 侧边栏：Slate 800
+  --dt-bg-card-dark: #1e293b;           // 卡片背景：Slate 800
+  --dt-bg-input-dark: #334155;         // 输入框背景：Slate 700
+  --dt-bg-hover-dark: #334155;         // 悬停背景：Slate 700
+  --dt-bg-active-dark: rgba(22, 119, 255, 0.2);  // 激活状态
 
-  --dt-text-primary-dark: #ffffff;      // 主要文本：纯白色
-  --dt-text-secondary-dark: #e5e5e5;   // 次要文本：浅灰白
-  --dt-text-tertiary-dark: #a0a0a0;    // 辅助文本
-  --dt-text-quaternary-dark: #707070;  // 占位符文本
-  --dt-text-disabled-dark: #505050;    // 禁用文本
+  --dt-text-primary-dark: #f1f5f9;      // 主要文本：Slate 100
+  --dt-text-secondary-dark: #cbd5e1;   // 次要文本：Slate 300
+  --dt-text-tertiary-dark: #94a3b8;    // 辅助文本：Slate 400
+  --dt-text-quaternary-dark: #64748b;  // 占位符文本：Slate 500
+  --dt-text-disabled-dark: #475569;    // 禁用文本：Slate 600
 
-  --dt-border-dark: #2a2a2a;           // 边框颜色
-  --dt-border-light-dark: #1a1a1a;     // 浅色边框
+  --dt-border-dark: #334155;           // 边框颜色：Slate 700
+  --dt-border-light-dark: #1e293b;     // 浅色边框：Slate 800
 
   // Element Plus 暗色适配变量
-  --el-bg-color-dark: #0a0a0a;
-  --el-bg-color-overlay-dark: #000000;
-  --el-text-color-primary-dark: #ffffff;
-  --el-text-color-regular-dark: #e5e5e5;
-  --el-border-color-dark: #2a2a2a;
-  --el-border-color-light-dark: #1a1a1a;
-  --el-fill-color-blank-dark: #141414;
-  --el-fill-color-light-dark: #0a0a0a;
+  --el-bg-color-dark: #1e293b;
+  --el-bg-color-overlay-dark: #0f172a;
+  --el-text-color-primary-dark: #f1f5f9;
+  --el-text-color-regular-dark: #cbd5e1;
+  --el-border-color-dark: #334155;
+  --el-border-color-light-dark: #1e293b;
+  --el-fill-color-blank-dark: #334155;
+  --el-fill-color-light-dark: #1e293b;
 
   // ============================================================================
   // 语义化颜色变量 (用于组件)
@@ -272,9 +273,9 @@
   --dt-border-light: var(--dt-border-light-dark);
   --dt-border-input: var(--dt-border-dark);
 
-  --dt-bubble-left-bg: #1e293b;
-  --dt-bubble-right-bg: #0d4bd1;
-  --dt-bubble-right-bg-hover: #0c3f9f;
+  --dt-bubble-left-bg: #1e293b;              // 接收消息背景：Slate 800
+  --dt-bubble-right-bg: #2563eb;           // 发送消息背景：Blue 600
+  --dt-bubble-right-bg-hover: #1d4ed8;     // 发送消息悬停：Blue 700
 
   // Element Plus 变量映射
   --el-bg-color: var(--el-bg-color-dark);
@@ -301,25 +302,6 @@
   // 布局响应式调整
   --dt-responsive-sidebar-width: var(--dt-nav-sidebar-width);
   --dt-responsive-session-width: var(--dt-session-panel-width);
-}
-
-// 小屏幕适配（< 768px）
-@media (max-width: 768px) {
-  :root {
-    --dt-responsive-sidebar-width: 56px;
-    --dt-responsive-session-width: 100%;
-    --dt-session-panel-width: 100%;
-    --dt-contact-panel-width: 100%;
-  }
-}
-
-// 中等屏幕适配（768px - 1024px）
-@media (min-width: 768px) and (max-width: 1024px) {
-  :root {
-    --dt-responsive-sidebar-width: 64px;
-    --dt-session-panel-width: 240px;
-    --dt-contact-panel-width: 200px;
-  }
 }
 
 // ============================================================================

@@ -299,48 +299,59 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .classic-search-dialog {
-  // 核心修复：确保对话框及其遮罩层不会阻挡输入
   pointer-events: auto !important;
 
   :deep(.el-dialog) {
     padding: 0;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
     position: relative;
     z-index: 3000;
-    
-    // 移动端全屏优化
-    @media (max-width: 480px) {
-      border-radius: 0;
-      margin: 0 !important;
-      height: 100vh;
-      max-height: 100vh;
-    }
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: dialogFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     
     .el-dialog__header {
       margin: 0;
-      padding: 16px 20px;
-      background: #f8fafc;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border-bottom: 1px solid #e2e8f0;
-      .dark & { background: #1e293b; border-color: #334155; }
+      .dark & { 
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
+        border-color: #334155; 
+      }
       
       .el-dialog__title { 
-        font-size: 16px; 
+        font-size: 17px; 
         font-weight: 600;
-        color: #1e293b;
+        color: #0f172a;
+        letter-spacing: -0.01em;
         .dark & { color: #f1f5f9; }
       }
       
       .el-dialog__headerbtn {
-        top: 16px;
-        right: 20px;
+        top: 20px;
+        right: 24px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark &:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
         
         .el-dialog__close {
           color: #64748b;
           font-size: 18px;
+          transition: all 0.2s ease;
           
           &:hover {
-            color: #1e293b;
+            color: #0f172a;
+            transform: rotate(90deg);
             .dark & { color: #f1f5f9; }
           }
         }
@@ -353,26 +364,23 @@ onMounted(() => {
   }
 }
 
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .classic-container {
   display: flex;
   flex-direction: column;
   height: 620px;
   background: #fff;
   .dark & { background: #0f172a; }
-  
-  // 移动端适配
-  @media (max-width: 576px) {
-    height: 80vh;
-  }
-  
-  @media (max-width: 768px) {
-    height: 85vh;
-  }
-  
-  @media (max-width: 480px) {
-    height: 100vh;
-    max-height: 100vh;
-  }
 }
 
 .classic-search-bar {
@@ -455,10 +463,6 @@ onMounted(() => {
   flex-shrink: 0;
   transition: width 0.3s ease;
   .dark & { background: #1e293b; border-color: #334155; }
-  
-  @media (max-width: 768px) {
-    width: 120px;
-  }
 
   .cat-tab {
     padding: 12px 16px;
@@ -503,34 +507,6 @@ onMounted(() => {
       .dark & { background: #334155; color: #cbd5e1; }
     }
   }
-  
-  // 移动端适配
-  @media (max-width: 768px) {
-    width: 100px;
-    
-    .cat-tab {
-      padding: 10px 8px;
-      font-size: 12px;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 60px;
-      
-      .label {
-        font-size: 11px;
-        margin-bottom: 2px;
-        text-align: center;
-      }
-      
-      .count-badge {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        font-size: 10px;
-        padding: 1px 4px;
-      }
-    }
-  }
 }
 
 .classic-main {
@@ -569,11 +545,6 @@ onMounted(() => {
       padding: 4px;
       border-radius: 4px;
       transition: all 0.2s ease;
-      
-      // 移动端始终显示
-      @media (max-width: 768px) {
-        opacity: 1;
-      }
       
       &:hover { 
         background: rgba(239, 68, 68, 0.1);
@@ -666,18 +637,6 @@ onMounted(() => {
          }
        }
      }
-     
-     // 移动端优化
-     @media (max-width: 768px) {
-       .result-row {
-         padding: 12px 16px;
-         
-         &:active {
-           background: #e2e8f0;
-           transform: scale(0.98);
-         }
-       }
-     }
   }
 }
 
@@ -714,16 +673,6 @@ onMounted(() => {
       border-color: #334155;
       color: #cbd5e1;
     }
-  }
-  
-  // 移动端隐藏快捷键提示
-  @media (max-width: 768px) {
-    .flex:first-child {
-      display: none;
-    }
-    
-    padding: 8px 16px;
-    justify-content: center;
   }
 }
 

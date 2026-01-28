@@ -234,11 +234,6 @@ function handleOpenSearch() {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 24px rgba(0, 0, 0, 0.12);
   animation: slideInLeft 0.4s var(--dt-ease-out);
   overflow: hidden;
-  
-  // 移动端优化
-  @media (max-width: 768px) {
-    width: 64px;
-  }
 }
 
 .bg-nav-light {
@@ -360,12 +355,6 @@ function handleOpenSearch() {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: rgba(255, 255, 255, 0.85);
   animation: fadeInUp 0.4s var(--dt-ease-out) both;
-  
-  // 移动端优化
-  @media (max-width: 768px) {
-    width: 44px;
-    height: 44px;
-  }
 
   @for $i from 1 through 9 {
     &:nth-child(#{$i}) {
@@ -464,12 +453,6 @@ function handleOpenSearch() {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: rgba(255, 255, 255, 0.65);
   position: relative;
-  
-  // 移动端优化
-  @media (max-width: 768px) {
-    width: 44px;
-    height: 44px;
-  }
 }
 
 .nav-item-action:hover {
@@ -520,12 +503,6 @@ function handleOpenSearch() {
   align-items: center;
   justify-content: center;
   animation: fadeInUp 0.6s var(--dt-ease-bounce) both;
-  
-  // 移动端优化
-  @media (max-width: 768px) {
-    width: 48px;
-    height: 48px;
-  }
 }
 
 .nav-avatar:hover {

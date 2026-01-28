@@ -166,7 +166,7 @@
 import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import { getGroupInfo, getGroupMembers } from '@/api/im/group'
+import { getGroup, getGroupMembers } from '@/api/im/group'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -199,7 +199,7 @@ const loadGroupInfo = async () => {
   loading.value = true
   try {
     const [infoRes, membersRes] = await Promise.all([
-      getGroupInfo(props.groupId),
+      getGroup(props.groupId),
       getGroupMembers(props.groupId)
     ])
 

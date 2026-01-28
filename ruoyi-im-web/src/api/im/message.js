@@ -290,3 +290,15 @@ export function getPinnedMessages(conversationId) {
     method: 'get'
   })
 }
+
+/**
+ * 清空会话聊天记录
+ * @param {number} conversationId - 会话ID
+ * @returns {Promise}
+ */
+export function clearConversationMessages(conversationId) {
+  return request({
+    url: `/api/im/message/clear/${conversationId}`,
+    method: 'delete'
+  })
+}

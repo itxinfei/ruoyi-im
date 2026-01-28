@@ -353,4 +353,10 @@
             GROUP BY conversation_id
         )
     </select>
+
+    <!-- 删除会话的所有消息 -->
+    <delete id="deleteByConversationId">
+        DELETE FROM im_message
+        WHERE conversation_id = #{conversationId}
+    </delete>
 </mapper>

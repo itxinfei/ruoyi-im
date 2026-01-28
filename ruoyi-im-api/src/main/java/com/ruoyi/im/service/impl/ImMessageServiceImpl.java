@@ -964,4 +964,19 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         return stats;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void clearConversationMessages(Long conversationId, Long userId) {
+        // 验证用户是否有权限访问该会话
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (member == null) {
+            throw new BusinessException("NO_PERMISSION", "无权限访问该会话");
+        }
+
+        // 删除该会话的所有消息
+        imMessageMapper.deleteByConversationId(conversationId);
+
+        log.info("用户清空会话聊天记录: conversationId={}, userId={}", conversationId, userId);
+    }
 }

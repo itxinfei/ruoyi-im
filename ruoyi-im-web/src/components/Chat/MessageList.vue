@@ -318,8 +318,12 @@ const formatTimeDivider = (timestamp) => {
 // 1. 同一发送者
 // 2. 时间间隔小于 2 分钟
 // 3. 非特殊消息类型（如撤回消息、系统消息等）
+// 4. 自己的消息不合并，始终显示头像
 const canMergeWith = (currentMsg, prevMsg) => {
   if (!prevMsg) return false
+
+  // 自己的消息不合并，始终显示头像
+  if (currentMsg.isOwn) return false
 
   // 必须是同一发送者
   if (currentMsg.senderId !== prevMsg.senderId) return false
@@ -1030,5 +1034,23 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 :global(.dark) .read-receipt-popover {
   background: #1e293b !important;
   border-color: #334155 !important;
+}
+
+// ============================================================================
+// 搜索结果高亮动画
+// ============================================================================
+:deep(.highlight-msg-active) {
+  animation: messageHighlight 2s ease-out;
+}
+
+@keyframes messageHighlight {
+  0% {
+    background-color: rgba(22, 119, 255, 0.2);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
 }
 </style>

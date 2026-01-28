@@ -30,21 +30,44 @@
             <el-button link @click="showAllMembers = true">查看全部</el-button>
           </div>
           <div class="members-grid">
-            <div 
-              v-for="m in members.slice(0, 7)" 
-              :key="m.id" 
-              class="member-item" 
-              @click="$emit('member-click', m)"
+            <el-dropdown
+              v-for="m in members.slice(0, 7)"
+              :key="m.id"
+              trigger="click"
+              placement="right-start"
+              @command="handleMemberCommand"
             >
-              <DingtalkAvatar 
-                :name="m.name" 
-                :user-id="m.id" 
-                :src="addTokenToUrl(m.avatar)" 
-                :size="36" 
-                shape="square" 
-              />
-              <span class="m-name">{{ m.name }}</span>
-            </div>
+              <div class="member-item">
+                <DingtalkAvatar
+                  :name="m.name"
+                  :user-id="m.id"
+                  :src="addTokenToUrl(m.avatar)"
+                  :size="36"
+                  shape="square"
+                />
+                <span class="m-name">{{ m.name }}</span>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item :command="{ action: 'chat', member: m }">
+                    <span class="material-icons-outlined menu-icon">chat_bubble</span>
+                    发消息
+                  </el-dropdown-item>
+                  <el-dropdown-item :command="{ action: 'mention', member: m }">
+                    <span class="material-icons-outlined menu-icon">alternate_email</span>
+                    @提及
+                  </el-dropdown-item>
+                  <el-dropdown-item :command="{ action: 'profile', member: m }">
+                    <span class="material-icons-outlined menu-icon">person</span>
+                    查看资料
+                  </el-dropdown-item>
+                  <el-dropdown-item divided :command="{ action: 'remove', member: m }" v-if="canManageMember">
+                    <span class="material-icons-outlined menu-icon remove">person_remove</span>
+                    移除出群
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <div class="member-item add-btn" @click="handleAddMember">
               <div class="add-icon"><el-icon><Plus /></el-icon></div>
               <span class="m-name">添加</span>
@@ -126,19 +149,23 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Close, Plus } from '@element-plus/icons-vue'
+import { useStore } from 'vuex'
 import { getGroup, getGroupMembers, leaveGroup } from '@/api/im/group'
 import { getUserInfo } from '@/api/im/user'
 import { addTokenToUrl } from '@/utils/file'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+const store = useStore()
+const currentUser = computed(() => store.getters['user/currentUser'])
+
 const props = defineProps({
   session: { type: Object, required: true }
 })
 
-const emit = defineEmits(['close', 'member-click', 'start-chat'])
+const emit = defineEmits(['close', 'member-click', 'start-chat', 'mention-member', 'show-profile'])
 
 const loading = ref(false)
 const detail = ref(null)
@@ -146,6 +173,13 @@ const members = ref([])
 const showAllMembers = ref(false)
 
 const isGroup = computed(() => props.session?.type === 'GROUP')
+
+// 判断是否有管理成员的权限（群主或管理员）
+const canManageMember = computed(() => {
+  if (!detail.value || !currentUser.value) return false
+  const memberRole = props.session?.memberRole
+  return memberRole === 'OWNER' || memberRole === 'ADMIN'
+})
 
 const loadDetail = async () => {
   if (!props.session?.id) return
@@ -178,6 +212,45 @@ const loadDetail = async () => {
 }
 
 const handleAddMember = () => ElMessage.info('邀请功能开发中...')
+
+// 处理成员菜单命令
+const handleMemberCommand = (command) => {
+  const { action, member } = command
+  switch (action) {
+    case 'chat':
+      // 发起私聊
+      emit('member-click', member)
+      break
+    case 'mention':
+      // @提及成员
+      emit('mention-member', member)
+      break
+    case 'profile':
+      // 查看成员资料
+      emit('show-profile', member)
+      break
+    case 'remove':
+      // 移除出群
+      handleRemoveMember(member)
+      break
+  }
+}
+
+// 移除群成员
+const handleRemoveMember = async (member) => {
+  try {
+    await ElMessageBox.confirm(`确定将 ${member.name} 移除出群吗？`, '移除成员', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
+    })
+    // TODO: 调用移除成员 API
+    ElMessage.info('移除功能开发中...')
+  } catch {
+    // 用户取消
+  }
+}
+
 const handleLeave = async () => {
   try {
     await ElMessageBox.confirm('确定退出群组吗？', '提示', { type: 'warning' })
@@ -230,15 +303,27 @@ watch(() => props.session?.id, () => {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
   .member-item {
     display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
+    padding: 4px; border-radius: 6px; transition: background-color 0.2s;
+    &:hover { background: var(--dt-bg-hover, #f5f5f5); }
     .m-name { font-size: 11px; color: #646a73; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     &.add-btn {
-      .add-icon { 
+      .add-icon {
         width: 36px; height: 36px; border: 1px dashed #d9d9d9; border-radius: 4px;
         display: flex; align-items: center; justify-content: center; color: #8f959e;
         &:hover { border-color: #1677ff; color: #1677ff; }
       }
     }
   }
+}
+
+// 菜单图标样式
+:deep(.el-dropdown-menu__item) {
+  display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+  .menu-icon {
+    font-size: 18px; color: #646a73;
+    &.remove { color: #ff4d4f; }
+  }
+  &:hover .menu-icon { color: #1677ff; }
 }
 
 .announcement-card {
