@@ -38,9 +38,6 @@
       </div>
 
       <div class="content-wrapper" :class="{ 'is-merged': message.isMerged }">
-        <!-- 发送者姓名 - 合并状态下隐藏 -->
-        <div v-if="!message.isOwn && !message.isMerged" class="sender-name">{{ message.senderName }}</div>
-
         <div class="message-content-main">
           <!-- 消息气泡内容插槽 -->
           <slot name="bubble"></slot>
@@ -115,7 +112,15 @@ const formattedTime = computed(() => {
     flex-direction: row-reverse;
   }
 
+  // 对方的消息：头像和气泡顶部对齐（钉钉风格）
+  &:not(.is-own) {
+    align-items: flex-start;
+  }
 
+  // 自己的消息：头像和气泡顶部对齐
+  &.is-own {
+    align-items: flex-start;
+  }
 }
 
 .time-divider {
@@ -198,11 +203,17 @@ const formattedTime = computed(() => {
   max-width: 85%;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
 
   // 合并状态：减少上边距让气泡更紧凑
   &.is-merged {
     margin-top: -8px;
   }
+}
+
+// 对方的消息：气泡顶部与头像顶部对齐（钉钉风格）
+.message-item:not(.is-own) .content-wrapper {
+  align-items: flex-start;
 }
 
 // 自己的消息：气泡右对齐，紧靠头像（钉钉风格）

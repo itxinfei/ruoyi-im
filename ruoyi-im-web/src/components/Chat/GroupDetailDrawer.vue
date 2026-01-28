@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     v-model="visible"
-    :size="isMobile ? '100%' : '420px'"
+    size="420px"
     direction="rtl"
     class="group-detail-drawer"
     :with-header="false"
@@ -64,41 +64,13 @@
           <span class="action-label">成员</span>
         </button>
 
-        <button class="action-card" @click="toggleMoreActions">
-          <div class="action-icon">
-            <span class="material-icons-outlined">more_horiz</span>
+        <button class="action-card" @click="handleFiles">
+          <div class="action-icon files">
+            <span class="material-icons-outlined">folder_open</span>
           </div>
-          <span class="action-label">更多</span>
+          <span class="action-label">文件</span>
         </button>
       </div>
-
-      <!-- 更多操作面板 -->
-      <transition name="expand">
-        <div v-if="showMoreActions" class="more-actions-panel">
-          <div class="more-action-item" @click="handleToggleMute">
-            <span class="material-icons-outlined action-icon">
-              {{ groupInfo.isMuted ? 'notifications' : 'notifications_off' }}
-            </span>
-            <span>{{ groupInfo.isMuted ? '取消免打扰' : '消息免打扰' }}</span>
-          </div>
-          <div class="more-action-item" @click="handlePin">
-            <span class="material-icons-outlined action-icon">push_pin</span>
-            <span>{{ groupInfo.isPinned ? '取消置顶' : '置顶会话' }}</span>
-          </div>
-          <div class="more-action-item" @click="handleFiles">
-            <span class="material-icons-outlined action-icon">folder_open</span>
-            <span>查看文件</span>
-          </div>
-          <div v-if="isOwnerOrAdmin" class="more-action-item" @click="handleSettings">
-            <span class="material-icons-outlined action-icon">settings</span>
-            <span>群设置</span>
-          </div>
-          <div class="more-action-item danger" @click="handleExitGroup">
-            <span class="material-icons-outlined action-icon">exit_to_app</span>
-            <span>退出群聊</span>
-          </div>
-        </div>
-      </transition>
 
       <!-- 群公告区域 -->
       <div v-if="groupInfo.announcement" class="announcement-section">
@@ -148,6 +120,28 @@
         </div>
       </div>
 
+      <!-- 更多操作 -->
+      <div class="more-actions">
+        <button class="more-action-item" @click="handleToggleMute">
+          <span class="material-icons-outlined action-icon">
+            {{ groupInfo.isMuted ? 'notifications' : 'notifications_off' }}
+          </span>
+          <span>{{ groupInfo.isMuted ? '取消免打扰' : '消息免打扰' }}</span>
+        </button>
+        <button class="more-action-item" @click="handlePin">
+          <span class="material-icons-outlined action-icon">push_pin</span>
+          <span>{{ groupInfo.isPinned ? '取消置顶' : '置顶会话' }}</span>
+        </button>
+        <button v-if="isOwnerOrAdmin" class="more-action-item" @click="handleSettings">
+          <span class="material-icons-outlined action-icon">settings</span>
+          <span>群设置</span>
+        </button>
+        <button class="more-action-item danger" @click="handleExitGroup">
+          <span class="material-icons-outlined action-icon">exit_to_app</span>
+          <span>退出群聊</span>
+        </button>
+      </div>
+
       <!-- 安全提示 -->
       <div class="security-footer">
         <span class="material-icons-outlined security-icon">verified_user</span>
@@ -182,11 +176,7 @@ const visible = computed({
 
 const groupInfo = ref(null)
 const loading = ref(false)
-const showMoreActions = ref(false)
 const displayMembers = ref([])
-
-// 响应式检测
-const isMobile = computed(() => window.innerWidth < 768)
 
 // 是否是群主或管理员
 const isOwnerOrAdmin = computed(() => {
@@ -212,7 +202,6 @@ const loadGroupInfo = async () => {
     }
 
     if (membersRes.code === 200) {
-      // 显示前8个成员
       displayMembers.value = membersRes.data.slice(0, 8)
       if (groupInfo.value) {
         groupInfo.value.memberCount = membersRes.data.length
@@ -241,14 +230,12 @@ const formatTime = (timestamp) => {
 
 watch(() => props.modelValue, (isOpen) => {
   if (isOpen) {
-    showMoreActions.value = false
     loadGroupInfo()
   }
 })
 
 const handleClose = () => {
   visible.value = false
-  showMoreActions.value = false
 }
 
 const handleSendMessage = () => {
@@ -264,8 +251,8 @@ const handleMembers = () => {
   emit('members', groupInfo.value)
 }
 
-const toggleMoreActions = () => {
-  showMoreActions.value = !showMoreActions.value
+const handleFiles = () => {
+  ElMessage.info('文件功能开发中')
 }
 
 const handleToggleMute = async () => {
@@ -288,10 +275,6 @@ const handlePin = async () => {
   } catch (error) {
     ElMessage.error('操作失败')
   }
-}
-
-const handleFiles = () => {
-  ElMessage.info('文件功能开发中')
 }
 
 const handleSettings = () => {
@@ -320,6 +303,9 @@ const handleMemberClick = (member) => {
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
 
+// ============================================================================
+// 抽屉基础样式
+// ============================================================================
 :deep(.group-detail-drawer) {
   .el-drawer__body {
     padding: 0;
@@ -505,6 +491,11 @@ const handleMemberClick = (member) => {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
       }
+
+      &.files {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+      }
     }
 
     .action-label {
@@ -518,63 +509,6 @@ const handleMemberClick = (member) => {
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
   }
-}
-
-// 更多操作面板
-.more-actions-panel {
-  padding: 0 24px 20px;
-  margin-top: -8px;
-
-  .more-action-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: var(--dt-bg-body);
-    border: 1px solid var(--dt-border-light);
-    border-radius: 12px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 14px;
-    color: var(--dt-text-primary);
-
-    .action-icon {
-      font-size: 20px;
-      color: var(--dt-text-secondary);
-    }
-
-    &:hover {
-      background: var(--dt-brand-bg);
-      border-color: var(--dt-brand-color);
-
-      .action-icon {
-        color: var(--dt-brand-color);
-      }
-    }
-
-    &.danger:hover {
-      background: var(--dt-error-bg);
-      border-color: var(--dt-error-color);
-
-      .action-icon {
-        color: var(--dt-error-color);
-      }
-    }
-  }
-}
-
-.expand-enter-active,
-.expand-leave-active {
-  transition: all 0.3s ease;
-  max-height: 300px;
-  overflow: hidden;
-}
-
-.expand-enter-from,
-.expand-leave-to {
-  max-height: 0;
-  opacity: 0;
 }
 
 // 内容区域滚动
@@ -699,6 +633,51 @@ const handleMemberClick = (member) => {
   }
 }
 
+// 更多操作
+.more-actions {
+  padding: 16px 24px;
+  border-top: 1px solid var(--dt-border-light);
+
+  .more-action-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-size: 14px;
+    color: var(--dt-text-primary);
+    margin-bottom: 4px;
+
+    .action-icon {
+      font-size: 20px;
+      color: var(--dt-text-secondary);
+    }
+
+    &:hover {
+      background: var(--dt-bg-hover);
+
+      .action-icon {
+        color: var(--dt-brand-color);
+      }
+    }
+
+    &.danger:hover {
+      background: var(--dt-error-bg);
+      color: var(--dt-error-color);
+
+      .action-icon {
+        color: var(--dt-error-color);
+      }
+    }
+  }
+}
+
 // 底部安全提示
 .security-footer {
   display: flex;
@@ -721,26 +700,5 @@ const handleMemberClick = (member) => {
 // 加载状态
 .profile-loading {
   padding: 24px;
-}
-
-// 响应式
-@media (max-width: 768px) {
-  .action-grid {
-    gap: 8px;
-    padding: 0 16px 16px;
-
-    .action-card {
-      padding: 12px 4px;
-
-      .action-icon {
-        width: 40px;
-        height: 40px;
-      }
-
-      .action-label {
-        font-size: 11px;
-      }
-    }
-  }
 }
 </style>

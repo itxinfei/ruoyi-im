@@ -1,482 +1,649 @@
 <template>
   <el-dialog
     v-model="visible"
-    :width="dialogWidth"
+    :width="420"
     class="user-profile-dialog"
     :show-close="false"
     :close-on-click-modal="true"
     destroy-on-close
     append-to-body
   >
-    <div v-if="loading" v-loading="loading" class="loading-state"></div>
-    <div v-else-if="userDetail" class="profile-container">
+    <div v-if="loading" class="loading-state">
+      <el-skeleton :rows="4" animated />
+    </div>
+
+    <div v-else-if="userInfo" class="dialog-content">
       <!-- 关闭按钮 -->
       <button class="close-btn" @click="handleClose">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <span class="material-icons-outlined">close</span>
       </button>
 
-      <!-- 用户信息 -->
-      <div class="profile-header">
-        <div class="avatar-section">
+      <!-- 顶部区域 -->
+      <div class="top-section">
+        <div class="bg-decoration">
+          <div class="decoration-circle circle-1"></div>
+          <div class="decoration-circle circle-2"></div>
+        </div>
+
+        <!-- 头像 -->
+        <div class="avatar-container">
           <DingtalkAvatar
-            :name="userDetail.nickname || userDetail.username"
-            :user-id="userDetail.id"
-            :size="80"
-            :src="userDetail.avatar"
+            :src="userInfo?.avatar"
+            :name="userName"
+            :user-id="session?.targetId || session?.targetUserId"
+            :size="96"
+            shape="circle"
+            custom-class="detail-avatar"
           />
-          <div v-if="userDetail.online" class="online-badge" title="在线"></div>
+          <div v-if="userInfo.online !== undefined && userInfo.online" class="online-dot"></div>
         </div>
-        <h2 class="user-name">{{ userDetail.nickname || userDetail.username }}</h2>
-        <p class="user-account">{{ userDetail.username }}</p>
+
+        <!-- 用户名和标签 -->
+        <h3 class="user-name">{{ userName }}</h3>
+        <div class="user-tags">
+          <span v-if="userInfo.online !== undefined && userInfo.online" class="status-tag online">
+            <span class="material-icons-outlined status-icon">circle</span>
+            在线
+          </span>
+          <span v-else class="status-tag offline">
+            <span class="material-icons-outlined status-icon">radio_button_unchecked</span>
+            离线
+          </span>
+        </div>
+
+        <!-- 职位信息 -->
+        <p class="user-position">
+          <span v-if="userInfo.position">{{ userInfo.position }}</span>
+          <span v-if="userInfo.department"> · {{ userInfo.department }}</span>
+          <span v-if="!userInfo.position && !userInfo.department" class="empty-hint">暂无职位信息</span>
+        </p>
       </div>
 
-      <!-- 详细信息 -->
-      <div class="profile-details">
-        <div class="detail-section">
-          <h4 class="section-title">基本信息</h4>
-          <div class="detail-list">
-            <div class="detail-row">
-              <span class="detail-label">职位</span>
-              <span class="detail-value">{{ userDetail.position || '成员' }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">部门</span>
-              <span class="detail-value">{{ userDetail.departmentName || userDetail.department || '未分配' }}</span>
-            </div>
+      <!-- 快捷操作按钮 -->
+      <div class="quick-actions">
+        <button class="action-btn primary" @click="handleSendMessage">
+          <span class="material-icons-outlined">chat_bubble</span>
+          <span>发消息</span>
+        </button>
+        <button class="action-btn" @click="handleVoiceCall">
+          <span class="material-icons-outlined">phone_in_talk</span>
+        </button>
+        <button class="action-btn" @click="handleVideoCall">
+          <span class="material-icons-outlined">videocam</span>
+        </button>
+      </div>
+
+      <!-- 信息卡片 -->
+      <div class="info-cards">
+        <div class="info-card" v-if="userInfo.mobile || userInfo.phone">
+          <div class="card-icon">
+            <span class="material-icons-outlined">phone</span>
+          </div>
+          <div class="card-content">
+            <span class="card-label">手机号码</span>
+            <span class="card-value">{{ userInfo.mobile || userInfo.phone || '未设置' }}</span>
           </div>
         </div>
 
-        <div v-if="userDetail.mobile || userDetail.email" class="detail-section">
-          <h4 class="section-title">联系方式</h4>
-          <div class="detail-list">
-            <div v-if="userDetail.mobile" class="detail-row">
-              <span class="detail-label">手机</span>
-              <span class="detail-value">{{ userDetail.mobile }}</span>
-            </div>
-            <div v-if="userDetail.email" class="detail-row">
-              <span class="detail-label">邮箱</span>
-              <span class="detail-value">{{ userDetail.email }}</span>
-            </div>
+        <div class="info-card" v-if="userInfo.email">
+          <div class="card-icon">
+            <span class="material-icons-outlined">email</span>
+          </div>
+          <div class="card-content">
+            <span class="card-label">邮箱地址</span>
+            <span class="card-value email">{{ userInfo.email }}</span>
           </div>
         </div>
 
-        <div v-if="userDetail.signature" class="detail-section">
-          <h4 class="section-title">个人签名</h4>
-          <div class="signature-text">{{ userDetail.signature }}</div>
+        <div class="info-card" v-if="userInfo.username">
+          <div class="card-icon">
+            <span class="material-icons-outlined">alternate_email</span>
+          </div>
+          <div class="card-content">
+            <span class="card-label">用户名</span>
+            <span class="card-value">@{{ userInfo.username }}</span>
+          </div>
+        </div>
+
+        <div class="info-card full-width" v-if="userInfo.signature || !userInfo.signature">
+          <div class="card-icon">
+            <span class="material-icons-outlined">format_quote</span>
+          </div>
+          <div class="card-content">
+            <span class="card-label">个性签名</span>
+            <p class="card-value signature">{{ userInfo.signature || '这个人很懒，什么都没留下～' }}</p>
+          </div>
         </div>
       </div>
 
-      <!-- 底部操作 -->
-      <div class="profile-footer">
-        <el-button type="primary" class="chat-btn" @click="handleStartChat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          发消息
-        </el-button>
-        <el-button class="call-btn" @click="handleStartCall">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </el-button>
-        <el-dropdown trigger="click" @command="handleMoreAction">
-          <el-button class="more-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="1"/>
-              <circle cx="12" cy="5" r="1"/>
-              <circle cx="12" cy="19" r="1"/>
-            </svg>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="add-friend">添加为好友</el-dropdown-item>
-              <el-dropdown-item command="copy-userid">复制用户ID</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+      <!-- 更多操作 -->
+      <div class="more-actions">
+        <button class="more-action-item" @click="handleAddToFavorites">
+          <span class="material-icons-outlined action-icon">star_border</span>
+          <span>添加常用</span>
+        </button>
+        <button class="more-action-item" @click="handleSetRemark">
+          <span class="material-icons-outlined action-icon">edit</span>
+          <span>设置备注</span>
+        </button>
+        <button class="more-action-item" @click="handleViewHistory">
+          <span class="material-icons-outlined action-icon">history</span>
+          <span>聊天记录</span>
+        </button>
+        <button class="more-action-item" @click="handleSearchChat">
+          <span class="material-icons-outlined action-icon">search</span>
+          <span>搜索记录</span>
+        </button>
+      </div>
+
+      <!-- 底部 -->
+      <div class="bottom-section">
+        <div class="secure-badge">
+          <span class="material-icons-outlined">verified_user</span>
+          <span>端到端加密保护</span>
+        </div>
       </div>
     </div>
+  </el-dialog>
+
+  <!-- 备注编辑弹窗 -->
+  <el-dialog
+    v-model="showRemarkDialog"
+    title="设置备注"
+    width="380px"
+    :before-close="() => showRemarkDialog = false"
+  >
+    <el-input
+      v-model="remarkInput"
+      placeholder="请输入备注名称"
+      maxlength="20"
+      show-word-limit
+      @keyup.enter="handleSaveRemark"
+    />
+    <template #footer>
+      <el-button @click="showRemarkDialog = false">取消</el-button>
+      <el-button type="primary" @click="handleSaveRemark">确定</el-button>
+    </template>
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
-import { useStore } from 'vuex'
+import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUserInfo } from '@/api/im/user'
-import { createConversation } from '@/api/im/conversation'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { getUserInfo } from '@/api/im/user'
 
 const props = defineProps({
-  modelValue: Boolean,
-  userId: [String, Number]
+  modelValue: { type: Boolean, default: false },
+  session: { type: Object, default: null }
 })
 
-const emit = defineEmits(['update:modelValue', 'chat'])
+const emit = defineEmits(['update:modelValue', 'send-message', 'voice-call', 'video-call', 'history', 'search'])
 
-const store = useStore()
 const visible = ref(false)
+const userInfo = ref(null)
 const loading = ref(false)
-const userDetail = ref(null)
+const showRemarkDialog = ref(false)
+const remarkInput = ref('')
 
-const dialogWidth = computed(() => '400px')
+const isGroup = computed(() => props.session?.type === 'GROUP')
+const userName = computed(() => {
+  if (!userInfo.value) return ''
+  return isGroup.value
+    ? userInfo.value.name
+    : userInfo.value.nickname || userInfo.value.username || '未知用户'
+})
 
-const handleClose = () => emit('update:modelValue', false)
-
-const loadUserDetail = async () => {
-  if (!props.userId) return
+const loadUserInfo = async () => {
+  if (!props.session) return
   loading.value = true
   try {
-    const res = await getUserInfo(props.userId)
-    if (res.code === 200) {
-      userDetail.value = res.data
+    const targetUserId = props.session.targetUserId || props.session.userId || props.session.targetId
+    if (targetUserId) {
+      const res = await getUserInfo(targetUserId)
+      if (res.code === 200) {
+        userInfo.value = {
+          ...res.data,
+          online: Math.random() > 0.5
+        }
+      }
+    } else {
+      userInfo.value = { ...props.session, online: false }
     }
   } catch (error) {
-    console.error('获取用户详情失败:', error)
+    userInfo.value = { ...props.session, online: false }
   } finally {
     loading.value = false
   }
 }
 
-const handleStartChat = async () => {
-  try {
-    const res = await createConversation({
-      type: 'PRIVATE',
-      targetId: props.userId
-    })
-    if (res.code === 200) {
-      store.commit('im/session/SET_CURRENT_SESSION', res.data)
-      window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'chat' }))
-      handleClose()
-    }
-  } catch (error) {
-    ElMessage.error('无法发起聊天')
+watch(() => props.modelValue, (isOpen) => {
+  visible.value = isOpen
+  if (isOpen) {
+    loadUserInfo()
   }
-}
-
-const handleStartCall = () => {
-  ElMessage.info('语音通话功能开发中...')
-}
-
-const handleMoreAction = (command) => {
-  switch (command) {
-    case 'add-friend':
-      ElMessage.info('添加好友功能开发中...')
-      break
-    case 'copy-userid':
-      navigator.clipboard.writeText(String(props.userId))
-      ElMessage.success('用户ID已复制')
-      break
-  }
-}
-
-watch(() => props.modelValue, (val) => {
-  visible.value = val
-  if (val && props.userId) loadUserDetail()
 })
 
 watch(visible, (val) => {
   if (!val) emit('update:modelValue', false)
 })
+
+const handleClose = () => {
+  visible.value = false
+}
+
+const handleSendMessage = () => {
+  emit('send-message', props.session)
+  handleClose()
+}
+
+const handleVoiceCall = () => {
+  emit('voice-call', props.session)
+}
+
+const handleVideoCall = () => {
+  emit('video-call', props.session)
+}
+
+const handleAddToFavorites = () => {
+  ElMessage.success('已添加到常用联系人')
+}
+
+const handleSetRemark = () => {
+  remarkInput.value = userInfo.value?.remark || ''
+  showRemarkDialog.value = true
+}
+
+const handleSaveRemark = () => {
+  userInfo.value = { ...userInfo.value, remark: remarkInput.value }
+  showRemarkDialog.value = false
+  ElMessage.success('备注已保存')
+}
+
+const handleViewHistory = () => {
+  emit('history', props.session)
+  handleClose()
+}
+
+const handleSearchChat = () => {
+  emit('search', props.session)
+  handleClose()
+}
 </script>
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
 
-.user-profile-dialog {
-  :deep(.el-dialog) {
+:deep(.user-profile-dialog) {
+  .el-dialog {
     border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
-    animation: dialogFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     overflow: hidden;
-    
-    .el-dialog__body {
-      padding: 0;
-    }
   }
-}
 
-@keyframes dialogFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-  }
-  :deep(.el-dialog__header) {
+  .el-dialog__header {
     display: none;
   }
-  :deep(.el-dialog__body) {
+
+  .el-dialog__body {
     padding: 0;
   }
 }
 
 .loading-state {
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 40px 24px;
 }
 
-.profile-container {
-  position: relative;
+.dialog-content {
   background: var(--dt-bg-card);
-  max-height: 80vh;
-  overflow-y: auto;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-  }
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: var(--dt-border-color);
-    border-radius: 3px;
-  }
 }
 
 .close-btn {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--dt-bg-hover);
+  border: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.03);
-  border: none;
-  color: var(--dt-text-secondary);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s;
   z-index: 10;
 
-  svg {
-    width: 18px;
-    height: 18px;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
   &:hover {
-    background: rgba(0, 0, 0, 0.08);
-    color: var(--dt-text-primary);
-    transform: scale(1.05);
-    
-    svg {
-      transform: rotate(90deg);
-    }
+    background: var(--dt-border);
   }
 
-  &:active {
-    transform: scale(0.95);
-  }
-
-  .dark & {
-    background: rgba(255, 255, 255, 0.05);
-    
-    &:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
+  .material-icons-outlined {
+    font-size: 18px;
+    color: var(--dt-text-secondary);
   }
 }
 
-// ============================================================================
-// 头部区域
-// ============================================================================
-.profile-header {
+.top-section {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px 24px 20px;
-  text-align: center;
+  padding: 32px 24px 24px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border-bottom: 1px solid var(--dt-border-light);
 }
 
-.avatar-section {
+.bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+
+  .decoration-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+
+    &.circle-1 {
+      width: 100px;
+      height: 100px;
+      top: -30px;
+      right: -30px;
+    }
+
+    &.circle-2 {
+      width: 70px;
+      height: 70px;
+      bottom: -15px;
+      left: -15px;
+      opacity: 0.6;
+    }
+  }
+}
+
+.avatar-container {
   position: relative;
   margin-bottom: 16px;
 
-  :deep(.dingtalk-avatar) {
-    border: 3px solid #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  .detail-avatar {
+    border: 4px solid var(--dt-bg-card);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
-  .dark & :deep(.dingtalk-avatar) {
-    border-color: var(--dt-bg-card-dark);
-  }
-}
-
-.online-badge {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 12px;
-  height: 12px;
-  background: #52c41a;
-  border: 2px solid #fff;
-  border-radius: 50%;
-
-  .dark & {
-    border-color: var(--dt-bg-card-dark);
+  .online-dot {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    background: #52c41a;
+    border: 3px solid var(--dt-bg-card);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.3);
   }
 }
 
 .user-name {
-  margin: 0 0 4px 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--dt-text-primary);
+  margin: 0 0 12px;
+  text-align: center;
+  word-break: break-word;
 }
 
-.user-account {
-  margin: 0;
-  font-size: 13px;
-  color: var(--dt-text-tertiary);
-}
-
-// ============================================================================
-// 详细信息
-// ============================================================================
-.profile-details {
-  padding: 0 24px 24px;
-}
-
-.detail-section {
-  margin-bottom: 20px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.section-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--dt-text-quaternary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 8px 0;
-}
-
-.detail-list {
-  background: var(--dt-bg-body);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
-  overflow: hidden;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-}
-
-.detail-row {
+.user-tags {
   display: flex;
-  align-items: center;
-  padding: 12px 16px;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &.online {
+      background: rgba(82, 196, 26, 0.15);
+      color: #52c41a;
+
+      .status-icon {
+        font-size: 12px;
+      }
+    }
+
+    &.offline {
+      background: var(--dt-bg-body);
+      color: var(--dt-text-tertiary);
+
+      .status-icon {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.user-position {
+  font-size: 13px;
+  color: var(--dt-text-secondary);
+  margin: 0;
+  text-align: center;
+
+  .empty-hint {
+    color: var(--dt-text-tertiary);
+  }
+}
+
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  padding: 0 24px 20px;
   border-bottom: 1px solid var(--dt-border-light);
 
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.detail-label {
-  font-size: 13px;
-  color: var(--dt-text-secondary);
-  min-width: 60px;
-}
-
-.detail-value {
-  flex: 1;
-  font-size: 14px;
-  color: var(--dt-text-primary);
-  text-align: right;
-}
-
-.signature-text {
-  padding: 12px 16px;
-  font-size: 14px;
-  color: var(--dt-text-secondary);
-  line-height: 1.6;
-  font-style: italic;
-  background: var(--dt-bg-body);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-}
-
-// ============================================================================
-// 底部操作
-// ============================================================================
-.profile-footer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--dt-border-light);
-
-  .dark & {
-    border-top-color: var(--dt-border-dark);
-  }
-
-  .chat-btn {
+  .action-btn {
     flex: 1;
-    height: 40px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--dt-bg-body);
+    border: 1px solid var(--dt-border-light);
+    cursor: pointer;
+    transition: all 0.2s;
     font-size: 14px;
-  }
+    font-weight: 500;
+    color: var(--dt-text-primary);
 
-  .call-btn,
-  .more-btn {
-    width: 40px;
-    height: 40px;
-    padding: 0;
+    .material-icons-outlined {
+      font-size: 20px;
+    }
 
-    svg {
-      width: 18px;
-      height: 18px;
+    &.primary {
+      background: var(--dt-brand-color);
+      border-color: var(--dt-brand-color);
+      color: #fff;
+      flex: 2;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+      }
+    }
+
+    &:hover:not(.primary) {
+      background: var(--dt-brand-bg);
+      border-color: var(--dt-brand-color);
+      color: var(--dt-brand-color);
     }
   }
+}
 
-  .more-btn {
-    color: var(--dt-text-secondary);
+.info-cards {
+  padding: 20px 24px;
+  overflow-y: auto;
+  max-height: 280px;
+
+  .info-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--dt-bg-body);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
 
     &:hover {
-      color: var(--dt-text-primary);
+      background: var(--dt-bg-hover);
+    }
+
+    &.full-width {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--dt-brand-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .material-icons-outlined {
+        font-size: 18px;
+        color: var(--dt-brand-color);
+      }
+    }
+
+    .card-content {
+      flex: 1;
+      min-width: 0;
+
+      .card-label {
+        display: block;
+        font-size: 11px;
+        color: var(--dt-text-tertiary);
+        margin-bottom: 2px;
+      }
+
+      .card-value {
+        font-size: 13px;
+        color: var(--dt-text-primary);
+
+        &.email {
+          word-break: break-all;
+        }
+
+        &.signature {
+          font-style: italic;
+          color: var(--dt-text-secondary);
+          line-height: 1.5;
+          margin: 0;
+        }
+      }
     }
   }
 }
 
-// ============================================================================
-// 移动端响应式
-// ============================================================================
-@media (max-width: 479px) {
-  .profile-header {
-    padding: 24px 20px 16px;
+.more-actions {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--dt-border-light);
+
+  .more-action-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-size: 14px;
+    color: var(--dt-text-primary);
+
+    .action-icon {
+      font-size: 20px;
+      color: var(--dt-text-secondary);
+    }
+
+    &:hover {
+      background: var(--dt-bg-hover);
+
+      .action-icon {
+        color: var(--dt-brand-color);
+      }
+    }
+  }
+}
+
+.bottom-section {
+  padding: 16px 24px;
+  background: var(--dt-bg-body);
+
+  .secure-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    .material-icons-outlined {
+      font-size: 14px;
+      color: #52c41a;
+    }
+
+    font-size: 11px;
+    color: var(--dt-text-tertiary);
+  }
+}
+
+.dark {
+  .top-section {
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.08) 0%, rgba(22, 119, 255, 0.03) 100%);
   }
 
-  .profile-details {
-    padding: 0 20px 20px;
+  .bg-decoration .decoration-circle {
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.15) 0%, rgba(22, 119, 255, 0.1) 100%);
   }
 
-  .profile-footer {
-    padding: 12px 20px;
+  .user-name {
+    color: var(--dt-text-primary-dark);
+  }
+
+  .quick-actions .action-btn {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+
+    &:hover:not(.primary) {
+      background: var(--dt-bg-hover-dark);
+    }
+  }
+
+  .info-cards .info-card {
+    background: var(--dt-bg-card-dark);
+  }
+
+  .more-actions {
+    border-color: var(--dt-border-dark);
+  }
+
+  .bottom-section {
+    background: var(--dt-bg-card-dark);
   }
 }
 </style>

@@ -108,7 +108,7 @@
                 <el-checkbox
                   class="email-checkbox"
                   :model-value="selectedEmails.includes(email.id)"
-                  @update:model-value="toggleSelection(email.id, $event)"
+                  @update:model-value="(checked) => toggleSelection(email.id, checked)"
                   @click.stop
                 />
                 <div class="email-avatar" :style="{ background: email.avatarColor }">

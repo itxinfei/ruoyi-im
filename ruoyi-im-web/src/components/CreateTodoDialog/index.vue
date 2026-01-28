@@ -136,7 +136,8 @@ const transformTodoToApi = (todo) => {
   return {
     title: todo.title,
     description: todo.content,
-    priority: priorityMap[todo.priority] || 2
+    priority: priorityMap[todo.priority] || 2,
+    dueDate: todo.dueDate || null
   }
 }
 

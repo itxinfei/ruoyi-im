@@ -2,7 +2,7 @@
   <div class="voice-recorder">
     <!-- 按住说话按钮 -->
     <button
-      v-if="!isRecording && !audioUrl"
+      v-if="!isRecording"
       class="record-btn"
       :class="{ 'no-permission': !hasPermission }"
       @mousedown.prevent="handleMouseDown"
@@ -16,7 +16,7 @@
     </button>
 
     <!-- 录音中 - 松手结束 -->
-    <div v-else-if="isRecording" class="recording-state">
+    <div v-else class="recording-state">
       <div class="recording-hint">
         <span class="hint-text">正在录音... 松手结束</span>
       </div>
@@ -25,71 +25,23 @@
       </div>
       <span class="recording-time">{{ formatTime(recordingTime) }}</span>
     </div>
-
-    <!-- 录音完成预览 -->
-    <div v-else-if="audioUrl && showPreview" class="preview-state">
-      <div class="audio-preview">
-        <button class="play-btn" @click="togglePlay">
-          <el-icon><component :is="isPlaying ? 'VideoPause' : 'VideoPlay'" /></el-icon>
-        </button>
-        <div class="audio-waveform">
-          <span
-            v-for="(item, index) in 20"
-            :key="index"
-            class="wave-bar"
-            :class="{ active: isPlaying && index < Math.floor((playProgress / 100) * 20) }"
-          ></span>
-        </div>
-        <span class="duration">{{ formatTime(duration) }}</span>
-      </div>
-
-      <!-- 语音转文字 -->
-      <VoiceToText
-        :message-id="`temp-${Date.now()}`"
-        :voice-url="audioUrl"
-        :duration="duration"
-        @transcribe="handleTranscribe"
-        @copy="handleCopyTranscript"
-        @reply="handleReplyTranscript"
-      />
-
-      <div class="preview-actions">
-        <button class="action-btn delete-btn" @click="deleteRecording">
-          <el-icon><Delete /></el-icon> 删除
-        </button>
-        <button class="action-btn send-btn" @click="sendRecording">
-          <el-icon><Promotion /></el-icon> 发送
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onUnmounted, watch, onMounted } from 'vue'
-import { Microphone, Close, VideoPlay, VideoPause, Delete, Promotion } from '@element-plus/icons-vue'
+import { ref, onUnmounted, onMounted } from 'vue'
+import { Microphone } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import VoiceToText from './VoiceToText.vue'
 
-const emit = defineEmits(['send', 'cancel', 'transcribe'])
+const emit = defineEmits(['record-complete', 'cancel'])
 
 const isRecording = ref(false)
-const isPlaying = ref(false)
 const recordingTime = ref(0)
-const duration = ref(0)
-const audioUrl = ref(null)
-const playProgress = ref(0)
-const transcript = ref('')
-const showPreview = ref(false)
-const isCancelled = ref(false)
-const startY = ref(0)
 const hasPermission = ref(true)
 
 let mediaRecorder = null
 let audioChunks = []
 let recordingInterval = null
-let audioElement = null
-let progressInterval = null
 
 // 检查麦克风权限
 const checkMicrophonePermission = async () => {
@@ -121,9 +73,6 @@ const handleMouseDown = (e) => {
     return
   }
   
-  startY.value = e.clientY
-  isCancelled.value = false
-  showPreview.value = false
   startRecording()
 }
 
@@ -131,7 +80,6 @@ const handleMouseDown = (e) => {
 const handleMouseUp = () => {
   if (isRecording.value) {
     stopRecording()
-    showPreview.value = true
   }
 }
 
@@ -153,30 +101,28 @@ const handleTouchStart = (e) => {
     return
   }
   
-  startY.value = e.touches[0].clientY
-  isCancelled.value = false
-  showPreview.value = false
   startRecording()
 }
 
 // 触摸结束
 const handleTouchEnd = (e) => {
   const endY = e.changedTouches[0].clientY
-  const diffY = startY.value - endY
   
   // 上滑超过 50px 视为取消
-  if (diffY > 50) {
+  if (startY.value - endY > 50) {
     cancelRecording()
   } else {
     if (isRecording.value) {
       stopRecording()
-      showPreview.value = true
     }
   }
 }
 
 // 开始录音
 const startRecording = async () => {
+  // 立即设置录音状态，提供即时反馈
+  isRecording.value = true
+  
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     mediaRecorder = new MediaRecorder(stream)
@@ -190,17 +136,33 @@ const startRecording = async () => {
 
     mediaRecorder.onstop = () => {
       const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
-      audioUrl.value = URL.createObjectURL(audioBlob)
-      duration.value = recordingTime.value
+      const audioUrl = URL.createObjectURL(audioBlob)
+      
+      // 发送录音完成事件，传递音频数据
+      emit('record-complete', {
+        blob: audioBlob,
+        url: audioUrl,
+        duration: recordingTime.value
+      })
+      
       recordingTime.value = 0
-
+      isRecording.value = false
+      clearInterval(recordingInterval)
+      
       // 停止所有音频轨道
       stream.getTracks().forEach(track => track.stop())
     }
 
+    // 录音失败时重置状态
+    mediaRecorder.onerror = (error) => {
+      console.error('录音器错误:', error)
+      isRecording.value = false
+      clearInterval(recordingInterval)
+      ElMessage.error('录音失败，请重试')
+    }
+
     mediaRecorder.start()
-    isRecording.value = true
-    hasPermission.value = true // 录音成功，更新权限状态
+    hasPermission.value = true
 
     // 开始计时
     recordingInterval = setInterval(() => {
@@ -211,6 +173,9 @@ const startRecording = async () => {
       }
     }, 1000)
   } catch (error) {
+    // 录音失败时重置状态
+    isRecording.value = false
+    
     let errorMessage = '无法访问麦克风'
     
     if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
@@ -231,20 +196,9 @@ const startRecording = async () => {
   }
 }
 
-// 停止录音（仅停止，不自动发送）
+// 停止录音
 const stopRecording = () => {
   if (mediaRecorder && isRecording.value) {
-    mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
-      audioUrl.value = URL.createObjectURL(audioBlob)
-      duration.value = recordingTime.value
-      recordingTime.value = 0
-      isRecording.value = false
-      clearInterval(recordingInterval)
-      
-      // 停止所有音频轨道
-      mediaRecorder.stream.getTracks().forEach(track => track.stop())
-    }
     mediaRecorder.stop()
   }
 }
@@ -252,83 +206,7 @@ const stopRecording = () => {
 // 取消录音
 const cancelRecording = () => {
   stopRecording()
-  audioUrl.value = null
-  recordingTime.value = 0
   emit('cancel')
-}
-
-// 删除录音
-const deleteRecording = () => {
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value)
-  }
-  audioUrl.value = null
-  duration.value = 0
-  playProgress.value = 0
-  if (audioElement) {
-    audioElement.pause()
-    audioElement = null
-  }
-  isPlaying.value = false
-}
-
-// 播放/暂停
-const togglePlay = () => {
-  if (!audioUrl.value) return
-
-  if (!audioElement) {
-    audioElement = new Audio(audioUrl.value)
-    audioElement.onended = () => {
-      isPlaying.value = false
-      playProgress.value = 0
-      clearInterval(progressInterval)
-    }
-  }
-
-  if (isPlaying.value) {
-    audioElement.pause()
-    clearInterval(progressInterval)
-  } else {
-    audioElement.play()
-    progressInterval = setInterval(() => {
-      playProgress.value = (audioElement.currentTime / audioElement.duration) * 100
-    }, 100)
-  }
-  isPlaying.value = !isPlaying.value
-}
-
-// 发送录音
-const sendRecording = () => {
-  if (!audioUrl.value) return
-
-  // 读取 Blob 数据
-  fetch(audioUrl.value)
-    .then(res => res.blob())
-    .then(blob => {
-      const file = new File([blob], `voice_${Date.now()}.webm`, { type: 'audio/webm' })
-      emit('send', {
-        file,
-        duration: duration.value,
-        transcript: transcript.value // 如果有转写文本，一起发送
-      })
-      deleteRecording()
-    })
-}
-
-// 处理转写完成
-const handleTranscribe = (result) => {
-  transcript.value = result.text
-  emit('transcribe', result)
-}
-
-// 复制转写文本
-const handleCopyTranscript = (text) => {
-  // 可以在这里添加额外处理
-}
-
-// 引用转写文本
-const handleReplyTranscript = (text) => {
-  // 可以在这里触发引用回复
 }
 
 // 格式化时间
@@ -341,19 +219,9 @@ const formatTime = (seconds) => {
 // 清理资源
 onUnmounted(() => {
   clearInterval(recordingInterval)
-  clearInterval(progressInterval)
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value)
+  if (mediaRecorder && mediaRecorder.stream) {
+    mediaRecorder.stream.getTracks().forEach(track => track.stop())
   }
-  if (audioElement) {
-    audioElement.pause()
-  }
-})
-
-defineExpose({
-  startRecording,
-  stopRecording,
-  cancelRecording
 })
 </script>
 

@@ -56,7 +56,7 @@
                   <div class="message-content">
                     <div class="message-header">
                       <span class="sender-name">{{ msg.senderName }}</span>
-                      <span class="message-time">{{ formatTime(msg.timestamp) }}</span>
+                      <span class="message-time">{{ formatTime(msg.sendTime) }}</span>
                     </div>
                     <div class="message-text">
                       <template v-if="msg.type === 'IMAGE'">
@@ -70,6 +70,10 @@
                       <template v-else-if="msg.type === 'VOICE'">
                         <span class="material-icons-outlined">mic</span>
                         [语音]
+                      </template>
+                      <template v-else-if="msg.type === 'VIDEO'">
+                        <span class="material-icons-outlined">videocam</span>
+                        [视频]
                       </template>
                       <template v-else>
                         {{ getMessagePreview(msg.content) }}
@@ -98,29 +102,36 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
+import { getMessages } from '@/api/im/message'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
-  sessionId: { type: [String, Number], default: null },
-  messages: { type: Array, default: () => [] }
+  conversationId: { type: [String, Number], default: null }
 })
 
 const emit = defineEmits(['close', 'jump-to-message', 'clear-history'])
+
+const store = useStore()
+const currentUserId = computed(() => store.state.im.user?.id)
 
 const searchKeyword = ref('')
 const listRef = ref(null)
 const loading = ref(false)
 const hasMore = ref(true)
+const historyMessages = ref([])
+const currentPage = ref(1)
+const pageSize = 50
 
 // 过滤后的消息
 const filteredMessages = computed(() => {
   if (!searchKeyword.value) {
-    return props.messages
+    return historyMessages.value
   }
   const keyword = searchKeyword.value.toLowerCase()
-  return props.messages.filter(msg => {
+  return historyMessages.value.filter(msg => {
     const content = getMessagePreview(msg.content).toLowerCase()
     return content.includes(keyword)
   })
@@ -130,7 +141,8 @@ const filteredMessages = computed(() => {
 const groupedMessages = computed(() => {
   const groups = {}
   filteredMessages.value.forEach(msg => {
-    const date = new Date(msg.timestamp).toDateString()
+    // 使用 sendTime 而不是 timestamp
+    const date = new Date(msg.sendTime).toDateString()
     if (!groups[date]) {
       groups[date] = []
     }
@@ -171,9 +183,46 @@ const formatDate = (dateStr) => {
 }
 
 // 格式化时间
-const formatTime = (timestamp) => {
-  const date = new Date(timestamp)
+const formatTime = (sendTime) => {
+  const date = new Date(sendTime)
   return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+}
+
+// 加载聊天记录
+const loadHistoryMessages = async () => {
+  if (!props.conversationId) return
+
+  loading.value = true
+  try {
+    const response = await getMessages(props.conversationId, {
+      pageNum: currentPage.value,
+      pageSize: pageSize
+    })
+
+    if (response.code === 200 && response.data) {
+      const newMessages = response.data.records || response.data || []
+      // 为每条消息添加 isOwn 标识
+      const messagesWithOwner = newMessages.map(msg => ({
+        ...msg,
+        isOwn: msg.senderId === currentUserId.value
+      }))
+
+      if (currentPage.value === 1) {
+        historyMessages.value = messagesWithOwner
+      } else {
+        historyMessages.value = [...historyMessages.value, ...messagesWithOwner]
+      }
+
+      // 判断是否还有更多数据
+      const totalCount = response.data.total || 0
+      hasMore.value = historyMessages.value.length < totalCount
+    }
+  } catch (error) {
+    console.error('加载聊天记录失败:', error)
+    ElMessage.error('加载聊天记录失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 搜索处理
@@ -192,23 +241,15 @@ const handleMessageClick = (msg) => {
 }
 
 // 加载更多
-const loadMore = () => {
-  emit('load-more')
+const loadMore = async () => {
+  if (!hasMore.value || loading.value) return
+  currentPage.value++
+  await loadHistoryMessages()
 }
 
 // 清空历史
-const handleClearHistory = async () => {
-  try {
-    await ElMessageBox.confirm('确定要清空聊天记录吗？此操作不可恢复', '清空记录', {
-      type: 'warning',
-      confirmButtonText: '确定清空',
-      cancelButtonText: '取消'
-    })
-    emit('clear-history')
-    ElMessage.success('聊天记录已清空')
-  } catch {
-    // 用户取消
-  }
+const handleClearHistory = () => {
+  emit('clear-history')
 }
 
 // 关闭
@@ -219,7 +260,11 @@ const handleClose = () => {
 // 监听 visible 变化
 watch(() => props.visible, (val) => {
   if (val) {
+    // 打开面板时重置状态并加载消息
     searchKeyword.value = ''
+    currentPage.value = 1
+    historyMessages.value = []
+    loadHistoryMessages()
   }
 })
 </script>

@@ -66,13 +66,7 @@
         </el-tooltip>
       </div>
 
-      <!-- 置顶消息按钮 -->
-      <el-tooltip content="置顶消息" placement="bottom">
-        <button class="action-btn pin-btn" @click="handleTogglePinned">
-          <span class="material-icons-outlined">push_pin</span>
-          <span v-if="pinnedCount > 0" class="pin-badge">{{ pinnedCount }}</span>
-        </button>
-      </el-tooltip>
+
 
       <!-- 更多菜单 -->
       <el-dropdown trigger="click" @command="handleMenuCommand" :placement="menuPlacement">
@@ -137,13 +131,11 @@
       </el-dropdown>
     </div>
 
-    <!-- 用户详情抽屉 -->
-    <UserDetailDrawer
+    <!-- 用户详情弹窗 -->
+    <UserProfileDialog
       v-model="showUserDetail"
-      :session="session"
-      @send-message="handleSendMessage"
-      @voice-call="handleVoiceCall"
-      @video-call="handleVideoCall"
+      :user-id="session?.targetId || session?.targetUserId"
+      @chat="handleSendMessage"
     />
 
     <!-- 聊天内搜索 -->
@@ -161,7 +153,7 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import UserDetailDrawer from './UserDetailDrawer.vue'
+import UserProfileDialog from '@/components/Contacts/UserProfileDialog.vue'
 import ChatSearch from './ChatSearch.vue'
 
 const props = defineProps({
@@ -176,16 +168,12 @@ const props = defineProps({
   typingUsers: {
     type: Array,
     default: () => []
-  },
-  pinnedCount: {
-    type: Number,
-    default: 0
   }
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'toggle-pinned', 'scroll-to-message'])
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'scroll-to-message'])
 
-// 用户详情抽屉显示状态
+// 用户详情弹窗显示状态
 const showUserDetail = ref(false)
 
 // 聊天内搜索显示状态
@@ -262,11 +250,6 @@ const handleMenuCommand = (command) => {
 // 处理搜索结果选择
 const handleSelectSearchResult = (messageId) => {
   emit('scroll-to-message', messageId)
-}
-
-// 切换置顶消息面板
-const handleTogglePinned = () => {
-  emit('toggle-pinned')
 }
 
 // 计算菜单弹出位置，确保菜单不会超出视口
@@ -675,33 +658,6 @@ const menuPlacement = computed(() => {
   // 更多按钮
   &.more-btn:hover {
     background: var(--dt-bg-hover);
-  }
-
-  // 置顶消息按钮
-  &.pin-btn {
-    position: relative;
-    color: var(--dt-text-secondary);
-
-    .pin-badge {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      min-width: 16px;
-      height: 16px;
-      padding: 0 4px;
-      background: var(--dt-error-color);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 600;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    &:hover {
-      color: var(--dt-brand-color);
-    }
   }
 
   // 详情按钮

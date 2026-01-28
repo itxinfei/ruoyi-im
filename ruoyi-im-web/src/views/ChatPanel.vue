@@ -89,7 +89,7 @@
       </div>
 
       <!-- 群组详情弹窗 -->
-      <GroupDetailDrawer
+      <GroupDetailDialog
         v-model="showGroupDetail"
         :group-id="session?.targetId"
         @refresh="$emit('refresh-sessions')"
@@ -129,8 +129,7 @@
       <!-- 聊天记录面板 -->
       <ChatHistoryPanel
         :visible="showChatHistory"
-        :session-id="session?.id"
-        :messages="messages"
+        :conversation-id="session?.id"
         @close="showChatHistory = false"
         @jump-to-message="handleJumpToMessage"
         @clear-history="handleClearHistory"
@@ -215,7 +214,7 @@ import VoiceCallDialog from '@/components/Chat/VoiceCallDialog.vue'
 import VideoCallDialog from '@/components/Chat/VideoCallDialog.vue'
 import ChatHistoryPanel from '@/components/Chat/ChatHistoryPanel.vue'
 import GroupAnnouncementDialog from '@/components/Chat/GroupAnnouncementDialog.vue'
-import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
+import GroupDetailDialog from '@/components/Contacts/GroupProfileDialog.vue'
 import ChatSearchPanel from '@/components/Chat/ChatSearchPanel.vue'
 import ChatSearch from '@/components/Chat/ChatSearch.vue'
 import ChatFilesPanel from '@/components/Chat/ChatFilesPanel.vue'
@@ -1102,8 +1101,8 @@ const handleForwardFile = (file) => {
 
 // 清空历史记录
 const handleClearHistory = async () => {
-  // 清空当前会话的消息
-  messages.value = []
+  // 复用 handleClearMessages 函数
+  await handleClearMessages()
   showChatHistory.value = false
 }
 
@@ -1835,16 +1834,16 @@ onMounted(() => {
 }
 
 .dark .multi-select-toolbar {
-  background: linear-gradient(135deg, #1a1f2e 0%, #141925 100%);
+  background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3);
 
   .selection-info {
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.15) 0%, rgba(22, 119, 255, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.2) 0%, rgba(22, 119, 255, 0.15) 100%);
     border-color: rgba(22, 119, 255, 0.3);
 
     .selection-text {
-      color: #e8e8e8;
+      color: #ffffff;
     }
   }
 

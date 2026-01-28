@@ -452,19 +452,9 @@ const contextMenuStyle = computed(() => {
   const menuWidth = 200
   const menuHeight = contextMenu.session?.isPinned ? 150 : 200
   
-  // 获取会话列表容器
-  const sessionList = document.querySelector('.session-list')
-  if (!sessionList) return {}
-  
-  const rect = sessionList.getBoundingClientRect()
-  
-  // 计算居中位置
-  const centerX = rect.left + rect.width / 2
-  const centerY = rect.top + rect.height / 2
-  
-  // 计算菜单位置（居中）
-  let x = centerX - menuWidth / 2
-  let y = centerY - menuHeight / 2
+  // 使用鼠标位置
+  let x = contextMenu.x
+  let y = contextMenu.y
   
   // 边界检测
   const padding = 10
@@ -487,9 +477,9 @@ const handleContextMenu = (e, session) => {
   contextMenu.show = true
   contextMenu.session = session
   
-  // 不使用鼠标位置，使用计算后的居中位置
-  contextMenu.x = 0
-  contextMenu.y = 0
+  // 使用鼠标右击位置
+  contextMenu.x = e.clientX
+  contextMenu.y = e.clientY
 }
 
 const hideContextMenu = () => {
@@ -1205,11 +1195,11 @@ onUnmounted(() => {
 }
 
 .dark .search-container {
-  background: var(--dt-bg-input-dark);
-  border-color: var(--dt-border-dark);
+  background: #3c3c3c;
+  border-color: #3e3e42;
 
   &:focus-within {
-    background: var(--dt-bg-hover-dark);
+    background: #404040;
     border-color: var(--dt-brand-color);
   }
 }
@@ -1247,7 +1237,7 @@ onUnmounted(() => {
   border-color: var(--dt-border-dark);
 
   .menu-item {
-    color: #f1f5f9;
+    color: var(--dt-text-primary-dark);
 
     .item-icon {
       color: #bdc3c9;

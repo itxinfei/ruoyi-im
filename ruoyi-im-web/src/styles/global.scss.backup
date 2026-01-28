@@ -2,7 +2,6 @@
 @use './design-tokens.scss' as *;
 @use './tailwind-overrides.scss' as *;
 @use './icons.scss';
-@use './global-simple.scss'; // 暗色模式简单修复
 
 // Tailwind CSS 指令
 @tailwind base;

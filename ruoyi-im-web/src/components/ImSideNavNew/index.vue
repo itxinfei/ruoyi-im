@@ -241,7 +241,7 @@ function handleOpenSearch() {
 }
 
 .bg-nav-dark {
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(180deg, #252526 0%, #1e1e1e 100%);
 }
 
 // ============================================================================
@@ -562,7 +562,7 @@ function handleOpenSearch() {
 // 暗色模式适配
 // ============================================================================
 .dark .dingtalk-nav {
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(180deg, #252526 0%, #1e1e1e 100%);
 }
 
 .dark .nav-logo {
@@ -599,7 +599,7 @@ function handleOpenSearch() {
 }
 
 .dark .nav-avatar-status {
-  border-color: #1e293b;
+  border-color: #252526;
 }
 
 .dark .nav-avatar-active {

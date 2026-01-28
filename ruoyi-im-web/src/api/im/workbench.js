@@ -39,6 +39,7 @@ export function getOverview() {
  * @param {string} data.type - 类型（可选，默认 TASK）
  * @param {number} data.relatedId - 关联ID（可选）
  * @param {number} data.priority - 优先级（可选，1=低, 2=中, 3=高）
+ * @param {string} data.dueDate - 截止日期（可选，格式：yyyy-MM-dd HH:mm:ss）
  * @returns {Promise}
  */
 export function createTodo(data) {
@@ -67,6 +68,8 @@ export function completeTodo(todoId) {
  * @param {Object} data - 待办数据
  * @param {string} data.title - 标题
  * @param {string} data.description - 描述
+ * @param {number} data.priority - 优先级（可选，1=低, 2=中, 3=高）
+ * @param {string} data.dueDate - 截止日期（可选，格式：yyyy-MM-dd HH:mm:ss）
  * @returns {Promise}
  */
 export function updateTodo(todoId, data) {

@@ -239,7 +239,7 @@ watch(visible, (val) => {
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 20px;
-    color: #000;
+    color: var(--dt-text-primary);
   }
 
   .form-data {
@@ -250,12 +250,12 @@ watch(visible, (val) => {
     .form-item {
       .label {
         font-size: 13px;
-        color: #8c8c8c;
+        color: var(--dt-text-tertiary);
         margin-bottom: 4px;
       }
       .value {
         font-size: 14px;
-        color: #262626;
+        color: var(--dt-text-primary);
         word-break: break-all;
       }
     }

@@ -81,6 +81,39 @@
       </div>
     </div>
 
+    <!-- 录音预览区域 -->
+    <div v-if="voicePreview" class="voice-preview-container">
+      <div class="voice-preview-box">
+        <div class="voice-info">
+          <span class="material-icons-outlined voice-icon">mic</span>
+          <span class="voice-duration">{{ formatTime(voicePreview.duration) }}</span>
+        </div>
+        <div class="voice-waveform">
+          <span
+            v-for="(item, index) in 20"
+            :key="index"
+            class="wave-bar"
+            :class="{ active: voicePreview.isPlaying && index < Math.floor((voicePreview.playProgress / 100) * 20) }"
+          ></span>
+        </div>
+        <div class="voice-actions">
+          <button class="voice-action-btn play-btn" @click="toggleVoicePlay">
+            <span class="material-icons-outlined">
+              {{ voicePreview.isPlaying ? 'pause' : 'play_arrow' }}
+            </span>
+          </button>
+          <button class="voice-action-btn delete-btn" @click="deleteVoicePreview">
+            <span class="material-icons-outlined">delete</span>
+            删除
+          </button>
+          <button class="voice-action-btn send-btn" @click="sendVoicePreview">
+            <span class="material-icons-outlined">send</span>
+            发送
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div v-if="editingMessage" class="edit-preview-container">
       <div class="edit-content-box">
         <span class="edit-label">正在编辑:</span>
@@ -101,8 +134,8 @@
       <!-- 语音录制模式 -->
       <VoiceRecorder
         v-if="isVoiceMode"
-        @send="handleSendVoice"
-        @cancel="isVoiceMode = false"
+        @record-complete="handleVoiceRecordComplete"
+        @cancel="handleVoiceCancel"
       />
 
       <!-- 文字输入模式 -->
@@ -294,6 +327,9 @@ const imageInputRef = ref(null)
 const fileInputRef = ref(null)
 const videoInputRef = ref(null)
 const isVoiceMode = ref(false)
+const voicePreview = ref(null)
+const voiceAudioElement = ref(null)
+const voiceProgressInterval = ref(null)
 const showScreenshotPreview = ref(false)
 const screenshotData = ref(null)
 const showScreenshotGuide = ref(false)
@@ -812,10 +848,91 @@ const toggleVoiceMode = () => {
   }
 }
 
-// 发送语音消息
-const handleSendVoice = ({ file, duration }) => {
-  emit('send-voice', { file, duration })
+// 录音完成处理
+const handleVoiceRecordComplete = ({ blob, url, duration }) => {
+  voicePreview.value = {
+    blob,
+    url,
+    duration,
+    isPlaying: false,
+    playProgress: 0
+  }
   isVoiceMode.value = false
+}
+
+// 录音取消处理
+const handleVoiceCancel = () => {
+  voicePreview.value = null
+  isVoiceMode.value = false
+}
+
+// 播放/暂停录音预览
+const toggleVoicePlay = () => {
+  if (!voicePreview.value) return
+
+  if (!voiceAudioElement.value) {
+    voiceAudioElement.value = new Audio(voicePreview.value.url)
+    voiceAudioElement.value.onended = () => {
+      voicePreview.value.isPlaying = false
+      voicePreview.value.playProgress = 0
+      if (voiceProgressInterval.value) {
+        clearInterval(voiceProgressInterval.value)
+        voiceProgressInterval.value = null
+      }
+    }
+  }
+
+  if (voicePreview.value.isPlaying) {
+    voiceAudioElement.value.pause()
+    if (voiceProgressInterval.value) {
+      clearInterval(voiceProgressInterval.value)
+      voiceProgressInterval.value = null
+    }
+    voicePreview.value.isPlaying = false
+  } else {
+    voiceAudioElement.value.play()
+    voiceProgressInterval.value = setInterval(() => {
+      if (voiceAudioElement.value && voiceAudioElement.value.duration) {
+        voicePreview.value.playProgress = (voiceAudioElement.value.currentTime / voiceAudioElement.value.duration) * 100
+      }
+    }, 100)
+    voicePreview.value.isPlaying = true
+  }
+}
+
+// 删除录音预览
+const deleteVoicePreview = () => {
+  if (voicePreview.value && voicePreview.value.url) {
+    URL.revokeObjectURL(voicePreview.value.url)
+  }
+  if (voiceAudioElement.value) {
+    voiceAudioElement.value.pause()
+    voiceAudioElement.value = null
+  }
+  if (voiceProgressInterval.value) {
+    clearInterval(voiceProgressInterval.value)
+    voiceProgressInterval.value = null
+  }
+  voicePreview.value = null
+}
+
+// 发送录音预览
+const sendVoicePreview = () => {
+  if (!voicePreview.value) return
+
+  const file = new File([voicePreview.value.blob], `voice_${Date.now()}.webm`, { type: 'audio/webm' })
+  emit('send-voice', {
+    file,
+    duration: voicePreview.value.duration
+  })
+  deleteVoicePreview()
+}
+
+// 格式化时间
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
 // 显示 AI 灵动回复面板
@@ -905,6 +1022,20 @@ onUnmounted(() => {
     clearTimeout(typingTimer)
     typingTimer = null
   }
+  
+  // 清理语音资源
+  if (voiceAudioElement.value) {
+    voiceAudioElement.value.pause()
+    voiceAudioElement.value = null
+  }
+  if (voiceProgressInterval.value) {
+    clearInterval(voiceProgressInterval.value)
+    voiceProgressInterval.value = null
+  }
+  if (voicePreview.value && voicePreview.value.url) {
+    URL.revokeObjectURL(voicePreview.value.url)
+  }
+  
   // 保存当前草稿
   if (currentConversationId.value && messageContent.value.trim()) {
     saveDraft(currentConversationId.value, messageContent.value)
@@ -1315,6 +1446,120 @@ onUnmounted(() => {
 // ============================================================================
 // 引用/编辑预览
 // ============================================================================
+.reply-preview-container,
+.edit-preview-container,
+.voice-preview-container {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: var(--dt-radius-md);
+  background: var(--dt-bg-body);
+  border-left: 3px solid var(--dt-brand-color);
+  transition: all var(--dt-transition-base);
+
+  .dark & {
+    background: var(--dt-bg-hover-dark);
+  }
+}
+
+.voice-preview-container {
+  background: rgba(22, 119, 255, 0.05);
+  border-color: var(--dt-brand-color);
+}
+
+.voice-preview-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.voice-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--dt-text-secondary);
+
+  .voice-icon {
+    font-size: 18px;
+    color: var(--dt-brand-color);
+  }
+
+  .voice-duration {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.voice-waveform {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  height: 24px;
+  padding: 8px 0;
+
+  .wave-bar {
+    width: 3px;
+    height: 8px;
+    background: #d1d5db;
+    border-radius: 2px;
+    transition: all 0.2s;
+
+    &.active {
+      background: var(--dt-brand-color);
+      height: 16px;
+    }
+  }
+}
+
+.voice-actions {
+  display: flex;
+  gap: 8px;
+
+  .voice-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+
+    .material-icons-outlined {
+      font-size: 16px;
+    }
+
+    &.play-btn {
+      background: var(--dt-brand-color);
+      color: #fff;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    &.delete-btn {
+      background: #f2f3f5;
+      color: #646a73;
+
+      &:hover {
+        background: #ff4d4f;
+        color: #fff;
+      }
+    }
+
+    &.send-btn {
+      background: var(--dt-brand-color);
+      color: #fff;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+}
+
 .reply-preview-container,
 .edit-preview-container {
   padding: 10px 12px;

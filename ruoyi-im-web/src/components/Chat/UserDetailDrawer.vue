@@ -1,13 +1,12 @@
 <template>
-  <el-dialog
+  <el-drawer
     v-model="visible"
-    :width="isMobile ? '100%' : '400px'"
+    size="420px"
+    direction="rtl"
     class="user-detail-drawer"
-    :show-close="false"
+    :with-header="false"
     append-to-body
     destroy-on-close
-    :modal-class="'user-detail-modal'"
-    align-center
   >
     <div v-if="userInfo" class="drawer-content">
       <!-- 关闭按钮 -->
@@ -21,7 +20,6 @@
         <div class="bg-decoration">
           <div class="decoration-circle circle-1"></div>
           <div class="decoration-circle circle-2"></div>
-          <div class="decoration-circle circle-3"></div>
         </div>
 
         <!-- 头像 -->
@@ -30,7 +28,7 @@
             :src="userInfo?.avatar"
             :name="userName"
             :user-id="session?.targetId || session?.targetUserId"
-            :size="88"
+            :size="96"
             shape="circle"
             custom-class="detail-avatar"
           />
@@ -66,37 +64,12 @@
           <span>发消息</span>
         </button>
         <button class="action-btn" @click="handleVoiceCall">
-          <span class="material-icons-outlined">call</span>
+          <span class="material-icons-outlined">phone</span>
         </button>
         <button class="action-btn" @click="handleVideoCall">
           <span class="material-icons-outlined">videocam</span>
         </button>
-        <button class="action-btn more" @click="toggleMore">
-          <span class="material-icons-outlined">more_horiz</span>
-        </button>
       </div>
-
-      <!-- 更多操作面板 -->
-      <transition name="expand">
-        <div v-if="showMore" class="more-panel">
-          <div class="more-item" @click="handleAddToFavorites">
-            <span class="material-icons-outlined">star_border</span>
-            <span>添加常用</span>
-          </div>
-          <div class="more-item" @click="handleSetRemark">
-            <span class="material-icons-outlined">edit</span>
-            <span>设置备注</span>
-          </div>
-          <div class="more-item" @click="handleViewHistory">
-            <span class="material-icons-outlined">history</span>
-            <span>历史消息</span>
-          </div>
-          <div class="more-item danger" @click="handleReport">
-            <span class="material-icons-outlined">block</span>
-            <span>举报</span>
-          </div>
-        </div>
-      </transition>
 
       <!-- 信息卡片 -->
       <div class="info-cards">
@@ -141,6 +114,26 @@
         </div>
       </div>
 
+      <!-- 更多操作 -->
+      <div class="more-actions">
+        <button class="more-action-item" @click="handleAddToFavorites">
+          <span class="material-icons-outlined action-icon">star_border</span>
+          <span>添加常用</span>
+        </button>
+        <button class="more-action-item" @click="handleSetRemark">
+          <span class="material-icons-outlined action-icon">edit</span>
+          <span>设置备注</span>
+        </button>
+        <button class="more-action-item" @click="handleViewHistory">
+          <span class="material-icons-outlined action-icon">history</span>
+          <span>历史消息</span>
+        </button>
+        <button class="more-action-item danger" @click="handleReport">
+          <span class="material-icons-outlined action-icon">block</span>
+          <span>举报</span>
+        </button>
+      </div>
+
       <!-- 底部 -->
       <div class="bottom-section">
         <div class="secure-badge">
@@ -161,7 +154,7 @@
         </template>
       </el-skeleton>
     </div>
-  </el-dialog>
+  </el-drawer>
 </template>
 
 <script setup>
@@ -184,7 +177,6 @@ const visible = computed({
 
 const userInfo = ref(null)
 const loading = ref(false)
-const showMore = ref(false)
 
 const isGroup = computed(() => props.session?.type === 'GROUP')
 const userName = computed(() => {
@@ -193,8 +185,6 @@ const userName = computed(() => {
     ? userInfo.value.name
     : userInfo.value.nickname || userInfo.value.username || '未知用户'
 })
-
-const isMobile = computed(() => window.innerWidth < 768)
 
 // 加载用户信息
 const loadUserInfo = async () => {
@@ -231,14 +221,12 @@ const loadUserInfo = async () => {
 
 watch(() => props.modelValue, (isOpen) => {
   if (isOpen) {
-    showMore.value = false
     loadUserInfo()
   }
 })
 
 const handleClose = () => {
   visible.value = false
-  showMore.value = false
 }
 
 const handleSendMessage = () => {
@@ -252,10 +240,6 @@ const handleVoiceCall = () => {
 
 const handleVideoCall = () => {
   emit('video-call', props.session)
-}
-
-const toggleMore = () => {
-  showMore.value = !showMore.value
 }
 
 const handleAddToFavorites = () => {
@@ -279,48 +263,21 @@ const handleReport = () => {
 @use '@/styles/design-tokens.scss' as *;
 
 // ============================================================================
-// 对话框基础样式
+// 抽屉基础样式
 // ============================================================================
 :deep(.user-detail-drawer) {
-  border-radius: 24px;
-  overflow: hidden;
-
-  .el-dialog__header {
-    display: none;
-  }
-
-  .el-dialog__body {
+  .el-drawer__body {
     padding: 0;
-    background: var(--dt-bg-card);
-    border-radius: 24px;
-  }
-}
-
-:deep(.user-detail-modal) {
-  .el-overlay {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(8px);
+    overflow: hidden;
   }
 }
 
 .drawer-content {
-  position: relative;
-  max-height: 85vh;
-  overflow-y: auto;
-  padding: 24px;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--dt-border);
-    border-radius: 2px;
-  }
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-  }
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--dt-bg-card);
 }
 
 // 关闭按钮
@@ -338,6 +295,7 @@ const handleReport = () => {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  z-index: 10;
 
   &:hover {
     background: var(--dt-border);
@@ -355,16 +313,17 @@ const handleReport = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-bottom: 1px solid var(--dt-border-light);
 }
 
 .bg-decoration {
   position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 200%;
-  height: 200px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
   overflow: hidden;
   pointer-events: none;
 
@@ -376,25 +335,16 @@ const handleReport = () => {
     &.circle-1 {
       width: 120px;
       height: 120px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: -40px;
+      right: -40px;
     }
 
     &.circle-2 {
       width: 80px;
       height: 80px;
-      top: 30%;
-      left: 20%;
+      bottom: -20px;
+      left: -20px;
       opacity: 0.6;
-    }
-
-    &.circle-3 {
-      width: 60px;
-      height: 60px;
-      bottom: 20%;
-      right: 20%;
-      opacity: 0.4;
     }
   }
 }
@@ -478,111 +428,56 @@ const handleReport = () => {
 // 快捷操作
 .quick-actions {
   display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 24px;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--dt-border-light);
 
   .action-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    flex: 1;
+    height: 44px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     background: var(--dt-bg-body);
-    border: 1px solid var(--dt-border-lighter);
+    border: 1px solid var(--dt-border-light);
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
 
     .material-icons-outlined {
       font-size: 20px;
-      color: var(--dt-text-secondary);
     }
 
     &.primary {
       background: var(--dt-brand-color);
       border-color: var(--dt-brand-color);
-
-      .material-icons-outlined {
-        color: #fff;
-      }
+      color: #fff;
+      flex: 2;
     }
 
     &:hover:not(.primary) {
       background: var(--dt-brand-bg);
       border-color: var(--dt-brand-color);
-
-      .material-icons-outlined {
-        color: var(--dt-brand-color);
-      }
+      color: var(--dt-brand-color);
     }
 
     &.primary:hover {
-      transform: scale(1.05);
+      transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
     }
   }
 }
 
-// 更多操作面板
-.more-panel {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 24px;
-
-  .more-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    background: var(--dt-bg-body);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    .material-icons-outlined {
-      font-size: 18px;
-      color: var(--dt-text-secondary);
-    }
-
-    span {
-      font-size: 13px;
-      color: var(--dt-text-primary);
-    }
-
-    &:hover {
-      background: var(--dt-bg-hover);
-    }
-
-    &.danger:hover {
-      background: var(--dt-error-bg);
-      color: var(--dt-error-color);
-
-      .material-icons-outlined {
-        color: var(--dt-error-color);
-      }
-    }
-  }
-}
-
-.expand-enter-active,
-.expand-leave-active {
-  transition: all 0.3s ease;
-}
-
-.expand-enter-from,
-.expand-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
 // 信息卡片
 .info-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--dt-border-light);
+  overflow-y: auto;
+  flex: 1;
 
   .info-card {
     display: flex;
@@ -590,7 +485,8 @@ const handleReport = () => {
     gap: 12px;
     padding: 14px;
     background: var(--dt-bg-body);
-    border-radius: 14px;
+    border-radius: 12px;
+    margin-bottom: 12px;
     transition: all 0.2s;
 
     &:hover {
@@ -648,10 +544,55 @@ const handleReport = () => {
   }
 }
 
+// 更多操作
+.more-actions {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--dt-border-light);
+
+  .more-action-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-size: 14px;
+    color: var(--dt-text-primary);
+    margin-bottom: 4px;
+
+    .action-icon {
+      font-size: 20px;
+      color: var(--dt-text-secondary);
+    }
+
+    &:hover {
+      background: var(--dt-bg-hover);
+
+      .action-icon {
+        color: var(--dt-brand-color);
+      }
+    }
+
+    &.danger:hover {
+      background: var(--dt-error-bg);
+      color: var(--dt-error-color);
+
+      .action-icon {
+        color: var(--dt-error-color);
+      }
+    }
+  }
+}
+
 // 底部
 .bottom-section {
-  padding-top: 16px;
-  border-top: 1px solid var(--dt-border-lighter);
+  padding: 16px 24px;
+  background: var(--dt-bg-body);
 
   .secure-badge {
     display: flex;
@@ -678,38 +619,6 @@ const handleReport = () => {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     border-radius: 24px 24px 0 0;
     margin: -24px -24px 16px -24px;
-  }
-}
-
-// 响应式
-@media (max-width: 768px) {
-  :deep(.user-detail-drawer) {
-    .el-dialog {
-      width: 100% !important;
-      margin: 0;
-      border-radius: 0;
-    }
-
-    .el-dialog__body {
-      border-radius: 0;
-      max-height: 100vh;
-    }
-  }
-
-  .drawer-content {
-    padding: 20px;
-    max-height: 100vh;
-  }
-
-  .quick-actions {
-    .action-btn {
-      width: 44px;
-      height: 44px;
-    }
-  }
-
-  .more-panel {
-    grid-template-columns: 1fr;
   }
 }
 </style>

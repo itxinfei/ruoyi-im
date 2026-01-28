@@ -932,18 +932,15 @@ onUnmounted(() => {
 @use '@/styles/design-tokens.scss' as *;
 
 .bubble {
-  // ========================================
-  // 钉钉聊天气泡样式 - 一比一精确复刻
-  // ========================================
-  background: #FFFFFF;  // 钉钉左侧气泡：纯白背景
-  border: 1px solid #E4E7ED;  // 钉钉风格：浅灰边框
-  padding: 10px 12px;  // 钉钉标准内边距
-  border-radius: 8px 8px 8px 2px;  // 钉钉风格：左下角2px形成尾部效果
-  box-shadow: none;  // 钉钉风格：扁平无阴影
+  background: #D4EAFF;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px 8px 8px 2px;
+  box-shadow: none;
   font-size: 14px;
   word-break: break-word;
   line-height: 1.5;
-  color: #303133;  // 钉钉标准文字色：深灰黑
+  color: #303133;
   position: relative;
   max-width: 520px;
   transition: background-color 0.15s ease, border-color 0.15s ease;
@@ -951,11 +948,10 @@ onUnmounted(() => {
 
   &.is-selected {
     border: 2px solid var(--dt-brand-color);
-    background-color: var(--dt-brand-bg);
+    background-color: #C4E0FF;
     animation: pulse 0.3s var(--dt-ease-out);
   }
 
-  // 长按视觉反馈
   &.is-long-press {
     animation: longPressPulse 0.3s ease-in-out;
     border-color: var(--dt-brand-color);
@@ -967,21 +963,17 @@ onUnmounted(() => {
     100% { transform: scale(1); }
   }
 
-  // 钉钉风格：悬停不改变阴影，保持扁平
   &:hover {
-    background: #FAFBFC;
+    background: #C4E0FF;
   }
 
-  // ========================================
-  // 发送消息气泡（右侧）- 钉钉淡蓝风格
-  // ========================================
   &.is-own {
-    background: #D4EAFF;  // 钉钉右侧气泡：淡蓝背景（加深一点更清晰）
-    color: #303133;  // 保持深色文字
-    border: none;  // 钉钉风格：右侧无边框
-    border-radius: 8px 8px 2px 8px;  // 钉钉风格：右下角2px形成尾部效果
-    box-shadow: none;  // 保持扁平
-    text-align: left;  // 钉钉风格：文本左对齐，气泡整体右对齐
+    background: #D4EAFF;
+    color: #303133;
+    border: none;
+    border-radius: 8px 8px 2px 8px;
+    box-shadow: none;
+    text-align: left;
 
     &.is-selected {
       border: 2px solid var(--dt-brand-color);
@@ -993,13 +985,12 @@ onUnmounted(() => {
     }
   }
 
-  /* 引用回复展示 - 钉钉风格增强 */
   .bubble-reply-ref {
     position: relative;
     display: flex;
     flex-direction: column;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-left: 3px solid var(--dt-brand-color);
     padding: 10px 12px;
     margin: -8px -10px 10px -10px;
@@ -1023,7 +1014,6 @@ onUnmounted(() => {
       }
     }
 
-    // 引用指示器竖线装饰
     &::before {
       content: '';
       position: absolute;
@@ -1043,7 +1033,6 @@ onUnmounted(() => {
       transition: height 0.25s var(--dt-ease-out);
     }
 
-    // 右侧箭头指示
     &::after {
       content: 'keyboard_return';
       font-family: 'Material Icons Outlined';
@@ -1065,7 +1054,7 @@ onUnmounted(() => {
 
       .ref-user {
         font-weight: 600;
-        color: #334155;
+        color: #1e293b;
         font-size: 12px;
         display: flex;
         align-items: center;
@@ -1110,7 +1099,7 @@ onUnmounted(() => {
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       padding-left: 8px;
-      border-left: 1px dashed #cbd5e1;
+      border-left: 1px dashed rgba(148, 163, 184, 0.5);
       transition: all 0.25s var(--dt-ease-out);
 
       .ref-image-text,
@@ -1136,8 +1125,8 @@ onUnmounted(() => {
     }
 
     &:hover {
-      background: #eff6ff;
-      border-color: #bfdbfe;
+      background: rgba(255, 255, 255, 0.7);
+      border-color: rgba(255, 255, 255, 0.8);
       border-left-color: var(--dt-brand-color);
       box-shadow: 0 2px 4px rgba(22, 119, 255, 0.1);
       transform: translateX(2px);
@@ -1163,14 +1152,12 @@ onUnmounted(() => {
       }
     }
 
-    // 激活状态（点击跳转时）
     &:active {
       transform: translateX(1px) scale(0.99);
       box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
     }
   }
 
-  // 自己发送消息中的引用回复样式适配
   &.is-own .bubble-reply-ref {
     background: rgba(255, 255, 255, 0.5);
     border-color: rgba(255, 255, 255, 0.6);
@@ -1187,11 +1174,22 @@ onUnmounted(() => {
 
     &:hover {
       background: rgba(255, 255, 255, 0.7);
-      border-color: rgba(22, 119, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.8);
+      border-left-color: var(--dt-brand-color);
+      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.1);
+
+      .ref-type-icon {
+        background: var(--dt-brand-color);
+        color: #fff;
+      }
+
+      .ref-content {
+        border-left-color: var(--dt-brand-color);
+        color: #475569;
+      }
     }
   }
 
-  // 暗色模式适配
   @media (prefers-color-scheme: dark) {
     .bubble-reply-ref {
       background: rgba(255, 255, 255, 0.08);
@@ -2106,20 +2104,20 @@ onUnmounted(() => {
 // ============================================================================
 :global(.dark) {
   .bubble {
-    background: #1E293B;  // 钉钉暗色左侧气泡
-    color: #F1F5F9;
-    border-color: #334155;
-    border-radius: 8px 8px 8px 2px;  // 保持钉钉尾部效果
+    background: #1E40AF;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px 8px 8px 2px;
 
     &.is-own {
-      background: #1E40AF;  // 钉钉暗色右侧气泡：深蓝
+      background: #1E40AF;
       color: #FFFFFF;
       border: none;
-      border-radius: 8px 8px 2px 8px;  // 保持钉钉尾部效果
+      border-radius: 8px 8px 2px 8px;
     }
 
     &:hover {
-      background: #253344;
+      background: #1E3A8A;
     }
 
     &.is-own:hover {
@@ -2138,7 +2136,6 @@ onUnmounted(() => {
     .file-name { color: #F1F5F9; }
   }
 
-  // 表情聚合显示 - 暗色模式
   .reaction-aggregate {
     .reaction-item {
       background: rgba(22, 119, 255, 0.1);
@@ -2168,7 +2165,6 @@ onUnmounted(() => {
     }
   }
 
-  // 表情详情弹窗 - 暗色模式
   .reaction-detail-dialog {
     .dialog-header {
       border-color: #334155;

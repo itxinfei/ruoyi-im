@@ -55,7 +55,7 @@
       <PersonalProfileDialog v-model="showProfile" />
       <SystemSettingsDialog v-model="showSettings" :default-menu="settingsDefaultMenu" />
       <HelpFeedbackDialog v-model="showHelp" />
-      <UserDetailDrawer v-model="showUserDetail" :session="detailSession" @send-message="handleSelectSession" />
+      <UserDetailDialog v-model="showUserDetail" :session="detailSession" @send-message="handleSelectSession" />
       <GlobalSearchDialog v-model="showGlobalSearch" @select-message="handleSearchSelectMessage" />
     </div>
   </div>
@@ -77,7 +77,7 @@ import ApprovalPanel from './ApprovalPanel.vue'
 import MailPanel from './MailPanel.vue'
 import AssistantPanel from './AssistantPanel.vue'
 import ChatPanel from './ChatPanel.vue'
-import UserDetailDrawer from '@/components/Chat/UserDetailDrawer.vue'
+import UserDetailDialog from '@/components/Chat/UserDetailDialog.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 
 // 新增弹窗组件
@@ -307,6 +307,7 @@ const handleKeydown = (e) => {
 .main-content-area > :not(.chat-layout) {
   width: 100%;
   height: 100%;
+  min-height: 0;
   display: flex;
   overflow: hidden;
 }
