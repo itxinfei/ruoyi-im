@@ -197,8 +197,8 @@
       @close="handleScreenshotPreviewClose"
     />
 
-    <!-- 网页截图组件 (js-web-screen-shot) -->
-    <WebScreenshot
+    <!-- 钉钉风格截图组件 -->
+    <DingtalkScreenshot
       :visible="showScreenshotGuide"
       @confirm="handleSendScreenshotFromGuide"
       @close="showScreenshotGuide = false"
@@ -225,7 +225,7 @@ import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
 import ScreenshotPreview from './ScreenshotPreview.vue'
-import WebScreenshot from './WebScreenshot.vue'
+import DingtalkScreenshot from './DingtalkScreenshot.vue'
 import CommandPalette from './CommandPalette.vue'
 import AiSmartReply from './AiSmartReply.vue'
 
@@ -1153,8 +1153,8 @@ onUnmounted(() => {
 
     .toolbar-btn {
       position: relative;
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       background: transparent;
       border: none;
       padding: 0;
@@ -1169,7 +1169,7 @@ onUnmounted(() => {
       // 图标样式
       .el-icon,
       .material-icons-outlined {
-        font-size: 18px;
+        font-size: 16px;
         transition: transform 0.2s var(--dt-ease-out);
       }
 

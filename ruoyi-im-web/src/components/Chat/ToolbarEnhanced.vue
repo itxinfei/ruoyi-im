@@ -90,17 +90,7 @@
                   </div>
                 </div>
               </el-dropdown-item>
-              <el-dropdown-item command="video">
-                <div class="menu-item-content">
-                  <div class="menu-icon video-icon">
-                    <el-icon><VideoCamera /></el-icon>
-                  </div>
-                  <div class="menu-info">
-                    <div class="menu-title">视频</div>
-                    <div class="menu-desc">MP4、WebM格式</div>
-                  </div>
-                </div>
-              </el-dropdown-item>
+
               <el-dropdown-item divided command="cloud">
                 <div class="menu-item-content">
                   <div class="menu-icon cloud-icon">
@@ -117,19 +107,7 @@
         </el-dropdown>
       </div>
 
-      <!-- 快捷功能 -->
-      <div class="tool-item">
-        <el-dropdown trigger="click" @command="handleQuickCommand">
-          <button class="tool-btn quick-btn">
-            <el-icon><Bolt /></el-icon>
-          </button>
-          <template #dropdown>
-            <el-dropdown-menu class="enhanced-menu">
-              <el-dropdown-item command="screenshot">
-                <div class="menu-item-content">
-                  <div class="menu-icon">
-                    <el-icon><ScissorOne /></el-icon>
-                  </div>
+
                   <div class="menu-info">
                     <div class="menu-title">截图</div>
                     <div class="menu-desc">Ctrl+Alt+A</div>
@@ -139,17 +117,7 @@
                   </div>
                 </div>
               </el-dropdown-item>
-              <el-dropdown-item command="voice">
-                <div class="menu-item-content">
-                  <div class="menu-icon">
-                    <el-icon><Microphone /></el-icon>
-                  </div>
-                  <div class="menu-info">
-                    <div class="menu-title">语音输入</div>
-                    <div class="menu-desc">长按说话</div>
-                  </div>
-                </div>
-              </el-dropdown-item>
+
               <el-dropdown-item command="translate">
                 <div class="menu-item-content">
                   <div class="menu-icon">
@@ -235,23 +203,70 @@
           </button>
         </el-tooltip>
 
-        <el-tooltip content="待办提醒" placement="top">
-          <button class="tool-btn reminder-btn" @click="handleSetReminder">
-            <el-icon><Bell /></el-icon>
-          </button>
-        </el-tooltip>
 
-        <el-tooltip content="快速回复" placement="top">
+
+        <el-tooltip content="快捷回复" placement="top">
           <button class="tool-btn quick-reply-btn" @click="handleQuickReply">
             <el-icon><ChatLineSquare /></el-icon>
           </button>
         </el-tooltip>
 
+        <el-tooltip content="收藏夹" placement="top">
+          <button class="tool-btn collection-btn" @click="handleShowCollection">
+            <el-icon><Star /></el-icon>
+            <el-badge v-if="collectionCount > 0" :value="collectionCount" :max="99" class="collection-badge" />
+          </button>
+        </el-tooltip>
+
+        <el-tooltip content="快捷操作" placement="top">
+          <el-dropdown trigger="click" @command="handleQuickAction">
+            <button class="tool-btn action-btn">
+              <el-icon><Operation /></el-icon>
+            </button>
+            <template #dropdown>
+              <el-dropdown-menu class="action-menu">
+                <el-dropdown-item command="forward">
+                  <div class="menu-item-content">
+                    <el-icon><Promotion /></el-icon>
+                    <span>转发消息</span>
+                  </div>
+                </el-dropdown-item>
+                <el-dropdown-item command="multiselect">
+                  <div class="menu-item-content">
+                    <el-icon><Select /></el-icon>
+                    <span>多选消息</span>
+                  </div>
+                </el-dropdown-item>
+                <el-dropdown-item command="search">
+                  <div class="menu-item-content">
+                    <el-icon><Search /></el-icon>
+                    <span>搜索聊天记录</span>
+                  </div>
+                </el-dropdown-item>
+                <el-dropdown-item command="export">
+                  <div class="menu-item-content">
+                    <el-icon><Download /></el-icon>
+                    <span>导出聊天记录</span>
+                  </div>
+                </el-dropdown-item>
+                <el-dropdown-item divided command="clear">
+                  <div class="menu-item-content">
+                    <el-icon><Delete /></el-icon>
+                    <span>清空聊天记录</span>
+                  </div>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </el-tooltip>
+
         <el-tooltip content="AI 助手" placement="top">
           <button class="tool-btn ai-btn" @click="handleShowSmartReply">
             <el-icon><MagicStick /></el-icon>
+            <el-badge v-if="aiWaitingCount > 0" :value="aiWaitingCount" :max="99" class="ai-badge" />
           </button>
         </el-tooltip>
+      </div>
       </div>
 
       <!-- 置顶/免打扰 -->
@@ -449,8 +464,9 @@ const emojiSearch = ref('')
 const aiEnabled = ref(false)
 const isDarkMode = ref(isDark.value)
 const isFavorite = ref(false)
+const markMode = ref(false)
 const collectionCount = ref(3)
-const aiWaiting = ref(0)
+const aiWaitingCount = ref(0)
 
 // Refs
 const imageInputRef = ref(null)
@@ -489,45 +505,41 @@ const moreTools = computed(() => [
   {
     key: 'whiteboard',
     name: '协作白板',
-    desc: '多人实时协作',
+    desc: '多人实时协作画板',
     icon: 'Monitor',
     color: '#722ed1',
-    status: { type: 'success', text: '新功能' }
+    status: { type: 'success', text: '即将上线' }
   },
   {
-    key: 'conference',
-    name: '视频会议',
-    desc: '发起群组通话',
-    icon: 'Phone',
-    color: '#13c2c2'
+    key: 'task',
+    name: '任务管理',
+    desc: '创建和分配任务',
+    icon: 'DocumentChecked',
+    color: '#1890ff'
   },
   {
     key: 'calendar',
     name: '日程安排',
-    desc: '创建会议邀请',
+    desc: '创建和管理日程',
     icon: 'Calendar',
-    color: '#1890ff'
-  },
-  {
-    key: 'vote',
-    name: '投票决策',
-    desc: '快速收集意见',
-    icon: 'DataBoard',
     color: '#52c41a'
   },
-  {
-    key: 'task',
-    name: '任务分配',
-    desc: '分配工作任务',
-    icon: 'Timer',
-    color: '#fa8c16'
   },
   {
-    key: 'share',
-    name: '文件分享',
-    desc: '安全分享文件',
-    icon: 'Share',
+    key: 'note',
+    name: '笔记记录',
+    desc: '快速记录要点',
+    icon: 'EditPen',
+    color: '#fa8c16'
+  },
+  },
+  {
+    key: 'poll',
+    name: '投票决策',
+    desc: '发起投票收集',
+    icon: 'DataBoard',
     color: '#722ed1'
+  }
   }
 ])
 
@@ -647,6 +659,22 @@ const handleAiToggle = (enabled) => {
   if (enabled) {
     aiWaiting.value = 0
   }
+}
+
+const handleShowMarkMenu = () => {
+  emit('tool-action', { type: 'mark' })
+}
+
+const handleQuickReply = () => {
+  emit('tool-action', { type: 'quick-reply' })
+}
+
+const handleSetReminder = () => {
+  emit('tool-action', { type: 'reminder' })
+}
+
+const handleShowCollection = () => {
+  emit('tool-action', { type: 'collection' })
 }
 
 const handleShowTodo = () => {
@@ -781,6 +809,68 @@ onUnmounted(() => {
         background: linear-gradient(135deg, #5a72d4 0%, #6a4190 100%);
         transform: scale(1.05);
       }
+    }
+    
+    &.more-btn:hover {
+      transform: rotate(180deg);
+    }
+    
+    &.favorite-btn {
+      &.is-favorite .el-icon {
+        color: #F5B800;
+      }
+    }
+    
+    &.pin-btn {
+      &.is-pinned .el-icon {
+        color: #1890FF;
+      }
+    }
+    
+    &.mark-btn {
+      &.is-marked .el-icon {
+        color: #F5B800;
+      }
+    }
+    
+    &.reminder-btn {
+      &.has-reminder .el-icon {
+        color: #F5B800;
+      }
+    }
+    
+    &.quick-reply-btn {
+      background: var(--el-fill-color-light);
+      
+      &:hover {
+        background: var(--el-color-primary);
+        color: white;
+        transform: scale(1.02);
+      }
+    }
+    
+    &.action-btn {
+      background: var(--el-fill-color-light);
+      color: var(--el-text-color-regular);
+      border: 1px solid var(--el-border-color-light);
+      
+      &:hover {
+        background: var(--el-color-primary);
+        color: white;
+        border-color: var(--el-color-primary);
+      }
+      
+      .el-icon {
+        font-size: 16px;
+      }
+    }
+    
+    &.collection-btn {
+      &.has-collection .el-icon {
+        color: #F5B800;
+      }
+    }
+  }
       
       .ai-badge {
         position: absolute;

@@ -104,7 +104,7 @@ const formattedTime = computed(() => {
 
 .message-item {
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   position: relative;
   padding: 0 16px;
   animation: fadeInUp 0.3s var(--dt-ease-out) both;

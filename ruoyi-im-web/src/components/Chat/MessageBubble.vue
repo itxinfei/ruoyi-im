@@ -922,9 +922,9 @@ onUnmounted(() => {
 .bubble {
   // 钉钉聊天气泡样式 - 精确复刻
   background: var(--dt-bubble-left-bg);  // #FFFFFF
-  padding: 12px 16px;
-  border-radius: 8px 8px 8px 0;  // 左下角直角
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 8px 12px;
+  border-radius: 6px 6px 6px 0;  // 左下角直角
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
   font-size: 14px;
   word-break: break-word;
   line-height: 1.5;
@@ -959,14 +959,14 @@ onUnmounted(() => {
 
   // 悬停时增强阴影
   &:hover {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   }
 
   &.is-own {
     background: var(--dt-bubble-right-bg);  // #E6F7FF
     color: var(--dt-text-primary);  // #000000
-    border-radius: 8px 8px 0 8px;  // 右下角直角
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    border-radius: 6px 6px 0 6px;  // 右下角直角
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
     border: none;
 
     &.is-selected {
@@ -976,7 +976,7 @@ onUnmounted(() => {
     }
 
     &:hover {
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     }
   }
 

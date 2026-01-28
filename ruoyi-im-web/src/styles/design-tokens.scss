@@ -48,19 +48,19 @@
   --dt-bg-mask: rgba(0, 0, 0, 0.6);
 
   // === DingTalk Special (钉钉特殊颜色) ===
-  --dt-bubble-left-bg: #ffffff;        // 接收消息背景
-  --dt-bubble-right-bg: #e6f4ff;       // 发送消息背景（与 brand-bg 一致）
-  --dt-bubble-right-bg-hover: #d6e4ff;
+  --dt-bubble-left-bg: #ffffff;              // 接收消息背景
+  --dt-bubble-right-bg: #1677ff15;          // 发送消息背景（钉钉淡蓝）
+  --dt-bubble-right-bg-hover: #1677ff25;    // 发送消息悬停
   --dt-unread-color: #1677ff;
   --dt-read-color: #8c8c8c;
   --dt-mention-bg: rgba(22, 119, 255, 0.1);
   --dt-mention-text: #1677ff;
 
   // === Text Colors (文本颜色 - 亮色模式) ===
-  --dt-text-primary: #000000;          // 主要文本
-  --dt-text-secondary: #595959;        // 次要文本
-  --dt-text-tertiary: #8c8c8c;         // 辅助文本
-  --dt-text-quaternary: #bfbfbf;       // 占位符文本
+  --dt-text-primary: #1f2329;          // 主要文本（钉钉深黑）
+  --dt-text-secondary: #646a73;        // 次要文本
+  --dt-text-tertiary: #8f959e;         // 辅助文本
+  --dt-text-quaternary: #c2c8d1;       // 占位符文本
   --dt-text-disabled: #d9d9d9;         // 禁用文本
   --dt-text-link: #1677ff;             // 链接文本
   --dt-text-link-hover: #4096ff;       // 链接悬停
@@ -150,7 +150,7 @@
   --dt-session-panel-collapsed-width: 60px;
   --dt-contact-panel-width: 320px;
   --dt-header-height: 48px;
-  --dt-chat-header-height: 56px;
+  --dt-chat-header-height: 52px;
   --dt-chat-input-height: 120px;
   --dt-chat-input-min-height: 80px;
   --dt-nav-item-height: 48px;
