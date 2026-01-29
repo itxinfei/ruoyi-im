@@ -303,7 +303,8 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             throw new BusinessException("无权限操作此考勤组");
         }
 
-        attendanceGroupMemberMapper.batchUpdateStatus(groupId, memberIds, "LEFT");
+        attendanceGroupMemberMapper.batchUpdateStatus(groupId, memberIds,
+                StatusConstants.AttendanceMemberStatus.LEFT);
 
         logger.info("移除考勤组成员成功: groupId={}, count={}", groupId, memberIds.size());
     }

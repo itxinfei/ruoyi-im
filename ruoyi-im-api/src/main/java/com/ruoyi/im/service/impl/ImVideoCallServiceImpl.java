@@ -352,7 +352,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         Long callId = call.getId();
 
         // 添加发起者作为参与者
-        addParticipant(callId, callerId, "JOINED");
+        addParticipant(callId, callerId, StatusConstants.CallParticipantStatus.JOINED);
 
         // 添加被邀请用户（状态为已邀请）
         for (Long userId : invitedUserIds) {
@@ -387,10 +387,10 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         // 检查是否已参与
         ImVideoCallParticipant existing = participantMapper.selectByCallIdAndUserId(callId, userId);
         if (existing != null) {
-            if ("JOINED".equals(existing.getStatus())) {
+            if (StatusConstants.CallParticipantStatus.JOINED.equals(existing.getStatus())) {
                 throw new BusinessException("您已在通话中");
             }
-            if ("LEFT".equals(existing.getStatus())) {
+            if (StatusConstants.CallParticipantStatus.LEFT.equals(existing.getStatus())) {
                 throw new BusinessException("您已离开该通话");
             }
         }
@@ -403,11 +403,11 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
 
         // 更新或创建参与者记录
         if (existing != null) {
-            existing.setStatus("JOINED");
+            existing.setStatus(StatusConstants.CallParticipantStatus.JOINED);
             existing.setJoinTime(LocalDateTime.now());
             participantMapper.updateById(existing);
         } else {
-            addParticipant(callId, userId, "JOINED");
+            addParticipant(callId, userId, StatusConstants.CallParticipantStatus.JOINED);
         }
 
         // 更新当前参与者数
@@ -434,8 +434,8 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
 
         // 更新参与者状态
         ImVideoCallParticipant participant = participantMapper.selectByCallIdAndUserId(callId, userId);
-        if (participant != null && "JOINED".equals(participant.getStatus())) {
-            participant.setStatus("LEFT");
+        if (participant != null && StatusConstants.CallParticipantStatus.JOINED.equals(participant.getStatus())) {
+            participant.setStatus(StatusConstants.CallParticipantStatus.LEFT);
             participant.setLeaveTime(LocalDateTime.now());
             participantMapper.updateById(participant);
 
@@ -517,7 +517,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         participant.setIsCameraOff(false);
         participant.setCreateTime(LocalDateTime.now());
 
-        if ("JOINED".equals(status)) {
+        if (StatusConstants.CallParticipantStatus.JOINED.equals(status)) {
             participant.setJoinTime(LocalDateTime.now());
         }
 

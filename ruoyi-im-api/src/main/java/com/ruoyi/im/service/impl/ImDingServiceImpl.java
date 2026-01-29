@@ -192,10 +192,10 @@ public class ImDingServiceImpl implements ImDingService {
                 .map(ImDingMessage::getSenderId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Map<Long, ImUser> senderMap = new HashMap<>();
+        final Map<Long, ImUser> senderMap = new HashMap<>();
         if (!senderIds.isEmpty()) {
             List<ImUser> senders = userMapper.selectImUserListByIds(new ArrayList<>(senderIds));
-            senderMap = senders.stream().collect(Collectors.toMap(ImUser::getId, u -> u));
+            senderMap.putAll(senders.stream().collect(Collectors.toMap(ImUser::getId, u -> u)));
         }
 
         // 批量查询当前用户的已读状态

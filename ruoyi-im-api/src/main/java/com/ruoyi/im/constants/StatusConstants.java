@@ -404,6 +404,28 @@ public class StatusConstants {
         public static final String COMPLETED = "COMPLETED";
     }
 
+    /**
+     * 视频通话参与者状态
+     */
+    public static class CallParticipantStatus {
+        /** 已加入 */
+        public static final String JOINED = "JOINED";
+
+        /** 已离开 */
+        public static final String LEFT = "LEFT";
+    }
+
+    /**
+     * 考勤组成员状态
+     */
+    public static class AttendanceMemberStatus {
+        /** 活跃 */
+        public static final String ACTIVE = "ACTIVE";
+
+        /** 已离开 */
+        public static final String LEFT = "LEFT";
+    }
+
     private StatusConstants() {
         throw new UnsupportedOperationException("常量类不允许实例化");
     }
