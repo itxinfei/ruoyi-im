@@ -127,16 +127,16 @@ defineExpose({ refresh: loadRequests })
 }
 
 .dt-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #e5e6eb;
-  border-top-color: #1890ff;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--dt-border-light);
+  border-top-color: var(--dt-brand-color);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 
   .dark & {
-    border-color: #3e3f42;
-    border-top-color: #1890ff;
+    border-color: var(--dt-border-dark);
+    border-top-color: var(--dt-brand-color);
   }
 }
 
@@ -153,35 +153,47 @@ defineExpose({ refresh: loadRequests })
   color: var(--dt-text-quaternary);
 
   svg {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
-    opacity: 0.3;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.2;
   }
 
   p {
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
     margin: 0;
+    color: var(--dt-text-tertiary);
   }
 }
 
 .dt-request-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  padding: 8px;
 }
 
 .dt-request-item {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #e5e6eb;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: var(--dt-radius-md);
+  border: 1px solid var(--dt-border-light);
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    border-color: var(--dt-border-color);
+    box-shadow: var(--dt-shadow-1);
+  }
 
   .dark & {
-    background: #2a2b2c;
-    border-color: #3e3f42;
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+
+    &:hover {
+      border-color: var(--dt-border-color);
+    }
   }
 }
 
@@ -192,16 +204,18 @@ defineExpose({ refresh: loadRequests })
 }
 
 .dt-request-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
   margin-bottom: 4px;
+
   @include text-ellipsis;
 }
 
 .dt-request-msg {
-  font-size: 12px;
-  color: var(--dt-text-quaternary);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+
   @include text-ellipsis;
 }
 
@@ -213,53 +227,86 @@ defineExpose({ refresh: loadRequests })
 
 .dt-btn-deny,
 .dt-btn-accept {
-  padding: 6px 16px;
-  font-size: 13px;
-  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
+  border-radius: var(--dt-radius-md);
   border: none;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dt-transition-fast);
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .dt-btn-deny {
-  background: #fff;
+  background: #ffffff;
   color: var(--dt-text-secondary);
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--dt-border-color);
 
   &:hover {
-    border-color: #1890ff;
-    color: #1890ff;
+    border-color: var(--dt-brand-color);
+    color: var(--dt-brand-color);
   }
 
   .dark & {
-    background: #3a3a3a;
-    border-color: #5c5c5c;
+    background: var(--dt-bg-input-dark);
+    border-color: var(--dt-border-dark);
+    color: var(--dt-text-secondary-dark);
+
+    &:hover {
+      border-color: var(--dt-brand-color);
+      color: var(--dt-brand-color);
+    }
   }
 }
 
 .dt-btn-accept {
-  background: #1890ff;
-  color: #fff;
+  background: var(--dt-brand-color);
+  color: #ffffff;
 
   &:hover {
-    background: #40a9ff;
-  }
-
-  .dark & {
-    background: #1890ff;
+    background: var(--dt-brand-hover);
   }
 }
 
 .dt-status {
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
+  padding: 4px 12px;
+  border-radius: var(--dt-radius-sm);
   color: var(--dt-text-quaternary);
+  background: var(--dt-bg-card-hover);
 
   &.accepted {
     color: var(--dt-success-color);
+    background: var(--dt-success-bg);
   }
 
   &.rejected {
     color: var(--dt-text-quaternary);
+    background: var(--dt-bg-card-hover);
+  }
+}
+
+// ============================================================================
+// 响应式适配
+// ============================================================================
+
+@media (max-width: 768px) {
+  .dt-request-list {
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .dt-request-item {
+    padding: 10px;
+  }
+
+  .dt-btn-deny,
+  .dt-btn-accept {
+    padding: 6px 12px;
+    font-size: var(--dt-font-size-xs);
   }
 }
 </style>

@@ -99,37 +99,40 @@ const handleTouchEnd = () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .contact-item {
   position: relative;
-  height: 60px;
-  overflow: hidden; // Hide swipe actions
-  background: #fff;
+  height: 64px;
+  overflow: hidden;
+  background: #ffffff;
   cursor: pointer;
-  transition: background 0.2s;
-  
+  transition: background var(--dt-transition-fast);
+
   &:hover {
-    background: var(--dt-bg-card-hover);
+    background: var(--dt-bg-session-hover);
   }
-  
+
   &.active {
-    background: var(--dt-brand-light);
-    
+    background: var(--dt-brand-bg);
+
     .item-name {
-        color: var(--dt-brand-color);
+      color: var(--dt-brand-color);
     }
   }
 }
 
+// 暗色模式适配
 .dark .contact-item {
-    background: var(--dt-bg-card-dark);
-    
-    &:hover {
-        background: var(--dt-bg-hover-dark);
-    }
-    
-    &.active {
-        background: rgba(22, 119, 255, 0.2);
-    }
+  background: var(--dt-bg-card-dark);
+
+  &:hover {
+    background: var(--dt-bg-hover-dark);
+  }
+
+  &.active {
+    background: rgba(22, 119, 255, 0.15);
+  }
 }
 
 .contact-content {
@@ -140,12 +143,12 @@ const handleTouchEnd = () => {
   height: 100%;
   padding: 0 16px;
   background: inherit;
-  transition: transform 0.3s ease;
+  transition: transform var(--dt-transition-base);
 }
 
-// Swipe Effect
+// 滑动删除效果
 .swiped-left .contact-content {
-    transform: translateX(-70px); // Width of delete button
+  transform: translateX(-70px);
 }
 
 .item-info {
@@ -158,51 +161,53 @@ const handleTouchEnd = () => {
 }
 
 .item-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .item-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  
+
+  .dark & {
+    color: var(--dt-text-primary-dark);
+  }
+
   :deep(.highlight) {
-      color: var(--dt-brand-color);
-      font-weight: bold;
+    color: var(--dt-brand-color);
+    font-weight: var(--dt-font-weight-semibold);
   }
 }
 
-.dark .item-name {
-    color: var(--dt-text-primary-dark);
-}
-
 .item-tag {
-    font-size: 10px;
-    padding: 1px 4px;
-    border-radius: 4px;
-    background: var(--dt-brand-light);
-    color: var(--dt-brand-color);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--dt-radius-sm);
+  background: var(--dt-brand-bg);
+  color: var(--dt-brand-color);
+  font-weight: var(--dt-font-weight-medium);
+  flex-shrink: 0;
 }
 
 .item-desc {
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 2px;
-}
 
-.dark .item-desc {
+  .dark & {
     color: var(--dt-text-secondary-dark);
+  }
 }
 
-// Swipe Actions
+// 滑动操作按钮
 .swipe-actions {
   position: absolute;
   top: 0;
@@ -216,15 +221,35 @@ const handleTouchEnd = () => {
 .action-btn {
   flex: 1;
   border: none;
-  font-size: 13px;
-  color: #fff;
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  
+  transition: opacity var(--dt-transition-fast);
+
+  &:active {
+    opacity: 0.8;
+  }
+
   &.delete {
-      background: var(--dt-error-color);
+    background: var(--dt-error-color);
+  }
+}
+
+// ============================================================================
+// 响应式适配
+// ============================================================================
+
+@media (max-width: 768px) {
+  .contact-item {
+    height: 60px;
+  }
+
+  .contact-content {
+    padding: 0 12px;
   }
 }
 </style>

@@ -946,8 +946,8 @@ onMounted(() => {
 
 .quick-apps-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr); // 钉钉使用4列快捷应用
+  gap: 16px; // 钉钉使用16px间距
 }
 
 .quick-app-item {
@@ -1028,12 +1028,12 @@ onMounted(() => {
 }
 
 // ============================================================================
-// Bento Grid 布局
+// Bento Grid 布局（钉钉风格）
 // ============================================================================
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr); // 钉钉使用3列布局
+  gap: 12px; // 钉钉间距12px
   align-items: start;
 
   &.edit-mode {
@@ -1053,19 +1053,19 @@ onMounted(() => {
 }
 
 // ============================================================================
-// Bento 卡片
+// Bento 卡片（钉钉风格）
 // ============================================================================
 .bento-card {
   position: relative;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-xl);
+  border-radius: 12px; // 钉钉使用12px圆角
   overflow: hidden;
   transition: all var(--dt-transition-base);
-  box-shadow: var(--dt-shadow-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); // 钉钉更轻的阴影
 
   &:hover {
-    box-shadow: var(--dt-shadow-card-hover);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); // 悬停时阴影加深
   }
 
   // 卡片尺寸

@@ -213,7 +213,7 @@ const confirmAdd = async () => {
   }
   :deep(.el-dialog__body) {
     padding: 0;
-    border-radius: 12px;
+    border-radius: var(--dt-radius-xl);
     overflow: hidden;
   }
 }
@@ -223,17 +223,17 @@ const confirmAdd = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid #e5e6eb;
+  border-bottom: 1px solid var(--dt-border-lighter);
 
   .dark & {
-    border-bottom-color: #3e3f42;
+    border-bottom-color: var(--dt-border-dark);
   }
 }
 
 .dt-dialog-title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-lg);
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
 }
 
@@ -246,8 +246,9 @@ const confirmAdd = async () => {
   border: none;
   background: transparent;
   color: var(--dt-text-secondary);
-  border-radius: 6px;
+  border-radius: var(--dt-radius-sm);
   cursor: pointer;
+  transition: all var(--dt-transition-fast);
 
   svg {
     width: 18px;
@@ -255,35 +256,37 @@ const confirmAdd = async () => {
   }
 
   &:hover {
-    background: #f5f5f5;
+    background: var(--dt-bg-session-hover);
   }
 }
 
 .dt-search-section {
   padding: 16px 20px;
-  background: #f5f5f5;
+  background: var(--dt-bg-body);
 
   .dark & {
-    background: #1a1a1a;
+    background: var(--dt-bg-body-dark);
   }
 }
 
 .dt-search-input {
   display: flex;
   align-items: center;
-  background: #fff;
-  border: 1px solid #e5e6eb;
-  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-md);
   padding: 8px 12px;
   margin-bottom: 12px;
+  transition: all var(--dt-transition-fast);
 
   .dark & {
-    background: #2a2b2c;
-    border-color: #3e3f42;
+    background: var(--dt-bg-input-dark);
+    border-color: var(--dt-border-dark);
   }
 
   &:focus-within {
-    border-color: #1890ff;
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 2px var(--dt-brand-lighter);
   }
 }
 
@@ -300,7 +303,7 @@ const confirmAdd = async () => {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   color: var(--dt-text-primary);
 
   &::placeholder {
@@ -336,16 +339,17 @@ const confirmAdd = async () => {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: #1890ff;
+  background: var(--dt-brand-color);
   color: #fff;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all var(--dt-transition-fast);
 
   &:hover {
-    background: #40a9ff;
+    background: var(--dt-brand-hover);
   }
 
   svg {
@@ -371,7 +375,8 @@ const confirmAdd = async () => {
 .dt-results {
   max-height: 320px;
   overflow-y: auto;
-  padding: 8px 0;
+
+  @extend .scrollbar-sm;
 }
 
 .dt-empty {
@@ -383,15 +388,16 @@ const confirmAdd = async () => {
   color: var(--dt-text-quaternary);
 
   svg {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
-    opacity: 0.3;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.2;
   }
 
   p {
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
     margin: 0;
+    color: var(--dt-text-tertiary);
   }
 }
 
@@ -399,13 +405,13 @@ const confirmAdd = async () => {
   display: flex;
   align-items: center;
   padding: 12px 20px;
-  transition: background 0.15s;
+  transition: background var(--dt-transition-fast);
 
   &:hover {
-    background: #f5f5f5;
+    background: var(--dt-bg-session-hover);
 
     .dark & {
-      background: #3a3a3a;
+      background: var(--dt-bg-hover-dark);
     }
   }
 }
@@ -417,41 +423,42 @@ const confirmAdd = async () => {
 }
 
 .dt-user-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
 .dt-user-meta {
-  font-size: 12px;
-  color: var(--dt-text-quaternary);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
 }
 
 .dt-add-btn {
   padding: 6px 16px;
-  background: #1890ff;
+  background: var(--dt-brand-color);
   color: #fff;
   border: none;
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all var(--dt-transition-fast);
 
   &:hover {
-    background: #40a9ff;
+    background: var(--dt-brand-hover);
   }
 }
 
 .dt-added-badge {
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-quaternary);
   padding: 6px 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
+  background: var(--dt-bg-card-hover);
+  border-radius: var(--dt-radius-md);
 
   .dark & {
-    background: #3a3a3a;
+    background: var(--dt-bg-hover-dark);
   }
 }
 
@@ -474,7 +481,8 @@ const confirmAdd = async () => {
 
   label {
     display: block;
-    font-size: 13px;
+    font-size: var(--dt-font-size-sm);
+    font-weight: var(--dt-font-weight-medium);
     color: var(--dt-text-secondary);
     margin-bottom: 8px;
   }
@@ -483,21 +491,24 @@ const confirmAdd = async () => {
   select {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #e5e6eb;
-    border-radius: 6px;
-    font-size: 14px;
+    border: 1px solid var(--dt-border-color);
+    border-radius: var(--dt-radius-md);
+    font-size: var(--dt-font-size-base);
     color: var(--dt-text-primary);
-    background: #fff;
+    background: #ffffff;
     outline: none;
     resize: none;
+    transition: all var(--dt-transition-fast);
 
     .dark & {
-      background: #2a2b2c;
-      border-color: #3e3f42;
+      background: var(--dt-bg-input-dark);
+      border-color: var(--dt-border-dark);
+      color: var(--dt-text-primary-dark);
     }
 
     &:focus {
-      border-color: #1890ff;
+      border-color: var(--dt-brand-color);
+      box-shadow: 0 0 0 2px var(--dt-brand-lighter);
     }
   }
 }
@@ -506,7 +517,7 @@ const confirmAdd = async () => {
   position: absolute;
   bottom: -20px;
   right: 0;
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-quaternary);
 }
 
@@ -514,31 +525,37 @@ const confirmAdd = async () => {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--dt-border-lighter);
+
+  .dark & {
+    border-top-color: var(--dt-border-dark);
+  }
 }
 
 .dt-btn {
   padding: 8px 20px;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-font-size-base);
   cursor: pointer;
   border: none;
-  transition: all 0.15s;
+  transition: all var(--dt-transition-fast);
 
   &.dt-btn-secondary {
-    background: #f5f5f5;
+    background: var(--dt-bg-card-hover);
     color: var(--dt-text-secondary);
 
     &:hover {
-      background: #e5e6eb;
+      background: var(--dt-border-color);
     }
   }
 
   &.dt-btn-primary {
-    background: #1890ff;
+    background: var(--dt-brand-color);
     color: #fff;
 
     &:hover {
-      background: #40a9ff;
+      background: var(--dt-brand-hover);
     }
 
     &.loading {

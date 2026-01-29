@@ -531,29 +531,46 @@ onBeforeUnmount(() => {
 defineExpose({ reload: loadData })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .contact-list-container {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: white;
-  border-right: 1px solid #e6e6e6;
+  background: #ffffff;
+  border-right: 1px solid var(--dt-border-divider);
   position: relative;
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-right-color: var(--dt-border-dark);
+  }
 }
 
 .search-box {
   padding: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--dt-border-lighter);
+
+  .dark & {
+    border-bottom-color: var(--dt-border-dark);
+  }
 }
 
 .list-content {
   flex: 1;
   overflow-y: auto;
+
+  @extend .scrollbar-sm;
 }
 
 .nav-list {
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dt-border-lighter);
+
+  .dark & {
+    border-bottom-color: var(--dt-border-dark);
+  }
 
   .nav-item {
     display: flex;
@@ -561,9 +578,10 @@ defineExpose({ reload: loadData })
     padding: 10px 12px;
     cursor: pointer;
     gap: 12px;
+    transition: background var(--dt-transition-fast);
 
     &:hover {
-      background: #f5f7fa;
+      background: var(--dt-bg-session-hover);
     }
 
     .nav-badge {
@@ -574,19 +592,19 @@ defineExpose({ reload: loadData })
     .nav-icon {
       width: 36px;
       height: 36px;
-      border-radius: 4px;
+      border-radius: var(--dt-radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-size: 20px;
 
-      &.new-friends { background: #fab6b6; }
+      &.new-friends { background: #FF9800; }
     }
 
     .nav-label {
-      font-size: 14px;
-      color: #333;
+      font-size: var(--dt-font-size-base);
+      color: var(--dt-text-primary);
     }
   }
 }
@@ -599,23 +617,27 @@ defineExpose({ reload: loadData })
   padding-right: 8px;
 
   .group-name {
-    font-size: 14px;
-    color: #333;
+    font-size: var(--dt-font-size-base);
+    color: var(--dt-text-primary);
   }
 
   .group-count {
-    font-size: 12px;
-    color: #999;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-tertiary);
   }
 
   .group-more {
     margin-left: auto;
     cursor: pointer;
-    color: #999;
+    color: var(--dt-text-tertiary);
     font-size: 16px;
+    padding: 4px;
+    border-radius: var(--dt-radius-sm);
+    transition: all var(--dt-transition-fast);
 
     &:hover {
-      color: #409eff;
+      color: var(--dt-brand-color);
+      background: var(--dt-bg-session-hover);
     }
   }
 }
@@ -625,31 +647,37 @@ defineExpose({ reload: loadData })
   align-items: center;
   padding: 10px 12px;
   cursor: pointer;
-  transition: background 0.2s;
-}
+  transition: background var(--dt-transition-fast);
 
-.friend-item:hover, .friend-item.active {
-  background-color: #f5f7fa;
+  &:hover,
+  &.active {
+    background-color: var(--dt-bg-session-hover);
+  }
+
+  &.active {
+    background-color: var(--dt-brand-bg);
+  }
 }
 
 .avatar {
   width: 36px;
   height: 36px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-md);
   margin-right: 10px;
-  background: #409eff;
+  background: var(--dt-brand-color);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   overflow: hidden;
-}
+  flex-shrink: 0;
 
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .info {
@@ -658,14 +686,14 @@ defineExpose({ reload: loadData })
 }
 
 .name {
-  font-size: 14px;
-  color: #333;
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-primary);
   margin-bottom: 2px;
 }
 
 .desc {
-  font-size: 12px;
-  color: #999;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -674,46 +702,73 @@ defineExpose({ reload: loadData })
 .custom-tree-node {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+
+  .el-icon {
+    color: var(--dt-text-tertiary);
+  }
+
+  .node-label {
+    font-size: var(--dt-font-size-base);
+  }
 }
 
 .empty-small {
   text-align: center;
-  color: #ccc;
-  font-size: 12px;
-  padding: 20px 0;
+  color: var(--dt-text-quaternary);
+  font-size: var(--dt-font-size-sm);
+  padding: 40px 20px;
 }
 
 /* 右键菜单 */
 .context-menu {
   position: fixed;
-  background: white;
-  border: 1px solid #e6e6e6;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  min-width: 150px;
+  background: #ffffff;
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-md);
+  box-shadow: var(--dt-shadow-float);
+  z-index: var(--dt-z-max);
+  min-width: 160px;
   padding: 4px 0;
+  animation: fadeInUp var(--dt-transition-fast);
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
 }
 
 .context-menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 10px;
+  padding: 10px 16px;
   cursor: pointer;
-  font-size: 14px;
-  color: #333;
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-primary);
+  transition: background var(--dt-transition-fast);
+
+  .el-icon {
+    color: var(--dt-text-tertiary);
+  }
 
   &:hover {
-    background: #f5f7fa;
+    background: var(--dt-bg-session-hover);
+
+    .el-icon {
+      color: var(--dt-text-secondary);
+    }
   }
 
   &.danger {
-    color: #f56c6c;
+    color: var(--dt-error-color);
+
+    .el-icon {
+      color: var(--dt-error-color);
+    }
 
     &:hover {
-      background: #fef0f0;
+      background: var(--dt-error-bg);
     }
   }
 }
@@ -721,8 +776,11 @@ defineExpose({ reload: loadData })
 /* 折叠面板标题样式优化 */
 :deep(.el-collapse-item__header) {
   padding: 0 12px;
-  height: 40px;
-  line-height: 40px;
+  height: 44px;
+  line-height: 44px;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
+  color: var(--dt-text-primary);
 }
 
 :deep(.el-collapse-item__wrap) {
@@ -731,5 +789,74 @@ defineExpose({ reload: loadData })
 
 :deep(.el-collapse-item__content) {
   padding-bottom: 0;
+}
+
+/* Element Plus 暗色模式适配 */
+:deep(.el-input__wrapper) {
+  .dark & {
+    background-color: var(--dt-bg-input-dark);
+    box-shadow: 0 0 0 1px var(--dt-border-dark) inset;
+  }
+}
+
+:deep(.el-collapse) {
+  border: none;
+}
+
+:deep(.el-tree) {
+  background: transparent;
+
+  .el-tree-node__content {
+    height: 36px;
+    border-radius: var(--dt-radius-sm);
+
+    &:hover {
+      background: var(--dt-bg-session-hover);
+    }
+  }
+
+  .dark & {
+    color: var(--dt-text-primary-dark);
+  }
+}
+
+/* 对话框样式 */
+:deep(.el-dialog) {
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border: 1px solid var(--dt-border-dark);
+  }
+
+  .el-dialog__header {
+    border-bottom: 1px solid var(--dt-border-lighter);
+
+    .dark & {
+      border-bottom-color: var(--dt-border-dark);
+    }
+  }
+
+  .el-dialog__title {
+    font-weight: var(--dt-font-weight-semibold);
+  }
+}
+
+/* 徽标样式 */
+:deep(.el-badge__content) {
+  font-size: var(--dt-font-size-xs);
+  font-weight: var(--dt-font-weight-medium);
+}
+
+/* 下拉菜单样式 */
+:deep(.el-dropdown-menu) {
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+
+  .el-dropdown-menu__item {
+    &:hover {
+      background: var(--dt-bg-session-hover);
+    }
+  }
 }
 </style>

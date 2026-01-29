@@ -216,18 +216,22 @@ const handleViewHistory = () => {
 
 :deep(.user-profile-dialog) {
   .el-dialog {
-    border-radius: 12px;
+    border-radius: var(--dt-radius-xl);
     overflow: hidden;
   }
 
   .el-dialog__header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--dt-border-light);
+    border-bottom: 1px solid var(--dt-border-lighter);
     margin: 0;
 
+    .dark & {
+      border-bottom-color: var(--dt-border-dark);
+    }
+
     .el-dialog__title {
-      font-size: 16px;
-      font-weight: 600;
+      font-size: var(--dt-font-size-lg);
+      font-weight: var(--dt-font-weight-semibold);
       color: var(--dt-text-primary);
     }
 
@@ -266,7 +270,11 @@ const handleViewHistory = () => {
   width: 160px;
   flex-shrink: 0;
   padding-right: 24px;
-  border-right: 1px solid var(--dt-border-light);
+  border-right: 1px solid var(--dt-border-lighter);
+
+  .dark & {
+    border-right-color: var(--dt-border-dark);
+  }
 
   .avatar-wrapper {
     position: relative;
@@ -278,15 +286,15 @@ const handleViewHistory = () => {
       right: 4px;
       width: 18px;
       height: 18px;
-      background: #52c41a;
+      background: var(--dt-success-color);
       border: 3px solid #fff;
       border-radius: 50%;
     }
   }
 
   .user-name {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: var(--dt-font-size-xl);
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
     margin: 0 0 12px;
     text-align: center;
@@ -299,8 +307,8 @@ const handleViewHistory = () => {
     align-items: center;
     gap: 6px;
     padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
+    border-radius: var(--dt-radius-full);
+    font-size: var(--dt-font-size-sm);
     margin-bottom: 12px;
 
     .dot {
@@ -310,20 +318,20 @@ const handleViewHistory = () => {
     }
 
     &.online {
-      background: rgba(82, 196, 26, 0.1);
-      color: #52c41a;
+      background: var(--dt-success-bg);
+      color: var(--dt-success-color);
 
       .dot {
-        background: #52c41a;
+        background: var(--dt-success-color);
       }
     }
 
     &.offline {
-      background: var(--dt-bg-body);
+      background: var(--dt-bg-card-hover);
       color: var(--dt-text-tertiary);
 
       .dot {
-        background: var(--dt-text-tertiary);
+        background: var(--dt-text-quaternary);
       }
     }
   }
@@ -333,7 +341,7 @@ const handleViewHistory = () => {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    font-size: 12px;
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-secondary);
     text-align: center;
 
@@ -358,15 +366,19 @@ const handleViewHistory = () => {
 .info-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 
   .info-row {
     display: flex;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--dt-border-light);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--dt-border-lighter);
 
     &:last-child {
       border-bottom: none;
+    }
+
+    .dark & {
+      border-bottom-color: var(--dt-border-dark);
     }
 
     &.full {
@@ -376,14 +388,14 @@ const handleViewHistory = () => {
 
     .info-label {
       width: 60px;
-      font-size: 13px;
+      font-size: var(--dt-font-size-sm);
       color: var(--dt-text-tertiary);
       flex-shrink: 0;
     }
 
     .info-value {
       flex: 1;
-      font-size: 14px;
+      font-size: var(--dt-font-size-base);
       color: var(--dt-text-primary);
 
       &.signature {
@@ -405,13 +417,18 @@ const handleViewHistory = () => {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: var(--dt-bg-body);
-    border: 1px solid var(--dt-border-light);
-    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid var(--dt-border-color);
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
     color: var(--dt-text-primary);
-    transition: all 0.2s;
+    transition: all var(--dt-transition-fast);
+
+    .dark & {
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
+    }
 
     .material-icons-outlined {
       font-size: 18px;
@@ -429,7 +446,7 @@ const handleViewHistory = () => {
     }
 
     &:hover:not(.primary) {
-      background: var(--dt-bg-hover);
+      background: var(--dt-bg-session-hover);
       border-color: var(--dt-brand-color);
       color: var(--dt-brand-color);
     }
@@ -447,19 +464,23 @@ const handleViewHistory = () => {
     gap: 6px;
     padding: 8px 14px;
     background: transparent;
-    border: 1px solid var(--dt-border-light);
-    border-radius: 8px;
+    border: 1px solid var(--dt-border-color);
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
-    font-size: 13px;
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-secondary);
-    transition: all 0.2s;
+    transition: all var(--dt-transition-fast);
+
+    .dark & {
+      border-color: var(--dt-border-dark);
+    }
 
     .material-icons-outlined {
       font-size: 16px;
     }
 
     &:hover {
-      background: var(--dt-bg-hover);
+      background: var(--dt-bg-session-hover);
       border-color: var(--dt-brand-color);
       color: var(--dt-brand-color);
     }
@@ -469,11 +490,20 @@ const handleViewHistory = () => {
 // 备注弹窗样式
 :deep(.remark-dialog) {
   .el-input__wrapper {
-    box-shadow: 0 0 0 1px var(--dt-border-light) inset;
-    transition: box-shadow 0.2s;
+    box-shadow: 0 0 0 1px var(--dt-border-color) inset;
+    transition: box-shadow var(--dt-transition-base);
+
+    .dark & {
+      background-color: var(--dt-bg-input-dark);
+      box-shadow: 0 0 0 1px var(--dt-border-dark) inset;
+    }
 
     &:hover {
-      box-shadow: 0 0 0 1px var(--dt-border) inset;
+      box-shadow: 0 0 0 1px var(--dt-border-input-hover) inset;
+
+      .dark & {
+        box-shadow: 0 0 0 1px var(--dt-border-color) inset;
+      }
     }
 
     &.is-focus {
@@ -482,7 +512,30 @@ const handleViewHistory = () => {
   }
 
   .el-input__count {
-    color: var(--dt-text-tertiary);
+    color: var(--dt-text-quaternary);
+  }
+}
+
+// ============================================================================
+// 响应式适配
+// ============================================================================
+
+@media (max-width: 768px) {
+  .dialog-content {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .left-section {
+    width: 100%;
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--dt-border-lighter);
+    padding-bottom: 20px;
+
+    .dark & {
+      border-bottom-color: var(--dt-border-dark);
+    }
   }
 }
 </style>

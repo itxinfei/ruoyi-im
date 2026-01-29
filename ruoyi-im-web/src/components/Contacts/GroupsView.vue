@@ -97,16 +97,16 @@ onMounted(() => {
 }
 
 .dt-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #e5e6eb;
-  border-top-color: #1890ff;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--dt-border-light);
+  border-top-color: var(--dt-brand-color);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 
   .dark & {
-    border-color: #3e3f42;
-    border-top-color: #1890ff;
+    border-color: var(--dt-border-dark);
+    border-top-color: var(--dt-brand-color);
   }
 }
 
@@ -123,45 +123,49 @@ onMounted(() => {
   color: var(--dt-text-quaternary);
 
   svg {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
-    opacity: 0.3;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.2;
   }
 
   p {
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
     margin: 0;
+    color: var(--dt-text-tertiary);
   }
 }
 
 .dt-groups-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  padding: 8px;
 }
 
 .dt-group-item {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #e5e6eb;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: var(--dt-radius-md);
+  border: 1px solid var(--dt-border-light);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dt-transition-fast);
 
   .dark & {
-    background: #2a2b2c;
-    border-color: #3e3f42;
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
   }
 
   &:hover {
-    background: #f5f5f5;
+    border-color: var(--dt-border-color);
+    box-shadow: var(--dt-shadow-1);
+    transform: translateX(2px);
+  }
 
-    .dark & {
-      background: #3a3a3a;
-    }
+  &:active {
+    transform: translateX(0);
   }
 }
 
@@ -172,16 +176,17 @@ onMounted(() => {
 }
 
 .dt-group-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
   margin-bottom: 4px;
+
   @include text-ellipsis;
 }
 
 .dt-group-desc {
-  font-size: 12px;
-  color: var(--dt-text-quaternary);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -189,12 +194,38 @@ onMounted(() => {
 
 .dt-group-desc-text {
   @include text-ellipsis;
+
+  &::before {
+    content: '•';
+    margin-right: 4px;
+  }
 }
 
 .dt-group-arrow {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: var(--dt-text-quaternary);
   flex-shrink: 0;
+  transition: transform var(--dt-transition-fast);
+
+  .dt-group-item:hover & {
+    color: var(--dt-brand-color);
+    transform: translateX(2px);
+  }
+}
+
+// ============================================================================
+// 响应式适配
+// ============================================================================
+
+@media (max-width: 768px) {
+  .dt-groups-list {
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .dt-group-item {
+    padding: 10px;
+  }
 }
 </style>

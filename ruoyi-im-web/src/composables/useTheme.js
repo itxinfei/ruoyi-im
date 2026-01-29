@@ -36,10 +36,18 @@ const updateIsDark = () => {
 const applyThemeToDOM = (dark) => {
   if (typeof document === 'undefined') return
 
+  const updateDOM = () => {
+    if (dark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }
+
   if (document.startViewTransition) {
-    document.startViewTransition(update)
+    document.startViewTransition(updateDOM)
   } else {
-    update()
+    updateDOM()
   }
 }
 

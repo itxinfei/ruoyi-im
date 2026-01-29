@@ -37,6 +37,7 @@
           @at="$emit('at', $event)"
           @show-user="$emit('show-user', $event)"
           @retry="$emit('retry', $event)"
+          @nudge="handleNudge"
         >
           <!-- 消息气泡内容插槽 -->
           <template #bubble>
@@ -116,6 +117,7 @@ import { computed, ref, nextTick, watch, onMounted, onUnmounted } from 'vue'
 import { Loading, ArrowDown, User } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
+import { sendNudge } from '@/api/im/nudge'
 import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -138,7 +140,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit', 'preview'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit', 'preview', 'nudge-success'])
 
 const listRef = ref(null)
 const readUsersMap = ref({})
@@ -233,6 +235,35 @@ const downloadFile = (fileInfo) => {
 const handleReEdit = ({ content }) => {
   // 触发重新编辑事件，由父组件处理
   emit('re-edit', content)
+}
+
+// 处理拍一拍
+const handleNudge = async (nudgedUserId) => {
+  if (!props.sessionId) return
+
+  try {
+    const res = await sendNudge({
+      conversationId: props.sessionId,
+      nudgedUserId
+    })
+
+    if (res.code === 200) {
+      // 拍一拍成功，显示提示
+      ElMessage.success(`${res.data.nudgerName} 拍了拍 ${res.data.nudgedUserName}`)
+      // 通知父组件有新消息（拍一拍消息）
+      emit('nudge-success', res.data)
+    } else {
+      ElMessage.warning(res.msg || '拍一拍失败')
+    }
+  } catch (error) {
+    // 业务异常（如冷却中）已经处理过
+    if (error.message) {
+      ElMessage.warning(error.message)
+    } else {
+      console.error('拍一拍失败:', error)
+      ElMessage.error('拍一拍失败，请稍后重试')
+    }
+  }
 }
 
 // 格式化时间分隔符文案

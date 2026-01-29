@@ -448,6 +448,8 @@ public class ImMessageServiceImpl implements ImMessageService {
                 ImMessageVO.QuotedMessageVO quotedMessage = buildQuotedMessageFromMap(
                         message.getReplyToMessageId(), batchData.replyToMessageMap, batchData.userMap);
                 vo.setQuotedMessage(quotedMessage);
+                // 同时设置replyTo字段以兼容前端
+                vo.setReplyTo(quotedMessage);
             }
 
             voList.add(vo);
@@ -485,7 +487,14 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         ImMessage originalMessage = replyToMessageMap.get(messageId);
         if (originalMessage == null) {
-            return null;
+            // 被引用的消息不存在（可能被删除），返回占位对象
+            ImMessageVO.QuotedMessageVO placeholder = new ImMessageVO.QuotedMessageVO();
+            placeholder.setId(messageId);
+            placeholder.setSenderName("未知用户");
+            placeholder.setContent("[消息已删除]");
+            placeholder.setType(MessageStatusConstants.MESSAGE_TYPE_TEXT);
+            placeholder.setIsFile(false);
+            return placeholder;
         }
 
         ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();

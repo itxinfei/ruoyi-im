@@ -143,12 +143,12 @@ defineExpose({
   display: flex;
   align-items: center;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: all 0.2s var(--dt-ease-out);
+  transition: all var(--dt-transition-base);
   color: var(--dt-text-secondary);
   position: relative;
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
 
   .dark & {
     color: var(--dt-text-secondary-dark);
@@ -156,8 +156,8 @@ defineExpose({
 }
 
 .root-node {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--dt-font-weight-semibold);
+  font-size: var(--dt-font-size-base);
   color: var(--dt-text-primary);
 
   .dark & {
@@ -167,7 +167,7 @@ defineExpose({
 
 .root-node:hover,
 .dept-node:hover {
-  background: var(--dt-bg-hover);
+  background: var(--dt-bg-session-hover);
 
   .dark & {
     background: var(--dt-bg-hover-dark);
@@ -175,9 +175,9 @@ defineExpose({
 }
 
 .dept-node.active {
-  background: var(--dt-brand-lighter);
+  background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
 
   .dark & {
     background: rgba(22, 119, 255, 0.15);
@@ -190,7 +190,7 @@ defineExpose({
   height: 16px;
   margin-right: 4px;
   color: var(--dt-text-quaternary);
-  transition: transform 0.2s;
+  transition: transform var(--dt-transition-base);
   transform: rotate(-90deg);
 
   .dark & {
@@ -217,7 +217,7 @@ defineExpose({
 }
 
 .node-label {
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
   flex: 1;
 }
 
@@ -238,12 +238,12 @@ defineExpose({
 }
 
 .member-badge {
-  font-size: 10px;
-  background: var(--dt-brand-lighter);
+  font-size: var(--dt-font-size-xs);
+  background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
   padding: 2px 6px;
   border-radius: 10px;
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-medium);
   margin-left: 6px;
 
   .dark & {
@@ -274,7 +274,7 @@ defineExpose({
 }
 
 .loading-text {
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-quaternary);
 
   .dark & {
@@ -300,7 +300,7 @@ defineExpose({
   }
 
   .empty-text {
-    font-size: 12px;
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-tertiary);
 
     .dark & {

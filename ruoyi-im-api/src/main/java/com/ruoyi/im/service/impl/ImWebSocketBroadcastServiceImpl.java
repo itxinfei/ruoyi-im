@@ -294,6 +294,65 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
         if (message.getReplyToMessageId() != null) {
             data.put("replyToMessageId", message.getReplyToMessageId());
+
+            // 查询并包含完整的引用消息信息
+            try {
+                ImMessage replyToMessage = messageMapper.selectImMessageById(message.getReplyToMessageId());
+                if (replyToMessage != null) {
+                    Map<String, Object> quotedData = new HashMap<>();
+                    quotedData.put("id", replyToMessage.getId());
+
+                    // 获取发送者信息
+                    com.ruoyi.im.domain.ImUser quotedSender = imUserMapper.selectImUserById(replyToMessage.getSenderId());
+                    quotedData.put("senderName", quotedSender != null ? quotedSender.getNickname() : "未知用户");
+
+                    quotedData.put("type", replyToMessage.getMessageType() != null 
+                            ? replyToMessage.getMessageType().toUpperCase() 
+                            : MessageStatusConstants.MESSAGE_TYPE_TEXT);
+
+                    // 解密内容
+                    String content = encryptionUtil.decryptMessage(replyToMessage.getContent());
+                    quotedData.put("content", content);
+
+                    // 根据消息类型处理内容显示
+                    String messageType = replyToMessage.getMessageType();
+                    if (MessageStatusConstants.MESSAGE_TYPE_IMAGE.equalsIgnoreCase(messageType)) {
+                        quotedData.put("content", "[图片]");
+                        quotedData.put("isFile", true);
+                    } else if (MessageStatusConstants.MESSAGE_TYPE_VIDEO.equalsIgnoreCase(messageType)) {
+                        quotedData.put("content", "[视频]");
+                        quotedData.put("isFile", true);
+                    } else if (MessageStatusConstants.MESSAGE_TYPE_VOICE.equalsIgnoreCase(messageType)) {
+                        quotedData.put("content", "[语音]");
+                        quotedData.put("isFile", true);
+                    } else if (MessageStatusConstants.MESSAGE_TYPE_FILE.equalsIgnoreCase(messageType)) {
+                        quotedData.put("content", "[文件]");
+                        quotedData.put("isFile", true);
+                    } else {
+                        // 文本消息截取前50个字符
+                        if (content != null && content.length() > 50) {
+                            quotedData.put("content", content.substring(0, 50) + "...");
+                        }
+                        quotedData.put("isFile", false);
+                    }
+
+                    // 同时设置quotedMessage和replyTo以兼容前端
+                    data.put("quotedMessage", quotedData);
+                    data.put("replyTo", quotedData);
+                } else {
+                    // 被引用的消息可能已被删除
+                    Map<String, Object> placeholder = new HashMap<>();
+                    placeholder.put("id", message.getReplyToMessageId());
+                    placeholder.put("senderName", "未知用户");
+                    placeholder.put("content", "[消息已删除]");
+                    placeholder.put("type", MessageStatusConstants.MESSAGE_TYPE_TEXT);
+                    placeholder.put("isFile", false);
+                    data.put("quotedMessage", placeholder);
+                    data.put("replyTo", placeholder);
+                }
+            } catch (Exception e) {
+                log.warn("构建引用消息信息失败: replyToMessageId={}", message.getReplyToMessageId(), e);
+            }
         }
 
         if (message.getIsRevoked() != null && message.getIsRevoked() == 1) {

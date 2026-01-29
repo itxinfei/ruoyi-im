@@ -189,13 +189,18 @@ const handleMoreCommand = (cmd) => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .contact-detail {
-  padding: 40px;
-  background: white;
+  padding: 24px;
+  background: #ffffff;
   height: 100%;
+  overflow-y: auto;
+
+  @extend .scrollbar-sm;
 
   .dark & {
-    background: #1e293b;
+    background: var(--dt-bg-card-dark);
   }
 }
 
@@ -208,8 +213,8 @@ const handleMoreCommand = (cmd) => {
 .avatar-large {
   width: 80px;
   height: 80px;
-  border-radius: 8px;
-  background: #409eff;
+  border-radius: var(--dt-radius-lg);
+  background: var(--dt-brand-color);
   color: white;
   display: flex;
   align-items: center;
@@ -243,64 +248,68 @@ const handleMoreCommand = (cmd) => {
 }
 
 .name {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1f2329;
+  font-size: var(--dt-font-size-2xl);
+  font-weight: var(--dt-font-weight-semibold);
+  color: var(--dt-text-primary);
 
   .dark & {
-    color: #f1f5f9;
+    color: var(--dt-text-primary-dark);
   }
 }
 
 .meta {
-  color: #666;
-  font-size: 14px;
+  color: var(--dt-text-secondary);
+  font-size: var(--dt-font-size-sm);
 
   .dark & {
-    color: #94a3b8;
+    color: var(--dt-text-secondary-dark);
   }
 }
 
 .actions {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
   flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .info-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
 .info-item {
   display: flex;
-  border-bottom: 1px solid #f9f9f9;
-  padding-bottom: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--dt-border-lighter);
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   .dark & {
-    border-bottom-color: #334155;
+    border-bottom-color: var(--dt-border-dark);
   }
 }
 
 .label {
   width: 80px;
-  color: #999;
+  color: var(--dt-text-secondary);
   flex-shrink: 0;
+  font-size: var(--dt-font-size-sm);
 
   .dark & {
-    color: #94a3b8;
+    color: var(--dt-text-secondary-dark);
   }
 }
 
 .value {
-  color: #333;
   flex: 1;
-  word-break: break-all;
+  color: var(--dt-text-primary);
+  word-break: break-word;
 
   .dark & {
-    color: #f1f5f9;
+    color: var(--dt-text-primary-dark);
   }
 }
 
@@ -309,14 +318,42 @@ const handleMoreCommand = (cmd) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
+  background: var(--dt-bg-body);
 
   .dark & {
-    background: #0f172a;
+    background: var(--dt-bg-body-dark);
   }
 }
 
 .danger-text {
-  color: #f56c6c;
+  color: var(--dt-error-color);
+}
+
+// ============================================================================
+// 响应式适配
+// ============================================================================
+
+@media (max-width: 768px) {
+  .contact-detail {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .avatar-large {
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+
+  .name-row {
+    justify-content: center;
+  }
+
+  .actions {
+    justify-content: center;
+  }
 }
 </style>

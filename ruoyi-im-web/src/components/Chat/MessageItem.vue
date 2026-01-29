@@ -25,7 +25,8 @@
         :class="{ 'is-merged': message.isMerged }"
         @contextmenu.prevent="$emit('at', message)"
         @click="$emit('show-user', message.senderId)"
-        title="右键 @提及，左键查看资料"
+        @dblclick="handleNudge"
+        title="右键 @提及，左键查看资料，双击拍一拍"
       >
         <DingtalkAvatar
           :src="message.senderAvatar"
@@ -79,7 +80,15 @@ const props = defineProps({
   multiSelectMode: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['reply', 'reaction', 'command', 'scroll-to', 'at', 'show-user', 'retry', 'toggle-select'])
+const emit = defineEmits(['reply', 'reaction', 'command', 'scroll-to', 'at', 'show-user', 'retry', 'toggle-select', 'nudge'])
+
+// 处理拍一拍
+const handleNudge = () => {
+  // 只对对方的消息生效，且不是自己发送的
+  if (!props.message.isOwn) {
+    emit('nudge', props.message.senderId)
+  }
+}
 
 // 消息是否被选中
 const isSelected = computed(() => {

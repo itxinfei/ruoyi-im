@@ -19,30 +19,30 @@
       <!-- 引用消息区块 (如果该消息是回复某人的) -->
       <div v-if="message.replyTo" class="bubble-reply-ref" @click.stop="$emit('scroll-to', message.replyTo.id)">
         <div class="ref-header">
-          <span class="ref-user">{{ message.replyTo.senderName }}</span>
-          <span class="ref-type-icon">
+          <span class="ref-icon">
             <span v-if="message.replyTo.type === 'IMAGE'" class="material-icons-outlined">image</span>
             <span v-else-if="message.replyTo.type === 'FILE'" class="material-icons-outlined">insert_drive_file</span>
             <span v-else-if="message.replyTo.type === 'VIDEO'" class="material-icons-outlined">videocam</span>
             <span v-else-if="message.replyTo.type === 'VOICE' || message.replyTo.type === 'AUDIO'" class="material-icons-outlined">mic</span>
             <span v-else class="material-icons-outlined">format_quote</span>
           </span>
+          <span class="ref-user">{{ message.replyTo.senderName }}</span>
         </div>
         <div class="ref-content">
           <template v-if="message.replyTo.type === 'IMAGE'">
-            <span class="ref-image-text">[图片]</span>
+            <span class="ref-type-text">[图片]</span>
           </template>
           <template v-else-if="message.replyTo.type === 'FILE'">
-            <span class="ref-file-text">[文件] {{ getFileName(message.replyTo.content) }}</span>
+            <span class="ref-type-text">[文件] {{ getFileName(message.replyTo.content) }}</span>
           </template>
           <template v-else-if="message.replyTo.type === 'VIDEO'">
-            <span class="ref-video-text">[视频]</span>
+            <span class="ref-type-text">[视频]</span>
           </template>
           <template v-else-if="message.replyTo.type === 'VOICE' || message.replyTo.type === 'AUDIO'">
-            <span class="ref-voice-text">[语音]</span>
+            <span class="ref-type-text">[语音]</span>
           </template>
           <template v-else>
-            {{ message.replyTo.content }}
+            <span class="ref-text-content">{{ message.replyTo.content }}</span>
           </template>
         </div>
       </div>
@@ -244,6 +244,22 @@
         {{ message.content }}
       </div>
 
+      <!-- 拍一拍消息 -->
+      <NudgeMessageBubble
+        v-else-if="message.type === 'NUDGE'"
+        :nudge="{
+          id: message.id,
+          nudgerId: message.senderId,
+          nudgerName: message.senderName,
+          nudgerAvatar: message.senderAvatar,
+          nudgedUserId: message.nudgedUserId,
+          nudgedUserName: message.nudgedUserName,
+          nudgeCount: message.nudgeCount || 1,
+          createTime: message.createTime || message.timestamp
+        }"
+        @show-user="$emit('show-user', $event)"
+      />
+
       <!-- 撤回消息 -->
       <div v-else-if="message.type === 'RECALLED'" class="msg-recalled" :class="{ 'is-own': message.isOwn }">
         <span class="recall-icon material-icons-outlined">history</span>
@@ -372,6 +388,7 @@ import { Document, ChatLineSquare, CopyDocument, Share, RefreshLeft, Delete, Edi
 import CombineMessagePreview from './CombineMessagePreview.vue'
 import LinkCard from './LinkCard.vue'
 import AiEmojiReaction from './AiEmojiReaction.vue'
+import NudgeMessageBubble from './NudgeMessageBubble.vue'
 import { extractLinksFromContent, formatLinkUrl } from '@/utils/file'
 
 const props = defineProps({
@@ -1021,48 +1038,29 @@ onUnmounted(() => {
     position: relative;
     display: flex;
     flex-direction: column;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.4);
     border-left: 3px solid var(--dt-brand-color);
-    padding: 10px 12px;
-    margin: -8px -10px 10px -10px;
-    border-radius: 6px 0 0 6px;
+    padding: 8px 12px;
+    margin: -6px -8px 8px -8px;
+    border-radius: 4px;
     font-size: 12px;
     color: #475569;
     cursor: pointer;
     overflow: hidden;
     user-select: none;
-    transition: all 0.25s var(--dt-ease-out);
-    animation: slideInDown 0.3s var(--dt-ease-out);
+    transition: all 0.2s var(--dt-ease-out);
+    animation: slideInDown 0.25s var(--dt-ease-out);
 
     @keyframes slideInDown {
       from {
         opacity: 0;
-        transform: translateY(-4px);
+        transform: translateY(-3px);
       }
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 60%;
-      background: linear-gradient(
-        180deg,
-        transparent 0%,
-        var(--dt-brand-color) 20%,
-        var(--dt-brand-color) 80%,
-        transparent 100%
-      );
-      border-radius: 0 2px 2px 0;
-      transition: height 0.25s var(--dt-ease-out);
     }
 
     &::after {
@@ -1082,42 +1080,28 @@ onUnmounted(() => {
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
+
+      .ref-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        background: var(--dt-brand-color);
+        color: #fff;
+        border-radius: 3px;
+        font-size: 11px;
+
+        .material-icons-outlined {
+          font-size: 13px;
+        }
+      }
 
       .ref-user {
         font-weight: 600;
         color: #1e293b;
         font-size: 12px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-
-        &::before {
-          content: '';
-          display: inline-block;
-          width: 4px;
-          height: 4px;
-          background: var(--dt-brand-color);
-          border-radius: 50%;
-        }
-      }
-
-      .ref-type-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        background: rgba(22, 119, 255, 0.1);
-        color: var(--dt-brand-color);
-        border-radius: 4px;
-        font-size: 12px;
-        margin-left: auto;
-        transition: all 0.25s var(--dt-ease-out);
-
-        .material-icons-outlined {
-          font-size: 14px;
-        }
       }
     }
 
@@ -1130,19 +1114,17 @@ onUnmounted(() => {
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
-      padding-left: 8px;
-      border-left: 1px dashed rgba(148, 163, 184, 0.5);
-      transition: all 0.25s var(--dt-ease-out);
+      padding-left: 22px;
+      transition: all 0.2s var(--dt-ease-out);
 
-      .ref-image-text,
-      .ref-file-text,
-      .ref-video-text,
-      .ref-voice-text {
+      .ref-type-text {
         color: var(--dt-brand-color);
         font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
+      }
+
+      .ref-text-content {
+        color: #64748b;
+      }
 
         &::before {
           content: 'attach_file';
@@ -1156,30 +1138,16 @@ onUnmounted(() => {
       .ref-voice-text::before { content: 'mic'; }
     }
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.7);
-      border-color: rgba(255, 255, 255, 0.8);
+&:hover {
+      background: rgba(255, 255, 255, 0.6);
       border-left-color: var(--dt-brand-color);
-      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.1);
-      transform: translateX(2px);
+      box-shadow: 0 2px 6px rgba(22, 119, 255, 0.1);
 
-      &::before {
-        height: 80%;
-      }
-
-      &::after {
-        opacity: 0.6;
-        transform: translateX(0);
-      }
-
-      .ref-type-icon {
-        background: var(--dt-brand-color);
-        color: #fff;
+      .ref-icon {
         transform: scale(1.05);
       }
 
       .ref-content {
-        border-left-color: var(--dt-brand-color);
         color: #475569;
       }
     }
@@ -1191,8 +1159,7 @@ onUnmounted(() => {
   }
 
   &.is-own .bubble-reply-ref {
-    background: rgba(255, 255, 255, 0.5);
-    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.4);
     border-left-color: var(--dt-brand-color);
 
     .ref-header .ref-user {
@@ -1201,22 +1168,18 @@ onUnmounted(() => {
 
     .ref-content {
       color: #64748b;
-      border-left-color: rgba(148, 163, 184, 0.5);
     }
 
     &:hover {
-      background: rgba(255, 255, 255, 0.7);
-      border-color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.6);
       border-left-color: var(--dt-brand-color);
-      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.1);
+      box-shadow: 0 2px 6px rgba(22, 119, 255, 0.1);
 
-      .ref-type-icon {
-        background: var(--dt-brand-color);
-        color: #fff;
+      .ref-icon {
+        transform: scale(1.05);
       }
 
       .ref-content {
-        border-left-color: var(--dt-brand-color);
         color: #475569;
       }
     }

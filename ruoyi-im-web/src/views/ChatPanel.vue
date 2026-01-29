@@ -453,10 +453,10 @@ const transformMsg = (m) => {
 
   const messageType = m.type || m.messageType || 'TEXT'
   
-  // 处理引用回复的数据结构
-  let replyTo = m.replyTo
+  // 处理引用回复的数据结构，优先使用后端返回的完整信息
+  let replyTo = m.replyTo || m.quotedMessage
   if (!replyTo && m.replyToMessageId) {
-    // 尝试在本地消息列表中查找被引用的消息
+    // 降级：尝试在本地消息列表中查找被引用的消息
     const quoted = messages.value.find(msg => msg.id === m.replyToMessageId)
     if (quoted) {
       replyTo = {

@@ -60,6 +60,9 @@ public class ImMessageVO implements Serializable {
     /** 引用消息内容（用于显示引用的原消息） */
     private QuotedMessageVO quotedMessage;
 
+    /** 引用消息内容（兼容前端，与quotedMessage字段功能相同） */
+    private QuotedMessageVO replyTo;
+
     /**
      * 引用消息内部类
      * 用于展示被回复/引用的原消息信息

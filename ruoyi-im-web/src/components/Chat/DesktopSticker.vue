@@ -1,0 +1,297 @@
+<template>
+  <teleport to="body">
+    <!-- 桌面贴图层 -->
+    <div
+      v-for="sticker in stickers"
+      :key="sticker.id"
+      class="desktop-sticker"
+      :class="{ minimized: sticker.minimized }"
+      :style="{ left: sticker.x + 'px', top: sticker.y + 'px', zIndex: sticker.zIndex }"
+      @mousedown="handleStickerMouseDown($event, sticker.id)"
+    >
+      <!-- 标题栏 -->
+      <div class="sticker-header" @mousedown="startDrag($event, sticker.id)">
+        <span class="sticker-title">截图贴图</span>
+        <div class="sticker-controls">
+          <button class="control-btn" @click.stop="toggleMinimize(sticker.id)" title="最小化">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13H5v-2h14v2z"/></svg>
+          </button>
+          <button class="control-btn" @click.stop="toggleTop(sticker.id)" title="置顶">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"/></svg>
+          </button>
+          <button class="control-btn close-btn" @click.stop="removeSticker(sticker.id)" title="关闭">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 图片内容 -->
+      <div v-if="!sticker.minimized" class="sticker-content">
+        <img :src="sticker.image" :alt="'贴图 ' + sticker.id" draggable="false">
+      </div>
+
+      <!-- 操作提示 -->
+      <div v-if="stickers.length === 1 && !stickers[0].minimized" class="sticker-hint">
+        双击贴图可复制 · 拖动标题栏移动
+      </div>
+    </div>
+  </teleport>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+
+// ==================== 状态管理 ====================
+const stickers = ref([])
+let nextZIndex = 10000
+let stickerIdCounter = 0
+
+// ==================== 拖拽状态 ====================
+const dragState = ref({
+  isDragging: false,
+  stickerId: null,
+  offsetX: 0,
+  offsetY: 0
+})
+
+// ==================== 方法：添加贴图 ====================
+const addSticker = (imageDataUrl, x = 100, y = 100) => {
+  const screenCenterX = window.innerWidth / 2
+  const screenCenterY = window.innerHeight / 2
+
+  // 加载图片获取实际尺寸
+  const img = new Image()
+  img.onload = () => {
+    const sticker = {
+      id: ++stickerIdCounter,
+      image: imageDataUrl,
+      x: screenCenterX - img.width / 4,
+      y: screenCenterY - img.height / 4,
+      width: img.width,
+      height: img.height,
+      minimized: false,
+      zIndex: ++nextZIndex
+    }
+
+    stickers.value.push(sticker)
+  }
+  img.src = imageDataUrl
+}
+
+// ==================== 方法：移除贴图 ====================
+const removeSticker = (id) => {
+  const index = stickers.value.findIndex(s => s.id === id)
+  if (index !== -1) {
+    stickers.value.splice(index, 1)
+  }
+}
+
+// ==================== 方法：最小化切换 ====================
+const toggleMinimize = (id) => {
+  const sticker = stickers.value.find(s => s.id === id)
+  if (sticker) {
+    sticker.minimized = !sticker.minimized
+  }
+}
+
+// ==================== 方法：置顶切换 ====================
+const toggleTop = (id) => {
+  const sticker = stickers.value.find(s => s.id === id)
+  if (sticker) {
+    sticker.zIndex = ++nextZIndex
+  }
+}
+
+// ==================== 方法：开始拖拽 ====================
+const startDrag = (e, id) => {
+  const sticker = stickers.value.find(s => s.id === id)
+  if (!sticker) return
+
+  // 提升到最顶层
+  sticker.zIndex = ++nextZIndex
+
+  dragState.value = {
+    isDragging: true,
+    stickerId: id,
+    offsetX: e.clientX - sticker.x,
+    offsetY: e.clientY - sticker.y
+  }
+
+  document.addEventListener('mousemove', handleDragMove)
+  document.addEventListener('mouseup', handleDragEnd)
+}
+
+// ==================== 方法：处理拖拽移动 ====================
+const handleDragMove = (e) => {
+  if (!dragState.value.isDragging) return
+
+  const sticker = stickers.value.find(s => s.id === dragState.value.stickerId)
+  if (!sticker) return
+
+  sticker.x = e.clientX - dragState.value.offsetX
+  sticker.y = e.clientY - dragState.value.offsetY
+
+  // 边界限制
+  sticker.x = Math.max(0, Math.min(window.innerWidth - 50, sticker.x))
+  sticker.y = Math.max(0, Math.min(window.innerHeight - 50, sticker.y))
+}
+
+// ==================== 方法：结束拖拽 ====================
+const handleDragEnd = () => {
+  dragState.value.isDragging = false
+  dragState.value.stickerId = null
+  document.removeEventListener('mousemove', handleDragMove)
+  document.removeEventListener('mouseup', handleDragEnd)
+}
+
+// ==================== 方法：激活贴图 ====================
+const handleStickerMouseDown = (e, id) => {
+  const sticker = stickers.value.find(s => s.id === id)
+  if (sticker) {
+    sticker.zIndex = ++nextZIndex
+  }
+}
+
+// ==================== 方法：双击复制贴图 ====================
+const handleDoubleClick = (e, id) => {
+  const sticker = stickers.value.find(s => s.id === id)
+  if (sticker) {
+    addSticker(sticker.image, sticker.x + 20, sticker.y + 20)
+  }
+}
+
+// ==================== 暴露方法 ====================
+defineExpose({
+  addSticker,
+  removeSticker,
+  clear: () => { stickers.value = [] }
+})
+
+// ==================== 生命周期 ====================
+onMounted(() => {
+  // 监听双击事件复制贴图
+  document.addEventListener('dblclick', (e) => {
+    const stickerEl = e.target.closest('.desktop-sticker')
+    if (stickerEl) {
+      const id = parseInt(stickerEl.dataset.id)
+      handleDoubleClick(e, id)
+    }
+  })
+})
+
+onUnmounted(() => {
+  document.removeEventListener('mousemove', handleDragMove)
+  document.removeEventListener('mouseup', handleDragEnd)
+})
+</script>
+
+<style scoped>
+/* ==================== 贴图容器 ==================== */
+.desktop-sticker {
+  position: fixed;
+  min-width: 200px;
+  background: rgba(30, 30, 30, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  user-select: none;
+  transition: box-shadow 0.2s;
+}
+
+.desktop-sticker:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+.desktop-sticker.minimized {
+  min-width: 150px;
+}
+
+/* ==================== 标题栏 ==================== */
+.sticker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: move;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sticker-title {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.sticker-controls {
+  display: flex;
+  gap: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.desktop-sticker:hover .sticker-controls {
+  opacity: 1;
+}
+
+.control-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.control-btn.close-btn:hover {
+  background: rgba(255, 59, 48, 0.3);
+  color: #ff3b30;
+}
+
+.control-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ==================== 内容区 ==================== */
+.sticker-content {
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sticker-content img {
+  max-width: 400px;
+  max-height: 300px;
+  display: block;
+  border-radius: 4px;
+}
+
+.desktop-sticker.minimized .sticker-content {
+  display: none;
+}
+
+/* ==================== 提示 ==================== */
+.sticker-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  border-radius: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+</style>
