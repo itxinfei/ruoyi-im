@@ -77,13 +77,22 @@ public final class ApprovalConstants {
     public static final String ACTION_REFUSE = "REFUSE";
 
     /** 操作：撤回 */
-    public final static final String ACTION_WITHDRAW = "WITHDRAW";
+    public static final String ACTION_WITHDRAW = "WITHDRAW";
 
     /** 操作：转办 */
     public static final String ACTION_TRANSFER = "TRANSFER";
 
     /** 操作：加签 */
     public static final String ACTION_ADD_SIGNER = "ADD_SIGNER";
+
+    /** 操作：审批（同意记录） */
+    public static final String ACTION_APPROVE = "APPROVE";
+
+    /** 操作：驳回 */
+    public static final String ACTION_REJECT = "REJECT";
+
+    /** 操作：委托 */
+    public static final String ACTION_DELEGATE = "DELEGATE";
 
     // ========== 默认值 ==========
 
