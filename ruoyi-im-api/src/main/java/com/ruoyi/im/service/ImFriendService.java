@@ -145,4 +145,33 @@ public interface ImFriendService {
      * @param groupName 目标分组名称，为空则移至默认分组
      */
     void moveFriendsToGroup(Long userId, List<Long> friendIds, String groupName);
+
+    /**
+     * 获取用户的所有标签
+     * 获取当前用户使用过的所有好友标签
+     *
+     * @param userId 用户ID
+     * @return 标签列表
+     */
+    List<String> getUserTags(Long userId);
+
+    /**
+     * 更新好友标签
+     * 为指定好友设置标签
+     *
+     * @param friendId 好友关系ID（或好友用户ID）
+     * @param userId 当前用户ID
+     * @param tags 标签列表
+     */
+    void updateFriendTags(Long friendId, Long userId, List<String> tags);
+
+    /**
+     * 按标签获取好友
+     * 获取具有指定标签的所有好友
+     *
+     * @param userId 用户ID
+     * @param tag 标签名称
+     * @return 好友列表
+     */
+    List<ImFriendVO> getFriendsByTag(Long userId, String tag);
 }

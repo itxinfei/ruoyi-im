@@ -18,11 +18,6 @@
                 <el-tag size="small" effect="plain" type="primary" class="meta-tag">
                   UID: {{ user.id }}
                 </el-tag>
-                <el-divider direction="vertical" />
-                <span class="meta-item">
-                  <el-icon><Monitor /></el-icon>
-                  {{ user.status === 'online' ? '在线' : '离线' }}
-                </span>
               </div>
             </div>
             <el-button type="primary" class="edit-btn" @click="$emit('edit-profile')">
@@ -104,37 +99,7 @@
       </div>
     </section>
 
-    <!-- 账号绑定 -->
-    <section class="setting-section">
-      <h3 class="section-title">第三方账号</h3>
-      <div class="setting-list">
-        <div class="setting-item">
-          <div class="item-icon-wrapper">
-            <div class="item-icon bg-wechat">
-              <el-icon><ChatDotRound /></el-icon>
-            </div>
-          </div>
-          <div class="item-content">
-            <div class="item-title">微信</div>
-            <div class="item-desc">未绑定</div>
-          </div>
-          <el-button type="primary" link>绑定</el-button>
-        </div>
 
-        <div class="setting-item">
-          <div class="item-icon-wrapper">
-            <div class="item-icon bg-dingtalk">
-              <el-icon><Connection /></el-icon>
-            </div>
-          </div>
-          <div class="item-content">
-            <div class="item-title">钉钉</div>
-            <div class="item-desc">未绑定</div>
-          </div>
-          <el-button type="primary" link>绑定</el-button>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -149,10 +114,8 @@ import {
   Phone,
   OfficeBuilding,
   Postcard,
-  Lock,
   Monitor,
-  ChatDotRound,
-  Connection
+  Lock
 } from '@element-plus/icons-vue'
 
 defineProps({

@@ -40,6 +40,23 @@
             正在输入...
           </span>
         </span>
+
+        <!-- 群聊成员头像列表 -->
+        <div v-if="session?.type === 'GROUP' && displayMembers.length > 0" class="member-avatars" @click="handleShowMembers">
+          <DingtalkAvatar
+            v-for="member in displayMembers.slice(0, 5)"
+            :key="member.id"
+            :src="member.avatar"
+            :name="member.name"
+            :user-id="member.id"
+            :size="24"
+            shape="circle"
+            custom-class="member-avatar"
+          />
+          <div v-if="session?.memberCount > 5" class="more-count">
+            +{{ session.memberCount - 5 }}
+          </div>
+        </div>
       </div>
       <div class="header-arrow">
         <span class="material-icons-outlined">chevron_right</span>
@@ -180,6 +197,11 @@ const props = defineProps({
   typingUsers: {
     type: Array,
     default: () => []
+  },
+  // 消息列表，用于搜索功能
+  messages: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -284,6 +306,31 @@ const menuPlacement = computed(() => {
 
   return 'bottom-end'
 })
+
+// 显示成员列表（用于群聊成员头像展示）
+const displayMembers = computed(() => {
+  if (props.session?.type !== 'GROUP') return []
+
+  // 从 store 中获取群组成员信息
+  const groupId = props.session?.targetId
+  if (!groupId) return []
+
+  const members = store.state.im.group?.groupMembers?.[groupId] || []
+
+  // 按角色排序：群主 > 管理员 > 普通成员
+  return members.sort((a, b) => {
+    const roleOrder = { OWNER: 0, ADMIN: 1, MEMBER: 2 }
+    const roleA = roleOrder[a.role] || 2
+    const roleB = roleOrder[b.role] || 2
+    if (roleA !== roleB) return roleA - roleB
+    return (a.joinTime || 0) - (b.joinTime || 0)
+  })
+})
+
+// 显示完整成员列表
+const handleShowMembers = () => {
+  emit('toggle-sidebar', 'members')
+}
 </script>
 
 <style scoped lang="scss">
@@ -518,6 +565,56 @@ const menuPlacement = computed(() => {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+// 群聊成员头像列表
+.member-avatars {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--dt-radius-md);
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-bg-hover);
+
+    .member-avatar {
+      transform: translateY(-2px);
+    }
+
+    .more-count {
+      background: var(--dt-brand-color);
+      color: #fff;
+    }
+  }
+}
+
+:deep(.member-avatar) {
+  border: 2px solid var(--dt-bg-card);
+  margin-left: -8px;
+  transition: transform var(--dt-transition-base);
+
+  &:first-child {
+    margin-left: 0;
+  }
+}
+
+.more-count {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--dt-bg-tertiary);
+  color: var(--dt-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -8px;
+  border: 2px solid var(--dt-bg-card);
+  transition: all var(--dt-transition-base);
 }
 
 // ============================================================================
@@ -989,6 +1086,26 @@ const menuPlacement = computed(() => {
 
 .dark .online-indicator {
   border-color: var(--dt-bg-card-dark);
+}
+
+.dark .member-avatars {
+  &:hover {
+    background: var(--dt-bg-hover-dark);
+
+    .more-count {
+      background: var(--dt-brand-color);
+    }
+  }
+
+  :deep(.member-avatar) {
+    border-color: var(--dt-bg-card-dark);
+  }
+
+  .more-count {
+    background: var(--dt-bg-tertiary-dark);
+    color: var(--dt-text-secondary-dark);
+    border-color: var(--dt-bg-card-dark);
+  }
 }
 
 .dark :deep(.header-dropdown) {

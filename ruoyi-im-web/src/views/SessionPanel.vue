@@ -103,18 +103,14 @@
           <!-- 分组标题 -->
           <div
             v-if="groupItem.group.name !== '全部消息' || customGroups.length > 0"
-            class="group-header"
-            @click="toggleGroupExpand(groupItem.group.id)"
           >
             <div class="group-title-row">
-              <span class="material-icons-outlined group-arrow">
-                {{ isGroupExpanded(groupItem.group.id) ? 'expand_more' : 'chevron_right' }}
-              </span>
+              <span class="material-icons-outlined group-arrow">expand_more</span>
               <span class="group-name">{{ groupItem.group.name }}</span>
               <span class="group-count">({{ groupItem.sessions.length }})</span>
             </div>
             <!-- 分组操作按钮 -->
-            <div v-if="!groupItem.group.isSystem" class="group-actions" @click.stop>
+            <div v-if="!groupItem.group.isSystem" class="group-actions">
               <el-dropdown trigger="click" placement="bottom-end">
                 <span class="material-icons-outlined more-icon">more_horiz</span>
                 <template #dropdown>
@@ -134,8 +130,7 @@
           </div>
 
           <!-- 分组内的会话列表 -->
-          <Transition name="group-expand">
-            <div v-show="isGroupExpanded(groupItem.group.id)" class="group-sessions">
+          <div class="group-sessions">
               <TransitionGroup name="session-list">
                 <div
                   v-for="session in groupItem.sessions"
@@ -219,7 +214,6 @@
                 </div>
               </TransitionGroup>
             </div>
-          </Transition>
         </div>
       </template>
 

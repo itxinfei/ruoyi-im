@@ -76,6 +76,12 @@ public class ImFriend implements Serializable {
     @TableField("update_time")
     private LocalDateTime updateTime;
 
+    /**
+     * 好友标签，多个标签用逗号分隔
+     */
+    @TableField("tags")
+    private String tags;
+
     // ==================== 以下字段为非数据库字段 ====================
 
     /**

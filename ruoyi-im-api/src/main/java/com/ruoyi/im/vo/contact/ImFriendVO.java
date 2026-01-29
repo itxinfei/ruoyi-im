@@ -89,4 +89,9 @@ public class ImFriendVO implements Serializable {
      * 职位
      */
     private String position;
+
+    /**
+     * 好友标签，多个标签用逗号分隔
+     */
+    private String tags;
 }

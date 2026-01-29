@@ -28,9 +28,7 @@
 
     <!-- 头像区域 -->
     <div
-      v-show="!message.isMerged"
       class="avatar-wrapper"
-      :class="{ 'is-merged': message.isMerged }"
       @contextmenu.prevent="$emit('at', message)"
       @click="$emit('show-user', message.senderId)"
       @dblclick="handleNudge"
@@ -229,11 +227,7 @@ const handleNudge = () => {
     box-shadow: 0 0 6px rgba(22, 119, 255, 0.2);
   }
 
-  &.is-merged {
-    visibility: hidden;
-    margin: 0;
-    width: 0;
-  }
+
 }
 
 // 内容包裹层

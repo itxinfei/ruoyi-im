@@ -319,6 +319,57 @@ public class ImContactController {
     }
 
     /**
+     * 获取用户的所有标签
+     * 获取当前用户使用过的所有好友标签
+     *
+     * @return 标签列表
+     * @apiNote 标签是从好友关系中动态提取的
+     */
+    @Operation(summary = "获取用户标签", description = "获取当前用户的所有好友标签")
+    @GetMapping("/tags")
+    public Result<List<String>> getUserTags() {
+        Long userId = SecurityUtils.getLoginUserId();
+        List<String> tags = imFriendService.getUserTags(userId);
+        return Result.success(tags);
+    }
+
+    /**
+     * 更新好友标签
+     * 为指定好友设置标签
+     *
+     * @param friendId 好友用户ID
+     * @param tags 标签列表
+     * @return 更新结果
+     * @apiNote 如果标签不存在，会自动创建
+     */
+    @Operation(summary = "更新好友标签", description = "为指定好友设置标签")
+    @PutMapping("/{friendId}/tags")
+    public Result<Void> updateFriendTags(@PathVariable Long friendId,
+                                           @RequestBody java.util.Map<String, Object> request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        @SuppressWarnings("unchecked")
+        List<String> tags = (List<String>) request.get("tags");
+        imFriendService.updateFriendTags(friendId, userId, tags);
+        return Result.success("标签更新成功");
+    }
+
+    /**
+     * 按标签获取好友
+     * 获取具有指定标签的所有好友
+     *
+     * @param tag 标签名称
+     * @return 好友列表
+     * @apiNote 用于标签筛选功能
+     */
+    @Operation(summary = "按标签获取好友", description = "获取具有指定标签的所有好友")
+    @GetMapping("/tag/{tag}")
+    public Result<List<ImFriendVO>> getFriendsByTag(@PathVariable String tag) {
+        Long userId = SecurityUtils.getLoginUserId();
+        List<ImFriendVO> list = imFriendService.getFriendsByTag(userId, tag);
+        return Result.success(list);
+    }
+
+    /**
      * 重命名分组请求体
      */
     public static class GroupRenameRequest {

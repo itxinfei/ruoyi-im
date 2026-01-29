@@ -1,0 +1,1144 @@
+/**
+ * 动画和交互效果样式库
+ * 提供 RuoYi-IM 项目中使用的统一动画效果
+ *
+ * @usage
+ * 在组件中引入：@use '@/styles/animations.scss' as *;
+ * 或通过全局样式自动加载
+ */
+
+@use 'design-tokens.scss' as *;
+
+// ============================================================================
+// 缓动函数 (Easing Functions)
+// ============================================================================
+
+$ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+$ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+$ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+// ============================================================================
+// 过渡时长 (Transition Durations)
+// ============================================================================
+
+$duration-instant: 100ms;
+$duration-fast: 150ms;
+$duration-base: 250ms;
+$duration-medium: 350ms;
+$duration-slow: 500ms;
+$duration-slower: 750ms;
+
+// ============================================================================
+// 淡入淡出动画 (Fade Animations)
+// ============================================================================
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// ============================================================================
+// 缩放动画 (Scale Animations)
+// ============================================================================
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes scaleInBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ============================================================================
+// 滑动动画 (Slide Animations)
+// ============================================================================
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+// ============================================================================
+// 旋转动画 (Rotate Animations)
+// ============================================================================
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+// ============================================================================
+// 弹跳动画 (Bounce Animations)
+// ============================================================================
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-12px);
+  }
+  60% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-2000px);
+  }
+  60% {
+    transform: translateY(20px);
+  }
+  80% {
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(2000px);
+  }
+  60% {
+    transform: translateY(-20px);
+  }
+  80% {
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================================
+// 脉冲动画 (Pulse Animations)
+// ============================================================================
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+// ============================================================================
+// 抖动动画 (Shake Animations)
+// ============================================================================
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-8px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes headShake {
+  0% {
+    transform: translateX(0);
+  }
+  6.5% {
+    transform: translateX(-6px) rotateY(-9deg);
+  }
+  18.5% {
+    transform: translateX(5px) rotateY(7deg);
+  }
+  31.5% {
+    transform: translateX(-3px) rotateY(-5deg);
+  }
+  43.5% {
+    transform: translateX(2px) rotateY(3deg);
+  }
+  50% {
+    transform: translateX(0);
+  }
+}
+
+// ============================================================================
+// 打字机动画 (Typing Animations)
+// ============================================================================
+
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes cursorBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+// ============================================================================
+// 进度条动画 (Progress Animations)
+// ============================================================================
+
+@keyframes progressStripe {
+  0% {
+    background-position: 40px 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes progressFill {
+  from {
+    width: 0;
+  }
+}
+
+// ============================================================================
+// 加载动画 (Loading Animations)
+// ============================================================================
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes doubleSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(720deg);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes dotWave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-8px);
+  }
+}
+
+// ============================================================================
+// 消息动画 (Message Animations)
+// ============================================================================
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes messagePopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ============================================================================
+// 通知动画 (Notification Animations)
+// ============================================================================
+
+@keyframes notificationSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes notificationSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes notificationBounce {
+  0% {
+    transform: translateX(100%) scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(-5%) scale(1.02);
+    opacity: 1;
+  }
+  70% {
+    transform: translateX(2%) scale(0.98);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
+// ============================================================================
+// 对话框动画 (Dialog Animations)
+// ============================================================================
+
+@keyframes dialogZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+// ============================================================================
+// 抽屉动画 (Drawer Animations)
+// ============================================================================
+
+@keyframes drawerSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawerSlideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawerSlideInTop {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes drawerSlideInBottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+// ============================================================================
+// 下拉菜单动画 (Dropdown Animations)
+// ============================================================================
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes menuExpand {
+  from {
+    opacity: 0;
+    height: 0;
+  }
+  to {
+    opacity: 1;
+    height: auto;
+  }
+}
+
+// ============================================================================
+// Tooltip 动画
+// ============================================================================
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// ============================================================================
+// Ripple 效果 (Material Design)
+// ============================================================================
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// ============================================================================
+// 页面切换动画 (Page Transitions)
+// ============================================================================
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pageSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ============================================================================
+// 列表项动画 (List Item Animations)
+// ============================================================================
+
+@keyframes listItemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes listItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================================
+// 卡片动画 (Card Animations)
+// ============================================================================
+
+@keyframes cardFlip {
+  0% {
+    transform: rotateY(0);
+  }
+  100% {
+    transform: rotateY(180deg);
+  }
+}
+
+@keyframes cardLift {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// ============================================================================
+// 徽章动画 (Badge Animations)
+// ============================================================================
+
+@keyframes badgePop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes badgeBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-2px);
+  }
+}
+
+// ============================================================================
+// 按钮动画 (Button Animations)
+// ============================================================================
+
+@keyframes buttonRipple {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes buttonPress {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// ============================================================================
+// 输入框动画 (Input Animations)
+// ============================================================================
+
+@keyframes inputFocus {
+  from {
+    box-shadow: 0 0 0 0 rgba(var(--dt-brand-color-rgb, 22, 119, 255), 0);
+  }
+  to {
+    box-shadow: 0 0 0 4px rgba(var(--dt-brand-color-rgb, 22, 119, 255), 0.1);
+  }
+}
+
+// ============================================================================
+// 头像动画 (Avatar Animations)
+// ============================================================================
+
+@keyframes avatarPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes avatarOnline {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// ============================================================================
+// Tab 切换动画
+// ============================================================================
+
+@keyframes tabSlide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes tabFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ============================================================================
+// 搜索动画 (Search Animations)
+// ============================================================================
+
+@keyframes searchExpand {
+  from {
+    width: 40px;
+  }
+  to {
+    width: 280px;
+  }
+}
+
+@keyframes searchCollapse {
+  from {
+    width: 280px;
+  }
+  to {
+    width: 40px;
+  }
+}
+
+// ============================================================================
+// 手势图标动画 (Gesture Icon Animations)
+// ============================================================================
+
+@keyframes like {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.3);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+// ============================================================================
+// 实用动画类 (Animation Utility Classes)
+// ============================================================================
+
+.animated {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+
+.animated.infinite {
+  animation-iteration-count: infinite;
+}
+
+.animated.hinge {
+  animation-duration: 2s;
+}
+
+.animated.flip {
+  backface-visibility: visible;
+}
+
+// 淡入
+.fade-in {
+  animation: fadeIn $duration-base $ease-out;
+}
+
+.fade-in-up {
+  animation: fadeInUp $duration-base $ease-out;
+}
+
+.fade-in-down {
+  animation: fadeInDown $duration-base $ease-out;
+}
+
+.fade-in-left {
+  animation: fadeInLeft $duration-base $ease-out;
+}
+
+.fade-in-right {
+  animation: fadeInRight $duration-base $ease-out;
+}
+
+// 缩放
+.scale-in {
+  animation: scaleIn $duration-base $ease-out;
+}
+
+.scale-in-bounce {
+  animation: scaleInBounce $duration-slow $ease-bounce;
+}
+
+// 弹跳
+.bounce {
+  animation: bounce $duration-slower infinite;
+}
+
+.bounce-in {
+  animation: bounceIn $duration-base $ease-out;
+}
+
+.bounce-in-down {
+  animation: bounceInDown $duration-base $ease-out;
+}
+
+.bounce-in-up {
+  animation: bounceInUp $duration-base $ease-out;
+}
+
+// 脉冲
+.pulse {
+  animation: pulse $duration-slow infinite;
+}
+
+// 旋转
+.rotate {
+  animation: rotate $duration-slower linear infinite;
+}
+
+// 抖动
+.shake {
+  animation: shake $duration-slow;
+}
+
+// 延迟类
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+// 快速类
+.fast {
+  animation-duration: $duration-fast;
+}
+
+.slow {
+  animation-duration: $duration-slow;
+}
+
+// ============================================================================
+// 过渡工具类 (Transition Utility Classes)
+// ============================================================================
+
+.transition-all {
+  transition: all $duration-base $ease-out;
+}
+
+.transition-transform {
+  transition: transform $duration-base $ease-out;
+}
+
+.transition-opacity {
+  transition: opacity $duration-base $ease-out;
+}
+
+.transition-colors {
+  transition: color $duration-base $ease-out,
+              background-color $duration-base $ease-out,
+              border-color $duration-base $ease-out;
+}
+
+.transition-width {
+  transition: width $duration-base $ease-out;
+}
+
+.transition-height {
+  transition: height $duration-base $ease-out;
+}
+
+// ============================================================================
+// 悬停效果类 (Hover Effect Classes)
+// ============================================================================
+
+.hover-lift {
+  transition: transform $duration-base $ease-out,
+              box-shadow $duration-base $ease-out;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.hover-scale {
+  transition: transform $duration-base $ease-out;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.hover-shrink {
+  transition: transform $duration-base $ease-out;
+
+  &:hover {
+    transform: scale(0.95);
+  }
+}
+
+.hover-glow {
+  transition: box-shadow $duration-base $ease-out;
+
+  &:hover {
+    box-shadow: 0 0 20px rgba(var(--dt-brand-color-rgb, 22, 119, 255), 0.4);
+  }
+}
+
+.hover-brighten {
+  transition: filter $duration-base $ease-out;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+// ============================================================================
+// 加载状态类 (Loading State Classes)
+// ============================================================================
+
+.is-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.6;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--dt-border-color);
+    border-top-color: var(--dt-brand-color);
+    border-radius: 50%;
+    animation: spin $duration-slow linear infinite;
+  }
+}
+
+// 骨架屏效果
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--dt-bg-tertiary) 0%,
+    var(--dt-bg-hover) 50%,
+    var(--dt-bg-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+// ============================================================================
+// 微交互动画类 (Micro-interaction Classes)
+// ============================================================================
+
+.click-animate {
+  &:active {
+    animation: buttonPress $duration-fast $ease-out;
+  }
+}
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:active::after {
+    animation: ripple 0.6s $ease-out;
+  }
+}

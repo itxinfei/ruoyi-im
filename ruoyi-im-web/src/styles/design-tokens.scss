@@ -898,11 +898,11 @@ $breakpoint-2xl: 1536px;
 }
 
 @mixin animation-pulse($duration: 2s, $infinite: true) {
-  animation: pulse $duration var(--dt-ease-in-out) #{if(sass($infinite): infinite; else: "")};
+  animation: pulse $duration var(--dt-ease-in-out) #{if(sass($infinite): infinite)};
 }
 
 @mixin animation-spin($duration: 1s, $infinite: true) {
-  animation: spin $duration linear #{if(sass($infinite): infinite; else: "")};
+  animation: spin $duration linear #{if(sass($infinite): infinite)};
 }
 
 @mixin animation-shake($duration: 0.5s) {
@@ -1725,6 +1725,7 @@ $breakpoint-2xl: 1536px;
   @extend .dt-input;
 
   padding-right: var(--dt-space-8);
+  appearance: textfield;
   -moz-appearance: textfield;
 
   &::-webkit-inner-spin-button,

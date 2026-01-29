@@ -22,11 +22,6 @@
             shape="square"
             class="rounded-lg shadow-sm border border-slate-100 dark:border-slate-800"
           />
-          <!-- 状态指示灯 -->
-          <div 
-            class="absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white dark:border-slate-900 rounded-full"
-            :style="{ backgroundColor: statusColor }"
-          ></div>
         </div>
         
         <div class="flex-1 min-w-0 pt-1">
@@ -38,11 +33,7 @@
             <span v-else-if="currentUser.sex === 2" class="material-icons-outlined text-pink-500 text-sm">female</span>
           </div>
           <p class="text-xs text-slate-400 mt-1 truncate">{{ currentUser.position || currentUser.dept?.deptName || '暂无职位' }}</p>
-          <div class="mt-2">
-            <el-tag size="small" effect="plain" class="!border-slate-200 !text-slate-500 !bg-transparent cursor-pointer hover:!border-primary hover:!text-primary transition-colors" @click="handleStatusToggle">
-              {{ statusLabel }}
-            </el-tag>
-          </div>
+
         </div>
 
         <!-- 关闭按钮 -->
@@ -156,7 +147,6 @@ const visible = ref(false)
 const loading = ref(false)
 const showEditDialog = ref(false)
 const showChangePassword = ref(false)
-const userStatus = ref('online')
 
 // 响应式宽度
 const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
@@ -182,20 +172,7 @@ onUnmounted(() => {
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
-const statusLabel = computed(() => {
-  const map = { online: '在线', busy: '忙碌', away: '离开', meeting: '会议中' }
-  return map[userStatus.value] || '在线'
-})
 
-const statusColor = computed(() => {
-  const map = {
-    online: '#22c55e',
-    busy: '#ef4444',
-    away: '#f59e0b',
-    meeting: '#3b82f6'
-  }
-  return map[userStatus.value] || '#22c55e'
-})
 
 // 修复移动端复制功能
 const copyToClipboard = async (text) => {
@@ -228,18 +205,7 @@ const copyToClipboard = async (text) => {
   }
 }
 
-const handleStatusToggle = () => {
-  const statusOptions = [
-    { label: '在线', value: 'online' },
-    { label: '忙碌', value: 'busy' },
-    { label: '离开', value: 'away' },
-    { label: '会议中', value: 'meeting' }
-  ]
-  const currentIndex = statusOptions.findIndex(s => s.value === userStatus.value)
-  const nextIndex = (currentIndex + 1) % statusOptions.length
-  userStatus.value = statusOptions[nextIndex].value
-  ElMessage.success(`状态已切换: ${statusOptions[nextIndex].label}`)
-}
+
 
 const handleChangePassword = () => showChangePassword.value = true
 const handleClose = () => emit('update:modelValue', false)

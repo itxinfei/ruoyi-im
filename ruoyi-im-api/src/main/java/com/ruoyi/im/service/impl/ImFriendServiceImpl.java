@@ -656,4 +656,78 @@ public class ImFriendServiceImpl implements ImFriendService {
         // 清除缓存
         clearFriendListCache(userId);
     }
+
+    @Override
+    public List<String> getUserTags(Long userId) {
+        // 获取当前用户所有好友的标签，去重后返回
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
+
+        return friendList.stream()
+                .map(ImFriend::getTags)
+                .filter(tags -> tags != null && !tags.trim().isEmpty())
+                .flatMap(tags -> Arrays.stream(tags.split(",")))
+                .map(String::trim)
+                .filter(tag -> !tag.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFriendTags(Long friendId, Long userId, List<String> tags) {
+        // 查找好友关系（支持通过好友用户ID查找）
+        ImFriend friend = imFriendMapper.selectImFriendById(friendId);
+        if (friend == null) {
+            // 如果通过ID找不到，尝试通过用户ID查找
+            ImFriend query = new ImFriend();
+            query.setUserId(userId);
+            query.setFriendId(friendId);
+            List<ImFriend> friends = imFriendMapper.selectImFriendList(query);
+            if (friends != null && !friends.isEmpty()) {
+                friend = friends.get(0);
+            }
+        }
+
+        if (friend == null) {
+            throw new BusinessException("好友关系不存在");
+        }
+
+        if (!friend.getUserId().equals(userId)) {
+            throw new BusinessException("无权限操作");
+        }
+
+        // 将标签列表转换为逗号分隔的字符串
+        String tagsStr = (tags == null || tags.isEmpty()) ? null :
+                String.join(",", tags);
+
+        friend.setTags(tagsStr);
+        friend.setUpdateTime(LocalDateTime.now());
+        imFriendMapper.updateImFriend(friend);
+
+        // 清除缓存
+        clearFriendListCache(userId);
+    }
+
+    @Override
+    public List<ImFriendVO> getFriendsByTag(Long userId, String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 获取好友列表并按标签筛选
+        List<ImFriendVO> friendList = getFriendList(userId);
+        String targetTag = tag.trim();
+
+        return friendList.stream()
+                .filter(friend -> {
+                    String tags = friend.getTags();
+                    if (tags == null || tags.trim().isEmpty()) {
+                        return false;
+                    }
+                    return Arrays.asList(tags.split(",")).contains(targetTag);
+                })
+                .collect(Collectors.toList());
+    }
 }

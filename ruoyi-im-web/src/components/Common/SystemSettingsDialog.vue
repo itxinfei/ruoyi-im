@@ -56,9 +56,6 @@
             <el-avatar :size="36" :src="currentUser.avatar" :alt="currentUser.nickname || currentUser.username" />
             <div class="user-details">
               <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
-              <span class="user-status" :class="{ online: currentUser.status === 'online' }">
-                {{ currentUser.status === 'online' ? '在线' : '离线' }}
-              </span>
             </div>
           </div>
           <div class="app-version" v-if="appVersion">
@@ -151,44 +148,11 @@ const showChangePassword = ref(false)
 const showEditProfile = ref(false)
 const appVersion = ref('1.0.0')
 
-// 响应式布局
-const windowWidth = ref(window.innerWidth)
-const isMobile = computed(() => windowWidth.value < 768)
-const isFullscreen = computed(() => windowWidth.value < 640)
+const dialogWidth = '900px'
+const sidebarWidth = '240px'
 
-const dialogWidth = computed(() => {
-  if (windowWidth.value < 768) return '100%'
-  if (windowWidth.value < 1024) return '800px'
-  if (windowWidth.value < 1440) return '900px'
-  return '1000px'
-})
-
-const sidebarWidth = computed(() => {
-  if (windowWidth.value < 768) return '64px'
-  if (windowWidth.value < 1024) return '180px'
-  if (windowWidth.value < 1440) return '220px'
-  return '260px'
-})
-
-const contentPadding = computed(() => {
-  if (windowWidth.value < 768) return '16px'
-  if (windowWidth.value < 1024) return '20px'
-  if (windowWidth.value < 1440) return '24px'
-  return '32px'
-})
-
-// 监听窗口大小变化
-const handleResize = () => {
-  windowWidth.value = window.innerWidth
-}
-
-onMounted(() => {
-  window.addEventListener('resize', handleResize)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-})
+// 移除响应式宽度逻辑
+const isFullscreen = computed(() => false) // 始终不全屏，保持 App 感
 
 // 菜单配置
 const menuItems = computed(() => {
@@ -419,11 +383,7 @@ watch(() => props.modelValue, (val) => {
 })
 watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 
-onMounted(() => {
-  window.addEventListener('resize', () => {
-    windowWidth.value = window.innerWidth
-  })
-})
+
 </script>
 
 <style scoped lang="scss">
@@ -444,7 +404,7 @@ onMounted(() => {
 :deep(.el-dialog__body) {
   padding: 0 !important;
   margin: 0 !important;
-  height: 720px;
+  height: 640px; // 固定高度
   background: var(--dt-bg-body);
   border: none;
 }
@@ -699,16 +659,7 @@ onMounted(() => {
 }
 
 .user-info.active {
-  background: rgba(22, 119, 255, 0.1);
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
-  
-  .user-name {
-    color: var(--dt-brand-color);
-  }
-  
-  .user-status {
-    color: var(--dt-brand-color);
-  }
+  background: var(--dt-bg-hover);
 }
 
 .user-details {
@@ -726,15 +677,7 @@ onMounted(() => {
   margin-bottom: 2px;
 }
 
-.user-status {
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
-  transition: color 0.2s ease;
-}
 
-.user-status.online {
-  color: #67C23A;
-}
 
 .app-version {
   font-size: 12px;
@@ -831,124 +774,7 @@ onMounted(() => {
 // .main-content 已重命名为 .main-body 在模版中
 
 // 移动端适配
-@media (max-width: 768px) {
-  :deep(.el-dialog) {
-    border-radius: 0;
-    margin: 0 !important;
-    height: 100vh;
-    max-height: 100vh;
-    border: none;
-    
-    .el-dialog__body {
-      padding: 0 !important;
-      margin: 0 !important;
-      height: 100vh;
-      max-height: 100vh;
-      border: none;
-    }
-  }
-  
-  .settings-sidebar {
-    width: 72px;
-    
-    .sidebar-header {
-      justify-content: center;
-      padding: 0;
-    }
-    
-    .brand-text {
-      display: none;
-    }
-    
-    .nav-item {
-      justify-content: center;
-      padding: 0;
-      height: 52px;
-    }
-    
-    .nav-item.active::before {
-      left: 12px;
-    }
-    
-    .nav-icon {
-      margin-right: 0;
-      font-size: 22px;
-    }
-    
-    .nav-label,
-    .nav-badge {
-      display: none;
-    }
-    
-    .sidebar-footer {
-      align-items: center;
-      padding: 12px 8px;
-    }
-    
-    .user-details {
-      display: none;
-    }
-    
-    .app-version {
-      font-size: 11px;
-      padding: 4px;
-    }
-  }
-  
-  .main-header {
-    padding: 0 16px;
-    height: 56px;
-  }
-  
-  .header-title {
-    font-size: 18px;
-  }
-  
-  .action-btn {
-    padding: 0 12px;
-    font-size: 13px;
-    
-    .btn-text {
-      display: none;
-    }
-  }
-  
-  .main-content {
-    padding: 16px;
-  }
-}
 
-// 平板适配
-@media (min-width: 769px) and (max-width: 1024px) {
-  .settings-sidebar {
-    width: 220px;
-    min-width: 220px;
-  }
-  
-  .main-header {
-    padding: 0 24px;
-  }
-  
-  .main-content {
-    padding: 24px;
-  }
-  
-  :deep(.el-dialog) {
-    margin-top: 3vh !important;
-  }
-  
-  :deep(.el-dialog__body) {
-    height: 680px;
-  }
-}
-
-// 小屏幕适配
-@media (min-width: 1025px) and (max-width: 1200px) {
-  .settings-sidebar {
-    width: 240px;
-    min-width: 240px;
-  }
-}
 
 // 暗黑模式适配
 .dark {
@@ -996,37 +822,8 @@ onMounted(() => {
     color: var(--dt-text-primary-dark);
   }
   
-  .user-status {
-    color: var(--dt-text-tertiary-dark);
-  }
-  
-  .main-header {
-    border-bottom-color: var(--dt-border-dark);
-    background: var(--dt-bg-body-dark);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .header-title {
+  .user-name {
     color: var(--dt-text-primary-dark);
-  }
-  
-  .header-subtitle {
-    color: var(--dt-text-secondary-dark);
-  }
-  
-  .action-btn {
-    &:hover {
-      background: var(--dt-bg-hover-dark);
-    }
-  }
-  
-  .close-btn {
-    color: var(--dt-text-secondary-dark);
-    
-    &:hover {
-      color: var(--dt-text-primary-dark);
-      background: var(--dt-bg-hover-dark);
-    }
   }
 }
 
