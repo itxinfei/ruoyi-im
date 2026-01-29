@@ -40,4 +40,12 @@ public interface ImWebSocketBroadcastService {
      * @param userId         操作用户ID
      */
     void broadcastRecallNotification(Long conversationId, Long messageId, Long userId);
+
+    /**
+     * 广播公告通知给目标用户
+     *
+     * @param announcementId 公告ID
+     * @param targetUserIds  目标用户ID集合
+     */
+    void broadcastAnnouncement(Long announcementId, Set<Long> targetUserIds);
 }

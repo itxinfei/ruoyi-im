@@ -220,6 +220,41 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         }
     }
 
+    @Override
+    public void broadcastAnnouncement(Long announcementId, Set<Long> targetUserIds) {
+        try {
+            // 构建公告通知消息
+            Map<String, Object> announcementNotification = new HashMap<>();
+            announcementNotification.put("type", "announcement");
+            Map<String, Object> data = new HashMap<>();
+            data.put("announcementId", announcementId);
+            data.put("action", "PUBLISHED");
+            data.put("timestamp", System.currentTimeMillis());
+            announcementNotification.put("data", data);
+
+            String messageJson = objectMapper.writeValueAsString(announcementNotification);
+
+            // 发送给目标用户
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            int sentCount = 0;
+            for (Long targetUserId : targetUserIds) {
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        sentCount++;
+                    } catch (Exception e) {
+                        log.error("发送公告通知给用户失败: userId={}, announcementId={}", targetUserId, announcementId, e);
+                    }
+                }
+            }
+            log.info("公告通知已推送: announcementId={}, targetCount={}, onlineSent={}",
+                    announcementId, targetUserIds.size(), sentCount);
+        } catch (Exception e) {
+            log.error("广播公告通知失败: announcementId={}", announcementId, e);
+        }
+    }
+
     private Map<String, Object> createMessageData(ImMessage message, com.ruoyi.im.domain.ImUser sender) {
         Map<String, Object> data = new HashMap<>();
         data.put("id", message.getId());

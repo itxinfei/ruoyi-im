@@ -12,11 +12,14 @@ import com.ruoyi.im.dto.announcement.ImAnnouncementCreateRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementQueryRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.mapper.ImAnnouncementCommentMapper;
 import com.ruoyi.im.mapper.ImAnnouncementLikeMapper;
 import com.ruoyi.im.mapper.ImAnnouncementMapper;
 import com.ruoyi.im.mapper.ImAnnouncementReadMapper;
+import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImAnnouncementService;
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO;
 import com.ruoyi.im.vo.announcement.ImAnnouncementVO;
 import org.slf4j.Logger;
@@ -51,6 +54,12 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
 
     @Autowired
     private ImAnnouncementCommentMapper announcementCommentMapper;
+
+    @Autowired
+    private ImWebSocketBroadcastService broadcastService;
+
+    @Autowired
+    private ImUserMapper userMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -217,8 +226,43 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         announcement.setUpdateTime(LocalDateTime.now());
         announcementMapper.updateById(announcement);
 
-        // TODO: 发送通知给目标用户
-        log.info("发布公告成功: announcementId={}, publisher={}", announcementId, userId);
+        // 发送通知给目标用户
+        Set<Long> targetUserIds = resolveTargetUserIds(announcement);
+        if (!targetUserIds.isEmpty()) {
+            broadcastService.broadcastAnnouncement(announcementId, targetUserIds);
+        }
+
+        log.info("发布公告成功: announcementId={}, publisher={}, targetCount={}",
+                announcementId, userId, targetUserIds.size());
+    }
+
+    /**
+     * 解析公告目标用户ID列表
+     *
+     * @param announcement 公告实体
+     * @return 目标用户ID集合
+     */
+    private Set<Long> resolveTargetUserIds(ImAnnouncement announcement) {
+        Set<Long> targetUserIds = new HashSet<>();
+
+        String targetType = announcement.getTargetType();
+        if ("ALL".equals(targetType)) {
+            // 全员公告 - 获取所有有效用户
+            List<ImUser> allUsers = userMapper.selectImUserList(new ImUser());
+            for (ImUser user : allUsers) {
+                targetUserIds.add(user.getId());
+            }
+        } else if (announcement.getTargetIds() != null && !announcement.getTargetIds().isEmpty()) {
+            try {
+                // 解析目标ID列表
+                List<Long> ids = JSON.parseArray(announcement.getTargetIds(), Long.class);
+                targetUserIds.addAll(ids);
+            } catch (Exception e) {
+                log.warn("解析公告目标ID失败: announcementId={}", announcement.getId(), e);
+            }
+        }
+
+        return targetUserIds;
     }
 
     @Override
