@@ -38,4 +38,12 @@ public interface ImSystemConfigService {
      * @param configValue 配置值
      */
     void updateSystemConfig(String configKey, Object configValue);
+
+    /**
+     * 获取配置值
+     *
+     * @param configKey 配置键
+     * @return 配置值
+     */
+    String getConfigValue(String configKey);
 }

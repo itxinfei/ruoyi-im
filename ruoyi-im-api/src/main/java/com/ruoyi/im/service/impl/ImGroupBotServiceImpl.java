@@ -3,6 +3,8 @@ package com.ruoyi.im.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constant.ImErrorCode;
+import com.ruoyi.im.constant.MessageStatusConstants;
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.domain.ImGroupBot;
 import com.ruoyi.im.domain.ImGroupBotRule;
@@ -55,8 +57,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
     private static final String MATCH_MODE_REGEX = "REGEX";
 
     // 回复类型常量
-    private static final String REPLY_TYPE_TEXT = "TEXT";
-    private static final String REPLY_TYPE_IMAGE = "IMAGE";
+    private static final String REPLY_TYPE_TEXT = MessageStatusConstants.MESSAGE_TYPE_TEXT;
+    private static final String REPLY_TYPE_IMAGE = MessageStatusConstants.MESSAGE_TYPE_IMAGE;
     private static final String REPLY_TYPE_CARD = "CARD";
 
     private final ImGroupBotMapper groupBotMapper;
@@ -103,7 +105,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 2. 验证用户是否是群主或管理员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(request.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -147,7 +150,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 验证权限
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -181,7 +185,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 验证权限
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -239,7 +244,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 验证权限
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -260,7 +266,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         ImGroupBot bot = groupBotMapper.selectById(rule.getBotId());
         if (bot != null) {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-            if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+            if (member == null || !StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())) {
                 throw new BusinessException(ImErrorCode.NO_PERMISSION);
             }
         }
@@ -300,7 +307,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         ImGroupBot bot = groupBotMapper.selectById(rule.getBotId());
         if (bot != null) {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-            if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+            if (member == null || !StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())) {
                 throw new BusinessException(ImErrorCode.NO_PERMISSION);
             }
         }
@@ -321,7 +329,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 验证权限
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -486,7 +495,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
             com.ruoyi.im.dto.message.ImMessageSendRequest request =
                     new com.ruoyi.im.dto.message.ImMessageSendRequest();
             request.setConversationId(groupId); // 群组ID即为会话ID
-            request.setType("TEXT");
+            request.setType(MessageStatusConstants.MESSAGE_TYPE_TEXT);
             request.setContent(replyContent);
 
             // 使用机器人ID作为发送者（需要特殊处理）

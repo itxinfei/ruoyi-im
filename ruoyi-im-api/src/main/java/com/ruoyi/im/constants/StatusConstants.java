@@ -180,6 +180,20 @@ public class StatusConstants {
     }
 
     /**
+     * 群组成员角色
+     */
+    public static class GroupMemberRole {
+        /** 群主 */
+        public static final String OWNER = "OWNER";
+
+        /** 管理员 */
+        public static final String ADMIN = "ADMIN";
+
+        /** 普通成员 */
+        public static final String MEMBER = "MEMBER";
+    }
+
+    /**
      * 班次类型
      */
     public static class ShiftType {

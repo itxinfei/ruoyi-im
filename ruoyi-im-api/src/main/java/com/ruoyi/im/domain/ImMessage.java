@@ -7,8 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.im.common.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
  */
 @TableName("im_message")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ImMessage extends BaseEntity {
 
     private static final long serialVersionUID = 1L;

@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.domain.ImGroupMember;
 import com.ruoyi.im.exception.BusinessException;
@@ -41,7 +42,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
             throw new BusinessException("您不是该群组成员");
         }
 
-        if (!"OWNER".equals(operator.getRole())) {
+        if (!StatusConstants.GroupMemberRole.OWNER.equals(operator.getRole())) {
             throw new BusinessException("只有群主可以设置全员禁言");
         }
 
@@ -60,8 +61,8 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         }
 
         String operatorRole = operator.getRole();
-        boolean isOwner = "OWNER".equals(operatorRole);
-        boolean isAdmin = "ADMIN".equals(operatorRole);
+        boolean isOwner = StatusConstants.GroupMemberRole.OWNER.equals(operatorRole);
+        boolean isAdmin = StatusConstants.GroupMemberRole.ADMIN.equals(operatorRole);
 
         if (!isOwner && !isAdmin) {
             throw new BusinessException("只有群主和管理员可以禁言成员");
@@ -95,8 +96,8 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         }
 
         String operatorRole = operator.getRole();
-        boolean isOwner = "OWNER".equals(operatorRole);
-        boolean isAdmin = "ADMIN".equals(operatorRole);
+        boolean isOwner = StatusConstants.GroupMemberRole.OWNER.equals(operatorRole);
+        boolean isAdmin = StatusConstants.GroupMemberRole.ADMIN.equals(operatorRole);
 
         if (!isOwner && !isAdmin) {
             throw new BusinessException("只有群主和管理员可以解除禁言");
@@ -168,8 +169,8 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         }
 
         String operatorRole = operator.getRole();
-        boolean isOwner = "OWNER".equals(operatorRole);
-        boolean isAdmin = "ADMIN".equals(operatorRole);
+        boolean isOwner = StatusConstants.GroupMemberRole.OWNER.equals(operatorRole);
+        boolean isAdmin = StatusConstants.GroupMemberRole.ADMIN.equals(operatorRole);
 
         if (!isOwner && !isAdmin) {
             throw new BusinessException("只有群主和管理员可以禁言成员");

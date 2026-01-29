@@ -24,7 +24,7 @@ import java.util.List;
  */
 @TableName("im_ding_message")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @Schema(description = "DING强提醒消息")
 public class ImDingMessage extends BaseEntity implements Serializable {
 

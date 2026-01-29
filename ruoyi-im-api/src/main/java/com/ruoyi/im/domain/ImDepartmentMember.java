@@ -1,6 +1,7 @@
 package com.ruoyi.im.domain;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
  */
 @TableName("im_department_member")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ImDepartmentMember extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

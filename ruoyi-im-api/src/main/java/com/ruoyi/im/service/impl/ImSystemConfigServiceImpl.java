@@ -137,9 +137,10 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
         log.info("系统配置已更新: {} = {}", configKey, strValue);
     }
 
-    private String getConfigValue(String key) {
+    @Override
+    public String getConfigValue(String configKey) {
         Map<String, Object> configs = getAllSystemConfigs();
-        Object value = configs.get(key);
+        Object value = configs.get(configKey);
         return value != null ? value.toString() : null;
     }
 }

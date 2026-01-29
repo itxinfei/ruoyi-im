@@ -138,7 +138,8 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
             }
 
         } catch (Exception e) {
-            return ExceptionHandlerUtil.logErrorAndReturnDefault(log, "消息重试发送异常: clientMsgId={}", e, clientMsgId, false);
+            ExceptionHandlerUtil.logError(log, "消息重试发送异常: clientMsgId={}", e, clientMsgId);
+            return false;
         }
     }
 
@@ -174,7 +175,8 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
             Object countObj = redisUtil.get(countKey);
             return countObj != null ? Integer.parseInt(countObj.toString()) : 0;
         } catch (Exception e) {
-            return ExceptionHandlerUtil.logErrorAndReturnDefault(log, "获取重试次数异常: clientMsgId={}", e, clientMsgId, 0);
+            ExceptionHandlerUtil.logError(log, "获取重试次数异常: clientMsgId={}", e, clientMsgId);
+            return 0;
         }
     }
 

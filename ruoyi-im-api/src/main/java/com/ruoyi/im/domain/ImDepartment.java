@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.im.common.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
  */
 @TableName("im_department")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ImDepartment extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

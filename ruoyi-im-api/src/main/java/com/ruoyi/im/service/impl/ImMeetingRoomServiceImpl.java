@@ -285,7 +285,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             String startTimeStr = request.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             String endTimeStr = request.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             webSocketBroadcastService.broadcastMeetingRoomBooking(
-                    booking.getId(), room.getName(), startTimeStr, endTimeStr, attendeeIds, userId);
+                    booking.getId(), room.getRoomName(), startTimeStr, endTimeStr, attendeeIds, userId);
         }
 
         return booking.getId();

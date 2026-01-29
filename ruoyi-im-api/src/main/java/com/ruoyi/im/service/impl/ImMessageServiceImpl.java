@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import cn.hutool.http.HtmlUtil;
+import com.ruoyi.im.constant.MessageStatusConstants;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
@@ -204,7 +205,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // XSS防护 + 加密
         String plainContent = request.getContent();
-        if ("TEXT".equalsIgnoreCase(request.getType())) {
+        if (MessageStatusConstants.MESSAGE_TYPE_TEXT.equalsIgnoreCase(request.getType())) {
             plainContent = HtmlUtil.escape(plainContent);
         }
         message.setContent(encryptionUtil.encryptMessage(plainContent));
@@ -297,7 +298,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         ImMessageVO vo = new ImMessageVO();
         BeanUtils.copyProperties(message, vo);
         vo.setContent(plainContent);
-        vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
+        vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
         vo.setIsSelf(true);
         vo.setSenderName(sender.getNickname());
         vo.setSenderAvatar(sender.getAvatar());
@@ -425,7 +426,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             // 解密内容
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
             vo.setContent(decryptedContent);
-            vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
+            vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
 
             // 设置发送者信息
             ImUser sender = batchData.userMap.get(message.getSenderId());
@@ -488,7 +489,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
         quotedMessage.setId(originalMessage.getId());
-        quotedMessage.setType(originalMessage.getMessageType() != null ? originalMessage.getMessageType().toUpperCase() : "TEXT");
+        quotedMessage.setType(originalMessage.getMessageType() != null ? originalMessage.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
         quotedMessage.setSendTime(originalMessage.getCreateTime());
 
         // 从预加载的Map中获取发送者信息
@@ -504,15 +505,17 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 根据消息类型处理内容
         String messageType = originalMessage.getMessageType();
-        if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
-                || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
+        if (MessageStatusConstants.MESSAGE_TYPE_IMAGE.equalsIgnoreCase(messageType)
+                || MessageStatusConstants.MESSAGE_TYPE_FILE.equalsIgnoreCase(messageType)
+                || MessageStatusConstants.MESSAGE_TYPE_VIDEO.equalsIgnoreCase(messageType)
+                || MessageStatusConstants.MESSAGE_TYPE_VOICE.equalsIgnoreCase(messageType)) {
             quotedMessage.setIsFile(true);
             // 文件类型消息显示文件名或类型标识
-            if ("IMAGE".equalsIgnoreCase(messageType)) {
+            if (MessageStatusConstants.MESSAGE_TYPE_IMAGE.equalsIgnoreCase(messageType)) {
                 quotedMessage.setContent("[图片]");
-            } else if ("VIDEO".equalsIgnoreCase(messageType)) {
+            } else if (MessageStatusConstants.MESSAGE_TYPE_VIDEO.equalsIgnoreCase(messageType)) {
                 quotedMessage.setContent("[视频]");
-            } else if ("VOICE".equalsIgnoreCase(messageType)) {
+            } else if (MessageStatusConstants.MESSAGE_TYPE_VOICE.equalsIgnoreCase(messageType)) {
                 quotedMessage.setContent("[语音]");
             } else {
                 quotedMessage.setContent("[文件]");
@@ -577,7 +580,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             throw new BusinessException("无权编辑该消息");
         }
 
-        if (!"TEXT".equals(message.getMessageType())) {
+        if (!MessageStatusConstants.MESSAGE_TYPE_TEXT.equals(message.getMessageType())) {
             throw new BusinessException("只能编辑文本消息");
         }
 
@@ -798,7 +801,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         replyMessage.setReceiverId(originalMessage.getSenderId());
         replyMessage.setSenderId(userId);
         replyMessage.setReplyToMessageId(messageId); // 设置回复消息ID
-        replyMessage.setMessageType("TEXT"); // 回复消息类型为TEXT
+        replyMessage.setMessageType(MessageStatusConstants.MESSAGE_TYPE_TEXT); // 回复消息类型为TEXT
         replyMessage.setContent(encryptionUtil.encryptMessage(content));
         replyMessage.setIsRevoked(0);
         replyMessage.setCreateTime(LocalDateTime.now());
@@ -1044,13 +1047,13 @@ public class ImMessageServiceImpl implements ImMessageService {
         int totalMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, false, false, false);
         stats.put("totalMessages", totalMessages);
 
-        int textMessages = imMessageMapper.countSearchResults(null, null, "TEXT", null, startTime, endTime, false, false, false);
+        int textMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_TEXT, null, startTime, endTime, false, false, false);
         stats.put("textMessages", textMessages);
 
-        int imageMessages = imMessageMapper.countSearchResults(null, null, "IMAGE", null, startTime, endTime, false, false, false);
+        int imageMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_IMAGE, null, startTime, endTime, false, false, false);
         stats.put("imageMessages", imageMessages);
 
-        int fileMessages = imMessageMapper.countSearchResults(null, null, "FILE", null, startTime, endTime, false, false, false);
+        int fileMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_FILE, null, startTime, endTime, false, false, false);
         stats.put("fileMessages", fileMessages);
 
         int revokedMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, true, false, false);

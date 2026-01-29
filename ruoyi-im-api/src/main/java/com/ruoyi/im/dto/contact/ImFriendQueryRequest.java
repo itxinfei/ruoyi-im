@@ -2,6 +2,7 @@ package com.ruoyi.im.dto.contact;
 
 import com.ruoyi.im.dto.BasePageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -11,6 +12,7 @@ import java.io.Serializable;
  * @author ruoyi
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ImFriendQueryRequest extends BasePageRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;

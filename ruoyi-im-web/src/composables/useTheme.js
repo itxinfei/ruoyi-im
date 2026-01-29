@@ -36,27 +36,6 @@ const updateIsDark = () => {
 const applyThemeToDOM = (dark) => {
   if (typeof document === 'undefined') return
 
-  const update = () => {
-    const html = document.documentElement
-    if (dark) {
-      html.classList.add('dark')
-      html.setAttribute('data-theme', 'dark')
-    } else {
-      html.classList.remove('dark')
-      html.setAttribute('data-theme', 'light')
-    }
-
-    // 更新 meta theme-color
-    let meta = document.querySelector('meta[name="theme-color"]')
-    if (!meta) {
-      meta = document.createElement('meta')
-      meta.name = 'theme-color'
-      document.head.appendChild(meta)
-    }
-    meta.content = dark ? '#0f172a' : '#ffffff'
-  }
-
-  // 尝试使用极简的 View Transition (如果支持)
   if (document.startViewTransition) {
     document.startViewTransition(update)
   } else {

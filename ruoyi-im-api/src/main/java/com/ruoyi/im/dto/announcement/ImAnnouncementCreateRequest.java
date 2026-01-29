@@ -60,6 +60,9 @@ public class ImAnnouncementCreateRequest {
     @Data
     @Schema(description = "附件信息")
     public static class AttachmentInfo {
+        @Schema(description = "附件ID")
+        private Long id;
+
         @Schema(description = "文件名")
         private String name;
 

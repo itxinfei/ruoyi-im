@@ -1,6 +1,5 @@
 package com.ruoyi.im.util;
 
-import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.exception.BusinessException;
 import org.slf4j.Logger;
 
@@ -44,15 +43,16 @@ public final class ExceptionHandlerUtil {
     }
 
     /**
-     * 记录错误日志并抛出业务异常（使用ImErrorCode）
+     * 记录错误日志并抛出业务异常（使用错误码和错误消息）
      *
-     * @param logger    日志记录器
-     * @param errorCode 错误码
-     * @param e         异常
+     * @param logger  日志记录器
+     * @param code    错误码
+     * @param message 错误消息
+     * @param e       异常
      */
-    public static void throwBusinessException(Logger logger, ImErrorCode errorCode, Exception e) {
-        logger.error("[{}] {}: {}", errorCode.getCode(), errorCode.getMessage(), e.getMessage(), e);
-        throw new BusinessException(errorCode.getCode(), errorCode.getMessage());
+    public static void throwBusinessException(Logger logger, String code, String message, Exception e) {
+        logger.error("[{}] {}: {}", code, message, e.getMessage(), e);
+        throw new BusinessException(code, message);
     }
 
     /**

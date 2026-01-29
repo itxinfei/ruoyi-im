@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ruoyi.im.constant.MessageStatusConstants;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
@@ -261,7 +262,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         data.put("conversationId", message.getConversationId());
         data.put("sessionId", message.getConversationId()); // 兼容旧版前端
         data.put("senderId", message.getSenderId());
-        data.put("type", message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
+        data.put("type", message.getMessageType() != null ? message.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
         data.put("content", encryptionUtil.decryptMessage(message.getContent()));
 
         // 尝试获取发送者信息

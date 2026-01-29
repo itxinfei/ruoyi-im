@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.ruoyi.im.constants.StatusConstants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.domain.ImGroupFile;
@@ -114,8 +115,8 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(gf.getGroupId(), userId);
             if (member != null) {
                 String role = member.getRole();
-                boolean isOwner = "OWNER".equals(role);
-                boolean isAdmin = "ADMIN".equals(role);
+                boolean isOwner = StatusConstants.GroupMemberRole.OWNER.equals(role);
+                boolean isAdmin = StatusConstants.GroupMemberRole.ADMIN.equals(role);
                 boolean isUploader = gf.getUploaderId().equals(userId);
 
                 vo.setCanDelete(isOwner || isAdmin || isUploader);

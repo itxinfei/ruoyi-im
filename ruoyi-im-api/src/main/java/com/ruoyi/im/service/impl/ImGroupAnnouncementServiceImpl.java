@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImGroupAnnouncement;
 import com.ruoyi.im.domain.ImGroupMember;
 import com.ruoyi.im.exception.BusinessException;
@@ -46,7 +47,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+        if (!StatusConstants.GroupMemberRole.OWNER.equals(role) && !StatusConstants.GroupMemberRole.ADMIN.equals(role)) {
             throw new BusinessException("只有群主和管理员可以发布公告");
         }
 
@@ -126,8 +127,8 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
-        boolean isAdmin = "ADMIN".equals(role);
+        boolean isOwner = StatusConstants.GroupMemberRole.OWNER.equals(role);
+        boolean isAdmin = StatusConstants.GroupMemberRole.ADMIN.equals(role);
         boolean isSender = announcement.getSenderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isSender) {
@@ -155,8 +156,8 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
-        boolean isAdmin = "ADMIN".equals(role);
+        boolean isOwner = StatusConstants.GroupMemberRole.OWNER.equals(role);
+        boolean isAdmin = StatusConstants.GroupMemberRole.ADMIN.equals(role);
         boolean isSender = announcement.getSenderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isSender) {
@@ -209,7 +210,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+        if (!StatusConstants.GroupMemberRole.OWNER.equals(role) && !StatusConstants.GroupMemberRole.ADMIN.equals(role)) {
             throw new BusinessException("只有群主和管理员可以置顶公告");
         }
 
