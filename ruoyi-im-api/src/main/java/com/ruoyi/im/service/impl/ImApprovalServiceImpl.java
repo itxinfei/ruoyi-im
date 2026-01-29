@@ -6,6 +6,7 @@ import com.ruoyi.im.domain.ImApprovalFormData;
 import com.ruoyi.im.domain.ImApprovalNode;
 import com.ruoyi.im.domain.ImApprovalRecord;
 import com.ruoyi.im.domain.ImApprovalTemplate;
+import com.ruoyi.im.constant.ApprovalConstants;
 import com.ruoyi.im.dto.approval.ConditionBranch;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImApprovalFormDataMapper;
@@ -426,12 +427,12 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     private void createDefaultNode(Long approvalId) {
         ImApprovalNode node = new ImApprovalNode();
         node.setApprovalId(approvalId);
-        node.setNodeName("审批");
-        node.setNodeType("APPROVE");
+        node.setNodeName(ApprovalConstants.DEFAULT_NODE_NAME);
+        node.setNodeType(ApprovalConstants.NODE_TYPE_APPROVE);
         node.setApproverIds("1");
-        node.setApproveType("ANY");
-        node.setSortOrder(1);
-        node.setStatus("PENDING");
+        node.setApproveType(ApprovalConstants.APPROVE_TYPE_ANY);
+        node.setSortOrder(ApprovalConstants.DEFAULT_SORT_ORDER);
+        node.setStatus(ApprovalConstants.NODE_STATUS_PENDING);
         nodeMapper.insertImApprovalNode(node);
     }
 
