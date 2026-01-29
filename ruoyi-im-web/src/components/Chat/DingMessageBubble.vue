@@ -6,27 +6,33 @@
     <!-- 头部区域 -->
     <div class="ding-header">
       <div class="ding-icon-wrapper">
-        <div class="ding-icon" :class="`priority-${priority.toLowerCase()}`">
+        <div class="ding-icon" :class="`priority-${priorityClass}`">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
             <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
             <circle cx="12" cy="12" r="3" fill="white"/>
           </svg>
         </div>
-        <div class="icon-glow" :class="`priority-${priority.toLowerCase()}`"></div>
+        <div class="icon-glow" :class="`priority-${priorityClass}`"></div>
       </div>
       <div class="ding-title">
         <div class="ding-label-wrapper">
           <span class="ding-label">DING</span>
           <div class="label-glow"></div>
         </div>
-        <span v-if="priority === 'URGENT'" class="priority-badge priority-urgent">
-          <span class="priority-icon">⚡</span>
+        <span v-if="isUrgent" class="priority-badge priority-urgent">
+          <svg class="priority-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+          </svg>
           <span>紧急</span>
           <div class="priority-pulse"></div>
         </span>
         <span v-else class="priority-badge priority-normal">
-          <span class="priority-icon">📢</span>
+          <svg class="priority-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 8V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
           <span>普通</span>
         </span>
         <span class="ding-type-label">{{ dingTypeLabel }}</span>
@@ -43,7 +49,9 @@
       <div class="read-status">
         <div class="read-info">
           <span class="read-count">
-            <span class="read-icon">👁️</span>
+            <svg class="read-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="currentColor"/>
+            </svg>
             已读 {{ readCount }}/{{ sendCount }} 人
           </span>
           <span class="read-percentage">{{ readPercentage }}%</span>
@@ -52,7 +60,7 @@
           <div class="progress-bar">
             <div
               class="progress-fill"
-              :class="`priority-${priority.toLowerCase()}`"
+              :class="`priority-${priorityClass}`"
               :style="{ width: `${readPercentage}%` }"
             >
               <div class="progress-glow"></div>
@@ -67,7 +75,9 @@
           class="action-btn action-btn--primary"
           @click="handleMarkAsRead"
         >
-          <span class="btn-icon">✓</span>
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor"/>
+          </svg>
           <span>标记已读</span>
         </button>
         <button
@@ -75,11 +85,15 @@
           class="action-btn action-btn--danger"
           @click="handleCancel"
         >
-          <span class="btn-icon">✕</span>
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+          </svg>
           <span>取消DING</span>
         </button>
         <button class="action-btn action-btn--default" @click="handleViewDetail">
-          <span class="btn-icon">📋</span>
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z" fill="currentColor"/>
+          </svg>
           <span>查看详情</span>
         </button>
       </div>
@@ -87,7 +101,9 @@
 
     <!-- 过期时间 -->
     <div v-if="expireTime" class="ding-expire">
-      <span class="expire-icon">⏰</span>
+      <svg class="expire-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.99 2C6.47 2 2 6.48 2 12C2 17.52 6.47 22 11.99 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 11.99 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20ZM12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z" fill="currentColor"/>
+      </svg>
       <span>过期时间：{{ formatTime(expireTime) }}</span>
     </div>
   </div>
@@ -112,9 +128,9 @@ const props = defineProps({
     type: String,
     default: 'APP'
   },
-  priority: {
-    type: String,
-    default: 'NORMAL'
+  isUrgent: {
+    type: Number,
+    default: 0
   },
   readCount: {
     type: Number,
@@ -140,6 +156,16 @@ const props = defineProps({
     type: String,
     default: 'ACTIVE'
   }
+})
+
+// 计算优先级样式类
+const priorityClass = computed(() => {
+  return props.isUrgent === 1 ? 'urgent' : 'normal'
+})
+
+// 是否紧急
+const isUrgent = computed(() => {
+  return props.isUrgent === 1
 })
 
 const emit = defineEmits(['read', 'cancel', 'detail'])
@@ -402,7 +428,8 @@ const handleViewDetail = () => {
   overflow: hidden;
 
   .priority-icon {
-    font-size: 14px;
+    width: 14px;
+    height: 14px;
   }
 
   &.priority-urgent {
@@ -502,7 +529,9 @@ const handleViewDetail = () => {
   gap: 4px;
 
   .read-icon {
-    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #999;
   }
 }
 
@@ -588,7 +617,8 @@ const handleViewDetail = () => {
   overflow: hidden;
 
   .btn-icon {
-    font-size: 14px;
+    width: 14px;
+    height: 14px;
   }
 
   &::before {
@@ -655,7 +685,9 @@ const handleViewDetail = () => {
   gap: 6px;
 
   .expire-icon {
-    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #999;
   }
 }
 

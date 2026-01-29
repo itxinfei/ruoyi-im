@@ -3,6 +3,8 @@ package com.ruoyi.im.dto.ding;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -34,12 +36,12 @@ public class DingSendRequest implements Serializable {
     private String dingType = "APP";
 
     /**
-     * 优先级
-     * URGENT：紧急
-     * NORMAL：普通
+     * 是否紧急
+     * 0：普通
+     * 1：紧急
      */
-    @Schema(description = "优先级：URGENT紧急/NORMAL普通")
-    private String priority = "NORMAL";
+    @Schema(description = "是否紧急：0否/1是")
+    private Integer isUrgent = 0;
 
     /** DING内容 */
     @Schema(description = "DING内容")
@@ -50,8 +52,10 @@ public class DingSendRequest implements Serializable {
     @Schema(description = "目标用户ID列表")
     private List<Long> targetUsers;
 
-    /** 过期时间（小时，默认24小时） */
+    /** 过期时间（小时，默认24小时，最大72小时） */
     @Schema(description = "过期时间（小时）")
+    @Min(value = 1, message = "过期时间至少1小时")
+    @Max(value = 72, message = "过期时间最多72小时")
     private Integer expireHours = 24;
 
     /** 是否需要回执 */
@@ -63,8 +67,4 @@ public class DingSendRequest implements Serializable {
     /** 兼容旧版：接收者ID列表 */
     @Schema(description = "接收者ID列表（兼容旧版）")
     private Long[] receiverIds;
-
-    /** 兼容旧版：是否紧急 */
-    @Schema(description = "是否紧急（兼容旧版）")
-    private Integer isUrgent = 0;
 }

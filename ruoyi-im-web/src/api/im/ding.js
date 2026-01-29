@@ -9,9 +9,10 @@ import request from '../request'
  * @param {number} data.conversationId - 会话ID
  * @param {string} data.content - DING内容
  * @param {string} data.dingType - DING类型：APP应用内/SMS短信/CALL电话
- * @param {string} data.priority - 优先级：URGENT紧急/NORMAL普通
+ * @param {number} data.isUrgent - 是否紧急：0普通/1紧急
  * @param {Array<number>} data.targetUsers - 目标用户ID列表
  * @param {number} data.expireHours - 过期时间（小时）
+ * @param {boolean} data.receiptRequired - 是否需要回执
  * @returns {Promise}
  */
 export function sendDing(data) {
@@ -27,7 +28,7 @@ export function sendDing(data) {
  * @param {Object} data - 查询参数
  * @param {number} data.conversationId - 会话ID
  * @param {string} data.dingType - DING类型
- * @param {string} data.priority - 优先级
+ * @param {number} data.isUrgent - 是否紧急
  * @param {string} data.status - 状态
  * @param {boolean} data.unreadOnly - 是否只查询未读
  * @param {number} data.pageNum - 页码
@@ -103,6 +104,18 @@ export function getUnreadDingCount() {
 }
 
 /**
+ * 获取DING消息已读用户列表
+ * @param {number} dingId - DING消息ID
+ * @returns {Promise}
+ */
+export function getDingReadUsers(dingId) {
+  return request({
+    url: `/api/im/ding/${dingId}/read-users`,
+    method: 'get'
+  })
+}
+
+/**
  * 获取DING消息已读状态
  * @param {number} dingId - DING消息ID
  * @returns {Promise}
@@ -111,5 +124,19 @@ export function getDingReadStatus(dingId) {
   return request({
     url: `/api/im/ding/${dingId}/status`,
     method: 'get'
+  })
+}
+
+/**
+ * 确认DING消息（需要回执时使用）
+ * @param {number} dingId - DING消息ID
+ * @param {string} remark - 回执备注
+ * @returns {Promise}
+ */
+export function confirmDing(dingId, remark = '') {
+  return request({
+    url: `/api/im/ding/${dingId}/confirm`,
+    method: 'put',
+    data: { remark }
   })
 }

@@ -68,7 +68,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
         ding.setSenderId(userId);
         ding.setContent(request.getContent());
         ding.setDingType(request.getDingType());
-        ding.setPriority(request.getPriority());
+        ding.setIsUrgent(request.getIsUrgent());
 
         // 处理目标用户列表
         List<Long> targetList = request.getTargetUsers();
@@ -317,7 +317,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             payload.put("dingId", ding.getId());
             payload.put("content", ding.getContent());
             payload.put("dingType", ding.getDingType());
-            payload.put("priority", ding.getPriority());
+            payload.put("isUrgent", ding.getIsUrgent());
             payload.put("createTime", ding.getCreateTime() != null ? ding.getCreateTime().toString() : LocalDateTime.now().toString());
             payload.put("senderId", senderId);
             payload.put("senderName", senderName);

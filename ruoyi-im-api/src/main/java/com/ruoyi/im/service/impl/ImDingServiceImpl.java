@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -47,10 +44,6 @@ public class ImDingServiceImpl implements ImDingService {
     private static final String DING_TYPE_APP = "APP";
     private static final String DING_TYPE_SMS = "SMS";
     private static final String DING_TYPE_CALL = "CALL";
-
-    // 优先级常量
-    private static final String PRIORITY_URGENT = "URGENT";
-    private static final String PRIORITY_NORMAL = "NORMAL";
 
     // 状态常量
     private static final String STATUS_ACTIVE = "ACTIVE";
@@ -128,7 +121,7 @@ public class ImDingServiceImpl implements ImDingService {
         ding.setConversationId(request.getConversationId());
         ding.setSenderId(userId);
         ding.setDingType(request.getDingType() != null ? request.getDingType() : DING_TYPE_APP);
-        ding.setPriority(request.getPriority() != null ? request.getPriority() : PRIORITY_NORMAL);
+        ding.setIsUrgent(request.getIsUrgent() != null ? request.getIsUrgent() : 0);
         ding.setContent(request.getContent());
         ding.setTargetUsers(JSONUtil.toJsonStr(targetUserIds));
         ding.setSendCount(targetUserIds.size());
@@ -170,8 +163,8 @@ public class ImDingServiceImpl implements ImDingService {
         if (request.getDingType() != null) {
             wrapper.eq(ImDingMessage::getDingType, request.getDingType());
         }
-        if (request.getPriority() != null) {
-            wrapper.eq(ImDingMessage::getPriority, request.getPriority());
+        if (request.getIsUrgent() != null) {
+            wrapper.eq(ImDingMessage::getIsUrgent, request.getIsUrgent());
         }
         if (request.getStatus() != null) {
             wrapper.eq(ImDingMessage::getStatus, request.getStatus());
@@ -190,18 +183,41 @@ public class ImDingServiceImpl implements ImDingService {
 
         List<ImDingMessage> dings = dingMapper.selectList(wrapper);
 
+        if (dings.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 批量查询优化：一次性获取所有发送者信息
+        Set<Long> senderIds = dings.stream()
+                .map(ImDingMessage::getSenderId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, ImUser> senderMap = new HashMap<>();
+        if (!senderIds.isEmpty()) {
+            List<ImUser> senders = userMapper.selectImUserListByIds(new ArrayList<>(senderIds));
+            senderMap = senders.stream().collect(Collectors.toMap(ImUser::getId, u -> u));
+        }
+
+        // 批量查询当前用户的已读状态
+        Map<Long, Boolean> readStatusMap = new HashMap<>();
+        if (userId != null) {
+            List<Long> dingIds = dings.stream().map(ImDingMessage::getId).collect(Collectors.toList());
+            List<Long> readDingIds = dingReadMapper.selectReadDingIdsByUserId(dingIds, userId);
+            for (Long dingId : dingIds) {
+                readStatusMap.put(dingId, readDingIds.contains(dingId));
+            }
+        }
+
         // 如果只查询未读，过滤已读的
         if (request.getUnreadOnly() != null && request.getUnreadOnly()) {
-            List<Long> readDingIds = dingReadMapper.selectReadDingIdsByUserId(
-                    dings.stream().map(ImDingMessage::getId).collect(Collectors.toList()), userId);
             dings = dings.stream()
-                    .filter(ding -> !readDingIds.contains(ding.getId()))
+                    .filter(ding -> Boolean.FALSE.equals(readStatusMap.get(ding.getId())))
                     .collect(Collectors.toList());
         }
 
-        // 转换为VO
+        // 转换为VO（使用批量加载的数据）
         return dings.stream()
-                .map(ding -> convertToVO(ding, userId))
+                .map(ding -> convertToVO(ding, userId, senderMap, readStatusMap))
                 .collect(Collectors.toList());
     }
 
@@ -332,7 +348,49 @@ public class ImDingServiceImpl implements ImDingService {
     }
 
     /**
-     * 转换为VO
+     * 转换为VO（批量查询优化版本）
+     *
+     * @param ding          DING消息实体
+     * @param userId        当前用户ID
+     * @param senderMap     发送者信息映射（批量加载）
+     * @param readStatusMap 已读状态映射（批量加载）
+     * @return DING消息VO
+     */
+    private DingMessageVO convertToVO(ImDingMessage ding, Long userId,
+                                      Map<Long, ImUser> senderMap,
+                                      Map<Long, Boolean> readStatusMap) {
+        DingMessageVO vo = new DingMessageVO();
+        vo.setId(ding.getId());
+        vo.setConversationId(ding.getConversationId());
+        vo.setSenderId(ding.getSenderId());
+        vo.setDingType(ding.getDingType());
+        vo.setIsUrgent(ding.getIsUrgent());
+        vo.setContent(ding.getContent());
+        vo.setReadCount(ding.getReadCount());
+        vo.setSendCount(ding.getSendCount());
+        vo.setExpireTime(ding.getExpireTime());
+        vo.setStatus(ding.getStatus());
+        vo.setCreateTime(ding.getCreateTime());
+
+        // 使用批量加载的已读状态
+        if (userId != null) {
+            vo.setIsRead(readStatusMap.getOrDefault(ding.getId(), false));
+        }
+
+        // 使用批量加载的发送者信息
+        if (ding.getSenderId() != null) {
+            ImUser sender = senderMap.get(ding.getSenderId());
+            if (sender != null) {
+                vo.setSenderName(sender.getNickname() != null ? sender.getNickname() : sender.getUsername());
+                vo.setSenderAvatar(sender.getAvatar());
+            }
+        }
+
+        return vo;
+    }
+
+    /**
+     * 转换为VO（单条查询版本，用于单个DING详情查询）
      *
      * @param ding   DING消息实体
      * @param userId 当前用户ID
@@ -344,7 +402,7 @@ public class ImDingServiceImpl implements ImDingService {
         vo.setConversationId(ding.getConversationId());
         vo.setSenderId(ding.getSenderId());
         vo.setDingType(ding.getDingType());
-        vo.setPriority(ding.getPriority());
+        vo.setIsUrgent(ding.getIsUrgent());
         vo.setContent(ding.getContent());
         vo.setReadCount(ding.getReadCount());
         vo.setSendCount(ding.getSendCount());

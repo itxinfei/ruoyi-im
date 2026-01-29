@@ -43,9 +43,9 @@ public class DingMessageVO implements Serializable {
     @Schema(description = "DING类型")
     private String dingType;
 
-    /** 优先级 */
-    @Schema(description = "优先级")
-    private String priority;
+    /** 是否紧急 */
+    @Schema(description = "是否紧急：0否/1是")
+    private Integer isUrgent;
 
     /** DING内容 */
     @Schema(description = "DING内容")

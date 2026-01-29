@@ -45,7 +45,17 @@
                 }"
                 @click="!type.disabled && (form.dingType = type.value)"
               >
-                <div class="type-icon">{{ type.icon }}</div>
+                <div class="type-icon">
+                  <svg v-if="type.value === 'APP'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 1.01L7 1C5.9 1 5 1.9 5 3V21C5 22.1 5.9 23 7 23H17C18.1 23 19 22.1 19 21V3C19 1.9 18.1 1.01 17 1.01ZM17 19H7V5H17V19Z" fill="currentColor"/>
+                  </svg>
+                  <svg v-else-if="type.value === 'SMS'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM18 14H6V12H18V14ZM18 11H6V9H18V11ZM18 8H6V6H18V8Z" fill="currentColor"/>
+                  </svg>
+                  <svg v-else viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.62 10.79C15.02 13.79 19.4 7.75 20.26 5.89C20.46 6.19 20.65 6.5 20.82 6.82C19.7 10.45 15.29 14.74 9.2 15.52C7.25 15.77 5.31 15.57 3.56 14.95C4.5 13.54 5.55 12.13 6.62 10.79ZM19.63 5.31C19.35 4.95 19.05 4.6 18.74 4.26C18.5 4.61 18.26 4.94 18.02 5.27C16.85 6.82 15.47 8.16 13.93 9.26C10.92 11.25 7.32 12.22 3.8 11.79C3.36 11.74 2.92 11.67 2.49 11.57C3.78 9.86 5.21 8.28 6.76 6.89C8.37 5.45 10.15 4.26 12.04 3.39C14.47 2.28 16.99 2.27 19.4 3.37C19.5 4.01 19.58 4.66 19.63 5.31ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20Z" fill="currentColor"/>
+                  </svg>
+                </div>
                 <div class="type-info">
                   <span class="type-label">{{ type.label }}</span>
                   <span v-if="type.disabled" class="type-disabled-tip">需要第三方服务</span>
@@ -56,18 +66,27 @@
           </el-form-item>
 
           <!-- 优先级 -->
-          <el-form-item label="优先级" prop="priority">
+          <el-form-item label="优先级" prop="isUrgent">
             <div class="priority-selector">
               <div
-                v-for="level in priorityLevels"
+                v-for="level in urgencyLevels"
                 :key="level.value"
                 class="priority-option"
-                :class="{ active: form.priority === level.value }"
-                @click="form.priority = level.value"
+                :class="{ active: form.isUrgent === level.value }"
+                @click="form.isUrgent = level.value"
               >
-                <div class="priority-icon">{{ level.icon }}</div>
+                <div class="priority-icon">
+                  <svg v-if="level.value === 0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  <svg v-else viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+                  </svg>
+                </div>
                 <span class="priority-label">{{ level.label }}</span>
-                <div v-if="form.priority === level.value" class="priority-glow"></div>
+                <div v-if="form.isUrgent === level.value" class="priority-glow"></div>
               </div>
             </div>
           </el-form-item>
@@ -78,7 +97,9 @@
               <div class="select-all-bar">
                 <el-checkbox v-model="selectAll" @change="handleSelectAll" class="custom-checkbox">
                   <span class="checkbox-label">
-                    <span class="checkbox-icon">👥</span>
+                    <svg class="checkbox-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M16 11C17.66 11 18.99 9.66 18.99 8C18.99 6.34 17.66 5 16 5C14.34 5 13 6.34 13 8C13 9.66 14.34 11 16 11ZM8 11C9.66 11 10.99 9.66 10.99 8C10.99 6.34 9.66 5 8 5C6.34 5 5 6.34 5 8C5 9.66 6.34 11 8 11ZM8 13C5.67 13 1 14.17 1 16.5V19H15V16.5C15 14.17 10.33 13 8 13ZM16 13C15.71 13 15.38 13.02 15.03 13.05C16.19 13.89 17 15.02 17 16.5V19H23V16.5C23 14.17 18.33 13 16 13Z" fill="currentColor"/>
+                    </svg>
                     <span>全选会话成员</span>
                   </span>
                 </el-checkbox>
@@ -108,7 +129,9 @@
                 </el-checkbox-group>
               </div>
               <div v-else class="empty-tip">
-                <span class="empty-icon">📭</span>
+                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z" fill="currentColor"/>
+                </svg>
                 <span>暂无可选成员</span>
               </div>
             </div>
@@ -148,11 +171,15 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="handleClose" class="footer-btn footer-btn--cancel">
-            <span class="btn-icon">✕</span>
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+            </svg>
             <span>取消</span>
           </el-button>
           <el-button type="danger" :loading="loading" @click="handleSubmit" class="footer-btn footer-btn--submit">
-            <span class="btn-icon">📨</span>
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="currentColor"/>
+            </svg>
             <span>发送DING</span>
           </el-button>
         </div>
@@ -191,34 +218,29 @@ const dingTypes = [
   {
     value: 'APP',
     label: '应用内提醒',
-    icon: '📱',
     disabled: false
   },
   {
     value: 'SMS',
     label: '短信提醒',
-    icon: '💬',
     disabled: true
   },
   {
     value: 'CALL',
     label: '电话提醒',
-    icon: '📞',
     disabled: true
   }
 ]
 
 // 优先级选项
-const priorityLevels = [
+const urgencyLevels = [
   {
-    value: 'NORMAL',
-    label: '普通',
-    icon: '📢'
+    value: 0,
+    label: '普通'
   },
   {
-    value: 'URGENT',
-    label: '紧急',
-    icon: '⚡'
+    value: 1,
+    label: '紧急'
   }
 ]
 
@@ -235,7 +257,7 @@ const expireOptions = [
 const form = reactive({
   content: '',
   dingType: 'APP',
-  priority: 'NORMAL',
+  isUrgent: 0,
   targetUsers: [],
   expireHours: 24,
   receiptRequired: true
@@ -298,7 +320,7 @@ const handleSubmit = async () => {
       conversationId: props.conversationId,
       content: form.content,
       dingType: form.dingType,
-      priority: form.priority,
+      isUrgent: form.isUrgent,
       targetUsers: form.targetUsers,
       expireHours: form.expireHours,
       receiptRequired: form.receiptRequired
@@ -322,7 +344,7 @@ const handleClose = () => {
   formRef.value?.resetFields()
   form.content = ''
   form.dingType = 'APP'
-  form.priority = 'NORMAL'
+  form.isUrgent = 0
   form.targetUsers = []
   form.expireHours = 24
   form.receiptRequired = true
@@ -463,8 +485,10 @@ watch(visible, (val) => {
     }
 
     .type-icon {
-      font-size: 24px;
+      width: 24px;
+      height: 24px;
       flex-shrink: 0;
+      color: #666;
     }
 
     .type-info {
@@ -543,8 +567,10 @@ watch(visible, (val) => {
     }
 
     .priority-icon {
-      font-size: 20px;
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
+      color: #666;
     }
 
     .priority-label {
@@ -607,7 +633,9 @@ watch(visible, (val) => {
         gap: 6px;
 
         .checkbox-icon {
-          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          color: #999;
         }
       }
     }
@@ -716,7 +744,9 @@ watch(visible, (val) => {
       font-size: 14px;
 
       .empty-icon {
-        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: #ccc;
       }
     }
   }
@@ -837,7 +867,8 @@ watch(visible, (val) => {
     overflow: hidden;
 
     .btn-icon {
-      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
 
     &::before {
