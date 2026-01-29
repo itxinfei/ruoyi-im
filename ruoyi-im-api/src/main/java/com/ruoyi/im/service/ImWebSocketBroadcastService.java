@@ -57,4 +57,17 @@ public interface ImWebSocketBroadcastService {
      * @param inviterId     邀请人ID
      */
     void broadcastMeetingInvitation(Long meetingId, Set<Long> targetUserIds, Long inviterId);
+
+    /**
+     * 广播会议室预订通知给目标用户
+     *
+     * @param bookingId     预订ID
+     * @param roomName      会议室名称
+     * @param startTime     开始时间
+     * @param endTime       结束时间
+     * @param targetUserIds 目标用户ID集合
+     * @param bookerId      预订人ID
+     */
+    void broadcastMeetingRoomBooking(Long bookingId, String roomName, String startTime, String endTime,
+                                      Set<Long> targetUserIds, Long bookerId);
 }

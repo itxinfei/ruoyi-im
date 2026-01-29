@@ -14,7 +14,7 @@ const isDark = ref(false)
  * 判断当前是否应该应用暗色
  */
 const getSystemIsDark = () => {
-  if (typeof window === 'undefined') return false
+  if (typeof window === 'undefined' || !window.matchMedia) return false
   return window.matchMedia('(prefers-color-scheme: dark)').matches
 }
 
@@ -77,12 +77,14 @@ const init = () => {
   applyThemeToDOM(isDark.value)
 
   // 3. 系统主题监听
-  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-  const listener = () => {
-    if (themeMode.value === 'auto') updateIsDark()
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const listener = () => {
+      if (themeMode.value === 'auto') updateIsDark()
+    }
+    if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', listener)
+    else mediaQuery.addListener(listener)
   }
-  if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', listener)
-  else mediaQuery.addListener(listener)
 
   // 4. 存储同步监听 (跨标签)
   window.addEventListener('storage', (e) => {

@@ -14,6 +14,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImTaskMapper;
 import com.ruoyi.im.mapper.ImTaskCommentMapper;
 import com.ruoyi.im.mapper.ImTaskAttachmentMapper;
+import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImTaskService;
 import com.ruoyi.im.vo.task.ImTaskDetailVO;
 import com.ruoyi.im.vo.task.ImTaskVO;
@@ -49,6 +50,9 @@ public class ImTaskServiceImpl implements ImTaskService {
 
     @Autowired
     private ImTaskAttachmentMapper taskAttachmentMapper;
+
+    @Autowired
+    private ImUserMapper userMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -580,7 +584,21 @@ public class ImTaskServiceImpl implements ImTaskService {
         if (task.getFollowers() != null && !task.getFollowers().isEmpty()) {
             try {
                 List<Long> followerIds = JSON.parseArray(task.getFollowers(), Long.class);
-                // TODO: 设置关注人详情
+                if (followerIds != null && !followerIds.isEmpty()) {
+                    List<ImTaskDetailVO.TaskFollower> followerList = new ArrayList<>();
+                    for (Long followerId : followerIds) {
+                        com.ruoyi.im.domain.ImUser user = userMapper.selectImUserById(followerId);
+                        if (user != null) {
+                            ImTaskDetailVO.TaskFollower follower = new ImTaskDetailVO.TaskFollower();
+                            follower.setUserId(followerId);
+                            follower.setUserName(user.getNickname() != null ? user.getNickname() : user.getUsername());
+                            follower.setUserAvatar(user.getAvatar());
+                            follower.setFollowTime(task.getUpdateTime()); // 使用任务更新时间作为关注时间
+                            followerList.add(follower);
+                        }
+                    }
+                    vo.setFollowers(followerList);
+                }
             } catch (Exception e) {
                 log.warn("解析关注人失败: taskId={}", task.getId());
             }

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,8 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     private static final String MEETING_CACHE_KEY = "im:meeting:";
     private static final String MEETING_USER_PREFIX = "im:meeting_user:";
 
+    private static final String DEFAULT_MEETING_SERVER_URL = "https://meeting.example.com";
+
     @Autowired
     private ImVideoMeetingMapper meetingMapper;
 
@@ -61,6 +64,9 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
 
     @Autowired
     private ImWebSocketBroadcastService webSocketBroadcastService;
+
+    @Value("${meeting.server.url:}")
+    private String meetingServerUrl;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -776,10 +782,10 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
      * 生成会议链接
      */
     private String generateMeetingLink(String roomId) {
-        // 根据部署环境生成实际链接
-        // TODO: 从配置文件读取会议服务器地址
-        String meetingServerUrl = "https://meeting.example.com";
-        return meetingServerUrl + "/join?room=" + roomId;
+        String serverUrl = (meetingServerUrl != null && !meetingServerUrl.isEmpty())
+                ? meetingServerUrl
+                : DEFAULT_MEETING_SERVER_URL;
+        return serverUrl + "/join?room=" + roomId;
     }
 
     /**

@@ -142,6 +142,11 @@ file:
     path: ./uploads/
     url-prefix: /api/im/file/download/
 
+# 视频会议配置
+meeting:
+  server:
+    url: "https://meeting.example.com"
+
 # 日志配置
 logging:
   level:

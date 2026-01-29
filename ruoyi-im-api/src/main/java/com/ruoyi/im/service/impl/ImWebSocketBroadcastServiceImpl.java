@@ -390,4 +390,50 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             log.error("广播会议邀请失败: meetingId={}", meetingId, e);
         }
     }
+
+    @Override
+    public void broadcastMeetingRoomBooking(Long bookingId, String roomName, String startTime, String endTime,
+                                             Set<Long> targetUserIds, Long bookerId) {
+        try {
+            // 获取预订人信息
+            com.ruoyi.im.domain.ImUser booker = imUserMapper.selectImUserById(bookerId);
+
+            // 构建会议室预订通知消息
+            Map<String, Object> bookingNotification = new HashMap<>();
+            bookingNotification.put("type", "meeting_room_booking");
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("bookingId", bookingId);
+            data.put("roomName", roomName);
+            data.put("startTime", startTime);
+            data.put("endTime", endTime);
+            data.put("bookerId", bookerId);
+            if (booker != null) {
+                data.put("bookerName", booker.getNickname() != null ? booker.getNickname() : booker.getUsername());
+            }
+            data.put("timestamp", System.currentTimeMillis());
+            bookingNotification.put("data", data);
+
+            String messageJson = objectMapper.writeValueAsString(bookingNotification);
+
+            // 发送给目标用户
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            int sentCount = 0;
+            for (Long targetUserId : targetUserIds) {
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        sentCount++;
+                    } catch (Exception e) {
+                        log.error("发送会议室预订通知给用户失败: userId={}, bookingId={}", targetUserId, bookingId, e);
+                    }
+                }
+            }
+            log.info("会议室预订通知已推送: bookingId={}, targetCount={}, onlineSent={}",
+                    bookingId, targetUserIds.size(), sentCount);
+        } catch (Exception e) {
+            log.error("广播会议室预订通知失败: bookingId={}", bookingId, e);
+        }
+    }
 }

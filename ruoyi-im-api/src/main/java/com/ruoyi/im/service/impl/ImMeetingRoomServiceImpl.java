@@ -13,7 +13,9 @@ import com.ruoyi.im.dto.meeting.ImMeetingRoomUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImMeetingBookingMapper;
 import com.ruoyi.im.mapper.ImMeetingRoomMapper;
+import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMeetingRoomService;
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.vo.meeting.ImMeetingBookingVO;
 import com.ruoyi.im.vo.meeting.ImMeetingRoomScheduleVO;
 import com.ruoyi.im.vo.meeting.ImMeetingRoomVO;
@@ -45,6 +47,12 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
 
     @Autowired
     private ImMeetingBookingMapper bookingMapper;
+
+    @Autowired
+    private ImWebSocketBroadcastService webSocketBroadcastService;
+
+    @Autowired
+    private ImUserMapper userMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -269,7 +277,15 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         bookingMapper.insert(booking);
         log.info("预订会议室成功: bookingId={}, roomId={}, userId={}", booking.getId(), request.getRoomId(), userId);
 
-        // TODO: 发送预订通知
+        // 发送预订通知给参会人员
+        if (request.getAttendees() != null && !request.getAttendees().isEmpty()) {
+            Set<Long> attendeeIds = new HashSet<>(request.getAttendees());
+            // 格式化时间字符串
+            String startTimeStr = request.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            String endTimeStr = request.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            webSocketBroadcastService.broadcastMeetingRoomBooking(
+                    booking.getId(), room.getName(), startTimeStr, endTimeStr, attendeeIds, userId);
+        }
 
         return booking.getId();
     }
@@ -538,7 +554,23 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         // 解析参会人员
         if (booking.getAttendees() != null && !booking.getAttendees().isEmpty()) {
             try {
-                // TODO: 解析并填充参会人员信息
+                List<Long> attendeeIds = JSON.parseArray(booking.getAttendees(), Long.class);
+                if (attendeeIds != null && !attendeeIds.isEmpty()) {
+                    List<com.ruoyi.im.vo.meeting.ImMeetingBookingVO.Attendee> attendeeList = new ArrayList<>();
+                    for (Long attendeeId : attendeeIds) {
+                        com.ruoyi.im.domain.ImUser user = userMapper.selectImUserById(attendeeId);
+                        if (user != null) {
+                            com.ruoyi.im.vo.meeting.ImMeetingBookingVO.Attendee attendee =
+                                    new com.ruoyi.im.vo.meeting.ImMeetingBookingVO.Attendee();
+                            attendee.setUserId(attendeeId);
+                            attendee.setUserName(user.getNickname() != null ? user.getNickname() : user.getUsername());
+                            attendee.setUserAvatar(user.getAvatar());
+                            attendee.setIsCheckedIn(false); // TODO: 从签到记录表查询实际签到状态
+                            attendeeList.add(attendee);
+                        }
+                    }
+                    vo.setAttendees(attendeeList);
+                }
             } catch (Exception e) {
                 log.warn("解析参会人员失败: bookingId={}", booking.getId());
             }
