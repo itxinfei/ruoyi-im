@@ -238,10 +238,12 @@ export default {
       try {
         const res = await getMessages(sessionId, { lastId: lastMessageId, pageSize })
         if (res.code === 200 && res.data) {
-          // 规范化消息类型为大写
+          // 规范化消息字段
           const normalized = res.data.map(msg => ({
             ...msg,
-            type: (msg.type || '').toUpperCase()
+            type: (msg.type || '').toUpperCase(),
+            senderName: msg.senderName || msg.senderNickname || msg.nickname || msg.userName || '未知用户',
+            senderAvatar: msg.senderAvatar || msg.avatar || ''
           }))
           // 后端已经按时间升序返回(oldest first, newest at bottom),无需反转
           const transformed = normalized
@@ -369,6 +371,10 @@ export default {
       if (message.type) {
         message.type = message.type.toUpperCase()
       }
+
+      // 规范化发送者信息
+      message.senderName = message.senderName || message.senderNickname || message.nickname || message.userName || '未知用户'
+      message.senderAvatar = message.senderAvatar || message.avatar || ''
 
       // 添加消息到列表
       commit('ADD_MESSAGE', { sessionId, message })

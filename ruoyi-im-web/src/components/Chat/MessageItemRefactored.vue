@@ -232,6 +232,8 @@ const handleNudge = () => {
 
   .message-avatar {
     border-radius: var(--dt-radius-sm);
+    border: 2px solid var(--dt-brand-color);
+    box-shadow: 0 0 8px rgba(22, 119, 255, 0.3);
   }
 
   &.is-merged {

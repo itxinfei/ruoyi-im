@@ -92,11 +92,23 @@ export function useMessageTransformation(options = {}) {
   const transformMsg = (rawMessage, localMessages = []) => {
     const user = currentUser.value || currentUser
 
+    // 规范化名称：兼容字段名差异
+    const senderName = rawMessage.senderName ||
+      rawMessage.senderNickname ||
+      rawMessage.nickname ||
+      rawMessage.userName ||
+      '未知用户'
+
+    // 规范化头像：兼容字段名差异
+    const senderAvatar = rawMessage.senderAvatar || rawMessage.avatar || ''
+
     return {
       ...rawMessage,
       // 标准化字段
       type: getMessageType(rawMessage),
       isOwn: isOwnMessage(rawMessage, user),
+      senderName,
+      senderAvatar,
       replyTo: processReplyTo(rawMessage, localMessages),
       timestamp: normalizeTimestamp(rawMessage)
     }

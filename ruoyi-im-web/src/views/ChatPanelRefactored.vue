@@ -417,6 +417,10 @@ const transformMsg = (m) => {
 
   const messageType = m.type || m.messageType || 'TEXT'
 
+  // 规范化名称和头像
+  const senderName = m.senderName || m.senderNickname || m.nickname || m.userName || '未知用户'
+  const senderAvatar = m.senderAvatar || m.avatar || ''
+
   let replyTo = m.replyTo || m.quotedMessage
   if (!replyTo && m.replyToMessageId) {
     const quoted = messages.value.find(msg => msg.id === m.replyToMessageId)
@@ -429,6 +433,8 @@ const transformMsg = (m) => {
     ...m,
     type: messageType,
     isOwn,
+    senderName,
+    senderAvatar,
     replyTo,
     timestamp: m.sendTime || m.createTime || m.timestamp || Date.now()
   }

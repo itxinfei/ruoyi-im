@@ -1,5 +1,5 @@
 <template>
-  <div class="login-container" :class="{ 'dark': isDark }">
+  <div class="login-container">
     <!-- 背景装饰 -->
     <div class="bg-decoration">
       <div class="bg-shapes">
@@ -212,15 +212,7 @@
       </div>
     </div>
 
-    <!-- 主题切换按钮 -->
-    <button
-      class="theme-toggle"
-      @click="toggleTheme"
-      :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
-    >
-      <span class="material-icons-outlined sun-icon" :class="{ hidden: isDark }">light_mode</span>
-      <span class="material-icons-outlined moon-icon" :class="{ hidden: !isDark }">dark_mode</span>
-    </button>
+
   </div>
 </template>
 
@@ -229,11 +221,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useTheme } from '@/composables/useTheme'
-
 const store = useStore()
 const router = useRouter()
-const { isDark, toggleTheme } = useTheme()
 
 // 表单引用
 const loginFormRef = ref(null)
@@ -417,9 +406,7 @@ onMounted(() => {
     opacity: 0.3;
   }
 
-  &.dark {
-    background: linear-gradient(135deg, #0a1628 0%, #162032 100%);
-  }
+
 }
 
 // 进入动画
@@ -1043,167 +1030,7 @@ onMounted(() => {
   }
 }
 
-// 主题切换按钮
-.theme-toggle {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  width: 48px;
-  height: 48px;
-  background: var(--dt-bg-card);
-  border: 1.5px solid var(--dt-border-color);
-  box-shadow: var(--dt-shadow-float);
-  z-index: 100;
-  transition: all var(--dt-transition-fast);
-  color: var(--dt-text-secondary);
-  border-radius: var(--dt-radius-full);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
-  .material-icons-outlined {
-    transition: all var(--dt-transition-base);
-
-    &.hidden {
-      opacity: 0;
-      transform: rotate(180deg) scale(0);
-      position: absolute;
-    }
-  }
-
-  &:hover {
-    transform: scale(1.05);
-    color: var(--dt-brand-color);
-    border-color: var(--dt-brand-color);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
-// ============================================================================
-// 暗色模式
-// ============================================================================
-.dark {
-  .login-card {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-
-  .welcome-title {
-    color: var(--dt-text-primary-dark);
-  }
-
-  .welcome-subtitle {
-    color: var(--dt-text-tertiary-dark);
-  }
-
-  .login-tabs {
-    background: var(--dt-bg-hover-dark);
-
-    .tab-btn {
-      &:hover:not(.active) {
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      &.active {
-        background: var(--dt-bg-hover-dark);
-      }
-    }
-  }
-
-  .input-wrapper {
-    .input-icon {
-      color: var(--dt-text-quaternary-dark);
-    }
-
-    :deep(.el-input__wrapper) {
-      background: var(--dt-bg-input-dark);
-      border-color: var(--dt-border-dark);
-
-      &:hover {
-        border-color: var(--dt-border-input-hover);
-      }
-
-      &.is-focus {
-        background: var(--dt-bg-hover-dark);
-      }
-    }
-
-    :deep(.el-input__inner) {
-      color: var(--dt-text-primary-dark);
-
-      &::placeholder {
-        color: var(--dt-text-quaternary-dark);
-      }
-    }
-
-    &.code-input-wrapper {
-      .code-btn {
-        background: var(--dt-bg-hover-dark);
-        border-color: var(--dt-border-dark);
-        color: var(--dt-brand-color);
-
-        &:hover:not(:disabled) {
-          border-color: var(--dt-brand-color);
-          background: var(--dt-bg-active-dark);
-        }
-
-        &.counting {
-          color: var(--dt-text-tertiary-dark);
-        }
-      }
-    }
-  }
-
-  .form-options {
-    .checkbox-label {
-      color: var(--dt-text-secondary-dark);
-    }
-
-    :deep(.el-checkbox__label) {
-      color: var(--dt-text-secondary-dark);
-    }
-  }
-
-  .third-party-login {
-    .divider::before {
-      background: var(--dt-border-dark);
-    }
-
-    .divider span {
-      background: var(--dt-bg-card-dark);
-    }
-
-    .third-party-btn {
-      background: var(--dt-bg-hover-dark);
-      border-color: var(--dt-border-dark);
-
-      &.wechat:hover {
-        background: rgba(7, 193, 96, 0.15);
-      }
-
-      &.dingtalk:hover {
-        background: var(--dt-bg-active-dark);
-      }
-
-      &.feishu:hover {
-        background: rgba(0, 214, 185, 0.15);
-      }
-    }
-  }
-
-  .login-footer p {
-    color: var(--dt-text-quaternary-dark);
-  }
-
-  .theme-toggle {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-}
 
 // ============================================================================
 // 响应式
@@ -1248,12 +1075,7 @@ onMounted(() => {
     height: 44px;
   }
 
-  .theme-toggle {
-    top: 16px;
-    right: 16px;
-    width: 44px;
-    height: 44px;
-  }
+
 
   .third-party-icons .third-party-btn {
     width: 44px;

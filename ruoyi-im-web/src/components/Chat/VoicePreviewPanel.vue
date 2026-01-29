@@ -3,7 +3,10 @@
     <div class="voice-preview-box">
       <div class="voice-info">
         <span class="material-icons-outlined voice-icon">mic</span>
-        <span class="voice-duration">{{ formattedDuration }}</span>
+        <div class="voice-time-info">
+          <span class="voice-duration">{{ formattedDuration }}</span>
+          <span class="voice-current-time">{{ formattedCurrentTime }}</span>
+        </div>
       </div>
       <div class="voice-waveform">
         <span
@@ -12,6 +15,13 @@
           class="wave-bar"
           :class="{ active: isPlaying && index < activeBars }"
         ></span>
+      </div>
+      <!-- 播放进度条 -->
+      <div class="voice-progress-container">
+        <div class="voice-progress-bar" @click="handleProgressClick">
+          <div class="voice-progress-fill" :style="{ width: `${playProgress}%` }"></div>
+          <div class="voice-progress-handle" :style="{ left: `${playProgress}%` }" @mousedown="handleProgressDragStart"></div>
+        </div>
       </div>
       <div class="voice-actions">
         <button class="voice-action-btn play-btn" @click="$emit('toggle-play')">
@@ -33,7 +43,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   duration: {
@@ -50,7 +60,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['toggle-play', 'delete', 'send'])
+const emit = defineEmits(['toggle-play', 'delete', 'send', 'seek'])
 
 // 格式化语音时长
 const formattedDuration = computed(() => {
@@ -60,10 +70,48 @@ const formattedDuration = computed(() => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 })
 
+// 格式化当前播放时间
+const formattedCurrentTime = computed(() => {
+  const currentSeconds = Math.floor((props.playProgress / 100) * props.duration / 1000)
+  const minutes = Math.floor(currentSeconds / 60)
+  const remainingSeconds = currentSeconds % 60
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+})
+
 // 计算激活的波形条数量
 const activeBars = computed(() => {
   return Math.floor((props.playProgress / 100) * 20)
 })
+
+// 处理进度条点击
+const handleProgressClick = (event) => {
+  const progressBar = event.currentTarget
+  const rect = progressBar.getBoundingClientRect()
+  const clickX = event.clientX - rect.left
+  const progress = (clickX / rect.width) * 100
+  emit('seek', Math.max(0, Math.min(100, progress)))
+}
+
+// 处理进度条拖拽开始
+const handleProgressDragStart = (event) => {
+  event.preventDefault()
+  const progressBar = event.currentTarget.parentElement
+  const rect = progressBar.getBoundingClientRect()
+  
+  const handleMouseMove = (moveEvent) => {
+    const moveX = moveEvent.clientX - rect.left
+    const progress = (moveX / rect.width) * 100
+    emit('seek', Math.max(0, Math.min(100, progress)))
+  }
+  
+  const handleMouseUp = () => {
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }
+  
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
+}
 </script>
 
 <style scoped lang="scss">
@@ -86,7 +134,7 @@ const activeBars = computed(() => {
 .voice-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   font-size: 13px;
   color: var(--dt-text-secondary);
 
@@ -95,9 +143,22 @@ const activeBars = computed(() => {
     color: var(--dt-brand-color);
   }
 
-  .voice-duration {
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
+  .voice-time-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .voice-duration {
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--dt-text-tertiary);
+    }
+
+    .voice-current-time {
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--dt-brand-color);
+    }
   }
 }
 
@@ -118,6 +179,53 @@ const activeBars = computed(() => {
     &.active {
       background: var(--dt-brand-color);
       height: 16px;
+    }
+  }
+}
+
+.voice-progress-container {
+  margin: 4px 0;
+
+  .voice-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #cbd5e1;
+    }
+
+    .voice-progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: var(--dt-brand-color);
+      border-radius: 3px;
+      transition: width 0.1s ease;
+    }
+
+    .voice-progress-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border: 2px solid var(--dt-brand-color);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+      }
     }
   }
 }
@@ -172,6 +280,24 @@ const activeBars = computed(() => {
 
     &.active {
       background: var(--dt-brand-color);
+    }
+  }
+
+  .voice-progress-container .voice-progress-bar {
+    background: #334155;
+
+    &:hover {
+      background: #475569;
+    }
+
+    .voice-progress-handle {
+      background: #1e293b;
+      border-color: var(--dt-brand-color);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+      &:hover {
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+      }
     }
   }
 

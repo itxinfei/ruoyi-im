@@ -299,3 +299,260 @@ export function getMessageStats(params) {
     params
   })
 }
+
+// ==================== 部门管理 ====================
+
+/**
+ * 获取部门列表（树形）
+ * @returns {Promise}
+ */
+export function getDepartmentTree() {
+  return request({
+    url: '/api/admin/departments/tree',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取部门详情
+ * @param {Number} id - 部门ID
+ * @returns {Promise}
+ */
+export function getDepartmentDetail(id) {
+  return request({
+    url: `/api/admin/departments/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 新增部门
+ * @param {Object} data - 部门信息 { name, parentId, leaderId, description, sort }
+ * @returns {Promise}
+ */
+export function createDepartment(data) {
+  return request({
+    url: '/api/admin/departments',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新部门信息
+ * @param {Number} id - 部门ID
+ * @param {Object} data - 部门信息
+ * @returns {Promise}
+ */
+export function updateDepartment(id, data) {
+  return request({
+    url: `/api/admin/departments/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 删除部门
+ * @param {Number} id - 部门ID
+ * @returns {Promise}
+ */
+export function deleteDepartment(id) {
+  return request({
+    url: `/api/admin/departments/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取部门成员列表
+ * @param {Number} id - 部门ID
+ * @returns {Promise}
+ */
+export function getDepartmentMembers(id) {
+  return request({
+    url: `/api/admin/departments/${id}/members`,
+    method: 'get'
+  })
+}
+
+/**
+ * 设置部门负责人
+ * @param {Number} id - 部门ID
+ * @param {Number} leaderId - 负责人用户ID
+ * @returns {Promise}
+ */
+export function setDepartmentLeader(id, leaderId) {
+  return request({
+    url: `/api/admin/departments/${id}/leader`,
+    method: 'put',
+    params: { leaderId }
+  })
+}
+
+/**
+ * 移动部门到新的父部门
+ * @param {Number} id - 部门ID
+ * @param {Number} parentId - 新的父部门ID
+ * @returns {Promise}
+ */
+export function moveDepartment(id, parentId) {
+  return request({
+    url: `/api/admin/departments/${id}/move`,
+    method: 'put',
+    params: { parentId }
+  })
+}
+
+// ==================== 角色权限管理 ====================
+
+/**
+ * 获取角色列表
+ * @param {Object} params - 查询参数
+ * @returns {Promise}
+ */
+export function getRoleList(params) {
+  return request({
+    url: '/api/admin/roles',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取角色详情
+ * @param {Number} id - 角色ID
+ * @returns {Promise}
+ */
+export function getRoleDetail(id) {
+  return request({
+    url: `/api/admin/roles/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 新增角色
+ * @param {Object} data - 角色信息 { name, code, description, permissions }
+ * @returns {Promise}
+ */
+export function createRole(data) {
+  return request({
+    url: '/api/admin/roles',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新角色信息
+ * @param {Number} id - 角色ID
+ * @param {Object} data - 角色信息
+ * @returns {Promise}
+ */
+export function updateRole(id, data) {
+  return request({
+    url: `/api/admin/roles/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 删除角色
+ * @param {Number} id - 角色ID
+ * @returns {Promise}
+ */
+export function deleteRole(id) {
+  return request({
+    url: `/api/admin/roles/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取角色权限列表
+ * @returns {Promise}
+ */
+export function getPermissionList() {
+  return request({
+    url: '/api/admin/permissions',
+    method: 'get'
+  })
+}
+
+/**
+ * 分配角色权限
+ * @param {Number} id - 角色ID
+ * @param {Array} permissionIds - 权限ID列表
+ * @returns {Promise}
+ */
+export function assignRolePermissions(id, permissionIds) {
+  return request({
+    url: `/api/admin/roles/${id}/permissions`,
+    method: 'put',
+    data: permissionIds
+  })
+}
+
+/**
+ * 获取角色成员列表
+ * @param {Number} id - 角色ID
+ * @returns {Promise}
+ */
+export function getRoleMembers(id) {
+  return request({
+    url: `/api/admin/roles/${id}/members`,
+    method: 'get'
+  })
+}
+
+// ==================== 系统配置 ====================
+
+/**
+ * 获取系统配置
+ * @returns {Promise}
+ */
+export function getSystemConfig() {
+  return request({
+    url: '/api/admin/system/config',
+    method: 'get'
+  })
+}
+
+/**
+ * 更新系统配置
+ * @param {Object} data - 配置项键值对
+ * @returns {Promise}
+ */
+export function updateSystemConfig(data) {
+  return request({
+    url: '/api/admin/system/config',
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 获取敏感词列表
+ * @returns {Promise}
+ */
+export function getSensitiveWords() {
+  return request({
+    url: '/api/admin/system/sensitive-words',
+    method: 'get'
+  })
+}
+
+/**
+ * 保存敏感词列表
+ * @param {Object} data - { strategy: 'reject|replace', words: [] }
+ * @returns {Promise}
+ */
+export function saveSensitiveWords(data) {
+  return request({
+    url: '/api/admin/system/sensitive-words',
+    method: 'post',
+    data
+  })
+}

@@ -301,6 +301,7 @@ aiEmojiPosition.value = {
 - [x] 修复 `App.vue` SASS 语法错误 ✅
 - [x] 修复 `design-tokens.scss` 缺失大括号 ✅
 - [x] 修复 `ContactsPanel.vue` emit 定义 ✅
+- [x] 修复 `MessageInputRefactored.vue` 函数初始化顺序问题 ✅
 - [ ] 新增批量获取已读用户 API
 
 ### P1 完善清单
@@ -387,6 +388,33 @@ aiEmojiPosition.value = {
 - `MessageBubble.vue` (旧版)
 - `MessageItem.vue` (旧版)
 - `MessageInput.vue` (旧版)
+
+### 6.4 最新修复（2026-01-29）
+
+| 修复项 | 文件 | 说明 |
+|--------|------|------|
+| ✅ 函数初始化顺序 | MessageInputRefactored.vue | 将命令处理函数移到 useInputCommand 调用之前，修复 ReferenceError |
+| ✅ WebSocket 错误处理 | imWebSocket.js | 修复 catch 块变量名与日志函数冲突 |
+| ✅ 设置更新 409 错误 | im.js, useTheme.js | 添加防抖机制和静默错误处理 |
+
+**问题详情**:
+
+1. **ReferenceError** (MessageInputRefactored.vue):
+   - 错误: `ReferenceError: Cannot access 'handleCommandExecute' before initialization`
+   - 原因: 函数在 line 604 定义，但在 line 246 被引用（在 useInputCommand 中）
+   - 修复: 将命令处理函数移到 useInputCommand 调用之前
+
+2. **error is not a function** (imWebSocket.js):
+   - 错误: catch 块使用 `error` 作为变量名，遮蔽了导入的日志函数
+   - 修复: 将所有 catch 块变量名改为 `err`
+
+3. **409 Conflict** (用户设置更新):
+   - 错误: 批量更新设置时出现 409 冲突
+   - 原因: 数据库唯一约束 (user_id, setting_key)，并发请求导致竞态条件
+   - 修复:
+     - useTheme.js 直接调用 batchUpdateServerSettings 而非 updateGeneralSettings
+     - batchUpdateServerSettings 添加 500ms 防抖
+     - 静默处理 409 错误（设置可能已存在）
 
 ---
 

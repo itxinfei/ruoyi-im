@@ -21,9 +21,6 @@ export {
   renderMentions
 } from './useMessageFormat'
 
-// 暗色模式
-export { useDarkMode, ThemeMode, getDarkModeStatus } from './useDarkMode'
-
 // 图片懒加载
 export {
   useLazyLoad,

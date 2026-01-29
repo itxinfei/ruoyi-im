@@ -7,6 +7,29 @@ import session from './im-session'
 import message from './im-message'
 import contact from './im-contact'
 
+// 防抖计时器
+let settingsUpdateTimer = null
+let pendingSettings = {}
+
+/**
+ * 执行防抖后的设置更新
+ */
+const flushSettingsUpdate = async (dispatch) => {
+  if (Object.keys(pendingSettings).length === 0) return
+
+  const settingsToSend = { ...pendingSettings }
+  pendingSettings = {}
+
+  try {
+    await batchUpdateUserSettings(settingsToSend)
+  } catch (e) {
+    // 409 冲突可以忽略（设置可能已存在），其他错误记录日志
+    if (e.response?.status !== 409) {
+      console.error('批量更新设置到服务器失败', e)
+    }
+  }
+}
+
 export default {
   namespaced: true,
 
@@ -193,14 +216,24 @@ export default {
       }
     },
 
-    // 批量更新设置到服务器
-    async batchUpdateServerSettings({ commit }, settings) {
-      try {
-        await batchUpdateUserSettings(settings)
-      } catch (e) {
-        console.error('批量更新设置到服务器失败', e)
-        throw e
+    // 批量更新设置到服务器（带防抖）
+    batchUpdateServerSettings({ dispatch }, settings) {
+      // 过滤掉 undefined 值，合并到待发送队列
+      for (const [key, value] of Object.entries(settings)) {
+        if (value !== undefined && value !== null) {
+          pendingSettings[key] = String(value)
+        }
       }
+
+      // 清除之前的计时器
+      if (settingsUpdateTimer) {
+        clearTimeout(settingsUpdateTimer)
+      }
+
+      // 设置新的防抖计时器（500ms 后发送）
+      settingsUpdateTimer = setTimeout(() => {
+        flushSettingsUpdate(dispatch)
+      }, 500)
     },
 
     // 新增：更新聊天设置
@@ -253,9 +286,19 @@ export default {
     // 更新通用设置
     updateGeneralSettings({ commit, dispatch }, settings) {
       commit('UPDATE_SETTINGS', { general: { ...settings } })
-      dispatch('batchUpdateServerSettings', {
-        'general.language': settings.language
-      })
+      // 只发送有效的设置项到服务器
+      const serverSettings = {}
+      if (settings.language !== undefined) {
+        serverSettings['general.language'] = settings.language
+      }
+      if (settings.theme !== undefined) {
+        serverSettings['general.theme'] = settings.theme
+      }
+      if (Object.keys(serverSettings).length > 0) {
+        dispatch('batchUpdateServerSettings', serverSettings).catch(() => {
+          // 静默处理失败，本地状态已更新
+        })
+      }
     },
 
     // 更新快捷键设置

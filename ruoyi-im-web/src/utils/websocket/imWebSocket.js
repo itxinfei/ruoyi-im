@@ -79,8 +79,8 @@ class ImWebSocket {
       this.ws.onmessage = this.onMessage.bind(this)
       this.ws.onerror = this.onError.bind(this)
       this.ws.onclose = this.onClose.bind(this)
-    } catch (error) {
-      error('ImWebSocket', '连接失败:', error)
+    } catch (err) {
+      error('ImWebSocket', '连接失败:', err)
       this.handleReconnect()
     }
   }
@@ -152,17 +152,17 @@ class ImWebSocket {
         default:
           warn('ImWebSocket', '未知消息类型:', type)
       }
-    } catch (error) {
-      error('ImWebSocket', '解析消息失败:', error)
+    } catch (err) {
+      error('ImWebSocket', '解析消息失败:', err)
     }
   }
 
   /**
    * 连接错误
    */
-  onError(error) {
-    error('ImWebSocket', '连接错误:', error)
-    this.emit('error', error)
+  onError(err) {
+    error('ImWebSocket', '连接错误:', err)
+    this.emit('error', err)
   }
 
   /**
@@ -211,8 +211,8 @@ class ImWebSocket {
       this.ws.send(data)
       debug('ImWebSocket', '发送消息:', message)
       return true
-    } catch (error) {
-      error('ImWebSocket', '发送消息失败:', error)
+    } catch (err) {
+      error('ImWebSocket', '发送消息失败:', err)
       return false
     }
   }
@@ -378,8 +378,8 @@ class ImWebSocket {
     handlers.forEach(handler => {
       try {
         handler(data)
-      } catch (error) {
-        error('ImWebSocket', `事件处理器执行失败 (${event}):`, error)
+      } catch (err) {
+        error('ImWebSocket', `事件处理器执行失败 (${event}):`, err)
       }
     })
   }

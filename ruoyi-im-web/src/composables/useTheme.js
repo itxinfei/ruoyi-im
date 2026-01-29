@@ -57,12 +57,19 @@ export function useTheme() {
 
     // 保存主题设置到本地存储
     localStorage.setItem('theme', theme)
-    currentTheme.value = theme
+    if (currentTheme.value !== theme) {
+      currentTheme.value = theme
+    }
 
-    // 同步到 Vuex 存储
-    store.dispatch('im/updateGeneralSettings', {
-      theme
-    })
+    // 同步到服务器（仅在已登录时执行，且静默处理）
+    const token = localStorage.getItem('im_token')
+    if (token) {
+      store.dispatch('im/batchUpdateServerSettings', {
+        'general.theme': theme
+      }).catch(() => {
+        // 忽略服务器更新失败
+      })
+    }
   }
 
   /**
@@ -86,7 +93,7 @@ export function useTheme() {
    */
   const setupThemeListener = () => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    
+
     const handleChange = (e) => {
       if (currentTheme.value === 'system') {
         isDarkMode.value = e.matches
@@ -109,15 +116,27 @@ export function useTheme() {
   })
 
   // 监听主题变化
-  watch(currentTheme, (newTheme) => {
-    applyTheme(newTheme)
+  watch(currentTheme, (newTheme, oldTheme) => {
+    if (newTheme !== oldTheme) {
+      applyTheme(newTheme)
+    }
   })
+
+  /**
+   * 切换主题模式
+   */
+  const toggleTheme = () => {
+    const newTheme = isDarkMode.value ? 'light' : 'dark'
+    applyTheme(newTheme)
+  }
 
   return {
     currentTheme,
+    isDark: isDarkMode,
     isDarkMode,
     setTheme,
     toggleDarkMode,
+    toggleTheme,
     applyTheme
   }
 }

@@ -127,6 +127,11 @@ const handleImageError = () => {
   }
 }
 
+.dingtalk-avatar.avatar-square.message-avatar {
+  border: 2px solid var(--dt-brand-color);
+  box-shadow: 0 0 8px rgba(22, 119, 255, 0.3);
+}
+
 .avatar-circle {
   border-radius: 50%;
 }
