@@ -456,7 +456,23 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         if (cloudFile.getFileAssetId() != null) {
             ImFileAsset fileAsset = fileAssetMapper.selectById(cloudFile.getFileAssetId());
             if (fileAsset != null) {
-                // TODO: 删除物理文件
+                // 删除磁盘上的物理文件
+                if (fileAsset.getFilePath() != null) {
+                    try {
+                        java.io.File physicalFile = new java.io.File(fileAsset.getFilePath());
+                        if (physicalFile.exists()) {
+                            boolean deleted = physicalFile.delete();
+                            if (deleted) {
+                                logger.info("物理文件已删除: filePath={}", fileAsset.getFilePath());
+                            } else {
+                                logger.warn("物理文件删除失败: filePath={}", fileAsset.getFilePath());
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.error("删除物理文件异常: filePath={}", fileAsset.getFilePath(), e);
+                    }
+                }
+                // 删除数据库记录
                 fileAssetMapper.deleteById(fileAsset.getId());
             }
         }

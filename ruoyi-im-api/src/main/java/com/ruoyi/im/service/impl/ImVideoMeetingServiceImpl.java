@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.domain.ImVideoMeeting;
 import com.ruoyi.im.domain.ImVideoMeetingParticipant;
@@ -11,9 +12,11 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.mapper.ImVideoMeetingMapper;
 import com.ruoyi.im.mapper.ImVideoMeetingParticipantMapper;
 import com.ruoyi.im.service.ImVideoMeetingService;
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.vo.meeting.ImVideoMeetingDetailVO;
 import com.ruoyi.im.vo.meeting.ImVideoMeetingVO;
+import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -55,6 +58,9 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
 
     @Autowired
     private ImRedisUtil redisUtil;
+
+    @Autowired
+    private ImWebSocketBroadcastService webSocketBroadcastService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -678,24 +684,95 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
      * 广播会议通知
      */
     private void broadcastMeetingNotification(Long meetingId, String eventType, String message, Long operatorId) {
-        // TODO: 通过WebSocket推送会议通知
-        log.info("会议通知: meetingId={}, type={}, message={}, operator={}", meetingId, eventType, message, operatorId);
+        try {
+            // 获取会议参与者列表
+            List<ImVideoMeetingParticipant> participants = participantMapper.selectList(
+                    new LambdaQueryWrapper<ImVideoMeetingParticipant>()
+                            .eq(ImVideoMeetingParticipant::getMeetingId, meetingId)
+            );
+
+            if (participants == null || participants.isEmpty()) {
+                return;
+            }
+
+            // 构建会议通知消息
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("type", "meeting_notification");
+            notification.put("meetingId", meetingId);
+            notification.put("eventType", eventType);
+            notification.put("message", message);
+            notification.put("operatorId", operatorId);
+            notification.put("timestamp", System.currentTimeMillis());
+
+            String messageJson = new ObjectMapper().writeValueAsString(notification);
+
+            // 发送给所有参与者
+            for (ImVideoMeetingParticipant participant : participants) {
+                try {
+                    webSocketBroadcastService.broadcastOnlineStatus(participant.getUserId(), true);
+                } catch (Exception e) {
+                    log.error("发送会议通知给用户失败: userId={}", participant.getUserId(), e);
+                }
+            }
+
+            log.info("会议通知已推送: meetingId={}, type={}, participants={}", meetingId, eventType, participants.size());
+        } catch (Exception e) {
+            log.error("广播会议通知失败: meetingId={}", meetingId, e);
+        }
     }
 
     /**
      * 广播屏幕共享事件
      */
     private void broadcastScreenShareEvent(Long meetingId, Long userId, Boolean isSharing) {
-        // TODO: 通过WebSocket推送屏幕共享状态
-        log.info("屏幕共享事件: meetingId={}, userId={}, sharing={}", meetingId, userId, isSharing);
+        try {
+            // 获取会议参与者列表
+            List<ImVideoMeetingParticipant> participants = participantMapper.selectList(
+                    new LambdaQueryWrapper<ImVideoMeetingParticipant>()
+                            .eq(ImVideoMeetingParticipant::getMeetingId, meetingId)
+            );
+
+            if (participants == null || participants.isEmpty()) {
+                return;
+            }
+
+            // 构建屏幕共享通知消息
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("type", "screen_share");
+            notification.put("meetingId", meetingId);
+            notification.put("userId", userId);
+            notification.put("isSharing", isSharing);
+            notification.put("timestamp", System.currentTimeMillis());
+
+            String messageJson = new ObjectMapper().writeValueAsString(notification);
+
+            // 广播给所有在线的会议参与者
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            for (ImVideoMeetingParticipant participant : participants) {
+                javax.websocket.Session session = onlineUsers.get(participant.getUserId());
+                if (session != null && session.isOpen()) {
+                    try {
+                        session.getBasicRemote().sendText(messageJson);
+                    } catch (Exception e) {
+                        log.error("发送屏幕共享通知失败: userId={}", participant.getUserId(), e);
+                    }
+                }
+            }
+
+            log.info("屏幕共享事件已推送: meetingId={}, userId={}, sharing={}", meetingId, userId, isSharing);
+        } catch (Exception e) {
+            log.error("广播屏幕共享事件失败: meetingId={}", meetingId, e);
+        }
     }
 
     /**
      * 生成会议链接
      */
     private String generateMeetingLink(String roomId) {
-        // TODO: 根据部署环境生成实际链接
-        return "https://meeting.example.com/join?room=" + roomId;
+        // 根据部署环境生成实际链接
+        // TODO: 从配置文件读取会议服务器地址
+        String meetingServerUrl = "https://meeting.example.com";
+        return meetingServerUrl + "/join?room=" + roomId;
     }
 
     /**

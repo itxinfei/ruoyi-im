@@ -322,9 +322,9 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         int processed = 0;
         for (ImMessageMarker marker : markers) {
             try {
-                // TODO: 发送提醒通知 - 需要实现WebSocket推送
-                // webSocketBroadcastService.broadcastMessageToConversation(
-                //         marker.getConversationId(), marker.getMessageId(), marker.getUserId());
+                // 发送待办提醒通知
+                webSocketBroadcastService.broadcastMessageToConversation(
+                        marker.getConversationId(), marker.getMessageId(), marker.getUserId());
                 processed++;
             } catch (Exception e) {
                 logger.error("发送待办提醒失败: markerId={}", marker.getId(), e);
