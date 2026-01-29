@@ -43,19 +43,6 @@ public final class ExceptionHandlerUtil {
     }
 
     /**
-     * 记录错误日志并抛出业务异常（使用错误码和错误消息）
-     *
-     * @param logger  日志记录器
-     * @param code    错误码
-     * @param message 错误消息
-     * @param e       异常
-     */
-    public static void throwBusinessException(Logger logger, String code, String message, Exception e) {
-        logger.error("[{}] {}: {}", code, message, e.getMessage(), e);
-        throw new BusinessException(code, message);
-    }
-
-    /**
      * 抛出业务异常（不记录日志）
      *
      * @param message 错误消息

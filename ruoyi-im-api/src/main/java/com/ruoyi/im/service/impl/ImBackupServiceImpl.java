@@ -256,6 +256,7 @@ public class ImBackupServiceImpl implements ImBackupService {
 
         } catch (Exception e) {
             ExceptionHandlerUtil.throwBusinessException(logger, "导出用户数据失败: userId=" + userId, e);
+            return null; // 这行不会执行，只是为了满足编译器要求
         }
     }
 

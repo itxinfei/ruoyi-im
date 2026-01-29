@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImUserSetting;
 import com.ruoyi.im.dto.setting.UserSettingUpdateRequest;
 import com.ruoyi.im.dto.setting.UserSettingsBatchUpdateRequest;
@@ -161,7 +162,7 @@ public class ImUserSettingServiceImpl implements IImUserSettingService {
         } else if (key.startsWith("privacy.")) {
             return "PRIVACY";
         } else if (key.startsWith("file.")) {
-            return "FILE";
+            return StatusConstants.CloudResourceType.FILE;
         } else if (key.startsWith("data.")) {
             return "DATA";
         } else {

@@ -194,6 +194,31 @@ public class StatusConstants {
     }
 
     /**
+     * 云盘资源类型
+     */
+    public static class CloudResourceType {
+        /** 文件 */
+        public static final String FILE = "FILE";
+
+        /** 文件夹 */
+        public static final String FOLDER = "FOLDER";
+    }
+
+    /**
+     * 文件夹权限类型
+     */
+    public static class FolderPermission {
+        /** 私有 */
+        public static final String PRIVATE = "PRIVATE";
+
+        /** 部门共享 */
+        public static final String DEPARTMENT = "DEPARTMENT";
+
+        /** 全公司共享 */
+        public static final String COMPANY = "COMPANY";
+    }
+
+    /**
      * 班次类型
      */
     public static class ShiftType {

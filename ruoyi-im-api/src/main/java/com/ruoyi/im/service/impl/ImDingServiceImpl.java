@@ -209,14 +209,15 @@ public class ImDingServiceImpl implements ImDingService {
         }
 
         // 如果只查询未读，过滤已读的
+        List<ImDingMessage> filteredDings = dings;
         if (request.getUnreadOnly() != null && request.getUnreadOnly()) {
-            dings = dings.stream()
+            filteredDings = dings.stream()
                     .filter(ding -> Boolean.FALSE.equals(readStatusMap.get(ding.getId())))
                     .collect(Collectors.toList());
         }
 
         // 转换为VO（使用批量加载的数据）
-        return dings.stream()
+        return filteredDings.stream()
                 .map(ding -> convertToVO(ding, userId, senderMap, readStatusMap))
                 .collect(Collectors.toList());
     }

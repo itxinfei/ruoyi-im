@@ -589,7 +589,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         }
 
         // 获取资源名称
-        if ("FILE".equals(request.getShareType())) {
+        if (StatusConstants.CloudResourceType.FILE.equals(request.getShareType())) {
             ImCloudFile file = cloudFileMapper.selectById(request.getResourceId());
             if (file != null) {
                 vo.setResourceName(file.getFileName());
@@ -635,7 +635,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             vo.setIsExpired(share.getExpireTime() != null && share.getExpireTime().isBefore(LocalDateTime.now()));
 
             // 获取资源名称
-            if ("FILE".equals(share.getShareType())) {
+            if (StatusConstants.CloudResourceType.FILE.equals(share.getShareType())) {
                 ImCloudFile file = cloudFileMapper.selectById(share.getResourceId());
                 if (file != null) {
                     vo.setResourceName(file.getFileName());
