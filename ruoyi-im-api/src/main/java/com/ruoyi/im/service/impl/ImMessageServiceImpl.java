@@ -1086,4 +1086,60 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         log.info("用户清空会话聊天记录: conversationId={}, userId={}", conversationId, userId);
     }
+
+    @Override
+    public List<ImMessageVO> getMessagesByCategory(Long conversationId, String category, Long userId, Long lastId, Integer limit) {
+        // 验证用户是否有权限访问该会话
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (member == null) {
+            throw new BusinessException("NO_PERMISSION", "无权限访问该会话");
+        }
+
+        // 根据category确定消息类型筛选
+        String messageTypeFilter = null;
+        if ("image".equals(category)) {
+            messageTypeFilter = MessageStatusConstants.MESSAGE_TYPE_IMAGE;
+        } else if ("file".equals(category)) {
+            messageTypeFilter = MessageStatusConstants.MESSAGE_TYPE_FILE;
+        } else if ("voice".equals(category)) {
+            messageTypeFilter = MessageStatusConstants.MESSAGE_TYPE_VOICE;
+        } else if ("video".equals(category)) {
+            messageTypeFilter = MessageStatusConstants.MESSAGE_TYPE_VIDEO;
+        }
+        // "all" 和 "link" 不筛选类型，link 需要特殊处理内容
+
+        // 查询消息列表
+        List<ImMessage> messageList = imMessageMapper.selectMessagesByCategory(
+                conversationId, messageTypeFilter, lastId, limit);
+
+        // 转换为VO
+        List<ImMessageVO> resultList = new ArrayList<>();
+        for (ImMessage message : messageList) {
+            // 如果是 link 类型，需要检查消息内容是否包含链接
+            if ("link".equals(category)) {
+                String content = encryptionUtil.decryptMessage(message.getContent());
+                if (!containsLink(content)) {
+                    continue;
+                }
+            }
+            resultList.add(convertToVO(message));
+        }
+
+        return resultList;
+    }
+
+    /**
+     * 检查消息内容是否包含链接
+     *
+     * @param content 消息内容
+     * @return 是否包含链接
+     */
+    private boolean containsLink(String content) {
+        if (content == null || content.isEmpty()) {
+            return false;
+        }
+        // 简单的链接检测正则表达式
+        String urlPattern = "https?://[\\w\\-._~:/?#[\\]@!$&'()*+,;=]+";
+        return content.matches(".*" + urlPattern + ".*");
+    }
 }

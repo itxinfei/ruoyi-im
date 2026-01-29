@@ -334,3 +334,21 @@ export function getExportableMessages(conversationId, params) {
     params
   })
 }
+
+/**
+ * 按类型获取会话消息
+ * 用于聊天记录面板按类型筛选消息
+ * @param {number} conversationId - 会话ID
+ * @param {string} category - 消息类型分类（all/image/file/link/voice/video）
+ * @param {Object} params - 查询参数
+ * @param {number} params.lastId - 上一条消息ID（用于分页）
+ * @param {number} params.limit - 每页数量
+ * @returns {Promise}
+ */
+export function getMessagesByCategory(conversationId, category, params = {}) {
+  return request({
+    url: `/api/im/message/${conversationId}/category/${category}`,
+    method: 'get',
+    params
+  })
+}

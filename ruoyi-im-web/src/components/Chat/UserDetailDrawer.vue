@@ -628,6 +628,69 @@ const handleGroupClick = (group) => {
           margin: 0;
         }
       }
+
+      // 共同群组区块样式
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 10px;
+
+        .section-icon {
+          font-size: 16px;
+          color: var(--dt-brand-color);
+        }
+
+        .card-label {
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--dt-text-primary);
+          margin: 0;
+        }
+      }
+
+      .groups-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .group-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+          background: var(--dt-bg-hover);
+        }
+
+        .group-info {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .group-name {
+            font-size: 13px;
+            color: var(--dt-text-primary);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .group-members {
+            font-size: 11px;
+            color: var(--dt-text-tertiary);
+            flex-shrink: 0;
+          }
+        }
+      }
     }
   }
 }

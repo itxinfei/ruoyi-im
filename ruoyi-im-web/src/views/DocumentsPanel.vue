@@ -860,56 +860,98 @@ const formatFileSize = (bytes) => {
 
 /* 上传区域 */
 .upload-area {
-  padding: 40px 20px;
+  padding: 48px 24px;
   border: 2px dashed var(--dt-border-color);
   border-radius: var(--dt-radius-xl);
   text-align: center;
-  transition: all var(--dt-transition-fast);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--dt-bg-body);
+  position: relative;
+  overflow: hidden;
 }
 
 .upload-area:hover {
   border-color: var(--dt-brand-color);
+  background: var(--dt-brand-bg);
+  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .upload-icon {
-  font-size: 48px;
+  font-size: 56px;
   color: var(--dt-brand-color);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  transition: transform 0.3s ease;
+}
+
+.upload-area:hover .upload-icon {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .upload-text {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--dt-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .upload-hint {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--dt-text-tertiary);
+  line-height: 1.4;
+  max-width: 320px;
+  margin: 0 auto;
 }
 
 .docs-content {
   flex: 1;
-  padding: 32px;
+  padding: 24px;
   overflow-y: auto;
+  background: var(--dt-bg-body);
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--dt-bg-body);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--dt-border-color);
+    border-radius: 3px;
+    
+    &:hover {
+      background-color: var(--dt-text-quaternary);
+    }
+  }
 }
 
 .files-table-wrapper {
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
-  box-shadow: var(--dt-shadow-1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--dt-border-color);
   overflow: hidden;
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.files-table-wrapper:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
 .files-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
 
 .files-table thead {
   background: var(--dt-bg-body);
   border-bottom: 1px solid var(--dt-border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .files-table th {
@@ -920,6 +962,23 @@ const formatFileSize = (bytes) => {
   color: var(--dt-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  position: relative;
+}
+
+.files-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dt-brand-lighter), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.files-table th:hover::after {
+  opacity: 1;
 }
 
 .files-table th.actions-col {
@@ -929,11 +988,15 @@ const formatFileSize = (bytes) => {
 .files-table tbody tr {
   border-bottom: 1px solid var(--dt-border-light);
   cursor: pointer;
-  transition: background var(--dt-transition-fast);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .files-table tbody tr:hover {
   background: var(--dt-bg-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .files-table tbody tr:last-child {
@@ -942,6 +1005,11 @@ const formatFileSize = (bytes) => {
 
 .files-table td {
   padding: 16px 24px;
+  transition: all 0.2s ease;
+}
+
+.files-table tbody tr:hover td {
+  color: var(--dt-text-primary);
 }
 
 .name-col {
@@ -951,94 +1019,192 @@ const formatFileSize = (bytes) => {
 .file-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  transition: all 0.2s ease;
 }
 
 .file-icon {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
 }
 
-.icon-folder { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
-.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
-.icon-sheet { background: var(--dt-success-bg); color: var(--dt-success-color); }
-.icon-pdf { background: var(--dt-error-bg); color: var(--dt-error-color); }
-.icon-image { background: #f3e8ff; color: #a855f7; }
+.file-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.file-icon:hover::before {
+  left: 100%;
+}
+
+.icon-folder { 
+  background: linear-gradient(135deg, var(--dt-warning-bg), #fef3c7); 
+  color: var(--dt-warning-color); 
+}
+.icon-doc { 
+  background: linear-gradient(135deg, var(--dt-brand-bg), #dbeafe); 
+  color: var(--dt-brand-color); 
+}
+.icon-sheet { 
+  background: linear-gradient(135deg, var(--dt-success-bg), #d1fae5); 
+  color: var(--dt-success-color); 
+}
+.icon-pdf { 
+  background: linear-gradient(135deg, var(--dt-error-bg), #fee2e2); 
+  color: var(--dt-error-color); 
+}
+.icon-image { 
+  background: linear-gradient(135deg, #f3e8ff, #e9d5ff); 
+  color: #a855f7; 
+}
+
+.file-icon:hover {
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
 
 .file-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--dt-text-primary);
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
 }
 
 .file-meta {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--dt-text-quaternary);
-  margin-top: 2px;
+  margin-top: 4px;
+  line-height: 1.3;
+  transition: color 0.2s ease;
+}
+
+.file-row:hover .file-name {
+  color: var(--dt-brand-color);
+}
+
+.file-row:hover .file-meta {
+  color: var(--dt-text-tertiary);
 }
 
 .owner-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
   color: var(--dt-text-secondary);
+  transition: all 0.2s ease;
 }
 
 .owner-avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.owner-avatar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.owner-avatar:hover::before {
+  left: 100%;
+}
+
+.file-row:hover .owner-avatar {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .file-time {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--dt-text-tertiary);
+  transition: all 0.2s ease;
+  font-weight: 400;
+}
+
+.file-row:hover .file-time {
+  color: var(--dt-text-secondary);
 }
 
 .actions-col {
   text-align: right;
+  position: relative;
 }
 
 .action-btn {
   opacity: 0;
-  background: none;
-  border: none;
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-color);
   color: var(--dt-text-quaternary);
   cursor: pointer;
-  padding: 4px;
+  padding: 6px 8px;
   border-radius: var(--dt-radius-sm);
-  transition: all var(--dt-transition-fast);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
 }
 
 .file-row:hover .action-btn {
   opacity: 1;
+  transform: translateY(-2px);
 }
 
 .action-btn:hover {
   color: var(--dt-brand-color);
-  background: var(--dt-bg-hover);
+  background: var(--dt-brand-bg);
+  border-color: var(--dt-brand-color);
+  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
 }
 
 .pagination {
-  margin-top: 16px;
+  margin-top: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 4px;
-  font-size: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
   color: var(--dt-text-tertiary);
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--dt-border-color);
 }
 
 .page-buttons {
@@ -1048,26 +1214,36 @@ const formatFileSize = (bytes) => {
 }
 
 .page-btn {
-  background: none;
-  border: none;
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-color);
   color: var(--dt-text-tertiary);
   cursor: pointer;
-  padding: 4px 8px;
-  font-size: 12px;
-  transition: color var(--dt-transition-fast);
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: var(--dt-radius-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .page-btn:hover:not([disabled]) {
   color: var(--dt-brand-color);
+  background: var(--dt-brand-bg);
+  border-color: var(--dt-brand-color);
+  box-shadow: 0 2px 6px rgba(22, 119, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .page-btn[disabled] {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .page-divider {
   color: var(--dt-border-color);
+  margin: 0 4px;
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 /* 暗色模式 */
@@ -1104,6 +1280,11 @@ const formatFileSize = (bytes) => {
   border-color: var(--dt-border-dark);
 }
 
+.dark .search-input:focus {
+  background: var(--dt-bg-card-dark);
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1), 0 2px 8px rgba(22, 119, 255, 0.15);
+}
+
 .dark .storage-info {
   background: var(--dt-bg-hover-dark);
 }
@@ -1115,6 +1296,10 @@ const formatFileSize = (bytes) => {
 
 .dark .files-table th {
   color: var(--dt-text-tertiary-dark);
+}
+
+.dark .files-table th::after {
+  background: linear-gradient(90deg, transparent, rgba(22, 119, 255, 0.2), transparent);
 }
 
 .dark .files-table tbody tr:hover {
@@ -1135,10 +1320,377 @@ const formatFileSize = (bytes) => {
 
 .dark .toggle-btn {
   color: var(--dt-text-quaternary-dark);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .dark .toggle-btn.active {
   background: var(--dt-bg-card-dark);
-  color: var(--dt-text-primary-dark);
+  color: var(--dt-brand-color);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dark .action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--dt-border-dark);
+  color: var(--dt-text-quaternary-dark);
+}
+
+.dark .action-btn:hover {
+  background: var(--dt-brand-bg-dark);
+  border-color: var(--dt-brand-color);
+  color: var(--dt-brand-color);
+}
+
+.dark .pagination {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark .page-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--dt-border-dark);
+  color: var(--dt-text-tertiary-dark);
+}
+
+.dark .page-btn:hover:not([disabled]) {
+  background: var(--dt-brand-bg-dark);
+  border-color: var(--dt-brand-color);
+  color: var(--dt-brand-color);
+}
+
+.dark .upload-area {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--dt-border-dark);
+}
+
+.dark .upload-area:hover {
+  background: var(--dt-brand-bg-dark);
+  border-color: var(--dt-brand-color);
+  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.1);
+}
+
+/* 全局动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 应用动画效果 */
+.docs-sidebar {
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.docs-header {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+.files-table-wrapper {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+.pagination {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+}
+
+/* 微交互优化 */
+.nav-item,
+.toggle-btn,
+.new-btn,
+.action-btn,
+.page-btn {
+  user-select: none;
+}
+
+/* 焦点样式优化 */
+*:focus-visible {
+  outline: 2px solid var(--dt-brand-color);
+  outline-offset: 2px;
+  border-radius: var(--dt-radius-sm);
+}
+
+.dark *:focus-visible {
+  outline: 2px solid var(--dt-brand-color);
+  outline-offset: 2px;
+  border-radius: var(--dt-radius-sm);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .docs-sidebar {
+    width: 200px;
+  }
+  
+  .sidebar-title {
+    font-size: 16px;
+    padding: 16px;
+  }
+  
+  .nav-item {
+    padding: 12px 16px;
+  }
+  
+  .storage-info {
+    padding: 16px;
+    margin: 16px;
+  }
+  
+  .name-col {
+    width: 45%;
+  }
+  
+  .file-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .docs-container {
+    flex-direction: column;
+  }
+  
+  .docs-sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--dt-border-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .sidebar-content {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .nav-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .nav-item {
+    padding: 8px 16px;
+    border-radius: var(--dt-radius-md);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  
+  .storage-info {
+    width: 100%;
+    margin: 12px 0 0 0;
+    padding: 12px;
+  }
+  
+  .docs-main {
+    flex: 1;
+  }
+  
+  .docs-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .header-left,
+  .header-right {
+    width: 100%;
+  }
+  
+  .header-title {
+    font-size: 18px;
+  }
+  
+  .search-box {
+    width: 100%;
+  }
+  
+  .view-controls {
+    justify-content: space-between;
+  }
+  
+  .files-table thead {
+    display: none;
+  }
+  
+  .files-table tbody tr {
+    display: block;
+    margin-bottom: 16px;
+    border: 1px solid var(--dt-border-color);
+    border-radius: var(--dt-radius-md);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  .files-table tbody tr td {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    text-align: left;
+    border: none;
+  }
+  
+  .files-table tbody tr td::before {
+    content: attr(data-label);
+    font-weight: 500;
+    color: var(--dt-text-tertiary);
+    margin-right: 8px;
+  }
+  
+  .name-col {
+    width: 100%;
+  }
+  
+  .file-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .file-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .actions-col {
+    text-align: left;
+  }
+  
+  .action-btn {
+    opacity: 1;
+    margin-right: 8px;
+  }
+  
+  .pagination {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .page-buttons {
+    order: 1;
+  }
+  
+  .page-info {
+    order: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .nav-list {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .nav-item {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .docs-header {
+    padding: 12px;
+  }
+  
+  .header-title {
+    font-size: 16px;
+  }
+  
+  .new-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .toggle-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .upload-area {
+    padding: 24px 16px;
+  }
+  
+  .upload-icon {
+    font-size: 32px;
+  }
+  
+  .upload-text {
+    font-size: 14px;
+  }
+  
+  .files-table tbody tr td {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .file-name {
+    font-size: 14px;
+  }
+  
+  .file-meta {
+    font-size: 11px;
+  }
+  
+  .action-btn {
+    padding: 4px 6px;
+    font-size: 14px;
+  }
+  
+  .pagination {
+    padding: 8px 12px;
+  }
+  
+  .page-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
 }
 </style>

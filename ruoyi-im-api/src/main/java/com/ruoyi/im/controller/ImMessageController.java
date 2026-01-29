@@ -440,4 +440,34 @@ public class ImMessageController {
             return Result.fail("清空聊天记录失败");
         }
     }
+
+    /**
+     * 按类型获取会话消息
+     * 获取指定会话中特定类型的消息（图片、文件、链接等）
+     *
+     * @param conversationId 会话ID
+     * @param category 消息类型分类（all/image/file/link/voice/video）
+     * @param lastId 上次查询的最后消息ID，用于分页
+     * @param limit 每页数量
+     * @return 消息列表
+     * @apiNote 用于聊天记录面板按类型筛选消息
+     */
+    @Operation(summary = "按类型获取会话消息", description = "获取指定会话中特定类型的消息")
+    @GetMapping("/{conversationId}/category/{category}")
+    public Result<List<ImMessageVO>> getMessagesByCategory(
+            @PathVariable Long conversationId,
+            @PathVariable String category,
+            @RequestParam(required = false) Long lastId,
+            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            List<ImMessageVO> list = imMessageService.getMessagesByCategory(
+                    conversationId, category, userId, lastId, limit);
+            return Result.success(list);
+        } catch (Exception e) {
+            log.error("按类型获取消息失败: conversationId={}, category={}", conversationId, category, e);
+            return Result.fail("获取消息失败");
+        }
+    }
 }

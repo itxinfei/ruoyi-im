@@ -232,59 +232,102 @@
 }
 
 :root {
-    // 断点定义（与 tailwind.config.js 保持一致）
-    --dt-breakpoint-sm: 640px;
-    --dt-breakpoint-md: 768px;
-    --dt-breakpoint-lg: 1024px;
-    --dt-breakpoint-xl: 1280px;
-    --dt-breakpoint-2xl: 1536px;
+  // 断点定义（与 tailwind.config.js 保持一致）
+  --dt-breakpoint-sm: 640px;
+  --dt-breakpoint-md: 768px;
+  --dt-breakpoint-lg: 1024px;
+  --dt-breakpoint-xl: 1280px;
+  --dt-breakpoint-2xl: 1536px;
 
-    // 布局响应式调整
-    --dt-responsive-sidebar-width: var(--dt-nav-sidebar-width);
-    --dt-responsive-session-width: var(--dt-session-panel-width);
+  // 布局响应式调整
+  --dt-responsive-sidebar-width: var(--dt-nav-sidebar-width);
+  --dt-responsive-session-width: var(--dt-session-panel-width);
+}
+
+// ============================================================================
+// Accessibility: Reduced Motion Support (减少动画支持)
+// ============================================================================
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ============================================================================
+// Focus Visible (键盘导航焦点指示器)
+// ============================================================================
+:focus-visible {
+  outline: 2px solid var(--dt-brand-color);
+  outline-offset: 2px;
+  border-radius: var(--dt-radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// ============================================================================
+// 滚动条样式 (统一滚动条外观)
+// ============================================================================
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--dt-radius-sm);
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.25);
+  }
+}
+
+
+
+// 细滚动条 (用于紧凑空间)
+.scrollbar-sm {
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
   }
 
-  // ============================================================================
-  // Accessibility: Reduced Motion Support (减少动画支持)
-  // ============================================================================
-  @media (prefers-reduced-motion: reduce) {
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
 
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
     }
   }
 
-  // ============================================================================
-  // Focus Visible (键盘导航焦点指示器)
-  // ============================================================================
-  :focus-visible {
-    outline: 2px solid var(--dt-brand-color);
-    outline-offset: 2px;
-    border-radius: var(--dt-radius-sm);
-  }
+  .dark &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
 
-  :focus:not(:focus-visible) {
-    outline: none;
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
   }
+}
 
-  // ============================================================================
-  // 滚动条样式 (统一滚动条外观)
-  // ============================================================================
-  ::-webkit-scrollbar {
+// 中等滚动条 (默认)
+.scrollbar-md {
+  &::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
+  &::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.15);
     border-radius: var(--dt-radius-sm);
 
@@ -293,1974 +336,1931 @@
     }
   }
 
-
-
-  // 细滚动条 (用于紧凑空间)
-  .scrollbar-sm {
-    &::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 2px;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.2);
-      }
-    }
-
-    .dark &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.2);
-      }
-    }
-  }
-
-  // 中等滚动条 (默认)
-  .scrollbar-md {
-    &::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: var(--dt-radius-sm);
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.25);
-      }
-    }
-
-    .dark &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.25);
-      }
-    }
-  }
-
-  // 粗滚动条 (用于触屏优化)
-  .scrollbar-lg {
-    &::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: var(--dt-radius-md);
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.35);
-      }
-
-      &:active {
-        background: rgba(0, 0, 0, 0.4);
-      }
-    }
-
-    .dark &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.35);
-      }
-
-      &:active {
-        background: rgba(255, 255, 255, 0.4);
-      }
-    }
-  }
-
-  // 隐藏滚动条 (但可滚动)
-  .scrollbar-none {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
-  // 品牌色滚动条 (强调使用场景)
-  .scrollbar-brand {
-    &::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(24, 144, 255, 0.3);
-      border-radius: var(--dt-radius-sm);
-
-      &:hover {
-        background: rgba(24, 144, 255, 0.5);
-      }
-    }
-
-    .dark &::-webkit-scrollbar-thumb {
-      background: rgba(24, 144, 255, 0.4);
-
-      &:hover {
-        background: rgba(24, 144, 255, 0.6);
-      }
-    }
-  }
-
-  // 滚动条带轨道背景
-  .scrollbar-tracked {
-    &::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: var(--dt-bg-card-hover);
-      border-radius: var(--dt-radius-sm);
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: var(--dt-radius-sm);
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.35);
-      }
-    }
-
-    .dark &::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .dark &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.35);
-      }
-    }
-  }
-
-  // 横向滚动条优化
-  .scrollbar-horizontal {
-    &::-webkit-scrollbar {
-      width: auto;
-      height: 6px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: 3px;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.25);
-      }
-    }
-
-    .dark &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.25);
-      }
-    }
-  }
-
-  // 纵向滚动条优化
-  .scrollbar-vertical {
-    &::-webkit-scrollbar {
-      width: 6px;
-      height: auto;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: 3px;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.25);
-      }
-    }
-
-    .dark &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.25);
-      }
-    }
-  }
-
-  // 悬停显示滚动条
-  .scrollbar-hover {
-    &::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-      opacity: 0;
-      transition: opacity var(--dt-transition-base);
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: var(--dt-radius-sm);
-    }
-
-    &:hover::-webkit-scrollbar {
-      opacity: 1;
-    }
-
-    .dark &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-    }
-  }
-
-  // ============================================================================
-  // 选择文本样式
-  // ============================================================================
-  ::selection {
-    background: var(--dt-brand-light);
-    color: var(--dt-brand-color);
-  }
-
-  ::-moz-selection {
-    background: var(--dt-brand-light);
-    color: var(--dt-brand-color);
-  }
-
-  // ============================================================================
-  // 通用工具类 (SCSS Mixins)
-  // ============================================================================
-  @mixin flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  @mixin flex-between {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  @mixin text-ellipsis {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  @mixin text-ellipsis-multiline($lines: 2) {
-    display: -webkit-box;
-    -webkit-line-clamp: $lines;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  @mixin card-style {
-    background: var(--dt-bg-card);
-    border: 1px solid var(--dt-border-light);
-    border-radius: var(--dt-radius-lg);
-    box-shadow: var(--dt-shadow-card);
-    transition: box-shadow var(--dt-transition-base);
+  .dark &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
 
     &:hover {
-      box-shadow: var(--dt-shadow-card-hover);
+      background: rgba(255, 255, 255, 0.25);
     }
   }
+}
 
-  @mixin button-reset {
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-    color: inherit;
-    font: inherit;
+// 粗滚动条 (用于触屏优化)
+.scrollbar-lg {
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
   }
 
-  @mixin interactive {
-    cursor: pointer;
-    transition: all var(--dt-transition-base);
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--dt-radius-md);
 
     &:hover {
-      opacity: 0.85;
+      background: rgba(0, 0, 0, 0.35);
     }
 
     &:active {
-      opacity: 0.7;
-      transform: scale(0.98);
+      background: rgba(0, 0, 0, 0.4);
     }
   }
 
-  // ============================================================================
-  // 响应式断点
-  // ============================================================================
-  $breakpoint-sm: 640px;
-  $breakpoint-md: 768px;
-  $breakpoint-lg: 1024px;
-  $breakpoint-xl: 1280px;
-  $breakpoint-2xl: 1536px;
-
-  @mixin respond-to($breakpoint) {
-    @media (min-width: $breakpoint) {
-      @content;
-    }
-  }
-
-  @mixin respond-below($breakpoint) {
-    @media (max-width: ($breakpoint - 1px)) {
-      @content;
-    }
-  }
-
-  // ============================================================================
-  // 动画关键帧 (Keyframe Animations)
-  // ============================================================================
-
-  // 淡入动画
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  // 从上淡入
-  @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  // 从下淡入
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  // 从左淡入
-  @keyframes fadeInLeft {
-    from {
-      opacity: 0;
-      transform: translateX(-10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  // 从右淡入
-  @keyframes fadeInRight {
-    from {
-      opacity: 0;
-      transform: translateX(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  // 缩放淡入
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  // 弹跳进入
-  @keyframes bounceIn {
-    0% {
-      opacity: 0;
-      transform: scale(0.3);
-    }
-
-    50% {
-      transform: scale(1.05);
-    }
-
-    70% {
-      transform: scale(0.9);
-    }
-
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  // 滑入从左
-  @keyframes slideInLeft {
-    from {
-      transform: translateX(-100%);
-    }
-
-    to {
-      transform: translateX(0);
-    }
-  }
-
-  // 滑入从右
-  @keyframes slideInRight {
-    from {
-      transform: translateX(100%);
-    }
-
-    to {
-      transform: translateX(0);
-    }
-  }
-
-  // 脉冲动画
-  @keyframes pulse {
-
-    0%,
-    100% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  // 呼吸动画（用于在线状态等）
-  @keyframes breathe {
-
-    0%,
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    50% {
-      transform: scale(1.1);
-      opacity: 0.8;
-    }
-  }
-
-  // 旋转动画
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  // 加载动画（圆点跳跃）
-  @keyframes dotBounce {
-
-    0%,
-    80%,
-    100% {
-      transform: scale(0);
-      opacity: 0.5;
-    }
-
-    40% {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
-
-  // 波纹扩散动画
-  @keyframes ripple {
-    0% {
-      transform: scale(0);
-      opacity: 1;
-    }
-
-    100% {
-      transform: scale(4);
-      opacity: 0;
-    }
-  }
-
-  // 骨架屏闪烁动画
-  @keyframes skeleton {
-    0% {
-      background-position: -200% 0;
-    }
-
-    100% {
-      background-position: 200% 0;
-    }
-  }
-
-  // 消息气泡弹出动画
-  @keyframes messagePop {
-    0% {
-      opacity: 0;
-      transform: scale(0.8) translateY(10px);
-    }
-
-    100% {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-
-  // 震动动画（用于错误提示等）
-  @keyframes shake {
-
-    0%,
-    100% {
-      transform: translateX(0);
-    }
-
-    25% {
-      transform: translateX(-5px);
-    }
-
-    75% {
-      transform: translateX(5px);
-    }
-  }
-
-  // 打字机光标闪烁
-  @keyframes blink {
-
-    0%,
-    100% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0;
-    }
-  }
-
-  // 加载条动画
-  @keyframes loadingBar {
-    0% {
-      left: -35%;
-      width: 35%;
-    }
-
-    100% {
-      left: 100%;
-      width: 100%;
-    }
-  }
-
-  // ============================================================================
-  // 动画 Mixins
-  // ============================================================================
-
-  @mixin animation-fade-in($duration: var(--dt-transition-base)) {
-    animation: fadeIn $duration var(--dt-ease-out);
-  }
-
-  @mixin animation-fade-in-up($duration: var(--dt-transition-base)) {
-    animation: fadeInUp $duration var(--dt-ease-out);
-  }
-
-  @mixin animation-scale-in($duration: var(--dt-transition-base)) {
-    animation: scaleIn $duration var(--dt-ease-bounce);
-  }
-
-  @mixin animation-bounce-in($duration: 0.5s) {
-    animation: bounceIn $duration var(--dt-ease-bounce);
-  }
-
-  @mixin animation-pulse($duration: 2s, $infinite: true) {
-    animation: pulse $duration var(--dt-ease-in-out) #{if(sass($infinite): infinite; else: "")};
-  }
-
-  @mixin animation-spin($duration: 1s, $infinite: true) {
-    animation: spin $duration linear #{if(sass($infinite): infinite; else: "")};
-  }
-
-  @mixin animation-shake($duration: 0.5s) {
-    animation: shake $duration var(--dt-ease-in-out);
-  }
-
-  // 骨架屏效果
-  @mixin skeleton-loading {
-    background: linear-gradient(90deg,
-        var(--dt-bg-card-hover) 0%,
-        var(--dt-bg-card) 50%,
-        var(--dt-bg-card-hover) 100%);
-    background-size: 200% 100%;
-    animation: skeleton 1.5s var(--dt-ease-in-out) infinite;
-    border-radius: var(--dt-radius-sm);
-    color: transparent !important;
-    pointer-events: none;
-  }
-
-  // 悬停提升效果
-  @mixin hover-lift($translate-y: -2px) {
-    transition: transform var(--dt-transition-base), box-shadow var(--dt-transition-base);
+  .dark &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
 
     &:hover {
-      transform: translateY($translate-y);
-      box-shadow: var(--dt-shadow-card-hover);
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    &:active {
+      background: rgba(255, 255, 255, 0.4);
+    }
+  }
+}
+
+// 隐藏滚动条 (但可滚动)
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// 品牌色滚动条 (强调使用场景)
+.scrollbar-brand {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(24, 144, 255, 0.3);
+    border-radius: var(--dt-radius-sm);
+
+    &:hover {
+      background: rgba(24, 144, 255, 0.5);
     }
   }
 
-  // 涟漪效果
-  @mixin ripple-effect($color: var(--dt-brand-color), $duration: 0.6s) {
-    position: relative;
-    overflow: hidden;
+  .dark &::-webkit-scrollbar-thumb {
+    background: rgba(24, 144, 255, 0.4);
 
-    &::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: $color;
-      transform: translate(-50%, -50%);
-      transition: width $duration var(--dt-ease-out), height $duration var(--dt-ease-out);
-      opacity: 0.3;
-    }
-
-    &:active::after {
-      width: 200px;
-      height: 200px;
+    &:hover {
+      background: rgba(24, 144, 255, 0.6);
     }
   }
+}
 
-  // 平滑过渡（所有属性）
-  @mixin smooth-transition($properties: all) {
-    transition: $properties var(--dt-transition-base) var(--dt-ease-in-out);
+// 滚动条带轨道背景
+.scrollbar-tracked {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
 
-  // 玻璃态效果
-  @mixin glass-effect($blur: 10px, $opacity: 0.8) {
-    background: rgba(255, 255, 255, $opacity);
-    backdrop-filter: blur($blur);
-    -webkit-backdrop-filter: blur($blur);
+  &::-webkit-scrollbar-track {
+    background: var(--dt-bg-card-hover);
+    border-radius: var(--dt-radius-sm);
   }
 
-  // 暗色玻璃态
-  @mixin glass-dark($blur: 10px, $opacity: 0.6) {
-    background: rgba(15, 23, 42, $opacity);
-    backdrop-filter: blur($blur);
-    -webkit-backdrop-filter: blur($blur);
-  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--dt-radius-sm);
 
-  // 渐变背景
-  @mixin gradient-bg($start: #1677ff, $end: #0e5fd9, $direction: 135deg) {
-    background: linear-gradient($direction, $start, $end);
-  }
-
-  // 文本渐变
-  @mixin text-gradient($start: #1677ff, $end: #4096ff) {
-    background: linear-gradient(135deg, $start, $end);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  // 阴影层次
-  @mixin shadow-level($level: 1) {
-    @if $level ==1 {
-      box-shadow: var(--dt-shadow-1);
-    }
-
-    @else if $level ==2 {
-      box-shadow: var(--dt-shadow-2);
-    }
-
-    @else if $level ==3 {
-      box-shadow: var(--dt-shadow-3);
-    }
-
-    @else if $level ==4 {
-      box-shadow: var(--dt-shadow-4);
-    }
-
-    @else if $level ==5 {
-      box-shadow: var(--dt-shadow-5);
+    &:hover {
+      background: rgba(0, 0, 0, 0.35);
     }
   }
 
-  // 绝对居中
-  @mixin absolute-center {
+  .dark &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .dark &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+  }
+}
+
+// 横向滚动条优化
+.scrollbar-horizontal {
+  &::-webkit-scrollbar {
+    width: auto;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  .dark &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
+// 纵向滚动条优化
+.scrollbar-vertical {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: auto;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  .dark &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
+// 悬停显示滚动条
+.scrollbar-hover {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    transition: opacity var(--dt-transition-base);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--dt-radius-sm);
+  }
+
+  &:hover::-webkit-scrollbar {
+    opacity: 1;
+  }
+
+  .dark &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// ============================================================================
+// 选择文本样式
+// ============================================================================
+::selection {
+  background: var(--dt-brand-light);
+  color: var(--dt-brand-color);
+}
+
+::-moz-selection {
+  background: var(--dt-brand-light);
+  color: var(--dt-brand-color);
+}
+
+// ============================================================================
+// 通用工具类 (SCSS Mixins)
+// ============================================================================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-ellipsis-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin card-style {
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-card);
+  transition: box-shadow var(--dt-transition-base);
+
+  &:hover {
+    box-shadow: var(--dt-shadow-card-hover);
+  }
+}
+
+@mixin button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+@mixin interactive {
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  &:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+// ============================================================================
+// 响应式断点
+// ============================================================================
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+@mixin respond-to($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin respond-below($breakpoint) {
+  @media (max-width: ($breakpoint - 1px)) {
+    @content;
+  }
+}
+
+// ============================================================================
+// 动画关键帧 (Keyframe Animations)
+// ============================================================================
+
+// 淡入动画
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+// 从上淡入
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 从下淡入
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 从左淡入
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// 从右淡入
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// 缩放淡入
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 弹跳进入
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 滑入从左
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+// 滑入从右
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+// 脉冲动画
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// 呼吸动画（用于在线状态等）
+@keyframes breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+// 旋转动画
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// 加载动画（圆点跳跃）
+@keyframes dotBounce {
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// 波纹扩散动画
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// 骨架屏闪烁动画
+@keyframes skeleton {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// 消息气泡弹出动画
+@keyframes messagePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// 震动动画（用于错误提示等）
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+// 打字机光标闪烁
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+// 加载条动画
+@keyframes loadingBar {
+  0% {
+    left: -35%;
+    width: 35%;
+  }
+
+  100% {
+    left: 100%;
+    width: 100%;
+  }
+}
+
+// ============================================================================
+// 动画 Mixins
+// ============================================================================
+
+@mixin animation-fade-in($duration: var(--dt-transition-base)) {
+  animation: fadeIn $duration var(--dt-ease-out);
+}
+
+@mixin animation-fade-in-up($duration: var(--dt-transition-base)) {
+  animation: fadeInUp $duration var(--dt-ease-out);
+}
+
+@mixin animation-scale-in($duration: var(--dt-transition-base)) {
+  animation: scaleIn $duration var(--dt-ease-bounce);
+}
+
+@mixin animation-bounce-in($duration: 0.5s) {
+  animation: bounceIn $duration var(--dt-ease-bounce);
+}
+
+@mixin animation-pulse($duration: 2s, $infinite: true) {
+  animation: pulse $duration var(--dt-ease-in-out) #{if(sass($infinite): infinite; else: "")};
+}
+
+@mixin animation-spin($duration: 1s, $infinite: true) {
+  animation: spin $duration linear #{if(sass($infinite): infinite; else: "")};
+}
+
+@mixin animation-shake($duration: 0.5s) {
+  animation: shake $duration var(--dt-ease-in-out);
+}
+
+// 骨架屏效果
+@mixin skeleton-loading {
+  background: linear-gradient(90deg,
+      var(--dt-bg-card-hover) 0%,
+      var(--dt-bg-card) 50%,
+      var(--dt-bg-card-hover) 100%);
+  background-size: 200% 100%;
+  animation: skeleton 1.5s var(--dt-ease-in-out) infinite;
+  border-radius: var(--dt-radius-sm);
+  color: transparent !important;
+  pointer-events: none;
+}
+
+// 悬停提升效果
+@mixin hover-lift($translate-y: -2px) {
+  transition: transform var(--dt-transition-base), box-shadow var(--dt-transition-base);
+
+  &:hover {
+    transform: translateY($translate-y);
+    box-shadow: var(--dt-shadow-card-hover);
+  }
+}
+
+// 涟漪效果
+@mixin ripple-effect($color: var(--dt-brand-color), $duration: 0.6s) {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  // 绝对填满
-  @mixin absolute-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
-
-  // 重置列表样式
-  @mixin list-reset {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  // 重置按钮样式
-  @mixin reset-button {
-    @include button-reset;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-  }
-
-  // Focus 环绕效果
-  @mixin focus-ring($color: var(--dt-brand-color), $width: 2px) {
-    &:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 #{$width}px $color;
-    }
-  }
-
-  // 滚动隐藏（但可滚动）
-  @mixin scroll-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
-  // 响应式隐藏
-  @mixin hide-on-mobile {
-    @include respond-below($breakpoint-md) {
-      display: none;
-    }
-  }
-
-  @mixin hide-on-desktop {
-    @include respond-to($breakpoint-lg) {
-      display: none;
-    }
-  }
-
-  // ============================================================================
-  // 实用动画类
-  // ============================================================================
-
-  .animate-fade-in {
-    @include animation-fade-in;
-  }
-
-  .animate-fade-in-up {
-    @include animation-fade-in-up;
-  }
-
-  .animate-scale-in {
-    @include animation-scale-in;
-  }
-
-  .animate-bounce-in {
-    @include animation-bounce-in;
-  }
-
-  .animate-pulse {
-    @include animation-pulse;
-  }
-
-  .animate-spin {
-    @include animation-spin;
-  }
-
-  .hover-lift {
-    @include hover-lift;
-  }
-
-  // 延迟动画工具类
-  .animation-delay-100 {
-    animation-delay: 100ms;
-  }
-
-  .animation-delay-200 {
-    animation-delay: 200ms;
-  }
-
-  .animation-delay-300 {
-    animation-delay: 300ms;
-  }
-
-  .animation-delay-400 {
-    animation-delay: 400ms;
-  }
-
-  .animation-delay-500 {
-    animation-delay: 500ms;
-  }
-
-  // ============================================================================
-  // DingTalk 风格按钮系统
-  // ============================================================================
-
-  // 按钮基础样式
-  .dt-btn {
-    @include reset-button;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dt-space-2);
-    font-size: var(--dt-font-size-base);
-    font-weight: var(--dt-font-weight-normal);
-    line-height: 1.5;
-    white-space: nowrap;
-    user-select: none;
-    text-decoration: none;
-    border-radius: var(--dt-radius-md);
-    transition: all var(--dt-transition-base);
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-
-    &:focus-visible {
-      outline: 2px solid var(--dt-brand-color);
-      outline-offset: 2px;
-    }
-
-    &:disabled,
-    &.is-disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-
-    // 图标按钮
-    &.is-icon-only {
-      padding: 0;
-      aspect-ratio: 1;
-    }
-
-    // 加载状态
-    &.is-loading {
-      pointer-events: none;
-      opacity: 0.7;
-
-      &::before {
-        content: '';
-        position: absolute;
-        width: 1em;
-        height: 1em;
-        border: 2px solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-      }
-    }
-  }
-
-  // 按钮尺寸
-  .dt-btn--sm {
-    height: var(--dt-btn-height-sm);
-    padding: 0 var(--dt-space-3);
-    font-size: var(--dt-font-size-sm);
-    border-radius: var(--dt-radius-sm);
-
-    &.is-icon-only {
-      width: var(--dt-btn-height-sm);
-    }
-  }
-
-  .dt-btn--md {
-    height: var(--dt-btn-height-md);
-    padding: 0 var(--dt-space-4);
-    font-size: var(--dt-font-size-base);
-
-    &.is-icon-only {
-      width: var(--dt-btn-height-md);
-    }
-  }
-
-  .dt-btn--lg {
-    height: var(--dt-btn-height-lg);
-    padding: 0 var(--dt-space-5);
-    font-size: var(--dt-font-size-md);
-
-    &.is-icon-only {
-      width: var(--dt-btn-height-lg);
-    }
-  }
-
-  .dt-btn--xl {
-    height: var(--dt-btn-height-xl);
-    padding: 0 var(--dt-space-6);
-    font-size: var(--dt-font-size-lg);
-
-    &.is-icon-only {
-      width: var(--dt-btn-height-xl);
-    }
-  }
-
-  // 主要按钮 (Primary)
-  .dt-btn--primary {
-    background: var(--dt-brand-color);
-    color: #ffffff;
-    border: 1px solid transparent;
-
-    &:hover:not(:disabled) {
-      background: var(--dt-brand-hover);
-    }
-
-    &:active:not(:disabled) {
-      background: var(--dt-brand-active);
-    }
-
-    &.is-ghost {
-      background: transparent;
-      color: var(--dt-brand-color);
-      border: 1px solid var(--dt-brand-color);
-
-      &:hover:not(:disabled) {
-        background: var(--dt-brand-bg);
-      }
-    }
-  }
-
-  // 次要按钮 (Secondary)
-  .dt-btn--secondary {
-    background: #ffffff;
-    color: var(--dt-text-primary);
-    border: 1px solid var(--dt-border-color);
-
-    &:hover:not(:disabled) {
-      border-color: var(--dt-brand-color);
-      color: var(--dt-brand-color);
-    }
-
-    &:active:not(:disabled) {
-      background: var(--dt-bg-session-hover);
-    }
-
-    &.is-ghost {
-      background: transparent;
-      border-color: transparent;
-
-      &:hover:not(:disabled) {
-        background: var(--dt-bg-session-hover);
-      }
-    }
-  }
-
-  // 文字按钮 (Text)
-  .dt-btn--text {
-    background: transparent;
-    color: var(--dt-text-secondary);
-    border: 1px solid transparent;
-
-    &:hover:not(:disabled) {
-      color: var(--dt-brand-color);
-      background: var(--dt-brand-bg);
-    }
-
-    &:active:not(:disabled) {
-      background: var(--dt-brand-light);
-    }
-  }
-
-  // 危险按钮 (Danger)
-  .dt-btn--danger {
-    background: var(--dt-error-color);
-    color: #ffffff;
-    border: 1px solid transparent;
-
-    &:hover:not(:disabled) {
-      background: #ff7875;
-    }
-
-    &:active:not(:disabled) {
-      background: #d9363e;
-    }
-
-    &.is-ghost {
-      background: transparent;
-      color: var(--dt-error-color);
-      border: 1px solid var(--dt-error-color);
-
-      &:hover:not(:disabled) {
-        background: var(--dt-error-bg);
-      }
-    }
-  }
-
-  // 成功按钮 (Success)
-  .dt-btn--success {
-    background: var(--dt-success-color);
-    color: #ffffff;
-    border: 1px solid transparent;
-
-    &:hover:not(:disabled) {
-      background: #73d13d;
-    }
-
-    &:active:not(:disabled) {
-      background: #389e0d;
-    }
-  }
-
-  // 幽灵按钮 - 通用样式
-  .dt-btn--ghost {
-    background: transparent;
-    border: 1px solid var(--dt-border-color);
-    color: var(--dt-text-primary);
-
-    &:hover:not(:disabled) {
-      border-color: var(--dt-brand-color);
-      color: var(--dt-brand-color);
-    }
-  }
-
-  // 圆形按钮
-  .dt-btn--circle {
-    border-radius: var(--dt-radius-full);
-    padding: 0;
-    aspect-ratio: 1;
-
-    &.dt-btn--sm {
-      width: var(--dt-btn-height-sm);
-    }
-
-    &.dt-btn--md {
-      width: var(--dt-btn-height-md);
-    }
-
-    &.dt-btn--lg {
-      width: var(--dt-btn-height-lg);
-    }
-
-    &.dt-btn--xl {
-      width: var(--dt-btn-height-xl);
-    }
-  }
-
-  // 按钮组
-  .dt-btn-group {
-    display: inline-flex;
-
-    .dt-btn {
-      border-radius: 0;
-      margin-left: -1px;
-
-      &:first-child {
-        border-top-left-radius: var(--dt-radius-md);
-        border-bottom-left-radius: var(--dt-radius-md);
-      }
-
-      &:last-child {
-        border-top-right-radius: var(--dt-radius-md);
-        border-bottom-right-radius: var(--dt-radius-md);
-      }
-
-      &:hover {
-        z-index: 1;
-      }
-    }
-
-    // 纵向按钮组
-    &.is-vertical {
-      flex-direction: column;
-
-      .dt-btn {
-        margin-left: 0;
-        margin-top: -1px;
-
-        &:first-child {
-          border-radius: var(--dt-radius-md) var(--dt-radius-md) 0 0;
-        }
-
-        &:last-child {
-          border-radius: 0 0 var(--dt-radius-md) var(--dt-radius-md);
-        }
-      }
-    }
-  }
-
-  // 全宽按钮
-  .dt-btn--block {
-    width: 100%;
-    display: flex;
-  }
-
-  // 按钮内图标
-  .dt-btn__icon {
-    &--left {
-      margin-right: var(--dt-space-1);
-    }
-
-    &--right {
-      margin-left: var(--dt-space-1);
-    }
-  }
-
-  // ============================================================================
-  // DingTalk 风格输入框系统
-  // ============================================================================
-
-  // 输入框基础样式
-  .dt-input {
-    display: block;
-    width: 100%;
-    padding: 0 var(--dt-space-3);
-    font-size: var(--dt-font-size-base);
-    line-height: 1.5;
-    color: var(--dt-text-primary);
-    background: var(--dt-bg-input);
-    border: 1px solid var(--dt-border-input);
-    border-radius: var(--dt-radius-md);
-    transition: all var(--dt-transition-base);
-
-    &::placeholder {
-      color: var(--dt-text-quaternary);
-    }
-
-    &:hover {
-      border-color: var(--dt-border-input-hover);
-    }
-
-    &:focus {
-      outline: none;
-      border-color: var(--dt-border-input-focus);
-      box-shadow: 0 0 0 2px var(--dt-brand-lighter);
-    }
-
-    &:disabled,
-    &.is-disabled {
-      background: var(--dt-bg-card-hover);
-      color: var(--dt-text-disabled);
-      cursor: not-allowed;
-      border-color: var(--dt-border-light);
-
-      &::placeholder {
-        color: var(--dt-text-quaternary);
-      }
-    }
-
-    // 只读状态
-    &.is-readonly {
-      background: var(--dt-bg-card-hover);
-      border-color: var(--dt-border-light);
-      cursor: default;
-    }
-
-    // 错误状态
-    &.is-error {
-      border-color: var(--dt-error-color);
-
-      &:focus {
-        box-shadow: 0 0 0 2px var(--dt-error-bg);
-      }
-    }
-
-    // 警告状态
-    &.is-warning {
-      border-color: var(--dt-warning-color);
-
-      &:focus {
-        box-shadow: 0 0 0 2px var(--dt-warning-bg);
-      }
-    }
-
-    // 成功状态
-    &.is-success {
-      border-color: var(--dt-success-color);
-
-      &:focus {
-        box-shadow: 0 0 0 2px var(--dt-success-bg);
-      }
-    }
-  }
-
-  // 输入框尺寸
-  .dt-input--sm {
-    height: var(--dt-input-height-sm);
-    padding: 0 var(--dt-space-2);
-    font-size: var(--dt-font-size-sm);
-  }
-
-  .dt-input--md {
-    height: var(--dt-input-height-md);
-    padding: 0 var(--dt-space-3);
-  }
-
-  .dt-input--lg {
-    height: var(--dt-input-height-lg);
-    padding: 0 var(--dt-space-4);
-    font-size: var(--dt-font-size-md);
-  }
-
-  // 文本域
-  .dt-textarea {
-    @extend .dt-input;
-    min-height: 80px;
-    padding: var(--dt-space-3);
-    line-height: 1.6;
-    resize: vertical;
-
-    &.is-auto-resize {
-      resize: none;
-      overflow: hidden;
-    }
-  }
-
-  .dt-textarea--sm {
-    @extend .dt-input--sm;
-    min-height: 60px;
-    padding: var(--dt-space-2);
-  }
-
-  .dt-textarea--lg {
-    @extend .dt-input--lg;
-    min-height: 120px;
-    padding: var(--dt-space-4);
-  }
-
-  // 输入框组（带前缀/后缀）
-  .dt-input-group {
-    display: flex;
-    align-items: center;
-    width: 100%;
-
-    .dt-input {
-      flex: 1;
-      border-radius: 0;
-
-      &:first-child {
-        border-top-left-radius: var(--dt-radius-md);
-        border-bottom-left-radius: var(--dt-radius-md);
-      }
-
-      &:last-child {
-        border-top-right-radius: var(--dt-radius-md);
-        border-bottom-right-radius: var(--dt-radius-md);
-      }
-    }
-  }
-
-  .dt-input-group__prefix,
-  .dt-input-group__suffix {
-    display: inline-flex;
-    align-items: center;
-    padding: 0 var(--dt-space-3);
-    background: var(--dt-bg-card-hover);
-    border: 1px solid var(--dt-border-input);
-    color: var(--dt-text-tertiary);
-    white-space: nowrap;
-
-    .dt-input--sm & {
-      padding: 0 var(--dt-space-2);
-      font-size: var(--dt-font-size-sm);
-    }
-
-    .dt-input--lg & {
-      padding: 0 var(--dt-space-4);
-      font-size: var(--dt-font-size-md);
-    }
-  }
-
-  .dt-input-group__prefix {
-    border-right: none;
-    border-top-left-radius: var(--dt-radius-md);
-    border-bottom-left-radius: var(--dt-radius-md);
-  }
-
-  .dt-input-group__suffix {
-    border-left: none;
-    border-top-right-radius: var(--dt-radius-md);
-    border-bottom-right-radius: var(--dt-radius-md);
-  }
-
-  .dt-input-group__addon {
-    display: inline-flex;
-    align-items: center;
-    padding: 0 var(--dt-space-3);
-    background: var(--dt-bg-card-hover);
-    border: 1px solid var(--dt-border-color);
-    color: var(--dt-text-secondary);
-    white-space: nowrap;
-
-    &:first-child {
-      border-right: none;
-      border-top-left-radius: var(--dt-radius-md);
-      border-bottom-left-radius: var(--dt-radius-md);
-    }
-
-    &:last-child {
-      border-left: none;
-      border-top-right-radius: var(--dt-radius-md);
-      border-bottom-right-radius: var(--dt-radius-md);
-    }
-  }
-
-  // 输入框标签
-  .dt-input-label {
-    display: block;
-    margin-bottom: var(--dt-space-2);
-    font-size: var(--dt-font-size-sm);
-    font-weight: var(--dt-font-weight-medium);
-    color: var(--dt-text-secondary);
-
-    &.is-required {
-      &::before {
-        content: '*';
-        margin-right: 4px;
-        color: var(--dt-error-color);
-      }
-    }
-  }
-
-  // 输入框帮助文本
-  .dt-input-help {
-    margin-top: var(--dt-space-2);
-    font-size: var(--dt-font-size-sm);
-    color: var(--dt-text-tertiary);
-
-    &.is-error {
-      color: var(--dt-error-color);
-    }
-
-    &.is-warning {
-      color: var(--dt-warning-color);
-    }
-
-    &.is-success {
-      color: var(--dt-success-color);
-    }
-  }
-
-  // 输入框计数器
-  .dt-input-count {
-    position: absolute;
-    right: var(--dt-space-3);
-    bottom: var(--dt-space-2);
-    font-size: var(--dt-font-size-xs);
-    color: var(--dt-text-quaternary);
-    pointer-events: none;
-  }
-
-  // 输入框清除按钮
-  .dt-input-clear {
-    position: absolute;
-    right: var(--dt-space-3);
-    top: 50%;
-    transform: translateY(-50%);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    color: var(--dt-text-quaternary);
-    cursor: pointer;
+    width: 0;
+    height: 0;
     border-radius: 50%;
-    transition: all var(--dt-transition-fast);
-
-    &:hover {
-      background: var(--dt-bg-overlay);
-      color: var(--dt-text-tertiary);
-    }
+    background: $color;
+    transform: translate(-50%, -50%);
+    transition: width $duration var(--dt-ease-out), height $duration var(--dt-ease-out);
+    opacity: 0.3;
   }
 
-  .dt-input-wrapper {
-    position: relative;
-
-    &:hover .dt-input-clear,
-    .dt-input:focus~.dt-input-clear {
-      display: flex;
-    }
+  &:active::after {
+    width: 200px;
+    height: 200px;
   }
+}
 
-  // 搜索框
-  .dt-input-search {
-    @extend .dt-input;
+// 平滑过渡（所有属性）
+@mixin smooth-transition($properties: all) {
+  transition: $properties var(--dt-transition-base) var(--dt-ease-in-out);
+}
 
-    padding-left: var(--dt-space-8);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c8c8c' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: var(--dt-space-3) center;
-    background-size: 14px;
+// 玻璃态效果
+@mixin glass-effect($blur: 10px, $opacity: 0.8) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+}
 
-    &:focus {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231890ff' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
-    }
-  }
+// 暗色玻璃态
+@mixin glass-dark($blur: 10px, $opacity: 0.6) {
+  background: rgba(15, 23, 42, $opacity);
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+}
 
-  // 数字输入框
-  .dt-input-number {
-    @extend .dt-input;
+// 渐变背景
+@mixin gradient-bg($start: #1677ff, $end: #0e5fd9, $direction: 135deg) {
+  background: linear-gradient($direction, $start, $end);
+}
 
-    padding-right: var(--dt-space-8);
-    -moz-appearance: textfield;
+// 文本渐变
+@mixin text-gradient($start: #1677ff, $end: #4096ff) {
+  background: linear-gradient(135deg, $start, $end);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-  }
-
-  .dt-input-number__controls {
-    position: absolute;
-    right: 1px;
-    top: 1px;
-    bottom: 1px;
-    display: flex;
-    flex-direction: column;
-    border-left: 1px solid var(--dt-border-light);
-    background: var(--dt-bg-card-hover);
-    border-top-right-radius: var(--dt-radius-md);
-    border-bottom-right-radius: var(--dt-radius-md);
-  }
-
-  .dt-input-number__btn {
-    @include reset-button;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 var(--dt-space-2);
-    color: var(--dt-text-tertiary);
-    transition: all var(--dt-transition-fast);
-
-    &:hover {
-      color: var(--dt-brand-color);
-    }
-
-    &:first-child {
-      border-bottom: 1px solid var(--dt-border-light);
-    }
-  }
-
-  // 密码输入框
-  .dt-input-password {
-    @extend .dt-input;
-
-    padding-right: var(--dt-space-10);
-  }
-
-  .dt-input-password__toggle {
-    position: absolute;
-    right: var(--dt-space-3);
-    top: 50%;
-    transform: translateY(-50%);
-    @include reset-button;
-    color: var(--dt-text-tertiary);
-    cursor: pointer;
-    transition: color var(--dt-transition-fast);
-
-    &:hover {
-      color: var(--dt-text-secondary);
-    }
-  }
-
-  // 前缀/后缀图标
-  .dt-input__icon {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--dt-text-tertiary);
-    pointer-events: none;
-
-    &.is-prefix {
-      left: var(--dt-space-3);
-    }
-
-    &.is-suffix {
-      right: var(--dt-space-3);
-    }
-  }
-
-  .dt-input-wrapper {
-    position: relative;
-
-    &.has-prefix {
-      .dt-input {
-        padding-left: var(--dt-space-10);
-      }
-    }
-
-    &.has-suffix {
-      .dt-input {
-        padding-right: var(--dt-space-10);
-      }
-    }
-
-    &.has-prefix.has-suffix {
-      .dt-input {
-        padding-left: var(--dt-space-10);
-        padding-right: var(--dt-space-10);
-      }
-    }
-  }
-
-  // ============================================================================
-  // DingTalk 风格卡片系统
-  // ============================================================================
-
-  // 基础卡片
-  .dt-card {
-    background: var(--dt-bg-card);
-    border: 1px solid var(--dt-border-light);
-    border-radius: var(--dt-radius-lg);
-    box-shadow: var(--dt-shadow-card);
-    transition: all var(--dt-transition-base);
-
-    &:hover {
-      box-shadow: var(--dt-shadow-card-hover);
-    }
-  }
-
-  // 卡片层级
-  .dt-card--level-1 {
+// 阴影层次
+@mixin shadow-level($level: 1) {
+  @if $level ==1 {
     box-shadow: var(--dt-shadow-1);
   }
 
-  .dt-card--level-2 {
+  @else if $level ==2 {
     box-shadow: var(--dt-shadow-2);
   }
 
-  .dt-card--level-3 {
+  @else if $level ==3 {
     box-shadow: var(--dt-shadow-3);
   }
 
-  // 可点击卡片
-  .dt-card--clickable {
-    cursor: pointer;
-
-    &:hover {
-      border-color: var(--dt-border-input-hover);
-      box-shadow: var(--dt-shadow-card-hover);
-      transform: translateY(-1px);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
+  @else if $level ==4 {
+    box-shadow: var(--dt-shadow-4);
   }
 
-  // 浮动卡片（用于下拉菜单、气泡等）
-  .dt-card--float {
-    box-shadow: var(--dt-shadow-float);
-    border-radius: var(--dt-radius-md);
+  @else if $level ==5 {
+    box-shadow: var(--dt-shadow-5);
+  }
+}
+
+// 绝对居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 绝对填满
+@mixin absolute-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+// 重置列表样式
+@mixin list-reset {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+// 重置按钮样式
+@mixin reset-button {
+  @include button-reset;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+// Focus 环绕效果
+@mixin focus-ring($color: var(--dt-brand-color), $width: 2px) {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 #{$width}px $color;
+  }
+}
+
+// 滚动隐藏（但可滚动）
+@mixin scroll-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// 响应式隐藏
+@mixin hide-on-mobile {
+  @include respond-below($breakpoint-md) {
+    display: none;
+  }
+}
+
+@mixin hide-on-desktop {
+  @include respond-to($breakpoint-lg) {
+    display: none;
+  }
+}
+
+// ============================================================================
+// 实用动画类
+// ============================================================================
+
+.animate-fade-in {
+  @include animation-fade-in;
+}
+
+.animate-fade-in-up {
+  @include animation-fade-in-up;
+}
+
+.animate-scale-in {
+  @include animation-scale-in;
+}
+
+.animate-bounce-in {
+  @include animation-bounce-in;
+}
+
+.animate-pulse {
+  @include animation-pulse;
+}
+
+.animate-spin {
+  @include animation-spin;
+}
+
+.hover-lift {
+  @include hover-lift;
+}
+
+// 延迟动画工具类
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
+// ============================================================================
+// DingTalk 风格按钮系统
+// ============================================================================
+
+// 按钮基础样式
+.dt-btn {
+  @include reset-button;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dt-space-2);
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-normal);
+  line-height: 1.5;
+  white-space: nowrap;
+  user-select: none;
+  text-decoration: none;
+  border-radius: var(--dt-radius-md);
+  transition: all var(--dt-transition-base);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  &:focus-visible {
+    outline: 2px solid var(--dt-brand-color);
+    outline-offset: 2px;
   }
 
-  // 模态框卡片
-  .dt-card--modal {
-    box-shadow: var(--dt-shadow-modal);
-    border-radius: var(--dt-radius-xl);
-  }
-
-  // 无边框卡片
-  .dt-card--borderless {
-    border: none;
-    box-shadow: var(--dt-shadow-1);
-  }
-
-  // 卡片头部
-  .dt-card__header {
-    padding: var(--dt-space-4) var(--dt-space-5);
-    border-bottom: 1px solid var(--dt-border-light);
-
-    .dt-card--borderless & {
-      border-bottom: none;
-    }
-  }
-
-  .dt-card__title {
-    margin: 0;
-    font-size: var(--dt-font-size-lg);
-    font-weight: var(--dt-font-weight-semibold);
-    color: var(--dt-text-primary);
-  }
-
-  .dt-card__subtitle {
-    margin: var(--dt-space-1) 0 0;
-    font-size: var(--dt-font-size-sm);
-    color: var(--dt-text-tertiary);
-  }
-
-  .dt-card__extra {
-    margin-left: auto;
-    color: var(--dt-text-tertiary);
-  }
-
-  // 卡片内容
-  .dt-card__body {
-    padding: var(--dt-space-5);
-
-    &.is-paddingless {
-      padding: 0;
-    }
-
-    &.is-paddingless--horizontal {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    &.is-paddingless--vertical {
-      padding-top: 0;
-      padding-bottom: 0;
-    }
-  }
-
-  // 卡片底部
-  .dt-card__footer {
-    padding: var(--dt-space-4) var(--dt-space-5);
-    border-top: 1px solid var(--dt-border-light);
-    background: var(--dt-bg-card-hover);
-    border-bottom-left-radius: var(--dt-radius-lg);
-    border-bottom-right-radius: var(--dt-radius-lg);
-
-    .dt-card--borderless & {
-      border-top: none;
-      background: transparent;
-    }
-  }
-
-  // 卡片操作栏
-  .dt-card__actions {
-    display: flex;
-    gap: var(--dt-space-2);
-    justify-content: flex-end;
-
-    &.is-centered {
-      justify-content: center;
-    }
-
-    &.is-spaced {
-      justify-content: space-between;
-    }
-  }
-
-  // 卡片封面
-  .dt-card__cover {
-    position: relative;
-    overflow: hidden;
-
-    img {
-      width: 100%;
-      height: auto;
-      display: block;
-      transition: transform var(--dt-transition-slow);
-    }
-
-    .dt-card--clickable &:hover img {
-      transform: scale(1.05);
-    }
-  }
-
-  // 卡片加载状态
-  .dt-card--loading {
+  &:disabled,
+  &.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
     pointer-events: none;
-    position: relative;
-
-    &::after {
-      content: '';
-      @include absolute-fill;
-      background: rgba(255, 255, 255, 0.8);
-      z-index: 1;
-    }
   }
 
-  // 小型卡片
-  .dt-card--sm {
-    .dt-card__header {
-      padding: var(--dt-space-2) var(--dt-space-3);
-    }
-
-    .dt-card__body {
-      padding: var(--dt-space-3);
-    }
-
-    .dt-card__footer {
-      padding: var(--dt-space-2) var(--dt-space-3);
-    }
+  // 图标按钮
+  &.is-icon-only {
+    padding: 0;
+    aspect-ratio: 1;
   }
 
-  // 大型卡片
-  .dt-card--lg {
-    .dt-card__header {
-      padding: var(--dt-space-5) var(--dt-space-6);
-    }
-
-    .dt-card__body {
-      padding: var(--dt-space-6);
-    }
-
-    .dt-card__footer {
-      padding: var(--dt-space-5) var(--dt-space-6);
-    }
-  }
-
-  // 玻璃态卡片
-  .dt-card--glass {
-    @include glass-effect(10px, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  // ============================================================================
-  // DingTalk 风格过渡动画
-  // ============================================================================
-
-  // 基础过渡类
-  .dt-transition {
-    transition: all var(--dt-transition-base) var(--dt-ease-in-out);
-  }
-
-  .dt-transition--fast {
-    transition: all var(--dt-transition-fast) var(--dt-ease-out);
-  }
-
-  .dt-transition--slow {
-    transition: all var(--dt-transition-slow) var(--dt-ease-in-out);
-  }
-
-  // 属性特定过渡
-  .dt-transition--opacity {
-    transition: opacity var(--dt-transition-base) var(--dt-ease-in-out);
-  }
-
-  .dt-transition--transform {
-    transition: transform var(--dt-transition-base) var(--dt-ease-in-out);
-  }
-
-  .dt-transition--colors {
-    transition: color var(--dt-transition-base) var(--dt-ease-in-out),
-      background-color var(--dt-transition-base) var(--dt-ease-in-out),
-      border-color var(--dt-transition-base) var(--dt-ease-in-out);
-  }
-
-  .dt-transition--shadow {
-    transition: box-shadow var(--dt-transition-base) var(--dt-ease-in-out);
-  }
-
-  .dt-transition--width {
-    transition: width var(--dt-transition-slow) var(--dt-ease-in-out);
-  }
-
-  .dt-transition--height {
-    transition: height var(--dt-transition-slow) var(--dt-ease-in-out);
-  }
-
-  // 组合过渡
-  .dt-transition--all {
-    transition: all var(--dt-transition-base) var(--dt-ease-in-out);
-  }
-
-  // 弹性过渡
-  .dt-transition--bouncy {
-    transition: all 0.4s var(--dt-ease-bounce);
-  }
-
-  // 常用交互动画
-  // 悬停提升
-  .hover-lift {
-    @include hover-lift(-2px);
-  }
-
-  .hover-lift--strong {
-    transition: transform var(--dt-transition-base), box-shadow var(--dt-transition-base);
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--dt-shadow-lg);
-    }
-  }
-
-  // 悬停放大
-  .hover-scale {
-    transition: transform var(--dt-transition-base);
-
-    &:hover {
-      transform: scale(1.02);
-    }
-  }
-
-  .hover-scale--strong {
-    transition: transform var(--dt-transition-base);
-
-    &:hover {
-      transform: scale(1.05);
-    }
-  }
-
-  // 悬停淡入
-  .hover-fade {
-    opacity: 0.8;
-    transition: opacity var(--dt-transition-base);
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-
-  // 悬停显示
-  .hover-reveal {
-    .hover-reveal__target {
-      opacity: 0;
-      visibility: hidden;
-      transition: all var(--dt-transition-fast);
-    }
-
-    &:hover .hover-reveal__target {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
-
-  // 点击反馈
-  .click-shrink {
-    &:active {
-      transform: scale(0.97);
-    }
-  }
-
-  .click-pulse {
-    &:active {
-      animation: pulse 0.3s var(--dt-ease-out);
-    }
-  }
-
-  // 加载动画
-  .is-loading {
+  // 加载状态
+  &.is-loading {
     pointer-events: none;
-    position: relative;
+    opacity: 0.7;
 
-    &::after {
+    &::before {
       content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid var(--dt-brand-color);
+      width: 1em;
+      height: 1em;
+      border: 2px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
     }
   }
+}
 
-  // 骨架屏加载
-  .dt-skeleton {
-    @include skeleton-loading;
-    min-height: 1em;
-    display: inline-block;
+// 按钮尺寸
+.dt-btn--sm {
+  height: var(--dt-btn-height-sm);
+  padding: 0 var(--dt-space-3);
+  font-size: var(--dt-font-size-sm);
+  border-radius: var(--dt-radius-sm);
 
-    &.is-block {
-      display: block;
-      width: 100%;
+  &.is-icon-only {
+    width: var(--dt-btn-height-sm);
+  }
+}
+
+.dt-btn--md {
+  height: var(--dt-btn-height-md);
+  padding: 0 var(--dt-space-4);
+  font-size: var(--dt-font-size-base);
+
+  &.is-icon-only {
+    width: var(--dt-btn-height-md);
+  }
+}
+
+.dt-btn--lg {
+  height: var(--dt-btn-height-lg);
+  padding: 0 var(--dt-space-5);
+  font-size: var(--dt-font-size-md);
+
+  &.is-icon-only {
+    width: var(--dt-btn-height-lg);
+  }
+}
+
+.dt-btn--xl {
+  height: var(--dt-btn-height-xl);
+  padding: 0 var(--dt-space-6);
+  font-size: var(--dt-font-size-lg);
+
+  &.is-icon-only {
+    width: var(--dt-btn-height-xl);
+  }
+}
+
+// 主要按钮 (Primary)
+.dt-btn--primary {
+  background: var(--dt-brand-color);
+  color: #ffffff;
+  border: 1px solid transparent;
+
+  &:hover:not(:disabled) {
+    background: var(--dt-brand-hover);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--dt-brand-active);
+  }
+
+  &.is-ghost {
+    background: transparent;
+    color: var(--dt-brand-color);
+    border: 1px solid var(--dt-brand-color);
+
+    &:hover:not(:disabled) {
+      background: var(--dt-brand-bg);
+    }
+  }
+}
+
+// 次要按钮 (Secondary)
+.dt-btn--secondary {
+  background: #ffffff;
+  color: var(--dt-text-primary);
+  border: 1px solid var(--dt-border-color);
+
+  &:hover:not(:disabled) {
+    border-color: var(--dt-brand-color);
+    color: var(--dt-brand-color);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--dt-bg-session-hover);
+  }
+
+  &.is-ghost {
+    background: transparent;
+    border-color: transparent;
+
+    &:hover:not(:disabled) {
+      background: var(--dt-bg-session-hover);
+    }
+  }
+}
+
+// 文字按钮 (Text)
+.dt-btn--text {
+  background: transparent;
+  color: var(--dt-text-secondary);
+  border: 1px solid transparent;
+
+  &:hover:not(:disabled) {
+    color: var(--dt-brand-color);
+    background: var(--dt-brand-bg);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--dt-brand-light);
+  }
+}
+
+// 危险按钮 (Danger)
+.dt-btn--danger {
+  background: var(--dt-error-color);
+  color: #ffffff;
+  border: 1px solid transparent;
+
+  &:hover:not(:disabled) {
+    background: #ff7875;
+  }
+
+  &:active:not(:disabled) {
+    background: #d9363e;
+  }
+
+  &.is-ghost {
+    background: transparent;
+    color: var(--dt-error-color);
+    border: 1px solid var(--dt-error-color);
+
+    &:hover:not(:disabled) {
+      background: var(--dt-error-bg);
+    }
+  }
+}
+
+// 成功按钮 (Success)
+.dt-btn--success {
+  background: var(--dt-success-color);
+  color: #ffffff;
+  border: 1px solid transparent;
+
+  &:hover:not(:disabled) {
+    background: #73d13d;
+  }
+
+  &:active:not(:disabled) {
+    background: #389e0d;
+  }
+}
+
+// 幽灵按钮 - 通用样式
+.dt-btn--ghost {
+  background: transparent;
+  border: 1px solid var(--dt-border-color);
+  color: var(--dt-text-primary);
+
+  &:hover:not(:disabled) {
+    border-color: var(--dt-brand-color);
+    color: var(--dt-brand-color);
+  }
+}
+
+// 圆形按钮
+.dt-btn--circle {
+  border-radius: var(--dt-radius-full);
+  padding: 0;
+  aspect-ratio: 1;
+
+  &.dt-btn--sm {
+    width: var(--dt-btn-height-sm);
+  }
+
+  &.dt-btn--md {
+    width: var(--dt-btn-height-md);
+  }
+
+  &.dt-btn--lg {
+    width: var(--dt-btn-height-lg);
+  }
+
+  &.dt-btn--xl {
+    width: var(--dt-btn-height-xl);
+  }
+}
+
+// 按钮组
+.dt-btn-group {
+  display: inline-flex;
+
+  .dt-btn {
+    border-radius: 0;
+    margin-left: -1px;
+
+    &:first-child {
+      border-top-left-radius: var(--dt-radius-md);
+      border-bottom-left-radius: var(--dt-radius-md);
     }
 
-    &.is-circle {
-      border-radius: 50%;
+    &:last-child {
+      border-top-right-radius: var(--dt-radius-md);
+      border-bottom-right-radius: var(--dt-radius-md);
     }
 
-    &.is-rounded {
-      border-radius: var(--dt-radius-md);
+    &:hover {
+      z-index: 1;
     }
   }
 
-  // 骨架屏元素组合
-  .dt-skeleton__element {
+  // 纵向按钮组
+  &.is-vertical {
+    flex-direction: column;
+
+    .dt-btn {
+      margin-left: 0;
+      margin-top: -1px;
+
+      &:first-child {
+        border-radius: var(--dt-radius-md) var(--dt-radius-md) 0 0;
+      }
+
+      &:last-child {
+        border-radius: 0 0 var(--dt-radius-md) var(--dt-radius-md);
+      }
+    }
+  }
+}
+
+// 全宽按钮
+.dt-btn--block {
+  width: 100%;
+  display: flex;
+}
+
+// 按钮内图标
+.dt-btn__icon {
+  &--left {
+    margin-right: var(--dt-space-1);
+  }
+
+  &--right {
+    margin-left: var(--dt-space-1);
+  }
+}
+
+// ============================================================================
+// DingTalk 风格输入框系统
+// ============================================================================
+
+// 输入框基础样式
+.dt-input {
+  display: block;
+  width: 100%;
+  padding: 0 var(--dt-space-3);
+  font-size: var(--dt-font-size-base);
+  line-height: 1.5;
+  color: var(--dt-text-primary);
+  background: var(--dt-bg-input);
+  border: 1px solid var(--dt-border-input);
+  border-radius: var(--dt-radius-md);
+  transition: all var(--dt-transition-base);
+
+  &::placeholder {
+    color: var(--dt-text-quaternary);
+  }
+
+  &:hover {
+    border-color: var(--dt-border-input-hover);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--dt-border-input-focus);
+    box-shadow: 0 0 0 2px var(--dt-brand-lighter);
+  }
+
+  &:disabled,
+  &.is-disabled {
+    background: var(--dt-bg-card-hover);
+    color: var(--dt-text-disabled);
+    cursor: not-allowed;
+    border-color: var(--dt-border-light);
+
+    &::placeholder {
+      color: var(--dt-text-quaternary);
+    }
+  }
+
+  // 只读状态
+  &.is-readonly {
+    background: var(--dt-bg-card-hover);
+    border-color: var(--dt-border-light);
+    cursor: default;
+  }
+
+  // 错误状态
+  &.is-error {
+    border-color: var(--dt-error-color);
+
+    &:focus {
+      box-shadow: 0 0 0 2px var(--dt-error-bg);
+    }
+  }
+
+  // 警告状态
+  &.is-warning {
+    border-color: var(--dt-warning-color);
+
+    &:focus {
+      box-shadow: 0 0 0 2px var(--dt-warning-bg);
+    }
+  }
+
+  // 成功状态
+  &.is-success {
+    border-color: var(--dt-success-color);
+
+    &:focus {
+      box-shadow: 0 0 0 2px var(--dt-success-bg);
+    }
+  }
+}
+
+// 输入框尺寸
+.dt-input--sm {
+  height: var(--dt-input-height-sm);
+  padding: 0 var(--dt-space-2);
+  font-size: var(--dt-font-size-sm);
+}
+
+.dt-input--md {
+  height: var(--dt-input-height-md);
+  padding: 0 var(--dt-space-3);
+}
+
+.dt-input--lg {
+  height: var(--dt-input-height-lg);
+  padding: 0 var(--dt-space-4);
+  font-size: var(--dt-font-size-md);
+}
+
+// 文本域
+.dt-textarea {
+  @extend .dt-input;
+  min-height: 80px;
+  padding: var(--dt-space-3);
+  line-height: 1.6;
+  resize: vertical;
+
+  &.is-auto-resize {
+    resize: none;
+    overflow: hidden;
+  }
+}
+
+.dt-textarea--sm {
+  @extend .dt-input--sm;
+  min-height: 60px;
+  padding: var(--dt-space-2);
+}
+
+.dt-textarea--lg {
+  @extend .dt-input--lg;
+  min-height: 120px;
+  padding: var(--dt-space-4);
+}
+
+// 输入框组（带前缀/后缀）
+.dt-input-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .dt-input {
+    flex: 1;
+    border-radius: 0;
+
+    &:first-child {
+      border-top-left-radius: var(--dt-radius-md);
+      border-bottom-left-radius: var(--dt-radius-md);
+    }
+
+    &:last-child {
+      border-top-right-radius: var(--dt-radius-md);
+      border-bottom-right-radius: var(--dt-radius-md);
+    }
+  }
+}
+
+.dt-input-group__prefix,
+.dt-input-group__suffix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--dt-space-3);
+  background: var(--dt-bg-card-hover);
+  border: 1px solid var(--dt-border-input);
+  color: var(--dt-text-tertiary);
+  white-space: nowrap;
+
+  .dt-input--sm & {
+    padding: 0 var(--dt-space-2);
+    font-size: var(--dt-font-size-sm);
+  }
+
+  .dt-input--lg & {
+    padding: 0 var(--dt-space-4);
+    font-size: var(--dt-font-size-md);
+  }
+}
+
+.dt-input-group__prefix {
+  border-right: none;
+  border-top-left-radius: var(--dt-radius-md);
+  border-bottom-left-radius: var(--dt-radius-md);
+}
+
+.dt-input-group__suffix {
+  border-left: none;
+  border-top-right-radius: var(--dt-radius-md);
+  border-bottom-right-radius: var(--dt-radius-md);
+}
+
+.dt-input-group__addon {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--dt-space-3);
+  background: var(--dt-bg-card-hover);
+  border: 1px solid var(--dt-border-color);
+  color: var(--dt-text-secondary);
+  white-space: nowrap;
+
+  &:first-child {
+    border-right: none;
+    border-top-left-radius: var(--dt-radius-md);
+    border-bottom-left-radius: var(--dt-radius-md);
+  }
+
+  &:last-child {
+    border-left: none;
+    border-top-right-radius: var(--dt-radius-md);
+    border-bottom-right-radius: var(--dt-radius-md);
+  }
+}
+
+// 输入框标签
+.dt-input-label {
+  display: block;
+  margin-bottom: var(--dt-space-2);
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
+  color: var(--dt-text-secondary);
+
+  &.is-required {
+    &::before {
+      content: '*';
+      margin-right: 4px;
+      color: var(--dt-error-color);
+    }
+  }
+}
+
+// 输入框帮助文本
+.dt-input-help {
+  margin-top: var(--dt-space-2);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+
+  &.is-error {
+    color: var(--dt-error-color);
+  }
+
+  &.is-warning {
+    color: var(--dt-warning-color);
+  }
+
+  &.is-success {
+    color: var(--dt-success-color);
+  }
+}
+
+// 输入框计数器
+.dt-input-count {
+  position: absolute;
+  right: var(--dt-space-3);
+  bottom: var(--dt-space-2);
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-quaternary);
+  pointer-events: none;
+}
+
+// 输入框清除按钮
+.dt-input-clear {
+  position: absolute;
+  right: var(--dt-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--dt-text-quaternary);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-bg-overlay);
+    color: var(--dt-text-tertiary);
+  }
+}
+
+.dt-input-wrapper {
+  position: relative;
+
+  &:hover .dt-input-clear,
+  .dt-input:focus~.dt-input-clear {
+    display: flex;
+  }
+}
+
+// 搜索框
+.dt-input-search {
+  @extend .dt-input;
+
+  padding-left: var(--dt-space-8);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c8c8c' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: var(--dt-space-3) center;
+  background-size: 14px;
+
+  &:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231890ff' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+  }
+}
+
+// 数字输入框
+.dt-input-number {
+  @extend .dt-input;
+
+  padding-right: var(--dt-space-8);
+  -moz-appearance: textfield;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.dt-input-number__controls {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card-hover);
+  border-top-right-radius: var(--dt-radius-md);
+  border-bottom-right-radius: var(--dt-radius-md);
+}
+
+.dt-input-number__btn {
+  @include reset-button;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--dt-space-2);
+  color: var(--dt-text-tertiary);
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    color: var(--dt-brand-color);
+  }
+
+  &:first-child {
+    border-bottom: 1px solid var(--dt-border-light);
+  }
+}
+
+// 密码输入框
+.dt-input-password {
+  @extend .dt-input;
+
+  padding-right: var(--dt-space-10);
+}
+
+.dt-input-password__toggle {
+  position: absolute;
+  right: var(--dt-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  @include reset-button;
+  color: var(--dt-text-tertiary);
+  cursor: pointer;
+  transition: color var(--dt-transition-fast);
+
+  &:hover {
+    color: var(--dt-text-secondary);
+  }
+}
+
+// 前缀/后缀图标
+.dt-input__icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dt-text-tertiary);
+  pointer-events: none;
+
+  &.is-prefix {
+    left: var(--dt-space-3);
+  }
+
+  &.is-suffix {
+    right: var(--dt-space-3);
+  }
+}
+
+.dt-input-wrapper {
+  position: relative;
+
+  &.has-prefix {
+    .dt-input {
+      padding-left: var(--dt-space-10);
+    }
+  }
+
+  &.has-suffix {
+    .dt-input {
+      padding-right: var(--dt-space-10);
+    }
+  }
+
+  &.has-prefix.has-suffix {
+    .dt-input {
+      padding-left: var(--dt-space-10);
+      padding-right: var(--dt-space-10);
+    }
+  }
+}
+
+// ============================================================================
+// DingTalk 风格卡片系统
+// ============================================================================
+
+// 基础卡片
+.dt-card {
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-card);
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    box-shadow: var(--dt-shadow-card-hover);
+  }
+}
+
+// 卡片层级
+.dt-card--level-1 {
+  box-shadow: var(--dt-shadow-1);
+}
+
+.dt-card--level-2 {
+  box-shadow: var(--dt-shadow-2);
+}
+
+.dt-card--level-3 {
+  box-shadow: var(--dt-shadow-3);
+}
+
+// 可点击卡片
+.dt-card--clickable {
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--dt-border-input-hover);
+    box-shadow: var(--dt-shadow-card-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// 浮动卡片（用于下拉菜单、气泡等）
+.dt-card--float {
+  box-shadow: var(--dt-shadow-float);
+  border-radius: var(--dt-radius-md);
+}
+
+// 模态框卡片
+.dt-card--modal {
+  box-shadow: var(--dt-shadow-modal);
+  border-radius: var(--dt-radius-xl);
+}
+
+// 无边框卡片
+.dt-card--borderless {
+  border: none;
+  box-shadow: var(--dt-shadow-1);
+}
+
+// 卡片头部
+.dt-card__header {
+  padding: var(--dt-space-4) var(--dt-space-5);
+  border-bottom: 1px solid var(--dt-border-light);
+
+  .dt-card--borderless & {
+    border-bottom: none;
+  }
+}
+
+.dt-card__title {
+  margin: 0;
+  font-size: var(--dt-font-size-lg);
+  font-weight: var(--dt-font-weight-semibold);
+  color: var(--dt-text-primary);
+}
+
+.dt-card__subtitle {
+  margin: var(--dt-space-1) 0 0;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+}
+
+.dt-card__extra {
+  margin-left: auto;
+  color: var(--dt-text-tertiary);
+}
+
+// 卡片内容
+.dt-card__body {
+  padding: var(--dt-space-5);
+
+  &.is-paddingless {
+    padding: 0;
+  }
+
+  &.is-paddingless--horizontal {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &.is-paddingless--vertical {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+// 卡片底部
+.dt-card__footer {
+  padding: var(--dt-space-4) var(--dt-space-5);
+  border-top: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card-hover);
+  border-bottom-left-radius: var(--dt-radius-lg);
+  border-bottom-right-radius: var(--dt-radius-lg);
+
+  .dt-card--borderless & {
+    border-top: none;
+    background: transparent;
+  }
+}
+
+// 卡片操作栏
+.dt-card__actions {
+  display: flex;
+  gap: var(--dt-space-2);
+  justify-content: flex-end;
+
+  &.is-centered {
+    justify-content: center;
+  }
+
+  &.is-spaced {
+    justify-content: space-between;
+  }
+}
+
+// 卡片封面
+.dt-card__cover {
+  position: relative;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform var(--dt-transition-slow);
+  }
+
+  .dt-card--clickable &:hover img {
+    transform: scale(1.05);
+  }
+}
+
+// 卡片加载状态
+.dt-card--loading {
+  pointer-events: none;
+  position: relative;
+
+  &::after {
+    content: '';
+    @include absolute-fill;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 1;
+  }
+}
+
+// 小型卡片
+.dt-card--sm {
+  .dt-card__header {
+    padding: var(--dt-space-2) var(--dt-space-3);
+  }
+
+  .dt-card__body {
+    padding: var(--dt-space-3);
+  }
+
+  .dt-card__footer {
+    padding: var(--dt-space-2) var(--dt-space-3);
+  }
+}
+
+// 大型卡片
+.dt-card--lg {
+  .dt-card__header {
+    padding: var(--dt-space-5) var(--dt-space-6);
+  }
+
+  .dt-card__body {
+    padding: var(--dt-space-6);
+  }
+
+  .dt-card__footer {
+    padding: var(--dt-space-5) var(--dt-space-6);
+  }
+}
+
+// 玻璃态卡片
+.dt-card--glass {
+  @include glass-effect(10px, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+// ============================================================================
+// DingTalk 风格过渡动画
+// ============================================================================
+
+// 基础过渡类
+.dt-transition {
+  transition: all var(--dt-transition-base) var(--dt-ease-in-out);
+}
+
+.dt-transition--fast {
+  transition: all var(--dt-transition-fast) var(--dt-ease-out);
+}
+
+.dt-transition--slow {
+  transition: all var(--dt-transition-slow) var(--dt-ease-in-out);
+}
+
+// 属性特定过渡
+.dt-transition--opacity {
+  transition: opacity var(--dt-transition-base) var(--dt-ease-in-out);
+}
+
+.dt-transition--transform {
+  transition: transform var(--dt-transition-base) var(--dt-ease-in-out);
+}
+
+.dt-transition--colors {
+  transition: color var(--dt-transition-base) var(--dt-ease-in-out),
+    background-color var(--dt-transition-base) var(--dt-ease-in-out),
+    border-color var(--dt-transition-base) var(--dt-ease-in-out);
+}
+
+.dt-transition--shadow {
+  transition: box-shadow var(--dt-transition-base) var(--dt-ease-in-out);
+}
+
+.dt-transition--width {
+  transition: width var(--dt-transition-slow) var(--dt-ease-in-out);
+}
+
+.dt-transition--height {
+  transition: height var(--dt-transition-slow) var(--dt-ease-in-out);
+}
+
+// 组合过渡
+.dt-transition--all {
+  transition: all var(--dt-transition-base) var(--dt-ease-in-out);
+}
+
+// 弹性过渡
+.dt-transition--bouncy {
+  transition: all 0.4s var(--dt-ease-bounce);
+}
+
+// 常用交互动画
+// 悬停提升
+.hover-lift {
+  @include hover-lift(-2px);
+}
+
+.hover-lift--strong {
+  transition: transform var(--dt-transition-base), box-shadow var(--dt-transition-base);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--dt-shadow-lg);
+  }
+}
+
+// 悬停放大
+.hover-scale {
+  transition: transform var(--dt-transition-base);
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+.hover-scale--strong {
+  transition: transform var(--dt-transition-base);
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+// 悬停淡入
+.hover-fade {
+  opacity: 0.8;
+  transition: opacity var(--dt-transition-base);
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// 悬停显示
+.hover-reveal {
+  .hover-reveal__target {
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--dt-transition-fast);
+  }
+
+  &:hover .hover-reveal__target {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+// 点击反馈
+.click-shrink {
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.click-pulse {
+  &:active {
+    animation: pulse 0.3s var(--dt-ease-out);
+  }
+}
+
+// 加载动画
+.is-loading {
+  pointer-events: none;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--dt-brand-color);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+
+// 骨架屏加载
+.dt-skeleton {
+  @include skeleton-loading;
+  min-height: 1em;
+  display: inline-block;
+
+  &.is-block {
+    display: block;
+    width: 100%;
+  }
+
+  &.is-circle {
+    border-radius: 50%;
+  }
+
+  &.is-rounded {
+    border-radius: var(--dt-radius-md);
+  }
+}
+
+// 骨架屏元素组合
+.dt-skeleton__element {
+  @include skeleton-loading;
+  margin-bottom: var(--dt-space-3);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.dt-skeleton__title {
+  @include skeleton-loading;
+  width: 40%;
+  height: 20px;
+  margin-bottom: var(--dt-space-4);
+}
+
+.dt-skeleton__paragraph {
+  >li {
     @include skeleton-loading;
-    margin-bottom: var(--dt-space-3);
+    height: 14px;
+    margin-bottom: var(--dt-space-2);
 
     &:last-child {
       margin-bottom: 0;
     }
-  }
 
-  .dt-skeleton__title {
-    @include skeleton-loading;
-    width: 40%;
-    height: 20px;
-    margin-bottom: var(--dt-space-4);
-  }
+    &:nth-child(1) {
+      width: 100%;
+    }
 
-  .dt-skeleton__paragraph {
-    >li {
-      @include skeleton-loading;
-      height: 14px;
-      margin-bottom: var(--dt-space-2);
+    &:nth-child(2) {
+      width: 80%;
+    }
 
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      &:nth-child(1) {
-        width: 100%;
-      }
-
-      &:nth-child(2) {
-        width: 80%;
-      }
-
-      &:nth-child(3) {
-        width: 60%;
-      }
+    &:nth-child(3) {
+      width: 60%;
     }
   }
+}
 
-  .dt-skeleton__avatar {
-    @include skeleton-loading;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-  }
+.dt-skeleton__avatar {
+  @include skeleton-loading;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
 
-  .dt-skeleton__button {
-    @include skeleton-loading;
-    height: var(--dt-btn-height-md);
-    width: 80px;
-    border-radius: var(--dt-radius-md);
-  }
+.dt-skeleton__button {
+  @include skeleton-loading;
+  height: var(--dt-btn-height-md);
+  width: 80px;
+  border-radius: var(--dt-radius-md);
+}
 
-  .dt-skeleton__input {
-    @include skeleton-loading;
-    height: var(--dt-input-height-md);
-    width: 100%;
-    border-radius: var(--dt-radius-md);
-  }
+.dt-skeleton__input {
+  @include skeleton-loading;
+  height: var(--dt-input-height-md);
+  width: 100%;
+  border-radius: var(--dt-radius-md);
+}
 
-  .dt-skeleton__image {
-    @include skeleton-loading;
-    width: 100%;
-    padding-top: 56.25%; // 16:9 比例
-    border-radius: var(--dt-radius-md);
-  }
+.dt-skeleton__image {
+  @include skeleton-loading;
+  width: 100%;
+  padding-top: 56.25%; // 16:9 比例
+  border-radius: var(--dt-radius-md);
+}

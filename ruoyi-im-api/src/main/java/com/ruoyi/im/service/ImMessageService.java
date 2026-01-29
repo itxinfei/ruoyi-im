@@ -171,4 +171,17 @@ public interface ImMessageService {
      * @param userId         当前用户ID
      */
     void clearConversationMessages(Long conversationId, Long userId);
+
+    /**
+     * 按类型获取会话消息
+     * 获取指定会话中特定类型的消息（图片、文件、链接等）
+     *
+     * @param conversationId 会话ID
+     * @param category       消息类型分类（all/image/file/link/voice/video）
+     * @param userId         当前用户ID
+     * @param lastId         最后一条消息ID（分页用）
+     * @param limit          每页条数
+     * @return 消息列表
+     */
+    List<ImMessageVO> getMessagesByCategory(Long conversationId, String category, Long userId, Long lastId, Integer limit);
 }

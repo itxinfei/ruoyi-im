@@ -14,6 +14,20 @@
             </button>
           </div>
 
+          <!-- 分类筛选 -->
+          <div class="history-categories">
+            <div
+              v-for="cat in categories"
+              :key="cat.value"
+              class="category-item"
+              :class="{ active: activeCategory === cat.value }"
+              @click="handleCategoryChange(cat.value)"
+            >
+              <span class="material-icons-outlined category-icon">{{ cat.icon }}</span>
+              <span class="category-label">{{ cat.label }}</span>
+            </div>
+          </div>
+
           <!-- 搜索框 -->
           <div class="history-search">
             <el-input
@@ -113,11 +127,12 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
-import { getMessages } from '@/api/im/message'
+import { getMessages, getMessagesByCategory } from '@/api/im/message'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
-  conversationId: { type: [String, Number], default: null }
+  conversationId: { type: [String, Number], default: null },
+  session: { type: Object, default: null }
 })
 
 const emit = defineEmits(['close', 'jump-to-message', 'clear-history'])
@@ -132,6 +147,15 @@ const hasMore = ref(true)
 const historyMessages = ref([])
 const currentPage = ref(1)
 const pageSize = 50
+
+// 分类筛选
+const activeCategory = ref('all')
+const categories = [
+  { value: 'all', label: '全部', icon: 'chat_bubble' },
+  { value: 'image', label: '图片', icon: 'image' },
+  { value: 'file', label: '文件', icon: 'attach_file' },
+  { value: 'link', label: '链接', icon: 'link' }
+]
 
 // 过滤后的消息
 const filteredMessages = computed(() => {
@@ -197,14 +221,24 @@ const formatTime = (sendTime) => {
 
 // 加载聊天记录
 const loadHistoryMessages = async () => {
-  if (!props.conversationId) return
+  const conversationId = getConversationId()
+  if (!conversationId) return
 
   loading.value = true
   try {
-    const response = await getMessages(props.conversationId, {
-      pageNum: currentPage.value,
-      pageSize: pageSize
-    })
+    let response
+    // 根据分类选择不同的API
+    if (activeCategory.value === 'all') {
+      response = await getMessages(conversationId, {
+        pageNum: currentPage.value,
+        pageSize: pageSize
+      })
+    } else {
+      response = await getMessagesByCategory(conversationId, activeCategory.value, {
+        lastId: historyMessages.value.length > 0 ? historyMessages.value[historyMessages.value.length - 1].id : null,
+        limit: pageSize
+      })
+    }
 
     if (response.code === 200 && response.data) {
       const newMessages = response.data.records || response.data || []
@@ -239,6 +273,11 @@ const handleSearch = () => {
   })
 }
 
+// 分类切换处理
+const handleCategoryChange = (category) => {
+  activeCategory.value = category
+}
+
 // 点击消息
 const handleMessageClick = (msg) => {
   emit('jump-to-message', msg)
@@ -260,11 +299,24 @@ const handleClose = () => {
 watch(() => props.visible, (val) => {
   if (val) {
     searchKeyword.value = ''
+    activeCategory.value = 'all'
     currentPage.value = 1
     historyMessages.value = []
     loadHistoryMessages()
   }
 })
+
+// 监听分类变化
+watch(activeCategory, () => {
+  currentPage.value = 1
+  historyMessages.value = []
+  loadHistoryMessages()
+})
+
+// 获取会话ID
+const getConversationId = () => {
+  return props.conversationId || props.session?.conversationId || props.session?.id
+}
 </script>
 
 <style scoped lang="scss">
@@ -363,6 +415,56 @@ watch(() => props.visible, (val) => {
 }
 
 // 搜索
+.history-categories {
+  display: flex;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--dt-border-light);
+  gap: 8px;
+  overflow-x: auto;
+
+  .dark & {
+    border-bottom-color: var(--dt-border-dark);
+  }
+
+  .category-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: var(--dt-bg-body);
+    border: 1px solid var(--dt-border-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    .category-icon {
+      font-size: 16px;
+      color: var(--dt-text-secondary);
+    }
+
+    .category-label {
+      font-size: 13px;
+      color: var(--dt-text-secondary);
+    }
+
+    &:hover {
+      background: var(--dt-bg-hover);
+    }
+
+    &.active {
+      background: var(--dt-brand-bg);
+      border-color: var(--dt-brand-color);
+
+      .category-icon,
+      .category-label {
+        color: var(--dt-brand-color);
+      }
+    }
+  }
+}
+
 .history-search {
   padding: 12px 20px;
   border-bottom: 1px solid var(--dt-border-light);

@@ -269,4 +269,36 @@ public class ImGroupController {
         List<ImGroupVO> list = imGroupService.getCommonGroups(currentUserId, targetUserId);
         return Result.success(list);
     }
+
+    /**
+     * 获取群二维码
+     * 获取群组的二维码图片供扫码加入
+     *
+     * @param id 群组ID
+     * @return 二维码信息，包含二维码图片URL
+     * @apiNote 返回二维码图片URL或Base64数据，前端可直接展示
+     */
+    @Operation(summary = "获取群二维码", description = "获取群组的二维码图片供扫码加入")
+    @GetMapping("/{id}/qrcode")
+    public Result<java.util.Map<String, String>> getGroupQrcode(@PathVariable Long id) {
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        java.util.Map<String, String> qrcodeInfo = imGroupService.getGroupQrcode(id, currentUserId);
+        return Result.success(qrcodeInfo);
+    }
+
+    /**
+     * 刷新群二维码
+     * 重新生成群二维码，旧二维码失效
+     *
+     * @param id 群组ID
+     * @return 新二维码信息
+     * @apiNote 刷新后旧二维码将无法使用
+     */
+    @Operation(summary = "刷新群二维码", description = "重新生成群二维码")
+    @PostMapping("/{id}/qrcode/refresh")
+    public Result<java.util.Map<String, String>> refreshGroupQrcode(@PathVariable Long id) {
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        java.util.Map<String, String> qrcodeInfo = imGroupService.refreshGroupQrcode(id, currentUserId);
+        return Result.success(qrcodeInfo);
+    }
 }

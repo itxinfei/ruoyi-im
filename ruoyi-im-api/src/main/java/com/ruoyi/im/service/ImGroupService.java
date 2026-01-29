@@ -197,4 +197,24 @@ public interface ImGroupService {
      * @return 共同群组列表
      */
     List<ImGroupVO> getCommonGroups(Long userId1, Long userId2);
+
+    /**
+     * 获取群二维码
+     * 获取群组的二维码图片供扫码加入
+     *
+     * @param groupId 群组ID
+     * @param userId 当前用户ID
+     * @return 二维码信息，包含二维码图片URL
+     */
+    java.util.Map<String, String> getGroupQrcode(Long groupId, Long userId);
+
+    /**
+     * 刷新群二维码
+     * 重新生成群二维码，旧二维码失效
+     *
+     * @param groupId 群组ID
+     * @param userId 当前用户ID
+     * @return 新二维码信息
+     */
+    java.util.Map<String, String> refreshGroupQrcode(Long groupId, Long userId);
 }

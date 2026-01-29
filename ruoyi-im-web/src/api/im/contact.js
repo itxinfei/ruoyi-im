@@ -197,3 +197,43 @@ export function getSentRequests() {
     method: 'get'
   })
 }
+
+/**
+ * 获取用户标签列表
+ * 获取当前用户所有的好友标签
+ * @returns {Promise}
+ */
+export function getUserTags() {
+  return request({
+    url: '/api/im/contact/tags',
+    method: 'get'
+  })
+}
+
+/**
+ * 更新用户标签
+ * 为好友设置或更新标签
+ * @param {number} userId - 用户ID（联系人ID）
+ * @param {Array<string>} tags - 标签列表
+ * @returns {Promise}
+ */
+export function updateUserTags(userId, tags) {
+  return request({
+    url: `/api/im/contact/${userId}/tags`,
+    method: 'put',
+    data: { tags }
+  })
+}
+
+/**
+ * 按标签获取联系人
+ * 根据标签筛选联系人
+ * @param {string} tag - 标签名称
+ * @returns {Promise}
+ */
+export function getContactsByTag(tag) {
+  return request({
+    url: `/api/im/contact/tag/${encodeURIComponent(tag)}`,
+    method: 'get'
+  })
+}

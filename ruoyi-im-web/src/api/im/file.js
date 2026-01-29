@@ -71,3 +71,20 @@ export function deleteFile(fileId) {
         method: 'delete'
     })
 }
+
+/**
+ * 上传群头像
+ * @param {number} groupId - 群组ID
+ * @param {FormData} formData - 文件数据
+ * @returns {Promise}
+ */
+export function uploadGroupAvatar(groupId, formData) {
+    return request({
+        url: `/api/im/group/${groupId}/avatar`,
+        method: 'post',
+        data: formData,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+}

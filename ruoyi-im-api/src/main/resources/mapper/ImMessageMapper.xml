@@ -359,4 +359,24 @@
         DELETE FROM im_message
         WHERE conversation_id = #{conversationId}
     </delete>
+
+    <!-- 按类型查询会话消息 -->
+    <select id="selectMessagesByCategory" resultMap="ImMessageResult">
+        SELECT * FROM im_message
+        <where>
+            conversation_id = #{conversationId}
+            AND is_revoked = 0
+            AND is_deleted = 0
+            <if test="messageType != null">
+                AND message_type = #{messageType}
+            </if>
+            <if test="lastId != null">
+                AND id &lt; #{lastId}
+            </if>
+        </where>
+        ORDER BY id DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
 </mapper>

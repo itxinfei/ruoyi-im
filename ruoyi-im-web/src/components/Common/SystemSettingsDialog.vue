@@ -67,45 +67,34 @@
         </div>
       </aside>
 
-      <!-- 主内容区域 -->
-      <main class="settings-main">
-        <header class="main-header">
-          <div>
-            <h2 class="header-title">{{ currentMenuLabel }}</h2>
-            <div class="header-subtitle">{{ currentMenuDescription }}</div>
-          </div>
-          <div class="header-actions">
-            <el-tooltip content="恢复默认设置" placement="bottom">
-              <el-button class="action-btn" type="text" @click="resetToDefault">
-                <el-icon><Refresh /></el-icon>
-                <span class="btn-text">恢复默认</span>
-              </el-button>
-            </el-tooltip>
-            <el-tooltip content="保存设置并关闭" placement="bottom">
-              <el-button class="action-btn primary" type="primary" @click="onSave">
-                <el-icon><Check /></el-icon>
-                <span class="btn-text">保存并关闭</span>
-              </el-button>
-            </el-tooltip>
-            <el-tooltip content="关闭设置" placement="bottom">
-              <el-button class="action-btn close-btn" circle text @click="visible = false">
-                <el-icon><Close /></el-icon>
-              </el-button>
-            </el-tooltip>
-          </div>
-        </header>
+      <!-- 设置详情区 - 采用标准 Native App 布局 -->
+      <section class="settings-content">
+        <!-- 关闭按钮 -->
+        <button class="settings-close-x" title="关闭" @click="visible = false">
+          <el-icon><Close /></el-icon>
+        </button>
 
-        <div class="main-content custom-scrollbar">
+        <div class="content-scroll-area custom-scrollbar">
+          <!-- 页面头部 -->
+          <div class="page-header">
+            <div class="page-title-group">
+              <h2 class="page-title">{{ currentMenuLabel }}</h2>
+              <p class="page-desc">{{ currentMenuDescription }}</p>
+            </div>
+          </div>
+          
+          <!-- 动态组件内容 -->
           <transition name="settings-fade" mode="out-in">
             <component 
               :is="currentComponent" 
               v-bind="componentProps"
               v-on="finalComponentEvents"
-              key="settings-" + activeMenu
+              :key="'settings-' + activeMenu"
+              class="active-content"
             />
           </transition>
         </div>
-      </main>
+      </section>
     </div>
 
     <!-- 全局弹窗 -->
@@ -605,6 +594,18 @@ onMounted(() => {
   position: relative;
   overflow: hidden;
   flex-direction: row;
+  
+  .nav-icon {
+    font-size: 18px;
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
 }
 
 .nav-item:hover {
@@ -614,21 +615,25 @@ onMounted(() => {
 }
 
 .nav-item.active {
-  background: rgba(22, 119, 255, 0.1);
+  background: var(--dt-bg-hover);
   color: var(--dt-brand-color);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
-}
+  
+  .nav-icon {
+    color: var(--dt-brand-color);
+    transform: scale(1.1);
+  }
 
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 12px;
-  bottom: 12px;
-  width: 3px;
-  background: var(--dt-brand-color);
-  border-radius: 0 3px 3px 0;
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    background: var(--dt-brand-color);
+    border-radius: 0 3px 3px 0;
+  }
 }
 
 .nav-icon {
@@ -739,116 +744,91 @@ onMounted(() => {
   border-top: 1px solid var(--dt-border-light);
 }
 
-// Main Content - 优化后的主内容区
-.settings-main {
+// Main Content - 优化后的内容区
+.settings-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: var(--dt-bg-body);
-}
+  background: #ffffff; // 纯白内容区，对比侧边栏
+  position: relative;
 
-.main-header {
-  height: 64px;
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--dt-border-light);
-  background: var(--dt-bg-body);
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-}
-
-.header-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  margin: 0;
-  letter-spacing: 0.5px;
-}
-
-.header-subtitle {
-  font-size: 13px;
-  color: var(--dt-text-secondary);
-  margin-top: 4px;
-  font-weight: 400;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  
-  .btn-text {
-    white-space: nowrap;
+  .dark & {
+    background: #1d1d1f; // 深色模式专用背景
   }
+}
+
+.settings-close-x {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--dt-text-tertiary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
   
   &:hover {
     background: var(--dt-bg-hover);
-  }
-}
-
-.action-btn.primary {
-  background: var(--dt-brand-color);
-  color: white;
-  
-  &:hover {
-    background: var(--dt-brand-color-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
-  }
-}
-
-.close-btn {
-  font-size: 20px;
-  color: var(--dt-text-secondary);
-  padding: 4px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  
-  &:hover {
     color: var(--dt-text-primary);
-    background: var(--dt-bg-hover);
+    transform: rotate(90deg);
   }
 }
 
-.main-content {
+.content-scroll-area {
   flex: 1;
-  padding: v-bind(contentPadding);
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  padding: 40px 60px; // 增加留白，显得更高端
+  scroll-behavior: smooth;
   
-  // 优化滚动条样式
   &::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
-    
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.25);
-    }
+    width: 6px;
   }
 }
+
+.page-header {
+  margin-bottom: 40px;
+  
+  .page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+  }
+  
+  .page-desc {
+    font-size: 14px;
+    color: var(--dt-text-tertiary);
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+.active-content {
+  animation: contentSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes contentSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// 移除多余的 main-content 避免混淆
+// .main-content 已重命名为 .main-body 在模版中
 
 // 移动端适配
 @media (max-width: 768px) {

@@ -695,4 +695,90 @@ public class ImGroupServiceImpl implements ImGroupService {
         BeanUtils.copyProperties(group, vo);
         return vo;
     }
+
+    @Override
+    public java.util.Map<String, String> getGroupQrcode(Long groupId, Long userId) {
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            throw new BusinessException("群组不存在");
+        }
+
+        ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
+        if (member == null) {
+            throw new BusinessException("不是群成员");
+        }
+
+        // 检查是否已有有效的二维码
+        String qrcodeUrl = group.getQrcodeUrl();
+        java.time.LocalDateTime qrcodeExpireTime = group.getQrcodeExpireTime();
+
+        // 如果二维码不存在或已过期，生成新的
+        if (qrcodeUrl == null || qrcodeExpireTime == null ||
+                java.time.LocalDateTime.now().isAfter(qrcodeExpireTime)) {
+            return generateGroupQrcode(group);
+        }
+
+        java.util.Map<String, String> result = new java.util.HashMap<>();
+        result.put("qrcodeUrl", qrcodeUrl);
+        result.put("expireTime", qrcodeExpireTime != null ?
+                qrcodeExpireTime.toString() : "");
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public java.util.Map<String, String> refreshGroupQrcode(Long groupId, Long userId) {
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            throw new BusinessException("群组不存在");
+        }
+
+        ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
+        if (member == null) {
+            throw new BusinessException("不是群成员");
+        }
+
+        // 检查是否有权限（只有群主和管理员可以刷新）
+        if (!StatusConstants.GroupMemberRole.OWNER.equals(member.getRole()) &&
+                !StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())) {
+            throw new BusinessException("无权限刷新二维码");
+        }
+
+        return generateGroupQrcode(group);
+    }
+
+    /**
+     * 生成群二维码
+     *
+     * @param group 群组信息
+     * @return 二维码信息
+     */
+    private java.util.Map<String, String> generateGroupQrcode(ImGroup group) {
+        // 生成唯一的二维码标识
+        String qrcodeId = java.util.UUID.randomUUID().toString().replace("-", "");
+        // 设置二维码有效期（7天）
+        java.time.LocalDateTime expireTime = java.time.LocalDateTime.now().plusDays(7);
+
+        // 生成二维码内容（这里简化处理，实际应该调用二维码生成库）
+        // 二维码内容格式: GROUP:groupId:qrcodeId
+        String qrcodeContent = "GROUP:" + group.getId() + ":" + qrcodeId;
+
+        // 这里应该调用二维码生成库（如 ZXing）生成图片并上传
+        // 暂时返回一个占位URL，实际使用时需要实现真实的二维码生成逻辑
+        String qrcodeUrl = "/api/im/group/qrcode/" + qrcodeId;
+
+        // 更新群组二维码信息
+        group.setQrcodeUrl(qrcodeUrl);
+        group.setQrcodeExpireTime(expireTime);
+        group.setUpdateTime(java.time.LocalDateTime.now());
+        imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(group.getId());
+
+        java.util.Map<String, String> result = new java.util.HashMap<>();
+        result.put("qrcodeUrl", qrcodeUrl);
+        result.put("expireTime", expireTime.toString());
+        return result;
+    }
 }

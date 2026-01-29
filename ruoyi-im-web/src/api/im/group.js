@@ -198,3 +198,29 @@ export function getCommonGroups(targetUserId) {
     method: 'get'
   })
 }
+
+/**
+ * 获取群二维码
+ * 获取群组的二维码图片供扫码加入
+ * @param {number} groupId - 群组ID
+ * @returns {Promise}
+ */
+export function getGroupQrcode(groupId) {
+  return request({
+    url: `/api/im/group/${groupId}/qrcode`,
+    method: 'get'
+  })
+}
+
+/**
+ * 刷新群二维码
+ * 重新生成群二维码
+ * @param {number} groupId - 群组ID
+ * @returns {Promise}
+ */
+export function refreshGroupQrcode(groupId) {
+  return request({
+    url: `/api/im/group/${groupId}/qrcode/refresh`,
+    method: 'post'
+  })
+}

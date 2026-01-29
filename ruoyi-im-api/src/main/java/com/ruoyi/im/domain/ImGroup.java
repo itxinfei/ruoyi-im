@@ -116,4 +116,52 @@ public class ImGroup implements Serializable {
      */
     @TableField(exist = false)
     private String ownerName;
+
+    /**
+     * 群二维码URL
+     */
+    @TableField("qrcode_url")
+    private String qrcodeUrl;
+
+    /**
+     * 群二维码过期时间
+     */
+    @TableField("qrcode_expire_time")
+    private LocalDateTime qrcodeExpireTime;
+
+    /**
+     * 群公告
+     */
+    @TableField("notice")
+    private String notice;
+
+    /**
+     * 入群是否需要审核：0=否, 1=是
+     */
+    @TableField("need_approval")
+    private Integer needApproval;
+
+    /**
+     * 邀请是否需要确认：0=否, 1=是
+     */
+    @TableField("invite_confirm")
+    private Integer inviteConfirm;
+
+    /**
+     * 当前成员数量（统计字段）
+     */
+    @TableField("member_count")
+    private Integer memberCount;
+
+    /**
+     * 允许成员上传文件：0=否, 1=是
+     */
+    @TableField("allow_upload")
+    private Integer allowUpload;
+
+    /**
+     * 显示成员列表（非群成员可见）：0=否, 1=是
+     */
+    @TableField("show_member_list")
+    private Integer showMemberList;
 }

@@ -202,4 +202,19 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
      * @return 删除数量
      */
     int deleteByConversationId(@Param("conversationId") Long conversationId);
+
+    /**
+     * 按类型查询会话消息
+     * 用于聊天记录面板按类型筛选消息
+     *
+     * @param conversationId 会话ID
+     * @param messageType 消息类型（可选，null表示全部）
+     * @param lastId 上次查询的最后消息ID（分页用）
+     * @param limit 每页数量
+     * @return 消息列表
+     */
+    List<ImMessage> selectMessagesByCategory(@Param("conversationId") Long conversationId,
+                                              @Param("messageType") String messageType,
+                                              @Param("lastId") Long lastId,
+                                              @Param("limit") Integer limit);
 }
