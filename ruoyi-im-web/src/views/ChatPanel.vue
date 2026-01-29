@@ -186,6 +186,13 @@
         @forward="handleCombineForwardDetail"
       />
 
+      <!-- 导出聊天记录对话框 -->
+      <ExportChatDialog
+        v-model="showExportDialog"
+        :messages="messages"
+        :contact-name="session?.peerName || session?.groupName || '聊天'"
+      />
+
       <!-- 多选操作栏 -->
       <Transition name="slide-up">
         <div v-if="isMultiSelectModeActive" class="multi-select-toolbar">
@@ -250,6 +257,7 @@ import ChatFilesPanel from '@/components/Chat/ChatFilesPanel.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 import CombineDetailDialog from '@/components/Chat/CombineDetailDialog.vue'
 import GroupFilePanel from '@/components/Chat/GroupFilePanel.vue'
+import ExportChatDialog from '@/components/Chat/ExportChatDialog.vue'
 import { getMessages, batchForwardMessages, deleteMessage, clearConversationMessages } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { addFavorite, removeFavorite } from '@/api/im/favorite'
@@ -288,6 +296,7 @@ const showAnnouncementDialog = ref(false)
 const showSearchPanel = ref(false)
 const showChatSearch = ref(false)
 const showFilesPanel = ref(false)
+const showExportDialog = ref(false)
 const showGroupFilesPanel = ref(false)
 const showCombineDetail = ref(false)
 const combineMessages = ref([])
@@ -654,6 +663,8 @@ const handleCommand = (cmd, msg) => {
     handleMultiSelect(msg)
   } else if (cmd === 'view-combine') {
     handleViewCombine(msg)
+  } else if (cmd === 'export') {
+    showExportDialog.value = true
   }
 }
 

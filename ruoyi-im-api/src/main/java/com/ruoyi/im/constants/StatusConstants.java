@@ -1,0 +1,132 @@
+package com.ruoyi.im.constants;
+
+/**
+ * 通用状态常量
+ * 用于跨模块的统一状态管理
+ *
+ * @author ruoyi
+ */
+public class StatusConstants {
+
+    /**
+     * 通用任务/工单状态
+     */
+    public static class Task {
+        /** 待办 */
+        public static final String PENDING = "PENDING";
+
+        /** 进行中 */
+        public static final String IN_PROGRESS = "IN_PROGRESS";
+
+        /** 已完成 */
+        public static final String COMPLETED = "COMPLETED";
+
+        /** 已取消 */
+        public static final String CANCELLED = "CANCELLED";
+
+        /** 已过期 */
+        public static final String EXPIRED = "EXPIRED";
+
+        /** 活跃 */
+        public static final String ACTIVE = "ACTIVE";
+    }
+
+    /**
+     * 审批状态
+     */
+    public static class Approval {
+        /** 待审批 */
+        public static final String PENDING = "PENDING";
+
+        /** 已批准 */
+        public static final String APPROVED = "APPROVED";
+
+        /** 已拒绝 */
+        public static final String REJECTED = "REJECTED";
+    }
+
+    /**
+     * 好友请求状态
+     */
+    public static class FriendRequest {
+        /** 待处理 */
+        public static final String PENDING = "PENDING";
+
+        /** 已接受 */
+        public static final String ACCEPTED = "ACCEPTED";
+
+        /** 已拒绝 */
+        public static final String REJECTED = "REJECTED";
+    }
+
+    /**
+     * 会议状态
+     */
+    public static class Meeting {
+        /** 已预定 */
+        public static final String SCHEDULED = "SCHEDULED";
+
+        /** 进行中 */
+        public static final String IN_PROGRESS = "IN_PROGRESS";
+
+        /** 已结束 */
+        public static final String ENDED = "ENDED";
+
+        /** 已取消 */
+        public static final String CANCELLED = "CANCELLED";
+    }
+
+    /**
+     * 会议参与者角色
+     */
+    public static class ParticipantRole {
+        /** 主持人 */
+        public static final String HOST = "HOST";
+
+        /** 参会者 */
+        public static final String ATTENDEE = "ATTENDEE";
+    }
+
+    /**
+     * 会议参与者状态
+     */
+    public static class ParticipantStatus {
+        /** 已邀请 */
+        public static final String INVITED = "INVITED";
+
+        /** 已加入 */
+        public static final String JOINED = "JOINED";
+
+        /** 已离开 */
+        public static final String LEFT = "LEFT";
+    }
+
+    /**
+     * 视频会议类型
+     */
+    public static class VideoMeetingType {
+        /** 常规会议 */
+        public static final String MEETING = "MEETING";
+
+        /** 网络研讨会 */
+        public static final String WEBINAR = "WEBINAR";
+    }
+
+    /**
+     * 会议事件类型（用于WebSocket通知）
+     */
+    public static class MeetingEvent {
+        /** 已取消 */
+        public static final String CANCELLED = "CANCELLED";
+
+        /** 已开始 */
+        public static final String STARTED = "STARTED";
+
+        /** 已结束 */
+        public static final String ENDED = "ENDED";
+    }
+
+    private StatusConstants() {
+        throw new UnsupportedOperationException("常量类不允许实例化");
+    }
+}

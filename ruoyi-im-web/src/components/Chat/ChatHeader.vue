@@ -127,6 +127,12 @@
 
             <el-dropdown-item divided></el-dropdown-item>
 
+            <!-- 导出 -->
+            <el-dropdown-item command="export" class="menu-item">
+              <span class="material-icons-outlined item-icon">download</span>
+              <span class="item-text">导出聊天记录</span>
+            </el-dropdown-item>
+
             <!-- 清空 -->
             <el-dropdown-item command="clear" class="menu-item danger-item">
               <span class="material-icons-outlined item-icon">delete_outline</span>
