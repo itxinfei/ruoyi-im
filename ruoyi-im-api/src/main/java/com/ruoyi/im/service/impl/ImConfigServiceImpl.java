@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImUserConfig;
 import com.ruoyi.im.mapper.ImUserConfigMapper;
 import com.ruoyi.im.service.ImConfigService;
+import com.ruoyi.im.util.ExceptionHandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,8 +184,7 @@ public class ImConfigServiceImpl implements ImConfigService {
                 imUserConfigMapper.insertOrUpdate(config);
             }
         } catch (Exception e) {
-            logger.error("更新用户设置失败，userId={}, type={}", userId, type, e);
-            throw new RuntimeException("更新用户设置失败", e);
+            ExceptionHandlerUtil.throwBusinessException(logger, "更新用户设置失败，userId=" + userId + ", type=" + type, e);
         }
     }
 }
