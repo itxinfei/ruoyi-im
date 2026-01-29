@@ -16,7 +16,8 @@ const routes = [
   {
     path: '/admin',
     component: () => import('../views/admin/AdminLayout.vue'),
-    meta: { requiresAuth: true, roles: ['ADMIN', 'SUPER_ADMIN'] },
+    meta: { requiresAuth: true, adminOnly: true },
+    redirect: '/admin/dashboard',
     children: [
       {
         path: 'dashboard',
@@ -41,8 +42,50 @@ const routes = [
         name: 'AdminMessages',
         component: () => import('../views/admin/MessageManagement.vue'),
         meta: { title: '消息管理' }
+      },
+      {
+        path: 'departments',
+        name: 'AdminDepartments',
+        component: () => import('../views/admin/DepartmentManagement.vue'),
+        meta: { title: '部门管理' }
+      },
+      {
+        path: 'roles',
+        name: 'AdminRoles',
+        component: () => import('../views/admin/RoleManagement.vue'),
+        meta: { title: '角色权限' }
+      },
+      {
+        path: 'settings',
+        name: 'AdminSettings',
+        component: () => import('../views/admin/SystemSettings.vue'),
+        meta: { title: '系统设置' }
+      },
+      {
+        path: 'logs',
+        name: 'AdminLogs',
+        component: () => import('../views/admin/OperationLog.vue'),
+        meta: { title: '操作日志' }
+      },
+      {
+        path: 'backup',
+        name: 'AdminBackup',
+        component: () => import('../views/admin/DataBackup.vue'),
+        meta: { title: '数据备份' }
+      },
+      {
+        path: 'monitor',
+        name: 'AdminMonitor',
+        component: () => import('../views/admin/SystemMonitor.vue'),
+        meta: { title: '系统监控' }
       }
     ]
+  },
+  // 404 页面
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    redirect: '/'
   }
 ]
 
@@ -54,8 +97,22 @@ const router = createRouter({
 // 路由守卫：检查登录状态和角色权限
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('im_token')
-  // 获取用户角色（从 localStorage 或登录信息中获取）
-  const userRole = localStorage.getItem('im_user_role') || 'USER'
+
+  // 获取用户角色（优先从 im_user_role 读取，兼容 im_user_info）
+  let userRole = localStorage.getItem('im_user_role') || 'USER'
+
+  // 如果没有单独存储的角色，尝试从用户信息中解析
+  if (userRole === 'USER') {
+    try {
+      const userStr = localStorage.getItem('im_user_info')
+      if (userStr) {
+        const userInfo = JSON.parse(userStr)
+        userRole = userInfo.role || 'USER'
+      }
+    } catch (e) {
+      console.error('解析用户信息失败', e)
+    }
+  }
 
   // 如果路由需要认证
   if (to.meta.requiresAuth) {
@@ -68,7 +125,21 @@ router.beforeEach((to, from, next) => {
       return
     }
 
-    // 检查角色权限
+    // 检查是否是管理后台专属页面
+    if (to.meta.adminOnly) {
+      // 管理后台需要 ADMIN 或 SUPER_ADMIN 角色
+      if (userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
+        console.warn('权限不足，需要管理员角色')
+        // 权限不足，跳转到首页并提示
+        next({
+          path: '/',
+          query: { error: 'no_admin_permission' }
+        })
+        return
+      }
+    }
+
+    // 检查具体角色权限
     if (to.meta.roles && to.meta.roles.length > 0) {
       if (!to.meta.roles.includes(userRole)) {
         // 权限不足，跳转到首页
@@ -82,7 +153,12 @@ router.beforeEach((to, from, next) => {
   } else {
     // 如果已登录，访问登录页时跳转到首页
     if (to.path === '/login' && token) {
-      next('/')
+      // 如果是管理员，跳转到管理后台
+      if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+        next('/admin/dashboard')
+      } else {
+        next('/')
+      }
     } else {
       next()
     }
@@ -90,4 +166,3 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-

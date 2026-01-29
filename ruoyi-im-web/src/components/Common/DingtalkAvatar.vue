@@ -128,12 +128,20 @@ const handleImageError = () => {
 }
 
 .dingtalk-avatar.avatar-square.message-avatar {
-  border: 2px solid var(--dt-brand-color);
-  box-shadow: 0 0 8px rgba(22, 119, 255, 0.3);
+  border: 1px solid var(--dt-brand-color);
+  box-shadow: 0 0 6px rgba(22, 119, 255, 0.2);
+}
+
+/* 为个人信息头像添加相同的边框样式 */
+.dingtalk-avatar.avatar-square.user-info-avatar {
+  border: 1px solid var(--dt-brand-color);
+  box-shadow: 0 0 6px rgba(22, 119, 255, 0.2);
 }
 
 .avatar-circle {
-  border-radius: 50%;
+  border-radius: var(--dt-radius-md); /* 改为矩形圆角 */
+  border: 1px solid var(--dt-brand-color);
+  box-shadow: 0 0 6px rgba(22, 119, 255, 0.2);
 }
 
 .avatar-square {

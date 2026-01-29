@@ -20,17 +20,11 @@
             <div class="quick-actions-section">
               <div class="section-title">快捷操作</div>
               <div class="quick-actions-grid">
-                <div class="quick-action-item" @click="handleCommand('chat')">
-                  <div class="action-icon primary">
-                    <span class="material-icons-outlined">chat</span>
-                  </div>
-                  <span class="action-label">发起单聊</span>
-                </div>
                 <div class="quick-action-item" @click="handleCommand('group')">
                   <div class="action-icon success">
                     <span class="material-icons-outlined">group_add</span>
                   </div>
-                  <span class="action-label">创建群组</span>
+                  <span class="action-label">发起群聊</span>
                 </div>
                 <div class="quick-action-item" @click="handleCommand('join')">
                   <div class="action-icon warning">
@@ -42,7 +36,13 @@
                   <div class="action-icon info">
                     <span class="material-icons-outlined">person_add</span>
                   </div>
-                  <span class="action-label">添加好友</span>
+                  <span class="action-label">添加联系人</span>
+                </div>
+                <div class="quick-action-item" @click="handleCommand('scan')">
+                  <div class="action-icon primary">
+                    <span class="material-icons-outlined">qr_code_scanner</span>
+                  </div>
+                  <span class="action-label">扫一扫</span>
                 </div>
               </div>
             </div>
@@ -51,35 +51,13 @@
 
             <!-- 常用功能 -->
             <div class="common-actions-section">
-              <div class="section-title">常用功能</div>
-              <el-dropdown-item command="scan" class="menu-item-with-icon">
-                <span class="material-icons-outlined item-icon">qr_code_scanner</span>
-                <div class="item-content">
-                  <span class="item-title">扫一扫</span>
-                  <span class="item-desc">扫描二维码添加好友或加入群组</span>
-                </div>
-              </el-dropdown-item>
+              <div class="section-title">其他功能</div>
               <el-dropdown-item command="invite" class="menu-item-with-icon">
                 <span class="material-icons-outlined item-icon">share</span>
                 <div class="item-content">
                   <span class="item-title">邀请好友</span>
                   <span class="item-desc">分享邀请链接给好友</span>
                 </div>
-              </el-dropdown-item>
-            </div>
-
-            <div class="menu-divider"></div>
-
-            <!-- 管理功能 -->
-            <div class="manage-actions-section">
-              <div class="section-title">管理</div>
-              <el-dropdown-item command="manageGroups" class="menu-item-simple">
-                <span class="material-icons-outlined item-icon">folder</span>
-                <span class="item-title">管理分组</span>
-              </el-dropdown-item>
-              <el-dropdown-item command="archived" class="menu-item-simple">
-                <span class="material-icons-outlined item-icon">archive</span>
-                <span class="item-title">归档会话</span>
               </el-dropdown-item>
             </div>
           </div>
@@ -1478,8 +1456,8 @@ onUnmounted(() => {
 
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 .quick-action-item {
@@ -1549,8 +1527,7 @@ onUnmounted(() => {
 }
 
 // 常用功能
-.common-actions-section,
-.manage-actions-section {
+.common-actions-section {
   padding: 12px 16px;
 
   .section-title {

@@ -253,4 +253,20 @@ public class ImGroupController {
         imGroupService.transferOwner(id, newOwnerId, userId);
         return Result.success("转让成功");
     }
+
+    /**
+     * 获取与指定用户的共同群组
+     * 查询当前用户与目标用户共同加入的所有群组
+     *
+     * @param targetUserId 目标用户ID
+     * @return 共同群组列表
+     * @apiNote 用于用户详情页展示共同群组
+     */
+    @Operation(summary = "获取共同群组", description = "获取当前用户与指定用户共同加入的群组列表")
+    @GetMapping("/common/{targetUserId}")
+    public Result<List<ImGroupVO>> getCommonGroups(@PathVariable Long targetUserId) {
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        List<ImGroupVO> list = imGroupService.getCommonGroups(currentUserId, targetUserId);
+        return Result.success(list);
+    }
 }

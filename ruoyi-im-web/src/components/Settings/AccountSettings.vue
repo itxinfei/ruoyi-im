@@ -2,63 +2,51 @@
   <div class="account-settings">
     <!-- 个人信息卡片 -->
     <section class="setting-section">
-      <h3 class="section-title">个人信息</h3>
       <div class="profile-card">
+        <div class="profile-banner"></div>
         <div class="profile-main">
-          <div class="avatar-wrapper">
-            <el-avatar :size="72" :src="user.avatar" class="profile-avatar" />
-            <div class="avatar-overlay" @click="$emit('edit-profile')">
-              <el-icon><Camera /></el-icon>
+          <div class="profile-header">
+            <div class="avatar-wrapper">
+              <el-avatar :size="80" :src="user.avatar" class="profile-avatar" />
+              <div class="avatar-overlay" @click="$emit('edit-profile')">
+                <el-icon><Camera /></el-icon>
+              </div>
             </div>
+            <div class="profile-info">
+              <h2 class="profile-name">{{ user.nickname || user.username }}</h2>
+              <div class="profile-meta">
+                <el-tag size="small" effect="plain" type="primary" class="meta-tag">
+                  UID: {{ user.id }}
+                </el-tag>
+                <el-divider direction="vertical" />
+                <span class="meta-item">
+                  <el-icon><Monitor /></el-icon>
+                  {{ user.status === 'online' ? '在线' : '离线' }}
+                </span>
+              </div>
+            </div>
+            <el-button type="primary" class="edit-btn" @click="$emit('edit-profile')">
+              <el-icon><Edit /></el-icon>
+              编辑资料
+            </el-button>
           </div>
-          <div class="profile-info">
-            <h2 class="profile-name">{{ user.nickname || user.username }}</h2>
-            <p class="profile-meta">
-              <span class="meta-item">
-                <el-icon><User /></el-icon>
-                {{ user.username }}
-              </span>
-              <span class="meta-divider">·</span>
-              <span class="meta-item">UID: {{ user.id }}</span>
-            </p>
-          </div>
-          <el-button type="primary" @click="$emit('edit-profile')">
-            <el-icon><Edit /></el-icon>
-            编辑资料
-          </el-button>
-        </div>
 
-        <div class="profile-details">
-          <div class="detail-row">
+          <div class="profile-details-grid">
             <div class="detail-item">
-              <span class="detail-label">
-                <el-icon><Message /></el-icon>
-                邮箱
-              </span>
-              <span class="detail-value">{{ user.email || '未绑定' }}</span>
+              <span class="detail-label">账号名称</span>
+              <span class="detail-value">{{ user.username }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">
-                <el-icon><Phone /></el-icon>
-                手机
-              </span>
-              <span class="detail-value">{{ user.phonenumber || '未绑定' }}</span>
-            </div>
-          </div>
-          <div class="detail-row">
-            <div class="detail-item">
-              <span class="detail-label">
-                <el-icon><OfficeBuilding /></el-icon>
-                部门
-              </span>
-              <span class="detail-value">{{ user.dept?.deptName || '无' }}</span>
+              <span class="detail-label">所属部门</span>
+              <span class="detail-value">{{ user.dept?.deptName || '未分配' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">
-                <el-icon><Postcard /></el-icon>
-                职位
-              </span>
-              <span class="detail-value">{{ user.position || '未设置' }}</span>
+              <span class="detail-label">注册邮箱</span>
+              <span class="detail-value">{{ user.email || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">关联手机</span>
+              <span class="detail-value">{{ user.phonenumber || '-' }}</span>
             </div>
           </div>
         </div>
@@ -206,25 +194,52 @@ const twoFactorEnabled = ref(false)
 .profile-card {
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 
   .dark & {
     background: var(--dt-bg-card-dark);
     border-color: var(--dt-border-dark);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.profile-banner {
+  height: 80px;
+  background: linear-gradient(135deg, var(--dt-brand-color) 0%, #00d2ff 100%);
+  opacity: 0.1;
+  position: relative;
+
+  .dark & {
+    opacity: 0.2;
   }
 }
 
 .profile-main {
+  padding: 0 24px 24px;
+  margin-top: -40px;
+}
+
+.profile-header {
   display: flex;
-  align-items: center;
-  padding: 24px;
+  align-items: flex-end;
   gap: 20px;
+  margin-bottom: 24px;
+  position: relative;
 }
 
 .avatar-wrapper {
   position: relative;
   flex-shrink: 0;
+  border-radius: 50%;
+  padding: 4px;
+  background: var(--dt-bg-card);
+  
+  .dark & {
+    background: var(--dt-bg-card-dark);
+  }
 
   &:hover .avatar-overlay {
     opacity: 1;
@@ -232,7 +247,7 @@ const twoFactorEnabled = ref(false)
 }
 
 .profile-avatar {
-  border: 3px solid var(--dt-bg-body);
+  border: 2px solid var(--dt-bg-body);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   .dark & {
@@ -242,7 +257,7 @@ const twoFactorEnabled = ref(false)
 
 .avatar-overlay {
   position: absolute;
-  inset: 0;
+  inset: 4px;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 50%;
   display: flex;
@@ -254,83 +269,78 @@ const twoFactorEnabled = ref(false)
 
   .el-icon {
     color: #fff;
-    font-size: 20px;
+    font-size: 24px;
   }
 }
 
 .profile-info {
   flex: 1;
-  min-width: 0;
+  padding-bottom: 8px;
 }
 
 .profile-name {
   margin: 0 0 8px;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   color: var(--dt-text-primary);
+  letter-spacing: -0.5px;
 }
 
 .profile-meta {
-  margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--dt-text-secondary);
+  gap: 12px;
+  
+  .meta-tag {
+    font-weight: 600;
+    border-radius: 4px;
+  }
 
   .meta-item {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--dt-text-secondary);
+    font-weight: 500;
 
     .el-icon {
       font-size: 14px;
     }
   }
-
-  .meta-divider {
-    color: var(--dt-text-tertiary);
-  }
 }
 
-// 详细信息
-.profile-details {
-  padding: 20px 24px;
-  border-top: 1px solid var(--dt-border-light);
-  background: var(--dt-bg-body);
-
-  .dark & {
-    border-top-color: var(--dt-border-dark);
-    background: rgba(255, 255, 255, 0.02);
-  }
+.edit-btn {
+  margin-bottom: 8px;
 }
 
-.detail-row {
+.profile-details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 24px;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.015);
+  border-radius: 8px;
+  border: 1px dashed var(--dt-border-light);
 
-  &:not(:last-child) {
-    margin-bottom: 16px;
+  .dark & {
+    background: rgba(255, 255, 255, 0.01);
+    border-color: var(--dt-border-dark);
   }
 }
 
 .detail-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .detail-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   color: var(--dt-text-tertiary);
-
-  .el-icon {
-    font-size: 14px;
-  }
+  font-weight: 600;
 }
 
 .detail-value {

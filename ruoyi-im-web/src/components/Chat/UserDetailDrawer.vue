@@ -73,6 +73,25 @@
 
       <!-- 信息卡片 -->
       <div class="info-cards">
+        <!-- 共同群组区块 -->
+        <div v-if="!isGroup && commonGroups.length > 0" class="info-card full-width common-groups-card">
+          <div class="card-content">
+            <div class="section-header">
+              <span class="material-icons-outlined section-icon">groups</span>
+              <span class="card-label">共同群组 ({{ commonGroups.length }})</span>
+            </div>
+            <div class="groups-list">
+              <div v-for="group in commonGroups" :key="group.id"
+                   class="group-item" @click="handleGroupClick(group)">
+                <DingtalkAvatar :src="group.avatar" :name="group.name" :size="32" />
+                <div class="group-info">
+                  <span class="group-name">{{ group.name }}</span>
+                  <span class="group-members">{{ group.memberCount || 0 }}人</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="info-card" v-if="userInfo.phone">
           <div class="card-icon">
             <span class="material-icons-outlined">phone</span>
@@ -170,13 +189,16 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import ChatHistoryPanel from '@/components/Chat/ChatHistoryPanel.vue'
 import { getUserInfo } from '@/api/im/user'
 import { updateContactRemark } from '@/api/im/contact'
+import { getCommonGroups } from '@/api/im/group'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   session: { type: Object, default: null }
 })
 
-const emit = defineEmits(['update:modelValue', 'send-message', 'voice-call', 'video-call'])
+const emit = defineEmits(['update:modelValue', 'send-message', 'voice-call', 'video-call', 'switch-to-group'])
 
 const visible = computed({
   get: () => props.modelValue,
@@ -186,6 +208,11 @@ const visible = computed({
 const userInfo = ref(null)
 const loading = ref(false)
 const showHistory = ref(false)
+const commonGroups = ref([])
+const loadingCommonGroups = ref(false)
+const router = useRouter()
+const store = useStore()
+const currentUserId = computed(() => store.state.im.user?.id)
 
 const isGroup = computed(() => props.session?.type === 'GROUP')
 const userName = computed(() => {
@@ -215,6 +242,8 @@ const loadUserInfo = async () => {
             ...res.data,
             online: Math.random() > 0.5
           }
+          // 加载共同群组
+          loadCommonGroups(targetUserId)
         }
       } else {
         userInfo.value = { ...props.session, online: false }
@@ -225,6 +254,23 @@ const loadUserInfo = async () => {
     userInfo.value = { ...props.session, online: false }
   } finally {
     loading.value = false
+  }
+}
+
+// 加载共同群组
+const loadCommonGroups = async (targetUserId) => {
+  if (!targetUserId || !currentUserId.value) return
+  loadingCommonGroups.value = true
+  try {
+    const res = await getCommonGroups(targetUserId)
+    if (res.code === 200) {
+      commonGroups.value = res.data || []
+    }
+  } catch (error) {
+    console.error('加载共同群组失败:', error)
+    commonGroups.value = []
+  } finally {
+    loadingCommonGroups.value = false
   }
 }
 
@@ -290,6 +336,14 @@ const handleViewHistory = () => {
 
 const handleReport = () => {
   ElMessage.info('举报功能开发中')
+}
+
+// 点击共同群组
+const handleGroupClick = (group) => {
+  // 关闭抽屉
+  visible.value = false
+  // 发送切换到群组会话的事件
+  emit('switch-to-group', group)
 }
 </script>
 

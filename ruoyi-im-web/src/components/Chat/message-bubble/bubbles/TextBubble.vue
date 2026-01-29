@@ -50,7 +50,7 @@ const props = defineProps({
 .text-content {
   word-break: break-word;
   white-space: pre-wrap;
-  line-height: 1.6;
+  line-height: 1.4;
 }
 
 .edited-tag {

@@ -12,25 +12,46 @@
     :lock-scroll="true"
   >
     <div class="classic-container">
-      <!-- 搜索栏区：直角、硬朗 -->
-      <div class="classic-search-bar">
-        <el-input
-          ref="searchInputRef"
-          v-model="searchKeyword"
-          placeholder="搜索联系人、群组、聊天记录..."
-          class="square-input"
-          clearable
-          autofocus
-          @input="handleInput"
-          @keyup.enter="handleSearch"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-          <template #append>
-            <el-button @click="handleSearch">检索</el-button>
-          </template>
-        </el-input>
+      <!-- 搜索栏区：现代化设计 -->
+      <div class="modern-search-bar">
+        <div class="search-container">
+          <el-input
+            ref="searchInputRef"
+            v-model="searchKeyword"
+            placeholder="搜索联系人、群组、聊天记录、文件..."
+            class="modern-input"
+            clearable
+            autofocus
+            @input="handleInput"
+            @keyup.enter="handleSearch"
+            @focus="handleFocus"
+            @blur="handleBlur"
+          >
+            <template #prefix>
+              <el-icon class="search-icon"><Search /></el-icon>
+            </template>
+            <template #append>
+              <el-button class="search-button" @click="handleSearch">
+                <el-icon><Search /></el-icon>
+              </el-button>
+            </template>
+          </el-input>
+          
+          <!-- 自动补全建议 -->
+          <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown">
+            <div
+              v-for="(suggestion, index) in suggestions"
+              :key="index"
+              class="suggestion-item"
+              :class="{ active: suggestionIndex === index }"
+              @click="selectSuggestion(suggestion)"
+              @mouseenter="suggestionIndex = index"
+            >
+              <el-icon class="suggestion-icon"><Search /></el-icon>
+              <span class="suggestion-text" v-html="highlightSuggestion(suggestion)"></span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="classic-body">
@@ -48,71 +69,120 @@
           </div>
         </div>
 
-        <!-- 右侧结果：标准列表 -->
-        <div class="classic-main scrollbar-thin">
+        <!-- 右侧结果：现代化列表 -->
+        <div class="modern-main scrollbar-thin">
           <!-- 加载状态 -->
-          <div v-if="searching" class="p-20 flex flex-col items-center justify-center">
-            <el-icon class="is-loading text-2xl text-primary mb-2"><Loading /></el-icon>
-            <span class="text-xs text-slate-400">正在搜索...</span>
+          <div v-if="searching" class="loading-state flex flex-col items-center justify-center">
+            <el-icon class="is-loading text-2xl text-primary mb-3"><Loading /></el-icon>
+            <span class="loading-text">正在搜索...</span>
           </div>
 
-          <!-- 默认状态：历史记录 -->
-          <div v-else-if="!searchKeyword && historyKeywords.length > 0" class="p-4">
-            <div class="section-label">最近搜索历史</div>
-            <div class="history-grid">
-              <div 
-                v-for="kw in historyKeywords" 
-                :key="kw" 
-                class="history-item"
-                @click="searchKeyword = kw; handleSearch()"
-              >
-                <el-icon class="mr-2 opacity-40"><Timer /></el-icon>
-                <span class="flex-1 truncate">{{ kw }}</span>
-                <el-icon class="close-icon" @click.stop="removeHistory(kw)"><Close /></el-icon>
+          <!-- 默认状态：历史记录和热门搜索 -->
+          <div v-else-if="!searchKeyword" class="default-state">
+            <!-- 最近搜索历史 -->
+            <div v-if="historyKeywords.length > 0" class="history-section">
+              <div class="section-header">
+                <h3 class="section-title">最近搜索</h3>
+                <el-button 
+                  type="text" 
+                  size="small" 
+                  class="clear-history-btn"
+                  @click="clearAllHistory"
+                >
+                  清空
+                </el-button>
+              </div>
+              <div class="history-grid">
+                <div 
+                  v-for="kw in historyKeywords" 
+                  :key="kw" 
+                  class="history-item"
+                  @click="searchKeyword = kw; handleSearch()"
+                >
+                  <el-icon class="history-icon"><Timer /></el-icon>
+                  <span class="history-text">{{ kw }}</span>
+                  <el-icon class="close-icon" @click.stop="removeHistory(kw)"><Close /></el-icon>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 热门搜索 -->
+            <div class="trending-section">
+              <h3 class="section-title">热门搜索</h3>
+              <div class="trending-tags">
+                <span 
+                  v-for="(tag, index) in trendingTags" 
+                  :key="index"
+                  class="trending-tag"
+                  @click="searchKeyword = tag; handleSearch()"
+                >
+                  <span class="tag-rank">{{ index + 1 }}</span>
+                  {{ tag }}
+                </span>
               </div>
             </div>
           </div>
 
           <!-- 搜索结果列表 -->
-          <div v-else-if="hasResults" class="results-list">
-            <div v-for="(section, type) in filteredResultSections" :key="type" class="result-group">
-              <div class="group-header">{{ section.title }}</div>
-              
-              <div
-                v-for="item in section.data"
-                :key="item.id"
-                class="result-row"
-                @click="handleItemClick(type, item)"
-              >
-                <!-- 头像 -->
-                <div class="avatar-box">
-                  <DingtalkAvatar
-                    v-if="type !== 'files'"
-                    :name="item.name || item.friendName || item.senderName"
-                    :src="item.avatar || item.friendAvatar"
-                    :size="34"
-                    shape="square"
-                  />
-                  <div v-else class="file-icon-bg">
-                    <el-icon><Document /></el-icon>
-                  </div>
+          <div v-else-if="hasResults" class="results-container">
+            <div v-for="(section, type) in filteredResultSections" :key="type" class="result-section">
+              <div class="section-header">
+                <div class="section-title with-icon">
+                  <el-icon class="section-icon">{{ getSectionIcon(type) }}</el-icon>
+                  {{ section.title }}
+                  <span class="result-count">({{ section.data.length }})</span>
                 </div>
-
-                <!-- 信息 -->
-                <div class="info-box">
-                  <div class="info-top">
-                    <span class="name-text" v-html="highlight(item.name || item.friendName || item.senderName || item.fileName)"></span>
-                    <span class="time-text">{{ formatTime(item.timestamp) }}</span>
+              </div>
+              
+              <div class="result-list">
+                <div
+                  v-for="(item, index) in section.data"
+                  :key="item.id || index"
+                  class="result-card"
+                  @click="handleItemClick(type, item)"
+                >
+                  <!-- 头像/图标 -->
+                  <div class="result-avatar">
+                    <DingtalkAvatar
+                      v-if="type !== 'files'"
+                      :name="item.name || item.friendName || item.senderName"
+                      :src="item.avatar || item.friendAvatar"
+                      :size="40"
+                      shape="square"
+                      custom-class="result-avatar-img"
+                    />
+                    <div v-else class="file-icon-container">
+                      <el-icon class="file-icon"><Document /></el-icon>
+                    </div>
                   </div>
-                  <div class="desc-text" v-html="highlight(item.content || item.remark || item.departmentName || (item.memberCount ? item.memberCount + '人' : ''))"></div>
+
+                  <!-- 信息 -->
+                  <div class="result-info">
+                    <div class="result-header">
+                      <h4 class="result-title" v-html="highlight(item.name || item.friendName || item.senderName || item.fileName)"></h4>
+                      <span class="result-time">{{ formatTime(item.timestamp) }}</span>
+                    </div>
+                    <div class="result-desc" v-html="highlight(item.content || item.remark || item.departmentName || (item.memberCount ? item.memberCount + '人' : ''))"></div>
+                    <div v-if="type === 'messages'" class="result-meta">
+                      <span class="meta-tag">消息</span>
+                    </div>
+                    <div v-else-if="type === 'files'" class="result-meta">
+                      <span class="meta-tag">文件</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- 空状态 -->
-          <div v-else-if="searchKeyword && !searching" class="py-20">
-            <el-empty description="未找到匹配项" :image-size="80" />
+          <div v-else-if="searchKeyword && !searching" class="empty-state">
+            <div class="empty-icon">
+              <el-icon class="text-4xl text-gray-300"><Search /></el-icon>
+            </div>
+            <h3 class="empty-title">未找到匹配项</h3>
+            <p class="empty-desc">尝试使用其他关键词或检查拼写</p>
+            <el-button class="empty-btn" @click="resetSearch">清除搜索</el-button>
           </div>
         </div>
       </div>
@@ -130,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { Search, Document, Loading, Timer, Close } from '@element-plus/icons-vue'
 import { globalSearch } from '@/api/im/globalSearch'
 import { ElMessage } from 'element-plus'
@@ -146,6 +216,23 @@ const searchResult = ref(null)
 const searching = ref(false)
 const searchInputRef = ref(null)
 const historyKeywords = ref(JSON.parse(localStorage.getItem('search_history') || '[]'))
+
+// 自动补全和搜索建议
+const suggestions = ref([])
+const showSuggestions = ref(false)
+const suggestionIndex = ref(-1)
+
+// 热门搜索标签
+const trendingTags = ref([
+  '项目进度',
+  '会议纪要',
+  '周报',
+  '产品需求',
+  '技术方案',
+  'bug修复',
+  '测试报告',
+  '发布计划'
+])
 
 // 响应式尺寸
 const windowWidth = ref(window.innerWidth)
@@ -231,23 +318,68 @@ const getCategoryCount = (key) => {
   return searchResult.value[keyMap[key]]?.length || 0
 }
 
+// 搜索结果缓存
+const searchCache = ref(new Map())
 let timer = null
+
 const handleInput = () => {
-  if (!searchKeyword.value.trim()) {
+  const keyword = searchKeyword.value.trim()
+  if (!keyword) {
     searchResult.value = null
+    suggestions.value = []
+    showSuggestions.value = false
     return
   }
+  
+  // 生成搜索建议
+  generateSuggestions()
+  
+  // 防抖处理
   clearTimeout(timer)
-  timer = setTimeout(handleSearch, 300)
+  timer = setTimeout(async () => {
+    // 检查缓存
+    const cacheKey = `${keyword}_${searchType.value}`
+    if (searchCache.value.has(cacheKey)) {
+      searchResult.value = searchCache.value.get(cacheKey)
+      searching.value = false
+      return
+    }
+    
+    await handleSearch()
+  }, 250)
 }
 
 const handleSearch = async () => {
   const keyword = searchKeyword.value.trim()
   if (!keyword) return
+  
   searching.value = true
   try {
+    const cacheKey = `${keyword}_${searchType.value}`
+    
+    // 检查缓存
+    if (searchCache.value.has(cacheKey)) {
+      searchResult.value = searchCache.value.get(cacheKey)
+      return
+    }
+    
     const res = await globalSearch({ keyword, searchType: searchType.value, pageNum: 1, pageSize: 50 })
-    searchResult.value = res.data || {}
+    const result = res.data || {}
+    
+    // 缓存结果，设置过期时间
+    searchCache.value.set(cacheKey, result)
+    
+    // 限制缓存大小
+    if (searchCache.value.size > 20) {
+      const keys = Array.from(searchCache.value.keys())
+      for (let i = 0; i < 5; i++) {
+        searchCache.value.delete(keys[i])
+      }
+    }
+    
+    searchResult.value = result
+    
+    // 更新历史记录
     if (!historyKeywords.value.includes(keyword)) {
       historyKeywords.value.unshift(keyword)
       historyKeywords.value = historyKeywords.value.slice(0, 10)
@@ -289,11 +421,124 @@ const formatTime = (ts) => {
   return (d.getMonth() + 1) + '-' + d.getDate()
 }
 
+// 自动补全和搜索建议相关方法
+const handleFocus = () => {
+  if (searchKeyword.value) {
+    generateSuggestions()
+  }
+}
+
+const handleBlur = () => {
+  // 延迟隐藏建议，以便点击建议时能够触发点击事件
+  setTimeout(() => {
+    showSuggestions.value = false
+  }, 200)
+}
+
+const generateSuggestions = () => {
+  const keyword = searchKeyword.value.trim()
+  if (!keyword) {
+    suggestions.value = []
+    showSuggestions.value = false
+    return
+  }
+  
+  // 从历史记录中生成建议
+  const historySuggestions = historyKeywords.value
+    .filter(item => item.toLowerCase().includes(keyword.toLowerCase()))
+    .slice(0, 5)
+  
+  // 添加一些默认建议
+  const defaultSuggestions = [
+    `@${keyword}`,
+    `#${keyword}`,
+    `文件: ${keyword}`,
+    `群组: ${keyword}`
+  ].filter(item => item.toLowerCase().includes(keyword.toLowerCase()))
+  
+  suggestions.value = [...historySuggestions, ...defaultSuggestions].slice(0, 8)
+  showSuggestions.value = suggestions.value.length > 0
+  suggestionIndex.value = -1
+}
+
+const selectSuggestion = (suggestion) => {
+  searchKeyword.value = suggestion
+  showSuggestions.value = false
+  handleSearch()
+}
+
+const highlightSuggestion = (text) => {
+  if (!text || !searchKeyword.value) return text
+  const reg = new RegExp(`(${searchKeyword.value})`, 'gi')
+  return String(text).replace(reg, '<span class="highlight-text">$1</span>')
+}
+
+// 监听键盘事件，支持上下箭头选择建议
+const handleKeyDown = (event) => {
+  if (!showSuggestions.value) return
+  
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      suggestionIndex.value = (suggestionIndex.value + 1) % suggestions.value.length
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      suggestionIndex.value = suggestionIndex.value <= 0 ? suggestions.value.length - 1 : suggestionIndex.value - 1
+      break
+    case 'Enter':
+      if (suggestionIndex.value >= 0) {
+        event.preventDefault()
+        selectSuggestion(suggestions.value[suggestionIndex.value])
+      }
+      break
+    case 'Escape':
+      showSuggestions.value = false
+      break
+  }
+}
+
+// 清空所有历史记录
+const clearAllHistory = () => {
+  historyKeywords.value = []
+  localStorage.setItem('search_history', JSON.stringify(historyKeywords.value))
+}
+
+// 重置搜索
+const resetSearch = () => {
+  searchKeyword.value = ''
+  searchResult.value = null
+  suggestions.value = []
+  showSuggestions.value = false
+}
+
+// 获取分类图标
+const getSectionIcon = (type) => {
+  const iconMap = {
+    contacts: 'User',
+    groups: 'ChatDotRound',
+    messages: 'ChatLineRound',
+    files: 'Document'
+  }
+  return iconMap[type] || 'Search'
+}
+
 // 监听窗口大小变化
 onMounted(() => {
   window.addEventListener('resize', () => {
     windowWidth.value = window.innerWidth
   })
+  
+  // 添加键盘事件监听
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+// 清理事件监听
+onUnmounted(() => {
+  window.removeEventListener('resize', () => {
+    windowWidth.value = window.innerWidth
+  })
+  window.removeEventListener('keydown', handleKeyDown)
 })
 </script>
 
@@ -383,68 +628,279 @@ onMounted(() => {
   .dark & { background: #0f172a; }
 }
 
-.classic-search-bar {
-  padding: 16px 20px;
+.modern-search-bar {
+  padding: 20px;
   border-bottom: 1px solid #f1f5f9;
   flex-shrink: 0;
   .dark & { border-color: #1e293b; background: #1e293b; }
 
-  .square-input {
-    // 确保 input 元素本身是可交互的
+  .search-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .modern-input {
+    width: 100%;
+    
     :deep(input) {
       cursor: text !important;
       pointer-events: auto !important;
-      font-size: 14px;
-      padding: 0 12px;
+      font-size: 16px;
+      padding: 0 52px 0 44px;
+      height: 48px;
+      line-height: 48px;
+      border-radius: 24px;
+    }
+
+    .search-icon {
+      font-size: 18px;
+      color: #94a3b8;
+      transition: all 0.2s ease;
+      margin-left: 12px;
     }
 
     :deep(.el-input__wrapper) {
-      border-radius: 8px;
-      box-shadow: 0 0 0 1px #e2e8f0;
+      border-radius: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       transition: all 0.2s ease;
+      border: 1px solid transparent;
+      background: #f8fafc;
       
       &:hover {
-        box-shadow: 0 0 0 1px #cbd5e1;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        background: #f1f5f9;
       }
       
       &.is-focus { 
-        box-shadow: 0 0 0 2px #1677ff;
-        border-color: #1677ff; 
+        box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-color: #1677ff;
+        background: #fff;
       }
       
       .dark & { 
-        background: #0f172a; 
+        background: #1e293b; 
         border-color: #334155;
-        box-shadow: 0 0 0 1px #334155;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         
         &:hover {
-          box-shadow: 0 0 0 1px #475569;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+          background: #2563eb;
+        }
+        
+        &.is-focus {
+          box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.2);
+          background: #0f172a;
         }
       }
     }
-    :deep(.el-input-group__append) {
+    
+    .search-button {
       background: #1677ff;
       color: #fff;
       border: none;
-      border-radius: 0 8px 8px 0;
-      font-weight: 500;
-      padding: 0 16px;
+      border-radius: 20px;
+      width: 40px;
+      height: 40px;
+      margin-right: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.2s ease;
       
       &:hover {
         background: #0958d9;
+        transform: scale(1.05);
+      }
+      
+      &:active {
+        transform: scale(0.98);
       }
     }
   }
   
-  // 移动端优化
-  @media (max-width: 480px) {
-    padding: 12px 16px;
+  // 自动补全建议
+  .suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 8px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 1000;
+    animation: dropdownFadeIn 0.2s ease-out;
     
-    .square-input {
-      :deep(input) {
-        font-size: 16px; // 防止iOS缩放
+    .dark & {
+      background: #0f172a;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+  
+  .suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #1e293b;
+    
+    &:hover,
+    &.active {
+      background: #f0f9ff;
+      
+      .dark & {
+        background: #1e40af;
       }
+    }
+    
+    .dark & {
+      color: #f1f5f9;
+    }
+    
+    .suggestion-icon {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-right: 12px;
+      
+      .dark & {
+        color: #94a3b8;
+      }
+    }
+    
+    .suggestion-text {
+      flex: 1;
+      
+      .highlight-text {
+        color: #1677ff;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  @keyframes dropdownFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+  }
+  
+  // 搜索结果渐入动画
+  @keyframes resultFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  // 分类切换动画
+  @keyframes categorySwitch {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  // 按钮微动画
+  @keyframes buttonPulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  // 加载动画
+  @keyframes loadingSpin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  // 移动端优化
+  @media (max-width: 768px) {
+    padding: 16px;
+    
+    .modern-input {
+      :deep(input) {
+        font-size: 16px;
+        height: 44px;
+        line-height: 44px;
+        padding: 0 44px 0 36px;
+      }
+    }
+    
+    .search-icon {
+      font-size: 16px;
+      margin-left: 8px;
+    }
+    
+    .search-button {
+      width: 36px;
+      height: 36px;
+      margin-right: 2px;
+    }
+    
+    .suggestions-dropdown {
+      margin-top: 6px;
+      border-radius: 8px;
+      
+      .suggestion-item {
+        padding: 10px 12px;
+        font-size: 13px;
+        
+        .suggestion-icon {
+          font-size: 12px;
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+  
+  // 小屏幕手机优化
+  @media (max-width: 480px) {
+    padding: 12px;
+    
+    .modern-input {
+      :deep(input) {
+        font-size: 15px;
+        height: 42px;
+        line-height: 42px;
+        padding: 0 38px 0 32px;
+      }
+    }
+    
+    .search-icon {
+      font-size: 15px;
+      margin-left: 6px;
+    }
+    
+    .search-button {
+      width: 32px;
+      height: 32px;
     }
   }
 }
@@ -465,29 +921,39 @@ onMounted(() => {
   .dark & { background: #1e293b; border-color: #334155; }
 
   .cat-tab {
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    font-size: 13px;
-    color: #64748b;
-    transition: all 0.2s ease;
-    position: relative;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 13px;
+      color: #64748b;
+      transition: all 0.2s ease;
+      position: relative;
+      animation: categorySwitch 0.3s ease-out forwards;
 
-    &:hover { 
-      background: #f1f5f9; 
-      color: #1e293b; 
-      .dark & { background: #0f172a; color: #f1f5f9; } 
-    }
-    &.active {
-      background: #fff;
-      color: #1677ff;
-      font-weight: 600;
-      border-right: 3px solid #1677ff;
-      box-shadow: inset 0 0 0 1px #e2e8f0;
-      .dark & { background: #0f172a; }
-    }
+      &:hover { 
+        background: #f1f5f9; 
+        color: #1e293b; 
+        transform: translateX(4px);
+        .dark & { background: #0f172a; color: #f1f5f9; } 
+      }
+      &.active {
+        background: #fff;
+        color: #1677ff;
+        font-weight: 600;
+        border-right: 3px solid #1677ff;
+        box-shadow: inset 0 0 0 1px #e2e8f0;
+        transform: translateX(4px);
+        .dark & { background: #0f172a; }
+      }
+      
+      // 为每个分类标签添加不同的动画延迟
+      &:nth-child(1) { animation-delay: 0.05s; }
+      &:nth-child(2) { animation-delay: 0.1s; }
+      &:nth-child(3) { animation-delay: 0.15s; }
+      &:nth-child(4) { animation-delay: 0.2s; }
+      &:nth-child(5) { animation-delay: 0.25s; }
 
     .label {
       flex: 1;
@@ -509,134 +975,621 @@ onMounted(() => {
   }
 }
 
-.classic-main {
+.modern-main {
   flex: 1;
   overflow-y: auto;
+  padding: 20px;
   
-  .section-label {
-    padding: 12px 20px 8px;
-    font-size: 11px;
-    font-weight: bold;
-    color: #94a3b8;
-    text-transform: uppercase;
-  }
-}
-
-.history-grid {
-  padding: 0 12px;
-  .history-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    color: #475569;
-    transition: all 0.2s ease;
-    .dark & { color: #cbd5e1; }
-    &:hover {
-      background: #f8fafc;
-      .dark & { background: #1e293b; }
-      .close-icon { opacity: 1; }
-    }
-    .close-icon {
-      opacity: 0;
-      font-size: 12px;
-      padding: 4px;
-      border-radius: 4px;
-      transition: all 0.2s ease;
+  // 加载状态
+  .loading-state {
+    min-height: 400px;
+    
+    .loading-text {
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 8px;
       
-      &:hover { 
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444; 
+      .dark & {
+        color: #94a3b8;
       }
     }
   }
-}
-
-.results-list {
-  .result-group {
-    .group-header {
-      padding: 8px 20px;
-      background: #f8fafc;
-      font-size: 12px;
-      font-weight: bold;
-      color: #64748b;
-      border-bottom: 1px solid #f1f5f9;
-      .dark & { background: #1e293b; border-color: #334155; color: #94a3b8; }
+  
+  // 默认状态
+  .default-state {
+    .history-section,
+    .trending-section {
+      margin-bottom: 32px;
     }
-
-     .result-row {
-       padding: 14px 20px;
-       display: flex;
-       gap: 12px;
-       cursor: pointer;
-       border-bottom: 1px solid #f8fafc;
-       transition: all 0.2s ease;
-       min-height: 58px; // 确保一致的高度
-       .dark & { border-color: #1e293b; }
-       &:hover { 
-         background: #f1f5f9; 
-         .dark & { background: #1e293b; } 
-         
-         // 添加轻微的缩放效果
-         transform: translateX(2px);
-       }
-
-       .avatar-box {
-         flex-shrink: 0;
-         width: 34px;
-         height: 34px;
-         
-         .file-icon-bg {
-           width: 34px; 
-           height: 34px;
-           background: #eff6ff; 
-           color: #3b82f6;
-           display: flex; 
-           align-items: center; 
-           justify-content: center;
-           border-radius: 6px;
-           font-size: 16px;
-         }
-       }
-
-       .info-box {
-         flex: 1; 
-         min-width: 0;
-         display: flex;
-         flex-direction: column;
-         justify-content: center;
-         
-         .info-top {
-           display: flex; 
-           justify-content: space-between; 
-           align-items: center;
-           margin-bottom: 4px;
-           
-           .name-text { 
-             font-size: 14px; 
-             font-weight: 500; 
-             color: #1e293b; 
-             .dark & { color: #f1f5f9; }
-           }
-           .time-text { 
-             font-size: 11px; 
-             color: #94a3b8;
-             flex-shrink: 0;
-             margin-left: 8px;
-           }
-         }
-         .desc-text { 
-           font-size: 12px; 
-           color: #64748b; 
-           overflow: hidden; 
-           text-overflow: ellipsis; 
-           white-space: nowrap;
-           line-height: 1.4;
-         }
-       }
-     }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+        
+        .dark & {
+          color: #f1f5f9;
+        }
+      }
+      
+      .clear-history-btn {
+        color: #64748b;
+        font-size: 13px;
+        
+        &:hover {
+          color: #ef4444;
+        }
+        
+        .dark & {
+          color: #94a3b8;
+          
+          &:hover {
+            color: #f87171;
+          }
+        }
+      }
+    }
+    
+    // 历史记录
+    .history-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      
+      .history-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #475569;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+        
+        .dark & {
+          background: #1e293b;
+          color: #cbd5e1;
+        }
+        
+        &:hover {
+          background: #f1f5f9;
+          transform: translateX(4px);
+          
+          .dark & {
+            background: #2563eb;
+          }
+          
+          .close-icon {
+            opacity: 1;
+          }
+        }
+        
+        .history-icon {
+          font-size: 14px;
+          color: #94a3b8;
+          margin-right: 12px;
+          flex-shrink: 0;
+          
+          .dark & {
+            color: #94a3b8;
+          }
+        }
+        
+        .history-text {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        
+        .close-icon {
+          opacity: 0;
+          font-size: 14px;
+          padding: 4px;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+          color: #64748b;
+          
+          &:hover { 
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444; 
+          }
+          
+          .dark & {
+            color: #94a3b8;
+            
+            &:hover {
+              background: rgba(248, 113, 113, 0.2);
+              color: #f87171;
+            }
+          }
+        }
+      }
+    }
+    
+    // 热门搜索
+    .trending-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      
+      .trending-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-radius: 20px;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        .dark & {
+          background: #1e293b;
+          color: #cbd5e1;
+        }
+        
+        &:hover {
+          background: #f0f9ff;
+          color: #1677ff;
+          transform: translateY(-2px);
+          box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
+          
+          .dark & {
+            background: #1e40af;
+            box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+          }
+        }
+        
+        .tag-rank {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          border-radius: 9px;
+          background: #1677ff;
+          color: #fff;
+          font-size: 11px;
+          font-weight: bold;
+          margin-right: 8px;
+          
+          &:nth-child(1) {
+            background: #ef4444;
+          }
+          
+          &:nth-child(2) {
+            background: #f97316;
+          }
+          
+          &:nth-child(3) {
+            background: #eab308;
+          }
+        }
+      }
+    }
+  }
+  
+  // 搜索结果
+  .results-container {
+    .result-section {
+      margin-bottom: 24px;
+      
+      .section-header {
+        margin-bottom: 16px;
+        
+        .section-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1e293b;
+          display: flex;
+          align-items: center;
+          
+          .dark & {
+            color: #f1f5f9;
+          }
+          
+          &.with-icon {
+            .section-icon {
+              font-size: 18px;
+              color: #1677ff;
+              margin-right: 8px;
+            }
+            
+            .result-count {
+              font-size: 13px;
+              font-weight: 400;
+              color: #64748b;
+              margin-left: 8px;
+              
+              .dark & {
+                color: #94a3b8;
+              }
+            }
+          }
+        }
+      }
+      
+      .result-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        
+        .result-card {
+          display: flex;
+          gap: 16px;
+          padding: 16px;
+          border-radius: 12px;
+          background: #f8fafc;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          animation: resultFadeIn 0.3s ease-out forwards;
+          opacity: 0;
+          
+          // 为每个结果卡片添加不同的动画延迟
+          &:nth-child(1) { animation-delay: 0.05s; }
+          &:nth-child(2) { animation-delay: 0.1s; }
+          &:nth-child(3) { animation-delay: 0.15s; }
+          &:nth-child(4) { animation-delay: 0.2s; }
+          &:nth-child(5) { animation-delay: 0.25s; }
+          &:nth-child(6) { animation-delay: 0.3s; }
+          &:nth-child(7) { animation-delay: 0.35s; }
+          &:nth-child(8) { animation-delay: 0.4s; }
+          &:nth-child(9) { animation-delay: 0.45s; }
+          &:nth-child(10) { animation-delay: 0.5s; }
+          
+          .dark & {
+            background: #1e293b;
+          }
+          
+          &:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            
+            .dark & {
+              background: #2563eb;
+              box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+            }
+          }
+          
+          .result-avatar {
+            flex-shrink: 0;
+            
+            .result-avatar-img {
+              border-radius: 8px;
+            }
+            
+            .file-icon-container {
+              width: 40px;
+              height: 40px;
+              background: #eff6ff;
+              color: #3b82f6;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 8px;
+              font-size: 18px;
+              
+              .dark & {
+                background: #1e40af;
+                color: #93c5fd;
+              }
+            }
+          }
+          
+          .result-info {
+            flex: 1;
+            min-width: 0;
+            
+            .result-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 8px;
+              
+              .result-title {
+                font-size: 15px;
+                font-weight: 600;
+                color: #1e293b;
+                flex: 1;
+                margin-right: 12px;
+                
+                .dark & {
+                  color: #f1f5f9;
+                }
+              }
+              
+              .result-time {
+                font-size: 12px;
+                color: #94a3b8;
+                flex-shrink: 0;
+              }
+            }
+            
+            .result-desc {
+              font-size: 14px;
+              color: #64748b;
+              line-height: 1.4;
+              margin-bottom: 8px;
+              
+              .dark & {
+                color: #94a3b8;
+              }
+            }
+            
+            .result-meta {
+              .meta-tag {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 10px;
+                background: #e0f2fe;
+                color: #0284c7;
+                font-size: 11px;
+                font-weight: 500;
+                
+                .dark & {
+                  background: #0e7490;
+                  color: #7dd3fc;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // 空状态
+  .empty-state {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    
+    .empty-icon {
+      margin-bottom: 16px;
+    }
+    
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0 0 8px 0;
+      
+      .dark & {
+        color: #f1f5f9;
+      }
+    }
+    
+    .empty-desc {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0 0 24px 0;
+      max-width: 300px;
+      
+      .dark & {
+        color: #94a3b8;
+      }
+    }
+    
+    .empty-btn {
+      border-radius: 8px;
+      padding: 8px 20px;
+    }
+  }
+  
+  // 响应式设计
+  @media (max-width: 768px) {
+    padding: 16px;
+    
+    // 默认状态
+    .default-state {
+      .history-section,
+      .trending-section {
+        margin-bottom: 24px;
+      }
+      
+      .section-header {
+        margin-bottom: 12px;
+        
+        .section-title {
+          font-size: 14px;
+        }
+      }
+      
+      .history-grid {
+        gap: 6px;
+        
+        .history-item {
+          padding: 10px 12px;
+          font-size: 13px;
+        }
+      }
+      
+      .trending-tags {
+        gap: 8px;
+        
+        .trending-tag {
+          padding: 6px 12px;
+          font-size: 12px;
+          
+          .tag-rank {
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            margin-right: 6px;
+          }
+        }
+      }
+    }
+    
+    // 搜索结果
+    .results-container {
+      .result-section {
+        margin-bottom: 16px;
+        
+        .section-header {
+          margin-bottom: 12px;
+          
+          .section-title {
+            font-size: 14px;
+            
+            &.with-icon {
+              .section-icon {
+                font-size: 16px;
+                margin-right: 6px;
+              }
+              
+              .result-count {
+                font-size: 12px;
+                margin-left: 6px;
+              }
+            }
+          }
+        }
+        
+        .result-list {
+          gap: 6px;
+          
+          .result-card {
+            gap: 12px;
+            padding: 12px;
+            
+            .result-avatar {
+              .result-avatar-img {
+                width: 36px;
+                height: 36px;
+              }
+              
+              .file-icon-container {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+              }
+            }
+            
+            .result-info {
+              .result-header {
+                margin-bottom: 6px;
+                
+                .result-title {
+                  font-size: 14px;
+                }
+                
+                .result-time {
+                  font-size: 11px;
+                }
+              }
+              
+              .result-desc {
+                font-size: 13px;
+                margin-bottom: 6px;
+              }
+              
+              .result-meta {
+                .meta-tag {
+                  padding: 2px 6px;
+                  font-size: 10px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // 空状态
+    .empty-state {
+      min-height: 300px;
+      padding: 30px 16px;
+      
+      .empty-icon {
+        margin-bottom: 12px;
+      }
+      
+      .empty-title {
+        font-size: 16px;
+      }
+      
+      .empty-desc {
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+      
+      .empty-btn {
+        padding: 6px 16px;
+        font-size: 13px;
+      }
+    }
+  }
+  
+  // 小屏幕手机优化
+  @media (max-width: 480px) {
+    padding: 12px;
+    
+    // 默认状态
+    .default-state {
+      .history-section,
+      .trending-section {
+        margin-bottom: 20px;
+      }
+      
+      .trending-tags {
+        .trending-tag {
+          padding: 5px 10px;
+          font-size: 11px;
+        }
+      }
+    }
+    
+    // 搜索结果
+    .results-container {
+      .result-section {
+        .result-list {
+          .result-card {
+            gap: 10px;
+            padding: 10px;
+            
+            .result-avatar {
+              .result-avatar-img {
+                width: 32px;
+                height: 32px;
+              }
+              
+              .file-icon-container {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+              }
+            }
+            
+            .result-info {
+              .result-header {
+                .result-title {
+                  font-size: 13px;
+                }
+              }
+              
+              .result-desc {
+                font-size: 12px;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 

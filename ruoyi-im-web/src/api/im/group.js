@@ -185,3 +185,16 @@ export function muteGroupMember(groupId, targetUserId, duration) {
     params: { duration }
   })
 }
+
+/**
+ * 获取共同群组
+ * 获取当前用户与指定用户共同加入的群组列表
+ * @param {number} targetUserId - 目标用户ID
+ * @returns {Promise}
+ */
+export function getCommonGroups(targetUserId) {
+  return request({
+    url: `/api/im/group/common/${targetUserId}`,
+    method: 'get'
+  })
+}

@@ -117,6 +117,7 @@ public class ImAuthController {
         userInfo.setUsername(userVO.getUsername());
         userInfo.setNickname(userVO.getNickname());
         userInfo.setAvatar(userVO.getAvatar());
+        userInfo.setRole(userVO.getRole() != null ? userVO.getRole() : "USER");
         loginVO.setUserInfo(userInfo);
 
         return Result.success(loginVO);

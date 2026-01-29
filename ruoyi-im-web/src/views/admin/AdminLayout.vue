@@ -37,6 +37,30 @@
             <el-icon><ChatLineSquare /></el-icon>
             <template #title>消息管理</template>
           </el-menu-item>
+          <el-menu-item index="/admin/departments">
+            <el-icon><OfficeBuilding /></el-icon>
+            <template #title>部门管理</template>
+          </el-menu-item>
+          <el-menu-item index="/admin/roles">
+            <el-icon><Lock /></el-icon>
+            <template #title>角色权限</template>
+          </el-menu-item>
+          <el-menu-item index="/admin/settings">
+            <el-icon><Setting /></el-icon>
+            <template #title>系统设置</template>
+          </el-menu-item>
+          <el-menu-item index="/admin/logs">
+            <el-icon><Document /></el-icon>
+            <template #title>操作日志</template>
+          </el-menu-item>
+          <el-menu-item index="/admin/backup">
+            <el-icon><FolderOpened /></el-icon>
+            <template #title>数据备份</template>
+          </el-menu-item>
+          <el-menu-item index="/admin/monitor">
+            <el-icon><TrendCharts /></el-icon>
+            <template #title>系统监控</template>
+          </el-menu-item>
         </el-menu>
 
         <!-- 底部折叠按钮 -->
@@ -75,12 +99,22 @@
             </el-breadcrumb>
           </div>
 
-          <!-- 右侧：通知 + 用户信息 + 退出 -->
+          <!-- 右侧：通知 + 主题切换 + 用户信息 + 退出 -->
           <div class="header-right">
             <!-- 通知图标 -->
             <el-badge :value="notificationCount" :hidden="notificationCount === 0" class="notification-badge">
               <el-button :icon="Bell" text class="header-icon-btn" />
             </el-badge>
+
+            <!-- 主题切换按钮 -->
+            <el-tooltip :content="themeTooltip" placement="bottom">
+              <el-button
+                :icon="themeIcon"
+                text
+                class="header-icon-btn theme-toggle-btn"
+                @click="toggleDark"
+              />
+            </el-tooltip>
 
             <!-- 用户信息下拉 -->
             <el-dropdown trigger="click" @command="handleUserCommand">
@@ -129,8 +163,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useTheme } from '@/composables/useTheme'
 import {
   Monitor,
   User,
@@ -141,7 +176,14 @@ import {
   Bell,
   ArrowDown,
   Setting,
-  SwitchButton
+  SwitchButton,
+  OfficeBuilding,
+  Lock,
+  Document,
+  FolderOpened,
+  TrendCharts,
+  Sunny,
+  Moon
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -157,6 +199,11 @@ const notificationCount = ref(0)
 
 // 是否移动端
 const isMobile = ref(window.innerWidth < 768)
+
+// 主题管理
+const { isDark, toggleDark } = useTheme()
+const themeIcon = computed(() => isDark.value ? Moon : Sunny)
+const themeTooltip = computed(() => isDark.value ? '切换到浅色模式' : '切换到深色模式')
 
 // 监听窗口大小变化
 const handleResize = () => {
@@ -181,7 +228,13 @@ const pageTitleMap = {
   '/admin/dashboard': { title: '数据概览', parent: '' },
   '/admin/users': { title: '用户管理', parent: '' },
   '/admin/groups': { title: '群组管理', parent: '' },
-  '/admin/messages': { title: '消息管理', parent: '' }
+  '/admin/messages': { title: '消息管理', parent: '' },
+  '/admin/departments': { title: '部门管理', parent: '' },
+  '/admin/roles': { title: '角色权限', parent: '' },
+  '/admin/settings': { title: '系统设置', parent: '' },
+  '/admin/logs': { title: '操作日志', parent: '' },
+  '/admin/backup': { title: '数据备份', parent: '' },
+  '/admin/monitor': { title: '系统监控', parent: '' }
 }
 
 // 面包屑列表
@@ -455,6 +508,15 @@ if (typeof window !== 'undefined') {
 }
 
 .header-icon-btn:hover {
+  color: var(--dt-primary);
+}
+
+/* 主题切换按钮 */
+.theme-toggle-btn {
+  font-size: 18px;
+}
+
+.theme-toggle-btn:hover {
   color: var(--dt-primary);
 }
 

@@ -51,9 +51,13 @@
 
       <el-dropdown trigger="click" placement="bottom-end" @command="handleCommand">
         <div class="header-user">
-          <el-avatar :size="32" :src="currentUserAvatar">
-            {{ currentUser?.name?.charAt(0) }}
-          </el-avatar>
+          <DingtalkAvatar 
+            :src="currentUserAvatar" 
+            :name="currentUser?.name" 
+            :size="32" 
+            shape="square"
+            custom-class="user-info-avatar"
+          />
           <span class="header-username">{{ currentUser?.name }}</span>
           <el-icon class="dropdown-arrow">
             <ArrowDown />
@@ -84,6 +88,7 @@ import {
 } from '@element-plus/icons-vue'
 import { logout } from '@/api/im/auth'
 import { addTokenToUrl } from '@/utils/file'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const router = useRouter()
 const searchKeyword = ref('')

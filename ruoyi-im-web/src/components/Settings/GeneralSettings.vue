@@ -42,10 +42,73 @@
 
 
 
+    <!-- 外观设置 -->
+    <section class="setting-section">
+      <h3 class="section-title">外观设置</h3>
+      <div class="theme-selector">
+        <div 
+          class="theme-card" 
+          :class="{ active: localSettings.general.theme === 'light' }"
+          @click="handleThemeChange('light')"
+        >
+          <div class="theme-preview light">
+            <div class="preview-ui">
+              <div class="ui-header"></div>
+              <div class="ui-content">
+                <div class="ui-item"></div>
+                <div class="ui-item mini"></div>
+              </div>
+            </div>
+          </div>
+          <div class="theme-info">
+            <span class="theme-label">浅色模式</span>
+            <el-icon v-if="localSettings.general.theme === 'light'" class="check-icon"><Check /></el-icon>
+          </div>
+        </div>
+
+        <div 
+          class="theme-card" 
+          :class="{ active: localSettings.general.theme === 'dark' }"
+          @click="handleThemeChange('dark')"
+        >
+          <div class="theme-preview dark">
+            <div class="preview-ui">
+              <div class="ui-header"></div>
+              <div class="ui-content">
+                <div class="ui-item"></div>
+                <div class="ui-item mini"></div>
+              </div>
+            </div>
+          </div>
+          <div class="theme-info">
+            <span class="theme-label">深色模式</span>
+            <el-icon v-if="localSettings.general.theme === 'dark'" class="check-icon"><Check /></el-icon>
+          </div>
+        </div>
+
+        <div 
+          class="theme-card" 
+          :class="{ active: localSettings.general.theme === 'auto' }"
+          @click="handleThemeChange('auto')"
+        >
+          <div class="theme-preview auto">
+            <div class="preview-split">
+              <div class="split-left"></div>
+              <div class="split-right"></div>
+            </div>
+          </div>
+          <div class="theme-info">
+            <span class="theme-label">跟随系统</span>
+            <el-icon v-if="localSettings.general.theme === 'auto'" class="check-icon"><Check /></el-icon>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 语言设置 -->
     <section class="setting-section">
       <h3 class="section-title">语言与地区</h3>
-      <div class="setting-list">
+      <div class="setting-list card-style">
         <div class="setting-item">
           <div class="item-icon-wrapper">
             <div class="item-icon bg-purple">
@@ -103,7 +166,7 @@
     <!-- 启动与行为 -->
     <section class="setting-section">
       <h3 class="section-title">启动与行为</h3>
-      <div class="setting-list">
+      <div class="setting-list card-style">
         <div class="setting-item">
           <div class="item-icon-wrapper">
             <div class="item-icon bg-blue">
@@ -128,19 +191,6 @@
             <div class="item-desc">点击关闭按钮时最小化到系统托盘</div>
           </div>
           <el-switch v-model="localSettings.general.minimizeToTray" @change="handleChange" />
-        </div>
-
-        <div class="setting-item">
-          <div class="item-icon-wrapper">
-            <div class="item-icon bg-orange">
-              <el-icon><FullScreen /></el-icon>
-            </div>
-          </div>
-          <div class="item-content">
-            <div class="item-title">默认最大化窗口</div>
-            <div class="item-desc">启动时自动最大化窗口</div>
-          </div>
-          <el-switch v-model="localSettings.general.startMaximized" @change="handleChange" />
         </div>
       </div>
     </section>
@@ -176,6 +226,7 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const store = useStore()
 const localSettings = reactive({
   general: {
+    theme: 'light',
     language: 'zh-CN',
     timeFormat: '24h',
     autoStart: false,
@@ -184,6 +235,15 @@ const localSettings = reactive({
     ...props.modelValue.general
   }
 })
+
+import { useTheme } from '@/composables/useTheme'
+const { setTheme: switchTheme } = useTheme()
+
+const handleThemeChange = (theme) => {
+  localSettings.general.theme = theme
+  switchTheme(theme)
+  handleChange()
+}
 
 // 判断是否为管理员
 const isAdmin = computed(() => store.getters['user/isAdmin'])
@@ -365,30 +425,147 @@ const handleChange = () => {
 
 
 
+// 主题选择器
+.theme-selector {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.theme-card {
+  flex: 1;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  
+  &:hover {
+    transform: translateY(-2px);
+    
+    .theme-preview {
+      border-color: var(--dt-brand-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+  }
+  
+  &.active {
+    .theme-preview {
+      border-color: var(--dt-brand-color);
+      border-width: 2px;
+    }
+    
+    .theme-label {
+      color: var(--dt-brand-color);
+      font-weight: 600;
+    }
+  }
+}
+
+.theme-preview {
+  height: 80px;
+  border-radius: 8px;
+  border: 1px solid var(--dt-border-light);
+  margin-bottom: 8px;
+  background: var(--dt-bg-body);
+  overflow: hidden;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+
+  .dark & {
+    background: var(--dt-bg-body-dark);
+    border-color: var(--dt-border-dark);
+  }
+
+  &.dark {
+    background: #1a1a1a;
+    border-color: #333;
+    
+    .preview-ui {
+      background: #2a2a2a;
+      .ui-header { background: #333; }
+      .ui-item { background: #3d3d3d; }
+    }
+  }
+
+  &.auto {
+    padding: 0;
+    .preview-split {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      .split-left { flex: 1; background: #f5f5f5; }
+      .split-right { flex: 1; background: #1a1a1a; }
+    }
+  }
+}
+
+.preview-ui {
+  width: 60px;
+  height: 45px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .ui-header {
+    height: 10px;
+    background: #f0f0f0;
+    margin-bottom: 4px;
+  }
+  
+  .ui-content {
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  
+  .ui-item {
+    height: 4px;
+    background: #f5f5f5;
+    border-radius: 2px;
+    width: 100%;
+    
+    &.mini {
+      width: 60%;
+    }
+  }
+}
+
 .theme-info {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 4px;
 }
 
 .theme-label {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
   color: var(--dt-text-primary);
+  font-weight: 500;
 }
 
 .check-icon {
   color: var(--dt-brand-color);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
 }
 
-// 设置列表
-.setting-list {
+// 设置列表优化
+.card-style {
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: 8px;
-  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
 }
 
 .setting-item {
@@ -396,8 +573,12 @@ const handleChange = () => {
   align-items: center;
   padding: 16px 20px;
   gap: 16px;
-  border-bottom: 1px solid var(--dt-border-light);
+  border-bottom: 1px solid var(--dt-border-lighter);
   transition: background-color 0.2s;
+
+  .dark & {
+    border-bottom-color: var(--dt-border-dark);
+  }
 
   &:last-child {
     border-bottom: none;
@@ -408,80 +589,14 @@ const handleChange = () => {
   }
 }
 
-// 图标样式
-.item-icon-wrapper {
-  flex-shrink: 0;
-}
-
-.item-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-
-  &.bg-blue {
-    background: rgba(22, 119, 255, 0.1);
-    color: #1677ff;
-  }
-
-  &.bg-green {
-    background: rgba(82, 196, 26, 0.1);
-    color: #52c41a;
-  }
-
-  &.bg-orange {
-    background: rgba(250, 140, 22, 0.1);
-    color: #fa8c16;
-  }
-
-  &.bg-purple {
-    background: rgba(114, 46, 209, 0.1);
-    color: #722ed1;
-  }
-
-  &.bg-cyan {
-    background: rgba(19, 194, 194, 0.1);
-    color: #13c2c2;
-  }
-}
-
-// 内容区域
-.item-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.item-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--dt-text-primary);
-  margin-bottom: 4px;
-}
-
-.item-desc {
-  font-size: 13px;
-  color: var(--dt-text-secondary);
-}
-
-// 响应式适配
+// 响应式
 @media (max-width: 640px) {
-  .logo-setting {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  .theme-selector {
+    gap: 12px;
   }
-
-  .logo-actions {
-    justify-content: center;
-  }
-
-
-
-  .setting-item {
-    padding: 14px 16px;
+  
+  .theme-preview {
+    height: 64px;
   }
 }
 </style>

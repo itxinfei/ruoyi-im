@@ -121,4 +121,14 @@ public interface ImGroupMemberMapper extends BaseMapper<ImGroupMember> {
      * @return 结果
      */
     int deleteByGroupIds(@Param("groupIds") List<Long> groupIds);
+
+    /**
+     * 查询两个用户共同加入的群组ID列表
+     * 用于用户详情页展示共同群组
+     *
+     * @param userId1 用户1的ID
+     * @param userId2 用户2的ID
+     * @return 共同群组ID列表
+     */
+    List<Long> selectCommonGroupIds(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 }

@@ -898,11 +898,11 @@
   }
 
   @mixin animation-pulse($duration: 2s, $infinite: true) {
-    animation: pulse $duration var(--dt-ease-in-out) #{if($infinite, infinite, "")};
+    animation: pulse $duration var(--dt-ease-in-out) #{if(sass($infinite): infinite; else: "")};
   }
 
   @mixin animation-spin($duration: 1s, $infinite: true) {
-    animation: spin $duration linear #{if($infinite, infinite, "")};
+    animation: spin $duration linear #{if(sass($infinite): infinite; else: "")};
   }
 
   @mixin animation-shake($duration: 0.5s) {

@@ -661,4 +661,38 @@ public class ImGroupServiceImpl implements ImGroupService {
         // 清除缓存
         imRedisUtil.evictGroupInfo(groupId);
     }
+
+    @Override
+    public List<ImGroupVO> getCommonGroups(Long userId1, Long userId2) {
+        // 查询两个用户共同加入的群组ID列表
+        List<Long> commonGroupIds = imGroupMemberMapper.selectCommonGroupIds(userId1, userId2);
+
+        if (commonGroupIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 批量获取群组信息并转换为VO
+        List<ImGroupVO> result = new ArrayList<>();
+        for (Long groupId : commonGroupIds) {
+            ImGroup group = imGroupMapper.selectImGroupById(groupId);
+            if (group != null && (group.getIsDeleted() == null || group.getIsDeleted() == 0)) {
+                ImGroupVO vo = convertToVO(group);
+                // 添加成员数量
+                Integer memberCount = imGroupMemberMapper.countMembersByGroupId(groupId);
+                vo.setMemberCount(memberCount != null ? memberCount : 0);
+                result.add(vo);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 将群组实体转换为VO
+     */
+    private ImGroupVO convertToVO(ImGroup group) {
+        ImGroupVO vo = new ImGroupVO();
+        BeanUtils.copyProperties(group, vo);
+        return vo;
+    }
 }

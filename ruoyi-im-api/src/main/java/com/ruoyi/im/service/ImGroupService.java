@@ -187,4 +187,14 @@ public interface ImGroupService {
      * @param userId 用户ID
      */
     void adminRemoveMember(Long groupId, Long userId);
+
+    /**
+     * 获取两个用户共同加入的群组列表
+     * 用于用户详情页展示共同群组
+     *
+     * @param userId1 用户1的ID
+     * @param userId2 用户2的ID
+     * @return 共同群组列表
+     */
+    List<ImGroupVO> getCommonGroups(Long userId1, Long userId2);
 }

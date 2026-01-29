@@ -21,17 +21,33 @@
         </div>
         
         <nav class="sidebar-nav">
+          <!-- 搜索框 -->
+          <div class="sidebar-search" v-if="!isFullscreen">
+            <el-input
+              v-model="searchQuery"
+              placeholder="搜索设置..."
+              :prefix-icon="Search"
+              clearable
+              size="small"
+              class="search-input"
+            />
+          </div>
+
           <div
-            v-for="item in menuItems"
+            v-for="item in filteredMenuItems"
             :key="item.id"
             class="nav-item"
             :class="{ active: activeMenu === item.id }"
-            @click="activeMenu = item.id"
+            @click="handleNavClick(item)"
             :title="item.label"
           >
             <el-icon class="nav-icon"><component :is="item.icon" /></el-icon>
             <span class="nav-label">{{ item.label }}</span>
             <span v-if="item.badge" class="nav-badge">{{ item.badge }}</span>
+          </div>
+          
+          <div v-if="filteredMenuItems.length === 0" class="no-results">
+            未找到结果
           </div>
         </nav>
         
@@ -101,6 +117,7 @@
 <script setup>
 import { ref, watch, reactive, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   User,
@@ -112,7 +129,9 @@ import {
   Close,
   Brush,
   Refresh,
-  Check
+  Check,
+  Monitor,
+  Search
 } from '@element-plus/icons-vue'
 
 // 动态导入子组件
@@ -134,9 +153,11 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const store = useStore()
+const router = useRouter()
 
 const visible = ref(false)
 const activeMenu = ref('account')
+const searchQuery = ref('')
 const showChangePassword = ref(false)
 const showEditProfile = ref(false)
 const appVersion = ref('1.0.0')
@@ -181,17 +202,42 @@ onUnmounted(() => {
 })
 
 // 菜单配置
-const menuItems = [
-  { id: 'account', label: '账号与安全', icon: User, description: '管理个人信息和账号安全' },
-  { id: 'notification', label: '消息通知', icon: Bell, description: '设置消息通知偏好' },
-  { id: 'general', label: '通用设置', icon: Setting, description: '基本功能 and 行为设置' },
-  { id: 'storage', label: '存储管理', icon: Files, description: '管理本地存储和缓存' },
-  { id: 'help', label: '帮助反馈', icon: QuestionFilled, description: '获取帮助和提交反馈' },
-  { id: 'about', label: '关于', icon: InfoFilled, description: '了解应用信息和版本' }
-]
+const menuItems = computed(() => {
+  const baseItems = [
+    { id: 'account', label: '账号与安全', icon: User, description: '管理个人信息和账号安全' },
+    { id: 'notification', label: '消息通知', icon: Bell, description: '设置消息通知偏好' },
+    { id: 'general', label: '通用设置', icon: Setting, description: '基本功能 and 行为设置' },
+    { id: 'storage', label: '存储管理', icon: Files, description: '管理本地存储和缓存' },
+    { id: 'help', label: '帮助反馈', icon: QuestionFilled, description: '获取帮助和提交反馈' },
+    { id: 'about', label: '关于', icon: InfoFilled, description: '了解应用信息和版本' }
+  ]
 
-const currentMenuLabel = computed(() => menuItems.find(i => i.id === activeMenu.value)?.label || '系统设置')
-const currentMenuDescription = computed(() => menuItems.find(i => i.id === activeMenu.value)?.description || '')
+  // 如果是管理员，添加管理后台入口
+  const isAdmin = store.getters['user/isAdmin']
+  if (isAdmin) {
+    baseItems.splice(baseItems.length - 2, 0, {
+      id: 'admin',
+      label: '管理后台',
+      icon: Monitor,
+      description: '进入系统管理后台'
+    })
+  }
+
+  return baseItems
+})
+
+// 过滤后的菜单项
+const filteredMenuItems = computed(() => {
+  if (!searchQuery.value) return menuItems.value
+  const query = searchQuery.value.toLowerCase()
+  return menuItems.value.filter(item => 
+    item.label.toLowerCase().includes(query) || 
+    item.description.toLowerCase().includes(query)
+  )
+})
+
+const currentMenuLabel = computed(() => menuItems.value.find(i => i.id === activeMenu.value)?.label || '系统设置')
+const currentMenuDescription = computed(() => menuItems.value.find(i => i.id === activeMenu.value)?.description || '')
 
 // 数据源
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
@@ -335,6 +381,17 @@ const resetToDefault = () => {
 const onSave = () => {
   saveSettings()
   visible.value = false
+}
+
+// 处理导航点击
+const handleNavClick = (item) => {
+  // 如果是管理后台入口，跳转到管理后台
+  if (item.id === 'admin') {
+    visible.value = false
+    router.push('/admin/dashboard')
+  } else {
+    activeMenu.value = item.id
+  }
 }
 
 // 缓存清理
@@ -492,6 +549,44 @@ onMounted(() => {
       background-color: rgba(0, 0, 0, 0.2);
     }
   }
+}
+
+.sidebar-search {
+  padding: 0 8px 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--dt-border-lighter);
+  
+  :deep(.el-input__wrapper) {
+    background-color: var(--dt-bg-body);
+    box-shadow: none;
+    border: 1px solid var(--dt-border-light);
+    border-radius: 6px;
+    padding-left: 8px;
+    
+    &.is-focus {
+      border-color: var(--dt-brand-color);
+      background-color: #fff;
+    }
+  }
+
+  .dark & {
+    border-bottom-color: var(--dt-border-dark);
+    :deep(.el-input__wrapper) {
+      background-color: var(--dt-bg-body-dark);
+      border-color: var(--dt-border-dark);
+      
+      &.is-focus {
+        background-color: rgba(22, 119, 255, 0.05);
+      }
+    }
+  }
+}
+
+.no-results {
+  padding: 20px;
+  text-align: center;
+  color: var(--dt-text-tertiary);
+  font-size: 13px;
 }
 
 .nav-item {

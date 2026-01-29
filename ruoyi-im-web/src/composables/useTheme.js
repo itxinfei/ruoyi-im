@@ -1,142 +1,127 @@
 // ============================================================================
 // useTheme.js
 // 主题管理组合式函数
+// 支持浅色/深色/自动模式，使用 data-theme 属性切换
 // ============================================================================
 
-import { ref, computed, onMounted, watch } from 'vue'
-import { useStore } from 'vuex'
+import { ref, onMounted, watch } from 'vue'
+
+const THEME_KEY = 'im_admin_theme'
+const THEME_LIGHT = 'light'
+const THEME_DARK = 'dark'
+const THEME_AUTO = 'auto'
+
+// 全局响应式主题状态（单例模式）
+const currentTheme = ref(THEME_LIGHT)
+const isDark = ref(false)
 
 /**
- * 主题管理组合式函数
+ * 获取系统主题偏好
+ */
+const getSystemTheme = () => {
+  if (typeof window === 'undefined') return THEME_LIGHT
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? THEME_DARK : THEME_LIGHT
+}
+
+/**
+ * 应用主题到 DOM
+ * @param {string} theme 主题名称 ('light', 'dark', 'auto')
+ */
+const applyTheme = (theme) => {
+  if (typeof document === 'undefined') return
+
+  const root = document.documentElement
+  const actualTheme = theme === THEME_AUTO ? getSystemTheme() : theme
+
+  // 使用 data-theme 属性（与 admin-theme.css 配合）
+  root.setAttribute('data-theme', actualTheme)
+  isDark.value = actualTheme === THEME_DARK
+}
+
+/**
+ * 初始化主题
+ */
+const initTheme = () => {
+  // 从 localStorage 读取保存的主题设置
+  const savedTheme = localStorage.getItem(THEME_KEY) || THEME_AUTO
+  currentTheme.value = savedTheme
+  applyTheme(savedTheme)
+}
+
+/**
+ * 设置主题
+ * @param {string} theme 主题名称
+ */
+const setTheme = (theme) => {
+  currentTheme.value = theme
+  localStorage.setItem(THEME_KEY, theme)
+  applyTheme(theme)
+}
+
+/**
+ * 切换深色/浅色模式
+ */
+const toggleDark = () => {
+  const newTheme = isDark.value ? THEME_LIGHT : THEME_DARK
+  setTheme(newTheme)
+}
+
+/**
+ * 主题管理 Hook
  * @returns {Object} 主题相关的状态和方法
  */
 export function useTheme() {
-  const store = useStore()
-  const currentTheme = ref('light')
-  const isDarkMode = ref(false)
+  // 监听系统主题变化（仅在 auto 模式下）
+  const setupSystemThemeListener = () => {
+    if (typeof window === 'undefined') return () => {}
 
-  /**
-   * 初始化主题
-   */
-  const initTheme = () => {
-    // 从本地存储获取主题设置
-    const savedTheme = localStorage.getItem('theme')
-    if (savedTheme) {
-      currentTheme.value = savedTheme
-      isDarkMode.value = savedTheme === 'dark'
-    } else {
-      // 检查系统偏好
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      currentTheme.value = prefersDark ? 'dark' : 'light'
-      isDarkMode.value = prefersDark
-    }
-
-    // 应用主题
-    applyTheme(currentTheme.value)
-  }
-
-  /**
-   * 应用主题
-   * @param {string} theme 主题名称 ('light', 'dark', 'system')
-   */
-  const applyTheme = (theme) => {
-    if (theme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      isDarkMode.value = prefersDark
-    } else {
-      isDarkMode.value = theme === 'dark'
-    }
-
-    // 更新文档根元素的 class
-    const root = document.documentElement
-    if (isDarkMode.value) {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
-
-    // 保存主题设置到本地存储
-    localStorage.setItem('theme', theme)
-    if (currentTheme.value !== theme) {
-      currentTheme.value = theme
-    }
-
-    // 同步到服务器（仅在已登录时执行，且静默处理）
-    const token = localStorage.getItem('im_token')
-    if (token) {
-      store.dispatch('im/batchUpdateServerSettings', {
-        'general.theme': theme
-      }).catch(() => {
-        // 忽略服务器更新失败
-      })
-    }
-  }
-
-  /**
-   * 切换主题
-   * @param {string} theme 主题名称 ('light', 'dark', 'system')
-   */
-  const setTheme = (theme) => {
-    applyTheme(theme)
-  }
-
-  /**
-   * 切换深色模式
-   * @param {boolean} dark 是否启用深色模式
-   */
-  const toggleDarkMode = (dark) => {
-    applyTheme(dark ? 'dark' : 'light')
-  }
-
-  /**
-   * 监听系统主题变化
-   */
-  const setupThemeListener = () => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
     const handleChange = (e) => {
-      if (currentTheme.value === 'system') {
-        isDarkMode.value = e.matches
-        applyTheme('system')
+      if (currentTheme.value === THEME_AUTO) {
+        applyTheme(THEME_AUTO)
       }
     }
 
-    mediaQuery.addEventListener('change', handleChange)
-
-    // 清理监听器
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange)
+    // 现代浏览器使用 addEventListener
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
     }
+    // 旧版浏览器兼容
+    else if (mediaQuery.addListener) {
+      mediaQuery.addListener(handleChange)
+      return () => mediaQuery.removeListener(handleChange)
+    }
+
+    return () => {}
   }
 
-  // 生命周期钩子
+  // 组件挂载时初始化（仅第一次调用时执行）
+  let initialized = false
   onMounted(() => {
-    initTheme()
-    setupThemeListener()
+    if (!initialized) {
+      initTheme()
+      const cleanup = setupSystemThemeListener()
+      initialized = true
+      return cleanup
+    }
   })
 
   // 监听主题变化
-  watch(currentTheme, (newTheme, oldTheme) => {
-    if (newTheme !== oldTheme) {
-      applyTheme(newTheme)
-    }
-  })
-
-  /**
-   * 切换主题模式
-   */
-  const toggleTheme = () => {
-    const newTheme = isDarkMode.value ? 'light' : 'dark'
+  watch(currentTheme, (newTheme) => {
     applyTheme(newTheme)
-  }
+  })
 
   return {
     currentTheme,
-    isDark: isDarkMode,
-    isDarkMode,
+    isDark,
     setTheme,
-    toggleDarkMode,
-    toggleTheme,
-    applyTheme
+    toggleDark,
+    THEME_LIGHT,
+    THEME_DARK,
+    THEME_AUTO
   }
 }
+
+// 导出初始化函数供应用入口调用
+export { initTheme }

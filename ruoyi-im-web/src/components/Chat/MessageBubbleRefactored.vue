@@ -299,9 +299,11 @@ const canRecall = computed(() => {
 .message-bubble {
   position: relative;
   display: inline-flex;
-  align-items: flex-end;
+  align-items: flex-start;
   max-width: min(520px, calc(100vw - 400px));
   animation: messagePop 0.3s var(--dt-ease-bounce);
+  margin-top: 0;
+  padding-top: 0;
 }
 
 @keyframes messagePop {
@@ -319,10 +321,12 @@ const canRecall = computed(() => {
   padding: 10px 12px;
   border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-base);
-  line-height: 1.5;
+  line-height: 1.4;
   word-break: break-word;
   overflow-wrap: break-word;
   transition: background-color var(--dt-transition-base);
+  display: flex;
+  align-items: flex-start;
 }
 
 // 对方消息样式

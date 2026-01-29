@@ -140,21 +140,14 @@ const handleNudge = () => {
 
 .message-item {
   display: flex;
+  align-items: flex-start;
   margin-bottom: 16px;
   position: relative;
-  padding: 0 16px;
+  padding: 0;
   animation: fadeInUp 0.3s var(--dt-ease-out) both;
 
   &.is-own {
     flex-direction: row-reverse;
-  }
-
-  &:not(.is-own) {
-    align-items: flex-start;
-  }
-
-  &.is-own {
-    align-items: flex-start;
   }
 }
 
@@ -221,7 +214,7 @@ const handleNudge = () => {
 
 // 头像区域
 .avatar-wrapper {
-  margin: 0 10px;
+  margin: 0 4px;
   flex-shrink: 0;
   cursor: pointer;
   transition: opacity var(--dt-transition-base);
@@ -232,8 +225,8 @@ const handleNudge = () => {
 
   .message-avatar {
     border-radius: var(--dt-radius-sm);
-    border: 2px solid var(--dt-brand-color);
-    box-shadow: 0 0 8px rgba(22, 119, 255, 0.3);
+    border: 1px solid var(--dt-brand-color);
+    box-shadow: 0 0 6px rgba(22, 119, 255, 0.2);
   }
 
   &.is-merged {
@@ -249,6 +242,9 @@ const handleNudge = () => {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  align-items: flex-start;
+  margin-top: 0;
+  padding-top: 0;
 
   &.is-merged {
     margin-top: -8px;

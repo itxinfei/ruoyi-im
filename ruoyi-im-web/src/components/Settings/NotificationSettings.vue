@@ -3,7 +3,7 @@
     <!-- 消息通知 -->
     <section class="setting-section">
       <h3 class="section-title">消息通知</h3>
-      <div class="setting-list">
+      <div class="setting-list card-style">
         <div class="setting-item">
           <div class="item-icon-wrapper">
             <div class="item-icon bg-blue">
@@ -12,7 +12,7 @@
           </div>
           <div class="item-content">
             <div class="item-title">桌面通知</div>
-            <div class="item-desc">收到新消息时在屏幕右下角显示通知</div>
+            <div class="item-desc">开启后，将在桌面角标处显示新消息提醒</div>
           </div>
           <el-switch v-model="localSettings.notifications.enabled" @change="handleChange" />
         </div>
@@ -24,10 +24,21 @@
             </div>
           </div>
           <div class="item-content">
-            <div class="item-title">提示音</div>
-            <div class="item-desc">收到新消息时播放声音</div>
+            <div class="item-title">新消息提示音</div>
+            <div class="item-desc">收到消息时播放提示音</div>
           </div>
           <div class="item-action-group">
+            <el-button 
+              v-if="localSettings.notifications.sound" 
+              type="primary" 
+              link 
+              size="small" 
+              class="test-sound-btn"
+              @click="testSound"
+            >
+              <el-icon><VideoPlay /></el-icon>
+              试听
+            </el-button>
             <el-select
               v-model="localSettings.notifications.soundType"
               size="small"
@@ -50,8 +61,8 @@
             </div>
           </div>
           <div class="item-content">
-            <div class="item-title">消息预览</div>
-            <div class="item-desc">通知中显示消息内容预览</div>
+            <div class="item-title">消息弹窗预览</div>
+            <div class="item-desc">通知中显示发送者姓名和消息摘要</div>
           </div>
           <el-switch v-model="localSettings.notifications.showPreview" @change="handleChange" />
         </div>
@@ -63,36 +74,41 @@
             </div>
           </div>
           <div class="item-content">
-            <div class="item-title">免打扰模式</div>
-            <div class="item-desc">在指定时间段内静音所有通知</div>
+            <div class="item-title">免打扰模式 (DND)</div>
+            <div class="item-desc">在设定时间内自动静音所有消息提醒</div>
           </div>
           <el-switch v-model="localSettings.notifications.dndEnabled" @change="handleChange" />
         </div>
       </div>
 
       <!-- 免打扰时间设置 -->
-      <div v-if="localSettings.notifications.dndEnabled" class="sub-settings">
-        <div class="time-range-setting">
-          <span class="range-label">免打扰时间</span>
-          <el-time-picker
-            v-model="dndStartTime"
-            size="small"
-            placeholder="开始时间"
-            format="HH:mm"
-            style="width: 110px;"
-            @change="handleDndTimeChange"
-          />
-          <span class="range-separator">至</span>
-          <el-time-picker
-            v-model="dndEndTime"
-            size="small"
-            placeholder="结束时间"
-            format="HH:mm"
-            style="width: 110px;"
-            @change="handleDndTimeChange"
-          />
+      <transition name="el-zoom-in-top">
+        <div v-if="localSettings.notifications.dndEnabled" class="dnd-config-card">
+          <div class="config-header">
+            <el-icon><Clock /></el-icon>
+            <span>免打扰生效时间</span>
+          </div>
+          <div class="time-range-picker">
+            <el-time-picker
+              v-model="dndStartTime"
+              size="default"
+              placeholder="开始时间"
+              format="HH:mm"
+              style="flex: 1"
+              @change="handleDndTimeChange"
+            />
+            <span class="separator">至</span>
+            <el-time-picker
+              v-model="dndEndTime"
+              size="default"
+              placeholder="结束时间"
+              format="HH:mm"
+              style="flex: 1"
+              @change="handleDndTimeChange"
+            />
+          </div>
         </div>
-      </div>
+      </transition>
     </section>
 
     <!-- 快捷键 -->
@@ -195,15 +211,14 @@
 <script setup>
 import { reactive, watch, ref } from 'vue'
 import {
-  Bell,
-  Headset,
-  MessageBox,
   Mute,
   Promotion,
   Crop,
   Search,
   ChatLineRound,
-  Star
+  Star,
+  VideoPlay,
+  Clock
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -271,6 +286,15 @@ const handleDndTimeChange = () => {
   handleChange()
 }
 
+const testSound = () => {
+  // 模拟播放提示音（实际开发中可调用系统提示音或音频文件）
+  const audio = new Audio('/assets/audio/notification.mp3')
+  audio.play().catch(() => {
+    // 忽略音频播放错误（如用户未点击过页面）
+    console.log('播放提示音测试')
+  })
+}
+
 const handleChange = () => {
   emit('update:modelValue', JSON.parse(JSON.stringify(localSettings)))
   emit('change')
@@ -330,6 +354,31 @@ const handleChange = () => {
 
   &:hover {
     background-color: var(--dt-bg-hover);
+  }
+}
+
+// 设置列表优化 (统一样式)
+.card-style {
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+}
+
+.test-sound-btn {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  .el-icon {
+    font-size: 16px;
   }
 }
 
@@ -412,35 +461,45 @@ const handleChange = () => {
   align-items: center;
 }
 
-// 子设置
-.sub-settings {
-  margin-top: 12px;
-  padding: 16px 20px;
-  background: var(--dt-bg-body);
+// 免打扰时间卡片
+.dnd-config-card {
+  margin-top: 16px;
+  padding: 20px;
+  background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-top: none;
-  border-radius: 0 0 8px 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 
   .dark & {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--dt-bg-card-dark);
     border-color: var(--dt-border-dark);
+  }
+
+  .config-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin-bottom: 16px;
+    
+    .el-icon {
+      color: var(--dt-brand-color);
+      font-size: 18px;
+    }
   }
 }
 
-.time-range-setting {
+.time-range-picker {
   display: flex;
   align-items: center;
-  gap: 12px;
-
-  .range-label {
-    font-size: 14px;
-    color: var(--dt-text-primary);
-    font-weight: 500;
-  }
-
-  .range-separator {
+  gap: 16px;
+  
+  .separator {
     color: var(--dt-text-tertiary);
     font-size: 13px;
+    font-weight: 500;
   }
 }
 

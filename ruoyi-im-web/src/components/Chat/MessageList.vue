@@ -102,13 +102,7 @@
       </div>
     </template>
 
-    <!-- 回到底部按钮 -->
-    <Transition name="fade">
-      <div v-if="showScrollToBottom" class="scroll-to-bottom-btn" @click="scrollToBottom()">
-        <el-icon><ArrowDown /></el-icon>
-        <span>回到最新</span>
-      </div>
-    </Transition>
+
   </div>
 </template>
 
@@ -851,45 +845,7 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 
 // 移除重复的样式定义（已在上面 .read-status-simple 中定义）
 
-.scroll-to-bottom-btn {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-full);
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  box-shadow: var(--dt-shadow-2);
-  font-size: 13px;
-  color: var(--dt-text-secondary);
-  z-index: 10;
-  transition: all var(--dt-transition-base);
 
-  &:hover {
-    background: var(--dt-bg-hover);
-    border-color: var(--dt-brand-color);
-    color: var(--dt-brand-color);
-    transform: translateY(-2px);
-    box-shadow: var(--dt-shadow-3);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity var(--dt-transition-base), transform var(--dt-transition-base);
-}
-
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
-}
 
 // 图片预览器过渡动画
 .viewer-fade-enter-active,
