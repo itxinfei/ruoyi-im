@@ -10,6 +10,8 @@ import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImBackupService;
+import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.util.ExceptionHandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,15 +139,15 @@ public class ImBackupServiceImpl implements ImBackupService {
 
         ImBackup backup = imBackupMapper.selectById(backupId);
         if (backup == null) {
-            throw new RuntimeException("备份文件不存在");
+            ExceptionHandlerUtil.throwBusinessException("备份文件不存在");
         }
 
         if (!"completed".equals(backup.getStatus())) {
-            throw new RuntimeException("备份文件状态异常，无法恢复");
+            ExceptionHandlerUtil.throwBusinessException("备份文件状态异常，无法恢复");
         }
 
         if (backup.getFilePath() == null || backup.getFilePath().isEmpty()) {
-            throw new RuntimeException("备份文件路径为空");
+            ExceptionHandlerUtil.throwBusinessException("备份文件路径为空");
         }
 
         // 执行恢复
@@ -161,7 +163,7 @@ public class ImBackupServiceImpl implements ImBackupService {
 
         ImBackup backup = imBackupMapper.selectById(backupId);
         if (backup == null) {
-            throw new RuntimeException("备份文件不存在");
+            ExceptionHandlerUtil.throwBusinessException("备份文件不存在");
         }
 
         // 删除物理文件
@@ -170,7 +172,7 @@ public class ImBackupServiceImpl implements ImBackupService {
                 Files.deleteIfExists(Paths.get(backup.getFilePath()));
                 logger.info("已删除备份文件: {}", backup.getFilePath());
             } catch (IOException e) {
-                logger.warn("删除备份文件失败: {}", backup.getFilePath(), e);
+                ExceptionHandlerUtil.logWarning(logger, "删除备份文件失败: {}", e, backup.getFilePath());
             }
         }
 
@@ -184,7 +186,7 @@ public class ImBackupServiceImpl implements ImBackupService {
     public Map<String, Object> getBackupDetail(Long backupId) {
         ImBackup backup = imBackupMapper.selectById(backupId);
         if (backup == null) {
-            throw new RuntimeException("备份文件不存在");
+            ExceptionHandlerUtil.throwBusinessException("备份文件不存在");
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -215,7 +217,7 @@ public class ImBackupServiceImpl implements ImBackupService {
             // 查询用户数据
             ImUser user = imUserMapper.selectImUserById(userId);
             if (user == null) {
-                throw new RuntimeException("用户不存在");
+                ExceptionHandlerUtil.throwBusinessException("用户不存在");
             }
 
             // 构建导出数据
@@ -253,8 +255,7 @@ public class ImBackupServiceImpl implements ImBackupService {
             return result;
 
         } catch (Exception e) {
-            logger.error("导出用户数据失败，userId: {}", userId, e);
-            throw new RuntimeException("导出用户数据失败: " + e.getMessage(), e);
+            ExceptionHandlerUtil.throwBusinessException(logger, "导出用户数据失败: userId=" + userId, e);
         }
     }
 
@@ -330,7 +331,7 @@ public class ImBackupServiceImpl implements ImBackupService {
                 }
 
             } catch (Exception e) {
-                logger.error("备份执行异常，ID: {}", backup.getId(), e);
+                ExceptionHandlerUtil.logError(logger, "备份执行异常: backupId={}", e, backup.getId());
                 imBackupMapper.updateStatus(backup.getId(), "failed", e.getMessage());
             }
         }).start();
@@ -345,7 +346,7 @@ public class ImBackupServiceImpl implements ImBackupService {
             File backupFile = new File(filePath);
 
             if (!backupFile.exists()) {
-                throw new RuntimeException("备份文件不存在: " + filePath);
+                ExceptionHandlerUtil.throwBusinessException("备份文件不存在: " + filePath);
             }
 
             // 构建mysql命令
@@ -368,14 +369,13 @@ public class ImBackupServiceImpl implements ImBackupService {
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new RuntimeException("恢复失败，mysql退出码: " + exitCode);
+                ExceptionHandlerUtil.throwBusinessException("恢复失败，mysql退出码: " + exitCode);
             }
 
             logger.info("数据库恢复成功，备份ID: {}", backup.getId());
 
         } catch (Exception e) {
-            logger.error("数据库恢复异常，备份ID: {}", backup.getId(), e);
-            throw new RuntimeException("数据库恢复失败: " + e.getMessage(), e);
+            ExceptionHandlerUtil.throwBusinessException(logger, "数据库恢复失败: backupId=" + backup.getId(), e);
         }
     }
 

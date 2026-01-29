@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.service.ImMessageRetryService;
 import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.util.ExceptionHandlerUtil;
 import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,7 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
                 log.error("消息已达最大重试次数: clientMsgId={}, maxRetry={}", clientMsgId, MAX_RETRY_COUNT);
             }
         } catch (Exception e) {
-            log.error("记录消息发送失败异常: clientMsgId={}", clientMsgId, e);
+            ExceptionHandlerUtil.logError(log, "记录消息发送失败异常: clientMsgId={}", e, clientMsgId);
         }
     }
 
@@ -137,8 +138,7 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
             }
 
         } catch (Exception e) {
-            log.error("消息重试发送异常: clientMsgId={}", clientMsgId, e);
-            return false;
+            return ExceptionHandlerUtil.logErrorAndReturnDefault(log, "消息重试发送异常: clientMsgId={}", e, clientMsgId, false);
         }
     }
 
@@ -158,7 +158,7 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
                     }
                 }
             } catch (Exception e) {
-                log.error("延迟重试消息异常: clientMsgId={}", clientMsgId, e);
+                ExceptionHandlerUtil.logError(log, "延迟重试消息异常: clientMsgId={}", e, clientMsgId);
             }
         }, delay, TimeUnit.MILLISECONDS);
     }
@@ -174,8 +174,7 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
             Object countObj = redisUtil.get(countKey);
             return countObj != null ? Integer.parseInt(countObj.toString()) : 0;
         } catch (Exception e) {
-            log.error("获取重试次数异常: clientMsgId={}", clientMsgId, e);
-            return 0;
+            return ExceptionHandlerUtil.logErrorAndReturnDefault(log, "获取重试次数异常: clientMsgId={}", e, clientMsgId, 0);
         }
     }
 
@@ -192,7 +191,7 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
 
             log.debug("清除消息失败记录: clientMsgId={}", clientMsgId);
         } catch (Exception e) {
-            log.error("清除失败记录异常: clientMsgId={}", clientMsgId, e);
+            ExceptionHandlerUtil.logError(log, "清除失败记录异常: clientMsgId={}", e, clientMsgId);
         }
     }
 
