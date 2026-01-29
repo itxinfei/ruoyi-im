@@ -272,13 +272,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         String cacheKey = "contact:list:" + userId;
         imRedisUtil.delete(cacheKey);
     }
-
-    /**
-     * 批量获取用户信息，避免N+1查询问题
-     * 
-     * @param userIds 用户ID列表
-     * @return 用户ID -> 用户信息的映射
-     */
+    
     /**
      * 批量获取用户信息，避免N+1查询问题
      * 
