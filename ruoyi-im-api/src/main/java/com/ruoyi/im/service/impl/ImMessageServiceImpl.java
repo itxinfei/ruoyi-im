@@ -158,8 +158,43 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 实际执行发送消息的逻辑
      * 支持消息发送状态追踪
      */
-    private ImMessageVO doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId, ImUser sender,
-            String clientMsgId) {
+    private ImMessageVO doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId,
+                                       ImUser sender, String clientMsgId) {
+        // 1. 创建并保存消息
+        ImMessage message = createAndSaveMessage(request, userId, conversationId, clientMsgId);
+
+        // 2. 记录客户端消息ID（用于幂等性）
+        if (clientMsgId != null && !clientMsgId.isEmpty()) {
+            redisUtil.recordClientMsgId(clientMsgId, message.getId());
+        }
+
+        // 3. 更新会话最后消息信息
+        updateConversationLastMessage(conversationId, message);
+
+        // 4. 处理未读计数
+        handleUnreadCount(conversationId, userId);
+
+        // 5. 处理@提及功能
+        processMentions(request, conversationId, message.getId(), userId);
+
+        // 6. 记录审计日志
+        AuditLogUtil.logSendMessage(userId, message.getId(), conversationId, true);
+
+        // 7. 发布群组消息事件（触发机器人回复）
+        publishGroupMessageEvent(conversationId, message, sender);
+
+        // 8. 广播消息到会话成员
+        broadcastService.broadcastMessageToConversation(conversationId, message.getId(), sender);
+
+        // 9. 构建返回VO
+        return buildMessageVO(message, sender);
+    }
+
+    /**
+     * 创建并保存消息实体
+     */
+    private ImMessage createAndSaveMessage(ImMessageSendRequest request, Long userId, Long conversationId,
+                                           String clientMsgId) {
         ImMessage message = new ImMessage();
         message.setConversationId(conversationId);
         message.setSenderId(userId);
@@ -167,53 +202,60 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setMessageType(request.getType());
         message.setReplyToMessageId(request.getReplyToMessageId());
 
+        // XSS防护 + 加密
         String plainContent = request.getContent();
-        // XSS防护：如果是文本消息，进行HTML转义
         if ("TEXT".equalsIgnoreCase(request.getType())) {
             plainContent = HtmlUtil.escape(plainContent);
         }
+        message.setContent(encryptionUtil.encryptMessage(plainContent));
 
-        String contentToSave = encryptionUtil.encryptMessage(plainContent);
-        message.setContent(contentToSave);
         message.setIsRevoked(0);
         message.setCreateTime(LocalDateTime.now());
         message.setUpdateTime(LocalDateTime.now());
-
         message.setClientMsgId(clientMsgId);
         message.setSendStatus("SENDING");
         message.setSendRetryCount(0);
         message.setDeliveredTime(LocalDateTime.now());
 
         imMessageMapper.insertImMessage(message);
+        return message;
+    }
 
-        if (clientMsgId != null && !clientMsgId.isEmpty()) {
-            redisUtil.recordClientMsgId(clientMsgId, message.getId());
-        }
-
+    /**
+     * 更新会话的最后消息信息
+     */
+    private void updateConversationLastMessage(Long conversationId, ImMessage message) {
         ImConversation conversationUpdate = new ImConversation();
         conversationUpdate.setId(conversationId);
         conversationUpdate.setLastMessageId(message.getId());
         conversationUpdate.setLastMessageTime(message.getCreateTime());
         conversationUpdate.setUpdateTime(LocalDateTime.now());
         imConversationMapper.updateById(conversationUpdate);
+    }
 
+    /**
+     * 处理会话成员的未读计数
+     */
+    private void handleUnreadCount(Long conversationId, Long senderId) {
         List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
                 .selectByConversationId(conversationId);
-
         boolean shouldEvictCache = members.size() <= 20;
 
         for (com.ruoyi.im.domain.ImConversationMember member : members) {
-            if (!member.getUserId().equals(userId)) {
+            if (!member.getUserId().equals(senderId)) {
                 imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
-
                 if (shouldEvictCache) {
                     redisUtil.delete("conversation:list:" + member.getUserId());
                 }
             }
         }
+        redisUtil.delete("conversation:list:" + senderId);
+    }
 
-        redisUtil.delete("conversation:list:" + userId);
-
+    /**
+     * 处理消息@提及功能
+     */
+    private void processMentions(ImMessageSendRequest request, Long conversationId, Long messageId, Long senderId) {
         ImMentionInfo mentionInfo = request.getMentionInfo();
         if (mentionInfo == null && request.getContent() != null) {
             mentionInfo = messageMentionService.parseMentions(request.getContent());
@@ -222,10 +264,35 @@ public class ImMessageServiceImpl implements ImMessageService {
         if (mentionInfo != null
                 && (mentionInfo.getUserIds() != null || Boolean.TRUE.equals(mentionInfo.getMentionAll()))) {
             mentionInfo.setConversationId(conversationId);
-            messageMentionService.createMentions(message.getId(), mentionInfo, userId);
+            messageMentionService.createMentions(messageId, mentionInfo, senderId);
         }
+    }
 
-        AuditLogUtil.logSendMessage(userId, message.getId(), conversationId, true);
+    /**
+     * 发布群组消息事件（触发机器人自动回复）
+     */
+    private void publishGroupMessageEvent(Long conversationId, ImMessage message, ImUser sender) {
+        ImConversation conversation = imConversationMapper.selectById(conversationId);
+        if (conversation != null && "GROUP".equalsIgnoreCase(conversation.getType())) {
+            Long groupId = conversation.getTargetId();
+            if (groupId != null && "TEXT".equalsIgnoreCase(message.getMessageType())) {
+                try {
+                    String plainContent = encryptionUtil.decryptMessage(message.getContent());
+                    eventPublisher.publishEvent(
+                            new BotMessageListener.GroupMessageEvent(conversationId, groupId, sender.getId(), plainContent)
+                    );
+                } catch (Exception e) {
+                    log.error("发布群组消息事件失败: groupId={}", groupId, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * 构建消息返回VO
+     */
+    private ImMessageVO buildMessageVO(ImMessage message, ImUser sender) {
+        String plainContent = encryptionUtil.decryptMessage(message.getContent());
 
         ImMessageVO vo = new ImMessageVO();
         BeanUtils.copyProperties(message, vo);
@@ -236,68 +303,79 @@ public class ImMessageServiceImpl implements ImMessageService {
         vo.setSenderAvatar(sender.getAvatar());
         vo.setSendTime(message.getCreateTime());
         vo.setStatus(1);
-
-        // 如果是群组消息，发布群组消息事件触发机器人自动回复
-        ImConversation conversation = imConversationMapper.selectById(conversationId);
-        if (conversation != null && "GROUP".equalsIgnoreCase(conversation.getType())) {
-            Long groupId = conversation.getTargetId();
-            if (groupId != null && "TEXT".equalsIgnoreCase(message.getMessageType())) {
-                try {
-                    eventPublisher.publishEvent(
-                            new BotMessageListener.GroupMessageEvent(conversationId, groupId, userId, plainContent)
-                    );
-                } catch (Exception e) {
-                    log.error("发布群组消息事件失败: groupId={}", groupId, e);
-                }
-            }
-        }
-
-        // 异步广播消息
-        broadcastService.broadcastMessageToConversation(conversationId, message.getId(), sender);
-
         return vo;
     }
 
     @Override
     public List<ImMessageVO> getMessages(Long conversationId, Long userId, Long lastId, Integer limit) {
-        // 调试日志：记录接收到的 userId
         log.info("getMessages 被调用 - conversationId={}, userId={}, lastId={}, limit={}",
                 conversationId, userId, lastId, limit);
 
-        // 权限检查：验证用户是否是会话成员
+        // 1. 权限检查
+        validateConversationAccess(conversationId, userId);
+
+        // 2. 参数校验和默认值
+        limit = validateAndNormalizeLimit(limit);
+
+        // 3. 查询消息列表
+        List<ImMessage> messageList = queryMessages(conversationId, lastId, limit);
+        if (messageList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 4. 批量加载相关数据
+        MessageBatchData batchData = loadMessageBatchData(messageList);
+
+        // 5. 构建VO列表
+        List<ImMessageVO> voList = buildMessageVOList(messageList, batchData, userId);
+
+        // 6. 反转列表（SQL返回降序，前端需要时间顺序）
+        java.util.Collections.reverse(voList);
+
+        return voList;
+    }
+
+    /**
+     * 验证用户是否有权访问会话消息
+     */
+    private void validateConversationAccess(Long conversationId, Long userId) {
         ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null || (member.getIsDeleted() != null && member.getIsDeleted() == 1)) {
             throw new BusinessException("无权查看该会话消息");
         }
+    }
 
-        List<ImMessageVO> voList = new ArrayList<>();
-
-        // 参数校验和默认值
+    /**
+     * 校验并规范化分页参数
+     */
+    private int validateAndNormalizeLimit(Integer limit) {
         if (limit == null || limit <= 0) {
-            limit = 20;
+            return 20;
         }
-        if (limit > 100) {
-            limit = 100; // 限制最大返回数量
-        }
+        return Math.min(limit, 100);
+    }
 
-        // 构建查询条件
+    /**
+     * 查询消息列表
+     */
+    private List<ImMessage> queryMessages(Long conversationId, Long lastId, int limit) {
         ImMessage query = new ImMessage();
         query.setConversationId(conversationId);
-
-        // 如果指定了lastId，只查询ID小于lastId的消息（用于向上翻页）
         if (lastId != null && lastId > 0) {
             query.setId(lastId);
-            // 设置查询条件，需要在Mapper XML中实现 lt 条件
         }
-
-        // 限制查询数量
         query.getParams().put("limit", limit);
+        return imMessageMapper.selectImMessageList(query);
+    }
 
-        List<ImMessage> messageList = imMessageMapper.selectImMessageList(query);
-
-        // 优化：批量查询发送者信息，避免N+1查询问题
+    /**
+     * 批量加载消息相关数据（避免N+1查询）
+     */
+    private MessageBatchData loadMessageBatchData(List<ImMessage> messageList) {
         java.util.Set<Long> senderIds = new java.util.HashSet<>();
         java.util.Set<Long> replyToMessageIds = new java.util.HashSet<>();
+
+        // 收集ID
         for (ImMessage message : messageList) {
             senderIds.add(message.getSenderId());
             if (message.getReplyToMessageId() != null && message.getReplyToMessageId() > 0) {
@@ -314,43 +392,49 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         }
 
-        // 批量查询被回复的消息（用于获取其发送者信息）
-        java.util.Set<Long> replyToSenderIds = new java.util.HashSet<>();
+        // 批量查询被回复的消息
         java.util.Map<Long, ImMessage> replyToMessageMap = new java.util.HashMap<>();
         for (Long replyToId : replyToMessageIds) {
             ImMessage replyToMsg = imMessageMapper.selectImMessageById(replyToId);
             if (replyToMsg != null) {
                 replyToMessageMap.put(replyToId, replyToMsg);
-                if (replyToMsg.getSenderId() != null) {
-                    replyToSenderIds.add(replyToMsg.getSenderId());
+                // 补充被回复消息的发送者信息
+                if (replyToMsg.getSenderId() != null && !userMap.containsKey(replyToMsg.getSenderId())) {
+                    ImUser replyUser = imUserMapper.selectImUserById(replyToMsg.getSenderId());
+                    if (replyUser != null) {
+                        userMap.put(replyUser.getId(), replyUser);
+                    }
                 }
             }
         }
 
-        // 批量查询被回复消息的发送者信息
-        if (!replyToSenderIds.isEmpty()) {
-            List<ImUser> replyUsers = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(replyToSenderIds));
-            for (ImUser user : replyUsers) {
-                userMap.put(user.getId(), user);
-            }
-        }
+        return new MessageBatchData(userMap, replyToMessageMap);
+    }
+
+    /**
+     * 构建消息VO列表
+     */
+    private List<ImMessageVO> buildMessageVOList(List<ImMessage> messageList,
+                                                  MessageBatchData batchData, Long userId) {
+        List<ImMessageVO> voList = new ArrayList<>();
 
         for (ImMessage message : messageList) {
             ImMessageVO vo = new ImMessageVO();
             BeanUtils.copyProperties(message, vo);
 
+            // 解密内容
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
             vo.setContent(decryptedContent);
             vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
 
-            // 从Map中获取发送者信息（避免重复查询）
-            ImUser sender = userMap.get(message.getSenderId());
+            // 设置发送者信息
+            ImUser sender = batchData.userMap.get(message.getSenderId());
             if (sender != null) {
                 vo.setSenderName(sender.getNickname());
                 vo.setSenderAvatar(sender.getAvatar());
             }
 
-            // 设置 isSelf 并记录调试日志
+            // 设置是否为自己发送
             boolean isSelf = message.getSenderId().equals(userId);
             vo.setIsSelf(isSelf);
             log.debug("消息 isSelf 判断 - messageId={}, senderId={}, userId={}, isSelf={}, senderName={}",
@@ -360,17 +444,27 @@ public class ImMessageServiceImpl implements ImMessageService {
             if (message.getReplyToMessageId() != null && message.getReplyToMessageId() > 0) {
                 vo.setReplyToMessageId(message.getReplyToMessageId());
                 ImMessageVO.QuotedMessageVO quotedMessage = buildQuotedMessageFromMap(
-                        message.getReplyToMessageId(), replyToMessageMap, userMap);
+                        message.getReplyToMessageId(), batchData.replyToMessageMap, batchData.userMap);
                 vo.setQuotedMessage(quotedMessage);
             }
 
             voList.add(vo);
         }
 
-        // 重要：SQL返回的是按ID降序（最新的在前），需要反转以便前端按时间顺序显示
-        java.util.Collections.reverse(voList);
-
         return voList;
+    }
+
+    /**
+     * 消息批量数据容器
+     */
+    private static class MessageBatchData {
+        final java.util.Map<Long, ImUser> userMap;
+        final java.util.Map<Long, ImMessage> replyToMessageMap;
+
+        MessageBatchData(java.util.Map<Long, ImUser> userMap, java.util.Map<Long, ImMessage> replyToMessageMap) {
+            this.userMap = userMap;
+            this.replyToMessageMap = replyToMessageMap;
+        }
     }
 
     /**

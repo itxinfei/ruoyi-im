@@ -74,38 +74,62 @@ public class ImConversationServiceImpl implements ImConversationService {
      * @return 会话列表
      */
     private List<ImConversationVO> getUserConversationsOptimized(Long userId) {
-        String cacheKey = "conversation:list:" + userId;
-
-        // 尝试从缓存获取
-        @SuppressWarnings("unchecked")
-        List<ImConversationVO> cachedList = (List<ImConversationVO>) imRedisUtil.get(cacheKey);
+        // 1. 尝试从缓存获取
+        List<ImConversationVO> cachedList = tryGetFromCache(userId);
         if (cachedList != null) {
             return cachedList;
         }
 
-        // 批量查询：一次性获取会话和成员信息
+        // 2. 查询用户会话
         List<ImConversationVO> conversations = imConversationMapper.selectUserConversationsWithMembers(userId);
         if (conversations == null || conversations.isEmpty()) {
             return new java.util.ArrayList<>();
         }
 
-        // 收集所有需要批量查询的ID
+        // 3. 批量加载相关数据
+        BatchData batchData = loadBatchData(conversations, userId);
+
+        // 4. 组装VO数据
+        List<ImConversationVO> voList = assembleConversationVOs(conversations, batchData, userId);
+
+        // 5. 存入缓存
+        saveToCache(userId, voList);
+
+        return voList;
+    }
+
+    /**
+     * 尝试从缓存获取会话列表
+     */
+    private List<ImConversationVO> tryGetFromCache(Long userId) {
+        String cacheKey = "conversation:list:" + userId;
+        @SuppressWarnings("unchecked")
+        List<ImConversationVO> cachedList = (List<ImConversationVO>) imRedisUtil.get(cacheKey);
+        return cachedList;
+    }
+
+    /**
+     * 批量加载会话相关数据（避免N+1查询）
+     */
+    private BatchData loadBatchData(List<ImConversationVO> conversations, Long userId) {
         java.util.Set<Long> conversationIds = new java.util.HashSet<>();
         java.util.Set<Long> userIds = new java.util.HashSet<>();
         java.util.Set<Long> groupIds = new java.util.HashSet<>();
 
+        // 收集所有需要批量查询的ID
         for (ImConversationVO vo : conversations) {
             conversationIds.add(vo.getId());
             if ("PRIVATE".equalsIgnoreCase(vo.getType()) || "SINGLE".equalsIgnoreCase(vo.getType())) {
-                userIds.add(getPeerUserId(vo.getId(), userId));
-            } else if ("GROUP".equalsIgnoreCase(vo.getType())) {
-                if (vo.getTargetId() != null) {
-                    groupIds.add(vo.getTargetId());
+                Long peerUserId = getPeerUserId(vo.getId(), userId);
+                if (peerUserId != null) {
+                    userIds.add(peerUserId);
                 }
+            } else if ("GROUP".equalsIgnoreCase(vo.getType()) && vo.getTargetId() != null) {
+                groupIds.add(vo.getTargetId());
             }
         }
 
-        // 批量查询：一次性获取所有需要的数据（3个查询替代N个查询）
+        // 批量查询最后消息
         java.util.Map<Long, ImMessage> lastMessageMap = new java.util.HashMap<>();
         if (!conversationIds.isEmpty()) {
             List<ImMessage> lastMessages = imMessageMapper
@@ -115,6 +139,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             }
         }
 
+        // 批量查询用户信息
         java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();
         if (!userIds.isEmpty()) {
             List<ImUser> users = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(userIds));
@@ -123,6 +148,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             }
         }
 
+        // 批量查询群组信息
         java.util.Map<Long, ImGroup> groupMap = new java.util.HashMap<>();
         if (!groupIds.isEmpty()) {
             List<ImGroup> groups = imGroupMapper.selectGroupsByIds(new java.util.ArrayList<>(groupIds));
@@ -131,107 +157,181 @@ public class ImConversationServiceImpl implements ImConversationService {
             }
         }
 
-        // 组装VO数据
+        return new BatchData(lastMessageMap, userMap, groupMap);
+    }
+
+    /**
+     * 组装会话VO列表
+     */
+    private List<ImConversationVO> assembleConversationVOs(List<ImConversationVO> conversations,
+                                                            BatchData batchData, Long userId) {
         List<ImConversationVO> voList = new ArrayList<>();
         java.util.Map<Long, ImConversationVO> privateConversationMap = new java.util.HashMap<>();
 
         for (ImConversationVO vo : conversations) {
             // 设置最后消息
-            ImMessage lastMessage = lastMessageMap.get(vo.getId());
-            if (lastMessage != null) {
-                com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
-                BeanUtils.copyProperties(lastMessage, messageVO);
-                // 解密消息内容
-                if (lastMessage.getContent() != null) {
-                    try {
-                        messageVO.setContent(encryptionUtil.decryptMessage(lastMessage.getContent()));
-                    } catch (Exception e) {
-                        log.warn("消息解密失败: messageId={}, error={}", lastMessage.getId(), e.getMessage());
-                        messageVO.setContent("[加密消息]");
-                    }
-                }
-                vo.setLastMessage(messageVO);
-                vo.setLastMessageTime(lastMessage.getCreateTime());
-            }
+            setLastMessage(vo, batchData.lastMessageMap);
 
-            // 设置会话相关信息
+            // 根据会话类型处理
             if ("PRIVATE".equalsIgnoreCase(vo.getType()) || "SINGLE".equalsIgnoreCase(vo.getType())) {
-                // 私聊会话，从Map中获取对方用户信息（已批量查询）
-                Long peerUserId = getPeerUserId(vo.getId(), userId);
-                if (peerUserId != null) {
-                    ImUser peerUser = userMap.get(peerUserId);
-                    if (peerUser != null) {
-                        String peerName = peerUser.getNickname() != null ? peerUser.getNickname()
-                                : peerUser.getUsername();
-                        String peerAvatar = peerUser.getAvatar();
-                        boolean peerOnline = imRedisUtil.isOnlineUser(peerUserId);
-                        vo.setPeerName(peerName);
-                        vo.setPeerAvatar(peerAvatar);
-                        vo.setPeerOnline(peerOnline);
-                        vo.setName(peerName);
-                        vo.setAvatar(peerAvatar);
-
-                        // 私聊会话去重
-                        ImConversationVO existing = privateConversationMap.get(peerUserId);
-                        if (existing == null) {
-                            privateConversationMap.put(peerUserId, vo);
-                        } else {
-                            // 比较最后消息时间，保留较新的
-                            if (vo.getLastMessageTime() != null &&
-                                    (existing.getLastMessageTime() == null ||
-                                            vo.getLastMessageTime().isAfter(existing.getLastMessageTime()))) {
-                                privateConversationMap.put(peerUserId, vo);
-                            }
-                        }
-                    }
-                }
+                processPrivateConversation(vo, userId, batchData.userMap, privateConversationMap);
             } else if ("GROUP".equalsIgnoreCase(vo.getType())) {
-                // 群聊会话，从Map中获取群组信息（已批量查询）
-                Long groupId = vo.getTargetId();
-                if (groupId != null) {
-                    ImGroup group = groupMap.get(groupId);
-                    if (group != null) {
-                        String groupName = group.getName();
-                        String groupAvatar = group.getAvatar();
-                        if (groupAvatar == null || groupAvatar.isEmpty()) {
-                            groupAvatar = "/avatar/group_default.png";
-                        }
-                        vo.setPeerName(groupName);
-                        vo.setPeerAvatar(groupAvatar);
-                        vo.setName(groupName);
-                        vo.setAvatar(groupAvatar);
-                    } else {
-                        // 群组信息获取失败，使用默认值
-                        String groupName = vo.getName();
-                        if (groupName == null || groupName.isEmpty()) {
-                            groupName = "群聊";
-                        }
-                        vo.setPeerName(groupName);
-                        vo.setPeerAvatar("/avatar/group_default.png");
-                        vo.setName(groupName);
-                        vo.setAvatar("/avatar/group_default.png");
-                    }
-                }
-                // 群聊会话直接添加到结果列表
-                voList.add(vo);
+                processGroupConversation(vo, batchData.groupMap, voList);
             }
         }
 
-        // 将去重后的私聊会话添加到结果列表
+        // 合并私聊会话去重结果
         voList.addAll(privateConversationMap.values());
 
         // 按最后更新时间排序
+        sortConversations(voList);
+
+        return voList;
+    }
+
+    /**
+     * 设置会话的最后消息
+     */
+    private void setLastMessage(ImConversationVO vo, java.util.Map<Long, ImMessage> lastMessageMap) {
+        ImMessage lastMessage = lastMessageMap.get(vo.getId());
+        if (lastMessage != null) {
+            com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
+            BeanUtils.copyProperties(lastMessage, messageVO);
+            // 解密消息内容
+            if (lastMessage.getContent() != null) {
+                try {
+                    messageVO.setContent(encryptionUtil.decryptMessage(lastMessage.getContent()));
+                } catch (Exception e) {
+                    log.warn("消息解密失败: messageId={}, error={}", lastMessage.getId(), e.getMessage());
+                    messageVO.setContent("[加密消息]");
+                }
+            }
+            vo.setLastMessage(messageVO);
+            vo.setLastMessageTime(lastMessage.getCreateTime());
+        }
+    }
+
+    /**
+     * 处理私聊会话
+     */
+    private void processPrivateConversation(ImConversationVO vo, Long userId,
+                                           java.util.Map<Long, ImUser> userMap,
+                                           java.util.Map<Long, ImConversationVO> privateConversationMap) {
+        Long peerUserId = getPeerUserId(vo.getId(), userId);
+        if (peerUserId == null) {
+            return;
+        }
+
+        ImUser peerUser = userMap.get(peerUserId);
+        if (peerUser == null) {
+            return;
+        }
+
+        String peerName = peerUser.getNickname() != null ? peerUser.getNickname() : peerUser.getUsername();
+        String peerAvatar = peerUser.getAvatar();
+        boolean peerOnline = imRedisUtil.isOnlineUser(peerUserId);
+
+        vo.setPeerName(peerName);
+        vo.setPeerAvatar(peerAvatar);
+        vo.setPeerOnline(peerOnline);
+        vo.setName(peerName);
+        vo.setAvatar(peerAvatar);
+
+        // 私聊会话去重（保留最新的）
+        deduplicatePrivateConversation(privateConversationMap, peerUserId, vo);
+    }
+
+    /**
+     * 私聊会话去重，保留最后消息时间较新的
+     */
+    private void deduplicatePrivateConversation(java.util.Map<Long, ImConversationVO> privateConversationMap,
+                                               Long peerUserId, ImConversationVO newVo) {
+        ImConversationVO existing = privateConversationMap.get(peerUserId);
+        if (existing == null) {
+            privateConversationMap.put(peerUserId, newVo);
+        } else {
+            // 比较最后消息时间，保留较新的
+            if (newVo.getLastMessageTime() != null &&
+                    (existing.getLastMessageTime() == null ||
+                            newVo.getLastMessageTime().isAfter(existing.getLastMessageTime()))) {
+                privateConversationMap.put(peerUserId, newVo);
+            }
+        }
+    }
+
+    /**
+     * 处理群聊会话
+     */
+    private void processGroupConversation(ImConversationVO vo, java.util.Map<Long, ImGroup> groupMap,
+                                         List<ImConversationVO> voList) {
+        Long groupId = vo.getTargetId();
+        if (groupId == null) {
+            return;
+        }
+
+        ImGroup group = groupMap.get(groupId);
+        String groupName;
+        String groupAvatar;
+
+        if (group != null) {
+            groupName = group.getName();
+            groupAvatar = group.getAvatar();
+            if (groupAvatar == null || groupAvatar.isEmpty()) {
+                groupAvatar = "/avatar/group_default.png";
+            }
+        } else {
+            // 群组信息获取失败，使用默认值
+            groupName = vo.getName();
+            if (groupName == null || groupName.isEmpty()) {
+                groupName = "群聊";
+            }
+            groupAvatar = "/avatar/group_default.png";
+        }
+
+        vo.setPeerName(groupName);
+        vo.setPeerAvatar(groupAvatar);
+        vo.setName(groupName);
+        vo.setAvatar(groupAvatar);
+
+        // 群聊会话直接添加到结果列表
+        voList.add(vo);
+    }
+
+    /**
+     * 按最后更新时间排序会话列表
+     */
+    private void sortConversations(List<ImConversationVO> voList) {
         voList.sort((a, b) -> {
             if (a.getLastMessageTime() != null && b.getLastMessageTime() != null) {
                 return b.getLastMessageTime().compareTo(a.getLastMessageTime());
             }
             return b.getUpdateTime().compareTo(a.getUpdateTime());
         });
+    }
 
-        // 存入缓存，过期时间5分钟
+    /**
+     * 保存会话列表到缓存
+     */
+    private void saveToCache(Long userId, List<ImConversationVO> voList) {
+        String cacheKey = "conversation:list:" + userId;
         imRedisUtil.set(cacheKey, voList, 5, java.util.concurrent.TimeUnit.MINUTES);
+    }
 
-        return voList;
+    /**
+     * 批量数据容器类
+     */
+    private static class BatchData {
+        final java.util.Map<Long, ImMessage> lastMessageMap;
+        final java.util.Map<Long, ImUser> userMap;
+        final java.util.Map<Long, ImGroup> groupMap;
+
+        BatchData(java.util.Map<Long, ImMessage> lastMessageMap,
+                 java.util.Map<Long, ImUser> userMap,
+                 java.util.Map<Long, ImGroup> groupMap) {
+            this.lastMessageMap = lastMessageMap;
+            this.userMap = userMap;
+            this.groupMap = groupMap;
+        }
     }
 
     private void clearConversationListCache(Long userId) {
