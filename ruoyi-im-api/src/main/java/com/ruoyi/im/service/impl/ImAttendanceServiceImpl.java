@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImAttendance;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImAttendanceMapper;
@@ -186,11 +187,11 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
             throw new BusinessException("无权限操作");
         }
 
-        if ("PENDING".equals(attendance.getApproveStatus())) {
+        if (StatusConstants.Approval.PENDING.equals(attendance.getApproveStatus())) {
             throw new BusinessException("已有审批中的申请");
         }
 
-        attendance.setApproveStatus("PENDING");
+        attendance.setApproveStatus(StatusConstants.Approval.PENDING);
         attendance.setRemark(attendance.getRemark() != null ? attendance.getRemark() + ";补卡原因:" + reason : "补卡原因:" + reason);
         attendance.setUpdateTime(LocalDateTime.now());
 

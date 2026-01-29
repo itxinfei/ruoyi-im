@@ -152,7 +152,7 @@
 import { ref, computed, watch } from 'vue'
 import { Close, Plus } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
-import { getGroup, getGroupMembers, leaveGroup } from '@/api/im/group'
+import { getGroup, getGroupMembers, leaveGroup, removeGroupMember } from '@/api/im/group'
 import { getUserInfo } from '@/api/im/user'
 import { addTokenToUrl } from '@/utils/file'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -244,10 +244,16 @@ const handleRemoveMember = async (member) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消'
     })
-    // TODO: 调用移除成员 API
-    ElMessage.info('移除功能开发中...')
-  } catch {
-    // 用户取消
+    const gId = props.session.targetId || props.session.id
+    await removeGroupMember(gId, [member.id])
+    ElMessage.success('已移除成员')
+    // 刷新成员列表
+    loadDetail()
+  } catch (err) {
+    // 用户取消或请求失败
+    if (err !== 'cancel') {
+      ElMessage.error('移除失败，请重试')
+    }
   }
 }
 

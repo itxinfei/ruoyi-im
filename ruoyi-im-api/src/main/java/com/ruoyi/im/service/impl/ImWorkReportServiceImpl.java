@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.ruoyi.im.constants.StatusConstants;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImUser;
@@ -392,7 +393,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
             return "已完成";
         } else if ("IN_PROGRESS".equals(status)) {
             return "进行中";
-        } else if ("PENDING".equals(status)) {
+        } else if (StatusConstants.Approval.PENDING.equals(status)) {
             return "待处理";
         }
         return status;

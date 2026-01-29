@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImCloudFile;
 import com.ruoyi.im.domain.ImCloudFileShare;
@@ -616,7 +617,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             throw new BusinessException("无权限操作此分享");
         }
 
-        share.setStatus("CANCELLED");
+        share.setStatus(StatusConstants.Task.CANCELLED);
         share.setUpdateTime(LocalDateTime.now());
         cloudFileShareMapper.updateById(share);
 
@@ -658,7 +659,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             throw new BusinessException("分享不存在或已失效");
         }
 
-        if ("CANCELLED".equals(share.getStatus())) {
+        if (StatusConstants.Task.CANCELLED.equals(share.getStatus())) {
             throw new BusinessException("分享已取消");
         }
 

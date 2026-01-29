@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageMarker;
@@ -98,7 +99,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         marker.setUserId(userId);
         marker.setMarkerType(markerType);
         marker.setColor(color);
-        marker.setTodoStatus("PENDING");
+        marker.setTodoStatus(StatusConstants.Task.PENDING);
         marker.setCreateTime(LocalDateTime.now());
         marker.setUpdateTime(LocalDateTime.now());
 
@@ -166,7 +167,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         marker.setMarkerType("TODO");
         marker.setRemindTime(remindTime);
         marker.setRemark(remark);
-        marker.setTodoStatus("PENDING");
+        marker.setTodoStatus(StatusConstants.Task.PENDING);
         marker.setCreateTime(LocalDateTime.now());
         marker.setUpdateTime(LocalDateTime.now());
 
@@ -222,7 +223,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
             throw new BusinessException("无权限操作此待办");
         }
 
-        marker.setTodoStatus("PENDING");
+        marker.setTodoStatus(StatusConstants.Task.PENDING);
         marker.setDoneTime(null);
         marker.setUpdateTime(LocalDateTime.now());
         messageMarkerMapper.updateById(marker);

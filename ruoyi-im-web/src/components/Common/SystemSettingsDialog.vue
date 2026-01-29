@@ -355,12 +355,11 @@ onMounted(() => {
 <style scoped lang="scss">
 // Dialog Styles Overlay
 :deep(.el-dialog) {
-  /* 扁平化：去掉圆角、阴影和顶部外边距 */
-  border-radius: 0;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: none;
-  margin-top: 0 !important;
-  background: transparent;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  margin-top: 5vh !important;
+  background: var(--dt-bg-body);
 }
 
 :deep(.el-dialog__header) {
@@ -369,8 +368,7 @@ onMounted(() => {
 
 :deep(.el-dialog__body) {
   padding: 0;
-  /* 合理高度，桌面下 720px，移动端使用全屏样式 */
-  height: 720px;
+  height: 680px;
   background: var(--dt-bg-body);
 }
 
@@ -378,30 +376,31 @@ onMounted(() => {
   display: flex;
   height: 100%;
   width: 100%;
-  margin: 0; /* 去除外边距，方正布局 */
+  margin: 0;
   padding: 0;
   box-sizing: border-box;
   background: var(--dt-bg-body);
 }
 
-// Sidebar
+// Sidebar - 优化后的侧边栏
 .settings-sidebar {
-  width: 260px;
-  background: transparent;
-  border-right: 1px solid transparent;
+  width: 200px;
+  background: var(--dt-bg-card);
+  border-right: 1px solid var(--dt-border-light);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  transition: width 0.2s ease;
+  transition: width 0.3s ease;
   position: relative;
 }
 
 .sidebar-header {
-  height: 64px;
+  height: 60px;
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid transparent;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card);
 }
 
 .app-brand {
@@ -410,30 +409,29 @@ onMounted(() => {
 }
 
 .brand-text {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--dt-text-primary);
-  letter-spacing: -0.3px;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 12px 12px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  height: 44px;
+  height: 40px;
   padding: 0 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   color: var(--dt-text-secondary);
-  transition: all 0.16s ease;
+  transition: all 0.2s ease;
   user-select: none;
   font-size: 14px;
   font-weight: 500;
@@ -445,25 +443,27 @@ onMounted(() => {
 }
 
 .nav-item.active {
-  background: var(--dt-brand-color);
-  color: #fff;
+  background: rgba(22, 119, 255, 0.1);
+  color: var(--dt-brand-color);
   font-weight: 600;
 }
 
 .nav-icon {
-  font-size: 20px;
+  font-size: 18px;
   margin-right: 10px;
+  width: 20px;
+  text-align: center;
 }
 
 .nav-label {
   flex: 1;
+  font-size: 14px;
 }
 
 .sidebar-footer {
   padding: 12px;
-  border-top: 1px solid transparent;
-  display: flex;
-  align-items: center;
+  border-top: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card);
 }
 
 .user-info {
@@ -471,9 +471,9 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.16s ease;
+  transition: background 0.2s ease;
   width: calc(100% - 24px);
 }
 
@@ -482,10 +482,10 @@ onMounted(() => {
 }
 
 .user-info.active {
-  background: var(--dt-brand-color);
+  background: rgba(22, 119, 255, 0.1);
   
   .user-name {
-    color: #fff;
+    color: var(--dt-brand-color);
   }
 }
 
@@ -498,7 +498,7 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-// Main Content
+// Main Content - 优化后的主内容区
 .settings-main {
   flex: 1;
   display: flex;
@@ -508,17 +508,18 @@ onMounted(() => {
 }
 
 .main-header {
-  height: 56px;
-  padding: 0 16px;
+  height: 60px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-body);
   flex-shrink: 0;
 }
 
 .header-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--dt-text-primary);
   margin: 0;
@@ -527,28 +528,29 @@ onMounted(() => {
 .header-subtitle {
   font-size: 12px;
   color: var(--dt-text-secondary);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .close-btn {
   font-size: 18px;
   color: var(--dt-text-secondary);
+  
+  &:hover {
+    color: var(--dt-text-primary);
+  }
 }
 
 .main-content {
   flex: 1;
-  padding: 0; /* 取消整体边距 */
+  padding: 24px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  @media (max-width: 768px) {
-    padding: 8px;
-  }
   
   // 优化滚动条样式
   &::-webkit-scrollbar {
@@ -560,40 +562,44 @@ onMounted(() => {
   }
   
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.15);
     border-radius: 3px;
     
     &:hover {
-      background-color: rgba(0, 0, 0, 0.3);
+      background-color: rgba(0, 0, 0, 0.25);
     }
   }
 }
 
-// 增强的移动端适配
+// 移动端适配
 @media (max-width: 768px) {
+  :deep(.el-dialog) {
+    border-radius: 0;
+    margin: 0 !important;
+    height: 100vh;
+    
+    .el-dialog__body {
+      height: 100vh;
+    }
+  }
+  
   .settings-sidebar {
-    width: 64px; // Collapsed sidebar
+    width: 64px;
     
     .sidebar-header {
       justify-content: center;
       padding: 0;
-      height: 56px; // 稍微减小高度
     }
     
     .nav-item {
       justify-content: center;
       padding: 0;
-      height: 48px; // 增大触摸区域
-      
-      // 添加点击波纹效果
-      &:active {
-        transform: scale(0.95);
-      }
+      height: 48px;
     }
     
     .nav-icon {
       margin-right: 0;
-      font-size: 22px;
+      font-size: 20px;
     }
     
     .nav-label {
@@ -602,32 +608,21 @@ onMounted(() => {
     
     .sidebar-footer {
       justify-content: center;
-      padding: 12px;
+      padding: 8px;
+    }
+    
+    .user-name {
+      display: none;
     }
   }
   
   .main-header {
     padding: 0 16px;
-    height: 56px; // 与侧边栏保持一致
-    
-    .header-title {
-      font-size: 16px;
-    }
+    height: 56px;
   }
   
   .main-content {
     padding: 16px;
-  }
-  
-  // 对话框全屏时的优化
-  :deep(.el-dialog) {
-    height: 100vh;
-    margin: 0 !important;
-    
-    .el-dialog__body {
-      height: 100vh;
-      padding: 0;
-    }
   }
 }
 
@@ -635,14 +630,31 @@ onMounted(() => {
 @media (min-width: 769px) and (max-width: 1024px) {
   .settings-sidebar {
     width: 180px;
-    
-    .nav-label {
-      font-size: 13px;
-    }
   }
   
   .main-content {
-    padding: 24px;
+    padding: 20px;
+  }
+}
+
+// 暗黑模式适配
+.dark {
+  .settings-sidebar {
+    background: var(--dt-bg-card-dark);
+    border-right-color: var(--dt-border-dark);
+  }
+  
+  .sidebar-header,
+  .sidebar-footer {
+    border-color: var(--dt-border-dark);
+  }
+  
+  .nav-item.active {
+    background: rgba(22, 119, 255, 0.2);
+  }
+  
+  .main-header {
+    border-bottom-color: var(--dt-border-dark);
   }
 }
 </style>

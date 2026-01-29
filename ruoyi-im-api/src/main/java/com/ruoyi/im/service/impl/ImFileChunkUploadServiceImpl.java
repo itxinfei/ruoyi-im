@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.domain.ImFileChunkDetail;
 import com.ruoyi.im.domain.ImFileChunkUpload;
@@ -104,7 +105,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             detail.setUploadId(uploadId);
             detail.setChunkNumber(i);
             detail.setChunkSize(chunkSize);
-            detail.setStatus("PENDING");
+            detail.setStatus(StatusConstants.Task.PENDING);
             detail.setRetryCount(0);
             chunkDetails.add(detail);
         }
@@ -289,7 +290,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         }
 
         // 更新状态为已取消
-        chunkUploadMapper.updateStatus(uploadId, "CANCELLED", null, null);
+        chunkUploadMapper.updateStatus(uploadId, StatusConstants.Task.CANCELLED, null, null);
 
         // 删除临时分片文件
         cleanupChunks(uploadId);

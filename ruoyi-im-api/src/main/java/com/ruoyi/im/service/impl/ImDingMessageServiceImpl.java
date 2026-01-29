@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constants.StatusConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImDingMessage;
 import com.ruoyi.im.domain.ImDingReceipt;
@@ -247,7 +248,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             throw new BusinessException("只能取消定时的DING");
         }
 
-        ding.setStatus("CANCELLED");
+        ding.setStatus(StatusConstants.Task.CANCELLED);
         dingMessageMapper.updateById(ding);
     }
 

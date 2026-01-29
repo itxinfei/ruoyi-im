@@ -269,14 +269,17 @@ const handleMemberCommand = (command) => {
   const { action, member } = command
   switch (action) {
     case 'chat':
-      // 发起私聊
-      ElMessage.info(`正在与 ${member.name} 聊天...`)
-      // TODO: 触发切换到私聊会话
+      // 发起私聊 - 触发切换到与该成员的私聊会话
+      emit('start-chat', {
+        type: 'PRIVATE',
+        targetId: member.userId,
+        peerName: member.name,
+        peerAvatar: member.avatar
+      })
       break
     case 'profile':
       // 查看成员资料
-      ElMessage.info(`查看 ${member.name} 的资料...`)
-      // TODO: 打开成员资料弹窗
+      emit('show-member-profile', member)
       break
     case 'setAdmin':
       // 设置/取消管理员
@@ -298,12 +301,16 @@ const handleToggleAdmin = async (member) => {
       isSetAdmin ? '设置管理员' : '取消管理员',
       { type: 'warning' }
     )
-    // TODO: 调用设置管理员 API
+    // 调用设置管理员 API
+    await setGroupAdmin(props.groupId, member.id, isSetAdmin)
     ElMessage.success(isSetAdmin ? '已设置为管理员' : '已取消管理员')
     // 刷新成员列表
     loadGroupDetail()
-  } catch {
-    // 用户取消
+  } catch (err) {
+    // 用户取消或请求失败
+    if (err !== 'cancel') {
+      ElMessage.error('操作失败，请重试')
+    }
   }
 }
 
@@ -315,10 +322,16 @@ const handleRemoveMember = async (member) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消'
     })
-    // TODO: 调用移除成员 API
-    ElMessage.info('移除功能开发中...')
-  } catch {
-    // 用户取消
+    // 调用移除成员 API
+    await removeGroupMember(props.groupId, [member.id])
+    ElMessage.success('已移除成员')
+    // 刷新成员列表
+    loadGroupDetail()
+  } catch (err) {
+    // 用户取消或请求失败
+    if (err !== 'cancel') {
+      ElMessage.error('移除失败，请重试')
+    }
   }
 }
 </script>
