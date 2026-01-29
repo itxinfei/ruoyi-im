@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImQuickReplyMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImQuickReply" id="ImQuickReplyResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="category" column="category"/>
+        <result property="title" column="title"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="useCount" column="use_count"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImQuickReplyVo">
+        select id, user_id, content, category, title, sort_order, use_count, create_time, update_time
+        from im_quick_reply
+    </sql>
+
+    <select id="selectUserReplies" resultMap="ImQuickReplyResult">
+        <include refid="selectImQuickReplyVo"/>
+        where user_id = #{userId} or user_id = 0
+        order by category asc, sort_order asc, use_count desc
+    </select>
+
+    <select id="selectByCategory" resultMap="ImQuickReplyResult">
+        <include refid="selectImQuickReplyVo"/>
+        where category = #{category}
+          and (user_id = #{userId} or user_id = 0)
+        order by sort_order asc, use_count desc
+    </select>
+
+    <select id="selectSystemReplies" resultMap="ImQuickReplyResult">
+        <include refid="selectImQuickReplyVo"/>
+        where user_id = 0
+        order by category asc, sort_order asc
+    </select>
+
+    <update id="incrementUseCount">
+        update im_quick_reply
+        set use_count = use_count + 1,
+            update_time = now()
+        where id = #{id}
+    </update>
+
+</mapper>

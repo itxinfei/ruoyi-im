@@ -347,4 +347,47 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             }
         }
     }
+
+    @Override
+    public void broadcastMeetingInvitation(Long meetingId, Set<Long> targetUserIds, Long inviterId) {
+        try {
+            // 获取邀请人信息
+            com.ruoyi.im.domain.ImUser inviter = imUserMapper.selectImUserById(inviterId);
+
+            // 构建会议邀请消息
+            Map<String, Object> invitationNotification = new HashMap<>();
+            invitationNotification.put("type", "meeting_invitation");
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("meetingId", meetingId);
+            data.put("action", "INVITED");
+            data.put("inviterId", inviterId);
+            if (inviter != null) {
+                data.put("inviterName", inviter.getNickname() != null ? inviter.getNickname() : inviter.getUsername());
+            }
+            data.put("timestamp", System.currentTimeMillis());
+            invitationNotification.put("data", data);
+
+            String messageJson = objectMapper.writeValueAsString(invitationNotification);
+
+            // 发送给目标用户
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            int sentCount = 0;
+            for (Long targetUserId : targetUserIds) {
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        sentCount++;
+                    } catch (Exception e) {
+                        log.error("发送会议邀请给用户失败: userId={}, meetingId={}", targetUserId, meetingId, e);
+                    }
+                }
+            }
+            log.info("会议邀请已推送: meetingId={}, targetCount={}, onlineSent={}",
+                    meetingId, targetUserIds.size(), sentCount);
+        } catch (Exception e) {
+            log.error("广播会议邀请失败: meetingId={}", meetingId, e);
+        }
+    }
 }

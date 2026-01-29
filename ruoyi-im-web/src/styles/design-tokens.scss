@@ -210,23 +210,23 @@
   --dt-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   // ============================================================================
-  // 暗色模式变量 - 简洁暗色
+  // 暗色模式变量 - 简洁暗色 (Updated Palette)
   // ============================================================================
-  --dt-bg-body-dark: #1e1e1e;           // 主背景：深灰
-  --dt-bg-sidebar-dark: #252526;        // 侧边栏：深灰
-  --dt-bg-card-dark: #2d2d2d;           // 卡片背景：中灰
-  --dt-bg-input-dark: #3c3c3c;         // 输入框背景：中灰
-  --dt-bg-hover-dark: #404040;         // 悬停背景：中灰
-  --dt-bg-active-dark: #0958d9;        // 激活状态：蓝色
+  --dt-bg-body-dark: #0f172a;           // 主背景：Slate 900
+  --dt-bg-sidebar-dark: #1e293b;        // 侧边栏：Slate 800
+  --dt-bg-card-dark: #1e293b;           // 卡片背景：Slate 800
+  --dt-bg-input-dark: #334155;         // 输入框背景：Slate 700
+  --dt-bg-hover-dark: #334155;         // 悬停背景：Slate 700
+  --dt-bg-active-dark: #1677ff;        // 激活状态：蓝色
 
-  --dt-text-primary-dark: #ffffff;      // 主要文本：纯白
-  --dt-text-secondary-dark: #cccccc;   // 次要文本：浅灰
-  --dt-text-tertiary-dark: #999999;    // 辅助文本：中灰
-  --dt-text-quaternary-dark: #666666;  // 占位符文本：深灰
-  --dt-text-disabled-dark: #444444;    // 禁用文本：更深灰
+  --dt-text-primary-dark: #f8fafc;      // 主要文本：Slate 50
+  --dt-text-secondary-dark: #cbd5e1;   // 次要文本：Slate 300
+  --dt-text-tertiary-dark: #94a3b8;    // 辅助文本：Slate 400
+  --dt-text-quaternary-dark: #64748b;  // 占位符文本：Slate 500
+  --dt-text-disabled-dark: #475569;    // 禁用文本：Slate 600
 
-  --dt-border-dark: #3e3e42;           // 边框颜色：深灰
-  --dt-border-light-dark: #2d2d2d;     // 浅色边框：中灰
+  --dt-border-dark: #334155;           // 边框颜色：Slate 700
+  --dt-border-light-dark: #1e293b;     // 浅色边框：Slate 800
 
   // Element Plus 暗色适配变量
   --el-bg-color-dark: #2d2d2d;

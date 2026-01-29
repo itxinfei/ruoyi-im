@@ -22,6 +22,33 @@
 
     <!-- 快捷工具栏 - 优化版本 -->
     <div class="quick-toolbar">
+      <!-- 快捷回复条 -->
+      <div v-if="showQuickReplyBar" class="quick-reply-bar">
+        <div class="quick-reply-header">
+          <span class="quick-reply-title">快捷回复</span>
+          <el-icon class="close-btn" @click="showQuickReplyBar = false"><Close /></el-icon>
+        </div>
+        <div class="quick-reply-list">
+          <div
+            v-for="reply in quickReplies.slice(0, 8)"
+            :key="reply.id"
+            class="quick-reply-item"
+            @click="handleUseQuickReply(reply)"
+          >
+            <span class="reply-content">{{ reply.content }}</span>
+          </div>
+          <div v-if="quickReplies.length === 0" class="quick-reply-empty">
+            暂无快捷回复，点击右侧按钮添加
+          </div>
+        </div>
+        <div class="quick-reply-actions">
+          <el-button size="small" text @click="showQuickReplyDialog = true">
+            <el-icon><Edit /></el-icon>
+            管理快捷回复
+          </el-button>
+        </div>
+      </div>
+
       <!-- 常用功能组 -->
       <div class="toolbar-section">
         <el-tooltip content="表情" placement="top">
@@ -260,7 +287,16 @@
     </div>
 
     <!-- 子组件 -->
-    <EmojiPicker v-if="showEmojiPicker" @select="selectEmoji" ref="emojiPickerRef" />
+    <EmojiPicker
+      v-if="showEmojiPicker"
+      @select="selectEmoji"
+      @open-manager="showEmojiManager = true"
+      ref="emojiPickerRef"
+    />
+    <EmojiManager
+      v-model="showEmojiManager"
+      @refresh="handleEmojiRefresh"
+    />
     <AtMemberPicker ref="atMemberPickerRef" :session-id="session?.id" @select="onAtSelect" />
     <CommandPalette
       :show="showCommandPalette"
@@ -279,6 +315,10 @@
       :trigger-message="lastReceivedMessage"
       :position="smartReplyPosition"
       @select="handleSelectSmartReply"
+    />
+    <QuickReplyDialog
+      v-model="showQuickReplyDialog"
+      @refresh="handleQuickReplyRefresh"
     />
     
     <!-- 隐藏的输入元素 -->
@@ -336,15 +376,19 @@ import {
   DataBoard,
   SwitchButton,
   Bell,
-  Position
+  Position,
+  QuickReply
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
+import EmojiManager from '@/components/EmojiManager.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
 import ScreenshotPreview from './ScreenshotPreview.vue'
 import CommandPalette from './CommandPalette.vue'
 import AiSmartReply from './AiSmartReply.vue'
+import QuickReplyDialog from '@/components/QuickReplyDialog.vue'
+import { getQuickReplyList, useQuickReply } from '@/api/im/quickReply'
 
 const props = defineProps({
   session: Object,
@@ -384,6 +428,12 @@ const smartReplyPosition = ref({ x: 0, y: 0 })
 const showCommandPalette = ref(false)
 const commandPalettePosition = ref({ x: 0, y: 0 })
 const activeMenuTab = ref('tools')
+
+// 快捷回复相关
+const quickReplies = ref([])
+const showQuickReplyBar = ref(false)
+const showQuickReplyDialog = ref(false)
+const showEmojiManager = ref(false)
 
 // 拖拽状态
 const isDragOver = ref(false)
@@ -473,11 +523,18 @@ const quickItems = computed(() => [
     shortcut: '/r'
   },
   {
-    key: 'voice-translate',
-    title: '语音转文字',
-    desc: '自动转换语音为文字',
-    icon: 'Microphone',
-    bgColor: '#a0d911'
+    key: 'quick-reply-manage',
+    title: '管理快捷回复',
+    desc: '添加编辑快捷回复',
+    icon: 'Edit',
+    bgColor: '#1890ff'
+  },
+  {
+    key: 'emoji-manage',
+    title: '表情管理',
+    desc: '管理自定义表情',
+    icon: 'FolderOpened',
+    bgColor: '#722ed1'
   },
   {
     key: 'remind',
@@ -485,13 +542,6 @@ const quickItems = computed(() => [
     desc: '设置消息提醒',
     icon: 'Bell',
     bgColor: '#eb2f96'
-  },
-  {
-    key: 'encrypt',
-    title: '加密消息',
-    desc: '发送端到端加密消息',
-    icon: 'Lock',
-    bgColor: '#2f54eb'
   }
 ])
 
@@ -511,6 +561,55 @@ const getSendHint = () => {
     return 'Ctrl + Enter 发送'
   }
   return 'Enter 发送，Shift + Enter 换行'
+}
+
+// 加载快捷回复
+const loadQuickReplies = async () => {
+  try {
+    const res = await getQuickReplyList()
+    if (res.code === 200) {
+      quickReplies.value = res.data || []
+    }
+  } catch (error) {
+    console.error('加载快捷回复失败', error)
+  }
+}
+
+// 切换快捷回复条
+const toggleQuickReplyBar = () => {
+  showQuickReplyBar.value = !showQuickReplyBar.value
+  if (showQuickReplyBar.value && quickReplies.value.length === 0) {
+    loadQuickReplies()
+  }
+}
+
+// 使用快捷回复
+const handleUseQuickReply = async (reply) => {
+  messageContent.value = reply.content
+  showQuickReplyBar.value = false
+  nextTick(() => {
+    textareaRef.value?.focus()
+  })
+
+  // 记录使用次数
+  try {
+    await useQuickReply(reply.id)
+  } catch (error) {
+    console.error('记录快捷回复使用失败', error)
+  }
+}
+
+// 刷新快捷回复列表（从对话框回调）
+const handleQuickReplyRefresh = () => {
+  loadQuickReplies()
+}
+
+// 刷新表情列表
+const handleEmojiRefresh = () => {
+  // 通知 EmojiPicker 刷新
+  if (emojiPickerRef.value) {
+    emojiPickerRef.value.loadCustomEmojis?.()
+  }
 }
 
 // 文件处理
@@ -592,10 +691,13 @@ const handleMenuAction = (item) => {
       emit('start-video')
       break
     case 'quick-reply':
-      ElMessage.info('快捷回复功能即将上线')
+      toggleQuickReplyBar()
       break
-    case 'voice-translate':
-      ElMessage.info('语音转文字功能即将上线')
+    case 'quick-reply-manage':
+      showQuickReplyDialog.value = true
+      break
+    case 'emoji-manage':
+      showEmojiManager.value = true
       break
     case 'remind':
       ElMessage.info('定时提醒功能即将上线')
@@ -964,12 +1066,107 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 12px;
   padding: 0 4px;
-  
+  position: relative;
+
+  .quick-reply-bar {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: var(--el-bg-color);
+    border: 1px solid var(--el-border-color-light);
+    border-radius: 8px 8px 0 0;
+    padding: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    animation: slideDown 0.2s ease;
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .quick-reply-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      .quick-reply-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--el-text-color-primary);
+      }
+
+      .close-btn {
+        cursor: pointer;
+        color: var(--el-text-color-secondary);
+        transition: color 0.2s;
+
+        &:hover {
+          color: var(--el-text-color-primary);
+        }
+      }
+    }
+
+    .quick-reply-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      max-height: 120px;
+      overflow-y: auto;
+
+      .quick-reply-item {
+        padding: 8px 12px;
+        background: var(--el-fill-color-light);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          background: var(--el-color-primary-light-9);
+          color: var(--el-color-primary);
+        }
+
+        .reply-content {
+          display: block;
+          font-size: 12px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
+      .quick-reply-empty {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 20px;
+        color: var(--el-text-color-secondary);
+        font-size: 13px;
+      }
+    }
+
+    .quick-reply-actions {
+      margin-top: 8px;
+      text-align: center;
+
+      .el-button {
+        font-size: 12px;
+      }
+    }
+  }
+
   .toolbar-section {
     display: flex;
     align-items: center;
     gap: 4px;
-    
+
     &.right-section {
       margin-left: auto;
     }

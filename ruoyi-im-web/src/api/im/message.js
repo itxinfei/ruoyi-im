@@ -302,3 +302,35 @@ export function clearConversationMessages(conversationId) {
     method: 'delete'
   })
 }
+
+/**
+ * 导出会话聊天记录
+ * @param {number} conversationId - 会话ID
+ * @param {Object} options - 导出选项
+ * @param {string} options.format - 导出格式 txt/html/pdf
+ * @param {string} options.startTime - 开始时间（可选）
+ * @param {string} options.endTime - 结束时间（可选）
+ * @returns {Promise}
+ */
+export function exportChatMessages(conversationId, options) {
+  return request({
+    url: `/api/im/message/export/${conversationId}`,
+    method: 'post',
+    data: options,
+    responseType: 'blob'
+  })
+}
+
+/**
+ * 获取可导出的消息列表
+ * @param {number} conversationId - 会话ID
+ * @param {Object} params - 查询参数
+ * @returns {Promise}
+ */
+export function getExportableMessages(conversationId, params) {
+  return request({
+    url: `/api/im/message/export/list/${conversationId}`,
+    method: 'get',
+    params
+  })
+}

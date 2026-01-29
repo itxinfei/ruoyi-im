@@ -277,14 +277,14 @@
           </div>
         </transition>
 
-        <!-- 已发送状态 -->
+        <!-- 已送达状态 (DELIVERED - 双勾轮廓) -->
         <transition name="status-scale">
-          <div v-if="message.status === 'sent'" class="status-indicator status-sent" title="已发送">
-            <span class="material-icons-outlined">check</span>
+          <div v-if="message.status === 'sent'" class="status-indicator status-delivered" title="已送达">
+            <span class="material-icons-outlined">done_all</span>
           </div>
         </transition>
 
-        <!-- 已读状态 -->
+        <!-- 已读状态 (READ - 双勾填充) -->
         <transition name="status-scale">
           <div v-if="message.status === 'read'" class="status-indicator status-read" title="已读">
             <span class="material-icons-outlined">done_all</span>
@@ -1509,11 +1509,15 @@ onUnmounted(() => {
     }
   }
 
-  // 已发送状态
-  .status-sent {
+  // 已送达状态 (DELIVERED - 双勾灰色)
+  .status-delivered {
     color: #94a3b8;
-    opacity: 0.8;
+    opacity: 0.9;
     transition: all 0.25s var(--dt-ease-out);
+
+    .material-icons-outlined {
+      font-weight: 400;
+    }
 
     &:hover {
       color: var(--dt-brand-color);
@@ -1521,13 +1525,13 @@ onUnmounted(() => {
     }
   }
 
-  // 已读状态
+  // 已读状态 (READ - 双勾蓝色)
   .status-read {
     color: var(--dt-brand-color);
     opacity: 1;
 
     .material-icons-outlined {
-      font-weight: 600;
+      font-weight: 700;
     }
 
     &:hover {

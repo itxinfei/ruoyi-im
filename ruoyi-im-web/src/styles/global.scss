@@ -132,6 +132,7 @@ textarea {
   }
 
   &.is-plain {
+
     &:hover,
     &:focus {
       background-color: var(--dt-brand-bg);
@@ -333,123 +334,85 @@ textarea {
 // ============================================================================
 // 暗色模式 Element Plus 样式覆盖
 // ============================================================================
+// ============================================================================
+// 暗色模式 Element Plus 样式覆盖
+// ============================================================================
 .dark {
-
-  // 强制覆盖所有文本颜色
-  * {
-    color: var(--dt-text-primary) !important;
-  }
-
-  // 恢复特殊颜色（品牌色、语义色等）
-  [class*="primary"], [class*="success"], [class*="warning"],
-  [class*="danger"], [class*="error"], [class*="info"],
-  [class*="brand"], .brand-color,
-  .el-button--primary, .el-link--primary,
-  .el-tag--success, .el-tag--warning, .el-tag--danger,
-  .el-tag--info, .text-primary, .text-success,
-  .text-warning, .text-danger, .text-info {
-    color: var(--dt-brand-color) !important;
-  }
-
-  [class*="success"]:not([class*="primary"]):not([class*="warning"]):not([class*="danger"]):not([class*="info"]),
-  .text-success:not([class*="primary"]) {
-    color: var(--dt-success-color) !important;
-  }
-
-  [class*="warning"]:not([class*="primary"]):not([class*="success"]):not([class*="danger"]):not([class*="info"]),
-  .text-warning:not([class*="primary"]) {
-    color: var(--dt-warning-color) !important;
-  }
-
-  [class*="danger"]:not([class*="primary"]):not([class*="success"]):not([class*="warning"]):not([class*="info"]),
-  [class*="error"]:not([class*="primary"]):not([class*="success"]):not([class*="warning"]):not([class*="info"]),
-  .text-danger:not([class*="primary"]),
-  .text-error:not([class*="primary"]) {
-    color: var(--dt-error-color) !important;
-  }
-
-  [class*="info"]:not([class*="primary"]):not([class*="success"]):not([class*="warning"]):not([class*="danger"]),
-  .text-info:not([class*="primary"]) {
-    color: var(--dt-info-color) !important;
-  }
-
-  // 特殊图标颜色保留
-  .material-icons-outlined,
-  .material-icons,
-  [class*="icon-"], [class^="icon-"] {
-    color: var(--dt-text-primary) !important;
-  }
+  // 设置全局背景和文字颜色 (通过继承而非强制覆盖)
+  background-color: var(--dt-bg-body);
+  color: var(--dt-text-primary);
 
   // 链接颜色
-  a, .el-link {
-    color: var(--dt-text-link) !important;
+  a,
+  .el-link {
+    color: var(--dt-text-link);
+
+    &:hover {
+      color: var(--dt-text-link-hover);
+    }
   }
 
-  a:hover, .el-link:hover {
-    color: var(--dt-text-link-hover) !important;
+  // 恢复特殊颜色（品牌色、语义色等）- 仅在必要时覆盖
+  [class*="primary"],
+  .text-primary {
+    color: var(--dt-brand-color);
+  }
+
+  [class*="success"],
+  .text-success {
+    color: var(--dt-success-color);
+  }
+
+  [class*="warning"],
+  .text-warning {
+    color: var(--dt-warning-color);
+  }
+
+  [class*="danger"],
+  .text-danger,
+  .text-error {
+    color: var(--dt-error-color);
+  }
+
+  [class*="info"],
+  .text-info {
+    color: var(--dt-info-color);
   }
 
   // 我们系统特定的变量覆盖
   .el-dialog,
   .el-drawer,
   .el-message-box {
-    background-color: var(--dt-bg-card-dark) !important;
+    background-color: var(--dt-bg-card-dark); // Use variable directly
     border-color: var(--dt-border-dark);
+
+    .el-dialog__title,
+    .el-message-box__title {
+      color: var(--dt-text-primary-dark);
+    }
   }
 
   .el-popover.el-popper,
   .el-select__popper.el-popper {
-    background-color: var(--dt-bg-card-dark) !important;
-    border-color: var(--dt-border-dark) !important;
+    background-color: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
   }
 
   // 暗色模式按钮样式
   .el-button {
-    color: var(--dt-text-primary-dark);
-    background-color: var(--dt-bg-input-dark);
-    border-color: var(--dt-border-dark);
 
-    &:hover,
-    &:focus {
-      color: var(--dt-brand-hover);
-      border-color: var(--dt-brand-hover);
-      background-color: var(--dt-bg-active-dark);
-    }
-  }
-
-  .el-button--primary {
-    background-color: var(--dt-brand-color);
-    border-color: var(--dt-brand-color);
-    color: #fff;
-
-    &:hover,
-    &:focus {
-      background-color: var(--dt-brand-hover);
-      border-color: var(--dt-brand-hover);
-      color: #fff;
-    }
-
-    &.is-plain {
-      background-color: var(--dt-bg-active-dark);
-      border-color: var(--dt-brand-color);
-      color: var(--dt-brand-color);
+    // Default button style in dark mode
+    &:not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(.el-button--danger):not(.el-button--info):not(.is-link):not(.is-text) {
+      background-color: var(--dt-bg-input-dark);
+      border-color: var(--dt-border-dark);
+      color: var(--dt-text-primary-dark);
 
       &:hover,
       &:focus {
-        background-color: var(--dt-brand-color);
-        border-color: var(--dt-brand-color);
-        color: #fff;
+        color: var(--dt-brand-hover);
+        border-color: var(--dt-brand-hover);
+        background-color: var(--dt-bg-hover-dark);
       }
-    }
-  }
-
-  .el-button--text {
-    color: var(--dt-brand-color);
-
-    &:hover,
-    &:focus {
-      color: var(--dt-brand-hover);
-      background-color: var(--dt-bg-active-dark);
     }
   }
 

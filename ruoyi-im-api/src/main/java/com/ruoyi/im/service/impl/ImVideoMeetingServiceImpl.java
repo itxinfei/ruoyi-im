@@ -477,6 +477,9 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         String inviterName = inviter != null ?
             (inviter.getNickname() != null ? inviter.getNickname() : inviter.getUsername()) : "系统";
 
+        // 收集成功邀请的用户ID
+        Set<Long> invitedUserIds = new HashSet<>();
+
         for (Long userId : userIds) {
             // 检查是否已是参与者
             ImVideoMeetingParticipant existing = participantMapper.selectByMeetingAndUser(meetingId, userId);
@@ -496,11 +499,15 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
                 participant.setCreateTime(LocalDateTime.now());
 
                 participantMapper.insert(participant);
+                invitedUserIds.add(userId);
 
-                // 发送邀请通知
-                // TODO: 通过WebSocket或系统通知发送邀请
                 log.info("会议邀请: meetingId={}, invited={}, inviter={}", meetingId, userId, inviterName);
             }
+        }
+
+        // 通过WebSocket发送会议邀请通知
+        if (!invitedUserIds.isEmpty()) {
+            webSocketBroadcastService.broadcastMeetingInvitation(meetingId, invitedUserIds, inviterId);
         }
     }
 

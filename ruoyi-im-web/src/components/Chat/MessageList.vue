@@ -108,13 +108,6 @@
         <span>回到最新</span>
       </div>
     </Transition>
-
-    <!-- 图片预览对话框 -->
-    <ImageViewerDialog
-      v-model="showImageViewer"
-      :images="viewerImages"
-      :initial-index="viewerInitialIndex"
-    />
   </div>
 </template>
 
@@ -125,7 +118,6 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
 import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
-import ImageViewerDialog from './ImageViewerDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
@@ -146,17 +138,12 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit', 'preview'])
 
 const listRef = ref(null)
 const readUsersMap = ref({})
 const loadingReadUsers = ref({})
 const showScrollToBottom = ref(false)
-
-// 图片预览状态
-const showImageViewer = ref(false)
-const viewerImages = ref([])
-const viewerInitialIndex = ref(0)
 
 // ============================================================================
 // 性能优化：消息分页渲染
@@ -230,45 +217,10 @@ const unreadCount = (msg) => {
   return Math.max(0, msg.groupMemberCount - readCount)
 }
 
-// 图片预览 - 使用 ImageViewerDialog
+// 图片预览 - 发送事件给父组件处理
 const previewImage = (clickedUrl) => {
-  // 收集会话中所有图片消息的 URL
-  const imageUrls = []
-  let clickedIndex = 0
-
-  props.messages.forEach((msg) => {
-    if (msg.type === 'IMAGE') {
-      let imageUrl = ''
-      // 尝试从不同字段获取图片 URL
-      if (typeof msg.content === 'string') {
-        try {
-          const contentObj = JSON.parse(msg.content)
-          imageUrl = contentObj.imageUrl || contentObj.url || ''
-        } catch {
-          imageUrl = msg.content
-        }
-      } else if (typeof msg.content === 'object') {
-        imageUrl = msg.content.imageUrl || msg.content.url || ''
-      }
-
-      if (imageUrl) {
-        imageUrls.push(imageUrl)
-        // 记录被点击图片的索引
-        if (imageUrl === clickedUrl || imageUrl === decodeURIComponent(clickedUrl)) {
-          clickedIndex = imageUrls.length - 1
-        }
-      }
-    }
-  })
-
-  if (imageUrls.length > 0) {
-    viewerImages.value = imageUrls
-    viewerInitialIndex.value = clickedIndex
-    showImageViewer.value = true
-  } else {
-    // 降级到新窗口打开
-    window.open(clickedUrl, '_blank')
-  }
+  // 发送预览事件，父组件负责显示完整的图片预览器
+  emit('preview', clickedUrl)
 }
 
 // 下载文件

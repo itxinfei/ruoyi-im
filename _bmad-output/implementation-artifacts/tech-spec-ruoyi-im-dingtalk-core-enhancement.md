@@ -2,8 +2,8 @@
 title: 'RuoYi-IM 钉钉核心功能全面完善'
 slug: 'ruoyi-im-dingtalk-core-enhancement'
 created: '2026-01-27T04:45:33Z'
-status: 'in-progress'
-stepsCompleted: [1, 2, 3]
+status: 'ready-for-dev'
+stepsCompleted: [1, 2, 3, 4]
 tech_stack:
   - Vue 3.3.11
   - Element Plus 2.4.4

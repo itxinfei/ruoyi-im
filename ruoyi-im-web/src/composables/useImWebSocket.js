@@ -69,6 +69,16 @@ export function useImWebSocket() {
     return imWebSocket.send(message)
   }
 
+  // 发送正在输入状态
+  const sendTyping = (conversationId) => {
+    return imWebSocket.sendTyping(conversationId)
+  }
+
+  // 发送停止输入状态
+  const sendStopTyping = (conversationId) => {
+    return imWebSocket.sendStopTyping(conversationId)
+  }
+
   // 监听消息
   const onMessage = (callback) => {
     registerHandler('message', callback)
@@ -132,6 +142,8 @@ export function useImWebSocket() {
     disconnect,
     destroy,
     sendMessage,
+    sendTyping,
+    sendStopTyping,
     cleanup,
 
     // 事件监听

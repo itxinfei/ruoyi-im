@@ -41,20 +41,55 @@
       </div>
     </div>
 
+    <!-- 自定义表情管理入口 -->
+    <div v-if="activeTab === 'custom' && !searchKeyword" class="emoji-manager-bar">
+      <el-button size="small" text @click="openEmojiManager">
+        <el-icon><FolderOpened /></el-icon>
+        表情管理
+      </el-button>
+    </div>
+
     <!-- 表情网格 -->
     <div class="emoji-grid" :class="{ 'full-height': searchKeyword || !recentEmojis.length }">
-      <div
-        v-for="emoji in currentEmojis"
-        :key="emoji.char"
-        class="emoji-item"
-        :title="emoji.keywords?.[0] || ''"
-        @click="selectEmoji(emoji.char)"
-      >
-        {{ emoji.char }}
+      <!-- 加载中 -->
+      <div v-if="loadingCustom && activeTab === 'custom'" class="loading-state">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>加载中...</span>
       </div>
 
+      <!-- 自定义表情空状态 -->
+      <div v-else-if="activeTab === 'custom' && currentEmojis.length === 0" class="empty-custom">
+        <el-icon><Plus /></el-icon>
+        <span>暂无自定义表情</span>
+        <el-button size="small" type="primary" text @click="openEmojiManager">
+          添加表情
+        </el-button>
+      </div>
+
+      <!-- 表情列表 -->
+      <template v-else>
+        <div
+          v-for="emoji in currentEmojis"
+          :key="emoji.char || emoji.emojiId"
+          class="emoji-item"
+          :class="{ 'is-image': emoji.type === 'image' }"
+          :title="emoji.emojiName || emoji.keywords?.[0] || ''"
+          @click="selectEmoji(emoji)"
+        >
+          <!-- Unicode 表情 -->
+          <span v-if="emoji.type !== 'image' && emoji.char">{{ emoji.char }}</span>
+          <!-- 图片表情 -->
+          <img
+            v-else-if="emoji.type === 'image'"
+            :src="emoji.url"
+            :alt="emoji.emojiName || ''"
+            class="emoji-image"
+          />
+        </div>
+      </template>
+
       <!-- 无搜索结果 -->
-      <div v-if="currentEmojis.length === 0" class="no-results">
+      <div v-if="searchKeyword && currentEmojis.length === 0" class="no-results">
         <span class="material-icons-outlined">search_off</span>
         <span>未找到相关表情</span>
       </div>
@@ -71,8 +106,9 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { Search, Delete } from '@element-plus/icons-vue'
+import { Search, Delete, Plus, FolderOpened, Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { getEmojiList, useEmoji as useEmojiApi } from '@/api/im/emoji'
 
 const props = defineProps({
   visible: {
@@ -81,7 +117,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'open-manager'])
 
 const activeTab = ref('smile')
 const searchKeyword = ref('')
@@ -91,6 +127,10 @@ const STORAGE_KEY = 'im_recent_emojis'
 const MAX_RECENT = 20
 
 const recentEmojis = ref([])
+// 自定义表情数据
+const customEmojis = ref([])
+const loadingCustom = ref(false)
+const showEmojiManager = ref(false)
 
 // 从本地存储加载最近表情
 const loadRecentEmojis = () => {
@@ -115,17 +155,16 @@ const saveRecentEmojis = (emojis) => {
 }
 
 // 添加表情到最近使用
-const addToRecent = (char) => {
+const addToRecent = (emoji) => {
+  // 支持自定义表情对象
   const emojiData = getAllEmojis()
-  const emoji = emojiData.find(e => e.char === char)
-
-  if (!emoji) return
+  const existing = emojiData.find(e => e.char === emoji.char || e.emojiId === emoji.emojiId)
 
   // 移除已存在的
-  recentEmojis.value = recentEmojis.value.filter(e => e.char !== char)
+  recentEmojis.value = recentEmojis.value.filter(e => e.char !== emoji.char && e.emojiId !== emoji.emojiId)
 
   // 添加到开头
-  recentEmojis.value.unshift(emoji)
+  recentEmojis.value.unshift(existing || emoji)
 
   // 限制数量
   if (recentEmojis.value.length > MAX_RECENT) {
@@ -135,22 +174,51 @@ const addToRecent = (char) => {
   saveRecentEmojis(recentEmojis.value)
 }
 
+// 加载自定义表情
+const loadCustomEmojis = async () => {
+  if (customEmojis.value.length > 0) return // 已加载则跳过
+
+  loadingCustom.value = true
+  try {
+    const res = await getEmojiList()
+    if (res.code === 200) {
+      customEmojis.value = (res.data || []).map(e => ({
+        type: 'image',
+        url: e.emojiUrl,
+        char: e.emojiCode,
+        emojiId: e.id,
+        emojiName: e.emojiName,
+        isOwn: e.isOwn,
+        category: e.category || 'custom'
+      }))
+    }
+  } catch (error) {
+    console.error('加载自定义表情失败', error)
+  } finally {
+    loadingCustom.value = false
+  }
+}
+
 // 获取所有表情数据
 const getAllEmojis = () => {
   const all = []
   Object.values(emojiData).forEach(arr => all.push(...arr))
+  // 合并自定义表情
+  all.push(...customEmojis.value)
   return all
 }
 
 // 表情分类标签
-const tabs = [
+const tabs = computed(() => [
+  { type: 'recent', label: '🕐' },
   { type: 'smile', label: '😀' },
   { type: 'hand', label: '👋' },
   { type: 'animal', label: '🐶' },
   { type: 'food', label: '🍎' },
   { type: 'activity', label: '⚽' },
-  { type: 'object', label: '❤️' }
-]
+  { type: 'object', label: '❤️' },
+  { type: 'custom', label: '🎨' }
+])
 
 // 表情数据
 const emojiData = {
@@ -660,18 +728,45 @@ const currentEmojis = computed(() => {
 
     const allEmojis = getAllEmojis()
     return allEmojis.filter(emoji => {
-      const char = emoji.char
+      const char = emoji.char || ''
       const keywords = emoji.keywords || []
-      return char.includes(keyword) || keywords.some(k => k.includes(keyword))
+      const name = emoji.emojiName || ''
+      return char.includes(keyword) || keywords.some(k => k.includes(keyword)) || name.toLowerCase().includes(keyword)
     })
   }
+
+  // 自定义表情分类
+  if (activeTab.value === 'custom') {
+    return customEmojis.value
+  }
+
+  // 最近使用分类
+  if (activeTab.value === 'recent') {
+    return recentEmojis.value
+  }
+
   return emojiData[activeTab.value] || []
 })
 
 // 选择表情
-const selectEmoji = (char) => {
-  addToRecent(char)
-  emit('select', char)
+const selectEmoji = (emoji) => {
+  // emoji 可能是字符串（兼容）或对象
+  const emojiObj = typeof emoji === 'string' ? { char: emoji, type: 'unicode' } : emoji
+
+  // 如果是自定义表情，调用使用 API
+  if (emojiObj.emojiId) {
+    useEmojiApi(emojiObj.emojiId).catch(() => {
+      // 静默失败，不影响使用
+    })
+  }
+
+  addToRecent(emojiObj)
+  emit('select', emojiObj)
+}
+
+// 打开表情管理
+const openEmojiManager = () => {
+  emit('open-manager')
 }
 
 // 搜索处理
@@ -684,11 +779,21 @@ onMounted(() => {
   loadRecentEmojis()
 })
 
-// 监听显示状态，重置搜索
+// 监听显示状态，重置搜索和加载自定义表情
 watch(() => props.visible, (val) => {
-  if (!val) {
+  if (val) {
+    // 打开时加载自定义表情
+    loadCustomEmojis()
+  } else {
     searchKeyword.value = ''
     activeTab.value = 'smile'
+  }
+})
+
+// 监听自定义表情 tab 切换
+watch(activeTab, (val) => {
+  if (val === 'custom' && customEmojis.value.length === 0) {
+    loadCustomEmojis()
   }
 })
 </script>
@@ -817,6 +922,57 @@ watch(() => props.visible, (val) => {
 
       &:active {
         transform: scale(0.95);
+      }
+
+      &.is-image {
+        padding: 4px;
+
+        .emoji-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+    }
+
+    .loading-state,
+    .empty-custom {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--dt-text-quaternary);
+      height: 100%;
+
+      .el-icon {
+        font-size: 32px;
+        opacity: 0.5;
+      }
+    }
+
+    .empty-custom {
+      gap: 8px;
+
+      .el-icon {
+        font-size: 48px;
+        color: var(--dt-text-tertiary);
+      }
+    }
+  }
+
+  .emoji-manager-bar {
+    padding: 8px 12px;
+    border-top: 1px solid var(--dt-border-light);
+    display: flex;
+    justify-content: center;
+
+    .el-button {
+      color: var(--dt-text-secondary);
+
+      &:hover {
+        color: var(--dt-brand-color);
       }
     }
   }

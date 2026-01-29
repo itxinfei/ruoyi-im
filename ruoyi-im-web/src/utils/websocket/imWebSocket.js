@@ -243,6 +243,36 @@ class ImWebSocket {
   }
 
   /**
+   * 发送正在输入状态
+   * @param {string} conversationId - 会话ID
+   */
+  sendTyping(conversationId) {
+    this.send({
+      type: MESSAGE_TYPE.TYPING,
+      data: {
+        conversationId,
+        isTyping: true,
+        timestamp: Date.now()
+      }
+    })
+  }
+
+  /**
+   * 发送停止输入状态
+   * @param {string} conversationId - 会话ID
+   */
+  sendStopTyping(conversationId) {
+    this.send({
+      type: MESSAGE_TYPE.TYPING,
+      data: {
+        conversationId,
+        isTyping: false,
+        timestamp: Date.now()
+      }
+    })
+  }
+
+  /**
    * 处理重连
    */
   handleReconnect() {

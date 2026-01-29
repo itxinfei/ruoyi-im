@@ -555,9 +555,22 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         // 解析附件
         if (announcement.getAttachments() != null && !announcement.getAttachments().isEmpty()) {
             try {
-                List<ImAnnouncementCreateRequest.AttachmentInfo> attachments =
+                List<ImAnnouncementCreateRequest.AttachmentInfo> attachmentInfos =
                         JSON.parseArray(announcement.getAttachments(), ImAnnouncementCreateRequest.AttachmentInfo.class);
-                // TODO: 转换为详情VO的附件格式
+                List<ImAnnouncementDetailVO.AnnouncementAttachment> attachmentVOs = new ArrayList<>();
+                for (ImAnnouncementCreateRequest.AttachmentInfo info : attachmentInfos) {
+                    ImAnnouncementDetailVO.AnnouncementAttachment attachmentVO =
+                            new ImAnnouncementDetailVO.AnnouncementAttachment();
+                    attachmentVO.setId(info.getId() != null ? info.getId() : 0L);
+                    attachmentVO.setName(info.getName());
+                    attachmentVO.setUrl(info.getUrl());
+                    attachmentVO.setSize(info.getSize() != null ? info.getSize() : 0L);
+                    attachmentVO.setSizeDisplay(formatFileSize(info.getSize()));
+                    attachmentVO.setFileType(info.getFileType());
+                    attachmentVO.setIsImage(isImageFile(info.getFileType()));
+                    attachmentVOs.add(attachmentVO);
+                }
+                vo.setAttachments(attachmentVOs);
             } catch (Exception e) {
                 log.warn("解析附件失败: announcementId={}", announcement.getId());
             }
@@ -664,5 +677,42 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             case "USER": return "指定用户";
             default: return targetType;
         }
+    }
+
+    /**
+     * 格式化文件大小
+     *
+     * @param size 文件大小（字节）
+     * @return 格式化后的字符串
+     */
+    private String formatFileSize(Long size) {
+        if (size == null || size == 0) {
+            return "0 B";
+        }
+
+        final String[] units = {"B", "KB", "MB", "GB", "TB"};
+        int unitIndex = (int) (Math.log10(size) / Math.log10(1024));
+        double unitSize = size / Math.pow(1024, unitIndex);
+        return String.format("%.1f %s", unitSize, units[unitIndex]);
+    }
+
+    /**
+     * 判断是否为图片文件
+     *
+     * @param fileType 文件类型
+     * @return 是否为图片
+     */
+    private boolean isImageFile(String fileType) {
+        if (fileType == null) {
+            return false;
+        }
+        String upperType = fileType.toUpperCase();
+        return upperType.startsWith("IMAGE/") ||
+                "JPG".equals(upperType) ||
+                "JPEG".equals(upperType) ||
+                "PNG".equals(upperType) ||
+                "GIF".equals(upperType) ||
+                "BMP".equals(upperType) ||
+                "WEBP".equals(upperType);
     }
 }

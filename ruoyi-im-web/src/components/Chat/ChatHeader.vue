@@ -88,6 +88,12 @@
               <span class="item-shortcut">Ctrl+F</span>
             </el-dropdown-item>
 
+            <!-- 多选 -->
+            <el-dropdown-item command="multiselect" class="menu-item">
+              <span class="material-icons-outlined item-icon">check_circle_outline</span>
+              <span class="item-text">多选消息</span>
+            </el-dropdown-item>
+
             <!-- 文件 -->
             <el-dropdown-item command="files" class="menu-item">
               <span class="material-icons-outlined item-icon">folder_open</span>
@@ -171,7 +177,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'scroll-to-message'])
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'history', 'search', 'multiselect', 'files', 'announcement', 'pin', 'mute', 'clear', 'toggle-sidebar', 'scroll-to-message'])
 
 // 用户详情弹窗显示状态
 const showUserDetail = ref(false)
@@ -228,6 +234,9 @@ const handleMenuCommand = (command) => {
       break
     case 'search':
       showSearch.value = true
+      break
+    case 'multiselect':
+      emit('multiselect', true)
       break
     case 'files':
       emit('files', props.session)

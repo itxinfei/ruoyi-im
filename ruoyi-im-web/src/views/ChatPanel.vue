@@ -25,6 +25,7 @@
             :typing-users="typingUsers"
             :pinned-count="pinnedCount"
             @toggle-sidebar="handleToggleDetail"
+            @multiselect="handleToggleMultiSelect"
             @toggle-multi-select="handleToggleMultiSelect"
             @toggle-pinned="showPinnedPanel = !showPinnedPanel"
             @clear-selection="handleClearSelection"
@@ -52,6 +53,7 @@
             @load-more="handleLoadMore"
             @show-user="handleShowUser"
             @retry="handleRetry"
+            @preview="handleImagePreview"
           />
           <MessageInput
             ref="messageInputRef"
@@ -71,6 +73,7 @@
             @upload-video="handleVideoUpload"
             @send-location="handleSendLocation"
             @send-screenshot="handleScreenshotUpload"
+            @input="handleInput"
           />
         </div>
 
@@ -168,6 +171,21 @@
         @forward-file="handleForwardFile"
       />
 
+      <!-- 群文件面板 -->
+      <GroupFilePanel
+        v-if="showGroupFilesPanel && session?.type === 'GROUP'"
+        :group-id="session?.targetId"
+        class="group-files-drawer"
+      />
+
+      <!-- 合并消息详情对话框 -->
+      <CombineDetailDialog
+        v-model="showCombineDetail"
+        :messages="combineMessages"
+        :conversation-title="combineConversationTitle"
+        @forward="handleCombineForwardDetail"
+      />
+
       <!-- 多选操作栏 -->
       <Transition name="slide-up">
         <div v-if="isMultiSelectModeActive" class="multi-select-toolbar">
@@ -197,12 +215,24 @@
       </Transition>
     </template>
   </div>
+
+  <!-- 图片预览器 -->
+  <Teleport to="body">
+    <el-image-viewer
+      v-if="showImagePreview"
+      :url-list="conversationImages"
+      :initial-index="imagePreviewIndex"
+      @close="closeImagePreview"
+      :z-index="9999"
+    />
+  </Teleport>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useStore } from 'vuex'
 import { Share, Folder, Delete } from '@element-plus/icons-vue'
+import { ElImageViewer } from 'element-plus'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
@@ -218,6 +248,8 @@ import ChatSearchPanel from '@/components/Chat/ChatSearchPanel.vue'
 import ChatSearch from '@/components/Chat/ChatSearch.vue'
 import ChatFilesPanel from '@/components/Chat/ChatFilesPanel.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
+import CombineDetailDialog from '@/components/Chat/CombineDetailDialog.vue'
+import GroupFilePanel from '@/components/Chat/GroupFilePanel.vue'
 import { getMessages, batchForwardMessages, deleteMessage, clearConversationMessages } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { addFavorite, removeFavorite } from '@/api/im/favorite'
@@ -256,9 +288,41 @@ const showAnnouncementDialog = ref(false)
 const showSearchPanel = ref(false)
 const showChatSearch = ref(false)
 const showFilesPanel = ref(false)
+const showGroupFilesPanel = ref(false)
+const showCombineDetail = ref(false)
+const combineMessages = ref([])
+const combineConversationTitle = ref('')
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
 const messageInputRef = ref(null)
+
+// 图片预览状态
+const showImagePreview = ref(false)
+const imagePreviewUrl = ref('')
+const imagePreviewIndex = ref(0)
+
+// 当前会话所有图片URL列表（用于预览时左右切换）
+const conversationImages = computed(() => {
+  return messages.value
+    .filter(m => {
+      if (m.type !== 'IMAGE') return false
+      try {
+        const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
+        return content && (content.url || content.imageUrl)
+      } catch {
+        return false
+      }
+    })
+    .map(m => {
+      try {
+        const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
+        return content.url || content.imageUrl
+      } catch {
+        return ''
+      }
+    })
+    .filter(url => url)
+})
 
 // 多选模式状态（由头部按钮触发，而非基于选中状态判断）
 const isMultiSelectModeActive = ref(false)
@@ -269,11 +333,53 @@ const pinnedCount = computed(() => messages.value.filter(m => m.isPinned).length
 
 const emit = defineEmits(['show-user'])
 
-const { onMessage, onTyping, onMessageStatus, onReaction } = useImWebSocket()
+const { onMessage, onTyping, onMessageStatus, onReaction, sendTyping, sendStopTyping } = useImWebSocket()
 
 // 输入状态用户列表（用于显示"xxx正在输入..."）
 const typingUsers = ref([])
 let typingTimers = {} // userId -> timerId
+
+// 发送输入状态（防抖）
+let sendTypingTimer = null
+const TYPING_DEBOUNCE = 500 // 500ms 防抖
+
+// 发送正在输入状态
+const sendMyTypingStatus = () => {
+  // 只在单聊时发送输入状态
+  if (!props.session || props.session.type !== 'PRIVATE') return
+
+  // 清除之前的定时器
+  if (sendTypingTimer) {
+    clearTimeout(sendTypingTimer)
+  }
+
+  // 防抖：500ms 后才发送 typing 事件
+  sendTypingTimer = setTimeout(() => {
+    sendTyping(props.session.id)
+  }, TYPING_DEBOUNCE)
+}
+
+// 发送停止输入状态
+const sendMyStopTypingStatus = () => {
+  // 只在单聊时发送停止输入状态
+  if (!props.session || props.session.type !== 'PRIVATE') return
+
+  if (sendTypingTimer) {
+    clearTimeout(sendTypingTimer)
+    sendTypingTimer = null
+  }
+
+  sendStopTyping(props.session.id)
+}
+
+// 处理输入事件（防抖发送 typing 状态）
+const handleInput = (content) => {
+  if (content && content.trim().length > 0) {
+    sendMyTypingStatus()
+  } else {
+    sendMyStopTypingStatus()
+  }
+}
 
 const loadHistory = async () => {
   if (!props.session?.id) return
@@ -360,6 +466,9 @@ const transformMsg = (m) => {
 }
 
 const handleSend = async (content) => {
+  // 发送消息时停止输入状态
+  sendMyStopTypingStatus()
+
   // 乐观更新：先显示消息，状态为 sending
   const tempId = `temp-${Date.now()}`
   const tempMsg = {
@@ -392,7 +501,7 @@ const handleSend = async (content) => {
     if (index !== -1) {
       // 保持 status 为 success，且替换为真实数据
       const realMsg = transformMsg(msg)
-      messages.value.splice(index, 1, { ...realMsg, status: 'success' })
+      messages.value.splice(index, 1, { ...realMsg, status: 'sent' })
     }
   } catch (error) {
     // 发送失败，标记状态
@@ -406,6 +515,7 @@ const handleSend = async (content) => {
 
 // 发送语音消息
 const handleSendVoice = async ({ file, duration }) => {
+  sendMyStopTypingStatus()
   const tempId = `temp-${Date.now()}`
   const tempMsg = {
     id: tempId,
@@ -443,7 +553,7 @@ const handleSendVoice = async ({ file, duration }) => {
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
       const realMsg = transformMsg(msg)
-      messages.value.splice(index, 1, { ...realMsg, status: 'success' })
+      messages.value.splice(index, 1, { ...realMsg, status: 'sent' })
     }
   } catch (error) {
     // 发送失败，标记状态
@@ -542,6 +652,8 @@ const handleCommand = (cmd, msg) => {
     handleMarkMessage(msg)
   } else if (cmd === 'multi-select') {
     handleMultiSelect(msg)
+  } else if (cmd === 'view-combine') {
+    handleViewCombine(msg)
   }
 }
 
@@ -667,6 +779,26 @@ const selectedMessages = computed(() => store.getters['im/message/selectedMessag
 const handleMultiSelect = (msg) => {
   store.commit('im/message/TOGGLE_MESSAGE_SELECTION', msg.id)
   ElMessage.info('进入多选模式')
+}
+
+// 查看合并转发消息详情
+const handleViewCombine = (msg) => {
+  // msg 包含 messages 数组（合并的消息内容）
+  if (msg.messages && msg.messages.length > 0) {
+    combineMessages.value = msg.messages
+    combineConversationTitle.value = `${msg.senderName}的聊天记录`
+    showCombineDetail.value = true
+  } else {
+    ElMessage.warning('无法查看聊天记录详情')
+  }
+}
+
+// 合并消息详情中的转发
+const handleCombineForwardDetail = (messages) => {
+  const messageIds = messages.map(m => m.id)
+  if (messageIds.length > 0) {
+    forwardDialogRef.value?.openForBatch(messageIds, 'combine')
+  }
 }
 
 // 批量转发 - 逐条转发
@@ -857,6 +989,18 @@ const handleToggleDetail = () => {
   }
 }
 
+// 图片预览处理
+const handleImagePreview = (imageUrl) => {
+  imagePreviewUrl.value = imageUrl
+  imagePreviewIndex.value = conversationImages.value.indexOf(imageUrl)
+  showImagePreview.value = true
+}
+
+// 关闭图片预览
+const closeImagePreview = () => {
+  showImagePreview.value = false
+}
+
 const handleCancelReply = () => {
   store.commit('im/message/SET_REPLYING_MESSAGE', null)
 }
@@ -880,7 +1024,7 @@ const handleRetry = async (msg) => {
     
     // 更新
     const realMsg = transformMsg(res)
-    Object.assign(msg, { ...realMsg, status: 'success' })
+    Object.assign(msg, { ...realMsg, status: 'sent' })
   } catch (error) {
     msg.status = 'failed'
     ElMessage.error('重试失败')
@@ -983,7 +1127,12 @@ const handleVideoCall = () => {
 
 // 查看文件
 const handleShowFiles = () => {
-  showFilesPanel.value = true
+  // 群组显示群文件面板，单聊显示会话文件面板
+  if (props.session?.type === 'GROUP') {
+    showGroupFilesPanel.value = true
+  } else {
+    showFilesPanel.value = true
+  }
 }
 
 // 搜索消息
@@ -1132,6 +1281,7 @@ const triggerFileUpload = () => fileInputRef.value?.click()
 const triggerImageUpload = () => imageInputRef.value?.click()
 
 const handleFileUpload = async (payload) => {
+  sendMyStopTypingStatus()
   let file, formData
   if (payload instanceof FormData) {
     formData = payload
@@ -1192,7 +1342,7 @@ const handleFileUpload = async (payload) => {
       // 4. 更新状态
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
       }
     } else {
       throw new Error(res.msg || 'Upload failed')
@@ -1207,6 +1357,7 @@ const handleFileUpload = async (payload) => {
 }
 
 const handleImageUpload = async (payload) => {
+  sendMyStopTypingStatus()
   let file, formData
   if (payload instanceof FormData) {
     formData = payload
@@ -1261,7 +1412,7 @@ const handleImageUpload = async (payload) => {
       
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
       }
       // 释放 blob
       URL.revokeObjectURL(blobUrl)
@@ -1279,6 +1430,7 @@ const handleImageUpload = async (payload) => {
 
 // 截图上传处理
 const handleScreenshotUpload = async (formData) => {
+  sendMyStopTypingStatus()
   const file = formData.get('file')
   if (!file) return
 
@@ -1316,7 +1468,7 @@ const handleScreenshotUpload = async (formData) => {
 
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
       }
       URL.revokeObjectURL(blobUrl)
     } else {
@@ -1333,6 +1485,7 @@ const handleScreenshotUpload = async (formData) => {
 
 // 视频上传处理
 const handleVideoUpload = async ({ file, url }) => {
+  sendMyStopTypingStatus()
   // 1. 乐观更新：立即显示视频消息
   const tempId = `temp-video-${Date.now()}`
   const tempMsg = {
@@ -1378,7 +1531,7 @@ const handleVideoUpload = async ({ file, url }) => {
       // 4. 更新状态
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
       }
       // 释放 blob
       URL.revokeObjectURL(url)
@@ -1397,6 +1550,7 @@ const handleVideoUpload = async ({ file, url }) => {
 
 // 发送位置消息
 const handleSendLocation = async ({ latitude, longitude, address }) => {
+  sendMyStopTypingStatus()
   // 1. 乐观更新：立即显示位置消息
   const tempId = `temp-location-${Date.now()}`
   const tempMsg = {
@@ -1434,7 +1588,7 @@ const handleSendLocation = async ({ latitude, longitude, address }) => {
     // 3. 更新状态
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
-      messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+      messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
     }
   } catch (error) {
     const index = messages.value.findIndex(m => m.id === tempId)
@@ -1470,16 +1624,17 @@ onMounted(() => {
 
     const index = messages.value.findIndex(m => m.id === data.messageId)
     if (index !== -1) {
-      // 映射后端状态到前端状态
+      // 映射后端 sendStatus 数值到前端状态字符串
+      // 0=PENDING, 1=SENDING, 2=DELIVERED, 3=READ, 4=FAILED
       const statusMap = {
-        'PENDING': 'sending',
-        'SENDING': 'sending',
-        'SENT': 'success',
-        'DELIVERED': 'success',
-        'READ': 'success',
-        'FAILED': 'failed'
+        0: 'sending',  // PENDING
+        1: 'sending',  // SENDING
+        2: 'sent',     // DELIVERED - 双勾（蓝色）
+        3: 'read',     // READ - 实心双勾（绿色）
+        4: 'failed'    // FAILED
       }
-      messages.value[index].status = statusMap[data.sendStatus] || data.sendStatus
+      const sendStatus = parseInt(data.sendStatus)
+      messages.value[index].status = statusMap[sendStatus] ?? 'sent'
     }
   })
 

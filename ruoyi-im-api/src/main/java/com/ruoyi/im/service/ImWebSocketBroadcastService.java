@@ -48,4 +48,13 @@ public interface ImWebSocketBroadcastService {
      * @param targetUserIds  目标用户ID集合
      */
     void broadcastAnnouncement(Long announcementId, Set<Long> targetUserIds);
+
+    /**
+     * 广播会议邀请通知给目标用户
+     *
+     * @param meetingId      会议ID
+     * @param targetUserIds 目标用户ID集合
+     * @param inviterId     邀请人ID
+     */
+    void broadcastMeetingInvitation(Long meetingId, Set<Long> targetUserIds, Long inviterId);
 }

@@ -1,7 +1,7 @@
 /**
  * 群组文件 API
  */
-import request from '@/utils/request'
+import request from '@/api/request'
 
 /**
  * 上传群组文件
