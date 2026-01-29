@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import cn.hutool.http.HtmlUtil;
 import com.ruoyi.im.constant.MessageStatusConstants;
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
@@ -274,7 +275,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      */
     private void publishGroupMessageEvent(Long conversationId, ImMessage message, ImUser sender) {
         ImConversation conversation = imConversationMapper.selectById(conversationId);
-        if (conversation != null && "GROUP".equalsIgnoreCase(conversation.getType())) {
+        if (conversation != null && StatusConstants.ConversationType.GROUP.equalsIgnoreCase(conversation.getType())) {
             Long groupId = conversation.getTargetId();
             if (groupId != null && "TEXT".equalsIgnoreCase(message.getMessageType())) {
                 try {

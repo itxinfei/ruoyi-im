@@ -13,6 +13,7 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageReadMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageReadService;
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import com.ruoyi.im.vo.message.ImMessageReadDetailVO;
@@ -199,7 +200,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         }
 
         int totalCount;
-        if ("GROUP".equals(conversation.getType())) {
+        if (StatusConstants.ConversationType.GROUP.equals(conversation.getType())) {
             // 群聊：获取群组成员数
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversation.getId());
             totalCount = members.size();

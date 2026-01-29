@@ -35,6 +35,20 @@ public class StatusConstants {
     }
 
     /**
+     * 任务类型
+     */
+    public static class TaskType {
+        /** 个人任务 */
+        public static final String PERSONAL = "PERSONAL";
+
+        /** 团队任务 */
+        public static final String TEAM = "TEAM";
+
+        /** 项目任务 */
+        public static final String PROJECT = "PROJECT";
+    }
+
+    /**
      * 审批状态
      */
     public static class Approval {
@@ -152,6 +166,40 @@ public class StatusConstants {
     }
 
     /**
+     * 可见性范围
+     */
+    public static class Visibility {
+        /** 私有 */
+        public static final String PRIVATE = "PRIVATE";
+
+        /** 部门可见 */
+        public static final String DEPARTMENT = "DEPARTMENT";
+
+        /** 公开 */
+        public static final String PUBLIC = "PUBLIC";
+    }
+
+    /**
+     * 会话类型
+     */
+    public static class ConversationType {
+        /** 私聊 */
+        public static final String PRIVATE = "PRIVATE";
+
+        /** 单聊（历史兼容） */
+        public static final String SINGLE = "SINGLE";
+
+        /** 群聊 */
+        public static final String GROUP = "GROUP";
+
+        /** 系统通知 */
+        public static final String SYSTEM = "SYSTEM";
+
+        /** 通知会话 */
+        public static final String NOTIFICATION = "NOTIFICATION";
+    }
+
+    /**
      * 考勤打卡方式
      */
     public static class CheckMethod {
@@ -227,6 +275,17 @@ public class StatusConstants {
 
         /** 语音通话 */
         public static final String AUDIO = "AUDIO";
+    }
+
+    /**
+     * 视频通话模式
+     */
+    public static class CallMode {
+        /** 单人通话 */
+        public static final String SINGLE = "SINGLE";
+
+        /** 群组通话 */
+        public static final String GROUP = "GROUP";
     }
 
     /**

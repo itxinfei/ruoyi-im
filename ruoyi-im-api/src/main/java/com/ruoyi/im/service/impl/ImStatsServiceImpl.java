@@ -9,6 +9,7 @@ import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImStatsService;
+import com.ruoyi.im.constants.StatusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -128,7 +129,7 @@ public class ImStatsServiceImpl implements ImStatsService {
             // 活跃群组数（通过会话表查询群组类型的会话，且有最近消息的）
             List<ImConversation> allConversations = imConversationMapper.selectImConversationList(new ImConversation());
             long activeGroups = allConversations.stream()
-                    .filter(c -> "GROUP".equals(c.getType()))
+                    .filter(c -> StatusConstants.ConversationType.GROUP.equals(c.getType()))
                     .filter(c -> c.getLastMessageTime() != null && !c.getLastMessageTime().isBefore(since))
                     .count();
 

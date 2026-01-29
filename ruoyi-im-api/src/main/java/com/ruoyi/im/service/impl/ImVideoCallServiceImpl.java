@@ -340,7 +340,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         call.setCallerId(callerId);
         call.setConversationId(conversationId);
         call.setCallType(callType);
-        call.setCallMode("GROUP");
+        call.setCallMode(StatusConstants.CallMode.GROUP);
         call.setStatus(StatusConstants.VideoCallStatus.CALLING);
         call.setMaxParticipants(maxParticipants);
         call.setCurrentParticipants(1); // 发起者自动加入
@@ -380,7 +380,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             throw new BusinessException("通话不存在或已过期");
         }
 
-        if (!"GROUP".equals(call.getCallMode())) {
+        if (!StatusConstants.CallMode.GROUP.equals(call.getCallMode())) {
             throw new BusinessException("该通话不是群组通话");
         }
 
@@ -428,7 +428,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             throw new BusinessException("通话不存在或已过期");
         }
 
-        if (!"GROUP".equals(call.getCallMode())) {
+        if (!StatusConstants.CallMode.GROUP.equals(call.getCallMode())) {
             throw new BusinessException("该通话不是群组通话");
         }
 

@@ -77,7 +77,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setOwnerId(userId);
         group.setAvatar(request.getAvatar());
         group.setDescription(request.getDescription());
-        group.setType(request.getType() != null ? request.getType() : "PRIVATE");
+        group.setType(request.getType() != null ? request.getType() : StatusConstants.ConversationType.PRIVATE);
         group.setMaxMembers(request.getMemberLimit() != null ? request.getMemberLimit() : 500);
         group.setMemberCount(1);
         group.setStatus("NORMAL");
@@ -88,7 +88,7 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         // 创建群组对应的会话（确保群组在会话列表中显示）
         ImConversation conversation = new ImConversation();
-        conversation.setType("GROUP");
+        conversation.setType(StatusConstants.ConversationType.GROUP);
         conversation.setTargetId(group.getId()); // 关联群组ID
         conversation.setName(group.getName());
         conversation.setAvatar(group.getAvatar());
@@ -281,7 +281,8 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         // 查找群组对应的会话
-        ImConversation conversation = imConversationMapper.selectByTypeAndTarget("GROUP", groupId, null);
+        ImConversation conversation = imConversationMapper.selectByTypeAndTarget(
+                StatusConstants.ConversationType.GROUP, groupId, null);
 
         int addedCount = 0;
         for (Long userId : userIds) {

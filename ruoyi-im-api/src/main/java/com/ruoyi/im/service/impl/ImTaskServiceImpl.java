@@ -685,9 +685,9 @@ public class ImTaskServiceImpl implements ImTaskService {
     private String getTaskTypeDisplay(String taskType) {
         if (taskType == null) return "个人";
         switch (taskType) {
-            case "PERSONAL": return "个人";
-            case "TEAM": return "团队";
-            case "PROJECT": return "项目";
+            case StatusConstants.TaskType.PERSONAL: return "个人";
+            case StatusConstants.TaskType.TEAM: return "团队";
+            case StatusConstants.TaskType.PROJECT: return "项目";
             default: return taskType;
         }
     }

@@ -400,11 +400,11 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     }
 
     private String getVisibilityName(String visibility) {
-        if ("PRIVATE".equals(visibility)) {
+        if (StatusConstants.Visibility.PRIVATE.equals(visibility)) {
             return "私有";
-        } else if ("DEPARTMENT".equals(visibility)) {
+        } else if (StatusConstants.Visibility.DEPARTMENT.equals(visibility)) {
             return "部门";
-        } else if ("PUBLIC".equals(visibility)) {
+        } else if (StatusConstants.Visibility.PUBLIC.equals(visibility)) {
             return "公开";
         }
         return visibility;

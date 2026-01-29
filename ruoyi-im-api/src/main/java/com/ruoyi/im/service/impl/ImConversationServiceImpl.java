@@ -122,12 +122,12 @@ public class ImConversationServiceImpl implements ImConversationService {
         for (ImConversationVO vo : conversations) {
             conversationIds.add(vo.getId());
             if (MessageStatusConstants.CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(vo.getType())
-                    || "SINGLE".equalsIgnoreCase(vo.getType())) {
+                    || StatusConstants.ConversationType.SINGLE.equalsIgnoreCase(vo.getType())) {
                 Long peerUserId = getPeerUserId(vo.getId(), userId);
                 if (peerUserId != null) {
                     userIds.add(peerUserId);
                 }
-            } else if ("GROUP".equalsIgnoreCase(vo.getType()) && vo.getTargetId() != null) {
+            } else if (StatusConstants.ConversationType.GROUP.equalsIgnoreCase(vo.getType()) && vo.getTargetId() != null) {
                 groupIds.add(vo.getTargetId());
             }
         }
@@ -177,7 +177,7 @@ public class ImConversationServiceImpl implements ImConversationService {
 
             // 根据会话类型处理
             if (MessageStatusConstants.CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(vo.getType())
-                    || "SINGLE".equalsIgnoreCase(vo.getType())) {
+                    || StatusConstants.ConversationType.SINGLE.equalsIgnoreCase(vo.getType())) {
                 processPrivateConversation(vo, userId, batchData.userMap, privateConversationMap);
             } else if (MessageStatusConstants.CONVERSATION_TYPE_GROUP.equalsIgnoreCase(vo.getType())) {
                 processGroupConversation(vo, batchData.groupMap, voList);
@@ -496,7 +496,8 @@ public class ImConversationServiceImpl implements ImConversationService {
         ImConversation existingConversation = imConversationMapper.selectByTypeAndTarget(MessageStatusConstants.CONVERSATION_TYPE_PRIVATE,
                 Math.min(userId, request.getPeerUserId()), Math.max(userId, request.getPeerUserId()));
         if (existingConversation == null) {
-            existingConversation = imConversationMapper.selectByTypeAndTarget("SINGLE",
+            existingConversation = imConversationMapper.selectByTypeAndTarget(
+                    StatusConstants.ConversationType.SINGLE,
                     Math.min(userId, request.getPeerUserId()), Math.max(userId, request.getPeerUserId()));
         }
 
@@ -588,12 +589,13 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Transactional(rollbackFor = Exception.class)
     public Long createConversation(ImConversationCreateRequest request, Long userId) {
         // 兼容PRIVATE和SINGLE类型
-        if ("PRIVATE".equalsIgnoreCase(request.getType()) || "SINGLE".equalsIgnoreCase(request.getType())) {
+        if (StatusConstants.ConversationType.PRIVATE.equalsIgnoreCase(request.getType())
+                || StatusConstants.ConversationType.SINGLE.equalsIgnoreCase(request.getType())) {
             // 创建私聊会话
             ImPrivateConversationCreateRequest privateRequest = new ImPrivateConversationCreateRequest();
             privateRequest.setPeerUserId(request.getTargetId());
             return createPrivateConversation(userId, privateRequest);
-        } else if ("GROUP".equalsIgnoreCase(request.getType())) {
+        } else if (StatusConstants.ConversationType.GROUP.equalsIgnoreCase(request.getType())) {
             // 创建群聊会话
             ImGroupConversationCreateRequest groupRequest = new ImGroupConversationCreateRequest();
             groupRequest.setGroupName(request.getGroupName());
@@ -653,8 +655,8 @@ public class ImConversationServiceImpl implements ImConversationService {
 
                 // 设置会话相关信息
                 // 兼容PRIVATE和SINGLE类型（历史数据可能使用SINGLE）
-                if ("PRIVATE".equalsIgnoreCase(conversation.getType())
-                        || "SINGLE".equalsIgnoreCase(conversation.getType())) {
+                if (StatusConstants.ConversationType.PRIVATE.equalsIgnoreCase(conversation.getType())
+                        || StatusConstants.ConversationType.SINGLE.equalsIgnoreCase(conversation.getType())) {
                     // 私聊会话，获取对方用户信息
                     Long peerUserId = getPeerUserId(conversation.getId(), userId);
                     if (peerUserId != null) {

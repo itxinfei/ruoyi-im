@@ -114,7 +114,8 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         folder.setOwnerId(userId);
         folder.setOwnerType(request.getOwnerType());
         folder.setDepartmentId(request.getDepartmentId());
-        folder.setAccessPermission(request.getAccessPermission() != null ? request.getAccessPermission() : "PRIVATE");
+        folder.setAccessPermission(request.getAccessPermission() != null ? request.getAccessPermission()
+                : StatusConstants.FolderPermission.PRIVATE);
         folder.setIsDeleted(false);
         folder.setCreateTime(LocalDateTime.now());
         folder.setUpdateTime(LocalDateTime.now());
@@ -385,7 +386,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         cloudFile.setUploaderId(userId);
         cloudFile.setDownloadCount(0);
         cloudFile.setPreviewCount(0);
-        cloudFile.setAccessPermission("PRIVATE");
+        cloudFile.setAccessPermission(StatusConstants.FolderPermission.PRIVATE);
         cloudFile.setIsDeleted(false);
         cloudFile.setCreateTime(LocalDateTime.now());
         cloudFile.setUpdateTime(LocalDateTime.now());

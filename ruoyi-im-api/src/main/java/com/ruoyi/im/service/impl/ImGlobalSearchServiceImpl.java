@@ -5,6 +5,7 @@ import com.ruoyi.im.dto.search.GlobalSearchRequest;
 import com.ruoyi.im.domain.*;
 import com.ruoyi.im.mapper.*;
 import com.ruoyi.im.service.ImGlobalSearchService;
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.vo.search.GlobalSearchResultVO;
@@ -227,7 +228,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                     // 获取会话名称
                     ImConversation conv = conversationMap.get(msg.getConversationId());
                     if (conv != null) {
-                        result.setConversationName(conv.getType().equals("GROUP") ?
+                        result.setConversationName(conv.getType().equals(StatusConstants.ConversationType.GROUP) ?
                             conv.getName() : getPrivateConversationName(conv, userMap));
                     }
 
@@ -521,7 +522,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
      * 获取私聊会话名称
      */
     private String getPrivateConversationName(ImConversation conv, Map<Long, ImUser> userMap) {
-        if ("PRIVATE".equals(conv.getType())) {
+        if (StatusConstants.ConversationType.PRIVATE.equals(conv.getType())) {
             ImUser targetUser = userMap.get(conv.getTargetId());
             if (targetUser != null) {
                 return targetUser.getNickname() != null ? targetUser.getNickname() : targetUser.getUsername();

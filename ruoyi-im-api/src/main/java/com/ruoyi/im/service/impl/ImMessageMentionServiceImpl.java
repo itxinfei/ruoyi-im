@@ -144,7 +144,7 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
         }
 
         // 只对群聊进行权限验证
-        if ("GROUP".equals(conversation.getType())) {
+        if (StatusConstants.ConversationType.GROUP.equals(conversation.getType())) {
             Long groupId = conversation.getTargetId();
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, senderId);
 
@@ -168,7 +168,7 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
      */
     private List<Long> getAllGroupMemberIds(Long conversationId) {
         ImConversation conversation = conversationMapper.selectById(conversationId);
-        if (conversation == null || !"GROUP".equals(conversation.getType())) {
+        if (conversation == null || !StatusConstants.ConversationType.GROUP.equals(conversation.getType())) {
             return null;
         }
 
