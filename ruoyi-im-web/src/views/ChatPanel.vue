@@ -512,7 +512,7 @@ const handleSend = async (content) => {
     if (index !== -1) {
       // 保持 status 为 success，且替换为真实数据
       const realMsg = transformMsg(msg)
-      messages.value.splice(index, 1, { ...realMsg, status: 'sent' })
+      messages.value.splice(index, 1, { ...realMsg, status: null })
     }
   } catch (error) {
     // 发送失败，标记状态
@@ -564,7 +564,7 @@ const handleSendVoice = async ({ file, duration }) => {
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
       const realMsg = transformMsg(msg)
-      messages.value.splice(index, 1, { ...realMsg, status: 'sent' })
+      messages.value.splice(index, 1, { ...realMsg, status: null })
     }
   } catch (error) {
     // 发送失败，标记状态
@@ -955,7 +955,7 @@ const uploadImageFile = async (file) => {
         messages.value[index] = {
           ...messages.value[index],
           content: JSON.stringify({ imageUrl: res.data.url }),
-          status: 'sent'
+          status: null
         }
       }
     }
@@ -1037,7 +1037,7 @@ const handleRetry = async (msg) => {
     
     // 更新
     const realMsg = transformMsg(res)
-    Object.assign(msg, { ...realMsg, status: 'sent' })
+    Object.assign(msg, { ...realMsg, status: null })
   } catch (error) {
     msg.status = 'failed'
     ElMessage.error('重试失败')
@@ -1390,7 +1390,7 @@ const handleFileUpload = async (payload) => {
       // 4. 更新状态
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
       }
     } else {
       throw new Error(res.msg || 'Upload failed')
@@ -1460,7 +1460,7 @@ const handleImageUpload = async (payload) => {
       
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
       }
       // 释放 blob
       URL.revokeObjectURL(blobUrl)
@@ -1516,7 +1516,7 @@ const handleScreenshotUpload = async (formData) => {
 
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
       }
       URL.revokeObjectURL(blobUrl)
     } else {
@@ -1579,7 +1579,7 @@ const handleVideoUpload = async ({ file, url }) => {
       // 4. 更新状态
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
       }
       // 释放 blob
       URL.revokeObjectURL(url)
@@ -1636,7 +1636,7 @@ const handleSendLocation = async ({ latitude, longitude, address }) => {
     // 3. 更新状态
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
-      messages.value.splice(index, 1, { ...transformMsg(msg), status: 'sent' })
+      messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
     }
   } catch (error) {
     const index = messages.value.findIndex(m => m.id === tempId)
@@ -1673,16 +1673,16 @@ onMounted(() => {
     const index = messages.value.findIndex(m => m.id === data.messageId)
     if (index !== -1) {
       // 映射后端 sendStatus 数值到前端状态字符串
-      // 0=PENDING, 1=SENDING, 2=DELIVERED, 3=READ, 4=FAILED
+      // 0=PENDING, 1=SENDING, 2=DELIVERED(不显示), 3=READ(已读), 4=FAILED
       const statusMap = {
-        0: 'sending',  // PENDING
-        1: 'sending',  // SENDING
-        2: 'sent',     // DELIVERED - 双勾（蓝色）
-        3: 'read',     // READ - 实心双勾（绿色）
-        4: 'failed'    // FAILED
+        0: 'sending',  // PENDING - 显示发送中
+        1: 'sending',  // SENDING - 显示发送中
+        2: null,       // DELIVERED - 不显示任何状态（已移除已送达显示）
+        3: 'read',     // READ - 显示已读
+        4: 'failed'    // FAILED - 显示失败
       }
       const sendStatus = parseInt(data.sendStatus)
-      messages.value[index].status = statusMap[sendStatus] ?? 'sent'
+      messages.value[index].status = statusMap[sendStatus] ?? null
     }
   })
 
@@ -1729,9 +1729,11 @@ onMounted(() => {
   height: 100%;
   flex: 1;
   min-width: 0;
+  min-height: 0;              // 修复 flex 子元素高度问题
+  overflow: hidden;           // 防止内容溢出
   background: var(--dt-bg-body);
   position: relative;
-  z-index: 2; // 确保 ChatPanel 在 SessionPanel 之上
+  z-index: var(--dt-z-base);  // 使用设计令牌替代魔法值
 
 
   &.is-dragging {
@@ -1795,8 +1797,7 @@ onMounted(() => {
 .main-container {
   display: flex;
   flex: 1;
-  height: 100%;
-  min-height: 0;
+  min-height: 0;    // flex: 1 配合 min-height: 0 正确处理高度
   overflow: hidden;
 }
 
@@ -1865,7 +1866,7 @@ onMounted(() => {
   justify-content: space-between;
   padding: 0 24px;
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
-  z-index: 100;
+  z-index: var(--dt-z-sticky);
 
   .selection-info {
     display: flex;

@@ -14,7 +14,7 @@
     >
       <!-- 搜索框 -->
       <div class="search-section">
-        <div class="search-box">
+        <div class="search-box" :class="{ 'is-focused': showSearchHistory }">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
             <path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
@@ -24,6 +24,8 @@
             type="text"
             placeholder="搜索联系人、群组"
             @input="handleSearch"
+            @focus="onSearchFocus"
+            @blur="showSearchHistory = false"
           />
           <button v-if="searchQuery" class="clear-btn" @click="clearSearch">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -31,6 +33,26 @@
             </svg>
           </button>
         </div>
+        
+        <!-- 搜索历史 -->
+        <Transition name="fade">
+          <div v-if="showSearchHistory" class="search-history">
+            <div class="history-header">
+              <span>搜索历史</span>
+              <button class="clear-history-btn" @click="clearSearchHistory">清除</button>
+            </div>
+            <div class="history-list">
+              <span
+                v-for="item in searchHistory"
+                :key="item"
+                class="history-tag"
+                @mousedown.prevent="useHistorySearch(item)"
+              >
+                {{ item }}
+              </span>
+            </div>
+          </div>
+        </Transition>
       </div>
 
       <!-- 导航菜单 -->
@@ -93,28 +115,30 @@
             :class="{ expanded: orgExpanded }"
             @click="toggleOrg"
           >
-             <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <svg class="arrow-icon" :class="{ rotated: orgExpanded }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
             <span class="item-text font-medium">组织架构</span>
           </div>
 
-          <div v-show="orgExpanded" class="org-list">
-            <div
-              v-for="dept in flatDepts"
-              :key="dept.id"
-              class="org-item"
-              :class="{
-                'is-child': dept.isChild,
-                active: selectedDeptId === dept.id
-              }"
-              @click="selectDept(dept)"
-            >
-              <span v-if="dept.isChild" class="org-dot"></span>
-              <span class="org-name">{{ dept.name }}</span>
-              <span class="org-count">({{ dept.userCount || 0 }})</span>
+          <Transition name="slide-down">
+            <div v-show="orgExpanded" class="org-list">
+              <div
+                v-for="dept in flatDepts"
+                :key="dept.id"
+                class="org-item"
+                :class="{
+                  'is-child': dept.isChild,
+                  active: selectedDeptId === dept.id
+                }"
+                @click="selectDept(dept)"
+              >
+                <span v-if="dept.isChild" class="org-dot"></span>
+                <span class="org-name">{{ dept.name }}</span>
+                <span class="org-count">({{ dept.userCount || 0 }})</span>
+              </div>
             </div>
-          </div>
+          </Transition>
         </div>
       </nav>
     </aside>
@@ -242,6 +266,7 @@
       </div>
 
       <template v-else>
+        <!-- 联系人详情 -->
         <ContactDetail 
             v-if="selectedType === 'friend' || selectedType === 'member'" 
             :user="selectedItem"
@@ -249,39 +274,58 @@
             @video-call="startVideoCall"
             @message="startChat"
         />
-        <GroupProfileDialog 
-            v-else-if="selectedType === 'group'"
-            :model-value="true" 
-            :group="selectedItem"
-            :inline="true"
-            @close=""
-        />
-        <!-- Note: GroupProfileDialog typically is a dialog, we might need an extraction here or use content directly. 
-             Ideally we should have a GroupDetail component. For now reusing existing or duplicating structure inside.
-             The original code had inline Detail logic. Let's keep inline logic or Component if available.
-             Original code had inline template. Let's extract to ensure cleanliness or restore inline.
-             To be safe and consistent with 'ContactDetail' I will restore inline logic simplified or use a new component.
-             Since I cannot see GroupProfileDialog content fully, I will restore inline layout for Groups to match original behavior but refined.
-        -->
+        <!-- 群组详情 - 统一风格 -->
         <div v-else-if="selectedType === 'group'" class="detail-content">
-             <div class="detail-header">
-                <DingtalkAvatar :name="selectedItem?.name" :size="80" :src="selectedItem?.avatar" shape="square" />
-                <div class="detail-name">{{ selectedItem?.name }}</div>
-                <div class="detail-signature">{{ selectedItem?.description || '暂无描述' }}</div>
-             </div>
-             <div class="detail-actions">
-                <el-button type="primary" size="large" @click="startChat">发消息</el-button>
-             </div>
-             <div class="detail-section">
-                <div class="info-item">
-                    <span class="info-label">群主</span>
-                    <span class="info-value">{{ selectedItem?.ownerName || 'Unknown' }}</span>
-                </div>
-                 <div class="info-item">
-                    <span class="info-label">成员数</span>
-                    <span class="info-value">{{ selectedItem?.memberCount || 0 }}</span>
-                </div>
-             </div>
+          <div class="detail-header">
+            <DingtalkAvatar :name="selectedItem?.name" :size="80" :src="selectedItem?.avatar" shape="square" />
+            <div class="detail-name">{{ selectedItem?.name }}</div>
+            <div class="detail-meta">
+              <span class="meta-item">{{ selectedItem?.memberCount || 0 }} 人</span>
+              <span class="meta-divider">·</span>
+              <span class="meta-item">群号: {{ selectedItem?.id }}</span>
+            </div>
+            <div class="detail-signature">{{ selectedItem?.description || '暂无群描述' }}</div>
+          </div>
+          
+          <div class="detail-actions">
+            <button class="action-btn primary" @click="startChat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              发消息
+            </button>
+            <button class="action-btn" @click="startVoiceCall">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              语音通话
+            </button>
+            <button class="action-btn" @click="startVideoCall">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+              视频通话
+            </button>
+          </div>
+          
+          <div class="detail-section">
+            <div class="section-title">群信息</div>
+            <div class="info-list">
+              <div class="info-item">
+                <span class="info-label">群主</span>
+                <span class="info-value">{{ selectedItem?.ownerName || '-' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">创建时间</span>
+                <span class="info-value">{{ selectedItem?.createTime || '-' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">群公告</span>
+                <span class="info-value">{{ selectedItem?.notice || '暂无公告' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </template>
     </aside>
@@ -291,13 +335,13 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
-import { useWindowSize } from '@vueuse/core'
+import { useWindowSize, useDebounceFn } from '@vueuse/core'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
 import ContactItem from '@/components/Contacts/ContactItem.vue'
 import ContactDetail from '@/components/Contacts/ContactDetail.vue'
 import VirtualList from '@/components/Common/VirtualList.vue'
-import { getFriendRequests, getGroupedFriendList } from '@/api/im/contact'
+import { getFriendRequests, getGroupedFriendList, searchContacts } from '@/api/im/contact'
 import { getGroups } from '@/api/im/group'
 import { getOrgTree, getDepartmentMembers } from '@/api/im/organization'
 import { ElMessage } from 'element-plus'
@@ -532,28 +576,103 @@ const startChat = () => {
 }
 const startVoiceCall = () => ElMessage.info('语音通话开发中')
 const startVideoCall = () => ElMessage.info('视频通话开发中')
-const clearSearch = () => searchQuery.value = ''
-const handleSearch = () => {
+// 搜索历史
+const searchHistory = ref([])
+const showSearchHistory = ref(false)
+
+// 加载搜索历史
+const loadSearchHistory = () => {
+    const history = localStorage.getItem('contacts_search_history')
+    if (history) {
+        searchHistory.value = JSON.parse(history)
+    }
+}
+
+// 保存搜索历史
+const saveSearchHistory = (query) => {
+    if (!query.trim()) return
+    const history = searchHistory.value.filter(h => h !== query)
+    history.unshift(query)
+    if (history.length > 10) history.pop()
+    searchHistory.value = history
+    localStorage.setItem('contacts_search_history', JSON.stringify(history))
+}
+
+// 清除搜索历史
+const clearSearchHistory = () => {
+    searchHistory.value = []
+    localStorage.removeItem('contacts_search_history')
+}
+
+// 使用历史搜索
+const useHistorySearch = (query) => {
+    searchQuery.value = query
+    handleSearch()
+}
+
+const clearSearch = () => {
+    searchQuery.value = ''
+    searchResults.value = []
+    showSearchHistory.value = false
+}
+
+// 防抖搜索
+const handleSearch = useDebounceFn(async () => {
     if (!searchQuery.value.trim()) {
+        searchResults.value = []
+        showSearchHistory.value = false
+        return
+    }
+    
+    loading.value = true
+    showSearchHistory.value = false
+    
+    try {
+        // 优先使用后端搜索
+        const res = await searchContacts({ keyword: searchQuery.value.trim() })
+        if (res.code === 200 && res.data) {
+            searchResults.value = [
+                ...(res.data.users || []).map(u => ({ ...u, type: 'friend' })),
+                ...(res.data.groups || []).map(g => ({ ...g, type: 'group' }))
+            ]
+        } else {
+            // 降级到前端搜索
+            performLocalSearch()
+        }
+        // 保存搜索历史
+        saveSearchHistory(searchQuery.value)
+    } catch (e) {
+        // 后端搜索失败，使用前端搜索
+        performLocalSearch()
+    } finally {
+        loading.value = false
+    }
+}, 300)
+
+// 前端本地搜索（降级方案）
+const performLocalSearch = () => {
+    const q = searchQuery.value.toLowerCase().trim()
+    if (!q) {
         searchResults.value = []
         return
     }
-    const q = searchQuery.value.toLowerCase()
+    
     const results = []
     
-    // Search Friends
+    // 搜索好友
     friendGroups.value.forEach(g => {
         if (g.friends) {
             g.friends.forEach(f => {
                 const name = f.displayName || f.friendName || ''
-                if (name.toLowerCase().includes(q)) {
+                const pinyin = f.pinyin || ''
+                if (name.toLowerCase().includes(q) || pinyin.toLowerCase().includes(q)) {
                     results.push({ ...f, type: 'friend' })
                 }
             })
         }
     })
     
-    // Search Groups
+    // 搜索群组
     groupList.value.forEach(g => {
         if (g.name && g.name.toLowerCase().includes(q)) {
             results.push({ ...g, type: 'group' })
@@ -561,6 +680,13 @@ const handleSearch = () => {
     })
     
     searchResults.value = results
+}
+
+// 聚焦搜索框时显示历史
+const onSearchFocus = () => {
+    if (!searchQuery.value && searchHistory.value.length > 0) {
+        showSearchHistory.value = true
+    }
 }
 const handleDelete = () => ElMessage.warning('删除功能开发中')
 
@@ -579,6 +705,7 @@ const flattenOrgTree = (tree) => {
 onMounted(() => {
     loadFriends()
     loadOrgTree()
+    loadSearchHistory()
 })
 </script>
 
@@ -605,10 +732,11 @@ onMounted(() => {
 
 // ============================================================================
 // 侧边栏 Sidebar - 使用浅色背景，改善可读性
+// 钉钉风格：侧边栏宽度 200px
 // ============================================================================
 
 .sidebar {
-  width: 260px;
+  width: 200px; /* 钉钉标准宽度 */
   background: #ffffff;
   border-right: 1px solid var(--dt-border-divider);
   display: flex;
@@ -652,11 +780,78 @@ onMounted(() => {
 // ============================================================================
 
 .search-section {
-  padding: 16px;
+  padding: 12px 8px; /* 左右与列表内边距对齐 */
   border-bottom: 1px solid var(--dt-border-lighter);
+  position: relative;
 
   .dark & {
     border-bottom-color: var(--dt-border-dark);
+  }
+}
+
+// 搜索历史下拉
+.search-history {
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  right: 8px;
+  background: #ffffff;
+  border-radius: var(--dt-radius-md);
+  box-shadow: var(--dt-shadow-float);
+  padding: 12px;
+  z-index: 100;
+  margin-top: 4px;
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+  }
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-secondary);
+}
+
+.clear-history-btn {
+  border: none;
+  background: transparent;
+  color: var(--dt-brand-color);
+  font-size: var(--dt-font-size-sm);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--dt-radius-sm);
+
+  &:hover {
+    background: var(--dt-brand-bg);
+  }
+}
+
+.history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.history-tag {
+  padding: 6px 12px;
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-primary);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-bg-session-hover);
+    color: var(--dt-brand-color);
+  }
+
+  .dark & {
+    background: var(--dt-bg-body-dark);
   }
 }
 
@@ -664,10 +859,10 @@ onMounted(() => {
   position: relative;
   display: flex;
   align-items: center;
-  height: 40px;
+  height: 32px;
   background: var(--dt-bg-card-hover);
   border-radius: var(--dt-radius-md);
-  padding: 0 12px;
+  padding: 0 8px;
   transition: all var(--dt-transition-base);
 
   &:focus-within {
@@ -681,11 +876,11 @@ onMounted(() => {
   }
 
   .search-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     color: var(--dt-text-tertiary);
     flex-shrink: 0;
-    margin-right: 8px;
+    margin-right: 6px;
   }
 
   input {
@@ -733,7 +928,7 @@ onMounted(() => {
 .nav-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 12px;
+  padding: 8px 8px; /* 减少左右内边距，为内容腾出空间 */
 
   @extend .scrollbar-sm;
 }
@@ -741,7 +936,7 @@ onMounted(() => {
 .nav-divider {
   height: 1px;
   background: var(--dt-border-lighter);
-  margin: 8px 0 12px;
+  margin: 8px 8px 12px; /* 与列表内边距对齐 */
 
   .dark & {
     background: var(--dt-border-dark);
@@ -750,14 +945,17 @@ onMounted(() => {
 
 .nav-item {
   display: flex;
+  flex-direction: row; /* 显式声明水平排列，防止变形 */
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 8px; /* 减少图标与文字间距 */
+  height: 36px;
+  padding: 0 8px; /* 减少内边距 */
   border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: background-color 0.15s ease, color 0.15s ease;
   color: var(--dt-text-primary);
   user-select: none;
+  position: relative;
 
   &:hover {
     background: var(--dt-bg-session-hover);
@@ -766,6 +964,19 @@ onMounted(() => {
   &.active {
     background: var(--dt-brand-bg);
     color: var(--dt-brand-color);
+
+    /* 钉钉风格：左侧蓝色指示条 */
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 16px;
+      background: var(--dt-brand-color);
+      border-radius: 0 2px 2px 0;
+    }
 
     .icon-wrapper {
       background: var(--dt-brand-color);
@@ -776,26 +987,30 @@ onMounted(() => {
     flex: 1;
     font-size: var(--dt-font-size-base);
     font-weight: var(--dt-font-weight-normal);
+    white-space: nowrap; /* 防止文字换行 */
+    overflow: hidden;
+    text-overflow: ellipsis; /* 超长显示省略号 */
   }
 
   .item-badge {
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
+    min-width: 18px; /* 稍微缩小徽章 */
+    height: 18px;
+    padding: 0 5px;
     background: var(--dt-error-color);
     color: #ffffff;
     font-size: var(--dt-font-size-xs);
     font-weight: var(--dt-font-weight-medium);
-    border-radius: 10px;
+    border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 }
 
 .icon-wrapper {
-  width: 36px;
-  height: 36px;
+  width: 30px; /* 稍微缩小图标容器 */
+  height: 30px;
   border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
@@ -808,26 +1023,29 @@ onMounted(() => {
   &.bg-green { background: #4CAF50; }
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
 }
 
-// 组织架构样式
+// 组织架构样式 - 钉钉风格优化
 .org-section {
   margin-top: 4px;
 
   .nav-item.org-root {
-    padding: 8px 12px;
+    height: 36px;
+    padding: 0 8px; /* 与导航项保持一致 */
     color: var(--dt-text-secondary);
     font-weight: var(--dt-font-weight-medium);
 
     .arrow-icon {
-      width: 16px;
-      height: 16px;
-      transition: transform var(--dt-transition-fast);
+      width: 14px;
+      height: 14px;
+      transition: transform 0.2s ease;
+      margin-right: 4px;
+      flex-shrink: 0;
 
-      .org-root.expanded & {
+      &.rotated {
         transform: rotate(90deg);
       }
     }
@@ -838,19 +1056,41 @@ onMounted(() => {
   }
 
   .org-list {
-    margin-left: 16px;
+    margin-left: 12px; /* 减少左侧缩进 */
     padding: 4px 0;
+    transform-origin: top;
+  }
+
+  // 展开/收起动画
+  .slide-down-enter-active,
+  .slide-down-leave-active {
+    transition: all 0.2s ease;
+    overflow: hidden;
+  }
+
+  .slide-down-enter-from,
+  .slide-down-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+
+  .slide-down-enter-to,
+  .slide-down-leave-from {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
   }
 
   .org-item {
     display: flex;
     align-items: center;
-    padding: 6px 12px;
+    padding: 6px 8px; /* 减少内边距 */
     font-size: var(--dt-font-size-sm);
     color: var(--dt-text-secondary);
     border-radius: var(--dt-radius-sm);
     cursor: pointer;
-    transition: all var(--dt-transition-fast);
+    transition: background-color 0.15s ease, color 0.15s ease;
 
     &:hover {
       background: var(--dt-bg-session-hover);
@@ -858,13 +1098,13 @@ onMounted(() => {
     }
 
     &.is-child {
-      padding-left: 24px;
+      padding-left: 16px; /* 减少子部门缩进 */
       position: relative;
 
       &::before {
         content: '';
         position: absolute;
-        left: 12px;
+        left: 8px; /* 调整圆点位置 */
         top: 50%;
         transform: translateY(-50%);
         width: 4px;
@@ -881,11 +1121,16 @@ onMounted(() => {
 
     .org-name {
       flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .org-count {
       font-size: var(--dt-font-size-xs);
       color: var(--dt-text-quaternary);
+      flex-shrink: 0;
+      margin-left: 4px;
     }
   }
 }
@@ -957,7 +1202,7 @@ onMounted(() => {
   }
 }
 
-// A-Z 索引栏
+// A-Z 索引栏 - 钉钉风格优化
 .index-bar {
   position: absolute;
   right: 8px;
@@ -966,9 +1211,9 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px; /* 钉钉标准间距 */
   z-index: 10;
-  padding: 8px 4px;
+  padding: 4px 2px; /* 钉钉标准内边距 */
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-lg);
   box-shadow: var(--dt-shadow-1);
@@ -979,8 +1224,8 @@ onMounted(() => {
 }
 
 .index-item {
-  width: 20px;
-  height: 20px;
+  width: 18px; /* 钉钉标准索引项尺寸 */
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1101,12 +1346,12 @@ onMounted(() => {
 }
 
 // ============================================================================
-// 详情面板
+// 详情面板 - 钉钉风格优化
 // ============================================================================
 
 .detail-panel {
   flex: 1;
-  max-width: 400px;
+  max-width: 360px; /* 钉钉标准详情面板宽度 */
   background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
@@ -1198,18 +1443,25 @@ onMounted(() => {
 .detail-content {
   flex: 1;
   overflow-y: auto;
+  background: var(--dt-bg-body);
 
   @extend .scrollbar-sm;
+
+  .dark & {
+    background: var(--dt-bg-body-dark);
+  }
 }
 
 .detail-header {
-  padding: 32px 24px;
+  padding: 40px 24px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-lighter);
 
   .dark & {
+    background: var(--dt-bg-card-dark);
     border-bottom-color: var(--dt-border-dark);
   }
 
@@ -1221,42 +1473,123 @@ onMounted(() => {
     text-align: center;
   }
 
-  .detail-signature {
-    color: var(--dt-text-secondary);
+  .detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-top: 8px;
     font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+
+    .meta-divider {
+      color: var(--dt-text-quaternary);
+    }
+  }
+
+  .detail-signature {
+    color: var(--dt-text-secondary);
+    margin-top: 12px;
+    font-size: var(--dt-font-size-sm);
     text-align: center;
+    max-width: 280px;
+    line-height: 1.5;
   }
 }
 
 .detail-actions {
   padding: 20px 24px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
   gap: 12px;
+  background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-lighter);
 
   .dark & {
+    background: var(--dt-bg-card-dark);
     border-bottom-color: var(--dt-border-dark);
+  }
+
+  .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 20px;
+    border: none;
+    background: var(--dt-bg-body);
+    border-radius: var(--dt-radius-md);
+    cursor: pointer;
+    transition: all var(--dt-transition-fast);
+    min-width: 72px;
+
+    .dark & {
+      background: var(--dt-bg-body-dark);
+    }
+
+    &:hover {
+      background: var(--dt-brand-bg);
+      color: var(--dt-brand-color);
+    }
+
+    &.primary {
+      background: var(--dt-brand-color);
+      color: #ffffff;
+
+      &:hover {
+        background: var(--dt-brand-color-hover);
+      }
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-primary);
   }
 }
 
 .detail-section {
   padding: 20px 24px;
+  background: var(--dt-bg-card);
+  margin-top: 12px;
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+  }
+
+  .section-title {
+    font-size: var(--dt-font-size-base);
+    font-weight: var(--dt-font-weight-semibold);
+    color: var(--dt-text-primary);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--dt-border-lighter);
+
+    .dark & {
+      border-bottom-color: var(--dt-border-dark);
+    }
+  }
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
 }
 
 .info-item {
   display: flex;
   padding: 12px 0;
-  border-bottom: 1px solid var(--dt-border-lighter);
   font-size: var(--dt-font-size-base);
 
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--dt-border-lighter);
 
-  &:last-child {
-    border-bottom: none;
+    .dark & {
+      border-bottom-color: var(--dt-border-dark);
+    }
   }
 
   .info-label {
@@ -1273,16 +1606,31 @@ onMounted(() => {
 }
 
 // ============================================================================
+// 动画效果
+// ============================================================================
+
+// 淡入淡出动画
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// ============================================================================
 // 响应式适配
 // ============================================================================
 
 @media (max-width: 1024px) {
   .sidebar {
-    width: 220px;
+    width: 180px; /* 响应式适配 */
   }
 
   .detail-panel {
-    max-width: 350px;
+    max-width: 320px;
   }
 }
 
@@ -1298,6 +1646,16 @@ onMounted(() => {
 
   .list-panel {
     border-right: none;
+  }
+
+  .detail-actions {
+    flex-wrap: wrap;
+
+    .action-btn {
+      flex: 1;
+      min-width: 60px;
+      padding: 10px 12px;
+    }
   }
 }
 </style>

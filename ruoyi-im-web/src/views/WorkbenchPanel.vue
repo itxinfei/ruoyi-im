@@ -715,18 +715,19 @@ onMounted(() => {
 }
 
 // ============================================================================
-// 顶部欢迎区
+// 顶部欢迎区 - 钉钉风格优化
 // ============================================================================
 .workbench-header {
-  background: linear-gradient(135deg, #e6f4ff 0%, #f0f9ff 50%, #fff 100%);
+  background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 50%, #ffffff 100%);
   border-bottom: 1px solid var(--dt-border-light);
-  padding: 24px 32px;
+  padding: 20px 24px; // 钉钉标准内边距
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
+  min-height: 88px; // 钉钉标准头部高度
 
   &::before {
     content: '';
@@ -735,7 +736,7 @@ onMounted(() => {
     top: -100px;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(22, 119, 255, 0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(22, 119, 255, 0.06) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
   }
@@ -747,21 +748,27 @@ onMounted(() => {
 }
 
 .greeting-title {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 22px; // 钉钉标准标题大小
+  font-weight: 600; // 钉钉标准字重
   color: var(--dt-text-primary);
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
 .greeting-date {
   font-size: 13px;
   color: var(--dt-text-secondary);
   margin: 4px 0 0 0;
-  font-weight: 500;
+  font-weight: 400;
   display: flex;
   align-items: center;
   gap: 4px;
+
+  .material-icons-outlined {
+    font-size: 14px;
+    color: var(--dt-brand-color);
+  }
 }
 
 .header-actions {
@@ -794,12 +801,12 @@ onMounted(() => {
 
 .search-input {
   width: 100%;
-  max-width: 240px;
+  max-width: 280px; // 钉钉搜索框宽度
   height: 36px;
-  padding: 0 12px 0 36px;
-  background: var(--dt-bg-card);
+  padding: 0 12px 0 38px; // 增加左侧 padding 适配图标
+  background: #ffffff;
   border: 1px solid var(--dt-border-color);
-  border-radius: var(--dt-radius-lg);
+  border-radius: var(--dt-radius-md); // 钉钉使用 8px 圆角
   font-size: 14px;
   color: var(--dt-text-primary);
   outline: none;
@@ -810,29 +817,43 @@ onMounted(() => {
   }
 
   &:hover {
-    border-color: var(--dt-border-input-hover);
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 2px var(--dt-brand-bg);
   }
 
   &:focus {
     border-color: var(--dt-brand-color);
     box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
   }
+
+  .dark & {
+    background: var(--dt-bg-input-dark);
+    border-color: var(--dt-border-dark);
+
+    &:hover,
+    &:focus {
+      border-color: var(--dt-brand-color);
+    }
+  }
 }
 
+// ============================================================================
+// 按钮样式 - 钉钉风格优化
+// ============================================================================
 .icon-btn {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 16px;
-  height: 36px;
-  background: var(--dt-bg-card);
+  height: 32px; // 钉钉标准按钮高度
+  background: #ffffff;
   color: var(--dt-text-secondary);
   border: 1px solid var(--dt-border-color);
-  border-radius: var(--dt-radius-lg);
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: var(--dt-radius-md);
+  font-size: 14px;
+  font-weight: 400;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-color);
@@ -844,10 +865,21 @@ onMounted(() => {
     background: var(--dt-brand-color);
     color: #fff;
     border-color: var(--dt-brand-color);
+    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.2);
   }
 
   .material-icons-outlined {
     font-size: 18px;
+  }
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+    color: var(--dt-text-secondary-dark);
+
+    &:hover {
+      border-color: var(--dt-brand-color);
+    }
   }
 }
 
@@ -856,12 +888,12 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 0 16px;
-  height: 36px;
+  height: 32px;
   background: var(--dt-brand-color);
   color: #fff;
   border: none;
-  border-radius: var(--dt-radius-lg);
-  font-size: 13px;
+  border-radius: var(--dt-radius-md);
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--dt-transition-base);
@@ -869,7 +901,11 @@ onMounted(() => {
   &:hover {
     background: var(--dt-brand-hover);
     transform: translateY(-1px);
-    box-shadow: var(--dt-shadow-2);
+    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   .material-icons-outlined {
@@ -903,7 +939,7 @@ onMounted(() => {
 }
 
 // ============================================================================
-// 快捷应用区域
+// 快捷应用区域 - 钉钉风格优化
 // ============================================================================
 .quick-apps-section {
   position: relative;
@@ -913,15 +949,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px; // 钉钉标准间距
 }
 
 .section-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px; // 钉钉标准标题大小
+  font-weight: 500;
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -946,8 +982,8 @@ onMounted(() => {
 
 .quick-apps-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); // 钉钉使用4列快捷应用
-  gap: 16px; // 钉钉使用16px间距
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px; // 钉钉网格间距
 }
 
 .quick-app-item {
@@ -955,8 +991,8 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 12px 8px;
+  gap: 8px;
+  padding: 16px 8px;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-lg);
@@ -966,7 +1002,11 @@ onMounted(() => {
   &:hover {
     border-color: var(--dt-brand-color);
     transform: translateY(-2px);
-    box-shadow: var(--dt-shadow-2);
+    box-shadow: 0 4px 16px rgba(22, 119, 255, 0.12);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   &.add-app {
@@ -974,7 +1014,7 @@ onMounted(() => {
     border: 1px dashed var(--dt-border-color);
 
     .app-icon {
-      background: var(--dt-bg-input);
+      background: var(--dt-bg-hover);
       color: var(--dt-text-quaternary);
     }
 
@@ -1006,19 +1046,33 @@ onMounted(() => {
     font-size: 22px;
   }
 
-  &.icon-orange { background: rgba(250, 140, 22, 0.1); color: #fa8c16; }
-  &.icon-blue { background: rgba(22, 119, 255, 0.1); color: #1677ff; }
-  &.icon-green { background: rgba(82, 196, 26, 0.1); color: #52c41a; }
-  &.icon-purple { background: rgba(114, 46, 209, 0.1); color: #722ed1; }
-  &.icon-pink { background: rgba(235, 47, 150, 0.1); color: #eb2f96; }
-  &.icon-cyan { background: rgba(13, 202, 240, 0.1); color: #13c2c2; }
-  &.icon-indigo { background: rgba(89, 78, 236, 0.1); color: #594efc; }
-  &.icon-teal { background: rgba(19, 180, 167, 0.1); color: #13c2c2; }
+  // 钉钉风格应用图标颜色
+  &.icon-orange { background: rgba(250, 140, 22, 0.12); color: #fa8c16; }
+  &.icon-blue { background: rgba(22, 119, 255, 0.12); color: #1677ff; }
+  &.icon-green { background: rgba(82, 196, 26, 0.12); color: #52c41a; }
+  &.icon-purple { background: rgba(114, 46, 209, 0.12); color: #722ed1; }
+  &.icon-pink { background: rgba(235, 47, 150, 0.12); color: #eb2f96; }
+  &.icon-cyan { background: rgba(13, 202, 240, 0.12); color: #13c2c2; }
+  &.icon-indigo { background: rgba(89, 78, 236, 0.12); color: #594efc; }
+  &.icon-teal { background: rgba(19, 180, 167, 0.12); color: #13c2c2; }
+
+  .dark & {
+    background: var(--dt-bg-input-dark);
+
+    &.icon-orange { background: rgba(250, 140, 22, 0.2); color: #fdba74; }
+    &.icon-blue { background: rgba(22, 119, 255, 0.2); color: #7dd3fc; }
+    &.icon-green { background: rgba(82, 196, 26, 0.2); color: #86efac; }
+    &.icon-purple { background: rgba(114, 46, 209, 0.2); color: #c084fc; }
+    &.icon-pink { background: rgba(235, 47, 150, 0.2); color: #f472b6; }
+    &.icon-cyan { background: rgba(13, 202, 240, 0.2); color: #22d3ee; }
+    &.icon-indigo { background: rgba(89, 78, 236, 0.2); color: #818cf8; }
+    &.icon-teal { background: rgba(19, 180, 167, 0.2); color: #2dd4bf; }
+  }
 }
 
 .app-label {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--dt-text-primary);
   text-align: center;
   white-space: nowrap;
@@ -1033,7 +1087,7 @@ onMounted(() => {
 .bento-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); // 钉钉使用3列布局
-  gap: 12px; // 钉钉间距12px
+  gap: 16px; // 钉钉间距16px
   align-items: start;
 
   &.edit-mode {
@@ -1059,13 +1113,19 @@ onMounted(() => {
   position: relative;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-radius: 12px; // 钉钉使用12px圆角
+  border-radius: 8px; // 钉钉使用8px圆角
   overflow: hidden;
   transition: all var(--dt-transition-base);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); // 钉钉更轻的阴影
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); // 钉钉更轻的阴影
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); // 悬停时阴影加深
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); // 悬停时阴影加深
+    transform: translateY(-1px);
+  }
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
   }
 
   // 卡片尺寸

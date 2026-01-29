@@ -523,11 +523,13 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 
 .message-list {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;           // 防止横向溢出
+  overflow-y: auto;           // 单独控制纵向滚动
   padding: 16px;
   background: var(--dt-bg-chat);
   position: relative;
-  min-height: 0; // 修复 flex 容器溢出问题
+  min-height: 0;             // 修复 flex 容器溢出问题
+  word-break: break-word;    // 防止长文本撑破布局
 
   &::-webkit-scrollbar {
     width: 4px;

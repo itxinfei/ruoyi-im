@@ -293,13 +293,6 @@
           </div>
         </transition>
 
-        <!-- 已送达状态 (DELIVERED - 双勾轮廓) -->
-        <transition name="status-scale">
-          <div v-if="message.status === 'sent'" class="status-indicator status-delivered" title="已送达">
-            <span class="material-icons-outlined">done_all</span>
-          </div>
-        </transition>
-
         <!-- 已读状态 (READ - 双勾填充) -->
         <transition name="status-scale">
           <div v-if="message.status === 'read'" class="status-indicator status-read" title="已读">
@@ -991,7 +984,8 @@ onUnmounted(() => {
   line-height: 1.5;
   color: #303133;
   position: relative;
-  max-width: 520px;
+  max-width: min(520px, calc(100vw - 400px));  // 响应式最大宽度
+  overflow-wrap: break-word;                    // 防止长文本撑破
   transition: background-color 0.15s ease, border-color 0.15s ease;
   animation: messagePop 0.3s var(--dt-ease-bounce);
 
@@ -1061,7 +1055,6 @@ onUnmounted(() => {
         transform: translateY(0);
       }
     }
-    }
 
     &::after {
       content: 'keyboard_return';
@@ -1125,17 +1118,6 @@ onUnmounted(() => {
       .ref-text-content {
         color: #64748b;
       }
-
-        &::before {
-          content: 'attach_file';
-          font-family: 'Material Icons Outlined';
-          font-size: 14px;
-        }
-      }
-
-      .ref-image-text::before { content: 'image'; }
-      .ref-video-text::before { content: 'videocam'; }
-      .ref-voice-text::before { content: 'mic'; }
     }
 
 &:hover {
@@ -1501,22 +1483,6 @@ onUnmounted(() => {
         &:nth-child(2) { animation-delay: 0.16s; }
         &:nth-child(3) { animation-delay: 0.32s; }
       }
-    }
-  }
-
-  // 已送达状态 (DELIVERED - 双勾灰色)
-  .status-delivered {
-    color: #94a3b8;
-    opacity: 0.9;
-    transition: all 0.25s var(--dt-ease-out);
-
-    .material-icons-outlined {
-      font-weight: 400;
-    }
-
-    &:hover {
-      color: var(--dt-brand-color);
-      transform: scale(1.1);
     }
   }
 

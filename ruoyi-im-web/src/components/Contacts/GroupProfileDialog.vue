@@ -232,36 +232,45 @@ const handleExitGroup = async () => {
 
 :deep(.group-profile-dialog) {
   .el-dialog {
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 
   .el-dialog__header {
-    padding: 16px 20px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--dt-border-light);
     margin: 0;
+    background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
 
     .el-dialog__title {
       font-size: 16px;
       font-weight: 600;
-      color: var(--dt-text-primary);
+      color: #fff;
     }
 
     .el-dialog__headerbtn {
-      top: 16px;
-      right: 16px;
+      top: 18px;
+      right: 20px;
       width: 32px;
       height: 32px;
+      border-radius: 8px;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
 
       .el-dialog__close {
         font-size: 18px;
-        color: var(--dt-text-secondary);
+        color: rgba(255, 255, 255, 0.9);
       }
     }
   }
 
   .el-dialog__body {
-    padding: 24px;
+    padding: 28px;
+    background: var(--dt-bg-body);
   }
 }
 
@@ -279,15 +288,26 @@ const handleExitGroup = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 180px;
+  width: 200px;
   flex-shrink: 0;
-  padding-right: 24px;
-  border-right: 1px solid var(--dt-border-light);
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(114, 46, 209, 0.08) 0%, transparent 100%);
+  border-radius: 12px;
+  margin-right: 24px;
 
   .group-avatar-wrapper {
     width: 100px;
     height: 100px;
     margin-bottom: 16px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(114, 46, 209, 0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(114, 46, 209, 0.35);
+    }
 
     .group-avatar-img {
       width: 100%;
@@ -300,7 +320,7 @@ const handleExitGroup = async () => {
       width: 100%;
       height: 100%;
       border-radius: 20px;
-      background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+      background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
       color: #fff;
       display: flex;
       align-items: center;
@@ -313,7 +333,7 @@ const handleExitGroup = async () => {
   }
 
   .group-name {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: var(--dt-text-primary);
     margin: 0 0 12px;
@@ -325,33 +345,39 @@ const handleExitGroup = async () => {
   .group-meta {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     margin-bottom: 12px;
 
     .meta-item {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 12px;
+      font-size: 13px;
+      font-weight: 500;
       color: var(--dt-text-secondary);
+      background: rgba(114, 46, 209, 0.1);
+      padding: 4px 10px;
+      border-radius: 12px;
 
       .material-icons-outlined {
         font-size: 14px;
+        color: #722ed1;
       }
     }
   }
 
   .group-desc {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--dt-text-tertiary);
     text-align: center;
-    line-height: 1.5;
+    line-height: 1.6;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
+    padding: 0 4px;
   }
 }
 
@@ -366,47 +392,74 @@ const handleExitGroup = async () => {
 
 // 成员预览
 .members-preview {
+  background: var(--dt-bg-card);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--dt-border-lighter);
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+
   .section-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     font-size: 14px;
     font-weight: 600;
     color: var(--dt-text-primary);
 
     .count {
-      font-size: 12px;
-      color: var(--dt-text-tertiary);
-      font-weight: 400;
+      font-size: 13px;
+      color: #722ed1;
+      font-weight: 600;
+      background: rgba(114, 46, 209, 0.1);
+      padding: 2px 10px;
+      border-radius: 10px;
     }
   }
 
   .members-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
 
     .member-item {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       flex-shrink: 0;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      border-radius: 50%;
 
       &:hover {
-        transform: scale(1.1);
+        transform: scale(1.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      :deep(.dingtalk-avatar) {
+        border-radius: 50%;
       }
 
       &.more {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--dt-bg-body);
+        background: rgba(114, 46, 209, 0.08);
         border-radius: 50%;
-        font-size: 11px;
-        color: var(--dt-text-secondary);
-        border: 1px dashed var(--dt-border);
+        font-size: 12px;
+        font-weight: 600;
+        color: #722ed1;
+        border: 2px dashed rgba(114, 46, 209, 0.3);
+        transition: all 0.25s ease;
+
+        &:hover {
+          background: rgba(114, 46, 209, 0.15);
+          border-color: #722ed1;
+          transform: scale(1.1);
+        }
       }
     }
   }
@@ -415,42 +468,61 @@ const handleExitGroup = async () => {
 // 快捷操作
 .quick-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
 
   .quick-btn {
     flex: 1;
-    height: 36px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    background: var(--dt-bg-body);
+    gap: 8px;
+    background: #ffffff;
     border: 1px solid var(--dt-border-light);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 14px;
+    font-weight: 500;
     color: var(--dt-text-primary);
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    .dark & {
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
+    }
 
     .material-icons-outlined {
-      font-size: 18px;
+      font-size: 20px;
     }
 
     &.primary {
       flex: 2;
-      background: var(--dt-brand-color);
-      border-color: var(--dt-brand-color);
+      background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+      border-color: transparent;
       color: #fff;
+      box-shadow: 0 4px 12px rgba(114, 46, 209, 0.35);
 
       &:hover {
-        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(114, 46, 209, 0.45);
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
 
     &:hover:not(.primary) {
       background: var(--dt-bg-hover);
-      border-color: var(--dt-brand-color);
-      color: var(--dt-brand-color);
+      border-color: #722ed1;
+      color: #722ed1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active:not(.primary) {
+      transform: translateY(0);
     }
   }
 }
@@ -459,35 +531,50 @@ const handleExitGroup = async () => {
 .more-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 
   .more-btn {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
-    background: transparent;
-    border: 1px solid var(--dt-border-light);
-    border-radius: 8px;
+    padding: 10px 16px;
+    background: var(--dt-bg-card);
+    border: 1px solid var(--dt-border-lighter);
+    border-radius: 10px;
     cursor: pointer;
     font-size: 13px;
+    font-weight: 500;
     color: var(--dt-text-secondary);
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+
+    .dark & {
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
+    }
 
     .material-icons-outlined {
-      font-size: 16px;
+      font-size: 18px;
     }
 
     &:hover {
       background: var(--dt-bg-hover);
-      border-color: var(--dt-brand-color);
-      color: var(--dt-brand-color);
+      border-color: #722ed1;
+      color: #722ed1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
-    &.danger:hover {
-      background: var(--dt-error-bg);
-      border-color: var(--dt-error-color);
-      color: var(--dt-error-color);
+    &:active {
+      transform: translateY(0);
+    }
+
+    &.danger {
+      &:hover {
+        background: var(--dt-error-bg);
+        border-color: var(--dt-error-color);
+        color: var(--dt-error-color);
+      }
     }
   }
 }

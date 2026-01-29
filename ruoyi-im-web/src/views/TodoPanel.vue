@@ -14,10 +14,34 @@
           </div>
         </div>
       </div>
-      <button class="add-btn" @click="showAddDialog = true">
-        <span class="material-icons-outlined">add</span>
-        <span>新建待办</span>
-      </button>
+      <div class="header-actions">
+        <!-- 批量操作按钮 -->
+        <template v-if="batchMode">
+          <span class="selected-count">已选 {{ selectedTodos.size }} 项</span>
+          <button class="batch-btn batch-btn--complete" @click="batchComplete" :disabled="selectedTodos.size === 0">
+            <span class="material-icons-outlined">check_circle</span>
+            <span>完成</span>
+          </button>
+          <button class="batch-btn batch-btn--danger" @click="batchDelete" :disabled="selectedTodos.size === 0">
+            <span class="material-icons-outlined">delete</span>
+            <span>删除</span>
+          </button>
+          <button class="batch-btn batch-btn--cancel" @click="exitBatchMode">
+            <span class="material-icons-outlined">close</span>
+            <span>取消</span>
+          </button>
+        </template>
+        <template v-else>
+          <button class="icon-btn" @click="enterBatchMode" title="批量操作">
+            <span class="material-icons-outlined">checklist</span>
+            <span>批量</span>
+          </button>
+          <button class="add-btn" @click="showAddDialog = true">
+            <span class="material-icons-outlined">add</span>
+            <span>新建待办</span>
+          </button>
+        </template>
+      </div>
     </div>
 
     <!-- 统计卡片 -->
@@ -135,17 +159,31 @@
             :class="{
               completed: todo.completed,
               overdue: isOverdue(todo.dueDate),
-              [`priority-${todo.priority}`]: true
+              [`priority-${todo.priority}`]: true,
+              'batch-selected': selectedTodos.has(todo.id),
+              'is-dragging': draggingTodo === todo.id
             }"
-            @click="handleViewDetail(todo)"
+            draggable="true"
+            @dragstart="handleDragStart($event, todo)"
+            @dragend="handleDragEnd"
+            @dragover="handleDragOver($event, todo)"
+            @drop="handleDrop($event, todo)"
+            @click="handleItemClick(todo)"
           >
             <!-- 优先级指示条 -->
             <div class="priority-indicator" :class="`priority-${todo.priority}`">
               <div class="indicator-glow"></div>
             </div>
 
-            <!-- 复选框 -->
-            <div class="todo-checkbox" @click.stop="toggleComplete(todo)">
+            <!-- 批量选择复选框 -->
+            <div v-if="batchMode" class="batch-checkbox" @click.stop="toggleSelectTodo(todo)">
+              <div class="checkbox-inner" :class="{ checked: selectedTodos.has(todo.id) }">
+                <span v-if="selectedTodos.has(todo.id)" class="material-icons-outlined check-icon">check</span>
+              </div>
+            </div>
+
+            <!-- 完成复选框 -->
+            <div v-else class="todo-checkbox" @click.stop="toggleComplete(todo)">
               <div class="checkbox-inner" :class="{ checked: todo.completed }">
                 <span v-if="todo.completed" class="material-icons-outlined check-icon">check</span>
                 <div class="checkbox-ripple"></div>
@@ -171,6 +209,9 @@
 
             <!-- 操作按钮 -->
             <div class="todo-actions" @click.stop>
+              <span v-if="!batchMode" class="drag-handle" title="拖拽排序">
+                <span class="material-icons-outlined">drag_indicator</span>
+              </span>
               <el-tooltip content="编辑" placement="top">
                 <button class="action-btn" @click="handleEdit(todo)">
                   <span class="material-icons-outlined">edit</span>
@@ -206,12 +247,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateTodoDialog from '@/components/CreateTodoDialog/index.vue'
 import TodoDetailDialog from '@/components/TodoDetailDialog/index.vue'
-import { getTodos, completeTodo, deleteTodo as deleteTodoApi } from '@/api/im/workbench'
+import { getTodos, completeTodo, deleteTodo as deleteTodoApi, updateTodo } from '@/api/im/workbench'
 
 const loading = ref(false)
 const showAddDialog = ref(false)
@@ -220,6 +261,14 @@ const todos = ref([])
 const editingTodo = ref(null)
 const selectedTodo = ref(null)
 const activeFilter = ref('all')
+
+// 批量操作状态
+const batchMode = ref(false)
+const selectedTodos = ref(new Set())
+
+// 拖拽排序状态
+const draggingTodo = ref(null)
+const dragOverTodo = ref(null)
 
 // 筛选标签配置
 const filterTabs = [
@@ -452,6 +501,152 @@ const handleTodoCreated = () => {
   loadTodos()
 }
 
+// ============================================================================
+// 批量操作功能
+// ============================================================================
+const enterBatchMode = () => {
+  batchMode.value = true
+  selectedTodos.value.clear()
+}
+
+const exitBatchMode = () => {
+  batchMode.value = false
+  selectedTodos.value.clear()
+}
+
+const toggleSelectTodo = (todo) => {
+  if (selectedTodos.value.has(todo.id)) {
+    selectedTodos.value.delete(todo.id)
+  } else {
+    selectedTodos.value.add(todo.id)
+  }
+  // 触发响应式更新
+  selectedTodos.value = new Set(selectedTodos.value)
+}
+
+const selectAllTodos = () => {
+  if (selectedTodos.value.size === filteredTodos.value.length) {
+    selectedTodos.value.clear()
+  } else {
+    filteredTodos.value.forEach(todo => selectedTodos.value.add(todo.id))
+  }
+  selectedTodos.value = new Set(selectedTodos.value)
+}
+
+const batchComplete = async () => {
+  if (selectedTodos.value.size === 0) return
+
+  try {
+    await ElMessageBox.confirm(`确定要完成选中的 ${selectedTodos.value.size} 个待办吗？`, '批量完成', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
+    })
+
+    const promises = Array.from(selectedTodos.value).map(id => completeTodo(id))
+    await Promise.all(promises)
+
+    // 更新本地状态
+    todos.value = todos.value.map(todo => {
+      if (selectedTodos.value.has(todo.id)) {
+        return { ...todo, completed: true }
+      }
+      return todo
+    })
+
+    ElMessage.success(`已完成 ${selectedTodos.value.size} 个待办`)
+    exitBatchMode()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('批量完成失败', error)
+      ElMessage.error('操作失败，请稍后重试')
+    }
+  }
+}
+
+const batchDelete = async () => {
+  if (selectedTodos.value.size === 0) return
+
+  try {
+    await ElMessageBox.confirm(`确定要删除选中的 ${selectedTodos.value.size} 个待办吗？此操作不可恢复。`, '批量删除', {
+      type: 'error',
+      confirmButtonText: '删除',
+      cancelButtonText: '取消'
+    })
+
+    const promises = Array.from(selectedTodos.value).map(id => deleteTodoApi(id))
+    await Promise.all(promises)
+
+    // 从列表中移除已删除的待办
+    todos.value = todos.value.filter(todo => !selectedTodos.value.has(todo.id))
+
+    ElMessage.success(`已删除 ${selectedTodos.value.size} 个待办`)
+    exitBatchMode()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('批量删除失败', error)
+      ElMessage.error('操作失败，请稍后重试')
+    }
+  }
+}
+
+// ============================================================================
+// 拖拽排序功能
+// ============================================================================
+const handleDragStart = (e, todo) => {
+  if (batchMode.value) {
+    e.preventDefault()
+    return
+  }
+  draggingTodo.value = todo.id
+  e.dataTransfer.effectAllowed = 'move'
+  e.target.classList.add('is-dragging')
+}
+
+const handleDragEnd = (e) => {
+  draggingTodo.value = null
+  dragOverTodo.value = null
+  e.target.classList.remove('is-dragging')
+}
+
+const handleDragOver = (e, todo) => {
+  e.preventDefault()
+  if (!draggingTodo.value || draggingTodo.value === todo.id || batchMode.value) return
+  dragOverTodo.value = todo.id
+}
+
+const handleDrop = async (e, targetTodo) => {
+  e.preventDefault()
+  if (!draggingTodo.value || draggingTodo.value === targetTodo.id || batchMode.value) return
+
+  // 交换数组位置
+  const draggingIndex = todos.value.findIndex(t => t.id === draggingTodo.value)
+  const targetIndex = todos.value.findIndex(t => t.id === targetTodo.id)
+
+  if (draggingIndex !== -1 && targetIndex !== -1) {
+    const temp = todos.value[draggingIndex]
+    todos.value.splice(draggingIndex, 1)
+    todos.value.splice(targetIndex, 0, temp)
+
+    // 保存顺序到后端（如果有相关API）
+    ElMessage.success('排序已更新')
+  }
+
+  draggingTodo.value = null
+  dragOverTodo.value = null
+}
+
+// ============================================================================
+// 点击处理（批量模式和普通模式）
+// ============================================================================
+const handleItemClick = (todo) => {
+  if (batchMode.value) {
+    toggleSelectTodo(todo)
+  } else {
+    handleViewDetail(todo)
+  }
+}
+
 onMounted(() => {
   loadTodos()
 })
@@ -484,6 +679,91 @@ onMounted(() => {
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
+  gap: 16px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.selected-count {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  padding: 0 8px;
+}
+
+.batch-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &--complete {
+    background: var(--dt-success-bg);
+    color: var(--dt-success-color);
+    border-color: var(--dt-success-color);
+
+    &:hover:not(:disabled) {
+      background: var(--dt-success-color);
+      color: #fff;
+    }
+  }
+
+  &--danger {
+    background: var(--dt-error-bg);
+    color: var(--dt-error-color);
+    border-color: var(--dt-error-color);
+
+    &:hover:not(:disabled) {
+      background: var(--dt-error-color);
+      color: #fff;
+    }
+  }
+
+  &--cancel {
+    background: #f5f5f5;
+    color: #666;
+
+    &:hover:not(:disabled) {
+      background: #e0e0e0;
+    }
+  }
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: var(--dt-brand-color);
+    color: var(--dt-brand-color);
+    background: var(--dt-brand-bg);
+  }
+}
 
   &::after {
     content: '';
@@ -1235,6 +1515,43 @@ onMounted(() => {
 }
 
 // ============================================================================
+// 批量选择复选框
+// ============================================================================
+.batch-checkbox {
+  flex-shrink: 0;
+  padding-top: 3px;
+  cursor: pointer;
+}
+
+.batch-checkbox .checkbox-inner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d0d0d0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: #fafafa;
+
+  &.checked {
+    background: var(--dt-brand-color);
+    border-color: var(--dt-brand-color);
+
+    .check-icon {
+      color: #fff;
+      font-size: 16px;
+      animation: checkBounce 0.3s ease;
+    }
+  }
+}
+
+.todo-item.batch-selected {
+  background: var(--dt-brand-bg);
+  border-color: var(--dt-brand-color);
+}
+
+// ============================================================================
 // 复选框
 // ============================================================================
 .todo-checkbox {
@@ -1403,6 +1720,37 @@ onMounted(() => {
 }
 
 // ============================================================================
+// 拖拽手柄
+// ============================================================================
+.drag-handle {
+  width: 24px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: #ccc;
+  transition: all 0.2s;
+
+  &:hover {
+    color: var(--dt-brand-color);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  .material-icons-outlined {
+    font-size: 20px;
+  }
+}
+
+.todo-item.is-dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
+// ============================================================================
 // 操作按钮
 // ============================================================================
 .todo-actions {
@@ -1445,6 +1793,45 @@ onMounted(() => {
 // ============================================================================
 // 暗色模式
 // ============================================================================
+.dark .todo-panel {
+  background: #0a0e1a;
+}
+
+.dark .header-actions {
+  .selected-count {
+    color: #999;
+  }
+
+  .batch-btn {
+    background: #1a1f2e;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #999;
+
+    &--complete {
+      background: rgba(82, 196, 26, 0.15);
+      border-color: #52c41a;
+      color: #86efac;
+    }
+
+    &--danger {
+      background: rgba(245, 74, 69, 0.15);
+      border-color: #f54a45;
+      color: #fca5a5;
+    }
+
+    &--cancel {
+      background: #2d2d2d;
+      color: #999;
+    }
+  }
+
+  .icon-btn {
+    background: #1a1f2e;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #999;
+  }
+}
+
 .dark .todo-panel {
   background: #0a0e1a;
 }
@@ -1540,5 +1927,28 @@ onMounted(() => {
 
 .dark .empty-text {
   color: #888;
+}
+
+.dark .todo-item.batch-selected {
+  background: rgba(22, 119, 255, 0.15);
+  border-color: rgba(22, 119, 255, 0.3);
+}
+
+.dark .batch-checkbox .checkbox-inner {
+  background: #1a1f2e;
+  border-color: #3d3d3d;
+
+  &.checked {
+    background: var(--dt-brand-color);
+    border-color: var(--dt-brand-color);
+  }
+}
+
+.dark .drag-handle {
+  color: #3d3d3d;
+
+  &:hover {
+    color: var(--dt-brand-color);
+  }
 }
 </style>

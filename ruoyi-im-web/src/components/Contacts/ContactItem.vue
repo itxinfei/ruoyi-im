@@ -103,7 +103,7 @@ const handleTouchEnd = () => {
 
 .contact-item {
   position: relative;
-  height: 64px;
+  height: 60px; /* 钉钉标准列表项高度 */
   overflow: hidden;
   background: #ffffff;
   cursor: pointer;
@@ -141,7 +141,7 @@ const handleTouchEnd = () => {
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 16px;
+  padding: 0 12px; /* 钉钉标准内边距 */
   background: inherit;
   transition: transform var(--dt-transition-base);
 }
@@ -245,7 +245,7 @@ const handleTouchEnd = () => {
 
 @media (max-width: 768px) {
   .contact-item {
-    height: 60px;
+    height: 56px; /* 移动端适配 */
   }
 
   .contact-content {

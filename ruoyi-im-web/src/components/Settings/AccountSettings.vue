@@ -88,7 +88,7 @@
         <div class="setting-item">
           <div class="item-icon-wrapper">
             <div class="item-icon bg-green">
-              <el-icon><Shield /></el-icon>
+              <el-icon><Lock /></el-icon>
             </div>
           </div>
           <div class="item-content">
@@ -162,7 +162,6 @@ import {
   OfficeBuilding,
   Postcard,
   Lock,
-  Shield,
   Monitor,
   ChatDotRound,
   Connection

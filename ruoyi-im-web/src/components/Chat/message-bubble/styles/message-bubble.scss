@@ -1,0 +1,89 @@
+// ============================================================================
+// 消息气泡统一样式
+// 用于所有消息气泡组件的共享样式
+// ============================================================================
+
+@use '@/styles/design-tokens.scss' as *;
+
+// ============================================================================
+// 消息气泡基础样式
+// ============================================================================
+
+.bubble-base {
+  position: relative;
+  animation: fadeInUp 0.3s var(--dt-ease-out);
+}
+
+// ============================================================================
+// 媒体消息基础样式
+// ============================================================================
+
+.media-bubble {
+  display: inline-block;
+  border-radius: var(--dt-radius-md);
+  overflow: hidden;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    box-shadow: var(--dt-shadow-lg);
+    transform: translateY(-2px);
+  }
+}
+
+// ============================================================================
+// 进度环动画
+// ============================================================================
+
+.progress-ring {
+  position: absolute;
+  inset: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 48px;
+    height: 48px;
+    transform: rotate(-90deg);
+  }
+
+  .spinner {
+    animation: spin 1.5s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+// ============================================================================
+// 加载状态样式
+// ============================================================================
+
+.is-loading {
+  opacity: 0.7;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: inherit;
+  }
+}
+
+// ============================================================================
+// 响应式断点
+// ============================================================================
+
+@media (max-width: 768px) {
+  .bubble-base {
+    max-width: calc(100vw - 120px);
+  }
+
+  .media-bubble {
+    max-width: 240px;
+  }
+}

@@ -3,33 +3,86 @@
     <!-- 头部 -->
     <div class="panel-header">
       <h1 class="panel-title">消息</h1>
-      <el-dropdown trigger="click" @command="handleCommand" placement="bottom-start">
-        <button class="add-btn">
+      <el-dropdown
+        trigger="click"
+        @command="handleCommand"
+        placement="bottom-start"
+        popper-class="add-menu-dropdown"
+        :show-timeout="0"
+        :hide-timeout="200"
+      >
+        <button class="add-btn" :class="{ 'is-active': isAddMenuOpen }">
           <span class="material-icons-outlined">add</span>
         </button>
         <template #dropdown>
-          <el-dropdown-menu class="action-dropdown">
-            <el-dropdown-item command="chat">
-              <span class="material-icons-outlined item-icon">chat</span>
-              发起单聊
-            </el-dropdown-item>
-            <el-dropdown-item command="group">
-              <span class="material-icons-outlined item-icon">group_add</span>
-              创建群组
-            </el-dropdown-item>
-            <el-dropdown-item command="join">
-              <span class="material-icons-outlined item-icon">search</span>
-              加入群组
-            </el-dropdown-item>
-            <el-dropdown-item divided command="contacts">
-              <span class="material-icons-outlined item-icon">person_add</span>
-              添加好友
-            </el-dropdown-item>
-            <el-dropdown-item divided command="manageGroups">
-              <span class="material-icons-outlined item-icon">folder</span>
-              管理分组
-            </el-dropdown-item>
-          </el-dropdown-menu>
+          <div class="add-menu-container">
+            <!-- 快捷操作区 -->
+            <div class="quick-actions-section">
+              <div class="section-title">快捷操作</div>
+              <div class="quick-actions-grid">
+                <div class="quick-action-item" @click="handleCommand('chat')">
+                  <div class="action-icon primary">
+                    <span class="material-icons-outlined">chat</span>
+                  </div>
+                  <span class="action-label">发起单聊</span>
+                </div>
+                <div class="quick-action-item" @click="handleCommand('group')">
+                  <div class="action-icon success">
+                    <span class="material-icons-outlined">group_add</span>
+                  </div>
+                  <span class="action-label">创建群组</span>
+                </div>
+                <div class="quick-action-item" @click="handleCommand('join')">
+                  <div class="action-icon warning">
+                    <span class="material-icons-outlined">search</span>
+                  </div>
+                  <span class="action-label">加入群组</span>
+                </div>
+                <div class="quick-action-item" @click="handleCommand('contacts')">
+                  <div class="action-icon info">
+                    <span class="material-icons-outlined">person_add</span>
+                  </div>
+                  <span class="action-label">添加好友</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="menu-divider"></div>
+
+            <!-- 常用功能 -->
+            <div class="common-actions-section">
+              <div class="section-title">常用功能</div>
+              <el-dropdown-item command="scan" class="menu-item-with-icon">
+                <span class="material-icons-outlined item-icon">qr_code_scanner</span>
+                <div class="item-content">
+                  <span class="item-title">扫一扫</span>
+                  <span class="item-desc">扫描二维码添加好友或加入群组</span>
+                </div>
+              </el-dropdown-item>
+              <el-dropdown-item command="invite" class="menu-item-with-icon">
+                <span class="material-icons-outlined item-icon">share</span>
+                <div class="item-content">
+                  <span class="item-title">邀请好友</span>
+                  <span class="item-desc">分享邀请链接给好友</span>
+                </div>
+              </el-dropdown-item>
+            </div>
+
+            <div class="menu-divider"></div>
+
+            <!-- 管理功能 -->
+            <div class="manage-actions-section">
+              <div class="section-title">管理</div>
+              <el-dropdown-item command="manageGroups" class="menu-item-simple">
+                <span class="material-icons-outlined item-icon">folder</span>
+                <span class="item-title">管理分组</span>
+              </el-dropdown-item>
+              <el-dropdown-item command="archived" class="menu-item-simple">
+                <span class="material-icons-outlined item-icon">archive</span>
+                <span class="item-title">归档会话</span>
+              </el-dropdown-item>
+            </div>
+          </div>
         </template>
       </el-dropdown>
     </div>
@@ -292,6 +345,8 @@ const store = useStore()
 const searchKeyword = ref('')
 const showCreateGroupDialog = ref(false)
 const showGlobalSearch = ref(false)
+const showContactSelector = ref(false)
+const isAddMenuOpen = ref(false)
 
 // 分组管理相关状态
 const showGroupManageDialog = ref(false)
@@ -381,13 +436,75 @@ const handleCommand = async (command) => {
   if (command === 'group') {
     showCreateGroupDialog.value = true
   } else if (command === 'chat') {
-    ElMessage.info('发起单聊请前往联系人页面选择好友')
+    await handleStartChat()
   } else if (command === 'join') {
     await handleJoinGroup()
   } else if (command === 'contacts') {
     await handleAddFriend()
   } else if (command === 'manageGroups') {
     showGroupManageDialog.value = true
+  } else if (command === 'scan') {
+    await handleScanQR()
+  } else if (command === 'invite') {
+    await handleInviteFriend()
+  } else if (command === 'archived') {
+    ElMessage.info('归档会话功能开发中')
+  }
+}
+
+// 发起单聊 - 打开联系人选择器
+const handleStartChat = async () => {
+  try {
+    // 获取好友列表
+    const res = await store.dispatch('im/contact/loadContacts')
+    if (!res || res.length === 0) {
+      ElMessage.warning('暂无好友，请先添加好友')
+      return
+    }
+    // 打开联系人选择对话框
+    showContactSelector.value = true
+  } catch (error) {
+    ElMessage.error('加载好友列表失败')
+  }
+}
+
+// 处理选择的联系人
+const handleContactSelected = (contact) => {
+  showContactSelector.value = false
+  if (contact) {
+    // 创建或获取会话
+    store.dispatch('im/session/createSession', {
+      targetId: contact.id,
+      type: 'SINGLE'
+    }).then(session => {
+      emit('select-session', session)
+      ElMessage.success(`已开始与 ${contact.name || contact.userName} 的聊天`)
+    }).catch(() => {
+      ElMessage.error('创建会话失败')
+    })
+  }
+}
+
+// 扫一扫
+const handleScanQR = async () => {
+  ElMessage.info('扫一扫功能开发中，敬请期待')
+}
+
+// 邀请好友
+const handleInviteFriend = async () => {
+  try {
+    // 生成邀请链接
+    const inviteLink = `${window.location.origin}/invite?ref=${store.state.user.userInfo.userId}`
+
+    // 复制到剪贴板
+    await navigator.clipboard.writeText(inviteLink)
+
+    ElMessage.success({
+      message: '邀请链接已复制到剪贴板',
+      duration: 3000
+    })
+  } catch (err) {
+    ElMessage.error('复制失败，请手动复制')
   }
 }
 
@@ -1317,7 +1434,204 @@ onUnmounted(() => {
 }
 
 // ============================================================================
-// Element Plus 下拉菜单样式
+// 添加按钮菜单样式
+// ============================================================================
+:deep(.add-menu-dropdown) {
+  .el-dropdown__popper {
+    padding: 0;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    border: none;
+    overflow: hidden;
+  }
+
+  .el-dropdown__list {
+    padding: 0;
+  }
+}
+
+.add-menu-container {
+  width: 320px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+
+  .dark & {
+    background: var(--dt-bg-card-dark);
+  }
+}
+
+// 快捷操作区
+.quick-actions-section {
+  padding: 16px;
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dt-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.quick-action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 4px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: var(--dt-bg-session-hover);
+    transform: translateY(-2px);
+
+    .action-icon {
+      transform: scale(1.1);
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  .action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+
+    .material-icons-outlined {
+      font-size: 24px;
+      color: #fff;
+    }
+
+    &.primary {
+      background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.35);
+    }
+
+    &.success {
+      background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+      box-shadow: 0 4px 12px rgba(82, 196, 26, 0.35);
+    }
+
+    &.warning {
+      background: linear-gradient(135deg, #faad14 0%, #d48806 100%);
+      box-shadow: 0 4px 12px rgba(250, 173, 20, 0.35);
+    }
+
+    &.info {
+      background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+      box-shadow: 0 4px 12px rgba(114, 46, 209, 0.35);
+    }
+  }
+
+  .action-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
+    text-align: center;
+  }
+}
+
+// 常用功能
+.common-actions-section,
+.manage-actions-section {
+  padding: 12px 16px;
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dt-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+}
+
+.menu-item-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px !important;
+  border-radius: 10px !important;
+  margin: 2px 0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--dt-bg-session-hover) !important;
+  }
+
+  .item-icon {
+    font-size: 20px;
+    color: var(--dt-brand-color);
+    margin-top: 2px;
+  }
+
+  .item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .item-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
+  }
+
+  .item-desc {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+  }
+}
+
+.menu-item-simple {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px !important;
+  border-radius: 10px !important;
+  margin: 2px 0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--dt-bg-session-hover) !important;
+  }
+
+  .item-icon {
+    font-size: 18px;
+    color: var(--dt-text-secondary);
+  }
+
+  .item-title {
+    font-size: 14px;
+    color: var(--dt-text-primary);
+  }
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--dt-border-lighter);
+  margin: 0 16px;
+}
+
+// ============================================================================
+// Element Plus 下拉菜单样式（旧版兼容）
 // ============================================================================
 :deep(.action-dropdown) {
   .el-dropdown-menu__item {
