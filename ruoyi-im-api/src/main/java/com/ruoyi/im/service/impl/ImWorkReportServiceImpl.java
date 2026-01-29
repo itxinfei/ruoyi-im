@@ -293,7 +293,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         report.setApproverId(userId);
         report.setApproveTime(LocalDateTime.now());
         report.setApproveRemark(remark);
-        report.setStatus(approved ? "APPROVED" : "REJECTED");
+        report.setStatus(approved ? StatusConstants.Approval.APPROVED : StatusConstants.Approval.REJECTED);
         workReportMapper.updateById(report);
     }
 
@@ -389,7 +389,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     }
 
     private String getCompletionStatusName(String status) {
-        if ("COMPLETED".equals(status)) {
+        if (StatusConstants.Task.COMPLETED.equals(status)) {
             return "已完成";
         } else if (StatusConstants.Task.IN_PROGRESS.equals(status)) {
             return "进行中";
@@ -415,9 +415,9 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
             return "草稿";
         } else if ("SUBMITTED".equals(status)) {
             return "已提交";
-        } else if ("APPROVED".equals(status)) {
+        } else if (StatusConstants.Approval.APPROVED.equals(status)) {
             return "已审批";
-        } else if ("REJECTED".equals(status)) {
+        } else if (StatusConstants.Approval.REJECTED.equals(status)) {
             return "已退回";
         }
         return status;

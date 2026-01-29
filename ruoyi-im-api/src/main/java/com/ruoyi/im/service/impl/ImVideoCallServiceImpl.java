@@ -10,6 +10,7 @@ import com.ruoyi.im.mapper.ImVideoCallMapper;
 import com.ruoyi.im.mapper.ImVideoCallParticipantMapper;
 import com.ruoyi.im.service.ImVideoCallService;
 import com.ruoyi.im.util.ImRedisUtil;
+import com.ruoyi.im.constants.StatusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         call.setCalleeId(calleeId);
         call.setConversationId(conversationId);
         call.setCallType(callType);
-        call.setStatus("CALLING");
+        call.setStatus(StatusConstants.VideoCallStatus.CALLING);
         call.setStartTime(LocalDateTime.now());
 
         videoCallMapper.insertImVideoCall(call);
@@ -101,7 +102,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             throw new BusinessException("无权限接听此通话");
         }
 
-        if (!"CALLING".equals(call.getStatus())) {
+        if (!StatusConstants.VideoCallStatus.CALLING.equals(call.getStatus())) {
             throw new BusinessException("通话状态不正确");
         }
 
@@ -133,12 +134,12 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             throw new BusinessException("无权限拒绝此通话");
         }
 
-        if (!"CALLING".equals(call.getStatus())) {
+        if (!StatusConstants.VideoCallStatus.CALLING.equals(call.getStatus())) {
             throw new BusinessException("通话状态不正确");
         }
 
         // 更新状态
-        call.setStatus("REJECTED");
+        call.setStatus(StatusConstants.VideoCallStatus.REJECTED);
         call.setRejectReason(reason);
         call.setEndTime(LocalDateTime.now());
         videoCallMapper.updateImVideoCall(call);
@@ -161,7 +162,9 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             throw new BusinessException("无权限结束此通话");
         }
 
-        if ("ENDED".equals(call.getStatus()) || "REJECTED".equals(call.getStatus()) || "TIMEOUT".equals(call.getStatus())) {
+        if (StatusConstants.VideoCallStatus.ENDED.equals(call.getStatus())
+                || StatusConstants.VideoCallStatus.REJECTED.equals(call.getStatus())
+                || StatusConstants.VideoCallStatus.TIMEOUT.equals(call.getStatus())) {
             return; // 已经结束
         }
 
@@ -173,7 +176,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         }
 
         // 更新状态
-        call.setStatus("ENDED");
+        call.setStatus(StatusConstants.VideoCallStatus.ENDED);
         call.setEndTime(endTime);
         call.setDuration(duration);
         videoCallMapper.updateImVideoCall(call);
@@ -213,12 +216,12 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             return;
         }
 
-        if (!"CALLING".equals(call.getStatus())) {
+        if (!StatusConstants.VideoCallStatus.CALLING.equals(call.getStatus())) {
             return;
         }
 
         // 更新状态
-        call.setStatus("TIMEOUT");
+        call.setStatus(StatusConstants.VideoCallStatus.TIMEOUT);
         call.setEndTime(LocalDateTime.now());
         videoCallMapper.updateImVideoCall(call);
 
@@ -236,7 +239,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         ImVideoCall call = (ImVideoCall) redisTemplate.opsForValue().get(callKey);
         if (call == null) {
             call = videoCallMapper.selectImVideoCallById(callId);
-            if (call != null && "CALLING".equals(call.getStatus())) {
+            if (call != null && StatusConstants.VideoCallStatus.CALLING.equals(call.getStatus())) {
                 // 如果数据库中还在呼叫中，说明可能缓存丢失了，恢复缓存
                 redisTemplate.opsForValue().set(callKey, call, CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             }
@@ -338,7 +341,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         call.setConversationId(conversationId);
         call.setCallType(callType);
         call.setCallMode("GROUP");
-        call.setStatus("CALLING");
+        call.setStatus(StatusConstants.VideoCallStatus.CALLING);
         call.setMaxParticipants(maxParticipants);
         call.setCurrentParticipants(1); // 发起者自动加入
         call.setStartTime(LocalDateTime.now());

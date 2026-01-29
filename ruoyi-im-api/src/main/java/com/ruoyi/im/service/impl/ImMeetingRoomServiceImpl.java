@@ -178,7 +178,9 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         Long bookingCount = bookingMapper.selectCount(
                 new LambdaQueryWrapper<ImMeetingBooking>()
                         .eq(ImMeetingBooking::getRoomId, roomId)
-                        .in(ImMeetingBooking::getStatus, Arrays.asList("PENDING", "CONFIRMED"))
+                        .in(ImMeetingBooking::getStatus, Arrays.asList(
+                                MeetingRoomConstants.BookingStatus.PENDING,
+                                MeetingRoomConstants.BookingStatus.CONFIRMED))
                         .gt(ImMeetingBooking::getEndTime, LocalDateTime.now())
         );
         if (bookingCount != null && bookingCount > 0) {
@@ -344,7 +346,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             throw new BusinessException("只有预订人可以签到");
         }
 
-        if (!"CONFIRMED".equals(booking.getStatus())) {
+        if (!MeetingRoomConstants.BookingStatus.CONFIRMED.equals(booking.getStatus())) {
             throw new BusinessException("预订状态不正确");
         }
 
@@ -467,7 +469,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             throw new BusinessException("只有预订人可以提交反馈");
         }
 
-        if (!"COMPLETED".equals(booking.getStatus())) {
+        if (!MeetingRoomConstants.BookingStatus.COMPLETED.equals(booking.getStatus())) {
             throw new BusinessException("会议结束后才能提交反馈");
         }
 
@@ -490,7 +492,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         List<ImMeetingBooking> upcomingBookings = bookingMapper.selectList(
                 new LambdaQueryWrapper<ImMeetingBooking>()
                         .eq(ImMeetingBooking::getBookingUserId, userId)
-                        .eq(ImMeetingBooking::getStatus, "CONFIRMED")
+                        .eq(ImMeetingBooking::getStatus, MeetingRoomConstants.BookingStatus.CONFIRMED)
                         .gt(ImMeetingBooking::getStartTime, LocalDateTime.now())
                         .orderByAsc(ImMeetingBooking::getStartTime)
                         .last("LIMIT 5")

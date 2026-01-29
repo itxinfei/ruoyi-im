@@ -100,7 +100,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             adminMember.setUserId(userId);
             ImUser creator = userMapper.selectImUserById(userId);
             adminMember.setUserName(creator != null ? creator.getNickname() : "");
-            adminMember.setRole("ADMIN");
+            adminMember.setRole(StatusConstants.AttendanceMemberRole.ADMIN);
             adminMember.setStatus(StatusConstants.Active.ACTIVE);
             adminMember.setJoinTime(LocalDateTime.now());
             adminMember.setCreateTime(LocalDateTime.now());

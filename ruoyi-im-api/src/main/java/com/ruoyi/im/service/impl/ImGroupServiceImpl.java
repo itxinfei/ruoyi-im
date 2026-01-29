@@ -28,6 +28,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ruoyi.im.constant.SystemConstants;
+import com.ruoyi.im.constants.StatusConstants;
 
 /**
  * 群组服务实现
@@ -99,7 +100,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         ImGroupMember ownerMember = new ImGroupMember();
         ownerMember.setGroupId(group.getId());
         ownerMember.setUserId(userId);
-        ownerMember.setRole("OWNER");
+        ownerMember.setRole(StatusConstants.GroupMemberRole.OWNER);
         ownerMember.setJoinedTime(LocalDateTime.now());
         ownerMember.setCreateTime(LocalDateTime.now());
         ownerMember.setUpdateTime(LocalDateTime.now());
@@ -113,7 +114,7 @@ public class ImGroupServiceImpl implements ImGroupService {
                 ImGroupMember member = new ImGroupMember();
                 member.setGroupId(group.getId());
                 member.setUserId(memberId);
-                member.setRole("MEMBER");
+                member.setRole(StatusConstants.GroupMemberRole.MEMBER);
                 member.setInviterId(userId);
                 member.setJoinedTime(LocalDateTime.now());
                 member.setCreateTime(LocalDateTime.now());
@@ -138,7 +139,8 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
-        if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
+        if (operator == null || (!StatusConstants.GroupMemberRole.OWNER.equals(operator.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(operator.getRole()))) {
             throw new BusinessException("无权限修改群组信息");
         }
 
@@ -269,7 +271,8 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
-        if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
+        if (operator == null || (!StatusConstants.GroupMemberRole.OWNER.equals(operator.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(operator.getRole()))) {
             throw new BusinessException("无权限添加成员");
         }
 
@@ -290,7 +293,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             ImGroupMember member = new ImGroupMember();
             member.setGroupId(groupId);
             member.setUserId(userId);
-            member.setRole("MEMBER");
+            member.setRole(StatusConstants.GroupMemberRole.MEMBER);
             member.setInviterId(operatorId);
             member.setJoinedTime(LocalDateTime.now());
             member.setCreateTime(LocalDateTime.now());
@@ -320,7 +323,8 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
-        if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
+        if (operator == null || (!StatusConstants.GroupMemberRole.OWNER.equals(operator.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(operator.getRole()))) {
             throw new BusinessException("无权限移除成员");
         }
 
@@ -331,10 +335,11 @@ public class ImGroupServiceImpl implements ImGroupService {
 
             ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
             if (member != null) {
-                if ("OWNER".equals(member.getRole())) {
+                if (StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())) {
                     throw new BusinessException("不能移除群主");
                 }
-                if ("ADMIN".equals(member.getRole()) && !"OWNER".equals(operator.getRole())) {
+                if (StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())
+                        && !StatusConstants.GroupMemberRole.OWNER.equals(operator.getRole())) {
                     throw new BusinessException("管理员不能移除其他管理员");
                 }
                 imGroupMemberMapper.deleteImGroupMemberById(member.getId());
@@ -396,9 +401,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         if (isAdmin) {
-            member.setRole("ADMIN");
+            member.setRole(StatusConstants.GroupMemberRole.ADMIN);
         } else {
-            member.setRole("MEMBER");
+            member.setRole(StatusConstants.GroupMemberRole.MEMBER);
         }
         member.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(member);
@@ -416,7 +421,8 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
-        if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
+        if (operator == null || (!StatusConstants.GroupMemberRole.OWNER.equals(operator.getRole())
+                && !StatusConstants.GroupMemberRole.ADMIN.equals(operator.getRole()))) {
             throw new BusinessException("无权限禁言成员");
         }
 
@@ -425,11 +431,12 @@ public class ImGroupServiceImpl implements ImGroupService {
             throw new BusinessException("用户不在群组中");
         }
 
-        if ("OWNER".equals(member.getRole())) {
+        if (StatusConstants.GroupMemberRole.OWNER.equals(member.getRole())) {
             throw new BusinessException("不能禁言群主");
         }
 
-        if ("ADMIN".equals(member.getRole()) && !"OWNER".equals(operator.getRole())) {
+        if (StatusConstants.GroupMemberRole.ADMIN.equals(member.getRole())
+                && !StatusConstants.GroupMemberRole.OWNER.equals(operator.getRole())) {
             throw new BusinessException("管理员不能禁言其他管理员");
         }
 
@@ -466,11 +473,11 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         ImGroupMember oldOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
 
-        oldOwner.setRole("ADMIN");
+        oldOwner.setRole(StatusConstants.GroupMemberRole.ADMIN);
         oldOwner.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(oldOwner);
 
-        newOwner.setRole("OWNER");
+        newOwner.setRole(StatusConstants.GroupMemberRole.OWNER);
         newOwner.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(newOwner);
 
@@ -634,9 +641,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         // 转换为适合前端显示的格式
         for (java.util.Map<String, Object> member : members) {
             String role = (String) member.get("role");
-            if ("OWNER".equals(role)) {
+            if (StatusConstants.GroupMemberRole.OWNER.equals(role)) {
                 member.put("roleDisplay", "群主");
-            } else if ("ADMIN".equals(role)) {
+            } else if (StatusConstants.GroupMemberRole.ADMIN.equals(role)) {
                 member.put("roleDisplay", "管理员");
             } else {
                 member.put("roleDisplay", "成员");

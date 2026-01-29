@@ -137,7 +137,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         }
         if (request.getCompletionPercent() != null) {
             task.setCompletionPercent(request.getCompletionPercent());
-            if (request.getCompletionPercent() == 100 && "COMPLETED".equals(task.getStatus())) {
+            if (request.getCompletionPercent() == 100 && StatusConstants.Task.COMPLETED.equals(task.getStatus())) {
                 task.setCompletedTime(LocalDateTime.now());
             }
         }

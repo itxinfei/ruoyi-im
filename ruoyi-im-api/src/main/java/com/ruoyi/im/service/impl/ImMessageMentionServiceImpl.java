@@ -16,6 +16,7 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageMentionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageMentionService;
+import com.ruoyi.im.constants.StatusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,7 +153,8 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
             }
 
             String role = member.getRole();
-            if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+            if (!StatusConstants.GroupMemberRole.OWNER.equals(role)
+                    && !StatusConstants.GroupMemberRole.ADMIN.equals(role)) {
                 throw new BusinessException("只有群主和管理员可以使用@所有人");
             }
         }

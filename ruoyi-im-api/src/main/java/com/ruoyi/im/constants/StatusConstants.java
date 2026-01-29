@@ -271,6 +271,80 @@ public class StatusConstants {
         public static final String EARLY_LATE = "EARLY_LATE";
     }
 
+    /**
+     * 考勤打卡状态
+     */
+    public static class AttendanceCheckStatus {
+        /** 正常 */
+        public static final String NORMAL = "NORMAL";
+
+        /** 迟到 */
+        public static final String LATE = "LATE";
+
+        /** 早退 */
+        public static final String EARLY = "EARLY";
+
+        /** 缺卡 */
+        public static final String ABSENT = "ABSENT";
+    }
+
+    /**
+     * 考勤类型
+     */
+    public static class AttendanceType {
+        /** 工作日 */
+        public static final String WORK = "WORK";
+
+        /** 加班 */
+        public static final String OVERTIME = "OVERTIME";
+
+        /** 周末 */
+        public static final String WEEKEND = "WEEKEND";
+
+        /** 节假日 */
+        public static final String HOLIDAY = "HOLIDAY";
+    }
+
+    /**
+     * 视频通话状态
+     */
+    public static class VideoCallStatus {
+        /** 呼叫中 */
+        public static final String CALLING = "CALLING";
+
+        /** 进行中 */
+        public static final String ONGOING = "ONGOING";
+
+        /** 已结束 */
+        public static final String ENDED = "ENDED";
+
+        /** 已拒绝 */
+        public static final String REJECTED = "REJECTED";
+
+        /** 超时未接 */
+        public static final String TIMEOUT = "TIMEOUT";
+
+        /** 取消 */
+        public static final String CANCELLED = "CANCELLED";
+    }
+
+    /**
+     * 会议室预订状态
+     */
+    public static class MeetingBookingStatus {
+        /** 待确认 */
+        public static final String PENDING = "PENDING";
+
+        /** 已确认 */
+        public static final String CONFIRMED = "CONFIRMED";
+
+        /** 已取消 */
+        public static final String CANCELLED = "CANCELLED";
+
+        /** 已完成 */
+        public static final String COMPLETED = "COMPLETED";
+    }
+
     private StatusConstants() {
         throw new UnsupportedOperationException("常量类不允许实例化");
     }

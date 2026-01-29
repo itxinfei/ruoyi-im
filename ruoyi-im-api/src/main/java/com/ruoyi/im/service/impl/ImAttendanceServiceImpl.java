@@ -72,12 +72,12 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
 
             // 判断是否迟到
             LocalTime checkInTime = now.toLocalTime();
-            String status = "NORMAL";
+            String status = StatusConstants.AttendanceCheckStatus.NORMAL;
             if (checkInTime.isAfter(CHECK_IN_TIME.plusMinutes(LATE_TOLERANCE_MINUTES))) {
-                status = "LATE";
+                status = StatusConstants.AttendanceCheckStatus.LATE;
             }
             attendance.setCheckInStatus(status);
-            attendance.setAttendanceType("WORK");
+            attendance.setAttendanceType(StatusConstants.AttendanceType.WORK);
 
             attendanceMapper.insertImAttendance(attendance);
         } else if (attendance.getCheckInTime() == null) {
@@ -88,9 +88,9 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
             attendance.setUpdateTime(now);
 
             LocalTime checkInTime = now.toLocalTime();
-            String status = "NORMAL";
+            String status = StatusConstants.AttendanceCheckStatus.NORMAL;
             if (checkInTime.isAfter(CHECK_IN_TIME.plusMinutes(LATE_TOLERANCE_MINUTES))) {
-                status = "LATE";
+                status = StatusConstants.AttendanceCheckStatus.LATE;
             }
             attendance.setCheckInStatus(status);
 
@@ -126,9 +126,9 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
 
         // 判断是否早退
         LocalTime checkOutTime = now.toLocalTime();
-        String status = "NORMAL";
+        String status = StatusConstants.AttendanceCheckStatus.NORMAL;
         if (checkOutTime.isBefore(CHECK_OUT_TIME.minusMinutes(30))) {
-            status = "EARLY";
+            status = StatusConstants.AttendanceCheckStatus.EARLY;
         }
         attendance.setCheckOutStatus(status);
 
@@ -206,25 +206,25 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
             throw new BusinessException("打卡记录不存在");
         }
 
-        if (!"PENDING".equals(attendance.getApproveStatus())) {
+        if (!StatusConstants.Approval.PENDING.equals(attendance.getApproveStatus())) {
             throw new BusinessException("该申请已被处理");
         }
 
         attendance.setApproverId(approverId);
         attendance.setApproveTime(LocalDateTime.now());
         attendance.setApproveComment(comment);
-        attendance.setApproveStatus(approved ? "APPROVED" : "REJECTED");
+        attendance.setApproveStatus(approved ? StatusConstants.Approval.APPROVED : StatusConstants.Approval.REJECTED);
         attendance.setUpdateTime(LocalDateTime.now());
 
         // 如果审批通过，需要根据情况补齐打卡记录
         if (approved) {
             if (attendance.getCheckInTime() == null) {
                 attendance.setCheckInTime(LocalDateTime.of(attendance.getAttendanceDate(), CHECK_IN_TIME));
-                attendance.setCheckInStatus("NORMAL");
+                attendance.setCheckInStatus(StatusConstants.AttendanceCheckStatus.NORMAL);
             }
             if (attendance.getCheckOutTime() == null) {
                 attendance.setCheckOutTime(LocalDateTime.of(attendance.getAttendanceDate(), CHECK_OUT_TIME));
-                attendance.setCheckOutStatus("NORMAL");
+                attendance.setCheckOutStatus(StatusConstants.AttendanceCheckStatus.NORMAL);
 
                 // 计算工作时长
                 if (attendance.getCheckInTime() != null) {

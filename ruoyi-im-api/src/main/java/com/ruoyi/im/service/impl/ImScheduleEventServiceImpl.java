@@ -48,7 +48,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
         BeanUtils.copyProperties(request, event);
         event.setUserId(userId);
         event.setIsAllDay(Boolean.TRUE.equals(request.getIsAllDay()) ? 1 : 0);
-        event.setStatus("SCHEDULED");
+        event.setStatus(StatusConstants.Meeting.SCHEDULED);
         eventMapper.insert(event);
 
         // 添加参与人
@@ -294,11 +294,11 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     }
 
     private String getStatusName(String status) {
-        if ("SCHEDULED".equals(status)) {
+        if (StatusConstants.Meeting.SCHEDULED.equals(status)) {
             return "已安排";
         } else if (StatusConstants.Task.CANCELLED.equals(status)) {
             return "已取消";
-        } else if ("COMPLETED".equals(status)) {
+        } else if (StatusConstants.Task.COMPLETED.equals(status)) {
             return "已完成";
         }
         return status;
