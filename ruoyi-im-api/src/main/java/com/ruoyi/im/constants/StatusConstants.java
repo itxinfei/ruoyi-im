@@ -129,6 +129,67 @@ public class StatusConstants {
         public static final String ENDED = "ENDED";
     }
 
+    /**
+     * 通用活跃状态
+     */
+    public static class Active {
+        /** 活跃/启用 */
+        public static final String ACTIVE = "ACTIVE";
+
+        /** 未激活/禁用 */
+        public static final String INACTIVE = "INACTIVE";
+    }
+
+    /**
+     * 操作结果
+     */
+    public static class OperationResult {
+        /** 成功 */
+        public static final String SUCCESS = "SUCCESS";
+
+        /** 失败 */
+        public static final String FAILED = "FAILED";
+    }
+
+    /**
+     * 考勤打卡方式
+     */
+    public static class CheckMethod {
+        /** 地理位置 */
+        public static final String LOCATION = "LOCATION";
+
+        /** 人脸 */
+        public static final String FACE = "FACE";
+
+        /** Wi-Fi */
+        public static final String WIFI = "WIFI";
+
+        /** 混合 */
+        public static final String MIXED = "MIXED";
+    }
+
+    /**
+     * 考勤组成员角色
+     */
+    public static class AttendanceMemberRole {
+        /** 管理员 */
+        public static final String ADMIN = "ADMIN";
+
+        /** 普通成员 */
+        public static final String MEMBER = "MEMBER";
+    }
+
+    /**
+     * 班次类型
+     */
+    public static class ShiftType {
+        /** 正常班 */
+        public static final String NORMAL = "NORMAL";
+
+        /** 早晚班 */
+        public static final String EARLY_LATE = "EARLY_LATE";
+    }
+
     private StatusConstants() {
         throw new UnsupportedOperationException("常量类不允许实例化");
     }

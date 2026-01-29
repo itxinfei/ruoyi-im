@@ -259,6 +259,7 @@ import CombineDetailDialog from '@/components/Chat/CombineDetailDialog.vue'
 import GroupFilePanel from '@/components/Chat/GroupFilePanel.vue'
 import ExportChatDialog from '@/components/Chat/ExportChatDialog.vue'
 import { getMessages, batchForwardMessages, deleteMessage, clearConversationMessages } from '@/api/im/message'
+import { pinConversation, muteConversation } from '@/api/im/conversation'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { addFavorite, removeFavorite } from '@/api/im/favorite'
 import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
@@ -1152,12 +1153,38 @@ const handleSearchMessages = () => {
 }
 
 // 会话操作
-const handlePinSession = () => {
-  ElMessage.info('置顶功能开发中')
+const handlePinSession = async () => {
+  const currentSession = store.state.session?.currentSession
+  if (!currentSession) return
+
+  const newState = !currentSession.isPinned
+  try {
+    await pinConversation(currentSession.id, newState)
+    store.commit('im/session/UPDATE_SESSION', {
+      id: currentSession.id,
+      isPinned: newState
+    })
+    ElMessage.success(newState ? '已置顶' : '已取消置顶')
+  } catch (e) {
+    ElMessage.error('操作失败，请重试')
+  }
 }
 
-const handleMuteSession = () => {
-  ElMessage.info('免打扰功能开发中')
+const handleMuteSession = async () => {
+  const currentSession = store.state.session?.currentSession
+  if (!currentSession) return
+
+  const newState = !currentSession.isMuted
+  try {
+    await muteConversation(currentSession.id, newState)
+    store.commit('im/session/UPDATE_SESSION', {
+      id: currentSession.id,
+      isMuted: newState
+    })
+    ElMessage.success(newState ? '已开启免打扰' : '已关闭免打扰')
+  } catch (e) {
+    ElMessage.error('操作失败，请重试')
+  }
 }
 
 const handleClearMessages = async () => {

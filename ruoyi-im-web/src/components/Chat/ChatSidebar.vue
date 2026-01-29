@@ -152,7 +152,7 @@
 import { ref, computed, watch } from 'vue'
 import { Close, Plus } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
-import { getGroup, getGroupMembers, leaveGroup, removeGroupMember } from '@/api/im/group'
+import { getGroup, getGroupMembers, leaveGroup, removeGroupMember, addGroupMembers } from '@/api/im/group'
 import { getUserInfo } from '@/api/im/user'
 import { addTokenToUrl } from '@/utils/file'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -211,7 +211,39 @@ const loadDetail = async () => {
   }
 }
 
-const handleAddMember = () => ElMessage.info('邀请功能开发中...')
+const handleAddMember = async () => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      '请输入要邀请的用户ID（多个用户用逗号分隔）',
+      '邀请成员',
+      {
+        confirmButtonText: '邀请',
+        cancelButtonText: '取消',
+        inputPattern: /^(\d+)(,\s*\d+)*$/,
+        inputErrorMessage: '请输入有效的用户ID，多个用逗号分隔'
+      }
+    )
+
+    if (!value) return
+
+    const userIds = value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id))
+    if (userIds.length === 0) {
+      ElMessage.warning('请输入有效的用户ID')
+      return
+    }
+
+    const gId = props.session.targetId || props.session.id
+    await addGroupMembers(gId, userIds)
+    ElMessage.success(`已邀请 ${userIds.length} 位成员`)
+    // 刷新成员列表
+    loadDetail()
+  } catch (err) {
+    // 用户取消或请求失败
+    if (err !== 'cancel') {
+      ElMessage.error('邀请失败，请重试')
+    }
+  }
+}
 
 // 处理成员菜单命令
 const handleMemberCommand = (command) => {

@@ -533,7 +533,35 @@ const startChat = () => {
 const startVoiceCall = () => ElMessage.info('语音通话开发中')
 const startVideoCall = () => ElMessage.info('视频通话开发中')
 const clearSearch = () => searchQuery.value = ''
-const handleSearch = () => { /* Simulated local Search or API */ }
+const handleSearch = () => {
+    if (!searchQuery.value.trim()) {
+        searchResults.value = []
+        return
+    }
+    const q = searchQuery.value.toLowerCase()
+    const results = []
+    
+    // Search Friends
+    friendGroups.value.forEach(g => {
+        if (g.friends) {
+            g.friends.forEach(f => {
+                const name = f.displayName || f.friendName || ''
+                if (name.toLowerCase().includes(q)) {
+                    results.push({ ...f, type: 'friend' })
+                }
+            })
+        }
+    })
+    
+    // Search Groups
+    groupList.value.forEach(g => {
+        if (g.name && g.name.toLowerCase().includes(q)) {
+            results.push({ ...g, type: 'group' })
+        }
+    })
+    
+    searchResults.value = results
+}
 const handleDelete = () => ElMessage.warning('删除功能开发中')
 
 // Utils

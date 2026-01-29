@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImAttendanceGroup;
 import com.ruoyi.im.domain.ImAttendanceGroupMember;
 import com.ruoyi.im.domain.ImAttendanceSchedule;
@@ -72,7 +73,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         group.setManagerId(userId);
         group.setDescription(request.getDescription());
         group.setAttendanceType(request.getAttendanceType());
-        group.setCheckMethod(request.getCheckMethod() != null ? request.getCheckMethod() : "LOCATION");
+        group.setCheckMethod(request.getCheckMethod() != null ? request.getCheckMethod() : StatusConstants.CheckMethod.LOCATION);
         group.setWorkStartTime(request.getWorkStartTime());
         group.setWorkEndTime(request.getWorkEndTime());
         group.setCheckInBefore(request.getCheckInBefore() != null ? request.getCheckInBefore() : 120);
@@ -85,7 +86,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         group.setCheckLocation(request.getCheckLocation());
         group.setWifiSsid(request.getWifiSsid());
         group.setAutoAttendance(false);
-        group.setStatus("ACTIVE");
+        group.setStatus(StatusConstants.Active.ACTIVE);
         group.setCreatorId(userId);
         group.setCreateTime(LocalDateTime.now());
         group.setUpdateTime(LocalDateTime.now());
@@ -100,7 +101,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             ImUser creator = userMapper.selectImUserById(userId);
             adminMember.setUserName(creator != null ? creator.getNickname() : "");
             adminMember.setRole("ADMIN");
-            adminMember.setStatus("ACTIVE");
+            adminMember.setStatus(StatusConstants.Active.ACTIVE);
             adminMember.setJoinTime(LocalDateTime.now());
             adminMember.setCreateTime(LocalDateTime.now());
             attendanceGroupMemberMapper.insert(adminMember);
@@ -258,7 +259,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         for (Long memberId : memberIds) {
             // 检查是否已是成员
             ImAttendanceGroupMember existMember = attendanceGroupMemberMapper.selectByGroupAndUser(groupId, memberId);
-            if (existMember != null && "ACTIVE".equals(existMember.getStatus())) {
+            if (existMember != null && StatusConstants.Active.ACTIVE.equals(existMember.getStatus())) {
                 continue;
             }
 
@@ -276,8 +277,8 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             member.setUserId(memberId);
             ImUser user = userMapper.selectImUserById(memberId);
             member.setUserName(user != null ? user.getNickname() : "");
-            member.setRole("MEMBER");
-            member.setStatus("ACTIVE");
+            member.setRole(StatusConstants.AttendanceMemberRole.MEMBER);
+            member.setStatus(StatusConstants.Active.ACTIVE);
             member.setJoinTime(LocalDateTime.now());
             member.setCreateTime(LocalDateTime.now());
             members.add(member);
@@ -311,7 +312,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
     public List<Long> getGroupMembers(Long groupId) {
         List<ImAttendanceGroupMember> members = attendanceGroupMemberMapper.selectByGroupId(groupId);
         return members.stream()
-                .filter(m -> "ACTIVE".equals(m.getStatus()))
+                .filter(m -> StatusConstants.Active.ACTIVE.equals(m.getStatus()))
                 .map(ImAttendanceGroupMember::getUserId)
                 .collect(Collectors.toList());
     }
@@ -332,14 +333,14 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         ImAttendanceShift shift = new ImAttendanceShift();
         shift.setGroupId(groupId);
         shift.setShiftName(shiftName);
-        shift.setShiftType("NORMAL");
+        shift.setShiftType(StatusConstants.ShiftType.NORMAL);
         shift.setWorkStartTime(workStartTime);
         shift.setWorkEndTime(workEndTime);
         shift.setCheckInBefore(120);
         shift.setCheckOutAfter(60);
         shift.setLateTolerance(0);
         shift.setEarlyTolerance(0);
-        shift.setStatus("ACTIVE");
+        shift.setStatus(StatusConstants.Active.ACTIVE);
         shift.setCreateTime(LocalDateTime.now());
         shift.setUpdateTime(LocalDateTime.now());
 

@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.mapper.ImAuditLogMapper;
 import com.ruoyi.im.service.ImAuditService;
@@ -88,8 +89,8 @@ public class ImAuditServiceImpl implements ImAuditService {
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalOperations", allLogs.size());
-        stats.put("successCount", allLogs.stream().filter(log -> "SUCCESS".equals(log.getOperationResult())).count());
-        stats.put("failCount", allLogs.stream().filter(log -> "FAILED".equals(log.getOperationResult())).count());
+        stats.put("successCount", allLogs.stream().filter(log -> StatusConstants.OperationResult.SUCCESS.equals(log.getOperationResult())).count());
+        stats.put("failCount", allLogs.stream().filter(log -> StatusConstants.OperationResult.FAILED.equals(log.getOperationResult())).count());
         stats.put("startTime", startTime);
         stats.put("endTime", endTime);
         return stats;

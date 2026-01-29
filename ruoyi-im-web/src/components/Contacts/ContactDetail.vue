@@ -96,7 +96,9 @@ import {
   ChatDotRound,
   StarFilled,
   MoreFilled,
-  Setting
+  Setting,
+  Phone,
+  VideoCamera
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { updateContactRemark, deleteContact } from '@/api/im/contact'
@@ -107,7 +109,7 @@ const props = defineProps({
   contact: Object
 })
 
-const emit = defineEmits(['update'])
+const emit = defineEmits(['update', 'voice-call', 'video-call'])
 const store = useStore()
 
 const getName = computed(() => {
