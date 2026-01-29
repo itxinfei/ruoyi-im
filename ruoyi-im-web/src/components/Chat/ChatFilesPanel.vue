@@ -160,7 +160,7 @@ const props = defineProps({
   messages: { type: Array, default: () => [] }
 })
 
-const emit = defineEmits(['close', 'open-file', 'download-file', 'forward-file'])
+const emit = defineEmits(['close', 'open-file', 'download-file', 'forward-file', 'load-more'])
 
 const searchKeyword = ref('')
 const loading = ref(false)
@@ -416,7 +416,7 @@ const handleFileAction = async (cmd, file) => {
 }
 
 const loadMore = () => {
-  ElMessage.info('加载更多功能开发中')
+  emit('load-more')
 }
 
 // 保存文件到云盘
