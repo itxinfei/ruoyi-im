@@ -48,6 +48,8 @@ Thumbs.db
 # 忽略临时文件
 **/tmpclaude*
 
+# 忽略bmad目录
+/_bmad/
 
 # 忽略Eclipse相关文件
 /.settings/
