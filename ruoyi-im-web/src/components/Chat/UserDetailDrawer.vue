@@ -155,13 +155,21 @@
       </el-skeleton>
     </div>
   </el-drawer>
+
+  <!-- 聊天记录面板 -->
+  <ChatHistoryPanel
+    v-model:visible="showHistory"
+    :session="props.session"
+  />
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import ChatHistoryPanel from '@/components/Chat/ChatHistoryPanel.vue'
 import { getUserInfo } from '@/api/im/user'
+import { updateContactRemark } from '@/api/im/contact'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -177,6 +185,7 @@ const visible = computed({
 
 const userInfo = ref(null)
 const loading = ref(false)
+const showHistory = ref(false)
 
 const isGroup = computed(() => props.session?.type === 'GROUP')
 const userName = computed(() => {
@@ -246,12 +255,37 @@ const handleAddToFavorites = () => {
   ElMessage.success('已添加到常用联系人')
 }
 
-const handleSetRemark = () => {
-  ElMessage.info('设置备注功能开发中')
+const handleSetRemark = async () => {
+  if (!userInfo.value) return
+
+  try {
+    const { value } = await ElMessageBox.prompt('请输入备注名称', '设置备注', {
+      confirmButtonText: '保存',
+      cancelButtonText: '取消',
+      inputValue: userInfo.value.remark || '',
+      inputPlaceholder: '请输入备注名称'
+    })
+
+    if (!value || !value.trim()) {
+      ElMessage.warning('备注不能为空')
+      return
+    }
+
+    // 使用用户ID作为联系人ID
+    await updateContactRemark(userInfo.value.id, { remark: value.trim() })
+    ElMessage.success('备注已更新')
+    // 更新本地用户信息
+    userInfo.value.remark = value.trim()
+  } catch (err) {
+    // 用户取消或请求失败
+    if (err !== 'cancel') {
+      ElMessage.error('设置备注失败，请重试')
+    }
+  }
 }
 
 const handleViewHistory = () => {
-  ElMessage.info('历史消息功能开发中')
+  showHistory.value = true
 }
 
 const handleReport = () => {

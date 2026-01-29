@@ -74,6 +74,7 @@
             @send-location="handleSendLocation"
             @send-screenshot="handleScreenshotUpload"
             @input="handleInput"
+            @create-announcement="handleCreateAnnouncement"
           />
         </div>
 
@@ -1135,6 +1136,15 @@ const handleVoiceCall = () => {
 const handleVideoCall = () => {
   isIncomingCall.value = false
   showVideoCall.value = true
+}
+
+// 创建公告
+const handleCreateAnnouncement = () => {
+  if (session.value?.type === 'GROUP') {
+    showAnnouncementDialog.value = true
+  } else {
+    ElMessage.warning('只有群聊可以发布公告')
+  }
 }
 
 // 查看文件

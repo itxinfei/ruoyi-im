@@ -277,6 +277,7 @@ import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
+import { sendFriendRequest } from '@/api/im/contact'
 
 const props = defineProps({
   currentSession: {
@@ -376,15 +377,15 @@ const handleAvatarClick = (e, session) => {
 }
 
 // 处理下拉菜单命令
-const handleCommand = (command) => {
+const handleCommand = async (command) => {
   if (command === 'group') {
     showCreateGroupDialog.value = true
   } else if (command === 'chat') {
     ElMessage.info('发起单聊请前往联系人页面选择好友')
   } else if (command === 'join') {
-    ElMessage.info('加入群组功能开发中')
+    await handleJoinGroup()
   } else if (command === 'contacts') {
-    ElMessage.info('添加好友功能开发中')
+    await handleAddFriend()
   } else if (command === 'manageGroups') {
     showGroupManageDialog.value = true
   }
@@ -394,6 +395,63 @@ const handleCommand = (command) => {
 const handleGroupCreated = () => {
   ElMessage.success('群组创建成功')
   store.dispatch('im/session/loadSessions')
+}
+
+// 添加好友
+const handleAddFriend = async () => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      '请输入要添加的好友用户ID或手机号',
+      '添加好友',
+      {
+        confirmButtonText: '发送申请',
+        cancelButtonText: '取消',
+        inputPlaceholder: '用户ID或手机号',
+        inputPattern: /^[a-zA-Z0-9\u4e00-\u9fa5]+$/,
+        inputErrorMessage: '请输入有效的用户ID或手机号'
+      }
+    )
+
+    if (!value) return
+
+    // 发送好友申请
+    await sendFriendRequest({
+      userId: value.trim(),
+      remark: ''
+    })
+
+    ElMessage.success('好友申请已发送，等待对方确认')
+  } catch (err) {
+    if (err !== 'cancel') {
+      ElMessage.error('操作失败，请重试')
+    }
+  }
+}
+
+// 加入群组
+const handleJoinGroup = async () => {
+  try {
+    const { value } = await ElMessageBox.prompt(
+      '请输入群组ID或群组码',
+      '加入群组',
+      {
+        confirmButtonText: '申请加入',
+        cancelButtonText: '取消',
+        inputPlaceholder: '群组ID或群组码',
+        inputErrorMessage: '请输入有效的群组ID或群组码'
+      }
+    )
+
+    if (!value) return
+
+    // TODO: 调用加入群组 API
+    // 目前群组模块可能需要邀请才能加入
+    ElMessage.info('请通过群成员邀请加入群组')
+  } catch (err) {
+    if (err !== 'cancel') {
+      ElMessage.error('操作失败，请重试')
+    }
+  }
 }
 
 // 处理搜索选择

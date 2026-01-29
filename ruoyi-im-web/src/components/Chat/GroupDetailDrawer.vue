@@ -167,7 +167,7 @@ const props = defineProps({
   groupId: { type: [String, Number], default: null }
 })
 
-const emit = defineEmits(['update:modelValue', 'send-message', 'announcement', 'members', 'settings', 'exit', 'update-group'])
+const emit = defineEmits(['update:modelValue', 'send-message', 'announcement', 'members', 'files', 'settings', 'exit', 'update-group'])
 
 const visible = computed({
   get: () => props.modelValue,
@@ -252,7 +252,7 @@ const handleMembers = () => {
 }
 
 const handleFiles = () => {
-  ElMessage.info('文件功能开发中')
+  emit('files', groupInfo.value)
 }
 
 const handleToggleMute = async () => {

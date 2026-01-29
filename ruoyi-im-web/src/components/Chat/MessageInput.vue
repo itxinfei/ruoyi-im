@@ -240,6 +240,12 @@
       :position="smartReplyPosition"
       @select="handleSelectSmartReply"
     />
+
+    <!-- 日程创建对话框 -->
+    <ScheduleDialog
+      v-model="showScheduleDialog"
+      @saved="handleScheduleSaved"
+    />
   </div>
 </template>
 
@@ -247,8 +253,9 @@
 import { ref, nextTick, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useStore } from 'vuex'
 import { Close, ChatDotRound, Picture, FolderOpened, Phone, Microphone } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useImWebSocket } from '@/composables/useImWebSocket'
+import { setTodoReminder } from '@/api/im/marker'
 import { captureScreenshot, isScreenshotSupported } from '@/utils/screenshot'
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
@@ -257,6 +264,7 @@ import ScreenshotPreview from './ScreenshotPreview.vue'
 import DingtalkScreenshot from './DingtalkScreenshot.vue'
 import CommandPalette from './CommandPalette.vue'
 import AiSmartReply from './AiSmartReply.vue'
+import ScheduleDialog from './ScheduleDialog.vue'
 
 const props = defineProps({
   session: Object,
@@ -320,6 +328,7 @@ const sendShortcutHint = computed(() => {
 })
 
 const showEmojiPicker = ref(false)
+const showScheduleDialog = ref(false)
 const emojiPickerPosition = ref({ x: 0, y: 0 })
 const textareaRef = ref(null)
 const atMemberPickerRef = ref(null)
@@ -388,23 +397,27 @@ const handleCommandSelect = (commandId) => {
       emit('upload-file')
       break
     case 'schedule':
-      ElMessage.info('日程功能开发中，敬请期待')
+      // 创建日程
+      handleCreateSchedule()
       break
     case 'meeting':
       // 触发视频会议
       emit('start-video')
       break
     case 'todo':
-      ElMessage.info('待办功能开发中，敬请期待')
+      // 创建待办消息
+      handleCreateTodo()
       break
     case 'approval':
-      ElMessage.info('审批功能开发中，敬请期待')
+      // 创建审批
+      handleCreateApproval()
       break
     case 'vote':
-      ElMessage.info('投票功能开发中，敬请期待')
+      ElMessage.info('投票功能即将上线')
       break
     case 'announcement':
-      ElMessage.info('公告功能开发中，敬请期待')
+      // 创建公告
+      emit('create-announcement')
       break
     case 'checkin':
       // 触发位置分享
@@ -753,6 +766,88 @@ const handleLocation = () => {
       maximumAge: 0
     }
   )
+}
+
+// 创建待办消息
+const handleCreateTodo = async () => {
+  try {
+    const { value: todoContent } = await ElMessageBox.prompt('请输入待办事项', '创建待办', {
+      confirmButtonText: '创建',
+      cancelButtonText: '取消',
+      inputPlaceholder: '例如：下午3点开会'
+    })
+
+    if (!todoContent || !todoContent.trim()) {
+      ElMessage.warning('待办内容不能为空')
+      return
+    }
+
+    // 询问提醒时间
+    const { value: reminderOption } = await ElMessageBox.confirm(
+      todoContent.trim() + '\n\n是否设置提醒？',
+      '设置提醒',
+      {
+        confirmButtonText: '设置提醒',
+        cancelButtonText: '不需要',
+        distinguishCancelAndClose: true,
+        type: 'info'
+      }
+    ).then(
+      () => ({ setReminder: true }),
+      (action) => {
+        if (action === 'cancel') return { setReminder: false }
+        return { setReminder: false }
+      }
+    )
+
+    // 将待办内容放入输入框
+    content.value = todoContent.trim()
+
+    // 发送消息
+    emit('send-message', { type: 'TEXT', content: content.value })
+
+    // 清空输入框
+    content.value = ''
+  } catch (err) {
+    // 用户取消
+  }
+}
+
+// 创建审批
+const handleCreateApproval = async () => {
+  try {
+    const { value: approvalContent } = await ElMessageBox.prompt(
+      '请输入审批事项',
+      '发起审批',
+      {
+        confirmButtonText: '发起',
+        cancelButtonText: '取消',
+        inputPlaceholder: '例如：申请报销xxx元'
+      }
+    )
+
+    if (!approvalContent || !approvalContent.trim()) {
+      ElMessage.warning('审批事项不能为空')
+      return
+    }
+
+    // 发送审批请求消息
+    content.value = `[审批申请] ${approvalContent.trim()}`
+    emit('send-message', { type: 'TEXT', content: content.value })
+    content.value = ''
+    ElMessage.success('审批申请已发起')
+  } catch (err) {
+    // 用户取消
+  }
+}
+
+// 创建日程
+const handleCreateSchedule = () => {
+  showScheduleDialog.value = true
+}
+
+const handleScheduleSaved = () => {
+  ElMessage.success('日程已创建')
 }
 
 const handleVideoUpload = () => {

@@ -150,8 +150,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
+import { saveFileToCloud } from '@/api/im/cloud'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -397,7 +398,7 @@ const handleFileAction = async (cmd, file) => {
       emit('forward-file', file)
       break
     case 'save':
-      ElMessage.info('保存到云盘功能开发中')
+      await handleSaveToCloud(file)
       break
     case 'delete':
       try {
@@ -416,6 +417,32 @@ const handleFileAction = async (cmd, file) => {
 
 const loadMore = () => {
   ElMessage.info('加载更多功能开发中')
+}
+
+// 保存文件到云盘
+const handleSaveToCloud = async (file) => {
+  try {
+    const loading = ElLoading.service({
+      lock: true,
+      text: '正在保存到云盘...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
+
+    try {
+      await saveFileToCloud({
+        fileName: file.name,
+        fileUrl: file.url,
+        folderId: null // 保存到根目录
+      })
+
+      ElMessage.success('已保存到云盘')
+    } finally {
+      loading.close()
+    }
+  } catch (err) {
+    console.error('保存到云盘失败:', err)
+    ElMessage.error('保存失败，请重试')
+  }
 }
 
 const handleBatchDownload = () => {

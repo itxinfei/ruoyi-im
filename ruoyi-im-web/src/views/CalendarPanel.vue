@@ -225,14 +225,22 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 日程创建对话框 -->
+    <ScheduleDialog
+      v-model="showScheduleDialog"
+      :default-date="scheduleDefaultDate"
+      @saved="handleScheduleSaved"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { Plus, ArrowLeft, ArrowRight, Refresh, Timer, Location, Calendar } from '@element-plus/icons-vue'
-import { getEventsByTimeRange } from '@/api/im/schedule'
+import { getEventsByTimeRange, createEvent } from '@/api/im/schedule'
 import { ElMessage } from 'element-plus'
+import ScheduleDialog from '@/components/Chat/ScheduleDialog.vue'
 
 // --- PC 状态 ---
 const currentDate = ref(new Date())
@@ -334,8 +342,25 @@ const nextMonth = () => { currentDate.value = new Date(currentDate.value.setMont
 const goToToday = () => { currentDate.value = new Date(); selectedDate.value = new Date() }
 
 const handleEventDetail = (e) => { activeEvent.value = e; showEventDetail.value = true }
-const handleGridClick = (date, event) => { selectedDate.value = date; ElMessage.info('正在唤起快速创建...') }
-const handleAddSchedule = () => ElMessage.info('新建日程功能开发中...')
+
+// 日程对话框
+const showScheduleDialog = ref(false)
+const scheduleDefaultDate = ref(null)
+
+const handleGridClick = (date, event) => {
+  selectedDate.value = date
+  scheduleDefaultDate.value = date
+  showScheduleDialog.value = true
+}
+
+const handleAddSchedule = () => {
+  scheduleDefaultDate.value = new Date()
+  showScheduleDialog.value = true
+}
+
+const handleScheduleSaved = () => {
+  loadEvents()
+}
 
 let timer = null
 onMounted(() => { loadEvents(); updateTimeLine(); timer = setInterval(updateTimeLine, 60000) })
