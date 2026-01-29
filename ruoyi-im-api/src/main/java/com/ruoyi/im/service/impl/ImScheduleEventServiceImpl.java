@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.ruoyi.im.constants.StatusConstants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImScheduleEvent;
 import com.ruoyi.im.domain.ImScheduleParticipant;
@@ -58,7 +59,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
                     ImScheduleParticipant participant = new ImScheduleParticipant();
                     participant.setEventId(event.getId());
                     participant.setUserId(participantId);
-                    participant.setStatus("PENDING");
+                    participant.setStatus(StatusConstants.Approval.PENDING);
                     participant.setCreateTime(LocalDateTime.now());
                     participantMapper.insert(participant);
                 }
@@ -96,7 +97,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
                     ImScheduleParticipant participant = new ImScheduleParticipant();
                     participant.setEventId(eventId);
                     participant.setUserId(participantId);
-                    participant.setStatus("PENDING");
+                    participant.setStatus(StatusConstants.Approval.PENDING);
                     participant.setCreateTime(LocalDateTime.now());
                     participantMapper.insert(participant);
                 }
@@ -214,7 +215,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
             throw new BusinessException("无权限操作");
         }
 
-        event.setStatus("CANCELLED");
+        event.setStatus(StatusConstants.Task.CANCELLED);
         eventMapper.updateById(event);
     }
 
@@ -295,7 +296,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     private String getStatusName(String status) {
         if ("SCHEDULED".equals(status)) {
             return "已安排";
-        } else if ("CANCELLED".equals(status)) {
+        } else if (StatusConstants.Task.CANCELLED.equals(status)) {
             return "已取消";
         } else if ("COMPLETED".equals(status)) {
             return "已完成";
@@ -304,7 +305,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     }
 
     private String getParticipantStatusName(String status) {
-        if ("PENDING".equals(status)) {
+        if (StatusConstants.Approval.PENDING.equals(status)) {
             return "待确认";
         } else if ("ACCEPTED".equals(status)) {
             return "已接受";

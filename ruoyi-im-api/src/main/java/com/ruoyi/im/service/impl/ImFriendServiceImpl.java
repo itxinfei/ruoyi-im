@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImFriend;
 import com.ruoyi.im.domain.ImFriendRequest;
 import com.ruoyi.im.domain.ImUser;
@@ -106,7 +107,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         friendRequest.setFromUserId(userId);
         friendRequest.setToUserId(request.getTargetUserId());
         friendRequest.setMessage(request.getMessage());
-        friendRequest.setStatus("PENDING");
+        friendRequest.setStatus(StatusConstants.FriendRequest.PENDING);
         friendRequest.setCreateTime(LocalDateTime.now());
         imFriendRequestMapper.insertImFriendRequest(friendRequest);
 
@@ -121,7 +122,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
         List<ImFriendRequest> pendingList = new ArrayList<>();
         for (ImFriendRequest request : requestList) {
-            if ("PENDING".equals(request.getStatus())) {
+            if (StatusConstants.FriendRequest.PENDING.equals(request.getStatus())) {
                 // 查询目标用户信息
                 ImUser toUser = imUserMapper.selectImUserById(request.getToUserId());
                 if (toUser != null) {
@@ -318,7 +319,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
         List<ImFriendRequest> pendingList = new ArrayList<>();
         for (ImFriendRequest request : requestList) {
-            if ("PENDING".equals(request.getStatus())) {
+            if (StatusConstants.FriendRequest.PENDING.equals(request.getStatus())) {
                 ImUser fromUser = imUserMapper.selectImUserById(request.getFromUserId());
                 if (fromUser != null) {
                     request.setFromUserName(
@@ -355,7 +356,7 @@ public class ImFriendServiceImpl implements ImFriendService {
                     () -> doCreateFriendRelationship(fromUserId, toUserId, request));
         } else {
             // 拒绝
-            request.setStatus("REJECTED");
+            request.setStatus(StatusConstants.FriendRequest.REJECTED);
             request.setHandledTime(LocalDateTime.now());
             imFriendRequestMapper.updateImFriendRequest(request);
         }

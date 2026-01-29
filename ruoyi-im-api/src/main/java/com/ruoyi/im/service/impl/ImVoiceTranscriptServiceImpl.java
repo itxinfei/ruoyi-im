@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImVoiceTranscript;
 import com.ruoyi.im.exception.BusinessException;
@@ -80,7 +81,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
         transcript.setVoiceUrl(voiceUrl);
         transcript.setDuration(duration);
         transcript.setLanguage(language != null ? language : DEFAULT_LANGUAGE);
-        transcript.setStatus("PENDING");
+        transcript.setStatus(StatusConstants.Task.PENDING);
         transcript.setProvider(transcriptProvider != null ? transcriptProvider : DEFAULT_PROVIDER);
         transcript.setCreateTime(LocalDateTime.now());
 
@@ -190,7 +191,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
         int totalCount = transcripts.size();
         int successCount = (int) transcripts.stream().filter(t -> "SUCCESS".equals(t.getStatus())).count();
         int failedCount = (int) transcripts.stream().filter(t -> "FAILED".equals(t.getStatus())).count();
-        int pendingCount = (int) transcripts.stream().filter(t -> "PENDING".equals(t.getStatus())
+        int pendingCount = (int) transcripts.stream().filter(t -> StatusConstants.Task.PENDING.equals(t.getStatus())
                 || "PROCESSING".equals(t.getStatus())).count();
 
         stats.put("totalCount", totalCount);

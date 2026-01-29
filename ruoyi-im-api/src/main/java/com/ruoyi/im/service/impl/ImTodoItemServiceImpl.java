@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImTodoItem;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImTodoItemMapper;
@@ -29,7 +30,7 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
         todo.setDescription(description);
         // type和relatedId不在数据库表中，跳过设置
         todo.setPriority(2); // 2=中
-        todo.setStatus("PENDING");
+        todo.setStatus(StatusConstants.Task.PENDING);
         todo.setCreateTime(LocalDateTime.now());
         todoItemMapper.insertImTodoItem(todo);
         return todo.getId();
@@ -43,7 +44,7 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
         todo.setDescription(description);
         // 优先级：1=低, 2=中, 3=高
         todo.setPriority(priority != null && priority >= 1 && priority <= 3 ? priority : 2);
-        todo.setStatus("PENDING");
+        todo.setStatus(StatusConstants.Task.PENDING);
         todo.setCreateTime(LocalDateTime.now());
         todoItemMapper.insertImTodoItem(todo);
         return todo.getId();

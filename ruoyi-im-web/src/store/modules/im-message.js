@@ -67,7 +67,10 @@ export default {
     loading: false,
 
     // 选中的消息列表（用于多选操作）
-    selectedMessages: new Set()
+    selectedMessages: new Set(),
+
+    // 最后点击的消息ID（用于连续选择）
+    lastClickedMessageId: null
   }),
 
   getters: {
@@ -177,6 +180,35 @@ export default {
     // 清空选中消息
     CLEAR_MESSAGE_SELECTION(state) {
       state.selectedMessages = new Set()
+      state.lastClickedMessageId = null
+    },
+
+    // 范围选择消息（连续选择）
+    SELECT_MESSAGE_RANGE(state, { sessionId, startMessageId, endMessageId }) {
+      if (!state.messages[sessionId]) return
+
+      const messages = state.messages[sessionId]
+      const startIndex = messages.findIndex(m => m.id === startMessageId)
+      const endIndex = messages.findIndex(m => m.id === endMessageId)
+
+      if (startIndex === -1 || endIndex === -1) return
+
+      // 确定范围
+      const minIndex = Math.min(startIndex, endIndex)
+      const maxIndex = Math.max(startIndex, endIndex)
+
+      // 选中范围内的所有消息
+      for (let i = minIndex; i <= maxIndex; i++) {
+        state.selectedMessages.add(messages[i].id)
+      }
+
+      // 触发响应式更新
+      state.selectedMessages = new Set(state.selectedMessages)
+    },
+
+    // 设置最后点击的消息ID（用于范围选择）
+    SET_LAST_CLICKED_MESSAGE(state, messageId) {
+      state.lastClickedMessageId = messageId
     },
 
     /**

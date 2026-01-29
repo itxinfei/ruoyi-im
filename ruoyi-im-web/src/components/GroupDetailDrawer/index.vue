@@ -135,7 +135,9 @@ import {
   dismissGroup,
   leaveGroup,
   updateGroup,
-  setGroupMute
+  setGroupMute,
+  removeGroupMember,
+  setGroupAdmin
 } from '@/api/im/group'
 
 const props = defineProps({
@@ -143,7 +145,7 @@ const props = defineProps({
   groupId: { type: [Number, String], default: null }
 })
 
-const emit = defineEmits(['update:modelValue', 'refresh'])
+const emit = defineEmits(['update:modelValue', 'refresh', 'start-chat', 'show-member-profile'])
 
 const visible = computed({
   get: () => props.modelValue,

@@ -418,12 +418,44 @@ const handleClick = (event) => {
 
 const toggleSelection = () => {
   store.commit('im/message/TOGGLE_MESSAGE_SELECTION', props.message.id)
+  // 记录最后点击的消息
+  store.commit('im/message/SET_LAST_CLICKED_MESSAGE', props.message.id)
 }
 
 const rangeSelection = () => {
-  // TODO: 实现连续选择逻辑
-  // 需要获取当前会话的所有消息，然后找到当前消息和最后选中的消息之间的所有消息
-  toggleSelection()
+  // 获取当前会话ID
+  const currentSession = store.state.session?.currentSession
+  if (!currentSession) return
+
+  const sessionId = currentSession.id
+  const lastClickedId = store.state.message?.lastClickedMessageId
+
+  if (!lastClickedId) {
+    // 如果没有最后点击的消息，只切换当前消息
+    toggleSelection()
+    store.commit('im/message/SET_LAST_CLICKED_MESSAGE', props.message.id)
+    return
+  }
+
+  // 如果最后点击的消息就是当前消息，只切换当前消息
+  if (lastClickedId === props.message.id) {
+    toggleSelection()
+    return
+  }
+
+  // 获取当前会话的所有消息
+  const messages = store.state.message?.messages?.[sessionId] || []
+  if (messages.length === 0) return
+
+  // 执行范围选择
+  store.commit('im/message/SELECT_MESSAGE_RANGE', {
+    sessionId,
+    startMessageId: lastClickedId,
+    endMessageId: props.message.id
+  })
+
+  // 更新最后点击的消息
+  store.commit('im/message/SET_LAST_CLICKED_MESSAGE', props.message.id)
 }
 
 const handleCommand = (cmd) => {
