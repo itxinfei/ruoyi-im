@@ -61,8 +61,7 @@ describe('useTheme', () => {
     it('should toggle themes correctly (smart skip)', async () => {
         const { toggleTheme, themeMode, setThemeMode } = useTheme()
 
-        // System is Light (mock default: matches=false runs in getSystemIsDark)
-
+        // System is Light (mock default)
         setThemeMode('light')
         expect(themeMode.value).toBe('light')
 
@@ -91,6 +90,10 @@ describe('useTheme', () => {
     it('should update calling applyThemeToDOM', async () => {
         const { setThemeMode } = useTheme()
 
+        // Force transition to ensure watcher fires (in case state is already dark from prev test)
+        setThemeMode('light')
+        await nextTick()
+
         setThemeMode('dark')
         await nextTick()
 
@@ -106,6 +109,10 @@ describe('useTheme', () => {
 
     it('should persist theme to localStorage', async () => {
         const { setThemeMode } = useTheme()
+
+        // Force transition
+        setThemeMode('light')
+        await nextTick()
 
         setThemeMode('dark')
         await nextTick()

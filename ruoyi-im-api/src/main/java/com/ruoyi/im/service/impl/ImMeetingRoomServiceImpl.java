@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constants.MeetingRoomConstants;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImMeetingBooking;
@@ -71,7 +72,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         ImMeetingRoom room = new ImMeetingRoom();
         BeanUtils.copyProperties(request, room);
 
-        room.setStatus("AVAILABLE");
+        room.setStatus(MeetingRoomConstants.Status.AVAILABLE);
         room.setIsBookable(true);
         room.setCreateTime(LocalDateTime.now());
         room.setUpdateTime(LocalDateTime.now());
@@ -232,7 +233,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             throw new BusinessException("该会议室暂不可预订");
         }
 
-        if (!"AVAILABLE".equals(room.getStatus())) {
+        if (!MeetingRoomConstants.Status.AVAILABLE.equals(room.getStatus())) {
             throw new BusinessException("该会议室当前不可用");
         }
 
@@ -259,7 +260,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         ImMeetingBooking booking = new ImMeetingBooking();
         BeanUtils.copyProperties(request, booking);
         booking.setBookingUserId(userId);
-        booking.setStatus("CONFIRMED");
+        booking.setStatus(MeetingRoomConstants.BookingStatus.CONFIRMED);
         booking.setReminderSent(false);
         booking.setCreateTime(LocalDateTime.now());
         booking.setUpdateTime(LocalDateTime.now());
@@ -302,11 +303,12 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             throw new BusinessException("只有预订人可以取消预订");
         }
 
-        if ("CANCELLED".equals(booking.getStatus()) || "COMPLETED".equals(booking.getStatus())) {
+        if (MeetingRoomConstants.BookingStatus.CANCELLED.equals(booking.getStatus())
+                || MeetingRoomConstants.BookingStatus.COMPLETED.equals(booking.getStatus())) {
             throw new BusinessException("该预订无法取消");
         }
 
-        booking.setStatus("CANCELLED");
+        booking.setStatus(MeetingRoomConstants.BookingStatus.CANCELLED);
         booking.setUpdateTime(LocalDateTime.now());
         bookingMapper.updateById(booking);
         log.info("取消预订成功: bookingId={}, userId={}", bookingId, userId);
@@ -320,11 +322,11 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             throw new BusinessException("预订不存在");
         }
 
-        if (!"PENDING".equals(booking.getStatus())) {
+        if (!MeetingRoomConstants.BookingStatus.PENDING.equals(booking.getStatus())) {
             throw new BusinessException("该预订不需要确认");
         }
 
-        booking.setStatus("CONFIRMED");
+        booking.setStatus(MeetingRoomConstants.BookingStatus.CONFIRMED);
         booking.setUpdateTime(LocalDateTime.now());
         bookingMapper.updateById(booking);
         log.info("确认预订成功: bookingId={}, userId={}", bookingId, userId);
@@ -591,13 +593,13 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     private String getStatusDisplay(String status) {
         if (status == null) return "未知";
         switch (status) {
-            case "AVAILABLE": return "可用";
-            case "MAINTENANCE": return "维护中";
-            case "DISABLED": return "已停用";
-            case "PENDING": return "待确认";
-            case "CONFIRMED": return "已确认";
-            case "CANCELLED": return "已取消";
-            case "COMPLETED": return "已完成";
+            case MeetingRoomConstants.Status.AVAILABLE: return "可用";
+            case MeetingRoomConstants.Status.MAINTENANCE: return "维护中";
+            case MeetingRoomConstants.Status.DISABLED: return "已停用";
+            case MeetingRoomConstants.BookingStatus.PENDING: return "待确认";
+            case MeetingRoomConstants.BookingStatus.CONFIRMED: return "已确认";
+            case MeetingRoomConstants.BookingStatus.CANCELLED: return "已取消";
+            case MeetingRoomConstants.BookingStatus.COMPLETED: return "已完成";
             default: return status;
         }
     }
@@ -605,10 +607,10 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     private String getMeetingTypeDisplay(String type) {
         if (type == null) return "常规会议";
         switch (type) {
-            case "REGULAR": return "常规会议";
-            case "TRAINING": return "培训";
-            case "INTERVIEW": return "面试";
-            case "CLIENT": return "客户会议";
+            case MeetingRoomConstants.MeetingType.REGULAR: return "常规会议";
+            case MeetingRoomConstants.MeetingType.TRAINING: return "培训";
+            case MeetingRoomConstants.MeetingType.INTERVIEW: return "面试";
+            case MeetingRoomConstants.MeetingType.CLIENT: return "客户会议";
             default: return type;
         }
     }

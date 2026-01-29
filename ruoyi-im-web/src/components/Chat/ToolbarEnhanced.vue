@@ -727,6 +727,27 @@ const handleSettingCommand = (command) => {
   emit('setting-change', command)
 }
 
+// 快捷操作菜单处理
+const handleQuickAction = (command) => {
+  switch (command) {
+    case 'forward':
+      emit('tool-action', { type: 'forward' })
+      break
+    case 'multiselect':
+      emit('tool-action', { type: 'multiselect' })
+      break
+    case 'search':
+      emit('tool-action', { type: 'search' })
+      break
+    case 'export':
+      emit('tool-action', { type: 'export' })
+      break
+    case 'clear':
+      emit('tool-action', { type: 'clear' })
+      break
+  }
+}
+
 const addToRecent = (type, item) => {
   // 添加到最近使用逻辑
   let key = ''
