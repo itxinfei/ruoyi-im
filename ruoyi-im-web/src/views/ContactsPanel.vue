@@ -346,6 +346,9 @@ import { getGroups } from '@/api/im/group'
 import { getOrgTree, getDepartmentMembers } from '@/api/im/organization'
 import { ElMessage } from 'element-plus'
 
+// 定义 emit，用于通知父组件切换模块
+const emit = defineEmits(['switch-module'])
+
 const store = useStore()
 const { width } = useWindowSize()
 const isMobile = computed(() => width.value < 768)
@@ -573,6 +576,8 @@ const startChat = () => {
     if (!selectedItemId.value) return
     const type = selectedType.value === 'group' ? 'GROUP' : 'PRIVATE'
     store.dispatch('im/session/createAndSwitchSession', { targetId: selectedItemId.value, type })
+    // 通知父组件切换到聊天模块
+    emit('switch-module', 'chat')
 }
 const startVoiceCall = () => ElMessage.info('语音通话开发中')
 const startVideoCall = () => ElMessage.info('视频通话开发中')

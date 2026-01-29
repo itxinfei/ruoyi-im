@@ -2,10 +2,19 @@
   <div class="approval-panel">
     <div class="panel-header">
       <h2 class="panel-title">审批流程</h2>
-      <button class="add-btn" @click="showCreateDialog = true">
-        <span class="material-icons-outlined">add</span>
-        发起审批
-      </button>
+      <div class="header-actions">
+        <!-- 待我审批时的批量操作 -->
+        <template v-if="activeTab === 'pending' && pendingApprovals.length > 0">
+          <button class="batch-btn batch-btn--approve" @click="batchApproveAll">
+            <span class="material-icons-outlined">check_circle</span>
+            <span>全部通过</span>
+          </button>
+        </template>
+        <button class="add-btn" @click="showCreateDialog = true">
+          <span class="material-icons-outlined">add</span>
+          发起审批
+        </button>
+      </div>
     </div>
 
     <div class="panel-content">
@@ -17,6 +26,7 @@
           :class="{ active: activeTab === tab.key }"
           @click="activeTab = tab.key"
         >
+          <span class="material-icons-outlined tab-icon">{{ tab.icon }}</span>
           {{ tab.label }}
           <span v-if="getCount(tab.key) > 0" class="tab-count">{{ getCount(tab.key) }}</span>
         </button>
@@ -28,8 +38,8 @@
       </div>
 
       <div v-else-if="approvals.length === 0" class="empty-state">
-        <span class="material-icons-outlined empty-icon">assignment</span>
-        <p class="empty-text">暂无审批事项</p>
+        <span class="material-icons-outlined empty-icon">{{ emptyIcon }}</span>
+        <p class="empty-text">{{ emptyText }}</p>
       </div>
 
       <div v-else class="approval-list">
@@ -37,6 +47,10 @@
           v-for="approval in approvals"
           :key="approval.id"
           class="approval-item"
+          :class="{
+            'is-pending': approval.status === 'pending',
+            'batch-selected': selectedApprovals.has(approval.id)
+          }"
           @click="handleView(approval)"
         >
           <div class="approval-avatar" :style="{ background: approval.bgColor }">
@@ -51,6 +65,15 @@
           </div>
           <div class="approval-status" :class="approval.status">
             {{ statusText(approval.status) }}
+          </div>
+          <!-- 待审批项的快捷操作 -->
+          <div v-if="approval.status === 'pending'" class="quick-actions" @click.stop>
+            <button class="quick-btn quick-btn--approve" @click="handleQuickApprove(approval)" title="通过">
+              <span class="material-icons-outlined">check</span>
+            </button>
+            <button class="quick-btn quick-btn--reject" @click="handleQuickReject(approval)" title="拒绝">
+              <span class="material-icons-outlined">close</span>
+            </button>
           </div>
         </div>
       </div>
@@ -74,10 +97,10 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateApprovalDialog from '@/components/CreateApprovalDialog/index.vue'
 import ApprovalDetailDialog from '@/components/ApprovalDetailDialog/index.vue'
-import { getPendingApprovals, getMyApprovals, getProcessedApprovals } from '@/api/im/approval'
+import { getPendingApprovals, getMyApprovals, getProcessedApprovals, handleApproval } from '@/api/im/approval'
 
 const loading = ref(false)
 const showCreateDialog = ref(false)
@@ -85,17 +108,45 @@ const showDetailDialog = ref(false)
 const selectedApproval = ref(null)
 const activeTab = ref('pending')
 const approvals = ref([])
-
+const selectedApprovals = ref(new Set())
 
 const tabs = [
-  { key: 'pending', label: '待我审批' },
-  { key: 'processed', label: '我已处理' },
-  { key: 'initiated', label: '我发起的' }
+  { key: 'pending', label: '待我审批', icon: 'pending_actions' },
+  { key: 'processed', label: '我已处理', icon: 'task_alt' },
+  { key: 'initiated', label: '我发起的', icon: 'send' }
 ]
+
+// 待审批列表（用于批量操作）
+const pendingApprovals = computed(() => {
+  return approvals.value.filter(a => a.status === 'pending')
+})
+
+// 空状态配置
+const emptyConfig = computed(() => {
+  const configs = {
+    pending: {
+      icon: 'check_circle',
+      text: '暂无待审批事项，太棒了！'
+    },
+    processed: {
+      icon: 'history',
+      text: '暂无已处理的审批记录'
+    },
+    initiated: {
+      icon: 'send',
+      text: '暂无发起的审批'
+    }
+  }
+  return configs[activeTab.value] || configs.pending
+})
+
+const emptyIcon = computed(() => emptyConfig.value.icon)
+const emptyText = computed(() => emptyConfig.value.text)
 
 // 监听标签切换
 watch(activeTab, () => {
   loadApprovals()
+  selectedApprovals.value.clear()
 })
 
 // 加载审批列表
@@ -167,6 +218,91 @@ const handleApprovalAction = () => {
   showDetailDialog.value = false
 }
 
+// ============================================================================
+// 快捷操作功能
+// ============================================================================
+const handleQuickApprove = async (approval) => {
+  try {
+    await ElMessageBox.prompt('请输入审批意见（可选）', '通过审批', {
+      confirmButtonText: '通过',
+      cancelButtonText: '取消',
+      inputPattern: /^.{0,200}$/,
+      inputErrorMessage: '审批意见不能超过200字'
+    }).then(async ({ value }) => {
+      const comment = value || '同意'
+      await processApproval(approval.id, 'APPROVE', comment)
+    }).catch(() => {
+      // 用户取消，直接通过无意见
+      processApproval(approval.id, 'APPROVE', '同意')
+    })
+  } catch (error) {
+    // 用户取消对话框
+  }
+}
+
+const handleQuickReject = async (approval) => {
+  try {
+    await ElMessageBox.prompt('请输入拒绝原因（必填）', '拒绝审批', {
+      confirmButtonText: '拒绝',
+      cancelButtonText: '取消',
+      inputPattern: /^.{1,200}$/,
+      inputErrorMessage: '拒绝原因不能为空且不能超过200字'
+    }).then(async ({ value }) => {
+      await processApproval(approval.id, 'REJECT', value)
+    })
+  } catch (error) {
+    // 用户取消
+  }
+}
+
+const processApproval = async (approvalId, action, comment) => {
+  try {
+    const res = await handleApproval({
+      approvalId,
+      action,
+      comment
+    })
+    if (res.code === 200) {
+      ElMessage.success(action === 'APPROVE' ? '已通过' : '已拒绝')
+      loadApprovals()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
+    }
+  } catch (error) {
+    console.error('审批操作失败', error)
+    ElMessage.error('操作失败，请稍后重试')
+  }
+}
+
+// 批量全部通过
+const batchApproveAll = async () => {
+  const pending = pendingApprovals.value
+  if (pending.length === 0) return
+
+  try {
+    await ElMessageBox.confirm(`确定要全部通过 ${pending.length} 条待审批吗？`, '批量通过', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
+    })
+
+    const promises = pending.map(a => handleApproval({
+      approvalId: a.id,
+      action: 'APPROVE',
+      comment: '批量通过'
+    }))
+
+    await Promise.all(promises)
+    ElMessage.success(`已通过 ${pending.length} 条审批`)
+    loadApprovals()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('批量审批失败', error)
+      ElMessage.error('操作失败，请稍后重试')
+    }
+  }
+}
+
 // 组件加载时初始加载数据
 loadApprovals()
 </script>
@@ -189,6 +325,38 @@ loadApprovals()
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-color);
   flex-shrink: 0;
+  gap: 16px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.batch-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+  background: var(--dt-bg-card);
+
+  &--approve {
+    background: var(--dt-success-bg);
+    border-color: var(--dt-success-color);
+    color: var(--dt-success-color);
+
+    &:hover {
+      background: var(--dt-success-color);
+      color: #fff;
+    }
+  }
 }
 
 .panel-title {
@@ -239,6 +407,9 @@ loadApprovals()
 }
 
 .tab-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   position: relative;
   padding: 14px 16px;
   background: none;
@@ -248,6 +419,10 @@ loadApprovals()
   color: var(--dt-text-secondary);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
+
+  .tab-icon {
+    font-size: 18px;
+  }
 }
 
 .tab-item:hover {
@@ -381,6 +556,63 @@ loadApprovals()
   color: var(--dt-error-color);
 }
 
+// 快捷操作按钮
+.quick-actions {
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity var(--dt-transition-fast);
+}
+
+.approval-item:hover .quick-actions,
+.approval-item.is-pending .quick-actions {
+  opacity: 1;
+}
+
+.quick-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
+
+  &--approve {
+    background: var(--dt-success-bg);
+    color: var(--dt-success-color);
+
+    &:hover {
+      background: var(--dt-success-color);
+      color: #fff;
+      transform: scale(1.1);
+    }
+  }
+
+  &--reject {
+    background: var(--dt-error-bg);
+    color: var(--dt-error-color);
+
+    &:hover {
+      background: var(--dt-error-color);
+      color: #fff;
+      transform: scale(1.1);
+    }
+  }
+}
+
+.approval-item.is-pending {
+  .quick-actions {
+    opacity: 1;
+  }
+}
+
 /* 暗色模式 */
 .dark .approval-panel {
   background: var(--dt-bg-body-dark);
@@ -420,5 +652,45 @@ loadApprovals()
 
 .dark .empty-icon {
   color: var(--dt-border-dark);
+}
+
+.dark .header-actions {
+  .batch-btn {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+
+    &--approve {
+      background: rgba(82, 196, 26, 0.15);
+      border-color: #52c41a;
+      color: #86efac;
+
+      &:hover {
+        background: #52c41a;
+        color: #fff;
+      }
+    }
+  }
+}
+
+.dark .quick-btn {
+  &--approve {
+    background: rgba(82, 196, 26, 0.15);
+    color: #86efac;
+
+    &:hover {
+      background: #52c41a;
+      color: #fff;
+    }
+  }
+
+  &--reject {
+    background: rgba(245, 74, 69, 0.15);
+    color: #fca5a5;
+
+    &:hover {
+      background: #f54a45;
+      color: #fff;
+    }
+  }
 }
 </style>

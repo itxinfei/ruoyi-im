@@ -15,7 +15,7 @@
       class="message-bubble"
       :class="bubbleClasses"
       @click="handleClick"
-      @touchstart="handleTouchStart"
+      @touchstart="enhancedHandleTouchStart"
       @touchend="handleTouchEnd"
       @touchcancel="handleTouchEnd"
       @mousedown="handleMouseHold"
@@ -174,26 +174,26 @@ import { computed, ref } from 'vue'
 import { CopyDocument, ChatLineSquare, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Top } from '@element-plus/icons-vue'
 
 // Composables
-import { useMessageBubble } from './composables/useMessageBubble.js'
-import { useMessageStatus } from './composables/useMessageStatus.js'
-import { useMessageReaction } from './composables/useMessageReaction.js'
+import { useMessageBubble } from './message-bubble/composables/useMessageBubble.js'
+import { useMessageStatus } from './message-bubble/composables/useMessageStatus.js'
+import { useMessageReaction } from './message-bubble/composables/useMessageReaction.js'
 
 // 子组件
-import TextBubble from './bubbles/TextBubble.vue'
-import ImageBubble from './bubbles/ImageBubble.vue'
-import FileBubble from './bubbles/FileBubble.vue'
-import VoiceBubble from './bubbles/VoiceBubble.vue'
-import VideoBubble from './bubbles/VideoBubble.vue'
-import LocationBubble from './bubbles/LocationBubble.vue'
-import SystemBubble from './bubbles/SystemBubble.vue'
-import RecalledBubble from './bubbles/RecalledBubble.vue'
-import MessageStatus from './parts/MessageStatus.vue'
-import MessageReactions from './parts/MessageReactions.vue'
+import TextBubble from './message-bubble/bubbles/TextBubble.vue'
+import ImageBubble from './message-bubble/bubbles/ImageBubble.vue'
+import FileBubble from './message-bubble/bubbles/FileBubble.vue'
+import VoiceBubble from './message-bubble/bubbles/VoiceBubble.vue'
+import VideoBubble from './message-bubble/bubbles/VideoBubble.vue'
+import LocationBubble from './message-bubble/bubbles/LocationBubble.vue'
+import SystemBubble from './message-bubble/bubbles/SystemBubble.vue'
+import RecalledBubble from './message-bubble/bubbles/RecalledBubble.vue'
+import MessageStatus from './message-bubble/parts/MessageStatus.vue'
+import MessageReactions from './message-bubble/parts/MessageReactions.vue'
 
 // 已有的组件（保持不变）
-import NudgeMessageBubble from '../NudgeMessageBubble.vue'
-import CombineMessagePreview from '../CombineMessagePreview.vue'
-import AiEmojiReaction from '../AiEmojiReaction.vue'
+import NudgeMessageBubble from './NudgeMessageBubble.vue'
+import CombineMessagePreview from './CombineMessagePreview.vue'
+import AiEmojiReaction from './AiEmojiReaction.vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -255,19 +255,23 @@ const enhancedHandleTouchStart = (e) => {
     if (isLongPressing.value) {
       const rect = e.currentTarget?.getBoundingClientRect()
       if (rect) {
+        // AI 面板尺寸
+        const PANEL_WIDTH = 320
+        const PANEL_HEIGHT = 400
+        const PADDING = 20
+
+        // 计算安全位置，防止超出屏幕边界
+        const maxX = window.innerWidth - PANEL_WIDTH - PADDING
+        const maxY = window.innerHeight - PANEL_HEIGHT - PADDING
+
         aiEmojiPosition.value = {
-          x: rect.right + 10,
-          y: rect.top
+          x: Math.min(Math.max(PADDING, rect.right + 10), maxX),
+          y: Math.max(PADDING, Math.min(rect.top, maxY))
         }
       }
       showAiEmojiPanel.value = true
     }
   }, 500)
-}
-
-// 覆盖长按处理
-const handleTouchStart = (e) => {
-  enhancedHandleTouchStart(e)
 }
 
 // ==================== 计算属性 ====================

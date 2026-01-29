@@ -2,7 +2,6 @@
 @use './design-tokens.scss' as *;
 @use './tailwind-overrides.scss' as *;
 @use './icons.scss';
-@use './global-simple.scss'; // 暗色模式简单修复
 
 // Tailwind CSS 指令
 @tailwind base;
@@ -20,7 +19,6 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  transition: background-color var(--dt-transition-base), color var(--dt-transition-base);
 }
 
 // ============================================================================
@@ -58,7 +56,6 @@ body {
   background-color: var(--dt-bg-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color var(--dt-transition-base), color var(--dt-transition-base);
 }
 
 a {
@@ -332,97 +329,6 @@ textarea {
 }
 
 // ============================================================================
-// 暗色模式 Element Plus 样式覆盖
-// ============================================================================
-.dark {
-  // 注意:不要在这里直接设置 background-color 和 color
-  // 这会导致所有子元素继承,造成显示问题
-
-  // 链接颜色
-  a,
-  .el-link {
-    color: var(--dt-text-link);
-
-    &:hover {
-      color: var(--dt-text-link-hover);
-    }
-  }
-
-  // 恢复特殊颜色(品牌色、语义色等)- 仅在必要时覆盖
-  [class*="primary"],
-  .text-primary {
-    color: var(--dt-brand-color);
-  }
-
-  [class*="success"],
-  .text-success {
-    color: var(--dt-success-color);
-  }
-
-  [class*="warning"],
-  .text-warning {
-    color: var(--dt-warning-color);
-  }
-
-  [class*="danger"],
-  .text-danger,
-  .text-error {
-    color: var(--dt-error-color);
-  }
-
-  [class*="info"],
-  .text-info {
-    color: var(--dt-info-color);
-  }
-
-  // 我们系统特定的变量覆盖
-  .el-dialog,
-  .el-drawer,
-  .el-message-box {
-    background-color: var(--dt-bg-card-dark); // Use variable directly
-    border-color: var(--dt-border-dark);
-
-    .el-dialog__title,
-    .el-message-box__title {
-      color: var(--dt-text-primary-dark);
-    }
-  }
-
-  .el-popover.el-popper,
-  .el-select__popper.el-popper {
-    background-color: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-
-  // 暗色模式按钮样式
-  .el-button {
-
-    // Default button style in dark mode
-    &:not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(.el-button--danger):not(.el-button--info):not(.is-link):not(.is-text) {
-      background-color: var(--dt-bg-input-dark);
-      border-color: var(--dt-border-dark);
-      color: var(--dt-text-primary-dark);
-
-      &:hover,
-      &:focus {
-        color: var(--dt-brand-hover);
-        border-color: var(--dt-brand-hover);
-        background-color: var(--dt-bg-hover-dark);
-      }
-    }
-  }
-
-  // 滚动条暗色适配
-  ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-  }
-}
-
-// ============================================================================
 // Input 样式覆盖
 // ============================================================================
 
@@ -451,22 +357,7 @@ textarea {
   }
 }
 
-.dark .el-input__wrapper {
-  background-color: var(--dt-bg-input-dark);
-  border-color: var(--dt-border-dark);
 
-  &:hover {
-    border-color: var(--dt-border-dark);
-  }
-
-  &.is-focus {
-    border-color: var(--dt-brand-color);
-  }
-
-  .el-input__inner {
-    color: var(--dt-text-primary-dark);
-  }
-}
 
 .el-input-group__append,
 .el-input-group__prepend {
@@ -475,12 +366,7 @@ textarea {
   color: var(--dt-text-secondary);
 }
 
-.dark .el-input-group__append,
-.dark .el-input-group__prepend {
-  background-color: var(--dt-bg-hover-dark);
-  border-color: var(--dt-border-dark);
-  color: var(--dt-text-secondary-dark);
-}
+
 
 .el-textarea__inner {
   background-color: var(--dt-bg-input);
@@ -499,11 +385,7 @@ textarea {
   }
 }
 
-.dark .el-textarea__inner {
-  background-color: var(--dt-bg-input-dark);
-  border-color: var(--dt-border-dark);
-  color: var(--dt-text-primary-dark);
-}
+
 
 // ============================================================================
 // Avatar 样式覆盖
@@ -516,9 +398,7 @@ textarea {
   font-weight: 500;
 }
 
-.dark .el-avatar {
-  border-color: var(--dt-bg-body-dark);
-}
+
 
 // ============================================================================
 // Badge 样式覆盖
@@ -558,20 +438,7 @@ textarea {
   }
 }
 
-.dark .el-card {
-  background-color: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-  color: var(--dt-text-primary-dark);
 
-  .el-card__header {
-    border-bottom-color: var(--dt-border-dark);
-    color: var(--dt-text-primary-dark);
-  }
-
-  .el-card__body {
-    color: var(--dt-text-primary-dark);
-  }
-}
 
 // ============================================================================
 // Tag 样式覆盖
@@ -636,24 +503,7 @@ textarea {
   }
 }
 
-.dark .el-menu {
-  background-color: var(--dt-bg-card-dark);
-  border-right-color: var(--dt-border-dark);
-}
 
-.dark .el-menu-item {
-  color: var(--dt-text-secondary-dark);
-
-  &:hover {
-    background-color: var(--dt-bg-hover-dark);
-    color: var(--dt-brand-color);
-  }
-
-  &.is-active {
-    background-color: var(--dt-bg-active-dark);
-    color: var(--dt-brand-color);
-  }
-}
 
 // ============================================================================
 // Tabs 样式覆盖
@@ -684,21 +534,7 @@ textarea {
   background-color: var(--dt-border-light);
 }
 
-.dark .el-tabs__item {
-  color: var(--dt-text-secondary-dark);
 
-  &:hover {
-    color: var(--dt-brand-hover);
-  }
-
-  &.is-active {
-    color: var(--dt-brand-hover);
-  }
-}
-
-.dark .el-tabs__nav-wrap::after {
-  background-color: var(--dt-border-dark);
-}
 
 // ============================================================================
 // Dropdown 样式覆盖
@@ -727,18 +563,7 @@ textarea {
   }
 }
 
-.dark .el-dropdown-menu {
-  background-color: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-}
 
-.dark .el-dropdown-menu__item {
-  color: var(--dt-text-primary-dark);
-
-  &:hover {
-    background-color: var(--dt-bg-hover-dark);
-  }
-}
 
 // ============================================================================
 // Select 样式覆盖
@@ -781,15 +606,7 @@ textarea {
   }
 }
 
-.dark .el-select__wrapper {
-  background-color: var(--dt-bg-input-dark);
-  border-color: var(--dt-border-dark);
-}
 
-.dark .el-select__popper.el-popper {
-  background-color: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-}
 
 .dark .el-select-dropdown__item {
   color: var(--dt-text-primary-dark);

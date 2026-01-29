@@ -588,6 +588,7 @@ const isActiveSession = (session) => {
 
 // 处理会话点击
 const handleSessionClick = (session) => {
+  console.log('[SessionPanel] handleSessionClick called with:', session)
   emit('select-session', session)
 }
 

@@ -40,8 +40,7 @@ export default {
         readReceipt: true
       },
       general: {
-        language: 'zh-CN',
-        theme: 'auto' // 'light' | 'dark' | 'auto'
+        language: 'zh-CN'
       },
       shortcuts: {
         send: 'enter' // 'enter' | 'ctrl-enter'
@@ -255,8 +254,7 @@ export default {
     updateGeneralSettings({ commit, dispatch }, settings) {
       commit('UPDATE_SETTINGS', { general: { ...settings } })
       dispatch('batchUpdateServerSettings', {
-        'general.language': settings.language,
-        'general.theme': settings.theme
+        'general.language': settings.language
       })
     },
 

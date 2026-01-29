@@ -36,7 +36,7 @@
         <!-- 工作台 -->
         <WorkbenchPanel v-if="activeModule === 'workbench'" />
         <!-- 通讯录 -->
-        <ContactsPanel v-if="activeModule === 'contacts'" />
+        <ContactsPanel v-if="activeModule === 'contacts'" @switch-module="activeModule = $event" />
         <!-- 云盘 -->
         <DocumentsPanel v-if="activeModule === 'drive'" />
         <!-- 日历 -->
@@ -131,6 +131,11 @@ const handleOpenSettings = (menu = 'account') => {
 }
 
 const handleSelectSession = (session) => {
+  console.log('[MainPage] handleSelectSession called with:', session)
+  if (!session || !session.id) {
+    console.error('[MainPage] Invalid session object:', session)
+    return
+  }
   store.dispatch('im/session/selectSession', session)
 }
 

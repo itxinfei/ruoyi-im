@@ -340,24 +340,7 @@
           </button>
           <template #dropdown>
             <el-dropdown-menu class="enhanced-menu">
-              <el-dropdown-item command="theme">
-                <div class="menu-item-content">
-                  <div class="menu-icon">
-                    <el-icon><Sunny /></el-icon>
-                  </div>
-                  <div class="menu-info">
-                    <div class="menu-title">主题切换</div>
-                    <div class="menu-desc">亮色/暗色模式</div>
-                  </div>
-                  <div class="menu-control">
-                    <el-switch
-                      v-model="isDarkMode"
-                      @change="toggleTheme"
-                      @click.stop
-                    />
-                  </div>
-                </div>
-              </el-dropdown-item>
+
               <el-dropdown-item command="notification">
                 <div class="menu-item-content">
                   <div class="menu-icon">
@@ -442,7 +425,7 @@ import {
   At
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { useTheme } from '@/composables/useTheme'
+
 
 const props = defineProps({
   session: Object
@@ -462,14 +445,14 @@ const emit = defineEmits([
 ])
 
 const store = useStore()
-const { isDark, setThemeMode } = useTheme()
+
 
 // 状态管理
 const showEmojiPanel = ref(false)
 const activeEmojiTab = ref('smileys')
 const emojiSearch = ref('')
 const aiEnabled = ref(false)
-const isDarkMode = ref(isDark.value)
+
 const isFavorite = ref(false)
 const markMode = ref(false)
 const collectionCount = ref(3)
@@ -525,28 +508,11 @@ const moreTools = computed(() => [
     color: '#1890ff'
   },
   {
-    key: 'calendar',
-    name: '日程安排',
-    desc: '创建和管理日程',
-    icon: 'Calendar',
-    color: '#52c41a'
-  },
-  },
-  {
-    key: 'note',
-    name: '笔记记录',
-    desc: '快速记录要点',
-    icon: 'EditPen',
-    color: '#fa8c16'
-  },
-  },
-  {
     key: 'poll',
     name: '投票决策',
     desc: '发起投票收集',
     icon: 'DataBoard',
     color: '#722ed1'
-  }
   }
 ])
 
@@ -589,7 +555,8 @@ const aiFeatures = computed(() => [
     desc: '续写已有内容',
     icon: 'Edit'
   }
-]
+  ])
+})
 
 const recentTools = ref([])
 
@@ -717,11 +684,7 @@ const togglePin = () => {
   emit('pin-toggle')
 }
 
-const toggleTheme = () => {
-  const newMode = isDarkMode.value ? 'light' : 'dark'
-  setThemeMode(newMode)
-  isDarkMode.value = !isDarkMode.value
-}
+
 
 const handleSettingCommand = (command) => {
   emit('setting-change', command)
@@ -781,11 +744,7 @@ const handleKeydown = (e) => {
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)
   
-  // 从本地存储恢复状态
-  const savedTheme = localStorage.getItem('im-theme-mode')
-  if (savedTheme) {
-    isDarkMode.value = savedTheme === 'dark'
-  }
+
 })
 
 onUnmounted(() => {

@@ -147,9 +147,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, h } from 'vue'
+import { ref, computed, onMounted, h, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
+
+// ============================================================================
+// 工具函数：防抖
+// ============================================================================
+const debounce = (fn, delay) => {
+  let timer = null
+  return (...args) => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
 
 const store = useStore()
 
@@ -163,6 +174,19 @@ const dragOverCard = ref(null)
 const showAddCardDialog = ref(false)
 const selectedCardType = ref('data')
 const selectedTemplate = ref('')
+
+// ============================================================================
+// 搜索防抖处理（预留搜索功能）
+// ============================================================================
+// 当搜索内容变化时，300ms 后执行搜索逻辑
+const debouncedSearch = debounce((value) => {
+  // TODO: 实现搜索逻辑
+  console.log('搜索:', value)
+}, 300)
+
+watch(searchQuery, (newValue) => {
+  debouncedSearch(newValue)
+})
 
 // ============================================================================
 // 用户信息

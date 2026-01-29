@@ -243,7 +243,7 @@ import { Share, Folder, Delete } from '@element-plus/icons-vue'
 import { ElImageViewer } from 'element-plus'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
-import MessageInput from '@/components/Chat/MessageInput.vue'
+import MessageInput from '@/components/Chat/MessageInputRefactored.vue'
 import PinnedMessagesPanel from '@/components/Chat/PinnedMessagesPanel.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
@@ -1164,7 +1164,7 @@ const handleSearchMessages = () => {
 
 // 会话操作
 const handlePinSession = async () => {
-  const currentSession = store.state.session?.currentSession
+  const currentSession = store.state.im.session?.currentSession
   if (!currentSession) return
 
   const newState = !currentSession.isPinned
@@ -1181,7 +1181,7 @@ const handlePinSession = async () => {
 }
 
 const handleMuteSession = async () => {
-  const currentSession = store.state.session?.currentSession
+  const currentSession = store.state.im.session?.currentSession
   if (!currentSession) return
 
   const newState = !currentSession.isMuted

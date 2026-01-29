@@ -1,11 +1,11 @@
 <template>
   <div class="dashboard">
     <!-- 统计卡片 -->
-    <el-row :gutter="20">
+    <el-row :gutter="16">
       <el-col :span="6">
-        <el-card class="stat-card" shadow="hover">
+        <el-card class="stat-card stat-card--user" shadow="hover">
           <div class="stat-content">
-            <div class="stat-icon user-icon">
+            <div class="stat-icon">
               <el-icon><User /></el-icon>
             </div>
             <div class="stat-info">
@@ -16,9 +16,9 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card" shadow="hover">
+        <el-card class="stat-card stat-card--active" shadow="hover">
           <div class="stat-content">
-            <div class="stat-icon active-icon">
+            <div class="stat-icon">
               <el-icon><Star /></el-icon>
             </div>
             <div class="stat-info">
@@ -29,9 +29,9 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card" shadow="hover">
+        <el-card class="stat-card stat-card--group" shadow="hover">
           <div class="stat-content">
-            <div class="stat-icon group-icon">
+            <div class="stat-icon">
               <el-icon><ChatDotRound /></el-icon>
             </div>
             <div class="stat-info">
@@ -42,9 +42,9 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card" shadow="hover">
+        <el-card class="stat-card stat-card--message" shadow="hover">
           <div class="stat-content">
-            <div class="stat-icon message-icon">
+            <div class="stat-icon">
               <el-icon><ChatLineSquare /></el-icon>
             </div>
             <div class="stat-info">
@@ -57,41 +57,43 @@
     </el-row>
 
     <!-- 数据图表区域 -->
-    <el-row :gutter="20" style="margin-top: 20px">
+    <el-row :gutter="16" class="chart-row">
       <!-- 消息统计 -->
       <el-col :span="12">
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
-              <span>消息统计（近7天）</span>
-              <el-button type="primary" link @click="loadMessageStats">刷新</el-button>
+              <span class="card-title">消息统计（近7天）</span>
+              <el-button type="primary" link @click="loadMessageStats">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
             </div>
           </template>
           <div v-loading="messageStatsLoading" class="chart-container">
             <div v-if="messageStats.totalMessages > 0" class="message-stats">
               <div class="stat-row">
-                <span class="stat-label">总消息</span>
-                <span class="stat-value">{{ messageStats.totalMessages }}</span>
+                <span class="stat-row-label">总消息</span>
+                <span class="stat-row-value">{{ messageStats.totalMessages }}</span>
               </div>
               <div class="message-bar-chart">
                 <div class="bar-item">
                   <div class="bar-label">文本</div>
                   <div class="bar-track">
-                    <div class="bar-fill text-bar" :style="{ width: getTextPercent + '%' }"></div>
+                    <div class="bar-fill bar-fill--primary" :style="{ width: getTextPercent + '%' }"></div>
                   </div>
                   <div class="bar-value">{{ messageStats.textMessages }}</div>
                 </div>
                 <div class="bar-item">
                   <div class="bar-label">图片</div>
                   <div class="bar-track">
-                    <div class="bar-fill image-bar" :style="{ width: getImagePercent + '%' }"></div>
+                    <div class="bar-fill bar-fill--success" :style="{ width: getImagePercent + '%' }"></div>
                   </div>
                   <div class="bar-value">{{ messageStats.imageMessages }}</div>
                 </div>
                 <div class="bar-item">
                   <div class="bar-label">文件</div>
                   <div class="bar-track">
-                    <div class="bar-fill file-bar" :style="{ width: getFilePercent + '%' }"></div>
+                    <div class="bar-fill bar-fill--warning" :style="{ width: getFilePercent + '%' }"></div>
                   </div>
                   <div class="bar-value">{{ messageStats.fileMessages }}</div>
                 </div>
@@ -107,19 +109,21 @@
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
-              <span>用户角色分布</span>
-              <el-button type="primary" link @click="loadUserStats">刷新</el-button>
+              <span class="card-title">用户角色分布</span>
+              <el-button type="primary" link @click="loadUserStats">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
             </div>
           </template>
           <div v-loading="userStatsLoading" class="chart-container">
             <div v-if="userStats.total > 0" class="role-stats">
               <div class="pie-chart-wrapper">
                 <svg class="pie-chart" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="20" />
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--dt-border-lighter)" stroke-width="20" />
                   <circle
                     cx="50" cy="50" r="40"
                     fill="none"
-                    stroke="#f56c6c"
+                    stroke="var(--dt-error)"
                     stroke-width="20"
                     :stroke-dasharray="superAdminCircumference + ' ' + (251.32 - superAdminCircumference)"
                     stroke-dashoffset="0"
@@ -128,7 +132,7 @@
                   <circle
                     cx="50" cy="50" r="40"
                     fill="none"
-                    stroke="#e6a23c"
+                    stroke="var(--dt-warning)"
                     stroke-width="20"
                     :stroke-dasharray="adminCircumference + ' ' + (251.32 - adminCircumference)"
                     :stroke-dashoffset="(-superAdminCircumference) + 'px'"
@@ -137,7 +141,7 @@
                   <circle
                     cx="50" cy="50" r="40"
                     fill="none"
-                    stroke="#909399"
+                    stroke="var(--dt-text-secondary)"
                     stroke-width="20"
                     :stroke-dasharray="userCircumference + ' ' + (251.32 - userCircumference)"
                     :stroke-dashoffset="(-(superAdminCircumference + adminCircumference)) + 'px'"
@@ -147,15 +151,15 @@
               </div>
               <div class="legend">
                 <div class="legend-item">
-                  <div class="legend-dot super-admin"></div>
+                  <div class="legend-dot legend-dot--super"></div>
                   <span>超级管理员: {{ userStats.superAdminCount || 0 }}</span>
                 </div>
                 <div class="legend-item">
-                  <div class="legend-dot admin"></div>
+                  <div class="legend-dot legend-dot--admin"></div>
                   <span>管理员: {{ userStats.adminCount || 0 }}</span>
                 </div>
                 <div class="legend-item">
-                  <div class="legend-dot user"></div>
+                  <div class="legend-dot legend-dot--user"></div>
                   <span>普通用户: {{ userStats.userCount || 0 }}</span>
                 </div>
               </div>
@@ -176,7 +180,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { User, ChatDotRound, ChatLineSquare } from '@element-plus/icons-vue'
+import { User, ChatDotRound, ChatLineSquare, Star, Refresh } from '@element-plus/icons-vue'
 import { getOverview, getUserStats, getMessageAdminStats } from '@/api/admin'
 
 const loading = ref(false)
@@ -292,75 +296,114 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* 引入主题变量 */
+@import '@/styles/admin-theme.css';
+
+/* ================================
+   页面容器
+   ================================ */
 .dashboard {
-  padding: 20px;
+  padding: 0;
 }
 
+.chart-row {
+  margin-top: var(--dt-space-md);
+}
+
+/* ================================
+   统计卡片
+   ================================ */
 .stat-card {
+  border-radius: var(--dt-card-radius);
+  border: 1px solid var(--dt-card-border);
+  transition: all var(--dt-transition-base) var(--dt-ease-out);
   cursor: pointer;
-  transition: box-shadow 0.3s;
 }
 
 .stat-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-base);
+  transform: translateY(-2px);
 }
 
 .stat-content {
   display: flex;
   align-items: center;
+  gap: var(--dt-space-md);
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  color: #fff;
+  font-size: 24px;
+  color: white;
 }
 
-.user-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* 各卡片图标样式 */
+.stat-card--user .stat-icon {
+  background: var(--dt-primary-gradient);
 }
 
-.active-icon {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+.stat-card--active .stat-icon {
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF3D71 100%);
 }
 
-.group-icon {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+.stat-card--group .stat-icon {
+  background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);
 }
 
-.message-icon {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+.stat-card--message .stat-icon {
+  background: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%);
 }
 
 .stat-info {
-  margin-left: 20px;
+  flex: 1;
 }
 
 .stat-value {
   font-size: 28px;
-  font-weight: bold;
-  color: #333;
+  font-weight: var(--dt-font-weight-bold);
+  color: var(--dt-text-primary);
+  line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #999;
-  margin-top: 5px;
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-secondary);
+  margin-top: 4px;
 }
 
+/* ================================
+   图表卡片
+   ================================ */
 .chart-card {
+  border-radius: var(--dt-card-radius);
+  border: 1px solid var(--dt-card-border);
   height: 320px;
+}
+
+.chart-card :deep(.el-card__header) {
+  padding: var(--dt-space-sm) var(--dt-space-md);
+  border-bottom: 1px solid var(--dt-divider);
+}
+
+.chart-card :deep(.el-card__body) {
+  padding: var(--dt-space-md);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.card-title {
+  font-size: var(--dt-font-size-md);
+  font-weight: var(--dt-font-weight-medium);
+  color: var(--dt-text-primary);
 }
 
 .chart-container {
@@ -370,82 +413,89 @@ onMounted(async () => {
   justify-content: center;
 }
 
+/* ================================
+   消息统计
+   ================================ */
 .message-stats {
   width: 100%;
-  padding: 10px;
+  padding: var(--dt-space-sm);
 }
 
 .stat-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+  margin-bottom: var(--dt-space-md);
+  padding-bottom: var(--dt-space-sm);
+  border-bottom: 1px solid var(--dt-divider);
 }
 
-.stat-row .stat-label {
-  color: #666;
-  font-size: 14px;
+.stat-row-label {
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-regular);
 }
 
-.stat-row .stat-value {
+.stat-row-value {
   font-size: 24px;
-  font-weight: bold;
-  color: #409eff;
+  font-weight: var(--dt-font-weight-bold);
+  color: var(--dt-primary);
 }
 
 .message-bar-chart {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--dt-space-sm);
 }
 
 .bar-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--dt-space-sm);
 }
 
 .bar-label {
-  width: 50px;
-  font-size: 14px;
-  color: #666;
+  width: 40px;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-regular);
 }
 
 .bar-track {
   flex: 1;
   height: 24px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
+  background-color: var(--dt-bg-hover);
+  border-radius: var(--dt-radius-sm);
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
+  border-radius: var(--dt-radius-sm);
+  transition: width var(--dt-transition-slow) var(--dt-ease-out);
 }
 
-.text-bar {
-  background: linear-gradient(90deg, #409eff 0%, #66b1ff 100%);
+.bar-fill--primary {
+  background: var(--dt-primary-gradient);
 }
 
-.image-bar {
-  background: linear-gradient(90deg, #67c23a 0%, #85ce61 100%);
+.bar-fill--success {
+  background: linear-gradient(90deg, var(--dt-success) 0%, var(--dt-success-light) 100%);
 }
 
-.file-bar {
-  background: linear-gradient(90deg, #e6a23c 0%, #f0c78a 100%);
+.bar-fill--warning {
+  background: linear-gradient(90deg, var(--dt-warning) 0%, var(--dt-warning-light) 100%);
 }
 
 .bar-value {
   width: 50px;
   text-align: right;
-  font-size: 14px;
-  color: #666;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-regular);
+  font-weight: var(--dt-font-weight-medium);
 }
 
+/* ================================
+   角色分布饼图
+   ================================ */
 .role-stats {
   display: flex;
   align-items: center;
@@ -466,39 +516,71 @@ onMounted(async () => {
 .legend {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--dt-space-sm);
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #666;
+  gap: var(--dt-space-sm);
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-regular);
 }
 
 .legend-dot {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-round);
+  flex-shrink: 0;
 }
 
-.legend-dot.super-admin {
-  background-color: #f56c6c;
+.legend-dot--super {
+  background-color: var(--dt-error);
 }
 
-.legend-dot.admin {
-  background-color: #e6a23c;
+.legend-dot--admin {
+  background-color: var(--dt-warning);
 }
 
-.legend-dot.user {
-  background-color: #909399;
+.legend-dot--user {
+  background-color: var(--dt-text-secondary);
 }
 
+/* ================================
+   加载容器
+   ================================ */
 .loading-container {
-  margin-top: 20px;
-  padding: 20px;
-  background: #fff;
-  border-radius: 4px;
+  margin-top: var(--dt-space-md);
+  padding: var(--dt-space-md);
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-card-radius);
+  border: 1px solid var(--dt-card-border);
+}
+
+/* ================================
+   Element Plus 样式覆盖
+   ================================ */
+
+/* 按钮 link 样式 */
+:deep(.el-button--link.el-button--primary) {
+  color: var(--dt-primary);
+}
+
+:deep(.el-button--link.el-button--primary:hover) {
+  color: var(--dt-primary-light);
+}
+
+/* 空状态样式 */
+:deep(.el-empty) {
+  --el-empty-description-color: var(--dt-text-placeholder);
+}
+
+/* Loading 样式 */
+:deep(.el-loading-mask) {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='dark'] :deep(.el-loading-mask) {
+  background-color: rgba(42, 42, 42, 0.9);
 }
 </style>

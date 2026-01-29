@@ -118,8 +118,9 @@ import { Loading, ArrowDown, User } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMessageReadUsers } from '@/api/im/message'
 import { sendNudge } from '@/api/im/nudge'
-import MessageItem from './MessageItem.vue'
-import MessageBubble from './MessageBubble.vue'
+import MessageItem from './MessageItemRefactored.vue'
+// 使用重构后的消息气泡组件
+import MessageBubble from './MessageBubbleRefactored.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
@@ -380,9 +381,6 @@ const scrollToBottom = (smooth = true) => {
     }
   })
 }
-
-// 监听消息变化自动滚动
-watch(() => props.messages.length, () => scrollToBottom())
 
 // 处理菜单命令
 const handleCommand = async (cmd, msg) => {

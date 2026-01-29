@@ -1,142 +1,123 @@
-/**
- * 主题切换 Composable
- * 提供亮色/暗色模式切换功能，支持系统自动跟随、跨标签页同步
- */
-import { ref, watch, computed } from 'vue'
+// ============================================================================
+// useTheme.js
+// 主题管理组合式函数
+// ============================================================================
 
-const STORAGE_KEY = 'theme-mode'
-
-// 核心单例状态
-const themeMode = ref('auto')
-const isDark = ref(false)
+import { ref, computed, onMounted, watch } from 'vue'
+import { useStore } from 'vuex'
 
 /**
- * 判断当前是否应该应用暗色
- */
-const getSystemIsDark = () => {
-  if (typeof window === 'undefined' || !window.matchMedia) return false
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-}
-
-/**
- * 更新最终导出的 isDark 状态
- */
-const updateIsDark = () => {
-  if (themeMode.value === 'auto') {
-    isDark.value = getSystemIsDark()
-  } else {
-    isDark.value = themeMode.value === 'dark'
-  }
-}
-
-/**
- * 应用主题样式到 DOM
- * 使用 View Transition API 实现平滑切换 (如果可用)
- */
-const applyThemeToDOM = (dark) => {
-  if (typeof document === 'undefined') return
-
-  const updateDOM = () => {
-    if (dark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }
-
-  if (document.startViewTransition) {
-    document.startViewTransition(updateDOM)
-  } else {
-    updateDOM()
-  }
-}
-
-// === 初始化逻辑 ===
-const init = () => {
-  if (typeof window === 'undefined') return
-
-  // 1. 加载持久化设置
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored) themeMode.value = stored
-
-  // 2. 初始计算状态
-  updateIsDark()
-  applyThemeToDOM(isDark.value)
-
-  // 3. 系统主题监听
-  if (window.matchMedia) {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const listener = () => {
-      if (themeMode.value === 'auto') updateIsDark()
-    }
-    if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', listener)
-    else mediaQuery.addListener(listener)
-  }
-
-  // 4. 存储同步监听 (跨标签)
-  window.addEventListener('storage', (e) => {
-    if (e.key === STORAGE_KEY && e.newValue && e.newValue !== themeMode.value) {
-      themeMode.value = e.newValue
-    }
-  })
-}
-
-// 立即执行初始化
-init()
-
-// 侦听变化
-watch(themeMode, (val) => {
-  localStorage.setItem(STORAGE_KEY, val)
-  updateIsDark()
-})
-
-watch(isDark, (val) => {
-  applyThemeToDOM(val)
-})
-
-/**
- * 主题管理 Hook
+ * 主题管理组合式函数
+ * @returns {Object} 主题相关的状态和方法
  */
 export function useTheme() {
+  const store = useStore()
+  const currentTheme = ref('light')
+  const isDarkMode = ref(false)
+
   /**
-   * 切换主题: 亮色 -> 暗色 -> 自动
+   * 初始化主题
    */
-  const toggleTheme = () => {
-    const modes = ['light', 'dark', 'auto']
-    let nextIdx = (modes.indexOf(themeMode.value) + 1) % modes.length
-
-    // 智能跳过视觉上无变化的模式
-    const getPreviewIsDark = (mode) => {
-      if (mode === 'auto') return getSystemIsDark()
-      return mode === 'dark'
+  const initTheme = () => {
+    // 从本地存储获取主题设置
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme) {
+      currentTheme.value = savedTheme
+      isDarkMode.value = savedTheme === 'dark'
+    } else {
+      // 检查系统偏好
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      currentTheme.value = prefersDark ? 'dark' : 'light'
+      isDarkMode.value = prefersDark
     }
 
-    // 如果下一个模式的视觉效果与当前一致，则再跳一步（确保点击即反馈）
-    if (getPreviewIsDark(modes[nextIdx]) === isDark.value) {
-      nextIdx = (nextIdx + 1) % modes.length
-    }
-
-    themeMode.value = modes[nextIdx]
+    // 应用主题
+    applyTheme(currentTheme.value)
   }
 
-  const setThemeMode = (mode) => {
-    if (['light', 'dark', 'auto'].includes(mode)) {
-      themeMode.value = mode
+  /**
+   * 应用主题
+   * @param {string} theme 主题名称 ('light', 'dark', 'system')
+   */
+  const applyTheme = (theme) => {
+    if (theme === 'system') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      isDarkMode.value = prefersDark
+    } else {
+      isDarkMode.value = theme === 'dark'
+    }
+
+    // 更新文档根元素的 class
+    const root = document.documentElement
+    if (isDarkMode.value) {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
+
+    // 保存主题设置到本地存储
+    localStorage.setItem('theme', theme)
+    currentTheme.value = theme
+
+    // 同步到 Vuex 存储
+    store.dispatch('im/updateGeneralSettings', {
+      theme
+    })
+  }
+
+  /**
+   * 切换主题
+   * @param {string} theme 主题名称 ('light', 'dark', 'system')
+   */
+  const setTheme = (theme) => {
+    applyTheme(theme)
+  }
+
+  /**
+   * 切换深色模式
+   * @param {boolean} dark 是否启用深色模式
+   */
+  const toggleDarkMode = (dark) => {
+    applyTheme(dark ? 'dark' : 'light')
+  }
+
+  /**
+   * 监听系统主题变化
+   */
+  const setupThemeListener = () => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    
+    const handleChange = (e) => {
+      if (currentTheme.value === 'system') {
+        isDarkMode.value = e.matches
+        applyTheme('system')
+      }
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+
+    // 清理监听器
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange)
     }
   }
 
-  // 计算模式文字提示
-  const themeModeLabel = computed(() => {
-    if (themeMode.value === 'light') return '浅色模式'
-    if (themeMode.value === 'dark') return '深色模式'
-    return '跟随系统'
+  // 生命周期钩子
+  onMounted(() => {
+    initTheme()
+    setupThemeListener()
+  })
+
+  // 监听主题变化
+  watch(currentTheme, (newTheme) => {
+    applyTheme(newTheme)
   })
 
   return {
-    isDark,
-    themeMode,
-    themeModeLabel,
-    toggleTheme,
-    setThemeMode
+    currentTheme,
+    isDarkMode,
+    setTheme,
+    toggleDarkMode,
+    applyTheme
   }
 }

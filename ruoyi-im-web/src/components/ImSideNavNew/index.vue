@@ -2,8 +2,7 @@
   <nav
     :class="[
       'dingtalk-nav',
-      'flex flex-col items-center z-20 shrink-0 transition-colors duration-300',
-      isDark ? 'bg-nav-dark' : 'bg-nav-light'
+      'flex flex-col items-center z-20 shrink-0 bg-nav-light'
     ]"
     style="height: 100vh;"
     role="navigation"
@@ -59,17 +58,7 @@
         </button>
       </el-tooltip>
 
-      <!-- 主题切换按钮 -->
-      <el-tooltip :content="themeTooltip" placement="right" :show-after="500" :hide-after="0">
-        <button
-          @click="handleToggleTheme"
-          class="nav-item nav-item-action"
-          :aria-label="themeTooltip"
-        >
-          <component :is="themeIcon" class="nav-icon" aria-hidden="true" />
-          <span v-if="themeMode === 'auto'" class="auto-badge">A</span>
-        </button>
-      </el-tooltip>
+
 
       <!-- 设置按钮 -->
       <el-tooltip content="设置" placement="right" :show-after="500" :hide-after="0">
@@ -114,12 +103,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useTheme } from '@/composables/useTheme'
 import request from '@/api/request'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import {
   ChatDotRound, User, Grid, Cloudy, Calendar, CircleCheck,
-  Document, Message, Search, Setting, Sunny, Moon
+  Document, Message, Search, Setting
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -131,7 +119,6 @@ const props = defineProps({
 
 const emit = defineEmits(['switch-module', 'open-search', 'open-settings'])
 const store = useStore()
-const { isDark, themeMode, toggleTheme } = useTheme()
 
 const logoUrl = ref(null)
 
@@ -149,15 +136,7 @@ onMounted(async () => {
   }
 })
 
-const themeIcon = computed(() => {
-  // Element Plus 没有 MoonFilled，使用 Moon 和 Sunny 区分
-  return themeMode.value === 'dark' || themeMode.value === 'auto' ? Moon : Sunny
-})
 
-const themeTooltip = computed(() => {
-  const currentLabel = themeMode.value === 'auto' ? '跟随系统' : (themeMode.value === 'dark' ? '深色模式' : '浅色模式')
-  return `外观模式: ${currentLabel} (点击切换)`
-})
 
 // 未读消息数
 const unreadCount = computed(() => store.state.im?.totalUnreadCount || 0)
@@ -187,16 +166,7 @@ const navModules = ref([
   { key: 'assistant', label: 'AI助理', icon: ChatDotRound }
 ])
 
-/**
- * 处理主题切换并同步 Store
- */
-function handleToggleTheme() {
-  toggleTheme()
-  const newSettings = { ...store.state.im.settings }
-  if (!newSettings.general) newSettings.general = {}
-  newSettings.general.theme = themeMode.value
-  store.commit('im/UPDATE_SETTINGS', newSettings)
-}
+
 
 /**
  * 切换模块
@@ -238,10 +208,6 @@ function handleOpenSearch() {
 
 .bg-nav-light {
   background: linear-gradient(180deg, #1677ff 0%, #0e5fd9 100%);
-}
-
-.bg-nav-dark {
-  background: linear-gradient(180deg, #252526 0%, #1e1e1e 100%);
 }
 
 // ============================================================================
@@ -558,51 +524,5 @@ function handleOpenSearch() {
   animation: pulse 2s ease-in-out infinite;
 }
 
-// ============================================================================
-// 暗色模式适配
-// ============================================================================
-.dark .dingtalk-nav {
-  background: linear-gradient(180deg, #252526 0%, #1e1e1e 100%);
-}
 
-.dark .nav-logo {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.dark .nav-logo:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.dark .nav-item {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.dark .nav-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.dark .nav-item-active {
-  background: rgba(22, 119, 255, 0.2);
-}
-
-.dark .nav-item-active::before {
-  background: var(--dt-brand-color);
-}
-
-.dark .nav-item-action {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.dark .nav-item-action:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.dark .nav-avatar-status {
-  border-color: #252526;
-}
-
-.dark .nav-avatar-active {
-  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.3);
-}
 </style>

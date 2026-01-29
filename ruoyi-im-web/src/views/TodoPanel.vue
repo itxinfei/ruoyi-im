@@ -13,6 +13,17 @@
             <span class="badge-count">{{ todos.filter(t => !t.completed).length }}</span>
           </div>
         </div>
+        <!-- 搜索框 -->
+        <div class="search-wrapper" v-if="!batchMode">
+          <span class="material-icons-outlined search-icon">search</span>
+          <input
+            v-model="searchInput"
+            type="text"
+            class="search-input"
+            placeholder="搜索待办..."
+            @input="handleSearchInput"
+          />
+        </div>
       </div>
       <div class="header-actions">
         <!-- 批量操作按钮 -->
@@ -254,6 +265,17 @@ import CreateTodoDialog from '@/components/CreateTodoDialog/index.vue'
 import TodoDetailDialog from '@/components/TodoDetailDialog/index.vue'
 import { getTodos, completeTodo, deleteTodo as deleteTodoApi, updateTodo } from '@/api/im/workbench'
 
+// ============================================================================
+// 工具函数：防抖
+// ============================================================================
+const debounce = (fn, delay) => {
+  let timer = null
+  return (...args) => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
+
 const loading = ref(false)
 const showAddDialog = ref(false)
 const showDetailDialog = ref(false)
@@ -261,6 +283,8 @@ const todos = ref([])
 const editingTodo = ref(null)
 const selectedTodo = ref(null)
 const activeFilter = ref('all')
+const searchKeyword = ref('') // 搜索关键词
+const searchInput = ref('') // 搜索输入框的值（用于防抖）
 
 // 批量操作状态
 const batchMode = ref(false)
@@ -269,6 +293,17 @@ const selectedTodos = ref(new Set())
 // 拖拽排序状态
 const draggingTodo = ref(null)
 const dragOverTodo = ref(null)
+
+// ============================================================================
+// 搜索防抖处理
+// ============================================================================
+const debouncedSearch = debounce((value) => {
+  searchKeyword.value = value
+}, 300)
+
+const handleSearchInput = (e) => {
+  debouncedSearch(e.target.value)
+}
 
 // 筛选标签配置
 const filterTabs = [
@@ -281,6 +316,15 @@ const filterTabs = [
 // 根据筛选条件过滤待办
 const filteredTodos = computed(() => {
   let list = todos.value
+
+  // 搜索过滤
+  if (searchKeyword.value) {
+    const keyword = searchKeyword.value.toLowerCase()
+    list = list.filter(t =>
+      t.title.toLowerCase().includes(keyword) ||
+      (t.content && t.content.toLowerCase().includes(keyword))
+    )
+  }
 
   switch (activeFilter.value) {
     case 'pending':
@@ -507,6 +551,8 @@ const handleTodoCreated = () => {
 const enterBatchMode = () => {
   batchMode.value = true
   selectedTodos.value.clear()
+  searchInput.value = ''
+  searchKeyword.value = ''
 }
 
 const exitBatchMode = () => {
@@ -765,21 +811,56 @@ onMounted(() => {
   }
 }
 
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.06) 50%, transparent 50%);
-  }
-}
-
 .header-left {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+// ============================================================================
+// 搜索框
+// ============================================================================
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 240px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #999;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px 0 38px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  font-size: 14px;
+  color: #1a1a1a;
+  outline: none;
+  transition: all 0.3s;
+
+  &::placeholder {
+    color: #999;
+  }
+
+  &:hover {
+    border-color: rgba(22, 119, 255, 0.3);
+  }
+
+  &:focus {
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+  }
 }
 
 .title-wrapper {
@@ -831,15 +912,6 @@ onMounted(() => {
     animation: shimmer 3s infinite;
   }
 
-  @keyframes shimmer {
-    0% {
-      background-position: -100% 0;
-    }
-    100% {
-      background-position: 100% 0;
-    }
-  }
-
   .badge-icon-wrapper {
     position: relative;
   }
@@ -860,23 +932,23 @@ onMounted(() => {
     animation: iconPulse 2s ease-in-out infinite;
   }
 
-  @keyframes iconPulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.2;
-    }
-    50% {
-      transform: scale(1.2);
-      opacity: 0.3;
-    }
-  }
-
   .badge-count {
     font-size: 13px;
     font-weight: 700;
     color: var(--dt-brand-color);
     position: relative;
     z-index: 1;
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.3;
   }
 }
 
@@ -913,15 +985,6 @@ onMounted(() => {
 
   &:active {
     transform: translateY(0);
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: -100% 0;
-    }
-    100% {
-      background-position: 100% 0;
-    }
   }
 }
 
@@ -1034,17 +1097,6 @@ onMounted(() => {
 
   &--done .stat-icon {
     color: #52c41a;
-  }
-
-  @keyframes statIconPulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.3;
-    }
-    50% {
-      transform: scale(1.15);
-      opacity: 0.5;
-    }
   }
 
   .stat-info {
@@ -1294,7 +1346,7 @@ onMounted(() => {
 
   &:nth-child(2) {
     width: 160px;
-    height  : 160px;
+    height: 160px;
     animation-delay: 0.3s;
   }
 
@@ -1376,15 +1428,6 @@ onMounted(() => {
     background: linear-gradient(135deg, var(--dt-brand-hover) 0%, #4096ff 100%);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(22, 119, 255, 0.4);
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: -100% 0;
-    }
-    100% {
-      background-position: 100% 0;
-    }
   }
 }
 
@@ -1501,16 +1544,16 @@ onMounted(() => {
     opacity: 0.4;
     animation: priorityPulse 2s ease-in-out infinite;
   }
+}
 
-  @keyframes priorityPulse {
-    0%, 100% {
-      opacity: 0.4;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.6;
-      transform: scale(1.5);
-    }
+@keyframes priorityPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.5);
   }
 }
 
@@ -1832,10 +1875,6 @@ onMounted(() => {
   }
 }
 
-.dark .todo-panel {
-  background: #0a0e1a;
-}
-
 .dark .panel-header,
 .dark .filter-tabs,
 .dark .stats-row {
@@ -1949,6 +1988,54 @@ onMounted(() => {
 
   &:hover {
     color: var(--dt-brand-color);
+  }
+}
+
+.dark .search-wrapper {
+  .search-icon {
+    color: #888;
+  }
+
+  .search-input {
+    background: #1a1f2e;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e8e8e8;
+
+    &::placeholder {
+      color: #888;
+    }
+
+    &:hover {
+      border-color: rgba(22, 119, 255, 0.3);
+    }
+
+    &:focus {
+      border-color: var(--dt-brand-color);
+      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.15);
+    }
+  }
+}
+
+// ============================================================================
+// 全局动画
+// ============================================================================
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
+}
+
+@keyframes statIconPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.5;
   }
 }
 </style>

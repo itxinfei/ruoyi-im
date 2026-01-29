@@ -40,74 +40,7 @@
       </div>
     </section>
 
-    <!-- 外观主题 -->
-    <section class="setting-section">
-      <h3 class="section-title">外观</h3>
-      <div class="setting-card">
-        <div class="theme-selector">
-          <div
-            class="theme-option"
-            :class="{ active: localSettings.general.theme === 'light' }"
-            @click="selectTheme('light')"
-          >
-            <div class="theme-preview light-preview">
-              <div class="preview-sidebar"></div>
-              <div class="preview-main">
-                <div class="preview-header"></div>
-                <div class="preview-content">
-                  <div class="preview-line"></div>
-                  <div class="preview-line short"></div>
-                </div>
-              </div>
-            </div>
-            <div class="theme-info">
-              <span class="theme-label">浅色</span>
-              <el-icon v-if="localSettings.general.theme === 'light'" class="check-icon"><Check /></el-icon>
-            </div>
-          </div>
 
-          <div
-            class="theme-option"
-            :class="{ active: localSettings.general.theme === 'dark' }"
-            @click="selectTheme('dark')"
-          >
-            <div class="theme-preview dark-preview">
-              <div class="preview-sidebar"></div>
-              <div class="preview-main">
-                <div class="preview-header"></div>
-                <div class="preview-content">
-                  <div class="preview-line"></div>
-                  <div class="preview-line short"></div>
-                </div>
-              </div>
-            </div>
-            <div class="theme-info">
-              <span class="theme-label">深色</span>
-              <el-icon v-if="localSettings.general.theme === 'dark'" class="check-icon"><Check /></el-icon>
-            </div>
-          </div>
-
-          <div
-            class="theme-option"
-            :class="{ active: localSettings.general.theme === 'auto' }"
-            @click="selectTheme('auto')"
-          >
-            <div class="theme-preview auto-preview">
-              <div class="preview-half light">
-                <div class="mini-sidebar"></div>
-              </div>
-              <div class="preview-half dark">
-                <div class="mini-sidebar"></div>
-              </div>
-            </div>
-            <div class="theme-info">
-              <span class="theme-label">跟随系统</span>
-              <el-icon v-if="localSettings.general.theme === 'auto'" class="check-icon"><Check /></el-icon>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- 语言设置 -->
     <section class="setting-section">
@@ -243,7 +176,6 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const store = useStore()
 const localSettings = reactive({
   general: {
-    theme: 'light',
     language: 'zh-CN',
     timeFormat: '24h',
     autoStart: false,
@@ -328,10 +260,7 @@ watch(() => props.modelValue, (newVal) => {
   }
 }, { deep: true })
 
-const selectTheme = (theme) => {
-  localSettings.general.theme = theme
-  handleChange()
-}
+
 
 const handleChange = () => {
   emit('update:modelValue', JSON.parse(JSON.stringify(localSettings)))
@@ -367,11 +296,6 @@ const handleChange = () => {
   border: 1px solid var(--dt-border-light);
   border-radius: 8px;
   padding: 24px;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
 }
 
 // Logo设置
@@ -439,163 +363,7 @@ const handleChange = () => {
   gap: 12px;
 }
 
-// 主题选择器
-.theme-selector {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-}
 
-.theme-option {
-  position: relative;
-  cursor: pointer;
-  width: 140px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  &:hover .theme-preview {
-    border-color: var(--dt-brand-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  &.active .theme-preview {
-    border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
-  }
-}
-
-.theme-preview {
-  width: 100%;
-  height: 90px;
-  border-radius: 8px;
-  border: 2px solid var(--dt-border-light);
-  overflow: hidden;
-  position: relative;
-  transition: all 0.2s;
-
-  .dark & {
-    border-color: var(--dt-border-dark);
-  }
-}
-
-.light-preview {
-  background: #f5f7fa;
-  display: flex;
-
-  .preview-sidebar {
-    width: 28px;
-    height: 100%;
-    background: #fff;
-    border-right: 1px solid #e4e7ed;
-  }
-
-  .preview-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .preview-header {
-    height: 24px;
-    background: #fff;
-    border-bottom: 1px solid #e4e7ed;
-  }
-
-  .preview-content {
-    flex: 1;
-    padding: 12px;
-  }
-
-  .preview-line {
-    height: 6px;
-    background: #dcdfe6;
-    margin-bottom: 8px;
-    border-radius: 3px;
-
-    &.short {
-      width: 60%;
-    }
-  }
-}
-
-.dark-preview {
-  background: #1a1a1a;
-  display: flex;
-
-  .preview-sidebar {
-    width: 28px;
-    height: 100%;
-    background: #2c2c2c;
-    border-right: 1px solid #3c3c3c;
-  }
-
-  .preview-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .preview-header {
-    height: 24px;
-    background: #2c2c2c;
-    border-bottom: 1px solid #3c3c3c;
-  }
-
-  .preview-content {
-    flex: 1;
-    padding: 12px;
-  }
-
-  .preview-line {
-    height: 6px;
-    background: #4c4c4c;
-    margin-bottom: 8px;
-    border-radius: 3px;
-
-    &.short {
-      width: 60%;
-    }
-  }
-}
-
-.auto-preview {
-  display: flex;
-
-  .preview-half {
-    flex: 1;
-    height: 100%;
-    position: relative;
-
-    &.light {
-      background: #f5f7fa;
-
-      .mini-sidebar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 14px;
-        height: 100%;
-        background: #fff;
-        border-right: 1px solid #e4e7ed;
-      }
-    }
-
-    &.dark {
-      background: #1a1a1a;
-
-      .mini-sidebar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 14px;
-        height: 100%;
-        background: #2c2c2c;
-        border-right: 1px solid #3c3c3c;
-      }
-    }
-  }
-}
 
 .theme-info {
   display: flex;
@@ -621,11 +389,6 @@ const handleChange = () => {
   border: 1px solid var(--dt-border-light);
   border-radius: 8px;
   overflow: hidden;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
 }
 
 .setting-item {
@@ -635,10 +398,6 @@ const handleChange = () => {
   gap: 16px;
   border-bottom: 1px solid var(--dt-border-light);
   transition: background-color 0.2s;
-
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
 
   &:last-child {
     border-bottom: none;
@@ -719,13 +478,7 @@ const handleChange = () => {
     justify-content: center;
   }
 
-  .theme-selector {
-    justify-content: center;
-  }
 
-  .theme-option {
-    width: 120px;
-  }
 
   .setting-item {
     padding: 14px 16px;

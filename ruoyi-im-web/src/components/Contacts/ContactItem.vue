@@ -60,15 +60,20 @@ const props = defineProps({
 
 const emit = defineEmits(['click', 'contextmenu', 'delete'])
 
-// 高亮显示搜索关键词
+// 高亮显示搜索关键词（转义特殊字符）
 const highlightName = computed(() => {
   const name = props.item.name || props.item.displayName || ''
   if (!props.searchQuery) return name
-  const reg = new RegExp(`(${props.searchQuery})`, 'gi')
+
+  // 转义正则特殊字符
+  const escapedQuery = props.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const reg = new RegExp(`(${escapedQuery})`, 'gi')
   return name.replace(reg, '<span class="highlight">$1</span>')
 })
 
 // ========== Touch Swipe Logic ==========
+
+const SWIPE_THRESHOLD = 30 // 滑动阈值
 const touchStartX = ref(0)
 const touchStartY = ref(0)
 const isSwipedLeft = ref(false)
@@ -79,22 +84,24 @@ const handleTouchStart = (e) => {
 }
 
 const handleTouchMove = (e) => {
-  // Simple Horizontal Swipe Detection
   const deltaX = e.touches[0].clientX - touchStartX.value
   const deltaY = e.touches[0].clientY - touchStartY.value
-  
-  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
-      // Horizontal move dominant
-      if (deltaX < 0) {
-          isSwipedLeft.value = true
-      } else {
-          isSwipedLeft.value = false
-      }
+
+  // 水平滑动判定：水平移动距离 > 垂直移动距离 && 超过阈值
+  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+    isSwipedLeft.value = deltaX < 0
   }
 }
 
 const handleTouchEnd = () => {
-  // Optional: Add snap logic or velocity check
+  // 可选：添加回弹逻辑或速度检测
+}
+
+// 防止 XSS 攻击：对用户输入进行转义
+const escapeHtml = (str) => {
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
 }
 </script>
 

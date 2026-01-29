@@ -67,11 +67,11 @@ export function useMessageBubble(props, emit) {
 
   // 范围选择
   const rangeSelection = () => {
-    const currentSession = store.state.session?.currentSession
+    const currentSession = store.state.im.session?.currentSession
     if (!currentSession) return
 
     const sessionId = currentSession.id
-    const lastClickedId = store.state.message?.lastClickedMessageId
+    const lastClickedId = store.state.im.message?.lastClickedMessageId
 
     if (!lastClickedId) {
       toggleSelection()
@@ -84,7 +84,7 @@ export function useMessageBubble(props, emit) {
       return
     }
 
-    const messages = store.state.message?.messages?.[sessionId] || []
+    const messages = store.state.im.message?.messages?.[sessionId] || []
     if (messages.length === 0) return
 
     store.commit('im/message/SELECT_MESSAGE_RANGE', {

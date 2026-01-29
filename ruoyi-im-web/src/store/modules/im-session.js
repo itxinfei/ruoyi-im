@@ -472,6 +472,11 @@ export default {
 
     // 选择会话
     async selectSession({ commit, dispatch }, session) {
+      console.log('[Store] selectSession called with:', session)
+      if (!session || !session.id) {
+        console.error('[Store] Invalid session object:', session)
+        return
+      }
       commit('SET_CURRENT_SESSION', session)
       commit('UPDATE_SESSION', {
         id: session.id,
@@ -479,6 +484,7 @@ export default {
       })
       try {
         await markConversationAsRead(session.id)
+        console.log('[Store] Session selected successfully, currentSession:', session)
       } catch (e) {
         console.warn('标记已读失败', e)
       }
