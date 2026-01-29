@@ -70,11 +70,18 @@
         </div>
       </div>
     </transition>
+
+    <!-- 自定义风格对话框 -->
+    <AiStyleDialog
+      v-model="showStyleDialog"
+      @save="handleStyleSave"
+    />
   </teleport>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import AiStyleDialog from './AiStyleDialog.vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -86,6 +93,22 @@ const emit = defineEmits(['select', 'close', 'update:visible'])
 
 const loading = ref(false)
 const suggestions = ref([])
+const showStyleDialog = ref(false)
+
+// 加载风格配置
+const loadStyleConfig = () => {
+  const saved = localStorage.getItem('ai_reply_style_config')
+  if (saved) {
+    try {
+      return JSON.parse(saved)
+    } catch (e) {
+      return { categories: ['confirm', 'polite', 'work'] }
+    }
+  }
+  return { categories: ['confirm', 'polite', 'work'] }
+}
+
+const styleConfig = ref(loadStyleConfig())
 
 // 回复模板分类
 const replyTemplates = {
@@ -157,7 +180,8 @@ const categoryConfigs = {
   '感谢': { icon: 'favorite_border', name: '表示感谢' },
   '工作': { icon: 'work_outline', name: '工作相关' },
   '轻松': { icon: 'sentiment_satisfied', name: '轻松随意' },
-  '结束': { icon: 'logout', name: '结束对话' }
+  '结束': { icon: 'logout', name: '结束对话' },
+  '自定义': { icon: 'edit_note', name: '自定义' }
 }
 
 // 根据触发消息内容智能推荐回复
@@ -204,11 +228,25 @@ const generateSmartReplies = (message) => {
 const categorizedSuggestions = computed(() => {
   const replies = generateSmartReplies(props.triggerMessage)
 
-  return Object.entries(replies).map(([categoryName, items]) => ({
+  const result = Object.entries(replies).map(([categoryName, items]) => ({
     name: categoryConfigs[categoryName]?.name || categoryName,
     icon: categoryConfigs[categoryName]?.icon || 'chat_bubble',
     suggestions: items
   }))
+
+  // 添加自定义模板（如果有）
+  if (styleConfig.value.customTemplates && styleConfig.value.customTemplates.length > 0) {
+    const validTemplates = styleConfig.value.customTemplates.filter(t => t.text && t.text.trim())
+    if (validTemplates.length > 0) {
+      result.push({
+        name: categoryConfigs['自定义'].name,
+        icon: categoryConfigs['自定义'].icon,
+        suggestions: validTemplates
+      })
+    }
+  }
+
+  return result
 })
 
 // 面板位置样式
@@ -252,7 +290,17 @@ const handleGenerateMore = () => {
 
 // 自定义风格
 const handleCustomize = () => {
-  // TODO: 打开自定义风格对话框
+  showStyleDialog.value = true
+}
+
+// 保存风格配置
+const handleStyleSave = (config) => {
+  styleConfig.value = config
+  // 重新生成建议
+  loading.value = true
+  setTimeout(() => {
+    loading.value = false
+  }, 300)
 }
 
 // 监听显示状态

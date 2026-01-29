@@ -507,7 +507,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         newTask.setTaskNumber(generateTaskNumber());
         newTask.setTitle(sourceTask.getTitle() + " (副本)");
         newTask.setCreatorId(userId);
-        newTask.setStatus("PENDING");
+        newTask.setStatus(StatusConstants.Task.PENDING);
         newTask.setCompletionPercent(0);
         newTask.setCompletedTime(null);
         newTask.setCreateTime(LocalDateTime.now());

@@ -71,7 +71,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
                 vo.setUploadedChunks(Collections.emptyList());
                 vo.setNeedUpload(false);
                 vo.setFileUrl(existingUpload.getFileUrl());
-                vo.setStatus("COMPLETED");
+                vo.setStatus(StatusConstants.Task.COMPLETED);
                 return vo;
             }
         }

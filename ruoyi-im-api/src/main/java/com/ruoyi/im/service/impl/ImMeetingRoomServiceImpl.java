@@ -379,7 +379,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         }
 
         booking.setCheckOutTime(LocalDateTime.now());
-        booking.setStatus("COMPLETED");
+        booking.setStatus(MeetingRoomConstants.BookingStatus.COMPLETED);
         booking.setUpdateTime(LocalDateTime.now());
         bookingMapper.updateById(booking);
         log.info("签退成功: bookingId={}, userId={}", bookingId, userId);
