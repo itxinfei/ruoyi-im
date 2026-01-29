@@ -16,16 +16,19 @@
       <div class="recording-btn" @click="handleStopRecording">
         <div class="recording-content">
           <div class="recording-left">
+            <div class="recording-icon">
+              <span class="material-icons-outlined">mic</span>
+            </div>
             <div class="recording-animation">
               <span class="wave" v-for="i in 5" :key="i" :style="{ height: `${volumeLevels[i-1]}px` }"></span>
             </div>
             <span class="recording-time">{{ formatTime(recordingTime) }}</span>
           </div>
           <div class="recording-right">
-            <span class="stop-icon">
-              <span class="material-icons-outlined">stop</span>
-            </span>
             <span class="stop-text">点击停止</span>
+            <span class="stop-icon">
+              <span class="material-icons-outlined">stop_circle</span>
+            </span>
           </div>
         </div>
       </div>
@@ -283,14 +286,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .voice-recorder {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
-  background: #f8fafc;
-  border-radius: 6px;
-  min-height: 60px;
+  min-height: 48px;
+
   .dark & {
     background: #1e293b;
   }
@@ -321,7 +324,7 @@ onUnmounted(() => {
   &.no-permission {
     background: #ff4d4f;
     cursor: help;
-    
+
     &:hover {
       opacity: 1;
       transform: none;
@@ -336,7 +339,7 @@ onUnmounted(() => {
 .recording-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 }
 
@@ -345,16 +348,17 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 12px 24px;
-  background: rgba(22, 119, 255, 0.1);
-  border: 2px solid var(--dt-brand-color, #1677ff);
-  border-radius: 12px;
+  padding: 10px 20px;
+  background: var(--dt-brand-bg);
+  border: 1px solid var(--dt-brand-color);
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: all 0.2s;
   animation: recording-pulse 1.5s ease-in-out infinite;
 
   &:hover {
-    background: rgba(22, 119, 255, 0.15);
+    background: var(--dt-brand-bg);
+    border-color: var(--dt-brand-hover);
   }
 
   .recording-content {
@@ -362,18 +366,34 @@ onUnmounted(() => {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 20px;
+    gap: 16px;
   }
 
   .recording-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .recording-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--dt-brand-color);
+    border-radius: 50%;
+
+    .material-icons-outlined {
+      font-size: 18px;
+      color: #fff;
+    }
   }
 
   .recording-animation {
     display: flex;
-    gap: 4px;
+    gap: 3px;
     align-items: center;
 
     .wave {
@@ -385,7 +405,7 @@ onUnmounted(() => {
   }
 
   .recording-time {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--dt-brand-color, #1677ff);
     font-variant-numeric: tabular-nums;
@@ -394,27 +414,23 @@ onUnmounted(() => {
   .recording-right {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+
+    .stop-text {
+      font-size: 13px;
+      color: var(--dt-text-secondary);
+      font-weight: 500;
+    }
 
     .stop-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
-      background: #ff4d4f;
-      border-radius: 50%;
 
       .material-icons-outlined {
-        font-size: 16px;
-        color: #fff;
+        font-size: 24px;
+        color: #ff4d4f;
       }
-    }
-
-    .stop-text {
-      font-size: 13px;
-      color: var(--dt-brand-color, #1677ff);
-      font-weight: 500;
     }
   }
 }
@@ -426,35 +442,33 @@ onUnmounted(() => {
   .cancel-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
-    border-radius: 6px;
+    gap: 4px;
+    padding: 6px 12px;
+    border: 1px solid var(--dt-border-color);
+    background: var(--dt-bg-card);
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
-    font-size: 13px;
-    color: #64748b;
+    font-size: 12px;
+    color: var(--dt-text-secondary);
     transition: all 0.2s;
 
     &:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-      color: #334155;
+      background: var(--dt-bg-hover);
+      border-color: var(--dt-border-input-hover);
+      color: var(--dt-text-primary);
     }
 
     .material-icons-outlined {
-      font-size: 16px;
+      font-size: 14px;
     }
 
     .dark & {
-      background: #1e293b;
-      border-color: #334155;
-      color: #94a3b8;
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
 
       &:hover {
-        background: #334155;
-        border-color: #475569;
-        color: #cbd5e1;
+        background: var(--dt-bg-hover-dark);
+        border-color: var(--dt-border-dark);
       }
     }
   }

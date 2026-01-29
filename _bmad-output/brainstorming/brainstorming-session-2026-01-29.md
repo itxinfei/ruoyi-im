@@ -302,16 +302,16 @@ aiEmojiPosition.value = {
 - [x] 修复 `design-tokens.scss` 缺失大括号 ✅
 - [x] 修复 `ContactsPanel.vue` emit 定义 ✅
 - [x] 修复 `MessageInputRefactored.vue` 函数初始化顺序问题 ✅
-- [ ] 新增批量获取已读用户 API
+- [x] 新增批量获取已读用户 API ✅ (2026-01-29)
 
 ### P1 完善清单
 
 - [x] 添加 AI 面板边界检测 ✅
 - [x] 添加全选/反选功能 ✅
-- [ ] 实现虚拟滚动（使用 `vue-virtual-scroller`）
-- [ ] 统一错误处理（创建 errorHandler.js）
-- [ ] 添加消息加载骨架屏
-- [ ] 优化消息列表渲染性能
+- [x] 实现虚拟滚动（使用 `vue-virtual-scroller`）✅ (2026-01-29)
+- [x] 统一错误处理（创建 errorHandler.js）✅ (2026-01-29)
+- [x] 添加消息加载骨架屏 ✅ (2026-01-29)
+- [x] 优化消息列表渲染性能（批量已读查询）✅ (2026-01-29)
 
 ---
 
@@ -396,6 +396,10 @@ aiEmojiPosition.value = {
 | ✅ 函数初始化顺序 | MessageInputRefactored.vue | 将命令处理函数移到 useInputCommand 调用之前，修复 ReferenceError |
 | ✅ WebSocket 错误处理 | imWebSocket.js | 修复 catch 块变量名与日志函数冲突 |
 | ✅ 设置更新 409 错误 | im.js, useTheme.js | 添加防抖机制和静默错误处理 |
+| ✅ 统一错误处理机制 | utils/errorHandler.js | 新建统一错误处理工具，提供 8 种处理方法 |
+| ✅ 消息加载骨架屏 | MessageList.vue | 使用 SkeletonLoader 组件，添加首次加载和加载更多骨架屏 |
+| ✅ 批量获取已读用户 | 后端+前端 | N+1 查询优化，批量 API + 前端预加载 |
+| ✅ 虚拟滚动优化 | MessageList.vue, main.js | 使用 vue-virtual-scroller，阈值 100 条消息 |
 
 **问题详情**:
 
@@ -416,13 +420,84 @@ aiEmojiPosition.value = {
      - batchUpdateServerSettings 添加 500ms 防抖
      - 静默处理 409 错误（设置可能已存在）
 
+4. **统一错误处理机制** (utils/errorHandler.js):
+   - 功能: 新建统一错误处理工具
+   - 提供方法:
+     - `handleApiError()` - API 错误处理（显示提示）
+     - `handleSilentError()` - 静默错误处理（仅记录日志）
+     - `handleBusinessError()` - 业务错误处理
+     - `handleValidationErrors()` - 验证错误处理
+     - `withErrorHandling()` - 异步操作包装器
+     - `createSafeApi()` - 创建带错误处理的 API 函数
+     - `withRetry()` - 错误重试装饰器
+   - 特性:
+     - 集成现有 logger
+     - 自动处理 401 跳转登录
+     - 支持静默模式（头像 404 等）
+     - 支持自定义错误回调
+
+5. **消息加载骨架屏** (MessageList.vue):
+   - 功能: 使用现有 SkeletonLoader 组件替代内联实现
+   - 首次加载: 显示 6 条消息骨架屏
+   - 加载更多: 在消息列表末尾显示 3 条骨架屏
+   - 新增功能: 滚动到底部按钮（钉钉风格）
+   - 清理: 删除了约 70 行内联骨架屏样式代码
+
+6. **批量获取已读用户 API** (后端 + 前端):
+   - 功能: 解决 N+1 查询问题，优化已读用户查询性能
+   - 后端修改:
+     - `ImMessageReadMapper`: 新增 `batchSelectReadUserIds()` 方法
+     - `ImMessageReadService`: 新增 `getBatchMessageReadUsers()` 方法
+     - `ImMessageReadController`: 新增 `POST /api/im/message/read/batch/users` 接口
+   - 前端修改:
+     - `message.js`: 新增 `getBatchMessageReadUsers()` API 方法
+     - `MessageList.vue`: 新增 `prefetchReadUsers()` 预加载函数
+   - 优化效果: 从 O(n) 单条查询降低到 O(1) 批量查询（一次请求最多 100 条消息）
+
+7. **虚拟滚动优化** (MessageList.vue, main.js, package.json):
+   - 功能: 使用 vue-virtual-scroller 实现消息列表虚拟滚动
+   - 阈值设置: 消息数 ≥ 100 条时自动启用虚拟滚动
+   - 组件选择: DynamicScroller（支持动态高度的消息项）
+   - 全局注册: main.js 中注册 RecycleScroller, DynamicScroller, DynamicScrollerItem
+   - 特性:
+     - 按需渲染可见区域消息
+     - 动态计算消息高度
+     - 支持时间分隔符
+     - 保留原有滚动交互逻辑
+   - 性能提升: 大量消息时渲染性能显著提升
+
 ---
 
-## 七、进一步优化建议
+## 八、测试验证
+
+测试清单已生成: `test-checklist.md`
+
+### 启动测试环境
+
+```bash
+# 1. 安装新依赖
+cd ruoyi-im-web
+npm install
+
+# 2. 启动后端
+cd ruoyi-im-api
+mvn spring-boot:run
+
+# 3. 启动前端
+cd ruoyi-im-web
+npm run dev
+```
+
+### 测试重点
+
+1. **统一错误处理** - 断网、Token 过期、权限错误
+2. **消息骨架屏** - 首次加载、加载更多
+3. **批量已读查询** - Network 请求减少
+4. **虚拟滚动** - 100+ 条消息性能
 
 ### 7.1 性能优化
 
-#### 虚拟滚动实现
+#### 虚拟滚动实现 ✅ (已完成)
 ```javascript
 // 使用 vue-virtual-scroller 替代当前分页渲染
 import { RecycleScroller } from 'vue-virtual-scroller'

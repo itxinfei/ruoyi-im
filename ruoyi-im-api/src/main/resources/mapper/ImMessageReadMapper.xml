@@ -102,4 +102,17 @@
         delete from im_message_read where message_id = #{messageId}
     </delete>
 
+    <!-- 批量获取消息的已读用户ID列表 -->
+    <select id="batchSelectReadUserIds" resultType="java.util.HashMap">
+        select
+            message_id as messageId,
+            user_id as userId
+        from im_message_read
+        where message_id in
+        <foreach collection="list" item="messageId" open="(" separator="," close=")">
+            #{messageId}
+        </foreach>
+        order by message_id, read_time desc
+    </select>
+
 </mapper>

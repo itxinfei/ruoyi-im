@@ -36,18 +36,8 @@
           <div v-if="!isGroup && userInfo.online" class="online-dot"></div>
         </div>
 
-        <!-- 用户名和标签 -->
+        <!-- 用户名 -->
         <h2 class="user-name">{{ userName }}</h2>
-        <div class="user-tags">
-          <span v-if="userInfo.online" class="status-tag online">
-            <span class="material-icons-outlined status-icon">circle</span>
-            在线
-          </span>
-          <span v-else class="status-tag offline">
-            <span class="material-icons-outlined status-icon">radio_button_unchecked</span>
-            离线
-          </span>
-        </div>
 
         <!-- 职位信息 -->
         <p v-if="!isGroup" class="user-position">
@@ -467,40 +457,6 @@ const handleGroupClick = (group) => {
   word-break: break-word;
 }
 
-.user-tags {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 8px;
-
-  .status-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 500;
-
-    &.online {
-      background: rgba(82, 196, 26, 0.1);
-      color: #52c41a;
-
-      .status-icon {
-        font-size: 12px;
-      }
-    }
-
-    &.offline {
-      background: var(--dt-bg-body);
-      color: var(--dt-text-tertiary);
-
-      .status-icon {
-        font-size: 12px;
-      }
-    }
-  }
-}
 
 .user-position {
   font-size: 13px;

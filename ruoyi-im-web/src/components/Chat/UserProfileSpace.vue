@@ -46,10 +46,6 @@
         <div class="summary-info">
           <h1 class="nickname">{{ user.nickname || user.username }}</h1>
           <p class="username">@{{ user.username }}</p>
-          <div class="status-badge" :class="{ online: isOnline }">
-            <span class="dot"></span>
-            {{ isOnline ? '在线' : '离线' }}
-          </div>
         </div>
       </div>
     </div>
@@ -556,32 +552,6 @@ onMounted(() => {
         margin: 0 0 8px 0;
       }
 
-      .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 10px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.9);
-
-        .dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.5);
-        }
-
-        &.online {
-          background: rgba(82, 196, 26, 0.3);
-          color: #fff;
-
-          .dot {
-            background: #52c41a;
-          }
-        }
-      }
     }
   }
 }

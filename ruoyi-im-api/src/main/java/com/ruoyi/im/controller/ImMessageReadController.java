@@ -170,4 +170,30 @@ public class ImMessageReadController {
         messageReadService.revokeReadReceipt(messageId, userId);
         return Result.success("已撤回已读回执");
     }
+
+    /**
+     * 批量获取消息的已读用户列表
+     *
+     * @param request 请求参数
+     * @return 已读用户列表 Map
+     */
+    @Operation(summary = "批量获取已读用户", description = "批量获取多条消息的已读用户ID列表")
+    @PostMapping("/batch/users")
+    public Result<java.util.Map<Long, List<Long>>> getBatchReadUsers(
+            @RequestBody java.util.Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        List<Long> messageIds = (List<Long>) request.get("messageIds");
+
+        if (messageIds == null || messageIds.isEmpty()) {
+            return Result.success(new java.util.HashMap<>());
+        }
+
+        // 限制批量查询数量，防止一次查询过多
+        if (messageIds.size() > 100) {
+            return Result.error("单次查询消息数量不能超过100条");
+        }
+
+        java.util.Map<Long, List<Long>> result = messageReadService.getBatchMessageReadUsers(messageIds);
+        return Result.success(result);
+    }
 }

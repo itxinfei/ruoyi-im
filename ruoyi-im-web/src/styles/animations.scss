@@ -13,6 +13,7 @@
 // 缓动函数 (Easing Functions)
 // ============================================================================
 
+$ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 $ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
 $ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 $ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);

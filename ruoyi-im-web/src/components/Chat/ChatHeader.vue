@@ -22,11 +22,11 @@
       <div class="header-info">
         <h2 class="header-name">{{ session?.name }}</h2>
         <span v-if="session?.type === 'GROUP'" class="meta-info">
-          <span class="material-icons-outlined meta-icon">people</span>
+          <span class="material-icons-outlined">people</span>
           {{ session?.memberCount || 0 }} 人
         </span>
         <span v-else class="meta-info" :class="{ online: isOnline }">
-          <span v-if="!isTyping" class="material-icons-outlined meta-icon">
+          <span v-if="!isTyping" class="material-icons-outlined">
             {{ isOnline ? 'circle' : 'radio_button_unchecked' }}
           </span>
           <span v-if="!isTyping">{{ isOnline ? '在线' : '离线' }}</span>
@@ -94,32 +94,32 @@
           <el-dropdown-menu class="header-dropdown">
             <!-- 聊天记录 -->
             <el-dropdown-item command="history" class="menu-item">
-              <span class="material-icons-outlined item-icon">history</span>
+              <span class="item-icon material-icons-outlined">history</span>
               <span class="item-text">聊天记录</span>
             </el-dropdown-item>
 
             <!-- 搜索 -->
             <el-dropdown-item command="search" class="menu-item">
-              <span class="material-icons-outlined item-icon">search</span>
+              <span class="item-icon material-icons-outlined">search</span>
               <span class="item-text">搜索聊天记录</span>
               <span class="item-shortcut">Ctrl+F</span>
             </el-dropdown-item>
 
             <!-- 多选 -->
             <el-dropdown-item command="multiselect" class="menu-item">
-              <span class="material-icons-outlined item-icon">check_circle_outline</span>
+              <span class="item-icon material-icons-outlined">check_circle_outline</span>
               <span class="item-text">多选消息</span>
             </el-dropdown-item>
 
             <!-- 文件 -->
             <el-dropdown-item command="files" class="menu-item">
-              <span class="material-icons-outlined item-icon">folder_open</span>
+              <span class="item-icon material-icons-outlined">folder_open</span>
               <span class="item-text">查看文件</span>
             </el-dropdown-item>
 
             <!-- 群公告 -->
             <el-dropdown-item v-if="session?.type === 'GROUP'" command="announcement" class="menu-item">
-              <span class="material-icons-outlined item-icon">campaign</span>
+              <span class="item-icon material-icons-outlined">campaign</span>
               <span class="item-text">群公告</span>
               <span v-if="session?.hasAnnouncement" class="item-badge">新</span>
             </el-dropdown-item>
@@ -128,7 +128,7 @@
 
             <!-- 置顶 -->
             <el-dropdown-item command="pin" class="menu-item" :class="{ 'is-active': session?.isPinned }">
-              <span class="material-icons-outlined item-icon">
+              <span class="item-icon material-icons-outlined">
                 {{ session?.isPinned ? 'push_pin' : 'push_pin' }}
               </span>
               <span class="item-text">{{ session?.isPinned ? '取消置顶' : '置顶会话' }}</span>
@@ -136,7 +136,7 @@
 
             <!-- 免打扰 -->
             <el-dropdown-item command="mute" class="menu-item" :class="{ 'is-active': session?.isMuted }">
-              <span class="material-icons-outlined item-icon">
+              <span class="item-icon material-icons-outlined">
                 {{ session?.isMuted ? 'notifications' : 'notifications_off' }}
               </span>
               <span class="item-text">{{ session?.isMuted ? '取消免打扰' : '消息免打扰' }}</span>
@@ -146,13 +146,13 @@
 
             <!-- 导出 -->
             <el-dropdown-item command="export" class="menu-item">
-              <span class="material-icons-outlined item-icon">download</span>
+              <span class="item-icon material-icons-outlined">download</span>
               <span class="item-text">导出聊天记录</span>
             </el-dropdown-item>
 
             <!-- 清空 -->
             <el-dropdown-item command="clear" class="menu-item danger-item">
-              <span class="material-icons-outlined item-icon">delete_outline</span>
+              <span class="item-icon material-icons-outlined">delete_outline</span>
               <span class="item-text">清空聊天记录</span>
             </el-dropdown-item>
           </el-dropdown-menu>
@@ -432,14 +432,13 @@ const handleShowMembers = () => {
   border-radius: var(--dt-radius-md);
   background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
   color: #fff;
+}
+
+.btn-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
-
-  .material-icons-outlined {
-    font-size: 22px;
-  }
 }
 
 // 在线状态指示器
@@ -486,10 +485,6 @@ const handleShowMembers = () => {
   color: var(--dt-text-tertiary);
   opacity: 0.5;
   transition: all 0.25s var(--dt-ease-out);
-
-  .material-icons-outlined {
-    font-size: 18px;
-  }
 }
 
 .header-info {
@@ -515,17 +510,8 @@ const handleShowMembers = () => {
   color: var(--dt-text-tertiary);
   font-weight: 500;
 
-  .meta-icon {
-    font-size: 12px;
-    opacity: 0.7;
-  }
-
   &.online {
     color: var(--dt-success-color);
-
-    .meta-icon {
-      opacity: 1;
-    }
   }
 }
 
@@ -656,18 +642,9 @@ const handleShowMembers = () => {
   transition: all 0.2s var(--dt-ease-out);
   position: relative;
 
-  .material-icons-outlined {
-    font-size: 20px;
-    transition: transform 0.2s var(--dt-ease-out);
-  }
-
   &:hover {
     background: var(--dt-bg-hover);
     color: var(--dt-brand-color);
-
-    .material-icons-outlined {
-      transform: scale(1.1);
-    }
   }
 
   &:active {
@@ -726,10 +703,6 @@ const handleShowMembers = () => {
         .icon-glow {
           opacity: 1;
         }
-
-        .material-icons-outlined {
-          transform: scale(1.1);
-        }
       }
 
       &:active {
@@ -754,10 +727,6 @@ const handleShowMembers = () => {
 
         .icon-glow {
           opacity: 1;
-        }
-
-        .material-icons-outlined {
-          transform: scale(1.1);
         }
       }
 
@@ -1228,10 +1197,6 @@ const handleShowMembers = () => {
   .group-avatar {
     width: 38px;
     height: 38px;
-
-    .material-icons-outlined {
-      font-size: 20px;
-    }
   }
 
   .action-btn {
@@ -1241,10 +1206,6 @@ const handleShowMembers = () => {
     &.call-btn {
       width: 36px;
       height: 36px;
-    }
-
-    .material-icons-outlined {
-      font-size: 18px;
     }
   }
 

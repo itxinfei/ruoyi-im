@@ -339,7 +339,22 @@ const handleLogin = async () => {
 
     ElMessage.success('登录成功')
 
-    const redirectUrl = router.currentRoute.value.query.redirect || '/'
+    // 根据角色判断跳转
+    const userRole = store.getters['user/userRole']
+    const redirectParam = router.currentRoute.value.query.redirect
+
+    let redirectUrl
+    if (redirectParam) {
+      // 如果有指定跳转地址，使用指定地址
+      redirectUrl = redirectParam
+    } else if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+      // 管理员默认跳转到管理后台
+      redirectUrl = '/admin/dashboard'
+    } else {
+      // 普通用户跳转到首页
+      redirectUrl = '/'
+    }
+
     router.push(redirectUrl)
 
   } catch (error) {

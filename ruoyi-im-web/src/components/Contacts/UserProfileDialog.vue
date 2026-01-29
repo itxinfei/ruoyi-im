@@ -28,10 +28,6 @@
 
         <h3 class="user-name">{{ userName }}</h3>
 
-        <div class="status-badge" :class="{ online: userInfo.online, offline: !userInfo.online }">
-          <span class="dot"></span>
-          {{ userInfo.online ? '在线' : '离线' }}
-        </div>
 
         <div class="user-extra">
           <span v-if="userInfo.position" class="position">{{ userInfo.position }}</span>
@@ -319,43 +315,6 @@ const handleViewHistory = () => {
     max-width: 100%;
   }
 
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 12px;
-    backdrop-filter: blur(8px);
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    &.online {
-      background: rgba(82, 196, 26, 0.15);
-      color: var(--dt-success-color);
-
-      .dot {
-        background: var(--dt-success-color);
-      }
-    }
-
-    &.offline {
-      background: rgba(0, 0, 0, 0.06);
-      color: var(--dt-text-tertiary);
-
-      .dot {
-        background: var(--dt-text-quaternary);
-        animation: none;
-      }
-    }
-  }
 
   .user-extra {
     display: flex;
@@ -383,14 +342,6 @@ const handleViewHistory = () => {
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
 
 // 右侧区域
 .right-section {

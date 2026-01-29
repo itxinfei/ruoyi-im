@@ -1,22 +1,11 @@
 <template>
   <div class="message-list" ref="listRef" @scroll="handleScroll">
-    <!-- 加载中状态 - 骨架屏 -->
-    <div v-if="loading" class="skeleton-wrapper">
-      <div v-for="i in 5" :key="i" class="message-skeleton">
-        <div class="skeleton-avatar"></div>
-        <div class="skeleton-content">
-          <div class="skeleton-name"></div>
-          <div class="skeleton-bubble">
-            <div class="skeleton-line long"></div>
-            <div class="skeleton-line"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
+    <!-- 首次加载骨架屏 -->
+    <SkeletonLoader v-if="loading && messages.length === 0" type="message" :count="6" />
+
     <!-- 空状态 -->
-    <div v-else-if="messages.length === 0" class="empty">暂无消息</div>
-    
+    <div v-else-if="messages.length === 0 && !loading" class="empty">暂无消息</div>
+
     <!-- 消息内容 -->
     <template v-else>
       <div v-for="msg in messagesWithDividers" :key="msg.id || msg.timeText" :data-id="msg.id" class="message-wrapper">
@@ -100,9 +89,18 @@
           </template>
         </MessageItem>
       </div>
+
+      <!-- 加载更多骨架屏 -->
+      <SkeletonLoader v-if="loading && messages.length > 0" type="message" :count="3" />
+
+      <!-- 滚动到底部按钮 -->
+      <transition name="fade">
+        <div v-if="showScrollToBottom" class="scroll-to-bottom" @click="scrollToBottom">
+          <el-icon><ArrowDown /></el-icon>
+          <span>回到底部</span>
+        </div>
+      </transition>
     </template>
-
-
   </div>
 </template>
 
@@ -110,12 +108,13 @@
 import { computed, ref, nextTick, watch, onMounted, onUnmounted } from 'vue'
 import { Loading, ArrowDown, User } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getMessageReadUsers } from '@/api/im/message'
+import { getMessageReadUsers, getBatchMessageReadUsers } from '@/api/im/message'
 import { sendNudge } from '@/api/im/nudge'
 import MessageItem from './MessageItemRefactored.vue'
 // 使用重构后的消息气泡组件
 import MessageBubble from './MessageBubbleRefactored.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 
 const props = defineProps({
   messages: {
@@ -188,9 +187,14 @@ watch(() => props.messages.length, (newLength, oldLength) => {
       scrollToBottom()
     }
   }
+
+  // 批量预加载可见区域的已读用户
+  // 限制预加载数量为最近 20 条消息
+  const visibleMessages = props.messages.slice(-20)
+  prefetchReadUsers(visibleMessages)
 })
 
-// 获取已读用户列表
+// 获取已读用户列表（单条消息）
 const fetchReadUsers = async (msg) => {
   if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) return
 
@@ -207,6 +211,53 @@ const fetchReadUsers = async (msg) => {
   }
 }
 
+/**
+ * 批量预加载已读用户列表
+ * 用于优化可见区域消息的已读状态查询
+ * @param {Array} messages - 需要预加载的消息列表
+ */
+const prefetchReadUsers = async (messages) => {
+  if (!messages || messages.length === 0) return
+
+  // 过滤出需要查询的消息（群聊、有已读数据、未加载过）
+  const messagesToFetch = messages.filter(msg =>
+    msg.groupMemberCount &&
+    (msg.readCount > 0 || msg.isRead) &&
+    !readUsersMap.value[msg.id] &&
+    !loadingReadUsers.value[msg.id]
+  )
+
+  if (messagesToFetch.length === 0) return
+
+  // 设置加载状态
+  messagesToFetch.forEach(msg => {
+    loadingReadUsers.value[msg.id] = true
+  })
+
+  try {
+    const messageIds = messagesToFetch.map(m => m.id)
+    const res = await getBatchMessageReadUsers(messageIds)
+
+    if (res.code === 200) {
+      // 将结果存入缓存
+      Object.keys(res.data).forEach(msgId => {
+        readUsersMap.value[msgId] = res.data[msgId]
+      })
+    }
+  } catch (error) {
+    console.error('批量获取已读用户失败', error)
+    // 批量失败时回退到单个查询
+    messagesToFetch.forEach(msg => {
+      loadingReadUsers.value[msg.id] = false
+    })
+  } finally {
+    // 清除加载状态
+    messagesToFetch.forEach(msg => {
+      loadingReadUsers.value[msg.id] = false
+    })
+  }
+}
+
 // 计算未读人数（群聊中需要知道群成员总数）
 const unreadCount = (msg) => {
   if (!msg.groupMemberCount) return null
@@ -216,7 +267,6 @@ const unreadCount = (msg) => {
 
 // 图片预览 - 发送事件给父组件处理
 const previewImage = (clickedUrl) => {
-  // 发送预览事件，父组件负责显示完整的图片预览器
   emit('preview', clickedUrl)
 }
 
@@ -228,7 +278,6 @@ const downloadFile = (fileInfo) => {
 
 // 处理重新编辑撤回的消息
 const handleReEdit = ({ content }) => {
-  // 触发重新编辑事件，由父组件处理
   emit('re-edit', content)
 }
 
@@ -243,15 +292,12 @@ const handleNudge = async (nudgedUserId) => {
     })
 
     if (res.code === 200) {
-      // 拍一拍成功，显示提示
       ElMessage.success(`${res.data.nudgerName} 拍了拍 ${res.data.nudgedUserName}`)
-      // 通知父组件有新消息（拍一拍消息）
       emit('nudge-success', res.data)
     } else {
       ElMessage.warning(res.msg || '拍一拍失败')
     }
   } catch (error) {
-    // 业务异常（如冷却中）已经处理过
     if (error.message) {
       ElMessage.warning(error.message)
     } else {
@@ -327,24 +373,12 @@ const messagesWithDividers = computed(() => {
   const res = []
 
   props.messages.forEach((msg, index) => {
-    // 判断是否需要显示时间分割线
-    let showDivider = false
-    if (index === 0) {
-      showDivider = true
-    } else {
-      const prevMsg = props.messages[index - 1]
-      const timeDiff = msg.timestamp - prevMsg.timestamp
-      // 5分钟间隔显示时间分割线（钉钉风格）
-      if (timeDiff > 5 * 60 * 1000) {
-        showDivider = true
-      }
-    }
-
-    if (showDivider) {
+    // 添加时间分割线
+    if (index === 0 || shouldAddTimeDivider(msg, props.messages[index - 1])) {
       res.push({
+        id: `time-${msg.id}`,
         isTimeDivider: true,
-        timeText: formatTimeDivider(msg.timestamp),
-        id: 'divider-' + msg.timestamp + '-' + index
+        timeText: formatTimeDivider(msg.timestamp)
       })
     }
 
@@ -363,6 +397,18 @@ const messagesWithDividers = computed(() => {
   })
   return res
 })
+
+// 判断是否需要添加时间分割线
+const shouldAddTimeDivider = (currentMsg, prevMsg) => {
+  if (!prevMsg) return true
+
+  const currentTime = currentMsg.timestamp
+  const prevTime = prevMsg.timestamp
+
+  // 时间间隔超过 5 分钟添加分割线
+  const TIME_DIVIDER_THRESHOLD = 5 * 60 * 1000
+  return currentTime - prevTime > TIME_DIVIDER_THRESHOLD
+}
 
 // 滚动到底部
 const scrollToBottom = (smooth = true) => {
@@ -444,14 +490,14 @@ const scrollToMsg = (id) => {
 // 监听滚动事件
 const handleScroll = () => {
   if (!listRef.value || props.loading) return
-  
+
   const { scrollTop, clientHeight, scrollHeight } = listRef.value
-  
+
   // 滚动到顶部加载更多
   if (scrollTop === 0) {
     emit('load-more')
   }
-  
+
   // 检测是否接近底部
   const distanceFromBottom = scrollHeight - scrollTop - clientHeight
   showScrollToBottom.value = distanceFromBottom > 300
@@ -471,7 +517,7 @@ const observer = ref(null)
 // 初始化已读上报监听
 const initReadObserver = () => {
   if (observer.value) observer.value.disconnect()
-  
+
   observer.value = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -515,13 +561,13 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 
 .message-list {
   flex: 1;
-  overflow: hidden;           // 防止横向溢出
-  overflow-y: auto;           // 单独控制纵向滚动
+  overflow: hidden;
+  overflow-y: auto;
   padding: 16px;
   background: var(--dt-bg-chat);
   position: relative;
-  min-height: 0;             // 修复 flex 容器溢出问题
-  word-break: break-word;    // 防止长文本撑破布局
+  min-height: 0;
+  word-break: break-word;
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -557,73 +603,51 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
   gap: 8px;
 }
 
-// 骨架屏样式
-.skeleton-wrapper {
-  padding: 16px;
+// 滚动到底部按钮 - 钉钉风格
+.scroll-to-bottom {
+  position: fixed;
+  right: calc(50% - 280px);
+  bottom: 80px;
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.message-skeleton {
-  display: flex;
-  gap: 12px;
-  animation: fadeIn 0.5s var(--dt-ease-out) both;
-
-  &:nth-child(1) { animation-delay: 0ms; }
-  &:nth-child(2) { animation-delay: 100ms; }
-  &:nth-child(3) { animation-delay: 200ms; }
-  &:nth-child(4) { animation-delay: 300ms; }
-  &:nth-child(5) { animation-delay: 400ms; }
-}
-
-.skeleton-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--dt-radius-lg);
-  @include skeleton-loading;
-  flex-shrink: 0;
-}
-
-.skeleton-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 400px;
-}
-
-.skeleton-name {
-  width: 80px;
-  height: 14px;
-  border-radius: 4px;
-  @include skeleton-loading;
-}
-
-.skeleton-bubble {
-  padding: 10px 14px;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
   background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-md);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
   border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-full);
+  color: var(--dt-brand-color);
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: var(--dt-shadow-sm);
+  transition: all var(--dt-transition-fast);
+  z-index: 10;
 
   .dark & {
     background: var(--dt-bg-card-dark);
     border-color: var(--dt-border-dark);
   }
+
+  &:hover {
+    background: var(--dt-brand-bg);
+    border-color: var(--dt-brand-color);
+    transform: translateY(-2px);
+    box-shadow: var(--dt-shadow-md);
+  }
+
+  .el-icon {
+    font-size: 14px;
+  }
 }
 
-.skeleton-line {
-  height: 12px;
-  border-radius: 3px;
-  @include skeleton-loading;
-  width: 100%;
+// 淡入淡出动画
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--dt-transition-fast);
+}
 
-  &.long {
-    width: 80%;
-  }
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .empty {
@@ -697,299 +721,104 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 
   &.read {
     color: var(--dt-text-quaternary);
-    background: var(--dt-bg-body);
-
-    &::before {
-      content: 'done_all';
-      font-family: 'Material Icons Outlined';
-      font-size: 12px;
-    }
   }
 
   &.unread {
     color: var(--dt-brand-color);
-    background: var(--dt-brand-bg);
-
-    &::before {
-      content: 'visibility';
-      font-family: 'Material Icons Outlined';
-      font-size: 12px;
-    }
   }
 }
 
-.read-users-list {
-  // 钉钉风格已读详情弹窗
-  background: var(--dt-bg-card);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+.unread {
+  color: var(--dt-brand-color);
+  font-size: 11px;
+}
 
+// ============================================================================
+// 已读用户列表样式
+// ============================================================================
+.read-users-list {
   .read-users-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 16px 12px;
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--dt-border-lighter);
-    background: linear-gradient(180deg, var(--dt-bg-hover) 0%, var(--dt-bg-card) 100%);
+    margin-bottom: 12px;
+  }
 
-    .read-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--dt-text-primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+  .read-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
+  }
 
-      &::before {
-        content: 'visibility';
-        font-family: 'Material Icons Outlined';
-        font-size: 16px;
-        color: var(--dt-success-color);
-      }
-    }
-
-    .read-count-badge {
-      background: var(--dt-brand-color);
-      color: #fff;
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 12px;
-      min-width: 20px;
-      text-align: center;
-      font-weight: 500;
-      box-shadow: 0 2px 4px rgba(22, 119, 255, 0.3);
-    }
+  .read-count-badge {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: var(--dt-radius-full);
   }
 
   .read-users-body {
-    max-height: 280px;
+    max-height: 200px;
     overflow-y: auto;
-    padding: 8px 0;
-
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: var(--dt-border);
-      border-radius: 3px;
-
-      &:hover {
-        background: var(--dt-border-dark);
-      }
-    }
-
-    .read-user-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      font-size: 13px;
-      transition: all var(--dt-transition-fast);
-      cursor: default;
-      border-radius: 8px;
-
-      &:hover {
-        background: var(--dt-bg-hover);
-        transform: translateX(2px);
-      }
-
-      .user-name {
-        color: var(--dt-text-primary);
-        font-weight: 400;
-        flex: 1;
-      }
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 16px;
-      color: var(--dt-text-tertiary);
-      gap: 8px;
-
-      .el-icon {
-        font-size: 36px;
-        opacity: 0.4;
-      }
-    }
   }
 
-  .unread-users-footer {
-    padding: 10px 16px;
-    border-top: 1px solid var(--dt-border-lighter);
-    color: var(--dt-text-secondary);
-    font-size: 12px;
-    text-align: center;
-    background: var(--dt-bg-hover);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-
-    &::before {
-      content: 'schedule';
-      font-family: 'Material Icons Outlined';
-      font-size: 14px;
-      opacity: 0.6;
-    }
-  }
-}
-
-// 移除重复的样式定义（已在上面 .read-status-simple 中定义）
-
-
-
-// 图片预览器过渡动画
-.viewer-fade-enter-active,
-.viewer-fade-leave-active {
-  transition: opacity 0.3s;
-}
-
-.viewer-fade-enter-from,
-.viewer-fade-leave-to {
-  opacity: 0;
-}
-</style>
-
-<style lang="scss">
-@use '@/styles/design-tokens.scss' as *;
-
-@keyframes highlight-pulse {
-  0% { background-color: transparent; }
-  15% { background-color: var(--dt-brand-lighter); }
-  85% { background-color: var(--dt-brand-lighter); }
-  100% { background-color: transparent; }
-}
-
-.highlight-msg {
-  animation: highlight-pulse 2s var(--dt-ease-in-out) forwards;
-  border-radius: var(--dt-radius-md);
-}
-
-/* 全局样式用于气泡右键菜单 */
-.message-context-menu {
-  padding: 4px 0 !important;
-  border-radius: 6px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-  border: 1px solid #e5e7eb !important;
-  background: #fff !important;
-  min-width: 120px !important;
-
-  .el-dropdown-menu__item {
+  .read-user-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px !important;
-    font-size: 13px !important;
-    color: #1f2329 !important;
-    transition: all var(--dt-transition-fast);
-
-    .el-icon {
-      font-size: 16px;
-      color: #646a73;
-      margin-right: 0;
-      flex-shrink: 0;
-    }
+    padding: 6px 0;
 
     &:hover {
-      background-color: #f5f6f7 !important;
-      color: #1677ff !important;
-      .el-icon { color: #1677ff; }
-    }
-
-    &.danger {
-      color: #f5222d !important;
-      &:hover {
-        background-color: #fff1f0 !important;
-        .el-icon { color: #f5222d; }
-      }
-    }
-
-    &.is-pinned {
-      color: #1677ff !important;
-      .el-icon {
-        color: #1677ff;
-      }
+      background: var(--dt-bg-hover);
+      margin: 0 -8px;
+      padding-left: 8px;
+      padding-right: 8px;
+      border-radius: var(--dt-radius-sm);
     }
   }
 
-  .menu-divider {
-    height: 1px;
-    background-color: #e5e7eb;
-    margin: 4px 0;
-  }
-}
-
-.dark .message-context-menu {
-  border-color: #334155 !important;
-  background: #1e293b !important;
-
-  .el-dropdown-menu__item {
-    color: #f1f5f9 !important;
-
-    .el-icon {
-      color: #bdc3c9;
-    }
-
-    &:hover {
-      background-color: #334155 !important;
-      color: #1677ff !important;
-      .el-icon { color: #1677ff; }
-    }
-
-    &.danger {
-      color: #ef4444 !important;
-      &:hover {
-        background-color: rgba(239, 68, 68, 0.1) !important;
-        .el-icon { color: #ef4444; }
-      }
-    }
+  .user-name {
+    font-size: 13px;
+    color: var(--dt-text-primary);
   }
 
-  .menu-divider {
-    background-color: #334155;
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+    color: var(--dt-text-quaternary);
+    font-size: 12px;
+    gap: 8px;
   }
-}
 
-/* 已读回执弹窗样式 */
-.read-receipt-popover {
-  padding: 0 !important;
-  border-radius: 8px !important;
-  overflow: hidden;
-
-  .el-popover__title {
-    display: none;
+  .unread-users-footer {
+    padding-top: 12px;
+    border-top: 1px solid var(--dt-border-lighter);
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
   }
-}
-
-:global(.dark) .read-receipt-popover {
-  background: #1e293b !important;
-  border-color: #334155 !important;
 }
 
 // ============================================================================
-// 搜索结果高亮动画
+// 消息高亮动画
 // ============================================================================
-:deep(.highlight-msg-active) {
-  animation: messageHighlight 2s ease-out;
+.message-wrapper {
+  &[data-id] {
+    transition: background var(--dt-transition-fast);
+  }
 }
 
-@keyframes messageHighlight {
-  0% {
-    background-color: rgba(22, 119, 255, 0.2);
-    transform: scale(1.02);
-  }
-  100% {
-    background-color: transparent;
-    transform: scale(1);
-  }
+.highlight-msg-active {
+  animation: highlightPulse 1s ease-out;
+}
+
+@keyframes highlightPulse {
+  0%, 100% { background: transparent; }
+  50% { background: var(--dt-brand-bg); }
 }
 </style>

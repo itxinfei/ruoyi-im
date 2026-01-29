@@ -345,11 +345,9 @@ public class ImContactController {
     @Operation(summary = "更新好友标签", description = "为指定好友设置标签")
     @PutMapping("/{friendId}/tags")
     public Result<Void> updateFriendTags(@PathVariable Long friendId,
-                                           @RequestBody java.util.Map<String, Object> request) {
+                                           @Valid @RequestBody FriendTagsUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        @SuppressWarnings("unchecked")
-        List<String> tags = (List<String>) request.get("tags");
-        imFriendService.updateFriendTags(friendId, userId, tags);
+        imFriendService.updateFriendTags(friendId, userId, request.getTags());
         return Result.success("标签更新成功");
     }
 
@@ -405,6 +403,24 @@ public class ImContactController {
 
         public void setGroupName(String groupName) {
             this.groupName = groupName;
+        }
+    }
+
+    /**
+     * 更新好友标签请求体
+     */
+    public static class FriendTagsUpdateRequest {
+        /**
+         * 标签列表
+         */
+        private java.util.List<String> tags;
+
+        public java.util.List<String> getTags() {
+            return tags;
+        }
+
+        public void setTags(java.util.List<String> tags) {
+            this.tags = tags;
         }
     }
 }

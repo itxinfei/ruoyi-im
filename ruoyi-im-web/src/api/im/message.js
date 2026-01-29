@@ -156,6 +156,19 @@ export function getMessageReadUsers(conversationId, messageId) {
 }
 
 /**
+ * 批量获取消息已读用户列表
+ * @param {Array<number>} messageIds - 消息ID列表
+ * @returns {Promise} 返回 Map<messageId, 已读用户ID列表>
+ */
+export function getBatchMessageReadUsers(messageIds) {
+  return request({
+    url: '/api/im/message/read/batch/users',
+    method: 'post',
+    data: { messageIds }
+  })
+}
+
+/**
  * 回复消息
  * @param {Object} data - 回复数据
  * @param {number} data.messageId - 原消息ID

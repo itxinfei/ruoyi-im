@@ -100,34 +100,7 @@
           :key="groupItem.group.id"
           class="session-group"
         >
-          <!-- 分组标题 -->
-          <div
-            v-if="groupItem.group.name !== '全部消息' || customGroups.length > 0"
-          >
-            <div class="group-title-row">
-              <span class="material-icons-outlined group-arrow">expand_more</span>
-              <span class="group-name">{{ groupItem.group.name }}</span>
-              <span class="group-count">({{ groupItem.sessions.length }})</span>
-            </div>
-            <!-- 分组操作按钮 -->
-            <div v-if="!groupItem.group.isSystem" class="group-actions">
-              <el-dropdown trigger="click" placement="bottom-end">
-                <span class="material-icons-outlined more-icon">more_horiz</span>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="handleRenameGroup(groupItem.group)">
-                      <span class="material-icons-outlined item-icon">edit</span>
-                      重命名
-                    </el-dropdown-item>
-                    <el-dropdown-item divided @click="handleDeleteGroup(groupItem.group)">
-                      <span class="material-icons-outlined item-icon danger">delete</span>
-                      删除分组
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-          </div>
+
 
           <!-- 分组内的会话列表 -->
           <div class="group-sessions">
@@ -1627,42 +1600,6 @@ onUnmounted(() => {
   margin-bottom: 4px;
 }
 
-.group-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  cursor: pointer;
-  user-select: none;
-  transition: all var(--dt-transition-fast);
-  border-radius: var(--dt-radius-md);
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.04);
-
-    .group-name {
-      color: var(--dt-text-primary);
-    }
-  }
-
-  .dark &:hover {
-    background: rgba(255, 255, 255, 0.06);
-  }
-}
-
-.group-title-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-}
-
-.group-arrow {
-  font-size: 18px;
-  color: var(--dt-text-tertiary);
-  transition: transform var(--dt-transition-fast);
-}
-
 .group-name {
   font-size: 12px;
   font-weight: 600;
@@ -1681,44 +1618,13 @@ onUnmounted(() => {
   transition: opacity var(--dt-transition-fast);
 }
 
-.group-header:hover .group-actions {
-  opacity: 1;
-}
 
-.more-icon {
-  font-size: 18px;
-  color: var(--dt-text-quaternary);
-  padding: 2px;
-  border-radius: var(--dt-radius-sm);
-  transition: all var(--dt-transition-fast);
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.06);
-    color: var(--dt-text-secondary);
-  }
-}
 
 .group-sessions {
   overflow: hidden;
 }
 
-// 分组展开/收起过渡动画
-.group-expand-enter-active,
-.group-expand-leave-active {
-  transition: all 0.25s var(--dt-ease-out);
-}
 
-.group-expand-enter-from,
-.group-expand-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
-
-.group-expand-enter-to,
-.group-expand-leave-from {
-  opacity: 1;
-  max-height: 1000px;
-}
 
 // 右键菜单子菜单样式
 .context-menu {

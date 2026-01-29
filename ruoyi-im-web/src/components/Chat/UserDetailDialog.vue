@@ -25,9 +25,6 @@
             :size="88"
             shape="circle"
           />
-          <span v-if="userInfo.online !== undefined" :class="['online-status', userInfo.online ? 'online' : 'offline']">
-            {{ userInfo.online ? '在线' : '离线' }}
-          </span>
         </div>
         <h3 class="user-name">{{ userName }}</h3>
         <div class="user-tags">
@@ -224,26 +221,6 @@ const handleVideoCall = () => {
       position: relative;
       display: inline-block;
 
-      .online-status {
-        position: absolute;
-        bottom: -2px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 11px;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-weight: 500;
-
-        &.online {
-          background: #67c23a;
-          color: #fff;
-        }
-
-        &.offline {
-          background: var(--dt-text-tertiary);
-          color: #fff;
-        }
-      }
     }
 
     .user-name {

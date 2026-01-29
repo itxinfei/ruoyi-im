@@ -110,7 +110,16 @@ public class ImGroupServiceImpl implements ImGroupService {
         addConversationMember(conversation.getId(), userId);
 
         if (request.getMemberIds() != null && !request.getMemberIds().isEmpty()) {
+            // 过滤掉创建者自己的 ID，避免重复插入
+            List<Long> validMemberIds = new ArrayList<>();
             for (Long memberId : request.getMemberIds()) {
+                if (!memberId.equals(userId)) {  // 排除创建者
+                    validMemberIds.add(memberId);
+                }
+            }
+
+            // 添加有效成员
+            for (Long memberId : validMemberIds) {
                 ImGroupMember member = new ImGroupMember();
                 member.setGroupId(group.getId());
                 member.setUserId(memberId);
@@ -124,7 +133,7 @@ public class ImGroupServiceImpl implements ImGroupService {
                 // 添加成员到会话
                 addConversationMember(conversation.getId(), memberId);
             }
-            group.setMemberCount(group.getMemberCount() + request.getMemberIds().size());
+            group.setMemberCount(group.getMemberCount() + validMemberIds.size());
             imGroupMapper.updateImGroup(group);
         }
 

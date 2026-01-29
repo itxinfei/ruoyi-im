@@ -100,4 +100,12 @@ public interface ImMessageReadMapper {
      * @return 已读人数
      */
     int countReadUsersByMessageId(Long messageId);
+
+    /**
+     * 批量获取消息的已读用户ID列表
+     *
+     * @param messageIds 消息ID列表
+     * @return Map<messageId, 已读用户ID列表>
+     */
+    java.util.Map<Long, List<Long>> batchSelectReadUserIds(java.util.List<Long> messageIds);
 }

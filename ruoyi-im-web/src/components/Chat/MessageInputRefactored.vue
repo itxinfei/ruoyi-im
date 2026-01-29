@@ -25,6 +25,14 @@
       @smart-reply="handleShowSmartReply"
     />
 
+    <!-- 录音动画区域 - 显示在工具栏上方 -->
+    <div v-if="isVoiceMode" class="voice-recording-wrapper">
+      <VoiceRecorder
+        @record-complete="handleVoiceRecordComplete"
+        @cancel="handleVoiceCancel"
+      />
+    </div>
+
     <!-- 引用消息预览 -->
     <ReplyPreview
       v-if="replyingMessage"
@@ -54,29 +62,22 @@
     <!-- 输入核心区域 -->
     <div
       class="input-area"
-      :class="{ 'is-drag-over': isDragOver }"
+      :class="{ 'is-drag-over': isDragOver, 'is-voice-mode': isVoiceMode }"
       @dragenter="handleDragEnter"
       @dragleave="handleDragLeave"
       @dragover="handleDragOver"
       @drop.prevent="handleDrop"
     >
-      <!-- 语音录制模式 -->
-      <VoiceRecorder
-        v-if="isVoiceMode"
-        @record-complete="handleVoiceRecordComplete"
-        @cancel="handleVoiceCancel"
-      />
-
-      <!-- 文字输入模式 -->
+      <!-- 文字输入区域 -->
       <textarea
-        v-else
         ref="textareaRef"
         v-model="messageContent"
         class="message-input"
-        :placeholder="session?.type === 'GROUP' ? '发消息...' : '发消息...'"
+        :placeholder="isVoiceMode ? '正在录音...' : (session?.type === 'GROUP' ? '发消息...' : '发消息...')"
         @input="handleInput"
         @keydown="handleKeydown"
         @paste="handlePaste"
+        :disabled="isVoiceMode"
       ></textarea>
 
       <div class="input-footer" v-if="!isVoiceMode">
@@ -775,6 +776,11 @@ onUnmounted(() => {
   transition: background var(--dt-transition-base);
   z-index: 10;
 
+  // 为录音区域预留空间
+  &.has-recording {
+    padding-bottom: 16px;
+  }
+
   .dark & {
     border-top-color: var(--dt-border-dark);
   }
@@ -936,6 +942,49 @@ onUnmounted(() => {
   .message-input {
     font-size: 14px;
     min-height: 60px;
+  }
+}
+
+// 录音区域 - 显示在工具栏上方
+.voice-recording-wrapper {
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 16px;
+  right: 16px;
+  z-index: 100;
+  pointer-events: auto;
+
+  :deep(.voice-recorder) {
+    background: var(--dt-bg-card);
+    border: 1px solid var(--dt-brand-color);
+    border-radius: var(--dt-radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: slideInUp 0.2s ease-out;
+  }
+
+  .dark & :deep(.voice-recorder) {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-brand-color);
+  }
+}
+
+// 录音动画滑入效果
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 输入区域在语音模式下的样式
+.input-area.is-voice-mode {
+  .message-input {
+    background: rgba(22, 119, 255, 0.05);
+    cursor: not-allowed;
   }
 }
 </style>

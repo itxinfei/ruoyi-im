@@ -898,11 +898,11 @@ $breakpoint-2xl: 1536px;
 }
 
 @mixin animation-pulse($duration: 2s, $infinite: true) {
-  animation: pulse $duration var(--dt-ease-in-out) #{if(sass($infinite): infinite)};
+  animation: pulse $duration var(--dt-ease-in-out) if(sass($infinite): infinite; else: null);
 }
 
 @mixin animation-spin($duration: 1s, $infinite: true) {
-  animation: spin $duration linear #{if(sass($infinite): infinite)};
+  animation: spin $duration linear if(sass($infinite): infinite; else: null);
 }
 
 @mixin animation-shake($duration: 0.5s) {

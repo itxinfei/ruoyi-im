@@ -67,6 +67,14 @@ public interface ImMessageReadService {
     List<ImMessageReadStatusVO> getConversationMessageReadStatus(Long conversationId, Long userId);
 
     /**
+     * 批量获取消息的已读用户列表
+     *
+     * @param messageIds 消息ID列表
+     * @return Map<messageId, 已读用户ID列表>
+     */
+    java.util.Map<Long, List<Long>> getBatchMessageReadUsers(java.util.List<Long> messageIds);
+
+    /**
      * 撤回已读回执（删除已读记录）
      *
      * @param messageId 消息ID
