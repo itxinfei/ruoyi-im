@@ -395,7 +395,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         participantMapper.updateById(participant);
 
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
-        if (meeting != null && "IN_PROGRESS".equals(meeting.getStatus())) {
+        if (meeting != null && StatusConstants.Meeting.IN_PROGRESS.equals(meeting.getStatus())) {
             // 更新参与人数
             Integer currentCount = meeting.getCurrentParticipants();
             if (currentCount != null && currentCount > 0) {

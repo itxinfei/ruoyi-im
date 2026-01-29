@@ -28,6 +28,8 @@
 
     <div class="actions">
       <el-button type="primary" :icon="ChatDotRound" @click="startChat">发消息</el-button>
+      <el-button :icon="Phone" @click="$emit('voice-call', contact)">语音通话</el-button>
+      <el-button :icon="VideoCamera" @click="$emit('video-call', contact)">视频通话</el-button>
       
       <template v-if="!contact.isGroup">
         <el-button :icon="contact.isFavorite ? StarFilled : Star" @click="toggleFavorite">

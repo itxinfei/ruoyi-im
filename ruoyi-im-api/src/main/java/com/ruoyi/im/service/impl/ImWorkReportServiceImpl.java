@@ -391,7 +391,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     private String getCompletionStatusName(String status) {
         if ("COMPLETED".equals(status)) {
             return "已完成";
-        } else if ("IN_PROGRESS".equals(status)) {
+        } else if (StatusConstants.Task.IN_PROGRESS.equals(status)) {
             return "进行中";
         } else if (StatusConstants.Approval.PENDING.equals(status)) {
             return "待处理";
