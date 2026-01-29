@@ -29,6 +29,9 @@ public class StatusConstants {
 
         /** 活跃 */
         public static final String ACTIVE = "ACTIVE";
+
+        /** 阻塞 */
+        public static final String BLOCKED = "BLOCKED";
     }
 
     /**

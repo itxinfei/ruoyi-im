@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constants.StatusConstants;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImTask;
@@ -63,7 +64,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         // 生成任务编号
         task.setTaskNumber(generateTaskNumber());
         task.setCreatorId(userId);
-        task.setStatus("PENDING");
+        task.setStatus(StatusConstants.Task.PENDING);
         task.setCompletionPercent(0);
         task.setHasSubtask(false);
         task.setCreateTime(LocalDateTime.now());
@@ -117,7 +118,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         }
         if (request.getStatus() != null) {
             task.setStatus(request.getStatus());
-            if ("COMPLETED".equals(request.getStatus()) && task.getCompletedTime() == null) {
+            if (StatusConstants.Task.COMPLETED.equals(request.getStatus()) && task.getCompletedTime() == null) {
                 task.setCompletedTime(LocalDateTime.now());
                 task.setCompletionPercent(100);
             }
@@ -276,7 +277,7 @@ public class ImTaskServiceImpl implements ImTaskService {
 
         task.setStatus(status);
         task.setUpdateTime(LocalDateTime.now());
-        if ("COMPLETED".equals(status)) {
+        if (StatusConstants.Task.COMPLETED.equals(status)) {
             task.setCompletedTime(LocalDateTime.now());
             task.setCompletionPercent(100);
         }
@@ -295,7 +296,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         task.setCompletionPercent(percent);
         task.setUpdateTime(LocalDateTime.now());
         if (percent >= 100) {
-            task.setStatus("COMPLETED");
+            task.setStatus(StatusConstants.Task.COMPLETED);
             task.setCompletedTime(LocalDateTime.now());
         }
         taskMapper.updateById(task);
@@ -431,15 +432,15 @@ public class ImTaskServiceImpl implements ImTaskService {
         Map<String, Object> stats = new HashMap<>();
 
         // 待办任务数
-        int pendingCount = taskMapper.selectByAssigneeId(userId, "PENDING").size();
+        int pendingCount = taskMapper.selectByAssigneeId(userId, StatusConstants.Task.PENDING).size();
         stats.put("pendingCount", pendingCount);
 
         // 进行中任务数
-        int inProgressCount = taskMapper.selectByAssigneeId(userId, "IN_PROGRESS").size();
+        int inProgressCount = taskMapper.selectByAssigneeId(userId, StatusConstants.Task.IN_PROGRESS).size();
         stats.put("inProgressCount", inProgressCount);
 
         // 已完成任务数
-        int completedCount = taskMapper.selectByAssigneeId(userId, "COMPLETED").size();
+        int completedCount = taskMapper.selectByAssigneeId(userId, StatusConstants.Task.COMPLETED).size();
         stats.put("completedCount", completedCount);
 
         // 未完成任务总数
@@ -542,7 +543,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         }
 
         // 计算是否逾期
-        if (task.getDueDate() != null && !"COMPLETED".equals(task.getStatus())) {
+        if (task.getDueDate() != null && !StatusConstants.Task.COMPLETED.equals(task.getStatus())) {
             boolean isOverdue = task.getDueDate().isBefore(LocalDate.now());
             vo.setIsOverdue(isOverdue);
             vo.setRemainingDays((int) (task.getDueDate().toEpochDay() - LocalDate.now().toEpochDay()));
@@ -552,7 +553,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         if (task.getHasSubtask()) {
             List<ImTask> subtasks = taskMapper.selectSubtasks(task.getId());
             vo.setSubtaskCount(subtasks.size());
-            long completedCount = subtasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
+            long completedCount = subtasks.stream().filter(t -> StatusConstants.Task.COMPLETED.equals(t.getStatus())).count();
             vo.setCompletedSubtaskCount((int) completedCount);
         }
 
@@ -605,7 +606,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         }
 
         // 计算是否逾期
-        if (task.getDueDate() != null && !"COMPLETED".equals(task.getStatus())) {
+        if (task.getDueDate() != null && !StatusConstants.Task.COMPLETED.equals(task.getStatus())) {
             boolean isOverdue = task.getDueDate().isBefore(LocalDate.now());
             vo.setIsOverdue(isOverdue);
             vo.setRemainingDays((int) (task.getDueDate().toEpochDay() - LocalDate.now().toEpochDay()));
@@ -614,7 +615,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         // 设置子任务数量
         if (task.getHasSubtask()) {
             List<ImTask> subtasks = taskMapper.selectSubtasks(task.getId());
-            long completedCount = subtasks.stream().filter(t -> "COMPLETED".equals(t.getStatus())).count();
+            long completedCount = subtasks.stream().filter(t -> StatusConstants.Task.COMPLETED.equals(t.getStatus())).count();
             vo.setSubtaskCount(subtasks.size());
             vo.setCompletedSubtaskCount((int) completedCount);
         }
@@ -672,11 +673,11 @@ public class ImTaskServiceImpl implements ImTaskService {
     private String getStatusDisplay(String status) {
         if (status == null) return "待办";
         switch (status) {
-            case "PENDING": return "待办";
-            case "IN_PROGRESS": return "进行中";
-            case "COMPLETED": return "已完成";
-            case "CANCELLED": return "已取消";
-            case "BLOCKED": return "阻塞";
+            case StatusConstants.Task.PENDING: return "待办";
+            case StatusConstants.Task.IN_PROGRESS: return "进行中";
+            case StatusConstants.Task.COMPLETED: return "已完成";
+            case StatusConstants.Task.CANCELLED: return "已取消";
+            case StatusConstants.Task.BLOCKED: return "阻塞";
             default: return status;
         }
     }
