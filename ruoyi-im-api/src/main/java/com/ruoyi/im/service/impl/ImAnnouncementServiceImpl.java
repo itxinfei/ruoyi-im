@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constants.StatusConstants;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImAnnouncement;
@@ -102,7 +103,8 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         }
 
         // 只有草稿或已撤回的公告才能修改
-        if (!"DRAFT".equals(announcement.getStatus()) && !"WITHDRAWN".equals(announcement.getStatus())) {
+        if (!StatusConstants.AnnouncementStatus.DRAFT.equals(announcement.getStatus())
+                && !StatusConstants.AnnouncementStatus.WITHDRAWN.equals(announcement.getStatus())) {
             throw new BusinessException("只能修改草稿或已撤回的公告");
         }
 
@@ -220,7 +222,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             throw new BusinessException("只能发布草稿状态的公告");
         }
 
-        announcement.setStatus("PUBLISHED");
+        announcement.setStatus(StatusConstants.AnnouncementStatus.PUBLISHED);
         announcement.setPublisherId(userId);
         announcement.setPublishTime(LocalDateTime.now());
         announcement.setUpdateTime(LocalDateTime.now());
@@ -277,7 +279,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             throw new BusinessException("只有发布人可以撤回公告");
         }
 
-        announcement.setStatus("WITHDRAWN");
+        announcement.setStatus(StatusConstants.AnnouncementStatus.WITHDRAWN);
         announcement.setUpdateTime(LocalDateTime.now());
         announcementMapper.updateById(announcement);
         log.info("撤回公告成功: announcementId={}, operator={}", announcementId, userId);
@@ -313,7 +315,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public void markAllAsRead(Long userId) {
         // 查询所有已发布的公告
         LambdaQueryWrapper<ImAnnouncement> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ImAnnouncement::getStatus, "PUBLISHED");
+        queryWrapper.eq(ImAnnouncement::getStatus, StatusConstants.AnnouncementStatus.PUBLISHED);
         List<ImAnnouncement> announcements = announcementMapper.selectList(queryWrapper);
 
         // 批量插入已读记录
@@ -446,7 +448,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         Long publishedCount = announcementMapper.selectCount(
                 new LambdaQueryWrapper<ImAnnouncement>()
                         .eq(ImAnnouncement::getPublisherId, userId)
-                        .eq(ImAnnouncement::getStatus, "PUBLISHED")
+                        .eq(ImAnnouncement::getStatus, StatusConstants.AnnouncementStatus.PUBLISHED)
         );
         stats.put("publishedCount", publishedCount != null ? publishedCount : 0);
 
@@ -640,9 +642,9 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     private String getTypeDisplay(String type) {
         if (type == null) return "系统公告";
         switch (type) {
-            case "SYSTEM": return "系统公告";
-            case "DEPARTMENT": return "部门公告";
-            case "PROJECT": return "项目公告";
+            case StatusConstants.AnnouncementType.SYSTEM: return "系统公告";
+            case StatusConstants.AnnouncementType.DEPARTMENT: return "部门公告";
+            case StatusConstants.AnnouncementType.PROJECT: return "项目公告";
             default: return type;
         }
     }
@@ -661,9 +663,9 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         if (status == null) return "草稿";
         switch (status) {
             case "DRAFT": return "草稿";
-            case "PUBLISHED": return "已发布";
-            case "EXPIRED": return "已过期";
-            case "WITHDRAWN": return "已撤回";
+            case StatusConstants.AnnouncementStatus.PUBLISHED: return "已发布";
+            case StatusConstants.AnnouncementStatus.EXPIRED: return "已过期";
+            case StatusConstants.AnnouncementStatus.WITHDRAWN: return "已撤回";
             default: return status;
         }
     }
@@ -672,7 +674,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         if (targetType == null) return "全部";
         switch (targetType) {
             case "ALL": return "全部";
-            case "DEPARTMENT": return "指定部门";
+            case StatusConstants.AnnouncementType.DEPARTMENT: return "指定部门";
             case "ROLE": return "指定角色";
             case "USER": return "指定用户";
             default: return targetType;

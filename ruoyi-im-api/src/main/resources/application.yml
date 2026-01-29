@@ -10,6 +10,8 @@ app:
     enabled: false
   dev:
     user-id: 1
+  upload:
+    path: D:/uploads
 
 # Spring框架配置
 spring:

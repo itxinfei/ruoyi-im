@@ -219,6 +219,48 @@ public class StatusConstants {
     }
 
     /**
+     * 视频通话类型
+     */
+    public static class CallType {
+        /** 视频通话 */
+        public static final String VIDEO = "VIDEO";
+
+        /** 语音通话 */
+        public static final String AUDIO = "AUDIO";
+    }
+
+    /**
+     * 公告状态
+     */
+    public static class AnnouncementStatus {
+        /** 草稿 */
+        public static final String DRAFT = "DRAFT";
+
+        /** 已发布 */
+        public static final String PUBLISHED = "PUBLISHED";
+
+        /** 已撤回 */
+        public static final String WITHDRAWN = "WITHDRAWN";
+
+        /** 已过期 */
+        public static final String EXPIRED = "EXPIRED";
+    }
+
+    /**
+     * 公告类型
+     */
+    public static class AnnouncementType {
+        /** 系统公告 */
+        public static final String SYSTEM = "SYSTEM";
+
+        /** 部门公告 */
+        public static final String DEPARTMENT = "DEPARTMENT";
+
+        /** 项目公告 */
+        public static final String PROJECT = "PROJECT";
+    }
+
+    /**
      * 班次类型
      */
     public static class ShiftType {
