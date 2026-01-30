@@ -370,7 +370,7 @@ const {
 })
 
 // 输入状态
-const { sendMyStopTypingStatus } = useTypingIndicator({
+const { sendMyStopTypingStatus, handleInput: handleTypingInput } = useTypingIndicator({
   sessionId: computed(() => props.session?.id),
   currentUser,
   sendTyping: (sessionId) => {
@@ -439,7 +439,7 @@ const handleInput = () => {
   autoResize()
   emit('input', messageContent.value)
   checkCommandTrigger()
-  sendMyStopTypingStatus()
+  handleTypingInput(messageContent.value)
 }
 
 const handleKeydown = (e) => {
@@ -834,8 +834,33 @@ const handleScheduleSaved = () => {
 
 // ========== 暴露方法 ==========
 
+/**
+ * 设置输入框内容
+ * @param {string} content - 要设置的内容
+ */
+const setContent = (content) => {
+  messageContent.value = content || ''
+  nextTick(() => {
+    autoResize()
+    // 将光标移到末尾
+    if (textareaRef.value) {
+      textareaRef.value.selectionStart = textareaRef.value.value.length
+      textareaRef.value.selectionEnd = textareaRef.value.value.length
+    }
+  })
+}
+
+/**
+ * 聚焦输入框
+ */
+const focus = () => {
+  textareaRef.value?.focus()
+}
+
 defineExpose({
   insertAt,
+  setContent,
+  focus,
   triggerScreenshot: handleScreenshot
 })
 

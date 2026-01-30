@@ -97,7 +97,7 @@
         <CombineMessagePreview
           v-else-if="message.type === 'COMBINE' || message.type === 'COMBINE_FORWARD'"
           :messages="parsedContent.messages || []"
-          @click="$emit('command', 'view-combine', { ...message, messages: parsedContent.messages })"
+          @click="handleCombineClick"
         />
 
         <!-- 未知消息类型 -->
@@ -108,7 +108,9 @@
       <MessageStatus
         v-if="showStatus"
         :message="message"
+        :session-type="sessionType"
         @retry="$emit('retry', message)"
+        @show-read-info="handleShowReadInfo"
       />
 
       <!-- 表情回应 -->
@@ -167,6 +169,18 @@
     @select="handleAiEmojiSelect"
     @close="showAiEmojiPanel = false"
   />
+
+  <!-- 已读详情弹窗 -->
+  <ReadInfoDialog
+    v-model:visible="showReadInfoDialog"
+    :message-id="message.id"
+    :read-count="message.readCount"
+    :read-by="message.readBy"
+    :read-time="message.readTime"
+    :is-group-chat="sessionType === 'GROUP'"
+    :total-members="message.totalMembers"
+    :all-members="message.allMembers || []"
+  />
 </template>
 
 <script setup>
@@ -194,6 +208,7 @@ import MessageReactions from './message-bubble/parts/MessageReactions.vue'
 import NudgeMessageBubble from './NudgeMessageBubble.vue'
 import CombineMessagePreview from './CombineMessagePreview.vue'
 import AiEmojiReaction from './AiEmojiReaction.vue'
+import ReadInfoDialog from './ReadInfoDialog.vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -203,7 +218,7 @@ const props = defineProps({
 const emit = defineEmits([
   'command', 'preview', 'download', 'at', 'scroll-to',
   'retry', 'toggle-reaction', 'add-reaction', 're-edit',
-  'show-user', 'long-press'
+  'show-user', 'long-press', 'show-read-info'
 ])
 
 // ==================== Composables ====================
@@ -241,9 +256,40 @@ const {
 
 const showAiEmojiPanel = ref(false)
 const aiEmojiPosition = ref({ x: 0, y: 0 })
+const showReadInfoDialog = ref(false)
 
 const handleAiEmojiSelect = (emoji) => {
   addReaction(emoji)
+}
+
+/**
+ * 显示已读详情
+ */
+const handleShowReadInfo = (readInfo) => {
+  // 如果没有 readBy 数据，尝试获取（这里简化处理，实际应该从 store 获取）
+  if (!readInfo.readBy || readInfo.readBy.length === 0) {
+    // 显示空状态或跳过
+    return
+  }
+
+  showReadInfoDialog.value = true
+}
+
+/**
+ * 处理合并转发消息点击
+ */
+const handleCombineClick = () => {
+  const combineData = {
+    id: props.message.id,
+    type: props.message.type,
+    senderId: props.message.senderId,
+    senderName: props.message.senderName,
+    content: props.message.content,
+    createTime: props.message.createTime,
+    timestamp: props.message.timestamp,
+    messages: parsedContent.value.messages
+  }
+  emit('command', 'view-combine', combineData)
 }
 
 // 处理长按事件，显示AI表情面板

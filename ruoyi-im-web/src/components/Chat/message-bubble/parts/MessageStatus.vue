@@ -20,10 +20,21 @@
 
     <!-- 已读 -->
     <transition name="status-scale">
-      <div v-if="status === 'read'" class="status-indicator status-read" title="已读">
+      <div
+        v-if="status === 'read'"
+        class="status-indicator status-read"
+        :class="{ 'is-clickable': showReadInfo }"
+        :title="readTooltip"
+        @click="handleShowReadInfo"
+      >
         <span class="material-icons-outlined">done_all</span>
       </div>
     </transition>
+
+    <!-- 已读信息（群聊显示人数） -->
+    <div v-if="status === 'read' && isGroupChat && readCount > 0" class="read-count">
+      {{ readCountText }}
+    </div>
 
     <!-- 发送失败 -->
     <transition name="status-shake">
@@ -41,16 +52,74 @@
 
 <script setup>
 import { computed } from 'vue'
+import { formatRelativeTime } from '@/utils/message'
 
 const props = defineProps({
-  message: { type: Object, required: true }
+  message: { type: Object, required: true },
+  sessionType: { type: String, default: 'PRIVATE' }
 })
 
-const emit = defineEmits(['retry'])
+const emit = defineEmits(['retry', 'show-read-info'])
 
 const status = computed(() => {
   return props.message.status || 'sent'
 })
+
+// 是否是群聊
+const isGroupChat = computed(() => {
+  return props.sessionType === 'GROUP'
+})
+
+// 已读人数
+const readCount = computed(() => {
+  return props.message.readCount || 0
+})
+
+// 已读人数文本
+const readCountText = computed(() => {
+  if (!isGroupChat.value) return ''
+  const count = readCount.value
+  const totalCount = props.message.totalMembers || 0
+  return totalCount > 0 ? `${count}/${totalCount}` : `${count}`
+})
+
+// 是否显示已读信息
+const showReadInfo = computed(() => {
+  return status.value === 'read' && (isGroupChat.value || props.message.readTime)
+})
+
+// 已读提示文本
+const readTooltip = computed(() => {
+  if (!showReadInfo.value) return '已读'
+
+  // 单聊：显示已读时间
+  if (!isGroupChat.value && props.message.readTime) {
+    const readTime = formatRelativeTime(props.message.readTime)
+    return `已读 ${readTime}`
+  }
+
+  // 群聊：显示人数
+  if (isGroupChat.value) {
+    return `${readCount.value}人已读，点击查看详情`
+  }
+
+  return '已读'
+})
+
+/**
+ * 显示已读信息
+ */
+function handleShowReadInfo() {
+  if (!showReadInfo.value) return
+
+  emit('show-read-info', {
+    messageId: props.message.id,
+    readCount: readCount.value,
+    readBy: props.message.readBy || [],
+    readTime: props.message.readTime,
+    isGroupChat: isGroupChat.value
+  })
+}
 </script>
 
 <style scoped lang="scss">
@@ -127,9 +196,22 @@ const status = computed(() => {
 .status-read {
   color: var(--dt-brand-color);
 
-  &:hover {
-    transform: scale(1.1);
+  .is-clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+    }
   }
+}
+
+// 已读人数显示（群聊）
+.read-count {
+  font-size: 11px;
+  color: var(--dt-brand-color);
+  margin-left: 4px;
+  font-weight: 500;
+  user-select: none;
 }
 
 // 失败状态

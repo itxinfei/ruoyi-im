@@ -148,6 +148,14 @@
                     >
                       {{ session.isMuted ? '' : (session.unreadCount > 99 ? '99+' : session.unreadCount) }}
                     </span>
+                    <!-- @提及角标 -->
+                    <span
+                      v-if="getSessionMentionCount(session.id) > 0"
+                      class="mention-badge"
+                      title="有@我的消息"
+                    >
+                      @
+                    </span>
                     <!-- 置顶标记 -->
                     <span v-if="session.isPinned && !isActiveSession(session)" class="pin-indicator">
                       置顶
@@ -277,6 +285,7 @@ import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 import { sendFriendRequest } from '@/api/im/contact'
 import { formatChatTime } from '@/utils/format'
+import { useMentions } from '@/composables/useMentions.js'
 
 const props = defineProps({
   currentSession: {
@@ -304,6 +313,20 @@ const expandedGroups = ref(new Set(['pinned', 'default']))
 const sessions = computed(() => store.state.im.session?.sessions || [])
 const loading = computed(() => store.state.im.session?.loading || false)
 const userStatus = computed(() => store.state.im.contact?.userStatus || {})
+
+// @提及管理
+const {
+  unreadMentions,
+  unreadCount: mentionCount,
+  loadAll: loadMentions,
+  getUnreadCountByConversation,
+  batchMarkAsRead
+} = useMentions()
+
+// 获取会话的未读@提及数量
+const getSessionMentionCount = (sessionId) => {
+  return getUnreadCountByConversation(sessionId)
+}
 
 // 分组会话列表
 const groupedSessions = computed(() => store.getters['im/session/groupedSessions'] || [])
@@ -535,7 +558,31 @@ const isActiveSession = (session) => {
 // 处理会话点击
 const handleSessionClick = (session) => {
   console.log('[SessionPanel] handleSessionClick called with:', session)
+
+  // 标记该会话的@提及为已读
+  const mentionCount = getSessionMentionCount(session.id)
+  if (mentionCount > 0) {
+    // 找出该会话的所有未读提及消息ID
+    const messageIds = unreadMentions.value
+      .filter(m => m.conversationId === session.id)
+      .map(m => m.messageId)
+
+    if (messageIds.length > 0) {
+      // 异步标记为已读，不阻塞用户操作
+      markMentionsAsRead(messageIds)
+    }
+  }
+
   emit('select-session', session)
+}
+
+// 标记提及为已读
+const markMentionsAsRead = async (messageIds) => {
+  try {
+    await batchMarkAsRead(messageIds)
+  } catch (error) {
+    console.error('标记@提及已读失败:', error)
+  }
 }
 
 // 格式化时间
@@ -740,6 +787,8 @@ onMounted(() => {
   store.dispatch('im/session/loadDrafts')
   // 启动输入状态清理
   store.dispatch('im/session/startTypingCleanup')
+  // 加载未读@提及
+  loadMentions()
   window.addEventListener('click', hideContextMenu)
 })
 
@@ -1121,6 +1170,27 @@ onUnmounted(() => {
     border-radius: 50%;
     animation: pulse 1.5s ease-in-out infinite;
   }
+}
+
+.mention-badge {
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--dt-bg-card);
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+  animation: mentionPulse 2s ease-in-out infinite;
+  z-index: 3;
+  cursor: pointer;
 }
 
 .pin-indicator {
@@ -1671,9 +1741,23 @@ onUnmounted(() => {
   color: var(--dt-brand-color);
   font-weight: 500;
   animation: typingPulse 1.5s ease-in-out infinite;
-  
+
   .typing-icon {
     font-size: 14px;
+  }
+}
+
+// ============================================================================
+// @提及动画
+// ============================================================================
+@keyframes mentionPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 2px 12px rgba(255, 77, 79, 0.6);
   }
 }
 

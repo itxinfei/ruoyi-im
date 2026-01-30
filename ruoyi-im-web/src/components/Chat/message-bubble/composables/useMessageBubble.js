@@ -36,12 +36,38 @@ export function useMessageBubble(props, emit) {
 
   // 是否可以撤回
   const canRecall = computed(() => {
-    if (!props.message?.timestamp || !props.message.isOwn) return false
+    if (!props.message?.timestamp) return false
+
+    // 检查时间限制
     const recallTimeLimit = store.state.im.settings.chat?.recallTimeLimit || 2
     const messageTime = new Date(props.message.timestamp).getTime()
     const elapsed = Date.now() - messageTime
     const timeLimit = recallTimeLimit * 60 * 1000
-    return elapsed < timeLimit
+    if (elapsed >= timeLimit) return false
+
+    // 单聊：只能撤回自己的消息
+    if (props.sessionType === 'PRIVATE') {
+      return props.message.isOwn
+    }
+
+    // 群聊：群主/管理员可以撤回任何消息，普通成员只能撤回自己的消息
+    if (props.sessionType === 'GROUP') {
+      const currentUser = store.getters['user/currentUser']
+      const memberRole = props.message?.memberRole // 'OWNER', 'ADMIN', 'MEMBER'
+
+      // 如果是自己的消息，可以撤回
+      if (props.message.isOwn) return true
+
+      // 如果是群主或管理员，可以撤回任何人的消息
+      if (memberRole === 'OWNER' || memberRole === 'ADMIN') {
+        return true
+      }
+
+      // 普通成员不能撤回别人的消息
+      return false
+    }
+
+    return false
   })
 
   // ==================== 交互处理 ====================
