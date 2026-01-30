@@ -404,13 +404,3 @@ export function setAiReplyStyle(config) {
 
 // 导出所有 Key 常量
 export { StorageKeys as default }
-
-// 便捷导出
-export {
-  getItem,
-  setItem,
-  removeItem,
-  clear,
-  getJSON,
-  setJSON
-}
