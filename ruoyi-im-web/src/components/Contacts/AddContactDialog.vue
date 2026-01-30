@@ -134,7 +134,8 @@
 import { ref } from 'vue'
 import { searchUsers } from '@/api/im/user'
 import { sendFriendRequest } from '@/api/im/contact'
-import { ElMessage } from 'element-plus'
+import { messageSuccess, messageError, messageWarning } from '@/utils/ui'
+import { getData } from '@/utils/api'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
@@ -156,16 +157,14 @@ const sending = ref(false)
 
 const handleSearch = async () => {
   if (!keyword.value.trim()) {
-    ElMessage.warning('请输入搜索关键词')
+    messageWarning('请输入搜索关键词')
     return
   }
   searching.value = true
   hasSearched.value = true
   try {
     const res = await searchUsers(keyword.value)
-    if (res.code === 200) {
-      results.value = res.data || []
-    }
+    results.value = getData(res, [])
   } catch (error) {
     console.error('搜索用户失败:', error)
   } finally {
@@ -188,7 +187,7 @@ const confirmAdd = async () => {
       message: requestMessage.value,
       groupName: selectedGroup.value
     })
-    ElMessage.success('申请已发送')
+    messageSuccess('申请已发送')
     showRequestDialog.value = false
     results.value = results.value.map(u => {
       if (u.id === targetUser.value.id) {
@@ -197,7 +196,7 @@ const confirmAdd = async () => {
       return u
     })
   } catch (error) {
-    ElMessage.error(error.message || '发送失败')
+    messageError(error.message || '发送失败')
   } finally {
     sending.value = false
   }
