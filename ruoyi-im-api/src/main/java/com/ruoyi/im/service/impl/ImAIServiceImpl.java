@@ -450,6 +450,7 @@ public class ImAIServiceImpl implements ImAIService {
     /**
      * 获取对话历史
      */
+    @SuppressWarnings("unchecked")
     private List<String> getConversationHistory(String conversationId, Long userId) {
         String key = getConversationKey(conversationId, userId);
         Object history = redisTemplate.opsForValue().get(key);

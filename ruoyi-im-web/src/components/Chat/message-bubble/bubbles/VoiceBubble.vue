@@ -35,6 +35,7 @@
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
 import { VideoPlay, VideoPause } from '@element-plus/icons-vue'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   message: { type: Object, required: true }
@@ -44,16 +45,7 @@ const audioRef = ref(null)
 const isPlaying = ref(false)
 const progress = ref(0)
 
-const parsedContent = computed(() => {
-  if (typeof props.message.content === 'string') {
-    try {
-      return JSON.parse(props.message.content)
-    } catch {
-      return {}
-    }
-  }
-  return props.message.content || {}
-})
+const parsedContent = computed(() => parseMessageContent(props.message) || {})
 
 const voiceUrl = computed(() => {
   return parsedContent.value.voiceUrl || parsedContent.value.url || ''

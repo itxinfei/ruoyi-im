@@ -275,7 +275,7 @@ const handleViewHistory = () => {
   width: 180px;
   flex-shrink: 0;
   padding: 20px;
-  background: linear-gradient(180deg, rgba(22, 119, 255, 0.08) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(0, 137, 255, 0.08) 0%, transparent 100%);
   border-radius: 12px;
   margin-right: 24px;
 
@@ -328,7 +328,7 @@ const handleViewHistory = () => {
     .position {
       font-weight: 500;
       color: var(--dt-brand-color);
-      background: rgba(22, 119, 255, 0.1);
+      background: rgba(0, 137, 255, 0.1);
       padding: 2px 10px;
       border-radius: 10px;
     }
@@ -459,11 +459,11 @@ const handleViewHistory = () => {
       background: linear-gradient(135deg, var(--dt-brand-color) 0%, #0e5fd9 100%);
       border-color: transparent;
       color: #fff;
-      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.35);
+      box-shadow: 0 4px 12px rgba(0, 137, 255, 0.35);
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(22, 119, 255, 0.45);
+        box-shadow: 0 6px 16px rgba(0, 137, 255, 0.45);
       }
 
       &:active {

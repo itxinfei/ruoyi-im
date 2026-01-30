@@ -40,6 +40,7 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   message: { type: Object, required: true }
@@ -51,15 +52,8 @@ const uploadProgress = ref(0)
 let progressTimer = null
 
 const imageUrl = computed(() => {
-  if (typeof props.message.content === 'string') {
-    try {
-      const parsed = JSON.parse(props.message.content)
-      return parsed.imageUrl || parsed.url || ''
-    } catch {
-      return props.message.content || ''
-    }
-  }
-  return props.message.content?.imageUrl || props.message.content?.url || ''
+  const parsed = parseMessageContent(props.message)
+  return parsed?.imageUrl || parsed?.url || ''
 })
 
 const isUploading = computed(() => {
@@ -145,7 +139,7 @@ onUnmounted(() => {
   }
 
   .progress-spinner {
-    animation: spin 1.5s linear infinite;
+    animation: spinSvgStroke 1.5s linear infinite;
   }
 }
 
@@ -154,10 +148,5 @@ onUnmounted(() => {
   color: #fff;
   font-size: 13px;
   font-weight: 600;
-}
-
-@keyframes spin {
-  from { stroke-dashoffset: 100; }
-  to { stroke-dashoffset: 0; }
 }
 </style>

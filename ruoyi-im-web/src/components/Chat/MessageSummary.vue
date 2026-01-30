@@ -154,6 +154,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { formatRelativeTime } from '@/utils/format'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -270,23 +271,7 @@ const handleViewFullHistory = () => {
 }
 
 // 格式化时间
-const formatTime = (timestamp) => {
-  const now = new Date()
-  const msgTime = new Date(timestamp)
-  const diff = now - msgTime
-  const minutes = Math.floor(diff / 60000)
-
-  if (minutes < 1) return '刚刚'
-  if (minutes < 60) return `${minutes}分钟前`
-
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}小时前`
-
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}天前`
-
-  return msgTime.toLocaleDateString()
-}
+const formatTime = formatRelativeTime
 
 // 获取附件图标
 const getAttachmentIcon = (type) => {
@@ -378,7 +363,7 @@ watch(() => props.visible, (newVal) => {
   justify-content: space-between;
   padding: 16px 20px;
   border-bottom: 1px solid var(--dt-border-light);
-  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, rgba(22, 119, 255, 0.03) 100%);
+  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, rgba(0, 137, 255, 0.03) 100%);
 }
 
 .header-left {
@@ -438,11 +423,6 @@ watch(() => props.visible, (newVal) => {
   .material-icons-outlined {
     font-size: 18px;
   }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 // ============================================================================
@@ -517,7 +497,7 @@ watch(() => props.visible, (newVal) => {
   border-radius: var(--dt-radius-md);
   flex-shrink: 0;
 
-  &.topic-icon { background: rgba(22, 119, 255, 0.1); color: #1677ff; }
+  &.topic-icon { background: rgba(0, 137, 255, 0.1); color: #0089FF; }
   &.time-icon { background: rgba(82, 196, 26, 0.1); color: #52c41a; }
   &.participant-icon { background: rgba(250, 140, 22, 0.1); color: #fa8c16; }
 
@@ -874,7 +854,7 @@ watch(() => props.visible, (newVal) => {
 
   .summary-header {
     border-color: var(--dt-border-dark);
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.15) 0%, rgba(22, 119, 255, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(0, 137, 255, 0.15) 0%, rgba(0, 137, 255, 0.05) 100%);
   }
 
   .message-count {

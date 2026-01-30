@@ -814,11 +814,6 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 }
 
 .highlight-msg-active {
-  animation: highlightPulse 1s ease-out;
-}
-
-@keyframes highlightPulse {
-  0%, 100% { background: transparent; }
-  50% { background: var(--dt-brand-bg); }
+  animation: highlightPulseBg 1s ease-out;
 }
 </style>

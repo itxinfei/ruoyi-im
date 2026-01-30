@@ -66,7 +66,7 @@ const hasReactions = computed(() => reactions.value.length > 0)
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: rgba(22, 119, 255, 0.08);
+  background: rgba(0, 137, 255, 0.08);
   border-radius: 12px;
   font-size: 13px;
   cursor: pointer;
@@ -85,7 +85,7 @@ const hasReactions = computed(() => reactions.value.length > 0)
   }
 
   &:hover {
-    background: rgba(22, 119, 255, 0.15);
+    background: rgba(0, 137, 255, 0.15);
 
     .reaction-count {
       color: var(--dt-brand-color);
@@ -114,17 +114,17 @@ const hasReactions = computed(() => reactions.value.length > 0)
 // 暗色模式
 :global(.dark) {
   .reaction-item {
-    background: rgba(22, 119, 255, 0.1);
+    background: rgba(0, 137, 255, 0.1);
     border-color: transparent;
 
     &:hover {
-      background: rgba(22, 119, 255, 0.2);
-      border-color: #1677ff;
+      background: rgba(0, 137, 255, 0.2);
+      border-color: #0089FF;
     }
 
     &.is-active {
-      background: rgba(22, 119, 255, 0.25);
-      border-color: #1677ff;
+      background: rgba(0, 137, 255, 0.25);
+      border-color: #0089FF;
     }
 
     .reaction-emoji {

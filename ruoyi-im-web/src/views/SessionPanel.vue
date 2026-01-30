@@ -276,6 +276,7 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 import { sendFriendRequest } from '@/api/im/contact'
+import { formatChatTime } from '@/utils/format'
 
 const props = defineProps({
   currentSession: {
@@ -538,25 +539,7 @@ const handleSessionClick = (session) => {
 }
 
 // 格式化时间
-const formatTime = (timestamp) => {
-  if (!timestamp) return ''
-
-  const date = new Date(timestamp)
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const yesterday = new Date(today.getTime() - 86400000)
-
-  if (date >= today) {
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
-  }
-  if (date >= yesterday) {
-    return '昨天'
-  }
-  if (date.getFullYear() === now.getFullYear()) {
-    return `${date.getMonth() + 1}/${date.getDate()}`
-  }
-  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
-}
+const formatTime = formatChatTime
 
 // 右键菜单状态
 const contextMenu = reactive({
@@ -1006,7 +989,7 @@ onUnmounted(() => {
   }
 
   &.active {
-    background: rgba(22, 119, 255, 0.08); // 钉钉风格：品牌色的淡背景
+    background: rgba(0, 137, 255, 0.08); // 钉钉风格：品牌色的淡背景
 
     &::before {
       height: 32px;
@@ -1031,7 +1014,7 @@ onUnmounted(() => {
   }
 
   &.pinned.active {
-    background: rgba(22, 119, 255, 0.08);
+    background: rgba(0, 137, 255, 0.08);
   }
 
   &.unread {
@@ -1049,7 +1032,7 @@ onUnmounted(() => {
   }
 
   .dark &.active {
-    background: rgba(22, 119, 255, 0.15);
+    background: rgba(0, 137, 255, 0.15);
   }
 
   .dark &.pinned {
@@ -1074,9 +1057,9 @@ onUnmounted(() => {
   transition: transform 0.2s var(--dt-ease-out), box-shadow 0.2s var(--dt-ease-out);
 
   &.group-avatar {
-    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+    background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
   }
 
   :deep(.dingtalk-avatar) {
@@ -1097,8 +1080,8 @@ onUnmounted(() => {
   transition: all var(--dt-transition-base);
 
   &.online {
-    background: var(--dt-success-color);
-    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+    background: #00C853;
+    box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
     animation: pulse 2s ease-in-out infinite;
   }
 }
@@ -1267,10 +1250,10 @@ onUnmounted(() => {
 
     &:hover {
       background: #f5f6f7;
-      color: #1677ff;
+      color: #0089FF;
 
       .item-icon {
-        color: #1677ff;
+        color: #0089FF;
       }
     }
 
@@ -1366,10 +1349,10 @@ onUnmounted(() => {
 
     &:hover {
       background: var(--dt-bg-hover-dark);
-      color: #1677ff;
+      color: #0089FF;
 
       .item-icon {
-        color: #1677ff;
+        color: #0089FF;
       }
     }
   }
@@ -1465,8 +1448,8 @@ onUnmounted(() => {
     }
 
     &.primary {
-      background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
-      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.35);
+      background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
+      box-shadow: 0 4px 12px rgba(0, 137, 255, 0.35);
     }
 
     &.success {
@@ -1689,22 +1672,5 @@ onUnmounted(() => {
   }
 }
 
-@keyframes typingPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
 // ============================================================================
-// 动画定义
-// ============================================================================
-@keyframes menuFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 </style>

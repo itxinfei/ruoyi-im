@@ -431,7 +431,7 @@ const handleRemoveMember = async (member) => {
         .cell-icon-wrap {
           width: 40px; height: 40px; border: 1px dashed #dcdfe6; border-radius: 6px;
           display: flex; align-items: center; justify-content: center; color: #8f959e;
-          &:hover { border-color: #1677ff; color: #1677ff; }
+          &:hover { border-color: #0089FF; color: #0089FF; }
         }
         span { font-size: 12px; color: #8f959e; }
       }
@@ -451,7 +451,7 @@ const handleRemoveMember = async (member) => {
           font-size: 18px; color: #646a73;
           &.remove { color: #ff4d4f; }
         }
-        &:hover .menu-icon { color: #1677ff; }
+        &:hover .menu-icon { color: #0089FF; }
       }
     }
   }

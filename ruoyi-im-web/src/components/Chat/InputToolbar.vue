@@ -142,7 +142,7 @@ defineEmits([
     &.active {
       color: var(--dt-brand-color);
       background: var(--dt-brand-bg);
-      box-shadow: inset 0 1px 2px rgba(22, 119, 255, 0.2);
+      box-shadow: inset 0 1px 2px rgba(0, 137, 255, 0.2);
 
       &::before {
         content: '';
@@ -173,14 +173,9 @@ defineEmits([
         box-shadow: 0 4px 12px rgba(147, 51, 234, 0.25);
       }
 
-      animation: aiPulse 3s ease-in-out infinite;
+      animation: aiPulsePurple 3s ease-in-out infinite;
     }
   }
-}
-
-@keyframes aiPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0); }
-  50% { box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.2); }
 }
 
 // 暗色模式
@@ -194,12 +189,12 @@ defineEmits([
     color: var(--dt-text-secondary-dark);
 
     &:hover {
-      background: rgba(22, 119, 255, 0.15);
+      background: rgba(0, 137, 255, 0.15);
       color: var(--dt-brand-color);
     }
 
     &.active {
-      background: rgba(22, 119, 255, 0.15);
+      background: rgba(0, 137, 255, 0.15);
       color: var(--dt-brand-color);
     }
 

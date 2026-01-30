@@ -571,7 +571,7 @@ watch(showCreateDialog, (val) => {
 .dark {
   .announcement-item {
     &.unread {
-      background: rgba(22, 119, 255, 0.1);
+      background: rgba(0, 137, 255, 0.1);
     }
 
     &.pinned {

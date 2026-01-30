@@ -10,15 +10,15 @@
         <div class="forward-message-label">转发消息：</div>
         <div class="forward-message-content">
           <div v-if="message.type === 'IMAGE'">
-            <img :src="JSON.parse(message.content).imageUrl" class="msg-img" />
+            <img :src="parsedMessageContent.imageUrl" class="msg-img" />
           </div>
           <div v-if="message.type === 'VIDEO'">
-            <video :src="JSON.parse(message.content).videoUrl" class="msg-video" controls />
+            <video :src="parsedMessageContent.videoUrl" class="msg-video" controls />
           </div>
           <div v-else-if="message.type === 'FILE'">
             <div class="file-preview">
               <el-icon><Document /></el-icon>
-              <span>{{ message.fileData?.fileName || message.content }}</span>
+              <span>{{ parsedMessageContent.fileName || message.fileData?.fileName || message.content }}</span>
             </div>
           </div>
           <div v-else>
@@ -91,6 +91,7 @@ import { ElMessage } from 'element-plus'
 import { Search, Document } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
 import { addTokenToUrl } from '@/utils/file'
+import { parseMessageContent } from '@/utils/message'
 
 const store = useStore()
 
@@ -117,6 +118,11 @@ const filteredSessions = computed(() => {
 
 // 获取单条消息（兼容旧代码）
 const message = computed(() => messages.value[0] || null)
+
+// 解析消息内容
+const parsedMessageContent = computed(() => {
+  return message.value ? parseMessageContent(message.value) : {}
+})
 
 // 获取消息预览
 const getMessagePreview = (msg) => {

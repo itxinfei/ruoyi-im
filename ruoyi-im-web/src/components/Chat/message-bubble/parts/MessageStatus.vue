@@ -142,11 +142,6 @@ const status = computed(() => {
   }
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
 // 状态过渡动画
 .status-fade-enter-active,
 .status-fade-leave-active {

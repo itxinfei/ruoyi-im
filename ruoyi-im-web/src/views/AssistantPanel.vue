@@ -167,7 +167,7 @@ const chatHistory = ref([])
 
 // 快捷功能
 const quickActions = [
-  { id: 1, label: '写文案', icon: 'edit', bgColor: '#1677ff', prompt: '帮我写一段关于' },
+  { id: 1, label: '写文案', icon: 'edit', bgColor: '#0089FF', prompt: '帮我写一段关于' },
   { id: 2, label: '翻译', icon: 'translate', bgColor: '#52c41a', prompt: '请翻译以下内容：' },
   { id: 3, label: '总结', icon: 'summarize', bgColor: '#fa8c16', prompt: '请帮我总结以下内容：' },
   { id: 4, label: '代码', icon: 'code', bgColor: '#722ed1', prompt: '请帮我写一段代码：' },
@@ -368,7 +368,7 @@ onMounted(() => {
 .new-chat-btn:hover {
   background: var(--dt-brand-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.25);
 }
 
 .panel-content {
@@ -517,7 +517,7 @@ onMounted(() => {
   height: 8px;
   background: var(--dt-text-quaternary);
   border-radius: 50%;
-  animation: typing 1.4s infinite ease-in-out;
+  animation: typingPulse 1.4s infinite ease-in-out;
 }
 
 .typing-indicator span:nth-child(2) {
@@ -526,15 +526,6 @@ onMounted(() => {
 
 .typing-indicator span:nth-child(3) {
   animation-delay: 0.4s;
-}
-
-@keyframes typing {
-  0%, 60%, 100% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(-8px);
-  }
 }
 
 @keyframes fadeIn {

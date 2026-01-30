@@ -380,8 +380,8 @@ const confirmAction = async () => {
 }
 
 .flow-item.active .flow-dot {
-  background: #1677ff;
-  box-shadow: 0 0 0 4px rgba(22, 119, 255, 0.2);
+  background: #0089FF;
+  box-shadow: 0 0 0 4px rgba(0, 137, 255, 0.2);
 }
 
 .flow-content {

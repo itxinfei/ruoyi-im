@@ -31,6 +31,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   messages: {
@@ -106,12 +107,8 @@ const getMessagePreview = (msg) => {
     case 'VIDEO':
       return '[视频]'
     case 'FILE':
-      try {
-        const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-        return `[文件] ${content.fileName || '未知文件'}`
-      } catch {
-        return '[文件]'
-      }
+      const content = parseMessageContent(msg) || {}
+      return `[文件] ${content.fileName || '未知文件'}`
     case 'AUDIO':
     case 'VOICE':
       return '[语音]'
@@ -154,7 +151,7 @@ const handleClick = () => {
 
     .material-icons-outlined {
       font-size: 16px;
-      color: var(--dt-brand-color, #1677ff);
+      color: var(--dt-brand-color, #0089FF);
     }
 
     .header-title {
@@ -182,7 +179,7 @@ const handleClick = () => {
 
       .msg-sender {
         font-weight: 500;
-        color: var(--dt-brand-color, #1677ff);
+        color: var(--dt-brand-color, #0089FF);
         flex-shrink: 0;
       }
 

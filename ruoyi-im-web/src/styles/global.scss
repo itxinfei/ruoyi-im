@@ -111,7 +111,7 @@ textarea {
 // Element Plus 组件样式覆盖
 // ============================================================================
 
-// 按钮基础样式修复
+// 按钮基础样式修复（钉钉蓝 #0089FF）
 .el-button {
   color: var(--dt-text-primary);
   background-color: var(--dt-bg-card);
@@ -119,14 +119,14 @@ textarea {
 
   &:hover,
   &:focus {
-    color: var(--dt-brand-hover);
-    border-color: var(--dt-brand-hover);
-    background-color: var(--dt-brand-bg);
+    color: #006ECC;
+    border-color: #006ECC;
+    background-color: #E5F2FF;
   }
 
   &:active {
-    color: var(--dt-brand-active);
-    border-color: var(--dt-brand-active);
+    color: #0057A3;
+    border-color: #0057A3;
   }
 
   &.is-plain {
@@ -140,33 +140,33 @@ textarea {
   }
 }
 
-// 主按钮样式
+// 主按钮样式（钉钉蓝）
 .el-button--primary {
-  background-color: var(--dt-brand-color);
-  border-color: var(--dt-brand-color);
+  background-color: #0089FF;
+  border-color: #0089FF;
   color: #fff;
 
   &:hover,
   &:focus {
-    background-color: var(--dt-brand-hover);
-    border-color: var(--dt-brand-hover);
+    background-color: #006ECC;
+    border-color: #006ECC;
     color: #fff;
   }
 
   &:active {
-    background-color: var(--dt-brand-active);
-    border-color: var(--dt-brand-active);
+    background-color: #0057A3;
+    border-color: #0057A3;
   }
 
   &.is-plain {
-    background-color: var(--dt-brand-bg);
-    border-color: var(--dt-brand-color);
-    color: var(--dt-brand-color);
+    background-color: #E5F2FF;
+    border-color: #0089FF;
+    color: #0089FF;
 
     &:hover,
     &:focus {
-      background-color: var(--dt-brand-color);
-      border-color: var(--dt-brand-color);
+      background-color: #0089FF;
+      border-color: #0089FF;
       color: #fff;
     }
   }
@@ -287,32 +287,32 @@ textarea {
   }
 }
 
-// 文本按钮
+// 文本按钮（钉钉蓝）
 .el-button--text {
-  color: var(--dt-brand-color);
+  color: #0089FF;
   background: transparent;
   border: none;
 
   &:hover,
   &:focus {
-    color: var(--dt-brand-hover);
-    background-color: var(--dt-brand-lighter);
+    color: #006ECC;
+    background-color: rgba(0, 137, 255, 0.05);
   }
 
   &:active {
-    color: var(--dt-brand-active);
+    color: #0057A3;
   }
 }
 
-// 链接按钮
+// 链接按钮（钉钉蓝）
 .el-button.is-link {
-  color: var(--dt-brand-color);
+  color: #0089FF;
   background: transparent;
   border: none;
 
   &:hover,
   &:focus {
-    color: var(--dt-brand-hover);
+    color: #006ECC;
   }
 }
 
@@ -341,12 +341,12 @@ textarea {
   box-shadow: none;
 
   &:hover {
-    border-color: var(--dt-border-input-hover);
+    border-color: #0089FF;
   }
 
   &.is-focus {
-    border-color: var(--dt-border-input-focus);
-    box-shadow: 0 0 0 2px var(--dt-brand-light);
+    border-color: #0089FF;
+    box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
   }
 
   .el-input__inner {
@@ -451,9 +451,9 @@ textarea {
 }
 
 .el-tag--primary {
-  background-color: var(--dt-brand-bg);
-  border-color: var(--dt-brand-color);
-  color: var(--dt-brand-color);
+  background-color: #E5F2FF;
+  border-color: #0089FF;
+  color: #0089FF;
 }
 
 .el-tag--success {
@@ -494,12 +494,12 @@ textarea {
 
   &:hover {
     background-color: var(--dt-bg-card-hover);
-    color: var(--dt-brand-color);
+    color: #0089FF;
   }
 
   &.is-active {
-    background-color: var(--dt-brand-bg);
-    color: var(--dt-brand-color);
+    background-color: #E5F2FF;
+    color: #0089FF;
     font-weight: 500;
   }
 }
@@ -518,17 +518,17 @@ textarea {
   color: var(--dt-text-secondary);
 
   &:hover {
-    color: var(--dt-brand-color);
+    color: #0089FF;
   }
 
   &.is-active {
-    color: var(--dt-brand-color);
+    color: #0089FF;
     font-weight: 500;
   }
 }
 
 .el-tabs__active-bar {
-  background-color: var(--dt-brand-color);
+  background-color: #0089FF;
 }
 
 .el-tabs__nav-wrap::after {
@@ -556,7 +556,7 @@ textarea {
 
   &:hover {
     background-color: var(--dt-bg-card-hover);
-    color: var(--dt-brand-color);
+    color: #0089FF;
   }
 
   &.is-disabled {
@@ -581,7 +581,7 @@ textarea {
   }
 
   &.is-focus {
-    border-color: var(--dt-brand-color);
+    border-color: #0089FF;
   }
 }
 
@@ -597,12 +597,12 @@ textarea {
 
   &:hover {
     background-color: var(--dt-bg-card-hover);
-    color: var(--dt-brand-color);
+    color: #0089FF;
   }
 
   &.is-selected {
-    background-color: var(--dt-brand-bg);
-    color: var(--dt-brand-color);
+    background-color: #E5F2FF;
+    color: #0089FF;
     font-weight: 500;
   }
 }
@@ -776,15 +776,15 @@ textarea {
 }
 
 .el-checkbox__input.is-checked .el-checkbox__inner {
-  background-color: var(--dt-brand-color);
-  border-color: var(--dt-brand-color);
+  background-color: #0089FF;
+  border-color: #0089FF;
 }
 
 .el-checkbox__inner {
   border-color: var(--dt-border-input);
 
   &:hover {
-    border-color: var(--dt-brand-color);
+    border-color: #0089FF;
   }
 }
 
@@ -814,15 +814,15 @@ textarea {
 }
 
 .el-radio__input.is-checked .el-radio__inner {
-  background-color: var(--dt-brand-color);
-  border-color: var(--dt-brand-color);
+  background-color: #0089FF;
+  border-color: #0089FF;
 }
 
 .el-radio__inner {
   border-color: var(--dt-border-input);
 
   &:hover {
-    border-color: var(--dt-brand-color);
+    border-color: #0089FF;
   }
 }
 
@@ -848,7 +848,7 @@ textarea {
 // ============================================================================
 
 .el-switch {
-  --el-switch-on-color: var(--dt-brand-color);
+  --el-switch-on-color: #0089FF;
   --el-switch-off-color: var(--dt-border-dark);
 }
 
@@ -865,11 +865,11 @@ textarea {
 }
 
 .el-slider__bar {
-  background-color: var(--dt-brand-color);
+  background-color: #0089FF;
 }
 
 .el-slider__button {
-  border-color: var(--dt-brand-color);
+  border-color: #0089FF;
 }
 
 // ============================================================================
@@ -877,7 +877,7 @@ textarea {
 // ============================================================================
 
 .el-progress-bar__inner {
-  background-color: var(--dt-brand-color);
+  background-color: #0089FF;
 }
 
 // ============================================================================

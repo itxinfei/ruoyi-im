@@ -305,7 +305,7 @@ onUnmounted(() => {
   gap: 8px;
   padding: 12px 24px;
   border: none;
-  background: var(--dt-brand-color, #1677ff);
+  background: var(--dt-brand-color, #0089FF);
   color: #fff;
   border-radius: 6px;
   cursor: pointer;
@@ -398,7 +398,7 @@ onUnmounted(() => {
 
     .wave {
       width: 4px;
-      background: var(--dt-brand-color, #1677ff);
+      background: var(--dt-brand-color, #0089FF);
       border-radius: 2px;
       transition: height 0.1s ease;
     }
@@ -407,7 +407,7 @@ onUnmounted(() => {
   .recording-time {
     font-size: 15px;
     font-weight: 600;
-    color: var(--dt-brand-color, #1677ff);
+    color: var(--dt-brand-color, #0089FF);
     font-variant-numeric: tabular-nums;
   }
 
@@ -501,7 +501,7 @@ onUnmounted(() => {
       width: 40px;
       height: 40px;
       border: none;
-      background: var(--dt-brand-color, #1677ff);
+      background: var(--dt-brand-color, #0089FF);
       border-radius: 50%;
       cursor: pointer;
       color: #fff;
@@ -531,7 +531,7 @@ onUnmounted(() => {
         transition: all 0.2s;
 
         &.active {
-          background: var(--dt-brand-color, #1677ff);
+          background: var(--dt-brand-color, #0089FF);
           height: 16px;
         }
       }
@@ -572,7 +572,7 @@ onUnmounted(() => {
       }
 
       &.send-btn {
-        background: var(--dt-brand-color, #1677ff);
+        background: var(--dt-brand-color, #0089FF);
         color: #fff;
 
         &:hover {
@@ -594,12 +594,12 @@ onUnmounted(() => {
 
 @keyframes recording-pulse {
   0%, 100% {
-    border-color: var(--dt-brand-color, #1677ff);
-    background: rgba(22, 119, 255, 0.1);
+    border-color: var(--dt-brand-color, #0089FF);
+    background: rgba(0, 137, 255, 0.1);
   }
   50% {
-    border-color: rgba(22, 119, 255, 0.7);
-    background: rgba(22, 119, 255, 0.15);
+    border-color: rgba(0, 137, 255, 0.7);
+    background: rgba(0, 137, 255, 0.15);
   }
 }
 </style>

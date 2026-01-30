@@ -207,7 +207,7 @@ function handleOpenSearch() {
 }
 
 .bg-nav-light {
-  background: linear-gradient(180deg, #1677ff 0%, #0e5fd9 100%);
+  background: linear-gradient(180deg, #0089FF 0%, #006ECC 100%);
 }
 
 // ============================================================================

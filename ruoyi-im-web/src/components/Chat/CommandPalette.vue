@@ -397,7 +397,7 @@ defineExpose({
   }
 
   &.active {
-    background: rgba(22, 119, 255, 0.1);
+    background: rgba(0, 137, 255, 0.1);
 
     .command-name {
       color: var(--dt-brand-color);
@@ -415,7 +415,7 @@ defineExpose({
   font-size: 20px;
   flex-shrink: 0;
 
-  &.icon-blue { background: rgba(22, 119, 255, 0.1); color: #1677ff; }
+  &.icon-blue { background: rgba(0, 137, 255, 0.1); color: #0089FF; }
   &.icon-green { background: rgba(82, 196, 26, 0.1); color: #52c41a; }
   &.icon-purple { background: rgba(114, 46, 209, 0.1); color: #722ed1; }
   &.icon-orange { background: rgba(250, 140, 22, 0.1); color: #fa8c16; }

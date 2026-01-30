@@ -588,16 +588,7 @@ defineExpose({
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 
   &.pulse {
-    animation: avatarPulse 1.5s ease-in-out infinite;
-  }
-}
-
-@keyframes avatarPulse {
-  0%, 100% {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  }
-  50% {
-    box-shadow: 0 8px 48px rgba(22, 119, 255, 0.6);
+    animation: videoAvatarPulse 1.5s ease-in-out infinite;
   }
 }
 

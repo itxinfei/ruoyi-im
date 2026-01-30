@@ -23,6 +23,7 @@ import java.util.List;
  * @author ruoyi
  */
 @Deprecated
+@SuppressWarnings("deprecation")
 @Service
 public class ImSessionServiceImpl implements ImSessionService {
 

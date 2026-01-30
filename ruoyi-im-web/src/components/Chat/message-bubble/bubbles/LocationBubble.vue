@@ -21,21 +21,13 @@
 <script setup>
 import { computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   message: { type: Object, required: true }
 })
 
-const parsedContent = computed(() => {
-  if (typeof props.message.content === 'string') {
-    try {
-      return JSON.parse(props.message.content)
-    } catch {
-      return {}
-    }
-  }
-  return props.message.content || {}
-})
+const parsedContent = computed(() => parseMessageContent(props.message) || {})
 
 const address = computed(() => {
   return parsedContent.value.address || parsedContent.value.name || ''

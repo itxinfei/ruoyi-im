@@ -331,18 +331,7 @@ defineExpose({
   filter: blur(40px);
 
   &.pulse {
-    animation: bgPulse 2s ease-in-out infinite;
-  }
-}
-
-@keyframes bgPulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.1;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 0.15;
+    animation: callBgPulse 2s ease-in-out infinite;
   }
 }
 
@@ -371,16 +360,7 @@ defineExpose({
   border: 3px solid rgba(255, 255, 255, 0.1);
 
   &.pulse {
-    animation: avatarPulse 1.5s ease-in-out infinite;
-  }
-}
-
-@keyframes avatarPulse {
-  0%, 100% {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  }
-  50% {
-    box-shadow: 0 8px 48px rgba(22, 119, 255, 0.4);
+    animation: callAvatarPulse 1.5s ease-in-out infinite;
   }
 }
 
@@ -494,7 +474,7 @@ defineExpose({
   cursor: pointer;
 
   &.incoming {
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.9) 0%, rgba(22, 119, 255, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(64, 158, 255, 0.9) 0%, rgba(0, 137, 255, 0.9) 100%);
     animation: floatPulse 1.5s ease-in-out infinite;
   }
 }

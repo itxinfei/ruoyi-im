@@ -306,17 +306,6 @@ const canRecall = computed(() => {
   padding-top: 0;
 }
 
-@keyframes messagePop {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
 .bubble-content {
   padding: 10px 12px;
   border-radius: var(--dt-radius-md);
@@ -366,12 +355,6 @@ const canRecall = computed(() => {
 // 长按状态
 .message-bubble.is-long-press {
   animation: longPressPulse 0.3s ease-in-out;
-}
-
-@keyframes longPressPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.01); }
-  100% { transform: scale(1); }
 }
 
 // 消息类型特殊样式

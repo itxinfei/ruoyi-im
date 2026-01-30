@@ -1,0 +1,236 @@
+/**
+ * 通用格式化工具函数
+ * 统一项目中的时间、文件大小等格式化逻辑，避免重复代码
+ */
+
+/**
+ * 格式化时间为 HH:mm 格式（聊天消息常用）
+ * @param {Number|String|Date} date - 日期对象、时间戳或日期字符串
+ * @returns {String} 格式化后的时间字符串 "HH:mm"
+ * @example
+ * formatTime(new Date()) // "14:30"
+ * formatTime(1706580600000) // "14:30"
+ */
+export function formatTime(date) {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
+/**
+ * 格式化时间为 HH:mm:ss 格式
+ * @param {Number|String|Date} date - 日期对象、时间戳或日期字符串
+ * @returns {String} 格式化后的时间字符串 "HH:mm:ss"
+ */
+export function formatTimeFull(date) {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  const seconds = String(d.getSeconds()).padStart(2, '0')
+  return `${hours}:${minutes}:${seconds}`
+}
+
+/**
+ * 格式化日期为 MM月DD日 格式
+ * @param {Number|String|Date} date - 日期对象、时间戳或日期字符串
+ * @returns {String} 格式化后的日期字符串 "MM月DD日"
+ */
+export function formatDate(date) {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  const month = d.getMonth() + 1
+  const day = d.getDate()
+  return `${month}月${day}日`
+}
+
+/**
+ * 格式化日期为 YYYY-MM-DD 格式
+ * @param {Number|String|Date} date - 日期对象、时间戳或日期字符串
+ * @returns {String} 格式化后的日期字符串 "YYYY-MM-DD"
+ */
+export function formatDateISO(date) {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/**
+ * 格式化日期时间为 YYYY-MM-DD HH:mm:ss 格式
+ * @param {Number|String|Date} date - 日期对象、时间戳或日期字符串
+ * @returns {String} 格式化后的日期时间字符串
+ */
+export function formatDateTimeISO(date) {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  return `${formatDateISO(d)} ${formatTimeFull(d)}`
+}
+
+/**
+ * 格式化相对时间（如：刚刚、5分钟前）
+ * @param {Number|String|Date} timestamp - 时间戳
+ * @returns {String} 相对时间字符串
+ */
+export function formatRelativeTime(timestamp) {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  const now = new Date()
+  if (isNaN(date.getTime())) return ''
+
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) return '刚刚'
+  if (diffMins < 60) return `${diffMins}分钟前`
+  if (diffHours < 24) return `${diffHours}小时前`
+  if (diffDays < 7) return `${diffDays}天前`
+
+  // 超过7天显示具体日期
+  return formatDate(date)
+}
+
+/**
+ * 聊天消息时间格式化（根据时间差智能显示）
+ * @param {Number|String|Date} timestamp - 时间戳
+ * @returns {String} 格式化后的时间
+ */
+export function formatChatTime(timestamp) {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  const now = new Date()
+  if (isNaN(date.getTime())) return ''
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const diffDays = Math.floor((today - targetDate) / 86400000)
+
+  if (diffDays === 0) {
+    // 今天：显示时间
+    return formatTime(date)
+  } else if (diffDays === 1) {
+    // 昨天：显示"昨天 HH:mm"
+    return `昨天 ${formatTime(date)}`
+  } else if (diffDays < 7) {
+    // 一周内：显示"周X HH:mm"
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    const weekday = weekdays[date.getDay()]
+    return `${weekday} ${formatTime(date)}`
+  } else {
+    // 更早：显示日期
+    return `${formatDate(date)} ${formatTime(date)}`
+  }
+}
+
+/**
+ * 格式化文件大小
+ * @param {Number} bytes - 字节数
+ * @returns {String} 格式化后的大小字符串
+ */
+export function formatFileSize(bytes) {
+  if (!bytes || bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+/**
+ * 格式化持续时间（秒转为可读格式）
+ * @param {Number} seconds - 秒数
+ * @returns {String} 格式化后的持续时间
+ * @example
+ * formatDuration(65) // "1分5秒"
+ * formatDuration(3665) // "1小时1分5秒"
+ */
+export function formatDuration(seconds) {
+  if (!seconds || seconds < 0) return '0秒'
+
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+
+  const parts = []
+  if (hours > 0) parts.push(`${hours}小时`)
+  if (minutes > 0) parts.push(`${minutes}分`)
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}秒`)
+
+  return parts.join('')
+}
+
+/**
+ * 格式化数字（添加千分位分隔符）
+ * @param {Number} num - 数字
+ * @returns {String} 格式化后的字符串
+ * @example
+ * formatNumber(1234567) // "1,234,567"
+ */
+export function formatNumber(num) {
+  if (num == null) return ''
+  return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+/**
+ * 格式化百分比
+ * @param {Number} value - 数值
+ * @param {Number} total - 总数
+ * @param {Number} decimals - 小数位数，默认0
+ * @returns {String} 百分比字符串
+ * @example
+ * formatPercent(50, 200) // "25%"
+ * formatPercent(1, 3, 2) // "33.33%"
+ */
+export function formatPercent(value, total, decimals = 0) {
+  if (!total || total === 0) return '0%'
+  const percent = (value / total) * 100
+  return percent.toFixed(decimals) + '%'
+}
+
+/**
+ * 截断文本并添加省略号
+ * @param {String} text - 原文本
+ * @param {Number} maxLength - 最大长度
+ * @returns {String} 截断后的文本
+ */
+export function truncateText(text, maxLength) {
+  if (!text) return ''
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength) + '...'
+}
+
+/**
+ * 格式化手机号（隐藏中间4位）
+ * @param {String} phone - 手机号
+ * @returns {String} 格式化后的手机号
+ * @example
+ * formatPhone('13812345678') // "138****5678"
+ */
+export function formatPhone(phone) {
+  if (!phone) return ''
+  const phoneStr = String(phone)
+  if (phoneStr.length !== 11) return phoneStr
+  return phoneStr.substring(0, 3) + '****' + phoneStr.substring(7)
+}
+
+/**
+ * 格式化身份证号（隐藏中间部分）
+ * @param {String} idCard - 身份证号
+ * @returns {String} 格式化后的身份证号
+ */
+export function formatIdCard(idCard) {
+  if (!idCard) return ''
+  const idStr = String(idCard)
+  if (idStr.length < 8) return idStr
+  return idStr.substring(0, 4) + '**********' + idStr.substring(idStr.length - 4)
+}

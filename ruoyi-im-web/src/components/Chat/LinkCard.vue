@@ -51,7 +51,7 @@ const openLink = () => {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
     transform: translateY(-1px);
   }
 

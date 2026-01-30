@@ -105,6 +105,7 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 import { Close, Delete } from '@element-plus/icons-vue'
 import { pinMessage, unpinMessage } from '@/api/im/message'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { formatChatTime } from '@/utils/format'
 
 const props = defineProps({
   messages: {
@@ -145,29 +146,7 @@ const getFileName = (msg) => {
 }
 
 // 格式化时间
-const formatTime = (timestamp) => {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now - date
-
-  // 小于1分钟
-  if (diff < 60000) return '刚刚'
-  // 小于1小时
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
-  // 今天
-  if (date.toDateString() === now.toDateString()) {
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  }
-  // 昨天
-  const yesterday = new Date(now)
-  yesterday.setDate(yesterday.getDate() - 1)
-  if (date.toDateString() === yesterday.toDateString()) {
-    return `昨天 ${date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
-  }
-  // 更早
-  return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
-}
+const formatTime = formatChatTime
 
 // 点击消息 - 滚动到对应位置
 const handleMessageClick = (msg) => {

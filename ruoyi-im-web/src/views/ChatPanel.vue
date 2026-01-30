@@ -266,6 +266,7 @@ import { addFavorite, removeFavorite } from '@/api/im/favorite'
 import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   session: {
@@ -317,20 +318,12 @@ const conversationImages = computed(() => {
   return messages.value
     .filter(m => {
       if (m.type !== 'IMAGE') return false
-      try {
-        const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
-        return content && (content.url || content.imageUrl)
-      } catch {
-        return false
-      }
+      const content = parseMessageContent(m)
+      return content && (content.url || content.imageUrl)
     })
     .map(m => {
-      try {
-        const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
-        return content.url || content.imageUrl
-      } catch {
-        return ''
-      }
+      const content = parseMessageContent(m)
+      return content?.url || content?.imageUrl || ''
     })
     .filter(url => url)
 })
@@ -1875,7 +1868,7 @@ onMounted(() => {
     padding: 8px 16px;
     background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-hover) 100%);
     border-radius: 24px;
-    border: 1px solid rgba(22, 119, 255, 0.2);
+    border: 1px solid rgba(0, 137, 255, 0.2);
 
     .selection-indicator {
       width: 12px;
@@ -1883,18 +1876,7 @@ onMounted(() => {
       background: var(--dt-brand-color);
       border-radius: 50%;
       animation: selectionPulse 2s ease-in-out infinite;
-      box-shadow: 0 0 8px rgba(22, 119, 255, 0.5);
-    }
-
-    @keyframes selectionPulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.2);
-        opacity: 0.8;
-      }
+      box-shadow: 0 0 8px rgba(0, 137, 255, 0.5);
     }
 
     .selection-text {
@@ -2042,8 +2024,8 @@ onMounted(() => {
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3);
 
   .selection-info {
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.2) 0%, rgba(22, 119, 255, 0.15) 100%);
-    border-color: rgba(22, 119, 255, 0.3);
+    background: linear-gradient(135deg, rgba(0, 137, 255, 0.2) 0%, rgba(0, 137, 255, 0.15) 100%);
+    border-color: rgba(0, 137, 255, 0.3);
 
     .selection-text {
       color: #ffffff;

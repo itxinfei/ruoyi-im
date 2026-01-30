@@ -283,7 +283,7 @@ const updateFolderCounts = async () => {
 
 // 随机颜色
 const getRandomColor = () => {
-  const colors = ['#1677ff', '#52c41a', '#fa8c16', '#722ed1', '#eb2f96']
+  const colors = ['#0089FF', '#52c41a', '#fa8c16', '#722ed1', '#eb2f96']
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
@@ -568,7 +568,7 @@ onMounted(() => {
 .compose-btn:hover {
   background: var(--dt-brand-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.25);
 }
 
 .compose-btn:active {

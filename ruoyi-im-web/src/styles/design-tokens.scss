@@ -6,75 +6,75 @@
 
 :root {
   // === Brand Colors (品牌色) ===
-  // 统一使用 #1677ff 作为主品牌色（与 Tailwind 配置保持一致）
-  --dt-brand-color: #1677ff;
-  --dt-brand-hover: #4096ff;
-  --dt-brand-active: #0958d9;
-  --dt-brand-bg: #e6f4ff;
-  --dt-brand-light: rgba(22, 119, 255, 0.1);
-  --dt-brand-lighter: rgba(22, 119, 255, 0.05);
+  // 钉钉品牌色 DingTalk Blue
+  --dt-brand-color: #0089FF;
+  --dt-brand-hover: #006ECC;
+  --dt-brand-active: #0057A3;
+  --dt-brand-bg: #E5F2FF;
+  --dt-brand-light: rgba(0, 137, 255, 0.1);
+  --dt-brand-lighter: rgba(0, 137, 255, 0.05);
 
-  // === Semantic Colors (语义色) ===
-  --dt-success-color: #52c41a;
-  --dt-success-bg: #f6ffed;
-  --dt-success-border: #b7eb8f;
-  --dt-warning-color: #faad14;
-  --dt-warning-bg: #fffbe6;
-  --dt-warning-border: #ffe58f;
-  --dt-error-color: #ff4d4f;
-  --dt-error-bg: #fff1f0;
-  --dt-error-border: #ffccc7;
-  --dt-danger-color: #f5222d;
-  --dt-info-color: #1890ff;
-  --dt-info-bg: #e6f7ff;
-  --dt-info-border: #91caff;
+  // === Semantic Colors (语义色 - 钉钉规范) ===
+  --dt-success-color: #00C853;
+  --dt-success-bg: #E8F5E9;
+  --dt-success-border: #A5D6A7;
+  --dt-warning-color: #FF9800;
+  --dt-warning-bg: #FFF3E0;
+  --dt-warning-border: #FFCC80;
+  --dt-error-color: #F44336;
+  --dt-error-bg: #FFEBEE;
+  --dt-error-border: #EF9A9A;
+  --dt-danger-color: #F44336;
+  --dt-info-color: #0089FF;
+  --dt-info-bg: #E5F2FF;
+  --dt-info-border: #90CAF9;
 
-  // === Background Colors (亮色模式) ===
-  --dt-bg-body: #f5f7fa;
-  --dt-bg-sidebar: #1890ff;
-  --dt-bg-sidebar-gradient: linear-gradient(180deg, #1890ff 0%, #096dd9 100%);
+  // === Background Colors (亮色模式 - 钉钉规范) ===
+  --dt-bg-body: #F5F7FA;
+  --dt-bg-sidebar: #0089FF;
+  --dt-bg-sidebar-gradient: linear-gradient(180deg, #0089FF 0%, #006ECC 100%);
   --dt-bg-sidebar-item: transparent;
   --dt-bg-sidebar-item-hover: rgba(255, 255, 255, 0.12);
   --dt-bg-sidebar-item-active: rgba(255, 255, 255, 0.2);
-  --dt-bg-session-list: #ffffff;
-  --dt-bg-chat: #f5f7fa;
-  --dt-bg-session-hover: #f6f8fa;
-  --dt-bg-session-active: #e6f7ff;
-  --dt-bg-input: #ffffff;
-  --dt-bg-card: #ffffff;
-  --dt-bg-card-hover: #fafbfc;
-  --dt-bg-dropdown: #ffffff;
+  --dt-bg-session-list: #FFFFFF;
+  --dt-bg-chat: #F5F7FA;
+  --dt-bg-session-hover: #F6F8FA;
+  --dt-bg-session-active: #EBF2FF;
+  --dt-bg-input: #FFFFFF;
+  --dt-bg-card: #FFFFFF;
+  --dt-bg-card-hover: #FAFBFC;
+  --dt-bg-dropdown: #FFFFFF;
   --dt-bg-overlay: rgba(0, 0, 0, 0.45);
   --dt-bg-mask: rgba(0, 0, 0, 0.6);
 
   // === DingTalk Special (钉钉特殊颜色) ===
   --dt-bubble-left-bg: #FFFFFF; // 接收消息背景（钉钉纯白）
-  --dt-bubble-left-border: #E4E7ED; // 接收消息边框（钉钉浅灰）
-  --dt-bubble-right-bg: #E8F4FF; // 发送消息背景（钉钉淡蓝）
-  --dt-bubble-right-bg-hover: #DBEEFF; // 发送消息悬停（钉钉淡蓝加深）
-  --dt-unread-color: #1677ff;
-  --dt-read-color: #8c8c8c;
-  --dt-mention-bg: rgba(22, 119, 255, 0.1);
-  --dt-mention-text: #1677ff;
+  --dt-bubble-left-border: #E5E9EF; // 接收消息边框（钉钉浅灰）
+  --dt-bubble-right-bg: #0089FF; // 发送消息背景（钉钉蓝）
+  --dt-bubble-right-bg-hover: #006ECC; // 发送消息悬停（钉钉蓝加深）
+  --dt-unread-color: #0089FF;
+  --dt-read-color: #8C8C8C;
+  --dt-mention-bg: rgba(0, 137, 255, 0.1);
+  --dt-mention-text: #0089FF;
 
-  // === Text Colors (文本颜色 - 亮色模式) ===
-  --dt-text-primary: #1f2329; // 主要文本（钉钉深黑）
-  --dt-text-secondary: #646a73; // 次要文本
-  --dt-text-tertiary: #8f959e; // 辅助文本
-  --dt-text-quaternary: #c2c8d1; // 占位符文本
-  --dt-text-disabled: #d9d9d9; // 禁用文本
-  --dt-text-link: #1677ff; // 链接文本
-  --dt-text-link-hover: #4096ff; // 链接悬停
+  // === Text Colors (文本颜色 - 钉钉规范) ===
+  --dt-text-primary: #171A1D; // 主要文本（钉钉深黑）
+  --dt-text-secondary: #5F6672; // 次要文本
+  --dt-text-tertiary: #858E9E; // 辅助文本
+  --dt-text-quaternary: #A0A8B8; // 占位符文本
+  --dt-text-disabled: #D9D9D9; // 禁用文本
+  --dt-text-link: #0089FF; // 链接文本
+  --dt-text-link-hover: #006ECC; // 链接悬停
 
-  // === Border Colors (边框颜色) ===
-  --dt-border-color: #e5e6eb;
-  --dt-border-light: #f0f0f0;
-  --dt-border-lighter: #f5f5f5;
-  --dt-border-dark: #d9d9d9;
-  --dt-border-divider: #e5e6eb;
-  --dt-border-input: #d9d9d9;
-  --dt-border-input-hover: #4096ff;
-  --dt-border-input-focus: #1677ff;
+  // === Border Colors (边框颜色 - 钉钉规范) ===
+  --dt-border-color: #E5E9EF;
+  --dt-border-light: #EEF1F6;
+  --dt-border-lighter: #F5F7FA;
+  --dt-border-dark: #CED4DB;
+  --dt-border-divider: #E5E9EF;
+  --dt-border-input: #D9D9D9;
+  --dt-border-input-hover: #0089FF;
+  --dt-border-input-focus: #0089FF;
 
   // === Shadow Colors (阴影颜色) ===
   --dt-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -976,13 +976,13 @@ $breakpoint-2xl: 1536px;
   -webkit-backdrop-filter: blur($blur);
 }
 
-// 渐变背景
-@mixin gradient-bg($start: #1677ff, $end: #0e5fd9, $direction: 135deg) {
+// 渐变背景（钉钉蓝）
+@mixin gradient-bg($start: #0089FF, $end: #006ECC, $direction: 135deg) {
   background: linear-gradient($direction, $start, $end);
 }
 
-// 文本渐变
-@mixin text-gradient($start: #1677ff, $end: #4096ff) {
+// 文本渐变（钉钉蓝）
+@mixin text-gradient($start: #0089FF, $end: #4096ff) {
   background: linear-gradient(135deg, $start, $end);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1076,60 +1076,7 @@ $breakpoint-2xl: 1536px;
 }
 
 // ============================================================================
-// 实用动画类
-// ============================================================================
-
-.animate-fade-in {
-  @include animation-fade-in;
-}
-
-.animate-fade-in-up {
-  @include animation-fade-in-up;
-}
-
-.animate-scale-in {
-  @include animation-scale-in;
-}
-
-.animate-bounce-in {
-  @include animation-bounce-in;
-}
-
-.animate-pulse {
-  @include animation-pulse;
-}
-
-.animate-spin {
-  @include animation-spin;
-}
-
-.hover-lift {
-  @include hover-lift;
-}
-
-// 延迟动画工具类
-.animation-delay-100 {
-  animation-delay: 100ms;
-}
-
-.animation-delay-200 {
-  animation-delay: 200ms;
-}
-
-.animation-delay-300 {
-  animation-delay: 300ms;
-}
-
-.animation-delay-400 {
-  animation-delay: 400ms;
-}
-
-.animation-delay-500 {
-  animation-delay: 500ms;
-}
-
-// ============================================================================
-// DingTalk 风格按钮系统
+// DingTalk 风格按钮系统（与 animations.scss 不重复）
 // ============================================================================
 
 // 按钮基础样式

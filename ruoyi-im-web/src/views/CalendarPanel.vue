@@ -241,6 +241,7 @@ import { Plus, ArrowLeft, ArrowRight, Refresh, Timer, Location, Calendar } from 
 import { getEventsByTimeRange, createEvent } from '@/api/im/schedule'
 import { ElMessage } from 'element-plus'
 import ScheduleDialog from '@/components/Chat/ScheduleDialog.vue'
+import { formatTime } from '@/utils/format'
 
 // --- PC 状态 ---
 const currentDate = ref(new Date())
@@ -258,7 +259,7 @@ const viewOptions = [
 ]
 
 const calendarCategories = ref([
-  { name: '工作日程', hex: '#1677ff', enabled: true },
+  { name: '工作日程', hex: '#0089FF', enabled: true },
   { name: '会议安排', hex: '#722ed1', enabled: true },
   { name: '个人生活', hex: '#52c41a', enabled: true }
 ])
@@ -288,7 +289,6 @@ const loadEvents = async () => {
 
 const formatYearMonth = (d) => `${d.getFullYear()}年${d.getMonth() + 1}月`
 const formatDateTime = (d, t) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${t}`
-const formatTime = (ts) => { const d = new Date(ts); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` }
 const formatDateOnly = (d) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`
 const getWeekStart = (d) => { const curr = new Date(d); const day = curr.getDay(); const diff = curr.getDate() - day + (day === 0 ? -6 : 1); return new Date(curr.setDate(diff)) }
 const getWeekEnd = (d) => { const s = getWeekStart(d); return new Date(s.getTime() + 6 * 86400000) }
@@ -328,7 +328,7 @@ const getEventStyle = (e) => {
   const s = p(e.startTime), end = p(e.endTime)
   return { top: `${(s - START_HOUR) * 80}px`, height: `${(end - s) * 80}px` }
 }
-const getHexColor = (c) => ({ blue: '#1677ff', purple: '#722ed1', emerald: '#52c41a', orange: '#f97316', red: '#ff4d4f' }[c] || '#1677ff')
+const getHexColor = (c) => ({ blue: '#0089FF', purple: '#722ed1', emerald: '#52c41a', orange: '#f97316', red: '#ff4d4f' }[c] || '#0089FF')
 const formatDateDisplay = (d) => `${d.getMonth()+1}月${d.getDate()}日 ${['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]}`
 
 const updateTimeLine = () => {
@@ -394,7 +394,7 @@ watch(currentDate, loadEvents)
   .aside-top { padding: 20px; }
   .create-btn {
     @apply w-full !h-10 !rounded-md !font-bold flex items-center justify-center gap-2;
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.15);
   }
 
   .mini-picker-wrapper {
@@ -402,7 +402,7 @@ watch(currentDate, loadEvents)
     .mini-cal-header {
       @apply flex items-center justify-between mb-3 px-2;
       .year-month { font-size: 13px; font-weight: 800; color: #1e293b; .dark & { color: #f1f5f9; } }
-      .nav-ops { @apply flex gap-2 text-slate-400 cursor-pointer; i:hover { color: #1677ff; } }
+      .nav-ops { @apply flex gap-2 text-slate-400 cursor-pointer; i:hover { color: #0089FF; } }
     }
     .mini-cal-grid {
       display: grid;
@@ -496,7 +496,7 @@ watch(currentDate, loadEvents)
         .add-hover-btn { opacity: 1; }
       }
       &.not-curr { background: #fafbfc; .dark & { background: rgba(15, 23, 42, 0.5); } .day-num { opacity: 0.3; } }
-      &.is-active { background: rgba(22, 119, 255, 0.02); }
+      &.is-active { background: rgba(0, 137, 255, 0.02); }
       
       .cell-head {
         @apply flex justify-between items-start mb-1;
@@ -540,7 +540,7 @@ watch(currentDate, loadEvents)
       @apply flex-1 py-3 flex flex-col items-center border-l border-slate-50 dark:border-slate-800;
       .name { @apply text-[10px] font-black text-slate-400 uppercase; }
       .date { @apply text-lg font-black text-slate-700 dark:text-slate-200; }
-      &.is-today { .name, .date { color: #1677ff; } background: rgba(22, 119, 255, 0.02); }
+      &.is-today { .name, .date { color: #0089FF; } background: rgba(0, 137, 255, 0.02); }
     }
   }
   .week-body-container {
@@ -554,7 +554,7 @@ watch(currentDate, loadEvents)
       .week-col {
         @apply flex-1 relative border-l border-slate-50 dark:border-slate-800;
         .hour-block { @apply h-20 border-b border-slate-50 dark:border-slate-800/50; }
-        &:hover { background: rgba(22, 119, 255, 0.01); }
+        &:hover { background: rgba(0, 137, 255, 0.01); }
       }
     }
   }

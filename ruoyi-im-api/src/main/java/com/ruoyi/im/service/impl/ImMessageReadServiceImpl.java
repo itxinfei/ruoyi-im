@@ -395,17 +395,8 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         // 去重消息ID
         List<Long> uniqueMessageIds = messageIds.stream().distinct().collect(Collectors.toList());
 
-        // 批量查询
-        List<java.util.Map<String, Object>> results = messageReadMapper.batchSelectReadUserIds(uniqueMessageIds);
-
-        // 按 messageId 分组
-        java.util.Map<Long, List<Long>> resultMap = new java.util.HashMap<>();
-        for (java.util.Map<String, Object> row : results) {
-            Long messageId = ((Number) row.get("messageId")).longValue();
-            Long userId = ((Number) row.get("userId")).longValue();
-
-            resultMap.computeIfAbsent(messageId, k -> new ArrayList<>()).add(userId);
-        }
+        // 批量查询，直接返回 Map<Long, List<Long>>
+        java.util.Map<Long, List<Long>> resultMap = messageReadMapper.batchSelectReadUserIds(uniqueMessageIds);
 
         // 为没有已读用户的消息添加空列表
         for (Long messageId : uniqueMessageIds) {

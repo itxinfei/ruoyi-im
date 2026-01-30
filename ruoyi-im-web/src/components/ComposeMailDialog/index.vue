@@ -230,6 +230,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { sendMail, saveDraft, searchUsers as searchUsersApi, uploadAttachment } from '@/api/im/mail'
+import { formatFileSize } from '@/utils/format'
 
 const props = defineProps({
   modelValue: {
@@ -501,19 +502,6 @@ const downloadAttachment = (attachment) => {
   }
 }
 
-// 格式化文件大小
-const formatFileSize = (bytes) => {
-  if (!bytes) return ''
-  const units = ['B', 'KB', 'MB', 'GB']
-  let size = bytes
-  let unitIndex = 0
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024
-    unitIndex++
-  }
-  return `${size.toFixed(1)} ${units[unitIndex]}`
-}
-
 // 提交表单
 const handleSubmit = async () => {
   try {
@@ -666,7 +654,7 @@ watch(visible, (val) => {
 
   &:hover {
     .upload-area {
-      background: linear-gradient(135deg, rgba(22, 119, 255, 0.05) 0%, rgba(22, 119, 255, 0.02) 100%);
+      background: linear-gradient(135deg, rgba(0, 137, 255, 0.05) 0%, rgba(0, 137, 255, 0.02) 100%);
     }
   }
 }
@@ -681,7 +669,7 @@ watch(visible, (val) => {
   border-radius: 12px;
 
   &.is-dragging {
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.1) 0%, rgba(22, 119, 255, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(0, 137, 255, 0.1) 0%, rgba(0, 137, 255, 0.05) 100%);
     border-color: var(--el-color-primary);
     transform: scale(1.02);
 
@@ -710,20 +698,9 @@ watch(visible, (val) => {
   .icon-glow {
     position: absolute;
     inset: -8px;
-    background: radial-gradient(circle, rgba(22, 119, 255, 0.2) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 137, 255, 0.2) 0%, transparent 70%);
     border-radius: 50%;
-    animation: iconPulse 2s ease-in-out infinite;
-  }
-
-  @keyframes iconPulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.5;
-    }
-    50% {
-      transform: scale(1.3);
-      opacity: 0;
-    }
+    animation: iconPulseFade 2s ease-in-out infinite;
   }
 
   .upload-text {
@@ -786,7 +763,7 @@ watch(visible, (val) => {
 
   &.uploading {
     border-color: var(--el-color-primary-light-5);
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.03) 0%, rgba(22, 119, 255, 0.01) 100%);
+    background: linear-gradient(135deg, rgba(0, 137, 255, 0.03) 0%, rgba(0, 137, 255, 0.01) 100%);
   }
 
   &.success {

@@ -53,6 +53,7 @@
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Upload, Document } from '@element-plus/icons-vue'
+import { formatFileSize } from '@/utils/format'
 
 const props = defineProps({
   // 上传类型: image, file
@@ -209,15 +210,6 @@ const handleError = (error, file) => {
     file: file,
     error: error
   })
-}
-
-// 格式化文件大小
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 
 // 手动触发上传

@@ -153,6 +153,7 @@ import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { saveFileToCloud } from '@/api/im/cloud'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -185,48 +186,33 @@ const fileList = computed(() => {
   props.messages.forEach(msg => {
     if (msg.type === 'FILE' || msg.type === 'IMAGE') {
       let fileInfo = null
+      const content = parseMessageContent(msg) || {}
 
       if (msg.type === 'IMAGE') {
-        try {
-          const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-          fileInfo = {
-            id: `img_${msg.id}`,
-            name: content.fileName || `图片_${msg.timestamp}.${content.fileType || 'jpg'}`,
-            type: 'image',
-            size: content.fileSize || 0,
-            url: content.imageUrl || content.url || '',
-            senderName: msg.senderName,
-            senderId: msg.senderId,
-            timestamp: msg.timestamp,
-            messageId: msg.id
-          }
-        } catch {
-          fileInfo = {
-            id: `img_${msg.id}`,
-            name: `图片_${msg.timestamp}.jpg`,
-            type: 'image',
-            size: 0,
-            url: msg.content || '',
-            senderName: msg.senderName,
-            timestamp: msg.timestamp,
-            messageId: msg.id
-          }
+        fileInfo = {
+          id: `img_${msg.id}`,
+          name: content.fileName || `图片_${msg.timestamp}.${content.fileType || 'jpg'}`,
+          type: 'image',
+          size: content.fileSize || 0,
+          url: content.imageUrl || content.url || '',
+          senderName: msg.senderName,
+          senderId: msg.senderId,
+          timestamp: msg.timestamp,
+          messageId: msg.id
         }
       } else if (msg.type === 'FILE') {
-        try {
-          const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-          fileInfo = {
-            id: msg.id,
-            name: content.fileName || '未知文件',
-            type: getFileType(content.fileName),
-            size: content.fileSize || 0,
-            url: content.fileUrl || content.url || '',
-            senderName: msg.senderName,
-            senderId: msg.senderId,
-            timestamp: msg.timestamp,
-            messageId: msg.id
-          }
-        } catch {
+        fileInfo = {
+          id: msg.id,
+          name: content.fileName || '未知文件',
+          type: getFileType(content.fileName),
+          size: content.fileSize || 0,
+          url: content.fileUrl || content.url || '',
+          senderName: msg.senderName,
+          senderId: msg.senderId,
+          timestamp: msg.timestamp,
+          messageId: msg.id
+        }
+      }
           return
         }
       }

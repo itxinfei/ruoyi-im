@@ -173,6 +173,7 @@ import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getFriendRequests, handleFriendRequest } from '@/api/im/contact'
 import { addTokenToUrl } from '@/utils/file'
+import { formatRelativeTime } from '@/utils/format'
 
 const props = defineProps({
   modelValue: {
@@ -237,19 +238,7 @@ const handleReject = async (request) => {
 }
 
 // 格式化时间
-const formatTime = (timestamp) => {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now - date
-
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
-  if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`
-  
-  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
-}
+const formatTime = formatRelativeTime
 
 // 关闭对话框
 const handleClose = () => {

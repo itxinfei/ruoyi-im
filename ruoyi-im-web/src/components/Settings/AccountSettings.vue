@@ -365,8 +365,8 @@ const twoFactorEnabled = ref(false)
   font-size: 20px;
 
   &.bg-blue {
-    background: rgba(22, 119, 255, 0.1);
-    color: #1677ff;
+    background: rgba(0, 137, 255, 0.1);
+    color: #0089FF;
   }
 
   &.bg-green {

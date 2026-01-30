@@ -131,7 +131,7 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import EditProfileDialog from '@/components/EditProfileDialog/index.vue'
+import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
 
 const props = defineProps({

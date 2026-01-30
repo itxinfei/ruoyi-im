@@ -247,6 +247,7 @@ public class ImWebSocketEndpoint {
      * @param session WebSocket 会话
      */
     @OnMessage
+    @SuppressWarnings("unchecked")
     public void onMessage(String message, Session session) {
         try {
             Long userId = sessionUserMap.get(session);

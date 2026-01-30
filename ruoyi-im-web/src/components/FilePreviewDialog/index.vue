@@ -198,7 +198,7 @@ const handleDownload = () => {
 
 .preview-placeholder .material-icons-outlined {
   font-size: 64px;
-  color: #1677ff;
+  color: #0089FF;
   margin-bottom: 16px;
 }
 

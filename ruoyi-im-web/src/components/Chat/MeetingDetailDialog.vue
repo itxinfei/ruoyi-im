@@ -199,7 +199,7 @@ watch(() => props.meeting, (newMeeting) => {
     font-weight: 500;
 
     &.status-scheduled {
-      background: rgba(22, 119, 255, 0.1);
+      background: rgba(0, 137, 255, 0.1);
       color: var(--dt-brand-color);
     }
 

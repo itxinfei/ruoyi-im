@@ -121,7 +121,7 @@ const handleProgressDragStart = (event) => {
   padding: 10px 12px;
   margin-bottom: 12px;
   border-radius: var(--dt-radius-md);
-  background: rgba(22, 119, 255, 0.05);
+  background: rgba(0, 137, 255, 0.05);
   border-left: 3px solid var(--dt-brand-color);
 }
 

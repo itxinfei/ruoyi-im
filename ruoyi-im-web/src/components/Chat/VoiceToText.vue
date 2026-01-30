@@ -443,7 +443,7 @@ defineExpose({
     border-color: var(--dt-border-dark);
 
     &:hover {
-      background: rgba(22, 119, 255, 0.15);
+      background: rgba(0, 137, 255, 0.15);
     }
   }
 

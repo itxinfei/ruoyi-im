@@ -226,6 +226,8 @@ import { useStore } from 'vuex'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
+import { formatFileSize as utilsFormatFileSize } from '@/utils/format'
+import { parseMessageContent } from '@/utils/message'
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
@@ -303,7 +305,7 @@ const extractContentFromMessages = () => {
   images.value = props.messages
     .filter(m => m.messageType === 'IMAGE' && m.senderId == props.userId)
     .map(m => {
-      const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
+      const content = parseMessageContent(m) || {}
       return {
         id: m.id,
         url: addTokenToUrl(content.url || content.thumbUrl),
@@ -316,7 +318,7 @@ const extractContentFromMessages = () => {
   files.value = props.messages
     .filter(m => m.messageType === 'FILE' && m.senderId == props.userId)
     .map(m => {
-      const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
+      const content = parseMessageContent(m) || {}
       return {
         id: m.id,
         name: content.fileName || content.name,
@@ -396,17 +398,10 @@ const formatTime = (time) => {
   return dayjs(time).fromNow()
 }
 
-// 格式化文件大小
+// 格式化文件大小（兼容无数据情况）
 const formatFileSize = (bytes) => {
   if (!bytes) return '未知'
-  const units = ['B', 'KB', 'MB', 'GB']
-  let size = bytes
-  let unitIndex = 0
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024
-    unitIndex++
-  }
-  return `${size.toFixed(1)} ${units[unitIndex]}`
+  return utilsFormatFileSize(bytes)
 }
 
 // 事件处理
@@ -706,8 +701,8 @@ onMounted(() => {
       flex-shrink: 0;
 
       &.type-message {
-        background: rgba(22, 119, 255, 0.1);
-        color: #1677ff;
+        background: rgba(0, 137, 255, 0.1);
+        color: #0089FF;
       }
 
       &.type-image {
@@ -811,7 +806,7 @@ onMounted(() => {
 
       &.type-image {
         background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
-        color: #1677ff;
+        color: #0089FF;
       }
 
       &.type-pdf {

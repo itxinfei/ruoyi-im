@@ -161,7 +161,7 @@
                 v-for="event in scheduleList.slice(0, 4)"
                 :key="event.id"
                 class="schedule-item"
-                :style="{ borderLeftColor: event.color || '#1677ff' }"
+                :style="{ borderLeftColor: event.color || '#0089FF' }"
               >
                 <div class="schedule-time">
                   <span class="time-start">{{ formatTime(event.startTime) }}</span>
@@ -863,7 +863,7 @@ onUnmounted(() => {
     top: -100px;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(22, 119, 255, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 137, 255, 0.06) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
   }
@@ -925,11 +925,6 @@ onUnmounted(() => {
       animation: spin 1s linear infinite;
     }
   }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 // ============================================================================
@@ -1013,11 +1008,11 @@ onUnmounted(() => {
   }
 
   &.stat-card-primary .stat-icon {
-    background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+    background: linear-gradient(135deg, #0089FF 0%, #0958d9 100%);
   }
 
   &.stat-card-primary .stat-value {
-    color: #1677ff;
+    color: #0089FF;
   }
 
   &.stat-card-success .stat-icon {
@@ -1231,7 +1226,7 @@ onUnmounted(() => {
 
     &.priority-low {
       background: #e6f7ff;
-      color: #1677ff;
+      color: #0089FF;
     }
   }
 }
@@ -1430,7 +1425,7 @@ onUnmounted(() => {
 
     &.tag-notice {
       background: #e6f7ff;
-      color: #1677ff;
+      color: #0089FF;
     }
 
     &.tag-normal {

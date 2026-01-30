@@ -340,6 +340,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     /**
      * 根据节点数组创建审批节点（原有逻辑）
      */
+    @SuppressWarnings("unchecked")
     private void createNodesFromConfigArray(Long approvalId, cn.hutool.json.JSONObject configObj) {
         Object nodesObj = configObj.get("nodes");
         if (!(nodesObj instanceof List)) {

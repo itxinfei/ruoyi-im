@@ -8,8 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.sql.DataSource;
@@ -226,5 +228,24 @@ public class ImHealthCheckController {
         liveness.put("status", "ALIVE");
         liveness.put("timestamp", System.currentTimeMillis());
         return Result.success(liveness);
+    }
+
+    /**
+     * 生成密码哈希（仅用于开发测试）
+     */
+    @Operation(summary = "生成密码哈希", description = "生成BCrypt密码哈希（仅开发环境使用）")
+    @GetMapping("/hash")
+    public Result<Map<String, String>> generateHash(@RequestParam(defaultValue = "123456") String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hash = encoder.encode(password);
+        boolean matches = encoder.matches(password, hash);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("password", password);
+        result.put("hash", hash);
+        result.put("hashLength", String.valueOf(hash.length()));
+        result.put("verified", String.valueOf(matches));
+
+        return Result.success(result);
     }
 }

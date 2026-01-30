@@ -129,7 +129,7 @@ const displayHeight = computed(() => Math.round(props.containerHeight))
     background: var(--dt-brand-color);
     color: #fff;
     border-radius: 0 0 6px 6px;
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.3);
     pointer-events: none;
     z-index: 100;
 

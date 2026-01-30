@@ -18,21 +18,13 @@
 <script setup>
 import { computed } from 'vue'
 import { VideoCamera } from '@element-plus/icons-vue'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   message: { type: Object, required: true }
 })
 
-const parsedContent = computed(() => {
-  if (typeof props.message.content === 'string') {
-    try {
-      return JSON.parse(props.message.content)
-    } catch {
-      return {}
-    }
-  }
-  return props.message.content || {}
-})
+const parsedContent = computed(() => parseMessageContent(props.message) || {})
 
 const videoUrl = computed(() => {
   return parsedContent.value.videoUrl || parsedContent.value.url || ''

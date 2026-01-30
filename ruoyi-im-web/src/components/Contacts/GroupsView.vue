@@ -110,10 +110,6 @@ onMounted(() => {
   }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .dt-empty {
   display: flex;
   flex-direction: column;

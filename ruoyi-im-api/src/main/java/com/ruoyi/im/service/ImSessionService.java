@@ -15,6 +15,7 @@ import java.util.List;
  * @author ruoyi
  */
 @Deprecated
+@SuppressWarnings("deprecation")
 public interface ImSessionService {
 
     /**

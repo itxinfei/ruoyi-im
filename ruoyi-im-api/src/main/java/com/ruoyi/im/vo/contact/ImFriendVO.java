@@ -94,4 +94,9 @@ public class ImFriendVO implements Serializable {
      * 好友标签，多个标签用逗号分隔
      */
     private String tags;
+
+    /**
+     * 好友名称拼音首字母，用于搜索
+     */
+    private String pinyin;
 }

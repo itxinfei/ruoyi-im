@@ -363,7 +363,7 @@ const handleShowMembers = () => {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(22, 119, 255, 0.1) 50%,
+      rgba(0, 137, 255, 0.1) 50%,
       transparent 100%
     );
     opacity: 0;
@@ -430,7 +430,7 @@ const handleShowMembers = () => {
   width: 42px;
   height: 42px;
   border-radius: var(--dt-radius-md);
-  background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+  background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
   color: #fff;
 }
 
@@ -438,7 +438,7 @@ const handleShowMembers = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.25);
 }
 
 // 在线状态指示器
@@ -780,7 +780,7 @@ const handleShowMembers = () => {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #1677ff 0%, #52c41a 50%, #ff4d4f 100%);
+    background: linear-gradient(90deg, #0089FF 0%, #52c41a 50%, #ff4d4f 100%);
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -856,12 +856,12 @@ const handleShowMembers = () => {
       border-radius: 12px;
       font-weight: 600;
       flex-shrink: 0;
-      animation: badgePulse 2s ease-in-out infinite;
+      animation: badgePulseShadow 2s ease-in-out infinite;
       box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
     }
 
     &:hover {
-      background: linear-gradient(90deg, rgba(22, 119, 255, 0.06) 0%, rgba(22, 119, 255, 0.02) 100%);
+      background: linear-gradient(90deg, rgba(0, 137, 255, 0.06) 0%, rgba(0, 137, 255, 0.02) 100%);
       color: var(--dt-brand-color);
       transform: translateX(4px);
 
@@ -875,9 +875,9 @@ const handleShowMembers = () => {
       }
 
       .item-shortcut {
-        background: linear-gradient(135deg, rgba(22, 119, 255, 0.12) 0%, rgba(22, 119, 255, 0.06) 100%);
+        background: linear-gradient(135deg, rgba(0, 137, 255, 0.12) 0%, rgba(0, 137, 255, 0.06) 100%);
         color: var(--dt-brand-color);
-        border-color: rgba(22, 119, 255, 0.15);
+        border-color: rgba(0, 137, 255, 0.15);
         transform: scale(1.05);
       }
     }
@@ -887,7 +887,7 @@ const handleShowMembers = () => {
     }
 
     &.is-active {
-      background: linear-gradient(90deg, rgba(22, 119, 255, 0.1) 0%, rgba(22, 119, 255, 0.03) 100%);
+      background: linear-gradient(90deg, rgba(0, 137, 255, 0.1) 0%, rgba(0, 137, 255, 0.03) 100%);
       color: var(--dt-brand-color);
 
       &::before {
@@ -965,20 +965,6 @@ const handleShowMembers = () => {
   }
 }
 
-// 徽章脉冲动画
-@keyframes badgePulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.08);
-    box-shadow: 0 4px 12px rgba(255, 77, 79, 0.5);
-  }
-}
-
 // ============================================================================
 // 暗色模式
 // ============================================================================
@@ -990,7 +976,7 @@ const handleShowMembers = () => {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(22, 119, 255, 0.15) 50%,
+      rgba(0, 137, 255, 0.15) 50%,
       transparent 100%
     );
   }
@@ -1045,10 +1031,10 @@ const handleShowMembers = () => {
 
   &.info-btn {
     color: var(--dt-brand-color);
-    background: rgba(22, 119, 255, 0.15);
+    background: rgba(0, 137, 255, 0.15);
 
     &:hover {
-      background: rgba(22, 119, 255, 0.25);
+      background: rgba(0, 137, 255, 0.25);
     }
   }
 }
@@ -1086,7 +1072,7 @@ const handleShowMembers = () => {
     0 20px 50px -10px rgba(0, 0, 0, 0.2);
 
   &::before {
-    background: linear-gradient(90deg, #1677ff 0%, #52c41a 50%, #ff4d4f 100%);
+    background: linear-gradient(90deg, #0089FF 0%, #52c41a 50%, #ff4d4f 100%);
   }
 
   .el-dropdown-menu__item {
@@ -1116,7 +1102,7 @@ const handleShowMembers = () => {
     }
 
     &:hover {
-      background: linear-gradient(90deg, rgba(22, 119, 255, 0.15) 0%, rgba(22, 119, 255, 0.05) 100%);
+      background: linear-gradient(90deg, rgba(0, 137, 255, 0.15) 0%, rgba(0, 137, 255, 0.05) 100%);
       color: var(--dt-brand-color);
 
       .item-icon {
@@ -1124,14 +1110,14 @@ const handleShowMembers = () => {
       }
 
       .item-shortcut {
-        background: linear-gradient(135deg, rgba(22, 119, 255, 0.2) 0%, rgba(22, 119, 255, 0.1) 100%);
+        background: linear-gradient(135deg, rgba(0, 137, 255, 0.2) 0%, rgba(0, 137, 255, 0.1) 100%);
         color: var(--dt-brand-color);
-        border-color: rgba(22, 119, 255, 0.25);
+        border-color: rgba(0, 137, 255, 0.25);
       }
     }
 
     &.is-active {
-      background: linear-gradient(90deg, rgba(22, 119, 255, 0.2) 0%, rgba(22, 119, 255, 0.08) 100%);
+      background: linear-gradient(90deg, rgba(0, 137, 255, 0.2) 0%, rgba(0, 137, 255, 0.08) 100%);
       color: var(--dt-brand-color);
 
       .item-icon {

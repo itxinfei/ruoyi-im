@@ -351,7 +351,7 @@ const handleEnter = () => {
   &:focus-within {
     background: var(--dt-bg-card);
     border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1);
   }
 
   .search-icon {
@@ -625,7 +625,7 @@ const handleEnter = () => {
   }
 
   .result-item.active {
-    background: rgba(22, 119, 255, 0.15);
+    background: rgba(0, 137, 255, 0.15);
 
     .sender-name {
       color: var(--dt-brand-color);

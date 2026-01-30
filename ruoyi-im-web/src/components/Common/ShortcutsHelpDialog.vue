@@ -254,7 +254,7 @@ registerShortcut(ShortcutKeys.SHOW_SHORTCUTS, () => {
   }
 
   .tip-section {
-    background: rgba(22, 119, 255, 0.15);
+    background: rgba(0, 137, 255, 0.15);
   }
 }
 

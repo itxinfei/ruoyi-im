@@ -291,12 +291,12 @@ const resetForm = () => {
 }
 
 .template-item:hover {
-  border-color: #1677ff;
+  border-color: #0089FF;
   background: #f0f7ff;
 }
 
 .template-item.active {
-  border-color: #1677ff;
+  border-color: #0089FF;
   background: #e6f7ff;
 }
 
@@ -305,7 +305,7 @@ const resetForm = () => {
   height: 48px;
   border-radius: 12px;
   background: #f0f7ff;
-  color: #1677ff;
+  color: #0089FF;
   display: flex;
   align-items: center;
   justify-content: center;

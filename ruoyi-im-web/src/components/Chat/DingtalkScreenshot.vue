@@ -1016,8 +1016,8 @@ watch(() => props.visible, (val) => {
 }
 
 .tool-btn.active {
-  background: rgba(22, 119, 255, 0.3);
-  color: #1677ff;
+  background: rgba(0, 137, 255, 0.3);
+  color: #0089FF;
 }
 
 .tool-btn:disabled {
@@ -1036,7 +1036,7 @@ watch(() => props.visible, (val) => {
 }
 
 .save-btn {
-  background: #1677ff;
+  background: #0089FF;
   color: #fff;
   padding: 0 16px;
   gap: 6px;
@@ -1074,7 +1074,7 @@ watch(() => props.visible, (val) => {
 
 .color-btn.active {
   border-color: #fff;
-  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.5);
 }
 
 .custom-color {
@@ -1141,7 +1141,7 @@ watch(() => props.visible, (val) => {
 .text-input {
   padding: 6px 10px;
   font-size: 14px;
-  border: 2px solid #1677ff;
+  border: 2px solid #0089FF;
   border-radius: 4px;
   outline: none;
   min-width: 150px;
@@ -1247,7 +1247,7 @@ watch(() => props.visible, (val) => {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #1677ff;
+  background: #0089FF;
   color: #fff;
   border: none;
   border-radius: 6px;

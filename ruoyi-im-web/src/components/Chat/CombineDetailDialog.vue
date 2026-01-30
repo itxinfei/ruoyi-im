@@ -102,6 +102,7 @@
 import { ref, computed } from 'vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElImageViewer } from 'element-plus'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   modelValue: {
@@ -199,35 +200,23 @@ const formatTime = (timestamp) => {
 
 // 获取图片URL
 const getImageUrl = (msg) => {
-  try {
-    const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-    return content.url || content.imageUrl || ''
-  } catch {
-    return ''
-  }
+  const content = parseMessageContent(msg) || {}
+  return content.url || content.imageUrl || ''
 }
 
 // 获取文件名
 const getFileName = (msg) => {
-  try {
-    const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-    return content.fileName || content.name || ''
-  } catch {
-    return ''
-  }
+  const content = parseMessageContent(msg) || {}
+  return content.fileName || content.name || ''
 }
 
 // 获取语音时长
 const getVoiceDuration = (msg) => {
-  try {
-    const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-    const duration = content.duration || 0
-    const mins = Math.floor(duration / 60)
-    const secs = Math.floor(duration % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  } catch {
-    return ''
-  }
+  const content = parseMessageContent(msg) || {}
+  const duration = content.duration || 0
+  const mins = Math.floor(duration / 60)
+  const secs = Math.floor(duration % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
 // 预览图片

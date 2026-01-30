@@ -678,7 +678,7 @@ onUnmounted(() => {
   transition: all 0.2s;
 
   &:hover {
-    border: 2px solid rgba(22, 119, 255, 0.5);
+    border: 2px solid rgba(0, 137, 255, 0.5);
   }
 
   &.is-active {

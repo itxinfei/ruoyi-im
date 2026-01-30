@@ -32,6 +32,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   reply: { type: Object, required: true }
@@ -44,15 +45,8 @@ const replyType = computed(() => {
 })
 
 const fileName = computed(() => {
-  try {
-    if (typeof props.reply.content === 'string') {
-      const parsed = JSON.parse(props.reply.content)
-      return parsed.fileName || parsed.name || '文件'
-    }
-    return props.reply.content?.fileName || props.reply.content?.name || '文件'
-  } catch {
-    return '文件'
-  }
+  const parsed = parseMessageContent(props.reply)
+  return parsed?.fileName || parsed?.name || '文件'
 })
 
 const handleClick = () => {
@@ -82,7 +76,7 @@ const handleClick = () => {
   &:hover {
     background: rgba(255, 255, 255, 0.6);
     border-left-color: var(--dt-brand-hover);
-    box-shadow: 0 2px 6px rgba(22, 119, 255, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 137, 255, 0.1);
 
     .ref-icon {
       transform: scale(1.05);
@@ -169,7 +163,7 @@ const handleClick = () => {
     }
 
     &:hover {
-      background: rgba(22, 119, 255, 0.15);
+      background: rgba(0, 137, 255, 0.15);
       border-left-color: var(--dt-brand-hover);
     }
   }

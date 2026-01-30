@@ -359,6 +359,7 @@ import {
   getMessageDetail,
   getMessageAdminStats
 } from '@/api/admin'
+import { formatFileSize } from '@/utils/format'
 
 const loading = ref(false)
 const messageList = ref([])
@@ -565,15 +566,6 @@ const handleSaveSensitiveConfig = async () => {
   } catch (error) {
     ElMessage.error('保存失败')
   }
-}
-
-// 工具方法
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i]
 }
 
 const getMessageTypeLabel = (type) => {

@@ -101,6 +101,7 @@ public class MessageValidator {
      *
      * @param word 敏感词
      */
+    @SuppressWarnings("unchecked")
     private void addSensitiveWord(String word) {
         if (!StringUtils.hasText(word)) {
             return;
@@ -205,6 +206,7 @@ public class MessageValidator {
      * @param beginIndex 开始位置
      * @return 匹配到的敏感词长度，0表示未匹配
      */
+    @SuppressWarnings("unchecked")
     private int checkSensitiveWord(String content, int beginIndex) {
         Map<String, Object> nowMap = sensitiveWordMap;
         int matchLength = 0;

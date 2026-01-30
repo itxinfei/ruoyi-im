@@ -19,6 +19,7 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.PinyinUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -243,8 +244,8 @@ public class ImFriendServiceImpl implements ImFriendService {
                 // 从批量查询结果中获取用户信息
                 ImUser friendUser = userMap.get(friend.getFriendId());
                 if (friendUser != null) {
-                    vo.setFriendName(
-                            friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
+                    String friendName = friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername();
+                    vo.setFriendName(friendName);
                     vo.setFriendAvatar(friendUser.getAvatar());
                     vo.setUsername(friendUser.getUsername());
                     vo.setEmail(friendUser.getEmail());
@@ -252,6 +253,9 @@ public class ImFriendServiceImpl implements ImFriendService {
                     vo.setSignature(friendUser.getSignature());
                     vo.setDepartment(friendUser.getDepartment());
                     vo.setPosition(friendUser.getPosition());
+
+                    // 设置拼音首字母，用于搜索
+                    vo.setPinyin(PinyinUtil.getFirstLetter(friendName));
 
                     // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
                     // 实际在线状态应从Redis获取
@@ -487,10 +491,15 @@ public class ImFriendServiceImpl implements ImFriendService {
         // 查询好友用户信息
         ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
         if (friendUser != null) {
-            vo.setFriendName(friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
+            String friendName = friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername();
+            vo.setFriendName(friendName);
             vo.setFriendAvatar(friendUser.getAvatar());
             vo.setDepartment(friendUser.getDepartment());
             vo.setPosition(friendUser.getPosition());
+
+            // 设置拼音首字母
+            vo.setPinyin(PinyinUtil.getFirstLetter(friendName));
+
             // 根据用户状态判断是否在线
             vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
         } else {

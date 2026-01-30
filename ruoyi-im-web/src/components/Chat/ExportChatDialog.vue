@@ -102,6 +102,7 @@ import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
 import { exportChat, EXPORT_FORMAT, generateExportFileName } from '@/utils/chatExport'
 import { useStore } from 'vuex'
+import { formatFileSize } from '@/utils/format'
 
 const props = defineProps({
   modelValue: {
@@ -212,15 +213,6 @@ const estimatedSize = computed(() => {
 
   return size
 })
-
-// 格式化文件大小
-const formatFileSize = (bytes) => {
-  if (!bytes || bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
 
 // 禁用日期
 const disabledDate = (time) => {

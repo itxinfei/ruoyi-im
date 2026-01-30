@@ -94,6 +94,7 @@ import { ChatLineSquare, Share, StarFilled, Delete, ArrowLeft, ArrowRight } from
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { starMail, downloadAttachment as downloadAttachmentApi } from '@/api/im/mail'
+import { formatFileSize } from '@/utils/format'
 
 const props = defineProps({
   modelValue: {
@@ -201,18 +202,6 @@ const downloadAttachment = async (file) => {
   }
 }
 
-const formatFileSize = (bytes) => {
-  if (!bytes) return ''
-  const units = ['B', 'KB', 'MB', 'GB']
-  let size = bytes
-  let unitIndex = 0
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024
-    unitIndex++
-  }
-  return `${size.toFixed(1)} ${units[unitIndex]}`
-}
-
 const getFileIcon = (fileName) => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || ''
   const iconMap = {
@@ -242,7 +231,7 @@ const getFileIconColor = (fileName) => {
     // 图片 - 蓝紫色
     jpg: '#722ed1', jpeg: '#722ed1', png: '#722ed1', gif: '#722ed1', bmp: '#722ed1', svg: '#722ed1',
     // 文档 - 蓝色
-    doc: '#1677ff', docx: '#1677ff',
+    doc: '#0089FF', docx: '#0089FF',
     xls: '#52c41a', xlsx: '#52c41a',
     ppt: '#fa8c16', pptx: '#fa8c16',
     pdf: '#f5222d',

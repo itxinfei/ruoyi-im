@@ -93,6 +93,7 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getAllSystemConfigs() {
         Object cached = redisUtil.get(SYSTEM_CONFIG_ALL_KEY);
         if (cached instanceof Map) {

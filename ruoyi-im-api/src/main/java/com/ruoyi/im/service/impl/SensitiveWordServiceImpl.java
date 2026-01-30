@@ -148,6 +148,7 @@ public class SensitiveWordServiceImpl implements ISensitiveWordService {
      *
      * @param words 敏感词列表
      */
+    @SuppressWarnings("unchecked")
     private void initSensitiveWordMap(List<String> words) {
         sensitiveWordMap.clear();
         minLength = Integer.MAX_VALUE;

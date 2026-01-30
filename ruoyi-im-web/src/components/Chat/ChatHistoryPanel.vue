@@ -128,6 +128,7 @@ import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { getMessages, getMessagesByCategory } from '@/api/im/message'
+import { formatTime } from '@/utils/format'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -211,12 +212,6 @@ const formatDate = (dateStr) => {
   } else {
     return `${date.getMonth() + 1}月${date.getDate()}日`
   }
-}
-
-// 格式化时间
-const formatTime = (sendTime) => {
-  const date = new Date(sendTime)
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
 }
 
 // 加载聊天记录

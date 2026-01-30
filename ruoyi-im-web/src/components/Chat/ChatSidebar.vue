@@ -345,6 +345,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
+import { formatFileSize as utilsFormatFileSize } from '@/utils/format'
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
@@ -481,7 +482,7 @@ const loadFiles = () => {
   const fileList = props.messages
     .filter(m => m.messageType === 'IMAGE' || m.messageType === 'FILE')
     .map(m => {
-      const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
+      const content = parseMessageContent(m) || {}
       return {
         id: m.id,
         name: content.fileName || content.name || '未命名文件',
@@ -525,16 +526,10 @@ const getFileIcon = (type) => {
   return iconMap[type] || iconMap.default
 }
 
+// 格式化文件大小（兼容无数据情况）
 const formatFileSize = (bytes) => {
   if (!bytes) return '未知'
-  const units = ['B', 'KB', 'MB', 'GB']
-  let size = bytes
-  let unitIndex = 0
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024
-    unitIndex++
-  }
-  return `${size.toFixed(1)} ${units[unitIndex]}`
+  return utilsFormatFileSize(bytes)
 }
 
 const formatDate = (date) => {
@@ -975,7 +970,7 @@ watch(() => props.messages, () => {
       }
 
       &.admin {
-        background: linear-gradient(135deg, #1677ff 0%, #40a9ff 100%);
+        background: linear-gradient(135deg, #0089FF 0%, #40a9ff 100%);
         color: #fff;
       }
     }
@@ -1227,7 +1222,7 @@ watch(() => props.messages, () => {
 
       &.type-image {
         background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
-        color: #1677ff;
+        color: #0089FF;
       }
 
       &.type-pdf {

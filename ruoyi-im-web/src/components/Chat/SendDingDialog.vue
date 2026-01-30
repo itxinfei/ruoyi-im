@@ -400,7 +400,7 @@ watch(visible, (val) => {
         &:focus {
           border-color: var(--dt-brand-color);
           background: #fff;
-          box-shadow: 0 4px 12px rgba(22, 119, 255, 0.1);
+          box-shadow: 0 4px 12px rgba(0, 137, 255, 0.1);
         }
       }
 
@@ -463,7 +463,7 @@ watch(visible, (val) => {
 
     &:hover:not(.disabled) {
       background: #fff;
-      border-color: rgba(22, 119, 255, 0.3);
+      border-color: rgba(0, 137, 255, 0.3);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
@@ -475,7 +475,7 @@ watch(visible, (val) => {
     &.active {
       background: linear-gradient(135deg, #e8f4ff 0%, #f0f7ff 100%);
       border-color: var(--dt-brand-color);
-      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
     }
 
     &.disabled {
@@ -551,14 +551,14 @@ watch(visible, (val) => {
 
     &:hover {
       background: #fff;
-      border-color: rgba(22, 119, 255, 0.3);
+      border-color: rgba(0, 137, 255, 0.3);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     &.active {
       border-color: var(--dt-brand-color);
-      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
 
       &:nth-child(2) {
         background: linear-gradient(135deg, #fff1f0 0%, #fff5f3 100%);
@@ -608,7 +608,7 @@ watch(visible, (val) => {
     transition: all 0.3s;
 
     &:hover {
-      border-color: rgba(22, 119, 255, 0.2);
+      border-color: rgba(0, 137, 255, 0.2);
     }
 
     .select-all-bar {
@@ -708,7 +708,7 @@ watch(visible, (val) => {
               position: absolute;
               inset: -4px;
               border-radius: 50%;
-              background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+              background: linear-gradient(135deg, #0089FF 0%, #0e5fd9 100%);
               opacity: 0.3;
               animation: avatarGlow 3s ease-in-out infinite;
             }
@@ -774,7 +774,7 @@ watch(visible, (val) => {
 
     &:hover {
       background: #fff;
-      border-color: rgba(22, 119, 255, 0.3);
+      border-color: rgba(0, 137, 255, 0.3);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
@@ -782,7 +782,7 @@ watch(visible, (val) => {
     &.active {
       background: linear-gradient(135deg, #e8f4ff 0%, #f0f7ff 100%);
       border-color: var(--dt-brand-color);
-      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
     }
 
     .expire-label {
@@ -1011,7 +1011,7 @@ watch(visible, (val) => {
 
   &:hover {
     background: #1a1f2e;
-    border-color: rgba(22, 119, 255, 0.3);
+    border-color: rgba(0, 137, 255, 0.3);
   }
 
   &.active {

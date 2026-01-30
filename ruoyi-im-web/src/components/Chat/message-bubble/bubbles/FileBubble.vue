@@ -14,7 +14,7 @@
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke="rgba(22, 119, 255, 0.15)"
+            stroke="rgba(0, 137, 255, 0.15)"
             stroke-width="3"
           />
           <path
@@ -34,7 +34,7 @@
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke="rgba(22, 119, 255, 0.15)"
+            stroke="rgba(0, 137, 255, 0.15)"
             stroke-width="3"
           />
           <path
@@ -72,6 +72,8 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { Document, Download, Loading } from '@element-plus/icons-vue'
+import { parseMessageContent } from '@/utils/message'
+import { formatFileSize } from '@/utils/format'
 
 const props = defineProps({
   message: { type: Object, required: true }
@@ -82,29 +84,14 @@ const emit = defineEmits(['download'])
 const isDownloading = ref(false)
 const downloadProgress = ref(0)
 
-const parsedContent = computed(() => {
-  if (typeof props.message.content === 'string') {
-    try {
-      return JSON.parse(props.message.content)
-    } catch {
-      return {}
-    }
-  }
-  return props.message.content || {}
-})
+const parsedContent = computed(() => parseMessageContent(props.message) || {})
 
 const fileName = computed(() => {
   return parsedContent.value.fileName || parsedContent.value.name || '未知文件'
 })
 
 const fileSize = computed(() => {
-  const size = parsedContent.value.size
-  if (!size) return '0 B'
-
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(size) / Math.log(k))
-  return parseFloat((size / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  return formatFileSize(parsedContent.value.size || 0)
 })
 
 const isUploading = computed(() => {
@@ -283,13 +270,4 @@ const handleClick = async () => {
   }
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
 </style>

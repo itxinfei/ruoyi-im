@@ -935,7 +935,7 @@ defineExpose({
     background: linear-gradient(180deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
     border-radius: 6px;
     animation: wave 1.2s ease-in-out infinite;
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.3);
 
     &:nth-child(2) { animation-delay: 0.15s; }
     &:nth-child(3) { animation-delay: 0.3s; }
@@ -968,11 +968,11 @@ defineExpose({
   .spinner-ring {
     width: 50px;
     height: 50px;
-    border: 4px solid rgba(22, 119, 255, 0.1);
+    border: 4px solid rgba(0, 137, 255, 0.1);
     border-top-color: var(--dt-brand-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    box-shadow: 0 0 20px rgba(22, 119, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 137, 255, 0.2);
   }
 
   .spinner-dot {
@@ -982,28 +982,13 @@ defineExpose({
     background: var(--dt-brand-color);
     border-radius: 50%;
     animation: dotPulse 1s ease-in-out infinite;
-    box-shadow: 0 0 10px rgba(22, 119, 255, 0.4);
+    box-shadow: 0 0 10px rgba(0, 137, 255, 0.4);
   }
 
   p {
     color: var(--dt-text-secondary);
     font-size: 16px;
     font-weight: 500;
-  }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes dotPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 1;
   }
 }
 
@@ -1045,23 +1030,12 @@ defineExpose({
 
   .accept-glow {
     background: radial-gradient(circle, rgba(82, 196, 26, 0.4) 0%, transparent 70%);
-    animation: glowPulse 1.5s ease-in-out infinite;
+    animation: callGlowPulse 1.5s ease-in-out infinite;
   }
 
   .reject-glow {
     background: radial-gradient(circle, rgba(245, 74, 69, 0.4) 0%, transparent 70%);
-    animation: glowPulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes glowPulse {
-    0%, 100% {
-      opacity: 0.6;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.2);
-    }
+    animation: callGlowPulse 1.5s ease-in-out infinite;
   }
 
   .material-icons-outlined {
@@ -1164,36 +1138,14 @@ defineExpose({
           inset: 0;
           border-radius: 50%;
           border: 3px solid var(--dt-brand-color);
-          animation: ringPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes ringPulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          50% {
-            transform: scale(1.2);
-            opacity: 0.5;
-          }
+          animation: callRingPulse 2s ease-in-out infinite;
         }
       }
 
       .pulse-icon {
         font-size: 64px;
         color: var(--dt-brand-color);
-        animation: iconPulse 2s ease-in-out infinite;
-      }
-
-      @keyframes iconPulse {
-        0%, 100% {
-          opacity: 0.6;
-          transform: scale(1);
-        }
-        50% {
-          opacity: 1;
-          transform: scale(1.1);
-        }
+        animation: callIconPulse 2s ease-in-out infinite;
       }
 
       .placeholder-text {
@@ -1397,13 +1349,13 @@ defineExpose({
   }
 
   &.sharing {
-    background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+    background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
     border: none;
-    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 137, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
 
     &:hover {
-      background: linear-gradient(135deg, #4096ff 0%, #69b1ff 100%);
-      box-shadow: 0 12px 32px rgba(22, 119, 255, 0.5);
+      background: linear-gradient(135deg, #006ECC 0%, #0089FF 100%);
+      box-shadow: 0 12px 32px rgba(0, 137, 255, 0.5);
     }
   }
 
@@ -1474,7 +1426,7 @@ defineExpose({
     grid-column: span 2;
     grid-row: span 2;
     border: 3px solid var(--dt-brand-color);
-    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 137, 255, 0.3);
   }
 
   &:hover {

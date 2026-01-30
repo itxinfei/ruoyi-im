@@ -525,7 +525,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
       border-color: var(--dt-border-dark);
       
       &.is-focus {
-        background-color: rgba(22, 119, 255, 0.05);
+        background-color: rgba(0, 137, 255, 0.05);
       }
     }
   }
@@ -804,7 +804,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   }
   
   .nav-item.active {
-    background: rgba(22, 119, 255, 0.2);
+    background: rgba(0, 137, 255, 0.2);
     color: var(--dt-brand-color);
   }
   
@@ -815,7 +815,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   }
   
   .user-info.active {
-    background: rgba(22, 119, 255, 0.2);
+    background: rgba(0, 137, 255, 0.2);
   }
   
   .user-name {

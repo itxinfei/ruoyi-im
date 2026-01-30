@@ -50,6 +50,7 @@ Thumbs.db
 
 # 忽略bmad目录
 /_bmad/
+/_bmad-output/
 
 # 忽略Eclipse相关文件
 /.settings/

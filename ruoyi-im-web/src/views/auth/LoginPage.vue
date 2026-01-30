@@ -937,12 +937,12 @@ onMounted(() => {
   gap: 8px;
   transition: all var(--dt-transition-fast);
   margin-bottom: 28px;
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.25);
 
   &:hover:not(:disabled) {
     background: var(--dt-brand-hover);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(22, 119, 255, 0.35);
+    box-shadow: 0 6px 20px rgba(0, 137, 255, 0.35);
   }
 
   &:active:not(:disabled) {

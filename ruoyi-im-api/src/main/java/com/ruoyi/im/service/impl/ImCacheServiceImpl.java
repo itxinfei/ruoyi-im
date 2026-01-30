@@ -38,6 +38,7 @@ public class ImCacheServiceImpl implements ImCacheService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T get(String key) {
         return (T) redisTemplate.opsForValue().get(key);
     }

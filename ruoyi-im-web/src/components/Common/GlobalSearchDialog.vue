@@ -205,6 +205,7 @@ import { Search, Document, Loading, Timer, Close } from '@element-plus/icons-vue
 import { globalSearch } from '@/api/im/globalSearch'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { formatTime } from '@/utils/format'
 
 const props = defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue', 'select-message', 'select-contact', 'select-group', 'select-file'])
@@ -400,7 +401,7 @@ const handleCategoryChange = (key) => {
 const highlight = (text) => {
   if (!text || !searchKeyword.value) return text
   const reg = new RegExp(`(${searchKeyword.value})`, 'gi')
-  return String(text).replace(reg, '<span style="color: #1677ff; font-weight: bold;">$1</span>')
+  return String(text).replace(reg, '<span style="color: #0089FF; font-weight: bold;">$1</span>')
 }
 
 const handleItemClick = (type, item) => {
@@ -412,13 +413,6 @@ const handleItemClick = (type, item) => {
 const removeHistory = (kw) => {
   historyKeywords.value = historyKeywords.value.filter(k => k !== kw)
   localStorage.setItem('search_history', JSON.stringify(historyKeywords.value))
-}
-
-const formatTime = (ts) => {
-  if (!ts) return ''
-  const d = new Date(ts); const now = new Date()
-  if (d.toDateString() === now.toDateString()) return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0')
-  return (d.getMonth() + 1) + '-' + d.getDate()
 }
 
 // 自动补全和搜索建议相关方法
@@ -609,17 +603,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes dialogFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
 .classic-container {
   display: flex;
   flex-direction: column;
@@ -672,8 +655,8 @@ onUnmounted(() => {
       }
       
       &.is-focus { 
-        box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
-        border-color: #1677ff;
+        box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-color: #0089FF;
         background: #fff;
       }
       
@@ -688,14 +671,14 @@ onUnmounted(() => {
         }
         
         &.is-focus {
-          box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.2);
           background: #0f172a;
         }
       }
     }
     
     .search-button {
-      background: #1677ff;
+      background: #0089FF;
       color: #fff;
       border: none;
       border-radius: 20px;
@@ -774,72 +757,12 @@ onUnmounted(() => {
       flex: 1;
       
       .highlight-text {
-        color: #1677ff;
+        color: #0089FF;
         font-weight: 600;
       }
     }
   }
-  
-  @keyframes dropdownFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    }
-  }
-  
-  // 搜索结果渐入动画
-  @keyframes resultFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  // 分类切换动画
-  @keyframes categorySwitch {
-    from {
-      opacity: 0;
-      transform: translateX(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  // 按钮微动画
-  @keyframes buttonPulse {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.05);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-  
-  // 加载动画
-  @keyframes loadingSpin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
+
   // 移动端优化
   @media (max-width: 768px) {
     padding: 16px;
@@ -940,9 +863,9 @@ onUnmounted(() => {
       }
       &.active {
         background: #fff;
-        color: #1677ff;
+        color: #0089FF;
         font-weight: 600;
-        border-right: 3px solid #1677ff;
+        border-right: 3px solid #0089FF;
         box-shadow: inset 0 0 0 1px #e2e8f0;
         transform: translateX(4px);
         .dark & { background: #0f172a; }
@@ -1139,13 +1062,13 @@ onUnmounted(() => {
         
         &:hover {
           background: #f0f9ff;
-          color: #1677ff;
+          color: #0089FF;
           transform: translateY(-2px);
-          box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
+          box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
           
           .dark & {
             background: #1e40af;
-            box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
           }
         }
         
@@ -1156,7 +1079,7 @@ onUnmounted(() => {
           width: 18px;
           height: 18px;
           border-radius: 9px;
-          background: #1677ff;
+          background: #0089FF;
           color: #fff;
           font-size: 11px;
           font-weight: bold;
@@ -1200,7 +1123,7 @@ onUnmounted(() => {
           &.with-icon {
             .section-icon {
               font-size: 18px;
-              color: #1677ff;
+              color: #0089FF;
               margin-right: 8px;
             }
             

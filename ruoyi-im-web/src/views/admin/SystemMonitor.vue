@@ -429,6 +429,7 @@ import {
   FolderOpened,
   Search
 } from '@element-plus/icons-vue'
+import { formatFileSize } from '@/utils/format'
 
 // 系统状态
 const systemStatus = ref({
@@ -569,22 +570,9 @@ const getSuccessClass = (rate) => {
   return 'stat-row-value--error'
 }
 
-// 格式化文件大小
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i]
-}
-
-// 格式化字节
+// 格式化字节（兼容不同的精度需求）
 const formatBytes = (bytes) => {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i]
+  return formatFileSize(bytes)
 }
 
 onMounted(() => {

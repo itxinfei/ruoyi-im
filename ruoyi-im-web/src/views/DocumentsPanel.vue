@@ -221,6 +221,7 @@
 import { ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import FilePreviewDialog from '@/components/FilePreviewDialog/index.vue'
+import { formatFileSize } from '@/utils/format'
 
 const activeNav = ref('recent')
 const viewMode = ref('list')
@@ -462,19 +463,6 @@ const handleDownload = (file) => {
   ElMessage.success(`开始下载: ${file.name}`)
   // 实际项目中这里应该创建一个下载链接
 }
-
-// 格式化文件大小
-const formatFileSize = (bytes) => {
-  if (!bytes || bytes === 0) return '0 B'
-  const units = ['B', 'KB', 'MB', 'GB']
-  let size = bytes
-  let unitIndex = 0
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024
-    unitIndex++
-  }
-  return `${size.toFixed(1)} ${units[unitIndex]}`
-}
 </script>
 
 <style scoped lang="scss">
@@ -573,7 +561,7 @@ const formatFileSize = (bytes) => {
   background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
 }
 
 .nav-item.active::before {
@@ -662,7 +650,7 @@ const formatFileSize = (bytes) => {
   background: linear-gradient(90deg, var(--dt-brand-color), var(--dt-brand-light));
   border-radius: 3px;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 8px rgba(22, 119, 255, 0.3);
+  box-shadow: 0 0 8px rgba(0, 137, 255, 0.3);
 }
 
 .storage-text {
@@ -747,7 +735,7 @@ const formatFileSize = (bytes) => {
 .search-input:focus {
   background: var(--dt-bg-card);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 0 0 3px var(--dt-brand-lighter), 0 2px 8px rgba(22, 119, 255, 0.15);
+  box-shadow: 0 0 0 3px var(--dt-brand-lighter), 0 2px 8px rgba(0, 137, 255, 0.15);
   width: 320px;
 }
 
@@ -815,7 +803,7 @@ const formatFileSize = (bytes) => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
   position: relative;
   overflow: hidden;
 }
@@ -823,7 +811,7 @@ const formatFileSize = (bytes) => {
 .new-btn:hover {
   background: linear-gradient(135deg, var(--dt-brand-hover), var(--dt-brand-color));
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(22, 119, 255, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 137, 255, 0.3);
 }
 
 .new-btn:active {
@@ -873,7 +861,7 @@ const formatFileSize = (bytes) => {
 .upload-area:hover {
   border-color: var(--dt-brand-color);
   background: var(--dt-brand-bg);
-  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 137, 255, 0.1);
   transform: translateY(-2px);
 }
 
@@ -1190,7 +1178,7 @@ const formatFileSize = (bytes) => {
   color: var(--dt-brand-color);
   background: var(--dt-brand-bg);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
 }
 
 .pagination {
@@ -1229,7 +1217,7 @@ const formatFileSize = (bytes) => {
   color: var(--dt-brand-color);
   background: var(--dt-brand-bg);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 2px 6px rgba(22, 119, 255, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 137, 255, 0.15);
   transform: translateY(-1px);
 }
 
@@ -1282,7 +1270,7 @@ const formatFileSize = (bytes) => {
 
 .dark .search-input:focus {
   background: var(--dt-bg-card-dark);
-  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1), 0 2px 8px rgba(22, 119, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1), 0 2px 8px rgba(0, 137, 255, 0.15);
 }
 
 .dark .storage-info {
@@ -1299,7 +1287,7 @@ const formatFileSize = (bytes) => {
 }
 
 .dark .files-table th::after {
-  background: linear-gradient(90deg, transparent, rgba(22, 119, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 137, 255, 0.2), transparent);
 }
 
 .dark .files-table tbody tr:hover {
@@ -1371,51 +1359,10 @@ const formatFileSize = (bytes) => {
 .dark .upload-area:hover {
   background: var(--dt-brand-bg-dark);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 137, 255, 0.1);
 }
 
-/* 全局动画效果 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* 应用动画效果 */
+/* 应用动画效果 - 使用全局动画 */
 .docs-sidebar {
   animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

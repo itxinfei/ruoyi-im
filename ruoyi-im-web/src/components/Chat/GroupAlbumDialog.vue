@@ -187,6 +187,8 @@ import { Upload, Download, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { addTokenToUrl } from '@/utils/file'
 import dayjs from 'dayjs'
+import { formatTime } from '@/utils/format'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -231,7 +233,7 @@ const extractImages = () => {
   const imageList = props.messages
     .filter(m => m.messageType === 'IMAGE')
     .map(m => {
-      const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
+      const content = parseMessageContent(m) || {}
       return {
         id: m.id,
         url: addTokenToUrl(content.url || content.thumbUrl || content.fileUrl),
@@ -318,11 +320,6 @@ const formatDateHeader = (dateStr) => {
   } else {
     return date.format('YYYY年MM月DD日')
   }
-}
-
-// 格式化时间
-const formatTime = (time) => {
-  return dayjs(time).format('HH:mm')
 }
 
 // 预览图片

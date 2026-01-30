@@ -98,6 +98,7 @@ public class SecurityUtils {
      * @param token JWT Token
      * @return 用户名
      */
+    @SuppressWarnings("deprecation")
     public static String getUsernameFromToken(String token) {
         try {
             Claims claims = Jwts.parser()

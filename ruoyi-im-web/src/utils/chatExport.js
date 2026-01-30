@@ -99,7 +99,7 @@ export function exportToHtml(messages, options = {}) {
         overflow: hidden;
       }
       .header {
-        background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+        background: linear-gradient(135deg, #0089FF 0%, #0958d9 100%);
         color: #fff;
         padding: 24px;
         text-align: center;
@@ -153,7 +153,7 @@ export function exportToHtml(messages, options = {}) {
         font-size: 14px;
       }
       .message.own .message-avatar {
-        background: linear-gradient(135deg, #1677ff, #0958d9);
+        background: linear-gradient(135deg, #0089FF, #0958d9);
         color: #fff;
       }
       .message-body {
@@ -185,7 +185,7 @@ export function exportToHtml(messages, options = {}) {
         word-break: break-word;
       }
       .message.own .message-bubble {
-        background: linear-gradient(135deg, #1677ff, #0958d9);
+        background: linear-gradient(135deg, #0089FF, #0958d9);
         color: #fff;
         border-radius: 12px 2px 12px 12px;
       }

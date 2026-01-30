@@ -8,37 +8,50 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // 品牌颜色
+        // 钉钉品牌色 DingTalk Blue
         primary: {
-          DEFAULT: '#1677ff',
-          hover: '#4096ff',
-          active: '#0958d9',
-          light: 'rgba(22, 119, 255, 0.1)',
-          bg: '#e6f4ff',
+          DEFAULT: '#0089FF',
+          hover: '#006ECC',
+          active: '#0057A3',
+          light: 'rgba(0, 137, 255, 0.1)',
+          bg: '#E5F2FF',
         },
         // 背景色
         background: {
-          light: '#f4f7f9',
+          light: '#F5F7FA',
           dark: '#0f172a',
         },
-        // 语义颜色
-        success: '#52c41a',
-        warning: '#faad14',
-        error: '#ff4d4f',
-        danger: '#f5222d',
+        // 语义色（钉钉规范）
+        success: '#00C853',
+        warning: '#FF9800',
+        error: '#F44336',
+        danger: '#F44336',
         // Slate 色系（用于暗色模式）
         slate: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0',
+          300: '#CBD5E1',
+          400: '#94A3B8',
+          500: '#64748B',
           600: '#475569',
           700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
+          800: '#1E293B',
+          900: '#0F172A',
           950: '#020617',
+        },
+        // 钉钉灰色系
+        gray: {
+          50: '#FAFBFC',
+          100: '#F5F7FA',
+          200: '#EEF1F6',
+          300: '#E5E9EF',
+          400: '#CED4DB',
+          500: '#A0A8B8',
+          600: '#858E9E',
+          700: '#5F6672',
+          800: '#373D45',
+          900: '#171A1D',
         },
       },
       borderRadius: {
@@ -90,6 +103,10 @@ module.exports = {
         '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
         inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+        // 钉钉风格阴影
+        ding: '0 2px 8px rgba(0, 0, 0, 0.08)',
+        'ding-lg': '0 4px 16px rgba(0, 0, 0, 0.12)',
+        'ding-xl': '0 8px 24px rgba(0, 0, 0, 0.16)',
       },
       animation: {
         'bounce-slow': 'bounce 3s infinite',

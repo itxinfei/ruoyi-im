@@ -21,7 +21,7 @@ export function getOrgTree() {
  */
 export function getDepartment(deptId) {
     return request({
-        url: `/api/im/organization/dept/${deptId}`,
+        url: `/api/im/organization/department/${deptId}`,
         method: 'get'
     })
 }
@@ -33,7 +33,7 @@ export function getDepartment(deptId) {
  */
 export function getDepartmentMembers(deptId) {
     return request({
-        url: `/api/im/organization/dept/${deptId}/members`,
+        url: `/api/im/organization/department/${deptId}/members`,
         method: 'get'
     })
 }

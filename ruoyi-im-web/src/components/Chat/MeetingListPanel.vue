@@ -552,12 +552,12 @@ onMounted(() => {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.1);
   }
 
   &.is-live {
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.05) 0%, rgba(22, 119, 255, 0.02) 100%);
-    border-color: rgba(22, 119, 255, 0.2);
+    background: linear-gradient(135deg, rgba(0, 137, 255, 0.05) 0%, rgba(0, 137, 255, 0.02) 100%);
+    border-color: rgba(0, 137, 255, 0.2);
   }
 
   .meeting-cover {
@@ -660,7 +660,7 @@ onMounted(() => {
 // 暗色模式适配
 .dark .meeting-card {
   &:hover {
-    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
   }
 }
 </style>

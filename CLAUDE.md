@@ -44,6 +44,38 @@
 - ✅ 简单问题用简单方案
 - ✅ 不需要的代码直接删除
 
+## 🔴 大模型开发禁止清单（2025-01-30 更新）
+
+### 代码重复问题
+- ❌ **创建本地格式化函数**：已有 `utils/message.js` 的 `formatFileSize`、`formatRelativeTime`，组件内重复定义 35+ 次
+- ❌ **内联 JSON 解析**：已有 `utils/message.js` 的 `parseMessageContent`，组件内 `JSON.parse` 重复 25+ 次
+- ❌ **本地动画定义**：已有 `styles/animations.scss` 的全局动画，组件内 `@keyframes` 重复 30+ 次
+- ✅ **必须先搜索**：Grep/Glob 搜索已有实现，引用现有工具函数
+
+### 组件管理问题
+- ❌ **创建重复组件**：如 `EmojiPicker` 和 `GroupDetailDialog` 重复
+- ❌ **创建未使用组件**：如 `MessageStatisticsDialog`、`UserTagsDialog` 等创建后从未引用
+- ❌ **错误导入路径**：如 `@/utils/format` 不存在却导入
+- ✅ **删除前确认**：用 Grep 搜索所有引用，确认无引用后再删除
+
+### 工具函数问题
+- ❌ **不使用现有工具**：`utils/message.js` 有完整格式化函数，组件全部重写
+- ❌ **创建临时测试文件**：`debug-draft.js`、`test-draft.js` 等遗留
+- ❌ **创建备份文件**：`global.scss.backup` 等
+- ✅ **先查后用**：Read 工具文件确认函数存在，直接引用
+
+### 导入路径问题
+- ❌ **错误导入路径**：`@/components/EditProfileDialog/index.vue` 路径错误
+- ❌ **不存在的文件夹**：Glob 先确认文件夹存在
+- ✅ **验证路径**：创建文件前检查目录结构
+
+### 前端开发规范
+- ❌ **内联样式重复**：相同样式在 40+ 组件重复定义（如滚动条、暗色模式）
+- ❌ **动画名称冲突**：本地动画覆盖全局同名动画
+- ✅ **使用全局样式**：引用 `design-tokens.scss` 和 `animations.scss`
+
+## 幻觉问题防范
+
 ## 幻觉问题防范
 - ❌ 使用"应该有"的方法而不验证
 - ❌ 假设某个类存在直接调用

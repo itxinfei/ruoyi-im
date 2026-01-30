@@ -182,6 +182,7 @@ import {
 } from '@/api/im/groupFile'
 import { uploadFile } from '@/api/im/file'
 import { useStore } from 'vuex'
+import { formatChatTime } from '@/utils/format'
 
 const props = defineProps({
   groupId: {
@@ -211,6 +212,9 @@ const statistics = ref({
   videoCount: 0,
   otherCount: 0
 })
+
+// 格式化时间（本地别名）
+const formatTime = formatChatTime
 
 // 分页
 const pagination = ref({
@@ -254,26 +258,6 @@ const formatSize = (bytes) => {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-// 格式化时间
-const formatTime = (timestamp) => {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now - date
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-  if (days === 0) {
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } else if (days === 1) {
-    return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } else if (days < 7) {
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    return weekdays[date.getDay()] + ' ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } else {
-    return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
-  }
 }
 
 // 加载文件列表
@@ -605,7 +589,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+  background: linear-gradient(135deg, #0089FF 0%, #0958d9 100%);
   color: #fff;
   border-radius: 8px;
   margin-top: 16px;

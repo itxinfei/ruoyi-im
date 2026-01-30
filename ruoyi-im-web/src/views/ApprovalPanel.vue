@@ -98,8 +98,8 @@
 import { ref, computed, watch } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import CreateApprovalDialog from '@/components/CreateApprovalDialog/index.vue'
-import ApprovalDetailDialog from '@/components/ApprovalDetailDialog/index.vue'
+import CreateApprovalDialog from '@/components/Workplace/CreateApprovalDialog.vue'
+import ApprovalDetailDialog from '@/components/Workplace/ApprovalDetailDialog.vue'
 import { getPendingApprovals, getMyApprovals, getProcessedApprovals, handleApproval } from '@/api/im/approval'
 
 const loading = ref(false)
@@ -180,7 +180,7 @@ const loadApprovals = async () => {
 
 // 随机颜色
 const getRandomColor = () => {
-  const colors = ['#1677ff', '#52c41a', '#fa8c16', '#722ed1', '#eb2f96']
+  const colors = ['#0089FF', '#52c41a', '#fa8c16', '#722ed1', '#eb2f96']
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
@@ -384,7 +384,7 @@ loadApprovals()
 .add-btn:hover {
   background: var(--dt-brand-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.25);
 }
 
 .add-btn:active {

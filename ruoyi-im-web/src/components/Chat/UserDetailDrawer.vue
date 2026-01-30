@@ -511,7 +511,7 @@ const handleGroupClick = (group) => {
 
     &.primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 137, 255, 0.3);
     }
   }
 }

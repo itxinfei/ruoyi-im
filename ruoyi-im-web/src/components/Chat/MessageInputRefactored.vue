@@ -786,7 +786,7 @@ onUnmounted(() => {
   }
 
   &.is-resizing {
-    box-shadow: 0 -4px 16px rgba(22, 119, 255, 0.15);
+    box-shadow: 0 -4px 16px rgba(0, 137, 255, 0.15);
     border-top-color: var(--dt-brand-color);
   }
 }
@@ -983,7 +983,7 @@ onUnmounted(() => {
 // 输入区域在语音模式下的样式
 .input-area.is-voice-mode {
   .message-input {
-    background: rgba(22, 119, 255, 0.05);
+    background: rgba(0, 137, 255, 0.05);
     cursor: not-allowed;
   }
 }

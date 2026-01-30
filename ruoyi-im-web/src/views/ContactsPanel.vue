@@ -1,77 +1,44 @@
 <template>
   <div class="contacts-panel" :class="{ 'mobile-view': isMobile }">
     <!-- Mobile Overlay -->
-    <div 
-      v-if="isMobile && showMobileSidebar" 
+    <div
+      v-if="isMobile && showMobileSidebar"
       class="mobile-overlay"
       @click="showMobileSidebar = false"
     ></div>
 
-    <!-- 左侧导航栏 (Sidebar / Drawer) -->
-    <aside 
-      class="sidebar" 
+    <!-- 左侧导航栏 - 钉钉风格超窄侧边栏 -->
+    <aside
+      class="sidebar"
       :class="{ 'sidebar-open': showMobileSidebar }"
     >
-      <!-- 搜索框 -->
+      <!-- 搜索框 - 紧凑设计 -->
       <div class="search-section">
-        <div class="search-box" :class="{ 'is-focused': showSearchHistory }">
+        <div class="search-trigger" :class="{ 'has-value': searchQuery }" @click="showSearchPanel = true">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
             <path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="搜索联系人、群组"
-            @input="handleSearch"
-            @focus="onSearchFocus"
-            @blur="showSearchHistory = false"
-          />
-          <button v-if="searchQuery" class="clear-btn" @click="clearSearch">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
         </div>
-        
-        <!-- 搜索历史 -->
-        <Transition name="fade">
-          <div v-if="showSearchHistory" class="search-history">
-            <div class="history-header">
-              <span>搜索历史</span>
-              <button class="clear-history-btn" @click="clearSearchHistory">清除</button>
-            </div>
-            <div class="history-list">
-              <span
-                v-for="item in searchHistory"
-                :key="item"
-                class="history-tag"
-                @mousedown.prevent="useHistorySearch(item)"
-              >
-                {{ item }}
-              </span>
-            </div>
-          </div>
-        </Transition>
       </div>
 
-      <!-- 导航菜单 -->
+      <!-- 导航菜单 - 图标居中排列 -->
       <nav class="nav-list scrollbar-sm">
         <div
           class="nav-item"
           :class="{ active: currentNav === 'new' }"
           @click="switchNav('new')"
         >
-          <div class="icon-wrapper bg-orange">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="8.5" cy="7" r="4"></circle>
-                <line x1="20" y1="8" x2="20" y2="14"></line>
-                <line x1="23" y1="11" x2="17" y2="11"></line>
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="8.5" cy="7" r="4"/>
+              <line x1="20" y1="8" x2="20" y2="14"/>
+              <line x1="23" y1="11" x2="17" y2="11"/>
             </svg>
+            <span v-if="pendingCount > 0" class="nav-badge">{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
           </div>
-          <span class="item-text">新的朋友</span>
-          <span v-if="pendingCount > 0" class="item-badge">{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
+          <span class="nav-tooltip">新的朋友</span>
         </div>
 
         <div
@@ -79,15 +46,15 @@
           :class="{ active: currentNav === 'friends' }"
           @click="switchNav('friends')"
         >
-           <div class="icon-wrapper bg-blue">
+          <div class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-           </div>
-          <span class="item-text">我的好友</span>
+          </div>
+          <span class="nav-tooltip">我的好友</span>
         </div>
 
         <div
@@ -95,30 +62,36 @@
           :class="{ active: currentNav === 'groups' }"
           @click="switchNav('groups')"
         >
-          <div class="icon-wrapper bg-green">
+          <div class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
             </svg>
           </div>
-          <span class="item-text">我的群组</span>
+          <span class="nav-tooltip">我的群组</span>
         </div>
 
         <div class="nav-divider"></div>
 
-        <!-- 组织架构 -->
+        <!-- 组织架构 - 树形结构 -->
         <div class="org-section">
           <div
             class="nav-item org-root"
             :class="{ expanded: orgExpanded }"
             @click="toggleOrg"
           >
-             <svg class="arrow-icon" :class="{ rotated: orgExpanded }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="arrow-icon" :class="{ rotated: orgExpanded }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
-            <span class="item-text font-medium">组织架构</span>
+            <svg class="org-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span class="nav-tooltip">组织架构</span>
           </div>
 
           <Transition name="slide-down">
@@ -143,23 +116,122 @@
       </nav>
     </aside>
 
-    <!-- 中间列表栏 -->
+    <!-- 搜索面板 -->
+    <Transition name="slide-left">
+      <div v-if="showSearchPanel" class="search-panel">
+        <div class="search-panel-header">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input
+              ref="searchInputRef"
+              v-model="searchQuery"
+              type="text"
+              placeholder="搜索联系人、群组"
+              @input="handleSearch"
+              @blur="handleSearchBlur"
+            />
+            <button v-if="searchQuery" class="clear-btn" @click="clearSearch">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <button class="close-btn" @click="showSearchPanel = false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 搜索历史 -->
+        <div v-if="!searchQuery && searchHistory.length > 0" class="search-history">
+          <div class="history-header">
+            <span>搜索历史</span>
+            <button class="clear-history-btn" @click="clearSearchHistory">清除</button>
+          </div>
+          <div class="history-list">
+            <span
+              v-for="item in searchHistory"
+              :key="item"
+              class="history-tag"
+              @mousedown.prevent="useHistorySearch(item)"
+            >
+              {{ item }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 搜索结果 -->
+        <div v-if="searchQuery" class="search-results">
+          <template v-if="loading">
+            <div class="loading-state">
+              <div class="loading-spinner"></div>
+              <span class="loading-text">搜索中...</span>
+            </div>
+          </template>
+          <template v-else-if="searchResults.length > 0">
+            <VirtualList
+              class="virtual-scroll-container"
+              :items="searchResults"
+              :item-size="60"
+            >
+              <template #default="{ item }">
+                <ContactItem
+                  :item="item"
+                  :is-active="selectedItemId === item.id"
+                  :search-query="searchQuery"
+                  @click="selectItem(item); showSearchPanel = false"
+                />
+              </template>
+            </VirtualList>
+          </template>
+          <template v-else>
+            <div class="empty-state">
+              <svg class="empty-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="19" cy="19" r="9"/>
+                <path d="M39 39l-6-6" stroke-linecap="round"/>
+              </svg>
+              <p class="empty-text">未找到相关结果</p>
+            </div>
+          </template>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- 中间列表栏 - 优化布局 -->
     <main class="list-panel" :class="{ 'has-index': showIndexBar }">
       <!-- Mobile Header -->
       <div v-if="isMobile" class="mobile-header">
         <button class="menu-btn" @click="showMobileSidebar = true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
         </button>
         <span class="mobile-title">{{ listTitle }}</span>
+        <button class="search-btn" @click="showSearchPanel = true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
 
-      <!-- A-Z 索引栏 (仅组织架构显示) -->
+      <!-- PC Header -->
+      <header v-if="!isMobile" class="list-header">
+        <h2 class="list-title">{{ listTitle }}</h2>
+        <div class="header-actions">
+          <span v-if="listCount > 0" class="list-count">{{ listCount }}人</span>
+        </div>
+      </header>
+
+      <!-- A-Z 索引栏 -->
       <div v-if="showIndexBar && !isMobile" class="index-bar">
-        <span
+        <div
           v-for="letter in indexLetters"
           :key="letter"
           class="index-item"
@@ -167,39 +239,15 @@
           @click="scrollToLetter(letter)"
         >
           {{ letter }}
-        </span>
+        </div>
       </div>
-
-      <!-- 列表头部 (Desktop Only) -->
-      <header v-if="!isMobile" class="list-header">
-        <h2 class="list-title">{{ listTitle }}</h2>
-        <span v-if="listCount > 0" class="list-count">{{ listCount }}</span>
-      </header>
 
       <!-- 列表内容 -->
       <div class="list-body">
         <!-- 加载中 -->
-        <div v-if="loading" class="loading">
-          <div class="spinner"></div>
-          <span>加载中...</span>
-        </div>
-
-        <!-- 搜索结果 -->
-        <div v-else-if="searchQuery && searchResults.length > 0" class="search-list">
-             <VirtualList
-                class="virtual-scroll-container"
-                :items="searchResults"
-                :item-size="60"
-            >
-                <template #default="{ item }">
-                    <ContactItem
-                        :item="item"
-                        :is-active="selectedItemId === item.id"
-                        :search-query="searchQuery"
-                        @click="selectItem(item)"
-                    />
-                </template>
-            </VirtualList>
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">加载中...</span>
         </div>
 
         <!-- 新的朋友 -->
@@ -207,122 +255,146 @@
           <NewFriendsView ref="newFriendsRef" @update-count="updatePendingCount" />
         </template>
 
-        <!-- 我的好友 / 组织架构 / Search Empty -->
+        <!-- 我的好友 / 群组 / 组织架构 -->
         <template v-else>
-             <!-- 使用 VirtualList 渲染扁平化的列表 (包含 Header) -->
-             <div v-if="virtualListData.length === 0" class="empty">
-                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="19" cy="19" r="9"/>
-                    <path d="M39 39l-6-6" stroke-linecap="round"/>
-                </svg>
-                <p>暂无数据</p>
-             </div>
-             
-             <VirtualList
+          <div v-if="virtualListData.length === 0" class="empty-state">
+            <svg class="empty-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="19" cy="19" r="9"/>
+              <path d="M39 39l-6-6" stroke-linecap="round"/>
+            </svg>
+            <p class="empty-text">暂无数据</p>
+          </div>
+
+          <VirtualList
+            v-else
+            ref="virtualListRef"
+            class="virtual-scroll-container"
+            :items="virtualListData"
+            :item-size="getItemSize"
+            @scroll="handleListScroll"
+          >
+            <template #default="{ item }">
+              <!-- Group Header -->
+              <div v-if="item.type === 'header'" class="list-group-header">
+                {{ item.title }}
+              </div>
+              <!-- Contact Item -->
+              <ContactItem
                 v-else
-                ref="virtualListRef"
-                class="virtual-scroll-container"
-                :items="virtualListData"
-                :item-size="getItemSize"
-                @scroll="handleListScroll"
-            >
-                <template #default="{ item }">
-                     <!-- Group Header -->
-                    <div v-if="item.type === 'header'" class="list-group-header">
-                        {{ item.title }}
-                    </div>
-                    <!-- Contact Item -->
-                    <ContactItem
-                        v-else
-                        :item="item"
-                        :is-active="selectedItemId === item.id"
-                        @click="selectItem(item)"
-                        @delete="handleDelete"
-                    />
-                </template>
-            </VirtualList>
+                :item="item"
+                :is-active="selectedItemId === item.id"
+                @click="selectItem(item)"
+                @delete="handleDelete"
+              />
+            </template>
+          </VirtualList>
         </template>
       </div>
     </main>
 
-    <!-- 右侧详情栏 -->
+    <!-- 右侧详情栏 - 卡片式布局 -->
     <aside class="detail-panel" :class="{ 'detail-open': selectedItemId && isMobile }">
-       <!-- Mobile Back Button -->
-       <div v-if="isMobile && selectedItemId" class="mobile-detail-nav">
-           <button class="back-btn" @click="selectedItemId = null">
-               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                   <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
-               </svg>
-               返回
-           </button>
-       </div>
+      <!-- Mobile Back Button -->
+      <div v-if="isMobile && selectedItemId" class="mobile-detail-nav">
+        <button class="back-btn" @click="selectedItemId = null">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          返回
+        </button>
+      </div>
 
+      <!-- 空状态 -->
       <div v-if="!selectedItemId" class="empty-detail">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="24" cy="24" r="18"/>
-          <path d="M24 16v16M16 24h16" stroke-linecap="round"/>
-        </svg>
-        <p>选择联系人或群组查看详情</p>
+        <div class="empty-detail-icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="24" cy="24" r="18"/>
+            <path d="M24 16v16M16 24h16" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="empty-detail-text">选择联系人或群组查看详情</p>
       </div>
 
       <template v-else>
         <!-- 联系人详情 -->
-        <ContactDetail 
-            v-if="selectedType === 'friend' || selectedType === 'member'" 
-            :user="selectedItem"
-            @voice-call="startVoiceCall"
-            @video-call="startVideoCall"
-            @message="startChat"
+        <ContactDetail
+          v-if="selectedType === 'friend' || selectedType === 'member'"
+          :user="selectedItem"
+          @voice-call="startVoiceCall"
+          @video-call="startVideoCall"
+          @message="startChat"
         />
-        <!-- 群组详情 - 统一风格 -->
-        <div v-else-if="selectedType === 'group'" class="detail-content">
-          <div class="detail-header">
-            <DingtalkAvatar :name="selectedItem?.name" :size="80" :src="selectedItem?.avatar" shape="square" />
-            <div class="detail-name">{{ selectedItem?.name }}</div>
-            <div class="detail-meta">
-              <span class="meta-item">{{ selectedItem?.memberCount || 0 }} 人</span>
-              <span class="meta-divider">·</span>
-              <span class="meta-item">群号: {{ selectedItem?.id }}</span>
+
+        <!-- 群组详情 - 卡片式布局 -->
+        <div v-else-if="selectedType === 'group'" class="group-detail">
+          <!-- 群组基本信息卡片 -->
+          <div class="detail-card group-info-card">
+            <div class="group-avatar-wrapper">
+              <DingtalkAvatar :name="selectedItem?.name" :size="64" :src="selectedItem?.avatar" shape="square" />
             </div>
-            <div class="detail-signature">{{ selectedItem?.description || '暂无群描述' }}</div>
+            <div class="group-basic-info">
+              <h3 class="group-name">{{ selectedItem?.name }}</h3>
+              <div class="group-meta">
+                <span class="meta-tag">
+                  <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                  </svg>
+                  {{ selectedItem?.memberCount || 0 }} 人
+                </span>
+                <span class="meta-tag">
+                  <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="9" y1="9" x2="15" y2="9"/>
+                    <line x1="9" y1="13" x2="15" y2="13"/>
+                  </svg>
+                  ID: {{ selectedItem?.id }}
+                </span>
+              </div>
+              <p class="group-description">{{ selectedItem?.description || '暂无群描述' }}</p>
+            </div>
           </div>
-          
-          <div class="detail-actions">
-            <button class="action-btn primary" @click="startChat">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              </svg>
-              发消息
-            </button>
-            <button class="action-btn" @click="startVoiceCall">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-              </svg>
-              语音通话
-            </button>
-            <button class="action-btn" @click="startVideoCall">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-              </svg>
-              视频通话
-            </button>
+
+          <!-- 操作按钮卡片 -->
+          <div class="detail-card action-card">
+            <div class="action-grid">
+              <button class="action-item primary" @click="startChat">
+                <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span class="action-label">发消息</span>
+              </button>
+              <button class="action-item" @click="startVoiceCall">
+                <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <span class="action-label">语音通话</span>
+              </button>
+              <button class="action-item" @click="startVideoCall">
+                <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="23 7 16 12 23 17 23 7"/>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                <span class="action-label">视频通话</span>
+              </button>
+            </div>
           </div>
-          
-          <div class="detail-section">
-            <div class="section-title">群信息</div>
+
+          <!-- 群详细信息卡片 -->
+          <div class="detail-card info-card">
+            <h4 class="card-title">群信息</h4>
             <div class="info-list">
-              <div class="info-item">
-                <span class="info-label">群主</span>
-                <span class="info-value">{{ selectedItem?.ownerName || '-' }}</span>
+              <div class="info-row">
+                <span class="info-key">群主</span>
+                <span class="info-val">{{ selectedItem?.ownerName || '-' }}</span>
               </div>
-              <div class="info-item">
-                <span class="info-label">创建时间</span>
-                <span class="info-value">{{ selectedItem?.createTime || '-' }}</span>
+              <div class="info-row">
+                <span class="info-key">创建时间</span>
+                <span class="info-val">{{ selectedItem?.createTime || '-' }}</span>
               </div>
-              <div class="info-item">
-                <span class="info-label">群公告</span>
-                <span class="info-value">{{ selectedItem?.notice || '暂无公告' }}</span>
+              <div class="info-row">
+                <span class="info-key">群公告</span>
+                <span class="info-val">{{ selectedItem?.notice || '暂无公告' }}</span>
               </div>
             </div>
           </div>
@@ -333,7 +405,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useWindowSize, useDebounceFn } from '@vueuse/core'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -357,7 +429,9 @@ const isMobile = computed(() => width.value < 768)
 const currentNav = ref('friends')
 const searchQuery = ref('')
 const showMobileSidebar = ref(false)
+const showSearchPanel = ref(false)
 const loading = ref(false)
+const searchInputRef = ref(null)
 
 // Data
 const friendGroups = ref([])
@@ -415,7 +489,7 @@ const virtualListData = computed(() => {
     if (currentNav.value === 'groups') {
         return groupList.value.map(g => ({ ...g, type: 'group' }))
     }
-    
+
     if (currentNav.value === 'friends') {
         // Flatten Grouped Friends (e.g. A -> [User1, User2])
         const res = []
@@ -427,10 +501,9 @@ const virtualListData = computed(() => {
         })
         return res
     }
-    
+
     if (currentNav.value === 'org') {
         // Group Org Members by A-Z
-        // Note: Similar logic to `groupedOrgMembers` but flattened
         const groups = groupMembersByLetter(orgMembers.value)
         const res = []
         Object.keys(groups).sort().forEach(letter => {
@@ -447,7 +520,7 @@ const virtualListData = computed(() => {
         }
         return res
     }
-    
+
     return []
 })
 
@@ -466,7 +539,7 @@ const letterCounts = computed(() => {
 function groupMembersByLetter(members) {
     const groups = {}
     indexLetters.forEach(l => groups[l] = [])
-    
+
     members.forEach(m => {
         let char = (m.name?.[0] || '#').toUpperCase()
         if (!/[A-Z]/.test(char)) char = '#'
@@ -487,7 +560,8 @@ const switchNav = (nav) => {
     if (isMobile.value) showMobileSidebar.value = false
     selectedItemId.value = null
     searchQuery.value = ''
-    
+    showSearchPanel.value = false
+
     if (nav === 'friends') loadFriends()
     else if (nav === 'groups') loadGroups()
     else if (nav === 'new') loadNewFriends()
@@ -496,7 +570,6 @@ const switchNav = (nav) => {
 const selectItem = (item) => {
     selectedItemId.value = item.id
     selectedType.value = item.type || (currentNav.value === 'groups' ? 'group' : 'friend')
-    // Mobile: Stay on page but Detail panel slides in
 }
 
 const selectDept = (dept) => {
@@ -519,10 +592,9 @@ const scrollToLetter = (letter) => {
 
 const handleListScroll = (e) => {
    // Logic to update activeLetter based on scroll position could be complex with VirtualList
-   // Simpler: Use visible-range event from VirtualList if available, or just ignore for now
 }
 
-// API Loaders (Mirrored from original)
+// API Loaders
 const loadFriends = async () => {
     loading.value = true
     try {
@@ -533,7 +605,10 @@ const loadFriends = async () => {
                  id: f.friendId,
                  displayName: f.remark || f.friendName,
                  avatar: f.friendAvatar,
-                 dept: f.dept
+                 dept: f.department,
+                 pinyin: f.pinyin || '',
+                 position: f.position,
+                 online: f.online
              }))
         }))
     } finally { loading.value = false }
@@ -576,16 +651,14 @@ const startChat = () => {
     if (!selectedItemId.value) return
     const type = selectedType.value === 'group' ? 'GROUP' : 'PRIVATE'
     store.dispatch('im/session/createAndSwitchSession', { targetId: selectedItemId.value, type })
-    // 通知父组件切换到聊天模块
     emit('switch-module', 'chat')
 }
 const startVoiceCall = () => ElMessage.info('语音通话开发中')
 const startVideoCall = () => ElMessage.info('视频通话开发中')
+
 // 搜索历史
 const searchHistory = ref([])
-const showSearchHistory = ref(false)
 
-// 加载搜索历史
 const loadSearchHistory = () => {
     const history = localStorage.getItem('contacts_search_history')
     if (history) {
@@ -593,7 +666,6 @@ const loadSearchHistory = () => {
     }
 }
 
-// 保存搜索历史
 const saveSearchHistory = (query) => {
     if (!query.trim()) return
     const history = searchHistory.value.filter(h => h !== query)
@@ -603,13 +675,11 @@ const saveSearchHistory = (query) => {
     localStorage.setItem('contacts_search_history', JSON.stringify(history))
 }
 
-// 清除搜索历史
 const clearSearchHistory = () => {
     searchHistory.value = []
     localStorage.removeItem('contacts_search_history')
 }
 
-// 使用历史搜索
 const useHistorySearch = (query) => {
     searchQuery.value = query
     handleSearch()
@@ -618,20 +688,26 @@ const useHistorySearch = (query) => {
 const clearSearch = () => {
     searchQuery.value = ''
     searchResults.value = []
-    showSearchHistory.value = false
+}
+
+const handleSearchBlur = () => {
+    // 延迟关闭，让点击事件先触发
+    setTimeout(() => {
+        if (!searchQuery.value) {
+            showSearchPanel.value = false
+        }
+    }, 200)
 }
 
 // 防抖搜索
 const handleSearch = useDebounceFn(async () => {
     if (!searchQuery.value.trim()) {
         searchResults.value = []
-        showSearchHistory.value = false
         return
     }
-    
+
     loading.value = true
-    showSearchHistory.value = false
-    
+
     try {
         // 优先使用后端搜索
         const res = await searchContacts({ keyword: searchQuery.value.trim() })
@@ -661,9 +737,9 @@ const performLocalSearch = () => {
         searchResults.value = []
         return
     }
-    
+
     const results = []
-    
+
     // 搜索好友
     friendGroups.value.forEach(g => {
         if (g.friends) {
@@ -676,23 +752,17 @@ const performLocalSearch = () => {
             })
         }
     })
-    
+
     // 搜索群组
     groupList.value.forEach(g => {
         if (g.name && g.name.toLowerCase().includes(q)) {
             results.push({ ...g, type: 'group' })
         }
     })
-    
+
     searchResults.value = results
 }
 
-// 聚焦搜索框时显示历史
-const onSearchFocus = () => {
-    if (!searchQuery.value && searchHistory.value.length > 0) {
-        showSearchHistory.value = true
-    }
-}
 const handleDelete = () => ElMessage.warning('删除功能开发中')
 
 // Utils
@@ -707,6 +777,15 @@ const flattenOrgTree = (tree) => {
     return res
 }
 
+// Watch for search panel open to focus input
+watch(showSearchPanel, (val) => {
+    if (val) {
+        nextTick(() => {
+            searchInputRef.value?.focus()
+        })
+    }
+})
+
 onMounted(() => {
     loadFriends()
     loadOrgTree()
@@ -718,7 +797,7 @@ onMounted(() => {
 @use '@/styles/design-tokens.scss' as *;
 
 // ============================================================================
-// 布局容器
+// 布局容器 - 钉钉风格三栏布局
 // ============================================================================
 
 .contacts-panel {
@@ -728,212 +807,66 @@ onMounted(() => {
   background: var(--dt-bg-body);
   overflow: hidden;
   position: relative;
-
-  // 暗色模式适配
-  .dark & {
-    background: var(--dt-bg-body-dark);
-  }
 }
 
 // ============================================================================
-// 侧边栏 Sidebar - 使用浅色背景，改善可读性
-// 钉钉风格：侧边栏宽度 200px
+// 左侧导航栏 - 钉钉风格超窄侧边栏 (56px)
 // ============================================================================
 
 .sidebar {
-  width: 200px; /* 钉钉标准宽度 */
+  width: 56px;
   background: #ffffff;
-  border-right: 1px solid var(--dt-border-divider);
+  border-right: 1px solid var(--dt-border-color);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   transition: transform var(--dt-transition-base);
   z-index: 20;
 
-  .dark & {
-    background: var(--dt-bg-sidebar-dark);
-    border-right-color: var(--dt-border-dark);
+  // 搜索触发器
+  .search-section {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--dt-border-lighter);
   }
 
-  &.sidebar-open {
-    transform: translateX(0);
-  }
-}
-
-// Mobile 侧边栏
-.mobile-view .sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  transform: translateX(-100%);
-  width: 280px;
-  max-width: 85vw;
-  box-shadow: var(--dt-shadow-float);
-}
-
-.mobile-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 15;
-  animation: fadeIn var(--dt-transition-base);
-}
-
-// ============================================================================
-// 搜索区域
-// ============================================================================
-
-.search-section {
-  padding: 12px 8px; /* 左右与列表内边距对齐 */
-  border-bottom: 1px solid var(--dt-border-lighter);
-  position: relative;
-
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
-}
-
-// 搜索历史下拉
-.search-history {
-  position: absolute;
-  top: 100%;
-  left: 8px;
-  right: 8px;
-  background: #ffffff;
-  border-radius: var(--dt-radius-md);
-  box-shadow: var(--dt-shadow-float);
-  padding: 12px;
-  z-index: 100;
-  margin-top: 4px;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-  }
-}
-
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-secondary);
-}
-
-.clear-history-btn {
-  border: none;
-  background: transparent;
-  color: var(--dt-brand-color);
-  font-size: var(--dt-font-size-sm);
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: var(--dt-radius-sm);
-
-  &:hover {
-    background: var(--dt-brand-bg);
-  }
-}
-
-.history-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.history-tag {
-  padding: 6px 12px;
-  background: var(--dt-bg-body);
-  border-radius: var(--dt-radius-md);
-  font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-primary);
-  cursor: pointer;
-  transition: all var(--dt-transition-fast);
-
-  &:hover {
-    background: var(--dt-bg-session-hover);
-    color: var(--dt-brand-color);
-  }
-
-  .dark & {
-    background: var(--dt-bg-body-dark);
-  }
-}
-
-.search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 32px;
-  background: var(--dt-bg-card-hover);
-  border-radius: var(--dt-radius-md);
-  padding: 0 8px;
-  transition: all var(--dt-transition-base);
-
-  &:focus-within {
-    background: #ffffff;
-    box-shadow: 0 0 0 2px var(--dt-brand-color);
-
-    .dark & {
-      background: var(--dt-bg-input-dark);
-      box-shadow: 0 0 0 2px var(--dt-brand-color);
-    }
-  }
-
-  .search-icon {
-    width: 16px;
-    height: 16px;
-    color: var(--dt-text-tertiary);
-    flex-shrink: 0;
-    margin-right: 6px;
-  }
-
-  input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-size: var(--dt-font-size-base);
-    color: var(--dt-text-primary);
-    outline: none;
-
-    &::placeholder {
-      color: var(--dt-text-quaternary);
-    }
-  }
-
-  .clear-btn {
+  .search-trigger {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
-    border: none;
-    background: transparent;
-    color: var(--dt-text-tertiary);
+    background: var(--dt-bg-card-hover);
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
-    border-radius: 50%;
-    transition: all var(--dt-transition-fast);
+    transition: all var(--dt-transition-base);
 
     &:hover {
-      background: var(--dt-bg-overlay);
-      color: var(--dt-text-secondary);
+      background: var(--dt-brand-bg);
     }
 
-    svg {
-      width: 14px;
-      height: 14px;
+    &.has-value {
+      background: var(--dt-brand-bg);
+
+      .search-icon {
+        color: var(--dt-brand-color);
+      }
+    }
+
+    .search-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--dt-text-tertiary);
+      transition: color var(--dt-transition-base);
     }
   }
 }
 
-// ============================================================================
-// 导航菜单
-// ============================================================================
-
+// 导航菜单 - 图标居中
 .nav-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 8px; /* 减少左右内边距，为内容腾出空间 */
+  padding: 8px 4px;
 
   @extend .scrollbar-sm;
 }
@@ -941,177 +874,146 @@ onMounted(() => {
 .nav-divider {
   height: 1px;
   background: var(--dt-border-lighter);
-  margin: 8px 8px 12px; /* 与列表内边距对齐 */
-
-  .dark & {
-    background: var(--dt-border-dark);
-  }
+  margin: 4px 0;
 }
 
 .nav-item {
-  display: flex;
-  flex-direction: row; /* 显式声明水平排列，防止变形 */
-  align-items: center;
-  gap: 8px; /* 减少图标与文字间距 */
-  height: 36px;
-  padding: 0 8px; /* 减少内边距 */
-  border-radius: var(--dt-radius-md);
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-  color: var(--dt-text-primary);
-  user-select: none;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  height: 48px;
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+  color: var(--dt-text-secondary);
+  user-select: none;
 
   &:hover {
-    background: var(--dt-bg-session-hover);
+    color: var(--dt-text-primary);
+
+    .nav-icon {
+      background: var(--dt-bg-card-hover);
+    }
+
+    .nav-tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 
   &.active {
-    background: var(--dt-brand-bg);
     color: var(--dt-brand-color);
 
-    /* 钉钉风格：左侧蓝色指示条 */
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 16px;
-      background: var(--dt-brand-color);
-      border-radius: 0 2px 2px 0;
-    }
-
-    .icon-wrapper {
-      background: var(--dt-brand-color);
+    .nav-icon {
+      background: var(--dt-brand-bg);
     }
   }
 
-  .item-text {
-    flex: 1;
-    font-size: var(--dt-font-size-base);
-    font-weight: var(--dt-font-weight-normal);
-    white-space: nowrap; /* 防止文字换行 */
-    overflow: hidden;
-    text-overflow: ellipsis; /* 超长显示省略号 */
+  .nav-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--dt-radius-md);
+    background: transparent;
+    position: relative;
+    transition: all var(--dt-transition-base);
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 
-  .item-badge {
-    min-width: 18px; /* 稍微缩小徽章 */
-    height: 18px;
-    padding: 0 5px;
+  .nav-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
     background: var(--dt-error-color);
     color: #ffffff;
-    font-size: var(--dt-font-size-xs);
-    font-weight: var(--dt-font-weight-medium);
-    border-radius: 9px;
+    font-size: 10px;
+    font-weight: 500;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
-}
 
-.icon-wrapper {
-  width: 30px; /* 稍微缩小图标容器 */
-  height: 30px;
-  border-radius: var(--dt-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  flex-shrink: 0;
-
-  &.bg-orange { background: #FF9800; }
-  &.bg-blue { background: #2196F3; }
-  &.bg-green { background: #4CAF50; }
-
-  svg {
-    width: 16px;
-    height: 16px;
+  // Tooltip
+  .nav-tooltip {
+    position: absolute;
+    left: 100%;
+    margin-left: 8px;
+    padding: 6px 12px;
+    background: var(--dt-text-primary);
+    color: #ffffff;
+    font-size: 12px;
+    white-space: nowrap;
+    border-radius: var(--dt-radius-sm);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--dt-transition-fast);
+    pointer-events: none;
+    z-index: 100;
   }
 }
 
-// 组织架构样式 - 钉钉风格优化
+// 组织架构
 .org-section {
   margin-top: 4px;
 
-  .nav-item.org-root {
-    height: 36px;
-    padding: 0 8px; /* 与导航项保持一致 */
-    color: var(--dt-text-secondary);
-    font-weight: var(--dt-font-weight-medium);
-
-    .arrow-icon {
-      width: 14px;
-      height: 14px;
-      transition: transform 0.2s ease;
-      margin-right: 4px;
-      flex-shrink: 0;
-
-      &.rotated {
-        transform: rotate(90deg);
-      }
-    }
-
-    &.expanded {
-      color: var(--dt-text-primary);
-    }
-  }
-
   .org-list {
-    margin-left: 12px; /* 减少左侧缩进 */
     padding: 4px 0;
-    transform-origin: top;
   }
 
-  // 展开/收起动画
   .slide-down-enter-active,
   .slide-down-leave-active {
-    transition: all 0.2s ease;
+    transition: all var(--dt-transition-base);
     overflow: hidden;
   }
 
   .slide-down-enter-from,
   .slide-down-leave-to {
     opacity: 0;
-    transform: translateY(-10px);
     max-height: 0;
   }
 
   .slide-down-enter-to,
   .slide-down-leave-from {
     opacity: 1;
-    transform: translateY(0);
-    max-height: 500px;
+    max-height: 300px;
   }
 
   .org-item {
     display: flex;
     align-items: center;
-    padding: 6px 8px; /* 减少内边距 */
-    font-size: var(--dt-font-size-sm);
+    padding: 8px 6px;
+    font-size: 12px;
     color: var(--dt-text-secondary);
-    border-radius: var(--dt-radius-sm);
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: all var(--dt-transition-fast);
+    margin: 0 4px;
+    border-radius: var(--dt-radius-sm);
 
     &:hover {
-      background: var(--dt-bg-session-hover);
+      background: var(--dt-bg-card-hover);
       color: var(--dt-text-primary);
     }
 
     &.is-child {
-      padding-left: 16px; /* 减少子部门缩进 */
+      padding-left: 16px;
       position: relative;
 
-      &::before {
-        content: '';
+      .org-dot {
         position: absolute;
-        left: 8px; /* 调整圆点位置 */
-        top: 50%;
-        transform: translateY(-50%);
+        left: 6px;
         width: 4px;
         height: 4px;
         background: var(--dt-border-color);
@@ -1132,51 +1034,237 @@ onMounted(() => {
     }
 
     .org-count {
-      font-size: var(--dt-font-size-xs);
-      color: var(--dt-text-quaternary);
-      flex-shrink: 0;
-      margin-left: 4px;
+      font-size: 11px;
+      color: var(--dt-text-tertiary);
+    }
+  }
+
+  .org-root {
+    height: 40px;
+    flex-direction: row;
+    gap: 0;
+
+    .arrow-icon {
+      width: 14px;
+      height: 14px;
+      transition: transform var(--dt-transition-base);
+      margin-right: 2px;
+
+      &.rotated {
+        transform: rotate(90deg);
+      }
+    }
+
+    .org-icon {
+      width: 20px;
+      height: 20px;
     }
   }
 }
 
 // ============================================================================
-// 中间列表栏
+// 搜索面板 - 侧滑式搜索
+// ============================================================================
+
+.search-panel {
+  position: absolute;
+  left: 56px;
+  top: 0;
+  bottom: 0;
+  width: 320px;
+  background: #ffffff;
+  border-right: 1px solid var(--dt-border-color);
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--dt-shadow-3);
+}
+
+.search-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--dt-border-lighter);
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  background: var(--dt-bg-card-hover);
+  border-radius: var(--dt-radius-md);
+  padding: 0 12px;
+
+  &:focus-within {
+    background: #ffffff;
+    box-shadow: 0 0 0 2px var(--dt-brand-light);
+  }
+
+  .search-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--dt-text-tertiary);
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: var(--dt-text-primary);
+    outline: none;
+
+    &::placeholder {
+      color: var(--dt-text-quaternary);
+    }
+  }
+
+  .clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--dt-text-tertiary);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all var(--dt-transition-fast);
+    flex-shrink: 0;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--dt-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--dt-radius-sm);
+  transition: all var(--dt-transition-fast);
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--dt-bg-card-hover);
+    color: var(--dt-text-secondary);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.search-history {
+  padding: 12px;
+  border-bottom: 1px solid var(--dt-border-lighter);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--dt-text-tertiary);
+}
+
+.clear-history-btn {
+  border: none;
+  background: transparent;
+  color: var(--dt-brand-color);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--dt-radius-sm);
+  transition: background var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-brand-bg);
+  }
+}
+
+.history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.history-tag {
+  padding: 6px 12px;
+  background: var(--dt-bg-card-hover);
+  border-radius: 16px;
+  font-size: 12px;
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+  }
+}
+
+.search-results {
+  flex: 1;
+  overflow: hidden;
+}
+
+// ============================================================================
+// 中间列表栏 - 优化布局
 // ============================================================================
 
 .list-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--dt-bg-card);
+  background: #ffffff;
   position: relative;
-  border-right: 1px solid var(--dt-border-divider);
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-right-color: var(--dt-border-dark);
-  }
+  border-right: 1px solid var(--dt-border-color);
+  margin-left: 0;
+  transition: margin-left var(--dt-transition-base);
 
   &.has-index {
-    padding-right: 48px;
+    padding-right: 40px;
+  }
+
+  // 当搜索面板打开时，添加左边距
+  &:has(+ .search-panel) {
+    margin-left: 320px;
   }
 }
 
+// Mobile Header
 .mobile-header {
   height: 56px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-divider);
+  padding: 0 12px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--dt-border-lighter);
   flex-shrink: 0;
 
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-bottom-color: var(--dt-border-dark);
-  }
-
-  .menu-btn {
+  .menu-btn,
+  .search-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1185,12 +1273,13 @@ onMounted(() => {
     border: none;
     padding: 0;
     background: transparent;
-    color: var(--dt-text-primary);
+    color: var(--dt-text-secondary);
     cursor: pointer;
     border-radius: var(--dt-radius-sm);
+    transition: background var(--dt-transition-fast);
 
     &:hover {
-      background: var(--dt-bg-session-hover);
+      background: var(--dt-bg-card-hover);
     }
 
     svg {
@@ -1200,14 +1289,44 @@ onMounted(() => {
   }
 
   .mobile-title {
-    font-size: var(--dt-font-size-lg);
-    font-weight: var(--dt-font-weight-semibold);
-    margin-left: 8px;
+    flex: 1;
+    font-size: 16px;
+    font-weight: 500;
     color: var(--dt-text-primary);
+    text-align: center;
   }
 }
 
-// A-Z 索引栏 - 钉钉风格优化
+// PC Header
+.list-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--dt-border-lighter);
+  flex-shrink: 0;
+
+  .list-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .list-count {
+    font-size: 14px;
+    color: var(--dt-text-tertiary);
+  }
+}
+
+// A-Z 索引栏
 .index-bar {
   position: absolute;
   right: 8px;
@@ -1216,33 +1335,29 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px; /* 钉钉标准间距 */
+  gap: 1px;
   z-index: 10;
-  padding: 4px 2px; /* 钉钉标准内边距 */
-  background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-lg);
-  box-shadow: var(--dt-shadow-1);
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-  }
+  padding: 6px 3px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: var(--dt-shadow-sm);
 }
 
 .index-item {
-  width: 18px; /* 钉钉标准索引项尺寸 */
-  height: 18px;
+  width: 14px;
+  height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: var(--dt-font-weight-medium);
+  font-size: 10px;
+  font-weight: 500;
   color: var(--dt-text-tertiary);
   border-radius: 50%;
   cursor: pointer;
   transition: all var(--dt-transition-fast);
 
   &:hover:not(.disabled) {
-    background: var(--dt-bg-session-hover);
+    background: var(--dt-brand-bg);
     color: var(--dt-brand-color);
   }
 
@@ -1252,34 +1367,8 @@ onMounted(() => {
   }
 
   &.disabled {
-    opacity: 0.3;
+    opacity: 0.2;
     cursor: default;
-  }
-}
-
-.list-header {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--dt-border-lighter);
-  flex-shrink: 0;
-
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
-
-  h2 {
-    font-size: var(--dt-font-size-xl);
-    font-weight: var(--dt-font-weight-semibold);
-    color: var(--dt-text-primary);
-    margin: 0;
-  }
-
-  .list-count {
-    margin-left: 8px;
-    font-size: var(--dt-font-size-sm);
-    color: var(--dt-text-tertiary);
   }
 }
 
@@ -1292,16 +1381,12 @@ onMounted(() => {
 .list-group-header {
   padding: 8px 16px;
   background: var(--dt-bg-body);
-  color: var(--dt-text-secondary);
-  font-size: var(--dt-font-size-sm);
-  font-weight: var(--dt-font-weight-semibold);
+  color: var(--dt-text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
   position: sticky;
   top: 0;
   z-index: 5;
-
-  .dark & {
-    background: var(--dt-bg-body-dark);
-  }
 }
 
 .virtual-scroll-container {
@@ -1309,7 +1394,7 @@ onMounted(() => {
 }
 
 // 加载状态
-.loading {
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1317,69 +1402,54 @@ onMounted(() => {
   height: 200px;
   color: var(--dt-text-tertiary);
 
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--dt-border-light);
+  .loading-spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--dt-border-lighter);
     border-top-color: var(--dt-brand-color);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin-bottom: 12px;
   }
+
+  .loading-text {
+    font-size: 13px;
+  }
 }
 
 // 空状态
-.empty {
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: var(--dt-text-quaternary);
+  color: var(--dt-text-tertiary);
 
-  svg {
-    width: 64px;
-    height: 64px;
+  .empty-icon {
+    width: 56px;
+    height: 56px;
     margin-bottom: 16px;
     opacity: 0.3;
   }
 
-  p {
+  .empty-text {
     margin: 0;
-    font-size: var(--dt-font-size-base);
+    font-size: 13px;
   }
 }
 
 // ============================================================================
-// 详情面板 - 钉钉风格优化
+// 详情面板 - 卡片式布局
 // ============================================================================
 
 .detail-panel {
   flex: 1;
-  max-width: 360px; /* 钉钉标准详情面板宽度 */
-  background: var(--dt-bg-card);
+  max-width: 360px;
+  background: var(--dt-bg-body);
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--dt-border-divider);
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-left-color: var(--dt-border-dark);
-  }
-}
-
-.mobile-view .detail-panel {
-  position: fixed;
-  inset: 0;
-  transform: translateX(100%);
-  transition: transform var(--dt-transition-base);
-  z-index: 30;
-  max-width: none;
-  border-left: none;
-
-  &.detail-open {
-    transform: translateX(0);
-  }
+  border-left: 1px solid var(--dt-border-color);
 }
 
 .mobile-detail-nav {
@@ -1389,10 +1459,7 @@ onMounted(() => {
   padding: 0 16px;
   border-bottom: 1px solid var(--dt-border-lighter);
   flex-shrink: 0;
-
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
+  background: #ffffff;
 
   .back-btn {
     display: flex;
@@ -1401,11 +1468,12 @@ onMounted(() => {
     border: none;
     padding: 8px 12px;
     background: transparent;
-    font-size: var(--dt-font-size-base);
-    font-weight: var(--dt-font-weight-medium);
+    font-size: 14px;
+    font-weight: 500;
     color: var(--dt-brand-color);
     cursor: pointer;
     border-radius: var(--dt-radius-sm);
+    transition: background var(--dt-transition-fast);
 
     &:hover {
       background: var(--dt-brand-bg);
@@ -1424,189 +1492,190 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--dt-text-quaternary);
   padding: 40px;
 
-  svg {
-    width: 80px;
-    height: 80px;
+  .empty-detail-icon {
+    width: 72px;
+    height: 72px;
     margin-bottom: 16px;
-    opacity: 0.2;
+    opacity: 0.15;
+    color: var(--dt-text-tertiary);
   }
 
-  p {
+  .empty-detail-text {
     margin: 0;
-    font-size: var(--dt-font-size-base);
+    font-size: 13px;
     color: var(--dt-text-tertiary);
   }
 }
 
-// ============================================================================
-// 详情内容
-// ============================================================================
-
-.detail-content {
+// 群组详情
+.group-detail {
   flex: 1;
   overflow-y: auto;
-  background: var(--dt-bg-body);
+  padding: 16px;
 
   @extend .scrollbar-sm;
-
-  .dark & {
-    background: var(--dt-bg-body-dark);
-  }
 }
 
-.detail-header {
-  padding: 40px 24px 32px;
+.detail-card {
+  background: #ffffff;
+  border-radius: var(--dt-radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--dt-shadow-sm);
+}
+
+// 群组信息卡片
+.group-info-card {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-lighter);
+  gap: 12px;
+  align-items: flex-start;
 
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-bottom-color: var(--dt-border-dark);
+  .group-avatar-wrapper {
+    flex-shrink: 0;
   }
 
-  .detail-name {
-    font-size: var(--dt-font-size-2xl);
-    font-weight: var(--dt-font-weight-semibold);
+  .group-basic-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .group-name {
+    font-size: 16px;
+    font-weight: 500;
     color: var(--dt-text-primary);
-    margin-top: 16px;
-    text-align: center;
+    margin: 0 0 8px 0;
+    word-break: break-word;
   }
 
-  .detail-meta {
+  .group-meta {
     display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .meta-tag {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    font-size: var(--dt-font-size-sm);
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--dt-bg-body);
+    border-radius: 12px;
+    font-size: 11px;
     color: var(--dt-text-secondary);
 
-    .meta-divider {
-      color: var(--dt-text-quaternary);
+    .meta-icon {
+      width: 12px;
+      height: 12px;
     }
   }
 
-  .detail-signature {
+  .group-description {
+    font-size: 13px;
     color: var(--dt-text-secondary);
-    margin-top: 12px;
-    font-size: var(--dt-font-size-sm);
-    text-align: center;
-    max-width: 280px;
     line-height: 1.5;
+    margin: 0;
+    word-break: break-word;
   }
 }
 
-.detail-actions {
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 12px;
-  background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-lighter);
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-bottom-color: var(--dt-border-dark);
+// 操作按钮卡片
+.action-card {
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 
-  .action-btn {
+  .action-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    padding: 12px 20px;
+    padding: 14px 8px;
     border: none;
     background: var(--dt-bg-body);
     border-radius: var(--dt-radius-md);
     cursor: pointer;
     transition: all var(--dt-transition-fast);
-    min-width: 72px;
-
-    .dark & {
-      background: var(--dt-bg-body-dark);
-    }
 
     &:hover {
       background: var(--dt-brand-bg);
-      color: var(--dt-brand-color);
+
+      .action-icon,
+      .action-label {
+        color: var(--dt-brand-color);
+      }
     }
 
     &.primary {
       background: var(--dt-brand-color);
-      color: #ffffff;
+
+      .action-icon,
+      .action-label {
+        color: #ffffff;
+      }
 
       &:hover {
-        background: var(--dt-brand-color-hover);
+        background: var(--dt-brand-hover);
       }
     }
 
-    svg {
-      width: 24px;
-      height: 24px;
+    .action-icon {
+      width: 22px;
+      height: 22px;
+      color: var(--dt-text-secondary);
+      transition: color var(--dt-transition-fast);
     }
 
-    font-size: var(--dt-font-size-sm);
-    color: var(--dt-text-primary);
+    .action-label {
+      font-size: 11px;
+      color: var(--dt-text-secondary);
+      font-weight: 400;
+      transition: color var(--dt-transition-fast);
+    }
   }
 }
 
-.detail-section {
-  padding: 20px 24px;
-  background: var(--dt-bg-card);
-  margin-top: 12px;
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
+// 信息卡片
+.info-card {
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
+    margin: 0 0 12px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--dt-border-lighter);
   }
 
-  .section-title {
-    font-size: var(--dt-font-size-base);
-    font-weight: var(--dt-font-weight-semibold);
-    color: var(--dt-text-primary);
-    margin-bottom: 16px;
-    padding-bottom: 12px;
+  .info-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .info-row {
+    display: flex;
+    padding: 10px 0;
+    font-size: 13px;
     border-bottom: 1px solid var(--dt-border-lighter);
 
-    .dark & {
-      border-bottom-color: var(--dt-border-dark);
+    &:last-child {
+      border-bottom: none;
     }
-  }
-}
 
-.info-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.info-item {
-  display: flex;
-  padding: 12px 0;
-  font-size: var(--dt-font-size-base);
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--dt-border-lighter);
-
-    .dark & {
-      border-bottom-color: var(--dt-border-dark);
+    .info-key {
+      width: 70px;
+      color: var(--dt-text-secondary);
+      flex-shrink: 0;
     }
-  }
 
-  .info-label {
-    width: 80px;
-    color: var(--dt-text-secondary);
-    flex-shrink: 0;
-  }
-
-  .info-value {
-    flex: 1;
-    color: var(--dt-text-primary);
-    word-break: break-word;
+    .info-val {
+      flex: 1;
+      color: var(--dt-text-primary);
+      word-break: break-word;
+    }
   }
 }
 
@@ -1614,14 +1683,29 @@ onMounted(() => {
 // 动画效果
 // ============================================================================
 
-// 淡入淡出动画
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity var(--dt-transition-fast);
 }
 
 .fade-enter-from,
 .fade-leave-to {
+  opacity: 0;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform var(--dt-transition-base), opacity var(--dt-transition-base);
+}
+
+.slide-left-enter-from,
+.slide-left-leave-to {
+  transform: translateX(-20px);
   opacity: 0;
 }
 
@@ -1630,12 +1714,18 @@ onMounted(() => {
 // ============================================================================
 
 @media (max-width: 1024px) {
-  .sidebar {
-    width: 180px; /* 响应式适配 */
-  }
-
   .detail-panel {
     max-width: 320px;
+  }
+
+  .group-info-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    .group-meta {
+      justify-content: center;
+    }
   }
 }
 
@@ -1645,22 +1735,93 @@ onMounted(() => {
   }
 
   .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    width: 200px;
+    max-width: 80vw;
+    box-shadow: var(--dt-shadow-lg);
+    z-index: 30;
+
+    &.sidebar-open {
+      transform: translateX(0);
+    }
+  }
+
+  .search-panel {
+    left: 0;
     width: 100%;
-    max-width: none;
+    z-index: 25;
   }
 
   .list-panel {
     border-right: none;
+    margin-left: 0 !important;
   }
 
-  .detail-actions {
-    flex-wrap: wrap;
+  .detail-panel {
+    position: fixed;
+    inset: 0;
+    transform: translateX(100%);
+    transition: transform var(--dt-transition-base);
+    z-index: 35;
+    max-width: none;
+    border-left: none;
 
-    .action-btn {
-      flex: 1;
-      min-width: 60px;
-      padding: 10px 12px;
+    &.detail-open {
+      transform: translateX(0);
     }
+  }
+
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 25;
+    animation: fadeIn var(--dt-transition-base);
+  }
+
+  .action-card .action-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .group-detail {
+    padding: 12px;
+  }
+
+  .detail-card {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .action-card .action-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .action-item {
+    padding: 12px 6px;
+
+    .action-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .action-label {
+      font-size: 10px;
+    }
+  }
+
+  .group-info-card {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .group-name {
+    font-size: 15px;
   }
 }
 </style>

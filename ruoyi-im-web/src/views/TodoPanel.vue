@@ -854,12 +854,12 @@ onMounted(() => {
   }
 
   &:hover {
-    border-color: rgba(22, 119, 255, 0.3);
+    border-color: rgba(0, 137, 255, 0.3);
   }
 
   &:focus {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1);
   }
 }
 
@@ -900,7 +900,7 @@ onMounted(() => {
   padding: 6px 14px;
   background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-hover) 100%);
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
   position: relative;
   overflow: hidden;
 
@@ -929,7 +929,7 @@ onMounted(() => {
     border-radius: 50%;
     background: var(--dt-brand-color);
     opacity: 0.2;
-    animation: iconPulse 2s ease-in-out infinite;
+    animation: iconPulseWeak 2s ease-in-out infinite;
   }
 
   .badge-count {
@@ -938,17 +938,6 @@ onMounted(() => {
     color: var(--dt-brand-color);
     position: relative;
     z-index: 1;
-  }
-}
-
-@keyframes iconPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.2;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.3;
   }
 }
 
@@ -965,7 +954,7 @@ onMounted(() => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 137, 255, 0.3);
   position: relative;
   overflow: hidden;
 
@@ -980,7 +969,7 @@ onMounted(() => {
   &:hover {
     background: linear-gradient(135deg, var(--dt-brand-hover) 0%, #4096ff 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 137, 255, 0.4);
   }
 
   &:active {
@@ -1080,11 +1069,11 @@ onMounted(() => {
     border-radius: 50%;
     background: currentColor;
     opacity: 0.3;
-    animation: statIconPulse 3s ease-in-out infinite;
+    animation: statIconBreath 3s ease-in-out infinite;
   }
 
   &--total .stat-icon {
-    color: #1677ff;
+    color: #0089FF;
   }
 
   &--pending .stat-icon {
@@ -1126,7 +1115,7 @@ onMounted(() => {
     right: 0;
     width: 60px;
     height: 60px;
-    background: radial-gradient(circle at top right, rgba(22, 119, 255, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle at top right, rgba(0, 137, 255, 0.05) 0%, transparent 70%);
     pointer-events: none;
     opacity: 0.6;
   }
@@ -1260,7 +1249,7 @@ onMounted(() => {
 .spinner-ring {
   position: absolute;
   inset: 0;
-  border: 3px solid rgba(22, 119, 255, 0.1);
+  border: 3px solid rgba(0, 137, 255, 0.1);
   border-top-color: var(--dt-brand-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -1275,22 +1264,7 @@ onMounted(() => {
   background: var(--dt-brand-color);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  animation: dotPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes dotPulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.3);
-    opacity: 1;
-  }
+  animation: dotPulseTranslate 1.5s ease-in-out infinite;
 }
 
 .loading-text {
@@ -1357,20 +1331,6 @@ onMounted(() => {
   }
 }
 
-@keyframes ringPulse {
-  0% {
-    transform: translate(-50%, -50%) scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    opacity: 0.3;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0;
-  }
-}
-
 .empty-decoration {
   position: absolute;
   bottom: -20px;
@@ -1378,7 +1338,7 @@ onMounted(() => {
   transform: translateX(-50%);
   width: 80px;
   height: 8px;
-  background: rgba(22, 119, 255, 0.1);
+  background: rgba(0, 137, 255, 0.1);
   border-radius: 50%;
   opacity: 0.5;
 }
@@ -1412,7 +1372,7 @@ onMounted(() => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 137, 255, 0.3);
   position: relative;
   overflow: hidden;
 
@@ -1427,7 +1387,7 @@ onMounted(() => {
   &:hover {
     background: linear-gradient(135deg, var(--dt-brand-hover) 0%, #4096ff 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 137, 255, 0.4);
   }
 }
 
@@ -1467,7 +1427,7 @@ onMounted(() => {
   &:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
-    border-color: rgba(22, 119, 255, 0.1);
+    border-color: rgba(0, 137, 255, 0.1);
 
     &::before {
       opacity: 1;
@@ -1542,18 +1502,7 @@ onMounted(() => {
     background: currentColor;
     border-radius: 4px;
     opacity: 0.4;
-    animation: priorityPulse 2s ease-in-out infinite;
-  }
-}
-
-@keyframes priorityPulse {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.5);
+    animation: priorityPulseStrong 2s ease-in-out infinite;
   }
 }
 
@@ -1619,7 +1568,7 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.1) 0%, transparent 50%);
+    background: linear-gradient(135deg, rgba(0, 137, 255, 0.1) 0%, transparent 50%);
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -1647,7 +1596,7 @@ onMounted(() => {
     position: absolute;
     inset: 0;
     border-radius: 6px;
-    background: rgba(22, 119, 255, 0.3);
+    background: rgba(0, 137, 255, 0.3);
     transform: scale(0);
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1918,7 +1867,7 @@ onMounted(() => {
 }
 
 .dark .filter-tab.active .tab-count {
-  background: rgba(22, 119, 255, 0.15);
+  background: rgba(0, 137, 255, 0.15);
 }
 
 .dark .todo-item {
@@ -1957,7 +1906,7 @@ onMounted(() => {
 }
 
 .dark .empty-decoration {
-  background: rgba(22, 119, 255, 0.05);
+  background: rgba(0, 137, 255, 0.05);
 }
 
 .dark .empty-title {
@@ -1969,8 +1918,8 @@ onMounted(() => {
 }
 
 .dark .todo-item.batch-selected {
-  background: rgba(22, 119, 255, 0.15);
-  border-color: rgba(22, 119, 255, 0.3);
+  background: rgba(0, 137, 255, 0.15);
+  border-color: rgba(0, 137, 255, 0.3);
 }
 
 .dark .batch-checkbox .checkbox-inner {
@@ -2006,29 +1955,21 @@ onMounted(() => {
     }
 
     &:hover {
-      border-color: rgba(22, 119, 255, 0.3);
+      border-color: rgba(0, 137, 255, 0.3);
     }
 
     &:focus {
       border-color: var(--dt-brand-color);
-      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.15);
+      box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.15);
     }
   }
 }
 
 // ============================================================================
-// 全局动画
+// 局部动画 - 特定效果
 // ============================================================================
-@keyframes shimmer {
-  0% {
-    background-position: -100% 0;
-  }
-  100% {
-    background-position: 100% 0;
-  }
-}
-
-@keyframes statIconPulse {
+// statIconBreath: 图标呼吸效果（缩放+透明度）- 与全局 statIconPulse 不同
+@keyframes statIconBreath {
   0%, 100% {
     transform: scale(1);
     opacity: 0.3;

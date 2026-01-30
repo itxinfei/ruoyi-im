@@ -88,6 +88,7 @@ import { ElMessage } from 'element-plus'
 import { Delete, ArrowDown } from '@element-plus/icons-vue'
 import { chat, clearConversation as apiClearConversation, getSupportedModels } from '@/api/im'
 import { useUserStore } from '@/store/modules/user'
+import { formatTime } from '@/utils/format'
 
 const userStore = useUserStore()
 
@@ -188,13 +189,6 @@ const scrollToBottom = () => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
-}
-
-// 格式化时间
-const formatTime = (date) => {
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${hours}:${minutes}`
 }
 
 // 加载支持的模型
@@ -301,7 +295,7 @@ export default {
   height: 8px;
   background-color: #999;
   border-radius: 50%;
-  animation: typing 1.4s infinite;
+  animation: typingPulse 1.4s infinite;
 }
 
 .typing-indicator span:nth-child(2) {
@@ -310,15 +304,6 @@ export default {
 
 .typing-indicator span:nth-child(3) {
   animation-delay: 0.4s;
-}
-
-@keyframes typing {
-  0%, 60%, 100% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(-8px);
-  }
 }
 
 .chat-input {

@@ -160,6 +160,8 @@ import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { searchMessages } from '@/api/im/message'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { formatTime } from '@/utils/format'
+import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -239,12 +241,6 @@ const formatDate = (dateStr) => {
   }
 }
 
-// 格式化时间
-const formatTime = (timestamp) => {
-  const date = new Date(timestamp)
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
-}
-
 // 执行搜索
 const handleSearch = async () => {
   const keyword = searchKeyword.value.trim()
@@ -278,24 +274,23 @@ const handleSearch = async () => {
 
         // 搜索文件名
         if (msg.type === 'FILE' && msg.content) {
-          try {
-            const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-            if (content.fileName && content.fileName.toLowerCase().includes(keyword.toLowerCase())) {
-              return true
-            }
-          } catch {
-            // 忽略解析错误
+          const content = parseMessageContent(msg)
+          if (content?.fileName?.toLowerCase().includes(keyword.toLowerCase())) {
+            return true
           }
         }
 
         return false
-      }).map(msg => ({
-        ...msg,
-        // 解析内容用于显示
-        content: msg.type === 'TEXT' ? msg.content : '',
-        fileName: msg.type === 'FILE' ? (typeof msg.content === 'object' ? msg.content.fileName : JSON.parse(msg.content)?.fileName || '') : '',
-        duration: msg.type === 'VOICE' ? (typeof msg.content === 'object' ? msg.content.duration : '') : ''
-      }))
+      }).map(msg => {
+        const content = parseMessageContent(msg) || {}
+        return {
+          ...msg,
+          // 解析内容用于显示
+          content: msg.type === 'TEXT' ? msg.content : '',
+          fileName: msg.type === 'FILE' ? content.fileName || '' : '',
+          duration: msg.type === 'VOICE' ? content.duration || '' : ''
+        }
+      })
     }
 
     // 如果有API，也调用API搜索
@@ -493,7 +488,7 @@ watch(() => props.visible, (val) => {
       padding: 8px 16px;
 
       &:hover, &.is-focus {
-        box-shadow: 0 2px 12px rgba(22, 119, 255, 0.2);
+        box-shadow: 0 2px 12px rgba(0, 137, 255, 0.2);
       }
     }
 
@@ -740,7 +735,7 @@ watch(() => props.visible, (val) => {
     }
 
     .dark & mark {
-      background: rgba(22, 119, 255, 0.2);
+      background: rgba(0, 137, 255, 0.2);
       color: #60a5fa;
     }
   }

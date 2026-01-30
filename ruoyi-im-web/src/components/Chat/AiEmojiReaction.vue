@@ -273,7 +273,7 @@ watch(() => props.visible, (newVal) => {
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--dt-border-light);
-  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, rgba(22, 119, 255, 0.05) 100%);
+  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, rgba(0, 137, 255, 0.05) 100%);
 }
 
 .panel-title {
@@ -535,7 +535,7 @@ watch(() => props.visible, (newVal) => {
   }
 
   .panel-header {
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.15) 0%, rgba(22, 119, 255, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(0, 137, 255, 0.15) 0%, rgba(0, 137, 255, 0.05) 100%);
     border-color: var(--dt-border-dark);
   }
 
@@ -551,7 +551,7 @@ watch(() => props.visible, (newVal) => {
   }
 
   .emoji-btn.is-recommended {
-    background: rgba(22, 119, 255, 0.2);
+    background: rgba(0, 137, 255, 0.2);
     border-color: var(--dt-brand-color);
   }
 

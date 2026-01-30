@@ -259,7 +259,7 @@ const handleViewDetail = () => {
   // 不同类型的渐变背景
   &.ding-APP {
     background: linear-gradient(135deg, #e8f4ff 0%, #f0f7ff 100%);
-    border-color: rgba(22, 119, 255, 0.2);
+    border-color: rgba(0, 137, 255, 0.2);
   }
 
   &.ding-SMS {
@@ -326,19 +326,9 @@ const handleViewDetail = () => {
     animation: urgentPulse 2s ease-in-out infinite;
   }
 
+  // 使用全局动画定义
   &.priority-normal {
-    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
-  }
-
-  @keyframes urgentPulse {
-    0%, 100% {
-      transform: scale(1);
-      box-shadow: 0 4px 12px rgba(245, 74, 69, 0.3);
-    }
-    50% {
-      transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(245, 74, 69, 0.5);
-    }
+    background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
   }
 }
 
@@ -357,29 +347,7 @@ const handleViewDetail = () => {
   }
 
   &.priority-normal {
-    background: #1677ff;
-  }
-
-  @keyframes iconGlowPulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.3;
-    }
-    50% {
-      transform: scale(1.2);
-      opacity: 0.5;
-    }
-  }
-
-  @keyframes urgentGlow {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.4;
-    }
-    50% {
-      transform: scale(1.3);
-      opacity: 0.6;
-    }
+    background: #0089FF;
   }
 }
 
@@ -398,7 +366,7 @@ const handleViewDetail = () => {
 .ding-label {
   font-weight: 800;
   font-size: 18px;
-  background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+  background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -412,7 +380,7 @@ const handleViewDetail = () => {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, rgba(22, 119, 255, 0.3) 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(0, 137, 255, 0.3) 0%, transparent 100%);
   border-radius: 2px;
 }
 
@@ -440,8 +408,8 @@ const handleViewDetail = () => {
 
   &.priority-normal {
     background: linear-gradient(135deg, #f0f9ff 0%, #bae7ff 100%);
-    color: #1677ff;
-    border: 1px solid rgba(22, 119, 255, 0.2);
+    color: #0089FF;
+    border: 1px solid rgba(0, 137, 255, 0.2);
   }
 
   .priority-pulse {
@@ -538,7 +506,7 @@ const handleViewDetail = () => {
 .read-percentage {
   font-size: 14px;
   font-weight: 700;
-  color: #1677ff;
+  color: #0089FF;
 }
 
 .progress-wrapper {
@@ -567,7 +535,7 @@ const handleViewDetail = () => {
   }
 
   &.priority-normal {
-    background: linear-gradient(90deg, #1677ff 0%, #4096ff 100%);
+    background: linear-gradient(90deg, #0089FF 0%, #4096ff 100%);
   }
 
   .progress-glow {
@@ -654,9 +622,9 @@ const handleViewDetail = () => {
   }
 
   &--primary {
-    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+    background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
     color: #fff;
-    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
   }
 
   &--danger {
@@ -704,7 +672,7 @@ const handleViewDetail = () => {
 
   &.ding-APP {
     background: linear-gradient(135deg, #0d1d2d 0%, #0a1929 100%);
-    border-color: rgba(22, 119, 255, 0.2);
+    border-color: rgba(0, 137, 255, 0.2);
   }
 
   &.ding-SMS {
