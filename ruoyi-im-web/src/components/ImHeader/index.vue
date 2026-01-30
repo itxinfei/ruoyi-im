@@ -77,7 +77,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   Search,
   Bell,
@@ -87,6 +87,7 @@ import {
   ChatDotRound
 } from '@element-plus/icons-vue'
 import { logout } from '@/api/im/auth'
+import { confirm, messageSuccess } from '@/utils/ui'
 import { addTokenToUrl } from '@/utils/file'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -122,30 +123,23 @@ const loadUserInfo = () => {
 
 // 处理登出
 const handleLogout = async () => {
+  if (!await confirm('确定要退出登录吗？', '提示')) {
+    return
+  }
+
+  // 调用登出接口
   try {
-    await ElMessageBox.confirm(
-      '确定要退出登录吗？',
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
+    await logout()
+  } catch (error) {
+    console.error('登出接口调用失败:', error)
+    // 即使接口失败也继续清除本地数据
+  }
 
-    // 调用登出接口
-    try {
-      await logout()
-    } catch (error) {
-      console.error('登出接口调用失败:', error)
-      // 即使接口失败也继续清除本地数据
-    }
+  // 清除本地存储
+  const { clearAuth } = require('@/utils/storage')
+  clearAuth()
 
-    // 清除本地存储
-    const { clearAuth } = require('@/utils/storage')
-    clearAuth()
-
-    ElMessage.success('已退出登录')
+  messageSuccess('已退出登录')
 
     // 跳转到登录页
     router.push('/login')

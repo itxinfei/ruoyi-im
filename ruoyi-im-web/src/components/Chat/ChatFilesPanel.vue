@@ -150,8 +150,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
+import { ElLoading } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
+import { confirmDelete, deleteSuccess } from '@/utils/ui'
 import { saveFileToCloud } from '@/api/im/cloud'
 import { parseMessageContent } from '@/utils/message'
 
@@ -387,15 +388,8 @@ const handleFileAction = async (cmd, file) => {
       await handleSaveToCloud(file)
       break
     case 'delete':
-      try {
-        await ElMessageBox.confirm(`确定要删除"${file.name}"吗？`, '删除文件', {
-          type: 'warning',
-          confirmButtonText: '确定删除',
-          cancelButtonText: '取消'
-        })
-        ElMessage.success('文件已删除')
-      } catch {
-        // 用户取消
+      if (await confirmDelete(`"${file.name}"`)) {
+        deleteSuccess('文件已删除')
       }
       break
   }

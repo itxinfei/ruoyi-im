@@ -182,10 +182,10 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, Download, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { addTokenToUrl } from '@/utils/file'
+import { confirmDelete, deleteSuccess } from '@/utils/ui'
 import dayjs from 'dayjs'
 import { formatTime } from '@/utils/format'
 import { parseMessageContent } from '@/utils/message'
@@ -359,20 +359,9 @@ const handleDownload = (image) => {
 
 // 删除图片
 const handleDelete = async (image) => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要删除这张图片吗？删除后将无法恢复。`,
-      '删除图片',
-      {
-        type: 'warning',
-        confirmButtonText: '删除',
-        cancelButtonText: '取消'
-      }
-    )
+  if (await confirmDelete('这张图片')) {
     emit('delete', image)
-    ElMessage.success('删除成功')
-  } catch {
-    // 用户取消
+    deleteSuccess()
   }
 }
 

@@ -260,7 +260,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { confirmDelete, deleteSuccess, messageError, messageSuccess } from '@/utils/ui'
 import CreateTodoDialog from '@/components/CreateTodoDialog/index.vue'
 import TodoDetailDialog from '@/components/TodoDetailDialog/index.vue'
 import { getTodos, completeTodo, deleteTodo as deleteTodoApi, updateTodo } from '@/api/im/workbench'
@@ -506,22 +506,18 @@ const toggleComplete = async (todo) => {
 }
 
 const deleteTodo = async (todo) => {
-  try {
-    await ElMessageBox.confirm('确定要删除这个待办吗？', '确认删除', {
-      type: 'warning',
-      confirmButtonText: '删除',
-      cancelButtonText: '取消'
-    })
-    const res = await deleteTodoApi(todo.id)
-    if (res.code === 200) {
-      todos.value = todos.value.filter(t => t.id !== todo.id)
-      ElMessage.success('删除成功')
-      showDetailDialog.value = false
-    } else {
-      ElMessage.error(res.msg || '删除失败')
-    }
-  } catch {
-    // 用户取消
+  if (!await confirmDelete('这个待办')) {
+    return
+  }
+  const res = await deleteTodoApi(todo.id)
+  if (res.code === 200) {
+    todos.value = todos.value.filter(t => t.id !== todo.id)
+    deleteSuccess()
+    showDetailDialog.value = false
+  } else {
+    messageError(res.msg || '删除失败')
+  }
+}
   }
 }
 
@@ -613,26 +609,22 @@ const batchComplete = async () => {
 const batchDelete = async () => {
   if (selectedTodos.value.size === 0) return
 
-  try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${selectedTodos.value.size} 个待办吗？此操作不可恢复。`, '批量删除', {
-      type: 'error',
-      confirmButtonText: '删除',
-      cancelButtonText: '取消'
-    })
+  if (!await confirmDelete(`选中的 ${selectedTodos.value.size} 个待办`, `确定要删除选中的 ${selectedTodos.value.size} 个待办吗？此操作不可恢复。`)) {
+    return
+  }
 
+  try {
     const promises = Array.from(selectedTodos.value).map(id => deleteTodoApi(id))
     await Promise.all(promises)
 
     // 从列表中移除已删除的待办
     todos.value = todos.value.filter(todo => !selectedTodos.value.has(todo.id))
 
-    ElMessage.success(`已删除 ${selectedTodos.value.size} 个待办`)
+    messageSuccess(`已删除 ${selectedTodos.value.size} 个待办`)
     exitBatchMode()
   } catch (error) {
-    if (error !== 'cancel') {
-      console.error('批量删除失败', error)
-      ElMessage.error('操作失败，请稍后重试')
-    }
+    console.error('批量删除失败', error)
+    messageError('操作失败，请稍后重试')
   }
 }
 

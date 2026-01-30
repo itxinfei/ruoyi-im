@@ -111,9 +111,10 @@
 
 <script setup>
 import { computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { messageSuccess, messageError, confirmDelete } from '@/utils/ui'
+import { formatDateTimeISO } from '@/utils/format'
 import { markDingAsRead, cancelDing } from '@/api/im/ding'
-import dayjs from 'dayjs'
 
 const props = defineProps({
   id: {
@@ -185,31 +186,29 @@ const readPercentage = computed(() => {
 })
 
 const formatTime = (time) => {
-  return dayjs(time).format('YYYY-MM-DD HH:mm')
+  return formatDateTimeISO(time)
 }
 
 const handleMarkAsRead = async () => {
   try {
     await markDingAsRead(props.id)
-    ElMessage.success('已标记为已读')
+    messageSuccess('已标记为已读')
     emit('read', props.id)
   } catch (error) {
-    ElMessage.error('标记失败')
+    messageError('标记失败')
   }
 }
 
 const handleCancel = async () => {
+  if (!await confirm('确定要取消此DING消息吗？', '确认')) {
+    return
+  }
   try {
-    await ElMessageBox.confirm('确定要取消此DING消息吗？', '确认', {
-      type: 'warning'
-    })
     await cancelDing(props.id)
-    ElMessage.success('DING已取消')
+    messageSuccess('DING已取消')
     emit('cancel', props.id)
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('取消失败')
-    }
+    messageError('取消失败')
   }
 }
 
