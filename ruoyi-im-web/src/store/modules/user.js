@@ -1,6 +1,6 @@
 import { login, logout } from '@/api/im/auth'
 import { getUserInfo, updateUser } from '@/api/im/user'
-import { getToken, setToken, getUserInfo as getStoredUserInfo, setUserInfo, setUserRole, clearAuth } from '@/utils/storage'
+import { getToken, setToken, getUserInfo as getStoredUserInfo, getUserRole, setUserInfo, setUserRole, clearAuth } from '@/utils/storage'
 
 export default {
     namespaced: true,
