@@ -61,7 +61,8 @@
   </div>
 </template>
 
-<script setup>
+<script setup>import { getToken } from '@/utils/storage'
+
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useImWebSocket } from '@/composables/useImWebSocket'
@@ -201,7 +202,6 @@ onMounted(async () => {
   }
 
   if (!isConnected.value) {
-    const { getToken } = require('@/utils/storage')
     const token = getToken()
     if (token) {
         connect(token)

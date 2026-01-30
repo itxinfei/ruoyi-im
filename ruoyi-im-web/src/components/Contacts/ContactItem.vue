@@ -149,6 +149,7 @@ const escapeHtml = (str) => {
   align-items: center;
   height: 100%;
   padding: 0 12px; /* 钉钉标准内边距 */
+  gap: 12px; /* 头像和内容之间的间距 */
   background: inherit;
   transition: transform var(--dt-transition-base);
 }
@@ -160,7 +161,6 @@ const escapeHtml = (str) => {
 
 .item-info {
   flex: 1;
-  margin-left: 12px;
   min-width: 0;
   display: flex;
   flex-direction: column;

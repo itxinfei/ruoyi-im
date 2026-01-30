@@ -75,6 +75,7 @@
 <script setup>
 import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { getAiReplyStyle, setAiReplyStyle } from '@/utils/storage'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false }
@@ -86,7 +87,7 @@ const visible = ref(false)
 
 // 从 localStorage 加载配置
 const loadConfig = () => {
-  const { getAiReplyStyle } = require('@/utils/storage')
+
   const saved = getAiReplyStyle()
   return Object.keys(saved).length > 0 ? saved : null
 }
@@ -132,7 +133,6 @@ const handleSave = () => {
     styleConfig.categories = ['confirm', 'polite', 'work']
   }
   // 保存到 localStorage
-  const { setAiReplyStyle } = require('@/utils/storage')
   setAiReplyStyle({ ...styleConfig })
   ElMessage.success('风格设置已保存')
   emit('save', { ...styleConfig })

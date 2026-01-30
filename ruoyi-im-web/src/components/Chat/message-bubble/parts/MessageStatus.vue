@@ -11,6 +11,13 @@
       </div>
     </transition>
 
+    <!-- 发送成功（未读） -->
+    <transition name="status-scale">
+      <div v-if="status === 'sent'" class="status-indicator status-sent" title="已发送">
+        <span class="material-icons-outlined">done</span>
+      </div>
+    </transition>
+
     <!-- 已读 -->
     <transition name="status-scale">
       <div v-if="status === 'read'" class="status-indicator status-read" title="已读">
@@ -104,6 +111,15 @@ const status = computed(() => {
   40% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+// 发送成功状态（绿色对勾）
+.status-sent {
+  color: var(--dt-color-success);
+
+  &:hover {
+    transform: scale(1.1);
   }
 }
 

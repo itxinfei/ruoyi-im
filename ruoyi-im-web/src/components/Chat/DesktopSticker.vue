@@ -73,7 +73,8 @@ const addSticker = (imageDataUrl, x = 100, y = 100) => {
       zIndex: ++nextZIndex
     }
 
-    stickers.value.push(sticker)
+    // 创建新数组触发响应式更新
+    stickers.value = [...stickers.value, sticker]
   }
   img.src = imageDataUrl
 }
@@ -82,7 +83,8 @@ const addSticker = (imageDataUrl, x = 100, y = 100) => {
 const removeSticker = (id) => {
   const index = stickers.value.findIndex(s => s.id === id)
   if (index !== -1) {
-    stickers.value.splice(index, 1)
+    // 创建新数组触发响应式更新
+    stickers.value = [...stickers.value.slice(0, index), ...stickers.value.slice(index + 1)]
   }
 }
 
@@ -160,6 +162,9 @@ const handleDoubleClick = (e, id) => {
   }
 }
 
+// 保存双击事件处理器引用，用于后续清理
+let handleDoubleClickWrapper = null
+
 // ==================== 暴露方法 ====================
 defineExpose({
   addSticker,
@@ -170,18 +175,24 @@ defineExpose({
 // ==================== 生命周期 ====================
 onMounted(() => {
   // 监听双击事件复制贴图
-  document.addEventListener('dblclick', (e) => {
+  handleDoubleClickWrapper = (e) => {
     const stickerEl = e.target.closest('.desktop-sticker')
     if (stickerEl) {
       const id = parseInt(stickerEl.dataset.id)
       handleDoubleClick(e, id)
     }
-  })
+  }
+  document.addEventListener('dblclick', handleDoubleClickWrapper)
 })
 
 onUnmounted(() => {
+  // 清理所有事件监听器
   document.removeEventListener('mousemove', handleDragMove)
   document.removeEventListener('mouseup', handleDragEnd)
+  if (handleDoubleClickWrapper) {
+    document.removeEventListener('dblclick', handleDoubleClickWrapper)
+    handleDoubleClickWrapper = null
+  }
 })
 </script>
 

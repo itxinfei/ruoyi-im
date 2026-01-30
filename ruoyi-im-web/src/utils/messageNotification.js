@@ -2,6 +2,7 @@
  * 消息提醒工具类
  * 提供浏览器通知、提示音、标题闪烁等功能
  */
+import { getDoNotDisturb } from './storage'
 
 // 提示音音频对象
 let notificationAudio = null
@@ -197,6 +198,7 @@ export function restoreFavicon() {
         console.error('[消息提醒] 恢复favicon失败:', error)
     }
 }
+import {  } from '../utils/storage'
 
 import store from '@/store'
 
@@ -267,7 +269,6 @@ export function shouldNotify(message, currentUser, session) {
     // 检查免打扰时段(可从设置中读取)
     const now = new Date()
     const hour = now.getHours()
-    const { getDoNotDisturb } = require('./storage')
     const { start: doNotDisturbStart, end: doNotDisturbEnd } = getDoNotDisturb()
 
     if (doNotDisturbStart < doNotDisturbEnd) {

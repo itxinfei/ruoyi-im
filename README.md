@@ -8,7 +8,7 @@
 
 ## 1.2 统一架构升级
 
-2025-01-24 完成架构升级，移除独立的管理系统，实现前后端统一架构设计：
+2026-01-30 完成架构升级，移除独立的管理系统，实现前后端统一架构设计：
 - **后端统一**：管理功能集成到 im-api，通过路径隔离和角色权限控制
 - **前端统一**：根据用户权限动态渲染用户端或管理端界面
 - **权限统一**：使用 Spring Security 角色权限体系，简化认证流程
@@ -40,7 +40,7 @@
 |模块|说明|技术栈|默认端口|核心职责|
 |---|---|---|---|---|
 |im-api|核心后端 API 服务|Spring Boot 2.7, WebSocket, Netty, MyBatis Plus|8080|用户认证、消息收发、好友/群组管理、文件传输核心逻辑、管理后台接口|
-|im-web|前端 Web 聊天界面|Vue 3, Vite, Element Plus, Vuex, Axios|5173 (Dev)|用户登录、聊天界面展示、消息收发交互、文件/图片上传、个人信息管理、管理后台界面|
+|im-web|前端 Web 聊天界面|Vue 3, Vite, Element Plus, Vuex, Axios|3000 (Dev)|用户登录、聊天界面展示、消息收发交互、文件/图片上传、个人信息管理、管理后台界面|
 |sql/im.sql|数据库初始化脚本|MySQL|-|创建用户、消息、好友、群组等核心表结构，初始化基础数据|
 
 # 三、技术栈详情
@@ -53,7 +53,7 @@
 
 - 通信技术：WebSocket（实时消息推送）、Netty（高性能网络通信）
 
-- 缓存中间件：Redis 3.0+（用户状态缓存、消息队列、在线状态存储）
+- 缓存中间件：Redis 7.0+（用户状态缓存、消息队列、在线状态存储）
 
 - 数据库：MySQL 5.7/8.0（数据持久化）
 
@@ -99,11 +99,11 @@
 
 - MySQL：5.7.44，配置字符集为 utf8mb4（支持表情符号），排序规则 utf8mb4_general_ci，max_connections ≥ 1000
 
-- Redis：3.0+，配置 requirepass 密码，bind 限制访问 IP（生产环境），默认端口 6379
+- Redis：7.0+，配置 requirepass 密码，bind 限制访问 IP（生产环境），默认端口 6379
 
 - Node.js：16+（建议 18+），npm 8+ 或 yarn 1.22+
 
-- 操作系统：开发/测试环境支持 Windows 10/11、CentOS 7.9；生产环境推荐 CentOS 7.9（64位），关闭 SELinux，开放 8080、8081、5173、6379 端口
+- 操作系统：开发/测试环境支持 Windows 10/11、CentOS 7.9；生产环境推荐 CentOS 7.9（64位），关闭 SELinux，开放 8080、8081、6379 端口
 
 ### 4.1.2 环境验证命令
 
@@ -123,11 +123,16 @@ npm -v
 ## 4.2 数据库初始化
 
 1. 登录 MySQL 客户端（命令行/Navicat 等），执行以下命令创建数据库：
-        `CREATE DATABASE IF NOT EXISTS im DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`
+        ```sql
+        CREATE DATABASE IF NOT EXISTS im DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+        ```
 
 2. 导入项目根目录下的 `im.sql` 脚本（两种方式）：
-        `# 命令行导入
-mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择"运行 SQL 文件"，选择 im.sql 执行
+        ```bash
+        # 命令行导入
+        mysql -u root -p im < im.sql
+        ```
+        或通过 Navicat 等工具，右键数据库选择"运行 SQL 文件"，选择 im.sql 执行
 
 3. 验证：导入完成后，检查是否生成 user（用户）、friend（好友）、group（群组）、message（消息）等核心表，确保无报错
 
@@ -136,23 +141,27 @@ mysql -u root -p im < im.sql`或通过 Navicat 等工具，右键数据库选择
 1. 打开 IDE（IDEA/Eclipse），导入 im-api 模块
 
 2. 配置数据源：修改 `im-api/src/main/resources/application.yml` 中以下配置：
-        `spring:
-    datasource:
-    url: jdbc:mysql://localhost:3306/im?useUnicode=true&characterEncoding=utf8mb4&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root  # 你的 MySQL 用户名
-    password: 123456  # 你的 MySQL 密码
-    redis:
-    host: localhost  # 你的 Redis 地址
-    port: 6379
-    password: 123456  # 你的 Redis 密码
-    database: 0`
+        ```yaml
+        spring:
+          datasource:
+            url: jdbc:mysql://localhost:3306/im?useUnicode=true&characterEncoding=utf8mb4&useSSL=false&serverTimezone=Asia/Shanghai
+            username: root  # 你的 MySQL 用户名
+            password: 123456  # 你的 MySQL 密码
+          redis:
+            host: localhost  # 你的 Redis 地址
+            port: 6379
+            password: 123456  # 你的 Redis 密码
+            database: 0
+        ```
 
 3. 配置 WebSocket/Netty：检查 application.yml 中通信相关配置（默认无需修改，按需调整端口）：
-        `im:
-    websocket:
-    port: 8080  # WebSocket 绑定端口（与 API 服务端口一致）
-    netty:
-    port: 8888  # Netty 服务端口（高性能通信备用）`
+        ```yaml
+        im:
+          websocket:
+            port: 8080  # WebSocket 绑定端口（与 API 服务端口一致）
+          netty:
+            port: 8888  # Netty 服务端口（高性能通信备用）
+        ```
 
 4. 启动服务：运行 `com.im.ImApplication` 类的 main 方法，控制台输出"Started ImApplication in XXX seconds"即为启动成功
 
@@ -177,11 +186,11 @@ npm install
 npm cache clean --force
 npm install
 
-# 启动开发服务器（默认端口 5173）
+# 启动开发服务器（默认端口 3000）
 npm run dev
 ```
 
-启动成功后，控制台会输出本地访问地址（通常为 http://localhost:5173），打开浏览器访问即可进入登录界面
+启动成功后，控制台会输出本地访问地址（通常为 http://localhost:3000），打开浏览器访问即可进入登录界面
 
 ### 4.4.1 前端配置修改（对接后端）
 
@@ -275,53 +284,57 @@ const ws = new WebSocket(`ws://localhost:8080/im/websocket/${userId}`)
 ### 6.1.2 测试环境部署（服务器）
 
 1. 后端部署：
-        `# 打包 im-api 模块（IDEA 中执行 mvn clean package 或命令行）
-cd im-api
-mvn clean package -Dmaven.test.skip=true
-
-# 上传 jar 包至服务器 /usr/local/im/api 目录
-scp target/im-api.jar root@服务器IP:/usr/local/im/api
-
-# 启动服务（后台运行）
-cd /usr/local/im/api
-nohup java -jar im-api.jar --spring.profiles.active=test > im-api.log 2>&1 `&      
+        ```bash
+        # 打包 im-api 模块（IDEA 中执行 mvn clean package 或命令行）
+        cd im-api
+        mvn clean package -Dmaven.test.skip=true
+        
+        # 上传 jar 包至服务器 /usr/local/im/api 目录
+        scp target/im-api.jar root@服务器IP:/usr/local/im/api
+        
+        # 启动服务（后台运行）
+        cd /usr/local/im/api
+        nohup java -jar im-api.jar --spring.profiles.active=test > im-api.log 2>&1 &
+        ```
 
 2. 前端部署：
-`# 构建生产环境包
-cd im-web
-npm run build
-
-# 上传 dist 目录至服务器 Nginx 静态资源目录
-scp -r dist root@服务器IP:/usr/local/nginx/html/im
-
-# 配置 Nginx（/usr/local/nginx/conf/nginx.conf）
-server {
-  listen 80;
-  server_name 测试服务器IP;
-
-  location / {
-    root /usr/local/nginx/html/im;
-    index index.html;
-  }
-
-  # 反向代理后端 API
-  location /api {
-    proxy_pass http://localhost:8080;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-  }
-
-  # WebSocket 代理
-  location /im/websocket {
-    proxy_pass http://localhost:8080;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-  }
-}
-
-# 重启 Nginx
-nginx -s reload`
+        ```bash
+        # 构建生产环境包
+        cd im-web
+        npm run build
+        
+        # 上传 dist 目录至服务器 Nginx 静态资源目录
+        scp -r dist root@服务器IP:/usr/local/nginx/html/im
+        
+        # 配置 Nginx（/usr/local/nginx/conf/nginx.conf）
+        server {
+          listen 80;
+          server_name 测试服务器IP;
+        
+          location / {
+            root /usr/local/nginx/html/im;
+            index index.html;
+          }
+        
+          # 反向代理后端 API
+          location /api {
+            proxy_pass http://localhost:8080;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+          }
+        
+          # WebSocket 代理
+          location /im/websocket {
+            proxy_pass http://localhost:8080;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+          }
+        }
+        
+        # 重启 Nginx
+        nginx -s reload
+        ```
 
 ### 6.1.3 生产环境部署（集群）
 
@@ -346,20 +359,24 @@ nginx -s reload`
 ### 6.2.2 数据备份
 
 - MySQL 备份：每天凌晨 2 点执行全量备份，使用 crontab 定时任务，备份文件保留 30 天：
-        `0 2 * * * mysqldump -u root -p123456 im > /usr/local/backup/im_$(date +%Y%m%d).sql`
+        ```bash
+        0 2 * * * mysqldump -u root -p123456 im > /usr/local/backup/im_$(date +%Y%m%d).sql
+        ```
 
 - 文件备份：用户上传的文件（图片/文档）每天同步至备份服务器，采用 rsync 工具实现增量同步
 
 ## 6.3 运维监控规范
 
-- 日志管理：后端日志存储在 /usr/local/im/logs 目录，按天分割（如 im-api-20240520.log），保留 30 天；前端日志通过 Sentry 收集，监控前端报错
+- 日志管理：后端日志存储在 /usr/local/im/logs 目录，按天分割（如 im-api-20260130.log），保留 30 天；前端日志通过 Sentry 收集，监控前端报错
 
 - 日志查看命令：
-        `# 实时查看后端日志
-tail -f /usr/local/im/logs/im-api.log
-
-# 查看错误日志
-grep "ERROR" /usr/local/im/logs/im-api.log`
+        ```bash
+        # 实时查看后端日志
+        tail -f /usr/local/im/logs/im-api.log
+        
+        # 查看错误日志
+        grep "ERROR" /usr/local/im/logs/im-api.log
+        ```
 
 - 核心指标监控：
         
@@ -374,19 +391,19 @@ grep "ERROR" /usr/local/im/logs/im-api.log`
 
 ```scss
 // 主色调
---dt-brand-color: #1677ff
---dt-brand-hover: #4096ff
---dt-brand-active: #0958d9
---dt-brand-bg: #e6f4ff
+--dt-brand-color: #1677ff;
+--dt-brand-hover: #4096ff;
+--dt-brand-active: #0958d9;
+--dt-brand-bg: #e6f4ff;
 
 // 背景色
---dt-bg-body: #f4f7f9
---dt-bg-sidebar: #1677ff
---dt-bg-card: #ffffff
+--dt-bg-body: #f4f7f9;
+--dt-bg-sidebar: #1677ff;
+--dt-bg-card: #ffffff;
 
 // 暗色模式
---dt-bg-body-dark: #0f172a
---dt-bg-sidebar-dark: #1e293b
+--dt-bg-body-dark: #0f172a;
+--dt-bg-sidebar-dark: #1e293b;
 ```
 
 ## 7.2 尺寸规范

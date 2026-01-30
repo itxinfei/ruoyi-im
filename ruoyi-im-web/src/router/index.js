@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getToken, getUserRole, getUserInfo } from '@/utils/storage'
 
 const routes = [
   {
@@ -96,7 +97,6 @@ const router = createRouter({
 
 // 路由守卫：检查登录状态和角色权限
 router.beforeEach((to, from, next) => {
-  const { getToken, getUserRole, getUserInfo: getStoredUserInfo } = require('@/utils/storage')
   const token = getToken()
 
   // 获取用户角色（优先从 im_user_role 读取，兼容 im_user_info）
@@ -104,7 +104,7 @@ router.beforeEach((to, from, next) => {
 
   // 如果没有单独存储的角色，尝试从用户信息中解析
   if (userRole === 'USER') {
-    const userInfo = getStoredUserInfo()
+    const userInfo = getUserInfo()
     if (userInfo?.role) {
       userRole = userInfo.role
     }

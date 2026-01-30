@@ -243,8 +243,8 @@ watch(recentEmojis, (newVal) => {
 }
 
 .emoji-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);  // 钉钉标准：8列网格
   padding: 8px;
   gap: 4px;
   max-height: 200px;

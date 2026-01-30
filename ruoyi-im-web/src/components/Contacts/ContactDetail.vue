@@ -10,17 +10,17 @@
       <div class="main-info">
         <div class="name-row">
           <span class="name">{{ getName }}</span>
-          <template v-if="!contact.isGroup">
+          <template v-if="!isGroup">
             <el-tag size="small" type="success" v-if="contact.online">在线</el-tag>
             <el-tag size="small" type="info" v-else>离线</el-tag>
           </template>
         </div>
         <div class="meta">
-          <template v-if="contact.isGroup">
-            群号: {{ contact.id }} · {{ contact.memberCount || 0 }} 成员
+          <template v-if="isGroup">
+            群号: {{ contact.id }} · {{ contact.memberCount || contact.memberCount || 0 }} 成员
           </template>
           <template v-else>
-            {{ contact.position || '职位未知' }} · {{ contact.department || '部门未知' }}
+            {{ getPosition }} · {{ getDepartment }}
           </template>
         </div>
       </div>
@@ -31,7 +31,7 @@
       <el-button :icon="Phone" @click="$emit('voice-call', contact)">语音通话</el-button>
       <el-button :icon="VideoCamera" @click="$emit('video-call', contact)">视频通话</el-button>
       
-      <template v-if="!contact.isGroup">
+      <template v-if="!isGroup">
         <el-button :icon="contact.isFavorite ? StarFilled : Star" @click="toggleFavorite">
           {{ contact.isFavorite ? '已收藏' : '收藏' }}
         </el-button>
@@ -54,7 +54,7 @@
     <el-divider />
 
     <div class="info-list">
-      <template v-if="contact.isGroup">
+      <template v-if="isGroup">
         <div class="info-item">
           <span class="label">群公告</span>
           <span class="value">{{ contact.notice || '暂无公告' }}</span>
@@ -71,15 +71,15 @@
       <template v-else>
         <div class="info-item">
           <span class="label">手机</span>
-          <span class="value">{{ contact.phone || '-' }}</span>
+          <span class="value">{{ getPhone }}</span>
         </div>
         <div class="info-item">
           <span class="label">邮箱</span>
-          <span class="value">{{ contact.email || '-' }}</span>
+          <span class="value">{{ getEmail }}</span>
         </div>
         <div class="info-item">
           <span class="label">签名</span>
-          <span class="value">{{ contact.signature || '-' }}</span>
+          <span class="value">{{ getSignature }}</span>
         </div>
       </template>
     </div>
@@ -113,23 +113,82 @@ const props = defineProps({
 const emit = defineEmits(['update', 'voice-call', 'video-call'])
 const store = useStore()
 
-const getName = computed(() => {
-  if (!props.contact) return ''
-  return props.contact.isGroup ? props.contact.name : props.contact.friendName
+// 统一类型判断逻辑（兼容多种写法）
+const isGroup = computed(() => {
+  return props.contact?.isGroup || props.contact?.type === 'group'
 })
 
+// 获取显示名称（兼容多种字段）
+const getName = computed(() => {
+  if (!props.contact) return '未知用户'
+  if (isGroup.value) {
+    return props.contact.name || props.contact.groupName || '未知群组'
+  }
+  return props.contact.name || props.contact.nickname || props.contact.friendName || props.contact.displayName || '未知用户'
+})
+
+// 获取头像（兼容多种字段）
 const getAvatar = computed(() => {
   if (!props.contact) return ''
-  const avatar = props.contact.isGroup ? props.contact.avatar : props.contact.friendAvatar
+  if (isGroup.value) {
+    const avatar = props.contact.avatar || props.contact.groupAvatar
+    return addTokenToUrl(avatar)
+  }
+  const avatar = props.contact.avatar || props.contact.friendAvatar || props.contact.headImg
   return addTokenToUrl(avatar)
+})
+
+// 获取职位（兼容 dept/department 字段）
+const getPosition = computed(() => {
+  if (!props.contact) return ''
+  return props.contact.position || props.contact.job || '职位未知'
+})
+
+// 获取部门（兼容 dept/department 字段）
+const getDepartment = computed(() => {
+  if (!props.contact) return ''
+  return props.contact.dept || props.contact.department || '部门未知'
+})
+
+// 获取手机号（兼容 phone/mobile 字段）
+const getPhone = computed(() => {
+  if (!props.contact) return ''
+  return props.contact.phone || props.contact.mobile || '-'
+})
+
+// 获取邮箱
+const getEmail = computed(() => {
+  if (!props.contact) return ''
+  return props.contact.email || '-'
+})
+
+// 获取签名
+const getSignature = computed(() => {
+  if (!props.contact) return ''
+  return props.contact.signature || props.contact.sign || '这个人很懒，什么都没留下～'
 })
 
 const startChat = async () => {
   try {
-    const isGroup = props.contact.isGroup
-    // For friends, targetId is friendId. For groups, it's id.
-    const targetId = isGroup ? props.contact.id : props.contact.friendId
-    const type = isGroup ? 'GROUP' : 'PRIVATE'
+    // 🔑 获取 targetId 并验证有效性
+    let targetId = isGroup.value ? props.contact.id : (props.contact.friendId || props.contact.id)
+
+    // 验证 targetId 是否有效
+    if (!targetId || targetId === 'undefined' || targetId === 'null') {
+      console.error('无效的 targetId:', targetId, 'contact:', props.contact)
+      ElMessage.error('无法发起聊天：无效的联系人信息')
+      return
+    }
+
+    // 确保 targetId 是数字类型
+    targetId = Number(targetId)
+    if (isNaN(targetId) || targetId <= 0) {
+      console.error('targetId 不是有效数字:', targetId, 'contact:', props.contact)
+      ElMessage.error('无法发起聊天：无效的联系人ID')
+      return
+    }
+
+    const type = isGroup.value ? 'GROUP' : 'PRIVATE'
 
     const res = await createConversation({ type, targetId })
     if (res.code === 200) {
@@ -139,10 +198,12 @@ const startChat = async () => {
       ElMessage.success('已发起聊天')
       // NOTE: We usually emit an event or use a global event bus to switch tabs
       window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'chat' }))
+    } else {
+      ElMessage.error(res.msg || '无法发起聊天')
     }
   } catch (e) {
     console.error('发起聊天失败', e)
-    ElMessage.error('无法发起聊天')
+    ElMessage.error('无法发起聊天，请稍后重试')
   }
 }
 

@@ -121,10 +121,15 @@ export default {
       // 避免重复添加 (通过消息ID判断)
       const index = state.messages[sessionId].findIndex(m => m.id === message.id)
       if (index === -1) {
-        state.messages[sessionId].push(message)
+        // 创建新数组触发响应式更新
+        state.messages[sessionId] = [...state.messages[sessionId], message]
       } else {
-        // 如果已存在，则更新 (比如编辑后)
-        state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...message }
+        // 如果已存在，则更新 (比如编辑后) - 创建新数组触发响应式更新
+        state.messages[sessionId] = [
+          ...state.messages[sessionId].slice(0, index),
+          { ...state.messages[sessionId][index], ...message },
+          ...state.messages[sessionId].slice(index + 1)
+        ]
       }
     },
 
@@ -146,7 +151,11 @@ export default {
       }
       const index = state.messages[sessionId].findIndex(m => m.id === messageId)
       if (index !== -1) {
-        state.messages[sessionId].splice(index, 1)
+        // 创建新数组触发响应式更新
+        state.messages[sessionId] = [
+          ...state.messages[sessionId].slice(0, index),
+          ...state.messages[sessionId].slice(index + 1)
+        ]
       }
     },
 

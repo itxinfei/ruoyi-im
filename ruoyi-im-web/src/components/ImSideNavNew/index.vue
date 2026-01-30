@@ -89,7 +89,7 @@
             :src="currentUser.avatar"
             :name="currentUser.nickname || currentUser.username || '我'"
             :user-id="currentUser.id"
-            :size="48"
+            :size="42"
             shape="circle"
           />
           <!-- 在线状态点 -->
@@ -197,7 +197,7 @@ function handleOpenSearch() {
 // 导航容器
 // ============================================================================
 .dingtalk-nav {
-  width: 72px;
+  width: 60px;  // 钉钉标准：左侧导航栏宽度 60px
   height: 100vh;
   max-height: 100vh;
   background: var(--dt-bg-sidebar-gradient);
@@ -214,27 +214,23 @@ function handleOpenSearch() {
 // Logo 区域
 // ============================================================================
 .nav-logo-wrapper {
-  padding: 8px 0;
+  padding: 8px 0;  // 上下8px，左右0（居中）
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: center;  // 水平居中
   flex-shrink: 0;
 }
 
 .nav-logo {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 40px;  // 钉钉标准：40px × 40px
+  height: 40px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: var(--dt-radius-xl);
+  border-radius: 8px;  // 小圆角
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s var(--dt-ease-out);
-  animation: fadeInDown 0.5s var(--dt-ease-bounce);
-
-  @include hover-lift;
+  transition: all 0.2s ease;
 }
 
 .nav-logo:hover {
@@ -243,15 +239,11 @@ function handleOpenSearch() {
 }
 
 .nav-logo-text {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  color: #fff;
+  color: #FFFFFF;  // 纯白色，不要渐变
   letter-spacing: -0.5px;
   line-height: 1;
-  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .nav-logo-image {
@@ -286,9 +278,10 @@ function handleOpenSearch() {
 .nav-items {
   flex: 1;
   width: 100%;
-  padding: 4px 12px;
+  padding: 4px 0;  // 移除左右padding，只保留上下padding
   display: flex;
   flex-direction: column;
+  align-items: center;  // 水平居中
   gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -308,13 +301,12 @@ function handleOpenSearch() {
 // ============================================================================
 .nav-item {
   position: relative;
-  width: 48px;
-  height: 48px;
-  margin: 0 auto;
+  width: 40px;  // 钉钉标准：导航项 40px × 40px
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 8px;  // 钉钉标准：圆角 8px
   background: transparent;
   border: none;
   cursor: pointer;
@@ -357,10 +349,14 @@ function handleOpenSearch() {
 }
 
 .nav-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22px;
   transition: transform 0.3s var(--dt-ease-out);
   width: 22px;
   height: 22px;
+  line-height: 1;  // 确保垂直居中
 }
 
 .nav-item:hover .nav-item-icon {
@@ -368,9 +364,13 @@ function handleOpenSearch() {
 }
 
 .nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22px;
   width: 22px;
   height: 22px;
+  line-height: 1;  // 确保垂直居中
 }
 
 .nav-item-badge {
@@ -396,9 +396,10 @@ function handleOpenSearch() {
 // 底部操作区
 // ============================================================================
 .nav-footer {
-  padding: 4px 12px 12px;
+  padding: 4px 0 12px;  // 移除左右padding
   display: flex;
   flex-direction: column;
+  align-items: center;  // 水平居中
   gap: 2px;
   width: 100%;
   flex-shrink: 0;
@@ -406,11 +407,11 @@ function handleOpenSearch() {
 }
 
 .nav-item-action {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto;
+  width: 40px;  // 统一为 40px
+  height: 40px;
   display: flex;
   align-items: center;
+  justify-content: center;
   justify-content: center;
   border-radius: 12px;
   background: transparent;
@@ -456,8 +457,8 @@ function handleOpenSearch() {
 // ============================================================================
 .nav-avatar {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 48px;  // 与其他按钮统一
+  height: 48px;
   margin: 4px auto 0;
   padding: 3px;
   border-radius: 50%;
@@ -465,6 +466,9 @@ function handleOpenSearch() {
   border: none;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   display: flex;
   align-items: center;
   justify-content: center;

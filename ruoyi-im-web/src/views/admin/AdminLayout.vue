@@ -162,7 +162,8 @@
   </div>
 </template>
 
-<script setup>
+<script setup>import { clearAuth } from '@/utils/storage'
+
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
@@ -272,7 +273,6 @@ const handleUserCommand = (command) => {
 
 // 退出登录
 const logout = () => {
-  const { clearAuth } = require('@/utils/storage')
   clearAuth()
   router.push('/login')
 }

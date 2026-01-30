@@ -12,6 +12,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImDepartmentMapper;
 import com.ruoyi.im.mapper.ImDepartmentMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.service.ImOrganizationService;
 import com.ruoyi.im.vo.organization.ImDepartmentMemberVO;
 import com.ruoyi.im.vo.organization.ImDepartmentTreeVO;
@@ -39,6 +40,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
     private final ImDepartmentMapper imDepartmentMapper;
     private final ImDepartmentMemberMapper imDepartmentMemberMapper;
     private final ImUserMapper imUserMapper;
+    private final ImRedisUtil imRedisUtil;
 
     /**
      * 构造器注入依赖
@@ -46,13 +48,16 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
      * @param imDepartmentMapper        部门Mapper
      * @param imDepartmentMemberMapper  部门成员Mapper
      * @param imUserMapper               用户Mapper
+     * @param imRedisUtil                Redis工具类
      */
     public ImOrganizationServiceImpl(ImDepartmentMapper imDepartmentMapper,
                                       ImDepartmentMemberMapper imDepartmentMemberMapper,
-                                      ImUserMapper imUserMapper) {
+                                      ImUserMapper imUserMapper,
+                                      ImRedisUtil imRedisUtil) {
         this.imDepartmentMapper = imDepartmentMapper;
         this.imDepartmentMemberMapper = imDepartmentMemberMapper;
         this.imUserMapper = imUserMapper;
+        this.imRedisUtil = imRedisUtil;
     }
 
     @Override
@@ -238,7 +243,22 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
 
     @Override
     public List<ImDepartmentMemberVO> getDepartmentMembers(Long departmentId) {
-        return imDepartmentMemberMapper.selectMembersByDepartmentId(departmentId);
+        List<ImDepartmentMemberVO> members = imDepartmentMemberMapper.selectMembersByDepartmentId(departmentId);
+
+        // 为每个成员添加在线状态
+        if (members != null && !members.isEmpty()) {
+            for (ImDepartmentMemberVO member : members) {
+                try {
+                    boolean isOnline = imRedisUtil.isOnlineUser(member.getUserId());
+                    member.setOnline(isOnline);
+                } catch (Exception e) {
+                    logger.warn("获取用户在线状态失败: userId={}", member.getUserId(), e);
+                    member.setOnline(false); // 降级为离线
+                }
+            }
+        }
+
+        return members;
     }
 
     @Override

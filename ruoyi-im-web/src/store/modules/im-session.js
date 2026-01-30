@@ -214,7 +214,8 @@ export default {
     DELETE_SESSION(state, sessionId) {
       const index = state.sessions.findIndex(s => s.id === sessionId)
       if (index !== -1) {
-        state.sessions.splice(index, 1)
+        // 创建新数组触发响应式更新
+        state.sessions = [...state.sessions.slice(0, index), ...state.sessions.slice(index + 1)]
       }
       if (state.currentSession && state.currentSession.id === sessionId) {
         state.currentSession = null

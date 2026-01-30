@@ -134,9 +134,9 @@ const handleNavClick = (moduleKey) => {
 .nav-sidebar {
   display: flex;
   flex-direction: column;
-  width: 64px;
-  min-width: 64px;
-  max-width: 64px;
+  width: 60px;  // 钉钉标准：60px
+  min-width: 60px;
+  max-width: 60px;
   flex-shrink: 0;
   background-color: #0089ff;
   border-right: 1px solid #e8e8e8;
@@ -152,13 +152,14 @@ const handleNavClick = (moduleKey) => {
 }
 
 .logo-box {
-  width: 40px;
+  width: 40px;  // 钉钉标准：40px
   height: 40px;
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.2);  // 半透明白色
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 8px auto;  // 居中，上下8px间距
 }
 
 .logo-text {
@@ -183,11 +184,12 @@ const handleNavClick = (moduleKey) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 10px;
+  width: 100%;  // 填满父容器宽度（60px）
+  height: 40px;  // 钉钉标准：40px
+  margin: 0 auto;  // 居中（虽然width是100%，但保留以确保）
+  border-radius: 8px;  // 钉钉标准：8px 圆角
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.15);
@@ -206,7 +208,7 @@ const handleNavClick = (moduleKey) => {
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 28px;
+    height: 20px;
     background-color: #ffffff;
     border-radius: 0 2px 2px 0;
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
@@ -214,18 +216,25 @@ const handleNavClick = (moduleKey) => {
 }
 
 .nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22px;
   color: rgba(255, 255, 255, 0.85);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 2px;
+  line-height: 1;  // 确保图标垂直居中
 }
 
 .nav-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 11px;
   color: rgba(255, 255, 255, 0.85);
-  line-height: 1.2;
+  line-height: 1;
   font-weight: 500;
   letter-spacing: 0.3px;
+  margin-top: 2px;  // 图标和文字之间的间距
 }
 
 .nav-item:hover .nav-icon,

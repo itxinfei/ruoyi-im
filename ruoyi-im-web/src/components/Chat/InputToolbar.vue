@@ -84,7 +84,8 @@ defineEmits([
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 12px;
+  height: 40px;  // 钉钉标准：工具栏高度 40px
+  padding-bottom: 0;
   gap: 12px;
 
   .toolbar-left {
@@ -95,24 +96,24 @@ defineEmits([
     .toolbar-group {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 16px;  // 钉钉标准：工具栏按钮间距 16px
       padding: 4px;
-      background: var(--dt-bg-input);
-      border-radius: var(--dt-radius-lg);
+      background: transparent;  // 钉钉标准：无背景
+      border-radius: 0;
       transition: all var(--dt-transition-fast);
     }
   }
 
   .toolbar-btn {
     position: relative;
-    width: 28px;
-    height: 28px;
+    width: 20px;  // 钉钉标准：工具栏按钮 20px × 20px
+    height: 20px;
     background: transparent;
     border: none;
     padding: 0;
     cursor: pointer;
     color: var(--dt-text-secondary);
-    border-radius: var(--dt-radius-md);
+    border-radius: 4px;  // 钉钉标准：圆角 4px
     display: flex;
     align-items: center;
     justify-content: center;
@@ -120,34 +121,34 @@ defineEmits([
 
     .el-icon,
     .material-icons-outlined {
-      font-size: 16px;
+      font-size: 20px;  // 钉钉标准：图标 20px × 20px
       transition: transform 0.2s var(--dt-ease-out);
     }
 
     &:hover {
-      background: var(--dt-brand-bg);
+      background: rgba(0, 137, 255, 0.1);  // 钉钉标准：悬停时浅蓝色背景
       color: var(--dt-brand-color);
-      transform: translateY(-1px);
+      transform: none;  // 钉钉标准：无位移
 
       .el-icon,
       .material-icons-outlined {
-        transform: scale(1.1);
+        transform: none;  // 钉钉标准：无缩放
       }
     }
 
     &:active {
-      transform: translateY(0) scale(0.95);
+      transform: scale(0.95);  // 钉钉标准：点击时缩小
     }
 
     &.active {
       color: var(--dt-brand-color);
-      background: var(--dt-brand-bg);
-      box-shadow: inset 0 1px 2px rgba(0, 137, 255, 0.2);
+      background: rgba(0, 137, 255, 0.15);  // 钉钉标准：激活时略深的蓝色背景
+      box-shadow: none;  // 钉钉标准：无阴影
 
       &::before {
         content: '';
         position: absolute;
-        bottom: 0;
+        bottom: -4px;  // 调整下划线位置
         left: 50%;
         transform: translateX(-50%);
         width: 16px;

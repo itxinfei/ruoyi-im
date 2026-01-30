@@ -216,7 +216,8 @@
   </div>
 </template>
 
-<script setup>
+<script setup>import { getRememberedUsername, removeItem, setRememberedUsername } from '@/utils/storage'
+
 import { ref, reactive, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
@@ -328,10 +329,8 @@ const handleLogin = async () => {
       })
 
       if (formData.rememberMe) {
-        const { setRememberedUsername } = require('@/utils/storage')
         setRememberedUsername(formData.username)
       } else {
-        const { removeItem } = require('@/utils/storage')
         removeItem('remembered_username')
       }
     } else {
@@ -375,7 +374,6 @@ const handleSMSLogin = () => {
 
 // 初始化
 onMounted(() => {
-  const { getRememberedUsername } = require('@/utils/storage')
   const rememberedUsername = getRememberedUsername()
   if (rememberedUsername) {
     loginForm.username = rememberedUsername

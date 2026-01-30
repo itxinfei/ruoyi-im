@@ -71,9 +71,15 @@ export default {
     UPDATE_CONTACT(state, contact) {
       const index = state.contacts.findIndex(c => c.id === contact.id)
       if (index !== -1) {
-        state.contacts[index] = { ...state.contacts[index], ...contact }
+        // 创建新数组触发响应式更新
+        state.contacts = [
+          ...state.contacts.slice(0, index),
+          { ...state.contacts[index], ...contact },
+          ...state.contacts.slice(index + 1)
+        ]
       } else {
-        state.contacts.push(contact)
+        // 创建新数组触发响应式更新
+        state.contacts = [...state.contacts, contact]
       }
     },
 
@@ -81,7 +87,8 @@ export default {
     DELETE_CONTACT(state, contactId) {
       const index = state.contacts.findIndex(c => c.id === contactId)
       if (index !== -1) {
-        state.contacts.splice(index, 1)
+        // 创建新数组触发响应式更新
+        state.contacts = [...state.contacts.slice(0, index), ...state.contacts.slice(index + 1)]
       }
     },
 
@@ -94,9 +101,15 @@ export default {
     UPDATE_GROUP(state, group) {
       const index = state.groups.findIndex(g => g.id === group.id)
       if (index !== -1) {
-        state.groups[index] = { ...state.groups[index], ...group }
+        // 创建新数组触发响应式更新
+        state.groups = [
+          ...state.groups.slice(0, index),
+          { ...state.groups[index], ...group },
+          ...state.groups.slice(index + 1)
+        ]
       } else {
-        state.groups.push(group)
+        // 创建新数组触发响应式更新
+        state.groups = [...state.groups, group]
       }
     },
 
@@ -104,7 +117,8 @@ export default {
     DELETE_GROUP(state, groupId) {
       const index = state.groups.findIndex(g => g.id === groupId)
       if (index !== -1) {
-        state.groups.splice(index, 1)
+        // 创建新数组触发响应式更新
+        state.groups = [...state.groups.slice(0, index), ...state.groups.slice(index + 1)]
       }
     },
 

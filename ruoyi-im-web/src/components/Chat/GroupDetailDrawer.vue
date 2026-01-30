@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     v-model="visible"
-    size="420px"
+    size="280px"  // 钉钉标准：抽屉宽度 280px
     direction="rtl"
     class="group-detail-drawer"
     :with-header="false"

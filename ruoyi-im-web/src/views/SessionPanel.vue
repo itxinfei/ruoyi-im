@@ -960,12 +960,14 @@ onUnmounted(() => {
 .session-item {
   position: relative;
   display: flex;
-  padding: 12px; // 钉钉风格：统一间距
+  height: 72px; // 钉钉标准：固定高度 72px
+  padding: 0 16px; // 钉钉标准：左右内边距 16px
   cursor: pointer;
-  gap: 10px;
+  gap: 12px; // 增加间距，钉钉标准约 12px
   transition: all var(--dt-transition-fast);
   animation: fadeInLeft 0.3s var(--dt-ease-out) both;
   border-radius: 0; // 钉钉风格：无圆角，方形设计
+  align-items: center; // 垂直居中
 
   &::before {
     content: '';
@@ -981,7 +983,7 @@ onUnmounted(() => {
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.04); // 钉钉风格：淡淡的hover背景
+    background: var(--dt-bg-session-hover); // 钉钉标准：#F6F8FA
 
     &::before {
       height: 24px;
@@ -989,7 +991,7 @@ onUnmounted(() => {
   }
 
   &.active {
-    background: rgba(0, 137, 255, 0.08); // 钉钉风格：品牌色的淡背景
+    background: var(--dt-bg-session-active); // 钉钉标准：#EBF2FF
 
     &::before {
       height: 32px;
@@ -1014,7 +1016,7 @@ onUnmounted(() => {
   }
 
   &.pinned.active {
-    background: rgba(0, 137, 255, 0.08);
+    background: var(--dt-bg-session-active); // 钉钉标准：#EBF2FF
   }
 
   &.unread {
@@ -1044,12 +1046,15 @@ onUnmounted(() => {
 .avatar-wrapper {
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .session-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--dt-radius-lg);
+  width: 48px;  // 钉钉标准：会话列表头像 48px
+  height: 48px;
+  border-radius: 6px;  // 钉钉方形头像，圆角 6px
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1059,11 +1064,11 @@ onUnmounted(() => {
   &.group-avatar {
     background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
   }
 
   :deep(.dingtalk-avatar) {
-    border-radius: var(--dt-radius-lg) !important;
+    border-radius: 6px !important;  // 统一圆角
     transition: transform 0.2s var(--dt-ease-out);
   }
 }

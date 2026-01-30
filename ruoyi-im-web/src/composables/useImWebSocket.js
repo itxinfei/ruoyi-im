@@ -1,7 +1,8 @@
 /**
  * WebSocket 组合式函数
  * 用于在 Vue 组件中使用 WebSocket
- */
+ */import { getToken } from '../utils/storage'
+
 import { onUnmounted, ref } from 'vue'
 import { error } from '@/utils/logger'
 import imWebSocket, { WS_STATUS } from '@/utils/websocket/imWebSocket'
@@ -26,7 +27,6 @@ export function useImWebSocket() {
   // 连接 WebSocket
   const connect = (token) => {
     if (!token) {
-      const { getToken } = require('@/utils/storage')
       token = getToken()
     }
 

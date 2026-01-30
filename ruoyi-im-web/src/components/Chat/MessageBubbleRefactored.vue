@@ -323,7 +323,8 @@ const canRecall = computed(() => {
   .bubble-content {
     background: var(--dt-bubble-left-bg);
     border: 1px solid var(--dt-bubble-left-border);
-    border-radius: var(--dt-radius-md) var(--dt-radius-md) var(--dt-radius-md) 2px;
+    // 钉钉标准：左尖右圆（左上4px 左下4px 右上12px 右下12px）
+    border-radius: 4px 12px 12px 4px;
   }
 
   &:hover .bubble-content {
@@ -337,12 +338,26 @@ const canRecall = computed(() => {
 
   .bubble-content {
     background: var(--dt-bubble-right-bg);
+    color: var(--dt-bubble-right-text);  // 白色文字
     border: none;
-    border-radius: var(--dt-radius-md) var(--dt-radius-md) 2px var(--dt-radius-md);
+    // 钉钉标准：左圆右尖（左上12px 左下12px 右上4px 右下4px）
+    border-radius: 12px 4px 4px 12px;
   }
 
   &:hover .bubble-content {
     background: var(--dt-bubble-right-bg-hover);
+  }
+
+  // 确保所有子元素文字颜色都是白色
+  :deep(.message-text),
+  :deep(.message-content),
+  :deep(.link-content) {
+    color: #FFFFFF !important;
+  }
+
+  :deep(a) {
+    color: #FFFFFF !important;
+    text-decoration: underline;
   }
 }
 

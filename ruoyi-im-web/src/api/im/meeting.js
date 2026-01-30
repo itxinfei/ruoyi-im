@@ -10,7 +10,7 @@ import request from '../request'
  */
 export function getMeetingList(status) {
   return request({
-    url: '/im/meeting/list',
+    url: '/api/im/meeting/list',  // 修复：添加 /api 前缀
     method: 'get',
     params: { status }
   })
@@ -23,7 +23,7 @@ export function getMeetingList(status) {
  */
 export function getMeetingDetail(meetingId) {
   return request({
-    url: `/im/meeting/${meetingId}`,
+    url: `/api/im/meeting/${meetingId}`,  // 修复：添加 /api 前缀
     method: 'get'
   })
 }
@@ -35,7 +35,7 @@ export function getMeetingDetail(meetingId) {
  */
 export function createMeeting(data) {
   return request({
-    url: '/im/meeting/create',
+    url: '/api/im/meeting/create',  // 修复：添加 /api 前缀
     method: 'post',
     data
   })
@@ -49,7 +49,7 @@ export function createMeeting(data) {
  */
 export function updateMeeting(meetingId, data) {
   return request({
-    url: `/im/meeting/${meetingId}`,
+    url: `/api/im/meeting/${meetingId}`,  // 修复：添加 /api 前缀
     method: 'put',
     data
   })
@@ -62,7 +62,7 @@ export function updateMeeting(meetingId, data) {
  */
 export function cancelMeeting(meetingId) {
   return request({
-    url: `/im/meeting/${meetingId}/cancel`,
+    url: `/api/im/meeting/${meetingId}/cancel`,  // 修复：添加 /api 前缀
     method: 'post'
   })
 }
@@ -74,7 +74,7 @@ export function cancelMeeting(meetingId) {
  */
 export function deleteMeeting(meetingId) {
   return request({
-    url: `/im/meeting/${meetingId}`,
+    url: `/api/im/meeting/${meetingId}`,  // 修复：添加 /api 前缀
     method: 'delete'
   })
 }
@@ -86,7 +86,7 @@ export function deleteMeeting(meetingId) {
  */
 export function startMeeting(meetingId) {
   return request({
-    url: `/im/meeting/${meetingId}/start`,
+    url: `/api/im/meeting/${meetingId}/start`,  // 修复：添加 /api 前缀
     method: 'post'
   })
 }
@@ -98,7 +98,7 @@ export function startMeeting(meetingId) {
  */
 export function endMeeting(meetingId) {
   return request({
-    url: `/im/meeting/${meetingId}/end`,
+    url: `/api/im/meeting/${meetingId}/end`,  // 修复：添加 /api 前缀
     method: 'post'
   })
 }
@@ -111,7 +111,7 @@ export function endMeeting(meetingId) {
  */
 export function joinMeeting(meetingId, password) {
   return request({
-    url: `/im/meeting/${meetingId}/join`,
+    url: `/api/im/meeting/${meetingId}/join`,  // 修复：添加 /api 前缀
     method: 'post',
     params: { password }
   })
@@ -124,7 +124,7 @@ export function joinMeeting(meetingId, password) {
  */
 export function leaveMeeting(meetingId) {
   return request({
-    url: `/im/meeting/${meetingId}/leave`,
+    url: `/api/im/meeting/${meetingId}/leave`,  // 修复：添加 /api 前缀
     method: 'post'
   })
 }
@@ -136,7 +136,7 @@ export function leaveMeeting(meetingId) {
  */
 export function getParticipants(meetingId) {
   return request({
-    url: `/im/meeting/${meetingId}/participants`,
+    url: `/api/im/meeting/${meetingId}/participants`,  // 修复：添加 /api 前缀
     method: 'get'
   })
 }
@@ -149,7 +149,7 @@ export function getParticipants(meetingId) {
  */
 export function inviteUsers(meetingId, userIds) {
   return request({
-    url: `/im/meeting/${meetingId}/invite`,
+    url: `/api/im/meeting/${meetingId}/invite`,  // 修复：添加 /api 前缀
     method: 'post',
     data: userIds
   })
@@ -163,7 +163,7 @@ export function inviteUsers(meetingId, userIds) {
  */
 export function removeParticipant(meetingId, userId) {
   return request({
-    url: `/im/meeting/${meetingId}/remove`,
+    url: `/api/im/meeting/${meetingId}/remove`,  // 修复：添加 /api 前缀
     method: 'post',
     params: { userId }
   })
@@ -178,7 +178,7 @@ export function removeParticipant(meetingId, userId) {
  */
 export function muteParticipant(meetingId, userId, muted) {
   return request({
-    url: `/im/meeting/${meetingId}/mute`,
+    url: `/api/im/meeting/${meetingId}/mute`,  // 修复：添加 /api 前缀
     method: 'post',
     params: { userId, muted }
   })

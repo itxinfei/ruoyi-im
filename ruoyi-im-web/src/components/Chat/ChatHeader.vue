@@ -11,7 +11,7 @@
           :src="session?.avatar"
           :name="session?.name"
           :user-id="session?.targetId"
-          :size="42"
+          :size="40"
           shape="square"
           custom-class="header-avatar"
         />
@@ -414,24 +414,40 @@ const handleShowMembers = () => {
 
 .header-avatar-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.25s var(--dt-ease-out);
 }
 
 .header-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--dt-radius-md);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   :deep(.dingtalk-avatar) {
-    border-radius: var(--dt-radius-md) !important;
+    border-radius: 6px !important;  // 钉钉标准圆角
   }
 }
 
 .group-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: var(--dt-radius-md);
+  border-radius: 6px;  // 钉钉标准圆角
   background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
   color: #fff;
+
+  :deep(.material-icons-outlined) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
 }
 
 .btn-icon-wrapper {

@@ -15,7 +15,8 @@
  *   storageKey: 'im_input_height'
  * })
  * ```
- */
+ */import { getItem } from '../utils/storage'
+
 import { ref, onMounted } from 'vue'
 
 export function useInputResize(options = {}) {
@@ -94,7 +95,6 @@ export function useInputResize(options = {}) {
    * 从 localStorage 恢复高度
    */
   const restoreHeight = () => {
-    const { getItem } = require('@/utils/storage')
     try {
       const saved = getItem(storageKey)
       if (saved) {

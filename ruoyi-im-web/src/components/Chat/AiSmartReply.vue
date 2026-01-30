@@ -82,6 +82,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import AiStyleDialog from './AiStyleDialog.vue'
+import { getAiReplyStyle } from '@/utils/storage'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -97,7 +98,6 @@ const showStyleDialog = ref(false)
 
 // 加载风格配置
 const loadStyleConfig = () => {
-  const { getAiReplyStyle } = require('@/utils/storage')
   const saved = getAiReplyStyle()
   return Object.keys(saved).length > 0 ? saved : { categories: ['confirm', 'polite', 'work'] }
 }

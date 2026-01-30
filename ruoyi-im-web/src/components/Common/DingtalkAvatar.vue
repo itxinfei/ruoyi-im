@@ -110,7 +110,7 @@ const handleImageError = () => {
 
 <style scoped lang="scss">
 .dingtalk-avatar {
-  display: inline-flex;
+  display: flex;  // 改为 flex，确保在 flex 容器中正常居中
   align-items: center;
   justify-content: center;
   color: #fff;
@@ -118,7 +118,6 @@ const handleImageError = () => {
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
-  box-shadow: var(--dt-shadow-2);
   transition: all var(--dt-transition-fast);
 
   &:hover {
@@ -127,36 +126,49 @@ const handleImageError = () => {
   }
 }
 
-.dingtalk-avatar.avatar-square.message-avatar {
-  border: 1px solid var(--dt-brand-color);
-  box-shadow: 0 0 6px rgba(0, 137, 255, 0.2);
-}
-
-/* 为个人信息头像添加相同的边框样式 */
-.dingtalk-avatar.avatar-square.user-info-avatar {
-  border: 1px solid var(--dt-brand-color);
-  box-shadow: 0 0 6px rgba(0, 137, 255, 0.2);
-}
-
+/* 圆形头像（单聊） */
 .avatar-circle {
-  border-radius: var(--dt-radius-md); /* 改为矩形圆角 */
-  border: 1px solid var(--dt-brand-color);
-  box-shadow: 0 0 6px rgba(0, 137, 255, 0.2);
+  border-radius: 50%;  // 钉钉单聊头像是完全圆形的
+  border: none;  // 移除边框
+  box-shadow: var(--dt-shadow-2);
 }
 
+/* 方形头像（群聊） */
 .avatar-square {
-  border-radius: var(--dt-radius-md); /* 钉钉标准的圆角 */
+  border-radius: 6px;  // 钉钉群聊头像：小圆角方形
+  border: 1px solid rgba(0, 137, 255, 0.1);
+  box-shadow: var(--dt-shadow-2);
 }
 
+/* 消息中的特殊头像样式 */
+.dingtalk-avatar.message-avatar {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 137, 255, 0.15);
+}
+
+/* 用户信息头像 */
+.dingtalk-avatar.user-info-avatar {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 137, 255, 0.15);
+}
+
+/* 头像图片 */
 .avatar-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;  // 移除 inline，确保完全填充
 }
 
+/* 头像文字（首字母） */
 .avatar-text {
   white-space: nowrap;
   user-select: none;
   text-transform: uppercase;
+  display: flex;  // 确保文字居中
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 </style>

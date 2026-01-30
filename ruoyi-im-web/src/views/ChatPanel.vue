@@ -54,6 +54,7 @@
             @show-user="handleShowUser"
             @retry="handleRetry"
             @preview="handleImagePreview"
+            @re-edit="handleReEdit"
           />
           <MessageInput
             ref="messageInputRef"
@@ -265,6 +266,7 @@ import { uploadFile, uploadImage } from '@/api/im/file'
 import { addFavorite, removeFavorite } from '@/api/im/favorite'
 import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
 import { useImWebSocket } from '@/composables/useImWebSocket'
+import { useMessageRetry } from '@/composables/useMessageRetry'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseMessageContent } from '@/utils/message'
 
@@ -338,6 +340,14 @@ const pinnedCount = computed(() => messages.value.filter(m => m.isPinned).length
 const emit = defineEmits(['show-user'])
 
 const { onMessage, onTyping, onMessageStatus, onReaction, sendTyping, sendStopTyping } = useImWebSocket()
+
+// 失败消息重试管理
+const {
+  init: initMessageRetry,
+  recordFailedMessage,
+  removeFailedMessage,
+  canRetry
+} = useMessageRetry()
 
 // 输入状态用户列表（用于显示"xxx正在输入..."）
 const typingUsers = ref([])
@@ -512,6 +522,11 @@ const handleSend = async (content) => {
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
       messages.value[index].status = 'failed'
+      // 记录失败消息到缓存
+      recordFailedMessage({
+        ...tempMsg,
+        sessionId: props.session.id
+      })
     }
     console.error('发送失败', error)
   }
@@ -1017,23 +1032,41 @@ const handleCancelEdit = () => {
 
 const handleRetry = async (msg) => {
   if (msg.status !== 'failed') return
-  
+
+  // 检查是否可以重试
+  if (!canRetry(msg.id)) {
+    ElMessage.warning('重试次数已达上限')
+    return
+  }
+
   // 重置为发送中
   msg.status = 'sending'
-  
+
   try {
     const res = await store.dispatch('im/message/sendMessage', {
       sessionId: props.session.id,
       type: msg.type,
       content: typeof msg.content === 'object' ? JSON.stringify(msg.content) : msg.content
     })
-    
-    // 更新
+
+    // 更新消息
     const realMsg = transformMsg(res)
     Object.assign(msg, { ...realMsg, status: null })
+
+    // 移除失败消息缓存
+    removeFailedMessage(msg.id)
+
+    ElMessage.success('发送成功')
   } catch (error) {
     msg.status = 'failed'
-    ElMessage.error('重试失败')
+    // 重新记录失败消息（增加重试次数）
+    recordFailedMessage({
+      ...msg,
+      sessionId: props.session.id
+    })
+
+    ElMessage.error('重试失败，请稍后重试')
+    console.error('重试失败', error)
   }
 }
 
@@ -1107,6 +1140,30 @@ const handleEditConfirm = async (content) => {
   } catch (error) {
     console.error('编辑失败', error)
   }
+}
+
+/**
+ * 处理撤回消息重新编辑
+ */
+const handleReEdit = ({ content }) => {
+  if (!content) return
+
+  // 设置编辑消息（临时对象，用于触发编辑模式）
+  editingMessage.value = {
+    id: `reedit-${Date.now()}`,
+    content,
+    isReEdit: true  // 标记为重新编辑
+  }
+
+  // 将内容填充到输入框
+  messageInputRef.value?.setContent(content)
+
+  // 聚焦输入框
+  nextTick(() => {
+    messageInputRef.value?.focus()
+  })
+
+  ElMessage.info('已恢复消息内容，修改后点击发送')
 }
 
 // 通话功能
@@ -1642,6 +1699,9 @@ const handleSendLocation = async ({ latitude, longitude, address }) => {
 }
 
 onMounted(() => {
+  // 初始化失败消息重试管理
+  initMessageRetry()
+
   if (props.session) loadHistory()
 
   // 请求浏览器通知权限

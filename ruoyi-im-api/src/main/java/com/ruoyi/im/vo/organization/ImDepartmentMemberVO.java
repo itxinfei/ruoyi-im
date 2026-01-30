@@ -1,5 +1,6 @@
 package com.ruoyi.im.vo.organization;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -23,7 +24,8 @@ public class ImDepartmentMemberVO implements Serializable {
     /** 部门ID */
     private Long departmentId;
 
-    /** 部门名称 */
+    /** 部门名称（映射到 dept） */
+    @JsonProperty("dept")
     private String departmentName;
 
     /** 用户ID */
@@ -32,7 +34,8 @@ public class ImDepartmentMemberVO implements Serializable {
     /** 用户名 */
     private String username;
 
-    /** 昵称 */
+    /** 昵称（映射到 name） */
+    @JsonProperty("name")
     private String nickname;
 
     /** 头像 */
@@ -58,4 +61,7 @@ public class ImDepartmentMemberVO implements Serializable {
 
     /** 创建时间 */
     private LocalDateTime createTime;
+
+    /** 在线状态（新增） */
+    private Boolean online;
 }

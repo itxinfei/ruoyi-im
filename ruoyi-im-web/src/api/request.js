@@ -4,6 +4,7 @@
  */
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { getToken, getUserInfo, clearAuth } from '@/utils/storage'
 
 // 创建 axios 实例
 const service = axios.create({
@@ -15,14 +16,13 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // 从 localStorage 获取 token
-    const { getToken, getUserInfo: getStoredUserInfo } = require('@/utils/storage')
     const token = getToken()
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
     }
 
     // 从 localStorage 获取用户信息并发送 userId
-    const userInfo = getStoredUserInfo()
+    const userInfo = getUserInfo()
     if (userInfo?.id) {
       config.headers['userId'] = String(userInfo.id)
     }
@@ -46,7 +46,6 @@ service.interceptors.response.use(
       // 401: 未授权
       if (res.code === 401) {
         // 清除 token 并跳转登录页
-        const { clearAuth } = require('@/utils/storage')
         clearAuth()
         if (window.location.pathname !== '/login') {
           window.location.href = '/login'
@@ -73,7 +72,6 @@ service.interceptors.response.use(
           break
         case 401:
           ElMessage.error('未授权，请重新登录')
-          const { clearAuth } = require('@/utils/storage')
           clearAuth()
           if (window.location.pathname !== '/login') {
             window.location.href = '/login'

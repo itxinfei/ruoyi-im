@@ -101,12 +101,12 @@
                 :key="dept.id"
                 class="org-item"
                 :class="{
-                  'is-child': dept.isChild,
                   active: selectedDeptId === dept.id
                 }"
+                :style="{ paddingLeft: `${8 + (dept.level || 0) * 16}px` }"
                 @click="selectDept(dept)"
               >
-                <span v-if="dept.isChild" class="org-dot"></span>
+                <span v-if="dept.level > 0" class="org-dot"></span>
                 <span class="org-name">{{ dept.name }}</span>
                 <span class="org-count">({{ dept.userCount || 0 }})</span>
               </div>
@@ -319,7 +319,7 @@
         <!-- 联系人详情 -->
         <ContactDetail
           v-if="selectedType === 'friend' || selectedType === 'member'"
-          :user="selectedItem"
+          :contact="selectedItem"
           @voice-call="startVoiceCall"
           @video-call="startVideoCall"
           @message="startChat"
@@ -404,7 +404,8 @@
   </div>
 </template>
 
-<script setup>
+<script setup>import { getItem, removeItem, setJSON } from '@/utils/storage'
+
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useWindowSize, useDebounceFn } from '@vueuse/core'
@@ -535,6 +536,13 @@ const letterCounts = computed(() => {
     return counts
 })
 
+// A-Z 索引栏显示控制
+const showIndexBar = computed(() => {
+    if (currentNav.value !== 'org') return false
+    // 只有当成员数量超过一定阈值时显示索引
+    return orgMembers.value.length > 20
+})
+
 // Helper: Group By Letter
 function groupMembersByLetter(members) {
     const groups = {}
@@ -591,7 +599,29 @@ const scrollToLetter = (letter) => {
 }
 
 const handleListScroll = (e) => {
-   // Logic to update activeLetter based on scroll position could be complex with VirtualList
+    // 🔑 A-Z 索引同步高亮
+    if (currentNav.value !== 'org' || !virtualListRef.value) return
+
+    // 获取当前滚动位置对应的索引
+    const scrollTop = e?.target?.scrollTop || 0
+    const itemHeight = 60 // header: 32, item: 60
+    const currentIndex = Math.floor(scrollTop / itemHeight)
+
+    // 找到对应的字母分组
+    let currentLetter = ''
+    for (let i = 0; i < virtualListData.value.length; i++) {
+        if (i >= currentIndex) {
+            const item = virtualListData.value[i]
+            if (item.type === 'header') {
+                currentLetter = item.title
+                break
+            }
+        }
+    }
+
+    if (currentLetter && currentLetter !== activeLetter.value) {
+        activeLetter.value = currentLetter
+    }
 }
 
 // API Loaders
@@ -635,7 +665,20 @@ const loadOrgMembers = async (deptId) => {
     loading.value = true
     try {
         const res = await getDepartmentMembers(deptId)
-        orgMembers.value = res.data || []
+        // 字段映射：后端返回 nickname/name/departmentName/online，前端需要统一格式
+        orgMembers.value = (res.data || []).map(m => ({
+            id: m.userId,
+            name: m.nickname || m.username,       // 映射到 name
+            displayName: m.nickname || m.username,
+            avatar: m.avatar,
+            dept: m.departmentName,              // 映射到 dept
+            position: m.position,
+            online: m.online || false,            // 在线状态
+            type: 'member'
+        }))
+    } catch (e) {
+        console.error('加载部门成员失败', e)
+        ElMessage.error('加载部门成员失败')
     } finally { loading.value = false }
 }
 
@@ -660,7 +703,6 @@ const startVideoCall = () => ElMessage.info('视频通话开发中')
 const searchHistory = ref([])
 
 const loadSearchHistory = () => {
-    const { getItem, setJSON, removeItem } = require('@/utils/storage')
     const history = getItem('contacts_search_history')
     if (history) {
         searchHistory.value = JSON.parse(history)
@@ -668,7 +710,6 @@ const loadSearchHistory = () => {
 }
 
 const saveSearchHistory = (query) => {
-    const { setJSON } = require('@/utils/storage')
     if (!query.trim()) return
     const history = searchHistory.value.filter(h => h !== query)
     history.unshift(query)
@@ -678,7 +719,6 @@ const saveSearchHistory = (query) => {
 }
 
 const clearSearchHistory = () => {
-    const { removeItem } = require('@/utils/storage')
     searchHistory.value = []
     removeItem('contacts_search_history')
 }
@@ -769,12 +809,21 @@ const performLocalSearch = () => {
 const handleDelete = () => ElMessage.warning('删除功能开发中')
 
 // Utils
-const flattenOrgTree = (tree) => {
+// Utils - 支持无限层级的组织架构扁平化
+const flattenOrgTree = (tree, level = 0) => {
     const res = []
     tree.forEach(d => {
-        res.push({ id: d.id, name: d.name, isChild: false, userCount: d.userCount })
-        if (d.children) {
-            d.children.forEach(c => res.push({ id: c.id, name: c.name, isChild: true, parentId: d.id, userCount: c.userCount }))
+        res.push({
+            id: d.id,
+            name: d.name,
+            isChild: level > 0,
+            level: level,           // 🔑 记录层级深度
+            userCount: d.memberCount || d.userCount || 0,
+            parentId: level > 0 ? undefined : d.parentId  // 根节点记录父ID
+        })
+        // 🔑 递归处理子部门（支持无限层级）
+        if (d.children && d.children.length > 0) {
+            res.push(...flattenOrgTree(d.children, level + 1))
         }
     })
     return res
@@ -1010,18 +1059,15 @@ onMounted(() => {
       color: var(--dt-text-primary);
     }
 
-    &.is-child {
-      padding-left: 16px;
-      position: relative;
+    // 动态层级缩进（通过内联样式控制）
 
-      .org-dot {
-        position: absolute;
-        left: 6px;
-        width: 4px;
-        height: 4px;
-        background: var(--dt-border-color);
-        border-radius: 50%;
-      }
+    .org-dot {
+      position: absolute;
+      left: 6px;
+      width: 4px;
+      height: 4px;
+      background: var(--dt-border-color);
+      border-radius: 50%;
     }
 
     &.active {
@@ -1237,7 +1283,8 @@ onMounted(() => {
 // ============================================================================
 
 .list-panel {
-  flex: 1;
+  width: 360px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -1447,8 +1494,8 @@ onMounted(() => {
 // ============================================================================
 
 .detail-panel {
-  flex: 1;
-  max-width: 360px;
+  width: 360px;
+  flex-shrink: 0;
   background: var(--dt-bg-body);
   display: flex;
   flex-direction: column;

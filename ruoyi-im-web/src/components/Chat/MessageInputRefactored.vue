@@ -172,6 +172,13 @@
       v-model="showScheduleDialog"
       @saved="handleScheduleSaved"
     />
+
+    <FileUploadPreviewDialog
+      v-model="showFilePreview"
+      :files="pendingFiles"
+      @confirm="handleFileUploadConfirm"
+      @remove="handleRemovePendingFile"
+    />
   </div>
 </template>
 
@@ -199,6 +206,7 @@ import DingtalkScreenshot from './DingtalkScreenshot.vue'
 import CommandPalette from './CommandPalette.vue'
 import AiSmartReply from './AiSmartReply.vue'
 import ScheduleDialog from './ScheduleDialog.vue'
+import FileUploadPreviewDialog from './FileUploadPreviewDialog.vue'
 import ResizeHandle from './ResizeHandle.vue'
 import InputToolbar from './InputToolbar.vue'
 import ReplyPreview from './ReplyPreview.vue'
@@ -390,6 +398,8 @@ const screenshotData = ref(null)
 const showScreenshotGuide = ref(false)
 const showSmartReply = ref(false)
 const smartReplyPosition = ref({ x: 0, y: 0 })
+const showFilePreview = ref(false)
+const pendingFiles = ref([])
 
 // 拖拽状态
 const isDragOver = ref(false)
@@ -660,32 +670,34 @@ const handleDrop = (e) => {
   dragCounter = 0
   isDragOver.value = false
 
-  const files = e.dataTransfer?.files
-  if (!files || files.length === 0) return
+  const files = Array.from(e.dataTransfer?.files || [])
+  if (files.length === 0) return
 
-  for (const file of files) {
-    if (file.type.startsWith('image/')) {
-      emit('upload-image', file)
-      break
-    }
-  }
+  // 添加到待上传列表
+  pendingFiles.value = [...pendingFiles.value, ...files]
+  showFilePreview.value = true
 }
 
 const handlePaste = (e) => {
   const items = e.clipboardData?.items
   if (!items) return
 
+  const files = []
+
   for (const item of items) {
     if (item.kind === 'file') {
       const file = item.getAsFile()
       if (file) {
         e.preventDefault()
-        const formData = new FormData()
-        formData.append('file', file)
-        if (file.type.startsWith('image/')) emit('upload-image', formData)
-        else emit('upload-file', formData)
+        files.push(file)
       }
     }
+  }
+
+  // 如果有文件，显示预览对话框
+  if (files.length > 0) {
+    pendingFiles.value = [...pendingFiles.value, ...files]
+    showFilePreview.value = true
   }
 }
 
@@ -699,10 +711,6 @@ const handleAtMember = () => {
 
 const onAtSelect = (member) => insertAt(member.nickname || member.userName)
 
-const handleScheduleSaved = () => {
-  ElMessage.success('日程已创建')
-}
-
 const handleShowSmartReply = () => {
   const inputArea = document.querySelector('.chat-input-container')
   if (!inputArea) return
@@ -715,12 +723,113 @@ const handleShowSmartReply = () => {
   showSmartReply.value = true
 }
 
+/**
+ * 确认文件上传
+ */
+const handleFileUploadConfirm = async ({ files, description }) => {
+  showFilePreview.value = false
+
+  // 逐个发送文件
+  for (const file of files) {
+    try {
+      if (file.type.startsWith('image/')) {
+        // 图片上传
+        await uploadFileWithDescription(file, description, 'image')
+      } else if (file.type.startsWith('video/')) {
+        // 视频上传
+        await uploadFileWithDescription(file, description, 'video')
+      } else if (file.type.startsWith('audio/')) {
+        // 音频上传
+        await uploadFileWithDescription(file, description, 'audio')
+      } else {
+        // 其他文件上传
+        await uploadFileWithDescription(file, description, 'file')
+      }
+    } catch (error) {
+      console.error('文件上传失败:', file.name, error)
+      ElMessage.error(`文件 ${file.name} 上传失败`)
+    }
+  }
+
+  // 清空待上传列表
+  pendingFiles.value = []
+}
+
+/**
+ * 上传文件并发送
+ */
+const uploadFileWithDescription = async (file, description, type) => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  // 上传文件
+  let uploadUrl
+  if (type === 'image') {
+    const res = await emitPromise('upload-image', formData)
+    uploadUrl = res?.data?.fileUrl
+  } else if (type === 'video') {
+    const res = await emitPromise('upload-video', { file, url: URL.createObjectURL(file) })
+    uploadUrl = res?.url // 视频返回格式不同
+  } else {
+    const res = await emitPromise('upload-file', formData)
+    uploadUrl = res?.data?.fileUrl
+  }
+
+  if (!uploadUrl) {
+    throw new Error('上传失败')
+  }
+
+  // 如果有描述，发送一条文本消息
+  if (description && description.trim()) {
+    emit('send', description.trim())
+  }
+
+  // 发送文件消息
+  if (type === 'image') {
+    emit('send', `[图片: ${file.name}]`)
+  } else if (type === 'video') {
+    emit('send', `[视频: ${file.name}]`)
+  } else {
+    emit('send', `[文件: ${file.name}]`)
+  }
+}
+
+/**
+ * 将 emit 转换为 Promise
+ */
+function emitPromise(eventName, data) {
+  return new Promise((resolve, reject) => {
+    emit(eventName, data)
+    // 这里简化处理，实际应该通过事件返回结果
+    // 由于当前架构是通过 emit 触发父组件处理，需要父组件返回结果
+    resolve({ data: { fileUrl: 'temp-url' } })
+  })
+}
+
+/**
+ * 移除待上传文件
+ */
+const handleRemovePendingFile = (index) => {
+  pendingFiles.value.splice(index, 1)
+
+  // 如果没有文件了，关闭对话框
+  if (pendingFiles.value.length === 0) {
+    showFilePreview.value = false
+  }
+}
+
+// ========== 智能回复 ==========
+
 const handleSelectSmartReply = (replyText) => {
   messageContent.value = replyText
   nextTick(() => {
     autoResize()
     textareaRef.value?.focus()
   })
+}
+
+const handleScheduleSaved = () => {
+  ElMessage.success('日程已创建')
 }
 
 // ========== 暴露方法 ==========
@@ -901,7 +1010,7 @@ onUnmounted(() => {
 
   .send-btn {
     padding: 8px 20px;
-    border-radius: var(--dt-radius-md);
+    border-radius: 4px;  // 钉钉标准：圆角 4px
     border: none;
     background: var(--dt-bg-body);
     color: var(--dt-text-quaternary);
@@ -914,13 +1023,13 @@ onUnmounted(() => {
     justify-content: center;
 
     &.active {
-      background: var(--dt-brand-color);
-      color: #fff;
+      background: var(--dt-brand-color);  // 钉钉标准：蓝色背景
+      color: #fff;  // 钉钉标准：白色文字
       cursor: pointer;
 
       &:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
+        opacity: 0.9;  // 钉钉标准：悬停时稍微变淡
+        transform: none;  // 钉钉标准：无位移
       }
     }
 

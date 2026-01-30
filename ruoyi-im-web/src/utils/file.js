@@ -1,6 +1,7 @@
 /**
  * 文件URL处理工具函数
  */
+import { getToken } from './storage'
 
 /**
  * 为文件URL添加认证token
@@ -29,7 +30,6 @@ export function addTokenToUrl(url) {
     }
 
     // 获取token
-    const { getToken } = require('./storage')
     const token = getToken()
     if (!token) {
         console.warn('未找到token，无法添加到URL')

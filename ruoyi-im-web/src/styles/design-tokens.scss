@@ -49,8 +49,9 @@
 
   // === DingTalk Special (钉钉特殊颜色) ===
   --dt-bubble-left-bg: #FFFFFF; // 接收消息背景（钉钉纯白）
-  --dt-bubble-left-border: #E5E9EF; // 接收消息边框（钉钉浅灰）
-  --dt-bubble-right-bg: #0089FF; // 发送消息背景（钉钉蓝）
+  --dt-bubble-left-border: #F0F0F0; // 接收消息边框（极浅灰，几乎看不见）
+  --dt-bubble-right-bg: #0089FF; // 发送消息背景（钉钉蓝，纯色无渐变）
+  --dt-bubble-right-text: #FFFFFF; // 发送消息文字（白色）
   --dt-bubble-right-bg-hover: #006ECC; // 发送消息悬停（钉钉蓝加深）
   --dt-unread-color: #0089FF;
   --dt-read-color: #8C8C8C;
@@ -145,8 +146,8 @@
   --dt-space-20: 80px;
 
   // === Layout Dimensions (布局尺寸) ===
-  --dt-nav-sidebar-width: 72px;
-  --dt-nav-sidebar-collapsed-width: 64px;
+  --dt-nav-sidebar-width: 60px;  // 钉钉标准：60px（不是64或72）
+  --dt-nav-sidebar-collapsed-width: 60px;
   --dt-session-panel-width: 280px;
   --dt-session-panel-collapsed-width: 60px;
   --dt-contact-panel-width: 320px;
@@ -154,7 +155,8 @@
   --dt-chat-header-height: 52px;
   --dt-chat-input-height: 120px;
   --dt-chat-input-min-height: 80px;
-  --dt-nav-item-height: 48px;
+  --dt-nav-item-height: 40px;  // 导航项 40px × 40px
+  --dt-nav-logo-size: 40px;    // Logo 40px × 40px
   --dt-session-item-height: 72px;
   --dt-message-max-width: 520px;
 

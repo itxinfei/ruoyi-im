@@ -38,7 +38,7 @@
         :src="message.senderAvatar"
         :name="message.senderName"
         :user-id="message.senderId"
-        :size="36"
+        :size="40"
         shape="square"
         custom-class="message-avatar"
       />
@@ -212,7 +212,7 @@ const handleNudge = () => {
 
 // 头像区域
 .avatar-wrapper {
-  margin: 0 4px;
+  margin: 0;  // 钉钉标准：头像与气泡紧贴，无间距
   flex-shrink: 0;
   cursor: pointer;
   transition: opacity var(--dt-transition-base);
@@ -222,12 +222,9 @@ const handleNudge = () => {
   }
 
   .message-avatar {
-    border-radius: var(--dt-radius-sm);
-    border: 1px solid var(--dt-brand-color);
-    box-shadow: 0 0 6px rgba(0, 137, 255, 0.2);
+    border-radius: 4px;  // 钉钉方形头像，小圆角
+    // 移除边框和阴影，保持简洁风格
   }
-
-
 }
 
 // 内容包裹层

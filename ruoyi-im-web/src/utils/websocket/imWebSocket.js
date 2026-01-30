@@ -2,6 +2,7 @@
  * IM WebSocket 客户端
  * 提供 WebSocket 连接管理、消息收发、心跳保活、断线重连等功能
  */
+import { getUserInfo } from '../storage'
 import { debug, info, warn, error } from '../logger.js'
 
 // WebSocket 连接状态
@@ -57,8 +58,7 @@ class ImWebSocket {
     // 从 localStorage 获取 userId
     let userId = ''
     try {
-      const { getUserInfo: getStoredUserInfo } = require('../storage')
-      const user = getStoredUserInfo()
+      const user = getUserInfo()
       if (user?.id) {
         userId = user.id
         debug('ImWebSocket', '用户ID:', userId)
