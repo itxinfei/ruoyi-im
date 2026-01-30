@@ -133,23 +133,26 @@ const noResults = computed(() => {
 
 // 加载历史记录
 const loadHistory = () => {
-  const saved = localStorage.getItem('im_search_history')
-  if (saved) history.value = JSON.parse(saved)
+  const { getJSON } = require('@/utils/storage')
+  const saved = getJSON('im_search_history', [])
+  history.value = saved
 }
 
 // 保存历史记录
 const saveToHistory = (kw) => {
+  const { setJSON } = require('@/utils/storage')
   if (!kw) return
   const index = history.value.indexOf(kw)
   if (index !== -1) history.value.splice(index, 1)
   history.value.unshift(kw)
   history.value = history.value.slice(0, 10)
-  localStorage.setItem('im_search_history', JSON.stringify(history.value))
+  setJSON('im_search_history', history.value)
 }
 
 const clearHistory = () => {
+  const { removeItem } = require('@/utils/storage')
   history.value = []
-  localStorage.removeItem('im_search_history')
+  removeItem('im_search_history')
 }
 
 // 搜索消息 (防抖)

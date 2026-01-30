@@ -113,7 +113,8 @@ const uploadUrl = computed(() => {
 
 // 上传请求头
 const uploadHeaders = computed(() => {
-  const token = localStorage.getItem('access_token')
+  const { getToken } = require('@/utils/storage')
+  const token = getToken()
   return {
     'Authorization': token ? `Bearer ${token}` : ''
   }

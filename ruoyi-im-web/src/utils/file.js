@@ -29,7 +29,8 @@ export function addTokenToUrl(url) {
     }
 
     // 获取token
-    const token = localStorage.getItem('im_token')
+    const { getToken } = require('./storage')
+    const token = getToken()
     if (!token) {
         console.warn('未找到token，无法添加到URL')
         return url

@@ -86,15 +86,9 @@ const visible = ref(false)
 
 // 从 localStorage 加载配置
 const loadConfig = () => {
-  const saved = localStorage.getItem('ai_reply_style_config')
-  if (saved) {
-    try {
-      return JSON.parse(saved)
-    } catch (e) {
-      return null
-    }
-  }
-  return null
+  const { getAiReplyStyle } = require('@/utils/storage')
+  const saved = getAiReplyStyle()
+  return Object.keys(saved).length > 0 ? saved : null
 }
 
 const savedConfig = loadConfig()
@@ -138,7 +132,8 @@ const handleSave = () => {
     styleConfig.categories = ['confirm', 'polite', 'work']
   }
   // 保存到 localStorage
-  localStorage.setItem('ai_reply_style_config', JSON.stringify(styleConfig))
+  const { setAiReplyStyle } = require('@/utils/storage')
+  setAiReplyStyle({ ...styleConfig })
   ElMessage.success('风格设置已保存')
   emit('save', { ...styleConfig })
   handleClose()

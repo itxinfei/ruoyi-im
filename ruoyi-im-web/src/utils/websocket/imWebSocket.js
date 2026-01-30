@@ -57,10 +57,10 @@ class ImWebSocket {
     // 从 localStorage 获取 userId
     let userId = ''
     try {
-      const userInfo = localStorage.getItem('im_user_info')
-      if (userInfo) {
-        const user = JSON.parse(userInfo)
-        userId = user.id || ''
+      const { getUserInfo: getStoredUserInfo } = require('../storage')
+      const user = getStoredUserInfo()
+      if (user?.id) {
+        userId = user.id
         debug('ImWebSocket', '用户ID:', userId)
       }
     } catch (e) {

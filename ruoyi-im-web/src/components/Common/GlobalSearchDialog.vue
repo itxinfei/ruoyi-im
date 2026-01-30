@@ -216,7 +216,8 @@ const searchType = ref('ALL')
 const searchResult = ref(null)
 const searching = ref(false)
 const searchInputRef = ref(null)
-const historyKeywords = ref(JSON.parse(localStorage.getItem('search_history') || '[]'))
+const { getJSON, setJSON } = require('@/utils/storage')
+const historyKeywords = ref(getJSON('search_history', []))
 
 // 自动补全和搜索建议
 const suggestions = ref([])
@@ -384,7 +385,7 @@ const handleSearch = async () => {
     if (!historyKeywords.value.includes(keyword)) {
       historyKeywords.value.unshift(keyword)
       historyKeywords.value = historyKeywords.value.slice(0, 10)
-      localStorage.setItem('search_history', JSON.stringify(historyKeywords.value))
+      setJSON('search_history', historyKeywords.value)
     }
   } catch (e) {
     console.error('搜索失败', e)
@@ -412,7 +413,7 @@ const handleItemClick = (type, item) => {
 
 const removeHistory = (kw) => {
   historyKeywords.value = historyKeywords.value.filter(k => k !== kw)
-  localStorage.setItem('search_history', JSON.stringify(historyKeywords.value))
+  setJSON('search_history', historyKeywords.value)
 }
 
 // 自动补全和搜索建议相关方法
@@ -495,7 +496,7 @@ const handleKeyDown = (event) => {
 // 清空所有历史记录
 const clearAllHistory = () => {
   historyKeywords.value = []
-  localStorage.setItem('search_history', JSON.stringify(historyKeywords.value))
+  setJSON('search_history', historyKeywords.value)
 }
 
 // 重置搜索

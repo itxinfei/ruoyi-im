@@ -3,6 +3,7 @@
  * 管理即时通讯的核心状态和子模块
  */
 import { getUserSettingsMap, updateUserSetting, batchUpdateUserSettings } from '@/api/im/user_setting'
+import { getJSON, setJSON } from '@/utils/storage'
 import session from './im-session'
 import message from './im-message'
 import contact from './im-contact'
@@ -132,15 +133,15 @@ export default {
     // 更新系统设置
     UPDATE_SETTINGS(state, settings) {
       state.settings = { ...state.settings, ...settings }
-      localStorage.setItem('im-system-settings', JSON.stringify(state.settings))
+      setJSON('im-system-settings', state.settings)
     },
 
     // 加载本地设置
     LOAD_SETTINGS(state) {
       try {
-        const local = localStorage.getItem('im-system-settings')
+        const local = getJSON('im-system-settings', null)
         if (local) {
-          state.settings = { ...state.settings, ...JSON.parse(local) }
+          state.settings = { ...state.settings, ...local }
         }
       } catch (e) {
         console.warn('加载设置失败', e)

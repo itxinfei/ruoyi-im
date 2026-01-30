@@ -1,42 +1,41 @@
 import { login, logout } from '@/api/im/auth'
 import { getUserInfo, updateUser } from '@/api/im/user'
+import { getToken, setToken, getUserInfo as getStoredUserInfo, setUserInfo, setUserRole, clearAuth } from '@/utils/storage'
 
 export default {
     namespaced: true,
 
     state: () => ({
-        token: localStorage.getItem('im_token') || '',
-        userInfo: JSON.parse(localStorage.getItem('im_user_info') || '{}'),
-        role: localStorage.getItem('im_user_role') || 'USER',
+        token: getToken(),
+        userInfo: getStoredUserInfo(),
+        role: getUserRole(),
         online: false
     }),
 
     mutations: {
         SET_TOKEN(state, token) {
             state.token = token
-            localStorage.setItem('im_token', token)
+            setToken(token)
         },
         SET_USER_INFO(state, userInfo) {
             state.userInfo = userInfo
-            localStorage.setItem('im_user_info', JSON.stringify(userInfo))
+            setUserInfo(userInfo)
             // 保存用户角色
             if (userInfo.role) {
                 state.role = userInfo.role
-                localStorage.setItem('im_user_role', userInfo.role)
+                setUserRole(userInfo.role)
             }
         },
         SET_ROLE(state, role) {
             state.role = role
-            localStorage.setItem('im_user_role', role)
+            setUserRole(role)
         },
         CLEAR_USER(state) {
             state.token = ''
             state.userInfo = {}
             state.role = 'USER'
             state.online = false
-            localStorage.removeItem('im_token')
-            localStorage.removeItem('im_user_info')
-            localStorage.removeItem('im_user_role')
+            clearAuth()
         },
         SET_ONLINE_STATUS(state, status) {
             state.online = status

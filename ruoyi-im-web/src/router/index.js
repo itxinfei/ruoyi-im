@@ -96,21 +96,17 @@ const router = createRouter({
 
 // 路由守卫：检查登录状态和角色权限
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('im_token')
+  const { getToken, getUserRole, getUserInfo: getStoredUserInfo } = require('@/utils/storage')
+  const token = getToken()
 
   // 获取用户角色（优先从 im_user_role 读取，兼容 im_user_info）
-  let userRole = localStorage.getItem('im_user_role') || 'USER'
+  let userRole = getUserRole()
 
   // 如果没有单独存储的角色，尝试从用户信息中解析
   if (userRole === 'USER') {
-    try {
-      const userStr = localStorage.getItem('im_user_info')
-      if (userStr) {
-        const userInfo = JSON.parse(userStr)
-        userRole = userInfo.role || 'USER'
-      }
-    } catch (e) {
-      console.error('解析用户信息失败', e)
+    const userInfo = getStoredUserInfo()
+    if (userInfo?.role) {
+      userRole = userInfo.role
     }
   }
 

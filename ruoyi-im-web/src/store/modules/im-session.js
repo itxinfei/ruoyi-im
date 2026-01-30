@@ -11,6 +11,7 @@ import {
   getConversation
 } from '@/api/im'
 import { formatMessagePreviewFromObject } from '@/utils/message'
+import { getJSON, setJSON } from '@/utils/storage'
 
 // 默认分组配置
 const DEFAULT_GROUPS = [
@@ -240,7 +241,7 @@ export default {
       state.groups = groups
       // 保存到本地存储
       try {
-        localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(groups))
+        setJSON(STORAGE_KEY_GROUPS, groups)
       } catch (e) {
         console.warn('保存分组失败', e)
       }
@@ -250,7 +251,7 @@ export default {
     ADD_GROUP(state, group) {
       state.groups.push(group)
       try {
-        localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(state.groups))
+        setJSON(STORAGE_KEY_GROUPS, state.groups)
       } catch (e) {
         console.warn('保存分组失败', e)
       }
@@ -262,7 +263,7 @@ export default {
       if (index !== -1) {
         state.groups[index] = { ...state.groups[index], ...updates }
         try {
-          localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(state.groups))
+          setJSON(STORAGE_KEY_GROUPS, state.groups)
         } catch (e) {
           console.warn('保存分组失败', e)
         }
@@ -283,8 +284,8 @@ export default {
         })
         state.conversationGroupMap = newMap
         try {
-          localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(state.groups))
-          localStorage.setItem(STORAGE_KEY_CONVERSATION_GROUP, JSON.stringify(newMap))
+          setJSON(STORAGE_KEY_GROUPS, state.groups)
+          setJSON(STORAGE_KEY_CONVERSATION_GROUP, newMap)
         } catch (e) {
           console.warn('保存分组失败', e)
         }
@@ -297,7 +298,7 @@ export default {
       if (group) {
         group.isExpanded = !group.isExpanded
         try {
-          localStorage.setItem(STORAGE_KEY_GROUPS, JSON.stringify(state.groups))
+          setJSON(STORAGE_KEY_GROUPS, state.groups)
         } catch (e) {
           console.warn('保存分组状态失败', e)
         }
@@ -311,7 +312,7 @@ export default {
         [conversationId]: groupId
       }
       try {
-        localStorage.setItem(STORAGE_KEY_CONVERSATION_GROUP, JSON.stringify(state.conversationGroupMap))
+        setJSON(STORAGE_KEY_CONVERSATION_GROUP, state.conversationGroupMap)
       } catch (e) {
         console.warn('保存会话分组失败', e)
       }
@@ -324,7 +325,7 @@ export default {
         ...mapping
       }
       try {
-        localStorage.setItem(STORAGE_KEY_CONVERSATION_GROUP, JSON.stringify(state.conversationGroupMap))
+        setJSON(STORAGE_KEY_CONVERSATION_GROUP, state.conversationGroupMap)
       } catch (e) {
         console.warn('保存会话分组失败', e)
       }
@@ -333,18 +334,18 @@ export default {
     // 加载分组数据
     LOAD_GROUPS(state) {
       try {
-        const groups = localStorage.getItem(STORAGE_KEY_GROUPS)
-        const map = localStorage.getItem(STORAGE_KEY_CONVERSATION_GROUP)
+        const groups = getJSON(STORAGE_KEY_GROUPS, null)
+        const map = getJSON(STORAGE_KEY_CONVERSATION_GROUP, null)
 
         if (groups) {
-          state.groups = JSON.parse(groups)
+          state.groups = groups
         } else {
           // 初始化默认分组
           state.groups = [...DEFAULT_GROUPS]
         }
 
         if (map) {
-          state.conversationGroupMap = JSON.parse(map)
+          state.conversationGroupMap = map
         }
       } catch (e) {
         console.warn('加载分组数据失败', e)
@@ -582,10 +583,10 @@ export default {
     // 保存草稿
     async saveDraft({ commit, state }, { conversationId, content }) {
       commit('SET_DRAFT', { conversationId, content })
-      
+
       // 同步到 localStorage（持久化）
       try {
-        localStorage.setItem(STORAGE_KEY_DRAFTS, JSON.stringify(state.drafts))
+        setJSON(STORAGE_KEY_DRAFTS, state.drafts)
       } catch (e) {
         console.warn('保存草稿到 localStorage 失败', e)
       }
@@ -594,13 +595,10 @@ export default {
     // 加载草稿
     async loadDrafts({ commit }) {
       try {
-        const data = localStorage.getItem(STORAGE_KEY_DRAFTS)
-        if (data) {
-          const drafts = JSON.parse(data)
-          Object.entries(drafts).forEach(([conversationId, draft]) => {
-            commit('SET_DRAFT', { conversationId, content: draft.content })
-          })
-        }
+        const drafts = getJSON(STORAGE_KEY_DRAFTS, {})
+        Object.entries(drafts).forEach(([conversationId, draft]) => {
+          commit('SET_DRAFT', { conversationId, content: draft.content })
+        })
       } catch (e) {
         console.warn('从 localStorage 加载草稿失败', e)
       }
@@ -609,10 +607,10 @@ export default {
     // 清除草稿
     async clearDraft({ commit, state }, conversationId) {
       commit('CLEAR_DRAFT', conversationId)
-      
+
       // 同步到 localStorage
       try {
-        localStorage.setItem(STORAGE_KEY_DRAFTS, JSON.stringify(state.drafts))
+        setJSON(STORAGE_KEY_DRAFTS, state.drafts)
       } catch (e) {
         console.warn('清除草稿到 localStorage 失败', e)
       }
@@ -621,10 +619,10 @@ export default {
     // 清空所有草稿
     async clearAllDrafts({ commit, state }) {
       commit('CLEAR_ALL_DRAFTS')
-      
+
       // 同步到 localStorage
       try {
-        localStorage.setItem(STORAGE_KEY_DRAFTS, JSON.stringify(state.drafts))
+        setJSON(STORAGE_KEY_DRAFTS, state.drafts)
       } catch (e) {
         console.warn('清空草稿到 localStorage 失败', e)
       }

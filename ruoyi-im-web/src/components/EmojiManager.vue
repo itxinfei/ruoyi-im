@@ -147,19 +147,15 @@ const uploadUrl = computed(() => {
 })
 
 const uploadHeaders = computed(() => {
-  const token = localStorage.getItem('im_token')
-  const userInfo = localStorage.getItem('im_user_info')
+  const { getToken, getUserInfo: getStoredUserInfo } = require('@/utils/storage')
+  const token = getToken()
+  const userInfo = getStoredUserInfo()
   const headers = {}
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  if (userInfo) {
-    try {
-      const user = JSON.parse(userInfo)
-      if (user.id) {
-        headers['userId'] = String(user.id)
-      }
-    } catch (e) {}
+  if (userInfo?.id) {
+    headers['userId'] = String(userInfo.id)
   }
   return headers
 })

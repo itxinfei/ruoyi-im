@@ -97,15 +97,9 @@ const showStyleDialog = ref(false)
 
 // 加载风格配置
 const loadStyleConfig = () => {
-  const saved = localStorage.getItem('ai_reply_style_config')
-  if (saved) {
-    try {
-      return JSON.parse(saved)
-    } catch (e) {
-      return { categories: ['confirm', 'polite', 'work'] }
-    }
-  }
-  return { categories: ['confirm', 'polite', 'work'] }
+  const { getAiReplyStyle } = require('@/utils/storage')
+  const saved = getAiReplyStyle()
+  return Object.keys(saved).length > 0 ? saved : { categories: ['confirm', 'polite', 'work'] }
 }
 
 const styleConfig = ref(loadStyleConfig())

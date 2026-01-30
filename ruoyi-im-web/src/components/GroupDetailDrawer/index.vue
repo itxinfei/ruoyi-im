@@ -159,12 +159,10 @@ const members = ref([])
 const currentUserId = ref(null)
 
 const loadCurrentUser = () => {
-  const info = localStorage.getItem('user_info')
-  if (info) {
-    try {
-      const u = JSON.parse(info)
-      currentUserId.value = u.userId || u.id
-    } catch (e) {}
+  const { getUserInfo: getStoredUserInfo } = require('@/utils/storage')
+  const u = getStoredUserInfo()
+  if (u) {
+    currentUserId.value = u.userId || u.id
   }
 }
 

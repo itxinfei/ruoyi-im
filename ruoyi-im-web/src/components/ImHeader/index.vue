@@ -106,17 +106,16 @@ const currentUserAvatar = computed(() => {
 
 // 从 localStorage 加载用户信息
 const loadUserInfo = () => {
-  const userInfoStr = localStorage.getItem('user_info')
-  if (userInfoStr) {
-    try {
-      const userInfo = JSON.parse(userInfoStr)
-      currentUser.value = {
-        id: userInfo.userId || userInfo.id,
-        name: userInfo.userName || userInfo.name || '用户',
-        avatar: userInfo.avatar || ''
-      }
-    } catch (error) {
-      console.error('解析用户信息失败:', error)
+  const { getUserInfo: getStoredUserInfo } = require('@/utils/storage')
+  const userInfo = getStoredUserInfo()
+  if (userInfo?.id || userInfo?.userId) {
+    currentUser.value = {
+      id: userInfo.userId || userInfo.id,
+      name: userInfo.userName || userInfo.name || '用户',
+      avatar: userInfo.avatar || ''
+    }
+  } else {
+    console.error('未找到用户信息')
     }
   }
 }
@@ -143,8 +142,8 @@ const handleLogout = async () => {
     }
 
     // 清除本地存储
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user_info')
+    const { clearAuth } = require('@/utils/storage')
+    clearAuth()
 
     ElMessage.success('已退出登录')
 

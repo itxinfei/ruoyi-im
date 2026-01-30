@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { ref, onMounted, watch } from 'vue'
+import { getItem, setItem } from '@/utils/storage'
 
 const THEME_KEY = 'im_admin_theme'
 const THEME_LIGHT = 'light'
@@ -43,7 +44,7 @@ const applyTheme = (theme) => {
  */
 const initTheme = () => {
   // 从 localStorage 读取保存的主题设置
-  const savedTheme = localStorage.getItem(THEME_KEY) || THEME_AUTO
+  const savedTheme = getItem(THEME_KEY) || THEME_AUTO
   currentTheme.value = savedTheme
   applyTheme(savedTheme)
 }
@@ -54,7 +55,7 @@ const initTheme = () => {
  */
 const setTheme = (theme) => {
   currentTheme.value = theme
-  localStorage.setItem(THEME_KEY, theme)
+  setItem(THEME_KEY, theme)
   applyTheme(theme)
 }
 

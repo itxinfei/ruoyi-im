@@ -660,24 +660,27 @@ const startVideoCall = () => ElMessage.info('视频通话开发中')
 const searchHistory = ref([])
 
 const loadSearchHistory = () => {
-    const history = localStorage.getItem('contacts_search_history')
+    const { getItem, setJSON, removeItem } = require('@/utils/storage')
+    const history = getItem('contacts_search_history')
     if (history) {
         searchHistory.value = JSON.parse(history)
     }
 }
 
 const saveSearchHistory = (query) => {
+    const { setJSON } = require('@/utils/storage')
     if (!query.trim()) return
     const history = searchHistory.value.filter(h => h !== query)
     history.unshift(query)
     if (history.length > 10) history.pop()
     searchHistory.value = history
-    localStorage.setItem('contacts_search_history', JSON.stringify(history))
+    setJSON('contacts_search_history', history)
 }
 
 const clearSearchHistory = () => {
+    const { removeItem } = require('@/utils/storage')
     searchHistory.value = []
-    localStorage.removeItem('contacts_search_history')
+    removeItem('contacts_search_history')
 }
 
 const useHistorySearch = (query) => {

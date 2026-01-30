@@ -94,8 +94,9 @@ export function useInputResize(options = {}) {
    * 从 localStorage 恢复高度
    */
   const restoreHeight = () => {
+    const { getItem } = require('@/utils/storage')
     try {
-      const saved = localStorage.getItem(storageKey)
+      const saved = getItem(storageKey)
       if (saved) {
         const height = parseInt(saved, 10)
         if (!isNaN(height) && height >= minHeight && height <= maxHeight) {

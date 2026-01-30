@@ -201,7 +201,8 @@ onMounted(async () => {
   }
 
   if (!isConnected.value) {
-    const token = localStorage.getItem('im_token')
+    const { getToken } = require('@/utils/storage')
+    const token = getToken()
     if (token) {
         connect(token)
     }

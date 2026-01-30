@@ -272,7 +272,8 @@ const handleUserCommand = (command) => {
 
 // 退出登录
 const logout = () => {
-  localStorage.removeItem('im_token')
+  const { clearAuth } = require('@/utils/storage')
+  clearAuth()
   router.push('/login')
 }
 

@@ -267,8 +267,8 @@ export function shouldNotify(message, currentUser, session) {
     // 检查免打扰时段(可从设置中读取)
     const now = new Date()
     const hour = now.getHours()
-    const doNotDisturbStart = parseInt(localStorage.getItem('im_dnd_start') || '22')
-    const doNotDisturbEnd = parseInt(localStorage.getItem('im_dnd_end') || '8')
+    const { getDoNotDisturb } = require('./storage')
+    const { start: doNotDisturbStart, end: doNotDisturbEnd } = getDoNotDisturb()
 
     if (doNotDisturbStart < doNotDisturbEnd) {
         // 正常时段,如22:00-8:00

@@ -15,22 +15,16 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // 从 localStorage 获取 token
-    const token = localStorage.getItem('im_token')
+    const { getToken, getUserInfo: getStoredUserInfo } = require('@/utils/storage')
+    const token = getToken()
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
     }
 
     // 从 localStorage 获取用户信息并发送 userId
-    const userInfo = localStorage.getItem('im_user_info')
-    if (userInfo) {
-      try {
-        const user = JSON.parse(userInfo)
-        if (user.id) {
-          config.headers['userId'] = String(user.id)
-        }
-      } catch (e) {
-        // 解析失败，静默处理
-      }
+    const userInfo = getStoredUserInfo()
+    if (userInfo?.id) {
+      config.headers['userId'] = String(userInfo.id)
     }
 
     return config
@@ -52,7 +46,8 @@ service.interceptors.response.use(
       // 401: 未授权
       if (res.code === 401) {
         // 清除 token 并跳转登录页
-        localStorage.removeItem('im_token')
+        const { clearAuth } = require('@/utils/storage')
+        clearAuth()
         if (window.location.pathname !== '/login') {
           window.location.href = '/login'
         }
@@ -78,7 +73,8 @@ service.interceptors.response.use(
           break
         case 401:
           ElMessage.error('未授权，请重新登录')
-          localStorage.removeItem('im_token')
+          const { clearAuth } = require('@/utils/storage')
+          clearAuth()
           if (window.location.pathname !== '/login') {
             window.location.href = '/login'
           }

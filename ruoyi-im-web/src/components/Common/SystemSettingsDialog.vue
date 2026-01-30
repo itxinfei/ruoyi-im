@@ -321,7 +321,8 @@ const resetToDefault = () => {
     type: 'warning'
   }).then(() => {
     try {
-      localStorage.removeItem('im-system-settings')
+      const { removeItem } = require('@/utils/storage')
+      removeItem('im-system-settings')
       store.commit('im/LOAD_SETTINGS')
       ElMessage.success('已恢复默认设置')
     } catch (e) {

@@ -328,9 +328,11 @@ const handleLogin = async () => {
       })
 
       if (formData.rememberMe) {
-        localStorage.setItem('remembered_username', formData.username)
+        const { setRememberedUsername } = require('@/utils/storage')
+        setRememberedUsername(formData.username)
       } else {
-        localStorage.removeItem('remembered_username')
+        const { removeItem } = require('@/utils/storage')
+        removeItem('remembered_username')
       }
     } else {
       ElMessage.info('短信登录功能开发中')
@@ -373,7 +375,8 @@ const handleSMSLogin = () => {
 
 // 初始化
 onMounted(() => {
-  const rememberedUsername = localStorage.getItem('remembered_username')
+  const { getRememberedUsername } = require('@/utils/storage')
+  const rememberedUsername = getRememberedUsername()
   if (rememberedUsername) {
     loginForm.username = rememberedUsername
     loginForm.rememberMe = true

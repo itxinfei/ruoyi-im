@@ -95,28 +95,16 @@ const recentEmojis = ref([])
 
 // 加载最近使用的表情
 const loadRecentEmojis = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      recentEmojis.value = JSON.parse(saved)
-    }
-  } catch (e) {
-    recentEmojis.value = []
-  }
+  const { getRecentEmoji } = require('@/utils/storage')
+  recentEmojis.value = getRecentEmoji()
 }
 
 // 保存表情到最近使用
 const saveRecentEmoji = (emoji) => {
-  // 移除重复的
-  const filtered = recentEmojis.value.filter(e => e !== emoji)
-  // 添加到开头
-  recentEmojis.value = [emoji, ...filtered].slice(0, 20)
-  // 保存
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(recentEmojis.value))
-  } catch (e) {
-    // ignore
-  }
+  const { addRecentEmoji } = require('@/utils/storage')
+  addRecentEmoji(emoji, 20)
+  recentEmojis.value = getRecentEmoji()
+}
 }
 
 // 当前分类的表情
