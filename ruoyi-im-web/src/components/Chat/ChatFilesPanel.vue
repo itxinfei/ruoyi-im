@@ -152,7 +152,7 @@
 import { ref, computed, watch } from 'vue'
 import { ElLoading } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
-import { confirmDelete, deleteSuccess } from '@/utils/ui'
+import { confirmDelete, messageSuccess } from '@/utils/ui'
 import { saveFileToCloud } from '@/api/im/cloud'
 import { parseMessageContent } from '@/utils/message'
 
@@ -389,7 +389,7 @@ const handleFileAction = async (cmd, file) => {
       break
     case 'delete':
       if (await confirmDelete(`"${file.name}"`)) {
-        deleteSuccess('文件已删除')
+        messageSuccess('文件已删除')
       }
       break
   }
