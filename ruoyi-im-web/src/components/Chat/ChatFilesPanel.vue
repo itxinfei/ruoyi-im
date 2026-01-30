@@ -214,9 +214,6 @@ const fileList = computed(() => {
           messageId: msg.id
         }
       }
-          return
-        }
-      }
 
       if (fileInfo) {
         files.push(fileInfo)

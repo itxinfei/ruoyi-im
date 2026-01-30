@@ -226,6 +226,8 @@
 
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
+import { getToken } from '@/utils/storage'
+
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -273,7 +275,6 @@ const uploadUrl = computed(() => {
 
 // 上传请求头
 const uploadHeaders = computed(() => {
-  const { getToken } = require('@/utils/storage')
   const token = getToken()
   return {
     'Authorization': token ? `Bearer ${token}` : ''

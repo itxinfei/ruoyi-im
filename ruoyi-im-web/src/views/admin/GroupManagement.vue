@@ -29,7 +29,7 @@
           </el-input>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width="120px" @change="handleSearch">
+          <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width: 120px" @change="handleSearch">
             <el-option label="正常" value="normal" />
             <el-option label="全员禁言" value="allMuted" />
           </el-select>
@@ -47,7 +47,7 @@
       <div v-if="selectedGroups.length > 0" class="batch-actions">
         <span class="selected-count">已选择 {{ selectedGroups.length }} 项</span>
         <el-button size="small" :icon="Bell" @click="handleBatchMute">批量禁言</el-button>
-        <el-button size="small" :icon="BellOff" @click="handleBatchUnmute">取消禁言</el-button>
+        <el-button size="small" :icon="MuteNotification" @click="handleBatchUnmute">取消禁言</el-button>
         <el-button size="small" :icon="Delete" type="danger" @click="handleBatchDelete">批量解散</el-button>
         <el-button size="small" text @click="handleClearSelection">取消选择</el-button>
       </div>
@@ -105,7 +105,7 @@
               text
               @click="handleToggleMute(row)"
             >
-              <el-icon><component :is="row.allMuted ? 'BellOff' : 'Bell'" /></el-icon>
+              <el-icon><component :is="row.allMuted ? 'MuteNotification' : 'Bell'" /></el-icon>
               {{ row.allMuted ? '解除' : '禁言' }}
             </el-button>
             <el-button size="small" text type="danger" @click="handleDelete(row)">
@@ -312,7 +312,7 @@ import {
   User,
   Edit,
   Bell,
-  BellOff,
+  MuteNotification,
   ArrowDown,
   Upload
 } from '@element-plus/icons-vue'

@@ -102,6 +102,8 @@
 
 <script setup>
 import { ref, watch, reactive, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
+import { removeItem } from '@/utils/storage'
+
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -321,7 +323,6 @@ const resetToDefault = () => {
     type: 'warning'
   }).then(() => {
     try {
-      const { removeItem } = require('@/utils/storage')
       removeItem('im-system-settings')
       store.commit('im/LOAD_SETTINGS')
       ElMessage.success('已恢复默认设置')

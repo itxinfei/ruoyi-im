@@ -509,15 +509,18 @@ const deleteTodo = async (todo) => {
   if (!await confirmDelete('这个待办')) {
     return
   }
-  const res = await deleteTodoApi(todo.id)
-  if (res.code === 200) {
-    todos.value = todos.value.filter(t => t.id !== todo.id)
-    deleteSuccess()
-    showDetailDialog.value = false
-  } else {
-    messageError(res.msg || '删除失败')
-  }
-}
+  try {
+    const res = await deleteTodoApi(todo.id)
+    if (res.code === 200) {
+      todos.value = todos.value.filter(t => t.id !== todo.id)
+      deleteSuccess()
+      showDetailDialog.value = false
+    } else {
+      messageError(res.msg || '删除失败')
+    }
+  } catch (error) {
+    console.error('删除待办失败', error)
+    messageError('操作失败，请稍后重试')
   }
 }
 

@@ -119,6 +119,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { getStoredUserInfo, getToken } from '@/utils/storage'
+
 import { Plus, Search, FolderOpened, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getEmojiList, deleteEmoji, uploadEmoji, shareEmoji } from '@/api/im/emoji'
@@ -147,7 +149,6 @@ const uploadUrl = computed(() => {
 })
 
 const uploadHeaders = computed(() => {
-  const { getToken, getUserInfo: getStoredUserInfo } = require('@/utils/storage')
   const token = getToken()
   const userInfo = getStoredUserInfo()
   const headers = {}

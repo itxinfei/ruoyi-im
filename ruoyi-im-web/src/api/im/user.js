@@ -48,6 +48,15 @@ export function searchUsers(keyword) {
 }
 
 /**
+ * 搜索用户（API 别名）
+ * @param {string} keyword - 搜索关键词
+ * @returns {Promise}
+ */
+export function searchUsersApi(keyword) {
+  return searchUsers(keyword)
+}
+
+/**
  * 获取用户详情
  * @param {string|number} userId - 用户ID
  * @returns {Promise}

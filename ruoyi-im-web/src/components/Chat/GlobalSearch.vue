@@ -91,6 +91,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { getJSON, removeItem, setJSON } from '@/utils/storage'
+
 import { useStore } from 'vuex'
 import { Loading } from '@element-plus/icons-vue'
 import { searchMessages } from '@/api/im/message'
@@ -133,14 +135,12 @@ const noResults = computed(() => {
 
 // 加载历史记录
 const loadHistory = () => {
-  const { getJSON } = require('@/utils/storage')
   const saved = getJSON('im_search_history', [])
   history.value = saved
 }
 
 // 保存历史记录
 const saveToHistory = (kw) => {
-  const { setJSON } = require('@/utils/storage')
   if (!kw) return
   const index = history.value.indexOf(kw)
   if (index !== -1) history.value.splice(index, 1)
@@ -150,7 +150,6 @@ const saveToHistory = (kw) => {
 }
 
 const clearHistory = () => {
-  const { removeItem } = require('@/utils/storage')
   history.value = []
   removeItem('im_search_history')
 }

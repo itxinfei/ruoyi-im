@@ -201,6 +201,8 @@
 
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { getJSON, setJSON } from '@/utils/storage'
+
 import { Search, Document, Loading, Timer, Close } from '@element-plus/icons-vue'
 import { globalSearch } from '@/api/im/globalSearch'
 import { ElMessage } from 'element-plus'
@@ -216,7 +218,6 @@ const searchType = ref('ALL')
 const searchResult = ref(null)
 const searching = ref(false)
 const searchInputRef = ref(null)
-const { getJSON, setJSON } = require('@/utils/storage')
 const historyKeywords = ref(getJSON('search_history', []))
 
 // 自动补全和搜索建议

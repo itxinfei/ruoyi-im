@@ -15,7 +15,7 @@
     <!-- 系统状态概览 -->
     <el-row :gutter="16" class="status-overview">
       <el-col :span="6">
-        <el-card class="status-card" :class="{ status--error: systemStatus.overall !== 'healthy' }">
+        <el-card class="status-card" :class="{ 'status--error': systemStatus.overall !== 'healthy' }">
           <div class="status-icon">
             <el-icon :size="32">
               <Monitor v-if="systemStatus.overall === 'healthy'" />

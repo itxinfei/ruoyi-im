@@ -49,6 +49,7 @@
 </template>
 
 <script setup>
+import { addRecentEmoji, getRecentEmoji } from '@/utils/storage'
 import { ref, computed, onMounted, watch } from 'vue'
 
 const props = defineProps({
@@ -95,16 +96,13 @@ const recentEmojis = ref([])
 
 // 加载最近使用的表情
 const loadRecentEmojis = () => {
-  const { getRecentEmoji } = require('@/utils/storage')
   recentEmojis.value = getRecentEmoji()
 }
 
 // 保存表情到最近使用
 const saveRecentEmoji = (emoji) => {
-  const { addRecentEmoji } = require('@/utils/storage')
   addRecentEmoji(emoji, 20)
   recentEmojis.value = getRecentEmoji()
-}
 }
 
 // 当前分类的表情

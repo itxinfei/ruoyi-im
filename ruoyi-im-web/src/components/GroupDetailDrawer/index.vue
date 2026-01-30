@@ -126,6 +126,8 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { getStoredUserInfo } from '@/utils/storage'
+
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Bell, User, Setting, MoreFilled, Edit, Plus } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -159,7 +161,6 @@ const members = ref([])
 const currentUserId = ref(null)
 
 const loadCurrentUser = () => {
-  const { getUserInfo: getStoredUserInfo } = require('@/utils/storage')
   const u = getStoredUserInfo()
   if (u) {
     currentUserId.value = u.userId || u.id

@@ -51,6 +51,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { getToken } from '@/utils/storage'
+
 import { ElMessage } from 'element-plus'
 import { Upload, Document } from '@element-plus/icons-vue'
 import { formatFileSize } from '@/utils/format'
@@ -113,7 +115,6 @@ const uploadUrl = computed(() => {
 
 // 上传请求头
 const uploadHeaders = computed(() => {
-  const { getToken } = require('@/utils/storage')
   const token = getToken()
   return {
     'Authorization': token ? `Bearer ${token}` : ''

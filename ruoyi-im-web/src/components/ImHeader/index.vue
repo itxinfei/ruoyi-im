@@ -76,6 +76,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { clearAuth, getStoredUserInfo } from '@/utils/storage'
+
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -107,7 +109,6 @@ const currentUserAvatar = computed(() => {
 
 // 从 localStorage 加载用户信息
 const loadUserInfo = () => {
-  const { getUserInfo: getStoredUserInfo } = require('@/utils/storage')
   const userInfo = getStoredUserInfo()
   if (userInfo?.id || userInfo?.userId) {
     currentUser.value = {
@@ -136,7 +137,6 @@ const handleLogout = async () => {
   }
 
   // 清除本地存储
-  const { clearAuth } = require('@/utils/storage')
   clearAuth()
 
   messageSuccess('已退出登录')

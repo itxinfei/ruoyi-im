@@ -71,6 +71,46 @@ export function deleteUser(id) {
 }
 
 /**
+ * 创建用户
+ * @param {Object} data - 用户信息
+ * @returns {Promise}
+ */
+export function createUser(data) {
+  return request({
+    url: '/api/admin/users',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新用户信息
+ * @param {Number} id - 用户ID
+ * @param {Object} data - 用户信息
+ * @returns {Promise}
+ */
+export function updateUser(id, data) {
+  return request({
+    url: `/api/admin/users/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 获取用户选项（用于下拉选择）
+ * @param {Object} params - 查询参数
+ * @returns {Promise}
+ */
+export function getUserOptions(params) {
+  return request({
+    url: '/api/admin/users/options',
+    method: 'get',
+    params
+  })
+}
+
+/**
  * 获取用户统计
  * @returns {Promise}
  */
@@ -180,6 +220,48 @@ export function removeGroupMember(groupId, userId) {
   return request({
     url: `/api/admin/groups/${groupId}/members/${userId}`,
     method: 'delete'
+  })
+}
+
+/**
+ * 添加群组成员
+ * @param {Number} groupId - 群组ID
+ * @param {Object} data - { userIds: [], role: '' }
+ * @returns {Promise}
+ */
+export function addGroupMember(groupId, data) {
+  return request({
+    url: `/api/admin/groups/${groupId}/members`,
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 切换群组禁言状态
+ * @param {Number} groupId - 群组ID
+ * @param {Boolean} muted - 是否禁言
+ * @returns {Promise}
+ */
+export function toggleGroupMute(groupId, muted) {
+  return request({
+    url: `/api/admin/groups/${groupId}/mute`,
+    method: 'put',
+    data: { muted }
+  })
+}
+
+/**
+ * 转让群主
+ * @param {Number} groupId - 群组ID
+ * @param {Number} newOwnerId - 新群主用户ID
+ * @returns {Promise}
+ */
+export function transferGroupOwner(groupId, newOwnerId) {
+  return request({
+    url: `/api/admin/groups/${groupId}/owner`,
+    method: 'put',
+    data: { newOwnerId }
   })
 }
 

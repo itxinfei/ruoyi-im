@@ -86,6 +86,8 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { getToken } from '@/utils/storage'
+
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { updateUser } from '@/api/im/user'
@@ -113,7 +115,6 @@ const uploadUrl = computed(() => {
 })
 
 const uploadHeaders = computed(() => {
-  const { getToken } = require('@/utils/storage')
   const token = getToken()
   return { Authorization: `Bearer ${token}` }
 })
