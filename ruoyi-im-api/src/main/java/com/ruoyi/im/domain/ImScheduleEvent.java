@@ -77,6 +77,10 @@ public class ImScheduleEvent implements Serializable {
     @Schema(description = "状态")
     private String status;
 
+    @TableField("is_deleted")
+    @Schema(description = "是否删除")
+    private Integer isDeleted;
+
     @TableField("reminder_minutes")
     @Schema(description = "提醒时间（分钟）")
     private Integer reminderMinutes;

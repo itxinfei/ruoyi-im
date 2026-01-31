@@ -23,6 +23,8 @@
       @screenshot="handleScreenshot"
       @at-member="handleAtMember"
       @smart-reply="handleShowSmartReply"
+      @send-location="handleLocation"
+      @create-todo="handleCreateTodo"
     />
 
     <!-- 录音动画区域 - 暂时禁用（语音功能未来考虑） -->
@@ -77,13 +79,17 @@
         @input="handleInput"
         @keydown="handleKeydown"
         @paste="handlePaste"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
         :disabled="isVoiceMode"
       ></textarea>
 
       <!-- 空状态引导提示 -->
       <div v-if="showDragHint" class="drag-hint">
-        <span class="material-icons-outlined">cloud_upload</span>
-        <span>拖拽图片、视频、文件到这里</span>
+        <div class="hint-icon">
+          <span class="material-icons-outlined">add_photo_alternate</span>
+        </div>
+        <div class="hint-text">支持拖拽上传图片、视频、文件</div>
       </div>
 
       <div class="input-footer" v-if="!isVoiceMode">
@@ -107,7 +113,8 @@
             :disabled="!canSend || sending"
             @click="handleSend"
           >
-            {{ sending ? '发送中' : '发送' }}
+            <span v-if="!sending" class="material-icons-outlined send-icon">send</span>
+            <span>{{ sending ? '发送中' : '发送' }}</span>
           </button>
         </div>
       </div>
@@ -410,6 +417,7 @@ const pendingFiles = ref([])
 
 // 拖拽状态
 const isDragOver = ref(false)
+const isFocused = ref(false)
 let dragCounter = 0
 
 // ========== 计算属性 ==========
@@ -419,7 +427,15 @@ const sendShortcutHint = computed(() => {
   return shortcut === 'ctrl-enter' ? '按 Ctrl + Enter 发送' : '按 Enter 发送'
 })
 
-const canSend = computed(() => messageContent.value.trim().length > 0)
+// 优化发送条件：检查内容、会话有效性、网络状态和发送状态
+const canSend = computed(() => {
+  const hasContent = messageContent.value.trim().length > 0
+  const hasSession = !!props.session?.id
+  const isOnline = store.state.im.wsConnected
+  const notSending = !props.sending
+
+  return hasContent && hasSession && isOnline && notSending
+})
 
 // 输入框占位符（语音模式时显示不同的提示）
 const inputPlaceholder = computed(() => {
@@ -954,9 +970,10 @@ onUnmounted(() => {
   flex-direction: column;
   position: relative;
   border-top: 1px solid var(--dt-border-light);
-  padding: 8px 16px 16px;
-  transition: background var(--dt-transition-base);
+  padding: 12px 16px 16px;
+  transition: all var(--dt-transition-base);
   z-index: 10;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
 
   // 为录音区域预留空间
   &.has-recording {
@@ -965,10 +982,11 @@ onUnmounted(() => {
 
   .dark & {
     border-top-color: var(--dt-border-dark);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
   }
 
   &.is-resizing {
-    box-shadow: 0 -4px 16px rgba(0, 137, 255, 0.15);
+    box-shadow: 0 -4px 16px rgba(var(--dt-brand-rgb), 0.15);
     border-top-color: var(--dt-brand-color);
   }
 }
@@ -980,29 +998,40 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 0;
   position: relative;
+  border-radius: 12px;
+  background: var(--dt-bg-body);
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    background: var(--dt-bg-card);
+    box-shadow: 0 0 0 2px rgba(var(--dt-brand-rgb), 0.1);
+  }
 
   &.is-drag-over {
-    background: rgba(24, 144, 255, 0.04);
-    border-radius: var(--dt-radius-md);
-    box-shadow: inset 0 0 0 2px var(--dt-brand-color);
+    background: linear-gradient(135deg, rgba(var(--dt-brand-rgb), 0.03) 0%, rgba(var(--dt-brand-rgb), 0.06) 100%);
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 2px rgba(var(--dt-brand-rgb), 0.2);
 
     &::after {
-      content: '松开即可发送（支持图片、视频、文件）';
+      content: '松开发送文件';
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 12px 20px;
-      background: var(--dt-brand-color);
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--dt-brand-color) 0%, shade(var(--dt-brand-color), 15%) 100%);
       color: #fff;
       font-size: 14px;
       font-weight: 500;
       border-radius: 8px;
       pointer-events: none;
       z-index: 10;
+      animation: pulse 1s ease-in-out infinite;
+      box-shadow: 0 4px 16px rgba(var(--dt-brand-rgb), 0.3);
     }
 
     .message-input { opacity: 0.3; }
+    .drag-hint { opacity: 0; }
   }
 }
 
@@ -1015,12 +1044,19 @@ onUnmounted(() => {
   font-size: var(--dt-font-size-base);
   line-height: 1.6;
   color: var(--dt-text-primary);
-  padding: 8px 0;
-  min-height: 80px;
+  padding: 16px;
+  min-height: 100px;
   background: transparent;
   font-family: var(--dt-font-family);
+  border-radius: 12px;
 
-  &::placeholder { color: var(--dt-text-quaternary); }
+  &::placeholder {
+    color: var(--dt-text-tertiary);
+  }
+
+  &:focus {
+    background: transparent;
+  }
 
   .dark & { color: var(--dt-text-primary-dark); }
 }
@@ -1034,20 +1070,49 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  color: var(--dt-text-tertiary);
-  font-size: 13px;
+  gap: 12px;
   pointer-events: none;
-  transition: opacity var(--dt-transition-fast);
+  transition: all 0.3s ease;
+  opacity: 0.5;
 
-  .material-icons-outlined {
-    font-size: 32px;
-    opacity: 0.5;
+  .hint-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(var(--dt-brand-rgb), 0.08) 0%, rgba(var(--dt-brand-rgb), 0.04) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .material-icons-outlined {
+      font-size: 24px;
+      color: var(--dt-brand-color);
+    }
+  }
+
+  .hint-text {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+    text-align: center;
+    font-weight: 400;
+    letter-spacing: 0.3px;
   }
 }
 
 .input-area:hover .drag-hint {
   opacity: 0.7;
+}
+
+// 脉冲动画
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.02);
+  }
 }
 
 .input-footer {
@@ -1107,11 +1172,11 @@ onUnmounted(() => {
   }
 
   .send-btn {
-    padding: 8px 20px;
-    border-radius: 4px;  // 钉钉标准：圆角 4px
+    padding: 10px 24px;
+    border-radius: 8px;
     border: none;
-    background: var(--dt-bg-body);
-    color: var(--dt-text-quaternary);
+    background: var(--dt-bg-hover);
+    color: var(--dt-text-tertiary);
     font-size: 14px;
     font-weight: 500;
     cursor: default;
@@ -1119,21 +1184,28 @@ onUnmounted(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+
+    .send-icon {
+      font-size: 18px;
+    }
 
     &.active {
-      background: var(--dt-brand-color);  // 钉钉标准：蓝色背景
-      color: #fff;  // 钉钉标准：白色文字
+      background: linear-gradient(135deg, var(--dt-brand-color) 0%, shade(var(--dt-brand-color), 10%) 100%);
+      color: #fff;
       cursor: pointer;
+      box-shadow: 0 2px 8px rgba(var(--dt-brand-rgb), 0.3);
 
       &:hover {
-        opacity: 0.9;  // 钉钉标准：悬停时稍微变淡
-        transform: none;  // 钉钉标准：无位移
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(var(--dt-brand-rgb), 0.4);
       }
     }
 
     &:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
     }
 
     .dark & { background: var(--dt-bg-hover-dark); }

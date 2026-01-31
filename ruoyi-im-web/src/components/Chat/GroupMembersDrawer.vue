@@ -159,7 +159,7 @@ const props = defineProps({
   currentUserRole: { type: String, default: 'MEMBER' }
 })
 
-const emit = defineEmits(['update:modelValue', 'add-members', '@-member', 'member-click'])
+const emit = defineEmits(['update:modelValue', 'add-members', 'at-member', 'member-click'])
 
 const store = useStore()
 const currentUserId = computed(() => store.state.im.user?.id)
@@ -231,7 +231,7 @@ const handleMemberClick = (member) => {
 }
 
 const handleAtMember = (member) => {
-  emit('@-member', member)
+  emit('at-member', member)
   handleClose()
 }
 

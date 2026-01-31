@@ -629,18 +629,25 @@ const loadFriends = async () => {
     loading.value = true
     try {
         const res = await getGroupedFriendList()
-        friendGroups.value = res.data.map(g => ({
-             name: g.groupName,
-             friends: (g.friends||[]).map(f => ({
-                 id: f.friendId,
-                 displayName: f.remark || f.friendName,
-                 avatar: f.friendAvatar,
-                 dept: f.department,
-                 pinyin: f.pinyin || '',
-                 position: f.position,
-                 online: f.online
-             }))
-        }))
+        if (res.code === 200 && res.data) {
+            friendGroups.value = res.data.map(g => ({
+                 name: g.groupName,
+                 friends: (g.friends||[]).map(f => ({
+                     id: f.friendId,
+                     displayName: f.remark || f.friendName,
+                     avatar: f.friendAvatar,
+                     dept: f.department,
+                     pinyin: f.pinyin || '',
+                     position: f.position,
+                     online: f.online
+                 }))
+            }))
+        } else {
+            friendGroups.value = []
+        }
+    } catch (error) {
+        console.warn('加载好友列表失败:', error.message)
+        friendGroups.value = []
     } finally { loading.value = false }
 }
 
@@ -648,17 +655,29 @@ const loadGroups = async () => {
     loading.value = true
     try {
         const res = await getGroups()
-        groupList.value = res.data || []
+        if (res.code === 200) {
+            groupList.value = res.data || []
+        } else {
+            groupList.value = []
+        }
+    } catch (error) {
+        console.warn('加载群组列表失败:', error.message)
+        groupList.value = []
     } finally { loading.value = false }
 }
 
 const loadOrgTree = async () => {
     try {
         const res = await getOrgTree()
-        if (res.data) {
+        if (res.code === 200 && res.data) {
              flatDepts.value = flattenOrgTree(res.data)
+        } else {
+            flatDepts.value = []
         }
-    } catch(e) {}
+    } catch(e) {
+        console.warn('加载组织架构失败:', e.message)
+        flatDepts.value = []
+    }
 }
 
 const loadOrgMembers = async (deptId) => {

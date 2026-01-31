@@ -45,12 +45,12 @@
         <div class="storage-info">
           <div class="storage-header">
             <span class="storage-label">存储空间</span>
-            <span class="storage-percent">85%</span>
+            <span class="storage-percent">{{ storageDisplay.percent }}%</span>
           </div>
           <div class="storage-bar">
-            <div class="storage-fill" style="width: 85%"></div>
+            <div class="storage-fill" :style="{ width: storageDisplay.percent + '%' }"></div>
           </div>
-          <div class="storage-text">85GB / 100GB</div>
+          <div class="storage-text">{{ storageDisplay.used }} / {{ storageDisplay.total }}</div>
         </div>
       </div>
     </aside>
@@ -111,7 +111,17 @@
       </header>
 
       <div class="docs-content">
-        <div class="files-table-wrapper">
+        <div v-if="loading" class="loading-state">
+          <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+          <span>加载中...</span>
+        </div>
+
+        <div v-else-if="files.length === 0" class="empty-state">
+          <span class="material-icons-outlined empty-icon">cloud_off</span>
+          <p class="empty-text">暂无文件</p>
+        </div>
+
+        <div v-else class="files-table-wrapper">
           <table class="files-table">
             <thead>
               <tr>
@@ -178,11 +188,11 @@
         placeholder="请输入文件夹名称"
         maxlength="50"
         show-word-limit
-        @keyup.enter="createFolder"
+        @keyup.enter="handleCreateFolder"
       />
       <template #footer>
         <el-button @click="showFolderDialog = false">取消</el-button>
-        <el-button type="primary" @click="createFolder">确定</el-button>
+        <el-button type="primary" @click="handleCreateFolder">确定</el-button>
       </template>
     </el-dialog>
 
@@ -218,14 +228,16 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, computed, watch, onMounted } from 'vue'
+import { ElMessage, ElMessageBox, ElIcon, Loading } from 'element-plus'
 import FilePreviewDialog from '@/components/FilePreviewDialog/index.vue'
 import { formatFileSize } from '@/utils/format'
+import { getFolderList, getFileList, createFolder, uploadToCloud, getStorageQuota } from '@/api/im/cloud'
 
 const activeNav = ref('recent')
 const viewMode = ref('list')
 const searchQuery = ref('')
+const currentFolderId = ref(null)
 
 // 对话框状态
 const showFolderDialog = ref(false)
@@ -236,6 +248,12 @@ const uploadFiles = ref([])
 const uploading = ref(false)
 const selectedFile = ref(null)
 
+// 数据加载状态
+const loading = ref(false)
+
+// 存储配额
+const storageQuota = ref({ used: 0, total: 0, percent: 0 })
+
 const mainNavItems = ref([
   { id: 'recent', label: '最近使用', icon: 'schedule' },
   { id: 'my-created', label: '我创建的', icon: 'folder_special' },
@@ -244,63 +262,19 @@ const mainNavItems = ref([
 ])
 
 const storageNavItems = ref([
-  { id: 'enterprise', label: '企业空间', icon: 'corporate_fare' },
-  { id: 'personal', label: '个人空间', icon: 'person_outline' },
-  { id: 'trash', label: '回收站', icon: 'delete_outline' }
+  { id: 'enterprise', label: '企业空间', icon: 'corporate_fare', ownerType: 'COMPANY' },
+  { id: 'personal', label: '个人空间', icon: 'person_outline', ownerType: 'PERSONAL' },
+  { id: 'trash', label: '回收站', icon: 'delete_outline', ownerType: 'PERSONAL' }
 ])
 
-const files = ref([
-  {
-    id: 1,
-    name: '2023年度项目资料',
-    icon: 'folder',
-    iconClass: 'icon-folder',
-    meta: '3 个文件',
-    owner: '我',
-    ownerColor: '#3b82f6',
-    modifiedTime: '2023-11-01 14:20'
-  },
-  {
-    id: 2,
-    name: 'RuoYi-IM 产品需求规格说明书 v2.0.docx',
-    icon: 'description',
-    iconClass: 'icon-doc',
-    meta: '2.4 MB',
-    owner: '李明',
-    ownerColor: '#6366f1',
-    modifiedTime: '2023-10-28 09:15'
-  },
-  {
-    id: 3,
-    name: 'Q4 研发部预算表.xlsx',
-    icon: 'table_view',
-    iconClass: 'icon-sheet',
-    meta: '1.1 MB',
-    owner: '张伟',
-    ownerColor: '#ec4899',
-    modifiedTime: '2023-10-27 16:45'
-  },
-  {
-    id: 4,
-    name: '系统架构设计图_Final.pdf',
-    icon: 'picture_as_pdf',
-    iconClass: 'icon-pdf',
-    meta: '5.8 MB',
-    owner: '王芳',
-    ownerColor: '#f97316',
-    modifiedTime: '2023-10-25 11:30'
-  },
-  {
-    id: 5,
-    name: '登录页UI_v3.png',
-    icon: 'image',
-    iconClass: 'icon-image',
-    meta: '856 KB',
-    owner: '刘洋',
-    ownerColor: '#06b6d4',
-    modifiedTime: '2023-10-24 15:10'
-  }
-])
+// 文件列表
+const files = ref([])
+
+// 当前所有者类型
+const currentOwnerType = computed(() => {
+  const nav = [...storageNavItems.value].find(item => item.id === activeNav.value)
+  return nav?.ownerType || 'PERSONAL'
+})
 
 const currentViewTitle = computed(() => {
   const item = [...mainNavItems.value, ...storageNavItems.value]
@@ -308,10 +282,91 @@ const currentViewTitle = computed(() => {
   return item?.label || '最近使用'
 })
 
+// 存储空间显示
+const storageDisplay = computed(() => {
+  const { used, total } = storageQuota.value
+  const percent = total > 0 ? Math.round((used / total) * 100) : 0
+  return {
+    used: formatFileSize(used),
+    total: formatFileSize(total),
+    percent
+  }
+})
+
+// 图标映射
+const getIconForFile = (fileName) => {
+  const ext = fileName.split('.').pop().toLowerCase()
+  const iconMap = {
+    doc: { icon: 'description', iconClass: 'icon-doc' },
+    docx: { icon: 'description', iconClass: 'icon-doc' },
+    xls: { icon: 'table_view', iconClass: 'icon-sheet' },
+    xlsx: { icon: 'table_view', iconClass: 'icon-sheet' },
+    pdf: { icon: 'picture_as_pdf', iconClass: 'icon-pdf' },
+    png: { icon: 'image', iconClass: 'icon-image' },
+    jpg: { icon: 'image', iconClass: 'icon-image' },
+    jpeg: { icon: 'image', iconClass: 'icon-image' },
+    gif: { icon: 'image', iconClass: 'icon-image' },
+    txt: { icon: 'text_snippet', iconClass: 'icon-file' },
+    zip: { icon: 'folder_zip', iconClass: 'icon-file' },
+    rar: { icon: 'folder_zip', iconClass: 'icon-file' }
+  }
+  return iconMap[ext] || { icon: 'insert_drive_file', iconClass: 'icon-file' }
+}
+
+// 加载文件列表
+const loadFiles = async () => {
+  loading.value = true
+  try {
+    const res = await getFileList(currentFolderId.value)
+    if (res.code === 200 && res.data) {
+      files.value = res.data.map(item => ({
+        id: item.id,
+        name: item.fileName || item.name || item.folderName,
+        icon: item.isFolder ? 'folder' : getIconForFile(item.fileName || item.name).icon,
+        iconClass: item.isFolder ? 'icon-folder' : getIconForFile(item.fileName || item.name).iconClass,
+        meta: item.isFolder ? `${item.fileCount || 0} 个文件` : formatFileSize(item.fileSize || 0),
+        owner: item.ownerName || '我',
+        ownerColor: '#3b82f6',
+        modifiedTime: item.updateTime || item.createTime || '',
+        isFolder: item.isFolder,
+        fileUrl: item.fileUrl,
+        folderId: item.folderId
+      }))
+    } else {
+      files.value = []
+    }
+  } catch (error) {
+    console.warn('加载文件列表失败:', error.message)
+    // 失败时显示空列表
+    files.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// 加载存储配额
+const loadStorageQuota = async () => {
+  try {
+    const res = await getStorageQuota()
+    if (res.code === 200 && res.data) {
+      storageQuota.value = {
+        used: res.data.used || 0,
+        total: res.data.total || 0,
+        percent: res.data.percent || 0
+      }
+    }
+  } catch (error) {
+    console.warn('获取存储配额失败:', error.message)
+    // 默认值
+    storageQuota.value = { used: 0, total: 100 * 1024 * 1024 * 1024, percent: 0 }
+  }
+}
+
 const handleFileClick = (file) => {
-  if (file.icon === 'folder') {
+  if (file.isFolder) {
     // 文件夹：进入文件夹
-    ElMessage.info(`进入文件夹: ${file.name}`)
+    currentFolderId.value = file.id
+    loadFiles()
   } else {
     // 文件：预览
     selectedFile.value = file
@@ -381,26 +436,30 @@ const handleNewCommand = (command) => {
 }
 
 // 创建文件夹
-const createFolder = () => {
+const handleCreateFolder = async () => {
   if (!newFolderName.value.trim()) {
     ElMessage.warning('请输入文件夹名称')
     return
   }
 
-  const newFolder = {
-    id: Date.now(),
-    name: newFolderName.value,
-    icon: 'folder',
-    iconClass: 'icon-folder',
-    meta: '0 个文件',
-    owner: '我',
-    ownerColor: '#3b82f6',
-    modifiedTime: new Date().toISOString().slice(0, 16).replace('T', ' ')
-  }
+  try {
+    const res = await createFolder({
+      folderName: newFolderName.value,
+      parentId: currentFolderId.value,
+      ownerType: currentOwnerType.value
+    })
 
-  files.value.unshift(newFolder)
-  ElMessage.success('文件夹创建成功')
-  showFolderDialog.value = false
+    if (res.code === 200) {
+      ElMessage.success('文件夹创建成功')
+      showFolderDialog.value = false
+      loadFiles()
+    } else {
+      ElMessage.error(res.msg || '创建失败')
+    }
+  } catch (error) {
+    console.error('创建文件夹失败:', error)
+    ElMessage.error('创建失败，请稍后重试')
+  }
 }
 
 // 文件选择变化
@@ -417,41 +476,24 @@ const handleUploadSubmit = async () => {
 
   uploading.value = true
   try {
-    // 模拟上传
-    for (const file of uploadFiles.value) {
-      const fileExt = file.name.split('.').pop().toLowerCase()
-      let icon, iconClass, color
+    const uploadPromises = uploadFiles.value.map(file => {
+      return uploadToCloud(currentFolderId.value || null, file.raw)
+    })
 
-      const iconMap = {
-        doc: { icon: 'description', iconClass: 'icon-doc' },
-        docx: { icon: 'description', iconClass: 'icon-doc' },
-        xls: { icon: 'table_view', iconClass: 'icon-sheet' },
-        xlsx: { icon: 'table_view', iconClass: 'icon-sheet' },
-        pdf: { icon: 'picture_as_pdf', iconClass: 'icon-pdf' },
-        png: { icon: 'image', iconClass: 'icon-image' },
-        jpg: { icon: 'image', iconClass: 'icon-image' },
-        jpeg: { icon: 'image', iconClass: 'icon-image' },
-        gif: { icon: 'image', iconClass: 'icon-image' }
-      }
+    const results = await Promise.all(uploadPromises)
+    const successCount = results.filter(r => r.code === 200).length
 
-      const mapped = iconMap[fileExt] || { icon: 'insert_drive_file', iconClass: 'icon-file' }
-
-      files.value.unshift({
-        id: Date.now() + Math.random(),
-        name: file.name,
-        icon: mapped.icon,
-        iconClass: mapped.iconClass,
-        meta: formatFileSize(file.size),
-        owner: '我',
-        ownerColor: '#3b82f6',
-        modifiedTime: new Date().toISOString().slice(0, 16).replace('T', ' ')
-      })
+    if (successCount > 0) {
+      ElMessage.success(`成功上传 ${successCount} 个文件`)
+      showUploadDialog.value = false
+      uploadFiles.value = []
+      loadFiles()
+      loadStorageQuota()
+    } else {
+      ElMessage.error('上传失败，请稍后重试')
     }
-
-    ElMessage.success(`成功上传 ${uploadFiles.value.length} 个文件`)
-    showUploadDialog.value = false
-    uploadFiles.value = []
   } catch (error) {
+    console.error('上传失败:', error)
     ElMessage.error('上传失败，请稍后重试')
   } finally {
     uploading.value = false
@@ -460,9 +502,28 @@ const handleUploadSubmit = async () => {
 
 // 下载文件
 const handleDownload = (file) => {
-  ElMessage.success(`开始下载: ${file.name}`)
-  // 实际项目中这里应该创建一个下载链接
+  if (file.fileUrl) {
+    const link = document.createElement('a')
+    link.href = file.fileUrl
+    link.download = file.name
+    link.click()
+    ElMessage.success(`开始下载: ${file.name}`)
+  } else {
+    ElMessage.warning('暂无下载链接')
+  }
 }
+
+// 监听导航变化
+watch(activeNav, () => {
+  currentFolderId.value = null
+  loadFiles()
+})
+
+// 初始加载
+onMounted(() => {
+  loadFiles()
+  loadStorageQuota()
+})
 </script>
 
 <style scoped lang="scss">
@@ -897,6 +958,31 @@ const handleDownload = (file) => {
   padding: 24px;
   overflow-y: auto;
   background: var(--dt-bg-body);
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: var(--dt-text-tertiary);
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  color: var(--dt-border-color);
+}
+
+.empty-text {
+  font-size: 14px;
+  color: var(--dt-text-secondary);
+  margin: 0;
+}
   
   &::-webkit-scrollbar {
     width: 6px;

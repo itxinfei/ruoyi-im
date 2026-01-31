@@ -442,7 +442,14 @@ export default {
             // 使用 dispatch action 而不是跨模块 commit mutation，避免命名空间问题
             dispatch('im/contact/batchUpdateUserStatus', userStatusMap, { root: true })
           }
+        } else {
+          // API 返回非 200，确保有空数组
+          commit('SET_SESSIONS', [])
         }
+      } catch (error) {
+        // 网络错误时设置空数组，避免 UI 报错
+        console.warn('加载会话失败，使用空列表:', error.message)
+        commit('SET_SESSIONS', [])
       } finally {
         commit('SET_LOADING', false)
       }

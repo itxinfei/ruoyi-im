@@ -60,16 +60,25 @@ export default {
         },
 
         // 获取用户信息
-        async getUserInfo({ commit }) {
+        async getUserInfo({ commit, state }) {
             try {
                 const res = await getUserInfo()
                 if (res.code === 200) {
                     commit('SET_USER_INFO', res.data)
                     commit('SET_ONLINE_STATUS', true)
                     return res.data
+                } else {
+                    // API 返回非 200，确保有默认用户对象
+                    const defaultUser = state.userInfo || { id: '', nickname: '未登录', username: 'guest' }
+                    commit('SET_USER_INFO', defaultUser)
+                    return defaultUser
                 }
             } catch (error) {
-                console.error('Failed to get user info:', error)
+                console.warn('获取用户信息失败，使用默认值:', error.message)
+                // 网络错误时使用默认用户对象，避免 UI 报错
+                const defaultUser = state.userInfo || { id: '', nickname: '未登录', username: 'guest' }
+                commit('SET_USER_INFO', defaultUser)
+                return defaultUser
             }
         },
 

@@ -2,7 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.ruoyi.im.constants.StatusConstants;
+import com.ruoyi.im.constant.StatusConstants;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.domain.ImAnnouncement;
@@ -44,23 +44,29 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
 
     private static final Logger log = LoggerFactory.getLogger(ImAnnouncementServiceImpl.class);
 
-    @Autowired
-    private ImAnnouncementMapper announcementMapper;
+    private final ImAnnouncementMapper announcementMapper;
+    private final ImAnnouncementReadMapper announcementReadMapper;
+    private final ImAnnouncementLikeMapper announcementLikeMapper;
+    private final ImAnnouncementCommentMapper announcementCommentMapper;
+    private final ImWebSocketBroadcastService broadcastService;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImAnnouncementReadMapper announcementReadMapper;
-
-    @Autowired
-    private ImAnnouncementLikeMapper announcementLikeMapper;
-
-    @Autowired
-    private ImAnnouncementCommentMapper announcementCommentMapper;
-
-    @Autowired
-    private ImWebSocketBroadcastService broadcastService;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    /**
+     * 构造器注入依赖
+     */
+    public ImAnnouncementServiceImpl(ImAnnouncementMapper announcementMapper,
+                                     ImAnnouncementReadMapper announcementReadMapper,
+                                     ImAnnouncementLikeMapper announcementLikeMapper,
+                                     ImAnnouncementCommentMapper announcementCommentMapper,
+                                     ImWebSocketBroadcastService broadcastService,
+                                     ImUserMapper userMapper) {
+        this.announcementMapper = announcementMapper;
+        this.announcementReadMapper = announcementReadMapper;
+        this.announcementLikeMapper = announcementLikeMapper;
+        this.announcementCommentMapper = announcementCommentMapper;
+        this.broadcastService = broadcastService;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

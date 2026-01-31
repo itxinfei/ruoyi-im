@@ -74,7 +74,7 @@ const openWebsite = () => {
   justify-content: center;
   position: relative;
   z-index: 2;
-  box-shadow: 0 10px 20px rgba(var(--dt-brand-color-rgb), 0.3);
+  box-shadow: 0 10px 20px rgba(0, 137, 255, 0.3);
 }
 
 .logo-icon {

@@ -1,23 +1,29 @@
 <template>
   <div class="input-toolbar">
     <div class="toolbar-left">
-      <!-- 媒体发送组 -->
+      <!-- 基础工具组 -->
       <div class="toolbar-group">
         <el-tooltip content="表情" placement="top">
           <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="$emit('toggle-emoji')">
-            <el-icon><ChatDotRound /></el-icon>
+            <span class="material-icons-outlined">sentiment_satisfied_alt</span>
           </button>
         </el-tooltip>
 
+        <el-tooltip content="@成员" placement="top" v-if="showAtButton">
+          <button class="toolbar-btn" @click="$emit('at-member')">
+            <span class="material-icons-outlined">alternate_email</span>
+          </button>
+        </el-tooltip>
+      </div>
+
+      <!-- 分隔线 -->
+      <div class="toolbar-divider" v-if="showAtButton"></div>
+
+      <!-- 媒体发送组 -->
+      <div class="toolbar-group">
         <el-tooltip content="图片" placement="top">
           <button class="toolbar-btn" @click="$emit('upload-image')">
-            <el-icon><Picture /></el-icon>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip content="文件" placement="top">
-          <button class="toolbar-btn" @click="$emit('upload-file')">
-            <el-icon><FolderOpened /></el-icon>
+            <span class="material-icons-outlined">image</span>
           </button>
         </el-tooltip>
 
@@ -27,15 +33,33 @@
           </button>
         </el-tooltip>
 
-        <el-tooltip content="截图 (Ctrl+Alt+A)" placement="top">
+        <el-tooltip content="文件" placement="top">
+          <button class="toolbar-btn" @click="$emit('upload-file')">
+            <span class="material-icons-outlined">attach_file</span>
+          </button>
+        </el-tooltip>
+      </div>
+
+      <!-- 分隔线 -->
+      <div class="toolbar-divider"></div>
+
+      <!-- 更多工具组 -->
+      <div class="toolbar-group">
+        <el-tooltip content="截图" placement="top">
           <button class="toolbar-btn" @click="$emit('screenshot')">
-            <span class="material-icons-outlined">content_cut</span>
+            <span class="material-icons-outlined">screenshot</span>
           </button>
         </el-tooltip>
 
-        <el-tooltip v-if="showAtButton" content="@成员" placement="top">
-          <button class="toolbar-btn" @click="$emit('at-member')">
-            <span class="material-icons-outlined">alternate_email</span>
+        <el-tooltip content="位置" placement="top">
+          <button class="toolbar-btn" @click="$emit('send-location')">
+            <span class="material-icons-outlined">location_on</span>
+          </button>
+        </el-tooltip>
+
+        <el-tooltip content="任务" placement="top">
+          <button class="toolbar-btn" @click="$emit('create-todo')">
+            <span class="material-icons-outlined">check_circle</span>
           </button>
         </el-tooltip>
       </div>
@@ -53,8 +77,6 @@
 </template>
 
 <script setup>
-import { ChatDotRound, Picture, FolderOpened } from '@element-plus/icons-vue'
-
 const props = defineProps({
   showEmojiPicker: {
     type: Boolean,
@@ -73,7 +95,9 @@ defineEmits([
   'upload-video',
   'screenshot',
   'at-member',
-  'smart-reply'
+  'smart-reply',
+  'send-location',
+  'create-todo'
 ])
 </script>
 
@@ -84,74 +108,77 @@ defineEmits([
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 40px;  // 钉钉标准：工具栏高度 40px
+  height: 40px;
   padding-bottom: 0;
   gap: 12px;
 
   .toolbar-left {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
 
     .toolbar-group {
       display: flex;
       align-items: center;
-      gap: 16px;  // 钉钉标准：工具栏按钮间距 16px
-      padding: 4px;
-      background: transparent;  // 钉钉标准：无背景
-      border-radius: 0;
+      gap: 4px;
+      padding: 4px 8px;
+      background: transparent;
+      border-radius: 8px;
       transition: all var(--dt-transition-fast);
     }
   }
 
+  // 分隔线
+  .toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--dt-border-light);
+  }
+
   .toolbar-btn {
     position: relative;
-    width: 20px;  // 钉钉标准：工具栏按钮 20px × 20px
-    height: 20px;
+    width: 28px;
+    height: 28px;
     background: transparent;
     border: none;
     padding: 0;
     cursor: pointer;
     color: var(--dt-text-secondary);
-    border-radius: 4px;  // 钉钉标准：圆角 4px
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-    .el-icon,
     .material-icons-outlined {
-      font-size: 20px;  // 钉钉标准：图标 20px × 20px
+      font-size: 20px;
       transition: transform 0.2s var(--dt-ease-out);
     }
 
     &:hover {
-      background: rgba(0, 137, 255, 0.1);  // 钉钉标准：悬停时浅蓝色背景
+      background: var(--dt-bg-hover);
       color: var(--dt-brand-color);
-      transform: none;  // 钉钉标准：无位移
 
-      .el-icon,
       .material-icons-outlined {
-        transform: none;  // 钉钉标准：无缩放
+        transform: scale(1.1);
       }
     }
 
     &:active {
-      transform: scale(0.95);  // 钉钉标准：点击时缩小
+      transform: scale(0.95);
     }
 
     &.active {
       color: var(--dt-brand-color);
-      background: rgba(0, 137, 255, 0.15);  // 钉钉标准：激活时略深的蓝色背景
-      box-shadow: none;  // 钉钉标准：无阴影
+      background: var(--dt-brand-bg);
 
       &::before {
         content: '';
         position: absolute;
-        bottom: -4px;  // 调整下划线位置
+        bottom: 2px;
         left: 50%;
         transform: translateX(-50%);
-        width: 16px;
+        width: 12px;
         height: 2px;
         background: var(--dt-brand-color);
         border-radius: 1px;
@@ -159,60 +186,62 @@ defineEmits([
     }
 
     &.ai-reply-btn {
-      background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.15) 100%);
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(147, 51, 234, 0.12) 100%);
       color: #9333ea;
 
       .material-icons-outlined {
         background: linear-gradient(135deg, #9333ea, #7c3aed);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        font-size: 22px;
       }
 
       &:hover {
-        background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(147, 51, 234, 0.25) 100%);
-        transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.25);
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0.2) 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(147, 51, 234, 0.2);
       }
 
-      animation: aiPulsePurple 3s ease-in-out infinite;
+      &:active {
+        transform: translateY(0) scale(0.95);
+      }
     }
   }
 }
 
 // 暗色模式
 :global(.dark) {
-  .input-toolbar .toolbar-left .toolbar-group {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--dt-border-dark);
-  }
-
-  .input-toolbar .toolbar-btn {
-    color: var(--dt-text-secondary-dark);
-
-    &:hover {
-      background: rgba(0, 137, 255, 0.15);
-      color: var(--dt-brand-color);
+  .input-toolbar {
+    .toolbar-divider {
+      background: var(--dt-border-dark);
     }
 
-    &.active {
-      background: rgba(0, 137, 255, 0.15);
-      color: var(--dt-brand-color);
-    }
-
-    &.ai-reply-btn {
-      background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0.1) 100%);
-      color: #c084fc;
-
-      .material-icons-outlined {
-        background: linear-gradient(135deg, #c084fc, #a78bfa);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
+    .toolbar-btn {
+      color: var(--dt-text-secondary-dark);
 
       &:hover {
-        background: linear-gradient(135deg, rgba(147, 51, 234, 0.25) 0%, rgba(147, 51, 234, 0.2) 100%);
-        color: #d8b4fe;
-        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--dt-brand-color);
+      }
+
+      &.active {
+        background: rgba(0, 137, 255, 0.15);
+        color: var(--dt-brand-color);
+      }
+
+      &.ai-reply-btn {
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0.1) 100%);
+        color: #c084fc;
+
+        .material-icons-outlined {
+          background: linear-gradient(135deg, #c084fc, #a78bfa);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(147, 51, 234, 0.25) 0%, rgba(147, 51, 234, 0.2) 100%);
+        }
       }
     }
   }

@@ -556,7 +556,46 @@ const handleDeleteFromDetail = async () => {
 
 // 导出数据
 const handleExport = () => {
-  ElMessage.info('导出功能开发中...')
+  try {
+    // 导出当前消息列表为 CSV
+    const headers = ['消息ID', '类型', '发送者', '会话ID', '会话类型', '内容', '发送时间', '状态']
+    const typeMap = {
+      TEXT: '文本',
+      IMAGE: '图片',
+      FILE: '文件',
+      VOICE: '语音',
+      VIDEO: '视频',
+      SYSTEM: '系统'
+    }
+
+    const rows = messageList.value.map(m => [
+      m.id,
+      typeMap[m.messageType] || m.messageType,
+      `"${(m.senderNickName || m.senderId || '')}"`,
+      m.conversationId || '',
+      m.conversationType === 'PRIVATE' ? '单聊' : '群聊',
+      `"${(m.content || '').replace(/"/g, '""')}"`, // 转义引号和换行
+      m.createTime || '',
+      m.isRevoked ? '已撤回' : (m.isDeleted ? '已删除' : '正常')
+    ])
+
+    // 添加 BOM 以支持中文
+    const BOM = '\uFEFF'
+    const csvContent = BOM + headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n')
+
+    // 创建 Blob 并下载
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `消息列表_${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
 }
 
 // 保存敏感词配置

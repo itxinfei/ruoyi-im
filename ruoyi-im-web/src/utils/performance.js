@@ -33,10 +33,11 @@ function logMetric(metric) {
 }
 
 /**
- * 上报性能数据到服务器（可选）
+ * 上报性能数据到服务器（可选功能）
+ * 需要后端支持分析平台接口时启用
  */
 function reportMetric(metric) {
-  // TODO: 发送到分析平台
+  // 可选：发送到分析平台
   // fetch('/api/analytics/performance', {
   //   method: 'POST',
   //   headers: { 'Content-Type': 'application/json' },

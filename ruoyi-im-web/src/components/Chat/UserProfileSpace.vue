@@ -212,6 +212,49 @@
       :initial-index="previewIndex"
       @close="previewVisible = false"
     />
+
+    <!-- 用户二维码对话框 -->
+    <el-dialog
+      v-model="qrcodeDialogVisible"
+      title="我的二维码"
+      width="360px"
+      :close-on-click-modal="false"
+    >
+      <div class="qrcode-container">
+        <!-- 用户头像 -->
+        <div class="qrcode-avatar">
+          <DingtalkAvatar
+            :src="user.avatar"
+            :name="user.nickname || user.username"
+            :user-id="user.id"
+            :size="80"
+            shape="square"
+          />
+        </div>
+        <!-- 用户名称 -->
+        <h3 class="qrcode-name">{{ user.nickname || user.username }}</h3>
+        <!-- 二维码占位（后续可集成 qrcode 库生成真实二维码） -->
+        <div class="qrcode-placeholder">
+          <div class="qrcode-pattern">
+            <div class="qrcode-corner top-left"></div>
+            <div class="qrcode-corner top-right"></div>
+            <div class="qrcode-corner bottom-left"></div>
+            <div class="qrcode-corner bottom-right"></div>
+            <div class="qrcode-dots">
+              <span v-for="i in 25" :key="i"></span>
+            </div>
+          </div>
+        </div>
+        <!-- 用户ID -->
+        <p class="qrcode-id">ID: {{ user.id || user.userId }}</p>
+        <!-- 提示信息 -->
+        <p class="qrcode-tip">扫一扫上方二维码，添加我为好友</p>
+      </div>
+      <template #footer>
+        <el-button @click="qrcodeDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="handleSaveQrcode">保存图片</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -262,6 +305,7 @@ const images = ref([])
 const files = ref([])
 const previewVisible = ref(false)
 const previewIndex = ref(0)
+const qrcodeDialogVisible = ref(false)
 
 const isOnline = computed(() => {
   if (isCurrentUser.value) return true
@@ -420,7 +464,7 @@ const handleMoreAction = async (command) => {
       ElMessage.success('名片链接已复制')
       break
     case 'qrcode':
-      ElMessage.info('二维码功能开发中')
+      qrcodeDialogVisible.value = true
       break
     case 'block':
       try {
@@ -458,6 +502,11 @@ const handleFileClick = (file) => {
   if (file.url) {
     window.open(file.url, '_blank')
   }
+}
+
+// 保存二维码图片
+const handleSaveQrcode = () => {
+  ElMessage.info('保存图片功能开发中，可截图保存')
 }
 
 onMounted(() => {
@@ -917,6 +966,110 @@ onMounted(() => {
   .image-gallery {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 8px;
+  }
+
+  // 二维码对话框样式
+  .qrcode-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+  }
+
+  .qrcode-avatar {
+    margin-bottom: 16px;
+  }
+
+  .qrcode-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin: 0 0 24px 0;
+  }
+
+  .qrcode-placeholder {
+    width: 200px;
+    height: 200px;
+    background: #fff;
+    border: 1px solid var(--dt-border-color);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .qrcode-pattern {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #f5f5f5;
+  }
+
+  .qrcode-corner {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #000;
+
+    &.top-left {
+      top: 16px;
+      left: 16px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    &.top-right {
+      top: 16px;
+      right: 16px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    &.bottom-left {
+      bottom: 16px;
+      left: 16px;
+      border-right: none;
+      border-top: none;
+    }
+
+    &.bottom-right {
+      bottom: 16px;
+      right: 16px;
+      border-left: none;
+      border-top: none;
+    }
+  }
+
+  .qrcode-dots {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-wrap: wrap;
+    width: 80px;
+    gap: 4px;
+
+    span {
+      width: 4px;
+      height: 4px;
+      background: #000;
+      opacity: 0.3;
+    }
+  }
+
+  .qrcode-id {
+    font-size: 14px;
+    color: var(--dt-text-secondary);
+    margin: 0 0 8px 0;
+  }
+
+  .qrcode-tip {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+    margin: 0;
   }
 }
 </style>

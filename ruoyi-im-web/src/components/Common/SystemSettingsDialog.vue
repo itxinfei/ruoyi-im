@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, defineAsyncComponent } from 'vue'
+import { ref, computed, watch, defineAsyncComponent, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -91,6 +91,7 @@ const AboutSettings = defineAsyncComponent(() => import('../Settings/AboutSettin
 
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
 import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
+import { getUserSettings } from '@/api/im/userSettings'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -107,6 +108,10 @@ const activeMenu = ref('account')
 const showChangePassword = ref(false)
 const showEditProfile = ref(false)
 
+// 从后端加载的设置
+const backendSettings = ref(null)
+const loadingSettings = ref(false)
+
 // 菜单配置
 const menuItems = computed(() => {
   const items = [
@@ -117,15 +122,15 @@ const menuItems = computed(() => {
     { id: 'help', label: '帮助反馈', icon: QuestionFilled },
     { id: 'about', label: '关于', icon: InfoFilled }
   ]
-  
+
   if (store.getters['user/isAdmin']) {
     items.splice(items.length - 2, 0, { id: 'admin', label: '管理后台', icon: Monitor })
   }
-  
+
   return items
 })
 
-const currentMenuLabel = computed(() => 
+const currentMenuLabel = computed(() =>
   menuItems.value.find(i => i.id === activeMenu.value)?.label || '设置'
 )
 
@@ -143,10 +148,72 @@ const componentMap = {
 
 const currentComponent = computed(() => componentMap[activeMenu.value] || AccountSettings)
 
+// 组件 Props - 合并后端设置和 Vuex 设置
 const componentProps = computed(() => ({
   user: currentUser.value,
-  modelValue: store.state.im.settings
+  modelValue: {
+    // 从后端加载的设置（优先使用）
+    ...(backendSettings.value || {}),
+    // Vuex 本地设置作为后备
+    ...store.state.im.settings
+  }
 }))
+
+// 加载后端用户设置
+const loadBackendSettings = async () => {
+  try {
+    loadingSettings.value = true
+    const res = await getUserSettings()
+    if (res.code === 200 && res.data) {
+      backendSettings.value = {
+        general: res.data.general || {},
+        notification: res.data.notification || {},
+        security: res.data.security || {},
+        storage: res.data.storage || {}
+      }
+      console.log('后端设置加载成功')
+    }
+  } catch (error) {
+    console.error('加载后端设置失败:', error)
+    ElMessage.error('加载设置失败')
+  } finally {
+    loadingSettings.value = false
+  }
+}
+
+// 保存设置到后端
+const saveBackendSettings = async () => {
+  try {
+    loadingSettings.value = true
+    // 将本地 Vuex 设置转换为后端格式
+    const backendData = {
+      general: store.state.im.settings.general || {},
+      notification: store.state.im.settings.notification || {},
+      security: store.state.im.settings.security || {},
+      storage: store.state.im.settings.storage || {}
+    }
+    
+    // 合并后端设置
+    const mergedSettings = { ...backendSettings.value, ...backendData }
+    
+    const res = await batchUpdateSettings({
+      settings: Object.entries(mergedSettings).map(([key, value]) => ({ key, value: String(value) }))
+    })
+    
+    if (res.code === 200) {
+      // 更新后端设置缓存
+      backendSettings.value = mergedSettings
+      ElMessage.success('设置已保存')
+    } else {
+      ElMessage.error('保存失败: ' + (res.msg || '未知错误'))
+    }
+  } catch (error) {
+    console.error('保存设置失败:', error)
+    ElMessage.error('保存设置失败')
+  } finally {
+    loadingSettings.value = false
+  }
+}
 
 const handleClearCache = () => {
   store.dispatch('im/clearCache').then(() => {
@@ -167,8 +234,12 @@ const handleExportChat = () => {
 const componentEvents = computed(() => ({
   'edit-profile': () => { showEditProfile.value = true },
   'change-password': () => { showChangePassword.value = true },
-  'update:modelValue': (val) => store.dispatch('im/updateSettings', val),
-  change: () => store.dispatch('im/saveSettings'),
+  'update:modelValue': (val) => {
+    // 保存到 Vuex 并同步到后端
+    store.dispatch('im/updateSettings', val)
+    saveBackendSettings()
+  },
+  'change': () => store.dispatch('im/saveSettings'),
   'clear-cache': handleClearCache,
   'export-chat': handleExportChat
 }))
@@ -185,6 +256,11 @@ const handleMenuClick = (item) => {
 const handleProfileUpdate = () => {
   store.dispatch('user/getCurrentUser')
 }
+
+// 加载后端设置
+onMounted(() => {
+  loadBackendSettings()
+})
 
 // 监听
 watch(() => props.modelValue, (val) => {

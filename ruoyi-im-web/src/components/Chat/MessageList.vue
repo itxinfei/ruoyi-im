@@ -227,11 +227,6 @@ const visibleMessages = computed(() => {
   return allMessages.slice(startIndex, endIndex)
 })
 
-// 监听消息变化，重置分页
-watch(() => props.sessionId, () => {
-  currentPage.value = 1
-})
-
 // 监听新消息，如果是自己的消息则滚动到底部
 watch(() => props.messages.length, (newLength, oldLength) => {
   if (newLength > oldLength) {

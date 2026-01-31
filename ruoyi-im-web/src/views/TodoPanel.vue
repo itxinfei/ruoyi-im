@@ -260,6 +260,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { confirmDelete, deleteSuccess, messageError, messageSuccess } from '@/utils/ui'
 import CreateTodoDialog from '@/components/CreateTodoDialog/index.vue'
 import TodoDetailDialog from '@/components/TodoDetailDialog/index.vue'
@@ -451,11 +452,11 @@ const loadTodos = async () => {
     if (res.code === 200) {
       todos.value = (res.data || []).map(item => transformTodoFromApi(item))
     } else {
-      ElMessage.error(res.msg || '加载失败')
+      todos.value = []
     }
   } catch (error) {
-    console.error('加载待办失败', error)
-    ElMessage.error('加载失败，请稍后重试')
+    console.warn('加载待办失败:', error.message)
+    todos.value = []
   } finally {
     loading.value = false
   }

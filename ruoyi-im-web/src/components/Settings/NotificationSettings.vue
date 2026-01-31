@@ -9,7 +9,7 @@
             <el-icon class="row-icon"><Bell /></el-icon>
             桌面通知
           </span>
-          <el-switch v-model="localSettings.notifications.enabled" size="small" @change="handleChange" />
+          <el-switch v-model="settings.enabled" size="small" @change="handleSettingChange('enabled', $event)" :loading="saving" />
         </div>
         <div class="setting-row">
           <span class="row-label">
@@ -18,46 +18,40 @@
           </span>
           <div class="row-value">
             <el-select
-              v-model="localSettings.notifications.soundType"
+              v-model="settings.soundType"
               size="small"
               style="width: 70px"
-              :disabled="!localSettings.notifications.sound"
-              @change="handleChange"
+              :disabled="!settings.enabled"
+              @change="handleSettingChange('soundType', $event)"
             >
               <el-option label="默认" value="default" />
               <el-option label="清脆" value="light" />
               <el-option label="柔和" value="soft" />
             </el-select>
             <el-button
-              v-if="localSettings.notifications.sound"
+              v-if="settings.enabled"
               link
               type="primary"
               size="small"
               @click="testSound"
+              :loading="testingSound"
             >
               <el-icon><VideoPlay /></el-icon>
             </el-button>
-            <el-switch v-model="localSettings.notifications.sound" size="small" @change="handleChange" />
           </div>
+          <el-switch v-model="settings.sound" size="small" @change="handleSettingChange('sound', $event)" :disabled="!settings.enabled" />
         </div>
         <div class="setting-row">
           <span class="row-label">
             <el-icon class="row-icon"><MessageBox /></el-icon>
             弹窗预览
           </span>
-          <el-switch v-model="localSettings.notifications.showPreview" size="small" @change="handleChange" />
-        </div>
-        <div class="setting-row">
-          <span class="row-label">
-            <el-icon class="row-icon"><Mute /></el-icon>
-            免打扰
-          </span>
-          <el-switch v-model="localSettings.notifications.dndEnabled" size="small" @change="handleChange" />
+          <el-switch v-model="settings.showPreview" size="small" @change="handleSettingChange('showPreview', $event)" :disabled="!settings.enabled" />
         </div>
       </div>
 
       <!-- 免打扰时间设置 -->
-      <div v-if="localSettings.notifications.dndEnabled" class="dnd-time-row">
+      <div v-if="settings.dndEnabled" class="dnd-time-row">
         <span class="dnd-label">生效时间</span>
         <div class="time-picker-group">
           <el-time-picker
@@ -67,6 +61,7 @@
             format="HH:mm"
             style="width: 80px"
             @change="handleDndTimeChange"
+            :disabled="saving"
           />
           <span class="time-separator">至</span>
           <el-time-picker
@@ -76,64 +71,31 @@
             format="HH:mm"
             style="width: 80px"
             @change="handleDndTimeChange"
+            :disabled="saving"
           />
         </div>
       </div>
-    </section>
 
-    <!-- 快捷键 -->
-    <section class="setting-group">
-      <h3 class="group-title">快捷键</h3>
-      <div class="setting-list">
-        <div class="setting-row">
-          <span class="row-label">
-            <el-icon class="row-icon"><Promotion /></el-icon>
-            发送消息
-          </span>
-          <el-select v-model="localSettings.shortcuts.send" size="small" style="width: 100px" @change="handleChange">
-            <el-option label="Enter" value="enter" />
-            <el-option label="Ctrl+Enter" value="ctrl-enter" />
-          </el-select>
-        </div>
-        <div class="setting-row">
-          <span class="row-label">
-            <el-icon class="row-icon"><Crop /></el-icon>
-            截屏
-          </span>
-          <span class="shortcut-kbd">Alt + A</span>
-        </div>
-        <div class="setting-row">
-          <span class="row-label">
-            <el-icon class="row-icon"><Search /></el-icon>
-            唤起搜索
-          </span>
-          <span class="shortcut-kbd">Ctrl + K</span>
-        </div>
-        <div class="setting-row">
-          <span class="row-label">
-            <el-icon class="row-icon"><ChatLineRound /></el-icon>
-            快速跳转
-          </span>
-          <span class="shortcut-kbd">Ctrl + Tab</span>
-        </div>
+      <!-- 快捷键 -->
+      <div class="setting-row">
+        <span class="row-label">
+          <el-icon class="row-icon"><Promotion /></el-icon>
+          发送消息
+        </span>
+        <el-select v-model="settings.send" size="small" style="width: 100px" @change="handleSettingChange('send', $event)">
+          <el-option label="Enter" value="enter" />
+          <el-option label="Ctrl+Enter" value="ctrl-enter" />
+        </el-select>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { reactive, watch, ref } from 'vue'
-import {
-  Bell,
-  Headset,
-  MessageBox,
-  Mute,
-  Promotion,
-  Crop,
-  Search,
-  ChatLineRound,
-  VideoPlay
-} from '@element-plus/icons-vue'
+import { reactive, watch, ref, onMounted } from 'vue'
+import { Bell, Headset, MessageBox, Mute, Promotion, VideoPlay } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { getNotificationSetting, updateNotificationSetting } from '@/api/im/notificationSetting'
 
 const props = defineProps({
   modelValue: {
@@ -144,71 +106,156 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-const localSettings = reactive({
-  notifications: {
-    enabled: true,
-    sound: true,
-    soundType: 'default',
-    showPreview: true,
-    dndEnabled: false,
-    dndStart: '22:00',
-    dndEnd: '08:00',
-    ...props.modelValue.notifications
-  },
-  shortcuts: {
-    send: 'enter',
-    ...props.modelValue.shortcuts
-  }
+// 后端设置数据
+const settings = reactive({
+  enabled: true,
+  sound: true,
+  soundType: 'default',
+  showPreview: true,
+  dndEnabled: false,
+  dndStart: '22:00',
+  dndEnd: '08:00',
+  send: 'enter'
 })
 
+// 免打扰时间（用于时间选择器）
 const dndStartTime = ref(null)
 const dndEndTime = ref(null)
 
-const initDndTime = () => {
-  if (localSettings.notifications.dndStart) {
-    const [hours, minutes] = localSettings.notifications.dndStart.split(':')
-    dndStartTime.value = new Date(2000, 0, 1, hours, minutes)
-  }
-  if (localSettings.notifications.dndEnd) {
-    const [hours, minutes] = localSettings.notifications.dndEnd.split(':')
-    dndEndTime.value = new Date(2000, 0, 1, hours, minutes)
+// 加载状态
+const saving = ref(false)
+const testingSound = ref(false)
+
+// 初始化
+onMounted(async () => {
+  await loadSettings()
+})
+
+// 加载设置
+const loadSettings = async () => {
+  try {
+    const res = await getNotificationSetting()
+    if (res.code === 200 && res.data) {
+      // 合并后端设置到本地状态
+      Object.assign(settings, {
+        enabled: res.data.enabled === 1,
+        sound: res.data.soundEnabled === 1,
+        soundType: res.data.soundType || 'default',
+        showPreview: res.data.showPreview === 1,
+        dndEnabled: res.data.dndEnabled === 1,
+        dndStart: res.data.dndStartTime || '22:00',
+        dndEnd: res.data.dndEndTime || '08:00'
+      })
+      
+      // 初始化时间选择器
+      if (res.data.dndEnabled === 1) {
+        initDndTime()
+      }
+      
+      console.log('通知设置加载成功')
+    }
+  } catch (error) {
+    console.error('加载通知设置失败:', error)
+    ElMessage.error('加载设置失败')
   }
 }
 
-initDndTime()
+// 初始化免打扰时间
+const initDndTime = () => {
+  const now = new Date()
+  const [startHours, startMinutes] = settings.dndStart.split(':').map(Number)
+  const [endHours, endMinutes] = settings.dndEnd.split(':').map(Number)
+  
+  dndStartTime.value = new Date(2000, 0, 1, startHours, startMinutes, 0)
+  dndEndTime.value = new Date(2000, 0, 1, endHours, endMinutes, 0)
+}
 
+// 防抖定时器（必须在 handleSettingChange 之前声明）
+const saveTimer = ref(null)
+
+// 处理设置变更
+const handleSettingChange = async (key, value) => {
+  // 更新本地状态
+  settings[key] = value
+
+  // 防抖保存到后端
+  if (saveTimer.value) clearTimeout(saveTimer.value)
+  saveTimer.value = setTimeout(async () => {
+    await saveSettings()
+  }, 500)
+}
+
+// 处理免打扰时间变更
+const handleDndTimeChange = () => {
+  if (dndStartTime.value && dndEndTime.value) {
+    const startHours = dndStartTime.value.getHours().toString().padStart(2, '0')
+    const startMinutes = dndStartTime.value.getMinutes().toString().padStart(2, '0')
+    const endHours = dndEndTime.value.getHours().toString().padStart(2, '0')
+    const endMinutes = dndEndTime.value.getMinutes().toString().padStart(2, '0')
+    
+    settings.dndStart = `${startHours}:${startMinutes}`
+    settings.dndEnd = `${endHours}:${endMinutes}`
+    
+    handleSettingChange('dndStart', settings.dndStart)
+    handleSettingChange('dndEnd', settings.dndEnd)
+  }
+}
+
+// 保存设置到后端
+const saveSettings = async () => {
+  try {
+    saving.value = true
+    
+    // 转换为后端格式
+    const backendData = {
+      enabled: settings.enabled ? 1 : 0,
+      desktopNotification: settings.enabled ? 1 : 0,
+      soundEnabled: settings.sound ? 1 : 0,
+      soundType: settings.soundType,
+      customSoundUrl: null,
+      showPreview: settings.showPreview ? 1 : 0,
+      dndEnabled: settings.dndEnabled ? 1 : 0,
+      dndStart: settings.dndEnabled ? settings.dndStart : null,
+      dndEnd: settings.dndEnabled ? settings.dndEnd : null,
+      mentionOnly: 0
+    }
+    
+    const res = await updateNotificationSetting(backendData)
+    if (res.code === 200) {
+      ElMessage.success('设置已保存')
+      emit('change')
+    } else {
+      ElMessage.error('保存失败: ' + (res.msg || '未知错误'))
+    }
+  } catch (error) {
+    console.error('保存设置失败:', error)
+    ElMessage.error('保存设置失败')
+  } finally {
+    saving.value = false
+  }
+}
+
+// 测试提示音
+const testSound = async () => {
+  try {
+    testingSound.value = true
+    const audio = new Audio('/assets/audio/notification.mp3')
+    await audio.play()
+    setTimeout(() => {
+      testingSound.value = false
+    }, 1000)
+  } catch (error) {
+    console.error('播放提示音失败:', error)
+    ElMessage.error('播放失败')
+  }
+}
+
+// 监听 props 变化
 watch(() => props.modelValue, (newVal) => {
-  if (JSON.stringify(newVal) !== JSON.stringify(localSettings)) {
-    Object.assign(localSettings, JSON.parse(JSON.stringify(newVal)))
-    initDndTime()
+  if (JSON.stringify(newVal) !== JSON.stringify(settings)) {
+    Object.assign(settings, JSON.parse(JSON.stringify(newVal)))
   }
 }, { deep: true })
-
-const handleDndTimeChange = () => {
-  if (dndStartTime.value) {
-    const hours = dndStartTime.value.getHours().toString().padStart(2, '0')
-    const minutes = dndStartTime.value.getMinutes().toString().padStart(2, '0')
-    localSettings.notifications.dndStart = `${hours}:${minutes}`
-  }
-  if (dndEndTime.value) {
-    const hours = dndEndTime.value.getHours().toString().padStart(2, '0')
-    const minutes = dndEndTime.value.getMinutes().toString().padStart(2, '0')
-    localSettings.notifications.dndEnd = `${hours}:${minutes}`
-  }
-  handleChange()
-}
-
-const testSound = () => {
-  const audio = new Audio('/assets/audio/notification.mp3')
-  audio.play().catch(() => {
-    console.log('播放提示音测试')
-  })
-}
-
-const handleChange = () => {
-  emit('update:modelValue', JSON.parse(JSON.stringify(localSettings)))
-  emit('change')
-}
 </script>
 
 <style scoped lang="scss">
@@ -272,40 +319,29 @@ const handleChange = () => {
   gap: 8px;
 }
 
-.shortcut-kbd {
-  font-family: monospace;
-  font-size: 12px;
-  color: #666;
-  background: #f0f0f0;
-  padding: 2px 8px;
-  border-radius: 3px;
-  border: 1px solid #e0e0e0;
-}
-
 .dnd-time-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
   background: #f5f5f5;
-  border: 1px solid #e8e8e8;
   border-top: none;
+}
 
-  .dnd-label {
-    font-size: 12px;
-    color: #666;
-  }
+.dnd-label {
+  font-size: 12px;
+  color: #666;
+}
 
-  .time-picker-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.time-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-    .time-separator {
-      font-size: 12px;
-      color: #999;
-    }
-  }
+.time-separator {
+  font-size: 12px;
+  color: #999;
 }
 
 // 深色模式
@@ -322,6 +358,10 @@ const handleChange = () => {
 
   .setting-row {
     border-color: #333;
+
+    &.clickable:hover {
+      background: #333;
+    }
   }
 
   .row-label {
@@ -336,23 +376,17 @@ const handleChange = () => {
     color: #ccc;
   }
 
-  .shortcut-kbd {
-    color: #999;
+  .dnd-time-row {
     background: #333;
-    border-color: #444;
+    border-color: #333;
   }
 
-  .dnd-time-row {
-    background: #2a2a2a;
-    border-color: #333;
+  .dnd-label {
+    color: #999;
+  }
 
-    .dnd-label {
-      color: #999;
-    }
-
-    .time-separator {
-      color: #666;
-    }
+  .time-separator {
+    color: #666;
   }
 }
 </style>

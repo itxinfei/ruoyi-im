@@ -247,7 +247,7 @@ const loadMails = async () => {
       pageSize: pageSize.value,
       keyword: searchKeyword.value || undefined
     })
-    if (res.code === 200) {
+    if (res && res.code === 200) {
       emails.value = (res.data?.list || res.data || []).map(email => ({
         ...email,
         avatarColor: getRandomColor()
@@ -255,11 +255,13 @@ const loadMails = async () => {
       totalCount.value = res.data?.total || res.data?.length || 0
       await updateFolderCounts()
     } else {
-      ElMessage.error(res.msg || '加载失败')
+      emails.value = []
+      totalCount.value = 0
     }
   } catch (error) {
-    console.error('加载邮件列表失败', error)
-    ElMessage.error('加载失败，请稍后重试')
+    console.warn('加载邮件列表失败:', error.message)
+    emails.value = []
+    totalCount.value = 0
   } finally {
     loading.value = false
   }

@@ -203,14 +203,19 @@
         SELECT 'member'
     </select>
 
-    <!-- 根据关键词搜索用户 -->
+    <!-- 根据关键词搜索用户（优化版 - 使用前缀匹配） -->
+    <!-- 前缀匹配 LIKE 'keyword%' 可以利用 idx_user_*_prefix 前缀索引，性能大幅提升 -->
     <select id="selectImUserByKeyword" parameterType="String" resultMap="ImUserResult">
         select id, username, password, nickname, email, mobile, avatar, status,
                gender, signature, department, position, last_online_time, create_time, update_time
         from im_user
         <where>
             <if test="keyword != null and keyword != ''">
-                and (username like concat('%', #{keyword}, '%') or nickname like concat('%', #{keyword}, '%'))
+                and (
+                    username like concat(#{keyword}, '%')
+                    or nickname like concat(#{keyword}, '%')
+                    or mobile like concat(#{keyword}, '%')
+                )
             </if>
         </where>
         limit 50

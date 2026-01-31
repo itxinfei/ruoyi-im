@@ -1,7 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.ruoyi.im.constants.StatusConstants;
+import com.ruoyi.im.constant.StatusConstants;
 import com.ruoyi.im.domain.ImAttendanceGroup;
 import com.ruoyi.im.domain.ImAttendanceGroupMember;
 import com.ruoyi.im.domain.ImAttendanceSchedule;
@@ -40,22 +40,28 @@ import java.util.stream.Collectors;
 @Service
 public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImAttendanceGroupServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ImAttendanceGroupServiceImpl.class);
 
-    @Autowired
-    private ImAttendanceGroupMapper attendanceGroupMapper;
+    private final ImAttendanceGroupMapper attendanceGroupMapper;
+    private final ImAttendanceGroupMemberMapper attendanceGroupMemberMapper;
+    private final ImAttendanceShiftMapper attendanceShiftMapper;
+    private final ImAttendanceScheduleMapper attendanceScheduleMapper;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImAttendanceGroupMemberMapper attendanceGroupMemberMapper;
-
-    @Autowired
-    private ImAttendanceShiftMapper attendanceShiftMapper;
-
-    @Autowired
-    private ImAttendanceScheduleMapper attendanceScheduleMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    /**
+     * 构造器注入依赖
+     */
+    public ImAttendanceGroupServiceImpl(ImAttendanceGroupMapper attendanceGroupMapper,
+                                        ImAttendanceGroupMemberMapper attendanceGroupMemberMapper,
+                                        ImAttendanceShiftMapper attendanceShiftMapper,
+                                        ImAttendanceScheduleMapper attendanceScheduleMapper,
+                                        ImUserMapper userMapper) {
+        this.attendanceGroupMapper = attendanceGroupMapper;
+        this.attendanceGroupMemberMapper = attendanceGroupMemberMapper;
+        this.attendanceShiftMapper = attendanceShiftMapper;
+        this.attendanceScheduleMapper = attendanceScheduleMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -113,7 +119,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             addMembers(group.getId(), request.getMemberIds(), userId);
         }
 
-        logger.info("创建考勤组成功: groupId={}, groupName={}", group.getId(), group.getGroupName());
+        log.info("创建考勤组成功: groupId={}, groupName={}", group.getId(), group.getGroupName());
         return group.getId();
     }
 
@@ -147,7 +153,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
 
         attendanceGroupMapper.updateById(group);
 
-        logger.info("更新考勤组成功: groupId={}", groupId);
+        log.info("更新考勤组成功: groupId={}", groupId);
     }
 
     @Override
@@ -170,7 +176,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
                         .eq(ImAttendanceGroupMember::getGroupId, groupId)
         );
 
-        logger.info("删除考勤组成功: groupId={}", groupId);
+        log.info("删除考勤组成功: groupId={}", groupId);
     }
 
     @Override
@@ -288,7 +294,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             attendanceGroupMemberMapper.batchInsert(members);
         }
 
-        logger.info("添加考勤组成员成功: groupId={}, count={}", groupId, members.size());
+        log.info("添加考勤组成员成功: groupId={}, count={}", groupId, members.size());
     }
 
     @Override
@@ -306,7 +312,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         attendanceGroupMemberMapper.batchUpdateStatus(groupId, memberIds,
                 StatusConstants.AttendanceMemberStatus.LEFT);
 
-        logger.info("移除考勤组成员成功: groupId={}, count={}", groupId, memberIds.size());
+        log.info("移除考勤组成员成功: groupId={}, count={}", groupId, memberIds.size());
     }
 
     @Override
@@ -347,7 +353,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
 
         attendanceShiftMapper.insert(shift);
 
-        logger.info("创建班次成功: shiftId={}, shiftName={}", shift.getId(), shiftName);
+        log.info("创建班次成功: shiftId={}, shiftName={}", shift.getId(), shiftName);
         return shift.getId();
     }
 
@@ -366,7 +372,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
 
         attendanceShiftMapper.deleteById(shiftId);
 
-        logger.info("删除班次成功: shiftId={}", shiftId);
+        log.info("删除班次成功: shiftId={}", shiftId);
     }
 
     @Override
@@ -423,7 +429,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             attendanceScheduleMapper.batchInsert(schedules);
         }
 
-        logger.info("批量排班成功: groupId={}, count={}", groupId, schedules.size());
+        log.info("批量排班成功: groupId={}, count={}", groupId, schedules.size());
     }
 
     @Override

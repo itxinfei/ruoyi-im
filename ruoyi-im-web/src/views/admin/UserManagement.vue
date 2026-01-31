@@ -531,10 +531,40 @@ const handleImport = () => {
 
 // 导出
 const handleExport = () => {
-  ElMessage.info('导出功能开发中')
-}
+  try {
+    const headers = ["用户ID", "用户名", "昵称", "邮箱", "手机号", "角色", "状态", "创建时间"]
+    const roleMap = { USER: "普通用户", ADMIN: "管理员", SUPER_ADMIN: "超级管理员" }
+    const statusMap = { 0: "禁用", 1: "启用" }
 
-// 重置密码
+    const rows = userList.value.map(u => {
+      return [
+        u.id,
+        JSON.stringify(String(u.username || "")),
+        JSON.stringify(String(u.nickName || "")),
+        JSON.stringify(String(u.email || "")),
+        JSON.stringify(String(u.phonenumber || "")),
+        roleMap[u.role] || u.role,
+        statusMap[u.status] ?? u.status,
+        u.createTime || ""
+      ]
+    })
+
+    const BOM = "\uFEFF"
+    const csvContent = BOM + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `用户列表_${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+
+    ElMessage.success("导出成功")
+  } catch (error) {
+    ElMessage.error("导出失败")
+  }
+}
 const handleResetPassword = () => {
   ElMessage.info('重置密码功能开发中')
 }

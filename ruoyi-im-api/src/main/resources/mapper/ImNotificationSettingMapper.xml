@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImNotificationSettingMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImNotificationSetting" id="ImNotificationSettingResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="enabled" column="enabled"/>
+        <result property="desktopNotification" column="desktop_notification"/>
+        <result property="soundEnabled" column="sound_enabled"/>
+        <result property="soundType" column="sound_type"/>
+        <result property="customSoundUrl" column="custom_sound_url"/>
+        <result property="showPreview" column="show_preview"/>
+        <result property="dndEnabled" column="dnd_enabled"/>
+        <result property="dndStartTime" column="dnd_start_time"/>
+        <result property="dndEndTime" column="dnd_end_time"/>
+        <result property="mentionOnly" column="mention_only"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImNotificationSettingVo">
+        select id, user_id, enabled, desktop_notification, sound_enabled, sound_type,
+               custom_sound_url, show_preview, dnd_enabled, dnd_start_time, dnd_end_time,
+               mention_only, create_time, update_time
+        from im_notification_setting
+    </sql>
+
+    <!-- 根据用户ID查询通知设置 -->
+    <select id="selectByUserId" resultMap="ImNotificationSettingResult" parameterType="Long">
+        <include refid="selectImNotificationSettingVo"/>
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+    <!-- 插入或更新通知设置 -->
+    <insert id="insertOrUpdate" parameterType="com.ruoyi.im.domain.ImNotificationSetting">
+        INSERT INTO im_notification_setting 
+        (user_id, enabled, desktop_notification, sound_enabled, sound_type,
+         custom_sound_url, show_preview, dnd_enabled, dnd_start_time, dnd_end_time, mention_only, create_time, update_time)
+        VALUES 
+        (#{userId}, #{enabled}, #{desktopNotification}, #{soundEnabled}, #{soundType},
+         #{customSoundUrl}, #{showPreview}, #{dndEnabled}, #{dndStartTime}, #{dndEndTime}, #{mentionOnly}, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE 
+        enabled = VALUES(enabled),
+        desktop_notification = VALUES(desktop_notification),
+        sound_enabled = VALUES(sound_enabled),
+        sound_type = VALUES(sound_type),
+        custom_sound_url = VALUES(custom_sound_url),
+        show_preview = VALUES(show_preview),
+        dnd_enabled = VALUES(dnd_enabled),
+        dnd_start_time = VALUES(dnd_start_time),
+        dnd_end_time = VALUES(dnd_end_time),
+        mention_only = VALUES(mention_only),
+        update_time = NOW()
+    </insert>
+
+</mapper>

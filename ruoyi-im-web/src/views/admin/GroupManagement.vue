@@ -738,10 +738,9 @@ const handleOwnerCommand = async (command) => {
           h('select', {
             id: 'new-owner-select',
             style: 'width: 100%; padding: 8px; border: 1px solid var(--el-border-color); border-radius: 4px;'
-          },
-          candidates.map(m =>
+          }, candidates.map(m =>
             h('option', { value: m.userId, key: m.userId }, `${m.nickName} (${m.role === 'ADMIN' ? '管理员' : '成员'})`)
-          )
+          ))
         ]),
         showCancelButton: true,
         confirmButtonText: '确定转让',
@@ -870,59 +869,6 @@ const removeBatchUser = (user) => {
     batchAddSelectedUsers.value.splice(index, 1)
   }
 }
-  if (batchAddSelectedUsers.value.length === 0) {
-    ElMessage.warning('请选择要添加的成员')
-    return
-  }
-
-  // 检查是否已存在
-  const existingUserIds = memberList.value.map(m => m.userId)
-  const newUserIds = batchAddSelectedUsers.value
-    .filter(u => !existingUserIds.includes(u.userId))
-    .map(u => u.userId)
-
-  if (newUserIds.length === 0) {
-    ElMessage.warning('所选成员已在群组中')
-    return
-  }
-
-  if (newUserIds.length < batchAddSelectedUsers.value.length) {
-    ElMessage.warning(`${batchAddSelectedUsers.value.length - newUserIds.length} 个成员已存在，将跳过`)
-  }
-
-  batchAddLoading.value = true
-  try {
-    // 逐个添加成员（因为 API 支持单个添加）
-    let successCount = 0
-    for (const userId of newUserIds) {
-      try {
-        const res = await addGroupMember(currentGroup.value.id, {
-          userId,
-          role: 'MEMBER'
-        })
-        if (res.code === 200) {
-          successCount++
-        }
-      } catch (error) {
-        console.error(`添加成员 ${userId} 失败:`, error)
-      }
-    }
-
-    if (successCount > 0) {
-      ElMessage.success(`成功添加 ${successCount} 个成员`)
-      batchAddDialogVisible.value = false
-      // 重新加载成员列表
-      await handleViewMembers(currentGroup.value)
-      loadGroups()
-    } else {
-      ElMessage.error('添加失败')
-    }
-  } catch (error) {
-    ElMessage.error('添加失败')
-  } finally {
-    batchAddLoading.value = false
-  }
-}
 
 // 搜索用户
 const searchUsers = async (query) => {
@@ -968,7 +914,35 @@ const handleAddMemberSubmit = async () => {
 
 // 导出数据
 const handleExport = () => {
-  ElMessage.info('导出功能开发中')
+  try {
+    // 导出当前群组列表为 CSV
+    const headers = ['群组ID', '群组名称', '群主ID', '成员数量', '类型', '创建时间']
+    const rows = groups.value.map(g => [
+      g.id,
+      `"${g.name || ''}"`, // 名称加引号防止CSV格式问题
+      g.ownerId,
+      g.memberCount || 0,
+      g.type || '',
+      g.createTime || ''
+    ])
+
+    // 添加 BOM 以支持中文
+    const BOM = '\uFEFF'
+    const csvContent = BOM + headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n')
+
+    // 创建 Blob 并下载
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `群组列表_${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
 }
 
 onMounted(() => {

@@ -397,7 +397,36 @@ const handleViewDetail = (row) => {
 
 // 导出
 const handleExport = () => {
-  ElMessage.info('导出功能开发中...')
+  try {
+    // 导出当前日志列表为 CSV
+    const headers = ['日志ID', '操作模块', '操作类型', '操作人', 'IP地址', '操作时间', '状态']
+    const rows = logs.value.map(log => [
+      log.id,
+      `"${log.module || ''}"`,
+      `"${log.operation || ''}"`,
+      `"${log.operator || ''}"`,
+      log.ip || '',
+      log.operateTime || '',
+      log.status === 1 ? '成功' : '失败'
+    ])
+
+    // 添加 BOM 以支持中文
+    const BOM = '\uFEFF'
+    const csvContent = BOM + headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n')
+
+    // 创建 Blob 并下载
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `操作日志_${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
 }
 
 // 清空日志

@@ -106,11 +106,6 @@ const handleChange = () => {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-  
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
 }
 
 .setting-item {
@@ -121,10 +116,6 @@ const handleChange = () => {
   gap: 16px;
   border-bottom: 1px solid var(--dt-border-lighter);
   transition: background-color 0.2s;
-  
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
 
   &:last-child {
     border-bottom: none;

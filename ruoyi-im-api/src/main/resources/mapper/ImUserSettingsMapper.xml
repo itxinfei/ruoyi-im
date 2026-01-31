@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImUserSettingsMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImUserSettings" id="ImUserSettingsResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="settingKey" column="setting_key"/>
+        <result property="settingValue" column="setting_value"/>
+        <result property="settingType" column="setting_type"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImUserSettingsVo">
+        select id, user_id, setting_key, setting_value, setting_type, create_time, update_time
+        from im_user_settings
+    </sql>
+
+    <!-- 根据用户ID查询设置列表 -->
+    <select id="selectByUserId" resultMap="ImUserSettingsResult" parameterType="Long">
+        <include refid="selectImUserSettingsVo"/>
+        where user_id = #{userId}
+        order by setting_type, setting_key
+    </select>
+
+    <!-- 根据用户ID和设置类型查询设置列表 -->
+    <select id="selectByUserIdAndType" resultMap="ImUserSettingsResult">
+        <include refid="selectImUserSettingsVo"/>
+        where user_id = #{userId} and setting_type = #{settingType}
+        order by setting_key
+    </select>
+
+    <!-- 根据用户ID和设置键查询设置 -->
+    <select id="selectByUserIdAndKey" resultMap="ImUserSettingsResult">
+        <include refid="selectImUserSettingsVo"/>
+        where user_id = #{userId} and setting_key = #{settingKey}
+        limit 1
+    </select>
+
+    <!-- 更新设置（批量） -->
+    <update id="updateSettings" parameterType="java.util.List">
+        <foreach collection="list" item="setting" separator=";">
+            update im_user_settings
+            set setting_value = #{setting.settingValue},
+                update_time = NOW()
+            where id = #{setting.id}
+        </foreach>
+    </update>
+
+    <!-- 删除用户设置 -->
+    <delete id="deleteByUserIdAndKey" parameterType="map">
+        delete from im_user_settings
+        where user_id = #{userId} and setting_key = #{settingKey}
+    </delete>
+
+</mapper>

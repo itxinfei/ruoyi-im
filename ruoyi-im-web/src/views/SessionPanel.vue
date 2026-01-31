@@ -81,10 +81,11 @@
         </span>
       </div>
       <!-- 全局搜索面板 -->
-      <GlobalSearch
-        v-model:visible="showGlobalSearch"
-        :keyword="searchKeyword"
-        @select="handleSearchSelect"
+      <GlobalSearchDialog
+        v-model="showGlobalSearch"
+        @select-message="handleSearchSelectMessage"
+        @select-contact="handleSearchSelectContact"
+        @select-group="handleSearchSelectGroup"
       />
     </div>
 
@@ -274,7 +275,7 @@ import { ref, computed, onMounted, onUnmounted, reactive, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
-import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
+import GlobalSearchDialog from '@/components/Common/GlobalSearchDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
@@ -549,6 +550,47 @@ const handleSearchSelect = (item) => {
   } else if (item.id && item.conversationId) {
     const session = sessions.value.find(s => s.id === item.conversationId)
     if (session) emit('select-session', session)
+  }
+}
+
+// 处理消息搜索选择
+const handleSearchSelectMessage = (message) => {
+  if (message && message.conversationId) {
+    const session = sessions.value.find(s => s.id === message.conversationId)
+    if (session) {
+      emit('select-session', session)
+      ElMessage.success('正在定位消息...')
+    }
+  }
+}
+
+// 处理联系人搜索选择
+const handleSearchSelectContact = (contact) => {
+  if (contact && contact.userId) {
+    const existingContact = sessions.value.find(s => 
+      s.type === 'PRIVATE' && s.targetId === contact.userId
+    )
+    if (existingContact) {
+      emit('select-session', existingContact)
+    } else {
+      // 创建新会话
+      ElMessage.info(`正在发起与 ${contact.nickname || contact.userName} 的对话...`)
+    }
+  }
+}
+
+// 处理群组搜索选择
+const handleSearchSelectGroup = (group) => {
+  if (group && group.groupId) {
+    const existingGroup = sessions.value.find(s => 
+      s.type === 'GROUP' && s.targetId === group.groupId
+    )
+    if (existingGroup) {
+      emit('select-session', existingGroup)
+    } else {
+      // 创建新会话
+      ElMessage.info(`正在加入 ${group.groupName}...`)
+    }
   }
 }
 

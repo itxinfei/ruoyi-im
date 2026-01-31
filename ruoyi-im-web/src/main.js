@@ -3,12 +3,17 @@ import 'viewerjs/dist/viewer.css'
 import VueViewer from 'v-viewer'
 
 import './styles/global.scss'
+import './styles/a11y.scss'
 // 只注册 Element Plus 图标组件（其他组件自动按需导入）
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
 import { initPerformanceMonitoring } from './utils/performance'
+import { setupSkipLinks } from './utils/a11y'
+
+// 初始化可访问性功能
+setupSkipLinks()
 
 // 初始化性能监控（仅生产环境）
 if (import.meta.env.PROD) {

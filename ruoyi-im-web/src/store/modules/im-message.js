@@ -30,19 +30,28 @@ export const SEND_STATUS = {
 }
 
 /**
+ * 发送队列配置
+ */
+export const SENDING_QUEUE_CONFIG = {
+  MAX_QUEUE_SIZE: 100, // 最大队列长度（防止内存溢出和滥用）
+  CLEANUP_INTERVAL: 60 * 1000, // 清理间隔：1分钟
+  EXPIRED_TIME: 10 * 60 * 1000 // 过期时间：10分钟
+}
+
+/**
  * 将后端 sendStatus 数值映射为前端 UI 使用的字符串
  * @param {number} sendStatus - 后端 sendStatus 枚举值
  * @returns {string} 前端状态字符串
  */
 function mapSendStatusToUi(sendStatus) {
   const statusMap = {
-    [SEND_STATUS.PENDING]: 'sending',
+    [SEND_STATUS.PENDING]: 'pending',
     [SEND_STATUS.SENDING]: 'sending',
-    [SEND_STATUS.DELIVERED]: 'sent',
+    [SEND_STATUS.DELIVERED]: 'delivered',
     [SEND_STATUS.READ]: 'read',
     [SEND_STATUS.FAILED]: 'failed'
   }
-  return statusMap[sendStatus] || 'sent'
+  return statusMap[sendStatus] || 'pending'
 }
 
 // 简单UUID生成
@@ -116,6 +125,16 @@ export default {
     // 检查消息是否在发送中
     isMessageSending: (state) => (clientMsgId) => {
       return state.sendingMessages.has(clientMsgId)
+    },
+
+    // 获取发送队列大小
+    sendingQueueSize: (state) => {
+      return state.sendingMessages.size
+    },
+
+    // 检查发送队列是否已满
+    isSendingQueueFull: (state) => {
+      return state.sendingMessages.size >= SENDING_QUEUE_CONFIG.MAX_QUEUE_SIZE
     }
   },
 
@@ -284,18 +303,25 @@ export default {
     },
 
     /**
-     * 清理过期的发送中消息（超过 10 分钟）
+     * 清理过期的发送中消息（超过配置时间）
      * 避免内存泄漏
      * @param {Object} state - Vuex state
      */
     CLEANUP_EXPIRED_MESSAGES(state) {
       const now = Date.now()
-      const EXPIRED_TIME = 10 * 60 * 1000 // 10 分钟
+      const expiredTime = SENDING_QUEUE_CONFIG.EXPIRED_TIME
 
+      let cleanedCount = 0
       for (const [clientMsgId, data] of state.sendingMessages.entries()) {
-        if (now - data.timestamp > EXPIRED_TIME) {
+        if (now - data.timestamp > expiredTime) {
           state.sendingMessages.delete(clientMsgId)
+          cleanedCount++
         }
+      }
+
+      // 如果清理了消息，输出日志
+      if (cleanedCount > 0) {
+        console.log(`[发送队列清理] 清理了 ${cleanedCount} 条过期消息`)
       }
     }
   },
@@ -329,7 +355,18 @@ export default {
     },
 
     // 发送消息（含乐观 UI 和发送队列管理）
-    async sendMessage({ commit, dispatch }, { sessionId, type = 'TEXT', content, replyToMessageId = null }) {
+    async sendMessage({ commit, dispatch, state }, { sessionId, type = 'TEXT', content, replyToMessageId = null }) {
+      // ========== 检查发送队列是否已满 ==========
+      if (state.sendingMessages.size >= SENDING_QUEUE_CONFIG.MAX_QUEUE_SIZE) {
+        const error = new Error(
+          `发送队列已满（${SENDING_QUEUE_CONFIG.MAX_QUEUE_SIZE}条），请稍后重试`
+        )
+        error.code = 'QUEUE_FULL'
+        error.queueSize = state.sendingMessages.size
+        error.maxQueueSize = SENDING_QUEUE_CONFIG.MAX_QUEUE_SIZE
+        throw error
+      }
+
       const clientMsgId = generateUUID()
 
       // ========== 乐观 UI：先添加消息到发送队列 ==========
@@ -656,12 +693,12 @@ export default {
   }
 }
 
-// ========== 定期清理机制（每 5 分钟）==========
+// ========== 定期清理机制 ==========
 let cleanupTimer = null
 
 /**
  * 启动定期清理任务
- * 每 5 分钟清理一次超过 10 分钟的发送中消息
+ * 每隔配置时间清理一次过期的发送中消息
  */
 export function startCleanupTimer(store) {
   // 清除旧的定时器（如果存在）
@@ -669,13 +706,13 @@ export function startCleanupTimer(store) {
     clearInterval(cleanupTimer)
   }
 
-  // 每 5 分钟（300000 ms）清理一次
+  // 按配置的间隔时间清理
   cleanupTimer = setInterval(() => {
     store.dispatch('imMessage/cleanupExpiredMessages')
-    console.log('[im-message] 清理过期的发送中消息')
-  }, 5 * 60 * 1000) // 5 分钟
+    console.log(`[im-message] 清理过期的发送中消息（队列大小: ${store.getters['imMessage/sendingQueueSize']}）`)
+  }, SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL)
 
-  console.log('[im-message] 启动定期清理任务（每 5 分钟）')
+  console.log(`[im-message] 启动定期清理任务（间隔: ${SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL / 1000}秒）`)
 }
 
 /**

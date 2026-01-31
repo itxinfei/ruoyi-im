@@ -3,7 +3,8 @@
 @use './menu-standards.scss' as *;
 @use './tailwind-overrides.scss' as *;
 @use './icons.scss';
-@use './animations.scss' as *;
+// 使用模块化动画 - 支持按需加载和代码分割
+@use './animations/index.scss' as *;
 
 // Tailwind CSS 指令
 @tailwind base;

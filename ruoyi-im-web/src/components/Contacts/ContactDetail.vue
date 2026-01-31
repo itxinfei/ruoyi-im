@@ -32,8 +32,8 @@
       <el-button :icon="VideoCamera" @click="$emit('video-call', contact)">视频通话</el-button>
       
       <template v-if="!isGroup">
-        <el-button :icon="contact.isFavorite ? StarFilled : Star" @click="toggleFavorite">
-          {{ contact.isFavorite ? '已收藏' : '收藏' }}
+        <el-button :icon="isFavorite ? StarFilled : Star" @click="toggleFavorite">
+          {{ isFavorite ? '已收藏' : '收藏' }}
         </el-button>
         <el-dropdown @command="handleMoreCommand">
           <el-button :icon="MoreFilled" circle />
@@ -90,10 +90,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import {
   ChatDotRound,
+  Star,
   StarFilled,
   MoreFilled,
   Setting,
@@ -112,6 +113,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update', 'voice-call', 'video-call'])
 const store = useStore()
+
+// 收藏状态
+const isFavorite = ref(false)
 
 // 统一类型判断逻辑（兼容多种写法）
 const isGroup = computed(() => {
@@ -168,6 +172,24 @@ const getSignature = computed(() => {
   return props.contact.signature || props.contact.sign || '这个人很懒，什么都没留下～'
 })
 
+// 检查收藏状态
+const checkFavoriteStatus = async () => {
+  if (!props.contact?.id) return
+  try {
+    const res = await isFavorited(props.contact.id)
+    isFavorite.value = res.code === 200 && res.data === true
+  } catch (err) {
+    isFavorite.value = false
+  }
+}
+
+// 监听联系人变化，检查收藏状态
+watch(() => props.contact?.id, (newId) => {
+  if (newId && !props.contact?.isGroup) {
+    checkFavoriteStatus()
+  }
+}, { immediate: true })
+
 const startChat = async () => {
   try {
     // 🔑 获取 targetId 并验证有效性
@@ -212,18 +234,24 @@ const handleGroupConfig = () => {
 }
 
 const toggleFavorite = async () => {
-  // 这里简化处理，直接收藏/取消收藏联系人
-  // 实际可能需要先检查是否已收藏
+  if (!props.contact?.id) return
   try {
-    // 简单实现：切换收藏状态
-    // TODO: 实际应用中应该检查当前收藏状态
-    await addFavorite({
-      messageId: props.contact.id, // 使用联系人ID作为消息ID的替代
-      remark: '联系人收藏'
-    })
-    ElMessage.success('已添加到收藏')
+    if (isFavorite.value) {
+      // 取消收藏
+      await removeFavorite(props.contact.id)
+      isFavorite.value = false
+      ElMessage.success('已取消收藏')
+    } else {
+      // 添加收藏
+      await addFavorite({
+        messageId: props.contact.id,
+        remark: '联系人收藏'
+      })
+      isFavorite.value = true
+      ElMessage.success('已添加到收藏')
+    }
   } catch (err) {
-    console.error('收藏失败:', err)
+    console.error('操作失败:', err)
     ElMessage.error('操作失败，请重试')
   }
 }

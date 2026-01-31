@@ -5,6 +5,7 @@ import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.service.impl.ImMessageServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

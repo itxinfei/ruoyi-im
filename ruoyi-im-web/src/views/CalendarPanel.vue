@@ -275,7 +275,7 @@ const loadEvents = async () => {
       formatDateTime(getWeekStart(currentDate.value), '00:00:00'),
       formatDateTime(getWeekEnd(currentDate.value), '23:59:59')
     )
-    if (res.code === 200 && res.data) {
+    if (res && res.code === 200 && res.data) {
       allEvents.value = res.data.map(e => ({
         id: e.id, title: e.title,
         startTime: formatTime(e.startTime), endTime: formatTime(e.endTime),
@@ -283,8 +283,13 @@ const loadEvents = async () => {
         color: e.color?.toLowerCase() || 'blue',
         location: e.location, description: e.description
       }))
+    } else {
+      allEvents.value = []
     }
-  } catch (e) { console.error('Load failed', e) }
+  } catch (e) {
+    console.warn('加载日程失败:', e.message)
+    allEvents.value = []
+  }
 }
 
 const formatYearMonth = (d) => `${d.getFullYear()}年${d.getMonth() + 1}月`

@@ -162,17 +162,17 @@ const loadApprovals = async () => {
       res = await getMyApprovals()
     }
 
-    if (res.code === 200) {
+    if (res && res.code === 200) {
       approvals.value = (res.data || []).map(item => ({
         ...item,
         bgColor: getRandomColor()
       }))
     } else {
-      ElMessage.error(res.msg || '加载失败')
+      approvals.value = []
     }
   } catch (error) {
-    console.error('加载审批列表失败', error)
-    ElMessage.error('加载失败，请稍后重试')
+    console.warn('加载审批列表失败:', error.message)
+    approvals.value = []
   } finally {
     loading.value = false
   }

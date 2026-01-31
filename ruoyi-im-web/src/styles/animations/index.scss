@@ -1,0 +1,532 @@
+/**
+ * 动画模块索引文件
+ * 按需导入动画模块，减少初始加载体积
+ *
+ * @usage
+ * 全局导入: @use '@/styles/animations/index.scss' as *;
+ * 按需导入: @use '@/styles/animations/fade.scss' as *;
+ */
+
+@use '../design-tokens.scss' as *;
+
+// ============================================================================
+// 核心动画模块 (Core Animation Modules)
+// ============================================================================
+
+// 淡入淡出
+@use './fade.scss';
+
+// 滑动动画
+@use './slide.scss';
+
+// 缩放动画
+@use './scale.scss';
+
+// 旋转动画
+@use './rotate.scss';
+
+// ============================================================================
+// 额外动画 (Additional Animations)
+// ============================================================================
+
+// 弹跳动画
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-12px);
+  }
+  60% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-2000px);
+  }
+  60% {
+    transform: translateY(20px);
+  }
+  80% {
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(2000px);
+  }
+  60% {
+    transform: translateY(-20px);
+  }
+  80% {
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 脉冲动画
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+// 抖动动画
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-8px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(8px);
+  }
+}
+
+// 打字机动画
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes cursorBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+// 消息动画
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes messagePopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 通知动画
+@keyframes notificationSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes notificationSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+// 对话框动画
+@keyframes dialogZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+// 抽屉动画
+@keyframes drawerSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawerSlideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+// 下拉菜单动画
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// 徽章动画
+@keyframes badgePop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes badgePulseShadow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(255, 77, 79, 0.5);
+  }
+}
+
+// 头像动画
+@keyframes avatarPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes avatarOnline {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// ============================================================================
+// 脉冲动画变体 (Pulse Animation Variants)
+// ============================================================================
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 137, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 137, 255, 0.6);
+  }
+}
+
+@keyframes urgentBadgePulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(244, 67, 54, 0);
+  }
+}
+
+@keyframes avatarPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 137, 255, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(0, 137, 255, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 137, 255, 0);
+  }
+}
+
+@keyframes buttonPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 137, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 137, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 137, 255, 0);
+  }
+}
+
+@keyframes onlinePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+@keyframes aiPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(103, 58, 183, 0.4));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px rgba(103, 58, 183, 0.8));
+  }
+}
+
+// ============================================================================
+// 通话组件专用动画 (Call Component Animations)
+// ============================================================================
+
+@keyframes callBgPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.15;
+  }
+}
+
+@keyframes callAvatarPulse {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 8px 48px rgba(0, 137, 255, 0.4);
+  }
+}
+
+@keyframes videoAvatarPulse {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 8px 48px rgba(0, 137, 255, 0.6);
+  }
+}
+
+// ============================================================================
+// 动画工具类 (Animation Utility Classes)
+// ============================================================================
+
+.animated {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+
+.animated.infinite {
+  animation-iteration-count: infinite;
+}
+
+// 淡入
+.fade-in {
+  animation: fadeIn 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.fade-in-up {
+  animation: fadeInUp 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.fade-in-down {
+  animation: fadeInDown 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+// 缩放
+.scale-in {
+  animation: scaleIn 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+// 弹跳
+.bounce {
+  animation: bounce 750ms infinite;
+}
+
+.bounce-in {
+  animation: bounceIn 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+// 脉冲
+.pulse {
+  animation: pulse 500ms infinite;
+}
+
+// 旋转
+.rotate {
+  animation: rotate 750ms linear infinite;
+}
+
+// 抖动
+.shake {
+  animation: shake 500ms;
+}
+
+// 循环脉冲动画类
+.pulse-icon {
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+.pulse-glow {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+.pulse-badge {
+  animation: urgentBadgePulse 2s ease-in-out infinite;
+}
+
+.pulse-avatar {
+  animation: avatarPulse 2s ease-in-out infinite;
+}
+
+.pulse-button {
+  animation: buttonPulse 2s ease-in-out infinite;
+}
+
+.pulse-online {
+  animation: onlinePulse 2s ease-in-out infinite;
+}
+
+.pulse-ai {
+  animation: aiPulse 2s ease-in-out infinite;
+}
+
+// 延迟类
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+// 快速类
+.fast {
+  animation-duration: 150ms;
+}
+
+.slow {
+  animation-duration: 500ms;
+}

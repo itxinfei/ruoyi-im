@@ -386,7 +386,9 @@ const loadHistory = async () => {
       pageSize: 50
     })
 
-    messages.value = (res || []).map(m => transformMsg(m))
+    // 使用 splice 更新数组，而不是直接替换，避免组件被销毁
+    const newMessages = (res || []).map(m => transformMsg(m))
+    messages.value.splice(0, messages.value.length, ...newMessages)
   } finally {
     loading.value = false
     msgListRef.value?.scrollToBottom()
@@ -464,10 +466,24 @@ const handleSend = async (content) => {
   // 发送消息时停止输入状态
   sendMyStopTypingStatus()
 
+  // 先检查队列是否已满（避免添加临时消息后才发现队列满）
+  const queueSize = store.getters['imMessage/sendingQueueSize'] || 0
+  const maxSize = 100 // 与 store 配置一致
+
+  if (queueSize >= maxSize) {
+    ElMessage.warning({
+      message: `发送队列已满（${maxSize}条），请稍后重试`,
+      duration: 3000,
+      showClose: true
+    })
+    return
+  }
+
   // 乐观更新：先显示消息，状态为 sending
   const tempId = `temp-${Date.now()}`
   const tempMsg = {
     id: tempId,
+    clientMsgId: tempId,
     content,
     type: 'TEXT',
     senderId: currentUser.value?.id,
@@ -476,6 +492,7 @@ const handleSend = async (content) => {
     timestamp: Date.now(),
     isOwn: true,
     status: 'sending',
+    sendStatus: 1, // SENDING
     readCount: 0
   }
 
@@ -484,6 +501,7 @@ const handleSend = async (content) => {
   msgListRef.value?.scrollToBottom()
 
   try {
+    // 发送消息到服务器
     const msg = await store.dispatch('im/message/sendMessage', {
       sessionId: props.session.id,
       type: 'TEXT',
@@ -503,13 +521,21 @@ const handleSend = async (content) => {
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
       messages.value[index].status = 'failed'
-      // 记录失败消息到缓存
+      messages.value[index].sendStatus = 4 // FAILED
+
+      // 记录失败消息到缓存（使用 tempId 作为 clientMsgId）
       recordFailedMessage({
-        ...tempMsg,
-        sessionId: props.session.id
+        id: tempId,
+        clientMsgId: tempId,
+        sessionId: props.session.id,
+        type: 'TEXT',
+        content,
+        timestamp: Date.now()
       })
     }
+
     console.error('发送失败', error)
+    ElMessage.error(error.message || '发送失败，请检查网络连接')
   }
 }
 
@@ -599,7 +625,8 @@ onMessage((msg) => {
 })
 
 watch(() => props.session, () => {
-  messages.value = []
+  // 清空消息列表
+  messages.value.splice(0, messages.value.length)
   loadHistory()
 })
 
@@ -1018,7 +1045,7 @@ const handleCancelEdit = () => {
 const handleRetry = async (msg) => {
   // 检查消息状态
   const status = msg.sendStatus || msg.status
-  if (status !== 'FAILED' && status !== 'failed') return
+  if (status !== 4 && status !== 'FAILED' && status !== 'failed') return
 
   // 获取客户端消息ID
   const clientMsgId = msg.clientMsgId || msg.id
@@ -1033,8 +1060,8 @@ const handleRetry = async (msg) => {
     return
   }
 
-  // 重置为发送中
-  msg.sendStatus = 'SENDING'
+  // 重置为发送中（使用数字状态：1 = SENDING）
+  msg.sendStatus = 1
   msg.status = 'sending'
 
   try {
@@ -1049,13 +1076,14 @@ const handleRetry = async (msg) => {
 
       // 注意：实际发送结果是异步的，后端会通过 WebSocket 推送更新
       // 这里只需更新 UI 状态为"发送中"
-      msg.sendStatus = 'SENDING'
+      msg.sendStatus = 1
     } else {
       // 服务端返回错误（如已达重试上限）
       throw new Error(res.msg || '重试失败')
     }
   } catch (error) {
-    msg.sendStatus = 'FAILED'
+    // 重置为失败状态（使用数字状态：4 = FAILED）
+    msg.sendStatus = 4
     msg.status = 'failed'
 
     ElMessage.error(error.message || '重试失败，请稍后重试')
@@ -1296,7 +1324,7 @@ const handleClearMessages = async () => {
     await clearConversationMessages(session.value?.id)
 
     // 清空本地消息列表
-    messages.value = []
+    messages.value.splice(0, messages.value.length)
 
     // 重置分页状态
     noMore.value = false

@@ -665,7 +665,27 @@ const handleClearLogs = async () => {
 
 // 导出数据
 const handleExportData = () => {
-  ElMessage.info('数据导出功能开发中...')
+  try {
+    // 导出系统配置为 JSON 文件
+    const exportData = {
+      exportTime: new Date().toISOString(),
+      systemConfig: systemConfig.value,
+      sensitiveWords: sensitiveWords.value
+    }
+
+    const jsonContent = JSON.stringify(exportData, null, 2)
+    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `系统配置_${new Date().toISOString().slice(0, 10)}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
 }
 
 // 清空缓存

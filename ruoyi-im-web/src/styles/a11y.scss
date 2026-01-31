@@ -1,0 +1,339 @@
+/**
+ * 可访问性样式
+ * 包含焦点样式、跳过链接、屏幕阅读器专用内容等
+ */
+
+// ==================== 焦点样式 ====================
+
+// 所有可聚焦元素的焦点样式
+*:focus-visible {
+  outline: 2px solid var(--el-color-primary, #409EFF);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+// 移除默认的 focus 样式（当不是键盘导航时）
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// 为特定元素提供更强的焦点指示
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-width: 3px;
+  outline-offset: 1px;
+}
+
+// ==================== 跳过链接 ====================
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  background: var(--el-color-primary, #409EFF);
+  color: white;
+  padding: 12px 24px;
+  z-index: 9999;
+  text-decoration: none;
+  font-weight: 500;
+  transition: top 0.3s ease;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+// ==================== 屏幕阅读器专用内容 ====================
+
+// 仅屏幕阅读器可见
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// 屏幕阅读器可见但视觉上隐藏
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  border: 0;
+}
+
+// ==================== 高对比度模式支持 ====================
+
+@media (prefers-contrast: high) {
+  *:focus-visible {
+    outline-width: 4px;
+    outline-color: currentColor;
+  }
+
+  // 确保文本有足够的对比度
+  .text-muted,
+  .text-secondary {
+    color: #000000;
+  }
+}
+
+// ==================== 减少动画模式 ====================
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ==================== 表单可访问性 ====================
+
+// 错误状态的视觉指示
+input[aria-invalid='true'],
+textarea[aria-invalid='true'],
+select[aria-invalid='true'],
+.el-input.is-error .el-input__inner,
+.el-textarea.is-error .el-textarea__inner {
+  border-color: var(--el-color-danger, #F56C6C);
+  outline-color: var(--el-color-danger, #F56C6C);
+
+  &:focus-visible {
+    outline-color: var(--el-color-danger, #F56C6C);
+  }
+}
+
+// 必填字段指示
+label.required::after {
+  content: ' *';
+  color: var(--el-color-danger, #F56C6C);
+}
+
+// ==================== 按钮可访问性 ====================
+
+// 禁用状态的可访问性
+button:disabled,
+.el-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+
+  &:focus-visible {
+    outline: 2px dashed var(--el-color-danger, #F56C6C);
+  }
+}
+
+// 图标按钮的可访问性
+.icon-button {
+  padding: 8px;
+  min-width: 44px; // 确保触摸目标足够大
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+// ==================== 模态框可访问性 ====================
+
+.el-dialog[role='dialog'] {
+  // 确保模态框内容可以被滚动和聚焦
+  overflow: auto;
+
+  // 焦点管理
+  &[aria-modal='true'] {
+    z-index: 2000;
+  }
+}
+
+// ==================== 列表可访问性 ====================
+
+.message-item,
+.contact-item,
+.session-item {
+  // 确保列表项可以被聚焦
+  &:focus-visible {
+    background-color: var(--el-fill-color-light, #F5F7FA);
+    outline: 2px solid var(--el-color-primary, #409EFF);
+    outline-offset: -2px;
+  }
+}
+
+// ==================== 加载状态可访问性 ====================
+
+.loading-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+// ==================== Toast/通知可访问性 ====================
+
+.el-notification,
+.el-message {
+  // 确保通知可以被屏幕阅读器读取
+  &[role='alert'],
+  &[role='status'] {
+    z-index: 9999;
+  }
+
+  // 添加关闭按钮的可访问性
+  .el-notification__closeBtn,
+  .el-message__closeBtn {
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+
+    &:focus-visible {
+      outline: 2px solid var(--el-color-primary, #409EFF);
+      border-radius: 2px;
+    }
+  }
+}
+
+// ==================== 表格可访问性 ====================
+
+.el-table {
+  // 表头排序指示器的可访问性
+  .el-table__column-filter-trigger {
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+// ==================== 颜色对比度辅助 ====================
+
+// 确保链接有足够的对比度
+a {
+  color: var(--el-color-primary, #409EFF);
+  text-decoration: underline;
+
+  &:hover,
+  &:focus {
+    color: var(--el-color-primary-light-3, #79BBFF);
+  }
+
+  &:visited {
+    color: var(--el-color-primary-dark-2, #337ECC);
+  }
+}
+
+// ==================== 工具提示可访问性 ====================
+
+[data-tooltip] {
+  position: relative;
+
+  &::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    font-size: 12px;
+    white-space: nowrap;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  &:hover::before,
+  &:focus::before {
+    opacity: 1;
+  }
+}
+
+// ==================== 键盘快捷键提示 ====================
+
+.keyboard-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: var(--el-fill-color-light, #F5F7FA);
+  border: 1px solid var(--el-border-color, #DCDFE6);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--el-text-color-regular, #606266);
+
+  kbd {
+    padding: 2px 6px;
+    background: white;
+    border: 1px solid var(--el-border-color, #DCDFE6);
+    border-radius: 2px;
+    font-family: monospace;
+    font-weight: bold;
+  }
+}
+
+// ==================== 实时区域 ====================
+
+[aria-live] {
+  // 屏幕阅读器专用
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// ==================== 拖放可访问性 ====================
+
+[draggable='true'] {
+  cursor: move;
+  padding: 8px;
+
+  &:focus-visible {
+    outline: 2px solid var(--el-color-primary, #409EFF);
+    outline-offset: 2px;
+  }
+
+  &[aria-grabbed='true'] {
+    opacity: 0.5;
+    cursor: grabbing;
+  }
+}

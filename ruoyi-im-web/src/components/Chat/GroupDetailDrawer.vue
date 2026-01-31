@@ -1,7 +1,7 @@
 <template>
   <el-drawer
     v-model="visible"
-    size="280px"  // 钉钉标准：抽屉宽度 280px
+    size="320px"
     direction="rtl"
     class="group-detail-drawer"
     :with-header="false"
@@ -19,7 +19,14 @@
 
         <!-- 群组图标 -->
         <div class="group-icon">
-          <span class="material-icons-outlined">groups</span>
+          <img v-if="groupInfo.avatar" :src="groupInfo.avatar" class="group-avatar-img" />
+          <span v-else class="material-icons-outlined group-icon-default">groups</span>
+        </div>
+
+        <!-- 群主/管理员标签 -->
+        <div class="role-badges">
+          <span v-if="isOwner" class="role-badge owner-badge">群主</span>
+          <span v-else-if="isAdmin" class="role-badge admin-badge">管理员</span>
         </div>
       </div>
 
@@ -27,6 +34,15 @@
       <div class="profile-info">
         <h2 class="profile-name">{{ groupInfo.name }}</h2>
         <p class="profile-desc">{{ groupInfo.description || '暂无群简介' }}</p>
+
+        <!-- 群号 -->
+        <div class="group-code">
+          <span class="code-label">群号</span>
+          <span class="code-value">{{ groupInfo.id }}</span>
+          <el-button link size="small" @click="copyGroupCode">
+            <span class="material-icons-outlined">content_copy</span>
+          </el-button>
+        </div>
 
         <!-- 群组标签 -->
         <div class="profile-tags">
@@ -72,6 +88,28 @@
         </button>
       </div>
 
+      <!-- 管理员操作区域 -->
+      <div v-if="isOwnerOrAdmin" class="admin-section">
+        <div class="section-header">
+          <span class="material-icons-outlined section-icon">admin_panel_settings</span>
+          <span class="section-title">管理操作</span>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-action" @click="handleAddMembers">
+            <span class="material-icons-outlined">person_add</span>
+            添加成员
+          </button>
+          <button class="admin-action" @click="handleOpenMembersManage">
+            <span class="material-icons-outlined">manage_accounts</span>
+            成员管理
+          </button>
+          <button v-if="isOwner" class="admin-action" @click="handleTransferOwner">
+            <span class="material-icons-outlined">supervisor_account</span>
+            转让群主
+          </button>
+        </div>
+      </div>
+
       <!-- 群公告区域 -->
       <div v-if="groupInfo.announcement" class="announcement-section">
         <div class="section-header">
@@ -87,7 +125,7 @@
         </div>
       </div>
 
-      <!-- 群成员区域 -->
+      <!-- 群成员预览（可点击展开完整列表） -->
       <div class="members-section">
         <div class="section-header" @click="handleMembers">
           <span class="material-icons-outlined section-icon">people</span>
@@ -153,6 +191,24 @@
     <div v-else-if="loading" class="profile-loading">
       <el-skeleton :rows="3" animated />
     </div>
+
+    <!-- 添加成员对话框 -->
+    <AddMembersDialog
+      v-model="showAddMembersDialog"
+      :group-id="groupId"
+      :existing-members="allMembers"
+      @success="onMembersAdded"
+    />
+
+    <!-- 群成员管理抽屉 -->
+    <GroupMembersDrawer
+      v-model="showMembersDrawer"
+      :group-id="groupId"
+      :current-user-role="currentUserRole"
+      @add-members="handleAddMembers"
+      @at-member="handleAtMember"
+      @member-click="handleMemberClick"
+    />
   </el-drawer>
 </template>
 
@@ -160,14 +216,20 @@
 import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import { getGroup, getGroupMembers } from '@/api/im/group'
+import { getGroup, getGroupMembers, transferGroupOwner, leaveGroup, updateGroup } from '@/api/im/group'
+import { useStore } from 'vuex'
+import AddMembersDialog from './AddMembersDialog.vue'
+import GroupMembersDrawer from './GroupMembersDrawer.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   groupId: { type: [String, Number], default: null }
 })
 
-const emit = defineEmits(['update:modelValue', 'send-message', 'announcement', 'members', 'files', 'settings', 'exit', 'update-group'])
+const emit = defineEmits(['update:modelValue', 'send-message', 'announcement', 'members', 'files', 'settings', 'exit', 'update-group', 'refresh', 'at-member'])
+
+const store = useStore()
+const currentUserId = computed(() => store.state.im.user?.id)
 
 const visible = computed({
   get: () => props.modelValue,
@@ -177,11 +239,23 @@ const visible = computed({
 const groupInfo = ref(null)
 const loading = ref(false)
 const displayMembers = ref([])
+const allMembers = ref([]) // 所有成员（用于添加时排除）
+const showAddMembersDialog = ref(false)
+const showMembersDrawer = ref(false)
 
-// 是否是群主或管理员
-const isOwnerOrAdmin = computed(() => {
-  return groupInfo.value?.role === 'OWNER' || groupInfo.value?.role === 'ADMIN'
+// 当前用户在群中的角色
+const currentUserRole = computed(() => {
+  if (!groupInfo.value || !currentUserId.value) return 'MEMBER'
+  const member = allMembers.value.find(m => m.id === currentUserId.value)
+  return member?.role || 'MEMBER'
 })
+
+// 是否是群主
+const isOwner = computed(() => currentUserRole.value === 'OWNER')
+// 是否是管理员
+const isAdmin = computed(() => currentUserRole.value === 'ADMIN')
+// 是否是群主或管理员
+const isOwnerOrAdmin = computed(() => isOwner.value || isAdmin.value)
 
 // 加载群组信息
 const loadGroupInfo = async () => {
@@ -197,14 +271,16 @@ const loadGroupInfo = async () => {
       groupInfo.value = {
         ...infoRes.data,
         isMuted: infoRes.data.isMuted || false,
-        isPinned: infoRes.data.isPinned || false
+        isPinned: infoRes.data.isPinned || false,
+        role: infoRes.data.role || 'MEMBER'
       }
     }
 
     if (membersRes.code === 200) {
-      displayMembers.value = membersRes.data.slice(0, 8)
+      allMembers.value = membersRes.data || []
+      displayMembers.value = allMembers.value.slice(0, 8)
       if (groupInfo.value) {
-        groupInfo.value.memberCount = membersRes.data.length
+        groupInfo.value.memberCount = allMembers.value.length
       }
     }
   } catch (error) {
@@ -228,6 +304,12 @@ const formatTime = (timestamp) => {
   return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
 }
 
+// 复制群号
+const copyGroupCode = () => {
+  navigator.clipboard.writeText(String(props.groupId))
+  ElMessage.success('群号已复制')
+}
+
 watch(() => props.modelValue, (isOpen) => {
   if (isOpen) {
     loadGroupInfo()
@@ -248,11 +330,80 @@ const handleAnnouncement = () => {
 }
 
 const handleMembers = () => {
-  emit('members', groupInfo.value)
+  showMembersDrawer.value = true
 }
 
 const handleFiles = () => {
   emit('files', groupInfo.value)
+}
+
+// 添加成员
+const handleAddMembers = () => {
+  showAddMembersDialog.value = true
+}
+
+// 打开成员管理
+const handleOpenMembersManage = () => {
+  showMembersDrawer.value = true
+}
+
+// 转让群主
+const handleTransferOwner = async () => {
+  try {
+    // 使用 ElMessageBox + h 函数创建选择器
+    const { h } = await import('vue')
+
+    // 获取管理员列表作为候选人
+    const candidates = allMembers.value.filter(m => m.role === 'ADMIN')
+
+    if (candidates.length === 0) {
+      ElMessage.warning('没有可以转让的管理员')
+      return
+    }
+
+    // 创建选择内容
+    const content = () => h('div', { style: 'padding: 20px 0;' }, [
+      h('p', { style: 'margin-bottom: 16px; color: #666;' }, '选择新群主：'),
+      h('el-select', {
+        modelValue: 'selectedMember',
+        placeholder: '请选择管理员',
+        style: 'width: 100%'
+      }, candidates.map(admin =>
+        h('el-option', { value: admin.id, label: admin.name })
+      ))
+    ])
+
+    const selectedMember = ref(null)
+
+    const dialog = ElMessageBox({
+      title: '转让群主',
+      message: h(content),
+      showCancelButton: true,
+      confirmButtonText: '确定转让',
+      cancelButtonText: '取消',
+      beforeClose: async (action, instance, done) => {
+        if (action === 'confirm') {
+          const select = instance.$refs.select?.ref
+          if (!select?.value) {
+            ElMessage.warning('请选择新群主')
+            return false
+          }
+          selectedMember.value = select.value
+        }
+        done()
+      }
+    })
+
+    if (selectedMember.value) {
+      await transferGroupOwner(props.groupId, selectedMember.value)
+      ElMessage.success('群主已转让')
+      emit('refresh')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
 }
 
 const handleToggleMute = async () => {
@@ -288,15 +439,31 @@ const handleExitGroup = async () => {
       confirmButtonText: '确定退出',
       cancelButtonText: '取消'
     })
+    await leaveGroup(props.groupId)
+    ElMessage.success('已退出群聊')
     emit('exit', groupInfo.value)
     handleClose()
-  } catch {
-    // 用户取消
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
   }
 }
 
 const handleMemberClick = (member) => {
-  ElMessage.info(`查看 ${member.name} 的资料`)
+  showMembersDrawer.value = true
+}
+
+const handleAtMember = (member) => {
+  emit('at-member', member)
+  // 关闭详情抽屉，返回聊天界面
+  handleClose()
+}
+
+// 添加成员成功后刷新
+const onMembersAdded = () => {
+  loadGroupInfo()
+  emit('refresh')
 }
 </script>
 
@@ -449,7 +616,149 @@ const handleMemberClick = (member) => {
   }
 }
 
+// ============================================================================
+// 新增元素样式
+// ============================================================================
+
+// 群头像图片
+.group-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+// 默认群图标
+.group-icon-default {
+  font-size: 40px;
+  color: #667eea;
+}
+
+// 角色徽章（封面区域）
+.role-badges {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 6;
+
+  .role-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &.owner-badge {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    &.admin-badge {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+  }
+}
+
+// 群号显示
+.group-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: var(--dt-bg-body);
+  border-radius: 20px;
+  font-size: 13px;
+
+  .code-label {
+    color: var(--dt-text-secondary);
+  }
+
+  .code-value {
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    font-family: 'Courier New', monospace;
+  }
+
+  .el-button {
+    .material-icons-outlined {
+      font-size: 16px;
+      color: var(--dt-text-tertiary);
+
+      &:hover {
+        color: var(--dt-brand-color);
+      }
+    }
+  }
+}
+
+// 管理操作区域
+.admin-section {
+  margin: 0 24px 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 16px;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    .section-icon {
+      font-size: 18px;
+      color: #667eea;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dt-text-primary);
+      margin: 0;
+    }
+  }
+
+  .admin-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .admin-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--dt-bg-card);
+      border: 1px solid rgba(102, 126, 234, 0.15);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      color: var(--dt-text-primary);
+      text-align: left;
+
+      .material-icons-outlined {
+        font-size: 20px;
+        color: #667eea;
+      }
+
+      &:hover {
+        background: rgba(102, 126, 234, 0.1);
+        border-color: rgba(102, 126, 234, 0.3);
+        transform: translateX(4px);
+      }
+    }
+  }
+}
+
+// ============================================================================
 // 操作网格
+// ============================================================================
 .action-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

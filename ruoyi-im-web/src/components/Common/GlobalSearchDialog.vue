@@ -190,8 +190,10 @@
       <!-- 页脚 -->
       <div class="classic-footer">
         <div class="flex items-center gap-4">
-          <span class="flex items-center gap-1"><kbd>Enter</kbd> 查看详情</span>
-          <span class="flex items-center gap-1"><kbd>Esc</kbd> 关闭窗口</span>
+          <span class="flex items-center gap-1"><kbd>Enter</kbd> 搜索/查看</span>
+          <span class="flex items-center gap-1"><kbd>Esc</kbd> 关闭</span>
+          <span class="flex items-center gap-1"><kbd>Tab</kbd> 切换分类</span>
+          <span class="flex items-center gap-1"><kbd>←</kbd><kbd>→</kbd> 切换分类</span>
         </div>
         <div v-if="totalCount > 0">找到 {{ totalCount }} 条结果</div>
       </div>
@@ -471,25 +473,84 @@ const highlightSuggestion = (text) => {
 
 // 监听键盘事件，支持上下箭头选择建议
 const handleKeyDown = (event) => {
-  if (!showSuggestions.value) return
-  
+  if (!showSuggestions.value && !visible.value) return
+
+  // 快捷键映射到数字键 1-5 快速切换搜索类型
+  const categoryKeys = ['1', '2', '3', '4', '5']
+  if (event.key >= '1' && event.key <= '5' && event.altKey) {
+    event.preventDefault()
+    const typeMap = { '1': 'ALL', '2': 'CONTACT', '3': 'GROUP', '4': 'MESSAGE', '5': 'FILE' }
+    handleCategoryChange(typeMap[event.key])
+    return
+  }
+
   switch (event.key) {
     case 'ArrowDown':
-      event.preventDefault()
-      suggestionIndex.value = (suggestionIndex.value + 1) % suggestions.value.length
+      if (showSuggestions.value) {
+        event.preventDefault()
+        suggestionIndex.value = (suggestionIndex.value + 1) % suggestions.value.length
+      } else {
+        // 在结果列表中向下导航
+        event.preventDefault()
+      }
       break
     case 'ArrowUp':
+      if (showSuggestions.value) {
+        event.preventDefault()
+        suggestionIndex.value = suggestionIndex.value <= 0 ? suggestions.value.length - 1 : suggestionIndex.value - 1
+      } else {
+        // 在结果列表中向上导航
+        event.preventDefault()
+      }
+      break
+    case 'ArrowLeft':
+      // 切换到上一个搜索类型
       event.preventDefault()
-      suggestionIndex.value = suggestionIndex.value <= 0 ? suggestions.value.length - 1 : suggestionIndex.value - 1
+      const typeOrder = ['ALL', 'CONTACT', 'GROUP', 'MESSAGE', 'FILE']
+      const currentIndex = typeOrder.indexOf(searchType.value)
+      const prevIndex = currentIndex <= 0 ? typeOrder.length - 1 : currentIndex - 1
+      handleCategoryChange(typeOrder[prevIndex])
+      break
+    case 'ArrowRight':
+      // 切换到下一个搜索类型
+      event.preventDefault()
+      const nextIndex = (typeOrder.indexOf(searchType.value) + 1) % typeOrder.length
+      handleCategoryChange(typeOrder[nextIndex])
       break
     case 'Enter':
-      if (suggestionIndex.value >= 0) {
+      if (showSuggestions.value && suggestionIndex.value >= 0) {
         event.preventDefault()
         selectSuggestion(suggestions.value[suggestionIndex.value])
+      } else {
+        // 执行搜索
+        event.preventDefault()
+        handleSearch()
       }
       break
     case 'Escape':
-      showSuggestions.value = false
+      if (showSuggestions.value) {
+        showSuggestions.value = false
+      } else {
+        // 关闭搜索弹窗
+        visible.value = false
+        emit('update:modelValue', false)
+      }
+      break
+    case 'Tab':
+      if (!event.shiftKey) {
+        event.preventDefault()
+        const typeOrder = ['ALL', 'CONTACT', 'GROUP', 'MESSAGE', 'FILE']
+        const nextIndex = (typeOrder.indexOf(searchType.value) + 1) % typeOrder.length
+        handleCategoryChange(typeOrder[nextIndex])
+      }
+      break
+    case 'Delete':
+    case 'Backspace':
+      // 如果在历史记录中，删除最后一个搜索词
+      if (!searchKeyword.value && historyKeywords.value.length > 0 && document.activeElement?.classList?.contains('history-item')) {
+        event.preventDefault()
+        // 需要实现删除特定历史记录项的功能
+      }
       break
   }
 }

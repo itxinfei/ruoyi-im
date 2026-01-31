@@ -105,19 +105,10 @@ const handleSubmit = async () => {
   border: 1px solid var(--dt-border-light);
   border-radius: 12px;
   overflow: hidden;
-  
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
 }
 
 .faq-item {
   border-bottom: 1px solid var(--dt-border-light);
-  
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-  }
 
   &:last-child {
     border-bottom: none;
@@ -164,11 +155,6 @@ const handleSubmit = async () => {
   border: 1px solid var(--dt-border-light);
   border-radius: 12px;
   padding: 24px;
-  
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
 }
 
 .type-selector {
@@ -184,15 +170,11 @@ const handleSubmit = async () => {
   font-size: 14px;
   color: var(--dt-text-secondary);
   transition: all 0.2s;
-  
-  .dark & {
-    border-color: var(--dt-border-dark);
-  }
-  
+
   &:hover {
     background: var(--dt-bg-hover);
   }
-  
+
   &.active {
     background: var(--dt-brand-color-light);
     color: var(--dt-brand-color);

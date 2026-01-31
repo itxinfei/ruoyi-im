@@ -66,6 +66,10 @@ public class ImFileAsset implements Serializable {
     @Schema(description = "状态：ACTIVE=正常, DELETED=已删除")
     private String status;
 
+    @TableField("is_deleted")
+    @Schema(description = "是否删除：0=正常 1=已删除")
+    private Integer isDeleted;
+
     @Schema(description = "创建时间")
     @TableField("create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

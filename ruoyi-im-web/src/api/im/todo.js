@@ -24,7 +24,7 @@ export function getTodoList(markerType) {
  */
 export function getTodoCount() {
   return request({
-    url: '/api/im/message/marker/count',
+    url: '/api/im/message/marker/todo/count',
     method: 'get'
   })
 }
@@ -52,8 +52,8 @@ export function setTodoReminder(data) {
  */
 export function completeTodo(markerId) {
   return request({
-    url: `/api/im/message/marker/${markerId}/complete`,
-    method: 'put'
+    url: `/api/im/message/marker/todo/${markerId}/complete`,
+    method: 'post'
   })
 }
 
@@ -64,8 +64,8 @@ export function completeTodo(markerId) {
  */
 export function reopenTodo(markerId) {
   return request({
-    url: `/api/im/message/marker/${markerId}/reopen`,
-    method: 'put'
+    url: `/api/im/message/marker/todo/${markerId}/reopen`,
+    method: 'post'
   })
 }
 

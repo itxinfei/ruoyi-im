@@ -154,26 +154,45 @@ export default {
 
   actions: {
     // 加载联系人列表
-    async loadContacts({ commit }) {
+    async loadContacts({ commit, state }) {
+      // 如果已经有数据，先不重新加载（避免重复请求）
+      if (state.contacts.length > 0) return
+
       commit('SET_LOADING', { key: 'contacts', value: true })
       try {
         const res = await getContacts()
         if (res.code === 200 && res.data) {
           commit('SET_CONTACTS', res.data)
+        } else {
+          // API 返回非 200，确保有空数组
+          commit('SET_CONTACTS', [])
         }
+      } catch (error) {
+        // 网络错误时设置空数组，避免 UI 报错
+        console.warn('加载联系人失败，使用空列表:', error.message)
+        commit('SET_CONTACTS', [])
       } finally {
         commit('SET_LOADING', { key: 'contacts', value: false })
       }
     },
 
     // 加载群组列表
-    async loadGroups({ commit }) {
+    async loadGroups({ commit, state }) {
+      // 如果已经有数据，先不重新加载
+      if (state.groups.length > 0) return
+
       commit('SET_LOADING', { key: 'groups', value: true })
       try {
         const res = await getGroups()
         if (res.code === 200 && res.data) {
           commit('SET_GROUPS', res.data)
+        } else {
+          commit('SET_GROUPS', [])
         }
+      } catch (error) {
+        // 网络错误时设置空数组
+        console.warn('加载群组失败，使用空列表:', error.message)
+        commit('SET_GROUPS', [])
       } finally {
         commit('SET_LOADING', { key: 'groups', value: false })
       }

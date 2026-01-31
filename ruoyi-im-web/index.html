@@ -9,24 +9,22 @@
 
   <!-- 安全相关的 meta 标签 -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   <meta name="description" content="企业级即时通讯系统，支持单聊、群聊、文件传输、音视频通话">
 
   <!-- Content Security Policy (CSP) -->
+  <!-- 开发环境：允许 localhost 连接（API 代理和 WebSocket） -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://jsdelivr.net;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com;
-    img-src 'self' data: blob: https:;
-    connect-src 'self' ws://localhost:8080 wss://localhost:8080 https://api.example.com;
+    img-src 'self' data: blob: https: http:;
+    connect-src 'self' http://localhost:* https://localhost:* ws://localhost:* wss://localhost:*;
     media-src 'self' blob: data:;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
-    frame-ancestors 'none';
-    upgrade-insecure-requests;
   ">
 
   <!-- 优化字体加载 -->

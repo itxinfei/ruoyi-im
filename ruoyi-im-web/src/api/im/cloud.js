@@ -12,8 +12,11 @@ import request from '../request'
 export function uploadToCloud(folderId, file) {
   const formData = new FormData()
   formData.append('file', file)
+  if (folderId != null) {
+    formData.append('folderId', folderId)
+  }
   return request({
-    url: `/api/im/cloud/folder/${folderId}/upload`,
+    url: '/api/im/cloud/file/upload',
     method: 'post',
     data: formData,
     headers: { 'Content-Type': 'multipart/form-data' }
@@ -60,7 +63,7 @@ export function getFolderList(parentId = null, ownerType = 'PERSONAL') {
  */
 export function createFolder(data) {
   return request({
-    url: '/api/im/cloud/folder',
+    url: '/api/im/cloud/folder/create',
     method: 'post',
     data
   })
@@ -90,11 +93,37 @@ export function getStorageQuota() {
   })
 }
 
+/**
+ * 获取最近文件
+ * @returns {Promise}
+ */
+export function getRecentFiles() {
+  return request({
+    url: '/api/im/cloud/file/recent',
+    method: 'get'
+  })
+}
+
+/**
+ * 搜索文件
+ * @param {string} keyword - 搜索关键词
+ * @returns {Promise}
+ */
+export function searchFiles(keyword) {
+  return request({
+    url: '/api/im/cloud/file/search',
+    method: 'get',
+    params: { keyword }
+  })
+}
+
 export default {
   uploadToCloud,
   saveFileToCloud,
   getFolderList,
   createFolder,
   getFileList,
-  getStorageQuota
+  getStorageQuota,
+  getRecentFiles,
+  searchFiles
 }
