@@ -218,10 +218,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ArrowLeft, ChatDotRound, MoreFilled } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { addTokenToUrl } from '@/utils/file'
 import { getCommonGroups } from '@/api/im/group'
+import { blockFriend } from '@/api/im/contact'
 import { useStore } from 'vuex'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -413,7 +414,7 @@ const handleGroupClick = (group) => {
   emit('group-click', group)
 }
 
-const handleMoreAction = (command) => {
+const handleMoreAction = async (command) => {
   switch (command) {
     case 'share':
       ElMessage.success('名片链接已复制')
@@ -422,7 +423,25 @@ const handleMoreAction = (command) => {
       ElMessage.info('二维码功能开发中')
       break
     case 'block':
-      ElMessage.info('加入黑名单功能开发中')
+      try {
+        await ElMessageBox.confirm(
+          `确定要将 ${user.value.nickname || user.value.username} 加入黑名单吗？加入后将不再接收该用户的消息。`,
+          '加入黑名单',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+        const res = await blockFriend(props.userId, true)
+        if (res.code === 200) {
+          ElMessage.success('已加入黑名单')
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          ElMessage.error('操作失败')
+        }
+      }
       break
     case 'edit':
       emit('edit')

@@ -163,7 +163,6 @@ public class ImNudgeServiceImpl implements ImNudgeService {
      * 广播拍一拍消息到会话
      */
     private void broadcastNudgeMessage(Long conversationId, ImNudgeVO vo) {
-        // TODO: 通过 WebSocket 广播
-        // broadcastService.broadcastToConversation(conversationId, "NUDGE", vo);
+        broadcastService.broadcastNudgeMessage(conversationId, vo.getNudgerId(), vo.getNudgedUserId());
     }
 }

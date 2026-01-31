@@ -3,10 +3,10 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.service.ImApplicationService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.app.ImApplicationVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -38,12 +38,7 @@ public class ImAppController {
      * @return 应用视图对象
      */
     private ImApplicationVO toVO(ImApplication app) {
-        if (app == null) {
-            return new ImApplicationVO();
-        }
-        ImApplicationVO vo = new ImApplicationVO();
-        BeanUtils.copyProperties(app, vo);
-        return vo;
+        return BeanConvertUtil.convert(app, ImApplicationVO.class);
     }
 
     /**
@@ -53,12 +48,7 @@ public class ImAppController {
      * @return 应用视图对象列表
      */
     private List<ImApplicationVO> toVOList(List<ImApplication> list) {
-        if (list == null || list.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return list.stream()
-                .map(this::toVO)
-                .collect(Collectors.toList());
+        return BeanConvertUtil.convertList(list, ImApplicationVO.class);
     }
 
     /**

@@ -1,9 +1,17 @@
 /**
  * 文本消息气泡组件
  * 支持高亮显示@提及
+ * 支持显示和点击引用消息
  */
 <template>
   <div class="text-bubble">
+    <!-- 引用消息预览 -->
+    <MessageReplyRef
+      v-if="replyMessage"
+      :message="replyMessage"
+      @click="handleReplyClick"
+    />
+
     <!-- 文本内容 -->
     <div class="text-content" v-html="formattedContent"></div>
 
@@ -36,18 +44,47 @@
 import { computed } from 'vue'
 import { Top } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
+import DOMPurify from 'dompurify'
+import MessageReplyRef from '../parts/MessageReplyRef.vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
   hasMarkers: { type: Boolean, default: false }
 })
 
+const emit = defineEmits(['scroll-to'])
+
 const store = useStore()
 const currentUserId = store.getters['user/currentUserId'] || store.state.user.userInfo?.userId
 
 /**
+ * 查找被引用的消息
+ * 从消息列表中查找 replyToMessageId 对应的原始消息
+ */
+const replyMessage = computed(() => {
+  if (!props.message.replyToMessageId) return null
+
+  // 从当前会话的消息列表中查找
+  const messages = store.getters['im/message/currentMessages'] || []
+  return messages.find(m => m.id === props.message.replyToMessageId) || null
+})
+
+/**
+ * 处理引用消息点击事件
+ * 触发滚动到原消息，并带高亮标记
+ */
+const handleReplyClick = () => {
+  if (!replyMessage.value) return
+  emit('scroll-to', {
+    messageId: props.message.replyToMessageId,
+    highlight: true
+  })
+}
+
+/**
  * 格式化消息内容，高亮@提及
  * 将 @用户名 转换为带样式的 span
+ * 使用 DOMPurify 过滤防止 XSS 攻击
  */
 const formattedContent = computed(() => {
   const content = props.message.content || ''
@@ -76,11 +113,17 @@ const formattedContent = computed(() => {
       )
     }
 
-    return formatted
+    // XSS 防护：过滤 HTML
+    return DOMPurify.sanitize(formatted, {
+      ALLOWED_TAGS: ['p', 'br', 'span', 'strong', 'em', 'u', 'a'],
+      ALLOWED_ATTR: ['class', 'href', 'target', 'rel'],
+      ALLOW_DATA_ATTR: false,
+      KEEP_CONTENT: true
+    })
   }
 
   // 如果没有提及列表，使用正则表达式匹配 @xxx 格式
-  return content.replace(
+  const formatted = content.replace(
     /@([\u4e00-\u9fa5a-zA-Z0-9_-]+)/g,
     (match, name) => {
       // 简单判断是否提及当前用户
@@ -88,6 +131,14 @@ const formattedContent = computed(() => {
       return `<span class="mention-highlight ${isCurrentUser ? 'is-current-user' : ''}">${match}</span>`
     }
   )
+
+  // XSS 防护：过滤 HTML
+  return DOMPurify.sanitize(formatted, {
+    ALLOWED_TAGS: ['p', 'br', 'span', 'strong', 'em', 'u', 'a'],
+    ALLOWED_ATTR: ['class', 'href', 'target', 'rel'],
+    ALLOW_DATA_ATTR: false,
+    KEEP_CONTENT: true
+  })
 })
 
 /**

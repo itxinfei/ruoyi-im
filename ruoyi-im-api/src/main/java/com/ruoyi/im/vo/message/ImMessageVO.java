@@ -40,6 +40,12 @@ public class ImMessageVO implements Serializable {
     /** 状态: 0=发送中, 1=已发送, 2=已送达, 3=已读, 4=发送失败, 5=已撤回 */
     private Integer status;
 
+    /** 发送状态: PENDING/SENDING/DELIVERED/READ/FAILED */
+    private String sendStatus;
+
+    /** 发送错误码 */
+    private String sendErrorCode;
+
     /** 是否撤回 */
     private Integer isRevoked;
 

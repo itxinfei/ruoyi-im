@@ -1,0 +1,327 @@
+// ============================================================================
+// 菜单统一尺寸标准
+// 统一所有菜单组件的尺寸规格，确保视觉一致性
+// ============================================================================
+
+// 菜单尺寸变量
+:root {
+  // 菜单容器尺寸
+  --dt-menu-width: 240px;
+  --dt-menu-width-sm: 200px;
+  --dt-menu-width-lg: 280px;
+  --dt-menu-min-width: 180px;
+  --dt-menu-max-width: 320px;
+
+  // 菜单项尺寸
+  --dt-menu-item-height: 44px;
+  --dt-menu-item-height-sm: 36px;
+  --dt-menu-item-height-lg: 52px;
+
+  // 菜单内边距
+  --dt-menu-padding: 8px;
+  --dt-menu-item-padding-x: 16px;
+  --dt-menu-item-padding-y: 0;
+  --dt-menu-item-gap: 4px;
+
+  // 菜单图标尺寸
+  --dt-menu-icon-size: 18px;
+  --dt-menu-icon-margin: 12px;
+
+  // 菜单圆角
+  --dt-menu-border-radius: 8px;
+  --dt-menu-item-border-radius: 6px;
+
+  // 菜单字体
+  --dt-menu-font-size: 14px;
+  --dt-menu-font-weight: 500;
+  --dt-menu-line-height: 1.5;
+}
+
+// ============================================================================
+// 通用菜单样式 mixin
+// ============================================================================
+
+// 基础菜单容器
+@mixin menu-container($width: var(--dt-menu-width)) {
+  width: $width;
+  min-width: var(--dt-menu-min-width);
+  max-width: var(--dt-menu-max-width);
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-menu-border-radius);
+  padding: var(--dt-menu-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-menu-item-gap);
+  box-shadow: var(--dt-shadow-float);
+  border: 1px solid var(--dt-border-light);
+}
+
+// 菜单项基础样式
+@mixin menu-item($height: var(--dt-menu-item-height)) {
+  display: flex;
+  align-items: center;
+  height: $height;
+  padding: var(--dt-menu-item-padding-y) var(--dt-menu-item-padding-x);
+  border-radius: var(--dt-menu-item-border-radius);
+  font-size: var(--dt-menu-font-size);
+  font-weight: var(--dt-menu-font-weight);
+  line-height: var(--dt-menu-line-height);
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    background: var(--dt-bg-hover);
+    color: var(--dt-text-primary);
+  }
+
+  &.active,
+  &.is-active {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+    font-weight: 600;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 16px;
+      background: var(--dt-brand-color);
+      border-radius: 0 2px 2px 0;
+    }
+  }
+
+  .menu-icon {
+    font-size: var(--dt-menu-icon-size);
+    margin-right: var(--dt-menu-icon-margin);
+    width: var(--dt-menu-icon-size);
+    height: var(--dt-menu-icon-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .menu-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .menu-badge {
+    background: var(--dt-brand-color);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+}
+
+// 菜单头部样式
+@mixin menu-header($height: 60px) {
+  height: $height;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--dt-menu-item-padding-x);
+  border-bottom: 1px solid var(--dt-border-light);
+  margin-bottom: var(--dt-menu-padding);
+  flex-shrink: 0;
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+  }
+}
+
+// 菜单底部样式
+@mixin menu-footer($height: 52px) {
+  height: $height;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--dt-menu-item-padding-x);
+  border-top: 1px solid var(--dt-border-light);
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+// ============================================================================
+// 固定定位设置页面样式
+// ============================================================================
+
+// 固定定位设置页面容器
+.settings-fixed-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dt-bg-overlay);
+  backdrop-filter: blur(4px);
+
+  // 设置页面内容区
+  .settings-content-wrapper {
+    width: 900px;
+    height: 640px;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: var(--dt-bg-body);
+    border-radius: 12px;
+    box-shadow: var(--dt-shadow-modal);
+    display: flex;
+    overflow: hidden;
+    position: relative;
+
+    // 响应式适配
+    @media (max-width: 768px) {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 0;
+    }
+  }
+
+  // 侧边栏
+  .settings-sidebar {
+    width: var(--dt-menu-width);
+    background: var(--dt-bg-card);
+    border-right: 1px solid var(--dt-border-light);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid var(--dt-border-light);
+    }
+  }
+
+  // 主内容区
+  .settings-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--dt-bg-body);
+    overflow: hidden;
+  }
+}
+
+// ============================================================================
+// 统一菜单组件类
+// ============================================================================
+
+.dt-menu {
+  @include menu-container();
+
+  .dt-menu-item {
+    @include menu-item();
+  }
+
+  .dt-menu-header {
+    @include menu-header();
+  }
+
+  .dt-menu-footer {
+    @include menu-footer();
+  }
+
+  // 小型菜单
+  &--sm {
+    width: var(--dt-menu-width-sm);
+
+    .dt-menu-item {
+      height: var(--dt-menu-item-height-sm);
+      font-size: 13px;
+    }
+  }
+
+  // 大型菜单
+  &--lg {
+    width: var(--dt-menu-width-lg);
+
+    .dt-menu-item {
+      height: var(--dt-menu-item-height-lg);
+      font-size: 15px;
+    }
+  }
+
+  // 紧凑模式
+  &--compact {
+    padding: 4px;
+
+    .dt-menu-item {
+      padding: 0 12px;
+    }
+  }
+
+  // 无边框模式
+  &--borderless {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+}
+
+// ============================================================================
+// 深色模式适配
+// ============================================================================
+
+.dark {
+  .dt-menu {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+
+    .dt-menu-item {
+      color: var(--dt-text-secondary);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--dt-text-primary);
+      }
+
+      &.active,
+      &.is-active {
+        background: rgba(0, 137, 255, 0.15);
+      }
+    }
+
+    .dt-menu-header,
+    .dt-menu-footer {
+      border-color: var(--dt-border-dark);
+    }
+  }
+
+  .settings-fixed-container {
+    .settings-content-wrapper {
+      background: var(--dt-bg-body-dark);
+    }
+
+    .settings-sidebar {
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
+    }
+
+    .settings-main {
+      background: var(--dt-bg-body-dark);
+    }
+  }
+}

@@ -60,6 +60,10 @@ export default {
     // 消息列表（按 sessionId 分组）
     messages: {},
 
+    // 发送中的消息 Map（用于内存泄漏防护）
+    // key: clientMsgId, value: { timestamp, sessionId, message }
+    sendingMessages: new Map(),
+
     // 当前正在回复的消息
     replyingMessage: null,
 
@@ -76,8 +80,8 @@ export default {
   getters: {
     // 获取当前会话的消息列表
     currentMessages: (state, getters, rootState) => {
-      if (!rootState.session.currentSession) return []
-      return state.messages[rootState.session.currentSession.id] || []
+      if (!rootState.im?.session?.currentSession) return []
+      return state.messages[rootState.im.session.currentSession.id] || []
     },
 
     // 获取指定会话的消息列表
@@ -90,12 +94,28 @@ export default {
 
     // 获取选中消息的列表
     selectedMessageList: (state, getters, rootState) => {
-      const sessionId = rootState.session.currentSession?.id
+      const sessionId = rootState.im?.session?.currentSession?.id
       if (!sessionId || !state.messages[sessionId]) return []
 
       return Array.from(state.selectedMessages).map(messageId => {
         return state.messages[sessionId].find(msg => msg.id === messageId)
       }).filter(msg => msg !== undefined)
+    },
+
+    // ========== 发送中消息管理 ==========
+    // 获取发送中的消息列表
+    sendingMessagesList: (state) => {
+      return Array.from(state.sendingMessages.values())
+    },
+
+    // 获取发送中的消息列表（别名，用于向后兼容）
+    getSendingMessages: (state) => {
+      return Array.from(state.sendingMessages.values())
+    },
+
+    // 检查消息是否在发送中
+    isMessageSending: (state) => (clientMsgId) => {
+      return state.sendingMessages.has(clientMsgId)
     }
   },
 
@@ -237,6 +257,46 @@ export default {
           status: mapSendStatusToUi(sendStatus)
         }
       }
+    },
+
+    // ========== 发送中消息管理 Mutations ==========
+
+    /**
+     * 添加发送中的消息
+     * @param {Object} state - Vuex state
+     * @param {Object} payload - { clientMsgId, sessionId, message }
+     */
+    ADD_SENDING_MESSAGE(state, { clientMsgId, sessionId, message }) {
+      state.sendingMessages.set(clientMsgId, {
+        timestamp: message?.timestamp || Date.now(),
+        sessionId,
+        message
+      })
+    },
+
+    /**
+     * 移除发送中的消息
+     * @param {Object} state - Vuex state
+     * @param {string} clientMsgId - 客户端消息ID
+     */
+    REMOVE_SENDING_MESSAGE(state, clientMsgId) {
+      state.sendingMessages.delete(clientMsgId)
+    },
+
+    /**
+     * 清理过期的发送中消息（超过 10 分钟）
+     * 避免内存泄漏
+     * @param {Object} state - Vuex state
+     */
+    CLEANUP_EXPIRED_MESSAGES(state) {
+      const now = Date.now()
+      const EXPIRED_TIME = 10 * 60 * 1000 // 10 分钟
+
+      for (const [clientMsgId, data] of state.sendingMessages.entries()) {
+        if (now - data.timestamp > EXPIRED_TIME) {
+          state.sendingMessages.delete(clientMsgId)
+        }
+      }
     }
   },
 
@@ -268,33 +328,97 @@ export default {
       }
     },
 
-    // 发送消息
-    async sendMessage({ commit }, { sessionId, type = 'TEXT', content, replyToMessageId = null }) {
+    // 发送消息（含乐观 UI 和发送队列管理）
+    async sendMessage({ commit, dispatch }, { sessionId, type = 'TEXT', content, replyToMessageId = null }) {
       const clientMsgId = generateUUID()
-      const res = await apiSendMessage({
+
+      // ========== 乐观 UI：先添加消息到发送队列 ==========
+      const tempMessage = {
+        clientMsgId,
         conversationId: sessionId,
         type,
         content,
         replyToMessageId,
-        clientMsgId
+        sendStatus: SEND_STATUS.PENDING, // 发送中状态
+        timestamp: Date.now()
+      }
+
+      // 添加到发送队列（用于内存泄漏防护）
+      commit('ADD_SENDING_MESSAGE', {
+        clientMsgId,
+        sessionId,
+        message: tempMessage
       })
 
-      if (res.code === 200 && res.data) {
-        // 规范化响应中的消息类型
-        const normalizedMessage = {
-          ...res.data,
-          type: (res.data.type || '').toUpperCase()
+      // 添加到消息列表（乐观 UI）
+      commit('ADD_MESSAGE', { sessionId, message: tempMessage })
+
+      try {
+        // 发送消息到服务器
+        const res = await apiSendMessage({
+          conversationId: sessionId,
+          type,
+          content,
+          replyToMessageId,
+          clientMsgId
+        })
+
+        if (res.code === 200 && res.data) {
+          // 发送成功：移除发送队列
+          commit('REMOVE_SENDING_MESSAGE', clientMsgId)
+
+          // 规范化响应中的消息类型
+          const normalizedMessage = {
+            ...res.data,
+            type: (res.data.type || '').toUpperCase(),
+            // 移除临时状态，使用服务器返回的状态
+            sendStatus: res.data.sendStatus
+          }
+
+          // 更新消息列表（替换临时消息）
+          commit('UPDATE_MESSAGE', {
+            sessionId,
+            message: {
+              clientMsgId,
+              ...normalizedMessage
+            }
+          })
+
+          // 更新会话列表
+          commit('im/session/UPDATE_SESSION', {
+            id: sessionId,
+            lastMessage: formatMessagePreviewFromObject(normalizedMessage),
+            lastMessageTime: normalizedMessage.timestamp,
+            lastMessageType: type
+          }, { root: true })
+
+          return normalizedMessage
+        } else {
+          // 服务器返回错误：标记为失败
+          commit('REMOVE_SENDING_MESSAGE', clientMsgId)
+          commit('UPDATE_MESSAGE', {
+            sessionId,
+            message: {
+              clientMsgId,
+              sendStatus: SEND_STATUS.FAILED,
+              sendErrorCode: 'SERVER_ERROR'
+            }
+          })
+          throw new Error(res.msg || '发送消息失败')
         }
-        commit('ADD_MESSAGE', { sessionId, message: normalizedMessage })
-        commit('im/session/UPDATE_SESSION', {
-          id: sessionId,
-          lastMessage: formatMessagePreviewFromObject(normalizedMessage),
-          lastMessageTime: normalizedMessage.timestamp,
-          lastMessageType: type
-        }, { root: true })
-        return normalizedMessage
+      } catch (error) {
+        // 网络错误或其他异常：标记为失败
+        commit('REMOVE_SENDING_MESSAGE', clientMsgId)
+        commit('UPDATE_MESSAGE', {
+          sessionId,
+          message: {
+            clientMsgId,
+            sendStatus: SEND_STATUS.FAILED,
+            sendErrorCode: 'NETWORK_ERROR'
+          }
+        })
+        throw error
       }
-      throw new Error('发送消息失败')
     },
 
     // 编辑消息
@@ -302,13 +426,13 @@ export default {
       const res = await apiEditMessage(messageId, { content })
       if (res.code === 200) {
         // 查找该消息在哪个会话中 (通常是当前会话)
-        const sessionId = rootState.session.currentSession?.id
+        const sessionId = rootState.im?.session?.currentSession?.id
         if (sessionId && rootState.message.messages[sessionId]) {
           const editedMsg = { ...rootState.message.messages[sessionId].find(m => m.id === messageId), content, isEdited: true }
           commit('UPDATE_MESSAGE', { sessionId, message: editedMsg })
 
           // 如果是最后一条消息，更新会话列表
-          const session = rootState.session.sessions.find(s => s.id === sessionId)
+          const session = rootState.im?.session?.sessions?.find(s => s.id === sessionId)
           if (session && session.lastMessageId === messageId) {
             commit('im/session/UPDATE_SESSION', {
               id: sessionId,
@@ -349,7 +473,7 @@ export default {
     async deleteMessage({ commit, rootState }, messageId) {
       await deleteMessage(messageId)
       // 需要找到该消息所属的会话ID
-      const sessionId = rootState.session.currentSession?.id
+      const sessionId = rootState.im?.session?.currentSession?.id
       if (sessionId) {
         commit('DELETE_MESSAGE', { sessionId, messageId })
       }
@@ -359,7 +483,7 @@ export default {
     async recallMessage({ commit, rootState }, messageId) {
       await recallMessage(messageId)
       // 需要找到该消息所属的会话ID并更新为撤回状态
-      const sessionId = rootState.session.currentSession?.id
+      const sessionId = rootState.im?.session?.currentSession?.id
       if (sessionId && rootState.message.messages[sessionId]) {
         const msg = rootState.message.messages[sessionId].find(m => m.id === messageId)
         if (msg) {
@@ -389,8 +513,8 @@ export default {
       commit('ADD_MESSAGE', { sessionId, message })
 
       // 如果不是当前正在查看的会话，则增加未读数
-      const isCurrentSession = rootState.session.currentSession && rootState.session.currentSession.id === sessionId
-      const session = rootState.session.sessions.find(s => s.id === sessionId)
+      const isCurrentSession = rootState.im?.session?.currentSession?.id === sessionId
+      const session = rootState.im?.session?.sessions?.find(s => s.id === sessionId)
 
       // 检查是否有 @ 我
       const currentUser = rootState.im?.currentUser
@@ -456,6 +580,111 @@ export default {
           break
         }
       }
+    },
+
+    // ========== 发送中消息管理 Actions ==========
+
+    /**
+     * 添加消息到发送队列（乐观 UI）
+     * @param {Object} context - Vuex context
+     * @param {Object} payload - { clientMsgId, sessionId, message }
+     */
+    addSendingMessage({ commit }, { clientMsgId, sessionId, message }) {
+      commit('ADD_SENDING_MESSAGE', { clientMsgId, sessionId, message })
+    },
+
+    /**
+     * 处理消息送达事件（WebSocket 推送）
+     * 实现幂等性处理：使用 clientMsgId 去重
+     * @param {Object} context - Vuex context
+     * @param {Object} payload - { clientMsgId, messageId, sessionId }
+     */
+    handleMessageDelivered({ commit, state }, { clientMsgId, messageId, sessionId }) {
+      // 幂等性处理：检查消息是否在发送队列中
+      if (!state.sendingMessages.has(clientMsgId)) {
+        return
+      }
+
+      // 移除发送队列记录
+      commit('REMOVE_SENDING_MESSAGE', clientMsgId)
+
+      // 更新消息状态为已送达
+      commit('UPDATE_MESSAGE_STATUS', {
+        sessionId,
+        messageId,
+        sendStatus: SEND_STATUS.DELIVERED
+      })
+    },
+
+    /**
+     * 处理消息失败事件（WebSocket 推送）
+     * @param {Object} context - Vuex context
+     * @param {Object} payload - { clientMsgId, sessionId, errorCode }
+     */
+    handleMessageFailed({ commit, state }, { clientMsgId, sessionId, errorCode }) {
+      // 幂等性处理：检查消息是否在发送队列中
+      if (!state.sendingMessages.has(clientMsgId)) {
+        return
+      }
+
+      // 移除发送队列记录
+      commit('REMOVE_SENDING_MESSAGE', clientMsgId)
+
+      // 查找消息的 ID
+      const message = state.messages[sessionId]?.find(m => m.clientMsgId === clientMsgId)
+      if (message) {
+        // 更新消息状态为失败
+        commit('UPDATE_MESSAGE', {
+          sessionId,
+          message: {
+            ...message,
+            sendStatus: SEND_STATUS.FAILED,
+            sendErrorCode: errorCode || 'UNKNOWN_ERROR'
+          }
+        })
+      }
+    },
+
+    /**
+     * 清理过期的发送中消息
+     * 每 5 分钟清理一次超过 10 分钟的记录
+     * @param {Object} context - Vuex context
+     */
+    cleanupExpiredMessages({ commit }) {
+      commit('CLEANUP_EXPIRED_MESSAGES')
     }
+  }
+}
+
+// ========== 定期清理机制（每 5 分钟）==========
+let cleanupTimer = null
+
+/**
+ * 启动定期清理任务
+ * 每 5 分钟清理一次超过 10 分钟的发送中消息
+ */
+export function startCleanupTimer(store) {
+  // 清除旧的定时器（如果存在）
+  if (cleanupTimer) {
+    clearInterval(cleanupTimer)
+  }
+
+  // 每 5 分钟（300000 ms）清理一次
+  cleanupTimer = setInterval(() => {
+    store.dispatch('imMessage/cleanupExpiredMessages')
+    console.log('[im-message] 清理过期的发送中消息')
+  }, 5 * 60 * 1000) // 5 分钟
+
+  console.log('[im-message] 启动定期清理任务（每 5 分钟）')
+}
+
+/**
+ * 停止定期清理任务
+ */
+export function stopCleanupTimer() {
+  if (cleanupTimer) {
+    clearInterval(cleanupTimer)
+    cleanupTimer = null
+    console.log('[im-message] 停止定期清理任务')
   }
 }

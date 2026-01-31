@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImSystemConfigMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImSystemConfig" id="ImSystemConfigResult">
+        <id property="id" column="id"/>
+        <result property="configKey" column="config_key"/>
+        <result property="configValue" column="config_value"/>
+        <result property="configType" column="config_type"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImSystemConfigVo">
+        select id, config_key, config_value, config_type, description, status, create_time, update_time
+        from im_system_config
+    </sql>
+
+    <select id="selectImSystemConfigById" parameterType="Long" resultMap="ImSystemConfigResult">
+        <include refid="selectImSystemConfigVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectImSystemConfigList" resultMap="ImSystemConfigResult">
+        <include refid="selectImSystemConfigVo"/>
+        <where>
+            <if test="configKey != null and configKey != ''">
+                and config_key like concat('%', #{configKey}, '%')
+            </if>
+            <if test="configType != null and configType != ''">
+                and config_type = #{configType}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+        </where>
+        order by id asc
+    </select>
+
+</mapper>

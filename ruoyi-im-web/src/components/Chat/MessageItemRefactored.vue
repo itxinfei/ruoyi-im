@@ -182,13 +182,7 @@ const handleNudge = () => {
   padding-top: 8px;
   margin: 0 8px;
   flex-shrink: 0;
-
-  .message-item.is-merged & {
-    visibility: hidden;
-    margin: 0;
-    padding: 0;
-    width: 0;
-  }
+  width: 20px;
 
   :deep(.el-checkbox) {
     .el-checkbox__input.is-checked .el-checkbox__inner {
@@ -212,6 +206,8 @@ const handleNudge = () => {
 
 // 头像区域
 .avatar-wrapper {
+  width: 40px;
+  height: 40px;
   margin: 0;  // 钉钉标准：头像与气泡紧贴，无间距
   flex-shrink: 0;
   cursor: pointer;
@@ -225,6 +221,8 @@ const handleNudge = () => {
     border-radius: 4px;  // 钉钉方形头像，小圆角
     // 移除边框和阴影，保持简洁风格
   }
+
+  // 合并模式：头像始终显示，只调整间距
 }
 
 // 内容包裹层

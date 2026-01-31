@@ -11,8 +11,18 @@
       <div v-if="files.length > 0" class="file-list">
         <div v-for="(file, index) in files" :key="index" class="file-item">
           <!-- 图片预览 -->
-          <div v-if="file.type.startsWith('image/')" class="file-preview image-preview">
+          <div v-if="isImage(file)" class="file-preview image-preview">
             <img :src="previewUrl(file)" :alt="file.name" />
+          </div>
+
+          <!-- 视频文件图标 -->
+          <div v-else-if="isVideo(file)" class="file-preview file-icon video-icon">
+            <span class="material-icons-outlined">videocam</span>
+          </div>
+
+          <!-- 音频文件图标 -->
+          <div v-else-if="isAudio(file)" class="file-preview file-icon audio-icon">
+            <span class="material-icons-outlined">mic</span>
           </div>
 
           <!-- 其他文件图标 -->
@@ -60,11 +70,17 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { formatFileSize } from '@/utils/message'
 
 /**
  * 文件上传预览对话框
  * 显示待上传文件的预览，允许用户添加描述或取消
  */
+
+// 文件类型检测
+const isImage = (file) => file.type.startsWith('image/')
+const isVideo = (file) => file.type.startsWith('video/')
+const isAudio = (file) => file.type.startsWith('audio/')
 
 const props = defineProps({
   modelValue: Boolean,
@@ -118,16 +134,7 @@ function clearPreviewUrls() {
   previewUrls.clear()
 }
 
-/**
- * 格式化文件大小
- */
-function formatFileSize(bytes) {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
-}
+// formatFileSize 已从 @/utils/message 导入，不再重复定义
 
 /**
  * 移除文件
@@ -233,6 +240,16 @@ function handleConfirm() {
 
     .material-icons-outlined {
       font-size: inherit;
+    }
+
+    &.video-icon {
+      background: rgba(0, 137, 255, 0.1);
+      color: var(--dt-brand-color);
+    }
+
+    &.audio-icon {
+      background: rgba(82, 196, 26, 0.1);
+      color: #52c41a;
     }
   }
 }

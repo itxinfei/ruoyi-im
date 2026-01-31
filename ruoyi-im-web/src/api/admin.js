@@ -121,6 +121,33 @@ export function getUserStats() {
   })
 }
 
+/**
+ * 批量删除用户
+ * @param {Array} ids - 用户ID列表
+ * @returns {Promise}
+ */
+export function batchDeleteUsers(ids) {
+  return request({
+    url: '/api/admin/users/batch',
+    method: 'delete',
+    data: ids
+  })
+}
+
+/**
+ * 批量更新用户状态
+ * @param {Array} ids - 用户ID列表
+ * @param {Number} status - 状态 0=禁用 1=启用
+ * @returns {Promise}
+ */
+export function batchUpdateUserStatus(ids, status) {
+  return request({
+    url: '/api/admin/users/batch/status',
+    method: 'put',
+    data: { ids, status }
+  })
+}
+
 // ==================== 群组管理 ====================
 
 /**
@@ -248,6 +275,35 @@ export function toggleGroupMute(groupId, muted) {
     url: `/api/admin/groups/${groupId}/mute`,
     method: 'put',
     data: { muted }
+  })
+}
+
+/**
+ * 批量设置群成员禁言
+ * @param {Number} groupId - 群组ID
+ * @param {Array} userIds - 用户ID列表
+ * @param {Number} duration - 禁言时长（秒），0表示永久禁言
+ * @returns {Promise}
+ */
+export function batchMuteGroupMembers(groupId, userIds, duration) {
+  return request({
+    url: `/api/admin/groups/${groupId}/members/batch-mute`,
+    method: 'put',
+    data: { userIds, duration }
+  })
+}
+
+/**
+ * 批量解除群成员禁言
+ * @param {Number} groupId - 群组ID
+ * @param {Array} userIds - 用户ID列表
+ * @returns {Promise}
+ */
+export function batchUnmuteGroupMembers(groupId, userIds) {
+  return request({
+    url: `/api/admin/groups/${groupId}/members/batch-unmute`,
+    method: 'put',
+    data: userIds
   })
 }
 
@@ -486,6 +542,33 @@ export function moveDepartment(id, parentId) {
   })
 }
 
+/**
+ * 添加成员到部门
+ * @param {Number} id - 部门ID
+ * @param {Array} userIds - 用户ID列表
+ * @returns {Promise}
+ */
+export function addDepartmentMembers(id, userIds) {
+  return request({
+    url: `/api/admin/departments/${id}/members`,
+    method: 'post',
+    data: userIds
+  })
+}
+
+/**
+ * 移除部门成员
+ * @param {Number} id - 部门ID
+ * @param {Number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function removeDepartmentMember(id, userId) {
+  return request({
+    url: `/api/admin/departments/${id}/members/${userId}`,
+    method: 'delete'
+  })
+}
+
 // ==================== 角色权限管理 ====================
 
 /**
@@ -586,6 +669,33 @@ export function getRoleMembers(id) {
   return request({
     url: `/api/admin/roles/${id}/members`,
     method: 'get'
+  })
+}
+
+/**
+ * 添加成员到角色
+ * @param {Number} id - 角色ID
+ * @param {Array} userIds - 用户ID列表
+ * @returns {Promise}
+ */
+export function addRoleMembers(id, userIds) {
+  return request({
+    url: `/api/admin/roles/${id}/members`,
+    method: 'post',
+    data: userIds
+  })
+}
+
+/**
+ * 移除角色成员
+ * @param {Number} id - 角色ID
+ * @param {Number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function removeRoleMember(id, userId) {
+  return request({
+    url: `/api/admin/roles/${id}/members/${userId}`,
+    method: 'delete'
   })
 }
 

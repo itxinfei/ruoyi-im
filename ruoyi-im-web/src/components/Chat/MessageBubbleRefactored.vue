@@ -52,11 +52,11 @@
           :message="message"
         />
 
-        <!-- 语音消息 -->
-        <VoiceBubble
+        <!-- 语音消息 - 暂时禁用（未来考虑） -->
+        <!-- <VoiceBubble
           v-else-if="message.type === 'VOICE' || message.type === 'AUDIO'"
           :message="message"
-        />
+        /> -->
 
         <!-- 位置消息 -->
         <LocationBubble
@@ -180,6 +180,8 @@
     :is-group-chat="sessionType === 'GROUP'"
     :total-members="message.totalMembers"
     :all-members="message.allMembers || []"
+    :conversation-id="message.conversationId || message.sessionId"
+    @remind-unread="(data) => $emit('remind-unread', data)"
   />
 </template>
 
@@ -196,7 +198,7 @@ import { useMessageReaction } from './message-bubble/composables/useMessageReact
 import TextBubble from './message-bubble/bubbles/TextBubble.vue'
 import ImageBubble from './message-bubble/bubbles/ImageBubble.vue'
 import FileBubble from './message-bubble/bubbles/FileBubble.vue'
-import VoiceBubble from './message-bubble/bubbles/VoiceBubble.vue'
+// VoiceBubble 已删除（语音功能未来考虑）
 import VideoBubble from './message-bubble/bubbles/VideoBubble.vue'
 import LocationBubble from './message-bubble/bubbles/LocationBubble.vue'
 import SystemBubble from './message-bubble/bubbles/SystemBubble.vue'
@@ -218,7 +220,7 @@ const props = defineProps({
 const emit = defineEmits([
   'command', 'preview', 'download', 'at', 'scroll-to',
   'retry', 'toggle-reaction', 'add-reaction', 're-edit',
-  'show-user', 'long-press', 'show-read-info'
+  'show-user', 'long-press', 'show-read-info', 'remind-unread'
 ])
 
 // ==================== Composables ====================

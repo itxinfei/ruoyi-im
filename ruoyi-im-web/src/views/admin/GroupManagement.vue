@@ -297,11 +297,81 @@
         <el-button type="primary" :loading="submitting" @click="handleAddMemberSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 批量添加成员对话框 -->
+    <el-dialog
+      v-model="batchAddDialogVisible"
+      title="批量添加成员"
+      width="600px"
+      :close-on-click-modal="false"
+    >
+      <el-alert
+        :title="`当前群组: ${currentGroup?.name || ''}`"
+        type="info"
+        :closable="false"
+        style="margin-bottom: 16px"
+      />
+      <el-form label-width="80px">
+        <el-form-item label="选择成员">
+          <el-select
+            v-model="batchAddSelectedUsers"
+            multiple
+            filterable
+            remote
+            reserve-keyword
+            placeholder="搜索并选择用户"
+            :remote-method="searchUsers"
+            :loading="userSearchLoading"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="user in userOptions"
+              :key="user.id"
+              :label="`${user.nickname} (${user.username})`"
+              :value="user"
+            >
+              <div class="user-option">
+                <el-avatar :size="24" :src="user.avatar">
+                  <el-icon><User /></el-icon>
+                </el-avatar>
+                <span>{{ user.nickname }}</span>
+                <span class="user-option-username">{{ user.username }}</span>
+              </div>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="已选择">
+          <div v-if="batchAddSelectedUsers.length > 0" class="selected-users">
+            <el-tag
+              v-for="user in batchAddSelectedUsers"
+              :key="user.id"
+              closable
+              @close="removeBatchUser(user)"
+              style="margin: 4px"
+            >
+              {{ user.nickname }}
+            </el-tag>
+          </div>
+          <span v-else style="color: var(--el-text-color-secondary)">未选择任何成员</span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchAddDialogVisible = false">取消</el-button>
+        <el-button
+          type="primary"
+          :loading="batchAddLoading"
+          :disabled="batchAddSelectedUsers.length === 0"
+          @click="handleConfirmBatchAdd"
+        >
+          确定添加 ({{ batchAddSelectedUsers.length }})
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, h } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -325,6 +395,8 @@ import {
   removeGroupMember,
   addGroupMember,
   toggleGroupMute,
+  batchMuteGroupMembers,
+  batchUnmuteGroupMembers,
   getUserOptions,
   transferGroupOwner
 } from '@/api/admin'
@@ -383,6 +455,11 @@ const addMemberForm = reactive({
 })
 const userSearchLoading = ref(false)
 const userOptions = ref([])
+
+// 批量添加成员对话框
+const batchAddDialogVisible = ref(false)
+const batchAddSelectedUsers = ref([])
+const batchAddLoading = ref(false)
 
 // 加载群组列表
 const loadGroups = async () => {
@@ -548,13 +625,53 @@ const handleDelete = async (row) => {
 
 // 批量操作
 const handleBatchMute = async () => {
-  // TODO: 实现批量禁言
-  ElMessage.info('批量禁言功能开发中')
+  if (selectedGroups.value.length === 0) {
+    ElMessage.warning('请先选择要禁言的群组')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`确定要禁言选中的 ${selectedGroups.value.length} 个群组吗？`, '批量禁言', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    // 批量禁言所有选中的群组
+    for (const group of selectedGroups.value) {
+      await toggleGroupMute(group.id, true)
+    }
+    ElMessage.success('批量禁言成功')
+    handleClearSelection()
+    loadGroups()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量禁言失败')
+    }
+  }
 }
 
 const handleBatchUnmute = async () => {
-  // TODO: 实现批量解除禁言
-  ElMessage.info('批量解除禁言功能开发中')
+  if (selectedGroups.value.length === 0) {
+    ElMessage.warning('请先选择要解除禁言的群组')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`确定要解除禁言选中的 ${selectedGroups.value.length} 个群组吗？`, '批量解除禁言', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    // 批量解除禁言所有选中的群组
+    for (const group of selectedGroups.value) {
+      await toggleGroupMute(group.id, false)
+    }
+    ElMessage.success('批量解除禁言成功')
+    handleClearSelection()
+    loadGroups()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量解除禁言失败')
+    }
+  }
 }
 
 const handleBatchDelete = async () => {
@@ -604,7 +721,71 @@ const handleRemoveMember = async (row) => {
 // 群主操作
 const handleOwnerCommand = async (command) => {
   if (command === 'transfer') {
-    ElMessage.info('转让群主功能开发中')
+    try {
+      // 获取可能的群主候选人（管理员和普通成员）
+      const candidates = memberList.value.filter(m => m.role !== 'OWNER')
+
+      if (candidates.length === 0) {
+        ElMessage.warning('没有可转让的成员')
+        return
+      }
+
+      // 使用 ElMessageBox 和 ElSelect 结合实现选择
+      const { value: selectedMemberId } = await ElMessageBox({
+        title: '选择新群主',
+        message: h('div', { class: 'transfer-owner-dialog' }, [
+          h('p', { style: 'margin-bottom: 12px; color: var(--el-text-color-regular)' }, '请选择新群主：'),
+          h('select', {
+            id: 'new-owner-select',
+            style: 'width: 100%; padding: 8px; border: 1px solid var(--el-border-color); border-radius: 4px;'
+          },
+          candidates.map(m =>
+            h('option', { value: m.userId, key: m.userId }, `${m.nickName} (${m.role === 'ADMIN' ? '管理员' : '成员'})`)
+          )
+        ]),
+        showCancelButton: true,
+        confirmButtonText: '确定转让',
+        cancelButtonText: '取消',
+        beforeClose: (action, instance, done) => {
+          if (action === 'confirm') {
+            const select = document.getElementById('new-owner-select')
+            if (select) {
+              instance.value = select.value
+            }
+          }
+          done()
+        }
+      })
+
+      if (!selectedMemberId) {
+        ElMessage.warning('请选择新群主')
+        return
+      }
+
+      const selectedMember = candidates.find(m => m.userId == selectedMemberId)
+      if (!selectedMember) {
+        ElMessage.error('选择的成员无效')
+        return
+      }
+
+      await ElMessageBox.confirm(
+        `确定将群主转让给 "${selectedMember.nickName}" 吗？转让后你将成为普通成员。`,
+        '转让确认',
+        { type: 'warning' }
+      )
+
+      const res = await transferGroupOwner(currentGroup.value.id, selectedMember.userId)
+      if (res.code === 200) {
+        ElMessage.success('群主转让成功')
+        // 重新加载成员列表和群组信息
+        await handleViewMembers(currentGroup.value)
+        loadGroups()
+      }
+    } catch (error) {
+      if (error !== 'cancel') {
+        ElMessage.error('转让失败')
+      }
+    }
   }
 }
 
@@ -618,7 +799,129 @@ const handleAddMember = () => {
 
 // 批量添加成员
 const handleBatchAddMembers = () => {
-  ElMessage.info('批量添加成员功能开发中')
+  if (!currentGroup.value) {
+    ElMessage.warning('请先选择群组')
+    return
+  }
+  batchAddSelectedUsers.value = []
+  batchAddDialogVisible.value = true
+}
+
+// 批量添加成员确认
+const handleConfirmBatchAdd = async () => {
+  if (batchAddSelectedUsers.value.length === 0) {
+    ElMessage.warning('请选择要添加的成员')
+    return
+  }
+
+  // 检查是否已存在
+  const existingUserIds = memberList.value.map(m => m.userId)
+  const newUserIds = batchAddSelectedUsers.value
+    .filter(u => !existingUserIds.includes(u.userId || u.id))
+    .map(u => u.userId || u.id)
+
+  if (newUserIds.length === 0) {
+    ElMessage.warning('所选成员已在群组中')
+    return
+  }
+
+  if (newUserIds.length < batchAddSelectedUsers.value.length) {
+    ElMessage.warning(`${batchAddSelectedUsers.value.length - newUserIds.length} 个成员已存在，将跳过`)
+  }
+
+  batchAddLoading.value = true
+  try {
+    // 逐个添加成员（因为 API 支持单个添加）
+    let successCount = 0
+    for (const userId of newUserIds) {
+      try {
+        const res = await addGroupMember(currentGroup.value.id, {
+          userId,
+          role: 'MEMBER'
+        })
+        if (res.code === 200) {
+          successCount++
+        }
+      } catch (error) {
+        console.error(`添加成员 ${userId} 失败:`, error)
+      }
+    }
+
+    if (successCount > 0) {
+      ElMessage.success(`成功添加 ${successCount} 个成员`)
+      batchAddDialogVisible.value = false
+      // 重新加载成员列表
+      await handleViewMembers(currentGroup.value)
+      loadGroups()
+    } else {
+      ElMessage.error('添加失败')
+    }
+  } catch (error) {
+    ElMessage.error('添加失败')
+  } finally {
+    batchAddLoading.value = false
+  }
+}
+
+// 移除批量添加中的用户
+const removeBatchUser = (user) => {
+  const index = batchAddSelectedUsers.value.findIndex(u => (u.id || u.userId) === (user.id || user.userId))
+  if (index > -1) {
+    batchAddSelectedUsers.value.splice(index, 1)
+  }
+}
+  if (batchAddSelectedUsers.value.length === 0) {
+    ElMessage.warning('请选择要添加的成员')
+    return
+  }
+
+  // 检查是否已存在
+  const existingUserIds = memberList.value.map(m => m.userId)
+  const newUserIds = batchAddSelectedUsers.value
+    .filter(u => !existingUserIds.includes(u.userId))
+    .map(u => u.userId)
+
+  if (newUserIds.length === 0) {
+    ElMessage.warning('所选成员已在群组中')
+    return
+  }
+
+  if (newUserIds.length < batchAddSelectedUsers.value.length) {
+    ElMessage.warning(`${batchAddSelectedUsers.value.length - newUserIds.length} 个成员已存在，将跳过`)
+  }
+
+  batchAddLoading.value = true
+  try {
+    // 逐个添加成员（因为 API 支持单个添加）
+    let successCount = 0
+    for (const userId of newUserIds) {
+      try {
+        const res = await addGroupMember(currentGroup.value.id, {
+          userId,
+          role: 'MEMBER'
+        })
+        if (res.code === 200) {
+          successCount++
+        }
+      } catch (error) {
+        console.error(`添加成员 ${userId} 失败:`, error)
+      }
+    }
+
+    if (successCount > 0) {
+      ElMessage.success(`成功添加 ${successCount} 个成员`)
+      batchAddDialogVisible.value = false
+      // 重新加载成员列表
+      await handleViewMembers(currentGroup.value)
+      loadGroups()
+    } else {
+      ElMessage.error('添加失败')
+    }
+  } catch (error) {
+    ElMessage.error('添加失败')
+  } finally {
+    batchAddLoading.value = false
+  }
 }
 
 // 搜索用户

@@ -1,112 +1,75 @@
 <template>
   <el-dialog
     v-model="visible"
-    :width="dialogWidth"
-    class="el-dialog system-settings-dialog"
+    width="900px"
+    class="system-settings-dialog"
     destroy-on-close
     append-to-body
-    :fullscreen="isFullscreen"
     :show-close="false"
     :close-on-click-modal="true"
     :close-on-press-escape="true"
+    title=""
   >
-    <div class="settings-layout">
+    <div class="settings-container">
       <!-- 侧边导航栏 -->
       <aside class="settings-sidebar">
         <div class="sidebar-header">
-          <div class="app-brand">
-            <el-icon class="brand-icon"><Setting /></el-icon>
-            <span class="brand-text">系统设置</span>
-          </div>
+          <el-icon class="header-icon"><Setting /></el-icon>
+          <span class="header-title">设置</span>
         </div>
         
-        <nav class="sidebar-nav">
-          <!-- 搜索框 -->
-          <div class="sidebar-search" v-if="!isFullscreen">
-            <el-input
-              v-model="searchQuery"
-              placeholder="搜索设置..."
-              :prefix-icon="Search"
-              clearable
-              size="small"
-              class="search-input"
-            />
-          </div>
-
+        <nav class="sidebar-menu">
           <div
-            v-for="item in filteredMenuItems"
+            v-for="item in menuItems"
             :key="item.id"
-            class="nav-item"
+            class="menu-item"
             :class="{ active: activeMenu === item.id }"
-            @click="handleNavClick(item)"
-            :title="item.label"
+            @click="handleMenuClick(item)"
           >
-            <el-icon class="nav-icon"><component :is="item.icon" /></el-icon>
-            <span class="nav-label">{{ item.label }}</span>
-            <span v-if="item.badge" class="nav-badge">{{ item.badge }}</span>
-          </div>
-          
-          <div v-if="filteredMenuItems.length === 0" class="no-results">
-            未找到结果
+            <el-icon class="menu-icon"><component :is="item.icon" /></el-icon>
+            <span class="menu-label">{{ item.label }}</span>
           </div>
         </nav>
         
         <div class="sidebar-footer">
-          <div class="user-info" @click="activeMenu = 'account'" :class="{ active: activeMenu === 'account' }">
-            <el-avatar :size="36" :src="currentUser.avatar" :alt="currentUser.nickname || currentUser.username" />
-            <div class="user-details">
-              <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
-            </div>
-          </div>
-          <div class="app-version" v-if="appVersion">
-            版本 {{ appVersion }}
+          <div class="user-info" @click="activeMenu = 'account'">
+            <el-avatar :size="28" :src="currentUser.avatar" />
+            <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
           </div>
         </div>
       </aside>
 
-      <!-- 设置详情区 - 采用标准 Native App 布局 -->
+      <!-- 内容区域 -->
       <section class="settings-content">
-        <!-- 关闭按钮 -->
-        <button class="settings-close-x" title="关闭" @click="visible = false">
-          <el-icon><Close /></el-icon>
-        </button>
-
-        <div class="content-scroll-area custom-scrollbar">
-          <!-- 页面头部 -->
-          <div class="page-header">
-            <div class="page-title-group">
-              <h2 class="page-title">{{ currentMenuLabel }}</h2>
-              <p class="page-desc">{{ currentMenuDescription }}</p>
-            </div>
-          </div>
-          
-          <!-- 动态组件内容 -->
-          <transition name="settings-fade" mode="out-in">
-            <component 
-              :is="currentComponent" 
-              v-bind="componentProps"
-              v-on="finalComponentEvents"
-              :key="'settings-' + activeMenu"
-              class="active-content"
-            />
-          </transition>
+        <div class="content-header">
+          <h2 class="content-title">{{ currentMenuLabel }}</h2>
+          <button class="close-btn" @click="visible = false">
+            <el-icon><Close /></el-icon>
+          </button>
+        </div>
+        
+        <div class="content-body">
+          <component 
+            :is="currentComponent" 
+            v-bind="componentProps"
+            v-on="componentEvents"
+            :key="activeMenu"
+          />
         </div>
       </section>
     </div>
 
-    <!-- 全局弹窗 -->
+    <!-- 弹窗 -->
     <ChangePasswordDialog v-model="showChangePassword" />
     <EditProfileDialog v-model="showEditProfile" @success="handleProfileUpdate" />
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch, reactive, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
-import { removeItem } from '@/utils/storage'
-
+import { ref, computed, watch, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   User,
   Bell,
@@ -115,11 +78,7 @@ import {
   QuestionFilled,
   InfoFilled,
   Close,
-  Brush,
-  Refresh,
-  Check,
-  Monitor,
-  Search
+  Monitor
 } from '@element-plus/icons-vue'
 
 // 动态导入子组件
@@ -145,58 +104,32 @@ const router = useRouter()
 
 const visible = ref(false)
 const activeMenu = ref('account')
-const searchQuery = ref('')
 const showChangePassword = ref(false)
 const showEditProfile = ref(false)
-const appVersion = ref('1.0.0')
-
-const dialogWidth = '900px'
-const sidebarWidth = '240px'
-
-// 移除响应式宽度逻辑
-const isFullscreen = computed(() => false) // 始终不全屏，保持 App 感
 
 // 菜单配置
 const menuItems = computed(() => {
-  const baseItems = [
-    { id: 'account', label: '账号与安全', icon: User, description: '管理个人信息和账号安全' },
-    { id: 'notification', label: '消息通知', icon: Bell, description: '设置消息通知偏好' },
-    { id: 'general', label: '通用设置', icon: Setting, description: '基本功能 and 行为设置' },
-    { id: 'storage', label: '存储管理', icon: Files, description: '管理本地存储和缓存' },
-    { id: 'help', label: '帮助反馈', icon: QuestionFilled, description: '获取帮助和提交反馈' },
-    { id: 'about', label: '关于', icon: InfoFilled, description: '了解应用信息和版本' }
+  const items = [
+    { id: 'account', label: '账号与安全', icon: User },
+    { id: 'notification', label: '消息通知', icon: Bell },
+    { id: 'general', label: '通用设置', icon: Setting },
+    { id: 'storage', label: '存储管理', icon: Files },
+    { id: 'help', label: '帮助反馈', icon: QuestionFilled },
+    { id: 'about', label: '关于', icon: InfoFilled }
   ]
-
-  // 如果是管理员，添加管理后台入口
-  const isAdmin = store.getters['user/isAdmin']
-  if (isAdmin) {
-    baseItems.splice(baseItems.length - 2, 0, {
-      id: 'admin',
-      label: '管理后台',
-      icon: Monitor,
-      description: '进入系统管理后台'
-    })
+  
+  if (store.getters['user/isAdmin']) {
+    items.splice(items.length - 2, 0, { id: 'admin', label: '管理后台', icon: Monitor })
   }
-
-  return baseItems
+  
+  return items
 })
 
-// 过滤后的菜单项
-const filteredMenuItems = computed(() => {
-  if (!searchQuery.value) return menuItems.value
-  const query = searchQuery.value.toLowerCase()
-  return menuItems.value.filter(item => 
-    item.label.toLowerCase().includes(query) || 
-    item.description.toLowerCase().includes(query)
-  )
-})
+const currentMenuLabel = computed(() => 
+  menuItems.value.find(i => i.id === activeMenu.value)?.label || '设置'
+)
 
-const currentMenuLabel = computed(() => menuItems.value.find(i => i.id === activeMenu.value)?.label || '系统设置')
-const currentMenuDescription = computed(() => menuItems.value.find(i => i.id === activeMenu.value)?.description || '')
-
-// 数据源
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
-const settings = computed(() => store.state.im.settings)
 
 // 组件映射
 const componentMap = {
@@ -208,650 +141,292 @@ const componentMap = {
   about: AboutSettings
 }
 
-const currentComponent = computed(() => componentMap[activeMenu.value])
+const currentComponent = computed(() => componentMap[activeMenu.value] || AccountSettings)
 
-// 组件 Props
-const componentProps = computed(() => {
-  switch (activeMenu.value) {
-    case 'account':
-      return { user: currentUser.value }
-    case 'notification':
-      return { modelValue: settings.value }
-    case 'general':
-      return { modelValue: settings.value }
-    case 'storage':
-      return { modelValue: settings.value, cacheSize: cacheSize.value }
-    default:
-      return {}
-  }
-})
+const componentProps = computed(() => ({
+  user: currentUser.value,
+  modelValue: store.state.im.settings
+}))
 
-// 组件事件
-const componentEvents = computed(() => {
-  const commonEvents = {
-    'update:modelValue': realHandleSettingsUpdate,
-    'change': saveSettings
-  }
-
-  switch (activeMenu.value) {
-    case 'account':
-      return {
-        'edit-profile': () => showEditProfile.value = true,
-        'change-password': () => showChangePassword.value = true
-      }
-    case 'storage':
-      return {
-        ...commonEvents,
-        'clear-cache': handleClearCache,
-        'export-chat': handleExportChat
-      }
-    default:
-      return commonEvents
-  }
-})
-
-// 缓存计算
-const cacheSize = ref('0 MB')
-const calculateCacheSize = () => {
-  let total = 0
-  try {
-    for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
-        try {
-          total += localStorage[key].length + key.length
-        } catch (e) {
-          // 忽略无法读取的项
-        }
-      }
-    }
-  } catch (e) {
-    console.warn('计算缓存大小失败:', e)
-  }
-  cacheSize.value = `${(total / 1024 / 1024).toFixed(2)} MB`
-}
-
-// 业务逻辑处理
-const handleProfileUpdate = () => store.dispatch('user/getInfo')
-
-const saveSettings = () => {
-  // 主动保存：把当前 store 的设置写入本地（Vuex 已经会写 localStorage），并提示
-  try {
-    store.commit('im/UPDATE_SETTINGS', store.state.im.settings)
-    ElMessage.success('设置已保存')
-  } catch (e) {
-    console.error('保存设置失败', e)
-    ElMessage.error('保存失败')
-  }
-}
-
-// 修正 settings 更新逻辑
-// 子组件 emit 'update:modelValue' 时触发
-const updateSettingsMap = {
-  notification: (val) => store.dispatch('im/updateNotificationSettings', val.notifications),
-  general: (val) => store.dispatch('im/updateGeneralSettings', val.general),
-  storage: (val) => store.dispatch('im/updateDataSettings', val.data),
-}
-
-// 覆盖上面的 handleSettingsUpdate
-const realHandleSettingsUpdate = (newSettings) => {
-  if (updateSettingsMap[activeMenu.value]) {
-    updateSettingsMap[activeMenu.value](newSettings)
-  } else {
-    // Fallback: update whole settings if needed, or specific sections
-    // 我们的子组件返回的是整个 settings 结构副本
-    store.commit('im/UPDATE_SETTINGS', newSettings)
-  }
-}
-
-// 重新绑定事件
-watch(activeMenu, () => {
-    // 切换菜单时重新计算 cache
-    if (activeMenu.value === 'storage') calculateCacheSize()
-})
-
-// 重写 computed events 以使用正确的 handler
-const finalComponentEvents = computed(() => {
-    const events = { ...componentEvents.value }
-    return events
-})
-
-// 头部操作：重置为默认、保存并关闭等
-const resetToDefault = () => {
-  ElMessageBox.confirm('恢复默认设置将移除本地自定义项，是否继续？', '恢复默认', {
-    confirmButtonText: '恢复',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    try {
-      removeItem('im-system-settings')
-      store.commit('im/LOAD_SETTINGS')
-      ElMessage.success('已恢复默认设置')
-    } catch (e) {
-      console.error(e)
-      ElMessage.error('恢复失败')
-    }
+const handleClearCache = () => {
+  store.dispatch('im/clearCache').then(() => {
+    ElMessage.success('缓存已清理')
+  }).catch(() => {
+    ElMessage.error('清理缓存失败')
   })
 }
 
-const onSave = () => {
-  saveSettings()
-  visible.value = false
+const handleExportChat = () => {
+  store.dispatch('im/exportChatHistory').then(() => {
+    ElMessage.success('聊天记录导出成功')
+  }).catch(() => {
+    ElMessage.error('导出失败')
+  })
 }
 
-// 处理导航点击
-const handleNavClick = (item) => {
-  // 如果是管理后台入口，跳转到管理后台
+const componentEvents = computed(() => ({
+  'edit-profile': () => { showEditProfile.value = true },
+  'change-password': () => { showChangePassword.value = true },
+  'update:modelValue': (val) => store.dispatch('im/updateSettings', val),
+  change: () => store.dispatch('im/saveSettings'),
+  'clear-cache': handleClearCache,
+  'export-chat': handleExportChat
+}))
+
+const handleMenuClick = (item) => {
   if (item.id === 'admin') {
     visible.value = false
-    router.push('/admin/dashboard')
+    router.push('/admin')
   } else {
     activeMenu.value = item.id
   }
 }
 
-// 缓存清理
-const handleClearCache = () => {
-  ElMessageBox.confirm('清理缓存将释放本地空间，但图片和文件需要重新下载。是否继续？', '清理缓存', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    const keep = ['im-system-settings', 'token', 'user-info']
-    Object.keys(localStorage).forEach(key => { if (!keep.includes(key)) localStorage.removeItem(key) })
-    calculateCacheSize()
-    ElMessage.success('缓存清理成功')
-  })
+const handleProfileUpdate = () => {
+  store.dispatch('user/getCurrentUser')
 }
-
-// 聊天导出
-const handleExportChat = () => {
-  const dataStr = JSON.stringify(store.state.im.message?.messages || [], null, 2)
-  const blob = new Blob([dataStr], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `im-backup-${new Date().getTime()}.json`
-  a.click()
-  ElMessage.success('备份已导出')
-}
-
-
 
 // 监听
 watch(() => props.modelValue, (val) => {
   visible.value = val
   if (val && props.defaultMenu) activeMenu.value = props.defaultMenu
-  if (val) calculateCacheSize()
 })
 watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
-
-
 </script>
 
 <style scoped lang="scss">
-// Dialog Styles Overlay
-:deep(.el-dialog) {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  margin-top: 4vh !important;
-  background: var(--dt-bg-body);
-  border: 1px solid var(--dt-border-light);
-}
-
-:deep(.el-dialog__header) {
-  display: none;
-}
-
+// 对话框样式
 :deep(.el-dialog__body) {
   padding: 0 !important;
   margin: 0 !important;
-  height: 640px; // 固定高度
-  background: var(--dt-bg-body);
-  border: none;
 }
 
-// 过渡动画
-.settings-fade-enter-active,
-.settings-fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.settings-fade-enter-from,
-.settings-fade-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.settings-layout {
+// 主容器 - 固定大小
+.settings-container {
   display: flex;
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  background: var(--dt-bg-body);
+  width: 900px;
+  height: 600px;
+  background: #fff;
 }
 
-// Sidebar - 优化后的侧边栏
+// 侧边栏 - 窄边设计
 .settings-sidebar {
-  width: v-bind(sidebarWidth);
-  background: var(--dt-bg-card);
-  border-right: 1px solid var(--dt-border-light);
+  width: 140px;
+  min-width: 140px;
+  background: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.02);
-  min-width: 64px;
 }
 
 .sidebar-header {
-  height: 64px;
+  height: 48px;
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--dt-border-light);
-  background: var(--dt-bg-card);
+  padding: 0 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f5f5f5;
+  
+  .header-icon {
+    font-size: 16px;
+    color: #666;
+    margin-right: 8px;
+  }
+  
+  .header-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
 }
 
-.app-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.brand-icon {
-  font-size: 20px;
-  color: var(--dt-brand-color);
-  font-weight: 600;
-}
-
-.brand-text {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  letter-spacing: 0.5px;
-}
-
-.sidebar-nav {
+.sidebar-menu {
   flex: 1;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  padding: 4px;
   overflow-y: auto;
-  
-  // 优化滚动条样式
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
-    
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.2);
-    }
-  }
 }
 
-.sidebar-search {
-  padding: 0 8px 12px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--dt-border-lighter);
-  
-  :deep(.el-input__wrapper) {
-    background-color: var(--dt-bg-body);
-    box-shadow: none;
-    border: 1px solid var(--dt-border-light);
-    border-radius: 6px;
-    padding-left: 8px;
-    
-    &.is-focus {
-      border-color: var(--dt-brand-color);
-      background-color: #fff;
-    }
-  }
-
-  .dark & {
-    border-bottom-color: var(--dt-border-dark);
-    :deep(.el-input__wrapper) {
-      background-color: var(--dt-bg-body-dark);
-      border-color: var(--dt-border-dark);
-      
-      &.is-focus {
-        background-color: rgba(0, 137, 255, 0.05);
-      }
-    }
-  }
-}
-
-.no-results {
-  padding: 20px;
-  text-align: center;
-  color: var(--dt-text-tertiary);
-  font-size: 13px;
-}
-
-.nav-item {
+.menu-item {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 8px;
+  height: 32px;
+  padding: 0 8px;
   cursor: pointer;
-  color: var(--dt-text-secondary);
-  transition: all 0.2s ease;
-  user-select: none;
-  font-size: 14px;
-  font-weight: 500;
-  position: relative;
-  overflow: hidden;
-  flex-direction: row;
-  
-  .nav-icon {
-    font-size: 18px;
-    margin-right: 12px;
-    width: 20px;
-    text-align: center;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-  }
-}
-
-.nav-item:hover {
-  background: var(--dt-bg-hover);
-  color: var(--dt-text-primary);
-  transform: translateX(2px);
-}
-
-.nav-item.active {
-  background: var(--dt-bg-hover);
-  color: var(--dt-brand-color);
-  font-weight: 600;
-  
-  .nav-icon {
-    color: var(--dt-brand-color);
-    transform: scale(1.1);
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 12px;
-    bottom: 12px;
-    width: 3px;
-    background: var(--dt-brand-color);
-    border-radius: 0 3px 3px 0;
-  }
-}
-
-.nav-icon {
-  font-size: 18px;
-  margin-right: 12px;
-  width: 20px;
-  text-align: center;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-label {
-  flex: 1;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: 8px;
-  display: flex;
-  align-items: center;
-}
-
-.nav-badge {
-  background: var(--dt-brand-color);
-  color: white;
+  color: #666;
   font-size: 12px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  min-width: 20px;
-  text-align: center;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: all 0.15s;
+  margin-bottom: 1px;
+  
+  &:hover {
+    background: #e8e8e8;
+    color: #333;
+  }
+  
+  &.active {
+    background: #fff;
+    color: #1890ff;
+    font-weight: 500;
+  }
+  
+  .menu-icon {
+    font-size: 14px;
+    margin-right: 8px;
+  }
+  
+  .menu-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid var(--dt-border-light);
-  background: var(--dt-bg-card);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  padding: 8px;
+  border-top: 1px solid #e0e0e0;
+  background: #f5f5f5;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-radius: 8px;
+  gap: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
+  padding: 4px;
+  border-radius: 4px;
+  
+  &:hover {
+    background: #e8e8e8;
+  }
+  
+  .user-name {
+    font-size: 12px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
-.user-info:hover {
-  background: var(--dt-bg-hover);
-}
-
-.user-info.active {
-  background: var(--dt-bg-hover);
-}
-
-.user-details {
-  flex: 1;
-  min-width: 0;
-}
-
-.user-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--dt-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-bottom: 2px;
-}
-
-
-
-.app-version {
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
-  text-align: center;
-  padding-top: 8px;
-  border-top: 1px solid var(--dt-border-light);
-}
-
-// Main Content - 优化后的内容区
+// 内容区域
 .settings-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #ffffff; // 纯白内容区，对比侧边栏
-  position: relative;
-
-  .dark & {
-    background: #1d1d1f; // 深色模式专用背景
-  }
+  background: #fff;
 }
 
-.settings-close-x {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+.content-header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fff;
+}
+
+.content-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.close-btn {
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--dt-text-tertiary);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100;
+  color: #999;
+  border-radius: 4px;
   
   &:hover {
-    background: var(--dt-bg-hover);
-    color: var(--dt-text-primary);
-    transform: rotate(90deg);
+    background: #f5f5f5;
+    color: #666;
   }
 }
 
-.content-scroll-area {
+.content-body {
   flex: 1;
   overflow-y: auto;
-  padding: 40px 60px; // 增加留白，显得更高端
-  scroll-behavior: smooth;
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
+  padding: 12px 16px;
 }
 
-.page-header {
-  margin-bottom: 40px;
-  
-  .page-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--dt-text-primary);
-    margin: 0 0 8px 0;
-    letter-spacing: -0.5px;
-  }
-  
-  .page-desc {
-    font-size: 14px;
-    color: var(--dt-text-tertiary);
-    margin: 0;
-    line-height: 1.5;
-  }
-}
-
-.active-content {
-  animation: contentSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes contentSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-// 移除多余的 main-content 避免混淆
-// .main-content 已重命名为 .main-body 在模版中
-
-// 移动端适配
-
-
-// 暗黑模式适配
+// 深色模式
 .dark {
-  :deep(.el-dialog) {
-    border-color: var(--dt-border-dark);
+  .settings-container {
+    background: #1a1a1a;
   }
   
   .settings-sidebar {
-    background: var(--dt-bg-card-dark);
-    border-right-color: var(--dt-border-dark);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background: #252525;
+    border-color: #333;
   }
   
-  .sidebar-header,
-  .sidebar-footer {
-    border-color: var(--dt-border-dark);
-    background: var(--dt-bg-card-dark);
-  }
-  
-  .nav-item {
-    color: var(--dt-text-secondary-dark);
+  .sidebar-header {
+    background: #252525;
+    border-color: #333;
     
-    &:hover {
-      color: var(--dt-text-primary-dark);
-      background: var(--dt-bg-hover-dark);
+    .header-icon,
+    .header-title {
+      color: #ccc;
     }
   }
   
-  .nav-item.active {
-    background: rgba(0, 137, 255, 0.2);
-    color: var(--dt-brand-color);
+  .menu-item {
+    color: #999;
+    
+    &:hover {
+      background: #333;
+      color: #ccc;
+    }
+    
+    &.active {
+      background: #1a1a1a;
+      color: #1890ff;
+    }
+  }
+  
+  .sidebar-footer {
+    background: #252525;
+    border-color: #333;
   }
   
   .user-info {
+    .user-name {
+      color: #ccc;
+    }
+    
     &:hover {
-      background: var(--dt-bg-hover-dark);
+      background: #333;
     }
   }
   
-  .user-info.active {
-    background: rgba(0, 137, 255, 0.2);
+  .settings-content {
+    background: #1a1a1a;
   }
   
-  .user-name {
-    color: var(--dt-text-primary-dark);
+  .content-header {
+    background: #1a1a1a;
+    border-color: #333;
   }
   
-  .user-name {
-    color: var(--dt-text-primary-dark);
-  }
-}
-
-// 高对比度模式
-@media (prefers-contrast: high) {
-  .settings-sidebar {
-    border-right-width: 2px;
+  .content-title {
+    color: #ccc;
   }
   
-  .nav-item.active {
-    border-left: 3px solid var(--dt-brand-color);
-  }
-}
-
-// 减少动画偏好
-@media (prefers-reduced-motion: reduce) {
-  .settings-sidebar,
-  .nav-item,
-  .user-info,
-  .action-btn {
-    transition: none;
-  }
-  
-  .settings-fade-enter-active,
-  .settings-fade-leave-active {
-    transition: none;
+  .close-btn {
+    color: #666;
+    
+    &:hover {
+      background: #333;
+      color: #999;
+    }
   }
 }
 </style>

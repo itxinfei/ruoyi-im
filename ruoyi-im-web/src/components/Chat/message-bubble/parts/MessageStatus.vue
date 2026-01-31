@@ -1,19 +1,15 @@
 <template>
-  <div v-if="message.isOwn" class="message-status" :class="`status-${status}`">
-    <!-- 发送中 -->
+  <div v-if="message.isOwn" class="message-status" :class="`status-${uiStatus}`">
+    <!-- 发送中：转圈动画 + 消息半透明 -->
     <transition name="status-fade">
-      <div v-if="status === 'sending'" class="status-indicator status-sending" title="发送中">
-        <span class="sending-dots">
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </span>
+      <div v-if="uiStatus === 'sending'" class="status-indicator status-sending" title="发送中">
+        <span class="material-icons-outlined rotating">sync</span>
       </div>
     </transition>
 
-    <!-- 发送成功（未读） -->
+    <!-- 发送成功/已送达：灰色对勾 -->
     <transition name="status-scale">
-      <div v-if="status === 'sent'" class="status-indicator status-sent" title="已发送">
+      <div v-if="uiStatus === 'delivered'" class="status-indicator status-delivered" title="已送达">
         <span class="material-icons-outlined">done</span>
       </div>
     </transition>
@@ -21,7 +17,7 @@
     <!-- 已读 -->
     <transition name="status-scale">
       <div
-        v-if="status === 'read'"
+        v-if="uiStatus === 'read'"
         class="status-indicator status-read"
         :class="{ 'is-clickable': showReadInfo }"
         :title="readTooltip"
@@ -32,19 +28,30 @@
     </transition>
 
     <!-- 已读信息（群聊显示人数） -->
-    <div v-if="status === 'read' && isGroupChat && readCount > 0" class="read-count">
+    <div v-if="uiStatus === 'read' && isGroupChat && readCount > 0" class="read-count">
       {{ readCountText }}
     </div>
 
-    <!-- 发送失败 -->
+    <!-- 发送失败：红色感叹号 + 红色背景 + 点击重发按钮 -->
     <transition name="status-shake">
       <div
-        v-if="status === 'failed'"
-        class="status-indicator status-failed"
-        @click="$emit('retry')"
-        title="点击重试"
+        v-if="uiStatus === 'failed'"
+        class="status-indicator status-failed-wrapper"
+        @click="handleRetry"
       >
-        <span class="material-icons-outlined">error_outline</span>
+        <!-- 红色背景 -->
+        <div class="failed-background"></div>
+        <!-- 红色感叹号 -->
+        <span class="material-icons-outlined failed-icon">error_outline</span>
+        <!-- 重发按钮（悬停显示） -->
+        <div class="retry-button">
+          <span class="material-icons-outlined">refresh</span>
+          <span class="retry-text">点击重发</span>
+        </div>
+        <!-- 失败原因提示 -->
+        <div class="error-tooltip">
+          {{ errorText }}
+        </div>
       </div>
     </transition>
   </div>
@@ -53,6 +60,7 @@
 <script setup>
 import { computed } from 'vue'
 import { formatRelativeTime } from '@/utils/message'
+import { MessageStatus } from '@/utils/message'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -61,8 +69,28 @@ const props = defineProps({
 
 const emit = defineEmits(['retry', 'show-read-info'])
 
-const status = computed(() => {
-  return props.message.status || 'sent'
+// 映射后端 sendStatus 到前端 UI 状态
+const uiStatus = computed(() => {
+  const sendStatus = props.message.sendStatus || props.message.status
+
+  // 如果是字符串，直接使用
+  if (typeof sendStatus === 'string') {
+    if (sendStatus === 'PENDING' || sendStatus === 'SENDING') return 'sending'
+    if (sendStatus === 'DELIVERED') return 'delivered'
+    if (sendStatus === 'READ') return 'read'
+    if (sendStatus === 'FAILED') return 'failed'
+  }
+
+  // 如果是数字，映射到对应状态
+  const statusMap = {
+    0: 'sending',  // PENDING
+    1: 'sending',  // SENDING
+    2: 'delivered', // DELIVERED
+    3: 'read',     // READ
+    4: 'failed'    // FAILED
+  }
+
+  return statusMap[sendStatus] || 'delivered'
 })
 
 // 是否是群聊
@@ -85,7 +113,7 @@ const readCountText = computed(() => {
 
 // 是否显示已读信息
 const showReadInfo = computed(() => {
-  return status.value === 'read' && (isGroupChat.value || props.message.readTime)
+  return uiStatus.value === 'read' && (isGroupChat.value || props.message.readTime)
 })
 
 // 已读提示文本
@@ -106,6 +134,21 @@ const readTooltip = computed(() => {
   return '已读'
 })
 
+// 失败原因文本
+const errorText = computed(() => {
+  const errorCode = props.message.sendErrorCode || props.message.errorCode
+
+  const errorMessages = {
+    'NETWORK_ERROR': '网络错误，请检查网络连接',
+    'TIMEOUT': '请求超时，请稍后重试',
+    'SERVER_ERROR': '服务器错误，请稍后重试',
+    'RATE_LIMIT': '发送过于频繁，请稍后再试',
+    'FORBIDDEN': '无权限发送此消息'
+  }
+
+  return errorMessages[errorCode] || '发送失败，点击重发'
+})
+
 /**
  * 显示已读信息
  */
@@ -119,6 +162,13 @@ function handleShowReadInfo() {
     readTime: props.message.readTime,
     isGroupChat: isGroupChat.value
   })
+}
+
+/**
+ * 点击重发
+ */
+function handleRetry() {
+  emit('retry', props.message)
 }
 </script>
 
@@ -149,50 +199,30 @@ function handleShowReadInfo() {
   }
 }
 
-// 发送中状态
+// ========== 发送中状态：转圈动画 ==========
 .status-sending {
   color: var(--dt-text-tertiary);
 
-  .sending-dots {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-
-    .dot {
-      width: 4px;
-      height: 4px;
-      background: currentColor;
-      border-radius: 50%;
-      animation: sendingBounce 1.4s ease-in-out infinite;
-
-      &:nth-child(1) { animation-delay: 0s; }
-      &:nth-child(2) { animation-delay: 0.16s; }
-      &:nth-child(3) { animation-delay: 0.32s; }
-    }
+  .rotating {
+    animation: rotate 1s linear infinite;
   }
 }
 
-@keyframes sendingBounce {
-  0%, 80%, 100% {
-    transform: scale(0.6);
-    opacity: 0.5;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-// 发送成功状态（绿色对勾）
-.status-sent {
-  color: var(--dt-color-success);
+// ========== 已送达状态：灰色对勾（钉钉标准）==========
+.status-delivered {
+  color: #999999; // 钉钉标准：灰色对勾
 
   &:hover {
     transform: scale(1.1);
   }
 }
 
-// 已读状态
+// ========== 已读状态：蓝色双对勾 ==========
 .status-read {
   color: var(--dt-brand-color);
 
@@ -205,7 +235,101 @@ function handleShowReadInfo() {
   }
 }
 
-// 已读人数显示（群聊）
+// ========== 发送失败状态：红色感叹号 + 红色背景 + 重发按钮 ==========
+.status-failed-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px;
+
+  // 红色背景（钉钉标准：略带红色背景）
+  .failed-background {
+    position: absolute;
+    inset: 0;
+    background: rgba(244, 67, 54, 0.1); // rgba(244, 67, 54, 0.1)
+    border-radius: 50%;
+    opacity: 1;
+    transition: opacity var(--dt-transition-base);
+  }
+
+  // 红色感叹号
+  .failed-icon {
+    position: relative;
+    z-index: 1;
+    color: #F44336; // 钉钉标准：红色
+    font-size: 18px;
+  }
+
+  // 重发按钮（默认隐藏）
+  .retry-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--dt-transition-base);
+    white-space: nowrap;
+
+    .material-icons-outlined {
+      font-size: 14px;
+      color: #F44336;
+    }
+
+    .retry-text {
+      font-size: 12px;
+      color: #333;
+      font-weight: 500;
+    }
+  }
+
+  // 失败原因提示（悬停显示）
+  .error-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dt-transition-base);
+    z-index: 100;
+  }
+
+  // 悬停时显示重发按钮和错误提示
+  &:hover {
+    transform: scale(1.15);
+
+    .failed-background {
+      opacity: 1;
+    }
+
+    .retry-button {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .error-tooltip {
+      opacity: 1;
+    }
+  }
+}
+
+// ========== 已读人数显示（群聊）==========
 .read-count {
   font-size: 11px;
   color: var(--dt-brand-color);
@@ -214,33 +338,7 @@ function handleShowReadInfo() {
   user-select: none;
 }
 
-// 失败状态
-.status-failed {
-  color: var(--dt-error-color);
-  cursor: pointer;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    background: rgba(239, 68, 68, 0.1);
-    opacity: 0;
-    transition: opacity var(--dt-transition-base);
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  &:hover {
-    transform: scale(1.15);
-
-    &::after {
-      opacity: 1;
-    }
-  }
-}
-
-// 状态过渡动画
+// ========== 状态过渡动画 ==========
 .status-fade-enter-active,
 .status-fade-leave-active {
   transition: all 0.2s var(--dt-ease-out);

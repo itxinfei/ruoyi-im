@@ -1,11 +1,12 @@
 <template>
   <el-dialog
     v-model="visible"
-    :title="messages.length > 1 ? `转发 ${messages.length} 条消息` : '转发消息'"
+    :title="getMessageTitle()"
     width="600px"
     @close="handleClose"
   >
     <div class="forward-dialog">
+      <!-- 消息预览 -->
       <div class="forward-message" v-if="messages.length === 1">
         <div class="forward-message-label">转发消息：</div>
         <div class="forward-message-content">
@@ -42,6 +43,28 @@
 
       <el-divider />
 
+      <!-- 转发方式选择（仅多条消息时显示） -->
+      <div v-if="messages.length > 1" class="forward-type-selector">
+        <div class="type-label">转发方式：</div>
+        <el-radio-group v-model="forwardType">
+          <el-radio value="batch">
+            <div class="radio-content">
+              <div class="radio-title">逐条转发</div>
+              <div class="radio-desc">将每条消息单独发送</div>
+            </div>
+          </el-radio>
+          <el-radio value="combine">
+            <div class="radio-content">
+              <div class="radio-title">合并为聊天记录</div>
+              <div class="radio-desc">合并成一个聊天记录卡片</div>
+            </div>
+          </el-radio>
+        </el-radio-group>
+      </div>
+
+      <el-divider />
+
+      <!-- 会话选择 -->
       <div class="forward-sessions">
         <div class="search-box">
           <el-input
@@ -79,7 +102,7 @@
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
       <el-button type="primary" :disabled="!selectedSessionId" @click="handleForward">
-        转发
+        {{ forwardType === 'combine' ? '合并转发' : '转发' }}
       </el-button>
     </template>
   </el-dialog>
@@ -201,7 +224,14 @@ const handleClose = () => {
   searchKeyword.value = ''
 }
 
-const emit = defineEmits(['forward', 'batch-forward'])
+// 获取对话框标题
+const getMessageTitle = () => {
+  if (messages.value.length === 1) {
+    return '转发消息'
+  }
+  const typeText = forwardType.value === 'combine' ? '合并转发' : '逐条转发'
+  return `${typeText} ${messages.value.length} 条消息`
+}
 
 defineExpose({
   open,
@@ -267,6 +297,67 @@ defineExpose({
           color: #8c8c8c;
           font-style: italic;
           text-align: center;
+        }
+      }
+    }
+  }
+
+  // 转发方式选择器
+  .forward-type-selector {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #fafafa;
+    border-radius: 8px;
+
+    .type-label {
+      font-size: 14px;
+      color: #595959;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .el-radio-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .el-radio {
+      flex: 1;
+      margin: 0;
+      border: 1px solid #e8e8e8 !important;
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      transition: all 0.2s;
+
+      &:hover {
+        border-color: var(--el-color-primary) !important;
+      }
+
+      &.is-checked {
+        border-color: var(--el-color-primary) !important;
+        background: #ecf5ff;
+      }
+
+      .el-radio__label {
+        width: 100%;
+        padding: 0;
+      }
+
+      .radio-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .radio-title {
+          font-size: 14px;
+          font-weight: 500;
+          color: #262626;
+        }
+
+        .radio-desc {
+          font-size: 12px;
+          color: #8c8c8c;
         }
       }
     }

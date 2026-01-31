@@ -70,4 +70,13 @@ public interface ImWebSocketBroadcastService {
      */
     void broadcastMeetingRoomBooking(Long bookingId, String roomName, String startTime, String endTime,
                                       Set<Long> targetUserIds, Long bookerId);
+
+    /**
+     * 广播拍一拍消息给会话成员
+     *
+     * @param conversationId 会话ID
+     * @param nudgerId       拍人者ID
+     * @param nudgedUserId   被拍者ID
+     */
+    void broadcastNudgeMessage(Long conversationId, Long nudgerId, Long nudgedUserId);
 }

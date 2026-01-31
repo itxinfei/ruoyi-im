@@ -304,7 +304,9 @@ import {
   updateDepartment,
   deleteDepartment,
   setDepartmentLeader,
-  moveDepartment
+  moveDepartment,
+  addDepartmentMembers,
+  removeDepartmentMember
 } from '@/api/admin'
 import { searchUsersApi } from '@/api/im/user'
 
@@ -577,11 +579,18 @@ const searchUsersForAdd = async (query) => {
 
 // 添加成员
 const handleAddMembers = async () => {
-  // TODO: 调用添加成员到部门的 API
-  ElMessage.success(`已添加 ${selectedMembersToAdd.value.length} 名成员`)
-  memberDialogVisible.value = false
-  selectedMembersToAdd.value = []
-  loadDepartmentMembers(currentDepartment.value.id)
+  try {
+    const userIds = selectedMembersToAdd.value.map(m => m.id)
+    const res = await addDepartmentMembers(currentDepartment.value.id, userIds)
+    if (res.code === 200) {
+      ElMessage.success(`已添加 ${userIds.length} 名成员`)
+      memberDialogVisible.value = false
+      selectedMembersToAdd.value = []
+      loadDepartmentMembers(currentDepartment.value.id)
+    }
+  } catch (error) {
+    ElMessage.error('添加成员失败')
+  }
 }
 
 // 成员操作
@@ -597,11 +606,15 @@ const handleMemberAction = async (command, member) => {
         await ElMessageBox.confirm(`确定将 ${member.nickName} 移出该部门吗？`, '确认', {
           type: 'warning'
         })
-        // TODO: 调用移除成员 API
-        ElMessage.success('已移除')
-        loadDepartmentMembers(currentDepartment.value.id)
+        const res = await removeDepartmentMember(currentDepartment.value.id, member.id)
+        if (res.code === 200) {
+          ElMessage.success('已移除')
+          loadDepartmentMembers(currentDepartment.value.id)
+        }
       } catch (error) {
-        // 取消
+        if (error !== 'cancel') {
+          ElMessage.error('移除失败')
+        }
       }
       break
   }

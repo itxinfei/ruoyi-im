@@ -304,7 +304,10 @@ public class ImMessageServiceImpl implements ImMessageService {
         vo.setSenderName(sender.getNickname());
         vo.setSenderAvatar(sender.getAvatar());
         vo.setSendTime(message.getCreateTime());
-        vo.setStatus(1);
+        // 使用 Entity 中的 sendStatus，不要硬编码
+        if (vo.getSendStatus() == null) {
+            vo.setSendStatus(message.getSendStatus() != null ? message.getSendStatus() : "SENDING");
+        }
         return vo;
     }
 

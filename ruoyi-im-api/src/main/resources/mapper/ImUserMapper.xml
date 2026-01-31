@@ -113,9 +113,9 @@
     </delete>
     
     <select id="selectImUserByUsername" parameterType="String" resultMap="ImUserResult">
-        select id, username, password, nickname, email, 
+        select id, username, password, nickname, email,
                mobile, avatar, status, gender, signature,
-               department, position,
+               department, position, role,
                last_online_time,
                create_time, update_time
         from im_user
@@ -125,7 +125,7 @@
     <select id="selectImUserByEmail" parameterType="String" resultMap="ImUserResult">
         select id, username, password, nickname, email,
                mobile, avatar, status, gender, signature,
-               department, position,
+               department, position, role,
                last_online_time,
                create_time, update_time
         from im_user

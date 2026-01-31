@@ -167,9 +167,10 @@
       </div>
     </div>
 
-    <!-- 创建会议对话框 -->
+    <!-- 创建/编辑会议对话框 -->
     <CreateMeetingDialog
       v-model="showCreateDialog"
+      :meeting-id="editingMeetingId"
       @success="handleCreateSuccess"
     />
 
@@ -213,6 +214,7 @@ const meetings = ref([])
 const showCreateDialog = ref(false)
 const showDetailDialog = ref(false)
 const selectedMeeting = ref(null)
+const editingMeetingId = ref(null)
 
 // 计算属性
 const filteredMeetings = computed(() => {
@@ -262,13 +264,17 @@ const loadMeetings = async () => {
 
 // 处理创建会议
 const handleCreateMeeting = () => {
+  editingMeetingId.value = null
   showCreateDialog.value = true
 }
 
-// 处理创建成功
+// 处理创建/编辑成功
 const handleCreateSuccess = (meeting) => {
+  editingMeetingId.value = null
   loadMeetings()
-  emit('start-meeting', meeting)
+  if (meeting && meeting.status === 'IN_PROGRESS') {
+    emit('start-meeting', meeting)
+  }
 }
 
 // 处理开始会议
@@ -325,8 +331,8 @@ const handleCommand = async (command, meeting) => {
       handleViewDetail(meeting)
       break
     case 'edit':
-      // TODO: 打开编辑对话框
-      ElMessage.info('编辑功能开发中')
+      editingMeetingId.value = meeting.id
+      showCreateDialog.value = true
       break
     case 'cancel':
       await handleCancelMeeting(meeting)

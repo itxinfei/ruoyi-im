@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="发起视频会议"
+    :title="isEditMode ? '编辑会议' : '发起视频会议'"
     width="500px"
     :close-on-click-modal="false"
     @close="handleClose"
@@ -112,11 +112,15 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { createMeeting } from '@/api/im/meeting'
+import { createMeeting, updateMeeting, getMeetingDetail } from '@/api/im/meeting'
 import { getContacts } from '@/api/im/contact'
 
 const props = defineProps({
-  modelValue: Boolean
+  modelValue: Boolean,
+  meetingId: {
+    type: Number,
+    default: null
+  }
 })
 
 const emit = defineEmits(['update:modelValue', 'success'])
@@ -125,6 +129,8 @@ const visible = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 })
+
+const isEditMode = computed(() => !!props.meetingId)
 
 const formRef = ref(null)
 const submitting = ref(false)
@@ -184,6 +190,28 @@ const loadUsers = async () => {
   }
 }
 
+// 加载会议数据（编辑模式）
+const loadMeetingData = async () => {
+  try {
+    const res = await getMeetingDetail(props.meetingId)
+    if (res.code === 200 && res.data) {
+      form.value = {
+        title: res.data.title || '',
+        description: res.data.description || '',
+        meetingType: res.data.meetingType || 'SCHEDULED',
+        scheduledStartTime: res.data.scheduledStartTime || null,
+        participantIds: res.data.participantIds || [],
+        requirePassword: !!res.data.password,
+        password: res.data.password || '',
+        videoEnabled: res.data.videoEnabled || false,
+        audioEnabled: res.data.audioEnabled || false
+      }
+    }
+  } catch (error) {
+    ElMessage.error('加载会议信息失败')
+  }
+}
+
 // 监听会议类型变化
 watch(() => form.value.meetingType, (newType) => {
   if (newType === 'INSTANT') {
@@ -195,7 +223,11 @@ watch(() => form.value.meetingType, (newType) => {
 watch(() => props.modelValue, (isOpen) => {
   if (isOpen) {
     loadUsers()
-    resetForm()
+    if (props.meetingId) {
+      loadMeetingData()
+    } else {
+      resetForm()
+    }
   }
 })
 
@@ -229,16 +261,30 @@ const handleSubmit = async () => {
       requirePassword: form.value.requirePassword ? 1 : 0
     }
 
-    const res = await createMeeting(data)
-    if (res.code === 200) {
-      ElMessage.success('会议创建成功')
-      emit('success', res.data)
-      visible.value = false
+    let res
+    if (isEditMode.value) {
+      // 编辑模式
+      res = await updateMeeting(props.meetingId, data)
+      if (res.code === 200) {
+        ElMessage.success('会议更新成功')
+        emit('success', { ...res.data, id: props.meetingId })
+        visible.value = false
+      } else {
+        ElMessage.error(res.msg || '更新失败')
+      }
     } else {
-      ElMessage.error(res.msg || '创建失败')
+      // 创建模式
+      res = await createMeeting(data)
+      if (res.code === 200) {
+        ElMessage.success('会议创建成功')
+        emit('success', res.data)
+        visible.value = false
+      } else {
+        ElMessage.error(res.msg || '创建失败')
+      }
     }
   } catch (error) {
-    ElMessage.error('创建失败：' + (error.message || '未知错误'))
+    ElMessage.error(isEditMode.value ? '更新失败：' + (error.message || '未知错误') : '创建失败：' + (error.message || '未知错误'))
   } finally {
     submitting.value = false
   }

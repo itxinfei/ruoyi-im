@@ -46,6 +46,7 @@ public class ImMessageController {
     private final ImWebSocketBroadcastService broadcastService;
     private final ImMessageReadService messageReadService;
     private final ImConversationService conversationService;
+    private final ImMessageRetryService retryService;
 
     public ImMessageController(
             ImMessageService imMessageService,
@@ -53,13 +54,15 @@ public class ImMessageController {
             ImMessageMentionService mentionService,
             ImWebSocketBroadcastService broadcastService,
             ImMessageReadService messageReadService,
-            ImConversationService conversationService) {
+            ImConversationService conversationService,
+            ImMessageRetryService retryService) {
         this.imMessageService = imMessageService;
         this.reactionService = reactionService;
         this.mentionService = mentionService;
         this.broadcastService = broadcastService;
         this.messageReadService = messageReadService;
         this.conversationService = conversationService;
+        this.retryService = retryService;
     }
 
     @PostMapping("/send")
@@ -67,6 +70,33 @@ public class ImMessageController {
         Long userId = SecurityUtils.getLoginUserId();
         ImMessageVO messageVO = imMessageService.sendMessage(request, userId);
         return Result.success(messageVO);
+    }
+
+    /**
+     * 重试发送失败的消息
+     * 支持自动重试（最多3次，采用指数退避策略：1s, 2s, 4s）
+     *
+     * @param clientMsgId 客户端消息ID
+     * @return 重试结果
+     */
+    @PostMapping("/retry/{clientMsgId}")
+    @Operation(summary = "重试发送消息", description = "重试发送失败的消息，最多重试3次，采用指数退避策略（1s, 2s, 4s）")
+    public Result<ImMessageVO> retryMessage(@PathVariable String clientMsgId) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        // 检查是否可以重试
+        if (!retryService.canRetry(clientMsgId)) {
+            int retryCount = retryService.getRetryCount(clientMsgId);
+            return Result.error(400, String.format("重试次数已达上限（%d次）", retryCount));
+        }
+
+        // 异步重试发送（带延迟）
+        retryService.retrySendWithDelay(clientMsgId);
+
+        log.info("消息重试任务已提交: clientMsgId={}, userId={}", clientMsgId, userId);
+
+        // 返回提示信息（实际发送结果是异步的）
+        return Result.success("正在重试发送...");
     }
 
     @GetMapping("/list/{conversationId}")

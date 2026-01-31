@@ -2,6 +2,19 @@
  * 消息格式化工具函数
  */
 
+// 从 format.js 重新导出 formatFileSize，避免重复定义
+export { formatFileSize } from './format.js'
+
+/**
+ * 消息状态枚举
+ */
+export const MessageStatus = {
+  PENDING: 'PENDING',       // 发送中
+  SENDING: 'SENDING',       // 发送中（带进度）
+  DELIVERED: 'DELIVERED',   // 已送达
+  FAILED: 'FAILED'          // 发送失败
+}
+
 /**
  * 根据消息类型格式化消息预览文本
  * @param {String} type - 消息类型 (TEXT/IMAGE/FILE/VIDEO/VOICE/RECALLED等)
@@ -193,19 +206,6 @@ export function formatMessagePreviewFromObject(message) {
                 default: return type || '[暂无消息]'
             }
     }
-}
-
-/**
- * 格式化文件大小
- * @param {Number} bytes - 字节数
- * @returns {String} 格式化后的大小字符串
- */
-export function formatFileSize(bytes) {
-    if (!bytes || bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 /**

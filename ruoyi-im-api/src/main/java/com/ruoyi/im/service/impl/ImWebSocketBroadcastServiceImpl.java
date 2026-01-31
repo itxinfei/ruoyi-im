@@ -496,4 +496,58 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             log.error("广播会议室预订通知失败: bookingId={}", bookingId, e);
         }
     }
+
+    @Override
+    public void broadcastNudgeMessage(Long conversationId, Long nudgerId, Long nudgedUserId) {
+        try {
+            // 获取用户信息
+            com.ruoyi.im.domain.ImUser nudger = imUserMapper.selectImUserById(nudgerId);
+            com.ruoyi.im.domain.ImUser nudgedUser = imUserMapper.selectImUserById(nudgedUserId);
+
+            // 构建拍一拍消息
+            Map<String, Object> nudgeNotification = new HashMap<>();
+            nudgeNotification.put("type", "nudge");
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("conversationId", conversationId);
+            data.put("nudgerId", nudgerId);
+            data.put("nudgedUserId", nudgedUserId);
+            if (nudger != null) {
+                data.put("nudgerName", nudger.getNickname() != null ? nudger.getNickname() : nudger.getUsername());
+            }
+            if (nudgedUser != null) {
+                data.put("nudgedUserName", nudgedUser.getNickname() != null ? nudgedUser.getNickname() : nudgedUser.getUsername());
+            }
+            data.put("timestamp", System.currentTimeMillis());
+            nudgeNotification.put("data", data);
+
+            String messageJson = objectMapper.writeValueAsString(nudgeNotification);
+
+            // 获取会话成员
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) {
+                return;
+            }
+
+            // 广播给会话所有成员（不排除拍人者）
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            int sentCount = 0;
+            for (ImConversationMember member : members) {
+                Long targetUserId = member.getUserId();
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                        sentCount++;
+                    } catch (Exception e) {
+                        log.error("发送拍一拍消息给用户失败: userId={}", targetUserId, e);
+                    }
+                }
+            }
+            log.info("拍一拍消息已推送: conversationId={}, nudgerId={}, nudgedUserId={}, sentCount={}",
+                    conversationId, nudgerId, nudgedUserId, sentCount);
+        } catch (Exception e) {
+            log.error("广播拍一拍消息失败: conversationId={}", conversationId, e);
+        }
+    }
 }

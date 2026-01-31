@@ -167,7 +167,7 @@ const handleCreate = async () => {
   }
 
   try {
-    // TODO: 调用新建分组API
+    await createGroup({ groupName })
     ElMessage.success('分组创建成功')
     showCreateDialog.value = false
     createForm.value.groupName = ''

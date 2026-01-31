@@ -1,5 +1,6 @@
 // Global Base Styles (必须在 @tailwind 之前)
 @use './design-tokens.scss' as *;
+@use './menu-standards.scss' as *;
 @use './tailwind-overrides.scss' as *;
 @use './icons.scss';
 @use './animations.scss' as *;
@@ -538,29 +539,57 @@ textarea {
 
 
 // ============================================================================
-// Dropdown 样式覆盖
+// Dropdown 样式覆盖 - 钉钉风格
 // ============================================================================
 
 .el-dropdown-menu {
   background-color: var(--dt-bg-dropdown);
   border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-md);
-  box-shadow: var(--dt-shadow-float);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
   padding: 4px 0;
+  min-width: 140px;
 }
 
 .el-dropdown-menu__item {
   color: var(--dt-text-primary);
-  padding: 8px 16px;
-  font-size: var(--dt-font-size-base);
+  padding: 7px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  border-radius: 0;
+  transition: background-color 0.15s ease;
 
   &:hover {
-    background-color: var(--dt-bg-card-hover);
-    color: #0089FF;
+    background-color: var(--dt-bg-session-hover);
+    color: var(--dt-text-primary);
   }
 
   &.is-disabled {
     color: var(--dt-text-disabled);
+  }
+
+  .material-icons-outlined,
+  .el-icon {
+    font-size: 16px;
+    margin-right: 8px;
+    color: var(--dt-text-tertiary);
+  }
+}
+
+// 消息右键菜单特殊样式
+.message-context-menu {
+  &.el-dropdown-menu {
+    padding: 4px 0;
+  }
+
+  .el-dropdown-menu__item {
+    padding: 7px 12px;
+    font-size: 13px;
+
+    &:hover {
+      background-color: var(--dt-bg-session-hover);
+      color: var(--dt-text-primary);
+    }
   }
 }
 

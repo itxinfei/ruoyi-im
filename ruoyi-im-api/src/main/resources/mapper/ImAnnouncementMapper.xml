@@ -37,10 +37,10 @@
         SELECT a.*,
                u.nickname as publisher_name,
                u.avatar as publisher_avatar,
-               d.dept_name as department_name
+               d.name as department_name
         FROM im_announcement a
         LEFT JOIN im_user u ON a.publisher_id = u.id
-        LEFT JOIN sys_dept d ON a.department_id = d.dept_id
+        LEFT JOIN im_department d ON a.department_id = d.id
         <where>
             <if test="req.keyword != null and req.keyword != ''">
                 AND a.title LIKE CONCAT('%', #{req.keyword}, '%')

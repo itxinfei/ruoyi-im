@@ -8,7 +8,7 @@
 
     <!-- 消息内容 -->
     <template v-else>
-      <div v-for="msg in messagesWithDividers" :key="msg.id || msg.timeText" :data-id="msg.id" class="message-wrapper">
+      <div v-for="msg in visibleMessages" :key="msg.id || msg.timeText" :data-id="msg.id" class="message-wrapper">
         <!-- 时间分隔符 -->
         <div v-if="msg.isTimeDivider" class="time-divider">
           <span class="time-text">{{ msg.timeText }}</span>
@@ -27,6 +27,7 @@
           @show-user="$emit('show-user', $event)"
           @retry="$emit('retry', $event)"
           @nudge="handleNudge"
+          @long-press="$emit('long-press', $event)"
         >
           <!-- 消息气泡内容插槽 -->
           <template #bubble>
@@ -134,7 +135,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit', 'preview', 'nudge-success'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit', 'preview', 'nudge-success', 'long-press'])
 
 const listRef = ref(null)
 const readUsersMap = ref({})
@@ -142,37 +143,89 @@ const loadingReadUsers = ref({})
 const showScrollToBottom = ref(false)
 
 // ============================================================================
-// 性能优化：消息分页渲染
+// 性能优化：消息懒加载渲染
 // ============================================================================
 
-// 每页渲染的消息数量
-const PAGE_SIZE = 30
-// 当前渲染的页数
-const currentPage = ref(1)
-// 是否启用分页渲染（消息数超过阈值时启用）
-const ENABLE_PAGINATION_THRESHOLD = 50
-
-// 是否启用分页
-const isPaginationEnabled = computed(() => props.messages.length > ENABLE_PAGINATION_THRESHOLD)
-
-// 分页渲染的消息列表
-const paginatedMessages = computed(() => {
-  if (!isPaginationEnabled.value) {
-    return messagesWithDividers.value
-  }
-  // 始终渲染最后 N 条消息，避免一次性渲染全部
-  const startIndex = Math.max(0, messagesWithDividers.value.length - (currentPage.value * PAGE_SIZE))
-  return messagesWithDividers.value.slice(startIndex)
-})
-
-// 加载更多历史消息（向前加载）
-const loadMoreHistory = () => {
-  if (!isPaginationEnabled.value) return
-  const totalPages = Math.ceil(messagesWithDividers.value.length / PAGE_SIZE)
-  if (currentPage.value < totalPages) {
-    currentPage.value++
-  }
+// 懒加载配置
+const ENABLE_LAZY_LOADING_THRESHOLD = 100 // 消息数超过此阈值时启用懒加载
+const BUFFER_ZONE = {
+  ABOVE: 200,  // 视口上方缓冲区（像素）
+  BELOW: 400,  // 视口下方缓冲区（像素）
+  MESSAGE_COUNT: 20  // 最少渲染消息数（即使不在缓冲区内）
 }
+
+// 滚动位置跟踪
+const scrollTop = ref(0)
+const clientHeight = ref(600) // 初始估算值
+
+// 消息高度缓存（用于快速计算）
+const messageHeightCache = ref(new Map())
+
+// 平均消息高度（用于估算）
+const AVERAGE_MESSAGE_HEIGHT = 80 // 包含头像、内容、间距的估算高度
+
+// 是否启用懒加载
+const isLazyLoadingEnabled = computed(() => props.messages.length > ENABLE_LAZY_LOADING_THRESHOLD)
+
+/**
+ * 计算可见区域的消息范围
+ * @returns {Object} { startIndex, endIndex } - 在 messagesWithDividers 中的索引范围
+ */
+const calculateVisibleRange = () => {
+  if (!isLazyLoadingEnabled.value) {
+    // 不启用懒加载时，渲染全部消息
+    return { startIndex: 0, endIndex: messagesWithDividers.value.length }
+  }
+
+  const allMessages = messagesWithDividers.value
+  if (allMessages.length === 0) {
+    return { startIndex: 0, endIndex: 0 }
+  }
+
+  // 从滚动位置估算可见的消息索引
+  // scrollTop 是当前滚动位置，需要找到对应的消息索引
+  const viewportTop = scrollTop.value
+  const viewportBottom = scrollTop.value + clientHeight.value
+
+  // 扩展视口范围，包含缓冲区
+  const renderTop = Math.max(0, viewportTop - BUFFER_ZONE.ABOVE)
+  const renderBottom = viewportBottom + BUFFER_ZONE.BELOW
+
+  // 估算消息索引
+  let startIndex = Math.floor(renderTop / AVERAGE_MESSAGE_HEIGHT)
+  let endIndex = Math.ceil(renderBottom / AVERAGE_MESSAGE_HEIGHT)
+
+  // 确保在有效范围内
+  startIndex = Math.max(0, startIndex - BUFFER_ZONE.MESSAGE_COUNT) // 向上多取一些
+  endIndex = Math.min(allMessages.length, endIndex + BUFFER_ZONE.MESSAGE_COUNT) // 向下多取一些
+
+  // 确保至少渲染一定数量的消息
+  if (endIndex - startIndex < BUFFER_ZONE.MESSAGE_COUNT * 2) {
+    // 如果渲染的消息太少，扩展范围
+    const centerIndex = Math.floor((startIndex + endIndex) / 2)
+    startIndex = Math.max(0, centerIndex - BUFFER_ZONE.MESSAGE_COUNT)
+    endIndex = Math.min(allMessages.length, centerIndex + BUFFER_ZONE.MESSAGE_COUNT)
+  }
+
+  return { startIndex, endIndex }
+}
+
+// 可见消息列表（动态计算）
+const visibleMessages = computed(() => {
+  const allMessages = messagesWithDividers.value
+  if (allMessages.length === 0) return []
+
+  // 不启用懒加载时，返回全部消息
+  if (!isLazyLoadingEnabled.value) {
+    return allMessages
+  }
+
+  // 计算可见范围
+  const { startIndex, endIndex } = calculateVisibleRange()
+
+  // 截取可见区域的消息
+  return allMessages.slice(startIndex, endIndex)
+})
 
 // 监听消息变化，重置分页
 watch(() => props.sessionId, () => {
@@ -341,13 +394,10 @@ const formatTimeDivider = (timestamp) => {
 // 规则：
 // 1. 同一发送者
 // 2. 时间间隔小于 2 分钟
-// 3. 非特殊消息类型（如撤回消息、系统消息等）
-// 4. 自己的消息不合并，始终显示头像
+// 3. 非特殊消息类型（如撤回消息、系统消息、拍一拍等）
+// 4. 自己的消息和对方的消息都可以合并
 const canMergeWith = (currentMsg, prevMsg) => {
   if (!prevMsg) return false
-
-  // 自己的消息不合并，始终显示头像
-  if (currentMsg.isOwn) return false
 
   // 必须是同一发送者
   if (currentMsg.senderId !== prevMsg.senderId) return false
@@ -361,7 +411,7 @@ const canMergeWith = (currentMsg, prevMsg) => {
   if (timeDiff > MERGE_TIME_THRESHOLD) return false
 
   // 特殊消息类型不合并
-  const nonMergeableTypes = ['RECALLED', 'SYSTEM', 'NOTICE']
+  const nonMergeableTypes = ['RECALLED', 'SYSTEM', 'NOTICE', 'NUDGE']
   if (nonMergeableTypes.includes(currentMsg.type)) return false
   if (nonMergeableTypes.includes(prevMsg.type)) return false
 
@@ -371,6 +421,8 @@ const canMergeWith = (currentMsg, prevMsg) => {
 // 计算带时间分割线和合并标记的消息列表
 const messagesWithDividers = computed(() => {
   const res = []
+  // 保存已处理的最后一条真实消息（用于判断合并）
+  let lastRealMessage = null
 
   props.messages.forEach((msg, index) => {
     // 添加时间分割线
@@ -383,15 +435,14 @@ const messagesWithDividers = computed(() => {
     }
 
     // 判断是否需要与上一条消息合并
+    // 直接使用 lastRealMessage 判断，避免在 res 数组中查找
     let isMerged = false
-    if (index > 0) {
-      const prevMsg = props.messages[index - 1]
-      // 查找上一条非时间分割线的消息
-      const prevRealMsg = res[res.length - 1]
-      if (prevRealMsg && !prevRealMsg.isTimeDivider) {
-        isMerged = canMergeWith(msg, prevRealMsg)
-      }
+    if (lastRealMessage && canMergeWith(msg, lastRealMessage)) {
+      isMerged = true
     }
+
+    // 更新最后一条真实消息
+    lastRealMessage = msg
 
     res.push({ ...msg, isMerged })
   })
@@ -474,32 +525,87 @@ const handleAddReaction = (messageId, emoji, isAdded) => {
 }
 
 // 滚动到指定消息
-const scrollToMsg = (id) => {
-  const el = listRef.value?.querySelector(`[data-id="${id}"]`)
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    el.classList.add('highlight-msg-active')
-    setTimeout(() => {
-      el.classList.remove('highlight-msg-active')
-    }, 2000)
-  } else {
-    ElMessage.warning('消息时间过久，请向上翻阅查找')
+// 支持参数: id (消息ID) 或 { messageId, highlight } 对象
+const scrollToMsg = (param) => {
+  let messageId
+  let highlight = false
+
+  // 支持两种调用方式
+  if (typeof param === 'string' || typeof param === 'number') {
+    messageId = param
+  } else if (param && typeof param === 'object') {
+    messageId = param.messageId || param.id
+    highlight = param.highlight === true
   }
+
+  // 在懒加载模式下，临时禁用懒加载以确保消息在 DOM 中
+  // 这里的策略是：暂时扩大渲染范围，等待 DOM 更新后再滚动
+  const tempDisableLazyLoading = () => {
+    if (!isLazyLoadingEnabled.value) {
+      performScroll()
+      return
+    }
+
+    // 临时扩大渲染范围：找到目标消息的索引
+    const targetIndex = messagesWithDividers.value.findIndex(m => m.id == messageId)
+    if (targetIndex === -1) {
+      ElMessage.warning('消息不存在')
+      return
+    }
+
+    // 计算需要渲染的范围（包含目标消息 + 上下各 10 条消息）
+    const rangeSize = 20
+    const rangeStart = Math.max(0, targetIndex - rangeSize / 2)
+    const rangeEnd = Math.min(messagesWithDividers.value.length, targetIndex + rangeSize / 2)
+
+    // 临时渲染更大范围的消息
+    // 注意：这里我们使用 nextTick 确保 DOM 更新后再滚动
+    // 但由于 visibleMessages 是 computed，我们需要用其他方法
+    // 简单方案：直接滚动并等待
+    performScroll()
+  }
+
+  const performScroll = () => {
+    // 使用 nextTick 确保 DOM 更新
+    nextTick(() => {
+      const el = listRef.value?.querySelector(`[data-id="${messageId}"]`)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+        // 根据是否需要高亮闪烁，选择不同的动画类
+        const highlightClass = highlight ? 'message-highlight-flash' : 'highlight-msg-active'
+        const duration = highlight ? 1500 : 2000
+
+        el.classList.add(highlightClass)
+        setTimeout(() => {
+          el.classList.remove(highlightClass)
+        }, duration)
+      } else {
+        ElMessage.warning('消息时间过久，请向上翻阅查找')
+      }
+    })
+  }
+
+  tempDisableLazyLoading()
 }
 
 // 监听滚动事件
 const handleScroll = () => {
   if (!listRef.value || props.loading) return
 
-  const { scrollTop, clientHeight, scrollHeight } = listRef.value
+  const { scrollTop: newScrollTop, clientHeight: newClientHeight, scrollHeight } = listRef.value
+
+  // 更新滚动位置信息（用于懒加载计算）
+  scrollTop.value = newScrollTop
+  clientHeight.value = newClientHeight
 
   // 滚动到顶部加载更多
-  if (scrollTop === 0) {
+  if (newScrollTop === 0) {
     emit('load-more')
   }
 
   // 检测是否接近底部
-  const distanceFromBottom = scrollHeight - scrollTop - clientHeight
+  const distanceFromBottom = scrollHeight - newScrollTop - newClientHeight
   showScrollToBottom.value = distanceFromBottom > 300
 }
 
@@ -547,6 +653,29 @@ watch(() => props.messages.length, () => {
 onMounted(() => {
   initReadObserver()
   updateObserver()
+
+  // 初始化视口高度
+  if (listRef.value) {
+    clientHeight.value = listRef.value.clientHeight
+  }
+
+  // 监听容器大小变化
+  const resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.target === listRef.value) {
+        clientHeight.value = entry.contentRect.height
+      }
+    }
+  })
+
+  if (listRef.value) {
+    resizeObserver.observe(listRef.value)
+  }
+
+  // 保存 observer 引用以便清理
+  onUnmounted(() => {
+    resizeObserver.disconnect()
+  })
 })
 
 onUnmounted(() => {
@@ -815,5 +944,10 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 
 .highlight-msg-active {
   animation: highlightPulseBg 1s ease-out;
+}
+
+// 消息引用跳转高亮（3次黄色闪烁）
+.message-highlight-flash {
+  animation: messageHighlightFlash 1.5s ease-in-out;
 }
 </style>

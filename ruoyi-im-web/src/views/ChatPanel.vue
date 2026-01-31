@@ -53,6 +53,8 @@
             @load-more="handleLoadMore"
             @show-user="handleShowUser"
             @retry="handleRetry"
+            @remind-unread="handleRemindUnread"
+            @long-press="handleMultiSelect"
             @preview="handleImagePreview"
             @re-edit="handleReEdit"
           />
@@ -196,52 +198,29 @@
       />
 
       <!-- 多选操作栏 -->
-      <Transition name="slide-up">
-        <div v-if="isMultiSelectModeActive" class="multi-select-toolbar">
-          <div class="selection-info">
-            <div class="selection-indicator"></div>
-            <span class="selection-text">已选择 <strong>{{ selectedMessages.length }}</strong> 条消息</span>
-          </div>
-          <div class="actions">
-            <button class="toolbar-btn toolbar-btn--forward" @click="handleBatchForward" :disabled="selectedMessages.length === 0">
-              <span class="material-icons-outlined">share</span>
-              <span>逐条转发</span>
-            </button>
-            <button class="toolbar-btn toolbar-btn--combine" @click="handleCombineForward" :disabled="selectedMessages.length === 0">
-              <span class="material-icons-outlined">collections</span>
-              <span>合并转发</span>
-            </button>
-            <button class="toolbar-btn toolbar-btn--delete" @click="handleBatchDelete" :disabled="selectedMessages.length === 0">
-              <span class="material-icons-outlined">delete_outline</span>
-              <span>删除</span>
-            </button>
-            <div class="toolbar-divider"></div>
-            <button class="toolbar-btn toolbar-btn--cancel" @click="handleClearSelection">
-              <span>取消</span>
-            </button>
-          </div>
-        </div>
-      </Transition>
+      <MultiSelectToolbar
+        :active="isMultiSelectModeActive"
+        :count="selectedMessages?.length || 0"
+        @forward="handleBatchForward"
+        @combine="handleCombineForward"
+        @delete="handleBatchDelete"
+        @cancel="handleClearSelection"
+      />
     </template>
   </div>
 
   <!-- 图片预览器 -->
-  <Teleport to="body">
-    <el-image-viewer
-      v-if="showImagePreview"
-      :url-list="conversationImages"
-      :initial-index="imagePreviewIndex"
-      @close="closeImagePreview"
-      :z-index="9999"
-    />
-  </Teleport>
+  <ImageViewerDialog
+    v-model="showImagePreview"
+    :images="conversationImages"
+    :initial-index="imagePreviewIndex"
+  />
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useStore } from 'vuex'
 import { Share, Folder, Delete } from '@element-plus/icons-vue'
-import { ElImageViewer } from 'element-plus'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInputRefactored.vue'
@@ -260,7 +239,9 @@ import EmptyState from '@/components/Common/EmptyState.vue'
 import CombineDetailDialog from '@/components/Chat/CombineDetailDialog.vue'
 import GroupFilePanel from '@/components/Chat/GroupFilePanel.vue'
 import ExportChatDialog from '@/components/Chat/ExportChatDialog.vue'
-import { getMessages, batchForwardMessages, deleteMessage, clearConversationMessages } from '@/api/im/message'
+import MultiSelectToolbar from '@/components/Chat/MultiSelectToolbar.vue'
+import ImageViewerDialog from '@/components/Chat/ImageViewerDialog.vue'
+import { getMessages, batchForwardMessages, deleteMessage, clearConversationMessages, retryMessage } from '@/api/im/message'
 import { pinConversation, muteConversation } from '@/api/im/conversation'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { addFavorite, removeFavorite } from '@/api/im/favorite'
@@ -312,11 +293,11 @@ const messageInputRef = ref(null)
 
 // 图片预览状态
 const showImagePreview = ref(false)
-const imagePreviewUrl = ref('')
 const imagePreviewIndex = ref(0)
 
 // 当前会话所有图片URL列表（用于预览时左右切换）
 const conversationImages = computed(() => {
+  if (!messages.value || !Array.isArray(messages.value)) return []
   return messages.value
     .filter(m => {
       if (m.type !== 'IMAGE') return false
@@ -794,12 +775,22 @@ const markMessageAction = async (msg, markerType, color) => {
 }
 
 // 处理多选
-const isMultiSelectMode = computed(() => store.getters['im/message/selectedMessageCount'] > 0)
-const selectedMessages = computed(() => store.getters['im/message/selectedMessageList'])
+const isMultiSelectMode = computed(() => (store.getters['im/message/selectedMessageCount'] || 0) > 0)
+const selectedMessages = computed(() => store.getters['im/message/selectedMessageList'] || [])
 
 const handleMultiSelect = (msg) => {
+  // 切换选中状态
   store.commit('im/message/TOGGLE_MESSAGE_SELECTION', msg.id)
-  ElMessage.info('进入多选模式')
+
+  // 如果是第一次选中（之前没有选中消息），进入多选模式
+  if (!isMultiSelectModeActive.value && store.getters['im/message/selectedMessageCount'] > 0) {
+    isMultiSelectModeActive.value = true
+
+    // 触感反馈
+    if (navigator.vibrate) {
+      navigator.vibrate(50) // 轻微震动 50ms
+    }
+  }
 }
 
 // 查看合并转发消息详情
@@ -1012,14 +1003,8 @@ const handleToggleDetail = () => {
 
 // 图片预览处理
 const handleImagePreview = (imageUrl) => {
-  imagePreviewUrl.value = imageUrl
   imagePreviewIndex.value = conversationImages.value.indexOf(imageUrl)
   showImagePreview.value = true
-}
-
-// 关闭图片预览
-const closeImagePreview = () => {
-  showImagePreview.value = false
 }
 
 const handleCancelReply = () => {
@@ -1031,42 +1016,50 @@ const handleCancelEdit = () => {
 }
 
 const handleRetry = async (msg) => {
-  if (msg.status !== 'failed') return
+  // 检查消息状态
+  const status = msg.sendStatus || msg.status
+  if (status !== 'FAILED' && status !== 'failed') return
+
+  // 获取客户端消息ID
+  const clientMsgId = msg.clientMsgId || msg.id
+  if (!clientMsgId) {
+    ElMessage.error('无法重试：缺少消息标识')
+    return
+  }
 
   // 检查是否可以重试
-  if (!canRetry(msg.id)) {
-    ElMessage.warning('重试次数已达上限')
+  if (!canRetry(clientMsgId)) {
+    ElMessage.warning('重试次数已达上限（最多3次）')
     return
   }
 
   // 重置为发送中
+  msg.sendStatus = 'SENDING'
   msg.status = 'sending'
 
   try {
-    const res = await store.dispatch('im/message/sendMessage', {
-      sessionId: props.session.id,
-      type: msg.type,
-      content: typeof msg.content === 'object' ? JSON.stringify(msg.content) : msg.content
-    })
+    // 调用后端重试 API（支持自动重试：1s, 2s, 4s）
+    const res = await retryMessage(clientMsgId)
 
-    // 更新消息
-    const realMsg = transformMsg(res)
-    Object.assign(msg, { ...realMsg, status: null })
+    if (res.code === 200) {
+      ElMessage.success({
+        message: '正在重试发送...',
+        duration: 2000
+      })
 
-    // 移除失败消息缓存
-    removeFailedMessage(msg.id)
-
-    ElMessage.success('发送成功')
+      // 注意：实际发送结果是异步的，后端会通过 WebSocket 推送更新
+      // 这里只需更新 UI 状态为"发送中"
+      msg.sendStatus = 'SENDING'
+    } else {
+      // 服务端返回错误（如已达重试上限）
+      throw new Error(res.msg || '重试失败')
+    }
   } catch (error) {
+    msg.sendStatus = 'FAILED'
     msg.status = 'failed'
-    // 重新记录失败消息（增加重试次数）
-    recordFailedMessage({
-      ...msg,
-      sessionId: props.session.id
-    })
 
-    ElMessage.error('重试失败，请稍后重试')
-    console.error('重试失败', error)
+    ElMessage.error(error.message || '重试失败，请稍后重试')
+    console.error('消息重试失败:', error)
   }
 }
 
@@ -1117,6 +1110,44 @@ const handleEdit = (message) => {
 const handleAt = (message) => {
   if (!message) return
   messageInputRef.value?.insertAt(message.senderName)
+}
+
+/**
+ * 一键提醒未读成员
+ * 发送 @ 提醒消息给所有未读成员
+ */
+const handleRemindUnread = async ({ conversationId, messageId, unreadMembers }) => {
+  if (!unreadMembers || unreadMembers.length === 0) {
+    ElMessage.info('暂无未读成员')
+    return
+  }
+
+  try {
+    // 构建消息内容：@所有未读成员
+    const mentions = unreadMembers.map(m => ({
+      userId: m.userId,
+      nickname: m.nickname || m.userName
+    }))
+
+    // 构建 @ 提及文本
+    const mentionText = unreadMembers
+      .map(m => `@${m.nickname || m.userName}`)
+      .join(' ')
+
+    // 发送提醒消息
+    await store.dispatch('im/message/sendMessage', {
+      sessionId: conversationId,
+      type: 'TEXT',
+      content: `${mentionText} 请查看上方消息`,
+      replyToMessageId: messageId, // 引用原消息
+      atUserIds: mentions.map(m => m.userId) // @ 提及的用户ID列表
+    })
+
+    ElMessage.success(`已提醒 ${unreadMembers.length} 位成员`)
+  } catch (error) {
+    console.error('提醒失败:', error)
+    ElMessage.error('提醒失败，请稍后重试')
+  }
 }
 
 const handleEditConfirm = async (content) => {
@@ -1900,149 +1931,6 @@ onMounted(() => {
   :deep(.empty-state) {
     width: 100%;
     max-width: 400px;
-  }
-}
-
-// ============================================================================
-// 多选工具栏
-// ============================================================================
-.multi-select-toolbar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 72px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
-  z-index: var(--dt-z-sticky);
-
-  .selection-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 16px;
-    background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-hover) 100%);
-    border-radius: 24px;
-    border: 1px solid rgba(0, 137, 255, 0.2);
-
-    .selection-indicator {
-      width: 12px;
-      height: 12px;
-      background: var(--dt-brand-color);
-      border-radius: 50%;
-      animation: selectionPulse 2s ease-in-out infinite;
-      box-shadow: 0 0 8px rgba(0, 137, 255, 0.5);
-    }
-
-    .selection-text {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--dt-brand-color);
-
-      strong {
-        font-weight: 700;
-        font-size: 16px;
-      }
-    }
-  }
-
-  .actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .toolbar-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 16px;
-    border-radius: 20px;
-    border: none;
-    background: transparent;
-    color: #666;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-
-    .material-icons-outlined {
-      font-size: 16px;
-      transition: transform 0.3s;
-    }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-
-      &:hover {
-        transform: none;
-        background: transparent;
-      }
-    }
-
-    &--forward {
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-      color: #0284c7;
-      border: 1px solid rgba(2, 132, 199, 0.2);
-
-      &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-        color: #fff;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
-      }
-    }
-
-    &--combine {
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      color: #d97706;
-      border: 1px solid rgba(217, 119, 6, 0.2);
-
-      &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-        color: #fff;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
-      }
-    }
-
-    &--delete {
-      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-      color: #dc2626;
-      border: 1px solid rgba(220, 38, 38, 0.2);
-
-      &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-        color: #fff;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-      }
-    }
-
-    &--cancel {
-      background: rgba(0, 0, 0, 0.04);
-      color: #666;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.08);
-        color: #1a1a1a;
-      }
-    }
-  }
-
-  .toolbar-divider {
-    width: 1px;
-    height: 24px;
-    background: rgba(0, 0, 0, 0.1);
   }
 }
 

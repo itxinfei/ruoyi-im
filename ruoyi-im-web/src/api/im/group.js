@@ -200,6 +200,20 @@ export function getCommonGroups(targetUserId) {
 }
 
 /**
+ * 加入群组
+ * 通过群组ID或群组码申请加入群组
+ * @param {string} groupCode - 群组ID或群组码
+ * @returns {Promise}
+ */
+export function joinGroup(groupCode) {
+  return request({
+    url: '/api/im/group/join',
+    method: 'post',
+    data: { groupCode }
+  })
+}
+
+/**
  * 获取群二维码
  * 获取群组的二维码图片供扫码加入
  * @param {number} groupId - 群组ID

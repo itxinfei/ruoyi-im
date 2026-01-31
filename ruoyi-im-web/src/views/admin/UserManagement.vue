@@ -229,7 +229,7 @@ import {
   Edit,
   RefreshRight
 } from '@element-plus/icons-vue'
-import { getUserList, updateUserStatus, deleteUser, createUser, updateUser } from '@/api/admin'
+import { getUserList, updateUserStatus, deleteUser, createUser, updateUser, batchDeleteUsers, batchUpdateUserStatus } from '@/api/admin'
 
 // 搜索表单
 const searchForm = reactive({
@@ -464,7 +464,8 @@ const handleBatchDelete = async () => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    // TODO: 实现批量删除 API
+    const ids = selectedRows.value.map(row => row.id)
+    await batchDeleteUsers(ids)
     ElMessage.success('批量删除成功')
     handleClearSelection()
     loadUsers()
@@ -477,14 +478,50 @@ const handleBatchDelete = async () => {
 
 // 批量禁用
 const handleBatchDisable = async () => {
-  // TODO: 实现批量禁用
-  ElMessage.info('批量禁用功能开发中')
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要禁用的用户')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`确定要禁用选中的 ${selectedRows.value.length} 个用户吗？`, '批量禁用', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const ids = selectedRows.value.map(row => row.id)
+    await batchUpdateUserStatus(ids, 0)
+    ElMessage.success('批量禁用成功')
+    handleClearSelection()
+    loadUsers()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量禁用失败')
+    }
+  }
 }
 
 // 批量启用
 const handleBatchEnable = async () => {
-  // TODO: 实现批量启用
-  ElMessage.info('批量启用功能开发中')
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要启用的用户')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`确定要启用选中的 ${selectedRows.value.length} 个用户吗？`, '批量启用', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const ids = selectedRows.value.map(row => row.id)
+    await batchUpdateUserStatus(ids, 1)
+    ElMessage.success('批量启用成功')
+    handleClearSelection()
+    loadUsers()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量启用失败')
+    }
+  }
 }
 
 // 导入

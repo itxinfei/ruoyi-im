@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.constant.SystemConstants;
+import com.ruoyi.im.constant.UserRole;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.BasePageRequest;
 import com.ruoyi.im.dto.user.ImLoginRequest;
@@ -133,6 +134,7 @@ public class ImUserServiceImpl implements ImUserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus(1); // 1=启用
         user.setGender(0);
+        user.setRole(UserRole.USER); // 默认角色为普通用户
         user.setAvatar(SystemConstants.DEFAULT_USER_AVATAR);
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());

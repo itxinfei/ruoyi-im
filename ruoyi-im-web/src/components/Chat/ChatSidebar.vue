@@ -336,7 +336,7 @@
 import { ref, computed, watch } from 'vue'
 import { Close, Plus, ArrowRight, Search, MoreFilled } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
-import { getGroup, getGroupMembers, leaveGroup, removeGroupMember, addGroupMembers } from '@/api/im/group'
+import { getGroup, getGroupMembers, leaveGroup, removeGroupMember, addGroupMembers, setGroupAdmin } from '@/api/im/group'
 import { getUserInfo } from '@/api/im/user'
 import { searchMessages } from '@/api/im/message'
 import { addTokenToUrl } from '@/utils/file'
@@ -668,11 +668,13 @@ const handleSetAdmin = async (member) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消'
     })
-    // TODO: 调用设置管理员 API
+    await setGroupAdmin(groupDetail.value.id, member.userId, newRole === 'ADMIN')
     ElMessage.success(`${action}成功`)
     loadDetail()
   } catch (err) {
-    // 用户取消
+    if (err !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
   }
 }
 

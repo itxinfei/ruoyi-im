@@ -15,6 +15,7 @@
         <template v-if="activeModule === 'chat'">
           <div class="chat-layout">
             <SessionPanel
+              :current-session="currentSession"
               @select-session="handleSelectSession"
               @show-user="handleShowUser"
             />
@@ -61,31 +62,34 @@
   </div>
 </template>
 
-<script setup>import { getToken } from '@/utils/storage'
+<script setup>
+import { getToken } from '@/utils/storage'
 
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useTheme } from '@/composables/useTheme'
 import ImSideNavNew from '../components/ImSideNavNew/index.vue'
 import SessionPanel from './SessionPanel.vue'
-import WorkbenchPanel from './WorkbenchPanel.vue'
-import ContactsPanel from './ContactsPanel.vue'
-import DocumentsPanel from './DocumentsPanel.vue'
-import CalendarPanel from './CalendarPanel.vue'
-import TodoPanel from './TodoPanel.vue'
-import ApprovalPanel from './ApprovalPanel.vue'
-import MailPanel from './MailPanel.vue'
-import AssistantPanel from './AssistantPanel.vue'
 import ChatPanel from './ChatPanel.vue'
-import UserDetailDialog from '@/components/Chat/UserDetailDialog.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 
-// 新增弹窗组件
-import PersonalProfileDialog from '@/components/Common/PersonalProfileDialog.vue'
-import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
-import HelpFeedbackDialog from '@/components/Common/HelpFeedbackDialog.vue'
-import GlobalSearchDialog from '@/components/Common/GlobalSearchDialog.vue'
+// 异步加载非聊天模块（延迟加载，减少首屏包体积）
+const WorkbenchPanel = defineAsyncComponent(() => import('./WorkbenchPanel.vue'))
+const ContactsPanel = defineAsyncComponent(() => import('./ContactsPanel.vue'))
+const DocumentsPanel = defineAsyncComponent(() => import('./DocumentsPanel.vue'))
+const CalendarPanel = defineAsyncComponent(() => import('./CalendarPanel.vue'))
+const TodoPanel = defineAsyncComponent(() => import('./TodoPanel.vue'))
+const ApprovalPanel = defineAsyncComponent(() => import('./ApprovalPanel.vue'))
+const MailPanel = defineAsyncComponent(() => import('./MailPanel.vue'))
+const AssistantPanel = defineAsyncComponent(() => import('./AssistantPanel.vue'))
+
+// 异步加载弹窗组件（按需加载）
+const UserDetailDialog = defineAsyncComponent(() => import('@/components/Chat/UserDetailDialog.vue'))
+const PersonalProfileDialog = defineAsyncComponent(() => import('@/components/Common/PersonalProfileDialog.vue'))
+const SystemSettingsDialog = defineAsyncComponent(() => import('@/components/Common/SystemSettingsDialog.vue'))
+const HelpFeedbackDialog = defineAsyncComponent(() => import('@/components/Common/HelpFeedbackDialog.vue'))
+const GlobalSearchDialog = defineAsyncComponent(() => import('@/components/Common/GlobalSearchDialog.vue'))
 
 const store = useStore()
 const activeModule = ref('chat')

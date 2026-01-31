@@ -25,13 +25,13 @@
       @smart-reply="handleShowSmartReply"
     />
 
-    <!-- 录音动画区域 - 显示在工具栏上方 -->
-    <div v-if="isVoiceMode" class="voice-recording-wrapper">
+    <!-- 录音动画区域 - 暂时禁用（语音功能未来考虑） -->
+    <!-- <div v-if="isVoiceMode" class="voice-recording-wrapper">
       <VoiceRecorder
         @record-complete="handleVoiceRecordComplete"
         @cancel="handleVoiceCancel"
       />
-    </div>
+    </div> -->
 
     <!-- 引用消息预览 -->
     <ReplyPreview
@@ -73,25 +73,32 @@
         ref="textareaRef"
         v-model="messageContent"
         class="message-input"
-        :placeholder="isVoiceMode ? '正在录音...' : (session?.type === 'GROUP' ? '发消息...' : '发消息...')"
+        :placeholder="inputPlaceholder"
         @input="handleInput"
         @keydown="handleKeydown"
         @paste="handlePaste"
         :disabled="isVoiceMode"
       ></textarea>
 
+      <!-- 空状态引导提示 -->
+      <div v-if="showDragHint" class="drag-hint">
+        <span class="material-icons-outlined">cloud_upload</span>
+        <span>拖拽图片、视频、文件到这里</span>
+      </div>
+
       <div class="input-footer" v-if="!isVoiceMode">
         <span class="hint-text">{{ sendShortcutHint }}</span>
         <div class="footer-actions">
           <!-- 语音输入切换按钮 -->
           <el-tooltip content="按住说话" placement="top">
-            <button
+            <!-- 语音按钮暂时禁用（未来考虑） -->
+            <!-- <button
               class="footer-action-btn voice-btn"
               :class="{ active: isVoiceMode }"
               @click="toggleVoiceMode"
             >
               <el-icon><Microphone /></el-icon>
-            </button>
+            </button> -->
           </el-tooltip>
 
           <button
@@ -200,7 +207,7 @@ import { useTypingIndicator } from '@/composables/useTypingIndicator'
 // 子组件
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
-import VoiceRecorder from './VoiceRecorder.vue'
+// VoiceRecorder 已删除（语音功能未来考虑）
 import ScreenshotPreview from './ScreenshotPreview.vue'
 import DingtalkScreenshot from './DingtalkScreenshot.vue'
 import CommandPalette from './CommandPalette.vue'
@@ -413,6 +420,19 @@ const sendShortcutHint = computed(() => {
 })
 
 const canSend = computed(() => messageContent.value.trim().length > 0)
+
+// 输入框占位符（语音模式时显示不同的提示）
+const inputPlaceholder = computed(() => {
+  if (isVoiceMode.value) {
+    return '正在录音...'
+  }
+  return props.session?.type === 'GROUP' ? '发消息...' : '发消息...'
+})
+
+// 显示拖拽引导提示（输入框为空且不在拖拽状态时）
+const showDragHint = computed(() => {
+  return !messageContent.value.trim() && !isDragOver.value && !isVoiceMode.value
+})
 
 // ========== 工具方法 ==========
 
@@ -725,31 +745,59 @@ const handleShowSmartReply = () => {
 
 /**
  * 确认文件上传
+ * 支持并发控制：最多同时上传 3 个文件
  */
 const handleFileUploadConfirm = async ({ files, description }) => {
   showFilePreview.value = false
 
-  // 逐个发送文件
-  for (const file of files) {
+  const MAX_CONCURRENT = 3 // 最多同时上传 3 个文件
+  const uploadQueue = [...files]
+  const uploading = new Set()
+
+  /**
+   * 上传单个文件
+   */
+  const uploadFile = async (file) => {
+    uploading.add(file)
+
     try {
       if (file.type.startsWith('image/')) {
-        // 图片上传
         await uploadFileWithDescription(file, description, 'image')
       } else if (file.type.startsWith('video/')) {
-        // 视频上传
         await uploadFileWithDescription(file, description, 'video')
       } else if (file.type.startsWith('audio/')) {
-        // 音频上传
         await uploadFileWithDescription(file, description, 'audio')
       } else {
-        // 其他文件上传
         await uploadFileWithDescription(file, description, 'file')
       }
     } catch (error) {
       console.error('文件上传失败:', file.name, error)
       ElMessage.error(`文件 ${file.name} 上传失败`)
+    } finally {
+      uploading.delete(file)
     }
   }
+
+  /**
+   * 并发控制上传
+   */
+  const processQueue = async () => {
+    while (uploadQueue.length > 0 || uploading.size > 0) {
+      // 启动新的上传任务（直到达到并发限制）
+      while (uploadQueue.length > 0 && uploading.size < MAX_CONCURRENT) {
+        const file = uploadQueue.shift()
+        uploadFile(file) // 不等待，异步执行
+      }
+
+      // 等待至少一个上传完成
+      if (uploading.size >= MAX_CONCURRENT || uploadQueue.length === 0) {
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+    }
+  }
+
+  // 开始并发上传
+  await processQueue()
 
   // 清空待上传列表
   pendingFiles.value = []
@@ -939,7 +987,7 @@ onUnmounted(() => {
     box-shadow: inset 0 0 0 2px var(--dt-brand-color);
 
     &::after {
-      content: '松开即可发送文件';
+      content: '松开即可发送（支持图片、视频、文件）';
       position: absolute;
       top: 50%;
       left: 50%;
@@ -975,6 +1023,31 @@ onUnmounted(() => {
   &::placeholder { color: var(--dt-text-quaternary); }
 
   .dark & { color: var(--dt-text-primary-dark); }
+}
+
+// 拖拽引导提示（空状态）
+.drag-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--dt-text-tertiary);
+  font-size: 13px;
+  pointer-events: none;
+  transition: opacity var(--dt-transition-fast);
+
+  .material-icons-outlined {
+    font-size: 32px;
+    opacity: 0.5;
+  }
+}
+
+.input-area:hover .drag-hint {
+  opacity: 0.7;
 }
 
 .input-footer {

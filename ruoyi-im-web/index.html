@@ -6,11 +6,33 @@
   <link rel="icon" href="/favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IM即时通讯</title>
-  
+
+  <!-- 安全相关的 meta 标签 -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="description" content="企业级即时通讯系统，支持单聊、群聊、文件传输、音视频通话">
+
+  <!-- Content Security Policy (CSP) -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com;
+    img-src 'self' data: blob: https:;
+    connect-src 'self' ws://localhost:8080 wss://localhost:8080 https://api.example.com;
+    media-src 'self' blob: data:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+  ">
+
   <!-- 优化字体加载 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
+
   <!-- Material Icons Outlined 字体 -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined&display=swap">
 </head>

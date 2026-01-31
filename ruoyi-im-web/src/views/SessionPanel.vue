@@ -169,11 +169,6 @@
                         <span v-if="session.isMuted" class="mute-icon">
                           <span class="material-icons-outlined">notifications_off</span>
                         </span>
-                        <!-- 草稿标识 -->
-                        <span v-if="hasDraft(session.id)" class="draft-badge">
-                          <span class="material-icons-outlined draft-icon">edit</span>
-                          草稿
-                        </span>
                       </div>
                       <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
                     </div>
@@ -284,6 +279,7 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 import { sendFriendRequest } from '@/api/im/contact'
+import { joinGroup } from '@/api/im/group'
 import { formatChatTime } from '@/utils/format'
 import { useMentions } from '@/composables/useMentions.js'
 
@@ -530,12 +526,18 @@ const handleJoinGroup = async () => {
 
     if (!value) return
 
-    // TODO: 调用加入群组 API
-    // 目前群组模块可能需要邀请才能加入
-    ElMessage.info('请通过群成员邀请加入群组')
+    // 调用加入群组 API
+    const res = await joinGroup(value.trim())
+    if (res.code === 200) {
+      ElMessage.success('成功加入群组')
+      // 刷新会话列表
+      store.dispatch('im/session/loadSessions')
+    } else {
+      ElMessage.warning(res.msg || '加入失败，请检查群组码是否正确')
+    }
   } catch (err) {
     if (err !== 'cancel') {
-      ElMessage.error('操作失败，请重试')
+      ElMessage.error(err.response?.data?.msg || '操作失败，请重试')
     }
   }
 }
@@ -1292,43 +1294,42 @@ onUnmounted(() => {
 }
 
 // ============================================================================
-// 右键菜单
+// 右键菜单 - 钉钉风格简化版
 // ============================================================================
 .context-menu {
   position: fixed;
   background: var(--dt-bg-dropdown);
-  backdrop-filter: blur(12px);
-  border-radius: var(--dt-radius-lg);
-  box-shadow: var(--dt-shadow-float);
-  padding: 6px;
-  min-width: 160px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
+  padding: 4px 0;
+  min-width: 140px;
   z-index: 2000;
   border: 1px solid var(--dt-border-light);
-  animation: menuFadeIn 0.2s var(--dt-ease-out);
+  animation: menuFadeIn 0.15s ease-out;
 
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 10px;
+    gap: 8px;
+    padding: 7px 12px;
     font-size: 13px;
-    color: #1f2329;
+    color: var(--dt-text-primary);
     cursor: pointer;
-    border-radius: 6px;
-    transition: all var(--dt-transition-base);
-    font-weight: 500;
+    border-radius: 0;
+    transition: background-color 0.15s ease;
+    font-weight: 400;
 
     .item-icon {
       font-size: 16px;
-      color: #646a73;
+      color: var(--dt-text-tertiary);
     }
 
     &:hover {
-      background: #f5f6f7;
-      color: #0089FF;
+      background: var(--dt-bg-session-hover);
+      color: var(--dt-text-primary);
 
       .item-icon {
-        color: #0089FF;
+        color: var(--dt-text-secondary);
       }
     }
 
@@ -1341,7 +1342,15 @@ onUnmounted(() => {
 
       &:hover {
         background: var(--dt-error-bg);
-        color: var(--dt-error-color);
+      }
+    }
+
+    &.has-submenu {
+      justify-content: space-between;
+
+      .submenu-arrow {
+        font-size: 14px;
+        color: var(--dt-text-quaternary);
       }
     }
   }
@@ -1349,7 +1358,7 @@ onUnmounted(() => {
   .menu-divider {
     height: 1px;
     background: var(--dt-border-light);
-    margin: 4px 6px;
+    margin: 4px 0;
   }
 }
 
@@ -1706,23 +1715,6 @@ onUnmounted(() => {
 // ============================================================================
 // 草稿标识样式
 // ============================================================================
-.draft-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px 6px;
-  background: rgba(103, 194, 58, 0.1);
-  color: var(--dt-success-color);
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 500;
-  margin-left: 4px;
-}
-
-.draft-icon {
-  font-size: 11px;
-}
-
 .draft-tag {
   color: var(--dt-success-color);
   font-size: 11px;

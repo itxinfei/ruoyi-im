@@ -7,7 +7,7 @@
         <p class="page-desc">管理系统消息内容、敏感词过滤和消息统计</p>
       </div>
       <div class="page-actions">
-        <el-button :icon="Setting" @click="sensitiveConfigVisible = true">敏感词配置</el-button>
+        <el-button :icon="Setting" @click="handleOpenSensitiveConfig">敏感词配置</el-button>
         <el-button :icon="Download" @click="handleExport">导出数据</el-button>
       </div>
     </div>
@@ -357,7 +357,9 @@ import {
   deleteMessage,
   batchDeleteMessages,
   getMessageDetail,
-  getMessageAdminStats
+  getMessageAdminStats,
+  getSensitiveWords,
+  saveSensitiveWords
 } from '@/api/admin'
 import { formatFileSize } from '@/utils/format'
 
@@ -560,11 +562,39 @@ const handleExport = () => {
 // 保存敏感词配置
 const handleSaveSensitiveConfig = async () => {
   try {
-    // TODO: 调用保存敏感词配置的 API
-    ElMessage.success('敏感词配置已保存')
-    sensitiveConfigVisible.value = false
+    // 将敏感词按行分割并过滤空行
+    const words = sensitiveForm.value.words
+      .split('\n')
+      .map(w => w.trim())
+      .filter(w => w.length > 0)
+
+    const res = await saveSensitiveWords({
+      strategy: sensitiveForm.value.strategy,
+      words: words
+    })
+
+    if (res.code === 200) {
+      ElMessage.success('敏感词配置已保存')
+      sensitiveConfigVisible.value = false
+    }
   } catch (error) {
     ElMessage.error('保存失败')
+  }
+}
+
+// 打开敏感词配置对话框
+const handleOpenSensitiveConfig = async () => {
+  try {
+    const res = await getSensitiveWords()
+    if (res.code === 200 && res.data) {
+      sensitiveForm.value.strategy = res.data.strategy || 'reject'
+      sensitiveForm.value.words = (res.data.words || []).join('\n')
+    }
+    sensitiveConfigVisible.value = true
+  } catch (error) {
+    // 加载失败也打开对话框，使用默认值
+    sensitiveForm.value = { strategy: 'reject', words: '' }
+    sensitiveConfigVisible.value = true
   }
 }
 

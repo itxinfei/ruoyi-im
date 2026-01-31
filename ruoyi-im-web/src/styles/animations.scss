@@ -1555,6 +1555,16 @@ $duration-slower: 750ms;
   }
 }
 
+// 消息高亮闪烁（3次黄色闪烁）- 用于引用消息跳转
+@keyframes messageHighlightFlash {
+  0%, 100% { background: transparent; }
+  16.67% { background: rgba(255, 235, 59, 0.4); } // 第1次亮
+  33.33% { background: transparent; }
+  50% { background: rgba(255, 235, 59, 0.4); } // 第2次亮
+  66.67% { background: transparent; }
+  83.33% { background: rgba(255, 235, 59, 0.4); } // 第3次亮
+}
+
 // 按钮微脉冲（缩放）- 用于按钮微动画
 @keyframes buttonMicroPulse {
   0% {

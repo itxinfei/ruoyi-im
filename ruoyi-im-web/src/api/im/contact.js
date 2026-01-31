@@ -162,6 +162,20 @@ export function getGroupList() {
 }
 
 /**
+ * 创建好友分组
+ * @param {Object} data - 分组数据
+ * @param {string} data.groupName - 分组名称
+ * @returns {Promise}
+ */
+export function createGroup(data) {
+  return request({
+    url: '/api/im/contact/group',
+    method: 'post',
+    data
+  })
+}
+
+/**
  * 重命名好友分组
  * @param {string} oldName - 旧分组名称
  * @param {string} newName - 新分组名称

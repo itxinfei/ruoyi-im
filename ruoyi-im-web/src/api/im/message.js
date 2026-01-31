@@ -21,6 +21,19 @@ export function sendMessage(data) {
 }
 
 /**
+ * 重试发送失败的消息
+ * 支持自动重试（最多3次，采用指数退避策略：1s, 2s, 4s）
+ * @param {string} clientMsgId - 客户端消息ID
+ * @returns {Promise}
+ */
+export function retryMessage(clientMsgId) {
+  return request({
+    url: `/api/im/message/retry/${clientMsgId}`,
+    method: 'post'
+  })
+}
+
+/**
  * 获取会话消息列表
  * @param {Object} params - 查询参数
  * @param {number} params.conversationId - 会话ID

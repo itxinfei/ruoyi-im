@@ -1,6 +1,7 @@
 <template>
   <el-dialog
-    v-model="visible"
+    :model-value="visible"
+    @update:model-value="visible = $event"
     title="已读详情"
     width="400px"
     :close-on-click-modal="true"
@@ -65,13 +66,26 @@
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">关闭</el-button>
+      <div class="dialog-footer">
+        <!-- 未读成员提醒按钮（仅群聊且有未读成员时显示） -->
+        <el-button
+          v-if="isGroupChat && unreadMembers.length > 0"
+          type="primary"
+          @click="handleRemindUnread"
+        >
+          <span class="material-icons-outlined">notifications_active</span>
+          <span>提醒未读 ({{ unreadMembers.length }})</span>
+        </el-button>
+
+        <el-button @click="visible = false">关闭</el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { ElMessage } from 'element-plus'
 import { formatRelativeTime } from '@/utils/message'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -106,8 +120,11 @@ const props = defineProps({
   allMembers: {
     type: Array,
     default: () => []
-  }
+  },
+  conversationId: [String, Number]
 })
+
+const emit = defineEmits(['remind-unread'])
 
 // 格式化已读时间
 const formatReadTime = computed(() => {
@@ -119,6 +136,31 @@ const formatReadTime = computed(() => {
     minute: '2-digit'
   })
 })
+
+/**
+ * 一键提醒未读成员
+ * 发送 @ 提醒给所有未读成员
+ */
+const handleRemindUnread = () => {
+  if (!props.conversationId) {
+    ElMessage.warning('缺少会话信息')
+    return
+  }
+
+  if (unreadMembers.value.length === 0) {
+    ElMessage.info('暂无未读成员')
+    return
+  }
+
+  // 触发提醒事件，传递未读成员列表
+  emit('remind-unread', {
+    conversationId: props.conversationId,
+    messageId: props.messageId,
+    unreadMembers: unreadMembers.value
+  })
+
+  ElMessage.success(`已提醒 ${unreadMembers.value.length} 位未读成员`)
+}
 
 // 未读成员
 const unreadMembers = computed(() => {
@@ -235,6 +277,24 @@ const unreadMembers = computed(() => {
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--dt-border-light);
+}
+
+// Dialog Footer
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+
+  .el-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    .material-icons-outlined {
+      font-size: 16px;
+    }
+  }
 }
 
 // 暗色模式

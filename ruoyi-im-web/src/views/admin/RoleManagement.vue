@@ -318,7 +318,9 @@ import {
   deleteRole,
   getPermissionList,
   assignRolePermissions,
-  getRoleMembers
+  getRoleMembers,
+  addRoleMembers,
+  removeRoleMember
 } from '@/api/admin'
 import { searchUsersApi } from '@/api/im/user'
 
@@ -587,11 +589,18 @@ const searchUsers = async (query) => {
 
 // 添加成员
 const handleAddMembers = async () => {
-  // TODO: 调用添加成员到角色的 API
-  ElMessage.success(`已添加 ${selectedUsersToAdd.value.length} 名成员`)
-  addMemberDialogVisible.value = false
-  selectedUsersToAdd.value = []
-  loadRoleMembers()
+  try {
+    const userIds = selectedUsersToAdd.value.map(u => u.id)
+    const res = await addRoleMembers(currentRole.value.id, userIds)
+    if (res.code === 200) {
+      ElMessage.success(`已添加 ${userIds.length} 名成员`)
+      addMemberDialogVisible.value = false
+      selectedUsersToAdd.value = []
+      loadRoleMembers()
+    }
+  } catch (error) {
+    ElMessage.error('添加成员失败')
+  }
 }
 
 // 移除成员
@@ -600,11 +609,15 @@ const handleRemoveMember = async (member) => {
     await ElMessageBox.confirm(`确定要将 ${member.nickName} 从该角色中移除吗？`, '确认', {
       type: 'warning'
     })
-    // TODO: 调用移除成员 API
-    ElMessage.success('已移除')
-    loadRoleMembers()
-  } catch {
-    // 取消
+    const res = await removeRoleMember(currentRole.value.id, member.id)
+    if (res.code === 200) {
+      ElMessage.success('已移除')
+      loadRoleMembers()
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('移除失败')
+    }
   }
 }
 

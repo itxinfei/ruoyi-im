@@ -15,11 +15,12 @@ import com.ruoyi.im.mapper.ImAttendanceScheduleMapper;
 import com.ruoyi.im.mapper.ImAttendanceShiftMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImAttendanceGroupService;
+import com.ruoyi.im.util.BeanConvertUtil;
+import com.ruoyi.im.util.VoBuilder;
 import com.ruoyi.im.vo.attendance.ImAttendanceGroupVO;
 import com.ruoyi.im.vo.attendance.ImAttendanceShiftVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -179,28 +180,29 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             throw new BusinessException("考勤组不存在");
         }
 
-        ImAttendanceGroupVO vo = new ImAttendanceGroupVO();
-        BeanUtils.copyProperties(group, vo);
-
-        // 获取负责人信息
-        ImUser manager = userMapper.selectImUserById(group.getManagerId());
-        if (manager != null) {
-            vo.setManagerName(manager.getNickname());
-        }
-
-        // 解析工作日
-        if (group.getWorkDays() != null) {
-            List<Integer> workDays = Arrays.stream(group.getWorkDays().split(","))
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList());
-            vo.setWorkDays(workDays);
-        }
-
-        // 统计成员数量
-        Integer memberCount = attendanceGroupMapper.countMembers(groupId);
-        vo.setMemberCount(memberCount != null ? memberCount : 0);
-
-        return vo;
+        // 使用 VoBuilder 进行转换并设置额外字段
+        return VoBuilder.of(group, ImAttendanceGroupVO.class)
+                .convert()
+                .andThen(vo -> {
+                    // 获取负责人信息
+                    ImUser manager = userMapper.selectImUserById(group.getManagerId());
+                    if (manager != null) {
+                        vo.setManagerName(manager.getNickname());
+                    }
+                })
+                .andThenIfNotBlank(group.getWorkDays(), vo -> {
+                    // 解析工作日
+                    List<Integer> workDays = Arrays.stream(group.getWorkDays().split(","))
+                            .map(Integer::parseInt)
+                            .collect(Collectors.toList());
+                    vo.setWorkDays(workDays);
+                })
+                .andThen(vo -> {
+                    // 统计成员数量
+                    Integer memberCount = attendanceGroupMapper.countMembers(groupId);
+                    vo.setMemberCount(memberCount != null ? memberCount : 0);
+                })
+                .build();
     }
 
     @Override
@@ -208,8 +210,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         List<ImAttendanceGroup> groups = attendanceGroupMapper.selectGroupsByUser(userId);
 
         return groups.stream().map(group -> {
-            ImAttendanceGroupVO vo = new ImAttendanceGroupVO();
-            BeanUtils.copyProperties(group, vo);
+            ImAttendanceGroupVO vo = BeanConvertUtil.convert(group, ImAttendanceGroupVO.class);
 
             if (group.getWorkDays() != null) {
                 vo.setWorkDays(Arrays.stream(group.getWorkDays().split(","))
@@ -231,16 +232,15 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             return null;
         }
 
-        ImAttendanceGroupVO vo = new ImAttendanceGroupVO();
-        BeanUtils.copyProperties(group, vo);
-
-        if (group.getWorkDays() != null) {
-            vo.setWorkDays(Arrays.stream(group.getWorkDays().split(","))
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList()));
-        }
-
-        return vo;
+        return VoBuilder.of(group, ImAttendanceGroupVO.class)
+                .convert()
+                .andThenIfNotBlank(group.getWorkDays(), vo -> {
+                    // 解析工作日
+                    vo.setWorkDays(Arrays.stream(group.getWorkDays().split(","))
+                            .map(Integer::parseInt)
+                            .collect(Collectors.toList()));
+                })
+                .build();
     }
 
     @Override
@@ -372,12 +372,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
     @Override
     public List<ImAttendanceShiftVO> getShiftList(Long groupId) {
         List<ImAttendanceShift> shifts = attendanceShiftMapper.selectByGroupId(groupId);
-
-        return shifts.stream().map(shift -> {
-            ImAttendanceShiftVO vo = new ImAttendanceShiftVO();
-            BeanUtils.copyProperties(shift, vo);
-            return vo;
-        }).collect(Collectors.toList());
+        return BeanConvertUtil.convertList(shifts, ImAttendanceShiftVO.class);
     }
 
     @Override
@@ -435,14 +430,10 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
     public List<ImAttendanceShiftVO> getUserSchedule(Long userId, LocalDate startDate, LocalDate endDate) {
         List<ImAttendanceSchedule> schedules = attendanceScheduleMapper.selectUserSchedule(userId, startDate, endDate);
 
-        return schedules.stream().map(schedule -> {
-            ImAttendanceShift shift = attendanceShiftMapper.selectById(schedule.getShiftId());
-            if (shift != null) {
-                ImAttendanceShiftVO vo = new ImAttendanceShiftVO();
-                BeanUtils.copyProperties(shift, vo);
-                return vo;
-            }
-            return null;
-        }).filter(vo -> vo != null).collect(Collectors.toList());
+        return schedules.stream()
+                .map(schedule -> attendanceShiftMapper.selectById(schedule.getShiftId()))
+                .filter(shift -> shift != null)
+                .map(shift -> BeanConvertUtil.convert(shift, ImAttendanceShiftVO.class))
+                .collect(Collectors.toList());
     }
 }
