@@ -57,6 +57,12 @@
           </button>
         </el-tooltip>
 
+        <el-tooltip content="定时发送" placement="top">
+          <button class="toolbar-btn schedule-btn" @click="$emit('schedule-send')">
+            <span class="material-icons-outlined">schedule_send</span>
+          </button>
+        </el-tooltip>
+
         <el-tooltip content="任务" placement="top">
           <button class="toolbar-btn" @click="$emit('create-todo')">
             <span class="material-icons-outlined">check_circle</span>
@@ -97,6 +103,7 @@ defineEmits([
   'at-member',
   'smart-reply',
   'send-location',
+  'schedule-send',
   'create-todo'
 ])
 </script>
@@ -204,6 +211,19 @@ defineEmits([
 
       &:active {
         transform: translateY(0) scale(0.95);
+      }
+    }
+
+    &.schedule-btn {
+      color: var(--dt-warning-color);
+
+      .material-icons-outlined {
+        font-size: 22px;
+      }
+
+      &:hover {
+        background: var(--dt-warning-bg);
+        color: var(--dt-warning-color);
       }
     }
   }

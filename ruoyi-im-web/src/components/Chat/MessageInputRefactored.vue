@@ -24,16 +24,19 @@
       @at-member="handleAtMember"
       @smart-reply="handleShowSmartReply"
       @send-location="handleLocation"
+      @schedule-send="handleScheduleSend"
       @create-todo="handleCreateTodo"
     />
 
-    <!-- 录音动画区域 - 暂时禁用（语音功能未来考虑） -->
-    <!-- <div v-if="isVoiceMode" class="voice-recording-wrapper">
+    <!-- 录音动画区域 -->
+    <div v-if="isVoiceMode" class="voice-recording-wrapper">
       <VoiceRecorder
+        :max-length="60000"
+        :min-length="1000"
         @record-complete="handleVoiceRecordComplete"
         @cancel="handleVoiceCancel"
       />
-    </div> -->
+    </div>
 
     <!-- 引用消息预览 -->
     <ReplyPreview
@@ -96,15 +99,14 @@
         <span class="hint-text">{{ sendShortcutHint }}</span>
         <div class="footer-actions">
           <!-- 语音输入切换按钮 -->
-          <el-tooltip content="按住说话" placement="top">
-            <!-- 语音按钮暂时禁用（未来考虑） -->
-            <!-- <button
+          <el-tooltip :content="isVoiceMode ? '切换到文字输入' : '按住说话'" placement="top">
+            <button
               class="footer-action-btn voice-btn"
               :class="{ active: isVoiceMode }"
               @click="toggleVoiceMode"
             >
               <el-icon><Microphone /></el-icon>
-            </button> -->
+            </button>
           </el-tooltip>
 
           <button
@@ -187,6 +189,14 @@
       @saved="handleScheduleSaved"
     />
 
+    <!-- 定时消息对话框 -->
+    <ScheduledMessageDialog
+      v-model="showScheduledMessageDialog"
+      :message-content="messageContent"
+      :conversation-id="session?.id"
+      @scheduled="handleScheduledMessage"
+    />
+
     <FileUploadPreviewDialog
       v-model="showFilePreview"
       :files="pendingFiles"
@@ -214,12 +224,13 @@ import { useTypingIndicator } from '@/composables/useTypingIndicator'
 // 子组件
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
-// VoiceRecorder 已删除（语音功能未来考虑）
+import VoiceRecorder from './VoiceRecorder.vue'
 import ScreenshotPreview from './ScreenshotPreview.vue'
 import DingtalkScreenshot from './DingtalkScreenshot.vue'
 import CommandPalette from './CommandPalette.vue'
 import AiSmartReply from './AiSmartReply.vue'
 import ScheduleDialog from './ScheduleDialog.vue'
+import ScheduledMessageDialog from './ScheduledMessageDialog.vue'
 import FileUploadPreviewDialog from './FileUploadPreviewDialog.vue'
 import ResizeHandle from './ResizeHandle.vue'
 import InputToolbar from './InputToolbar.vue'
@@ -407,6 +418,7 @@ const isVoiceMode = ref(false)
 const showEmojiPicker = ref(false)
 const emojiPickerPosition = ref({ x: 0, y: 0 })
 const showScheduleDialog = ref(false)
+const showScheduledMessageDialog = ref(false)
 const showScreenshotPreview = ref(false)
 const screenshotData = ref(null)
 const showScreenshotGuide = ref(false)
@@ -531,7 +543,14 @@ const handleSendVoice = () => {
 }
 
 const handleVoiceRecordComplete = (data) => {
-  handleVoiceRecordCompleteInternal(data)
+  // VoiceRecorder 发出 { blob, duration }
+  // useVoicePreview 期望 { blob, url, duration }
+  const voiceData = {
+    blob: data.blob,
+    url: URL.createObjectURL(data.blob),
+    duration: data.duration
+  }
+  handleVoiceRecordCompleteInternal(voiceData)
   isVoiceMode.value = false
 }
 
@@ -758,6 +777,22 @@ const handleShowSmartReply = () => {
     y: rect.top - 480
   }
   showSmartReply.value = true
+}
+
+// ========== 定时发送 ==========
+const handleScheduleSend = () => {
+  if (!messageContent.value.trim()) {
+    ElMessage.warning('请先输入消息内容')
+    return
+  }
+  showScheduledMessageDialog.value = true
+}
+
+const handleScheduledMessage = ({ scheduledTime }) => {
+  ElMessage.success(`消息已设置在 ${scheduledTime} 发送`)
+  // 清空输入框
+  messageContent.value = ''
+  clearDraft()
 }
 
 /**

@@ -6,9 +6,23 @@
     <!-- 空状态 -->
     <div v-else-if="messages.length === 0 && !loading" class="empty">暂无消息</div>
 
-    <!-- 消息内容 -->
+    <!-- 消息内容 - 虚拟滚动优化 -->
     <template v-else>
-      <div v-for="msg in visibleMessages" :key="msg.id || msg.timeText" :data-id="msg.id" class="message-wrapper">
+      <!-- 顶部占位符：维持滚动高度 -->
+      <div
+        v-if="isLazyLoadingEnabled"
+        class="virtual-spacer-top"
+        :style="{ height: topSpacerHeight + 'px' }"
+      ></div>
+
+      <!-- 可见消息列表 -->
+      <div
+        v-for="msg in visibleMessages"
+        :key="msg.id || msg.timeText"
+        :data-id="msg.id"
+        class="message-wrapper"
+        v-memo="[(msg.id || msg.timeText), msg.isRead, msg.isPinned]"
+      >
         <!-- 时间分隔符 -->
         <div v-if="msg.isTimeDivider" class="time-divider">
           <span class="time-text">{{ msg.timeText }}</span>
@@ -91,6 +105,13 @@
         </MessageItem>
       </div>
 
+      <!-- 底部占位符：维持滚动高度 -->
+      <div
+        v-if="isLazyLoadingEnabled"
+        class="virtual-spacer-bottom"
+        :style="{ height: bottomSpacerHeight + 'px' }"
+      ></div>
+
       <!-- 加载更多骨架屏 -->
       <SkeletonLoader v-if="loading && messages.length > 0" type="message" :count="3" />
 
@@ -166,6 +187,22 @@ const AVERAGE_MESSAGE_HEIGHT = 80 // 包含头像、内容、间距的估算高�
 
 // 是否启用懒加载
 const isLazyLoadingEnabled = computed(() => props.messages.length > ENABLE_LAZY_LOADING_THRESHOLD)
+
+// 计算顶部和底部占位符高度（虚拟滚动优化）
+const topSpacerHeight = computed(() => {
+  if (!isLazyLoadingEnabled.value) return 0
+  const { startIndex } = calculateVisibleRange()
+  // 估算顶部消息的总高度
+  return startIndex * AVERAGE_MESSAGE_HEIGHT
+})
+
+const bottomSpacerHeight = computed(() => {
+  if (!isLazyLoadingEnabled.value) return 0
+  const { endIndex } = calculateVisibleRange()
+  const allMessages = messagesWithDividers.value
+  // 估算底部未渲染消息的总高度
+  return (allMessages.length - endIndex) * AVERAGE_MESSAGE_HEIGHT
+})
 
 /**
  * 计算可见区域的消息范围
@@ -584,7 +621,7 @@ const scrollToMsg = (param) => {
   tempDisableLazyLoading()
 }
 
-// 监听滚动事件
+// 监听滚动事件 - 性能优化版
 const handleScroll = () => {
   if (!listRef.value || props.loading) return
 
@@ -594,14 +631,36 @@ const handleScroll = () => {
   scrollTop.value = newScrollTop
   clientHeight.value = newClientHeight
 
-  // 滚动到顶部加载更多
-  if (newScrollTop === 0) {
+  // 滚动到顶部加载更多（带阈值，避免频繁触发）
+  if (newScrollTop < 50 && newScrollTop >= 0) {
     emit('load-more')
   }
 
   // 检测是否接近底部
   const distanceFromBottom = scrollHeight - newScrollTop - newClientHeight
   showScrollToBottom.value = distanceFromBottom > 300
+
+  // 更新可见区域（用于已读上报）
+  updateVisibleRange(newScrollTop, newClientHeight)
+}
+
+// 可见区域跟踪（用于已读上报优化）
+const visibleRange = ref({ start: 0, end: 0 })
+const updateVisibleRange = (scrollPos, viewportHeight) => {
+  const allMessages = messagesWithDividers.value
+  if (allMessages.length === 0) return
+
+  const viewportTop = scrollPos
+  const viewportBottom = scrollPos + viewportHeight
+
+  // 简单估算可见范围
+  const startIdx = Math.floor(viewportTop / AVERAGE_MESSAGE_HEIGHT)
+  const endIdx = Math.ceil(viewportBottom / AVERAGE_MESSAGE_HEIGHT)
+
+  visibleRange.value = {
+    start: Math.max(0, startIdx),
+    end: Math.min(allMessages.length - 1, endIdx)
+  }
 }
 
 // 保持滚动偏移（用于加载更多）
@@ -761,6 +820,16 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
   .el-icon {
     font-size: 14px;
   }
+}
+
+// ============================================================================
+// 虚拟滚动占位符 - 维持正确的滚动条高度
+// ============================================================================
+.virtual-spacer-top,
+.virtual-spacer-bottom {
+  width: 100%;
+  pointer-events: none;
+  flex-shrink: 0;
 }
 
 // 淡入淡出动画

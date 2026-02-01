@@ -1,5 +1,20 @@
 <template>
-  <div class="session-panel">
+  <div
+    class="session-panel"
+    :style="{ width: panelWidth + 'px' }"
+    @mouseleave="isResizing = false"
+  >
+    <!-- 拖拽调整宽度的手柄 -->
+    <div
+      class="resize-handle"
+      :class="{ 'is-resizing': isResizing }"
+      @mousedown="handleResizeStart"
+      @dblclick="resetWidth"
+    >
+      <div class="resize-line"></div>
+      <div class="resize-hint" v-show="isResizing">{{ Math.round(panelWidth) }}px</div>
+    </div>
+
     <!-- 头部 -->
     <div class="panel-header">
       <h1 class="panel-title">消息</h1>
@@ -80,6 +95,18 @@
           <span class="material-icons-outlined">close</span>
         </span>
       </div>
+
+      <!-- 归档入口按钮 -->
+      <div
+        v-if="archivedCount > 0"
+        class="archive-entry"
+        @click="handleShowArchived"
+      >
+        <span class="material-icons-outlined archive-icon">archive</span>
+        <span class="archive-text">归档 ({{ archivedCount }})</span>
+        <span class="archive-chevron material-icons-outlined">chevron_right</span>
+      </div>
+
       <!-- 全局搜索面板 -->
       <GlobalSearchDialog
         v-model="showGlobalSearch"
@@ -210,6 +237,11 @@
         <span class="material-icons-outlined item-icon">done_all</span>
         标记已读
       </div>
+      <!-- 归档会话选项 -->
+      <div class="menu-item" @click="handleArchiveSession">
+        <span class="material-icons-outlined item-icon">archive</span>
+        {{ contextMenu.session?.isArchived ? '取消归档' : '归档会话' }}
+      </div>
       <div class="menu-item" @click="handleTogglePin">
         <span class="material-icons-outlined item-icon">
           {{ contextMenu.session?.isPinned ? 'push_pin' : 'push_pin' }}
@@ -271,7 +303,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, reactive, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, reactive, nextTick, watch } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
@@ -294,11 +326,103 @@ const props = defineProps({
 const emit = defineEmits(['select-session', 'show-user'])
 const store = useStore()
 
+// ==================== 侧边栏宽度调整 ====================
+const STORAGE_KEY = 'session-panel-width'
+const MIN_WIDTH = 220
+const MAX_WIDTH = 420
+const DEFAULT_WIDTH = 280
+
+const panelWidth = ref(DEFAULT_WIDTH)
+const isResizing = ref(false)
+
+// 初始化宽度
+onMounted(() => {
+  const savedWidth = localStorage.getItem(STORAGE_KEY)
+  if (savedWidth) {
+    const width = parseInt(savedWidth, 10)
+    if (!isNaN(width) && width >= MIN_WIDTH && width <= MAX_WIDTH) {
+      panelWidth.value = width
+    }
+  }
+
+  // 监听全局鼠标移动和释放
+  window.addEventListener('mousemove', handleResizeMove)
+  window.addEventListener('mouseup', handleResizeEnd)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', handleResizeMove)
+  window.removeEventListener('mouseup', handleResizeEnd)
+})
+
+// 开始拖拽
+const handleResizeStart = (e) => {
+  isResizing.value = true
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+}
+
+// 拖拽中
+const handleResizeMove = (e) => {
+  if (!isResizing.value) return
+
+  const newWidth = e.clientX
+  if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
+    panelWidth.value = newWidth
+  }
+}
+
+// 结束拖拽
+const handleResizeEnd = () => {
+  if (isResizing.value) {
+    isResizing.value = false
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
+    // 保存到 localStorage
+    localStorage.setItem(STORAGE_KEY, String(panelWidth.value))
+  }
+}
+
+// 重置宽度
+const resetWidth = () => {
+  panelWidth.value = DEFAULT_WIDTH
+  localStorage.setItem(STORAGE_KEY, String(DEFAULT_WIDTH))
+}
+
+// 暴露宽度供父组件使用
+defineExpose({
+  panelWidth
+})
+// ====================================================
+
 const searchKeyword = ref('')
 const showCreateGroupDialog = ref(false)
 const showGlobalSearch = ref(false)
 const showContactSelector = ref(false)
 const isAddMenuOpen = ref(false)
+
+// ==================== 会话归档 ====================
+const archivedCount = ref(0)
+const showArchivedSessions = ref(false)
+
+// 加载归档数量
+const loadArchivedCount = async () => {
+  try {
+    const count = await store.dispatch('im/session/getArchivedCount')
+    archivedCount.value = count || 0
+  } catch (error) {
+    console.error('获取归档数量失败', error)
+  }
+}
+
+// 显示归档会话列表
+const handleShowArchived = () => {
+  showArchivedSessions.value = !showArchivedSessions.value
+  if (showArchivedSessions.value) {
+    ElMessage.info('归档会话列表功能开发中')
+  }
+}
+// ====================================================
 
 // 分组管理相关状态
 const showGroupManageDialog = ref(false)
@@ -717,6 +841,24 @@ const handleDeleteSession = () => {
   }).catch(() => {})
 }
 
+// 归档/取消归档会话
+const handleArchiveSession = async () => {
+  if (!contextMenu.session) return
+  const session = contextMenu.session
+  const isArchived = session.isArchived || false
+
+  try {
+    await store.dispatch('im/session/toggleArchive', {
+      conversationId: session.id,
+      archived: !isArchived
+    })
+    ElMessage.success(isArchived ? '已取消归档' : '会话已归档')
+    hideContextMenu()
+  } catch (error) {
+    ElMessage.error('操作失败，请重试')
+  }
+}
+
 // ========== 分组管理函数 ==========
 
 // 切换分组展开/收起
@@ -833,6 +975,8 @@ onMounted(() => {
   store.dispatch('im/session/startTypingCleanup')
   // 加载未读@提及
   loadMentions()
+  // 加载归档数量
+  loadArchivedCount()
   window.addEventListener('click', hideContextMenu)
 })
 
@@ -850,14 +994,97 @@ onUnmounted(() => {
 .session-panel {
   display: flex;
   flex-direction: column;
-  width: var(--dt-session-panel-width);
+  min-width: 220px;
+  max-width: 420px;
   flex-shrink: 0;
   border-right: 1px solid var(--dt-border-light);
   background: var(--dt-bg-card);
   height: 100%;
   animation: fadeIn 0.3s var(--dt-ease-out);
   position: relative;
-  z-index: 1; // 确保在正常的 flex 流中
+  z-index: 10; // 确保在正常的 flex 流中
+  transition: width 0.05s linear; // 拖拽时无延迟
+}
+
+// ============================================================================
+// 拖拽调整宽度的手柄
+// ============================================================================
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 20;
+  transition: background-color 0.2s;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 40px;
+    background: transparent;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  &:hover::before {
+    background: var(--dt-brand-color);
+    opacity: 0.5;
+  }
+
+  &.is-resizing::before {
+    background: var(--dt-brand-color);
+    height: 60px;
+    opacity: 0.8;
+  }
+
+  &:hover .resize-line {
+    opacity: 1;
+  }
+
+  &.is-resizing .resize-line {
+    opacity: 1;
+  }
+}
+
+.resize-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 30px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--dt-border-color) 20%,
+    var(--dt-border-color) 80%,
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.resize-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 4px 8px;
+  background: var(--dt-brand-color);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeIn 0.2s;
 }
 
 // ============================================================================
@@ -937,6 +1164,41 @@ onUnmounted(() => {
 // ============================================================================
 .search-section {
   padding: 0 12px 14px;
+}
+
+// ============================================================================
+// 归档入口
+// ============================================================================
+.archive-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-md);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-bg-session-hover);
+  }
+
+  .archive-icon {
+    font-size: 18px;
+    color: var(--dt-text-secondary);
+  }
+
+  .archive-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--dt-text-primary);
+  }
+
+  .archive-chevron {
+    font-size: 18px;
+    color: var(--dt-text-quaternary);
+  }
 }
 
 .search-container {

@@ -130,6 +130,7 @@ declare module 'vue' {
     GroupManageDialog: typeof import('./components/Contacts/GroupManageDialog.vue')['default']
     GroupMembersDrawer: typeof import('./components/Chat/GroupMembersDrawer.vue')['default']
     GroupProfileDialog: typeof import('./components/Contacts/GroupProfileDialog.vue')['default']
+    GroupProfileDialogV2: typeof import('./components/Contacts/GroupProfileDialogV2.vue')['default']
     GroupsView: typeof import('./components/Contacts/GroupsView.vue')['default']
     HelpFeedbackDialog: typeof import('./components/Common/HelpFeedbackDialog.vue')['default']
     HelpSettings: typeof import('./components/Settings/HelpSettings.vue')['default']
@@ -171,6 +172,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScheduleDialog: typeof import('./components/Chat/ScheduleDialog.vue')['default']
+    ScheduledMessageDialog: typeof import('./components/Chat/ScheduledMessageDialog.vue')['default']
     ScreenshotPreview: typeof import('./components/Chat/ScreenshotPreview.vue')['default']
     SearchBar: typeof import('./components/admin/SearchBar.vue')['default']
     SearchBox: typeof import('./components/Base/SearchBox.vue')['default']
@@ -196,6 +198,7 @@ declare module 'vue' {
     VirtualMessageItem: typeof import('./components/Chat/VirtualMessageItem.vue')['default']
     VoiceCallDialog: typeof import('./components/Chat/VoiceCallDialog.vue')['default']
     VoicePreviewPanel: typeof import('./components/Chat/VoicePreviewPanel.vue')['default']
+    VoiceRecorder: typeof import('./components/Chat/VoiceRecorder.vue')['default']
     VoiceToText: typeof import('./components/Chat/VoiceToText.vue')['default']
     WebScreenshot: typeof import('./components/Chat/WebScreenshot.vue')['default']
   }
