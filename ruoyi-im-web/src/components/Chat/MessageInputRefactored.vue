@@ -475,7 +475,8 @@ const handleInput = () => {
   autoResize()
   emit('input', messageContent.value)
   checkCommandTrigger()
-  handleTypingInput(messageContent.value)
+  // 移除输入时的 typing 状态发送，只在发送消息时才发请求
+  // handleTypingInput(messageContent.value)
 }
 
 const handleKeydown = (e) => {
