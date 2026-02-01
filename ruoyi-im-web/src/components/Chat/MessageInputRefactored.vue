@@ -997,33 +997,23 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/design-tokens.scss' as *;
-
 // 容器
 .chat-input-container {
-  background: var(--dt-bg-input);
+  background: #fff;
   display: flex;
   flex-direction: column;
   position: relative;
-  border-top: 1px solid var(--dt-border-light);
+  border-top: 1px solid #e8e8e8;
   padding: 12px 16px 16px;
-  transition: all var(--dt-transition-base);
   z-index: 10;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
-
-  // 为录音区域预留空间
-  &.has-recording {
-    padding-bottom: 16px;
-  }
 
   .dark & {
-    border-top-color: var(--dt-border-dark);
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+    background: #1a1a1a;
+    border-top-color: rgba(255, 255, 255, 0.1);
   }
 
   &.is-resizing {
-    box-shadow: 0 -4px 16px rgba(var(--dt-brand-rgb), 0.15);
-    border-top-color: var(--dt-brand-color);
+    border-top-color: #1890ff;
   }
 }
 
@@ -1034,40 +1024,52 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 0;
   position: relative;
-  border-radius: 12px;
-  background: var(--dt-bg-body);
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  background: #f5f5f5;
+  transition: background 0.15s ease;
 
   &:focus-within {
-    background: var(--dt-bg-card);
-    box-shadow: 0 0 0 2px rgba(var(--dt-brand-rgb), 0.1);
+    background: #fff;
+    box-shadow: 0 0 0 2px #1890ff;
+  }
+
+  .dark & {
+    background: #2a2a2a;
+
+    &:focus-within {
+      background: #333;
+      box-shadow: 0 0 0 2px #1890ff;
+    }
   }
 
   &.is-drag-over {
-    background: linear-gradient(135deg, rgba(var(--dt-brand-rgb), 0.03) 0%, rgba(var(--dt-brand-rgb), 0.06) 100%);
-    border-radius: 12px;
-    box-shadow: inset 0 0 0 2px rgba(var(--dt-brand-rgb), 0.2);
+    background: #e6f7ff;
+    box-shadow: inset 0 0 0 2px #1890ff;
 
     &::after {
-      content: '松开发送文件';
+      content: '松开发送';
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 12px 24px;
-      background: linear-gradient(135deg, var(--dt-brand-color) 0%, shade(var(--dt-brand-color), 15%) 100%);
+      padding: 8px 16px;
+      background: #1890ff;
       color: #fff;
       font-size: 14px;
-      font-weight: 500;
-      border-radius: 8px;
+      border-radius: 4px;
       pointer-events: none;
       z-index: 10;
-      animation: pulse 1s ease-in-out infinite;
-      box-shadow: 0 4px 16px rgba(var(--dt-brand-rgb), 0.3);
     }
 
     .message-input { opacity: 0.3; }
     .drag-hint { opacity: 0; }
+  }
+
+  &.is-voice-mode {
+    .message-input {
+      background: rgba(24, 144, 255, 0.05);
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -1077,27 +1079,25 @@ onUnmounted(() => {
   border: none;
   outline: none;
   resize: none;
-  font-size: var(--dt-font-size-base);
+  font-size: 14px;
   line-height: 1.6;
-  color: var(--dt-text-primary);
-  padding: 16px;
-  min-height: 100px;
+  color: #333;
+  padding: 12px;
+  min-height: 80px;
   background: transparent;
-  font-family: var(--dt-font-family);
-  border-radius: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   &::placeholder {
-    color: var(--dt-text-tertiary);
+    color: #999;
   }
 
-  &:focus {
-    background: transparent;
+  .dark & {
+    color: #e8e8e8;
+    &::placeholder { color: #666; }
   }
-
-  .dark & { color: var(--dt-text-primary-dark); }
 }
 
-// 拖拽引导提示（空状态）
+// 拖拽引导提示（简化版）
 .drag-hint {
   position: absolute;
   top: 50%;
@@ -1106,64 +1106,53 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   pointer-events: none;
-  transition: all 0.3s ease;
-  opacity: 0.5;
+  opacity: 0.4;
 
   .hint-icon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(var(--dt-brand-rgb), 0.08) 0%, rgba(var(--dt-brand-rgb), 0.04) 100%);
+    background: #e8e8e8;
     display: flex;
     align-items: center;
     justify-content: center;
 
     .material-icons-outlined {
-      font-size: 24px;
-      color: var(--dt-brand-color);
+      font-size: 20px;
+      color: #999;
     }
   }
 
   .hint-text {
     font-size: 12px;
-    color: var(--dt-text-tertiary);
-    text-align: center;
-    font-weight: 400;
-    letter-spacing: 0.3px;
+    color: #999;
+  }
+
+  .dark & {
+    .hint-icon { background: rgba(255, 255, 255, 0.1); }
+    .hint-text { color: #666; }
   }
 }
 
 .input-area:hover .drag-hint {
-  opacity: 0.7;
-}
-
-// 脉冲动画
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    opacity: 0.9;
-    transform: translate(-50%, -50%) scale(1.02);
-  }
+  opacity: 0.6;
 }
 
 .input-footer {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   margin-top: 8px;
 
   .hint-text {
     font-size: 12px;
-    color: var(--dt-text-tertiary);
+    color: #999;
     user-select: none;
 
-    .dark & { color: var(--dt-text-tertiary-dark); }
+    .dark & { color: #666; }
   }
 
   .footer-actions {
@@ -1178,73 +1167,74 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--dt-bg-body);
-    border: 1px solid var(--dt-border-color);
-    border-radius: var(--dt-radius-md);
-    color: var(--dt-text-secondary);
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    color: #666;
     cursor: pointer;
-    transition: all var(--dt-transition-fast);
+    transition: all 0.15s ease;
 
     .el-icon { font-size: 16px; }
 
     &:hover {
-      background: var(--dt-bg-hover);
-      color: var(--dt-brand-color);
-      border-color: var(--dt-brand-color);
+      background: #f5f5f5;
+      color: #1890ff;
+      border-color: #1890ff;
     }
 
     &.active {
-      background: var(--dt-brand-color);
+      background: #1890ff;
       color: #fff;
-      border-color: var(--dt-brand-color);
+      border-color: #1890ff;
     }
 
     .dark & {
-      background: var(--dt-bg-body-dark);
-      border-color: var(--dt-border-dark);
+      background: #333;
+      border-color: rgba(255, 255, 255, 0.1);
 
-      &:hover { background: var(--dt-bg-hover-dark); }
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
     }
   }
 
   .send-btn {
-    padding: 10px 24px;
-    border-radius: 8px;
+    padding: 8px 20px;
+    border-radius: 6px;
     border: none;
-    background: var(--dt-bg-hover);
-    color: var(--dt-text-tertiary);
+    background: #e8e8e8;
+    color: #999;
     font-size: 14px;
     font-weight: 500;
     cursor: default;
-    transition: all var(--dt-transition-fast);
+    transition: all 0.15s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
 
     .send-icon {
       font-size: 18px;
     }
 
     &.active {
-      background: linear-gradient(135deg, var(--dt-brand-color) 0%, shade(var(--dt-brand-color), 10%) 100%);
+      background: #1890ff;
       color: #fff;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(var(--dt-brand-rgb), 0.3);
 
       &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(var(--dt-brand-rgb), 0.4);
+        background: #40a9ff;
       }
     }
 
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
     }
 
-    .dark & { background: var(--dt-bg-hover-dark); }
+    .dark & {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 
@@ -1260,7 +1250,7 @@ onUnmounted(() => {
   }
 }
 
-// 录音区域 - 显示在工具栏上方
+// 录音区域
 .voice-recording-wrapper {
   position: absolute;
   bottom: calc(100% - 4px);
@@ -1270,36 +1260,27 @@ onUnmounted(() => {
   pointer-events: auto;
 
   :deep(.voice-recorder) {
-    background: var(--dt-bg-card);
-    border: 1px solid var(--dt-brand-color);
-    border-radius: var(--dt-radius-lg);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     animation: slideInUp 0.2s ease-out;
   }
 
   .dark & :deep(.voice-recorder) {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-brand-color);
+    background: #2a2a2a;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }
 
-// 录音动画滑入效果
 @keyframes slideInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-// 输入区域在语音模式下的样式
-.input-area.is-voice-mode {
-  .message-input {
-    background: rgba(0, 137, 255, 0.05);
-    cursor: not-allowed;
   }
 }
 </style>

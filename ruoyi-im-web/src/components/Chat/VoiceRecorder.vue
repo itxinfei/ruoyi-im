@@ -17,13 +17,13 @@
 
     <!-- 录音中状态 -->
     <div v-else class="recording-state">
-      <!-- 录音动画波形 -->
+      <!-- 简化的录音动画波形 -->
       <div class="recording-waveform">
         <span
-          v-for="index in 15"
+          v-for="index in 5"
           :key="index"
           class="wave-bar"
-          :style="{ animationDelay: `${index * 0.05}s` }"
+          :style="{ animationDelay: `${index * 0.1}s` }"
         ></span>
       </div>
 
@@ -39,17 +39,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
-  maxLength: { type: Number, default: 60000 }, // 最长60秒
-  minLength: { type: Number, default: 1000 }   // 最短1秒
+  maxLength: { type: Number, default: 60000 },
+  minLength: { type: Number, default: 1000 }
 })
 
 const emit = defineEmits(['record-complete', 'cancel'])
 
-// 状态
 const isRecording = ref(false)
 const recordingTime = ref(0)
 const touchStarted = ref(false)
@@ -58,7 +57,6 @@ const audioChunks = ref([])
 const startTime = ref(0)
 const timer = ref(null)
 
-// 格式化时间
 const formattedTime = computed(() => {
   const seconds = Math.floor(recordingTime.value / 1000)
   const minutes = Math.floor(seconds / 60)
@@ -66,7 +64,6 @@ const formattedTime = computed(() => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 })
 
-// 开始录音
 const startRecording = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -80,11 +77,8 @@ const startRecording = async () => {
 
     mediaRecorder.value.onstop = () => {
       const audioBlob = new Blob(audioChunks.value, { type: 'audio/webm' })
-
-      // 停止所有轨道
       stream.getTracks().forEach(track => track.stop())
 
-      // 如果录音时长符合要求，发送完成事件
       const duration = Date.now() - startTime.value
       if (duration >= props.minLength && duration <= props.maxLength) {
         emit('record-complete', {
@@ -100,11 +94,8 @@ const startRecording = async () => {
     startTime.value = Date.now()
     isRecording.value = true
 
-    // 开始计时
     timer.value = setInterval(() => {
       recordingTime.value = Date.now() - startTime.value
-
-      // 检查是否超过最大时长
       if (recordingTime.value >= props.maxLength) {
         stopRecording()
       }
@@ -117,77 +108,79 @@ const startRecording = async () => {
   }
 }
 
-// 停止录音
 const stopRecording = () => {
   if (mediaRecorder.value && mediaRecorder.value.state !== 'inactive') {
     mediaRecorder.value.stop()
   }
-
   clearInterval(timer.value)
   isRecording.value = false
   recordingTime.value = 0
 }
 
-// 处理鼠标按下
 const handleStartRecord = () => {
   touchStarted.value = false
   startRecording()
 }
 
-// 处理触摸开始
 const handleTouchStart = () => {
   touchStarted.value = true
   startRecording()
 }
 
-// 处理鼠标释放
 const handleEndRecord = () => {
   if (!touchStarted.value) {
     stopRecording()
   }
 }
 
-// 处理触摸结束
 const handleTouchEnd = () => {
   stopRecording()
 }
 
-// 处理取消（鼠标离开）
 const handleCancel = () => {
   if (isRecording.value && recordingTime.value < 500) {
-    // 录音时间太短，自动取消
     stopRecording()
   }
 }
 
-// 清理
 onUnmounted(() => {
   stopRecording()
 })
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/design-tokens.scss' as *;
-
 .voice-recorder-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: var(--dt-bg-chat);
-  border-radius: var(--dt-radius-lg);
+  background: #fff;
+  border-radius: 8px;
   user-select: none;
   touch-action: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
+  border: 1px solid #e8e8e8;
 
   &:hover {
-    background: var(--dt-bg-hover);
+    background: #fafafa;
   }
 
   &.is-recording {
-    background: rgba(244, 67, 54, 0.1);
+    background: #fff1f0;
+    border-color: #ffccc7;
     cursor: default;
+  }
+
+  .dark & {
+    background: #2a2a2a;
+    border-color: rgba(255, 255, 255, 0.1);
+
+    &:hover { background: #333; }
+    &.is-recording {
+      background: rgba(255, 77, 79, 0.1);
+      border-color: rgba(255, 77, 79, 0.3);
+    }
   }
 
   .voice-guide {
@@ -195,11 +188,11 @@ onUnmounted(() => {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    color: var(--dt-text-secondary);
+    color: #666;
 
     .mic-icon {
-      font-size: 32px;
-      color: var(--dt-brand-color);
+      font-size: 28px;
+      color: #1890ff;
     }
 
     .guide-text {
@@ -212,22 +205,23 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  }
+}
 
 .recording-waveform {
   display: flex;
-  gap: 3px;
+  gap: 4px;
   align-items: center;
   justify-content: center;
-  height: 40px;
+  height: 32px;
 
   .wave-bar {
     width: 4px;
-    background: var(--dt-error-color);
+    background: #ff4d4f;
     border-radius: 2px;
-    animation: recordingWave 1s ease-in-out infinite;
+    animation: recordingWave 0.6s ease-in-out infinite;
+    height: 8px;
 
     @keyframes recordingWave {
       0%, 100% {
@@ -241,58 +235,40 @@ onUnmounted(() => {
 }
 
 .recording-time {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--dt-error-color);
-  margin: 8px 0;
+  color: #ff4d4f;
 }
 
 .cancel-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.05);
+  background: #f5f5f5;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: rgba(244, 67, 54, 0.15);
+    background: #ffe6e6;
 
     .material-icons-outlined {
-      color: var(--dt-error-color);
+      color: #ff4d4f;
     }
   }
 
   .material-icons-outlined {
-    font-size: 20px;
-    color: var(--dt-text-quaternary);
-  }
-}
-
-// 暗色模式
-:global(.dark) {
-  .voice-recorder-wrapper {
-    background: #1e1e1e1;
-
-    &:hover {
-      background: #2a2a2a2a;
-    }
-
-    &.is-recording {
-      background: rgba(244, 67, 54, 0.15);
-    }
+    font-size: 18px;
+    color: #999;
   }
 
-  .cancel-btn {
+  .dark & {
     background: rgba(255, 255, 255, 0.08);
 
-    &:hover {
-      background: rgba(244, 67, 54, 0.25);
-    }
+    &:hover { background: rgba(255, 77, 79, 0.2); }
   }
 }
 </style>
