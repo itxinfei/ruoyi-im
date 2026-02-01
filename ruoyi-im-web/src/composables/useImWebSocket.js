@@ -4,6 +4,7 @@
  */import { getToken } from '../utils/storage'
 
 import { onUnmounted, ref } from 'vue'
+import { useStore } from 'vuex'
 import { error } from '@/utils/logger'
 import imWebSocket, { WS_STATUS } from '@/utils/websocket/imWebSocket'
 
@@ -44,6 +45,12 @@ export function useImWebSocket() {
     registerHandler('disconnected', () => {
       isConnected.value = false
       connectionState.value = WS_STATUS.CLOSED
+    })
+
+    // 设置 Vuex store 状态同步回调
+    const store = useStore()
+    imWebSocket.setStoreConnectionCallback((connected) => {
+      store.commit('im/SET_WS_CONNECTED', connected)
     })
 
     // 开始连接

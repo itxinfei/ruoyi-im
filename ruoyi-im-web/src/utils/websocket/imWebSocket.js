@@ -40,6 +40,29 @@ class ImWebSocket {
     this.reconnectInterval = 3000
     this.heartbeatInterval = 30000 // 30 秒心跳
     this.eventHandlers = new Map()
+    this.storeConnectionCallback = null // 回调函数：用于更新 Vuex store 的连接状态
+  }
+
+  /**
+   * 设置连接状态回调（用于同步 Vuex store）
+   * @param {Function} callback - 回调函数，接收 (connected: boolean) 参数
+   */
+  setStoreConnectionCallback(callback) {
+    this.storeConnectionCallback = callback
+  }
+
+  /**
+   * 更新 Vuex store 的连接状态
+   * @param {boolean} connected - 连接状态
+   */
+  updateStoreConnectionState(connected) {
+    if (this.storeConnectionCallback) {
+      try {
+        this.storeConnectionCallback(connected)
+      } catch (e) {
+        error('ImWebSocket', '更新 store 连接状态失败:', e)
+      }
+    }
   }
 
   /**
@@ -100,6 +123,9 @@ class ImWebSocket {
 
     // 触发连接成功事件
     this.emit('connected')
+
+    // 更新 Vuex store 的连接状态
+    this.updateStoreConnectionState(true)
   }
 
   /**
@@ -176,6 +202,9 @@ class ImWebSocket {
 
     // 触发断开连接事件
     this.emit('disconnected')
+
+    // 更新 Vuex store 的连接状态
+    this.updateStoreConnectionState(false)
 
     // 尝试重连
     if (event.code !== 1000) { // 1000 表示正常关闭
