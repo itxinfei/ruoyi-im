@@ -3,7 +3,8 @@
     class="contact-item"
     :class="{ 
       active: isActive,
-      'swiped-left': isSwipedLeft
+      'swiped-left': isSwipedLeft,
+      [size]: true
     }"
     @click="$emit('click', item)"
     @contextmenu.prevent="$emit('contextmenu', $event, item)"
@@ -55,6 +56,11 @@ const props = defineProps({
   searchQuery: {
     type: String,
     default: ''
+  },
+  size: {
+    type: String,
+    enum: ['compact', 'normal', 'expanded'],
+    default: 'normal'
   }
 })
 
@@ -110,11 +116,11 @@ const escapeHtml = (str) => {
 
 .contact-item {
   position: relative;
-  height: 60px; /* 钉钉标准列表项高度 */
+  height: 60px; /* 默认标准高度 */
   overflow: hidden;
   background: #ffffff;
   cursor: pointer;
-  transition: background var(--dt-transition-fast);
+  transition: background var(--dt-transition-fast), height var(--dt-transition-fast);
 
   &:hover {
     background: var(--dt-bg-session-hover);
@@ -125,6 +131,33 @@ const escapeHtml = (str) => {
 
     .item-name {
       color: var(--dt-brand-color);
+    }
+  }
+
+  /* 紧凑模式 - 48px */
+  &.compact {
+    height: 48px;
+
+    .item-desc {
+      display: none;
+    }
+
+    .contact-content {
+      padding: 0 12px;
+    }
+  }
+
+  /* 展开模式 - 72px */
+  &.expanded {
+    height: 72px;
+
+    .item-info {
+      gap: 6px;
+    }
+
+    .item-desc {
+      font-size: var(--dt-font-size-xs);
+      line-height: 1.3;
     }
   }
 }

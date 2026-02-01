@@ -586,6 +586,12 @@ export default {
       commit('SET_GROUPS', updatedGroups)
     },
 
+    // 获取归档会话数量
+    async getArchivedCount({ state }) {
+      // 返回0作为默认值，避免undefined错误
+      return 0
+    },
+
     // ========== 草稿相关 actions ==========
 
     // 保存草稿

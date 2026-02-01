@@ -142,6 +142,7 @@ declare module 'vue' {
     InputToolbar: typeof import('./components/Chat/InputToolbar.vue')['default']
     LinkCard: typeof import('./components/Chat/LinkCard.vue')['default']
     LinkCardList: typeof import('./components/Chat/message-bubble/parts/LinkCardList.vue')['default']
+    ListGroupHeader: typeof import('./components/Contacts/ListGroupHeader.vue')['default']
     LocationBubble: typeof import('./components/Chat/message-bubble/bubbles/LocationBubble.vue')['default']
     MailDetailDialog: typeof import('./components/MailDetailDialog/index.vue')['default']
     MeetingDetailDialog: typeof import('./components/Chat/MeetingDetailDialog.vue')['default']

@@ -997,6 +997,8 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/animations.scss' as *;
+
 // 容器
 .chat-input-container {
   background: #fff;
@@ -1006,6 +1008,9 @@ onUnmounted(() => {
   border-top: 1px solid #e8e8e8;
   padding: 12px 16px 16px;
   z-index: 10;
+  // 平滑高度过渡（对齐钉钉输入框体验）
+  transition: min-height 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.15s ease;
 
   .dark & {
     background: #1a1a1a;
@@ -1086,9 +1091,13 @@ onUnmounted(() => {
   min-height: 80px;
   background: transparent;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  // 平滑高度过渡（对齐钉钉输入框体验）
+  transition: min-height 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.15s ease;
 
   &::placeholder {
     color: #999;
+    transition: color 0.15s ease;
   }
 
   .dark & {

@@ -202,7 +202,7 @@
     </Transition>
 
     <!-- 中间列表栏 - 优化布局 -->
-    <main class="list-panel" :class="{ 'has-index': showIndexBar }">
+    <main class="list-panel">
       <!-- Mobile Header -->
       <div v-if="isMobile" class="mobile-header">
         <button class="menu-btn" @click="showMobileSidebar = true">
@@ -587,41 +587,8 @@ const selectDept = (dept) => {
     loadOrgMembers(dept.id)
 }
 
-// Scroll Handling (A-Z)
-const scrollToLetter = (letter) => {
-    // Find index of header
-    const index = virtualListData.value.findIndex(i => i.type === 'header' && i.title === letter)
-    if (index !== -1 && virtualListRef.value) {
-        virtualListRef.value.scrollToIndex(index)
-        activeLetter.value = letter
-        setTimeout(() => activeLetter.value = '', 1000)
-    }
-}
-
 const handleListScroll = (e) => {
-    // 🔑 A-Z 索引同步高亮
-    if (currentNav.value !== 'org' || !virtualListRef.value) return
-
-    // 获取当前滚动位置对应的索引
-    const scrollTop = e?.target?.scrollTop || 0
-    const itemHeight = 60 // header: 32, item: 60
-    const currentIndex = Math.floor(scrollTop / itemHeight)
-
-    // 找到对应的字母分组
-    let currentLetter = ''
-    for (let i = 0; i < virtualListData.value.length; i++) {
-        if (i >= currentIndex) {
-            const item = virtualListData.value[i]
-            if (item.type === 'header') {
-                currentLetter = item.title
-                break
-            }
-        }
-    }
-
-    if (currentLetter && currentLetter !== activeLetter.value) {
-        activeLetter.value = currentLetter
-    }
+    // 列表滚动处理
 }
 
 // API Loaders
@@ -1312,10 +1279,6 @@ onMounted(() => {
   margin-left: 0;
   transition: margin-left var(--dt-transition-base);
 
-  &.has-index {
-    padding-right: 40px;
-  }
-
   // 当搜索面板打开时，添加左边距
   &:has(+ .search-panel) {
     margin-left: 320px;
@@ -1392,52 +1355,6 @@ onMounted(() => {
   .list-count {
     font-size: 14px;
     color: var(--dt-text-tertiary);
-  }
-}
-
-// A-Z 索引栏
-.index-bar {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  z-index: 10;
-  padding: 6px 3px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  box-shadow: var(--dt-shadow-sm);
-}
-
-.index-item {
-  width: 14px;
-  height: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--dt-text-tertiary);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all var(--dt-transition-fast);
-
-  &:hover:not(.disabled) {
-    background: var(--dt-brand-bg);
-    color: var(--dt-brand-color);
-  }
-
-  &.active {
-    background: var(--dt-brand-color);
-    color: #ffffff;
-  }
-
-  &.disabled {
-    opacity: 0.2;
-    cursor: default;
   }
 }
 

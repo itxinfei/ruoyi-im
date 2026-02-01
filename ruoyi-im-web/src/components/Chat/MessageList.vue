@@ -17,11 +17,11 @@
 
       <!-- 可见消息列表 -->
       <div
-        v-for="msg in visibleMessages"
-        :key="msg.id || msg.timeText"
-        :data-id="msg.id"
-        class="message-wrapper"
-        v-memo="[(msg.id || msg.timeText), msg.isRead, msg.isPinned]"
+    v-for="msg in visibleMessages"
+    :key="msg.id || msg.timeText"
+    :data-id="msg.id"
+    class="message-wrapper"
+    v-memo="[(msg?.id || msg?.timeText), msg?.isRead || false, msg?.isPinned || false]"
       >
         <!-- 时间分隔符 -->
         <div v-if="msg.isTimeDivider" class="time-divider">
@@ -252,16 +252,19 @@ const visibleMessages = computed(() => {
   const allMessages = messagesWithDividers.value
   if (allMessages.length === 0) return []
 
+  // 过滤掉无效的消息对象
+  const validMessages = allMessages.filter(msg => msg && (msg.id || msg.timeText))
+
   // 不启用懒加载时，返回全部消息
   if (!isLazyLoadingEnabled.value) {
-    return allMessages
+    return validMessages
   }
 
   // 计算可见范围
   const { startIndex, endIndex } = calculateVisibleRange()
 
   // 截取可见区域的消息
-  return allMessages.slice(startIndex, endIndex)
+  return validMessages.slice(startIndex, endIndex)
 })
 
 // 监听新消息，如果是自己的消息则滚动到底部

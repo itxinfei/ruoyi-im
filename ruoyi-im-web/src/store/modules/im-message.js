@@ -708,8 +708,8 @@ export function startCleanupTimer(store) {
 
   // 按配置的间隔时间清理
   cleanupTimer = setInterval(() => {
-    store.dispatch('imMessage/cleanupExpiredMessages')
-    console.log(`[im-message] 清理过期的发送中消息（队列大小: ${store.getters['imMessage/sendingQueueSize']}）`)
+    store.dispatch('im/message/cleanupExpiredMessages')
+    console.log(`[im-message] 清理过期的发送中消息（队列大小: ${store.getters['im/message/sendingQueueSize']}）`)
   }, SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL)
 
   console.log(`[im-message] 启动定期清理任务（间隔: ${SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL / 1000}秒）`)

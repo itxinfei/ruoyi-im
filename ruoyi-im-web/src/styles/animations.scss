@@ -1013,6 +1013,22 @@ $duration-slower: 750ms;
 }
 
 // ============================================================================
+// 消息动画专用类 (Message Animation Classes)
+// ============================================================================
+
+.message-slide-elastic {
+  animation: messageSlideInElastic 0.4s $ease-spring;
+}
+
+.message-fade-slide {
+  animation: messageFadeSlideIn 0.3s $ease-out;
+}
+
+.message-pop-in {
+  animation: messagePop 0.3s var(--dt-ease-bounce);
+}
+
+// ============================================================================
 // 过渡工具类 (Transition Utility Classes)
 // ============================================================================
 
@@ -1637,6 +1653,36 @@ $duration-slower: 750ms;
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+// 消息弹性滑入 - 用于新发送消息的弹性动画（对齐钉钉）
+@keyframes messageSlideInElastic {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
+  }
+  80% {
+    transform: translateY(1px) scale(0.99);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+// 消息淡入滑入 - 适用于接收消息
+@keyframes messageFadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
