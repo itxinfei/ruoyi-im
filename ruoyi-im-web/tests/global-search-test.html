@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局搜索组件UI测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .test-container {
+            width: 900px;
+            max-width: 95vw;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            position: relative;
+            z-index: 3000;
+        }
+
+        .dialog-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dialog-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #0f172a;
+            letter-spacing: -0.01em;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #64748b;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #0f172a;
+            transform: rotate(90deg);
+        }
+
+        .modern-search-bar {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .modern-input {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border-radius: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .modern-input:hover {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+            background: #f1f5f9;
+        }
+
+        .modern-input.is-focus {
+            box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-color: #0089FF;
+            background: #fff;
+        }
+
+        .search-icon {
+            font-size: 18px;
+            color: #94a3b8;
+            margin-left: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            padding: 14px 0;
+            outline: none;
+            cursor: text;
+        }
+
+        .search-button {
+            background: #0089FF;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            width: 40px;
+            height: 40px;
+            margin-right: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .search-button:hover {
+            background: #0958d9;
+            transform: scale(1.05);
+        }
+
+        .search-button:active {
+            transform: scale(0.98);
+        }
+
+        .shortcut-hints {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        .hint-item {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .hint-item kbd {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        .hint-text {
+            margin-left: 4px;
+        }
+
+        .classic-body {
+            display: flex;
+            height: 500px;
+            overflow: hidden;
+        }
+
+        .classic-aside {
+            width: 160px;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            padding: 8px 0;
+            flex-shrink: 0;
+        }
+
+        .cat-tab {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #64748b;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .cat-tab:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+            transform: translateX(4px);
+        }
+
+        .cat-tab.active {
+            background: #fff;
+            color: #0089FF;
+            font-weight: 600;
+            border-right: 3px solid #0089FF;
+            box-shadow: inset 0 0 0 1px #e2e8f0;
+            transform: translateX(4px);
+        }
+
+        .cat-icon {
+            font-size: 16px;
+        }
+
+        .label {
+            flex: 1;
+        }
+
+        .count-badge {
+            font-size: 11px;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 500;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .modern-main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modern-main::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modern-main::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modern-main::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .modern-main::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* 欢迎卡片 */
+        .welcome-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 32px 24px;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 24px;
+            animation: welcomeFadeIn 0.5s ease-out;
+        }
+
+        @keyframes welcomeFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+
+        .welcome-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .welcome-desc {
+            font-size: 14px;
+            opacity: 0.8;
+            margin: 0 0 24px 0;
+        }
+
+        .quick-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+        }
+
+        .action-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 历史记录 */
+        .history-section {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            font-size: 18px;
+            color: #0089FF;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .clear-history-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .clear-history-btn:hover {
+            color: #ef4444;
+        }
+
+        .history-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #475569;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+
+        .history-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .history-icon {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .history-text {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 热门搜索 */
+        .trending-section {
+            margin-bottom: 32px;
+        }
+
+        .trending-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .trending-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .trending-tag:hover {
+            background: #f0f9ff;
+            color: #0089FF;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
+        }
+
+        .tag-rank {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            background: #0089FF;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .tag-rank.rank-1 { background: #ef4444; }
+        .tag-rank.rank-2 { background: #f97316; }
+        .tag-rank.rank-3 { background: #eab308; }
+
+        /* 骨架屏 */
+        .skeleton-container {
+            padding: 20px 0;
+        }
+
+        .skeleton-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .skeleton-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.5s infinite;
+        }
+
+        .skeleton-content {
+            flex: 1;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.5s infinite;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-line.skeleton-title { width: 60%; }
+        .skeleton-line.skeleton-desc { width: 80%; }
+        .skeleton-line.skeleton-meta { width: 40%; }
+
+        @keyframes skeletonShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* 搜索结果 */
+        .results-container {
+            display: none;
+        }
+
+        .result-section {
+            margin-bottom: 24px;
+        }
+
+        .result-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .result-card {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            animation: resultFadeIn 0.3s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes resultFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-card:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .result-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .result-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .result-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .result-time {
+            font-size: 12px;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .result-desc {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .result-meta .meta-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .meta-tag.contact-tag {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .meta-tag.group-tag {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .meta-tag.message-tag {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .meta-tag.file-tag {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: none;
+            min-height: 400px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .empty-icon {
+            font-size: 36px;
+            color: #94a3b8;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0 0 8px 0;
+        }
+
+        .empty-title strong {
+            color: #0089FF;
+        }
+
+        .empty-desc {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0 0 24px 0;
+            max-width: 300px;
+        }
+
+        .empty-suggestions {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 400px;
+        }
+
+        .suggestion-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin: 0 0 12px 0;
+            text-align: left;
+        }
+
+        .suggestion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .suggestion-item {
+            font-size: 13px;
+            color: #0089FF;
+            cursor: pointer;
+            text-align: left;
+            padding: 6px 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background: #e0f2fe;
+        }
+
+        /* 页脚 */
+        .classic-footer {
+            padding: 10px 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .footer-shortcuts {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .shortcut-item kbd {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* 深色模式 */
+        .test-container.dark {
+            background: #0f172a;
+        }
+
+        .test-container.dark .dialog-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-color: #334155;
+        }
+
+        .test-container.dark .dialog-title {
+            color: #f1f5f9;
+        }
+
+        .test-container.dark .modern-search-bar {
+            background: #1e293b;
+            border-color: #1e293b;
+        }
+
+        .test-container.dark .modern-input {
+            background: #1e293b;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-container.dark .modern-input:hover {
+            background: #2563eb;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .test-container.dark .modern-input.is-focus {
+            background: #0f172a;
+            box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-container.dark .classic-aside {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .test-container.dark .cat-tab {
+            color: #94a3b8;
+        }
+
+        .test-container.dark .cat-tab:hover {
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+
+        .test-container.dark .cat-tab.active {
+            background: #0f172a;
+            color: #0089FF;
+        }
+
+        .test-container.dark .count-badge {
+            background: #334155;
+            color: #cbd5e1;
+        }
+
+        .test-container.dark .section-title {
+            color: #f1f5f9;
+        }
+
+        .test-container.dark .history-item {
+            background: #1e293b;
+            color: #cbd5e1;
+        }
+
+        .test-container.dark .history-item:hover {
+            background: #2563eb;
+        }
+
+        .test-container.dark .trending-tag {
+            background: #1e293b;
+            color: #cbd5e1;
+        }
+
+        .test-container.dark .trending-tag:hover {
+            background: #1e40af;
+            box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
+        }
+
+        .test-container.dark .skeleton-item,
+        .test-container.dark .skeleton-avatar,
+        .test-container.dark .skeleton-line {
+            background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+        }
+
+        .test-container.dark .result-card {
+            background: #1e293b;
+        }
+
+        .test-container.dark .result-card:hover {
+            background: #2563eb;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-container.dark .result-title {
+            color: #f1f5f9;
+        }
+
+        .test-container.dark .result-desc {
+            color: #94a3b8;
+        }
+
+        .test-container.dark .meta-tag.contact-tag {
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+
+        .test-container.dark .meta-tag.group-tag {
+            background: #312e81;
+            color: #a5b4fc;
+        }
+
+        .test-container.dark .meta-tag.message-tag {
+            background: #0e7490;
+            color: #7dd3fc;
+        }
+
+        .test-container.dark .meta-tag.file-tag {
+            background: #78350f;
+            color: #fcd34d;
+        }
+
+        .test-container.dark .empty-icon-wrapper {
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        }
+
+        .test-container.dark .empty-title {
+            color: #f1f5f9;
+        }
+
+        .test-container.dark .empty-desc {
+            color: #94a3b8;
+        }
+
+        .test-container.dark .empty-suggestions {
+            background: #1e293b;
+        }
+
+        .test-container.dark .suggestion-title {
+            color: #94a3b8;
+        }
+
+        .test-container.dark .suggestion-item {
+            color: #60a5fa;
+        }
+
+        .test-container.dark .suggestion-item:hover {
+            background: #0e7490;
+        }
+
+        .test-container.dark .classic-footer {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .test-container.dark .shortcut-item kbd {
+            background: #0f172a;
+            border-color: #334155;
+            color: #cbd5e1;
+        }
+
+        /* 测试控制面板 */
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            color: #fff;
+            z-index: 10000;
+        }
+
+        .test-controls h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .test-controls button {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            background: #0089FF;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .test-controls button:hover {
+            background: #0958d9;
+        }
+
+        .test-controls button.active {
+            background: #22c55e;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .test-container {
+                width: 95%;
+            }
+
+            .classic-aside {
+                width: 120px;
+            }
+
+            .modern-main {
+                padding: 16px;
+            }
+
+            .welcome-card {
+                padding: 24px 16px;
+            }
+
+            .welcome-icon {
+                font-size: 36px;
+            }
+
+            .welcome-title {
+                font-size: 18px;
+            }
+
+            .welcome-desc {
+                font-size: 13px;
+            }
+
+            .quick-actions {
+                gap: 8px;
+            }
+
+            .action-item {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .modern-search-bar {
+                padding: 16px;
+            }
+
+            .search-input {
+                font-size: 16px;
+                padding: 12px 0;
+            }
+
+            .search-icon {
+                font-size: 16px;
+                margin-left: 8px;
+            }
+
+            .search-button {
+                width: 36px;
+                height: 36px;
+            }
+
+            .shortcut-hints {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .test-container {
+                width: 100%;
+                border-radius: 0;
+            }
+
+            .classic-aside {
+                width: 100px;
+            }
+
+            .cat-tab {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .cat-icon {
+                font-size: 14px;
+            }
+
+            .modern-search-bar {
+                padding: 12px;
+            }
+
+            .welcome-card {
+                padding: 20px 12px;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .action-item {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-controls">
+        <h3>测试控制面板</h3>
+        <button id="testDefault">默认状态</button>
+        <button id="testLoading">骨架屏加载</button>
+        <button id="testResults">搜索结果</button>
+        <button id="testEmpty">空状态</button>
+        <button id="toggleDark">切换深色模式</button>
+    </div>
+
+    <div class="test-container" id="searchDialog">
+        <div class="dialog-header">
+            <div class="dialog-title">全局搜索</div>
+            <button class="close-btn" onclick="document.getElementById('testControls').style.display = 'none'">×</button>
+        </div>
+
+        <div class="modern-search-bar">
+            <div class="search-container">
+                <div class="modern-input" id="searchInputWrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索联系人、群组、聊天记录、文件...">
+                    <button class="search-button">
+                        <span>🔍</span>
+                    </button>
+                </div>
+                <div class="shortcut-hints">
+                    <span class="hint-item">
+                        <kbd>⌘</kbd><kbd>K</kbd>
+                        <span class="hint-text">快速搜索</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="classic-body">
+            <div class="classic-aside">
+                <div class="cat-tab active" data-cat="all">
+                    <span class="cat-icon">🔍</span>
+                    <span class="label">全部内容</span>
+                    <span class="count-badge">0</span>
+                </div>
+                <div class="cat-tab" data-cat="contact">
+                    <span class="cat-icon">👤</span>
+                    <span class="label">联系人</span>
+                    <span class="count-badge">0</span>
+                </div>
+                <div class="cat-tab" data-cat="group">
+                    <span class="cat-icon">💬</span>
+                    <span class="label">群组</span>
+                    <span class="count-badge">0</span>
+                </div>
+                <div class="cat-tab" data-cat="message">
+                    <span class="cat-icon">💬</span>
+                    <span class="label">消息记录</span>
+                    <span class="count-badge">0</span>
+                </div>
+                <div class="cat-tab" data-cat="file">
+                    <span class="cat-icon">📄</span>
+                    <span class="label">文件</span>
+                    <span class="count-badge">0</span>
+                </div>
+            </div>
+
+            <div class="modern-main">
+                <!-- 默认状态 -->
+                <div id="defaultState">
+                    <div class="welcome-card">
+                        <div class="welcome-icon">🔍</div>
+                        <h3 class="welcome-title">智能搜索</h3>
+                        <p class="welcome-desc">快速查找联系人、群组、消息和文件</p>
+                        <div class="quick-actions">
+                            <div class="action-item">
+                                <span>👤</span>
+                                <span>@联系人</span>
+                            </div>
+                            <div class="action-item">
+                                <span>💬</span>
+                                <span>#群组</span>
+                            </div>
+                            <div class="action-item">
+                                <span>📄</span>
+                                <span>文件</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="section-header">
+                            <div class="section-title-wrapper">
+                                <span class="section-icon">⏰</span>
+                                <h3 class="section-title">最近搜索</h3>
+                            </div>
+                            <button class="clear-history-btn">
+                                <span>🗑️</span>
+                                清空
+                            </button>
+                        </div>
+                        <div class="history-grid">
+                            <div class="history-item">
+                                <span class="history-icon">🕐</span>
+                                <span class="history-text">项目进度</span>
+                            </div>
+                            <div class="history-item">
+                                <span class="history-icon">🕐</span>
+                                <span class="history-text">会议纪要</span>
+                            </div>
+                            <div class="history-item">
+                                <span class="history-icon">🕐</span>
+                                <span class="history-text">周报</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="trending-section">
+                        <div class="section-title-wrapper">
+                            <span class="section-icon">📈</span>
+                            <h3 class="section-title">热门搜索</h3>
+                        </div>
+                        <div class="trending-tags">
+                            <span class="trending-tag">
+                                <span class="tag-rank rank-1">1</span>
+                                项目进度
+                            </span>
+                            <span class="trending-tag">
+                                <span class="tag-rank rank-2">2</span>
+                                会议纪要
+                            </span>
+                            <span class="trending-tag">
+                                <span class="tag-rank rank-3">3</span>
+                                周报
+                            </span>
+                            <span class="trending-tag">
+                                <span class="tag-rank">4</span>
+                                产品需求
+                            </span>
+                            <span class="trending-tag">
+                                <span class="tag-rank">5</span>
+                                技术方案
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 骨架屏 -->
+                <div id="skeletonState" style="display: none;">
+                    <div class="skeleton-container">
+                        <div class="skeleton-item">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-content">
+                                <div class="skeleton-line skeleton-title"></div>
+                                <div class="skeleton-line skeleton-desc"></div>
+                                <div class="skeleton-line skeleton-meta"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-item">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-content">
+                                <div class="skeleton-line skeleton-title"></div>
+                                <div class="skeleton-line skeleton-desc"></div>
+                                <div class="skeleton-line skeleton-meta"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-item">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-content">
+                                <div class="skeleton-line skeleton-title"></div>
+                                <div class="skeleton-line skeleton-desc"></div>
+                                <div class="skeleton-line skeleton-meta"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-item">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-content">
+                                <div class="skeleton-line skeleton-title"></div>
+                                <div class="skeleton-line skeleton-desc"></div>
+                                <div class="skeleton-line skeleton-meta"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-item">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-content">
+                                <div class="skeleton-line skeleton-title"></div>
+                                <div class="skeleton-line skeleton-desc"></div>
+                                <div class="skeleton-line skeleton-meta"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜索结果 -->
+                <div id="resultsState" style="display: none;">
+                    <div class="results-container" style="display: block;">
+                        <div class="result-section">
+                            <div class="section-header">
+                                <div class="section-title with-icon">
+                                    <span class="section-icon">👤</span>
+                                    联系人
+                                    <span class="result-count">(3)</span>
+                                </div>
+                            </div>
+                            <div class="result-list">
+                                <div class="result-card" style="animation-delay: 0.05s;">
+                                    <div class="result-avatar">张</div>
+                                    <div class="result-info">
+                                        <div class="result-header">
+                                            <h4 class="result-title">张三</h4>
+                                            <span class="result-time">10分钟前</span>
+                                        </div>
+                                        <div class="result-desc">产品经理 · 技术部</div>
+                                        <div class="result-meta">
+                                            <span class="meta-tag contact-tag">👤 联系人</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="result-card" style="animation-delay: 0.1s;">
+                                    <div class="result-avatar">李</div>
+                                    <div class="result-info">
+                                        <div class="result-header">
+                                            <h4 class="result-title">李四</h4>
+                                            <span class="result-time">1小时前</span>
+                                        </div>
+                                        <div class="result-desc">前端工程师 · 开发部</div>
+                                        <div class="result-meta">
+                                            <span class="meta-tag contact-tag">👤 联系人</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="result-card" style="animation-delay: 0.15s;">
+                                    <div class="result-avatar">王</div>
+                                    <div class="result-info">
+                                        <div class="result-header">
+                                            <h4 class="result-title">王五</h4>
+                                            <span class="result-time">2小时前</span>
+                                        </div>
+                                        <div class="result-desc">后端工程师 · 开发部</div>
+                                        <div class="result-meta">
+                                            <span class="meta-tag contact-tag">👤 联系人</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="result-section">
+                            <div class="section-header">
+                                <div class="section-title with-icon">
+                                    <span class="section-icon">💬</span>
+                                    群组
+                                    <span class="result-count">(2)</span>
+                                </div>
+                            </div>
+                            <div class="result-list">
+                                <div class="result-card" style="animation-delay: 0.2s;">
+                                    <div class="result-avatar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">项</div>
+                                    <div class="result-info">
+                                        <div class="result-header">
+                                            <h4 class="result-title">项目开发群</h4>
+                                            <span class="result-time">5分钟前</span>
+                                        </div>
+                                        <div class="result-desc">25人 · 张三: 下周进行项目评审</div>
+                                        <div class="result-meta">
+                                            <span class="meta-tag group-tag">💬 群组</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="result-card" style="animation-delay: 0.25s;">
+                                    <div class="result-avatar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">周</div>
+                                    <div class="result-info">
+                                        <div class="result-header">
+                                            <h4 class="result-title">周报讨论群</h4>
+                                            <span class="result-time">1小时前</span>
+                                        </div>
+                                        <div class="result-desc">10人 · 李四: 请大家按时提交周报</div>
+                                        <div class="result-meta">
+                                            <span class="meta-tag group-tag">💬 群组</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="result-section">
+                            <div class="section-header">
+                                <div class="section-title with-icon">
+                                    <span class="section-icon">💬</span>
+                                    消息记录
+                                    <span class="result-count">(2)</span>
+                                </div>
+                            </div>
+                            <div class="result-list">
+                                <div class="result-card" style="animation-delay: 0.3s;">
+                                    <div class="result-avatar" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">张</div>
+                                    <div class="result-info">
+                                        <div class="result-header">
+                                            <h4 class="result-title">张三</h4>
+                                            <span class="result-time">10分钟前</span>
+                                        </div>
+                                        <div class="result-desc">项目进度如何了？下周要进行演示了...</div>
+                                        <div class="result-meta">
+                                            <span class="meta-tag message-tag">💬 消息</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="result-card" style="animation-delay: 0.35s;">
+                                    <div class="result-avatar" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">李</div>
+                                    <div class="result-info">
+                                        <div class="result-header">
+                                            <h4 class="result-title">李四</h4>
+                                            <span class="result-time">1小时前</span>
+                                        </div>
+                                        <div class="result-desc">文档已经上传到共享空间了，请查收</div>
+                                        <div class="result-meta">
+                                            <span class="meta-tag message-tag">💬 消息</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 空状态 -->
+                <div id="emptyState" style="display: none;">
+                    <div class="empty-state" style="display: flex;">
+                        <div class="empty-icon-wrapper">
+                            <span class="empty-icon">🔍</span>
+                        </div>
+                        <h3 class="empty-title">未找到相关结果</h3>
+                        <p class="empty-desc">没有找到与"<strong>测试关键词</strong>"相关的内容</p>
+                        <div class="empty-suggestions">
+                            <p class="suggestion-title">搜索建议：</p>
+                            <div class="suggestion-list">
+                                <span class="suggestion-item">清除搜索关键词</span>
+                                <span class="suggestion-item">切换到"全部内容"分类</span>
+                                <span class="suggestion-item">删除最后一个字符</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="classic-footer">
+            <div class="footer-shortcuts">
+                <span class="shortcut-item">
+                    <kbd>Enter</kbd> 搜索/查看
+                </span>
+                <span class="shortcut-item">
+                    <kbd>Esc</kbd> 关闭
+                </span>
+                <span class="shortcut-item">
+                    <kbd>↑</kbd><kbd>↓</kbd> 导航
+                </span>
+                <span class="shortcut-item">
+                    <kbd>←</kbd><kbd>→</kbd> 切换分类
+                </span>
+            </div>
+            <div class="result-count">
+                <span>📊</span>
+                找到 <strong>7</strong> 条结果
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 搜索框焦点效果
+        const searchInput = document.getElementById('searchInput');
+        const searchInputWrapper = document.getElementById('searchInputWrapper');
+
+        searchInput.addEventListener('focus', () => {
+            searchInputWrapper.classList.add('is-focus');
+        });
+
+        searchInput.addEventListener('blur', () => {
+            searchInputWrapper.classList.remove('is-focus');
+        });
+
+        // 分类切换
+        const catTabs = document.querySelectorAll('.cat-tab');
+        catTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                catTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        // 测试控制
+        const testDefault = document.getElementById('testDefault');
+        const testLoading = document.getElementById('testLoading');
+        const testResults = document.getElementById('testResults');
+        const testEmpty = document.getElementById('testEmpty');
+        const toggleDark = document.getElementById('toggleDark');
+
+        const defaultState = document.getElementById('defaultState');
+        const skeletonState = document.getElementById('skeletonState');
+        const resultsState = document.getElementById('resultsState');
+        const emptyState = document.getElementById('emptyState');
+        const searchDialog = document.getElementById('searchDialog');
+
+        function showState(state) {
+            defaultState.style.display = 'none';
+            skeletonState.style.display = 'none';
+            resultsState.style.display = 'none';
+            emptyState.style.display = 'none';
+
+            testDefault.classList.remove('active');
+            testLoading.classList.remove('active');
+            testResults.classList.remove('active');
+            testEmpty.classList.remove('active');
+
+            state.style.display = 'block';
+        }
+
+        testDefault.addEventListener('click', () => {
+            showState(defaultState);
+            testDefault.classList.add('active');
+            searchInput.value = '';
+        });
+
+        testLoading.addEventListener('click', () => {
+            showState(skeletonState);
+            testLoading.classList.add('active');
+            searchInput.value = '项目';
+        });
+
+        testResults.addEventListener('click', () => {
+            showState(resultsState);
+            testResults.classList.add('active');
+            searchInput.value = '项目';
+
+            // 更新分类计数
+            const badges = document.querySelectorAll('.count-badge');
+            badges[0].textContent = '7';
+            badges[1].textContent = '3';
+            badges[2].textContent = '2';
+            badges[3].textContent = '2';
+            badges[4].textContent = '0';
+        });
+
+        testEmpty.addEventListener('click', () => {
+            showState(emptyState);
+            testEmpty.classList.add('active');
+            searchInput.value = '测试关键词';
+
+            // 更新分类计数
+            const badges = document.querySelectorAll('.count-badge');
+            badges.forEach(badge => badge.textContent = '0');
+        });
+
+        toggleDark.addEventListener('click', () => {
+            searchDialog.classList.toggle('dark');
+            toggleDark.classList.toggle('active');
+        });
+
+        // 默认激活默认状态
+        testDefault.classList.add('active');
+    </script>
+</body>
+</html>
