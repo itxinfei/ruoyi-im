@@ -37,10 +37,10 @@ public class ImFileServiceImpl implements ImFileService {
     @Autowired
     private ImFileAssetMapper imFileAssetMapper;
 
-    @Value("${file.upload.path}")
+    @Value("${file.upload.path:src/main/resources/uploads/}")
     private String uploadPath;
 
-    @Value("${file.upload.url-prefix}")
+    @Value("${file.upload.url-prefix:/uploads/}")
     private String urlPrefix;
 
     @Override

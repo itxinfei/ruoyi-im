@@ -44,7 +44,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
     @Autowired
     private ImFileAssetMapper fileAssetMapper;
 
-    @Value("${file.upload.path:uploads/}")
+    @Value("${file.upload.path:src/main/resources/uploads/}")
     private String uploadPath;
 
     @Value("${file.upload.url-prefix:/uploads/}")

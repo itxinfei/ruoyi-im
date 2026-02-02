@@ -303,6 +303,8 @@ watch(() => props.modelValue, (newVal) => {
 <style scoped lang="scss">
 .general-settings {
   padding: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .setting-group {

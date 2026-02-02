@@ -84,10 +84,10 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     @Autowired
     private ImUserMapper userMapper;
 
-    @Value("${file.upload.path}")
+    @Value("${file.upload.path:src/main/resources/uploads/}")
     private String uploadPath;
 
-    @Value("${file.upload.url-prefix}")
+    @Value("${file.upload.url-prefix:/uploads/}")
     private String urlPrefix;
 
     @Override

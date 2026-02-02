@@ -52,10 +52,10 @@ public class ImUserServiceImpl implements ImUserService {
     private final JwtUtils jwtUtils;
     private final ImRedisUtil imRedisUtil;
 
-    @Value("${file.upload.path}")
+    @Value("${file.upload.path:src/main/resources/uploads/}")
     private String uploadPath;
 
-    @Value("${file.upload.url-prefix}")
+    @Value("${file.upload.url-prefix:/uploads/}")
     private String urlPrefix;
 
     /**

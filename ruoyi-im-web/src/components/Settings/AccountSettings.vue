@@ -84,6 +84,8 @@ const twoFactorEnabled = ref(false)
 <style scoped lang="scss">
 .account-settings {
   padding: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .setting-group {

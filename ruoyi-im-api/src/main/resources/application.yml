@@ -11,7 +11,7 @@ app:
   dev:
     user-id: 1
   upload:
-    path: D:/uploads
+    path: src/main/resources/uploads/
 
 # Spring框架配置
 spring:

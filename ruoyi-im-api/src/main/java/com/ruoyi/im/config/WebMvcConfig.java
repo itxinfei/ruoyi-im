@@ -20,19 +20,31 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private String uploadPath;
 
     /**
+     * 获取上传文件的绝对路径
+     */
+    private String getAbsoluteUploadPath() {
+        String projectRoot = System.getProperty("user.dir");
+        String apiModulePath = projectRoot + File.separator + "ruoyi-im-api";
+        String fullPath = apiModulePath + File.separator + uploadPath;
+
+        // 确保目录存在
+        File dir = new File(fullPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        return fullPath;
+    }
+
+    /**
      * 配置静态资源处理
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 获取项目根目录的绝对路径
-        String projectRoot = System.getProperty("user.dir");
-        String absoluteUploadPath = projectRoot + File.separator + "ruoyi-im-api" + File.separator + uploadPath;
+        // 获取上传文件的绝对路径
+        String absoluteUploadPath = getAbsoluteUploadPath();
         // 确保路径格式正确（Windows使用\，Unix使用/）
-        if (!uploadPath.startsWith("/") && !uploadPath.contains(":")) {
-            absoluteUploadPath = "file:" + absoluteUploadPath.replace("\\", "/");
-        } else {
-            absoluteUploadPath = "file:" + uploadPath;
-        }
+        String resourceLocation = "file:" + absoluteUploadPath.replace("\\", "/");
 
         // 配置头像资源映射
         registry.addResourceHandler("/avatar/**")
@@ -40,11 +52,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         // 配置上传文件资源映射 - 支持文件下载
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(absoluteUploadPath);
+                .addResourceLocations(resourceLocation);
 
         // 配置API文件下载路径映射
         registry.addResourceHandler("/api/im/file/download/**")
-                .addResourceLocations(absoluteUploadPath);
+                .addResourceLocations(resourceLocation);
 
         // 配置其他静态资源
         registry.addResourceHandler("/profile/**")

@@ -272,15 +272,21 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 
 <style scoped lang="scss">
 // 对话框样式
-:deep(.el-dialog__body) {
-  padding: 0 !important;
-  margin: 0 !important;
+:deep(.system-settings-dialog) {
+  .el-dialog__body {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .el-dialog__header {
+    display: none;
+  }
 }
 
 // 主容器 - 固定大小
 .settings-container {
   display: flex;
-  width: 900px;
+  width: 100%;
   height: 600px;
   background: #fff;
 }
@@ -390,6 +396,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   flex-direction: column;
   min-width: 0;
   background: #fff;
+  overflow: hidden;
 }
 
 .content-header {
@@ -430,7 +437,9 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 .content-body {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 12px 16px;
+  min-width: 0;
 }
 
 // 深色模式
