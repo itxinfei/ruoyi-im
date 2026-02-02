@@ -469,23 +469,52 @@ const canRecall = computed(() => {
   }
 }
 
-// 暗色模式适配
+// 暗色模式适配（钉钉风格）
 :global(.dark) {
+  // 对方消息：深灰背景
   .message-bubble:not(.is-own) .bubble-content {
-    background: #2d2d2d;
-    border-color: #3e3e3e;
+    background: #2a2a2a;
+    border-color: #3a3a3a;
+    color: #e8e8e8;
   }
 
+  // 自己消息：钉钉蓝（暗模式下稍亮）
   .message-bubble.is-own .bubble-content {
-    background: #0958d9;
+    background: #0089FF;
+    color: #FFFFFF;
   }
 
+  // 悬停状态
   .message-bubble:not(.is-own):hover .bubble-content {
-    background: #1e293b;
+    background: #333333;
+    border-color: #444444;
   }
 
   .message-bubble.is-own:hover .bubble-content {
-    background: #0e5fd9;
+    background: #1A9FFF;
   }
+}
+
+// 钉钉风格：消息气泡之间的间距优化
+.message-bubble + .message-bubble {
+  margin-top: 8px;
+}
+
+// 第一条消息不需要上边距
+.message-bubble:first-child {
+  margin-top: 0;
+}
+
+// 钉钉风格：图片/视频消息的特殊圆角
+.message-bubble.type-image .bubble-content,
+.message-bubble.type-video .bubble-content {
+  // 钉钉图片消息：圆角8px
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+// 钉钉风格：文件消息样式优化
+.message-bubble.type-file .bubble-content {
+  padding: 12px 16px;
 }
 </style>

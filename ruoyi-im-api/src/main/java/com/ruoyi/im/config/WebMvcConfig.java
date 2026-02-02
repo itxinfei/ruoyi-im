@@ -32,12 +32,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/avatar/**")
                 .addResourceLocations("file:" + absoluteUploadPath.replace("\\", "/") + "/avatar/");
 
-        // 配置上传文件资源映射 - 支持文件下载
+        // 配置上传文件资源映射 - 统一通过 /uploads/** 访问
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(resourceLocation);
-
-        // 配置API文件下载路径映射
-        registry.addResourceHandler("/api/im/file/download/**")
                 .addResourceLocations(resourceLocation);
 
         // 配置其他静态资源

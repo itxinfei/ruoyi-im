@@ -519,7 +519,8 @@ import {
   getSystemConfig,
   updateSystemConfig,
   getSensitiveWords,
-  saveSensitiveWords
+  saveSensitiveWords,
+  getFileStatistics
 } from '@/api/admin'
 import { formatFileSize } from '@/utils/format'
 
@@ -578,11 +579,11 @@ const storageConfig = ref({
   cosSecretKey: ''
 })
 
-// 存储统计
+// 存储统计 - 从 API 获取真实数据
 const storageStats = ref({
-  usedSpace: 1024 * 1024 * 512, // 512MB
-  fileCount: 1234,
-  userCount: 56
+  usedSpace: 0,
+  fileCount: 0,
+  userCount: 0
 })
 
 // 高级配置
@@ -620,6 +621,22 @@ const loadSensitiveWords = async () => {
     if (res.data.strategy) {
       messageConfig.value.sensitiveStrategy = res.data.strategy
     }
+  }
+}
+
+// 加载存储统计
+const loadStorageStats = async () => {
+  try {
+    const res = await getFileStatistics()
+    if (res.code === 200 && res.data) {
+      storageStats.value = {
+        usedSpace: res.data.usedSpace || 0,
+        fileCount: res.data.fileCount || 0,
+        userCount: res.data.userCount || 0
+      }
+    }
+  } catch (error) {
+    console.error('加载存储统计失败:', error)
   }
 }
 
@@ -669,7 +686,13 @@ const handleExportData = () => {
     // 导出系统配置为 JSON 文件
     const exportData = {
       exportTime: new Date().toISOString(),
-      systemConfig: systemConfig.value,
+      systemConfig: {
+        basic: basicConfig.value,
+        message: messageConfig.value,
+        security: securityConfig.value,
+        storage: storageConfig.value,
+        advanced: advancedConfig.value
+      },
       sensitiveWords: sensitiveWords.value
     }
 
@@ -703,6 +726,7 @@ const handleClearCache = async () => {
 onMounted(() => {
   loadSystemConfig()
   loadSensitiveWords()
+  loadStorageStats()
 })
 </script>
 

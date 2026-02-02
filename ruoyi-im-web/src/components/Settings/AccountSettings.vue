@@ -1,63 +1,124 @@
 <template>
   <div class="account-settings">
     <!-- 基本信息 -->
-    <section class="setting-group">
-      <h3 class="group-title">基本信息</h3>
-      <div class="setting-list">
-        <div class="setting-row">
-          <span class="row-label">头像</span>
-          <div class="row-value">
-            <el-avatar :size="36" :src="user.avatar" />
-            <el-button link type="primary" size="small" @click="$emit('edit-profile')">修改</el-button>
+    <section class="setting-section">
+      <div class="section-header">
+        <h3 class="section-title">基本信息</h3>
+        <p class="section-desc">管理您的个人资料和展示信息</p>
+      </div>
+      
+      <div class="setting-card">
+        <div class="setting-item">
+          <div class="item-content">
+            <span class="item-label">头像</span>
+            <span class="item-desc">支持 jpg, png, gif 格式，最大 2MB</span>
+          </div>
+          <div class="item-action">
+            <el-avatar :size="48" :src="user.avatar" class="user-avatar" />
+            <el-button link type="primary" @click="$emit('edit-profile')">更换头像</el-button>
           </div>
         </div>
-        <div class="setting-row">
-          <span class="row-label">昵称</span>
-          <span class="row-value">{{ user.nickname || user.username }}</span>
+        
+        <el-divider class="card-divider" />
+        
+        <div class="setting-item">
+          <div class="item-content">
+            <span class="item-label">昵称</span>
+          </div>
+          <div class="item-action">
+            <span class="item-value">{{ user.nickname || user.username }}</span>
+            <el-button link type="primary" icon="Edit" @click="$emit('edit-profile')"></el-button>
+          </div>
         </div>
-        <div class="setting-row">
-          <span class="row-label">账号</span>
-          <span class="row-value">{{ user.username }}</span>
+
+        <el-divider class="card-divider" />
+        
+        <div class="setting-item">
+          <div class="item-content">
+            <span class="item-label">账号 ID</span>
+          </div>
+          <div class="item-action">
+            <span class="item-value text-mono">{{ user.username }}</span>
+          </div>
         </div>
-        <div class="setting-row">
-          <span class="row-label">UID</span>
-          <span class="row-value text-mono">{{ user.id }}</span>
+
+        <el-divider class="card-divider" />
+        
+        <div class="setting-item">
+          <div class="item-content">
+            <span class="item-label">UID</span>
+          </div>
+          <div class="item-action">
+            <span class="item-value text-mono">{{ user.id }}</span>
+          </div>
         </div>
-        <div class="setting-row">
-          <span class="row-label">部门</span>
-          <span class="row-value">{{ user.dept?.deptName || '-' }}</span>
+        
+        <el-divider class="card-divider" />
+        
+        <div class="setting-item">
+          <div class="item-content">
+            <span class="item-label">所属部门</span>
+          </div>
+          <div class="item-action">
+            <span class="item-value">{{ user.dept?.deptName || '暂无部门' }}</span>
+          </div>
         </div>
-        <div class="setting-row">
-          <span class="row-label">邮箱</span>
-          <span class="row-value">{{ user.email || '-' }}</span>
-        </div>
-        <div class="setting-row">
-          <span class="row-label">手机</span>
-          <span class="row-value">{{ user.phonenumber || '-' }}</span>
+        
+        <el-divider class="card-divider" />
+        
+        <div class="setting-item">
+          <div class="item-content">
+            <span class="item-label">联系方式</span>
+          </div>
+          <div class="item-action vertical">
+            <div class="contact-row">
+              <el-icon><Message /></el-icon>
+              <span>{{ user.email || '未绑定邮箱' }}</span>
+            </div>
+            <div class="contact-row">
+              <el-icon><Iphone /></el-icon>
+              <span>{{ user.phonenumber || '未绑定手机' }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- 账号安全 -->
-    <section class="setting-group">
-      <h3 class="group-title">账号安全</h3>
-      <div class="setting-list">
-        <div class="setting-row clickable" @click="$emit('change-password')">
-          <span class="row-label">
-            <el-icon class="row-icon"><Lock /></el-icon>
-            登录密码
-          </span>
-          <div class="row-value">
-            <span class="status-text">已设置</span>
+    <section class="setting-section">
+      <div class="section-header">
+        <h3 class="section-title">账号安全</h3>
+        <p class="section-desc">保护您的账号安全和隐私</p>
+      </div>
+      
+      <div class="setting-card">
+        <div class="setting-item clickable" @click="$emit('change-password')">
+          <div class="item-content">
+            <div class="label-with-icon">
+              <el-icon class="item-icon"><Lock /></el-icon>
+              <span class="item-label">登录密码</span>
+            </div>
+            <span class="item-desc">定期修改密码可以保护账号安全</span>
+          </div>
+          <div class="item-action">
+            <span class="status-text success">已设置</span>
             <el-icon class="arrow-icon"><ArrowRight /></el-icon>
           </div>
         </div>
-        <div class="setting-row">
-          <span class="row-label">
-            <el-icon class="row-icon"><Lock /></el-icon>
-            双重验证
-          </span>
-          <el-switch v-model="twoFactorEnabled" disabled size="small" />
+        
+        <el-divider class="card-divider" />
+        
+        <div class="setting-item">
+          <div class="item-content">
+            <div class="label-with-icon">
+              <el-icon class="item-icon"><Key /></el-icon>
+              <span class="item-label">双重验证</span>
+            </div>
+            <span class="item-desc">启用后，登录时需要进行二次验证</span>
+          </div>
+          <div class="item-action">
+            <el-switch v-model="twoFactorEnabled" disabled />
+          </div>
         </div>
       </div>
     </section>
@@ -66,7 +127,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { ArrowRight, Lock } from '@element-plus/icons-vue'
+import { ArrowRight, Lock, Key, Message, Iphone, Edit } from '@element-plus/icons-vue'
 
 defineProps({
   user: {
@@ -83,131 +144,161 @@ const twoFactorEnabled = ref(false)
 
 <style scoped lang="scss">
 .account-settings {
-  padding: 0;
-  max-width: 100%;
-  box-sizing: border-box;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.setting-group {
-  margin-bottom: 20px;
-
+.setting-section {
+  margin-bottom: 32px;
+  
   &:last-child {
     margin-bottom: 0;
   }
 }
 
-.group-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 8px 0;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e8e8e8;
+.section-header {
+  margin-bottom: 16px;
+  
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color-primary);
+    margin: 0 0 4px 0;
+  }
+  
+  .section-desc {
+    font-size: 13px;
+    color: var(--text-color-secondary);
+    margin: 0;
+  }
 }
 
-.setting-list {
-  background: #fafafa;
-  border: 1px solid #e8e8e8;
+.setting-card {
+  background: var(--bg-color-overlay);
+  border: 1px solid var(--border-color-light);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.setting-row {
+.card-divider {
+  margin: 0;
+  border-color: var(--border-color-lighter);
+}
+
+.setting-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  min-height: 40px;
-  border-bottom: 1px solid #e8e8e8;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
+  padding: 20px 24px;
+  min-height: 24px;
+  transition: background 0.2s;
+  
   &.clickable {
     cursor: pointer;
-
+    
     &:hover {
-      background: #f0f0f0;
+      background: var(--bg-color-hover);
+    }
+  }
+
+  .item-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    
+    .item-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-color-primary);
+    }
+    
+    .item-desc {
+      font-size: 12px;
+      color: var(--text-color-secondary);
+    }
+    
+    .label-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .item-icon {
+        font-size: 16px;
+        color: var(--text-color-secondary);
+      }
+    }
+  }
+
+  .item-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    &.vertical {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    
+    .item-value {
+      font-size: 14px;
+      color: var(--text-color-regular);
+      
+      &.text-mono {
+        font-family: monospace;
+        background: var(--bg-color-hover);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+    }
+    
+    .status-text {
+      font-size: 13px;
+      
+      &.success {
+        color: var(--el-color-success);
+      }
+    }
+    
+    .arrow-icon {
+      font-size: 16px;
+      color: var(--text-color-placeholder);
+    }
+    
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-color-regular);
+      
+      .el-icon {
+        color: var(--text-color-secondary);
+      }
     }
   }
 }
 
-.row-label {
-  font-size: 13px;
-  color: #666;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  .row-icon {
-    font-size: 14px;
-    color: #999;
-  }
-}
-
-.row-value {
-  font-size: 13px;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  &.text-mono {
-    font-family: monospace;
-    color: #666;
-  }
-
-  .status-text {
-    color: #999;
-    font-size: 12px;
-  }
-
-  .arrow-icon {
-    font-size: 12px;
-    color: #ccc;
-  }
-}
-
-// 深色模式
+// 深色模式适配
 .dark {
-  .group-title {
-    color: #ccc;
-    border-color: #333;
-  }
-
-  .setting-list {
+  .setting-card {
     background: #252525;
     border-color: #333;
   }
-
-  .setting-row {
+  
+  .card-divider {
     border-color: #333;
-
+  }
+  
+  .setting-item {
     &.clickable:hover {
       background: #333;
     }
-  }
-
-  .row-label {
-    color: #999;
-
-    .row-icon {
-      color: #666;
-    }
-  }
-
-  .row-value {
-    color: #ccc;
-
-    &.text-mono {
-      color: #999;
-    }
-
-    .status-text {
-      color: #666;
-    }
-
-    .arrow-icon {
-      color: #444;
+    
+    .item-action .item-value.text-mono {
+      background: #333;
     }
   }
 }

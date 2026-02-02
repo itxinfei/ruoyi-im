@@ -540,9 +540,9 @@ const handleExport = () => {
       return [
         u.id,
         JSON.stringify(String(u.username || "")),
-        JSON.stringify(String(u.nickName || "")),
+        JSON.stringify(String(u.nickname || "")),
         JSON.stringify(String(u.email || "")),
-        JSON.stringify(String(u.phonenumber || "")),
+        JSON.stringify(String(u.mobile || "")),
         roleMap[u.role] || u.role,
         statusMap[u.status] ?? u.status,
         u.createTime || ""

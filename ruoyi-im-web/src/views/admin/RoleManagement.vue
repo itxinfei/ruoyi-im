@@ -407,88 +407,9 @@ const loadRoleList = async () => {
 const loadPermissionTree = async () => {
   const res = await getPermissionList()
   if (res.code === 200) {
-    permissionTree.value = buildPermissionTree(res.data || [])
+    // 后端已经返回树形结构，直接使用
+    permissionTree.value = res.data || []
   }
-}
-
-// 构建权限树
-const buildPermissionTree = (permissions) => {
-  // 模拟权限数据结构
-  return [
-    {
-      id: 'dashboard',
-      name: '数据概览',
-      icon: 'Monitor',
-      children: [
-        { id: 'dashboard:view', name: '查看概览', type: 'button' }
-      ]
-    },
-    {
-      id: 'user',
-      name: '用户管理',
-      icon: 'User',
-      children: [
-        { id: 'user:view', name: '查看用户', type: 'button' },
-        { id: 'user:add', name: '新增用户', type: 'button' },
-        { id: 'user:edit', name: '编辑用户', type: 'button' },
-        { id: 'user:delete', name: '删除用户', type: 'button' },
-        { id: 'user:status', name: '修改状态', type: 'button' },
-        { id: 'user:role', name: '分配角色', type: 'button' }
-      ]
-    },
-    {
-      id: 'group',
-      name: '群组管理',
-      icon: 'ChatDotRound',
-      children: [
-        { id: 'group:view', name: '查看群组', type: 'button' },
-        { id: 'group:dissolve', name: '解散群组', type: 'button' },
-        { id: 'group:mute', name: '群组禁言', type: 'button' }
-      ]
-    },
-    {
-      id: 'message',
-      name: '消息管理',
-      icon: 'ChatLineSquare',
-      children: [
-        { id: 'message:view', name: '查看消息', type: 'button' },
-        { id: 'message:delete', name: '删除消息', type: 'button' },
-        { id: 'message:sensitive', name: '敏感词配置', type: 'button' }
-      ]
-    },
-    {
-      id: 'department',
-      name: '部门管理',
-      icon: 'Folder',
-      children: [
-        { id: 'dept:view', name: '查看部门', type: 'button' },
-        { id: 'dept:add', name: '新增部门', type: 'button' },
-        { id: 'dept:edit', name: '编辑部门', type: 'button' },
-        { id: 'dept:delete', name: '删除部门', type: 'button' }
-      ]
-    },
-    {
-      id: 'role',
-      name: '角色管理',
-      icon: 'Setting',
-      children: [
-        { id: 'role:view', name: '查看角色', type: 'button' },
-        { id: 'role:add', name: '新增角色', type: 'button' },
-        { id: 'role:edit', name: '编辑角色', type: 'button' },
-        { id: 'role:delete', name: '删除角色', type: 'button' },
-        { id: 'role:permission', name: '分配权限', type: 'button' }
-      ]
-    },
-    {
-      id: 'system',
-      name: '系统设置',
-      icon: 'Setting',
-      children: [
-        { id: 'system:config', name: '系统配置', type: 'button' },
-        { id: 'system:log', name: '操作日志', type: 'button' }
-      ]
-    }
-  ]
 }
 
 // 选择角色
@@ -625,11 +546,14 @@ const searchUsers = async (query) => {
 
 // 添加成员
 const handleAddMembers = async () => {
+  if (selectedUsersToAdd.value.length === 0) {
+    ElMessage.warning('请选择要添加的用户')
+    return
+  }
   try {
-    const userIds = selectedUsersToAdd.value.map(u => u.id)
-    const res = await addRoleMembers(currentRole.value.id, userIds)
+    const res = await addRoleMembers(currentRole.value.id, selectedUsersToAdd.value)
     if (res.code === 200) {
-      ElMessage.success(`已添加 ${userIds.length} 名成员`)
+      ElMessage.success(`已添加 ${selectedUsersToAdd.value.length} 名成员`)
       addMemberDialogVisible.value = false
       selectedUsersToAdd.value = []
       loadRoleMembers()
@@ -642,7 +566,7 @@ const handleAddMembers = async () => {
 // 移除成员
 const handleRemoveMember = async (member) => {
   try {
-    await ElMessageBox.confirm(`确定要将 ${member.nickName} 从该角色中移除吗？`, '确认', {
+    await ElMessageBox.confirm(`确定要将 ${member.nickname || member.username} 从该角色中移除吗？`, '确认', {
       type: 'warning'
     })
     const res = await removeRoleMember(currentRole.value.id, member.id)
@@ -655,11 +579,6 @@ const handleRemoveMember = async (member) => {
       ElMessage.error('移除失败')
     }
   }
-}
-
-// 监听成员抽屉打开
-const openMemberDrawer = () => {
-  loadRoleMembers()
 }
 
 // 获取角色颜色

@@ -145,7 +145,7 @@ im:
 file:
   upload:
     path: uploads/
-    url-prefix: /api/im/file/download/
+    url-prefix: /uploads/
 
 # 视频会议配置
 meeting:

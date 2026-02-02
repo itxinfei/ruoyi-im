@@ -145,10 +145,10 @@
                 class="member-item"
               >
                 <el-avatar :size="36" :src="member.avatar">
-                  {{ member.nickName?.[0] || 'U' }}
+                  {{ member.nickname?.[0] || 'U' }}
                 </el-avatar>
                 <div class="member-info">
-                  <div class="member-name">{{ member.nickName }}</div>
+                  <div class="member-name">{{ member.nickname }}</div>
                   <div class="member-position">{{ member.position || '员工' }}</div>
                 </div>
                 <el-tag v-if="member.id === currentDepartment.leaderId" size="small" type="warning">
@@ -216,7 +216,7 @@
             <el-option
               v-for="user in userOptions"
               :key="user.id"
-              :label="user.nickName"
+              :label="user.nickname"
               :value="user.id"
             />
           </el-select>
@@ -261,12 +261,12 @@
             <el-option
               v-for="user in userSearchResults"
               :key="user.id"
-              :label="user.nickName"
+              :label="user.nickname"
               :value="user.id"
             >
               <div class="user-option">
-                <el-avatar :size="24" :src="user.avatar">{{ user.nickName?.[0] }}</el-avatar>
-                <span>{{ user.nickName }}</span>
+                <el-avatar :size="24" :src="user.avatar">{{ user.nickname?.[0] }}</el-avatar>
+                <span>{{ user.nickname }}</span>
               </div>
             </el-option>
           </el-select>
@@ -371,7 +371,7 @@ const departmentTreeForSelect = computed(() => {
 const filteredMembers = computed(() => {
   if (!memberSearch.value) return departmentMembers.value
   return departmentMembers.value.filter(m =>
-    m.nickName?.toLowerCase().includes(memberSearch.value.toLowerCase())
+    m.nickname?.toLowerCase().includes(memberSearch.value.toLowerCase())
   )
 })
 
@@ -488,7 +488,7 @@ const handleEdit = (data) => {
   }
   // 加载负责人选项
   if (data.leaderId) {
-    userOptions.value = [{ id: data.leaderId, nickName: data.leaderName }]
+    userOptions.value = [{ id: data.leaderId, nickname: data.leaderName }]
   }
   dialogVisible.value = true
 }
@@ -603,7 +603,7 @@ const handleMemberAction = async (command, member) => {
       break
     case 'remove':
       try {
-        await ElMessageBox.confirm(`确定将 ${member.nickName} 移出该部门吗？`, '确认', {
+        await ElMessageBox.confirm(`确定将 ${member.nickname} 移出该部门吗？`, '确认', {
           type: 'warning'
         })
         const res = await removeDepartmentMember(currentDepartment.value.id, member.id)

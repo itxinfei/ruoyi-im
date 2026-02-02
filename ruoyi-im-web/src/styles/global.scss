@@ -84,7 +84,7 @@ textarea {
   outline: none;
 }
 
-// Scrollbar Styling
+// Scrollbar Styling - 钉钉风格
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -95,11 +95,38 @@ textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 3px;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.25);
+  }
+}
+
+// 暗色模式滚动条
+:global(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+// 钉钉风格：活跃滚动条（用于主要内容区域）
+.scrollbar-dingtalk::-webkit-scrollbar-thumb {
+  background: rgba(0, 137, 255, 0.2);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba(0, 137, 255, 0.3);
+  }
+}
+
+:global(.dark) .scrollbar-dingtalk::-webkit-scrollbar-thumb {
+  background: rgba(0, 137, 255, 0.3);
+
+  &:hover {
+    background: rgba(0, 137, 255, 0.4);
   }
 }
 

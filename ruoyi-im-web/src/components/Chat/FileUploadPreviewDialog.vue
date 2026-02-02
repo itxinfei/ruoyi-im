@@ -98,6 +98,8 @@ const previewUrls = new Map()
 
 // 监听 modelValue 变化
 watch(() => props.modelValue, (newVal) => {
+  console.log('FileUploadPreviewDialog modelValue 变化:', newVal)
+  console.log('当前文件数量:', props.files?.length)
   visible.value = newVal
   if (newVal) {
     // 对话框打开时，清空之前的预览 URL
@@ -107,6 +109,7 @@ watch(() => props.modelValue, (newVal) => {
 
 // 监听 visible 变化
 watch(visible, (newVal) => {
+  console.log('FileUploadPreviewDialog visible 变化:', newVal)
   if (!newVal) {
     emit('update:modelValue', false)
     clearPreviewUrls()
@@ -155,6 +158,7 @@ function handleClose() {
  * 确认上传
  */
 function handleConfirm() {
+  console.log('handleConfirm 被调用，文件数量:', props.files.length)
   if (props.files.length === 0) {
     ElMessage.warning('请先选择文件')
     return

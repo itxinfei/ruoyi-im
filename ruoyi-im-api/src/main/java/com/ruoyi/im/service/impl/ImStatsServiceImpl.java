@@ -191,25 +191,46 @@ public class ImStatsServiceImpl implements ImStatsService {
         Map<String, Object> stats = new HashMap<>();
 
         try {
-            List<ImMessage> allMessages = imMessageMapper.selectImMessageList(new ImMessage());
+            // 获取天数参数，默认7天
+            Integer days = 7;
+            if (params != null && params.get("days") != null) {
+                Object daysObj = params.get("days");
+                if (daysObj instanceof Number) {
+                    days = ((Number) daysObj).intValue();
+                } else if (daysObj instanceof String) {
+                    try {
+                        days = Integer.parseInt((String) daysObj);
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+
+            // 计算起始时间
+            LocalDateTime startTime = LocalDateTime.now().minusDays(days);
+
+            // 查询指定天数内的消息
+            LambdaQueryWrapper<ImMessage> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.ge(ImMessage::getCreateTime, startTime);
+
+            List<ImMessage> messages = imMessageMapper.selectList(queryWrapper);
 
             // 总消息数
-            stats.put("totalMessages", allMessages.size());
+            stats.put("totalMessages", messages.size());
 
             // 文本消息数
-            long textMessages = allMessages.stream()
+            long textMessages = messages.stream()
                     .filter(m -> "TEXT".equals(m.getType()))
                     .count();
             stats.put("textMessages", textMessages);
 
             // 图片消息数
-            long imageMessages = allMessages.stream()
+            long imageMessages = messages.stream()
                     .filter(m -> "IMAGE".equals(m.getType()))
                     .count();
             stats.put("imageMessages", imageMessages);
 
             // 文件消息数
-            long fileMessages = allMessages.stream()
+            long fileMessages = messages.stream()
                     .filter(m -> "FILE".equals(m.getType()))
                     .count();
             stats.put("fileMessages", fileMessages);

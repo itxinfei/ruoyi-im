@@ -489,36 +489,28 @@ const memoryUsage = ref(53)
 const memoryCache = ref(12)
 const memoryFree = computed(() => 100 - memoryUsage.value - memoryCache.value)
 
-// 磁盘使用率
-const diskUsage = ref([
-  { path: '/', mount: '/', total: 500 * 1024 * 1024 * 1024, used: 320 * 1024 * 1024 * 1024, usage: 64 },
-  { path: '/home', mount: '/home', total: 200 * 1024 * 1024 * 1024, used: 80 * 1024 * 1024 * 1024, usage: 40 },
-  { path: '/data', mount: '/data', total: 1024 * 1024 * 1024 * 1024, used: 512 * 1024 * 1024 * 1024, usage: 50 }
-])
+// 磁盘使用率（从API获取）
+const diskUsage = ref([])
 
-// 网络流量
+// 网络流量（从API获取）
 const networkStats = ref({
-  inSpeed: '2.5 MB/s',
-  outSpeed: '1.2 MB/s',
-  totalIn: 1024 * 1024 * 1024 * 50,
-  totalOut: 1024 * 1024 * 1024 * 25
+  inSpeed: '-',
+  outSpeed: '-',
+  totalIn: 0,
+  totalOut: 0
 })
 
-// 请求统计
+// 请求统计（从API获取）
 const requestStats = ref({
-  todayCount: 125680,
-  avgResponse: 45,
-  successRate: 99.8,
-  errorCount: 25
+  todayCount: 0,
+  avgResponse: 0,
+  successRate: 100,
+  errorCount: 0
 })
 
-// 趋势图数据
+// 趋势图数据（从API获取）
 const trendPeriod = ref('24h')
-const trendPoints = ref([
-  { x: 40, y: 130 }, { x: 113, y: 110 }, { x: 186, y: 100 }, { x: 260, y: 90 },
-  { x: 333, y: 85 }, { x: 406, y: 95 }, { x: 480, y: 80 }, { x: 553, y: 75 },
-  { x: 626, y: 70 }
-])
+const trendPoints = ref([])
 
 
 // 对话框状态
@@ -544,19 +536,75 @@ const refreshAll = async () => {
     const monitorRes = await getSystemMonitor()
     if (monitorRes.code === 200 && monitorRes.data) {
       const data = monitorRes.data
+
       // 更新在线用户数
       if (data.onlineUserCount !== undefined) {
         systemStatus.value.onlineUsers = data.onlineUserCount
       }
+
+      // 更新系统状态
+      if (data.uptime !== undefined) {
+        systemStatus.value.uptime = formatUptime(data.uptime)
+      }
+      if (data.qps !== undefined) {
+        systemStatus.value.qps = data.qps
+      }
+
       // 更新 JVM 内存信息
       if (data.jvm) {
-        systemStatus.value.totalMemory = (data.jvm.maxMemory || 0) + ' MB'
-        systemStatus.value.usedMemory = (data.jvm.usedMemory || 0) + ' MB'
-        systemStatus.value.jvmMemory = (data.jvm.usedMemory || 0) + ' MB'
+        systemStatus.value.totalMemory = formatBytes(data.jvm.maxMemory || 0)
+        systemStatus.value.usedMemory = formatBytes(data.jvm.usedMemory || 0)
+        systemStatus.value.jvmMemory = formatBytes(data.jvm.usedMemory || 0)
         // 更新内存使用率
         if (data.jvm.memoryUsagePercent !== undefined) {
           memoryUsage.value = data.jvm.memoryUsagePercent
+          // 计算缓存和可用内存
+          memoryCache.value = data.jvm.memoryCachePercent || 0
         }
+      }
+
+      // 更新CPU使用率
+      if (data.cpu !== undefined && data.cpu.usagePercent !== undefined) {
+        cpuUsage.value = data.cpu.usagePercent
+      }
+
+      // 更新磁盘使用率
+      if (data.disks && data.disks.length > 0) {
+        diskUsage.value = data.disks.map(disk => ({
+          path: disk.path || disk.mount,
+          mount: disk.mount || disk.path,
+          total: disk.total || 0,
+          used: disk.used || 0,
+          usage: Math.round((disk.used / disk.total) * 100) || 0
+        }))
+      }
+
+      // 更新网络流量
+      if (data.network) {
+        networkStats.value = {
+          inSpeed: formatSpeed(data.network.inSpeed || 0),
+          outSpeed: formatSpeed(data.network.outSpeed || 0),
+          totalIn: data.network.totalIn || 0,
+          totalOut: data.network.totalOut || 0
+        }
+      }
+
+      // 更新请求统计
+      if (data.requests) {
+        requestStats.value = {
+          todayCount: data.requests.todayCount || 0,
+          avgResponse: data.requests.avgResponse || 0,
+          successRate: data.requests.successRate || 100,
+          errorCount: data.requests.errorCount || 0
+        }
+      }
+
+      // 更新趋势图数据
+      if (data.trends && data.trends.length > 0) {
+        trendPoints.value = data.trends.map((point, index) => ({
+          x: 40 + (index * 70),
+          y: Math.max(20, 130 - point.value)
+        }))
       }
     }
 
@@ -583,6 +631,35 @@ const refreshAll = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// 格式化运行时间
+const formatUptime = (seconds) => {
+  if (!seconds) return '-'
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  if (days > 0) return `${days}天${hours}小时`
+  if (hours > 0) return `${hours}小时${minutes}分钟`
+  return `${minutes}分钟`
+}
+
+// 格式化字节
+const formatBytes = (bytes) => {
+  if (!bytes || bytes === 0) return '0 B'
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  const unitIndex = Math.floor(Math.log(bytes) / Math.log(1024))
+  const value = bytes / Math.pow(1024, unitIndex)
+  return Math.round(value * 100) / 100 + ' ' + units[unitIndex]
+}
+
+// 格式化速度
+const formatSpeed = (bytesPerSecond) => {
+  if (!bytesPerSecond || bytesPerSecond === 0) return '0 B/s'
+  const units = ['B/s', 'KB/s', 'MB/s', 'GB/s']
+  const unitIndex = Math.floor(Math.log(bytesPerSecond) / Math.log(1024))
+  const value = bytesPerSecond / Math.pow(1024, unitIndex)
+  return Math.round(value * 100) / 100 + ' ' + units[unitIndex]
 }
 
 // 踢出用户
@@ -659,9 +736,9 @@ const handleSaveSettings = () => {
 // 开始自动刷新
 const startAutoRefresh = () => {
   stopAutoRefresh()
-  refreshTimer = setInterval(() => {
-    // 更新数据
-    cpuUsage.value = Math.floor(Math.random() * 50) + 10
+  refreshTimer = setInterval(async () => {
+    // 调用完整的刷新逻辑，从API获取真实数据
+    await refreshAll()
   }, monitorSettings.value.refreshInterval)
 }
 

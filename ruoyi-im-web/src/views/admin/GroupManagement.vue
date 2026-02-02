@@ -739,7 +739,7 @@ const handleOwnerCommand = async (command) => {
             id: 'new-owner-select',
             style: 'width: 100%; padding: 8px; border: 1px solid var(--el-border-color); border-radius: 4px;'
           }, candidates.map(m =>
-            h('option', { value: m.userId, key: m.userId }, `${m.nickName} (${m.role === 'ADMIN' ? '管理员' : '成员'})`)
+            h('option', { value: m.userId, key: m.userId }, `${m.nickname} (${m.role === 'ADMIN' ? '管理员' : '成员'})`)
           ))
         ]),
         showCancelButton: true,
@@ -768,7 +768,7 @@ const handleOwnerCommand = async (command) => {
       }
 
       await ElMessageBox.confirm(
-        `确定将群主转让给 "${selectedMember.nickName}" 吗？转让后你将成为普通成员。`,
+        `确定将群主转让给 "${selectedMember.nickname}" 吗？转让后你将成为普通成员。`,
         '转让确认',
         { type: 'warning' }
       )
@@ -917,7 +917,7 @@ const handleExport = () => {
   try {
     // 导出当前群组列表为 CSV
     const headers = ['群组ID', '群组名称', '群主ID', '成员数量', '类型', '创建时间']
-    const rows = groups.value.map(g => [
+    const rows = groupList.value.map(g => [
       g.id,
       `"${g.name || ''}"`, // 名称加引号防止CSV格式问题
       g.ownerId,

@@ -3,7 +3,7 @@
     <!-- 统计卡片 -->
     <el-row :gutter="16">
       <el-col :span="6">
-        <el-card class="stat-card stat-card--user" shadow="hover">
+        <el-card class="stat-card stat-card--user" shadow="hover" @click="handleUsersClick">
           <div class="stat-content">
             <div class="stat-icon">
               <el-icon><User /></el-icon>
@@ -16,7 +16,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card stat-card--active" shadow="hover">
+        <el-card class="stat-card stat-card--active" shadow="hover" @click="handleUsersClick">
           <div class="stat-content">
             <div class="stat-icon">
               <el-icon><Star /></el-icon>
@@ -29,7 +29,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card stat-card--group" shadow="hover">
+        <el-card class="stat-card stat-card--group" shadow="hover" @click="handleGroupsClick">
           <div class="stat-content">
             <div class="stat-icon">
               <el-icon><ChatDotRound /></el-icon>
@@ -42,7 +42,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card stat-card--message" shadow="hover">
+        <el-card class="stat-card stat-card--message" shadow="hover" @click="handleMessagesClick">
           <div class="stat-content">
             <div class="stat-icon">
               <el-icon><ChatLineSquare /></el-icon>
@@ -182,7 +182,9 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { User, ChatDotRound, ChatLineSquare, Star, Refresh } from '@element-plus/icons-vue'
 import { getOverview, getUserStats, getMessageAdminStats } from '@/api/admin'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const loading = ref(false)
 const overview = ref({
   totalUsers: 0,
@@ -255,7 +257,8 @@ const loadOverview = async () => {
 const loadMessageStats = async () => {
   messageStatsLoading.value = true
   try {
-    const res = await getMessageAdminStats({})
+    // 获取近7天的消息统计
+    const res = await getMessageAdminStats({ days: 7 })
     if (res.code === 200) {
       messageStats.value = res.data
     }
@@ -273,9 +276,9 @@ const loadUserStats = async () => {
     if (res.code === 200) {
       userStats.value = {
         total: res.data.total || 0,
-        superAdminCount: 0, // 需要从后端获取具体角色统计
-        adminCount: 0,
-        userCount: res.data.total || 0
+        superAdminCount: res.data.superAdminCount || 0,
+        adminCount: res.data.adminCount || 0,
+        userCount: res.data.userCount || 0
       }
     }
   } catch (error) {
@@ -284,6 +287,15 @@ const loadUserStats = async () => {
     userStatsLoading.value = false
   }
 }
+
+// 统计卡片点击跳转
+const navigateTo = (path) => {
+  router.push(path)
+}
+
+const handleUsersClick = () => navigateTo('/admin/users')
+const handleGroupsClick = () => navigateTo('/admin/groups')
+const handleMessagesClick = () => navigateTo('/admin/messages')
 
 onMounted(async () => {
   loading.value = true

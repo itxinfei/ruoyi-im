@@ -773,6 +773,16 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* 深色模式下的按钮样式 */
+[data-theme='dark'] .batch-buttons .el-button {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='dark'] .batch-buttons .el-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .batch-buttons .el-button--danger {
   background: var(--dt-error);
   border-color: var(--dt-error);

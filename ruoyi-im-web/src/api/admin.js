@@ -374,13 +374,13 @@ export function batchDeleteMessages(ids) {
 }
 
 /**
- * 获取消息统计
- * @param {Object} params - { startTime, endTime }
+ * 获取消息统计（管理后台）
+ * @param {Object} params - 查询参数
  * @returns {Promise}
  */
 export function getMessageAdminStats(params) {
   return request({
-    url: '/api/admin/messages/stats',
+    url: '/api/admin/stats/messages/types',
     method: 'get',
     params
   })

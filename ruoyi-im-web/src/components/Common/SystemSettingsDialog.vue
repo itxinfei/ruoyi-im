@@ -1,20 +1,19 @@
 <template>
   <el-dialog
     v-model="visible"
-    width="1000px"
+    width="900px"
     class="system-settings-dialog"
     destroy-on-close
     append-to-body
     :show-close="false"
     :close-on-click-modal="true"
     :close-on-press-escape="true"
-    title=""
+    align-center
   >
     <div class="settings-container">
       <!-- 侧边导航栏 -->
       <aside class="settings-sidebar">
         <div class="sidebar-header">
-          <el-icon class="header-icon"><Setting /></el-icon>
           <span class="header-title">设置</span>
         </div>
         
@@ -33,8 +32,11 @@
         
         <div class="sidebar-footer">
           <div class="user-info" @click="activeMenu = 'account'">
-            <el-avatar :size="28" :src="currentUser.avatar" />
-            <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
+            <el-avatar :size="32" :src="currentUser.avatar" />
+            <div class="user-details">
+              <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
+              <span class="user-status">在线</span>
+            </div>
           </div>
         </div>
       </aside>
@@ -48,7 +50,7 @@
           </button>
         </div>
         
-        <div class="content-body">
+        <div class="content-body scrollbar-custom">
           <component 
             :is="currentComponent" 
             v-bind="componentProps"
@@ -174,7 +176,7 @@ const loadBackendSettings = async () => {
     }
   } catch (error) {
     console.error('加载后端设置失败:', error)
-    ElMessage.error('加载设置失败')
+    // 静默失败，使用默认值
   } finally {
     loadingSettings.value = false
   }
@@ -203,12 +205,9 @@ const saveBackendSettings = async () => {
       // 更新后端设置缓存
       backendSettings.value = mergedSettings
       ElMessage.success('设置已保存')
-    } else {
-      ElMessage.error('保存失败: ' + (res.msg || '未知错误'))
     }
   } catch (error) {
     console.error('保存设置失败:', error)
-    ElMessage.error('保存设置失败')
   } finally {
     loadingSettings.value = false
   }
@@ -281,100 +280,108 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   display: flex;
   width: 100%;
   height: 600px;
-  background: #fff;
+  background: var(--bg-color);
+  border-radius: 8px;
+  overflow: hidden;
 
   .settings-sidebar {
-    width: 140px;
-    min-width: 140px;
-    background: #f5f5f5;
-    border-right: 1px solid #e0e0e0;
+    width: 220px;
+    min-width: 220px;
+    background: var(--bg-color-overlay);
+    border-right: 1px solid var(--border-color-light);
     display: flex;
     flex-direction: column;
+    padding: 16px 0;
 
     .sidebar-header {
-      height: 48px;
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      border-bottom: 1px solid #e0e0e0;
-      background: #f5f5f5;
-      
-      .header-icon {
-        font-size: 16px;
-        color: #666;
-        margin-right: 8px;
-      }
+      padding: 0 24px;
+      margin-bottom: 16px;
       
       .header-title {
-        font-size: 14px;
+        font-size: 20px;
         font-weight: 600;
-        color: #333;
+        color: var(--text-color-primary);
       }
     }
 
     .sidebar-menu {
       flex: 1;
-      padding: 4px;
+      padding: 0 12px;
       overflow-y: auto;
 
       .menu-item {
         display: flex;
         align-items: center;
-        height: 32px;
-        padding: 0 8px;
+        height: 40px;
+        padding: 0 12px;
+        margin-bottom: 4px;
+        border-radius: 8px;
         cursor: pointer;
-        color: #666;
-        font-size: 12px;
-        transition: all 0.15s;
-        margin-bottom: 1px;
+        color: var(--text-color-regular);
+        font-size: 14px;
+        transition: all 0.2s ease;
         
         &:hover {
-          background: #e8e8e8;
-          color: #333;
+          background: var(--bg-color-hover);
+          color: var(--text-color-primary);
         }
         
         &.active {
-          background: #fff;
-          color: #1890ff;
+          background: var(--el-color-primary-light-9);
+          color: var(--el-color-primary);
           font-weight: 500;
+          
+          .menu-icon {
+            color: var(--el-color-primary);
+          }
         }
         
         .menu-icon {
-          font-size: 14px;
-          margin-right: 8px;
-        }
-        
-        .menu-label {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          font-size: 18px;
+          margin-right: 12px;
+          color: var(--text-color-secondary);
+          transition: color 0.2s;
         }
       }
     }
 
     .sidebar-footer {
-      padding: 8px;
-      border-top: 1px solid #e0e0e0;
-      background: #f5f5f5;
+      padding: 16px 20px 0;
+      margin-top: 8px;
+      border-top: 1px solid var(--border-color-light);
 
       .user-info {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
         cursor: pointer;
-        padding: 4px;
-        border-radius: 4px;
+        padding: 8px;
+        border-radius: 8px;
+        transition: background 0.2s;
         
         &:hover {
-          background: #e8e8e8;
+          background: var(--bg-color-hover);
         }
         
-        .user-name {
-          font-size: 12px;
-          color: #333;
-          white-space: nowrap;
+        .user-details {
+          display: flex;
+          flex-direction: column;
           overflow: hidden;
-          text-overflow: ellipsis;
+          
+          .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          
+          .user-status {
+            font-size: 12px;
+            color: var(--el-color-success);
+            margin-top: 2px;
+          }
         }
       }
     }
@@ -385,40 +392,43 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     display: flex;
     flex-direction: column;
     min-width: 0;
-    max-width: calc(1000px - 140px);
-    background: #fff;
+    background: var(--bg-color);
 
     .content-header {
-      height: 48px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
-      border-bottom: 1px solid #e8e8e8;
-      background: #fff;
+      padding: 0 32px;
+      flex-shrink: 0;
 
       .content-title {
-        font-size: 14px;
+        font-size: 18px;
         font-weight: 600;
-        color: #333;
+        color: var(--text-color-primary);
         margin: 0;
       }
 
       .close-btn {
-        width: 24px;
-        height: 24px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
         background: transparent;
         border: none;
         cursor: pointer;
-        color: #999;
-        border-radius: 4px;
+        color: var(--text-color-secondary);
+        border-radius: 50%;
+        transition: all 0.2s;
         
         &:hover {
-          background: #f5f5f5;
-          color: #666;
+          background: var(--bg-color-hover);
+          color: var(--text-color-primary);
+        }
+        
+        .el-icon {
+          font-size: 20px;
         }
       }
     }
@@ -427,86 +437,44 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 12px 16px;
-      max-width: 100%;
-      box-sizing: border-box;
+      padding: 0 32px 32px;
     }
   }
 }
 
-// 深色模式
+// 深色模式适配
 .dark {
   .settings-container {
     background: #1a1a1a;
-
+    
     .settings-sidebar {
       background: #252525;
       border-color: #333;
-
-      .sidebar-header {
-        background: #252525;
-        border-color: #333;
-        
-        .header-icon,
-        .header-title {
-          color: #ccc;
-        }
+      
+      .menu-item.active {
+        background: rgba(var(--el-color-primary-rgb), 0.1);
       }
-
-      .menu-item {
-        color: #999;
-        
-        &:hover {
-          background: #333;
-          color: #ccc;
-        }
-        
-        &.active {
-          background: #1a1a1a;
-          color: #1890ff;
-        }
-      }
-
+      
       .sidebar-footer {
-        background: #252525;
         border-color: #333;
-
-        .user-info {
-          .user-name {
-            color: #ccc;
-          }
-          
-          &:hover {
-            background: #333;
-          }
-        }
-      }
-    }
-
-    .settings-content {
-      background: #1a1a1a;
-
-      .content-header {
-        background: #1a1a1a;
-        border-color: #333;
-
-        .content-title {
-          color: #ccc;
-        }
       }
     }
   }
 }
 
-// 对话框样式
+// 对话框样式重写
 :deep(.system-settings-dialog) {
-  .el-dialog__body {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
   .el-dialog__header {
     display: none;
+  }
+  
+  .el-dialog__body {
+    padding: 0;
+    margin: 0;
   }
 }
 </style>

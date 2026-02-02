@@ -441,7 +441,20 @@ const canSend = computed(() => {
   const notSending = !props.sending
 
   // 有文本内容或者有文件都可以发送
-  return (hasContent || hasFiles) && hasSession && isOnline && notSending
+  const result = (hasContent || hasFiles) && hasSession && isOnline && notSending
+  
+  // 调试日志
+  console.log('canSend 计算:', {
+    hasContent,
+    hasFiles,
+    pendingFilesCount: pendingFiles.value.length,
+    hasSession,
+    isOnline,
+    notSending,
+    result
+  })
+  
+  return result
 })
 
 // 输入框占位符（语音模式时显示不同的提示）
@@ -620,8 +633,15 @@ const handleImageFileChange = () => {
   }
 
   if (validateFile(file, config)) {
-    emit('upload-image', file)
+    // 添加到待上传列表
+    pendingFiles.value = [...pendingFiles.value, file]
+    showFilePreview.value = true
     imageInputRef.value.value = ''
+    
+    console.log('图片文件已添加到待上传列表:', {
+      fileName: file.name,
+      pendingFilesCount: pendingFiles.value.length
+    })
   }
 }
 
@@ -635,8 +655,15 @@ const handleFileInputChange = () => {
   }
 
   if (validateFile(file, config)) {
-    emit('upload-file', file)
+    // 添加到待上传列表
+    pendingFiles.value = [...pendingFiles.value, file]
+    showFilePreview.value = true
     fileInputRef.value.value = ''
+    
+    console.log('普通文件已添加到待上传列表:', {
+      fileName: file.name,
+      pendingFilesCount: pendingFiles.value.length
+    })
   }
 }
 
@@ -652,10 +679,16 @@ const handleVideoFileChange = () => {
   }
 
   if (validateFile(file, config)) {
-    const url = URL.createObjectURL(file)
-    emit('upload-video', { file, url })
+    // 添加到待上传列表
+    pendingFiles.value = [...pendingFiles.value, file]
+    showFilePreview.value = true
+    videoInputRef.value.value = ''
+    
+    console.log('视频文件已添加到待上传列表:', {
+      fileName: file.name,
+      pendingFilesCount: pendingFiles.value.length
+    })
   }
-  videoInputRef.value.value = ''
 }
 
 // ========== 截图 ==========
