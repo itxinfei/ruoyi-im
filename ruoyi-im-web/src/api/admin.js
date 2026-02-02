@@ -116,7 +116,7 @@ export function getUserOptions(params) {
  */
 export function getUserStats() {
   return request({
-    url: '/api/admin/users/stats',
+    url: '/api/admin/stats/users/roles',
     method: 'get'
   })
 }
@@ -433,6 +433,19 @@ export function getGroupActiveStats(days = 7) {
 export function getMessageStats(params) {
   return request({
     url: '/api/admin/stats/messages',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取消息类型统计（管理后台）
+ * @param {Object} params - 查询参数
+ * @returns {Promise}
+ */
+export function getMessageTypeStats(params) {
+  return request({
+    url: '/api/admin/stats/messages/types',
     method: 'get',
     params
   })

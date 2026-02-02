@@ -217,4 +217,46 @@ public interface ImGroupService {
      * @return 新二维码信息
      */
     java.util.Map<String, String> refreshGroupQrcode(Long groupId, Long userId);
+
+    /**
+     * 管理员添加群组成员
+     *
+     * @param groupId 群组ID
+     * @param userIds 用户ID列表
+     * @param role 角色（OWNER/ADMIN/MEMBER）
+     */
+    void adminAddMembers(Long groupId, List<Long> userIds, String role);
+
+    /**
+     * 管理员切换群组全员禁言状态
+     *
+     * @param groupId 群组ID
+     * @param muted 是否禁言
+     */
+    void adminToggleGroupMute(Long groupId, Boolean muted);
+
+    /**
+     * 管理员批量设置群成员禁言
+     *
+     * @param groupId 群组ID
+     * @param userIds 用户ID列表
+     * @param duration 禁言时长（秒）
+     */
+    void adminBatchMuteMembers(Long groupId, List<Long> userIds, Integer duration);
+
+    /**
+     * 管理员批量解除群成员禁言
+     *
+     * @param groupId 群组ID
+     * @param userIds 用户ID列表
+     */
+    void adminBatchUnmuteMembers(Long groupId, List<Long> userIds);
+
+    /**
+     * 管理员转让群主
+     *
+     * @param groupId 群组ID
+     * @param newOwnerId 新群主用户ID
+     */
+    void adminTransferOwner(Long groupId, Long newOwnerId);
 }

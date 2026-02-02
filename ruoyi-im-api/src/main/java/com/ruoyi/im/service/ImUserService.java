@@ -199,4 +199,36 @@ public interface ImUserService {
      * @return 统计信息Map，包含total、online、offline
      */
     java.util.Map<String, Long> getUserStats();
+
+    /**
+     * 管理员创建用户
+     *
+     * @param data 用户数据Map
+     * @return 新用户ID
+     */
+    Long adminCreateUser(java.util.Map<String, Object> data);
+
+    /**
+     * 管理员更新用户信息
+     *
+     * @param userId 用户ID
+     * @param data   用户数据Map
+     */
+    void adminUpdateUser(Long userId, java.util.Map<String, Object> data);
+
+    /**
+     * 批量更新用户状态
+     *
+     * @param userIds 用户ID列表
+     * @param status  状态：0=禁用，1=启用
+     */
+    void batchUpdateUserStatus(List<Long> userIds, Integer status);
+
+    /**
+     * 获取用户选项（用于下拉选择）
+     *
+     * @param keyword 搜索关键词
+     * @return 用户选项列表
+     */
+    List<java.util.Map<String, Object>> getUserOptions(String keyword);
 }

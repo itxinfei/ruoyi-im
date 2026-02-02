@@ -1,11 +1,10 @@
 package com.ruoyi.im.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.io.File;
+import javax.annotation.Resource;
 
 /**
  * Web MVC 配置
@@ -16,25 +15,8 @@ import java.io.File;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Value("${file.upload.path:src/main/resources/uploads/}")
-    private String uploadPath;
-
-    /**
-     * 获取上传文件的绝对路径
-     */
-    private String getAbsoluteUploadPath() {
-        String projectRoot = System.getProperty("user.dir");
-        String apiModulePath = projectRoot + File.separator + "ruoyi-im-api";
-        String fullPath = apiModulePath + File.separator + uploadPath;
-
-        // 确保目录存在
-        File dir = new File(fullPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        return fullPath;
-    }
+    @Resource
+    private FileUploadConfig fileUploadConfig;
 
     /**
      * 配置静态资源处理
@@ -42,13 +24,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 获取上传文件的绝对路径
-        String absoluteUploadPath = getAbsoluteUploadPath();
+        String absoluteUploadPath = fileUploadConfig.getAbsoluteUploadPath();
         // 确保路径格式正确（Windows使用\，Unix使用/）
         String resourceLocation = "file:" + absoluteUploadPath.replace("\\", "/");
 
         // 配置头像资源映射 - 指向上传目录下的 avatar 子目录
         registry.addResourceHandler("/avatar/**")
-                .addResourceLocations("file:" + getAbsoluteUploadPath().replace("\\", "/") + "/avatar/");
+                .addResourceLocations("file:" + absoluteUploadPath.replace("\\", "/") + "/avatar/");
 
         // 配置上传文件资源映射 - 支持文件下载
         registry.addResourceHandler("/uploads/**")

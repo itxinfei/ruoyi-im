@@ -185,4 +185,76 @@ public class ImStatsServiceImpl implements ImStatsService {
 
         return stats;
     }
+
+    @Override
+    public Map<String, Object> getMessageAdminStats(Map<String, Object> params) {
+        Map<String, Object> stats = new HashMap<>();
+
+        try {
+            List<ImMessage> allMessages = imMessageMapper.selectImMessageList(new ImMessage());
+
+            // 总消息数
+            stats.put("totalMessages", allMessages.size());
+
+            // 文本消息数
+            long textMessages = allMessages.stream()
+                    .filter(m -> "TEXT".equals(m.getType()))
+                    .count();
+            stats.put("textMessages", textMessages);
+
+            // 图片消息数
+            long imageMessages = allMessages.stream()
+                    .filter(m -> "IMAGE".equals(m.getType()))
+                    .count();
+            stats.put("imageMessages", imageMessages);
+
+            // 文件消息数
+            long fileMessages = allMessages.stream()
+                    .filter(m -> "FILE".equals(m.getType()))
+                    .count();
+            stats.put("fileMessages", fileMessages);
+
+        } catch (Exception e) {
+            logger.error("获取消息类型统计失败", e);
+            stats.put("error", "统计数据获取失败");
+        }
+
+        return stats;
+    }
+
+    @Override
+    public Map<String, Object> getUserStats() {
+        Map<String, Object> stats = new HashMap<>();
+
+        try {
+            List<ImUser> allUsers = imUserMapper.selectImUserList(new ImUser());
+
+            // 总用户数
+            stats.put("total", allUsers.size());
+
+            // 超级管理员数
+            long superAdminCount = allUsers.stream()
+                    .filter(u -> "SUPER_ADMIN".equals(u.getRole()))
+                    .count();
+            stats.put("superAdminCount", superAdminCount);
+
+            // 管理员数
+            long adminCount = allUsers.stream()
+                    .filter(u -> "ADMIN".equals(u.getRole()))
+                    .count();
+            stats.put("adminCount", adminCount);
+
+            // 普通用户数
+            long userCount = allUsers.stream()
+                    .filter(u -> "USER".equals(u.getRole()) || u.getRole() == null)
+                    .count();
+            stats.put("userCount", userCount);
+
+        } catch (Exception e) {
+            logger.error("获取用户角色统计失败", e);
+            stats.put("error", "统计数据获取失败");
+        }
+
+        return stats;
+    }
 }

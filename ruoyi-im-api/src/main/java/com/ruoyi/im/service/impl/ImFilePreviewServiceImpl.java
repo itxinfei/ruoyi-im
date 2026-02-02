@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.config.FileUploadConfig;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -35,11 +37,8 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
     @Autowired
     private ImFileAssetMapper fileAssetMapper;
 
-    @Value("${file.upload.path:uploads/}")
-    private String uploadPath;
-
-    @Value("${file.upload.url-prefix:/uploads/}")
-    private String urlPrefix;
+    @Resource
+    private FileUploadConfig fileUploadConfig;
 
     @Value("${im.security.file.preview.thumbnail-dir:thumbnails/}")
     private String thumbnailDir;
@@ -110,7 +109,7 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
         }
 
         // 设置预览URL
-        String fileUrl = urlPrefix + fileAsset.getFilePath();
+        String fileUrl = fileUploadConfig.buildFileUrl(fileAsset.getFilePath());
         vo.setPreviewUrl(fileUrl);
         vo.setDownloadUrl(fileUrl);
 
@@ -169,7 +168,7 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
 
             // 保存缩略图
             String dateDir = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-            String thumbnailPathDir = uploadPath + thumbnailDir + dateDir + "/";
+            String thumbnailPathDir = fileUploadConfig.getAbsoluteUploadPath() + thumbnailDir + dateDir + "/";
             Path thumbnailPath = Paths.get(thumbnailPathDir);
             if (!Files.exists(thumbnailPath)) {
                 Files.createDirectories(thumbnailPath);
@@ -181,7 +180,7 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
             ImageIO.write(thumbnailImage, "jpg", thumbnailFile);
 
             // 返回缩略图URL
-            return urlPrefix + thumbnailDir + dateDir + "/" + thumbnailFileName;
+            return fileUploadConfig.buildFileUrl(thumbnailDir + dateDir + "/" + thumbnailFileName);
 
         } catch (IOException e) {
             throw new BusinessException("生成缩略图失败: " + e.getMessage());
@@ -203,9 +202,9 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
             case "html":
                 // 对于PDF/Office等，需要转换后返回URL
                 // 这里简化处理，直接返回原文件URL
-                return urlPrefix + fileAsset.getFilePath();
+                return fileUploadConfig.buildFileUrl(fileAsset.getFilePath());
             default:
-                return urlPrefix + fileAsset.getFilePath();
+                return fileUploadConfig.buildFileUrl(fileAsset.getFilePath());
         }
     }
 

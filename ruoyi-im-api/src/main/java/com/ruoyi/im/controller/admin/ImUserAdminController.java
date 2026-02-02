@@ -145,4 +145,74 @@ public class ImUserAdminController {
         Map<String, Long> stats = imUserService.getUserStats();
         return Result.success(stats);
     }
+
+    /**
+     * 创建用户
+     *
+     * @param data 用户数据
+     * @return 操作结果
+     */
+    @Operation(summary = "创建用户", description = "管理员创建新用户")
+    @PostMapping
+    public Result<Long> create(@RequestBody Map<String, Object> data) {
+        Long userId = imUserService.adminCreateUser(data);
+        return Result.success("创建成功", userId);
+    }
+
+    /**
+     * 更新用户信息
+     *
+     * @param id   用户ID
+     * @param data 用户数据
+     * @return 操作结果
+     */
+    @Operation(summary = "更新用户信息", description = "管理员更新用户信息")
+    @PutMapping("/{id}")
+    public Result<Void> update(@PathVariable Long id, @RequestBody Map<String, Object> data) {
+        imUserService.adminUpdateUser(id, data);
+        return Result.success("更新成功");
+    }
+
+    /**
+     * 批量删除用户
+     *
+     * @param ids 用户ID列表
+     * @return 操作结果
+     */
+    @Operation(summary = "批量删除用户", description = "管理员批量删除用户")
+    @DeleteMapping("/batch")
+    public Result<Void> batchDelete(@RequestBody List<Long> ids) {
+        imUserService.batchDeleteUsers(ids);
+        return Result.success("批量删除成功");
+    }
+
+    /**
+     * 批量更新用户状态
+     *
+     * @param data 包含ids和status
+     * @return 操作结果
+     */
+    @Operation(summary = "批量更新用户状态", description = "管理员批量更新用户状态")
+    @PutMapping("/batch/status")
+    public Result<Void> batchUpdateStatus(@RequestBody Map<String, Object> data) {
+        @SuppressWarnings("unchecked")
+        List<Long> ids = (List<Long>) data.get("ids");
+        Integer status = (Integer) data.get("status");
+        imUserService.batchUpdateUserStatus(ids, status);
+        return Result.success("批量更新状态成功");
+    }
+
+    /**
+     * 获取用户选项（用于下拉选择）
+     *
+     * @param keyword 搜索关键词
+     * @return 用户选项列表
+     */
+    @Operation(summary = "获取用户选项", description = "获取用户选项列表，用于下拉选择")
+    @GetMapping("/options")
+    public Result<List<Map<String, Object>>> getOptions(
+            @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword) {
+        List<Map<String, Object>> options = imUserService.getUserOptions(keyword);
+        return Result.success(options);
+    }
 }

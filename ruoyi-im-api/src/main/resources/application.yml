@@ -11,7 +11,7 @@ app:
   dev:
     user-id: 1
   upload:
-    path: src/main/resources/uploads/
+    path: uploads/
 
 # Spring框架配置
 spring:
@@ -139,9 +139,12 @@ im:
         thumbnail-dir: thumbnails/
 
 # 文件上传配置
+# 路径说明：
+# - 开发环境：文件上传到项目根目录下的 uploads/ 目录
+# - 生产环境：文件上传到 JAR 包所在目录下的 uploads/ 目录
 file:
   upload:
-    path: ./resources/uploads/
+    path: uploads/
     url-prefix: /api/im/file/download/
 
 # 视频会议配置

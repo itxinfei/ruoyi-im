@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.config.FileUploadConfig;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
@@ -11,10 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -37,11 +38,8 @@ public class ImFileServiceImpl implements ImFileService {
     @Autowired
     private ImFileAssetMapper imFileAssetMapper;
 
-    @Value("${file.upload.path:src/main/resources/uploads/}")
-    private String uploadPath;
-
-    @Value("${file.upload.url-prefix:/uploads/}")
-    private String urlPrefix;
+    @Resource
+    private FileUploadConfig fileUploadConfig;
 
     @Override
     public ImFileVO uploadFile(MultipartFile file, Long userId) {
@@ -56,7 +54,7 @@ public class ImFileServiceImpl implements ImFileService {
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
         String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         String relativePath = datePath + "/" + fileName;
-        String filePath = uploadPath + relativePath;
+        String filePath = fileUploadConfig.getAbsoluteUploadPath() + relativePath;
 
         File targetFile = new File(filePath);
         File parentDir = targetFile.getParentFile();
@@ -165,7 +163,7 @@ public class ImFileServiceImpl implements ImFileService {
         BeanUtils.copyProperties(asset, vo);
         vo.setFileId(asset.getId());
         vo.setFileExtension(asset.getFileExt());
-        vo.setFileUrl(urlPrefix + asset.getFilePath());
+        vo.setFileUrl(fileUploadConfig.buildFileUrl(asset.getFilePath()));
         vo.setUploadTime(asset.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         vo.setDeleted("DELETED".equals(asset.getStatus()));
         return vo;

@@ -90,4 +90,30 @@ public class ImStatsController {
         Map<String, Object> stats = imStatsService.getMessageStats(startDate, endDate);
         return Result.success(stats);
     }
+
+    /**
+     * 获取消息类型统计（管理后台）
+     *
+     * @param params 查询参数
+     * @return 消息类型统计数据
+     */
+    @Operation(summary = "获取消息类型统计", description = "获取不同类型消息的数量统计")
+    @GetMapping("/messages/types")
+    public Result<Map<String, Object>> getMessageAdminStats(
+            @Parameter(description = "查询参数") @RequestParam(required = false) Map<String, Object> params) {
+        Map<String, Object> stats = imStatsService.getMessageAdminStats(params);
+        return Result.success(stats);
+    }
+
+    /**
+     * 获取用户角色统计（管理后台）
+     *
+     * @return 用户角色统计数据
+     */
+    @Operation(summary = "获取用户角色统计", description = "获取不同角色的用户数量统计")
+    @GetMapping("/users/roles")
+    public Result<Map<String, Object>> getUserStats() {
+        Map<String, Object> stats = imStatsService.getUserStats();
+        return Result.success(stats);
+    }
 }

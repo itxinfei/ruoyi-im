@@ -171,4 +171,92 @@ public class ImGroupAdminController {
         imGroupService.adminRemoveMember(groupId, userId);
         return Result.success("成员已移除");
     }
+
+    /**
+     * 添加群组成员
+     *
+     * @param groupId 群组ID
+     * @param data 包含userIds和role
+     * @return 操作结果
+     */
+    @Operation(summary = "添加群组成员", description = "管理员添加群组成员")
+    @PostMapping("/{groupId}/members")
+    public Result<Void> addMember(
+            @Parameter(description = "群组ID") @PathVariable Long groupId,
+            @RequestBody Map<String, Object> data) {
+        @SuppressWarnings("unchecked")
+        List<Long> userIds = (List<Long>) data.get("userIds");
+        String role = (String) data.getOrDefault("role", "MEMBER");
+        imGroupService.adminAddMembers(groupId, userIds, role);
+        return Result.success("成员已添加");
+    }
+
+    /**
+     * 切换群组禁言状态
+     *
+     * @param groupId 群组ID
+     * @param data 包含muted状态
+     * @return 操作结果
+     */
+    @Operation(summary = "切换群组禁言状态", description = "管理员切换群组全员禁言状态")
+    @PutMapping("/{groupId}/mute")
+    public Result<Void> toggleMute(
+            @Parameter(description = "群组ID") @PathVariable Long groupId,
+            @RequestBody Map<String, Object> data) {
+        Boolean muted = (Boolean) data.get("muted");
+        imGroupService.adminToggleGroupMute(groupId, muted);
+        return Result.success("禁言状态已更新");
+    }
+
+    /**
+     * 批量设置群成员禁言
+     *
+     * @param groupId 群组ID
+     * @param data 包含userIds和duration
+     * @return 操作结果
+     */
+    @Operation(summary = "批量设置群成员禁言", description = "管理员批量设置群成员禁言")
+    @PutMapping("/{groupId}/members/batch-mute")
+    public Result<Void> batchMuteMembers(
+            @Parameter(description = "群组ID") @PathVariable Long groupId,
+            @RequestBody Map<String, Object> data) {
+        @SuppressWarnings("unchecked")
+        List<Long> userIds = (List<Long>) data.get("userIds");
+        Integer duration = (Integer) data.get("duration");
+        imGroupService.adminBatchMuteMembers(groupId, userIds, duration);
+        return Result.success("已设置禁言");
+    }
+
+    /**
+     * 批量解除群成员禁言
+     *
+     * @param groupId 群组ID
+     * @param userIds 用户ID列表
+     * @return 操作结果
+     */
+    @Operation(summary = "批量解除群成员禁言", description = "管理员批量解除群成员禁言")
+    @PutMapping("/{groupId}/members/batch-unmute")
+    public Result<Void> batchUnmuteMembers(
+            @Parameter(description = "群组ID") @PathVariable Long groupId,
+            @RequestBody List<Long> userIds) {
+        imGroupService.adminBatchUnmuteMembers(groupId, userIds);
+        return Result.success("已解除禁言");
+    }
+
+    /**
+     * 转让群主
+     *
+     * @param groupId 群组ID
+     * @param data 包含newOwnerId
+     * @return 操作结果
+     */
+    @Operation(summary = "转让群主", description = "管理员转让群主")
+    @PutMapping("/{groupId}/owner")
+    public Result<Void> transferOwner(
+            @Parameter(description = "群组ID") @PathVariable Long groupId,
+            @RequestBody Map<String, Object> data) {
+        Long newOwnerId = ((Number) data.get("newOwnerId")).longValue();
+        imGroupService.adminTransferOwner(groupId, newOwnerId);
+        return Result.success("群主已转让");
+    }
 }

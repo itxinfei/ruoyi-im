@@ -11,6 +11,10 @@ import java.io.File;
 /**
  * 文件上传配置类
  * 统一管理文件上传路径和初始化上传目录
+ * <p>
+ * 路径说明：
+ * - 开发环境：文件上传到项目根目录下的 uploads/ 目录
+ * - 生产环境：文件上传到 JAR 包所在目录下的 uploads/ 目录
  *
  * @author ruoyi
  */
@@ -20,9 +24,9 @@ public class FileUploadConfig {
     private static final Logger logger = LoggerFactory.getLogger(FileUploadConfig.class);
 
     /**
-     * 上传文件的基础路径
+     * 上传文件的基础路径（相对于项目根目录或 JAR 包所在目录）
      */
-    @Value("${file.upload.path:src/main/resources/uploads/}")
+    @Value("${file.upload.path:uploads/}")
     private String uploadPath;
 
     /**
@@ -76,13 +80,37 @@ public class FileUploadConfig {
 
     /**
      * 获取上传文件的绝对路径
+     * <p>
+     * 规则：
+     * - 如果配置的路径是绝对路径（以 / 或 Windows 盘符开头），直接使用
+     * - 否则，相对于项目/JAR 包所在目录
      *
      * @return 绝对路径
      */
     public String getAbsoluteUploadPath() {
-        String projectRoot = System.getProperty("user.dir");
-        String apiModulePath = projectRoot + File.separator + "ruoyi-im-api";
-        return apiModulePath + File.separator + uploadPath;
+        File pathFile = new File(uploadPath);
+
+        // 如果已经是绝对路径，直接使用
+        if (pathFile.isAbsolute()) {
+            return normalizePath(uploadPath);
+        }
+
+        // 相对路径：基于当前工作目录（JAR 包所在目录或项目根目录）
+        String workingDir = System.getProperty("user.dir");
+        String fullPath = workingDir + File.separator + uploadPath;
+
+        return normalizePath(fullPath);
+    }
+
+    /**
+     * 标准化路径，处理路径分隔符
+     *
+     * @param path 原始路径
+     * @return 标准化后的路径
+     */
+    private String normalizePath(String path) {
+        File file = new File(path);
+        return file.getAbsolutePath();
     }
 
     /**

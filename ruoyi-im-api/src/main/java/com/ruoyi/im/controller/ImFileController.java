@@ -1,6 +1,7 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.config.FileUploadConfig;
 import com.ruoyi.im.service.ImFileService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
@@ -10,10 +11,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Files;
@@ -37,8 +38,8 @@ public class ImFileController {
 
     private final JwtUtils jwtUtils;
 
-    @Value("${file.upload.path}")
-    private String uploadPath;
+    @Resource
+    private FileUploadConfig fileUploadConfig;
 
     /**
      * 构造器注入依赖
@@ -116,7 +117,7 @@ public class ImFileController {
         }
 
         // 构建文件完整路径
-        String filePath = uploadPath + fileVO.getFilePath();
+        String filePath = fileUploadConfig.getAbsoluteUploadPath() + fileVO.getFilePath();
         File file = new File(filePath);
 
         if (!file.exists()) {
@@ -183,7 +184,7 @@ public class ImFileController {
 
         // 构建文件路径
         String relativePath = "/" + fileType + "/" + year + "/" + month + "/" + day + "/" + fileName;
-        String filePath = uploadPath + relativePath;
+        String filePath = fileUploadConfig.getAbsoluteUploadPath() + relativePath;
         File file = new File(filePath);
 
         if (!file.exists()) {

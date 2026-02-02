@@ -407,11 +407,11 @@ watch(() => props.visible, (val) => {
 .chat-search-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.25);
   z-index: 2000;
   display: flex;
   justify-content: flex-end;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(2px);
 }
 
 .chat-search-panel {

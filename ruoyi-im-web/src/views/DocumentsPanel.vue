@@ -112,7 +112,7 @@
 
       <div class="docs-content">
         <div v-if="loading" class="loading-state">
-          <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+          <el-icon class="is-loading" :size="32"><ElIconLoading /></el-icon>
           <span>加载中...</span>
         </div>
 
@@ -229,7 +229,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, ElIcon, Loading } from 'element-plus'
+import { ElMessage, ElMessageBox, ElIcon } from 'element-plus'
+import { Loading as ElIconLoading } from '@element-plus/icons-vue'
 import FilePreviewDialog from '@/components/FilePreviewDialog/index.vue'
 import { formatFileSize } from '@/utils/format'
 import { getFolderList, getFileList, createFolder, uploadToCloud, getStorageQuota } from '@/api/im/cloud'
@@ -960,6 +961,24 @@ onMounted(() => {
   background: var(--dt-bg-body);
   display: flex;
   flex-direction: column;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--dt-bg-body);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--dt-border-color);
+    border-radius: 3px;
+
+    &:hover {
+      background-color: var(--dt-text-quaternary);
+    }
+  }
 }
 
 .loading-state,
@@ -982,25 +1001,6 @@ onMounted(() => {
   font-size: 14px;
   color: var(--dt-text-secondary);
   margin: 0;
-}
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: var(--dt-bg-body);
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--dt-border-color);
-    border-radius: 3px;
-    
-    &:hover {
-      background-color: var(--dt-text-quaternary);
-    }
-  }
 }
 
 .files-table-wrapper {

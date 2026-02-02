@@ -29,11 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.ruoyi.im.config.FileUploadConfig;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -84,11 +85,8 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     @Autowired
     private ImUserMapper userMapper;
 
-    @Value("${file.upload.path:src/main/resources/uploads/}")
-    private String uploadPath;
-
-    @Value("${file.upload.url-prefix:/uploads/}")
-    private String urlPrefix;
+    @Resource
+    private FileUploadConfig fileUploadConfig;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -346,7 +344,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
         String datePath = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         String relativePath = "cloud/" + datePath + "/" + fileName;
-        String filePath = uploadPath + relativePath;
+        String filePath = fileUploadConfig.getAbsoluteUploadPath() + relativePath;
 
         File targetFile = new File(filePath);
         File parentDir = targetFile.getParentFile();
@@ -734,7 +732,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         if (cloudFile.getFileAssetId() != null) {
             ImFileAsset asset = fileAssetMapper.selectById(cloudFile.getFileAssetId());
             if (asset != null) {
-                vo.setFileUrl(urlPrefix + asset.getFilePath());
+                vo.setFileUrl(fileUploadConfig.buildFileUrl(asset.getFilePath()));
             }
         }
 

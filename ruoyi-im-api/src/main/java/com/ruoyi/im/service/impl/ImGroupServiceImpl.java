@@ -522,6 +522,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         ImConversationMember member = new ImConversationMember();
         member.setConversationId(conversationId);
         member.setUserId(userId);
+        member.setRole(StatusConstants.GroupMemberRole.MEMBER);
         member.setUnreadCount(0);
         member.setIsPinned(0);
         member.setIsMuted(0);
@@ -789,5 +790,141 @@ public class ImGroupServiceImpl implements ImGroupService {
         result.put("qrcodeUrl", qrcodeUrl);
         result.put("expireTime", expireTime.toString());
         return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminAddMembers(Long groupId, List<Long> userIds, String role) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            throw new RuntimeException("群组不存在");
+        }
+
+        for (Long userId : userIds) {
+            // 检查是否已存在
+            ImGroupMember existing = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
+            if (existing == null) {
+                ImGroupMember member = new ImGroupMember();
+                member.setGroupId(groupId);
+                member.setUserId(userId);
+                member.setRole(role != null ? role : "MEMBER");
+                member.setJoinedTime(LocalDateTime.now());
+                member.setCreateTime(LocalDateTime.now());
+                member.setUpdateTime(LocalDateTime.now());
+                imGroupMemberMapper.insertImGroupMember(member);
+
+                // 添加到会话成员
+                ImConversation conversation = imConversationMapper.selectByTypeAndTarget(
+                        "GROUP", groupId, null);
+                if (conversation != null) {
+                    addConversationMember(conversation.getId(), userId);
+                }
+            }
+        }
+
+        // 更新群组成员数量
+        Integer memberCount = imGroupMemberMapper.countMembersByGroupId(groupId);
+        group.setMemberCount(memberCount);
+        group.setUpdateTime(LocalDateTime.now());
+        imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminToggleGroupMute(Long groupId, Boolean muted) {
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            throw new RuntimeException("群组不存在");
+        }
+
+        group.setAllMuted(muted ? 1 : 0);
+        group.setUpdateTime(LocalDateTime.now());
+        imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminBatchMuteMembers(Long groupId, List<Long> userIds, Integer duration) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime muteEndTime = duration != null && duration > 0
+                ? LocalDateTime.now().plusSeconds(duration)
+                : null;
+
+        for (Long userId : userIds) {
+            ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
+            if (member != null) {
+                member.setMuteEndTime(muteEndTime);
+                member.setUpdateTime(LocalDateTime.now());
+                imGroupMemberMapper.updateImGroupMember(member);
+            }
+        }
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminBatchUnmuteMembers(Long groupId, List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+
+        for (Long userId : userIds) {
+            ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
+            if (member != null) {
+                member.setMuteEndTime(null);
+                member.setUpdateTime(LocalDateTime.now());
+                imGroupMemberMapper.updateImGroupMember(member);
+            }
+        }
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adminTransferOwner(Long groupId, Long newOwnerId) {
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            throw new RuntimeException("群组不存在");
+        }
+
+        ImGroupMember newOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, newOwnerId);
+        if (newOwner == null) {
+            throw new RuntimeException("用户不在群组中");
+        }
+
+        ImGroupMember oldOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, group.getOwnerId());
+        if (oldOwner != null) {
+            oldOwner.setRole("ADMIN");
+            oldOwner.setUpdateTime(LocalDateTime.now());
+            imGroupMemberMapper.updateImGroupMember(oldOwner);
+        }
+
+        newOwner.setRole("OWNER");
+        newOwner.setUpdateTime(LocalDateTime.now());
+        imGroupMemberMapper.updateImGroupMember(newOwner);
+
+        group.setOwnerId(newOwnerId);
+        group.setUpdateTime(LocalDateTime.now());
+        imGroupMapper.updateImGroup(group);
+
+        // 清除缓存
+        imRedisUtil.evictGroupInfo(groupId);
     }
 }

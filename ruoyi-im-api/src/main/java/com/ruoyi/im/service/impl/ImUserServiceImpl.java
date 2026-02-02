@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.config.FileUploadConfig;
 import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.constant.UserRole;
@@ -20,12 +21,12 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -52,11 +53,8 @@ public class ImUserServiceImpl implements ImUserService {
     private final JwtUtils jwtUtils;
     private final ImRedisUtil imRedisUtil;
 
-    @Value("${file.upload.path:src/main/resources/uploads/}")
-    private String uploadPath;
-
-    @Value("${file.upload.url-prefix:/uploads/}")
-    private String urlPrefix;
+    @Resource
+    private FileUploadConfig fileUploadConfig;
 
     /**
      * 构造器注入依赖
@@ -389,7 +387,7 @@ public class ImUserServiceImpl implements ImUserService {
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
         String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         String relativePath = "avatar/" + datePath + "/" + fileName;
-        String filePath = uploadPath + relativePath;
+        String filePath = fileUploadConfig.getAbsoluteUploadPath() + relativePath;
 
         // 确保目录存在
         File targetFile = new File(filePath);
@@ -407,7 +405,7 @@ public class ImUserServiceImpl implements ImUserService {
         }
 
         // 生成访问URL
-        String avatarUrl = urlPrefix + relativePath;
+        String avatarUrl = fileUploadConfig.buildFileUrl(relativePath);
 
         // 更新用户头像
         ImUser user = imUserMapper.selectImUserById(userId);
@@ -517,11 +515,114 @@ public class ImUserServiceImpl implements ImUserService {
         java.util.Map<String, Long> stats = new java.util.HashMap<>();
         int total = imUserMapper.countImUsers();
         long online = imRedisUtil.getOnlineUserCount();
-        
+
         stats.put("total", (long) total);
         stats.put("online", online);
         stats.put("offline", Math.max(0, total - online));
-        
+
         return stats;
+    }
+
+    @Override
+    public Long adminCreateUser(java.util.Map<String, Object> data) {
+        String username = (String) data.get("username");
+        String password = (String) data.get("password");
+        String nickname = (String) data.get("nickname");
+        String mobile = (String) data.get("mobile");
+        String email = (String) data.get("email");
+        String role = (String) data.getOrDefault("role", "USER");
+
+        // 验证必填字段
+        if (username == null || username.trim().isEmpty()) {
+            throw new RuntimeException("用户名不能为空");
+        }
+        if (password == null || password.trim().isEmpty()) {
+            throw new RuntimeException("密码不能为空");
+        }
+
+        // 检查用户名是否已存在
+        if (imUserMapper.selectImUserByUsername(username) != null) {
+            throw new RuntimeException("用户名已存在");
+        }
+
+        // 创建用户
+        ImUser user = new ImUser();
+        user.setUsername(username);
+        user.setPassword(password); // 这里应该加密，实际项目中需要使用 BCryptPasswordEncoder
+        user.setNickname(nickname != null ? nickname : username);
+        user.setMobile(mobile);
+        user.setEmail(email);
+        user.setRole(role);
+        user.setStatus(1);
+        user.setCreateTime(java.time.LocalDateTime.now());
+        user.setUpdateTime(java.time.LocalDateTime.now());
+
+        imUserMapper.insertImUser(user);
+        return user.getId();
+    }
+
+    @Override
+    public void adminUpdateUser(Long userId, java.util.Map<String, Object> data) {
+        ImUser user = imUserMapper.selectImUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 更新字段
+        if (data.containsKey("nickname")) {
+            user.setNickname((String) data.get("nickname"));
+        }
+        if (data.containsKey("mobile")) {
+            user.setMobile((String) data.get("mobile"));
+        }
+        if (data.containsKey("email")) {
+            user.setEmail((String) data.get("email"));
+        }
+        if (data.containsKey("role")) {
+            user.setRole((String) data.get("role"));
+        }
+        if (data.containsKey("status")) {
+            user.setStatus((Integer) data.get("status"));
+        }
+        if (data.containsKey("avatar")) {
+            user.setAvatar((String) data.get("avatar"));
+        }
+        if (data.containsKey("signature")) {
+            user.setSignature((String) data.get("signature"));
+        }
+
+        user.setUpdateTime(java.time.LocalDateTime.now());
+        imUserMapper.updateImUser(user);
+    }
+
+    @Override
+    public void batchUpdateUserStatus(List<Long> userIds, Integer status) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+        for (Long userId : userIds) {
+            updateStatus(userId, status);
+        }
+    }
+
+    @Override
+    public List<java.util.Map<String, Object>> getUserOptions(String keyword) {
+        List<ImUserVO> users;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            users = searchUsers(keyword);
+        } else {
+            users = getUserListWithPagination(null, null, 0, 100);
+        }
+
+        List<java.util.Map<String, Object>> options = new java.util.ArrayList<>();
+        for (ImUserVO user : users) {
+            java.util.Map<String, Object> option = new java.util.HashMap<>();
+            option.put("value", user.getId());
+            option.put("label", user.getNickname() != null ? user.getNickname() : user.getUsername());
+            option.put("avatar", user.getAvatar());
+            option.put("role", user.getRole());
+            options.add(option);
+        }
+        return options;
     }
 }

@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.config.FileUploadConfig;
 import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.domain.ImFileChunkDetail;
@@ -14,11 +15,11 @@ import com.ruoyi.im.service.ImFileChunkUploadService;
 import com.ruoyi.im.vo.file.ImFileChunkUploadInitVO;
 import com.ruoyi.im.vo.file.ImFileVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,11 +45,8 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
     @Autowired
     private ImFileAssetMapper fileAssetMapper;
 
-    @Value("${file.upload.path:src/main/resources/uploads/}")
-    private String uploadPath;
-
-    @Value("${file.upload.url-prefix:/uploads/}")
-    private String urlPrefix;
+    @Resource
+    private FileUploadConfig fileUploadConfig;
 
     /** 上传任务过期时间（小时） */
     private static final int EXPIRE_HOURS = 24;
@@ -151,7 +149,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         try {
             // 保存分片文件
             String dateDir = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
-            String chunkDir = uploadPath + CHUNK_TEMP_DIR + uploadId + "/";
+            String chunkDir = fileUploadConfig.getAbsoluteUploadPath() + CHUNK_TEMP_DIR + uploadId + "/";
             Path chunkPath = Paths.get(chunkDir);
             if (!Files.exists(chunkPath)) {
                 Files.createDirectories(chunkPath);
@@ -205,7 +203,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
 
             // 创建最终文件目录
             String dateDir = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-            String targetDir = uploadPath + dateDir + "/";
+            String targetDir = fileUploadConfig.getAbsoluteUploadPath() + dateDir + "/";
             Path targetPath = Paths.get(targetDir);
             if (!Files.exists(targetPath)) {
                 Files.createDirectories(targetPath);
@@ -215,7 +213,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             String fileExtension = getFileExtension(chunkUpload.getFileName());
             String finalFileName = UUID.randomUUID().toString().replace("-", "") + "." + fileExtension;
             String finalFilePath = targetDir + finalFileName;
-            String fileUrl = urlPrefix + dateDir + finalFileName;
+            String fileUrl = fileUploadConfig.buildFileUrl(dateDir + finalFileName);
 
             // 合并分片
             try (FileOutputStream fos = new FileOutputStream(finalFilePath)) {
@@ -367,7 +365,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
      */
     private void cleanupChunks(String uploadId) {
         try {
-            String chunkDir = uploadPath + CHUNK_TEMP_DIR + uploadId + "/";
+            String chunkDir = fileUploadConfig.getAbsoluteUploadPath() + CHUNK_TEMP_DIR + uploadId + "/";
             Path chunkPath = Paths.get(chunkDir);
             if (Files.exists(chunkPath)) {
                 Files.walk(chunkPath)

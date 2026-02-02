@@ -43,4 +43,21 @@ public interface ImStatsService {
      * @return 消息统计数据Map
      */
     Map<String, Object> getMessageStats(LocalDate startDate, LocalDate endDate);
+
+    /**
+     * 获取消息类型统计（用于管理后台）
+     * 统计不同类型消息的数量
+     *
+     * @param params 查询参数
+     * @return 消息类型统计数据Map，包含totalMessages、textMessages、imageMessages、fileMessages
+     */
+    Map<String, Object> getMessageAdminStats(Map<String, Object> params);
+
+    /**
+     * 获取用户角色统计（用于管理后台）
+     * 统计不同角色的用户数量
+     *
+     * @return 用户角色统计数据Map，包含total、superAdminCount、adminCount、userCount
+     */
+    Map<String, Object> getUserStats();
 }

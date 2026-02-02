@@ -87,14 +87,6 @@
         :disabled="isVoiceMode"
       ></textarea>
 
-      <!-- 空状态引导提示 -->
-      <div v-if="showDragHint" class="drag-hint">
-        <div class="hint-icon">
-          <span class="material-icons-outlined">add_photo_alternate</span>
-        </div>
-        <div class="hint-text">支持拖拽上传图片、视频、文件</div>
-      </div>
-
       <div class="input-footer" v-if="!isVoiceMode">
         <span class="hint-text">{{ sendShortcutHint }}</span>
         <div class="footer-actions">
@@ -440,14 +432,16 @@ const sendShortcutHint = computed(() => {
   return shortcut === 'ctrl-enter' ? '按 Ctrl + Enter 发送' : '按 Enter 发送'
 })
 
-// 优化发送条件：检查内容、会话有效性、网络状态和发送状态
+// 优化发送条件：检查内容、文件、会话有效性、网络状态和发送状态
 const canSend = computed(() => {
   const hasContent = messageContent.value.trim().length > 0
+  const hasFiles = pendingFiles.value.length > 0
   const hasSession = !!props.session?.id
   const isOnline = store.state.im.wsConnected
   const notSending = !props.sending
 
-  return hasContent && hasSession && isOnline && notSending
+  // 有文本内容或者有文件都可以发送
+  return (hasContent || hasFiles) && hasSession && isOnline && notSending
 })
 
 // 输入框占位符（语音模式时显示不同的提示）
@@ -456,11 +450,6 @@ const inputPlaceholder = computed(() => {
     return '正在录音...'
   }
   return props.session?.type === 'GROUP' ? '发消息...' : '发消息...'
-})
-
-// 显示拖拽引导提示（输入框为空且不在拖拽状态时）
-const showDragHint = computed(() => {
-  return !messageContent.value.trim() && !isDragOver.value && !isVoiceMode.value
 })
 
 // 格式化回复预览内容（处理各种消息类型）
@@ -1074,7 +1063,6 @@ onUnmounted(() => {
     }
 
     .message-input { opacity: 0.3; }
-    .drag-hint { opacity: 0; }
   }
 
   &.is-voice-mode {
@@ -1111,49 +1099,6 @@ onUnmounted(() => {
     color: var(--dt-text-primary-dark);
     &::placeholder { color: var(--dt-text-quaternary-dark); }
   }
-}
-
-// 拖拽引导提示（简化版）
-.drag-hint {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--dt-space-2);
-  pointer-events: none;
-  opacity: 0.4;
-
-  .hint-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--dt-border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .material-icons-outlined {
-      font-size: 20px;
-      color: var(--dt-text-tertiary);
-    }
-  }
-
-  .hint-text {
-    font-size: var(--dt-font-size-sm);
-    color: var(--dt-text-tertiary);
-  }
-
-  .dark & {
-    .hint-icon { background: var(--dt-border-dark); }
-    .hint-text { color: var(--dt-text-tertiary-dark); }
-  }
-}
-
-.input-area:hover .drag-hint {
-  opacity: 0.6;
 }
 
 .input-footer {
