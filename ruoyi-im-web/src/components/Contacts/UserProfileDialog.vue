@@ -1,275 +1,350 @@
 <template>
   <el-dialog
     v-model="visible"
-    :width="720"
-    class="user-profile-dialog"
+    :width="layoutMode === 'compact' ? 640 : 500"
+    :class="['user-profile-dialog', `layout-${layoutMode}`]"
     :show-close="false"
     :close-on-click-modal="true"
     destroy-on-close
     append-to-body
   >
+    <!-- 加载状态 -->
     <div v-if="loading" class="loading-state">
       <el-skeleton :rows="5" animated />
     </div>
 
-    <div v-else-if="userInfo" class="profile-container">
-      <!-- 左侧：用户基本信息和快捷操作 -->
-      <div class="profile-sidebar">
-        <!-- 关闭按钮 -->
-        <el-button class="close-btn" circle @click="handleClose">
+    <div v-else-if="userInfo" class="dialog-container">
+      <!-- compact 模式：左右分栏简洁布局 -->
+      <template v-if="layoutMode === 'compact'">
+        <button class="close-btn close-btn-compact" @click="handleClose">
           <el-icon><Close /></el-icon>
-        </el-button>
+        </button>
+        <div class="compact-layout">
+          <!-- 左侧：用户信息 -->
+          <div class="compact-left">
+            <div class="avatar-wrapper">
+              <DingtalkAvatar
+                :src="userInfo?.avatar"
+                :name="userName"
+                :user-id="targetUserId"
+                :size="88"
+                shape="circle"
+              />
+            </div>
+            <h3 class="user-name-compact">{{ userName }}</h3>
+            <div class="user-tags-compact">
+              <span v-if="userInfo.position" class="tag">
+                <span class="material-icons-outlined tag-icon">badge</span>
+                {{ userInfo.position }}
+              </span>
+              <span v-if="userInfo.department" class="tag">
+                <span class="material-icons-outlined tag-icon">business</span>
+                {{ userInfo.department }}
+              </span>
+              <span v-if="genderIcon" class="tag gender-tag">
+                <span class="material-icons-outlined tag-icon">{{ genderIcon }}</span>
+                {{ genderText }}
+              </span>
+            </div>
+          </div>
 
-        <div class="sidebar-content">
-          <div class="avatar-wrapper">
+          <!-- 右侧：信息和操作 -->
+          <div class="compact-right">
+            <!-- 信息列表 -->
+            <div class="info-list-compact">
+              <div class="info-item">
+                <span class="material-icons-outlined info-icon">person</span>
+                <span class="info-label">用户名</span>
+                <span class="info-value">{{ userInfo.username || '-' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="material-icons-outlined info-icon">phone</span>
+                <span class="info-label">手机</span>
+                <span class="info-value">{{ userInfo.mobile || userInfo.phone || '未设置' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="material-icons-outlined info-icon">email</span>
+                <span class="info-label">邮箱</span>
+                <span class="info-value">{{ userInfo.email || '未设置' }}</span>
+              </div>
+              <div v-if="userInfo.birthday" class="info-item">
+                <span class="material-icons-outlined info-icon">cake</span>
+                <span class="info-label">生日</span>
+                <span class="info-value">{{ formatDate(userInfo.birthday) }}</span>
+              </div>
+              <div v-if="userInfo.lastOnlineTime" class="info-item">
+                <span class="material-icons-outlined info-icon">schedule</span>
+                <span class="info-label">最近在线</span>
+                <span class="info-value">{{ formatDateTime(userInfo.lastOnlineTime) }}</span>
+              </div>
+              <div v-if="userInfo.signature" class="info-item full-width">
+                <span class="material-icons-outlined info-icon">format_quote</span>
+                <span class="info-value signature">{{ userInfo.signature }}</span>
+              </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="action-group-compact">
+              <button class="action-btn primary" @click="handleSendMessage">
+                <span class="material-icons-outlined">chat_bubble</span>
+                发消息
+              </button>
+              <button class="action-btn" @click="handleVoiceCall">
+                <span class="material-icons-outlined">phone_in_talk</span>
+                语音
+              </button>
+              <button class="action-btn" @click="handleVideoCall">
+                <span class="material-icons-outlined">videocam</span>
+                视频
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- default 模式：原始垂直布局 -->
+      <template v-else>
+        <!-- 顶部：用户基本信息 + 关闭按钮 -->
+        <div class="dialog-header">
+          <button class="close-btn" @click="handleClose">
+            <el-icon><Close /></el-icon>
+          </button>
+
+          <!-- 用户信息 -->
+          <div class="user-info-section">
             <DingtalkAvatar
               :src="userInfo?.avatar"
               :name="userName"
               :user-id="targetUserId"
-              :size="100"
+              :size="64"
               shape="circle"
+              custom-class="user-avatar-large"
             />
-            <div v-if="userInfo.online" class="online-indicator" title="在线"></div>
+            <div class="user-basic-info">
+              <h2 class="user-name">{{ userName }}</h2>
+              <p class="user-id">ID: {{ userInfo.username || targetUserId }}</p>
+              <div v-if="userInfo.signature" class="user-signature">{{ userInfo.signature }}</div>
+            </div>
           </div>
 
-          <h2 class="user-name">{{ userName }}</h2>
-          <p class="user-account">@{{ userInfo.username }}</p>
-
-          <div class="user-tags">
-            <el-tag v-if="userInfo.position" size="small" type="primary" effect="light">
-              {{ userInfo.position }}
+          <!-- 状态标签 -->
+          <div class="user-status-tags">
+            <el-tag v-if="userInfo.online" type="success" size="small" effect="plain">
+              <span class="status-dot online"></span>在线
             </el-tag>
-            <el-tag v-if="userInfo.department" size="small" type="info" effect="light">
+            <el-tag v-else type="info" size="small" effect="plain">
+              <span class="status-dot offline"></span>离线
+            </el-tag>
+            <el-tag v-if="userInfo.department" type="info" size="small" effect="plain">
               {{ userInfo.department }}
             </el-tag>
           </div>
+        </div>
 
-          <div class="quick-actions">
-            <el-button type="primary" size="large" @click="handleSendMessage">
-              <el-icon><ChatDotRound /></el-icon>发消息
+        <!-- 快捷操作区 -->
+        <div class="dialog-actions">
+          <el-button type="primary" @click="handleSendMessage">
+            <el-icon><ChatDotRound /></el-icon>发消息
+          </el-button>
+          <el-button @click="handleVoiceCall">
+            <el-icon><Phone /></el-icon>语音
+          </el-button>
+          <el-button @click="handleVideoCall">
+            <el-icon><VideoCamera /></el-icon>视频
+          </el-button>
+          <el-dropdown @command="handleMoreCommand" trigger="click">
+            <el-button>
+              <el-icon><MoreFilled /></el-icon>更多
             </el-button>
-            <div class="secondary-actions">
-              <el-button size="large" @click="handleVoiceCall">
-                <el-icon><Phone /></el-icon>语音
-              </el-button>
-              <el-button size="large" @click="handleVideoCall">
-                <el-icon><VideoCamera /></el-icon>视频
-              </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="set-remark">
+                  <el-icon><Edit /></el-icon>设置备注
+                </el-dropdown-item>
+                <el-dropdown-item command="favorite">
+                  <el-icon><Star /></el-icon>{{ isFavorite ? '取消常用' : '设为常用' }}
+                </el-dropdown-item>
+                <el-dropdown-item command="history">
+                  <el-icon><Clock /></el-icon>聊天记录
+                </el-dropdown-item>
+                <el-dropdown-item command="share">
+                  <el-icon><Share /></el-icon>分享名片
+                </el-dropdown-item>
+                <el-dropdown-item v-if="!isCurrentUser" command="block" divided class="danger">
+                  <el-icon><CircleClose /></el-icon>加入黑名单
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+
+        <!-- Tab 内容区 -->
+        <el-tabs v-model="activeTab" class="dialog-tabs">
+        <!-- 资料 Tab -->
+        <el-tab-pane label="资料" name="info">
+          <div class="tab-content">
+            <!-- 基本信息 -->
+            <div class="info-section">
+              <h4 class="section-title">基本信息</h4>
+              <div class="info-row">
+                <span class="label">手机</span>
+                <span class="value">{{ userInfo.mobile || userInfo.phone || '-' }}</span>
+                <el-button
+                  v-if="userInfo.mobile || userInfo.phone"
+                  link
+                  size="small"
+                  @click="copyToClipboard(userInfo.mobile || userInfo.phone)"
+                >
+                  <el-icon><CopyDocument /></el-icon>
+                </el-button>
+              </div>
+              <div class="info-row">
+                <span class="label">邮箱</span>
+                <span class="value">{{ userInfo.email || '-' }}</span>
+                <el-button
+                  v-if="userInfo.email"
+                  link
+                  size="small"
+                  @click="copyToClipboard(userInfo.email)"
+                >
+                  <el-icon><CopyDocument /></el-icon>
+                </el-button>
+              </div>
+              <div class="info-row">
+                <span class="label">部门</span>
+                <span class="value">{{ userInfo.department || '-' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">职位</span>
+                <span class="value">{{ userInfo.position || '-' }}</span>
+              </div>
+            </div>
+
+            <!-- 备注 -->
+            <div class="info-section">
+              <div class="section-title">
+                <h4>备注</h4>
+                <el-button link size="small" @click="handleSetRemark">
+                  <el-icon><Edit /></el-icon>编辑
+                </el-button>
+              </div>
+              <p class="remark-text">{{ userInfo.remark || '暂无备注' }}</p>
             </div>
           </div>
-        </div>
-      </div>
+        </el-tab-pane>
 
-      <!-- 右侧：详细信息和功能 -->
-      <div class="profile-main">
-        <el-tabs v-model="activeTab" class="profile-tabs">
-          <!-- 资料 Tab -->
-          <el-tab-pane label="详细资料" name="info">
-            <div class="tab-content">
-              <!-- 联系信息 -->
-              <div class="info-section">
-                <div class="section-title">联系信息</div>
-                <div class="info-grid">
-                  <div v-if="userInfo.mobile || userInfo.phone" class="info-item">
-                    <span class="info-label">
-                      <el-icon><Iphone /></el-icon>手机
-                    </span>
-                    <span class="info-value">{{ userInfo.mobile || userInfo.phone }}</span>
-                    <el-button
-                      link
-                      type="primary"
-                      class="copy-btn"
-                      @click="copyToClipboard(userInfo.mobile || userInfo.phone)"
-                    >
-                      <el-icon><CopyDocument /></el-icon>复制
-                    </el-button>
-                  </div>
-                  <div v-if="userInfo.email" class="info-item">
-                    <span class="info-label">
-                      <el-icon><Message /></el-icon>邮箱
-                    </span>
-                    <span class="info-value">{{ userInfo.email }}</span>
-                    <el-button
-                      link
-                      type="primary"
-                      class="copy-btn"
-                      @click="copyToClipboard(userInfo.email)"
-                    >
-                      <el-icon><CopyDocument /></el-icon>复制
-                    </el-button>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">
-                      <el-icon><User /></el-icon>账号
-                    </span>
-                    <span class="info-value">{{ userInfo.username }}</span>
-                  </div>
+        <!-- 共同群组 Tab -->
+        <el-tab-pane name="groups">
+          <template #label>
+            共同群组
+            <el-badge v-if="commonGroups.length > 0" :value="commonGroups.length" :max="99" />
+          </template>
+          <div class="tab-content">
+            <div v-if="commonGroups.length === 0" class="empty-state">
+              <el-icon :size="48"><ChatLineSquare /></el-icon>
+              <p>暂无共同群组</p>
+            </div>
+            <div v-else class="groups-list">
+              <div
+                v-for="group in commonGroups"
+                :key="group.id"
+                class="group-item"
+                @click="handleGroupClick(group)"
+              >
+                <DingtalkAvatar
+                  :src="group.avatar"
+                  :name="group.name"
+                  :size="40"
+                  shape="square"
+                />
+                <div class="group-details">
+                  <div class="group-name">{{ group.name }}</div>
+                  <div class="group-meta">{{ group.memberCount || 0 }} 人</div>
+                </div>
+                <el-icon><ArrowRight /></el-icon>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+
+        <!-- 更多 Tab -->
+        <el-tab-pane label="更多" name="more">
+          <div class="tab-content">
+            <div class="more-list">
+              <div class="more-item" @click="handleToggleFavorite">
+                <div class="more-icon" :class="{ active: isFavorite }">
+                  <el-icon><Star /></el-icon>
+                </div>
+                <div class="more-content">
+                  <span class="more-name">{{ isFavorite ? '取消常用联系人' : '添加为常用联系人' }}</span>
+                  <span class="more-desc">{{ isFavorite ? '从常用联系人列表移除' : '添加到常用联系人列表' }}</span>
                 </div>
               </div>
-
-              <!-- 工作信息 -->
-              <div class="info-section">
-                <div class="section-title">工作信息</div>
-                <div class="info-grid">
-                  <div v-if="userInfo.department" class="info-item">
-                    <span class="info-label">
-                      <el-icon><OfficeBuilding /></el-icon>部门
-                    </span>
-                    <span class="info-value">{{ userInfo.department }}</span>
-                  </div>
-                  <div v-if="userInfo.position" class="info-item">
-                    <span class="info-label">
-                      <el-icon><Postcard /></el-icon>职位
-                    </span>
-                    <span class="info-value">{{ userInfo.position }}</span>
-                  </div>
+              <div class="more-item" @click="handleShareCard">
+                <div class="more-icon">
+                  <el-icon><Share /></el-icon>
+                </div>
+                <div class="more-content">
+                  <span class="more-name">分享名片</span>
+                  <span class="more-desc">将该用户名片分享给其他人</span>
                 </div>
               </div>
-
-              <!-- 个人简介 -->
-              <div class="info-section">
-                <div class="section-title">个人简介</div>
-                <div class="signature-box">
-                  {{ userInfo.signature || '这个人很懒，什么都没留下～' }}
+              <div v-if="!isCurrentUser" class="more-item danger" @click="handleBlock">
+                <div class="more-icon danger">
+                  <el-icon><CircleClose /></el-icon>
+                </div>
+                <div class="more-content">
+                  <span class="more-name">加入黑名单</span>
+                  <span class="more-desc">屏蔽该用户的消息</span>
                 </div>
               </div>
             </div>
-          </el-tab-pane>
-
-          <!-- 共同群组 Tab -->
-          <el-tab-pane name="groups">
-            <template #label>
-              <span>共同群组</span>
-              <el-badge v-if="commonGroups.length > 0" :value="commonGroups.length" :max="99" class="tab-badge" />
-            </template>
-            <div class="tab-content">
-              <div v-if="commonGroups.length === 0" class="empty-state">
-                <el-icon :size="48" color="#dcdfe6"><ChatLineSquare /></el-icon>
-                <p>暂无共同群组</p>
-              </div>
-              <div v-else class="groups-grid">
-                <div
-                  v-for="group in commonGroups"
-                  :key="group.id"
-                  class="group-card"
-                  @click="handleGroupClick(group)"
-                >
-                  <DingtalkAvatar
-                    :src="group.avatar"
-                    :name="group.name"
-                    :size="48"
-                    shape="square"
-                  />
-                  <div class="group-info">
-                    <div class="group-name">{{ group.name }}</div>
-                    <div class="group-meta">{{ group.memberCount || 0 }} 人</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </el-tab-pane>
-
-          <!-- 操作 Tab -->
-          <el-tab-pane label="更多操作" name="actions">
-            <div class="tab-content">
-              <div class="action-list">
-                <div class="action-item" @click="handleSetRemark">
-                  <div class="action-icon">
-                    <el-icon><Edit /></el-icon>
-                  </div>
-                  <div class="action-content">
-                    <span class="action-name">设置备注</span>
-                    <span class="action-desc">添加备注名和标签</span>
-                  </div>
-                  <el-icon class="action-arrow"><ArrowRight /></el-icon>
-                </div>
-                <div class="action-item" @click="handleToggleFavorite">
-                  <div class="action-icon" :class="{ active: isFavorite }">
-                    <el-icon><Star /></el-icon>
-                  </div>
-                  <div class="action-content">
-                    <span class="action-name">{{ isFavorite ? '取消常用联系人' : '添加为常用联系人' }}</span>
-                    <span class="action-desc">{{ isFavorite ? '从常用联系人中移除' : '添加到常用联系人列表' }}</span>
-                  </div>
-                  <el-icon class="action-arrow"><ArrowRight /></el-icon>
-                </div>
-                <div class="action-item" @click="handleViewHistory">
-                  <div class="action-icon">
-                    <el-icon><Clock /></el-icon>
-                  </div>
-                  <div class="action-content">
-                    <span class="action-name">查看聊天记录</span>
-                    <span class="action-desc">查看与该用户的所有聊天记录</span>
-                  </div>
-                  <el-icon class="action-arrow"><ArrowRight /></el-icon>
-                </div>
-                <div class="action-item" @click="handleShareCard">
-                  <div class="action-icon">
-                    <el-icon><Share /></el-icon>
-                  </div>
-                  <div class="action-content">
-                    <span class="action-name">分享名片</span>
-                    <span class="action-desc">将该用户名片分享给其他人</span>
-                  </div>
-                  <el-icon class="action-arrow"><ArrowRight /></el-icon>
-                </div>
-                <div v-if="!isCurrentUser" class="action-item danger" @click="handleBlock">
-                  <div class="action-icon">
-                    <el-icon><CircleClose /></el-icon>
-                  </div>
-                  <div class="action-content">
-                    <span class="action-name">加入黑名单</span>
-                    <span class="action-desc">屏蔽该用户的消息</span>
-                  </div>
-                  <el-icon class="action-arrow"><ArrowRight /></el-icon>
-                </div>
-              </div>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
-      </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+      </template>
     </div>
-  </el-dialog>
 
-  <!-- 备注编辑弹窗 -->
-  <el-dialog
-    v-model="showRemarkDialog"
-    title="设置备注"
-    width="400px"
-    class="remark-dialog"
-    append-to-body
-  >
-    <el-form :model="remarkForm" label-position="top">
-      <el-form-item label="备注名称">
-        <el-input
-          v-model="remarkForm.remark"
-          placeholder="请输入备注名称"
-          maxlength="20"
-          show-word-limit
-        />
-      </el-form-item>
-      <el-form-item label="标签">
-        <el-select
-          v-model="remarkForm.tags"
-          multiple
-          filterable
-          allow-create
-          placeholder="添加标签"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="tag in presetTags"
-            :key="tag"
-            :label="tag"
-            :value="tag"
+    <!-- 备注编辑弹窗 (仅 default 模式) -->
+    <el-dialog
+      v-if="layoutMode === 'default'"
+      v-model="showRemarkDialog"
+      title="设置备注"
+      width="400px"
+      append-to-body
+    >
+      <el-form :model="remarkForm" label-position="top">
+        <el-form-item label="备注名称">
+          <el-input
+            v-model="remarkForm.remark"
+            placeholder="请输入备注名称"
+            maxlength="20"
+            show-word-limit
           />
-        </el-select>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="showRemarkDialog = false">取消</el-button>
-      <el-button type="primary" @click="handleSaveRemark">确定</el-button>
-    </template>
+        </el-form-item>
+        <el-form-item label="标签">
+          <el-select
+            v-model="remarkForm.tags"
+            multiple
+            filterable
+            allow-create
+            placeholder="添加标签"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="tag in presetTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showRemarkDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleSaveRemark">确定</el-button>
+      </template>
+    </el-dialog>
   </el-dialog>
 </template>
 
@@ -279,17 +354,18 @@ import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Close, ChatDotRound, Phone, VideoCamera, Edit, Star,
-  Clock, Share, CircleClose, Iphone, Message, User,
-  OfficeBuilding, Postcard, CopyDocument, ArrowRight,
-  ChatLineSquare
+  Clock, Share, CircleClose, CopyDocument, ArrowRight,
+  ChatLineSquare, MoreFilled
 } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { getUserInfo } from '@/api/im/user'
 import { getCommonGroups } from '@/api/im/group'
+import dayjs from 'dayjs'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
-  session: { type: Object, default: null }
+  session: { type: Object, default: null },
+  layoutMode: { type: String, default: 'default' } // 'default' | 'compact'
 })
 
 const emit = defineEmits([
@@ -325,6 +401,32 @@ const isCurrentUser = computed(() => {
   return currentUser.value?.id == targetUserId.value
 })
 
+// 性别相关计算属性（用于 compact 模式）
+const genderIcon = computed(() => {
+  const gender = userInfo.value?.gender
+  if (gender === 1) return 'male'
+  if (gender === 2) return 'female'
+  return null
+})
+
+const genderText = computed(() => {
+  const gender = userInfo.value?.gender
+  if (gender === 1) return '男'
+  if (gender === 2) return '女'
+  return null
+})
+
+// 日期格式化函数
+const formatDate = (date) => {
+  if (!date) return ''
+  return dayjs(date).format('YYYY-MM-DD')
+}
+
+const formatDateTime = (dateTime) => {
+  if (!dateTime) return ''
+  return dayjs(dateTime).format('YYYY-MM-DD HH:mm')
+}
+
 // 加载用户信息
 const loadUserInfo = async () => {
   if (!props.session) return
@@ -338,7 +440,6 @@ const loadUserInfo = async () => {
           ...res.data,
           online: Math.random() > 0.5
         }
-        // 加载共同群组
         await loadCommonGroups(userId)
       }
     } else {
@@ -372,8 +473,8 @@ const loadCommonGroups = async (userId) => {
 watch(() => props.modelValue, (isOpen) => {
   visible.value = isOpen
   if (isOpen) {
-    loadUserInfo()
     activeTab.value = 'info'
+    loadUserInfo()
   }
 })
 
@@ -435,7 +536,7 @@ const handleBlock = () => {
   ElMessageBox.confirm(
     `确定要将 ${userName.value} 加入黑名单吗？加入后将不再接收该用户的消息。`,
     '加入黑名单',
-    { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消' }
+    { type: 'warning', confirmButtonText: '确定加入', cancelButtonText: '取消' }
   ).then(() => {
     ElMessage.success('已加入黑名单')
   }).catch(() => {})
@@ -443,6 +544,26 @@ const handleBlock = () => {
 
 const handleGroupClick = (group) => {
   emit('group-click', group)
+}
+
+const handleMoreCommand = (command) => {
+  switch (command) {
+    case 'set-remark':
+      handleSetRemark()
+      break
+    case 'favorite':
+      handleToggleFavorite()
+      break
+    case 'history':
+      handleViewHistory()
+      break
+    case 'share':
+      handleShareCard()
+      break
+    case 'block':
+      handleBlock()
+      break
+  }
 }
 
 // 工具函数
@@ -468,11 +589,12 @@ const copyToClipboard = async (text) => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .user-profile-dialog {
   :deep(.el-dialog) {
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 
   :deep(.el-dialog__header) {
@@ -482,209 +604,181 @@ const copyToClipboard = async (text) => {
   :deep(.el-dialog__body) {
     padding: 0;
   }
+
+  :deep(.el-dialog__close) {
+    z-index: 1;
+  }
 }
 
 .loading-state {
-  padding: 60px 40px;
+  padding: 40px 24px;
 }
 
-.profile-container {
+.dialog-container {
   display: flex;
-  min-height: 500px;
-  max-height: 700px;
+  flex-direction: column;
+  min-height: 400px;
 }
 
-// 左侧边栏
-.profile-sidebar {
-  width: 260px;
-  background: linear-gradient(180deg, var(--dt-brand-color) 0%, #0e5fd9 100%);
-  color: #fff;
-  padding: 32px 24px;
+// ====== 头部区域 ======
+.dialog-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--dt-border-light);
+  background: linear-gradient(180deg, #0089FF 0%, #006ECC 100%);
   position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dt-transition-base);
 
-  .close-btn {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: #fff;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
   }
 
-  .sidebar-content {
+  .el-icon {
+    font-size: 18px;
+  }
+}
+
+.user-info-section {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.user-avatar-large {
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.user-basic-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 4px;
+}
+
+.user-id {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 8px;
+}
+
+.user-signature {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-status-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+
+  &.online {
+    background: #52c41a;
+  }
+
+  &.offline {
+    background: #9ca3af;
+  }
+}
+
+// ====== 快捷操作区 ======
+.dialog-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-light);
+
+  .el-button {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+    height: 36px;
 
-  .avatar-wrapper {
-    position: relative;
-    margin-bottom: 20px;
-
-    :deep(.dingtalk-avatar) {
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-
-    .online-indicator {
-      position: absolute;
-      bottom: 6px;
-      right: 6px;
-      width: 20px;
-      height: 20px;
-      background: #52c41a;
-      border: 3px solid #fff;
-      border-radius: 50%;
-    }
-  }
-
-  .user-name {
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0 0 8px;
-    color: #fff;
-    text-align: center;
-  }
-
-  .user-account {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
-    margin: 0 0 16px;
-  }
-
-  .user-tags {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 32px;
-
-    :deep(.el-tag) {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.3);
-      color: #fff;
-    }
-  }
-
-  .quick-actions {
-    width: 100%;
-
-    .el-button {
-      width: 100%;
-      margin-bottom: 12px;
-      background: #fff;
-      border-color: #fff;
-      color: var(--dt-brand-color);
-      font-size: 15px;
-      height: 44px;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.9);
-      }
-
-      .el-icon {
-        margin-right: 6px;
-      }
-    }
-
-    .secondary-actions {
-      display: flex;
-      gap: 12px;
-
-      .el-button {
-        flex: 1;
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #fff;
-        margin-bottom: 0;
-
-        &:hover {
-          background: rgba(255, 255, 255, 0.25);
-        }
-      }
+    .el-icon {
+      margin-right: 4px;
     }
   }
 }
 
-// 右侧主内容区
-.profile-main {
+// ====== Tab 内容区 ======
+.dialog-tabs {
   flex: 1;
-  background: var(--dt-bg-body);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 
-  :deep(.profile-tabs) {
+  :deep(.el-tabs__header) {
+    margin: 0;
+    padding: 0 24px;
+    background: #fff;
+    border-bottom: 1px solid var(--dt-border-light);
+  }
+
+  :deep(.el-tabs__nav-wrap::after) {
+    display: none;
+  }
+
+  :deep(.el-tabs__item) {
+    height: 48px;
+    line-height: 48px;
+    font-size: 14px;
+    color: var(--dt-text-secondary);
+    padding: 0 16px;
+    margin: 0 4px;
+
+    &.is-active {
+      color: var(--dt-brand-color);
+      font-weight: 500;
+    }
+  }
+
+  :deep(.el-tabs__active-bar) {
+    height: 2px;
+    background: var(--dt-brand-color);
+  }
+
+  :deep(.el-tabs__content) {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-
-    .el-tabs__header {
-      margin: 0;
-      padding: 0 20px;
-      background: #fff;
-      border-bottom: 1px solid var(--dt-border-lighter);
-    }
-
-    .el-tabs__nav-wrap::after {
-      display: none;
-    }
-
-    .el-tabs__item {
-      height: 56px;
-      line-height: 56px;
-      font-size: 14px;
-      color: var(--dt-text-secondary);
-
-      &.is-active {
-        color: var(--dt-brand-color);
-        font-weight: 500;
-      }
-    }
-
-    .el-tabs__active-bar {
-      height: 3px;
-      border-radius: 2px;
-    }
-
-    .el-tabs__content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-    }
+    overflow-y: auto;
+    padding: 16px 24px;
   }
 }
 
 .tab-content {
-  min-height: 100%;
+  min-height: 200px;
 }
 
-// Tab 徽标
-.tab-badge {
-  :deep(.el-badge__content) {
-    margin-left: 6px;
-    margin-top: -2px;
-  }
-}
-
-// 区域标题
-.section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  margin-bottom: 12px;
-  padding-left: 12px;
-  border-left: 3px solid var(--dt-brand-color);
-}
-
-// 信息区域
+// ====== 资料Tab ======
 .info-section {
   margin-bottom: 24px;
 
@@ -693,163 +787,164 @@ const copyToClipboard = async (text) => {
   }
 }
 
-// 信息网格
-.info-grid {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid var(--dt-border-lighter);
-  overflow: hidden;
-}
-
-.info-item {
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  margin: 0 0 12px;
   display: flex;
   align-items: center;
-  padding: 14px 16px;
+  justify-content: space-between;
+
+  h4 {
+    margin: 0;
+  }
+
+  .el-button {
+    font-size: 13px;
+    padding: 0;
+  }
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
   border-bottom: 1px solid var(--dt-border-lighter);
 
   &:last-child {
     border-bottom: none;
   }
 
-  .info-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 80px;
-    font-size: 14px;
+  .label {
+    width: 60px;
+    font-size: 13px;
     color: var(--dt-text-secondary);
     flex-shrink: 0;
-
-    .el-icon {
-      font-size: 16px;
-    }
   }
 
-  .info-value {
+  .value {
     flex: 1;
     font-size: 14px;
     color: var(--dt-text-primary);
-    word-break: break-all;
   }
 
-  .copy-btn {
+  .el-button {
     margin-left: 8px;
-    font-size: 13px;
-
-    .el-icon {
-      margin-right: 4px;
-    }
   }
 }
 
-// 个人简介
-.signature-box {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  border: 1px solid var(--dt-border-lighter);
+.remark-text {
   font-size: 14px;
   color: var(--dt-text-secondary);
   line-height: 1.6;
-  min-height: 80px;
+  margin: 0;
+  min-height: 40px;
+  white-space: pre-wrap;
 }
 
-// 共同群组网格
-.groups-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.group-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid var(--dt-border-lighter);
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: var(--dt-brand-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  .group-info {
-    flex: 1;
-    min-width: 0;
-
-    .group-name {
-      font-size: 14px;
-      color: var(--dt-text-primary);
-      font-weight: 500;
-      margin-bottom: 4px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .group-meta {
-      font-size: 12px;
-      color: var(--dt-text-tertiary);
-    }
-  }
-}
-
-// 空状态
+// ====== 空状态 ======
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  color: var(--dt-text-secondary);
+  padding: 40px 20px;
+  color: var(--dt-text-tertiary);
+
+  .el-icon {
+    font-size: 48px;
+    color: var(--dt-border-color);
+    margin-bottom: 12px;
+  }
 
   p {
-    margin-top: 16px;
+    margin: 0;
     font-size: 14px;
   }
 }
 
-// 操作列表
-.action-list {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid var(--dt-border-lighter);
-  overflow: hidden;
+// ====== 群组列表 ======
+.groups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.action-item {
+.group-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--dt-bg-tertiary);
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
-  border-bottom: 1px solid var(--dt-border-lighter);
-
-  &:last-child {
-    border-bottom: none;
-  }
+  transition: all var(--dt-transition-base);
 
   &:hover {
-    background: var(--dt-bg-session-hover);
+    background: var(--dt-brand-bg);
   }
 
-  .action-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--dt-bg-body);
+  .group-details {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .group-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dt-text-primary);
+  }
+
+  .group-meta {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+  }
+
+  .el-icon {
+    color: var(--dt-text-tertiary);
+  }
+}
+
+// ====== 更多Tab ======
+.more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.more-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--dt-bg-tertiary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    background: var(--dt-bg-hover);
+  }
+
+  &.danger {
+    &:hover {
+      background: var(--dt-error-bg);
+    }
+  }
+
+  .more-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 
     .el-icon {
-      font-size: 20px;
+      font-size: 18px;
       color: var(--dt-text-secondary);
     }
 
@@ -860,100 +955,332 @@ const copyToClipboard = async (text) => {
         color: #faad14;
       }
     }
+
+    &.danger {
+      background: var(--dt-error-bg);
+
+      .el-icon {
+        color: var(--dt-error-color);
+      }
+    }
   }
 
-  .action-content {
+  .more-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 2px;
 
-    .action-name {
+    .more-name {
       font-size: 14px;
       color: var(--dt-text-primary);
       font-weight: 500;
     }
 
-    .action-desc {
+    .more-desc {
       font-size: 12px;
       color: var(--dt-text-tertiary);
     }
   }
-
-  .action-arrow {
-    color: var(--dt-text-tertiary);
-  }
-
-  &.danger {
-    .action-icon {
-      background: #fff2f0;
-
-      .el-icon {
-        color: #ff4d4f;
-      }
-    }
-
-    .action-name {
-      color: #ff4d4f;
-    }
-  }
 }
 
-// 弹窗样式
-.remark-dialog {
-  :deep(.el-dialog__body) {
-    padding-top: 20px;
-  }
-}
-
-// 响应式适配
-@media (max-width: 768px) {
+// ====== 暗色模式 ======
+:global(.dark) {
   .user-profile-dialog {
     :deep(.el-dialog) {
-      width: 95% !important;
-      margin: 20px auto;
+      background: var(--dt-bg-card-dark);
     }
   }
 
-  .profile-container {
-    flex-direction: column;
-    min-height: auto;
-    max-height: 85vh;
-  }
-
-  .profile-sidebar {
-    width: 100%;
-    padding: 24px;
-
-    .sidebar-content {
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 20px;
+  .dialog-tabs {
+    :deep(.el-tabs__header) {
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
     }
 
-    .avatar-wrapper {
-      margin-bottom: 0;
-    }
+    :deep(.el-tabs__item) {
+      color: var(--dt-text-secondary-dark);
 
-    .user-info {
-      flex: 1;
-      text-align: left;
-    }
-
-    .user-tags {
-      justify-content: flex-start;
-      margin-bottom: 16px;
-    }
-
-    .quick-actions {
-      .el-button {
-        margin-bottom: 8px;
+      &.is-active {
+        color: var(--dt-brand-color);
       }
     }
   }
 
-  .groups-grid {
-    grid-template-columns: 1fr;
+  .dialog-actions {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+
+  .info-row {
+    border-color: var(--dt-border-dark);
+  }
+
+  .group-item,
+  .more-item {
+    background: var(--dt-bg-tertiary-dark);
+  }
+
+  .group-name,
+  .more-name {
+    color: var(--dt-text-primary-dark);
+  }
+
+  .group-meta,
+  .more-desc {
+    color: var(--dt-text-tertiary-dark);
+  }
+
+  // ====== Compact 模式暗色适配 ======
+  .info-list-compact .info-item {
+    &:hover {
+      background: var(--dt-bg-hover-dark);
+    }
+  }
+
+  .action-group-compact .action-btn:not(.primary) {
+    background: var(--dt-bg-hover-dark);
+  }
+}
+
+// ====== Compact 模式样式 ======
+.layout-compact {
+  :deep(.el-dialog__body) {
+    padding: 32px;
+  }
+}
+
+.close-btn-compact {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--dt-bg-hover);
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+
+  &:hover {
+    background: var(--dt-border);
+  }
+}
+
+.compact-layout {
+  display: flex;
+  gap: 32px;
+
+  .compact-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+    text-align: center;
+
+    .avatar-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .user-name-compact {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--dt-text-primary);
+      margin: 14px 0 12px;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-tags-compact {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+
+      .tag {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 12px;
+        color: var(--dt-text-secondary);
+        background: var(--dt-bg-secondary);
+        padding: 5px 10px;
+        border-radius: 4px;
+        white-space: nowrap;
+
+        .tag-icon {
+          font-size: 13px;
+        }
+
+        &.gender-tag {
+          .tag-icon {
+            font-size: 15px;
+          }
+        }
+      }
+    }
+  }
+
+  .compact-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.info-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 24px;
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: var(--dt-bg-secondary);
+    }
+
+    &.full-width {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .info-icon {
+      font-size: 20px;
+      color: var(--dt-text-tertiary);
+      width: 22px;
+      text-align: center;
+    }
+
+    .info-label {
+      font-size: 13px;
+      color: var(--dt-text-tertiary);
+      min-width: 60px;
+    }
+
+    .info-value {
+      flex: 1;
+      font-size: 15px;
+      color: var(--dt-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &.signature {
+        white-space: normal;
+        color: var(--dt-text-secondary);
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+.action-group-compact {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--dt-border-light);
+    background: var(--dt-bg-card);
+
+    .material-icons-outlined {
+      font-size: 19px;
+      color: var(--dt-text-secondary);
+    }
+
+    &.primary {
+      flex: 1;
+      background: var(--dt-brand-color);
+      border-color: var(--dt-brand-color);
+      color: #fff;
+
+      .material-icons-outlined {
+        color: #fff;
+      }
+    }
+
+    &:not(.primary) {
+      background: var(--dt-bg-secondary);
+      color: var(--dt-text-secondary);
+    }
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+}
+
+// ====== 以下为原有的暗色模式样式（保持兼容）=====
+:global(.dark) {
+  .user-profile-dialog {
+    :deep(.el-dialog) {
+      background: var(--dt-bg-card-dark);
+    }
+  }
+
+  .dialog-tabs {
+    :deep(.el-tabs__header) {
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
+    }
+
+    :deep(.el-tabs__item) {
+      color: var(--dt-text-secondary-dark);
+
+      &.is-active {
+        color: var(--dt-brand-color);
+      }
+    }
+  }
+
+  .dialog-actions {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+
+  .info-row {
+    border-color: var(--dt-border-dark);
+  }
+
+  .group-item,
+  .more-item {
+    background: var(--dt-bg-tertiary-dark);
+  }
+
+  .group-name,
+  .more-name {
+    color: var(--dt-text-primary-dark);
+  }
+
+  .group-meta,
+  .more-desc {
+    color: var(--dt-text-tertiary-dark);
   }
 }
 </style>

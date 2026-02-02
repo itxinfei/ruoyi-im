@@ -56,7 +56,7 @@
       <PersonalProfileDialog v-model="showProfile" />
       <SystemSettingsDialog v-model="showSettings" :default-menu="settingsDefaultMenu" />
       <HelpFeedbackDialog v-model="showHelp" />
-      <UserDetailDialog v-model="showUserDetail" :session="detailSession" @send-message="handleSelectSession" />
+      <UserProfileDialog v-model="showUserDetail" :session="detailSession" layout-mode="compact" @send-message="handleSelectSession" />
       <GlobalSearchDialog v-model="showGlobalSearch" @select-message="handleSearchSelectMessage" />
     </div>
   </div>
@@ -69,6 +69,7 @@ import { ref, watch, onMounted, onUnmounted, computed, defineAsyncComponent } fr
 import { useStore } from 'vuex'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useTheme } from '@/composables/useTheme'
+import { ElMessage } from 'element-plus'
 import ImSideNavNew from '../components/ImSideNavNew/index.vue'
 import SessionPanel from './SessionPanel.vue'
 import ChatPanel from './ChatPanel.vue'
@@ -85,7 +86,7 @@ const MailPanel = defineAsyncComponent(() => import('./MailPanel.vue'))
 const AssistantPanel = defineAsyncComponent(() => import('./AssistantPanel.vue'))
 
 // 异步加载弹窗组件（按需加载）
-const UserDetailDialog = defineAsyncComponent(() => import('@/components/Chat/UserDetailDialog.vue'))
+const UserProfileDialog = defineAsyncComponent(() => import('@/components/Contacts/UserProfileDialog.vue'))
 const PersonalProfileDialog = defineAsyncComponent(() => import('@/components/Common/PersonalProfileDialog.vue'))
 const SystemSettingsDialog = defineAsyncComponent(() => import('@/components/Common/SystemSettingsDialog.vue'))
 const HelpFeedbackDialog = defineAsyncComponent(() => import('@/components/Common/HelpFeedbackDialog.vue'))
@@ -146,7 +147,7 @@ const handleSelectSession = (session) => {
 
 const handleShowUser = (userId) => {
   if (!userId) return
-  // 构造简易 session 对象供 UserDetailDrawer 使用
+  // 构造简易 session 对象供 UserProfileDialog 使用
   detailSession.value = {
     targetUserId: userId,
     type: 'PRIVATE'
@@ -266,6 +267,7 @@ const handleKeydown = (e) => {
   height: 100vh;
   overflow: hidden;
   background: var(--dt-bg-body);
+  position: relative;
 }
 
 // ============================================================================
