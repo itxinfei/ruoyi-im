@@ -273,6 +273,8 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 <style scoped lang="scss">
 // 对话框样式
 :deep(.system-settings-dialog) {
+  max-width: 90vw;
+
   .el-dialog__body {
     padding: 0 !important;
     margin: 0 !important;

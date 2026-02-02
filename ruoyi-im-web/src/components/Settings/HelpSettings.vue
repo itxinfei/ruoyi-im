@@ -86,6 +86,8 @@ const handleSubmit = async () => {
 <style scoped lang="scss">
 .help-settings {
   padding-bottom: 20px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .setting-group {

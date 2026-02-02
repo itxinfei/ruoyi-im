@@ -50,6 +50,8 @@ const openWebsite = () => {
   align-items: center;
   justify-content: center;
   padding-bottom: 40px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .about-content {
