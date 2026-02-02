@@ -1,6 +1,6 @@
 package com.ruoyi.im.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.domain.ImDepartment;
 import com.ruoyi.im.domain.ImDepartmentMember;
@@ -365,7 +365,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
 
     @Override
     public boolean checkDepartmentNameExists(String name, Long parentId, Long excludeId) {
-        QueryWrapper<ImDepartment> queryWrapper = new QueryWrapper<>();
+        LambdaQueryWrapper<ImDepartment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ImDepartment::getName, name);
         queryWrapper.eq(ImDepartment::getParentId, parentId);
         queryWrapper.eq(ImDepartment::getDelFlag, 0);

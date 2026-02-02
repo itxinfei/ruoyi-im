@@ -1,8 +1,13 @@
 <template>
   <div class="reply-preview-container">
     <div class="reply-content-box">
-      <span class="reply-user">{{ senderName }}:</span>
-      <span class="reply-text">{{ content }}</span>
+      <div class="reply-icon">
+        <span class="material-icons-outlined">reply</span>
+      </div>
+      <div class="reply-info">
+        <span class="reply-user">{{ senderName }}</span>
+        <span class="reply-text">{{ content }}</span>
+      </div>
       <el-icon class="cancel-reply" @click="$emit('cancel')">
         <Close />
       </el-icon>
@@ -31,14 +36,15 @@ defineEmits(['cancel'])
 @use '@/styles/design-tokens.scss' as *;
 
 .reply-preview-container {
-  padding: 10px 12px;
-  margin-bottom: 12px;
-  border-radius: var(--dt-radius-md);
-  background: var(--dt-bg-body);
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: var(--dt-radius-sm);
+  background: var(--dt-bg-tertiary);
   border-left: 3px solid var(--dt-brand-color);
 
   .dark & {
-    background: var(--dt-bg-hover-dark);
+    background: rgba(0, 137, 255, 0.08);
+    border-left-color: var(--dt-brand-color);
   }
 }
 
@@ -48,18 +54,43 @@ defineEmits(['cancel'])
   gap: 8px;
   font-size: 13px;
 
-  .reply-user {
-    color: var(--dt-brand-color);
-    font-weight: 500;
+  .reply-icon {
     flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dt-brand-color);
+
+    .material-icons-outlined {
+      font-size: 16px;
+    }
+  }
+
+  .reply-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .reply-user {
+    color: var(--dt-text-primary);
+    font-weight: 500;
+    font-size: 12px;
+    flex-shrink: 0;
+
+    .dark & { color: #e2e8f0; }
   }
 
   .reply-text {
-    flex: 1;
     color: var(--dt-text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 13px;
 
     .dark & { color: var(--dt-text-secondary-dark); }
   }
@@ -68,8 +99,18 @@ defineEmits(['cancel'])
     cursor: pointer;
     color: var(--dt-text-tertiary);
     flex-shrink: 0;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
 
-    &:hover { color: var(--dt-error-color); }
+    &:hover {
+      color: var(--dt-error-color);
+      background: var(--dt-bg-hover);
+    }
+
+    .dark &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 </style>

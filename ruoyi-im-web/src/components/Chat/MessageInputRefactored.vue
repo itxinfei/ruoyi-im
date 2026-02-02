@@ -41,8 +41,8 @@
     <!-- 引用消息预览 -->
     <ReplyPreview
       v-if="replyingMessage"
-      :sender-name="replyingMessage.senderName"
-      :content="replyingMessage.content"
+      :sender-name="replyingMessage.senderName || replyingMessage.senderNickname || replyingMessage.userName || '未知'"
+      :content="replyPreviewContent"
       @cancel="$emit('cancel-reply')"
     />
 
@@ -213,6 +213,7 @@ import { Microphone } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { isScreenshotSupported } from '@/utils/screenshot'
+import { formatMessagePreviewFromObject } from '@/utils/message'
 
 // Composables
 import { useInputDraft } from '@/composables/useInputDraft'
@@ -460,6 +461,12 @@ const inputPlaceholder = computed(() => {
 // 显示拖拽引导提示（输入框为空且不在拖拽状态时）
 const showDragHint = computed(() => {
   return !messageContent.value.trim() && !isDragOver.value && !isVoiceMode.value
+})
+
+// 格式化回复预览内容（处理各种消息类型）
+const replyPreviewContent = computed(() => {
+  if (!props.replyingMessage) return ''
+  return formatMessagePreviewFromObject(props.replyingMessage)
 })
 
 // ========== 工具方法 ==========

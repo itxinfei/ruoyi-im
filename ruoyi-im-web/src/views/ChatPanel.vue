@@ -318,7 +318,7 @@ const isMultiSelectModeActive = ref(false)
 const showPinnedPanel = ref(false)
 const pinnedCount = computed(() => messages.value.filter(m => m.isPinned).length)
 
-const emit = defineEmits(['show-user'])
+const emit = defineEmits(['show-user', 'toggle-reaction'])
 
 const { onMessage, onTyping, onMessageStatus, onReaction, sendTyping, sendStopTyping } = useImWebSocket()
 
@@ -681,6 +681,56 @@ const handleCommand = (cmd, msg) => {
     handleViewCombine(msg)
   } else if (cmd === 'export') {
     showExportDialog.value = true
+  } else if (cmd === 'emoji') {
+    handleShowEmojiPicker(msg)
+  }
+}
+
+// 快捷表情列表（钉钉风格）
+const QUICK_EMOJIS = ['👍', '👏', '❤️', '😂', '😮', '😢', '😡', '🎉']
+const showEmojiPopover = ref(false)
+const emojiPopoverPosition = ref({ x: 0, y: 0 })
+const emojiTargetMessage = ref(null)
+
+// 显示表情选择器
+const handleShowEmojiPicker = (msg) => {
+  emojiTargetMessage.value = msg
+  // 计算位置：显示在消息附近
+  const rect = event?.target?.getBoundingClientRect()
+  if (rect) {
+    emojiPopoverPosition.value = {
+      x: rect.left,
+      y: rect.bottom + 8
+    }
+  } else {
+    // 默认位置
+    emojiPopoverPosition.value = { x: 200, y: 300 }
+  }
+  showEmojiPopover.value = true
+}
+
+// 选择表情反应
+const handleSelectEmoji = async (emoji) => {
+  if (!emojiTargetMessage.value) return
+
+  try {
+    // 触发表情反应
+    emit('toggle-reaction', {
+      messageId: emojiTargetMessage.value.id,
+      emoji: emoji
+    })
+
+    // 如果需要保存到后端，取消注释以下代码
+    // await addReaction({
+    //   messageId: emojiTargetMessage.value.id,
+    //   emoji: emoji
+    // })
+
+    showEmojiPopover.value = false
+    emojiTargetMessage.value = null
+  } catch (error) {
+    console.error('添加表情失败:', error)
+    ElMessage.error('添加表情失败')
   }
 }
 
@@ -1127,6 +1177,10 @@ const handleBatchForwardConfirm = async ({ messageIds, targetSessionId, forwardT
 
 const handleReply = (message) => {
   store.commit('im/message/SET_REPLYING_MESSAGE', message)
+  // 聚焦输入框，提升用户体验
+  nextTick(() => {
+    messageInputRef.value?.focus()
+  })
 }
 
 const handleEdit = (message) => {
