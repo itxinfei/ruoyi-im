@@ -129,6 +129,7 @@ import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { getMessages, getMessagesByCategory } from '@/api/im/message'
 import { formatTime } from '@/utils/format'
+import { parseContentString } from '@/utils/message'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -188,7 +189,7 @@ const getMessagePreview = (content) => {
   if (!content) return ''
   if (typeof content === 'string') return content
   try {
-    const parsed = JSON.parse(content)
+    const parsed = parseContentString(content)
     if (parsed.text) return parsed.text
     if (parsed.imageUrl) return '[图片]'
     if (parsed.fileName) return `[文件] ${parsed.fileName}`

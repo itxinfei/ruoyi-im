@@ -112,6 +112,7 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
+import { parseContentString } from '@/utils/message'
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
@@ -226,7 +227,7 @@ const escapeRegExp = (string) => {
 // 获取文件名
 const getFileName = (content) => {
   try {
-    const parsed = JSON.parse(content)
+    const parsed = parseContentString(content)
     return parsed.fileName || parsed.name || ''
   } catch {
     return ''

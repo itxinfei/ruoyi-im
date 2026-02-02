@@ -254,3 +254,22 @@ export function parseMessageContent(message) {
         return message.content
     }
 }
+
+/**
+ * 解析内容字符串（处理JSON格式）
+ * @param {string|Object} content - 内容字符串或对象
+ * @returns {Object} 解析后的对象
+ */
+export function parseContentString(content) {
+    if (!content) return {}
+
+    // 如果已经是对象，直接返回
+    if (typeof content === 'object') return content
+
+    // 尝试解析JSON字符串
+    try {
+        return JSON.parse(content)
+    } catch (e) {
+        return { text: String(content) }
+    }
+}

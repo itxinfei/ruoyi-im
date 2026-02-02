@@ -2,6 +2,7 @@
  * 文件URL处理工具函数
  */
 import { getToken } from './storage'
+import { parseContentString } from './message'
 
 /**
  * 为文件URL添加认证token
@@ -122,7 +123,7 @@ export function extractLinksFromContent(content) {
     if (typeof content === 'string') {
         // 尝试解析 JSON
         try {
-            const parsed = JSON.parse(content)
+            const parsed = parseContentString(content)
             if (parsed.links) {
                 return parsed.links
             }

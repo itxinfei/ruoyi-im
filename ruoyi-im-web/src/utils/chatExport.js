@@ -4,6 +4,7 @@
  */
 
 import { formatMessagePreviewFromObject } from './message'
+import { formatFileSize } from './format'
 import dayjs from 'dayjs'
 
 /**
@@ -438,19 +439,6 @@ function formatMessageContent(message, format) {
     default:
       return `[${type}]`
   }
-}
-
-/**
- * 格式化文件大小
- * @param {number} bytes - 字节数
- * @returns {string} 格式化后的大小
- */
-function formatFileSize(bytes) {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 /**

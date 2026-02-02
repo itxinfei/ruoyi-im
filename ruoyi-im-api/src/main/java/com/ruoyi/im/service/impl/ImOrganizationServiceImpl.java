@@ -366,12 +366,12 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
     @Override
     public boolean checkDepartmentNameExists(String name, Long parentId, Long excludeId) {
         QueryWrapper<ImDepartment> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", name);
-        queryWrapper.eq("parent_id", parentId);
-        queryWrapper.eq("del_flag", 0);
+        queryWrapper.eq(ImDepartment::getName, name);
+        queryWrapper.eq(ImDepartment::getParentId, parentId);
+        queryWrapper.eq(ImDepartment::getDelFlag, 0);
 
         if (excludeId != null) {
-            queryWrapper.ne("id", excludeId);
+            queryWrapper.ne(ImDepartment::getId, excludeId);
         }
 
         Long count = imDepartmentMapper.selectCount(queryWrapper);
