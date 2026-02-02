@@ -4,7 +4,7 @@
  * @author ruoyi
  */
 
-import type { ImConversation, ImGroup, ImMessage, ImUser, PageResult } from './im'
+import type { ImMessage, SystemNotification } from './im'
 
 // ==================== 消息 API ====================
 
@@ -171,17 +171,7 @@ export interface FriendOperationResponse {
 
 // ==================== 通知 API ====================
 
-/**
- * 系统通知
- */
-export interface SystemNotification {
-  id: number
-  type: 'message' | 'mention' | 'system' | 'friend' | 'group' | 'approval'
-  title: string
-  content: string
-  isRead: boolean
-  createTime: string
-}
+// SystemNotification 类型从 im.ts 导入
 
 // ==================== 文件上传 API ====================
 

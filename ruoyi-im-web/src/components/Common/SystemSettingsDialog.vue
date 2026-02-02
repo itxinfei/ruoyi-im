@@ -378,6 +378,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     display: flex;
     flex-direction: column;
     min-width: 0;
+    max-width: calc(1000px - 140px);
     background: #fff;
 
     .content-header {
