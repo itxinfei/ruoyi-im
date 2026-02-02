@@ -168,6 +168,14 @@ export function setUserInfo(userInfo) {
 }
 
 /**
+ * 获取存储的用户信息（别名方法，与 getUserInfo 相同）
+ * @returns {Object}
+ */
+export function getStoredUserInfo() {
+  return getUserInfo()
+}
+
+/**
  * 获取用户角色
  * @returns {string}
  */

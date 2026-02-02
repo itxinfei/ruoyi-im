@@ -36,12 +36,12 @@
             :class="{ active: currentRole?.id === role.id }"
             @click="handleSelectRole(role)"
           >
-            <div class="role-icon" :style="{ background: role.color || getRoleColor(role.code) }">
+            <div class="role-icon" :style="{ background: role.color || getRoleColor(role.roleCode) }">
               <el-icon><User /></el-icon>
             </div>
             <div class="role-info">
-              <div class="role-name">{{ role.name }}</div>
-              <div class="role-code">{{ role.code }}</div>
+              <div class="role-name">{{ role.roleName }}</div>
+              <div class="role-code">{{ role.roleCode }}</div>
             </div>
             <div class="role-badge">
               <el-tag v-if="role.builtin" size="small" type="info">系统</el-tag>
@@ -57,12 +57,12 @@
         <template v-if="currentRole">
           <!-- 角色头部 -->
           <div class="role-header">
-            <div class="role-icon-large" :style="{ background: currentRole.color || getRoleColor(currentRole.code) }">
+            <div class="role-icon-large" :style="{ background: currentRole.color || getRoleColor(currentRole.roleCode) }">
               <el-icon :size="24"><User /></el-icon>
             </div>
             <div class="role-header-info">
-              <h3 class="role-header-name">{{ currentRole.name }}</h3>
-              <p class="role-header-code">{{ currentRole.code }}</p>
+              <h3 class="role-header-name">{{ currentRole.roleName }}</h3>
+              <p class="role-header-code">{{ currentRole.roleCode }}</p>
               <p v-if="currentRole.description" class="role-header-desc">{{ currentRole.description }}</p>
             </div>
             <div class="role-header-actions">
@@ -135,14 +135,15 @@
             <el-tab-pane label="基本信息" name="info">
               <el-descriptions :column="2" border>
                 <el-descriptions-item label="角色ID">{{ currentRole.id }}</el-descriptions-item>
-                <el-descriptions-item label="角色编码">{{ currentRole.code }}</el-descriptions-item>
-                <el-descriptions-item label="角色名称">{{ currentRole.name }}</el-descriptions-item>
+                <el-descriptions-item label="角色编码">{{ currentRole.roleCode }}</el-descriptions-item>
+                <el-descriptions-item label="角色名称">{{ currentRole.roleName }}</el-descriptions-item>
                 <el-descriptions-item label="系统角色">
                   <el-tag :type="currentRole.builtin ? 'success' : 'info'" size="small">
                     {{ currentRole.builtin ? '是' : '否' }}
                   </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="成员数量">{{ currentRole.memberCount || 0 }} 人</el-descriptions-item>
+                <el-descriptions-item label="数据范围">{{ currentRole.dataScopeDesc || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="创建时间">{{ currentRole.createTime }}</el-descriptions-item>
                 <el-descriptions-item label="描述" :span="2">
                   {{ currentRole.description || '-' }}
@@ -167,21 +168,29 @@
       :close-on-click-modal="false"
     >
       <el-form :model="roleForm" :rules="roleRules" ref="roleFormRef" label-width="100px">
-        <el-form-item label="角色名称" prop="name">
-          <el-input v-model="roleForm.name" placeholder="请输入角色名称" />
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="roleForm.roleName" placeholder="请输入角色名称" />
         </el-form-item>
-        <el-form-item label="角色编码" prop="code">
+        <el-form-item label="角色编码" prop="roleCode">
           <el-input
-            v-model="roleForm.code"
+            v-model="roleForm.roleCode"
             placeholder="请输入角色编码，如：ROLE_EDITOR"
             :disabled="isEdit"
           />
         </el-form-item>
+        <el-form-item label="数据范围" prop="dataScope" v-if="!isEdit">
+          <el-select v-model="roleForm.dataScope" placeholder="请选择数据范围" style="width: 100%">
+            <el-option label="全部数据" :value="1" />
+            <el-option label="本部门数据" :value="2" />
+            <el-option label="本部门及子部门数据" :value="3" />
+            <el-option label="仅本人数据" :value="4" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="显示颜色" prop="color">
           <el-color-picker v-model="roleForm.color" show-alpha />
         </el-form-item>
-        <el-form-item label="排序号" prop="sort">
-          <el-input-number v-model="roleForm.sort" :min="0" :max="9999" controls-position="right" />
+        <el-form-item label="排序号" prop="sortOrder">
+          <el-input-number v-model="roleForm.sortOrder" :min="0" :max="9999" controls-position="right" />
         </el-form-item>
         <el-form-item label="角色描述" prop="description">
           <el-input
@@ -203,15 +212,16 @@
       v-model="memberDrawerVisible"
       title="角色成员"
       size="400px"
+      @open="loadRoleMembers"
     >
       <template v-if="currentRole">
         <div class="member-drawer-header">
           <div class="member-drawer-role">
-            <div class="role-icon-small" :style="{ background: currentRole.color || getRoleColor(currentRole.code) }">
+            <div class="role-icon-small" :style="{ background: currentRole.color || getRoleColor(currentRole.roleCode) }">
               <el-icon><User /></el-icon>
             </div>
             <div>
-              <h4>{{ currentRole.name }}</h4>
+              <h4>{{ currentRole.roleName }}</h4>
               <p>{{ roleMembers.length }} 位成员</p>
             </div>
           </div>
@@ -223,11 +233,11 @@
         <div v-loading="membersLoading" class="member-list">
           <div v-for="member in roleMembers" :key="member.id" class="member-item">
             <el-avatar :size="40" :src="member.avatar">
-              {{ member.nickName?.[0] || 'U' }}
+              {{ member.nickname?.[0] || 'U' }}
             </el-avatar>
             <div class="member-info">
-              <div class="member-name">{{ member.nickName }}</div>
-              <div class="member-dept">{{ member.deptName || '未分配部门' }}</div>
+              <div class="member-name">{{ member.nickname || member.username }}</div>
+              <div class="member-dept">{{ member.department || '未分配部门' }}</div>
             </div>
             <el-button
               size="small"
@@ -267,13 +277,13 @@
             <el-option
               v-for="user in userSearchResults"
               :key="user.id"
-              :label="user.nickName"
+              :label="user.nickname || user.username"
               :value="user.id"
             >
               <div class="user-option">
-                <el-avatar :size="24" :src="user.avatar">{{ user.nickName?.[0] }}</el-avatar>
-                <span>{{ user.nickName }}</span>
-                <span class="user-dept">{{ user.deptName || '' }}</span>
+                <el-avatar :size="24" :src="user.avatar">{{ (user.nickname || user.username)?.[0] }}</el-avatar>
+                <span>{{ user.nickname || user.username }}</span>
+                <span class="user-dept">{{ user.department || '' }}</span>
               </div>
             </el-option>
           </el-select>
@@ -322,7 +332,7 @@ import {
   addRoleMembers,
   removeRoleMember
 } from '@/api/admin'
-import { searchUsersApi } from '@/api/im/user'
+import { searchUsersApi, getUserInfo } from '@/api/im/user'
 
 // 角色列表
 const roles = ref([])
@@ -333,8 +343,8 @@ const activeTab = ref('permissions')
 const filteredRoles = computed(() => {
   if (!roleSearch.value) return roles.value
   return roles.value.filter(r =>
-    r.name?.toLowerCase().includes(roleSearch.value.toLowerCase()) ||
-    r.code?.toLowerCase().includes(roleSearch.value.toLowerCase())
+    r.roleName?.toLowerCase().includes(roleSearch.value.toLowerCase()) ||
+    r.roleCode?.toLowerCase().includes(roleSearch.value.toLowerCase())
   )
 })
 
@@ -345,7 +355,7 @@ const checkedPermissions = ref([])
 const dataScope = ref('all')
 const permissionProps = {
   children: 'children',
-  label: 'name'
+  label: 'permissionName'
 }
 
 // 成员相关
@@ -363,16 +373,17 @@ const dialogTitle = ref('新增角色')
 const roleFormRef = ref(null)
 const isEdit = ref(false)
 const roleForm = ref({
-  name: '',
-  code: '',
+  roleName: '',
+  roleCode: '',
   color: '',
-  sort: 0,
+  sortOrder: 0,
+  dataScope: 1,
   description: ''
 })
 
 const roleRules = {
-  name: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
-  code: [
+  roleName: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
+  roleCode: [
     { required: true, message: '请输入角色编码', trigger: 'blur' },
     { pattern: /^[A-Z_]+$/, message: '角色编码只能包含大写字母和下划线', trigger: 'blur' }
   ]
@@ -380,13 +391,13 @@ const roleRules = {
 
 // 加载角色列表
 const loadRoleList = async () => {
-  const res = await getRoleList()
+  const res = await getRoleList({ pageNum: 1, pageSize: 100 })
   if (res.code === 200) {
-    roles.value = res.data || []
+    roles.value = res.data?.list || []
     // 内置角色颜色
     roles.value.forEach(role => {
       if (!role.color) {
-        role.color = getRoleColor(role.code)
+        role.color = getRoleColor(role.roleCode)
       }
     })
   }
@@ -485,8 +496,10 @@ const handleSelectRole = async (role) => {
   const res = await getRoleDetail(role.id)
   if (res.code === 200) {
     currentRole.value = res.data
-    checkedPermissions.value = res.data.permissions || []
-    dataScope.value = res.data.dataScope || 'all'
+    checkedPermissions.value = res.data.permissionIds || []
+    // 数据范围值转换为前端枚举
+    const scopeMap = { 1: 'all', 2: 'dept', 3: 'deptAndSub', 4: 'self' }
+    dataScope.value = scopeMap[res.data.dataScope] || 'all'
     activeTab.value = 'permissions'
   }
 }
@@ -496,10 +509,11 @@ const handleAdd = () => {
   dialogTitle.value = '新增角色'
   isEdit.value = false
   roleForm.value = {
-    name: '',
-    code: '',
+    roleName: '',
+    roleCode: '',
     color: '#' + Math.floor(Math.random()*16777215).toString(16),
-    sort: 0,
+    sortOrder: 0,
+    dataScope: 1,
     description: ''
   }
   dialogVisible.value = true
@@ -511,10 +525,11 @@ const handleEdit = (role) => {
   isEdit.value = true
   roleForm.value = {
     id: role.id,
-    name: role.name,
-    code: role.code,
+    roleName: role.roleName,
+    roleCode: role.roleCode,
     color: role.color,
-    sort: role.sort || 0,
+    sortOrder: role.sortOrder || 0,
+    dataScope: role.dataScope || 1,
     description: role.description || ''
   }
   dialogVisible.value = true
@@ -523,15 +538,26 @@ const handleEdit = (role) => {
 // 提交表单
 const handleSubmit = async () => {
   await roleFormRef.value?.validate()
-  const api = isEdit.value ? updateRole : createRole
   const data = { ...roleForm.value }
-  delete data.id
 
-  const res = await api(data.id || data, data)
-  if (res.code === 200) {
-    ElMessage.success(isEdit.value ? '更新成功' : '创建成功')
-    dialogVisible.value = false
-    loadRoleList()
+  if (isEdit.value) {
+    const res = await updateRole(data.id, data)
+    if (res.code === 200) {
+      ElMessage.success('更新成功')
+      dialogVisible.value = false
+      loadRoleList()
+      // 更新当前选中角色
+      if (currentRole.value?.id === data.id) {
+        handleSelectRole(currentRole.value)
+      }
+    }
+  } else {
+    const res = await createRole(data)
+    if (res.code === 200) {
+      ElMessage.success('创建成功')
+      dialogVisible.value = false
+      loadRoleList()
+    }
   }
 }
 
@@ -566,7 +592,17 @@ const loadRoleMembers = async () => {
   try {
     const res = await getRoleMembers(currentRole.value.id)
     if (res.code === 200) {
-      roleMembers.value = res.data || []
+      const userIds = res.data || []
+      // 根据用户ID列表获取完整用户信息 (使用 Promise.all 并发请求)
+      if (userIds.length > 0) {
+        const userPromises = userIds.map(id => getUserInfo(id))
+        const results = await Promise.all(userPromises)
+        roleMembers.value = results
+          .filter(r => r.code === 200)
+          .map(r => r.data)
+      } else {
+        roleMembers.value = []
+      }
     }
   } finally {
     membersLoading.value = false

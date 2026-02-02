@@ -382,4 +382,69 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
     public List<Long> getDepartmentAndChildrenIds(Long departmentId) {
         return imDepartmentMapper.selectDepartmentAndChildrenIds(departmentId);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void setDepartmentLeader(Long departmentId, Long leaderId) {
+        ImDepartment department = imDepartmentMapper.selectById(departmentId);
+        if (department == null) {
+            throw new BusinessException("DEPARTMENT_NOT_EXIST", "部门不存在");
+        }
+
+        ImUser leader = imUserMapper.selectImUserById(leaderId);
+        if (leader == null) {
+            throw new BusinessException("USER_NOT_EXIST", "指定的负责人用户不存在");
+        }
+
+        department.setLeaderId(leaderId);
+        department.setUpdateTime(LocalDateTime.now());
+
+        int result = imDepartmentMapper.updateById(department);
+        if (result <= 0) {
+            throw new BusinessException("SET_LEADER_FAILED", "设置部门负责人失败");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void moveDepartment(Long departmentId, Long newParentId) {
+        ImDepartment department = imDepartmentMapper.selectById(departmentId);
+        if (department == null) {
+            throw new BusinessException("DEPARTMENT_NOT_EXIST", "部门不存在");
+        }
+
+        if (departmentId.equals(newParentId)) {
+            throw new BusinessException("CANNOT_SET_SELF_AS_PARENT", "不能将部门移动到自己下面");
+        }
+
+        List<Long> childrenIds = imDepartmentMapper.selectDepartmentAndChildrenIds(departmentId);
+        if (childrenIds.contains(newParentId)) {
+            throw new BusinessException("CANNOT_MOVE_TO_CHILD", "不能将部门移动到其子部门下");
+        }
+
+        ImDepartment newParent = null;
+        String newAncestors;
+        if (newParentId.equals(0L)) {
+            newParent = null;
+            newAncestors = "0";
+        } else {
+            newParent = imDepartmentMapper.selectById(newParentId);
+            if (newParent == null) {
+                throw new BusinessException("PARENT_DEPARTMENT_NOT_EXIST", "新的父部门不存在");
+            }
+            newAncestors = newParent.getAncestors() + "," + newParent.getId();
+        }
+
+        department.setParentId(newParentId);
+        department.setAncestors(newAncestors);
+        department.setUpdateTime(LocalDateTime.now());
+
+        int result = imDepartmentMapper.updateById(department);
+        if (result <= 0) {
+            throw new BusinessException("MOVE_DEPARTMENT_FAILED", "移动部门失败");
+        }
+
+        // 更新子部门的 ancestors
+        updateChildrenAncestors(departmentId, newAncestors);
+    }
 }

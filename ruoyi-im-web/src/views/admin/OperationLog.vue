@@ -282,6 +282,11 @@ import {
   CircleCheck,
   CircleClose
 } from '@element-plus/icons-vue'
+import {
+  getAuditLogList,
+  getAuditStatistics,
+  deleteExpiredLogs
+} from '@/api/admin'
 
 const loading = ref(false)
 const logList = ref([])
@@ -316,34 +321,49 @@ const logStats = ref({
 const loadLogs = async () => {
   loading.value = true
   try {
-    // 模拟数据
-    await new Promise(resolve => setTimeout(resolve, 300))
-    const mockData = Array.from({ length: pageSize.value }, (_, i) => ({
-      id: 10001 + i + (pageNum.value - 1) * pageSize.value,
-      operatorId: `user_${10001 + i}`,
-      operatorName: ['张三', '李四', '王五', '赵六', '管理员'][i % 5],
-      operatorAvatar: '',
-      module: ['user', 'group', 'message', 'department', 'role', 'system'][i % 6],
-      action: ['create', 'update', 'delete', 'query', 'export', 'login', 'logout'][i % 7],
-      description: `用户${['新增', '修改', '删除', '查询', '导出', '登录', '登出'][i % 7]}了数据`,
-      ip: `192.168.1.${100 + (i % 50)}`,
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      method: ['GET', 'POST', 'PUT', 'DELETE'][i % 4],
-      path: `/api/${['user', 'group', 'message'][i % 3]}/${i}`,
-      status: i % 10 === 0 ? 'failed' : 'success',
-      errorMessage: i % 10 === 0 ? '参数错误' : '',
-      duration: Math.floor(Math.random() * 500) + 10,
-      createTime: new Date(Date.now() - i * 3600000).toLocaleString('zh-CN')
-    }))
-    logList.value = mockData
-    total.value = 523
-    logStats.value = {
-      total: 523,
-      success: 510,
-      failed: 13,
-      activeUsers: 45
+    // 构建查询参数
+    const params = {
+      pageNum: pageNum.value,
+      pageSize: pageSize.value,
+      startTime: searchForm.value.dateRange?.[0],
+      endTime: searchForm.value.dateRange?.[1]
+    }
+
+    // 调用后端 API
+    const res = await getAuditLogList(params)
+    if (res.code === 200 && res.data) {
+      logList.value = (res.data.list || []).map(log => ({
+        id: log.id,
+        operatorId: log.userId || '-',
+        operatorName: log.userName || '-',
+        operatorAvatar: log.userAvatar || '',
+        module: log.module || 'system',
+        action: log.operationType || 'query',
+        description: log.description || '-',
+        ip: log.ip || '-',
+        userAgent: log.userAgent || '-',
+        method: log.method || 'GET',
+        path: log.requestUrl || '-',
+        status: log.operationResult === 'success' ? 'success' : 'failed',
+        errorMessage: log.errorMessage || '',
+        duration: log.duration || 0,
+        createTime: log.createTime || '-'
+      }))
+      total.value = res.data.total || 0
+    }
+
+    // 加载统计数据
+    const statsRes = await getAuditStatistics(params)
+    if (statsRes.code === 200 && statsRes.data) {
+      logStats.value = {
+        total: statsRes.data.total || 0,
+        success: statsRes.data.successCount || 0,
+        failed: statsRes.data.failedCount || 0,
+        activeUsers: statsRes.data.activeUsers || 0
+      }
     }
   } catch (error) {
+    console.error('加载日志失败:', error)
     ElMessage.error('加载日志失败')
   } finally {
     loading.value = false
@@ -400,14 +420,14 @@ const handleExport = () => {
   try {
     // 导出当前日志列表为 CSV
     const headers = ['日志ID', '操作模块', '操作类型', '操作人', 'IP地址', '操作时间', '状态']
-    const rows = logs.value.map(log => [
+    const rows = logList.value.map(log => [
       log.id,
       `"${log.module || ''}"`,
-      `"${log.operation || ''}"`,
-      `"${log.operator || ''}"`,
+      `"${log.action || ''}"`,
+      `"${log.operatorName || ''}"`,
       log.ip || '',
-      log.operateTime || '',
-      log.status === 1 ? '成功' : '失败'
+      log.createTime || '',
+      log.status === 'success' ? '成功' : '失败'
     ])
 
     // 添加 BOM 以支持中文
@@ -432,11 +452,23 @@ const handleExport = () => {
 // 清空日志
 const handleClear = async () => {
   try {
-    await ElMessageBox.confirm('确定要清空所有操作日志吗？此操作不可恢复。', '警告', {
-      type: 'warning'
+    await ElMessageBox.confirm('确定要清空30天前的操作日志吗？此操作不可恢复。', '警告', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
     })
-    ElMessage.success('日志已清空')
-    loadLogs()
+
+    // 删除30天前的日志
+    const beforeDate = new Date()
+    beforeDate.setDate(beforeDate.getDate() - 30)
+    const res = await deleteExpiredLogs(beforeDate.toISOString())
+
+    if (res.code === 200) {
+      ElMessage.success(`已清理 ${res.data || 0} 条日志`)
+      loadLogs()
+    } else {
+      ElMessage.error(res.msg || '清理失败')
+    }
   } catch {
     // 取消
   }
@@ -446,12 +478,14 @@ const handleClear = async () => {
 const handleBatchDelete = async () => {
   try {
     await ElMessageBox.confirm(`确定要删除选中的 ${selectedLogs.value.length} 条日志吗？`, '确认', {
-      type: 'warning'
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
     })
-    ElMessage.success('删除成功')
-    selectedLogs.value = []
-    tableRef.value?.clearSelection()
-    loadLogs()
+
+    // 实际后端可能需要提供批量删除接口
+    // 这里暂时用清空30天前的日志代替
+    ElMessage.warning('批量删除功能开发中，请使用清空过期日志功能')
   } catch {
     // 取消
   }

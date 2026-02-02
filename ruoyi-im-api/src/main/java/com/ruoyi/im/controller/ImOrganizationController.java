@@ -196,6 +196,40 @@ public class ImOrganizationController {
     }
 
     /**
+     * 设置部门负责人
+     * 设置指定部门的负责人
+     *
+     * @param departmentId 部门ID
+     * @param leaderId 负责人用户ID
+     * @return 操作结果
+     */
+    @Operation(summary = "设置部门负责人", description = "设置指定部门的负责人")
+    @PutMapping("/department/{departmentId}/leader/{leaderId}")
+    public Result<Void> setDepartmentLeader(
+            @PathVariable Long departmentId,
+            @PathVariable Long leaderId) {
+        imOrganizationService.setDepartmentLeader(departmentId, leaderId);
+        return Result.success();
+    }
+
+    /**
+     * 移动部门
+     * 将部门移动到新的父部门下
+     *
+     * @param departmentId 部门ID
+     * @param newParentId 新的父部门ID
+     * @return 操作结果
+     */
+    @Operation(summary = "移动部门", description = "将部门移动到新的父部门下")
+    @PutMapping("/department/{departmentId}/move/{newParentId}")
+    public Result<Void> moveDepartment(
+            @PathVariable Long departmentId,
+            @PathVariable Long newParentId) {
+        imOrganizationService.moveDepartment(departmentId, newParentId);
+        return Result.success();
+    }
+
+    /**
      * 获取用户所属部门列表
      * 获取指定用户所属的所有部门
      *

@@ -318,6 +318,14 @@ import {
   WarningFilled
 } from '@element-plus/icons-vue'
 import { formatFileSize } from '@/utils/format'
+import {
+  getBackupList,
+  getBackupStatistics,
+  createBackup,
+  restoreBackup,
+  deleteBackup,
+  getBackupDetail
+} from '@/api/admin'
 
 const loading = ref(false)
 const backupList = ref([])
@@ -374,72 +382,35 @@ const filteredBackupList = computed(() => {
 const loadBackups = async () => {
   loading.value = true
   try {
-    // 模拟数据
-    await new Promise(resolve => setTimeout(resolve, 300))
-    backupList.value = [
-      {
-        id: 1,
-        name: '完整备份_20250129',
-        type: 'auto',
-        description: '系统自动备份',
-        size: 1024 * 1024 * 156,
-        fileCount: 5234,
-        createTime: '2026-01-29 02:00:00',
-        creator: '系统',
-        status: 'success'
-      },
-      {
-        id: 2,
-        name: '手动备份_用户数据',
-        type: 'manual',
-        description: '用户信息手动备份',
-        size: 1024 * 1024 * 32,
-        fileCount: 120,
-        createTime: '2026-01-28 15:30:00',
-        creator: 'admin',
-        status: 'success'
-      },
-      {
-        id: 3,
-        name: '消息记录备份',
-        type: 'manual',
-        description: '消息记录导出备份',
-        size: 1024 * 1024 * 28,
-        fileCount: 3500,
-        createTime: '2026-01-27 10:15:00',
-        creator: 'admin',
-        status: 'success'
-      },
-      {
-        id: 4,
-        name: '完整备份_20250126',
-        type: 'auto',
-        description: '系统自动备份',
-        size: 1024 * 1024 * 155,
-        fileCount: 5201,
-        createTime: '2026-01-26 02:00:00',
-        creator: '系统',
-        status: 'success'
-      },
-      {
-        id: 5,
-        name: '失败备份示例',
-        type: 'manual',
-        description: '备份失败示例',
-        size: 0,
-        fileCount: 0,
-        createTime: '2026-01-25 18:00:00',
-        creator: 'admin',
-        status: 'failed'
+    // 获取备份列表
+    const listRes = await getBackupList()
+    if (listRes.code === 200 && listRes.data) {
+      backupList.value = listRes.data.map(item => ({
+        id: item.id,
+        name: item.name || `备份_${item.id}`,
+        type: item.type || 'manual',
+        description: item.description || '',
+        size: item.fileSize || 0,
+        fileCount: item.fileCount || 0,
+        createTime: item.createTime || '-',
+        creator: item.creator || '-',
+        status: item.status === 'completed' ? 'success' : 'failed'
+      }))
+    }
+
+    // 获取备份统计
+    const statsRes = await getBackupStatistics()
+    if (statsRes.code === 200 && statsRes.data) {
+      const data = statsRes.data
+      backupStats.value = {
+        totalBackups: data.totalCount || 0,
+        totalSize: data.totalSize || 0,
+        lastBackup: data.lastBackupTime || '-',
+        autoBackupCount: data.autoBackupCount || 0
       }
-    ]
-    backupStats.value = {
-      totalBackups: backupList.value.length,
-      totalSize: backupList.value.reduce((sum, item) => sum + item.size, 0),
-      lastBackup: '2026-01-29 02:00:00',
-      autoBackupCount: backupList.value.filter(item => item.type === 'auto').length
     }
   } catch (error) {
+    console.error('加载备份列表失败:', error)
     ElMessage.error('加载备份列表失败')
   } finally {
     loading.value = false
@@ -461,12 +432,24 @@ const handleCreateBackup = async () => {
   await backupFormRef.value?.validate()
   backupLoading.value = true
   try {
-    // 模拟备份过程
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    ElMessage.success('数据备份完成')
-    backupDialogVisible.value = false
-    loadBackups()
+    const description = backupForm.value.description || backupForm.value.name || '手动备份'
+    const res = await createBackup(description)
+
+    if (res.code === 200) {
+      ElMessage.success('数据备份已创建')
+      backupDialogVisible.value = false
+      // 重置表单
+      backupForm.value = {
+        name: '',
+        description: '',
+        content: ['users', 'groups', 'messages', 'departments', 'roles', 'system']
+      }
+      loadBackups()
+    } else {
+      ElMessage.error(res.msg || '备份失败')
+    }
   } catch (error) {
+    console.error('创建备份失败:', error)
     ElMessage.error('备份失败')
   } finally {
     backupLoading.value = false
@@ -482,11 +465,17 @@ const handleRestore = (row) => {
 const handleConfirmRestore = async () => {
   restoreLoading.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    ElMessage.success('数据恢复完成')
-    restoreDialogVisible.value = false
-    loadBackups()
+    const res = await restoreBackup(selectedBackup.value.id)
+
+    if (res.code === 200) {
+      ElMessage.success('数据恢复完成')
+      restoreDialogVisible.value = false
+      loadBackups()
+    } else {
+      ElMessage.error(res.msg || '恢复失败')
+    }
   } catch (error) {
+    console.error('恢复备份失败:', error)
     ElMessage.error('恢复失败')
   } finally {
     restoreLoading.value = false
@@ -494,18 +483,38 @@ const handleConfirmRestore = async () => {
 }
 
 // 下载备份
-const handleDownload = (row) => {
-  ElMessage.info(`开始下载: ${row.name}`)
+const handleDownload = async (row) => {
+  try {
+    // 获取备份详情，可能包含下载链接
+    const res = await getBackupDetail(row.id)
+    if (res.code === 200 && res.data && res.data.downloadUrl) {
+      // 创建下载链接
+      window.open(res.data.downloadUrl, '_blank')
+    } else {
+      ElMessage.info(`备份 "${row.name}" 暂不支持直接下载，请联系管理员`)
+    }
+  } catch (error) {
+    console.error('下载备份失败:', error)
+    ElMessage.error('下载失败')
+  }
 }
 
 // 删除备份
 const handleDelete = async (row) => {
   try {
     await ElMessageBox.confirm(`确定要删除备份"${row.name}"吗？此操作不可恢复。`, '删除确认', {
-      type: 'warning'
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
     })
-    ElMessage.success('删除成功')
-    loadBackups()
+
+    const res = await deleteBackup(row.id)
+    if (res.code === 200) {
+      ElMessage.success('删除成功')
+      loadBackups()
+    } else {
+      ElMessage.error(res.msg || '删除失败')
+    }
   } catch {
     // 取消
   }

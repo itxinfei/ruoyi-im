@@ -346,7 +346,7 @@
     <el-card class="table-card" shadow="never">
       <template #header>
         <div class="table-header">
-          <span>活跃用户</span>
+          <span>在线用户列表 ({{ onlineUsers.length }})</span>
           <el-input
             v-model="userSearch"
             placeholder="搜索用户"
@@ -356,13 +356,30 @@
           />
         </div>
       </template>
-      <el-table :data="filteredUsers" stripe>
-        <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column prop="nickname" label="昵称" width="120" />
-        <el-table-column prop="department" label="部门" />
-        <el-table-column prop="lastActive" label="最后活跃时间" width="160" />
-        <el-table-column prop="requestCount" label="今日请求数" width="100" align="right" />
+      <el-table :data="filteredUsers" stripe v-loading="loading">
+        <el-table-column label="用户" width="200">
+          <template #default="{ row }">
+            <div class="user-cell">
+              <el-avatar :size="32" :src="row.avatar">{{ row.nickname?.charAt(0) || row.username?.charAt(0) }}</el-avatar>
+              <div class="user-info">
+                <div class="user-name">{{ row.nickname || row.username }}</div>
+                <div class="user-account">@{{ row.username }}</div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="loginIp" label="登录IP" width="140" />
+        <el-table-column prop="sessionId" label="会话ID" width="200" show-overflow-tooltip />
+        <el-table-column prop="lastActive" label="最后活跃时间" width="120" />
+        <el-table-column label="操作" width="100" align="center">
+          <template #default="{ row }">
+            <el-button type="danger" size="small" :icon="Delete" @click="handleKickUser(row)">
+              踢出
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table>
+      <el-empty v-if="!loading && onlineUsers.length === 0" description="暂无在线用户" />
     </el-card>
 
     <!-- 监控设置对话框 -->
@@ -415,7 +432,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Refresh,
   Setting,
@@ -427,19 +444,38 @@ import {
   Download,
   Upload,
   FolderOpened,
-  Search
+  Search,
+  Delete
 } from '@element-plus/icons-vue'
 import { formatFileSize } from '@/utils/format'
+import {
+  getSystemMonitor,
+  getOnlineUsers,
+  getSystemPerformance,
+  kickUser
+} from '@/api/admin'
 
 // 系统状态
 const systemStatus = ref({
   overall: 'healthy',
-  uptime: '15天 8小时',
-  onlineUsers: 128,
-  qps: 156,
-  totalMemory: '16 GB',
-  usedMemory: '8.5 GB',
-  jvmMemory: '4.2 GB'
+  uptime: '-',
+  onlineUsers: 0,
+  qps: 0,
+  totalMemory: '-',
+  usedMemory: '-',
+  jvmMemory: '-'
+})
+
+// 在线用户列表
+const onlineUsers = ref([])
+const userSearch = ref('')
+
+const filteredUsers = computed(() => {
+  if (!userSearch.value) return onlineUsers.value
+  return onlineUsers.value.filter(u =>
+    (u.username && u.username.includes(userSearch.value)) ||
+    (u.nickname && u.nickname.includes(userSearch.value))
+  )
 })
 
 // CPU使用率
@@ -484,23 +520,6 @@ const trendPoints = ref([
   { x: 626, y: 70 }
 ])
 
-// 活跃用户
-const activeUsers = ref([
-  { username: 'user001', nickname: '张三', department: '技术部', lastActive: '刚刚', requestCount: 156 },
-  { username: 'user002', nickname: '李四', department: '产品部', lastActive: '2分钟前', requestCount: 89 },
-  { username: 'user003', nickname: '王五', department: '运营部', lastActive: '5分钟前', requestCount: 45 },
-  { username: 'user004', nickname: '赵六', department: '市场部', lastActive: '10分钟前', requestCount: 23 },
-  { username: 'user005', nickname: '钱七', department: '技术部', lastActive: '15分钟前', requestCount: 12 }
-])
-
-const userSearch = ref('')
-const filteredUsers = computed(() => {
-  if (!userSearch.value) return activeUsers.value
-  return activeUsers.value.filter(u =>
-    u.username.includes(userSearch.value) ||
-    u.nickname.includes(userSearch.value)
-  )
-})
 
 // 对话框状态
 const settingsDialogVisible = ref(false)
@@ -515,15 +534,120 @@ const monitorSettings = ref({
 })
 
 let refreshTimer = null
+const loading = ref(false)
 
 // 刷新所有数据
 const refreshAll = async () => {
-  // 模拟刷新
-  cpuUsage.value = Math.floor(Math.random() * 60) + 20
-  memoryUsage.value = Math.floor(Math.random() * 40) + 40
-  systemStatus.value.onlineUsers = 120 + Math.floor(Math.random() * 30)
-  systemStatus.value.qps = 100 + Math.floor(Math.random() * 100)
-  ElMessage.success('数据已刷新')
+  loading.value = true
+  try {
+    // 获取系统监控数据
+    const monitorRes = await getSystemMonitor()
+    if (monitorRes.code === 200 && monitorRes.data) {
+      const data = monitorRes.data
+      // 更新在线用户数
+      if (data.onlineUserCount !== undefined) {
+        systemStatus.value.onlineUsers = data.onlineUserCount
+      }
+      // 更新 JVM 内存信息
+      if (data.jvm) {
+        systemStatus.value.totalMemory = (data.jvm.maxMemory || 0) + ' MB'
+        systemStatus.value.usedMemory = (data.jvm.usedMemory || 0) + ' MB'
+        systemStatus.value.jvmMemory = (data.jvm.usedMemory || 0) + ' MB'
+        // 更新内存使用率
+        if (data.jvm.memoryUsagePercent !== undefined) {
+          memoryUsage.value = data.jvm.memoryUsagePercent
+        }
+      }
+    }
+
+    // 获取在线用户列表
+    const usersRes = await getOnlineUsers()
+    if (usersRes.code === 200 && usersRes.data) {
+      onlineUsers.value = usersRes.data.map(user => ({
+        userId: user.userId,
+        username: user.username || '-',
+        nickname: user.nickname || '-',
+        department: '-',
+        lastActive: formatTime(user.lastActiveTime),
+        requestCount: 0,
+        sessionId: user.sessionId,
+        loginIp: user.loginIp || '-',
+        avatar: user.avatar
+      }))
+    }
+
+    ElMessage.success('数据已刷新')
+  } catch (error) {
+    console.error('刷新数据失败:', error)
+    ElMessage.error('刷新数据失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 踢出用户
+const handleKickUser = async (user) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要踢出用户 "${user.nickname || user.username}" 吗？`,
+      '确认踢出',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    const res = await kickUser(user.userId)
+    if (res.code === 200) {
+      ElMessage.success('踢出成功')
+      // 刷新在线用户列表
+      await loadOnlineUsers()
+    } else {
+      ElMessage.error(res.msg || '踢出失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('踢出用户失败:', error)
+      ElMessage.error('踢出用户失败')
+    }
+  }
+}
+
+// 加载在线用户列表
+const loadOnlineUsers = async () => {
+  try {
+    const res = await getOnlineUsers()
+    if (res.code === 200 && res.data) {
+      onlineUsers.value = res.data.map(user => ({
+        userId: user.userId,
+        username: user.username || '-',
+        nickname: user.nickname || '-',
+        department: '-',
+        lastActive: formatTime(user.lastActiveTime),
+        requestCount: 0,
+        sessionId: user.sessionId,
+        loginIp: user.loginIp || '-',
+        avatar: user.avatar
+      }))
+      // 更新在线用户数
+      systemStatus.value.onlineUsers = onlineUsers.value.length
+    }
+  } catch (error) {
+    console.error('加载在线用户失败:', error)
+  }
+}
+
+// 格式化时间
+const formatTime = (time) => {
+  if (!time) return '-'
+  const now = new Date()
+  const date = new Date(time)
+  const diff = now - date
+  if (diff < 60000) return '刚刚'
+  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
+  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
+  return Math.floor(diff / 86400000) + '天前'
 }
 
 // 保存设置
@@ -576,6 +700,7 @@ const formatBytes = (bytes) => {
 }
 
 onMounted(() => {
+  loadOnlineUsers()
   startAutoRefresh()
 })
 
@@ -1042,6 +1167,29 @@ onUnmounted(() => {
 .threshold-unit {
   margin-left: var(--dt-space-xs);
   font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-secondary);
+}
+
+/* 用户单元格 */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-space-sm);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
+  color: var(--dt-text-primary);
+}
+
+.user-account {
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-secondary);
 }
 </style>

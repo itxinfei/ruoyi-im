@@ -452,6 +452,7 @@ export function getMessageTypeStats(params) {
 }
 
 // ==================== 部门管理 ====================
+// 后端接口路径: /api/im/organization
 
 /**
  * 获取部门列表（树形）
@@ -459,7 +460,7 @@ export function getMessageTypeStats(params) {
  */
 export function getDepartmentTree() {
   return request({
-    url: '/api/admin/departments/tree',
+    url: '/api/im/organization/department/tree',
     method: 'get'
   })
 }
@@ -471,7 +472,7 @@ export function getDepartmentTree() {
  */
 export function getDepartmentDetail(id) {
   return request({
-    url: `/api/admin/departments/${id}`,
+    url: `/api/im/organization/department/${id}`,
     method: 'get'
   })
 }
@@ -483,7 +484,7 @@ export function getDepartmentDetail(id) {
  */
 export function createDepartment(data) {
   return request({
-    url: '/api/admin/departments',
+    url: '/api/im/organization/department',
     method: 'post',
     data
   })
@@ -497,7 +498,7 @@ export function createDepartment(data) {
  */
 export function updateDepartment(id, data) {
   return request({
-    url: `/api/admin/departments/${id}`,
+    url: '/api/im/organization/department',
     method: 'put',
     data
   })
@@ -510,7 +511,7 @@ export function updateDepartment(id, data) {
  */
 export function deleteDepartment(id) {
   return request({
-    url: `/api/admin/departments/${id}`,
+    url: `/api/im/organization/department/${id}`,
     method: 'delete'
   })
 }
@@ -522,7 +523,7 @@ export function deleteDepartment(id) {
  */
 export function getDepartmentMembers(id) {
   return request({
-    url: `/api/admin/departments/${id}/members`,
+    url: `/api/im/organization/department/${id}/members`,
     method: 'get'
   })
 }
@@ -535,9 +536,8 @@ export function getDepartmentMembers(id) {
  */
 export function setDepartmentLeader(id, leaderId) {
   return request({
-    url: `/api/admin/departments/${id}/leader`,
-    method: 'put',
-    params: { leaderId }
+    url: `/api/im/organization/department/${id}/leader/${leaderId}`,
+    method: 'put'
   })
 }
 
@@ -549,23 +549,22 @@ export function setDepartmentLeader(id, leaderId) {
  */
 export function moveDepartment(id, parentId) {
   return request({
-    url: `/api/admin/departments/${id}/move`,
-    method: 'put',
-    params: { parentId }
+    url: `/api/im/organization/department/${id}/move/${parentId}`,
+    method: 'put'
   })
 }
 
 /**
  * 添加成员到部门
  * @param {Number} id - 部门ID
- * @param {Array} userIds - 用户ID列表
+ * @param {Object} data - { userId, isPrimary }
  * @returns {Promise}
  */
-export function addDepartmentMembers(id, userIds) {
+export function addDepartmentMembers(id, data) {
   return request({
-    url: `/api/admin/departments/${id}/members`,
+    url: '/api/im/organization/department/member',
     method: 'post',
-    data: userIds
+    data: { departmentId: id, ...data }
   })
 }
 
@@ -577,7 +576,7 @@ export function addDepartmentMembers(id, userIds) {
  */
 export function removeDepartmentMember(id, userId) {
   return request({
-    url: `/api/admin/departments/${id}/members/${userId}`,
+    url: `/api/im/organization/department/${id}/member/${userId}`,
     method: 'delete'
   })
 }
@@ -650,11 +649,12 @@ export function deleteRole(id) {
 
 /**
  * 获取角色权限列表
+ * 后端接口路径: /api/admin/roles/permissions
  * @returns {Promise}
  */
 export function getPermissionList() {
   return request({
-    url: '/api/admin/permissions',
+    url: '/api/admin/roles/permissions',
     method: 'get'
   })
 }
@@ -713,6 +713,7 @@ export function removeRoleMember(id, userId) {
 }
 
 // ==================== 系统配置 ====================
+// 后端接口路径: /api/admin/config
 
 /**
  * 获取系统配置
@@ -720,7 +721,7 @@ export function removeRoleMember(id, userId) {
  */
 export function getSystemConfig() {
   return request({
-    url: '/api/admin/system/config',
+    url: '/api/admin/config/all',
     method: 'get'
   })
 }
@@ -732,7 +733,7 @@ export function getSystemConfig() {
  */
 export function updateSystemConfig(data) {
   return request({
-    url: '/api/admin/system/config',
+    url: '/api/admin/config/update',
     method: 'put',
     data
   })
@@ -744,7 +745,7 @@ export function updateSystemConfig(data) {
  */
 export function getSensitiveWords() {
   return request({
-    url: '/api/admin/system/sensitive-words',
+    url: '/api/admin/config/sensitive-words',
     method: 'get'
   })
 }
@@ -756,8 +757,297 @@ export function getSensitiveWords() {
  */
 export function saveSensitiveWords(data) {
   return request({
-    url: '/api/admin/system/sensitive-words',
+    url: '/api/admin/config/sensitive-words',
     method: 'post',
     data
+  })
+}
+
+// ==================== 审计日志 ====================
+// 后端接口路径: /api/im/audit
+
+/**
+ * 获取审计日志列表
+ * @param {Object} params - 查询参数 { pageNum, pageSize, userId, operationType, operationResult, startTime, endTime }
+ * @returns {Promise}
+ */
+export function getAuditLogList(params) {
+  return request({
+    url: '/api/im/audit/list',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取审计日志详情
+ * @param {Number} id - 日志ID
+ * @returns {Promise}
+ */
+export function getAuditLogDetail(id) {
+  return request({
+    url: `/api/im/audit/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取审计统计信息
+ * @param {Object} params - { startTime, endTime }
+ * @returns {Promise}
+ */
+export function getAuditStatistics(params) {
+  return request({
+    url: '/api/im/audit/statistics',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取用户操作日志
+ * @param {Number} userId - 用户ID
+ * @param {Object} params - { startTime, endTime }
+ * @returns {Promise}
+ */
+export function getUserAuditLogs(userId, params) {
+  return request({
+    url: `/api/im/audit/user/${userId}`,
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 删除过期日志
+ * @param {String} beforeDate - 删除此日期之前的日志 (ISO格式)
+ * @returns {Promise}
+ */
+export function deleteExpiredLogs(beforeDate) {
+  return request({
+    url: '/api/im/audit/clean',
+    method: 'delete',
+    params: { beforeDate }
+  })
+}
+
+// ==================== 数据备份 ====================
+// 后端接口路径: /api/im/backup
+
+/**
+ * 获取备份列表
+ * @returns {Promise}
+ */
+export function getBackupList() {
+  return request({
+    url: '/api/im/backup/list',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取备份详情
+ * @param {Number} id - 备份ID
+ * @returns {Promise}
+ */
+export function getBackupDetail(id) {
+  return request({
+    url: `/api/im/backup/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 创建备份
+ * @param {String} description - 备份描述
+ * @returns {Promise}
+ */
+export function createBackup(description) {
+  return request({
+    url: '/api/im/backup/create',
+    method: 'post',
+    params: { description }
+  })
+}
+
+/**
+ * 恢复备份
+ * @param {Number} id - 备份ID
+ * @returns {Promise}
+ */
+export function restoreBackup(id) {
+  return request({
+    url: `/api/im/backup/restore/${id}`,
+    method: 'post'
+  })
+}
+
+/**
+ * 删除备份
+ * @param {Number} id - 备份ID
+ * @returns {Promise}
+ */
+export function deleteBackup(id) {
+  return request({
+    url: `/api/im/backup/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取备份统计信息
+ * @returns {Promise}
+ */
+export function getBackupStatistics() {
+  return request({
+    url: '/api/im/backup/statistics',
+    method: 'get'
+  })
+}
+
+/**
+ * 导出用户数据
+ * @param {Number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function exportUserData(userId) {
+  return request({
+    url: `/api/im/backup/export/user/${userId}`,
+    method: 'get'
+  })
+}
+
+// ==================== 系统监控 ====================
+// 后端接口路径: 待实现 /api/admin/monitor
+
+/**
+ * 获取系统监控数据
+ * @returns {Promise}
+ */
+export function getSystemMonitor() {
+  return request({
+    url: '/api/admin/monitor/system',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取在线用户列表
+ * @returns {Promise}
+ */
+export function getOnlineUsers() {
+  return request({
+    url: '/api/admin/monitor/online-users',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取在线用户统计
+ * @returns {Promise}
+ */
+export function getOnlineUserStats() {
+  return request({
+    url: '/api/admin/monitor/online-stats',
+    method: 'get'
+  })
+}
+
+/**
+ * 踢出用户（强制下线）
+ * @param {Number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function kickUser(userId) {
+  return request({
+    url: `/api/admin/monitor/kick/${userId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 根据会话ID踢出用户
+ * @param {String} sessionId - 会话ID
+ * @returns {Promise}
+ */
+export function kickBySessionId(sessionId) {
+  return request({
+    url: `/api/admin/monitor/kick/session/${sessionId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取系统性能指标
+ * @returns {Promise}
+ */
+export function getSystemPerformance() {
+  return request({
+    url: '/api/admin/monitor/performance',
+    method: 'get'
+  })
+}
+
+// ==================== 文件管理 ====================
+// 后端接口路径: 待实现 /api/admin/files
+
+/**
+ * 获取文件列表
+ * @param {Object} params - 查询参数 { pageNum, pageSize, fileName, fileType, uploaderId, startTime, endTime }
+ * @returns {Promise}
+ */
+export function getFileList(params) {
+  return request({
+    url: '/api/admin/files',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取文件详情
+ * @param {Number} id - 文件ID
+ * @returns {Promise}
+ */
+export function getFileDetail(id) {
+  return request({
+    url: `/api/admin/files/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 删除文件
+ * @param {Number} id - 文件ID
+ * @returns {Promise}
+ */
+export function deleteFile(id) {
+  return request({
+    url: `/api/admin/files/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 批量删除文件
+ * @param {Array} ids - 文件ID列表
+ * @returns {Promise}
+ */
+export function batchDeleteFiles(ids) {
+  return request({
+    url: '/api/admin/files/batch',
+    method: 'delete',
+    data: ids
+  })
+}
+
+/**
+ * 获取文件统计
+ * @returns {Promise}
+ */
+export function getFileStatistics() {
+  return request({
+    url: '/api/admin/files/statistics',
+    method: 'get'
   })
 }

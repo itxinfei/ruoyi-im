@@ -2,204 +2,212 @@
   <el-dialog
     v-model="visible"
     :title="null"
-    width="600px"
-    :modal="true"
-    :close-on-click-modal="true"
-    :close-on-press-escape="true"
-    destroy-on-close
+    :width="isMobile ? '100%' : '600px'"
+    :fullscreen="isMobile"
+    class="group-detail-modal modern-modal"
     append-to-body
-    class="group-detail-modal"
+    destroy-on-close
+    :show-close="false"
+    :close-on-click-modal="!isMobile"
   >
-    <!-- 关闭按钮 -->
-    <template #header="{ close, titleId, titleClass }">
+    <div class="modal-container">
+      <!-- Header -->
       <div class="modal-header">
-        <button class="close-btn" @click="close">
-          <el-icon><Close /></el-icon>
-        </button>
-      </div>
-    </template>
-
-    <div v-if="groupInfo" v-loading="loading" class="group-detail-content">
-      <!-- 群组信息卡片 -->
-      <div class="group-info-card">
-        <DingtalkAvatar
-          :src="groupInfo.avatar"
-          :name="groupInfo.name"
-          :size="80"
-          shape="square"
-          custom-class="group-avatar"
-        />
-        <h3 class="group-name">{{ groupInfo.name }}</h3>
-        <div class="group-meta">
-          <span class="member-count">{{ members.length }} 位成员</span>
-          <span v-if="groupInfo.ownerId === currentUserId" class="role-badge owner">群主</span>
-          <span v-else-if="isAdmin" class="role-badge admin">管理员</span>
-        </div>
-      </div>
-
-      <!-- 快捷操作按钮 -->
-      <div class="quick-actions">
-        <el-button class="action-btn" @click="handleAddMembers" v-if="isOwnerOrAdmin">
-          <el-icon><Plus /></el-icon>
-          <span>邀请成员</span>
-        </el-button>
-        <el-button class="action-btn" @click="handleEditGroupName" v-if="isOwnerOrAdmin">
-          <el-icon><Edit /></el-icon>
-          <span>修改群名</span>
-        </el-button>
-        <el-button class="action-btn" @click="handleEditAnnouncement" v-if="isOwnerOrAdmin">
-          <el-icon><Bell /></el-icon>
-          <span>编辑公告</span>
-        </el-button>
-      </div>
-
-      <!-- 群公告区块 -->
-      <div class="section-block" v-if="groupInfo.announcement || isOwnerOrAdmin">
-        <div class="section-header">
-          <el-icon><Bell /></el-icon>
-          <span class="section-title">群公告</span>
-        </div>
-        <div class="announcement-content" :class="{ empty: !groupInfo.announcement }">
-          {{ groupInfo.announcement || '暂无群公告' }}
-        </div>
-      </div>
-
-      <!-- 群成员区块 -->
-      <div class="section-block members-block">
-        <div class="section-header">
-          <el-icon><User /></el-icon>
-          <span class="section-title">群成员 ({{ members.length }})</span>
-          <el-button
-            v-if="members.length > 24"
-            text
-            type="primary"
-            size="small"
-            class="view-all-btn"
-            @click="handleViewAllMembers"
-          >
-            查看全部
-          </el-button>
-        </div>
-        <!-- 成员网格 - 每行6个 -->
-        <div class="members-grid">
-          <!-- 成员列表 -->
-          <div
-            v-for="member in displayMembers"
-            :key="member.id"
-            class="member-item"
-            @click="handleMemberClick(member)"
-          >
-            <div class="member-avatar-wrap">
-              <DingtalkAvatar
-                :src="member.avatar"
-                :name="member.name"
-                :size="48"
-                shape="circle"
-                custom-class="member-avatar"
-              />
-              <div v-if="member.role === 'OWNER'" class="role-icon owner">
-                <el-icon><Crown /></el-icon>
-              </div>
-              <div v-else-if="member.role === 'ADMIN'" class="role-icon admin">
-                <el-icon><UserFilled /></el-icon>
-              </div>
-            </div>
-            <span class="member-name">{{ member.name }}</span>
-          </div>
-
-          <!-- 邀请按钮（管理员可见） -->
-          <div
-            v-if="isOwnerOrAdmin"
-            class="member-item add-member"
-            @click="handleAddMembers"
-          >
-            <div class="member-avatar-wrap add-icon">
-              <el-icon><Plus /></el-icon>
-            </div>
-            <span class="member-name">邀请</span>
+        <div class="header-content">
+          <h3 class="title">群组详情</h3>
+          <div class="header-actions">
+            <el-button circle text class="close-btn" @click="visible = false">
+              <el-icon><Close /></el-icon>
+            </el-button>
           </div>
         </div>
       </div>
 
-      <!-- 群文件区块 -->
-      <div class="section-block">
-        <div class="section-header">
-          <el-icon><Folder /></el-icon>
-          <span class="section-title">群文件</span>
-          <el-button text type="primary" size="small" class="view-all-btn" @click="handleViewFiles">
-            查看全部
-          </el-button>
-        </div>
-        <div class="files-preview">
-          <div v-if="recentFiles.length === 0" class="empty-state">
-            <el-icon><FolderOpened /></el-icon>
-            <span>暂无群文件</span>
-          </div>
-          <div v-else class="file-list">
-            <div
-              v-for="file in recentFiles"
-              :key="file.id"
-              class="file-item"
-              @click="handleFileClick(file)"
-            >
-              <div class="file-icon">
-                <el-icon><Document /></el-icon>
+      <div class="modal-body custom-scrollbar" v-loading="loading">
+        <!-- Group Identity Card -->
+        <div class="group-identity-card">
+          <div class="group-avatar-section">
+            <DingtalkAvatar
+              :src="groupInfo?.avatar"
+              :name="groupInfo?.name"
+              :size="80"
+              shape="square"
+              class="group-avatar"
+            />
+            <div class="group-info">
+              <div class="name-row">
+                <h2 class="group-name">{{ groupInfo?.name }}</h2>
+                <el-button 
+                  v-if="isOwnerOrAdmin" 
+                  circle 
+                  text 
+                  size="small"
+                  class="edit-name-btn"
+                  @click="handleEditGroupName"
+                >
+                  <el-icon><EditPen /></el-icon>
+                </el-button>
               </div>
-              <div class="file-info">
-                <span class="file-name">{{ file.name }}</span>
-                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              <div class="meta-row">
+                <span class="meta-item">{{ members.length }} 位成员</span>
+                <span class="divider">·</span>
+                <span class="meta-item">ID: {{ groupInfo?.id }}</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 设置选项 -->
-      <div class="settings-section">
-        <div class="setting-item">
-          <div class="setting-label">
-            <el-icon><Bell /></el-icon>
-            <span>消息免打扰</span>
-          </div>
-          <el-switch
-            v-model="groupInfo.isMuted"
-            @change="handleMuteChange"
-            :active-color="#0089FF"
-          />
-        </div>
-        <div class="setting-item">
-          <div class="setting-label">
-            <el-icon><PushPin /></el-icon>
-            <span>置顶聊天</span>
-          </div>
-          <el-switch
-            v-model="groupInfo.isPinned"
-            @change="handlePinChange"
-            :active-color="#0089FF"
-          />
-        </div>
-      </div>
+        <!-- Tabs -->
+        <div class="detail-tabs-wrapper">
+          <el-tabs v-model="activeTab" class="modern-tabs" stretch>
+            
+            <!-- Overview Tab -->
+            <el-tab-pane label="概览" name="overview">
+              <div class="tab-content">
+                <!-- Announcement -->
+                <div class="section-card">
+                  <div class="card-header">
+                    <div class="title-with-icon">
+                      <el-icon class="icon-primary"><Bell /></el-icon>
+                      <span>群公告</span>
+                    </div>
+                    <el-button v-if="isOwnerOrAdmin" link type="primary" size="small" @click="handleEditAnnouncement">
+                      编辑
+                    </el-button>
+                  </div>
+                  <div class="announcement-content" :class="{ 'is-empty': !groupInfo?.announcement }">
+                    {{ groupInfo?.announcement || '暂无群公告，点击编辑添加' }}
+                  </div>
+                </div>
 
-      <!-- 底部操作 -->
-      <div class="footer-actions">
-        <el-button
-          v-if="isOwner"
-          type="danger"
-          plain
-          class="footer-btn danger-btn"
-          @click="handleDismiss"
-        >
-          解散群聊
-        </el-button>
-        <el-button
-          v-else
-          type="danger"
-          plain
-          class="footer-btn danger-btn"
-          @click="handleLeave"
-        >
-          退出群聊
-        </el-button>
+                <!-- Members -->
+                <div class="section-card">
+                  <div class="card-header">
+                    <div class="title-with-icon">
+                      <el-icon class="icon-success"><UserFilled /></el-icon>
+                      <span>群成员 <span class="count">({{ members.length }})</span></span>
+                    </div>
+                    <div class="actions">
+                      <el-button v-if="isOwnerOrAdmin" link type="primary" size="small" @click="handleAddMembers">
+                        <el-icon><Plus /></el-icon> 邀请
+                      </el-button>
+                      <el-button link type="info" size="small" @click="handleViewAllMembers">
+                        全部 <el-icon><ArrowRight /></el-icon>
+                      </el-button>
+                    </div>
+                  </div>
+                  
+                  <div class="members-grid">
+                    <div 
+                      v-for="member in displayMembers" 
+                      :key="member.id" 
+                      class="member-item"
+                      @click="handleMemberClick(member)"
+                    >
+                      <div class="avatar-box">
+                        <DingtalkAvatar
+                          :src="member.avatar"
+                          :name="member.name"
+                          :size="48"
+                          shape="circle"
+                        />
+                        <div v-if="member.role === 'OWNER'" class="role-badge owner">
+                          <el-icon><Star /></el-icon>
+                        </div>
+                        <div v-else-if="member.role === 'ADMIN'" class="role-badge admin">
+                          <el-icon><User /></el-icon>
+                        </div>
+                      </div>
+                      <span class="member-name">{{ member.name }}</span>
+                    </div>
+
+                    <div v-if="isOwnerOrAdmin" class="member-item add-btn" @click="handleAddMembers">
+                      <div class="avatar-box dashed">
+                        <el-icon><Plus /></el-icon>
+                      </div>
+                      <span class="member-name">邀请</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <!-- Files Tab -->
+            <el-tab-pane label="文件" name="files">
+              <div class="tab-content">
+                <div class="files-header">
+                  <span>最近文件</span>
+                  <el-button link type="primary" @click="handleViewFiles">查看全部</el-button>
+                </div>
+                
+                <div v-if="recentFiles.length > 0" class="file-list">
+                  <div v-for="file in recentFiles" :key="file.id" class="file-item" @click="handleFileClick(file)">
+                    <div class="file-icon">
+                      <el-icon><Document /></el-icon>
+                    </div>
+                    <div class="file-info">
+                      <div class="file-name">{{ file.name }}</div>
+                      <div class="file-meta">{{ formatFileSize(file.size) }} · {{ file.uploaderName }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="empty-state">
+                  <el-empty description="暂无群文件" :image-size="100">
+                    <template #image>
+                      <div class="empty-icon-bg">
+                        <el-icon><Folder /></el-icon>
+                      </div>
+                    </template>
+                  </el-empty>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <!-- Settings Tab -->
+            <el-tab-pane label="设置" name="settings">
+              <div class="tab-content">
+                <div class="settings-group">
+                  <div class="setting-item">
+                    <div class="label-group">
+                      <div class="label">消息免打扰</div>
+                      <div class="desc">开启后，将不再接收此群的消息通知</div>
+                    </div>
+                    <el-switch v-model="groupInfo.isMuted" @change="handleMuteChange" />
+                  </div>
+                  
+                  <div class="setting-item">
+                    <div class="label-group">
+                      <div class="label">置顶聊天</div>
+                      <div class="desc">将此群固定在聊天列表顶部</div>
+                    </div>
+                    <el-switch v-model="groupInfo.isPinned" @change="handlePinChange" />
+                  </div>
+                </div>
+
+                <div class="danger-zone">
+                  <el-button 
+                    v-if="isOwner" 
+                    type="danger" 
+                    plain 
+                    class="danger-btn"
+                    @click="handleDismiss"
+                  >
+                    解散群聊
+                  </el-button>
+                  <el-button 
+                    v-else 
+                    type="danger" 
+                    plain 
+                    class="danger-btn"
+                    @click="handleLeave"
+                  >
+                    退出群聊
+                  </el-button>
+                </div>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
       </div>
     </div>
   </el-dialog>
@@ -207,10 +215,11 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Close, Plus, Edit, Bell, User, Crown, UserFilled,
-  Folder, FolderOpened, Document, PushPin
+  Close, Plus, EditPen, Bell, User, Star, UserFilled,
+  Folder, Document, ArrowRight
 } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { getStoredUserInfo } from '@/utils/storage'
@@ -221,8 +230,6 @@ import {
   leaveGroup,
   updateGroup,
   setGroupMute,
-  removeGroupMember,
-  setGroupAdmin,
   addGroupMembers
 } from '@/api/im/group'
 
@@ -231,47 +238,42 @@ const props = defineProps({
   groupId: { type: [Number, String], default: null }
 })
 
-const emit = defineEmits(['update:modelValue', 'refresh', 'start-chat', 'show-member-profile', 'view-files', 'view-all-members'])
+const emit = defineEmits(['update:modelValue', 'refresh', 'show-member-profile', 'view-files', 'view-all-members'])
+
+const { width } = useWindowSize()
+const isMobile = computed(() => width.value < 768)
 
 const visible = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 })
 
+const activeTab = ref('overview')
 const loading = ref(false)
-const groupInfo = ref(null)
+const groupInfo = ref({})
 const members = ref([])
 const currentUserId = ref(null)
 const recentFiles = ref([])
 
-// 是否是群主
+// Computed
 const isOwner = computed(() => groupInfo.value?.ownerId === currentUserId.value)
-
-// 是否是管理员
 const isAdmin = computed(() => {
   if (isOwner.value) return true
   const m = members.value.find(x => x.id === currentUserId.value)
   return m?.role === 'ADMIN'
 })
-
-// 是否是群主或管理员
 const isOwnerOrAdmin = computed(() => isOwner.value || isAdmin.value)
-
-// 显示的成员（最多显示24个，加上邀请按钮）
 const displayMembers = computed(() => {
-  const maxCount = isOwnerOrAdmin.value ? 23 : 24
+  const maxCount = isOwnerOrAdmin.value ? 19 : 20 
   return members.value.slice(0, maxCount)
 })
 
-// 加载当前用户信息
+// Methods
 const loadCurrentUser = () => {
   const u = getStoredUserInfo()
-  if (u) {
-    currentUserId.value = u.userId || u.id
-  }
+  if (u) currentUserId.value = u.userId || u.id
 }
 
-// 加载群组详情
 const loadGroupDetail = async () => {
   if (!props.groupId) return
   loading.value = true
@@ -296,8 +298,7 @@ const loadGroupDetail = async () => {
         role: m.role || 'MEMBER'
       }))
     }
-    // TODO: 加载最近文件
-    recentFiles.value = []
+    recentFiles.value = [] 
   } catch (e) {
     ElMessage.error('加载群组信息失败')
   } finally {
@@ -305,20 +306,16 @@ const loadGroupDetail = async () => {
   }
 }
 
-// 监听弹窗打开
 watch(() => props.modelValue, (val) => {
   if (val) {
     loadCurrentUser()
     loadGroupDetail()
+    activeTab.value = 'overview'
   }
 })
 
-// 处理成员点击
-const handleMemberClick = (member) => {
-  emit('show-member-profile', member)
-}
+const handleMemberClick = (member) => emit('show-member-profile', member)
 
-// 编辑群公告
 const handleEditAnnouncement = async () => {
   const { value } = await ElMessageBox.prompt('编辑群公告', {
     confirmButtonText: '保存',
@@ -327,17 +324,16 @@ const handleEditAnnouncement = async () => {
     inputType: 'textarea',
     inputPlaceholder: '请输入群公告内容...'
   })
-  if (!value) return
+  if (value === null) return
   try {
     await updateGroup({ groupId: props.groupId, announcement: value })
     groupInfo.value.announcement = value
     ElMessage.success('群公告已更新')
   } catch (e) {
-    // 用户取消
+    if (e !== 'cancel') ElMessage.error('更新失败')
   }
 }
 
-// 编辑群名称
 const handleEditGroupName = async () => {
   const { value } = await ElMessageBox.prompt('修改群聊名称', {
     confirmButtonText: '保存',
@@ -352,11 +348,10 @@ const handleEditGroupName = async () => {
     ElMessage.success('群名称已修改')
     emit('refresh')
   } catch (e) {
-    // 用户取消
+    if (e !== 'cancel') ElMessage.error('修改失败')
   }
 }
 
-// 添加成员
 const handleAddMembers = async () => {
   try {
     const { value } = await ElMessageBox.prompt(
@@ -367,63 +362,45 @@ const handleAddMembers = async () => {
         cancelButtonText: '取消',
         inputPlaceholder: '例如: 1, 2, 3',
         inputPattern: /^(\d+)(,\s*\d+)*$/,
-        inputErrorMessage: '请输入有效的用户ID，多个用逗号分隔'
+        inputErrorMessage: '请输入有效的用户ID'
       }
     )
     if (!value) return
     const userIds = value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id))
-    if (userIds.length === 0) {
-      ElMessage.warning('请输入有效的用户ID')
-      return
-    }
+    if (userIds.length === 0) return
+    
     await addGroupMembers(props.groupId, userIds)
     ElMessage.success(`已邀请 ${userIds.length} 位成员`)
     loadGroupDetail()
   } catch (e) {
-    if (e !== 'cancel') {
-      ElMessage.error('邀请失败，请重试')
-    }
+    if (e !== 'cancel') ElMessage.error('邀请失败')
   }
 }
 
-// 查看全部成员
-const handleViewAllMembers = () => {
-  emit('view-all-members', members.value)
-}
+const handleViewAllMembers = () => emit('view-all-members', members.value)
+const handleViewFiles = () => emit('view-files', props.groupId)
+const handleFileClick = (file) => ElMessage.info('文件预览功能开发中')
 
-// 查看文件
-const handleViewFiles = () => {
-  emit('view-files', props.groupId)
-}
-
-// 文件点击
-const handleFileClick = (file) => {
-  // TODO: 实现文件预览或下载
-  ElMessage.info('文件预览功能开发中')
-}
-
-// 免打扰设置
 const handleMuteChange = async (v) => {
   try {
     await setGroupMute({ groupId: props.groupId, isMuted: v })
     ElMessage.success(v ? '已开启免打扰' : '已关闭免打扰')
   } catch (e) {
     groupInfo.value.isMuted = !v
+    ElMessage.error('设置失败')
   }
 }
 
-// 置顶设置
 const handlePinChange = (v) => {
   ElMessage.success(v ? '已置顶' : '已取消置顶')
-  // TODO: 调用置顶 API
 }
 
-// 解散群聊
 const handleDismiss = () => {
   ElMessageBox.confirm('确定要解散群组吗？此操作不可逆。', '警告', {
     type: 'error',
-    confirmButtonText: '确定',
-    cancelButtonText: '取消'
+    confirmButtonText: '确定解散',
+    cancelButtonText: '取消',
+    confirmButtonClass: 'el-button--danger'
   }).then(async () => {
     await dismissGroup(props.groupId)
     ElMessage.success('群聊已解散')
@@ -432,12 +409,12 @@ const handleDismiss = () => {
   }).catch(() => {})
 }
 
-// 退出群聊
 const handleLeave = () => {
   ElMessageBox.confirm('确定退出群聊吗？', '提示', {
     type: 'warning',
-    confirmButtonText: '确定',
-    cancelButtonText: '取消'
+    confirmButtonText: '确定退出',
+    cancelButtonText: '取消',
+    confirmButtonClass: 'el-button--danger'
   }).then(async () => {
     await leaveGroup(props.groupId)
     ElMessage.success('已退出群聊')
@@ -446,9 +423,8 @@ const handleLeave = () => {
   }).catch(() => {})
 }
 
-// 格式化文件大小
 const formatFileSize = (bytes) => {
-  if (!bytes || bytes === 0) return '0 B'
+  if (!bytes) return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -457,457 +433,386 @@ const formatFileSize = (bytes) => {
 </script>
 
 <style scoped lang="scss">
-// 钉钉颜色变量
-$dt-blue: #0089FF;
-$dt-text-primary: #1F2329;
-$dt-text-secondary: #646A73;
-$dt-text-tertiary: #8F959E;
-$dt-bg-hover: #F5F5F5;
-$dt-border-color: #E5E6EB;
-$dt-danger: #FF4D4F;
-
-.group-detail-modal {
-  :deep(.el-dialog) {
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
+.modern-modal {
   :deep(.el-dialog__header) {
-    padding: 0;
-  }
-
-  :deep(.el-dialog__body) {
-    padding: 0;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-
-  :deep(.el-dialog__footer) {
     display: none;
   }
-
-  // 自定义滚动条
-  :deep(.el-dialog__body)::-webkit-scrollbar {
-    width: 6px;
+  :deep(.el-dialog__body) {
+    padding: 0;
+    height: 100%;
   }
+  border-radius: 16px;
+  overflow: hidden;
+}
 
-  :deep(.el-dialog__body)::-webkit-scrollbar-thumb {
-    background: #C0C0C0;
-    border-radius: 3px;
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  height: 65vh;
+  min-height: 550px;
+  background-color: var(--el-bg-color-page);
 
-    &:hover {
-      background: #A0A0A0;
-    }
+  @media (max-width: 768px) {
+    height: 100vh;
   }
 }
 
 .modal-header {
-  padding: 16px 16px 0;
-  text-align: right;
-
-  .close-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    border-radius: 6px;
-    cursor: pointer;
+  background-color: var(--el-bg-color);
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  padding: 16px 24px;
+  
+  .header-content {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    color: $dt-text-secondary;
-    transition: all 0.15s;
-
-    &:hover {
-      background: $dt-bg-hover;
-      color: $dt-text-primary;
-    }
-
-    .el-icon {
-      font-size: 20px;
-    }
-  }
-}
-
-.group-detail-content {
-  padding: 0 24px 24px;
-}
-
-// 群组信息卡片
-.group-info-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 0;
-  text-align: center;
-  border-bottom: 1px solid $dt-border-color;
-
-  :deep(.group-avatar) {
-    border-radius: 12px;
-  }
-
-  .group-name {
-    margin: 16px 0 8px;
-    font-size: 20px;
-    font-weight: 600;
-    color: $dt-text-primary;
-  }
-
-  .group-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: $dt-text-tertiary;
-
-    .role-badge {
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-
-      &.owner {
-        background: #FFF1F0;
-        color: $dt-danger;
-      }
-
-      &.admin {
-        background: #FFF7E6;
-        color: #FAAD14;
-      }
-    }
-  }
-}
-
-// 快捷操作按钮
-.quick-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  padding: 16px 0;
-  border-bottom: 1px solid $dt-border-color;
-
-  .action-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border: 1px solid $dt-border-color;
-    border-radius: 6px;
-    background: #fff;
-    color: $dt-text-primary;
-    font-size: 14px;
-    transition: all 0.15s;
-
-    &:hover {
-      border-color: $dt-blue;
-      color: $dt-blue;
-      background: rgba(0, 137, 255, 0.05);
-    }
-
-    .el-icon {
-      font-size: 16px;
-    }
-  }
-}
-
-// 区块样式
-.section-block {
-  padding: 20px 0;
-  border-bottom: 1px solid $dt-border-color;
-
-  &:last-of-type {
-    border-bottom: none;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-
-    .el-icon {
+    
+    .title {
+      margin: 0;
       font-size: 18px;
-      color: $dt-text-tertiary;
-    }
-
-    .section-title {
-      flex: 1;
-      font-size: 16px;
       font-weight: 600;
-      color: $dt-text-primary;
+      color: var(--el-text-color-primary);
     }
-
-    .view-all-btn {
-      font-size: 13px;
-      padding: 4px 8px;
-      height: auto;
+    
+    .close-btn {
+      font-size: 20px;
+      color: var(--el-text-color-regular);
+      &:hover { color: var(--el-text-color-primary); }
     }
   }
 }
 
-// 公告内容
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.group-identity-card {
+  background: var(--el-bg-color);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  
+  .group-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    
+    .group-avatar {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 12px;
+    }
+    
+    .group-info {
+      flex: 1;
+      
+      .name-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        
+        .group-name {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 600;
+          color: var(--el-text-color-primary);
+        }
+        
+        .edit-name-btn {
+          color: var(--el-text-color-secondary);
+          &:hover { color: var(--el-color-primary); }
+        }
+      }
+      
+      .meta-row {
+        display: flex;
+        align-items: center;
+        color: var(--el-text-color-secondary);
+        font-size: 13px;
+        
+        .divider {
+          margin: 0 8px;
+        }
+      }
+    }
+  }
+}
+
+.modern-tabs {
+  :deep(.el-tabs__header) {
+    margin-bottom: 24px;
+  }
+  :deep(.el-tabs__nav-wrap::after) {
+    height: 1px;
+    background-color: var(--el-border-color-lighter);
+  }
+  :deep(.el-tabs__item) {
+    font-size: 15px;
+    font-weight: 500;
+    &.is-active {
+      font-weight: 600;
+    }
+  }
+}
+
+.section-card {
+  background: var(--el-bg-color);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    
+    .title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--el-text-color-primary);
+      
+      .el-icon { font-size: 18px; }
+      .icon-primary { color: var(--el-color-primary); }
+      .icon-success { color: var(--el-color-success); }
+      
+      .count {
+        color: var(--el-text-color-secondary);
+        font-weight: normal;
+        font-size: 13px;
+        margin-left: 4px;
+      }
+    }
+  }
+}
+
 .announcement-content {
-  padding: 12px 16px;
-  background: #F8FAFC;
-  border-radius: 8px;
   font-size: 14px;
   line-height: 1.6;
-  color: $dt-text-secondary;
+  color: var(--el-text-color-regular);
   white-space: pre-wrap;
-
-  &.empty {
-    color: $dt-text-tertiary;
+  padding: 12px 16px;
+  background-color: var(--el-fill-color-light);
+  border-radius: 8px;
+  
+  &.is-empty {
+    color: var(--el-text-color-placeholder);
     font-style: italic;
   }
 }
 
-// 成员网格 - 每行6个
 .members-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
   gap: 16px;
-}
-
-.member-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s;
-
-  &:hover {
-    background: $dt-bg-hover;
-  }
-
-  .member-avatar-wrap {
-    position: relative;
-
-    :deep(.member-avatar) {
-      border-radius: 50%;
-    }
-
-    .role-icon {
-      position: absolute;
-      bottom: -2px;
-      right: -2px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-
-      &.owner {
-        background: $dt-danger;
-      }
-
-      &.admin {
-        background: #FAAD14;
-      }
-
-      .el-icon {
-        font-size: 12px;
-      }
-    }
-
-    &.add-icon {
-      width: 48px;
-      height: 48px;
-      border: 1px dashed $dt-border-color;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: $dt-text-tertiary;
-      transition: all 0.15s;
-
-      .el-icon {
-        font-size: 20px;
-      }
-    }
-  }
-
-  &.add-member:hover .add-icon {
-    border-color: $dt-blue;
-    color: $dt-blue;
-  }
-
-  .member-name {
-    font-size: 12px;
-    color: $dt-text-primary;
-    text-align: center;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-// 文件预览
-.files-preview {
-  .empty-state {
+  
+  .member-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 24px;
-    color: $dt-text-tertiary;
-
-    .el-icon {
-      font-size: 40px;
+    cursor: pointer;
+    
+    .avatar-box {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+      
+      &.dashed {
+        border: 1px dashed var(--el-border-color);
+        color: var(--el-text-color-secondary);
+        &:hover {
+          border-color: var(--el-color-primary);
+          color: var(--el-color-primary);
+        }
+      }
+      
+      &:hover:not(.dashed) {
+        transform: scale(1.05);
+      }
+      
+      .role-badge {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        border: 2px solid var(--el-bg-color);
+        
+        &.owner { background-color: var(--el-color-warning); }
+        &.admin { background-color: var(--el-color-primary); }
+      }
+    }
+    
+    .member-name {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--el-text-color-regular);
+      text-align: center;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
+}
 
-  .file-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
 
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  
   .file-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 6px;
+    padding: 12px;
+    background: var(--el-bg-color);
+    border-radius: 12px;
+    border: 1px solid var(--el-border-color-lighter);
     cursor: pointer;
-    transition: background 0.15s;
-
+    transition: all 0.2s;
+    
     &:hover {
-      background: $dt-bg-hover;
+      border-color: var(--el-color-primary-light-5);
+      background-color: var(--el-color-primary-light-9);
     }
-
+    
     .file-icon {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background-color: var(--el-fill-color);
+      color: var(--el-color-primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #F0F2F5;
-      border-radius: 6px;
-      color: $dt-text-secondary;
-
-      .el-icon {
-        font-size: 18px;
-      }
+      font-size: 20px;
+      margin-right: 12px;
     }
-
+    
     .file-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
       flex: 1;
-
+      min-width: 0;
+      
       .file-name {
         font-size: 14px;
-        color: $dt-text-primary;
+        font-weight: 500;
+        margin-bottom: 4px;
+        color: var(--el-text-color-primary);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
-      .file-size {
+      
+      .file-meta {
         font-size: 12px;
-        color: $dt-text-tertiary;
+        color: var(--el-text-color-secondary);
       }
     }
   }
 }
 
-// 设置区域
-.settings-section {
-  padding: 16px 0;
-  border-bottom: 1px solid $dt-border-color;
-
+.settings-group {
+  background: var(--el-bg-color);
+  border-radius: 12px;
+  padding: 0 20px;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  
   .setting-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-
-    &:not(:last-child) {
-      border-bottom: 1px solid #F0F2F5;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+    
+    &:last-child {
+      border-bottom: none;
     }
-
-    .setting-label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      color: $dt-text-primary;
-
-      .el-icon {
-        font-size: 18px;
-        color: $dt-text-tertiary;
+    
+    .label-group {
+      .label {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--el-text-color-primary);
+        margin-bottom: 4px;
+      }
+      .desc {
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
       }
     }
   }
 }
 
-// 底部操作
-.footer-actions {
-  padding: 16px 0 0;
-  text-align: center;
-
-  .footer-btn {
+.danger-zone {
+  padding: 0 20px;
+  
+  .danger-btn {
     width: 100%;
-    height: 40px;
-    font-size: 14px;
-
-    &.danger-btn {
-      border-color: $dt-danger;
-      color: $dt-danger;
-
-      &:hover {
-        background: rgba(255, 77, 79, 0.1);
-      }
-    }
+    height: 44px;
+    font-size: 15px;
   }
 }
 
-// 暗色模式适配
-:global(.dark) {
-  .group-detail-modal {
-    :deep(.el-dialog) {
-      background: #1e293b;
-    }
+.empty-state {
+  padding: 40px 0;
+  .empty-icon-bg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--el-fill-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: var(--el-text-color-placeholder);
+    margin: 0 auto;
   }
+}
 
-  .group-name {
-    color: #f1f5f9;
+// Custom Scrollbar
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
   }
-
-  .group-meta {
-    color: #94a3b8;
+  &::-webkit-scrollbar-track {
+    background: transparent;
   }
-
-  .section-title {
-    color: #e2e8f0;
-  }
-
-  .member-name {
-    color: #94a3b8;
-  }
-
-  .setting-label {
-    span {
-      color: #e2e8f0;
-    }
-  }
-
-  .action-btn {
-    background: #334155;
-    border-color: #475569;
-    color: #e2e8f0;
-
-    &:hover {
-      background: rgba(0, 137, 255, 0.1);
-      border-color: $dt-blue;
-    }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    &:hover { background-color: rgba(0, 0, 0, 0.2); }
   }
 }
 </style>

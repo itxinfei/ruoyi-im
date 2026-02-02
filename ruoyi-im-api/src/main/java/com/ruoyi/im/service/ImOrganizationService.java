@@ -119,4 +119,20 @@ public interface ImOrganizationService {
      * @return 部门ID列表
      */
     List<Long> getDepartmentAndChildrenIds(Long departmentId);
+
+    /**
+     * 设置部门负责人
+     *
+     * @param departmentId 部门ID
+     * @param leaderId 负责人用户ID
+     */
+    void setDepartmentLeader(Long departmentId, Long leaderId);
+
+    /**
+     * 移动部门到新的父部门
+     *
+     * @param departmentId 部门ID
+     * @param newParentId 新的父部门ID
+     */
+    void moveDepartment(Long departmentId, Long newParentId);
 }

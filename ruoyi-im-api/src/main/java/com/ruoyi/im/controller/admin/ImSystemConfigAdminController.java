@@ -40,10 +40,14 @@ public class ImSystemConfigAdminController {
         return Result.success(configService.getAllSystemConfigs());
     }
 
-    @Operation(summary = "更新系统配置")
+    @Operation(summary = "更新系统配置", description = "批量更新系统配置，传入键值对Map")
     @PutMapping("/update")
-    public Result<Void> updateConfig(@RequestParam String key, @RequestParam String value) {
-        configService.updateSystemConfig(key, value);
+    public Result<Void> updateConfig(@RequestBody Map<String, String> configs) {
+        if (configs != null && !configs.isEmpty()) {
+            for (Map.Entry<String, String> entry : configs.entrySet()) {
+                configService.updateSystemConfig(entry.getKey(), entry.getValue());
+            }
+        }
         return Result.success("更新成功");
     }
 
