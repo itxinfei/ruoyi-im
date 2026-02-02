@@ -283,6 +283,8 @@ public class ImConversationServiceImpl implements ImConversationService {
             if (groupAvatar == null || groupAvatar.isEmpty()) {
                 groupAvatar = "/avatar/group_default.png";
             }
+            // 设置群成员数量
+            vo.setMemberCount(group.getMemberCount() != null ? group.getMemberCount() : 0);
         } else {
             // 群组信息获取失败，使用默认值
             groupName = vo.getName();
@@ -290,6 +292,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                 groupName = "群聊";
             }
             groupAvatar = "/avatar/group_default.png";
+            vo.setMemberCount(0);
         }
 
         vo.setPeerName(groupName);

@@ -96,4 +96,9 @@ public class ImConversationVO implements Serializable {
     private String peerName; // 对方姓名
     private String peerAvatar; // 对方头像
     private Boolean peerOnline; // 对方是否在线
+
+    /**
+     * 群组成员数量（仅群聊会话有效）
+     */
+    private Integer memberCount;
 }

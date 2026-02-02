@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    :width="780"
+    :width="640"
     class="group-profile-dialog"
     :show-close="false"
     :close-on-click-modal="true"
@@ -845,10 +845,10 @@ const formatTime = (time) => {
 
 // 左侧边栏
 .profile-sidebar {
-  width: 280px;
+  width: 240px;
   background: linear-gradient(180deg, var(--dt-brand-color) 0%, #0e5fd9 100%);
   color: #fff;
-  padding: 32px 24px;
+  padding: 28px 20px;
   position: relative;
   display: flex;
   flex-direction: column;
