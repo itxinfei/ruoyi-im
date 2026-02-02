@@ -48,9 +48,16 @@ export function useImWebSocket() {
     })
 
     // 设置 Vuex store 状态同步回调
-    const store = useStore()
+    let store = null
+    try {
+      store = useStore()
+    } catch (e) {
+      console.warn('[useImWebSocket] useStore 获取失败，跳过 store 同步')
+    }
     imWebSocket.setStoreConnectionCallback((connected) => {
-      store.commit('im/SET_WS_CONNECTED', connected)
+      if (store) {
+        store.commit('im/SET_WS_CONNECTED', connected)
+      }
     })
 
     // 开始连接

@@ -997,28 +997,28 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/animations.scss' as *;
+@use '@/styles/design-tokens.scss' as *;
 
 // 容器
 .chat-input-container {
-  background: #fff;
+  background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
   position: relative;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--dt-border-light);
   padding: 12px 16px 16px;
   z-index: 10;
   // 平滑高度过渡（对齐钉钉输入框体验）
-  transition: min-height 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.15s ease;
+  transition: min-height var(--dt-transition-base) var(--dt-ease-out),
+              border-color var(--dt-transition-fast) var(--dt-ease-out);
 
   .dark & {
-    background: #1a1a1a;
-    border-top-color: rgba(255, 255, 255, 0.1);
+    background: var(--dt-bg-card-dark);
+    border-top-color: var(--dt-border-dark);
   }
 
   &.is-resizing {
-    border-top-color: #1890ff;
+    border-top-color: var(--dt-brand-color);
   }
 }
 
@@ -1029,27 +1029,27 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 0;
   position: relative;
-  border-radius: 8px;
-  background: #f5f5f5;
-  transition: background 0.15s ease;
+  border-radius: var(--dt-radius-md);
+  background: var(--dt-bg-tertiary);
+  transition: background var(--dt-transition-base);
 
   &:focus-within {
-    background: #fff;
-    box-shadow: 0 0 0 2px #1890ff;
+    background: var(--dt-bg-card);
+    box-shadow: 0 0 0 2px var(--dt-brand-color);
   }
 
   .dark & {
-    background: #2a2a2a;
+    background: var(--dt-bg-hover-dark);
 
     &:focus-within {
-      background: #333;
-      box-shadow: 0 0 0 2px #1890ff;
+      background: var(--dt-bg-card-dark);
+      box-shadow: 0 0 0 2px var(--dt-brand-color);
     }
   }
 
   &.is-drag-over {
-    background: #e6f7ff;
-    box-shadow: inset 0 0 0 2px #1890ff;
+    background: var(--dt-brand-bg);
+    box-shadow: inset 0 0 0 2px var(--dt-brand-color);
 
     &::after {
       content: '松开发送';
@@ -1057,11 +1057,11 @@ onUnmounted(() => {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 8px 16px;
-      background: #1890ff;
+      padding: var(--dt-space-2) var(--dt-space-4);
+      background: var(--dt-brand-color);
       color: #fff;
-      font-size: 14px;
-      border-radius: 4px;
+      font-size: var(--dt-font-size-base);
+      border-radius: var(--dt-radius-sm);
       pointer-events: none;
       z-index: 10;
     }
@@ -1072,7 +1072,7 @@ onUnmounted(() => {
 
   &.is-voice-mode {
     .message-input {
-      background: rgba(24, 144, 255, 0.05);
+      background: var(--dt-brand-lighter);
       cursor: not-allowed;
     }
   }
@@ -1084,25 +1084,25 @@ onUnmounted(() => {
   border: none;
   outline: none;
   resize: none;
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   line-height: 1.6;
-  color: #333;
-  padding: 12px;
+  color: var(--dt-text-primary);
+  padding: var(--dt-space-3);
   min-height: 80px;
   background: transparent;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--dt-font-family);
   // 平滑高度过渡（对齐钉钉输入框体验）
-  transition: min-height 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.15s ease;
+  transition: min-height var(--dt-transition-base) var(--dt-ease-out),
+              color var(--dt-transition-base);
 
   &::placeholder {
-    color: #999;
-    transition: color 0.15s ease;
+    color: var(--dt-text-quaternary);
+    transition: color var(--dt-transition-base);
   }
 
   .dark & {
-    color: #e8e8e8;
-    &::placeholder { color: #666; }
+    color: var(--dt-text-primary-dark);
+    &::placeholder { color: var(--dt-text-quaternary-dark); }
   }
 }
 
@@ -1115,7 +1115,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--dt-space-2);
   pointer-events: none;
   opacity: 0.4;
 
@@ -1123,25 +1123,25 @@ onUnmounted(() => {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #e8e8e8;
+    background: var(--dt-border-color);
     display: flex;
     align-items: center;
     justify-content: center;
 
     .material-icons-outlined {
       font-size: 20px;
-      color: #999;
+      color: var(--dt-text-tertiary);
     }
   }
 
   .hint-text {
-    font-size: 12px;
-    color: #999;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-tertiary);
   }
 
   .dark & {
-    .hint-icon { background: rgba(255, 255, 255, 0.1); }
-    .hint-text { color: #666; }
+    .hint-icon { background: var(--dt-border-dark); }
+    .hint-text { color: var(--dt-text-tertiary-dark); }
   }
 }
 
@@ -1153,21 +1153,21 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: var(--dt-space-3);
+  margin-top: var(--dt-space-2);
 
   .hint-text {
-    font-size: 12px;
-    color: #999;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-tertiary);
     user-select: none;
 
-    .dark & { color: #666; }
+    .dark & { color: var(--dt-text-quaternary-dark); }
   }
 
   .footer-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--dt-space-2);
   }
 
   .footer-action-btn {
@@ -1176,63 +1176,63 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
-    border: 1px solid #e8e8e8;
-    border-radius: 6px;
-    color: #666;
+    background: var(--dt-bg-card);
+    border: 1px solid var(--dt-border-color);
+    border-radius: var(--dt-radius-sm);
+    color: var(--dt-text-secondary);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--dt-transition-base);
 
     .el-icon { font-size: 16px; }
 
     &:hover {
-      background: #f5f5f5;
-      color: #1890ff;
-      border-color: #1890ff;
+      background: var(--dt-bg-tertiary);
+      color: var(--dt-brand-color);
+      border-color: var(--dt-brand-color);
     }
 
     &.active {
-      background: #1890ff;
+      background: var(--dt-brand-color);
       color: #fff;
-      border-color: #1890ff;
+      border-color: var(--dt-brand-color);
     }
 
     .dark & {
-      background: #333;
-      border-color: rgba(255, 255, 255, 0.1);
+      background: var(--dt-bg-card-dark);
+      border-color: var(--dt-border-dark);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--dt-bg-hover-dark);
       }
     }
   }
 
   .send-btn {
-    padding: 8px 20px;
-    border-radius: 6px;
+    padding: var(--dt-space-2) var(--dt-space-5);
+    border-radius: var(--dt-radius-sm);
     border: none;
-    background: #e8e8e8;
-    color: #999;
-    font-size: 14px;
-    font-weight: 500;
+    background: var(--dt-border-color);
+    color: var(--dt-text-tertiary);
+    font-size: var(--dt-font-size-base);
+    font-weight: var(--dt-font-weight-medium);
     cursor: default;
-    transition: all 0.15s ease;
+    transition: all var(--dt-transition-base);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: var(--dt-space-1);
 
     .send-icon {
       font-size: 18px;
     }
 
     &.active {
-      background: #1890ff;
+      background: var(--dt-brand-color);
       color: #fff;
       cursor: pointer;
 
       &:hover {
-        background: #40a9ff;
+        background: var(--dt-brand-hover);
       }
     }
 
@@ -1242,7 +1242,7 @@ onUnmounted(() => {
     }
 
     .dark & {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--dt-bg-hover-dark);
     }
   }
 }
@@ -1250,11 +1250,11 @@ onUnmounted(() => {
 // 响应式
 @media (max-width: 479px) {
   .chat-input-container {
-    padding: 8px 12px 12px;
+    padding: var(--dt-space-2) var(--dt-space-3) var(--dt-space-3);
   }
 
   .message-input {
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
     min-height: 60px;
   }
 }
@@ -1269,16 +1269,16 @@ onUnmounted(() => {
   pointer-events: auto;
 
   :deep(.voice-recorder) {
-    background: #fff;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    animation: slideInUp 0.2s ease-out;
+    background: var(--dt-bg-card);
+    border: 1px solid var(--dt-border-color);
+    border-radius: var(--dt-radius-md);
+    box-shadow: var(--dt-shadow-3);
+    animation: slideInUp var(--dt-transition-base) var(--dt-ease-out);
   }
 
   .dark & :deep(.voice-recorder) {
-    background: #2a2a2a;
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
   }
 }
 

@@ -89,6 +89,8 @@ defineEmits([
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .input-toolbar {
   display: flex;
   justify-content: space-between;
@@ -118,20 +120,20 @@ defineEmits([
     border: none;
     padding: 0;
     cursor: pointer;
-    color: #666;
-    border-radius: 6px;
+    color: var(--dt-text-secondary);
+    border-radius: var(--dt-radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s ease-out;
+    transition: all var(--dt-transition-fast);
 
     .material-icons-outlined {
       font-size: 20px;
     }
 
     &:hover {
-      background: #f5f5f5;
-      color: #1890ff;
+      background: var(--dt-bg-session-hover);
+      color: var(--dt-brand-color);
     }
 
     &:active {
@@ -139,8 +141,8 @@ defineEmits([
     }
 
     &.active {
-      color: #1890ff;
-      background: #e6f7ff;
+      color: var(--dt-brand-color);
+      background: var(--dt-brand-bg);
 
       &::after {
         content: '';
@@ -150,14 +152,14 @@ defineEmits([
         transform: translateX(-50%);
         width: 12px;
         height: 2px;
-        background: #1890ff;
+        background: var(--dt-brand-color);
         border-radius: 1px;
       }
     }
 
     // AI回复按钮
     &.ai-reply-btn {
-      background: #f5f5ff;
+      background: var(--dt-brand-bg);
       color: #7c3aed;
 
       .material-icons-outlined {
@@ -165,7 +167,7 @@ defineEmits([
       }
 
       &:hover {
-        background: #ede9fe;
+        background: var(--dt-brand-light);
       }
     }
   }
@@ -175,20 +177,20 @@ defineEmits([
 :global(.dark) {
   .input-toolbar {
     .toolbar-btn {
-      color: #999;
+      color: var(--dt-text-tertiary);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: #1890ff;
+        background: var(--dt-bg-hover-dark);
+        color: var(--dt-brand-color);
       }
 
       &.active {
-        background: rgba(24, 144, 255, 0.15);
-        color: #1890ff;
+        background: var(--dt-brand-light);
+        color: var(--dt-brand-color);
       }
 
       &.ai-reply-btn {
-        background: rgba(124, 58, 237, 0.15);
+        background: var(--dt-brand-light);
         color: #a78bfa;
 
         &:hover {

@@ -178,7 +178,8 @@ function handleRetry() {
 .message-status {
   display: flex;
   align-items: center;
-  margin-left: 6px;
+  margin-left: 8px;  // 方案A: 6px → 8px，增加间距让状态更独立
+  margin-bottom: 2px;  // 方案A: 新增，稍微向下偏移垂直居中
   font-size: 14px;
   cursor: pointer;
   transition: all var(--dt-transition-base);
@@ -189,28 +190,55 @@ function handleRetry() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;  // 方案A: 18px → 20px，增大尺寸更易看清
+  height: 20px;  // 方案A: 18px → 20px
   border-radius: 50%;
   transition: all var(--dt-transition-base);
 
   .material-icons-outlined {
-    font-size: 16px;
+    font-size: 18px;  // 方案A: 16px → 18px
   }
 }
 
-// ========== 发送中状态：转圈动画 ==========
+// ========== 发送中状态：转圈动画 + 脉冲环效果 ==========
 .status-sending {
   color: var(--dt-text-tertiary);
+  position: relative;
 
+  // 方案A: 加快动画速度，更有"处理中"的感觉
   .rotating {
-    animation: rotate 1s linear infinite;
+    animation: rotate 0.6s linear infinite;  // 1s → 0.6s
+  }
+
+  // 方案B: 添加脉冲环效果，让发送中状态更醒目
+  .status-indicator {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      border: 1px solid var(--dt-text-tertiary);
+      opacity: 0;
+      animation: pulse-ring 1.5s ease-out infinite;
+    }
   }
 }
 
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+// 方案B: 脉冲环动画
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
 }
 
 // ========== 已送达状态：灰色对勾（钉钉标准）==========
@@ -228,14 +256,17 @@ function handleRetry() {
 
   .is-clickable {
     cursor: pointer;
+    padding: 2px;  // 方案A: 新增内边距，增大点击区域
 
     &:hover {
       transform: scale(1.1);
+      background: var(--dt-brand-bg);  // 方案A: 新增背景色，hover 更明显
+      border-radius: 4px;
     }
   }
 }
 
-// ========== 发送失败状态：红色感叹号 + 红色背景 + 重发按钮 ==========
+// ========== 发送失败状态：红色感叹号 + 红色背景 + 重发按钮 + 闪烁提示 ==========
 .status-failed-wrapper {
   position: relative;
   display: flex;
@@ -243,14 +274,24 @@ function handleRetry() {
   cursor: pointer;
   padding: 2px;
 
-  // 红色背景（钉钉标准：略带红色背景）
+  // 方案B: 失败状态闪烁3次，吸引用户注意
+  animation: failed-blink 2s ease-in-out 3;  // 闪烁 3 次
+
+  // 方案A: 增强红色背景可见性
   .failed-background {
     position: absolute;
     inset: 0;
-    background: rgba(244, 67, 54, 0.1); // rgba(244, 67, 54, 0.1)
+    background: rgba(244, 67, 54, 0.2);  // 方案A: 0.1 → 0.2，增强可见性
+    border: 1px solid rgba(244, 67, 54, 0.3);  // 方案A: 新增边框
     border-radius: 50%;
     opacity: 1;
     transition: opacity var(--dt-transition-base);
+  }
+
+  // 方案B: 失败闪烁动画
+  @keyframes failed-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 
   // 红色感叹号
@@ -350,8 +391,9 @@ function handleRetry() {
   transform: translateY(-4px);
 }
 
+// 方案A: 优化已送达/已读的进入动画，更有弹性
 .status-scale-enter-active {
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);  // 0.3s → 0.4s
 }
 
 .status-scale-leave-active {
@@ -360,7 +402,7 @@ function handleRetry() {
 
 .status-scale-enter-from {
   opacity: 0;
-  transform: scale(0);
+  transform: scale(0) rotate(-15deg);  // 方案A: 添加旋转，进入更生动
 }
 
 .status-scale-leave-to {

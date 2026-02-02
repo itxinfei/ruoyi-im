@@ -124,6 +124,7 @@ declare module 'vue' {
     GlobalSearch: typeof import('./components/Chat/GlobalSearch.vue')['default']
     GlobalSearchDialog: typeof import('./components/Common/GlobalSearchDialog.vue')['default']
     GroupAnnouncementDialog: typeof import('./components/Chat/GroupAnnouncementDialog.vue')['default']
+    GroupDetailDrawer: typeof import('./components/GroupDetailDrawer/index.vue')['default']
     GroupFilePanel: typeof import('./components/Chat/GroupFilePanel.vue')['default']
     GroupManageDialog: typeof import('./components/Contacts/GroupManageDialog.vue')['default']
     GroupProfileDialog: typeof import('./components/Contacts/GroupProfileDialog.vue')['default']

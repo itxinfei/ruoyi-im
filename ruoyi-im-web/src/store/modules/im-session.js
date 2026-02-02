@@ -8,7 +8,8 @@ import {
   muteConversation,
   deleteConversation as apiDeleteConversation,
   markConversationAsRead,
-  getConversation
+  getConversation,
+  createConversation
 } from '@/api/im'
 import { formatMessagePreviewFromObject } from '@/utils/message'
 import { getJSON, setJSON } from '@/utils/storage'
@@ -524,6 +525,47 @@ export default {
 
       if (session) {
         await dispatch('selectSession', session)
+      }
+    },
+
+    // 创建会话并切换到聊天
+    async createAndSwitchSession({ commit, dispatch, state }, { targetId, type }) {
+      try {
+        // 先检查是否已存在该会话（使用 Number 转换确保类型一致）
+        const targetIdNum = Number(targetId)
+        const existingSession = state.sessions.find(s =>
+          s.type === type && Number(s.targetId) === targetIdNum
+        )
+
+        if (existingSession) {
+          // 如果会话已存在，直接选中
+          await dispatch('selectSession', existingSession)
+          return existingSession
+        }
+
+        // 创建新会话
+        console.log('[createAndSwitchSession] 创建新会话:', { type, targetId })
+        const res = await createConversation({ type, targetId })
+        console.log('[createAndSwitchSession] 创建会话响应:', res)
+        if (res.code === 200 && res.data) {
+          const newSession = {
+            ...res.data,
+            targetId: Number(targetId), // 确保 targetId 被保存
+            type: type, // 确保 type 被保存
+            lastMessage: '[暂无消息]'
+          }
+          console.log('[createAndSwitchSession] 新会话数据:', newSession)
+          // 添加到会话列表
+          commit('UPDATE_SESSION', newSession)
+          // 设置为当前会话
+          await dispatch('selectSession', newSession)
+          return newSession
+        } else {
+          throw new Error(res.msg || '创建会话失败')
+        }
+      } catch (e) {
+        console.error('创建会话失败:', e)
+        throw e
       }
     },
 

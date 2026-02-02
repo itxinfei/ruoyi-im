@@ -21,10 +21,14 @@
       </div>
       <div class="header-info">
         <h2 class="header-name">{{ session?.name }}</h2>
+
+        <!-- 群聊 meta-info -->
         <span v-if="session?.type === 'GROUP'" class="meta-info">
           <span class="material-icons-outlined">people</span>
           {{ session?.memberCount || 0 }} 人
         </span>
+
+        <!-- 单聊 meta-info -->
         <span v-else class="meta-info" :class="{ online: isOnline }">
           <span v-if="!isTyping" class="material-icons-outlined">
             {{ isOnline ? 'circle' : 'radio_button_unchecked' }}
@@ -41,8 +45,18 @@
           </span>
         </span>
 
+        <!-- 群聊正在输入状态 - 显示在成员头像下方 -->
+        <div v-if="session?.type === 'GROUP' && isTyping" class="group-typing-indicator">
+          <span class="typing-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </span>
+          <span class="typing-text">{{ typingText }}</span>
+        </div>
+
         <!-- 群聊成员头像列表 -->
-        <div v-if="session?.type === 'GROUP' && displayMembers.length > 0" class="member-avatars" @click="handleShowMembers">
+        <div v-if="session?.type === 'GROUP' && displayMembers.length > 0 && !isTyping" class="member-avatars" @click="handleShowMembers">
           <DingtalkAvatar
             v-for="member in displayMembers.slice(0, 5)"
             :key="member.id"
@@ -229,6 +243,22 @@ const isOnline = computed(() => {
 // 是否有用户正在输入
 const isTyping = computed(() => {
   return props.typingUsers && props.typingUsers.length > 0
+})
+
+// 正在输入的文本（支持多人）
+const typingText = computed(() => {
+  if (!props.typingUsers || props.typingUsers.length === 0) {
+    return ''
+  }
+
+  const names = props.typingUsers.map(u => u.userName)
+  if (names.length === 1) {
+    return `${names[0]} 正在输入...`
+  } else if (names.length === 2) {
+    return `${names[0]} 和 ${names[1]} 正在输入...`
+  } else {
+    return `${names[0]} 等 ${names.length} 人正在输入...`
+  }
 })
 
 // 显示详情
@@ -531,13 +561,17 @@ const handleShowMembers = () => {
   }
 }
 
-// 输入状态指示器
+// 输入状态指示器 - 增强版
 .typing-indicator {
   display: flex;
   align-items: center;
   gap: 6px;
   color: var(--dt-brand-color);
   font-weight: 500;
+  padding: 3px 8px;  // 新增：内边距，增加背景区域
+  background: rgba(0, 137, 255, 0.08);  // 新增：浅蓝背景
+  border-radius: 12px;  // 新增：圆角
+  animation: typing-pulse 2s ease-in-out infinite;  // 新增：整体呼吸效果
 
   .typing-dots {
     display: flex;
@@ -545,27 +579,73 @@ const handleShowMembers = () => {
     gap: 3px;
 
     .dot {
-      width: 4px;
-      height: 4px;
+      width: 5px;  // 4px → 5px，更大更清晰
+      height: 5px;
       background: currentColor;
       border-radius: 50%;
-      animation: typingBounce 1.4s ease-in-out infinite;
+      animation: typingBounce 1.2s ease-in-out infinite;  // 1.4s → 1.2s，更快节奏
 
       &:nth-child(1) { animation-delay: 0s; }
-      &:nth-child(2) { animation-delay: 0.16s; }
-      &:nth-child(3) { animation-delay: 0.32s; }
+      &:nth-child(2) { animation-delay: 0.15s; }  // 0.16s → 0.15s
+      &:nth-child(3) { animation-delay: 0.3s; }  // 0.32s → 0.3s
     }
+  }
+}
+
+// 新增：整体呼吸效果，让输入状态更醒目
+@keyframes typing-pulse {
+  0%, 100% {
+    background: rgba(0, 137, 255, 0.08);
+  }
+  50% {
+    background: rgba(0, 137, 255, 0.15);
   }
 }
 
 @keyframes typingBounce {
   0%, 80%, 100% {
-    transform: scale(0.6);
-    opacity: 0.5;
+    transform: scale(0.5);  // 0.6 → 0.5，对比更明显
+    opacity: 0.4;
   }
   40% {
-    transform: scale(1);
+    transform: scale(1.2);  // 1 → 1.2，放大更明显
     opacity: 1;
+  }
+}
+
+// 群聊正在输入状态指示器
+.group-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 10px;
+  background: rgba(0, 137, 255, 0.08);
+  border-radius: 12px;
+  animation: typing-pulse 2s ease-in-out infinite;
+
+  .typing-dots {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      background: var(--dt-brand-color);
+      border-radius: 50%;
+      animation: typingBounce 1.2s ease-in-out infinite;
+
+      &:nth-child(1) { animation-delay: 0s; }
+      &:nth-child(2) { animation-delay: 0.15s; }
+      &:nth-child(3) { animation-delay: 0.3s; }
+    }
+  }
+
+  .typing-text {
+    font-size: 12px;
+    color: var(--dt-brand-color);
+    font-weight: 500;
   }
 }
 

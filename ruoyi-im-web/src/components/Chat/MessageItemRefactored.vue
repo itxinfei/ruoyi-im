@@ -139,7 +139,7 @@ const handleNudge = () => {
 .message-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 16px;  // 钉钉标准：16px 消息间距
   position: relative;
   padding: 0;
   animation: fadeInUp 0.3s var(--dt-ease-out) both;
@@ -219,10 +219,7 @@ const handleNudge = () => {
 
   .message-avatar {
     border-radius: 4px;  // 钉钉方形头像，小圆角
-    // 移除边框和阴影，保持简洁风格
   }
-
-  // 合并模式：头像始终显示，只调整间距
 }
 
 // 内容包裹层
@@ -236,7 +233,7 @@ const handleNudge = () => {
   padding-top: 0;
 
   &.is-merged {
-    margin-top: -8px;
+    margin-top: -8px;  // 钉钉标准：合并消息 -8px
   }
 }
 
@@ -254,7 +251,7 @@ const handleNudge = () => {
 .message-footer {
   display: flex;
   align-items: center;
-  margin-top: 4px;
+  margin-top: 4px;  // 钉钉标准：4px 间距
   font-size: var(--dt-font-size-xs);
 }
 

@@ -17,11 +17,10 @@
 
       <!-- 可见消息列表 -->
       <div
-    v-for="msg in visibleMessages"
-    :key="msg.id || msg.timeText"
-    :data-id="msg.id"
-    class="message-wrapper"
-    v-memo="[(msg?.id || msg?.timeText), msg?.isRead || false, msg?.isPinned || false]"
+        v-for="msg in visibleMessages"
+        :key="msg.id || msg.timeText"
+        :data-id="msg.id"
+        class="message-wrapper"
       >
         <!-- 时间分隔符 -->
         <div v-if="msg.isTimeDivider" class="time-divider">

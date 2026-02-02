@@ -355,10 +355,10 @@ const canRecall = computed(() => {
 }
 
 .bubble-content {
-  padding: 10px 12px;
+  padding: 10px 12px;  // 钉钉标准：保持紧凑，不修改
   border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-base);
-  line-height: 1.4;
+  line-height: 1.4;  // 钉钉标准：保持 1.4 行高
   word-break: break-word;
   overflow-wrap: break-word;
   transition: background-color var(--dt-transition-base);

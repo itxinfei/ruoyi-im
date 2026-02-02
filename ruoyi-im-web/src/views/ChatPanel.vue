@@ -338,10 +338,9 @@ let typingTimers = {} // userId -> timerId
 let sendTypingTimer = null
 const TYPING_DEBOUNCE = 500 // 500ms 防抖
 
-// 发送正在输入状态
+// 发送正在输入状态（单聊和群聊都支持）
 const sendMyTypingStatus = () => {
-  // 只在单聊时发送输入状态
-  if (!props.session || props.session.type !== 'PRIVATE') return
+  if (!props.session) return
 
   // 清除之前的定时器
   if (sendTypingTimer) {
@@ -356,8 +355,7 @@ const sendMyTypingStatus = () => {
 
 // 发送停止输入状态
 const sendMyStopTypingStatus = () => {
-  // 只在单聊时发送停止输入状态
-  if (!props.session || props.session.type !== 'PRIVATE') return
+  if (!props.session) return
 
   if (sendTypingTimer) {
     clearTimeout(sendTypingTimer)
