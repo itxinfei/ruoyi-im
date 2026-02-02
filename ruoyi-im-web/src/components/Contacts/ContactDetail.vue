@@ -103,7 +103,6 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { updateContactRemark, deleteContact } from '@/api/im/contact'
-import { createConversation } from '@/api/im/conversation'
 import { addFavorite, removeFavorite, isFavorited } from '@/api/im/favorite'
 import { addTokenToUrl } from '@/utils/file'
 
@@ -111,7 +110,7 @@ const props = defineProps({
   contact: Object
 })
 
-const emit = defineEmits(['update', 'voice-call', 'video-call'])
+const emit = defineEmits(['update', 'voice-call', 'video-call', 'message'])
 const store = useStore()
 
 // 收藏状态
@@ -190,43 +189,9 @@ watch(() => props.contact?.id, (newId) => {
   }
 }, { immediate: true })
 
-const startChat = async () => {
-  try {
-    // 🔑 获取 targetId 并验证有效性
-    let targetId = isGroup.value ? props.contact.id : (props.contact.friendId || props.contact.id)
-
-    // 验证 targetId 是否有效
-    if (!targetId || targetId === 'undefined' || targetId === 'null') {
-      console.error('无效的 targetId:', targetId, 'contact:', props.contact)
-      ElMessage.error('无法发起聊天：无效的联系人信息')
-      return
-    }
-
-    // 确保 targetId 是数字类型
-    targetId = Number(targetId)
-    if (isNaN(targetId) || targetId <= 0) {
-      console.error('targetId 不是有效数字:', targetId, 'contact:', props.contact)
-      ElMessage.error('无法发起聊天：无效的联系人ID')
-      return
-    }
-
-    const type = isGroup.value ? 'GROUP' : 'PRIVATE'
-
-    const res = await createConversation({ type, targetId })
-    if (res.code === 200) {
-      const conv = res.data
-      store.commit('im/session/SET_CURRENT_SESSION', conv)
-      // Signal parent or use router to switch to Chat tab
-      ElMessage.success('已发起聊天')
-      // NOTE: We usually emit an event or use a global event bus to switch tabs
-      window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'chat' }))
-    } else {
-      ElMessage.error(res.msg || '无法发起聊天')
-    }
-  } catch (e) {
-    console.error('发起聊天失败', e)
-    ElMessage.error('无法发起聊天，请稍后重试')
-  }
+const startChat = () => {
+  // 触发 message 事件，让父组件处理创建会话和切换
+  emit('message', props.contact)
 }
 
 const handleGroupConfig = () => {

@@ -358,7 +358,7 @@
           <!-- 操作按钮卡片 -->
           <div class="detail-card action-card">
             <div class="action-grid">
-              <button class="action-item primary" @click="startChat">
+              <button class="action-item primary" @click="startChat(selectedItem)">
                 <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
@@ -676,11 +676,34 @@ const loadNewFriends = async () => {
 // Handlers
 const toggleOrg = () => orgExpanded.value = !orgExpanded.value
 const updatePendingCount = (c) => pendingCount.value = c
-const startChat = () => {
-    if (!selectedItemId.value) return
-    const type = selectedType.value === 'group' ? 'GROUP' : 'PRIVATE'
-    store.dispatch('im/session/createAndSwitchSession', { targetId: selectedItemId.value, type })
-    emit('switch-module', 'chat')
+const startChat = async (contact = null) => {
+    // 优先使用传入的联系人数据，否则使用当前选中的
+    let targetId = contact?.id || selectedItemId.value
+
+    // 判断会话类型：优先使用传入的参数，否则使用当前选中的类型
+    let type = 'PRIVATE'
+    if (contact?.type === 'group' || selectedType.value === 'group') {
+        type = 'GROUP'
+    }
+
+    if (!targetId) {
+        ElMessage.warning('请选择联系人')
+        return
+    }
+
+    // 确保 targetId 是数字类型
+    targetId = Number(targetId)
+    if (isNaN(targetId) || targetId <= 0) {
+        ElMessage.error('无效的联系人ID')
+        return
+    }
+
+    try {
+        await store.dispatch('im/session/createAndSwitchSession', { targetId, type })
+        emit('switch-module', 'chat')
+    } catch (e) {
+        ElMessage.error('创建会话失败，请稍后重试')
+    }
 }
 const startVoiceCall = () => ElMessage.info('语音通话开发中')
 const startVideoCall = () => ElMessage.info('视频通话开发中')

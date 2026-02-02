@@ -229,6 +229,25 @@
 
 
   // ============================================================================
+  // 暗色模式令牌 (Dark Mode Tokens)
+  // ============================================================================
+  --dt-bg-body-dark: #121212;
+  --dt-bg-sidebar-dark: #1a1a1a;
+  --dt-bg-card-dark: #1e1e1e;
+  --dt-bg-card-hover-dark: #252525;
+  --dt-bg-hover-dark: rgba(255, 255, 255, 0.05);
+  --dt-bg-tertiary-dark: #2d2d2d;
+  --dt-bg-input-dark: #2d2d2d;
+
+  --dt-text-primary-dark: #E8E8E8;
+  --dt-text-secondary-dark: #A0A8B8;
+  --dt-text-tertiary-dark: #6B7280;
+  --dt-text-quaternary-dark: #4B5563;
+
+  --dt-border-dark: #374151;
+  --dt-border-light-dark: #2D3748;
+
+  // ============================================================================
   // 响应式断点变量（与 Tailwind 配置保持一致）
   // ============================================================================
 }
