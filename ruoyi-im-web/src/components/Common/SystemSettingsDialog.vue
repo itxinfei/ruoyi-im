@@ -419,7 +419,10 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     .content-body {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 12px 16px;
+      max-width: 100%;
+      box-sizing: border-box;
     }
   }
 }

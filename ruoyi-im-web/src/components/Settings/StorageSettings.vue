@@ -86,8 +86,10 @@ const handleChange = () => {
 <style scoped lang="scss">
 .storage-settings {
   padding-bottom: 20px;
+  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .setting-group {
@@ -118,6 +120,8 @@ const handleChange = () => {
   gap: 16px;
   border-bottom: 1px solid var(--dt-border-lighter);
   transition: background-color 0.2s;
+  max-width: 100%;
+  box-sizing: border-box;
 
   &:last-child {
     border-bottom: none;
@@ -160,6 +164,8 @@ const handleChange = () => {
 .item-content {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .item-title {
