@@ -46,9 +46,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 确保路径格式正确（Windows使用\，Unix使用/）
         String resourceLocation = "file:" + absoluteUploadPath.replace("\\", "/");
 
-        // 配置头像资源映射
+        // 配置头像资源映射 - 指向上传目录下的 avatar 子目录
         registry.addResourceHandler("/avatar/**")
-                .addResourceLocations("classpath:/static/avatar/");
+                .addResourceLocations("file:" + getAbsoluteUploadPath().replace("\\", "/") + "/avatar/");
 
         // 配置上传文件资源映射 - 支持文件下载
         registry.addResourceHandler("/uploads/**")

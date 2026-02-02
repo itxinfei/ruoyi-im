@@ -22,7 +22,7 @@ public class FileUploadConfig {
     /**
      * 上传文件的基础路径
      */
-    @Value("${file.upload.path:src/uploads/}")
+    @Value("${file.upload.path:src/main/resources/uploads/}")
     private String uploadPath;
 
     /**
@@ -81,7 +81,8 @@ public class FileUploadConfig {
      */
     public String getAbsoluteUploadPath() {
         String projectRoot = System.getProperty("user.dir");
-        return projectRoot + File.separator + uploadPath;
+        String apiModulePath = projectRoot + File.separator + "ruoyi-im-api";
+        return apiModulePath + File.separator + uploadPath;
     }
 
     /**
