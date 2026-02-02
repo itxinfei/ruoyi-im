@@ -91,7 +91,7 @@ const AboutSettings = defineAsyncComponent(() => import('../Settings/AboutSettin
 
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
 import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
-import { getUserSettings } from '@/api/im/userSettings'
+import { getUserSettings, batchUpdateSettings } from '@/api/im/userSettings'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -215,30 +215,37 @@ const saveBackendSettings = async () => {
 }
 
 const handleClearCache = () => {
-  store.dispatch('im/clearCache').then(() => {
-    ElMessage.success('缓存已清理')
-  }).catch(() => {
+  // 清理 localStorage 缓存
+  try {
+    const keysToRemove = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (key.startsWith('im-') || key.includes('cache'))) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+    ElMessage.success(`已清理 ${keysToRemove.length} 项缓存`)
+  } catch (error) {
+    console.error('清理缓存失败:', error)
     ElMessage.error('清理缓存失败')
-  })
+  }
 }
 
 const handleExportChat = () => {
-  store.dispatch('im/exportChatHistory').then(() => {
-    ElMessage.success('聊天记录导出成功')
-  }).catch(() => {
-    ElMessage.error('导出失败')
-  })
+  ElMessage.info('聊天记录导出功能开发中...')
 }
 
 const componentEvents = computed(() => ({
   'edit-profile': () => { showEditProfile.value = true },
   'change-password': () => { showChangePassword.value = true },
   'update:modelValue': (val) => {
-    // 保存到 Vuex 并同步到后端
-    store.dispatch('im/updateSettings', val)
-    saveBackendSettings()
+    visible.value = val
+    if (!val) {
+      // 对话框关闭时保存设置
+      saveBackendSettings()
+    }
   },
-  'change': () => store.dispatch('im/saveSettings'),
   'clear-cache': handleClearCache,
   'export-chat': handleExportChat
 }))

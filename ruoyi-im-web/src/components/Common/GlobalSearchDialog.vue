@@ -37,6 +37,14 @@
             </template>
           </el-input>
           
+          <!-- 快捷键提示 -->
+          <div class="shortcut-hints">
+            <span class="hint-item">
+              <kbd>⌘</kbd><kbd>K</kbd>
+              <span class="hint-text">快速搜索</span>
+            </span>
+          </div>
+          
           <!-- 自动补全建议 -->
           <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown">
             <div
@@ -49,6 +57,7 @@
             >
               <el-icon class="suggestion-icon"><Search /></el-icon>
               <span class="suggestion-text" v-html="highlightSuggestion(suggestion)"></span>
+              <el-icon class="arrow-icon"><ArrowRight /></el-icon>
             </div>
           </div>
         </div>
@@ -64,6 +73,7 @@
             :class="{ active: searchType === cat.key }"
             @click="handleCategoryChange(cat.key)"
           >
+            <el-icon class="cat-icon">{{ getCategoryIcon(cat.key) }}</el-icon>
             <span class="label">{{ cat.label }}</span>
             <span v-if="getCategoryCount(cat.key)" class="count-badge">{{ getCategoryCount(cat.key) }}</span>
           </div>
@@ -71,24 +81,57 @@
 
         <!-- 右侧结果：现代化列表 -->
         <div class="modern-main scrollbar-thin">
-          <!-- 加载状态 -->
-          <div v-if="searching" class="loading-state flex flex-col items-center justify-center">
-            <el-icon class="is-loading text-2xl text-primary mb-3"><Loading /></el-icon>
-            <span class="loading-text">正在搜索...</span>
+          <!-- 骨架屏加载状态 -->
+          <div v-if="searching" class="skeleton-container">
+            <div v-for="i in 5" :key="i" class="skeleton-item">
+              <div class="skeleton-avatar"></div>
+              <div class="skeleton-content">
+                <div class="skeleton-line skeleton-title"></div>
+                <div class="skeleton-line skeleton-desc"></div>
+                <div class="skeleton-line skeleton-meta"></div>
+              </div>
+            </div>
           </div>
 
           <!-- 默认状态：历史记录和热门搜索 -->
           <div v-else-if="!searchKeyword" class="default-state">
+            <!-- 欢迎卡片 -->
+            <div class="welcome-card">
+              <div class="welcome-icon">
+                <el-icon class="icon-large"><Search /></el-icon>
+              </div>
+              <h3 class="welcome-title">智能搜索</h3>
+              <p class="welcome-desc">快速查找联系人、群组、消息和文件</p>
+              <div class="quick-actions">
+                <div class="action-item" @click="handleQuickSearch('@')">
+                  <el-icon><User /></el-icon>
+                  <span>@联系人</span>
+                </div>
+                <div class="action-item" @click="handleQuickSearch('#')">
+                  <el-icon><ChatDotRound /></el-icon>
+                  <span>#群组</span>
+                </div>
+                <div class="action-item" @click="handleQuickSearch('file:')">
+                  <el-icon><Document /></el-icon>
+                  <span>文件</span>
+                </div>
+              </div>
+            </div>
+
             <!-- 最近搜索历史 -->
             <div v-if="historyKeywords.length > 0" class="history-section">
               <div class="section-header">
-                <h3 class="section-title">最近搜索</h3>
+                <div class="section-title-wrapper">
+                  <el-icon class="section-icon"><Timer /></el-icon>
+                  <h3 class="section-title">最近搜索</h3>
+                </div>
                 <el-button 
                   type="text" 
                   size="small" 
                   class="clear-history-btn"
                   @click="clearAllHistory"
                 >
+                  <el-icon><Delete /></el-icon>
                   清空
                 </el-button>
               </div>
@@ -99,7 +142,7 @@
                   class="history-item"
                   @click="searchKeyword = kw; handleSearch()"
                 >
-                  <el-icon class="history-icon"><Timer /></el-icon>
+                  <el-icon class="history-icon"><History /></el-icon>
                   <span class="history-text">{{ kw }}</span>
                   <el-icon class="close-icon" @click.stop="removeHistory(kw)"><Close /></el-icon>
                 </div>
@@ -108,7 +151,10 @@
             
             <!-- 热门搜索 -->
             <div class="trending-section">
-              <h3 class="section-title">热门搜索</h3>
+              <div class="section-title-wrapper">
+                <el-icon class="section-icon"><TrendCharts /></el-icon>
+                <h3 class="section-title">热门搜索</h3>
+              </div>
               <div class="trending-tags">
                 <span 
                   v-for="(tag, index) in trendingTags" 
@@ -116,7 +162,7 @@
                   class="trending-tag"
                   @click="searchKeyword = tag; handleSearch()"
                 >
-                  <span class="tag-rank">{{ index + 1 }}</span>
+                  <span class="tag-rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</span>
                   {{ tag }}
                 </span>
               </div>
@@ -132,13 +178,23 @@
                   {{ section.title }}
                   <span class="result-count">({{ section.data.length }})</span>
                 </div>
+                <el-button
+                  v-if="section.data.length > 5"
+                  type="text"
+                  size="small"
+                  class="view-more-btn"
+                  @click="viewMore(type)"
+                >
+                  查看更多
+                </el-button>
               </div>
               
               <div class="result-list">
                 <div
-                  v-for="(item, index) in section.data"
+                  v-for="(item, index) in section.data.slice(0, 5)"
                   :key="item.id || index"
                   class="result-card"
+                  :class="'result-' + index"
                   @click="handleItemClick(type, item)"
                 >
                   <!-- 头像/图标 -->
@@ -147,12 +203,13 @@
                       v-if="type !== 'files'"
                       :name="item.name || item.friendName || item.senderName"
                       :src="item.avatar || item.friendAvatar"
-                      :size="40"
+                      :size="44"
                       shape="square"
                       custom-class="result-avatar-img"
                     />
                     <div v-else class="file-icon-container">
                       <el-icon class="file-icon"><Document /></el-icon>
+                      <span class="file-ext">{{ getFileExtension(item.fileName) }}</span>
                     </div>
                   </div>
 
@@ -163,12 +220,36 @@
                       <span class="result-time">{{ formatTime(item.timestamp) }}</span>
                     </div>
                     <div class="result-desc" v-html="highlight(item.content || item.remark || item.departmentName || (item.memberCount ? item.memberCount + '人' : ''))"></div>
-                    <div v-if="type === 'messages'" class="result-meta">
-                      <span class="meta-tag">消息</span>
+                    <div class="result-meta">
+                      <span v-if="type === 'messages'" class="meta-tag message-tag">
+                        <el-icon><ChatLineRound /></el-icon>
+                        消息
+                      </span>
+                      <span v-else-if="type === 'files'" class="meta-tag file-tag">
+                        <el-icon><Folder /></el-icon>
+                        文件
+                      </span>
+                      <span v-else-if="type === 'contacts'" class="meta-tag contact-tag">
+                        <el-icon><User /></el-icon>
+                        联系人
+                      </span>
+                      <span v-else-if="type === 'groups'" class="meta-tag group-tag">
+                        <el-icon><ChatDotRound /></el-icon>
+                        群组
+                      </span>
                     </div>
-                    <div v-else-if="type === 'files'" class="result-meta">
-                      <span class="meta-tag">文件</span>
-                    </div>
+                  </div>
+                  
+                  <!-- 快捷操作 -->
+                  <div class="result-actions">
+                    <el-button
+                      type="text"
+                      size="small"
+                      class="action-btn"
+                      @click.stop="handlePreview(type, item)"
+                    >
+                      <el-icon><View /></el-icon>
+                    </el-button>
                   </div>
                 </div>
               </div>
@@ -177,25 +258,43 @@
 
           <!-- 空状态 -->
           <div v-else-if="searchKeyword && !searching" class="empty-state">
-            <div class="empty-icon">
-              <el-icon class="text-4xl text-gray-300"><Search /></el-icon>
+            <div class="empty-icon-wrapper">
+              <el-icon class="empty-icon"><Search /></el-icon>
             </div>
-            <h3 class="empty-title">未找到匹配项</h3>
-            <p class="empty-desc">尝试使用其他关键词或检查拼写</p>
-            <el-button class="empty-btn" @click="resetSearch">清除搜索</el-button>
+            <h3 class="empty-title">未找到相关结果</h3>
+            <p class="empty-desc">没有找到与"<strong>{{ searchKeyword }}</strong>"相关的内容</p>
+            <div class="empty-suggestions">
+              <p class="suggestion-title">搜索建议：</p>
+              <div class="suggestion-list">
+                <span class="suggestion-item" @click="searchKeyword = ''; resetSearch()">清除搜索关键词</span>
+                <span class="suggestion-item" @click="handleCategoryChange('ALL')">切换到"全部内容"分类</span>
+                <span class="suggestion-item" @click="searchKeyword = searchKeyword.slice(0, -1)">删除最后一个字符</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- 页脚 -->
       <div class="classic-footer">
-        <div class="flex items-center gap-4">
-          <span class="flex items-center gap-1"><kbd>Enter</kbd> 搜索/查看</span>
-          <span class="flex items-center gap-1"><kbd>Esc</kbd> 关闭</span>
-          <span class="flex items-center gap-1"><kbd>Tab</kbd> 切换分类</span>
-          <span class="flex items-center gap-1"><kbd>←</kbd><kbd>→</kbd> 切换分类</span>
+        <div class="footer-shortcuts">
+          <span class="shortcut-item">
+            <kbd>Enter</kbd> 搜索/查看
+          </span>
+          <span class="shortcut-item">
+            <kbd>Esc</kbd> 关闭
+          </span>
+          <span class="shortcut-item">
+            <kbd>↑</kbd><kbd>↓</kbd> 导航
+          </span>
+          <span class="shortcut-item">
+            <kbd>←</kbd><kbd>→</kbd> 切换分类
+          </span>
         </div>
-        <div v-if="totalCount > 0">找到 {{ totalCount }} 条结果</div>
+        <div v-if="totalCount > 0" class="result-count">
+          <el-icon class="count-icon"><DataLine /></el-icon>
+          找到 <strong>{{ totalCount }}</strong> 条结果
+        </div>
       </div>
     </div>
   </el-dialog>
@@ -205,7 +304,8 @@
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { getJSON, setJSON } from '@/utils/storage'
 
-import { Search, Document, Loading, Timer, Close } from '@element-plus/icons-vue'
+import { Search, Document, Loading, Timer, Close, User, ChatDotRound, ChatLineRound, 
+         Folder, View, TrendCharts, History, Delete, ArrowRight, DataLine } from '@element-plus/icons-vue'
 import { globalSearch } from '@/api/im/globalSearch'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -323,6 +423,43 @@ const getCategoryCount = (key) => {
   return searchResult.value[keyMap[key]]?.length || 0
 }
 
+// 获取分类图标
+const getCategoryIcon = (key) => {
+  const iconMap = {
+    'ALL': 'Search',
+    'CONTACT': 'User',
+    'GROUP': 'ChatDotRound',
+    'MESSAGE': 'ChatLineRound',
+    'FILE': 'Document'
+  }
+  return iconMap[key] || 'Search'
+}
+
+// 获取文件扩展名
+const getFileExtension = (fileName) => {
+  if (!fileName) return ''
+  const parts = fileName.split('.')
+  return parts.length > 1 ? parts[parts.length - 1].toUpperCase() : ''
+}
+
+// 快速搜索
+const handleQuickSearch = (prefix) => {
+  searchKeyword.value = prefix
+  nextTick(() => {
+    searchInputRef.value?.$el?.querySelector('input')?.focus()
+  })
+}
+
+// 查看更多
+const viewMore = (type) => {
+  ElMessage.info('加载更多功能开发中...')
+}
+
+// 预览
+const handlePreview = (type, item) => {
+  ElMessage.info('预览功能开发中...')
+}
+
 // 搜索结果缓存
 const searchCache = ref(new Map())
 let timer = null
@@ -351,7 +488,7 @@ const handleInput = () => {
     }
     
     await handleSearch()
-  }, 250)
+  }, 300)
 }
 
 const handleSearch = async () => {
@@ -471,6 +608,17 @@ const highlightSuggestion = (text) => {
   return String(text).replace(reg, '<span class="highlight-text">$1</span>')
 }
 
+// 获取分类图标
+const getSectionIcon = (type) => {
+  const iconMap = {
+    contacts: 'User',
+    groups: 'ChatDotRound',
+    messages: 'ChatLineRound',
+    files: 'Document'
+  }
+  return iconMap[type] || 'Search'
+}
+
 // 监听键盘事件，支持上下箭头选择建议
 const handleKeyDown = (event) => {
   if (!showSuggestions.value && !visible.value) return
@@ -567,17 +715,6 @@ const resetSearch = () => {
   searchResult.value = null
   suggestions.value = []
   showSuggestions.value = false
-}
-
-// 获取分类图标
-const getSectionIcon = (type) => {
-  const iconMap = {
-    contacts: 'User',
-    groups: 'ChatDotRound',
-    messages: 'ChatLineRound',
-    files: 'Document'
-  }
-  return iconMap[type] || 'Search'
 }
 
 // 监听窗口大小变化
