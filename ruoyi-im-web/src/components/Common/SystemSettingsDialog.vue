@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    width="900px"
+    width="1000px"
     class="system-settings-dialog"
     destroy-on-close
     append-to-body
@@ -172,7 +172,6 @@ const loadBackendSettings = async () => {
         storage: res.data.storage || {}
       }
     }
-    }
   } catch (error) {
     console.error('加载后端设置失败:', error)
     ElMessage.error('加载设置失败')
@@ -271,10 +270,225 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 </script>
 
 <style scoped lang="scss">
+.settings-container {
+  display: flex;
+  width: 100%;
+  height: 600px;
+  background: #fff;
+
+  .settings-sidebar {
+    width: 140px;
+    min-width: 140px;
+    background: #f5f5f5;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+
+    .sidebar-header {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f5f5f5;
+      
+      .header-icon {
+        font-size: 16px;
+        color: #666;
+        margin-right: 8px;
+      }
+      
+      .header-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+      }
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      padding: 4px;
+      overflow-y: auto;
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        height: 32px;
+        padding: 0 8px;
+        cursor: pointer;
+        color: #666;
+        font-size: 12px;
+        transition: all 0.15s;
+        margin-bottom: 1px;
+        
+        &:hover {
+          background: #e8e8e8;
+          color: #333;
+        }
+        
+        &.active {
+          background: #fff;
+          color: #1890ff;
+          font-weight: 500;
+        }
+        
+        .menu-icon {
+          font-size: 14px;
+          margin-right: 8px;
+        }
+        
+        .menu-label {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+
+    .sidebar-footer {
+      padding: 8px;
+      border-top: 1px solid #e0e0e0;
+      background: #f5f5f5;
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        
+        &:hover {
+          background: #e8e8e8;
+        }
+        
+        .user-name {
+          font-size: 12px;
+          color: #333;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+
+  .settings-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: #fff;
+
+    .content-header {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fff;
+
+      .content-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+      }
+
+      .close-btn {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #999;
+        border-radius: 4px;
+        
+        &:hover {
+          background: #f5f5f5;
+          color: #666;
+        }
+      }
+    }
+
+    .content-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+    }
+  }
+}
+
+// 深色模式
+.dark {
+  .settings-container {
+    background: #1a1a1a;
+
+    .settings-sidebar {
+      background: #252525;
+      border-color: #333;
+
+      .sidebar-header {
+        background: #252525;
+        border-color: #333;
+        
+        .header-icon,
+        .header-title {
+          color: #ccc;
+        }
+      }
+
+      .menu-item {
+        color: #999;
+        
+        &:hover {
+          background: #333;
+          color: #ccc;
+        }
+        
+        &.active {
+          background: #1a1a1a;
+          color: #1890ff;
+        }
+      }
+
+      .sidebar-footer {
+        background: #252525;
+        border-color: #333;
+
+        .user-info {
+          .user-name {
+            color: #ccc;
+          }
+          
+          &:hover {
+            background: #333;
+          }
+        }
+      }
+    }
+
+    .settings-content {
+      background: #1a1a1a;
+
+      .content-header {
+        background: #1a1a1a;
+        border-color: #333;
+
+        .content-title {
+          color: #ccc;
+        }
+      }
+    }
+  }
+}
+
 // 对话框样式
 :deep(.system-settings-dialog) {
-  max-width: 90vw;
-
   .el-dialog__body {
     padding: 0 !important;
     margin: 0 !important;
@@ -282,238 +496,6 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 
   .el-dialog__header {
     display: none;
-  }
-}
-
-// 主容器 - 固定大小
-.settings-container {
-  display: flex;
-  width: 100%;
-  height: 600px;
-  background: #fff;
-}
-
-// 侧边栏 - 窄边设计
-.settings-sidebar {
-  width: 140px;
-  min-width: 140px;
-  background: #f5f5f5;
-  border-right: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-header {
-  height: 48px;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f5f5f5;
-  
-  .header-icon {
-    font-size: 16px;
-    color: #666;
-    margin-right: 8px;
-  }
-  
-  .header-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-  }
-}
-
-.sidebar-menu {
-  flex: 1;
-  padding: 4px;
-  overflow-y: auto;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 8px;
-  cursor: pointer;
-  color: #666;
-  font-size: 12px;
-  transition: all 0.15s;
-  margin-bottom: 1px;
-  
-  &:hover {
-    background: #e8e8e8;
-    color: #333;
-  }
-  
-  &.active {
-    background: #fff;
-    color: #1890ff;
-    font-weight: 500;
-  }
-  
-  .menu-icon {
-    font-size: 14px;
-    margin-right: 8px;
-  }
-  
-  .menu-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-.sidebar-footer {
-  padding: 8px;
-  border-top: 1px solid #e0e0e0;
-  background: #f5f5f5;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  
-  &:hover {
-    background: #e8e8e8;
-  }
-  
-  .user-name {
-    font-size: 12px;
-    color: #333;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-// 内容区域
-.settings-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  background: #fff;
-  overflow: hidden;
-}
-
-.content-header {
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  border-bottom: 1px solid #e8e8e8;
-  background: #fff;
-}
-
-.content-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-.close-btn {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  border-radius: 4px;
-  
-  &:hover {
-    background: #f5f5f5;
-    color: #666;
-  }
-}
-
-.content-body {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px 16px;
-  min-width: 0;
-}
-
-// 深色模式
-.dark {
-  .settings-container {
-    background: #1a1a1a;
-  }
-  
-  .settings-sidebar {
-    background: #252525;
-    border-color: #333;
-  }
-  
-  .sidebar-header {
-    background: #252525;
-    border-color: #333;
-    
-    .header-icon,
-    .header-title {
-      color: #ccc;
-    }
-  }
-  
-  .menu-item {
-    color: #999;
-    
-    &:hover {
-      background: #333;
-      color: #ccc;
-    }
-    
-    &.active {
-      background: #1a1a1a;
-      color: #1890ff;
-    }
-  }
-  
-  .sidebar-footer {
-    background: #252525;
-    border-color: #333;
-  }
-  
-  .user-info {
-    .user-name {
-      color: #ccc;
-    }
-    
-    &:hover {
-      background: #333;
-    }
-  }
-  
-  .settings-content {
-    background: #1a1a1a;
-  }
-  
-  .content-header {
-    background: #1a1a1a;
-    border-color: #333;
-  }
-  
-  .content-title {
-    color: #ccc;
-  }
-  
-  .close-btn {
-    color: #666;
-    
-    &:hover {
-      background: #333;
-      color: #999;
-    }
   }
 }
 </style>

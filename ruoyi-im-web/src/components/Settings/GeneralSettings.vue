@@ -176,7 +176,6 @@ const loadSettings = async () => {
         minimizeToTray: backendSettings.minimizeToTray === 'true'
       })
     }
-    }
   } catch (error) {
     console.error('加载设置失败:', error)
     ElMessage.error('加载设置失败')

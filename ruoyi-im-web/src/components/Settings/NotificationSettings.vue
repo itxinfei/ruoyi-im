@@ -152,7 +152,6 @@ const loadSettings = async () => {
         initDndTime()
       }
     }
-    }
   } catch (error) {
     console.error('加载通知设置失败:', error)
     ElMessage.error('加载设置失败')
