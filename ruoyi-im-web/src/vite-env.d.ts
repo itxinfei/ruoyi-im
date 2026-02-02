@@ -23,4 +23,7 @@ interface ImportMetaEnv {
   readonly SSR: boolean
 }
 
-declare const import: ImportMetaEnv
+// 扩展 ImportMeta 以支持 import.meta.env
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}

@@ -331,7 +331,7 @@ export interface PrivacySettings {
 export interface GeneralSettings {
   language: string
   theme: 'auto' | 'light' | 'dark'
-  fontSize: 'small' | 'medium' 'large'
+  fontSize: 'small' | 'medium' | 'large'
 }
 
 /**

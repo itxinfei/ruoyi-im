@@ -118,28 +118,28 @@ const loadUserInfo = () => {
     }
   } else {
     console.error('未找到用户信息')
-    }
   }
 }
 
 // 处理登出
 const handleLogout = async () => {
-  if (!await confirm('确定要退出登录吗？', '提示')) {
-    return
-  }
-
-  // 调用登出接口
   try {
-    await logout()
-  } catch (error) {
-    console.error('登出接口调用失败:', error)
-    // 即使接口失败也继续清除本地数据
-  }
+    if (!await confirm('确定要退出登录吗？', '提示')) {
+      return
+    }
 
-  // 清除本地存储
-  clearAuth()
+    // 调用登出接口
+    try {
+      await logout()
+    } catch (error) {
+      console.error('登出接口调用失败:', error)
+      // 即使接口失败也继续清除本地数据
+    }
 
-  messageSuccess('已退出登录')
+    // 清除本地存储
+    clearAuth()
+
+    messageSuccess('已退出登录')
 
     // 跳转到登录页
     router.push('/login')
