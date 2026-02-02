@@ -171,7 +171,7 @@ const loadBackendSettings = async () => {
         security: res.data.security || {},
         storage: res.data.storage || {}
       }
-      console.log('后端设置加载成功')
+    }
     }
   } catch (error) {
     console.error('加载后端设置失败:', error)

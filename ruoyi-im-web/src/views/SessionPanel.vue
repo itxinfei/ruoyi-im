@@ -725,8 +725,6 @@ const isActiveSession = (session) => {
 
 // 处理会话点击
 const handleSessionClick = (session) => {
-  console.log('[SessionPanel] handleSessionClick called with:', session)
-
   // 标记该会话的@提及为已读
   const mentionCount = getSessionMentionCount(session.id)
   if (mentionCount > 0) {

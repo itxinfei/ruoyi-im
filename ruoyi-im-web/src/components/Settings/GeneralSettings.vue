@@ -175,8 +175,7 @@ const loadSettings = async () => {
         autoStart: backendSettings.autoStart === 'true',
         minimizeToTray: backendSettings.minimizeToTray === 'true'
       })
-      
-      console.log('通用设置加载成功:', backendSettings)
+    }
     }
   } catch (error) {
     console.error('加载设置失败:', error)

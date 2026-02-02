@@ -137,7 +137,6 @@ const handleOpenSettings = (menu = 'account') => {
 }
 
 const handleSelectSession = (session) => {
-  console.log('[MainPage] handleSelectSession called with:', session)
   if (!session || !session.id) {
     console.error('[MainPage] Invalid session object:', session)
     return

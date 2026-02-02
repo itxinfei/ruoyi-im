@@ -151,8 +151,7 @@ const loadSettings = async () => {
       if (res.data.dndEnabled === 1) {
         initDndTime()
       }
-      
-      console.log('通知设置加载成功')
+    }
     }
   } catch (error) {
     console.error('加载通知设置失败:', error)
