@@ -765,6 +765,58 @@ onUnmounted(() => {
         transform: scale(1) translateY(0);
       }
     }
+
+    .el-dialog__header {
+      margin: 0;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 1px solid #e2e8f0;
+      .dark & {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-color: #334155;
+      }
+
+      .el-dialog__title {
+        font-size: 17px;
+        font-weight: 600;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+        .dark & { color: #f1f5f9; }
+      }
+
+      .el-dialog__headerbtn {
+        top: 20px;
+        right: 24px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark &:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .el-dialog__close {
+          color: #64748b;
+          font-size: 18px;
+          transition: all 0.2s ease;
+
+          &:hover {
+            color: #0f172a;
+            transform: rotate(90deg);
+            .dark & { color: #f1f5f9; }
+          }
+        }
+      }
+    }
+
+    .el-dialog__body {
+      padding: 0;
+    }
   }
 }
 
