@@ -215,12 +215,38 @@
     :images="conversationImages"
     :initial-index="imagePreviewIndex"
   />
+
+  <!-- 快捷表情选择器 -->
+  <teleport to="body">
+    <div
+      v-if="showEmojiPopover"
+      class="emoji-popover"
+      :style="{ left: emojiPopoverPosition.x + 'px', top: emojiPopoverPosition.y + 'px' }"
+    >
+      <div class="emoji-popover-header">
+        <span>添加表情回应</span>
+        <el-icon @click="showEmojiPopover = false" class="close-icon">
+          <Close />
+        </el-icon>
+      </div>
+      <div class="emoji-grid">
+        <span
+          v-for="emoji in QUICK_EMOJIS"
+          :key="emoji"
+          class="emoji-item"
+          @click="handleSelectEmoji(emoji)"
+        >
+          {{ emoji }}
+        </span>
+      </div>
+    </div>
+  </teleport>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useStore } from 'vuex'
-import { Share, Folder, Delete } from '@element-plus/icons-vue'
+import { Share, Folder, Delete, Close } from '@element-plus/icons-vue'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInputRefactored.vue'
@@ -318,7 +344,7 @@ const isMultiSelectModeActive = ref(false)
 const showPinnedPanel = ref(false)
 const pinnedCount = computed(() => messages.value.filter(m => m.isPinned).length)
 
-const emit = defineEmits(['show-user', 'toggle-reaction'])
+const emit = defineEmits(['show-user'])
 
 const { onMessage, onTyping, onMessageStatus, onReaction, sendTyping, sendStopTyping } = useImWebSocket()
 
@@ -695,16 +721,20 @@ const emojiTargetMessage = ref(null)
 // 显示表情选择器
 const handleShowEmojiPicker = (msg) => {
   emojiTargetMessage.value = msg
-  // 计算位置：显示在消息附近
-  const rect = event?.target?.getBoundingClientRect()
-  if (rect) {
+  // 计算位置：显示在输入框上方
+  const inputArea = document.querySelector('.chat-input-container')
+  if (inputArea) {
+    const rect = inputArea.getBoundingClientRect()
     emojiPopoverPosition.value = {
-      x: rect.left,
-      y: rect.bottom + 8
+      x: rect.right - 300,
+      y: rect.top - 220
     }
   } else {
-    // 默认位置
-    emojiPopoverPosition.value = { x: 200, y: 300 }
+    // 默认位置：屏幕中央
+    emojiPopoverPosition.value = {
+      x: window.innerWidth / 2 - 140,
+      y: window.innerHeight / 2 - 110
+    }
   }
   showEmojiPopover.value = true
 }
@@ -713,18 +743,50 @@ const handleShowEmojiPicker = (msg) => {
 const handleSelectEmoji = async (emoji) => {
   if (!emojiTargetMessage.value) return
 
-  try {
-    // 触发表情反应
-    emit('toggle-reaction', {
-      messageId: emojiTargetMessage.value.id,
-      emoji: emoji
-    })
+  const msg = emojiTargetMessage.value
+  const userId = currentUser.value?.id
+  const userName = currentUser.value?.nickName || currentUser.value?.userName || '我'
+  const userAvatar = currentUser.value?.avatar || ''
 
-    // 如果需要保存到后端，取消注释以下代码
-    // await addReaction({
-    //   messageId: emojiTargetMessage.value.id,
-    //   emoji: emoji
-    // })
+  try {
+    // 检查是否已经有当前用户的这个表情
+    const existingReactionIndex = (msg.reactions || []).findIndex(
+      r => r.emoji === emoji && r.userId === userId
+    )
+
+    let newReactions = [...(msg.reactions || [])]
+
+    if (existingReactionIndex !== -1) {
+      // 移除现有反应
+      newReactions.splice(existingReactionIndex, 1)
+    } else {
+      // 添加新反应
+      newReactions.push({
+        emoji,
+        userId,
+        userName,
+        userAvatar
+      })
+    }
+
+    // 更新本地消息
+    const index = messages.value.findIndex(m => m.id === msg.id)
+    if (index !== -1) {
+      messages.value[index] = {
+        ...messages.value[index],
+        reactions: newReactions
+      }
+    }
+
+    // 通过 WebSocket 广播表情反应更新
+    store.dispatch('im/message/handleReactionUpdate', {
+      messageId: msg.id,
+      emoji,
+      userId,
+      userName,
+      userAvatar,
+      isAdd: existingReactionIndex === -1
+    })
 
     showEmojiPopover.value = false
     emojiTargetMessage.value = null
@@ -1876,9 +1938,22 @@ onMounted(() => {
   }
   window.addEventListener('keydown', handleKeydown)
 
+  // 点击外部关闭表情弹窗
+  const handleClickOutside = (e) => {
+    if (showEmojiPopover.value) {
+      const popover = document.querySelector('.emoji-popover')
+      if (popover && !popover.contains(e.target)) {
+        showEmojiPopover.value = false
+        emojiTargetMessage.value = null
+      }
+    }
+  }
+  document.addEventListener('click', handleClickOutside)
+
   // 清理函数（在组件卸载时调用）
   onUnmounted(() => {
     window.removeEventListener('keydown', handleKeydown)
+    document.removeEventListener('click', handleClickOutside)
   })
 })
 </script>
@@ -2121,6 +2196,85 @@ onMounted(() => {
   50% {
     opacity: 0.6;
     transform: scale(1.02);
+  }
+}
+
+// 快捷表情选择器
+.emoji-popover {
+  position: fixed;
+  z-index: 9999;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-md);
+  box-shadow: var(--dt-shadow-3);
+  border: 1px solid var(--dt-border-light);
+  padding: 12px;
+  min-width: 280px;
+  animation: popoverFadeIn 0.2s var(--dt-ease-out);
+
+  .dark & {
+    background: #2d2d2d;
+    border-color: #3e3e3e;
+  }
+
+  .emoji-popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--dt-border-light);
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dt-text-primary);
+    }
+
+    .close-icon {
+      cursor: pointer;
+      color: var(--dt-text-tertiary);
+      font-size: 16px;
+
+      &:hover {
+        color: var(--dt-text-secondary);
+      }
+    }
+  }
+
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+
+    .emoji-item {
+      font-size: 24px;
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: var(--dt-radius-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+
+      &:hover {
+        background: var(--dt-bg-hover);
+        transform: scale(1.15);
+      }
+
+      &:active {
+        transform: scale(1.05);
+      }
+    }
+  }
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>
