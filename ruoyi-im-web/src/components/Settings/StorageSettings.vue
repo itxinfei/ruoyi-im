@@ -86,6 +86,8 @@ const handleChange = () => {
 <style scoped lang="scss">
 .storage-settings {
   padding-bottom: 20px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .setting-group {
