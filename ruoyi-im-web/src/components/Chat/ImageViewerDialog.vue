@@ -12,7 +12,7 @@
       <!-- 工具栏 -->
       <div class="viewer-toolbar" v-if="images.length > 0">
         <div class="toolbar-left">
-          <span class="image-counter">{{ currentIndex + 1 }} / {{ images.length }}</span>
+          <span class="image-counter">{{ currentIndex + 1 }}&nbsp;/&nbsp;{{ images.length }}</span>
         </div>
         <div class="toolbar-center">
           <span class="image-name">{{ currentImageName }}</span>

@@ -19,7 +19,7 @@
       <div v-else class="group-chat-info">
         <div class="info-row">
           <span class="info-label">已读人数:</span>
-          <span class="info-value">{{ readCount }} / {{ totalCount }}</span>
+          <span class="info-value">{{ readCount }}&nbsp;/&nbsp;{{ totalCount }}</span>
         </div>
 
         <el-divider />

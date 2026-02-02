@@ -37,7 +37,7 @@
       </div>
       <div class="detail-item">
         <span class="detail-label">已上传:</span>
-        <span class="detail-value">{{ uploadedSize }} / {{ totalSize }}</span>
+        <span class="detail-value">{{ uploadedSize }}&nbsp;/&nbsp;{{ totalSize }}</span>
       </div>
     </div>
 

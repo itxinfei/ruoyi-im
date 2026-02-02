@@ -67,10 +67,10 @@ public class ImOnlineUserServiceImpl implements ImOnlineUserService {
                 // 尝试从 Redis 获取更多会话信息
                 if (imRedisUtil != null) {
                     try {
-                        String sessionInfo = imRedisUtil.getSessionInfo(userId);
+                        Map<String, Object> sessionInfo = imRedisUtil.getSessionInfo(userId);
                         if (sessionInfo != null && !sessionInfo.isEmpty()) {
                             // 可以解析 sessionInfo 获取更多信息
-                            vo.setClientInfo(sessionInfo);
+                            vo.setClientInfo(sessionInfo.toString());
                         }
                     } catch (Exception e) {
                         // 忽略 Redis 获取失败

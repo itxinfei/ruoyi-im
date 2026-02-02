@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller.admin;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -173,17 +174,12 @@ public class ImFileAdminController {
     @Operation(summary = "文件类型统计", description = "按文件类型统计文件数量和大小")
     @GetMapping("/statistics/by-type")
     public Result<List<Map<String, Object>>> getFileStatisticsByType() {
-        List<Map<String, Object>> statistics = fileAssetMapper.selectMaps(
-                new LambdaQueryWrapper<ImFileAsset>()
-                        .select(
-                                ImFileAsset::getFileType,
-                                "COUNT(*) as count",
-                                "SUM(file_size) as totalSize"
-                        )
-                        .eq(ImFileAsset::getIsDeleted, 0)
-                        .groupBy(ImFileAsset::getFileType)
-        );
+        QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
+        wrapper.select("file_type", "COUNT(*) as count", "SUM(file_size) as totalSize");
+        wrapper.eq("is_deleted", 0);
+        wrapper.groupBy("file_type");
 
+        List<Map<String, Object>> statistics = fileAssetMapper.selectMaps(wrapper);
         return Result.success(statistics);
     }
 
@@ -195,19 +191,14 @@ public class ImFileAdminController {
     @Operation(summary = "上传者统计", description = "按上传者统计文件数量和大小")
     @GetMapping("/statistics/by-uploader")
     public Result<List<Map<String, Object>>> getFileStatisticsByUploader() {
-        List<Map<String, Object>> statistics = fileAssetMapper.selectMaps(
-                new LambdaQueryWrapper<ImFileAsset>()
-                        .select(
-                                ImFileAsset::getUploaderId,
-                                "COUNT(*) as count",
-                                "SUM(file_size) as totalSize"
-                        )
-                        .eq(ImFileAsset::getIsDeleted, 0)
-                        .groupBy(ImFileAsset::getUploaderId)
-                        .orderByDesc("COUNT(*)")
-                        .last("LIMIT 10")
-        );
+        QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
+        wrapper.select("uploader_id", "COUNT(*) as count", "SUM(file_size) as totalSize");
+        wrapper.eq("is_deleted", 0);
+        wrapper.groupBy("uploader_id");
+        wrapper.orderByDesc("COUNT(*)");
+        wrapper.last("LIMIT 10");
 
+        List<Map<String, Object>> statistics = fileAssetMapper.selectMaps(wrapper);
         return Result.success(statistics);
     }
 }

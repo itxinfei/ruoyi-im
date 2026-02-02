@@ -130,10 +130,28 @@ textarea {
   }
 }
 
-// Focus styles for accessibility
+// Focus styles for accessibility - 钉钉风格
 *:focus-visible {
   outline: 2px solid var(--dt-brand-color);
   outline-offset: 2px;
+  border-radius: 2px;
+}
+
+// 钉钉风格：移除默认 focus 样式，只保留 focus-visible
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// 钉钉风格：输入框 focus 时的高亮效果
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
+}
+
+// 钉钉风格：按钮点击反馈
+button:active {
+  transform: scale(0.98);
 }
 
 // ============================================================================

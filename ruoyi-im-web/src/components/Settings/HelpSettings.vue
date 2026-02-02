@@ -1,8 +1,12 @@
 <template>
   <div class="help-settings">
-    <div class="setting-group">
-      <h3 class="group-title">常见问题</h3>
-      <div class="faq-list">
+    <div class="setting-section">
+      <div class="section-header">
+        <h3 class="section-title">常见问题</h3>
+        <p class="section-desc">为您解答使用过程中的常见疑问</p>
+      </div>
+      
+      <div class="setting-card faq-card">
         <div v-for="(faq, index) in faqs" :key="index" class="faq-item">
           <div class="faq-question" @click="faq.expanded = !faq.expanded">
             <span class="question-text">{{ faq.question }}</span>
@@ -11,13 +15,18 @@
           <div v-show="faq.expanded" class="faq-answer">
             {{ faq.answer }}
           </div>
+          <el-divider v-if="index < faqs.length - 1" />
         </div>
       </div>
     </div>
 
-    <div class="setting-group">
-      <h3 class="group-title">意见反馈</h3>
-      <div class="feedback-card">
+    <div class="setting-section">
+      <div class="section-header">
+        <h3 class="section-title">意见反馈</h3>
+        <p class="section-desc">帮助我们改进产品，您的建议对我们很重要</p>
+      </div>
+      
+      <div class="setting-card feedback-card">
         <el-form :model="feedbackForm" label-position="top">
           <el-form-item label="问题类型">
             <div class="type-selector">
@@ -85,35 +94,50 @@ const handleSubmit = async () => {
 
 <style scoped lang="scss">
 .help-settings {
-  padding-bottom: 20px;
-  max-width: 100%;
+  padding: 0;
   box-sizing: border-box;
 }
 
-.setting-group {
-  margin-bottom: 32px;
+.setting-section {
+  margin-bottom: 24px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
-.group-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dt-text-secondary);
-  margin-bottom: 16px;
-  padding-left: 4px;
+.section-header {
+  margin-bottom: 12px;
+  
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color-primary, #303133);
+    margin: 0 0 4px 0;
+  }
+  
+  .section-desc {
+    font-size: 12px;
+    color: var(--text-color-secondary, #909399);
+    margin: 0;
+  }
 }
 
-.faq-list {
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 12px;
+.setting-card {
+  background: var(--bg-color-overlay, #fff);
+  border: 1px solid var(--border-color-light, #e4e7ed);
+  border-radius: 8px;
   overflow: hidden;
 }
 
-.faq-item {
-  border-bottom: 1px solid var(--dt-border-light);
-
-  &:last-child {
-    border-bottom: none;
+.faq-card {
+  .faq-item {
+    transition: background-color 0.2s;
+  }
+  
+  .el-divider {
+    margin: 0;
+    border-color: var(--border-color-lighter, #ebeef5);
   }
 }
 
@@ -123,22 +147,22 @@ const handleSubmit = async () => {
   justify-content: space-between;
   padding: 16px 20px;
   cursor: pointer;
-  transition: background-color 0.2s;
   
   &:hover {
-    background-color: var(--dt-bg-hover);
+    background-color: var(--bg-color-hover, #f5f7fa);
   }
 }
 
 .question-text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--dt-text-primary);
+  color: var(--text-color-primary, #303133);
 }
 
 .expand-icon {
-  color: var(--dt-text-tertiary);
+  color: var(--text-color-secondary, #909399);
   transition: transform 0.3s;
+  font-size: 14px;
   
   &.is-expanded {
     transform: rotate(90deg);
@@ -147,15 +171,13 @@ const handleSubmit = async () => {
 
 .faq-answer {
   padding: 0 20px 20px;
-  font-size: 14px;
-  color: var(--dt-text-secondary);
+  font-size: 13px;
+  color: var(--text-color-secondary, #606266);
   line-height: 1.6;
+  background-color: var(--bg-color-page, #f9f9f9);
 }
 
 .feedback-card {
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 12px;
   padding: 24px;
 }
 
@@ -167,20 +189,22 @@ const handleSubmit = async () => {
 .type-option {
   padding: 8px 16px;
   border-radius: 6px;
-  border: 1px solid var(--dt-border-light);
+  border: 1px solid var(--border-color-light, #dcdfe6);
   cursor: pointer;
   font-size: 14px;
-  color: var(--dt-text-secondary);
+  color: var(--text-color-regular, #606266);
   transition: all 0.2s;
+  background-color: var(--bg-color-overlay, #fff);
 
   &:hover {
-    background: var(--dt-bg-hover);
+    border-color: var(--el-color-primary, #409eff);
+    color: var(--el-color-primary, #409eff);
   }
 
   &.active {
-    background: var(--dt-brand-color-light);
-    color: var(--dt-brand-color);
-    border-color: var(--dt-brand-color);
+    background: var(--el-color-primary-light-9, #ecf5ff);
+    color: var(--el-color-primary, #409eff);
+    border-color: var(--el-color-primary, #409eff);
   }
 }
 

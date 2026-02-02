@@ -15,17 +15,18 @@
         <result property="signature" column="signature"/>
         <result property="department" column="department"/>
         <result property="position" column="position"/>
+        <result property="role" column="role"/>
         <result property="lastOnlineTime" column="last_online_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImUserVo">
-        select id, username, password, nickname, email, 
+        select id, username, password, nickname, email,
                mobile, avatar, status, gender, signature,
-               department, position,
+               department, position, role,
                last_online_time,
-               create_time, update_time 
+               create_time, update_time
         from im_user
     </sql>
 
@@ -157,14 +158,28 @@
     <select id="selectImUserListWithPagination" resultMap="ImUserResult">
         <include refid="selectImUserVo"/>
         <where>
-            <if test="imUser.username != null and imUser.username != ''"> and username like concat('%', #{imUser.username}, '%') </if>
-            <if test="imUser.nickname != null and imUser.nickname != ''"> and nickname like concat('%', #{imUser.nickname}, '%') </if>
-            <if test="imUser.email != null and imUser.email != ''"> and email = #{imUser.email} </if>
-            <if test="imUser.mobile != null and imUser.mobile != ''"> and mobile = #{imUser.mobile} </if>
-            <if test="imUser.status != null"> and status = #{imUser.status} </if>
+            <if test="username != null and username != ''"> and username like concat('%', #{username}, '%') </if>
+            <if test="nickname != null and nickname != ''"> and nickname like concat('%', #{nickname}, '%') </if>
+            <if test="email != null and email != ''"> and email = #{email} </if>
+            <if test="mobile != null and mobile != ''"> and mobile = #{mobile} </if>
+            <if test="status != null"> and status = #{status} </if>
+            <if test="role != null and role != ''"> and role = #{role} </if>
         </where>
         order by id desc
         limit #{limit} offset #{offset}
+    </select>
+
+    <!-- 查询用户总数（用于分页） -->
+    <select id="selectImUserCount" parameterType="com.ruoyi.im.domain.ImUser" resultType="java.lang.Integer">
+        select count(*) from im_user
+        <where>
+            <if test="username != null and username != ''"> and username like concat('%', #{username}, '%') </if>
+            <if test="nickname != null and nickname != ''"> and nickname like concat('%', #{nickname}, '%') </if>
+            <if test="email != null and email != ''"> and email = #{email} </if>
+            <if test="mobile != null and mobile != ''"> and mobile = #{mobile} </if>
+            <if test="status != null"> and status = #{status} </if>
+            <if test="role != null and role != ''"> and role = #{role} </if>
+        </where>
     </select>
     
     <!-- 检查用户名是否存在 - 性能优化 -->

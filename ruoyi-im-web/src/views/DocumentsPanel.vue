@@ -50,7 +50,7 @@
           <div class="storage-bar">
             <div class="storage-fill" :style="{ width: storageDisplay.percent + '%' }"></div>
           </div>
-          <div class="storage-text">{{ storageDisplay.used }} / {{ storageDisplay.total }}</div>
+          <div class="storage-text">{{ storageDisplay.used }}&nbsp;/&nbsp;{{ storageDisplay.total }}</div>
         </div>
       </div>
     </aside>

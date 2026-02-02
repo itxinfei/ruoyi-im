@@ -754,6 +754,7 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
   min-height: 0;
   word-break: break-word;
 
+  // 钉钉风格滚动条：默认隐藏，悬停时显示
   &::-webkit-scrollbar {
     width: 4px;
   }
@@ -769,11 +770,20 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
   }
 
   &:hover::-webkit-scrollbar-thumb {
-    background: var(--dt-scrollbar-thumb);
+    background: rgba(0, 137, 255, 0.2);
   }
 
+  &:hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 137, 255, 0.3);
+  }
+
+  // 暗色模式
   .dark &:hover::-webkit-scrollbar-thumb {
-    background: var(--dt-scrollbar-thumb-dark);
+    background: rgba(0, 137, 255, 0.3);
+  }
+
+  .dark &:hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 137, 255, 0.4);
   }
 }
 

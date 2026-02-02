@@ -194,7 +194,7 @@
                   <span class="disk-value">{{ disk.usage }}%</span>
                 </div>
                 <div class="disk-size">
-                  <span>{{ formatFileSize(disk.used) }} / {{ formatFileSize(disk.total) }}</span>
+                  <span>{{ formatFileSize(disk.used) }}&nbsp;/&nbsp;{{ formatFileSize(disk.total) }}</span>
                 </div>
               </div>
             </div>
@@ -769,11 +769,6 @@ const getSuccessClass = (rate) => {
   if (rate >= 99) return 'stat-row-value--success'
   if (rate >= 95) return 'stat-row-value--warning'
   return 'stat-row-value--error'
-}
-
-// 格式化字节（兼容不同的精度需求）
-const formatBytes = (bytes) => {
-  return formatFileSize(bytes)
 }
 
 onMounted(() => {

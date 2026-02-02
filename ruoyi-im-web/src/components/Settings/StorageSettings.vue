@@ -1,8 +1,12 @@
 <template>
   <div class="storage-settings">
-    <div class="setting-group">
-      <h3 class="group-title">缓存管理</h3>
-      <div class="setting-list card-style">
+    <div class="setting-section">
+      <div class="section-header">
+        <h3 class="section-title">缓存管理</h3>
+        <p class="section-desc">管理本地缓存文件，释放磁盘空间</p>
+      </div>
+      
+      <div class="setting-card">
         <div class="setting-item">
           <div class="item-icon-wrapper">
             <div class="item-icon bg-orange">
@@ -14,14 +18,20 @@
             <div class="item-desc">当前占用空间: <span class="size-text">{{ cacheSize }}</span></div>
             <div class="item-tip">包含聊天对话中的图片、视频及文件预览</div>
           </div>
-          <el-button type="danger" plain size="small" @click="$emit('clear-cache')">清理缓存</el-button>
+          <div class="item-action">
+            <el-button type="danger" plain size="small" @click="$emit('clear-cache')">清理缓存</el-button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="setting-group">
-      <h3 class="group-title">数据备份与安全</h3>
-      <div class="setting-list card-style">
+    <div class="setting-section">
+      <div class="section-header">
+        <h3 class="section-title">数据备份与安全</h3>
+        <p class="section-desc">管理您的聊天记录备份和数据保留策略</p>
+      </div>
+      
+      <div class="setting-card">
         <div class="setting-item">
           <div class="item-icon-wrapper">
             <div class="item-icon bg-blue">
@@ -32,8 +42,12 @@
             <div class="item-title">导出聊天记录</div>
             <div class="item-desc">将所有本地聊天历史备份为 .json 文件</div>
           </div>
-          <el-button type="primary" plain size="small" @click="$emit('export-chat')">立即导出</el-button>
+          <div class="item-action">
+            <el-button type="primary" plain size="small" @click="$emit('export-chat')">立即导出</el-button>
+          </div>
         </div>
+        
+        <el-divider />
         
         <div class="setting-item">
           <div class="item-icon-wrapper">
@@ -45,7 +59,9 @@
             <div class="item-title">退出时保留本地数据</div>
             <div class="item-desc">开启后，退出登录将不会清除本地聊天缓存</div>
           </div>
-          <el-switch v-model="localSettings.data.keepOnLogout" @change="handleChange" />
+          <div class="item-action">
+            <el-switch v-model="localSettings.data.keepOnLogout" @change="handleChange" />
+          </div>
         </div>
       </div>
     </div>
@@ -85,31 +101,41 @@ const handleChange = () => {
 
 <style scoped lang="scss">
 .storage-settings {
-  padding-bottom: 20px;
+  padding: 0;
   width: 100%;
-  max-width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
 }
 
-.setting-group {
-  margin-bottom: 32px;
+.setting-section {
+  margin-bottom: 24px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
-.group-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dt-text-secondary);
-  margin-bottom: 16px;
-  padding-left: 4px;
+.section-header {
+  margin-bottom: 12px;
+  
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color-primary, #303133);
+    margin: 0 0 4px 0;
+  }
+  
+  .section-desc {
+    font-size: 12px;
+    color: var(--text-color-secondary, #909399);
+    margin: 0;
+  }
 }
 
-.card-style {
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 12px;
+.setting-card {
+  background: var(--bg-color-overlay, #fff);
+  border: 1px solid var(--border-color-light, #e4e7ed);
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .setting-item {
@@ -118,17 +144,10 @@ const handleChange = () => {
   justify-content: space-between;
   padding: 16px 20px;
   gap: 16px;
-  border-bottom: 1px solid var(--dt-border-lighter);
   transition: background-color 0.2s;
-  max-width: 100%;
-  box-sizing: border-box;
-
-  &:last-child {
-    border-bottom: none;
-  }
 
   &:hover {
-    background-color: var(--dt-bg-hover);
+    background-color: var(--bg-color-hover, #f5f7fa);
   }
 }
 
@@ -146,49 +165,56 @@ const handleChange = () => {
   font-size: 20px;
 
   &.bg-orange {
-    background: rgba(255, 153, 0, 0.1);
-    color: #ff9900;
+    background: rgba(230, 162, 60, 0.1);
+    color: #e6a23c;
   }
 
   &.bg-blue {
-    background: rgba(0, 137, 255, 0.1);
-    color: #0089FF;
+    background: rgba(64, 158, 255, 0.1);
+    color: #409eff;
   }
 
   &.bg-green {
-    background: rgba(82, 196, 26, 0.1);
-    color: #52c41a;
+    background: rgba(103, 194, 58, 0.1);
+    color: #67c23a;
   }
 }
 
 .item-content {
   flex: 1;
   min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
 }
 
 .item-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--dt-text-primary);
+  color: var(--text-color-primary, #303133);
   margin-bottom: 4px;
 }
 
 .item-desc {
-  font-size: 13px;
-  color: var(--dt-text-secondary);
+  font-size: 12px;
+  color: var(--text-color-secondary, #909399);
   margin-bottom: 4px;
 }
 
 .size-text {
-  color: var(--dt-brand-color);
+  color: var(--el-color-primary, #409eff);
   font-weight: 600;
 }
 
 .item-tip {
   font-size: 12px;
-  color: var(--dt-text-tertiary);
-  font-style: italic;
+  color: var(--text-color-secondary, #909399);
+  opacity: 0.8;
+}
+
+.item-action {
+  flex-shrink: 0;
+}
+
+:deep(.el-divider) {
+  margin: 0;
+  border-color: var(--border-color-lighter, #ebeef5);
 }
 </style>

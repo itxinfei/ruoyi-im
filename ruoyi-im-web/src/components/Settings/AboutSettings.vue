@@ -50,7 +50,6 @@ const openWebsite = () => {
   align-items: center;
   justify-content: center;
   padding-bottom: 40px;
-  max-width: 100%;
   box-sizing: border-box;
 }
 
@@ -69,14 +68,14 @@ const openWebsite = () => {
 .app-logo {
   width: 96px;
   height: 96px;
-  background: linear-gradient(135deg, var(--dt-brand-color) 0%, #0e5fd9 100%);
+  background: linear-gradient(135deg, var(--el-color-primary, #409eff) 0%, #0e5fd9 100%);
   border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 2;
-  box-shadow: 0 10px 20px rgba(0, 137, 255, 0.3);
+  box-shadow: 0 10px 20px rgba(64, 158, 255, 0.3);
 }
 
 .logo-icon {
@@ -93,7 +92,7 @@ const openWebsite = () => {
   transform: translate(-50%, -50%);
   width: 120px;
   height: 120px;
-  background: var(--dt-brand-color);
+  background: var(--el-color-primary, #409eff);
   opacity: 0.2;
   filter: blur(20px);
   border-radius: 50%;
@@ -103,17 +102,17 @@ const openWebsite = () => {
 .app-name {
   font-size: 24px;
   font-weight: 600;
-  color: var(--dt-text-primary);
+  color: var(--text-color-primary, #303133);
   margin: 0 0 12px;
 }
 
 .version-badge {
   display: inline-block;
   padding: 4px 12px;
-  background: var(--dt-bg-hover);
+  background: var(--bg-color-hover, #f5f7fa);
   border-radius: 100px;
   font-size: 13px;
-  color: var(--dt-text-secondary);
+  color: var(--text-color-secondary, #909399);
   margin-bottom: 32px;
   font-family: monospace;
 }
@@ -135,13 +134,13 @@ const openWebsite = () => {
   margin-bottom: 16px;
   
   .divider {
-    color: var(--dt-border-light);
+    color: var(--border-color-light, #e4e7ed);
   }
 }
 
 .copyright {
   font-size: 12px;
-  color: var(--dt-text-quaternary);
+  color: var(--text-color-placeholder, #c0c4cc);
   margin: 0;
 }
 </style>

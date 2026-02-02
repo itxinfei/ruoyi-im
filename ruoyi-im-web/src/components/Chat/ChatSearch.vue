@@ -34,7 +34,7 @@
             <span class="material-icons-outlined">chevron_left</span>
           </button>
           <span v-if="totalCount > 0" class="result-count">
-            {{ currentIndex + 1 }} / {{ totalCount }}
+            {{ currentIndex + 1 }}&nbsp;/&nbsp;{{ totalCount }}
           </span>
           <button v-if="totalCount > 0" class="nav-btn" @click="navigateNext" title="下一个">
             <span class="material-icons-outlined">chevron_right</span>

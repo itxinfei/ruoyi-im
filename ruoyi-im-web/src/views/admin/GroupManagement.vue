@@ -78,7 +78,7 @@
           <template #default="{ row }">
             <span class="member-count">
               {{ row.memberCount || 0 }}
-              <span class="member-max">/{{ row.maxMembers || 500 }}</span>
+              <span class="member-max">&nbsp;/&nbsp;{{ row.maxMembers || 500 }}</span>
             </span>
           </template>
         </el-table-column>

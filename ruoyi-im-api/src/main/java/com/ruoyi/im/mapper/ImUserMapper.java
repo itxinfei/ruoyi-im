@@ -1,5 +1,6 @@
 package com.ruoyi.im.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.im.domain.ImUser;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Set;
  *
  * @author ruoyi
  */
-public interface ImUserMapper {
+public interface ImUserMapper extends BaseMapper<ImUser> {
 
     /**
      * 查询IM用户

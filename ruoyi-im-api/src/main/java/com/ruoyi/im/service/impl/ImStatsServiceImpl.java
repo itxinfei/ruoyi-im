@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.domain.ImMessage;
@@ -54,31 +55,32 @@ public class ImStatsServiceImpl implements ImStatsService {
         Map<String, Object> overview = new HashMap<>();
 
         try {
-            // 用户统计
-            int totalUsers = imUserMapper.countImUsers();
+            // 用户统计 - 使用 count 查询
+            Long totalUsers = imUserMapper.selectCount(new LambdaQueryWrapper<>());
             overview.put("totalUsers", totalUsers);
 
-            // 群组统计
-            List<ImGroup> allGroups = imGroupMapper.selectImGroupList(new ImGroup());
-            overview.put("totalGroups", allGroups.size());
+            // 群组统计 - 使用 count 查询
+            Long totalGroups = imGroupMapper.selectCount(new LambdaQueryWrapper<>());
+            overview.put("totalGroups", totalGroups);
 
-            // 消息统计
-            List<ImMessage> allMessages = imMessageMapper.selectImMessageList(new ImMessage());
-            overview.put("totalMessages", allMessages.size());
+            // 消息统计 - 使用 count 查询
+            Long totalMessages = imMessageMapper.selectCount(new LambdaQueryWrapper<>());
+            overview.put("totalMessages", totalMessages);
 
-            // 今日消息数
+            // 今日消息数 - 使用数据库条件查询
             LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-            long todayCount = allMessages.stream()
-                    .filter(m -> m.getCreateTime() != null && !m.getCreateTime().isBefore(todayStart))
-                    .count();
+            Long todayCount = imMessageMapper.selectCount(
+                new LambdaQueryWrapper<ImMessage>()
+                    .ge(ImMessage::getCreateTime, todayStart)
+            );
             overview.put("todayMessages", todayCount);
 
-            // 活跃用户（最近7天登录）
+            // 活跃用户（最近7天登录）- 使用数据库条件查询
             LocalDateTime weekStart = LocalDateTime.now().minusDays(7);
-            List<ImUser> allUsers = imUserMapper.selectImUserList(new ImUser());
-            long activeUsers = allUsers.stream()
-                    .filter(u -> u.getLastOnlineTime() != null && !u.getLastOnlineTime().isBefore(weekStart))
-                    .count();
+            Long activeUsers = imUserMapper.selectCount(
+                new LambdaQueryWrapper<ImUser>()
+                    .ge(ImUser::getLastOnlineTime, weekStart)
+            );
             overview.put("activeUsers", activeUsers);
 
         } catch (Exception e) {
@@ -96,16 +98,17 @@ public class ImStatsServiceImpl implements ImStatsService {
         try {
             LocalDateTime since = LocalDateTime.now().minusDays(days);
 
-            // 活跃用户数（有登录记录）
-            List<ImUser> allUsers = imUserMapper.selectImUserList(new ImUser());
-            long activeUsers = allUsers.stream()
-                    .filter(u -> u.getLastOnlineTime() != null && !u.getLastOnlineTime().isBefore(since))
-                    .count();
+            // 活跃用户数（有登录记录）- 使用 count 查询
+            Long activeUsers = imUserMapper.selectCount(
+                new LambdaQueryWrapper<ImUser>()
+                    .ge(ImUser::getLastOnlineTime, since)
+            );
 
-            // 新增用户数
-            long newUsers = allUsers.stream()
-                    .filter(u -> u.getCreateTime() != null && !u.getCreateTime().isBefore(since))
-                    .count();
+            // 新增用户数 - 使用 count 查询
+            Long newUsers = imUserMapper.selectCount(
+                new LambdaQueryWrapper<ImUser>()
+                    .ge(ImUser::getCreateTime, since)
+            );
 
             stats.put("activeUsers", activeUsers);
             stats.put("newUsers", newUsers);
@@ -126,18 +129,18 @@ public class ImStatsServiceImpl implements ImStatsService {
         try {
             LocalDateTime since = LocalDateTime.now().minusDays(days);
 
-            // 活跃群组数（通过会话表查询群组类型的会话，且有最近消息的）
-            List<ImConversation> allConversations = imConversationMapper.selectImConversationList(new ImConversation());
-            long activeGroups = allConversations.stream()
-                    .filter(c -> StatusConstants.ConversationType.GROUP.equals(c.getType()))
-                    .filter(c -> c.getLastMessageTime() != null && !c.getLastMessageTime().isBefore(since))
-                    .count();
+            // 活跃群组数（通过会话表查询群组类型的会话，且有最近消息的）- 使用 count 查询
+            Long activeGroups = imConversationMapper.selectCount(
+                new LambdaQueryWrapper<ImConversation>()
+                    .eq(ImConversation::getType, StatusConstants.ConversationType.GROUP)
+                    .ge(ImConversation::getLastMessageTime, since)
+            );
 
-            // 新建群组数
-            List<ImGroup> allGroups = imGroupMapper.selectImGroupList(new ImGroup());
-            long newGroups = allGroups.stream()
-                    .filter(g -> g.getCreateTime() != null && !g.getCreateTime().isBefore(since))
-                    .count();
+            // 新建群组数 - 使用 count 查询
+            Long newGroups = imGroupMapper.selectCount(
+                new LambdaQueryWrapper<ImGroup>()
+                    .ge(ImGroup::getCreateTime, since)
+            );
 
             stats.put("activeGroups", activeGroups);
             stats.put("newGroups", newGroups);
@@ -166,12 +169,12 @@ public class ImStatsServiceImpl implements ImStatsService {
             LocalDateTime start = LocalDateTime.of(startDate, LocalTime.MIN);
             LocalDateTime end = LocalDateTime.of(endDate, LocalTime.MAX);
 
-            // 日期范围内的消息总数
-            List<ImMessage> allMessages = imMessageMapper.selectImMessageList(new ImMessage());
-            long messageCount = allMessages.stream()
-                    .filter(m -> m.getCreateTime() != null)
-                    .filter(m -> !m.getCreateTime().isBefore(start) && !m.getCreateTime().isAfter(end))
-                    .count();
+            // 日期范围内的消息总数 - 使用 count 查询
+            Long messageCount = imMessageMapper.selectCount(
+                new LambdaQueryWrapper<ImMessage>()
+                    .ge(ImMessage::getCreateTime, start)
+                    .le(ImMessage::getCreateTime, end)
+            );
 
             stats.put("messageCount", messageCount);
             stats.put("startDate", startDate);
@@ -208,31 +211,33 @@ public class ImStatsServiceImpl implements ImStatsService {
             // 计算起始时间
             LocalDateTime startTime = LocalDateTime.now().minusDays(days);
 
-            // 查询指定天数内的消息
-            LambdaQueryWrapper<ImMessage> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.ge(ImMessage::getCreateTime, startTime);
+            // 使用数据库 count 查询统计各类型消息
+            Long totalMessages = imMessageMapper.selectCount(
+                new LambdaQueryWrapper<ImMessage>()
+                    .ge(ImMessage::getCreateTime, startTime)
+            );
 
-            List<ImMessage> messages = imMessageMapper.selectList(queryWrapper);
+            Long textMessages = imMessageMapper.selectCount(
+                new LambdaQueryWrapper<ImMessage>()
+                    .ge(ImMessage::getCreateTime, startTime)
+                    .eq(ImMessage::getType, "TEXT")
+            );
 
-            // 总消息数
-            stats.put("totalMessages", messages.size());
+            Long imageMessages = imMessageMapper.selectCount(
+                new LambdaQueryWrapper<ImMessage>()
+                    .ge(ImMessage::getCreateTime, startTime)
+                    .eq(ImMessage::getType, "IMAGE")
+            );
 
-            // 文本消息数
-            long textMessages = messages.stream()
-                    .filter(m -> "TEXT".equals(m.getType()))
-                    .count();
+            Long fileMessages = imMessageMapper.selectCount(
+                new LambdaQueryWrapper<ImMessage>()
+                    .ge(ImMessage::getCreateTime, startTime)
+                    .eq(ImMessage::getType, "FILE")
+            );
+
+            stats.put("totalMessages", totalMessages);
             stats.put("textMessages", textMessages);
-
-            // 图片消息数
-            long imageMessages = messages.stream()
-                    .filter(m -> "IMAGE".equals(m.getType()))
-                    .count();
             stats.put("imageMessages", imageMessages);
-
-            // 文件消息数
-            long fileMessages = messages.stream()
-                    .filter(m -> "FILE".equals(m.getType()))
-                    .count();
             stats.put("fileMessages", fileMessages);
 
         } catch (Exception e) {
@@ -248,27 +253,33 @@ public class ImStatsServiceImpl implements ImStatsService {
         Map<String, Object> stats = new HashMap<>();
 
         try {
-            List<ImUser> allUsers = imUserMapper.selectImUserList(new ImUser());
+            // 总用户数 - 使用 count 查询
+            Long total = imUserMapper.selectCount(new LambdaQueryWrapper<>());
+            stats.put("total", total);
 
-            // 总用户数
-            stats.put("total", allUsers.size());
-
-            // 超级管理员数
-            long superAdminCount = allUsers.stream()
-                    .filter(u -> "SUPER_ADMIN".equals(u.getRole()))
-                    .count();
+            // 超级管理员数 - 使用 count 查询
+            Long superAdminCount = imUserMapper.selectCount(
+                new LambdaQueryWrapper<ImUser>()
+                    .eq(ImUser::getRole, "SUPER_ADMIN")
+            );
             stats.put("superAdminCount", superAdminCount);
 
-            // 管理员数
-            long adminCount = allUsers.stream()
-                    .filter(u -> "ADMIN".equals(u.getRole()))
-                    .count();
+            // 管理员数 - 使用 count 查询
+            Long adminCount = imUserMapper.selectCount(
+                new LambdaQueryWrapper<ImUser>()
+                    .eq(ImUser::getRole, "ADMIN")
+            );
             stats.put("adminCount", adminCount);
 
-            // 普通用户数
-            long userCount = allUsers.stream()
-                    .filter(u -> "USER".equals(u.getRole()) || u.getRole() == null)
-                    .count();
+            // 普通用户数 - 使用 count 查询
+            Long userCount = imUserMapper.selectCount(
+                new LambdaQueryWrapper<ImUser>()
+                    .and(wrapper -> wrapper
+                        .eq(ImUser::getRole, "USER")
+                        .or()
+                        .isNull(ImUser::getRole)
+                    )
+            );
             stats.put("userCount", userCount);
 
         } catch (Exception e) {

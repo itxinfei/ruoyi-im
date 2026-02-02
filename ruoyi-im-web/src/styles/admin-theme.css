@@ -508,6 +508,47 @@
   color: #FFFFFF;
 }
 
+// 钉钉风格：Dialog 按钮组样式优化
+.el-dialog__footer {
+  .el-button {
+    min-width: 80px;
+  }
+}
+
+// 钉钉风格：按钮悬停效果优化
+.el-button:not(.is-disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+}
+
+.el-button--primary:not(.is-disabled):hover {
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
+}
+
+// 钉钉风格：按钮点击反馈
+.el-button:not(.is-disabled):active {
+  transform: translateY(0);
+}
+
+// 钉钉风格：消息对话框标题样式
+.el-message-box__title {
+  font-weight: 600;
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-message-box__title {
+  color: var(--dt-text-primary-dark);
+}
+
+// 钉钉风格：消息对话框内容样式
+.el-message-box__content {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-message-box__content {
+  color: var(--dt-text-regular-dark);
+}
+
 [data-theme='dark'] .el-notification {
   background-color: var(--dt-card-bg);
   border-color: var(--dt-card-border);

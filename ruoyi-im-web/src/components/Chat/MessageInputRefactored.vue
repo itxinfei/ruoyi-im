@@ -29,7 +29,10 @@
     />
 
     <!-- 录音动画区域 -->
-    <div v-if="isVoiceMode" class="voice-recording-wrapper">
+    <div
+      v-if="isVoiceMode"
+      class="voice-recording-wrapper"
+    >
       <VoiceRecorder
         :max-length="60000"
         :min-length="1000"
@@ -66,8 +69,9 @@
 
     <!-- 输入核心区域 -->
     <div
+      ref="inputAreaRef"
       class="input-area"
-      :class="{ 'is-drag-over': isDragOver, 'is-voice-mode': isVoiceMode }"
+      :class="{ 'is-drag-over': isDragOver, 'is-voice-mode': isVoiceMode, 'is-focused': isFocused }"
       @dragenter="handleDragEnter"
       @dragleave="handleDragLeave"
       @dragover="handleDragOver"
@@ -79,19 +83,25 @@
         v-model="messageContent"
         class="message-input"
         :placeholder="inputPlaceholder"
+        :disabled="isVoiceMode"
         @input="handleInput"
         @keydown="handleKeydown"
         @paste="handlePaste"
         @focus="isFocused = true"
         @blur="isFocused = false"
-        :disabled="isVoiceMode"
-      ></textarea>
+      />
 
-      <div class="input-footer" v-if="!isVoiceMode">
+      <div
+        v-if="!isVoiceMode"
+        class="input-footer"
+      >
         <span class="hint-text">{{ sendShortcutHint }}</span>
         <div class="footer-actions">
           <!-- 语音输入切换按钮 -->
-          <el-tooltip :content="isVoiceMode ? '切换到文字输入' : '按住说话'" placement="top">
+          <el-tooltip
+            :content="isVoiceMode ? '切换到文字输入' : '按住说话'"
+            placement="top"
+          >
             <button
               class="footer-action-btn voice-btn"
               :class="{ active: isVoiceMode }"
@@ -107,7 +117,10 @@
             :disabled="!canSend || sending"
             @click="handleSend"
           >
-            <span v-if="!sending" class="material-icons-outlined send-icon">send</span>
+            <span
+              v-if="!sending"
+              class="material-icons-outlined send-icon"
+            >send</span>
             <span>{{ sending ? '发送中' : '发送' }}</span>
           </button>
         </div>
@@ -122,7 +135,11 @@
       @close="showEmojiPicker = false"
     />
 
-    <AtMemberPicker ref="atMemberPickerRef" :session-id="session?.id" @select="onAtSelect" />
+    <AtMemberPicker
+      ref="atMemberPickerRef"
+      :session-id="session?.id"
+      @select="onAtSelect"
+    />
 
     <CommandPalette
       :show="showCommandPalette"
@@ -133,27 +150,27 @@
 
     <!-- 隐藏的输入元素 -->
     <input
-      type="file"
       ref="videoInputRef"
+      type="file"
       accept="video/mp4,video/webm,video/ogg,video/quicktime"
       style="display: none"
       @change="handleVideoFileChange"
-    />
+    >
 
     <input
-      type="file"
       ref="imageInputRef"
+      type="file"
       accept="image/*"
       style="display: none"
       @change="handleImageFileChange"
-    />
+    >
 
     <input
-      type="file"
       ref="fileInputRef"
+      type="file"
       style="display: none"
       @change="handleFileInputChange"
-    />
+    >
 
     <!-- 对话框 -->
     <ScreenshotPreview
@@ -255,7 +272,7 @@ const currentUser = computed(() => store.getters['user/currentUser'])
 // 草稿管理
 const { messageContent, clear: clearDraft } = useInputDraft({
   session: computed(() => props.session),
-  onDraftChange: (data) => emit('draft-change', data)
+  onDraftChange: data => emit('draft-change', data)
 })
 
 // 高度调整
@@ -320,7 +337,7 @@ const handleLocation = () => {
   ElMessage.info('正在获取位置...')
 
   navigator.geolocation.getCurrentPosition(
-    (position) => {
+    position => {
       const { latitude, longitude } = position.coords
       emit('send-location', {
         latitude,
@@ -328,7 +345,7 @@ const handleLocation = () => {
         address: ''
       })
     },
-    (error) => {
+    error => {
       console.error('获取位置失败:', error)
       ElMessage.error('获取位置失败，请检查定位权限')
     },
@@ -336,7 +353,7 @@ const handleLocation = () => {
   )
 }
 
-const handleCommandExecute = (command) => {
+const handleCommandExecute = command => {
   switch (command.action) {
     case 'upload-file':
       triggerFileUpload()
@@ -384,17 +401,17 @@ const {
   deleteVoicePreview,
   cleanup: cleanupVoice
 } = useVoicePreview({
-  onSend: (data) => emit('send-voice', data)
+  onSend: data => emit('send-voice', data)
 })
 
 // 输入状态
 const { sendMyStopTypingStatus, handleInput: handleTypingInput } = useTypingIndicator({
   sessionId: computed(() => props.session?.id),
   currentUser,
-  sendTyping: (sessionId) => {
+  sendTyping: sessionId => {
     wsSendMessage({ type: 'typing', data: { conversationId: sessionId, userId: currentUser.value?.id } })
   },
-  sendStopTyping: (sessionId) => {
+  sendStopTyping: sessionId => {
     wsSendMessage({ type: 'stop-typing', data: { conversationId: sessionId, userId: currentUser.value?.id } })
   }
 })
@@ -402,6 +419,7 @@ const { sendMyStopTypingStatus, handleInput: handleTypingInput } = useTypingIndi
 // ========== 其他状态 ==========
 
 const textareaRef = ref(null)
+const inputAreaRef = ref(null)
 const atMemberPickerRef = ref(null)
 const imageInputRef = ref(null)
 const fileInputRef = ref(null)
@@ -441,20 +459,7 @@ const canSend = computed(() => {
   const notSending = !props.sending
 
   // 有文本内容或者有文件都可以发送
-  const result = (hasContent || hasFiles) && hasSession && isOnline && notSending
-  
-  // 调试日志
-  console.log('canSend 计算:', {
-    hasContent,
-    hasFiles,
-    pendingFilesCount: pendingFiles.value.length,
-    hasSession,
-    isOnline,
-    notSending,
-    result
-  })
-  
-  return result
+  return (hasContent || hasFiles) && hasSession && isOnline && notSending
 })
 
 // 输入框占位符（语音模式时显示不同的提示）
@@ -467,7 +472,7 @@ const inputPlaceholder = computed(() => {
 
 // 格式化回复预览内容（处理各种消息类型）
 const replyPreviewContent = computed(() => {
-  if (!props.replyingMessage) return ''
+  if (!props.replyingMessage) {return ''}
   return formatMessagePreviewFromObject(props.replyingMessage)
 })
 
@@ -475,12 +480,12 @@ const replyPreviewContent = computed(() => {
 
 const autoResize = () => {
   const tx = textareaRef.value
-  if (!tx) return
+  if (!tx) {return}
   tx.style.height = 'auto'
   tx.style.height = tx.scrollHeight + 'px'
 }
 
-const insertAt = (nickname) => {
+const insertAt = nickname => {
   const atText = `@${nickname} `
   const pos = textareaRef.value?.selectionStart || messageContent.value.length
   messageContent.value = messageContent.value.slice(0, pos) + atText + messageContent.value.slice(pos)
@@ -500,7 +505,7 @@ const handleInput = () => {
   // handleTypingInput(messageContent.value)
 }
 
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   const sendShortcut = store.state.im.settings.shortcuts.send || 'enter'
 
   if (e.key === 'Enter') {
@@ -524,7 +529,7 @@ const handleKeydown = (e) => {
 
 const handleSend = async () => {
   const content = messageContent.value.trim()
-  if (!content) return
+  if (!content) {return}
 
   if (props.editingMessage) {
     emit('edit-confirm', content)
@@ -537,21 +542,21 @@ const handleSend = async () => {
 
   messageContent.value = ''
   nextTick(() => {
-    if (textareaRef.value) textareaRef.value.style.height = 'auto'
+    if (textareaRef.value) {textareaRef.value.style.height = 'auto'}
     textareaRef.value?.focus()
   })
 }
 
 const handleSendVoice = () => {
   const result = voicePreview.value
-    if (!result) return
+    if (!result) {return}
 
   emit('send-voice', { file: result.file, duration: result.duration })
   deleteVoicePreview()
   isVoiceMode.value = false
 }
 
-const handleVoiceRecordComplete = (data) => {
+const handleVoiceRecordComplete = data => {
   // VoiceRecorder 发出 { blob, duration }
   // useVoicePreview 期望 { blob, url, duration }
   const voiceData = {
@@ -583,7 +588,7 @@ const toggleVoiceMode = () => {
 
 const toggleEmojiPicker = () => {
   if (!showEmojiPicker.value) {
-    const inputArea = document.querySelector('.input-area')
+    const inputArea = inputAreaRef.value
     if (inputArea) {
       const rect = inputArea.getBoundingClientRect()
       emojiPickerPosition.value = {
@@ -597,7 +602,7 @@ const toggleEmojiPicker = () => {
   }
 }
 
-const selectEmoji = (emoji) => {
+const selectEmoji = emoji => {
   const pos = textareaRef.value?.selectionStart || messageContent.value.length
   messageContent.value = messageContent.value.slice(0, pos) + emoji + messageContent.value.slice(pos)
   showEmojiPicker.value = false
@@ -623,7 +628,7 @@ const validateFile = (file, config) => {
 
 const handleImageFileChange = () => {
   const file = imageInputRef.value?.files?.[0]
-  if (!file) return
+  if (!file) {return}
 
   const config = {
     validTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
@@ -637,17 +642,12 @@ const handleImageFileChange = () => {
     pendingFiles.value = [...pendingFiles.value, file]
     showFilePreview.value = true
     imageInputRef.value.value = ''
-    
-    console.log('图片文件已添加到待上传列表:', {
-      fileName: file.name,
-      pendingFilesCount: pendingFiles.value.length
-    })
   }
 }
 
 const handleFileInputChange = () => {
   const file = fileInputRef.value?.files?.[0]
-  if (!file) return
+  if (!file) {return}
 
   const config = {
     maxSize: 100 * 1024 * 1024,
@@ -659,17 +659,12 @@ const handleFileInputChange = () => {
     pendingFiles.value = [...pendingFiles.value, file]
     showFilePreview.value = true
     fileInputRef.value.value = ''
-    
-    console.log('普通文件已添加到待上传列表:', {
-      fileName: file.name,
-      pendingFilesCount: pendingFiles.value.length
-    })
   }
 }
 
 const handleVideoFileChange = () => {
   const file = videoInputRef.value?.files?.[0]
-  if (!file) return
+  if (!file) {return}
 
   const config = {
     validTypes: ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'],
@@ -683,11 +678,6 @@ const handleVideoFileChange = () => {
     pendingFiles.value = [...pendingFiles.value, file]
     showFilePreview.value = true
     videoInputRef.value.value = ''
-    
-    console.log('视频文件已添加到待上传列表:', {
-      fileName: file.name,
-      pendingFilesCount: pendingFiles.value.length
-    })
   }
 }
 
@@ -701,7 +691,7 @@ const handleScreenshot = () => {
   showScreenshotGuide.value = true
 }
 
-const handleSendScreenshot = async (blob) => {
+const handleSendScreenshot = async blob => {
   const formData = new FormData()
   formData.append('file', blob, 'screenshot.png')
   emit('send-screenshot', formData)
@@ -709,8 +699,8 @@ const handleSendScreenshot = async (blob) => {
   screenshotData.value = null
 }
 
-const handleSendScreenshotFromGuide = async (dataURL) => {
-  if (!dataURL) return
+const handleSendScreenshotFromGuide = async dataURL => {
+  if (!dataURL) {return}
 
   try {
     const response = await fetch(dataURL)
@@ -729,7 +719,7 @@ const handleScreenshotPreviewClose = () => {
 
 // ========== 拖拽上传 ==========
 
-const handleDragEnter = (e) => {
+const handleDragEnter = e => {
   e.preventDefault()
   dragCounter++
   const files = e.dataTransfer?.files
@@ -746,26 +736,26 @@ const handleDragLeave = () => {
   }
 }
 
-const handleDragOver = (e) => {
+const handleDragOver = e => {
   e.preventDefault()
 }
 
-const handleDrop = (e) => {
+const handleDrop = e => {
   e.preventDefault()
   dragCounter = 0
   isDragOver.value = false
 
   const files = Array.from(e.dataTransfer?.files || [])
-  if (files.length === 0) return
+  if (files.length === 0) {return}
 
   // 添加到待上传列表
   pendingFiles.value = [...pendingFiles.value, ...files]
   showFilePreview.value = true
 }
 
-const handlePaste = (e) => {
+const handlePaste = e => {
   const items = e.clipboardData?.items
-  if (!items) return
+  if (!items) {return}
 
   const files = []
 
@@ -794,11 +784,11 @@ const handleAtMember = () => {
   }
 }
 
-const onAtSelect = (member) => insertAt(member.nickname || member.userName)
+const onAtSelect = member => insertAt(member.nickname || member.userName)
 
 const handleShowSmartReply = () => {
   const inputArea = document.querySelector('.chat-input-container')
-  if (!inputArea) return
+  if (!inputArea) {return}
 
   const rect = inputArea.getBoundingClientRect()
   smartReplyPosition.value = {
@@ -838,7 +828,7 @@ const handleFileUploadConfirm = async ({ files, description }) => {
   /**
    * 上传单个文件
    */
-  const uploadFile = async (file) => {
+  const uploadFile = async file => {
     uploading.add(file)
 
     try {
@@ -938,7 +928,7 @@ function emitPromise(eventName, data) {
 /**
  * 移除待上传文件
  */
-const handleRemovePendingFile = (index) => {
+const handleRemovePendingFile = index => {
   pendingFiles.value.splice(index, 1)
 
   // 如果没有文件了，关闭对话框
@@ -949,7 +939,7 @@ const handleRemovePendingFile = (index) => {
 
 // ========== 智能回复 ==========
 
-const handleSelectSmartReply = (replyText) => {
+const handleSelectSmartReply = replyText => {
   messageContent.value = replyText
   nextTick(() => {
     autoResize()
@@ -967,7 +957,7 @@ const handleScheduleSaved = () => {
  * 设置输入框内容
  * @param {string} content - 要设置的内容
  */
-const setContent = (content) => {
+const setContent = content => {
   messageContent.value = content || ''
   nextTick(() => {
     autoResize()
@@ -1000,7 +990,7 @@ onMounted(() => {
   store.dispatch('im/session/loadDrafts')
 
   // 注册全局截图快捷键
-  const handleGlobalKeydown = (e) => {
+  const handleGlobalKeydown = e => {
     const isWinShortcut = e.ctrlKey && e.altKey && e.key === 'a'
     const isMacShortcut = e.metaKey && e.shiftKey && e.key === 'a'
 
@@ -1062,7 +1052,7 @@ onUnmounted(() => {
   background: var(--dt-bg-tertiary);
   transition: background var(--dt-transition-base);
 
-  &:focus-within {
+  &.is-focused {
     background: var(--dt-bg-card);
     box-shadow: 0 0 0 2px var(--dt-brand-color);
   }
@@ -1070,7 +1060,7 @@ onUnmounted(() => {
   .dark & {
     background: var(--dt-bg-hover-dark);
 
-    &:focus-within {
+    &.is-focused {
       background: var(--dt-bg-card-dark);
       box-shadow: 0 0 0 2px var(--dt-brand-color);
     }
