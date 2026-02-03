@@ -349,7 +349,14 @@ const deptForm = ref({
 })
 
 const deptRules = {
-  name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }]
+  name: [
+    { required: true, message: '请输入部门名称', trigger: 'blur' },
+    { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' },
+    { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9（）()]+$/, message: '只能包含中文、字母、数字和括号', trigger: 'blur' }
+  ],
+  sort: [
+    { type: 'number', min: 0, max: 9999, message: '排序值在 0-9999 之间', trigger: 'blur' }
+  ]
 }
 
 // 计算属性
@@ -532,11 +539,19 @@ const handleDelete = async (data) => {
 const handleSubmit = async () => {
   await deptFormRef.value?.validate()
   const isEdit = !!deptForm.value.id
-  const api = isEdit ? updateDepartment : createDepartment
+  const deptId = deptForm.value.id
   const data = { ...deptForm.value }
   delete data.id
 
-  const res = await api(data.id || data, data)
+  let res
+  if (isEdit) {
+    // 更新部门：updateDepartment(id, data)
+    res = await updateDepartment(deptId, data)
+  } else {
+    // 创建部门：createDepartment(data)
+    res = await createDepartment(data)
+  }
+
   if (res.code === 200) {
     ElMessage.success(isEdit ? '更新成功' : '创建成功')
     dialogVisible.value = false
@@ -632,8 +647,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-/* 引入主题变量 */
-@import '@/styles/admin-theme.scss';
+
 
 /* ================================
    页面容器

@@ -230,6 +230,7 @@ import {
   RefreshRight
 } from '@element-plus/icons-vue'
 import { getUserList, updateUserStatus, deleteUser, createUser, updateUser, batchDeleteUsers, batchUpdateUserStatus } from '@/api/admin'
+import { exportToCSV } from '@/utils/export'
 
 // 搜索表单
 const searchForm = reactive({
@@ -273,10 +274,16 @@ const editForm = reactive({
 const editRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_]+$/, message: '只能包含字母、数字和下划线', trigger: 'blur' }
   ],
   nickname: [
-    { required: true, message: '请输入昵称', trigger: 'blur' }
+    { required: true, message: '请输入昵称', trigger: 'blur' },
+    { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
   ],
   mobile: [
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
@@ -286,7 +293,8 @@ const editRules = {
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+    { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' },
+    { pattern: /^(?=.*[a-zA-Z])(?=.*\d).+$/, message: '密码必须包含字母和数字', trigger: 'blur' }
   ]
 }
 
@@ -538,28 +546,18 @@ const handleExport = () => {
 
     const rows = userList.value.map(u => {
       return [
-        u.id,
-        JSON.stringify(String(u.username || "")),
-        JSON.stringify(String(u.nickname || "")),
-        JSON.stringify(String(u.email || "")),
-        JSON.stringify(String(u.mobile || "")),
+        u.id || "",
+        u.username || "",
+        u.nickname || "",
+        u.email || "",
+        u.mobile || "",
         roleMap[u.role] || u.role,
         statusMap[u.status] ?? u.status,
         u.createTime || ""
       ]
     })
 
-    const BOM = "\uFEFF"
-    const csvContent = BOM + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n")
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `用户列表_${new Date().toISOString().slice(0, 10)}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-
+    exportToCSV(headers, rows, "用户列表")
     ElMessage.success("导出成功")
   } catch (error) {
     ElMessage.error("导出失败")
@@ -575,8 +573,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-/* 引入主题变量 */
-@import '@/styles/admin-theme.scss';
+
 
 /* ================================
    页面容器

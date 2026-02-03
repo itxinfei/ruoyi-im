@@ -287,6 +287,7 @@ import {
   getAuditStatistics,
   deleteExpiredLogs
 } from '@/api/admin'
+import { exportToCSV } from '@/utils/export'
 
 const loading = ref(false)
 const logList = ref([])
@@ -418,31 +419,18 @@ const handleViewDetail = (row) => {
 // 导出
 const handleExport = () => {
   try {
-    // 导出当前日志列表为 CSV
     const headers = ['日志ID', '操作模块', '操作类型', '操作人', 'IP地址', '操作时间', '状态']
     const rows = logList.value.map(log => [
-      log.id,
-      `"${log.module || ''}"`,
-      `"${log.action || ''}"`,
-      `"${log.operatorName || ''}"`,
+      log.id || '',
+      log.module || '',
+      log.action || '',
+      log.operatorName || '',
       log.ip || '',
       log.createTime || '',
       log.status === 'success' ? '成功' : '失败'
     ])
 
-    // 添加 BOM 以支持中文
-    const BOM = '\uFEFF'
-    const csvContent = BOM + headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n')
-
-    // 创建 Blob 并下载
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `操作日志_${new Date().toISOString().slice(0, 10)}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-
+    exportToCSV(headers, rows, '操作日志')
     ElMessage.success('导出成功')
   } catch (error) {
     ElMessage.error('导出失败')
@@ -536,8 +524,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-/* 引入主题变量 */
-@import '@/styles/admin-theme.scss';
+
 
 /* ================================
    页面容器

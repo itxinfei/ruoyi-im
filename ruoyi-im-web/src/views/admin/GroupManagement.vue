@@ -388,6 +388,7 @@ import {
 } from '@element-plus/icons-vue'
 import {
   getGroupList,
+  createGroup,
   deleteGroup,
   updateGroup,
   batchDeleteGroups,
@@ -400,6 +401,7 @@ import {
   getUserOptions,
   transferGroupOwner
 } from '@/api/admin'
+import { exportToCSV } from '@/utils/export'
 
 // 搜索表单
 const searchForm = reactive({
@@ -439,7 +441,11 @@ const editForm = reactive({
 const editRules = {
   name: [
     { required: true, message: '请输入群名称', trigger: 'blur' },
-    { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
+    { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' },
+    { pattern: /^[\u4e00-\u9fa5a-zA-Z0-9\s]+$/, message: '只能包含中文、字母、数字和空格', trigger: 'blur' }
+  ],
+  description: [
+    { max: 200, message: '描述不能超过 200 个字符', trigger: 'blur' }
   ],
   maxMembers: [
     { required: true, message: '请输入成员上限', trigger: 'blur' },
@@ -568,14 +574,21 @@ const handleSubmit = async () => {
 
   submitting.value = true
   try {
-    const res = await updateGroup(editForm)
+    let res
+    if (editMode.value === 'create') {
+      // 创建群组
+      res = await createGroup(editForm)
+    } else {
+      // 更新群组
+      res = await updateGroup(editForm.id, editForm)
+    }
     if (res.code === 200) {
       ElMessage.success(editMode.value === 'create' ? '创建成功' : '保存成功')
       editDialogVisible.value = false
       loadGroups()
     }
   } catch (error) {
-    ElMessage.error('操作失败')
+    ElMessage.error(editMode.value === 'create' ? '创建失败' : '保存失败')
   } finally {
     submitting.value = false
   }
@@ -915,30 +928,17 @@ const handleAddMemberSubmit = async () => {
 // 导出数据
 const handleExport = () => {
   try {
-    // 导出当前群组列表为 CSV
     const headers = ['群组ID', '群组名称', '群主ID', '成员数量', '类型', '创建时间']
     const rows = groupList.value.map(g => [
-      g.id,
-      `"${g.name || ''}"`, // 名称加引号防止CSV格式问题
-      g.ownerId,
+      g.id || '',
+      g.name || '',
+      g.ownerId || '',
       g.memberCount || 0,
       g.type || '',
       g.createTime || ''
     ])
 
-    // 添加 BOM 以支持中文
-    const BOM = '\uFEFF'
-    const csvContent = BOM + headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n')
-
-    // 创建 Blob 并下载
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `群组列表_${new Date().toISOString().slice(0, 10)}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-
+    exportToCSV(headers, rows, '群组列表')
     ElMessage.success('导出成功')
   } catch (error) {
     ElMessage.error('导出失败')
@@ -951,8 +951,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-/* 引入主题变量 */
-@import '@/styles/admin-theme.scss';
+
 
 /* ================================
    页面容器

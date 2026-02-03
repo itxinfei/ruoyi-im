@@ -176,6 +176,19 @@ export function getGroupDetail(id) {
 }
 
 /**
+ * 创建群组
+ * @param {Object} data - 群组信息 { name, description, avatar, maxMembers, allowInvite, needApproval }
+ * @returns {Promise}
+ */
+export function createGroup(data) {
+  return request({
+    url: '/api/admin/groups',
+    method: 'post',
+    data
+  })
+}
+
+/**
  * 更新群组信息
  * @param {Number} id - 群组ID
  * @param {Object} data - 群组信息
