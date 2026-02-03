@@ -107,7 +107,7 @@ import request from '@/api/request'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import {
   ChatDotRound, User, Grid, Cloudy, Calendar, CircleCheck,
-  Document, Message, Search, Setting
+  Document, Message, Search, Setting, Shop
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -163,6 +163,7 @@ const navModules = ref([
   { key: 'todo', label: '待办', icon: CircleCheck },
   { key: 'approval', label: '审批', icon: Document },
   { key: 'mail', label: '邮箱', icon: Message },
+  { key: 'appcenter', label: '应用中心', icon: Shop },
   { key: 'assistant', label: 'AI助理', icon: ChatDotRound }
 ])
 
@@ -314,7 +315,7 @@ function handleOpenSearch() {
   color: rgba(255, 255, 255, 0.85);
   animation: fadeInUp 0.4s var(--dt-ease-out) both;
 
-  @for $i from 1 through 9 {
+  @for $i from 1 through 10 {
     &:nth-child(#{$i}) {
       animation-delay: #{0.05 * $i}s;
     }

@@ -48,6 +48,8 @@
         <ApprovalPanel v-if="activeModule === 'approval'" />
         <!-- 邮箱 -->
         <MailPanel v-if="activeModule === 'mail'" />
+        <!-- 应用中心 -->
+        <AppCenter v-if="activeModule === 'appcenter'" />
         <!-- AI助理 -->
         <AssistantPanel v-if="activeModule === 'assistant'" />
       </main>
@@ -83,6 +85,7 @@ const CalendarPanel = defineAsyncComponent(() => import('./CalendarPanel.vue'))
 const TodoPanel = defineAsyncComponent(() => import('./TodoPanel.vue'))
 const ApprovalPanel = defineAsyncComponent(() => import('./ApprovalPanel.vue'))
 const MailPanel = defineAsyncComponent(() => import('./MailPanel.vue'))
+const AppCenter = defineAsyncComponent(() => import('./AppCenter.vue'))
 const AssistantPanel = defineAsyncComponent(() => import('./AssistantPanel.vue'))
 
 // 异步加载弹窗组件（按需加载）

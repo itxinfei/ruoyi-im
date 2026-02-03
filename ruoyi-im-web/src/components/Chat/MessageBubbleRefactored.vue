@@ -5,11 +5,7 @@
  * 提高可维护性和可测试性
  */
 <template>
-  <el-dropdown
-    trigger="contextmenu"
-    @command="handleCommand"
-    popper-class="message-context-menu"
-  >
+  <div class="message-bubble-wrapper">
     <div
       ref="bubbleRef"
       class="message-bubble"
@@ -21,7 +17,7 @@
       @mousedown="handleMouseHold"
       @mouseup="handleMouseRelease"
       @mouseleave="handleMouseRelease"
-    >
+      @contextmenu.prevent="handleContextMenu"
       <!-- 消息内容区域 -->
       <div class="bubble-content">
         <!-- 文本消息 -->
@@ -122,44 +118,14 @@
     </div>
 
     <!-- 右键菜单 -->
-    <template #dropdown>
-      <el-dropdown-menu>
-        <el-dropdown-item command="copy" v-if="message.type === 'TEXT'">
-          <el-icon><CopyDocument /></el-icon> <span>复制</span>
-        </el-dropdown-item>
-        <el-dropdown-item command="reply">
-          <el-icon><ChatLineSquare /></el-icon> <span>回复</span>
-        </el-dropdown-item>
-        <el-dropdown-item command="emoji" divided>
-          <span class="material-icons-outlined emoji-icon">sentiment_satisfied_alt</span>
-          <span>表情表态</span>
-        </el-dropdown-item>
-        <el-dropdown-item command="at" v-if="!message.isOwn && sessionType === 'GROUP'">
-          <el-icon><InfoFilled /></el-icon> <span>@ 提及</span>
-        </el-dropdown-item>
-        <el-dropdown-item command="forward" divided>
-          <el-icon><Share /></el-icon> <span>转发</span>
-        </el-dropdown-item>
-        <el-dropdown-item command="todo">
-          <el-icon><Checked /></el-icon> <span>设为待办</span>
-        </el-dropdown-item>
-        <el-dropdown-item command="pin" :class="{ 'is-pinned': message.isPinned }">
-          <el-icon><Top /></el-icon> <span>{{ message.isPinned ? '取消置顶' : '置顶' }}</span>
-        </el-dropdown-item>
-
-        <el-dropdown-item v-if="message.isOwn && canRecall" command="recall" divided class="danger">
-          <el-icon><RefreshLeft /></el-icon>
-          <span>撤回{{ recallTimeDisplay ? ` (${recallTimeDisplay})` : '' }}</span>
-        </el-dropdown-item>
-        <el-dropdown-item v-if="message.isOwn" command="delete" class="danger">
-          <el-icon><Delete /></el-icon> <span>删除</span>
-        </el-dropdown-item>
-        <el-dropdown-item v-if="message.isOwn && message.type === 'TEXT'" command="edit" divided>
-          <el-icon><Edit /></el-icon> <span>编辑</span>
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </template>
-  </el-dropdown>
+    <ContextMenu
+      :show="contextMenuVisible"
+      :x="contextMenuX"
+      :y="contextMenuY"
+      :items="contextMenuItems"
+      @select="handleContextMenuSelect"
+      @update:show="contextMenuVisible = $event"
+    />
 
   <!-- AI表情表态浮窗 -->
   <AiEmojiReaction
@@ -211,6 +177,7 @@ import NudgeMessageBubble from './NudgeMessageBubble.vue'
 import CombineMessagePreview from './CombineMessagePreview.vue'
 import AiEmojiReaction from './AiEmojiReaction.vue'
 import ReadInfoDialog from './ReadInfoDialog.vue'
+import ContextMenu from '@/components/Common/ContextMenu.vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -262,6 +229,121 @@ const showReadInfoDialog = ref(false)
 
 const handleAiEmojiSelect = (emoji) => {
   addReaction(emoji)
+}
+
+// ==================== 右键菜单 ====================
+
+const contextMenuVisible = ref(false)
+const contextMenuX = ref(0)
+const contextMenuY = ref(0)
+
+// 右键菜单项配置
+const contextMenuItems = computed(() => {
+  const msg = props.message
+  const items = []
+
+  // 复制（仅文本消息）
+  if (msg.type === 'TEXT') {
+    items.push({
+      label: '复制',
+      icon: 'content_copy',
+      value: 'copy'
+    })
+  }
+
+  // 回复
+  items.push({
+    label: '回复',
+    icon: 'chat_bubble',
+    value: 'reply'
+  })
+
+  // 表情表态
+  items.push({
+    label: '表情表态',
+    icon: 'sentiment_satisfied_alt',
+    value: 'emoji'
+  })
+
+  // @提及（仅群聊且非自己消息）
+  if (!msg.isOwn && props.sessionType === 'GROUP') {
+    items.push({
+      label: '@ 提及',
+      icon: 'alternate_email',
+      value: 'at'
+    })
+  }
+
+  // 分隔线
+  items.push({ divider: true })
+
+  // 转发
+  items.push({
+    label: '转发',
+    icon: 'forward',
+    value: 'forward'
+  })
+
+  // 设为待办
+  items.push({
+    label: '设为待办',
+    icon: 'check_circle',
+    value: 'todo'
+  })
+
+  // 置顶/取消置顶
+  items.push({
+    label: msg.isPinned ? '取消置顶' : '置顶',
+    icon: 'push_pin',
+    value: 'pin'
+  })
+
+  // 分隔线
+  items.push({ divider: true })
+
+  // 撤回（仅自己消息且可撤回）
+  if (msg.isOwn && canRecallBubble.value) {
+    items.push({
+      label: `撤回${recallTimeDisplay.value ? ` (${recallTimeDisplay.value})` : ''}`,
+      icon: 'refresh',
+      value: 'recall',
+      danger: true
+    })
+  }
+
+  // 删除（仅自己消息）
+  if (msg.isOwn) {
+    items.push({
+      label: '删除',
+      icon: 'delete',
+      value: 'delete',
+      danger: true
+    })
+  }
+
+  // 编辑（仅自己消息且为文本消息）
+  if (msg.isOwn && msg.type === 'TEXT') {
+    items.push({
+      label: '编辑',
+      icon: 'edit',
+      value: 'edit'
+    })
+  }
+
+  return items
+})
+
+// 处理右键菜单触发
+const handleContextMenu = (e) => {
+  contextMenuX.value = e.clientX
+  contextMenuY.value = e.clientY
+  contextMenuVisible.value = true
+}
+
+// 处理右键菜单选择
+const handleContextMenuSelect = (item) => {
+  handleCommand(item.value, props.message)
+  contextMenuVisible.value = false
 }
 
 /**
@@ -343,6 +425,12 @@ const canRecall = computed(() => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+
+// 包装器
+.message-bubble-wrapper {
+  position: relative;
+  display: inline-flex;
+}
 
 .message-bubble {
   position: relative;
@@ -448,25 +536,6 @@ const canRecall = computed(() => {
 .unknown-type {
   color: var(--dt-text-tertiary);
   font-style: italic;
-}
-
-// 右键菜单图标样式
-:deep(.message-context-menu) {
-  .emoji-icon {
-    font-size: 16px;
-    color: #f5222d;
-    margin-right: 8px;
-  }
-
-  .is-pinned {
-    .el-icon__text {
-      color: var(--dt-brand-color);
-    }
-  }
-
-  .danger {
-    color: var(--dt-error-color);
-  }
 }
 
 // 暗色模式适配（钉钉风格）

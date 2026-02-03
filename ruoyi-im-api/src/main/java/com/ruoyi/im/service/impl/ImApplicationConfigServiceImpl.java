@@ -9,7 +9,7 @@ import com.ruoyi.im.mapper.ImApplicationConfigMapper;
 import com.ruoyi.im.service.ImApplicationConfigService;
 import com.ruoyi.im.dto.app.ImAppConfigRequest.ConfigItem;
 import com.ruoyi.im.util.SecurityUtils;
-import com.ruoyi.im.util.StringUtil;
+import com.ruoyi.im.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,7 +42,7 @@ public class ImApplicationConfigServiceImpl implements ImApplicationConfigServic
         List<ImApplicationConfig> configs = getAppConfigs(appId);
         return configs.stream()
                 .collect(Collectors.groupingBy(
-                        config -> StringUtil.isNullOrEmpty(config.getConfigGroup()) ? "默认" : config.getConfigGroup()
+                        config -> StringUtils.isBlank(config.getConfigGroup()) ? "默认" : config.getConfigGroup()
                 ));
     }
 
@@ -138,7 +138,7 @@ public class ImApplicationConfigServiceImpl implements ImApplicationConfigServic
 
     @Override
     public boolean validateConfigItem(ConfigItem configItem) {
-        if (StringUtil.isNullOrEmpty(configItem.getKey())) {
+        if (StringUtils.isBlank(configItem.getKey())) {
             return false;
         }
 

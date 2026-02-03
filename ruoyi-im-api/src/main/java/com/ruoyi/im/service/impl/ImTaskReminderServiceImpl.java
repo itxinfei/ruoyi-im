@@ -6,7 +6,7 @@ import com.ruoyi.im.domain.ImTask;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImTaskMapper;
 import com.ruoyi.im.service.ImTaskReminderService;
-import com.ruoyi.im.service.ImNotificationService;
+import com.ruoyi.im.service.ImSystemNotificationService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class ImTaskReminderServiceImpl implements ImTaskReminderService {
     private ImTaskMapper taskMapper;
 
     @Resource
-    private ImNotificationService notificationService;
+    private final ImSystemNotificationService notificationService;
 
     @Resource
     private ImWebSocketBroadcastService broadcastService;

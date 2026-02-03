@@ -232,67 +232,14 @@
     </div>
 
     <!-- 右键菜单 -->
-    <div v-if="contextMenu.show" class="context-menu" :style="contextMenuStyle">
-      <div class="menu-item" @click="handleMarkAsRead">
-        <span class="material-icons-outlined item-icon">done_all</span>
-        标记已读
-      </div>
-      <!-- 归档会话选项 -->
-      <div class="menu-item" @click="handleArchiveSession">
-        <span class="material-icons-outlined item-icon">archive</span>
-        {{ contextMenu.session?.isArchived ? '取消归档' : '归档会话' }}
-      </div>
-      <div class="menu-item" @click="handleTogglePin">
-        <span class="material-icons-outlined item-icon">
-          {{ contextMenu.session?.isPinned ? 'push_pin' : 'push_pin' }}
-        </span>
-        {{ contextMenu.session?.isPinned ? '取消置顶' : '置顶会话' }}
-      </div>
-      <div class="menu-item" @click="handleToggleMute">
-        <span class="material-icons-outlined item-icon">
-          {{ contextMenu.session?.isMuted ? 'notifications' : 'notifications_off' }}
-        </span>
-        {{ contextMenu.session?.isMuted ? '取消免打扰' : '消息免打扰' }}
-      </div>
-      <div class="menu-divider"></div>
-      <!-- 移动到分组子菜单 -->
-      <el-dropdown
-        v-if="!contextMenu.session?.isPinned"
-        trigger="hover"
-        placement="right"
-        @command="handleMoveSessionToGroup"
-      >
-        <div class="menu-item has-submenu">
-          <span class="material-icons-outlined item-icon">folder</span>
-          移动到分组
-          <span class="material-icons-outlined submenu-arrow">chevron_right</span>
-        </div>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item
-              v-for="group in customGroups"
-              :key="group.id"
-              :command="group.id"
-            >
-              <span class="material-icons-outlined item-icon">folder</span>
-              {{ group.name }}
-            </el-dropdown-item>
-            <el-dropdown-item
-              v-if="customGroups.length === 0"
-              disabled
-            >
-              <span class="material-icons-outlined item-icon">info</span>
-              暂无自定义分组
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      <div class="menu-divider" v-if="!contextMenu.session?.isPinned"></div>
-      <div class="menu-item danger" @click="handleDeleteSession">
-        <span class="material-icons-outlined item-icon">delete</span>
-        删除会话
-      </div>
-    </div>
+    <ContextMenu
+      :show="contextMenu.show"
+      :x="contextMenu.x"
+      :y="contextMenu.y"
+      :items="contextMenuItems"
+      @select="handleContextMenuSelect"
+      @update:show="contextMenu.show = $event"
+    />
 
     <!-- 创建群组对话框 -->
     <CreateGroupDialog
@@ -311,6 +258,7 @@ import GlobalSearchDialog from '@/components/Common/GlobalSearchDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
+import ContextMenu from '@/components/Common/ContextMenu.vue'
 import { sendFriendRequest } from '@/api/im/contact'
 import { joinGroup } from '@/api/im/group'
 import { formatChatTime } from '@/utils/format'
@@ -755,94 +703,155 @@ const markMentionsAsRead = async (messageIds) => {
 const formatTime = formatChatTime
 
 // 右键菜单状态
-const contextMenu = reactive({
+const contextMenu = ref({
   show: false,
   x: 0,
   y: 0,
   session: null
 })
 
-const contextMenuStyle = computed(() => {
-  if (!contextMenu.show) return {}
-  
-  // 获取菜单尺寸
-  const menuWidth = 200
-  const menuHeight = contextMenu.session?.isPinned ? 150 : 200
-  
-  // 使用鼠标位置
-  let x = contextMenu.x
-  let y = contextMenu.y
-  
-  // 边界检测
-  const padding = 10
-  const maxX = window.innerWidth - menuWidth - padding
-  const maxY = window.innerHeight - menuHeight - padding
-  
-  x = Math.max(padding, Math.min(x, maxX))
-  y = Math.max(padding, Math.min(y, maxY))
-  
-  return {
-    left: `${x}px`,
-    top: `${y}px`
+// 右键菜单项配置
+const contextMenuItems = computed(() => {
+  const session = contextMenu.value.session
+  if (!session) return []
+
+  const items = [
+    {
+      label: '标记已读',
+      icon: 'done_all',
+      value: 'markRead',
+      disabled: !session.unreadCount
+    },
+    {
+      label: session.isArchived ? '取消归档' : '归档会话',
+      icon: 'archive',
+      value: 'archive'
+    },
+    {
+      label: session.isPinned ? '取消置顶' : '置顶会话',
+      icon: session.isPinned ? 'push_pin' : 'push_pin',
+      value: 'pin'
+    },
+    {
+      label: session.isMuted ? '取消免打扰' : '消息免打扰',
+      icon: session.isMuted ? 'notifications' : 'notifications_off',
+      value: 'mute'
+    }
+  ]
+
+  // 添加分组选项（仅当会话未置顶时）
+  if (!session.isPinned) {
+    items.push({ divider: true })
+
+    // 添加分组子菜单项
+    if (customGroups.value.length > 0) {
+      customGroups.value.forEach(group => {
+        items.push({
+          label: group.name,
+          icon: 'folder',
+          value: `moveToGroup:${group.id}`
+        })
+      })
+    } else {
+      items.push({
+        label: '暂无自定义分组',
+        icon: 'info',
+        value: 'noGroup',
+        disabled: true
+      })
+    }
+
+    items.push({ divider: true })
   }
+
+  // 删除选项
+  items.push({
+    label: '删除会话',
+    icon: 'delete',
+    value: 'delete',
+    danger: true
+  })
+
+  return items
 })
 
 const handleContextMenu = (e, session) => {
   e.preventDefault()
   e.stopPropagation()
-  
-  contextMenu.show = true
-  contextMenu.session = session
-  
-  // 使用鼠标右击位置
-  contextMenu.x = e.clientX
-  contextMenu.y = e.clientY
+
+  contextMenu.value = {
+    show: true,
+    x: e.clientX,
+    y: e.clientY,
+    session
+  }
 }
 
-const hideContextMenu = () => {
-  contextMenu.show = false
+// 右键菜单选择处理
+const handleContextMenuSelect = async (item) => {
+  const session = contextMenu.value.session
+  if (!session) return
+
+  switch (item.value) {
+    case 'markRead':
+      await handleMarkAsRead(session)
+      break
+    case 'archive':
+      await handleArchiveSession(session)
+      break
+    case 'pin':
+      await handleTogglePin(session)
+      break
+    case 'mute':
+      await handleToggleMute(session)
+      break
+    case 'delete':
+      await handleDeleteSession(session)
+      break
+    case 'noGroup':
+      // 无操作，只是提示
+      break
+    default:
+      // 处理移动到分组
+      if (item.value?.startsWith('moveToGroup:')) {
+        const groupId = item.value.split(':')[1]
+        await handleMoveSessionToGroup(groupId)
+      }
+  }
+
+  contextMenu.value.show = false
 }
 
 // 会话操作
-const handleMarkAsRead = async () => {
-  if (!contextMenu.session) return
-  await store.dispatch('im/session/markSessionAsRead', contextMenu.session.id)
-  hideContextMenu()
+const handleMarkAsRead = async (session) => {
+  await store.dispatch('im/session/markSessionAsRead', session.id)
 }
 
-const handleTogglePin = async () => {
-  if (!contextMenu.session) return
-  const pinned = !contextMenu.session.isPinned
-  await store.dispatch('im/session/pinSession', { sessionId: contextMenu.session.id, pinned })
+const handleTogglePin = async (session) => {
+  const pinned = !session.isPinned
+  await store.dispatch('im/session/pinSession', { sessionId: session.id, pinned })
   ElMessage.success(pinned ? '已置顶' : '已取消置顶')
-  hideContextMenu()
 }
 
-const handleToggleMute = async () => {
-  if (!contextMenu.session) return
-  const muted = !contextMenu.session.isMuted
-  await store.dispatch('im/session/muteSession', { sessionId: contextMenu.session.id, muted })
+const handleToggleMute = async (session) => {
+  const muted = !session.isMuted
+  await store.dispatch('im/session/muteSession', { sessionId: session.id, muted })
   ElMessage.success(muted ? '已开启免打扰' : '已关闭免打扰')
-  hideContextMenu()
 }
 
-const handleDeleteSession = () => {
-  if (!contextMenu.session) return
+const handleDeleteSession = async (session) => {
   ElMessageBox.confirm('确定要删除该会话吗？历史消息将保留。', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
-    await store.dispatch('im/session/deleteSession', contextMenu.session.id)
+    await store.dispatch('im/session/deleteSession', session.id)
     ElMessage.success('已删除')
-    hideContextMenu()
   }).catch(() => {})
 }
 
 // 归档/取消归档会话
-const handleArchiveSession = async () => {
-  if (!contextMenu.session) return
-  const session = contextMenu.session
+const handleArchiveSession = async (session) => {
   const isArchived = session.isArchived || false
 
   try {
@@ -851,7 +860,6 @@ const handleArchiveSession = async () => {
       archived: !isArchived
     })
     ElMessage.success(isArchived ? '已取消归档' : '会话已归档')
-    hideContextMenu()
   } catch (error) {
     ElMessage.error('操作失败，请重试')
   }
@@ -975,11 +983,10 @@ onMounted(() => {
   loadMentions()
   // 加载归档数量
   loadArchivedCount()
-  window.addEventListener('click', hideContextMenu)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('click', hideContextMenu)
+  // 清理工作
 })
 </script>
 
@@ -1596,75 +1603,6 @@ onUnmounted(() => {
 }
 
 // ============================================================================
-// 右键菜单 - 钉钉风格简化版
-// ============================================================================
-.context-menu {
-  position: fixed;
-  background: var(--dt-bg-dropdown);
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
-  padding: 4px 0;
-  min-width: 140px;
-  z-index: 2000;
-  border: 1px solid var(--dt-border-light);
-  animation: menuFadeIn 0.15s ease-out;
-
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 12px;
-    font-size: 13px;
-    color: var(--dt-text-primary);
-    cursor: pointer;
-    border-radius: 0;
-    transition: background-color 0.15s ease;
-    font-weight: 400;
-
-    .item-icon {
-      font-size: 16px;
-      color: var(--dt-text-tertiary);
-    }
-
-    &:hover {
-      background: var(--dt-bg-session-hover);
-      color: var(--dt-text-primary);
-
-      .item-icon {
-        color: var(--dt-text-secondary);
-      }
-    }
-
-    &.danger {
-      color: var(--dt-error-color);
-
-      .item-icon {
-        color: var(--dt-error-color);
-      }
-
-      &:hover {
-        background: var(--dt-error-bg);
-      }
-    }
-
-    &.has-submenu {
-      justify-content: space-between;
-
-      .submenu-arrow {
-        font-size: 14px;
-        color: var(--dt-text-quaternary);
-      }
-    }
-  }
-
-  .menu-divider {
-    height: 1px;
-    background: var(--dt-border-light);
-    margin: 4px 0;
-  }
-}
-
-// ============================================================================
 // 暗色模式
 // ============================================================================
 .dark .session-panel {
@@ -1720,32 +1658,6 @@ onUnmounted(() => {
 
 .dark .unread-badge {
   border-color: var(--dt-bg-card-dark);
-}
-
-.dark .context-menu {
-  background: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-
-  .menu-item {
-    color: var(--dt-text-primary-dark);
-
-    .item-icon {
-      color: #bdc3c9;
-    }
-
-    &:hover {
-      background: var(--dt-bg-hover-dark);
-      color: #0089FF;
-
-      .item-icon {
-        color: #0089FF;
-      }
-    }
-  }
-
-  .menu-divider {
-    background: var(--dt-border-dark);
-  }
 }
 
 // ============================================================================

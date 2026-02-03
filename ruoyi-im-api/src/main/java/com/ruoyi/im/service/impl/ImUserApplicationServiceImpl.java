@@ -10,7 +10,7 @@ import com.ruoyi.im.mapper.ImApplicationMapper;
 import com.ruoyi.im.mapper.ImUserApplicationMapper;
 import com.ruoyi.im.service.ImUserApplicationService;
 import com.ruoyi.im.dto.app.ImAppInstallRequest;
-import com.ruoyi.im.util.StringUtil;
+import com.ruoyi.im.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -134,7 +134,7 @@ public class ImUserApplicationServiceImpl implements ImUserApplicationService {
         }
 
         String configJson = userApp.getAppConfig();
-        if (StringUtil.isNullOrEmpty(configJson)) {
+        if (StringUtils.isBlank(configJson)) {
             return new HashMap<>();
         }
 

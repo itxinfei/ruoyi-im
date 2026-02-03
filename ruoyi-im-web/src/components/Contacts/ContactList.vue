@@ -158,26 +158,14 @@
     </el-dialog>
 
     <!-- 联系人右键菜单 -->
-    <transition name="el-fade-in">
-      <div
-        v-if="contextMenuVisible"
-        class="context-menu"
-        :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
-      >
-        <div class="context-menu-item" @click="handleMoveToGroup">
-          <el-icon><FolderOpened /></el-icon>
-          <span>移动到分组</span>
-        </div>
-        <div class="context-menu-item" @click="handleEditRemark">
-          <el-icon><Edit /></el-icon>
-          <span>修改备注</span>
-        </div>
-        <div class="context-menu-item danger" @click="handleDeleteContact">
-          <el-icon><Delete /></el-icon>
-          <span>删除联系人</span>
-        </div>
-      </div>
-    </transition>
+    <ContextMenu
+      :show="contextMenuVisible"
+      :x="contextMenuX"
+      :y="contextMenuY"
+      :items="contextMenuItems"
+      @select="handleContextMenuSelect"
+      @update:show="contextMenuVisible = $event"
+    />
 
     <!-- 移动到分组对话框 -->
     <el-dialog
@@ -226,6 +214,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Search, OfficeBuilding, User, MoreFilled, FolderOpened, Edit, Delete } from '@element-plus/icons-vue'
+import ContextMenu from '@/components/Common/ContextMenu.vue'
 import { getContacts, getGroupedFriendList, getGroupList, renameGroup, deleteGroup, moveContactToGroup, updateContactRemark, deleteContact, getFriendRequests } from '@/api/im/contact'
 import { getOrgTree } from '@/api/im/organization'
 import { getGroups } from '@/api/im/group'
@@ -406,47 +395,91 @@ const doDeleteGroup = async (groupName) => {
 // 右键菜单
 const showContactMenu = (event, contact) => {
   currentContactForMenu.value = contact
-  const menuWidth = 150
-  const menuHeight = 120
-  const viewportWidth = window.innerWidth
-  const viewportHeight = window.innerHeight
-
-  let x = event.clientX
-  let y = event.clientY
-
-  if (x + menuWidth > viewportWidth) {
-    x = viewportWidth - menuWidth - 10
-  }
-
-  if (y + menuHeight > viewportHeight) {
-    y = viewportHeight - menuHeight - 10
-  }
-
-  contextMenuX.value = Math.max(10, x)
-  contextMenuY.value = Math.max(10, y)
+  contextMenuX.value = event.clientX
+  contextMenuY.value = event.clientY
   contextMenuVisible.value = true
 }
 
-const hideContextMenu = () => {
+// 右键菜单项配置
+const contextMenuItems = computed(() => {
+  return [
+    {
+      label: '移动到分组',
+      icon: 'folder_open',
+      value: 'moveToGroup'
+    },
+    {
+      label: '修改备注',
+      icon: 'edit',
+      value: 'editRemark'
+    },
+    {
+      label: '删除联系人',
+      icon: 'delete',
+      value: 'delete',
+      danger: true
+    }
+  ]
+})
+
+// 右键菜单选择处理
+const handleContextMenuSelect = async (item) => {
+  const contact = currentContactForMenu.value
+  if (!contact) return
+
+  switch (item.value) {
+    case 'moveToGroup':
+      currentContactForMove.value = contact
+      targetGroupName.value = contact.groupName || ''
+      moveDialogVisible.value = true
+      break
+    case 'editRemark':
+      currentContactForRemark.value = contact
+      newRemark.value = contact.remark || contact.friendName || ''
+      remarkDialogVisible.value = true
+      break
+    case 'delete':
+      ElMessageBox.confirm(
+        `确定删除联系人 "${contact.remark || contact.friendName}" 吗？`,
+        '确认删除',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).then(async () => {
+        try {
+          const res = await deleteContact(contact.id)
+          if (res.code === 200) {
+            ElMessage.success('删除成功')
+            await loadData()
+            emit('refresh')
+          } else {
+            ElMessage.error(res.msg || '删除失败')
+          }
+        } catch (e) {
+          ElMessage.error('删除失败')
+        }
+      }).catch(() => {})
+      break
+  }
+
   contextMenuVisible.value = false
 }
 
 const handleMoveToGroup = () => {
-  hideContextMenu()
   currentContactForMove.value = currentContactForMenu.value
   targetGroupName.value = currentContactForMenu.value.groupName || ''
   moveDialogVisible.value = true
 }
 
 const handleEditRemark = () => {
-  hideContextMenu()
   currentContactForRemark.value = currentContactForMenu.value
   newRemark.value = currentContactForMenu.value.remark || currentContactForMenu.value.friendName || ''
   remarkDialogVisible.value = true
 }
 
 const handleDeleteContact = () => {
-  hideContextMenu()
   const contact = currentContactForMenu.value
   ElMessageBox.confirm(
     `确定删除联系人 "${contact.remark || contact.friendName}" 吗？`,
@@ -521,11 +554,10 @@ const confirmRemark = async () => {
 
 onMounted(() => {
   loadData()
-  document.addEventListener('click', hideContextMenu)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', hideContextMenu)
+  // 清理工作
 })
 
 defineExpose({ reload: loadData })
@@ -718,59 +750,6 @@ defineExpose({ reload: loadData })
   color: var(--dt-text-quaternary);
   font-size: var(--dt-font-size-sm);
   padding: 40px 20px;
-}
-
-/* 右键菜单 */
-.context-menu {
-  position: fixed;
-  background: #ffffff;
-  border: 1px solid var(--dt-border-color);
-  border-radius: var(--dt-radius-md);
-  box-shadow: var(--dt-shadow-float);
-  z-index: var(--dt-z-max);
-  min-width: 160px;
-  padding: 4px 0;
-  animation: fadeInUp var(--dt-transition-fast);
-
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-}
-
-.context-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  cursor: pointer;
-  font-size: var(--dt-font-size-base);
-  color: var(--dt-text-primary);
-  transition: background var(--dt-transition-fast);
-
-  .el-icon {
-    color: var(--dt-text-tertiary);
-  }
-
-  &:hover {
-    background: var(--dt-bg-session-hover);
-
-    .el-icon {
-      color: var(--dt-text-secondary);
-    }
-  }
-
-  &.danger {
-    color: var(--dt-error-color);
-
-    .el-icon {
-      color: var(--dt-error-color);
-    }
-
-    &:hover {
-      background: var(--dt-error-bg);
-    }
-  }
 }
 
 /* 折叠面板标题样式优化 */

@@ -1,6 +1,8 @@
 package com.ruoyi.im.service.impl;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constant.ErrorCode;
 import com.ruoyi.im.domain.ImEmailTemplate;
@@ -17,6 +19,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.time.LocalDateTime;
 
 /**
  * 邮件模板服务实现类
@@ -155,7 +158,14 @@ public class ImEmailTemplateServiceImpl implements ImEmailTemplateService {
         }
 
         try {
-            return JSON.parseArray(variables, Object.class);
+            List<Map<String, Object>> result = new ArrayList<>();
+            JSONArray array = JSON.parseArray(variablesJson);
+            for (Object item : array) {
+                if (item instanceof JSONObject) {
+                    result.add((Map<String, Object>) ((JSONObject) item).toJavaObject(Map.class));
+                }
+            }
+            return result;
         } catch (Exception e) {
             log.warn("解析模板变量失败: templateCode={}, error={}", templateCode, e.getMessage());
             return Collections.emptyList();
@@ -163,7 +173,7 @@ public class ImEmailTemplateServiceImpl implements ImEmailTemplateService {
     }
 
     @Override
-    @Transactional(rollbackFor Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public Long copyTemplate(Long templateId) {
         ImEmailTemplate original = templateMapper.selectById(templateId);
         if (original == null) {
