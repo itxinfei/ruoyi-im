@@ -12,7 +12,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { getMessages, sendMessage, retryMessage, deleteMessage } from '@/api/im/message'
-import { useIndexedDB } from './useIndexedDB.js'
+import { useIndexedDB } from '../useIndexedDB.js'
 
 export function useChatMessages(sessionId, currentUser) {
   const store = useStore()

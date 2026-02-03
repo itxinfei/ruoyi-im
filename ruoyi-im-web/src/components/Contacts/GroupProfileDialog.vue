@@ -72,7 +72,7 @@
           <el-tab-pane name="qrcode">
             <template #label>
               <span>二维码</span>
-              <el-icon><QrCode /></el-icon>
+              <el-icon><Grid /></el-icon>
             </template>
             <GroupQRCode :group-info="groupInfo" />
           </el-tab-pane>
@@ -189,7 +189,7 @@
 import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, ArrowDown, QrCode, Folder } from '@element-plus/icons-vue'
+import { Check, Grid, Folder } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 // 子组件
 import GroupProfileHeader from './GroupProfile/GroupProfileHeader.vue'
@@ -201,7 +201,6 @@ import GroupQRCode from './GroupProfile/GroupQRCode.vue'
 import GroupFiles from './GroupProfile/GroupFiles.vue'
 // API
 import { getGroup, getGroupMembers, setGroupAdmin, transferGroupOwner, dismissGroup, leaveGroup } from '@/api/im/group'
-import { formatListItemTime } from '@/utils/format'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -246,33 +245,6 @@ const isAdmin = computed(() => {
 })
 
 const isOwnerOrAdmin = computed(() => isOwner.value || isAdmin.value)
-
-const transferableMembers = computed(() => {
-  return members.value.filter(m => (m.userId || m.id) != currentUser.value?.id)
-})
-
-// 计算属性
-const isOwner = computed(() => {
-  const myMember = members.value.find(m => (m.userId || m.id) == currentUser.value?.id)
-  return myMember?.role === 'OWNER'
-})
-
-const isAdmin = computed(() => {
-  const myMember = members.value.find(m => (m.userId || m.id) == currentUser.value?.id)
-  return myMember?.role === 'ADMIN'
-})
-
-const isOwnerOrAdmin = computed(() => isOwner.value || isAdmin.value)
-
-const filteredMembers = computed(() => {
-  if (!memberSearch.value) return members.value
-  const keyword = memberSearch.value.toLowerCase()
-  return members.value.filter(m =>
-    (m.nickname || m.username || '').toLowerCase().includes(keyword)
-  )
-})
-
-const displayedMembers = computed(() => filteredMembers.value)
 
 const transferableMembers = computed(() => {
   return members.value.filter(m => (m.userId || m.id) != currentUser.value?.id)
@@ -586,10 +558,7 @@ const handleOpenFileInChat = (file) => {
 const handlePreviewImage = (file) => {
   // 预览图片
   ElMessage.info('预览: ' + file.name)
-}
-
-// 使用共享工具函数
-const formatTime = formatListItemTime</script>
+}</script>
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
@@ -679,10 +648,6 @@ const formatTime = formatListItemTime</script>
     margin-left: 6px;
     margin-top: -2px;
   }
-}
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
 }
 
 .member-item {

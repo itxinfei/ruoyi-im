@@ -714,7 +714,7 @@ const handleDeleteGroup = async (groupName) => {
 }
 
 // 移动联系人到分组
-const moveContactToGroup = async (contactId, groupName) => {
+const handleMoveContactToGroup = async (contactId, groupName) => {
   try {
     const res = await moveContactToGroup({ contactId, groupName })
     if (res.code === 200) {

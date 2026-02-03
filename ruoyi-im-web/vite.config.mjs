@@ -21,7 +21,18 @@ export default defineConfig({
       dts: 'src/auto-imports.d.ts',
       eslintrc: {
         enabled: true // 生成 .eslintrc-auto-import.json
-      }
+      },
+      // 只监听相关文件变化
+      include: [
+        /\.[jt]sx?$/, // .js, .ts, .jsx, .tsx
+        /\.vue$/,
+        /\.vue\?vue/
+      ],
+      exclude: [
+        /node_modules/,
+        /dist/,
+        /\.git/
+      ]
     }),
     // 自动导入组件（包括 Element Plus 组件）
     Components({
@@ -33,7 +44,24 @@ export default defineConfig({
           useBuiltInComponents: true
         })
       ],
-      dts: 'src/components.d.ts'
+      dts: 'src/components.d.ts',
+      // 只扫描 components 目录，避免重复扫描
+      include: [/\.vue$/, /\.vue\?vue/],
+      // 排除不需要自动注册的目录
+      exclude: [
+        /node_modules/,
+        /dist/,
+        /\.git/,
+        /tests/,
+        // 排除 views 目录，手动导入更明确
+        /src\/views/,
+        // 排除 composables 目录
+        /src\/composables/
+      ],
+      // 减少深度扫描
+      deep: false,
+      // 禁用生成时的日志
+      silent: false
     }),
     // PWA 插件
     VitePWA({

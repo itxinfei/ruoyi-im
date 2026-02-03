@@ -18,7 +18,6 @@ import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import {
-  copyMessage,
   forwardMessage,
   recallMessage,
   deleteMessage as apiDeleteMessage,

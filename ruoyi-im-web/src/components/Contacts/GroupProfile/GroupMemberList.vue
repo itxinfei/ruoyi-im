@@ -58,7 +58,7 @@
           >
             <div class="role-group-info">
               <el-icon class="role-icon" :size="18">
-                <Crown v-if="role === 'OWNER'" />
+                <Trophy v-if="role === 'OWNER'" />
                 <UserFilled v-else-if="role === 'ADMIN'" />
                 <User v-else />
               </el-icon>
@@ -194,7 +194,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
-import { Search, ArrowDown, MoreFilled, Crown, UserFilled, User } from '@element-plus/icons-vue'
+import { Search, ArrowDown, MoreFilled, Trophy, UserFilled, User } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
