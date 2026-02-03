@@ -24,6 +24,7 @@
             :session="session"
             :typing-users="typingUsers"
             :pinned-count="pinnedCount"
+            @show-detail="handleToggleDetail"
             @toggle-sidebar="handleToggleDetail"
             @multiselect="handleToggleMultiSelect"
             @toggle-multi-select="handleToggleMultiSelect"
@@ -1134,7 +1135,8 @@ const handleToggleDetail = () => {
   if (props.session.type === 'GROUP') {
     showGroupDetail.value = true
   } else {
-    handleShowUser(props.session.targetId)
+    // 触发父组件处理用户详情显示
+    emit('show-user', props.session.targetId)
   }
 }
 
@@ -1202,7 +1204,13 @@ const handleRetry = async (msg) => {
 }
 
 const handleMemberClick = (member) => {
-  handleShowUser(member.id)
+  // 触发父组件显示用户详情
+  emit('show-user', member.id)
+}
+
+// 处理 MessageList 组件中的用户显示请求
+const handleShowUser = (userId) => {
+  emit('show-user', userId)
 }
 
 // 处理转发确认

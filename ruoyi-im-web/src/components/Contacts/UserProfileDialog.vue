@@ -2,7 +2,7 @@
   <el-dialog
     v-model="visible"
     :width="layoutMode === 'compact' ? 640 : 500"
-    :class="['user-profile-dialog', `layout-${layoutMode}`]"
+    :class="['user-profile-dialog', `layout-${layoutMode}`, 'dingtalk-dialog-fade']"
     :show-close="false"
     :close-on-click-modal="true"
     destroy-on-close
@@ -624,7 +624,7 @@ const copyToClipboard = async (text) => {
 .dialog-header {
   padding: 20px 24px 16px;
   border-bottom: 1px solid var(--dt-border-light);
-  background: linear-gradient(180deg, #0089FF 0%, #006ECC 100%);
+  background: var(--dt-bg-sidebar-gradient);
   position: relative;
 }
 
@@ -704,11 +704,11 @@ const copyToClipboard = async (text) => {
   margin-right: 4px;
 
   &.online {
-    background: #52c41a;
+    background: var(--dt-success-color);
   }
 
   &.offline {
-    background: #9ca3af;
+    background: var(--dt-text-tertiary);
   }
 }
 
@@ -740,7 +740,7 @@ const copyToClipboard = async (text) => {
   :deep(.el-tabs__header) {
     margin: 0;
     padding: 0 24px;
-    background: #fff;
+    background: var(--dt-bg-card);
     border-bottom: 1px solid var(--dt-border-light);
   }
 
@@ -937,7 +937,7 @@ const copyToClipboard = async (text) => {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: #fff;
+    background: var(--dt-bg-card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -949,10 +949,10 @@ const copyToClipboard = async (text) => {
     }
 
     &.active {
-      background: #fff7e6;
+      background: var(--dt-warning-bg);
 
       .el-icon {
-        color: #faad14;
+        color: var(--dt-warning-color);
       }
     }
 
@@ -1281,6 +1281,39 @@ const copyToClipboard = async (text) => {
   .group-meta,
   .more-desc {
     color: var(--dt-text-tertiary-dark);
+  }
+}
+</style>
+
+<!-- 钉钉风格弹窗淡入动画 -->
+<style lang="scss">
+// 弹窗遮罩淡入
+.dingtalk-dialog-fade .el-overlay {
+  animation: dialog-fade-in 0.2s ease-out;
+}
+
+// 弹窗内容淡入缩放
+.dingtalk-dialog-fade .el-dialog {
+  animation: dialog-zoom-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 </style>
