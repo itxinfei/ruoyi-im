@@ -452,7 +452,7 @@ export function getMessageTypeStats(params) {
 }
 
 // ==================== 部门管理 ====================
-// 后端接口路径: /api/im/organization
+// 后端接口路径: /api/admin/departments
 
 /**
  * 获取部门列表（树形）
@@ -460,7 +460,7 @@ export function getMessageTypeStats(params) {
  */
 export function getDepartmentTree() {
   return request({
-    url: '/api/im/organization/department/tree',
+    url: '/api/admin/departments/tree',
     method: 'get'
   })
 }
@@ -472,7 +472,7 @@ export function getDepartmentTree() {
  */
 export function getDepartmentDetail(id) {
   return request({
-    url: `/api/im/organization/department/${id}`,
+    url: `/api/admin/departments/${id}`,
     method: 'get'
   })
 }
@@ -484,7 +484,7 @@ export function getDepartmentDetail(id) {
  */
 export function createDepartment(data) {
   return request({
-    url: '/api/im/organization/department',
+    url: '/api/admin/departments',
     method: 'post',
     data
   })
@@ -498,7 +498,7 @@ export function createDepartment(data) {
  */
 export function updateDepartment(id, data) {
   return request({
-    url: '/api/im/organization/department',
+    url: '/api/admin/departments',
     method: 'put',
     data
   })
@@ -511,7 +511,7 @@ export function updateDepartment(id, data) {
  */
 export function deleteDepartment(id) {
   return request({
-    url: `/api/im/organization/department/${id}`,
+    url: `/api/admin/departments/${id}`,
     method: 'delete'
   })
 }
@@ -523,7 +523,7 @@ export function deleteDepartment(id) {
  */
 export function getDepartmentMembers(id) {
   return request({
-    url: `/api/im/organization/department/${id}/members`,
+    url: `/api/admin/departments/${id}/members`,
     method: 'get'
   })
 }
@@ -536,7 +536,7 @@ export function getDepartmentMembers(id) {
  */
 export function setDepartmentLeader(id, leaderId) {
   return request({
-    url: `/api/im/organization/department/${id}/leader/${leaderId}`,
+    url: `/api/admin/departments/${id}/leader/${leaderId}`,
     method: 'put'
   })
 }
@@ -549,7 +549,7 @@ export function setDepartmentLeader(id, leaderId) {
  */
 export function moveDepartment(id, parentId) {
   return request({
-    url: `/api/im/organization/department/${id}/move/${parentId}`,
+    url: `/api/admin/departments/${id}/move/${parentId}`,
     method: 'put'
   })
 }
@@ -562,7 +562,7 @@ export function moveDepartment(id, parentId) {
  */
 export function addDepartmentMembers(id, data) {
   return request({
-    url: '/api/im/organization/department/member',
+    url: '/api/admin/departments/member',
     method: 'post',
     data: { departmentId: id, ...data }
   })
@@ -576,8 +576,31 @@ export function addDepartmentMembers(id, data) {
  */
 export function removeDepartmentMember(id, userId) {
   return request({
-    url: `/api/im/organization/department/${id}/member/${userId}`,
+    url: `/api/admin/departments/${id}/member/${userId}`,
     method: 'delete'
+  })
+}
+
+/**
+ * 获取用户所属部门列表
+ * @param {Number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function getUserDepartments(userId) {
+  return request({
+    url: `/api/admin/departments/user/${userId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取部门统计信息
+ * @returns {Promise}
+ */
+export function getDepartmentStats() {
+  return request({
+    url: '/api/admin/departments/stats',
+    method: 'get'
   })
 }
 
@@ -764,7 +787,7 @@ export function saveSensitiveWords(data) {
 }
 
 // ==================== 审计日志 ====================
-// 后端接口路径: /api/im/audit
+// 后端接口路径: /api/admin/audit-logs
 
 /**
  * 获取审计日志列表
@@ -773,7 +796,7 @@ export function saveSensitiveWords(data) {
  */
 export function getAuditLogList(params) {
   return request({
-    url: '/api/im/audit/list',
+    url: '/api/admin/audit-logs',
     method: 'get',
     params
   })
@@ -786,7 +809,7 @@ export function getAuditLogList(params) {
  */
 export function getAuditLogDetail(id) {
   return request({
-    url: `/api/im/audit/${id}`,
+    url: `/api/admin/audit-logs/${id}`,
     method: 'get'
   })
 }
@@ -798,7 +821,7 @@ export function getAuditLogDetail(id) {
  */
 export function getAuditStatistics(params) {
   return request({
-    url: '/api/im/audit/statistics',
+    url: '/api/admin/audit-logs/statistics',
     method: 'get',
     params
   })
@@ -812,7 +835,7 @@ export function getAuditStatistics(params) {
  */
 export function getUserAuditLogs(userId, params) {
   return request({
-    url: `/api/im/audit/user/${userId}`,
+    url: `/api/admin/audit-logs/user/${userId}`,
     method: 'get',
     params
   })
@@ -825,14 +848,40 @@ export function getUserAuditLogs(userId, params) {
  */
 export function deleteExpiredLogs(beforeDate) {
   return request({
-    url: '/api/im/audit/clean',
+    url: '/api/admin/audit-logs/clean',
     method: 'delete',
     params: { beforeDate }
   })
 }
 
+/**
+ * 批量删除审计日志
+ * @param {Array} ids - 日志ID列表
+ * @returns {Promise}
+ */
+export function batchDeleteAuditLogs(ids) {
+  return request({
+    url: '/api/admin/audit-logs/batch',
+    method: 'delete',
+    data: ids
+  })
+}
+
+/**
+ * 导出审计日志
+ * @param {Object} params - { startTime, endTime }
+ * @returns {Promise}
+ */
+export function exportAuditLogs(params) {
+  return request({
+    url: '/api/admin/audit-logs/export',
+    method: 'get',
+    params
+  })
+}
+
 // ==================== 数据备份 ====================
-// 后端接口路径: /api/im/backup
+// 后端接口路径: /api/admin/backups
 
 /**
  * 获取备份列表
@@ -840,7 +889,7 @@ export function deleteExpiredLogs(beforeDate) {
  */
 export function getBackupList() {
   return request({
-    url: '/api/im/backup/list',
+    url: '/api/admin/backups',
     method: 'get'
   })
 }
@@ -852,7 +901,7 @@ export function getBackupList() {
  */
 export function getBackupDetail(id) {
   return request({
-    url: `/api/im/backup/${id}`,
+    url: `/api/admin/backups/${id}`,
     method: 'get'
   })
 }
@@ -864,7 +913,7 @@ export function getBackupDetail(id) {
  */
 export function createBackup(description) {
   return request({
-    url: '/api/im/backup/create',
+    url: '/api/admin/backups',
     method: 'post',
     params: { description }
   })
@@ -877,7 +926,7 @@ export function createBackup(description) {
  */
 export function restoreBackup(id) {
   return request({
-    url: `/api/im/backup/restore/${id}`,
+    url: `/api/admin/backups/${id}/restore`,
     method: 'post'
   })
 }
@@ -889,8 +938,21 @@ export function restoreBackup(id) {
  */
 export function deleteBackup(id) {
   return request({
-    url: `/api/im/backup/${id}`,
+    url: `/api/admin/backups/${id}`,
     method: 'delete'
+  })
+}
+
+/**
+ * 批量删除备份
+ * @param {Array} ids - 备份ID列表
+ * @returns {Promise}
+ */
+export function batchDeleteBackups(ids) {
+  return request({
+    url: '/api/admin/backups/batch',
+    method: 'delete',
+    data: ids
   })
 }
 
@@ -900,7 +962,7 @@ export function deleteBackup(id) {
  */
 export function getBackupStatistics() {
   return request({
-    url: '/api/im/backup/statistics',
+    url: '/api/admin/backups/statistics',
     method: 'get'
   })
 }
@@ -912,7 +974,7 @@ export function getBackupStatistics() {
  */
 export function exportUserData(userId) {
   return request({
-    url: `/api/im/backup/export/user/${userId}`,
+    url: `/api/admin/backups/export/user/${userId}`,
     method: 'get'
   })
 }
