@@ -4,7 +4,7 @@ import VueViewer from 'v-viewer'
 
 import './styles/global.scss'
 import './styles/a11y.scss'
-import './styles/admin-theme.css'
+import './styles/admin-theme.scss'
 // 只注册 Element Plus 图标组件（其他组件自动按需导入）
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'

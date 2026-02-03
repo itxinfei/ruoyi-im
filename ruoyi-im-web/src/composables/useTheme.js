@@ -34,7 +34,7 @@ const applyTheme = (theme) => {
   const root = document.documentElement
   const actualTheme = theme === THEME_AUTO ? getSystemTheme() : theme
 
-  // 使用 data-theme 属性（与 admin-theme.css 配合）
+  // 使用 data-theme 属性（与 admin-theme.scss 配合）
   root.setAttribute('data-theme', actualTheme)
   isDark.value = actualTheme === THEME_DARK
 }
@@ -74,7 +74,7 @@ const toggleDark = () => {
 export function useTheme() {
   // 监听系统主题变化（仅在 auto 模式下）
   const setupSystemThemeListener = () => {
-    if (typeof window === 'undefined') return () => {}
+    if (typeof window === 'undefined') return () => { }
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = (e) => {
@@ -94,7 +94,7 @@ export function useTheme() {
       return () => mediaQuery.removeListener(handleChange)
     }
 
-    return () => {}
+    return () => { }
   }
 
   // 组件挂载时初始化（仅第一次调用时执行）

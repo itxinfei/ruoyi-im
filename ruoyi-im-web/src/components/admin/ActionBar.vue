@@ -144,9 +144,9 @@ const handleMoreAction = (key) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 /* 引入主题变量 */
-@import '@/styles/admin-theme.css';
+@import '@/styles/admin-theme.scss';
 
 /* ================================
    操作栏容器

@@ -1,0 +1,1313 @@
+/**
+ * RuoYi-IM 管理后台主题变量 (钉钉风格)
+ * DingTalk-inspired Admin Theme Variables
+ * Created: 2026-01-29
+ */
+
+/* ================================
+   品牌色 (Brand Colors)
+   ================================ */
+:root {
+  /* 主品牌色 - 钉钉蓝 */
+  --dt-primary: #0089FF;
+  --dt-primary-light: #33A1FF;
+  --dt-primary-lighter: #66B8FF;
+  --dt-primary-dark: #0066CC;
+  --dt-primary-darker: #004499;
+
+  /* 主色渐变 */
+  --dt-primary-gradient: linear-gradient(135deg, #0089FF 0%, #0066CC 100%);
+
+  /* 辅助色 - 2025 钉钉新增紫色系 */
+  --dt-secondary: #7C4DFF;
+  --dt-secondary-light: #A27BFF;
+  --dt-secondary-dark: #5E32CC;
+
+  /* ================================
+     功能色 (Functional Colors)
+     ================================ */
+  --dt-success: #00C853;
+  --dt-success-light: #00E675;
+  --dt-success-dark: #009624;
+  --dt-success-bg: #E8F5E9;
+
+  --dt-warning: #FFAB00;
+  --dt-warning-light: #FFC300;
+  --dt-warning-dark: #FF8F00;
+  --dt-warning-bg: #FFF8E1;
+
+  --dt-error: #FF3D00;
+  --dt-error-light: #FF6E40;
+  --dt-error-dark: #D50000;
+  --dt-error-bg: #FFEBEE;
+
+  --dt-info: #0089FF;
+  --dt-info-bg: #E3F2FD;
+
+  /* ================================
+     背景色 (Background Colors)
+     ================================ */
+  --dt-bg-page: #F5F7FA;
+  --dt-bg-card: #FFFFFF;
+  --dt-bg-sidebar: #FFFFFF;
+  --dt-bg-header: #FFFFFF;
+  --dt-bg-table: #FFFFFF;
+  --dt-bg-hover: #F5F7FA;
+  --dt-bg-active: #ECF5FF;
+  --dt-bg-disabled: #F5F5F5;
+  --dt-bg-mask: rgba(0, 0, 0, 0.45);
+
+  /* ================================
+     文字色 (Text Colors)
+     ================================ */
+  --dt-text-primary: #303133;
+  --dt-text-regular: #606266;
+  --dt-text-secondary: #909399;
+  --dt-text-placeholder: #C0C4CC;
+  --dt-text-disabled: #C0C4CC;
+  --dt-text-white: #FFFFFF;
+  --dt-text-link: #0089FF;
+
+  /* ================================
+     边框色 (Border Colors)
+     ================================ */
+  --dt-border-base: #DCDFE6;
+  --dt-border-light: #EBEEF5;
+  --dt-border-lighter: #F2F6FC;
+  --dt-border-dark: #D4D7DE;
+  --dt-divider: #EBEEF5;
+
+  /* ================================
+     阴影 (Shadows)
+     ================================ */
+  --dt-shadow-light: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --dt-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12);
+  --dt-shadow-dark: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --dt-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --dt-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* ================================
+     圆角 (Border Radius)
+     ================================ */
+  --dt-radius-xs: 2px;
+  --dt-radius-sm: 4px;
+  --dt-radius-md: 8px;
+  --dt-radius-lg: 12px;
+  --dt-radius-xl: 16px;
+  --dt-radius-round: 50%;
+
+  /* ================================
+     间距 (Spacing) - 基于 4px 栅格
+     ================================ */
+  --dt-space-0: 0;
+  --dt-space-xs: 4px;
+  --dt-space-sm: 8px;
+  --dt-space-md: 16px;
+  --dt-space-lg: 24px;
+  --dt-space-xl: 32px;
+  --dt-space-xxl: 48px;
+
+  /* ================================
+     字体 (Typography)
+     ================================ */
+  --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                   'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+                   'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+                   'Noto Color Emoji';
+
+  --dt-font-size-xs: 12px;
+  --dt-font-size-sm: 13px;
+  --dt-font-size-base: 14px;
+  --dt-font-size-md: 16px;
+  --dt-font-size-lg: 18px;
+  --dt-font-size-xl: 20px;
+  --dt-font-size-xxl: 24px;
+
+  --dt-font-weight-normal: 400;
+  --dt-font-weight-medium: 500;
+  --dt-font-weight-semibold: 600;
+  --dt-font-weight-bold: 700;
+
+  --dt-line-height-tight: 1.25;
+  --dt-line-height-base: 1.5;
+  --dt-line-height-loose: 1.75;
+
+  /* ================================
+     布局尺寸 (Layout Dimensions)
+     ================================ */
+  --dt-header-height: 56px;
+  --dt-sidebar-width: 200px;
+  --dt-sidebar-collapsed-width: 64px;
+  --dt-main-min-height: calc(100vh - var(--dt-header-height));
+
+  /* ================================
+     过渡动画 (Transitions)
+     ================================ */
+  --dt-transition-fast: 0.1s;
+  --dt-transition-base: 0.15s;
+  --dt-transition-slow: 0.3s;
+
+  --dt-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dt-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --dt-ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ================================
+     组件特定变量
+     ================================ */
+
+  /* 侧边栏 */
+  --dt-sidebar-bg: #FFFFFF;
+  --dt-sidebar-text: #606266;
+  --dt-sidebar-text-active: #0089FF;
+  --dt-sidebar-bg-active: #ECF5FF;
+  --dt-sidebar-indicator-width: 3px;
+
+  /* Header */
+  --dt-header-bg: #FFFFFF;
+  --dt-header-border: #EBEEF5;
+  --dt-header-height: 56px;
+
+  /* 卡片 */
+  --dt-card-bg: #FFFFFF;
+  --dt-card-border: #EBEEF5;
+  --dt-card-radius: 8px;
+  --dt-card-padding: 20px;
+  --dt-card-margin-bottom: 16px;
+
+  /* 表格 */
+  --dt-table-header-bg: #F5F7FA;
+  --dt-table-header-text: #606266;
+  --dt-table-border: #EBEEF5;
+  --dt-table-row-hover: #F5F7FA;
+  --dt-table-row-selected: #ECF5FF;
+  --dt-table-stripe: #FAFAFA;
+
+  /* 表单 */
+  --dt-form-label-width: 100px;
+  --dt-form-label-color: #606266;
+  --dt-input-height: 36px;
+  --dt-input-radius: 4px;
+
+  /* 按钮 */
+  --dt-button-height-sm: 32px;
+  --dt-button-height-md: 36px;
+  --dt-button-height-lg: 40px;
+  --dt-button-radius: 4px;
+  --dt-button-padding-sm: 0 12px;
+  --dt-button-padding-md: 0 16px;
+
+  /* 菜单 */
+  --dt-menu-item-height: 40px;
+  --dt-menu-sub-item-height: 36px;
+  --dt-menu-item-padding: 0 16px;
+  --dt-menu-indent: 16px;
+}
+
+/* ================================
+   暗色模式 (Dark Mode)
+   ================================ */
+[data-theme='dark'] {
+  /* 品牌色 - 暗色模式下略微降低饱和度 */
+  --dt-primary: #33A1FF;
+  --dt-primary-light: #66B8FF;
+  --dt-primary-dark: #0089FF;
+
+  /* 背景色 */
+  --dt-bg-page: #1A1A1A;
+  --dt-bg-card: #2A2A2A;
+  --dt-bg-sidebar: #2A2A2A;
+  --dt-bg-header: #2A2A2A;
+  --dt-bg-table: #2A2A2A;
+  --dt-bg-hover: #333333;
+  --dt-bg-active: #1A3A5C;
+  --dt-bg-disabled: #1F1F1F;
+  --dt-bg-mask: rgba(0, 0, 0, 0.65);
+
+  /* 文字色 */
+  --dt-text-primary: #E5E5E5;
+  --dt-text-regular: #B8B8B8;
+  --dt-text-secondary: #8C8C8C;
+  --dt-text-placeholder: #666666;
+  --dt-text-disabled: #4A4A4A;
+  --dt-text-white: #E5E5E5;
+  --dt-text-link: #33A1FF;
+
+  /* 边框色 */
+  --dt-border-base: #434343;
+  --dt-border-light: #333333;
+  --dt-border-lighter: #2A2A2A;
+  --dt-border-dark: #555555;
+  --dt-divider: #333333;
+
+  /* 阴影 - 暗色模式下减少阴影 */
+  --dt-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --dt-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --dt-shadow-dark: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --dt-shadow-card: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --dt-shadow-dropdown: 0 4px 10px rgba(0, 0, 0, 0.5);
+
+  /* 功能色背景 */
+  --dt-success-bg: rgba(0, 200, 83, 0.15);
+  --dt-warning-bg: rgba(255, 171, 0, 0.15);
+  --dt-error-bg: rgba(255, 61, 0, 0.15);
+  --dt-info-bg: rgba(0, 137, 255, 0.15);
+
+  /* 组件特定 */
+  --dt-table-header-bg: #333333;
+  --dt-table-header-text: #B8B8B8;
+  --dt-table-border: #434343;
+  --dt-table-row-hover: #333333;
+  --dt-table-row-selected: #1A3A5C;
+  --dt-table-stripe: #2F2F2F;
+
+  --dt-sidebar-bg: #2A2A2A;
+  --dt-sidebar-text: #B8B8B8;
+  --dt-sidebar-text-active: #33A1FF;
+  --dt-sidebar-bg-active: #1A3A5C;
+
+  --dt-header-bg: #2A2A2A;
+  --dt-header-border: #434343;
+
+  --dt-card-bg: #2A2A2A;
+  --dt-card-border: #434343;
+}
+
+/* ================================
+   Element Plus 组件深色模式适配
+   ================================ */
+[data-theme='dark'] {
+  /* 对话框 */
+  --el-bg-color: #2A2A2A;
+  --el-bg-color-overlay: #2A2A2A;
+  --el-text-color-primary: #E5E5E5;
+  --el-text-color-regular: #B8B8B8;
+  --el-text-color-secondary: #8C8C8C;
+  --el-text-color-placeholder: #666666;
+  --el-border-color: #434343;
+  --el-border-color-light: #434343;
+  --el-border-color-lighter: #333333;
+  --el-border-color-extra-light: #2A2A2A;
+  --el-border-color-dark: #555555;
+  --el-border-color-darker: #666666;
+  --el-fill-color: #333333;
+  --el-fill-color-light: #3A3A3A;
+  --el-fill-color-lighter: #2A2A2A;
+  --el-fill-color-extra-light: #1F1F1F;
+  --el-fill-color-dark: #2A2A2A;
+  --el-fill-color-darker: #1F1F1F;
+  --el-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --el-box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --el-box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --el-box-shadow-dark: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* 深色模式下的组件覆盖样式 */
+[data-theme='dark'] .el-dialog {
+  background-color: var(--dt-card-bg);
+  border: 1px solid var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-dialog__header {
+  border-bottom: 1px solid var(--dt-divider);
+}
+
+[data-theme='dark'] .el-drawer {
+  background-color: var(--dt-card-bg);
+}
+
+[data-theme='dark'] .el-table {
+  background-color: var(--dt-bg-card);
+  --el-table-bg-color: var(--dt-bg-card);
+  --el-table-tr-bg-color: var(--dt-bg-card);
+  --el-table-current-row-bg-color: var(--dt-bg-active);
+  --el-table-header-bg-color: var(--dt-table-header-bg);
+  --el-fill-color-light: var(--dt-fill-color-light);
+}
+
+[data-theme='dark'] .el-table__body-wrapper,
+[data-theme='dark'] .el-table__header-wrapper {
+  background-color: var(--dt-bg-card);
+}
+
+[data-theme='dark'] .el-table__row {
+  background-color: var(--dt-bg-card) !important;
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-table th.el-table__cell {
+  background-color: var(--dt-table-header-bg);
+  color: var(--dt-table-header-text);
+  border-color: var(--dt-table-border);
+}
+
+[data-theme='dark'] .el-table td.el-table__cell {
+  border-color: var(--dt-table-border);
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-table--enable-row-hover .el-table__body tr:hover > td {
+  background-color: var(--dt-table-row-hover) !important;
+}
+
+[data-theme='dark'] .el-table__body tr.el-table__row--striped td {
+  background-color: var(--dt-table-stripe) !important;
+}
+
+[data-theme='dark'] .el-table__body tr.current-row > td {
+  background-color: var(--dt-table-row-selected) !important;
+}
+
+/* 表格固定列 */
+[data-theme='dark'] .el-table__fixed,
+[data-theme='dark'] .el-table__fixed-right {
+  background-color: var(--dt-bg-card);
+}
+
+[data-theme='dark'] .el-table__fixed-body-wrapper {
+  background-color: var(--dt-bg-card);
+}
+
+/* 表格展开行 */
+[data-theme='dark'] .el-table__expanded-cell {
+  background-color: var(--dt-bg-card);
+}
+
+[data-theme='dark'] .el-table__expand-icon {
+  color: var(--dt-text-secondary);
+}
+
+[data-theme='dark'] .el-table__expand-icon:hover {
+  color: var(--dt-primary);
+}
+
+/* 表格复选框 */
+[data-theme='dark'] .el-checkbox__inner {
+  background-color: var(--dt-bg-card);
+  border-color: var(--dt-border-base);
+}
+
+[data-theme='dark'] .el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: var(--dt-primary);
+  border-color: var(--dt-primary);
+}
+
+/* 表格空状态 */
+[data-theme='dark'] .el-table__empty-block {
+  background-color: var(--dt-bg-card);
+}
+
+[data-theme='dark'] .el-table__empty-text {
+  color: var(--dt-text-placeholder);
+}
+
+[data-theme='dark'] .el-pagination {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-pagination button {
+  background-color: var(--dt-bg-card);
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-pagination .el-pager li {
+  background-color: var(--dt-bg-card);
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-pagination .el-pager li:hover {
+  color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-pagination .el-pager li.is-active {
+  background-color: var(--dt-primary);
+  color: white;
+}
+
+[data-theme='dark'] .el-card {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-select-dropdown {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-select-dropdown__item {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-select-dropdown__item:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+[data-theme='dark'] .el-select-dropdown__item.is-selected {
+  color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-picker-panel {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-input__wrapper {
+  background-color: var(--dt-bg-card);
+}
+
+[data-theme='dark'] .el-input__inner {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-textarea__inner {
+  background-color: var(--dt-bg-card);
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-form-item__label {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-message-box {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+/* MessageBox 按钮样式修复 */
+[data-theme='dark'] .el-message-box__btns {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+[data-theme='dark'] .el-message-box__btns .el-button {
+  background-color: var(--dt-bg-card);
+  border-color: var(--dt-border-base);
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-message-box__btns .el-button--primary {
+  background-color: var(--dt-primary);
+  border-color: var(--dt-primary);
+  color: #FFFFFF;
+}
+
+[data-theme='dark'] .el-message-box__btns .el-button--primary:hover {
+  background-color: var(--dt-primary-light);
+  border-color: var(--dt-primary-light);
+}
+
+[data-theme='dark'] .el-message-box__btns .el-button:hover {
+  background-color: var(--dt-bg-hover);
+  border-color: var(--dt-border-dark);
+  color: var(--dt-text-primary);
+}
+
+/* 浅色模式也确保按钮样式正确 */
+.el-message-box__btns .el-button--primary {
+  color: #FFFFFF;
+}
+
+// 钉钉风格：Dialog 按钮组样式优化
+.el-dialog__footer {
+  .el-button {
+    min-width: 80px;
+  }
+}
+
+// 钉钉风格：按钮悬停效果优化
+.el-button:not(.is-disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+}
+
+.el-button--primary:not(.is-disabled):hover {
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
+}
+
+// 钉钉风格：按钮点击反馈
+.el-button:not(.is-disabled):active {
+  transform: translateY(0);
+}
+
+// 钉钉风格：消息对话框标题样式
+.el-message-box__title {
+  font-weight: 600;
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-message-box__title {
+  color: var(--dt-text-primary-dark);
+}
+
+// 钉钉风格：消息对话框内容样式
+.el-message-box__content {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-message-box__content {
+  color: var(--dt-text-regular-dark);
+}
+
+[data-theme='dark'] .el-notification {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-popover {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-tooltip__popper {
+  background-color: #333333;
+}
+
+[data-theme='dark'] .el-tooltip__popper .el-tooltip__arrow::before {
+  border-color: #333333;
+}
+
+/* 空状态组件深色模式 */
+[data-theme='dark'] .el-empty {
+  --el-empty-description-color: var(--dt-text-placeholder);
+}
+
+[data-theme='dark'] .el-empty__image svg {
+  fill: var(--dt-text-placeholder);
+}
+
+/* 骨架屏深色模式 */
+[data-theme='dark'] .el-skeleton {
+  --el-skeleton-bg-color: var(--dt-fill-color);
+  --el-skeleton-to-color: var(--dt-fill-color-light);
+}
+
+[data-theme='dark'] .el-skeleton__p {
+  background: linear-gradient(
+    90deg,
+    var(--dt-fill-color) 25%,
+    var(--dt-fill-color-light) 37%,
+    var(--dt-fill-color) 63%
+  );
+}
+
+/* 开关组件深色模式 */
+[data-theme='dark'] .el-switch {
+  --el-switch-off-color: #4A4A4A;
+  --el-switch-on-color: var(--dt-primary);
+  --el-switch-border-color: #4A4A4A;
+}
+
+/* 滑块深色模式 */
+[data-theme='dark'] .el-slider__runway {
+  background-color: var(--dt-fill-color);
+}
+
+[data-theme='dark'] .el-slider__bar {
+  background-color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-slider__button {
+  border-color: var(--dt-primary);
+}
+
+/* 标签页深色模式 */
+[data-theme='dark'] .el-tabs__nav-wrap::after {
+  background-color: var(--dt-divider);
+}
+
+[data-theme='dark'] .el-tabs__item {
+  color: var(--dt-text-secondary);
+}
+
+[data-theme='dark'] .el-tabs__item:hover {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-tabs__item.is-active {
+  color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-tabs__active-bar {
+  background-color: var(--dt-primary);
+}
+
+/* 徽标深色模式 */
+[data-theme='dark'] .el-badge__content {
+  background-color: var(--dt-error);
+  border-color: var(--dt-bg-card);
+}
+
+/* 分隔线深色模式 */
+[data-theme='dark'] .el-divider {
+  --el-divider-bg-color: var(--dt-divider);
+}
+
+/* 警告框深色模式 */
+[data-theme='dark'] .el-alert {
+  --el-alert-bg-color: var(--dt-fill-color-light);
+  --el-alert-border-color: var(--dt-border-light);
+}
+
+[data-theme='dark'] .el-alert--success {
+  --el-alert-bg-color: rgba(0, 200, 83, 0.1);
+  --el-alert-border-color: rgba(0, 200, 83, 0.3);
+}
+
+[data-theme='dark'] .el-alert--warning {
+  --el-alert-bg-color: rgba(255, 171, 0, 0.1);
+  --el-alert-border-color: rgba(255, 171, 0, 0.3);
+}
+
+[data-theme='dark'] .el-alert--error {
+  --el-alert-bg-color: rgba(255, 61, 0, 0.1);
+  --el-alert-border-color: rgba(255, 61, 0, 0.3);
+}
+
+[data-theme='dark'] .el-alert--info {
+  --el-alert-bg-color: rgba(0, 137, 255, 0.1);
+  --el-alert-border-color: rgba(0, 137, 255, 0.3);
+}
+
+/* ================================
+   按钮深色模式
+   ================================ */
+[data-theme='dark'] .el-button {
+  --el-button-bg-color: var(--dt-bg-card);
+  --el-button-border-color: var(--dt-border-base);
+  --el-button-text-color: var(--dt-text-regular);
+  --el-button-hover-bg-color: var(--dt-bg-hover);
+  --el-button-hover-border-color: var(--dt-border-dark);
+  --el-button-hover-text-color: var(--dt-text-primary);
+  --el-button-active-bg-color: var(--dt-fill-color);
+  --el-button-active-border-color: var(--dt-border-base);
+  --el-button-active-text-color: var(--dt-text-primary);
+  --el-button-disabled-bg-color: var(--dt-bg-disabled);
+  --el-button-disabled-border-color: var(--dt-border-lighter);
+  --el-button-disabled-text-color: var(--dt-text-disabled);
+}
+
+[data-theme='dark'] .el-button--primary {
+  --el-button-bg-color: var(--dt-primary);
+  --el-button-border-color: var(--dt-primary);
+  --el-button-text-color: #FFFFFF;
+  --el-button-hover-bg-color: var(--dt-primary-light);
+  --el-button-hover-border-color: var(--dt-primary-light);
+  --el-button-hover-text-color: #FFFFFF;
+}
+
+[data-theme='dark'] .el-button--success {
+  --el-button-bg-color: var(--dt-success);
+  --el-button-border-color: var(--dt-success);
+  --el-button-text-color: #FFFFFF;
+  --el-button-hover-bg-color: var(--dt-success-light);
+  --el-button-hover-border-color: var(--dt-success-light);
+}
+
+[data-theme='dark'] .el-button--warning {
+  --el-button-bg-color: var(--dt-warning);
+  --el-button-border-color: var(--dt-warning);
+  --el-button-text-color: #FFFFFF;
+  --el-button-hover-bg-color: var(--dt-warning-light);
+  --el-button-hover-border-color: var(--dt-warning-light);
+}
+
+[data-theme='dark'] .el-button--danger {
+  --el-button-bg-color: var(--dt-error);
+  --el-button-border-color: var(--dt-error);
+  --el-button-text-color: #FFFFFF;
+  --el-button-hover-bg-color: var(--dt-error-light);
+  --el-button-hover-border-color: var(--dt-error-light);
+}
+
+[data-theme='dark'] .el-button--info {
+  --el-button-bg-color: var(--dt-info);
+  --el-button-border-color: var(--dt-info);
+  --el-button-text-color: #FFFFFF;
+  --el-button-hover-bg-color: var(--dt-info-light);
+  --el-button-hover-border-color: var(--dt-info-light);
+}
+
+[data-theme='dark'] .el-button.is-plain {
+  --el-button-bg-color: transparent;
+  --el-button-text-color: var(--dt-text-regular);
+  --el-button-hover-bg-color: var(--dt-bg-hover);
+}
+
+[data-theme='dark'] .el-button--primary.is-plain {
+  --el-button-text-color: var(--dt-primary);
+  --el-button-bg-color: rgba(51, 161, 255, 0.1);
+  --el-button-border-color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-button--text {
+  --el-button-text-color: var(--dt-text-regular);
+  --el-button-hover-bg-color: var(--dt-bg-hover);
+  --el-button-hover-text-color: var(--dt-primary);
+}
+
+/* ================================
+   输入框深色模式增强
+   ================================ */
+[data-theme='dark'] .el-input__wrapper {
+  background-color: var(--dt-bg-card);
+  box-shadow: 0 0 0 1px var(--dt-border-base) inset;
+}
+
+[data-theme='dark'] .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--dt-border-dark) inset;
+}
+
+[data-theme='dark'] .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--dt-primary) inset;
+}
+
+[data-theme='dark'] .el-input__inner {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-input__prefix,
+[data-theme='dark'] .el-input__suffix {
+  color: var(--dt-text-secondary);
+}
+
+[data-theme='dark'] .el-input__prefix-inner:hover,
+[data-theme='dark'] .el-input__suffix-inner:hover {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-input.is-disabled .el-input__wrapper {
+  background-color: var(--dt-bg-disabled);
+  box-shadow: 0 0 0 1px var(--dt-border-lighter) inset;
+}
+
+[data-theme='dark'] .el-input.is-disabled .el-input__inner {
+  color: var(--dt-text-disabled);
+}
+
+/* ================================
+   选择器深色模式增强
+   ================================ */
+[data-theme='dark'] .el-select__wrapper {
+  background-color: var(--dt-bg-card);
+  box-shadow: 0 0 0 1px var(--dt-border-base) inset;
+}
+
+[data-theme='dark'] .el-select__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--dt-border-dark) inset;
+}
+
+[data-theme='dark'] .el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--dt-primary) inset;
+}
+
+[data-theme='dark'] .el-select__placeholder {
+  color: var(--dt-text-placeholder);
+}
+
+[data-theme='dark'] .el-select__selected-item {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-select__input {
+  color: var(--dt-text-primary);
+}
+
+/* ================================
+   标签 Tag 深色模式
+   ================================ */
+[data-theme='dark'] .el-tag {
+  --el-tag-bg-color: var(--dt-fill-color-light);
+  --el-tag-border-color: var(--dt-border-base);
+  --el-tag-text-color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-tag--primary {
+  --el-tag-bg-color: rgba(51, 161, 255, 0.2);
+  --el-tag-border-color: rgba(51, 161, 255, 0.3);
+  --el-tag-text-color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-tag--success {
+  --el-tag-bg-color: rgba(0, 200, 83, 0.2);
+  --el-tag-border-color: rgba(0, 200, 83, 0.3);
+  --el-tag-text-color: var(--dt-success);
+}
+
+[data-theme='dark'] .el-tag--warning {
+  --el-tag-bg-color: rgba(255, 171, 0, 0.2);
+  --el-tag-border-color: rgba(255, 171, 0, 0.3);
+  --el-tag-text-color: var(--dt-warning);
+}
+
+[data-theme='dark'] .el-tag--danger {
+  --el-tag-bg-color: rgba(255, 61, 0, 0.2);
+  --el-tag-border-color: rgba(255, 61, 0, 0.3);
+  --el-tag-text-color: var(--dt-error);
+}
+
+[data-theme='dark'] .el-tag--info {
+  --el-tag-bg-color: rgba(0, 137, 255, 0.2);
+  --el-tag-border-color: rgba(0, 137, 255, 0.3);
+  --el-tag-text-color: var(--dt-info);
+}
+
+/* ================================
+   复选框深色模式
+   ================================ */
+[data-theme='dark'] .el-checkbox {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-checkbox__input.is-checked + .el-checkbox__label {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-checkbox__input.is-disabled + .el-checkbox__label {
+  color: var(--dt-text-disabled);
+}
+
+/* ================================
+   单选框深色模式
+   ================================ */
+[data-theme='dark'] .el-radio {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-radio__input.is-checked + .el-radio__label {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-radio__input.is-disabled + .el-radio__label {
+  color: var(--dt-text-disabled);
+}
+
+[data-theme='dark'] .el-radio__inner {
+  background-color: var(--dt-bg-card);
+  border-color: var(--dt-border-base);
+}
+
+[data-theme='dark'] .el-radio__input.is-checked .el-radio__inner {
+  background-color: var(--dt-primary);
+  border-color: var(--dt-primary);
+}
+
+/* ================================
+   菜单深色模式增强
+   ================================ */
+[data-theme='dark'] .el-menu {
+  background-color: var(--dt-sidebar-bg);
+  border-color: var(--dt-divider);
+}
+
+[data-theme='dark'] .el-menu-item,
+[data-theme='dark'] .el-sub-menu__title {
+  color: var(--dt-sidebar-text);
+}
+
+[data-theme='dark'] .el-menu-item:hover,
+[data-theme='dark'] .el-sub-menu__title:hover {
+  background-color: var(--dt-bg-hover);
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-menu-item.is-active {
+  background-color: var(--dt-sidebar-bg-active);
+  color: var(--dt-sidebar-text-active);
+}
+
+[data-theme='dark'] .el-sub-menu .el-menu-item {
+  background-color: var(--dt-bg-card);
+}
+
+[data-theme='dark'] .el-menu--collapse .el-sub-menu.is-opened > .el-sub-menu__title .el-sub-menu__icon-arrow {
+  color: var(--dt-text-secondary);
+}
+
+/* ================================
+   下拉菜单深色模式增强
+   ================================ */
+[data-theme='dark'] .el-dropdown-menu {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-dropdown-menu__item {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-dropdown-menu__item:focus,
+[data-theme='dark'] .el-dropdown-menu__item:hover {
+  background-color: var(--dt-bg-hover);
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-dropdown-menu__item.is-disabled {
+  color: var(--dt-text-disabled);
+}
+
+[data-theme='dark'] .el-dropdown-menu__item.divider {
+  background-color: var(--dt-divider);
+}
+
+/* ================================
+   级联选择器深色模式
+   ================================ */
+[data-theme='dark'] .el-cascader__dropdown {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-cascader-menu {
+  background-color: var(--dt-card-bg);
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-cascader-node:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+[data-theme='dark'] .el-cascader-node.is-active {
+  color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-cascader-node.in-active-path {
+  color: var(--dt-text-primary);
+  font-weight: 600;
+}
+
+/* ================================
+   时间选择器深色模式
+   ================================ */
+[data-theme='dark'] .el-time-panel {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-time-spinner__item {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-time-spinner__item:hover:not(.is-disabled):not(.is-active) {
+  background-color: var(--dt-bg-hover);
+}
+
+[data-theme='dark'] .el-time-spinner__item.is-active:not(.is-disabled) {
+  color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-time-panel__content {
+  border-color: var(--dt-divider);
+}
+
+/* ================================
+   日期选择器深色模式增强
+   ================================ */
+[data-theme='dark'] .el-picker-panel {
+  background-color: var(--dt-card-bg);
+  border-color: var(--dt-card-border);
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-date-table th {
+  background-color: var(--dt-bg-card);
+  color: var(--dt-text-secondary);
+  border-color: var(--dt-divider);
+}
+
+[data-theme='dark'] .el-date-table td {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-date-table td.today .el-date-table-cell__text {
+  color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-date-table td.available:hover .el-date-table-cell__text {
+  background-color: var(--dt-bg-hover);
+}
+
+[data-theme='dark'] .el-date-table td.in-range .el-date-table-cell__text {
+  background-color: var(--dt-bg-active);
+}
+
+[data-theme='dark'] .el-date-table td.start-date .el-date-table-cell__text,
+[data-theme='dark'] .el-date-table td.end-date .el-date-table-cell__text {
+  background-color: var(--dt-primary);
+  color: #FFFFFF;
+}
+
+[data-theme='dark'] .el-date-table td.disabled .el-date-table-cell__text {
+  color: var(--dt-text-disabled);
+  background-color: transparent;
+}
+
+[data-theme='dark'] .el-month-table td .el-date-table-cell__text,
+[data-theme='dark'] .el-year-table td .el-date-table-cell__text {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-month-table td.today .el-date-table-cell__text,
+[data-theme='dark'] .el-year-table td.today .el-date-table-cell__text {
+  color: var(--dt-primary);
+}
+
+/* ================================
+   进度条深色模式
+   ================================ */
+[data-theme='dark'] .el-progress-bar__outer {
+  background-color: var(--dt-fill-color);
+}
+
+[data-theme='dark'] .el-progress-bar__inner {
+  background-color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-progress__text {
+  color: var(--dt-text-regular);
+}
+
+/* ================================
+   上传组件深色模式
+   ================================ */
+[data-theme='dark'] .el-upload {
+  border-color: var(--dt-border-darker);
+}
+
+[data-theme='dark'] .el-upload-dragger {
+  background-color: var(--dt-bg-card);
+  border-color: var(--dt-border-darker);
+}
+
+[data-theme='dark'] .el-upload-dragger:hover {
+  border-color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-upload-list {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-upload-list__item-name {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-upload-list__item:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+/* ================================
+   穿梭框深色模式
+   ================================ */
+[data-theme='dark'] .el-transfer-panel {
+  background-color: var(--dt-bg-card);
+  border-color: var(--dt-card-border);
+}
+
+[data-theme='dark'] .el-transfer-panel__header {
+  background-color: var(--dt-bg-card);
+  color: var(--dt-text-primary);
+  border-color: var(--dt-divider);
+}
+
+[data-theme='dark'] .el-transfer-panel__body {
+  background-color: var(--dt-bg-card);
+}
+
+[data-theme='dark'] .el-transfer-panel__item {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-transfer-panel__item:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+/* ================================
+   树形控件深色模式
+   ================================ */
+[data-theme='dark'] .el-tree {
+  background-color: transparent;
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-tree-node__content {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-tree-node__content:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+[data-theme='dark'] .el-tree-node.is-current > .el-tree-node__content {
+  background-color: var(--dt-bg-active);
+  color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-tree-node__expand-icon {
+  color: var(--dt-text-secondary);
+}
+
+[data-theme='dark'] .el-tree-node__expand-icon.is-leaf {
+  color: transparent;
+}
+
+/* ================================
+   步骤条深色模式
+   ================================ */
+[data-theme='dark'] .el-step__head {
+  background-color: var(--dt-bg-card);
+}
+
+[data-theme='dark'] .el-step__title {
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-step.is-process .el-step__title {
+  color: var(--dt-primary);
+}
+
+[data-theme='dark'] .el-step.is-finish .el-step__title {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-step__description {
+  color: var(--dt-text-secondary);
+}
+
+[data-theme='dark'] .el-step__line {
+  background-color: var(--dt-border-light);
+}
+
+[data-theme='dark'] .el-step.is-finish .el-step__line {
+  background-color: var(--dt-primary);
+}
+
+/* ================================
+   面包屑深色模式
+   ================================ */
+[data-theme='dark'] .el-breadcrumb {
+  color: var(--dt-text-secondary);
+}
+
+[data-theme='dark'] .el-breadcrumb__item {
+  color: var(--dt-text-secondary);
+}
+
+[data-theme='dark'] .el-breadcrumb__item:last-child .el-breadcrumb__inner {
+  color: var(--dt-text-primary);
+}
+
+[data-theme='dark'] .el-breadcrumb__separator {
+  color: var(--dt-text-placeholder);
+}
+
+/* ================================
+   全局基础样式
+   ================================ */
+
+/* 管理后台容器样式 */
+.admin-layout {
+  font-family: var(--dt-font-family);
+  font-size: var(--dt-font-size-base);
+  line-height: var(--dt-line-height-base);
+  color: var(--dt-text-primary);
+  background-color: var(--dt-bg-page);
+}
+
+/* 链接样式 */
+a {
+  color: var(--dt-text-link);
+  text-decoration: none;
+  transition: color var(--dt-transition-base) var(--dt-ease-out);
+}
+
+a:hover {
+  color: var(--dt-primary-light);
+}
+
+/* ================================
+   工具类 (Utility Classes)
+   ================================ */
+
+/* 文字颜色 */
+.dt-text-primary { color: var(--dt-text-primary); }
+.dt-text-regular { color: var(--dt-text-regular); }
+.dt-text-secondary { color: var(--dt-text-secondary); }
+.dt-text-success { color: var(--dt-success); }
+.dt-text-warning { color: var(--dt-warning); }
+.dt-text-error { color: var(--dt-error); }
+.dt-text-link { color: var(--dt-text-link); }
+
+/* 背景色 */
+.dt-bg-page { background-color: var(--dt-bg-page); }
+.dt-bg-card { background-color: var(--dt-bg-card); }
+.dt-bg-primary { background-color: var(--dt-primary); }
+.dt-bg-success { background-color: var(--dt-success-bg); }
+.dt-bg-warning { background-color: var(--dt-warning-bg); }
+.dt-bg-error { background-color: var(--dt-error-bg); }
+
+/* 间距 */
+.dt-m-xs { margin: var(--dt-space-xs); }
+.dt-m-sm { margin: var(--dt-space-sm); }
+.dt-m-md { margin: var(--dt-space-md); }
+.dt-m-lg { margin: var(--dt-space-lg); }
+.dt-p-xs { padding: var(--dt-space-xs); }
+.dt-p-sm { padding: var(--dt-space-sm); }
+.dt-p-md { padding: var(--dt-space-md); }
+.dt-p-lg { padding: var(--dt-space-lg); }
+
+/* 圆角 */
+.dt-radius-sm { border-radius: var(--dt-radius-sm); }
+.dt-radius-md { border-radius: var(--dt-radius-md); }
+.dt-radius-lg { border-radius: var(--dt-radius-lg); }
+
+/* 卡片样式 */
+.dt-card {
+  background-color: var(--dt-card-bg);
+  border: 1px solid var(--dt-card-border);
+  border-radius: var(--dt-card-radius);
+  padding: var(--dt-card-padding);
+  margin-bottom: var(--dt-card-margin-bottom);
+  box-shadow: var(--dt-shadow-card);
+}
+
+/* 阴影 */
+.dt-shadow-light { box-shadow: var(--dt-shadow-light); }
+.dt-shadow-base { box-shadow: var(--dt-shadow-base); }
+.dt-shadow-card { box-shadow: var(--dt-shadow-card); }
+
+/* ================================
+   滚动条样式
+   ================================ */
+/* 全局滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dt-bg-page);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dt-border-base);
+  border-radius: 4px;
+  transition: background var(--dt-transition-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dt-border-dark);
+}
+
+/* 深色模式滚动条 */
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: var(--dt-bg-page);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #4A4A4A;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #5A5A5A;
+}

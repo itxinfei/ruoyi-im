@@ -284,9 +284,9 @@ if (typeof window !== 'undefined') {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 /* 引入主题变量 */
-@import '@/styles/admin-theme.css';
+@import '@/styles/admin-theme.scss';
 
 /* ================================
    布局容器

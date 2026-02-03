@@ -139,12 +139,6 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
-  // 启用文件系统缓存
-  fs: {
-    allow: ['.js', '.jsx', '.json', '.vue', '.ts', '.tsx'],
-    strict: false,
-    maxCacheSize: 100 * 1024 * 1024 // 100MB
-  },
   // 优化依赖预构建
   optimizeDeps: {
     include: [
@@ -226,19 +220,6 @@ export default defineConfig({
         './src/store/index.js'
       ]
     },
-    // 排除 tests 目录
-    fs: {
-      strict: false,
-      allow: ['..'],
-      deny: ['.env', '.env.*', 'node_modules', 'tests']
-    }
-  },
-  // 启用文件系统缓存
-  fs: {
-    allow: ['.js', '.jsx', '.json', '.vue', '.ts', '.tsx'],
-    strict: false,
-    maxCacheSize: 100 * 1024 * 1024 // 100MB
-  },
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
@@ -247,6 +228,14 @@ export default defineConfig({
         timeout: 30000
       }
     }
+  },
+  // 启用文件系统缓存
+  fs: {
+    allow: ['..'],
+    strict: false,
+    maxCacheSize: 100 * 1024 * 1024, // 100MB
+    // 排除不需要扫描的目录
+    deny: ['node_modules', '.git', 'tests']
   },
   test: {
     environment: 'jsdom',
