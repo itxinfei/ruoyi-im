@@ -335,7 +335,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -363,6 +363,7 @@ import {
 } from '@/api/admin'
 import { formatFileSize } from '@/utils/format'
 import { exportToCSV } from '@/utils/export'
+import { debounce } from '@/utils/debounce'
 
 const loading = ref(false)
 const messageList = ref([])
@@ -648,6 +649,16 @@ const getMessageTypeColor = (type) => {
   }
   return colors[type] || ''
 }
+
+// 防抖搜索
+const debouncedSearch = debounce(() => {
+  pageNum.value = 1
+  loadMessages()
+}, 300)
+
+watch(() => searchForm.value.keyword, () => {
+  debouncedSearch()
+})
 
 onMounted(() => {
   loadMessages()

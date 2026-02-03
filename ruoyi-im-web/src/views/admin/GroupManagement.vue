@@ -371,7 +371,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, h } from 'vue'
+import { ref, reactive, onMounted, computed, h, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -402,6 +402,7 @@ import {
   transferGroupOwner
 } from '@/api/admin'
 import { exportToCSV } from '@/utils/export'
+import { debounce } from '@/utils/debounce'
 
 // 搜索表单
 const searchForm = reactive({
@@ -944,6 +945,16 @@ const handleExport = () => {
     ElMessage.error('导出失败')
   }
 }
+
+// 防抖搜索
+const debouncedSearch = debounce(() => {
+  pageNum.value = 1
+  loadGroups()
+}, 300)
+
+watch(() => searchForm.keyword, () => {
+  debouncedSearch()
+})
 
 onMounted(() => {
   loadGroups()

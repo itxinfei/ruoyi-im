@@ -214,7 +214,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -231,6 +231,7 @@ import {
 } from '@element-plus/icons-vue'
 import { getUserList, updateUserStatus, deleteUser, createUser, updateUser, batchDeleteUsers, batchUpdateUserStatus } from '@/api/admin'
 import { exportToCSV } from '@/utils/export'
+import { debounce } from '@/utils/debounce'
 
 // 搜索表单
 const searchForm = reactive({
@@ -566,6 +567,17 @@ const handleExport = () => {
 const handleResetPassword = () => {
   ElMessage.info('重置密码功能开发中')
 }
+
+// 防抖搜索：关键词变化时延迟执行搜索
+const debouncedSearch = debounce(() => {
+  pageNum.value = 1
+  loadUsers()
+}, 300)
+
+// 监听搜索关键词变化，自动触发搜索
+watch(() => searchForm.keyword, () => {
+  debouncedSearch()
+})
 
 onMounted(() => {
   loadUsers()

@@ -3,56 +3,48 @@
     <!-- 统计卡片 -->
     <el-row :gutter="16">
       <el-col :span="6">
-        <el-card class="stat-card stat-card--user" shadow="hover" @click="handleUsersClick">
-          <div class="stat-content">
-            <div class="stat-icon">
-              <el-icon><User /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ overview.totalUsers || 0 }}</div>
-              <div class="stat-label">总用户数</div>
-            </div>
-          </div>
-        </el-card>
+        <StatCard
+          title="总用户数"
+          :value="overview.totalUsers"
+          :icon="User"
+          icon-color="#409eff"
+          :loading="loading"
+          clickable
+          @click="handleUsersClick"
+        />
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card stat-card--active" shadow="hover" @click="handleUsersClick">
-          <div class="stat-content">
-            <div class="stat-icon">
-              <el-icon><Star /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ overview.activeUsers || 0 }}</div>
-              <div class="stat-label">活跃用户</div>
-            </div>
-          </div>
-        </el-card>
+        <StatCard
+          title="活跃用户"
+          :value="overview.activeUsers"
+          :icon="Star"
+          icon-color="#67c23a"
+          :loading="loading"
+          clickable
+          @click="handleUsersClick"
+        />
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card stat-card--group" shadow="hover" @click="handleGroupsClick">
-          <div class="stat-content">
-            <div class="stat-icon">
-              <el-icon><ChatDotRound /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ overview.totalGroups || 0 }}</div>
-              <div class="stat-label">群组数</div>
-            </div>
-          </div>
-        </el-card>
+        <StatCard
+          title="群组数"
+          :value="overview.totalGroups"
+          :icon="ChatDotRound"
+          icon-color="#e6a23c"
+          :loading="loading"
+          clickable
+          @click="handleGroupsClick"
+        />
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card stat-card--message" shadow="hover" @click="handleMessagesClick">
-          <div class="stat-content">
-            <div class="stat-icon">
-              <el-icon><ChatLineSquare /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ overview.todayMessages || 0 }}</div>
-              <div class="stat-label">今日消息</div>
-            </div>
-          </div>
-        </el-card>
+        <StatCard
+          title="今日消息"
+          :value="overview.todayMessages"
+          :icon="ChatLineSquare"
+          icon-color="#f56c6c"
+          :loading="loading"
+          clickable
+          @click="handleMessagesClick"
+        />
       </el-col>
     </el-row>
 
@@ -183,6 +175,7 @@ import { ElMessage } from 'element-plus'
 import { User, ChatDotRound, ChatLineSquare, Star, Refresh } from '@element-plus/icons-vue'
 import { getOverview, getUserStats, getMessageAdminStats } from '@/api/admin'
 import { useRouter } from 'vue-router'
+import StatCard from '@/components/admin/StatCard.vue'
 
 const router = useRouter()
 const loading = ref(false)
@@ -308,8 +301,7 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-/* 引入主题变量 */
-@import '@/styles/admin-theme.scss';
+
 
 /* ================================
    页面容器
@@ -320,72 +312,6 @@ onMounted(async () => {
 
 .chart-row {
   margin-top: var(--dt-space-md);
-}
-
-/* ================================
-   统计卡片
-   ================================ */
-.stat-card {
-  border-radius: var(--dt-card-radius);
-  border: 1px solid var(--dt-card-border);
-  transition: all var(--dt-transition-base) var(--dt-ease-out);
-  cursor: pointer;
-}
-
-.stat-card:hover {
-  box-shadow: var(--dt-shadow-base);
-  transform: translateY(-2px);
-}
-
-.stat-content {
-  display: flex;
-  align-items: center;
-  gap: var(--dt-space-md);
-}
-
-.stat-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--dt-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: white;
-}
-
-/* 各卡片图标样式 */
-.stat-card--user .stat-icon {
-  background: var(--dt-primary-gradient);
-}
-
-.stat-card--active .stat-icon {
-  background: linear-gradient(135deg, #FF6B9D 0%, #FF3D71 100%);
-}
-
-.stat-card--group .stat-icon {
-  background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);
-}
-
-.stat-card--message .stat-icon {
-  background: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%);
-}
-
-.stat-info {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: var(--dt-font-weight-bold);
-  color: var(--dt-text-primary);
-  line-height: 1.2;
-}
-
-.stat-label {
-  font-size: var(--dt-font-size-base);
-  color: var(--dt-text-secondary);
-  margin-top: 4px;
 }
 
 /* ================================

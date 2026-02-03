@@ -269,7 +269,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -288,6 +288,7 @@ import {
   deleteExpiredLogs
 } from '@/api/admin'
 import { exportToCSV } from '@/utils/export'
+import { debounce } from '@/utils/debounce'
 
 const loading = ref(false)
 const logList = ref([])
@@ -517,6 +518,16 @@ const getActionLabel = (action) => {
   }
   return labels[action] || action
 }
+
+// 防抖搜索
+const debouncedSearch = debounce(() => {
+  pageNum.value = 1
+  loadLogs()
+}, 300)
+
+watch(() => searchForm.value.keyword, () => {
+  debouncedSearch()
+})
 
 onMounted(() => {
   loadLogs()
