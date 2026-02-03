@@ -27,36 +27,36 @@ public class DingMessageScheduledTask {
     private ImDingMessageMapper dingMessageMapper;
 
     /**
-     * 处理过期DING消息
-     * 每小时执行一次，检查并处理过期的DING消息
+     * 处理长时间未完成的DING消息
+     * 每小时执行一次，检查并处理超过24小时仍处于SENDING状态的DING消息
      */
     @Scheduled(cron = "0 0 * * * ?")
     public void processExpiredDingMessages() {
         try {
-            // 查询已过期的DING消息
+            // 查询超过24小时仍处于SENDING状态的DING消息
+            LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
             LambdaQueryWrapper<ImDingMessage> wrapper = new LambdaQueryWrapper<>();
             wrapper.select(ImDingMessage::getId,
-                        ImDingMessage::getSenderId,
-                        ImDingMessage::getContent,
-                        ImDingMessage::getDingType,
-                        ImDingMessage::getIsUrgent,
-                        ImDingMessage::getStatus,
-                        ImDingMessage::getExpireTime,
-                        ImDingMessage::getCreateTime)
-                    .eq(ImDingMessage::getStatus, "SENT")
-                    .isNotNull(ImDingMessage::getExpireTime)
-                    .le(ImDingMessage::getExpireTime, LocalDateTime.now());
+                    ImDingMessage::getSenderId,
+                    ImDingMessage::getContent,
+                    ImDingMessage::getDingType,
+                    ImDingMessage::getIsUrgent,
+                    ImDingMessage::getStatus,
+                    ImDingMessage::getSendTime,
+                    ImDingMessage::getCreateTime)
+                    .eq(ImDingMessage::getStatus, "SENDING")
+                    .le(ImDingMessage::getCreateTime, oneDayAgo);
 
             List<ImDingMessage> expiredDings = dingMessageMapper.selectList(wrapper);
 
             if (!expiredDings.isEmpty()) {
-                log.info("发现 {} 条过期DING消息", expiredDings.size());
-                // 可以在这里将过期消息状态更新为EXPIRED
+                log.info("发现 {} 条长时间未完成的DING消息", expiredDings.size());
+                // 将长时间未完成的消息状态更新为FAILED
                 for (ImDingMessage ding : expiredDings) {
-                    ding.setStatus("EXPIRED");
+                    ding.setStatus("FAILED");
                     dingMessageMapper.updateById(ding);
                 }
-                log.info("过期DING消息处理完成，处理数量: {}", expiredDings.size());
+                log.info("长时间未完成DING消息处理完成，处理数量: {}", expiredDings.size());
             }
 
         } catch (Exception e) {
@@ -76,12 +76,17 @@ public class DingMessageScheduledTask {
             sentWrapper.eq(ImDingMessage::getStatus, "SENT");
             Long sentCount = dingMessageMapper.selectCount(sentWrapper);
 
-            // 统计已过期的DING消息数量
-            LambdaQueryWrapper<ImDingMessage> expiredWrapper = new LambdaQueryWrapper<>();
-            expiredWrapper.eq(ImDingMessage::getStatus, "EXPIRED");
-            Long expiredCount = dingMessageMapper.selectCount(expiredWrapper);
+            // 统计发送中的DING消息数量
+            LambdaQueryWrapper<ImDingMessage> sendingWrapper = new LambdaQueryWrapper<>();
+            sendingWrapper.eq(ImDingMessage::getStatus, "SENDING");
+            Long sendingCount = dingMessageMapper.selectCount(sendingWrapper);
 
-            log.info("DING消息统计 - 已发送: {}, 已过期: {}", sentCount, expiredCount);
+            // 统计失败的DING消息数量
+            LambdaQueryWrapper<ImDingMessage> failedWrapper = new LambdaQueryWrapper<>();
+            failedWrapper.eq(ImDingMessage::getStatus, "FAILED");
+            Long failedCount = dingMessageMapper.selectCount(failedWrapper);
+
+            log.info("DING消息统计 - 已发送: {}, 发送中: {}, 失败: {}", sentCount, sendingCount, failedCount);
 
         } catch (Exception e) {
             log.error("生成DING消息统计失败", e);

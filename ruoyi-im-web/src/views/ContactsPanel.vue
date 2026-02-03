@@ -444,6 +444,7 @@ watch(showSearchPanel, (val) => {
 </script>
 
 <style scoped lang="scss">
+@use "sass:color";
 /* Variables */
 $sidebar-width: 260px;
 $list-width: 320px;
@@ -552,7 +553,7 @@ $active-bg: #e6f1fc; // Light blue for active states
     transition: all 0.2s;
     
     &:hover {
-      background: darken($hover-bg, 2%);
+      background: color.adjust($hover-bg, $lightness: -2%);
     }
     
     .search-icon {

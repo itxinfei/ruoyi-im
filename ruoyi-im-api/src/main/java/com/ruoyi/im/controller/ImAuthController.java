@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
@@ -55,6 +56,7 @@ public class ImAuthController {
      */
     @Operation(summary = "用户登录", description = "验证用户名和密码，返回JWT Token")
     @PostMapping("/login")
+    @RateLimit(key = "login", time = 60, count = 5, limitType = RateLimit.LimitType.IP)
     public Result<ImLoginVO> login(@Valid @RequestBody ImLoginRequest request) {
         logger.info("收到登录请求 - 用户名: {}, 客户端: {}", request.getUsername(), request.getClientType());
         try {
@@ -81,6 +83,7 @@ public class ImAuthController {
      */
     @Operation(summary = "用户注册", description = "创建新用户账号")
     @PostMapping("/register")
+    @RateLimit(key = "register", time = 60, count = 3, limitType = RateLimit.LimitType.IP)
     public Result<Long> register(@Valid @RequestBody ImRegisterRequest request) {
         Long userId = imUserService.register(request);
         return Result.success("注册成功", userId);

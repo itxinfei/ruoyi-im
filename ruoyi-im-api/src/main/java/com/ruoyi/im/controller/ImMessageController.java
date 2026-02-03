@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImMessageMention;
 import com.ruoyi.im.dto.message.ImMessageBatchReadStatusRequest;
@@ -66,6 +67,7 @@ public class ImMessageController {
     }
 
     @PostMapping("/send")
+    @RateLimit(key = "send_message", time = 60, count = 300, limitType = RateLimit.LimitType.USER)
     public Result<ImMessageVO> send(@Valid @RequestBody ImMessageSendRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         ImMessageVO messageVO = imMessageService.sendMessage(request, userId);

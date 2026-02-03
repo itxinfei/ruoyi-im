@@ -87,4 +87,12 @@ public interface ImEmailMapper {
      * @return 统计信息列表
      */
     java.util.List<java.util.Map<String, Object>> countByFolder(@Param("userId") Long userId);
+
+    /**
+     * 统计星标邮件数量
+     *
+     * @param userId 用户ID
+     * @return 星标邮件数量
+     */
+    int countStarredByUserId(@Param("userId") Long userId);
 }

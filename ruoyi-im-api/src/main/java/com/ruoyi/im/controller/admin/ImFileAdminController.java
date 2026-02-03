@@ -67,7 +67,8 @@ public class ImFileAdminController {
 
         // 构建查询条件
         LambdaQueryWrapper<ImFileAsset> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ImFileAsset::getIsDeleted, 0);
+        // 使用 status 字段过滤未删除的记录
+        wrapper.eq(ImFileAsset::getStatus, "ACTIVE");
 
         if (fileName != null && !fileName.isEmpty()) {
             wrapper.like(ImFileAsset::getFileName, fileName);

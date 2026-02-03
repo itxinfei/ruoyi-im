@@ -158,4 +158,10 @@ public class ImCacheServiceImpl implements ImCacheService {
             redisTemplate.delete(keys);
         }
     }
+
+    @Override
+    public void clearAll() {
+        // 清理所有 IM 前缀的缓存
+        deleteByPattern(CACHE_KEY_PREFIX + "*");
+    }
 }

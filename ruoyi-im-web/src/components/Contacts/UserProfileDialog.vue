@@ -1287,33 +1287,17 @@ const copyToClipboard = async (text) => {
 
 <!-- 钉钉风格弹窗淡入动画 -->
 <style lang="scss">
-// 弹窗遮罩淡入
+// 弹窗遮罩淡入（使用全局 dialogFadeIn 动画）
 .dingtalk-dialog-fade .el-overlay {
-  animation: dialog-fade-in 0.2s ease-out;
+  animation: dialogFadeIn 0.2s ease-out;
 }
 
-// 弹窗内容淡入缩放
+// 弹窗内容淡入缩放（使用全局 dialogZoomIn 动画）
 .dingtalk-dialog-fade .el-dialog {
-  animation: dialog-zoom-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: dialogZoomIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes dialog-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes dialog-zoom-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
+// 使用全局对话框动画 (@/styles/animations.scss):
+// - dialogFadeIn: 遮罩淡入
+// - dialogZoomIn: 内容缩放淡入
 </style>

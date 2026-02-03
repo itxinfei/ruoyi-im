@@ -76,6 +76,29 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理限流异常
+     *
+     * 捕获并处理接口限流异常，返回429状态码
+     * 提示用户请求过于频繁，需稍后重试
+     *
+     * @param e 限流异常对象，包含限流key和限制次数
+     * @param request HTTP请求对象，用于记录请求路径
+     * @return 包含429状态码和限流提示的响应对象
+     */
+    @ExceptionHandler(RateLimitException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public Result<Void> handleRateLimitException(RateLimitException e, HttpServletRequest request) {
+        String traceId = generateTraceId();
+        try {
+            log.warn("接口限流[{}]: key={}, count={}, uri={}",
+                     traceId, e.getLimitKey(), e.getLimitCount(), request.getRequestURI());
+            return Result.error(429, "请求过于频繁，请稍后重试");
+        } finally {
+            clearTraceId();
+        }
+    }
+
+    /**
      * 处理业务异常
      *
      * 捕获并处理系统中抛出的业务异常，返回标准化的错误响应

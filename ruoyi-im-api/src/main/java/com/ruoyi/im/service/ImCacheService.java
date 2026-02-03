@@ -196,4 +196,10 @@ public interface ImCacheService {
      * @param pattern 匹配模式
      */
     void deleteByPattern(String pattern);
+
+    /**
+     * 清理所有 IM 相关缓存
+     * 用于测试环境重启时清理旧数据
+     */
+    void clearAll();
 }

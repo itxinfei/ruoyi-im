@@ -10,6 +10,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="senderName" column="sender_name"/>
         <result property="senderEmail" column="sender_email"/>
         <result property="receiverId" column="receiver_id"/>
+        <result property="ccIds" column="cc_ids"/>
+        <result property="bccIds" column="bcc_ids"/>
+        <result property="replyToEmailId" column="reply_to_email_id"/>
+        <result property="forwardFromEmailId" column="forward_from_email_id"/>
         <result property="subject" column="subject"/>
         <result property="htmlContent" column="html_content"/>
         <result property="textContent" column="text_content"/>
@@ -24,7 +28,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectImEmailVo">
-        select id, sender_id, sender_name, sender_email, receiver_id, subject,
+        select id, sender_id, sender_name, sender_email, receiver_id, cc_ids, bcc_ids,
+               reply_to_email_id, forward_from_email_id, subject,
                html_content, text_content, is_read, is_deleted, is_starred,
                folder, attachment_count, send_time, receive_time, create_time
         from im_email
@@ -32,11 +37,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectEmailsByUserIdAndFolder" resultMap="ImEmailResult">
         <include refid="selectImEmailVo"/>
-        where receiver_id = #{userId}
-        and is_deleted = 0
-        <if test="folder != null and folder != ''">
-            and folder = #{folder}
-        </if>
+        where is_deleted = 0
+        <choose>
+            <!-- 星标邮件：查询所有星标邮件 -->
+            <when test="folder == 'STARRED'">
+                and (receiver_id = #{userId} or sender_id = #{userId})
+                and is_starred = 1
+            </when>
+            <!-- 已发送：查询发送者为自己的邮件 -->
+            <when test="folder == 'SENT'">
+                and sender_id = #{userId}
+            </when>
+            <!-- 草稿：查询发送者为自己且文件夹为DRAFTS -->
+            <when test="folder == 'DRAFTS'">
+                and sender_id = #{userId}
+                and folder = 'DRAFTS'
+            </when>
+            <!-- 其他文件夹：查询接收者为自己 -->
+            <otherwise>
+                and (receiver_id = #{userId} or sender_id = #{userId})
+                and folder = #{folder}
+            </otherwise>
+        </choose>
         order by create_time desc
     </select>
 
@@ -74,6 +96,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         group by folder
     </select>
 
+    <select id="countStarredByUserId" resultType="int">
+        select count(*) from im_email
+        where (receiver_id = #{userId} or sender_id = #{userId})
+        and is_starred = 1
+        and is_deleted = 0
+    </select>
+
     <insert id="insertEmail" parameterType="com.ruoyi.im.domain.ImEmail" useGeneratedKeys="true" keyProperty="id">
         insert into im_email
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -81,6 +110,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="senderName != null">sender_name,</if>
             <if test="senderEmail != null">sender_email,</if>
             <if test="receiverId != null">receiver_id,</if>
+            <if test="ccIds != null">cc_ids,</if>
+            <if test="bccIds != null">bcc_ids,</if>
+            <if test="replyToEmailId != null">reply_to_email_id,</if>
+            <if test="forwardFromEmailId != null">forward_from_email_id,</if>
             <if test="subject != null">subject,</if>
             <if test="htmlContent != null">html_content,</if>
             <if test="textContent != null">text_content,</if>
@@ -97,6 +130,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="senderName != null">#{senderName},</if>
             <if test="senderEmail != null">#{senderEmail},</if>
             <if test="receiverId != null">#{receiverId},</if>
+            <if test="ccIds != null">#{ccIds},</if>
+            <if test="bccIds != null">#{bccIds},</if>
+            <if test="replyToEmailId != null">#{replyToEmailId},</if>
+            <if test="forwardFromEmailId != null">#{forwardFromEmailId},</if>
             <if test="subject != null">#{subject},</if>
             <if test="htmlContent != null">#{htmlContent},</if>
             <if test="textContent != null">#{textContent},</if>
@@ -121,13 +158,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateEmail" parameterType="com.ruoyi.im.domain.ImEmail">
         update im_email
         <trim prefix="SET" suffixOverrides=",">
+            <if test="senderId != null">sender_id = #{senderId},</if>
+            <if test="senderName != null">sender_name = #{senderName},</if>
+            <if test="senderEmail != null">sender_email = #{senderEmail},</if>
+            <if test="receiverId != null">receiver_id = #{receiverId},</if>
+            <if test="ccIds != null">cc_ids = #{ccIds},</if>
+            <if test="bccIds != null">bcc_ids = #{bccIds},</if>
+            <if test="replyToEmailId != null">reply_to_email_id = #{replyToEmailId},</if>
+            <if test="forwardFromEmailId != null">forward_from_email_id = #{forwardFromEmailId},</if>
+            <if test="subject != null">subject = #{subject},</if>
+            <if test="htmlContent != null">html_content = #{htmlContent},</if>
+            <if test="textContent != null">text_content = #{textContent},</if>
             <if test="isRead != null">is_read = #{isRead},</if>
             <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
             <if test="isStarred != null">is_starred = #{isStarred},</if>
             <if test="folder != null">folder = #{folder},</if>
-            <if test="subject != null">subject = #{subject},</if>
-            <if test="htmlContent != null">html_content = #{htmlContent},</if>
-            <if test="textContent != null">text_content = #{textContent},</if>
+            <if test="attachmentCount != null">attachment_count = #{attachmentCount},</if>
         </trim>
         where id = #{id}
     </update>

@@ -154,8 +154,10 @@ public class ImDingServiceImpl implements ImDingService {
         // 构建查询条件
         LambdaQueryWrapper<ImDingMessage> wrapper = new LambdaQueryWrapper<>();
 
+        // 注意：conversationId 不是数据库字段，如果需要按会话查询，需要在内存中过滤
+        // 暂不支持按 conversationId 查询 DING 消息
         if (request.getConversationId() != null) {
-            wrapper.eq(ImDingMessage::getConversationId, request.getConversationId());
+            log.warn("按会话ID查询DING消息暂不支持，conversationId 将被忽略: {}", request.getConversationId());
         }
         if (request.getSenderId() != null) {
             wrapper.eq(ImDingMessage::getSenderId, request.getSenderId());

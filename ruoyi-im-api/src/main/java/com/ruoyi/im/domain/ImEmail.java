@@ -42,6 +42,22 @@ public class ImEmail implements Serializable {
     @TableField("receiver_id")
     private Long receiverId;
 
+    /** 抄送ID列表(JSON) */
+    @TableField("cc_ids")
+    private String ccIds;
+
+    /** 密送ID列表(JSON) */
+    @TableField("bcc_ids")
+    private String bccIds;
+
+    /** 回复的原始邮件ID */
+    @TableField("reply_to_email_id")
+    private Long replyToEmailId;
+
+    /** 转发的原始邮件ID */
+    @TableField("forward_from_email_id")
+    private Long forwardFromEmailId;
+
     /** 邮件主题 */
     private String subject;
 
@@ -84,4 +100,8 @@ public class ImEmail implements Serializable {
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
+
+    /** 附件列表（非数据库字段，用于查询时返回） */
+    @TableField(exist = false)
+    private List<ImEmailAttachment> attachments;
 }

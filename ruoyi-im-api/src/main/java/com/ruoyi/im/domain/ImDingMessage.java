@@ -35,23 +35,22 @@ public class ImDingMessage extends BaseEntity implements Serializable {
     @Schema(description = "DING ID")
     private Long id;
 
-    /** 会话ID，关联到im_conversation表 */
-    @Schema(description = "会话ID")
-    @TableField("conversation_id")
-    private Long conversationId;
-
     /** 发送者用户ID，关联到im_user表 */
     @Schema(description = "发送者ID")
     @TableField("sender_id")
     private Long senderId;
 
+    /** DING内容 */
+    @Schema(description = "DING内容")
+    private String content;
+
     /**
      * DING类型
      * APP：应用内强提醒
      * SMS：短信提醒（需要第三方服务）
-     * CALL：电话提醒（需要第三方服务）
+     * SYSTEM：系统通知
      */
-    @Schema(description = "DING类型：APP应用内/SMS短信/CALL电话")
+    @Schema(description = "DING类型：APP应用内/SMS短信/SYSTEM系统通知")
     @TableField("ding_type")
     private String dingType;
 
@@ -64,45 +63,72 @@ public class ImDingMessage extends BaseEntity implements Serializable {
     @TableField("is_urgent")
     private Integer isUrgent;
 
-    /** DING内容 */
-    @Schema(description = "DING内容")
-    private String content;
+    /** 定时发送时间 */
+    @Schema(description = "定时发送时间")
+    @TableField("schedule_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime scheduleTime;
+
+    /** 实际发送时间 */
+    @Schema(description = "实际发送时间")
+    @TableField("send_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime sendTime;
 
     /**
-     * 目标用户ID列表（JSON格式）
-     * 为空表示发送给会话中的所有成员
+     * 状态
+     * DRAFT：草稿
+     * SENDING：发送中
+     * SENT：已发送
+     * CANCELLED：已取消
+     * FAILED：失败
      */
-    @Schema(description = "目标用户ID列表（JSON格式）")
-    @TableField("target_users")
-    private String targetUsers;
+    @Schema(description = "状态：DRAFT草稿/SENDING发送中/SENT已发送/CANCELLED已取消/FAILED失败")
+    @TableField("status")
+    private String status;
+
+    /** 是否需要回执 */
+    @Schema(description = "是否需要回执：0否/1是")
+    @TableField("receipt_required")
+    private Integer receiptRequired;
+
+    /** 总接收人数 */
+    @Schema(description = "总接收人数")
+    @TableField("total_count")
+    private Integer totalCount;
 
     /** 已读人数 */
     @Schema(description = "已读人数")
     @TableField("read_count")
     private Integer readCount;
 
-    /** 发送人数 */
-    @Schema(description = "发送人数")
-    @TableField("send_count")
-    private Integer sendCount;
+    /** 已确认人数 */
+    @Schema(description = "已确认人数")
+    @TableField("confirmed_count")
+    private Integer confirmedCount;
 
-    /** 过期时间 */
-    @Schema(description = "过期时间")
-    @TableField("expire_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime expireTime;
-
-    /**
-     * 状态
-     * ACTIVE：激活
-     * EXPIRED：过期
-     * CANCELLED：已取消
-     */
-    @Schema(description = "状态：ACTIVE激活/EXPIRED过期/CANCELLED已取消")
-    @TableField("status")
-    private String status;
+    /** 附件URL */
+    @Schema(description = "附件URL")
+    @TableField("attachment")
+    private String attachment;
 
     // ==================== 以下字段为非数据库字段 ====================
+
+    /** 会话ID（非数据库字段，用于业务逻辑） */
+    @TableField(exist = false)
+    private Long conversationId;
+
+    /** 目标用户ID列表（非数据库字段，JSON格式） */
+    @TableField(exist = false)
+    private String targetUsers;
+
+    /** 发送人数（非数据库字段，业务计算用） */
+    @TableField(exist = false)
+    private Integer sendCount;
+
+    /** 过期时间（非数据库字段，业务计算用） */
+    @TableField(exist = false)
+    private LocalDateTime expireTime;
 
     /** 发送者信息（非数据库字段） */
     @TableField(exist = false)

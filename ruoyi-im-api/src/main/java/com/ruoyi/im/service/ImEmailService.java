@@ -41,6 +41,19 @@ public interface ImEmailService {
     Long sendEmail(List<Long> toIds, String subject, String content, Long senderId);
 
     /**
+     * 发送邮件（支持抄送密送）
+     *
+     * @param toIds 接收者ID列表
+     * @param ccIds 抄送ID列表
+     * @param bccIds 密送ID列表
+     * @param subject 主题
+     * @param content 内容
+     * @param senderId 发送者ID
+     * @return 邮件ID
+     */
+    Long sendEmail(List<Long> toIds, List<Long> ccIds, List<Long> bccIds, String subject, String content, Long senderId);
+
+    /**
      * 保存草稿
      *
      * @param subject 主题
@@ -57,6 +70,14 @@ public interface ImEmailService {
      * @param userId 用户ID
      */
     void markAsRead(Long emailId, Long userId);
+
+    /**
+     * 标记未读
+     *
+     * @param emailId 邮件ID
+     * @param userId 用户ID
+     */
+    void markAsUnread(Long emailId, Long userId);
 
     /**
      * 标记星标
@@ -131,6 +152,15 @@ public interface ImEmailService {
     int batchMarkAsRead(List<Long> emailIds, Long userId);
 
     /**
+     * 批量标记未读
+     *
+     * @param emailIds 邮件ID列表
+     * @param userId 用户ID
+     * @return 成功标记的数量
+     */
+    int batchMarkAsUnread(List<Long> emailIds, Long userId);
+
+    /**
      * 批量删除（移至垃圾箱）
      *
      * @param emailIds 邮件ID列表
@@ -138,6 +168,16 @@ public interface ImEmailService {
      * @return 成功删除的数量
      */
     int batchMoveToTrash(List<Long> emailIds, Long userId);
+
+    /**
+     * 批量移动到文件夹
+     *
+     * @param emailIds 邮件ID列表
+     * @param folder 目标文件夹
+     * @param userId 用户ID
+     * @return 成功移动的数量
+     */
+    int batchMoveToFolder(List<Long> emailIds, String folder, Long userId);
 
     /**
      * 搜索邮件

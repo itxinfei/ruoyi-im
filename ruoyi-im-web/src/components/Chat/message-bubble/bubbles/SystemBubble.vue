@@ -29,14 +29,5 @@ defineProps({
   border-radius: var(--dt-radius-full);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+// 使用全局 fadeIn 动画 (@/styles/animations.scss)
 </style>

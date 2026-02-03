@@ -281,13 +281,5 @@ onUnmounted(() => {
   font-weight: 600;
 }
 
-// 动画
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+// rotate 使用全局 spin 动画 (@/styles/animations.scss)
 </style>

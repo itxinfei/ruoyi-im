@@ -2,13 +2,16 @@
 <configuration>
     <!-- 日志存放路径 -->
     <property name="log.path" value="/home/ruoyi/im/logs" />
-    <!-- 日志输出格式 -->
-    <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - [%method,%line] - %msg%n" />
+    <!-- 日志输出格式 - 包含追踪ID -->
+    <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - [%method,%line] - [TraceId:%X{traceId}] - %msg%n" />
+
+    <!-- 控制台输出格式 -->
+    <property name="log.pattern.console" value="%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{50}) - [TraceId:%magenta(%X{traceId})] - %msg%n" />
 
     <!-- 控制台输出 -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${log.pattern}</pattern>
+            <pattern>${log.pattern.console}</pattern>
         </encoder>
     </appender>
     

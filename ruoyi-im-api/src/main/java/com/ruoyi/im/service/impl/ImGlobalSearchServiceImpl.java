@@ -343,7 +343,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             // 搜索文件资产（使用前缀匹配以利用索引）
             LambdaQueryWrapper<ImFileAsset> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.likeRight(ImFileAsset::getFileName, keyword)
-                .eq(ImFileAsset::getIsDeleted, 0)
+                .eq(ImFileAsset::getStatus, "ACTIVE")
                 .orderByDesc(ImFileAsset::getCreateTime)
                 .last("LIMIT " + MAX_RESULTS_PER_TYPE);
 

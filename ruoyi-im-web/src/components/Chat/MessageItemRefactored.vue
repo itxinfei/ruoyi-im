@@ -149,16 +149,7 @@ const handleNudge = () => {
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+// 使用全局 fadeInUp 动画 (@/styles/animations.scss)
 
 // 时间分割线
 .time-divider-wrapper {

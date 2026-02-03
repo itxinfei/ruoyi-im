@@ -23,6 +23,9 @@ public class FileUploadConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUploadConfig.class);
 
+    /** 静态实例，用于静态方法调用 */
+    private static FileUploadConfig instance;
+
     /**
      * 上传文件的基础路径（相对于项目根目录或 JAR 包所在目录）
      */
@@ -40,6 +43,7 @@ public class FileUploadConfig {
      */
     @PostConstruct
     public void init() {
+        instance = this;
         String absolutePath = getAbsoluteUploadPath();
         File uploadDir = new File(absolutePath);
 
@@ -60,6 +64,7 @@ public class FileUploadConfig {
         createSubDirectory(absolutePath, "chunks");
         createSubDirectory(absolutePath, "cloud");
         createSubDirectory(absolutePath, "emoji");
+        createSubDirectory(absolutePath, "email");
     }
 
     /**
@@ -149,5 +154,18 @@ public class FileUploadConfig {
         String path = relativePath.startsWith("/") ? relativePath.substring(1) : relativePath;
         String prefix = urlPrefix.endsWith("/") ? urlPrefix : urlPrefix + "/";
         return prefix + path;
+    }
+
+    /**
+     * 静态方法：获取上传文件的绝对路径
+     * 用于非 Spring 管理的类中调用
+     *
+     * @return 绝对路径
+     */
+    public static String getAbsoluteUploadPathStatic() {
+        if (instance == null) {
+            return "uploads/";
+        }
+        return instance.getAbsoluteUploadPath();
     }
 }

@@ -501,7 +501,7 @@ const handleShowMembers = () => {
   z-index: 2;
 }
 
-// 在线脉冲动画
+// 在线脉冲动画（使用全局 onlinePulse 动画）
 .online-pulse {
   position: absolute;
   bottom: -1px;
@@ -511,18 +511,7 @@ const handleShowMembers = () => {
   background: var(--dt-success-color);
   border-radius: 50%;
   z-index: 1;
-  animation: onlinePulse 2s ease-out infinite;
-}
-
-@keyframes onlinePulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
+  animation: onlinePulse 2s ease-out infinite;  // 使用全局动画
 }
 
 .header-arrow {
@@ -593,6 +582,7 @@ const handleShowMembers = () => {
 }
 
 // 新增：整体呼吸效果，让输入状态更醒目
+// 注意：typing-pulse 动画在全局 animations.scss 中不存在，保留本地定义
 @keyframes typing-pulse {
   0%, 100% {
     background: rgba(0, 137, 255, 0.08);
@@ -602,16 +592,7 @@ const handleShowMembers = () => {
   }
 }
 
-@keyframes typingBounce {
-  0%, 80%, 100% {
-    transform: scale(0.5);  // 0.6 → 0.5，对比更明显
-    opacity: 0.4;
-  }
-  40% {
-    transform: scale(1.2);  // 1 → 1.2，放大更明显
-    opacity: 1;
-  }
-}
+// typingBounce 使用全局动画 (@/styles/animations.scss)
 
 // 群聊正在输入状态指示器
 .group-typing-indicator {
@@ -865,7 +846,7 @@ const handleShowMembers = () => {
     0 20px 50px -10px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(20px) saturate(180%);
   background: rgba(255, 255, 255, 0.95);
-  animation: menuSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: dropdownFadeInShadow 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);  // 使用全局动画
   overflow: hidden;
 
   // 顶部装饰条
@@ -1049,17 +1030,7 @@ const handleShowMembers = () => {
   }
 }
 
-// 菜单滑入动画
-@keyframes menuSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-12px) scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
+// 使用全局 dropdownFadeInShadow 动画 (@/styles/animations.scss)
 
 // ============================================================================
 // 暗色模式

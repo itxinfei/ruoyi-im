@@ -88,14 +88,5 @@ const canReEdit = computed(() => {
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+// 使用全局 fadeInUp 动画 (@/styles/animations.scss)
 </style>

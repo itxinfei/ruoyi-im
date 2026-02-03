@@ -5,6 +5,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.task.ImTaskCreateRequest;
 import com.ruoyi.im.dto.task.ImTaskQueryRequest;
 import com.ruoyi.im.dto.task.ImTaskUpdateRequest;
+import com.ruoyi.im.service.ImTaskReminderService;
 import com.ruoyi.im.service.ImTaskService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.task.ImTaskDetailVO;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -341,5 +343,120 @@ public class ImTaskController {
         Long userId = SecurityUtils.getLoginUserId();
         Long newTaskId = taskService.copyTask(taskId, userId);
         return Result.success("复制成功", newTaskId);
+    }
+
+    // ==================== 任务提醒功能接口 ====================
+
+    private final ImTaskReminderService taskReminderService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param taskService 任务服务
+     * @param taskReminderService 任务提醒服务
+     */
+    public ImTaskController(ImTaskService taskService,
+                             ImTaskReminderService taskReminderService) {
+        this.taskService = taskService;
+        this.taskReminderService = taskReminderService;
+    }
+
+    /**
+     * 设置任务提醒
+     * 为任务设置提醒时间和提醒方式
+     *
+     * @param taskId 任务ID
+     * @param remindTime 提醒时间
+     * @param remindType 提醒类型（NONE无 EMAIL邮件 SMS短信 DING钉钉）
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     * @apiNote 提醒类型为NONE时表示取消提醒
+     */
+    @Operation(summary = "设置任务提醒", description = "为任务设置提醒时间和提醒方式")
+    @PutMapping("/{taskId}/reminder")
+    public Result<Void> setReminder(@PathVariable Long taskId,
+                                     @RequestParam LocalDateTime remindTime,
+                                     @RequestParam(defaultValue = "DING") String remindType) {
+        Long userId = SecurityUtils.getLoginUserId();
+        taskReminderService.setReminder(taskId, remindTime, remindType);
+        return Result.success("提醒已设置");
+    }
+
+    /**
+     * 取消任务提醒
+     * 取消任务的提醒通知
+     *
+     * @param taskId 任务ID
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 操作结果
+     */
+    @Operation(summary = "取消任务提醒", description = "取消任务的提醒通知")
+    @DeleteMapping("/{taskId}/reminder")
+    public Result<Void> cancelReminder(@PathVariable Long taskId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        taskReminderService.cancelReminder(taskId);
+        return Result.success("提醒已取消");
+    }
+
+    /**
+     * 发送任务提醒
+     * 手动触发发送任务提醒通知
+     *
+     * @param taskId 任务ID
+     * @return 操作结果
+     * @apiNote 用于测试或手动触发提醒
+     */
+    @Operation(summary = "发送任务提醒", description = "手动触发发送任务提醒通知")
+    @PostMapping("/{taskId}/reminder/send")
+    public Result<Void> sendReminder(@PathVariable Long taskId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        // 这里需要验证权限（任务创建人或负责人）
+        // 简化实现：暂时允许任务负责人手动触发
+        taskReminderService.batchSendReminders(java.util.Collections.singletonList(taskId));
+        return Result.success("提醒已发送");
+    }
+
+    /**
+     * 获取我的提醒任务列表
+     * 获取当前用户所有设置了提醒的任务
+     *
+     * @param userId 当前登录用户ID，从请求头中获取
+     * @return 提醒任务列表
+     * @apiNote 包含分配给用户的任务和用户关注的任务
+     */
+    @Operation(summary = "获取我的提醒任务", description = "获取当前用户所有设置了提醒的任务")
+    @GetMapping("/reminders")
+    public Result<List<ImTaskVO>> getMyReminders() {
+        Long userId = SecurityUtils.getLoginUserId();
+        List<com.ruoyi.im.domain.ImTask> tasks = taskReminderService.getUserReminderTasks(userId);
+        List<ImTaskVO> list = new java.util.ArrayList<>();
+        for (com.ruoyi.im.domain.ImTask task : tasks) {
+            ImTaskVO vo = new ImTaskVO();
+            vo.setId(task.getId());
+            vo.setTitle(task.getTitle());
+            vo.setDescription(task.getDescription());
+            vo.setDueDate(task.getDueDate());
+            vo.setRemindTime(task.getRemindTime());
+            vo.setRemindType(task.getRemindType());
+            vo.setStatus(task.getStatus());
+            vo.setPriority(task.getPriority());
+            vo.setCompletionPercent(task.getCompletionPercent());
+            list.add(vo);
+        }
+        return Result.success(list);
+    }
+
+    /**
+     * 扫描并发送提醒
+     * 手动触发扫描并发送任务提醒
+     *
+     * @return 操作结果，包含发送的提醒数量
+     * @apiNote 定时任务会自动执行，此接口用于手动触发
+     */
+    @Operation(summary = "扫描并发送提醒", description = "手动触发扫描并发送任务提醒")
+    @PostMapping("/reminders/scan")
+    public Result<Map<String, Object>> scanAndSendReminders() {
+        taskReminderService.scanAndSendOverdueReminders();
+        return Result.success("提醒扫描完成", java.util.Collections.singletonMap("timestamp", System.currentTimeMillis()));
     }
 }

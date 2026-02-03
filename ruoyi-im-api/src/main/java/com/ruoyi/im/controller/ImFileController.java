@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.config.FileUploadConfig;
 import com.ruoyi.im.service.ImFileService;
@@ -61,6 +62,7 @@ public class ImFileController {
      */
     @Operation(summary = "上传文件", description = "上传文件到服务器")
     @PostMapping("/upload")
+    @RateLimit(key = "file_upload", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<ImFileVO> uploadFile(@RequestParam("file") MultipartFile file) {
         Long userId = SecurityUtils.getLoginUserId();
         if (file == null || file.isEmpty()) {
@@ -80,6 +82,7 @@ public class ImFileController {
      */
     @Operation(summary = "批量上传文件", description = "批量上传多个文件")
     @PostMapping("/upload/batch")
+    @RateLimit(key = "file_upload_batch", time = 60, count = 5, limitType = RateLimit.LimitType.USER)
     public Result<List<ImFileVO>> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
         Long userId = SecurityUtils.getLoginUserId();
         if (files == null || files.isEmpty()) {

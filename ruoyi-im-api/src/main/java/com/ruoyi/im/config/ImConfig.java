@@ -32,7 +32,7 @@ public class ImConfig {
     
     /** 导出配置 */
     private Export export = new Export();
-    
+
     /** 安全配置 */
     private Security security = new Security();
 

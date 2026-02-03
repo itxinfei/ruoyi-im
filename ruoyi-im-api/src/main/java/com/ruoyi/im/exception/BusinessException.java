@@ -1,12 +1,12 @@
 package com.ruoyi.im.exception;
 
-import com.ruoyi.im.constant.ImErrorCode;
+import com.ruoyi.im.constant.ErrorCode;
 import lombok.Data;
 
 /**
  * 业务异常类
  *
- * 用于处理业务逻辑错误
+ * 用于处理业务逻辑错误，支持使用ErrorCode枚举和传统int错误码
  *
  * @author ruoyi
  */
@@ -14,86 +14,81 @@ public class BusinessException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * 错误码枚举
+     */
+    private ErrorCode errorCodeEnum;
+
+    /**
+     * 错误码（兼容旧代码）
+     */
     private int code;
 
+    /**
+     * 错误码字符串（兼容旧代码）
+     */
     private String errorCode;
 
     /**
-     * 构造一个带错误码的异常
+     * 构造一个带错误码枚举的异常
+     *
+     * @param errorCode 错误码枚举
+     */
+    public BusinessException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCodeEnum = errorCode;
+        this.code = errorCode.getCode();
+        this.errorCode = errorCode.name();
+    }
+
+    /**
+     * 构造一个带错误码枚举和自定义消息的异常
+     *
+     * @param errorCode     错误码枚举
+     * @param customMessage 自定义错误消息
+     */
+    public BusinessException(ErrorCode errorCode, String customMessage) {
+        super(customMessage);
+        this.errorCodeEnum = errorCode;
+        this.code = errorCode.getCode();
+        this.errorCode = errorCode.name();
+    }
+
+    /**
+     * 构造一个带错误码枚举、自定义消息和原因的异常
+     *
+     * @param errorCode     错误码枚举
+     * @param customMessage 自定义错误消息
+     * @param cause         原始异常
+     */
+    public BusinessException(ErrorCode errorCode, String customMessage, Throwable cause) {
+        super(customMessage, cause);
+        this.errorCodeEnum = errorCode;
+        this.code = errorCode.getCode();
+        this.errorCode = errorCode.name();
+    }
+
+    /**
+     * 构造一个带错误码的异常（兼容旧代码）
      *
      * @param code 错误码
      */
     public BusinessException(int code) {
-        super(getMessageByCode(code));
-        this.code = code;
-        this.errorCode = String.valueOf(code);
+        this(ErrorCode.fromCode(code));
     }
 
     /**
-     * 构造一个带错误码和额外消息的异常
+     * 构造一个带错误码和额外消息的异常（兼容旧代码）
      *
      * @param code          错误码
      * @param customMessage 自定义错误消息
      */
     public BusinessException(int code, String customMessage) {
-        super(customMessage);
-        this.code = code;
-        this.errorCode = String.valueOf(code);
-    }
-    
-    /**
-     * 根据错误码获取默认消息
-     *
-     * @param code 错误码
-     * @return 默认消息
-     */
-    private static String getMessageByCode(int code) {
-        switch (code) {
-            case ImErrorCode.SUCCESS:
-                return "成功";
-            case ImErrorCode.ERROR:
-                return "失败";
-            case ImErrorCode.PARAM_ERROR:
-                return "参数错误";
-            case ImErrorCode.UNAUTHORIZED:
-                return "未授权";
-            case ImErrorCode.FORBIDDEN:
-                return "禁止访问";
-            case ImErrorCode.NOT_FOUND:
-                return "资源不存在";
-            case ImErrorCode.USER_NOT_EXIST:
-                return "用户不存在";
-            case ImErrorCode.USER_ALREADY_EXIST:
-                return "用户已存在";
-            case ImErrorCode.PASSWORD_ERROR:
-                return "密码错误";
-            case ImErrorCode.SESSION_NOT_EXIST:
-                return "会话不存在";
-            case ImErrorCode.MESSAGE_NOT_EXIST:
-                return "消息不存在";
-            case ImErrorCode.GROUP_NOT_EXIST:
-                return "群组不存在";
-            case ImErrorCode.FRIEND_NOT_EXIST:
-                return "好友关系不存在";
-            case ImErrorCode.FRIEND_REQUEST_ALREADY_EXIST:
-                return "好友申请已存在";
-            case ImErrorCode.NOT_IN_GROUP:
-                return "不在群组中";
-            case ImErrorCode.MESSAGE_RECALL_TIMEOUT:
-                return "消息撤回超时";
-            case ImErrorCode.WS_CONNECT_FAILED:
-                return "WebSocket连接失败";
-            case ImErrorCode.WS_DISCONNECTED:
-                return "WebSocket连接断开";
-            case ImErrorCode.WS_SEND_FAILED:
-                return "消息发送失败";
-            default:
-                return "未知错误";
-        }
+        this(ErrorCode.fromCode(code), customMessage);
     }
 
     /**
-     * 构造一个带HTTP状态码和错误码的异常
+     * 构造一个带HTTP状态码和错误码的异常（兼容旧代码）
      */
     public BusinessException(int code, String errorCode, String message) {
         super(message);
@@ -102,7 +97,7 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * 构造一个只带错误码字符串的异常
+     * 构造一个只带错误码字符串的异常（兼容旧代码）
      */
     public BusinessException(String errorCode, String message) {
         super(message);
@@ -125,6 +120,9 @@ public class BusinessException extends RuntimeException {
         this.code = code;
     }
 
+    /**
+     * 获取错误码
+     */
     public int getCode() {
         return code;
     }
@@ -133,11 +131,49 @@ public class BusinessException extends RuntimeException {
         this.code = code;
     }
 
+    /**
+     * 获取错误码字符串
+     */
     public String getErrorCode() {
         return errorCode;
     }
 
     public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
+    }
+
+    /**
+     * 获取错误码枚举
+     */
+    public ErrorCode getErrorCodeEnum() {
+        return errorCodeEnum;
+    }
+
+    /**
+     * 便捷静态方法：抛出用户不存在异常
+     */
+    public static BusinessException userNotFound() {
+        return new BusinessException(ErrorCode.USER_NOT_EXIST);
+    }
+
+    /**
+     * 便捷静态方法：抛出数据不存在异常
+     */
+    public static BusinessException dataNotFound() {
+        return new BusinessException(ErrorCode.DATA_NOT_FOUND);
+    }
+
+    /**
+     * 便捷静态方法：抛出参数错误异常
+     */
+    public static BusinessException paramError(String message) {
+        return new BusinessException(ErrorCode.PARAM_ERROR, message);
+    }
+
+    /**
+     * 便捷静态方法：抛出无权限异常
+     */
+    public static BusinessException noPermission() {
+        return new BusinessException(ErrorCode.FORBIDDEN);
     }
 }

@@ -207,7 +207,7 @@ function handleRetry() {
 
   // 方案A: 加快动画速度，更有"处理中"的感觉
   .rotating {
-    animation: rotate 0.6s linear infinite;  // 1s → 0.6s
+    animation: rotate 0.6s linear infinite;  // 使用全局 rotate 动画
   }
 
   // 方案B: 添加脉冲环效果，让发送中状态更醒目
@@ -219,27 +219,14 @@ function handleRetry() {
       border-radius: 50%;
       border: 1px solid var(--dt-text-tertiary);
       opacity: 0;
-      animation: pulse-ring 1.5s ease-out infinite;
+      animation: pulseRing 1.5s ease-out infinite;  // 使用全局 pulseRing 动画
     }
   }
 }
 
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-// 方案B: 脉冲环动画
-@keyframes pulse-ring {
-  0% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
-}
+// 使用全局动画 (@/styles/animations.scss):
+// - rotate: 旋转动画
+// - pulseRing: 脉冲环动画
 
 // ========== 已送达状态：灰色对勾（钉钉标准）==========
 .status-delivered {
@@ -411,7 +398,7 @@ function handleRetry() {
 }
 
 .status-shake-enter-active {
-  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;  // 使用全局 shake 动画
 }
 
 .status-shake-leave-active {
@@ -423,10 +410,5 @@ function handleRetry() {
   transform: scale(0.8);
 }
 
-@keyframes shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
-}
+// 使用全局 shake 动画 (@/styles/animations.scss)
 </style>

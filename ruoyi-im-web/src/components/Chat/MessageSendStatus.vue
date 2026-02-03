@@ -135,23 +135,23 @@ onUnmounted(() => {
   }
 }
 
-// 发送中：灰色 + 旋转动画
+// 发送中：灰色 + 旋转动画（使用全局 rotate 动画）
 .sending-icon {
   color: var(--dt-text-tertiary);
 
   .el-icon.is-loading {
-    animation: rotating 2s linear infinite;
+    animation: rotate 2s linear infinite;
   }
 }
 
-// 发送成功：绿色
+// 发送成功：绿色（使用全局 scale-in 动画）
 .success-icon {
   color: var(--dt-color-success);
 
-  animation: fadeInScale 0.3s ease-out;
+  animation: scale-in 0.3s ease-out;
 }
 
-// 发送失败：红色
+// 发送失败：红色（使用全局 shake 动画）
 .failed-icon {
   color: var(--dt-color-danger);
 
@@ -164,38 +164,10 @@ onUnmounted(() => {
   transition: color var(--dt-transition-fast);
 }
 
-// 动画
-@keyframes rotating {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-4px);
-  }
-  75% {
-    transform: translateX(4px);
-  }
-}
+// 动画使用全局定义 (@/styles/animations.scss):
+// - rotate: 旋转动画
+// - scale-in: 缩放淡入
+// - shake: 抖动动画
 
 // 暗色模式
 .dark {

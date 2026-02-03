@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.ruoyi.im.domain.ImEmail;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImEmailMapper;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,6 +54,12 @@ public class ImEmailServiceImpl implements ImEmailService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendEmail(List<Long> toIds, String subject, String content, Long senderId) {
+        return sendEmail(toIds, null, null, subject, content, senderId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long sendEmail(List<Long> toIds, List<Long> ccIds, List<Long> bccIds, String subject, String content, Long senderId) {
         if (toIds == null || toIds.isEmpty()) {
             throw new BusinessException("接收者不能为空");
         }
@@ -63,12 +71,19 @@ public class ImEmailServiceImpl implements ImEmailService {
         List<ImEmail> emails = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
 
+        // 转换抄送密送列表为JSON字符串
+        String ccIdsJson = (ccIds != null && !ccIds.isEmpty()) ? JSON.toJSONString(ccIds) : null;
+        String bccIdsJson = (bccIds != null && !bccIds.isEmpty()) ? JSON.toJSONString(bccIds) : null;
+
+        // 为每个接收者创建邮件记录（收件人）
         for (Long toId : toIds) {
             ImEmail email = new ImEmail();
             email.setSenderId(senderId);
             email.setSenderName(senderName);
             email.setSenderEmail(senderEmail);
             email.setReceiverId(toId);
+            email.setCcIds(ccIdsJson);
+            email.setBccIds(bccIdsJson);
             email.setSubject(subject);
             email.setHtmlContent(content);
             email.setTextContent(stripHtml(content));
@@ -82,14 +97,63 @@ public class ImEmailServiceImpl implements ImEmailService {
             emails.add(email);
         }
 
-        // 为每个接收者创建邮件记录
+        // 为每个抄送人创建邮件记录
+        if (ccIds != null && !ccIds.isEmpty()) {
+            for (Long ccId : ccIds) {
+                // 抄送人不重复接收
+                if (toIds.contains(ccId)) {
+                    continue;
+                }
+                ImEmail email = new ImEmail();
+                email.setSenderId(senderId);
+                email.setSenderName(senderName);
+                email.setSenderEmail(senderEmail);
+                email.setReceiverId(ccId);
+                email.setCcIds(ccIdsJson);
+                email.setBccIds(bccIdsJson);
+                email.setSubject(subject);
+                email.setHtmlContent(content);
+                email.setTextContent(stripHtml(content));
+                email.setIsRead(false);
+                email.setIsDeleted(false);
+                email.setIsStarred(false);
+                email.setFolder("INBOX");
+                email.setAttachmentCount(0);
+                email.setSendTime(now);
+                email.setReceiveTime(now);
+                emails.add(email);
+            }
+        }
+
+        // 插入所有接收者和抄送者的邮件
         for (ImEmail email : emails) {
             emailMapper.insertEmail(email);
         }
 
-        log.info("发送邮件: senderId={}, toIds={}, count={}", senderId, toIds, emails.size());
+        // 为发送者创建"已发送"记录
+        ImEmail sentEmail = new ImEmail();
+        sentEmail.setSenderId(senderId);
+        sentEmail.setSenderName(senderName);
+        sentEmail.setSenderEmail(senderEmail);
+        sentEmail.setReceiverId(toIds.get(0)); // 主收件人
+        sentEmail.setCcIds(ccIdsJson);
+        sentEmail.setBccIds(bccIdsJson);
+        sentEmail.setSubject(subject);
+        sentEmail.setHtmlContent(content);
+        sentEmail.setTextContent(stripHtml(content));
+        sentEmail.setIsRead(true);
+        sentEmail.setIsDeleted(false);
+        sentEmail.setIsStarred(false);
+        sentEmail.setFolder("SENT");
+        sentEmail.setAttachmentCount(0);
+        sentEmail.setSendTime(now);
+        sentEmail.setReceiveTime(now);
+        emailMapper.insertEmail(sentEmail);
 
-        return emails.isEmpty() ? null : emails.get(0).getId();
+        log.info("发送邮件: senderId={}, toIds={}, ccIds={}, bccIds={}, totalCount={}",
+                senderId, toIds, ccIds, bccIds, emails.size() + 1);
+
+        return emails.isEmpty() ? sentEmail.getId() : emails.get(0).getId();
     }
 
     @Override
@@ -127,6 +191,22 @@ public class ImEmailServiceImpl implements ImEmailService {
         emailMapper.updateEmail(email);
 
         log.info("标记已读: emailId={}, userId={}", emailId, userId);
+    }
+
+    @Override
+    public void markAsUnread(Long emailId, Long userId) {
+        ImEmail email = emailMapper.selectEmailById(emailId);
+        if (email == null) {
+            throw new BusinessException("邮件不存在");
+        }
+        if (!email.getReceiverId().equals(userId)) {
+            throw new BusinessException("无权限操作此邮件");
+        }
+
+        email.setIsRead(false);
+        emailMapper.updateEmail(email);
+
+        log.info("标记未读: emailId={}, userId={}", emailId, userId);
     }
 
     @Override
@@ -262,6 +342,27 @@ public class ImEmailServiceImpl implements ImEmailService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public int batchMarkAsUnread(List<Long> emailIds, Long userId) {
+        if (emailIds == null || emailIds.isEmpty()) {
+            return 0;
+        }
+
+        int successCount = 0;
+        for (Long emailId : emailIds) {
+            try {
+                markAsUnread(emailId, userId);
+                successCount++;
+            } catch (Exception e) {
+                log.warn("批量标记未读失败: emailId={}, error={}", emailId, e.getMessage());
+            }
+        }
+
+        log.info("批量标记未读: userId={}, successCount={}", userId, successCount);
+        return successCount;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public int batchMoveToTrash(java.util.List<Long> emailIds, Long userId) {
         if (emailIds == null || emailIds.isEmpty()) {
             return 0;
@@ -282,6 +383,27 @@ public class ImEmailServiceImpl implements ImEmailService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int batchMoveToFolder(List<Long> emailIds, String folder, Long userId) {
+        if (emailIds == null || emailIds.isEmpty()) {
+            return 0;
+        }
+
+        int successCount = 0;
+        for (Long emailId : emailIds) {
+            try {
+                moveToFolder(emailId, folder, userId);
+                successCount++;
+            } catch (Exception e) {
+                log.warn("批量移动失败: emailId={}, folder={}, error={}", emailId, folder, e.getMessage());
+            }
+        }
+
+        log.info("批量移动: userId={}, folder={}, successCount={}", userId, folder, successCount);
+        return successCount;
+    }
+
+    @Override
     public java.util.List<ImEmail> searchEmails(Long userId, String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return java.util.Collections.emptyList();
@@ -298,7 +420,7 @@ public class ImEmailServiceImpl implements ImEmailService {
         java.util.List<java.util.Map<String, Object>> folderCounts = emailMapper.countByFolder(userId);
 
         // 初始化所有文件夹
-        String[] folders = {"INBOX", "SENT", "DRAFTS", "STARRED", "TRASH"};
+        String[] folders = {"INBOX", "SENT", "DRAFTS", "TRASH"};
         for (String folder : folders) {
             java.util.Map<String, Object> folderStats = new java.util.HashMap<>();
             folderStats.put("total", 0);
@@ -318,6 +440,14 @@ public class ImEmailServiceImpl implements ImEmailService {
                 folderStats.put("unread", unread);
             }
         }
+
+        // 单独查询星标邮件
+        int starredCount = emailMapper.countStarredByUserId(userId);
+        int starredUnreadCount = emailMapper.countUnreadByUserId(userId); // 星标邮件未读数单独查询
+        java.util.Map<String, Object> starredStats = new java.util.HashMap<>();
+        starredStats.put("total", starredCount);
+        starredStats.put("unread", 0); // 星标邮件的未读暂不计入
+        stats.put("STARRED", starredStats);
 
         log.info("获取文件夹统计: userId={}, stats={}", userId, stats);
         return stats;

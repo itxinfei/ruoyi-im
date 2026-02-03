@@ -5,74 +5,84 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 视频通话实体
+ * 音视频通话实体
  *
  * @author ruoyi
  */
 @TableName("im_video_call")
 @Data
+@Schema(description = "音视频通话记录")
 public class ImVideoCall implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /** ID */
+    @Schema(description = "通话ID")
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** 发起者ID */
+    @Schema(description = "发起者ID")
     @TableField("caller_id")
     private Long callerId;
 
-    /** 接收者ID（单聊时使用） */
+    @Schema(description = "接收者ID")
     @TableField("callee_id")
     private Long calleeId;
 
-    /** 会话ID（关联的聊天会话） */
-    @TableField("conversation_id")
-    private Long conversationId;
-
-    /** 通话类型：VIDEO视频, VOICE语音 */
+    @Schema(description = "通话类型：VOICE语音 VIDEO视频")
+    @TableField("type")
     private String callType;
 
-    /** 通话模式：PRIVATE单聊, GROUP群组多人 */
-    @TableField("call_mode")
-    private String callMode;
-
-    /** 通话状态：CALLING呼叫中, CONNECTED通话中, ENDED已结束, REJECTED拒绝, TIMEOUT超时 */
+    @Schema(description = "状态：PENDING进行中 ACCEPTED接通 REJECTED拒绝 ENDED结束")
     private String status;
 
-    /** 最大参与者数量 */
-    @TableField("max_participants")
-    private Integer maxParticipants;
-
-    /** 当前参与者数量 */
-    @TableField("current_participants")
-    private Integer currentParticipants;
-
-    /** 开始时间 */
+    @Schema(description = "开始时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField("start_time")
     private LocalDateTime startTime;
 
-    /** 结束时间 */
+    @Schema(description = "结束时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("end_time")
     private LocalDateTime endTime;
 
-    /** 通话时长（秒） */
-    @TableField("duration")
+    @Schema(description = "时长（秒）")
     private Integer duration;
 
-    /** 拒绝原因 */
-    @TableField("reject_reason")
+    @Schema(description = "结束原因/拒绝原因")
+    @TableField("reason")
     private String rejectReason;
 
-    /** 房间号（用于多人视频通话的WebRTC房间标识） */
-    @TableField("room_id")
+    @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField("create_time")
+    private LocalDateTime createTime;
+
+    // ==================== 非数据库字段 ====================
+
+    /** 会话ID（非数据库字段，用于业务关联） */
+    @TableField(exist = false)
+    private Long conversationId;
+
+    /** 通话模式：PRIVATE单聊, GROUP群组多人（非数据库字段） */
+    @TableField(exist = false)
+    private String callMode;
+
+    /** 最大参与者数量（非数据库字段） */
+    @TableField(exist = false)
+    private Integer maxParticipants;
+
+    /** 当前参与者数量（非数据库字段） */
+    @TableField(exist = false)
+    private Integer currentParticipants;
+
+    /** 房间号（非数据库字段，用于WebRTC房间标识） */
+    @TableField(exist = false)
     private String roomId;
 }
