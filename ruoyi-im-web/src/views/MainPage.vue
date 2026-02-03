@@ -37,7 +37,12 @@
         <!-- 工作台 -->
         <WorkbenchPanel v-if="activeModule === 'workbench'" />
         <!-- 通讯录 -->
-        <ContactsPanel v-if="activeModule === 'contacts'" @switch-module="activeModule = $event" />
+        <ContactsPanel
+          v-if="activeModule === 'contacts'"
+          @switch-module="activeModule = $event"
+          @voice-call="handleVoiceCallFromContact"
+          @video-call="handleVideoCallFromContact"
+        />
         <!-- 云盘 -->
         <DocumentsPanel v-if="activeModule === 'drive'" />
         <!-- 日历 -->
@@ -49,7 +54,11 @@
         <!-- 邮箱 -->
         <MailPanel v-if="activeModule === 'mail'" />
         <!-- 应用中心 -->
-        <AppCenter v-if="activeModule === 'appcenter'" />
+        <AppCenter
+          v-if="activeModule === 'appcenter'"
+          @switch-module="activeModule = $event"
+          @open-external-app="handleOpenExternalApp"
+        />
         <!-- AI助理 -->
         <AssistantPanel v-if="activeModule === 'assistant'" />
       </main>
@@ -60,6 +69,46 @@
       <HelpFeedbackDialog v-model="showHelp" />
       <UserProfileDialog v-model="showUserDetail" :session="detailSession" layout-mode="compact" @send-message="handleSelectSession" />
       <GlobalSearchDialog v-model="showGlobalSearch" @select-message="handleSearchSelectMessage" />
+
+      <!-- 外部应用对话框 -->
+      <el-dialog
+        v-model="showExternalApp"
+        :title="externalApp?.name || '应用'"
+        width="90%"
+        :fullscreen="isMobileScreen"
+        :close-on-click-modal="false"
+        class="external-app-dialog"
+        @closed="externalApp = null"
+      >
+        <div v-if="externalApp" class="external-app-container">
+          <iframe
+            v-if="externalApp.openMode === 'iframe' && externalApp.appUrl"
+            :src="externalApp.appUrl"
+            class="external-app-iframe"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          />
+          <div v-else class="app-placeholder">
+            <span class="material-icons-outlined">extension</span>
+            <p>该应用暂不支持在此打开</p>
+          </div>
+        </div>
+      </el-dialog>
+
+      <!-- 语音通话对话框 -->
+      <VoiceCallDialog
+        v-model:visible="showVoiceCall"
+        :remote-user="remoteCallUser"
+        :is-incoming="isIncomingCall"
+      />
+
+      <!-- 视频通话对话框 -->
+      <VideoCallDialog
+        v-model:visible="showVideoCall"
+        :remote-user="remoteCallUser"
+        :is-incoming="isIncomingCall"
+      />
     </div>
   </div>
 </template>
@@ -94,6 +143,8 @@ const PersonalProfileDialog = defineAsyncComponent(() => import('@/components/Co
 const SystemSettingsDialog = defineAsyncComponent(() => import('@/components/Common/SystemSettingsDialog.vue'))
 const HelpFeedbackDialog = defineAsyncComponent(() => import('@/components/Common/HelpFeedbackDialog.vue'))
 const GlobalSearchDialog = defineAsyncComponent(() => import('@/components/Common/GlobalSearchDialog.vue'))
+const VoiceCallDialog = defineAsyncComponent(() => import('@/components/Chat/VoiceCallDialog.vue'))
+const VideoCallDialog = defineAsyncComponent(() => import('@/components/Chat/VideoCallDialog.vue'))
 
 const store = useStore()
 const activeModule = ref('chat')
@@ -108,6 +159,14 @@ const showUserDetail = ref(false)
 const showGlobalSearch = ref(false)
 const detailSession = ref(null)
 const settingsDefaultMenu = ref('account') // 设置对话框默认菜单
+const showExternalApp = ref(false) // 外部应用对话框
+const externalApp = ref(null) // 当前打开的外部应用
+
+// 通话相关状态
+const showVoiceCall = ref(false)
+const showVideoCall = ref(false)
+const isIncomingCall = ref(false)
+const remoteCallUser = ref(null) // 远端通话用户
 
 const { connect, onMessage, isConnected } = useImWebSocket()
 
@@ -167,6 +226,28 @@ const handleSearchSelectMessage = (message) => {
         // 这里可以添加滚动到指定消息的逻辑
       })
   }
+}
+
+// 处理打开外部应用
+const handleOpenExternalApp = (app) => {
+  externalApp.value = app
+  showExternalApp.value = true
+}
+
+// 处理从通讯录发起的语音通话
+const handleVoiceCallFromContact = (contact) => {
+  remoteCallUser.value = contact
+  isIncomingCall.value = false
+  showVoiceCall.value = true
+  ElMessage.info(`正在呼叫 ${contact.userName}...`)
+}
+
+// 处理从通讯录发起的视频通话
+const handleVideoCallFromContact = (contact) => {
+  remoteCallUser.value = contact
+  isIncomingCall.value = false
+  showVideoCall.value = true
+  ElMessage.info(`正在呼叫 ${contact.userName}...`)
 }
 
 // Watch session change to auto-switch to chat
@@ -339,5 +420,46 @@ const handleKeydown = (e) => {
 
 .dark .chat-placeholder {
   background: var(--dt-bg-card-dark);
+}
+
+// ============================================================================
+// 外部应用对话框
+// ============================================================================
+.external-app-dialog {
+  :deep(.el-dialog__body) {
+    padding: 0;
+  }
+}
+
+.external-app-container {
+  width: 100%;
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.external-app-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.app-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+  color: var(--dt-text-tertiary);
+
+  .material-icons-outlined {
+    font-size: 64px;
+  }
+
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
 }
 </style>

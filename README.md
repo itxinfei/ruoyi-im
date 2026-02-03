@@ -39,7 +39,7 @@
 
 |模块|说明|技术栈|默认端口|核心职责|
 |---|---|---|---|---|
-|im-api|核心后端 API 服务|Spring Boot 2.7, WebSocket, Netty, MyBatis Plus|8080|用户认证、消息收发、好友/群组管理、文件传输核心逻辑、管理后台接口|
+|im-api|核心后端 API 服务|Spring Boot 2.7, WebSocket, Netty, MyBatis Plus|8888|用户认证、消息收发、好友/群组管理、文件传输核心逻辑、管理后台接口|
 |im-web|前端 Web 聊天界面|Vue 3, Vite, Element Plus, Vuex, Axios|3000 (Dev)|用户登录、聊天界面展示、消息收发交互、文件/图片上传、个人信息管理、管理后台界面|
 |sql/im.sql|数据库初始化脚本|MySQL|-|创建用户、消息、好友、群组等核心表结构，初始化基础数据|
 
@@ -103,7 +103,7 @@
 
 - Node.js：16+（建议 18+），npm 8+ 或 yarn 1.22+
 
-- 操作系统：开发/测试环境支持 Windows 10/11、CentOS 7.9；生产环境推荐 CentOS 7.9（64位），关闭 SELinux，开放 8080、8081、6379 端口
+- 操作系统：开发/测试环境支持 Windows 10/11、CentOS 7.9；生产环境推荐 CentOS 7.9（64位），关闭 SELinux，开放 8888、6379 端口
 
 ### 4.1.2 环境验证命令
 
@@ -158,9 +158,9 @@ npm -v
         ```yaml
         im:
           websocket:
-            port: 8080  # WebSocket 绑定端口（与 API 服务端口一致）
+            port: 8888  # WebSocket 绑定端口（与 API 服务端口一致）
           netty:
-            port: 8888  # Netty 服务端口（高性能通信备用）
+            port: 8889  # Netty 服务端口（高性能通信备用）
         ```
 
 4. 启动服务：运行 `com.im.ImApplication` 类的 main 方法，控制台输出"Started ImApplication in XXX seconds"即为启动成功
@@ -199,14 +199,14 @@ npm run dev
 1. **API 地址**：修改 `im-web/src/utils/request.js` 中的 baseURL
 ```javascript
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080', // 后端 API 地址
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8888', // 后端 API 地址
   timeout: 5000
 })
 ```
 
 2. **WebSocket 地址**：修改 `im-web/src/views/chat/index.vue` 中的连接地址
 ```javascript
-const ws = new WebSocket(`ws://localhost:8080/im/websocket/${userId}`)
+const ws = new WebSocket(`ws://localhost:8888/im/websocket/${userId}`)
 ```
 
 3. **管理界面路由**：`im-web/src/router/index.js` 中已配置权限守卫，无需额外修改
@@ -318,14 +318,14 @@ const ws = new WebSocket(`ws://localhost:8080/im/websocket/${userId}`)
         
           # 反向代理后端 API
           location /api {
-            proxy_pass http://localhost:8080;
+            proxy_pass http://localhost:8888;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
           }
-        
+
           # WebSocket 代理
           location /im/websocket {
-            proxy_pass http://localhost:8080;
+            proxy_pass http://localhost:8888;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";

@@ -148,6 +148,48 @@ export function batchUpdateUserStatus(ids, status) {
   })
 }
 
+/**
+ * 重置用户密码
+ * @param {Number} id - 用户ID
+ * @param {String} newPassword - 新密码
+ * @returns {Promise}
+ */
+export function resetUserPassword(id, newPassword) {
+  return request({
+    url: `/api/admin/users/${id}/password`,
+    method: 'put',
+    data: { password: newPassword }
+  })
+}
+
+/**
+ * 批量导入用户
+ * @param {FormData} data - 包含文件和导入选项的 FormData
+ * @returns {Promise}
+ */
+export function batchImportUsers(data) {
+  return request({
+    url: '/api/admin/users/import',
+    method: 'post',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+/**
+ * 下载用户导入模板
+ * @returns {Promise}
+ */
+export function downloadUserTemplate() {
+  return request({
+    url: '/api/admin/users/template',
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
 // ==================== 群组管理 ====================
 
 /**

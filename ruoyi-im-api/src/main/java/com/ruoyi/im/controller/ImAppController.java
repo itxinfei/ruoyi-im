@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImApplication;
+import com.ruoyi.im.domain.ImApplicationConfig;
 import com.ruoyi.im.service.ImApplicationService;
 import com.ruoyi.im.service.ImApplicationConfigService;
 import com.ruoyi.im.service.ImUserApplicationService;
@@ -355,8 +356,8 @@ public class ImAppController {
      */
     @Operation(summary = "获取应用配置（分组）", description = "获取应用的所有配置项，按分组组织")
     @GetMapping("/{appId}/config/grouped")
-    public Result<Map<String, List<?>>> getAppConfigsGrouped(@PathVariable Long appId) {
-        Map<String, List<?>> groupedConfigs = applicationConfigService.getAppConfigsGrouped(appId);
+    public Result<Map<String, List<ImApplicationConfig>>> getAppConfigsGrouped(@PathVariable Long appId) {
+        Map<String, List<ImApplicationConfig>> groupedConfigs = applicationConfigService.getAppConfigsGrouped(appId);
         return Result.success(groupedConfigs);
     }
 

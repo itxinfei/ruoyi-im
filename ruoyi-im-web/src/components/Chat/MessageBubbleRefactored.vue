@@ -116,6 +116,7 @@
         @toggle="toggleReaction"
       />
     </div>
+  </div>
 
     <!-- 右键菜单 -->
     <ContextMenu

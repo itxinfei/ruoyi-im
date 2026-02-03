@@ -13,6 +13,7 @@ export function useChatDialogs() {
   const showVoiceCall = ref(false)
   const showVideoCall = ref(false)
   const isIncomingCall = ref(false)
+  const remoteCallUser = ref(null) // 远端通话用户信息
 
   // 搜索面板
   const showChatSearch = ref(false)
@@ -47,8 +48,11 @@ export function useChatDialogs() {
 
   /**
    * 显示语音通话
+   * @param {Object} user - 远端用户信息 { userId, userName, avatar }
+   * @param {Boolean} incoming - 是否为来电
    */
-  const openVoiceCall = (incoming = false) => {
+  const openVoiceCall = (user = null, incoming = false) => {
+    remoteCallUser.value = user
     isIncomingCall.value = incoming
     showVoiceCall.value = true
     showVideoCall.value = false
@@ -56,8 +60,11 @@ export function useChatDialogs() {
 
   /**
    * 显示视频通话
+   * @param {Object} user - 远端用户信息 { userId, userName, avatar }
+   * @param {Boolean} incoming - 是否为来电
    */
-  const openVideoCall = (incoming = false) => {
+  const openVideoCall = (user = null, incoming = false) => {
+    remoteCallUser.value = user
     isIncomingCall.value = incoming
     showVideoCall.value = true
     showVoiceCall.value = false
@@ -70,6 +77,7 @@ export function useChatDialogs() {
     showVoiceCall.value = false
     showVideoCall.value = false
     isIncomingCall.value = false
+    remoteCallUser.value = null
   }
 
   /**
@@ -138,6 +146,7 @@ export function useChatDialogs() {
     showVoiceCall,
     showVideoCall,
     isIncomingCall,
+    remoteCallUser,
     openVoiceCall,
     openVideoCall,
     closeAllCalls,

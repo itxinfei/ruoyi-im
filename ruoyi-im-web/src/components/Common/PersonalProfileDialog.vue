@@ -133,6 +133,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
+import { copyToClipboard } from '@/utils/format'
 
 const props = defineProps({
   modelValue: Boolean
@@ -171,41 +172,6 @@ onUnmounted(() => {
 })
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
-
-
-
-// 修复移动端复制功能
-const copyToClipboard = async (text) => {
-  if (!text || text === '-' || text === '未填写') {
-    ElMessage.warning('暂无内容可复制')
-    return
-  }
-  
-  try {
-    // 移动端优先使用现代API
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(text)
-      ElMessage.success('已复制')
-    } else {
-      // 兼容旧浏览器
-      const textArea = document.createElement('textarea')
-      textArea.value = text
-      textArea.style.position = 'fixed'
-      textArea.style.left = '-999999px'
-      textArea.style.top = '-999999px'
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textArea)
-      ElMessage.success('已复制')
-    }
-  } catch (error) {
-    ElMessage.error('复制失败，请手动复制')
-  }
-}
-
-
 
 const handleChangePassword = () => showChangePassword.value = true
 const handleClose = () => emit('update:modelValue', false)

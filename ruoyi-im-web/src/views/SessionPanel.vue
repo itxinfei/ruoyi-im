@@ -261,6 +261,8 @@ import EmptyState from '@/components/Common/EmptyState.vue'
 import ContextMenu from '@/components/Common/ContextMenu.vue'
 import { sendFriendRequest } from '@/api/im/contact'
 import { joinGroup } from '@/api/im/group'
+import { getArchivedSessions, archiveSession, unarchiveSession } from '@/api/im/conversation'
+import { scanQRCode } from '@/api/im/user'
 import { formatChatTime } from '@/utils/format'
 import { useMentions } from '@/composables/useMentions.js'
 
@@ -352,6 +354,7 @@ const isAddMenuOpen = ref(false)
 // ==================== 会话归档 ====================
 const archivedCount = ref(0)
 const showArchivedSessions = ref(false)
+const archivedSessions = ref([])
 
 // 加载归档数量
 const loadArchivedCount = async () => {
@@ -364,10 +367,22 @@ const loadArchivedCount = async () => {
 }
 
 // 显示归档会话列表
-const handleShowArchived = () => {
+const handleShowArchived = async () => {
   showArchivedSessions.value = !showArchivedSessions.value
   if (showArchivedSessions.value) {
-    ElMessage.info('归档会话列表功能开发中')
+    try {
+      const res = await getArchivedSessions()
+      if (res.code === 200) {
+        archivedSessions.value = res.data || []
+        if (archivedSessions.value.length === 0) {
+          ElMessage.info('暂无归档会话')
+        }
+      } else if (res.code === 404) {
+        ElMessage.warning('归档会话功能开发中，敬请期待')
+      }
+    } catch (error) {
+      ElMessage.error('加载归档会话失败')
+    }
   }
 }
 // ====================================================
@@ -486,7 +501,7 @@ const handleCommand = async (command) => {
   } else if (command === 'invite') {
     await handleInviteFriend()
   } else if (command === 'archived') {
-    ElMessage.info('归档会话功能开发中')
+    await handleShowArchived()
   }
 }
 
@@ -525,7 +540,30 @@ const handleContactSelected = (contact) => {
 
 // 扫一扫
 const handleScanQR = async () => {
-  ElMessage.info('扫一扫功能开发中，敬请期待')
+  try {
+    // 检查浏览器是否支持相机访问
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      ElMessage.warning('您的浏览器不支持相机访问，请使用最新版 Chrome 或 Safari')
+      return
+    }
+
+    // 尝试访问相机
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+
+    // 成功获取相机权限后，可以打开扫码对话框
+    // 这里简化处理，显示提示
+    stream.getTracks().forEach(track => track.stop())
+
+    ElMessage.info('扫码功能开发中，敬请期待')
+  } catch (error) {
+    if (error.name === 'NotAllowedError') {
+      ElMessage.warning('请允许相机访问权限以使用扫码功能')
+    } else if (error.name === 'NotFoundError') {
+      ElMessage.warning('未检测到相机设备')
+    } else {
+      ElMessage.warning('扫码功能开发中，敬请期待')
+    }
+  }
 }
 
 // 邀请好友

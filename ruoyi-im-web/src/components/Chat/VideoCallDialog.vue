@@ -153,6 +153,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { addTokenToUrl } from '@/utils/file'
+import { formatDurationMMSS } from '@/utils/format'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -209,11 +210,8 @@ const minimizedStatusText = computed(() => {
   return '视频通话'
 })
 
-const formattedDuration = computed(() => {
-  const minutes = Math.floor(callDuration.value / 60)
-  const seconds = callDuration.value % 60
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-})
+// 使用共享工具函数格式化通话时长
+const formattedDuration = computed(() => formatDurationMMSS(callDuration.value))
 
 const networkQualityClass = computed(() => {
   // 模拟网络质量显示

@@ -31,14 +31,18 @@ import java.util.Map;
 public class ImTaskController {
 
     private final ImTaskService taskService;
+    private final ImTaskReminderService taskReminderService;
 
     /**
      * 构造器注入依赖
      *
      * @param taskService 任务服务
+     * @param taskReminderService 任务提醒服务
      */
-    public ImTaskController(ImTaskService taskService) {
+    public ImTaskController(ImTaskService taskService,
+                            ImTaskReminderService taskReminderService) {
         this.taskService = taskService;
+        this.taskReminderService = taskReminderService;
     }
 
     /**
@@ -347,20 +351,6 @@ public class ImTaskController {
 
     // ==================== 任务提醒功能接口 ====================
 
-    private final ImTaskReminderService taskReminderService;
-
-    /**
-     * 构造器注入依赖
-     *
-     * @param taskService 任务服务
-     * @param taskReminderService 任务提醒服务
-     */
-    public ImTaskController(ImTaskService taskService,
-                             ImTaskReminderService taskReminderService) {
-        this.taskService = taskService;
-        this.taskReminderService = taskReminderService;
-    }
-
     /**
      * 设置任务提醒
      * 为任务设置提醒时间和提醒方式
@@ -436,8 +426,6 @@ public class ImTaskController {
             vo.setTitle(task.getTitle());
             vo.setDescription(task.getDescription());
             vo.setDueDate(task.getDueDate());
-            vo.setRemindTime(task.getRemindTime());
-            vo.setRemindType(task.getRemindType());
             vo.setStatus(task.getStatus());
             vo.setPriority(task.getPriority());
             vo.setCompletionPercent(task.getCompletionPercent());

@@ -5,6 +5,7 @@ import com.ruoyi.im.domain.ImEmailAttachment;
 import com.ruoyi.im.dto.email.ImEmailSendRequest;
 import com.ruoyi.im.service.ImEmailAttachmentService;
 import com.ruoyi.im.service.ImEmailService;
+import com.ruoyi.im.service.ImEmailTemplateService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,16 +40,21 @@ public class ImEmailController {
 
     private final ImEmailService emailService;
     private final ImEmailAttachmentService attachmentService;
+    private final ImEmailTemplateService emailTemplateService;
 
     /**
      * 构造器注入依赖
      *
      * @param emailService 邮件服务
      * @param attachmentService 附件服务
+     * @param emailTemplateService 邮件模板服务
      */
-    public ImEmailController(ImEmailService emailService, ImEmailAttachmentService attachmentService) {
+    public ImEmailController(ImEmailService emailService,
+                             ImEmailAttachmentService attachmentService,
+                             ImEmailTemplateService emailTemplateService) {
         this.emailService = emailService;
         this.attachmentService = attachmentService;
+        this.emailTemplateService = emailTemplateService;
     }
 
     // ==================== 邮件基础操作 ====================
@@ -587,23 +593,6 @@ public class ImEmailController {
     }
 
     // ==================== 邮件模板管理接口 ====================
-
-    private final com.ruoyi.im.service.ImEmailTemplateService emailTemplateService;
-
-    /**
-     * 构造器注入依赖
-     *
-     * @param emailService 邮件服务
-     * @param attachmentService 附件服务
-     * @param emailTemplateService 邮件模板服务
-     */
-    public ImEmailController(com.ruoyi.im.service.ImEmailService emailService,
-                             com.ruoyi.im.service.ImEmailAttachmentService attachmentService,
-                             com.ruoyi.im.service.ImEmailTemplateService emailTemplateService) {
-        this.emailService = emailService;
-        this.attachmentService = attachmentService;
-        this.emailTemplateService = emailTemplateService;
-    }
 
     /**
      * 获取邮件模板列表

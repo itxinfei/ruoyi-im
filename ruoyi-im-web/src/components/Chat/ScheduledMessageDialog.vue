@@ -71,11 +71,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { scheduleMessage } from '@/api/im/message'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   messageContent: { type: String, default: '' },
-  conversationId: { type: [String, Number], default: null }
+  conversationId: { type: [String, Number], default: null },
+  messageType: { type: String, default: 'TEXT' }
 })
 
 const emit = defineEmits(['update:modelValue', 'scheduled'])
@@ -165,21 +167,36 @@ const handleSchedule = async () => {
 
   const scheduledTime = customTime.value
 
+  // 校验会话ID
+  if (!props.conversationId) {
+    ElMessage.warning('无法获取会话信息，请重试')
+    return
+  }
+
   try {
     scheduling.value = true
 
-    // TODO: 调用后端 API 创建定时消息
-    // await scheduleMessage({
-    //   conversationId: props.conversationId,
-    //   content: props.messageContent,
-    //   scheduledTime: scheduledTime
-    // })
+    // 调用后端 API 创建定时消息
+    await scheduleMessage({
+      conversationId: props.conversationId,
+      messageType: props.messageType || 'TEXT',
+      content: props.messageContent,
+      scheduledTime: scheduledTime
+    })
 
     ElMessage.success(`消息已设置在 ${scheduledTime} 发送`)
     emit('scheduled', { scheduledTime })
     handleClose()
   } catch (error) {
-    ElMessage.error('设置定时发送失败，请重试')
+    // API 可能尚未实现，降级处理
+    console.warn('[ScheduledMessage] API 调用失败，可能后端尚未实现:', error)
+    if (error?.msg) {
+      ElMessage.error(error.msg)
+    } else if (error?.response?.status === 404) {
+      ElMessage.warning('定时消息功能开发中，敬请期待')
+    } else {
+      ElMessage.error('设置定时发送失败，请稍后重试')
+    }
   } finally {
     scheduling.value = false
   }

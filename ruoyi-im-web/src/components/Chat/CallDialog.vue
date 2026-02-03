@@ -268,6 +268,7 @@ import { ref, computed, onUnmounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import * as videoCallApi from '@/api/im/videoCall'
+import { formatDurationMMSS } from '@/utils/format'
 
 const props = defineProps({
   session: Object
@@ -329,11 +330,8 @@ const statusText = computed(() => {
   }
 })
 
-const formattedDuration = computed(() => {
-  const m = Math.floor(duration.value / 60)
-  const s = duration.value % 60
-  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-})
+// 使用共享工具函数格式化通话时长
+const formattedDuration = computed(() => formatDurationMMSS(duration.value))
 
 // WebRTC 配置
 const rtcConfig = {

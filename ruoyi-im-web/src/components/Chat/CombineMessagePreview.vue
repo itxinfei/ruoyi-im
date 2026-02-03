@@ -32,6 +32,7 @@
 <script setup>
 import { computed } from 'vue'
 import { parseMessageContent } from '@/utils/message'
+import { formatChatTime } from '@/utils/format'
 
 const props = defineProps({
   messages: {
@@ -76,23 +77,8 @@ const timeRange = computed(() => {
   const start = new Date(timestamps[0])
   const end = new Date(timestamps[timestamps.length - 1])
 
-  const formatDate = (date) => {
-    const now = new Date()
-    const isSameDay = date.toDateString() === now.toDateString()
-    const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === date.toDateString()
-
-    if (isSameDay) {
-      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    } else if (isYesterday) {
-      return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    } else {
-      return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) + ' ' +
-             date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    }
-  }
-
-  const startStr = formatDate(start)
-  const endStr = formatDate(end)
+  const startStr = formatChatTime(start)
+  const endStr = formatChatTime(end)
 
   return startStr === endStr ? startStr : `${startStr} - ${endStr}`
 })

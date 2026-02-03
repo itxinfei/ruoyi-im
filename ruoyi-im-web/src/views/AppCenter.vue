@@ -180,6 +180,72 @@
       :app="selectedApp"
       @success="handleConfigSaved"
     />
+
+    <!-- 应用管理对话框 -->
+    <el-dialog
+      v-model="showManageDialog"
+      title="管理我的应用"
+      width="500px"
+      :close-on-click-modal="false"
+      class="app-manage-dialog"
+    >
+      <div v-if="managingApps.length > 0" class="manage-apps-list">
+        <div
+          v-for="(app, index) in managingApps"
+          :key="app.id"
+          class="manage-app-item"
+        >
+          <div class="app-icon" :style="{ background: app.iconColor }">
+            <img v-if="app.iconUrl" :src="app.iconUrl" :alt="app.name" />
+            <span v-else>{{ app.name.charAt(0) }}</span>
+          </div>
+          <div class="app-info">
+            <span class="app-name">{{ app.name }}</span>
+            <el-tag v-if="app.pinned" size="small" type="warning">置顶</el-tag>
+          </div>
+          <div class="app-actions">
+            <el-button
+              size="small"
+              :disabled="index === 0"
+              @click="handleAppTogglePin(app)"
+            >
+              <span class="material-icons-outlined">{{ app.pinned ? 'push_pin' : 'push_unpin' }}</span>
+              {{ app.pinned ? '取消' : '置顶' }}
+            </el-button>
+            <el-button
+              size="small"
+              :disabled="index === 0"
+              @click="handleAppMoveUp(index)"
+            >
+              <span class="material-icons-outlined">arrow_upward</span>
+              上移
+            </el-button>
+            <el-button
+              size="small"
+              :disabled="index === managingApps.length - 1"
+              @click="handleAppMoveDown(index)"
+            >
+              <span class="material-icons-outlined">arrow_downward</span>
+              下移
+            </el-button>
+            <el-button
+              size="small"
+              type="danger"
+              @click="handleAppUninstall(app)"
+            >
+              <span class="material-icons-outlined">delete</span>
+              卸载
+            </el-button>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else description="暂无已安装应用" />
+
+      <template #footer>
+        <el-button @click="cancelAppManagement">取消</el-button>
+        <el-button type="primary" @click="saveAppManagement">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -195,10 +261,37 @@ import {
   uninstallApplication,
   pinApp,
   updateAppConfig,
-  recordAppUsage
+  recordAppUsage,
+  updateAppSort
 } from '@/api/im/app'
 import AppDetailDialog from '@/components/AppCenter/AppDetailDialog.vue'
 import AppConfigDialog from '@/components/AppCenter/AppConfigDialog.vue'
+
+// 定义 emit，用于与父组件通信
+const emit = defineEmits(['switch-module', 'open-external-app'])
+
+// 应用类型常量
+const APP_TYPE = {
+  ROUTE: 'ROUTE',     // 内部路由跳转
+  IFRAME: 'IFRAME',   // 嵌入式iframe
+  LINK: 'LINK'        // 外部链接
+}
+
+// 应用路由映射表
+const APP_ROUTE_MAP = {
+  // 工作台相关
+  'workbench': 'workbench',
+  'todo': 'todo',
+  'approval': 'approval',
+  'mail': 'mail',
+  'assistant': 'assistant',
+  'documents': 'drive',
+  'calendar': 'calendar',
+  // 通讯录
+  'contacts': 'contacts',
+  // 聊天
+  'chat': 'chat'
+}
 
 // 状态
 const loading = ref(false)
@@ -206,7 +299,9 @@ const searchKeyword = ref('')
 const activeCategory = ref('all')
 const showDetailDialog = ref(false)
 const showConfigDialog = ref(false)
+const showManageDialog = ref(false)
 const selectedApp = ref(null)
+const managingApps = ref([]) // 管理中的应用列表
 
 // 数据
 const appList = ref([])
@@ -352,11 +447,48 @@ const openApp = async (app) => {
     // 记录使用
     await recordAppUsage(app.id)
 
-    // 触发打开事件，由父组件处理具体跳转
-    ElMessage.success(`正在打开 "${app.name}"...`)
-    // TODO: 根据应用类型跳转到相应页面
+    const appType = (app.appType || 'ROUTE').toUpperCase()
+    const appUrl = app.appUrl || ''
+
+    switch (appType) {
+      case APP_TYPE.ROUTE:
+        // 内部路由跳转
+        const routeKey = appUrl.toLowerCase()
+        const targetModule = APP_ROUTE_MAP[routeKey]
+
+        if (targetModule) {
+          // 切换到对应模块
+          ElMessage.success(`正在打开 "${app.name}"...`)
+          emit('switch-module', targetModule)
+        } else {
+          ElMessage.warning(`应用 "${app.name}" 的路由配置无效`)
+        }
+        break
+
+      case APP_TYPE.IFRAME:
+        // 嵌入式应用 - 通过事件通知父组件打开iframe对话框
+        emit('open-external-app', {
+          ...app,
+          openMode: 'iframe'
+        })
+        break
+
+      case APP_TYPE.LINK:
+        // 外部链接 - 在新窗口打开
+        if (appUrl) {
+          window.open(appUrl, '_blank')
+          ElMessage.success(`已在新窗口打开 "${app.name}"`)
+        } else {
+          ElMessage.warning(`应用 "${app.name}" 未配置访问地址`)
+        }
+        break
+
+      default:
+        ElMessage.warning(`未知的应用类型: ${appType}`)
+    }
   } catch (error) {
     console.error('打开应用失败:', error)
+    ElMessage.error('打开应用失败，请稍后重试')
   }
 }
 
@@ -423,8 +555,70 @@ const handleConfigSaved = () => {
 
 // 编辑我的应用
 const editMyApps = () => {
-  // TODO: 打开应用管理对话框
-  ElMessage.info('应用管理功能开发中...')
+  // 复制我的应用列表到管理列表
+  managingApps.value = myApps.value.map(app => ({ ...app }))
+  showManageDialog.value = true
+}
+
+// 应用管理相关操作
+const handleAppMoveUp = (index) => {
+  if (index > 0) {
+    const temp = managingApps.value[index]
+    managingApps.value[index] = managingApps.value[index - 1]
+    managingApps.value[index - 1] = temp
+  }
+}
+
+const handleAppMoveDown = (index) => {
+  if (index < managingApps.value.length - 1) {
+    const temp = managingApps.value[index]
+    managingApps.value[index] = managingApps.value[index + 1]
+    managingApps.value[index + 1] = temp
+  }
+}
+
+const handleAppUninstall = (app) => {
+  const index = managingApps.value.findIndex(a => a.id === app.id)
+  if (index > -1) {
+    managingApps.value.splice(index, 1)
+  }
+}
+
+const handleAppTogglePin = (app) => {
+  const appItem = managingApps.value.find(a => a.id === app.id)
+  if (appItem) {
+    appItem.pinned = !appItem.pinned
+  }
+}
+
+// 保存应用管理更改
+const saveAppManagement = async () => {
+  try {
+    // 构建排序列表
+    const sortList = managingApps.value.map((app, index) => ({
+      appId: app.id,
+      sortOrder: index,
+      pinned: app.pinned || false
+    }))
+
+    const res = await updateAppSort({ sortList })
+    if (res.code === 200) {
+      ElMessage.success('应用排序已保存')
+      showManageDialog.value = false
+      await loadMyApps()
+    } else {
+      ElMessage.error(res.msg || '保存失败')
+    }
+  } catch (error) {
+    console.error('保存应用管理失败:', error)
+    ElMessage.error('保存失败，请稍后重试')
+  }
+}
+
+// 取消应用管理
+const cancelAppManagement = () => {
+  showManageDialog.value = false
+  managingApps.value = []
 }
 
 // 组件挂载
@@ -840,6 +1034,66 @@ onMounted(() => {
 
   .app-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+// 应用管理对话框
+.app-manage-dialog {
+  .manage-apps-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .manage-app-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--dt-border-color);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--dt-bg-hover);
+    }
+
+    .app-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+
+      img {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+      }
+    }
+
+    .app-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .app-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--dt-text-primary);
+      }
+    }
+
+    .app-actions {
+      display: flex;
+      gap: 4px;
+    }
   }
 }
 

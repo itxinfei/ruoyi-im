@@ -378,3 +378,100 @@ export function getMessagesByCategory(conversationId, category, params = {}) {
     params
   })
 }
+
+// ==================== 定时消息 ====================
+
+/**
+ * 创建定时消息
+ * @param {Object} data - 定时消息数据
+ * @param {number} data.conversationId - 会话ID
+ * @param {string} data.messageType - 消息类型 TEXT/IMAGE/FILE/VOICE/VIDEO
+ * @param {string} data.content - 消息内容
+ * @param {string} data.scheduledTime - 定时发送时间 yyyy-MM-dd HH:mm
+ * @param {number} data.replyToMessageId - 回复的消息ID（可选）
+ * @returns {Promise}
+ */
+export function scheduleMessage(data) {
+  return request({
+    url: '/api/im/message/schedule',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 获取定时消息列表
+ * @param {Object} params - 查询参数
+ * @param {number} params.conversationId - 会话ID（可选）
+ * @param {number} params.status - 状态筛选（可选）: pending=待发送, sent=已发送, cancelled=已取消
+ * @returns {Promise}
+ */
+export function getScheduledMessages(params = {}) {
+  return request({
+    url: '/api/im/message/schedule/list',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 取消定时消息
+ * @param {number} scheduledMessageId - 定时消息ID
+ * @returns {Promise}
+ */
+export function cancelScheduledMessage(scheduledMessageId) {
+  return request({
+    url: `/api/im/message/schedule/${scheduledMessageId}/cancel`,
+    method: 'put'
+  })
+}
+
+/**
+ * 修改定时消息发送时间
+ * @param {number} scheduledMessageId - 定时消息ID
+ * @param {string} scheduledTime - 新的定时发送时间
+ * @returns {Promise}
+ */
+export function rescheduleMessage(scheduledMessageId, scheduledTime) {
+  return request({
+    url: `/api/im/message/schedule/${scheduledMessageId}/reschedule`,
+    method: 'put',
+    data: { scheduledTime }
+  })
+}
+
+// ==================== 共享文件 ====================
+
+/**
+ * 获取与指定联系人的共享文件列表
+ * @param {number} contactId - 联系人ID
+ * @param {Object} params - 查询参数
+ * @param {string} params.category - 文件分类: all/image/document/video/other
+ * @param {number} params.pageNum - 页码
+ * @param {number} params.pageSize - 每页数量
+ * @returns {Promise}
+ */
+export function getSharedFiles(contactId, params = {}) {
+  return request({
+    url: `/api/im/message/shared-files/${contactId}`,
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取群组共享文件列表
+ * @param {number} groupId - 群组ID
+ * @param {Object} params - 查询参数
+ * @param {string} params.category - 文件分类
+ * @param {number} params.pageNum - 页码
+ * @param {number} params.pageSize - 每页数量
+ * @returns {Promise}
+ */
+export function getGroupSharedFiles(groupId, params = {}) {
+  return request({
+    url: `/api/im/message/group-files/${groupId}`,
+    method: 'get',
+    params
+  })
+}

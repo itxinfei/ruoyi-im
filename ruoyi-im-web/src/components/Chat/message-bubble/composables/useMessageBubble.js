@@ -4,6 +4,7 @@
  */
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
+import { parseMessageContent } from '@/utils/message'
 
 export function useMessageBubble(props, emit) {
   const store = useStore()
@@ -16,17 +17,9 @@ export function useMessageBubble(props, emit) {
     return store.state.im.message.selectedMessages.has(props.message.id)
   })
 
-  // 解析消息内容（处理 JSON 格式的媒体消息）
+  // 解析消息内容（使用统一的工具函数）
   const parsedContent = computed(() => {
-    try {
-      if (!props.message?.content) return {}
-      const isMedia = ['IMAGE', 'FILE', 'VIDEO', 'VOICE', 'AUDIO', 'COMBINE', 'COMBINE_FORWARD', 'LOCATION'].includes(props.message.type)
-      return (typeof props.message.content === 'string' && isMedia)
-        ? JSON.parse(props.message.content)
-        : (props.message.content || {})
-    } catch {
-      return {}
-    }
+    return parseMessageContent(props.message)
   })
 
   // 是否有标记

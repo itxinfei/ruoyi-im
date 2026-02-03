@@ -66,7 +66,7 @@
             <div class="content-text">{{ item.content }}</div>
             <div class="content-footer">
               <span class="publisher">{{ item.publisherName }}</span>
-              <span class="publish-time">{{ formatTime(item.publishTime) }}</span>
+              <span class="publish-time">{{ formatRelativeTime(item.publishTime) }}</span>
               <span v-if="item.readCount" class="read-count">
                 {{ item.readCount }}人已读
               </span>
@@ -153,7 +153,7 @@
         <div class="detail-footer">
           <div class="publisher-info">
             <span>{{ currentAnnouncement.publisherName }}</span>
-            <span>{{ formatTime(currentAnnouncement.publishTime) }}</span>
+            <span>{{ formatRelativeTime(currentAnnouncement.publishTime) }}</span>
           </div>
           <div v-if="currentAnnouncement.readCount" class="read-info">
             {{ currentAnnouncement.readCount }}人已读
@@ -181,7 +181,7 @@ import {
   setAnnouncementPinned,
   markAnnouncementAsRead
 } from '@/api/im/announcement'
-
+import { formatRelativeTime } from '@/utils/format'
 const props = defineProps({
   modelValue: Boolean,
   groupId: [String, Number],
@@ -350,24 +350,6 @@ const resetForm = () => {
 // 关闭对话框
 const handleClose = () => {
   visible.value = false
-}
-
-// 格式化时间
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  const now = new Date()
-  const diff = now - date
-
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
-  if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`
-
-  return date.toLocaleDateString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit'
-  })
 }
 
 // 监听对话框打开

@@ -2,7 +2,7 @@
  * IM 模块主 Store
  * 管理即时通讯的核心状态和子模块
  */
-import { getUserSettingsMap, updateUserSetting, batchUpdateUserSettings } from '@/api/im/user_setting'
+import { getUserSettingsMap, updateUserSetting, batchUpdateUserSettings } from '@/api/im/userSettings'
 import { getJSON, setJSON } from '@/utils/storage'
 import session from './im-session'
 import message from './im-message'

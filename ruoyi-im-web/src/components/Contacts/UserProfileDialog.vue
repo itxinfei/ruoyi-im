@@ -360,7 +360,7 @@ import {
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { getUserInfo } from '@/api/im/user'
 import { getCommonGroups } from '@/api/im/group'
-import dayjs from 'dayjs'
+import { formatDateISO, formatDateTimeISO, copyToClipboard } from '@/utils/format'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -415,17 +415,6 @@ const genderText = computed(() => {
   if (gender === 2) return '女'
   return null
 })
-
-// 日期格式化函数
-const formatDate = (date) => {
-  if (!date) return ''
-  return dayjs(date).format('YYYY-MM-DD')
-}
-
-const formatDateTime = (dateTime) => {
-  if (!dateTime) return ''
-  return dayjs(dateTime).format('YYYY-MM-DD HH:mm')
-}
 
 // 加载用户信息
 const loadUserInfo = async () => {
@@ -563,27 +552,6 @@ const handleMoreCommand = (command) => {
     case 'block':
       handleBlock()
       break
-  }
-}
-
-// 工具函数
-const copyToClipboard = async (text) => {
-  if (!text) return
-  try {
-    await navigator.clipboard.writeText(text)
-    ElMessage.success('已复制到剪贴板')
-  } catch (error) {
-    // 降级处理
-    const textArea = document.createElement('textarea')
-    textArea.value = text
-    textArea.style.position = 'fixed'
-    textArea.style.left = '-999999px'
-    document.body.appendChild(textArea)
-    textArea.focus()
-    textArea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textArea)
-    ElMessage.success('已复制到剪贴板')
   }
 }
 </script>

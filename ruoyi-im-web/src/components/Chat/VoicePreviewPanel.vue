@@ -44,6 +44,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { formatDurationMMSS } from '@/utils/format'
 
 const props = defineProps({
   duration: {
@@ -62,20 +63,13 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-play', 'delete', 'send', 'seek'])
 
-// 格式化语音时长
-const formattedDuration = computed(() => {
-  const seconds = Math.floor(props.duration / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const remainingSeconds = seconds % 60
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-})
+// 使用共享工具函数格式化语音时长（输入是毫秒，需要转换为秒）
+const formattedDuration = computed(() => formatDurationMMSS(props.duration / 1000))
 
 // 格式化当前播放时间
 const formattedCurrentTime = computed(() => {
-  const currentSeconds = Math.floor((props.playProgress / 100) * props.duration / 1000)
-  const minutes = Math.floor(currentSeconds / 60)
-  const remainingSeconds = currentSeconds % 60
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  const currentSeconds = (props.playProgress / 100) * props.duration / 1000
+  return formatDurationMMSS(currentSeconds)
 })
 
 // 计算激活的波形条数量

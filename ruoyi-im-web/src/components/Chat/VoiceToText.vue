@@ -64,6 +64,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { copyToClipboard } from '@/utils/format'
 
 const props = defineProps({
   messageId: {
@@ -168,11 +169,8 @@ const callTranscribeAPI = async () => {
 
 // 复制转写结果
 const handleCopy = () => {
-  navigator.clipboard.writeText(transcript.value).then(() => {
-    ElMessage.success('已复制到剪贴板')
+  copyToClipboard(transcript.value).then(() => {
     emit('copy', transcript.value)
-  }).catch(() => {
-    ElMessage.error('复制失败')
   })
 }
 

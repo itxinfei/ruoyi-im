@@ -288,6 +288,53 @@ const participants = ref([])
 const activeParticipantId = ref(null)
 const showParticipants = ref(false)
 
+// 会议功能
+const showChat = ref(false)
+const showSettings = ref(false)
+const isRecording = ref(false)
+let mediaRecorder = null
+let recordedChunks = []
+
+// 开始录制
+const startRecording = () => {
+  try {
+    const stream = new MediaStream([...localStream.value.getTracks()])
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
+    recordedChunks = []
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunks.push(event.data)
+      }
+    }
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `meeting-recording-${Date.now()}.webm`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+
+    mediaRecorder.start()
+    isRecording.value = true
+    ElMessage.success('开始录制会议')
+  } catch (error) {
+    ElMessage.error('录制失败，请稍后重试')
+  }
+}
+
+// 停止录制
+const stopRecording = () => {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop()
+    isRecording.value = false
+    ElMessage.success('录制已保存')
+  }
+}
+
 // 布局
 const gridLayout = ref('grid')
 
@@ -465,13 +512,17 @@ const handleMoreCommand = (command) => {
       showParticipants.value = !showParticipants.value
       break
     case 'chat':
-      ElMessage.info('会议聊天功能开发中')
+      showChat.value = !showChat.value
       break
     case 'settings':
-      ElMessage.info('会议设置功能开发中')
+      showSettings.value = !showSettings.value
       break
     case 'record':
-      ElMessage.info('录制功能开发中')
+      if (isRecording.value) {
+        stopRecording()
+      } else {
+        startRecording()
+      }
       break
   }
 }

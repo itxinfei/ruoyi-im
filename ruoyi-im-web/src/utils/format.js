@@ -234,3 +234,109 @@ export function formatIdCard(idCard) {
   if (idStr.length < 8) return idStr
   return idStr.substring(0, 4) + '**********' + idStr.substring(idStr.length - 4)
 }
+
+/**
+ * 复制文本到剪贴板
+ * @param {String} text - 要复制的文本
+ * @param {Object} options - 选项
+ * @param {String} options.successMsg - 成功提示消息，默认"已复制到剪贴板"
+ * @param {String} options.emptyMsg - 空内容提示消息，默认"暂无内容可复制"
+ * @param {Array<String>} options.emptyValues - 视为空内容的值，默认['-', '未填写', '未设置']
+ * @returns {Promise<Boolean>} 是否复制成功
+ */
+export async function copyToClipboard(text, options = {}) {
+  const {
+    successMsg = '已复制到剪贴板',
+    emptyMsg = '暂无内容可复制',
+    emptyValues = ['-', '未填写', '未设置']
+  } = options
+
+  // 动态导入 ElMessage 避免循环依赖
+  const { ElMessage } = await import('element-plus')
+
+  // 检查是否为空内容
+  if (!text || emptyValues.includes(String(text).trim())) {
+    ElMessage.warning(emptyMsg)
+    return false
+  }
+
+  try {
+    // 优先使用现代 Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text)
+      ElMessage.success(successMsg)
+      return true
+    }
+  } catch (error) {
+    // 降级处理：兼容旧浏览器
+    try {
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-999999px'
+      textArea.style.top = '-999999px'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textArea)
+
+      if (successful) {
+        ElMessage.success(successMsg)
+        return true
+      } else {
+        ElMessage.error('复制失败，请手动复制')
+        return false
+      }
+    } catch (e) {
+      ElMessage.error('复制失败，请手动复制')
+      return false
+    }
+  }
+
+  return false
+}
+
+/**
+ * 格式化列表项时间（适用于文件列表、公告列表等）
+ * 24小时内显示 HH:mm，7天内显示 X天前，更早显示 月日
+ * @param {Number|String|Date} time - 时间
+ * @returns {String} 格式化后的时间字符串
+ */
+export function formatListItemTime(time) {
+  if (!time) return ''
+  const date = new Date(time)
+  const now = new Date()
+  const diff = now - date
+
+  if (diff < 86400000) {
+    // 24小时内：显示时间
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${hours}:${minutes}`
+  } else if (diff < 604800000) {
+    // 7天内：显示X天前
+    const days = Math.floor(diff / 86400000)
+    return `${days}天前`
+  } else {
+    // 更早：显示月日
+    const month = date.toLocaleDateString('zh-CN', { month: 'short' })
+    const day = date.getDate()
+    return `${month}${day}日`
+  }
+}
+
+/**
+ * 格式化时长为 mm:ss 格式（适用于语音、通话时长显示）
+ * @param {Number} seconds - 秒数
+ * @returns {String} 格式化后的时长 "mm:ss"
+ */
+export function formatDurationMMSS(seconds) {
+  if (!seconds || seconds < 0) return '00:00'
+
+  const totalSeconds = Math.floor(seconds)
+  const minutes = Math.floor(totalSeconds / 60)
+  const secs = totalSeconds % 60
+
+  return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+}

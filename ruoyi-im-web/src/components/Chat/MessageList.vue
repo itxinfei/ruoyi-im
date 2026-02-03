@@ -136,6 +136,7 @@ import MessageItem from './MessageItemRefactored.vue'
 import MessageBubble from './MessageBubbleRefactored.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
+import { copyToClipboard } from '@/utils/format'
 
 const props = defineProps({
   messages: {
@@ -510,8 +511,7 @@ const scrollToBottom = (smooth = true) => {
 // 处理菜单命令
 const handleCommand = async (cmd, msg) => {
   if (cmd === 'copy') {
-    navigator.clipboard.writeText(msg.content)
-    ElMessage.success('已复制')
+    copyToClipboard(msg.content)
   } else if (cmd === 'at') {
     emit('at', msg)
   } else if (cmd === 'pin') {

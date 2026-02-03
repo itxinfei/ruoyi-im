@@ -222,6 +222,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { smsLogin, sendSmsCode } from '@/api/im/user'
 const store = useStore()
 const router = useRouter()
 
@@ -291,6 +292,23 @@ const sendSMSCode = async () => {
 
   try {
     await smsFormRef.value.validateField('phone')
+
+    // 调用发送验证码 API
+    const res = await sendSmsCode({
+      phone: smsForm.phone,
+      type: 'login'
+    })
+
+    if (res.code === 404) {
+      ElMessage.warning('短信验证码功能开发中，敬请期待')
+      return
+    }
+
+    if (res.code !== 200) {
+      ElMessage.error(res.msg || '发送验证码失败')
+      return
+    }
+
     ElMessage.success('验证码已发送')
 
     smsCountdown.value = 60
@@ -303,6 +321,9 @@ const sendSMSCode = async () => {
     }, 1000)
   } catch (error) {
     console.error('发送验证码失败:', error)
+    if (error.response?.status !== 404) {
+      ElMessage.error('发送验证码失败，请稍后重试')
+    }
   }
 }
 
@@ -334,8 +355,37 @@ const handleLogin = async () => {
         removeItem('remembered_username')
       }
     } else {
-      ElMessage.info('短信登录功能开发中')
-      return
+      // 短信验证码登录
+      if (!smsForm.phone || !smsForm.code) {
+        ElMessage.warning('请输入手机号和验证码')
+        loading.value = false
+        return
+      }
+
+      const res = await smsLogin({
+        phone: smsForm.phone,
+        code: smsForm.code
+      })
+
+      if (res.code === 404) {
+        ElMessage.warning('短信登录功能开发中，敬请期待')
+        loading.value = false
+        return
+      }
+
+      if (res.code !== 200) {
+        ElMessage.error(res.msg || '登录失败')
+        loading.value = false
+        return
+      }
+
+      // 存储token和用户信息
+      if (res.data.token) {
+        store.commit('user/SET_TOKEN', res.data.token)
+      }
+      if (res.data.userInfo) {
+        store.commit('user/SET_USER_INFO', res.data.userInfo)
+      }
     }
 
     ElMessage.success('登录成功')

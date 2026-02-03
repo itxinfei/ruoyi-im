@@ -113,3 +113,38 @@ export function getTotalUnreadCount() {
     method: 'get'
   })
 }
+
+/**
+ * 获取归档会话列表
+ * @returns {Promise}
+ */
+export function getArchivedSessions() {
+  return request({
+    url: '/api/im/conversation/archived',
+    method: 'get'
+  })
+}
+
+/**
+ * 归档会话
+ * @param {number} conversationId - 会话ID
+ * @returns {Promise}
+ */
+export function archiveSession(conversationId) {
+  return request({
+    url: `/api/im/conversation/${conversationId}/archive`,
+    method: 'put'
+  })
+}
+
+/**
+ * 取消归档会话
+ * @param {number} conversationId - 会话ID
+ * @returns {Promise}
+ */
+export function unarchiveSession(conversationId) {
+  return request({
+    url: `/api/im/conversation/${conversationId}/unarchive`,
+    method: 'put'
+  })
+}

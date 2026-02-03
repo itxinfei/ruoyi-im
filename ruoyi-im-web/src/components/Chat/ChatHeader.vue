@@ -274,13 +274,21 @@ const handleSendMessage = () => {
 
 // 语音通话
 const handleVoiceCall = () => {
-  ElMessage.info('语音通话功能开发中')
+  // 单聊才支持语音通话
+  if (props.session?.type === 'GROUP') {
+    ElMessage.warning('群聊暂不支持语音通话，请选择联系人后发起')
+    return
+  }
   emit('voice-call', props.session)
 }
 
 // 视频通话
 const handleVideoCall = () => {
-  ElMessage.info('视频通话功能开发中')
+  // 单聊才支持视频通话
+  if (props.session?.type === 'GROUP') {
+    ElMessage.warning('群聊暂不支持视频通话，请选择联系人后发起')
+    return
+  }
   emit('video-call', props.session)
 }
 

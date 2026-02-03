@@ -8,7 +8,14 @@
       </div>
       <div class="page-actions">
         <el-button type="primary" :icon="Plus" @click="handleAdd">新增用户</el-button>
-        <el-button :icon="Upload" @click="handleImport">批量导入</el-button>
+        <el-dropdown split-button :icon="Upload" @click="handleImport" @command="handleDownloadTemplate">
+          批量导入
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="download">下载导入模板</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
         <el-button :icon="Download" @click="handleExport">导出数据</el-button>
       </div>
     </div>
@@ -210,12 +217,21 @@
         <el-button type="primary" :loading="submitting" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 隐藏的文件输入 -->
+    <input
+      ref="importFileInput"
+      type="file"
+      accept=".xls,.xlsx"
+      style="display: none"
+      @change="handleFileChange"
+    >
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus'
 import {
   Search,
   Refresh,
@@ -229,7 +245,7 @@ import {
   Edit,
   RefreshRight
 } from '@element-plus/icons-vue'
-import { getUserList, updateUserStatus, deleteUser, createUser, updateUser, batchDeleteUsers, batchUpdateUserStatus } from '@/api/admin'
+import { getUserList, updateUserStatus, deleteUser, createUser, updateUser, batchDeleteUsers, batchUpdateUserStatus, resetUserPassword, batchImportUsers, downloadUserTemplate } from '@/api/admin'
 import { exportToCSV } from '@/utils/export'
 import { debounce } from '@/utils/debounce'
 
@@ -533,9 +549,83 @@ const handleBatchEnable = async () => {
   }
 }
 
-// 导入
+// 导入相关状态
+const importFileInput = ref(null)
+const importing = ref(false)
+
+// 导入用户
 const handleImport = () => {
-  ElMessage.info('批量导入功能开发中')
+  importFileInput.value?.click()
+}
+
+// 处理文件选择
+const handleFileChange = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // 验证文件类型
+  const validTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+  const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase()
+  if (!validTypes.includes(file.type) && !['.xls', '.xlsx'].includes(fileExt)) {
+    ElMessage.error('请上传 Excel 文件（.xls 或 .xlsx）')
+    return
+  }
+
+  // 验证文件大小（最大 5MB）
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.error('文件大小不能超过 5MB')
+    return
+  }
+
+  importing.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await batchImportUsers(formData)
+    if (res.code === 200) {
+      const { successCount, failCount, errors } = res.data || {}
+      if (failCount > 0) {
+        ElMessage.warning(`导入完成：成功 ${successCount} 条，失败 ${failCount} 条`)
+      } else {
+        ElMessage.success(`导入成功：共 ${successCount} 条数据`)
+      }
+      loadUsers()
+    } else if (res.code === 404) {
+      ElMessage.warning('批量导入功能开发中，敬请期待')
+    }
+  } catch (error) {
+    ElMessage.error('导入失败，请稍后重试')
+  } finally {
+    importing.value = false
+    // 重置文件输入
+    if (importFileInput.value) {
+      importFileInput.value.value = ''
+    }
+  }
+}
+
+// 下载导入模板
+const handleDownloadTemplate = async () => {
+  try {
+    const res = await downloadUserTemplate()
+    if (res.code === 404) {
+      ElMessage.warning('模板下载功能开发中，敬请期待')
+      return
+    }
+    // 创建下载链接
+    const url = window.URL.createObjectURL(new Blob([res]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', '用户导入模板.xlsx')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    ElMessage.error('模板下载失败')
+  }
 }
 
 // 导出
@@ -564,8 +654,33 @@ const handleExport = () => {
     ElMessage.error("导出失败")
   }
 }
-const handleResetPassword = () => {
-  ElMessage.info('重置密码功能开发中')
+const handleResetPassword = async () => {
+  if (!currentUser.value?.id) {
+    ElMessage.warning('请先选择用户')
+    return
+  }
+
+  // 默认密码
+  const defaultPassword = '123456'
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要将用户「${currentUser.value.nickname || currentUser.value.username}」的密码重置为 ${defaultPassword} 吗？`,
+      '重置密码',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    await resetUserPassword(currentUser.value.id, defaultPassword)
+    ElMessage.success('密码重置成功，新密码为：123456')
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('密码重置失败，请稍后重试')
+    }
+  }
 }
 
 // 防抖搜索：关键词变化时延迟执行搜索

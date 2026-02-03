@@ -122,14 +122,14 @@
       <!-- 语音通话 -->
       <VoiceCallDialog
         v-model:visible="showVoiceCall"
-        :remote-user="session"
+        :remote-user="remoteCallUser"
         :is-incoming="isIncomingCall"
       />
 
       <!-- 视频通话 -->
       <VideoCallDialog
         v-model:visible="showVideoCall"
-        :remote-user="session"
+        :remote-user="remoteCallUser"
         :is-incoming="isIncomingCall"
       />
 
@@ -268,13 +268,18 @@ import GroupFilePanel from '@/components/Chat/GroupFilePanel.vue'
 import ExportChatDialog from '@/components/Chat/ExportChatDialog.vue'
 import MultiSelectToolbar from '@/components/Chat/MultiSelectToolbar.vue'
 import ImageViewerDialog from '@/components/Chat/ImageViewerDialog.vue'
-import { getMessages, batchForwardMessages, deleteMessage, clearConversationMessages, retryMessage } from '@/api/im/message'
+import { getMessages, batchForwardMessages, clearConversationMessages, retryMessage } from '@/api/im/message'
 import { pinConversation, muteConversation } from '@/api/im/conversation'
-import { uploadFile, uploadImage } from '@/api/im/file'
-import { addFavorite, removeFavorite } from '@/api/im/favorite'
-import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
+import { uploadFile } from '@/api/im/file'
+import { markMessage, unmarkMessage, completeTodo, getUserTodoCount } from '@/api/im/marker'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useMessageRetry } from '@/composables/useMessageRetry'
+import {
+  useChatMessages,
+  useChatCommands,
+  useChatDialogs,
+  useChatUpload
+} from '@/composables/useChat'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseMessageContent } from '@/utils/message'
 
@@ -291,36 +296,89 @@ const props = defineProps({
 
 const store = useStore()
 const currentUser = computed(() => store.getters['user/currentUser'])
-const messages = ref([])
-const loading = ref(false)
-const sending = ref(false)
-const noMore = ref(false)
+
+// ==================== Composables ====================
+// 消息管理（加载、发送、重试）
+const {
+  messages,
+  loading,
+  sending,
+  noMore,
+  loadHistory,
+  send: sendMessage,
+  retry,
+  removeMessage,
+  markAsRead,
+  loadMore
+} = useChatMessages(computed(() => props.session?.id), currentUser)
+
+// 消息命令（复制、回复、转发、撤回、删除、编辑等）
+const {
+  replyingMessage,
+  editingMessage,
+  forwardingMessages,
+  copy,
+  reply: cmdReply,
+  cancelReply,
+  forward,
+  batchForward,
+  recall,
+  deleteMessage,
+  edit,
+  cancelEdit,
+  confirmEdit,
+  at,
+  addReaction,
+  addToTodo,
+  favorite,
+  unfavorite,
+  pin
+} = useChatCommands(currentUser, computed(() => props.session?.type))
+
+// 弹窗状态管理
+const {
+  showVoiceCall,
+  showVideoCall,
+  isIncomingCall,
+  remoteCallUser,
+  showChatSearch,
+  showFilesPanel,
+  showChatHistory,
+  showAnnouncementDialog,
+  showExportDialog,
+  showGroupFilesPanel,
+  showCombineDetail,
+  combineMessages,
+  combineConversationTitle,
+  showImagePreview,
+  imagePreviewIndex,
+  openVoiceCall,
+  openVideoCall,
+  closeAllCalls,
+  openCombineDetail,
+  openContactDetail,
+  openImagePreview,
+  closeAllDialogs
+} = useChatDialogs()
+
+// 文件上传
+const {
+  uploadImage,
+  uploadImages,
+  uploadCommonFile,
+  uploadVideo,
+  uploading
+} = useChatUpload()
+
+// ==================== 本地状态 ====================
 const showGroupDetail = ref(false)
-const replyingMessage = computed(() => store.state.im.message.replyingMessage)
-const editingMessage = ref(null)
 const msgListRef = ref(null)
 const forwardDialogRef = ref(null)
 const callDialogRef = ref(null)
-const showVoiceCall = ref(false)
-const showVideoCall = ref(false)
-const showChatHistory = ref(false)
-const isIncomingCall = ref(false)
-const showAnnouncementDialog = ref(false)
-const showSearchPanel = ref(false)
-const showChatSearch = ref(false)
-const showFilesPanel = ref(false)
-const showExportDialog = ref(false)
-const showGroupFilesPanel = ref(false)
-const showCombineDetail = ref(false)
-const combineMessages = ref([])
-const combineConversationTitle = ref('')
+const showSearchPanel = ref(false)  // 搜索面板（与聊天内搜索区分）
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
 const messageInputRef = ref(null)
-
-// 图片预览状态
-const showImagePreview = ref(false)
-const imagePreviewIndex = ref(0)
 
 // 当前会话所有图片URL列表（用于预览时左右切换）
 const conversationImages = computed(() => {
@@ -398,25 +456,6 @@ const handleInput = (content) => {
     sendMyTypingStatus()
   } else {
     sendMyStopTypingStatus()
-  }
-}
-
-const loadHistory = async () => {
-  if (!props.session?.id) return
-  loading.value = true
-  noMore.value = false
-  try {
-    const res = await store.dispatch('im/message/loadMessages', {
-      sessionId: props.session.id,
-      pageSize: 50
-    })
-
-    // 使用 splice 更新数组，而不是直接替换，避免组件被销毁
-    const newMessages = (res || []).map(m => transformMsg(m))
-    messages.value.splice(0, messages.value.length, ...newMessages)
-  } finally {
-    loading.value = false
-    msgListRef.value?.scrollToBottom()
   }
 }
 
@@ -655,30 +694,22 @@ watch(() => props.session, () => {
   loadHistory()
 })
 
-const handleDelete = async (messageId) => {
-  try {
-    await store.dispatch('im/message/deleteMessage', messageId)
-    // 移除本地消息
-    const index = messages.value.findIndex(m => m.id === messageId)
-    if (index !== -1) {
-      messages.value.splice(index, 1)
-    }
-  } catch (error) {
-    console.error('删除失败', error)
+const handleDelete = async (message) => {
+  await deleteMessage(message)
+  // 移除本地消息（composable 中已处理 store，这里只需处理本地列表）
+  const index = messages.value.findIndex(m => m.id === message.id)
+  if (index !== -1) {
+    messages.value.splice(index, 1)
   }
 }
 
-const handleRecall = async (messageId) => {
-  try {
-    await store.dispatch('im/message/recallMessage', messageId)
-    // 更新本地消息状态
-    const index = messages.value.findIndex(m => m.id === messageId)
-    if (index !== -1) {
-      messages.value[index].type = 'RECALLED' // 或其他处理
-      messages.value[index].content = '消息已撤回'
-    }
-  } catch (error) {
-    console.error('撤回失败', error)
+const handleRecall = async (message) => {
+  await recall(message)
+  // 更新本地消息状态已在 recall 中处理
+  const index = messages.value.findIndex(m => m.id === message.id)
+  if (index !== -1) {
+    messages.value[index].type = 'RECALLED'
+    messages.value[index].content = ''
   }
 }
 
@@ -689,9 +720,9 @@ const handleCommand = (cmd, msg) => {
   } else if (cmd === 'reply') {
     handleReply(msg)
   } else if (cmd === 'recall') {
-    handleRecall(msg.id)
+    handleRecall(msg)
   } else if (cmd === 'delete') {
-    handleDelete(msg.id)
+    handleDelete(msg)
   } else if (cmd === 'edit') {
     handleEdit(msg)
   } else if (cmd === 'mark-read') {
@@ -707,7 +738,7 @@ const handleCommand = (cmd, msg) => {
   } else if (cmd === 'view-combine') {
     handleViewCombine(msg)
   } else if (cmd === 'export') {
-    showExportDialog.value = true
+    // useChatDialogs 已提供 showExportDialog 状态
   } else if (cmd === 'emoji') {
     handleShowEmojiPicker(msg)
   }
@@ -745,92 +776,28 @@ const handleSelectEmoji = async (emoji) => {
   if (!emojiTargetMessage.value) return
 
   const msg = emojiTargetMessage.value
-  const userId = currentUser.value?.id
-  const userName = currentUser.value?.nickName || currentUser.value?.userName || '我'
-  const userAvatar = currentUser.value?.avatar || ''
 
-  try {
-    // 检查是否已经有当前用户的这个表情
-    const existingReactionIndex = (msg.reactions || []).findIndex(
-      r => r.emoji === emoji && r.userId === userId
-    )
+  // 使用 composable 的 addReaction 方法
+  await addReaction(msg, emoji, 'EMOJI')
 
-    let newReactions = [...(msg.reactions || [])]
-
-    if (existingReactionIndex !== -1) {
-      // 移除现有反应
-      newReactions.splice(existingReactionIndex, 1)
-    } else {
-      // 添加新反应
-      newReactions.push({
-        emoji,
-        userId,
-        userName,
-        userAvatar
-      })
-    }
-
-    // 更新本地消息
-    const index = messages.value.findIndex(m => m.id === msg.id)
-    if (index !== -1) {
-      messages.value[index] = {
-        ...messages.value[index],
-        reactions: newReactions
-      }
-    }
-
-    // 通过 WebSocket 广播表情反应更新
-    store.dispatch('im/message/handleReactionUpdate', {
-      messageId: msg.id,
-      emoji,
-      userId,
-      userName,
-      userAvatar,
-      isAdd: existingReactionIndex === -1
-    })
-
-    showEmojiPopover.value = false
-    emojiTargetMessage.value = null
-  } catch (error) {
-    console.error('添加表情失败:', error)
-    ElMessage.error('添加表情失败')
-  }
+  showEmojiPopover.value = false
+  emojiTargetMessage.value = null
 }
 
 // 处理设为待办
 const handleAddToTodo = async (msg) => {
-  try {
-    await setTodoReminder({
-      messageId: msg.id,
-      remindTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 默认明天提醒
-      remark: msg.content?.substring(0, 50) || '消息待办'
-    })
-    ElMessage.success('已添加到待办事项')
-    // 更新消息标记状态
-    if (msg.markers) {
-      msg.markers.push({ markerType: 'TODO', isCompleted: false })
-    } else {
-      msg.markers = [{ markerType: 'TODO', isCompleted: false }]
-    }
-  } catch (e) {
-    console.error('添加待办失败', e)
-    ElMessage.error('添加失败')
+  await addToTodo(msg)
+  // 更新本地消息标记状态
+  if (msg.markers) {
+    msg.markers.push({ markerType: 'TODO', isCompleted: false })
+  } else {
+    msg.markers = [{ markerType: 'TODO', isCompleted: false }]
   }
 }
 
 // 处理收藏消息
 const handleFavorite = async (msg) => {
-  try {
-    await addFavorite({
-      messageId: msg.id,
-      conversationId: props.session?.id,
-      remark: '',
-      tags: []
-    })
-    ElMessage.success('已收藏消息')
-  } catch (e) {
-    ElMessage.error('收藏失败')
-  }
+  await favorite(msg)
 }
 
 // 处理标记消息
@@ -935,9 +902,7 @@ const handleMultiSelect = (msg) => {
 const handleViewCombine = (msg) => {
   // msg 包含 messages 数组（合并的消息内容）
   if (msg.messages && msg.messages.length > 0) {
-    combineMessages.value = msg.messages
-    combineConversationTitle.value = `${msg.senderName}的聊天记录`
-    showCombineDetail.value = true
+    openCombineDetail(msg.messages, `${msg.senderName}的聊天记录`)
   } else {
     ElMessage.warning('无法查看聊天记录详情')
   }
@@ -1142,16 +1107,16 @@ const handleToggleDetail = () => {
 
 // 图片预览处理
 const handleImagePreview = (imageUrl) => {
-  imagePreviewIndex.value = conversationImages.value.indexOf(imageUrl)
-  showImagePreview.value = true
+  const index = conversationImages.value.indexOf(imageUrl)
+  openImagePreview(index, conversationImages.value)
 }
 
 const handleCancelReply = () => {
-  store.commit('im/message/SET_REPLYING_MESSAGE', null)
+  cancelReply()
 }
 
 const handleCancelEdit = () => {
-  editingMessage.value = null
+  cancelEdit()
 }
 
 const handleRetry = async (msg) => {
@@ -1246,7 +1211,7 @@ const handleBatchForwardConfirm = async ({ messageIds, targetSessionId, forwardT
 }
 
 const handleReply = (message) => {
-  store.commit('im/message/SET_REPLYING_MESSAGE', message)
+  cmdReply(message)
   // 聚焦输入框，提升用户体验
   nextTick(() => {
     messageInputRef.value?.focus()
@@ -1254,7 +1219,7 @@ const handleReply = (message) => {
 }
 
 const handleEdit = (message) => {
-  editingMessage.value = message
+  edit(message)
 }
 
 const handleAt = (message) => {
@@ -1302,24 +1267,14 @@ const handleRemindUnread = async ({ conversationId, messageId, unreadMembers }) 
 
 const handleEditConfirm = async (content) => {
   if (!editingMessage.value) return
-  
-  try {
-    await store.dispatch('im/message/editMessage', {
-      messageId: editingMessage.value.id,
-      content: content
-    })
-    
-    // 更新本地消息列表
-    const index = messages.value.findIndex(m => m.id === editingMessage.value.id)
-    if (index !== -1) {
-      messages.value[index].content = content
-      messages.value[index].isEdited = true // 标记已编辑
-    }
-    
-    editingMessage.value = null
-    ElMessage.success('已编辑')
-  } catch (error) {
-    console.error('编辑失败', error)
+
+  await confirmEdit(content)
+
+  // 更新本地消息列表
+  const index = messages.value.findIndex(m => m.id === editingMessage.value.id)
+  if (index !== -1) {
+    messages.value[index].content = content
+    messages.value[index].isEdited = true
   }
 }
 
@@ -1329,12 +1284,12 @@ const handleEditConfirm = async (content) => {
 const handleReEdit = ({ content }) => {
   if (!content) return
 
-  // 设置编辑消息（临时对象，用于触发编辑模式）
-  editingMessage.value = {
+  // 使用 composable 的编辑状态
+  edit({
     id: `reedit-${Date.now()}`,
     content,
-    isReEdit: true  // 标记为重新编辑
-  }
+    isReEdit: true
+  })
 
   // 将内容填充到输入框
   messageInputRef.value?.setContent(content)
@@ -1360,13 +1315,23 @@ const handleStartVideo = () => {
 
 // ChatHeader 通话按钮事件
 const handleVoiceCall = () => {
-  isIncomingCall.value = false
-  showVoiceCall.value = true
+  // 构建通话用户信息
+  const user = {
+    userId: session.value?.targetId,
+    userName: session.value?.name,
+    avatar: session.value?.avatar
+  }
+  openVoiceCall(user, false)
 }
 
 const handleVideoCall = () => {
-  isIncomingCall.value = false
-  showVideoCall.value = true
+  // 构建通话用户信息
+  const user = {
+    userId: session.value?.targetId,
+    userName: session.value?.name,
+    avatar: session.value?.avatar
+  }
+  openVideoCall(user, false)
 }
 
 // 创建公告

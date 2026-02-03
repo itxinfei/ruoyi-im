@@ -53,7 +53,51 @@
               <el-icon><Avatar /></el-icon>
             </div>
             <span class="nav-text">我的好友</span>
+            <el-dropdown trigger="click" @command="handleGroupCommand" @click.stop>
+              <el-icon class="group-menu-icon"><MoreFilled /></el-icon>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="add">
+                    <span class="material-icons-outlined">add</span>
+                    添加分组
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
+
+          <!-- 好友分组列表 -->
+          <Transition name="expand">
+            <div v-if="friendGroupNames.length > 0" class="friend-groups-list">
+              <div
+                v-for="groupName in friendGroupNames"
+                :key="groupName"
+                class="nav-item nav-item-sub"
+                :class="{ active: currentNav === groupName }"
+                @click="switchNav(groupName)"
+              >
+                <div class="nav-icon-wrapper bg-gradient-light">
+                  <span class="group-initial">{{ groupName.charAt(0) }}</span>
+                </div>
+                <span class="nav-text">{{ groupName }}</span>
+                <el-dropdown trigger="click" @command="(cmd) => handleGroupItemCommand(cmd, groupName)" @click.stop>
+                  <el-icon class="group-item-menu-icon"><MoreFilled /></el-icon>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="rename">
+                        <span class="material-icons-outlined">edit</span>
+                        重命名
+                      </el-dropdown-item>
+                      <el-dropdown-item command="delete" divided>
+                        <span class="material-icons-outlined">delete</span>
+                        删除分组
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </div>
+          </Transition>
 
           <div
             class="nav-item"
@@ -261,6 +305,54 @@
       </div>
     </Transition>
 
+    <!-- 添加分组对话框 -->
+    <el-dialog
+      v-model="showAddGroupDialog"
+      title="添加好友分组"
+      width="400px"
+      :close-on-click-modal="false"
+    >
+      <el-form @submit.prevent="handleAddGroup">
+        <el-form-item label="分组名称">
+          <el-input
+            v-model="newGroupName"
+            placeholder="请输入分组名称"
+            maxlength="20"
+            show-word-limit
+            @keyup.enter="handleAddGroup"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showAddGroupDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleAddGroup">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 重命名分组对话框 -->
+    <el-dialog
+      v-model="showRenameGroupDialog"
+      title="重命名分组"
+      width="400px"
+      :close-on-click-modal="false"
+    >
+      <el-form @submit.prevent="handleRenameGroup">
+        <el-form-item label="分组名称">
+          <el-input
+            v-model="renameGroupName"
+            placeholder="请输入新的分组名称"
+            maxlength="20"
+            show-word-limit
+            @keyup.enter="handleRenameGroup"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showRenameGroupDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleRenameGroup">确定</el-button>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -272,17 +364,17 @@ import { useWindowSize, useDebounceFn } from '@vueuse/core'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import ContactDetail from '@/components/Contacts/ContactDetail.vue'
 import VirtualList from '@/components/Common/VirtualList.vue'
-import { getFriendRequests, getGroupedFriendList, searchContacts } from '@/api/im/contact'
+import { getFriendRequests, getGroupedFriendList, searchContacts, handleFriendRequest, getGroupList, createGroup, renameGroup, deleteGroup, moveContactToGroup } from '@/api/im/contact'
 import { getGroups } from '@/api/im/group'
 import { getOrgTree, getDepartmentMembers } from '@/api/im/organization'
-import { ElMessage } from 'element-plus'
-import { 
-  Search, User, Avatar, ChatDotSquare, OfficeBuilding, 
-  ArrowRight, Plus, Close, Menu, ArrowLeft
+import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Search, User, Avatar, ChatDotSquare, OfficeBuilding,
+  ArrowRight, Plus, Close, Menu, ArrowLeft, MoreFilled
 } from '@element-plus/icons-vue'
 
-// 定义 emit，用于通知父组件切换模块
-const emit = defineEmits(['switch-module'])
+// 定义 emit，用于通知父组件切换模块或触发通话
+const emit = defineEmits(['switch-module', 'voice-call', 'video-call'])
 
 const store = useStore()
 const { width } = useWindowSize()
@@ -300,10 +392,20 @@ const searchInputRef = ref(null)
 
 // Data
 const friendGroups = ref([])
+const friendGroupNames = ref([]) // 好友分组名称列表
 const groupList = ref([])
 const orgMembers = ref([])
+const friendRequests = ref([])
 const pendingCount = ref(0)
 const searchResults = ref([])
+
+// 分组管理状态
+const showGroupManageMenu = ref(false)
+const showAddGroupDialog = ref(false)
+const showRenameGroupDialog = ref(false)
+const newGroupName = ref('')
+const renameGroupName = ref('')
+const selectedGroupName = ref('')
 
 // Selection
 const selectedItemId = ref(null)
@@ -317,15 +419,27 @@ const flatDepts = ref([])
 
 // Computed for Display Titles
 const listTitle = computed(() => {
-    if (searchQuery.value) return '搜索结果'
-    const map = { new: '新的朋友', friends: '我的好友', groups: '我的群组', org: '组织架构' }
-    return map[currentNav.value] || ''
+  if (searchQuery.value) return '搜索结果'
+  const map = { new: '新的朋友', friends: '我的好友', groups: '我的群组', org: '组织架构' }
+  if (map[currentNav.value]) return map[currentNav.value]
+  // 如果是分组导航，返回分组名称
+  const group = friendGroups.value.find(g => g.groupName === currentNav.value)
+  if (group) return group.groupName
+  return ''
 })
 
 const currentListTitle = computed(() => listTitle.value)
 
 const currentList = computed(() => {
-  if (currentNav.value === 'friends') return friendGroups.value.flatMap(g => g.friends) // Flatten for virtual list if needed, or handle groups
+  if (currentNav.value === 'friends') {
+    // 全部好友 - 展平所有分组
+    return friendGroups.value.flatMap(g => g.friends)
+  }
+  // 检查是否是分组导航
+  const group = friendGroups.value.find(g => g.groupName === currentNav.value)
+  if (group) {
+    return group.friends || []
+  }
   if (currentNav.value === 'groups') return groupList.value
   if (currentNav.value === 'org') return orgMembers.value
   return []
@@ -395,8 +509,8 @@ const fetchData = async (nav) => {
       groupList.value = res.data || []
     } else if (nav === 'new') {
       const res = await getFriendRequests()
-      // pendingCount.value = res.data.length
-      // Assuming friendRequests is stored in store as well or updated here
+      friendRequests.value = res.data || []
+      pendingCount.value = (res.data || []).length
     }
   } catch (error) {
     console.error(error)
@@ -406,33 +520,239 @@ const fetchData = async (nav) => {
 }
 
 const handleMessage = (contact) => {
-  // Logic to switch to chat panel
-  console.log('Message', contact)
+  // 切换到聊天模块并打开与该联系人的会话
+  emit('switch-module', 'chat')
+
+  // 需要创建或切换到与该联系人的会话
+  if (contact.id) {
+    store.dispatch('im/session/createAndSwitchSession', {
+      type: 'PRIVATE',
+      targetId: contact.id
+    }).catch(error => {
+      console.error('创建会话失败:', error)
+    })
+  }
 }
 
 const handleVoiceCall = (contact) => {
-  console.log('Voice Call', contact)
+  // 触发语音通话
+  emit('voice-call', {
+    userId: contact.id,
+    userName: contact.name || contact.nickname,
+    userAvatar: contact.avatar
+  })
 }
 
 const handleVideoCall = (contact) => {
-  console.log('Video Call', contact)
+  // 触发视频通话
+  emit('video-call', {
+    userId: contact.id,
+    userName: contact.name || contact.nickname,
+    userAvatar: contact.avatar
+  })
 }
 
-const acceptRequest = (req) => {
-  console.log('Accept', req)
+const acceptRequest = async (req) => {
+  try {
+    loading.value = true
+    await handleFriendRequest(req.id, true)
+    ElMessage.success('已接受好友请求')
+    // 重新加载好友请求列表
+    const res = await getFriendRequests()
+    friendRequests.value = res.data || []
+    pendingCount.value = (res.data || []).length
+  } catch (error) {
+    console.error('接受好友请求失败:', error)
+    ElMessage.error(error.msg || '操作失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
 }
 
-const ignoreRequest = (req) => {
-  console.log('Ignore', req)
+const ignoreRequest = async (req) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要忽略 ${req.nickname || req.fromUserNickname} 的好友请求吗？`,
+      '忽略请求',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    loading.value = true
+    await handleFriendRequest(req.id, false)
+    ElMessage.success('已忽略好友请求')
+    // 重新加载好友请求列表
+    const res = await getFriendRequests()
+    friendRequests.value = res.data || []
+    pendingCount.value = (res.data || []).length
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('忽略好友请求失败:', error)
+      ElMessage.error(error.msg || '操作失败，请稍后重试')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// ==================== 好友分组管理 ====================
+
+// 加载好友分组列表
+const loadFriendGroupNames = async () => {
+  try {
+    const res = await getGroupList()
+    friendGroupNames.value = res.data || []
+  } catch (error) {
+    console.error('加载好友分组失败:', error)
+  }
+}
+
+// 打开添加分组对话框
+const openAddGroupDialog = () => {
+  newGroupName.value = ''
+  showAddGroupDialog.value = true
+}
+
+// 创建好友分组
+const handleAddGroup = async () => {
+  if (!newGroupName.value.trim()) {
+    ElMessage.warning('请输入分组名称')
+    return
+  }
+
+  // 检查是否已存在
+  if (friendGroupNames.value.includes(newGroupName.value)) {
+    ElMessage.warning('该分组已存在')
+    return
+  }
+
+  try {
+    const res = await createGroup({ groupName: newGroupName.value })
+    if (res.code === 200) {
+      ElMessage.success('分组创建成功')
+      showAddGroupDialog.value = false
+      await loadFriendGroupNames()
+      await fetchData('friends')
+    } else {
+      ElMessage.error(res.msg || '创建失败')
+    }
+  } catch (error) {
+    console.error('创建分组失败:', error)
+    ElMessage.error('创建失败，请稍后重试')
+  }
+}
+
+// 打开重命名分组对话框
+const openRenameGroupDialog = (groupName) => {
+  selectedGroupName.value = groupName
+  renameGroupName.value = groupName
+  showRenameGroupDialog.value = true
+}
+
+// 重命名好友分组
+const handleRenameGroup = async () => {
+  if (!renameGroupName.value.trim()) {
+    ElMessage.warning('请输入分组名称')
+    return
+  }
+
+  // 检查是否与其他分组重名
+  if (renameGroupName.value !== selectedGroupName.value && friendGroupNames.value.includes(renameGroupName.value)) {
+    ElMessage.warning('该分组名称已存在')
+    return
+  }
+
+  try {
+    const res = await renameGroup(selectedGroupName.value, renameGroupName.value)
+    if (res.code === 200) {
+      ElMessage.success('分组重命名成功')
+      showRenameGroupDialog.value = false
+      await loadFriendGroupNames()
+      await fetchData('friends')
+    } else {
+      ElMessage.error(res.msg || '重命名失败')
+    }
+  } catch (error) {
+    console.error('重命名分组失败:', error)
+    ElMessage.error('重命名失败，请稍后重试')
+  }
+}
+
+// 删除好友分组
+const handleDeleteGroup = async (groupName) => {
+  try {
+    await ElMessageBox.confirm(
+      `删除分组"${groupName}"后，该分组下的好友将移至"未分组"，确定要删除吗？`,
+      '删除分组',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    const res = await deleteGroup(groupName)
+    if (res.code === 200) {
+      ElMessage.success('分组删除成功')
+      await loadFriendGroupNames()
+      await fetchData('friends')
+      // 如果当前正在查看该分组，切换到全部好友
+      if (currentNav.value === groupName) {
+        switchNav('friends')
+      }
+    } else {
+      ElMessage.error(res.msg || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除分组失败:', error)
+      ElMessage.error('删除失败，请稍后重试')
+    }
+  }
+}
+
+// 移动联系人到分组
+const moveContactToGroup = async (contactId, groupName) => {
+  try {
+    const res = await moveContactToGroup({ contactId, groupName })
+    if (res.code === 200) {
+      ElMessage.success('已移动到分组')
+      await fetchData('friends')
+    } else {
+      ElMessage.error(res.msg || '移动失败')
+    }
+  } catch (error) {
+    console.error('移动联系人失败:', error)
+    ElMessage.error('移动失败，请稍后重试')
+  }
+}
+
+// 分组菜单命令处理
+const handleGroupCommand = (command) => {
+  if (command === 'add') {
+    openAddGroupDialog()
+  }
+}
+
+// 分组项菜单命令处理
+const handleGroupItemCommand = (command, groupName) => {
+  if (command === 'rename') {
+    openRenameGroupDialog(groupName)
+  } else if (command === 'delete') {
+    handleDeleteGroup(groupName)
+  }
 }
 
 // Lifecycle
 onMounted(() => {
   fetchData('friends')
+  loadFriendGroupNames()
   // Load org tree
   getOrgTree().then(res => {
     // Flatten logic if needed, or just assign
-    flatDepts.value = res.data || [] 
+    flatDepts.value = res.data || []
   })
 })
 
@@ -639,6 +959,66 @@ $active-bg: #e6f1fc; // Light blue for active states
     border-radius: 10px;
     line-height: 1;
   }
+
+  // 分组菜单图标
+  .group-menu-icon,
+  .group-item-menu-icon {
+    margin-left: auto;
+    padding: 4px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  &:hover .group-menu-icon,
+  &:hover .group-item-menu-icon {
+    opacity: 1;
+  }
+}
+
+// 好友分组列表
+.friend-groups-list {
+  padding-left: 16px;
+  margin-bottom: 8px;
+
+  .nav-item-sub {
+    padding-left: 36px;
+    font-size: 13px;
+  }
+
+  .group-initial {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #909399;
+  }
+}
+
+// 渐变背景色
+.bg-gradient-light {
+  background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+}
+
+// 分组展开动画
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  max-height: 300px;
+  overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
 }
 
 .nav-divider {

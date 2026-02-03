@@ -73,6 +73,12 @@ public interface ImTaskReminderService {
     void scanAndSendOverdueReminders();
 
     /**
+     * 扫描并发送任务提醒
+     * 定时任务调用，扫描需要提醒的任务并发送
+     */
+    void scanAndSendReminders();
+
+    /**
      * 发送任务截止提醒
      *
      * @param task 任务信息

@@ -8,8 +8,11 @@
     }"
     @click="handleClick"
   >
-    <!-- 加载占位符 -->
-    <div v-if="isLoading && !imageLoaded" class="image-placeholder">
+    <!-- 加载占位符（带模糊缩略图） -->
+    <div v-if="isLoading && !imageLoaded" class="image-placeholder" :class="{ 'with-thumb': thumbUrl }">
+      <!-- 模糊缩略图背景 -->
+      <div v-if="thumbUrl" class="blur-thumb" :style="{ backgroundImage: `url(${thumbUrl})` }"></div>
+
       <el-icon class="loading-icon" :size="32">
         <Loading />
       </el-icon>
@@ -25,13 +28,14 @@
       <el-button size="small" text @click.stop="retryLoad">重试</el-button>
     </div>
 
-    <!-- 实际图片 -->
+    <!-- 实际图片（带渐进加载效果） -->
     <img
       v-show="imageLoaded"
       ref="imageRef"
       :src="currentImageUrl"
       :alt="`${message.senderName}的图片`"
       class="image-content"
+      :class="{ 'loaded': imageLoaded }"
       loading="lazy"
       @load="handleImageLoad"
       @error="handleImageError"
@@ -81,11 +85,31 @@ const isLoading = ref(false)
 const imageLoaded = ref(false)
 const hasError = ref(false)
 let progressTimer = null
+let observer = null
 
 // 图片 URL
 const imageUrl = computed(() => {
   const parsed = parseMessageContent(props.message)
   return parsed?.imageUrl || parsed?.url || ''
+})
+
+// 缩略图 URL（用于模糊预览）
+const thumbUrl = computed(() => {
+  const parsed = parseMessageContent(props.message)
+  // 优先使用 thumbnailUrl，否则生成带尺寸参数的缩略图 URL
+  if (parsed?.thumbnailUrl) return parsed.thumbnailUrl
+  if (parsed?.thumbUrl) return parsed.thumbUrl
+  // 如果有原始 URL，尝试生成缩略图 URL（适用于支持的服务）
+  if (imageUrl.value) {
+    const url = new URL(imageUrl.value, window.location.origin)
+    // 添加缩略图参数（适用于常见图床服务）
+    if (url.hostname.includes('aliyuncs.com')) {
+      url.searchParams.set('x-oss-process', 'image/resize,m_fill,h_200,w_200/quality,q_60')
+      return url.toString()
+    }
+    // 可以根据不同的图床服务添加不同的参数
+  }
+  return null
 })
 
 // 当前显示的图片 URL（支持重试）
@@ -95,6 +119,32 @@ const currentImageUrl = ref(imageUrl.value)
 const isUploading = computed(() => {
   return ['uploading', 'sending'].includes(props.message?.status)
 })
+
+// Intersection Observer for lazy loading
+const setupIntersectionObserver = () => {
+  if (!('IntersectionObserver' in window)) return
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // 图片进入视口，开始加载
+          if (imageRef.value && !imageLoaded.value && !hasError.value) {
+            isLoading.value = true
+          }
+          observer.unobserve(entry.target)
+        }
+      })
+    },
+    {
+      rootMargin: '50px' // 提前 50px 开始加载
+    }
+  )
+
+  if (imageRef.value) {
+    observer.observe(imageRef.value)
+  }
+}
 
 // 处理图片加载成功
 const handleImageLoad = () => {
@@ -140,6 +190,14 @@ watch(() => imageUrl.value, (newUrl) => {
   }
 }, { immediate: true })
 
+// 监听 imageLoaded 变化，设置 Intersection Observer
+watch(imageLoaded, (loaded) => {
+  if (loaded && observer) {
+    observer.disconnect()
+    observer = null
+  }
+})
+
 // 组件挂载时的处理
 onMounted(() => {
   if (isUploading.value) {
@@ -149,8 +207,8 @@ onMounted(() => {
       }
     }, 300)
   } else if (imageUrl.value) {
-    // 非上传状态，开始加载图片
-    isLoading.value = true
+    // 设置 Intersection Observer 实现懒加载
+    setupIntersectionObserver()
   }
 })
 
@@ -158,6 +216,9 @@ onMounted(() => {
 onUnmounted(() => {
   if (progressTimer) {
     clearInterval(progressTimer)
+  }
+  if (observer) {
+    observer.disconnect()
   }
 })
 </script>
@@ -199,10 +260,19 @@ onUnmounted(() => {
   max-height: 400px;
   object-fit: contain;
   pointer-events: none;
+  opacity: 0;
+  filter: blur(10px);
+  transition: opacity 0.4s ease, filter 0.4s ease;
+
+  &.loaded {
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 
 // 图片占位符（加载中/错误）
 .image-placeholder {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -215,15 +285,27 @@ onUnmounted(() => {
   max-height: 400px;
   background: var(--dt-bg-hover);
   border-radius: var(--dt-radius-md);
+  overflow: hidden;
+
+  &.with-thumb {
+    padding: 0;
+  }
 
   .loading-icon {
+    position: relative;
+    z-index: 1;
     color: var(--dt-brand-color);
     animation: rotate 1s linear infinite;
   }
 
   .placeholder-text {
+    position: relative;
+    z-index: 1;
     font-size: 13px;
     color: var(--dt-text-tertiary);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px 12px;
+    border-radius: 12px;
   }
 
   &.error-placeholder {
@@ -236,6 +318,16 @@ onUnmounted(() => {
       pointer-events: auto;
     }
   }
+}
+
+// 模糊缩略图背景
+.blur-thumb {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  transform: scale(1.1);
 }
 
 .image-bubble.is-uploading {

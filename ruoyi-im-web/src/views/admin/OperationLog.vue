@@ -285,7 +285,8 @@ import {
 import {
   getAuditLogList,
   getAuditStatistics,
-  deleteExpiredLogs
+  deleteExpiredLogs,
+  batchDeleteAuditLogs
 } from '@/api/admin'
 import { exportToCSV } from '@/utils/export'
 import { debounce } from '@/utils/debounce'
@@ -472,9 +473,15 @@ const handleBatchDelete = async () => {
       cancelButtonText: '取消'
     })
 
-    // 实际后端可能需要提供批量删除接口
-    // 这里暂时用清空30天前的日志代替
-    ElMessage.warning('批量删除功能开发中，请使用清空过期日志功能')
+    const ids = selectedLogs.value.map(log => log.id)
+    const res = await batchDeleteAuditLogs(ids)
+    if (res.code === 200) {
+      ElMessage.success(`成功删除 ${ids.length} 条日志`)
+      selectedLogs.value = []
+      loadLogs()
+    } else if (res.code === 404) {
+      ElMessage.warning('批量删除功能开发中，请使用清空过期日志功能')
+    }
   } catch {
     // 取消
   }

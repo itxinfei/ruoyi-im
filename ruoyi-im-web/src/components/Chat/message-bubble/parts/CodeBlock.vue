@@ -14,6 +14,7 @@
 import { computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Document } from '@element-plus/icons-vue'
+import { copyToClipboard } from '@/utils/format'
 
 const props = defineProps({
   language: { type: String, default: 'plaintext' },
@@ -46,24 +47,9 @@ const languageLabel = computed(() => {
   return langMap[props.language] || props.language || 'Text'
 })
 
-const handleCopy = async () => {
-  try {
-    await navigator.clipboard.writeText(props.code)
-    ElMessage.success('代码已复制')
-  } catch {
-    // 降级方案
-    const textarea = document.createElement('textarea')
-    textarea.value = props.code
-    document.body.appendChild(textarea)
-    textarea.select()
-    try {
-      document.execCommand('copy')
-      ElMessage.success('代码已复制')
-    } catch {
-      ElMessage.error('复制失败')
-    }
-    document.body.removeChild(textarea)
-  }
+// 使用共享复制函数
+const handleCopy = () => {
+  copyToClipboard(props.code, { successMsg: '代码已复制' })
 }
 </script>
 

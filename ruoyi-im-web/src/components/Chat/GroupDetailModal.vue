@@ -223,6 +223,7 @@ import {
 } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { getStoredUserInfo } from '@/utils/storage'
+import { formatFileSize } from '@/utils/format'
 import {
   getGroup,
   getGroupMembers,
@@ -379,7 +380,13 @@ const handleAddMembers = async () => {
 
 const handleViewAllMembers = () => emit('view-all-members', members.value)
 const handleViewFiles = () => emit('view-files', props.groupId)
-const handleFileClick = (file) => ElMessage.info('文件预览功能开发中')
+const handleFileClick = (file) => {
+  if (file.url) {
+    window.open(file.url, '_blank')
+  } else {
+    ElMessage.warning('文件预览暂不支持')
+  }
+}
 
 const handleMuteChange = async (v) => {
   try {
@@ -421,14 +428,6 @@ const handleLeave = () => {
     emit('refresh')
     visible.value = false
   }).catch(() => {})
-}
-
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 </script>
 

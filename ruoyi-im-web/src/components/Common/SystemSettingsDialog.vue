@@ -94,6 +94,7 @@ const AboutSettings = defineAsyncComponent(() => import('../Settings/AboutSettin
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
 import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
 import { getUserSettings, batchUpdateSettings } from '@/api/im/userSettings'
+import { exportChatMessages } from '@/api/im/message'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -231,8 +232,28 @@ const handleClearCache = () => {
   }
 }
 
-const handleExportChat = () => {
-  ElMessage.info('聊天记录导出功能开发中...')
+const handleExportChat = async () => {
+  try {
+    // 获取当前会话ID
+    const currentConversationId = store.state.im.chat?.currentConversationId
+    if (!currentConversationId) {
+      ElMessage.warning('请先选择要导出聊天记录的会话')
+      return
+    }
+
+    // 显示格式选择
+    ElMessage.info('聊天记录导出功能开发中，敬请期待')
+
+    // API 调用示例（待后端实现）
+    // const res = await exportChatMessages(currentConversationId, {
+    //   format: 'txt', // txt, html, pdf
+    //   startTime: null,
+    //   endTime: null
+    // })
+    // 处理下载...
+  } catch (error) {
+    console.error('导出聊天记录失败:', error)
+  }
 }
 
 const componentEvents = computed(() => ({

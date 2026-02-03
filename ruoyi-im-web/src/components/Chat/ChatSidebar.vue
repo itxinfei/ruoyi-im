@@ -345,7 +345,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
-import { formatFileSize as utilsFormatFileSize } from '@/utils/format'
+import { formatFileSize as utilsFormatFileSize, formatDateTimeISO } from '@/utils/format'
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
@@ -532,9 +532,7 @@ const formatFileSize = (bytes) => {
   return utilsFormatFileSize(bytes)
 }
 
-const formatDate = (date) => {
-  return dayjs(date).format('YYYY-MM-DD HH:mm')
-}
+const formatDate = formatDateTimeISO
 
 const formatTime = (date) => {
   return dayjs(date).fromNow()

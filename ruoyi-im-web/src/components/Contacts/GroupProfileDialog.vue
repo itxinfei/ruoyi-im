@@ -14,52 +14,20 @@
 
     <div v-else-if="groupInfo" class="profile-container">
       <!-- 左侧：群组基本信息和快捷操作 -->
-      <div class="profile-sidebar">
-        <!-- 关闭按钮 -->
-        <el-button class="close-btn" circle @click="handleClose">
-          <el-icon><Close /></el-icon>
-        </el-button>
+      <GroupProfileHeader
+        :group-info="groupInfo"
+        :member-count="members.length"
+        :is-owner="isOwner"
+        :is-admin="isAdmin"
+        @close="handleClose"
+      />
 
-        <div class="sidebar-content">
-          <div class="avatar-wrapper">
-            <DingtalkAvatar
-              :src="groupInfo.avatar"
-              :name="groupInfo.name"
-              :size="100"
-              shape="square"
-            />
-          </div>
-
-          <h2 class="group-name">{{ groupInfo.name }}</h2>
-          <p class="group-meta">
-            <span class="group-id">群号: {{ groupInfo.groupCode || groupInfo.id }}</span>
-            <span class="member-count">{{ members.length }} 人</span>
-          </p>
-          <p class="group-intro">{{ groupInfo.description || '暂无群简介' }}</p>
-
-          <div class="group-tags">
-            <el-tag v-if="groupInfo.groupType" size="small" type="primary" effect="light">
-              {{ groupInfo.groupType === 'INTERNAL' ? '内部群' : '外部群' }}
-            </el-tag>
-            <el-tag v-if="isOwner" size="small" type="danger" effect="light">群主</el-tag>
-            <el-tag v-else-if="isAdmin" size="small" type="warning" effect="light">管理员</el-tag>
-          </div>
-
-          <div class="quick-actions">
-            <el-button type="primary" size="large" @click="handleSendMessage">
-              <el-icon><ChatDotRound /></el-icon>发消息
-            </el-button>
-            <div class="secondary-actions">
-              <el-button size="large" @click="handleInviteMember">
-                <el-icon><Plus /></el-icon>邀请
-              </el-button>
-              <el-button v-if="isOwnerOrAdmin" size="large" @click="handleManage">
-                <el-icon><Setting /></el-icon>管理
-              </el-button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <GroupActions
+        :is-owner-or-admin="isOwnerOrAdmin"
+        @send-message="handleSendMessage"
+        @invite="handleInviteMember"
+        @manage="handleManage"
+      />
 
       <!-- 右侧：详细信息和功能 -->
       <div class="profile-main">
@@ -70,94 +38,19 @@
               <span>成员</span>
               <el-badge :value="members.length" :max="99" class="tab-badge" />
             </template>
-            <div class="tab-content">
-              <!-- 成员搜索 -->
-              <div class="members-header">
-                <el-input
-                  v-model="memberSearch"
-                  placeholder="搜索成员"
-                  clearable
-                  class="member-search"
-                >
-                  <template #prefix>
-                    <el-icon><Search /></el-icon>
-                  </template>
-                </el-input>
-                <el-dropdown v-if="isOwnerOrAdmin" @command="handleBatchCommand">
-                  <el-button>
-                    批量管理<el-icon class="el-icon--right"><ArrowDown /></el-icon>
-                  </el-button>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item command="invite">邀请成员</el-dropdown-item>
-                      <el-dropdown-item command="mute" divided>全员禁言</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </div>
-
-              <!-- 成员列表 -->
-              <div class="members-list">
-                <div
-                  v-for="member in displayedMembers"
-                  :key="member.id || member.userId"
-                  class="member-item"
-                  @click="handleMemberClick(member)"
-                >
-                  <div class="member-avatar-wrapper">
-                    <DingtalkAvatar
-                      :src="member.avatar"
-                      :name="member.nickname || member.username"
-                      :size="44"
-                      shape="circle"
-                    />
-                    <div v-if="isOnline(member)" class="online-indicator" title="在线"></div>
-                  </div>
-                  <div class="member-info">
-                    <div class="member-name">
-                      {{ member.nickname || member.username }}
-                      <span v-if="member.remark" class="member-remark">({{ member.remark }})</span>
-                    </div>
-                    <div class="member-role">
-                      <el-tag
-                        v-if="member.role === 'OWNER'"
-                        size="small"
-                        type="danger"
-                        effect="light"
-                      >群主</el-tag>
-                      <el-tag
-                        v-else-if="member.role === 'ADMIN'"
-                        size="small"
-                        type="warning"
-                        effect="light"
-                      >管理员</el-tag>
-                      <span v-else class="role-text">成员</span>
-                    </div>
-                  </div>
-                  <div v-if="isOwnerOrAdmin && !isSelf(member)" class="member-actions">
-                    <el-dropdown trigger="click" @command="handleMemberCommand($event, member)">
-                      <el-button link type="primary" @click.stop>
-                        <el-icon><MoreFilled /></el-icon>
-                      </el-button>
-                      <template #dropdown>
-                        <el-dropdown-menu>
-                          <el-dropdown-item v-if="isOwner && member.role !== 'ADMIN'" command="setAdmin">
-                            设为管理员
-                          </el-dropdown-item>
-                          <el-dropdown-item v-if="isOwner && member.role === 'ADMIN'" command="cancelAdmin">
-                            取消管理员
-                          </el-dropdown-item>
-                          <el-dropdown-item command="mute">禁言</el-dropdown-item>
-                          <el-dropdown-item command="remove" divided>
-                            <span style="color: #ff4d4f">移出群聊</span>
-                          </el-dropdown-item>
-                        </el-dropdown-menu>
-                      </template>
-                    </el-dropdown>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <GroupMemberList
+              :members="members"
+              :current-user="currentUser"
+              :is-owner="isOwner"
+              :is-admin="isAdmin"
+              @invite="handleInviteMember"
+              @mute-all="handleMuteAll"
+              @member-click="handleMemberClick"
+              @set-admin="handleSetAdmin"
+              @cancel-admin="handleCancelAdmin"
+              @mute-member="handleMuteMember"
+              @remove-member="handleRemoveMember"
+            />
           </el-tab-pane>
 
           <!-- 公告 Tab -->
@@ -166,168 +59,55 @@
               <span>公告</span>
               <el-badge v-if="announcements.length > 0" :value="announcements.length" :max="99" class="tab-badge" />
             </template>
-            <div class="tab-content">
-              <div class="announcement-header">
-                <el-button
-                  v-if="isOwnerOrAdmin"
-                  type="primary"
-                  @click="handleCreateAnnouncement"
-                >
-                  <el-icon><Plus /></el-icon>发布公告
-                </el-button>
-              </div>
+            <AnnouncementList
+              :announcements="announcements"
+              :can-manage="isOwnerOrAdmin"
+              @create="handleCreateAnnouncement"
+              @edit="handleEditAnnouncement"
+              @delete="handleDeleteAnnouncement"
+            />
+          </el-tab-pane>
 
-              <div v-if="announcements.length === 0" class="empty-state">
-                <el-icon :size="48" color="#dcdfe6"><Bell /></el-icon>
-                <p>暂无群公告</p>
-                <p v-if="isOwnerOrAdmin" class="empty-hint">点击上方按钮发布公告</p>
-              </div>
+          <!-- 二维码 Tab -->
+          <el-tab-pane name="qrcode">
+            <template #label>
+              <span>二维码</span>
+              <el-icon><QrCode /></el-icon>
+            </template>
+            <GroupQRCode :group-info="groupInfo" />
+          </el-tab-pane>
 
-              <div v-else class="announcement-list">
-                <div
-                  v-for="announcement in announcements"
-                  :key="announcement.id"
-                  class="announcement-item"
-                  :class="{ pinned: announcement.isPinned }"
-                >
-                  <div class="announcement-header-row">
-                    <div class="announcement-title">
-                      <el-icon v-if="announcement.isPinned" class="pin-icon"><Top /></el-icon>
-                      {{ announcement.title }}
-                    </div>
-                    <span class="announcement-time">{{ formatTime(announcement.createTime) }}</span>
-                  </div>
-                  <div class="announcement-content">{{ announcement.content }}</div>
-                  <div class="announcement-footer">
-                    <span class="publisher">{{ announcement.publisherName || '群主' }}</span>
-                    <div class="announcement-actions">
-                      <el-button v-if="isOwnerOrAdmin" link type="primary" size="small" @click="handleEditAnnouncement(announcement)">
-                        编辑
-                      </el-button>
-                      <el-button v-if="isOwnerOrAdmin" link type="danger" size="small" @click="handleDeleteAnnouncement(announcement)">
-                        删除
-                      </el-button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <!-- 文件 Tab -->
+          <el-tab-pane name="files">
+            <template #label>
+              <span>文件</span>
+              <el-icon><Folder /></el-icon>
+            </template>
+            <GroupFiles
+              :group-id="groupInfo?.id"
+              @open-in-chat="handleOpenFileInChat"
+              @preview-image="handlePreviewImage"
+            />
           </el-tab-pane>
 
           <!-- 设置 Tab -->
           <el-tab-pane label="设置" name="settings">
-            <div class="tab-content">
-              <!-- 群信息设置 -->
-              <div class="settings-section">
-                <div class="section-title">群信息</div>
-                <div class="settings-list">
-                  <div class="setting-item">
-                    <div class="setting-info">
-                      <span class="setting-name">群名称</span>
-                      <span class="setting-value">{{ groupInfo.name }}</span>
-                    </div>
-                    <el-button v-if="isOwnerOrAdmin" link type="primary" @click="handleEditGroupName">
-                      <el-icon><Edit /></el-icon>修改
-                    </el-button>
-                  </div>
-                  <div class="setting-item">
-                    <div class="setting-info">
-                      <span class="setting-name">群简介</span>
-                      <span class="setting-value">{{ groupInfo.description || '暂无简介' }}</span>
-                    </div>
-                    <el-button v-if="isOwnerOrAdmin" link type="primary" @click="handleEditGroupDesc">
-                      <el-icon><Edit /></el-icon>修改
-                    </el-button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 群权限设置 -->
-              <div v-if="isOwnerOrAdmin" class="settings-section">
-                <div class="section-title">群权限</div>
-                <div class="settings-list">
-                  <div class="setting-item">
-                    <div class="setting-info">
-                      <span class="setting-name">入群验证</span>
-                      <span class="setting-desc">新成员加入需要管理员审核</span>
-                    </div>
-                    <el-switch v-model="groupSettings.needVerify" @change="handleSettingChange('needVerify', $event)" />
-                  </div>
-                  <div class="setting-item">
-                    <div class="setting-info">
-                      <span class="setting-name">允许成员邀请</span>
-                      <span class="setting-desc">群成员可以邀请其他人加入</span>
-                    </div>
-                    <el-switch v-model="groupSettings.allowInvite" @change="handleSettingChange('allowInvite', $event)" />
-                  </div>
-                  <div class="setting-item">
-                    <div class="setting-info">
-                      <span class="setting-name">全员禁言</span>
-                      <span class="setting-desc">只有群主和管理员可以发言</span>
-                    </div>
-                    <el-switch v-model="groupSettings.allMuted" @change="handleSettingChange('allMuted', $event)" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- 我的设置 -->
-              <div class="settings-section">
-                <div class="section-title">我的设置</div>
-                <div class="settings-list">
-                  <div class="setting-item">
-                    <div class="setting-info">
-                      <span class="setting-name">消息免打扰</span>
-                      <span class="setting-desc">不再接收该群的消息通知</span>
-                    </div>
-                    <el-switch v-model="isMuted" @change="handleMuteChange" />
-                  </div>
-                  <div class="setting-item">
-                    <div class="setting-info">
-                      <span class="setting-name">置顶会话</span>
-                      <span class="setting-desc">将该群置顶在会话列表</span>
-                    </div>
-                    <el-switch v-model="isTop" @change="handleTopChange" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- 危险操作 -->
-              <div class="settings-section danger-section">
-                <div class="section-title">危险操作</div>
-                <div class="action-list">
-                  <div v-if="isOwner" class="action-item" @click="handleTransfer">
-                    <div class="action-icon">
-                      <el-icon><Switch /></el-icon>
-                    </div>
-                    <div class="action-content">
-                      <span class="action-name">转让群主</span>
-                      <span class="action-desc">将群主身份转让给其他成员</span>
-                    </div>
-                    <el-icon class="action-arrow"><ArrowRight /></el-icon>
-                  </div>
-                  <div v-if="isOwner" class="action-item danger" @click="handleDismiss">
-                    <div class="action-icon">
-                      <el-icon><Delete /></el-icon>
-                    </div>
-                    <div class="action-content">
-                      <span class="action-name">解散群聊</span>
-                      <span class="action-desc">解散后将删除所有聊天记录</span>
-                    </div>
-                    <el-icon class="action-arrow"><ArrowRight /></el-icon>
-                  </div>
-                  <div v-else class="action-item danger" @click="handleExit">
-                    <div class="action-icon">
-                      <el-icon><CircleClose /></el-icon>
-                    </div>
-                    <div class="action-content">
-                      <span class="action-name">退出群聊</span>
-                      <span class="action-desc">退出后将不再接收群消息</span>
-                    </div>
-                    <el-icon class="action-arrow"><ArrowRight /></el-icon>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <GroupSettingsPanel
+              :group-info="groupInfo"
+              :settings="groupSettings"
+              :is-muted="isMuted"
+              :is-top="isTop"
+              :is-owner="isOwner"
+              :is-admin="isAdmin"
+              @edit-name="handleEditGroupName"
+              @edit-desc="handleEditGroupDesc"
+              @setting-change="handleSettingChange"
+              @mute-change="handleMuteChange"
+              @top-change="handleTopChange"
+              @transfer="handleTransfer"
+              @dismiss="handleDismiss"
+              @exit="handleExit"
+            />
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -409,13 +189,19 @@
 import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Close, ChatDotRound, Plus, Setting, Search, MoreFilled,
-  Bell, Top, Edit, Mute, Switch, Delete, CircleClose,
-  ArrowRight, Check, ArrowDown
-} from '@element-plus/icons-vue'
+import { Check, ArrowDown, QrCode, Folder } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+// 子组件
+import GroupProfileHeader from './GroupProfile/GroupProfileHeader.vue'
+import GroupActions from './GroupProfile/GroupActions.vue'
+import GroupMemberList from './GroupProfile/GroupMemberList.vue'
+import GroupSettingsPanel from './GroupProfile/GroupSettingsPanel.vue'
+import AnnouncementList from './GroupProfile/AnnouncementList.vue'
+import GroupQRCode from './GroupProfile/GroupQRCode.vue'
+import GroupFiles from './GroupProfile/GroupFiles.vue'
+// API
 import { getGroup, getGroupMembers, setGroupAdmin, transferGroupOwner, dismissGroup, leaveGroup } from '@/api/im/group'
+import { formatListItemTime } from '@/utils/format'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -436,7 +222,6 @@ const groupInfo = ref(null)
 const loading = ref(false)
 const activeTab = ref('members')
 const members = ref([])
-const memberSearch = ref('')
 const isMuted = ref(false)
 const isTop = ref(false)
 const showAnnouncementDialog = ref(false)
@@ -448,6 +233,23 @@ const groupSettings = ref({ needVerify: false, allowInvite: true, allMuted: fals
 
 // 模拟公告数据
 const announcements = ref([])
+
+// 计算属性
+const isOwner = computed(() => {
+  const myMember = members.value.find(m => (m.userId || m.id) == currentUser.value?.id)
+  return myMember?.role === 'OWNER'
+})
+
+const isAdmin = computed(() => {
+  const myMember = members.value.find(m => (m.userId || m.id) == currentUser.value?.id)
+  return myMember?.role === 'ADMIN'
+})
+
+const isOwnerOrAdmin = computed(() => isOwner.value || isAdmin.value)
+
+const transferableMembers = computed(() => {
+  return members.value.filter(m => (m.userId || m.id) != currentUser.value?.id)
+})
 
 // 计算属性
 const isOwner = computed(() => {
@@ -547,68 +349,42 @@ const handleMemberClick = (member) => {
   emit('member-click', member)
 }
 
-const isSelf = (member) => {
-  return (member.userId || member.id) == currentUser.value?.id
+// 新的子组件事件处理方法
+const handleMuteAll = () => {
+  groupSettings.value.allMuted = !groupSettings.value.allMuted
+  handleSettingChange('allMuted', groupSettings.value.allMuted)
 }
 
-const isOnline = (member) => {
-  return Math.random() > 0.5
-}
-
-const handleBatchCommand = (command) => {
-  switch (command) {
-    case 'invite':
-      handleInviteMember()
-      break
-    case 'mute':
-      groupSettings.value.allMuted = !groupSettings.value.allMuted
-      handleSettingChange('allMuted', groupSettings.value.allMuted)
-      break
+const handleSetAdmin = async ({ member, memberId }) => {
+  try {
+    await setGroupAdmin(props.groupId, memberId, true)
+    loadGroupInfo()
+  } catch (e) {
+    ElMessage.error('设置失败')
   }
 }
 
-const handleMemberCommand = async (command, member) => {
-  const memberName = member.nickname || member.username
-  const memberId = member.userId || member.id
+const handleCancelAdmin = async ({ member, memberId }) => {
+  try {
+    await setGroupAdmin(props.groupId, memberId, false)
+    loadGroupInfo()
+  } catch (e) {
+    ElMessage.error('取消失败')
+  }
+}
 
-  switch (command) {
-    case 'setAdmin':
-      try {
-        await setGroupAdmin(props.groupId, memberId, true)
-        ElMessage.success(`已将 ${memberName} 设为管理员`)
-        loadGroupInfo()
-      } catch (e) {
-        ElMessage.error('设置失败')
-      }
-      break
-    case 'cancelAdmin':
-      try {
-        await setGroupAdmin(props.groupId, memberId, false)
-        ElMessage.success(`已取消 ${memberName} 的管理员权限`)
-        loadGroupInfo()
-      } catch (e) {
-        ElMessage.error('取消失败')
-      }
-      break
-    case 'mute':
-      ElMessage.success(`已禁言 ${memberName}`)
-      break
-    case 'remove':
-      ElMessageBox.confirm(
-        `确定要将 ${memberName} 移出群聊吗？`,
-        '移出群聊',
-        { type: 'warning' }
-      ).then(async () => {
-        try {
-          const { removeGroupMember } = await import('@/api/im/group')
-          await removeGroupMember(props.groupId, [memberId])
-          ElMessage.success('已移出群聊')
-          loadGroupInfo()
-        } catch (e) {
-          ElMessage.error('操作失败')
-        }
-      }).catch(() => {})
-      break
+const handleMuteMember = (member) => {
+  // 实现禁言逻辑
+}
+
+const handleRemoveMember = async ({ member, memberId }) => {
+  try {
+    const { removeGroupMember } = await import('@/api/im/group')
+    await removeGroupMember(props.groupId, [memberId])
+    ElMessage.success('已移出群聊')
+    loadGroupInfo()
+  } catch (e) {
+    ElMessage.error('操作失败')
   }
 }
 
@@ -799,24 +575,25 @@ const handleExit = async () => {
   }
 }
 
-const formatTime = (time) => {
-  if (!time) return ''
-  const date = new Date(time)
-  const now = new Date()
-  const diff = now - date
-
-  if (diff < 86400000) {
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } else if (diff < 604800000) {
-    const days = Math.floor(diff / 86400000)
-    return `${days}天前`
-  } else {
-    return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
-  }
+// 文件相关处理
+const handleOpenFileInChat = (file) => {
+  // 切换到对应会话并定位到消息
+  emit('send-message', groupInfo.value)
+  handleClose()
+  ElMessage.info('正在跳转到消息...')
 }
-</script>
+
+const handlePreviewImage = (file) => {
+  // 预览图片
+  ElMessage.info('预览: ' + file.name)
+}
+
+// 使用共享工具函数
+const formatTime = formatListItemTime</script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .group-profile-dialog {
   :deep(.el-dialog) {
     border-radius: 16px;
@@ -841,136 +618,6 @@ const formatTime = (time) => {
   display: flex;
   min-height: 550px;
   max-height: 750px;
-}
-
-// 左侧边栏
-.profile-sidebar {
-  width: 240px;
-  background: linear-gradient(180deg, var(--dt-brand-color) 0%, #0e5fd9 100%);
-  color: #fff;
-  padding: 28px 20px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-
-  .close-btn {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: #fff;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-  }
-
-  .sidebar-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .avatar-wrapper {
-    margin-bottom: 20px;
-
-    :deep(.dingtalk-avatar) {
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  .group-name {
-    font-size: 22px;
-    font-weight: 600;
-    margin: 0 0 8px;
-    color: #fff;
-    text-align: center;
-  }
-
-  .group-meta {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.85);
-    margin: 0 0 8px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .group-id,
-    .member-count {
-      background: rgba(255, 255, 255, 0.15);
-      padding: 2px 10px;
-      border-radius: 12px;
-    }
-  }
-
-  .group-intro {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
-    margin: 0 0 16px;
-    text-align: center;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-
-  .group-tags {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 32px;
-
-    :deep(.el-tag) {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.3);
-      color: #fff;
-    }
-  }
-
-  .quick-actions {
-    width: 100%;
-
-    .el-button {
-      width: 100%;
-      margin-bottom: 12px;
-      background: #fff;
-      border-color: #fff;
-      color: var(--dt-brand-color);
-      font-size: 15px;
-      height: 44px;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.9);
-      }
-
-      .el-icon {
-        margin-right: 6px;
-      }
-    }
-
-    .secondary-actions {
-      display: flex;
-      gap: 12px;
-
-      .el-button {
-        flex: 1;
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #fff;
-        margin-bottom: 0;
-
-        &:hover {
-          background: rgba(255, 255, 255, 0.25);
-        }
-      }
-    }
-  }
 }
 
 // 右侧主内容区
@@ -1033,19 +680,6 @@ const formatTime = (time) => {
     margin-top: -2px;
   }
 }
-
-// 成员区域
-.members-header {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-
-  .member-search {
-    flex: 1;
-  }
-}
-
-.members-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;

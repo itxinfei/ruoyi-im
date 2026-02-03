@@ -778,15 +778,42 @@ const handleResultClick = (type, item) => {
 }
 
 const handlePreview = (type, item) => {
-  ElMessage.info('预览功能开发中...')
+  // 根据类型提供不同的预览行为
+  if (type === 'message') {
+    emit('preview-message', item)
+  } else if (type === 'file') {
+    if (item.url) {
+      window.open(item.url, '_blank')
+    } else {
+      ElMessage.warning('文件预览暂不支持')
+    }
+  } else {
+    ElMessage.info('预览功能开发中...')
+  }
 }
 
 const handleMore = (type, item) => {
-  ElMessage.info('更多操作开发中...')
+  // 显示更多操作菜单
+  if (type === 'contact') {
+    ElMessage.info('更多联系人操作开发中...')
+  } else if (type === 'message') {
+    ElMessage.info('更多消息操作开发中...')
+  } else {
+    ElMessage.info('更多操作开发中...')
+  }
 }
 
 const viewMore = (type) => {
-  ElMessage.info('查看更多功能开发中...')
+  // 跳转到更多结果页面
+  if (type === 'message') {
+    emit('view-all-messages', searchKeyword.value)
+  } else if (type === 'contact') {
+    emit('view-all-contacts', searchKeyword.value)
+  } else if (type === 'file') {
+    emit('view-all-files', searchKeyword.value)
+  } else {
+    ElMessage.info('查看更多功能开发中...')
+  }
 }
 
 const handleTypoFix = () => {
@@ -798,8 +825,46 @@ const handleTypoFix = () => {
   }
 }
 
-const handleVoiceSearch = () => {
-  ElMessage.info('语音搜索功能开发中...')
+const handleVoiceSearch = async () => {
+  // 检查浏览器是否支持语音识别
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    ElMessage.warning('您的浏览器不支持语音搜索，请使用 Chrome 浏览器')
+    return
+  }
+
+  try {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'zh-CN'
+    recognition.continuous = false
+    recognition.interimResults = false
+
+    recognition.onstart = () => {
+      ElMessage.info('正在聆听...')
+    }
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      searchKeyword.value = transcript
+      handleSearch()
+    }
+
+    recognition.onerror = (event) => {
+      if (event.error === 'not-allowed') {
+        ElMessage.warning('请允许麦克风访问权限以使用语音搜索')
+      } else {
+        ElMessage.error('语音识别失败: ' + event.error)
+      }
+    }
+
+    recognition.onend = () => {
+      // 识别结束
+    }
+
+    recognition.start()
+  } catch (error) {
+    ElMessage.warning('语音搜索功能开发中，敬请期待')
+  }
 }
 
 // 键盘导航

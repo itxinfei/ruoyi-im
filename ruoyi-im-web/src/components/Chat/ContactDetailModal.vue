@@ -184,6 +184,42 @@
       </div>
     </div>
   </el-dialog>
+
+  <!-- 共同群组列表对话框 -->
+  <el-dialog
+    v-model="showCommonGroupsDialog"
+    title="共同群组"
+    width="480px"
+    append-to-body
+  >
+    <div v-loading="loading" class="common-groups-dialog-content">
+      <div v-if="commonGroups.length === 0" class="empty-state">
+        <span class="material-icons-outlined empty-icon">group_off</span>
+        <p>暂无共同群组</p>
+      </div>
+      <div v-else class="groups-list-full">
+        <div
+          v-for="group in commonGroups"
+          :key="group.id"
+          class="group-item-full"
+          @click="handleGroupClick(group)"
+        >
+          <DingtalkAvatar
+            :src="group.avatar"
+            :name="group.name"
+            :size="48"
+            shape="square"
+            custom-class="group-avatar-medium"
+          />
+          <div class="group-info">
+            <span class="group-name">{{ group.name }}</span>
+            <span class="group-member-count">{{ group.memberCount || 0 }} 人</span>
+          </div>
+          <el-icon class="arrow-icon"><ArrowRight /></el-icon>
+        </div>
+      </div>
+    </div>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -192,12 +228,15 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Close, Edit, ChatDotRound, VideoCamera, Phone, UserFilled,
-  Folder, FolderOpened, Document, Clock, PriceTag, Picture
+  Folder, FolderOpened, Document, Clock, PriceTag, Picture, ArrowRight
 } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { getCommonGroups } from '@/api/im/group'
-import { updateFriend, deleteFriend } from '@/api/im/contact'
+import { updateFriend, deleteFriend, getUserTags, updateUserTags } from '@/api/im/contact'
+import { getSharedFiles } from '@/api/im/message'
+import { getChatBackground, setChatBackground, clearChatBackground } from '@/api/im/user'
 import dayjs from 'dayjs'
+import { formatFileSize, formatDateISO } from '@/utils/format'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -217,6 +256,7 @@ const visible = computed({
 const loading = ref(false)
 const commonGroups = ref([])
 const sharedFiles = ref([])
+const showCommonGroupsDialog = ref(false)
 
 // 联系人信息（从 props 或默认值）
 const contactInfo = computed(() => {
@@ -258,10 +298,21 @@ const loadCommonGroups = async () => {
 watch(() => props.modelValue, (val) => {
   if (val) {
     loadCommonGroups()
-    // TODO: 加载共享文件
-    sharedFiles.value = []
+    loadSharedFiles()
   }
 })
+
+// 加载共享文件
+const loadSharedFiles = async () => {
+  try {
+    const res = await getSharedFiles(props.userId, { pageNum: 1, pageSize: 20 })
+    if (res.code === 200) {
+      sharedFiles.value = res.data.list || []
+    }
+  } catch (error) {
+    sharedFiles.value = []
+  }
+}
 
 // 发起聊天
 const handleStartChat = () => {
@@ -326,20 +377,36 @@ const handleGroupClick = (group) => {
 
 // 查看全部群组
 const handleViewAllGroups = () => {
-  // TODO: 打开共同群组列表
-  ElMessage.info('共同群组列表功能开发中')
+  showCommonGroupsDialog.value = true
 }
 
 // 查看文件
-const handleViewFiles = () => {
-  // TODO: 打开共享文件列表
-  ElMessage.info('共享文件列表功能开发中')
+const handleViewFiles = async () => {
+  try {
+    loading.value = true
+    const res = await getSharedFiles(props.userId, { pageNum: 1, pageSize: 50 })
+    if (res.code === 200) {
+      sharedFiles.value = res.data.list || []
+      if (sharedFiles.value.length === 0) {
+        ElMessage.info('暂无共享文件')
+      }
+    } else if (res.code === 404) {
+      ElMessage.warning('共享文件列表功能开发中，敬请期待')
+    }
+  } catch (error) {
+    console.error('加载共享文件失败:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 // 文件点击
 const handleFileClick = (file) => {
-  // TODO: 文件预览
-  ElMessage.info('文件预览功能开发中')
+  if (file.url) {
+    window.open(file.url, '_blank')
+  } else {
+    ElMessage.warning('文件预览功能开发中')
+  }
 }
 
 // 查看历史消息
@@ -350,15 +417,74 @@ const handleViewHistory = () => {
 }
 
 // 标签管理
-const handleAddToTags = () => {
-  // TODO: 打开标签管理
-  ElMessage.info('标签管理功能开发中')
+const handleAddToTags = async () => {
+  try {
+    const res = await getUserTags()
+    if (res.code === 200) {
+      const allTags = res.data || []
+      ElMessageBox.prompt('请输入标签（多个标签用逗号分隔）', '标签管理', {
+        inputValue: contactInfo.value.tags?.join(', ') || '',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPlaceholder: '例如: 重要, 客户, 同事'
+      }).then(({ value }) => {
+        const tags = value ? value.split(',').map(t => t.trim()).filter(t => t) : []
+        updateUserTags(props.userId, tags).then(() => {
+          ElMessage.success('标签设置成功')
+          contactInfo.value.tags = tags
+        }).catch(() => {
+          ElMessage.error('标签设置失败')
+        })
+      }).catch(() => {})
+    } else if (res.code === 404) {
+      ElMessage.warning('标签管理功能开发中，敬请期待')
+    }
+  } catch (error) {
+    console.error('获取标签失败:', error)
+  }
 }
 
 // 设置聊天背景
-const handleSetBackground = () => {
-  // TODO: 打开背景设置
-  ElMessage.info('聊天背景设置功能开发中')
+const handleSetBackground = async () => {
+  try {
+    const res = await getChatBackground(props.userId)
+    if (res.code === 404) {
+      ElMessage.warning('聊天背景设置功能开发中，敬请期待')
+      return
+    }
+
+    const currentBg = res.data || { type: 'default', value: '' }
+    ElMessageBox.prompt('请输入背景颜色值或图片 URL', '设置聊天背景', {
+      inputValue: currentBg.value || '',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputPlaceholder: '颜色值如 #f5f5f5，或图片 URL',
+      inputType: 'textarea'
+    }).then(({ value }) => {
+      if (!value) {
+        // 清除背景
+        clearChatBackground(props.userId).then(() => {
+          ElMessage.success('背景已恢复默认')
+        }).catch(() => {
+          ElMessage.error('背景设置失败')
+        })
+      } else {
+        // 判断是颜色还是图片
+        const type = value.startsWith('#') || value.startsWith('rgb') ? 'color' : 'image'
+        setChatBackground({
+          type,
+          value,
+          conversationId: props.userId
+        }).then(() => {
+          ElMessage.success('背景设置成功')
+        }).catch(() => {
+          ElMessage.error('背景设置失败')
+        })
+      }
+    }).catch(() => {})
+  } catch (error) {
+    console.error('获取背景设置失败:', error)
+  }
 }
 
 // 删除联系人
@@ -380,20 +506,8 @@ const handleDeleteContact = () => {
   }).catch(() => {})
 }
 
-// 格式化文件大小
-const formatFileSize = (bytes) => {
-  if (!bytes || bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-}
-
-// 格式化日期
-const formatDate = (date) => {
-  if (!date) return ''
-  return dayjs(date).format('YYYY-MM-DD')
-}
+// 使用共享工具函数
+const formatDate = formatDateISO
 </script>
 
 <style scoped lang="scss">
@@ -814,6 +928,89 @@ $dt-danger: #FF4D4F;
 
   .remark-content {
     background: rgba(30, 41, 59, 0.5);
+  }
+}
+
+// ============================================================================
+// 共同群组对话框样式
+// ============================================================================
+
+.common-groups-dialog-content {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    color: $dt-text-tertiary;
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+}
+
+.groups-list-full {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.group-item-full {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $dt-bg-hover;
+  }
+
+  :deep(.group-avatar-medium) {
+    border-radius: 8px;
+  }
+
+  .group-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    .group-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: $dt-text-primary;
+    }
+
+    .group-member-count {
+      font-size: 12px;
+      color: $dt-text-tertiary;
+    }
+  }
+
+  .arrow-icon {
+    color: $dt-text-tertiary;
+    font-size: 16px;
+    transition: transform 0.2s;
+  }
+
+  &:hover .arrow-icon {
+    transform: translateX(4px);
+    color: $dt-blue;
   }
 }
 </style>

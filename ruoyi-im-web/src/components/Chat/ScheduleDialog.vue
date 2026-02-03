@@ -98,6 +98,7 @@
 import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { createEvent } from '@/api/im/schedule'
+import { formatDateTimeISO } from '@/utils/format'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -199,15 +200,8 @@ const handleSave = async () => {
   }
 }
 
-const formatDateTime = (date) => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-}
+// 使用共享工具函数
+const formatDateTime = formatDateTimeISO
 
 const resetForm = () => {
   Object.assign(form, {

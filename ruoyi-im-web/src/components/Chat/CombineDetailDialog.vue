@@ -103,6 +103,7 @@ import { ref, computed } from 'vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElImageViewer } from 'element-plus'
 import { parseMessageContent } from '@/utils/message'
+import { formatChatTime, formatDurationMMSS } from '@/utils/format'
 
 const props = defineProps({
   modelValue: {
@@ -159,44 +160,15 @@ const timeRange = computed(() => {
   const start = new Date(timestamps[0])
   const end = new Date(timestamps[timestamps.length - 1])
 
-  const formatDate = (date) => {
-    const now = new Date()
-    const isSameDay = date.toDateString() === now.toDateString()
-    const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === date.toDateString()
-
-    if (isSameDay) {
-      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    } else if (isYesterday) {
-      return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    } else {
-      return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) + ' ' +
-             date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    }
-  }
-
-  const startStr = formatDate(start)
-  const endStr = formatDate(end)
+  const startStr = formatChatTime(start)
+  const endStr = formatChatTime(end)
 
   return startStr === endStr ? startStr : `${startStr} - ${endStr}`
 })
 
 // 格式化时间
-const formatTime = (timestamp) => {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  const now = new Date()
-  const isSameDay = date.toDateString() === now.toDateString()
-  const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === date.toDateString()
-
-  if (isSameDay) {
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } else if (isYesterday) {
-    return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } else {
-    return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) + ' ' +
-           date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  }
-}
+// 使用共享工具函数
+const formatTime = formatChatTime
 
 // 获取图片URL
 const getImageUrl = (msg) => {
@@ -210,13 +182,10 @@ const getFileName = (msg) => {
   return content.fileName || content.name || ''
 }
 
-// 获取语音时长
+// 获取语音时长（使用共享工具函数）
 const getVoiceDuration = (msg) => {
   const content = parseMessageContent(msg) || {}
-  const duration = content.duration || 0
-  const mins = Math.floor(duration / 60)
-  const secs = Math.floor(duration % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
+  return formatDurationMMSS(content.duration || 0)
 }
 
 // 预览图片

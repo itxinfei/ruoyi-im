@@ -42,7 +42,7 @@ public class ImUserApplicationServiceImpl implements ImUserApplicationService {
     @Transactional(rollbackFor = Exception.class)
     public Long installApplication(Long userId, ImAppInstallRequest request) {
         // 验证应用是否存在
-        ImApplication app = applicationMapper.selectById(request.getAppId());
+        ImApplication app = applicationMapper.selectImApplicationById(request.getAppId());
         if (app == null) {
             throw BusinessException.paramError("应用不存在");
         }
@@ -57,7 +57,7 @@ public class ImUserApplicationServiceImpl implements ImUserApplicationService {
                 log.info("重新启用应用: userId={}, appId={}", userId, request.getAppId());
                 return existing.getId();
             }
-            throw BusinessException.dataAlreadyExists();
+            throw BusinessException.paramError("应用已安装");
         }
 
         // 创建安装记录
@@ -89,9 +89,9 @@ public class ImUserApplicationServiceImpl implements ImUserApplicationService {
         }
 
         // 检查是否为系统应用，系统应用不允许卸载
-        ImApplication app = applicationMapper.selectById(appId);
+        ImApplication app = applicationMapper.selectImApplicationById(appId);
         if (app != null && app.getIsSystem() != null && app.getIsSystem() == 1) {
-            throw new BusinessException(ErrorCode.APP_NOT_EXIST, "系统应用不允许卸载");
+            throw BusinessException.paramError("系统应用不允许卸载");
         }
 
         // 软删除：设置为禁用状态

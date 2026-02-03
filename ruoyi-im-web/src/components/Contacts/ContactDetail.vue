@@ -195,10 +195,10 @@ import {
   ArrowRight
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useClipboard } from '@vueuse/core'
 import { updateContactRemark, deleteContact } from '@/api/im/contact'
 import { addFavorite, removeFavorite, isFavorited } from '@/api/im/favorite'
 import { addTokenToUrl } from '@/utils/file'
+import { copyToClipboard } from '@/utils/format'
 import GroupDetailModal from '@/components/Chat/GroupDetailModal.vue'
 
 const props = defineProps({
@@ -206,7 +206,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update', 'voice-call', 'video-call', 'message'])
-const { copy } = useClipboard()
 
 const isFavorite = ref(false)
 const showGroupSettings = ref(false)
@@ -272,9 +271,7 @@ const toggleFavorite = async () => {
 }
 
 const copyText = async (text) => {
-  if (!text || text === '-') return
-  await copy(text)
-  ElMessage.success('复制成功')
+  copyToClipboard(text, { successMsg: '复制成功', emptyValues: ['-'] })
 }
 
 const handleEditRemark = () => {

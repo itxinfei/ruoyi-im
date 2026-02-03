@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class ImTaskReminderServiceImpl implements ImTaskReminderService {
     private ImTaskMapper taskMapper;
 
     @Resource
-    private final ImSystemNotificationService notificationService;
+    private ImSystemNotificationService notificationService;
 
     @Resource
     private ImWebSocketBroadcastService broadcastService;
@@ -55,20 +56,15 @@ public class ImTaskReminderServiceImpl implements ImTaskReminderService {
         try {
             String message = buildReminderMessage(task);
 
-            // 通过WebSocket发送实时通知
-            if (task.getAssigneeId() != null) {
-                ImWebSocketEndpoint.sendNotification(task.getAssigneeId(), "TASK_REMINDER",
-                    "任务提醒: " + task.getTitle(), message);
-            }
-
             // 创建系统通知
             if (task.getAssigneeId() != null) {
-                notificationService.createNotification(
+                notificationService.sendNotification(
                     task.getAssigneeId(),
-                    "任务提醒",
+                    "TASK_REMINDER",
+                    "任务提醒: " + task.getTitle(),
                     message,
-                    "TASK",
-                    task.getId()
+                    task.getId(),
+                    "TASK"
                 );
             }
 
@@ -255,16 +251,14 @@ public class ImTaskReminderServiceImpl implements ImTaskReminderService {
             message = String.format("【任务提醒】您的任务「%s」将在%d天后到期，请提前安排", task.getTitle(), remainingDays);
         }
 
-        // 发送通知
-        ImWebSocketEndpoint.sendNotification(task.getAssigneeId(), "TASK_DUE_REMINDER",
-            "任务到期提醒", message);
-
-        notificationService.createNotification(
+        // 发送系统通知
+        notificationService.sendNotification(
             task.getAssigneeId(),
+            "TASK_DUE_REMINDER",
             "任务到期提醒",
             message,
-            "TASK",
-            task.getId()
+            task.getId(),
+            "TASK"
         );
 
         log.info("发送任务到期提醒: taskId={}, remainingDays={}", task.getId(), remainingDays);
@@ -283,16 +277,14 @@ public class ImTaskReminderServiceImpl implements ImTaskReminderService {
             message = String.format("【已逾期】您的任务「%s」已逾期%d天，请尽快处理", task.getTitle(), overdueDays);
         }
 
-        // 发送通知
-        ImWebSocketEndpoint.sendNotification(task.getAssigneeId(), "TASK_OVERDUE_REMINDER",
-            "任务逾期提醒", message);
-
-        notificationService.createNotification(
+        // 发送系统通知
+        notificationService.sendNotification(
             task.getAssigneeId(),
+            "TASK_OVERDUE_REMINDER",
             "任务逾期提醒",
             message,
-            "TASK",
-            task.getId()
+            task.getId(),
+            "TASK"
         );
 
         log.info("发送任务逾期提醒: taskId={}, overdueDays={}", task.getId(), overdueDays);
