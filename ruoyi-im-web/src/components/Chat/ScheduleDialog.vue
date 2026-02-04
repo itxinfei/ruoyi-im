@@ -258,7 +258,7 @@ watch(visible, (val) => {
   .color-option {
     width: 36px;
     height: 36px;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
     display: flex;
     align-items: center;

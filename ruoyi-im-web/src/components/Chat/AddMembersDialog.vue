@@ -250,7 +250,7 @@ watch(() => props.modelValue, (val) => {
       padding: 6px 10px 6px 6px;
       background: var(--dt-brand-color);
       color: #fff;
-      border-radius: 20px;
+      border-radius: var(--dt-radius-2xl);
       font-size: 13px;
 
       .member-name {
@@ -291,7 +291,7 @@ watch(() => props.modelValue, (val) => {
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     cursor: pointer;
     transition: all 0.2s;
     position: relative;

@@ -67,7 +67,7 @@ const hasReactions = computed(() => reactions.value.length > 0)
   gap: 4px;
   padding: 4px 8px;
   background: rgba(0, 137, 255, 0.08);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   font-size: 13px;
   cursor: pointer;
   transition: all var(--dt-transition-base);

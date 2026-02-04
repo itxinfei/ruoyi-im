@@ -437,7 +437,7 @@ defineExpose({
 // 变量定义
 $primary-color: #0089FF;
 $primary-light: rgba(0, 137, 255, 0.1);
-$border-radius: 12px;
+$border-radius: var(--dt-radius-lg);
 $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
 // 动画
@@ -508,7 +508,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .size-small {
   .search-input-container {
     padding: 2px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
   }
   
   .prefix-icon,
@@ -529,7 +529,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .size-large {
   .search-input-container {
     padding: 6px;
-    border-radius: 14px;
+    border-radius: var(--dt-radius-xl);
   }
   
   .prefix-icon,
@@ -608,7 +608,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #94a3b8;
   font-size: 16px;
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   flex-shrink: 0;
   transition: $transition;
   
@@ -639,7 +639,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #94a3b8;
   font-size: 18px;
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   flex-shrink: 0;
   transition: $transition;
   
@@ -686,7 +686,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #fff;
   font-size: 18px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   flex-shrink: 0;
   transition: $transition;
   
@@ -768,7 +768,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   justify-content: center;
   background: #f1f5f9;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   color: #64748b;
   font-size: 16px;
   flex-shrink: 0;
@@ -799,7 +799,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     color: $primary-color;
     font-weight: 600;
     padding: 0 2px;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
   
   :global(.dark) & {
@@ -823,7 +823,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 11px;
   padding: 2px 8px;
   background: #f1f5f9;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   color: #64748b;
   flex-shrink: 0;
   
@@ -866,7 +866,7 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 6px 12px;
   background: #f1f5f9;
   border: none;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   font-size: 13px;
   color: #64748b;
   cursor: pointer;

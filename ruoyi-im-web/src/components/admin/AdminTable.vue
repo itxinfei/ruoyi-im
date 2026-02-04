@@ -285,7 +285,7 @@ defineExpose({
     padding: 12px 16px;
     margin-bottom: 16px;
     background: var(--el-fill-color-light);
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
 
     .selected-count {
       font-size: 14px;

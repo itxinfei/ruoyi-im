@@ -104,7 +104,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 4px;
   padding: 4px 8px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   cursor: default;
   transition: all var(--dt-transition-fast);
 

@@ -396,7 +396,7 @@ watch(showCreateDialog, (val) => {
 
 .announcement-item {
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   background: var(--dt-bg-body);
   border: 1px solid var(--dt-border-light);
   transition: all 0.2s;
@@ -416,7 +416,7 @@ watch(showCreateDialog, (val) => {
   }
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--dt-shadow-3);
   }
 }
 

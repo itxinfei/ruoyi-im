@@ -573,7 +573,7 @@ const handlePreviewImage = (file) => {
 
 .group-profile-dialog {
   :deep(.el-dialog) {
-    border-radius: 16px;
+    border-radius: var(--dt-radius-xl);
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
@@ -635,7 +635,7 @@ const handlePreviewImage = (file) => {
 
     .el-tabs__active-bar {
       height: 3px;
-      border-radius: 2px;
+      border-radius: var(--dt-radius-sm);
     }
 
     .el-tabs__content {
@@ -664,7 +664,7 @@ const handlePreviewImage = (file) => {
   gap: 12px;
   padding: 12px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-lighter);
   cursor: pointer;
   transition: all 0.2s;
@@ -685,7 +685,7 @@ const handlePreviewImage = (file) => {
       height: 12px;
       background: #52c41a;
       border: 2px solid #fff;
-      border-radius: 50%;
+      border-radius: var(--dt-radius-full);
     }
   }
 
@@ -766,7 +766,7 @@ const handlePreviewImage = (file) => {
 .announcement-item {
   padding: 16px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-lighter);
 
   &.pinned {
@@ -843,7 +843,7 @@ const handlePreviewImage = (file) => {
 
 .settings-list {
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-lighter);
   overflow: hidden;
 }
@@ -894,7 +894,7 @@ const handlePreviewImage = (file) => {
 
 .action-list {
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-lighter);
   overflow: hidden;
 }
@@ -919,7 +919,7 @@ const handlePreviewImage = (file) => {
   .action-icon {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     background: var(--dt-bg-body);
     display: flex;
     align-items: center;
@@ -992,7 +992,7 @@ const handlePreviewImage = (file) => {
     align-items: center;
     gap: 12px;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
     transition: all 0.2s;
     margin-bottom: 4px;

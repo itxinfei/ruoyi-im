@@ -144,7 +144,7 @@ watch(() => props.visible, (val) => {
   position: relative;
   padding: 40px;
   background: var(--dt-bg-card);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   text-align: center;
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
   max-width: 400px;
@@ -161,7 +161,7 @@ watch(() => props.visible, (val) => {
     background: var(--dt-brand-color);
     color: #fff;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     font-size: 16px;
     cursor: pointer;
     display: inline-flex;
@@ -205,7 +205,7 @@ watch(() => props.visible, (val) => {
   img {
     max-width: 100%;
     max-height: 400px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
   }
 }
 </style>

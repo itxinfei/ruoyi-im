@@ -367,6 +367,7 @@ const {
 const showGroupDetail = ref(false)
 const msgListRef = ref(null)
 const forwardDialogRef = ref(null)
+const isUnmounted = ref(false) // 标记组件是否已卸载
 const showSearchPanel = ref(false)  // 搜索面板（与聊天内搜索区分）
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
@@ -1989,7 +1990,7 @@ onMounted(() => {
       color: #fff;
       font-size: 16px;
       font-weight: 500;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
       pointer-events: none;
       z-index: 100;

@@ -586,8 +586,8 @@ onMounted(() => {
   
   &::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
-    
+    border-radius: var(--dt-radius-sm);
+
     &:hover {
       background-color: rgba(0, 0, 0, 0.2);
     }
@@ -635,7 +635,7 @@ onMounted(() => {
   width: 3px;
   height: 20px;
   background-color: var(--dt-brand-color);
-  border-radius: 0 2px 2px 0;
+  border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
 }
 
 .nav-icon {
@@ -702,7 +702,7 @@ onMounted(() => {
   width: 100%;
   height: 6px;
   background: var(--dt-border-color);
-  border-radius: 3px;
+  border-radius: var(--dt-radius-sm);
   overflow: hidden;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -710,7 +710,7 @@ onMounted(() => {
 .storage-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--dt-brand-color), var(--dt-brand-light));
-  border-radius: 3px;
+  border-radius: var(--dt-radius-sm);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 8px rgba(0, 137, 255, 0.3);
 }
@@ -785,7 +785,7 @@ onMounted(() => {
   width: 280px;
   background: var(--dt-bg-body);
   border: 1.5px solid var(--dt-border-color);
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   padding: 10px 16px 10px 36px;
   font-size: 14px;
   color: var(--dt-text-primary);
@@ -820,7 +820,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   background: var(--dt-bg-body);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   padding: 2px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -830,7 +830,7 @@ onMounted(() => {
   color: var(--dt-text-quaternary);
   background: none;
   border: none;
-  border-radius: 14px;
+  border-radius: var(--dt-radius-xl);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 16px;
@@ -860,7 +860,7 @@ onMounted(() => {
   background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-brand-light));
   color: #fff;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -888,7 +888,7 @@ onMounted(() => {
   width: 0;
   height: 0;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   transform: translate(-50%, -50%);
   transition: width 0.6s, height 0.6s;
 }
@@ -968,12 +968,12 @@ onMounted(() => {
 
   &::-webkit-scrollbar-track {
     background: var(--dt-bg-body);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
   }
 
   &::-webkit-scrollbar-thumb {
     background-color: var(--dt-border-color);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
 
     &:hover {
       background-color: var(--dt-text-quaternary);
@@ -1188,7 +1188,7 @@ onMounted(() => {
 .owner-avatar {
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   color: #fff;
   display: flex;
   align-items: center;

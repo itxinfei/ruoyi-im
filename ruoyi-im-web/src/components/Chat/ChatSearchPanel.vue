@@ -461,7 +461,7 @@ watch(() => props.visible, (val) => {
     justify-content: center;
     background: transparent;
     border: none;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     cursor: pointer;
     color: var(--dt-text-secondary);
     transition: all 0.2s;
@@ -483,7 +483,7 @@ watch(() => props.visible, (val) => {
 
   :deep(.el-input) {
     .el-input__wrapper {
-      border-radius: 24px;
+      border-radius: var(--dt-radius-3xl);
       box-shadow: var(--dt-shadow-3);
       padding: 8px 16px;
 
@@ -514,7 +514,7 @@ watch(() => props.visible, (val) => {
 
     &::-webkit-scrollbar-thumb {
       background: var(--dt-border);
-      border-radius: 2px;
+      border-radius: var(--dt-radius-sm);
     }
 
     .filter-btn {
@@ -524,7 +524,7 @@ watch(() => props.visible, (val) => {
       padding: 6px 10px;
       background: var(--dt-bg-body);
       border: 1px solid var(--dt-border-light);
-      border-radius: 20px;
+      border-radius: var(--dt-radius-2xl);
       font-size: 12px;
       color: var(--dt-text-secondary);
       cursor: pointer;
@@ -538,7 +538,7 @@ watch(() => props.visible, (val) => {
       .filter-count {
         padding: 2px 6px;
         background: var(--dt-bg-hover);
-        border-radius: 10px;
+        border-radius: var(--dt-radius-lg);
         font-size: 10px;
       }
 
@@ -571,7 +571,7 @@ watch(() => props.visible, (val) => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -606,7 +606,7 @@ watch(() => props.visible, (val) => {
   .empty-icon {
     width: 80px;
     height: 80px;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     background: var(--dt-bg-body);
     display: flex;
     align-items: center;
@@ -622,7 +622,7 @@ watch(() => props.visible, (val) => {
   .search-tips {
     padding: 12px 16px;
     background: var(--dt-bg-body);
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     font-size: 12px;
     text-align: center;
 
@@ -641,7 +641,7 @@ watch(() => props.visible, (val) => {
     padding: 8px 12px;
     margin-bottom: 12px;
     background: var(--dt-brand-bg);
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     font-size: 13px;
     color: var(--dt-text-secondary);
 
@@ -677,7 +677,7 @@ watch(() => props.visible, (val) => {
   align-items: flex-start;
   gap: 12px;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: all 0.2s;
 
@@ -731,7 +731,7 @@ watch(() => props.visible, (val) => {
       background: #fff3cd;
       color: #856404;
       padding: 0 2px;
-      border-radius: 2px;
+      border-radius: var(--dt-radius-sm);
     }
 
     .dark & mark {
@@ -762,7 +762,7 @@ watch(() => props.visible, (val) => {
   color: var(--dt-brand-color);
   font-size: 13px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   transition: background 0.2s;
 
   &:hover {

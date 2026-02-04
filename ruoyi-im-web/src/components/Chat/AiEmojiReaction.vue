@@ -236,7 +236,7 @@ watch(() => props.visible, (newVal) => {
   width: 300px;
   max-height: 420px;
   background: var(--dt-bg-card);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   box-shadow: var(--dt-shadow-3xl);
   overflow: hidden;
   z-index: 9999;
@@ -396,7 +396,7 @@ watch(() => props.visible, (newVal) => {
   width: 14px;
   height: 14px;
   background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
 
   .material-icons-outlined {
@@ -417,7 +417,7 @@ watch(() => props.visible, (newVal) => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -434,7 +434,7 @@ watch(() => props.visible, (newVal) => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 

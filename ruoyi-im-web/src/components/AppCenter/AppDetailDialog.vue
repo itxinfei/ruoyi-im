@@ -195,7 +195,7 @@ watch(visible, (val) => {
 .app-icon-large {
   width: 80px;
   height: 80px;
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -323,7 +323,7 @@ watch(visible, (val) => {
   .screenshot-item {
     width: 60px;
     height: 60px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     overflow: hidden;
     cursor: pointer;
     border: 2px solid transparent;

@@ -944,7 +944,7 @@ onUnmounted(() => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 

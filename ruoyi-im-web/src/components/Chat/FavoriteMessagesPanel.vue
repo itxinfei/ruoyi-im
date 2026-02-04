@@ -385,7 +385,7 @@ watch(() => props.visible, (newVal) => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 

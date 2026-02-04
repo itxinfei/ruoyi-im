@@ -271,7 +271,7 @@ watch(visible, (val) => {
     align-items: center;
     gap: 12px;
     padding: 16px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     margin-bottom: 12px;
     background: #f5f5f5;
     transition: background-color 0.2s;

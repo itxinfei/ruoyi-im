@@ -921,7 +921,7 @@ watch(() => props.visible, (val) => {
   color: #fff;
   font-size: 12px;
   font-family: monospace;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   white-space: nowrap;
 }
 
@@ -930,7 +930,7 @@ watch(() => props.visible, (val) => {
   gap: 8px;
   padding: 6px;
   background: rgba(30, 30, 30, 0.95);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   pointer-events: auto;
 }
@@ -944,7 +944,7 @@ watch(() => props.visible, (val) => {
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
   font-size: 14px;
-  border-radius: 24px;
+  border-radius: var(--dt-radius-3xl);
   pointer-events: none;
 }
 
@@ -979,7 +979,7 @@ watch(() => props.visible, (val) => {
   gap: 4px;
   padding: 8px 12px;
   background: rgba(30, 30, 30, 0.95);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -1004,7 +1004,7 @@ watch(() => props.visible, (val) => {
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all 0.2s;
   color: rgba(255, 255, 255, 0.7);
@@ -1062,7 +1062,7 @@ watch(() => props.visible, (val) => {
   width: 28px;
   height: 28px;
   border: 2px solid transparent;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
@@ -1111,7 +1111,7 @@ watch(() => props.visible, (val) => {
   -webkit-appearance: none;
   appearance: none;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
+  border-radius: var(--dt-radius-sm);
   outline: none;
 }
 
@@ -1121,7 +1121,7 @@ watch(() => props.visible, (val) => {
   width: 14px;
   height: 14px;
   background: #fff;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   cursor: pointer;
 }
 
@@ -1142,7 +1142,7 @@ watch(() => props.visible, (val) => {
   padding: 6px 10px;
   font-size: 14px;
   border: 2px solid #0089FF;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   outline: none;
   min-width: 150px;
   background: rgba(255, 255, 255, 0.95);
@@ -1180,7 +1180,7 @@ watch(() => props.visible, (val) => {
   max-width: 80vw;
   max-height: 70vh;
   background: rgba(30, 30, 30, 0.98);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
@@ -1208,7 +1208,7 @@ watch(() => props.visible, (val) => {
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   color: rgba(255, 255, 255, 0.6);
   transition: all 0.2s;
@@ -1250,7 +1250,7 @@ watch(() => props.visible, (val) => {
   background: #0089FF;
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;

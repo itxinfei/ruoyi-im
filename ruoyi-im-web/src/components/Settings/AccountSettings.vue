@@ -176,7 +176,7 @@ const twoFactorEnabled = ref(false)
 .setting-card {
   background: var(--bg-color-overlay);
   border: 1px solid var(--border-color-light);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
 }
 
@@ -249,7 +249,7 @@ const twoFactorEnabled = ref(false)
         font-family: monospace;
         background: var(--bg-color-hover);
         padding: 2px 6px;
-        border-radius: 4px;
+        border-radius: var(--dt-radius-sm);
         font-size: 13px;
       }
     }

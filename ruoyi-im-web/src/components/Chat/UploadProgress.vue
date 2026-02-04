@@ -292,7 +292,7 @@ function handleCancel() {
   flex: 1;
   height: 8px;
   background: var(--dt-bg-body);
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   overflow: hidden;
   position: relative;
 }
@@ -300,7 +300,7 @@ function handleCancel() {
 .progress-bar {
   height: 100%;
   background: linear-gradient(90deg, var(--dt-brand-color), #4facfe);
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   position: relative;
   transition: width 0.3s ease;
 }
@@ -372,7 +372,7 @@ function handleCancel() {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -458,14 +458,14 @@ function handleCancel() {
   flex: 1;
   height: 4px;
   background: var(--dt-bg-body);
-  border-radius: 2px;
+  border-radius: var(--dt-radius-sm);
   overflow: hidden;
 }
 
 .mini-progress-fill {
   height: 100%;
   background: var(--dt-brand-color);
-  border-radius: 2px;
+  border-radius: var(--dt-radius-sm);
   transition: width 0.3s ease;
 }
 

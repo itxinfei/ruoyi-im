@@ -162,6 +162,7 @@ const listRef = ref(null)
 const readUsersMap = ref({})
 const loadingReadUsers = ref({})
 const showScrollToBottom = ref(false)
+const isUnmounted = ref(false) // 标记组件是否已卸载，防止卸载后执行 DOM 操作
 
 // ============================================================================
 // 性能优化：消息懒加载渲染
@@ -499,6 +500,7 @@ const shouldAddTimeDivider = (currentMsg, prevMsg) => {
 // 滚动到底部
 const scrollToBottom = (smooth = true) => {
   nextTick(() => {
+    if (isUnmounted.value) return // 组件已卸载，不执行 DOM 操作
     if (listRef.value) {
       listRef.value.scrollTo({
         top: listRef.value.scrollHeight,
@@ -602,6 +604,7 @@ const scrollToMsg = (param) => {
   const performScroll = () => {
     // 使用 nextTick 确保 DOM 更新
     nextTick(() => {
+      if (isUnmounted.value) return // 组件已卸载，不执行 DOM 操作
       const el = listRef.value?.querySelector(`[data-id="${messageId}"]`)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -668,6 +671,7 @@ const updateVisibleRange = (scrollPos, viewportHeight) => {
 // 保持滚动偏移（用于加载更多）
 const maintainScroll = (oldHeight) => {
   nextTick(() => {
+    if (isUnmounted.value) return // 组件已卸载，不执行 DOM 操作
     if (listRef.value) {
       listRef.value.scrollTop = listRef.value.scrollHeight - oldHeight
     }
@@ -681,6 +685,9 @@ const initReadObserver = () => {
   if (observer.value) observer.value.disconnect()
 
   observer.value = new IntersectionObserver((entries) => {
+    // 如果组件已卸载，不处理回调
+    if (isUnmounted.value) return
+
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const msgId = entry.target.getAttribute('data-id')
@@ -696,6 +703,7 @@ const initReadObserver = () => {
 
 const updateObserver = () => {
   nextTick(() => {
+    if (isUnmounted.value) return // 组件已卸载，不执行 DOM 操作
     const items = listRef.value?.querySelectorAll('.message-wrapper[data-id]')
     items?.forEach(el => observer.value?.observe(el))
   })
@@ -730,11 +738,13 @@ onMounted(() => {
 
   // 保存 observer 引用以便清理
   onUnmounted(() => {
+    isUnmounted.value = true // 标记组件已卸载
     resizeObserver.disconnect()
   })
 })
 
 onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
   if (observer.value) observer.value.disconnect()
 })
 
@@ -765,7 +775,7 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
 
   &::-webkit-scrollbar-thumb {
     background: transparent;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
     transition: background var(--dt-transition-base);
   }
 
@@ -897,7 +907,7 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
     align-items: center;
     gap: 2px;
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     background: var(--dt-brand-bg);
 
     &:hover {
@@ -920,7 +930,7 @@ defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
   align-items: center;
   gap: 2px;
   padding: 2px 6px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   font-size: 11px;
   transition: all var(--dt-transition-fast);
 

@@ -183,7 +183,7 @@ const unreadCount = (msg) => {
     align-items: center;
     gap: 2px;
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     background: var(--dt-brand-bg);
 
     &:hover {
@@ -204,7 +204,7 @@ const unreadCount = (msg) => {
   align-items: center;
   gap: 2px;
   padding: 2px 6px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   font-size: 11px;
   transition: all var(--dt-transition-fast);
 

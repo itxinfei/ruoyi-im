@@ -218,7 +218,7 @@ const { isDark } = useTheme()
   .skeleton-dot {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     @include skeleton-loading;
   }
 

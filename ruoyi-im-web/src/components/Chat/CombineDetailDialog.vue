@@ -301,7 +301,7 @@ const handleForward = () => {
         img {
           max-width: 100px;
           max-height: 100px;
-          border-radius: 4px;
+          border-radius: var(--dt-radius-sm);
           cursor: zoom-in;
           object-fit: cover;
         }

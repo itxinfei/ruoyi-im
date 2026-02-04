@@ -232,13 +232,13 @@ watch(visible, (val) => {
     gap: 16px;
     padding: 16px;
     background: var(--dt-bg-hover);
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     margin-bottom: 20px;
 
     .app-icon {
       width: 48px;
       height: 48px;
-      border-radius: 12px;
+      border-radius: var(--dt-radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -293,7 +293,7 @@ watch(visible, (val) => {
 .config-description {
   padding: 12px 16px;
   background: var(--dt-bg-hover);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   margin-top: 16px;
 
   h4 {

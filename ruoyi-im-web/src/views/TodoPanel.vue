@@ -742,7 +742,7 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -793,7 +793,7 @@ onMounted(() => {
   padding: 8px 16px;
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   font-size: 14px;
   font-weight: 500;
   color: #666;
@@ -895,7 +895,7 @@ onMounted(() => {
   gap: 8px;
   padding: 6px 14px;
   background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-hover) 100%);
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
   position: relative;
   overflow: hidden;
@@ -945,7 +945,7 @@ onMounted(() => {
   background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
   color: #fff;
   border: none;
-  border-radius: 24px;
+  border-radius: var(--dt-radius-3xl);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -1004,7 +1004,7 @@ onMounted(() => {
   gap: 14px;
   padding: 16px 20px;
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   border: 1px solid rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -1147,7 +1147,7 @@ onMounted(() => {
   padding: 10px 16px;
   background: transparent;
   border: none;
-  border-radius: 20px 20px 0 0;
+  border-radius: var(--dt-radius-2xl) var(--dt-radius-2xl) 0 0;
   font-size: 14px;
   color: #666;
   cursor: pointer;
@@ -1169,7 +1169,7 @@ onMounted(() => {
     padding: 2px 8px;
     background: rgba(0, 0, 0, 0.06);
     color: #666;
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     font-size: 12px;
     font-weight: 600;
     min-width: 20px;
@@ -1363,7 +1363,7 @@ onMounted(() => {
   background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
   color: #fff;
   border: none;
-  border-radius: 24px;
+  border-radius: var(--dt-radius-3xl);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -1400,7 +1400,7 @@ onMounted(() => {
 .todo-item {
   position: relative;
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   padding: 18px 20px;
   display: flex;
   align-items: flex-start;
@@ -1496,7 +1496,7 @@ onMounted(() => {
     position: absolute;
     inset: -4px;
     background: currentColor;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     opacity: 0.4;
     animation: priorityPulseStrong 2s ease-in-out infinite;
   }
@@ -1515,7 +1515,7 @@ onMounted(() => {
   width: 20px;
   height: 20px;
   border: 2px solid #d0d0d0;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1551,7 +1551,7 @@ onMounted(() => {
   width: 24px;
   height: 24px;
   border: 2px solid #e0e0e0;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1591,7 +1591,7 @@ onMounted(() => {
   .checkbox-ripple {
     position: absolute;
     inset: 0;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     background: rgba(0, 137, 255, 0.3);
     transform: scale(0);
     opacity: 0;
@@ -1649,7 +1649,7 @@ onMounted(() => {
 
 .todo-priority-badge {
   padding: 3px 10px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
@@ -1752,7 +1752,7 @@ onMounted(() => {
 .action-btn {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   background: #f5f5f5;
   border: none;
   display: flex;

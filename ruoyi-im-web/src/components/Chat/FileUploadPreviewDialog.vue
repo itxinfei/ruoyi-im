@@ -198,7 +198,7 @@ function handleConfirm() {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -214,7 +214,7 @@ function handleConfirm() {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.1);
+    box-shadow: var(--dt-shadow-brand-light);
   }
 }
 

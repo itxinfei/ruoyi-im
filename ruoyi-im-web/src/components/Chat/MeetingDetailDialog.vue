@@ -194,7 +194,7 @@ watch(() => props.meeting, (newMeeting) => {
     top: 0;
     right: 0;
     padding: 4px 12px;
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     font-size: 12px;
     font-weight: 500;
 
@@ -248,7 +248,7 @@ watch(() => props.meeting, (newMeeting) => {
       line-height: 1.6;
       padding: 12px;
       background: var(--dt-bg-body);
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
     }
   }
 
@@ -296,7 +296,7 @@ watch(() => props.meeting, (newMeeting) => {
       gap: 6px;
       padding: 6px 10px;
       background: var(--dt-bg-body);
-      border-radius: 20px;
+      border-radius: var(--dt-radius-2xl);
       font-size: 13px;
       color: var(--dt-text-secondary);
 

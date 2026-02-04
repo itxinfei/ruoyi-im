@@ -214,7 +214,7 @@ registerShortcut(ShortcutKeys.SHOW_SHORTCUTS, () => {
   padding: 0 8px;
   background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
   border: 1px solid #d4d4d4;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   box-shadow: 0 2px 0 #a0a0a0, 0 3px 1px rgba(0, 0, 0, 0.1);
   font-size: 12px;
   font-weight: 600;

@@ -380,7 +380,7 @@ const handleEnter = () => {
     justify-content: center;
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     cursor: pointer;
     color: var(--dt-text-tertiary);
     transition: all var(--dt-transition-fast);
@@ -465,7 +465,7 @@ const handleEnter = () => {
 
     &::-webkit-scrollbar-thumb {
       background: var(--dt-border-medium);
-      border-radius: 3px;
+      border-radius: var(--dt-radius-sm);
 
       &:hover {
         background: var(--dt-text-tertiary);
@@ -527,7 +527,7 @@ const handleEnter = () => {
       background: linear-gradient(180deg, transparent 40%, rgba(255, 230, 0, 0.4) 40%, rgba(255, 230, 0, 0.4) 60%, transparent 60%);
       color: inherit;
       padding: 0 2px;
-      border-radius: 2px;
+      border-radius: var(--dt-radius-sm);
     }
 
     .text-result {

@@ -379,7 +379,7 @@ watch(() => props.modelValue, (newVal) => {
 .setting-card {
   background: var(--bg-color-overlay);
   border: 1px solid var(--border-color-light);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
 }
 
@@ -441,7 +441,7 @@ watch(() => props.modelValue, (newVal) => {
     width: 48px;
     height: 48px;
     border: 1px solid var(--border-color-light);
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;

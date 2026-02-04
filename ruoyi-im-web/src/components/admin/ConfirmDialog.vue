@@ -312,7 +312,7 @@ defineExpose({
   flex-shrink: 0;
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   display: flex;
   align-items: center;
   justify-content: center;

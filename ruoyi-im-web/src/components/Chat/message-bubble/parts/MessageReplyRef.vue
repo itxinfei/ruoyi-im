@@ -103,7 +103,7 @@ const handleClick = () => {
   height: 16px;
   background: var(--dt-brand-color);
   color: #fff;
-  border-radius: 3px;
+  border-radius: var(--dt-radius-sm);
   font-size: 11px;
 
   .material-icons-outlined {

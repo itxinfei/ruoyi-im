@@ -597,7 +597,7 @@ onMounted(() => {
   justify-content: space-between;
   padding: 12px 16px;
   background: var(--dt-bg-card);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   margin-bottom: 16px;
 
   .filter-left {
@@ -622,7 +622,7 @@ onMounted(() => {
           padding: 6px 12px;
           font-size: 13px;
           color: var(--dt-text-secondary);
-          border-radius: 6px;
+          border-radius: var(--dt-radius-md);
           cursor: pointer;
           transition: all 0.2s;
 
@@ -651,7 +651,7 @@ onMounted(() => {
   flex: 1;
   overflow-y: auto;
   background: var(--dt-bg-card);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   padding: 8px;
 
   .file-item {
@@ -659,7 +659,7 @@ onMounted(() => {
     align-items: center;
     gap: 12px;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
     transition: background 0.2s;
 
@@ -677,7 +677,7 @@ onMounted(() => {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       flex-shrink: 0;
 
       .image-icon { color: #0089FF; }
@@ -757,7 +757,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%);
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     box-shadow: 0 8px 24px rgba(255, 107, 107, 0.25);
 
     .material-icons-outlined {
@@ -778,7 +778,7 @@ onMounted(() => {
       width: 36px;
       height: 36px;
       background: #fff;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       animation: float 3s ease-in-out infinite;
 
@@ -865,7 +865,7 @@ onMounted(() => {
   padding: 40px;
   text-align: center;
   border: 2px dashed var(--dt-border-color);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
 
   .upload-icon {
     font-size: 48px;
@@ -895,7 +895,7 @@ onMounted(() => {
     align-items: center;
     gap: 12px;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
     transition: background 0.2s;
 

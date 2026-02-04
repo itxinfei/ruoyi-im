@@ -335,7 +335,7 @@ watch(() => props.visible, (newVal) => {
   max-width: 560px;
   max-height: 80vh;
   background: var(--dt-bg-card);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   display: flex;
@@ -389,7 +389,7 @@ watch(() => props.visible, (newVal) => {
   color: var(--dt-text-quaternary);
   background: var(--dt-bg-input);
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
 }
 
 .header-actions {
@@ -466,7 +466,7 @@ watch(() => props.visible, (newVal) => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 

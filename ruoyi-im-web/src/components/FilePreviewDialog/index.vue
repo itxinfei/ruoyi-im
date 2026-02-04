@@ -146,7 +146,7 @@ const handleDownload = () => {
 .file-icon-large {
   width: 64px;
   height: 64px;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -192,7 +192,7 @@ const handleDownload = () => {
   text-align: center;
   padding: 40px;
   background: #f9f9f9;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   width: 100%;
 }
 

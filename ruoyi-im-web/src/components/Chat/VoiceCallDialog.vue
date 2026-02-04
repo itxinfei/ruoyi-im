@@ -309,7 +309,7 @@ defineExpose({
   position: relative;
   width: 380px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border-radius: 24px;
+  border-radius: var(--dt-radius-3xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   display: flex;
@@ -465,7 +465,7 @@ defineExpose({
   width: 280px;
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(20px);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   z-index: 9999;
   overflow: hidden;
@@ -557,7 +557,7 @@ defineExpose({
   justify-content: center;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
 
   .material-icons-outlined {

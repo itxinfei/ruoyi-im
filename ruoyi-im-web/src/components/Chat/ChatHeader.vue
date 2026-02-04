@@ -466,7 +466,7 @@ const handleShowMembers = () => {
   box-shadow: var(--dt-shadow-3);
 
   :deep(.dingtalk-avatar) {
-    border-radius: 6px !important;  // 钉钉标准圆角
+    border-radius: var(--dt-radius-md) !important;  // 钉钉标准圆角
   }
 }
 
@@ -476,7 +476,7 @@ const handleShowMembers = () => {
   justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: 6px;  // 钉钉标准圆角
+  border-radius: var(--dt-radius-md);  // 钉钉标准圆角
   background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
   color: #fff;
 
@@ -492,7 +492,7 @@ const handleShowMembers = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.25);
+  box-shadow: var(--dt-shadow-brand-light);
 }
 
 // 在线状态指示器
@@ -504,7 +504,7 @@ const handleShowMembers = () => {
   height: 12px;
   background: var(--dt-success-color);
   border: 2px solid var(--dt-bg-card);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
   z-index: 2;
 }
@@ -517,7 +517,7 @@ const handleShowMembers = () => {
   width: 12px;
   height: 12px;
   background: var(--dt-success-color);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   z-index: 1;
   animation: onlinePulse 2s ease-out infinite;  // 使用全局动画
 }
@@ -567,7 +567,7 @@ const handleShowMembers = () => {
   font-weight: 500;
   padding: 3px 8px;  // 新增：内边距，增加背景区域
   background: rgba(0, 137, 255, 0.08);  // 新增：浅蓝背景
-  border-radius: 12px;  // 新增：圆角
+  border-radius: var(--dt-radius-lg);  // 新增：圆角
   animation: typing-pulse 2s ease-in-out infinite;  // 新增：整体呼吸效果
 
   .typing-dots {
@@ -579,7 +579,7 @@ const handleShowMembers = () => {
       width: 5px;  // 4px → 5px，更大更清晰
       height: 5px;
       background: currentColor;
-      border-radius: 50%;
+      border-radius: var(--dt-radius-full);
       animation: typingBounce 1.2s ease-in-out infinite;  // 1.4s → 1.2s，更快节奏
 
       &:nth-child(1) { animation-delay: 0s; }
@@ -610,7 +610,7 @@ const handleShowMembers = () => {
   margin-top: 4px;
   padding: 4px 10px;
   background: rgba(0, 137, 255, 0.08);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   animation: typing-pulse 2s ease-in-out infinite;
 
   .typing-dots {
@@ -622,7 +622,7 @@ const handleShowMembers = () => {
       width: 5px;
       height: 5px;
       background: var(--dt-brand-color);
-      border-radius: 50%;
+      border-radius: var(--dt-radius-full);
       animation: typingBounce 1.2s ease-in-out infinite;
 
       &:nth-child(1) { animation-delay: 0s; }
@@ -675,7 +675,7 @@ const handleShowMembers = () => {
 .more-count {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   background: var(--dt-bg-tertiary);
   color: var(--dt-text-secondary);
   font-size: 11px;
@@ -750,7 +750,7 @@ const handleShowMembers = () => {
   &.call-btn {
     width: 40px;
     height: 40px;
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -764,7 +764,7 @@ const handleShowMembers = () => {
     .icon-glow {
       position: absolute;
       inset: -8px;
-      border-radius: 50%;
+      border-radius: var(--dt-radius-full);
       opacity: 0;
       transition: opacity 0.3s;
       pointer-events: none;
@@ -783,7 +783,7 @@ const handleShowMembers = () => {
         background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         color: #fff;
         transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        box-shadow: var(--dt-shadow-success);
 
         .icon-glow {
           opacity: 1;
@@ -808,7 +808,7 @@ const handleShowMembers = () => {
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         color: #fff;
         transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        box-shadow: var(--dt-shadow-info);
 
         .icon-glow {
           opacity: 1;
@@ -846,7 +846,7 @@ const handleShowMembers = () => {
   padding: 0;
   min-width: 240px;
   max-width: 280px;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.05),
@@ -925,7 +925,7 @@ const handleShowMembers = () => {
       color: var(--dt-text-quaternary);
       background: linear-gradient(135deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.02) 100%);
       padding: 3px 8px;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
       font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
       font-weight: 500;
       flex-shrink: 0;
@@ -938,11 +938,11 @@ const handleShowMembers = () => {
       color: #fff;
       font-size: 10px;
       padding: 3px 8px;
-      border-radius: 12px;
+      border-radius: var(--dt-radius-lg);
       font-weight: 600;
       flex-shrink: 0;
       animation: badgePulseShadow 2s ease-in-out infinite;
-      box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+      box-shadow: var(--dt-shadow-warning);
     }
 
     &:hover {
@@ -1173,7 +1173,7 @@ const handleShowMembers = () => {
 
     .item-badge {
       background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
-      box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+      box-shadow: var(--dt-shadow-warning-strong);
     }
 
     &:hover {

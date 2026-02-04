@@ -16,8 +16,7 @@
  * })
  * ```
  */import { getItem } from '../utils/storage'
-
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 export function useInputResize(options = {}) {
   const {
@@ -111,6 +110,13 @@ export function useInputResize(options = {}) {
   // 组件挂载时恢复高度
   onMounted(() => {
     restoreHeight()
+  })
+
+  // 组件卸载时清理事件监听器
+  onUnmounted(() => {
+    document.removeEventListener('mousemove', handleResize)
+    document.removeEventListener('mouseup', stopResize)
+    document.body.style.cursor = ''
   })
 
   return {

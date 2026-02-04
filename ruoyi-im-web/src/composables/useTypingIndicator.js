@@ -16,7 +16,7 @@
  * } = useTypingIndicator({ sessionId, currentUser })
  * ```
  */
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 
 // 防抖配置
 const TYPING_DEBOUNCE = 500 // 500ms 防抖
@@ -151,6 +151,17 @@ export function useTypingIndicator(options = {}) {
       sendTypingTimer = null
     }
   }
+
+  // 组件卸载时清理所有定时器
+  onUnmounted(() => {
+    // 清除所有用户定时器
+    Object.values(typingTimers).forEach(timerId => clearTimeout(timerId))
+    // 清除发送定时器
+    if (sendTypingTimer) {
+      clearTimeout(sendTypingTimer)
+      sendTypingTimer = null
+    }
+  })
 
   return {
     // 状态

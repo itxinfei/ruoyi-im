@@ -18,7 +18,7 @@
  * } = useVoicePreview({ onSend })
  * ```
  */
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 
 /**
  * 格式化时间
@@ -166,6 +166,30 @@ export function useVoicePreview(options = {}) {
   const cleanup = () => {
     deleteVoicePreview()
   }
+
+  // 组件卸载时清理所有资源（不触发回调）
+  onUnmounted(() => {
+    // 直接清理资源，不调用 deleteVoicePreview（避免触发 onDelete 回调）
+    const url = voicePreview.value?.url
+    // 先清空引用，避免异步操作访问已释放的资源
+    voicePreview.value = null
+
+    // 清理 Audio 元素
+    if (voiceAudioElement.value) {
+      voiceAudioElement.value.pause()
+      voiceAudioElement.value.src = ''
+      voiceAudioElement.value = null
+    }
+    // 清理定时器
+    if (voiceProgressInterval.value) {
+      clearInterval(voiceProgressInterval.value)
+      voiceProgressInterval.value = null
+    }
+    // 最后释放 Blob URL
+    if (url) {
+      URL.revokeObjectURL(url)
+    }
+  })
 
   return {
     // 状态

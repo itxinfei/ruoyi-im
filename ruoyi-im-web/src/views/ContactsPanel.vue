@@ -865,7 +865,7 @@ $active-bg: #e6f1fc; // Light blue for active states
   
   .search-box {
     background: $hover-bg;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     padding: 8px 12px;
     display: flex;
     align-items: center;
@@ -912,7 +912,7 @@ $active-bg: #e6f1fc; // Light blue for active states
   display: flex;
   align-items: center;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all 0.2s;
   color: $text-primary;
@@ -931,7 +931,7 @@ $active-bg: #e6f1fc; // Light blue for active states
   .nav-icon-wrapper {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -956,7 +956,7 @@ $active-bg: #e6f1fc; // Light blue for active states
     color: #fff;
     font-size: 11px;
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     line-height: 1;
   }
 
@@ -965,7 +965,7 @@ $active-bg: #e6f1fc; // Light blue for active states
   .group-item-menu-icon {
     margin-left: auto;
     padding: 4px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     opacity: 0;
     transition: all 0.2s;
 
@@ -1048,7 +1048,7 @@ $active-bg: #e6f1fc; // Light blue for active states
   padding: 8px 12px;
   cursor: pointer;
   transition: background-color 0.2s;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   
   &:hover {
     background-color: $hover-bg;
@@ -1175,7 +1175,7 @@ $active-bg: #e6f1fc; // Light blue for active states
       .role-tag {
         font-size: 10px;
         padding: 1px 4px;
-        border-radius: 4px;
+        border-radius: var(--dt-radius-sm);
         white-space: nowrap;
         
         &.owner { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
@@ -1256,7 +1256,7 @@ $active-bg: #e6f1fc; // Light blue for active states
   align-items: center;
   padding: 16px;
   background: #fff;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   border: 1px solid $border-color;
   margin-bottom: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.02);
@@ -1302,7 +1302,7 @@ $active-bg: #e6f1fc; // Light blue for active states
   width: 600px;
   max-width: 90%;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   display: flex;
   flex-direction: column;
@@ -1362,7 +1362,7 @@ $active-bg: #e6f1fc; // Light blue for active states
       color: $text-tertiary;
       background: #f0f2f5;
       padding: 1px 6px;
-      border-radius: 4px;
+      border-radius: var(--dt-radius-sm);
       align-self: flex-start;
       
       &.group { color: #1890ff; background: #e6f7ff; }

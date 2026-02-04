@@ -572,7 +572,7 @@ loadApprovals()
 .quick-btn {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   border: none;
   display: flex;
   align-items: center;

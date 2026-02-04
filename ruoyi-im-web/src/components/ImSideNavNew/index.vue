@@ -227,7 +227,7 @@ function handleOpenSearch() {
   width: 40px;  // 钉钉标准：40px × 40px
   height: 40px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;  // 小圆角
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -251,7 +251,7 @@ function handleOpenSearch() {
   width: 40px;
   height: 40px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
 }
 
 .nav-logo-badge {
@@ -294,7 +294,7 @@ function handleOpenSearch() {
 
 .nav-items::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
+  border-radius: var(--dt-radius-sm);
 }
 
 // ============================================================================
@@ -307,7 +307,7 @@ function handleOpenSearch() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;  // 钉钉标准：圆角 8px
+  border-radius: var(--dt-radius-md);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -385,7 +385,7 @@ function handleOpenSearch() {
   color: #fff;
   font-size: 10px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -414,7 +414,7 @@ function handleOpenSearch() {
   align-items: center;
   justify-content: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -446,7 +446,7 @@ function handleOpenSearch() {
   color: var(--dt-brand-color);
   font-size: 9px;
   font-weight: 700;
-  border-radius: 3px;
+  border-radius: var(--dt-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;

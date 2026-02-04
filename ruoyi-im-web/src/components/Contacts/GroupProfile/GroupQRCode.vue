@@ -200,11 +200,11 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   box-shadow: var(--dt-shadow-md);
 
   canvas {
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
   }
 }
 
@@ -218,7 +218,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 12px;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   color: var(--dt-text-secondary);
   font-size: 14px;
 }
@@ -248,7 +248,7 @@ onUnmounted(() => {
   max-width: 280px;
   padding: 8px 12px;
   background: var(--dt-bg-secondary);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   margin-bottom: 16px;
 }
 

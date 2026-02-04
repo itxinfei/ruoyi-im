@@ -202,7 +202,7 @@ onUnmounted(() => {
   position: fixed;
   min-width: 200px;
   background: rgba(30, 30, 30, 0.95);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   user-select: none;
@@ -253,7 +253,7 @@ onUnmounted(() => {
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   cursor: pointer;
   transition: all 0.2s;
   color: rgba(255, 255, 255, 0.6);
@@ -284,7 +284,7 @@ onUnmounted(() => {
   max-width: 400px;
   max-height: 300px;
   display: block;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
 }
 
 .desktop-sticker.minimized .sticker-content {
@@ -301,7 +301,7 @@ onUnmounted(() => {
   background: rgba(0, 0, 0, 0.7);
   color: rgba(255, 255, 255, 0.7);
   font-size: 11px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   pointer-events: none;
   white-space: nowrap;
 }

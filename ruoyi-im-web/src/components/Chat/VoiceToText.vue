@@ -253,7 +253,7 @@ defineExpose({
 .wave-bar {
   width: 3px;
   background: var(--dt-brand-color);
-  border-radius: 2px;
+  border-radius: var(--dt-radius-sm);
   animation: wave 1s ease-in-out infinite;
 
   &:nth-child(1) { animation-delay: 0s; height: 8px; }

@@ -547,7 +547,7 @@ onMounted(() => {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
       background: var(--dt-fill-color-light);
       flex-shrink: 0;
 
@@ -591,7 +591,7 @@ onMounted(() => {
   padding: 12px 16px;
   background: linear-gradient(135deg, #0089FF 0%, #0958d9 100%);
   color: #fff;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   margin-top: 16px;
 
   .selected-count {

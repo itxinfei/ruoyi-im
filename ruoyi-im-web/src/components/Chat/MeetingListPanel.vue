@@ -478,7 +478,7 @@ onMounted(() => {
     .count-badge {
       font-size: 11px;
       padding: 2px 6px;
-      border-radius: 10px;
+      border-radius: var(--dt-radius-lg);
       background: var(--dt-bg-hover);
       color: var(--dt-text-secondary);
 
@@ -510,7 +510,7 @@ onMounted(() => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
 
     &:hover {
       background: var(--dt-border-dark);
@@ -553,7 +553,7 @@ onMounted(() => {
   padding: 16px;
   background: var(--dt-bg-body);
   border: 1px solid var(--dt-border-lighter);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   transition: all 0.2s;
 
   &:hover {
@@ -573,7 +573,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     background: var(--dt-bg-hover);
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     flex-shrink: 0;
     position: relative;
 
@@ -588,7 +588,7 @@ onMounted(() => {
       background: var(--dt-error-color);
       color: white;
       font-size: 10px;
-      border-radius: 10px;
+      border-radius: var(--dt-radius-lg);
       white-space: nowrap;
 
       .live-dot {

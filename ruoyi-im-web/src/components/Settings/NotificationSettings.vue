@@ -378,7 +378,7 @@ watch(() => props.modelValue, (newVal) => {
 .setting-card {
   background: var(--bg-color-overlay, #fff);
   border: 1px solid var(--border-color-light, #e4e7ed);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
 }
 
@@ -440,7 +440,7 @@ watch(() => props.modelValue, (newVal) => {
   margin-left: 20px;
   margin-right: 20px;
   margin-bottom: 16px;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
 }
 
 .dnd-time-row {

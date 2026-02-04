@@ -100,9 +100,9 @@ const emit = defineEmits(['close'])
 
 .avatar-wrapper {
   margin-bottom: 16px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-dialog);
 }
 
 .group-name {

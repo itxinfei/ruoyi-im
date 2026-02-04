@@ -441,6 +441,7 @@ const pendingFiles = ref([])
 // 拖拽状态
 const isDragOver = ref(false)
 const isFocused = ref(false)
+const isUnmounted = ref(false) // 标记组件是否已卸载
 let dragCounter = 0
 
 // ========== 计算属性 ==========
@@ -490,6 +491,7 @@ const insertAt = nickname => {
   const pos = textareaRef.value?.selectionStart || messageContent.value.length
   messageContent.value = messageContent.value.slice(0, pos) + atText + messageContent.value.slice(pos)
   nextTick(() => {
+    if (isUnmounted.value) return
     textareaRef.value?.focus()
     autoResize()
   })
@@ -542,6 +544,7 @@ const handleSend = async () => {
 
   messageContent.value = ''
   nextTick(() => {
+    if (isUnmounted.value) return
     if (textareaRef.value) {textareaRef.value.style.height = 'auto'}
     textareaRef.value?.focus()
   })
@@ -576,6 +579,7 @@ const handleVoiceCancel = () => {
 const toggleVoiceMode = () => {
   isVoiceMode.value = !isVoiceMode.value
   nextTick(() => {
+    if (isUnmounted.value) return
     if (isVoiceMode.value) {
       textareaRef.value?.blur()
     } else {
@@ -607,6 +611,7 @@ const selectEmoji = emoji => {
   messageContent.value = messageContent.value.slice(0, pos) + emoji + messageContent.value.slice(pos)
   showEmojiPicker.value = false
   nextTick(() => {
+    if (isUnmounted.value) return
     textareaRef.value?.focus()
     autoResize()
   })
@@ -942,6 +947,7 @@ const handleRemovePendingFile = index => {
 const handleSelectSmartReply = replyText => {
   messageContent.value = replyText
   nextTick(() => {
+    if (isUnmounted.value) return
     autoResize()
     textareaRef.value?.focus()
   })
@@ -960,6 +966,7 @@ const handleScheduleSaved = () => {
 const setContent = content => {
   messageContent.value = content || ''
   nextTick(() => {
+    if (isUnmounted.value) return
     autoResize()
     // 将光标移到末尾
     if (textareaRef.value) {
@@ -985,12 +992,15 @@ defineExpose({
 
 // ========== 生命周期 ==========
 
+// 使用闭包变量存储事件处理器引用，避免污染全局对象
+let globalKeydownHandler = null
+
 onMounted(() => {
   // 加载所有草稿
   store.dispatch('im/session/loadDrafts')
 
   // 注册全局截图快捷键
-  const handleGlobalKeydown = e => {
+  globalKeydownHandler = e => {
     const isWinShortcut = e.ctrlKey && e.altKey && e.key === 'a'
     const isMacShortcut = e.metaKey && e.shiftKey && e.key === 'a'
 
@@ -1000,17 +1010,18 @@ onMounted(() => {
     }
   }
 
-  document.addEventListener('keydown', handleGlobalKeydown)
-  window._messageInputKeydownHandler = handleGlobalKeydown
+  document.addEventListener('keydown', globalKeydownHandler)
 })
 
 onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载，防止后续 DOM 操作
+
   cleanupVoice()
 
   // 移除全局键盘事件
-  if (window._messageInputKeydownHandler) {
-    document.removeEventListener('keydown', window._messageInputKeydownHandler)
-    delete window._messageInputKeydownHandler
+  if (globalKeydownHandler) {
+    document.removeEventListener('keydown', globalKeydownHandler)
+    globalKeydownHandler = null
   }
 })
 </script>

@@ -548,7 +548,7 @@ defineExpose({
   width: 700px;
   height: 480px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   display: flex;
@@ -607,7 +607,7 @@ defineExpose({
   padding: 12px 20px;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
-  border-radius: 24px;
+  border-radius: var(--dt-radius-3xl);
 }
 
 .remote-name {
@@ -630,7 +630,7 @@ defineExpose({
   width: 140px;
   height: 105px;
   background: #000;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   cursor: move;
@@ -664,7 +664,7 @@ defineExpose({
   justify-content: center;
   background: rgba(0, 0, 0, 0.6);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
 
   .material-icons-outlined {
@@ -768,7 +768,7 @@ defineExpose({
   gap: 6px;
   padding: 8px 14px;
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
 
   .material-icons-outlined {
     font-size: 16px;
@@ -803,7 +803,7 @@ defineExpose({
   width: 200px;
   height: 150px;
   background: #000;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   z-index: 9999;
   overflow: hidden;
@@ -839,7 +839,7 @@ defineExpose({
   right: 8px;
   padding: 6px 12px;
   background: rgba(0, 0, 0, 0.6);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   text-align: center;
 }
 

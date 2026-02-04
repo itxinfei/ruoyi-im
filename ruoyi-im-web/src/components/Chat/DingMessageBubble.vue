@@ -225,11 +225,11 @@ const handleViewDetail = () => {
   position: relative;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   padding: 20px;
   min-width: 300px;
   max-width: 450px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--dt-shadow-card);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 
@@ -243,7 +243,7 @@ const handleViewDetail = () => {
   }
 
   &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--dt-shadow-dialog);
     transform: translateY(-2px);
 
     &::before {
@@ -305,7 +305,7 @@ const handleViewDetail = () => {
 .ding-icon {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -313,7 +313,7 @@ const handleViewDetail = () => {
   position: relative;
   z-index: 1;
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-lg);
 
   svg {
     width: 22px;
@@ -380,7 +380,7 @@ const handleViewDetail = () => {
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, rgba(0, 137, 255, 0.3) 0%, transparent 100%);
-  border-radius: 2px;
+  border-radius: var(--dt-radius-sm);
 }
 
 .priority-badge {
@@ -388,7 +388,7 @@ const handleViewDetail = () => {
   align-items: center;
   gap: 4px;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   font-size: 12px;
   font-weight: 600;
   position: relative;
@@ -462,7 +462,7 @@ const handleViewDetail = () => {
   word-break: break-word;
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.6);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   border: 1px solid rgba(0, 0, 0, 0.04);
   position: relative;
   z-index: 1;
@@ -512,7 +512,7 @@ const handleViewDetail = () => {
   position: relative;
   height: 8px;
   background: rgba(0, 0, 0, 0.06);
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
 }
 
@@ -525,7 +525,7 @@ const handleViewDetail = () => {
 
 .progress-fill {
   height: 100%;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 
@@ -544,7 +544,7 @@ const handleViewDetail = () => {
     width: 20px;
     height: 100%;
     background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 100%);
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     animation: progressShine 2s ease-in-out infinite;
   }
 
@@ -574,7 +574,7 @@ const handleViewDetail = () => {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   border: none;
   font-size: 13px;
   font-weight: 600;
@@ -599,7 +599,7 @@ const handleViewDetail = () => {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--dt-shadow-lg);
 
     &::before {
       opacity: 1;

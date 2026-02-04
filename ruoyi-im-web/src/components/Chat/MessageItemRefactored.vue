@@ -209,7 +209,7 @@ const handleNudge = () => {
   }
 
   .message-avatar {
-    border-radius: 4px;  // 钉钉方形头像，小圆角
+    border-radius: var(--dt-radius-sm);  // 钉钉方形头像，小圆角
   }
 }
 

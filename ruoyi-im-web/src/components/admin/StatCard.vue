@@ -161,7 +161,7 @@ const handleClick = () => {
     justify-content: center;
     width: 56px;
     height: 56px;
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     color: #fff;
     flex-shrink: 0;
   }

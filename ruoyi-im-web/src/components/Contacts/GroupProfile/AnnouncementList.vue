@@ -117,7 +117,7 @@ const handleDelete = (announcement) => {
 
 .announcement-item {
   background: var(--dt-bg-card);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   padding: 14px 16px;
   border: 1px solid var(--dt-border-light);
 

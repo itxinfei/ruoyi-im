@@ -461,7 +461,7 @@ const canRecall = computed(() => {
     background: var(--dt-bubble-left-bg);
     border: 1px solid var(--dt-bubble-left-border);
     // 钉钉标准：左尖右圆（左上4px 左下4px 右上12px 右下12px）
-    border-radius: 4px 12px 12px 4px;
+    border-radius: var(--dt-radius-sm) var(--dt-radius-lg) var(--dt-radius-lg) var(--dt-radius-sm);
   }
 
   &:hover .bubble-content {
@@ -478,7 +478,7 @@ const canRecall = computed(() => {
     color: var(--dt-bubble-right-text);  // 白色文字
     border: none;
     // 钉钉标准：左圆右尖（左上12px 左下12px 右上4px 右下4px）
-    border-radius: 12px 4px 4px 12px;
+    border-radius: var(--dt-radius-lg) var(--dt-radius-sm) var(--dt-radius-sm) var(--dt-radius-lg);
   }
 
   &:hover .bubble-content {
@@ -579,7 +579,7 @@ const canRecall = computed(() => {
 .message-bubble.type-image .bubble-content,
 .message-bubble.type-video .bubble-content {
   // 钉钉图片消息：圆角8px
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
 }
 

@@ -463,8 +463,8 @@ watch(currentDate, loadEvents)
     .current-date-text { font-size: 18px; font-weight: 800; color: #1e293b; .dark & { color: #f1f5f9; } }
     .tool-btn {
       @apply h-8 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center hover:bg-slate-50 transition-colors;
-      &:first-child { border-radius: 4px 0 0 4px; }
-      &:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+      &:first-child { border-radius: var(--dt-radius-sm) 0 0 var(--dt-radius-sm); }
+      &:last-child { border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0; border-left: none; }
       &:nth-child(2) { border-left: none; }
     }
   }

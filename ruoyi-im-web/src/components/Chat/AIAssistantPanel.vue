@@ -220,7 +220,7 @@ export default {
   flex-direction: column;
   height: 100%;
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
 }
 
 .chat-messages {
@@ -256,7 +256,7 @@ export default {
 
 .message-text {
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   line-height: 1.5;
   word-wrap: break-word;
 }
@@ -287,14 +287,14 @@ export default {
   padding: 12px 16px;
   background-color: #fff;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
 }
 
 .typing-indicator span {
   width: 8px;
   height: 8px;
   background-color: #999;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   animation: typingPulse 1.4s infinite;
 }
 

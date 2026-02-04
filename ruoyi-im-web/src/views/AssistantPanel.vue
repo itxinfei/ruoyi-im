@@ -410,7 +410,7 @@ onMounted(() => {
 .ai-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: #fff;
   display: flex;
@@ -491,7 +491,7 @@ onMounted(() => {
 .user-avatar {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   background: var(--dt-brand-color);
   color: #fff;
   display: flex;
@@ -516,7 +516,7 @@ onMounted(() => {
   width: 8px;
   height: 8px;
   background: var(--dt-text-quaternary);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   animation: typingPulse 1.4s infinite ease-in-out;
 }
 

@@ -300,7 +300,7 @@ const handleExport = async () => {
   gap: 16px;
   padding: 16px;
   background: var(--el-fill-color-light);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
 
   .preview-stat {
     display: flex;

@@ -506,7 +506,7 @@ watch(() => props.visible, (val) => {
     justify-content: center;
     background: transparent;
     border: none;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     cursor: pointer;
     color: var(--dt-text-secondary);
     transition: all 0.2s;
@@ -530,7 +530,7 @@ watch(() => props.visible, (val) => {
     margin-bottom: 12px;
 
     .el-input__wrapper {
-      border-radius: 20px;
+      border-radius: var(--dt-radius-2xl);
     }
 
     .el-input__prefix {
@@ -559,7 +559,7 @@ watch(() => props.visible, (val) => {
       padding: 6px 10px;
       background: var(--dt-bg-body);
       border: 1px solid var(--dt-border-light);
-      border-radius: 20px;
+      border-radius: var(--dt-radius-2xl);
       font-size: 12px;
       color: var(--dt-text-secondary);
       cursor: pointer;
@@ -573,7 +573,7 @@ watch(() => props.visible, (val) => {
       .tab-count {
         padding: 2px 6px;
         background: var(--dt-bg-hover);
-        border-radius: 10px;
+        border-radius: var(--dt-radius-lg);
         font-size: 10px;
       }
 
@@ -607,7 +607,7 @@ watch(() => props.visible, (val) => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -660,7 +660,7 @@ watch(() => props.visible, (val) => {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: all 0.2s;
 
@@ -671,7 +671,7 @@ watch(() => props.visible, (val) => {
   .file-icon {
     width: 48px;
     height: 48px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -771,7 +771,7 @@ watch(() => props.visible, (val) => {
   color: var(--dt-brand-color);
   font-size: 13px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   transition: background 0.2s;
 
   &:hover {

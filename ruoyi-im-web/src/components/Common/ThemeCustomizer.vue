@@ -142,7 +142,7 @@ watch(visible, (val) => {
   .color-preview {
     width: 100%;
     height: 48px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     margin-bottom: 8px;
     border: 2px solid var(--dt-border-color);
     transition: all 0.2s;
@@ -174,7 +174,7 @@ watch(visible, (val) => {
     width: 40px;
     height: 40px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
   }
 

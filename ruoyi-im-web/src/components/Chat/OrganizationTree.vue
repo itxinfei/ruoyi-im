@@ -325,7 +325,7 @@ $dt-border-color: #E5E6EB;
 
     :deep(.el-tree-node__content) {
       height: 36px;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
       padding-right: 8px;
       transition: background 0.15s;
 

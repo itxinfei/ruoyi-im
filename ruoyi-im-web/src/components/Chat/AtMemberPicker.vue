@@ -129,7 +129,7 @@ defineExpose({ open })
       height: 32px;
       background-color: #0089ff;
       color: #fff;
-      border-radius: 50%;
+      border-radius: var(--dt-radius-full);
       display: flex;
       align-items: center;
       justify-content: center;

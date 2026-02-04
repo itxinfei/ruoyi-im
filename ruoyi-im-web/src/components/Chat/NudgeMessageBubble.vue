@@ -134,7 +134,7 @@ const formattedTime = computed(() => {
       padding: 8px 12px;
       background: linear-gradient(135deg, #fff9e6 0%, #fff4d6 100%);
       border: 1px solid #ffeaa7;
-      border-radius: 12px;
+      border-radius: var(--dt-radius-lg);
       font-size: 14px;
       color: var(--dt-text-primary);
       box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);

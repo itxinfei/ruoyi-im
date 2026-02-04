@@ -211,7 +211,7 @@ onMounted(() => {
 
 .global-search-input {
   :deep(.el-input__wrapper) {
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     background-color: var(--dt-bg-body);
     box-shadow: none;
     border: 1px solid transparent;
@@ -238,7 +238,7 @@ onMounted(() => {
     color: var(--dt-text-tertiary);
     background: var(--dt-bg-session-hover);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -255,7 +255,7 @@ onMounted(() => {
 .header-action-btn {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   transition: all 0.2s ease;
 
   &:hover {
@@ -278,7 +278,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 4px 12px 4px 8px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: background-color 0.2s ease;
 

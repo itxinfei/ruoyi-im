@@ -393,7 +393,7 @@ watch(visible, (val) => {
         right: 0;
         height: 2px;
         background: var(--dt-brand-color);
-        border-radius: 2px;
+        border-radius: var(--dt-radius-sm);
       }
     }
   }
@@ -724,7 +724,7 @@ watch(visible, (val) => {
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {

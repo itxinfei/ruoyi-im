@@ -105,7 +105,7 @@ defineEmits(['forward', 'combine', 'delete', 'cancel'])
     width: 4px;
     height: 16px;
     background: var(--dt-brand-color);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 
   .selection-text {

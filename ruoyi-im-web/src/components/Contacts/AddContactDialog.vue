@@ -367,7 +367,7 @@ const confirmAdd = async () => {
   height: 14px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   animation: spin 0.8s linear infinite;
 }
 
@@ -574,7 +574,7 @@ const confirmAdd = async () => {
   height: 14px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   animation: spin 1s linear infinite;
 }
 </style>

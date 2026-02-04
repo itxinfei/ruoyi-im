@@ -279,7 +279,7 @@ watch(visible, (val) => {
   margin-top: 30px;
   background: #f9f9f9;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
 
   .comment-input {
     margin-bottom: 16px;

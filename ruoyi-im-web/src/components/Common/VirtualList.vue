@@ -173,7 +173,7 @@ defineExpose({
 
   &::-webkit-scrollbar-thumb {
     background: transparent;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 
   &:hover::-webkit-scrollbar-thumb {

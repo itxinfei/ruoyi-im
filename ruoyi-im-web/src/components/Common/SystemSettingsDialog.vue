@@ -355,7 +355,7 @@ onMounted(() => {
 <style scoped lang="scss">
 // Dialog Styles Overlay
 :deep(.el-dialog) {
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
   box-shadow: var(--dt-shadow-dialog);
   margin-top: 5vh !important;
@@ -428,7 +428,7 @@ onMounted(() => {
   align-items: center;
   height: 40px;
   padding: 0 12px;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   color: var(--dt-text-secondary);
   transition: all 0.2s ease;
@@ -471,7 +471,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: background 0.2s ease;
   width: calc(100% - 24px);
@@ -563,7 +563,7 @@ onMounted(() => {
   
   &::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.15);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
     
     &:hover {
       background-color: rgba(0, 0, 0, 0.25);

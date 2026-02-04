@@ -43,7 +43,7 @@ const openLink = () => {
   display: flex;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
   cursor: pointer;
   transition: all var(--dt-transition-fast);
@@ -51,7 +51,7 @@ const openLink = () => {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
+    box-shadow: var(--dt-shadow-brand-light);
     transform: translateY(-1px);
   }
 

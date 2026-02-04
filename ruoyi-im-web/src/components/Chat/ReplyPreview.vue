@@ -100,7 +100,7 @@ defineEmits(['cancel'])
     color: var(--dt-text-tertiary);
     flex-shrink: 0;
     padding: 4px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     transition: all 0.2s;
 
     &:hover {

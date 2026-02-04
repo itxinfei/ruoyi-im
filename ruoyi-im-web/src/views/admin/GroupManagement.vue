@@ -751,7 +751,7 @@ const handleOwnerCommand = async (command) => {
           h('p', { style: 'margin-bottom: 12px; color: var(--el-text-color-regular)' }, '请选择新群主：'),
           h('select', {
             id: 'new-owner-select',
-            style: 'width: 100%; padding: 8px; border: 1px solid var(--el-border-color); border-radius: 4px;'
+            style: 'width: 100%; padding: 8px; border: 1px solid var(--el-border-color); border-radius: var(--dt-radius-sm);'
           }, candidates.map(m =>
             h('option', { value: m.userId, key: m.userId }, `${m.nickname} (${m.role === 'ADMIN' ? '管理员' : '成员'})`)
           ))

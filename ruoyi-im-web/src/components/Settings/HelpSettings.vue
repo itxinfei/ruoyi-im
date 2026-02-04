@@ -126,7 +126,7 @@ const handleSubmit = async () => {
 .setting-card {
   background: var(--bg-color-overlay, #fff);
   border: 1px solid var(--border-color-light, #e4e7ed);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
 }
 
@@ -188,7 +188,7 @@ const handleSubmit = async () => {
 
 .type-option {
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   border: 1px solid var(--border-color-light, #dcdfe6);
   cursor: pointer;
   font-size: 14px;

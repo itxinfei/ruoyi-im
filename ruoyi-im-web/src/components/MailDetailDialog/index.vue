@@ -347,7 +347,7 @@ const getFileIconColor = (fileName) => {
   gap: 12px;
   padding: 12px;
   background: var(--dt-bg-hover);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   transition: all var(--dt-transition-fast);
 
   &:hover {

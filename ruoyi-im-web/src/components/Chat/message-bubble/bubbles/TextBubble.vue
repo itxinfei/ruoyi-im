@@ -167,7 +167,7 @@ function escapeRegExp(string) {
     font-weight: 500;
     background: rgba(0, 137, 255, 0.1);
     padding: 2px 4px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     cursor: pointer;
     transition: all var(--dt-transition-fast);
 
@@ -216,7 +216,7 @@ function escapeRegExp(string) {
   margin-top: 4px;
   padding: 2px 6px;
   background: var(--dt-brand-bg);
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   font-size: 11px;
   color: var(--dt-brand-color);
 }

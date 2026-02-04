@@ -561,7 +561,7 @@ const handleMoreCommand = (command) => {
 
 .user-profile-dialog {
   :deep(.el-dialog) {
-    border-radius: 16px;
+    border-radius: var(--dt-radius-xl);
     overflow: hidden;
   }
 
@@ -602,7 +602,7 @@ const handleMoreCommand = (command) => {
   right: 16px;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   border: none;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
@@ -668,7 +668,7 @@ const handleMoreCommand = (command) => {
   display: inline-block;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   margin-right: 4px;
 
   &.online {
@@ -845,7 +845,7 @@ const handleMoreCommand = (command) => {
   gap: 12px;
   padding: 10px 12px;
   background: var(--dt-bg-tertiary);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all var(--dt-transition-base);
 
@@ -887,7 +887,7 @@ const handleMoreCommand = (command) => {
   gap: 12px;
   padding: 12px 16px;
   background: var(--dt-bg-tertiary);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all var(--dt-transition-base);
 
@@ -904,7 +904,7 @@ const handleMoreCommand = (command) => {
   .more-icon {
     width: 36px;
     height: 36px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     background: var(--dt-bg-card);
     display: flex;
     align-items: center;
@@ -1023,7 +1023,7 @@ const handleMoreCommand = (command) => {
   right: 16px;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   border: none;
   background: var(--dt-bg-hover);
   color: var(--dt-text-secondary);
@@ -1081,7 +1081,7 @@ const handleMoreCommand = (command) => {
         color: var(--dt-text-secondary);
         background: var(--dt-bg-secondary);
         padding: 5px 10px;
-        border-radius: 4px;
+        border-radius: var(--dt-radius-sm);
         white-space: nowrap;
 
         .tag-icon {
@@ -1115,7 +1115,7 @@ const handleMoreCommand = (command) => {
     align-items: center;
     gap: 14px;
     padding: 12px 16px;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     transition: background 0.2s;
 
     &:hover {
@@ -1170,7 +1170,7 @@ const handleMoreCommand = (command) => {
     gap: 8px;
     height: 42px;
     padding: 0 18px;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     font-size: 15px;
     cursor: pointer;
     transition: all 0.2s;

@@ -1200,7 +1200,7 @@ const selectEmailForPreview = async (email) => {
   width: 8px;
   height: 8px;
   background: var(--dt-brand-color);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   position: absolute;
   right: 16px;
   box-shadow: 0 0 0 3px var(--dt-brand-bg);
@@ -1288,7 +1288,7 @@ const selectEmailForPreview = async (email) => {
 .sender-avatar {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   color: #fff;
   display: flex;
   align-items: center;
@@ -1398,7 +1398,7 @@ const selectEmailForPreview = async (email) => {
   padding: 4px 8px;
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   color: var(--dt-text-secondary);
   cursor: pointer;
   display: flex;
@@ -1475,6 +1475,21 @@ const selectEmailForPreview = async (email) => {
   padding: 40px 20px;
 }
 
+// 移动端返回头部
+.mobile-back-header {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-back-header {
+    display: flex;
+  }
+
+  .preview-header .preview-actions {
+    display: none;
+  }
+}
+
 .preview-empty .empty-icon {
   font-size: 64px;
   color: var(--dt-border-color);
@@ -1514,7 +1529,7 @@ const selectEmailForPreview = async (email) => {
   padding: 6px 12px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   color: var(--dt-text-secondary);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
@@ -1908,13 +1923,50 @@ const selectEmailForPreview = async (email) => {
   }
 
   .mail-preview-panel {
-    position: absolute;
+    position: fixed;
     top: 0;
+    left: 0;
     right: 0;
     bottom: 0;
     width: 100% !important;
-    z-index: 10;
-    border-radius: var(--dt-radius-xl);
+    height: 100%;
+    z-index: 1000;
+    border-radius: 0;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .mail-preview-panel.mobile-show {
+    transform: translateX(0);
+  }
+
+  // 移动端返回头部
+  .mobile-back-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--dt-bg-card);
+    border-bottom: 1px solid var(--dt-border-light);
+  }
+
+  .back-btn,
+  .close-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-radius: var(--dt-radius-md);
+    font-size: 14px;
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+  }
+
+  .back-btn .material-icons-outlined,
+  .close-btn .material-icons-outlined {
+    font-size: 20px;
   }
 
   .preview-header {
@@ -1937,18 +1989,8 @@ const selectEmailForPreview = async (email) => {
     padding: 12px 16px;
   }
 
-  // 添加返回按钮（在移动端显示）
-  .preview-content::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 48px;
-    background: var(--dt-bg-card);
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
+  .preview-toolbar {
+    padding: 12px 16px;
   }
 }
 </style>

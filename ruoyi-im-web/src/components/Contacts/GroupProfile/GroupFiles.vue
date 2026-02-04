@@ -317,7 +317,7 @@ initMockData()
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: background-color var(--dt-transition-base);
 
@@ -338,7 +338,7 @@ initMockData()
   align-items: center;
   justify-content: center;
   background: var(--dt-bg-secondary);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
 }
 
 .file-info {

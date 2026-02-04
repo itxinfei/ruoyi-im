@@ -202,7 +202,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 <style scoped lang="scss">
 .dingtalk-desktop-profile {
   :deep(.el-dialog) {
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     overflow: hidden;
     padding: 0;
     border: 1px solid rgba(0,0,0,0.05);
@@ -214,7 +214,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     @media (max-width: 480px) {
       margin: 5vh auto !important;
       max-height: 85vh;
-      border-radius: 16px;
+      border-radius: var(--dt-radius-xl);
     }
   }
   :deep(.el-dialog__header) { display: none; }
@@ -270,7 +270,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     font-size: 16px;
     cursor: pointer;
     padding: 4px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     transition: all 0.2s ease;
     
     &:hover {

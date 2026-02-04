@@ -394,7 +394,7 @@ onUnmounted(() => {
   color: var(--dt-text-primary, #333333);
   cursor: pointer;
   transition: background-color 0.15s ease;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   margin: 0 4px;
 
   &:hover {

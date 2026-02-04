@@ -144,7 +144,7 @@ const panelClass = computed(() => [`panel-${props.type}`, props.customClass])
     
     &::-webkit-scrollbar-thumb {
       background: var(--el-border-color);
-      border-radius: 3px;
+      border-radius: var(--dt-radius-sm);
       
       &:hover {
         background: var(--el-border-color-darker);

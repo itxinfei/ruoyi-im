@@ -389,7 +389,7 @@ watch(visible, (val) => {
 
     .custom-textarea {
       :deep(.el-textarea__inner) {
-        border-radius: 12px;
+        border-radius: var(--dt-radius-lg);
         border: 2px solid rgba(0, 0, 0, 0.08);
         background: #fafafa;
         transition: all 0.3s;
@@ -407,7 +407,7 @@ watch(visible, (val) => {
       :deep(.el-input__count) {
         background: rgba(0, 0, 0, 0.03);
         padding: 2px 8px;
-        border-radius: 6px;
+        border-radius: var(--dt-radius-md);
         margin: 8px;
         color: #999;
         font-size: 12px;
@@ -421,7 +421,7 @@ watch(visible, (val) => {
       right: 0;
       height: 2px;
       background: linear-gradient(90deg, var(--dt-brand-color) 0%, transparent 100%);
-      border-radius: 2px;
+      border-radius: var(--dt-radius-sm);
       opacity: 0;
       transition: opacity 0.3s;
     }
@@ -446,7 +446,7 @@ watch(visible, (val) => {
     padding: 14px 16px;
     background: #fafafa;
     border: 2px solid rgba(0, 0, 0, 0.06);
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -514,7 +514,7 @@ watch(visible, (val) => {
       inset: -4px;
       background: var(--dt-brand-color);
       opacity: 0.1;
-      border-radius: 16px;
+      border-radius: var(--dt-radius-xl);
       animation: typeGlow 2s ease-in-out infinite;
     }
 
@@ -543,7 +543,7 @@ watch(visible, (val) => {
     padding: 12px 20px;
     background: #fafafa;
     border: 2px solid rgba(0, 0, 0, 0.06);
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -584,7 +584,7 @@ watch(visible, (val) => {
       inset: -4px;
       background: currentColor;
       opacity: 0.1;
-      border-radius: 16px;
+      border-radius: var(--dt-radius-xl);
       animation: priorityGlow 2s ease-in-out infinite;
     }
 
@@ -603,7 +603,7 @@ watch(visible, (val) => {
     width: 100%;
     background: #fafafa;
     border: 2px solid rgba(0, 0, 0, 0.06);
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     padding: 16px;
     transition: all 0.3s;
 
@@ -655,12 +655,12 @@ watch(visible, (val) => {
 
       &::-webkit-scrollbar-track {
         background: rgba(0, 0, 0, 0.04);
-        border-radius: 3px;
+        border-radius: var(--dt-radius-sm);
       }
 
       &::-webkit-scrollbar-thumb {
         background: rgba(0, 0, 0, 0.15);
-        border-radius: 3px;
+        border-radius: var(--dt-radius-sm);
 
         &:hover {
           background: rgba(0, 0, 0, 0.25);
@@ -765,7 +765,7 @@ watch(visible, (val) => {
     padding: 10px 16px;
     background: #fafafa;
     border: 2px solid rgba(0, 0, 0, 0.06);
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     text-align: center;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -800,7 +800,7 @@ watch(visible, (val) => {
       right: 0;
       height: 3px;
       background: linear-gradient(90deg, var(--dt-brand-color) 0%, transparent 100%);
-      border-radius: 2px;
+      border-radius: var(--dt-radius-sm);
       opacity: 0;
       transition: opacity 0.3s;
     }
@@ -831,7 +831,7 @@ watch(visible, (val) => {
       inset: -8px;
       background: var(--dt-brand-color);
       opacity: 0.1;
-      border-radius: 20px;
+      border-radius: var(--dt-radius-2xl);
       animation: switchGlow 3s ease-in-out infinite;
     }
 
@@ -857,7 +857,7 @@ watch(visible, (val) => {
     align-items: center;
     gap: 6px;
     padding: 10px 24px;
-    border-radius: 24px;
+    border-radius: var(--dt-radius-3xl);
     border: none;
     font-size: 14px;
     font-weight: 600;

@@ -919,8 +919,8 @@ onUnmounted(() => {
 // 变量定义
 $primary-color: #0089FF;
 $primary-light: rgba(0, 137, 255, 0.1);
-$border-radius: 16px;
-$border-radius-sm: 12px;
+$border-radius: var(--dt-radius-xl);
+$border-radius-sm: var(--dt-radius-lg);
 $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
 // 遮罩层动画
@@ -1052,7 +1052,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   background: #f1f5f9;
-  border-radius: 28px;
+  border-radius: var(--dt-radius-full);
   padding: 4px;
   transition: $transition;
   
@@ -1089,7 +1089,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   &.clear-btn,
   &.voice-btn {
     cursor: pointer;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     transition: $transition;
     
     &:hover {
@@ -1140,7 +1140,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 .search-submit-btn {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   background: $primary-color;
   color: #fff;
   border: none;
@@ -1174,7 +1174,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   background: #f1f5f9;
   color: #64748b;
   font-size: 13px;
@@ -1267,7 +1267,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: transparent;
   color: #94a3b8;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   
   &:hover {
     background: #f1f5f9;
@@ -1310,7 +1310,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   justify-content: center;
   background: #f1f5f9;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   color: #64748b;
   font-size: 16px;
   flex-shrink: 0;
@@ -1342,7 +1342,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: $primary-color;
     font-weight: 600;
     padding: 0 2px;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
   
   :global(.dark) & {
@@ -1355,7 +1355,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: #94a3b8;
   padding: 2px 6px;
   background: #f1f5f9;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   flex-shrink: 0;
   
   :global(.dark) & {
@@ -1415,7 +1415,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   border: none;
   background: transparent;
   color: #64748b;
@@ -1434,7 +1434,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: #fff;
     color: $primary-color;
     font-weight: 500;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dt-shadow-1);
     
     :global(.dark) & {
       background: #334155;
@@ -1469,7 +1469,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 11px;
   padding: 2px 6px;
   background: #e2e8f0;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   color: #64748b;
   min-width: 20px;
   text-align: center;
@@ -1528,7 +1528,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 .skeleton-avatar {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
@@ -1548,7 +1548,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
 .skeleton-line {
   height: 12px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
@@ -1591,19 +1591,19 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 80px;
   margin: 0 auto;
   background: linear-gradient(135deg, $primary-color, #667eea);
-  border-radius: 24px;
+  border-radius: var(--dt-radius-3xl);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-size: 36px;
-  box-shadow: 0 10px 30px rgba(0, 137, 255, 0.3);
+  box-shadow: var(--dt-shadow-brand-strong);
   
   @media (max-width: 768px) {
     width: 64px;
     height: 64px;
     font-size: 28px;
-    border-radius: 20px;
+    border-radius: var(--dt-radius-2xl);
   }
 }
 
@@ -1657,7 +1657,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   &:hover {
     background: #f1f5f9;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--dt-shadow-3);
   }
   
   :global(.dark) & {
@@ -1676,7 +1676,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 .action-icon {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1745,7 +1745,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: #64748b;
   font-size: 13px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   transition: $transition;
   
   &:hover {
@@ -1774,7 +1774,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: $transition;
   
@@ -1822,7 +1822,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: transparent;
   color: #94a3b8;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   opacity: 0;
   transition: $transition;
   
@@ -1858,7 +1858,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   gap: 6px;
   padding: 8px 14px;
   background: #f1f5f9;
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   font-size: 13px;
   color: #475569;
   cursor: pointer;
@@ -1886,7 +1886,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   justify-content: center;
   background: #cbd5e1;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   font-size: 11px;
   font-weight: 600;
   color: #fff;
@@ -1955,7 +1955,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: $primary-color;
   font-size: 13px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   transition: $transition;
   
   &:hover {
@@ -2009,7 +2009,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   &:hover {
     background: #f1f5f9;
     transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--dt-shadow-3);
     
     .card-actions {
       opacity: 1;
@@ -2037,7 +2037,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 .file-preview {
   width: 48px;
   height: 48px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2095,11 +2095,11 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     right: -2px;
     background: #fff;
     padding: 1px 4px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     font-size: 9px;
     font-weight: 600;
     color: #475569;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dt-shadow-1);
   }
 }
 
@@ -2113,7 +2113,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     width: 18px;
     height: 18px;
     background: $primary-color;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2154,7 +2154,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: $primary-color;
     font-weight: 600;
     padding: 0 2px;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
   
   :global(.dark) & {
@@ -2184,7 +2184,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: $primary-color;
     font-weight: 500;
     padding: 0 2px;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
   
   :global(.dark) & {
@@ -2203,7 +2203,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 4px;
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   font-size: 12px;
   font-weight: 500;
   
@@ -2279,7 +2279,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: transparent;
   color: #94a3b8;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2329,7 +2329,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100px;
   margin: 0 auto;
   background: #f1f5f9;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2392,7 +2392,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 8px 16px;
   background: #f1f5f9;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   font-size: 13px;
   color: #475569;
   cursor: pointer;
@@ -2455,7 +2455,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 2px 6px;
     background: #fff;
     border: 1px solid #e2e8f0;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     font-family: monospace;
     font-size: 11px;
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);

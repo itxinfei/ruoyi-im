@@ -236,7 +236,7 @@ const handleClearAll = async () => {
       color: #fff;
       background: var(--dt-brand-color);
       padding: 2px 6px;
-      border-radius: 10px;
+      border-radius: var(--dt-radius-lg);
       min-width: 18px;
       text-align: center;
     }
@@ -263,7 +263,7 @@ const handleClearAll = async () => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
 
     &:hover {
       background: var(--dt-border-dark);
@@ -309,7 +309,7 @@ const handleClearAll = async () => {
   align-items: stretch;
   gap: 8px;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
   background: var(--dt-bg-body);

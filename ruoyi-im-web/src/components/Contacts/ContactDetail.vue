@@ -378,7 +378,7 @@ const handleDeleteContact = () => {
         right: 8px;
         width: 20px;
         height: 20px;
-        border-radius: 50%;
+        border-radius: var(--dt-radius-full);
         background-color: var(--el-color-info);
         border: 3px solid var(--el-bg-color);
         
@@ -433,7 +433,7 @@ const handleDeleteContact = () => {
     .icon-box {
       width: 48px;
       height: 48px;
-      border-radius: 16px;
+      border-radius: var(--dt-radius-xl);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -476,7 +476,7 @@ const handleDeleteContact = () => {
 
 .section-card {
   background-color: var(--el-bg-color);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   padding: 20px;
   box-shadow: var(--dt-shadow-card);
   
@@ -494,7 +494,7 @@ const handleDeleteContact = () => {
       width: 4px;
       height: 16px;
       background-color: var(--el-color-primary);
-      border-radius: 2px;
+      border-radius: var(--dt-radius-sm);
       margin-right: 8px;
     }
   }
@@ -529,7 +529,7 @@ const handleDeleteContact = () => {
         white-space: pre-wrap;
         background-color: var(--el-fill-color-light);
         padding: 8px 12px;
-        border-radius: 8px;
+        border-radius: var(--dt-radius-md);
       }
     }
     
@@ -588,7 +588,7 @@ const handleDeleteContact = () => {
   .empty-illustration {
     width: 120px;
     height: 120px;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     background-color: var(--el-fill-color);
     display: flex;
     align-items: center;
@@ -624,7 +624,7 @@ const handleDeleteContact = () => {
   }
   &::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
     
     &:hover {
       background-color: rgba(0, 0, 0, 0.2);

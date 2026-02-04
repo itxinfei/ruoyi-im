@@ -155,7 +155,7 @@ const handleNavClick = (moduleKey) => {
   width: 40px;  // 钉钉标准：40px
   height: 40px;
   background-color: rgba(255, 255, 255, 0.2);  // 半透明白色
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -187,7 +187,7 @@ const handleNavClick = (moduleKey) => {
   width: 100%;  // 填满父容器宽度（60px）
   height: 40px;  // 钉钉标准：40px
   margin: 0 auto;  // 居中（虽然width是100%，但保留以确保）
-  border-radius: 8px;  // 钉钉标准：8px 圆角
+  border-radius: var(--dt-radius-md);  // 钉钉标准：8px 圆角
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -251,7 +251,7 @@ const handleNavClick = (moduleKey) => {
   width: 10px;
   height: 10px;
   background: linear-gradient(135deg, #ff4d4f, #ff7875);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   border: 2px solid #0089ff;
 }
 
@@ -266,7 +266,7 @@ const handleNavClick = (moduleKey) => {
 .user-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   display: flex;
   align-items: center;
   justify-content: center;

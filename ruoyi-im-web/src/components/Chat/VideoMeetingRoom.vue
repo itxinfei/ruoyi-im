@@ -677,7 +677,7 @@ onUnmounted(() => {
       gap: 4px;
       padding: 6px 12px;
       background: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
+      border-radius: var(--dt-radius-xl);
       font-size: 13px;
       color: #fff;
     }
@@ -723,7 +723,7 @@ onUnmounted(() => {
 .video-cell {
   position: relative;
   background: #1a1a1a;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
   cursor: pointer;
   transition: all 0.2s;
@@ -800,7 +800,7 @@ onUnmounted(() => {
     gap: 8px;
     padding: 4px 10px;
     background: rgba(0, 0, 0, 0.6);
-    border-radius: 16px;
+    border-radius: var(--dt-radius-xl);
 
     .participant-name {
       font-size: 13px;
@@ -939,7 +939,7 @@ onUnmounted(() => {
 
     &::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.2);
-      border-radius: 2px;
+      border-radius: var(--dt-radius-sm);
     }
   }
 
@@ -948,7 +948,7 @@ onUnmounted(() => {
     align-items: center;
     gap: 10px;
     padding: 10px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     transition: background 0.2s;
 
     &:hover {

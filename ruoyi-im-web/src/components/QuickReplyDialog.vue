@@ -436,7 +436,7 @@ const handleDrop = async (event, targetReply) => {
       align-items: center;
       gap: 6px;
       padding: 8px 16px;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
       cursor: pointer;
       transition: all 0.2s;
       color: var(--el-text-color-secondary);
@@ -454,7 +454,7 @@ const handleDrop = async (event, targetReply) => {
         font-size: 11px;
         background: var(--el-fill-color);
         padding: 2px 6px;
-        border-radius: 10px;
+        border-radius: var(--dt-radius-lg);
       }
     }
   }
@@ -495,7 +495,7 @@ const handleDrop = async (event, targetReply) => {
         gap: 12px;
         padding: 12px;
         background: var(--el-fill-color-light);
-        border-radius: 8px;
+        border-radius: var(--dt-radius-md);
         transition: all 0.2s;
 
         &:hover {

@@ -1071,7 +1071,7 @@ onUnmounted(() => {
     width: 3px;
     height: 40px;
     background: transparent;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
     transition: all 0.2s;
   }
 
@@ -1124,7 +1124,7 @@ onUnmounted(() => {
   color: #fff;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   white-space: nowrap;
   pointer-events: none;
   animation: fadeIn 0.2s;
@@ -1166,7 +1166,7 @@ onUnmounted(() => {
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   color: #3b4252;
   transition: all var(--dt-transition-fast);
@@ -1320,7 +1320,7 @@ onUnmounted(() => {
 
   &::-webkit-scrollbar-thumb {
     background: transparent;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 
   &:hover::-webkit-scrollbar-thumb {
@@ -1452,7 +1452,7 @@ onUnmounted(() => {
 .session-avatar {
   width: 48px;  // 钉钉标准：会话列表头像 48px
   height: 48px;
-  border-radius: 6px;  // 钉钉方形头像，圆角 6px
+  border-radius: var(--dt-radius-md);  // 钉钉方形头像，圆角 6px
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1466,7 +1466,7 @@ onUnmounted(() => {
   }
 
   :deep(.dingtalk-avatar) {
-    border-radius: 6px !important;  // 统一圆角
+    border-radius: var(--dt-radius-md) !important;  // 统一圆角
     transition: transform 0.2s var(--dt-ease-out);
   }
 }
@@ -1548,7 +1548,7 @@ onUnmounted(() => {
   left: -2px;
   padding: 2px 6px;
   background: var(--dt-warning-color);
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1704,7 +1704,7 @@ onUnmounted(() => {
 :deep(.add-menu-dropdown) {
   .el-dropdown__popper {
     padding: 0;
-    border-radius: 16px;
+    border-radius: var(--dt-radius-xl);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     border: none;
     overflow: hidden;
@@ -1718,7 +1718,7 @@ onUnmounted(() => {
 .add-menu-container {
   width: 320px;
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   overflow: hidden;
 
   .dark & {
@@ -1752,7 +1752,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   padding: 12px 4px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: all 0.25s ease;
 
@@ -1831,7 +1831,7 @@ onUnmounted(() => {
   align-items: flex-start;
   gap: 12px;
   padding: 12px !important;
-  border-radius: 10px !important;
+  border-radius: var(--dt-radius-lg) !important;
   margin: 2px 0;
   transition: all 0.2s ease;
 
@@ -1869,7 +1869,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   padding: 10px 12px !important;
-  border-radius: 10px !important;
+  border-radius: var(--dt-radius-lg) !important;
   margin: 2px 0;
   transition: all 0.2s ease;
 

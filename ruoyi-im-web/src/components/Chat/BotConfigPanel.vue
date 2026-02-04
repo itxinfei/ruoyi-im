@@ -530,7 +530,7 @@ onMounted(() => {
         width: 32px;
         height: 32px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 6px;
+        border-radius: var(--dt-radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -552,7 +552,7 @@ onMounted(() => {
         color: #909399;
         background: #f5f7fa;
         padding: 2px 8px;
-        border-radius: 10px;
+        border-radius: var(--dt-radius-lg);
       }
     }
   }
@@ -586,12 +586,12 @@ onMounted(() => {
 
       .bot-item {
         border: 1px solid #e4e7ed;
-        border-radius: 8px;
+        border-radius: var(--dt-radius-md);
         padding: 16px;
         transition: all 0.3s;
 
         &:hover {
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--dt-shadow-3);
         }
 
         &.bot-disabled {
@@ -645,7 +645,7 @@ onMounted(() => {
 
     .rule-item {
       border: 1px solid #e4e7ed;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
       padding: 12px;
       margin-bottom: 12px;
 
@@ -666,7 +666,7 @@ onMounted(() => {
   .avatar-uploader {
     :deep(.el-upload) {
       border: 1px dashed #d9d9d9;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
       cursor: pointer;
       position: relative;
       overflow: hidden;
@@ -691,7 +691,7 @@ onMounted(() => {
       width: 80px;
       height: 80px;
       display: block;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
     }
   }
 }

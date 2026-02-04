@@ -69,13 +69,13 @@ const openWebsite = () => {
   width: 96px;
   height: 96px;
   background: linear-gradient(135deg, var(--el-color-primary, #409eff) 0%, #0e5fd9 100%);
-  border-radius: 24px;
+  border-radius: var(--dt-radius-3xl);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 2;
-  box-shadow: 0 10px 20px rgba(64, 158, 255, 0.3);
+  box-shadow: var(--dt-shadow-brand-strong);
 }
 
 .logo-icon {

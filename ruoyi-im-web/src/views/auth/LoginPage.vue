@@ -570,7 +570,7 @@ onMounted(() => {
 
   .shape {
     position: absolute;
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     filter: blur(60px);
     animation: float 12s ease-in-out infinite;
 

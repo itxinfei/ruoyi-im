@@ -167,7 +167,7 @@ const handleProgressDragStart = (event) => {
     width: 3px;
     height: 8px;
     background: #d1d5db;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
     transition: all 0.2s;
 
     &.active {
@@ -185,7 +185,7 @@ const handleProgressDragStart = (event) => {
     width: 100%;
     height: 6px;
     background: #e2e8f0;
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
     cursor: pointer;
     transition: all 0.2s;
 
@@ -199,7 +199,7 @@ const handleProgressDragStart = (event) => {
       left: 0;
       height: 100%;
       background: var(--dt-brand-color);
-      border-radius: 3px;
+      border-radius: var(--dt-radius-sm);
       transition: width 0.1s ease;
     }
 
@@ -234,7 +234,7 @@ const handleProgressDragStart = (event) => {
     gap: 4px;
     padding: 6px 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
     font-size: 13px;
     transition: all 0.2s;

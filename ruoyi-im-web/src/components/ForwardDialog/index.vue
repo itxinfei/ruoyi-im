@@ -256,7 +256,7 @@ defineExpose({
       flex: 1;
       padding: 12px;
       background: #f5f5f5;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       font-size: 14px;
       color: #262626;
       word-break: break-all;
@@ -307,7 +307,7 @@ defineExpose({
     margin-bottom: 16px;
     padding: 12px;
     background: #fafafa;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
 
     .type-label {
       font-size: 14px;
@@ -325,7 +325,7 @@ defineExpose({
       flex: 1;
       margin: 0;
       border: 1px solid #e8e8e8 !important;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       background: #fff;
       padding: 12px;
       transition: all 0.2s;
@@ -376,7 +376,7 @@ defineExpose({
       flex: 1;
       overflow-y: auto;
       border: 1px solid #f0f0f0;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
 
       .session-item {
         display: flex;

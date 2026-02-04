@@ -801,7 +801,7 @@ watch(() => props.messages, () => {
       color: #fff;
       font-size: 10px;
       font-weight: 600;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -828,7 +828,7 @@ watch(() => props.messages, () => {
         width: 24px;
         height: 3px;
         background: var(--dt-brand-color);
-        border-radius: 2px 2px 0 0;
+        border-radius: var(--dt-radius-sm) var(--dt-radius-sm) 0 0;
       }
     }
   }
@@ -896,7 +896,7 @@ watch(() => props.messages, () => {
 
   .avatar {
     border-radius: var(--dt-radius-md);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--dt-shadow-3);
   }
 
   .name {
@@ -956,7 +956,7 @@ watch(() => props.messages, () => {
       padding: 2px 4px;
       font-size: 9px;
       font-weight: 600;
-      border-radius: 4px;
+      border-radius: var(--dt-radius-sm);
 
       &.owner {
         background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
@@ -1047,7 +1047,7 @@ watch(() => props.messages, () => {
 
   .avatar-large {
     border-radius: var(--dt-radius-md);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dt-shadow-lg);
   }
 
   .user-main {
@@ -1089,7 +1089,7 @@ watch(() => props.messages, () => {
       color: var(--dt-text-tertiary);
       padding: 4px 12px;
       background: var(--dt-bg-tertiary);
-      border-radius: 12px;
+      border-radius: var(--dt-radius-lg);
 
       .dot {
         width: 8px;
@@ -1359,7 +1359,7 @@ watch(() => props.messages, () => {
           background: rgba(255, 204, 0, 0.3);
           color: inherit;
           padding: 0 2px;
-          border-radius: 2px;
+          border-radius: var(--dt-radius-sm);
         }
       }
     }

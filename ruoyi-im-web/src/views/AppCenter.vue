@@ -689,7 +689,7 @@ onMounted(() => {
   padding: 10px 18px;
   background: transparent;
   border: none;
-  border-radius: 20px 20px 0 0;
+  border-radius: var(--dt-radius-2xl) var(--dt-radius-2xl) 0 0;
   font-size: 14px;
   color: var(--dt-text-secondary);
   cursor: pointer;
@@ -708,7 +708,7 @@ onMounted(() => {
   .tab-count {
     padding: 2px 8px;
     background: var(--dt-bg-hover);
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     font-size: 12px;
     font-weight: 600;
   }
@@ -784,7 +784,7 @@ onMounted(() => {
   gap: 10px;
   padding: 10px 16px;
   background: var(--dt-bg-hover);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: all 0.3s;
 
@@ -796,7 +796,7 @@ onMounted(() => {
   .app-icon {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     align-items: center;
@@ -852,7 +852,7 @@ onMounted(() => {
 .app-card {
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   padding: 20px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -886,7 +886,7 @@ onMounted(() => {
   position: relative;
   width: 56px;
   height: 56px;
-  border-radius: 14px;
+  border-radius: var(--dt-radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -910,7 +910,7 @@ onMounted(() => {
     position: absolute;
     top: -4px;
     padding: 2px 6px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     font-size: 10px;
     font-weight: 700;
     color: #fff;
@@ -979,7 +979,7 @@ onMounted(() => {
     .tag {
       padding: 2px 8px;
       background: var(--dt-bg-hover);
-      border-radius: 4px;
+      border-radius: var(--dt-radius-sm);
       font-size: 11px;
       color: var(--dt-text-secondary);
     }
@@ -994,7 +994,7 @@ onMounted(() => {
   .action-btn {
     flex: 1;
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -1050,7 +1050,7 @@ onMounted(() => {
     gap: 12px;
     padding: 12px;
     border: 1px solid var(--dt-border-color);
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     margin-bottom: 8px;
     transition: all 0.2s;
 
@@ -1061,7 +1061,7 @@ onMounted(() => {
     .app-icon {
       width: 40px;
       height: 40px;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       display: flex;
       align-items: center;
       justify-content: center;

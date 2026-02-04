@@ -85,8 +85,14 @@ const startRecording = async () => {
           blob: audioBlob,
           duration: duration
         })
-      } else if (duration > props.maxLength) {
-        ElMessage.warning(`录音时长不能超过${props.maxLength / 1000}秒`)
+      } else {
+        // 录音过短或过长，触发 cancel 事件让父组件重置状态
+        if (duration < props.minLength) {
+          ElMessage.warning(`录音时长太短，最少需要${props.minLength / 1000}秒`)
+        } else {
+          ElMessage.warning(`录音时长不能超过${props.maxLength / 1000}秒`)
+        }
+        emit('cancel')
       }
     }
 
@@ -138,8 +144,10 @@ const handleTouchEnd = () => {
 }
 
 const handleCancel = () => {
-  if (isRecording.value && recordingTime.value < 500) {
+  if (isRecording.value) {
     stopRecording()
+    // 始终触发 cancel 事件，让父组件重置 isVoiceMode
+    emit('cancel')
   }
 }
 
@@ -155,7 +163,7 @@ onUnmounted(() => {
   justify-content: center;
   padding: 16px;
   background: #fff;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   user-select: none;
   touch-action: none;
   cursor: pointer;
@@ -219,7 +227,7 @@ onUnmounted(() => {
   .wave-bar {
     width: 4px;
     background: #ff4d4f;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
     animation: recordingWave 0.6s ease-in-out infinite;
     height: 8px;
 

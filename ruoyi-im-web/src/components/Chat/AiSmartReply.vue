@@ -360,7 +360,7 @@ onUnmounted(() => {
   width: 340px;
   max-height: 480px;
   background: var(--dt-bg-card);
-  border-radius: 16px;
+  border-radius: var(--dt-radius-xl);
   box-shadow: var(--dt-shadow-3xl);
   overflow: hidden;
   z-index: 9999;
@@ -469,7 +469,7 @@ onUnmounted(() => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -550,7 +550,7 @@ onUnmounted(() => {
   width: 24px;
   height: 24px;
   background: var(--dt-brand-color);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   opacity: 0;
   transform: translateX(-8px);
   transition: all var(--dt-transition-fast);
@@ -577,7 +577,7 @@ onUnmounted(() => {
   height: 32px;
   border: 3px solid var(--dt-border-color);
   border-top-color: var(--dt-brand-color);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   animation: spin 1s linear infinite;
 }
 

@@ -183,7 +183,7 @@ watch(visible, (val) => {
   align-items: center;
   gap: 12px;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   border: 1px solid #f0f0f0;
   cursor: pointer;
   transition: all 0.2s;
@@ -198,13 +198,13 @@ watch(visible, (val) => {
     width: 48px;
     height: 48px;
     background: #e6f7ff;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #1890ff;
     font-size: 24px;
-    img { width: 100%; height: 100%; border-radius: 10px; object-fit: cover; }
+    img { width: 100%; height: 100%; border-radius: var(--dt-radius-lg); object-fit: cover; }
   }
 
   .tpl-name {

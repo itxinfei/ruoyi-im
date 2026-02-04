@@ -649,7 +649,7 @@ watch(visible, (val) => {
     width: 100%;
     padding: 0;
     border: 2px dashed var(--el-border-color);
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     background: transparent;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -668,7 +668,7 @@ watch(visible, (val) => {
   gap: 12px;
   padding: 32px 24px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
 
   &.is-dragging {
     background: linear-gradient(135deg, rgba(0, 137, 255, 0.1) 0%, rgba(0, 137, 255, 0.05) 100%);
@@ -701,7 +701,7 @@ watch(visible, (val) => {
     position: absolute;
     inset: -8px;
     background: radial-gradient(circle, rgba(0, 137, 255, 0.2) 0%, transparent 70%);
-    border-radius: 50%;
+    border-radius: var(--dt-radius-full);
     animation: iconPulseFade 2s ease-in-out infinite;
   }
 
@@ -730,7 +730,7 @@ watch(visible, (val) => {
       gap: 4px;
       padding: 4px 10px;
       background: var(--el-fill-color-light);
-      border-radius: 16px;
+      border-radius: var(--dt-radius-xl);
       font-size: 12px;
       color: var(--el-text-color-secondary);
       transition: all 0.3s;
@@ -758,7 +758,7 @@ watch(visible, (val) => {
 .upload-progress-item {
   padding: 12px 16px;
   background: var(--el-fill-color-lighter);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   border: 1px solid var(--el-border-color-lighter);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
@@ -888,7 +888,7 @@ watch(visible, (val) => {
   gap: 12px;
   padding: 12px 16px;
   background: var(--el-fill-color-light);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   border: 1px solid var(--el-border-color-lighter);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -924,7 +924,7 @@ watch(visible, (val) => {
   .attachment-icon-wrapper {
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     background: var(--el-fill-color);
     display: flex;
     align-items: center;

@@ -134,7 +134,7 @@ const handleDelete = () => {
 
 .status-badge {
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   font-size: 12px;
   font-weight: 500;
 }
@@ -151,7 +151,7 @@ const handleDelete = () => {
 
 .priority-badge {
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   font-size: 12px;
   font-weight: 500;
 }
@@ -203,7 +203,7 @@ const handleDelete = () => {
   padding: 2px 8px;
   background: #fff1f0;
   color: #ff4d4f;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   font-size: 12px;
 }
 

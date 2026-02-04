@@ -128,27 +128,27 @@ const handleImageError = () => {
 
 /* 圆形头像（单聊） */
 .avatar-circle {
-  border-radius: 50%;  // 钉钉单聊头像是完全圆形的
+  border-radius: var(--dt-radius-full);  // 钉钉单聊头像是完全圆形的
   border: none;  // 移除边框
   box-shadow: var(--dt-shadow-2);
 }
 
 /* 方形头像（群聊） */
 .avatar-square {
-  border-radius: 6px;  // 钉钉群聊头像：小圆角方形
+  border-radius: var(--dt-radius-md);  // 钉钉群聊头像：小圆角方形
   border: 1px solid rgba(0, 137, 255, 0.1);
   box-shadow: var(--dt-shadow-2);
 }
 
 /* 消息中的特殊头像样式 */
 .dingtalk-avatar.message-avatar {
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   border: 1px solid rgba(0, 137, 255, 0.15);
 }
 
 /* 用户信息头像 */
 .dingtalk-avatar.user-info-avatar {
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   border: 1px solid rgba(0, 137, 255, 0.15);
 }
 

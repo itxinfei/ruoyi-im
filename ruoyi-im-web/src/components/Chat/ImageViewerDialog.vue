@@ -529,7 +529,7 @@ onUnmounted(() => {
   z-index: 90;
   background: rgba(0, 0, 0, 0.6);
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   opacity: 0;
   transition: opacity 0.3s;
 
@@ -583,13 +583,13 @@ onUnmounted(() => {
 
   &::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 
   .thumbnail-item {
     width: 56px;
     height: 56px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     overflow: hidden;
     cursor: pointer;
     opacity: 0.6;

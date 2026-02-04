@@ -117,14 +117,14 @@ const handleClick = () => {
 .combine-preview {
   width: 280px;
   background: #f5f5f5;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
     background: #e8e8e8;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dt-shadow-2);
   }
 
   // 标题栏

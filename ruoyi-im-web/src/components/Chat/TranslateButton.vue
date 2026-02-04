@@ -138,7 +138,7 @@ export default {
   gap: 4px;
   padding: 4px 8px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   transition: background-color 0.2s;
 }
 

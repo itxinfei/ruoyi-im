@@ -188,7 +188,7 @@ const emit = defineEmits([
 
 .settings-list {
   background: var(--dt-bg-card);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
 }
 
@@ -228,7 +228,7 @@ const emit = defineEmits([
 
 .action-list {
   background: var(--dt-bg-card);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
 }
 
@@ -267,7 +267,7 @@ const emit = defineEmits([
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   background: var(--dt-bg-secondary);
   color: var(--dt-text-secondary);
 }

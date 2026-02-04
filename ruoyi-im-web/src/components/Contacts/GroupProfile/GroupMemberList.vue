@@ -447,7 +447,7 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: background-color var(--dt-transition-base);
 
@@ -469,7 +469,7 @@ onMounted(() => {
   height: 10px;
   background: #67c23a;
   border: 2px solid #fff;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
 }
 
 .member-info {
@@ -512,7 +512,7 @@ onMounted(() => {
 
 .role-group {
   background: var(--dt-bg-card);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
   border: 1px solid var(--dt-border-light);
   transition: all var(--dt-transition-base);
@@ -560,7 +560,7 @@ onMounted(() => {
   color: var(--dt-text-tertiary);
   background: var(--dt-bg-secondary);
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
 }
 
 .expand-icon {
@@ -573,7 +573,7 @@ onMounted(() => {
 
   .member-item {
     padding: 8px 10px;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
 
     &:hover {
       background: var(--dt-bg-secondary);

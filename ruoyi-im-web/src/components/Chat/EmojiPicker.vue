@@ -170,8 +170,8 @@ watch(recentEmojis, (newVal) => {
   max-height: 280px;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-color);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-dialog);
   z-index: 1000;
   overflow: hidden;
   display: flex;
@@ -180,7 +180,7 @@ watch(recentEmojis, (newVal) => {
   .dark & {
     background: var(--dt-bg-card-dark);
     border-color: var(--dt-border-dark);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--dt-shadow-3xl);
   }
 }
 
@@ -209,7 +209,7 @@ watch(recentEmojis, (newVal) => {
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all 0.2s;
 
@@ -256,7 +256,7 @@ watch(recentEmojis, (newVal) => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -269,7 +269,7 @@ watch(recentEmojis, (newVal) => {
   font-size: 20px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all 0.15s;
 

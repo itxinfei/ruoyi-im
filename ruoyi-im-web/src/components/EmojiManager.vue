@@ -360,7 +360,7 @@ const handleAddToMine = async (emoji) => {
 
     .emoji-item {
       background: var(--el-fill-color-light);
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       padding: 12px;
       transition: all 0.2s;
 
@@ -382,7 +382,7 @@ const handleAddToMine = async (emoji) => {
         justify-content: center;
         margin-bottom: 8px;
         background: #fff;
-        border-radius: 6px;
+        border-radius: var(--dt-radius-md);
         overflow: hidden;
 
         .emoji-image {

@@ -305,7 +305,7 @@ onUnmounted(() => {
     color: var(--dt-text-tertiary);
     background: rgba(0, 0, 0, 0.3);
     padding: 4px 12px;
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
   }
 
   &.error-placeholder {

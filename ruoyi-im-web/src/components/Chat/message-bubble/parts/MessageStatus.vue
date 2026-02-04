@@ -248,7 +248,7 @@ function handleRetry() {
     &:hover {
       transform: scale(1.1);
       background: var(--dt-brand-bg);  // 方案A: 新增背景色，hover 更明显
-      border-radius: 4px;
+      border-radius: var(--dt-radius-sm);
     }
   }
 }
@@ -301,7 +301,7 @@ function handleRetry() {
     gap: 4px;
     padding: 6px 12px;
     background: #fff;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     opacity: 0;
     pointer-events: none;
@@ -330,7 +330,7 @@ function handleRetry() {
     background: rgba(0, 0, 0, 0.8);
     color: #fff;
     font-size: 12px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;

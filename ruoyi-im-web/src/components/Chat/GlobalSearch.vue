@@ -263,7 +263,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   background: #fff;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   z-index: 101;
   max-height: 500px;
   display: flex;
@@ -306,7 +306,7 @@ onMounted(() => {
   align-items: center;
   padding: 4px 12px;
   background: #f2f3f5;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   font-size: 13px;
   color: #1f2329;
   max-width: 150px;
@@ -327,7 +327,7 @@ onMounted(() => {
   align-items: center;
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
 
   &:hover {
     background: #f5f6f7;
@@ -337,7 +337,7 @@ onMounted(() => {
   .avatar {
     width: 32px;
     height: 32px;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -356,7 +356,7 @@ onMounted(() => {
 .message-item {
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
 
   &:hover {
     background: #f5f6f7;
@@ -410,5 +410,5 @@ onMounted(() => {
 }
 
 .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: var(--dt-radius-sm); }
 </style>

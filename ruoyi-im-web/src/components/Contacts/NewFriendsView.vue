@@ -131,7 +131,7 @@ defineExpose({ refresh: loadRequests })
   height: 28px;
   border: 3px solid var(--dt-border-light);
   border-top-color: var(--dt-brand-color);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   animation: spin 0.8s linear infinite;
 
   .dark & {

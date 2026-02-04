@@ -228,7 +228,7 @@ $dt-border-color: #E5E6EB;
   align-items: center;
   gap: 8px;
   padding: 12px 8px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   transition: all 0.15s;
 
   &.clickable {
@@ -263,7 +263,7 @@ $dt-border-color: #E5E6EB;
       align-items: center;
       justify-content: center;
       color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--dt-shadow-2);
 
       &.owner {
         background: #FF4D4F;

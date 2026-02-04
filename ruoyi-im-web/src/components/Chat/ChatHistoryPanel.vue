@@ -395,7 +395,7 @@ const getConversationId = () => {
     justify-content: center;
     background: transparent;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
     color: var(--dt-text-secondary);
     transition: all 0.2s;
@@ -427,7 +427,7 @@ const getConversationId = () => {
     align-items: center;
     gap: 6px;
     padding: 8px 14px;
-    border-radius: 20px;
+    border-radius: var(--dt-radius-2xl);
     background: var(--dt-bg-body);
     border: 1px solid var(--dt-border-light);
     cursor: pointer;
@@ -471,7 +471,7 @@ const getConversationId = () => {
 
   :deep(.el-input) {
     .el-input__wrapper {
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       padding: 4px 12px;
       box-shadow: none;
       border: 1px solid var(--dt-border-light);
@@ -511,7 +511,7 @@ const getConversationId = () => {
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-color);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm);
 
     &:hover {
       background: var(--dt-text-tertiary);
@@ -565,7 +565,7 @@ const getConversationId = () => {
   display: flex;
   gap: 10px;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: all 0.2s;
 
@@ -586,7 +586,7 @@ const getConversationId = () => {
 .message-avatar {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: var(--dt-radius-full);
   overflow: hidden;
   flex-shrink: 0;
 
@@ -684,7 +684,7 @@ const getConversationId = () => {
 
     .el-button {
       flex: 1;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
 
       &.el-button--small {
         height: 28px;

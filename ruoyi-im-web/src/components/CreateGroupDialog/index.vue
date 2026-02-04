@@ -239,7 +239,7 @@ watch(visible, (val) => {
 .avatar-uploader {
   :deep(.el-upload) {
     border: 1px dashed #d9d9d9;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
     position: relative;
     overflow: hidden;
