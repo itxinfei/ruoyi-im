@@ -178,11 +178,11 @@
       </div>
     </Transition>
 
-    <GroupDetailModal 
+    <GroupProfileDialog
       v-if="isGroup"
       v-model="showGroupSettings"
       :group-id="contact?.id"
-      @update="emit('update')"
+      @update-group="emit('update')"
     />
   </div>
 </template>
@@ -199,7 +199,7 @@ import { updateContactRemark, deleteContact } from '@/api/im/contact'
 import { addFavorite, removeFavorite, isFavorited } from '@/api/im/favorite'
 import { addTokenToUrl } from '@/utils/file'
 import { copyToClipboard } from '@/utils/format'
-import GroupDetailModal from '@/components/Chat/GroupDetailModal.vue'
+import GroupProfileDialog from '@/components/Contacts/GroupProfileDialog.vue'
 
 const props = defineProps({
   contact: Object
@@ -365,7 +365,7 @@ const handleDeleteContact = () => {
       
       .main-avatar {
         border: 4px solid var(--el-bg-color);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        box-shadow: var(--dt-shadow-dialog);
         background: var(--el-color-primary-light-9);
         color: var(--el-color-primary);
         font-size: 48px;
@@ -478,7 +478,7 @@ const handleDeleteContact = () => {
   background-color: var(--el-bg-color);
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--dt-shadow-card);
   
   .card-title {
     font-size: 16px;

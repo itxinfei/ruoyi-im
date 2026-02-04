@@ -721,13 +721,13 @@ $transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   right: 0;
   background: #fff;
   border-radius: $border-radius;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-2xl);
   z-index: 1000;
   overflow: hidden;
-  
+
   :global(.dark) & {
     background: #1e293b;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--dt-shadow-3xl);
   }
 }
 

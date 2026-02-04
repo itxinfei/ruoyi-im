@@ -63,7 +63,7 @@ defineEmits(['toggle'])
   transition: all var(--dt-transition-fast);
 
   &.sticky {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--dt-shadow-2);
   }
 
   .group-title {

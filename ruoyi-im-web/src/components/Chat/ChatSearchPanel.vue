@@ -484,11 +484,11 @@ watch(() => props.visible, (val) => {
   :deep(.el-input) {
     .el-input__wrapper {
       border-radius: 24px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--dt-shadow-3);
       padding: 8px 16px;
 
       &:hover, &.is-focus {
-        box-shadow: 0 2px 12px rgba(0, 137, 255, 0.2);
+        box-shadow: var(--dt-shadow-brand-light);
       }
     }
 

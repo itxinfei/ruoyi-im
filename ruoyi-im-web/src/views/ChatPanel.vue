@@ -113,12 +113,6 @@
         @batch-forward="handleBatchForwardConfirm"
       />
 
-      <!-- 通话对话框 -->
-      <CallDialog
-        ref="callDialogRef"
-        :session="session"
-      />
-
       <!-- 语音通话 -->
       <VoiceCallDialog
         v-model:visible="showVoiceCall"
@@ -253,7 +247,6 @@ import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInputRefactored.vue'
 import PinnedMessagesPanel from '@/components/Chat/PinnedMessagesPanel.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
-import CallDialog from '@/components/Chat/CallDialog.vue'
 import VoiceCallDialog from '@/components/Chat/VoiceCallDialog.vue'
 import VideoCallDialog from '@/components/Chat/VideoCallDialog.vue'
 import ChatHistoryPanel from '@/components/Chat/ChatHistoryPanel.vue'
@@ -374,7 +367,6 @@ const {
 const showGroupDetail = ref(false)
 const msgListRef = ref(null)
 const forwardDialogRef = ref(null)
-const callDialogRef = ref(null)
 const showSearchPanel = ref(false)  // 搜索面板（与聊天内搜索区分）
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)

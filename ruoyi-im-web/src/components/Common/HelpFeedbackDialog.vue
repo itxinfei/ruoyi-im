@@ -703,12 +703,12 @@ watch(visible, (val) => {
       font-size: 16px;
       background: var(--dt-brand-color);
       border: none;
-      box-shadow: 0 4px 12px rgba(0, 137, 255, 0.3);
+      box-shadow: var(--dt-shadow-brand);
       transition: all var(--dt-transition-fast);
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 137, 255, 0.4);
+        box-shadow: 0 6px 20px rgba(0, 137, 255, 0.4); // 保持 hover 特效
       }
 
       &:active {

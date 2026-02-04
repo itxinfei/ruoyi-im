@@ -910,7 +910,7 @@ watch(visible, (val) => {
     background: var(--el-fill-color);
     border-color: var(--el-border-color);
     transform: translateX(2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--dt-shadow-3);
 
     &::before {
       opacity: 1;

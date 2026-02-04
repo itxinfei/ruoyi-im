@@ -357,7 +357,7 @@ onMounted(() => {
 :deep(.el-dialog) {
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--dt-shadow-dialog);
   margin-top: 5vh !important;
   background: var(--dt-bg-body);
 }

@@ -463,7 +463,7 @@ const handleShowMembers = () => {
   align-items: center;
   justify-content: center;
   border-radius: var(--dt-radius-md);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--dt-shadow-3);
 
   :deep(.dingtalk-avatar) {
     border-radius: 6px !important;  // 钉钉标准圆角
@@ -754,7 +754,7 @@ const handleShowMembers = () => {
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--dt-shadow-3);
 
     .btn-icon-wrapper {
       position: relative;

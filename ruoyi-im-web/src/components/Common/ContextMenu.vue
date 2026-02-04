@@ -359,7 +359,7 @@ onUnmounted(() => {
   background: var(--dt-bg-card, #ffffff);
   border: 1px solid var(--dt-border-light, #e5e5e5);
   border-radius: var(--dt-radius-md, 6px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-float);
   padding: 4px 0;
   min-width: 160px;
   max-width: 240px;

@@ -206,7 +206,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     overflow: hidden;
     padding: 0;
     border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--dt-shadow-dialog);
     // 确保在小屏幕上不会超出视口
     max-height: 90vh;
     

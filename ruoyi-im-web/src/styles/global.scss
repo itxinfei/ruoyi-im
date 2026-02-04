@@ -702,7 +702,7 @@ button:active {
 
 .el-dialog {
   background-color: var(--dt-bg-card);
-  border-radius: var(--dt-radius-lg);
+  border-radius: var(--dt-radius-xl); // 钉钉规范：弹窗圆角 16px
   box-shadow: var(--dt-shadow-modal);
 
   .el-dialog__header {

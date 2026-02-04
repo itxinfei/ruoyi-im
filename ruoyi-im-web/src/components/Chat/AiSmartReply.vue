@@ -361,7 +361,7 @@ onUnmounted(() => {
   max-height: 480px;
   background: var(--dt-bg-card);
   border-radius: 16px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--dt-shadow-3xl);
   overflow: hidden;
   z-index: 9999;
   animation: replyPanelIn 0.3s var(--dt-ease-out);
@@ -622,7 +622,7 @@ onUnmounted(() => {
 :global(.dark) {
   .ai-reply-panel {
     background: var(--dt-bg-card-dark);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--dt-shadow-3xl); // 暗色模式使用相同的阴影变量
   }
 
   .panel-header {

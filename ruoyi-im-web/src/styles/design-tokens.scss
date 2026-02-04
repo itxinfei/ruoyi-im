@@ -91,6 +91,17 @@
   --dt-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
   --dt-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
   --dt-shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.2);
+  // 扩展阴影令牌（用于特殊场景）
+  --dt-shadow-2xl: 0 10px 40px rgba(0, 0, 0, 0.15); // 大弹出层
+  --dt-shadow-3xl: 0 12px 48px rgba(0, 0, 0, 0.2);   // 超强阴影
+  --dt-shadow-brand: 0 4px 12px rgba(0, 137, 255, 0.3); // 品牌色阴影
+  --dt-shadow-brand-light: 0 2px 12px rgba(0, 137, 255, 0.2); // 浅品牌色阴影
+  --dt-shadow-brand-strong: 0 6px 20px rgba(0, 137, 255, 0.4); // 强品牌色阴影
+  --dt-shadow-warning: 0 4px 12px rgba(255, 77, 79, 0.3); // 警告色阴影
+  --dt-shadow-warning-strong: 0 2px 8px rgba(255, 77, 79, 0.4); // 强警告色阴影
+  --dt-shadow-success: 0 6px 20px rgba(34, 197, 94, 0.4); // 成功色阴影
+  --dt-shadow-info: 0 6px 20px rgba(59, 130, 246, 0.4); // 信息色阴影
+  --dt-shadow-dialog: 0 20px 40px rgba(0, 0, 0, 0.15); // 对话框专用
 
   // === Typography (字体) ===
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',

@@ -629,7 +629,7 @@ const handleMoreCommand = (command) => {
 
 .user-avatar-large {
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-float);
 }
 
 .user-basic-info {

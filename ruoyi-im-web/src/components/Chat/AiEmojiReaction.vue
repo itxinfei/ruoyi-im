@@ -237,7 +237,7 @@ watch(() => props.visible, (newVal) => {
   max-height: 420px;
   background: var(--dt-bg-card);
   border-radius: 16px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--dt-shadow-3xl);
   overflow: hidden;
   z-index: 9999;
   animation: emojiPanelIn 0.3s var(--dt-ease-out);
@@ -531,7 +531,7 @@ watch(() => props.visible, (newVal) => {
 :global(.dark) {
   .ai-emoji-panel {
     background: var(--dt-bg-card-dark);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--dt-shadow-3xl);
   }
 
   .panel-header {
