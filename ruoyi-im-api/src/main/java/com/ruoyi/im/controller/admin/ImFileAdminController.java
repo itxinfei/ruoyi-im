@@ -177,7 +177,7 @@ public class ImFileAdminController {
     public Result<List<Map<String, Object>>> getFileStatisticsByType() {
         QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         wrapper.select("file_type", "COUNT(*) as count", "SUM(file_size) as totalSize");
-        wrapper.eq("is_deleted", 0);
+        wrapper.eq("status", "ACTIVE");
         wrapper.groupBy("file_type");
 
         List<Map<String, Object>> statistics = fileAssetMapper.selectMaps(wrapper);
@@ -194,7 +194,7 @@ public class ImFileAdminController {
     public Result<List<Map<String, Object>>> getFileStatisticsByUploader() {
         QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         wrapper.select("uploader_id", "COUNT(*) as count", "SUM(file_size) as totalSize");
-        wrapper.eq("is_deleted", 0);
+        wrapper.eq("status", "ACTIVE");
         wrapper.groupBy("uploader_id");
         wrapper.orderByDesc("COUNT(*)");
         wrapper.last("LIMIT 10");

@@ -222,7 +222,7 @@
                 </div>
                 <div class="file-info">
                   <div class="file-name">{{ file.name }}</div>
-                  <div class="file-meta">{{ formatFileSize(file.size) }} · {{ formatDate(file.sendTime) }}</div>
+                  <div class="file-meta">{{ utilsFormatFileSize(file.size) }} · {{ formatDate(file.sendTime) }}</div>
                 </div>
                 <el-dropdown trigger="click" @command="(cmd) => handleFileCommand(cmd, file)">
                   <el-button link class="file-more">
@@ -524,12 +524,6 @@ const getFileIcon = (type) => {
     default: 'insert_drive_file'
   }
   return iconMap[type] || iconMap.default
-}
-
-// 格式化文件大小（兼容无数据情况）
-const formatFileSize = (bytes) => {
-  if (!bytes) return '未知'
-  return utilsFormatFileSize(bytes)
 }
 
 const formatDate = formatDateTimeISO

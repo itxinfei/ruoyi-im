@@ -388,7 +388,7 @@ import {
 } from '@element-plus/icons-vue'
 import { globalSearch } from '@/api/im/globalSearch'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import { formatTime } from '@/utils/format'
+import { formatTime, formatFileSize } from '@/utils/format'
 import { getJSON, setJSON } from '@/utils/storage'
 
 const props = defineProps({
@@ -576,14 +576,6 @@ const getFileTypeClass = (fileName) => {
     zip: 'zip', rar: 'zip', '7z': 'zip'
   }
   return typeMap[ext] || 'default'
-}
-
-const formatFileSize = (size) => {
-  if (!size) return ''
-  if (size < 1024) return size + ' B'
-  if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB'
-  if (size < 1024 * 1024 * 1024) return (size / (1024 * 1024)).toFixed(1) + ' MB'
-  return (size / (1024 * 1024 * 1024)).toFixed(1) + ' GB'
 }
 
 const highlightText = (text) => {
