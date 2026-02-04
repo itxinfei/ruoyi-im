@@ -52,11 +52,11 @@ export default defineConfig({
         /node_modules/,
         /dist/,
         /\.git/,
-        /tests/,
-        // 排除 views 目录，手动导入更明确
-        /src\/views/,
-        // 排除 composables 目录
-        /src\/composables/
+        /tests/
+        // views 目录需要自动导入 Element Plus 组件
+        // /src\/views/,
+        // composables 目录不需要组件自动导入
+        // /src\/composables/
       ],
       // 减少深度扫描
       deep: false,

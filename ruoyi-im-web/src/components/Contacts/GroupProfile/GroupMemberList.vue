@@ -32,7 +32,7 @@
 
     <!-- 成员统计 -->
     <div class="members-count">
-      共 {{ filteredMembers.length }} 位成员
+      共 {{ filteredIndexedMembers?.length || 0 }} 位成员
     </div>
 
     <!-- 成员列表（支持虚拟滚动 + 角色分组） -->

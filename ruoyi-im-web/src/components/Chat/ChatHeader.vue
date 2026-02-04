@@ -56,7 +56,7 @@
         </div>
 
         <!-- 群聊成员头像列表 -->
-        <div v-if="session?.type === 'GROUP' && displayMembers.length > 0 && !isTyping" class="member-avatars" @click="handleShowMembers">
+        <div v-if="session?.type === 'GROUP' && displayMembers.length > 0 && !isTyping" class="member-avatars" @click.stop="handleShowMembers">
           <DingtalkAvatar
             v-for="member in displayMembers.slice(0, 5)"
             :key="member.id"

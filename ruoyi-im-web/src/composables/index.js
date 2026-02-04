@@ -3,30 +3,8 @@
  * 提供项目所有可复用组合式函数的统一入口
  */
 
-// 时间格式化
-export { useTimeFormat, formatTime, formatTimeDivider, shouldShowTimeDivider } from './useTimeFormat'
-
 // 用户状态
 export { useUserStatus, UserStatus, mapUserOnlineStatus } from './useUserStatus'
-
-// 消息格式化
-export {
-  useMessageFormat,
-  MessageType,
-  formatMessagePreview,
-  getFileIcon,
-  isImageFile,
-  formatFileSize,
-  parseMentions,
-  renderMentions
-} from './useMessageFormat'
-
-// 图片懒加载
-export {
-  useLazyLoad,
-  useImageLazyLoad,
-  lazyLoadDirective
-} from './useLazyLoad'
 
 // 响应式断点
 export { useResponsive } from './useResponsive'
@@ -36,6 +14,13 @@ export { useTheme } from './useTheme'
 
 // WebSocket IM
 export { useImWebSocket } from './useImWebSocket'
+
+// 图片懒加载
+export {
+  useLazyLoad,
+  useImageLazyLoad,
+  lazyLoadDirective
+} from './useLazyLoad'
 
 // ========== 聊天相关 Composables ==========
 
@@ -64,3 +49,25 @@ export { useInputCommand, DEFAULT_COMMANDS } from './useInputCommand'
 
 // 语音预览
 export { useVoicePreview, formatVoiceTime } from './useVoicePreview'
+
+// 消息重试
+export { useMessageRetry } from './useMessageRetry'
+
+// @提及功能
+export { useMentions } from './useMentions'
+
+// 键盘快捷键
+export { useKeyboardShortcuts } from './useKeyboardShortcuts'
+
+// IndexedDB
+export { useIndexedDB } from './useIndexedDB'
+
+// ========== 聊天功能模块 ==========
+
+export {
+  useChatMultiSelect,
+  useChatUpload,
+  useChatDialogs,
+  useChatMessages,
+  useChatCommands
+} from './useChat'

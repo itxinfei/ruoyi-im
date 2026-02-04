@@ -7,7 +7,7 @@
   <div class="qrcode-container">
     <!-- 二维码展示区 -->
     <div class="qrcode-wrapper">
-      <div ref="qrcodeRef" class="qrcode-canvas"></div>
+      <canvas ref="qrcodeRef" class="qrcode-canvas"></canvas>
 
       <!-- 加载状态 -->
       <div v-if="loading" class="qrcode-loading">

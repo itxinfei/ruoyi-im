@@ -1099,19 +1099,30 @@ onUnmounted(() => {
 .message-input {
   flex: 1;
   width: 100%;
-  border: none;
-  outline: none;
+  border: none !important;
+  outline: none !important;
   resize: none;
   font-size: var(--dt-font-size-base);
   line-height: 1.6;
   color: var(--dt-text-primary);
   padding: var(--dt-space-3);
   min-height: 80px;
-  background: transparent;
+  background: transparent !important;
   font-family: var(--dt-font-family);
+  // 移除所有可能的边框效果（包括 Element Plus 的 box-shadow inset）
+  box-shadow: none !important;
   // 平滑高度过渡（对齐钉钉输入框体验）
   transition: min-height var(--dt-transition-base) var(--dt-ease-out),
               color var(--dt-transition-base);
+
+  &:focus,
+  &:hover,
+  &:active,
+  &:focus-visible {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
 
   &::placeholder {
     color: var(--dt-text-quaternary);

@@ -211,13 +211,11 @@
         </div>
       </div>
     </div>
-
-
   </div>
 </template>
 
-<script setup>import { getRememberedUsername, removeItem, setRememberedUsername } from '@/utils/storage'
-
+<script setup>
+import { getRememberedUsername, removeItem, setRememberedUsername } from '@/utils/storage'
 import { ref, reactive, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
@@ -472,6 +470,33 @@ onMounted(() => {
     opacity: 0.3;
   }
 
+  // 强制覆盖输入框边框样式，确保始终显示
+  :deep(.el-input__wrapper) {
+    border: 1.5px solid #E5E9EF !important;
+    box-shadow: none !important;
+  }
+
+  // 所有状态下都强制显示边框
+  :deep(.el-input__wrapper:hover),
+  :deep(.el-input__wrapper.is-focus),
+  :deep(.el-input:hover .el-input__wrapper),
+  :deep(.el-input.is-active .el-input__wrapper) {
+    border: 1.5px solid #0089FF !important;
+    box-shadow: none !important;
+  }
+
+  // 覆盖 Element Plus 默认的 box-shadow inset 效果
+  :deep(.el-input__inner) {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  // 确保所有状态下的输入框 wrapper 都有边框
+  :deep(.login-form .el-input__wrapper),
+  :deep(.el-form-item .el-input__wrapper) {
+    border: 1.5px solid #E5E9EF !important;
+    box-shadow: none !important;
+  }
 
 }
 
@@ -908,6 +933,17 @@ onMounted(() => {
 
         :deep(.el-input__wrapper) {
           padding-right: 16px;
+          border: 1.5px solid var(--dt-border-color);
+          box-shadow: none !important;
+
+          &:hover {
+            border-color: var(--dt-border-input-hover);
+          }
+
+          &.is-focus {
+            border-color: var(--dt-brand-color);
+            box-shadow: 0 0 0 3px var(--dt-brand-lighter) !important;
+          }
         }
       }
 

@@ -256,27 +256,35 @@ const loadGroupInfo = async () => {
   loading.value = true
   try {
     const [groupRes, membersRes] = await Promise.all([
-      getGroup(props.groupId),
-      getGroupMembers(props.groupId)
+      getGroup(props.groupId).catch(() => ({ code: 500, data: null })),
+      getGroupMembers(props.groupId).catch(() => ({ code: 500, data: [] }))
     ])
 
-    if (groupRes.code === 200) {
+    if (groupRes.code === 200 && groupRes.data) {
       groupInfo.value = groupRes.data
       groupSettings.value = {
         needVerify: groupRes.data.needVerify || false,
         allowInvite: groupRes.data.allowInvite !== false,
         allMuted: groupRes.data.allMuted || false
       }
+    } else {
+      // 确保即使失败也有默认值
+      groupInfo.value = { name: '群聊' }
     }
 
-    if (membersRes.code === 200) {
-      members.value = membersRes.data || []
+    // 确保 members 始终是数组
+    if (membersRes.code === 200 && Array.isArray(membersRes.data)) {
+      members.value = membersRes.data
+    } else {
+      members.value = []
     }
 
     loadAnnouncements()
   } catch (error) {
     console.error('加载群组信息失败', error)
-    ElMessage.error('加载群组信息失败')
+    // 确保错误情况下也有默认值
+    groupInfo.value = { name: '群聊' }
+    members.value = []
   } finally {
     loading.value = false
   }

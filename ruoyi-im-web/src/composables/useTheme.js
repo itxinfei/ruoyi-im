@@ -115,8 +115,10 @@ export function useTheme() {
 
   return {
     currentTheme,
+    themeMode: currentTheme, // 别名，保持兼容性
     isDark,
     setTheme,
+    setThemeMode: setTheme, // 别名，保持兼容性
     toggleDark,
     THEME_LIGHT,
     THEME_DARK,

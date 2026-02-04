@@ -25,7 +25,7 @@
             :typing-users="typingUsers"
             :pinned-count="pinnedCount"
             @show-detail="handleToggleDetail"
-            @toggle-sidebar="handleToggleDetail"
+            @toggle-sidebar="handleToggleSidebar"
             @multiselect="handleToggleMultiSelect"
             @toggle-multi-select="handleToggleMultiSelect"
             @toggle-pinned="showPinnedPanel = !showPinnedPanel"
@@ -1103,6 +1103,12 @@ const handleToggleDetail = () => {
     // 触发父组件处理用户详情显示
     emit('show-user', props.session.targetId)
   }
+}
+
+// 处理侧边栏切换（成员列表等），当前 ChatPanel 无此功能
+const handleToggleSidebar = (tab) => {
+  // 侧边栏切换逻辑（如成员列表），暂无实现
+  console.log('toggle-sidebar:', tab)
 }
 
 // 图片预览处理

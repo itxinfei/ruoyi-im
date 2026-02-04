@@ -81,7 +81,7 @@
                     <div class="file-name" :title="file.name">{{ file.name }}</div>
                     <div class="file-meta">
                       <span class="file-sender">{{ file.senderName }}</span>
-                      <span class="file-size">{{ formatSize(file.size) }}</span>
+                      <span class="file-size">{{ formatFileSize(file.size) }}</span>
                     </div>
                   </div>
 
@@ -154,7 +154,7 @@ import { ElLoading } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { confirmDelete, messageSuccess } from '@/utils/ui'
 import { saveFileToCloud } from '@/api/im/cloud'
-import { parseMessageContent } from '@/utils/message'
+import { parseMessageContent, formatFileSize } from '@/utils/message'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -322,25 +322,10 @@ const getFileIcon = (fileName) => {
   return icons[type] || icons.file
 }
 
-// 格式化文件大小
-const formatSize = (bytes) => {
-  if (!bytes) return '未知大小'
-  const units = ['B', 'KB', 'MB', 'GB']
-  let size = bytes
-  let unitIndex = 0
-
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024
-    unitIndex++
-  }
-
-  return `${size.toFixed(unitIndex > 0 ? 1 : 0)} ${units[unitIndex]}`
-}
-
-// 格式化总大小
+// 格式化总大小（使用全局 formatFileSize 函数）
 const formatTotalSize = () => {
   const total = fileList.value.reduce((sum, f) => sum + (f.size || 0), 0)
-  return formatSize(total)
+  return formatFileSize(total)
 }
 
 // 格式化日期
