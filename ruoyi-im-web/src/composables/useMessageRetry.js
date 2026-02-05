@@ -3,10 +3,10 @@
  * 管理失败消息的缓存、重试和清理
  */
 import { ref, computed } from 'vue'
+import { MAX_RETRIES } from '@/constants/retry.js'
 
 // LocalStorage 键
 const FAILED_MESSAGES_KEY = 'im_failed_messages'
-const RETRY_LIMIT = 3 // 最多重试3次
 const CACHE_TTL = 5 * 60 * 1000 // 5分钟缓存时间
 
 /**
@@ -83,7 +83,7 @@ export function useMessageRetry() {
     const retryCount = existing ? existing.retryCount + 1 : 1
 
     // 检查重试次数限制
-    if (retryCount > RETRY_LIMIT) {
+    if (retryCount > MAX_RETRIES) {
       console.warn('消息重试次数已达上限:', tempId)
       removeFailedMessage(tempId)
       return false
@@ -180,7 +180,7 @@ export function useMessageRetry() {
    */
   function canRetry(tempId) {
     const msg = failedMessages.value[tempId]
-    return msg && msg.retryCount < RETRY_LIMIT
+    return msg && msg.retryCount < MAX_RETRIES
   }
 
   return {

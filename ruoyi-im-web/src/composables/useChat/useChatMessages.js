@@ -13,6 +13,7 @@ import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { getMessages, sendMessage, retryMessage, deleteMessage } from '@/api/im/message'
 import { useIndexedDB } from '../useIndexedDB.js'
+import { MAX_RETRIES } from '@/constants/retry.js'
 
 export function useChatMessages(sessionId, currentUser) {
   const store = useStore()
@@ -154,24 +155,59 @@ export function useChatMessages(sessionId, currentUser) {
     }
   }
 
+  // 消息重试最大次数限制（从 @/constants/retry.js 统一管理）
+
   /**
    * 重试失败的消息
+   *
+   * 重试策略：
+   * - MAX_RETRIES = 3 表示总共最多尝试 3 次（首次发送 + 最多 2 次重试）
+   * - 重试前立即更新计数，防止竞态条件
+   * - 失败时回滚计数，允许后续重试
+   * - retryCount 持久化到 IndexedDB，刷新页面后保留
    */
   const retry = async (message) => {
+    // 预递增：在 API 调用前增加计数，防止失败时计数不增加
+    const currentRetryCount = message.retryCount || 0
+    const newRetryCount = currentRetryCount + 1
+
+    // 检查是否超过最大重试次数
+    if (currentRetryCount >= MAX_RETRIES) {
+      ElMessage.warning('已达到最大重试次数')
+      return
+    }
+
+    // 立即更新 UI，防止并发点击
+    const index = messages.value.findIndex(m => m.clientMsgId === message.clientMsgId)
+    if (index !== -1) {
+      messages.value[index] = {
+        ...messages.value[index],
+        retryCount: newRetryCount
+      }
+    }
+
     try {
       const response = await retryMessage(message.clientMsgId)
 
       if (response.code === 200) {
-        // 更新消息状态
-        const index = messages.value.findIndex(m => m.clientMsgId === message.clientMsgId)
+        // 成功：更新消息状态（保持已递增的计数）
         if (index !== -1) {
-          messages.value[index] = { ...messages.value[index], ...response.data }
+          messages.value[index] = {
+            ...messages.value[index],
+            ...response.data,
+            retryCount: newRetryCount
+          }
           await cacheSingleMessage(messages.value[index])
         }
 
         ElMessage.success('发送成功')
       }
     } catch (error) {
+      // 失败：回滚计数，允许后续重试
+      if (index !== -1) {
+        messages.value[index].retryCount = currentRetryCount
+        await cacheSingleMessage(messages.value[index])
+      }
       console.error('重试消息失败:', error)
       ElMessage.error('重试失败')
       throw error

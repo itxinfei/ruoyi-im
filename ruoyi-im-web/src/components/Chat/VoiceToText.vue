@@ -62,9 +62,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { copyToClipboard } from '@/utils/format'
+import { createTranscript, getTranscript } from '@/api/im/transcript'
+
+/**
+ * 转写错误类 - 保留完整错误信息用于调试
+ */
+class TranscriptError extends Error {
+  constructor(message, code, originalResponse) {
+    super(message)
+    this.name = 'TranscriptError'
+    this.code = code
+    this.originalResponse = originalResponse
+  }
+}
 
 const props = defineProps({
   messageId: {
@@ -97,6 +110,9 @@ const transcript = ref(props.existingTranscript)
 const error = ref('')
 const isExpanded = ref(true)
 
+// 中断控制器 - 用于组件卸载时停止轮询
+const abortController = ref(null)
+
 // 开始转写
 const handleStartTranscribe = async () => {
   if (!props.voiceUrl) {
@@ -104,26 +120,21 @@ const handleStartTranscribe = async () => {
     return
   }
 
+  // 创建新的中断控制器
+  abortController.value = new AbortController()
+
   isTranscribing.value = true
   error.value = ''
   progress.value = 0
 
-  // 模拟转写进度
-  const progressInterval = setInterval(() => {
-    if (progress.value < 90) {
-      progress.value += Math.random() * 15
-    }
-  }, 300)
-
   try {
     // 调用转写接口
-    const result = await callTranscribeAPI()
+    const result = await callTranscribeAPI(abortController.value.signal)
 
-    clearInterval(progressInterval)
     progress.value = 100
 
-    // 模拟转写延迟
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // 模拟转写延迟用于平滑过渡
+    await new Promise(resolve => setTimeout(resolve, 300))
 
     transcript.value = result.text
     isTranscribing.value = false
@@ -137,34 +148,105 @@ const handleStartTranscribe = async () => {
 
     ElMessage.success('语音转文字完成')
   } catch (err) {
-    clearInterval(progressInterval)
     isTranscribing.value = false
+    if (err.name === 'AbortError') {
+      // 用户主动取消，不显示错误
+      console.log('[VoiceToText] 转写已取消')
+      return
+    }
     error.value = err.message || '转写失败，请重试'
+    console.error('[VoiceToText] 转写失败:', err)
   }
 }
 
 // 调用转写 API
-const callTranscribeAPI = async () => {
-  // 这里应该调用真实的后端 API
-  // 目前返回模拟数据
+const callTranscribeAPI = async (signal) => {
+  // 1. 创建转写任务
+  const createResponse = await createTranscript({
+    messageId: props.messageId,
+    voiceUrl: props.voiceUrl,
+    duration: props.duration,
+    language: props.language
+  })
 
-  // 模拟网络请求延迟
-  await new Promise(resolve => setTimeout(resolve, 2000))
+  if (createResponse.code !== 200) {
+    throw new TranscriptError(
+      createResponse.msg || '创建转写任务失败',
+      createResponse.code,
+      createResponse
+    )
+  }
 
-  // 根据语言返回不同的模拟结果
-  const mockResults = {
-    'zh-CN': {
-      text: '这是一条模拟的语音转文字结果。在实际使用中，这里会显示真实的语音识别内容。支持中文、英文等多种语言的语音识别。',
-      confidence: 0.95
-    },
-    'en-US': {
-      text: 'This is a simulated voice-to-text result. In actual use, this will display real voice recognition content. Supports multiple languages.',
-      confidence: 0.92
+  // 2. 轮询获取转写结果（最多等待30秒）
+  const maxPolls = 30
+  const pollInterval = 1000
+
+  for (let i = 0; i < maxPolls; i++) {
+    // 检查是否被中断
+    if (signal?.aborted) {
+      throw new TranscriptError('转写已取消', 'ABORTED', null)
+    }
+
+    // 更新进度（仅使用轮询进度，移除模拟进度定时器）
+    progress.value = Math.min(90, Math.floor((i / maxPolls) * 90))
+
+    const resultResponse = await getTranscript(props.messageId)
+
+    // 验证响应
+    if (!resultResponse || resultResponse.code === undefined) {
+      console.error('[VoiceToText] API 响应异常:', resultResponse)
+      throw new TranscriptError('API 响应异常', 'INVALID_RESPONSE', resultResponse)
+    }
+
+    if (resultResponse.code !== 200) {
+      throw new TranscriptError(
+        resultResponse.msg || '获取转写结果失败',
+        resultResponse.code,
+        resultResponse
+      )
+    }
+
+    // 验证数据
+    if (!resultResponse.data) {
+      console.error('[VoiceToText] API 返回空数据:', resultResponse)
+      throw new TranscriptError('转写数据异常', 'EMPTY_DATA', resultResponse)
+    }
+
+    const { status, content, errorMessage, confidence } = resultResponse.data
+
+    // 使用 switch-case 处理各种状态
+    switch (status) {
+      case 'completed':
+        if (!content) {
+          throw new TranscriptError('转写完成但内容为空', 'EMPTY_CONTENT', resultResponse.data)
+        }
+        return { text: content, confidence: confidence || 1 }
+
+      case 'failed':
+        throw new TranscriptError(
+          errorMessage || '转写失败',
+          'TRANSCRIPT_FAILED',
+          resultResponse.data
+        )
+
+      case 'processing':
+        // 继续等待
+        await new Promise(resolve => setTimeout(resolve, pollInterval))
+        break
+
+      case 'pending':
+      case 'queued':
+        // 任务在队列中，继续等待
+        await new Promise(resolve => setTimeout(resolve, pollInterval))
+        break
+
+      default:
+        console.warn('[VoiceToText] 未知转写状态:', status, '继续等待...')
+        await new Promise(resolve => setTimeout(resolve, pollInterval))
     }
   }
 
-  const lang = props.language.startsWith('zh') ? 'zh-CN' : 'en-US'
-  return mockResults[lang] || mockResults['zh-CN']
+  throw new TranscriptError('转写超时，请稍后重试', 'TIMEOUT', null)
 }
 
 // 复制转写结果
@@ -184,6 +266,14 @@ const handleDelete = () => {
   transcript.value = ''
   emit('delete', props.messageId)
 }
+
+// 组件卸载时清理
+onUnmounted(() => {
+  if (abortController.value) {
+    abortController.value.abort()
+    abortController.value = null
+  }
+})
 
 // 暴露方法
 defineExpose({
