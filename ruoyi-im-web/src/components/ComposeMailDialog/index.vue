@@ -360,7 +360,18 @@ const form = reactive({
 // 表单校验规则
 const rules = {
   toIds: [
-    { required: true, message: '请选择收件人', trigger: 'change', type: 'array', min: 1 }
+    {
+      required: true,
+      message: '请选择收件人',
+      trigger: ['change', 'blur'],
+      validator: (rule, value, callback) => {
+        if (!value || value.length === 0) {
+          callback(new Error('请选择收件人'))
+        } else {
+          callback()
+        }
+      }
+    }
   ],
   subject: [
     { required: true, message: '请输入邮件主题', trigger: 'blur' },
