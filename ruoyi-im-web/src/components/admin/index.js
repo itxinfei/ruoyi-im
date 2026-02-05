@@ -23,7 +23,7 @@ const components = [
 ]
 
 // 安装函数
-const install = (app) => {
+const install = app => {
   components.forEach(component => {
     app.component(component.name || component.__name, component)
   })

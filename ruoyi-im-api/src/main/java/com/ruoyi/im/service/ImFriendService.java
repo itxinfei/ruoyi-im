@@ -7,6 +7,7 @@ import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 好友服务接口
@@ -174,4 +175,69 @@ public interface ImFriendService {
      * @return 好友列表
      */
     List<ImFriendVO> getFriendsByTag(Long userId, String tag);
+
+    /**
+     * 批量发送好友申请
+     * 向多个用户批量发送好友申请
+     *
+     * @param userIds 目标用户ID列表
+     * @param remark 验证消息
+     * @param currentUserId 当前用户ID
+     * @return 发送结果映射，key为用户ID，value为结果状态
+     */
+    Map<Long, String> batchSendFriendRequest(List<Long> userIds, String remark, Long currentUserId);
+
+    /**
+     * 批量删除好友
+     * 删除多个好友关系
+     *
+     * @param contactIds 好友关系ID列表
+     * @param userId 当前用户ID
+     */
+    void batchDeleteFriends(List<Long> contactIds, Long userId);
+
+    /**
+     * 获取推荐好友
+     * 基于部门、通讯录等推荐可能认识的人
+     *
+     * @param userId 当前用户ID
+     * @param type 推荐类型：department(同事)、phone(手机号)、all(全部)
+     * @param limit 返回数量限制
+     * @return 推荐用户列表
+     */
+    List<com.ruoyi.im.vo.user.ImUserVO> getRecommendedContacts(Long userId, String type, Integer limit);
+
+    /**
+     * 匹配通讯录联系人
+     * 上传的通讯录与已注册用户进行匹配
+     *
+     * @param userId 当前用户ID
+     * @param contacts 通讯录联系人列表，格式为[{name: "xxx", phone: "xxx"}]
+     * @return 匹配到的用户列表
+     */
+    List<com.ruoyi.im.vo.user.ImUserVO> matchAddressBookContacts(Long userId, List<Map<String, String>> contacts);
+
+    /**
+     * 获取通讯录匹配结果
+     * 获取之前上传通讯录匹配到的用户
+     *
+     * @param userId 当前用户ID
+     * @return 匹配的用户列表
+     */
+    List<com.ruoyi.im.vo.user.ImUserVO> getAddressBookMatches(Long userId);
+
+    /**
+     * 清除好友列表缓存
+     * 清除指定用户的好友列表Redis缓存
+     *
+     * @param userId 用户ID
+     */
+    void clearFriendListCache(Long userId);
+
+    /**
+     * 批量清除多个用户的好友列表缓存
+     *
+     * @param userIds 用户ID列表
+     */
+    void batchClearFriendListCache(List<Long> userIds);
 }

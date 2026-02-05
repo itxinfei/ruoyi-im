@@ -1,7 +1,10 @@
 <template>
   <div class="member-grid-container">
     <!-- 搜索栏（可选） -->
-    <div v-if="showSearch" class="member-search">
+    <div
+      v-if="showSearch"
+      class="member-search"
+    >
       <el-input
         v-model="searchKeyword"
         placeholder="搜索成员..."
@@ -12,7 +15,10 @@
     </div>
 
     <!-- 成员网格 -->
-    <div class="members-grid" :class="`grid-${columnsPerRow}`">
+    <div
+      class="members-grid"
+      :class="`grid-${columnsPerRow}`"
+    >
       <!-- 邀请按钮（管理员可见） -->
       <div
         v-if="showAddButton && canAddMember"
@@ -42,37 +48,68 @@
             custom-class="member-avatar"
           />
           <!-- 角色标识 -->
-          <div v-if="showRole && member.role === 'OWNER'" class="role-badge owner">
+          <div
+            v-if="showRole && member.role === 'OWNER'"
+            class="role-badge owner"
+          >
             <el-icon><Crown /></el-icon>
           </div>
-          <div v-else-if="showRole && member.role === 'ADMIN'" class="role-badge admin">
+          <div
+            v-else-if="showRole && member.role === 'ADMIN'"
+            class="role-badge admin"
+          >
             <el-icon><UserFilled /></el-icon>
           </div>
           <!-- 在线状态 -->
-          <div v-if="showOnlineStatus" class="online-status" :class="member.onlineStatus || 'offline'" />
+          <div
+            v-if="showOnlineStatus"
+            class="online-status"
+            :class="member.onlineStatus || 'offline'"
+          />
         </div>
-        <span class="member-name" :title="member.name">{{ member.name }}</span>
-        <span v-if="showPosition && member.position" class="member-position" :title="member.position">
+        <span
+          class="member-name"
+          :title="member.name"
+        >{{ member.name }}</span>
+        <span
+          v-if="showPosition && member.position"
+          class="member-position"
+          :title="member.position"
+        >
           {{ member.position }}
         </span>
       </div>
     </div>
 
     <!-- 加载更多 -->
-    <div v-if="hasMore && !loadingMore" class="load-more">
-      <el-button text @click="$emit('load-more')">
+    <div
+      v-if="hasMore && !loadingMore"
+      class="load-more"
+    >
+      <el-button
+        text
+        @click="$emit('load-more')"
+      >
         <el-icon><More /></el-icon>
         加载更多
       </el-button>
     </div>
 
-    <div v-if="loadingMore" class="loading-more">
-      <el-icon class="is-loading"><Loading /></el-icon>
+    <div
+      v-if="loadingMore"
+      class="loading-more"
+    >
+      <el-icon class="is-loading">
+        <Loading />
+      </el-icon>
       <span>加载中...</span>
     </div>
 
     <!-- 空状态 -->
-    <div v-if="filteredMembers.length === 0 && !loading" class="empty-state">
+    <div
+      v-if="filteredMembers.length === 0 && !loading"
+      class="empty-state"
+    >
       <el-icon><UserFilled /></el-icon>
       <span>{{ emptyText }}</span>
     </div>
@@ -175,7 +212,7 @@ const filteredMembers = computed(() => {
 })
 
 // 成员点击处理
-const handleMemberClick = (member) => {
+const handleMemberClick = member => {
   if (props.clickable) {
     emit('member-click', member)
   }

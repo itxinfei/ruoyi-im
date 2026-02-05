@@ -13,14 +13,24 @@
       
       <!-- 标题区域 -->
       <div class="title-section">
-        <h2 class="header-title">{{ title }}</h2>
-        <p v-if="subtitle" class="header-subtitle">{{ subtitle }}</p>
+        <h2 class="header-title">
+          {{ title }}
+        </h2>
+        <p
+          v-if="subtitle"
+          class="header-subtitle"
+        >
+          {{ subtitle }}
+        </p>
       </div>
     </div>
     
     <div class="header-right">
       <!-- 搜索框 -->
-      <div v-if="searchable" class="header-search">
+      <div
+        v-if="searchable"
+        class="header-search"
+      >
         <el-input
           v-model="searchValue"
           :placeholder="searchPlaceholder"
@@ -35,7 +45,10 @@
         <slot name="actions" />
         
         <!-- 更多按钮 -->
-        <el-dropdown v-if="$slots.more" trigger="click">
+        <el-dropdown
+          v-if="$slots.more"
+          trigger="click"
+        >
           <el-button text>
             <el-icon><MoreFilled /></el-icon>
           </el-button>

@@ -56,7 +56,7 @@ export class FocusTrap {
     }
 
     // 添加键盘事件监听
-    this.handleKeyDown = (e) => {
+    this.handleKeyDown = e => {
       if (e.key === 'Tab') {
         if (e.shiftKey) {
           // Shift + Tab
@@ -102,7 +102,7 @@ export function setupSkipLinks() {
 
   skipLinks.forEach((link, index) => {
     const existingLink = document.querySelector(`a[href="${link.href}"]`)
-    if (existingLink) return
+    if (existingLink) {return}
 
     const skipLink = document.createElement('a')
     skipLink.href = link.href
@@ -139,7 +139,7 @@ export function setupSkipLinks() {
  * 为元素添加 ARIA 标签
  */
 export function addAriaLabels(element, options = {}) {
-  if (!element) return
+  if (!element) {return}
 
   const {
     label,
@@ -151,13 +151,13 @@ export function addAriaLabels(element, options = {}) {
     role
   } = options
 
-  if (label) element.setAttribute('aria-label', label)
-  if (labelledby) element.setAttribute('aria-labelledby', labelledby)
-  if (describedby) element.setAttribute('aria-describedby', describedby)
-  if (live) element.setAttribute('aria-live', live)
-  if (atomic !== undefined) element.setAttribute('aria-atomic', String(atomic))
-  if (relevant) element.setAttribute('aria-relevant', relevant)
-  if (role) element.setAttribute('role', role)
+  if (label) {element.setAttribute('aria-label', label)}
+  if (labelledby) {element.setAttribute('aria-labelledby', labelledby)}
+  if (describedby) {element.setAttribute('aria-describedby', describedby)}
+  if (live) {element.setAttribute('aria-live', live)}
+  if (atomic !== undefined) {element.setAttribute('aria-atomic', String(atomic))}
+  if (relevant) {element.setAttribute('aria-relevant', relevant)}
+  if (role) {element.setAttribute('role', role)}
 }
 
 /**
@@ -169,7 +169,7 @@ export function setupKeyboardNavigation(options = {}) {
     shortcuts = {}
   } = options
 
-  container.addEventListener('keydown', (e) => {
+  container.addEventListener('keydown', e => {
     const key = `${e.altKey ? 'ALT_' : ''}${e.ctrlKey ? 'CTRL_' : ''}${e.shiftKey ? 'SHIFT_' : ''}${e.key.toUpperCase()}`
 
     if (shortcuts[key]) {
@@ -226,10 +226,10 @@ export function checkColorContrast(foreground, background, isLargeText = false) 
   const fg = hexToRgb(foreground)
   const bg = hexToRgb(background)
 
-  if (!fg || !bg) return null
+  if (!fg || !bg) {return null}
 
   // 计算相对亮度
-  const luminance = (color) => {
+  const luminance = color => {
     const [r, g, b] = color.map(v => {
       v = v / 255
       return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
@@ -275,7 +275,7 @@ function hexToRgb(hex) {
  * 为表单元素添加错误提示的可访问性支持
  */
 export function setupFormErrorA11y(input, errorElement, errorMessage) {
-  if (!input || !errorElement) return
+  if (!input || !errorElement) {return}
 
   // 设置 aria-invalid
   input.setAttribute('aria-invalid', 'true')

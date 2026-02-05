@@ -3,8 +3,12 @@
     <!-- 头部区域 -->
     <div class="app-header">
       <div class="header-left">
-        <h2 class="page-title">应用中心</h2>
-        <p class="page-subtitle">发现和管理工作应用</p>
+        <h2 class="page-title">
+          应用中心
+        </h2>
+        <p class="page-subtitle">
+          发现和管理工作应用
+        </p>
       </div>
       <div class="header-actions">
         <el-input
@@ -30,16 +34,30 @@
       >
         <span class="tab-icon">{{ category.icon }}</span>
         <span class="tab-label">{{ category.label }}</span>
-        <span v-if="category.count > 0" class="tab-count">{{ category.count }}</span>
+        <span
+          v-if="category.count > 0"
+          class="tab-count"
+        >{{ category.count }}</span>
       </button>
     </div>
 
     <!-- 我的应用区域 -->
-    <div v-if="myApps.length > 0" class="my-apps-section">
+    <div
+      v-if="myApps.length > 0"
+      class="my-apps-section"
+    >
       <div class="section-header">
-        <h3 class="section-title">我的应用</h3>
+        <h3 class="section-title">
+          我的应用
+        </h3>
         <div class="section-actions">
-          <el-button size="small" text @click="editMyApps">管理</el-button>
+          <el-button
+            size="small"
+            text
+            @click="editMyApps"
+          >
+            管理
+          </el-button>
         </div>
       </div>
       <div class="my-apps-list">
@@ -49,8 +67,15 @@
           class="my-app-item"
           @click="openApp(app)"
         >
-          <div class="app-icon" :style="{ background: app.iconColor }">
-            <img v-if="app.iconUrl" :src="app.iconUrl" :alt="app.name" />
+          <div
+            class="app-icon"
+            :style="{ background: app.iconColor }"
+          >
+            <img
+              v-if="app.iconUrl"
+              :src="app.iconUrl"
+              :alt="app.name"
+            >
             <span v-else>{{ app.name.charAt(0) }}</span>
           </div>
           <span class="app-name">{{ app.name }}</span>
@@ -61,23 +86,38 @@
     <!-- 应用市场区域 -->
     <div class="app-market-section">
       <div class="section-header">
-        <h3 class="section-title">{{ categoryTitle }}</h3>
+        <h3 class="section-title">
+          {{ categoryTitle }}
+        </h3>
       </div>
 
       <!-- 加载状态 -->
-      <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
+      <div
+        v-if="loading"
+        class="loading-state"
+      >
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>加载中...</span>
       </div>
 
       <!-- 空状态 -->
-      <div v-else-if="appList.length === 0" class="empty-state">
+      <div
+        v-else-if="appList.length === 0"
+        class="empty-state"
+      >
         <span class="material-icons-outlined empty-icon">apps</span>
-        <p class="empty-text">{{ searchKeyword ? '未找到相关应用' : '暂无应用' }}</p>
+        <p class="empty-text">
+          {{ searchKeyword ? '未找到相关应用' : '暂无应用' }}
+        </p>
       </div>
 
       <!-- 应用卡片列表 -->
-      <div v-else class="app-grid">
+      <div
+        v-else
+        class="app-grid"
+      >
         <div
           v-for="app in appList"
           :key="app.id"
@@ -85,15 +125,40 @@
           :class="{ installed: isInstalled(app.id) }"
         >
           <div class="app-header">
-            <div class="app-icon-wrapper" :style="{ background: app.iconColor }">
-              <img v-if="app.iconUrl" :src="app.iconUrl" :alt="app.name" class="app-icon-img" />
-              <span v-else class="app-icon-text">{{ app.name.charAt(0) }}</span>
-              <div v-if="app.isHot" class="hot-badge">HOT</div>
-              <div v-if="app.isNew" class="new-badge">NEW</div>
+            <div
+              class="app-icon-wrapper"
+              :style="{ background: app.iconColor }"
+            >
+              <img
+                v-if="app.iconUrl"
+                :src="app.iconUrl"
+                :alt="app.name"
+                class="app-icon-img"
+              >
+              <span
+                v-else
+                class="app-icon-text"
+              >{{ app.name.charAt(0) }}</span>
+              <div
+                v-if="app.isHot"
+                class="hot-badge"
+              >
+                HOT
+              </div>
+              <div
+                v-if="app.isNew"
+                class="new-badge"
+              >
+                NEW
+              </div>
             </div>
             <div class="app-info">
-              <h4 class="app-name">{{ app.name }}</h4>
-              <p class="app-description">{{ app.description }}</p>
+              <h4 class="app-name">
+                {{ app.name }}
+              </h4>
+              <p class="app-description">
+                {{ app.description }}
+              </p>
             </div>
           </div>
 
@@ -107,14 +172,24 @@
                 <span class="material-icons-outlined">star</span>
                 {{ app.rating || 5.0 }}
               </span>
-              <span class="meta-item" v-if="app.usageCount > 0">
+              <span
+                v-if="app.usageCount > 0"
+                class="meta-item"
+              >
                 <span class="material-icons-outlined">download</span>
                 {{ formatCount(app.usageCount) }}
               </span>
             </div>
 
-            <div v-if="app.tags && app.tags.length > 0" class="app-tags">
-              <span v-for="tag in app.tags.slice(0, 3)" :key="tag" class="tag">{{ tag }}</span>
+            <div
+              v-if="app.tags && app.tags.length > 0"
+              class="app-tags"
+            >
+              <span
+                v-for="tag in app.tags.slice(0, 3)"
+                :key="tag"
+                class="tag"
+              >{{ tag }}</span>
             </div>
           </div>
 
@@ -136,23 +211,39 @@
               安装
             </el-button>
 
-            <el-dropdown trigger="click" @command="(cmd) => handleAppAction(cmd, app)">
-              <el-button class="more-btn" :icon="MoreFilled" circle />
+            <el-dropdown
+              trigger="click"
+              @command="(cmd) => handleAppAction(cmd, app)"
+            >
+              <el-button
+                class="more-btn"
+                :icon="MoreFilled"
+                circle
+              />
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="detail">
                     <span class="material-icons-outlined">info</span>
                     应用详情
                   </el-dropdown-item>
-                  <el-dropdown-item v-if="isInstalled(app.id)" command="config">
+                  <el-dropdown-item
+                    v-if="isInstalled(app.id)"
+                    command="config"
+                  >
                     <span class="material-icons-outlined">settings</span>
                     应用设置
                   </el-dropdown-item>
-                  <el-dropdown-item v-if="isInstalled(app.id)" command="uninstall">
+                  <el-dropdown-item
+                    v-if="isInstalled(app.id)"
+                    command="uninstall"
+                  >
                     <span class="material-icons-outlined">delete</span>
                     卸载应用
                   </el-dropdown-item>
-                  <el-dropdown-item v-if="isInstalled(app.id)" command="pin">
+                  <el-dropdown-item
+                    v-if="isInstalled(app.id)"
+                    command="pin"
+                  >
                     <span class="material-icons-outlined">
                       {{ isPinned(app.id) ? 'push_pin' : 'push_unpin' }}
                     </span>
@@ -189,19 +280,35 @@
       :close-on-click-modal="false"
       class="app-manage-dialog"
     >
-      <div v-if="managingApps.length > 0" class="manage-apps-list">
+      <div
+        v-if="managingApps.length > 0"
+        class="manage-apps-list"
+      >
         <div
           v-for="(app, index) in managingApps"
           :key="app.id"
           class="manage-app-item"
         >
-          <div class="app-icon" :style="{ background: app.iconColor }">
-            <img v-if="app.iconUrl" :src="app.iconUrl" :alt="app.name" />
+          <div
+            class="app-icon"
+            :style="{ background: app.iconColor }"
+          >
+            <img
+              v-if="app.iconUrl"
+              :src="app.iconUrl"
+              :alt="app.name"
+            >
             <span v-else>{{ app.name.charAt(0) }}</span>
           </div>
           <div class="app-info">
             <span class="app-name">{{ app.name }}</span>
-            <el-tag v-if="app.pinned" size="small" type="warning">置顶</el-tag>
+            <el-tag
+              v-if="app.pinned"
+              size="small"
+              type="warning"
+            >
+              置顶
+            </el-tag>
           </div>
           <div class="app-actions">
             <el-button
@@ -239,11 +346,21 @@
           </div>
         </div>
       </div>
-      <el-empty v-else description="暂无已安装应用" />
+      <el-empty
+        v-else
+        description="暂无已安装应用"
+      />
 
       <template #footer>
-        <el-button @click="cancelAppManagement">取消</el-button>
-        <el-button type="primary" @click="saveAppManagement">保存</el-button>
+        <el-button @click="cancelAppManagement">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="saveAppManagement"
+        >
+          保存
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -326,20 +443,20 @@ const categoryTitle = computed(() => {
 })
 
 // 判断应用是否已安装
-const isInstalled = (appId) => installedAppIds.value.has(appId)
+const isInstalled = appId => installedAppIds.value.has(appId)
 
 // 判断应用是否置顶
-const isPinned = (appId) => pinnedAppIds.value.has(appId)
+const isPinned = appId => pinnedAppIds.value.has(appId)
 
 // 格式化数量
-const formatCount = (count) => {
-  if (count >= 10000) return (count / 10000).toFixed(1) + 'w'
-  if (count >= 1000) return (count / 1000).toFixed(1) + 'k'
+const formatCount = count => {
+  if (count >= 10000) {return (count / 10000).toFixed(1) + 'w'}
+  if (count >= 1000) {return (count / 1000).toFixed(1) + 'k'}
   return count
 }
 
 // 切换分类
-const switchCategory = (categoryKey) => {
+const switchCategory = categoryKey => {
   activeCategory.value = categoryKey
   loadApplications()
 }
@@ -398,7 +515,7 @@ const loadMyApps = async () => {
 }
 
 // 安装应用
-const installApp = async (app) => {
+const installApp = async app => {
   try {
     const res = await installApplication({
       appId: app.id,
@@ -421,7 +538,7 @@ const installApp = async (app) => {
 }
 
 // 卸载应用
-const uninstallApp = async (app) => {
+const uninstallApp = async app => {
   try {
     await ElMessageBox.confirm(`确定要卸载"${app.name}"吗？`, '确认卸载', {
       type: 'warning'
@@ -442,7 +559,7 @@ const uninstallApp = async (app) => {
 }
 
 // 打开应用
-const openApp = async (app) => {
+const openApp = async app => {
   try {
     // 记录使用
     await recordAppUsage(app.id)
@@ -493,7 +610,7 @@ const openApp = async (app) => {
 }
 
 // 置顶/取消置顶
-const togglePin = async (app) => {
+const togglePin = async app => {
   try {
     const newPinnedState = !isPinned(app.id)
     const res = await pinApp(app.id, newPinnedState)
@@ -536,13 +653,13 @@ const handleAppAction = async (command, app) => {
 }
 
 // 从详情对话框安装
-const handleInstallFromDialog = (app) => {
+const handleInstallFromDialog = app => {
   showDetailDialog.value = false
   installApp(app)
 }
 
 // 从详情对话框打开
-const handleOpenFromDialog = (app) => {
+const handleOpenFromDialog = app => {
   showDetailDialog.value = false
   openApp(app)
 }
@@ -561,7 +678,7 @@ const editMyApps = () => {
 }
 
 // 应用管理相关操作
-const handleAppMoveUp = (index) => {
+const handleAppMoveUp = index => {
   if (index > 0) {
     const temp = managingApps.value[index]
     managingApps.value[index] = managingApps.value[index - 1]
@@ -569,7 +686,7 @@ const handleAppMoveUp = (index) => {
   }
 }
 
-const handleAppMoveDown = (index) => {
+const handleAppMoveDown = index => {
   if (index < managingApps.value.length - 1) {
     const temp = managingApps.value[index]
     managingApps.value[index] = managingApps.value[index + 1]
@@ -577,14 +694,14 @@ const handleAppMoveDown = (index) => {
   }
 }
 
-const handleAppUninstall = (app) => {
+const handleAppUninstall = app => {
   const index = managingApps.value.findIndex(a => a.id === app.id)
   if (index > -1) {
     managingApps.value.splice(index, 1)
   }
 }
 
-const handleAppTogglePin = (app) => {
+const handleAppTogglePin = app => {
   const appItem = managingApps.value.find(a => a.id === app.id)
   if (appItem) {
     appItem.pinned = !appItem.pinned

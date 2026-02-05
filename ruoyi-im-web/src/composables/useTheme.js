@@ -20,7 +20,7 @@ const isDark = ref(false)
  * 获取系统主题偏好
  */
 const getSystemTheme = () => {
-  if (typeof window === 'undefined') return THEME_LIGHT
+  if (typeof window === 'undefined') {return THEME_LIGHT}
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? THEME_DARK : THEME_LIGHT
 }
 
@@ -28,8 +28,8 @@ const getSystemTheme = () => {
  * 应用主题到 DOM
  * @param {string} theme 主题名称 ('light', 'dark', 'auto')
  */
-const applyTheme = (theme) => {
-  if (typeof document === 'undefined') return
+const applyTheme = theme => {
+  if (typeof document === 'undefined') {return}
 
   const root = document.documentElement
   const actualTheme = theme === THEME_AUTO ? getSystemTheme() : theme
@@ -53,7 +53,7 @@ const initTheme = () => {
  * 设置主题
  * @param {string} theme 主题名称
  */
-const setTheme = (theme) => {
+const setTheme = theme => {
   currentTheme.value = theme
   setItem(THEME_KEY, theme)
   applyTheme(theme)
@@ -74,10 +74,10 @@ const toggleDark = () => {
 export function useTheme() {
   // 监听系统主题变化（仅在 auto 模式下）
   const setupSystemThemeListener = () => {
-    if (typeof window === 'undefined') return () => { }
+    if (typeof window === 'undefined') {return () => { }}
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = (e) => {
+    const handleChange = e => {
       if (currentTheme.value === THEME_AUTO) {
         applyTheme(THEME_AUTO)
       }
@@ -109,7 +109,7 @@ export function useTheme() {
   })
 
   // 监听主题变化
-  watch(currentTheme, (newTheme) => {
+  watch(currentTheme, newTheme => {
     applyTheme(newTheme)
   })
 

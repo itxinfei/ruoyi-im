@@ -11,7 +11,7 @@
  * @returns {String} 转义后的 CSV 字段值
  */
 export function escapeCsvField(value) {
-  if (value === null || value === undefined) return '""'
+  if (value === null || value === undefined) {return '""'}
   const str = String(value)
   // 转义双引号为两个双引号，并移除换行符
   const escaped = str.replace(/"/g, '""').replace(/[\r\n]+/g, ' ')

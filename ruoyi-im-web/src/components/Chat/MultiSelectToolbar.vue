@@ -4,9 +4,12 @@
 -->
 <template>
   <Transition name="slide-up">
-    <div v-if="active" class="multi-select-toolbar">
+    <div
+      v-if="active"
+      class="multi-select-toolbar"
+    >
       <div class="selection-info">
-        <div class="selection-indicator"></div>
+        <div class="selection-indicator" />
         <span class="selection-text">
           已选择 <strong>{{ count }}</strong> 条消息
         </span>
@@ -15,9 +18,9 @@
       <div class="actions">
         <button
           class="toolbar-btn toolbar-btn--forward"
-          @click="$emit('forward')"
           :disabled="count === 0"
           title="逐条转发"
+          @click="$emit('forward')"
         >
           <span class="material-icons-outlined">share</span>
           <span>逐条转发</span>
@@ -25,9 +28,9 @@
 
         <button
           class="toolbar-btn toolbar-btn--combine"
-          @click="$emit('combine')"
           :disabled="count === 0"
           title="合并转发"
+          @click="$emit('combine')"
         >
           <span class="material-icons-outlined">collections</span>
           <span>合并转发</span>
@@ -35,20 +38,20 @@
 
         <button
           class="toolbar-btn toolbar-btn--delete"
-          @click="$emit('delete')"
           :disabled="count === 0"
           title="删除"
+          @click="$emit('delete')"
         >
           <span class="material-icons-outlined">delete_outline</span>
           <span>删除</span>
         </button>
 
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <button
           class="toolbar-btn toolbar-btn--cancel"
-          @click="$emit('cancel')"
           title="取消选择"
+          @click="$emit('cancel')"
         >
           <span>取消</span>
         </button>

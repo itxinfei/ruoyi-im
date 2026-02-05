@@ -1,5 +1,8 @@
 <template>
-  <div v-if="hasReactions" class="reaction-aggregate">
+  <div
+    v-if="hasReactions"
+    class="reaction-aggregate"
+  >
     <div
       v-for="reaction in reactions"
       :key="reaction.emoji"
@@ -27,7 +30,7 @@ const store = useStore()
 
 // 按表情分组
 const reactions = computed(() => {
-  if (!props.message?.reactions) return []
+  if (!props.message?.reactions) {return []}
 
   const currentUser = store.getters['user/currentUser']
   const grouped = {}

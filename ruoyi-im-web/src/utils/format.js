@@ -12,9 +12,9 @@
  * formatTime(1706580600000) // "14:30"
  */
 export function formatTime(date) {
-  if (!date) return ''
+  if (!date) {return ''}
   const d = new Date(date)
-  if (isNaN(d.getTime())) return ''
+  if (isNaN(d.getTime())) {return ''}
   const hours = String(d.getHours()).padStart(2, '0')
   const minutes = String(d.getMinutes()).padStart(2, '0')
   return `${hours}:${minutes}`
@@ -26,9 +26,9 @@ export function formatTime(date) {
  * @returns {String} 格式化后的时间字符串 "HH:mm:ss"
  */
 export function formatTimeFull(date) {
-  if (!date) return ''
+  if (!date) {return ''}
   const d = new Date(date)
-  if (isNaN(d.getTime())) return ''
+  if (isNaN(d.getTime())) {return ''}
   const hours = String(d.getHours()).padStart(2, '0')
   const minutes = String(d.getMinutes()).padStart(2, '0')
   const seconds = String(d.getSeconds()).padStart(2, '0')
@@ -41,9 +41,9 @@ export function formatTimeFull(date) {
  * @returns {String} 格式化后的日期字符串 "MM月DD日"
  */
 export function formatDate(date) {
-  if (!date) return ''
+  if (!date) {return ''}
   const d = new Date(date)
-  if (isNaN(d.getTime())) return ''
+  if (isNaN(d.getTime())) {return ''}
   const month = d.getMonth() + 1
   const day = d.getDate()
   return `${month}月${day}日`
@@ -55,9 +55,9 @@ export function formatDate(date) {
  * @returns {String} 格式化后的日期字符串 "YYYY-MM-DD"
  */
 export function formatDateISO(date) {
-  if (!date) return ''
+  if (!date) {return ''}
   const d = new Date(date)
-  if (isNaN(d.getTime())) return ''
+  if (isNaN(d.getTime())) {return ''}
   const year = d.getFullYear()
   const month = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
@@ -70,9 +70,9 @@ export function formatDateISO(date) {
  * @returns {String} 格式化后的日期时间字符串
  */
 export function formatDateTimeISO(date) {
-  if (!date) return ''
+  if (!date) {return ''}
   const d = new Date(date)
-  if (isNaN(d.getTime())) return ''
+  if (isNaN(d.getTime())) {return ''}
   return `${formatDateISO(d)} ${formatTimeFull(d)}`
 }
 
@@ -82,20 +82,20 @@ export function formatDateTimeISO(date) {
  * @returns {String} 相对时间字符串
  */
 export function formatRelativeTime(timestamp) {
-  if (!timestamp) return ''
+  if (!timestamp) {return ''}
   const date = new Date(timestamp)
   const now = new Date()
-  if (isNaN(date.getTime())) return ''
+  if (isNaN(date.getTime())) {return ''}
 
   const diffMs = now - date
   const diffMins = Math.floor(diffMs / 60000)
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
 
-  if (diffMins < 1) return '刚刚'
-  if (diffMins < 60) return `${diffMins}分钟前`
-  if (diffHours < 24) return `${diffHours}小时前`
-  if (diffDays < 7) return `${diffDays}天前`
+  if (diffMins < 1) {return '刚刚'}
+  if (diffMins < 60) {return `${diffMins}分钟前`}
+  if (diffHours < 24) {return `${diffHours}小时前`}
+  if (diffDays < 7) {return `${diffDays}天前`}
 
   // 超过7天显示具体日期
   return formatDate(date)
@@ -107,10 +107,10 @@ export function formatRelativeTime(timestamp) {
  * @returns {String} 格式化后的时间
  */
 export function formatChatTime(timestamp) {
-  if (!timestamp) return ''
+  if (!timestamp) {return ''}
   const date = new Date(timestamp)
   const now = new Date()
-  if (isNaN(date.getTime())) return ''
+  if (isNaN(date.getTime())) {return ''}
 
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
@@ -139,7 +139,7 @@ export function formatChatTime(timestamp) {
  * @returns {String} 格式化后的大小字符串
  */
 export function formatFileSize(bytes) {
-  if (!bytes || bytes === 0) return '0 B'
+  if (!bytes || bytes === 0) {return '0 B'}
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -155,16 +155,16 @@ export function formatFileSize(bytes) {
  * formatDuration(3665) // "1小时1分5秒"
  */
 export function formatDuration(seconds) {
-  if (!seconds || seconds < 0) return '0秒'
+  if (!seconds || seconds < 0) {return '0秒'}
 
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   const secs = Math.floor(seconds % 60)
 
   const parts = []
-  if (hours > 0) parts.push(`${hours}小时`)
-  if (minutes > 0) parts.push(`${minutes}分`)
-  if (secs > 0 || parts.length === 0) parts.push(`${secs}秒`)
+  if (hours > 0) {parts.push(`${hours}小时`)}
+  if (minutes > 0) {parts.push(`${minutes}分`)}
+  if (secs > 0 || parts.length === 0) {parts.push(`${secs}秒`)}
 
   return parts.join('')
 }
@@ -177,7 +177,7 @@ export function formatDuration(seconds) {
  * formatNumber(1234567) // "1,234,567"
  */
 export function formatNumber(num) {
-  if (num == null) return ''
+  if (num == null) {return ''}
   return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
@@ -192,7 +192,7 @@ export function formatNumber(num) {
  * formatPercent(1, 3, 2) // "33.33%"
  */
 export function formatPercent(value, total, decimals = 0) {
-  if (!total || total === 0) return '0%'
+  if (!total || total === 0) {return '0%'}
   const percent = (value / total) * 100
   return percent.toFixed(decimals) + '%'
 }
@@ -204,8 +204,8 @@ export function formatPercent(value, total, decimals = 0) {
  * @returns {String} 截断后的文本
  */
 export function truncateText(text, maxLength) {
-  if (!text) return ''
-  if (text.length <= maxLength) return text
+  if (!text) {return ''}
+  if (text.length <= maxLength) {return text}
   return text.substring(0, maxLength) + '...'
 }
 
@@ -217,9 +217,9 @@ export function truncateText(text, maxLength) {
  * formatPhone('13812345678') // "138****5678"
  */
 export function formatPhone(phone) {
-  if (!phone) return ''
+  if (!phone) {return ''}
   const phoneStr = String(phone)
-  if (phoneStr.length !== 11) return phoneStr
+  if (phoneStr.length !== 11) {return phoneStr}
   return phoneStr.substring(0, 3) + '****' + phoneStr.substring(7)
 }
 
@@ -229,9 +229,9 @@ export function formatPhone(phone) {
  * @returns {String} 格式化后的身份证号
  */
 export function formatIdCard(idCard) {
-  if (!idCard) return ''
+  if (!idCard) {return ''}
   const idStr = String(idCard)
-  if (idStr.length < 8) return idStr
+  if (idStr.length < 8) {return idStr}
   return idStr.substring(0, 4) + '**********' + idStr.substring(idStr.length - 4)
 }
 
@@ -304,7 +304,7 @@ export async function copyToClipboard(text, options = {}) {
  * @returns {String} 格式化后的时间字符串
  */
 export function formatListItemTime(time) {
-  if (!time) return ''
+  if (!time) {return ''}
   const date = new Date(time)
   const now = new Date()
   const diff = now - date
@@ -332,7 +332,7 @@ export function formatListItemTime(time) {
  * @returns {String} 格式化后的时长 "mm:ss"
  */
 export function formatDurationMMSS(seconds) {
-  if (!seconds || seconds < 0) return '00:00'
+  if (!seconds || seconds < 0) {return '00:00'}
 
   const totalSeconds = Math.floor(seconds)
   const minutes = Math.floor(totalSeconds / 60)

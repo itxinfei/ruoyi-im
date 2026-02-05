@@ -5,9 +5,9 @@
     :width="600"
     :close-on-click-modal="true"
     :close-on-press-escape="true"
+    class="chat-search-dialog"
     @open="handleOpen"
     @close="handleClose"
-    class="chat-search-dialog"
   >
     <div class="chat-search">
       <!-- 搜索栏 -->
@@ -24,30 +24,53 @@
             @keydown.down="handleKeyDown"
             @keydown.up="handleKeyUp"
             @keydown.enter="handleEnter"
-          />
-          <span v-if="searchKeyword" class="clear-btn" @click="handleClear">
+          >
+          <span
+            v-if="searchKeyword"
+            class="clear-btn"
+            @click="handleClear"
+          >
             <span class="material-icons-outlined">close</span>
           </span>
         </div>
         <div class="search-actions">
-          <button v-if="totalCount > 0" class="nav-btn" @click="navigatePrev" title="上一个">
+          <button
+            v-if="totalCount > 0"
+            class="nav-btn"
+            title="上一个"
+            @click="navigatePrev"
+          >
             <span class="material-icons-outlined">chevron_left</span>
           </button>
-          <span v-if="totalCount > 0" class="result-count">
+          <span
+            v-if="totalCount > 0"
+            class="result-count"
+          >
             {{ currentIndex + 1 }}&nbsp;/&nbsp;{{ totalCount }}
           </span>
-          <button v-if="totalCount > 0" class="nav-btn" @click="navigateNext" title="下一个">
+          <button
+            v-if="totalCount > 0"
+            class="nav-btn"
+            title="下一个"
+            @click="navigateNext"
+          >
             <span class="material-icons-outlined">chevron_right</span>
           </button>
         </div>
       </div>
 
       <!-- 搜索结果列表 -->
-      <div v-if="!loading && searchResults.length > 0" class="search-results">
+      <div
+        v-if="!loading && searchResults.length > 0"
+        class="search-results"
+      >
         <div class="results-header">
           <span class="results-title">找到 {{ totalCount }} 条结果</span>
         </div>
-        <div class="results-list" ref="resultsListRef">
+        <div
+          ref="resultsListRef"
+          class="results-list"
+        >
           <div
             v-for="(result, index) in searchResults"
             :key="result.id"
@@ -67,20 +90,36 @@
               <span class="result-time">{{ formatTime(result.sendTime) }}</span>
             </div>
             <div class="result-content">
-              <div v-if="result.type === 'TEXT'" class="text-result" v-html="highlightKeyword(result.content)"></div>
-              <div v-else-if="result.type === 'IMAGE'" class="media-result">
+              <div
+                v-if="result.type === 'TEXT'"
+                class="text-result"
+                v-html="highlightKeyword(result.content)"
+              />
+              <div
+                v-else-if="result.type === 'IMAGE'"
+                class="media-result"
+              >
                 <span class="material-icons-outlined">image</span>
                 <span>[图片]</span>
               </div>
-              <div v-else-if="result.type === 'FILE'" class="media-result">
+              <div
+                v-else-if="result.type === 'FILE'"
+                class="media-result"
+              >
                 <span class="material-icons-outlined">insert_drive_file</span>
                 <span>[文件] {{ getFileName(result.content) }}</span>
               </div>
-              <div v-else-if="result.type === 'VIDEO'" class="media-result">
+              <div
+                v-else-if="result.type === 'VIDEO'"
+                class="media-result"
+              >
                 <span class="material-icons-outlined">videocam</span>
                 <span>[视频]</span>
               </div>
-              <div v-else-if="result.type === 'VOICE'" class="media-result">
+              <div
+                v-else-if="result.type === 'VOICE'"
+                class="media-result"
+              >
                 <span class="material-icons-outlined">mic</span>
                 <span>[语音]</span>
               </div>
@@ -90,15 +129,23 @@
       </div>
 
       <!-- 无结果 -->
-      <div v-else-if="!loading && searchKeyword && searchResults.length === 0" class="no-results">
+      <div
+        v-else-if="!loading && searchKeyword && searchResults.length === 0"
+        class="no-results"
+      >
         <span class="material-icons-outlined empty-icon">search_off</span>
         <p>未找到 "{{ searchKeyword }}" 相关消息</p>
         <span class="hint">试试其他关键词</span>
       </div>
 
       <!-- 搜索中 -->
-      <div v-if="loading" class="search-loading">
-        <el-icon class="is-loading"><Loading /></el-icon>
+      <div
+        v-if="loading"
+        class="search-loading"
+      >
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>搜索中...</span>
       </div>
     </div>
@@ -148,7 +195,7 @@ const isUnmounted = ref(false) // 标记组件是否已卸载
 // 对话框显示状态
 const dialogVisible = computed({
   get: () => props.visible,
-  set: (val) => emit('update:visible', val)
+  set: val => emit('update:visible', val)
 })
 
 // 总结果数
@@ -157,7 +204,7 @@ const totalCount = computed(() => searchResults.value.length)
 // 监听显示状态
 const handleOpen = () => {
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     searchInputRef.value?.focus()
   })
 }
@@ -214,20 +261,28 @@ const performSearch = () => {
 }
 
 // 高亮关键词
-const highlightKeyword = (text) => {
-  if (!searchKeyword.value) return text
+const highlightKeyword = text => {
+  if (!searchKeyword.value) {return escapeHtml(text)}
   const keyword = searchKeyword.value.trim()
   const regex = new RegExp(`(${escapeRegExp(keyword)})`, 'gi')
-  return text.replace(regex, '<mark class="highlight">$1</mark>')
+  return escapeHtml(text).replace(regex, '<mark class="highlight">$1</mark>')
+}
+
+// 转义 HTML 特殊字符，防止 XSS 攻击
+const escapeHtml = str => {
+  if (!str) {return ''}
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
 }
 
 // 转义正则特殊字符
-const escapeRegExp = (string) => {
+const escapeRegExp = string => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 // 获取文件名
-const getFileName = (content) => {
+const getFileName = content => {
   try {
     const parsed = parseContentString(content)
     return parsed.fileName || parsed.name || ''
@@ -237,8 +292,8 @@ const getFileName = (content) => {
 }
 
 // 格式化时间
-const formatTime = (time) => {
-  if (!time) return ''
+const formatTime = time => {
+  if (!time) {return ''}
   const date = dayjs(time)
   const now = dayjs()
   const diffDays = now.diff(date, 'day')
@@ -292,7 +347,7 @@ const navigateNext = () => {
 // 滚动到当前结果
 const scrollToCurrentResult = () => {
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     const activeElement = resultsListRef.value?.querySelector('.result-item.active')
     if (activeElement) {
       activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })

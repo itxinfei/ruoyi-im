@@ -66,7 +66,10 @@
     />
 
     <!-- 链接预览 -->
-    <div v-if="linkPreviewLoading || linkPreviewError || linkPreview" class="link-preview-wrapper">
+    <div
+      v-if="linkPreviewLoading || linkPreviewError || linkPreview"
+      class="link-preview-wrapper"
+    >
       <LinkCard
         v-if="linkPreview"
         :link="linkPreview"
@@ -473,7 +476,7 @@ const insertAt = nickname => {
   const pos = textareaRef.value?.selectionStart || messageContent.value.length
   messageContent.value = messageContent.value.slice(0, pos) + atText + messageContent.value.slice(pos)
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     textareaRef.value?.focus()
     autoResize()
   })
@@ -524,7 +527,7 @@ const detectAndPreviewLinks = () => {
 }
 
 // 解析链接预览
-const parseLinkPreview = async (url) => {
+const parseLinkPreview = async url => {
   linkPreviewLoading.value = true
   linkPreviewError.value = false
 
@@ -592,7 +595,7 @@ const handleSend = async () => {
 
   messageContent.value = ''
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     if (textareaRef.value) {textareaRef.value.style.height = 'auto'}
     textareaRef.value?.focus()
   })
@@ -627,7 +630,7 @@ const handleVoiceCancel = () => {
 const toggleVoiceMode = () => {
   isVoiceMode.value = !isVoiceMode.value
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     if (isVoiceMode.value) {
       textareaRef.value?.blur()
     } else {
@@ -659,7 +662,7 @@ const selectEmoji = emoji => {
   messageContent.value = messageContent.value.slice(0, pos) + emoji + messageContent.value.slice(pos)
   showEmojiPicker.value = false
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     textareaRef.value?.focus()
     autoResize()
   })
@@ -971,7 +974,7 @@ const handleRemovePendingFile = index => {
 const handleSelectSmartReply = replyText => {
   messageContent.value = replyText
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     autoResize()
     textareaRef.value?.focus()
   })
@@ -999,7 +1002,7 @@ const handleVideoCall = () => {
 const setContent = content => {
   messageContent.value = content || ''
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     autoResize()
     // 将光标移到末尾
     if (textareaRef.value) {

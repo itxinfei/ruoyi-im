@@ -24,11 +24,11 @@ describe('消息状态管理', () => {
           },
           getters: {
             // 获取发送中的消息
-            getSendingMessages: (state) => {
+            getSendingMessages: state => {
               return Array.from(state.sendingMessages.values())
             },
             // 检查消息是否在发送中
-            isMessageSending: (state) => (clientMsgId) => {
+            isMessageSending: state => clientMsgId => {
               return state.sendingMessages.has(clientMsgId)
             }
           },

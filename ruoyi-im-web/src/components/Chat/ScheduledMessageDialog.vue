@@ -9,8 +9,12 @@
     <div class="schedule-message-content">
       <!-- 消息预览 -->
       <div class="message-preview">
-        <div class="preview-header">消息预览</div>
-        <div class="preview-content">{{ messagePreview }}</div>
+        <div class="preview-header">
+          消息预览
+        </div>
+        <div class="preview-content">
+          {{ messagePreview }}
+        </div>
       </div>
 
       <!-- 定时选择 -->
@@ -55,7 +59,9 @@
     </div>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
+      <el-button @click="handleClose">
+        取消
+      </el-button>
       <el-button
         type="primary"
         :disabled="!canSchedule"
@@ -96,7 +102,7 @@ const quickTimeOptions = [
 ]
 
 // 计算快捷时间的显示文本
-const getQuickTimeText = (option) => {
+const getQuickTimeText = option => {
   const now = new Date()
   let targetTime
 
@@ -125,7 +131,7 @@ const getQuickTimeText = (option) => {
 }
 
 // 格式化日期时间
-const formatDate = (date) => {
+const formatDate = date => {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   const hours = String(date.getHours()).padStart(2, '0')
@@ -141,7 +147,7 @@ quickTimeOptions.forEach(option => {
 // 消息预览
 const messagePreview = computed(() => {
   const content = props.messageContent
-  if (!content) return '暂无消息内容'
+  if (!content) {return '暂无消息内容'}
   return content.length > 50 ? content.substring(0, 50) + '...' : content
 })
 
@@ -151,19 +157,19 @@ const canSchedule = computed(() => {
 })
 
 // 禁用过去的日期
-const disableDate = (time) => {
+const disableDate = time => {
   return time.getTime() < Date.now() - 60000 // 至少1分钟后
 }
 
 // 选择快捷时间
-const selectQuickTime = (option) => {
+const selectQuickTime = option => {
   selectedTimeOption.value = option.value
   customTime.value = getQuickTimeText(option)
 }
 
 // 设置定时发送
 const handleSchedule = async () => {
-  if (!canSchedule.value) return
+  if (!canSchedule.value) {return}
 
   const scheduledTime = customTime.value
 
@@ -209,11 +215,11 @@ const handleClose = () => {
   emit('update:modelValue', false)
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 </script>

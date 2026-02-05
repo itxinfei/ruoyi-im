@@ -44,7 +44,7 @@ onMounted(() => {
   background-color: var(--dt-bg-body);
 }
 
-.dingtalk-app {
+.im-app {
   height: 100%;
 }
 </style>

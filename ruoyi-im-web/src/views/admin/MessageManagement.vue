@@ -4,17 +4,35 @@
     <div class="page-header">
       <div class="page-title">
         <h2>消息管理</h2>
-        <p class="page-desc">管理系统消息内容、敏感词过滤和消息统计</p>
+        <p class="page-desc">
+          管理系统消息内容、敏感词过滤和消息统计
+        </p>
       </div>
       <div class="page-actions">
-        <el-button :icon="Setting" @click="handleOpenSensitiveConfig">敏感词配置</el-button>
-        <el-button :icon="Download" @click="handleExport">导出数据</el-button>
+        <el-button
+          :icon="Setting"
+          @click="handleOpenSensitiveConfig"
+        >
+          敏感词配置
+        </el-button>
+        <el-button
+          :icon="Download"
+          @click="handleExport"
+        >
+          导出数据
+        </el-button>
       </div>
     </div>
 
     <!-- 搜索卡片 -->
-    <el-card class="search-card" shadow="never">
-      <el-form :model="searchForm" inline>
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :model="searchForm"
+        inline
+      >
         <el-form-item label="关键词">
           <el-input
             v-model="searchForm.keyword"
@@ -29,19 +47,53 @@
           </el-input>
         </el-form-item>
         <el-form-item label="消息类型">
-          <el-select v-model="searchForm.messageType" placeholder="全部类型" clearable style="width: 120px">
-            <el-option label="文本" value="TEXT" />
-            <el-option label="图片" value="IMAGE" />
-            <el-option label="文件" value="FILE" />
-            <el-option label="语音" value="VOICE" />
-            <el-option label="视频" value="VIDEO" />
-            <el-option label="系统" value="SYSTEM" />
+          <el-select
+            v-model="searchForm.messageType"
+            placeholder="全部类型"
+            clearable
+            style="width: 120px"
+          >
+            <el-option
+              label="文本"
+              value="TEXT"
+            />
+            <el-option
+              label="图片"
+              value="IMAGE"
+            />
+            <el-option
+              label="文件"
+              value="FILE"
+            />
+            <el-option
+              label="语音"
+              value="VOICE"
+            />
+            <el-option
+              label="视频"
+              value="VIDEO"
+            />
+            <el-option
+              label="系统"
+              value="SYSTEM"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="会话类型">
-          <el-select v-model="searchForm.conversationType" placeholder="全部" clearable style="width: 120px">
-            <el-option label="单聊" value="PRIVATE" />
-            <el-option label="群聊" value="GROUP" />
+          <el-select
+            v-model="searchForm.conversationType"
+            placeholder="全部"
+            clearable
+            style="width: 120px"
+          >
+            <el-option
+              label="单聊"
+              value="PRIVATE"
+            />
+            <el-option
+              label="群聊"
+              value="GROUP"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="发送者">
@@ -65,47 +117,105 @@
           />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 120px">
-            <el-option label="正常" value="normal" />
-            <el-option label="已撤回" value="revoked" />
-            <el-option label="已删除" value="deleted" />
+          <el-select
+            v-model="searchForm.status"
+            placeholder="全部"
+            clearable
+            style="width: 120px"
+          >
+            <el-option
+              label="正常"
+              value="normal"
+            />
+            <el-option
+              label="已撤回"
+              value="revoked"
+            />
+            <el-option
+              label="已删除"
+              value="deleted"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            :icon="Search"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button
+            :icon="Refresh"
+            @click="handleReset"
+          >
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 批量操作栏 -->
-    <div v-if="selectedMessages.length > 0" class="batch-actions-bar">
+    <div
+      v-if="selectedMessages.length > 0"
+      class="batch-actions-bar"
+    >
       <div class="batch-info">
-        <el-icon class="batch-icon"><Select /></el-icon>
+        <el-icon class="batch-icon">
+          <Select />
+        </el-icon>
         <span>已选择 <strong>{{ selectedMessages.length }}</strong> 条消息</span>
       </div>
       <div class="batch-buttons">
-        <el-button type="danger" size="small" :icon="Delete" @click="handleBatchDelete">
+        <el-button
+          type="danger"
+          size="small"
+          :icon="Delete"
+          @click="handleBatchDelete"
+        >
           批量删除
         </el-button>
-        <el-button size="small" @click="handleClearSelection">取消选择</el-button>
+        <el-button
+          size="small"
+          @click="handleClearSelection"
+        >
+          取消选择
+        </el-button>
       </div>
     </div>
 
     <!-- 数据表格卡片 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <el-table
         ref="tableRef"
         v-loading="loading"
         :data="messageList"
-        @selection-change="handleSelectionChange"
         stripe
+        @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" fixed="left" />
-        <el-table-column prop="id" label="消息ID" width="90" />
-        <el-table-column label="类型" width="80" align="center">
+        <el-table-column
+          type="selection"
+          width="50"
+          fixed="left"
+        />
+        <el-table-column
+          prop="id"
+          label="消息ID"
+          width="90"
+        />
+        <el-table-column
+          label="类型"
+          width="80"
+          align="center"
+        >
           <template #default="{ row }">
-            <div class="type-badge" :class="'type-badge--' + row.messageType.toLowerCase()">
+            <div
+              class="type-badge"
+              :class="'type-badge--' + row.messageType.toLowerCase()"
+            >
               <el-icon>
                 <ChatLineSquare v-if="row.messageType === 'TEXT'" />
                 <Picture v-else-if="row.messageType === 'IMAGE'" />
@@ -117,11 +227,22 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="content" label="消息内容" min-width="250" show-overflow-tooltip>
+        <el-table-column
+          prop="content"
+          label="消息内容"
+          min-width="250"
+          show-overflow-tooltip
+        >
           <template #default="{ row }">
             <div class="message-content-cell">
-              <span v-if="row.messageType === 'TEXT'" class="text-content">{{ row.content }}</span>
-              <span v-else-if="row.messageType === 'IMAGE'" class="media-content">
+              <span
+                v-if="row.messageType === 'TEXT'"
+                class="text-content"
+              >{{ row.content }}</span>
+              <span
+                v-else-if="row.messageType === 'IMAGE'"
+                class="media-content"
+              >
                 <el-image
                   v-if="row.fileUrl"
                   :src="row.fileUrl"
@@ -131,15 +252,24 @@
                 />
                 <span class="media-label">[图片]</span>
               </span>
-              <span v-else-if="row.messageType === 'FILE'" class="file-content">
+              <span
+                v-else-if="row.messageType === 'FILE'"
+                class="file-content"
+              >
                 <el-icon class="file-icon"><Document /></el-icon>
                 <span>{{ row.fileName || '文件' }}</span>
               </span>
-              <span v-else-if="row.messageType === 'VOICE'" class="voice-content">
+              <span
+                v-else-if="row.messageType === 'VOICE'"
+                class="voice-content"
+              >
                 <el-icon><Microphone /></el-icon>
                 <span>{{ row.duration ? row.duration + 's' : '[语音]' }}</span>
               </span>
-              <span v-else-if="row.messageType === 'VIDEO'" class="video-content">
+              <span
+                v-else-if="row.messageType === 'VIDEO'"
+                class="video-content"
+              >
                 <el-icon><VideoCamera /></el-icon>
                 <span>[视频]</span>
               </span>
@@ -147,34 +277,99 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="senderId" label="发送者" width="150">
+        <el-table-column
+          prop="senderId"
+          label="发送者"
+          width="150"
+        >
           <template #default="{ row }">
             <div class="sender-cell">
-              <el-avatar :size="28" :src="row.senderAvatar">
+              <el-avatar
+                :size="28"
+                :src="row.senderAvatar"
+              >
                 {{ row.senderNickName ? row.senderNickName[0] : 'U' }}
               </el-avatar>
               <span class="sender-name">{{ row.senderNickName || row.senderId }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="conversationType" label="会话类型" width="90" align="center">
+        <el-table-column
+          prop="conversationType"
+          label="会话类型"
+          width="90"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.conversationType === 'PRIVATE'" size="small" type="info">单聊</el-tag>
-            <el-tag v-else size="small" type="warning">群聊</el-tag>
+            <el-tag
+              v-if="row.conversationType === 'PRIVATE'"
+              size="small"
+              type="info"
+            >
+              单聊
+            </el-tag>
+            <el-tag
+              v-else
+              size="small"
+              type="warning"
+            >
+              群聊
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="conversationId" label="会话ID" width="90" />
-        <el-table-column prop="createTime" label="发送时间" width="160" />
-        <el-table-column label="状态" width="80" align="center">
+        <el-table-column
+          prop="conversationId"
+          label="会话ID"
+          width="90"
+        />
+        <el-table-column
+          prop="createTime"
+          label="发送时间"
+          width="160"
+        />
+        <el-table-column
+          label="状态"
+          width="80"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.isRevoked" size="small" type="info">已撤回</el-tag>
-            <el-tag v-else-if="row.isDeleted" size="small" type="danger">已删除</el-tag>
-            <el-tag v-else size="small" type="success">正常</el-tag>
+            <el-tag
+              v-if="row.isRevoked"
+              size="small"
+              type="info"
+            >
+              已撤回
+            </el-tag>
+            <el-tag
+              v-else-if="row.isDeleted"
+              size="small"
+              type="danger"
+            >
+              已删除
+            </el-tag>
+            <el-tag
+              v-else
+              size="small"
+              type="success"
+            >
+              正常
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right" align="center">
+        <el-table-column
+          label="操作"
+          width="100"
+          fixed="right"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleViewDetail(row)">详情</el-button>
+            <el-button
+              type="primary"
+              link
+              @click="handleViewDetail(row)"
+            >
+              详情
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -200,25 +395,41 @@
       size="450px"
       class="message-detail-drawer"
     >
-      <div v-if="currentMessage" class="detail-content">
+      <div
+        v-if="currentMessage"
+        class="detail-content"
+      >
         <!-- 消息头部信息 -->
         <div class="detail-header">
-          <el-avatar :size="56" :src="currentMessage.senderAvatar">
+          <el-avatar
+            :size="56"
+            :src="currentMessage.senderAvatar"
+          >
             {{ currentMessage.senderNickName ? currentMessage.senderNickName[0] : 'U' }}
           </el-avatar>
           <div class="header-info">
             <h3>{{ currentMessage.senderNickName || '未知用户' }}</h3>
-            <p class="user-id">ID: {{ currentMessage.senderId }}</p>
+            <p class="user-id">
+              ID: {{ currentMessage.senderId }}
+            </p>
           </div>
         </div>
 
         <!-- 消息内容展示 -->
         <div class="message-detail-section">
-          <h4 class="section-title">消息内容</h4>
-          <div v-if="currentMessage.messageType === 'TEXT'" class="text-message-detail">
+          <h4 class="section-title">
+            消息内容
+          </h4>
+          <div
+            v-if="currentMessage.messageType === 'TEXT'"
+            class="text-message-detail"
+          >
             {{ currentMessage.content }}
           </div>
-          <div v-else-if="currentMessage.messageType === 'IMAGE'" class="image-message-detail">
+          <div
+            v-else-if="currentMessage.messageType === 'IMAGE'"
+            class="image-message-detail"
+          >
             <el-image
               v-if="currentMessage.fileUrl"
               :src="currentMessage.fileUrl"
@@ -226,65 +437,165 @@
               fit="contain"
               class="detail-image"
             />
-            <p v-if="currentMessage.fileName" class="file-name">{{ currentMessage.fileName }}</p>
+            <p
+              v-if="currentMessage.fileName"
+              class="file-name"
+            >
+              {{ currentMessage.fileName }}
+            </p>
           </div>
-          <div v-else-if="currentMessage.messageType === 'FILE'" class="file-message-detail">
+          <div
+            v-else-if="currentMessage.messageType === 'FILE'"
+            class="file-message-detail"
+          >
             <div class="file-card">
-              <el-icon class="file-card-icon" :size="40"><Document /></el-icon>
+              <el-icon
+                class="file-card-icon"
+                :size="40"
+              >
+                <Document />
+              </el-icon>
               <div class="file-card-info">
-                <div class="file-card-name">{{ currentMessage.fileName || '未知文件' }}</div>
-                <div class="file-card-size">{{ formatFileSize(currentMessage.fileSize) }}</div>
+                <div class="file-card-name">
+                  {{ currentMessage.fileName || '未知文件' }}
+                </div>
+                <div class="file-card-size">
+                  {{ formatFileSize(currentMessage.fileSize) }}
+                </div>
               </div>
-              <el-button type="primary" link>下载</el-button>
+              <el-button
+                type="primary"
+                link
+              >
+                下载
+              </el-button>
             </div>
           </div>
-          <div v-else-if="currentMessage.messageType === 'VOICE'" class="voice-message-detail">
-            <el-icon class="voice-icon"><Microphone /></el-icon>
+          <div
+            v-else-if="currentMessage.messageType === 'VOICE'"
+            class="voice-message-detail"
+          >
+            <el-icon class="voice-icon">
+              <Microphone />
+            </el-icon>
             <span>语音消息 {{ currentMessage.duration ? currentMessage.duration + '秒' : '' }}</span>
           </div>
-          <div v-else-if="currentMessage.messageType === 'VIDEO'" class="video-message-detail">
-            <el-icon class="video-icon"><VideoCamera /></el-icon>
+          <div
+            v-else-if="currentMessage.messageType === 'VIDEO'"
+            class="video-message-detail"
+          >
+            <el-icon class="video-icon">
+              <VideoCamera />
+            </el-icon>
             <span>视频消息</span>
           </div>
-          <div v-else class="other-message-detail">
+          <div
+            v-else
+            class="other-message-detail"
+          >
             {{ currentMessage.content || '[' + currentMessage.messageType + ']' }}
           </div>
         </div>
 
         <!-- 详细信息 -->
-        <el-descriptions :column="1" border class="detail-descriptions">
-          <el-descriptions-item label="消息ID">{{ currentMessage.id }}</el-descriptions-item>
-          <el-descriptions-item label="会话ID">{{ currentMessage.conversationId }}</el-descriptions-item>
+        <el-descriptions
+          :column="1"
+          border
+          class="detail-descriptions"
+        >
+          <el-descriptions-item label="消息ID">
+            {{ currentMessage.id }}
+          </el-descriptions-item>
+          <el-descriptions-item label="会话ID">
+            {{ currentMessage.conversationId }}
+          </el-descriptions-item>
           <el-descriptions-item label="会话类型">
-            <el-tag v-if="currentMessage.conversationType === 'PRIVATE'" type="info" size="small">单聊</el-tag>
-            <el-tag v-else type="warning" size="small">群聊</el-tag>
+            <el-tag
+              v-if="currentMessage.conversationType === 'PRIVATE'"
+              type="info"
+              size="small"
+            >
+              单聊
+            </el-tag>
+            <el-tag
+              v-else
+              type="warning"
+              size="small"
+            >
+              群聊
+            </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="消息类型">
-            <el-tag :type="getMessageTypeColor(currentMessage.messageType)" size="small">
+            <el-tag
+              :type="getMessageTypeColor(currentMessage.messageType)"
+              size="small"
+            >
               {{ getMessageTypeLabel(currentMessage.messageType) }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="发送时间">{{ currentMessage.createTime }}</el-descriptions-item>
+          <el-descriptions-item label="发送时间">
+            {{ currentMessage.createTime }}
+          </el-descriptions-item>
           <el-descriptions-item label="消息状态">
-            <el-tag v-if="currentMessage.isRevoked" type="info" size="small">已撤回</el-tag>
-            <el-tag v-else-if="currentMessage.isDeleted" type="danger" size="small">已删除</el-tag>
-            <el-tag v-else type="success" size="small">正常</el-tag>
+            <el-tag
+              v-if="currentMessage.isRevoked"
+              type="info"
+              size="small"
+            >
+              已撤回
+            </el-tag>
+            <el-tag
+              v-else-if="currentMessage.isDeleted"
+              type="danger"
+              size="small"
+            >
+              已删除
+            </el-tag>
+            <el-tag
+              v-else
+              type="success"
+              size="small"
+            >
+              正常
+            </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item v-if="currentMessage.isEdited" label="编辑状态">
-            <el-tag type="warning" size="small">已编辑</el-tag>
+          <el-descriptions-item
+            v-if="currentMessage.isEdited"
+            label="编辑状态"
+          >
+            <el-tag
+              type="warning"
+              size="small"
+            >
+              已编辑
+            </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item v-if="currentMessage.replyToMessageId" label="回复消息ID">
+          <el-descriptions-item
+            v-if="currentMessage.replyToMessageId"
+            label="回复消息ID"
+          >
             {{ currentMessage.replyToMessageId }}
           </el-descriptions-item>
-          <el-descriptions-item v-if="currentMessage.forwardFromMessageId" label="转发来源ID">
+          <el-descriptions-item
+            v-if="currentMessage.forwardFromMessageId"
+            label="转发来源ID"
+          >
             {{ currentMessage.forwardFromMessageId }}
           </el-descriptions-item>
         </el-descriptions>
 
         <!-- 操作按钮 -->
         <div class="detail-actions">
-          <el-button type="danger" :icon="Delete" @click="handleDeleteFromDetail">删除消息</el-button>
-          <el-button @click="detailDrawerVisible = false">关闭</el-button>
+          <el-button
+            type="danger"
+            :icon="Delete"
+            @click="handleDeleteFromDetail"
+          >
+            删除消息
+          </el-button>
+          <el-button @click="detailDrawerVisible = false">
+            关闭
+          </el-button>
         </div>
       </div>
     </el-drawer>
@@ -306,11 +617,18 @@
         配置敏感词后，包含敏感词的消息将被拦截或替换。每行一个敏感词。
       </el-alert>
 
-      <el-form :model="sensitiveForm" label-width="100px">
+      <el-form
+        :model="sensitiveForm"
+        label-width="100px"
+      >
         <el-form-item label="过滤策略">
           <el-radio-group v-model="sensitiveForm.strategy">
-            <el-radio label="reject">拦截消息</el-radio>
-            <el-radio label="replace">替换为***</el-radio>
+            <el-radio label="reject">
+              拦截消息
+            </el-radio>
+            <el-radio label="replace">
+              替换为***
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="敏感词列表">
@@ -327,8 +645,15 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="sensitiveConfigVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveSensitiveConfig">保存配置</el-button>
+        <el-button @click="sensitiveConfigVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSaveSensitiveConfig"
+        >
+          保存配置
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -397,7 +722,7 @@ const tableRef = ref(null)
 
 // 敏感词数量
 const sensitiveWordCount = computed(() => {
-  if (!sensitiveForm.value.words) return 0
+  if (!sensitiveForm.value.words) {return 0}
   return sensitiveForm.value.words.split('\n').filter(w => w.trim()).length
 })
 
@@ -455,18 +780,18 @@ const handleReset = () => {
 }
 
 // 分页
-const handleSizeChange = (val) => {
+const handleSizeChange = val => {
   pageSize.value = val
   loadMessages()
 }
 
-const handleCurrentChange = (val) => {
+const handleCurrentChange = val => {
   pageNum.value = val
   loadMessages()
 }
 
 // 表格选择
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedMessages.value = selection
 }
 
@@ -475,7 +800,7 @@ const handleClearSelection = () => {
 }
 
 // 删除
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   try {
     await ElMessageBox.confirm('确定要删除这条消息吗？删除后无法恢复。', '删除确认', {
       confirmButtonText: '确定删除',
@@ -522,7 +847,7 @@ const handleBatchDelete = async () => {
 }
 
 // 查看详情
-const handleViewDetail = async (row) => {
+const handleViewDetail = async row => {
   try {
     const res = await getMessageDetail(row.id)
     if (res.code === 200) {
@@ -536,7 +861,7 @@ const handleViewDetail = async (row) => {
 
 // 从详情删除
 const handleDeleteFromDetail = async () => {
-  if (!currentMessage.value) return
+  if (!currentMessage.value) {return}
   try {
     await ElMessageBox.confirm('确定要删除这条消息吗？删除后无法恢复。', '删除确认', {
       confirmButtonText: '确定删除',
@@ -626,7 +951,7 @@ const handleOpenSensitiveConfig = async () => {
   }
 }
 
-const getMessageTypeLabel = (type) => {
+const getMessageTypeLabel = type => {
   const labels = {
     TEXT: '文本',
     IMAGE: '图片',
@@ -638,7 +963,7 @@ const getMessageTypeLabel = (type) => {
   return labels[type] || type
 }
 
-const getMessageTypeColor = (type) => {
+const getMessageTypeColor = type => {
   const colors = {
     TEXT: 'primary',
     IMAGE: 'success',

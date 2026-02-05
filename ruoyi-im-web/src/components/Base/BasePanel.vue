@@ -1,7 +1,13 @@
 <template>
-  <div class="base-panel" :class="[panelClass, { 'has-sidebar': hasSidebar }]">
+  <div
+    class="base-panel"
+    :class="[panelClass, { 'has-sidebar': hasSidebar }]"
+  >
     <!-- 面板头部 -->
-    <div v-if="$slots.header" class="panel-header">
+    <div
+      v-if="$slots.header"
+      class="panel-header"
+    >
       <slot name="header" />
     </div>
     
@@ -11,7 +17,10 @@
         <slot name="sidebar" />
       </aside>
       <main class="panel-main-content">
-        <div v-if="$slots.toolbar" class="panel-toolbar">
+        <div
+          v-if="$slots.toolbar"
+          class="panel-toolbar"
+        >
           <slot name="toolbar" />
         </div>
         <div class="panel-main">
@@ -23,7 +32,10 @@
     <!-- 标准布局 -->
     <template v-else>
       <div class="panel-content">
-        <div v-if="$slots.toolbar" class="panel-toolbar">
+        <div
+          v-if="$slots.toolbar"
+          class="panel-toolbar"
+        >
           <slot name="toolbar" />
         </div>
         <div class="panel-main">

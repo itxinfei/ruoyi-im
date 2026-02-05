@@ -1,6 +1,9 @@
 <template>
   <teleport to="body">
-    <div v-if="visible" class="video-meeting-room">
+    <div
+      v-if="visible"
+      class="video-meeting-room"
+    >
       <!-- 顶部工具栏 -->
       <div class="room-header">
         <div class="header-left">
@@ -12,7 +15,11 @@
             <span class="material-icons-outlined">group</span>
             {{ participants.length }}人
           </span>
-          <el-button :icon="MoreFilled" circle size="small" />
+          <el-button
+            :icon="MoreFilled"
+            circle
+            size="small"
+          />
         </div>
       </div>
 
@@ -32,8 +39,11 @@
                 muted
                 playsinline
                 class="video-element"
-              ></video>
-              <div v-if="!localStream" class="no-video">
+              />
+              <div
+                v-if="!localStream"
+                class="no-video"
+              >
                 <span class="material-icons-outlined">videocam_off</span>
                 <span>摄像头已关闭</span>
               </div>
@@ -41,17 +51,32 @@
             <!-- 本地用户信息 -->
             <div class="participant-info">
               <span class="participant-name">我</span>
-              <el-tag v-if="isHost" size="small" type="warning">主持人</el-tag>
+              <el-tag
+                v-if="isHost"
+                size="small"
+                type="warning"
+              >
+                主持人
+              </el-tag>
             </div>
             <!-- 本地状态指示 -->
             <div class="status-indicators">
-              <span v-if="!isVideoEnabled" class="status-icon video-off">
+              <span
+                v-if="!isVideoEnabled"
+                class="status-icon video-off"
+              >
                 <span class="material-icons-outlined">videocam_off</span>
               </span>
-              <span v-if="!isAudioEnabled" class="status-icon audio-off">
+              <span
+                v-if="!isAudioEnabled"
+                class="status-icon audio-off"
+              >
                 <span class="material-icons-outlined">mic_off</span>
               </span>
-              <span v-if="isLocalSpeaking" class="speaking-indicator"></span>
+              <span
+                v-if="isLocalSpeaking"
+                class="speaking-indicator"
+              />
             </div>
           </div>
 
@@ -73,8 +98,11 @@
                 autoplay
                 playsinline
                 class="video-element"
-              ></video>
-              <div v-else class="no-video">
+              />
+              <div
+                v-else
+                class="no-video"
+              >
                 <DingtalkAvatar
                   :src="participant.avatar"
                   :name="participant.name"
@@ -87,17 +115,32 @@
             <!-- 参会者信息 -->
             <div class="participant-info">
               <span class="participant-name">{{ participant.name }}</span>
-              <el-tag v-if="participant.role === 'HOST'" size="small" type="warning">主持人</el-tag>
+              <el-tag
+                v-if="participant.role === 'HOST'"
+                size="small"
+                type="warning"
+              >
+                主持人
+              </el-tag>
             </div>
             <!-- 状态指示 -->
             <div class="status-indicators">
-              <span v-if="!participant.hasVideo" class="status-icon video-off">
+              <span
+                v-if="!participant.hasVideo"
+                class="status-icon video-off"
+              >
                 <span class="material-icons-outlined">videocam_off</span>
               </span>
-              <span v-if="!participant.hasAudio" class="status-icon audio-off">
+              <span
+                v-if="!participant.hasAudio"
+                class="status-icon audio-off"
+              >
                 <span class="material-icons-outlined">mic_off</span>
               </span>
-              <span v-if="participant.isSpeaking" class="speaking-indicator"></span>
+              <span
+                v-if="participant.isSpeaking"
+                class="speaking-indicator"
+              />
             </div>
           </div>
         </div>
@@ -107,7 +150,10 @@
       <div class="room-controls">
         <div class="controls-left">
           <!-- 麦克风开关 -->
-          <el-tooltip :content="isAudioEnabled ? '静音' : '取消静音'" placement="top">
+          <el-tooltip
+            :content="isAudioEnabled ? '静音' : '取消静音'"
+            placement="top"
+          >
             <el-button
               :type="isAudioEnabled ? 'default' : 'danger'"
               :icon="isAudioEnabled ? Mic : MicOff"
@@ -118,7 +164,10 @@
           </el-tooltip>
 
           <!-- 摄像头开关 -->
-          <el-tooltip :content="isVideoEnabled ? '关闭摄像头' : '开启摄像头'" placement="top">
+          <el-tooltip
+            :content="isVideoEnabled ? '关闭摄像头' : '开启摄像头'"
+            placement="top"
+          >
             <el-button
               :type="isVideoEnabled ? 'default' : 'danger'"
               :icon="isVideoEnabled ? Videocam : VideocamOff"
@@ -129,7 +178,10 @@
           </el-tooltip>
 
           <!-- 屏幕共享 -->
-          <el-tooltip :content="isScreenSharing ? '停止共享' : '共享屏幕'" placement="top">
+          <el-tooltip
+            :content="isScreenSharing ? '停止共享' : '共享屏幕'"
+            placement="top"
+          >
             <el-button
               :type="isScreenSharing ? 'primary' : 'default'"
               :icon="ScreenShare"
@@ -140,8 +192,15 @@
           </el-tooltip>
 
           <!-- 更多选项 -->
-          <el-dropdown trigger="click" @command="handleMoreCommand">
-            <el-button :icon="MoreHoriz" circle size="large" />
+          <el-dropdown
+            trigger="click"
+            @command="handleMoreCommand"
+          >
+            <el-button
+              :icon="MoreHoriz"
+              circle
+              size="large"
+            />
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="participants">
@@ -196,10 +255,18 @@
       </div>
 
       <!-- 参会者侧边栏 -->
-      <div v-if="showParticipants" class="participants-sidebar">
+      <div
+        v-if="showParticipants"
+        class="participants-sidebar"
+      >
         <div class="sidebar-header">
           <span>参会者 ({{ participants.length }})</span>
-          <el-button :icon="Close" circle size="small" @click="showParticipants = false" />
+          <el-button
+            :icon="Close"
+            circle
+            size="small"
+            @click="showParticipants = false"
+          />
         </div>
         <div class="sidebar-content">
           <div
@@ -216,7 +283,11 @@
             />
             <span class="participant-row-name">{{ participant.name }}</span>
             <div class="participant-actions">
-              <el-tooltip v-if="!participant.isLocal" content="静音" placement="top">
+              <el-tooltip
+                v-if="!participant.isLocal"
+                content="静音"
+                placement="top"
+              >
                 <el-button
                   :icon="participant.hasAudio ? Mic : MicOff"
                   size="small"
@@ -224,7 +295,11 @@
                   @click="toggleParticipantAudio(participant)"
                 />
               </el-tooltip>
-              <el-tooltip v-if="isHost && !participant.isHost" content="移除" placement="top">
+              <el-tooltip
+                v-if="isHost && !participant.isHost"
+                content="移除"
+                placement="top"
+              >
                 <el-button
                   :icon="PersonRemove"
                   size="small"
@@ -303,7 +378,7 @@ const startRecording = () => {
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
     recordedChunks = []
 
-    mediaRecorder.ondataavailable = (event) => {
+    mediaRecorder.ondataavailable = event => {
       if (event.data.size > 0) {
         recordedChunks.push(event.data)
       }
@@ -342,7 +417,7 @@ const gridLayout = ref('grid')
 // 远程视频引用
 const videoRefs = new Map()
 const setVideoRef = (id, el) => {
-  if (el) videoRefs.set(id, el)
+  if (el) {videoRefs.set(id, el)}
 }
 
 // 计算属性
@@ -356,9 +431,9 @@ const remoteParticipants = computed(() => {
 
 const gridSize = computed(() => {
   const count = participants.value.length
-  if (count <= 1) return 1
-  if (count <= 4) return 4
-  if (count <= 9) return 9
+  if (count <= 1) {return 1}
+  if (count <= 4) {return 4}
+  if (count <= 9) {return 9}
   return 16
 })
 
@@ -376,7 +451,7 @@ const initLocalMedia = async () => {
     localStream.value = stream
 
     await nextTick()
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     if (localVideoRef.value) {
       localVideoRef.value.srcObject = stream
     }
@@ -480,17 +555,17 @@ const toggleScreenShare = async () => {
 }
 
 // 设置活跃参会者
-const handleSetActive = (id) => {
+const handleSetActive = id => {
   activeParticipantId.value = id
 }
 
 // 切换参会者音频
-const toggleParticipantAudio = (participant) => {
+const toggleParticipantAudio = participant => {
   emit('participant-update', { ...participant, hasAudio: !participant.hasAudio })
 }
 
 // 移除参会者
-const removeParticipant = async (participant) => {
+const removeParticipant = async participant => {
   try {
     await ElMessageBox.confirm(
       `确定要将${participant.name}移出会议吗？`,
@@ -508,7 +583,7 @@ const removeParticipant = async (participant) => {
 }
 
 // 处理更多命令
-const handleMoreCommand = (command) => {
+const handleMoreCommand = command => {
   switch (command) {
     case 'participants':
       showParticipants.value = !showParticipants.value
@@ -551,7 +626,7 @@ const handleLeave = async () => {
 }
 
 // 添加参会者
-const addParticipant = (participant) => {
+const addParticipant = participant => {
   const exists = participants.value.find(p => p.id === participant.id)
   if (!exists) {
     participants.value.push({
@@ -563,7 +638,7 @@ const addParticipant = (participant) => {
 }
 
 // 移除参会者
-const removeParticipantById = (id) => {
+const removeParticipantById = id => {
   const index = participants.value.findIndex(p => p.id === id)
   if (index > -1) {
     const participant = participants.value[index]
@@ -584,7 +659,7 @@ const updateParticipantStream = (id, stream) => {
 
     // 绑定到 video 元素
     nextTick(() => {
-      if (isUnmounted.value) return
+      if (isUnmounted.value) {return}
       const videoEl = videoRefs.get(id)
       if (videoEl && stream) {
         videoEl.srcObject = stream
@@ -594,7 +669,7 @@ const updateParticipantStream = (id, stream) => {
 }
 
 // 监听可见状态
-watch(() => props.visible, (visible) => {
+watch(() => props.visible, visible => {
   if (visible) {
     // 添加本地用户
     participants.value = [{

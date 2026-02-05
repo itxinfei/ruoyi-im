@@ -1,5 +1,5 @@
 <template>
-  <div :class="['dingtalk-app', isDark ? 'dark' : '']">
+  <div :class="['im-app', isDark ? 'dark' : '']">
     <div class="app-container">
       <!-- 新侧边导航 -->
       <ImSideNavNew
@@ -24,7 +24,10 @@
               :session="currentSession"
               @show-user="handleShowUser"
             />
-            <div v-else class="chat-placeholder">
+            <div
+              v-else
+              class="chat-placeholder"
+            >
               <EmptyState
                 type="chat"
                 title="选择一个会话开始聊天"
@@ -65,10 +68,21 @@
 
       <!-- 全局交互弹窗 (对齐钉钉模式) -->
       <PersonalProfileDialog v-model="showProfile" />
-      <SystemSettingsDialog v-model="showSettings" :default-menu="settingsDefaultMenu" />
+      <SystemSettingsDialog
+        v-model="showSettings"
+        :default-menu="settingsDefaultMenu"
+      />
       <HelpFeedbackDialog v-model="showHelp" />
-      <UserProfileDialog v-model="showUserDetail" :session="detailSession" layout-mode="compact" @send-message="handleSelectSession" />
-      <GlobalSearchDialog v-model="showGlobalSearch" @select-message="handleSearchSelectMessage" />
+      <UserProfileDialog
+        v-model="showUserDetail"
+        :session="detailSession"
+        layout-mode="compact"
+        @send-message="handleSelectSession"
+      />
+      <GlobalSearchDialog
+        v-model="showGlobalSearch"
+        @select-message="handleSearchSelectMessage"
+      />
 
       <!-- 外部应用对话框 -->
       <el-dialog
@@ -80,7 +94,10 @@
         class="external-app-dialog"
         @closed="externalApp = null"
       >
-        <div v-if="externalApp" class="external-app-container">
+        <div
+          v-if="externalApp"
+          class="external-app-container"
+        >
           <iframe
             v-if="externalApp.openMode === 'iframe' && externalApp.appUrl"
             :src="externalApp.appUrl"
@@ -89,7 +106,10 @@
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
           />
-          <div v-else class="app-placeholder">
+          <div
+            v-else
+            class="app-placeholder"
+          >
             <span class="material-icons-outlined">extension</span>
             <p>该应用暂不支持在此打开</p>
           </div>
@@ -179,7 +199,7 @@ const handleResize = () => {
   windowWidth.value = window.innerWidth
 }
 
-const handleSwitchModule = (module) => {
+const handleSwitchModule = module => {
   if (module === 'profile') {
     showProfile.value = true
   } else if (module === 'settings') {
@@ -198,7 +218,7 @@ const handleOpenSettings = (menu = 'account') => {
   showSettings.value = true
 }
 
-const handleSelectSession = (session) => {
+const handleSelectSession = session => {
   if (!session || !session.id) {
     console.error('[MainPage] Invalid session object:', session)
     return
@@ -206,8 +226,8 @@ const handleSelectSession = (session) => {
   store.dispatch('im/session/selectSession', session)
 }
 
-const handleShowUser = (userId) => {
-  if (!userId) return
+const handleShowUser = userId => {
+  if (!userId) {return}
   // 构造简易 session 对象供 UserProfileDialog 使用
   detailSession.value = {
     targetUserId: userId,
@@ -217,7 +237,7 @@ const handleShowUser = (userId) => {
 }
 
 // 处理搜索结果点击
-const handleSearchSelectMessage = (message) => {
+const handleSearchSelectMessage = message => {
   // 根据消息的会话ID切换到对应会话
   if (message.conversationId) {
     store.dispatch('im/session/selectSessionById', message.conversationId)
@@ -229,13 +249,13 @@ const handleSearchSelectMessage = (message) => {
 }
 
 // 处理打开外部应用
-const handleOpenExternalApp = (app) => {
+const handleOpenExternalApp = app => {
   externalApp.value = app
   showExternalApp.value = true
 }
 
 // 处理从通讯录发起的语音通话
-const handleVoiceCallFromContact = (contact) => {
+const handleVoiceCallFromContact = contact => {
   remoteCallUser.value = contact
   isIncomingCall.value = false
   showVoiceCall.value = true
@@ -243,7 +263,7 @@ const handleVoiceCallFromContact = (contact) => {
 }
 
 // 处理从通讯录发起的视频通话
-const handleVideoCallFromContact = (contact) => {
+const handleVideoCallFromContact = contact => {
   remoteCallUser.value = contact
   isIncomingCall.value = false
   showVideoCall.value = true
@@ -251,26 +271,26 @@ const handleVideoCallFromContact = (contact) => {
 }
 
 // Watch session change to auto-switch to chat
-watch(currentSession, (sess) => {
+watch(currentSession, sess => {
   if (sess) {
     activeModule.value = 'chat'
   }
 })
 
 // Global WebSocket Message Handler
-onMessage((msg) => {
+onMessage(msg => {
   store.dispatch('im/message/receiveMessage', msg)
 })
 
 const { onOnline, onOffline } = useImWebSocket()
 
-onOnline((data) => {
+onOnline(data => {
   if (data.userId) {
     store.commit('im/contact/SET_USER_STATUS', { userId: data.userId, status: 'online' })
   }
 })
 
-onOffline((data) => {
+onOffline(data => {
   if (data.userId) {
     store.commit('im/contact/SET_USER_STATUS', { userId: data.userId, status: 'offline' })
   }
@@ -318,7 +338,7 @@ onUnmounted(() => {
 })
 
 // 处理从通讯录发起聊天的切换
-const handleSwitchToChat = (event) => {
+const handleSwitchToChat = event => {
   const { conversationId } = event.detail
   if (conversationId) {
     activeModule.value = 'chat'
@@ -326,7 +346,7 @@ const handleSwitchToChat = (event) => {
 }
 
 // 键盘快捷键处理
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   // Ctrl/Cmd + K 打开全局搜索
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault()
@@ -336,7 +356,7 @@ const handleKeydown = (e) => {
 </script>
 
 <style lang="scss" scoped>
-.dingtalk-app {
+.im-app {
   width: 100%;
   height: 100%;
 }

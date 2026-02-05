@@ -26,7 +26,7 @@ const props = defineProps({
   links: { type: Array, default: () => [] }
 })
 
-const truncateUrl = (url) => {
+const truncateUrl = url => {
   try {
     const urlObj = new URL(url)
     return urlObj.hostname + (urlObj.pathname.length > 1 ? '/...' : '')

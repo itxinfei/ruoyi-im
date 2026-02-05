@@ -251,3 +251,112 @@ export function getContactsByTag(tag) {
     method: 'get'
   })
 }
+
+/**
+ * 获取推荐好友列表
+ * 基于部门、手机号等推荐可能认识的人
+ * @param {Object} params - 查询参数
+ * @param {string} params.type - 推荐类型: department(同事), phone(手机号), all(全部)
+ * @param {number} params.limit - 返回数量限制
+ * @returns {Promise}
+ */
+export function getRecommendedContacts(params) {
+  return request({
+    url: '/api/im/contact/recommendations',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 上传通讯录用于好友匹配
+ * @param {Object} data - 通讯录数据
+ * @param {Array} data.contacts - 联系人列表 {name, phone}
+ * @returns {Promise}
+ */
+export function uploadAddressBook(data) {
+  return request({
+    url: '/api/im/contact/address-book/upload',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 获取通讯录匹配的好友
+ * @returns {Promise}
+ */
+export function getAddressBookMatches() {
+  return request({
+    url: '/api/im/contact/address-book/matches',
+    method: 'get'
+  })
+}
+
+/**
+ * 批量添加好友
+ * @param {Object} data - 请求数据
+ * @param {Array<number>} data.userIds - 用户ID列表
+ * @param {string} data.remark - 备注信息
+ * @returns {Promise}
+ */
+export function batchAddFriends(data) {
+  return request({
+    url: '/api/im/contact/batch-add',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 批量移动联系人到分组
+ * @param {Object} data - 请求数据
+ * @param {Array<number>} data.contactIds - 联系人ID列表
+ * @param {string} data.groupName - 分组名称
+ * @returns {Promise}
+ */
+export function batchMoveToGroup(data) {
+  return request({
+    url: '/api/im/contact/batch-move',
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 批量删除联系人
+ * @param {Array<number>} contactIds - 联系人ID列表
+ * @returns {Promise}
+ */
+export function batchDeleteContacts(contactIds) {
+  return request({
+    url: '/api/im/contact/batch-delete',
+    method: 'delete',
+    data: { contactIds }
+  })
+}
+
+/**
+ * 清除好友列表缓存
+ * 清除当前用户的好友列表Redis缓存，用于刷新数据
+ * @returns {Promise}
+ */
+export function clearFriendListCache() {
+  return request({
+    url: '/api/im/contact/cache/clear',
+    method: 'post'
+  })
+}
+
+/**
+ * 批量清除多个用户的好友列表缓存
+ * @param {Array<number>} userIds - 用户ID列表
+ * @returns {Promise}
+ */
+export function batchClearFriendListCache(userIds) {
+  return request({
+    url: '/api/im/contact/cache/clear-batch',
+    method: 'post',
+    data: { userIds }
+  })
+}

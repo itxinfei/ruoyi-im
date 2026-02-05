@@ -4,25 +4,52 @@
     <div class="page-header">
       <div class="page-title">
         <h2>用户管理</h2>
-        <p class="page-desc">管理系统用户账号、角色和状态</p>
+        <p class="page-desc">
+          管理系统用户账号、角色和状态
+        </p>
       </div>
       <div class="page-actions">
-        <el-button type="primary" :icon="Plus" @click="handleAdd">新增用户</el-button>
-        <el-dropdown split-button :icon="Upload" @click="handleImport" @command="handleDownloadTemplate">
+        <el-button
+          type="primary"
+          :icon="Plus"
+          @click="handleAdd"
+        >
+          新增用户
+        </el-button>
+        <el-dropdown
+          split-button
+          :icon="Upload"
+          @click="handleImport"
+          @command="handleDownloadTemplate"
+        >
           批量导入
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="download">下载导入模板</el-dropdown-item>
+              <el-dropdown-item command="download">
+                下载导入模板
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <el-button :icon="Download" @click="handleExport">导出数据</el-button>
+        <el-button
+          :icon="Download"
+          @click="handleExport"
+        >
+          导出数据
+        </el-button>
       </div>
     </div>
 
     <!-- 搜索和筛选栏 -->
-    <el-card class="search-card" shadow="never">
-      <el-form :inline="true" :model="searchForm" class="search-form">
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="搜索">
           <el-input
             v-model="searchForm.keyword"
@@ -37,34 +64,103 @@
           </el-input>
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="searchForm.role" placeholder="全部角色" clearable style="width: 140px" @change="handleSearch">
-            <el-option label="超级管理员" value="SUPER_ADMIN" />
-            <el-option label="管理员" value="ADMIN" />
-            <el-option label="普通用户" value="USER" />
+          <el-select
+            v-model="searchForm.role"
+            placeholder="全部角色"
+            clearable
+            style="width: 140px"
+            @change="handleSearch"
+          >
+            <el-option
+              label="超级管理员"
+              value="SUPER_ADMIN"
+            />
+            <el-option
+              label="管理员"
+              value="ADMIN"
+            />
+            <el-option
+              label="普通用户"
+              value="USER"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width: 120px" @change="handleSearch">
-            <el-option label="启用" :value="1" />
-            <el-option label="禁用" :value="0" />
+          <el-select
+            v-model="searchForm.status"
+            placeholder="全部状态"
+            clearable
+            style="width: 120px"
+            @change="handleSearch"
+          >
+            <el-option
+              label="启用"
+              :value="1"
+            />
+            <el-option
+              label="禁用"
+              :value="0"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            :icon="Search"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button
+            :icon="Refresh"
+            @click="handleReset"
+          >
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 用户列表卡片 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <!-- 批量操作栏 -->
-      <div v-if="selectedRows.length > 0" class="batch-actions">
+      <div
+        v-if="selectedRows.length > 0"
+        class="batch-actions"
+      >
         <span class="selected-count">已选择 {{ selectedRows.length }} 项</span>
-        <el-button size="small" :icon="Delete" type="danger" @click="handleBatchDelete">批量删除</el-button>
-        <el-button size="small" :icon="Lock" @click="handleBatchDisable">批量禁用</el-button>
-        <el-button size="small" :icon="Unlock" @click="handleBatchEnable">批量启用</el-button>
-        <el-button size="small" text @click="handleClearSelection">取消选择</el-button>
+        <el-button
+          size="small"
+          :icon="Delete"
+          type="danger"
+          @click="handleBatchDelete"
+        >
+          批量删除
+        </el-button>
+        <el-button
+          size="small"
+          :icon="Lock"
+          @click="handleBatchDisable"
+        >
+          批量禁用
+        </el-button>
+        <el-button
+          size="small"
+          :icon="Unlock"
+          @click="handleBatchEnable"
+        >
+          批量启用
+        </el-button>
+        <el-button
+          size="small"
+          text
+          @click="handleClearSelection"
+        >
+          取消选择
+        </el-button>
       </div>
 
       <!-- 数据表格 -->
@@ -78,36 +174,120 @@
         style="width: 100%"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" />
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="avatar" label="头像" width="70">
+        <el-table-column
+          type="selection"
+          width="50"
+        />
+        <el-table-column
+          prop="id"
+          label="ID"
+          width="80"
+        />
+        <el-table-column
+          prop="avatar"
+          label="头像"
+          width="70"
+        >
           <template #default="{ row }">
-            <el-avatar :size="36" :src="row.avatar">
+            <el-avatar
+              :size="36"
+              :src="row.avatar"
+            >
               <el-icon><User /></el-icon>
             </el-avatar>
           </template>
         </el-table-column>
-        <el-table-column prop="username" label="用户名" min-width="120" />
-        <el-table-column prop="nickname" label="昵称" min-width="120" />
-        <el-table-column prop="mobile" label="手机号" width="130" />
-        <el-table-column prop="role" label="角色" width="120">
+        <el-table-column
+          prop="username"
+          label="用户名"
+          min-width="120"
+        />
+        <el-table-column
+          prop="nickname"
+          label="昵称"
+          min-width="120"
+        />
+        <el-table-column
+          prop="mobile"
+          label="手机号"
+          width="130"
+        />
+        <el-table-column
+          prop="role"
+          label="角色"
+          width="120"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.role === 'SUPER_ADMIN'" type="danger" size="small">超级管理员</el-tag>
-            <el-tag v-else-if="row.role === 'ADMIN'" type="warning" size="small">管理员</el-tag>
-            <el-tag v-else type="info" size="small">普通用户</el-tag>
+            <el-tag
+              v-if="row.role === 'SUPER_ADMIN'"
+              type="danger"
+              size="small"
+            >
+              超级管理员
+            </el-tag>
+            <el-tag
+              v-else-if="row.role === 'ADMIN'"
+              type="warning"
+              size="small"
+            >
+              管理员
+            </el-tag>
+            <el-tag
+              v-else
+              type="info"
+              size="small"
+            >
+              普通用户
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="90">
+        <el-table-column
+          prop="status"
+          label="状态"
+          width="90"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.status === 1" type="success" size="small">启用</el-tag>
-            <el-tag v-else type="danger" size="small">禁用</el-tag>
+            <el-tag
+              v-if="row.status === 1"
+              type="success"
+              size="small"
+            >
+              启用
+            </el-tag>
+            <el-tag
+              v-else
+              type="danger"
+              size="small"
+            >
+              禁用
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="170" />
-        <el-table-column label="操作" fixed="right" width="200">
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="170"
+        />
+        <el-table-column
+          label="操作"
+          fixed="right"
+          width="200"
+        >
           <template #default="{ row }">
-            <el-button size="small" text @click="handleView(row)">查看</el-button>
-            <el-button size="small" text @click="handleEdit(row)">编辑</el-button>
+            <el-button
+              size="small"
+              text
+              @click="handleView(row)"
+            >
+              查看
+            </el-button>
+            <el-button
+              size="small"
+              text
+              @click="handleEdit(row)"
+            >
+              编辑
+            </el-button>
             <el-button
               size="small"
               :type="row.status === 1 ? 'warning' : 'success'"
@@ -116,7 +296,14 @@
             >
               {{ row.status === 1 ? '禁用' : '启用' }}
             </el-button>
-            <el-button size="small" text type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button
+              size="small"
+              text
+              type="danger"
+              @click="handleDelete(row)"
+            >
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -142,35 +329,88 @@
       size="500px"
       :close-on-click-modal="false"
     >
-      <div v-if="currentUser" class="user-detail">
+      <div
+        v-if="currentUser"
+        class="user-detail"
+      >
         <div class="detail-header">
-          <el-avatar :size="80" :src="currentUser.avatar">
+          <el-avatar
+            :size="80"
+            :src="currentUser.avatar"
+          >
             <el-icon><User /></el-icon>
           </el-avatar>
           <div class="user-info">
             <h3>{{ currentUser.nickname || currentUser.username }}</h3>
-            <el-tag :type="currentUser.status === 1 ? 'success' : 'danger'" size="small">
+            <el-tag
+              :type="currentUser.status === 1 ? 'success' : 'danger'"
+              size="small"
+            >
               {{ currentUser.status === 1 ? '启用' : '禁用' }}
             </el-tag>
           </div>
         </div>
-        <el-descriptions :column="1" border class="detail-descriptions">
-          <el-descriptions-item label="用户ID">{{ currentUser.id }}</el-descriptions-item>
-          <el-descriptions-item label="用户名">{{ currentUser.username }}</el-descriptions-item>
-          <el-descriptions-item label="昵称">{{ currentUser.nickname || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="手机号">{{ currentUser.mobile || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="邮箱">{{ currentUser.email || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="角色">
-            <el-tag v-if="currentUser.role === 'SUPER_ADMIN'" type="danger">超级管理员</el-tag>
-            <el-tag v-else-if="currentUser.role === 'ADMIN'" type="warning">管理员</el-tag>
-            <el-tag v-else type="info">普通用户</el-tag>
+        <el-descriptions
+          :column="1"
+          border
+          class="detail-descriptions"
+        >
+          <el-descriptions-item label="用户ID">
+            {{ currentUser.id }}
           </el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ currentUser.createTime }}</el-descriptions-item>
-          <el-descriptions-item label="最后登录">{{ currentUser.lastLoginTime || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="用户名">
+            {{ currentUser.username }}
+          </el-descriptions-item>
+          <el-descriptions-item label="昵称">
+            {{ currentUser.nickname || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="手机号">
+            {{ currentUser.mobile || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="邮箱">
+            {{ currentUser.email || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="角色">
+            <el-tag
+              v-if="currentUser.role === 'SUPER_ADMIN'"
+              type="danger"
+            >
+              超级管理员
+            </el-tag>
+            <el-tag
+              v-else-if="currentUser.role === 'ADMIN'"
+              type="warning"
+            >
+              管理员
+            </el-tag>
+            <el-tag
+              v-else
+              type="info"
+            >
+              普通用户
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="创建时间">
+            {{ currentUser.createTime }}
+          </el-descriptions-item>
+          <el-descriptions-item label="最后登录">
+            {{ currentUser.lastLoginTime || '-' }}
+          </el-descriptions-item>
         </el-descriptions>
         <div class="detail-actions">
-          <el-button type="primary" :icon="Edit" @click="handleEdit(currentUser)">编辑</el-button>
-          <el-button :icon="RefreshRight" @click="handleResetPassword">重置密码</el-button>
+          <el-button
+            type="primary"
+            :icon="Edit"
+            @click="handleEdit(currentUser)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            :icon="RefreshRight"
+            @click="handleResetPassword"
+          >
+            重置密码
+          </el-button>
         </div>
       </div>
     </el-drawer>
@@ -182,39 +422,109 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="editForm" :rules="editRules" ref="editFormRef" label-width="90px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="editForm.username" placeholder="请输入用户名" :disabled="editMode === 'edit'" />
+      <el-form
+        ref="editFormRef"
+        :model="editForm"
+        :rules="editRules"
+        label-width="90px"
+      >
+        <el-form-item
+          label="用户名"
+          prop="username"
+        >
+          <el-input
+            v-model="editForm.username"
+            placeholder="请输入用户名"
+            :disabled="editMode === 'edit'"
+          />
         </el-form-item>
-        <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="editForm.nickname" placeholder="请输入昵称" />
+        <el-form-item
+          label="昵称"
+          prop="nickname"
+        >
+          <el-input
+            v-model="editForm.nickname"
+            placeholder="请输入昵称"
+          />
         </el-form-item>
-        <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="editForm.mobile" placeholder="请输入手机号" />
+        <el-form-item
+          label="手机号"
+          prop="mobile"
+        >
+          <el-input
+            v-model="editForm.mobile"
+            placeholder="请输入手机号"
+          />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="editForm.email" placeholder="请输入邮箱" />
+        <el-form-item
+          label="邮箱"
+          prop="email"
+        >
+          <el-input
+            v-model="editForm.email"
+            placeholder="请输入邮箱"
+          />
         </el-form-item>
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="editForm.role" placeholder="请选择角色" style="width: 100%">
-            <el-option label="超级管理员" value="SUPER_ADMIN" />
-            <el-option label="管理员" value="ADMIN" />
-            <el-option label="普通用户" value="USER" />
+        <el-form-item
+          label="角色"
+          prop="role"
+        >
+          <el-select
+            v-model="editForm.role"
+            placeholder="请选择角色"
+            style="width: 100%"
+          >
+            <el-option
+              label="超级管理员"
+              value="SUPER_ADMIN"
+            />
+            <el-option
+              label="管理员"
+              value="ADMIN"
+            />
+            <el-option
+              label="普通用户"
+              value="USER"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="editForm.status">
-            <el-radio :value="1">启用</el-radio>
-            <el-radio :value="0">禁用</el-radio>
+            <el-radio :value="1">
+              启用
+            </el-radio>
+            <el-radio :value="0">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="editMode === 'add'" label="密码" prop="password">
-          <el-input v-model="editForm.password" type="password" placeholder="请输入密码" show-password />
+        <el-form-item
+          v-if="editMode === 'add'"
+          label="密码"
+          prop="password"
+        >
+          <el-input
+            v-model="editForm.password"
+            type="password"
+            placeholder="请输入密码"
+            show-password
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">确定</el-button>
+        <el-button @click="editDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -354,18 +664,18 @@ const handleReset = () => {
 }
 
 // 分页
-const handleSizeChange = (val) => {
+const handleSizeChange = val => {
   pageSize.value = val
   loadUsers()
 }
 
-const handleCurrentChange = (val) => {
+const handleCurrentChange = val => {
   pageNum.value = val
   loadUsers()
 }
 
 // 选择变化
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedRows.value = selection
 }
 
@@ -375,7 +685,7 @@ const handleClearSelection = () => {
 }
 
 // 查看详情
-const handleView = (row) => {
+const handleView = row => {
   currentUser.value = { ...row }
   detailDrawerVisible.value = true
 }
@@ -397,7 +707,7 @@ const handleAdd = () => {
 }
 
 // 编辑用户
-const handleEdit = (row) => {
+const handleEdit = row => {
   editMode.value = 'edit'
   Object.assign(editForm, {
     id: row.id,
@@ -416,7 +726,7 @@ const handleEdit = (row) => {
 // 提交表单
 const handleSubmit = async () => {
   const valid = await editFormRef.value.validate().catch(() => false)
-  if (!valid) return
+  if (!valid) {return}
 
   submitting.value = true
   try {
@@ -439,7 +749,7 @@ const handleSubmit = async () => {
 }
 
 // 切换状态
-const handleToggleStatus = async (row) => {
+const handleToggleStatus = async row => {
   const action = row.status === 1 ? '禁用' : '启用'
   try {
     await ElMessageBox.confirm(`确定要${action}用户 ${row.nickname || row.username} 吗？`, '提示', {
@@ -461,7 +771,7 @@ const handleToggleStatus = async (row) => {
 }
 
 // 删除用户
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   try {
     await ElMessageBox.confirm(`确定要删除用户 ${row.nickname || row.username} 吗？此操作不可恢复！`, '警告', {
       confirmButtonText: '确定',
@@ -482,7 +792,7 @@ const handleDelete = async (row) => {
 
 // 批量删除
 const handleBatchDelete = async () => {
-  if (selectedRows.value.length === 0) return
+  if (selectedRows.value.length === 0) {return}
   try {
     await ElMessageBox.confirm(`确定要删除选中的 ${selectedRows.value.length} 个用户吗？此操作不可恢复！`, '批量删除', {
       confirmButtonText: '确定',
@@ -559,9 +869,9 @@ const handleImport = () => {
 }
 
 // 处理文件选择
-const handleFileChange = async (event) => {
+const handleFileChange = async event => {
   const file = event.target.files?.[0]
-  if (!file) return
+  if (!file) {return}
 
   // 验证文件类型
   const validTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
@@ -631,27 +941,27 @@ const handleDownloadTemplate = async () => {
 // 导出
 const handleExport = () => {
   try {
-    const headers = ["用户ID", "用户名", "昵称", "邮箱", "手机号", "角色", "状态", "创建时间"]
-    const roleMap = { USER: "普通用户", ADMIN: "管理员", SUPER_ADMIN: "超级管理员" }
-    const statusMap = { 0: "禁用", 1: "启用" }
+    const headers = ['用户ID', '用户名', '昵称', '邮箱', '手机号', '角色', '状态', '创建时间']
+    const roleMap = { USER: '普通用户', ADMIN: '管理员', SUPER_ADMIN: '超级管理员' }
+    const statusMap = { 0: '禁用', 1: '启用' }
 
     const rows = userList.value.map(u => {
       return [
-        u.id || "",
-        u.username || "",
-        u.nickname || "",
-        u.email || "",
-        u.mobile || "",
+        u.id || '',
+        u.username || '',
+        u.nickname || '',
+        u.email || '',
+        u.mobile || '',
         roleMap[u.role] || u.role,
         statusMap[u.status] ?? u.status,
-        u.createTime || ""
+        u.createTime || ''
       ]
     })
 
-    exportToCSV(headers, rows, "用户列表")
-    ElMessage.success("导出成功")
+    exportToCSV(headers, rows, '用户列表')
+    ElMessage.success('导出成功')
   } catch (error) {
-    ElMessage.error("导出失败")
+    ElMessage.error('导出失败')
   }
 }
 const handleResetPassword = async () => {

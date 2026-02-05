@@ -210,7 +210,7 @@ export function showMessageNotification(options = {}) {
     const settings = store.state.im.settings.notifications
 
     // 如果全局通知已关，则直接返回
-    if (!settings.enabled) return
+    if (!settings.enabled) {return}
 
     const {
         title = '新消息',

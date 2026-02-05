@@ -71,14 +71,14 @@ export function createFolder(data) {
 
 /**
  * 获取文件列表
- * @param {number} folderId - 文件夹ID
+ * @param {number} folderId - 文件夹ID，null表示根目录
  * @returns {Promise}
  */
 export function getFileList(folderId = null) {
   return request({
     url: '/api/im/cloud/file/list',
     method: 'get',
-    params: { folderId }
+    params: { folderId: folderId ?? '' }
   })
 }
 

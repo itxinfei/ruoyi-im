@@ -8,7 +8,10 @@
     @drop.prevent="handleDrop"
     @paste="handlePaste"
   >
-    <div v-if="!session" class="empty-placeholder">
+    <div
+      v-if="!session"
+      class="empty-placeholder"
+    >
       <EmptyState
         type="chat"
         title="选择一个会话开始聊天"
@@ -19,7 +22,10 @@
     <template v-else>
       <div class="main-container">
         <!-- 左侧聊天主体 -->
-        <div class="chat-viewport" :class="{ 'with-pinned-panel': showPinnedPanel }">
+        <div
+          class="chat-viewport"
+          :class="{ 'with-pinned-panel': showPinnedPanel }"
+        >
           <ChatHeader
             :session="session"
             :typing-users="typingUsers"
@@ -103,8 +109,19 @@
       />
 
       <!-- 隐藏的文件上传 input -->
-      <input type="file" ref="fileInputRef" style="display: none" @change="handleFileUpload" />
-      <input type="file" ref="imageInputRef" style="display: none" accept="image/*" @change="handleImageUpload" />
+      <input
+        ref="fileInputRef"
+        type="file"
+        style="display: none"
+        @change="handleFileUpload"
+      >
+      <input
+        ref="imageInputRef"
+        type="file"
+        style="display: none"
+        accept="image/*"
+        @change="handleImageUpload"
+      >
 
       <!-- 转发对话框 -->
       <ForwardDialog
@@ -220,7 +237,10 @@
     >
       <div class="emoji-popover-header">
         <span>添加表情回应</span>
-        <el-icon @click="showEmojiPopover = false" class="close-icon">
+        <el-icon
+          class="close-icon"
+          @click="showEmojiPopover = false"
+        >
           <Close />
         </el-icon>
       </div>
@@ -275,13 +295,14 @@ import {
 } from '@/composables/useChat'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseMessageContent } from '@/utils/message'
+import { useMessageTransformation } from '@/composables/useMessageTransformation.js'
 
 const props = defineProps({
   session: {
     type: Object,
     default: null,
-    validator: (value) => {
-      if (value === null) return true
+    validator: value => {
+      if (value === null) {return true}
       return typeof value.id === 'string' || typeof value.id === 'number'
     }
   }
@@ -304,6 +325,9 @@ const {
   markAsRead,
   loadMore
 } = useChatMessages(computed(() => props.session?.id), currentUser)
+
+// 消息转换（统一消息格式）
+const { transformMsg } = useMessageTransformation({ currentUser })
 
 // 消息命令（复制、回复、转发、撤回、删除、编辑等）
 const {
@@ -375,10 +399,10 @@ const messageInputRef = ref(null)
 
 // 当前会话所有图片URL列表（用于预览时左右切换）
 const conversationImages = computed(() => {
-  if (!messages.value || !Array.isArray(messages.value)) return []
+  if (!messages.value || !Array.isArray(messages.value)) {return []}
   return messages.value
     .filter(m => {
-      if (m.type !== 'IMAGE') return false
+      if (m.type !== 'IMAGE') {return false}
       const content = parseMessageContent(m)
       return content && (content.url || content.imageUrl)
     })
@@ -410,7 +434,7 @@ const {
 
 // 输入状态用户列表（用于显示"xxx正在输入..."）
 const typingUsers = ref([])
-let typingTimers = {} // userId -> timerId
+const typingTimers = {} // userId -> timerId
 
 // 发送输入状态（防抖）
 let sendTypingTimer = null
@@ -418,7 +442,7 @@ const TYPING_DEBOUNCE = 500 // 500ms 防抖
 
 // 发送正在输入状态（单聊和群聊都支持）
 const sendMyTypingStatus = () => {
-  if (!props.session) return
+  if (!props.session) {return}
 
   // 清除之前的定时器
   if (sendTypingTimer) {
@@ -433,7 +457,7 @@ const sendMyTypingStatus = () => {
 
 // 发送停止输入状态
 const sendMyStopTypingStatus = () => {
-  if (!props.session) return
+  if (!props.session) {return}
 
   if (sendTypingTimer) {
     clearTimeout(sendTypingTimer)
@@ -444,7 +468,7 @@ const sendMyStopTypingStatus = () => {
 }
 
 // 处理输入事件（防抖发送 typing 状态）
-const handleInput = (content) => {
+const handleInput = content => {
   if (content && content.trim().length > 0) {
     sendMyTypingStatus()
   } else {
@@ -453,10 +477,10 @@ const handleInput = (content) => {
 }
 
 const handleLoadMore = async () => {
-  if (loading.value || noMore.value) return
+  if (loading.value || noMore.value) {return}
   
   const firstMsg = messages.value[0]
-  if (!firstMsg) return
+  if (!firstMsg) {return}
 
   loading.value = true
   const oldHeight = msgListRef.value?.$refs.listRef.scrollHeight
@@ -480,51 +504,12 @@ const handleLoadMore = async () => {
   }
 }
 
-const transformMsg = (m) => {
-  // 优先使用后端返回的 isSelf 字段
-  let isOwn = m.isSelf === true || m.isSelf === false
-    ? m.isSelf 
-    : false
-  
-  // 如果没有 isSelf 字段，通过比较 senderId 判断
-  // 注意：ID 可能是字符串或数字，需要统一转换为字符串比较
-  if (m.isSelf !== true && m.isSelf !== false) {
-    const msgSenderId = String(m.senderId || '')
-    const currentUserId = String(currentUser.value?.id || '')
-    isOwn = msgSenderId === currentUserId && msgSenderId !== ''
-  }
-
-  const messageType = m.type || m.messageType || 'TEXT'
-  
-  // 处理引用回复的数据结构，优先使用后端返回的完整信息
-  let replyTo = m.replyTo || m.quotedMessage
-  if (!replyTo && m.replyToMessageId) {
-    // 降级：尝试在本地消息列表中查找被引用的消息
-    const quoted = messages.value.find(msg => msg.id === m.replyToMessageId)
-    if (quoted) {
-      replyTo = {
-        id: quoted.id,
-        senderName: quoted.senderName,
-        content: quoted.content
-      }
-    }
-  }
-
-  return {
-    ...m,
-    type: messageType,
-    isOwn,
-    replyTo: replyTo,
-    timestamp: m.sendTime || m.createTime || m.timestamp || Date.now()
-  }
-}
-
-const handleSend = async (content) => {
+const handleSend = async content => {
   // 发送消息时停止输入状态
   sendMyStopTypingStatus()
 
   // 先检查队列是否已满（避免添加临时消息后才发现队列满）
-  const queueSize = store.getters['imMessage/sendingQueueSize'] || 0
+  const queueSize = store.getters['im/message/sendingQueueSize'] || 0
   const maxSize = 100 // 与 store 配置一致
 
   if (queueSize >= maxSize) {
@@ -651,9 +636,9 @@ const handleSendVoice = async ({ file, duration }) => {
 
 
 // Websocket handling
-onMessage((msg) => {
+onMessage(msg => {
   if (msg.conversationId === props.session?.id) {
-    const transformedMsg = transformMsg(msg)
+    const transformedMsg = transformMsg(msg, messages.value)
     messages.value.push(transformedMsg)
     msgListRef.value?.scrollToBottom()
     
@@ -663,9 +648,9 @@ onMessage((msg) => {
       import('@/utils/messageNotification').then(({ showMessageNotification, shouldNotify }) => {
         if (shouldNotify(msg, currentUser.value, props.session)) {
           let body = msg.content
-          if (msg.type === 'IMAGE') body = '[图片]'
-          else if (msg.type === 'FILE') body = '[文件]'
-          else if (msg.type === 'RECALLED') body = '撤回了一条消息'
+          if (msg.type === 'IMAGE') {body = '[图片]'}
+          else if (msg.type === 'FILE') {body = '[文件]'}
+          else if (msg.type === 'RECALLED') {body = '撤回了一条消息'}
           
           showMessageNotification({
             title: msg.senderName || '新消息',
@@ -687,7 +672,7 @@ watch(() => props.session, () => {
   loadHistory()
 })
 
-const handleDelete = async (message) => {
+const handleDelete = async message => {
   await deleteMessage(message)
   // 移除本地消息（composable 中已处理 store，这里只需处理本地列表）
   const index = messages.value.findIndex(m => m.id === message.id)
@@ -696,7 +681,7 @@ const handleDelete = async (message) => {
   }
 }
 
-const handleRecall = async (message) => {
+const handleRecall = async message => {
   await recall(message)
   // 更新本地消息状态已在 recall 中处理
   const index = messages.value.findIndex(m => m.id === message.id)
@@ -744,7 +729,7 @@ const emojiPopoverPosition = ref({ x: 0, y: 0 })
 const emojiTargetMessage = ref(null)
 
 // 显示表情选择器
-const handleShowEmojiPicker = (msg) => {
+const handleShowEmojiPicker = msg => {
   emojiTargetMessage.value = msg
   // 计算位置：显示在输入框上方
   const inputArea = document.querySelector('.chat-input-container')
@@ -765,8 +750,8 @@ const handleShowEmojiPicker = (msg) => {
 }
 
 // 选择表情反应
-const handleSelectEmoji = async (emoji) => {
-  if (!emojiTargetMessage.value) return
+const handleSelectEmoji = async emoji => {
+  if (!emojiTargetMessage.value) {return}
 
   const msg = emojiTargetMessage.value
 
@@ -778,7 +763,7 @@ const handleSelectEmoji = async (emoji) => {
 }
 
 // 处理设为待办
-const handleAddToTodo = async (msg) => {
+const handleAddToTodo = async msg => {
   await addToTodo(msg)
   // 更新本地消息标记状态
   if (msg.markers) {
@@ -789,12 +774,12 @@ const handleAddToTodo = async (msg) => {
 }
 
 // 处理收藏消息
-const handleFavorite = async (msg) => {
+const handleFavorite = async msg => {
   await favorite(msg)
 }
 
 // 处理标记消息
-const handleMarkMessage = async (msg) => {
+const handleMarkMessage = async msg => {
   // 使用 ElMessageBox 显示标记选项
   try {
     const result = await ElMessageBox({
@@ -876,7 +861,7 @@ const markMessageAction = async (msg, markerType, color) => {
 const isMultiSelectMode = computed(() => (store.getters['im/message/selectedMessageCount'] || 0) > 0)
 const selectedMessages = computed(() => store.getters['im/message/selectedMessageList'] || [])
 
-const handleMultiSelect = (msg) => {
+const handleMultiSelect = msg => {
   // 切换选中状态
   store.commit('im/message/TOGGLE_MESSAGE_SELECTION', msg.id)
 
@@ -892,7 +877,7 @@ const handleMultiSelect = (msg) => {
 }
 
 // 查看合并转发消息详情
-const handleViewCombine = (msg) => {
+const handleViewCombine = msg => {
   // msg 包含 messages 数组（合并的消息内容）
   if (msg.messages && msg.messages.length > 0) {
     openCombineDetail(msg.messages, `${msg.senderName}的聊天记录`)
@@ -902,7 +887,7 @@ const handleViewCombine = (msg) => {
 }
 
 // 合并消息详情中的转发
-const handleCombineForwardDetail = (messages) => {
+const handleCombineForwardDetail = messages => {
   const messageIds = messages.map(m => m.id)
   if (messageIds.length > 0) {
     forwardDialogRef.value?.openForBatch(messageIds, 'combine')
@@ -912,7 +897,7 @@ const handleCombineForwardDetail = (messages) => {
 // 批量转发 - 逐条转发
 const handleBatchForward = async () => {
   const messageIds = selectedMessages.value.map(msg => msg.id)
-  if (messageIds.length === 0) return
+  if (messageIds.length === 0) {return}
 
   // 使用 ForwardDialog 选择目标会话
   forwardDialogRef.value?.openForBatch(messageIds, 'batch')
@@ -921,7 +906,7 @@ const handleBatchForward = async () => {
 // 批量转发 - 合并转发
 const handleCombineForward = async () => {
   const messageIds = selectedMessages.value.map(msg => msg.id)
-  if (messageIds.length === 0) return
+  if (messageIds.length === 0) {return}
 
   // 使用 ForwardDialog 选择目标会话
   forwardDialogRef.value?.openForBatch(messageIds, 'combine')
@@ -930,7 +915,7 @@ const handleCombineForward = async () => {
 // 批量删除
 const handleBatchDelete = async () => {
   const selected = selectedMessages.value
-  if (selected.length === 0) return
+  if (selected.length === 0) {return}
 
   try {
     await ElMessageBox.confirm(
@@ -955,7 +940,7 @@ const handleBatchDelete = async () => {
 }
 
 // 切换多选模式
-const handleToggleMultiSelect = (active) => {
+const handleToggleMultiSelect = active => {
   isMultiSelectModeActive.value = active
   if (!active) {
     // 退出多选时清空选择
@@ -973,28 +958,22 @@ const isDragging = ref(false)
 const isDragOver = ref(false)
 let dragEnterCounter = 0 // 用于防止子元素触发 dragleave
 
-const handleDragEnter = (event) => {
+const handleDragEnter = event => {
   dragEnterCounter++
   const files = event.dataTransfer?.files
   if (files && files.length > 0) {
-    const hasImage = Array.from(files).some(file => file.type.startsWith('image/'))
-    if (hasImage) {
-      isDragOver.value = true
-    }
+    isDragOver.value = true
   }
 }
 
-const handleDragOver = (event) => {
+const handleDragOver = event => {
   const files = event.dataTransfer?.files
   if (files && files.length > 0) {
-    const hasImage = Array.from(files).some(file => file.type.startsWith('image/'))
-    if (hasImage) {
-      isDragging.value = true
-    }
+    isDragging.value = true
   }
 }
 
-const handleDragLeave = (event) => {
+const handleDragLeave = event => {
   dragEnterCounter--
   if (dragEnterCounter <= 0) {
     dragEnterCounter = 0
@@ -1003,22 +982,24 @@ const handleDragLeave = (event) => {
   }
 }
 
-const handleDrop = async (event) => {
+const handleDrop = async event => {
   isDragging.value = false
   isDragOver.value = false
   dragEnterCounter = 0
 
   const files = event.dataTransfer?.files
-  if (!files || files.length === 0) return
+  if (!files || files.length === 0) {return}
 
   for (const file of files) {
     if (file.type.startsWith('image/')) {
       await uploadImageFile(file)
+    } else {
+      await uploadFileFile(file)
     }
   }
 }
 
-const uploadImageFile = async (file) => {
+const uploadImageFile = async file => {
   try {
     const formData = new FormData()
     formData.append('file', file)
@@ -1060,9 +1041,47 @@ const uploadImageFile = async (file) => {
   }
 }
 
-const handlePaste = async (event) => {
+const uploadFileFile = async file => {
+  if (!props.session?.id) {
+    ElMessage.warning('请先选择一个会话')
+    return
+  }
+
+  // 验证文件大小（限制 100MB）
+  const maxSize = 100 * 1024 * 1024
+  if (file.size > maxSize) {
+    ElMessage.error('文件大小不能超过 100MB')
+    return
+  }
+
+  try {
+    // 上传文件到服务器
+    const uploadResult = await uploadCommonFile(file, props.session.id)
+
+    if (uploadResult && uploadResult.fileUrl) {
+      // 构建文件消息内容
+      const fileContent = {
+        fileName: file.name,
+        fileUrl: uploadResult.fileUrl,
+        fileId: uploadResult.fileId,
+        fileSize: file.size,
+        fileType: file.type || 'application/octet-stream'
+      }
+
+      // 发送文件消息
+      await handleSend(JSON.stringify(fileContent), 'FILE')
+
+      ElMessage.success(`文件 "${file.name}" 上传成功`)
+    }
+  } catch (error) {
+    console.error('文件上传失败:', error)
+    ElMessage.error(error.message || '文件上传失败')
+  }
+}
+
+const handlePaste = async event => {
   const items = event.clipboardData?.items
-  if (!items) return
+  if (!items) {return}
 
   for (const item of items) {
     if (item.type.startsWith('image/')) {
@@ -1076,7 +1095,7 @@ const handlePaste = async (event) => {
 }
 
 // 处理已读上报
-const handleMarkRead = async (msg) => {
+const handleMarkRead = async msg => {
   try {
     await store.dispatch('im/message/markMessageAsRead', {
       conversationId: props.session.id,
@@ -1099,13 +1118,13 @@ const handleToggleDetail = () => {
 }
 
 // 处理侧边栏切换（成员列表等），当前 ChatPanel 无此功能
-const handleToggleSidebar = (tab) => {
+const handleToggleSidebar = tab => {
   // 侧边栏切换逻辑（如成员列表），暂无实现
   console.log('toggle-sidebar:', tab)
 }
 
 // 图片预览处理
-const handleImagePreview = (imageUrl) => {
+const handleImagePreview = imageUrl => {
   const index = conversationImages.value.indexOf(imageUrl)
   openImagePreview(index, conversationImages.value)
 }
@@ -1118,10 +1137,10 @@ const handleCancelEdit = () => {
   cancelEdit()
 }
 
-const handleRetry = async (msg) => {
+const handleRetry = async msg => {
   // 检查消息状态
   const status = msg.sendStatus || msg.status
-  if (status !== 4 && status !== 'FAILED' && status !== 'failed') return
+  if (status !== 4 && status !== 'FAILED' && status !== 'failed') {return}
 
   // 获取客户端消息ID
   const clientMsgId = msg.clientMsgId || msg.id
@@ -1167,13 +1186,13 @@ const handleRetry = async (msg) => {
   }
 }
 
-const handleMemberClick = (member) => {
+const handleMemberClick = member => {
   // 触发父组件显示用户详情
   emit('show-user', member.id)
 }
 
 // 处理 MessageList 组件中的用户显示请求
-const handleShowUser = (userId) => {
+const handleShowUser = userId => {
   emit('show-user', userId)
 }
 
@@ -1209,21 +1228,21 @@ const handleBatchForwardConfirm = async ({ messageIds, targetSessionId, forwardT
   }
 }
 
-const handleReply = (message) => {
+const handleReply = message => {
   cmdReply(message)
   // 聚焦输入框，提升用户体验
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     messageInputRef.value?.focus()
   })
 }
 
-const handleEdit = (message) => {
+const handleEdit = message => {
   edit(message)
 }
 
-const handleAt = (message) => {
-  if (!message) return
+const handleAt = message => {
+  if (!message) {return}
   messageInputRef.value?.insertAt(message.senderName)
 }
 
@@ -1265,8 +1284,8 @@ const handleRemindUnread = async ({ conversationId, messageId, unreadMembers }) 
   }
 }
 
-const handleEditConfirm = async (content) => {
-  if (!editingMessage.value) return
+const handleEditConfirm = async content => {
+  if (!editingMessage.value) {return}
 
   await confirmEdit(content)
 
@@ -1282,7 +1301,7 @@ const handleEditConfirm = async (content) => {
  * 处理撤回消息重新编辑
  */
 const handleReEdit = ({ content }) => {
-  if (!content) return
+  if (!content) {return}
 
   // 使用 composable 的编辑状态
   edit({
@@ -1296,7 +1315,7 @@ const handleReEdit = ({ content }) => {
 
   // 聚焦输入框
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     messageInputRef.value?.focus()
   })
 
@@ -1305,51 +1324,67 @@ const handleReEdit = ({ content }) => {
 
 // 通话功能
 const handleStartCall = () => {
+  if (!props.session) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
   isIncomingCall.value = false
   // 设置通话用户信息
   remoteCallUser.value = {
-    userId: session.value?.targetId,
-    userName: session.value?.name,
-    avatar: session.value?.avatar
+    userId: props.session?.targetId,
+    userName: props.session?.name,
+    avatar: props.session?.avatar
   }
   showVoiceCall.value = true
 }
 
 const handleStartVideo = () => {
+  if (!props.session) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
   isIncomingCall.value = false
   // 设置通话用户信息
   remoteCallUser.value = {
-    userId: session.value?.targetId,
-    userName: session.value?.name,
-    avatar: session.value?.avatar
+    userId: props.session?.targetId,
+    userName: props.session?.name,
+    avatar: props.session?.avatar
   }
   showVideoCall.value = true
 }
 
 // ChatHeader 通话按钮事件
 const handleVoiceCall = () => {
+  if (!props.session) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
   // 构建通话用户信息
   const user = {
-    userId: session.value?.targetId,
-    userName: session.value?.name,
-    avatar: session.value?.avatar
+    userId: props.session?.targetId,
+    userName: props.session?.name,
+    avatar: props.session?.avatar
   }
   openVoiceCall(user, false)
 }
 
 const handleVideoCall = () => {
+  if (!props.session) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
   // 构建通话用户信息
   const user = {
-    userId: session.value?.targetId,
-    userName: session.value?.name,
-    avatar: session.value?.avatar
+    userId: props.session?.targetId,
+    userName: props.session?.name,
+    avatar: props.session?.avatar
   }
   openVideoCall(user, false)
 }
 
 // 创建公告
 const handleCreateAnnouncement = () => {
-  if (session.value?.type === 'GROUP') {
+  if (props.session?.type === 'GROUP') {
     showAnnouncementDialog.value = true
   } else {
     ElMessage.warning('只有群聊可以发布公告')
@@ -1374,7 +1409,7 @@ const handleSearchMessages = () => {
 // 会话操作
 const handlePinSession = async () => {
   const currentSession = store.state.im.session?.currentSession
-  if (!currentSession) return
+  if (!currentSession) {return}
 
   const newState = !currentSession.isPinned
   try {
@@ -1391,7 +1426,7 @@ const handlePinSession = async () => {
 
 const handleMuteSession = async () => {
   const currentSession = store.state.im.session?.currentSession
-  if (!currentSession) return
+  if (!currentSession) {return}
 
   const newState = !currentSession.isMuted
   try {
@@ -1407,9 +1442,14 @@ const handleMuteSession = async () => {
 }
 
 const handleClearMessages = async () => {
+  if (!props.session) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+
   try {
     await ElMessageBox.confirm(
-      `确定要清空与 ${session.value?.name} 的聊天记录吗？`,
+      `确定要清空与 ${props.session?.name} 的聊天记录吗？`,
       '清空聊天记录',
       {
         type: 'warning',
@@ -1421,7 +1461,7 @@ const handleClearMessages = async () => {
     )
 
     // 调用 API 清空消息
-    await clearConversationMessages(session.value?.id)
+    await clearConversationMessages(props.session?.id)
 
     // 清空本地消息列表
     messages.value.splice(0, messages.value.length)
@@ -1431,19 +1471,19 @@ const handleClearMessages = async () => {
 
     ElMessage.success('聊天记录已清空')
   } catch {
-    // 用户取消
+    // 用户取消或出错
   }
 }
 
 // 滚动到置顶消息
-const handleScrollToPinnedMessage = (messageId) => {
+const handleScrollToPinnedMessage = messageId => {
   if (msgListRef.value) {
     msgListRef.value.scrollToMessage(messageId)
   }
 }
 
 // 处理搜索结果滚动
-const handleScrollToMessage = (messageId) => {
+const handleScrollToMessage = messageId => {
   if (msgListRef.value) {
     msgListRef.value.scrollToMessage(messageId)
   }
@@ -1463,7 +1503,7 @@ const handleShowHistory = () => {
 }
 
 // 跳转到指定消息
-const handleJumpToMessage = (message) => {
+const handleJumpToMessage = message => {
   if (msgListRef.value) {
     msgListRef.value.scrollToMessage(message.id || message.messageId)
   }
@@ -1472,14 +1512,14 @@ const handleJumpToMessage = (message) => {
 }
 
 // 打开文件
-const handleOpenFile = (file) => {
+const handleOpenFile = file => {
   if (file.url) {
     window.open(file.url, '_blank')
   }
 }
 
 // 下载文件
-const handleDownloadFile = (file) => {
+const handleDownloadFile = file => {
   if (Array.isArray(file)) {
     // 批量下载
     ElMessage.info(`正在下载 ${file.length} 个文件...`)
@@ -1498,7 +1538,7 @@ const handleDownloadFile = (file) => {
 }
 
 // 转发文件
-const handleForwardFile = (file) => {
+const handleForwardFile = file => {
   if (forwardDialogRef.value) {
     forwardDialogRef.value.open([{ type: 'FILE', content: JSON.stringify(file) }])
   }
@@ -1537,7 +1577,7 @@ const handleTypingIndicator = (userId, userName) => {
 const triggerFileUpload = () => fileInputRef.value?.click()
 const triggerImageUpload = () => imageInputRef.value?.click()
 
-const handleFileUpload = async (payload) => {
+const handleFileUpload = async payload => {
   sendMyStopTypingStatus()
   let file, formData
   if (payload instanceof FormData) {
@@ -1551,7 +1591,7 @@ const handleFileUpload = async (payload) => {
   } else {
     // 事件对象
     file = payload?.target?.files?.[0]
-    if (!file) return
+    if (!file) {return}
     formData = new FormData()
     formData.append('file', file)
     if (payload?.target) {
@@ -1613,7 +1653,7 @@ const handleFileUpload = async (payload) => {
   }
 }
 
-const handleImageUpload = async (payload) => {
+const handleImageUpload = async payload => {
   sendMyStopTypingStatus()
   let file, formData
   if (payload instanceof FormData) {
@@ -1627,7 +1667,7 @@ const handleImageUpload = async (payload) => {
   } else {
     // 事件对象
     file = payload?.target?.files?.[0]
-    if (!file) return
+    if (!file) {return}
     formData = new FormData()
     formData.append('file', file)
     if (payload?.target) {
@@ -1686,10 +1726,10 @@ const handleImageUpload = async (payload) => {
 }
 
 // 截图上传处理
-const handleScreenshotUpload = async (formData) => {
+const handleScreenshotUpload = async formData => {
   sendMyStopTypingStatus()
   const file = formData.get('file')
-  if (!file) return
+  if (!file) {return}
 
   // 1. 乐观更新：立即显示截图
   const blobUrl = URL.createObjectURL(file)
@@ -1861,7 +1901,7 @@ onMounted(() => {
   // 初始化失败消息重试管理
   initMessageRetry()
 
-  if (props.session) loadHistory()
+  if (props.session) {loadHistory()}
 
   // 请求浏览器通知权限
   import('@/utils/messageNotification').then(({ requestNotificationPermission }) => {
@@ -1871,16 +1911,16 @@ onMounted(() => {
   })
 
   // 监听输入状态事件
-  onTyping((data) => {
-    if (data.conversationId !== props.session?.id) return
-    if (data.userId === currentUser.value?.id) return // 忽略自己的输入状态
+  onTyping(data => {
+    if (data.conversationId !== props.session?.id) {return}
+    if (data.userId === currentUser.value?.id) {return} // 忽略自己的输入状态
 
     handleTypingIndicator(data.userId, data.userName || data.senderName)
   })
 
   // 监听消息状态更新（发送成功/失败）
-  onMessageStatus((data) => {
-    if (data.conversationId !== props.session?.id) return
+  onMessageStatus(data => {
+    if (data.conversationId !== props.session?.id) {return}
 
     const index = messages.value.findIndex(m => m.id === data.messageId)
     if (index !== -1) {
@@ -1899,7 +1939,7 @@ onMounted(() => {
   })
 
   // 监听表情回复更新
-  onReaction((data) => {
+  onReaction(data => {
     // WebSocket 推送的数据格式: { messageId, emoji, userId, userName, userAvatar, isAdd }
     store.dispatch('im/message/handleReactionUpdate', {
       messageId: data.messageId,
@@ -1912,7 +1952,7 @@ onMounted(() => {
   })
 
   // 键盘快捷键：Ctrl/Cmd + Alt + A 截图
-  const handleKeydown = (e) => {
+  const handleKeydown = e => {
     // Ctrl/Cmd + Alt + A 触发截图
     if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'a' || e.key === 'A')) {
       e.preventDefault()
@@ -1925,7 +1965,7 @@ onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
 
   // 点击外部关闭表情弹窗
-  const handleClickOutside = (e) => {
+  const handleClickOutside = e => {
     if (showEmojiPopover.value) {
       const popover = document.querySelector('.emoji-popover')
       if (popover && !popover.contains(e.target)) {
@@ -1967,7 +2007,7 @@ onMounted(() => {
     border: 2px dashed #1890ff;
 
     &::after {
-      content: '释放以上传图片';
+      content: '释放以上传文件';
       position: absolute;
       top: 50%;
       left: 50%;
@@ -1995,7 +2035,7 @@ onMounted(() => {
     }
 
     &::after {
-      content: '拖放图片到此处';
+      content: '拖放文件到此处';
       position: absolute;
       top: 50%;
       left: 50%;

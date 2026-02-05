@@ -373,7 +373,7 @@ function formatMessageContent(message, format) {
           const imageUrl = contentObj.imageUrl || contentObj.url || ''
           return `<img class="message-image" src="${imageUrl}" alt="图片" />`
         } catch {
-          return `<div class="message-text">[图片]</div>`
+          return '<div class="message-text">[图片]</div>'
         }
       }
       return '[图片]'

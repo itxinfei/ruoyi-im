@@ -1,5 +1,8 @@
 <template>
-  <div class="list-group-header" :class="{ sticky: isSticky, collapsed: isCollapsed }">
+  <div
+    class="list-group-header"
+    :class="{ sticky: isSticky, collapsed: isCollapsed }"
+  >
     <div class="group-title">
       <span class="group-name">{{ title }}</span>
       <span class="group-count">({{ count }})</span>
@@ -10,8 +13,15 @@
       :title="isCollapsed ? '展开' : '折叠'"
       @click.stop="$emit('toggle')"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 12 15 18 9"></polyline>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9" />
       </svg>
     </button>
   </div>

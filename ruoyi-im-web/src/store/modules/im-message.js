@@ -56,8 +56,8 @@ function mapSendStatusToUi(sendStatus) {
 
 // 简单UUID生成
 function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8)
     return v.toString(16)
   })
 }
@@ -89,22 +89,22 @@ export default {
   getters: {
     // 获取当前会话的消息列表
     currentMessages: (state, getters, rootState) => {
-      if (!rootState.im?.session?.currentSession) return []
+      if (!rootState.im?.session?.currentSession) {return []}
       return state.messages[rootState.im.session.currentSession.id] || []
     },
 
     // 获取指定会话的消息列表
-    messagesBySessionId: (state) => (sessionId) => {
+    messagesBySessionId: state => sessionId => {
       return state.messages[sessionId] || []
     },
 
     // 获取选中消息的数量
-    selectedMessageCount: (state) => state.selectedMessages.size,
+    selectedMessageCount: state => state.selectedMessages.size,
 
     // 获取选中消息的列表
     selectedMessageList: (state, getters, rootState) => {
       const sessionId = rootState.im?.session?.currentSession?.id
-      if (!sessionId || !state.messages[sessionId]) return []
+      if (!sessionId || !state.messages[sessionId]) {return []}
 
       return Array.from(state.selectedMessages).map(messageId => {
         return state.messages[sessionId].find(msg => msg.id === messageId)
@@ -113,27 +113,27 @@ export default {
 
     // ========== 发送中消息管理 ==========
     // 获取发送中的消息列表
-    sendingMessagesList: (state) => {
+    sendingMessagesList: state => {
       return Array.from(state.sendingMessages.values())
     },
 
     // 获取发送中的消息列表（别名，用于向后兼容）
-    getSendingMessages: (state) => {
+    getSendingMessages: state => {
       return Array.from(state.sendingMessages.values())
     },
 
     // 检查消息是否在发送中
-    isMessageSending: (state) => (clientMsgId) => {
+    isMessageSending: state => clientMsgId => {
       return state.sendingMessages.has(clientMsgId)
     },
 
     // 获取发送队列大小
-    sendingQueueSize: (state) => {
+    sendingQueueSize: state => {
       return state.sendingMessages.size
     },
 
     // 检查发送队列是否已满
-    isSendingQueueFull: (state) => {
+    isSendingQueueFull: state => {
       return state.sendingMessages.size >= SENDING_QUEUE_CONFIG.MAX_QUEUE_SIZE
     }
   },
@@ -233,13 +233,13 @@ export default {
 
     // 范围选择消息（连续选择）
     SELECT_MESSAGE_RANGE(state, { sessionId, startMessageId, endMessageId }) {
-      if (!state.messages[sessionId]) return
+      if (!state.messages[sessionId]) {return}
 
       const messages = state.messages[sessionId]
       const startIndex = messages.findIndex(m => m.id === startMessageId)
       const endIndex = messages.findIndex(m => m.id === endMessageId)
 
-      if (startIndex === -1 || endIndex === -1) return
+      if (startIndex === -1 || endIndex === -1) {return}
 
       // 确定范围
       const minIndex = Math.min(startIndex, endIndex)
@@ -535,7 +535,7 @@ export default {
     // 接收消息（WebSocket 推送）
     receiveMessage({ commit, rootState }, message) {
       const sessionId = message.conversationId || message.sessionId
-      if (!sessionId) return
+      if (!sessionId) {return}
 
       // 规范化消息类型为大写（兼容后端可能返回的小写类型）
       if (message.type) {

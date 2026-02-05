@@ -103,4 +103,18 @@
         )
     </insert>
 
+    <!-- 批量统计会话成员数量 -->
+    <select id="countMembersByConversationIds" resultType="java.util.HashMap">
+        SELECT
+            conversation_id as "conversationId",
+            COUNT(*) as "memberCount"
+        FROM im_conversation_member
+        WHERE conversation_id IN
+        <foreach collection="conversationIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND is_deleted = 0
+        GROUP BY conversation_id
+    </select>
+
 </mapper>

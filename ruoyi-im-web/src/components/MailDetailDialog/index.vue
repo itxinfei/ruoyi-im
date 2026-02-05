@@ -3,10 +3,13 @@
     v-model="visible"
     :title="email?.subject || '邮件详情'"
     width="700px"
-    @close="handleClose"
     class="mail-detail-dialog"
+    @close="handleClose"
   >
-    <div v-if="email" class="mail-detail">
+    <div
+      v-if="email"
+      class="mail-detail"
+    >
       <!-- 邮件头部 -->
       <div class="mail-header">
         <div class="sender-info">
@@ -17,36 +20,65 @@
             shape="circle"
           />
           <div class="sender-detail">
-            <div class="sender-name">{{ email.sender }}</div>
-            <div class="send-time">{{ email.time }}</div>
-            <div v-if="email.cc && email.cc.length > 0" class="cc-info">
+            <div class="sender-name">
+              {{ email.sender }}
+            </div>
+            <div class="send-time">
+              {{ email.time }}
+            </div>
+            <div
+              v-if="email.cc && email.cc.length > 0"
+              class="cc-info"
+            >
               抄送: {{ email.cc.join(', ') }}
             </div>
           </div>
         </div>
         <div class="mail-actions">
-          <el-button :icon="ChatLineSquare" @click="handleReply">回复</el-button>
-          <el-button :icon="Share" @click="handleForward">转发</el-button>
+          <el-button
+            :icon="ChatLineSquare"
+            @click="handleReply"
+          >
+            回复
+          </el-button>
+          <el-button
+            :icon="Share"
+            @click="handleForward"
+          >
+            转发
+          </el-button>
           <el-button
             :icon="email.starred ? StarFilled : Star"
             :type="email.starred ? 'primary' : ''"
-            @click="toggleStar"
             :loading="starring"
+            @click="toggleStar"
           >
             {{ email.starred ? '已收藏' : '收藏' }}
           </el-button>
-          <el-button :icon="Delete" type="danger" @click="handleDelete">删除</el-button>
+          <el-button
+            :icon="Delete"
+            type="danger"
+            @click="handleDelete"
+          >
+            删除
+          </el-button>
         </div>
       </div>
 
       <!-- 邮件内容 -->
       <div class="mail-body">
-        <div v-if="email.preview || email.fullContent" class="mail-content">
+        <div
+          v-if="email.preview || email.fullContent"
+          class="mail-content"
+        >
           {{ email.fullContent || email.preview }}
         </div>
 
         <!-- 附件列表 -->
-        <div v-if="email.attachments && email.attachments.length > 0" class="attachments">
+        <div
+          v-if="email.attachments && email.attachments.length > 0"
+          class="attachments"
+        >
           <div class="section-title">
             <span class="material-icons-outlined">attach_file</span>
             附件 ({{ email.attachments.length }})
@@ -57,7 +89,10 @@
               :key="index"
               class="attachment-item"
             >
-              <span class="material-icons-outlined file-icon" :style="{ color: getFileIconColor(file.name) }">
+              <span
+                class="material-icons-outlined file-icon"
+                :style="{ color: getFileIconColor(file.name) }"
+              >
                 {{ getFileIcon(file.name) }}
               </span>
               <span class="file-name">{{ file.name }}</span>
@@ -66,8 +101,8 @@
                 size="small"
                 link
                 type="primary"
-                @click="downloadAttachment(file)"
                 :loading="downloadingFiles.has(file.id)"
+                @click="downloadAttachment(file)"
               >
                 <span class="material-icons-outlined download-icon">download</span>
                 下载
@@ -81,8 +116,16 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">关闭</el-button>
-        <el-button :icon="ArrowLeft" @click="handlePrev" :disabled="!hasPrev">上一封</el-button>
-        <el-button :icon="ArrowRight" @click="handleNext" :disabled="!hasNext">下一封</el-button>
+        <el-button
+          :icon="ArrowLeft"
+          :disabled="!hasPrev"
+          @click="handlePrev"
+        >上一封</el-button>
+        <el-button
+          :icon="ArrowRight"
+          :disabled="!hasNext"
+          @click="handleNext"
+        >下一封</el-button>
       </span>
     </template>
   </el-dialog>
@@ -121,11 +164,11 @@ const visible = ref(false)
 const starring = ref(false)
 const downloadingFiles = ref(new Set())
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 
@@ -142,7 +185,7 @@ const handleForward = () => {
 }
 
 const toggleStar = async () => {
-  if (!props.email) return
+  if (!props.email) {return}
 
   starring.value = true
   try {
@@ -175,8 +218,8 @@ const handleNext = () => {
   emit('next')
 }
 
-const downloadAttachment = async (file) => {
-  if (downloadingFiles.value.has(file.id)) return
+const downloadAttachment = async file => {
+  if (downloadingFiles.value.has(file.id)) {return}
 
   downloadingFiles.value.add(file.id)
   try {
@@ -202,7 +245,7 @@ const downloadAttachment = async (file) => {
   }
 }
 
-const getFileIcon = (fileName) => {
+const getFileIcon = fileName => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || ''
   const iconMap = {
     // 图片
@@ -225,7 +268,7 @@ const getFileIcon = (fileName) => {
   return iconMap[ext] || 'insert_drive_file'
 }
 
-const getFileIconColor = (fileName) => {
+const getFileIconColor = fileName => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || ''
   const colorMap = {
     // 图片 - 蓝紫色

@@ -7,8 +7,11 @@
       controls
       class="video-content"
       preload="metadata"
-    ></video>
-    <div v-else class="video-placeholder">
+    />
+    <div
+      v-else
+      class="video-placeholder"
+    >
       <el-icon><VideoCamera /></el-icon>
       <span>视频加载失败</span>
     </div>

@@ -174,7 +174,8 @@ public class ImUserController {
     @GetMapping("/list")
     public Result<java.util.List<ImUserVO>> list(@RequestParam(required = false) String keyword) {
         com.ruoyi.im.dto.BasePageRequest request = new com.ruoyi.im.dto.BasePageRequest();
-        // 如果需要关键词搜索，可以扩展BasePageRequest或直接调用特定方法
+        // 设置关键词搜索
+        request.setKeyword(keyword);
         java.util.List<ImUserVO> list = imUserService.getUserList(request);
         return Result.success(list);
     }

@@ -63,7 +63,7 @@ export function useMentions() {
    * 标记提及为已读
    * @param {number} messageId - 消息ID
    */
-  const markAsRead = async (messageId) => {
+  const markAsRead = async messageId => {
     try {
       await markMentionAsRead(messageId)
 
@@ -82,7 +82,7 @@ export function useMentions() {
    * 批量标记提及为已读
    * @param {number[]} messageIds - 消息ID列表
    */
-  const batchMarkAsRead = async (messageIds) => {
+  const batchMarkAsRead = async messageIds => {
     try {
       // 逐个标记（如果后端支持批量API可以优化）
       await Promise.all(messageIds.map(id => markMentionAsRead(id)))
@@ -103,7 +103,7 @@ export function useMentions() {
    * 获取指定会话的未读提及数量
    * @param {number} conversationId - 会话ID
    */
-  const getUnreadCountByConversation = (conversationId) => {
+  const getUnreadCountByConversation = conversationId => {
     return unreadMentions.value.filter(m => m.conversationId === conversationId).length
   }
 
@@ -111,7 +111,7 @@ export function useMentions() {
    * 获取指定消息是否被提及
    * @param {number} messageId - 消息ID
    */
-  const isMessageMentioned = (messageId) => {
+  const isMessageMentioned = messageId => {
     return unreadMentions.value.some(m => m.messageId === messageId)
   }
 
@@ -119,7 +119,7 @@ export function useMentions() {
    * 获取指定消息的提及信息
    * @param {number} messageId - 消息ID
    */
-  const getMessageMention = (messageId) => {
+  const getMessageMention = messageId => {
     return unreadMentions.value.find(m => m.messageId === messageId)
   }
 

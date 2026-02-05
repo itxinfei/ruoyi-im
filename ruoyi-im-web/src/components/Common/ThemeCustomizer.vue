@@ -19,7 +19,10 @@
             class="color-preset"
             @click="applyPreset(color)"
           >
-            <div class="color-preview" :style="{ background: color.primary }"></div>
+            <div
+              class="color-preview"
+              :style="{ background: color.primary }"
+            />
             <span class="color-name">{{ color.name }}</span>
           </div>
         </div>
@@ -30,20 +33,35 @@
         <div class="custom-colors">
           <div class="color-input">
             <span class="color-label">主色</span>
-            <input type="color" v-model="customColors.primary" @input="handleCustomColorChange">
+            <input
+              v-model="customColors.primary"
+              type="color"
+              @input="handleCustomColorChange"
+            >
             <span class="color-value">{{ customColors.primary }}</span>
           </div>
           <div class="color-input">
             <span class="color-label">强调色</span>
-            <input type="color" v-model="customColors.accent" @input="handleCustomColorChange">
+            <input
+              v-model="customColors.accent"
+              type="color"
+              @input="handleCustomColorChange"
+            >
             <span class="color-value">{{ customColors.accent }}</span>
           </div>
         </div>
       </div>
 
       <div class="customizer-actions">
-        <el-button @click="handleReset">重置</el-button>
-        <el-button type="primary" @click="handleApply">应用</el-button>
+        <el-button @click="handleReset">
+          重置
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleApply"
+        >
+          应用
+        </el-button>
       </div>
     </div>
   </el-dialog>
@@ -75,7 +93,7 @@ const customColors = reactive({
   accent: '#1890FF'
 })
 
-const applyPreset = (color) => {
+const applyPreset = color => {
   customColors.primary = color.primary
   customColors.accent = color.accent
 }
@@ -104,11 +122,11 @@ const handleClose = () => {
 }
 
 // 监听显示状态
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 </script>

@@ -1,133 +1,289 @@
 <template>
   <teleport to="body">
     <!-- 阶段1: 区域选择层 -->
-    <div v-if="capturing && !editing" class="dingtalk-screenshot"
+    <div
+      v-if="capturing && !editing"
+      class="dingtalk-screenshot"
       @mousedown="handleSelectionMouseDown"
       @mousemove="handleSelectionMouseMove"
       @mouseup="handleSelectionMouseUp"
-      @contextmenu.prevent>
+      @contextmenu.prevent
+    >
       <!-- 截图画面 -->
-      <canvas ref="canvasRef" class="screenshot-canvas"></canvas>
+      <canvas
+        ref="canvasRef"
+        class="screenshot-canvas"
+      />
 
       <!-- 选区遮罩 -->
-      <div class="screenshot-mask" :style="maskClipPath"></div>
+      <div
+        class="screenshot-mask"
+        :style="maskClipPath"
+      />
 
       <!-- 选区边框 -->
-      <div v-if="hasSelection" class="selection-border" :style="selectionStyle">
+      <div
+        v-if="hasSelection"
+        class="selection-border"
+        :style="selectionStyle"
+      >
         <!-- 尺寸显示 -->
-        <div class="size-tooltip">{{ selectionWidth }} × {{ selectionHeight }}</div>
+        <div class="size-tooltip">
+          {{ selectionWidth }} × {{ selectionHeight }}
+        </div>
 
         <!-- 确认工具栏 -->
-        <div class="screenshot-toolbar confirm-toolbar" :style="toolbarPosition">
-          <button class="tool-item" @click.stop="handleCancel" title="取消 (ESC)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        <div
+          class="screenshot-toolbar confirm-toolbar"
+          :style="toolbarPosition"
+        >
+          <button
+            class="tool-item"
+            title="取消 (ESC)"
+            @click.stop="handleCancel"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            /></svg>
           </button>
-          <button class="tool-item tool-save" @click.stop="enterEditMode" title="确认选区">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          <button
+            class="tool-item tool-save"
+            title="确认选区"
+            @click.stop="enterEditMode"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+            /></svg>
           </button>
         </div>
       </div>
 
       <!-- 提示 -->
-      <div class="screenshot-hint" v-if="!hasSelection">
+      <div
+        v-if="!hasSelection"
+        class="screenshot-hint"
+      >
         拖拽鼠标选择截图区域 · ESC 取消
       </div>
     </div>
 
     <!-- 阶段2: 标注编辑层 -->
-    <div v-if="editing" class="screenshot-editor" @contextmenu.prevent>
+    <div
+      v-if="editing"
+      class="screenshot-editor"
+      @contextmenu.prevent
+    >
       <!-- 编辑画布容器 -->
-      <div class="editor-canvas-container" :style="containerStyle">
-        <canvas ref="editorCanvasRef" class="editor-canvas"
+      <div
+        class="editor-canvas-container"
+        :style="containerStyle"
+      >
+        <canvas
+          ref="editorCanvasRef"
+          class="editor-canvas"
           @mousedown="handleDrawStart"
           @mousemove="handleDrawMove"
           @mouseup="handleDrawEnd"
-          @mouseleave="handleDrawEnd">
-        </canvas>
+          @mouseleave="handleDrawEnd"
+        />
       </div>
 
       <!-- 顶部工具栏 -->
       <div class="editor-toolbar">
         <!-- 绘图工具组 -->
         <div class="tool-group">
-          <button class="tool-btn" :class="{ active: currentTool === 'rectangle' }" @click="setTool('rectangle')" title="方框 (R)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h18v18H3V3zm2 2v14h14V5H5z"/></svg>
+          <button
+            class="tool-btn"
+            :class="{ active: currentTool === 'rectangle' }"
+            title="方框 (R)"
+            @click="setTool('rectangle')"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M3 3h18v18H3V3zm2 2v14h14V5H5z"
+            /></svg>
           </button>
-          <button class="tool-btn" :class="{ active: currentTool === 'arrow' }" @click="setTool('arrow')" title="箭头 (A)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16.01 11H4v2h12.01v3L20 12l-3.99-4z"/></svg>
+          <button
+            class="tool-btn"
+            :class="{ active: currentTool === 'arrow' }"
+            title="箭头 (A)"
+            @click="setTool('arrow')"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M16.01 11H4v2h12.01v3L20 12l-3.99-4z"
+            /></svg>
           </button>
-          <button class="tool-btn" :class="{ active: currentTool === 'brush' }" @click="setTool('brush')" title="画笔 (P)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          <button
+            class="tool-btn"
+            :class="{ active: currentTool === 'brush' }"
+            title="画笔 (P)"
+            @click="setTool('brush')"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+            /></svg>
           </button>
-          <button class="tool-btn" :class="{ active: currentTool === 'text' }" @click="setTool('text')" title="文字 (T)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 4v3h5.5v12h3V7H19V4z"/></svg>
+          <button
+            class="tool-btn"
+            :class="{ active: currentTool === 'text' }"
+            title="文字 (T)"
+            @click="setTool('text')"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M5 4v3h5.5v12h3V7H19V4z"
+            /></svg>
           </button>
-          <button class="tool-btn" :class="{ active: currentTool === 'mosaic' }" @click="setTool('mosaic')" title="马赛克 (M)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"/></svg>
+          <button
+            class="tool-btn"
+            :class="{ active: currentTool === 'mosaic' }"
+            title="马赛克 (M)"
+            @click="setTool('mosaic')"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"
+            /></svg>
           </button>
-          <button class="tool-btn" :class="{ active: currentTool === 'eraser' }" @click="setTool('eraser')" title="橡皮擦 (E)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M15.14 3c-.51 0-1.02.2-1.41.59L2.59 14.73c-.78.78-.78 2.05 0 2.83L5.17 20.17c.78.78 2.05.78 2.83 0l11.03-11.03c.79-.79.79-2.05 0-2.83l-2.58-2.58C16.07 3.2 15.61 3 15.14 3zM15.5 9l-11 11 2.5 2.5 11-11-2.5-2.5z"/></svg>
+          <button
+            class="tool-btn"
+            :class="{ active: currentTool === 'eraser' }"
+            title="橡皮擦 (E)"
+            @click="setTool('eraser')"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M15.14 3c-.51 0-1.02.2-1.41.59L2.59 14.73c-.78.78-.78 2.05 0 2.83L5.17 20.17c.78.78 2.05.78 2.83 0l11.03-11.03c.79-.79.79-2.05 0-2.83l-2.58-2.58C16.07 3.2 15.61 3 15.14 3zM15.5 9l-11 11 2.5 2.5 11-11-2.5-2.5z"
+            /></svg>
           </button>
         </div>
 
         <!-- 分隔线 -->
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <!-- 颜色选择器 -->
         <div class="tool-group">
-          <button class="color-btn" v-for="color in colors" :key="color"
+          <button
+            v-for="color in colors"
+            :key="color"
+            class="color-btn"
             :class="{ active: strokeColor === color }"
             :style="{ backgroundColor: color }"
+            :title="color"
             @click="setColor(color)"
-            :title="color">
-          </button>
+          />
           <!-- 自定义颜色输入 -->
-          <button class="color-btn custom-color" title="自定义颜色">
-            <input type="color" v-model="customColor" @input="setCustomColor">
+          <button
+            class="color-btn custom-color"
+            title="自定义颜色"
+          >
+            <input
+              v-model="customColor"
+              type="color"
+              @input="setCustomColor"
+            >
           </button>
         </div>
 
         <!-- 分隔线 -->
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <!-- 线宽调节 -->
         <div class="tool-group line-width-group">
           <span class="line-width-label">粗细</span>
-          <input type="range" v-model.number="lineWidth" min="1" max="20" class="line-width-slider">
+          <input
+            v-model.number="lineWidth"
+            type="range"
+            min="1"
+            max="20"
+            class="line-width-slider"
+          >
           <span class="line-width-value">{{ lineWidth }}</span>
         </div>
 
         <!-- 分隔线 -->
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <!-- 操作按钮组 -->
         <div class="tool-group">
-          <button class="tool-btn tool-ocr-btn" @click="handleOCR" title="文字识别 (OCR)" :disabled="isRecognizing">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 5h16v2H4V5zm0 4h16v2H4V9zm0 4h10v2H4v-2zm0 4h10v2H4v-2zm12 0h2v-2h-2v2zm0-4h2v-2h-2v2zm0-4h2V7h-2v2z"/></svg>
-            <span v-if="isRecognizing" class="ocr-loading">识别中...</span>
+          <button
+            class="tool-btn tool-ocr-btn"
+            title="文字识别 (OCR)"
+            :disabled="isRecognizing"
+            @click="handleOCR"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M4 5h16v2H4V5zm0 4h16v2H4V9zm0 4h10v2H4v-2zm0 4h10v2H4v-2zm12 0h2v-2h-2v2zm0-4h2v-2h-2v2zm0-4h2V7h-2v2z"
+            /></svg>
+            <span
+              v-if="isRecognizing"
+              class="ocr-loading"
+            >识别中...</span>
           </button>
-          <button class="tool-btn" @click="undo" title="撤销 (Ctrl+Z)" :disabled="history.length === 0">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+          <button
+            class="tool-btn"
+            title="撤销 (Ctrl+Z)"
+            :disabled="history.length === 0"
+            @click="undo"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"
+            /></svg>
           </button>
-          <button class="tool-btn" @click="redo" title="重做 (Ctrl+Y)" :disabled="redoHistory.length === 0">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M18.4 10.6C16.55 9 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>
+          <button
+            class="tool-btn"
+            title="重做 (Ctrl+Y)"
+            :disabled="redoHistory.length === 0"
+            @click="redo"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M18.4 10.6C16.55 9 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"
+            /></svg>
           </button>
         </div>
 
         <!-- 分隔线 -->
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <!-- 完成按钮 -->
         <div class="tool-group">
-          <button class="tool-btn cancel-btn" @click="handleCancel" title="取消 (ESC)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          <button
+            class="tool-btn cancel-btn"
+            title="取消 (ESC)"
+            @click="handleCancel"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            /></svg>
           </button>
-          <button class="tool-btn sticker-btn" @click="handlePinToDesktop" title="钉在桌面">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 12V4H17V2H7V4H8V12L6 14V16H11.2V22H12.8V16H18V14L16 12Z"/></svg>
+          <button
+            class="tool-btn sticker-btn"
+            title="钉在桌面"
+            @click="handlePinToDesktop"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M16 12V4H17V2H7V4H8V12L6 14V16H11.2V22H12.8V16H18V14L16 12Z"
+            /></svg>
             <span>钉在桌面</span>
           </button>
-          <button class="tool-btn save-btn" @click="handleConfirm" title="发送 (Enter)">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          <button
+            class="tool-btn save-btn"
+            title="发送 (Enter)"
+            @click="handleConfirm"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+            /></svg>
             <span>发送</span>
           </button>
         </div>
@@ -137,7 +293,11 @@
       </div>
 
       <!-- 文字输入框 (动态定位) -->
-      <div v-if="showTextInput" class="text-input-container" :style="textInputStyle">
+      <div
+        v-if="showTextInput"
+        class="text-input-container"
+        :style="textInputStyle"
+      >
         <input
           ref="textInputRef"
           v-model="textInputValue"
@@ -150,18 +310,36 @@
       </div>
 
       <!-- OCR 结果弹窗 -->
-      <div v-if="showOcrResult" class="ocr-result-dialog" @click.self="closeOcrResult">
+      <div
+        v-if="showOcrResult"
+        class="ocr-result-dialog"
+        @click.self="closeOcrResult"
+      >
         <div class="ocr-result-content">
           <div class="ocr-result-header">
             <span class="ocr-result-title">识别结果</span>
-            <button class="ocr-close-btn" @click="closeOcrResult">
-              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            <button
+              class="ocr-close-btn"
+              @click="closeOcrResult"
+            >
+              <svg viewBox="0 0 24 24"><path
+                fill="currentColor"
+                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+              /></svg>
             </button>
           </div>
-          <div class="ocr-result-text">{{ ocrResult }}</div>
+          <div class="ocr-result-text">
+            {{ ocrResult }}
+          </div>
           <div class="ocr-result-footer">
-            <button class="ocr-btn" @click="copyOcrResult">
-              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            <button
+              class="ocr-btn"
+              @click="copyOcrResult"
+            >
+              <svg viewBox="0 0 24 24"><path
+                fill="currentColor"
+                d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"
+              /></svg>
               复制
             </button>
           </div>
@@ -295,11 +473,11 @@ let ctx = null
 let baseImageData = null
 
 // ==================== 方法：设置工具 ====================
-const setTool = (tool) => {
+const setTool = tool => {
   currentTool.value = tool
 }
 
-const setColor = (color) => {
+const setColor = color => {
   strokeColor.value = color
 }
 
@@ -308,14 +486,14 @@ const setCustomColor = () => {
 }
 
 // ==================== 方法：区域选择 ====================
-const handleSelectionMouseDown = (e) => {
+const handleSelectionMouseDown = e => {
   isSelecting.value = true
   startPos.value = { x: e.clientX, y: e.clientY }
   selection.value = { x: e.clientX, y: e.clientY, width: 0, height: 0 }
 }
 
-const handleSelectionMouseMove = (e) => {
-  if (!isSelecting.value) return
+const handleSelectionMouseMove = e => {
+  if (!isSelecting.value) {return}
 
   selection.value = {
     x: startPos.value.x,
@@ -331,7 +509,7 @@ const handleSelectionMouseUp = () => {
 
 // ==================== 方法：进入编辑模式 ====================
 const enterEditMode = () => {
-  if (!hasSelection.value) return
+  if (!hasSelection.value) {return}
 
   const { x, y, width, height } = selection.value
   const left = Math.min(x, x + width)
@@ -346,7 +524,7 @@ const enterEditMode = () => {
   editing.value = true
 
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     initEditorCanvas()
   })
 }
@@ -356,7 +534,7 @@ const initEditorCanvas = () => {
   const canvas = editorCanvasRef.value
   const sourceCanvas = canvasRef.value
 
-  if (!canvas || !sourceCanvas) return
+  if (!canvas || !sourceCanvas) {return}
 
   const { x, y, width, height } = editorBounds.value
 
@@ -373,7 +551,7 @@ const initEditorCanvas = () => {
 }
 
 // ==================== 方法：绘图事件处理 ====================
-const handleDrawStart = (e) => {
+const handleDrawStart = e => {
   if (currentTool.value === 'text') {
     handleTextToolClick(e)
     return
@@ -392,8 +570,8 @@ const handleDrawStart = (e) => {
   }
 }
 
-const handleDrawMove = (e) => {
-  if (!isDrawing.value) return
+const handleDrawMove = e => {
+  if (!isDrawing.value) {return}
 
   const rect = editorCanvasRef.value.getBoundingClientRect()
   const currentPos = {
@@ -427,8 +605,8 @@ const handleDrawMove = (e) => {
   }
 }
 
-const handleDrawEnd = (e) => {
-  if (!isDrawing.value) return
+const handleDrawEnd = e => {
+  if (!isDrawing.value) {return}
 
   if (currentTool.value === 'rectangle' || currentTool.value === 'arrow' || currentTool.value === 'mosaic') {
     saveHistory()
@@ -485,8 +663,8 @@ const drawArrow = (start, end) => {
   ctx.stroke()
 }
 
-const drawBrush = (path) => {
-  if (path.length < 2) return
+const drawBrush = path => {
+  if (path.length < 2) {return}
 
   ctx.strokeStyle = strokeColor.value
   ctx.lineWidth = lineWidth.value
@@ -504,8 +682,8 @@ const drawBrush = (path) => {
   ctx.stroke()
 }
 
-const drawEraser = (path) => {
-  if (path.length < 2) return
+const drawEraser = path => {
+  if (path.length < 2) {return}
 
   const eraserSize = lineWidth.value * 5
   ctx.strokeStyle = '#ffffff'
@@ -579,7 +757,7 @@ const drawMosaic = (start, end) => {
 }
 
 // ==================== 方法：文字工具 ====================
-const handleTextToolClick = (e) => {
+const handleTextToolClick = e => {
   const rect = editorCanvasRef.value.getBoundingClientRect()
   textInputPos.value = {
     x: e.clientX - rect.left + editorBounds.value.x,
@@ -589,7 +767,7 @@ const handleTextToolClick = (e) => {
   showTextInput.value = true
 
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     textInputRef.value?.focus()
   })
 }
@@ -633,7 +811,7 @@ const cancelTextInput = () => {
 
 // ==================== 方法：历史记录 ====================
 const saveHistory = () => {
-  if (!ctx) return
+  if (!ctx) {return}
 
   const imageData = ctx.getImageData(0, 0, editorCanvasRef.value.width, editorCanvasRef.value.height)
   history.value.push(imageData)
@@ -648,7 +826,7 @@ const saveHistory = () => {
 }
 
 const undo = () => {
-  if (history.value.length === 0) return
+  if (history.value.length === 0) {return}
 
   // 保存当前状态到重做历史
   redoHistoryRef.value.push(ctx.getImageData(0, 0, editorCanvasRef.value.width, editorCanvasRef.value.height))
@@ -659,7 +837,7 @@ const undo = () => {
 }
 
 const redo = () => {
-  if (redoHistoryRef.value.length === 0) return
+  if (redoHistoryRef.value.length === 0) {return}
 
   const next = redoHistoryRef.value.pop()
   ctx.putImageData(next, 0, 0)
@@ -716,7 +894,7 @@ const startCapture = async () => {
       capturing.value = true
 
       nextTick(() => {
-        if (isUnmounted.value) return
+        if (isUnmounted.value) {return}
         initCanvas(img, x, y, w, h)
       })
     }
@@ -734,7 +912,7 @@ const startCapture = async () => {
 
 const initCanvas = (img, x, y, w, h) => {
   const canvas = canvasRef.value
-  if (!canvas) return
+  if (!canvas) {return}
 
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight
@@ -752,7 +930,7 @@ const initCanvas = (img, x, y, w, h) => {
 // ==================== 方法：确认和取消 ====================
 // 钉在桌面
 const handlePinToDesktop = () => {
-  if (!editorCanvasRef.value) return
+  if (!editorCanvasRef.value) {return}
 
   const dataUrl = editorCanvasRef.value.toDataURL('image/png')
   stickerRef.value?.addSticker(dataUrl)
@@ -763,7 +941,7 @@ const handlePinToDesktop = () => {
 
 // OCR 文字识别
 const handleOCR = async () => {
-  if (!editorCanvasRef.value) return
+  if (!editorCanvasRef.value) {return}
 
   isRecognizing.value = true
   ElMessage.info('正在识别文字，请稍候...')
@@ -772,7 +950,7 @@ const handleOCR = async () => {
     const dataUrl = editorCanvasRef.value.toDataURL('image/png')
     const result = await ocrEngine.recognize(dataUrl, {
       language: 'chi_sim+eng',
-      logger: (m) => {
+      logger: m => {
         if (m.status === 'processing') {
           // 可以显示进度
         }
@@ -813,7 +991,7 @@ const copyOcrResult = async () => {
 }
 
 const handleConfirm = () => {
-  if (!editorCanvasRef.value) return
+  if (!editorCanvasRef.value) {return}
 
   const dataUrl = editorCanvasRef.value.toDataURL('image/png')
   emit('confirm', dataUrl)
@@ -840,9 +1018,9 @@ const reset = () => {
 }
 
 // ==================== 键盘事件 ====================
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (!editing.value) {
-    if (e.key === 'Escape') handleCancel()
+    if (e.key === 'Escape') {handleCancel()}
     return
   }
 
@@ -873,7 +1051,7 @@ const handleKeydown = (e) => {
 }
 
 // ==================== 生命周期 ====================
-watch(() => props.visible, (val) => {
+watch(() => props.visible, val => {
   if (val) {
     startCapture()
     document.addEventListener('keydown', handleKeydown)

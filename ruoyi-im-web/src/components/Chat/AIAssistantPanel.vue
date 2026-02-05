@@ -1,29 +1,45 @@
 <template>
   <div class="ai-assistant-panel">
     <!-- 聊天消息区域 -->
-    <div class="chat-messages" ref="messagesContainer">
+    <div
+      ref="messagesContainer"
+      class="chat-messages"
+    >
       <div
         v-for="(msg, index) in messages"
         :key="index"
         :class="['message', msg.role]"
       >
         <div class="message-avatar">
-          <el-avatar :size="32" :src="msg.role === 'user' ? userAvatar : aiAvatar" />
+          <el-avatar
+            :size="32"
+            :src="msg.role === 'user' ? userAvatar : aiAvatar"
+          />
         </div>
         <div class="message-content">
-          <div class="message-text">{{ msg.content }}</div>
-          <div class="message-time">{{ msg.time }}</div>
+          <div class="message-text">
+            {{ msg.content }}
+          </div>
+          <div class="message-time">
+            {{ msg.time }}
+          </div>
         </div>
       </div>
-      <div v-if="isTyping" class="message assistant typing">
+      <div
+        v-if="isTyping"
+        class="message assistant typing"
+      >
         <div class="message-avatar">
-          <el-avatar :size="32" :src="aiAvatar" />
+          <el-avatar
+            :size="32"
+            :src="aiAvatar"
+          />
         </div>
         <div class="message-content">
           <div class="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span />
+            <span />
+            <span />
           </div>
         </div>
       </div>
@@ -36,9 +52,9 @@
         type="textarea"
         :rows="2"
         placeholder="输入消息与AI助手对话..."
+        :disabled="isTyping"
         @keydown.enter.exact="sendMessage"
         @keydown.enter.shift.prevent
-        :disabled="isTyping"
       />
       <div class="input-actions">
         <div class="input-tips">
@@ -57,12 +73,22 @@
 
     <!-- 快捷操作 -->
     <div class="quick-actions">
-      <el-button text size="small" @click="clearConversation">
+      <el-button
+        text
+        size="small"
+        @click="clearConversation"
+      >
         <el-icon><Delete /></el-icon>
         清空对话
       </el-button>
-      <el-dropdown trigger="click" @command="changeModel">
-        <el-button text size="small">
+      <el-dropdown
+        trigger="click"
+        @command="changeModel"
+      >
+        <el-button
+          text
+          size="small"
+        >
           当前模型: {{ currentModel }}
           <el-icon><ArrowDown /></el-icon>
         </el-button>
@@ -108,7 +134,7 @@ const aiAvatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f
 // 发送消息
 const sendMessage = async () => {
   const text = inputText.value.trim()
-  if (!text || isTyping.value) return
+  if (!text || isTyping.value) {return}
 
   // 添加用户消息
   const userMessage = {
@@ -121,7 +147,7 @@ const sendMessage = async () => {
 
   // 滚动到底部
   await nextTick()
-  if (isUnmounted.value) return
+  if (isUnmounted.value) {return}
   scrollToBottom()
 
   // 显示打字状态
@@ -157,7 +183,7 @@ const sendMessage = async () => {
   } finally {
     isTyping.value = false
     await nextTick()
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     scrollToBottom()
   }
 }
@@ -183,7 +209,7 @@ const clearConversation = async () => {
 }
 
 // 切换模型
-const changeModel = (model) => {
+const changeModel = model => {
   currentModel.value = model
   ElMessage.info(`已切换至 ${model} 模型`)
 }

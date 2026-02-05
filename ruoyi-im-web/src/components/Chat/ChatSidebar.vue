@@ -1,7 +1,13 @@
 <template>
-  <div class="chat-sidebar" :class="{ 'with-tabs': isGroup }">
+  <div
+    class="chat-sidebar"
+    :class="{ 'with-tabs': isGroup }"
+  >
     <!-- Tab 导航（仅群聊显示） -->
-    <div v-if="isGroup" class="sidebar-tabs">
+    <div
+      v-if="isGroup"
+      class="sidebar-tabs"
+    >
       <div
         v-for="tab in tabs"
         :key="tab.key"
@@ -11,31 +17,57 @@
       >
         <span class="material-icons-outlined tab-icon">{{ tab.icon }}</span>
         <span class="tab-label">{{ tab.label }}</span>
-        <span v-if="tab.badge" class="tab-badge">{{ tab.badge }}</span>
+        <span
+          v-if="tab.badge"
+          class="tab-badge"
+        >{{ tab.badge }}</span>
       </div>
     </div>
 
     <!-- 简单头部（单聊显示） -->
-    <div v-else class="sidebar-header">
-      <h3 class="title">个人资料</h3>
-      <el-button link @click="$emit('close')">
+    <div
+      v-else
+      class="sidebar-header"
+    >
+      <h3 class="title">
+        个人资料
+      </h3>
+      <el-button
+        link
+        @click="$emit('close')"
+      >
         <el-icon><Close /></el-icon>
       </el-button>
     </div>
 
     <!-- Tab 内容区域 -->
-    <div class="sidebar-content" v-loading="loading">
+    <div
+      v-loading="loading"
+      class="sidebar-content"
+    >
       <!-- ========== 成员 Tab ========== -->
       <template v-if="activeTab === 'members'">
-        <div v-if="isGroup && detail" class="tab-content">
+        <div
+          v-if="isGroup && detail"
+          class="tab-content"
+        >
           <!-- 群组信息 -->
           <div class="section group-info">
-            <el-avatar :size="64" :src="addTokenToUrl(detail.avatar)" shape="square" class="avatar">
+            <el-avatar
+              :size="64"
+              :src="addTokenToUrl(detail.avatar)"
+              shape="square"
+              class="avatar"
+            >
               {{ detail.name?.charAt(0) }}
             </el-avatar>
             <div class="info">
-              <div class="name">{{ detail.name }}</div>
-              <div class="id">群号: {{ detail.id }}</div>
+              <div class="name">
+                {{ detail.name }}
+              </div>
+              <div class="id">
+                群号: {{ detail.id }}
+              </div>
             </div>
           </div>
 
@@ -45,9 +77,15 @@
           <div class="section members-section">
             <div class="section-title">
               <span>群成员 ({{ detail.memberCount || members.length }})</span>
-              <el-button link type="primary" @click="handleShowAllMembers">
+              <el-button
+                link
+                type="primary"
+                @click="handleShowAllMembers"
+              >
                 查看全部
-                <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+                <el-icon class="el-icon--right">
+                  <ArrowRight />
+                </el-icon>
               </el-button>
             </div>
             <div class="members-grid">
@@ -58,7 +96,10 @@
                 placement="right-start"
                 @command="handleMemberCommand"
               >
-                <div class="member-item" :class="{ 'is-admin': m.role === 'ADMIN' || m.role === 'OWNER' }">
+                <div
+                  class="member-item"
+                  :class="{ 'is-admin': m.role === 'ADMIN' || m.role === 'OWNER' }"
+                >
                   <DingtalkAvatar
                     :name="m.name"
                     :user-id="m.id"
@@ -67,8 +108,14 @@
                     shape="square"
                   />
                   <span class="m-name">{{ m.name }}</span>
-                  <span v-if="m.role === 'OWNER'" class="role-badge owner">群主</span>
-                  <span v-else-if="m.role === 'ADMIN'" class="role-badge admin">管理员</span>
+                  <span
+                    v-if="m.role === 'OWNER'"
+                    class="role-badge owner"
+                  >群主</span>
+                  <span
+                    v-else-if="m.role === 'ADMIN'"
+                    class="role-badge admin"
+                  >管理员</span>
                 </div>
                 <template #dropdown>
                   <el-dropdown-menu>
@@ -84,19 +131,33 @@
                       <span class="material-icons-outlined menu-icon">person</span>
                       查看资料
                     </el-dropdown-item>
-                    <el-dropdown-item divided :command="{ action: 'setAdmin', member: m }" v-if="canManageMember && m.role !== 'OWNER'">
+                    <el-dropdown-item
+                      v-if="canManageMember && m.role !== 'OWNER'"
+                      divided
+                      :command="{ action: 'setAdmin', member: m }"
+                    >
                       <span class="material-icons-outlined menu-icon">{{ m.role === 'ADMIN' ? 'remove_moderator' : 'admin_panel_settings' }}</span>
                       {{ m.role === 'ADMIN' ? '取消管理员' : '设为管理员' }}
                     </el-dropdown-item>
-                    <el-dropdown-item divided :command="{ action: 'remove', member: m }" v-if="canManageMember && m.role !== 'OWNER'">
+                    <el-dropdown-item
+                      v-if="canManageMember && m.role !== 'OWNER'"
+                      divided
+                      :command="{ action: 'remove', member: m }"
+                    >
                       <span class="material-icons-outlined menu-icon remove">person_remove</span>
                       移除出群
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-              <div v-if="canManageMember" class="member-item add-btn" @click="handleAddMember">
-                <div class="add-icon"><el-icon><Plus /></el-icon></div>
+              <div
+                v-if="canManageMember"
+                class="member-item add-btn"
+                @click="handleAddMember"
+              >
+                <div class="add-icon">
+                  <el-icon><Plus /></el-icon>
+                </div>
                 <span class="m-name">添加</span>
               </div>
             </div>
@@ -106,8 +167,13 @@
 
           <!-- 群公告 -->
           <div class="section">
-            <div class="section-title">群公告</div>
-            <div class="announcement-card" :class="{ empty: !detail.announcement }">
+            <div class="section-title">
+              群公告
+            </div>
+            <div
+              class="announcement-card"
+              :class="{ empty: !detail.announcement }"
+            >
               {{ detail.announcement || '暂无群公告' }}
             </div>
           </div>
@@ -118,17 +184,28 @@
           <div class="section settings">
             <div class="setting-item">
               <span>置顶聊天</span>
-              <el-switch v-model="detail.isPinned" size="small" @change="handleSettingChange('pin', $event)" />
+              <el-switch
+                v-model="detail.isPinned"
+                size="small"
+                @change="handleSettingChange('pin', $event)"
+              />
             </div>
             <div class="setting-item">
               <span>消息免打扰</span>
-              <el-switch v-model="detail.isMuted" size="small" @change="handleSettingChange('mute', $event)" />
+              <el-switch
+                v-model="detail.isMuted"
+                size="small"
+                @change="handleSettingChange('mute', $event)"
+              />
             </div>
           </div>
         </div>
 
         <!-- 单聊详情 -->
-        <div v-else-if="detail" class="tab-content">
+        <div
+          v-else-if="detail"
+          class="tab-content"
+        >
           <div class="section user-info">
             <DingtalkAvatar
               :name="detail.nickname || detail.username"
@@ -141,12 +218,23 @@
             <div class="user-main">
               <div class="name-row">
                 <span class="nickname">{{ detail.nickname || detail.username }}</span>
-                <span v-if="detail.gender === 1" class="material-icons-outlined male">male</span>
-                <span v-else-if="detail.gender === 2" class="material-icons-outlined female">female</span>
+                <span
+                  v-if="detail.gender === 1"
+                  class="material-icons-outlined male"
+                >male</span>
+                <span
+                  v-else-if="detail.gender === 2"
+                  class="material-icons-outlined female"
+                >female</span>
               </div>
-              <div class="sub">账号: {{ detail.username }}</div>
-              <div class="status" :class="{ online: isOnline }">
-                <span class="dot"></span>
+              <div class="sub">
+                账号: {{ detail.username }}
+              </div>
+              <div
+                class="status"
+                :class="{ online: isOnline }"
+              >
+                <span class="dot" />
                 {{ isOnline ? '在线' : '离线' }}
               </div>
             </div>
@@ -206,8 +294,14 @@
             </div>
 
             <!-- 文件列表 -->
-            <div v-loading="loadingFiles" class="file-list">
-              <div v-if="filteredFiles.length === 0" class="empty-state">
+            <div
+              v-loading="loadingFiles"
+              class="file-list"
+            >
+              <div
+                v-if="filteredFiles.length === 0"
+                class="empty-state"
+              >
                 <span class="material-icons-outlined empty-icon">folder_open</span>
                 <p>暂无文件</p>
               </div>
@@ -217,15 +311,28 @@
                 class="file-item"
                 @click="handleFileClick(file)"
               >
-                <div class="file-icon" :class="`type-${file.type}`">
+                <div
+                  class="file-icon"
+                  :class="`type-${file.type}`"
+                >
                   <span class="material-icons-outlined">{{ getFileIcon(file.type) }}</span>
                 </div>
                 <div class="file-info">
-                  <div class="file-name">{{ file.name }}</div>
-                  <div class="file-meta">{{ utilsFormatFileSize(file.size) }} · {{ formatDate(file.sendTime) }}</div>
+                  <div class="file-name">
+                    {{ file.name }}
+                  </div>
+                  <div class="file-meta">
+                    {{ utilsFormatFileSize(file.size) }} · {{ formatDate(file.sendTime) }}
+                  </div>
                 </div>
-                <el-dropdown trigger="click" @command="(cmd) => handleFileCommand(cmd, file)">
-                  <el-button link class="file-more">
+                <el-dropdown
+                  trigger="click"
+                  @command="(cmd) => handleFileCommand(cmd, file)"
+                >
+                  <el-button
+                    link
+                    class="file-more"
+                  >
                     <el-icon><MoreFilled /></el-icon>
                   </el-button>
                   <template #dropdown>
@@ -262,15 +369,26 @@
                 @keyup.enter="handleSearch"
               >
                 <template #append>
-                  <el-button :icon="Search" @click="handleSearch" />
+                  <el-button
+                    :icon="Search"
+                    @click="handleSearch"
+                  />
                 </template>
               </el-input>
             </div>
 
             <!-- 搜索结果 -->
-            <div v-loading="searching" class="search-results">
-              <div v-if="!searchKeyword" class="search-hints">
-                <div class="hint-title">搜索提示</div>
+            <div
+              v-loading="searching"
+              class="search-results"
+            >
+              <div
+                v-if="!searchKeyword"
+                class="search-hints"
+              >
+                <div class="hint-title">
+                  搜索提示
+                </div>
                 <div class="hint-list">
                   <div class="hint-item">
                     <span class="material-icons-outlined">text_fields</span>
@@ -287,12 +405,18 @@
                 </div>
               </div>
 
-              <div v-else-if="searchResults.length === 0 && !searching" class="empty-state">
+              <div
+                v-else-if="searchResults.length === 0 && !searching"
+                class="empty-state"
+              >
                 <span class="material-icons-outlined empty-icon">search_off</span>
                 <p>未找到相关结果</p>
               </div>
 
-              <div v-else class="result-list">
+              <div
+                v-else
+                class="result-list"
+              >
                 <div
                   v-for="(result, index) in searchResults"
                   :key="result.id"
@@ -308,10 +432,21 @@
                     <span class="sender-name">{{ result.senderName }}</span>
                     <span class="result-time">{{ formatTime(result.sendTime) }}</span>
                   </div>
-                  <div class="result-content" v-html="highlightKeyword(result.content)"></div>
+                  <div
+                    class="result-content"
+                    v-html="highlightKeyword(result.content)"
+                  />
                 </div>
-                <div v-if="hasMoreResults" class="load-more">
-                  <el-button text @click="loadMoreResults">加载更多</el-button>
+                <div
+                  v-if="hasMoreResults"
+                  class="load-more"
+                >
+                  <el-button
+                    text
+                    @click="loadMoreResults"
+                  >
+                    加载更多
+                  </el-button>
                 </div>
               </div>
             </div>
@@ -322,10 +457,22 @@
 
     <!-- 底部操作区域 -->
     <div class="sidebar-footer">
-      <el-button v-if="isGroup && activeTab === 'members'" type="danger" plain class="w-full" @click="handleLeave">
+      <el-button
+        v-if="isGroup && activeTab === 'members'"
+        type="danger"
+        plain
+        class="w-full"
+        @click="handleLeave"
+      >
         退出群聊
       </el-button>
-      <el-button v-else-if="!isGroup" type="primary" plain class="w-full" @click="$emit('start-chat')">
+      <el-button
+        v-else-if="!isGroup"
+        type="primary"
+        plain
+        class="w-full"
+        @click="$emit('start-chat')"
+      >
         发起聊天
       </el-button>
     </div>
@@ -390,7 +537,7 @@ const displayMembers = computed(() => {
 
 // 在线状态
 const isOnline = computed(() => {
-  if (isGroup.value) return false
+  if (isGroup.value) {return false}
   const userId = props.session?.targetId
   if (userId && store.state.im.contact?.userStatus?.[userId]) {
     return store.state.im.contact.userStatus[userId] === 'online'
@@ -400,7 +547,7 @@ const isOnline = computed(() => {
 
 // 判断是否有管理成员的权限
 const canManageMember = computed(() => {
-  if (!detail.value || !currentUser.value) return false
+  if (!detail.value || !currentUser.value) {return false}
   const memberRole = props.session?.memberRole
   return memberRole === 'OWNER' || memberRole === 'ADMIN'
 })
@@ -444,7 +591,7 @@ const searchPage = ref(1)
 
 // ========== 加载详情 ==========
 const loadDetail = async () => {
-  if (!props.session?.id) return
+  if (!props.session?.id) {return}
   loading.value = true
   try {
     if (isGroup.value) {
@@ -453,7 +600,7 @@ const loadDetail = async () => {
         getGroup(gId),
         getGroupMembers(gId)
       ])
-      if (gRes.code === 200) detail.value = gRes.data
+      if (gRes.code === 200) {detail.value = gRes.data}
       if (mRes.code === 200) {
         members.value = mRes.data.map(m => ({
           id: m.userId || m.id,
@@ -466,7 +613,7 @@ const loadDetail = async () => {
       loadFiles()
     } else {
       const res = await getUserInfo(props.session.targetId)
-      if (res.code === 200) detail.value = res.data
+      if (res.code === 200) {detail.value = res.data}
     }
   } catch (e) {
     console.error('加载详情失败', e)
@@ -498,17 +645,17 @@ const loadFiles = () => {
   files.value = fileList
 }
 
-const getFileType = (messageType) => {
+const getFileType = messageType => {
   const typeMap = { IMAGE: 'image', FILE: 'file' }
   return typeMap[messageType] || 'file'
 }
 
-const getFileCategory = (messageType) => {
+const getFileCategory = messageType => {
   const catMap = { IMAGE: 'image', FILE: 'document' }
   return catMap[messageType] || 'other'
 }
 
-const getFileIcon = (type) => {
+const getFileIcon = type => {
   const iconMap = {
     image: 'image',
     pdf: 'picture_as_pdf',
@@ -528,7 +675,7 @@ const getFileIcon = (type) => {
 
 const formatDate = formatDateTimeISO
 
-const formatTime = (date) => {
+const formatTime = date => {
   return dayjs(date).fromNow()
 }
 
@@ -563,7 +710,7 @@ const handleSearch = async () => {
 }
 
 const loadMoreResults = async () => {
-  if (!hasMoreResults.value) return
+  if (!hasMoreResults.value) {return}
 
   try {
     const res = await searchMessages({
@@ -582,14 +729,28 @@ const loadMoreResults = async () => {
   }
 }
 
-const highlightKeyword = (content) => {
-  if (!searchKeyword.value) return content
+/**
+ * 高亮搜索关键词
+ * 先转义 HTML 防止 XSS，再进行关键词高亮
+ */
+const highlightKeyword = content => {
+  if (!searchKeyword.value) {return escapeHtml(content)}
   const keyword = searchKeyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp(`(${keyword})`, 'gi')
-  return content.replace(regex, '<mark>$1</mark>')
+  return escapeHtml(content).replace(regex, '<mark>$1</mark>')
 }
 
-const handleResultClick = (result) => {
+/**
+ * 转义 HTML 特殊字符，防止 XSS 攻击
+ */
+const escapeHtml = text => {
+  if (!text) {return ''}
+  const div = document.createElement('div')
+  div.textContent = text
+  return div.innerHTML
+}
+
+const handleResultClick = result => {
   emit('scroll-to-message', result.id)
 }
 
@@ -611,7 +772,7 @@ const handleAddMember = async () => {
       }
     )
 
-    if (!value) return
+    if (!value) {return}
 
     const userIds = value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id))
     if (userIds.length === 0) {
@@ -630,7 +791,7 @@ const handleAddMember = async () => {
   }
 }
 
-const handleMemberCommand = (command) => {
+const handleMemberCommand = command => {
   const { action, member } = command
   switch (action) {
     case 'chat':
@@ -651,7 +812,7 @@ const handleMemberCommand = (command) => {
   }
 }
 
-const handleSetAdmin = async (member) => {
+const handleSetAdmin = async member => {
   const newRole = member.role === 'ADMIN' ? 'MEMBER' : 'ADMIN'
   const action = newRole === 'ADMIN' ? '设为管理员' : '取消管理员'
   try {
@@ -670,7 +831,7 @@ const handleSetAdmin = async (member) => {
   }
 }
 
-const handleRemoveMember = async (member) => {
+const handleRemoveMember = async member => {
   try {
     await ElMessageBox.confirm(`确定将 ${member.name} 移除出群吗？`, '移除成员', {
       type: 'warning',
@@ -689,7 +850,7 @@ const handleRemoveMember = async (member) => {
 }
 
 // ========== 文件操作 ==========
-const handleFileClick = (file) => {
+const handleFileClick = file => {
   // 打开或预览文件
   if (file.url) {
     window.open(file.url, '_blank')
@@ -724,7 +885,9 @@ const handleLeave = async () => {
     await leaveGroup(props.session.targetId || props.session.id)
     ElMessage.success('已退出')
     emit('close')
-  } catch (e) {}
+  } catch (e) {
+    // 用户取消操作，无需处理
+  }
 }
 
 // ========== 监听会话变化 ==========

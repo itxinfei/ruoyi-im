@@ -22,8 +22,12 @@
 
     <!-- 原消息预览 -->
     <div class="original-message">
-      <div class="message-label">原消息内容:</div>
-      <div class="message-content">{{ displayContent }}</div>
+      <div class="message-label">
+        原消息内容:
+      </div>
+      <div class="message-content">
+        {{ displayContent }}
+      </div>
     </div>
   </div>
 </template>
@@ -43,14 +47,14 @@ const emit = defineEmits(['cancel'])
 
 // 显示内容（截断长文本）
 const displayContent = computed(() => {
-  if (!props.content) return ''
+  if (!props.content) {return ''}
   const maxLength = 100
-  if (props.content.length <= maxLength) return props.content
+  if (props.content.length <= maxLength) {return props.content}
   return props.content.substring(0, maxLength) + '...'
 })
 
 // 处理ESC键取消编辑
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (e.key === 'Escape') {
     emit('cancel')
   }

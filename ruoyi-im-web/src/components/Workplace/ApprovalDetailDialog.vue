@@ -1,27 +1,44 @@
 <template>
   <el-dialog
-    title="审批详情"
     v-model="visible"
+    title="审批详情"
     width="600px"
     destroy-on-close
     :close-on-click-modal="true"
     @close="handleClose"
   >
-    <div v-loading="loading" class="approval-detail">
-      <div v-if="detail" class="detail-container">
+    <div
+      v-loading="loading"
+      class="approval-detail"
+    >
+      <div
+        v-if="detail"
+        class="detail-container"
+      >
         <!-- 头部状态 -->
         <div class="header-section">
           <div class="applicant-info">
-            <el-avatar :size="50" :src="detail.applicantAvatar">
+            <el-avatar
+              :size="50"
+              :src="detail.applicantAvatar"
+            >
               {{ detail.applicantName?.charAt(0) }}
             </el-avatar>
             <div class="name-box">
-              <div class="applicant-name">{{ detail.applicantName }}</div>
-              <div class="apply-time">{{ detail.applyTime }}</div>
+              <div class="applicant-name">
+                {{ detail.applicantName }}
+              </div>
+              <div class="apply-time">
+                {{ detail.applyTime }}
+              </div>
             </div>
           </div>
           <div class="status-tag">
-            <el-tag :type="getStatusType(detail.status)" effect="dark" size="large">
+            <el-tag
+              :type="getStatusType(detail.status)"
+              effect="dark"
+              size="large"
+            >
               {{ getStatusLabel(detail.status) }}
             </el-tag>
           </div>
@@ -31,7 +48,9 @@
 
         <!-- 详情内容 -->
         <div class="content-section">
-          <h3 class="title">{{ detail.title }}</h3>
+          <h3 class="title">
+            {{ detail.title }}
+          </h3>
           
           <div class="form-data">
             <div 
@@ -39,20 +58,34 @@
               :key="key" 
               class="form-item"
             >
-              <div class="label">{{ translateKey(key) }}</div>
-              <div class="value">{{ formatValue(value) }}</div>
+              <div class="label">
+                {{ translateKey(key) }}
+              </div>
+              <div class="value">
+                {{ formatValue(value) }}
+              </div>
             </div>
           </div>
         </div>
 
         <el-divider v-if="detail.remark" />
-        <div v-if="detail.remark" class="remark-section">
-          <div class="label">备注/审批意见</div>
-          <div class="value">{{ detail.remark }}</div>
+        <div
+          v-if="detail.remark"
+          class="remark-section"
+        >
+          <div class="label">
+            备注/审批意见
+          </div>
+          <div class="value">
+            {{ detail.remark }}
+          </div>
         </div>
 
         <!-- 操作区域 -->
-        <div v-if="detail.status === 'PENDING'" class="action-footer">
+        <div
+          v-if="detail.status === 'PENDING'"
+          class="action-footer"
+        >
           <el-input
             v-model="comment"
             type="textarea"
@@ -61,9 +94,23 @@
             class="comment-input"
           />
           <div class="buttons">
-            <el-button @click="visible = false">取消</el-button>
-            <el-button type="danger" :loading="processing" @click="handleReject">驳回</el-button>
-            <el-button type="primary" :loading="processing" @click="handleApprove">通过</el-button>
+            <el-button @click="visible = false">
+              取消
+            </el-button>
+            <el-button
+              type="danger"
+              :loading="processing"
+              @click="handleReject"
+            >
+              驳回
+            </el-button>
+            <el-button
+              type="primary"
+              :loading="processing"
+              @click="handleApprove"
+            >
+              通过
+            </el-button>
           </div>
         </div>
       </div>
@@ -90,7 +137,7 @@ const detail = ref(null)
 const comment = ref('')
 
 const parsedFormData = computed(() => {
-  if (!detail.value || !detail.value.formData) return {}
+  if (!detail.value || !detail.value.formData) {return {}}
   try {
     return typeof detail.value.formData === 'string' 
       ? JSON.parse(detail.value.formData) 
@@ -100,7 +147,7 @@ const parsedFormData = computed(() => {
   }
 })
 
-const getStatusType = (status) => {
+const getStatusType = status => {
   const map = {
     'PENDING': 'warning',
     'APPROVED': 'success',
@@ -110,7 +157,7 @@ const getStatusType = (status) => {
   return map[status] || 'info'
 }
 
-const getStatusLabel = (status) => {
+const getStatusLabel = status => {
   const map = {
     'PENDING': '待审批',
     'APPROVED': '已通过',
@@ -120,7 +167,7 @@ const getStatusLabel = (status) => {
   return map[status] || status
 }
 
-const translateKey = (key) => {
+const translateKey = key => {
   const dictionary = {
     'startTime': '开始时间',
     'endTime': '结束时间',
@@ -133,14 +180,14 @@ const translateKey = (key) => {
   return dictionary[key] || key
 }
 
-const formatValue = (val) => {
-  if (val === true) return '是'
-  if (val === false) return '否'
+const formatValue = val => {
+  if (val === true) {return '是'}
+  if (val === false) {return '否'}
   return val
 }
 
 const fetchDetail = async () => {
-  if (!props.approvalId) return
+  if (!props.approvalId) {return}
   loading.value = true
   try {
     const res = await getApproval(props.approvalId)
@@ -191,7 +238,7 @@ const handleClose = () => {
   emit('update:modelValue', false)
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     comment.value = ''
@@ -199,8 +246,8 @@ watch(() => props.modelValue, (val) => {
   }
 })
 
-watch(visible, (val) => {
-  if (!val) emit('update:modelValue', false)
+watch(visible, val => {
+  if (!val) {emit('update:modelValue', false)}
 })
 </script>
 

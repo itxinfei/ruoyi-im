@@ -12,7 +12,10 @@
     @scroll="handleScroll"
   >
     <!-- 撑开滚动高度的占位元素 -->
-    <div class="virtual-list-phantom" :style="{ height: `${totalHeight}px` }"></div>
+    <div
+      class="virtual-list-phantom"
+      :style="{ height: `${totalHeight}px` }"
+    />
 
     <!-- 可见区域的内容 -->
     <div
@@ -26,7 +29,10 @@
         class="virtual-list-item"
         :style="{ height: `${itemSize}px` }"
       >
-        <slot :item="item.data" :index="item._index"></slot>
+        <slot
+          :item="item.data"
+          :index="item._index"
+        />
       </div>
     </div>
   </div>
@@ -94,7 +100,7 @@ const visibleData = computed(() => {
 })
 
 // 处理滚动事件
-const handleScroll = (e) => {
+const handleScroll = e => {
   scrollTop.value = e.target.scrollTop
   emit('scroll', e)
 
@@ -108,8 +114,8 @@ const handleScroll = (e) => {
 }
 
 // 滚动到指定索引
-const scrollToIndex = (index) => {
-  if (!containerRef.value) return
+const scrollToIndex = index => {
+  if (!containerRef.value) {return}
   const target = Math.max(0, Math.min(index, props.items.length - 1))
   const top = target * props.itemSize
   containerRef.value.scrollTop = top
@@ -117,7 +123,7 @@ const scrollToIndex = (index) => {
 
 // 滚动到顶部
 const scrollToTop = (smooth = true) => {
-  if (!containerRef.value) return
+  if (!containerRef.value) {return}
   containerRef.value.scrollTo({
     top: 0,
     behavior: smooth ? 'smooth' : 'auto'
@@ -126,7 +132,7 @@ const scrollToTop = (smooth = true) => {
 
 // 滚动到底部
 const scrollToBottom = (smooth = true) => {
-  if (!containerRef.value) return
+  if (!containerRef.value) {return}
   containerRef.value.scrollTo({
     top: totalHeight.value,
     behavior: smooth ? 'smooth' : 'auto'
@@ -135,7 +141,7 @@ const scrollToBottom = (smooth = true) => {
 
 // 获取滚动位置
 const getScrollInfo = () => {
-  if (!containerRef.value) return null
+  if (!containerRef.value) {return null}
   return {
     scrollTop: containerRef.value.scrollTop,
     scrollHeight: containerRef.value.scrollHeight,

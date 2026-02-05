@@ -38,8 +38,8 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 复制消息
    */
-  const copy = async (message) => {
-    if (message.type !== 'TEXT') return
+  const copy = async message => {
+    if (message.type !== 'TEXT') {return}
 
     try {
       // 复制到剪贴板
@@ -54,7 +54,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 回复消息
    */
-  const reply = (message) => {
+  const reply = message => {
     replyingMessage.value = message
   }
 
@@ -68,7 +68,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 转发消息
    */
-  const forward = (message) => {
+  const forward = message => {
     forwardingMessages.value = [message]
   }
 
@@ -92,7 +92,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 撤回消息
    */
-  const recall = async (message) => {
+  const recall = async message => {
     try {
       await recallMessage(message.id)
 
@@ -120,7 +120,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 删除消息
    */
-  const deleteMessage = async (message) => {
+  const deleteMessage = async message => {
     try {
       await apiDeleteMessage(message.id)
 
@@ -137,7 +137,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 编辑消息
    */
-  const edit = (message) => {
+  const edit = message => {
     editingMessage.value = { ...message }
   }
 
@@ -151,7 +151,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 确认编辑
    */
-  const confirmEdit = async (newContent) => {
+  const confirmEdit = async newContent => {
     if (!newContent.trim()) {
       ElMessage.warning('请输入消息内容')
       return
@@ -181,7 +181,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * @提及用户
    */
-  const at = (message) => {
+  const at = message => {
     // 触发 @ 事件
     // 父组件会处理
     return message
@@ -205,7 +205,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 设为待办
    */
-  const addToTodo = async (message) => {
+  const addToTodo = async message => {
     try {
       await setTodoReminder({
         messageId: message.id,
@@ -238,7 +238,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 收藏消息
    */
-  const favorite = async (message) => {
+  const favorite = async message => {
     try {
       await addFavorite({
         messageId: message.id,
@@ -256,7 +256,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 取消收藏
    */
-  const unfavorite = async (message) => {
+  const unfavorite = async message => {
     try {
       await removeFavorite(message.id)
       ElMessage.success('已取消收藏')
@@ -268,7 +268,7 @@ export function useChatCommands(currentUser, sessionType) {
   /**
    * 置顶消息
    */
-  const pin = async (message) => {
+  const pin = async message => {
     try {
       const isPinned = !message.isPinned
       // 调用置顶 API

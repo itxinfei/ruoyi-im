@@ -1,7 +1,7 @@
 <template>
   <div class="web-screenshot-wrapper">
     <!-- 截图按钮，点击触发截图 -->
-    <div ref="triggerRef"></div>
+    <div ref="triggerRef" />
   </div>
 </template>
 
@@ -46,7 +46,7 @@ const initScreenshot = async () => {
       // 层级
       level: 9999,
       // 截图完成回调
-      clickCallback: (dataUrl) => {
+      clickCallback: dataUrl => {
         emit('confirm', dataUrl)
         destroy()
       },
@@ -104,7 +104,7 @@ const destroy = () => {
 }
 
 // 监听 visible 变化
-watch(() => props.visible, async (val) => {
+watch(() => props.visible, async val => {
   if (val) {
     await initScreenshot()
   } else {

@@ -1,9 +1,21 @@
 <template>
-  <el-card class="admin-search-bar" shadow="never">
-    <el-form :model="internalForm" inline>
-      <template v-for="item in items" :key="item.prop">
+  <el-card
+    class="admin-search-bar"
+    shadow="never"
+  >
+    <el-form
+      :model="internalForm"
+      inline
+    >
+      <template
+        v-for="item in items"
+        :key="item.prop"
+      >
         <!-- 输入框类型 -->
-        <el-form-item v-if="item.type === 'input'" :label="item.label">
+        <el-form-item
+          v-if="item.type === 'input'"
+          :label="item.label"
+        >
           <el-input
             v-model="internalForm[item.prop]"
             :placeholder="item.placeholder || `请输入${item.label}`"
@@ -11,17 +23,26 @@
             :style="{ width: item.width || '200px' }"
             @keyup.enter="handleSearch"
           >
-            <template v-if="item.prefix" #prefix>
+            <template
+              v-if="item.prefix"
+              #prefix
+            >
               <el-icon><component :is="item.prefix" /></el-icon>
             </template>
-            <template v-if="item.suffix" #suffix>
+            <template
+              v-if="item.suffix"
+              #suffix
+            >
               <el-icon><component :is="item.suffix" /></el-icon>
             </template>
           </el-input>
         </el-form-item>
 
         <!-- 选择器类型 -->
-        <el-form-item v-else-if="item.type === 'select'" :label="item.label">
+        <el-form-item
+          v-else-if="item.type === 'select'"
+          :label="item.label"
+        >
           <el-select
             v-model="internalForm[item.prop]"
             :placeholder="item.placeholder || `请选择${item.label}`"
@@ -39,7 +60,10 @@
         </el-form-item>
 
         <!-- 日期选择器类型 -->
-        <el-form-item v-else-if="item.type === 'date'" :label="item.label">
+        <el-form-item
+          v-else-if="item.type === 'date'"
+          :label="item.label"
+        >
           <el-date-picker
             v-model="internalForm[item.prop]"
             :type="item.dateType || 'date'"
@@ -52,7 +76,10 @@
         </el-form-item>
 
         <!-- 日期范围选择器 -->
-        <el-form-item v-else-if="item.type === 'daterange'" :label="item.label">
+        <el-form-item
+          v-else-if="item.type === 'daterange'"
+          :label="item.label"
+        >
           <el-date-picker
             v-model="internalForm[item.prop]"
             type="datetimerange"
@@ -66,7 +93,10 @@
         </el-form-item>
 
         <!-- 级联选择器 -->
-        <el-form-item v-else-if="item.type === 'cascader'" :label="item.label">
+        <el-form-item
+          v-else-if="item.type === 'cascader'"
+          :label="item.label"
+        >
           <el-cascader
             v-model="internalForm[item.prop]"
             :options="item.options"
@@ -77,7 +107,10 @@
         </el-form-item>
 
         <!-- 开关 -->
-        <el-form-item v-else-if="item.type === 'switch'" :label="item.label">
+        <el-form-item
+          v-else-if="item.type === 'switch'"
+          :label="item.label"
+        >
           <el-switch
             v-model="internalForm[item.prop]"
             :active-text="item.activeText"
@@ -88,9 +121,25 @@
 
       <!-- 操作按钮 -->
       <el-form-item>
-        <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-        <el-button :icon="Refresh" @click="handleReset">重置</el-button>
-        <el-button v-if="showExpand" text link @click="expandVisible = !expandVisible">
+        <el-button
+          type="primary"
+          :icon="Search"
+          @click="handleSearch"
+        >
+          搜索
+        </el-button>
+        <el-button
+          :icon="Refresh"
+          @click="handleReset"
+        >
+          重置
+        </el-button>
+        <el-button
+          v-if="showExpand"
+          text
+          link
+          @click="expandVisible = !expandVisible"
+        >
           {{ expandVisible ? '收起' : '展开' }}
           <el-icon>
             <ArrowUp v-if="expandVisible" />
@@ -104,8 +153,14 @@
     <el-collapse-transition>
       <div v-show="expandVisible">
         <el-divider />
-        <el-form :model="internalForm" inline>
-          <template v-for="item in expandItems" :key="item.prop">
+        <el-form
+          :model="internalForm"
+          inline
+        >
+          <template
+            v-for="item in expandItems"
+            :key="item.prop"
+          >
             <el-form-item :label="item.label">
               <!-- 复用上面的搜索项类型逻辑 -->
               <el-input
@@ -192,12 +247,12 @@ const internalForm = ref({ ...props.model })
 const expandVisible = ref(false)
 
 // 监听外部 model 变化
-watch(() => props.model, (newVal) => {
+watch(() => props.model, newVal => {
   internalForm.value = { ...newVal }
 }, { deep: true })
 
 // 监听内部表单变化，同步到外部
-watch(internalForm, (newVal) => {
+watch(internalForm, newVal => {
   emit('update:model', { ...newVal })
 }, { deep: true })
 

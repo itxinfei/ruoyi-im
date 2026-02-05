@@ -9,14 +9,26 @@
     append-to-body
   >
     <!-- 加载状态 -->
-    <div v-if="loading" class="loading-state">
-      <el-skeleton :rows="5" animated />
+    <div
+      v-if="loading"
+      class="loading-state"
+    >
+      <el-skeleton
+        :rows="5"
+        animated
+      />
     </div>
 
-    <div v-else-if="userInfo" class="dialog-container">
+    <div
+      v-else-if="userInfo"
+      class="dialog-container"
+    >
       <!-- compact 模式：左右分栏简洁布局 -->
       <template v-if="layoutMode === 'compact'">
-        <button class="close-btn close-btn-compact" @click="handleClose">
+        <button
+          class="close-btn close-btn-compact"
+          @click="handleClose"
+        >
           <el-icon><Close /></el-icon>
         </button>
         <div class="compact-layout">
@@ -31,17 +43,28 @@
                 shape="circle"
               />
             </div>
-            <h3 class="user-name-compact">{{ userName }}</h3>
+            <h3 class="user-name-compact">
+              {{ userName }}
+            </h3>
             <div class="user-tags-compact">
-              <span v-if="userInfo.position" class="tag">
+              <span
+                v-if="userInfo.position"
+                class="tag"
+              >
                 <span class="material-icons-outlined tag-icon">badge</span>
                 {{ userInfo.position }}
               </span>
-              <span v-if="userInfo.department" class="tag">
+              <span
+                v-if="userInfo.department"
+                class="tag"
+              >
                 <span class="material-icons-outlined tag-icon">business</span>
                 {{ userInfo.department }}
               </span>
-              <span v-if="genderIcon" class="tag gender-tag">
+              <span
+                v-if="genderIcon"
+                class="tag gender-tag"
+              >
                 <span class="material-icons-outlined tag-icon">{{ genderIcon }}</span>
                 {{ genderText }}
               </span>
@@ -67,17 +90,26 @@
                 <span class="info-label">邮箱</span>
                 <span class="info-value">{{ userInfo.email || '未设置' }}</span>
               </div>
-              <div v-if="userInfo.birthday" class="info-item">
+              <div
+                v-if="userInfo.birthday"
+                class="info-item"
+              >
                 <span class="material-icons-outlined info-icon">cake</span>
                 <span class="info-label">生日</span>
                 <span class="info-value">{{ formatDate(userInfo.birthday) }}</span>
               </div>
-              <div v-if="userInfo.lastOnlineTime" class="info-item">
+              <div
+                v-if="userInfo.lastOnlineTime"
+                class="info-item"
+              >
                 <span class="material-icons-outlined info-icon">schedule</span>
                 <span class="info-label">最近在线</span>
                 <span class="info-value">{{ formatDateTime(userInfo.lastOnlineTime) }}</span>
               </div>
-              <div v-if="userInfo.signature" class="info-item full-width">
+              <div
+                v-if="userInfo.signature"
+                class="info-item full-width"
+              >
                 <span class="material-icons-outlined info-icon">format_quote</span>
                 <span class="info-value signature">{{ userInfo.signature }}</span>
               </div>
@@ -85,15 +117,24 @@
 
             <!-- 操作按钮 -->
             <div class="action-group-compact">
-              <button class="action-btn primary" @click="handleSendMessage">
+              <button
+                class="action-btn primary"
+                @click="handleSendMessage"
+              >
                 <span class="material-icons-outlined">chat_bubble</span>
                 发消息
               </button>
-              <button class="action-btn" @click="handleVoiceCall">
+              <button
+                class="action-btn"
+                @click="handleVoiceCall"
+              >
                 <span class="material-icons-outlined">phone_in_talk</span>
                 语音
               </button>
-              <button class="action-btn" @click="handleVideoCall">
+              <button
+                class="action-btn"
+                @click="handleVideoCall"
+              >
                 <span class="material-icons-outlined">videocam</span>
                 视频
               </button>
@@ -106,7 +147,10 @@
       <template v-else>
         <!-- 顶部：用户基本信息 + 关闭按钮 -->
         <div class="dialog-header">
-          <button class="close-btn" @click="handleClose">
+          <button
+            class="close-btn"
+            @click="handleClose"
+          >
             <el-icon><Close /></el-icon>
           </button>
 
@@ -121,21 +165,45 @@
               custom-class="user-avatar-large"
             />
             <div class="user-basic-info">
-              <h2 class="user-name">{{ userName }}</h2>
-              <p class="user-id">ID: {{ userInfo.username || targetUserId }}</p>
-              <div v-if="userInfo.signature" class="user-signature">{{ userInfo.signature }}</div>
+              <h2 class="user-name">
+                {{ userName }}
+              </h2>
+              <p class="user-id">
+                ID: {{ userInfo.username || targetUserId }}
+              </p>
+              <div
+                v-if="userInfo.signature"
+                class="user-signature"
+              >
+                {{ userInfo.signature }}
+              </div>
             </div>
           </div>
 
           <!-- 状态标签 -->
           <div class="user-status-tags">
-            <el-tag v-if="userInfo.online" type="success" size="small" effect="plain">
-              <span class="status-dot online"></span>在线
+            <el-tag
+              v-if="userInfo.online"
+              type="success"
+              size="small"
+              effect="plain"
+            >
+              <span class="status-dot online" />在线
             </el-tag>
-            <el-tag v-else type="info" size="small" effect="plain">
-              <span class="status-dot offline"></span>离线
+            <el-tag
+              v-else
+              type="info"
+              size="small"
+              effect="plain"
+            >
+              <span class="status-dot offline" />离线
             </el-tag>
-            <el-tag v-if="userInfo.department" type="info" size="small" effect="plain">
+            <el-tag
+              v-if="userInfo.department"
+              type="info"
+              size="small"
+              effect="plain"
+            >
               {{ userInfo.department }}
             </el-tag>
           </div>
@@ -143,7 +211,10 @@
 
         <!-- 快捷操作区 -->
         <div class="dialog-actions">
-          <el-button type="primary" @click="handleSendMessage">
+          <el-button
+            type="primary"
+            @click="handleSendMessage"
+          >
             <el-icon><ChatDotRound /></el-icon>发消息
           </el-button>
           <el-button @click="handleVoiceCall">
@@ -152,7 +223,10 @@
           <el-button @click="handleVideoCall">
             <el-icon><VideoCamera /></el-icon>视频
           </el-button>
-          <el-dropdown @command="handleMoreCommand" trigger="click">
+          <el-dropdown
+            trigger="click"
+            @command="handleMoreCommand"
+          >
             <el-button>
               <el-icon><MoreFilled /></el-icon>更多
             </el-button>
@@ -170,7 +244,12 @@
                 <el-dropdown-item command="share">
                   <el-icon><Share /></el-icon>分享名片
                 </el-dropdown-item>
-                <el-dropdown-item v-if="!isCurrentUser" command="block" divided class="danger">
+                <el-dropdown-item
+                  v-if="!isCurrentUser"
+                  command="block"
+                  divided
+                  class="danger"
+                >
                   <el-icon><CircleClose /></el-icon>加入黑名单
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -179,129 +258,175 @@
         </div>
 
         <!-- Tab 内容区 -->
-        <el-tabs v-model="activeTab" class="dialog-tabs">
-        <!-- 资料 Tab -->
-        <el-tab-pane label="资料" name="info">
-          <div class="tab-content">
-            <!-- 基本信息 -->
-            <div class="info-section">
-              <h4 class="section-title">基本信息</h4>
-              <div class="info-row">
-                <span class="label">手机</span>
-                <span class="value">{{ userInfo.mobile || userInfo.phone || '-' }}</span>
-                <el-button
-                  v-if="userInfo.mobile || userInfo.phone"
-                  link
-                  size="small"
-                  @click="copyToClipboard(userInfo.mobile || userInfo.phone)"
-                >
-                  <el-icon><CopyDocument /></el-icon>
-                </el-button>
+        <el-tabs
+          v-model="activeTab"
+          class="dialog-tabs"
+        >
+          <!-- 资料 Tab -->
+          <el-tab-pane
+            label="资料"
+            name="info"
+          >
+            <div class="tab-content">
+              <!-- 基本信息 -->
+              <div class="info-section">
+                <h4 class="section-title">
+                  基本信息
+                </h4>
+                <div class="info-row">
+                  <span class="label">手机</span>
+                  <span class="value">{{ userInfo.mobile || userInfo.phone || '-' }}</span>
+                  <el-button
+                    v-if="userInfo.mobile || userInfo.phone"
+                    link
+                    size="small"
+                    @click="copyToClipboard(userInfo.mobile || userInfo.phone)"
+                  >
+                    <el-icon><CopyDocument /></el-icon>
+                  </el-button>
+                </div>
+                <div class="info-row">
+                  <span class="label">邮箱</span>
+                  <span class="value">{{ userInfo.email || '-' }}</span>
+                  <el-button
+                    v-if="userInfo.email"
+                    link
+                    size="small"
+                    @click="copyToClipboard(userInfo.email)"
+                  >
+                    <el-icon><CopyDocument /></el-icon>
+                  </el-button>
+                </div>
+                <div class="info-row">
+                  <span class="label">部门</span>
+                  <span class="value">{{ userInfo.department || '-' }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">职位</span>
+                  <span class="value">{{ userInfo.position || '-' }}</span>
+                </div>
               </div>
-              <div class="info-row">
-                <span class="label">邮箱</span>
-                <span class="value">{{ userInfo.email || '-' }}</span>
-                <el-button
-                  v-if="userInfo.email"
-                  link
-                  size="small"
-                  @click="copyToClipboard(userInfo.email)"
-                >
-                  <el-icon><CopyDocument /></el-icon>
-                </el-button>
-              </div>
-              <div class="info-row">
-                <span class="label">部门</span>
-                <span class="value">{{ userInfo.department || '-' }}</span>
-              </div>
-              <div class="info-row">
-                <span class="label">职位</span>
-                <span class="value">{{ userInfo.position || '-' }}</span>
-              </div>
-            </div>
 
-            <!-- 备注 -->
-            <div class="info-section">
-              <div class="section-title">
-                <h4>备注</h4>
-                <el-button link size="small" @click="handleSetRemark">
-                  <el-icon><Edit /></el-icon>编辑
-                </el-button>
+              <!-- 备注 -->
+              <div class="info-section">
+                <div class="section-title">
+                  <h4>备注</h4>
+                  <el-button
+                    link
+                    size="small"
+                    @click="handleSetRemark"
+                  >
+                    <el-icon><Edit /></el-icon>编辑
+                  </el-button>
+                </div>
+                <p class="remark-text">
+                  {{ userInfo.remark || '暂无备注' }}
+                </p>
               </div>
-              <p class="remark-text">{{ userInfo.remark || '暂无备注' }}</p>
             </div>
-          </div>
-        </el-tab-pane>
+          </el-tab-pane>
 
-        <!-- 共同群组 Tab -->
-        <el-tab-pane name="groups">
-          <template #label>
-            共同群组
-            <el-badge v-if="commonGroups.length > 0" :value="commonGroups.length" :max="99" />
-          </template>
-          <div class="tab-content">
-            <div v-if="commonGroups.length === 0" class="empty-state">
-              <el-icon :size="48"><ChatLineSquare /></el-icon>
-              <p>暂无共同群组</p>
-            </div>
-            <div v-else class="groups-list">
+          <!-- 共同群组 Tab -->
+          <el-tab-pane name="groups">
+            <template #label>
+              共同群组
+              <el-badge
+                v-if="commonGroups.length > 0"
+                :value="commonGroups.length"
+                :max="99"
+              />
+            </template>
+            <div class="tab-content">
               <div
-                v-for="group in commonGroups"
-                :key="group.id"
-                class="group-item"
-                @click="handleGroupClick(group)"
+                v-if="commonGroups.length === 0"
+                class="empty-state"
               >
-                <DingtalkAvatar
-                  :src="group.avatar"
-                  :name="group.name"
-                  :size="40"
-                  shape="square"
-                />
-                <div class="group-details">
-                  <div class="group-name">{{ group.name }}</div>
-                  <div class="group-meta">{{ group.memberCount || 0 }} 人</div>
+                <el-icon :size="48">
+                  <ChatLineSquare />
+                </el-icon>
+                <p>暂无共同群组</p>
+              </div>
+              <div
+                v-else
+                class="groups-list"
+              >
+                <div
+                  v-for="group in commonGroups"
+                  :key="group.id"
+                  class="group-item"
+                  @click="handleGroupClick(group)"
+                >
+                  <DingtalkAvatar
+                    :src="group.avatar"
+                    :name="group.name"
+                    :size="40"
+                    shape="square"
+                  />
+                  <div class="group-details">
+                    <div class="group-name">
+                      {{ group.name }}
+                    </div>
+                    <div class="group-meta">
+                      {{ group.memberCount || 0 }} 人
+                    </div>
+                  </div>
+                  <el-icon><ArrowRight /></el-icon>
                 </div>
-                <el-icon><ArrowRight /></el-icon>
               </div>
             </div>
-          </div>
-        </el-tab-pane>
+          </el-tab-pane>
 
-        <!-- 更多 Tab -->
-        <el-tab-pane label="更多" name="more">
-          <div class="tab-content">
-            <div class="more-list">
-              <div class="more-item" @click="handleToggleFavorite">
-                <div class="more-icon" :class="{ active: isFavorite }">
-                  <el-icon><Star /></el-icon>
+          <!-- 更多 Tab -->
+          <el-tab-pane
+            label="更多"
+            name="more"
+          >
+            <div class="tab-content">
+              <div class="more-list">
+                <div
+                  class="more-item"
+                  @click="handleToggleFavorite"
+                >
+                  <div
+                    class="more-icon"
+                    :class="{ active: isFavorite }"
+                  >
+                    <el-icon><Star /></el-icon>
+                  </div>
+                  <div class="more-content">
+                    <span class="more-name">{{ isFavorite ? '取消常用联系人' : '添加为常用联系人' }}</span>
+                    <span class="more-desc">{{ isFavorite ? '从常用联系人列表移除' : '添加到常用联系人列表' }}</span>
+                  </div>
                 </div>
-                <div class="more-content">
-                  <span class="more-name">{{ isFavorite ? '取消常用联系人' : '添加为常用联系人' }}</span>
-                  <span class="more-desc">{{ isFavorite ? '从常用联系人列表移除' : '添加到常用联系人列表' }}</span>
+                <div
+                  class="more-item"
+                  @click="handleShareCard"
+                >
+                  <div class="more-icon">
+                    <el-icon><Share /></el-icon>
+                  </div>
+                  <div class="more-content">
+                    <span class="more-name">分享名片</span>
+                    <span class="more-desc">将该用户名片分享给其他人</span>
+                  </div>
                 </div>
-              </div>
-              <div class="more-item" @click="handleShareCard">
-                <div class="more-icon">
-                  <el-icon><Share /></el-icon>
-                </div>
-                <div class="more-content">
-                  <span class="more-name">分享名片</span>
-                  <span class="more-desc">将该用户名片分享给其他人</span>
-                </div>
-              </div>
-              <div v-if="!isCurrentUser" class="more-item danger" @click="handleBlock">
-                <div class="more-icon danger">
-                  <el-icon><CircleClose /></el-icon>
-                </div>
-                <div class="more-content">
-                  <span class="more-name">加入黑名单</span>
-                  <span class="more-desc">屏蔽该用户的消息</span>
+                <div
+                  v-if="!isCurrentUser"
+                  class="more-item danger"
+                  @click="handleBlock"
+                >
+                  <div class="more-icon danger">
+                    <el-icon><CircleClose /></el-icon>
+                  </div>
+                  <div class="more-content">
+                    <span class="more-name">加入黑名单</span>
+                    <span class="more-desc">屏蔽该用户的消息</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
+          </el-tab-pane>
+        </el-tabs>
       </template>
     </div>
 
@@ -313,7 +438,10 @@
       width="400px"
       append-to-body
     >
-      <el-form :model="remarkForm" label-position="top">
+      <el-form
+        :model="remarkForm"
+        label-position="top"
+      >
         <el-form-item label="备注名称">
           <el-input
             v-model="remarkForm.remark"
@@ -341,8 +469,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showRemarkDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveRemark">确定</el-button>
+        <el-button @click="showRemarkDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSaveRemark"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </el-dialog>
@@ -393,7 +528,7 @@ const targetUserId = computed(() => {
 })
 
 const userName = computed(() => {
-  if (!userInfo.value) return ''
+  if (!userInfo.value) {return ''}
   return userInfo.value.remark || userInfo.value.nickname || userInfo.value.username || '未知用户'
 })
 
@@ -404,21 +539,21 @@ const isCurrentUser = computed(() => {
 // 性别相关计算属性（用于 compact 模式）
 const genderIcon = computed(() => {
   const gender = userInfo.value?.gender
-  if (gender === 1) return 'male'
-  if (gender === 2) return 'female'
+  if (gender === 1) {return 'male'}
+  if (gender === 2) {return 'female'}
   return null
 })
 
 const genderText = computed(() => {
   const gender = userInfo.value?.gender
-  if (gender === 1) return '男'
-  if (gender === 2) return '女'
+  if (gender === 1) {return '男'}
+  if (gender === 2) {return '女'}
   return null
 })
 
 // 加载用户信息
 const loadUserInfo = async () => {
-  if (!props.session) return
+  if (!props.session) {return}
   loading.value = true
   try {
     const userId = targetUserId.value
@@ -442,7 +577,7 @@ const loadUserInfo = async () => {
 }
 
 // 加载共同群组
-const loadCommonGroups = async (userId) => {
+const loadCommonGroups = async userId => {
   if (isCurrentUser.value) {
     commonGroups.value = []
     return
@@ -459,7 +594,7 @@ const loadCommonGroups = async (userId) => {
 }
 
 // 监听弹窗打开
-watch(() => props.modelValue, (isOpen) => {
+watch(() => props.modelValue, isOpen => {
   visible.value = isOpen
   if (isOpen) {
     activeTab.value = 'info'
@@ -467,8 +602,8 @@ watch(() => props.modelValue, (isOpen) => {
   }
 })
 
-watch(visible, (val) => {
-  if (!val) emit('update:modelValue', false)
+watch(visible, val => {
+  if (!val) {emit('update:modelValue', false)}
 })
 
 // 事件处理
@@ -531,11 +666,11 @@ const handleBlock = () => {
   }).catch(() => {})
 }
 
-const handleGroupClick = (group) => {
+const handleGroupClick = group => {
   emit('group-click', group)
 }
 
-const handleMoreCommand = (command) => {
+const handleMoreCommand = command => {
   switch (command) {
     case 'set-remark':
       handleSetRemark()

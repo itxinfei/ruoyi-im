@@ -45,7 +45,7 @@ export function useChatUpload() {
       formData.append('type', type)
 
       // 上传文件
-      const response = await uploadFile(formData, (progress) => {
+      const response = await uploadFile(formData, progress => {
         uploadProgress.value[uploadId] = progress
       })
 
@@ -166,7 +166,7 @@ export function useChatUpload() {
   /**
    * 取消上传
    */
-  const cancelUpload = (uploadId) => {
+  const cancelUpload = uploadId => {
     const index = uploadQueue.value.findIndex(item => item.uploadId === uploadId)
     if (index !== -1) {
       uploadQueue.value.splice(index, 1)
@@ -177,9 +177,9 @@ export function useChatUpload() {
   /**
    * 重试上传
    */
-  const retryUpload = async (uploadId) => {
+  const retryUpload = async uploadId => {
     const item = uploadQueue.value.find(item => item.uploadId === uploadId)
-    if (!item) return
+    if (!item) {return}
 
     // 重置状态
     item.status = 'uploading'
@@ -203,7 +203,7 @@ export function useChatUpload() {
   /**
    * 获取上传进度
    */
-  const getUploadProgress = (uploadId) => {
+  const getUploadProgress = uploadId => {
     return uploadProgress.value[uploadId] || 0
   }
 

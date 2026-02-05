@@ -17,14 +17,26 @@
           <el-icon><Search /></el-icon>
         </template>
       </el-input>
-      <el-dropdown v-if="isOwnerOrAdmin" @command="handleBatchCommand">
+      <el-dropdown
+        v-if="isOwnerOrAdmin"
+        @command="handleBatchCommand"
+      >
         <el-button>
-          批量管理<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          批量管理<el-icon class="el-icon--right">
+            <ArrowDown />
+          </el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="invite">邀请成员</el-dropdown-item>
-            <el-dropdown-item command="mute" divided>全员禁言</el-dropdown-item>
+            <el-dropdown-item command="invite">
+              邀请成员
+            </el-dropdown-item>
+            <el-dropdown-item
+              command="mute"
+              divided
+            >
+              全员禁言
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -57,7 +69,10 @@
             @click="toggleGroup(role)"
           >
             <div class="role-group-info">
-              <el-icon class="role-icon" :size="18">
+              <el-icon
+                class="role-icon"
+                :size="18"
+              >
                 <Trophy v-if="role === 'OWNER'" />
                 <UserFilled v-else-if="role === 'ADMIN'" />
                 <User v-else />
@@ -65,13 +80,19 @@
               <span class="role-label">{{ group.label }}</span>
               <span class="role-count">{{ group.members.length }}</span>
             </div>
-            <el-icon class="expand-icon" :size="16">
+            <el-icon
+              class="expand-icon"
+              :size="16"
+            >
               <ArrowDown />
             </el-icon>
           </div>
 
           <!-- 分组成员列表 -->
-          <div v-show="expandedGroups.includes(role)" class="role-group-members">
+          <div
+            v-show="expandedGroups.includes(role)"
+            class="role-group-members"
+          >
             <div
               v-for="member in group.members"
               :key="member.id || member.userId"
@@ -85,29 +106,57 @@
                   :size="44"
                   shape="circle"
                 />
-                <div v-if="isOnline(member)" class="online-indicator" title="在线"></div>
+                <div
+                  v-if="isOnline(member)"
+                  class="online-indicator"
+                  title="在线"
+                />
               </div>
               <div class="member-info">
                 <div class="member-name">
                   {{ member.nickname || member.username }}
-                  <span v-if="member.remark" class="member-remark">({{ member.remark }})</span>
+                  <span
+                    v-if="member.remark"
+                    class="member-remark"
+                  >({{ member.remark }})</span>
                 </div>
               </div>
-              <div v-if="isOwnerOrAdmin && !isSelf(member)" class="member-actions">
-                <el-dropdown trigger="click" @command="cmd => handleMemberCommand(cmd, member)">
-                  <el-button link type="primary" @click.stop>
+              <div
+                v-if="isOwnerOrAdmin && !isSelf(member)"
+                class="member-actions"
+              >
+                <el-dropdown
+                  trigger="click"
+                  @command="cmd => handleMemberCommand(cmd, member)"
+                >
+                  <el-button
+                    link
+                    type="primary"
+                    @click.stop
+                  >
                     <el-icon><MoreFilled /></el-icon>
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item v-if="isOwner && member.role !== 'ADMIN'" command="setAdmin">
+                      <el-dropdown-item
+                        v-if="isOwner && member.role !== 'ADMIN'"
+                        command="setAdmin"
+                      >
                         设为管理员
                       </el-dropdown-item>
-                      <el-dropdown-item v-if="isOwner && member.role === 'ADMIN'" command="cancelAdmin">
+                      <el-dropdown-item
+                        v-if="isOwner && member.role === 'ADMIN'"
+                        command="cancelAdmin"
+                      >
                         取消管理员
                       </el-dropdown-item>
-                      <el-dropdown-item command="mute">禁言</el-dropdown-item>
-                      <el-dropdown-item command="remove" divided>
+                      <el-dropdown-item command="mute">
+                        禁言
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        command="remove"
+                        divided
+                      >
                         <span style="color: #ff4d4f">移出群聊</span>
                       </el-dropdown-item>
                     </el-dropdown-menu>
@@ -122,7 +171,10 @@
       <!-- 列表模式（虚拟滚动） -->
       <template v-else>
         <!-- 顶部占位符 -->
-        <div class="virtual-spacer-top" :style="{ height: topSpacerHeight + 'px' }"></div>
+        <div
+          class="virtual-spacer-top"
+          :style="{ height: topSpacerHeight + 'px' }"
+        />
 
         <!-- 可见成员项 -->
         <div
@@ -139,12 +191,19 @@
               :size="44"
               shape="circle"
             />
-            <div v-if="isOnline(member)" class="online-indicator" title="在线"></div>
+            <div
+              v-if="isOnline(member)"
+              class="online-indicator"
+              title="在线"
+            />
           </div>
           <div class="member-info">
             <div class="member-name">
               {{ member.nickname || member.username }}
-              <span v-if="member.remark" class="member-remark">({{ member.remark }})</span>
+              <span
+                v-if="member.remark"
+                class="member-remark"
+              >({{ member.remark }})</span>
             </div>
             <div class="member-role">
               <el-tag
@@ -152,31 +211,59 @@
                 size="small"
                 type="danger"
                 effect="light"
-              >群主</el-tag>
+              >
+                群主
+              </el-tag>
               <el-tag
                 v-else-if="member.role === 'ADMIN'"
                 size="small"
                 type="warning"
                 effect="light"
-              >管理员</el-tag>
-              <span v-else class="role-text">成员</span>
+              >
+                管理员
+              </el-tag>
+              <span
+                v-else
+                class="role-text"
+              >成员</span>
             </div>
           </div>
-          <div v-if="isOwnerOrAdmin && !isSelf(member)" class="member-actions">
-            <el-dropdown trigger="click" @command="cmd => handleMemberCommand(cmd, member)">
-              <el-button link type="primary" @click.stop>
+          <div
+            v-if="isOwnerOrAdmin && !isSelf(member)"
+            class="member-actions"
+          >
+            <el-dropdown
+              trigger="click"
+              @command="cmd => handleMemberCommand(cmd, member)"
+            >
+              <el-button
+                link
+                type="primary"
+                @click.stop
+              >
                 <el-icon><MoreFilled /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item v-if="isOwner && member.role !== 'ADMIN'" command="setAdmin">
+                  <el-dropdown-item
+                    v-if="isOwner && member.role !== 'ADMIN'"
+                    command="setAdmin"
+                  >
                     设为管理员
                   </el-dropdown-item>
-                  <el-dropdown-item v-if="isOwner && member.role === 'ADMIN'" command="cancelAdmin">
+                  <el-dropdown-item
+                    v-if="isOwner && member.role === 'ADMIN'"
+                    command="cancelAdmin"
+                  >
                     取消管理员
                   </el-dropdown-item>
-                  <el-dropdown-item command="mute">禁言</el-dropdown-item>
-                  <el-dropdown-item command="remove" divided>
+                  <el-dropdown-item command="mute">
+                    禁言
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="remove"
+                    divided
+                  >
                     <span style="color: #ff4d4f">移出群聊</span>
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -186,7 +273,10 @@
         </div>
 
         <!-- 底部占位符 -->
-        <div class="virtual-spacer-bottom" :style="{ height: bottomSpacerHeight + 'px' }"></div>
+        <div
+          class="virtual-spacer-bottom"
+          :style="{ height: bottomSpacerHeight + 'px' }"
+        />
       </template>
     </div>
   </div>
@@ -311,33 +401,33 @@ const visibleMembers = computed(() => {
 
 // 顶部和底部占位符高度
 const topSpacerHeight = computed(() => {
-  if (!enableVirtual.value) return 0
+  if (!enableVirtual.value) {return 0}
   const { startIndex } = visibleRange.value
   return startIndex * ITEM_HEIGHT
 })
 
 const bottomSpacerHeight = computed(() => {
-  if (!enableVirtual.value) return 0
+  if (!enableVirtual.value) {return 0}
   const { endIndex } = visibleRange.value
   return (filteredIndexedMembers.value.length - endIndex) * ITEM_HEIGHT
 })
 
 const isOwnerOrAdmin = computed(() => props.isOwner || props.isAdmin)
 
-const isSelf = (member) => {
+const isSelf = member => {
   return (member.userId || member.id) == props.currentUser?.id
 }
 
-const isOnline = (member) => {
+const isOnline = member => {
   // 模拟在线状态
   return Math.random() > 0.5
 }
 
-const handleMemberClick = (member) => {
+const handleMemberClick = member => {
   emit('member-click', member)
 }
 
-const handleBatchCommand = (command) => {
+const handleBatchCommand = command => {
   switch (command) {
     case 'invite':
       emit('invite')
@@ -348,12 +438,12 @@ const handleBatchCommand = (command) => {
   }
 }
 
-const handleScroll = (e) => {
+const handleScroll = e => {
   scrollTop.value = e.target.scrollTop
 }
 
 // 切换分组展开/收起
-const toggleGroup = (role) => {
+const toggleGroup = role => {
   const index = expandedGroups.value.indexOf(role)
   if (index > -1) {
     expandedGroups.value.splice(index, 1)
@@ -394,7 +484,7 @@ const handleMemberCommand = async (command, member) => {
 // 初始化
 onMounted(() => {
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     if (listRef.value) {
       clientHeight.value = listRef.value.clientHeight
     }

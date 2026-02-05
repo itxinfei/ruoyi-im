@@ -3,7 +3,11 @@
     <!-- 1. 左侧功能面板 (240px 固定) -->
     <aside class="calendar-aside">
       <div class="aside-top">
-        <el-button type="primary" class="create-btn" @click="handleAddSchedule">
+        <el-button
+          type="primary"
+          class="create-btn"
+          @click="handleAddSchedule"
+        >
           <el-icon><Plus /></el-icon>
           <span>新建日程</span>
         </el-button>
@@ -25,12 +29,22 @@
           <div class="mini-cal-header">
             <span class="year-month">{{ formatYearMonth(currentDate) }}</span>
             <div class="nav-ops">
-              <el-icon @click="prevMonth"><ArrowLeft /></el-icon>
-              <el-icon @click="nextMonth"><ArrowRight /></el-icon>
+              <el-icon @click="prevMonth">
+                <ArrowLeft />
+              </el-icon>
+              <el-icon @click="nextMonth">
+                <ArrowRight />
+              </el-icon>
             </div>
           </div>
           <div class="mini-cal-grid">
-            <div v-for="d in ['一','二','三','四','五','六','日']" :key="d" class="week-label">{{ d }}</div>
+            <div
+              v-for="d in ['一','二','三','四','五','六','日']"
+              :key="d"
+              class="week-label"
+            >
+              {{ d }}
+            </div>
             <div
               v-for="(day, idx) in monthDays"
               :key="idx"
@@ -47,14 +61,23 @@
           </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider" />
 
         <!-- 日历分类列表 -->
         <div class="calendar-list">
-          <h4 class="list-title text-slate-400">日历列表</h4>
-          <div v-for="cat in calendarCategories" :key="cat.name" class="list-item">
+          <h4 class="list-title text-slate-400">
+            日历列表
+          </h4>
+          <div
+            v-for="cat in calendarCategories"
+            :key="cat.name"
+            class="list-item"
+          >
             <el-checkbox v-model="cat.enabled" />
-            <div class="color-dot" :style="{ backgroundColor: cat.hex }"></div>
+            <div
+              class="color-dot"
+              :style="{ backgroundColor: cat.hex }"
+            />
             <span class="name">{{ cat.name }}</span>
           </div>
         </div>
@@ -65,11 +88,28 @@
     <main class="calendar-main">
       <header class="main-header">
         <div class="left-tools">
-          <h2 class="current-date-text">{{ viewTitle }}</h2>
+          <h2 class="current-date-text">
+            {{ viewTitle }}
+          </h2>
           <div class="btn-group">
-            <button class="tool-btn" @click="prev"><el-icon><ArrowLeft /></el-icon></button>
-            <button class="tool-btn text-sm px-3" @click="goToToday">今天</button>
-            <button class="tool-btn" @click="next"><el-icon><ArrowRight /></el-icon></button>
+            <button
+              class="tool-btn"
+              @click="prev"
+            >
+              <el-icon><ArrowLeft /></el-icon>
+            </button>
+            <button
+              class="tool-btn text-sm px-3"
+              @click="goToToday"
+            >
+              今天
+            </button>
+            <button
+              class="tool-btn"
+              @click="next"
+            >
+              <el-icon><ArrowRight /></el-icon>
+            </button>
           </div>
         </div>
 
@@ -85,16 +125,31 @@
               {{ v.label }}
             </div>
           </div>
-          <el-button circle link @click="loadEvents"><el-icon><Refresh /></el-icon></el-button>
+          <el-button
+            circle
+            link
+            @click="loadEvents"
+          >
+            <el-icon><Refresh /></el-icon>
+          </el-button>
         </div>
       </header>
 
       <!-- 网格内容区 -->
       <div class="view-content scrollbar-thin">
         <!-- 月视图：PC端核心 -->
-        <div v-if="currentView === 'month'" class="pc-month-view">
+        <div
+          v-if="currentView === 'month'"
+          class="pc-month-view"
+        >
           <div class="grid-header">
-            <div v-for="d in ['周一','周二','周三','周四','周五','周六','周日']" :key="d" class="header-cell">{{ d }}</div>
+            <div
+              v-for="d in ['周一','周二','周三','周四','周五','周六','周日']"
+              :key="d"
+              class="header-cell"
+            >
+              {{ d }}
+            </div>
           </div>
           <div class="grid-body">
             <div
@@ -106,7 +161,10 @@
             >
               <div class="cell-head">
                 <span class="day-num">{{ day.date.getDate() }}</span>
-                <span v-if="isToday(day.date)" class="today-mark">今天</span>
+                <span
+                  v-if="isToday(day.date)"
+                  class="today-mark"
+                >今天</span>
               </div>
               <div class="cell-events">
                 <div
@@ -116,16 +174,22 @@
                   :class="[`line-${event.color}`]"
                   @click.stop="handleEventDetail(event)"
                 >
-                  <span class="dot"></span>
+                  <span class="dot" />
                   <span class="time">{{ event.startTime }}</span>
                   <span class="title">{{ event.title }}</span>
                 </div>
-                <div v-if="getEventsForDay(day.date).length > 4" class="more-link">
+                <div
+                  v-if="getEventsForDay(day.date).length > 4"
+                  class="more-link"
+                >
                   还有 {{ getEventsForDay(day.date).length - 4 }} 项...
                 </div>
               </div>
               <!-- 悬浮新增按钮 -->
-              <div class="add-hover-btn" @click.stop="handleGridClick(day.date, $event)">
+              <div
+                class="add-hover-btn"
+                @click.stop="handleGridClick(day.date, $event)"
+              >
                 <el-icon><Plus /></el-icon>
               </div>
             </div>
@@ -133,23 +197,44 @@
         </div>
 
         <!-- 周视图：精细化时间轴 -->
-        <div v-else-if="currentView === 'week'" class="pc-week-view">
+        <div
+          v-else-if="currentView === 'week'"
+          class="pc-week-view"
+        >
           <div class="week-sticky-header">
-            <div class="time-col-head"></div>
-            <div v-for="day in weekHeaders" :key="day.date" class="day-col-head" :class="{ 'is-today': isToday(day.date) }">
+            <div class="time-col-head" />
+            <div
+              v-for="day in weekHeaders"
+              :key="day.date"
+              class="day-col-head"
+              :class="{ 'is-today': isToday(day.date) }"
+            >
               <span class="name">{{ day.name }}</span>
               <span class="date">{{ day.date.getDate() }}</span>
             </div>
           </div>
           <div class="week-body-container">
             <div class="time-axis">
-              <div v-for="hour in hours" :key="hour" class="hour-label">
+              <div
+                v-for="hour in hours"
+                :key="hour"
+                class="hour-label"
+              >
                 {{ hour.toString().padStart(2, '0') }}:00
               </div>
             </div>
             <div class="week-grid">
-              <div v-for="day in weekHeaders" :key="day.date" class="week-col" @click="handleGridClick(day.date, $event)">
-                <div v-for="h in 12" :key="h" class="hour-block"></div>
+              <div
+                v-for="day in weekHeaders"
+                :key="day.date"
+                class="week-col"
+                @click="handleGridClick(day.date, $event)"
+              >
+                <div
+                  v-for="h in 12"
+                  :key="h"
+                  class="hour-block"
+                />
                 
                 <!-- 日程卡片 -->
                 <div
@@ -161,14 +246,22 @@
                   @click.stop="handleEventDetail(event)"
                 >
                   <div class="card-inner">
-                    <div class="title">{{ event.title }}</div>
-                    <div class="time">{{ event.startTime }} - {{ event.endTime }}</div>
+                    <div class="title">
+                      {{ event.title }}
+                    </div>
+                    <div class="time">
+                      {{ event.startTime }} - {{ event.endTime }}
+                    </div>
                   </div>
                 </div>
 
                 <!-- 时间线 -->
-                <div v-if="isToday(day.date)" class="pc-now-line" :style="{ top: currentTimeTop + 'px' }">
-                  <div class="marker"></div>
+                <div
+                  v-if="isToday(day.date)"
+                  class="pc-now-line"
+                  :style="{ top: currentTimeTop + 'px' }"
+                >
+                  <div class="marker" />
                 </div>
               </div>
             </div>
@@ -181,46 +274,93 @@
     <aside class="calendar-info-panel">
       <div class="info-header">
         <h3>日程概览</h3>
-        <p class="text-xs text-slate-400">{{ formatDateDisplay(selectedDate) }}</p>
+        <p class="text-xs text-slate-400">
+          {{ formatDateDisplay(selectedDate) }}
+        </p>
       </div>
       
       <div class="info-content scrollbar-thin">
-        <div v-if="selectedDateEvents.length > 0" class="agenda-list">
-          <div v-for="event in selectedDateEvents" :key="event.id" class="agenda-card" @click="handleEventDetail(event)">
-            <div class="color-bar" :style="{ backgroundColor: getHexColor(event.color) }"></div>
+        <div
+          v-if="selectedDateEvents.length > 0"
+          class="agenda-list"
+        >
+          <div
+            v-for="event in selectedDateEvents"
+            :key="event.id"
+            class="agenda-card"
+            @click="handleEventDetail(event)"
+          >
+            <div
+              class="color-bar"
+              :style="{ backgroundColor: getHexColor(event.color) }"
+            />
             <div class="details">
-              <div class="t">{{ event.title }}</div>
+              <div class="t">
+                {{ event.title }}
+              </div>
               <div class="m flex items-center gap-2">
                 <el-icon><Timer /></el-icon>{{ event.startTime }} - {{ event.endTime }}
               </div>
-              <div v-if="event.location" class="m flex items-center gap-2">
+              <div
+                v-if="event.location"
+                class="m flex items-center gap-2"
+              >
                 <el-icon><Location /></el-icon>{{ event.location }}
               </div>
             </div>
           </div>
         </div>
-        <div v-else class="empty-agenda">
-          <el-icon class="text-4xl text-slate-100 dark:text-slate-800 mb-2"><Calendar /></el-icon>
+        <div
+          v-else
+          class="empty-agenda"
+        >
+          <el-icon class="text-4xl text-slate-100 dark:text-slate-800 mb-2">
+            <Calendar />
+          </el-icon>
           <p>今日暂无安排</p>
         </div>
       </div>
     </aside>
 
     <!-- 弹窗部分保持一致 -->
-    <el-dialog v-model="showEventDetail" title="日程详情" width="420px" class="pc-dialog">
-      <div v-if="activeEvent" class="space-y-4">
-        <h3 class="text-lg font-bold border-l-4 pl-3" :style="{ borderColor: getHexColor(activeEvent.color) }">{{ activeEvent.title }}</h3>
+    <el-dialog
+      v-model="showEventDetail"
+      title="日程详情"
+      width="420px"
+      class="pc-dialog"
+    >
+      <div
+        v-if="activeEvent"
+        class="space-y-4"
+      >
+        <h3
+          class="text-lg font-bold border-l-4 pl-3"
+          :style="{ borderColor: getHexColor(activeEvent.color) }"
+        >
+          {{ activeEvent.title }}
+        </h3>
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded">
-            <p class="text-slate-400 mb-1">开始时间</p>
-            <p class="font-medium">{{ activeEvent.startTime }}</p>
+            <p class="text-slate-400 mb-1">
+              开始时间
+            </p>
+            <p class="font-medium">
+              {{ activeEvent.startTime }}
+            </p>
           </div>
           <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded">
-            <p class="text-slate-400 mb-1">结束时间</p>
-            <p class="font-medium">{{ activeEvent.endTime }}</p>
+            <p class="text-slate-400 mb-1">
+              结束时间
+            </p>
+            <p class="font-medium">
+              {{ activeEvent.endTime }}
+            </p>
           </div>
         </div>
-        <div v-if="activeEvent.location" class="flex items-center gap-2 text-sm text-slate-600">
+        <div
+          v-if="activeEvent.location"
+          class="flex items-center gap-2 text-sm text-slate-600"
+        >
           <el-icon><Location /></el-icon> {{ activeEvent.location }}
         </div>
       </div>
@@ -292,15 +432,15 @@ const loadEvents = async () => {
   }
 }
 
-const formatYearMonth = (d) => `${d.getFullYear()}年${d.getMonth() + 1}月`
+const formatYearMonth = d => `${d.getFullYear()}年${d.getMonth() + 1}月`
 const formatDateTime = (d, t) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} ${t}`
-const formatDateOnly = (d) => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`
-const getWeekStart = (d) => { const curr = new Date(d); const day = curr.getDay(); const diff = curr.getDate() - day + (day === 0 ? -6 : 1); return new Date(curr.setDate(diff)) }
-const getWeekEnd = (d) => { const s = getWeekStart(d); return new Date(s.getTime() + 6 * 86400000) }
+const formatDateOnly = d => `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`
+const getWeekStart = d => { const curr = new Date(d); const day = curr.getDay(); const diff = curr.getDate() - day + (day === 0 ? -6 : 1); return new Date(curr.setDate(diff)) }
+const getWeekEnd = d => { const s = getWeekStart(d); return new Date(s.getTime() + 6 * 86400000) }
 
 // --- Computed ---
 const viewTitle = computed(() => {
-  if (currentView.value === 'month') return formatYearMonth(currentDate.value)
+  if (currentView.value === 'month') {return formatYearMonth(currentDate.value)}
   const s = getWeekStart(currentDate.value), e = getWeekEnd(currentDate.value)
   return `${s.getMonth()+1}月${s.getDate()}日 - ${e.getMonth()+1}月${e.getDate()}日`
 })
@@ -315,38 +455,38 @@ const monthDays = computed(() => {
   const y = currentDate.value.getFullYear(), m = currentDate.value.getMonth()
   const first = new Date(y, m, 1); let start = first.getDay(); start = start === 0 ? 7 : start
   const days = []
-  for (let i = start - 1; i > 0; i--) days.push({ date: new Date(y, m, 1 - i), isCurrentMonth: false })
+  for (let i = start - 1; i > 0; i--) {days.push({ date: new Date(y, m, 1 - i), isCurrentMonth: false })}
   const last = new Date(y, m + 1, 0).getDate()
-  for (let i = 1; i <= last; i++) days.push({ date: new Date(y, m, i), isCurrentMonth: true })
-  while (days.length < 42) days.push({ date: new Date(y, m + 1, days.length - (last + start - 2)), isCurrentMonth: false })
+  for (let i = 1; i <= last; i++) {days.push({ date: new Date(y, m, i), isCurrentMonth: true })}
+  while (days.length < 42) {days.push({ date: new Date(y, m + 1, days.length - (last + start - 2)), isCurrentMonth: false })}
   return days
 })
 
 const selectedDateEvents = computed(() => allEvents.value.filter(e => isSameDay(new Date(e.date), selectedDate.value)))
 
 // --- Methods ---
-const isToday = (d) => isSameDay(d, new Date())
+const isToday = d => isSameDay(d, new Date())
 const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate()
-const getEventsForDay = (d) => allEvents.value.filter(e => isSameDay(new Date(e.date), d))
-const getEventStyle = (e) => {
-  const p = (t) => { const [h, m] = t.split(':').map(Number); return h + m/60 }
+const getEventsForDay = d => allEvents.value.filter(e => isSameDay(new Date(e.date), d))
+const getEventStyle = e => {
+  const p = t => { const [h, m] = t.split(':').map(Number); return h + m/60 }
   const s = p(e.startTime), end = p(e.endTime)
   return { top: `${(s - START_HOUR) * 80}px`, height: `${(end - s) * 80}px` }
 }
-const getHexColor = (c) => ({ blue: '#0089FF', purple: '#722ed1', emerald: '#52c41a', orange: '#f97316', red: '#ff4d4f' }[c] || '#0089FF')
-const formatDateDisplay = (d) => `${d.getMonth()+1}月${d.getDate()}日 ${['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]}`
+const getHexColor = c => ({ blue: '#0089FF', purple: '#722ed1', emerald: '#52c41a', orange: '#f97316', red: '#ff4d4f' }[c] || '#0089FF')
+const formatDateDisplay = d => `${d.getMonth()+1}月${d.getDate()}日 ${['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]}`
 
 const updateTimeLine = () => {
   const n = new Date(); currentTimeTop.value = (n.getHours() + n.getMinutes()/60 - START_HOUR) * 80
 }
 
-const prev = () => { const d = new Date(currentDate.value); if(currentView.value === 'month') d.setMonth(d.getMonth()-1); else d.setDate(d.getDate()-7); currentDate.value = d }
-const next = () => { const d = new Date(currentDate.value); if(currentView.value === 'month') d.setMonth(d.getMonth()+1); else d.setDate(d.getDate()+7); currentDate.value = d }
+const prev = () => { const d = new Date(currentDate.value); if(currentView.value === 'month') {d.setMonth(d.getMonth()-1)} else {d.setDate(d.getDate()-7)} currentDate.value = d }
+const next = () => { const d = new Date(currentDate.value); if(currentView.value === 'month') {d.setMonth(d.getMonth()+1)} else {d.setDate(d.getDate()+7)} currentDate.value = d }
 const prevMonth = () => { currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth()-1)) }
 const nextMonth = () => { currentDate.value = new Date(currentDate.value.setMonth(currentDate.value.getMonth()+1)) }
 const goToToday = () => { currentDate.value = new Date(); selectedDate.value = new Date() }
 
-const handleEventDetail = (e) => { activeEvent.value = e; showEventDetail.value = true }
+const handleEventDetail = e => { activeEvent.value = e; showEventDetail.value = true }
 
 // 日程对话框
 const showScheduleDialog = ref(false)

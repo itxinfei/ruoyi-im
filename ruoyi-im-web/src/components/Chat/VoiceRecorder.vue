@@ -10,13 +10,19 @@
     @mouseleave="handleCancel"
   >
     <!-- 录音引导 -->
-    <div v-if="!isRecording" class="voice-guide">
+    <div
+      v-if="!isRecording"
+      class="voice-guide"
+    >
       <span class="material-icons-outlined mic-icon">mic</span>
       <span class="guide-text">{{ touchStarted ? '松开 发送' : '按住 说话' }}</span>
     </div>
 
     <!-- 录音中状态 -->
-    <div v-else class="recording-state">
+    <div
+      v-else
+      class="recording-state"
+    >
       <!-- 简化的录音动画波形 -->
       <div class="recording-waveform">
         <span
@@ -24,14 +30,19 @@
           :key="index"
           class="wave-bar"
           :style="{ animationDelay: `${index * 0.1}s` }"
-        ></span>
+        />
       </div>
 
       <!-- 录音时长 -->
-      <div class="recording-time">{{ formattedTime }}</div>
+      <div class="recording-time">
+        {{ formattedTime }}
+      </div>
 
       <!-- 取消按钮 -->
-      <div class="cancel-btn" @click.stop="handleCancel">
+      <div
+        class="cancel-btn"
+        @click.stop="handleCancel"
+      >
         <span class="material-icons-outlined">cancel</span>
       </div>
     </div>
@@ -71,7 +82,7 @@ const startRecording = async () => {
     mediaRecorder.value = new MediaRecorder(stream)
     audioChunks.value = []
 
-    mediaRecorder.value.ondataavailable = (e) => {
+    mediaRecorder.value.ondataavailable = e => {
       audioChunks.value.push(e.data)
     }
 

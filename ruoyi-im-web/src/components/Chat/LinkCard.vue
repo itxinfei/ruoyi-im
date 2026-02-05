@@ -1,36 +1,66 @@
 <template>
   <!-- 加载状态 -->
-  <div v-if="loading" class="link-card link-card--loading">
+  <div
+    v-if="loading"
+    class="link-card link-card--loading"
+  >
     <div class="link-image">
       <el-skeleton animated />
     </div>
     <div class="link-content">
-      <el-skeleton :rows="2" animated />
+      <el-skeleton
+        :rows="2"
+        animated
+      />
     </div>
   </div>
 
   <!-- 错误状态 -->
-  <div v-else-if="error" class="link-card link-card--error" @click="openLink">
+  <div
+    v-else-if="error"
+    class="link-card link-card--error"
+    @click="openLink"
+  >
     <div class="link-content link-content--full">
-      <div class="link-url link-url--full">{{ formatUrl(link.url) }}</div>
-      <div class="link-error">链接预览不可用</div>
+      <div class="link-url link-url--full">
+        {{ formatUrl(link.url) }}
+      </div>
+      <div class="link-error">
+        链接预览不可用
+      </div>
     </div>
   </div>
 
   <!-- 正常状态 -->
-  <div v-else class="link-card" @click="openLink">
-    <div v-if="link.image" class="link-image">
+  <div
+    v-else
+    class="link-card"
+    @click="openLink"
+  >
+    <div
+      v-if="link.image"
+      class="link-image"
+    >
       <img
         :src="link.image"
         :alt="link.title"
         loading="lazy"
         @error="handleImageError"
-      />
+      >
     </div>
     <div class="link-content">
-      <div class="link-title">{{ link.title || link.url }}</div>
-      <div v-if="link.description" class="link-description">{{ link.description }}</div>
-      <div class="link-url">{{ formatUrl(link.url) }}</div>
+      <div class="link-title">
+        {{ link.title || link.url }}
+      </div>
+      <div
+        v-if="link.description"
+        class="link-description"
+      >
+        {{ link.description }}
+      </div>
+      <div class="link-url">
+        {{ formatUrl(link.url) }}
+      </div>
     </div>
   </div>
 </template>
@@ -40,7 +70,7 @@ const props = defineProps({
   link: {
     type: Object,
     required: true,
-    validator: (value) => {
+    validator: value => {
       return value.url && typeof value.url === 'string'
     }
   },
@@ -56,7 +86,7 @@ const props = defineProps({
 
 const emit = defineEmits(['click'])
 
-const formatUrl = (url) => {
+const formatUrl = url => {
   try {
     const urlObj = new URL(url)
     return urlObj.hostname + urlObj.pathname
@@ -70,7 +100,7 @@ const openLink = () => {
   window.open(props.link.url, '_blank')
 }
 
-const handleImageError = (e) => {
+const handleImageError = e => {
   // 图片加载失败时隐藏
   e.target.style.display = 'none'
 }

@@ -4,18 +4,36 @@
     <div class="page-header">
       <div class="page-title">
         <h2>系统监控</h2>
-        <p class="page-desc">实时监控系统运行状态和性能指标</p>
+        <p class="page-desc">
+          实时监控系统运行状态和性能指标
+        </p>
       </div>
       <div class="page-actions">
-        <el-button :icon="Refresh" @click="refreshAll">刷新数据</el-button>
-        <el-button :icon="Setting" @click="settingsDialogVisible = true">监控设置</el-button>
+        <el-button
+          :icon="Refresh"
+          @click="refreshAll"
+        >
+          刷新数据
+        </el-button>
+        <el-button
+          :icon="Setting"
+          @click="settingsDialogVisible = true"
+        >
+          监控设置
+        </el-button>
       </div>
     </div>
 
     <!-- 系统状态概览 -->
-    <el-row :gutter="16" class="status-overview">
+    <el-row
+      :gutter="16"
+      class="status-overview"
+    >
       <el-col :span="6">
-        <el-card class="status-card" :class="{ 'status--error': systemStatus.overall !== 'healthy' }">
+        <el-card
+          class="status-card"
+          :class="{ 'status--error': systemStatus.overall !== 'healthy' }"
+        >
           <div class="status-icon">
             <el-icon :size="32">
               <Monitor v-if="systemStatus.overall === 'healthy'" />
@@ -23,8 +41,12 @@
             </el-icon>
           </div>
           <div class="status-info">
-            <div class="status-label">系统状态</div>
-            <div class="status-value">{{ systemStatus.overall === 'healthy' ? '运行正常' : '异常' }}</div>
+            <div class="status-label">
+              系统状态
+            </div>
+            <div class="status-value">
+              {{ systemStatus.overall === 'healthy' ? '运行正常' : '异常' }}
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -34,8 +56,12 @@
             <el-icon><Clock /></el-icon>
           </div>
           <div class="status-mini-info">
-            <div class="status-mini-label">运行时间</div>
-            <div class="status-mini-value">{{ systemStatus.uptime }}</div>
+            <div class="status-mini-label">
+              运行时间
+            </div>
+            <div class="status-mini-value">
+              {{ systemStatus.uptime }}
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -45,8 +71,12 @@
             <el-icon><User /></el-icon>
           </div>
           <div class="status-mini-info">
-            <div class="status-mini-label">在线用户</div>
-            <div class="status-mini-value">{{ systemStatus.onlineUsers }}</div>
+            <div class="status-mini-label">
+              在线用户
+            </div>
+            <div class="status-mini-value">
+              {{ systemStatus.onlineUsers }}
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -56,15 +86,22 @@
             <el-icon><Connection /></el-icon>
           </div>
           <div class="status-mini-info">
-            <div class="status-mini-label">QPS</div>
-            <div class="status-mini-value">{{ systemStatus.qps }}</div>
+            <div class="status-mini-label">
+              QPS
+            </div>
+            <div class="status-mini-value">
+              {{ systemStatus.qps }}
+            </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
     <!-- 监控图表 -->
-    <el-row :gutter="16" class="charts-row">
+    <el-row
+      :gutter="16"
+      class="charts-row"
+    >
       <!-- CPU使用率 -->
       <el-col :span="12">
         <el-card class="chart-card">
@@ -76,7 +113,10 @@
           </template>
           <div class="chart-container">
             <div class="gauge-wrapper">
-              <svg class="gauge" viewBox="0 0 200 100">
+              <svg
+                class="gauge"
+                viewBox="0 0 200 100"
+              >
                 <!-- 背景弧 -->
                 <path
                   d="M 20 90 A 80 80 0 0 1 180 90"
@@ -95,20 +135,34 @@
                   class="gauge-progress"
                 />
                 <!-- 刻度 -->
-                <text x="100" y="95" text-anchor="middle" class="gauge-label">{{ cpuUsage }}%</text>
+                <text
+                  x="100"
+                  y="95"
+                  text-anchor="middle"
+                  class="gauge-label"
+                >{{ cpuUsage }}%</text>
               </svg>
             </div>
             <div class="gauge-legend">
               <div class="legend-item">
-                <span class="legend-dot" style="background: var(--dt-success)"></span>
+                <span
+                  class="legend-dot"
+                  style="background: var(--dt-success)"
+                />
                 <span>0-50%</span>
               </div>
               <div class="legend-item">
-                <span class="legend-dot" style="background: var(--dt-warning)"></span>
+                <span
+                  class="legend-dot"
+                  style="background: var(--dt-warning)"
+                />
                 <span>50-80%</span>
               </div>
               <div class="legend-item">
-                <span class="legend-dot" style="background: var(--dt-error)"></span>
+                <span
+                  class="legend-dot"
+                  style="background: var(--dt-error)"
+                />
                 <span>80-100%</span>
               </div>
             </div>
@@ -130,21 +184,30 @@
               <div class="memory-bar">
                 <span class="memory-label">已使用</span>
                 <div class="bar-track">
-                  <div class="bar-fill bar-fill--used" :style="{ width: memoryUsage + '%' }"></div>
+                  <div
+                    class="bar-fill bar-fill--used"
+                    :style="{ width: memoryUsage + '%' }"
+                  />
                 </div>
                 <span class="memory-value">{{ memoryUsage }}%</span>
               </div>
               <div class="memory-bar">
                 <span class="memory-label">缓存</span>
                 <div class="bar-track">
-                  <div class="bar-fill bar-fill--cache" :style="{ width: memoryCache + '%' }"></div>
+                  <div
+                    class="bar-fill bar-fill--cache"
+                    :style="{ width: memoryCache + '%' }"
+                  />
                 </div>
                 <span class="memory-value">{{ memoryCache }}%</span>
               </div>
               <div class="memory-bar">
                 <span class="memory-label">可用</span>
                 <div class="bar-track">
-                  <div class="bar-fill bar-fill--free" :style="{ width: memoryFree + '%' }"></div>
+                  <div
+                    class="bar-fill bar-fill--free"
+                    :style="{ width: memoryFree + '%' }"
+                  />
                 </div>
                 <span class="memory-value">{{ memoryFree }}%</span>
               </div>
@@ -169,27 +232,43 @@
     </el-row>
 
     <!-- 磁盘使用率 -->
-    <el-row :gutter="16" class="charts-row">
+    <el-row
+      :gutter="16"
+      class="charts-row"
+    >
       <el-col :span="12">
         <el-card class="chart-card">
           <template #header>
-            <div class="chart-title">磁盘使用率</div>
+            <div class="chart-title">
+              磁盘使用率
+            </div>
           </template>
           <div class="chart-container">
             <div class="disk-list">
-              <div v-for="disk in diskUsage" :key="disk.path" class="disk-item">
+              <div
+                v-for="disk in diskUsage"
+                :key="disk.path"
+                class="disk-item"
+              >
                 <div class="disk-info">
                   <div class="disk-icon">
                     <el-icon><FolderOpened /></el-icon>
                   </div>
                   <div class="disk-details">
-                    <div class="disk-name">{{ disk.mount }}</div>
-                    <div class="disk-path">{{ disk.path }}</div>
+                    <div class="disk-name">
+                      {{ disk.mount }}
+                    </div>
+                    <div class="disk-path">
+                      {{ disk.path }}
+                    </div>
                   </div>
                 </div>
                 <div class="disk-usage">
                   <div class="disk-bar">
-                    <div class="bar-fill" :style="{ width: disk.usage + '%', background: getDiskColor(disk.usage) }"></div>
+                    <div
+                      class="bar-fill"
+                      :style="{ width: disk.usage + '%', background: getDiskColor(disk.usage) }"
+                    />
                   </div>
                   <span class="disk-value">{{ disk.usage }}%</span>
                 </div>
@@ -206,7 +285,9 @@
       <el-col :span="12">
         <el-card class="chart-card">
           <template #header>
-            <div class="chart-title">网络流量</div>
+            <div class="chart-title">
+              网络流量
+            </div>
           </template>
           <div class="chart-container">
             <div class="network-stats">
@@ -215,8 +296,12 @@
                   <el-icon><Download /></el-icon>
                 </div>
                 <div class="network-info">
-                  <div class="network-label">下载速率</div>
-                  <div class="network-value">{{ networkStats.inSpeed }}</div>
+                  <div class="network-label">
+                    下载速率
+                  </div>
+                  <div class="network-value">
+                    {{ networkStats.inSpeed }}
+                  </div>
                 </div>
               </div>
               <div class="network-item network-item--out">
@@ -224,8 +309,12 @@
                   <el-icon><Upload /></el-icon>
                 </div>
                 <div class="network-info">
-                  <div class="network-label">上传速率</div>
-                  <div class="network-value">{{ networkStats.outSpeed }}</div>
+                  <div class="network-label">
+                    上传速率
+                  </div>
+                  <div class="network-value">
+                    {{ networkStats.outSpeed }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -245,23 +334,38 @@
     </el-row>
 
     <!-- 请求统计 -->
-    <el-row :gutter="16" class="charts-row">
+    <el-row
+      :gutter="16"
+      class="charts-row"
+    >
       <!-- 今日请求趋势 -->
       <el-col :span="16">
         <el-card class="chart-card">
           <template #header>
             <div class="chart-title">
               <span>今日请求趋势</span>
-              <el-radio-group v-model="trendPeriod" size="small">
-                <el-radio-button label="1h">1小时</el-radio-button>
-                <el-radio-button label="6h">6小时</el-radio-button>
-                <el-radio-button label="24h">24小时</el-radio-button>
+              <el-radio-group
+                v-model="trendPeriod"
+                size="small"
+              >
+                <el-radio-button label="1h">
+                  1小时
+                </el-radio-button>
+                <el-radio-button label="6h">
+                  6小时
+                </el-radio-button>
+                <el-radio-button label="24h">
+                  24小时
+                </el-radio-button>
               </el-radio-group>
             </div>
           </template>
           <div class="chart-container">
             <div class="trend-chart">
-              <svg class="trend-svg" viewBox="0 0 600 150">
+              <svg
+                class="trend-svg"
+                viewBox="0 0 600 150"
+              >
                 <!-- 网格线 -->
                 <line
                   v-for="i in 6"
@@ -294,15 +398,21 @@
             </div>
             <div class="trend-legend">
               <div class="legend-item">
-                <span class="legend-dot"></span>
+                <span class="legend-dot" />
                 <span>请求数</span>
               </div>
               <div class="legend-item">
-                <span class="legend-dot" style="background: var(--dt-success)"></span>
+                <span
+                  class="legend-dot"
+                  style="background: var(--dt-success)"
+                />
                 <span>成功</span>
               </div>
               <div class="legend-item">
-                <span class="legend-dot" style="background: var(--dt-error)"></span>
+                <span
+                  class="legend-dot"
+                  style="background: var(--dt-error)"
+                />
                 <span>失败</span>
               </div>
             </div>
@@ -314,7 +424,9 @@
       <el-col :span="8">
         <el-card class="chart-card">
           <template #header>
-            <div class="chart-title">请求统计</div>
+            <div class="chart-title">
+              请求统计
+            </div>
           </template>
           <div class="chart-container">
             <div class="request-stats">
@@ -328,7 +440,10 @@
               </div>
               <div class="stat-row">
                 <span class="stat-row-label">成功率</span>
-                <span class="stat-row-value" :class="getSuccessClass(requestStats.successRate)">
+                <span
+                  class="stat-row-value"
+                  :class="getSuccessClass(requestStats.successRate)"
+                >
                   {{ requestStats.successRate }}%
                 </span>
               </div>
@@ -343,7 +458,10 @@
     </el-row>
 
     <!-- 活跃用户列表 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <template #header>
         <div class="table-header">
           <span>在线用户列表 ({{ onlineUsers.length }})</span>
@@ -356,30 +474,71 @@
           />
         </div>
       </template>
-      <el-table :data="filteredUsers" stripe v-loading="loading">
-        <el-table-column label="用户" width="200">
+      <el-table
+        v-loading="loading"
+        :data="filteredUsers"
+        stripe
+      >
+        <el-table-column
+          label="用户"
+          width="200"
+        >
           <template #default="{ row }">
             <div class="user-cell">
-              <el-avatar :size="32" :src="row.avatar">{{ row.nickname?.charAt(0) || row.username?.charAt(0) }}</el-avatar>
+              <el-avatar
+                :size="32"
+                :src="row.avatar"
+              >
+                {{ row.nickname?.charAt(0) || row.username?.charAt(0) }}
+              </el-avatar>
               <div class="user-info">
-                <div class="user-name">{{ row.nickname || row.username }}</div>
-                <div class="user-account">@{{ row.username }}</div>
+                <div class="user-name">
+                  {{ row.nickname || row.username }}
+                </div>
+                <div class="user-account">
+                  @{{ row.username }}
+                </div>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="loginIp" label="登录IP" width="140" />
-        <el-table-column prop="sessionId" label="会话ID" width="200" show-overflow-tooltip />
-        <el-table-column prop="lastActive" label="最后活跃时间" width="120" />
-        <el-table-column label="操作" width="100" align="center">
+        <el-table-column
+          prop="loginIp"
+          label="登录IP"
+          width="140"
+        />
+        <el-table-column
+          prop="sessionId"
+          label="会话ID"
+          width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="lastActive"
+          label="最后活跃时间"
+          width="120"
+        />
+        <el-table-column
+          label="操作"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-button type="danger" size="small" :icon="Delete" @click="handleKickUser(row)">
+            <el-button
+              type="danger"
+              size="small"
+              :icon="Delete"
+              @click="handleKickUser(row)"
+            >
               踢出
             </el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-empty v-if="!loading && onlineUsers.length === 0" description="暂无在线用户" />
+      <el-empty
+        v-if="!loading && onlineUsers.length === 0"
+        description="暂无在线用户"
+      />
     </el-card>
 
     <!-- 监控设置对话框 -->
@@ -390,41 +549,81 @@
     >
       <el-form label-width="120px">
         <el-form-item label="刷新间隔">
-          <el-select v-model="monitorSettings.refreshInterval" style="width: 150px">
-            <el-option label="5秒" :value="5000" />
-            <el-option label="10秒" :value="10000" />
-            <el-option label="30秒" :value="30000" />
-            <el-option label="1分钟" :value="60000" />
+          <el-select
+            v-model="monitorSettings.refreshInterval"
+            style="width: 150px"
+          >
+            <el-option
+              label="5秒"
+              :value="5000"
+            />
+            <el-option
+              label="10秒"
+              :value="10000"
+            />
+            <el-option
+              label="30秒"
+              :value="30000"
+            />
+            <el-option
+              label="1分钟"
+              :value="60000"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="告警阈值">
           <div class="threshold-item">
             <span class="threshold-label">CPU使用率</span>
-            <el-input-number v-model="monitorSettings.cpuThreshold" :max="100" controls-position="right" />
+            <el-input-number
+              v-model="monitorSettings.cpuThreshold"
+              :max="100"
+              controls-position="right"
+            />
             <span class="threshold-unit">%</span>
           </div>
           <div class="threshold-item">
             <span class="threshold-label">内存使用率</span>
-            <el-input-number v-model="monitorSettings.memoryThreshold" :max="100" controls-position="right" />
+            <el-input-number
+              v-model="monitorSettings.memoryThreshold"
+              :max="100"
+              controls-position="right"
+            />
             <span class="threshold-unit">%</span>
           </div>
           <div class="threshold-item">
             <span class="threshold-label">磁盘使用率</span>
-            <el-input-number v-model="monitorSettings.diskThreshold" :max="100" controls-position="right" />
+            <el-input-number
+              v-model="monitorSettings.diskThreshold"
+              :max="100"
+              controls-position="right"
+            />
             <span class="threshold-unit">%</span>
           </div>
         </el-form-item>
         <el-form-item label="告警通知">
           <el-checkbox-group v-model="monitorSettings.alertTypes">
-            <el-checkbox label="system">系统通知</el-checkbox>
-            <el-checkbox label="email">邮件通知</el-checkbox>
-            <el-checkbox label="webhook">Webhook</el-checkbox>
+            <el-checkbox label="system">
+              系统通知
+            </el-checkbox>
+            <el-checkbox label="email">
+              邮件通知
+            </el-checkbox>
+            <el-checkbox label="webhook">
+              Webhook
+            </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="settingsDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveSettings">保存</el-button>
+        <el-button @click="settingsDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSaveSettings"
+        >
+          保存
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -471,7 +670,7 @@ const onlineUsers = ref([])
 const userSearch = ref('')
 
 const filteredUsers = computed(() => {
-  if (!userSearch.value) return onlineUsers.value
+  if (!userSearch.value) {return onlineUsers.value}
   return onlineUsers.value.filter(u =>
     (u.username && u.username.includes(userSearch.value)) ||
     (u.nickname && u.nickname.includes(userSearch.value))
@@ -634,19 +833,19 @@ const refreshAll = async () => {
 }
 
 // 格式化运行时间
-const formatUptime = (seconds) => {
-  if (!seconds) return '-'
+const formatUptime = seconds => {
+  if (!seconds) {return '-'}
   const days = Math.floor(seconds / 86400)
   const hours = Math.floor((seconds % 86400) / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
-  if (days > 0) return `${days}天${hours}小时`
-  if (hours > 0) return `${hours}小时${minutes}分钟`
+  if (days > 0) {return `${days}天${hours}小时`}
+  if (hours > 0) {return `${hours}小时${minutes}分钟`}
   return `${minutes}分钟`
 }
 
 // 格式化字节
-const formatBytes = (bytes) => {
-  if (!bytes || bytes === 0) return '0 B'
+const formatBytes = bytes => {
+  if (!bytes || bytes === 0) {return '0 B'}
   const units = ['B', 'KB', 'MB', 'GB', 'TB']
   const unitIndex = Math.floor(Math.log(bytes) / Math.log(1024))
   const value = bytes / Math.pow(1024, unitIndex)
@@ -654,8 +853,8 @@ const formatBytes = (bytes) => {
 }
 
 // 格式化速度
-const formatSpeed = (bytesPerSecond) => {
-  if (!bytesPerSecond || bytesPerSecond === 0) return '0 B/s'
+const formatSpeed = bytesPerSecond => {
+  if (!bytesPerSecond || bytesPerSecond === 0) {return '0 B/s'}
   const units = ['B/s', 'KB/s', 'MB/s', 'GB/s']
   const unitIndex = Math.floor(Math.log(bytesPerSecond) / Math.log(1024))
   const value = bytesPerSecond / Math.pow(1024, unitIndex)
@@ -663,7 +862,7 @@ const formatSpeed = (bytesPerSecond) => {
 }
 
 // 踢出用户
-const handleKickUser = async (user) => {
+const handleKickUser = async user => {
   try {
     await ElMessageBox.confirm(
       `确定要踢出用户 "${user.nickname || user.username}" 吗？`,
@@ -716,14 +915,14 @@ const loadOnlineUsers = async () => {
 }
 
 // 格式化时间
-const formatTime = (time) => {
-  if (!time) return '-'
+const formatTime = time => {
+  if (!time) {return '-'}
   const now = new Date()
   const date = new Date(time)
   const diff = now - date
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
-  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
+  if (diff < 60000) {return '刚刚'}
+  if (diff < 3600000) {return Math.floor(diff / 60000) + '分钟前'}
+  if (diff < 86400000) {return Math.floor(diff / 3600000) + '小时前'}
   return Math.floor(diff / 86400000) + '天前'
 }
 
@@ -752,22 +951,22 @@ const stopAutoRefresh = () => {
 
 // 获取CPU颜色
 const getCpuColor = () => {
-  if (cpuUsage.value < 50) return 'var(--dt-success)'
-  if (cpuUsage.value < 80) return 'var(--dt-warning)'
+  if (cpuUsage.value < 50) {return 'var(--dt-success)'}
+  if (cpuUsage.value < 80) {return 'var(--dt-warning)'}
   return 'var(--dt-error)'
 }
 
 // 获取磁盘颜色
-const getDiskColor = (usage) => {
-  if (usage < 70) return 'var(--dt-success)'
-  if (usage < 90) return 'var(--dt-warning)'
+const getDiskColor = usage => {
+  if (usage < 70) {return 'var(--dt-success)'}
+  if (usage < 90) {return 'var(--dt-warning)'}
   return 'var(--dt-error)'
 }
 
 // 获取成功率样式类
-const getSuccessClass = (rate) => {
-  if (rate >= 99) return 'stat-row-value--success'
-  if (rate >= 95) return 'stat-row-value--warning'
+const getSuccessClass = rate => {
+  if (rate >= 99) {return 'stat-row-value--success'}
+  if (rate >= 95) {return 'stat-row-value--warning'}
   return 'stat-row-value--error'
 }
 

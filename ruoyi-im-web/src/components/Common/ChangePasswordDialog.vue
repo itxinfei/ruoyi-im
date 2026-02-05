@@ -15,7 +15,10 @@
       label-position="top"
       class="mt-2"
     >
-      <el-form-item label="旧密码" prop="oldPassword">
+      <el-form-item
+        label="旧密码"
+        prop="oldPassword"
+      >
         <el-input
           v-model="form.oldPassword"
           type="password"
@@ -23,7 +26,10 @@
           show-password
         />
       </el-form-item>
-      <el-form-item label="新密码" prop="newPassword">
+      <el-form-item
+        label="新密码"
+        prop="newPassword"
+      >
         <el-input
           v-model="form.newPassword"
           type="password"
@@ -31,7 +37,10 @@
           show-password
         />
       </el-form-item>
-      <el-form-item label="确认新密码" prop="confirmPassword">
+      <el-form-item
+        label="确认新密码"
+        prop="confirmPassword"
+      >
         <el-input
           v-model="form.confirmPassword"
           type="password"
@@ -43,8 +52,14 @@
 
     <template #footer>
       <div class="flex justify-end gap-2 px-4 pb-4">
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="handleSubmit">
+        <el-button @click="visible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="loading"
+          @click="handleSubmit"
+        >
           提交修改
         </el-button>
       </div>
@@ -72,7 +87,7 @@ const loading = ref(false)
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const form = reactive({
@@ -104,9 +119,9 @@ const rules = {
 }
 
 const handleSubmit = async () => {
-  if (!formRef.value) return
+  if (!formRef.value) {return}
   
-  await formRef.value.validate(async (valid) => {
+  await formRef.value.validate(async valid => {
     if (valid) {
       loading.value = true
       try {

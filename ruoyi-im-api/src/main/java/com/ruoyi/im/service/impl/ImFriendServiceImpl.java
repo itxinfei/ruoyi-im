@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -273,9 +274,33 @@ public class ImFriendServiceImpl implements ImFriendService {
         return voList;
     }
 
-    private void clearFriendListCache(Long userId) {
+    /**
+     * 清除好友列表缓存
+     * 将私有方法改为公有，支持外部调用
+     *
+     * @param userId 用户ID
+     */
+    @Override
+    public void clearFriendListCache(Long userId) {
         String cacheKey = "contact:list:" + userId;
         imRedisUtil.delete(cacheKey);
+        log.info("清除好友列表缓存: userId={}", userId);
+    }
+
+    /**
+     * 批量清除多个用户的好友列表缓存
+     *
+     * @param userIds 用户ID列表
+     */
+    @Override
+    public void batchClearFriendListCache(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+        for (Long userId : userIds) {
+            clearFriendListCache(userId);
+        }
+        log.info("批量清除好友列表缓存: count={}", userIds.size());
     }
 
     /**
@@ -739,5 +764,195 @@ public class ImFriendServiceImpl implements ImFriendService {
                     return Arrays.asList(tags.split(",")).contains(targetTag);
                 })
                 .collect(Collectors.toList());
+    }
+
+    // ==================== 新增增强功能方法 ====================
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<Long, String> batchSendFriendRequest(List<Long> userIds, String remark, Long currentUserId) {
+        Map<Long, String> results = new HashMap<>();
+
+        if (userIds == null || userIds.isEmpty()) {
+            return results;
+        }
+
+        for (Long targetUserId : userIds) {
+            try {
+                // 检查是否已经是好友
+                ImFriend query = new ImFriend();
+                query.setUserId(currentUserId);
+                query.setFriendId(targetUserId);
+                List<ImFriend> existing = imFriendMapper.selectImFriendList(query);
+
+                if (existing != null && !existing.isEmpty()) {
+                    results.put(targetUserId, "already_friend");
+                    continue;
+                }
+
+                // 检查是否已发送过申请
+                ImFriendRequest reqQuery = new ImFriendRequest();
+                reqQuery.setFromUserId(currentUserId);
+                reqQuery.setToUserId(targetUserId);
+                reqQuery.setStatus("PENDING");
+                List<ImFriendRequest> pendingRequests = imFriendRequestMapper.selectImFriendRequestList(reqQuery);
+
+                if (pendingRequests != null && !pendingRequests.isEmpty()) {
+                    results.put(targetUserId, "already_requested");
+                    continue;
+                }
+
+                // 发送好友申请
+                ImFriendAddRequest request = new ImFriendAddRequest();
+                request.setTargetUserId(targetUserId);
+                request.setMessage(remark);
+
+                Long requestId = sendFriendRequest(request, currentUserId);
+                results.put(targetUserId, "success");
+                log.info("批量发送好友申请成功: from={}, to={}", currentUserId, targetUserId);
+            } catch (Exception e) {
+                log.error("批量发送好友申请失败: from={}, to={}", currentUserId, targetUserId, e);
+                results.put(targetUserId, "failed");
+            }
+        }
+
+        return results;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchDeleteFriends(List<Long> contactIds, Long userId) {
+        if (contactIds == null || contactIds.isEmpty()) {
+            throw new BusinessException("联系人ID列表不能为空");
+        }
+
+        for (Long contactId : contactIds) {
+            try {
+                ImFriend friend = imFriendMapper.selectImFriendById(contactId);
+                if (friend != null && friend.getUserId().equals(userId)) {
+                    // 软删除
+                    friend.setIsDeleted(1);
+                    friend.setDeletedTime(LocalDateTime.now());
+                    friend.setUpdateTime(LocalDateTime.now());
+                    imFriendMapper.updateImFriend(friend);
+                    log.info("批量删除好友: userId={}, friendId={}", userId, friend.getFriendId());
+                }
+            } catch (Exception e) {
+                log.error("批量删除好友失败: contactId={}", contactId, e);
+            }
+        }
+
+        // 清除缓存
+        clearFriendListCache(userId);
+    }
+
+    @Override
+    public List<ImUserVO> getRecommendedContacts(Long userId, String type, Integer limit) {
+        List<ImUserVO> recommendations = new ArrayList<>();
+
+        try {
+            // 获取当前用户信息
+            ImUser currentUser = imUserMapper.selectImUserById(userId);
+            if (currentUser == null) {
+                return recommendations;
+            }
+
+            String userDept = currentUser.getDepartment();
+
+            // 根据类型推荐
+            if ("department".equals(type) || "all".equals(type)) {
+                // 推荐同部门用户
+                if (userDept != null && !userDept.isEmpty()) {
+                    ImFriend query = new ImFriend();
+                    query.setUserId(userId);
+                    List<ImFriend> existingFriends = imFriendMapper.selectImFriendList(query);
+                    Set<Long> friendIds = existingFriends.stream()
+                            .map(ImFriend::getFriendId)
+                            .collect(Collectors.toSet());
+
+                    // 查找同部门用户
+                    ImUser deptQuery = new ImUser();
+                    deptQuery.setDepartment(userDept);
+                    List<ImUser> deptUsers = imUserMapper.selectImUserList(deptQuery);
+                    for (ImUser user : deptUsers) {
+                        if (!user.getId().equals(userId) && !friendIds.contains(user.getId())) {
+                            ImUserVO vo = new ImUserVO();
+                            BeanUtils.copyProperties(user, vo);
+                            // 将推荐信息放到扩展字段中
+                            vo.setSignature("同部门: " + userDept);
+                            recommendations.add(vo);
+
+                            if (recommendations.size() >= limit) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("获取推荐好友失败: userId={}", userId, e);
+        }
+
+        return recommendations.stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<ImUserVO> matchAddressBookContacts(Long userId, List<Map<String, String>> contacts) {
+        List<ImUserVO> matchedUsers = new ArrayList<>();
+
+        if (contacts == null || contacts.isEmpty()) {
+            return matchedUsers;
+        }
+
+        try {
+            // 获取当前已经是好友的用户ID集合
+            ImFriend query = new ImFriend();
+            query.setUserId(userId);
+            List<ImFriend> existingFriends = imFriendMapper.selectImFriendList(query);
+            Set<Long> friendIds = existingFriends.stream()
+                    .map(ImFriend::getFriendId)
+                    .collect(Collectors.toSet());
+
+            // 遍历通讯录，匹配手机号
+            for (Map<String, String> contact : contacts) {
+                String phone = contact.get("phone");
+                if (phone == null || phone.isEmpty()) {
+                    continue;
+                }
+
+                // 查找手机号匹配的用户
+                ImUser userQuery = new ImUser();
+                userQuery.setMobile(phone);
+                List<ImUser> matchedUserList = imUserMapper.selectImUserList(userQuery);
+
+                for (ImUser user : matchedUserList) {
+                    if (!user.getId().equals(userId) && !friendIds.contains(user.getId())) {
+                        ImUserVO vo = new ImUserVO();
+                        BeanUtils.copyProperties(user, vo);
+                        String contactName = contact.get("name");
+                        // 将匹配信息放到扩展字段中
+                        vo.setSignature("来自通讯录: " + (contactName != null ? contactName : phone));
+                        matchedUsers.add(vo);
+                    }
+                }
+            }
+
+            log.info("通讯录匹配完成: userId={}, matched={}", userId, matchedUsers.size());
+        } catch (Exception e) {
+            log.error("通讯录匹配失败: userId={}", userId, e);
+        }
+
+        return matchedUsers;
+    }
+
+    @Override
+    public List<ImUserVO> getAddressBookMatches(Long userId) {
+        // TODO: 实现获取之前上传通讯录匹配结果的功能
+        // 这需要保存通讯录匹配结果，可以考虑添加一个缓存表或使用Redis
+        return new ArrayList<>();
     }
 }

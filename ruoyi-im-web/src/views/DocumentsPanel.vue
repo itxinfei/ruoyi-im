@@ -23,9 +23,11 @@
           </div>
         </div>
 
-        <div class="nav-divider"></div>
+        <div class="nav-divider" />
 
-        <div class="nav-section-label">存储位置</div>
+        <div class="nav-section-label">
+          存储位置
+        </div>
 
         <div class="nav-section">
           <div
@@ -48,9 +50,14 @@
             <span class="storage-percent">{{ storageDisplay.percent }}%</span>
           </div>
           <div class="storage-bar">
-            <div class="storage-fill" :style="{ width: storageDisplay.percent + '%' }"></div>
+            <div
+              class="storage-fill"
+              :style="{ width: storageDisplay.percent + '%' }"
+            />
           </div>
-          <div class="storage-text">{{ storageDisplay.used }}&nbsp;/&nbsp;{{ storageDisplay.total }}</div>
+          <div class="storage-text">
+            {{ storageDisplay.used }}&nbsp;/&nbsp;{{ storageDisplay.total }}
+          </div>
         </div>
       </div>
     </aside>
@@ -59,8 +66,10 @@
     <main class="docs-main">
       <header class="docs-header">
         <div class="header-left">
-          <h2 class="header-title">{{ currentViewTitle }}</h2>
-          <div class="header-divider"></div>
+          <h2 class="header-title">
+            {{ currentViewTitle }}
+          </h2>
+          <div class="header-divider" />
           <div class="search-box">
             <span class="material-icons-outlined search-icon">search</span>
             <input
@@ -68,7 +77,7 @@
               class="search-input"
               placeholder="搜索文件"
               type="text"
-            />
+            >
           </div>
         </div>
         <div class="header-right">
@@ -88,7 +97,10 @@
               <span class="material-icons-outlined">grid_view</span>
             </button>
           </div>
-          <el-dropdown trigger="click" @command="handleNewCommand">
+          <el-dropdown
+            trigger="click"
+            @command="handleNewCommand"
+          >
             <button class="new-btn">
               <span class="material-icons-outlined">add</span>
               新建
@@ -111,24 +123,44 @@
       </header>
 
       <div class="docs-content">
-        <div v-if="loading" class="loading-state">
-          <el-icon class="is-loading" :size="32"><ElIconLoading /></el-icon>
+        <div
+          v-if="loading"
+          class="loading-state"
+        >
+          <el-icon
+            class="is-loading"
+            :size="32"
+          >
+            <ElIconLoading />
+          </el-icon>
           <span>加载中...</span>
         </div>
 
-        <div v-else-if="files.length === 0" class="empty-state">
+        <div
+          v-else-if="files.length === 0"
+          class="empty-state"
+        >
           <span class="material-icons-outlined empty-icon">cloud_off</span>
-          <p class="empty-text">暂无文件</p>
+          <p class="empty-text">
+            暂无文件
+          </p>
         </div>
 
-        <div v-else class="files-table-wrapper">
+        <div
+          v-else
+          class="files-table-wrapper"
+        >
           <table class="files-table">
             <thead>
               <tr>
-                <th class="name-col">名称</th>
+                <th class="name-col">
+                  名称
+                </th>
                 <th>所有者</th>
                 <th>修改时间</th>
-                <th class="actions-col">操作</th>
+                <th class="actions-col">
+                  操作
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -140,18 +172,28 @@
               >
                 <td class="name-col">
                   <div class="file-info">
-                    <div class="file-icon" :class="file.iconClass">
+                    <div
+                      class="file-icon"
+                      :class="file.iconClass"
+                    >
                       <span class="material-icons-outlined">{{ file.icon }}</span>
                     </div>
                     <div>
-                      <div class="file-name">{{ file.name }}</div>
-                      <div class="file-meta">{{ file.meta }}</div>
+                      <div class="file-name">
+                        {{ file.name }}
+                      </div>
+                      <div class="file-meta">
+                        {{ file.meta }}
+                      </div>
                     </div>
                   </div>
                 </td>
                 <td>
                   <div class="owner-info">
-                    <div class="owner-avatar" :style="{ background: file.ownerColor }">
+                    <div
+                      class="owner-avatar"
+                      :style="{ background: file.ownerColor }"
+                    >
                       {{ file.owner.charAt(0) }}
                     </div>
                     <span>{{ file.owner }}</span>
@@ -161,7 +203,10 @@
                   <span class="file-time">{{ file.modifiedTime }}</span>
                 </td>
                 <td class="actions-col">
-                  <button class="action-btn" @click.stop="handleFileMenu(file)">
+                  <button
+                    class="action-btn"
+                    @click.stop="handleFileMenu(file)"
+                  >
                     <span class="material-icons-outlined">more_vert</span>
                   </button>
                 </td>
@@ -173,16 +218,27 @@
         <div class="pagination">
           <span>共 {{ files.length }} 个文件</span>
           <div class="page-buttons">
-            <button class="page-btn" disabled>上一页</button>
+            <button
+              class="page-btn"
+              disabled
+            >
+              上一页
+            </button>
             <span class="page-divider">|</span>
-            <button class="page-btn">下一页</button>
+            <button class="page-btn">
+              下一页
+            </button>
           </div>
         </div>
       </div>
     </main>
 
     <!-- 新建文件夹对话框 -->
-    <el-dialog v-model="showFolderDialog" title="新建文件夹" width="400px">
+    <el-dialog
+      v-model="showFolderDialog"
+      title="新建文件夹"
+      width="400px"
+    >
       <el-input
         v-model="newFolderName"
         placeholder="请输入文件夹名称"
@@ -191,13 +247,24 @@
         @keyup.enter="handleCreateFolder"
       />
       <template #footer>
-        <el-button @click="showFolderDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateFolder">确定</el-button>
+        <el-button @click="showFolderDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleCreateFolder"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
     <!-- 文件上传对话框 -->
-    <el-dialog v-model="showUploadDialog" title="上传文件" width="500px">
+    <el-dialog
+      v-model="showUploadDialog"
+      title="上传文件"
+      width="500px"
+    >
       <el-upload
         ref="uploadRef"
         class="upload-area"
@@ -209,12 +276,24 @@
         :multiple="true"
       >
         <span class="material-icons-outlined upload-icon">cloud_upload</span>
-        <div class="upload-text">将文件拖到此处，或点击上传</div>
-        <div class="upload-hint">支持任意类型文件，单个文件不超过100MB</div>
+        <div class="upload-text">
+          将文件拖到此处，或点击上传
+        </div>
+        <div class="upload-hint">
+          支持任意类型文件，单个文件不超过100MB
+        </div>
       </el-upload>
       <template #footer>
-        <el-button @click="showUploadDialog = false">取消</el-button>
-        <el-button type="primary" :loading="uploading" @click="handleUploadSubmit">开始上传</el-button>
+        <el-button @click="showUploadDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="uploading"
+          @click="handleUploadSubmit"
+        >
+          开始上传
+        </el-button>
       </template>
     </el-dialog>
 
@@ -224,6 +303,14 @@
       :file="selectedFile"
       @download="handleDownload"
     />
+
+    <!-- 文档协作编辑器 -->
+    <DocumentEditor
+      v-if="showDocumentEditor"
+      :document-id="editingDocumentId"
+      @close="handleCloseDocumentEditor"
+      @save="handleDocumentSave"
+    />
   </div>
 </template>
 
@@ -232,6 +319,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, ElIcon } from 'element-plus'
 import { Loading as ElIconLoading } from '@element-plus/icons-vue'
 import FilePreviewDialog from '@/components/FilePreviewDialog/index.vue'
+import DocumentEditor from '@/components/Documents/DocumentEditor.vue'
 import { formatFileSize } from '@/utils/format'
 import { getFolderList, getFileList, createFolder, uploadToCloud, getStorageQuota } from '@/api/im/cloud'
 
@@ -244,6 +332,8 @@ const currentFolderId = ref(null)
 const showFolderDialog = ref(false)
 const showUploadDialog = ref(false)
 const showPreviewDialog = ref(false)
+const showDocumentEditor = ref(false)
+const editingDocumentId = ref(null)
 const newFolderName = ref('')
 const uploadFiles = ref([])
 const uploading = ref(false)
@@ -295,7 +385,7 @@ const storageDisplay = computed(() => {
 })
 
 // 图标映射
-const getIconForFile = (fileName) => {
+const getIconForFile = fileName => {
   const ext = fileName.split('.').pop().toLowerCase()
   const iconMap = {
     doc: { icon: 'description', iconClass: 'icon-doc' },
@@ -363,19 +453,33 @@ const loadStorageQuota = async () => {
   }
 }
 
-const handleFileClick = (file) => {
+const handleFileClick = file => {
   if (file.isFolder) {
     // 文件夹：进入文件夹
     currentFolderId.value = file.id
     loadFiles()
   } else {
-    // 文件：预览
-    selectedFile.value = file
-    showPreviewDialog.value = true
+    // 检查是否为文档类型
+    const fileName = file.name?.toLowerCase() || ''
+    const isDocument = fileName.endsWith('.doc') ||
+                       fileName.endsWith('.docx') ||
+                       fileName.endsWith('.txt') ||
+                       fileName.endsWith('.md') ||
+                       file.iconClass === 'icon-doc'
+
+    if (isDocument) {
+      // 打开文档编辑器
+      editingDocumentId.value = file.id
+      showDocumentEditor.value = true
+    } else {
+      // 其他文件：预览
+      selectedFile.value = file
+      showPreviewDialog.value = true
+    }
   }
 }
 
-const handleFileMenu = (file) => {
+const handleFileMenu = file => {
   ElMessageBox({
     title: file.name,
     message: '请选择操作',
@@ -426,7 +530,7 @@ const handleFileMenu = (file) => {
 }
 
 // 新建命令处理
-const handleNewCommand = (command) => {
+const handleNewCommand = command => {
   if (command === 'folder') {
     newFolderName.value = ''
     showFolderDialog.value = true
@@ -502,7 +606,7 @@ const handleUploadSubmit = async () => {
 }
 
 // 下载文件
-const handleDownload = (file) => {
+const handleDownload = file => {
   if (file.fileUrl) {
     const link = document.createElement('a')
     link.href = file.fileUrl
@@ -511,6 +615,22 @@ const handleDownload = (file) => {
     ElMessage.success(`开始下载: ${file.name}`)
   } else {
     ElMessage.warning('暂无下载链接')
+  }
+}
+
+// 关闭文档编辑器
+const handleCloseDocumentEditor = () => {
+  showDocumentEditor.value = false
+  editingDocumentId.value = null
+}
+
+// 文档保存回调
+const handleDocumentSave = ({ title, content }) => {
+  // 更新本地文件列表中的文档信息
+  const file = files.value.find(f => f.id === editingDocumentId.value)
+  if (file) {
+    file.name = title
+    // 可以更新其他属性
   }
 }
 

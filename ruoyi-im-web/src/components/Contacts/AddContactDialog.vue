@@ -2,19 +2,33 @@
   <el-dialog
     :model-value="visible"
     width="420px"
-    @update:model-value="$emit('update:visible', $event)"
     class="dt-add-contact-dialog"
     :show-close="false"
     :close-on-click-modal="true"
     destroy-on-close
     append-to-body
+    @update:model-value="$emit('update:visible', $event)"
   >
     <!-- 头部 -->
     <div class="dt-dialog-header">
-      <h3 class="dt-dialog-title">添加联系人</h3>
-      <button class="dt-close-btn" @click="$emit('update:visible', false)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+      <h3 class="dt-dialog-title">
+        添加联系人
+      </h3>
+      <button
+        class="dt-close-btn"
+        @click="$emit('update:visible', false)"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M18 6L6 18M6 6l12 12"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </button>
     </div>
@@ -22,41 +36,99 @@
     <!-- 搜索区域 -->
     <div class="dt-search-section">
       <div class="dt-search-input">
-        <svg class="dt-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          class="dt-search-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle
+            cx="11"
+            cy="11"
+            r="8"
+          />
+          <path
+            d="M21 21l-4.35-4.35"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
         <input
           v-model="keyword"
           type="text"
           placeholder="输入用户名或昵称搜索"
           @keyup.enter="handleSearch"
-        />
+        >
         <button
           v-if="keyword"
           class="dt-clear-btn"
           @click="keyword = ''"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M18 6L6 18M6 6l12 12"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </button>
       </div>
-      <button class="dt-search-btn" :class="{ loading: searching }" @click="handleSearch">
-        <svg v-if="!searching" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"/>
+      <button
+        class="dt-search-btn"
+        :class="{ loading: searching }"
+        @click="handleSearch"
+      >
+        <svg
+          v-if="!searching"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
-        <span v-else class="dt-search-spinner"></span>
+        <span
+          v-else
+          class="dt-search-spinner"
+        />
         搜索
       </button>
     </div>
 
     <!-- 搜索结果 -->
-    <div class="dt-results" v-loading="searching && !hasSearched">
-      <div v-if="hasSearched && results.length === 0" class="dt-empty">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="19" cy="19" r="9"/>
-          <path d="M39 39l-6-6" stroke-linecap="round"/>
+    <div
+      v-loading="searching && !hasSearched"
+      class="dt-results"
+    >
+      <div
+        v-if="hasSearched && results.length === 0"
+        class="dt-empty"
+      >
+        <svg
+          viewBox="0 0 48 48"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle
+            cx="19"
+            cy="19"
+            r="9"
+          />
+          <path
+            d="M39 39l-6-6"
+            stroke-linecap="round"
+          />
         </svg>
         <p>未找到相关用户</p>
       </div>
@@ -71,7 +143,9 @@
           :src="user.avatar"
         />
         <div class="dt-user-info">
-          <div class="dt-user-name">{{ user.nickname || user.username }}</div>
+          <div class="dt-user-name">
+            {{ user.nickname || user.username }}
+          </div>
           <div class="dt-user-meta">
             {{ user.department || '未知部门' }} · {{ user.position || '未知职位' }}
           </div>
@@ -83,7 +157,10 @@
         >
           添加
         </button>
-        <span v-else class="dt-added-badge">已添加</span>
+        <span
+          v-else
+          class="dt-added-badge"
+        >已添加</span>
       </div>
     </div>
 
@@ -105,24 +182,40 @@
             placeholder="我是..."
             rows="3"
             maxlength="100"
-          ></textarea>
+          />
           <span class="dt-char-count">{{ requestMessage.length }}/100</span>
         </div>
         <div class="dt-form-group">
           <label>分组</label>
           <select v-model="selectedGroup">
-            <option value="默认分组">默认分组</option>
-            <option value="同事">同事</option>
-            <option value="朋友">朋友</option>
+            <option value="默认分组">
+              默认分组
+            </option>
+            <option value="同事">
+              同事
+            </option>
+            <option value="朋友">
+              朋友
+            </option>
           </select>
         </div>
       </div>
       <template #footer>
         <span class="dt-dialog-footer">
-          <button class="dt-btn dt-btn-secondary" @click="showRequestDialog = false">取消</button>
-          <button class="dt-btn dt-btn-primary" :class="{ loading: sending }" @click="confirmAdd">
+          <button
+            class="dt-btn dt-btn-secondary"
+            @click="showRequestDialog = false"
+          >取消</button>
+          <button
+            class="dt-btn dt-btn-primary"
+            :class="{ loading: sending }"
+            @click="confirmAdd"
+          >
             {{ sending ? '' : '发送' }}
-            <span v-if="sending" class="dt-btn-spinner"></span>
+            <span
+              v-if="sending"
+              class="dt-btn-spinner"
+            />
           </button>
         </span>
       </template>
@@ -172,14 +265,14 @@ const handleSearch = async () => {
   }
 }
 
-const handleAdd = (user) => {
+const handleAdd = user => {
   targetUser.value = user
   requestMessage.value = `我是${user.nickname || ''}`
   showRequestDialog.value = true
 }
 
 const confirmAdd = async () => {
-  if (!targetUser.value) return
+  if (!targetUser.value) {return}
   sending.value = true
   try {
     await sendFriendRequest({

@@ -1,7 +1,13 @@
 <template>
-  <div class="virtual-message-wrapper" :class="{ 'is-time-divider': msg.isTimeDivider }">
+  <div
+    class="virtual-message-wrapper"
+    :class="{ 'is-time-divider': msg.isTimeDivider }"
+  >
     <!-- 时间分隔符 -->
-    <div v-if="msg.isTimeDivider" class="time-divider">
+    <div
+      v-if="msg.isTimeDivider"
+      class="time-divider"
+    >
       <span class="time-text">{{ msg.timeText }}</span>
     </div>
 
@@ -50,33 +56,62 @@
               {{ msg.readCount > 0 ? `${msg.readCount}人已读` : '已读' }}
             </span>
           </template>
-          <div v-loading="loadingReadUsers[msg.id]" class="read-users-list">
+          <div
+            v-loading="loadingReadUsers[msg.id]"
+            class="read-users-list"
+          >
             <div class="read-users-header">
               <span class="read-title">已读成员</span>
-              <span v-if="readUsersMap[msg.id]" class="read-count-badge">{{ readUsersMap[msg.id].length }}</span>
+              <span
+                v-if="readUsersMap[msg.id]"
+                class="read-count-badge"
+              >{{ readUsersMap[msg.id].length }}</span>
             </div>
             <div class="read-users-body">
-              <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
-                <DingtalkAvatar :src="user.avatar" :name="user.name" :user-id="user.id" :size="32" shape="square" />
+              <div
+                v-for="user in readUsersMap[msg.id]"
+                :key="user.id"
+                class="read-user-item"
+              >
+                <DingtalkAvatar
+                  :src="user.avatar"
+                  :name="user.name"
+                  :user-id="user.id"
+                  :size="32"
+                  shape="square"
+                />
                 <span class="user-name">{{ user.name }}</span>
               </div>
-              <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)" class="empty-state">
+              <div
+                v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)"
+                class="empty-state"
+              >
                 <el-icon><User /></el-icon>
                 <span>暂无已读成员</span>
               </div>
             </div>
             <!-- 显示未读人数 -->
-            <div v-if="unreadCount(msg)" class="unread-users-footer">
+            <div
+              v-if="unreadCount(msg)"
+              class="unread-users-footer"
+            >
               <span>未读 {{ unreadCount(msg) }} 人</span>
             </div>
           </div>
         </el-popover>
         <!-- 单聊：只显示已读/未读 -->
-        <span v-else-if="sessionType === 'PRIVATE'" class="read-status-simple" :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }">
+        <span
+          v-else-if="sessionType === 'PRIVATE'"
+          class="read-status-simple"
+          :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }"
+        >
           {{ msg.isRead || msg.readCount > 0 ? '已读' : '未读' }}
         </span>
         <!-- 无已读数据时显示未读 -->
-        <span v-else class="unread">未读</span>
+        <span
+          v-else
+          class="unread"
+        >未读</span>
       </template>
     </MessageItem>
   </div>
@@ -125,8 +160,8 @@ const handleReaction = (msg, reaction) => {
   emit('reaction', msg, reaction)
 }
 
-const unreadCount = (msg) => {
-  if (!props.groupMemberCount) return null
+const unreadCount = msg => {
+  if (!props.groupMemberCount) {return null}
   const readCount = msg.readCount || 0
   return Math.max(0, props.groupMemberCount - readCount)
 }

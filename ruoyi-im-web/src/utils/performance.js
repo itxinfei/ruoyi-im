@@ -98,19 +98,19 @@ export function initPerformanceMonitoring() {
   console.log('[Performance] 初始化性能监控...')
 
   // 监控 CLS (累积布局偏移)
-  onCLS((metric) => {
+  onCLS(metric => {
     logMetric(metric)
     reportMetric(metric)
   })
 
   // 监控 INP (交互到下一次绘制)
-  onINP((metric) => {
+  onINP(metric => {
     logMetric(metric)
     reportMetric(metric)
   })
 
   // 监控 LCP (最大内容绘制)
-  onLCP((metric) => {
+  onLCP(metric => {
     logMetric(metric)
     reportMetric(metric)
 
@@ -121,13 +121,13 @@ export function initPerformanceMonitoring() {
   })
 
   // 监控 FCP (首次内容绘制)
-  onFCP((metric) => {
+  onFCP(metric => {
     logMetric(metric)
     reportMetric(metric)
   })
 
   // 监控 TTFB (首字节时间)
-  onTTFB((metric) => {
+  onTTFB(metric => {
     logMetric(metric)
     reportMetric(metric)
   })

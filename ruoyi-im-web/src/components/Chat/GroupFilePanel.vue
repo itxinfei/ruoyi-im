@@ -10,15 +10,25 @@
         class="search-input"
         @input="handleSearch"
       />
-      <el-button type="primary" @click="handleUpload" :loading="uploading">
+      <el-button
+        type="primary"
+        :loading="uploading"
+        @click="handleUpload"
+      >
         <el-icon><Upload /></el-icon>
         上传文件
       </el-button>
     </div>
 
     <!-- 分类标签页 -->
-    <el-tabs v-model="activeCategory" @tab-change="handleCategoryChange">
-      <el-tab-pane label="全部" name="all">
+    <el-tabs
+      v-model="activeCategory"
+      @tab-change="handleCategoryChange"
+    >
+      <el-tab-pane
+        label="全部"
+        name="all"
+      >
         <template #label>
           <span class="tab-item">
             <el-icon><Folder /></el-icon>
@@ -71,12 +81,19 @@
         ref="tableRef"
         v-loading="loading"
         :data="fileList"
-        @selection-change="handleSelectionChange"
         class="file-table"
         empty-text="暂无文件"
+        @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" />
-        <el-table-column label="文件名" min-width="200" show-overflow-tooltip>
+        <el-table-column
+          type="selection"
+          width="50"
+        />
+        <el-table-column
+          label="文件名"
+          min-width="200"
+          show-overflow-tooltip
+        >
           <template #default="{ row }">
             <div class="file-name-cell">
               <div class="file-icon-wrapper">
@@ -88,24 +105,45 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="大小" width="100" align="center">
+        <el-table-column
+          label="大小"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="file-size">{{ formatSize(row.fileSize) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="上传者" width="120" show-overflow-tooltip>
+        <el-table-column
+          label="上传者"
+          width="120"
+          show-overflow-tooltip
+        >
           <template #default="{ row }">
             <span class="uploader-name">{{ row.uploaderName }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="上传时间" width="160" align="center">
+        <el-table-column
+          label="上传时间"
+          width="160"
+          align="center"
+        >
           <template #default="{ row }">
             <span class="upload-time">{{ formatTime(row.uploadTime) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column
+          label="操作"
+          width="180"
+          align="center"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button link type="primary" @click="handleDownload(row)">
+            <el-button
+              link
+              type="primary"
+              @click="handleDownload(row)"
+            >
               <el-icon><Download /></el-icon>
               下载
             </el-button>
@@ -138,10 +176,16 @@
 
     <!-- 批量操作栏 -->
     <transition name="slide-up">
-      <div v-if="selectedFiles.length > 0" class="batch-toolbar">
+      <div
+        v-if="selectedFiles.length > 0"
+        class="batch-toolbar"
+      >
         <span class="selected-count">已选 {{ selectedFiles.length }} 项</span>
         <div class="batch-actions">
-          <el-button type="danger" @click="handleBatchDelete">
+          <el-button
+            type="danger"
+            @click="handleBatchDelete"
+          >
             <el-icon><Delete /></el-icon>
             批量删除
           </el-button>
@@ -159,7 +203,7 @@
       type="file"
       style="display: none"
       @change="handleFileChange"
-    />
+    >
   </div>
 </template>
 
@@ -231,7 +275,7 @@ const currentUserRole = computed(() => {
 })
 
 // 判断是否可以删除文件
-const canDelete = (file) => {
+const canDelete = file => {
   // 群主和管理员可以删除任意文件
   if (currentUserRole.value === 'OWNER' || currentUserRole.value === 'ADMIN') {
     return true
@@ -241,7 +285,7 @@ const canDelete = (file) => {
 }
 
 // 获取文件图标
-const getFileIcon = (category) => {
+const getFileIcon = category => {
   const iconMap = {
     image: PictureIcon,
     document: DocumentIcon,
@@ -252,8 +296,8 @@ const getFileIcon = (category) => {
 }
 
 // 格式化文件大小
-const formatSize = (bytes) => {
-  if (!bytes) return '0 B'
+const formatSize = bytes => {
+  if (!bytes) {return '0 B'}
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -322,7 +366,7 @@ const handleSizeChange = () => {
 }
 
 // 选择变化
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedFiles.value = selection
 }
 
@@ -336,9 +380,9 @@ const handleUpload = () => {
   fileInputRef.value?.click()
 }
 
-const handleFileChange = async (event) => {
+const handleFileChange = async event => {
   const file = event.target.files?.[0]
-  if (!file) return
+  if (!file) {return}
 
   uploading.value = true
   try {
@@ -371,15 +415,15 @@ const handleFileChange = async (event) => {
 }
 
 // 获取文件分类
-const getFileCategory = (mimeType) => {
-  if (mimeType.startsWith('image/')) return 'image'
-  if (mimeType.startsWith('video/')) return 'video'
-  if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('text')) return 'document'
+const getFileCategory = mimeType => {
+  if (mimeType.startsWith('image/')) {return 'image'}
+  if (mimeType.startsWith('video/')) {return 'video'}
+  if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('text')) {return 'document'}
   return 'other'
 }
 
 // 下载文件
-const handleDownload = async (file) => {
+const handleDownload = async file => {
   try {
     const res = await downloadGroupFile(file.id)
     if (res.code === 200 && res.data) {
@@ -400,7 +444,7 @@ const handleDownload = async (file) => {
 }
 
 // 删除文件
-const handleDelete = async (file) => {
+const handleDelete = async file => {
   try {
     await ElMessageBox.confirm(
       `确定要删除文件"${file.fileName}"吗？`,
@@ -425,7 +469,7 @@ const handleDelete = async (file) => {
 
 // 批量删除
 const handleBatchDelete = async () => {
-  if (selectedFiles.value.length === 0) return
+  if (selectedFiles.value.length === 0) {return}
 
   // 检查权限
   const cannotDelete = selectedFiles.value.filter(file => !canDelete(file))

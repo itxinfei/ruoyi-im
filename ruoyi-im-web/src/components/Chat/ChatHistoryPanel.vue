@@ -1,7 +1,11 @@
 <template>
   <teleport to="body">
     <transition name="slide">
-      <div v-if="visible" class="chat-history-overlay" @click.self="handleClose">
+      <div
+        v-if="visible"
+        class="chat-history-overlay"
+        @click.self="handleClose"
+      >
         <div class="chat-history-panel">
           <!-- 头部 -->
           <div class="history-header">
@@ -9,7 +13,10 @@
               <span class="material-icons-outlined">history</span>
               <span>聊天记录</span>
             </div>
-            <button class="close-btn" @click="handleClose">
+            <button
+              class="close-btn"
+              @click="handleClose"
+            >
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
@@ -43,21 +50,38 @@
           </div>
 
           <!-- 消息列表 -->
-          <div class="history-list" ref="listRef">
-            <div v-if="loading" class="loading-state">
-              <el-icon class="is-loading"><Loading /></el-icon>
+          <div
+            ref="listRef"
+            class="history-list"
+          >
+            <div
+              v-if="loading"
+              class="loading-state"
+            >
+              <el-icon class="is-loading">
+                <Loading />
+              </el-icon>
               <span>加载中...</span>
             </div>
 
-            <div v-else-if="filteredMessages.length === 0" class="empty-state">
+            <div
+              v-else-if="filteredMessages.length === 0"
+              class="empty-state"
+            >
               <span class="material-icons-outlined">forum</span>
               <p>暂无聊天记录</p>
             </div>
 
             <template v-else>
               <!-- 按日期分组 -->
-              <div v-for="(group, date) in groupedMessages" :key="date" class="history-group">
-                <div class="group-date">{{ formatDate(date) }}</div>
+              <div
+                v-for="(group, date) in groupedMessages"
+                :key="date"
+                class="history-group"
+              >
+                <div class="group-date">
+                  {{ formatDate(date) }}
+                </div>
 
                 <div
                   v-for="msg in group"
@@ -67,8 +91,15 @@
                   @click="handleMessageClick(msg)"
                 >
                   <div class="message-avatar">
-                    <img v-if="msg.senderAvatar" :src="msg.senderAvatar" alt="" />
-                    <span v-else class="avatar-placeholder">{{ msg.senderName?.charAt(0) || '?' }}</span>
+                    <img
+                      v-if="msg.senderAvatar"
+                      :src="msg.senderAvatar"
+                      alt=""
+                    >
+                    <span
+                      v-else
+                      class="avatar-placeholder"
+                    >{{ msg.senderName?.charAt(0) || '?' }}</span>
                   </div>
                   <div class="message-content">
                     <div class="message-header">
@@ -103,15 +134,25 @@
           </div>
 
           <!-- 底部操作 -->
-          <div class="history-footer" v-if="filteredMessages.length > 0 || !loading">
+          <div
+            v-if="filteredMessages.length > 0 || !loading"
+            class="history-footer"
+          >
             <div class="footer-info">
               <span class="record-count">共 {{ filteredMessages.length }} 条记录</span>
             </div>
             <div class="footer-actions">
-              <el-button size="small" @click="loadMore" :disabled="!hasMore || loading">
+              <el-button
+                size="small"
+                :disabled="!hasMore || loading"
+                @click="loadMore"
+              >
                 加载更多
               </el-button>
-              <el-button size="small" @click="handleClose">
+              <el-button
+                size="small"
+                @click="handleClose"
+              >
                 关闭
               </el-button>
             </div>
@@ -186,14 +227,14 @@ const groupedMessages = computed(() => {
 })
 
 // 获取消息预览
-const getMessagePreview = (content) => {
-  if (!content) return ''
-  if (typeof content === 'string') return content
+const getMessagePreview = content => {
+  if (!content) {return ''}
+  if (typeof content === 'string') {return content}
   try {
     const parsed = parseContentString(content)
-    if (parsed.text) return parsed.text
-    if (parsed.imageUrl) return '[图片]'
-    if (parsed.fileName) return `[文件] ${parsed.fileName}`
+    if (parsed.text) {return parsed.text}
+    if (parsed.imageUrl) {return '[图片]'}
+    if (parsed.fileName) {return `[文件] ${parsed.fileName}`}
     return '[消息]'
   } catch {
     return String(content).slice(0, 50)
@@ -201,7 +242,7 @@ const getMessagePreview = (content) => {
 }
 
 // 格式化日期
-const formatDate = (dateStr) => {
+const formatDate = dateStr => {
   const date = new Date(dateStr)
   const today = new Date()
   const yesterday = new Date(today)
@@ -219,7 +260,7 @@ const formatDate = (dateStr) => {
 // 加载聊天记录
 const loadHistoryMessages = async () => {
   const conversationId = getConversationId()
-  if (!conversationId) return
+  if (!conversationId) {return}
 
   loading.value = true
   try {
@@ -264,7 +305,7 @@ const loadHistoryMessages = async () => {
 // 搜索处理
 const handleSearch = () => {
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     if (listRef.value) {
       listRef.value.scrollTop = 0
     }
@@ -272,18 +313,18 @@ const handleSearch = () => {
 }
 
 // 分类切换处理
-const handleCategoryChange = (category) => {
+const handleCategoryChange = category => {
   activeCategory.value = category
 }
 
 // 点击消息
-const handleMessageClick = (msg) => {
+const handleMessageClick = msg => {
   emit('jump-to-message', msg)
 }
 
 // 加载更多
 const loadMore = async () => {
-  if (!hasMore.value || loading.value) return
+  if (!hasMore.value || loading.value) {return}
   currentPage.value++
   await loadHistoryMessages()
 }
@@ -294,7 +335,7 @@ const handleClose = () => {
 }
 
 // 监听 visible 变化
-watch(() => props.visible, (val) => {
+watch(() => props.visible, val => {
   if (val) {
     searchKeyword.value = ''
     activeCategory.value = 'all'

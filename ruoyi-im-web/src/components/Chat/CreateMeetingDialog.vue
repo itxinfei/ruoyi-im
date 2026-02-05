@@ -13,7 +13,10 @@
       label-width="80px"
       @submit.prevent="handleSubmit"
     >
-      <el-form-item label="会议主题" prop="title">
+      <el-form-item
+        label="会议主题"
+        prop="title"
+      >
         <el-input
           v-model="form.title"
           placeholder="请输入会议主题"
@@ -22,7 +25,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="会议描述" prop="description">
+      <el-form-item
+        label="会议描述"
+        prop="description"
+      >
         <el-input
           v-model="form.description"
           type="textarea"
@@ -33,7 +39,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="开始时间" prop="scheduledStartTime">
+      <el-form-item
+        label="开始时间"
+        prop="scheduledStartTime"
+      >
         <el-date-picker
           v-model="form.scheduledStartTime"
           type="datetime"
@@ -45,14 +54,24 @@
         />
       </el-form-item>
 
-      <el-form-item label="会议类型" prop="meetingType">
+      <el-form-item
+        label="会议类型"
+        prop="meetingType"
+      >
         <el-radio-group v-model="form.meetingType">
-          <el-radio label="INSTANT">立即开始</el-radio>
-          <el-radio label="SCHEDULED">预约会议</el-radio>
+          <el-radio label="INSTANT">
+            立即开始
+          </el-radio>
+          <el-radio label="SCHEDULED">
+            预约会议
+          </el-radio>
         </el-radio-group>
       </el-form-item>
 
-      <el-form-item label="参会人员" prop="participantIds">
+      <el-form-item
+        label="参会人员"
+        prop="participantIds"
+      >
         <el-select
           v-model="form.participantIds"
           multiple
@@ -67,14 +86,22 @@
             :value="user.id"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
-              <el-avatar :src="user.avatar" :size="24">{{ user.nickName?.charAt(0) }}</el-avatar>
+              <el-avatar
+                :src="user.avatar"
+                :size="24"
+              >
+                {{ user.nickName?.charAt(0) }}
+              </el-avatar>
               <span>{{ user.nickName }}</span>
             </div>
           </el-option>
         </el-select>
       </el-form-item>
 
-      <el-form-item label="需要密码" prop="requirePassword">
+      <el-form-item
+        label="需要密码"
+        prop="requirePassword"
+      >
         <el-switch v-model="form.requirePassword" />
         <el-input
           v-if="form.requirePassword"
@@ -101,8 +128,14 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleSubmit" :loading="submitting">
+      <el-button @click="handleClose">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="submitting"
+        @click="handleSubmit"
+      >
         {{ form.meetingType === 'INSTANT' ? '立即开始' : '创建会议' }}
       </el-button>
     </template>
@@ -127,7 +160,7 @@ const emit = defineEmits(['update:modelValue', 'success'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const isEditMode = computed(() => !!props.meetingId)
@@ -168,7 +201,7 @@ const rules = {
 }
 
 // 禁用过去的日期
-const disabledDate = (time) => {
+const disabledDate = time => {
   return time.getTime() < Date.now() - 8.64e7
 }
 
@@ -213,14 +246,14 @@ const loadMeetingData = async () => {
 }
 
 // 监听会议类型变化
-watch(() => form.value.meetingType, (newType) => {
+watch(() => form.value.meetingType, newType => {
   if (newType === 'INSTANT') {
     form.value.scheduledStartTime = new Date().toISOString().slice(0, 19) + 'Z'
   }
 })
 
 // 监听对话框打开
-watch(() => props.modelValue, (isOpen) => {
+watch(() => props.modelValue, isOpen => {
   if (isOpen) {
     loadUsers()
     if (props.meetingId) {
@@ -252,7 +285,7 @@ const handleClose = () => {
 
 const handleSubmit = async () => {
   const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
+  if (!valid) {return}
 
   submitting.value = true
   try {

@@ -32,8 +32,8 @@ export function useMessageStatus(props) {
   // 格式化撤回剩余时间
   const recallTimeDisplay = computed(() => {
     const seconds = recallRemainingSeconds.value
-    if (seconds <= 0) return ''
-    if (seconds < 60) return `${seconds}秒`
+    if (seconds <= 0) {return ''}
+    if (seconds < 60) {return `${seconds}秒`}
     const minutes = Math.floor(seconds / 60)
     const secs = seconds % 60
     return secs > 0 ? `${minutes}分${secs}秒` : `${minutes}分钟`
@@ -88,10 +88,10 @@ export function useMessageStatus(props) {
 
   // 状态文本
   const statusText = computed(() => {
-    if (isSending.value) return '发送中'
-    if (isFailed.value) return '发送失败'
-    if (isRead.value) return '已读'
-    if (isDelivered.value) return '已送达'
+    if (isSending.value) {return '发送中'}
+    if (isFailed.value) {return '发送失败'}
+    if (isRead.value) {return '已读'}
+    if (isDelivered.value) {return '已送达'}
     return '未读'
   })
 

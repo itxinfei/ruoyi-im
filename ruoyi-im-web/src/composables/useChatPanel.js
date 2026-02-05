@@ -75,7 +75,7 @@ export function useChatPanel(options = {}) {
   const conversationImages = computed(() => {
     return messages.value
       .filter(m => {
-        if (m.type !== 'IMAGE') return false
+        if (m.type !== 'IMAGE') {return false}
         try {
           const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
           return content && (content.url || content.imageUrl)
@@ -100,7 +100,7 @@ export function useChatPanel(options = {}) {
    * 加载历史消息
    */
   const loadHistory = async () => {
-    if (!session.value?.id) return
+    if (!session.value?.id) {return}
 
     loading.value = true
     noMore.value = false
@@ -122,10 +122,10 @@ export function useChatPanel(options = {}) {
    * 加载更多消息
    */
   const loadMore = async () => {
-    if (loading.value || noMore.value) return
+    if (loading.value || noMore.value) {return}
 
     const firstMsg = messages.value[0]
-    if (!firstMsg) return
+    if (!firstMsg) {return}
 
     loading.value = true
     const oldHeight = msgListRef.value?.$refs.listRef.scrollHeight
@@ -192,8 +192,8 @@ export function useChatPanel(options = {}) {
   /**
    * 重试发送失败的消息
    */
-  const retry = async (message) => {
-    if (message.status !== 'failed') return
+  const retry = async message => {
+    if (message.status !== 'failed') {return}
 
     message.status = 'sending'
 
@@ -215,7 +215,7 @@ export function useChatPanel(options = {}) {
   /**
    * 删除消息
    */
-  const remove = async (messageId) => {
+  const remove = async messageId => {
     try {
       await store.dispatch('im/message/deleteMessage', messageId)
       const index = messages.value.findIndex(m => m.id === messageId)
@@ -231,7 +231,7 @@ export function useChatPanel(options = {}) {
   /**
    * 撤回消息
    */
-  const recall = async (messageId) => {
+  const recall = async messageId => {
     try {
       await store.dispatch('im/message/recallMessage', messageId)
       const index = messages.value.findIndex(m => m.id === messageId)
@@ -290,7 +290,7 @@ export function useChatPanel(options = {}) {
 
   const selectedMessages = computed(() => store.getters['im/message/selectedMessageList'])
 
-  const toggleMultiSelect = (active) => {
+  const toggleMultiSelect = active => {
     isMultiSelectModeActive.value = active
     if (!active) {
       store.commit('im/message/CLEAR_MESSAGE_SELECTION')
@@ -314,7 +314,7 @@ export function useChatPanel(options = {}) {
   /**
    * 处理新消息
    */
-  const handleNewMessage = (msg) => {
+  const handleNewMessage = msg => {
     if (msg.conversationId === session.value?.id) {
       const transformedMsg = transformMsg(msg)
       messages.value.push(transformedMsg)
@@ -327,8 +327,8 @@ export function useChatPanel(options = {}) {
   /**
    * 处理消息状态更新
    */
-  const handleMessageStatus = (data) => {
-    if (data.conversationId !== session.value?.id) return
+  const handleMessageStatus = data => {
+    if (data.conversationId !== session.value?.id) {return}
 
     const index = messages.value.findIndex(m => m.id === data.messageId)
     if (index !== -1) {

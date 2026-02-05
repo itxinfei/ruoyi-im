@@ -66,27 +66,27 @@ public class ImFileAdminController {
             @Parameter(description = "结束时间") @RequestParam(required = false) LocalDateTime endTime) {
 
         // 构建查询条件
-        LambdaQueryWrapper<ImFileAsset> wrapper = new LambdaQueryWrapper<>();
+        QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         // 使用 status 字段过滤未删除的记录
-        wrapper.eq(ImFileAsset::getStatus, "ACTIVE");
+        wrapper.eq("status", "ACTIVE");
 
         if (fileName != null && !fileName.isEmpty()) {
-            wrapper.like(ImFileAsset::getFileName, fileName);
+            wrapper.like("file_name", fileName);
         }
         if (fileType != null && !fileType.isEmpty()) {
-            wrapper.eq(ImFileAsset::getFileType, fileType);
+            wrapper.eq("file_type", fileType);
         }
         if (uploaderId != null) {
-            wrapper.eq(ImFileAsset::getUploaderId, uploaderId);
+            wrapper.eq("uploader_id", uploaderId);
         }
         if (startTime != null) {
-            wrapper.ge(ImFileAsset::getCreateTime, startTime);
+            wrapper.ge("create_time", startTime);
         }
         if (endTime != null) {
-            wrapper.le(ImFileAsset::getCreateTime, endTime);
+            wrapper.le("create_time", endTime);
         }
 
-        wrapper.orderByDesc(ImFileAsset::getCreateTime);
+        wrapper.orderByDesc("create_time");
 
         // 分页查询
         IPage<ImFileAsset> page = new Page<>(pageNum, pageSize);

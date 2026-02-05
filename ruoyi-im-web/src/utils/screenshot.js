@@ -44,14 +44,14 @@ export async function captureScreenshot(options = {}) {
     video.play()
 
     // 等待视频加载
-    await new Promise((resolve) => {
+    await new Promise(resolve => {
       video.onloadedmetadata = () => {
         resolve()
       }
     })
 
     // 等待一帧确保有画面
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     // 创建画布
     const canvas = document.createElement('canvas')

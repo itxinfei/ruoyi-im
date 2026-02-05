@@ -1,51 +1,89 @@
 <template>
-  <div class="skeleton-loader" :class="{ dark: isDark }">
+  <div
+    class="skeleton-loader"
+    :class="{ dark: isDark }"
+  >
     <!-- 会话项骨架屏 -->
-    <div v-if="type === 'session'" class="skeleton-session">
-      <div v-for="i in count" :key="i" class="skeleton-session-item">
-        <div class="skeleton-avatar"></div>
+    <div
+      v-if="type === 'session'"
+      class="skeleton-session"
+    >
+      <div
+        v-for="i in count"
+        :key="i"
+        class="skeleton-session-item"
+      >
+        <div class="skeleton-avatar" />
         <div class="skeleton-content">
-          <div class="skeleton-title"></div>
-          <div class="skeleton-subtitle"></div>
+          <div class="skeleton-title" />
+          <div class="skeleton-subtitle" />
         </div>
       </div>
     </div>
 
     <!-- 消息列表骨架屏 -->
-    <div v-else-if="type === 'message'" class="skeleton-message">
-      <div v-for="i in count" :key="i" :class="['skeleton-message-item', i % 2 === 0 ? 'left' : 'right']">
-        <div class="skeleton-avatar"></div>
+    <div
+      v-else-if="type === 'message'"
+      class="skeleton-message"
+    >
+      <div
+        v-for="i in count"
+        :key="i"
+        :class="['skeleton-message-item', i % 2 === 0 ? 'left' : 'right']"
+      >
+        <div class="skeleton-avatar" />
         <div class="skeleton-bubble">
-          <div class="skeleton-line"></div>
-          <div v-if="i % 3 !== 0" class="skeleton-line short"></div>
+          <div class="skeleton-line" />
+          <div
+            v-if="i % 3 !== 0"
+            class="skeleton-line short"
+          />
         </div>
       </div>
     </div>
 
     <!-- 列表骨架屏 -->
-    <div v-else-if="type === 'list'" class="skeleton-list">
-      <div v-for="i in count" :key="i" class="skeleton-list-item">
-        <div class="skeleton-dot"></div>
-        <div class="skeleton-line-long"></div>
+    <div
+      v-else-if="type === 'list'"
+      class="skeleton-list"
+    >
+      <div
+        v-for="i in count"
+        :key="i"
+        class="skeleton-list-item"
+      >
+        <div class="skeleton-dot" />
+        <div class="skeleton-line-long" />
       </div>
     </div>
 
     <!-- 卡片骨架屏 -->
-    <div v-else-if="type === 'card'" class="skeleton-card">
+    <div
+      v-else-if="type === 'card'"
+      class="skeleton-card"
+    >
       <div class="skeleton-card-header">
-        <div class="skeleton-title-lg"></div>
-        <div class="skeleton-actions"></div>
+        <div class="skeleton-title-lg" />
+        <div class="skeleton-actions" />
       </div>
       <div class="skeleton-card-body">
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line short"></div>
+        <div class="skeleton-line" />
+        <div class="skeleton-line" />
+        <div class="skeleton-line short" />
       </div>
     </div>
 
     <!-- 通用块骨架屏 -->
-    <div v-else class="skeleton-block">
-      <div v-for="i in count" :key="i" class="skeleton-block-item" :style="{ width: width || '100%', height: height || '20px' }"></div>
+    <div
+      v-else
+      class="skeleton-block"
+    >
+      <div
+        v-for="i in count"
+        :key="i"
+        class="skeleton-block-item"
+        :style="{ width: width || '100%', height: height || '20px' }"
+      />
     </div>
   </div>
 </template>

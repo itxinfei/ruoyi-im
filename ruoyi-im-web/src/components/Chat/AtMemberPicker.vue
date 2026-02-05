@@ -17,9 +17,17 @@
       />
     </div>
     
-    <div v-loading="loading" class="member-list">
-      <div class="member-item all" @click="handleSelect({ id: 'all', name: '所有人' })">
-        <div class="avatar-all">@</div>
+    <div
+      v-loading="loading"
+      class="member-list"
+    >
+      <div
+        class="member-item all"
+        @click="handleSelect({ id: 'all', name: '所有人' })"
+      >
+        <div class="avatar-all">
+          @
+        </div>
         <span class="name">所有人</span>
       </div>
       
@@ -39,7 +47,10 @@
         <span class="name">{{ member.nickname || member.username }}</span>
       </div>
       
-      <el-empty v-if="!loading && filteredMembers.length === 0" description="未找到成员" />
+      <el-empty
+        v-if="!loading && filteredMembers.length === 0"
+        description="未找到成员"
+      />
     </div>
   </el-dialog>
 </template>
@@ -62,7 +73,7 @@ const searchKeyword = ref('')
 const members = ref([])
 
 const loadMembers = async () => {
-  if (!props.sessionId) return
+  if (!props.sessionId) {return}
   loading.value = true
   try {
     const res = await getGroupMembers(props.sessionId)
@@ -78,14 +89,14 @@ const loadMembers = async () => {
 
 const filteredMembers = computed(() => {
   const keyword = searchKeyword.value.toLowerCase()
-  if (!keyword) return members.value
+  if (!keyword) {return members.value}
   return members.value.filter(m => 
     (m.nickname && m.nickname.toLowerCase().includes(keyword)) ||
     (m.username && m.username.toLowerCase().includes(keyword))
   )
 })
 
-const handleSelect = (member) => {
+const handleSelect = member => {
   emit('select', member)
   visible.value = false
 }

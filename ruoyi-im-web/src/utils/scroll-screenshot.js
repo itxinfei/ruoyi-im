@@ -51,7 +51,7 @@ function calculateOverlap(img1, img2, minOverlap = 50) {
     }
 
     // 如果找到足够好的匹配，提前结束
-    if (maxMatch > 0.85) break
+    if (maxMatch > 0.85) {break}
   }
 
   return maxMatch > 0.7 ? h1 - bestY : 0
@@ -135,7 +135,7 @@ export class ScrollScreenshotManager {
    * @returns {boolean} - 是否成功拼接
    */
   addScreenshot(newCanvas) {
-    if (!this.isCapturing) return false
+    if (!this.isCapturing) {return false}
 
     const newImageData = newCanvas.getContext('2d').getImageData(
       0, 0, newCanvas.width, newCanvas.height
@@ -209,7 +209,7 @@ export function createManualScrollStitcher() {
      * 添加截图
      */
     addImage(dataUrl) {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const img = new Image()
         img.onload = () => {
           images.push(img)
@@ -223,7 +223,7 @@ export function createManualScrollStitcher() {
      * 拼接所有截图
      */
     async stitch() {
-      if (images.length === 0) return null
+      if (images.length === 0) {return null}
 
       // 创建输出画布
       const canvas = document.createElement('canvas')

@@ -1,23 +1,50 @@
 <template>
   <div class="dingtalk-groups-view">
     <!-- 加载状态 -->
-    <div v-if="loading" class="dt-loading">
-      <div class="dt-spinner"></div>
+    <div
+      v-if="loading"
+      class="dt-loading"
+    >
+      <div class="dt-spinner" />
     </div>
 
     <!-- 空状态 -->
-    <div v-else-if="groups.length === 0" class="dt-empty">
-      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke-linecap="round"/>
-        <circle cx="9" cy="7" r="3.5"/>
-        <path d="M23 21v-2a4 4 0 00-3-3.87" stroke-linecap="round"/>
-        <path d="M16 3.13a4 4 0 010 7.75" stroke-linecap="round"/>
+    <div
+      v-else-if="groups.length === 0"
+      class="dt-empty"
+    >
+      <svg
+        viewBox="0 0 48 48"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <path
+          d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+          stroke-linecap="round"
+        />
+        <circle
+          cx="9"
+          cy="7"
+          r="3.5"
+        />
+        <path
+          d="M23 21v-2a4 4 0 00-3-3.87"
+          stroke-linecap="round"
+        />
+        <path
+          d="M16 3.13a4 4 0 010 7.75"
+          stroke-linecap="round"
+        />
       </svg>
       <p>暂无群组</p>
     </div>
 
     <!-- 群组列表 -->
-    <div v-else class="dt-groups-list">
+    <div
+      v-else
+      class="dt-groups-list"
+    >
       <div
         v-for="group in groups"
         :key="group.id"
@@ -31,14 +58,29 @@
           shape="square"
         />
         <div class="dt-group-info">
-          <div class="dt-group-name">{{ group.name }}</div>
+          <div class="dt-group-name">
+            {{ group.name }}
+          </div>
           <div class="dt-group-desc">
             <span v-if="group.memberCount">{{ group.memberCount }}人</span>
-            <span v-if="group.description" class="dt-group-desc-text">{{ group.description }}</span>
+            <span
+              v-if="group.description"
+              class="dt-group-desc-text"
+            >{{ group.description }}</span>
           </div>
         </div>
-        <svg class="dt-group-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          class="dt-group-arrow"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            d="M9 18l6-6-6-6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </div>
     </div>
@@ -69,7 +111,7 @@ const loadGroups = async () => {
   }
 }
 
-const handleSelectGroup = (group) => {
+const handleSelectGroup = group => {
   emit('select-group', group)
 }
 

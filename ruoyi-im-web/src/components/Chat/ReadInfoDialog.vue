@@ -1,14 +1,17 @@
 <template>
   <el-dialog
     :model-value="visible"
-    @update:model-value="visible = $event"
     title="已读详情"
     width="400px"
     :close-on-click-modal="true"
+    @update:model-value="visible = $event"
   >
     <div class="read-info-container">
       <!-- 单聊已读信息 -->
-      <div v-if="!isGroupChat" class="single-chat-info">
+      <div
+        v-if="!isGroupChat"
+        class="single-chat-info"
+      >
         <div class="info-row">
           <span class="info-label">已读时间:</span>
           <span class="info-value">{{ formatReadTime }}</span>
@@ -16,7 +19,10 @@
       </div>
 
       <!-- 群聊已读信息 -->
-      <div v-else class="group-chat-info">
+      <div
+        v-else
+        class="group-chat-info"
+      >
         <div class="info-row">
           <span class="info-label">已读人数:</span>
           <span class="info-value">{{ readCount }}&nbsp;/&nbsp;{{ totalCount }}</span>
@@ -25,7 +31,9 @@
         <el-divider />
 
         <div class="members-section">
-          <div class="section-title">已读成员</div>
+          <div class="section-title">
+            已读成员
+          </div>
           <div class="members-grid">
             <div
               v-for="member in readBy"
@@ -38,13 +46,22 @@
                 :size="40"
                 :username="member.nickname || member.userName"
               />
-              <div class="member-name">{{ member.nickname || member.userName }}</div>
-              <div class="read-time">{{ formatRelativeTime(member.readTime) }}</div>
+              <div class="member-name">
+                {{ member.nickname || member.userName }}
+              </div>
+              <div class="read-time">
+                {{ formatRelativeTime(member.readTime) }}
+              </div>
             </div>
           </div>
 
-          <div v-if="unreadMembers.length > 0" class="unread-section">
-            <div class="section-title">未读成员</div>
+          <div
+            v-if="unreadMembers.length > 0"
+            class="unread-section"
+          >
+            <div class="section-title">
+              未读成员
+            </div>
             <div class="members-grid">
               <div
                 v-for="member in unreadMembers"
@@ -57,7 +74,9 @@
                   :size="40"
                   :username="member.nickname || member.userName"
                 />
-                <div class="member-name">{{ member.nickname || member.userName }}</div>
+                <div class="member-name">
+                  {{ member.nickname || member.userName }}
+                </div>
               </div>
             </div>
           </div>
@@ -77,7 +96,9 @@
           <span>提醒未读 ({{ unreadMembers.length }})</span>
         </el-button>
 
-        <el-button @click="visible = false">关闭</el-button>
+        <el-button @click="visible = false">
+          关闭
+        </el-button>
       </div>
     </template>
   </el-dialog>
@@ -128,7 +149,7 @@ const emit = defineEmits(['remind-unread'])
 
 // 格式化已读时间
 const formatReadTime = computed(() => {
-  if (!props.readTime) return '-'
+  if (!props.readTime) {return '-'}
   return new Date(props.readTime).toLocaleString('zh-CN', {
     month: '2-digit',
     day: '2-digit',
@@ -164,7 +185,7 @@ const handleRemindUnread = () => {
 
 // 未读成员
 const unreadMembers = computed(() => {
-  if (!props.isGroupChat || !props.allMembers.length) return []
+  if (!props.isGroupChat || !props.allMembers.length) {return []}
 
   const readUserIds = new Set(props.readBy.map(m => m.userId))
   return props.allMembers.filter(m => !readUserIds.has(m.userId))

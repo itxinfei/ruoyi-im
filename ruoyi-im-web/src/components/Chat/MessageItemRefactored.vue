@@ -6,7 +6,10 @@
  */
 <template>
   <!-- 时间分割线 -->
-  <div v-if="message.isTimeDivider" class="time-divider-wrapper">
+  <div
+    v-if="message.isTimeDivider"
+    class="time-divider-wrapper"
+  >
     <span class="time-text">{{ message.timeText }}</span>
   </div>
 
@@ -18,7 +21,10 @@
     :data-id="message.id"
   >
     <!-- 多选复选框 -->
-    <div v-if="multiSelectMode" class="checkbox-wrapper">
+    <div
+      v-if="multiSelectMode"
+      class="checkbox-wrapper"
+    >
       <el-checkbox
         :model-value="isSelected"
         @change="toggleSelection"
@@ -29,10 +35,10 @@
     <!-- 头像区域 -->
     <div
       class="avatar-wrapper"
+      title="右键@提及 | 查看资料 | 双击拍一拍"
       @contextmenu.prevent="$emit('at', message)"
       @click="$emit('show-user', message.senderId)"
       @dblclick="handleNudge"
-      title="右键@提及 | 查看资料 | 双击拍一拍"
     >
       <DingtalkAvatar
         :src="message.senderAvatar"
@@ -45,7 +51,10 @@
     </div>
 
     <!-- 消息内容包裹层 -->
-    <div class="content-wrapper" :class="{ 'is-merged': message.isMerged }">
+    <div
+      class="content-wrapper"
+      :class="{ 'is-merged': message.isMerged }"
+    >
       <!-- 消息气泡 -->
       <slot name="bubble">
         <MessageBubble
@@ -65,7 +74,10 @@
       </slot>
 
       <!-- 消息页脚（时间） -->
-      <div v-if="!hideFooter" class="message-footer">
+      <div
+        v-if="!hideFooter"
+        class="message-footer"
+      >
         <span class="message-time">{{ formattedTime }}</span>
       </div>
     </div>
@@ -108,7 +120,7 @@ const isSelected = computed(() => {
 
 // 格式化时间
 const formattedTime = computed(() => {
-  if (!props.message.timestamp) return ''
+  if (!props.message.timestamp) {return ''}
   const date = new Date(props.message.timestamp)
   return date.toLocaleTimeString('zh-CN', {
     hour: '2-digit',

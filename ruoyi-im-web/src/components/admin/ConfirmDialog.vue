@@ -13,7 +13,11 @@
     <!-- 图标和内容 -->
     <div class="confirm-dialog-content">
       <!-- 图标 -->
-      <div v-if="showIcon" class="confirm-icon" :class="'confirm-icon--' + type">
+      <div
+        v-if="showIcon"
+        class="confirm-icon"
+        :class="'confirm-icon--' + type"
+      >
         <el-icon :size="iconSize">
           <WarningFilled v-if="type === 'warning'" />
           <CircleCheckFilled v-else-if="type === 'success'" />
@@ -25,12 +29,22 @@
 
       <!-- 消息内容 -->
       <div class="confirm-message">
-        <h3 v-if="messageTitle" class="confirm-title">{{ messageTitle }}</h3>
-        <p class="confirm-text">{{ message }}</p>
+        <h3
+          v-if="messageTitle"
+          class="confirm-title"
+        >
+          {{ messageTitle }}
+        </h3>
+        <p class="confirm-text">
+          {{ message }}
+        </p>
 
         <!-- 额外内容插槽 -->
-        <div v-if="$slots.default" class="confirm-extra">
-          <slot></slot>
+        <div
+          v-if="$slots.default"
+          class="confirm-extra"
+        >
+          <slot />
         </div>
 
         <!-- 确认输入（防误操作） -->
@@ -45,14 +59,21 @@
     </div>
 
     <!-- 自定义内容插槽 -->
-    <div v-if="$slots.content" class="confirm-custom-content">
-      <slot name="content"></slot>
+    <div
+      v-if="$slots.content"
+      class="confirm-custom-content"
+    >
+      <slot name="content" />
     </div>
 
     <!-- 底部操作按钮 -->
     <template #footer>
       <div class="confirm-footer">
-        <el-checkbox v-if="showRemember" v-model="rememberChoice" class="remember-checkbox">
+        <el-checkbox
+          v-if="showRemember"
+          v-model="rememberChoice"
+          class="remember-checkbox"
+        >
           {{ rememberText }}
         </el-checkbox>
         <div class="confirm-buttons">
@@ -140,7 +161,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'warning',
-    validator: (val) => ['warning', 'success', 'error', 'info'].includes(val)
+    validator: val => ['warning', 'success', 'error', 'info'].includes(val)
   },
   // 确认按钮文字
   confirmText: {
@@ -224,7 +245,7 @@ const emit = defineEmits(['update:visible', 'confirm', 'cancel', 'close'])
 // 内部显示状态
 const internalVisible = computed({
   get: () => props.visible,
-  set: (val) => emit('update:visible', val)
+  set: val => emit('update:visible', val)
 })
 
 // 确认输入值
@@ -235,7 +256,7 @@ const rememberChoice = ref(false)
 
 // 确认关键词匹配检查
 const isConfirmMatch = computed(() => {
-  if (!props.requireConfirm) return true
+  if (!props.requireConfirm) {return true}
   return confirmInput.value === props.confirmKeyword
 })
 
@@ -262,7 +283,7 @@ const resetState = () => {
 }
 
 // 监听对话框关闭，重置状态
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, newVal => {
   if (!newVal) {
     resetState()
   }
@@ -282,8 +303,8 @@ const handleCancel = () => {
 }
 
 // 处理关闭前
-const handleBeforeClose = (done) => {
-  if (props.loading) return
+const handleBeforeClose = done => {
+  if (props.loading) {return}
   emit('close')
   done()
 }

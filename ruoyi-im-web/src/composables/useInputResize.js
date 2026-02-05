@@ -35,7 +35,7 @@ export function useInputResize(options = {}) {
   /**
    * 开始调整高度
    */
-  const startResize = (e) => {
+  const startResize = e => {
     isResizing.value = true
     startY = e.clientY
     startHeight = containerHeight.value
@@ -48,8 +48,8 @@ export function useInputResize(options = {}) {
   /**
    * 处理调整中
    */
-  const handleResize = (e) => {
-    if (!isResizing.value) return
+  const handleResize = e => {
+    if (!isResizing.value) {return}
 
     const delta = startY - e.clientY
     const newHeight = startHeight + delta

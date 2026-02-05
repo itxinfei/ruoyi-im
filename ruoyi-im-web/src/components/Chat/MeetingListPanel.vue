@@ -7,29 +7,47 @@
         <span class="header-title">视频会议</span>
       </div>
       <div class="header-actions">
-        <el-button type="primary" :icon="Plus" @click="handleCreateMeeting">
+        <el-button
+          type="primary"
+          :icon="Plus"
+          @click="handleCreateMeeting"
+        >
           发起会议
         </el-button>
-        <el-button :icon="Refresh" @click="loadMeetings" :loading="loading" />
+        <el-button
+          :icon="Refresh"
+          :loading="loading"
+          @click="loadMeetings"
+        />
       </div>
     </div>
 
     <!-- 分类标签页 -->
-    <el-tabs v-model="activeTab" @tab-change="handleTabChange" class="meeting-tabs">
+    <el-tabs
+      v-model="activeTab"
+      class="meeting-tabs"
+      @tab-change="handleTabChange"
+    >
       <el-tab-pane name="upcoming">
         <template #label>
           <span class="tab-item">
             <span>即将开始</span>
-            <span v-if="upcomingCount > 0" class="count-badge">{{ upcomingCount }}</span>
+            <span
+              v-if="upcomingCount > 0"
+              class="count-badge"
+            >{{ upcomingCount }}</span>
           </span>
         </template>
       </el-tab-pane>
       <el-tab-pane name="in-progress">
         <template #label>
           <span class="tab-item">
-            <span class="live-dot"></span>
+            <span class="live-dot" />
             <span>进行中</span>
-            <span v-if="inProgressCount > 0" class="count-badge live">{{ inProgressCount }}</span>
+            <span
+              v-if="inProgressCount > 0"
+              class="count-badge live"
+            >{{ inProgressCount }}</span>
           </span>
         </template>
       </el-tab-pane>
@@ -43,18 +61,32 @@
     </el-tabs>
 
     <!-- 会议列表 -->
-    <div class="meeting-list-container" v-loading="loading">
+    <div
+      v-loading="loading"
+      class="meeting-list-container"
+    >
       <!-- 空状态 -->
-      <div v-if="!loading && filteredMeetings.length === 0" class="empty-state">
+      <div
+        v-if="!loading && filteredMeetings.length === 0"
+        class="empty-state"
+      >
         <span class="material-icons-outlined empty-icon">videocam_off</span>
         <span class="empty-text">{{ emptyText }}</span>
-        <el-button v-if="activeTab === 'upcoming'" type="primary" plain @click="handleCreateMeeting">
+        <el-button
+          v-if="activeTab === 'upcoming'"
+          type="primary"
+          plain
+          @click="handleCreateMeeting"
+        >
           发起会议
         </el-button>
       </div>
 
       <!-- 会议卡片列表 -->
-      <div v-else class="meeting-list">
+      <div
+        v-else
+        class="meeting-list"
+      >
         <div
           v-for="meeting in filteredMeetings"
           :key="meeting.id"
@@ -63,19 +95,29 @@
         >
           <!-- 会议封面/头像 -->
           <div class="meeting-cover">
-            <div v-if="meeting.status === 'IN_PROGRESS'" class="live-badge">
-              <span class="live-dot"></span>
+            <div
+              v-if="meeting.status === 'IN_PROGRESS'"
+              class="live-badge"
+            >
+              <span class="live-dot" />
               进行中
             </div>
-            <span v-else class="meeting-icon">
+            <span
+              v-else
+              class="meeting-icon"
+            >
               <span class="material-icons-outlined">groups</span>
             </span>
           </div>
 
           <!-- 会议信息 -->
           <div class="meeting-info">
-            <div class="meeting-title">{{ meeting.title }}</div>
-            <div class="meeting-desc">{{ meeting.description || '无描述' }}</div>
+            <div class="meeting-title">
+              {{ meeting.title }}
+            </div>
+            <div class="meeting-desc">
+              {{ meeting.description || '无描述' }}
+            </div>
             <div class="meeting-meta">
               <span class="meta-item">
                 <span class="material-icons-outlined">person</span>
@@ -112,19 +154,32 @@
               >
                 加入会议
               </el-button>
-              <el-dropdown trigger="click" @command="(cmd) => handleCommand(cmd, meeting)">
-                <el-button :icon="MoreFilled" circle />
+              <el-dropdown
+                trigger="click"
+                @command="(cmd) => handleCommand(cmd, meeting)"
+              >
+                <el-button
+                  :icon="MoreFilled"
+                  circle
+                />
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item command="detail">
                       <span class="material-icons-outlined">info</span>
                       查看详情
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="meeting.isHost" command="edit">
+                    <el-dropdown-item
+                      v-if="meeting.isHost"
+                      command="edit"
+                    >
                       <span class="material-icons-outlined">edit</span>
                       编辑会议
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="meeting.isHost" command="cancel" class="danger-item">
+                    <el-dropdown-item
+                      v-if="meeting.isHost"
+                      command="cancel"
+                      class="danger-item"
+                    >
                       <span class="material-icons-outlined">cancel</span>
                       取消会议
                     </el-dropdown-item>
@@ -236,8 +291,8 @@ const inProgressCount = computed(() => {
 })
 
 const emptyText = computed(() => {
-  if (activeTab.value === 'upcoming') return '暂无即将开始的会议'
-  if (activeTab.value === 'in-progress') return '暂无进行中的会议'
+  if (activeTab.value === 'upcoming') {return '暂无即将开始的会议'}
+  if (activeTab.value === 'in-progress') {return '暂无进行中的会议'}
   return '暂无历史会议'
 })
 
@@ -269,7 +324,7 @@ const handleCreateMeeting = () => {
 }
 
 // 处理创建/编辑成功
-const handleCreateSuccess = (meeting) => {
+const handleCreateSuccess = meeting => {
   editingMeetingId.value = null
   loadMeetings()
   if (meeting && meeting.status === 'IN_PROGRESS') {
@@ -278,7 +333,7 @@ const handleCreateSuccess = (meeting) => {
 }
 
 // 处理开始会议
-const handleStartMeeting = async (meeting) => {
+const handleStartMeeting = async meeting => {
   try {
     const res = await startMeeting(meeting.id)
     if (res.code === 200) {
@@ -292,7 +347,7 @@ const handleStartMeeting = async (meeting) => {
 }
 
 // 处理加入会议
-const handleJoinMeeting = async (meeting) => {
+const handleJoinMeeting = async meeting => {
   try {
     const res = await joinMeeting(meeting.id)
     if (res.code === 200) {
@@ -304,7 +359,7 @@ const handleJoinMeeting = async (meeting) => {
 }
 
 // 处理结束会议
-const handleEndMeeting = async (meeting) => {
+const handleEndMeeting = async meeting => {
   try {
     await ElMessageBox.confirm('确定要结束会议吗？', '结束会议', {
       confirmButtonText: '结束',
@@ -341,7 +396,7 @@ const handleCommand = async (command, meeting) => {
 }
 
 // 处理取消会议
-const handleCancelMeeting = async (meeting) => {
+const handleCancelMeeting = async meeting => {
   try {
     await ElMessageBox.confirm(`确定要取消会议"${meeting.title}"吗？`, '取消会议', {
       confirmButtonText: '取消会议',
@@ -362,7 +417,7 @@ const handleCancelMeeting = async (meeting) => {
 }
 
 // 查看详情
-const handleViewDetail = (meeting) => {
+const handleViewDetail = meeting => {
   selectedMeeting.value = meeting
   showDetailDialog.value = true
 }
@@ -373,8 +428,8 @@ const handleTabChange = () => {
 }
 
 // 格式化时间
-const formatTime = (time) => {
-  if (!time) return '待定'
+const formatTime = time => {
+  if (!time) {return '待定'}
   const date = new Date(time)
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -388,8 +443,8 @@ const formatTime = (time) => {
 
   const diffDays = Math.floor((today - meetingDate) / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return `今天 ${timeStr}`
-  if (diffDays === 1) return `明天 ${timeStr}`
+  if (diffDays === 0) {return `今天 ${timeStr}`}
+  if (diffDays === 1) {return `明天 ${timeStr}`}
 
   return `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
 }

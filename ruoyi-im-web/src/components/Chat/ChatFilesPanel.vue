@@ -1,16 +1,26 @@
 <template>
   <teleport to="body">
     <transition name="slide">
-      <div v-if="visible" class="chat-files-overlay" @click.self="handleClose">
+      <div
+        v-if="visible"
+        class="chat-files-overlay"
+        @click.self="handleClose"
+      >
         <div class="chat-files-panel">
           <!-- 头部 -->
           <div class="files-header">
             <div class="header-title">
               <span class="material-icons-outlined">folder_open</span>
               <span>聊天文件</span>
-              <span v-if="totalFiles > 0" class="files-count">({{ totalFiles }})</span>
+              <span
+                v-if="totalFiles > 0"
+                class="files-count"
+              >({{ totalFiles }})</span>
             </div>
-            <button class="close-btn" @click="handleClose">
+            <button
+              class="close-btn"
+              @click="handleClose"
+            >
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
@@ -38,32 +48,61 @@
               >
                 <span class="material-icons-outlined">{{ tab.icon }}</span>
                 <span>{{ tab.label }}</span>
-                <span v-if="tab.count > 0" class="tab-count">{{ tab.count }}</span>
+                <span
+                  v-if="tab.count > 0"
+                  class="tab-count"
+                >{{ tab.count }}</span>
               </button>
             </div>
           </div>
 
           <!-- 文件列表 -->
-          <div class="files-list" ref="listRef">
+          <div
+            ref="listRef"
+            class="files-list"
+          >
             <!-- 加载状态 -->
-            <div v-if="loading" class="loading-state">
-              <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+            <div
+              v-if="loading"
+              class="loading-state"
+            >
+              <el-icon
+                class="is-loading"
+                :size="32"
+              >
+                <Loading />
+              </el-icon>
               <span>加载中...</span>
             </div>
 
             <!-- 空状态 -->
-            <div v-else-if="filteredFiles.length === 0" class="empty-state">
+            <div
+              v-else-if="filteredFiles.length === 0"
+              class="empty-state"
+            >
               <span class="material-icons-outlined">folder_off</span>
-              <p v-if="searchKeyword">未找到匹配的文件</p>
-              <p v-else>暂无文件</p>
+              <p v-if="searchKeyword">
+                未找到匹配的文件
+              </p>
+              <p v-else>
+                暂无文件
+              </p>
               <span class="hint">聊天中发送的文件会显示在这里</span>
             </div>
 
             <!-- 文件列表 -->
-            <div v-else class="file-items">
+            <div
+              v-else
+              class="file-items"
+            >
               <!-- 按日期分组 -->
-              <template v-for="(group, date) in groupedFiles" :key="date">
-                <div class="group-date">{{ formatDate(date) }}</div>
+              <template
+                v-for="(group, date) in groupedFiles"
+                :key="date"
+              >
+                <div class="group-date">
+                  {{ formatDate(date) }}
+                </div>
 
                 <div
                   v-for="file in group"
@@ -72,13 +111,21 @@
                   @click="handleFileClick(file)"
                 >
                   <!-- 文件图标 -->
-                  <div class="file-icon" :class="`type-${fileType(file.name)}`">
+                  <div
+                    class="file-icon"
+                    :class="`type-${fileType(file.name)}`"
+                  >
                     <span class="material-icons-outlined">{{ getFileIcon(file.name) }}</span>
                   </div>
 
                   <!-- 文件信息 -->
                   <div class="file-info">
-                    <div class="file-name" :title="file.name">{{ file.name }}</div>
+                    <div
+                      class="file-name"
+                      :title="file.name"
+                    >
+                      {{ file.name }}
+                    </div>
                     <div class="file-meta">
                       <span class="file-sender">{{ file.senderName }}</span>
                       <span class="file-size">{{ formatFileSize(file.size) }}</span>
@@ -86,7 +133,10 @@
                   </div>
 
                   <!-- 文件操作 -->
-                  <div class="file-actions" @click.stop>
+                  <div
+                    class="file-actions"
+                    @click.stop
+                  >
                     <el-button
                       type="primary"
                       size="small"
@@ -95,8 +145,14 @@
                     >
                       <span class="material-icons-outlined">download</span>
                     </el-button>
-                    <el-dropdown trigger="click" @command="(cmd) => handleFileAction(cmd, file)">
-                      <el-button size="small" text>
+                    <el-dropdown
+                      trigger="click"
+                      @command="(cmd) => handleFileAction(cmd, file)"
+                    >
+                      <el-button
+                        size="small"
+                        text
+                      >
                         <span class="material-icons-outlined">more_vert</span>
                       </el-button>
                       <template #dropdown>
@@ -109,11 +165,17 @@
                             <span class="material-icons-outlined">forward</span>
                             转发
                           </el-dropdown-item>
-                          <el-dropdown-item command="save" divided>
+                          <el-dropdown-item
+                            command="save"
+                            divided
+                          >
                             <span class="material-icons-outlined">save_alt</span>
                             保存到云盘
                           </el-dropdown-item>
-                          <el-dropdown-item command="delete" class="danger">
+                          <el-dropdown-item
+                            command="delete"
+                            class="danger"
+                          >
                             <span class="material-icons-outlined">delete</span>
                             删除
                           </el-dropdown-item>
@@ -126,18 +188,28 @@
             </div>
 
             <!-- 加载更多 -->
-            <div v-if="hasMore && !loading" class="load-more" @click="loadMore">
+            <div
+              v-if="hasMore && !loading"
+              class="load-more"
+              @click="loadMore"
+            >
               <span>加载更多</span>
             </div>
           </div>
 
           <!-- 底部统计 -->
-          <div v-if="filteredFiles.length > 0" class="files-footer">
+          <div
+            v-if="filteredFiles.length > 0"
+            class="files-footer"
+          >
             <div class="storage-info">
               <span class="material-icons-outlined">storage</span>
               <span>文件总大小：{{ formatTotalSize() }}</span>
             </div>
-            <el-button size="small" @click="handleBatchDownload">
+            <el-button
+              size="small"
+              @click="handleBatchDownload"
+            >
               <span class="material-icons-outlined">download</span>
               批量下载
             </el-button>
@@ -226,17 +298,17 @@ const fileList = computed(() => {
 })
 
 // 更新标签页计数
-watch(fileList, (files) => {
+watch(fileList, files => {
   fileTypeTabs.value.forEach(tab => {
     if (tab.key === 'all') {
       tab.count = files.length
     } else {
       tab.count = files.filter(f => {
-        if (tab.key === 'image') return f.type === 'image'
-        if (tab.key === 'document') return ['document', 'text', 'pdf'].includes(f.type)
-        if (tab.key === 'video') return f.type === 'video'
-        if (tab.key === 'audio') return f.type === 'audio'
-        if (tab.key === 'archive') return f.type === 'archive'
+        if (tab.key === 'image') {return f.type === 'image'}
+        if (tab.key === 'document') {return ['document', 'text', 'pdf'].includes(f.type)}
+        if (tab.key === 'video') {return f.type === 'video'}
+        if (tab.key === 'audio') {return f.type === 'audio'}
+        if (tab.key === 'archive') {return f.type === 'archive'}
         return false
       }).length
     }
@@ -288,7 +360,7 @@ const groupedFiles = computed(() => {
 })
 
 // 获取文件类型
-const getFileType = (fileName) => {
+const getFileType = fileName => {
   const ext = fileName.split('.').pop()?.toLowerCase() || ''
 
   const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico']
@@ -297,17 +369,17 @@ const getFileType = (fileName) => {
   const audioExts = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a']
   const archiveExts = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2']
 
-  if (imageExts.includes(ext)) return 'image'
-  if (documentExts.includes(ext)) return ext === 'pdf' ? 'pdf' : 'document'
-  if (videoExts.includes(ext)) return 'video'
-  if (audioExts.includes(ext)) return 'audio'
-  if (archiveExts.includes(ext)) return 'archive'
+  if (imageExts.includes(ext)) {return 'image'}
+  if (documentExts.includes(ext)) {return ext === 'pdf' ? 'pdf' : 'document'}
+  if (videoExts.includes(ext)) {return 'video'}
+  if (audioExts.includes(ext)) {return 'audio'}
+  if (archiveExts.includes(ext)) {return 'archive'}
 
   return 'file'
 }
 
 // 获取文件图标
-const getFileIcon = (fileName) => {
+const getFileIcon = fileName => {
   const type = getFileType(fileName)
   const icons = {
     image: 'image',
@@ -329,7 +401,7 @@ const formatTotalSize = () => {
 }
 
 // 格式化日期
-const formatDate = (dateStr) => {
+const formatDate = dateStr => {
   const date = new Date(dateStr)
   const today = new Date()
   const yesterday = new Date(today)
@@ -350,11 +422,11 @@ const formatDate = (dateStr) => {
 }
 
 // 文件操作
-const handleFileClick = (file) => {
+const handleFileClick = file => {
   emit('open-file', file)
 }
 
-const handleDownload = (file) => {
+const handleDownload = file => {
   emit('download-file', file)
 }
 
@@ -382,7 +454,7 @@ const loadMore = () => {
 }
 
 // 保存文件到云盘
-const handleSaveToCloud = async (file) => {
+const handleSaveToCloud = async file => {
   try {
     const loading = ElLoading.service({
       lock: true,
@@ -417,7 +489,7 @@ const handleClose = () => {
 }
 
 // 监听 visible 变化
-watch(() => props.visible, (val) => {
+watch(() => props.visible, val => {
   if (val) {
     searchKeyword.value = ''
     activeTab.value = 'all'

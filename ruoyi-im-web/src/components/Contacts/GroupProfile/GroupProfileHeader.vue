@@ -6,7 +6,11 @@
 <template>
   <div class="profile-sidebar">
     <!-- 关闭按钮 -->
-    <el-button class="close-btn" circle @click="$emit('close')">
+    <el-button
+      class="close-btn"
+      circle
+      @click="$emit('close')"
+    >
       <el-icon><Close /></el-icon>
     </el-button>
 
@@ -20,19 +24,42 @@
         />
       </div>
 
-      <h2 class="group-name">{{ groupInfo.name }}</h2>
+      <h2 class="group-name">
+        {{ groupInfo.name }}
+      </h2>
       <p class="group-meta">
         <span class="group-id">群号: {{ groupInfo.groupCode || groupInfo.id }}</span>
         <span class="member-count">{{ memberCount }} 人</span>
       </p>
-      <p class="group-intro">{{ groupInfo.description || '暂无群简介' }}</p>
+      <p class="group-intro">
+        {{ groupInfo.description || '暂无群简介' }}
+      </p>
 
       <div class="group-tags">
-        <el-tag v-if="groupInfo.groupType" size="small" type="primary" effect="light">
+        <el-tag
+          v-if="groupInfo.groupType"
+          size="small"
+          type="primary"
+          effect="light"
+        >
           {{ groupInfo.groupType === 'INTERNAL' ? '内部群' : '外部群' }}
         </el-tag>
-        <el-tag v-if="isOwner" size="small" type="danger" effect="light">群主</el-tag>
-        <el-tag v-else-if="isAdmin" size="small" type="warning" effect="light">管理员</el-tag>
+        <el-tag
+          v-if="isOwner"
+          size="small"
+          type="danger"
+          effect="light"
+        >
+          群主
+        </el-tag>
+        <el-tag
+          v-else-if="isAdmin"
+          size="small"
+          type="warning"
+          effect="light"
+        >
+          管理员
+        </el-tag>
       </div>
     </div>
   </div>

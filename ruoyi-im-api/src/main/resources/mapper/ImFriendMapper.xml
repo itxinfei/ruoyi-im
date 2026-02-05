@@ -15,12 +15,12 @@
     </resultMap>
 
     <sql id="selectImFriendVo">
-        select id, user_id, friend_id, remark, group_name, is_deleted, deleted_time, create_time, update_time
+        select id, user_id, friend_id, remark, group_name, is_deleted, deleted_time, create_time, update_time, tags
         from im_friend
     </sql>
 
     <sql id="selectImFriendVoWithUndeleted">
-        select id, user_id, friend_id, remark, group_name, create_time, update_time
+        select id, user_id, friend_id, remark, group_name, create_time, update_time, tags
         from im_friend
         where is_deleted = 0
     </sql>
@@ -32,7 +32,7 @@
 
     <select id="selectImFriendList" parameterType="com.ruoyi.im.domain.ImFriend" resultMap="ImFriendResult">
         -- 使用子查询确保每个好友只返回一条记录（取最早的）
-        SELECT f.id, f.user_id, f.friend_id, f.remark, f.group_name, f.is_deleted, f.deleted_time, f.create_time, f.update_time
+        SELECT f.id, f.user_id, f.friend_id, f.remark, f.group_name, f.is_deleted, f.deleted_time, f.create_time, f.update_time, f.tags
         FROM im_friend f
         INNER JOIN (
             SELECT user_id, friend_id, MIN(id) as min_id
@@ -51,7 +51,7 @@
 
     <select id="selectImFriendListByUserId" parameterType="Long" resultMap="ImFriendResult">
         -- 使用子查询确保每个好友只返回一条记录（取最早的）
-        SELECT f.id, f.user_id, f.friend_id, f.remark, f.group_name, f.create_time, f.update_time
+        SELECT f.id, f.user_id, f.friend_id, f.remark, f.group_name, f.create_time, f.update_time, f.tags
         FROM im_friend f
         INNER JOIN (
             SELECT user_id, friend_id, MIN(id) as min_id

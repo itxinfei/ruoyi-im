@@ -56,7 +56,7 @@ export default {
   getters: {
     // 当前会话未读数
     currentSessionUnread(state) {
-      if (!state.currentSession) return 0
+      if (!state.currentSession) {return 0}
       const session = state.sessions.find(s => s.id === state.currentSession.id)
       return session?.unreadCount || 0
     },
@@ -64,14 +64,14 @@ export default {
     // 排序后的会话列表（置顶优先）
     sortedSessions(state) {
       return [...state.sessions].sort((a, b) => {
-        if (a.isPinned && !b.isPinned) return -1
-        if (!a.isPinned && b.isPinned) return 1
+        if (a.isPinned && !b.isPinned) {return -1}
+        if (!a.isPinned && b.isPinned) {return 1}
         return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
       })
     },
 
     // 根据 ID 获取会话
-    sessionById: (state) => (id) => {
+    sessionById: state => id => {
       return state.sessions.find(s => s.id === id)
     },
 
@@ -130,7 +130,7 @@ export default {
     },
 
     // 获取会话所属分组
-    sessionGroup: (state) => (conversationId) => {
+    sessionGroup: state => conversationId => {
       const groupId = state.conversationGroupMap[conversationId]
       return state.groups.find(g => g.id === groupId)
     },
@@ -138,20 +138,20 @@ export default {
     // ========== 草稿相关 getters ==========
 
     // 判断会话是否有草稿
-    hasDraft: (state) => (conversationId) => {
+    hasDraft: state => conversationId => {
       const draft = state.drafts[conversationId]
       return draft && draft.content && draft.content.length > 0
     },
 
     // 获取草稿预览文本
-    getDraftPreview: (state) => (conversationId) => {
+    getDraftPreview: state => conversationId => {
       const draft = state.drafts[conversationId]
-      if (!draft || !draft.content) return ''
+      if (!draft || !draft.content) {return ''}
       return draft.content.slice(0, 20)
     },
 
     // 获取草稿完整内容
-    getDraftContent: (state) => (conversationId) => {
+    getDraftContent: state => conversationId => {
       const draft = state.drafts[conversationId]
       return draft?.content || ''
     },
@@ -159,9 +159,9 @@ export default {
     // ========== 输入状态相关 getters ==========
 
     // 判断会话是否正在输入
-    isTyping: (state) => (conversationId) => {
+    isTyping: state => conversationId => {
       const typing = state.typingSessions[conversationId]
-      if (!typing) return false
+      if (!typing) {return false}
       
       // 5秒后自动清除输入状态
       if (Date.now() - typing.lastTypingTime > 5000) {
@@ -172,7 +172,7 @@ export default {
     },
 
     // 获取所有正在输入的会话ID
-    getTypingSessionIds: (state) => {
+    getTypingSessionIds: state => {
       return Object.keys(state.typingSessions).filter(conversationId => {
         const typing = state.typingSessions[conversationId]
         return typing && (Date.now() - typing.lastTypingTime <= 5000)

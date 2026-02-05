@@ -8,9 +8,15 @@
     class="image-viewer-dialog"
     @close="handleClose"
   >
-    <div class="image-viewer-container" @click.self="handleClose">
+    <div
+      class="image-viewer-container"
+      @click.self="handleClose"
+    >
       <!-- 工具栏 -->
-      <div class="viewer-toolbar" v-if="images.length > 0">
+      <div
+        v-if="images.length > 0"
+        class="viewer-toolbar"
+      >
         <div class="toolbar-left">
           <span class="image-counter">{{ currentIndex + 1 }}&nbsp;/&nbsp;{{ images.length }}</span>
         </div>
@@ -23,23 +29,29 @@
             :icon="Download"
             circle
             size="small"
-            @click.stop="downloadCurrent"
             title="下载"
+            @click.stop="downloadCurrent"
           />
           <el-button
             type="default"
             :icon="CloseBold"
             circle
             size="small"
-            @click.stop="handleClose"
             title="关闭 (ESC)"
+            @click.stop="handleClose"
           />
         </div>
       </div>
 
       <!-- 主图片区域 -->
-      <div class="viewer-main" @wheel.prevent="handleWheel">
-        <transition name="image-fade" mode="out-in">
+      <div
+        class="viewer-main"
+        @wheel.prevent="handleWheel"
+      >
+        <transition
+          name="image-fade"
+          mode="out-in"
+        >
           <div
             :key="currentIndex"
             class="image-wrapper"
@@ -51,20 +63,31 @@
               @mousedown="handleDragStart"
               @load="handleImageLoad"
               @error="handleImageError"
-            />
+            >
           </div>
         </transition>
 
         <!-- 加载状态 -->
-        <div v-if="loading" class="image-loading">
-          <el-icon class="is-loading" :size="40">
+        <div
+          v-if="loading"
+          class="image-loading"
+        >
+          <el-icon
+            class="is-loading"
+            :size="40"
+          >
             <Loading />
           </el-icon>
         </div>
 
         <!-- 加载失败 -->
-        <div v-if="error" class="image-error">
-          <el-icon :size="48"><PictureFilled /></el-icon>
+        <div
+          v-if="error"
+          class="image-error"
+        >
+          <el-icon :size="48">
+            <PictureFilled />
+          </el-icon>
           <span>图片加载失败</span>
         </div>
       </div>
@@ -92,17 +115,45 @@
       <!-- 缩放控制栏 -->
       <div class="zoom-controls">
         <el-button-group>
-          <el-button :icon="ZoomOut" @click.stop="zoomOut" :disabled="scale <= 0.3" />
-          <el-button disabled class="zoom-display">{{ Math.round(scale * 100) }}%</el-button>
-          <el-button :icon="ZoomIn" @click.stop="zoomIn" :disabled="scale >= 3" />
+          <el-button
+            :icon="ZoomOut"
+            :disabled="scale <= 0.3"
+            @click.stop="zoomOut"
+          />
+          <el-button
+            disabled
+            class="zoom-display"
+          >
+            {{ Math.round(scale * 100) }}%
+          </el-button>
+          <el-button
+            :icon="ZoomIn"
+            :disabled="scale >= 3"
+            @click.stop="zoomIn"
+          />
         </el-button-group>
-        <el-button :icon="RefreshLeft" @click.stop="rotateLeft" title="向左旋转" />
-        <el-button :icon="RefreshRight" @click.stop="rotateRight" title="向右旋转" />
-        <el-button :icon="FullScreen" @click.stop="resetView" title="重置视图" />
+        <el-button
+          :icon="RefreshLeft"
+          title="向左旋转"
+          @click.stop="rotateLeft"
+        />
+        <el-button
+          :icon="RefreshRight"
+          title="向右旋转"
+          @click.stop="rotateRight"
+        />
+        <el-button
+          :icon="FullScreen"
+          title="重置视图"
+          @click.stop="resetView"
+        />
       </div>
 
       <!-- 缩略图列表 -->
-      <div v-if="images.length > 1" class="thumbnail-list">
+      <div
+        v-if="images.length > 1"
+        class="thumbnail-list"
+      >
         <div
           v-for="(img, index) in images"
           :key="index"
@@ -110,7 +161,10 @@
           :class="{ active: index === currentIndex }"
           @click.stop="goToImage(index)"
         >
-          <img :src="img" :alt="`缩略图 ${index + 1}`" />
+          <img
+            :src="img"
+            :alt="`缩略图 ${index + 1}`"
+          >
         </div>
       </div>
     </div>
@@ -173,7 +227,7 @@ const currentImage = computed(() => {
 // 当前图片名称
 const currentImageName = computed(() => {
   const url = currentImage.value
-  if (!url) return ''
+  if (!url) {return ''}
   try {
     const pathname = new URL(url).pathname
     const filename = pathname.split('/').pop()
@@ -184,7 +238,7 @@ const currentImageName = computed(() => {
 })
 
 // 监听显示状态
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     resetView()
@@ -192,20 +246,20 @@ watch(() => props.modelValue, (val) => {
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 
 // 监听初始索引
-watch(() => props.initialIndex, (val) => {
+watch(() => props.initialIndex, val => {
   if (val >= 0 && val < props.images.length) {
     currentIndex.value = val
   }
 })
 
 // 键盘事件
-const handleKeydown = (e) => {
-  if (!visible.value) return
+const handleKeydown = e => {
+  if (!visible.value) {return}
 
   switch (e.key) {
     case 'ArrowLeft':
@@ -248,7 +302,7 @@ const nextImage = () => {
   }
 }
 
-const goToImage = (index) => {
+const goToImage = index => {
   currentIndex.value = index
   resetView()
   emit('change', index)
@@ -278,7 +332,7 @@ const resetView = () => {
 }
 
 // 滚轮缩放
-const handleWheel = (e) => {
+const handleWheel = e => {
   if (e.deltaY < 0) {
     zoomIn()
   } else {
@@ -287,7 +341,7 @@ const handleWheel = (e) => {
 }
 
 // 拖拽
-const handleDragStart = (e) => {
+const handleDragStart = e => {
   if (scale.value > 1) {
     isDragging.value = true
     dragStartX.value = e.clientX - dragOffsetX.value
@@ -298,7 +352,7 @@ const handleDragStart = (e) => {
   }
 }
 
-const handleDragMove = (e) => {
+const handleDragMove = e => {
   if (isDragging.value) {
     dragOffsetX.value = e.clientX - dragStartX.value
     dragOffsetY.value = e.clientY - dragStartY.value

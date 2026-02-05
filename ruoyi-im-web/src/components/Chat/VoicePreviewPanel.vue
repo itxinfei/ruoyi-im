@@ -14,26 +14,45 @@
           :key="index"
           class="wave-bar"
           :class="{ active: isPlaying && index < activeBars }"
-        ></span>
+        />
       </div>
       <!-- 播放进度条 -->
       <div class="voice-progress-container">
-        <div class="voice-progress-bar" @click="handleProgressClick">
-          <div class="voice-progress-fill" :style="{ width: `${playProgress}%` }"></div>
-          <div class="voice-progress-handle" :style="{ left: `${playProgress}%` }" @mousedown="handleProgressDragStart"></div>
+        <div
+          class="voice-progress-bar"
+          @click="handleProgressClick"
+        >
+          <div
+            class="voice-progress-fill"
+            :style="{ width: `${playProgress}%` }"
+          />
+          <div
+            class="voice-progress-handle"
+            :style="{ left: `${playProgress}%` }"
+            @mousedown="handleProgressDragStart"
+          />
         </div>
       </div>
       <div class="voice-actions">
-        <button class="voice-action-btn play-btn" @click="$emit('toggle-play')">
+        <button
+          class="voice-action-btn play-btn"
+          @click="$emit('toggle-play')"
+        >
           <span class="material-icons-outlined">
             {{ isPlaying ? 'pause' : 'play_arrow' }}
           </span>
         </button>
-        <button class="voice-action-btn delete-btn" @click="$emit('delete')">
+        <button
+          class="voice-action-btn delete-btn"
+          @click="$emit('delete')"
+        >
           <span class="material-icons-outlined">delete</span>
           删除
         </button>
-        <button class="voice-action-btn send-btn" @click="$emit('send')">
+        <button
+          class="voice-action-btn send-btn"
+          @click="$emit('send')"
+        >
           <span class="material-icons-outlined">send</span>
           发送
         </button>
@@ -78,7 +97,7 @@ const activeBars = computed(() => {
 })
 
 // 处理进度条点击
-const handleProgressClick = (event) => {
+const handleProgressClick = event => {
   const progressBar = event.currentTarget
   const rect = progressBar.getBoundingClientRect()
   const clickX = event.clientX - rect.left
@@ -87,12 +106,12 @@ const handleProgressClick = (event) => {
 }
 
 // 处理进度条拖拽开始
-const handleProgressDragStart = (event) => {
+const handleProgressDragStart = event => {
   event.preventDefault()
   const progressBar = event.currentTarget.parentElement
   const rect = progressBar.getBoundingClientRect()
   
-  const handleMouseMove = (moveEvent) => {
+  const handleMouseMove = moveEvent => {
     const moveX = moveEvent.clientX - rect.left
     const progress = (moveX / rect.width) * 100
     emit('seek', Math.max(0, Math.min(100, progress)))

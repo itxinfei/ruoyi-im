@@ -24,6 +24,7 @@ export { default as MessageReactions } from './parts/MessageReactions.vue'
 export { default as CodeBlock } from './parts/CodeBlock.vue'
 export { default as MessageMarkers } from './parts/MessageMarkers.vue'
 export { default as LinkCardList } from './parts/LinkCardList.vue'
+export { default as LinkPreviewCard } from './parts/LinkPreviewCard.vue'
 
 // ==================== Composables ====================
 export { useMessageBubble } from './composables/useMessageBubble.js'

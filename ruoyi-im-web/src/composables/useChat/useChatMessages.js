@@ -14,6 +14,7 @@ import { ElMessage } from 'element-plus'
 import { getMessages, sendMessage, retryMessage, deleteMessage } from '@/api/im/message'
 import { useIndexedDB } from '../useIndexedDB.js'
 import { MAX_RETRIES } from '@/constants/retry.js'
+import { formatMessagePreviewFromObject } from '@/utils/message'
 
 export function useChatMessages(sessionId, currentUser) {
   const store = useStore()
@@ -36,7 +37,7 @@ export function useChatMessages(sessionId, currentUser) {
    * 加载历史消息
    */
   const loadHistory = async (sessionId = currentSessionId.value) => {
-    if (loading.value || noMore.value) return
+    if (loading.value || noMore.value) {return}
 
     loading.value = true
 
@@ -85,7 +86,7 @@ export function useChatMessages(sessionId, currentUser) {
   /**
    * 从服务器同步最新消息
    */
-  const syncMessagesFromServer = async (sessionId) => {
+  const syncMessagesFromServer = async sessionId => {
     try {
       const response = await getMessages(sessionId, {
         page: 1,
@@ -117,7 +118,7 @@ export function useChatMessages(sessionId, currentUser) {
    * 发送消息
    */
   const send = async (content, type = 'TEXT', extra = {}) => {
-    if (!content || sending.value) return
+    if (!content || sending.value) {return}
 
     sending.value = true
 
@@ -166,7 +167,7 @@ export function useChatMessages(sessionId, currentUser) {
    * - 失败时回滚计数，允许后续重试
    * - retryCount 持久化到 IndexedDB，刷新页面后保留
    */
-  const retry = async (message) => {
+  const retry = async message => {
     // 预递增：在 API 调用前增加计数，防止失败时计数不增加
     const currentRetryCount = message.retryCount || 0
     const newRetryCount = currentRetryCount + 1
@@ -217,7 +218,7 @@ export function useChatMessages(sessionId, currentUser) {
   /**
    * 删除消息
    */
-  const removeMessage = async (messageId) => {
+  const removeMessage = async messageId => {
     try {
       await deleteMessage(messageId)
 
@@ -237,16 +238,17 @@ export function useChatMessages(sessionId, currentUser) {
    * 更新会话的最后消息
    */
   const updateConversationLastMessage = (conversationId, message) => {
-    store.dispatch('im/session/updateLastMessage', {
-      conversationId,
-      message
+    store.commit('im/session/UPDATE_SESSION', {
+      id: conversationId,
+      lastMessage: formatMessagePreviewFromObject(message),
+      lastMessageTime: message.timestamp || message.sendTime || Date.now()
     })
   }
 
   /**
    * 标记消息为已读
    */
-  const markAsRead = async (messageId) => {
+  const markAsRead = async messageId => {
     try {
       await store.dispatch('im/message/markMessageAsRead', messageId)
     } catch (error) {
@@ -258,7 +260,7 @@ export function useChatMessages(sessionId, currentUser) {
    * 加载更多消息
    */
   const loadMore = async () => {
-    if (loading.value || noMore.value) return
+    if (loading.value || noMore.value) {return}
     currentPage.value++
     await loadHistory()
   }

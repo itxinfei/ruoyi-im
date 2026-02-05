@@ -10,11 +10,19 @@
     @closed="handleClosed"
     @opened="handleOpened"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="80px"
+    >
       <!-- 头像上传 -->
       <el-form-item label="头像">
         <div class="avatar-upload">
-          <el-avatar :size="80" :src="form.avatar || ''">
+          <el-avatar
+            :size="80"
+            :src="form.avatar || ''"
+          >
             {{ form.nickname?.charAt(0) || '?' }}
           </el-avatar>
           <el-upload
@@ -27,18 +35,34 @@
             :on-error="handleAvatarError"
             name="avatarfile"
           >
-            <el-button size="small" type="primary">更换头像</el-button>
+            <el-button
+              size="small"
+              type="primary"
+            >
+              更换头像
+            </el-button>
           </el-upload>
         </div>
       </el-form-item>
 
       <!-- 昵称 -->
-      <el-form-item label="昵称" prop="nickname">
-        <el-input v-model="form.nickname" placeholder="请输入昵称" maxlength="50" show-word-limit />
+      <el-form-item
+        label="昵称"
+        prop="nickname"
+      >
+        <el-input
+          v-model="form.nickname"
+          placeholder="请输入昵称"
+          maxlength="50"
+          show-word-limit
+        />
       </el-form-item>
 
       <!-- 个性签名 -->
-      <el-form-item label="个性签名" prop="signature">
+      <el-form-item
+        label="个性签名"
+        prop="signature"
+      >
         <el-input
           v-model="form.signature"
           type="textarea"
@@ -50,16 +74,28 @@
       </el-form-item>
 
       <!-- 性别 -->
-      <el-form-item label="性别" prop="gender">
+      <el-form-item
+        label="性别"
+        prop="gender"
+      >
         <el-radio-group v-model="form.gender">
-          <el-radio :label="0">保密</el-radio>
-          <el-radio :label="1">男</el-radio>
-          <el-radio :label="2">女</el-radio>
+          <el-radio :label="0">
+            保密
+          </el-radio>
+          <el-radio :label="1">
+            男
+          </el-radio>
+          <el-radio :label="2">
+            女
+          </el-radio>
         </el-radio-group>
       </el-form-item>
 
       <!-- 生日 -->
-      <el-form-item label="生日" prop="birthday">
+      <el-form-item
+        label="生日"
+        prop="birthday"
+      >
         <el-date-picker
           v-model="form.birthday"
           type="date"
@@ -72,14 +108,28 @@
       </el-form-item>
 
       <!-- 邮箱 -->
-      <el-form-item label="邮箱" prop="email">
-        <el-input v-model="form.email" placeholder="请输入邮箱" />
+      <el-form-item
+        label="邮箱"
+        prop="email"
+      >
+        <el-input
+          v-model="form.email"
+          placeholder="请输入邮箱"
+        />
       </el-form-item>
     </el-form>
 
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
+      <el-button @click="visible = false">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="saving"
+        @click="handleSave"
+      >
+        保存
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -105,7 +155,7 @@ const saving = ref(false)
 // 统一 visible 响应式管理方式
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 // 上传配置
@@ -141,12 +191,12 @@ const rules = {
 }
 
 // 禁用未来日期
-const disabledDate = (time) => {
+const disabledDate = time => {
   return time.getTime() > Date.now()
 }
 
 // 头像上传前校验
-const beforeAvatarUpload = (file) => {
+const beforeAvatarUpload = file => {
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
@@ -162,7 +212,7 @@ const beforeAvatarUpload = (file) => {
 }
 
 // 头像上传成功
-const handleAvatarSuccess = (response) => {
+const handleAvatarSuccess = response => {
   if (response.code === 200) {
     form.avatar = response.data
     ElMessage.success('头像上传成功')
@@ -172,7 +222,7 @@ const handleAvatarSuccess = (response) => {
 }
 
 // 头像上传失败处理
-const handleAvatarError = (error) => {
+const handleAvatarError = error => {
   ElMessage.error('头像上传失败，请稍后重试')
   console.error('Upload error:', error)
 }

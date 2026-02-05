@@ -13,7 +13,10 @@
         :rules="rules"
         label-width="80px"
       >
-        <el-form-item label="群组名称" prop="name">
+        <el-form-item
+          label="群组名称"
+          prop="name"
+        >
           <el-input
             v-model="form.name"
             placeholder="请输入群组名称"
@@ -22,18 +25,33 @@
           />
         </el-form-item>
 
-        <el-form-item label="群组头像" prop="avatar">
+        <el-form-item
+          label="群组头像"
+          prop="avatar"
+        >
           <el-upload
             class="avatar-uploader"
             :show-file-list="false"
             :before-upload="beforeAvatarUpload"
           >
-            <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            <img
+              v-if="form.avatar"
+              :src="addTokenToUrl(form.avatar)"
+              class="avatar"
+            >
+            <el-icon
+              v-else
+              class="avatar-uploader-icon"
+            >
+              <Plus />
+            </el-icon>
           </el-upload>
         </el-form-item>
 
-        <el-form-item label="群组公告" prop="announcement">
+        <el-form-item
+          label="群组公告"
+          prop="announcement"
+        >
           <el-input
             v-model="form.announcement"
             type="textarea"
@@ -44,7 +62,10 @@
           />
         </el-form-item>
 
-        <el-form-item label="选择成员" prop="members">
+        <el-form-item
+          label="选择成员"
+          prop="members"
+        >
           <el-select
             v-model="form.members"
             multiple
@@ -59,20 +80,31 @@
               :value="contact.id"
             >
               <div class="contact-option">
-                <el-avatar :size="24" :src="addTokenToUrl(contact.avatar)">
+                <el-avatar
+                  :size="24"
+                  :src="addTokenToUrl(contact.avatar)"
+                >
                   {{ contact.name?.charAt(0) }}
                 </el-avatar>
                 <span>{{ contact.name }}</span>
               </div>
             </el-option>
           </el-select>
-          <div class="member-count">已选择 {{ form.members.length }} 人</div>
+          <div class="member-count">
+            已选择 {{ form.members.length }} 人
+          </div>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="handleSubmit">
+        <el-button @click="handleClose">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="loading"
+          @click="handleSubmit"
+        >
           创建群组
         </el-button>
       </template>
@@ -139,7 +171,7 @@ const loadContacts = async () => {
 import { uploadAvatar } from '@/api/im/user'
 
 // 头像上传前验证
-const beforeAvatarUpload = (file) => {
+const beforeAvatarUpload = file => {
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
@@ -170,7 +202,7 @@ const beforeAvatarUpload = (file) => {
 
 // 提交表单
 const handleSubmit = async () => {
-  if (!formRef.value) return
+  if (!formRef.value) {return}
 
   try {
     await formRef.value.validate()
@@ -209,14 +241,14 @@ const handleClose = () => {
 }
 
 // 监听显示状态
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     loadContacts()
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   if (!val) {
     emit('update:modelValue', false)
   }

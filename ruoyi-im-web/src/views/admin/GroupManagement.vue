@@ -4,17 +4,36 @@
     <div class="page-header">
       <div class="page-title">
         <h2>群组管理</h2>
-        <p class="page-desc">管理系统内所有群组，支持成员管理和禁言设置</p>
+        <p class="page-desc">
+          管理系统内所有群组，支持成员管理和禁言设置
+        </p>
       </div>
       <div class="page-actions">
-        <el-button :icon="Plus" @click="handleCreate">创建群组</el-button>
-        <el-button :icon="Download" @click="handleExport">导出数据</el-button>
+        <el-button
+          :icon="Plus"
+          @click="handleCreate"
+        >
+          创建群组
+        </el-button>
+        <el-button
+          :icon="Download"
+          @click="handleExport"
+        >
+          导出数据
+        </el-button>
       </div>
     </div>
 
     <!-- 搜索和筛选栏 -->
-    <el-card class="search-card" shadow="never">
-      <el-form :inline="true" :model="searchForm" class="search-form">
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="搜索">
           <el-input
             v-model="searchForm.keyword"
@@ -29,27 +48,81 @@
           </el-input>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width: 120px" @change="handleSearch">
-            <el-option label="正常" value="normal" />
-            <el-option label="全员禁言" value="allMuted" />
+          <el-select
+            v-model="searchForm.status"
+            placeholder="全部状态"
+            clearable
+            style="width: 120px"
+            @change="handleSearch"
+          >
+            <el-option
+              label="正常"
+              value="normal"
+            />
+            <el-option
+              label="全员禁言"
+              value="allMuted"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            :icon="Search"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button
+            :icon="Refresh"
+            @click="handleReset"
+          >
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 群组列表卡片 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <!-- 批量操作栏 -->
-      <div v-if="selectedGroups.length > 0" class="batch-actions">
+      <div
+        v-if="selectedGroups.length > 0"
+        class="batch-actions"
+      >
         <span class="selected-count">已选择 {{ selectedGroups.length }} 项</span>
-        <el-button size="small" :icon="Bell" @click="handleBatchMute">批量禁言</el-button>
-        <el-button size="small" :icon="MuteNotification" @click="handleBatchUnmute">取消禁言</el-button>
-        <el-button size="small" :icon="Delete" type="danger" @click="handleBatchDelete">批量解散</el-button>
-        <el-button size="small" text @click="handleClearSelection">取消选择</el-button>
+        <el-button
+          size="small"
+          :icon="Bell"
+          @click="handleBatchMute"
+        >
+          批量禁言
+        </el-button>
+        <el-button
+          size="small"
+          :icon="MuteNotification"
+          @click="handleBatchUnmute"
+        >
+          取消禁言
+        </el-button>
+        <el-button
+          size="small"
+          :icon="Delete"
+          type="danger"
+          @click="handleBatchDelete"
+        >
+          批量解散
+        </el-button>
+        <el-button
+          size="small"
+          text
+          @click="handleClearSelection"
+        >
+          取消选择
+        </el-button>
       </div>
 
       <!-- 数据表格 -->
@@ -63,18 +136,43 @@
         style="width: 100%"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" />
-        <el-table-column prop="id" label="群组ID" width="80" />
-        <el-table-column label="群头像" width="70">
+        <el-table-column
+          type="selection"
+          width="50"
+        />
+        <el-table-column
+          prop="id"
+          label="群组ID"
+          width="80"
+        />
+        <el-table-column
+          label="群头像"
+          width="70"
+        >
           <template #default="{ row }">
-            <el-avatar :size="36" :src="row.avatar">
+            <el-avatar
+              :size="36"
+              :src="row.avatar"
+            >
               {{ row.name?.charAt(0) || '群' }}
             </el-avatar>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="群名称" min-width="180" />
-        <el-table-column prop="ownerName" label="群主" width="120" />
-        <el-table-column prop="memberCount" label="成员数" width="90">
+        <el-table-column
+          prop="name"
+          label="群名称"
+          min-width="180"
+        />
+        <el-table-column
+          prop="ownerName"
+          label="群主"
+          width="120"
+        />
+        <el-table-column
+          prop="memberCount"
+          label="成员数"
+          width="90"
+        >
           <template #default="{ row }">
             <span class="member-count">
               {{ row.memberCount || 0 }}
@@ -82,20 +180,52 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column
+          prop="status"
+          label="状态"
+          width="100"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.allMuted" type="danger" size="small">全员禁言</el-tag>
-            <el-tag v-else type="success" size="small">正常</el-tag>
+            <el-tag
+              v-if="row.allMuted"
+              type="danger"
+              size="small"
+            >
+              全员禁言
+            </el-tag>
+            <el-tag
+              v-else
+              type="success"
+              size="small"
+            >
+              正常
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="170" />
-        <el-table-column label="操作" fixed="right" width="240">
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="170"
+        />
+        <el-table-column
+          label="操作"
+          fixed="right"
+          width="240"
+        >
           <template #default="{ row }">
-            <el-button size="small" text @click="handleViewMembers(row)">
+            <el-button
+              size="small"
+              text
+              @click="handleViewMembers(row)"
+            >
               <el-icon><User /></el-icon>
               成员
             </el-button>
-            <el-button size="small" text @click="handleEdit(row)">
+            <el-button
+              size="small"
+              text
+              @click="handleEdit(row)"
+            >
               <el-icon><Edit /></el-icon>
               编辑
             </el-button>
@@ -108,7 +238,12 @@
               <el-icon><component :is="row.allMuted ? 'MuteNotification' : 'Bell'" /></el-icon>
               {{ row.allMuted ? '解除' : '禁言' }}
             </el-button>
-            <el-button size="small" text type="danger" @click="handleDelete(row)">
+            <el-button
+              size="small"
+              text
+              type="danger"
+              @click="handleDelete(row)"
+            >
               <el-icon><Delete /></el-icon>
               解散
             </el-button>
@@ -141,15 +276,33 @@
         <div class="drawer-header">
           <span>群组成员</span>
           <div class="header-actions">
-            <el-button size="small" :icon="Plus" @click="handleAddMember">添加成员</el-button>
-          <el-button size="small" :icon="Upload" @click="handleBatchAddMembers">批量添加</el-button>
+            <el-button
+              size="small"
+              :icon="Plus"
+              @click="handleAddMember"
+            >
+              添加成员
+            </el-button>
+            <el-button
+              size="small"
+              :icon="Upload"
+              @click="handleBatchAddMembers"
+            >
+              批量添加
+            </el-button>
           </div>
         </div>
       </template>
 
-      <div v-if="currentGroup" class="member-info">
+      <div
+        v-if="currentGroup"
+        class="member-info"
+      >
         <div class="group-info">
-          <el-avatar :size="48" :src="currentGroup.avatar">
+          <el-avatar
+            :size="48"
+            :src="currentGroup.avatar"
+          >
             {{ currentGroup.name?.charAt(0) || '群' }}
           </el-avatar>
           <div class="info-content">
@@ -168,24 +321,67 @@
         stripe
         style="width: 100%; margin-top: var(--dt-space-md)"
       >
-        <el-table-column prop="userId" label="ID" width="70" />
-        <el-table-column label="头像" width="60">
+        <el-table-column
+          prop="userId"
+          label="ID"
+          width="70"
+        />
+        <el-table-column
+          label="头像"
+          width="60"
+        >
           <template #default="{ row }">
-            <el-avatar :size="32" :src="row.avatar">
+            <el-avatar
+              :size="32"
+              :src="row.avatar"
+            >
               <el-icon><User /></el-icon>
             </el-avatar>
           </template>
         </el-table-column>
-        <el-table-column prop="nickname" label="昵称" width="140" />
-        <el-table-column prop="roleDisplay" label="角色" width="100">
+        <el-table-column
+          prop="nickname"
+          label="昵称"
+          width="140"
+        />
+        <el-table-column
+          prop="roleDisplay"
+          label="角色"
+          width="100"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.role === 'OWNER'" type="danger" size="small">群主</el-tag>
-            <el-tag v-else-if="row.role === 'ADMIN'" type="warning" size="small">管理员</el-tag>
-            <el-tag v-else type="info" size="small">成员</el-tag>
+            <el-tag
+              v-if="row.role === 'OWNER'"
+              type="danger"
+              size="small"
+            >
+              群主
+            </el-tag>
+            <el-tag
+              v-else-if="row.role === 'ADMIN'"
+              type="warning"
+              size="small"
+            >
+              管理员
+            </el-tag>
+            <el-tag
+              v-else
+              type="info"
+              size="small"
+            >
+              成员
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="joinTime" label="加入时间" width="160" />
-        <el-table-column label="操作" width="100">
+        <el-table-column
+          prop="joinTime"
+          label="加入时间"
+          width="160"
+        />
+        <el-table-column
+          label="操作"
+          width="100"
+        >
           <template #default="{ row }">
             <el-button
               v-if="row.role !== 'OWNER'"
@@ -196,13 +392,22 @@
             >
               移除
             </el-button>
-            <el-dropdown v-else trigger="click" @command="handleOwnerCommand">
-              <el-button size="small" text>
+            <el-dropdown
+              v-else
+              trigger="click"
+              @command="handleOwnerCommand"
+            >
+              <el-button
+                size="small"
+                text
+              >
                 管理
                 <el-icon><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
-                <el-dropdown-item command="transfer">转让群主</el-dropdown-item>
+                <el-dropdown-item command="transfer">
+                  转让群主
+                </el-dropdown-item>
               </template>
             </el-dropdown>
           </template>
@@ -217,11 +422,27 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="editForm" :rules="editRules" ref="editFormRef" label-width="90px">
-        <el-form-item label="群名称" prop="name">
-          <el-input v-model="editForm.name" placeholder="请输入群名称" maxlength="50" show-word-limit />
+      <el-form
+        ref="editFormRef"
+        :model="editForm"
+        :rules="editRules"
+        label-width="90px"
+      >
+        <el-form-item
+          label="群名称"
+          prop="name"
+        >
+          <el-input
+            v-model="editForm.name"
+            placeholder="请输入群名称"
+            maxlength="50"
+            show-word-limit
+          />
         </el-form-item>
-        <el-form-item label="群描述" prop="description">
+        <el-form-item
+          label="群描述"
+          prop="description"
+        >
           <el-input
             v-model="editForm.description"
             type="textarea"
@@ -231,8 +452,15 @@
             show-word-limit
           />
         </el-form-item>
-        <el-form-item label="成员上限" prop="maxMembers">
-          <el-input-number v-model="editForm.maxMembers" :min="3" :max="2000" />
+        <el-form-item
+          label="成员上限"
+          prop="maxMembers"
+        >
+          <el-input-number
+            v-model="editForm.maxMembers"
+            :min="3"
+            :max="2000"
+          />
         </el-form-item>
         <el-form-item label="全员禁言">
           <el-switch
@@ -245,8 +473,16 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">确定</el-button>
+        <el-button @click="editDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -257,7 +493,10 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="addMemberForm" label-width="80px">
+      <el-form
+        :model="addMemberForm"
+        label-width="80px"
+      >
         <el-form-item label="用户">
           <el-select
             v-model="addMemberForm.userId"
@@ -276,7 +515,10 @@
               :value="user.id"
             >
               <div class="user-option">
-                <el-avatar :size="24" :src="user.avatar">
+                <el-avatar
+                  :size="24"
+                  :src="user.avatar"
+                >
                   <el-icon><User /></el-icon>
                 </el-avatar>
                 <span>{{ user.nickname }}</span>
@@ -287,14 +529,26 @@
         </el-form-item>
         <el-form-item label="角色">
           <el-radio-group v-model="addMemberForm.role">
-            <el-radio value="MEMBER">普通成员</el-radio>
-            <el-radio value="ADMIN">管理员</el-radio>
+            <el-radio value="MEMBER">
+              普通成员
+            </el-radio>
+            <el-radio value="ADMIN">
+              管理员
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="addMemberDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleAddMemberSubmit">确定</el-button>
+        <el-button @click="addMemberDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleAddMemberSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -331,7 +585,10 @@
               :value="user"
             >
               <div class="user-option">
-                <el-avatar :size="24" :src="user.avatar">
+                <el-avatar
+                  :size="24"
+                  :src="user.avatar"
+                >
                   <el-icon><User /></el-icon>
                 </el-avatar>
                 <span>{{ user.nickname }}</span>
@@ -341,22 +598,30 @@
           </el-select>
         </el-form-item>
         <el-form-item label="已选择">
-          <div v-if="batchAddSelectedUsers.length > 0" class="selected-users">
+          <div
+            v-if="batchAddSelectedUsers.length > 0"
+            class="selected-users"
+          >
             <el-tag
               v-for="user in batchAddSelectedUsers"
               :key="user.id"
               closable
-              @close="removeBatchUser(user)"
               style="margin: 4px"
+              @close="removeBatchUser(user)"
             >
               {{ user.nickname }}
             </el-tag>
           </div>
-          <span v-else style="color: var(--el-text-color-secondary)">未选择任何成员</span>
+          <span
+            v-else
+            style="color: var(--el-text-color-secondary)"
+          >未选择任何成员</span>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="batchAddDialogVisible = false">取消</el-button>
+        <el-button @click="batchAddDialogVisible = false">
+          取消
+        </el-button>
         <el-button
           type="primary"
           :loading="batchAddLoading"
@@ -505,18 +770,18 @@ const handleReset = () => {
 }
 
 // 分页
-const handleSizeChange = (val) => {
+const handleSizeChange = val => {
   pageSize.value = val
   loadGroups()
 }
 
-const handleCurrentChange = (val) => {
+const handleCurrentChange = val => {
   pageNum.value = val
   loadGroups()
 }
 
 // 选择变化
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedGroups.value = selection
 }
 
@@ -526,7 +791,7 @@ const handleClearSelection = () => {
 }
 
 // 查看成员
-const handleViewMembers = async (row) => {
+const handleViewMembers = async row => {
   currentGroup.value = row
   memberDrawerVisible.value = true
   memberLoading.value = true
@@ -543,7 +808,7 @@ const handleViewMembers = async (row) => {
 }
 
 // 编辑群组
-const handleEdit = (row) => {
+const handleEdit = row => {
   editMode.value = 'edit'
   Object.assign(editForm, {
     id: row.id,
@@ -571,7 +836,7 @@ const handleCreate = () => {
 // 提交表单
 const handleSubmit = async () => {
   const valid = await editFormRef.value.validate().catch(() => false)
-  if (!valid) return
+  if (!valid) {return}
 
   submitting.value = true
   try {
@@ -596,7 +861,7 @@ const handleSubmit = async () => {
 }
 
 // 切换禁言状态
-const handleToggleMute = async (row) => {
+const handleToggleMute = async row => {
   const action = row.allMuted ? '解除禁言' : '全员禁言'
   try {
     await ElMessageBox.confirm(`确定要${action}群组 ${row.name} 吗？`, '提示', {
@@ -618,7 +883,7 @@ const handleToggleMute = async (row) => {
 }
 
 // 删除群组
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   try {
     await ElMessageBox.confirm(`确定要解散群组 ${row.name} 吗？此操作不可恢复！`, '警告', {
       confirmButtonText: '确定',
@@ -689,7 +954,7 @@ const handleBatchUnmute = async () => {
 }
 
 const handleBatchDelete = async () => {
-  if (selectedGroups.value.length === 0) return
+  if (selectedGroups.value.length === 0) {return}
   try {
     await ElMessageBox.confirm(`确定要解散选中的 ${selectedGroups.value.length} 个群组吗？此操作不可恢复！`, '批量解散', {
       confirmButtonText: '确定',
@@ -711,7 +976,7 @@ const handleBatchDelete = async () => {
 }
 
 // 移除成员
-const handleRemoveMember = async (row) => {
+const handleRemoveMember = async row => {
   try {
     await ElMessageBox.confirm(`确定要移除成员 ${row.nickname} 吗？`, '提示', {
       confirmButtonText: '确定',
@@ -733,7 +998,7 @@ const handleRemoveMember = async (row) => {
 }
 
 // 群主操作
-const handleOwnerCommand = async (command) => {
+const handleOwnerCommand = async command => {
   if (command === 'transfer') {
     try {
       // 获取可能的群主候选人（管理员和普通成员）
@@ -877,7 +1142,7 @@ const handleConfirmBatchAdd = async () => {
 }
 
 // 移除批量添加中的用户
-const removeBatchUser = (user) => {
+const removeBatchUser = user => {
   const index = batchAddSelectedUsers.value.findIndex(u => (u.id || u.userId) === (user.id || user.userId))
   if (index > -1) {
     batchAddSelectedUsers.value.splice(index, 1)
@@ -885,8 +1150,8 @@ const removeBatchUser = (user) => {
 }
 
 // 搜索用户
-const searchUsers = async (query) => {
-  if (!query) return
+const searchUsers = async query => {
+  if (!query) {return}
   userSearchLoading.value = true
   try {
     const res = await getUserOptions(query)

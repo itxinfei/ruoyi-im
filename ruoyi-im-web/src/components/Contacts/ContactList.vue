@@ -9,11 +9,24 @@
       />
     </div>
 
-    <div class="list-content" v-loading="loading">
+    <div
+      v-loading="loading"
+      class="list-content"
+    >
       <!-- 导航列表 -->
-      <div v-if="!searchQuery" class="nav-list">
-        <div class="nav-item" @click="$emit('nav', 'new-friends')">
-          <el-badge :value="unreadRequestCount" :hidden="unreadRequestCount === 0" class="nav-badge">
+      <div
+        v-if="!searchQuery"
+        class="nav-list"
+      >
+        <div
+          class="nav-item"
+          @click="$emit('nav', 'new-friends')"
+        >
+          <el-badge
+            :value="unreadRequestCount"
+            :hidden="unreadRequestCount === 0"
+            class="nav-badge"
+          >
             <div class="nav-icon new-friends">
               <el-icon><User /></el-icon>
             </div>
@@ -24,13 +37,17 @@
 
       <el-collapse v-model="activeNames">
         <!-- 组织架构 -->
-        <el-collapse-item v-if="!searchQuery" title="组织架构" name="org">
+        <el-collapse-item
+          v-if="!searchQuery"
+          title="组织架构"
+          name="org"
+        >
           <el-tree
             :data="orgTree"
             :props="{ children: 'children', label: 'name' }"
             @node-click="handleNodeClick"
           >
-             <template #default="{ node, data }">
+            <template #default="{ node, data }">
               <span class="custom-tree-node">
                 <el-icon v-if="data.type === 'dept'"><OfficeBuilding /></el-icon>
                 <el-icon v-else><User /></el-icon>
@@ -41,7 +58,10 @@
         </el-collapse-item>
 
         <!-- 我的群组 -->
-        <el-collapse-item title="我的群组" name="groups">
+        <el-collapse-item
+          title="我的群组"
+          name="groups"
+        >
           <div
             v-for="group in filteredGroups"
             :key="group.id"
@@ -49,15 +69,28 @@
             :class="{ active: currentContact?.id === group.id && currentContact?.isGroup }"
             @click="handleGroupClick(group)"
           >
-            <el-avatar :size="36" :src="addTokenToUrl(group.avatar)" class="avatar">
+            <el-avatar
+              :size="36"
+              :src="addTokenToUrl(group.avatar)"
+              class="avatar"
+            >
               {{ (group.name?.charAt(0) || '?').toUpperCase() }}
             </el-avatar>
             <div class="info">
-              <div class="name">{{ group.name }}</div>
-              <div class="desc">{{ group.memberCount || 0 }} 人</div>
+              <div class="name">
+                {{ group.name }}
+              </div>
+              <div class="desc">
+                {{ group.memberCount || 0 }} 人
+              </div>
             </div>
           </div>
-          <div v-if="filteredGroups.length === 0" class="empty-small">暂无群组</div>
+          <div
+            v-if="filteredGroups.length === 0"
+            class="empty-small"
+          >
+            暂无群组
+          </div>
         </el-collapse-item>
 
         <!-- 我的联系人 - 分组显示 -->
@@ -76,11 +109,23 @@
                   @command="(cmd) => handleGroupCommand(cmd, groupData.groupName)"
                   @click.stop
                 >
-                  <el-icon class="group-more" @click.stop><MoreFilled /></el-icon>
+                  <el-icon
+                    class="group-more"
+                    @click.stop
+                  >
+                    <MoreFilled />
+                  </el-icon>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item command="rename">重命名分组</el-dropdown-item>
-                      <el-dropdown-item command="delete" v-if="groupData.groupName">删除分组</el-dropdown-item>
+                      <el-dropdown-item command="rename">
+                        重命名分组
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        v-if="groupData.groupName"
+                        command="delete"
+                      >
+                        删除分组
+                      </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -95,22 +140,41 @@
               @contextmenu.prevent="showContactMenu($event, contact)"
             >
               <div class="avatar">
-                <img v-if="contact.friendAvatar" :src="contact.friendAvatar" />
-                <div v-else class="avatar-text">
+                <img
+                  v-if="contact.friendAvatar"
+                  :src="contact.friendAvatar"
+                >
+                <div
+                  v-else
+                  class="avatar-text"
+                >
                   {{ (contact.friendName || '?').charAt(0).toUpperCase() }}
                 </div>
               </div>
               <div class="info">
-                <div class="name">{{ contact.remark || contact.friendName }}</div>
-                <div class="desc">{{ contact.position || '联系人' }}</div>
+                <div class="name">
+                  {{ contact.remark || contact.friendName }}
+                </div>
+                <div class="desc">
+                  {{ contact.position || '联系人' }}
+                </div>
               </div>
             </div>
-            <div v-if="groupData.contacts.length === 0" class="empty-small">暂无联系人</div>
+            <div
+              v-if="groupData.contacts.length === 0"
+              class="empty-small"
+            >
+              暂无联系人
+            </div>
           </el-collapse-item>
         </template>
 
         <!-- 搜索结果 -->
-        <el-collapse-item v-else title="搜索结果" name="search">
+        <el-collapse-item
+          v-else
+          title="搜索结果"
+          name="search"
+        >
           <div
             v-for="contact in searchResults"
             :key="contact.id"
@@ -118,17 +182,32 @@
             @click="handleContactClick(contact)"
           >
             <div class="avatar">
-              <img v-if="contact.friendAvatar" :src="contact.friendAvatar" />
-              <div v-else class="avatar-text">
+              <img
+                v-if="contact.friendAvatar"
+                :src="contact.friendAvatar"
+              >
+              <div
+                v-else
+                class="avatar-text"
+              >
                 {{ (contact.friendName || '?').charAt(0).toUpperCase() }}
               </div>
             </div>
             <div class="info">
-              <div class="name">{{ contact.remark || contact.friendName }}</div>
-              <div class="desc">{{ contact.groupName || '未分组' }}</div>
+              <div class="name">
+                {{ contact.remark || contact.friendName }}
+              </div>
+              <div class="desc">
+                {{ contact.groupName || '未分组' }}
+              </div>
             </div>
           </div>
-          <div v-if="searchResults.length === 0" class="empty-small">未找到联系人</div>
+          <div
+            v-if="searchResults.length === 0"
+            class="empty-small"
+          >
+            未找到联系人
+          </div>
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -152,8 +231,16 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="renameDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmRename" :loading="renameLoading">确定</el-button>
+        <el-button @click="renameDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="renameLoading"
+          @click="confirmRename"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -174,8 +261,15 @@
       width="400px"
       :append-to-body="true"
     >
-      <el-select v-model="targetGroupName" placeholder="选择目标分组" style="width: 100%">
-        <el-option label="未分组" value="" />
+      <el-select
+        v-model="targetGroupName"
+        placeholder="选择目标分组"
+        style="width: 100%"
+      >
+        <el-option
+          label="未分组"
+          value=""
+        />
         <el-option
           v-for="group in groupList"
           :key="group"
@@ -184,8 +278,16 @@
         />
       </el-select>
       <template #footer>
-        <el-button @click="moveDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmMove" :loading="moveLoading">确定</el-button>
+        <el-button @click="moveDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="moveLoading"
+          @click="confirmMove"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -204,8 +306,16 @@
         @keyup.enter="confirmRemark"
       />
       <template #footer>
-        <el-button @click="remarkDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmRemark" :loading="remarkLoading">确定</el-button>
+        <el-button @click="remarkDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="remarkLoading"
+          @click="confirmRemark"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -274,9 +384,9 @@ const loadData = async () => {
     if (gcRes.code === 200 && gcRes.data) {
       groupedContacts.value = gcRes.data
     }
-    if (oRes && oRes.code === 200) orgTree.value = oRes.data
-    if (gRes && gRes.code === 200) groups.value = gRes.data
-    if (glRes && glRes.code === 200) groupList.value = glRes.data
+    if (oRes && oRes.code === 200) {orgTree.value = oRes.data}
+    if (gRes && gRes.code === 200) {groups.value = gRes.data}
+    if (glRes && glRes.code === 200) {groupList.value = glRes.data}
     if (frRes && frRes.code === 200) {
       unreadRequestCount.value = frRes.data.filter(r => r.status === 'PENDING').length
     }
@@ -292,7 +402,7 @@ const loadData = async () => {
 }
 
 const searchResults = computed(() => {
-  if (!searchQuery.value) return []
+  if (!searchQuery.value) {return []}
   const q = searchQuery.value.toLowerCase()
   const results = []
   groupedContacts.value.forEach(group => {
@@ -307,12 +417,12 @@ const searchResults = computed(() => {
 })
 
 const filteredGroups = computed(() => {
-  if (!searchQuery.value) return groups.value
+  if (!searchQuery.value) {return groups.value}
   const q = searchQuery.value.toLowerCase()
   return groups.value.filter(g => g.name && g.name.toLowerCase().includes(q))
 })
 
-const handleNodeClick = (data) => {
+const handleNodeClick = data => {
   if (data.type === 'user') {
     emit('select', {
       id: data.id,
@@ -324,11 +434,11 @@ const handleNodeClick = (data) => {
   }
 }
 
-const handleGroupClick = (group) => {
+const handleGroupClick = group => {
   emit('select', { ...group, isGroup: true })
 }
 
-const handleContactClick = (contact) => {
+const handleContactClick = contact => {
   contextMenuVisible.value = false
   emit('select', { ...contact, isGroup: false })
 }
@@ -377,7 +487,7 @@ const confirmRename = async () => {
   }
 }
 
-const doDeleteGroup = async (groupName) => {
+const doDeleteGroup = async groupName => {
   try {
     const res = await deleteGroup(groupName)
     if (res.code === 200) {
@@ -423,9 +533,9 @@ const contextMenuItems = computed(() => {
 })
 
 // 右键菜单选择处理
-const handleContextMenuSelect = async (item) => {
+const handleContextMenuSelect = async item => {
   const contact = currentContactForMenu.value
-  if (!contact) return
+  if (!contact) {return}
 
   switch (item.value) {
     case 'moveToGroup':

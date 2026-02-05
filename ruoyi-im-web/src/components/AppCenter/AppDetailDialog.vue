@@ -7,15 +7,31 @@
     class="app-detail-dialog"
     @close="handleClose"
   >
-    <div v-if="app" class="app-detail">
+    <div
+      v-if="app"
+      class="app-detail"
+    >
       <!-- 应用头部 -->
       <div class="detail-header">
-        <div class="app-icon-large" :style="{ background: app.iconColor }">
-          <img v-if="app.iconUrl" :src="app.iconUrl" :alt="app.name" class="app-icon-img" />
-          <span v-else class="app-icon-text">{{ app.name.charAt(0) }}</span>
+        <div
+          class="app-icon-large"
+          :style="{ background: app.iconColor }"
+        >
+          <img
+            v-if="app.iconUrl"
+            :src="app.iconUrl"
+            :alt="app.name"
+            class="app-icon-img"
+          >
+          <span
+            v-else
+            class="app-icon-text"
+          >{{ app.name.charAt(0) }}</span>
         </div>
         <div class="app-header-info">
-          <h3 class="app-name">{{ app.name }}</h3>
+          <h3 class="app-name">
+            {{ app.name }}
+          </h3>
           <div class="app-meta">
             <span class="meta-item">
               <span class="material-icons-outlined">category</span>
@@ -28,14 +44,35 @@
           </div>
         </div>
         <div class="app-status">
-          <el-tag v-if="isInstalled" type="success" size="small">已安装</el-tag>
-          <el-tag v-if="app.isHot" type="danger" size="small">热门</el-tag>
-          <el-tag v-if="app.isNew" type="primary" size="small">新上架</el-tag>
+          <el-tag
+            v-if="isInstalled"
+            type="success"
+            size="small"
+          >
+            已安装
+          </el-tag>
+          <el-tag
+            v-if="app.isHot"
+            type="danger"
+            size="small"
+          >
+            热门
+          </el-tag>
+          <el-tag
+            v-if="app.isNew"
+            type="primary"
+            size="small"
+          >
+            新上架
+          </el-tag>
         </div>
       </div>
 
       <!-- 应用截图 -->
-      <div v-if="app.screenshots && app.screenshots.length > 0" class="app-screenshots">
+      <div
+        v-if="app.screenshots && app.screenshots.length > 0"
+        class="app-screenshots"
+      >
         <div
           v-for="(shot, index) in app.screenshots"
           :key="index"
@@ -43,21 +80,36 @@
           :class="{ active: currentScreenshot === index }"
           @click="currentScreenshot = index"
         >
-          <img :src="shot" :alt="`截图 ${index + 1}`" />
+          <img
+            :src="shot"
+            :alt="`截图 ${index + 1}`"
+          >
         </div>
       </div>
 
       <!-- 应用描述 -->
       <div class="detail-section">
-        <h4 class="section-title">应用介绍</h4>
-        <p class="app-description">{{ app.description || app.summary }}</p>
+        <h4 class="section-title">
+          应用介绍
+        </h4>
+        <p class="app-description">
+          {{ app.description || app.summary }}
+        </p>
       </div>
 
       <!-- 功能特性 -->
-      <div v-if="app.features && app.features.length > 0" class="detail-section">
-        <h4 class="section-title">功能特性</h4>
+      <div
+        v-if="app.features && app.features.length > 0"
+        class="detail-section"
+      >
+        <h4 class="section-title">
+          功能特性
+        </h4>
         <ul class="features-list">
-          <li v-for="(feature, index) in app.features" :key="index">
+          <li
+            v-for="(feature, index) in app.features"
+            :key="index"
+          >
             <span class="material-icons-outlined feature-icon">check_circle</span>
             {{ feature }}
           </li>
@@ -65,14 +117,23 @@
       </div>
 
       <!-- 开发者信息 -->
-      <div v-if="app.developer" class="detail-section">
-        <h4 class="section-title">开发者</h4>
-        <p class="developer-info">{{ app.developer }}</p>
+      <div
+        v-if="app.developer"
+        class="detail-section"
+      >
+        <h4 class="section-title">
+          开发者
+        </h4>
+        <p class="developer-info">
+          {{ app.developer }}
+        </p>
       </div>
 
       <!-- 版本信息 -->
       <div class="detail-section">
-        <h4 class="section-title">版本信息</h4>
+        <h4 class="section-title">
+          版本信息
+        </h4>
         <div class="version-info">
           <span class="version-label">当前版本：</span>
           <span class="version-value">{{ app.version || '1.0.0' }}</span>
@@ -82,8 +143,13 @@
       </div>
 
       <!-- 权限说明 -->
-      <div v-if="app.permissions && app.permissions.length > 0" class="detail-section">
-        <h4 class="section-title">所需权限</h4>
+      <div
+        v-if="app.permissions && app.permissions.length > 0"
+        class="detail-section"
+      >
+        <h4 class="section-title">
+          所需权限
+        </h4>
         <div class="permissions-list">
           <el-tag
             v-for="(perm, index) in app.permissions"
@@ -99,7 +165,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleClose">关闭</el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
         <el-button
           v-if="!isInstalled"
           type="primary"
@@ -163,14 +231,14 @@ const handleOpen = () => {
   }
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     currentScreenshot.value = 0
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 </script>

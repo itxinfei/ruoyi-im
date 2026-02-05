@@ -9,7 +9,10 @@
       <el-icon><Document /></el-icon>
 
       <!-- 下载进度环 -->
-      <div v-if="isDownloading" class="progress-ring">
+      <div
+        v-if="isDownloading"
+        class="progress-ring"
+      >
         <svg viewBox="0 0 36 36">
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -29,7 +32,10 @@
       </div>
 
       <!-- 上传进度环 -->
-      <div v-if="isUploading" class="progress-ring">
+      <div
+        v-if="isUploading"
+        class="progress-ring"
+      >
         <svg viewBox="0 0 36 36">
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -53,18 +59,33 @@
 
     <!-- 文件信息 -->
     <div class="file-info">
-      <div class="file-name">{{ fileName }}</div>
+      <div class="file-name">
+        {{ fileName }}
+      </div>
       <div class="file-meta">
-        <template v-if="isUploading">上传中...</template>
-        <template v-else-if="isDownloading">下载中 {{ downloadProgress }}%</template>
-        <template v-else>{{ fileSize }}</template>
+        <template v-if="isUploading">
+          上传中...
+        </template>
+        <template v-else-if="isDownloading">
+          下载中 {{ downloadProgress }}%
+        </template>
+        <template v-else>
+          {{ fileSize }}
+        </template>
       </div>
     </div>
 
     <!-- 操作按钮 -->
     <div class="file-action">
-      <el-icon v-if="!isUploading && !isDownloading"><Download /></el-icon>
-      <el-icon v-else class="is-spinning"><Loading /></el-icon>
+      <el-icon v-if="!isUploading && !isDownloading">
+        <Download />
+      </el-icon>
+      <el-icon
+        v-else
+        class="is-spinning"
+      >
+        <Loading />
+      </el-icon>
     </div>
   </div>
 </template>
@@ -103,7 +124,7 @@ const fileUrl = computed(() => {
 })
 
 const handleClick = async () => {
-  if (isDownloading.value || isUploading.value) return
+  if (isDownloading.value || isUploading.value) {return}
   if (!fileUrl.value) {
     emit('download', parsedContent.value)
     return

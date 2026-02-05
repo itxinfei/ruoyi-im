@@ -57,7 +57,7 @@ export function useLazyLoad(options = {}) {
         // 创建 IntersectionObserver
         if (!observer.value) {
           observer.value = markRaw(new IntersectionObserver(
-            (entries) => {
+            entries => {
               entries.forEach(entry => {
                 if (entry.isIntersecting) {
                   const img = entry.target
@@ -109,8 +109,8 @@ export function useLazyLoad(options = {}) {
    * @param {string} url - 图片 URL
    * @returns {Promise<boolean>} 是否加载成功
    */
-  const preloadImage = (url) => {
-    return new Promise((resolve) => {
+  const preloadImage = url => {
+    return new Promise(resolve => {
       if (loaded.value.has(url)) {
         resolve(true)
         return

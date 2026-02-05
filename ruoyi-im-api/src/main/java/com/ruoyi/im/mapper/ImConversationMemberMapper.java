@@ -127,4 +127,12 @@ public interface ImConversationMemberMapper extends BaseMapper<ImConversationMem
      * @return 插入行数
      */
     int insertImConversationMember(ImConversationMember member);
+
+    /**
+     * 批量统计会话成员数量
+     *
+     * @param conversationIds 会话ID列表
+     * @return Map<会话ID, 成员数量>
+     */
+    List<java.util.Map<String, Object>> countMembersByConversationIds(@Param("conversationIds") List<Long> conversationIds);
 }

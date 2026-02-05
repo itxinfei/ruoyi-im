@@ -4,19 +4,36 @@
     <div class="page-header">
       <div class="page-title">
         <h2>操作日志</h2>
-        <p class="page-desc">记录系统内所有用户的操作行为</p>
+        <p class="page-desc">
+          记录系统内所有用户的操作行为
+        </p>
       </div>
       <div class="page-actions">
-        <el-button :icon="Download" @click="handleExport">导出日志</el-button>
-        <el-button :icon="Delete" @click="handleClear" :disabled="selectedLogs.length === 0">
+        <el-button
+          :icon="Download"
+          @click="handleExport"
+        >
+          导出日志
+        </el-button>
+        <el-button
+          :icon="Delete"
+          :disabled="selectedLogs.length === 0"
+          @click="handleClear"
+        >
           批量删除
         </el-button>
       </div>
     </div>
 
     <!-- 搜索卡片 -->
-    <el-card class="search-card" shadow="never">
-      <el-form :model="searchForm" inline>
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :model="searchForm"
+        inline
+      >
         <el-form-item label="操作人">
           <el-input
             v-model="searchForm.operator"
@@ -31,30 +48,90 @@
           </el-input>
         </el-form-item>
         <el-form-item label="操作模块">
-          <el-select v-model="searchForm.module" placeholder="全部模块" clearable style="width: 120px">
-            <el-option label="用户管理" value="user" />
-            <el-option label="群组管理" value="group" />
-            <el-option label="消息管理" value="message" />
-            <el-option label="部门管理" value="department" />
-            <el-option label="角色管理" value="role" />
-            <el-option label="系统设置" value="system" />
+          <el-select
+            v-model="searchForm.module"
+            placeholder="全部模块"
+            clearable
+            style="width: 120px"
+          >
+            <el-option
+              label="用户管理"
+              value="user"
+            />
+            <el-option
+              label="群组管理"
+              value="group"
+            />
+            <el-option
+              label="消息管理"
+              value="message"
+            />
+            <el-option
+              label="部门管理"
+              value="department"
+            />
+            <el-option
+              label="角色管理"
+              value="role"
+            />
+            <el-option
+              label="系统设置"
+              value="system"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="操作类型">
-          <el-select v-model="searchForm.action" placeholder="全部类型" clearable style="width: 120px">
-            <el-option label="新增" value="create" />
-            <el-option label="修改" value="update" />
-            <el-option label="删除" value="delete" />
-            <el-option label="查询" value="query" />
-            <el-option label="导出" value="export" />
-            <el-option label="登录" value="login" />
-            <el-option label="登出" value="logout" />
+          <el-select
+            v-model="searchForm.action"
+            placeholder="全部类型"
+            clearable
+            style="width: 120px"
+          >
+            <el-option
+              label="新增"
+              value="create"
+            />
+            <el-option
+              label="修改"
+              value="update"
+            />
+            <el-option
+              label="删除"
+              value="delete"
+            />
+            <el-option
+              label="查询"
+              value="query"
+            />
+            <el-option
+              label="导出"
+              value="export"
+            />
+            <el-option
+              label="登录"
+              value="login"
+            />
+            <el-option
+              label="登出"
+              value="logout"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 100px">
-            <el-option label="成功" value="success" />
-            <el-option label="失败" value="failed" />
+          <el-select
+            v-model="searchForm.status"
+            placeholder="全部"
+            clearable
+            style="width: 100px"
+          >
+            <el-option
+              label="成功"
+              value="success"
+            />
+            <el-option
+              label="失败"
+              value="failed"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="时间范围">
@@ -70,35 +147,70 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            :icon="Search"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button
+            :icon="Refresh"
+            @click="handleReset"
+          >
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 批量操作栏 -->
-    <div v-if="selectedLogs.length > 0" class="batch-actions-bar">
+    <div
+      v-if="selectedLogs.length > 0"
+      class="batch-actions-bar"
+    >
       <div class="batch-info">
-        <el-icon class="batch-icon"><Select /></el-icon>
+        <el-icon class="batch-icon">
+          <Select />
+        </el-icon>
         <span>已选择 <strong>{{ selectedLogs.length }}</strong> 条日志</span>
       </div>
       <div class="batch-buttons">
-        <el-button type="danger" size="small" :icon="Delete" @click="handleBatchDelete">
+        <el-button
+          type="danger"
+          size="small"
+          :icon="Delete"
+          @click="handleBatchDelete"
+        >
           批量删除
         </el-button>
-        <el-button size="small" @click="handleClearSelection">取消选择</el-button>
+        <el-button
+          size="small"
+          @click="handleClearSelection"
+        >
+          取消选择
+        </el-button>
       </div>
     </div>
 
     <!-- 日志统计卡片 -->
-    <el-row :gutter="16" class="stats-row">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
       <el-col :span="6">
         <el-card class="stat-card stat-card--total">
           <div class="stat-content">
-            <div class="stat-icon"><el-icon><Document /></el-icon></div>
+            <div class="stat-icon">
+              <el-icon><Document /></el-icon>
+            </div>
             <div class="stat-info">
-              <div class="stat-value">{{ logStats.total || 0 }}</div>
-              <div class="stat-label">总记录数</div>
+              <div class="stat-value">
+                {{ logStats.total || 0 }}
+              </div>
+              <div class="stat-label">
+                总记录数
+              </div>
             </div>
           </div>
         </el-card>
@@ -106,10 +218,16 @@
       <el-col :span="6">
         <el-card class="stat-card stat-card--success">
           <div class="stat-content">
-            <div class="stat-icon"><el-icon><CircleCheck /></el-icon></div>
+            <div class="stat-icon">
+              <el-icon><CircleCheck /></el-icon>
+            </div>
             <div class="stat-info">
-              <div class="stat-value">{{ logStats.success || 0 }}</div>
-              <div class="stat-label">今日成功</div>
+              <div class="stat-value">
+                {{ logStats.success || 0 }}
+              </div>
+              <div class="stat-label">
+                今日成功
+              </div>
             </div>
           </div>
         </el-card>
@@ -117,10 +235,16 @@
       <el-col :span="6">
         <el-card class="stat-card stat-card--error">
           <div class="stat-content">
-            <div class="stat-icon"><el-icon><CircleClose /></el-icon></div>
+            <div class="stat-icon">
+              <el-icon><CircleClose /></el-icon>
+            </div>
             <div class="stat-info">
-              <div class="stat-value">{{ logStats.failed || 0 }}</div>
-              <div class="stat-label">今日失败</div>
+              <div class="stat-value">
+                {{ logStats.failed || 0 }}
+              </div>
+              <div class="stat-label">
+                今日失败
+              </div>
             </div>
           </div>
         </el-card>
@@ -128,10 +252,16 @@
       <el-col :span="6">
         <el-card class="stat-card stat-card--active">
           <div class="stat-content">
-            <div class="stat-icon"><el-icon><User /></el-icon></div>
+            <div class="stat-icon">
+              <el-icon><User /></el-icon>
+            </div>
             <div class="stat-info">
-              <div class="stat-value">{{ logStats.activeUsers || 0 }}</div>
-              <div class="stat-label">活跃用户</div>
+              <div class="stat-value">
+                {{ logStats.activeUsers || 0 }}
+              </div>
+              <div class="stat-label">
+                活跃用户
+              </div>
             </div>
           </div>
         </el-card>
@@ -139,52 +269,127 @@
     </el-row>
 
     <!-- 日志表格 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <el-table
         ref="tableRef"
         v-loading="loading"
         :data="logList"
-        @selection-change="handleSelectionChange"
         stripe
+        @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="50" fixed="left" />
-        <el-table-column prop="id" label="日志ID" width="90" />
-        <el-table-column prop="operator" label="操作人" width="120">
+        <el-table-column
+          type="selection"
+          width="50"
+          fixed="left"
+        />
+        <el-table-column
+          prop="id"
+          label="日志ID"
+          width="90"
+        />
+        <el-table-column
+          prop="operator"
+          label="操作人"
+          width="120"
+        >
           <template #default="{ row }">
             <div class="operator-cell">
-              <el-avatar :size="24" :src="row.operatorAvatar">
+              <el-avatar
+                :size="24"
+                :src="row.operatorAvatar"
+              >
                 {{ row.operatorName?.[0] || 'U' }}
               </el-avatar>
               <span class="operator-name">{{ row.operatorName }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="module" label="操作模块" width="100" align="center">
+        <el-table-column
+          prop="module"
+          label="操作模块"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="getModuleColor(row.module)" size="small">
+            <el-tag
+              :type="getModuleColor(row.module)"
+              size="small"
+            >
               {{ getModuleLabel(row.module) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="action" label="操作类型" width="80" align="center">
+        <el-table-column
+          prop="action"
+          label="操作类型"
+          width="80"
+          align="center"
+        >
           <template #default="{ row }">
-            <span class="action-tag" :class="'action-tag--' + row.action">
+            <span
+              class="action-tag"
+              :class="'action-tag--' + row.action"
+            >
               {{ getActionLabel(row.action) }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="操作描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="ip" label="IP地址" width="130" />
-        <el-table-column prop="createTime" label="操作时间" width="160" />
-        <el-table-column prop="status" label="状态" width="80" align="center">
+        <el-table-column
+          prop="description"
+          label="操作描述"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="ip"
+          label="IP地址"
+          width="130"
+        />
+        <el-table-column
+          prop="createTime"
+          label="操作时间"
+          width="160"
+        />
+        <el-table-column
+          prop="status"
+          label="状态"
+          width="80"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.status === 'success'" size="small" type="success">成功</el-tag>
-            <el-tag v-else size="small" type="danger">失败</el-tag>
+            <el-tag
+              v-if="row.status === 'success'"
+              size="small"
+              type="success"
+            >
+              成功
+            </el-tag>
+            <el-tag
+              v-else
+              size="small"
+              type="danger"
+            >
+              失败
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80" fixed="right" align="center">
+        <el-table-column
+          label="操作"
+          width="80"
+          fixed="right"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleViewDetail(row)">详情</el-button>
+            <el-button
+              type="primary"
+              link
+              @click="handleViewDetail(row)"
+            >
+              详情
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -209,16 +414,33 @@
       title="日志详情"
       size="450px"
     >
-      <div v-if="currentLog" class="detail-content">
-        <el-descriptions :column="1" border class="detail-descriptions">
-          <el-descriptions-item label="日志ID">{{ currentLog.id }}</el-descriptions-item>
+      <div
+        v-if="currentLog"
+        class="detail-content"
+      >
+        <el-descriptions
+          :column="1"
+          border
+          class="detail-descriptions"
+        >
+          <el-descriptions-item label="日志ID">
+            {{ currentLog.id }}
+          </el-descriptions-item>
           <el-descriptions-item label="操作人">
             <div class="operator-detail">
-              <el-avatar :size="32" :src="currentLog.operatorAvatar">
+              <el-avatar
+                :size="32"
+                :src="currentLog.operatorAvatar"
+              >
                 {{ currentLog.operatorName?.[0] || 'U' }}
               </el-avatar>
               <span>{{ currentLog.operatorName }}</span>
-              <el-tag size="small" type="info">{{ currentLog.operatorId }}</el-tag>
+              <el-tag
+                size="small"
+                type="info"
+              >
+                {{ currentLog.operatorId }}
+              </el-tag>
             </div>
           </el-descriptions-item>
           <el-descriptions-item label="操作模块">
@@ -227,7 +449,10 @@
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="操作类型">
-            <span class="action-tag" :class="'action-tag--' + currentLog.action">
+            <span
+              class="action-tag"
+              :class="'action-tag--' + currentLog.action"
+            >
               {{ getActionLabel(currentLog.action) }}
             </span>
           </el-descriptions-item>
@@ -235,7 +460,12 @@
             {{ currentLog.description }}
           </el-descriptions-item>
           <el-descriptions-item label="请求方法">
-            <el-tag size="small" type="info">{{ currentLog.method || 'GET' }}</el-tag>
+            <el-tag
+              size="small"
+              type="info"
+            >
+              {{ currentLog.method || 'GET' }}
+            </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="请求路径">
             <span class="path-text">{{ currentLog.path || '-' }}</span>
@@ -253,13 +483,29 @@
             {{ currentLog.duration || '-' }} ms
           </el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag v-if="currentLog.status === 'success'" type="success">成功</el-tag>
-            <el-tag v-else type="danger">失败</el-tag>
+            <el-tag
+              v-if="currentLog.status === 'success'"
+              type="success"
+            >
+              成功
+            </el-tag>
+            <el-tag
+              v-else
+              type="danger"
+            >
+              失败
+            </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item v-if="currentLog.errorMessage" label="错误信息">
+          <el-descriptions-item
+            v-if="currentLog.errorMessage"
+            label="错误信息"
+          >
             <span class="error-message">{{ currentLog.errorMessage }}</span>
           </el-descriptions-item>
-          <el-descriptions-item v-if="currentLog.requestParams" label="请求参数">
+          <el-descriptions-item
+            v-if="currentLog.requestParams"
+            label="请求参数"
+          >
             <pre class="params-json">{{ JSON.stringify(currentLog.requestParams, null, 2) }}</pre>
           </el-descriptions-item>
         </el-descriptions>
@@ -393,18 +639,18 @@ const handleReset = () => {
 }
 
 // 分页
-const handleSizeChange = (val) => {
+const handleSizeChange = val => {
   pageSize.value = val
   loadLogs()
 }
 
-const handleCurrentChange = (val) => {
+const handleCurrentChange = val => {
   pageNum.value = val
   loadLogs()
 }
 
 // 表格选择
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedLogs.value = selection
 }
 
@@ -413,7 +659,7 @@ const handleClearSelection = () => {
 }
 
 // 查看详情
-const handleViewDetail = (row) => {
+const handleViewDetail = row => {
   currentLog.value = row
   detailDrawerVisible.value = true
 }
@@ -488,7 +734,7 @@ const handleBatchDelete = async () => {
 }
 
 // 获取模块标签
-const getModuleLabel = (module) => {
+const getModuleLabel = module => {
   const labels = {
     user: '用户',
     group: '群组',
@@ -500,7 +746,7 @@ const getModuleLabel = (module) => {
   return labels[module] || module
 }
 
-const getModuleColor = (module) => {
+const getModuleColor = module => {
   const colors = {
     user: 'primary',
     group: 'success',
@@ -513,7 +759,7 @@ const getModuleColor = (module) => {
 }
 
 // 获取操作类型标签
-const getActionLabel = (action) => {
+const getActionLabel = action => {
   const labels = {
     create: '新增',
     update: '修改',

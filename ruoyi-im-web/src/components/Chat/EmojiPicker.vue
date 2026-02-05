@@ -1,9 +1,9 @@
 <template>
   <div
-    class="emoji-picker"
-    :style="positionStyle"
     ref="pickerRef"
     v-click-outside="close"
+    class="emoji-picker"
+    :style="positionStyle"
   >
     <!-- 分类标签 -->
     <div class="emoji-tabs">
@@ -24,16 +24,21 @@
         v-for="emoji in currentEmojis"
         :key="emoji"
         class="emoji-item"
-        @click="selectEmoji(emoji)"
         :title="emoji"
+        @click="selectEmoji(emoji)"
       >
         {{ emoji }}
       </button>
     </div>
 
     <!-- 最近使用 -->
-    <div v-if="recentEmojis.length > 0" class="emoji-section">
-      <div class="section-title">最近使用</div>
+    <div
+      v-if="recentEmojis.length > 0"
+      class="emoji-section"
+    >
+      <div class="section-title">
+        最近使用
+      </div>
       <div class="emoji-list">
         <button
           v-for="emoji in recentEmojis"
@@ -100,7 +105,7 @@ const loadRecentEmojis = () => {
 }
 
 // 保存表情到最近使用
-const saveRecentEmoji = (emoji) => {
+const saveRecentEmoji = emoji => {
   addRecentEmoji(emoji, 20)
   recentEmojis.value = getRecentEmoji()
 }
@@ -122,7 +127,7 @@ const positionStyle = computed(() => {
 })
 
 // 选择表情
-const selectEmoji = (emoji) => {
+const selectEmoji = emoji => {
   saveRecentEmoji(emoji)
   emit('select', emoji)
   close()
@@ -136,7 +141,7 @@ const close = () => {
 // 点击外部关闭
 const vClickOutside = {
   mounted(el, binding) {
-    el.clickOutsideEvent = (event) => {
+    el.clickOutsideEvent = event => {
       if (!(el === event.target || el.contains(event.target))) {
         binding.value(event)
       }
@@ -154,7 +159,7 @@ onMounted(() => {
 })
 
 // 监听最近使用变化
-watch(recentEmojis, (newVal) => {
+watch(recentEmojis, newVal => {
   if (activeCategory.value === 'recent' && newVal.length === 0) {
     activeCategory.value = 'smile'
   }

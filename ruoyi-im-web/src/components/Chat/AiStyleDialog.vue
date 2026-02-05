@@ -10,54 +10,89 @@
       <!-- 语气偏好 -->
       <el-form-item label="语气偏好">
         <el-radio-group v-model="styleConfig.tone">
-          <el-radio-button label="formal">正式</el-radio-button>
-          <el-radio-button label="polite">礼貌</el-radio-button>
-          <el-radio-button label="casual">随意</el-radio-button>
+          <el-radio-button label="formal">
+            正式
+          </el-radio-button>
+          <el-radio-button label="polite">
+            礼貌
+          </el-radio-button>
+          <el-radio-button label="casual">
+            随意
+          </el-radio-button>
         </el-radio-group>
-        <div class="style-hint">{{ toneHints[styleConfig.tone] }}</div>
+        <div class="style-hint">
+          {{ toneHints[styleConfig.tone] }}
+        </div>
       </el-form-item>
 
       <!-- 回复长度 -->
       <el-form-item label="回复长度">
         <el-radio-group v-model="styleConfig.length">
-          <el-radio-button label="short">简短</el-radio-button>
-          <el-radio-button label="medium">中等</el-radio-button>
-          <el-radio-button label="long">详细</el-radio-button>
+          <el-radio-button label="short">
+            简短
+          </el-radio-button>
+          <el-radio-button label="medium">
+            中等
+          </el-radio-button>
+          <el-radio-button label="long">
+            详细
+          </el-radio-button>
         </el-radio-group>
-        <div class="style-hint">{{ lengthHints[styleConfig.length] }}</div>
+        <div class="style-hint">
+          {{ lengthHints[styleConfig.length] }}
+        </div>
       </el-form-item>
 
       <!-- 优先分类 -->
       <el-form-item label="优先分类">
         <el-checkbox-group v-model="styleConfig.categories">
-          <el-checkbox-button label="confirm">确认</el-checkbox-button>
-          <el-checkbox-button label="question">询问</el-checkbox-button>
-          <el-checkbox-button label="polite">感谢</el-checkbox-button>
-          <el-checkbox-button label="work">工作</el-checkbox-button>
-          <el-checkbox-button label="casual">轻松</el-checkbox-button>
-          <el-checkbox-button label="closing">结束</el-checkbox-button>
+          <el-checkbox-button label="confirm">
+            确认
+          </el-checkbox-button>
+          <el-checkbox-button label="question">
+            询问
+          </el-checkbox-button>
+          <el-checkbox-button label="polite">
+            感谢
+          </el-checkbox-button>
+          <el-checkbox-button label="work">
+            工作
+          </el-checkbox-button>
+          <el-checkbox-button label="casual">
+            轻松
+          </el-checkbox-button>
+          <el-checkbox-button label="closing">
+            结束
+          </el-checkbox-button>
         </el-checkbox-group>
       </el-form-item>
 
       <!-- 添加自定义模板 -->
       <el-form-item label="自定义">
         <div class="custom-templates">
-          <div v-for="(template, index) in styleConfig.customTemplates" :key="index" class="custom-item">
+          <div
+            v-for="(template, index) in styleConfig.customTemplates"
+            :key="index"
+            class="custom-item"
+          >
             <el-input
               v-model="template.text"
               placeholder="输入自定义回复"
               size="small"
             >
               <template #append>
-                <el-button @click="removeCustomTemplate(index)" icon="Delete" />
+                <el-button
+                  icon="Delete"
+                  @click="removeCustomTemplate(index)"
+                />
               </template>
             </el-input>
           </div>
           <el-button
             type="primary"
             link
-            @click="addCustomTemplate"
             :disabled="styleConfig.customTemplates.length >= 5"
+            @click="addCustomTemplate"
           >
             + 添加自定义回复 (最多5条)
           </el-button>
@@ -66,8 +101,15 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleSave">保存</el-button>
+      <el-button @click="handleClose">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        @click="handleSave"
+      >
+        保存
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -121,7 +163,7 @@ const addCustomTemplate = () => {
   styleConfig.customTemplates.push({ text: '', category: 'custom' })
 }
 
-const removeCustomTemplate = (index) => {
+const removeCustomTemplate = index => {
   styleConfig.customTemplates.splice(index, 1)
 }
 
@@ -144,11 +186,11 @@ const handleClose = () => {
   emit('update:modelValue', false)
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 

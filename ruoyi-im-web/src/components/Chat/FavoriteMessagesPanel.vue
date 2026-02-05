@@ -10,7 +10,11 @@
         <span class="material-icons-outlined">star</span>
         <span>收藏消息</span>
       </div>
-      <el-button size="small" text @click="handleClose">
+      <el-button
+        size="small"
+        text
+        @click="handleClose"
+      >
         <el-icon><Close /></el-icon>
       </el-button>
     </div>
@@ -29,9 +33,18 @@
         size="small"
         style="width: 120px"
       >
-        <el-option label="全部" value="all" />
-        <el-option label="按会话" value="conversation" />
-        <el-option label="按标签" value="tag" />
+        <el-option
+          label="全部"
+          value="all"
+        />
+        <el-option
+          label="按会话"
+          value="conversation"
+        />
+        <el-option
+          label="按标签"
+          value="tag"
+        />
       </el-select>
     </div>
 
@@ -44,7 +57,10 @@
       >
         <!-- 消息头部：会话信息和时间 -->
         <div class="favorite-header">
-          <div class="conversation-info" @click="handleJumpToConversation(item)">
+          <div
+            class="conversation-info"
+            @click="handleJumpToConversation(item)"
+          >
             <DingtalkAvatar
               :src="item.conversationAvatar"
               :size="32"
@@ -54,15 +70,28 @@
           </div>
           <div class="favorite-meta">
             <span class="favorite-time">{{ formatTime(item.favoriteTime) }}</span>
-            <el-dropdown trigger="click" @command="(cmd) => handleCommand(cmd, item)">
-              <el-button size="small" text>
+            <el-dropdown
+              trigger="click"
+              @command="(cmd) => handleCommand(cmd, item)"
+            >
+              <el-button
+                size="small"
+                text
+              >
                 <el-icon><MoreFilled /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="jump">跳转到消息</el-dropdown-item>
-                  <el-dropdown-item command="edit">编辑备注</el-dropdown-item>
-                  <el-dropdown-item command="unfavorite" class="danger">
+                  <el-dropdown-item command="jump">
+                    跳转到消息
+                  </el-dropdown-item>
+                  <el-dropdown-item command="edit">
+                    编辑备注
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="unfavorite"
+                    class="danger"
+                  >
                     取消收藏
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -72,38 +101,64 @@
         </div>
 
         <!-- 消息内容 -->
-        <div class="favorite-content" @click="handleJumpToMessage(item)">
-          <div class="message-sender">{{ item.senderName }}</div>
+        <div
+          class="favorite-content"
+          @click="handleJumpToMessage(item)"
+        >
+          <div class="message-sender">
+            {{ item.senderName }}
+          </div>
 
           <!-- 文本消息 -->
-          <div v-if="item.messageType === 'TEXT'" class="message-text">
+          <div
+            v-if="item.messageType === 'TEXT'"
+            class="message-text"
+          >
             {{ item.content }}
           </div>
 
           <!-- 图片消息 -->
-          <div v-else-if="item.messageType === 'IMAGE'" class="message-image">
-            <img :src="item.content?.imageUrl" alt="图片" />
+          <div
+            v-else-if="item.messageType === 'IMAGE'"
+            class="message-image"
+          >
+            <img
+              :src="item.content?.imageUrl"
+              alt="图片"
+            >
           </div>
 
           <!-- 文件消息 -->
-          <div v-else-if="item.messageType === 'FILE'" class="message-file">
+          <div
+            v-else-if="item.messageType === 'FILE'"
+            class="message-file"
+          >
             <el-icon><Document /></el-icon>
             <span>{{ item.content?.fileName || '文件' }}</span>
           </div>
 
           <!-- 其他类型 -->
-          <div v-else class="message-other">
+          <div
+            v-else
+            class="message-other"
+          >
             {{ getMessageTypeText(item.messageType) }}
           </div>
 
           <!-- 备注信息 -->
-          <div v-if="item.remark" class="favorite-remark">
+          <div
+            v-if="item.remark"
+            class="favorite-remark"
+          >
             <span class="material-icons-outlined">edit_note</span>
             <span>{{ item.remark }}</span>
           </div>
 
           <!-- 标签 -->
-          <div v-if="item.tags && item.tags.length > 0" class="favorite-tags">
+          <div
+            v-if="item.tags && item.tags.length > 0"
+            class="favorite-tags"
+          >
             <el-tag
               v-for="tag in item.tags"
               :key="tag"
@@ -117,7 +172,10 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredFavorites.length === 0" class="empty-state">
+      <div
+        v-if="filteredFavorites.length === 0"
+        class="empty-state"
+      >
         <el-empty
           :description="searchKeyword ? '没有找到匹配的收藏' : '还没有收藏的消息'"
         >
@@ -184,14 +242,14 @@ const filteredFavorites = computed(() => {
 /**
  * 格式化时间显示
  */
-const formatTime = (time) => {
+const formatTime = time => {
   return formatRelativeTime(time)
 }
 
 /**
  * 获取消息类型文本
  */
-const getMessageTypeText = (type) => {
+const getMessageTypeText = type => {
   const typeMap = {
     IMAGE: '[图片]',
     VIDEO: '[视频]',
@@ -219,14 +277,14 @@ const loadFavorites = async () => {
 /**
  * 跳转到会话
  */
-const handleJumpToConversation = (item) => {
+const handleJumpToConversation = item => {
   emit('jump-to-conversation', item.conversationId)
 }
 
 /**
  * 跳转到消息
  */
-const handleJumpToMessage = (item) => {
+const handleJumpToMessage = item => {
   emit('jump-to-message', {
     conversationId: item.conversationId,
     messageId: item.messageId
@@ -255,7 +313,7 @@ const handleCommand = async (cmd, item) => {
 /**
  * 编辑备注
  */
-const handleEditRemark = async (item) => {
+const handleEditRemark = async item => {
   try {
     const { value } = await ElMessageBox.prompt('请输入备注', '编辑备注', {
       inputValue: item.remark || '',
@@ -281,7 +339,7 @@ const handleEditRemark = async (item) => {
 /**
  * 取消收藏
  */
-const handleUnfavorite = async (item) => {
+const handleUnfavorite = async item => {
   try {
     await ElMessageBox.confirm(
       '确定要取消收藏这条消息吗？',
@@ -325,7 +383,7 @@ onMounted(() => {
 })
 
 // 监听显示状态
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, newVal => {
   if (newVal) {
     loadFavorites()
   }

@@ -18,7 +18,10 @@
           <span class="group-name">{{ group.name }}</span>
           <span class="group-count">({{ group.count }})</span>
           <div class="group-actions">
-            <el-icon class="action-icon" @click="handleRename(group)">
+            <el-icon
+              class="action-icon"
+              @click="handleRename(group)"
+            >
               <Edit />
             </el-icon>
             <el-icon
@@ -51,7 +54,10 @@
       :close-on-click-modal="false"
       append-to-body
     >
-      <el-form :model="createForm" label-width="60px">
+      <el-form
+        :model="createForm"
+        label-width="60px"
+      >
         <el-form-item label="分组名">
           <el-input
             v-model="createForm.groupName"
@@ -63,8 +69,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreateDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleCreate">确定</el-button>
+        <el-button @click="showCreateDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleCreate"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -76,7 +89,10 @@
       :close-on-click-modal="false"
       append-to-body
     >
-      <el-form :model="renameForm" label-width="60px">
+      <el-form
+        :model="renameForm"
+        label-width="60px"
+      >
         <el-form-item label="分组名">
           <el-input
             v-model="renameForm.newName"
@@ -88,8 +104,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showRenameDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleRenameConfirm">确定</el-button>
+        <el-button @click="showRenameDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleRenameConfirm"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </el-dialog>
@@ -139,11 +162,11 @@ const groups = computed(() => {
 })
 
 // 监听 modelValue 变化
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   dialogVisible.value = val
 })
 
-watch(dialogVisible, (val) => {
+watch(dialogVisible, val => {
   emit('update:modelValue', val)
 })
 
@@ -178,7 +201,7 @@ const handleCreate = async () => {
 }
 
 // 重命名分组
-const handleRename = (group) => {
+const handleRename = group => {
   renameForm.value.oldName = group.name
   renameForm.value.newName = group.name
   showRenameDialog.value = true
@@ -214,7 +237,7 @@ const handleRenameConfirm = async () => {
 }
 
 // 删除分组
-const handleDelete = async (group) => {
+const handleDelete = async group => {
   try {
     await ElMessageBox.confirm(
       `删除"${group.name}"分组后，该分组下的联系人将移至默认分组。确定删除吗？`,

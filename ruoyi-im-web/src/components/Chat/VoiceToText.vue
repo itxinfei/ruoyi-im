@@ -4,59 +4,91 @@
     <button
       v-if="!isTranscribing && !transcript"
       class="transcribe-btn"
-      @click="handleStartTranscribe"
       :title="`转成文字 (${duration}秒)`"
+      @click="handleStartTranscribe"
     >
       <span class="material-icons-outlined">text_format</span>
       <span class="btn-text">转文字</span>
     </button>
 
     <!-- 转写中状态 -->
-    <div v-else-if="isTranscribing" class="transcribing-state">
+    <div
+      v-else-if="isTranscribing"
+      class="transcribing-state"
+    >
       <div class="wave-animation">
-        <span class="wave-bar"></span>
-        <span class="wave-bar"></span>
-        <span class="wave-bar"></span>
-        <span class="wave-bar"></span>
+        <span class="wave-bar" />
+        <span class="wave-bar" />
+        <span class="wave-bar" />
+        <span class="wave-bar" />
       </div>
       <span class="state-text">正在转写...</span>
       <span class="progress-text">{{ progress }}%</span>
     </div>
 
     <!-- 转写结果 -->
-    <div v-else-if="transcript" class="transcript-result">
+    <div
+      v-else-if="transcript"
+      class="transcript-result"
+    >
       <div class="transcript-header">
         <span class="material-icons-outlined icon">check_circle</span>
         <span class="header-text">转写结果</span>
-        <button class="collapse-btn" @click="isExpanded = !isExpanded">
+        <button
+          class="collapse-btn"
+          @click="isExpanded = !isExpanded"
+        >
           <span class="material-icons-outlined">
             {{ isExpanded ? 'expand_less' : 'expand_more' }}
           </span>
         </button>
       </div>
       <transition name="expand">
-        <div v-show="isExpanded" class="transcript-content">
+        <div
+          v-show="isExpanded"
+          class="transcript-content"
+        >
           {{ transcript }}
         </div>
       </transition>
       <div class="transcript-actions">
-        <button class="action-btn" @click="handleCopy" title="复制">
+        <button
+          class="action-btn"
+          title="复制"
+          @click="handleCopy"
+        >
           <span class="material-icons-outlined">content_copy</span>
         </button>
-        <button class="action-btn" @click="handleReply" title="引用回复">
+        <button
+          class="action-btn"
+          title="引用回复"
+          @click="handleReply"
+        >
           <span class="material-icons-outlined">reply</span>
         </button>
-        <button class="action-btn danger" @click="handleDelete" title="删除">
+        <button
+          class="action-btn danger"
+          title="删除"
+          @click="handleDelete"
+        >
           <span class="material-icons-outlined">delete</span>
         </button>
       </div>
     </div>
 
     <!-- 错误状态 -->
-    <div v-else-if="error" class="error-state">
+    <div
+      v-else-if="error"
+      class="error-state"
+    >
       <span class="material-icons-outlined error-icon">error_outline</span>
       <span class="error-text">{{ error }}</span>
-      <button class="retry-btn" @click="handleStartTranscribe">重试</button>
+      <button
+        class="retry-btn"
+        @click="handleStartTranscribe"
+      >
+        重试
+      </button>
     </div>
   </div>
 </template>
@@ -160,7 +192,7 @@ const handleStartTranscribe = async () => {
 }
 
 // 调用转写 API
-const callTranscribeAPI = async (signal) => {
+const callTranscribeAPI = async signal => {
   // 1. 创建转写任务
   const createResponse = await createTranscript({
     messageId: props.messageId,

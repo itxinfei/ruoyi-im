@@ -13,9 +13,11 @@ import com.ruoyi.im.dto.message.ImMessageSearchRequest;
 import com.ruoyi.im.dto.message.MessageEditRequest;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
 import com.ruoyi.im.service.*;
+import com.ruoyi.im.service.ImMessageSyncService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
+import com.ruoyi.im.vo.message.SyncMessageResponse;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,6 +50,7 @@ public class ImMessageController {
     private final ImMessageReadService messageReadService;
     private final ImConversationService conversationService;
     private final ImMessageRetryService retryService;
+    private final ImMessageSyncService syncService;
 
     public ImMessageController(
             ImMessageService imMessageService,
@@ -56,7 +59,8 @@ public class ImMessageController {
             ImWebSocketBroadcastService broadcastService,
             ImMessageReadService messageReadService,
             ImConversationService conversationService,
-            ImMessageRetryService retryService) {
+            ImMessageRetryService retryService,
+            ImMessageSyncService syncService) {
         this.imMessageService = imMessageService;
         this.reactionService = reactionService;
         this.mentionService = mentionService;
@@ -64,6 +68,7 @@ public class ImMessageController {
         this.messageReadService = messageReadService;
         this.conversationService = conversationService;
         this.retryService = retryService;
+        this.syncService = syncService;
     }
 
     @PostMapping("/send")
@@ -500,6 +505,89 @@ public class ImMessageController {
         } catch (Exception e) {
             log.error("按类型获取消息失败: conversationId={}, category={}", conversationId, category, e);
             return Result.fail("获取消息失败");
+        }
+    }
+
+    // ==================== 消息同步功能（参考野火IM）====================
+
+    /**
+     * 同步消息
+     * 获取从lastSyncTime之后的新消息，支持断线重连后的消息补发
+     *
+     * @param lastSyncTime 上次同步时间戳（毫秒），首次同步传0
+     * @param deviceId 设备ID（客户端生成，如：web_abc123）
+     * @param limit 单次同步最大条数（默认100，最大500）
+     * @return 同步响应（包含消息列表和新的同步点）
+     * @apiNote 客户端需要在WebSocket连接成功后调用此接口同步消息
+     */
+    @Operation(summary = "同步消息", description = "获取从指定时间之后的所有新消息，支持断线重连补发")
+    @GetMapping("/sync")
+    public Result<SyncMessageResponse> syncMessages(
+            @RequestParam(required = false) Long lastSyncTime,
+            @RequestParam String deviceId,
+            @RequestParam(required = false, defaultValue = "100") Integer limit) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        // 参数校验
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            return Result.fail("设备ID不能为空");
+        }
+
+        try {
+            SyncMessageResponse response = syncService.syncMessages(userId, deviceId, lastSyncTime, limit);
+
+            // 更新同步点
+            if (response.getNewSyncTime() != null) {
+                syncService.updateSyncPoint(userId, deviceId, response.getNewSyncTime(), response.getLastMessageId());
+            }
+
+            log.info("消息同步成功: userId={}, deviceId={}, count={}", userId, deviceId, response.getTotalCount());
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("消息同步失败: userId={}, deviceId={}", userId, deviceId, e);
+            return Result.fail("消息同步失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取用户同步点
+     * 查询当前用户的所有设备同步点信息
+     *
+     * @return 同步点列表
+     */
+    @Operation(summary = "获取同步点", description = "查询当前用户的所有设备同步点")
+    @GetMapping("/sync/points")
+    public Result<List<com.ruoyi.im.domain.ImUserSyncPoint>> getSyncPoints() {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            List<com.ruoyi.im.domain.ImUserSyncPoint> points = syncService.getUserSyncPoints(userId);
+            return Result.success(points);
+        } catch (Exception e) {
+            log.error("获取同步点失败: userId={}", userId, e);
+            return Result.fail("获取同步点失败");
+        }
+    }
+
+    /**
+     * 重置同步点
+     * 删除设备的同步点，下次同步将从头开始
+     *
+     * @param deviceId 设备ID
+     * @return 操作结果
+     */
+    @Operation(summary = "重置同步点", description = "删除设备的同步点，下次同步将从头开始")
+    @DeleteMapping("/sync/point/{deviceId}")
+    public Result<Void> resetSyncPoint(@PathVariable String deviceId) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            syncService.deleteSyncPoint(userId, deviceId);
+            log.info("重置同步点成功: userId={}, deviceId={}", userId, deviceId);
+            return Result.success("同步点已重置");
+        } catch (Exception e) {
+            log.error("重置同步点失败: userId={}, deviceId={}", userId, deviceId, e);
+            return Result.fail("重置同步点失败");
         }
     }
 }

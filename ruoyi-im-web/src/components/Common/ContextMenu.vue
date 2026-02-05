@@ -28,8 +28,14 @@
         @contextmenu.prevent
       >
         <!-- 菜单项列表 -->
-        <div class="context-menu__list" role="menu">
-          <template v-for="(item, index) in visibleItems" :key="index">
+        <div
+          class="context-menu__list"
+          role="menu"
+        >
+          <template
+            v-for="(item, index) in visibleItems"
+            :key="index"
+          >
             <!-- 分隔线 -->
             <div
               v-if="item.divider"
@@ -53,14 +59,26 @@
               @mouseenter="handleItemMouseEnter(index)"
             >
               <!-- 图标 -->
-              <span v-if="item.icon" class="context-menu__icon">
-                <span v-if="isMaterialIcon(item.icon)" class="material-icons-outlined">{{ item.icon }}</span>
-                <component v-else :is="item.icon" />
+              <span
+                v-if="item.icon"
+                class="context-menu__icon"
+              >
+                <span
+                  v-if="isMaterialIcon(item.icon)"
+                  class="material-icons-outlined"
+                >{{ item.icon }}</span>
+                <component
+                  :is="item.icon"
+                  v-else
+                />
               </span>
               <!-- 标签 -->
               <span class="context-menu__label">{{ item.label }}</span>
               <!-- 快捷键提示 -->
-              <span v-if="item.shortcut" class="context-menu__shortcut">{{ item.shortcut }}</span>
+              <span
+                v-if="item.shortcut"
+                class="context-menu__shortcut"
+              >{{ item.shortcut }}</span>
             </div>
           </template>
         </div>
@@ -146,7 +164,7 @@ const visibleItems = computed(() => {
 })
 
 // 检查是否有相邻项（用于分隔线边距）
-const hasAdjacentItem = (index) => {
+const hasAdjacentItem = index => {
   const prevItem = visibleItems.value[index - 1]
   const nextItem = visibleItems.value[index + 1]
   return !!(prevItem && !prevItem.divider) || !!(nextItem && !nextItem.divider)
@@ -202,7 +220,7 @@ const menuStyle = computed(() => {
 })
 
 // 判断是否为 Material Icons
-const isMaterialIcon = (icon) => {
+const isMaterialIcon = icon => {
   return typeof icon === 'string'
 }
 
@@ -215,7 +233,7 @@ const handleMenuClick = () => {
 
 // 处理菜单项点击
 const handleItemClick = (item, index) => {
-  if (item.disabled) return
+  if (item.disabled) {return}
 
   focusedIndex.value = index
   emit('select', item)
@@ -223,7 +241,7 @@ const handleItemClick = (item, index) => {
 }
 
 // 处理菜单项鼠标进入
-const handleItemMouseEnter = (index) => {
+const handleItemMouseEnter = index => {
   isKeyboardMode.value = false
   focusedIndex.value = index
 }
@@ -238,8 +256,8 @@ const close = () => {
 }
 
 // 键盘导航处理
-const handleKeydown = (e) => {
-  if (!computedShow.value) return
+const handleKeydown = e => {
+  if (!computedShow.value) {return}
 
   switch (e.key) {
     case 'ArrowDown':
@@ -293,8 +311,8 @@ const handleKeydown = (e) => {
 // 滚动到聚焦的菜单项
 const scrollToFocusedItem = () => {
   nextTick(() => {
-    if (isUnmounted.value) return
-    const focusedElement = menuRef.value?._elRef?.querySelector(`.context-menu__item--focused`)
+    if (isUnmounted.value) {return}
+    const focusedElement = menuRef.value?._elRef?.querySelector('.context-menu__item--focused')
     if (focusedElement) {
       focusedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
     }
@@ -302,8 +320,8 @@ const scrollToFocusedItem = () => {
 }
 
 // 外部点击处理
-const handleOutsideClick = (e) => {
-  if (!computedShow.value) return
+const handleOutsideClick = e => {
+  if (!computedShow.value) {return}
   if (menuRef.value && !menuRef.value.contains(e.target)) {
     close()
   }
@@ -325,11 +343,11 @@ const updateMenuSize = () => {
 }
 
 // 监听显示状态变化
-watch(() => props.show, (newVal) => {
+watch(() => props.show, newVal => {
   computedShow.value = newVal
   if (newVal) {
     nextTick(() => {
-      if (isUnmounted.value) return
+      if (isUnmounted.value) {return}
       updateMenuSize()
       focusedIndex.value = -1
     })
@@ -339,7 +357,7 @@ watch(() => props.show, (newVal) => {
 // 监听 items 变化
 watch(() => props.items, () => {
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     updateMenuSize()
   })
 }, { deep: true })

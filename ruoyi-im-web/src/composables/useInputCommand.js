@@ -89,7 +89,7 @@ export function useInputCommand(options = {}) {
    */
   const showCommandPaletteAtCursor = () => {
     const tx = textareaRef.value
-    if (!tx) return
+    if (!tx) {return}
 
     const rect = tx.getBoundingClientRect()
     commandPalettePosition.value = {
@@ -111,7 +111,7 @@ export function useInputCommand(options = {}) {
    * 处理命令选择
    * @param {string} commandId - 命令ID
    */
-  const handleCommandSelect = (commandId) => {
+  const handleCommandSelect = commandId => {
     const currentContent = messageContent.value
     const cursorPos = textareaRef.value?.selectionStart || 0
 
@@ -140,7 +140,7 @@ export function useInputCommand(options = {}) {
    * 执行命令
    * @param {Object} command - 命令对象
    */
-  const executeCommand = (command) => {
+  const executeCommand = command => {
     if (onCommandExecute) {
       onCommandExecute(command)
       return

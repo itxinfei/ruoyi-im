@@ -49,49 +49,87 @@
     </el-row>
 
     <!-- 数据图表区域 -->
-    <el-row :gutter="16" class="chart-row">
+    <el-row
+      :gutter="16"
+      class="chart-row"
+    >
       <!-- 消息统计 -->
       <el-col :span="12">
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <span class="card-title">消息统计（近7天）</span>
-              <el-button type="primary" link @click="loadMessageStats">
+              <el-button
+                type="primary"
+                link
+                @click="loadMessageStats"
+              >
                 <el-icon><Refresh /></el-icon>
               </el-button>
             </div>
           </template>
-          <div v-loading="messageStatsLoading" class="chart-container">
-            <div v-if="messageStats.totalMessages > 0" class="message-stats">
+          <div
+            v-loading="messageStatsLoading"
+            class="chart-container"
+          >
+            <div
+              v-if="messageStats.totalMessages > 0"
+              class="message-stats"
+            >
               <div class="stat-row">
                 <span class="stat-row-label">总消息</span>
                 <span class="stat-row-value">{{ messageStats.totalMessages }}</span>
               </div>
               <div class="message-bar-chart">
                 <div class="bar-item">
-                  <div class="bar-label">文本</div>
-                  <div class="bar-track">
-                    <div class="bar-fill bar-fill--primary" :style="{ width: getTextPercent + '%' }"></div>
+                  <div class="bar-label">
+                    文本
                   </div>
-                  <div class="bar-value">{{ messageStats.textMessages }}</div>
+                  <div class="bar-track">
+                    <div
+                      class="bar-fill bar-fill--primary"
+                      :style="{ width: getTextPercent + '%' }"
+                    />
+                  </div>
+                  <div class="bar-value">
+                    {{ messageStats.textMessages }}
+                  </div>
                 </div>
                 <div class="bar-item">
-                  <div class="bar-label">图片</div>
-                  <div class="bar-track">
-                    <div class="bar-fill bar-fill--success" :style="{ width: getImagePercent + '%' }"></div>
+                  <div class="bar-label">
+                    图片
                   </div>
-                  <div class="bar-value">{{ messageStats.imageMessages }}</div>
+                  <div class="bar-track">
+                    <div
+                      class="bar-fill bar-fill--success"
+                      :style="{ width: getImagePercent + '%' }"
+                    />
+                  </div>
+                  <div class="bar-value">
+                    {{ messageStats.imageMessages }}
+                  </div>
                 </div>
                 <div class="bar-item">
-                  <div class="bar-label">文件</div>
-                  <div class="bar-track">
-                    <div class="bar-fill bar-fill--warning" :style="{ width: getFilePercent + '%' }"></div>
+                  <div class="bar-label">
+                    文件
                   </div>
-                  <div class="bar-value">{{ messageStats.fileMessages }}</div>
+                  <div class="bar-track">
+                    <div
+                      class="bar-fill bar-fill--warning"
+                      :style="{ width: getFilePercent + '%' }"
+                    />
+                  </div>
+                  <div class="bar-value">
+                    {{ messageStats.fileMessages }}
+                  </div>
                 </div>
               </div>
             </div>
-            <el-empty v-else description="暂无数据" :image-size="80" />
+            <el-empty
+              v-else
+              description="暂无数据"
+              :image-size="80"
+            />
           </div>
         </el-card>
       </el-col>
@@ -102,18 +140,40 @@
           <template #header>
             <div class="card-header">
               <span class="card-title">用户角色分布</span>
-              <el-button type="primary" link @click="loadUserStats">
+              <el-button
+                type="primary"
+                link
+                @click="loadUserStats"
+              >
                 <el-icon><Refresh /></el-icon>
               </el-button>
             </div>
           </template>
-          <div v-loading="userStatsLoading" class="chart-container">
-            <div v-if="userStats.total > 0" class="role-stats">
+          <div
+            v-loading="userStatsLoading"
+            class="chart-container"
+          >
+            <div
+              v-if="userStats.total > 0"
+              class="role-stats"
+            >
               <div class="pie-chart-wrapper">
-                <svg class="pie-chart" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="40" fill="none" stroke="var(--dt-border-lighter)" stroke-width="20" />
+                <svg
+                  class="pie-chart"
+                  viewBox="0 0 100 100"
+                >
                   <circle
-                    cx="50" cy="50" r="40"
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="var(--dt-border-lighter)"
+                    stroke-width="20"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
                     fill="none"
                     stroke="var(--dt-error)"
                     stroke-width="20"
@@ -122,7 +182,9 @@
                     transform="rotate(-90 50 50)"
                   />
                   <circle
-                    cx="50" cy="50" r="40"
+                    cx="50"
+                    cy="50"
+                    r="40"
                     fill="none"
                     stroke="var(--dt-warning)"
                     stroke-width="20"
@@ -131,7 +193,9 @@
                     transform="rotate(-90 50 50)"
                   />
                   <circle
-                    cx="50" cy="50" r="40"
+                    cx="50"
+                    cy="50"
+                    r="40"
                     fill="none"
                     stroke="var(--dt-text-secondary)"
                     stroke-width="20"
@@ -143,28 +207,38 @@
               </div>
               <div class="legend">
                 <div class="legend-item">
-                  <div class="legend-dot legend-dot--super"></div>
+                  <div class="legend-dot legend-dot--super" />
                   <span>超级管理员: {{ userStats.superAdminCount || 0 }}</span>
                 </div>
                 <div class="legend-item">
-                  <div class="legend-dot legend-dot--admin"></div>
+                  <div class="legend-dot legend-dot--admin" />
                   <span>管理员: {{ userStats.adminCount || 0 }}</span>
                 </div>
                 <div class="legend-item">
-                  <div class="legend-dot legend-dot--user"></div>
+                  <div class="legend-dot legend-dot--user" />
                   <span>普通用户: {{ userStats.userCount || 0 }}</span>
                 </div>
               </div>
             </div>
-            <el-empty v-else description="暂无数据" :image-size="80" />
+            <el-empty
+              v-else
+              description="暂无数据"
+              :image-size="80"
+            />
           </div>
         </el-card>
       </el-col>
     </el-row>
 
     <!-- 加载状态 -->
-    <div v-if="loading" class="loading-container">
-      <el-skeleton :rows="5" animated />
+    <div
+      v-if="loading"
+      class="loading-container"
+    >
+      <el-skeleton
+        :rows="5"
+        animated
+      />
     </div>
   </div>
 </template>
@@ -206,33 +280,33 @@ const userStats = ref({
 })
 
 const getTextPercent = computed(() => {
-  if (messageStats.value.totalMessages === 0) return 0
+  if (messageStats.value.totalMessages === 0) {return 0}
   return Math.round((messageStats.value.textMessages / messageStats.value.totalMessages) * 100)
 })
 
 const getImagePercent = computed(() => {
-  if (messageStats.value.totalMessages === 0) return 0
+  if (messageStats.value.totalMessages === 0) {return 0}
   return Math.round((messageStats.value.imageMessages / messageStats.value.totalMessages) * 100)
 })
 
 const getFilePercent = computed(() => {
-  if (messageStats.value.totalMessages === 0) return 0
+  if (messageStats.value.totalMessages === 0) {return 0}
   return Math.round((messageStats.value.fileMessages / messageStats.value.totalMessages) * 100)
 })
 
 // 饼图周长计算 (2 * PI * r = 2 * 3.14159 * 40 ≈ 251.32)
 const superAdminCircumference = computed(() => {
-  if (userStats.value.total === 0) return 0
+  if (userStats.value.total === 0) {return 0}
   return (userStats.value.superAdminCount / userStats.value.total) * 251.32
 })
 
 const adminCircumference = computed(() => {
-  if (userStats.value.total === 0) return 0
+  if (userStats.value.total === 0) {return 0}
   return (userStats.value.adminCount / userStats.value.total) * 251.32
 })
 
 const userCircumference = computed(() => {
-  if (userStats.value.total === 0) return 0
+  if (userStats.value.total === 0) {return 0}
   return (userStats.value.userCount / userStats.value.total) * 251.32
 })
 
@@ -282,7 +356,7 @@ const loadUserStats = async () => {
 }
 
 // 统计卡片点击跳转
-const navigateTo = (path) => {
+const navigateTo = path => {
   router.push(path)
 }
 

@@ -9,7 +9,10 @@
   >
     <div class="combine-detail-content">
       <!-- 会话信息 -->
-      <div v-if="conversationInfo" class="conversation-info">
+      <div
+        v-if="conversationInfo"
+        class="conversation-info"
+      >
         <span class="material-icons-outlined">chat_bubble_outline</span>
         <span>{{ conversationInfo }}</span>
       </div>
@@ -37,47 +40,68 @@
           <!-- 消息内容 -->
           <div class="message-content">
             <!-- 文本消息 -->
-            <div v-if="msg.type === 'TEXT'" class="text-content">
+            <div
+              v-if="msg.type === 'TEXT'"
+              class="text-content"
+            >
               {{ msg.content }}
             </div>
 
             <!-- 图片消息 -->
-            <div v-else-if="msg.type === 'IMAGE'" class="image-content">
+            <div
+              v-else-if="msg.type === 'IMAGE'"
+              class="image-content"
+            >
               <img
                 :src="getImageUrl(msg)"
                 :alt="msg.senderName + '的图片'"
                 @click="previewImage(getImageUrl(msg))"
-              />
+              >
               [图片]
             </div>
 
             <!-- 视频消息 -->
-            <div v-else-if="msg.type === 'VIDEO'" class="video-content">
+            <div
+              v-else-if="msg.type === 'VIDEO'"
+              class="video-content"
+            >
               <span class="material-icons-outlined">videocam</span>
               [视频]
             </div>
 
             <!-- 文件消息 -->
-            <div v-else-if="msg.type === 'FILE'" class="file-content">
+            <div
+              v-else-if="msg.type === 'FILE'"
+              class="file-content"
+            >
               <span class="material-icons-outlined">insert_drive_file</span>
               <span v-if="getFileName(msg)">{{ getFileName(msg) }}</span>
               <span v-else>[文件]</span>
             </div>
 
             <!-- 语音消息 -->
-            <div v-else-if="msg.type === 'VOICE' || msg.type === 'AUDIO'" class="voice-content">
+            <div
+              v-else-if="msg.type === 'VOICE' || msg.type === 'AUDIO'"
+              class="voice-content"
+            >
               <span class="material-icons-outlined">mic</span>
               [语音] {{ getVoiceDuration(msg) }}
             </div>
 
             <!-- 撤回消息 -->
-            <div v-else-if="msg.type === 'RECALLED'" class="recalled-content">
+            <div
+              v-else-if="msg.type === 'RECALLED'"
+              class="recalled-content"
+            >
               <span class="material-icons-outlined">history</span>
               {{ msg.senderName }}撤回了一条消息
             </div>
 
             <!-- 其他类型 -->
-            <div v-else class="other-content">
+            <div
+              v-else
+              class="other-content"
+            >
               [{{ msg.type }}]
             </div>
           </div>
@@ -92,8 +116,15 @@
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">关闭</el-button>
-      <el-button type="primary" @click="handleForward">转发</el-button>
+      <el-button @click="visible = false">
+        关闭
+      </el-button>
+      <el-button
+        type="primary"
+        @click="handleForward"
+      >
+        转发
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -124,7 +155,7 @@ const emit = defineEmits(['update:modelValue', 'forward'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 // 图片预览状态
@@ -134,8 +165,8 @@ const imagePreviewIndex = ref(0)
 
 // 会话信息
 const conversationInfo = computed(() => {
-  if (props.conversationTitle) return props.conversationTitle
-  if (props.messages.length === 0) return ''
+  if (props.conversationTitle) {return props.conversationTitle}
+  if (props.messages.length === 0) {return ''}
   // 从消息中提取会话信息（假设是群聊或单聊）
   const senders = [...new Set(props.messages.map(m => m.senderName))]
   if (senders.length === 1) {
@@ -147,7 +178,7 @@ const conversationInfo = computed(() => {
 
 // 时间范围
 const timeRange = computed(() => {
-  if (props.messages.length === 0) return ''
+  if (props.messages.length === 0) {return ''}
 
   const timestamps = props.messages
     .map(m => m.timestamp || m.sendTime || m.createTime)
@@ -155,7 +186,7 @@ const timeRange = computed(() => {
     .map(t => new Date(t).getTime())
     .sort((a, b) => a - b)
 
-  if (timestamps.length === 0) return ''
+  if (timestamps.length === 0) {return ''}
 
   const start = new Date(timestamps[0])
   const end = new Date(timestamps[timestamps.length - 1])
@@ -171,25 +202,25 @@ const timeRange = computed(() => {
 const formatTime = formatChatTime
 
 // 获取图片URL
-const getImageUrl = (msg) => {
+const getImageUrl = msg => {
   const content = parseMessageContent(msg) || {}
   return content.url || content.imageUrl || ''
 }
 
 // 获取文件名
-const getFileName = (msg) => {
+const getFileName = msg => {
   const content = parseMessageContent(msg) || {}
   return content.fileName || content.name || ''
 }
 
 // 获取语音时长（使用共享工具函数）
-const getVoiceDuration = (msg) => {
+const getVoiceDuration = msg => {
   const content = parseMessageContent(msg) || {}
   return formatDurationMMSS(content.duration || 0)
 }
 
 // 预览图片
-const previewImage = (url) => {
+const previewImage = url => {
   // 收集所有图片
   const images = props.messages
     .filter(m => m.type === 'IMAGE')

@@ -1,139 +1,94 @@
 <template>
   <el-dialog
     v-model="visible"
-    :width="dialogWidth"
-    :show-close="false"
-    :close-on-click-modal="true"
-    class="dingtalk-desktop-profile"
+    width="960px"
+    class="personal-profile-dialog"
     destroy-on-close
     append-to-body
+    :show-close="false"
+    :close-on-click-modal="true"
   >
-    <div v-if="loading" v-loading="loading" class="h-64 flex items-center justify-center"></div>
-    <div v-else class="bg-white dark:bg-slate-900">
-      
-      <!-- 顶部：头像与核心信息 -->
-      <div class="p-6 pb-4 flex items-start gap-4 relative">
-        <div class="relative flex-shrink-0">
-          <DingtalkAvatar
-            :src="currentUser.avatar"
-            :name="currentUser.nickname || currentUser.username"
-            :user-id="currentUser.id"
-            :size="64"
-            shape="square"
-            class="rounded-lg shadow-sm border border-slate-100 dark:border-slate-800"
-          />
+    <div class="profile-layout">
+      <!-- 侧边导航栏 -->
+      <aside class="profile-sidebar">
+        <div class="sidebar-header">
+          <span class="material-icons-outlined header-icon">person</span>
+          <span class="header-title">个人资料</span>
         </div>
-        
-        <div class="flex-1 min-w-0 pt-1">
-          <div class="flex items-center gap-2">
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 truncate">
-              {{ currentUser.nickname || currentUser.username }}
-            </h3>
-            <span v-if="currentUser.sex === 1" class="material-icons-outlined text-blue-500 text-sm">male</span>
-            <span v-else-if="currentUser.sex === 2" class="material-icons-outlined text-pink-500 text-sm">female</span>
+
+        <nav class="sidebar-nav scrollbar-custom">
+          <div
+            v-for="item in menuItems"
+            :key="item.id"
+            class="nav-item"
+            :class="{ active: activeMenu === item.id }"
+            @click="activeMenu = item.id"
+          >
+            <span class="material-icons-outlined nav-icon">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
           </div>
-          <p class="text-xs text-slate-400 mt-1 truncate">{{ currentUser.position || currentUser.dept?.deptName || '暂无职位' }}</p>
+        </nav>
 
+        <div class="sidebar-footer">
+          <div class="user-info">
+            <el-avatar :size="32" :src="currentUser.avatar" class="user-avatar" />
+            <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
+          </div>
         </div>
+      </aside>
 
-        <!-- 关闭按钮 -->
-        <el-button 
-          class="absolute top-4 right-4 !p-1 !h-auto !text-slate-300 hover:!text-slate-500 !bg-transparent !border-none"
-          @click="handleClose"
-        >
-          <el-icon><Close /></el-icon>
-        </el-button>
-      </div>
-
-      <!-- 分割线 -->
-      <div class="mx-6 border-b border-slate-50 dark:border-slate-800"></div>
-
-      <!-- 中部：详细属性列表 -->
-      <div class="p-6 space-y-4">
-        <div class="profile-info-row">
-          <span class="label">部门</span>
-          <span class="value">{{ currentUser.dept?.deptName || currentUser.departmentName || '未分配部门' }}</span>
-        </div>
-        <div class="profile-info-row">
-          <span class="label">工号</span>
-          <span class="value">{{ currentUser.id }}</span>
-        </div>
-        <div 
-          class="profile-info-row group"
-          :class="{ 'cursor-pointer': currentUser.mobile, 'cursor-default': !currentUser.mobile }" 
-          @click="copyToClipboard(currentUser.mobile)"
-        >
-          <span class="label">手机</span>
-          <div class="value-container">
-            <span class="value text-primary font-medium">{{ currentUser.mobile || '-' }}</span>
-            <el-icon 
-              v-if="currentUser.mobile"
-              class="copy-icon text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" 
-              @click.stop="copyToClipboard(currentUser.mobile)"
+      <!-- 主内容区域 -->
+      <main class="profile-main">
+        <header class="main-header">
+          <div class="header-content">
+            <h2 class="header-title">{{ currentMenuLabel }}</h2>
+            <p class="header-subtitle">{{ currentUser.nickname || currentUser.username }}</p>
+          </div>
+          <div class="header-actions">
+            <el-button
+              v-if="showEditButton"
+              type="primary"
+              @click="handleEdit"
             >
-              <CopyDocument />
-            </el-icon>
+              <span class="material-icons-outlined" style="font-size: 16px; margin-right: 4px;">edit</span>
+              编辑
+            </el-button>
+            <el-button circle text class="close-btn" @click="handleClose">
+              <span class="material-icons-outlined">close</span>
+            </el-button>
           </div>
-        </div>
-        <div 
-          class="profile-info-row group"
-          :class="{ 'cursor-pointer': currentUser.email, 'cursor-default': !currentUser.email }"
-          @click="copyToClipboard(currentUser.email)"
-        >
-          <span class="label">邮箱</span>
-          <div class="value-container">
-            <span class="value truncate">{{ currentUser.email || '-' }}</span>
-            <el-icon 
-              v-if="currentUser.email"
-              class="copy-icon text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity"
-              @click.stop="copyToClipboard(currentUser.email)"
-            >
-              <CopyDocument />
-            </el-icon>
-          </div>
-        </div>
-      </div>
+        </header>
 
-      <!-- 底部：操作按钮栏 -->
-      <div class="action-bar">
-        <div class="flex gap-2">
-          <el-button type="primary" size="small" round @click="showEditDialog = true">
-            <el-icon class="mr-1"><Edit /></el-icon>编辑资料
-          </el-button>
-          <el-button size="small" round plain @click="handleChangePassword">
-            <span class="material-icons-outlined mr-1">lock</span>安全
-          </el-button>
+        <div class="main-content scrollbar-custom">
+          <component :is="currentComponent" :user="currentUser" @open-password="showChangePassword = true" />
         </div>
-        <el-button link type="danger" size="small" @click="handleLogout">
-          <el-icon class="mr-1"><SwitchButton /></el-icon>退出登录
-        </el-button>
-      </div>
-
+      </main>
     </div>
 
-    <!-- 弹窗组件 -->
+    <!-- 编辑资料弹窗 -->
     <EditProfileDialog
-      v-model:visible="showEditDialog"
-      :user-info="currentUser"
+      v-model="showEditDialog"
       @save="handleSaveProfile"
     />
+
+    <!-- 修改密码弹窗 -->
     <ChangePasswordDialog v-model="showChangePassword" />
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
+import { ref, watch, computed, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
-import {
-  Close, Edit, Phone, Message,
-  SwitchButton, CopyDocument, User
-} from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
-import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
-import { copyToClipboard } from '@/utils/format'
+import { ElMessage } from 'element-plus'
+
+// 动态导入子组件
+const ProfileOverview = defineAsyncComponent(() => import('../Profile/Overview.vue'))
+const ProfileBasicInfo = defineAsyncComponent(() => import('../Profile/BasicInfo.vue'))
+const ProfileContactInfo = defineAsyncComponent(() => import('../Profile/ContactInfo.vue'))
+const ProfileSecurity = defineAsyncComponent(() => import('../Profile/Security.vue'))
+
+import EditProfileDialog from './EditProfileDialog.vue'
+import ChangePasswordDialog from './ChangePasswordDialog.vue'
 
 const props = defineProps({
   modelValue: Boolean
@@ -142,39 +97,46 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const store = useStore()
-const router = useRouter()
 
 const visible = ref(false)
-const loading = ref(false)
+const activeMenu = ref('overview')
 const showEditDialog = ref(false)
 const showChangePassword = ref(false)
 
-// 响应式宽度
-const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
+// 菜单配置
+const menuItems = [
+  { id: 'overview', label: '个人资料', icon: 'person' },
+  { id: 'basic', label: '基本信息', icon: 'badge' },
+  { id: 'contact', label: '联系方式', icon: 'contact_phone' },
+  { id: 'security', label: '账号安全', icon: 'security' }
+]
 
-const dialogWidth = computed(() => {
-  if (windowWidth.value < 576) return '95%'
-  if (windowWidth.value < 768) return '380px'
-  return '420px'
-})
+const currentMenuLabel = computed(() => menuItems.find(i => i.id === activeMenu.value)?.label || '个人资料')
 
-// 监听窗口大小变化
-onMounted(() => {
-  window.addEventListener('resize', () => {
-    windowWidth.value = window.innerWidth
-  })
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', () => {
-    windowWidth.value = window.innerWidth
-  })
-})
-
+// 数据源
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
-const handleChangePassword = () => showChangePassword.value = true
+// 组件映射
+const componentMap = {
+  overview: ProfileOverview,
+  basic: ProfileBasicInfo,
+  contact: ProfileContactInfo,
+  security: ProfileSecurity
+}
+
+const currentComponent = computed(() => componentMap[activeMenu.value])
+
+// 是否显示编辑按钮
+const showEditButton = computed(() => {
+  return ['overview', 'basic'].includes(activeMenu.value)
+})
+
+// 处理方法
 const handleClose = () => emit('update:modelValue', false)
+
+const handleEdit = () => {
+  showEditDialog.value = true
+}
 
 const handleSaveProfile = async (formData) => {
   try {
@@ -186,149 +148,252 @@ const handleSaveProfile = async (formData) => {
   }
 }
 
-const handleLogout = () => {
-  ElMessageBox.confirm('确定要退出当前账号并返回登录界面吗？', '提示', {
-    confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning', roundButton: true
-  }).then(async () => {
-    await store.dispatch('user/logout')
-    router.push('/login')
-  }).catch(() => {})
-}
-
+// 监听
 watch(() => props.modelValue, (val) => visible.value = val)
-watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
+watch(visible, (val) => {
+  if (!val) emit('update:modelValue', false)
+  if (val) activeMenu.value = 'overview' // 打开时重置为首页
+})
 </script>
 
 <style scoped lang="scss">
-.dingtalk-desktop-profile {
-  :deep(.el-dialog) {
-    border-radius: var(--dt-radius-lg);
-    overflow: hidden;
-    padding: 0;
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: var(--dt-shadow-dialog);
-    // 确保在小屏幕上不会超出视口
-    max-height: 90vh;
-    
-    // 移动端适配
-    @media (max-width: 480px) {
-      margin: 5vh auto !important;
-      max-height: 85vh;
-      border-radius: var(--dt-radius-xl);
-    }
-  }
-  :deep(.el-dialog__header) { display: none; }
-  :deep(.el-dialog__body) { 
-    padding: 0; 
-    // 确保内容可以滚动
-    max-height: 85vh;
-    overflow-y: auto;
-  }
+@use '@/styles/design-tokens.scss' as *;
+
+// 对话框样式
+:deep(.el-dialog) {
+  border-radius: var(--dt-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--dt-shadow-dialog);
+  margin-top: 5vh !important;
+  background: var(--dt-bg-body);
 }
 
-.profile-info-row {
+:deep(.el-dialog__header) {
+  display: none;
+}
+
+:deep(.el-dialog__body) {
+  padding: 0;
+  height: 720px;
+  background: var(--dt-bg-body);
+}
+
+.profile-layout {
   display: flex;
-  align-items: flex-start;
-  font-size: 14px;
-  line-height: 1.6;
-  padding: 12px 0;
-  border-bottom: 1px solid transparent;
-  transition: all 0.2s ease;
+  height: 100%;
+  width: 100%;
+  background: var(--dt-bg-body);
+}
 
-  &:last-child {
-    border-bottom: none;
+// 侧边栏样式
+.profile-sidebar {
+  width: 240px;
+  background: var(--dt-bg-card);
+  border-right: 1px solid var(--dt-border-color);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--dt-border-color);
+  background: var(--dt-bg-card);
+  gap: 12px;
+
+  .header-icon {
+    font-size: 24px;
+    color: var(--dt-brand-color);
   }
 
-  .label {
-    min-width: 60px;
-    width: 60px;
-    color: #64748b;
-    flex-shrink: 0;
-    font-weight: 500;
-    .dark & { color: #94a3b8; }
-  }
-
-  .value-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-width: 0;
-    gap: 8px;
-  }
-
-  .value {
-    color: #1e293b;
-    flex: 1;
-    min-width: 0;
-    word-break: break-all;
-    .dark & { color: #e2e8f0; }
-  }
-  
-  .copy-icon {
-    flex-shrink: 0;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: var(--dt-radius-sm);
-    transition: all 0.2s ease;
-    
-    &:hover {
-      background-color: var(--el-bg-color-page);
-      color: var(--el-color-primary);
-    }
-  
-  // 移动端始终显示
-  @media (max-width: 768px) {
-    opacity: 1 !important;
+  .header-title {
+    font-size: 18px;
+    font-weight: var(--dt-font-weight-semibold);
+    color: var(--dt-text-primary);
   }
 }
 
-.action-bar {
-  background: rgba(248, 250, 252, 0.8);
-  backdrop-filter: blur(8px);
-  padding: 16px 24px;
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: var(--dt-radius-md);
+  cursor: pointer;
+  color: var(--dt-text-secondary);
+  transition: all 0.2s ease;
+  user-select: none;
+  font-size: 14px;
+  gap: 12px;
+
+  &:hover {
+    background: var(--dt-bg-hover);
+    color: var(--dt-text-primary);
+  }
+
+  &.active {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+    font-weight: var(--dt-font-weight-medium);
+  }
+}
+
+.nav-icon {
+  font-size: 20px;
+}
+
+.nav-label {
+  font-size: 14px;
+}
+
+.sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid var(--dt-border-color);
+  background: var(--dt-bg-card);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--dt-radius-md);
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--dt-bg-hover);
+  }
+
+  .user-avatar {
+    border: 2px solid var(--dt-border-light);
+  }
+
+  .user-name {
+    font-size: 14px;
+    font-weight: var(--dt-font-weight-medium);
+    color: var(--dt-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// 主内容区
+.profile-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--dt-bg-body);
+}
+
+.main-header {
+  height: 64px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  
-  .dark & {
-    background: rgba(30, 41, 59, 0.8);
-    border-top-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--dt-border-color);
+  background: var(--dt-bg-body);
+  flex-shrink: 0;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: var(--dt-font-weight-semibold);
+  color: var(--dt-text-primary);
+  margin: 0;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  color: var(--dt-text-secondary);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.close-btn {
+  font-size: 20px;
+  color: var(--dt-text-secondary);
+
+  &:hover {
+    color: var(--dt-text-primary);
+    background: var(--dt-bg-hover);
   }
-  
-  // 移动端优化
-  @media (max-width: 480px) {
-    padding: 12px 16px;
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-    
-    .flex {
-      justify-content: center;
+}
+
+.main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+// 滚动条样式
+.scrollbar-custom {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--dt-border-color);
+    border-radius: var(--dt-radius-sm);
+
+    &:hover {
+      background-color: var(--dt-text-quaternary);
     }
   }
 }
 
-// 移动端整体优化
-@media (max-width: 480px) {
-  .p-6 {
-    padding: 16px !important;
+// 暗黑模式适配
+.dark {
+  .profile-sidebar {
+    background: var(--dt-bg-card-dark);
+    border-right-color: var(--dt-border-dark);
   }
-  
-  .pb-4 {
-    padding-bottom: 12px !important;
+
+  .sidebar-header,
+  .sidebar-footer {
+    border-color: var(--dt-border-dark);
   }
-  
-  .space-y-4 > * + * {
-    margin-top: 12px !important;
+
+  .nav-item.active {
+    background: var(--dt-brand-bg-dark);
   }
-}
-  
-  // 点击反馈
-  &:active {
-    background-color: var(--el-bg-color-page);
+
+  .main-header {
+    border-bottom-color: var(--dt-border-dark);
+  }
+
+  .user-info:hover {
+    background: var(--dt-bg-hover-dark);
   }
 }
 </style>

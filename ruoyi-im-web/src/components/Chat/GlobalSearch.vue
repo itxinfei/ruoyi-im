@@ -1,13 +1,31 @@
 <template>
   <div class="global-search-container">
-    <div class="search-overlay" v-if="visible" @click="close"></div>
-    <div v-show="visible" class="search-results-panel shadow-xl">
+    <div
+      v-if="visible"
+      class="search-overlay"
+      @click="close"
+    />
+    <div
+      v-show="visible"
+      class="search-results-panel shadow-xl"
+    >
       <!-- 搜索历史 -->
-      <div v-if="!keyword" class="search-initial">
-        <div v-if="history.length > 0" class="search-section">
+      <div
+        v-if="!keyword"
+        class="search-initial"
+      >
+        <div
+          v-if="history.length > 0"
+          class="search-section"
+        >
           <div class="section-header">
             <span>搜索历史</span>
-            <button @click="clearHistory" class="clear-btn">清空</button>
+            <button
+              class="clear-btn"
+              @click="clearHistory"
+            >
+              清空
+            </button>
           </div>
           <div class="history-list">
             <div 
@@ -28,24 +46,39 @@
       </div>
 
       <!-- 搜索结果 -->
-      <div v-else class="search-results scrollbar-thin">
+      <div
+        v-else
+        class="search-results scrollbar-thin"
+      >
         <!-- 联系人 -->
-        <div v-if="filteredContacts.length > 0" class="search-section">
-          <div class="section-header">联系人</div>
+        <div
+          v-if="filteredContacts.length > 0"
+          class="search-section"
+        >
+          <div class="section-header">
+            联系人
+          </div>
           <div 
             v-for="user in filteredContacts" 
             :key="user.id" 
             class="result-item"
             @click="handleUserClick(user)"
           >
-            <div class="avatar bg-blue-500">{{ user.nickname?.charAt(0) || user.username?.charAt(0) }}</div>
+            <div class="avatar bg-blue-500">
+              {{ user.nickname?.charAt(0) || user.username?.charAt(0) }}
+            </div>
             <span class="name">{{ user.nickname || user.username }}</span>
           </div>
         </div>
 
         <!-- 群组 -->
-        <div v-if="filteredGroups.length > 0" class="search-section">
-          <div class="section-header">群组</div>
+        <div
+          v-if="filteredGroups.length > 0"
+          class="search-section"
+        >
+          <div class="section-header">
+            群组
+          </div>
           <div 
             v-for="group in filteredGroups" 
             :key="group.id" 
@@ -60,8 +93,13 @@
         </div>
 
         <!-- 聊天记录 -->
-        <div v-if="messageResults.length > 0" class="search-section">
-          <div class="section-header">聊天记录</div>
+        <div
+          v-if="messageResults.length > 0"
+          class="search-section"
+        >
+          <div class="section-header">
+            聊天记录
+          </div>
           <div 
             v-for="msg in messageResults" 
             :key="msg.id" 
@@ -72,16 +110,27 @@
               <span class="msg-name">{{ msg.senderName }}</span>
               <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
             </div>
-            <div class="msg-content" v-html="highlight(msg.content)"></div>
+            <div
+              class="msg-content"
+              v-html="highlight(msg.content)"
+            />
           </div>
         </div>
 
-        <div v-if="loading" class="search-loading">
-          <el-icon class="is-loading"><Loading /></el-icon>
+        <div
+          v-if="loading"
+          class="search-loading"
+        >
+          <el-icon class="is-loading">
+            <Loading />
+          </el-icon>
           <span>正在搜索...</span>
         </div>
 
-        <div v-if="!loading && keyword && noResults" class="search-empty">
+        <div
+          v-if="!loading && keyword && noResults"
+          class="search-empty"
+        >
           <p>未找到相关结果</p>
         </div>
       </div>
@@ -114,14 +163,14 @@ const contacts = computed(() => store.state.im.contact?.contacts || [])
 const groups = computed(() => store.state.im.contact?.groups || [])
 
 const filteredContacts = computed(() => {
-  if (!props.keyword) return []
+  if (!props.keyword) {return []}
   return contacts.value.filter(c => 
     (c.nickname || '').includes(props.keyword) || (c.username || '').includes(props.keyword)
   ).slice(0, 5)
 })
 
 const filteredGroups = computed(() => {
-  if (!props.keyword) return []
+  if (!props.keyword) {return []}
   return groups.value.filter(g => 
     (g.name || '').includes(props.keyword)
   ).slice(0, 5)
@@ -140,10 +189,10 @@ const loadHistory = () => {
 }
 
 // 保存历史记录
-const saveToHistory = (kw) => {
-  if (!kw) return
+const saveToHistory = kw => {
+  if (!kw) {return}
   const index = history.value.indexOf(kw)
-  if (index !== -1) history.value.splice(index, 1)
+  if (index !== -1) {history.value.splice(index, 1)}
   history.value.unshift(kw)
   history.value = history.value.slice(0, 10)
   setJSON('im_search_history', history.value)
@@ -156,7 +205,7 @@ const clearHistory = () => {
 
 // 搜索消息 (防抖)
 let timer = null
-watch(() => props.keyword, (val) => {
+watch(() => props.keyword, val => {
   clearTimeout(timer)
   if (!val) {
     messageResults.value = []
@@ -181,11 +230,11 @@ const close = () => {
   emit('update:visible', false)
 }
 
-const handleSelect = (item) => {
+const handleSelect = item => {
   emit('select', item)
 }
 
-const handleUserClick = async (user) => {
+const handleUserClick = async user => {
   saveToHistory(props.keyword)
   // 创建或获取会话
   try {
@@ -199,7 +248,7 @@ const handleUserClick = async (user) => {
   }
 }
 
-const handleGroupClick = async (group) => {
+const handleGroupClick = async group => {
   saveToHistory(props.keyword)
   try {
     const res = await createConversation({ type: 'GROUP', targetId: group.id })
@@ -212,7 +261,7 @@ const handleGroupClick = async (group) => {
   }
 }
 
-const handleMessageClick = (msg) => {
+const handleMessageClick = msg => {
   saveToHistory(props.keyword)
   // 获取对应会话并跳转
   const session = {
@@ -225,21 +274,31 @@ const handleMessageClick = (msg) => {
   close()
 }
 
-const highlight = (content) => {
-  if (!props.keyword) return content
-  const reg = new RegExp(`(${props.keyword})`, 'gi')
-  return content.replace(reg, '<span class="highlight">$1</span>')
+// 高亮搜索关键词
+const highlight = content => {
+  if (!props.keyword) {return escapeHtml(content)}
+  const keyword = props.keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const reg = new RegExp(`(${keyword})`, 'gi')
+  return escapeHtml(content).replace(reg, '<span class="highlight">$1</span>')
 }
 
-const formatTime = (ts) => {
+// 转义 HTML 特殊字符，防止 XSS 攻击
+const escapeHtml = str => {
+  if (!str) {return ''}
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
+}
+
+const formatTime = ts => {
   const date = new Date(ts)
   return `${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`
 }
 
 onMounted(() => {
   loadHistory()
-  if (contacts.value.length === 0) store.dispatch('im/contact/loadContacts')
-  if (groups.value.length === 0) store.dispatch('im/contact/loadGroups')
+  if (contacts.value.length === 0) {store.dispatch('im/contact/loadContacts')}
+  if (groups.value.length === 0) {store.dispatch('im/contact/loadGroups')}
 })
 </script>
 

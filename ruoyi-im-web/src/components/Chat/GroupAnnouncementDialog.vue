@@ -8,20 +8,35 @@
   >
     <!-- 公告列表 -->
     <div class="announcement-list">
-      <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
+      <div
+        v-if="loading"
+        class="loading-state"
+      >
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>加载中...</span>
       </div>
 
-      <div v-else-if="announcements.length === 0" class="empty-state">
+      <div
+        v-else-if="announcements.length === 0"
+        class="empty-state"
+      >
         <el-empty description="暂无群公告">
-          <el-button v-if="canManage" type="primary" @click="showCreateDialog = true">
+          <el-button
+            v-if="canManage"
+            type="primary"
+            @click="showCreateDialog = true"
+          >
             发布公告
           </el-button>
         </el-empty>
       </div>
 
-      <div v-else class="announcement-items">
+      <div
+        v-else
+        class="announcement-items"
+      >
         <div
           v-for="item in announcements"
           :key="item.id"
@@ -30,15 +45,28 @@
         >
           <div class="announcement-header">
             <div class="header-left">
-              <span v-if="item.isPinned" class="pinned-badge">
+              <span
+                v-if="item.isPinned"
+                class="pinned-badge"
+              >
                 <span class="material-icons-outlined">push_pin</span>
                 置顶
               </span>
               <span class="announcement-title">{{ item.title }}</span>
             </div>
             <div class="header-right">
-              <el-tag v-if="item.priority === 'HIGH'" type="danger" size="small">重要</el-tag>
-              <el-dropdown v-if="canManage" trigger="click" @command="(cmd) => handleCommand(cmd, item)">
+              <el-tag
+                v-if="item.priority === 'HIGH'"
+                type="danger"
+                size="small"
+              >
+                重要
+              </el-tag>
+              <el-dropdown
+                v-if="canManage"
+                trigger="click"
+                @command="(cmd) => handleCommand(cmd, item)"
+              >
                 <span class="more-btn">
                   <span class="material-icons-outlined">more_horiz</span>
                 </span>
@@ -52,7 +80,10 @@
                       <span class="material-icons-outlined">{{ item.isPinned ? 'push_pin' : 'push_pin' }}</span>
                       {{ item.isPinned ? '取消置顶' : '置顶' }}
                     </el-dropdown-item>
-                    <el-dropdown-item command="delete" class="danger-item">
+                    <el-dropdown-item
+                      command="delete"
+                      class="danger-item"
+                    >
                       <span class="material-icons-outlined">delete</span>
                       删除
                     </el-dropdown-item>
@@ -62,12 +93,20 @@
             </div>
           </div>
 
-          <div class="announcement-content" @click="handleViewDetail(item)">
-            <div class="content-text">{{ item.content }}</div>
+          <div
+            class="announcement-content"
+            @click="handleViewDetail(item)"
+          >
+            <div class="content-text">
+              {{ item.content }}
+            </div>
             <div class="content-footer">
               <span class="publisher">{{ item.publisherName }}</span>
               <span class="publish-time">{{ formatRelativeTime(item.publishTime) }}</span>
-              <span v-if="item.readCount" class="read-count">
+              <span
+                v-if="item.readCount"
+                class="read-count"
+              >
                 {{ item.readCount }}人已读
               </span>
             </div>
@@ -79,8 +118,14 @@
     <!-- 底部按钮 -->
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleClose">关闭</el-button>
-        <el-button v-if="canManage" type="primary" @click="showCreateDialog = true">
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
+        <el-button
+          v-if="canManage"
+          type="primary"
+          @click="showCreateDialog = true"
+        >
           发布公告
         </el-button>
       </div>
@@ -93,8 +138,14 @@
       width="500px"
       append-to-body
     >
-      <el-form :model="formData" label-width="80px">
-        <el-form-item label="标题" required>
+      <el-form
+        :model="formData"
+        label-width="80px"
+      >
+        <el-form-item
+          label="标题"
+          required
+        >
           <el-input
             v-model="formData.title"
             placeholder="请输入公告标题"
@@ -103,7 +154,10 @@
           />
         </el-form-item>
 
-        <el-form-item label="内容" required>
+        <el-form-item
+          label="内容"
+          required
+        >
           <el-input
             v-model="formData.content"
             type="textarea"
@@ -116,16 +170,28 @@
 
         <el-form-item label="优先级">
           <el-radio-group v-model="formData.priority">
-            <el-radio label="LOW">普通</el-radio>
-            <el-radio label="MEDIUM">重要</el-radio>
-            <el-radio label="HIGH">紧急</el-radio>
+            <el-radio label="LOW">
+              普通
+            </el-radio>
+            <el-radio label="MEDIUM">
+              重要
+            </el-radio>
+            <el-radio label="HIGH">
+              紧急
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="showCreateDialog = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+        <el-button @click="showCreateDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
           {{ editingAnnouncement ? '更新' : '发布' }}
         </el-button>
       </template>
@@ -138,10 +204,19 @@
       width="500px"
       append-to-body
     >
-      <div v-if="currentAnnouncement" class="announcement-detail">
+      <div
+        v-if="currentAnnouncement"
+        class="announcement-detail"
+      >
         <div class="detail-header">
-          <h3 class="detail-title">{{ currentAnnouncement.title }}</h3>
-          <el-tag v-if="currentAnnouncement.priority === 'HIGH'" type="danger" size="small">
+          <h3 class="detail-title">
+            {{ currentAnnouncement.title }}
+          </h3>
+          <el-tag
+            v-if="currentAnnouncement.priority === 'HIGH'"
+            type="danger"
+            size="small"
+          >
             重要
           </el-tag>
         </div>
@@ -155,14 +230,19 @@
             <span>{{ currentAnnouncement.publisherName }}</span>
             <span>{{ formatRelativeTime(currentAnnouncement.publishTime) }}</span>
           </div>
-          <div v-if="currentAnnouncement.readCount" class="read-info">
+          <div
+            v-if="currentAnnouncement.readCount"
+            class="read-info"
+          >
             {{ currentAnnouncement.readCount }}人已读
           </div>
         </div>
       </div>
 
       <template #footer>
-        <el-button @click="showDetailDialog = false">关闭</el-button>
+        <el-button @click="showDetailDialog = false">
+          关闭
+        </el-button>
       </template>
     </el-dialog>
   </el-dialog>
@@ -195,7 +275,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const loading = ref(false)
@@ -214,7 +294,7 @@ const formData = ref({
 
 // 加载公告列表
 const loadAnnouncements = async () => {
-  if (!props.groupId) return
+  if (!props.groupId) {return}
 
   loading.value = true
   try {
@@ -236,7 +316,7 @@ const loadAnnouncements = async () => {
 }
 
 // 查看详情
-const handleViewDetail = async (item) => {
+const handleViewDetail = async item => {
   currentAnnouncement.value = item
   showDetailDialog.value = true
 
@@ -353,14 +433,14 @@ const handleClose = () => {
 }
 
 // 监听对话框打开
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   if (val) {
     loadAnnouncements()
   }
 })
 
 // 监听创建对话框关闭
-watch(showCreateDialog, (val) => {
+watch(showCreateDialog, val => {
   if (!val) {
     editingAnnouncement.value = null
     resetForm()

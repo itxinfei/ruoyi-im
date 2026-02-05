@@ -1,15 +1,27 @@
 <template>
-  <div v-if="message.isOwn" class="message-status" :class="`status-${uiStatus}`">
+  <div
+    v-if="message.isOwn"
+    class="message-status"
+    :class="`status-${uiStatus}`"
+  >
     <!-- 发送中：转圈动画 + 消息半透明 -->
     <transition name="status-fade">
-      <div v-if="uiStatus === 'sending'" class="status-indicator status-sending" title="发送中">
+      <div
+        v-if="uiStatus === 'sending'"
+        class="status-indicator status-sending"
+        title="发送中"
+      >
         <span class="material-icons-outlined rotating">sync</span>
       </div>
     </transition>
 
     <!-- 发送成功/已送达：灰色对勾 -->
     <transition name="status-scale">
-      <div v-if="uiStatus === 'delivered'" class="status-indicator status-delivered" title="已送达">
+      <div
+        v-if="uiStatus === 'delivered'"
+        class="status-indicator status-delivered"
+        title="已送达"
+      >
         <span class="material-icons-outlined">done</span>
       </div>
     </transition>
@@ -28,7 +40,10 @@
     </transition>
 
     <!-- 已读信息（群聊显示人数） -->
-    <div v-if="uiStatus === 'read' && isGroupChat && readCount > 0" class="read-count">
+    <div
+      v-if="uiStatus === 'read' && isGroupChat && readCount > 0"
+      class="read-count"
+    >
       {{ readCountText }}
     </div>
 
@@ -40,7 +55,7 @@
         @click="handleRetry"
       >
         <!-- 红色背景 -->
-        <div class="failed-background"></div>
+        <div class="failed-background" />
         <!-- 红色感叹号 -->
         <span class="material-icons-outlined failed-icon">error_outline</span>
         <!-- 重发按钮（悬停显示） -->
@@ -75,10 +90,10 @@ const uiStatus = computed(() => {
 
   // 如果是字符串，直接使用
   if (typeof sendStatus === 'string') {
-    if (sendStatus === 'PENDING' || sendStatus === 'SENDING') return 'sending'
-    if (sendStatus === 'DELIVERED') return 'delivered'
-    if (sendStatus === 'READ') return 'read'
-    if (sendStatus === 'FAILED') return 'failed'
+    if (sendStatus === 'PENDING' || sendStatus === 'SENDING') {return 'sending'}
+    if (sendStatus === 'DELIVERED') {return 'delivered'}
+    if (sendStatus === 'READ') {return 'read'}
+    if (sendStatus === 'FAILED') {return 'failed'}
   }
 
   // 如果是数字，映射到对应状态
@@ -105,7 +120,7 @@ const readCount = computed(() => {
 
 // 已读人数文本
 const readCountText = computed(() => {
-  if (!isGroupChat.value) return ''
+  if (!isGroupChat.value) {return ''}
   const count = readCount.value
   const totalCount = props.message.totalMembers || 0
   return totalCount > 0 ? `${count}/${totalCount}` : `${count}`
@@ -118,7 +133,7 @@ const showReadInfo = computed(() => {
 
 // 已读提示文本
 const readTooltip = computed(() => {
-  if (!showReadInfo.value) return '已读'
+  if (!showReadInfo.value) {return '已读'}
 
   // 单聊：显示已读时间
   if (!isGroupChat.value && props.message.readTime) {
@@ -153,7 +168,7 @@ const errorText = computed(() => {
  * 显示已读信息
  */
 function handleShowReadInfo() {
-  if (!showReadInfo.value) return
+  if (!showReadInfo.value) {return}
 
   emit('show-read-info', {
     messageId: props.message.id,

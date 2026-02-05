@@ -1,18 +1,40 @@
 <template>
   <div class="dingtalk-new-friends">
-    <div v-if="loading" class="dt-loading">
-      <div class="dt-spinner"></div>
+    <div
+      v-if="loading"
+      class="dt-loading"
+    >
+      <div class="dt-spinner" />
     </div>
 
-    <div v-else-if="requests.length === 0" class="dt-empty">
-      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="19" cy="19" r="9"/>
-        <path d="M34 10l-6 6m0 0l-6-6m6 6l-6 6m6-6h.01" stroke-linecap="round" stroke-linejoin="round"/>
+    <div
+      v-else-if="requests.length === 0"
+      class="dt-empty"
+    >
+      <svg
+        viewBox="0 0 48 48"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <circle
+          cx="19"
+          cy="19"
+          r="9"
+        />
+        <path
+          d="M34 10l-6 6m0 0l-6-6m6 6l-6 6m6-6h.01"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
       <p>暂无新的好友申请</p>
     </div>
 
-    <div v-else class="dt-request-list">
+    <div
+      v-else
+      class="dt-request-list"
+    >
       <div
         v-for="request in requests"
         :key="request.id"
@@ -24,15 +46,33 @@
           :src="request.avatar"
         />
         <div class="dt-request-info">
-          <div class="dt-request-name">{{ request.nickname || request.username }}</div>
-          <div class="dt-request-msg">{{ request.message || '请求添加你为好友' }}</div>
+          <div class="dt-request-name">
+            {{ request.nickname || request.username }}
+          </div>
+          <div class="dt-request-msg">
+            {{ request.message || '请求添加你为好友' }}
+          </div>
         </div>
         <div class="dt-request-actions">
           <template v-if="request.status === 'PENDING'">
-            <button class="dt-btn-deny" @click="handleReject(request)">拒绝</button>
-            <button class="dt-btn-accept" @click="handleAccept(request)">同意</button>
+            <button
+              class="dt-btn-deny"
+              @click="handleReject(request)"
+            >
+              拒绝
+            </button>
+            <button
+              class="dt-btn-accept"
+              @click="handleAccept(request)"
+            >
+              同意
+            </button>
           </template>
-          <span v-else class="dt-status" :class="request.status.toLowerCase()">
+          <span
+            v-else
+            class="dt-status"
+            :class="request.status.toLowerCase()"
+          >
             {{ request.status === 'ACCEPTED' ? '已添加' : '已拒绝' }}
           </span>
         </div>
@@ -61,8 +101,8 @@ const loadRequests = async () => {
         .filter(r => r.direction === 'RECEIVED')
         .sort((a, b) => {
           // 待处理的排前面
-          if (a.status === 'PENDING' && b.status !== 'PENDING') return -1
-          if (a.status !== 'PENDING' && b.status === 'PENDING') return 1
+          if (a.status === 'PENDING' && b.status !== 'PENDING') {return -1}
+          if (a.status !== 'PENDING' && b.status === 'PENDING') {return 1}
           return 0
         })
 
@@ -75,7 +115,7 @@ const loadRequests = async () => {
   }
 }
 
-const handleAccept = async (request) => {
+const handleAccept = async request => {
   try {
     const res = await handleFriendRequest(request.id, true)
     if (res.code === 200) {
@@ -90,7 +130,7 @@ const handleAccept = async (request) => {
   }
 }
 
-const handleReject = async (request) => {
+const handleReject = async request => {
   try {
     const res = await handleFriendRequest(request.id, false)
     if (res.code === 200) {

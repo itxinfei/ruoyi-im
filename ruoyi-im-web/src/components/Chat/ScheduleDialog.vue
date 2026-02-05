@@ -6,8 +6,16 @@
     :close-on-click-modal="false"
     @close="handleClose"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-      <el-form-item label="标题" prop="title">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="80px"
+    >
+      <el-form-item
+        label="标题"
+        prop="title"
+      >
         <el-input
           v-model="form.title"
           placeholder="请输入日程标题"
@@ -16,7 +24,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="开始时间" prop="startTime">
+      <el-form-item
+        label="开始时间"
+        prop="startTime"
+      >
         <el-date-picker
           v-model="form.startTime"
           type="datetime"
@@ -28,7 +39,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="结束时间" prop="endTime">
+      <el-form-item
+        label="结束时间"
+        prop="endTime"
+      >
         <el-date-picker
           v-model="form.endTime"
           type="datetime"
@@ -40,7 +54,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="地点" prop="location">
+      <el-form-item
+        label="地点"
+        prop="location"
+      >
         <el-input
           v-model="form.location"
           placeholder="请输入地点（可选）"
@@ -48,7 +65,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="描述" prop="description">
+      <el-form-item
+        label="描述"
+        prop="description"
+      >
         <el-input
           v-model="form.description"
           type="textarea"
@@ -69,25 +89,53 @@
             :style="{ backgroundColor: color.value }"
             @click="form.color = color.value"
           >
-            <span v-if="form.color === color.value" class="material-icons-outlined">check</span>
+            <span
+              v-if="form.color === color.value"
+              class="material-icons-outlined"
+            >check</span>
           </div>
         </div>
       </el-form-item>
 
       <el-form-item label="提醒时间">
-        <el-select v-model="form.reminderType" placeholder="选择提醒时间" style="width: 100%">
-          <el-option label="不提醒" value="" />
-          <el-option label="开始前15分钟" value="15" />
-          <el-option label="开始前30分钟" value="30" />
-          <el-option label="开始前1小时" value="60" />
-          <el-option label="开始前1天" value="1440" />
+        <el-select
+          v-model="form.reminderType"
+          placeholder="选择提醒时间"
+          style="width: 100%"
+        >
+          <el-option
+            label="不提醒"
+            value=""
+          />
+          <el-option
+            label="开始前15分钟"
+            value="15"
+          />
+          <el-option
+            label="开始前30分钟"
+            value="30"
+          />
+          <el-option
+            label="开始前1小时"
+            value="60"
+          />
+          <el-option
+            label="开始前1天"
+            value="1440"
+          />
         </el-select>
       </el-form-item>
     </el-form>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleSave" :loading="saving">
+      <el-button @click="handleClose">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="saving"
+        @click="handleSave"
+      >
         {{ saving ? '保存中...' : '保存' }}
       </el-button>
     </template>
@@ -154,17 +202,17 @@ const rules = {
 }
 
 // 禁用早于今天的日期
-const disableStartDate = (time) => {
+const disableStartDate = time => {
   return time.getTime() < Date.now() - 8.64e7 // 禁用昨天之前的日期
 }
 
-const disableEndDate = (time) => {
-  if (!form.startTime) return false
+const disableEndDate = time => {
+  if (!form.startTime) {return false}
   return time.getTime() < new Date(form.startTime).getTime()
 }
 
 const handleSave = async () => {
-  if (!formRef.value) return
+  if (!formRef.value) {return}
 
   try {
     await formRef.value.validate()
@@ -238,14 +286,14 @@ const setDefaultDateTime = () => {
   }
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     setDefaultDateTime()
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 </script>

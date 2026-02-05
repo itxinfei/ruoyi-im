@@ -4,17 +4,22 @@
     <div class="panel-header">
       <div class="header-left">
         <div class="title-wrapper">
-          <h2 class="panel-title">待办事项</h2>
+          <h2 class="panel-title">
+            待办事项
+          </h2>
           <div class="title-badge">
             <div class="badge-icon-wrapper">
               <span class="material-icons-outlined badge-icon">task_alt</span>
-              <div class="icon-glow"></div>
+              <div class="icon-glow" />
             </div>
             <span class="badge-count">{{ todos.filter(t => !t.completed).length }}</span>
           </div>
         </div>
         <!-- 搜索框 -->
-        <div class="search-wrapper" v-if="!batchMode">
+        <div
+          v-if="!batchMode"
+          class="search-wrapper"
+        >
           <span class="material-icons-outlined search-icon">search</span>
           <input
             v-model="searchInput"
@@ -22,32 +27,50 @@
             class="search-input"
             placeholder="搜索待办..."
             @input="handleSearchInput"
-          />
+          >
         </div>
       </div>
       <div class="header-actions">
         <!-- 批量操作按钮 -->
         <template v-if="batchMode">
           <span class="selected-count">已选 {{ selectedTodos.size }} 项</span>
-          <button class="batch-btn batch-btn--complete" @click="batchComplete" :disabled="selectedTodos.size === 0">
+          <button
+            class="batch-btn batch-btn--complete"
+            :disabled="selectedTodos.size === 0"
+            @click="batchComplete"
+          >
             <span class="material-icons-outlined">check_circle</span>
             <span>完成</span>
           </button>
-          <button class="batch-btn batch-btn--danger" @click="batchDelete" :disabled="selectedTodos.size === 0">
+          <button
+            class="batch-btn batch-btn--danger"
+            :disabled="selectedTodos.size === 0"
+            @click="batchDelete"
+          >
             <span class="material-icons-outlined">delete</span>
             <span>删除</span>
           </button>
-          <button class="batch-btn batch-btn--cancel" @click="exitBatchMode">
+          <button
+            class="batch-btn batch-btn--cancel"
+            @click="exitBatchMode"
+          >
             <span class="material-icons-outlined">close</span>
             <span>取消</span>
           </button>
         </template>
         <template v-else>
-          <button class="icon-btn" @click="enterBatchMode" title="批量操作">
+          <button
+            class="icon-btn"
+            title="批量操作"
+            @click="enterBatchMode"
+          >
             <span class="material-icons-outlined">checklist</span>
             <span>批量</span>
           </button>
-          <button class="add-btn" @click="showAddDialog = true">
+          <button
+            class="add-btn"
+            @click="showAddDialog = true"
+          >
             <span class="material-icons-outlined">add</span>
             <span>新建待办</span>
           </button>
@@ -60,58 +83,58 @@
       <div class="stat-card stat-card--total">
         <div class="stat-icon-wrapper">
           <span class="material-icons-outlined stat-icon">
-            <div class="icon-bg"></div>
+            <div class="icon-bg" />
             list
           </span>
-          <div class="icon-glow icon-glow--primary"></div>
+          <div class="icon-glow icon-glow--primary" />
         </div>
         <div class="stat-info">
           <span class="stat-value">{{ todos.length }}</span>
           <span class="stat-label">全部待办</span>
         </div>
-        <div class="stat-decoration"></div>
+        <div class="stat-decoration" />
       </div>
       <div class="stat-card stat-card--pending">
         <div class="stat-icon-wrapper">
           <span class="material-icons-outlined stat-icon">
-            <div class="icon-bg"></div>
+            <div class="icon-bg" />
             schedule
           </span>
-          <div class="icon-glow icon-glow--warning"></div>
+          <div class="icon-glow icon-glow--warning" />
         </div>
         <div class="stat-info">
           <span class="stat-value">{{ todos.filter(t => !t.completed).length }}</span>
           <span class="stat-label">进行中</span>
         </div>
-        <div class="stat-decoration"></div>
+        <div class="stat-decoration" />
       </div>
       <div class="stat-card stat-card--high">
         <div class="stat-icon-wrapper">
           <span class="material-icons-outlined stat-icon">
-            <div class="icon-bg"></div>
+            <div class="icon-bg" />
             priority_high
           </span>
-          <div class="icon-glow icon-glow--danger"></div>
+          <div class="icon-glow icon-glow--danger" />
         </div>
         <div class="stat-info">
           <span class="stat-value">{{ todos.filter(t => t.priority === 'high' && !t.completed).length }}</span>
           <span class="stat-label">紧急</span>
         </div>
-        <div class="stat-decoration"></div>
+        <div class="stat-decoration" />
       </div>
       <div class="stat-card stat-card--done">
         <div class="stat-icon-wrapper">
           <span class="material-icons-outlined stat-icon">
-            <div class="icon-bg"></div>
+            <div class="icon-bg" />
             check_circle
           </span>
-          <div class="icon-glow icon-glow--success"></div>
+          <div class="icon-glow icon-glow--success" />
         </div>
         <div class="stat-info">
           <span class="stat-value">{{ todos.filter(t => t.completed).length }}</span>
           <span class="stat-label">已完成</span>
         </div>
-        <div class="stat-decoration"></div>
+        <div class="stat-decoration" />
       </div>
     </div>
 
@@ -126,42 +149,62 @@
       >
         <span class="filter-tab-icon material-icons-outlined">{{ tab.icon }}</span>
         <span class="filter-tab-label">{{ tab.label }}</span>
-        <span v-if="getCount(tab.key) > 0" class="tab-count">{{ getCount(tab.key) }}</span>
-        <div class="tab-indicator"></div>
+        <span
+          v-if="getCount(tab.key) > 0"
+          class="tab-count"
+        >{{ getCount(tab.key) }}</span>
+        <div class="tab-indicator" />
       </button>
     </div>
 
     <!-- 内容区域 -->
     <div class="panel-content">
-      <div v-if="loading" class="loading-state">
+      <div
+        v-if="loading"
+        class="loading-state"
+      >
         <div class="loading-spinner">
-          <div class="spinner-ring"></div>
-          <div class="spinner-dot"></div>
+          <div class="spinner-ring" />
+          <div class="spinner-dot" />
         </div>
         <span class="loading-text">加载中...</span>
       </div>
 
-      <div v-else-if="filteredTodos.length === 0" class="empty-state">
+      <div
+        v-else-if="filteredTodos.length === 0"
+        class="empty-state"
+      >
         <div class="empty-illustration">
           <div class="empty-icon-wrapper">
             <span class="material-icons-outlined empty-icon">{{ emptyIcon }}</span>
             <div class="icon-rings">
-              <div class="ring"></div>
-              <div class="ring"></div>
-              <div class="ring"></div>
+              <div class="ring" />
+              <div class="ring" />
+              <div class="ring" />
             </div>
           </div>
-          <div class="empty-decoration"></div>
+          <div class="empty-decoration" />
         </div>
-        <h3 class="empty-title">{{ emptyTitle }}</h3>
-        <p class="empty-text">{{ emptyText }}</p>
-        <button v-if="activeFilter === 'all'" class="empty-action" @click="showAddDialog = true">
+        <h3 class="empty-title">
+          {{ emptyTitle }}
+        </h3>
+        <p class="empty-text">
+          {{ emptyText }}
+        </p>
+        <button
+          v-if="activeFilter === 'all'"
+          class="empty-action"
+          @click="showAddDialog = true"
+        >
           <span class="material-icons-outlined">add</span>
           创建第一个待办
         </button>
       </div>
 
-      <div v-else class="todo-list">
+      <div
+        v-else
+        class="todo-list"
+      >
         <transition-group name="todo-item">
           <div
             v-for="todo in filteredTodos"
@@ -182,36 +225,72 @@
             @click="handleItemClick(todo)"
           >
             <!-- 优先级指示条 -->
-            <div class="priority-indicator" :class="`priority-${todo.priority}`">
-              <div class="indicator-glow"></div>
+            <div
+              class="priority-indicator"
+              :class="`priority-${todo.priority}`"
+            >
+              <div class="indicator-glow" />
             </div>
 
             <!-- 批量选择复选框 -->
-            <div v-if="batchMode" class="batch-checkbox" @click.stop="toggleSelectTodo(todo)">
-              <div class="checkbox-inner" :class="{ checked: selectedTodos.has(todo.id) }">
-                <span v-if="selectedTodos.has(todo.id)" class="material-icons-outlined check-icon">check</span>
+            <div
+              v-if="batchMode"
+              class="batch-checkbox"
+              @click.stop="toggleSelectTodo(todo)"
+            >
+              <div
+                class="checkbox-inner"
+                :class="{ checked: selectedTodos.has(todo.id) }"
+              >
+                <span
+                  v-if="selectedTodos.has(todo.id)"
+                  class="material-icons-outlined check-icon"
+                >check</span>
               </div>
             </div>
 
             <!-- 完成复选框 -->
-            <div v-else class="todo-checkbox" @click.stop="toggleComplete(todo)">
-              <div class="checkbox-inner" :class="{ checked: todo.completed }">
-                <span v-if="todo.completed" class="material-icons-outlined check-icon">check</span>
-                <div class="checkbox-ripple"></div>
+            <div
+              v-else
+              class="todo-checkbox"
+              @click.stop="toggleComplete(todo)"
+            >
+              <div
+                class="checkbox-inner"
+                :class="{ checked: todo.completed }"
+              >
+                <span
+                  v-if="todo.completed"
+                  class="material-icons-outlined check-icon"
+                >check</span>
+                <div class="checkbox-ripple" />
               </div>
             </div>
 
             <!-- 内容 -->
             <div class="todo-content">
               <div class="todo-header">
-                <h4 class="todo-title">{{ todo.title }}</h4>
-                <span class="todo-priority-badge" :class="`priority-${todo.priority}`">
+                <h4 class="todo-title">
+                  {{ todo.title }}
+                </h4>
+                <span
+                  class="todo-priority-badge"
+                  :class="`priority-${todo.priority}`"
+                >
                   {{ priorityText(todo.priority) }}
                 </span>
               </div>
-              <p v-if="todo.content" class="todo-desc">{{ todo.content }}</p>
+              <p
+                v-if="todo.content"
+                class="todo-desc"
+              >
+                {{ todo.content }}
+              </p>
               <div class="todo-meta">
-                <span class="todo-date" :class="{ overdue: isOverdue(todo.dueDate) }">
+                <span
+                  class="todo-date"
+                  :class="{ overdue: isOverdue(todo.dueDate) }"
+                >
                   <span class="material-icons-outlined date-icon">{{ dateIcon(todo.dueDate) }}</span>
                   {{ formatDate(todo.dueDate) }}
                 </span>
@@ -219,17 +298,36 @@
             </div>
 
             <!-- 操作按钮 -->
-            <div class="todo-actions" @click.stop>
-              <span v-if="!batchMode" class="drag-handle" title="拖拽排序">
+            <div
+              class="todo-actions"
+              @click.stop
+            >
+              <span
+                v-if="!batchMode"
+                class="drag-handle"
+                title="拖拽排序"
+              >
                 <span class="material-icons-outlined">drag_indicator</span>
               </span>
-              <el-tooltip content="编辑" placement="top">
-                <button class="action-btn" @click="handleEdit(todo)">
+              <el-tooltip
+                content="编辑"
+                placement="top"
+              >
+                <button
+                  class="action-btn"
+                  @click="handleEdit(todo)"
+                >
                   <span class="material-icons-outlined">edit</span>
                 </button>
               </el-tooltip>
-              <el-tooltip content="删除" placement="top">
-                <button class="action-btn action-btn--danger" @click="deleteTodo(todo)">
+              <el-tooltip
+                content="删除"
+                placement="top"
+              >
+                <button
+                  class="action-btn action-btn--danger"
+                  @click="deleteTodo(todo)"
+                >
                   <span class="material-icons-outlined">delete</span>
                 </button>
               </el-tooltip>
@@ -272,7 +370,7 @@ import { getTodos, completeTodo, deleteTodo as deleteTodoApi, updateTodo } from 
 const debounce = (fn, delay) => {
   let timer = null
   return (...args) => {
-    if (timer) clearTimeout(timer)
+    if (timer) {clearTimeout(timer)}
     timer = setTimeout(() => fn(...args), delay)
   }
 }
@@ -298,11 +396,11 @@ const dragOverTodo = ref(null)
 // ============================================================================
 // 搜索防抖处理
 // ============================================================================
-const debouncedSearch = debounce((value) => {
+const debouncedSearch = debounce(value => {
   searchKeyword.value = value
 }, 300)
 
-const handleSearchInput = (e) => {
+const handleSearchInput = e => {
   debouncedSearch(e.target.value)
 }
 
@@ -341,12 +439,12 @@ const filteredTodos = computed(() => {
 
   // 按完成状态、优先级、截止日期排序
   return list.sort((a, b) => {
-    if (a.completed !== b.completed) return a.completed ? 1 : -1
+    if (a.completed !== b.completed) {return a.completed ? 1 : -1}
     const priorityOrder = { high: 0, medium: 1, low: 2 }
     if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
       return priorityOrder[a.priority] - priorityOrder[b.priority]
     }
-    if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate)
+    if (a.dueDate && b.dueDate) {return new Date(a.dueDate) - new Date(b.dueDate)}
     return a.dueDate ? -1 : 1
   })
 })
@@ -383,34 +481,34 @@ const emptyTitle = computed(() => emptyConfig.value.title)
 const emptyText = computed(() => emptyConfig.value.text)
 
 // 获取筛选条件数量
-const getCount = (filter) => {
-  if (filter === 'all') return todos.value.length
-  if (filter === 'pending') return todos.value.filter(t => !t.completed).length
-  if (filter === 'completed') return todos.value.filter(t => t.completed).length
-  if (filter === 'high') return todos.value.filter(t => t.priority === 'high' && !t.completed).length
+const getCount = filter => {
+  if (filter === 'all') {return todos.value.length}
+  if (filter === 'pending') {return todos.value.filter(t => !t.completed).length}
+  if (filter === 'completed') {return todos.value.filter(t => t.completed).length}
+  if (filter === 'high') {return todos.value.filter(t => t.priority === 'high' && !t.completed).length}
   return 0
 }
 
 // 判断是否过期
-const isOverdue = (dueDate) => {
-  if (!dueDate) return false
+const isOverdue = dueDate => {
+  if (!dueDate) {return false}
   return new Date(dueDate) < new Date()
 }
 
 // 日期图标
-const dateIcon = (dueDate) => {
-  if (!dueDate) return 'event_busy'
-  if (isOverdue(dueDate)) return 'warning'
+const dateIcon = dueDate => {
+  if (!dueDate) {return 'event_busy'}
+  if (isOverdue(dueDate)) {return 'warning'}
   const diff = new Date(dueDate) - new Date()
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  if (days === 0) return 'today'
-  if (days === 1) return 'event_available'
-  if (days === -1) return 'event'
+  if (days === 0) {return 'today'}
+  if (days === 1) {return 'event_available'}
+  if (days === -1) {return 'event'}
   return 'event'
 }
 
 // 数据转换：后端 -> 前端
-const transformTodoFromApi = (apiTodo) => {
+const transformTodoFromApi = apiTodo => {
   // 优先级转换：1=低, 2=中, 3=高 -> low/medium/high
   const priorityMap = { 1: 'low', 2: 'medium', 3: 'high' }
   const priority = priorityMap[apiTodo.priority] || 'medium'
@@ -433,7 +531,7 @@ const transformTodoFromApi = (apiTodo) => {
 }
 
 // 数据转换：前端 -> 后端
-const transformTodoToApi = (todo) => {
+const transformTodoToApi = todo => {
   // 优先级转换：low/medium/high -> 1/2/3
   const priorityMap = { low: 1, medium: 2, high: 3 }
   return {
@@ -462,33 +560,33 @@ const loadTodos = async () => {
   }
 }
 
-const priorityText = (priority) => {
+const priorityText = priority => {
   const map = { high: '紧急', medium: '普通', low: '低' }
   return map[priority] || '普通'
 }
 
-const getPriorityClass = (priority) => {
+const getPriorityClass = priority => {
   const map = { high: 'priority-high', medium: 'priority-medium', low: 'priority-low' }
   return map[priority] || 'priority-medium'
 }
 
-const formatDate = (date) => {
-  if (!date) return '无截止日期'
+const formatDate = date => {
+  if (!date) {return '无截止日期'}
   const d = new Date(date)
   const now = new Date()
   const diff = d - now
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-  if (days === 0) return '今天截止'
-  if (days === 1) return '明天截止'
-  if (days === -1) return '昨天截止'
-  if (days < -1) return `逾期 ${Math.abs(days)} 天`
-  if (days <= 7) return `${days} 天后截止`
+  if (days === 0) {return '今天截止'}
+  if (days === 1) {return '明天截止'}
+  if (days === -1) {return '昨天截止'}
+  if (days < -1) {return `逾期 ${Math.abs(days)} 天`}
+  if (days <= 7) {return `${days} 天后截止`}
 
   return `${d.getMonth() + 1}月${d.getDate()}日`
 }
 
-const toggleComplete = async (todo) => {
+const toggleComplete = async todo => {
   try {
     const res = await completeTodo(todo.id)
     if (res.code === 200) {
@@ -506,7 +604,7 @@ const toggleComplete = async (todo) => {
   }
 }
 
-const deleteTodo = async (todo) => {
+const deleteTodo = async todo => {
   if (!await confirmDelete('这个待办')) {
     return
   }
@@ -525,17 +623,17 @@ const deleteTodo = async (todo) => {
   }
 }
 
-const handleViewDetail = (todo) => {
+const handleViewDetail = todo => {
   selectedTodo.value = todo
   showDetailDialog.value = true
 }
 
-const handleEdit = (todo) => {
+const handleEdit = todo => {
   editingTodo.value = todo
   showAddDialog.value = true
 }
 
-const handleEditFromDetail = (todo) => {
+const handleEditFromDetail = todo => {
   showDetailDialog.value = false
   handleEdit(todo)
 }
@@ -560,7 +658,7 @@ const exitBatchMode = () => {
   selectedTodos.value.clear()
 }
 
-const toggleSelectTodo = (todo) => {
+const toggleSelectTodo = todo => {
   if (selectedTodos.value.has(todo.id)) {
     selectedTodos.value.delete(todo.id)
   } else {
@@ -580,7 +678,7 @@ const selectAllTodos = () => {
 }
 
 const batchComplete = async () => {
-  if (selectedTodos.value.size === 0) return
+  if (selectedTodos.value.size === 0) {return}
 
   try {
     await ElMessageBox.confirm(`确定要完成选中的 ${selectedTodos.value.size} 个待办吗？`, '批量完成', {
@@ -611,7 +709,7 @@ const batchComplete = async () => {
 }
 
 const batchDelete = async () => {
-  if (selectedTodos.value.size === 0) return
+  if (selectedTodos.value.size === 0) {return}
 
   if (!await confirmDelete(`选中的 ${selectedTodos.value.size} 个待办`, `确定要删除选中的 ${selectedTodos.value.size} 个待办吗？此操作不可恢复。`)) {
     return
@@ -645,7 +743,7 @@ const handleDragStart = (e, todo) => {
   e.target.classList.add('is-dragging')
 }
 
-const handleDragEnd = (e) => {
+const handleDragEnd = e => {
   draggingTodo.value = null
   dragOverTodo.value = null
   e.target.classList.remove('is-dragging')
@@ -653,13 +751,13 @@ const handleDragEnd = (e) => {
 
 const handleDragOver = (e, todo) => {
   e.preventDefault()
-  if (!draggingTodo.value || draggingTodo.value === todo.id || batchMode.value) return
+  if (!draggingTodo.value || draggingTodo.value === todo.id || batchMode.value) {return}
   dragOverTodo.value = todo.id
 }
 
 const handleDrop = async (e, targetTodo) => {
   e.preventDefault()
-  if (!draggingTodo.value || draggingTodo.value === targetTodo.id || batchMode.value) return
+  if (!draggingTodo.value || draggingTodo.value === targetTodo.id || batchMode.value) {return}
 
   // 交换数组位置
   const draggingIndex = todos.value.findIndex(t => t.id === draggingTodo.value)
@@ -681,7 +779,7 @@ const handleDrop = async (e, targetTodo) => {
 // ============================================================================
 // 点击处理（批量模式和普通模式）
 // ============================================================================
-const handleItemClick = (todo) => {
+const handleItemClick = todo => {
   if (batchMode.value) {
     toggleSelectTodo(todo)
   } else {

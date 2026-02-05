@@ -3,15 +3,23 @@
     <!-- 头部 -->
     <header class="panel-header">
       <div class="header-left">
-        <h2 class="header-title">群文件</h2>
-        <div v-if="statistics" class="header-stats">
+        <h2 class="header-title">
+          群文件
+        </h2>
+        <div
+          v-if="statistics"
+          class="header-stats"
+        >
           <span class="stat-item">{{ statistics.fileCount }} 个文件</span>
           <span class="stat-divider">|</span>
           <span class="stat-item">{{ formatSize(statistics.totalSize) }}</span>
         </div>
       </div>
       <div class="header-right">
-        <el-button type="primary" @click="handleUpload">
+        <el-button
+          type="primary"
+          @click="handleUpload"
+        >
           <span class="material-icons-outlined">upload_file</span>
           上传文件
         </el-button>
@@ -22,140 +30,187 @@
     <div class="panel-content">
       <!-- 筛选栏 -->
       <div class="filter-bar">
-      <div class="filter-left">
-        <!-- 分类筛选 -->
-        <div class="filter-group">
-          <span class="filter-label">分类:</span>
-          <div class="category-tabs">
-            <div
-              v-for="cat in categories"
-              :key="cat"
-              class="category-tab"
-              :class="{ active: selectedCategory === cat }"
-              @click="handleSelectCategory(cat)"
-            >
-              {{ cat }}
+        <div class="filter-left">
+          <!-- 分类筛选 -->
+          <div class="filter-group">
+            <span class="filter-label">分类:</span>
+            <div class="category-tabs">
+              <div
+                v-for="cat in categories"
+                :key="cat"
+                class="category-tab"
+                :class="{ active: selectedCategory === cat }"
+                @click="handleSelectCategory(cat)"
+              >
+                {{ cat }}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="filter-right">
-        <el-input
-          v-model="searchKeyword"
-          placeholder="搜索文件名"
-          clearable
-          @input="handleSearch"
-        >
-          <template #prefix>
-            <span class="material-icons-outlined">search</span>
-          </template>
-        </el-input>
-      </div>
-    </div>
-
-    <!-- 文件列表 -->
-    <div class="file-list">
-      <div
-        v-for="file in fileList"
-        :key="file.id"
-        class="file-item"
-        @click="handleFileClick(file)"
-        @contextmenu.prevent="handleContextMenu($event, file)"
-      >
-        <div class="file-icon">
-          <span v-if="isImage(file)" class="material-icons-outlined image-icon">image</span>
-          <span v-else-if="isVideo(file)" class="material-icons-outlined video-icon">videocam</span>
-          <span v-else-if="isDocument(file)" class="material-icons-outlined doc-icon">description</span>
-          <span v-else class="material-icons-outlined default-icon">insert_drive_file</span>
-        </div>
-        <div class="file-info">
-          <div class="file-name">{{ file.fileName }}</div>
-          <div class="file-meta">
-            <span class="file-size">{{ formatSize(file.fileSize) }}</span>
-            <span class="file-divider">·</span>
-            <span class="file-uploader">{{ file.uploaderName }}</span>
-            <span class="file-divider">·</span>
-            <span class="file-time">{{ formatTime(file.uploadTime) }}</span>
-          </div>
-        </div>
-        <div class="file-actions" @click.stop>
-          <el-dropdown trigger="click" @command="(cmd) => handleFileCommand(cmd, file)">
-            <span class="material-icons-outlined more-btn">more_horiz</span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="download">
-                  <span class="material-icons-outlined">download</span>
-                  下载
-                </el-dropdown-item>
-                <el-dropdown-item command="rename">
-                  <span class="material-icons-outlined">edit</span>
-                  重命名
-                </el-dropdown-item>
-                <el-dropdown-item command="move">
-                  <span class="material-icons-outlined">folder</span>
-                  移动到
-                </el-dropdown-item>
-                <el-dropdown-item divided command="delete" class="danger-item">
-                  <span class="material-icons-outlined">delete</span>
-                  删除
-                </el-dropdown-item>
-              </el-dropdown-menu>
+        <div class="filter-right">
+          <el-input
+            v-model="searchKeyword"
+            placeholder="搜索文件名"
+            clearable
+            @input="handleSearch"
+          >
+            <template #prefix>
+              <span class="material-icons-outlined">search</span>
             </template>
-          </el-dropdown>
+          </el-input>
         </div>
       </div>
 
-      <!-- 空状态 -->
-      <div v-if="fileList.length === 0 && !loading" class="empty-state">
-        <div class="empty-illustration">
-          <div class="folder-icon">
-            <span class="material-icons-outlined">folder_open</span>
+      <!-- 文件列表 -->
+      <div class="file-list">
+        <div
+          v-for="file in fileList"
+          :key="file.id"
+          class="file-item"
+          @click="handleFileClick(file)"
+          @contextmenu.prevent="handleContextMenu($event, file)"
+        >
+          <div class="file-icon">
+            <span
+              v-if="isImage(file)"
+              class="material-icons-outlined image-icon"
+            >image</span>
+            <span
+              v-else-if="isVideo(file)"
+              class="material-icons-outlined video-icon"
+            >videocam</span>
+            <span
+              v-else-if="isDocument(file)"
+              class="material-icons-outlined doc-icon"
+            >description</span>
+            <span
+              v-else
+              class="material-icons-outlined default-icon"
+            >insert_drive_file</span>
           </div>
-          <div class="floating-icons">
-            <span class="icon icon-1 material-icons-outlined">image</span>
-            <span class="icon icon-2 material-icons-outlined">description</span>
-            <span class="icon icon-3 material-icons-outlined">video_file</span>
+          <div class="file-info">
+            <div class="file-name">
+              {{ file.fileName }}
+            </div>
+            <div class="file-meta">
+              <span class="file-size">{{ formatSize(file.fileSize) }}</span>
+              <span class="file-divider">·</span>
+              <span class="file-uploader">{{ file.uploaderName }}</span>
+              <span class="file-divider">·</span>
+              <span class="file-time">{{ formatTime(file.uploadTime) }}</span>
+            </div>
+          </div>
+          <div
+            class="file-actions"
+            @click.stop
+          >
+            <el-dropdown
+              trigger="click"
+              @command="(cmd) => handleFileCommand(cmd, file)"
+            >
+              <span class="material-icons-outlined more-btn">more_horiz</span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="download">
+                    <span class="material-icons-outlined">download</span>
+                    下载
+                  </el-dropdown-item>
+                  <el-dropdown-item command="rename">
+                    <span class="material-icons-outlined">edit</span>
+                    重命名
+                  </el-dropdown-item>
+                  <el-dropdown-item command="move">
+                    <span class="material-icons-outlined">folder</span>
+                    移动到
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    divided
+                    command="delete"
+                    class="danger-item"
+                  >
+                    <span class="material-icons-outlined">delete</span>
+                    删除
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </div>
-        <h3 class="empty-title">群文件为空</h3>
-        <p class="empty-description">
-          {{ searchKeyword ? '没有找到匹配的文件' : '暂无群文件，上传文件与群成员共享' }}
-        </p>
-        <div v-if="!searchKeyword" class="empty-actions">
-          <el-button type="primary" @click="handleUpload">
-            <span class="material-icons-outlined">upload_file</span>
-            上传文件
-          </el-button>
-          <el-button @click="handleSelectCategory('全部')">
-            <span class="material-icons-outlined">refresh</span>
-            刷新列表
-          </el-button>
+
+        <!-- 空状态 -->
+        <div
+          v-if="fileList.length === 0 && !loading"
+          class="empty-state"
+        >
+          <div class="empty-illustration">
+            <div class="folder-icon">
+              <span class="material-icons-outlined">folder_open</span>
+            </div>
+            <div class="floating-icons">
+              <span class="icon icon-1 material-icons-outlined">image</span>
+              <span class="icon icon-2 material-icons-outlined">description</span>
+              <span class="icon icon-3 material-icons-outlined">video_file</span>
+            </div>
+          </div>
+          <h3 class="empty-title">
+            群文件为空
+          </h3>
+          <p class="empty-description">
+            {{ searchKeyword ? '没有找到匹配的文件' : '暂无群文件，上传文件与群成员共享' }}
+          </p>
+          <div
+            v-if="!searchKeyword"
+            class="empty-actions"
+          >
+            <el-button
+              type="primary"
+              @click="handleUpload"
+            >
+              <span class="material-icons-outlined">upload_file</span>
+              上传文件
+            </el-button>
+            <el-button @click="handleSelectCategory('全部')">
+              <span class="material-icons-outlined">refresh</span>
+              刷新列表
+            </el-button>
+          </div>
+        </div>
+
+        <!-- 加载状态 -->
+        <div
+          v-if="loading"
+          class="loading-state"
+        >
+          <el-icon class="is-loading">
+            <Loading />
+          </el-icon>
+          <span>加载中...</span>
         </div>
       </div>
 
-      <!-- 加载状态 -->
-      <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
-        <span>加载中...</span>
+      <!-- 分页 -->
+      <div
+        v-if="total > 0"
+        class="pagination-bar"
+      >
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
       </div>
-    </div>
-
-    <!-- 分页 -->
-    <div v-if="total > 0" class="pagination-bar">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :total="total"
-        :page-sizes="[20, 50, 100]"
-        layout="total, sizes, prev, pager, next"
-        @size-change="handleSizeChange"
-        @current-change="handlePageChange"
-      />
-    </div>
     </div>
 
     <!-- 上传对话框 -->
-    <el-dialog v-model="uploadDialogVisible" title="上传文件" width="500px">
+    <el-dialog
+      v-model="uploadDialogVisible"
+      title="上传文件"
+      width="500px"
+    >
       <el-upload
         ref="uploadRef"
         :auto-upload="false"
@@ -167,21 +222,35 @@
       >
         <div class="upload-area">
           <span class="material-icons-outlined upload-icon">cloud_upload</span>
-          <p class="upload-text">点击或拖拽文件到此区域上传</p>
-          <p class="upload-hint">支持任意格式文件</p>
+          <p class="upload-text">
+            点击或拖拽文件到此区域上传
+          </p>
+          <p class="upload-hint">
+            支持任意格式文件
+          </p>
         </div>
       </el-upload>
 
       <template #footer>
-        <el-button @click="uploadDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="uploading" @click="handleConfirmUpload">
+        <el-button @click="uploadDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="uploading"
+          @click="handleConfirmUpload"
+        >
           确定上传
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 重命名对话框 -->
-    <el-dialog v-model="renameDialogVisible" title="重命名文件" width="400px">
+    <el-dialog
+      v-model="renameDialogVisible"
+      title="重命名文件"
+      width="400px"
+    >
       <el-input
         v-model="newFileName"
         placeholder="请输入新文件名"
@@ -189,13 +258,24 @@
         show-word-limit
       />
       <template #footer>
-        <el-button @click="renameDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleConfirmRename">确定</el-button>
+        <el-button @click="renameDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleConfirmRename"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
     <!-- 移动文件对话框 -->
-    <el-dialog v-model="moveDialogVisible" title="移动到分类" width="400px">
+    <el-dialog
+      v-model="moveDialogVisible"
+      title="移动到分类"
+      width="400px"
+    >
       <div class="category-list">
         <div
           v-for="cat in categories"
@@ -209,8 +289,15 @@
         </div>
       </div>
       <template #footer>
-        <el-button @click="moveDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleConfirmMove">确定</el-button>
+        <el-button @click="moveDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleConfirmMove"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -316,7 +403,7 @@ const loadCategories = async () => {
 }
 
 // 选择分类
-const handleSelectCategory = (category) => {
+const handleSelectCategory = category => {
   selectedCategory.value = category
   currentPage.value = 1
   loadFileList()
@@ -389,7 +476,7 @@ const handleConfirmUpload = async () => {
 }
 
 // 文件操作
-const handleFileClick = (file) => {
+const handleFileClick = file => {
   // 可以打开预览
 }
 
@@ -414,7 +501,7 @@ const handleFileCommand = async (command, file) => {
   }
 }
 
-const handleDownload = async (file) => {
+const handleDownload = async file => {
   try {
     const res = await downloadGroupFile(file.id)
     if (res.code === 200) {
@@ -462,7 +549,7 @@ const handleConfirmMove = async () => {
   }
 }
 
-const handleDelete = async (file) => {
+const handleDelete = async file => {
   try {
     await ElMessageBox.confirm(`确定要删除文件 "${file.fileName}" 吗？`, '删除文件', {
       type: 'warning'
@@ -481,16 +568,16 @@ const handleDelete = async (file) => {
 }
 
 // 工具函数
-const formatSize = (bytes) => {
-  if (!bytes) return '0 B'
+const formatSize = bytes => {
+  if (!bytes) {return '0 B'}
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-const formatTime = (time) => {
-  if (!time) return ''
+const formatTime = time => {
+  if (!time) {return ''}
   const date = new Date(time)
   const now = new Date()
   const isSameYear = date.getFullYear() === now.getFullYear()
@@ -502,17 +589,17 @@ const formatTime = (time) => {
   }
 }
 
-const isImage = (file) => {
+const isImage = file => {
   const ext = file.fileName?.split('.').pop()?.toLowerCase()
   return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)
 }
 
-const isVideo = (file) => {
+const isVideo = file => {
   const ext = file.fileName?.split('.').pop()?.toLowerCase()
   return ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv'].includes(ext)
 }
 
-const isDocument = (file) => {
+const isDocument = file => {
   const ext = file.fileName?.split('.').pop()?.toLowerCase()
   return ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'].includes(ext)
 }

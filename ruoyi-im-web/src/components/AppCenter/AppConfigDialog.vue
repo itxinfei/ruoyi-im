@@ -7,16 +7,30 @@
     class="app-config-dialog"
     @close="handleClose"
   >
-    <div v-if="app" class="config-content">
+    <div
+      v-if="app"
+      class="config-content"
+    >
       <!-- 应用信息 -->
       <div class="app-info-section">
-        <div class="app-icon" :style="{ background: app.iconColor }">
-          <img v-if="app.iconUrl" :src="app.iconUrl" :alt="app.name" />
+        <div
+          class="app-icon"
+          :style="{ background: app.iconColor }"
+        >
+          <img
+            v-if="app.iconUrl"
+            :src="app.iconUrl"
+            :alt="app.name"
+          >
           <span v-else>{{ app.name.charAt(0) }}</span>
         </div>
         <div class="app-details">
-          <h3 class="app-name">{{ app.name }}</h3>
-          <p class="app-description">{{ app.description }}</p>
+          <h3 class="app-name">
+            {{ app.name }}
+          </h3>
+          <p class="app-description">
+            {{ app.description }}
+          </p>
         </div>
       </div>
 
@@ -84,7 +98,9 @@
           />
 
           <template v-if="item.description">
-            <div class="item-description">{{ item.description }}</div>
+            <div class="item-description">
+              {{ item.description }}
+            </div>
           </template>
         </el-form-item>
 
@@ -99,7 +115,10 @@
       </el-form>
 
       <!-- 配置说明 -->
-      <div v-if="app.configDescription" class="config-description">
+      <div
+        v-if="app.configDescription"
+        class="config-description"
+      >
         <h4>配置说明</h4>
         <p>{{ app.configDescription }}</p>
       </div>
@@ -107,8 +126,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="handleSave">
+        <el-button @click="handleClose">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saving"
+          @click="handleSave"
+        >
           保存设置
         </el-button>
       </div>
@@ -160,25 +185,29 @@ const configItems = computed(() => {
 
 // 初始化配置
 const initConfig = () => {
-  if (!props.app) return
+  if (!props.app) {return}
 
   // 设置置顶状态
   pinned.value = props.app.pinned || false
 
   // 初始化配置表单
   if (props.app.config) {
-    const config = typeof props.app.config === 'string'
-      ? JSON.parse(props.app.config)
-      : props.app.config
+    try {
+      const config = typeof props.app.config === 'string'
+        ? JSON.parse(props.app.config)
+        : props.app.config
 
-    Object.keys(configForm).forEach(key => delete configForm[key])
-    Object.assign(configForm, config)
+      Object.keys(configForm).forEach(key => delete configForm[key])
+      Object.assign(configForm, config)
+    } catch (error) {
+      console.error('解析应用配置失败:', error)
+    }
   }
 }
 
 // 保存配置
 const handleSave = async () => {
-  if (!props.app) return
+  if (!props.app) {return}
 
   try {
     saving.value = true
@@ -211,14 +240,14 @@ const handleClose = () => {
   emit('update:modelValue', false)
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     initConfig()
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 </script>

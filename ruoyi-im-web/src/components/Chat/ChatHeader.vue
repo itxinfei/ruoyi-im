@@ -1,10 +1,18 @@
 <template>
   <div class="chat-header">
     <!-- 左侧：头像+标题+状态 -->
-    <div class="header-left" @click="handleShowDetail" role="button" tabindex="0">
+    <div
+      class="header-left"
+      role="button"
+      tabindex="0"
+      @click="handleShowDetail"
+    >
       <div class="header-avatar-wrapper">
         <!-- 群组使用图标，单聊使用钉钉风格头像 -->
-        <div v-if="session?.type === 'GROUP'" class="header-avatar group-avatar">
+        <div
+          v-if="session?.type === 'GROUP'"
+          class="header-avatar group-avatar"
+        >
           <span class="material-icons-outlined">groups</span>
         </div>
         <DingtalkAvatar
@@ -16,15 +24,27 @@
           shape="square"
           custom-class="header-avatar"
         />
-        <span v-if="session?.type !== 'GROUP' && isOnline" class="online-indicator"></span>
-        <span v-if="session?.type !== 'GROUP' && isOnline" class="online-pulse"></span>
+        <span
+          v-if="session?.type !== 'GROUP' && isOnline"
+          class="online-indicator"
+        />
+        <span
+          v-if="session?.type !== 'GROUP' && isOnline"
+          class="online-pulse"
+        />
       </div>
       <div class="header-info">
         <h2 class="header-name">
           {{ session?.name }}
-          <span v-if="session?.type === 'GROUP'" class="member-count">({{ session?.memberCount || 0 }}人)</span>
+          <span
+            v-if="session?.type === 'GROUP'"
+            class="member-count"
+          >({{ session?.memberCount || 0 }}人)</span>
         </h2>
-        <p class="user-online-status" @click="clickConversationDesc">
+        <p
+          class="user-online-status"
+          @click="clickConversationDesc"
+        >
           {{ targetUserOnlineStateDesc }}
         </p>
       </div>
@@ -40,13 +60,6 @@
         <span class="material-icons-outlined">settings</span>
       </button>
     </div>
-
-    <!-- 用户详情弹窗 -->
-    <UserProfileDialog
-      v-model="showUserDetail"
-      :session="session"
-      @send-message="handleSendMessage"
-    />
   </div>
 </template>
 
@@ -55,14 +68,13 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import UserProfileDialog from '@/components/Contacts/UserProfileDialog.vue'
 
 const props = defineProps({
   session: {
     type: Object,
     default: null,
-    validator: (value) => {
-      if (value === null) return true
+    validator: value => {
+      if (value === null) {return true}
       return typeof value.id === 'string' || typeof value.id === 'number'
     }
   },
@@ -72,16 +84,14 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['show-detail', 'toggle-sidebar'])
+const emit = defineEmits(['show-detail', 'show-user', 'toggle-sidebar'])
 
-// 用户详情弹窗显示状态
-const showUserDetail = ref(false)
 const showConversationInfo = ref(false)
 
 // 获取在线状态
 const store = useStore()
 const isOnline = computed(() => {
-  if (props.session?.type === 'GROUP') return false
+  if (props.session?.type === 'GROUP') {return false}
 
   const userId = props.session?.targetId
   if (userId && store.state.im.contact.userStatus[userId]) {
@@ -113,15 +123,30 @@ const targetUserOnlineStateDesc = computed(() => {
   return '在线'
 })
 
-// 显示详情
+// 显示详情 - 触发全局弹窗
 const handleShowDetail = () => {
-  showUserDetail.value = true
+  // 单聊时触发用户详情弹窗
+  if (props.session?.type !== 'GROUP') {
+    const userId = props.session?.targetId
+    if (userId) {
+      emit('show-user', userId)
+      return
+    }
+  }
+  // 群聊或无targetId时触发详情面板
   emit('show-detail', props.session)
 }
 
-// 点击状态描述区域
+// 点击状态描述区域 - 触发用户详情弹窗
 const clickConversationDesc = () => {
-  // 可扩展：点击状态时触发操作（如添加好友）
+  // 单聊时触发用户详情弹窗
+  if (props.session?.type !== 'GROUP') {
+    const userId = props.session?.targetId
+    if (userId) {
+      emit('show-user', userId)
+      return
+    }
+  }
   emit('show-detail', props.session)
 }
 
@@ -129,11 +154,6 @@ const clickConversationDesc = () => {
 const toggleConversationInfo = () => {
   showConversationInfo.value = !showConversationInfo.value
   emit('toggle-sidebar', showConversationInfo.value ? 'info' : null)
-}
-
-// 发送消息
-const handleSendMessage = () => {
-  ElMessage.success('已切换到聊天')
 }
 </script>
 

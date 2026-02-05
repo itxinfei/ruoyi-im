@@ -1,8 +1,13 @@
 <template>
   <div class="assistant-panel">
     <div class="panel-header">
-      <h2 class="panel-title">AI 助理</h2>
-      <button class="new-chat-btn" @click="startNewChat">
+      <h2 class="panel-title">
+        AI 助理
+      </h2>
+      <button
+        class="new-chat-btn"
+        @click="startNewChat"
+      >
         <span class="material-icons-outlined">add_comment</span>
         新对话
       </button>
@@ -10,15 +15,26 @@
 
     <div class="panel-content">
       <!-- 对话区域 -->
-      <div v-if="currentChat || messages.length > 0" class="chat-area">
-        <div class="messages-container" ref="messagesContainer">
+      <div
+        v-if="currentChat || messages.length > 0"
+        class="chat-area"
+      >
+        <div
+          ref="messagesContainer"
+          class="messages-container"
+        >
           <!-- 欢迎消息 -->
-          <div v-if="messages.length === 0" class="welcome-message">
+          <div
+            v-if="messages.length === 0"
+            class="welcome-message"
+          >
             <div class="ai-avatar">
               <span class="material-icons-outlined">smart_toy</span>
             </div>
             <div class="message-content">
-              <div class="message-text">你好，我是你的 AI 助理。有什么可以帮你的吗？</div>
+              <div class="message-text">
+                你好，我是你的 AI 助理。有什么可以帮你的吗？
+              </div>
             </div>
           </div>
 
@@ -29,35 +45,56 @@
             class="message-item"
             :class="message.role"
           >
-            <div v-if="message.role === 'assistant'" class="ai-avatar-small">
+            <div
+              v-if="message.role === 'assistant'"
+              class="ai-avatar-small"
+            >
               <span class="material-icons-outlined">smart_toy</span>
             </div>
             <div class="message-content">
-              <div class="message-text" v-html="formatMessage(message.content)"></div>
-              <div v-if="message.role === 'assistant'" class="message-actions">
-                <button class="action-btn" @click="copyMessage(message.content)">
+              <div
+                class="message-text"
+                v-html="formatMessage(message.content)"
+              />
+              <div
+                v-if="message.role === 'assistant'"
+                class="message-actions"
+              >
+                <button
+                  class="action-btn"
+                  @click="copyMessage(message.content)"
+                >
                   <span class="material-icons-outlined">content_copy</span>
                 </button>
-                <button class="action-btn" @click="regenerateMessage">
+                <button
+                  class="action-btn"
+                  @click="regenerateMessage"
+                >
                   <span class="material-icons-outlined">refresh</span>
                 </button>
               </div>
             </div>
-            <div v-if="message.role === 'user'" class="user-avatar">
+            <div
+              v-if="message.role === 'user'"
+              class="user-avatar"
+            >
               {{ currentUserNickname?.charAt(0) || '我' }}
             </div>
           </div>
 
           <!-- 输入中状态 -->
-          <div v-if="isTyping" class="message-item assistant typing">
+          <div
+            v-if="isTyping"
+            class="message-item assistant typing"
+          >
             <div class="ai-avatar-small">
               <span class="material-icons-outlined">smart_toy</span>
             </div>
             <div class="message-content">
               <div class="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span />
+                <span />
+                <span />
               </div>
             </div>
           </div>
@@ -86,19 +123,28 @@
       </div>
 
       <!-- 首页：快捷功能 -->
-      <div v-else class="home-area">
+      <div
+        v-else
+        class="home-area"
+      >
         <!-- 欢迎区 -->
         <div class="welcome-section">
           <div class="ai-avatar-large">
             <span class="material-icons-outlined">smart_toy</span>
           </div>
-          <h3 class="welcome-title">你好，我是你的 AI 助理</h3>
-          <p class="welcome-desc">有什么可以帮你的吗？</p>
+          <h3 class="welcome-title">
+            你好，我是你的 AI 助理
+          </h3>
+          <p class="welcome-desc">
+            有什么可以帮你的吗？
+          </p>
         </div>
 
         <!-- 快捷功能 -->
         <div class="quick-actions">
-          <div class="section-title">快捷功能</div>
+          <div class="section-title">
+            快捷功能
+          </div>
           <div class="action-grid">
             <div
               v-for="action in quickActions"
@@ -106,7 +152,10 @@
               class="action-card"
               @click="handleQuickAction(action)"
             >
-              <div class="action-icon" :style="{ background: action.bgColor }">
+              <div
+                class="action-icon"
+                :style="{ background: action.bgColor }"
+              >
                 <span class="material-icons-outlined">{{ action.icon }}</span>
               </div>
               <span class="action-label">{{ action.label }}</span>
@@ -115,8 +164,13 @@
         </div>
 
         <!-- 对话历史 -->
-        <div v-if="chatHistory.length > 0" class="chat-section">
-          <div class="section-title">最近对话</div>
+        <div
+          v-if="chatHistory.length > 0"
+          class="chat-section"
+        >
+          <div class="section-title">
+            最近对话
+          </div>
           <div class="chat-list">
             <div
               v-for="chat in chatHistory"
@@ -128,8 +182,12 @@
                 <span class="material-icons-outlined">chat_bubble</span>
               </div>
               <div class="chat-content">
-                <div class="chat-title">{{ chat.title }}</div>
-                <div class="chat-preview">{{ chat.preview }}</div>
+                <div class="chat-title">
+                  {{ chat.title }}
+                </div>
+                <div class="chat-preview">
+                  {{ chat.preview }}
+                </div>
               </div>
               <span class="chat-time">{{ chat.time }}</span>
             </div>
@@ -189,13 +247,13 @@ const startNewChat = () => {
 }
 
 // 快捷功能点击
-const handleQuickAction = (action) => {
+const handleQuickAction = action => {
   inputMessage.value = action.prompt
   sendMessage()
 }
 
 // 加载历史对话
-const loadChat = (chat) => {
+const loadChat = chat => {
   currentChat.value = chat
   conversationId.value = chat.conversationId
   // 这里应该从后端加载历史消息，暂时使用模拟数据
@@ -208,7 +266,7 @@ const loadChat = (chat) => {
 // 发送消息
 const sendMessage = async () => {
   const content = inputMessage.value.trim()
-  if (!content || isSending.value) return
+  if (!content || isSending.value) {return}
 
   // 如果没有会话ID，生成一个新的
   if (!conversationId.value) {
@@ -289,7 +347,7 @@ const regenerateMessage = async () => {
 }
 
 // 复制消息
-const copyMessage = (content) => {
+const copyMessage = content => {
   navigator.clipboard.writeText(content).then(() => {
     ElMessage.success('已复制到剪贴板')
   }).catch(() => {
@@ -298,14 +356,25 @@ const copyMessage = (content) => {
 }
 
 // 格式化消息（支持换行和基本格式）
-const formatMessage = (content) => {
-  if (!content) return ''
-  return content
+const formatMessage = content => {
+  if (!content) {return ''}
+  // 先转义 HTML 防止 XSS，再进行格式化
+  let formatted = escapeHtml(content)
+  formatted = formatted
     .replace(/\n/g, '<br>')
     .replace(/• /g, '<br>• ')
     .replace(/(\d+)\./g, '<br>$1.')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/`(.*?)`/g, '<code>$1</code>')
+  return formatted
+}
+
+// 转义 HTML 特殊字符，防止 XSS 攻击
+const escapeHtml = str => {
+  if (!str) {return ''}
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
 }
 
 // 滚动到底部

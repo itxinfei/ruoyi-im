@@ -1,12 +1,15 @@
 <template>
   <el-dialog
-    title="发起审批"
     v-model="visible"
+    title="发起审批"
     width="600px"
     @close="handleClose"
   >
     <!-- 第一步：选择模板 -->
-    <div v-if="step === 1" class="template-grid">
+    <div
+      v-if="step === 1"
+      class="template-grid"
+    >
       <div 
         v-for="tpl in templates" 
         :key="tpl.id" 
@@ -14,27 +17,56 @@
         @click="selectTemplate(tpl)"
       >
         <div class="tpl-icon">
-          <img v-if="tpl.icon" :src="tpl.icon" />
-          <el-icon v-else><Document /></el-icon>
+          <img
+            v-if="tpl.icon"
+            :src="tpl.icon"
+          >
+          <el-icon v-else>
+            <Document />
+          </el-icon>
         </div>
-        <div class="tpl-name">{{ tpl.name }}</div>
+        <div class="tpl-name">
+          {{ tpl.name }}
+        </div>
       </div>
-      <el-empty v-if="templates.length === 0" description="暂无可用模板" />
+      <el-empty
+        v-if="templates.length === 0"
+        description="暂无可用模板"
+      />
     </div>
 
     <!-- 第二步：填写表单 -->
-    <div v-if="step === 2" class="form-section">
+    <div
+      v-if="step === 2"
+      class="form-section"
+    >
       <div class="form-header">
-        <el-button link :icon="ArrowLeft" @click="step = 1">返回重选</el-button>
+        <el-button
+          link
+          :icon="ArrowLeft"
+          @click="step = 1"
+        >
+          返回重选
+        </el-button>
         <span class="selected-name">{{ selectedTemplate?.name }}</span>
       </div>
 
-      <el-form :model="formData" label-width="100px" class="mt-20">
+      <el-form
+        :model="formData"
+        label-width="100px"
+        class="mt-20"
+      >
         <el-form-item label="审批标题">
-           <el-input v-model="title" placeholder="请输入标题 (如: 张三的请假申请)" />
+          <el-input
+            v-model="title"
+            placeholder="请输入标题 (如: 张三的请假申请)"
+          />
         </el-form-item>
 
-        <template v-for="field in formSchema" :key="field.key">
+        <template
+          v-for="field in formSchema"
+          :key="field.key"
+        >
           <el-form-item :label="field.label">
             <el-input 
               v-if="field.type === 'text'" 
@@ -73,8 +105,16 @@
 
     <template #footer>
       <div v-if="step === 2">
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">提交申请</el-button>
+        <el-button @click="visible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
+          提交申请
+        </el-button>
       </div>
     </template>
   </el-dialog>
@@ -102,7 +142,7 @@ const title = ref('')
 const formData = ref({})
 
 const formSchema = computed(() => {
-  if (!selectedTemplate.value || !selectedTemplate.value.formSchema) return []
+  if (!selectedTemplate.value || !selectedTemplate.value.formSchema) {return []}
   try {
     return JSON.parse(selectedTemplate.value.formSchema)
   } catch (e) {
@@ -122,7 +162,7 @@ const fetchTemplates = async () => {
   }
 }
 
-const selectTemplate = (tpl) => {
+const selectTemplate = tpl => {
   selectedTemplate.value = tpl
   title.value = `我的${tpl.name}`
   formData.value = {}
@@ -157,15 +197,15 @@ const handleClose = () => {
   step.value = 1
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     fetchTemplates()
   }
 })
 
-watch(visible, (val) => {
-  if (!val) emit('update:modelValue', false)
+watch(visible, val => {
+  if (!val) {emit('update:modelValue', false)}
 })
 </script>
 

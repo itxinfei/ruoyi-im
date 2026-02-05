@@ -423,4 +423,268 @@ public class ImContactController {
             this.tags = tags;
         }
     }
+
+    /**
+     * 批量添加好友
+     * 向多个用户发送好友申请
+     *
+     * @param request 批量添加请求，包含用户ID列表和验证消息
+     * @return 操作结果
+     * @apiNote 批量发送好友申请，每个用户都会收到相同的好友申请
+     */
+    @Operation(summary = "批量添加好友", description = "向多个用户批量发送好友申请")
+    @PostMapping("/batch-add")
+    public Result<java.util.Map<String, Object>> batchAddFriends(@RequestBody BatchAddRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        java.util.Map<Long, String> results = imFriendService.batchSendFriendRequest(
+                request.getUserIds(), request.getRemark(), userId);
+        // 转换为Map<String, Object>
+        java.util.Map<String, Object> resultData = new java.util.HashMap<>();
+        for (java.util.Map.Entry<Long, String> entry : results.entrySet()) {
+            resultData.put(String.valueOf(entry.getKey()), entry.getValue());
+        }
+        return Result.success("批量发送完成", resultData);
+    }
+
+    /**
+     * 批量删除好友
+     * 删除多个好友关系
+     *
+     * @param request 批量删除请求，包含好友关系ID列表
+     * @return 操作结果
+     * @apiNote 批量删除好友，对应的私聊会话也会被删除
+     */
+    @Operation(summary = "批量删除好友", description = "批量删除多个好友关系")
+    @DeleteMapping("/batch-delete")
+    public Result<java.util.Map<String, Object>> batchDeleteFriends(@RequestBody BatchDeleteRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imFriendService.batchDeleteFriends(request.getContactIds(), userId);
+        return Result.success("批量删除成功");
+    }
+
+    /**
+     * 批量移动到分组
+     * 将多个好友移动到指定分组
+     *
+     * @param request 批量移动请求，包含联系人ID列表和目标分组名称
+     * @return 操作结果
+     * @apiNote 批量移动好友到指定分组
+     */
+    @Operation(summary = "批量移动到分组", description = "将多个好友移动到指定分组")
+    @PutMapping("/batch-move")
+    public Result<Void> batchMoveToGroup(@RequestBody BatchMoveRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imFriendService.moveFriendsToGroup(userId, request.getContactIds(), request.getGroupName());
+        return Result.success("批量移动成功");
+    }
+
+    /**
+     * 获取推荐好友
+     * 基于部门、手机号等推荐可能认识的人
+     *
+     * @param type 推荐类型：department(同事)、phone(手机号)、all(全部)
+     * @param limit 返回数量限制
+     * @return 推荐好友列表
+     * @apiNote 推荐算法基于共同部门、通讯录匹配等
+     */
+    @Operation(summary = "获取推荐好友", description = "基于部门、手机号等推荐可能认识的人")
+    @GetMapping("/recommendations")
+    public Result<java.util.List<ImUserVO>> getRecommendedContacts(
+            @RequestParam(defaultValue = "all") String type,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        Long userId = SecurityUtils.getLoginUserId();
+        java.util.List<ImUserVO> list = imFriendService.getRecommendedContacts(userId, type, limit);
+        return Result.success(list);
+    }
+
+    /**
+     * 上传通讯录用于好友匹配
+     * 上传用户通讯录，匹配已注册的用户
+     *
+     * @param request 通讯录数据
+     * @return 匹配结果
+     * @apiNote 通讯录数据加密存储，仅用于好友匹配
+     */
+    @Operation(summary = "上传通讯录", description = "上传通讯录用于好友匹配")
+    @PostMapping("/address-book/upload")
+    public Result<java.util.List<ImUserVO>> uploadAddressBook(@RequestBody AddressBookUploadRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        // 转换ContactItem为Map<String, String>
+        java.util.List<java.util.Map<String, String>> contactsMap = new java.util.ArrayList<>();
+        if (request.getContacts() != null) {
+            for (AddressBookUploadRequest.ContactItem item : request.getContacts()) {
+                java.util.Map<String, String> map = new java.util.HashMap<>();
+                map.put("name", item.getName());
+                map.put("phone", item.getPhone());
+                contactsMap.add(map);
+            }
+        }
+        java.util.List<ImUserVO> matchedUsers = imFriendService.matchAddressBookContacts(
+                userId, contactsMap);
+        return Result.success("上传成功", matchedUsers);
+    }
+
+    /**
+     * 获取通讯录匹配的好友
+     * 获取之前上传通讯录匹配到的用户
+     *
+     * @return 匹配的用户列表
+     * @apiNote 返回已通过通讯录匹配到的用户
+     */
+    @Operation(summary = "获取通讯录匹配结果", description = "获取之前上传通讯录匹配到的用户")
+    @GetMapping("/address-book/matches")
+    public Result<java.util.List<ImUserVO>> getAddressBookMatches() {
+        Long userId = SecurityUtils.getLoginUserId();
+        java.util.List<ImUserVO> list = imFriendService.getAddressBookMatches(userId);
+        return Result.success(list);
+    }
+
+    /**
+     * 清除好友列表缓存
+     * 清除当前用户的好友列表Redis缓存，用于刷新数据
+     *
+     * @return 操作结果
+     * @apiNote 当数据更新后好友列表不更新时，可以调用此接口清除缓存
+     */
+    @Operation(summary = "清除好友列表缓存", description = "清除当前用户的好友列表缓存")
+    @PostMapping("/cache/clear")
+    public Result<Void> clearFriendListCache() {
+        Long userId = SecurityUtils.getLoginUserId();
+        imFriendService.clearFriendListCache(userId);
+        return Result.success("缓存已清除");
+    }
+
+    /**
+     * 批量清除多个用户的好友列表缓存
+     * 管理员接口，用于清除指定用户的缓存
+     *
+     * @param request 批量清除请求，包含用户ID列表
+     * @return 操作结果
+     * @apiNote 需要管理员权限
+     */
+    @Operation(summary = "批量清除好友列表缓存", description = "批量清除多个用户的好友列表缓存")
+    @PostMapping("/cache/clear-batch")
+    public Result<java.util.Map<String, Object>> batchClearFriendListCache(@RequestBody BatchClearCacheRequest request) {
+        imFriendService.batchClearFriendListCache(request.getUserIds());
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        result.put("cleared", request.getUserIds().size());
+        result.put("message", "已清除 " + request.getUserIds().size() + " 个用户的缓存");
+        return Result.success(result);
+    }
+
+    // ==================== 内部类 ====================
+
+    /**
+     * 批量添加请求体
+     */
+    public static class BatchAddRequest {
+        private java.util.List<Long> userIds;
+        private String remark;
+
+        public java.util.List<Long> getUserIds() {
+            return userIds;
+        }
+
+        public void setUserIds(java.util.List<Long> userIds) {
+            this.userIds = userIds;
+        }
+
+        public String getRemark() {
+            return remark;
+        }
+
+        public void setRemark(String remark) {
+            this.remark = remark;
+        }
+    }
+
+    /**
+     * 批量删除请求体
+     */
+    public static class BatchDeleteRequest {
+        private java.util.List<Long> contactIds;
+
+        public java.util.List<Long> getContactIds() {
+            return contactIds;
+        }
+
+        public void setContactIds(java.util.List<Long> contactIds) {
+            this.contactIds = contactIds;
+        }
+    }
+
+    /**
+     * 批量移动请求体
+     */
+    public static class BatchMoveRequest {
+        private java.util.List<Long> contactIds;
+        private String groupName;
+
+        public java.util.List<Long> getContactIds() {
+            return contactIds;
+        }
+
+        public void setContactIds(java.util.List<Long> contactIds) {
+            this.contactIds = contactIds;
+        }
+
+        public String getGroupName() {
+            return groupName;
+        }
+
+        public void setGroupName(String groupName) {
+            this.groupName = groupName;
+        }
+    }
+
+    /**
+     * 通讯录上传请求体
+     */
+    public static class AddressBookUploadRequest {
+        private java.util.List<ContactItem> contacts;
+
+        public java.util.List<ContactItem> getContacts() {
+            return contacts;
+        }
+
+        public void setContacts(java.util.List<ContactItem> contacts) {
+            this.contacts = contacts;
+        }
+
+        public static class ContactItem {
+            private String name;
+            private String phone;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getPhone() {
+                return phone;
+            }
+
+            public void setPhone(String phone) {
+                this.phone = phone;
+            }
+        }
+    }
+
+    /**
+     * 批量清除缓存请求体
+     */
+    public static class BatchClearCacheRequest {
+        private java.util.List<Long> userIds;
+
+        public java.util.List<Long> getUserIds() {
+            return userIds;
+        }
+
+        public void setUserIds(java.util.List<Long> userIds) {
+            this.userIds = userIds;
+        }
+    }
 }

@@ -19,12 +19,25 @@
     </div>
 
     <!-- 联系人列表 -->
-    <div class="contacts-list" v-loading="loading">
+    <div
+      v-loading="loading"
+      class="contacts-list"
+    >
       <!-- 已选择的成员 -->
-      <div v-if="selectedMembers.length > 0" class="selected-section">
+      <div
+        v-if="selectedMembers.length > 0"
+        class="selected-section"
+      >
         <div class="section-header">
           <span class="section-title">已选择 ({{ selectedMembers.length }})</span>
-          <el-button link type="danger" size="small" @click="clearSelection">清空</el-button>
+          <el-button
+            link
+            type="danger"
+            size="small"
+            @click="clearSelection"
+          >
+            清空
+          </el-button>
         </div>
         <div class="selected-members">
           <div
@@ -32,9 +45,16 @@
             :key="member.id"
             class="selected-member-chip"
           >
-            <DingtalkAvatar :src="member.avatar" :name="member.name" :size="28" />
+            <DingtalkAvatar
+              :src="member.avatar"
+              :name="member.name"
+              :size="28"
+            />
             <span class="member-name">{{ member.name }}</span>
-            <el-icon class="remove-icon" @click="toggleSelection(member)">
+            <el-icon
+              class="remove-icon"
+              @click="toggleSelection(member)"
+            >
               <Close />
             </el-icon>
           </div>
@@ -43,7 +63,10 @@
 
       <!-- 可选择的联系人 -->
       <div class="selectable-section">
-        <div class="section-header" v-if="selectedMembers.length > 0">
+        <div
+          v-if="selectedMembers.length > 0"
+          class="section-header"
+        >
           <span class="section-title">选择联系人</span>
         </div>
         <div class="contact-list">
@@ -54,18 +77,35 @@
             :class="{ selected: isSelected(contact) }"
             @click="toggleSelection(contact)"
           >
-            <el-checkbox :model-value="isSelected(contact)" @change="toggleSelection(contact)" />
-            <DingtalkAvatar :src="contact.avatar" :name="contact.name" :size="40" />
+            <el-checkbox
+              :model-value="isSelected(contact)"
+              @change="toggleSelection(contact)"
+            />
+            <DingtalkAvatar
+              :src="contact.avatar"
+              :name="contact.name"
+              :size="40"
+            />
             <div class="contact-info">
-              <div class="contact-name">{{ contact.name }}</div>
-              <div class="contact-dept">{{ contact.dept || contact.department || '无部门' }}</div>
+              <div class="contact-name">
+                {{ contact.name }}
+              </div>
+              <div class="contact-dept">
+                {{ contact.dept || contact.department || '无部门' }}
+              </div>
             </div>
-            <el-icon v-if="isSelected(contact)" class="check-icon">
+            <el-icon
+              v-if="isSelected(contact)"
+              class="check-icon"
+            >
               <Check />
             </el-icon>
           </div>
         </div>
-        <el-empty v-if="filteredContacts.length === 0 && !loading" description="未找到联系人" />
+        <el-empty
+          v-if="filteredContacts.length === 0 && !loading"
+          description="未找到联系人"
+        />
       </div>
     </div>
 
@@ -73,8 +113,15 @@
     <template #footer>
       <div class="dialog-footer">
         <span class="selected-count">已选 {{ selectedMembers.length }} 人</span>
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" :disabled="selectedMembers.length === 0" @click="handleConfirm" :loading="submitting">
+        <el-button @click="visible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :disabled="selectedMembers.length === 0"
+          :loading="submitting"
+          @click="handleConfirm"
+        >
           确定
         </el-button>
       </div>
@@ -100,7 +147,7 @@ const emit = defineEmits(['update:modelValue', 'success'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const contacts = ref([])
@@ -135,12 +182,12 @@ const filteredContacts = computed(() => {
 })
 
 // 判断是否已选中
-const isSelected = (contact) => {
+const isSelected = contact => {
   return selectedMembers.value.some(m => m.id === contact.id)
 }
 
 // 切换选中状态
-const toggleSelection = (contact) => {
+const toggleSelection = contact => {
   const index = selectedMembers.value.findIndex(m => m.id === contact.id)
   if (index > -1) {
     selectedMembers.value.splice(index, 1)
@@ -171,7 +218,7 @@ const loadContacts = async () => {
 
 // 确认添加成员
 const handleConfirm = async () => {
-  if (selectedMembers.value.length === 0) return
+  if (selectedMembers.value.length === 0) {return}
 
   submitting.value = true
   try {
@@ -193,7 +240,7 @@ const handleConfirm = async () => {
   }
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   if (val) {
     searchText.value = ''
     selectedMembers.value = []

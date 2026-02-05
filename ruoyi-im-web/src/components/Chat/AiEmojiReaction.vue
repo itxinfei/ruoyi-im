@@ -10,14 +10,19 @@
         <!-- 面板头部 -->
         <div class="panel-header">
           <span class="panel-title">AI 推荐表情</span>
-          <button class="close-btn" @click="handleClose">
+          <button
+            class="close-btn"
+            @click="handleClose"
+          >
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
 
         <!-- 快捷表情区域 -->
         <div class="quick-emoji-section">
-          <div class="section-title">常用表情</div>
+          <div class="section-title">
+            常用表情
+          </div>
           <div class="emoji-grid">
             <button
               v-for="emoji in quickEmojis"
@@ -27,7 +32,10 @@
               @click="handleSelectEmoji(emoji.emoji)"
             >
               <span class="emoji">{{ emoji.emoji }}</span>
-              <span v-if="emoji.recommended" class="recommend-badge">
+              <span
+                v-if="emoji.recommended"
+                class="recommend-badge"
+              >
                 <span class="material-icons-outlined">auto_awesome</span>
               </span>
               <span class="emoji-label">{{ emoji.label }}</span>
@@ -37,7 +45,9 @@
 
         <!-- 场景表情区域 -->
         <div class="scene-emoji-section">
-          <div class="section-title">场景表达</div>
+          <div class="section-title">
+            场景表达
+          </div>
           <div class="scene-tabs">
             <button
               v-for="scene in emojiScenes"
@@ -64,7 +74,10 @@
         </div>
 
         <!-- 消息上下文分析提示 -->
-        <div class="context-hint" v-if="contextHint">
+        <div
+          v-if="contextHint"
+          class="context-hint"
+        >
           <span class="material-icons-outlined hint-icon">lightbulb</span>
           {{ contextHint }}
         </div>
@@ -89,7 +102,7 @@ const activeScene = ref('agree')
 
 // 根据消息内容分析推荐表情
 const contextHint = computed(() => {
-  if (!props.message) return ''
+  if (!props.message) {return ''}
 
   const content = props.message.content?.toLowerCase() || ''
 
@@ -193,7 +206,7 @@ const panelStyle = computed(() => {
 })
 
 // 选择表情
-const handleSelectEmoji = (emoji) => {
+const handleSelectEmoji = emoji => {
   emit('select', emoji)
   emit('close')
 }
@@ -204,7 +217,7 @@ const handleClose = () => {
 }
 
 // 监听 visible 变化
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, newVal => {
   if (newVal) {
     // 面板打开时，根据消息内容智能选择默认场景
     if (props.message) {

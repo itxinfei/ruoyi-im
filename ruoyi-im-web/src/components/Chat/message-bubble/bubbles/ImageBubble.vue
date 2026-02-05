@@ -9,23 +9,46 @@
     @click="handleClick"
   >
     <!-- 加载占位符（带模糊缩略图） -->
-    <div v-if="isLoading && !imageLoaded" class="image-placeholder" :class="{ 'with-thumb': thumbUrl }">
+    <div
+      v-if="isLoading && !imageLoaded"
+      class="image-placeholder"
+      :class="{ 'with-thumb': thumbUrl }"
+    >
       <!-- 模糊缩略图背景 -->
-      <div v-if="thumbUrl" class="blur-thumb" :style="{ backgroundImage: `url(${thumbUrl})` }"></div>
+      <div
+        v-if="thumbUrl"
+        class="blur-thumb"
+        :style="{ backgroundImage: `url(${thumbUrl})` }"
+      />
 
-      <el-icon class="loading-icon" :size="32">
+      <el-icon
+        class="loading-icon"
+        :size="32"
+      >
         <Loading />
       </el-icon>
       <span class="placeholder-text">加载中...</span>
     </div>
 
     <!-- 错误占位符 -->
-    <div v-else-if="hasError" class="image-placeholder error-placeholder">
-      <el-icon class="error-icon" :size="32">
+    <div
+      v-else-if="hasError"
+      class="image-placeholder error-placeholder"
+    >
+      <el-icon
+        class="error-icon"
+        :size="32"
+      >
         <PictureFilled />
       </el-icon>
       <span class="placeholder-text">图片加载失败</span>
-      <el-button size="small" text @click.stop="retryLoad">重试</el-button>
+      <el-button
+        size="small"
+        text
+        @click.stop="retryLoad"
+      >
+        重试
+      </el-button>
     </div>
 
     <!-- 实际图片（带渐进加载效果） -->
@@ -39,10 +62,13 @@
       loading="lazy"
       @load="handleImageLoad"
       @error="handleImageError"
-    />
+    >
 
     <!-- 上传进度遮罩 -->
-    <div v-if="isUploading" class="upload-overlay">
+    <div
+      v-if="isUploading"
+      class="upload-overlay"
+    >
       <div class="progress-ring">
         <svg viewBox="0 0 36 36">
           <path
@@ -97,8 +123,8 @@ const imageUrl = computed(() => {
 const thumbUrl = computed(() => {
   const parsed = parseMessageContent(props.message)
   // 优先使用 thumbnailUrl，否则生成带尺寸参数的缩略图 URL
-  if (parsed?.thumbnailUrl) return parsed.thumbnailUrl
-  if (parsed?.thumbUrl) return parsed.thumbUrl
+  if (parsed?.thumbnailUrl) {return parsed.thumbnailUrl}
+  if (parsed?.thumbUrl) {return parsed.thumbUrl}
   // 如果有原始 URL，尝试生成缩略图 URL（适用于支持的服务）
   if (imageUrl.value) {
     const url = new URL(imageUrl.value, window.location.origin)
@@ -122,10 +148,10 @@ const isUploading = computed(() => {
 
 // Intersection Observer for lazy loading
 const setupIntersectionObserver = () => {
-  if (!('IntersectionObserver' in window)) return
+  if (!('IntersectionObserver' in window)) {return}
 
   observer = new IntersectionObserver(
-    (entries) => {
+    entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           // 图片进入视口，开始加载
@@ -174,14 +200,14 @@ const retryLoad = () => {
 
 // 处理点击预览
 const handleClick = () => {
-  if (isUploading.value || hasError.value) return
+  if (isUploading.value || hasError.value) {return}
   if (imageLoaded.value) {
     emit('preview', imageUrl.value)
   }
 }
 
 // 监听图片 URL 变化，重新加载
-watch(() => imageUrl.value, (newUrl) => {
+watch(() => imageUrl.value, newUrl => {
   if (newUrl && newUrl !== currentImageUrl.value) {
     currentImageUrl.value = newUrl
     isLoading.value = true
@@ -191,7 +217,7 @@ watch(() => imageUrl.value, (newUrl) => {
 }, { immediate: true })
 
 // 监听 imageLoaded 变化，设置 Intersection Observer
-watch(imageLoaded, (loaded) => {
+watch(imageLoaded, loaded => {
   if (loaded && observer) {
     observer.disconnect()
     observer = null

@@ -29,7 +29,9 @@
         <template v-if="activeMenu === 'faq'">
           <div class="faq-section">
             <div class="section-header">
-              <h2 class="section-title">常见问题</h2>
+              <h2 class="section-title">
+                常见问题
+              </h2>
               <el-input
                 v-model="faqSearchQuery"
                 placeholder="搜索您遇到的问题..."
@@ -47,19 +49,33 @@
               >
                 <div class="faq-question">
                   <span class="question-text">{{ faq.question }}</span>
-                  <el-icon class="arrow-icon" :class="{ expanded: activeCollapse === index }">
+                  <el-icon
+                    class="arrow-icon"
+                    :class="{ expanded: activeCollapse === index }"
+                  >
                     <ArrowDown />
                   </el-icon>
                 </div>
-                <div class="faq-answer" :class="{ show: activeCollapse === index }">
+                <div
+                  class="faq-answer"
+                  :class="{ show: activeCollapse === index }"
+                >
                   {{ faq.answer }}
                 </div>
               </div>
-              <el-empty v-if="filteredFaqs.length === 0" description="未找到相关问题" :image-size="100" />
+              <el-empty
+                v-if="filteredFaqs.length === 0"
+                description="未找到相关问题"
+                :image-size="100"
+              />
             </div>
             <div class="support-footer">
               <span>没找到答案？</span>
-              <el-button type="primary" link @click="handleContactSupport">
+              <el-button
+                type="primary"
+                link
+                @click="handleContactSupport"
+              >
                 <el-icon><Service /></el-icon>
                 联系在线客服
               </el-button>
@@ -70,7 +86,9 @@
         <!-- 功能介绍 -->
         <template v-else-if="activeMenu === 'features'">
           <div class="features-section">
-            <h2 class="section-title">功能介绍</h2>
+            <h2 class="section-title">
+              功能介绍
+            </h2>
             <div class="feature-grid">
               <div class="feature-card">
                 <div class="feature-icon-wrapper chat-bg">
@@ -133,11 +151,24 @@
         <!-- 意见反馈 -->
         <template v-else-if="activeMenu === 'feedback'">
           <div class="feedback-section">
-            <h2 class="section-title">意见反馈</h2>
+            <h2 class="section-title">
+              意见反馈
+            </h2>
             <div class="feedback-card">
-              <el-form :model="feedbackForm" label-position="top" :rules="feedbackRules" ref="feedbackFormRef">
-                <el-form-item label="反馈类型" prop="type">
-                  <el-radio-group v-model="feedbackForm.type" size="large">
+              <el-form
+                ref="feedbackFormRef"
+                :model="feedbackForm"
+                label-position="top"
+                :rules="feedbackRules"
+              >
+                <el-form-item
+                  label="反馈类型"
+                  prop="type"
+                >
+                  <el-radio-group
+                    v-model="feedbackForm.type"
+                    size="large"
+                  >
                     <el-radio-button label="bug">
                       <el-icon><Warning /></el-icon>
                       功能异常
@@ -152,7 +183,10 @@
                     </el-radio-button>
                   </el-radio-group>
                 </el-form-item>
-                <el-form-item label="问题描述" prop="content">
+                <el-form-item
+                  label="问题描述"
+                  prop="content"
+                >
                   <el-input 
                     v-model="feedbackForm.content" 
                     type="textarea" 
@@ -164,18 +198,23 @@
                 </el-form-item>
                 <el-form-item label="图片证据 (选填)">
                   <el-upload
+                    v-model:file-list="fileList"
                     action="#"
                     list-type="picture-card"
                     :auto-upload="false"
                     :limit="3"
-                    v-model:file-list="fileList"
                     class="feedback-upload"
                   >
                     <el-icon><Plus /></el-icon>
                   </el-upload>
-                  <div class="upload-tip">最多上传 3 张图片，每张不超过 5MB</div>
+                  <div class="upload-tip">
+                    最多上传 3 张图片，每张不超过 5MB
+                  </div>
                 </el-form-item>
-                <el-form-item label="联系方式 (选填)" prop="contact">
+                <el-form-item
+                  label="联系方式 (选填)"
+                  prop="contact"
+                >
                   <el-input 
                     v-model="feedbackForm.contact" 
                     placeholder="留下您的手机号或邮箱，方便我们回访" 
@@ -183,8 +222,15 @@
                   />
                 </el-form-item>
                 <div class="form-footer">
-                  <el-button type="primary" class="submit-btn" :loading="submitting" @click="submitFeedback">
-                    <el-icon v-if="!submitting"><Position /></el-icon>
+                  <el-button
+                    type="primary"
+                    class="submit-btn"
+                    :loading="submitting"
+                    @click="submitFeedback"
+                  >
+                    <el-icon v-if="!submitting">
+                      <Position />
+                    </el-icon>
                     {{ submitting ? '提交中...' : '提交反馈' }}
                   </el-button>
                 </div>
@@ -260,7 +306,7 @@ const faqs = [
 ]
 
 const filteredFaqs = computed(() => {
-  if (!faqSearchQuery.value) return faqs
+  if (!faqSearchQuery.value) {return faqs}
   const query = faqSearchQuery.value.toLowerCase()
   return faqs.filter(f => 
     f.question.toLowerCase().includes(query) || 
@@ -272,7 +318,7 @@ const handleContactSupport = () => {
   ElMessage.info('正在连接在线客服，请稍候...')
 }
 
-const toggleFaq = (index) => {
+const toggleFaq = index => {
   if (activeCollapse.value === index) {
     activeCollapse.value = ''
   } else {
@@ -294,9 +340,9 @@ const feedbackRules = {
 }
 
 const submitFeedback = async () => {
-  if (!feedbackFormRef.value) return
+  if (!feedbackFormRef.value) {return}
   
-  await feedbackFormRef.value.validate((valid) => {
+  await feedbackFormRef.value.validate(valid => {
     if (valid) {
       submitting.value = true
       // 模拟反馈提交 API 请求
@@ -312,11 +358,11 @@ const submitFeedback = async () => {
   })
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   if (!val) {
     emit('update:modelValue', false)
   }

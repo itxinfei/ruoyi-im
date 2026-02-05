@@ -5,6 +5,7 @@ import com.ruoyi.im.domain.ImUserApplication;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ public interface ImUserApplicationMapper extends BaseMapper<ImUserApplication> {
      * @param userId 用户ID
      * @param appId 应用ID
      */
-    @Select("UPDATE im_user_application SET last_used_time = NOW(), use_count = use_count + 1 WHERE user_id = #{userId} AND app_id = #{appId}")
+    @Update("UPDATE im_user_application SET last_used_time = NOW(), use_count = use_count + 1 WHERE user_id = #{userId} AND app_id = #{appId}")
     void updateLastUsedTime(@Param("userId") Long userId, @Param("appId") Long appId);
 
     /**
@@ -58,6 +59,6 @@ public interface ImUserApplicationMapper extends BaseMapper<ImUserApplication> {
      *
      * @param id 记录ID
      */
-    @Select("UPDATE im_user_application SET use_count = use_count + 1 WHERE id = #{id}")
+    @Update("UPDATE im_user_application SET use_count = use_count + 1 WHERE id = #{id}")
     void incrementUseCount(@Param("id") Long id);
 }

@@ -3,58 +3,97 @@
     <!-- 顶部欢迎区 -->
     <header class="workbench-header">
       <div class="greeting-section">
-        <h1 class="greeting-title">{{ greetingText }}，{{ displayName }}</h1>
+        <h1 class="greeting-title">
+          {{ greetingText }}，{{ displayName }}
+        </h1>
         <p class="greeting-date">
           <span class="material-icons-outlined date-icon">event</span>
           {{ currentDateText }}
         </p>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" @click="refreshAllData" :class="{ loading: refreshing }" title="刷新数据">
+        <button
+          class="icon-btn"
+          :class="{ loading: refreshing }"
+          title="刷新数据"
+          @click="refreshAllData"
+        >
           <span class="material-icons-outlined">refresh</span>
         </button>
       </div>
     </header>
 
     <!-- 主内容区 -->
-    <div class="workbench-content" v-loading="initialLoading" element-loading-text="加载中...">
+    <div
+      v-loading="initialLoading"
+      class="workbench-content"
+      element-loading-text="加载中..."
+    >
       <!-- 统计概览卡片 -->
       <section class="stats-overview-section">
         <div class="stats-overview-grid">
-          <div class="stat-card stat-card-primary" @click="navigateTo('todo')">
+          <div
+            class="stat-card stat-card-primary"
+            @click="navigateTo('todo')"
+          >
             <div class="stat-icon">
               <span class="material-icons-outlined">task_alt</span>
             </div>
             <div class="stat-content">
-              <div class="stat-value">{{ overviewData.todoCount || 0 }}</div>
-              <div class="stat-label">待办事项</div>
+              <div class="stat-value">
+                {{ overviewData.todoCount || 0 }}
+              </div>
+              <div class="stat-label">
+                待办事项
+              </div>
             </div>
           </div>
-          <div class="stat-card stat-card-success" @click="navigateTo('approval')">
+          <div
+            class="stat-card stat-card-success"
+            @click="navigateTo('approval')"
+          >
             <div class="stat-icon">
               <span class="material-icons-outlined">approval</span>
             </div>
             <div class="stat-content">
-              <div class="stat-value">{{ overviewData.approvalCount || 0 }}</div>
-              <div class="stat-label">待审批</div>
+              <div class="stat-value">
+                {{ overviewData.approvalCount || 0 }}
+              </div>
+              <div class="stat-label">
+                待审批
+              </div>
             </div>
           </div>
-          <div class="stat-card stat-card-warning" @click="navigateTo('mail')">
+          <div
+            class="stat-card stat-card-warning"
+            @click="navigateTo('mail')"
+          >
             <div class="stat-icon">
               <span class="material-icons-outlined">mail</span>
             </div>
             <div class="stat-content">
-              <div class="stat-value">{{ overviewData.mailCount || 0 }}</div>
-              <div class="stat-label">未读邮件</div>
+              <div class="stat-value">
+                {{ overviewData.mailCount || 0 }}
+              </div>
+              <div class="stat-label">
+                未读邮件
+              </div>
             </div>
           </div>
-          <div class="stat-card stat-card-info" @click="navigateTo('contacts')">
+          <div
+            class="stat-card stat-card-info"
+            @click="navigateTo('contacts')"
+          >
             <div class="stat-icon">
               <span class="material-icons-outlined">people</span>
             </div>
             <div class="stat-content">
-              <div class="stat-value">{{ onlineUsersCount }}</div>
-              <div class="stat-label">在线同事</div>
+              <div class="stat-value">
+                {{ onlineUsersCount }}
+              </div>
+              <div class="stat-label">
+                在线同事
+              </div>
             </div>
           </div>
         </div>
@@ -65,7 +104,10 @@
         <!-- 左侧：待办 + 审批 -->
         <div class="left-column">
           <!-- 待办事项 -->
-          <div class="content-card todo-card" @click="navigateTo('todo')">
+          <div
+            class="content-card todo-card"
+            @click="navigateTo('todo')"
+          >
             <div class="card-header">
               <h3 class="card-title">
                 <span class="material-icons-outlined card-icon">task_alt</span>
@@ -73,10 +115,19 @@
               </h3>
               <span class="view-all">查看全部 →</span>
             </div>
-            <div v-if="todoLoading" class="card-body loading">
-              <el-skeleton :rows="3" animated />
+            <div
+              v-if="todoLoading"
+              class="card-body loading"
+            >
+              <el-skeleton
+                :rows="3"
+                animated
+              />
             </div>
-            <div v-else-if="todoList.length > 0" class="card-body">
+            <div
+              v-else-if="todoList.length > 0"
+              class="card-body"
+            >
               <div
                 v-for="todo in todoList.slice(0, 5)"
                 :key="todo.id"
@@ -84,30 +135,50 @@
                 :class="`priority-${getPriorityClass(todo.priority)}`"
               >
                 <div class="todo-checkbox">
-                  <el-checkbox :model-value="todo.isCompleted" @change="toggleTodoComplete(todo)" @click.stop />
+                  <el-checkbox
+                    :model-value="todo.isCompleted"
+                    @change="toggleTodoComplete(todo)"
+                    @click.stop
+                  />
                 </div>
                 <div class="todo-content">
-                  <p class="todo-title">{{ todo.title || todo.content || '无标题' }}</p>
+                  <p class="todo-title">
+                    {{ todo.title || todo.content || '无标题' }}
+                  </p>
                   <span class="todo-meta">
-                    <span class="todo-deadline" v-if="todo.remindTime || todo.dueDate">
+                    <span
+                      v-if="todo.remindTime || todo.dueDate"
+                      class="todo-deadline"
+                    >
                       <span class="material-icons-outlined">schedule</span>
                       {{ formatDeadline(todo.remindTime || todo.dueDate) }}
                     </span>
                   </span>
                 </div>
-                <span v-if="todo.priority" class="priority-badge" :class="`priority-${getPriorityClass(todo.priority)}`">
+                <span
+                  v-if="todo.priority"
+                  class="priority-badge"
+                  :class="`priority-${getPriorityClass(todo.priority)}`"
+                >
                   {{ getPriorityLabel(todo.priority) }}
                 </span>
               </div>
             </div>
-            <div v-else class="card-body empty">
+            <div
+              v-else
+              class="card-body empty"
+            >
               <span class="material-icons-outlined empty-icon">check_circle</span>
               <p>暂无待办事项</p>
             </div>
           </div>
 
           <!-- 待审批 -->
-          <div class="content-card approval-card" @click="navigateTo('approval')" v-if="approvalList.length > 0">
+          <div
+            v-if="approvalList.length > 0"
+            class="content-card approval-card"
+            @click="navigateTo('approval')"
+          >
             <div class="card-header">
               <h3 class="card-title">
                 <span class="material-icons-outlined card-icon">approval</span>
@@ -125,18 +196,33 @@
                   <span class="material-icons-outlined">description</span>
                 </div>
                 <div class="approval-content">
-                  <p class="approval-title">{{ approval.title || approval.applyType || '审批申请' }}</p>
+                  <p class="approval-title">
+                    {{ approval.title || approval.applyType || '审批申请' }}
+                  </p>
                   <span class="approval-meta">
                     <span>{{ approval.applicantName || '申请人' }}</span>
                     <span>·</span>
                     <span>{{ formatTime(approval.applyTime || approval.createTime) }}</span>
                   </span>
                 </div>
-                <div class="approval-actions" @click.stop>
-                  <el-button type="success" size="small" circle @click="quickApprove(approval)">
+                <div
+                  class="approval-actions"
+                  @click.stop
+                >
+                  <el-button
+                    type="success"
+                    size="small"
+                    circle
+                    @click="quickApprove(approval)"
+                  >
                     <span class="material-icons-outlined">check</span>
                   </el-button>
-                  <el-button type="danger" size="small" circle @click="quickReject(approval)">
+                  <el-button
+                    type="danger"
+                    size="small"
+                    circle
+                    @click="quickReject(approval)"
+                  >
                     <span class="material-icons-outlined">close</span>
                   </el-button>
                 </div>
@@ -148,15 +234,24 @@
         <!-- 中间：日程 + 快捷操作 -->
         <div class="center-column">
           <!-- 今日日程 -->
-          <div class="content-card schedule-card" @click="navigateTo('calendar')">
+          <div
+            class="content-card schedule-card"
+            @click="navigateTo('calendar')"
+          >
             <div class="card-header">
               <h3 class="card-title">
                 <span class="material-icons-outlined card-icon">calendar_today</span>
                 今日日程
               </h3>
-              <span class="view-all" @click.stop="openScheduleDialog">新建 +</span>
+              <span
+                class="view-all"
+                @click.stop="openScheduleDialog"
+              >新建 +</span>
             </div>
-            <div v-if="scheduleList.length > 0" class="card-body">
+            <div
+              v-if="scheduleList.length > 0"
+              class="card-body"
+            >
               <div
                 v-for="event in scheduleList.slice(0, 4)"
                 :key="event.id"
@@ -169,15 +264,23 @@
                   <span class="time-end">{{ formatTime(event.endTime) }}</span>
                 </div>
                 <div class="schedule-content">
-                  <p class="schedule-title">{{ event.title }}</p>
-                  <span class="schedule-location" v-if="event.location">
+                  <p class="schedule-title">
+                    {{ event.title }}
+                  </p>
+                  <span
+                    v-if="event.location"
+                    class="schedule-location"
+                  >
                     <span class="material-icons-outlined">place</span>
                     {{ event.location }}
                   </span>
                 </div>
               </div>
             </div>
-            <div v-else class="card-body empty">
+            <div
+              v-else
+              class="card-body empty"
+            >
               <span class="material-icons-outlined empty-icon">event_available</span>
               <p>今日暂无日程</p>
             </div>
@@ -193,19 +296,31 @@
             </div>
             <div class="card-body">
               <div class="quick-actions-grid">
-                <div class="quick-action-item" @click="openNewTodo">
+                <div
+                  class="quick-action-item"
+                  @click="openNewTodo"
+                >
                   <span class="material-icons-outlined">add_task</span>
                   <span>新建待办</span>
                 </div>
-                <div class="quick-action-item" @click="openScheduleDialog">
+                <div
+                  class="quick-action-item"
+                  @click="openScheduleDialog"
+                >
                   <span class="material-icons-outlined">add_alert</span>
                   <span>新建日程</span>
                 </div>
-                <div class="quick-action-item" @click="navigateTo('meeting')">
+                <div
+                  class="quick-action-item"
+                  @click="navigateTo('meeting')"
+                >
                   <span class="material-icons-outlined">videocam</span>
                   <span>发起会议</span>
                 </div>
-                <div class="quick-action-item" @click="navigateTo('mail')">
+                <div
+                  class="quick-action-item"
+                  @click="navigateTo('mail')"
+                >
                   <span class="material-icons-outlined">edit</span>
                   <span>写邮件</span>
                 </div>
@@ -217,7 +332,10 @@
         <!-- 右侧：公告 + 近期会议 -->
         <div class="right-column">
           <!-- 公告通知 -->
-          <div class="content-card announcement-card" @click="navigateTo('announcement')">
+          <div
+            class="content-card announcement-card"
+            @click="navigateTo('announcement')"
+          >
             <div class="card-header">
               <h3 class="card-title">
                 <span class="material-icons-outlined card-icon">campaign</span>
@@ -225,30 +343,51 @@
               </h3>
               <span class="view-all">更多 →</span>
             </div>
-            <div v-if="announcementLoading" class="card-body loading">
-              <el-skeleton :rows="2" animated />
+            <div
+              v-if="announcementLoading"
+              class="card-body loading"
+            >
+              <el-skeleton
+                :rows="2"
+                animated
+              />
             </div>
-            <div v-else-if="announcementList.length > 0" class="card-body">
+            <div
+              v-else-if="announcementList.length > 0"
+              class="card-body"
+            >
               <div
                 v-for="item in announcementList.slice(0, 4)"
                 :key="item.id"
                 class="announcement-item"
               >
-                <span class="announcement-tag" :class="`tag-${getTypeClass(item.type || item.announcementType)}`">
+                <span
+                  class="announcement-tag"
+                  :class="`tag-${getTypeClass(item.type || item.announcementType)}`"
+                >
                   {{ getTypeLabel(item.type || item.announcementType) }}
                 </span>
-                <p class="announcement-title">{{ item.title }}</p>
+                <p class="announcement-title">
+                  {{ item.title }}
+                </p>
                 <span class="announcement-time">{{ formatTime(item.createTime || item.publishTime) }}</span>
               </div>
             </div>
-            <div v-else class="card-body empty">
+            <div
+              v-else
+              class="card-body empty"
+            >
               <span class="material-icons-outlined empty-icon">campaign</span>
               <p>暂无公告</p>
             </div>
           </div>
 
           <!-- 近期会议 -->
-          <div class="content-card meeting-card" @click="navigateTo('meeting')" v-if="meetingList.length > 0">
+          <div
+            v-if="meetingList.length > 0"
+            class="content-card meeting-card"
+            @click="navigateTo('meeting')"
+          >
             <div class="card-header">
               <h3 class="card-title">
                 <span class="material-icons-outlined card-icon">meeting_room</span>
@@ -266,7 +405,9 @@
                   <span class="material-icons-outlined">schedule</span>
                   {{ formatDate(meeting.scheduledStartTime || meeting.startTime) }}
                 </div>
-                <p class="meeting-title">{{ meeting.title }}</p>
+                <p class="meeting-title">
+                  {{ meeting.title }}
+                </p>
                 <span class="meeting-participants">
                   <span class="material-icons-outlined">people</span>
                   {{ meeting.participantCount || 0 }}人
@@ -279,16 +420,32 @@
     </div>
 
     <!-- 新建待办弹窗 -->
-    <el-dialog v-model="showTodoDialog" title="新建待办" width="500px">
-      <el-form :model="newTodo" label-width="80px">
+    <el-dialog
+      v-model="showTodoDialog"
+      title="新建待办"
+      width="500px"
+    >
+      <el-form
+        :model="newTodo"
+        label-width="80px"
+      >
         <el-form-item label="标题">
-          <el-input v-model="newTodo.title" placeholder="请输入待办标题" />
+          <el-input
+            v-model="newTodo.title"
+            placeholder="请输入待办标题"
+          />
         </el-form-item>
         <el-form-item label="优先级">
           <el-radio-group v-model="newTodo.priority">
-            <el-radio :label="1">低</el-radio>
-            <el-radio :label="2">中</el-radio>
-            <el-radio :label="3">高</el-radio>
+            <el-radio :label="1">
+              低
+            </el-radio>
+            <el-radio :label="2">
+              中
+            </el-radio>
+            <el-radio :label="3">
+              高
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="截止时间">
@@ -301,16 +458,34 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showTodoDialog = false">取消</el-button>
-        <el-button type="primary" @click="createNewTodo" :loading="todoSubmitting">确定</el-button>
+        <el-button @click="showTodoDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="todoSubmitting"
+          @click="createNewTodo"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
     <!-- 新建日程弹窗 -->
-    <el-dialog v-model="showScheduleDialog" title="新建日程" width="500px">
-      <el-form :model="newSchedule" label-width="80px">
+    <el-dialog
+      v-model="showScheduleDialog"
+      title="新建日程"
+      width="500px"
+    >
+      <el-form
+        :model="newSchedule"
+        label-width="80px"
+      >
         <el-form-item label="标题">
-          <el-input v-model="newSchedule.title" placeholder="请输入日程标题" />
+          <el-input
+            v-model="newSchedule.title"
+            placeholder="请输入日程标题"
+          />
         </el-form-item>
         <el-form-item label="时间">
           <el-date-picker
@@ -323,12 +498,23 @@
           />
         </el-form-item>
         <el-form-item label="地点">
-          <el-input v-model="newSchedule.location" placeholder="会议地点（可选）" />
+          <el-input
+            v-model="newSchedule.location"
+            placeholder="会议地点（可选）"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showScheduleDialog = false">取消</el-button>
-        <el-button type="primary" @click="createNewSchedule" :loading="scheduleSubmitting">确定</el-button>
+        <el-button @click="showScheduleDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="scheduleSubmitting"
+          @click="createNewSchedule"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -417,12 +603,12 @@ const onlineUsersCount = computed(() => {
 // 问候语
 const greetingText = computed(() => {
   const hour = new Date().getHours()
-  if (hour < 6) return '凌晨好'
-  if (hour < 9) return '早上好'
-  if (hour < 12) return '上午好'
-  if (hour < 14) return '中午好'
-  if (hour < 18) return '下午好'
-  if (hour < 22) return '晚上好'
+  if (hour < 6) {return '凌晨好'}
+  if (hour < 9) {return '早上好'}
+  if (hour < 12) {return '上午好'}
+  if (hour < 14) {return '中午好'}
+  if (hour < 18) {return '下午好'}
+  if (hour < 22) {return '晚上好'}
   return '夜深了'
 })
 
@@ -491,7 +677,7 @@ const loadTodoData = async () => {
           isCompleted: item.isCompleted !== false
         }))
         .sort((a, b) => {
-          if (a.isCompleted !== b.isCompleted) return a.isCompleted ? 1 : -1
+          if (a.isCompleted !== b.isCompleted) {return a.isCompleted ? 1 : -1}
           return (b.priority || 2) - (a.priority || 2)
         })
     }
@@ -600,13 +786,13 @@ const refreshAllData = async () => {
 // 格式化函数
 // ============================================================================
 
-const formatTime = (time) => {
-  if (!time) return ''
+const formatTime = time => {
+  if (!time) {return ''}
   return dayjs(time).fromNow()
 }
 
-const formatDate = (time) => {
-  if (!time) return ''
+const formatDate = time => {
+  if (!time) {return ''}
   const date = dayjs(time)
   const now = dayjs()
   const diffDays = date.diff(now, 'day')
@@ -624,45 +810,45 @@ const formatDate = (time) => {
   }
 }
 
-const formatDeadline = (time) => {
-  if (!time) return ''
+const formatDeadline = time => {
+  if (!time) {return ''}
   const date = dayjs(time)
   const now = dayjs()
   const diffDays = date.diff(now, 'day')
 
-  if (diffDays < 0) return '已逾期'
-  if (diffDays === 0) return '今天'
-  if (diffDays === 1) return '明天'
-  if (diffDays < 7) return `${diffDays}天后`
+  if (diffDays < 0) {return '已逾期'}
+  if (diffDays === 0) {return '今天'}
+  if (diffDays === 1) {return '明天'}
+  if (diffDays < 7) {return `${diffDays}天后`}
   return date.format('MM-DD')
 }
 
-const getPriorityClass = (priority) => {
+const getPriorityClass = priority => {
   const p = parseInt(priority) || 2
-  if (p >= 3) return 'high'
-  if (p <= 1) return 'low'
+  if (p >= 3) {return 'high'}
+  if (p <= 1) {return 'low'}
   return 'medium'
 }
 
-const getPriorityLabel = (priority) => {
+const getPriorityLabel = priority => {
   const p = parseInt(priority) || 2
-  if (p >= 3) return '高'
-  if (p <= 1) return '低'
+  if (p >= 3) {return '高'}
+  if (p <= 1) {return '低'}
   return '中'
 }
 
-const getTypeClass = (type) => {
+const getTypeClass = type => {
   const t = (type || '').toUpperCase()
-  if (t.includes('重要') || t === 'HIGH' || t === 'URGENT') return 'important'
-  if (t.includes('通知') || t === 'NOTICE') return 'notice'
+  if (t.includes('重要') || t === 'HIGH' || t === 'URGENT') {return 'important'}
+  if (t.includes('通知') || t === 'NOTICE') {return 'notice'}
   return 'normal'
 }
 
-const getTypeLabel = (type) => {
+const getTypeLabel = type => {
   const t = (type || '').toUpperCase()
-  if (t.includes('重要') || t === 'HIGH' || t === 'URGENT') return '重要'
-  if (t.includes('系统') || t === 'SYSTEM') return '系统'
-  if (t.includes('活动') || t === 'ACTIVITY') return '活动'
+  if (t.includes('重要') || t === 'HIGH' || t === 'URGENT') {return '重要'}
+  if (t.includes('系统') || t === 'SYSTEM') {return '系统'}
+  if (t.includes('活动') || t === 'ACTIVITY') {return '活动'}
   return '通知'
 }
 
@@ -671,7 +857,7 @@ const getTypeLabel = (type) => {
 // ============================================================================
 
 // 切换待办完成状态
-const toggleTodoComplete = async (todo) => {
+const toggleTodoComplete = async todo => {
   try {
     if (todo.isCompleted) {
       await completeTodoApi(todo.id || todo.markerId)
@@ -687,7 +873,7 @@ const toggleTodoComplete = async (todo) => {
 }
 
 // 快速审批
-const quickApprove = async (approval) => {
+const quickApprove = async approval => {
   try {
     await ElMessageBox.confirm('确认通过该审批吗？', '提示', { type: 'info' })
     await handleApprovalApi({
@@ -704,7 +890,7 @@ const quickApprove = async (approval) => {
   }
 }
 
-const quickReject = async (approval) => {
+const quickReject = async approval => {
   try {
     const { value } = await ElMessageBox.prompt('请输入驳回理由', '驳回审批', {
       confirmButtonText: '确定',
@@ -802,7 +988,7 @@ const createNewSchedule = async () => {
 }
 
 // 导航处理
-const navigateTo = (tab) => {
+const navigateTo = tab => {
   window.dispatchEvent(new CustomEvent('switch-tab', { detail: tab }))
 }
 

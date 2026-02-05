@@ -91,4 +91,12 @@ public interface ImConversationMemberService {
      * @param messageId 消息ID
      */
     void updateLastReadMessageId(Long conversationId, Long userId, Long messageId);
+
+    /**
+     * 获取用户参与的所有会话ID列表
+     *
+     * @param userId 用户ID
+     * @return 会话ID列表
+     */
+    List<Long> getUserConversationIds(Long userId);
 }

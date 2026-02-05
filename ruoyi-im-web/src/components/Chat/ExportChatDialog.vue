@@ -7,9 +7,17 @@
     class="export-chat-dialog"
     @open="handleOpen"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="90px"
+    >
       <!-- 导出格式 -->
-      <el-form-item label="导出格式" prop="format">
+      <el-form-item
+        label="导出格式"
+        prop="format"
+      >
         <el-radio-group v-model="form.format">
           <el-radio-button label="txt">
             <div class="format-option">
@@ -23,11 +31,20 @@
               <span>网页文件</span>
             </div>
           </el-radio-button>
-          <el-radio-button label="pdf" :disabled="true">
+          <el-radio-button
+            label="pdf"
+            :disabled="true"
+          >
             <div class="format-option">
               <span class="material-icons-outlined">picture_as_pdf</span>
               <span>PDF文件</span>
-              <el-tag size="small" type="info" style="margin-left: 4px">暂不支持</el-tag>
+              <el-tag
+                size="small"
+                type="info"
+                style="margin-left: 4px"
+              >
+                暂不支持
+              </el-tag>
             </div>
           </el-radio-button>
         </el-radio-group>
@@ -38,14 +55,25 @@
 
       <!-- 时间范围 -->
       <el-form-item label="时间范围">
-        <el-radio-group v-model="form.timeRange" @change="handleTimeRangeChange">
-          <el-radio-button label="all">全部消息</el-radio-button>
-          <el-radio-button label="custom">自定义</el-radio-button>
+        <el-radio-group
+          v-model="form.timeRange"
+          @change="handleTimeRangeChange"
+        >
+          <el-radio-button label="all">
+            全部消息
+          </el-radio-button>
+          <el-radio-button label="custom">
+            自定义
+          </el-radio-button>
         </el-radio-group>
       </el-form-item>
 
       <!-- 自定义时间 -->
-      <el-form-item v-if="form.timeRange === 'custom'" label="选择时间" prop="dateRange">
+      <el-form-item
+        v-if="form.timeRange === 'custom'"
+        label="选择时间"
+        prop="dateRange"
+      >
         <el-date-picker
           v-model="form.dateRange"
           type="daterange"
@@ -87,8 +115,14 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :loading="exporting" @click="handleExport">
+      <el-button @click="visible = false">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="exporting"
+        @click="handleExport"
+      >
         <el-icon><Download /></el-icon>
         {{ exporting ? '导出中...' : '开始导出' }}
       </el-button>
@@ -123,7 +157,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const store = useStore()
@@ -183,13 +217,13 @@ const messageCount = computed(() => filteredMessages.value.length)
 
 // 日期范围天数
 const dateRangeCount = computed(() => {
-  if (filteredMessages.value.length === 0) return 0
+  if (filteredMessages.value.length === 0) {return 0}
 
   const timestamps = filteredMessages.value
     .map(msg => new Date(msg.timestamp || msg.sendTime || msg.createTime).getTime())
     .sort((a, b) => a - b)
 
-  if (timestamps.length < 2) return 1
+  if (timestamps.length < 2) {return 1}
 
   const days = Math.ceil((timestamps[timestamps.length - 1] - timestamps[0]) / (1000 * 60 * 60 * 24))
   return Math.max(1, days)
@@ -215,7 +249,7 @@ const estimatedSize = computed(() => {
 })
 
 // 禁用日期
-const disabledDate = (time) => {
+const disabledDate = time => {
   return time.getTime() > Date.now()
 }
 

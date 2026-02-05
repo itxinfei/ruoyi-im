@@ -5,7 +5,10 @@
       <div class="header-left">
         <span class="material-icons-outlined header-icon">push_pin</span>
         <span class="header-title">置顶消息</span>
-        <span v-if="pinnedMessages.length > 0" class="header-count">{{ pinnedMessages.length }}</span>
+        <span
+          v-if="pinnedMessages.length > 0"
+          class="header-count"
+        >{{ pinnedMessages.length }}</span>
       </div>
       <div class="header-actions">
         <el-button
@@ -32,14 +35,20 @@
     <!-- 内容区域 -->
     <div class="panel-content">
       <!-- 空状态 -->
-      <div v-if="pinnedMessages.length === 0" class="empty-state">
+      <div
+        v-if="pinnedMessages.length === 0"
+        class="empty-state"
+      >
         <span class="material-icons-outlined empty-icon">push_pin</span>
         <span class="empty-text">暂无置顶消息</span>
         <span class="empty-hint">长按消息，选择「置顶」可将重要消息固定</span>
       </div>
 
       <!-- 置顶消息列表 -->
-      <div v-else class="pinned-list">
+      <div
+        v-else
+        class="pinned-list"
+      >
         <div
           v-for="msg in pinnedMessages"
           :key="msg.id"
@@ -60,35 +69,53 @@
               <span class="message-time">{{ formatTime(msg.timestamp) }}</span>
             </div>
             <div class="item-body">
-              <div v-if="msg.type === 'TEXT'" class="content-preview text-preview">
+              <div
+                v-if="msg.type === 'TEXT'"
+                class="content-preview text-preview"
+              >
                 {{ getContentPreview(msg) }}
               </div>
-              <div v-else-if="msg.type === 'IMAGE'" class="content-preview image-preview">
+              <div
+                v-else-if="msg.type === 'IMAGE'"
+                class="content-preview image-preview"
+              >
                 <span class="material-icons-outlined">image</span>
                 <span>[图片]</span>
               </div>
-              <div v-else-if="msg.type === 'FILE'" class="content-preview file-preview">
+              <div
+                v-else-if="msg.type === 'FILE'"
+                class="content-preview file-preview"
+              >
                 <span class="material-icons-outlined">description</span>
                 <span>[文件] {{ getFileName(msg) }}</span>
               </div>
-              <div v-else-if="msg.type === 'VOICE'" class="content-preview voice-preview">
+              <div
+                v-else-if="msg.type === 'VOICE'"
+                class="content-preview voice-preview"
+              >
                 <span class="material-icons-outlined">mic</span>
                 <span>[语音]</span>
               </div>
-              <div v-else class="content-preview">
+              <div
+                v-else
+                class="content-preview"
+              >
                 <span>[{{ msg.type }}]</span>
               </div>
             </div>
           </div>
 
           <!-- 操作按钮 -->
-          <div class="item-actions" @click.stop>
+          <div
+            class="item-actions"
+            @click.stop
+          >
             <el-button
               type="danger"
               size="small"
               text
-              @click="handleUnpin(msg)"
               title="取消置顶"
+              @click="handleUnpin(msg)"
             >
               <el-icon><Close /></el-icon>
             </el-button>
@@ -125,8 +152,8 @@ const pinnedMessages = computed(() => {
 })
 
 // 获取内容预览
-const getContentPreview = (msg) => {
-  if (!msg.content) return ''
+const getContentPreview = msg => {
+  if (!msg.content) {return ''}
   if (typeof msg.content === 'string') {
     return msg.content.length > 50 ? msg.content.substring(0, 50) + '...' : msg.content
   }
@@ -137,8 +164,8 @@ const getContentPreview = (msg) => {
 }
 
 // 获取文件名
-const getFileName = (msg) => {
-  if (!msg.content) return ''
+const getFileName = msg => {
+  if (!msg.content) {return ''}
   if (typeof msg.content === 'object') {
     return msg.content.fileName || msg.content.name || ''
   }
@@ -149,13 +176,13 @@ const getFileName = (msg) => {
 const formatTime = formatChatTime
 
 // 点击消息 - 滚动到对应位置
-const handleMessageClick = (msg) => {
+const handleMessageClick = msg => {
   emit('scroll-to-message', msg.id)
   emit('close')
 }
 
 // 取消单个置顶
-const handleUnpin = async (msg) => {
+const handleUnpin = async msg => {
   try {
     await unpinMessage(msg.id)
     ElMessage.success('已取消置顶')

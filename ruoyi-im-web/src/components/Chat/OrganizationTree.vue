@@ -1,7 +1,10 @@
 <template>
   <div class="organization-tree-container">
     <!-- 搜索栏 -->
-    <div v-if="showSearch" class="tree-search">
+    <div
+      v-if="showSearch"
+      class="tree-search"
+    >
       <el-input
         v-model="searchKeyword"
         placeholder="搜索部门或成员..."
@@ -30,18 +33,27 @@
       <template #default="{ node, data }">
         <div class="tree-node">
           <!-- 部门节点 -->
-          <div v-if="data.type === 'department'" class="department-node">
+          <div
+            v-if="data.type === 'department'"
+            class="department-node"
+          >
             <el-icon class="node-icon dept-icon">
               <Folder />
             </el-icon>
             <span class="node-label">{{ data.name }}</span>
-            <span v-if="data.memberCount !== undefined" class="member-count">
+            <span
+              v-if="data.memberCount !== undefined"
+              class="member-count"
+            >
               ({{ data.memberCount }})
             </span>
           </div>
 
           <!-- 成员节点 -->
-          <div v-else class="member-node">
+          <div
+            v-else
+            class="member-node"
+          >
             <DingtalkAvatar
               :src="data.avatar"
               :name="data.name"
@@ -50,14 +62,20 @@
               custom-class="tree-member-avatar"
             />
             <span class="node-label">{{ data.name }}</span>
-            <span v-if="data.position" class="member-position">{{ data.position }}</span>
+            <span
+              v-if="data.position"
+              class="member-position"
+            >{{ data.position }}</span>
           </div>
         </div>
       </template>
     </el-tree>
 
     <!-- 空状态 -->
-    <div v-if="!loading && treeData.length === 0" class="empty-state">
+    <div
+      v-if="!loading && treeData.length === 0"
+      class="empty-state"
+    >
       <el-icon><FolderOpened /></el-icon>
       <span>{{ emptyText }}</span>
     </div>
@@ -129,7 +147,7 @@ const loadTreeData = async () => {
 }
 
 // 构建树数据结构
-const buildTreeData = (departments) => {
+const buildTreeData = departments => {
   return departments.map(dept => {
     const node = {
       id: dept.id,
@@ -221,7 +239,7 @@ const updateNodeChildren = (deptData, node, members) => {
 
 // 搜索过滤
 const filterNode = (value, data) => {
-  if (!value) return true
+  if (!value) {return true}
   const keyword = value.toLowerCase()
 
   if (data.type === 'department') {
@@ -242,7 +260,7 @@ const filterNode = (value, data) => {
 }
 
 // 搜索处理
-const handleSearch = (value) => {
+const handleSearch = value => {
   if (treeRef.value) {
     treeRef.value.filter(value)
   }
@@ -255,14 +273,14 @@ const refresh = () => {
 }
 
 // 暴露方法：展开指定节点
-const expandNode = (nodeKey) => {
+const expandNode = nodeKey => {
   if (treeRef.value) {
     treeRef.value.store.nodesMap[nodeKey]?.expand()
   }
 }
 
 // 暴露方法：收起指定节点
-const collapseNode = (nodeKey) => {
+const collapseNode = nodeKey => {
   if (treeRef.value) {
     treeRef.value.store.nodesMap[nodeKey]?.collapse()
   }
@@ -294,7 +312,7 @@ defineExpose({
 })
 
 // 监听搜索关键字
-watch(searchKeyword, (val) => {
+watch(searchKeyword, val => {
   handleSearch(val)
 })
 

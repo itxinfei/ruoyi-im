@@ -22,18 +22,30 @@
       />
       <div class="item-info">
         <div class="item-header">
-          <span class="item-name" v-html="highlightName"></span>
-          <span v-if="item.tag" class="item-tag">{{ item.tag }}</span>
+          <span
+            class="item-name"
+            v-html="highlightName"
+          />
+          <span
+            v-if="item.tag"
+            class="item-tag"
+          >{{ item.tag }}</span>
         </div>
-        <div class="item-desc" v-if="item.description || item.dept || item.position">
-            {{ item.description || item.position || item.dept }}
+        <div
+          v-if="item.description || item.dept || item.position"
+          class="item-desc"
+        >
+          {{ item.description || item.position || item.dept }}
         </div>
       </div>
     </div>
 
     <!-- 滑动操作菜单 (Mobile) -->
     <div class="swipe-actions">
-      <button class="action-btn delete" @click.stop="$emit('delete', item)">
+      <button
+        class="action-btn delete"
+        @click.stop="$emit('delete', item)"
+      >
         删除
       </button>
     </div>
@@ -69,12 +81,13 @@ const emit = defineEmits(['click', 'contextmenu', 'delete'])
 // 高亮显示搜索关键词（转义特殊字符）
 const highlightName = computed(() => {
   const name = props.item.name || props.item.displayName || ''
-  if (!props.searchQuery) return name
+  if (!props.searchQuery) {return name}
 
-  // 转义正则特殊字符
+  // 先转义 HTML 防止 XSS，再进行关键词高亮
+  const escapedName = escapeHtml(name)
   const escapedQuery = props.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const reg = new RegExp(`(${escapedQuery})`, 'gi')
-  return name.replace(reg, '<span class="highlight">$1</span>')
+  return escapedName.replace(reg, '<span class="highlight">$1</span>')
 })
 
 // ========== Touch Swipe Logic ==========
@@ -84,12 +97,12 @@ const touchStartX = ref(0)
 const touchStartY = ref(0)
 const isSwipedLeft = ref(false)
 
-const handleTouchStart = (e) => {
+const handleTouchStart = e => {
   touchStartX.value = e.touches[0].clientX
   touchStartY.value = e.touches[0].clientY
 }
 
-const handleTouchMove = (e) => {
+const handleTouchMove = e => {
   const deltaX = e.touches[0].clientX - touchStartX.value
   const deltaY = e.touches[0].clientY - touchStartY.value
 
@@ -104,7 +117,7 @@ const handleTouchEnd = () => {
 }
 
 // 防止 XSS 攻击：对用户输入进行转义
-const escapeHtml = (str) => {
+const escapeHtml = str => {
   const div = document.createElement('div')
   div.textContent = str
   return div.innerHTML

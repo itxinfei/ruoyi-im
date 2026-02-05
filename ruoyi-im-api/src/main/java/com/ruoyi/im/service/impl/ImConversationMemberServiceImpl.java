@@ -131,4 +131,14 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
         }
         conversationMemberMapper.updateLastReadMessageId(conversationId, userId, messageId);
     }
+
+    @Override
+    public List<Long> getUserConversationIds(Long userId) {
+        List<ImConversationMember> memberList = conversationMemberMapper.selectByUserId(userId);
+        List<Long> conversationIds = new ArrayList<>();
+        for (ImConversationMember member : memberList) {
+            conversationIds.add(member.getConversationId());
+        }
+        return conversationIds;
+    }
 }

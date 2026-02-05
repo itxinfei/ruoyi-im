@@ -1,28 +1,58 @@
 <template>
-  <div class="contact-detail-container" :class="{ 'is-empty': !contact }">
-    <Transition name="slide-fade" mode="out-in">
-      <div v-if="contact" :key="contact.id" class="detail-content custom-scrollbar">
+  <div
+    class="contact-detail-container"
+    :class="{ 'is-empty': !contact }"
+  >
+    <Transition
+      name="slide-fade"
+      mode="out-in"
+    >
+      <div
+        v-if="contact"
+        :key="contact.id"
+        class="detail-content custom-scrollbar"
+      >
         <!-- Header with Blur Background -->
         <div class="profile-header">
-          <div class="header-bg" :style="{ backgroundImage: `url(${getAvatar})` }"></div>
+          <div
+            class="header-bg"
+            :style="{ backgroundImage: `url(${getAvatar})` }"
+          >
+            <div class="header-overlay" />
+          </div>
           <div class="header-content">
             <div class="avatar-wrapper">
-              <el-avatar 
-                :size="120" 
-                :src="getAvatar" 
+              <el-avatar
+                :size="120"
+                :src="getAvatar"
                 :shape="isGroup ? 'square' : 'circle'"
                 class="main-avatar"
               >
                 {{ getName.charAt(0) }}
               </el-avatar>
-              <div v-if="!isGroup" class="status-dot" :class="{ online: contact.online }"></div>
+              <!-- 在线状态指示 - 增强版带呼吸灯效果 -->
+              <div
+                v-if="!isGroup"
+                class="status-indicator"
+                :class="{ online: contact.online }"
+              >
+                <div class="status-pulse" />
+                <div class="status-dot" />
+              </div>
             </div>
             
             <div class="user-identity">
-              <h2 class="display-name">{{ getName }}</h2>
-              <p class="signature">{{ getSignature }}</p>
+              <h2 class="display-name">
+                {{ getName }}
+              </h2>
+              <p class="signature">
+                {{ getSignature }}
+              </p>
               
-              <div class="tags-container" v-if="!isGroup">
+              <div
+                v-if="!isGroup"
+                class="tags-container"
+              >
                 <el-tag 
                   :type="contact.online ? 'success' : 'info'" 
                   effect="dark" 
@@ -48,7 +78,10 @@
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-          <div class="action-item" @click="startChat">
+          <div
+            class="action-item"
+            @click="startChat"
+          >
             <div class="icon-box primary">
               <el-icon><ChatDotRound /></el-icon>
             </div>
@@ -56,22 +89,34 @@
           </div>
 
           <template v-if="!isGroup">
-            <div class="action-item" @click="$emit('voice-call', contact)">
+            <div
+              class="action-item"
+              @click="$emit('voice-call', contact)"
+            >
               <div class="icon-box success">
                 <el-icon><Phone /></el-icon>
               </div>
               <span>语音通话</span>
             </div>
             
-            <div class="action-item" @click="$emit('video-call', contact)">
+            <div
+              class="action-item"
+              @click="$emit('video-call', contact)"
+            >
               <div class="icon-box warning">
                 <el-icon><VideoCamera /></el-icon>
               </div>
               <span>视频通话</span>
             </div>
 
-            <div class="action-item" @click="toggleFavorite">
-              <div class="icon-box star" :class="{ active: isFavorite }">
+            <div
+              class="action-item"
+              @click="toggleFavorite"
+            >
+              <div
+                class="icon-box star"
+                :class="{ active: isFavorite }"
+              >
                 <el-icon><component :is="isFavorite ? StarFilled : Star" /></el-icon>
               </div>
               <span>{{ isFavorite ? '已收藏' : '收藏' }}</span>
@@ -79,7 +124,10 @@
           </template>
 
           <template v-else>
-            <div class="action-item" @click="handleGroupConfig">
+            <div
+              class="action-item"
+              @click="handleGroupConfig"
+            >
               <div class="icon-box info">
                 <el-icon><Setting /></el-icon>
               </div>
@@ -92,79 +140,128 @@
         <div class="info-sections">
           <!-- Basic Info -->
           <div class="section-card">
-            <div class="card-title">基本信息</div>
+            <div class="card-title">
+              基本信息
+            </div>
             
             <div class="info-list">
-              <div class="info-item" v-if="!isGroup">
+              <div
+                v-if="!isGroup"
+                class="info-item"
+              >
                 <div class="label">
                   <el-icon><Iphone /></el-icon>
                   手机号码
                 </div>
-                <div class="value">{{ getPhone }}</div>
-                <el-button v-if="getPhone !== '-'" link type="primary" size="small" class="copy-btn" @click="copyText(getPhone)">
+                <div class="value">
+                  {{ getPhone }}
+                </div>
+                <el-button
+                  v-if="getPhone !== '-'"
+                  link
+                  type="primary"
+                  size="small"
+                  class="copy-btn"
+                  @click="copyText(getPhone)"
+                >
                   复制
                 </el-button>
               </div>
 
-              <div class="info-item" v-if="!isGroup">
+              <div
+                v-if="!isGroup"
+                class="info-item"
+              >
                 <div class="label">
                   <el-icon><Message /></el-icon>
                   电子邮箱
                 </div>
-                <div class="value">{{ getEmail }}</div>
+                <div class="value">
+                  {{ getEmail }}
+                </div>
               </div>
 
-              <div class="info-item" v-if="!isGroup">
+              <div
+                v-if="!isGroup"
+                class="info-item"
+              >
                 <div class="label">
                   <el-icon><Suitcase /></el-icon>
                   职位信息
                 </div>
-                <div class="value">{{ getPosition }}</div>
+                <div class="value">
+                  {{ getPosition }}
+                </div>
               </div>
 
-              <div class="info-item" v-if="isGroup">
+              <div
+                v-if="isGroup"
+                class="info-item"
+              >
                 <div class="label">
                   <el-icon><InfoFilled /></el-icon>
                   群公告
                 </div>
-                <div class="value announcement">{{ contact.notice || '暂无公告' }}</div>
+                <div class="value announcement">
+                  {{ contact.notice || '暂无公告' }}
+                </div>
               </div>
               
-              <div class="info-item" v-if="isGroup">
+              <div
+                v-if="isGroup"
+                class="info-item"
+              >
                 <div class="label">
                   <el-icon><User /></el-icon>
                   群主
                 </div>
-                <div class="value">{{ contact.ownerName || '-' }}</div>
+                <div class="value">
+                  {{ contact.ownerName || '-' }}
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Settings / Danger Zone -->
           <div class="section-card">
-            <div class="card-title">更多操作</div>
+            <div class="card-title">
+              更多操作
+            </div>
             <div class="action-list">
-              <div class="list-action-item" @click="handleEditRemark">
+              <div
+                class="list-action-item"
+                @click="handleEditRemark"
+              >
                 <div class="left">
                   <el-icon><Edit /></el-icon>
                   <span>修改备注</span>
                 </div>
-                <el-icon class="arrow"><ArrowRight /></el-icon>
+                <el-icon class="arrow">
+                  <ArrowRight />
+                </el-icon>
               </div>
               
-              <div class="list-action-item danger" @click="handleDeleteContact">
+              <div
+                class="list-action-item danger"
+                @click="handleDeleteContact"
+              >
                 <div class="left">
                   <el-icon><Delete /></el-icon>
                   <span>删除好友</span>
                 </div>
-                <el-icon class="arrow"><ArrowRight /></el-icon>
+                <el-icon class="arrow">
+                  <ArrowRight />
+                </el-icon>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div v-else class="empty-placeholder">
+      <div
+        v-else
+        class="empty-placeholder"
+      >
         <el-empty 
           description="选择联系人查看详情" 
           :image-size="200"
@@ -214,13 +311,13 @@ const showGroupSettings = ref(false)
 const isGroup = computed(() => props.contact?.isGroup || props.contact?.type === 'group')
 
 const getName = computed(() => {
-  if (!props.contact) return 'Unknown'
-  if (isGroup.value) return props.contact.name || props.contact.groupName || '未知群组'
+  if (!props.contact) {return 'Unknown'}
+  if (isGroup.value) {return props.contact.name || props.contact.groupName || '未知群组'}
   return props.contact.friendName || props.contact.nickname || props.contact.name || '未知用户'
 })
 
 const getAvatar = computed(() => {
-  if (!props.contact) return ''
+  if (!props.contact) {return ''}
   const src = isGroup.value 
     ? (props.contact.avatar || props.contact.groupAvatar)
     : (props.contact.headImg || props.contact.avatar)
@@ -235,7 +332,7 @@ const getSignature = computed(() => props.contact?.signature || props.contact?.s
 
 // Methods
 const checkFavoriteStatus = async () => {
-  if (!props.contact?.id || isGroup.value) return
+  if (!props.contact?.id || isGroup.value) {return}
   try {
     const res = await isFavorited(props.contact.id)
     isFavorite.value = res.code === 200 && res.data === true
@@ -254,7 +351,7 @@ const handleGroupConfig = () => {
 }
 
 const toggleFavorite = async () => {
-  if (!props.contact?.id) return
+  if (!props.contact?.id) {return}
   try {
     if (isFavorite.value) {
       await removeFavorite(props.contact.id)
@@ -270,7 +367,7 @@ const toggleFavorite = async () => {
   }
 }
 
-const copyText = async (text) => {
+const copyText = async text => {
   copyToClipboard(text, { successMsg: '复制成功', emptyValues: ['-'] })
 }
 
@@ -302,9 +399,11 @@ const handleDeleteContact = () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .contact-detail-container {
   height: 100%;
-  background-color: var(--el-bg-color-page);
+  background-color: var(--dt-bg-page);
   position: relative;
   overflow: hidden;
 
@@ -318,35 +417,41 @@ const handleDeleteContact = () => {
 .detail-content {
   height: 100%;
   overflow-y: auto;
-  padding-bottom: 40px;
+  padding-bottom: var(--dt-spacing-5xl);
 }
 
 .profile-header {
   position: relative;
-  padding-top: 60px;
-  margin-bottom: 24px;
-  background-color: var(--el-bg-color);
-  
+  padding-top: var(--dt-spacing-4xl);
+  margin-bottom: var(--dt-spacing-2xl);
+  background-color: var(--dt-bg-card);
+  overflow: hidden;
+
   .header-bg {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 160px;
+    height: 200px;
     background-size: cover;
     background-position: center;
-    filter: blur(20px);
-    opacity: 0.3;
+    filter: blur(30px) saturate(1.2);
+    opacity: 0.5;
     z-index: 0;
-    
-    &::after {
-      content: '';
+    transform: scale(1.1);
+
+    .header-overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, transparent, var(--el-bg-color));
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 40%,
+        var(--dt-bg-card) 100%
+      );
     }
   }
 
@@ -357,57 +462,82 @@ const handleDeleteContact = () => {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 0 24px;
-    
+    padding: 0 var(--dt-spacing-2xl);
+
     .avatar-wrapper {
       position: relative;
-      margin-bottom: 16px;
-      
+      margin-bottom: var(--dt-spacing-lg);
+
       .main-avatar {
-        border: 4px solid var(--el-bg-color);
+        border: 4px solid var(--dt-bg-card);
         box-shadow: var(--dt-shadow-dialog);
-        background: var(--el-color-primary-light-9);
-        color: var(--el-color-primary);
+        background: var(--dt-color-primary-light);
+        color: var(--dt-color-primary);
         font-size: 48px;
         font-weight: 600;
       }
-      
-      .status-dot {
+
+      .status-indicator {
         position: absolute;
-        bottom: 8px;
-        right: 8px;
-        width: 20px;
-        height: 20px;
-        border-radius: var(--dt-radius-full);
-        background-color: var(--el-color-info);
-        border: 3px solid var(--el-bg-color);
-        
-        &.online {
-          background-color: var(--el-color-success);
-          box-shadow: 0 0 0 2px rgba(var(--el-color-success-rgb), 0.2);
+        bottom: 6px;
+        right: 6px;
+        width: 24px;
+        height: 24px;
+
+        .status-pulse {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: var(--dt-radius-full);
+          background-color: var(--dt-color-success);
+          opacity: 0.3;
+          animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+
+          &.offline {
+            display: none;
+          }
+        }
+
+        .status-dot {
+          position: absolute;
+          bottom: 2px;
+          right: 2px;
+          width: 18px;
+          height: 18px;
+          border-radius: var(--dt-radius-full);
+          background-color: var(--dt-color-info);
+          border: 3px solid var(--dt-bg-card);
+          transition: all 0.3s;
+        }
+
+        &.online .status-dot {
+          background-color: var(--dt-color-success);
+          box-shadow: 0 0 0 3px var(--dt-bg-card), 0 0 12px var(--dt-color-success);
         }
       }
     }
-    
+
     .user-identity {
       .display-name {
-        margin: 0 0 8px;
+        margin: 0 0 var(--dt-spacing-md);
         font-size: 24px;
         font-weight: 700;
-        color: var(--el-text-color-primary);
+        color: var(--dt-color-text-primary);
       }
-      
+
       .signature {
-        margin: 0 0 16px;
-        color: var(--el-text-color-secondary);
+        margin: 0 0 var(--dt-spacing-lg);
+        color: var(--dt-color-text-secondary);
         font-size: 14px;
         max-width: 480px;
         line-height: 1.5;
       }
-      
+
       .tags-container {
         display: flex;
-        gap: 8px;
+        gap: var(--dt-spacing-md);
         justify-content: center;
       }
     }
@@ -417,19 +547,19 @@ const handleDeleteContact = () => {
 .quick-actions {
   display: flex;
   justify-content: center;
-  gap: 24px;
-  margin-bottom: 32px;
-  padding: 0 20px;
+  gap: var(--dt-spacing-2xl);
+  margin-bottom: var(--dt-spacing-4xl);
+  padding: 0 var(--dt-spacing-xl);
   flex-wrap: wrap;
-  
+
   .action-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: var(--dt-spacing-md);
     cursor: pointer;
     group: true;
-    
+
     .icon-box {
       width: 48px;
       height: 48px;
@@ -438,29 +568,49 @@ const handleDeleteContact = () => {
       align-items: center;
       justify-content: center;
       font-size: 24px;
-      background-color: var(--el-fill-color);
-      color: var(--el-text-color-regular);
+      background-color: var(--dt-bg-hover);
+      color: var(--dt-color-text-regular);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      
-      &.primary { &:hover { background-color: var(--el-color-primary); color: #fff; } }
-      &.success { &:hover { background-color: var(--el-color-success); color: #fff; } }
-      &.warning { &:hover { background-color: var(--el-color-warning); color: #fff; } }
-      &.info { &:hover { background-color: var(--el-color-info); color: #fff; } }
-      
+
+      &.primary {
+        &:hover {
+          background-color: var(--dt-color-primary);
+          color: #fff;
+        }
+      }
+      &.success {
+        &:hover {
+          background-color: var(--dt-color-success);
+          color: #fff;
+        }
+      }
+      &.warning {
+        &:hover {
+          background-color: var(--dt-color-warning);
+          color: #fff;
+        }
+      }
+      &.info {
+        &:hover {
+          background-color: var(--dt-color-info);
+          color: #fff;
+        }
+      }
+
       &.star.active {
-        background-color: var(--el-color-warning-light-9);
-        color: var(--el-color-warning);
+        background-color: var(--dt-color-warning-light);
+        color: var(--dt-color-warning);
       }
     }
-    
+
     span {
       font-size: 12px;
-      color: var(--el-text-color-secondary);
+      color: var(--dt-color-text-secondary);
       transition: color 0.2s;
     }
-    
+
     &:hover span {
-      color: var(--el-text-color-primary);
+      color: var(--dt-color-text-primary);
     }
   }
 }
@@ -468,34 +618,34 @@ const handleDeleteContact = () => {
 .info-sections {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--dt-spacing-xl);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--dt-spacing-2xl);
 }
 
 .section-card {
-  background-color: var(--el-bg-color);
+  background-color: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
-  padding: 20px;
+  padding: var(--dt-spacing-2xl);
   box-shadow: var(--dt-shadow-card);
-  
+
   .card-title {
     font-size: 16px;
     font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--el-text-color-primary);
+    margin-bottom: var(--dt-spacing-lg);
+    color: var(--dt-color-text-primary);
     display: flex;
     align-items: center;
-    
+
     &::before {
       content: '';
       display: block;
       width: 4px;
       height: 16px;
-      background-color: var(--el-color-primary);
+      background-color: var(--dt-color-primary);
       border-radius: var(--dt-radius-sm);
-      margin-right: 8px;
+      margin-right: var(--dt-spacing-md);
     }
   }
 }
@@ -503,38 +653,38 @@ const handleDeleteContact = () => {
 .info-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  
+  gap: var(--dt-spacing-lg);
+
   .info-item {
     display: flex;
     align-items: flex-start;
     font-size: 14px;
-    
+
     .label {
       width: 100px;
-      color: var(--el-text-color-secondary);
+      color: var(--dt-color-text-secondary);
       display: flex;
       align-items: center;
       gap: 6px;
       flex-shrink: 0;
     }
-    
+
     .value {
       flex: 1;
-      color: var(--el-text-color-regular);
+      color: var(--dt-color-text-regular);
       line-height: 1.5;
       word-break: break-all;
-      
+
       &.announcement {
         white-space: pre-wrap;
-        background-color: var(--el-fill-color-light);
-        padding: 8px 12px;
+        background-color: var(--dt-bg-hover);
+        padding: var(--dt-spacing-md) var(--dt-spacing-lg);
         border-radius: var(--dt-radius-md);
       }
     }
-    
+
     .copy-btn {
-      margin-left: 8px;
+      margin-left: var(--dt-spacing-md);
       padding: 0;
       height: auto;
     }
@@ -546,32 +696,32 @@ const handleDeleteContact = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
+    padding: var(--dt-spacing-lg) 0;
     cursor: pointer;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    border-bottom: 1px solid var(--dt-border-color-light);
     transition: background-color 0.2s;
-    
+
     &:last-child {
       border-bottom: none;
     }
-    
+
     .left {
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 14px;
-      color: var(--el-text-color-regular);
+      color: var(--dt-color-text-regular);
     }
-    
+
     .arrow {
-      color: var(--el-text-color-placeholder);
+      color: var(--dt-color-text-placeholder);
       font-size: 16px;
     }
-    
+
     &.danger {
-      .left { color: var(--el-color-danger); }
+      .left { color: var(--dt-color-danger); }
     }
-    
+
     &:hover {
       .left { opacity: 0.8; }
     }
@@ -583,18 +733,18 @@ const handleDeleteContact = () => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--el-text-color-placeholder);
-  
+  color: var(--dt-color-text-placeholder);
+
   .empty-illustration {
     width: 120px;
     height: 120px;
     border-radius: var(--dt-radius-full);
-    background-color: var(--el-fill-color);
+    background-color: var(--dt-bg-hover);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 48px;
-    color: var(--el-text-color-placeholder);
+    color: var(--dt-color-text-placeholder);
     margin: 0 auto;
   }
 }
@@ -625,10 +775,22 @@ const handleDeleteContact = () => {
   &::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: var(--dt-radius-sm);
-    
+
     &:hover {
       background-color: rgba(0, 0, 0, 0.2);
     }
+  }
+}
+
+// Breathing pulse animation
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
   }
 }
 </style>

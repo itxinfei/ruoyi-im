@@ -1,20 +1,30 @@
 <template>
   <div class="notification-settings">
-    <div class="setting-section">
+    <!-- 消息通知设置 -->
+    <section class="setting-section">
       <div class="section-header">
-        <h3 class="section-title">消息通知</h3>
-        <p class="section-desc">管理桌面通知、提示音和免打扰设置</p>
+        <div class="section-icon-wrapper bg-gradient-green">
+          <span class="material-icons-outlined">notifications</span>
+        </div>
+        <div class="section-title-group">
+          <h3 class="section-title">
+            消息通知
+          </h3>
+          <p class="section-desc">
+            配置新消息的提醒方式
+          </p>
+        </div>
       </div>
-
+      
       <div class="setting-card">
         <!-- 桌面通知 -->
         <div class="setting-item">
           <div class="item-main">
-            <div class="item-title">
-              <el-icon class="item-icon"><Bell /></el-icon>
-              桌面通知
+            <div class="item-label-row">
+              <span class="material-icons-outlined item-icon">desktop_windows</span>
+              <span class="item-label">桌面通知</span>
             </div>
-            <div class="item-desc">开启后将收到系统桌面通知</div>
+            <span class="item-desc">接收新消息时在桌面显示通知弹窗</span>
           </div>
           <div class="item-action">
             <el-switch 
@@ -25,42 +35,52 @@
           </div>
         </div>
 
-        <el-divider />
+        <el-divider class="item-divider" />
 
         <!-- 提示音 -->
         <div class="setting-item">
           <div class="item-main">
-            <div class="item-title">
-              <el-icon class="item-icon"><Headset /></el-icon>
-              提示音
+            <div class="item-label-row">
+              <span class="material-icons-outlined item-icon">volume_up</span>
+              <span class="item-label">提示音</span>
             </div>
-            <div class="item-desc">新消息到达时的声音提醒</div>
+            <span class="item-desc">新消息到达时播放声音提醒</span>
           </div>
-          <div class="item-action">
-            <div class="sound-controls">
-              <el-select
-                v-model="settings.soundType"
-                size="small"
-                style="width: 100px"
-                :disabled="!settings.enabled"
-                @change="handleSettingChange('soundType', $event)"
-              >
-                <el-option label="默认" value="default" />
-                <el-option label="清脆" value="light" />
-                <el-option label="柔和" value="soft" />
-              </el-select>
-              <el-button
-                v-if="settings.enabled"
-                circle
-                type="info"
-                link
-                size="small"
-                @click="testSound"
-                :loading="testingSound"
-              >
-                <el-icon><VideoPlay /></el-icon>
-              </el-button>
-            </div>
+          <div class="item-action action-group">
+            <el-select
+              v-model="settings.soundType"
+              size="small"
+              style="width: 90px"
+              :disabled="!settings.enabled || !settings.sound"
+              @change="handleSettingChange('soundType', $event)"
+            >
+              <el-option
+                label="默认"
+                value="default"
+              />
+              <el-option
+                label="清脆"
+                value="light"
+              />
+              <el-option
+                label="柔和"
+                value="soft"
+              />
+            </el-select>
+            <el-button
+              v-if="settings.enabled && settings.sound"
+              circle
+              type="info"
+              plain
+              size="small"
+              :loading="testingSound"
+              @click="testSound"
+            >
+              <span
+                class="material-icons-outlined"
+                style="font-size: 16px;"
+              >play_arrow</span>
+            </el-button>
             <el-switch 
               v-model="settings.sound" 
               :disabled="!settings.enabled" 
@@ -69,16 +89,16 @@
           </div>
         </div>
 
-        <el-divider />
+        <el-divider class="item-divider" />
 
         <!-- 弹窗预览 -->
         <div class="setting-item">
           <div class="item-main">
-            <div class="item-title">
-              <el-icon class="item-icon"><MessageBox /></el-icon>
-              弹窗预览
+            <div class="item-label-row">
+              <span class="material-icons-outlined item-icon">preview</span>
+              <span class="item-label">消息预览</span>
             </div>
-            <div class="item-desc">通知中显示消息内容预览</div>
+            <span class="item-desc">在通知中显示消息内容摘要</span>
           </div>
           <div class="item-action">
             <el-switch 
@@ -89,22 +109,32 @@
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="setting-section">
+    <!-- 免打扰设置 -->
+    <section class="setting-section">
       <div class="section-header">
-        <h3 class="section-title">免打扰设置</h3>
-        <p class="section-desc">设置自动免打扰时间段</p>
+        <div class="section-icon-wrapper bg-gradient-purple">
+          <span class="material-icons-outlined">do_not_disturb_on</span>
+        </div>
+        <div class="section-title-group">
+          <h3 class="section-title">
+            免打扰模式
+          </h3>
+          <p class="section-desc">
+            在指定时间段内自动静音
+          </p>
+        </div>
       </div>
-
+      
       <div class="setting-card">
         <div class="setting-item">
           <div class="item-main">
-            <div class="item-title">
-              <el-icon class="item-icon"><Mute /></el-icon>
-              自动免打扰
+            <div class="item-label-row">
+              <span class="material-icons-outlined item-icon">nightlight</span>
+              <span class="item-label">自动免打扰</span>
             </div>
-            <div class="item-desc">在指定时间段内自动静音</div>
+            <span class="item-desc">在设定的时间段内自动关闭通知</span>
           </div>
           <div class="item-action">
             <el-switch 
@@ -114,69 +144,92 @@
           </div>
         </div>
 
-        <div v-if="settings.dndEnabled" class="setting-sub-panel">
-          <div class="dnd-time-row">
-            <span class="dnd-label">生效时间段</span>
-            <div class="time-picker-group">
-              <el-time-picker
-                v-model="dndStartTime"
-                size="small"
-                placeholder="开始时间"
-                format="HH:mm"
-                style="width: 110px"
-                @change="handleDndTimeChange"
-                :disabled="saving"
-              />
-              <span class="time-separator">至</span>
-              <el-time-picker
-                v-model="dndEndTime"
-                size="small"
-                placeholder="结束时间"
-                format="HH:mm"
-                style="width: 110px"
-                @change="handleDndTimeChange"
-                :disabled="saving"
-              />
+        <Transition name="expand">
+          <div
+            v-if="settings.dndEnabled"
+            class="dnd-panel"
+          >
+            <div class="dnd-content">
+              <div class="time-row">
+                <span class="time-label">开始时间</span>
+                <el-time-picker
+                  v-model="dndStartTime"
+                  size="default"
+                  placeholder="开始时间"
+                  format="HH:mm"
+                  style="width: 120px"
+                  :disabled="saving"
+                  @change="handleDndTimeChange"
+                />
+              </div>
+              <div class="time-divider">
+                <span class="material-icons-outlined">arrow_forward</span>
+              </div>
+              <div class="time-row">
+                <span class="time-label">结束时间</span>
+                <el-time-picker
+                  v-model="dndEndTime"
+                  size="default"
+                  placeholder="结束时间"
+                  format="HH:mm"
+                  style="width: 120px"
+                  :disabled="saving"
+                  @change="handleDndTimeChange"
+                />
+              </div>
             </div>
           </div>
+        </Transition>
+      </div>
+    </section>
+
+    <!-- 快捷键设置 -->
+    <section class="setting-section">
+      <div class="section-header">
+        <div class="section-icon-wrapper bg-gradient-blue">
+          <span class="material-icons-outlined">keyboard</span>
+        </div>
+        <div class="section-title-group">
+          <h3 class="section-title">
+            快捷键
+          </h3>
+          <p class="section-desc">
+            设置发送消息的快捷键
+          </p>
         </div>
       </div>
-    </div>
-
-    <div class="setting-section">
-      <div class="section-header">
-        <h3 class="section-title">快捷键</h3>
-        <p class="section-desc">设置发送消息的快捷键方式</p>
-      </div>
-
+      
       <div class="setting-card">
         <div class="setting-item">
           <div class="item-main">
-            <div class="item-title">
-              <el-icon class="item-icon"><Promotion /></el-icon>
-              发送消息
+            <div class="item-label-row">
+              <span class="material-icons-outlined item-icon">send</span>
+              <span class="item-label">发送消息</span>
             </div>
-            <div class="item-desc">聊天窗口发送消息的快捷键</div>
+            <span class="item-desc">选择发送消息的快捷键组合</span>
           </div>
           <div class="item-action">
-            <el-select 
+            <el-radio-group 
               v-model="settings.send" 
-              style="width: 140px" 
+              size="small"
               @change="handleSettingChange('send', $event)"
             >
-              <el-option label="Enter" value="enter" />
-              <el-option label="Ctrl + Enter" value="ctrl-enter" />
-            </el-select>
+              <el-radio-button label="enter">
+                <span class="kbd">Enter</span>
+              </el-radio-button>
+              <el-radio-button label="ctrl-enter">
+                <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span>
+              </el-radio-button>
+            </el-radio-group>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { reactive, watch, ref, onMounted } from 'vue'
-import { Bell, Headset, MessageBox, Mute, Promotion, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getNotificationSetting, updateNotificationSetting } from '@/api/im/notificationSetting'
 
@@ -201,25 +254,23 @@ const settings = reactive({
   send: 'enter'
 })
 
-// 免打扰时间（用于时间选择器）
+// 免打扰时间
 const dndStartTime = ref(null)
 const dndEndTime = ref(null)
 
 // 加载状态
 const saving = ref(false)
 const testingSound = ref(false)
+const saveTimer = ref(null)
 
-// 初始化
 onMounted(async () => {
   await loadSettings()
 })
 
-// 加载设置
 const loadSettings = async () => {
   try {
     const res = await getNotificationSetting()
     if (res.code === 200 && res.data) {
-      // 合并后端设置到本地状态
       Object.assign(settings, {
         enabled: res.data.enabled === 1,
         sound: res.data.soundEnabled === 1,
@@ -230,18 +281,15 @@ const loadSettings = async () => {
         dndEnd: res.data.dndEndTime || '08:00'
       })
       
-      // 初始化时间选择器
       if (res.data.dndEnabled === 1) {
         initDndTime()
       }
     }
   } catch (error) {
     console.error('加载通知设置失败:', error)
-    ElMessage.error('加载设置失败')
   }
 }
 
-// 初始化免打扰时间
 const initDndTime = () => {
   const now = new Date()
   const [startHours, startMinutes] = settings.dndStart.split(':').map(Number)
@@ -251,27 +299,19 @@ const initDndTime = () => {
   dndEndTime.value = new Date(2000, 0, 1, endHours, endMinutes, 0)
 }
 
-// 防抖定时器（必须在 handleSettingChange 之前声明）
-const saveTimer = ref(null)
-
-// 处理设置变更
 const handleSettingChange = async (key, value) => {
-  // 更新本地状态
   settings[key] = value
 
-  // 如果开启了免打扰，初始化时间
   if (key === 'dndEnabled' && value) {
     initDndTime()
   }
 
-  // 防抖保存到后端
-  if (saveTimer.value) clearTimeout(saveTimer.value)
+  if (saveTimer.value) {clearTimeout(saveTimer.value)}
   saveTimer.value = setTimeout(async () => {
     await saveSettings()
   }, 500)
 }
 
-// 处理免打扰时间变更
 const handleDndTimeChange = () => {
   if (dndStartTime.value && dndEndTime.value) {
     const startHours = dndStartTime.value.getHours().toString().padStart(2, '0')
@@ -287,12 +327,10 @@ const handleDndTimeChange = () => {
   }
 }
 
-// 保存设置到后端
 const saveSettings = async () => {
   try {
     saving.value = true
     
-    // 转换为后端格式
     const backendData = {
       enabled: settings.enabled ? 1 : 0,
       desktopNotification: settings.enabled ? 1 : 0,
@@ -310,8 +348,6 @@ const saveSettings = async () => {
     if (res.code === 200) {
       ElMessage.success('设置已保存')
       emit('change')
-    } else {
-      ElMessage.error('保存失败: ' + (res.msg || '未知错误'))
     }
   } catch (error) {
     console.error('保存设置失败:', error)
@@ -321,7 +357,6 @@ const saveSettings = async () => {
   }
 }
 
-// 测试提示音
 const testSound = async () => {
   try {
     testingSound.value = true
@@ -331,13 +366,12 @@ const testSound = async () => {
       testingSound.value = false
     }, 1000)
   } catch (error) {
-    console.error('播放提示音失败:', error)
+    testingSound.value = false
     ElMessage.error('播放失败')
   }
 }
 
-// 监听 props 变化
-watch(() => props.modelValue, (newVal) => {
+watch(() => props.modelValue, newVal => {
   if (JSON.stringify(newVal) !== JSON.stringify(settings)) {
     Object.assign(settings, JSON.parse(JSON.stringify(newVal)))
   }
@@ -346,12 +380,11 @@ watch(() => props.modelValue, (newVal) => {
 
 <style scoped lang="scss">
 .notification-settings {
-  padding: 0;
-  box-sizing: border-box;
+  max-width: 720px;
 }
 
 .setting-section {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   
   &:last-child {
     margin-bottom: 0;
@@ -359,27 +392,65 @@ watch(() => props.modelValue, (newVal) => {
 }
 
 .section-header {
-  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.section-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--dt-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
-  .section-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-color-primary, #333);
-    margin: 0 0 4px 0;
+  span {
+    font-size: 24px;
+    color: white;
   }
   
-  .section-desc {
-    font-size: 12px;
-    color: var(--text-color-secondary, #909399);
-    margin: 0;
+  &.bg-gradient-green {
+    background: linear-gradient(135deg, #52c41a 0%, #95de64 100%);
+  }
+  
+  &.bg-gradient-purple {
+    background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);
+  }
+  
+  &.bg-gradient-blue {
+    background: linear-gradient(135deg, #1890ff 0%, #69c0ff 100%);
   }
 }
 
+.section-title-group {
+  flex: 1;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: var(--dt-font-weight-semibold);
+  color: var(--dt-text-primary);
+  margin: 0 0 4px 0;
+}
+
+.section-desc {
+  font-size: 13px;
+  color: var(--dt-text-secondary);
+  margin: 0;
+}
+
 .setting-card {
-  background: var(--bg-color-overlay, #fff);
-  border: 1px solid var(--border-color-light, #e4e7ed);
-  border-radius: var(--dt-radius-md);
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
+}
+
+.item-divider {
+  margin: 0;
+  border-color: var(--dt-border-light);
 }
 
 .setting-item {
@@ -390,7 +461,7 @@ watch(() => props.modelValue, (newVal) => {
   transition: background-color 0.2s;
   
   &:hover {
-    background-color: var(--bg-color-hover, #f5f7fa);
+    background-color: var(--dt-bg-hover);
   }
 }
 
@@ -399,73 +470,125 @@ watch(() => props.modelValue, (newVal) => {
   margin-right: 20px;
 }
 
-.item-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-color-primary, #303133);
-  margin-bottom: 4px;
+.item-label-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  
-  .item-icon {
-    font-size: 16px;
-    color: var(--text-color-secondary, #909399);
-  }
+  margin-bottom: 4px;
+}
+
+.item-label {
+  font-size: 14px;
+  font-weight: var(--dt-font-weight-medium);
+  color: var(--dt-text-primary);
+}
+
+.item-icon {
+  font-size: 20px;
+  color: var(--dt-text-secondary);
 }
 
 .item-desc {
   font-size: 12px;
-  color: var(--text-color-secondary, #909399);
-  line-height: 1.4;
-  margin-left: 24px;
+  color: var(--dt-text-secondary);
+  padding-left: 28px;
 }
 
 .item-action {
   display: flex;
   align-items: center;
   gap: 12px;
+  
+  &.action-group {
+    gap: 8px;
+  }
 }
 
-.sound-controls {
+// 免打扰面板
+.dnd-panel {
+  background: var(--dt-bg-page);
+  border-top: 1px solid var(--dt-border-light);
+  padding: 20px;
+}
+
+.dnd-content {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.time-row {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
 }
 
-.setting-sub-panel {
-  padding: 12px 20px;
-  background-color: var(--bg-color-page, #f5f7fa);
-  border-top: 1px solid var(--border-color-light, #e4e7ed);
-  margin-left: 20px;
-  margin-right: 20px;
-  margin-bottom: 16px;
-  border-radius: var(--dt-radius-md);
+.time-label {
+  font-size: 12px;
+  color: var(--dt-text-secondary);
 }
 
-.dnd-time-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.time-divider {
+  color: var(--dt-text-tertiary);
+  
+  span {
+    font-size: 20px;
+  }
 }
 
-.dnd-label {
-  font-size: 13px;
-  color: var(--text-color-regular, #606266);
+// 键盘按键样式
+.kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--dt-bg-hover);
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-sm);
+  box-shadow: 0 1px 0 var(--dt-border-color);
 }
 
-.time-picker-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+// 展开动画
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  max-height: 200px;
+  opacity: 1;
 }
 
-.time-separator {
-  color: var(--text-color-secondary, #909399);
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
 }
 
-:deep(.el-divider) {
-  margin: 0;
-  border-color: var(--border-color-lighter, #ebeef5);
+// 暗黑模式适配
+.dark {
+  .setting-card {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+  
+  .item-divider {
+    border-color: var(--dt-border-dark);
+  }
+  
+  .setting-item:hover {
+    background-color: var(--dt-bg-hover-dark);
+  }
+  
+  .dnd-panel {
+    background: var(--dt-bg-body-dark);
+    border-color: var(--dt-border-dark);
+  }
+  
+  .kbd {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+    box-shadow: 0 1px 0 var(--dt-border-dark);
+  }
 }
 </style>

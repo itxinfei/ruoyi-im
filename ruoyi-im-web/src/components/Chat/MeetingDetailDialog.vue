@@ -5,15 +5,23 @@
     width="500px"
     @close="handleClose"
   >
-    <div v-if="meeting" class="meeting-detail">
+    <div
+      v-if="meeting"
+      class="meeting-detail"
+    >
       <!-- 状态标签 -->
-      <div class="status-badge" :class="statusClass">
+      <div
+        class="status-badge"
+        :class="statusClass"
+      >
         {{ statusText }}
       </div>
 
       <!-- 会议信息 -->
       <div class="detail-section">
-        <div class="section-title">会议信息</div>
+        <div class="section-title">
+          会议信息
+        </div>
         <div class="info-list">
           <div class="info-item">
             <span class="material-icons-outlined info-icon">person</span>
@@ -29,7 +37,10 @@
               <span class="info-value">{{ formatFullTime(meeting.scheduledStartTime) }}</span>
             </div>
           </div>
-          <div v-if="meeting.scheduledEndTime" class="info-item">
+          <div
+            v-if="meeting.scheduledEndTime"
+            class="info-item"
+          >
             <span class="material-icons-outlined info-icon">access_time</span>
             <div class="info-content">
               <span class="info-label">结束时间</span>
@@ -43,7 +54,10 @@
               <span class="info-value">{{ meeting.roomId || '-' }}</span>
             </div>
           </div>
-          <div v-if="meeting.password" class="info-item">
+          <div
+            v-if="meeting.password"
+            class="info-item"
+          >
             <span class="material-icons-outlined info-icon">lock</span>
             <div class="info-content">
               <span class="info-label">会议密码</span>
@@ -54,9 +68,16 @@
       </div>
 
       <!-- 会议描述 -->
-      <div v-if="meeting.description" class="detail-section">
-        <div class="section-title">会议描述</div>
-        <div class="description">{{ meeting.description }}</div>
+      <div
+        v-if="meeting.description"
+        class="detail-section"
+      >
+        <div class="section-title">
+          会议描述
+        </div>
+        <div class="description">
+          {{ meeting.description }}
+        </div>
       </div>
 
       <!-- 参会人员 -->
@@ -79,14 +100,22 @@
               shape="square"
             />
             <span class="participant-name">{{ participant.name }}</span>
-            <el-tag v-if="participant.role === 'HOST'" size="small" type="warning">主持人</el-tag>
+            <el-tag
+              v-if="participant.role === 'HOST'"
+              size="small"
+              type="warning"
+            >
+              主持人
+            </el-tag>
           </div>
         </div>
       </div>
     </div>
 
     <template #footer>
-      <el-button @click="handleClose">关闭</el-button>
+      <el-button @click="handleClose">
+        关闭
+      </el-button>
       <el-button
         v-if="meeting?.status === 'IN_PROGRESS'"
         type="primary"
@@ -121,7 +150,7 @@ const emit = defineEmits(['update:modelValue', 'join', 'start'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const participants = ref([])
@@ -150,8 +179,8 @@ const participantCount = computed(() => {
   return props.meeting?.participantCount || participants.value.length || 0
 })
 
-const formatFullTime = (time) => {
-  if (!time) return '-'
+const formatFullTime = time => {
+  if (!time) {return '-'}
   const date = new Date(time)
   return date.toLocaleString('zh-CN', {
     year: 'numeric',
@@ -176,7 +205,7 @@ const handleStart = () => {
   visible.value = false
 }
 
-watch(() => props.meeting, (newMeeting) => {
+watch(() => props.meeting, newMeeting => {
   if (newMeeting?.participants) {
     participants.value = newMeeting.participants
   }

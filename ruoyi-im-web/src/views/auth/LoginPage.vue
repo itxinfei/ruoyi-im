@@ -3,9 +3,9 @@
     <!-- 背景装饰 -->
     <div class="bg-decoration">
       <div class="bg-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
+        <div class="shape shape-1" />
+        <div class="shape shape-2" />
+        <div class="shape shape-3" />
       </div>
     </div>
 
@@ -18,8 +18,12 @@
             <div class="logo">
               <span class="material-icons-outlined logo-icon">forum</span>
             </div>
-            <h1 class="app-name">IM</h1>
-            <p class="app-desc">企业即时通讯</p>
+            <h1 class="app-name">
+              IM
+            </h1>
+            <p class="app-desc">
+              企业即时通讯
+            </p>
           </div>
           <div class="features">
             <div class="feature-item">
@@ -54,8 +58,12 @@
         </div>
 
         <div class="login-header">
-          <h2 class="welcome-title">登录</h2>
-          <p class="welcome-subtitle">欢迎回到企业即时通讯平台</p>
+          <h2 class="welcome-title">
+            登录
+          </h2>
+          <p class="welcome-subtitle">
+            欢迎回到企业即时通讯平台
+          </p>
         </div>
 
         <!-- 登录方式切换 -->
@@ -116,7 +124,11 @@
               <el-checkbox v-model="loginForm.rememberMe">
                 <span class="checkbox-label">记住我</span>
               </el-checkbox>
-              <el-link type="primary" underline="never" @click="handleForgotPassword">
+              <el-link
+                type="primary"
+                underline="never"
+                @click="handleForgotPassword"
+              >
                 忘记密码？
               </el-link>
             </div>
@@ -155,9 +167,9 @@
                 />
                 <el-button
                   :disabled="smsCountdown > 0"
-                  @click="sendSMSCode"
                   class="code-btn"
                   :class="{ counting: smsCountdown > 0 }"
+                  @click="sendSMSCode"
                 >
                   {{ smsCountdown > 0 ? `${smsCountdown}s 后重新获取` : '获取验证码' }}
                 </el-button>
@@ -186,19 +198,46 @@
               <span>其他登录方式</span>
             </div>
             <div class="third-party-icons">
-              <button class="third-party-btn wechat" title="微信登录">
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 01.598.082l1.584.926a.272.272 0 00.14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 01-.023-.156.49.49 0 01.201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.969-.982z"/>
+              <button
+                class="third-party-btn wechat"
+                title="微信登录"
+              >
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 01.598.082l1.584.926a.272.272 0 00.14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 01-.023-.156.49.49 0 01.201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.969-.982z"
+                  />
                 </svg>
               </button>
-              <button class="third-party-btn dingtalk" title="钉钉登录">
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              <button
+                class="third-party-btn dingtalk"
+                title="钉钉登录"
+              >
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+                  />
                 </svg>
               </button>
-              <button class="third-party-btn feishu" title="飞书登录">
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4H6v-2h4V7h2v4h4v2h-4v4z"/>
+              <button
+                class="third-party-btn feishu"
+                title="飞书登录"
+              >
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4H6v-2h4V7h2v4h4v2h-4v4z"
+                  />
                 </svg>
               </button>
             </div>
@@ -272,7 +311,7 @@ const smsRules = {
 }
 
 // 切换登录类型
-const switchLoginType = (type) => {
+const switchLoginType = type => {
   loginType.value = type
   if (type === 'password') {
     smsFormRef.value?.clearValidate()
@@ -335,7 +374,7 @@ const handleLogin = async () => {
   const formRef = loginType.value === 'password' ? loginFormRef.value : smsFormRef.value
   const formData = loginType.value === 'password' ? loginForm : smsForm
 
-  if (!formRef) return
+  if (!formRef) {return}
 
   try {
     await formRef.validate()

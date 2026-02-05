@@ -15,7 +15,7 @@ export function useMessageReaction(props, emit) {
 
   // 消息的表情回应（按表情分组）
   const messageReactions = computed(() => {
-    if (!props.message?.reactions) return []
+    if (!props.message?.reactions) {return []}
 
     const currentUser = store.getters['user/currentUser']
     const reactions = {}
@@ -41,7 +41,7 @@ export function useMessageReaction(props, emit) {
   const hasReactions = computed(() => messageReactions.value.length > 0)
 
   // 检查是否对某个表情回复过
-  const hasReacted = (emoji) => {
+  const hasReacted = emoji => {
     const currentUser = store.getters['user/currentUser']
     return props.message?.reactions?.some(
       r => r.emoji === emoji && r.userId === currentUser?.id
@@ -51,8 +51,8 @@ export function useMessageReaction(props, emit) {
   // ==================== 表情操作 ====================
 
   // 切换表情回应
-  const toggleReaction = async (emoji) => {
-    if (isReacting.value) return
+  const toggleReaction = async emoji => {
+    if (isReacting.value) {return}
 
     const alreadyReacted = hasReacted(emoji)
 
@@ -91,7 +91,7 @@ export function useMessageReaction(props, emit) {
   }
 
   // 添加表情（从AI表情面板）
-  const addReaction = async (emoji) => {
+  const addReaction = async emoji => {
     if (hasReacted(emoji)) {
       ElMessage.warning('已经表达过这个表情了')
       return

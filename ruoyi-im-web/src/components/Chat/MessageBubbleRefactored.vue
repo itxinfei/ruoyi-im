@@ -107,7 +107,10 @@
         />
 
         <!-- 未知消息类型 -->
-        <span v-else class="unknown-type">[{{ message.type }}]</span>
+        <span
+          v-else
+          class="unknown-type"
+        >[{{ message.type }}]</span>
       </div>
 
       <!-- 状态指示器 -->
@@ -128,15 +131,15 @@
     </div>
   </div>
 
-    <!-- 右键菜单 -->
-    <ContextMenu
-      :show="contextMenuVisible"
-      :x="contextMenuX"
-      :y="contextMenuY"
-      :items="contextMenuItems"
-      @select="handleContextMenuSelect"
-      @update:show="contextMenuVisible = $event"
-    />
+  <!-- 右键菜单 -->
+  <ContextMenu
+    :show="contextMenuVisible"
+    :x="contextMenuX"
+    :y="contextMenuY"
+    :items="contextMenuItems"
+    @select="handleContextMenuSelect"
+    @update:show="contextMenuVisible = $event"
+  />
 
   <!-- AI表情表态浮窗 -->
   <AiEmojiReaction
@@ -240,7 +243,7 @@ const showAiEmojiPanel = ref(false)
 const aiEmojiPosition = ref({ x: 0, y: 0 })
 const showReadInfoDialog = ref(false)
 
-const handleAiEmojiSelect = (emoji) => {
+const handleAiEmojiSelect = emoji => {
   addReaction(emoji)
 }
 
@@ -347,14 +350,14 @@ const contextMenuItems = computed(() => {
 })
 
 // 处理右键菜单触发
-const handleContextMenu = (e) => {
+const handleContextMenu = e => {
   contextMenuX.value = e.clientX
   contextMenuY.value = e.clientY
   contextMenuVisible.value = true
 }
 
 // 处理右键菜单选择
-const handleContextMenuSelect = (item) => {
+const handleContextMenuSelect = item => {
   handleCommand(item.value, props.message)
   contextMenuVisible.value = false
 }
@@ -362,7 +365,7 @@ const handleContextMenuSelect = (item) => {
 /**
  * 显示已读详情
  */
-const handleShowReadInfo = (readInfo) => {
+const handleShowReadInfo = readInfo => {
   // 如果没有 readBy 数据，尝试获取（这里简化处理，实际应该从 store 获取）
   if (!readInfo.readBy || readInfo.readBy.length === 0) {
     // 显示空状态或跳过
@@ -391,7 +394,7 @@ const handleCombineClick = () => {
 
 // 处理长按事件，显示AI表情面板
 const originalHandleTouchStart = handleTouchStart
-const enhancedHandleTouchStart = (e) => {
+const enhancedHandleTouchStart = e => {
   originalHandleTouchStart(e)
   // 长按后显示AI表情面板
   setTimeout(() => {

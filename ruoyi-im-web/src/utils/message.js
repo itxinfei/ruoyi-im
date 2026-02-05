@@ -24,7 +24,7 @@ export const MessageStatus = {
 export function formatMessagePreview(type, content) {
     // 统一转为大写，兼容后端可能返回的小写类型
     type = (type || '').toUpperCase()
-    if (!content && type !== 'RECALLED') return '[暂无消息]'
+    if (!content && type !== 'RECALLED') {return '[暂无消息]'}
 
     switch (type) {
         case 'TEXT':
@@ -66,7 +66,7 @@ export function formatMessagePreview(type, content) {
                 if (typeof content === 'string') {
                     if (content.startsWith('http')) {
                         // 可能是图片或文件URL
-                        if (/\.(jpg|jpeg|png|gif|webp)$/i.test(content)) return '[图片]'
+                        if (/\.(jpg|jpeg|png|gif|webp)$/i.test(content)) {return '[图片]'}
                         return '[文件]'
                     }
                     // 纯文本
@@ -74,8 +74,8 @@ export function formatMessagePreview(type, content) {
                 }
                 // 对象类型
                 if (typeof content === 'object') {
-                    if (content.fileName || content.name) return `[文件] ${content.fileName || content.name}`
-                    if (content.imageUrl || content.fileUrl) return '[图片]'
+                    if (content.fileName || content.name) {return `[文件] ${content.fileName || content.name}`}
+                    if (content.imageUrl || content.fileUrl) {return '[图片]'}
                 }
             }
             return type ? `[${type}]` : '[消息]'
@@ -88,7 +88,7 @@ export function formatMessagePreview(type, content) {
  * @returns {String} 格式化后的预览文本
  */
 export function formatMessagePreviewFromObject(message) {
-    if (!message) return '[空消息]'
+    if (!message) {return '[空消息]'}
 
     // 如果已经是字符串（已格式化），直接返回
     if (typeof message === 'string') {
@@ -221,10 +221,10 @@ export function formatRelativeTime(timestamp) {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return '刚刚'
-    if (diffMins < 60) return `${diffMins}分钟前`
-    if (diffHours < 24) return `${diffHours}小时前`
-    if (diffDays < 7) return `${diffDays}天前`
+    if (diffMins < 1) {return '刚刚'}
+    if (diffMins < 60) {return `${diffMins}分钟前`}
+    if (diffHours < 24) {return `${diffHours}小时前`}
+    if (diffDays < 7) {return `${diffDays}天前`}
 
     // 超过7天显示具体日期
     const month = date.getMonth() + 1
@@ -238,7 +238,7 @@ export function formatRelativeTime(timestamp) {
  * @returns {Object|String} 解析后的内容
  */
 export function parseMessageContent(message) {
-    if (!message || !message.content) return {}
+    if (!message || !message.content) {return {}}
 
     // 如果是文本消息，直接返回
     if (message.type === 'TEXT') {
@@ -261,10 +261,10 @@ export function parseMessageContent(message) {
  * @returns {Object} 解析后的对象
  */
 export function parseContentString(content) {
-    if (!content) return {}
+    if (!content) {return {}}
 
     // 如果已经是对象，直接返回
-    if (typeof content === 'object') return content
+    if (typeof content === 'object') {return content}
 
     // 尝试解析JSON字符串
     try {

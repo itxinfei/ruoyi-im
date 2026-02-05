@@ -22,7 +22,7 @@ export function confirm(message, title = '提示', confirmText = '确定', cance
     cancelButtonText: cancelText,
     type,
     distinguishCancelAndClose: true
-  }).then(() => true).catch((action) => {
+  }).then(() => true).catch(action => {
     // action: 'cancel' | 'close'
     return false
   })

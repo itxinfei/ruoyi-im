@@ -2,8 +2,15 @@
   <div class="admin-action-bar">
     <!-- 左侧：标题和描述 -->
     <div class="action-bar-left">
-      <h2 class="action-title">{{ title }}</h2>
-      <p v-if="description" class="action-desc">{{ description }}</p>
+      <h2 class="action-title">
+        {{ title }}
+      </h2>
+      <p
+        v-if="description"
+        class="action-desc"
+      >
+        {{ description }}
+      </p>
     </div>
 
     <!-- 右侧：操作按钮组 -->
@@ -34,10 +41,16 @@
       </el-button>
 
       <!-- 更多操作下拉菜单 -->
-      <el-dropdown v-if="moreActions.length > 0" trigger="click" @command="handleMoreAction">
+      <el-dropdown
+        v-if="moreActions.length > 0"
+        trigger="click"
+        @command="handleMoreAction"
+      >
         <el-button text>
           更多
-          <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          <el-icon class="el-icon--right">
+            <ArrowDown />
+          </el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
@@ -60,10 +73,20 @@
   </div>
 
   <!-- 统计信息栏（可选） -->
-  <div v-if="stats" class="action-stats">
-    <div class="stat-item" v-for="(stat, key) in stats" :key="key">
+  <div
+    v-if="stats"
+    class="action-stats"
+  >
+    <div
+      v-for="(stat, key) in stats"
+      :key="key"
+      class="stat-item"
+    >
       <span class="stat-label">{{ stat.label }}:</span>
-      <span class="stat-value" :class="stat.color">{{ stat.value }}</span>
+      <span
+        class="stat-value"
+        :class="stat.color"
+      >{{ stat.value }}</span>
     </div>
   </div>
 </template>
@@ -131,12 +154,12 @@ const props = defineProps({
 const emit = defineEmits(['action'])
 
 // 处理主要/次要操作
-const handleAction = (action) => {
+const handleAction = action => {
   emit('action', action.key, action)
 }
 
 // 处理更多操作
-const handleMoreAction = (key) => {
+const handleMoreAction = key => {
   const action = props.moreActions.find(a => a.key === key)
   if (action) {
     emit('action', key, action)

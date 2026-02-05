@@ -61,7 +61,7 @@ function charToFirstLetter(char) {
  * @returns {string} 拼音首字母字符串
  */
 export function getFirstLetter(str) {
-  if (!str) return ''
+  if (!str) {return ''}
   return Array.from(str)
     .map(char => charToFirstLetter(char))
     .join('')
@@ -75,7 +75,7 @@ export function getFirstLetter(str) {
  * @returns {Object} { matched, pinyin }
  */
 export function matchPinyin(text, keyword) {
-  if (!text || !keyword) return { matched: false, pinyin: '' }
+  if (!text || !keyword) {return { matched: false, pinyin: '' }}
 
   const textLower = text.toLowerCase()
   const keywordLower = keyword.toLowerCase()
@@ -100,7 +100,7 @@ export function matchPinyin(text, keyword) {
  * @returns {Array<string>} 拼音首字母数组
  */
 export function batchGetFirstLetter(strings) {
-  if (!Array.isArray(strings)) return []
+  if (!Array.isArray(strings)) {return []}
   return strings.map(str => getFirstLetter(str))
 }
 

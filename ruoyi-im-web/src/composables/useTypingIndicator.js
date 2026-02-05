@@ -36,7 +36,7 @@ export function useTypingIndicator(options = {}) {
   // 内部计时器存储
   const typingTimers = {} // userId -> timerId
   let sendTypingTimer = null
-  let lastTypingSendTime = 0
+  const lastTypingSendTime = 0
 
   /**
    * 添加正在输入的用户
@@ -65,7 +65,7 @@ export function useTypingIndicator(options = {}) {
    * 移除正在输入的用户
    * @param {string} userId - 用户ID
    */
-  const removeTypingUser = (userId) => {
+  const removeTypingUser = userId => {
     const index = typingUsers.value.findIndex(u => u.userId === userId)
     if (index !== -1) {
       typingUsers.value.splice(index, 1)
@@ -86,7 +86,7 @@ export function useTypingIndicator(options = {}) {
    */
   const sendMyTypingStatus = () => {
     // 只在单聊时发送输入状态
-    if (!sessionId.value) return
+    if (!sessionId.value) {return}
 
     // 清除之前的定时器
     if (sendTypingTimer) {
@@ -105,7 +105,7 @@ export function useTypingIndicator(options = {}) {
    * 发送停止输入状态
    */
   const sendMyStopTypingStatus = () => {
-    if (!sessionId.value) return
+    if (!sessionId.value) {return}
 
     if (sendTypingTimer) {
       clearTimeout(sendTypingTimer)
@@ -121,7 +121,7 @@ export function useTypingIndicator(options = {}) {
    * 处理输入事件（带输入内容判断）
    * @param {string} content - 输入内容
    */
-  const handleInput = (content) => {
+  const handleInput = content => {
     if (content && content.trim().length > 0) {
       sendMyTypingStatus()
     } else {
@@ -133,10 +133,10 @@ export function useTypingIndicator(options = {}) {
    * 处理来自 WebSocket 的输入事件
    * @param {Object} data - 事件数据 { conversationId, userId, userName }
    */
-  const handleTypingEvent = (data) => {
+  const handleTypingEvent = data => {
     // 过滤：不是当前会话或自己发出的
-    if (data.conversationId !== sessionId.value) return
-    if (data.userId === currentUser.value?.id) return
+    if (data.conversationId !== sessionId.value) {return}
+    if (data.userId === currentUser.value?.id) {return}
 
     addTypingUser(data.userId, data.userName || data.senderName)
   }

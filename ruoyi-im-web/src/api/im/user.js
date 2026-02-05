@@ -167,3 +167,16 @@ export function scanQRCode(qrData) {
     data: { qrData }
   })
 }
+
+/**
+ * 获取所有用户列表
+ * @param {string} keyword - 可选，搜索关键词
+ * @returns {Promise}
+ */
+export function getAllUsers(keyword) {
+  return request({
+    url: '/api/im/user/list',
+    method: 'get',
+    params: { keyword }
+  })
+}

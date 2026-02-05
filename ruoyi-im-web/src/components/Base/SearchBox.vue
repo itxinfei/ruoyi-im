@@ -9,11 +9,21 @@
     }"
   >
     <!-- 搜索输入框容器 -->
-    <div class="search-input-container" @click="focusInput">
+    <div
+      class="search-input-container"
+      @click="focusInput"
+    >
       <!-- 前缀图标 -->
       <div class="prefix-icon">
-        <el-icon v-if="loading" class="is-loading"><Loading /></el-icon>
-        <el-icon v-else><Search /></el-icon>
+        <el-icon
+          v-if="loading"
+          class="is-loading"
+        >
+          <Loading />
+        </el-icon>
+        <el-icon v-else>
+          <Search />
+        </el-icon>
       </div>
       
       <!-- 输入框 -->
@@ -28,7 +38,7 @@
         @blur="handleBlur"
         @input="handleInput"
         @keydown="handleKeyDown"
-      />
+      >
       
       <!-- 清除按钮 -->
       <transition name="fade-scale">
@@ -64,7 +74,10 @@
       </button>
       
       <!-- 后缀插槽 -->
-      <div v-if="$slots.suffix" class="suffix-slot">
+      <div
+        v-if="$slots.suffix"
+        class="suffix-slot"
+      >
         <slot name="suffix" />
       </div>
     </div>
@@ -91,33 +104,57 @@
           >
             <!-- 建议项图标 -->
             <div class="suggestion-icon">
-              <el-icon v-if="item.icon"><component :is="item.icon" /></el-icon>
-              <el-icon v-else><Search /></el-icon>
+              <el-icon v-if="item.icon">
+                <component :is="item.icon" />
+              </el-icon>
+              <el-icon v-else>
+                <Search />
+              </el-icon>
             </div>
             
             <!-- 建议内容 -->
             <div class="suggestion-content">
-              <span class="suggestion-text" v-html="highlightText(item.text)"></span>
-              <span v-if="item.description" class="suggestion-desc">{{ item.description }}</span>
+              <span
+                class="suggestion-text"
+                v-html="highlightText(item.text)"
+              />
+              <span
+                v-if="item.description"
+                class="suggestion-desc"
+              >{{ item.description }}</span>
             </div>
             
             <!-- 类型标签 -->
-            <span v-if="item.type" class="suggestion-type">{{ item.type }}</span>
+            <span
+              v-if="item.type"
+              class="suggestion-type"
+            >{{ item.type }}</span>
             
             <!-- 选中图标 -->
-            <el-icon v-if="isSelected(item)" class="selected-icon"><Check /></el-icon>
+            <el-icon
+              v-if="isSelected(item)"
+              class="selected-icon"
+            >
+              <Check />
+            </el-icon>
           </div>
         </div>
         
         <!-- 下拉底部 -->
-        <div v-if="$slots.dropdownFooter" class="dropdown-footer">
+        <div
+          v-if="$slots.dropdownFooter"
+          class="dropdown-footer"
+        >
           <slot name="dropdownFooter" />
         </div>
       </div>
     </transition>
     
     <!-- 快捷操作栏 -->
-    <div v-if="showQuickActions && quickActions.length > 0" class="quick-actions">
+    <div
+      v-if="showQuickActions && quickActions.length > 0"
+      class="quick-actions"
+    >
       <button
         v-for="action in quickActions"
         :key="action.key"
@@ -126,7 +163,9 @@
         :class="{ 'is-active': activeQuickAction === action.key }"
         @click.stop="handleQuickAction(action)"
       >
-        <el-icon v-if="action.icon"><component :is="action.icon" /></el-icon>
+        <el-icon v-if="action.icon">
+          <component :is="action.icon" />
+        </el-icon>
         <span>{{ action.label }}</span>
       </button>
     </div>
@@ -159,7 +198,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'default',
-    validator: (value) => ['small', 'default', 'large'].includes(value)
+    validator: value => ['small', 'default', 'large'].includes(value)
   },
   // 是否禁用
   disabled: {
@@ -261,11 +300,11 @@ const dropdownStyle = computed(() => {
 })
 
 // 监听输入值
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   inputValue.value = val
 })
 
-watch(inputValue, (val) => {
+watch(inputValue, val => {
   emit('update:modelValue', val)
   
   if (props.remote) {
@@ -284,7 +323,7 @@ watch(inputValue, (val) => {
 })
 
 // 监听建议列表
-watch(() => props.suggestions, (val) => {
+watch(() => props.suggestions, val => {
   if (val.length > 0 && inputValue.value) {
     isExpanded.value = true
     activeIndex.value = -1
@@ -329,7 +368,7 @@ const clearInput = () => {
   activeIndex.value = -1
   emit('clear')
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     focusInput()
   })
 }
@@ -339,21 +378,31 @@ const handleSearch = () => {
   emit('search', inputValue.value)
 }
 
-const selectSuggestion = (item) => {
+const selectSuggestion = item => {
   inputValue.value = item.text || item.value || item.label
   isExpanded.value = false
   activeIndex.value = -1
   emit('select', item)
 }
 
-const isSelected = (item) => {
+const isSelected = item => {
   return item.text === inputValue.value || item.value === inputValue.value
 }
 
-const highlightText = (text) => {
-  if (!text || !inputValue.value) return text
-  const reg = new RegExp(`(${inputValue.value})`, 'gi')
-  return String(text).replace(reg, '<mark>$1</mark>')
+// 高亮搜索文本
+const highlightText = text => {
+  if (!text || !inputValue.value) {return escapeHtml(String(text))}
+  const keyword = inputValue.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const reg = new RegExp(`(${keyword})`, 'gi')
+  return escapeHtml(String(text)).replace(reg, '<mark>$1</mark>')
+}
+
+// 转义 HTML 特殊字符，防止 XSS 攻击
+const escapeHtml = str => {
+  if (!str) {return ''}
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
 }
 
 const toggleVoice = () => {
@@ -368,13 +417,13 @@ const toggleVoice = () => {
   }
 }
 
-const handleQuickAction = (action) => {
+const handleQuickAction = action => {
   activeQuickAction.value = action.key
   emit('quickAction', action)
 }
 
 // 键盘导航
-const handleKeyDown = (e) => {
+const handleKeyDown = e => {
   if (!isExpanded.value || props.suggestions.length === 0) {
     if (e.key === 'Enter') {
       handleSearch()
@@ -416,7 +465,7 @@ const handleKeyDown = (e) => {
 onMounted(() => {
   if (props.autofocus) {
     nextTick(() => {
-      if (isUnmounted.value) return
+      if (isUnmounted.value) {return}
       focusInput()
     })
   }

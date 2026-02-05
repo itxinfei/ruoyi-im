@@ -2,7 +2,11 @@
   <teleport to="body">
     <!-- 遮罩层 -->
     <transition name="fade">
-      <div v-if="visible" class="ai-reply-overlay" @click="handleClose"></div>
+      <div
+        v-if="visible"
+        class="ai-reply-overlay"
+        @click="handleClose"
+      />
     </transition>
 
     <transition name="reply-pop">
@@ -17,20 +21,37 @@
           <span class="material-icons-outlined header-icon">auto_awesome</span>
           <span class="panel-title">AI 灵动回复</span>
           <div class="header-actions">
-            <button class="refresh-btn" @click="handleRefresh" :disabled="loading">
-              <span class="material-icons-outlined" :class="{ rotating: loading }">
+            <button
+              class="refresh-btn"
+              :disabled="loading"
+              @click="handleRefresh"
+            >
+              <span
+                class="material-icons-outlined"
+                :class="{ rotating: loading }"
+              >
                 refresh
               </span>
             </button>
-            <button class="close-btn" @click="handleClose">
+            <button
+              class="close-btn"
+              @click="handleClose"
+            >
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
         </div>
 
         <!-- 回复建议区域 -->
-        <div class="reply-suggestions" v-if="!loading">
-          <div class="suggestion-category" v-for="category in categorizedSuggestions" :key="category.name">
+        <div
+          v-if="!loading"
+          class="reply-suggestions"
+        >
+          <div
+            v-for="category in categorizedSuggestions"
+            :key="category.name"
+            class="suggestion-category"
+          >
             <div class="category-header">
               <span class="material-icons-outlined category-icon">{{ category.icon }}</span>
               <span class="category-name">{{ category.name }}</span>
@@ -52,18 +73,30 @@
         </div>
 
         <!-- 加载状态 -->
-        <div class="loading-state" v-else>
-          <div class="loading-spinner"></div>
+        <div
+          v-else
+          class="loading-state"
+        >
+          <div class="loading-spinner" />
           <span>AI 正在思考...</span>
         </div>
 
         <!-- 快捷操作 -->
-        <div class="quick-actions" v-if="!loading">
-          <button class="quick-btn" @click="handleGenerateMore">
+        <div
+          v-if="!loading"
+          class="quick-actions"
+        >
+          <button
+            class="quick-btn"
+            @click="handleGenerateMore"
+          >
             <span class="material-icons-outlined">add_circle</span>
             <span>生成更多</span>
           </button>
-          <button class="quick-btn" @click="handleCustomize">
+          <button
+            class="quick-btn"
+            @click="handleCustomize"
+          >
             <span class="material-icons-outlined">tune</span>
             <span>自定义风格</span>
           </button>
@@ -179,7 +212,7 @@ const categoryConfigs = {
 }
 
 // 根据触发消息内容智能推荐回复
-const generateSmartReplies = (message) => {
+const generateSmartReplies = message => {
   if (!message || !message.content) {
     // 没有消息时返回默认混合建议
     return {
@@ -254,7 +287,7 @@ const panelStyle = computed(() => {
 })
 
 // 选择回复
-const handleSelectReply = (suggestion) => {
+const handleSelectReply = suggestion => {
   emit('select', suggestion.text)
   emit('close')
   emit('update:visible', false)
@@ -288,7 +321,7 @@ const handleCustomize = () => {
 }
 
 // 保存风格配置
-const handleStyleSave = (config) => {
+const handleStyleSave = config => {
   styleConfig.value = config
   // 重新生成建议
   loading.value = true
@@ -298,7 +331,7 @@ const handleStyleSave = (config) => {
 }
 
 // 监听显示状态
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, newVal => {
   if (newVal) {
     // 面板打开时生成建议
     loading.value = true
@@ -309,7 +342,7 @@ watch(() => props.visible, (newVal) => {
 })
 
 // ESC 键处理
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (e.key === 'Escape' && props.visible) {
     handleClose()
   }

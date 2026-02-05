@@ -1,8 +1,15 @@
 <template>
-  <div class="code-block" :class="`language-${language}`">
+  <div
+    class="code-block"
+    :class="`language-${language}`"
+  >
     <div class="code-header">
       <span class="code-language">{{ languageLabel }}</span>
-      <button class="code-copy-btn" @click="handleCopy" title="复制代码">
+      <button
+        class="code-copy-btn"
+        title="复制代码"
+        @click="handleCopy"
+      >
         <el-icon><Document /></el-icon>
       </button>
     </div>

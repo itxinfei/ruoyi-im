@@ -1,7 +1,11 @@
 <template>
   <teleport to="body">
     <transition name="call-fade">
-      <div v-if="visible && !isMinimized" class="video-call-overlay" @click.self="handleMinimize">
+      <div
+        v-if="visible && !isMinimized"
+        class="video-call-overlay"
+        @click.self="handleMinimize"
+      >
         <div class="video-call-dialog">
           <!-- 远程视频区域 -->
           <div class="remote-video-container">
@@ -11,10 +15,13 @@
               autoplay
               playsinline
               :muted="false"
-            ></video>
+            />
 
             <!-- 无视频时的占位 -->
-            <div v-if="!remoteStream && !isConnected" class="video-placeholder">
+            <div
+              v-if="!remoteStream && !isConnected"
+              class="video-placeholder"
+            >
               <DingtalkAvatar
                 :src="remoteUser?.avatar"
                 :name="remoteUser?.name || remoteUser?.friendName"
@@ -23,13 +30,21 @@
                 class="placeholder-avatar"
                 :class="{ pulse: isCalling }"
               />
-              <p class="placeholder-status">{{ callStatusText }}</p>
+              <p class="placeholder-status">
+                {{ callStatusText }}
+              </p>
             </div>
 
             <!-- 远程用户信息浮层 -->
-            <div class="remote-info-overlay" v-if="remoteStream || isConnected">
+            <div
+              v-if="remoteStream || isConnected"
+              class="remote-info-overlay"
+            >
               <span class="remote-name">{{ remoteUser?.name || remoteUser?.friendName }}</span>
-              <span v-if="isConnected" class="call-timer">{{ formattedDuration }}</span>
+              <span
+                v-if="isConnected"
+                class="call-timer"
+              >{{ formattedDuration }}</span>
             </div>
 
             <!-- 画中画本地视频 -->
@@ -45,7 +60,7 @@
                 autoplay
                 playsinline
                 muted
-              ></video>
+              />
               <div class="pip-controls">
                 <button
                   class="pip-btn"
@@ -62,8 +77,14 @@
           <div class="video-controls">
             <!-- 左侧状态 -->
             <div class="controls-left">
-              <div v-if="isNetworkQualityVisible" class="network-quality">
-                <span class="material-icons-outlined" :class="networkQualityClass">signal_cellular_alt</span>
+              <div
+                v-if="isNetworkQualityVisible"
+                class="network-quality"
+              >
+                <span
+                  class="material-icons-outlined"
+                  :class="networkQualityClass"
+                >signal_cellular_alt</span>
                 <span class="quality-text">{{ networkQualityText }}</span>
               </div>
             </div>
@@ -89,20 +110,23 @@
               <button
                 class="control-btn"
                 :class="{ active: isScreenSharing }"
-                @click="toggleScreenShare"
                 :disabled="!isConnected"
+                @click="toggleScreenShare"
               >
                 <span class="material-icons-outlined">screen_share</span>
               </button>
 
-              <button class="control-btn hangup-btn" @click="handleHangup">
+              <button
+                class="control-btn hangup-btn"
+                @click="handleHangup"
+              >
                 <span class="material-icons-outlined">call_end</span>
               </button>
 
               <button
                 class="control-btn"
-                @click="toggleSpeaker"
                 :class="{ active: isSpeakerOn }"
+                @click="toggleSpeaker"
               >
                 <span class="material-icons-outlined">{{ isSpeakerOn ? 'volume_up' : 'volume_off' }}</span>
               </button>
@@ -110,7 +134,10 @@
 
             <!-- 右侧操作 -->
             <div class="controls-right">
-              <button class="control-btn small" @click="handleMinimize">
+              <button
+                class="control-btn small"
+                @click="handleMinimize"
+              >
                 <span class="material-icons-outlined">expand_less</span>
               </button>
             </div>
@@ -121,8 +148,14 @@
 
     <!-- 最小化悬浮窗 -->
     <transition name="float-window">
-      <div v-if="visible && isMinimized" class="video-float-window">
-        <div class="float-video-container" @click="handleExpand">
+      <div
+        v-if="visible && isMinimized"
+        class="video-float-window"
+      >
+        <div
+          class="float-video-container"
+          @click="handleExpand"
+        >
           <video
             v-if="localStream"
             ref="miniVideoRef"
@@ -130,8 +163,11 @@
             autoplay
             playsinline
             muted
-          ></video>
-          <div v-else class="float-placeholder">
+          />
+          <div
+            v-else
+            class="float-placeholder"
+          >
             <DingtalkAvatar
               :src="remoteUser?.avatar"
               :name="remoteUser?.name || remoteUser?.friendName"
@@ -188,7 +224,7 @@ const dragOffset = ref({ x: 0, y: 0 })
 const pipPosition = ref({ x: 20, y: 20 })
 
 let durationTimer = null
-let peerConnection = null
+const peerConnection = null
 const isUnmounted = ref(false) // 标记组件是否已卸载
 
 // 计算属性
@@ -196,18 +232,18 @@ const isCalling = computed(() => callStatus.value === 'calling')
 const isConnected = computed(() => callStatus.value === 'connected')
 
 const callStatusText = computed(() => {
-  if (props.isIncoming) return '来电中...'
-  if (callStatus.value === 'calling') return '正在呼叫...'
-  if (callStatus.value === 'connected') return '通话中'
-  if (callStatus.value === 'ended') return '通话结束'
-  if (callStatus.value === 'rejected') return '对方拒绝'
+  if (props.isIncoming) {return '来电中...'}
+  if (callStatus.value === 'calling') {return '正在呼叫...'}
+  if (callStatus.value === 'connected') {return '通话中'}
+  if (callStatus.value === 'ended') {return '通话结束'}
+  if (callStatus.value === 'rejected') {return '对方拒绝'}
   return ''
 })
 
 const minimizedStatusText = computed(() => {
-  if (props.isIncoming) return '来电中'
-  if (callStatus.value === 'calling') return '呼叫中'
-  if (callStatus.value === 'connected') return formattedDuration.value
+  if (props.isIncoming) {return '来电中'}
+  if (callStatus.value === 'calling') {return '呼叫中'}
+  if (callStatus.value === 'connected') {return formattedDuration.value}
   return '视频通话'
 })
 
@@ -216,22 +252,19 @@ const formattedDuration = computed(() => formatDurationMMSS(callDuration.value))
 
 const networkQualityClass = computed(() => {
   // 模拟网络质量显示
-  if (callDuration.value > 300) return 'excellent'
-  if (callDuration.value > 60) return 'good'
+  if (callDuration.value > 300) {return 'excellent'}
+  if (callDuration.value > 60) {return 'good'}
   return 'normal'
 })
 
 const networkQualityText = computed(() => {
   const quality = networkQualityClass.value
-  if (quality === 'excellent') return '极好'
-  if (quality === 'good') return '良好'
+  if (quality === 'excellent') {return '极好'}
+  if (quality === 'good') {return '良好'}
   return '正常'
 })
 
-// 获取头像URL
-if (props.remoteUser) {
-  props.remoteUser.avatar = addTokenToUrl(props.remoteUser.avatar)
-}
+// 注意：头像 URL 的 token 处理由 DingtalkAvatar 组件内部处理，无需在此处修改 props
 
 // 计时器
 const startDurationTimer = () => {
@@ -343,7 +376,7 @@ const initLocalMedia = async () => {
 
     // 设置本地视频预览
     await nextTick()
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     if (localVideoRef.value) {
       localVideoRef.value.srcObject = stream
     }
@@ -369,7 +402,7 @@ const stopMediaStreams = () => {
 }
 
 // 画中画拖拽
-const startDrag = (e) => {
+const startDrag = e => {
   isDragging.value = true
   dragOffset.value = {
     x: e.clientX - pipPosition.value.x,
@@ -380,15 +413,15 @@ const startDrag = (e) => {
   document.addEventListener('mouseup', stopDrag)
 }
 
-const onDrag = (e) => {
-  if (!isDragging.value) return
+const onDrag = e => {
+  if (!isDragging.value) {return}
 
   const container = document.querySelector('.remote-video-container')
-  if (!container) return
+  if (!container) {return}
 
   const rect = container.getBoundingClientRect()
   const pip = document.querySelector('.local-video-pip')
-  if (!pip) return
+  if (!pip) {return}
 
   let newX = e.clientX - dragOffset.value.x
   let newY = e.clientY - dragOffset.value.y
@@ -427,7 +460,7 @@ const handleExpand = () => {
   isMinimized.value = false
   emit('expand')
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     if (miniVideoRef.value && localStream.value) {
       miniVideoRef.value.srcObject = localStream.value
     }
@@ -459,7 +492,7 @@ const rejectCall = () => {
 }
 
 // 监听可见性
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, newVal => {
   if (newVal) {
     callStatus.value = 'calling'
     callDuration.value = 0
@@ -488,10 +521,10 @@ watch(() => props.visible, (newVal) => {
 })
 
 // 监听最小化状态，更新 mini 视频
-watch(isMinimized, (newVal) => {
+watch(isMinimized, newVal => {
   if (!newVal && localStream.value) {
     nextTick(() => {
-      if (isUnmounted.value) return
+      if (isUnmounted.value) {return}
       if (localVideoRef.value) {
         localVideoRef.value.srcObject = localStream.value
       }

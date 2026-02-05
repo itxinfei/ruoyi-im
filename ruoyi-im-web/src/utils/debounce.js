@@ -191,7 +191,7 @@ export function useDebounceRef(initialValue, delay = 300) {
     }
   }
 
-  watch(innerValue, (newValue) => {
+  watch(innerValue, newValue => {
     if (timer) {
       clearTimeout(timer)
     }

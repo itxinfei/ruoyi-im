@@ -18,7 +18,10 @@
         >
           <el-icon><component :is="category.icon" /></el-icon>
           <span>{{ category.label }}</span>
-          <span v-if="getCategoryCount(category.key) > 0" class="count">
+          <span
+            v-if="getCategoryCount(category.key) > 0"
+            class="count"
+          >
             {{ getCategoryCount(category.key) }}
           </span>
         </div>
@@ -37,19 +40,33 @@
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        <el-button type="primary" size="small" :icon="Plus" @click="handleAdd">
+        <el-button
+          type="primary"
+          size="small"
+          :icon="Plus"
+          @click="handleAdd"
+        >
           添加快捷回复
         </el-button>
       </div>
 
       <!-- 快捷回复列表 -->
-      <div v-loading="loading" class="reply-list">
-        <div v-if="!loading && filteredReplies.length === 0" class="empty-state">
+      <div
+        v-loading="loading"
+        class="reply-list"
+      >
+        <div
+          v-if="!loading && filteredReplies.length === 0"
+          class="empty-state"
+        >
           <el-icon><EditPen /></el-icon>
           <span>暂无快捷回复，点击上方按钮添加</span>
         </div>
 
-        <div v-else class="reply-items">
+        <div
+          v-else
+          class="reply-items"
+        >
           <div
             v-for="reply in filteredReplies"
             :key="reply.id"
@@ -60,7 +77,10 @@
             @dragover.prevent
             @drop="handleDrop($event, reply)"
           >
-            <div v-if="editingId === reply.id" class="edit-form">
+            <div
+              v-if="editingId === reply.id"
+              class="edit-form"
+            >
               <el-input
                 v-model="editForm.content"
                 type="textarea"
@@ -70,7 +90,11 @@
                 show-word-limit
               />
               <div class="edit-actions">
-                <el-select v-model="editForm.category" size="small" style="width: 120px; margin-right: 8px">
+                <el-select
+                  v-model="editForm.category"
+                  size="small"
+                  style="width: 120px; margin-right: 8px"
+                >
                   <el-option
                     v-for="cat in categories.filter(c => c.key !== 'all')"
                     :key="cat.key"
@@ -78,8 +102,19 @@
                     :value="cat.key"
                   />
                 </el-select>
-                <el-button size="small" @click="cancelEdit">取消</el-button>
-                <el-button size="small" type="primary" @click="saveEdit">保存</el-button>
+                <el-button
+                  size="small"
+                  @click="cancelEdit"
+                >
+                  取消
+                </el-button>
+                <el-button
+                  size="small"
+                  type="primary"
+                  @click="saveEdit"
+                >
+                  保存
+                </el-button>
               </div>
             </div>
             <template v-else>
@@ -87,9 +122,14 @@
                 <el-icon><Rank /></el-icon>
               </div>
               <div class="reply-content">
-                <div class="reply-text">{{ reply.content }}</div>
+                <div class="reply-text">
+                  {{ reply.content }}
+                </div>
                 <div class="reply-meta">
-                  <el-tag size="small" :type="getCategoryType(reply.category)">
+                  <el-tag
+                    size="small"
+                    :type="getCategoryType(reply.category)"
+                  >
                     {{ getCategoryLabel(reply.category) }}
                   </el-tag>
                   <span class="use-count">使用 {{ reply.useCount || 0 }} 次</span>
@@ -127,9 +167,20 @@
       width="500px"
       append-to-body
     >
-      <el-form ref="formRef" :model="addForm" :rules="formRules" label-width="80px">
-        <el-form-item label="分类" prop="category">
-          <el-select v-model="addForm.category" placeholder="请选择分类">
+      <el-form
+        ref="formRef"
+        :model="addForm"
+        :rules="formRules"
+        label-width="80px"
+      >
+        <el-form-item
+          label="分类"
+          prop="category"
+        >
+          <el-select
+            v-model="addForm.category"
+            placeholder="请选择分类"
+          >
             <el-option
               v-for="cat in categories.filter(c => c.key !== 'all')"
               :key="cat.key"
@@ -138,7 +189,10 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="内容" prop="content">
+        <el-form-item
+          label="内容"
+          prop="content"
+        >
           <el-input
             v-model="addForm.content"
             type="textarea"
@@ -150,13 +204,23 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showAddDialog = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="submitAdd">确定</el-button>
+        <el-button @click="showAddDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="submitAdd"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
     <template #footer>
-      <el-button @click="visible = false">关闭</el-button>
+      <el-button @click="visible = false">
+        关闭
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -195,7 +259,7 @@ const emit = defineEmits(['update:modelValue', 'refresh'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 // 分类定义
@@ -227,19 +291,19 @@ const formRules = {
 }
 
 // 获取分类数量
-const getCategoryCount = (category) => {
-  if (category === 'all') return replies.value.length
+const getCategoryCount = category => {
+  if (category === 'all') {return replies.value.length}
   return replies.value.filter(r => r.category === category).length
 }
 
 // 获取分类标签
-const getCategoryLabel = (category) => {
+const getCategoryLabel = category => {
   const cat = categories.find(c => c.key === category)
   return cat ? cat.label : '未知'
 }
 
 // 获取分类标签颜色
-const getCategoryType = (category) => {
+const getCategoryType = category => {
   const typeMap = {
     greeting: 'success',
     ending: 'warning',
@@ -313,7 +377,7 @@ const submitAdd = async () => {
 }
 
 // 开始编辑
-const startEdit = (reply) => {
+const startEdit = reply => {
   editingId.value = reply.id
   editForm.value = {
     content: reply.content,
@@ -355,7 +419,7 @@ const saveEdit = async () => {
 }
 
 // 删除快捷回复
-const handleDelete = async (reply) => {
+const handleDelete = async reply => {
   try {
     await ElMessageBox.confirm(`确定要删除快捷回复"${reply.content}"吗？`, '提示', {
       confirmButtonText: '确定',
@@ -389,7 +453,7 @@ const handleDragStart = (event, reply) => {
 
 const handleDrop = async (event, targetReply) => {
   event.preventDefault()
-  if (!draggedItem || draggedItem.id === targetReply.id) return
+  if (!draggedItem || draggedItem.id === targetReply.id) {return}
 
   // 重新排序
   const newOrder = [...filteredReplies.value]

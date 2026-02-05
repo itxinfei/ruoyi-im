@@ -84,7 +84,7 @@ textarea {
   outline: none;
 }
 
-// Scrollbar Styling - 钉钉风格
+// Scrollbar Styling - 企业IM风格（参考野火IM）
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -112,7 +112,7 @@ textarea {
   }
 }
 
-// 钉钉风格：活跃滚动条（用于主要内容区域）
+// 企业IM风格（参考野火IM）：活跃滚动条（用于主要内容区域）
 .scrollbar-dingtalk::-webkit-scrollbar-thumb {
   background: rgba(0, 137, 255, 0.2);
   border-radius: 3px;
@@ -130,26 +130,26 @@ textarea {
   }
 }
 
-// Focus styles for accessibility - 钉钉风格
+// Focus styles for accessibility - 企业IM风格（参考野火IM）
 *:focus-visible {
   outline: 2px solid var(--dt-brand-color);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
-// 钉钉风格：移除默认 focus 样式，只保留 focus-visible
+// 企业IM风格（参考野火IM）：移除默认 focus 样式，只保留 focus-visible
 :focus:not(:focus-visible) {
   outline: none;
 }
 
-// 钉钉风格：输入框 focus 时的高亮效果
+// 企业IM风格（参考野火IM）：输入框 focus 时的高亮效果
 input:focus,
 textarea:focus,
 select:focus {
   box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
 }
 
-// 钉钉风格：按钮点击反馈
+// 企业IM风格（参考野火IM）：按钮点击反馈
 button:active {
   transform: scale(0.98);
 }
@@ -585,7 +585,7 @@ button:active {
 
 
 // ============================================================================
-// Dropdown 样式覆盖 - 钉钉风格
+// Dropdown 样式覆盖 - 企业IM风格（参考野火IM）
 // ============================================================================
 
 .el-dropdown-menu {

@@ -4,19 +4,40 @@
     <div class="page-header">
       <div class="page-title">
         <h2>部门管理</h2>
-        <p class="page-desc">管理组织架构部门、设置负责人和部门成员</p>
+        <p class="page-desc">
+          管理组织架构部门、设置负责人和部门成员
+        </p>
       </div>
       <div class="page-actions">
-        <el-button type="primary" :icon="Plus" @click="handleAddRoot">新增根部门</el-button>
-        <el-button :icon="Sort" @click="expandAll">展开全部</el-button>
-        <el-button :icon="DCaret" @click="collapseAll">收起全部</el-button>
+        <el-button
+          type="primary"
+          :icon="Plus"
+          @click="handleAddRoot"
+        >
+          新增根部门
+        </el-button>
+        <el-button
+          :icon="Sort"
+          @click="expandAll"
+        >
+          展开全部
+        </el-button>
+        <el-button
+          :icon="DCaret"
+          @click="collapseAll"
+        >
+          收起全部
+        </el-button>
       </div>
     </div>
 
     <!-- 主内容区：部门树 + 成员列表 -->
     <div class="department-content">
       <!-- 左侧：部门树 -->
-      <el-card class="dept-tree-card" shadow="never">
+      <el-card
+        class="dept-tree-card"
+        shadow="never"
+      >
         <template #header>
           <div class="card-header">
             <span>组织架构</span>
@@ -30,7 +51,10 @@
             />
           </div>
         </template>
-        <div v-loading="treeLoading" class="tree-container">
+        <div
+          v-loading="treeLoading"
+          class="tree-container"
+        >
           <el-tree
             ref="treeRef"
             :data="departmentTree"
@@ -44,12 +68,18 @@
           >
             <template #default="{ node, data }">
               <div class="tree-node">
-                <el-icon class="node-icon" :color="getIconColor(data.level)">
+                <el-icon
+                  class="node-icon"
+                  :color="getIconColor(data.level)"
+                >
                   <OfficeBuilding />
                 </el-icon>
                 <span class="node-label">{{ node.label }}</span>
                 <span class="node-count">({{ data.memberCount || 0 }})</span>
-                <div class="node-actions" @click.stop>
+                <div
+                  class="node-actions"
+                  @click.stop
+                >
                   <el-button
                     size="small"
                     text
@@ -77,39 +107,70 @@
       </el-card>
 
       <!-- 右侧：部门详情和成员 -->
-      <el-card class="dept-detail-card" shadow="never">
+      <el-card
+        class="dept-detail-card"
+        shadow="never"
+      >
         <template v-if="currentDepartment">
           <!-- 部门信息头部 -->
           <div class="dept-header">
             <div class="dept-info">
-              <el-icon class="dept-icon" :size="32" color="#0089FF">
+              <el-icon
+                class="dept-icon"
+                :size="32"
+                color="#0089FF"
+              >
                 <OfficeBuilding />
               </el-icon>
               <div>
-                <h3 class="dept-name">{{ currentDepartment.name }}</h3>
-                <p class="dept-path">{{ currentDepartment.path }}</p>
+                <h3 class="dept-name">
+                  {{ currentDepartment.name }}
+                </h3>
+                <p class="dept-path">
+                  {{ currentDepartment.path }}
+                </p>
               </div>
             </div>
             <div class="dept-actions">
-              <el-button size="small" :icon="Edit" @click="handleEdit(currentDepartment)">
+              <el-button
+                size="small"
+                :icon="Edit"
+                @click="handleEdit(currentDepartment)"
+              >
                 编辑
               </el-button>
-              <el-button size="small" :icon="User" @click="memberDialogVisible = true">
+              <el-button
+                size="small"
+                :icon="User"
+                @click="memberDialogVisible = true"
+              >
                 添加成员
               </el-button>
             </div>
           </div>
 
           <!-- 负责人信息 -->
-          <div v-if="currentDepartment.leader" class="leader-section">
-            <div class="section-title">部门负责人</div>
+          <div
+            v-if="currentDepartment.leader"
+            class="leader-section"
+          >
+            <div class="section-title">
+              部门负责人
+            </div>
             <div class="leader-card">
-              <el-avatar :size="40" :src="currentDepartment.leaderAvatar">
+              <el-avatar
+                :size="40"
+                :src="currentDepartment.leaderAvatar"
+              >
                 {{ currentDepartment.leaderName?.[0] || 'L' }}
               </el-avatar>
               <div class="leader-info">
-                <div class="leader-name">{{ currentDepartment.leaderName }}</div>
-                <div class="leader-id">ID: {{ currentDepartment.leaderId }}</div>
+                <div class="leader-name">
+                  {{ currentDepartment.leaderName }}
+                </div>
+                <div class="leader-id">
+                  ID: {{ currentDepartment.leaderId }}
+                </div>
               </div>
               <el-button
                 size="small"
@@ -138,28 +199,56 @@
               />
             </div>
 
-            <div v-loading="membersLoading" class="members-list">
+            <div
+              v-loading="membersLoading"
+              class="members-list"
+            >
               <div
                 v-for="member in filteredMembers"
                 :key="member.id"
                 class="member-item"
               >
-                <el-avatar :size="36" :src="member.avatar">
+                <el-avatar
+                  :size="36"
+                  :src="member.avatar"
+                >
                   {{ member.nickname?.[0] || 'U' }}
                 </el-avatar>
                 <div class="member-info">
-                  <div class="member-name">{{ member.nickname }}</div>
-                  <div class="member-position">{{ member.position || '员工' }}</div>
+                  <div class="member-name">
+                    {{ member.nickname }}
+                  </div>
+                  <div class="member-position">
+                    {{ member.position || '员工' }}
+                  </div>
                 </div>
-                <el-tag v-if="member.id === currentDepartment.leaderId" size="small" type="warning">
+                <el-tag
+                  v-if="member.id === currentDepartment.leaderId"
+                  size="small"
+                  type="warning"
+                >
                   负责人
                 </el-tag>
-                <el-dropdown trigger="click" @command="(cmd) => handleMemberAction(cmd, member)">
-                  <el-button size="small" text :icon="MoreFilled" />
+                <el-dropdown
+                  trigger="click"
+                  @command="(cmd) => handleMemberAction(cmd, member)"
+                >
+                  <el-button
+                    size="small"
+                    text
+                    :icon="MoreFilled"
+                  />
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item command="setLeader">设为负责人</el-dropdown-item>
-                      <el-dropdown-item command="remove" divided>移出部门</el-dropdown-item>
+                      <el-dropdown-item command="setLeader">
+                        设为负责人
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        command="remove"
+                        divided
+                      >
+                        移出部门
+                      </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -175,8 +264,14 @@
         </template>
 
         <!-- 未选择部门时的空状态 -->
-        <div v-else class="empty-dept">
-          <el-empty description="请选择一个部门查看详情" :image-size="100" />
+        <div
+          v-else
+          class="empty-dept"
+        >
+          <el-empty
+            description="请选择一个部门查看详情"
+            :image-size="100"
+          />
         </div>
       </el-card>
     </div>
@@ -188,11 +283,25 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="deptForm" :rules="deptRules" ref="deptFormRef" label-width="100px">
-        <el-form-item label="部门名称" prop="name">
-          <el-input v-model="deptForm.name" placeholder="请输入部门名称" />
+      <el-form
+        ref="deptFormRef"
+        :model="deptForm"
+        :rules="deptRules"
+        label-width="100px"
+      >
+        <el-form-item
+          label="部门名称"
+          prop="name"
+        >
+          <el-input
+            v-model="deptForm.name"
+            placeholder="请输入部门名称"
+          />
         </el-form-item>
-        <el-form-item label="上级部门" prop="parentId">
+        <el-form-item
+          label="上级部门"
+          prop="parentId"
+        >
           <el-tree-select
             v-model="deptForm.parentId"
             :data="departmentTreeForSelect"
@@ -203,7 +312,10 @@
             placeholder="选择上级部门（不选则为根部门）"
           />
         </el-form-item>
-        <el-form-item label="部门负责人" prop="leaderId">
+        <el-form-item
+          label="部门负责人"
+          prop="leaderId"
+        >
           <el-select
             v-model="deptForm.leaderId"
             filterable
@@ -221,10 +333,21 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="排序号" prop="sort">
-          <el-input-number v-model="deptForm.sort" :min="0" :max="9999" controls-position="right" />
+        <el-form-item
+          label="排序号"
+          prop="sort"
+        >
+          <el-input-number
+            v-model="deptForm.sort"
+            :min="0"
+            :max="9999"
+            controls-position="right"
+          />
         </el-form-item>
-        <el-form-item label="部门描述" prop="description">
+        <el-form-item
+          label="部门描述"
+          prop="description"
+        >
           <el-input
             v-model="deptForm.description"
             type="textarea"
@@ -234,8 +357,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -265,7 +395,12 @@
               :value="user.id"
             >
               <div class="user-option">
-                <el-avatar :size="24" :src="user.avatar">{{ user.nickname?.[0] }}</el-avatar>
+                <el-avatar
+                  :size="24"
+                  :src="user.avatar"
+                >
+                  {{ user.nickname?.[0] }}
+                </el-avatar>
                 <span>{{ user.nickname }}</span>
               </div>
             </el-option>
@@ -273,8 +408,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="memberDialogVisible = false">取消</el-button>
-        <el-button type="primary" :disabled="selectedMembersToAdd.length === 0" @click="handleAddMembers">
+        <el-button @click="memberDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :disabled="selectedMembersToAdd.length === 0"
+          @click="handleAddMembers"
+        >
           添加 ({{ selectedMembersToAdd.length }})
         </el-button>
       </template>
@@ -365,7 +506,7 @@ const departmentTreeForSelect = computed(() => {
   const excludeId = deptForm.value.id
   const excludeTree = (nodes, id) => {
     return nodes.filter(node => {
-      if (node.id === id) return false
+      if (node.id === id) {return false}
       if (node.children) {
         node.children = excludeTree(node.children, id)
       }
@@ -376,7 +517,7 @@ const departmentTreeForSelect = computed(() => {
 })
 
 const filteredMembers = computed(() => {
-  if (!memberSearch.value) return departmentMembers.value
+  if (!memberSearch.value) {return departmentMembers.value}
   return departmentMembers.value.filter(m =>
     m.nickname?.toLowerCase().includes(memberSearch.value.toLowerCase())
   )
@@ -398,7 +539,7 @@ const loadDepartmentTree = async () => {
 }
 
 // 加载部门成员
-const loadDepartmentMembers = async (deptId) => {
+const loadDepartmentMembers = async deptId => {
   membersLoading.value = true
   try {
     const res = await getDepartmentMembers(deptId)
@@ -413,7 +554,7 @@ const loadDepartmentMembers = async (deptId) => {
 }
 
 // 节点点击
-const handleNodeClick = async (data) => {
+const handleNodeClick = async data => {
   const res = await getDepartmentDetail(data.id)
   if (res.code === 200) {
     currentDepartment.value = res.data
@@ -423,17 +564,17 @@ const handleNodeClick = async (data) => {
 
 // 树形过滤
 const filterNode = (value, data) => {
-  if (!value) return true
+  if (!value) {return true}
   return data.name.includes(value)
 }
 
-watch(filterText, (val) => {
+watch(filterText, val => {
   treeRef.value?.filter(val)
 })
 
 // 展开/收起
 const expandAll = () => {
-  const expandKeys = (nodes) => {
+  const expandKeys = nodes => {
     const keys = []
     nodes.forEach(node => {
       keys.push(node.id)
@@ -470,7 +611,7 @@ const handleAddRoot = () => {
 }
 
 // 新增子部门
-const handleAddChild = (data) => {
+const handleAddChild = data => {
   dialogTitle.value = '新增子部门'
   deptForm.value = {
     name: '',
@@ -483,7 +624,7 @@ const handleAddChild = (data) => {
 }
 
 // 编辑部门
-const handleEdit = (data) => {
+const handleEdit = data => {
   dialogTitle.value = '编辑部门'
   deptForm.value = {
     id: data.id,
@@ -501,7 +642,7 @@ const handleEdit = (data) => {
 }
 
 // 删除部门
-const handleDelete = async (data) => {
+const handleDelete = async data => {
   const hasChildren = data.children && data.children.length > 0
   const hasMembers = data.memberCount > 0
 
@@ -565,8 +706,8 @@ const handleChangeLeader = async () => {
 }
 
 // 搜索用户
-const searchUsers = async (query) => {
-  if (!query) return
+const searchUsers = async query => {
+  if (!query) {return}
   try {
     const res = await searchUsersApi(query)
     if (res.code === 200) {
@@ -577,8 +718,8 @@ const searchUsers = async (query) => {
   }
 }
 
-const searchUsersForAdd = async (query) => {
-  if (!query) return
+const searchUsersForAdd = async query => {
+  if (!query) {return}
   searchUsersLoading.value = true
   try {
     const res = await searchUsersApi(query)
@@ -636,7 +777,7 @@ const handleMemberAction = async (command, member) => {
 }
 
 // 图标颜色
-const getIconColor = (level) => {
+const getIconColor = level => {
   const colors = ['#0089FF', '#00C853', '#FFAB00', '#FF3D00', '#9C27B0']
   return colors[level % colors.length]
 }

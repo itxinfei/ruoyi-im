@@ -83,7 +83,7 @@ export function useChatDialogs() {
   /**
    * 显示联系人详情
    */
-  const openContactDetail = (user) => {
+  const openContactDetail = user => {
     currentContactUser.value = user
     showContactDetail.value = true
   }
@@ -127,17 +127,17 @@ export function useChatDialogs() {
   // 当前打开的弹窗数量
   const openDialogsCount = computed(() => {
     let count = 0
-    if (showVoiceCall.value) count++
-    if (showVideoCall.value) count++
-    if (showChatSearch.value) count++
-    if (showFilesPanel.value) count++
-    if (showChatHistory.value) count++
-    if (showAnnouncementDialog.value) count++
-    if (showExportDialog.value) count++
-    if (showGroupFilesPanel.value) count++
-    if (showCombineDetail.value) count++
-    if (showContactDetail.value) count++
-    if (showImagePreview.value) count++
+    if (showVoiceCall.value) {count++}
+    if (showVideoCall.value) {count++}
+    if (showChatSearch.value) {count++}
+    if (showFilesPanel.value) {count++}
+    if (showChatHistory.value) {count++}
+    if (showAnnouncementDialog.value) {count++}
+    if (showExportDialog.value) {count++}
+    if (showGroupFilesPanel.value) {count++}
+    if (showCombineDetail.value) {count++}
+    if (showContactDetail.value) {count++}
+    if (showImagePreview.value) {count++}
     return count
   })
 

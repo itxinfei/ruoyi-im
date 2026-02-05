@@ -2,8 +2,8 @@
 module.exports = {
   darkMode: 'class',
   content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{vue,js,ts,jsx,tsx}'
   ],
   theme: {
     extend: {
@@ -14,12 +14,12 @@ module.exports = {
           hover: '#006ECC',
           active: '#0057A3',
           light: 'rgba(0, 137, 255, 0.1)',
-          bg: '#E5F2FF',
+          bg: '#E5F2FF'
         },
         // 背景色
         background: {
           light: '#F5F7FA',
-          dark: '#0f172a',
+          dark: '#0f172a'
         },
         // 语义色（钉钉规范）
         success: '#00C853',
@@ -38,7 +38,7 @@ module.exports = {
           700: '#334155',
           800: '#1E293B',
           900: '#0F172A',
-          950: '#020617',
+          950: '#020617'
         },
         // 钉钉灰色系
         gray: {
@@ -51,8 +51,8 @@ module.exports = {
           600: '#858E9E',
           700: '#5F6672',
           800: '#373D45',
-          900: '#171A1D',
-        },
+          900: '#171A1D'
+        }
       },
       borderRadius: {
         DEFAULT: '8px',
@@ -61,12 +61,12 @@ module.exports = {
         lg: '12px',
         xl: '16px',
         '2xl': '20px',
-        full: '50%',
+        full: '50%'
       },
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
-        '128': '32rem',
+        '128': '32rem'
       },
       zIndex: {
         'dropdown': 1000,
@@ -75,17 +75,17 @@ module.exports = {
         'modal': 1040,
         'popover': 1050,
         'tooltip': 1060,
-        'notification': 1070,
+        'notification': 1070
       },
       transitionDuration: {
-        '250': '250ms',
+        '250': '250ms'
       },
       fontSize: {
         '2xl': ['1.5rem', { lineHeight: '2rem' }],
         '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
         '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
         '5xl': ['3rem', { lineHeight: '1' }],
-        '6xl': ['3.75rem', { lineHeight: '1' }],
+        '6xl': ['3.75rem', { lineHeight: '1' }]
       },
       fontWeight: {
         thin: '100',
@@ -96,7 +96,7 @@ module.exports = {
         semibold: '600',
         bold: '700',
         extrabold: '800',
-        black: '900',
+        black: '900'
       },
       boxShadow: {
         xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -106,59 +106,59 @@ module.exports = {
         // 钉钉风格阴影
         ding: '0 2px 8px rgba(0, 0, 0, 0.08)',
         'ding-lg': '0 4px 16px rgba(0, 0, 0, 0.12)',
-        'ding-xl': '0 8px 24px rgba(0, 0, 0, 0.16)',
+        'ding-xl': '0 8px 24px rgba(0, 0, 0, 0.16)'
       },
       animation: {
         'bounce-slow': 'bounce 3s infinite',
         'fade-in': 'fadeIn 0.5s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
-        'slide-down': 'slideDown 0.3s ease-out',
+        'slide-down': 'slideDown 0.3s ease-out'
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+          '100%': { opacity: '1' }
         },
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
         },
         slideDown: {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
         },
         rotate: {
           '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(90deg)' },
+          '100%': { transform: 'rotate(90deg)' }
         },
         pulse: {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.5' },
+          '50%': { opacity: '0.5' }
         },
         bounce: {
           '0%, 20%, 50%, 80%, 100%': { transform: 'translateY(0)' },
           '40%': { transform: 'translateY(-10px)' },
-          '60%': { transform: 'translateY(-5px)' },
-        },
+          '60%': { transform: 'translateY(-5px)' }
+        }
       },
       transformOrigin: {
         '0': '0',
         'center': 'center',
-        'full': '100% 100%',
+        'full': '100% 100%'
       },
       strokeWidth: {
         '0.5': '0.5px',
         '1': '1px',
         '2': '2px',
         '3': '3px',
-        '4': '4px',
+        '4': '4px'
       },
       lineHeight: {
         '3': '0.75rem',
         '10': '2.5rem',
         '11': '2.75rem',
         '12': '3rem',
-        '16': '4rem',
+        '16': '4rem'
       },
       letterSpacing: {
         tighter: '-0.05em',
@@ -166,7 +166,7 @@ module.exports = {
         normal: '0em',
         wide: '0.025em',
         wider: '0.05em',
-        widest: '0.1em',
+        widest: '0.1em'
       },
       scale: {
         '0': '0',
@@ -179,7 +179,7 @@ module.exports = {
         '110': '1.1',
         '120': '1.2',
         '125': '1.25',
-        '150': '1.5',
+        '150': '1.5'
       },
       translate: {
         '0': '0',
@@ -198,7 +198,7 @@ module.exports = {
         '1/2': '50%',
         '1/3': '33.333333%',
         '2/3': '66.666667%',
-        'full': '100%',
+        'full': '100%'
       },
       skew: {
         '0': '0deg',
@@ -206,7 +206,7 @@ module.exports = {
         '2': '0.1turn',
         '3': '0.15turn',
         '6': '0.3turn',
-        '12': '0.6turn',
+        '12': '0.6turn'
       },
       opacity: {
         '0': '0',
@@ -223,15 +223,15 @@ module.exports = {
         '80': '0.8',
         '90': '0.9',
         '95': '0.95',
-        '100': '1',
+        '100': '1'
       },
       ringColor: {
         DEFAULT: '#1677ff',
         primary: '#1677ff',
         white: '#ffffff',
         slate: {
-          800: '#1e293b',
-        },
+          800: '#1e293b'
+        }
       },
       ringWidth: {
         DEFAULT: '1px',
@@ -240,20 +240,20 @@ module.exports = {
         '2': '2px',
         '3': '3px',
         '4': '4px',
-        '8': '8px',
+        '8': '8px'
       },
       ringOffsetWidth: {
         '0': '0px',
         '1': '1px',
         '2': '2px',
         '4': '4px',
-        '8': '8px',
+        '8': '8px'
       },
       transitionTimingFunction: {
         DEFAULT: 'cubic-bezier(0.4, 0, 0.2, 1)',
         'in': 'cubic-bezier(0.4, 0, 1, 1)',
         'out': 'cubic-bezier(0, 0, 0.2, 1)',
-        'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)'
       },
       transitionDuration: {
         '0': '0ms',
@@ -264,7 +264,7 @@ module.exports = {
         '300': '300ms',
         '500': '500ms',
         '700': '700ms',
-        '1000': '1000ms',
+        '1000': '1000ms'
       },
       divideColor: {
         DEFAULT: '#e5e7eb',
@@ -272,8 +272,8 @@ module.exports = {
           50: '#f8fafc',
           100: '#f1f5f9',
           800: '#1e293b',
-          80050: 'rgba(30, 41, 59, 0.5)',
-        },
+          80050: 'rgba(30, 41, 59, 0.5)'
+        }
       },
       divideOpacity: {
         DEFAULT: '1',
@@ -288,9 +288,9 @@ module.exports = {
         '70': '0.7',
         '80': '0.8',
         '90': '0.9',
-        '100': '1',
-      },
-    },
+        '100': '1'
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 }

@@ -48,7 +48,7 @@ export const StorageKeys = {
 export function getItem(key, defaultValue = null) {
   try {
     const value = localStorage.getItem(key)
-    if (value === null) return defaultValue
+    if (value === null) {return defaultValue}
     return value
   } catch (e) {
     console.warn(`获取 localStorage 失败: ${key}`, e)
@@ -103,7 +103,7 @@ export function clear() {
 export function getJSON(key, defaultValue = {}) {
   try {
     const value = localStorage.getItem(key)
-    if (value === null) return defaultValue
+    if (value === null) {return defaultValue}
     return JSON.parse(value)
   } catch (e) {
     console.warn(`解析 JSON 失败: ${key}`, e)
@@ -271,7 +271,7 @@ export function getSearchHistory() {
  * @param {number} maxLength - 最大保留数量
  */
 export function addSearchHistory(keyword, maxLength = 10) {
-  if (!keyword || !keyword.trim()) return
+  if (!keyword || !keyword.trim()) {return}
   const history = getSearchHistory()
   const filtered = history.filter(item => item !== keyword)
   filtered.unshift(keyword)

@@ -83,7 +83,7 @@ const SilentPatterns = [
  * @param {Error} error - 错误对象
  * @returns {boolean}
  */
-const isSilentError = (error) => {
+const isSilentError = error => {
   // 检查 URL 是否匹配静默模式
   const url = error.config?.url || error.response?.config?.url || ''
   return SilentPatterns.some(pattern => url.includes(pattern))
@@ -94,8 +94,8 @@ const isSilentError = (error) => {
  * @param {Error} error - 错误对象
  * @returns {string} 错误类型
  */
-const getErrorType = (error) => {
-  if (!error) return ErrorType.UNKNOWN
+const getErrorType = error => {
+  if (!error) {return ErrorType.UNKNOWN}
 
   // 网络错误（无响应）
   if (!error.response && error.request) {
@@ -272,8 +272,8 @@ export const handleBusinessError = (message, options = {}) => {
  * @param {Array<string>} errors - 错误消息数组
  * @returns {void}
  */
-export const handleValidationErrors = (errors) => {
-  if (!errors || errors.length === 0) return
+export const handleValidationErrors = errors => {
+  if (!errors || errors.length === 0) {return}
 
   const message = errors.join('；')
   ElMessage.error(message)

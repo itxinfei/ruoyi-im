@@ -26,7 +26,7 @@ export function useImWebSocket() {
   }
 
   // 连接 WebSocket
-  const connect = (token) => {
+  const connect = token => {
     if (!token) {
       token = getToken()
     }
@@ -54,7 +54,7 @@ export function useImWebSocket() {
     } catch (e) {
       console.warn('[useImWebSocket] useStore 获取失败，跳过 store 同步')
     }
-    imWebSocket.setStoreConnectionCallback((connected) => {
+    imWebSocket.setStoreConnectionCallback(connected => {
       if (store) {
         store.commit('im/SET_WS_CONNECTED', connected)
       }
@@ -80,57 +80,57 @@ export function useImWebSocket() {
   }
 
   // 发送消息
-  const sendMessage = (message) => {
+  const sendMessage = message => {
     return imWebSocket.send(message)
   }
 
   // 发送正在输入状态
-  const sendTyping = (conversationId) => {
+  const sendTyping = conversationId => {
     return imWebSocket.sendTyping(conversationId)
   }
 
   // 发送停止输入状态
-  const sendStopTyping = (conversationId) => {
+  const sendStopTyping = conversationId => {
     return imWebSocket.sendStopTyping(conversationId)
   }
 
   // 监听消息
-  const onMessage = (callback) => {
+  const onMessage = callback => {
     registerHandler('message', callback)
   }
 
   // 监听用户上线
-  const onOnline = (callback) => {
+  const onOnline = callback => {
     registerHandler('online', callback)
   }
 
   // 监听用户下线
-  const onOffline = (callback) => {
+  const onOffline = callback => {
     registerHandler('offline', callback)
   }
 
   // 监听正在输入
-  const onTyping = (callback) => {
+  const onTyping = callback => {
     registerHandler('typing', callback)
   }
 
   // 监听已读回执
-  const onRead = (callback) => {
+  const onRead = callback => {
     registerHandler('read', callback)
   }
 
   // 监听消息状态更新
-  const onMessageStatus = (callback) => {
+  const onMessageStatus = callback => {
     registerHandler('message_status', callback)
   }
 
   // 监听通话事件
-  const onCall = (callback) => {
+  const onCall = callback => {
     registerHandler('call', callback)
   }
 
   // 监听表情回复
-  const onReaction = (callback) => {
+  const onReaction = callback => {
     registerHandler('reaction', callback)
   }
 

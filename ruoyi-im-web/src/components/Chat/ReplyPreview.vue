@@ -8,7 +8,10 @@
         <span class="reply-user">{{ senderName }}</span>
         <span class="reply-text">{{ content }}</span>
       </div>
-      <el-icon class="cancel-reply" @click="$emit('cancel')">
+      <el-icon
+        class="cancel-reply"
+        @click="$emit('cancel')"
+      >
         <Close />
       </el-icon>
     </div>

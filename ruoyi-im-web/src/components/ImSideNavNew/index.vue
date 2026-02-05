@@ -11,16 +11,30 @@
     <!-- Logo 区域 -->
     <div class="nav-logo-wrapper">
       <div class="nav-logo">
-        <img v-if="logoUrl" :src="logoUrl" class="nav-logo-image" alt="Logo" />
-        <span v-else class="nav-logo-text">IM</span>
-        <span class="nav-logo-badge" v-if="unreadCount > 0">
+        <img
+          v-if="logoUrl"
+          :src="logoUrl"
+          class="nav-logo-image"
+          alt="Logo"
+        >
+        <span
+          v-else
+          class="nav-logo-text"
+        >IM</span>
+        <span
+          v-if="unreadCount > 0"
+          class="nav-logo-badge"
+        >
           {{ unreadCount > 99 ? '99+' : unreadCount }}
         </span>
       </div>
     </div>
 
     <!-- 导航项 -->
-    <div class="nav-items" role="menubar">
+    <div
+      class="nav-items"
+      role="menubar"
+    >
       <el-tooltip
         v-for="item in navModules"
         :key="item.key"
@@ -30,7 +44,6 @@
         :hide-after="0"
       >
         <button
-          @click="handleSwitch(item.key)"
           :class="[
             'nav-item',
             activeModule === item.key ? 'nav-item-active' : ''
@@ -38,9 +51,17 @@
           :aria-label="item.label"
           :aria-current="activeModule === item.key ? 'page' : undefined"
           role="menuitem"
+          @click="handleSwitch(item.key)"
         >
-          <component :is="item.icon" class="nav-item-icon" aria-hidden="true" />
-          <span v-if="item.badge" class="nav-item-badge">{{ item.badge }}</span>
+          <component
+            :is="item.icon"
+            class="nav-item-icon"
+            aria-hidden="true"
+          />
+          <span
+            v-if="item.badge"
+            class="nav-item-badge"
+          >{{ item.badge }}</span>
         </button>
       </el-tooltip>
     </div>
@@ -48,27 +69,43 @@
     <!-- 底部操作区 -->
     <div class="nav-footer">
       <!-- 搜索按钮 -->
-      <el-tooltip content="全局搜索" placement="right" :show-after="500" :hide-after="0">
+      <el-tooltip
+        content="全局搜索"
+        placement="right"
+        :show-after="500"
+        :hide-after="0"
+      >
         <button
-          @click="handleOpenSearch"
           class="nav-item nav-item-action"
           aria-label="全局搜索"
+          @click="handleOpenSearch"
         >
-          <Search class="nav-icon" aria-hidden="true" />
+          <Search
+            class="nav-icon"
+            aria-hidden="true"
+          />
         </button>
       </el-tooltip>
 
 
 
       <!-- 设置按钮 -->
-      <el-tooltip content="设置" placement="right" :show-after="500" :hide-after="0">
+      <el-tooltip
+        content="设置"
+        placement="right"
+        :show-after="500"
+        :hide-after="0"
+      >
         <button
-          @click="handleSwitch('settings')"
           class="nav-item nav-item-action"
           :class="{ 'nav-item-active': activeModule === 'settings' }"
           aria-label="设置"
+          @click="handleSwitch('settings')"
         >
-          <Setting class="nav-icon" aria-hidden="true" />
+          <Setting
+            class="nav-icon"
+            aria-hidden="true"
+          />
         </button>
       </el-tooltip>
 
@@ -80,10 +117,10 @@
         :hide-after="0"
       >
         <button
-          @click="handleSwitch('profile')"
           class="nav-avatar"
           :class="{ 'nav-avatar-active': activeModule === 'profile' }"
           :aria-label="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`"
+          @click="handleSwitch('profile')"
         >
           <DingtalkAvatar
             :src="currentUser.avatar"
@@ -93,7 +130,10 @@
             shape="circle"
           />
           <!-- 在线状态点 -->
-          <span class="nav-avatar-status" :class="{ 'online': isUserOnline }"></span>
+          <span
+            class="nav-avatar-status"
+            :class="{ 'online': isUserOnline }"
+          />
         </button>
       </el-tooltip>
     </div>
@@ -149,7 +189,7 @@ const currentUser = computed(() => {
 
 // 用户在线状态
 const isUserOnline = computed(() => {
-  if (!currentUser.value?.id) return false
+  if (!currentUser.value?.id) {return false}
   return store.state.im?.userStatus?.[currentUser.value.id] === 'online'
 })
 

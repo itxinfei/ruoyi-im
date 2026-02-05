@@ -1,12 +1,19 @@
 <template>
-  <div v-if="visible" class="upload-progress-container">
+  <div
+    v-if="visible"
+    class="upload-progress-container"
+  >
     <div class="upload-progress-header">
       <div class="upload-info">
         <span class="material-icons-outlined upload-icon">cloud_upload</span>
         <span class="upload-title">正在上传...</span>
         <span class="upload-count">({{ totalCount }}/{{ totalCount }})</span>
       </div>
-      <button v-if="cancellable" class="cancel-btn" @click="handleCancel">
+      <button
+        v-if="cancellable"
+        class="cancel-btn"
+        @click="handleCancel"
+      >
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -14,11 +21,16 @@
     <!-- 总体进度条 -->
     <div class="progress-section">
       <div class="progress-bar-wrapper">
-        <div class="progress-bar" :style="{ width: overallProgress + '%' }">
-          <div class="progress-bar-shine"></div>
+        <div
+          class="progress-bar"
+          :style="{ width: overallProgress + '%' }"
+        >
+          <div class="progress-bar-shine" />
         </div>
       </div>
-      <div class="progress-text">{{ overallProgress }}%</div>
+      <div class="progress-text">
+        {{ overallProgress }}%
+      </div>
     </div>
 
     <!-- 详细信息 -->
@@ -42,7 +54,10 @@
     </div>
 
     <!-- 文件列表 -->
-    <div v-if="showFileList" class="file-list">
+    <div
+      v-if="showFileList"
+      class="file-list"
+    >
       <div
         v-for="(file, index) in files"
         :key="index"
@@ -50,15 +65,29 @@
         :class="{ 'is-uploading': file.status === 'uploading', 'is-completed': file.status === 'completed', 'is-failed': file.status === 'failed' }"
       >
         <div class="file-status-icon">
-          <span v-if="file.status === 'uploading'" class="material-icons-outlined is-loading">sync</span>
-          <span v-else-if="file.status === 'completed'" class="material-icons-outlined">check_circle</span>
-          <span v-else-if="file.status === 'failed'" class="material-icons-outlined">error</span>
+          <span
+            v-if="file.status === 'uploading'"
+            class="material-icons-outlined is-loading"
+          >sync</span>
+          <span
+            v-else-if="file.status === 'completed'"
+            class="material-icons-outlined"
+          >check_circle</span>
+          <span
+            v-else-if="file.status === 'failed'"
+            class="material-icons-outlined"
+          >error</span>
         </div>
         <div class="file-info">
-          <div class="file-name">{{ file.name }}</div>
+          <div class="file-name">
+            {{ file.name }}
+          </div>
           <div class="file-progress">
             <div class="mini-progress-bar">
-              <div class="mini-progress-fill" :style="{ width: file.progress + '%' }"></div>
+              <div
+                class="mini-progress-fill"
+                :style="{ width: file.progress + '%' }"
+              />
             </div>
             <span class="file-progress-text">{{ file.progress }}%</span>
           </div>
@@ -114,7 +143,7 @@ const emit = defineEmits(['cancel'])
 // 计算属性
 const totalCount = computed(() => props.files.length)
 const overallProgress = computed(() => {
-  if (props.totalBytes === 0) return 0
+  if (props.totalBytes === 0) {return 0}
   return Math.round((props.uploadedBytes / props.totalBytes) * 100)
 })
 
@@ -131,7 +160,7 @@ const currentSpeed = ref(0)
 // 更新速度（每秒计算一次）
 let speedUpdateTimer = null
 
-watch(() => props.uploadedBytes, (newBytes) => {
+watch(() => props.uploadedBytes, newBytes => {
   const now = Date.now()
   const timeDiff = (now - lastUpdateTime.value) / 1000 // 秒
   const bytesDiff = newBytes - lastUploadedBytes.value
@@ -162,7 +191,7 @@ function stopSpeedUpdateTimer() {
   }
 }
 
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, newVal => {
   if (newVal) {
     startSpeedUpdateTimer()
   } else {
@@ -176,7 +205,7 @@ onUnmounted(() => {
 
 // 格式化速度
 const uploadSpeed = computed(() => {
-  if (currentSpeed.value === 0) return '0 B/s'
+  if (currentSpeed.value === 0) {return '0 B/s'}
   return formatBytes(currentSpeed.value) + '/s'
 })
 
@@ -205,7 +234,7 @@ const uploadedSize = computed(() => formatBytes(props.uploadedBytes))
 const totalSize = computed(() => formatBytes(props.totalBytes))
 
 function formatBytes(bytes) {
-  if (bytes === 0) return '0 B'
+  if (bytes === 0) {return '0 B'}
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))

@@ -1,7 +1,10 @@
 <template>
   <div class="nudge-message-bubble">
     <!-- 头像 -->
-    <div class="nudge-avatar" @click="$emit('show-user', nudge.nudgerId)">
+    <div
+      class="nudge-avatar"
+      @click="$emit('show-user', nudge.nudgerId)"
+    >
       <DingtalkAvatar
         :src="nudge.nudgerAvatar"
         :name="nudge.nudgerName"
@@ -14,17 +17,24 @@
     <!-- 消息内容 -->
     <div class="nudge-content">
       <!-- 发送者昵称 -->
-      <div class="sender-name">{{ nudge.nudgerName }}</div>
+      <div class="sender-name">
+        {{ nudge.nudgerName }}
+      </div>
 
       <!-- 拍一拍提示 -->
       <div class="nudge-hint">
         <span class="nudge-icon">👋</span>
         <span class="nudge-text">{{ nudgeHint }}</span>
-        <span v-if="nudge.nudgeCount > 1" class="nudge-count">×{{ nudge.nudgeCount }}</span>
+        <span
+          v-if="nudge.nudgeCount > 1"
+          class="nudge-count"
+        >×{{ nudge.nudgeCount }}</span>
       </div>
 
       <!-- 时间戳 -->
-      <div class="message-time">{{ formattedTime }}</div>
+      <div class="message-time">
+        {{ formattedTime }}
+      </div>
     </div>
   </div>
 </template>
@@ -59,15 +69,15 @@ const nudgeHint = computed(() => {
 
 // 格式化时间
 const formattedTime = computed(() => {
-  if (!props.nudge.createTime) return ''
+  if (!props.nudge.createTime) {return ''}
   const date = new Date(props.nudge.createTime)
   const now = new Date()
   const diff = now - date
 
   // 小于1分钟
-  if (diff < 60000) return '刚刚'
+  if (diff < 60000) {return '刚刚'}
   // 小于1小时
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
+  if (diff < 3600000) {return `${Math.floor(diff / 60000)}分钟前`}
   // 今天
   if (date.toDateString() === now.toDateString()) {
     return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })

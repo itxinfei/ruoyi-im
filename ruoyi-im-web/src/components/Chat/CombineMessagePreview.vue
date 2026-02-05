@@ -1,5 +1,8 @@
 <template>
-  <div class="combine-preview" @click="handleClick">
+  <div
+    class="combine-preview"
+    @click="handleClick"
+  >
     <!-- 标题栏 -->
     <div class="preview-header">
       <span class="material-icons-outlined">forum</span>
@@ -16,7 +19,10 @@
         <span class="msg-sender">{{ msg.senderName }}:</span>
         <span class="msg-content">{{ getMessagePreview(msg) }}</span>
       </div>
-      <div v-if="hasMore" class="preview-more">
+      <div
+        v-if="hasMore"
+        class="preview-more"
+      >
         还有 {{ moreCount }} 条消息...
       </div>
     </div>
@@ -24,7 +30,10 @@
     <!-- 页脚：消息数量和时间范围 -->
     <div class="preview-footer">
       <span class="message-count">{{ messageCount }} 条消息</span>
-      <span v-if="timeRange" class="time-range">{{ timeRange }}</span>
+      <span
+        v-if="timeRange"
+        class="time-range"
+      >{{ timeRange }}</span>
     </div>
   </div>
 </template>
@@ -64,7 +73,7 @@ const moreCount = computed(() => props.messages.length - props.maxPreview)
 
 // 时间范围
 const timeRange = computed(() => {
-  if (props.messages.length === 0) return ''
+  if (props.messages.length === 0) {return ''}
 
   const timestamps = props.messages
     .map(m => m.timestamp || m.sendTime || m.createTime)
@@ -72,7 +81,7 @@ const timeRange = computed(() => {
     .map(t => new Date(t).getTime())
     .sort((a, b) => a - b)
 
-  if (timestamps.length === 0) return ''
+  if (timestamps.length === 0) {return ''}
 
   const start = new Date(timestamps[0])
   const end = new Date(timestamps[timestamps.length - 1])
@@ -84,7 +93,7 @@ const timeRange = computed(() => {
 })
 
 // 获取消息预览文本
-const getMessagePreview = (msg) => {
+const getMessagePreview = msg => {
   const type = msg.type || msg.messageType || 'TEXT'
 
   switch (type) {

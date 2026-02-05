@@ -2,32 +2,64 @@
   <div class="input-toolbar">
     <!-- 左侧工具组：媒体操作 -->
     <div class="toolbar-left">
-      <el-tooltip content="表情" placement="top">
-        <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="$emit('toggle-emoji')">
+      <el-tooltip
+        content="表情"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          :class="{ active: showEmojiPicker }"
+          @click.stop="$emit('toggle-emoji')"
+        >
           <span class="material-icons-outlined">sentiment_satisfied_alt</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip content="图片" placement="top">
-        <button class="toolbar-btn" @click="$emit('upload-image')">
+      <el-tooltip
+        content="图片"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('upload-image')"
+        >
           <span class="material-icons-outlined">image</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip content="文件" placement="top">
-        <button class="toolbar-btn" @click="$emit('upload-file')">
+      <el-tooltip
+        content="文件"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('upload-file')"
+        >
           <span class="material-icons-outlined">insert_drive_file</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip content="截图" placement="top">
-        <button class="toolbar-btn" @click="$emit('screenshot')">
+      <el-tooltip
+        content="截图"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('screenshot')"
+        >
           <span class="material-icons-outlined">screenshot</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip content="@成员" placement="top" v-if="showAtButton">
-        <button class="toolbar-btn" @click="$emit('at-member')">
+      <el-tooltip
+        v-if="showAtButton"
+        content="@成员"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('at-member')"
+        >
           <span class="material-icons-outlined">alternate_email</span>
         </button>
       </el-tooltip>
@@ -37,21 +69,39 @@
     <div class="toolbar-right">
       <!-- 通话按钮组 -->
       <div class="call-buttons">
-        <el-tooltip content="语音通话" placement="top">
-          <button class="toolbar-btn call-btn voice-call" @click="$emit('voice-call')">
+        <el-tooltip
+          content="语音通话"
+          placement="top"
+        >
+          <button
+            class="toolbar-btn call-btn voice-call"
+            @click="$emit('voice-call')"
+          >
             <span class="material-icons-outlined">phone</span>
           </button>
         </el-tooltip>
 
-        <el-tooltip content="视频通话" placement="top">
-          <button class="toolbar-btn call-btn video-call" @click="$emit('video-call')">
+        <el-tooltip
+          content="视频通话"
+          placement="top"
+        >
+          <button
+            class="toolbar-btn call-btn video-call"
+            @click="$emit('video-call')"
+          >
             <span class="material-icons-outlined">videocam</span>
           </button>
         </el-tooltip>
       </div>
 
-      <el-tooltip content="AI 灵动回复" placement="top">
-        <button class="toolbar-btn ai-reply-btn" @click="$emit('smart-reply')">
+      <el-tooltip
+        content="AI 灵动回复"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn ai-reply-btn"
+          @click="$emit('smart-reply')"
+        >
           <span class="material-icons-outlined">auto_awesome</span>
         </button>
       </el-tooltip>

@@ -22,15 +22,24 @@
           drag
         >
           <div class="upload-area">
-            <el-icon class="upload-icon"><Plus /></el-icon>
-            <div class="upload-text">点击或拖拽图片到此处上传</div>
-            <div class="upload-hint">支持 PNG、JPG、GIF、WebP 格式，最大 2MB</div>
+            <el-icon class="upload-icon">
+              <Plus />
+            </el-icon>
+            <div class="upload-text">
+              点击或拖拽图片到此处上传
+            </div>
+            <div class="upload-hint">
+              支持 PNG、JPG、GIF、WebP 格式，最大 2MB
+            </div>
           </div>
         </el-upload>
       </div>
 
       <!-- 表情列表 -->
-      <div v-loading="loading" class="emoji-list-section">
+      <div
+        v-loading="loading"
+        class="emoji-list-section"
+      >
         <div class="section-header">
           <span class="section-title">我的表情 ({{ myEmojis.length }})</span>
           <el-input
@@ -46,19 +55,29 @@
           </el-input>
         </div>
 
-        <div v-if="!loading && myEmojis.length === 0" class="empty-state">
+        <div
+          v-if="!loading && myEmojis.length === 0"
+          class="empty-state"
+        >
           <el-icon><FolderOpened /></el-icon>
           <span>还没有自定义表情，快来添加吧~</span>
         </div>
 
-        <div v-else class="emoji-grid">
+        <div
+          v-else
+          class="emoji-grid"
+        >
           <div
             v-for="emoji in filteredEmojis"
             :key="emoji.id"
             class="emoji-item"
           >
             <div class="emoji-image-wrapper">
-              <img :src="emoji.emojiUrl" :alt="emoji.emojiName" class="emoji-image" />
+              <img
+                :src="emoji.emojiUrl"
+                :alt="emoji.emojiName"
+                class="emoji-image"
+              >
             </div>
             <div class="emoji-info">
               <span class="emoji-name">{{ emoji.emojiName }}</span>
@@ -80,7 +99,10 @@
       </div>
 
       <!-- 系统表情（只读展示） -->
-      <div v-if="systemEmojis.length > 0" class="system-emoji-section">
+      <div
+        v-if="systemEmojis.length > 0"
+        class="system-emoji-section"
+      >
         <div class="section-header">
           <span class="section-title">系统表情 ({{ systemEmojis.length }})</span>
         </div>
@@ -91,7 +113,11 @@
             class="emoji-item system"
           >
             <div class="emoji-image-wrapper">
-              <img :src="emoji.emojiUrl" :alt="emoji.emojiName" class="emoji-image" />
+              <img
+                :src="emoji.emojiUrl"
+                :alt="emoji.emojiName"
+                class="emoji-image"
+              >
             </div>
             <div class="emoji-info">
               <span class="emoji-name">{{ emoji.emojiName }}</span>
@@ -112,7 +138,9 @@
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">关闭</el-button>
+      <el-button @click="visible = false">
+        关闭
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -136,7 +164,7 @@ const emit = defineEmits(['update:modelValue', 'refresh'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const loading = ref(false)
@@ -174,7 +202,7 @@ const systemEmojis = computed(() => {
 // 过滤后的表情
 const filteredEmojis = computed(() => {
   const keyword = searchKeyword.value.toLowerCase().trim()
-  if (!keyword) return myEmojis.value
+  if (!keyword) {return myEmojis.value}
   return myEmojis.value.filter(e =>
     (e.emojiName && e.emojiName.toLowerCase().includes(keyword)) ||
     (e.emojiCode && e.emojiCode.toLowerCase().includes(keyword))
@@ -197,7 +225,7 @@ const loadEmojis = async () => {
 }
 
 // 上传前校验
-const beforeUpload = (file) => {
+const beforeUpload = file => {
   const validTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
   const isValidType = validTypes.includes(file.type)
   const isValidSize = file.size <= 2 * 1024 * 1024
@@ -216,7 +244,7 @@ const beforeUpload = (file) => {
 }
 
 // 上传成功
-const handleUploadSuccess = (response) => {
+const handleUploadSuccess = response => {
   if (response.code === 200) {
     ElMessage.success('表情添加成功')
     loadEmojis()
@@ -232,7 +260,7 @@ const handleUploadError = () => {
 }
 
 // 删除表情
-const handleDelete = async (emoji) => {
+const handleDelete = async emoji => {
   try {
     await ElMessageBox.confirm(`确定要删除表情"${emoji.emojiName}"吗？`, '提示', {
       confirmButtonText: '确定',
@@ -257,7 +285,7 @@ const handleDelete = async (emoji) => {
 }
 
 // 添加系统表情到我的表情
-const handleAddToMine = async (emoji) => {
+const handleAddToMine = async emoji => {
   try {
     const res = await shareEmoji(emoji.id)
     if (res.code === 200) {

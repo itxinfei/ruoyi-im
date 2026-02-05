@@ -20,7 +20,7 @@ export class OCREngine {
    * 加载 Tesseract.js
    */
   async load() {
-    if (this.loaded) return true
+    if (this.loaded) {return true}
     if (this.loading) {
       // 等待加载完成
       while (this.loading) {
@@ -77,7 +77,7 @@ export class OCREngine {
         imageData,
         language,
         {
-          logger: (m) => {
+          logger: m => {
             if (m.status === 'recognizing text') {
               logger({
                 status: 'processing',

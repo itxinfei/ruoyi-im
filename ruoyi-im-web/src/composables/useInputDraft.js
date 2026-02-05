@@ -79,7 +79,7 @@ export function useInputDraft(options = {}) {
    * @param {string} content - 草稿内容
    */
   const saveDraft = (conversationId, content) => {
-    if (!conversationId) return
+    if (!conversationId) {return}
 
     // 只同步到 store，不触发可能导致 UI 更新的回调
     store.dispatch('im/session/saveDraft', { conversationId, content })
@@ -98,8 +98,8 @@ export function useInputDraft(options = {}) {
    * 清除草稿
    * @param {string} conversationId - 会话ID
    */
-  const clearDraft = (conversationId) => {
-    if (!conversationId) return
+  const clearDraft = conversationId => {
+    if (!conversationId) {return}
 
     store.dispatch('im/session/clearDraft', conversationId)
 
@@ -118,12 +118,12 @@ export function useInputDraft(options = {}) {
    * @param {Function} callback - 加载完成后的回调
    */
   const loadDraft = (conversationId, callback = null) => {
-    if (!conversationId) return
+    if (!conversationId) {return}
 
     const draftContent = store.getters['im/session/getDraftContent'](conversationId)
     if (draftContent) {
       messageContent.value = draftContent
-      if (callback) callback(draftContent)
+      if (callback) {callback(draftContent)}
     } else {
       messageContent.value = ''
     }
@@ -169,7 +169,7 @@ export function useInputDraft(options = {}) {
     }, { immediate: true })
 
     // 监听输入内容变化，防抖保存
-    watch(messageContent, (newContent) => {
+    watch(messageContent, newContent => {
       if (currentConversationId.value && newContent !== undefined) {
         debouncedSaveDraft(currentConversationId.value, newContent)
       }

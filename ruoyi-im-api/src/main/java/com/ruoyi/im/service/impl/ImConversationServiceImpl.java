@@ -153,14 +153,28 @@ public class ImConversationServiceImpl implements ImConversationService {
 
         // 批量查询群组信息
         java.util.Map<Long, ImGroup> groupMap = new java.util.HashMap<>();
+        java.util.Map<Long, Integer> groupMemberCountMap = new java.util.HashMap<>();
         if (!groupIds.isEmpty()) {
             List<ImGroup> groups = imGroupMapper.selectGroupsByIds(new java.util.ArrayList<>(groupIds));
             for (ImGroup group : groups) {
                 groupMap.put(group.getId(), group);
             }
+
+            // 批量查询群组成员数量
+            List<java.util.Map<String, Object>> memberCounts = imConversationMemberMapper.countMembersByConversationIds(new java.util.ArrayList<>(groupIds));
+            for (java.util.Map<String, Object> countMap : memberCounts) {
+                Long conversationId = ((Number) countMap.get("conversationId")).longValue();
+                Integer count = ((Number) countMap.get("memberCount")).intValue();
+                groupMemberCountMap.put(conversationId, count);
+                // 同时设置到 group 对象中
+                ImGroup group = groupMap.get(conversationId);
+                if (group != null) {
+                    group.setMemberCount(count);
+                }
+            }
         }
 
-        return new BatchData(lastMessageMap, userMap, groupMap);
+        return new BatchData(lastMessageMap, userMap, groupMap, groupMemberCountMap);
     }
 
     /**
@@ -180,7 +194,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                     || StatusConstants.ConversationType.SINGLE.equalsIgnoreCase(vo.getType())) {
                 processPrivateConversation(vo, userId, batchData.userMap, privateConversationMap);
             } else if (MessageStatusConstants.CONVERSATION_TYPE_GROUP.equalsIgnoreCase(vo.getType())) {
-                processGroupConversation(vo, batchData.groupMap, voList);
+                processGroupConversation(vo, batchData.groupMap, batchData.groupMemberCountMap, voList);
             }
         }
 
@@ -267,6 +281,7 @@ public class ImConversationServiceImpl implements ImConversationService {
      * 处理群聊会话
      */
     private void processGroupConversation(ImConversationVO vo, java.util.Map<Long, ImGroup> groupMap,
+                                         java.util.Map<Long, Integer> groupMemberCountMap,
                                          List<ImConversationVO> voList) {
         Long groupId = vo.getTargetId();
         if (groupId == null) {
@@ -276,6 +291,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         ImGroup group = groupMap.get(groupId);
         String groupName;
         String groupAvatar;
+        Integer memberCount = 0;
 
         if (group != null) {
             groupName = group.getName();
@@ -283,8 +299,6 @@ public class ImConversationServiceImpl implements ImConversationService {
             if (groupAvatar == null || groupAvatar.isEmpty()) {
                 groupAvatar = "/avatar/group_default.png";
             }
-            // 设置群成员数量
-            vo.setMemberCount(group.getMemberCount() != null ? group.getMemberCount() : 0);
         } else {
             // 群组信息获取失败，使用默认值
             groupName = vo.getName();
@@ -292,8 +306,13 @@ public class ImConversationServiceImpl implements ImConversationService {
                 groupName = "群聊";
             }
             groupAvatar = "/avatar/group_default.png";
-            vo.setMemberCount(0);
         }
+
+        // 从统计结果获取成员数量
+        if (groupMemberCountMap.containsKey(groupId)) {
+            memberCount = groupMemberCountMap.get(groupId);
+        }
+        vo.setMemberCount(memberCount != null ? memberCount : 0);
 
         vo.setPeerName(groupName);
         vo.setPeerAvatar(groupAvatar);
@@ -331,13 +350,16 @@ public class ImConversationServiceImpl implements ImConversationService {
         final java.util.Map<Long, ImMessage> lastMessageMap;
         final java.util.Map<Long, ImUser> userMap;
         final java.util.Map<Long, ImGroup> groupMap;
+        final java.util.Map<Long, Integer> groupMemberCountMap;
 
         BatchData(java.util.Map<Long, ImMessage> lastMessageMap,
                  java.util.Map<Long, ImUser> userMap,
-                 java.util.Map<Long, ImGroup> groupMap) {
+                 java.util.Map<Long, ImGroup> groupMap,
+                 java.util.Map<Long, Integer> groupMemberCountMap) {
             this.lastMessageMap = lastMessageMap;
             this.userMap = userMap;
             this.groupMap = groupMap;
+            this.groupMemberCountMap = groupMemberCountMap;
         }
     }
 

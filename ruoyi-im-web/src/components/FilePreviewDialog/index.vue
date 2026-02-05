@@ -5,14 +5,22 @@
     width="800px"
     @close="handleClose"
   >
-    <div v-if="file" class="file-preview">
+    <div
+      v-if="file"
+      class="file-preview"
+    >
       <!-- 文件信息 -->
       <div class="preview-header">
-        <div class="file-icon-large" :class="file.iconClass">
+        <div
+          class="file-icon-large"
+          :class="file.iconClass"
+        >
           <span class="material-icons-outlined">{{ file.icon }}</span>
         </div>
         <div class="file-info">
-          <div class="file-name">{{ file.name }}</div>
+          <div class="file-name">
+            {{ file.name }}
+          </div>
           <div class="file-meta">
             <span>{{ file.meta }}</span>
             <span>{{ file.modifiedTime }}</span>
@@ -22,43 +30,68 @@
 
       <!-- 预览内容 -->
       <div class="preview-content">
-        <div v-if="isImageFile" class="image-preview">
+        <div
+          v-if="isImageFile"
+          class="image-preview"
+        >
           <div class="preview-placeholder">
             <span class="material-icons-outlined">image</span>
             <p>图片预览</p>
-            <p class="preview-hint">{{ file.name }}</p>
+            <p class="preview-hint">
+              {{ file.name }}
+            </p>
           </div>
         </div>
 
-        <div v-else-if="isPdfFile" class="pdf-preview">
+        <div
+          v-else-if="isPdfFile"
+          class="pdf-preview"
+        >
           <div class="preview-placeholder">
             <span class="material-icons-outlined">picture_as_pdf</span>
             <p>PDF 文件预览</p>
-            <p class="preview-hint">{{ file.name }}</p>
+            <p class="preview-hint">
+              {{ file.name }}
+            </p>
           </div>
         </div>
 
-        <div v-else-if="isDocFile" class="doc-preview">
+        <div
+          v-else-if="isDocFile"
+          class="doc-preview"
+        >
           <div class="preview-placeholder">
             <span class="material-icons-outlined">description</span>
             <p>Word 文档预览</p>
-            <p class="preview-hint">{{ file.name }}</p>
+            <p class="preview-hint">
+              {{ file.name }}
+            </p>
           </div>
         </div>
 
-        <div v-else-if="isSheetFile" class="sheet-preview">
+        <div
+          v-else-if="isSheetFile"
+          class="sheet-preview"
+        >
           <div class="preview-placeholder">
             <span class="material-icons-outlined">table_view</span>
             <p>Excel 表格预览</p>
-            <p class="preview-hint">{{ file.name }}</p>
+            <p class="preview-hint">
+              {{ file.name }}
+            </p>
           </div>
         </div>
 
-        <div v-else class="unknown-preview">
+        <div
+          v-else
+          class="unknown-preview"
+        >
           <div class="preview-placeholder">
             <span class="material-icons-outlined">insert_drive_file</span>
             <p>该文件类型暂不支持预览</p>
-            <p class="preview-hint">您可以下载文件后使用本地程序打开</p>
+            <p class="preview-hint">
+              您可以下载文件后使用本地程序打开
+            </p>
           </div>
         </div>
       </div>
@@ -67,7 +100,10 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">关闭</el-button>
-        <el-button type="primary" @click="handleDownload">
+        <el-button
+          type="primary"
+          @click="handleDownload"
+        >
           <span class="material-icons-outlined">download</span>
           下载
         </el-button>
@@ -112,11 +148,11 @@ const isSheetFile = computed(() => {
   return props.file?.iconClass === 'icon-sheet'
 })
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 

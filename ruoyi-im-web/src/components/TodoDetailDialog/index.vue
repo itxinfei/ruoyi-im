@@ -5,34 +5,63 @@
     width="500px"
     @close="handleClose"
   >
-    <div v-if="todo" class="todo-detail">
+    <div
+      v-if="todo"
+      class="todo-detail"
+    >
       <!-- 状态标签 -->
       <div class="detail-header">
-        <span class="status-badge" :class="todo.completed ? 'completed' : 'pending'">
+        <span
+          class="status-badge"
+          :class="todo.completed ? 'completed' : 'pending'"
+        >
           {{ todo.completed ? '已完成' : '进行中' }}
         </span>
-        <span class="priority-badge" :class="todo.priority">{{ priorityText(todo.priority) }}</span>
+        <span
+          class="priority-badge"
+          :class="todo.priority"
+        >{{ priorityText(todo.priority) }}</span>
       </div>
 
       <!-- 内容描述 -->
-      <div v-if="todo.content" class="detail-section">
-        <div class="section-label">描述</div>
-        <div class="section-content">{{ todo.content }}</div>
+      <div
+        v-if="todo.content"
+        class="detail-section"
+      >
+        <div class="section-label">
+          描述
+        </div>
+        <div class="section-content">
+          {{ todo.content }}
+        </div>
       </div>
 
       <!-- 截止时间 -->
       <div class="detail-section">
-        <div class="section-label">截止时间</div>
-        <div class="section-content" :class="{ overdue: isOverdue(todo.dueDate) }">
+        <div class="section-label">
+          截止时间
+        </div>
+        <div
+          class="section-content"
+          :class="{ overdue: isOverdue(todo.dueDate) }"
+        >
           <span class="material-icons-outlined">schedule</span>
           {{ formatDate(todo.dueDate) }}
-          <span v-if="isOverdue(todo.dueDate)" class="overdue-tag">已过期</span>
+          <span
+            v-if="isOverdue(todo.dueDate)"
+            class="overdue-tag"
+          >已过期</span>
         </div>
       </div>
 
       <!-- 创建时间 -->
-      <div v-if="todo.createdAt" class="detail-section">
-        <div class="section-label">创建时间</div>
+      <div
+        v-if="todo.createdAt"
+        class="detail-section"
+      >
+        <div class="section-label">
+          创建时间
+        </div>
         <div class="section-content">
           <span class="material-icons-outlined">create</span>
           {{ todo.createdAt }}
@@ -42,14 +71,30 @@
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button v-if="todo && !todo.completed" type="success" :icon="Check" @click="handleComplete">
+        <el-button
+          v-if="todo && !todo.completed"
+          type="success"
+          :icon="Check"
+          @click="handleComplete"
+        >
           标记完成
         </el-button>
-        <el-button v-if="todo && todo.completed" :icon="Refresh" @click="handleComplete">
+        <el-button
+          v-if="todo && todo.completed"
+          :icon="Refresh"
+          @click="handleComplete"
+        >
           重启待办
         </el-button>
-        <el-button :icon="Edit" @click="handleEdit">编辑</el-button>
-        <el-button type="danger" :icon="Delete" @click="handleDelete">删除</el-button>
+        <el-button
+          :icon="Edit"
+          @click="handleEdit"
+        >编辑</el-button>
+        <el-button
+          type="danger"
+          :icon="Delete"
+          @click="handleDelete"
+        >删除</el-button>
       </span>
     </template>
   </el-dialog>
@@ -75,18 +120,18 @@ const emit = defineEmits(['update:modelValue', 'edit', 'delete', 'complete'])
 
 const visible = ref(false)
 
-const priorityText = (priority) => {
+const priorityText = priority => {
   const map = { high: '紧急', medium: '普通', low: '低' }
   return map[priority] || '普通'
 }
 
-const isOverdue = (dueDate) => {
-  if (!dueDate) return false
+const isOverdue = dueDate => {
+  if (!dueDate) {return false}
   return new Date(dueDate) < new Date()
 }
 
-const formatDate = (date) => {
-  if (!date) return '无截止日期'
+const formatDate = date => {
+  if (!date) {return '无截止日期'}
   return new Date(date).toLocaleString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
@@ -96,11 +141,11 @@ const formatDate = (date) => {
   })
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 

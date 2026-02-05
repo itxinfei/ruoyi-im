@@ -30,8 +30,8 @@ export function useUserStatus(options = {}) {
    * @param {number|string} userId - 用户ID
    * @returns {boolean} 用户是否在线
    */
-  const isUserOnline = (userId) => {
-    if (!userId) return false
+  const isUserOnline = userId => {
+    if (!userId) {return false}
     const userStatus = store.state.im?.contact?.userStatus || {}
     return userStatus[userId] === UserStatus.ONLINE
   }
@@ -41,8 +41,8 @@ export function useUserStatus(options = {}) {
    * @param {number|string} userId - 用户ID
    * @returns {string} 状态文本
    */
-  const getUserStatusText = (userId) => {
-    if (!userId) return '离线'
+  const getUserStatusText = userId => {
+    if (!userId) {return '离线'}
     const userStatus = store.state.im?.contact?.userStatus || {}
     const status = userStatus[userId]
     switch (status) {
@@ -71,8 +71,8 @@ export function useUserStatus(options = {}) {
    * @param {Object} session - 会话对象
    * @returns {boolean} 用户是否在线
    */
-  const isSessionUserOnline = (session) => {
-    if (!session || session.type === 'GROUP') return false
+  const isSessionUserOnline = session => {
+    if (!session || session.type === 'GROUP') {return false}
 
     const userId = session.targetId
     if (userId && store.state.im?.contact?.userStatus?.[userId]) {
@@ -87,7 +87,7 @@ export function useUserStatus(options = {}) {
    * @param {Object} session - 会话对象
    * @returns {import('vue').ComputedRef<boolean>}
    */
-  const createSessionOnlineComputed = (session) => {
+  const createSessionOnlineComputed = session => {
     return computed(() => isSessionUserOnline(session))
   }
 

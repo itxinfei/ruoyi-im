@@ -1,10 +1,23 @@
 <template>
-  <div class="message-list" ref="listRef" @scroll="handleScroll">
+  <div
+    ref="listRef"
+    class="message-list"
+    @scroll="handleScroll"
+  >
     <!-- 首次加载骨架屏 -->
-    <SkeletonLoader v-if="loading && messages.length === 0" type="message" :count="6" />
+    <SkeletonLoader
+      v-if="loading && messages.length === 0"
+      type="message"
+      :count="6"
+    />
 
     <!-- 空状态 -->
-    <div v-else-if="messages.length === 0 && !loading" class="empty">暂无消息</div>
+    <div
+      v-else-if="messages.length === 0 && !loading"
+      class="empty"
+    >
+      暂无消息
+    </div>
 
     <!-- 消息内容 - 虚拟滚动优化 -->
     <template v-else>
@@ -13,7 +26,7 @@
         v-if="isLazyLoadingEnabled"
         class="virtual-spacer-top"
         :style="{ height: topSpacerHeight + 'px' }"
-      ></div>
+      />
 
       <!-- 可见消息列表 -->
       <div
@@ -23,7 +36,10 @@
         class="message-wrapper"
       >
         <!-- 时间分隔符 -->
-        <div v-if="msg.isTimeDivider" class="time-divider">
+        <div
+          v-if="msg.isTimeDivider"
+          class="time-divider"
+        >
           <span class="time-text">{{ msg.timeText }}</span>
         </div>
 
@@ -73,33 +89,62 @@
                   {{ msg.readCount > 0 ? `${msg.readCount}人已读` : '已读' }}
                 </span>
               </template>
-              <div v-loading="loadingReadUsers[msg.id]" class="read-users-list">
+              <div
+                v-loading="loadingReadUsers[msg.id]"
+                class="read-users-list"
+              >
                 <div class="read-users-header">
                   <span class="read-title">已读成员</span>
-                  <span v-if="readUsersMap[msg.id]" class="read-count-badge">{{ readUsersMap[msg.id].length }}</span>
+                  <span
+                    v-if="readUsersMap[msg.id]"
+                    class="read-count-badge"
+                  >{{ readUsersMap[msg.id].length }}</span>
                 </div>
                 <div class="read-users-body">
-                  <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
-                    <DingtalkAvatar :src="user.avatar" :name="user.name" :user-id="user.id" :size="32" shape="square" />
+                  <div
+                    v-for="user in readUsersMap[msg.id]"
+                    :key="user.id"
+                    class="read-user-item"
+                  >
+                    <DingtalkAvatar
+                      :src="user.avatar"
+                      :name="user.name"
+                      :user-id="user.id"
+                      :size="32"
+                      shape="square"
+                    />
                     <span class="user-name">{{ user.name }}</span>
                   </div>
-                  <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)" class="empty-state">
+                  <div
+                    v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)"
+                    class="empty-state"
+                  >
                     <el-icon><User /></el-icon>
                     <span>暂无已读成员</span>
                   </div>
                 </div>
                 <!-- 显示未读人数 -->
-                <div v-if="unreadCount(msg)" class="unread-users-footer">
+                <div
+                  v-if="unreadCount(msg)"
+                  class="unread-users-footer"
+                >
                   <span>未读 {{ unreadCount(msg) }} 人</span>
                 </div>
               </div>
             </el-popover>
             <!-- 单聊：只显示已读/未读 -->
-            <span v-else-if="sessionType === 'PRIVATE'" class="read-status-simple" :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }">
+            <span
+              v-else-if="sessionType === 'PRIVATE'"
+              class="read-status-simple"
+              :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }"
+            >
               {{ msg.isRead || msg.readCount > 0 ? '已读' : '未读' }}
             </span>
             <!-- 无已读数据时显示未读 -->
-            <span v-else class="unread">未读</span>
+            <span
+              v-else
+              class="unread"
+            >未读</span>
           </template>
         </MessageItem>
       </div>
@@ -109,14 +154,22 @@
         v-if="isLazyLoadingEnabled"
         class="virtual-spacer-bottom"
         :style="{ height: bottomSpacerHeight + 'px' }"
-      ></div>
+      />
 
       <!-- 加载更多骨架屏 -->
-      <SkeletonLoader v-if="loading && messages.length > 0" type="message" :count="3" />
+      <SkeletonLoader
+        v-if="loading && messages.length > 0"
+        type="message"
+        :count="3"
+      />
 
       <!-- 滚动到底部按钮 -->
       <transition name="fade">
-        <div v-if="showScrollToBottom" class="scroll-to-bottom" @click="scrollToBottom">
+        <div
+          v-if="showScrollToBottom"
+          class="scroll-to-bottom"
+          @click="scrollToBottom"
+        >
           <el-icon><ArrowDown /></el-icon>
           <span>回到底部</span>
         </div>
@@ -191,14 +244,14 @@ const isLazyLoadingEnabled = computed(() => props.messages.length > ENABLE_LAZY_
 
 // 计算顶部和底部占位符高度（虚拟滚动优化）
 const topSpacerHeight = computed(() => {
-  if (!isLazyLoadingEnabled.value) return 0
+  if (!isLazyLoadingEnabled.value) {return 0}
   const { startIndex } = calculateVisibleRange()
   // 估算顶部消息的总高度
   return startIndex * AVERAGE_MESSAGE_HEIGHT
 })
 
 const bottomSpacerHeight = computed(() => {
-  if (!isLazyLoadingEnabled.value) return 0
+  if (!isLazyLoadingEnabled.value) {return 0}
   const { endIndex } = calculateVisibleRange()
   const allMessages = messagesWithDividers.value
   // 估算底部未渲染消息的总高度
@@ -251,7 +304,7 @@ const calculateVisibleRange = () => {
 // 可见消息列表（动态计算）
 const visibleMessages = computed(() => {
   const allMessages = messagesWithDividers.value
-  if (allMessages.length === 0) return []
+  if (allMessages.length === 0) {return []}
 
   // 过滤掉无效的消息对象
   const validMessages = allMessages.filter(msg => msg && (msg.id || msg.timeText))
@@ -284,8 +337,8 @@ watch(() => props.messages.length, (newLength, oldLength) => {
 })
 
 // 获取已读用户列表（单条消息）
-const fetchReadUsers = async (msg) => {
-  if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) return
+const fetchReadUsers = async msg => {
+  if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) {return}
 
   loadingReadUsers.value[msg.id] = true
   try {
@@ -305,8 +358,8 @@ const fetchReadUsers = async (msg) => {
  * 用于优化可见区域消息的已读状态查询
  * @param {Array} messages - 需要预加载的消息列表
  */
-const prefetchReadUsers = async (messages) => {
-  if (!messages || messages.length === 0) return
+const prefetchReadUsers = async messages => {
+  if (!messages || messages.length === 0) {return}
 
   // 过滤出需要查询的消息（群聊、有已读数据、未加载过）
   const messagesToFetch = messages.filter(msg =>
@@ -316,7 +369,7 @@ const prefetchReadUsers = async (messages) => {
     !loadingReadUsers.value[msg.id]
   )
 
-  if (messagesToFetch.length === 0) return
+  if (messagesToFetch.length === 0) {return}
 
   // 设置加载状态
   messagesToFetch.forEach(msg => {
@@ -348,20 +401,20 @@ const prefetchReadUsers = async (messages) => {
 }
 
 // 计算未读人数（群聊中需要知道群成员总数）
-const unreadCount = (msg) => {
-  if (!msg.groupMemberCount) return null
+const unreadCount = msg => {
+  if (!msg.groupMemberCount) {return null}
   const readCount = msg.readCount || 0
   return Math.max(0, msg.groupMemberCount - readCount)
 }
 
 // 图片预览 - 发送事件给父组件处理
-const previewImage = (clickedUrl) => {
+const previewImage = clickedUrl => {
   emit('preview', clickedUrl)
 }
 
 // 下载文件
-const downloadFile = (fileInfo) => {
-  if (!fileInfo.fileUrl) return
+const downloadFile = fileInfo => {
+  if (!fileInfo.fileUrl) {return}
   window.open(fileInfo.fileUrl, '_blank')
 }
 
@@ -371,8 +424,8 @@ const handleReEdit = ({ content }) => {
 }
 
 // 处理拍一拍
-const handleNudge = async (nudgedUserId) => {
-  if (!props.sessionId) return
+const handleNudge = async nudgedUserId => {
+  if (!props.sessionId) {return}
 
   try {
     const res = await sendNudge({
@@ -397,7 +450,7 @@ const handleNudge = async (nudgedUserId) => {
 }
 
 // 格式化时间分隔符文案
-const formatTimeDivider = (timestamp) => {
+const formatTimeDivider = timestamp => {
   const date = new Date(timestamp)
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -411,9 +464,9 @@ const formatTimeDivider = (timestamp) => {
     hour12: false
   })
 
-  if (diffDays === 0) return timeStr
-  if (diffDays === 1) return `昨天 ${timeStr}`
-  if (diffDays === 2) return `前天 ${timeStr}`
+  if (diffDays === 0) {return timeStr}
+  if (diffDays === 1) {return `昨天 ${timeStr}`}
+  if (diffDays === 2) {return `前天 ${timeStr}`}
   if (diffDays < 7) {
     const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
     return `${weekDays[date.getDay()]} ${timeStr}`
@@ -433,23 +486,23 @@ const formatTimeDivider = (timestamp) => {
 // 3. 非特殊消息类型（如撤回消息、系统消息、拍一拍等）
 // 4. 自己的消息和对方的消息都可以合并
 const canMergeWith = (currentMsg, prevMsg) => {
-  if (!prevMsg) return false
+  if (!prevMsg) {return false}
 
   // 必须是同一发送者
-  if (currentMsg.senderId !== prevMsg.senderId) return false
+  if (currentMsg.senderId !== prevMsg.senderId) {return false}
 
   // 必须是同一消息归属（自己的/对方的）
-  if (currentMsg.isOwn !== prevMsg.isOwn) return false
+  if (currentMsg.isOwn !== prevMsg.isOwn) {return false}
 
   // 时间间隔小于 2 分钟（120000ms）
   const MERGE_TIME_THRESHOLD = 2 * 60 * 1000
   const timeDiff = currentMsg.timestamp - prevMsg.timestamp
-  if (timeDiff > MERGE_TIME_THRESHOLD) return false
+  if (timeDiff > MERGE_TIME_THRESHOLD) {return false}
 
   // 特殊消息类型不合并
   const nonMergeableTypes = ['RECALLED', 'SYSTEM', 'NOTICE', 'NUDGE']
-  if (nonMergeableTypes.includes(currentMsg.type)) return false
-  if (nonMergeableTypes.includes(prevMsg.type)) return false
+  if (nonMergeableTypes.includes(currentMsg.type)) {return false}
+  if (nonMergeableTypes.includes(prevMsg.type)) {return false}
 
   return true
 }
@@ -487,7 +540,7 @@ const messagesWithDividers = computed(() => {
 
 // 判断是否需要添加时间分割线
 const shouldAddTimeDivider = (currentMsg, prevMsg) => {
-  if (!prevMsg) return true
+  if (!prevMsg) {return true}
 
   const currentTime = currentMsg.timestamp
   const prevTime = prevMsg.timestamp
@@ -500,7 +553,7 @@ const shouldAddTimeDivider = (currentMsg, prevMsg) => {
 // 滚动到底部
 const scrollToBottom = (smooth = true) => {
   nextTick(() => {
-    if (isUnmounted.value) return // 组件已卸载，不执行 DOM 操作
+    if (isUnmounted.value) {return} // 组件已卸载，不执行 DOM 操作
     if (listRef.value) {
       listRef.value.scrollTo({
         top: listRef.value.scrollHeight,
@@ -525,7 +578,7 @@ const handleCommand = async (cmd, msg) => {
 }
 
 // 处理置顶消息
-const handlePinMessage = async (msg) => {
+const handlePinMessage = async msg => {
   try {
     const { pinMessage, unpinMessage } = await import('@/api/im/message')
 
@@ -562,7 +615,7 @@ const handleAddReaction = (messageId, emoji, isAdded) => {
 
 // 滚动到指定消息
 // 支持参数: id (消息ID) 或 { messageId, highlight } 对象
-const scrollToMsg = (param) => {
+const scrollToMsg = param => {
   let messageId
   let highlight = false
 
@@ -604,7 +657,7 @@ const scrollToMsg = (param) => {
   const performScroll = () => {
     // 使用 nextTick 确保 DOM 更新
     nextTick(() => {
-      if (isUnmounted.value) return // 组件已卸载，不执行 DOM 操作
+      if (isUnmounted.value) {return} // 组件已卸载，不执行 DOM 操作
       const el = listRef.value?.querySelector(`[data-id="${messageId}"]`)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -628,7 +681,7 @@ const scrollToMsg = (param) => {
 
 // 监听滚动事件 - 性能优化版
 const handleScroll = () => {
-  if (!listRef.value || props.loading) return
+  if (!listRef.value || props.loading) {return}
 
   const { scrollTop: newScrollTop, clientHeight: newClientHeight, scrollHeight } = listRef.value
 
@@ -653,7 +706,7 @@ const handleScroll = () => {
 const visibleRange = ref({ start: 0, end: 0 })
 const updateVisibleRange = (scrollPos, viewportHeight) => {
   const allMessages = messagesWithDividers.value
-  if (allMessages.length === 0) return
+  if (allMessages.length === 0) {return}
 
   const viewportTop = scrollPos
   const viewportBottom = scrollPos + viewportHeight
@@ -669,9 +722,9 @@ const updateVisibleRange = (scrollPos, viewportHeight) => {
 }
 
 // 保持滚动偏移（用于加载更多）
-const maintainScroll = (oldHeight) => {
+const maintainScroll = oldHeight => {
   nextTick(() => {
-    if (isUnmounted.value) return // 组件已卸载，不执行 DOM 操作
+    if (isUnmounted.value) {return} // 组件已卸载，不执行 DOM 操作
     if (listRef.value) {
       listRef.value.scrollTop = listRef.value.scrollHeight - oldHeight
     }
@@ -682,11 +735,11 @@ const observer = ref(null)
 
 // 初始化已读上报监听
 const initReadObserver = () => {
-  if (observer.value) observer.value.disconnect()
+  if (observer.value) {observer.value.disconnect()}
 
-  observer.value = new IntersectionObserver((entries) => {
+  observer.value = new IntersectionObserver(entries => {
     // 如果组件已卸载，不处理回调
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
 
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -703,7 +756,7 @@ const initReadObserver = () => {
 
 const updateObserver = () => {
   nextTick(() => {
-    if (isUnmounted.value) return // 组件已卸载，不执行 DOM 操作
+    if (isUnmounted.value) {return} // 组件已卸载，不执行 DOM 操作
     const items = listRef.value?.querySelectorAll('.message-wrapper[data-id]')
     items?.forEach(el => observer.value?.observe(el))
   })
@@ -724,7 +777,7 @@ onMounted(() => {
   }
 
   // 监听容器大小变化
-  const resizeObserver = new ResizeObserver((entries) => {
+  const resizeObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
       if (entry.target === listRef.value) {
         clientHeight.value = entry.contentRect.height
@@ -745,7 +798,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   isUnmounted.value = true // 标记组件已卸载
-  if (observer.value) observer.value.disconnect()
+  if (observer.value) {observer.value.disconnect()}
 })
 
 defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })

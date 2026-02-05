@@ -7,19 +7,39 @@
   <div class="qrcode-container">
     <!-- 二维码展示区 -->
     <div class="qrcode-wrapper">
-      <canvas ref="qrcodeRef" class="qrcode-canvas"></canvas>
+      <canvas
+        ref="qrcodeRef"
+        class="qrcode-canvas"
+      />
 
       <!-- 加载状态 -->
-      <div v-if="loading" class="qrcode-loading">
-        <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+      <div
+        v-if="loading"
+        class="qrcode-loading"
+      >
+        <el-icon
+          class="is-loading"
+          :size="32"
+        >
+          <Loading />
+        </el-icon>
         <span>生成中...</span>
       </div>
 
       <!-- 二维码过期 -->
-      <div v-if="isExpired" class="qrcode-expired">
-        <el-icon :size="32"><Warning /></el-icon>
+      <div
+        v-if="isExpired"
+        class="qrcode-expired"
+      >
+        <el-icon :size="32">
+          <Warning />
+        </el-icon>
         <span>二维码已过期</span>
-        <el-button size="small" type="primary" @click="refreshQRCode">
+        <el-button
+          size="small"
+          type="primary"
+          @click="refreshQRCode"
+        >
           刷新
         </el-button>
       </div>
@@ -27,8 +47,12 @@
 
     <!-- 群组信息 -->
     <div class="group-info">
-      <div class="group-name">{{ groupInfo.name }}</div>
-      <div class="group-desc">扫一扫二维码，加入群聊</div>
+      <div class="group-name">
+        {{ groupInfo.name }}
+      </div>
+      <div class="group-desc">
+        扫一扫二维码，加入群聊
+      </div>
     </div>
 
     <!-- 有效期 -->
@@ -37,7 +61,11 @@
         <el-icon><Clock /></el-icon>
         <span>{{ expireText }}</span>
       </div>
-      <el-button link type="primary" @click="refreshQRCode">
+      <el-button
+        link
+        type="primary"
+        @click="refreshQRCode"
+      >
         <el-icon><Refresh /></el-icon>刷新
       </el-button>
     </div>
@@ -76,16 +104,16 @@ let expireTimer = null
 
 // 有效期文本
 const expireText = computed(() => {
-  if (isExpired.value) return '已过期'
+  if (isExpired.value) {return '已过期'}
   const remaining = expireTime.value - Date.now()
   if (remaining <= 0) {
     isExpired.value = true
     return '已过期'
   }
   const days = Math.floor(remaining / (24 * 60 * 60 * 1000))
-  if (days > 0) return `${days}天后过期`
+  if (days > 0) {return `${days}天后过期`}
   const hours = Math.floor(remaining / (60 * 60 * 1000))
-  if (hours > 0) return `${hours}小时后过期`
+  if (hours > 0) {return `${hours}小时后过期`}
   const minutes = Math.floor(remaining / (60 * 1000))
   return `${minutes}分钟后过期`
 })
@@ -99,7 +127,7 @@ const generateJoinLink = () => {
 
 // 生成二维码
 const generateQRCode = async () => {
-  if (!qrcodeRef.value) return
+  if (!qrcodeRef.value) {return}
 
   loading.value = true
   isExpired.value = false
@@ -132,7 +160,7 @@ const refreshQRCode = () => {
 // 保存二维码图片
 const saveQRCode = () => {
   const canvas = qrcodeRef.value
-  if (!canvas) return
+  if (!canvas) {return}
 
   try {
     const link = document.createElement('a')

@@ -23,25 +23,25 @@ export function useResponsive() {
   
   // 断点判断
   const isBreakpointDown = computed(() => {
-    return (breakpoint) => {
+    return breakpoint => {
       const breakpoints = { xs: 480, sm: 576, md: 768, lg: 992, xl: 1200 }
       return windowWidth.value < (breakpoints[breakpoint] || 768)
     }
   })
   
   const isBreakpointUp = computed(() => {
-    return (breakpoint) => {
+    return breakpoint => {
       const breakpoints = { xs: 480, sm: 576, md: 768, lg: 992, xl: 1200 }
       return windowWidth.value >= (breakpoints[breakpoint] || 768)
     }
   })
   
   const getCurrentBreakpoint = computed(() => {
-    if (windowWidth.value < 480) return 'xs'
-    if (windowWidth.value < 576) return 'sm'
-    if (windowWidth.value < 768) return 'md'
-    if (windowWidth.value < 992) return 'lg'
-    if (windowWidth.value < 1200) return 'xl'
+    if (windowWidth.value < 480) {return 'xs'}
+    if (windowWidth.value < 576) {return 'sm'}
+    if (windowWidth.value < 768) {return 'md'}
+    if (windowWidth.value < 992) {return 'lg'}
+    if (windowWidth.value < 1200) {return 'xl'}
     return 'xxl'
   })
   

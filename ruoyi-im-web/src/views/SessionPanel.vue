@@ -11,49 +11,73 @@
       @mousedown="handleResizeStart"
       @dblclick="resetWidth"
     >
-      <div class="resize-line"></div>
-      <div class="resize-hint" v-show="isResizing">{{ Math.round(panelWidth) }}px</div>
+      <div class="resize-line" />
+      <div
+        v-show="isResizing"
+        class="resize-hint"
+      >
+        {{ Math.round(panelWidth) }}px
+      </div>
     </div>
 
     <!-- 头部 -->
     <div class="panel-header">
-      <h1 class="panel-title">消息</h1>
+      <h1 class="panel-title">
+        消息
+      </h1>
       <el-dropdown
         trigger="click"
-        @command="handleCommand"
         placement="bottom-start"
         popper-class="add-menu-dropdown"
         :show-timeout="0"
         :hide-timeout="200"
+        @command="handleCommand"
       >
-        <button class="add-btn" :class="{ 'is-active': isAddMenuOpen }">
+        <button
+          class="add-btn"
+          :class="{ 'is-active': isAddMenuOpen }"
+        >
           <span class="material-icons-outlined">add</span>
         </button>
         <template #dropdown>
           <div class="add-menu-container">
             <!-- 快捷操作区 -->
             <div class="quick-actions-section">
-              <div class="section-title">快捷操作</div>
+              <div class="section-title">
+                快捷操作
+              </div>
               <div class="quick-actions-grid">
-                <div class="quick-action-item" @click="handleCommand('group')">
+                <div
+                  class="quick-action-item"
+                  @click="handleCommand('group')"
+                >
                   <div class="action-icon success">
                     <span class="material-icons-outlined">group_add</span>
                   </div>
                   <span class="action-label">发起群聊</span>
                 </div>
-                <div class="quick-action-item" @click="handleCommand('join')">
+                <div
+                  class="quick-action-item"
+                  @click="handleCommand('join')"
+                >
                   <div class="action-icon warning">
                     <span class="material-icons-outlined">search</span>
                   </div>
                   <span class="action-label">加入群组</span>
                 </div>
-                <div class="quick-action-item" @click="handleCommand('contacts')">
+                <div
+                  class="quick-action-item"
+                  @click="handleCommand('contacts')"
+                >
                   <div class="action-icon info">
                     <span class="material-icons-outlined">person_add</span>
                   </div>
                   <span class="action-label">添加联系人</span>
                 </div>
-                <div class="quick-action-item" @click="handleCommand('scan')">
+                <div
+                  class="quick-action-item"
+                  @click="handleCommand('scan')"
+                >
                   <div class="action-icon primary">
                     <span class="material-icons-outlined">qr_code_scanner</span>
                   </div>
@@ -62,12 +86,17 @@
               </div>
             </div>
 
-            <div class="menu-divider"></div>
+            <div class="menu-divider" />
 
             <!-- 常用功能 -->
             <div class="common-actions-section">
-              <div class="section-title">其他功能</div>
-              <el-dropdown-item command="invite" class="menu-item-with-icon">
+              <div class="section-title">
+                其他功能
+              </div>
+              <el-dropdown-item
+                command="invite"
+                class="menu-item-with-icon"
+              >
                 <span class="material-icons-outlined item-icon">share</span>
                 <div class="item-content">
                   <span class="item-title">邀请好友</span>
@@ -90,8 +119,12 @@
           placeholder="搜索联系人、群组、消息..."
           type="text"
           @focus="showGlobalSearch = true"
-        />
-        <span v-if="searchKeyword" class="clear-btn" @click="searchKeyword = ''">
+        >
+        <span
+          v-if="searchKeyword"
+          class="clear-btn"
+          @click="searchKeyword = ''"
+        >
           <span class="material-icons-outlined">close</span>
         </span>
       </div>
@@ -119,7 +152,11 @@
     <!-- 会话列表 -->
     <div class="session-list">
       <!-- 骨架屏加载状态 -->
-      <SkeletonLoader v-if="loading && sessions.length === 0" type="session" :count="5" />
+      <SkeletonLoader
+        v-if="loading && sessions.length === 0"
+        type="session"
+        :count="5"
+      />
 
       <!-- 分组会话列表 -->
       <template v-if="!loading">
@@ -128,96 +165,112 @@
           :key="groupItem.group.id"
           class="session-group"
         >
-
-
           <!-- 分组内的会话列表 -->
           <div class="group-sessions">
-              <TransitionGroup name="session-list">
-                <div
-                  v-for="session in groupItem.sessions"
-                  :key="session.id"
-                  class="session-item"
-                  :class="{
-                    active: isActiveSession(session),
-                    pinned: session.isPinned,
-                    unread: session.unreadCount > 0
-                  }"
-                  @click="handleSessionClick(session)"
-                  @contextmenu.prevent="handleContextMenu($event, session)"
-                >
-                  <div class="avatar-wrapper">
-                    <!-- 群组头像 -->
-                    <template v-if="session.type === 'GROUP'">
-                      <div class="session-avatar group-avatar">
-                        <span class="material-icons-outlined">groups</span>
-                      </div>
-                    </template>
-                    <!-- 单聊头像 -->
-                    <DingtalkAvatar
-                      v-else
-                      :name="session.name"
-                      :user-id="session.targetId"
-                      :size="40"
-                      shape="square"
-                      custom-class="session-avatar"
-                      @click="handleAvatarClick($event, session)"
-                    />
-                    <!-- 在线状态点 -->
-                    <span
-                      v-if="session.type === 'PRIVATE'"
-                      class="status-dot"
-                      :class="{ online: isUserOnline(session.targetId) }"
-                    ></span>
-                    <!-- 未读角标 -->
-                    <span
-                      v-if="session.unreadCount > 0"
-                      class="unread-badge"
-                      :class="{ 'badge-dot': session.isMuted }"
-                    >
-                      {{ session.isMuted ? '' : (session.unreadCount > 99 ? '99+' : session.unreadCount) }}
-                    </span>
-                    <!-- @提及角标 -->
-                    <span
-                      v-if="getSessionMentionCount(session.id) > 0"
-                      class="mention-badge"
-                      title="有@我的消息"
-                    >
-                      @
-                    </span>
-                    <!-- 置顶标记 -->
-                    <span v-if="session.isPinned && !isActiveSession(session)" class="pin-indicator">
-                      置顶
-                    </span>
-                  </div>
+            <TransitionGroup name="session-list">
+              <div
+                v-for="session in groupItem.sessions"
+                :key="session.id"
+                class="session-item"
+                :class="{
+                  active: isActiveSession(session),
+                  pinned: session.isPinned,
+                  unread: session.unreadCount > 0
+                }"
+                @click="handleSessionClick(session)"
+                @contextmenu.prevent="handleContextMenu($event, session)"
+              >
+                <div class="avatar-wrapper">
+                  <!-- 群组头像 -->
+                  <template v-if="session.type === 'GROUP'">
+                    <div class="session-avatar group-avatar">
+                      <span class="material-icons-outlined">groups</span>
+                    </div>
+                  </template>
+                  <!-- 单聊头像 -->
+                  <DingtalkAvatar
+                    v-else
+                    :name="session.name"
+                    :user-id="session.targetId"
+                    :size="40"
+                    shape="square"
+                    custom-class="session-avatar"
+                    @click="handleAvatarClick($event, session)"
+                  />
+                  <!-- 在线状态点 -->
+                  <span
+                    v-if="session.type === 'PRIVATE'"
+                    class="status-dot"
+                    :class="{ online: isUserOnline(session.targetId) }"
+                  />
+                  <!-- 未读角标 -->
+                  <span
+                    v-if="session.unreadCount > 0"
+                    class="unread-badge"
+                    :class="{ 'badge-dot': session.isMuted }"
+                  >
+                    {{ session.isMuted ? '' : (session.unreadCount > 99 ? '99+' : session.unreadCount) }}
+                  </span>
+                  <!-- @提及角标 -->
+                  <span
+                    v-if="getSessionMentionCount(session.id) > 0"
+                    class="mention-badge"
+                    title="有@我的消息"
+                  >
+                    @
+                  </span>
+                  <!-- 置顶标记 -->
+                  <span
+                    v-if="session.isPinned && !isActiveSession(session)"
+                    class="pin-indicator"
+                  >
+                    置顶
+                  </span>
+                </div>
 
-                  <div class="session-info">
-                    <div class="session-header">
-                      <div class="session-name-group">
-                        <span class="session-name">{{ session.name }}</span>
-                        <span v-if="session.isMuted" class="mute-icon">
-                          <span class="material-icons-outlined">notifications_off</span>
-                        </span>
-                      </div>
-                      <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
-                    </div>
-                    <div class="session-preview">
-                      <span v-if="getSessionStatus(session) === 'typing'" class="typing-indicator">
-                        <span class="material-icons-outlined typing-icon">edit</span>
-                        正在输入...
-                      </span>
-                      <span v-else-if="getSessionStatus(session) === 'draft'" class="draft-tag">[草稿]</span>
-                      <span v-else-if="getSessionStatus(session) === 'mention'" class="mention-tag">@</span>
-                      <span v-if="session.lastSenderNickname && session.type === 'GROUP' && getSessionStatus(session) === 'normal'" class="sender-name">
-                        {{ session.lastSenderNickname }}:
-                      </span>
-                      <span class="preview-text">
-                        {{ getSessionPreview(session) }}
+                <div class="session-info">
+                  <div class="session-header">
+                    <div class="session-name-group">
+                      <span class="session-name">{{ session.name }}</span>
+                      <span
+                        v-if="session.isMuted"
+                        class="mute-icon"
+                      >
+                        <span class="material-icons-outlined">notifications_off</span>
                       </span>
                     </div>
+                    <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
+                  </div>
+                  <div class="session-preview">
+                    <span
+                      v-if="getSessionStatus(session) === 'typing'"
+                      class="typing-indicator"
+                    >
+                      <span class="material-icons-outlined typing-icon">edit</span>
+                      正在输入...
+                    </span>
+                    <span
+                      v-else-if="getSessionStatus(session) === 'draft'"
+                      class="draft-tag"
+                    >[草稿]</span>
+                    <span
+                      v-else-if="getSessionStatus(session) === 'mention'"
+                      class="mention-tag"
+                    >@</span>
+                    <span
+                      v-if="session.lastSenderNickname && session.type === 'GROUP' && getSessionStatus(session) === 'normal'"
+                      class="sender-name"
+                    >
+                      {{ session.lastSenderNickname }}:
+                    </span>
+                    <span class="preview-text">
+                      {{ getSessionPreview(session) }}
+                    </span>
                   </div>
                 </div>
-              </TransitionGroup>
-            </div>
+              </div>
+            </TransitionGroup>
+          </div>
         </div>
       </template>
 
@@ -286,7 +339,23 @@ const panelWidth = ref(DEFAULT_WIDTH)
 const isResizing = ref(false)
 
 // 初始化宽度
+// 会话数据加载
 onMounted(() => {
+  // 初始化分组数据
+  store.dispatch('im/session/initGroups')
+  if (sessions.value.length === 0) {
+    store.dispatch('im/session/loadSessions')
+  }
+  // 加载草稿
+  store.dispatch('im/session/loadDrafts')
+  // 启动输入状态清理
+  store.dispatch('im/session/startTypingCleanup')
+  // 加载未读@提及
+  loadMentions()
+  // 加载归档数量
+  loadArchivedCount()
+
+  // 初始化面板宽度
   const savedWidth = localStorage.getItem(STORAGE_KEY)
   if (savedWidth) {
     const width = parseInt(savedWidth, 10)
@@ -301,20 +370,21 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  // 清理工作
   window.removeEventListener('mousemove', handleResizeMove)
   window.removeEventListener('mouseup', handleResizeEnd)
 })
 
 // 开始拖拽
-const handleResizeStart = (e) => {
+const handleResizeStart = e => {
   isResizing.value = true
   document.body.style.cursor = 'col-resize'
   document.body.style.userSelect = 'none'
 }
 
 // 拖拽中
-const handleResizeMove = (e) => {
-  if (!isResizing.value) return
+const handleResizeMove = e => {
+  if (!isResizing.value) {return}
 
   const newWidth = e.clientX
   if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
@@ -408,7 +478,7 @@ const {
 } = useMentions()
 
 // 获取会话的未读@提及数量
-const getSessionMentionCount = (sessionId) => {
+const getSessionMentionCount = sessionId => {
   return getUnreadCountByConversation(sessionId)
 }
 
@@ -422,21 +492,21 @@ const allGroups = computed(() => store.getters['im/session/sortedGroups'] || [])
 const customGroups = computed(() => allGroups.value.filter(g => !g.isSystem))
 
 // 草稿状态管理 - 使用 Vuex getters
-const hasDraft = (conversationId) => {
+const hasDraft = conversationId => {
   return store.getters['im/session/hasDraft'](conversationId)
 }
 
-const getDraftPreview = (conversationId) => {
+const getDraftPreview = conversationId => {
   return store.getters['im/session/getDraftPreview'](conversationId)
 }
 
 // 输入状态 - 使用 Vuex getters
-const isTyping = (conversationId) => {
+const isTyping = conversationId => {
   return store.getters['im/session/isTyping'](conversationId)
 }
 
 // 获取会话状态类型
-const getSessionStatus = (session) => {
+const getSessionStatus = session => {
   if (isTyping(session.id)) {
     return 'typing'
   }
@@ -453,7 +523,7 @@ const getSessionStatus = (session) => {
 }
 
 // 获取会话预览文本
-const getSessionPreview = (session) => {
+const getSessionPreview = session => {
   // 优先级：输入状态 > 草稿 > 最新消息
   if (isTyping(session.id)) {
     return ''  // 输入状态不显示预览文本
@@ -467,12 +537,12 @@ const getSessionPreview = (session) => {
 }
 
 // 判断用户是否在线
-const isUserOnline = (userId) => {
+const isUserOnline = userId => {
   return userStatus.value[userId] === 'online'
 }
 
 // 获取会话索引用于动画延迟
-const getSessionIndex = (session) => {
+const getSessionIndex = session => {
   return sortedSessions.value.findIndex(s => s.id === session.id)
 }
 
@@ -485,7 +555,7 @@ const handleAvatarClick = (e, session) => {
 }
 
 // 处理下拉菜单命令
-const handleCommand = async (command) => {
+const handleCommand = async command => {
   if (command === 'group') {
     showCreateGroupDialog.value = true
   } else if (command === 'chat') {
@@ -522,7 +592,7 @@ const handleStartChat = async () => {
 }
 
 // 处理选择的联系人
-const handleContactSelected = (contact) => {
+const handleContactSelected = contact => {
   showContactSelector.value = false
   if (contact) {
     // 创建或获取会话
@@ -605,7 +675,7 @@ const handleAddFriend = async () => {
       }
     )
 
-    if (!value) return
+    if (!value) {return}
 
     // 发送好友申请
     await sendFriendRequest({
@@ -635,7 +705,7 @@ const handleJoinGroup = async () => {
       }
     )
 
-    if (!value) return
+    if (!value) {return}
 
     // 调用加入群组 API
     const res = await joinGroup(value.trim())
@@ -654,17 +724,17 @@ const handleJoinGroup = async () => {
 }
 
 // 处理搜索选择
-const handleSearchSelect = (item) => {
+const handleSearchSelect = item => {
   if (typeof item === 'string') {
     searchKeyword.value = item
   } else if (item.id && item.conversationId) {
     const session = sessions.value.find(s => s.id === item.conversationId)
-    if (session) emit('select-session', session)
+    if (session) {emit('select-session', session)}
   }
 }
 
 // 处理消息搜索选择
-const handleSearchSelectMessage = (message) => {
+const handleSearchSelectMessage = message => {
   if (message && message.conversationId) {
     const session = sessions.value.find(s => s.id === message.conversationId)
     if (session) {
@@ -675,7 +745,7 @@ const handleSearchSelectMessage = (message) => {
 }
 
 // 处理联系人搜索选择
-const handleSearchSelectContact = (contact) => {
+const handleSearchSelectContact = contact => {
   if (contact && contact.userId) {
     const existingContact = sessions.value.find(s => 
       s.type === 'PRIVATE' && s.targetId === contact.userId
@@ -690,7 +760,7 @@ const handleSearchSelectContact = (contact) => {
 }
 
 // 处理群组搜索选择
-const handleSearchSelectGroup = (group) => {
+const handleSearchSelectGroup = group => {
   if (group && group.groupId) {
     const existingGroup = sessions.value.find(s => 
       s.type === 'GROUP' && s.targetId === group.groupId
@@ -705,12 +775,12 @@ const handleSearchSelectGroup = (group) => {
 }
 
 // 判断是否为当前会话
-const isActiveSession = (session) => {
+const isActiveSession = session => {
   return props.currentSession?.id === session.id
 }
 
 // 处理会话点击
-const handleSessionClick = (session) => {
+const handleSessionClick = session => {
   // 标记该会话的@提及为已读
   const mentionCount = getSessionMentionCount(session.id)
   if (mentionCount > 0) {
@@ -729,7 +799,7 @@ const handleSessionClick = (session) => {
 }
 
 // 标记提及为已读
-const markMentionsAsRead = async (messageIds) => {
+const markMentionsAsRead = async messageIds => {
   try {
     await batchMarkAsRead(messageIds)
   } catch (error) {
@@ -751,7 +821,7 @@ const contextMenu = ref({
 // 右键菜单项配置
 const contextMenuItems = computed(() => {
   const session = contextMenu.value.session
-  if (!session) return []
+  if (!session) {return []}
 
   const items = [
     {
@@ -826,9 +896,9 @@ const handleContextMenu = (e, session) => {
 }
 
 // 右键菜单选择处理
-const handleContextMenuSelect = async (item) => {
+const handleContextMenuSelect = async item => {
   const session = contextMenu.value.session
-  if (!session) return
+  if (!session) {return}
 
   switch (item.value) {
     case 'markRead':
@@ -861,23 +931,23 @@ const handleContextMenuSelect = async (item) => {
 }
 
 // 会话操作
-const handleMarkAsRead = async (session) => {
+const handleMarkAsRead = async session => {
   await store.dispatch('im/session/markSessionAsRead', session.id)
 }
 
-const handleTogglePin = async (session) => {
+const handleTogglePin = async session => {
   const pinned = !session.isPinned
   await store.dispatch('im/session/pinSession', { sessionId: session.id, pinned })
   ElMessage.success(pinned ? '已置顶' : '已取消置顶')
 }
 
-const handleToggleMute = async (session) => {
+const handleToggleMute = async session => {
   const muted = !session.isMuted
   await store.dispatch('im/session/muteSession', { sessionId: session.id, muted })
   ElMessage.success(muted ? '已开启免打扰' : '已关闭免打扰')
 }
 
-const handleDeleteSession = async (session) => {
+const handleDeleteSession = async session => {
   ElMessageBox.confirm('确定要删除该会话吗？历史消息将保留。', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -889,7 +959,7 @@ const handleDeleteSession = async (session) => {
 }
 
 // 归档/取消归档会话
-const handleArchiveSession = async (session) => {
+const handleArchiveSession = async session => {
   const isArchived = session.isArchived || false
 
   try {
@@ -906,7 +976,7 @@ const handleArchiveSession = async (session) => {
 // ========== 分组管理函数 ==========
 
 // 切换分组展开/收起
-const toggleGroupExpand = (groupId) => {
+const toggleGroupExpand = groupId => {
   store.dispatch('im/session/toggleGroupExpand', groupId)
   if (expandedGroups.value.has(groupId)) {
     expandedGroups.value.delete(groupId)
@@ -916,7 +986,7 @@ const toggleGroupExpand = (groupId) => {
 }
 
 // 判断分组是否展开
-const isGroupExpanded = (groupId) => {
+const isGroupExpanded = groupId => {
   const group = allGroups.value.find(g => g.id === groupId)
   return group?.isExpanded ?? true
 }
@@ -960,7 +1030,7 @@ const cancelCreateGroup = () => {
 }
 
 // 重命名分组
-const handleRenameGroup = (group) => {
+const handleRenameGroup = group => {
   ElMessageBox.prompt('请输入新的分组名称', '重命名分组', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -974,7 +1044,7 @@ const handleRenameGroup = (group) => {
 }
 
 // 删除分组
-const handleDeleteGroup = (group) => {
+const handleDeleteGroup = group => {
   const sessionCount = groupedSessions.value
     .find(item => item.group.id === group.id)
     ?.sessions.length || 0
@@ -994,10 +1064,10 @@ const handleDeleteGroup = (group) => {
 }
 
 // 移动会话到分组（右键菜单）
-const handleMoveSessionToGroup = (groupId) => {
-  if (!contextMenu.session) return
+const handleMoveSessionToGroup = groupId => {
+  if (!contextMenu.value.session) {return}
   store.dispatch('im/session/moveConversationToGroup', {
-    conversationId: contextMenu.session.id,
+    conversationId: contextMenu.value.session.id,
     groupId
   })
   ElMessage.success('已移动会话')
@@ -1007,25 +1077,7 @@ const handleMoveSessionToGroup = (groupId) => {
 // 排序后的会话列表
 const sortedSessions = computed(() => store.getters['im/session/sortedSessions'])
 
-onMounted(() => {
-  // 初始化分组数据
-  store.dispatch('im/session/initGroups')
-  if (sessions.value.length === 0) {
-    store.dispatch('im/session/loadSessions')
-  }
-  // 加载草稿
-  store.dispatch('im/session/loadDrafts')
-  // 启动输入状态清理
-  store.dispatch('im/session/startTypingCleanup')
-  // 加载未读@提及
-  loadMentions()
-  // 加载归档数量
-  loadArchivedCount()
-})
-
-onUnmounted(() => {
-  // 清理工作
-})
+// 已合并到前面的 onMounted 中
 </script>
 
 <style scoped lang="scss">

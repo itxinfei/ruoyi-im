@@ -15,7 +15,10 @@
       :disabled="disabled"
     >
       <slot>
-        <el-button :icon="Upload" :loading="uploading">
+        <el-button
+          :icon="Upload"
+          :loading="uploading"
+        >
           {{ uploadText }}
         </el-button>
       </slot>
@@ -31,10 +34,16 @@
     >
       <div class="upload-progress">
         <div class="file-info">
-          <el-icon class="file-icon"><Document /></el-icon>
+          <el-icon class="file-icon">
+            <Document />
+          </el-icon>
           <div class="file-details">
-            <div class="file-name">{{ currentFile?.name }}</div>
-            <div class="file-size">{{ formatFileSize(currentFile?.size) }}</div>
+            <div class="file-name">
+              {{ currentFile?.name }}
+            </div>
+            <div class="file-size">
+              {{ formatFileSize(currentFile?.size) }}
+            </div>
           </div>
         </div>
         <el-progress
@@ -62,7 +71,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'file',
-    validator: (value) => ['image', 'file'].includes(value)
+    validator: value => ['image', 'file'].includes(value)
   },
   // 接受的文件类型
   accept: {
@@ -130,13 +139,13 @@ const uploadData = computed(() => {
 
 // 上传状态文本
 const uploadStatusText = computed(() => {
-  if (uploadStatus.value === 'success') return '上传成功'
-  if (uploadStatus.value === 'exception') return '上传失败'
+  if (uploadStatus.value === 'success') {return '上传成功'}
+  if (uploadStatus.value === 'exception') {return '上传失败'}
   return '正在上传...'
 })
 
 // 上传前验证
-const beforeUpload = (file) => {
+const beforeUpload = file => {
   currentFile.value = file
 
   // 验证文件类型

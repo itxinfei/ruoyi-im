@@ -4,17 +4,26 @@
     <div class="page-header">
       <div class="page-title">
         <h2>数据备份</h2>
-        <p class="page-desc">管理系统数据备份和恢复</p>
+        <p class="page-desc">
+          管理系统数据备份和恢复
+        </p>
       </div>
       <div class="page-actions">
-        <el-button type="primary" :icon="Plus" @click="backupDialogVisible = true">
+        <el-button
+          type="primary"
+          :icon="Plus"
+          @click="backupDialogVisible = true"
+        >
           立即备份
         </el-button>
       </div>
     </div>
 
     <!-- 备份统计卡片 -->
-    <el-row :gutter="16" class="stats-row">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
@@ -22,8 +31,12 @@
               <el-icon><FolderOpened /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">{{ backupStats.totalBackups || 0 }}</div>
-              <div class="stat-label">备份总数</div>
+              <div class="stat-value">
+                {{ backupStats.totalBackups || 0 }}
+              </div>
+              <div class="stat-label">
+                备份总数
+              </div>
             </div>
           </div>
         </el-card>
@@ -35,8 +48,12 @@
               <el-icon><Coin /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">{{ formatFileSize(backupStats.totalSize) }}</div>
-              <div class="stat-label">占用空间</div>
+              <div class="stat-value">
+                {{ formatFileSize(backupStats.totalSize) }}
+              </div>
+              <div class="stat-label">
+                占用空间
+              </div>
             </div>
           </div>
         </el-card>
@@ -48,8 +65,12 @@
               <el-icon><Clock /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">{{ backupStats.lastBackup || '-' }}</div>
-              <div class="stat-label">上次备份</div>
+              <div class="stat-value">
+                {{ backupStats.lastBackup || '-' }}
+              </div>
+              <div class="stat-label">
+                上次备份
+              </div>
             </div>
           </div>
         </el-card>
@@ -61,8 +82,12 @@
               <el-icon><Timer /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="stat-value">{{ backupStats.autoBackupCount || 0 }}</div>
-              <div class="stat-label">自动备份</div>
+              <div class="stat-value">
+                {{ backupStats.autoBackupCount || 0 }}
+              </div>
+              <div class="stat-label">
+                自动备份
+              </div>
             </div>
           </div>
         </el-card>
@@ -70,7 +95,10 @@
     </el-row>
 
     <!-- 定时备份配置 -->
-    <el-card class="config-card" shadow="never">
+    <el-card
+      class="config-card"
+      shadow="never"
+    >
       <template #header>
         <div class="card-header">
           <span>定时备份配置</span>
@@ -82,16 +110,29 @@
           />
         </div>
       </template>
-      <el-form :model="backupConfig" label-width="120px" inline>
+      <el-form
+        :model="backupConfig"
+        label-width="120px"
+        inline
+      >
         <el-form-item label="备份周期">
           <el-select
             v-model="backupConfig.cycle"
             :disabled="!autoBackupEnabled"
             style="width: 120px"
           >
-            <el-option label="每天" value="daily" />
-            <el-option label="每周" value="weekly" />
-            <el-option label="每月" value="monthly" />
+            <el-option
+              label="每天"
+              value="daily"
+            />
+            <el-option
+              label="每周"
+              value="weekly"
+            />
+            <el-option
+              label="每月"
+              value="monthly"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="备份时间">
@@ -114,7 +155,11 @@
           <span class="form-unit">份</span>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :disabled="!autoBackupEnabled" @click="handleSaveConfig">
+          <el-button
+            type="primary"
+            :disabled="!autoBackupEnabled"
+            @click="handleSaveConfig"
+          >
             保存配置
           </el-button>
         </el-form-item>
@@ -122,7 +167,10 @@
     </el-card>
 
     <!-- 备份列表 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <template #header>
         <div class="table-header">
           <span>备份列表</span>
@@ -142,37 +190,100 @@
         :data="filteredBackupList"
         stripe
       >
-        <el-table-column prop="name" label="备份名称" min-width="200">
+        <el-table-column
+          prop="name"
+          label="备份名称"
+          min-width="200"
+        >
           <template #default="{ row }">
             <div class="backup-name">
-              <el-icon v-if="row.type === 'auto'" class="auto-icon"><MagicStick /></el-icon>
+              <el-icon
+                v-if="row.type === 'auto'"
+                class="auto-icon"
+              >
+                <MagicStick />
+              </el-icon>
               {{ row.name }}
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="type" label="类型" width="100" align="center">
+        <el-table-column
+          prop="type"
+          label="类型"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag :type="row.type === 'auto' ? 'info' : 'primary'" size="small">
+            <el-tag
+              :type="row.type === 'auto' ? 'info' : 'primary'"
+              size="small"
+            >
               {{ row.type === 'auto' ? '自动' : '手动' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="size" label="文件大小" width="100" align="right">
+        <el-table-column
+          prop="size"
+          label="文件大小"
+          width="100"
+          align="right"
+        >
           <template #default="{ row }">
             {{ formatFileSize(row.size) }}
           </template>
         </el-table-column>
-        <el-table-column prop="fileCount" label="文件数" width="80" align="center" />
-        <el-table-column prop="createTime" label="备份时间" width="160" />
-        <el-table-column prop="creator" label="创建者" width="100" />
-        <el-table-column prop="status" label="状态" width="80" align="center">
+        <el-table-column
+          prop="fileCount"
+          label="文件数"
+          width="80"
+          align="center"
+        />
+        <el-table-column
+          prop="createTime"
+          label="备份时间"
+          width="160"
+        />
+        <el-table-column
+          prop="creator"
+          label="创建者"
+          width="100"
+        />
+        <el-table-column
+          prop="status"
+          label="状态"
+          width="80"
+          align="center"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.status === 'success'" type="success" size="small">完成</el-tag>
-            <el-tag v-else-if="row.status === 'processing'" type="warning" size="small">备份中</el-tag>
-            <el-tag v-else type="danger" size="small">失败</el-tag>
+            <el-tag
+              v-if="row.status === 'success'"
+              type="success"
+              size="small"
+            >
+              完成
+            </el-tag>
+            <el-tag
+              v-else-if="row.status === 'processing'"
+              type="warning"
+              size="small"
+            >
+              备份中
+            </el-tag>
+            <el-tag
+              v-else
+              type="danger"
+              size="small"
+            >
+              失败
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right" align="center">
+        <el-table-column
+          label="操作"
+          width="180"
+          fixed="right"
+          align="center"
+        >
           <template #default="{ row }">
             <el-button
               type="primary"
@@ -221,14 +332,25 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="backupForm" :rules="backupRules" ref="backupFormRef" label-width="100px">
-        <el-form-item label="备份名称" prop="name">
+      <el-form
+        ref="backupFormRef"
+        :model="backupForm"
+        :rules="backupRules"
+        label-width="100px"
+      >
+        <el-form-item
+          label="备份名称"
+          prop="name"
+        >
           <el-input
             v-model="backupForm.name"
             placeholder="请输入备份名称（留空自动生成）"
           />
         </el-form-item>
-        <el-form-item label="备份描述" prop="description">
+        <el-form-item
+          label="备份描述"
+          prop="description"
+        >
           <el-input
             v-model="backupForm.description"
             type="textarea"
@@ -238,12 +360,24 @@
         </el-form-item>
         <el-form-item label="备份内容">
           <el-checkbox-group v-model="backupForm.content">
-            <el-checkbox label="users">用户数据</el-checkbox>
-            <el-checkbox label="groups">群组数据</el-checkbox>
-            <el-checkbox label="messages">消息记录</el-checkbox>
-            <el-checkbox label="departments">部门数据</el-checkbox>
-            <el-checkbox label="roles">角色权限</el-checkbox>
-            <el-checkbox label="system">系统配置</el-checkbox>
+            <el-checkbox label="users">
+              用户数据
+            </el-checkbox>
+            <el-checkbox label="groups">
+              群组数据
+            </el-checkbox>
+            <el-checkbox label="messages">
+              消息记录
+            </el-checkbox>
+            <el-checkbox label="departments">
+              部门数据
+            </el-checkbox>
+            <el-checkbox label="roles">
+              角色权限
+            </el-checkbox>
+            <el-checkbox label="system">
+              系统配置
+            </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
         <el-alert
@@ -257,8 +391,14 @@
         </el-alert>
       </el-form>
       <template #footer>
-        <el-button @click="backupDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="backupLoading" @click="handleCreateBackup">
+        <el-button @click="backupDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="backupLoading"
+          @click="handleCreateBackup"
+        >
           开始备份
         </el-button>
       </template>
@@ -272,11 +412,16 @@
       :close-on-click-modal="false"
     >
       <div class="restore-confirm">
-        <el-icon class="warning-icon"><WarningFilled /></el-icon>
+        <el-icon class="warning-icon">
+          <WarningFilled />
+        </el-icon>
         <div class="confirm-content">
           <h4>确定要恢复此备份吗？</h4>
           <p>恢复操作将覆盖当前数据，请谨慎操作。建议在恢复前先创建当前数据的备份。</p>
-          <div v-if="selectedBackup" class="backup-info">
+          <div
+            v-if="selectedBackup"
+            class="backup-info"
+          >
             <div class="info-row">
               <span class="info-label">备份名称：</span>
               <span>{{ selectedBackup.name }}</span>
@@ -293,8 +438,14 @@
         </div>
       </div>
       <template #footer>
-        <el-button @click="restoreDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="restoreLoading" @click="handleConfirmRestore">
+        <el-button @click="restoreDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="restoreLoading"
+          @click="handleConfirmRestore"
+        >
           确定恢复
         </el-button>
       </template>
@@ -372,7 +523,7 @@ const backupRules = {
 
 // 过滤后的备份列表
 const filteredBackupList = computed(() => {
-  if (!searchKeyword.value) return backupList.value
+  if (!searchKeyword.value) {return backupList.value}
   return backupList.value.filter(item =>
     item.name?.toLowerCase().includes(searchKeyword.value.toLowerCase())
   )
@@ -418,7 +569,7 @@ const loadBackups = async () => {
 }
 
 // 切换自动备份
-const handleToggleAutoBackup = (val) => {
+const handleToggleAutoBackup = val => {
   ElMessage.success(val ? '已启用定时备份' : '已停用定时备份')
 }
 
@@ -457,7 +608,7 @@ const handleCreateBackup = async () => {
 }
 
 // 恢复备份
-const handleRestore = (row) => {
+const handleRestore = row => {
   selectedBackup.value = row
   restoreDialogVisible.value = true
 }
@@ -483,7 +634,7 @@ const handleConfirmRestore = async () => {
 }
 
 // 下载备份
-const handleDownload = async (row) => {
+const handleDownload = async row => {
   try {
     // 获取备份详情，可能包含下载链接
     const res = await getBackupDetail(row.id)
@@ -500,7 +651,7 @@ const handleDownload = async (row) => {
 }
 
 // 删除备份
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   try {
     await ElMessageBox.confirm(`确定要删除备份"${row.name}"吗？此操作不可恢复。`, '删除确认', {
       type: 'warning',

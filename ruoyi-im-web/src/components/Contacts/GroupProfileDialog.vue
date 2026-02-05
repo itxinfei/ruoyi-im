@@ -8,11 +8,20 @@
     destroy-on-close
     append-to-body
   >
-    <div v-if="loading" class="loading-state">
-      <el-skeleton :rows="6" animated />
+    <div
+      v-if="loading"
+      class="loading-state"
+    >
+      <el-skeleton
+        :rows="6"
+        animated
+      />
     </div>
 
-    <div v-else-if="groupInfo" class="profile-container">
+    <div
+      v-else-if="groupInfo"
+      class="profile-container"
+    >
       <!-- 左侧：群组基本信息和快捷操作 -->
       <GroupProfileHeader
         :group-info="groupInfo"
@@ -31,12 +40,19 @@
 
       <!-- 右侧：详细信息和功能 -->
       <div class="profile-main">
-        <el-tabs v-model="activeTab" class="profile-tabs">
+        <el-tabs
+          v-model="activeTab"
+          class="profile-tabs"
+        >
           <!-- 成员 Tab -->
           <el-tab-pane name="members">
             <template #label>
               <span>成员</span>
-              <el-badge :value="members.length" :max="99" class="tab-badge" />
+              <el-badge
+                :value="members.length"
+                :max="99"
+                class="tab-badge"
+              />
             </template>
             <GroupMemberList
               :members="members"
@@ -57,7 +73,12 @@
           <el-tab-pane name="announcements">
             <template #label>
               <span>公告</span>
-              <el-badge v-if="announcements.length > 0" :value="announcements.length" :max="99" class="tab-badge" />
+              <el-badge
+                v-if="announcements.length > 0"
+                :value="announcements.length"
+                :max="99"
+                class="tab-badge"
+              />
             </template>
             <AnnouncementList
               :announcements="announcements"
@@ -91,7 +112,10 @@
           </el-tab-pane>
 
           <!-- 设置 Tab -->
-          <el-tab-pane label="设置" name="settings">
+          <el-tab-pane
+            label="设置"
+            name="settings"
+          >
             <GroupSettingsPanel
               :group-info="groupInfo"
               :settings="groupSettings"
@@ -122,8 +146,14 @@
     class="announcement-dialog"
     append-to-body
   >
-    <el-form :model="announcementForm" label-position="top">
-      <el-form-item label="标题" required>
+    <el-form
+      :model="announcementForm"
+      label-position="top"
+    >
+      <el-form-item
+        label="标题"
+        required
+      >
         <el-input
           v-model="announcementForm.title"
           placeholder="请输入公告标题"
@@ -131,7 +161,10 @@
           show-word-limit
         />
       </el-form-item>
-      <el-form-item label="内容" required>
+      <el-form-item
+        label="内容"
+        required
+      >
         <el-input
           v-model="announcementForm.content"
           type="textarea"
@@ -142,12 +175,21 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-checkbox v-model="announcementForm.isPinned">置顶公告</el-checkbox>
+        <el-checkbox v-model="announcementForm.isPinned">
+          置顶公告
+        </el-checkbox>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="showAnnouncementDialog = false">取消</el-button>
-      <el-button type="primary" @click="handleSaveAnnouncement">确定</el-button>
+      <el-button @click="showAnnouncementDialog = false">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        @click="handleSaveAnnouncement"
+      >
+        确定
+      </el-button>
     </template>
   </el-dialog>
 
@@ -159,7 +201,9 @@
     class="transfer-dialog"
     append-to-body
   >
-    <p class="transfer-hint">请选择新的群主：</p>
+    <p class="transfer-hint">
+      请选择新的群主：
+    </p>
     <div class="transfer-member-list">
       <div
         v-for="member in transferableMembers"
@@ -175,12 +219,25 @@
           shape="circle"
         />
         <span class="member-name">{{ member.nickname || member.username }}</span>
-        <el-icon v-if="selectedNewOwner?.id === member.id" class="check-icon"><Check /></el-icon>
+        <el-icon
+          v-if="selectedNewOwner?.id === member.id"
+          class="check-icon"
+        >
+          <Check />
+        </el-icon>
       </div>
     </div>
     <template #footer>
-      <el-button @click="showTransferDialog = false">取消</el-button>
-      <el-button type="primary" :disabled="!selectedNewOwner" @click="handleConfirmTransfer">确定转让</el-button>
+      <el-button @click="showTransferDialog = false">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        :disabled="!selectedNewOwner"
+        @click="handleConfirmTransfer"
+      >
+        确定转让
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -255,7 +312,7 @@ const transferableMembers = computed(() => {
 
 // 加载群组信息
 const loadGroupInfo = async () => {
-  if (!props.groupId) return
+  if (!props.groupId) {return}
   loading.value = true
   try {
     const [groupRes, membersRes] = await Promise.all([
@@ -294,7 +351,7 @@ const loadGroupInfo = async () => {
 }
 
 const loadAnnouncements = async () => {
-  if (!props.groupId) return
+  if (!props.groupId) {return}
   try {
     const res = await getGroupAnnouncements(props.groupId)
     if (res.code === 200) {
@@ -309,7 +366,7 @@ const loadAnnouncements = async () => {
 }
 
 // 监听弹窗打开
-watch(() => props.modelValue, (isOpen) => {
+watch(() => props.modelValue, isOpen => {
   visible.value = isOpen
   if (isOpen) {
     loadGroupInfo()
@@ -317,8 +374,8 @@ watch(() => props.modelValue, (isOpen) => {
   }
 })
 
-watch(visible, (val) => {
-  if (!val) emit('update:modelValue', false)
+watch(visible, val => {
+  if (!val) {emit('update:modelValue', false)}
 })
 
 // 事件处理
@@ -339,7 +396,7 @@ const handleManage = () => {
   emit('manage', groupInfo.value)
 }
 
-const handleMemberClick = (member) => {
+const handleMemberClick = member => {
   emit('member-click', member)
 }
 
@@ -367,7 +424,7 @@ const handleCancelAdmin = async ({ member, memberId }) => {
   }
 }
 
-const handleMuteMember = async (member) => {
+const handleMuteMember = async member => {
   try {
     const duration = 60 // 默认禁言60分钟
     const memberName = member.nickname || member.username
@@ -416,7 +473,7 @@ const handleCreateAnnouncement = () => {
   showAnnouncementDialog.value = true
 }
 
-const handleEditAnnouncement = (announcement) => {
+const handleEditAnnouncement = announcement => {
   editingAnnouncement.value = announcement
   announcementForm.value = {
     title: announcement.title,
@@ -467,7 +524,7 @@ const handleSaveAnnouncement = async () => {
   }
 }
 
-const handleDeleteAnnouncement = async (announcement) => {
+const handleDeleteAnnouncement = async announcement => {
   try {
     await ElMessageBox.confirm('确定要删除这条公告吗？', '删除公告', { type: 'warning' })
     await deleteGroupAnnouncement(announcement.id)
@@ -486,9 +543,9 @@ const handleEditGroupName = () => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     inputValue: groupInfo.value.name,
-    inputValidator: (value) => {
-      if (!value || value.trim() === '') return '群名称不能为空'
-      if (value.length > 50) return '群名称不能超过50个字符'
+    inputValidator: value => {
+      if (!value || value.trim() === '') {return '群名称不能为空'}
+      if (value.length > 50) {return '群名称不能超过50个字符'}
       return true
     }
   }).then(async ({ value }) => {
@@ -510,8 +567,8 @@ const handleEditGroupDesc = () => {
     cancelButtonText: '取消',
     inputValue: groupInfo.value.description || '',
     inputType: 'textarea',
-    inputValidator: (value) => {
-      if (value && value.length > 200) return '群简介不能超过200个字符'
+    inputValidator: value => {
+      if (value && value.length > 200) {return '群简介不能超过200个字符'}
       return true
     }
   }).then(async ({ value }) => {
@@ -540,11 +597,11 @@ const handleSettingChange = async (key, value) => {
   }
 }
 
-const handleMuteChange = (val) => {
+const handleMuteChange = val => {
   ElMessage.success(val ? '已开启消息免打扰' : '已取消消息免打扰')
 }
 
-const handleTopChange = (val) => {
+const handleTopChange = val => {
   ElMessage.success(val ? '已置顶会话' : '已取消置顶')
 }
 
@@ -554,7 +611,7 @@ const handleTransfer = () => {
 }
 
 const handleConfirmTransfer = async () => {
-  if (!selectedNewOwner.value) return
+  if (!selectedNewOwner.value) {return}
   const memberName = selectedNewOwner.value.nickname || selectedNewOwner.value.username
 
   try {
@@ -611,21 +668,20 @@ const handleExit = async () => {
 }
 
 // 文件相关处理
-const handleOpenFileInChat = (file) => {
+const handleOpenFileInChat = file => {
   // 切换到对应会话并定位到消息
   emit('send-message', groupInfo.value)
   handleClose()
   ElMessage.info('正在跳转到消息...')
 }
 
-const handlePreviewImage = (file) => {
+const handlePreviewImage = file => {
   // 预览图片
   ElMessage.info('预览: ' + file.name)
 }</script>
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
-@use '@/styles/group-common.scss' as *;
 
 .group-profile-dialog {
   :deep(.el-dialog) {

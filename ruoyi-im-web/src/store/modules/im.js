@@ -15,8 +15,8 @@ let pendingSettings = {}
 /**
  * 执行防抖后的设置更新
  */
-const flushSettingsUpdate = async (dispatch) => {
-  if (Object.keys(pendingSettings).length === 0) return
+const flushSettingsUpdate = async dispatch => {
+  if (Object.keys(pendingSettings).length === 0) {return}
 
   const settingsToSend = { ...pendingSettings }
   pendingSettings = {}
@@ -92,31 +92,31 @@ export default {
 
   getters: {
     // 当前用户ID
-    currentUserId: (state) => state.currentUser.id,
+    currentUserId: state => state.currentUser.id,
 
     // 是否已登录
-    isLoggedIn: (state) => !!state.currentUser.id,
+    isLoggedIn: state => !!state.currentUser.id,
 
     // 通知设置
-    notificationSettings: (state) => state.settings.notifications,
+    notificationSettings: state => state.settings.notifications,
 
     // 隐私设置
-    privacySettings: (state) => state.settings.privacy,
+    privacySettings: state => state.settings.privacy,
 
     // 通用设置
-    generalSettings: (state) => state.settings.general,
+    generalSettings: state => state.settings.general,
 
     // 快捷键设置
-    shortcutSettings: (state) => state.settings.shortcuts,
+    shortcutSettings: state => state.settings.shortcuts,
 
     // 聊天设置
-    chatSettings: (state) => state.settings.chat,
+    chatSettings: state => state.settings.chat,
 
     // 文件管理设置
-    fileSettings: (state) => state.settings.file,
+    fileSettings: state => state.settings.file,
 
     // 数据保留设置
-    dataSettings: (state) => state.settings.data
+    dataSettings: state => state.settings.data
   },
 
   mutations: {

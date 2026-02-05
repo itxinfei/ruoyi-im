@@ -2,14 +2,24 @@
   <div class="admin-layout">
     <el-container :class="{ 'sidebar-collapsed': isCollapsed }">
       <!-- 左侧主导航栏 -->
-      <el-aside :width="sidebarWidth" class="admin-sidebar">
+      <el-aside
+        :width="sidebarWidth"
+        class="admin-sidebar"
+      >
         <!-- Logo区域 -->
         <div class="sidebar-logo">
-          <div v-if="!isCollapsed" class="logo-content">
+          <div
+            v-if="!isCollapsed"
+            class="logo-content"
+          >
             <span class="logo-text">RuoYi-IM</span>
             <span class="logo-subtitle">管理后台</span>
           </div>
-          <el-icon v-else class="logo-icon" @click="toggleCollapse">
+          <el-icon
+            v-else
+            class="logo-icon"
+            @click="toggleCollapse"
+          >
             <Monitor />
           </el-icon>
         </div>
@@ -23,43 +33,63 @@
         >
           <el-menu-item index="/admin/dashboard">
             <el-icon><Monitor /></el-icon>
-            <template #title>数据概览</template>
+            <template #title>
+              数据概览
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/users">
             <el-icon><User /></el-icon>
-            <template #title>用户管理</template>
+            <template #title>
+              用户管理
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/groups">
             <el-icon><ChatDotRound /></el-icon>
-            <template #title>群组管理</template>
+            <template #title>
+              群组管理
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/messages">
             <el-icon><ChatLineSquare /></el-icon>
-            <template #title>消息管理</template>
+            <template #title>
+              消息管理
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/departments">
             <el-icon><OfficeBuilding /></el-icon>
-            <template #title>部门管理</template>
+            <template #title>
+              部门管理
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/roles">
             <el-icon><Lock /></el-icon>
-            <template #title>角色权限</template>
+            <template #title>
+              角色权限
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/settings">
             <el-icon><Setting /></el-icon>
-            <template #title>系统设置</template>
+            <template #title>
+              系统设置
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/logs">
             <el-icon><Document /></el-icon>
-            <template #title>操作日志</template>
+            <template #title>
+              操作日志
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/backup">
             <el-icon><FolderOpened /></el-icon>
-            <template #title>数据备份</template>
+            <template #title>
+              数据备份
+            </template>
           </el-menu-item>
           <el-menu-item index="/admin/monitor">
             <el-icon><TrendCharts /></el-icon>
-            <template #title>系统监控</template>
+            <template #title>
+              系统监控
+            </template>
           </el-menu-item>
         </el-menu>
 
@@ -68,8 +98,8 @@
           <el-button
             :icon="isCollapsed ? DArrowRight : DArrowLeft"
             text
-            @click="toggleCollapse"
             class="collapse-btn"
+            @click="toggleCollapse"
           >
             {{ isCollapsed ? '' : '收起' }}
           </el-button>
@@ -102,12 +132,23 @@
           <!-- 右侧：通知 + 主题切换 + 用户信息 + 退出 -->
           <div class="header-right">
             <!-- 通知图标 -->
-            <el-badge :value="notificationCount" :hidden="notificationCount === 0" class="notification-badge">
-              <el-button :icon="Bell" text class="header-icon-btn" />
+            <el-badge
+              :value="notificationCount"
+              :hidden="notificationCount === 0"
+              class="notification-badge"
+            >
+              <el-button
+                :icon="Bell"
+                text
+                class="header-icon-btn"
+              />
             </el-badge>
 
             <!-- 主题切换按钮 -->
-            <el-tooltip :content="themeTooltip" placement="bottom">
+            <el-tooltip
+              :content="themeTooltip"
+              placement="bottom"
+            >
               <el-button
                 :icon="themeIcon"
                 text
@@ -117,13 +158,24 @@
             </el-tooltip>
 
             <!-- 用户信息下拉 -->
-            <el-dropdown trigger="click" @command="handleUserCommand">
+            <el-dropdown
+              trigger="click"
+              @command="handleUserCommand"
+            >
               <div class="user-info">
-                <el-avatar :size="32" class="user-avatar">
+                <el-avatar
+                  :size="32"
+                  class="user-avatar"
+                >
                   <el-icon><User /></el-icon>
                 </el-avatar>
-                <span v-if="!isMobile" class="user-name">{{ userName }}</span>
-                <el-icon class="dropdown-icon"><ArrowDown /></el-icon>
+                <span
+                  v-if="!isMobile"
+                  class="user-name"
+                >{{ userName }}</span>
+                <el-icon class="dropdown-icon">
+                  <ArrowDown />
+                </el-icon>
               </div>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -135,11 +187,17 @@
                     <el-icon><Setting /></el-icon>
                     系统设置
                   </el-dropdown-item>
-                  <el-dropdown-item divided command="back">
+                  <el-dropdown-item
+                    divided
+                    command="back"
+                  >
                     <el-icon><ChatDotRound /></el-icon>
                     返回聊天
                   </el-dropdown-item>
-                  <el-dropdown-item command="logout" style="color: var(--dt-error);">
+                  <el-dropdown-item
+                    command="logout"
+                    style="color: var(--dt-error);"
+                  >
                     <el-icon><SwitchButton /></el-icon>
                     退出登录
                   </el-dropdown-item>
@@ -152,7 +210,10 @@
         <!-- 主内容区 -->
         <el-main class="admin-main">
           <router-view v-slot="{ Component }">
-            <transition name="fade" mode="out-in">
+            <transition
+              name="fade"
+              mode="out-in"
+            >
               <component :is="Component" />
             </transition>
           </router-view>
@@ -241,7 +302,7 @@ const pageTitleMap = {
 // 面包屑列表
 const breadcrumbList = computed(() => {
   const current = pageTitleMap[route.path]
-  if (!current) return [{ title: '管理后台', path: '/admin/dashboard' }]
+  if (!current) {return [{ title: '管理后台', path: '/admin/dashboard' }]}
   return [
     { title: '首页', path: '/admin/dashboard' },
     { title: current.title, path: route.path }
@@ -254,7 +315,7 @@ const toggleCollapse = () => {
 }
 
 // 用户下拉菜单命令处理
-const handleUserCommand = (command) => {
+const handleUserCommand = command => {
   switch (command) {
     case 'profile':
       // 打开个人信息

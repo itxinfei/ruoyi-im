@@ -13,7 +13,10 @@
       label-width="80px"
       label-position="left"
     >
-      <el-form-item label="标题" prop="title">
+      <el-form-item
+        label="标题"
+        prop="title"
+      >
         <el-input
           v-model="form.title"
           placeholder="请输入待办标题"
@@ -22,7 +25,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="内容" prop="content">
+      <el-form-item
+        label="内容"
+        prop="content"
+      >
         <el-input
           v-model="form.content"
           type="textarea"
@@ -33,15 +39,34 @@
         />
       </el-form-item>
 
-      <el-form-item label="优先级" prop="priority">
-        <el-select v-model="form.priority" placeholder="请选择优先级" style="width: 100%">
-          <el-option label="紧急" value="high" />
-          <el-option label="普通" value="medium" />
-          <el-option label="低" value="low" />
+      <el-form-item
+        label="优先级"
+        prop="priority"
+      >
+        <el-select
+          v-model="form.priority"
+          placeholder="请选择优先级"
+          style="width: 100%"
+        >
+          <el-option
+            label="紧急"
+            value="high"
+          />
+          <el-option
+            label="普通"
+            value="medium"
+          />
+          <el-option
+            label="低"
+            value="low"
+          />
         </el-select>
       </el-form-item>
 
-      <el-form-item label="截止日期" prop="dueDate">
+      <el-form-item
+        label="截止日期"
+        prop="dueDate"
+      >
         <el-date-picker
           v-model="form.dueDate"
           type="datetime"
@@ -56,7 +81,11 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
           {{ isEdit ? '保存' : '确定' }}
         </el-button>
       </span>
@@ -112,7 +141,7 @@ const rules = {
 }
 
 // 监听 modelValue 变化
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val && props.todo) {
     // 编辑模式：填充表单
@@ -123,7 +152,7 @@ watch(() => props.modelValue, (val) => {
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
   if (!val) {
     resetForm()
@@ -131,7 +160,7 @@ watch(visible, (val) => {
 })
 
 // 数据转换：前端 -> 后端
-const transformTodoToApi = (todo) => {
+const transformTodoToApi = todo => {
   const priorityMap = { low: 1, medium: 2, high: 3 }
   return {
     title: todo.title,

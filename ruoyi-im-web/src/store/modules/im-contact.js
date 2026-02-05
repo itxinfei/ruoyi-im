@@ -46,17 +46,17 @@ export default {
     },
 
     // 根据用户ID获取联系人
-    contactById: (state, getters) => (userId) => {
+    contactById: (state, getters) => userId => {
       return getters.contactMap.get(userId)
     },
 
     // 根据群组ID获取群组
-    groupById: (state, getters) => (groupId) => {
+    groupById: (state, getters) => groupId => {
       return getters.groupMap.get(groupId)
     },
 
     // 获取用户在线状态
-    getUserStatus: (state) => (userId) => {
+    getUserStatus: state => userId => {
       return state.userStatus[userId] || 'offline'
     }
   },
@@ -156,7 +156,7 @@ export default {
     // 加载联系人列表
     async loadContacts({ commit, state }) {
       // 如果已经有数据，先不重新加载（避免重复请求）
-      if (state.contacts.length > 0) return
+      if (state.contacts.length > 0) {return}
 
       commit('SET_LOADING', { key: 'contacts', value: true })
       try {
@@ -179,7 +179,7 @@ export default {
     // 加载群组列表
     async loadGroups({ commit, state }) {
       // 如果已经有数据，先不重新加载
-      if (state.groups.length > 0) return
+      if (state.groups.length > 0) {return}
 
       commit('SET_LOADING', { key: 'groups', value: true })
       try {

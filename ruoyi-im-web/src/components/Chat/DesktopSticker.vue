@@ -10,28 +10,62 @@
       @mousedown="handleStickerMouseDown($event, sticker.id)"
     >
       <!-- 标题栏 -->
-      <div class="sticker-header" @mousedown="startDrag($event, sticker.id)">
+      <div
+        class="sticker-header"
+        @mousedown="startDrag($event, sticker.id)"
+      >
         <span class="sticker-title">截图贴图</span>
         <div class="sticker-controls">
-          <button class="control-btn" @click.stop="toggleMinimize(sticker.id)" title="最小化">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13H5v-2h14v2z"/></svg>
+          <button
+            class="control-btn"
+            title="最小化"
+            @click.stop="toggleMinimize(sticker.id)"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M19 13H5v-2h14v2z"
+            /></svg>
           </button>
-          <button class="control-btn" @click.stop="toggleTop(sticker.id)" title="置顶">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"/></svg>
+          <button
+            class="control-btn"
+            title="置顶"
+            @click.stop="toggleTop(sticker.id)"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"
+            /></svg>
           </button>
-          <button class="control-btn close-btn" @click.stop="removeSticker(sticker.id)" title="关闭">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          <button
+            class="control-btn close-btn"
+            title="关闭"
+            @click.stop="removeSticker(sticker.id)"
+          >
+            <svg viewBox="0 0 24 24"><path
+              fill="currentColor"
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            /></svg>
           </button>
         </div>
       </div>
 
       <!-- 图片内容 -->
-      <div v-if="!sticker.minimized" class="sticker-content">
-        <img :src="sticker.image" :alt="'贴图 ' + sticker.id" draggable="false">
+      <div
+        v-if="!sticker.minimized"
+        class="sticker-content"
+      >
+        <img
+          :src="sticker.image"
+          :alt="'贴图 ' + sticker.id"
+          draggable="false"
+        >
       </div>
 
       <!-- 操作提示 -->
-      <div v-if="stickers.length === 1 && !stickers[0].minimized" class="sticker-hint">
+      <div
+        v-if="stickers.length === 1 && !stickers[0].minimized"
+        class="sticker-hint"
+      >
         双击贴图可复制 · 拖动标题栏移动
       </div>
     </div>
@@ -80,7 +114,7 @@ const addSticker = (imageDataUrl, x = 100, y = 100) => {
 }
 
 // ==================== 方法：移除贴图 ====================
-const removeSticker = (id) => {
+const removeSticker = id => {
   const index = stickers.value.findIndex(s => s.id === id)
   if (index !== -1) {
     // 创建新数组触发响应式更新
@@ -89,7 +123,7 @@ const removeSticker = (id) => {
 }
 
 // ==================== 方法：最小化切换 ====================
-const toggleMinimize = (id) => {
+const toggleMinimize = id => {
   const sticker = stickers.value.find(s => s.id === id)
   if (sticker) {
     sticker.minimized = !sticker.minimized
@@ -97,7 +131,7 @@ const toggleMinimize = (id) => {
 }
 
 // ==================== 方法：置顶切换 ====================
-const toggleTop = (id) => {
+const toggleTop = id => {
   const sticker = stickers.value.find(s => s.id === id)
   if (sticker) {
     sticker.zIndex = ++nextZIndex
@@ -107,7 +141,7 @@ const toggleTop = (id) => {
 // ==================== 方法：开始拖拽 ====================
 const startDrag = (e, id) => {
   const sticker = stickers.value.find(s => s.id === id)
-  if (!sticker) return
+  if (!sticker) {return}
 
   // 提升到最顶层
   sticker.zIndex = ++nextZIndex
@@ -124,11 +158,11 @@ const startDrag = (e, id) => {
 }
 
 // ==================== 方法：处理拖拽移动 ====================
-const handleDragMove = (e) => {
-  if (!dragState.value.isDragging) return
+const handleDragMove = e => {
+  if (!dragState.value.isDragging) {return}
 
   const sticker = stickers.value.find(s => s.id === dragState.value.stickerId)
-  if (!sticker) return
+  if (!sticker) {return}
 
   sticker.x = e.clientX - dragState.value.offsetX
   sticker.y = e.clientY - dragState.value.offsetY
@@ -175,7 +209,7 @@ defineExpose({
 // ==================== 生命周期 ====================
 onMounted(() => {
   // 监听双击事件复制贴图
-  handleDoubleClickWrapper = (e) => {
+  handleDoubleClickWrapper = e => {
     const stickerEl = e.target.closest('.desktop-sticker')
     if (stickerEl) {
       const id = parseInt(stickerEl.dataset.id)

@@ -1,5 +1,8 @@
 <template>
-  <aside class="nav-sidebar" :style="{ width: navWidth + 'px' }">
+  <aside
+    class="nav-sidebar"
+    :style="{ width: navWidth + 'px' }"
+  >
     <div class="logo-area">
       <div class="logo-box">
         <span class="logo-text">钉</span>
@@ -23,7 +26,10 @@
             <component :is="item.icon" />
           </el-icon>
           <span class="nav-label">{{ item.label }}</span>
-          <span v-if="item.key === 'chat' && unreadCount > 0" class="nav-dot"></span>
+          <span
+            v-if="item.key === 'chat' && unreadCount > 0"
+            class="nav-dot"
+          />
         </div>
       </el-tooltip>
     </nav>
@@ -125,7 +131,7 @@ const navModules = ref([
   }
 ])
 
-const handleNavClick = (moduleKey) => {
+const handleNavClick = moduleKey => {
   emit('switchModule', moduleKey)
 }
 </script>

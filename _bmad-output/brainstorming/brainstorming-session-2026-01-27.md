@@ -1237,13 +1237,16 @@ synchronized (onlineUsers) {
 ## 十、前端 UI/UX 优化方案（跨界借鉴头脑风暴）
 
 **日期**: 2026-01-27
+**更新日期**: 2026-02-05
 **方法**: 跨界借鉴 (Cross-Pollination)
-**竞品分析**: 钉钉 DingDesign、飞书 Universe Design、Slack 2025
+**主要参考**: 野火IM WildfireChat
+**竞品分析**: 野火IM、钉钉 DingDesign、飞书 Universe Design、Slack 2025
 
 ### 竞品 UI 分析对比
 
 | 产品 | 侧边导航 | 会话列表 | 聊天区域 | 特点 |
 |------|----------|----------|----------|------|
+| **野火IM** | 60px 垂直导航 | 280px 双栏（消息/联系人） | 自适应宽度 | 开源IM，功能齐全 |
 | **钉钉** | 72px 垂直导航 | 280px 三栏（消息/联系人/应用） | 自适应宽度 | 图标为主，紧凑高效 |
 | **飞书** | 可折叠侧边 + 顶部Tab | 多栏切换 | 支持多窗口 | 灵活组合，信息密度高 |
 | **Slack** | 整合侧边栏（2025新版） | 统一Tabs系统 | 沉浸式 | Focus优先，减少干扰 |
@@ -1297,7 +1300,7 @@ synchronized (onlineUsers) {
 #### 1. SystemSettingsDialog（设置页面）
 
 **优化点**:
-- 左侧导航改为56px图标导航（钉钉风格）
+- 左侧导航改为60px图标导航（参考野火IM）
 - 右侧内容采用卡片式布局（飞书风格）
 - 添加平滑切换动画
 
@@ -1349,9 +1352,9 @@ synchronized (onlineUsers) {
 
 ## 参考资源
 
-- [钉钉2025 B端设计趋势 - 版式](https://page.dingtalk.com/wow/dingtalk/default/dingtalk/EDeT4UWD0205)
-- [钉钉2025 B端设计趋势 - 个性化](https://page.dingtalk.com/wow/dingtalk/default/dingtalk/JVNYHDarV0121)
-- [钉钉2025 B端设计趋势 - 风格&质感](https://page.dingtalk.com/wow/dingtalk/default/dingtalk/9ijIiD4sqjwY0126)
+- [野火IM开发手册](https://docs.wildfirechat.cn/)
+- [野火IM GitHub](https://github.com/wildfirechat/im-server)
+- 设计参考：企业IM通用设计规范
 - [飞书UI设计规范](https://docs.feishu.cn/article/wiki/WkfiwqwgkiDgdpkiLKvcu0XInmd)
 - [Slack 2025 重新设计](https://slack.com/blog/productivity/a-redesigned-slack-built-for-focus)
 
@@ -1395,7 +1398,7 @@ synchronized (onlineUsers) {
 **关键代码**:
 ```scss
 .settings-nav {
-  width: 56px;  // 钉钉风格图标导航
+  width: 56px;  // 野火IM风格图标导航
   ...
 }
 

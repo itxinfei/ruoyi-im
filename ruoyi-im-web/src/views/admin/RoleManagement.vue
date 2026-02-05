@@ -4,17 +4,28 @@
     <div class="page-header">
       <div class="page-title">
         <h2>角色权限管理</h2>
-        <p class="page-desc">管理系统角色、分配权限和角色成员</p>
+        <p class="page-desc">
+          管理系统角色、分配权限和角色成员
+        </p>
       </div>
       <div class="page-actions">
-        <el-button type="primary" :icon="Plus" @click="handleAdd">新增角色</el-button>
+        <el-button
+          type="primary"
+          :icon="Plus"
+          @click="handleAdd"
+        >
+          新增角色
+        </el-button>
       </div>
     </div>
 
     <!-- 内容区域：角色列表 + 权限配置 -->
     <div class="role-content">
       <!-- 左侧：角色列表 -->
-      <el-card class="role-list-card" shadow="never">
+      <el-card
+        class="role-list-card"
+        shadow="never"
+      >
         <template #header>
           <div class="card-header">
             <span>角色列表</span>
@@ -36,60 +47,120 @@
             :class="{ active: currentRole?.id === role.id }"
             @click="handleSelectRole(role)"
           >
-            <div class="role-icon" :style="{ background: role.color || getRoleColor(role.roleCode) }">
+            <div
+              class="role-icon"
+              :style="{ background: role.color || getRoleColor(role.roleCode) }"
+            >
               <el-icon><User /></el-icon>
             </div>
             <div class="role-info">
-              <div class="role-name">{{ role.roleName }}</div>
-              <div class="role-code">{{ role.roleCode }}</div>
+              <div class="role-name">
+                {{ role.roleName }}
+              </div>
+              <div class="role-code">
+                {{ role.roleCode }}
+              </div>
             </div>
             <div class="role-badge">
-              <el-tag v-if="role.builtin" size="small" type="info">系统</el-tag>
+              <el-tag
+                v-if="role.builtin"
+                size="small"
+                type="info"
+              >
+                系统
+              </el-tag>
             </div>
           </div>
 
-          <el-empty v-if="filteredRoles.length === 0" description="暂无角色" :image-size="60" />
+          <el-empty
+            v-if="filteredRoles.length === 0"
+            description="暂无角色"
+            :image-size="60"
+          />
         </div>
       </el-card>
 
       <!-- 右侧：角色详情 -->
-      <el-card class="role-detail-card" shadow="never">
+      <el-card
+        class="role-detail-card"
+        shadow="never"
+      >
         <template v-if="currentRole">
           <!-- 角色头部 -->
           <div class="role-header">
-            <div class="role-icon-large" :style="{ background: currentRole.color || getRoleColor(currentRole.roleCode) }">
-              <el-icon :size="24"><User /></el-icon>
+            <div
+              class="role-icon-large"
+              :style="{ background: currentRole.color || getRoleColor(currentRole.roleCode) }"
+            >
+              <el-icon :size="24">
+                <User />
+              </el-icon>
             </div>
             <div class="role-header-info">
-              <h3 class="role-header-name">{{ currentRole.roleName }}</h3>
-              <p class="role-header-code">{{ currentRole.roleCode }}</p>
-              <p v-if="currentRole.description" class="role-header-desc">{{ currentRole.description }}</p>
+              <h3 class="role-header-name">
+                {{ currentRole.roleName }}
+              </h3>
+              <p class="role-header-code">
+                {{ currentRole.roleCode }}
+              </p>
+              <p
+                v-if="currentRole.description"
+                class="role-header-desc"
+              >
+                {{ currentRole.description }}
+              </p>
             </div>
             <div class="role-header-actions">
-              <el-button v-if="!currentRole.builtin" size="small" :icon="Edit" @click="handleEdit(currentRole)">
+              <el-button
+                v-if="!currentRole.builtin"
+                size="small"
+                :icon="Edit"
+                @click="handleEdit(currentRole)"
+              >
                 编辑
               </el-button>
-              <el-button size="small" :icon="User" @click="memberDrawerVisible = true">
+              <el-button
+                size="small"
+                :icon="User"
+                @click="memberDrawerVisible = true"
+              >
                 成员 ({{ currentRole.memberCount || 0 }})
               </el-button>
             </div>
           </div>
 
-          <el-tabs v-model="activeTab" class="role-tabs">
+          <el-tabs
+            v-model="activeTab"
+            class="role-tabs"
+          >
             <!-- 权限配置 -->
-            <el-tab-pane label="权限配置" name="permissions">
+            <el-tab-pane
+              label="权限配置"
+              name="permissions"
+            >
               <div class="permissions-content">
                 <div class="permission-header">
                   <span class="permission-title">菜单权限</span>
                   <div class="permission-actions">
-                    <el-button size="small" :icon="Check" @click="handleExpandAll">展开全部</el-button>
-                    <el-button size="small" @click="handleCollapseAll">收起全部</el-button>
+                    <el-button
+                      size="small"
+                      :icon="Check"
+                      @click="handleExpandAll"
+                    >
+                      展开全部
+                    </el-button>
+                    <el-button
+                      size="small"
+                      @click="handleCollapseAll"
+                    >
+                      收起全部
+                    </el-button>
                     <el-button
                       size="small"
                       type="primary"
                       :icon="Select"
-                      @click="handleSavePermissions"
                       :disabled="currentRole.builtin"
+                      @click="handleSavePermissions"
                     >
                       保存权限
                     </el-button>
@@ -112,7 +183,13 @@
                           <component :is="data.icon" />
                         </el-icon>
                         <span class="permission-label">{{ node.label }}</span>
-                        <el-tag v-if="data.type === 'button'" size="small" type="info">按钮</el-tag>
+                        <el-tag
+                          v-if="data.type === 'button'"
+                          size="small"
+                          type="info"
+                        >
+                          按钮
+                        </el-tag>
                       </div>
                     </template>
                   </el-tree>
@@ -120,32 +197,69 @@
 
                 <!-- 数据权限 -->
                 <div class="data-permission-section">
-                  <div class="section-title">数据权限范围</div>
-                  <el-radio-group v-model="dataScope" :disabled="currentRole.builtin">
-                    <el-radio label="all">全部数据</el-radio>
-                    <el-radio label="dept">本部门数据</el-radio>
-                    <el-radio label="deptAndSub">本部门及子部门数据</el-radio>
-                    <el-radio label="self">仅本人数据</el-radio>
+                  <div class="section-title">
+                    数据权限范围
+                  </div>
+                  <el-radio-group
+                    v-model="dataScope"
+                    :disabled="currentRole.builtin"
+                  >
+                    <el-radio label="all">
+                      全部数据
+                    </el-radio>
+                    <el-radio label="dept">
+                      本部门数据
+                    </el-radio>
+                    <el-radio label="deptAndSub">
+                      本部门及子部门数据
+                    </el-radio>
+                    <el-radio label="self">
+                      仅本人数据
+                    </el-radio>
                   </el-radio-group>
                 </div>
               </div>
             </el-tab-pane>
 
             <!-- 角色信息 -->
-            <el-tab-pane label="基本信息" name="info">
-              <el-descriptions :column="2" border>
-                <el-descriptions-item label="角色ID">{{ currentRole.id }}</el-descriptions-item>
-                <el-descriptions-item label="角色编码">{{ currentRole.roleCode }}</el-descriptions-item>
-                <el-descriptions-item label="角色名称">{{ currentRole.roleName }}</el-descriptions-item>
+            <el-tab-pane
+              label="基本信息"
+              name="info"
+            >
+              <el-descriptions
+                :column="2"
+                border
+              >
+                <el-descriptions-item label="角色ID">
+                  {{ currentRole.id }}
+                </el-descriptions-item>
+                <el-descriptions-item label="角色编码">
+                  {{ currentRole.roleCode }}
+                </el-descriptions-item>
+                <el-descriptions-item label="角色名称">
+                  {{ currentRole.roleName }}
+                </el-descriptions-item>
                 <el-descriptions-item label="系统角色">
-                  <el-tag :type="currentRole.builtin ? 'success' : 'info'" size="small">
+                  <el-tag
+                    :type="currentRole.builtin ? 'success' : 'info'"
+                    size="small"
+                  >
                     {{ currentRole.builtin ? '是' : '否' }}
                   </el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="成员数量">{{ currentRole.memberCount || 0 }} 人</el-descriptions-item>
-                <el-descriptions-item label="数据范围">{{ currentRole.dataScopeDesc || '-' }}</el-descriptions-item>
-                <el-descriptions-item label="创建时间">{{ currentRole.createTime }}</el-descriptions-item>
-                <el-descriptions-item label="描述" :span="2">
+                <el-descriptions-item label="成员数量">
+                  {{ currentRole.memberCount || 0 }} 人
+                </el-descriptions-item>
+                <el-descriptions-item label="数据范围">
+                  {{ currentRole.dataScopeDesc || '-' }}
+                </el-descriptions-item>
+                <el-descriptions-item label="创建时间">
+                  {{ currentRole.createTime }}
+                </el-descriptions-item>
+                <el-descriptions-item
+                  label="描述"
+                  :span="2"
+                >
                   {{ currentRole.description || '-' }}
                 </el-descriptions-item>
               </el-descriptions>
@@ -154,8 +268,14 @@
         </template>
 
         <!-- 未选择角色时的空状态 -->
-        <div v-else class="empty-role">
-          <el-empty description="请选择一个角色查看详情" :image-size="100" />
+        <div
+          v-else
+          class="empty-role"
+        >
+          <el-empty
+            description="请选择一个角色查看详情"
+            :image-size="100"
+          />
         </div>
       </el-card>
     </div>
@@ -167,32 +287,83 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="roleForm" :rules="roleRules" ref="roleFormRef" label-width="100px">
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="roleForm.roleName" placeholder="请输入角色名称" />
+      <el-form
+        ref="roleFormRef"
+        :model="roleForm"
+        :rules="roleRules"
+        label-width="100px"
+      >
+        <el-form-item
+          label="角色名称"
+          prop="roleName"
+        >
+          <el-input
+            v-model="roleForm.roleName"
+            placeholder="请输入角色名称"
+          />
         </el-form-item>
-        <el-form-item label="角色编码" prop="roleCode">
+        <el-form-item
+          label="角色编码"
+          prop="roleCode"
+        >
           <el-input
             v-model="roleForm.roleCode"
             placeholder="请输入角色编码，如：ROLE_EDITOR"
             :disabled="isEdit"
           />
         </el-form-item>
-        <el-form-item label="数据范围" prop="dataScope" v-if="!isEdit">
-          <el-select v-model="roleForm.dataScope" placeholder="请选择数据范围" style="width: 100%">
-            <el-option label="全部数据" :value="1" />
-            <el-option label="本部门数据" :value="2" />
-            <el-option label="本部门及子部门数据" :value="3" />
-            <el-option label="仅本人数据" :value="4" />
+        <el-form-item
+          v-if="!isEdit"
+          label="数据范围"
+          prop="dataScope"
+        >
+          <el-select
+            v-model="roleForm.dataScope"
+            placeholder="请选择数据范围"
+            style="width: 100%"
+          >
+            <el-option
+              label="全部数据"
+              :value="1"
+            />
+            <el-option
+              label="本部门数据"
+              :value="2"
+            />
+            <el-option
+              label="本部门及子部门数据"
+              :value="3"
+            />
+            <el-option
+              label="仅本人数据"
+              :value="4"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="显示颜色" prop="color">
-          <el-color-picker v-model="roleForm.color" show-alpha />
+        <el-form-item
+          label="显示颜色"
+          prop="color"
+        >
+          <el-color-picker
+            v-model="roleForm.color"
+            show-alpha
+          />
         </el-form-item>
-        <el-form-item label="排序号" prop="sortOrder">
-          <el-input-number v-model="roleForm.sortOrder" :min="0" :max="9999" controls-position="right" />
+        <el-form-item
+          label="排序号"
+          prop="sortOrder"
+        >
+          <el-input-number
+            v-model="roleForm.sortOrder"
+            :min="0"
+            :max="9999"
+            controls-position="right"
+          />
         </el-form-item>
-        <el-form-item label="角色描述" prop="description">
+        <el-form-item
+          label="角色描述"
+          prop="description"
+        >
           <el-input
             v-model="roleForm.description"
             type="textarea"
@@ -202,8 +373,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -217,7 +395,10 @@
       <template v-if="currentRole">
         <div class="member-drawer-header">
           <div class="member-drawer-role">
-            <div class="role-icon-small" :style="{ background: currentRole.color || getRoleColor(currentRole.roleCode) }">
+            <div
+              class="role-icon-small"
+              :style="{ background: currentRole.color || getRoleColor(currentRole.roleCode) }"
+            >
               <el-icon><User /></el-icon>
             </div>
             <div>
@@ -225,19 +406,38 @@
               <p>{{ roleMembers.length }} 位成员</p>
             </div>
           </div>
-          <el-button type="primary" size="small" :icon="Plus" @click="addMemberDialogVisible = true">
+          <el-button
+            type="primary"
+            size="small"
+            :icon="Plus"
+            @click="addMemberDialogVisible = true"
+          >
             添加成员
           </el-button>
         </div>
 
-        <div v-loading="membersLoading" class="member-list">
-          <div v-for="member in roleMembers" :key="member.id" class="member-item">
-            <el-avatar :size="40" :src="member.avatar">
+        <div
+          v-loading="membersLoading"
+          class="member-list"
+        >
+          <div
+            v-for="member in roleMembers"
+            :key="member.id"
+            class="member-item"
+          >
+            <el-avatar
+              :size="40"
+              :src="member.avatar"
+            >
               {{ member.nickname?.[0] || 'U' }}
             </el-avatar>
             <div class="member-info">
-              <div class="member-name">{{ member.nickname || member.username }}</div>
-              <div class="member-dept">{{ member.department || '未分配部门' }}</div>
+              <div class="member-name">
+                {{ member.nickname || member.username }}
+              </div>
+              <div class="member-dept">
+                {{ member.department || '未分配部门' }}
+              </div>
             </div>
             <el-button
               size="small"
@@ -250,7 +450,11 @@
             </el-button>
           </div>
 
-          <el-empty v-if="roleMembers.length === 0" description="暂无成员" :image-size="60" />
+          <el-empty
+            v-if="roleMembers.length === 0"
+            description="暂无成员"
+            :image-size="60"
+          />
         </div>
       </template>
     </el-drawer>
@@ -281,7 +485,12 @@
               :value="user.id"
             >
               <div class="user-option">
-                <el-avatar :size="24" :src="user.avatar">{{ (user.nickname || user.username)?.[0] }}</el-avatar>
+                <el-avatar
+                  :size="24"
+                  :src="user.avatar"
+                >
+                  {{ (user.nickname || user.username)?.[0] }}
+                </el-avatar>
                 <span>{{ user.nickname || user.username }}</span>
                 <span class="user-dept">{{ user.department || '' }}</span>
               </div>
@@ -290,8 +499,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="addMemberDialogVisible = false">取消</el-button>
-        <el-button type="primary" :disabled="selectedUsersToAdd.length === 0" @click="handleAddMembers">
+        <el-button @click="addMemberDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :disabled="selectedUsersToAdd.length === 0"
+          @click="handleAddMembers"
+        >
           添加 ({{ selectedUsersToAdd.length }})
         </el-button>
       </template>
@@ -341,7 +556,7 @@ const currentRole = ref(null)
 const activeTab = ref('permissions')
 
 const filteredRoles = computed(() => {
-  if (!roleSearch.value) return roles.value
+  if (!roleSearch.value) {return roles.value}
   return roles.value.filter(r =>
     r.roleName?.toLowerCase().includes(roleSearch.value.toLowerCase()) ||
     r.roleCode?.toLowerCase().includes(roleSearch.value.toLowerCase())
@@ -413,7 +628,7 @@ const loadPermissionTree = async () => {
 }
 
 // 选择角色
-const handleSelectRole = async (role) => {
+const handleSelectRole = async role => {
   const res = await getRoleDetail(role.id)
   if (res.code === 200) {
     currentRole.value = res.data
@@ -441,7 +656,7 @@ const handleAdd = () => {
 }
 
 // 编辑角色
-const handleEdit = (role) => {
+const handleEdit = role => {
   dialogTitle.value = '编辑角色'
   isEdit.value = true
   roleForm.value = {
@@ -508,7 +723,7 @@ const handleSavePermissions = async () => {
 
 // 加载角色成员
 const loadRoleMembers = async () => {
-  if (!currentRole.value) return
+  if (!currentRole.value) {return}
   membersLoading.value = true
   try {
     const res = await getRoleMembers(currentRole.value.id)
@@ -531,8 +746,8 @@ const loadRoleMembers = async () => {
 }
 
 // 搜索用户
-const searchUsers = async (query) => {
-  if (!query) return
+const searchUsers = async query => {
+  if (!query) {return}
   searchUsersLoading.value = true
   try {
     const res = await searchUsersApi(query)
@@ -564,7 +779,7 @@ const handleAddMembers = async () => {
 }
 
 // 移除成员
-const handleRemoveMember = async (member) => {
+const handleRemoveMember = async member => {
   try {
     await ElMessageBox.confirm(`确定要将 ${member.nickname || member.username} 从该角色中移除吗？`, '确认', {
       type: 'warning'
@@ -582,7 +797,7 @@ const handleRemoveMember = async (member) => {
 }
 
 // 获取角色颜色
-const getRoleColor = (code) => {
+const getRoleColor = code => {
   const colors = {
     SUPER_ADMIN: '#FF3D00',
     ADMIN: '#0089FF',

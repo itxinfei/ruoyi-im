@@ -1,7 +1,11 @@
 <template>
   <teleport to="body">
     <transition name="slide">
-      <div v-if="visible" class="chat-search-overlay" @click.self="handleClose">
+      <div
+        v-if="visible"
+        class="chat-search-overlay"
+        @click.self="handleClose"
+      >
         <div class="chat-search-panel">
           <!-- 头部 -->
           <div class="search-header">
@@ -9,7 +13,10 @@
               <span class="material-icons-outlined">search</span>
               <span>搜索聊天记录</span>
             </div>
-            <button class="close-btn" @click="handleClose">
+            <button
+              class="close-btn"
+              @click="handleClose"
+            >
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
@@ -41,21 +48,38 @@
               >
                 <span class="material-icons-outlined">{{ filter.icon }}</span>
                 <span>{{ filter.label }}</span>
-                <span v-if="filter.count > 0" class="filter-count">{{ filter.count }}</span>
+                <span
+                  v-if="filter.count > 0"
+                  class="filter-count"
+                >{{ filter.count }}</span>
               </button>
             </div>
           </div>
 
           <!-- 搜索结果 -->
-          <div class="search-results" ref="resultsRef">
+          <div
+            ref="resultsRef"
+            class="search-results"
+          >
             <!-- 加载状态 -->
-            <div v-if="searching" class="loading-state">
-              <el-icon class="is-loading" :size="32"><Loading /></el-icon>
+            <div
+              v-if="searching"
+              class="loading-state"
+            >
+              <el-icon
+                class="is-loading"
+                :size="32"
+              >
+                <Loading />
+              </el-icon>
               <span>搜索中...</span>
             </div>
 
             <!-- 空状态 - 未搜索 -->
-            <div v-else-if="!hasSearched" class="empty-initial">
+            <div
+              v-else-if="!hasSearched"
+              class="empty-initial"
+            >
               <div class="empty-icon">
                 <span class="material-icons-outlined">search</span>
               </div>
@@ -67,21 +91,33 @@
             </div>
 
             <!-- 空状态 - 无结果 -->
-            <div v-else-if="searchResults.length === 0" class="empty-no-result">
+            <div
+              v-else-if="searchResults.length === 0"
+              class="empty-no-result"
+            >
               <span class="material-icons-outlined">search_off</span>
               <p>未找到相关内容</p>
               <span class="hint">试试其他关键词</span>
             </div>
 
             <!-- 搜索结果列表 -->
-            <div v-else class="results-list">
+            <div
+              v-else
+              class="results-list"
+            >
               <div class="results-summary">
                 找到 <strong>{{ searchResults.length }}</strong> 条相关消息
               </div>
 
               <!-- 按日期分组的结果 -->
-              <div v-for="(group, date) in groupedResults" :key="date" class="result-group">
-                <div class="group-date">{{ formatDate(date) }}</div>
+              <div
+                v-for="(group, date) in groupedResults"
+                :key="date"
+                class="result-group"
+              >
+                <div class="group-date">
+                  {{ formatDate(date) }}
+                </div>
 
                 <div
                   v-for="item in group"
@@ -105,7 +141,7 @@
                     </div>
                     <div class="result-text">
                       <template v-if="item.type === 'TEXT'">
-                        <span v-html="highlightKeyword(item.content)"></span>
+                        <span v-html="highlightKeyword(item.content)" />
                       </template>
                       <template v-else-if="item.type === 'IMAGE'">
                         <span class="material-icons-outlined">image</span>
@@ -135,15 +171,25 @@
               </div>
 
               <!-- 加载更多 -->
-              <div v-if="hasMore" class="load-more" @click="loadMore">
+              <div
+                v-if="hasMore"
+                class="load-more"
+                @click="loadMore"
+              >
                 <span>加载更多</span>
               </div>
             </div>
           </div>
 
           <!-- 底部快捷操作 -->
-          <div v-if="hasSearched && searchResults.length > 0" class="search-footer">
-            <el-button size="small" @click="handleExportResults">
+          <div
+            v-if="hasSearched && searchResults.length > 0"
+            class="search-footer"
+          >
+            <el-button
+              size="small"
+              @click="handleExportResults"
+            >
               <span class="material-icons-outlined">download</span>
               导出结果
             </el-button>
@@ -212,17 +258,26 @@ const groupedResults = computed(() => {
 })
 
 // 高亮关键词
-const highlightKeyword = (text) => {
-  if (!searchKeyword.value) return text
+const highlightKeyword = text => {
+  if (!searchKeyword.value) {return escapeHtml(text)}
   const keyword = searchKeyword.value.trim()
-  if (!keyword) return text
+  if (!keyword) {return escapeHtml(text)}
 
-  const regex = new RegExp(`(${keyword})`, 'gi')
-  return text.replace(regex, '<mark>$1</mark>')
+  const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escapedKeyword})`, 'gi')
+  return escapeHtml(text).replace(regex, '<mark>$1</mark>')
+}
+
+// 转义 HTML 特殊字符，防止 XSS 攻击
+const escapeHtml = str => {
+  if (!str) {return ''}
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
 }
 
 // 格式化日期
-const formatDate = (dateStr) => {
+const formatDate = dateStr => {
   const date = new Date(dateStr)
   const today = new Date()
   const yesterday = new Date(today)
@@ -330,7 +385,7 @@ const handleSearch = async () => {
 
 // 加载更多
 const loadMore = async () => {
-  if (!searchKeyword.value || searching.value) return
+  if (!searchKeyword.value || searching.value) {return}
 
   searching.value = true
   currentPage.value++
@@ -357,7 +412,7 @@ const loadMore = async () => {
 }
 
 // 点击搜索结果
-const handleResultClick = (item) => {
+const handleResultClick = item => {
   emit('jump-to-message', item)
   handleClose()
 }
@@ -374,14 +429,14 @@ const handleClose = () => {
 }
 
 // 监听 visible 变化
-watch(() => props.visible, (val) => {
+watch(() => props.visible, val => {
   if (val) {
     searchKeyword.value = ''
     searchResults.value = []
     hasSearched.value = false
     activeFilter.value = 'all'
     nextTick(() => {
-      if (isUnmounted.value) return
+      if (isUnmounted.value) {return}
       searchInputRef.value?.focus()
     })
   }

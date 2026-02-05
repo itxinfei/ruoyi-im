@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,23 +61,25 @@ public class ImMessageServiceImpl implements ImMessageService {
     private final com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
     private final ImSystemConfigService systemConfigService;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.ruoyi.im.service.ImMessageRetryService retryService;
 
     /**
      * 构造器注入依赖
      */
     public ImMessageServiceImpl(ImMessageMapper imMessageMapper,
-                                 ImUserMapper imUserMapper,
-                                 ImConversationMapper imConversationMapper,
-                                 ImConversationMemberMapper imConversationMemberMapper,
-                                 ImConversationService imConversationService,
-                                 MessageEncryptionUtil encryptionUtil,
-                                 ImMessageMentionService messageMentionService,
-                                 ImMessageEditHistoryMapper editHistoryMapper,
-                                 com.ruoyi.im.util.ImDistributedLock distributedLock,
-                                 com.ruoyi.im.util.ImRedisUtil redisUtil,
-                                 com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService,
-                                 ImSystemConfigService systemConfigService,
-                                 ApplicationEventPublisher eventPublisher) {
+                                  ImUserMapper imUserMapper,
+                                  ImConversationMapper imConversationMapper,
+                                  ImConversationMemberMapper imConversationMemberMapper,
+                                  ImConversationService imConversationService,
+                                  MessageEncryptionUtil encryptionUtil,
+                                  ImMessageMentionService messageMentionService,
+                                  ImMessageEditHistoryMapper editHistoryMapper,
+                                  com.ruoyi.im.util.ImDistributedLock distributedLock,
+                                  com.ruoyi.im.util.ImRedisUtil redisUtil,
+                                  com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService,
+                                  ImSystemConfigService systemConfigService,
+                                  ApplicationEventPublisher eventPublisher,
+                                  @Lazy com.ruoyi.im.service.ImMessageRetryService retryService) {
         this.imMessageMapper = imMessageMapper;
         this.imUserMapper = imUserMapper;
         this.imConversationMapper = imConversationMapper;
@@ -90,6 +93,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         this.broadcastService = broadcastService;
         this.systemConfigService = systemConfigService;
         this.eventPublisher = eventPublisher;
+        this.retryService = retryService;
     }
 
     @Override
@@ -158,38 +162,66 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     /**
      * 实际执行发送消息的逻辑
-     * 支持消息发送状态追踪
+     * 支持消息发送状态追踪和失败重试
      */
     private ImMessageVO doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId,
                                        ImUser sender, String clientMsgId) {
-        // 1. 创建并保存消息
-        ImMessage message = createAndSaveMessage(request, userId, conversationId, clientMsgId);
+        ImMessage message = null;
+        try {
+            // 1. 创建并保存消息
+            message = createAndSaveMessage(request, userId, conversationId, clientMsgId);
 
-        // 2. 记录客户端消息ID（用于幂等性）
-        if (clientMsgId != null && !clientMsgId.isEmpty()) {
-            redisUtil.recordClientMsgId(clientMsgId, message.getId());
+            // 2. 记录客户端消息ID（用于幂等性）
+            if (clientMsgId != null && !clientMsgId.isEmpty()) {
+                redisUtil.recordClientMsgId(clientMsgId, message.getId());
+            }
+
+            // 3. 更新会话最后消息信息
+            updateConversationLastMessage(conversationId, message);
+
+            // 4. 处理未读计数
+            handleUnreadCount(conversationId, userId);
+
+            // 5. 处理@提及功能
+            processMentions(request, conversationId, message.getId(), userId);
+
+            // 6. 记录审计日志
+            AuditLogUtil.logSendMessage(userId, message.getId(), conversationId, true);
+
+            // 7. 发布群组消息事件（触发机器人回复）
+            publishGroupMessageEvent(conversationId, message, sender);
+
+            // 8. 广播消息到会话成员
+            broadcastService.broadcastMessageToConversation(conversationId, message.getId(), sender);
+
+            // 9. 更新消息状态为已送达
+            updateMessageSendStatus(message.getId(), "DELIVERED", null);
+
+            // 10. 清除失败记录（如果是重试成功的消息）
+            if (clientMsgId != null && !clientMsgId.isEmpty()) {
+                retryService.clearFailureRecord(clientMsgId);
+            }
+
+            // 11. 构建返回VO
+            return buildMessageVO(message, sender);
+
+        } catch (Exception e) {
+            // 记录发送失败，触发重试机制
+            log.error("消息发送失败: clientMsgId={}, error={}", clientMsgId, e.getMessage(), e);
+
+            // 如果消息已创建，更新状态为失败
+            if (message != null && message.getId() != null) {
+                updateMessageSendStatus(message.getId(), "FAILED", e.getMessage());
+            }
+
+            // 记录失败信息用于重试
+            if (clientMsgId != null && !clientMsgId.isEmpty()) {
+                retryService.recordSendFailure(clientMsgId, request, userId, e.getMessage());
+            }
+
+            // 重新抛出异常，让上层处理
+            throw new BusinessException("消息发送失败: " + e.getMessage());
         }
-
-        // 3. 更新会话最后消息信息
-        updateConversationLastMessage(conversationId, message);
-
-        // 4. 处理未读计数
-        handleUnreadCount(conversationId, userId);
-
-        // 5. 处理@提及功能
-        processMentions(request, conversationId, message.getId(), userId);
-
-        // 6. 记录审计日志
-        AuditLogUtil.logSendMessage(userId, message.getId(), conversationId, true);
-
-        // 7. 发布群组消息事件（触发机器人回复）
-        publishGroupMessageEvent(conversationId, message, sender);
-
-        // 8. 广播消息到会话成员
-        broadcastService.broadcastMessageToConversation(conversationId, message.getId(), sender);
-
-        // 9. 构建返回VO
-        return buildMessageVO(message, sender);
     }
 
     /**
@@ -287,6 +319,38 @@ public class ImMessageServiceImpl implements ImMessageService {
                     log.error("发布群组消息事件失败: groupId={}", groupId, e);
                 }
             }
+        }
+    }
+
+    /**
+     * 更新消息发送状态
+     *
+     * @param messageId   消息ID
+     * @param sendStatus  发送状态（SENDING/DELIVERED/FAILED）
+     * @param errorMsg    错误信息（失败时）
+     */
+    private void updateMessageSendStatus(Long messageId, String sendStatus, String errorMsg) {
+        try {
+            ImMessage updateMsg = new ImMessage();
+            updateMsg.setId(messageId);
+            updateMsg.setSendStatus(sendStatus);
+            updateMsg.setUpdateTime(LocalDateTime.now());
+
+            if ("DELIVERED".equals(sendStatus)) {
+                updateMsg.setDeliveredTime(LocalDateTime.now());
+            } else if ("FAILED".equals(sendStatus)) {
+                updateMsg.setSendErrorMsg(errorMsg);
+                // 增加重试计数
+                ImMessage existingMsg = imMessageMapper.selectImMessageById(messageId);
+                if (existingMsg != null) {
+                    int currentRetryCount = existingMsg.getSendRetryCount() != null ? existingMsg.getSendRetryCount() : 0;
+                    updateMsg.setSendRetryCount(currentRetryCount + 1);
+                }
+            }
+
+            imMessageMapper.updateImMessage(updateMsg);
+        } catch (Exception e) {
+            log.error("更新消息发送状态失败: messageId={}, status={}", messageId, sendStatus, e);
         }
     }
 

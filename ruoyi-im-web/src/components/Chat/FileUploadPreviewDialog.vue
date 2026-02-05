@@ -8,36 +8,65 @@
   >
     <div class="file-preview-container">
       <!-- 文件列表 -->
-      <div v-if="files.length > 0" class="file-list">
-        <div v-for="(file, index) in files" :key="index" class="file-item">
+      <div
+        v-if="files.length > 0"
+        class="file-list"
+      >
+        <div
+          v-for="(file, index) in files"
+          :key="index"
+          class="file-item"
+        >
           <!-- 图片预览 -->
-          <div v-if="isImage(file)" class="file-preview image-preview">
-            <img :src="previewUrl(file)" :alt="file.name" />
+          <div
+            v-if="isImage(file)"
+            class="file-preview image-preview"
+          >
+            <img
+              :src="previewUrl(file)"
+              :alt="file.name"
+            >
           </div>
 
           <!-- 视频文件图标 -->
-          <div v-else-if="isVideo(file)" class="file-preview file-icon video-icon">
+          <div
+            v-else-if="isVideo(file)"
+            class="file-preview file-icon video-icon"
+          >
             <span class="material-icons-outlined">videocam</span>
           </div>
 
           <!-- 音频文件图标 -->
-          <div v-else-if="isAudio(file)" class="file-preview file-icon audio-icon">
+          <div
+            v-else-if="isAudio(file)"
+            class="file-preview file-icon audio-icon"
+          >
             <span class="material-icons-outlined">mic</span>
           </div>
 
           <!-- 其他文件图标 -->
-          <div v-else class="file-preview file-icon">
+          <div
+            v-else
+            class="file-preview file-icon"
+          >
             <span class="material-icons-outlined">description</span>
           </div>
 
           <!-- 文件信息 -->
           <div class="file-info">
-            <div class="file-name">{{ file.name }}</div>
-            <div class="file-meta">{{ formatFileSize(file.size) }}</div>
+            <div class="file-name">
+              {{ file.name }}
+            </div>
+            <div class="file-meta">
+              {{ formatFileSize(file.size) }}
+            </div>
           </div>
 
           <!-- 删除按钮 -->
-          <button class="remove-btn" @click="removeFile(index)">
+          <button
+            class="remove-btn"
+            @click="removeFile(index)"
+          >
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -58,8 +87,14 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" @click="handleConfirm" :loading="uploading">
+        <el-button @click="handleClose">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="uploading"
+          @click="handleConfirm"
+        >
           发送 ({{ files.length }})
         </el-button>
       </div>
@@ -78,9 +113,9 @@ import { formatFileSize } from '@/utils/message'
  */
 
 // 文件类型检测
-const isImage = (file) => file.type.startsWith('image/')
-const isVideo = (file) => file.type.startsWith('video/')
-const isAudio = (file) => file.type.startsWith('audio/')
+const isImage = file => file.type.startsWith('image/')
+const isVideo = file => file.type.startsWith('video/')
+const isAudio = file => file.type.startsWith('audio/')
 
 const props = defineProps({
   modelValue: Boolean,
@@ -97,7 +132,7 @@ const description = ref('')
 const previewUrls = new Map()
 
 // 监听 modelValue 变化
-watch(() => props.modelValue, (newVal) => {
+watch(() => props.modelValue, newVal => {
   console.log('FileUploadPreviewDialog modelValue 变化:', newVal)
   console.log('当前文件数量:', props.files?.length)
   visible.value = newVal
@@ -108,7 +143,7 @@ watch(() => props.modelValue, (newVal) => {
 })
 
 // 监听 visible 变化
-watch(visible, (newVal) => {
+watch(visible, newVal => {
   console.log('FileUploadPreviewDialog visible 变化:', newVal)
   if (!newVal) {
     emit('update:modelValue', false)

@@ -1,12 +1,15 @@
 <template>
-  <div class="contacts-panel" :class="{ 'mobile-view': isMobile }">
+  <div
+    class="contacts-panel"
+    :class="{ 'mobile-view': isMobile }"
+  >
     <!-- Mobile Overlay -->
     <Transition name="fade">
       <div
         v-if="isMobile && showMobileSidebar"
         class="mobile-overlay"
         @click="showMobileSidebar = false"
-      ></div>
+      />
     </Transition>
 
     <!-- 左侧导航栏 -->
@@ -17,13 +20,28 @@
       <!-- 顶部标题区 -->
       <div class="sidebar-header">
         <div class="header-content">
-          <h2 class="sidebar-title">通讯录</h2>
-          <el-tooltip content="添加朋友/群组" placement="bottom">
-            <el-button circle size="small" :icon="Plus" @click="showAddMenu = true" />
+          <h2 class="sidebar-title">
+            通讯录
+          </h2>
+          <el-tooltip
+            content="添加朋友/群组"
+            placement="bottom"
+          >
+            <el-button
+              circle
+              size="small"
+              :icon="Plus"
+              @click="showAddMenu = true"
+            />
           </el-tooltip>
         </div>
-        <div class="search-box" @click="showSearchPanel = true">
-          <el-icon class="search-icon"><Search /></el-icon>
+        <div
+          class="search-box"
+          @click="showSearchPanel = true"
+        >
+          <el-icon class="search-icon">
+            <Search />
+          </el-icon>
           <span class="placeholder">搜索联系人、群组...</span>
         </div>
       </div>
@@ -31,7 +49,9 @@
       <!-- 导航菜单 -->
       <nav class="nav-list scrollbar-custom">
         <div class="nav-group">
-          <div class="nav-group-title">常用</div>
+          <div class="nav-group-title">
+            常用
+          </div>
           <div
             class="nav-item"
             :class="{ active: currentNav === 'new' }"
@@ -41,7 +61,37 @@
               <el-icon><User /></el-icon>
             </div>
             <span class="nav-text">新的朋友</span>
-            <span v-if="pendingCount > 0" class="nav-badge">{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
+            <span
+              v-if="pendingCount > 0"
+              class="nav-badge"
+            >{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
+          </div>
+
+          <div
+            class="nav-item"
+            :class="{ active: currentNav === 'recommended' }"
+            @click="switchNav('recommended')"
+          >
+            <div class="nav-icon-wrapper bg-gradient-pink">
+              <el-icon><Star /></el-icon>
+            </div>
+            <span class="nav-text">可能认识的人</span>
+            <span
+              v-if="recommendedCount > 0"
+              class="nav-dot"
+            />
+          </div>
+
+          <div
+            class="nav-item"
+            :class="{ active: currentNav === 'all' }"
+            @click="switchNav('all')"
+          >
+            <div class="nav-icon-wrapper bg-gradient-primary">
+              <el-icon><User /></el-icon>
+            </div>
+            <span class="nav-text">公司同事</span>
+            <span class="nav-count">{{ allUsers.length }}</span>
           </div>
 
           <div
@@ -53,8 +103,14 @@
               <el-icon><Avatar /></el-icon>
             </div>
             <span class="nav-text">我的好友</span>
-            <el-dropdown trigger="click" @command="handleGroupCommand" @click.stop>
-              <el-icon class="group-menu-icon"><MoreFilled /></el-icon>
+            <el-dropdown
+              trigger="click"
+              @command="handleGroupCommand"
+              @click.stop
+            >
+              <el-icon class="group-menu-icon">
+                <MoreFilled />
+              </el-icon>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="add">
@@ -68,7 +124,10 @@
 
           <!-- 好友分组列表 -->
           <Transition name="expand">
-            <div v-if="friendGroupNames.length > 0" class="friend-groups-list">
+            <div
+              v-if="friendGroupNames.length > 0"
+              class="friend-groups-list"
+            >
               <div
                 v-for="groupName in friendGroupNames"
                 :key="groupName"
@@ -80,15 +139,24 @@
                   <span class="group-initial">{{ groupName.charAt(0) }}</span>
                 </div>
                 <span class="nav-text">{{ groupName }}</span>
-                <el-dropdown trigger="click" @command="(cmd) => handleGroupItemCommand(cmd, groupName)" @click.stop>
-                  <el-icon class="group-item-menu-icon"><MoreFilled /></el-icon>
+                <el-dropdown
+                  trigger="click"
+                  @command="(cmd) => handleGroupItemCommand(cmd, groupName)"
+                  @click.stop
+                >
+                  <el-icon class="group-item-menu-icon">
+                    <MoreFilled />
+                  </el-icon>
                   <template #dropdown>
                     <el-dropdown-menu>
                       <el-dropdown-item command="rename">
                         <span class="material-icons-outlined">edit</span>
                         重命名
                       </el-dropdown-item>
-                      <el-dropdown-item command="delete" divided>
+                      <el-dropdown-item
+                        command="delete"
+                        divided
+                      >
                         <span class="material-icons-outlined">delete</span>
                         删除分组
                       </el-dropdown-item>
@@ -111,18 +179,36 @@
           </div>
         </div>
 
-        <div class="nav-divider"></div>
+        <div class="nav-divider" />
 
         <!-- 组织架构 -->
         <div class="nav-group">
-          <div class="nav-group-title">组织架构</div>
+          <div class="nav-group-title">
+            组织架构
+          </div>
+          <!-- 组织架构搜索 -->
+          <div class="org-search-box">
+            <el-input
+              v-model="orgSearchQuery"
+              placeholder="搜索部门/人员..."
+              :prefix-icon="Search"
+              size="small"
+              clearable
+              @input="handleOrgSearch"
+            />
+          </div>
           <div class="org-tree-container">
-             <div
+            <div
               class="nav-item org-root"
               :class="{ expanded: orgExpanded }"
               @click="toggleOrg"
             >
-              <el-icon class="arrow-icon" :class="{ rotated: orgExpanded }"><ArrowRight /></el-icon>
+              <el-icon
+                class="arrow-icon"
+                :class="{ rotated: orgExpanded }"
+              >
+                <ArrowRight />
+              </el-icon>
               <div class="nav-icon-wrapper bg-gradient-purple">
                 <el-icon><OfficeBuilding /></el-icon>
               </div>
@@ -130,21 +216,44 @@
             </div>
 
             <Transition name="expand">
-              <div v-show="orgExpanded" class="org-list">
+              <div
+                v-show="orgExpanded"
+                class="org-list"
+              >
                 <div
                   v-for="dept in flatDepts"
                   :key="dept.id"
                   class="org-item"
                   :class="{
-                    active: selectedDeptId === dept.id
+                    active: selectedDeptId === dept.id,
+                    'has-children': dept.hasChildren
                   }"
                   :style="{ paddingLeft: `${20 + (dept.level || 0) * 16}px` }"
                   @click="selectDept(dept)"
                 >
                   <div class="org-item-content">
-                    <span v-if="dept.level > 0" class="org-line"></span>
+                    <el-icon
+                      v-if="dept.hasChildren"
+                      class="org-expand-icon"
+                      :class="{ expanded: dept.expanded }"
+                    >
+                      <ArrowRight />
+                    </el-icon>
+                    <span
+                      v-if="dept.level > 0 && !dept.hasChildren"
+                      class="org-line"
+                    />
                     <span class="org-name">{{ dept.name }}</span>
-                    <span class="org-count">{{ dept.userCount || 0 }}</span>
+                    <span class="org-stats">
+                      <span class="org-count">{{ dept.userCount || 0 }}人</span>
+                      <span
+                        v-if="dept.onlineCount > 0"
+                        class="org-online"
+                      >
+                        <span class="online-dot" />
+                        {{ dept.onlineCount }}
+                      </span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -158,33 +267,100 @@
     <section class="list-panel">
       <div class="list-header">
         <div class="header-left">
-          <el-button v-if="isMobile" :icon="Menu" circle text @click="showMobileSidebar = true" class="mobile-menu-btn" />
-          <h3 class="list-title">{{ currentListTitle }}</h3>
+          <el-button
+            v-if="isMobile"
+            :icon="Menu"
+            circle
+            text
+            class="mobile-menu-btn"
+            @click="showMobileSidebar = true"
+          />
+          <h3 class="list-title">
+            {{ currentListTitle }}
+          </h3>
         </div>
         <div class="list-actions">
-           <el-button v-if="currentNav === 'friends'" type="primary" link @click="showAddFriend = true">
-             <el-icon class="mr-1"><Plus /></el-icon> 添加
-           </el-button>
+          <el-button
+            v-if="currentNav === 'friends'"
+            type="primary"
+            link
+            @click="showAddFriendDialog = true"
+          >
+            <el-icon class="mr-1">
+              <Plus />
+            </el-icon> 添加
+          </el-button>
         </div>
       </div>
       
-      <div class="list-content-wrapper" v-loading="loading">
+      <div
+        v-loading="loading"
+        class="list-content-wrapper"
+      >
+        <!-- 推荐联系人 -->
+        <div
+          v-if="currentNav === 'recommended'"
+          class="recommend-content scrollbar-custom"
+        >
+          <RecommendedContacts
+            ref="recommendedContactsRef"
+            @update="handleRecommendUpdate"
+          />
+        </div>
+
         <!-- 新的朋友列表 -->
-        <div v-if="currentNav === 'new'" class="friend-requests scrollbar-custom">
-          <div v-if="friendRequests.length === 0" class="empty-state">
-             <el-empty description="暂无新的好友请求" :image-size="120" />
+        <div
+          v-else-if="currentNav === 'new'"
+          class="friend-requests scrollbar-custom"
+        >
+          <div
+            v-if="friendRequests.length === 0"
+            class="empty-state"
+          >
+            <el-empty
+              description="暂无新的好友请求"
+              :image-size="120"
+            />
           </div>
-          <div v-else class="request-list">
-            <div v-for="req in friendRequests" :key="req.id" class="request-item">
-               <DingtalkAvatar :src="req.avatar" :name="req.nickname" :size="48" />
-               <div class="request-info">
-                 <div class="request-name">{{ req.nickname }}</div>
-                 <div class="request-msg">{{ req.reason || '请求添加好友' }}</div>
-               </div>
-               <div class="request-actions">
-                 <el-button type="primary" size="small" round @click="acceptRequest(req)">接受</el-button>
-                 <el-button size="small" round @click="ignoreRequest(req)">忽略</el-button>
-               </div>
+          <div
+            v-else
+            class="request-list"
+          >
+            <div
+              v-for="req in friendRequests"
+              :key="req.id"
+              class="request-item"
+            >
+              <DingtalkAvatar
+                :src="req.avatar"
+                :name="req.nickname"
+                :size="48"
+              />
+              <div class="request-info">
+                <div class="request-name">
+                  {{ req.nickname }}
+                </div>
+                <div class="request-msg">
+                  {{ req.reason || '请求添加好友' }}
+                </div>
+              </div>
+              <div class="request-actions">
+                <el-button
+                  type="primary"
+                  size="small"
+                  round
+                  @click="acceptRequest(req)"
+                >
+                  接受
+                </el-button>
+                <el-button
+                  size="small"
+                  round
+                  @click="ignoreRequest(req)"
+                >
+                  忽略
+                </el-button>
+              </div>
             </div>
           </div>
         </div>
@@ -195,26 +371,45 @@
           class="virtual-list scrollbar-custom"
           :items="currentList"
           :item-size="72"
+          :class="{ 'batch-mode': batchMode }"
         >
           <template #default="{ item }">
-            <div 
+            <div
               class="list-item"
-              :class="{ active: selectedItemId === item.id }"
-              @click="selectItem(item)"
+              :class="{ active: selectedItemId === item.id, 'batch-mode': batchMode }"
+              @click="handleItemClick(item)"
             >
-              <DingtalkAvatar 
-                :src="item.avatar || item.groupAvatar" 
-                :name="item.name || item.groupName || item.nickname" 
-                :size="44" 
+              <!-- 批量选择复选框 -->
+              <el-checkbox
+                v-if="batchMode"
+                :model-value="selectedContacts.has(item.id)"
+                class="item-checkbox"
+                @change="(val) => toggleContactSelection(item.id, val)"
+                @click.stop
+              />
+
+              <DingtalkAvatar
+                :src="item.avatar || item.groupAvatar"
+                :name="item.name || item.groupName || item.nickname"
+                :size="44"
                 :shape="currentNav === 'groups' ? 'square' : 'circle'"
               />
               <div class="item-info">
                 <div class="item-header">
                   <span class="item-name">{{ item.name || item.groupName || item.nickname }}</span>
-                  <span v-if="item.role === 'OWNER'" class="role-tag owner">群主</span>
-                  <span v-if="item.role === 'ADMIN'" class="role-tag admin">管理员</span>
+                  <span
+                    v-if="item.role === 'OWNER'"
+                    class="role-tag owner"
+                  >群主</span>
+                  <span
+                    v-if="item.role === 'ADMIN'"
+                    class="role-tag admin"
+                  >管理员</span>
                 </div>
-                <div class="item-desc" v-if="item.signature || item.description || item.notice">
+                <div
+                  v-if="item.signature || item.description || item.notice"
+                  class="item-desc"
+                >
                   {{ item.signature || item.description || item.notice || '暂无介绍' }}
                 </div>
               </div>
@@ -222,37 +417,65 @@
           </template>
         </VirtualList>
         
-        <div v-else class="empty-state">
-           <el-empty :description="getEmptyText" :image-size="120" />
+        <div
+          v-else
+          class="empty-state"
+        >
+          <el-empty
+            :description="getEmptyText"
+            :image-size="120"
+          />
         </div>
       </div>
     </section>
 
     <!-- 右侧详情区 -->
-    <main class="detail-panel" :class="{ 'detail-open': selectedItem || isMobile }">
-      <div v-if="isMobile && selectedItem" class="mobile-detail-header">
-        <el-button :icon="ArrowLeft" text @click="selectedItem = null">返回</el-button>
+    <main
+      class="detail-panel"
+      :class="{ 'detail-open': selectedItem || isMobile }"
+    >
+      <div
+        v-if="isMobile && selectedItem"
+        class="mobile-detail-header"
+      >
+        <el-button
+          :icon="ArrowLeft"
+          text
+          @click="selectedItem = null"
+        >
+          返回
+        </el-button>
         <span>详情</span>
       </div>
       
-      <div v-if="selectedItem" class="detail-content-wrapper">
-         <ContactDetail 
-           v-if="currentNav === 'friends' || currentNav === 'org' || currentNav === 'new'" 
-           :contact="selectedItem"
-           @message="handleMessage"
-           @voice-call="handleVoiceCall"
-           @video-call="handleVideoCall"
-         />
-         <!-- 群组详情暂时复用ContactDetail或开发新的组件，这里假设ContactDetail能处理 -->
-         <ContactDetail 
-           v-else-if="currentNav === 'groups'"
-           :contact="{ ...selectedItem, isGroup: true }"
-           @message="handleMessage"
-         />
+      <div
+        v-if="selectedItem"
+        class="detail-content-wrapper"
+      >
+        <ContactDetail 
+          v-if="currentNav === 'friends' || currentNav === 'org' || currentNav === 'new'" 
+          :contact="selectedItem"
+          @message="handleMessage"
+          @voice-call="handleVoiceCall"
+          @video-call="handleVideoCall"
+        />
+        <!-- 群组详情暂时复用ContactDetail或开发新的组件，这里假设ContactDetail能处理 -->
+        <ContactDetail 
+          v-else-if="currentNav === 'groups'"
+          :contact="{ ...selectedItem, isGroup: true }"
+          @message="handleMessage"
+        />
       </div>
-      <div v-else class="empty-selection">
+      <div
+        v-else
+        class="empty-selection"
+      >
         <div class="empty-content">
-          <img src="@/assets/images/login-bg.png" class="empty-bg" alt="" />
+          <img
+            src="@/assets/images/login-bg.png"
+            class="empty-bg"
+            alt=""
+          >
           <h3>即时通讯</h3>
           <p>选择联系人或群组以开始聊天</p>
         </div>
@@ -261,7 +484,11 @@
 
     <!-- 搜索面板 -->
     <Transition name="fade">
-      <div v-if="showSearchPanel" class="search-modal-overlay" @click.self="showSearchPanel = false">
+      <div
+        v-if="showSearchPanel"
+        class="search-modal-overlay"
+        @click.self="showSearchPanel = false"
+      >
         <div class="search-modal">
           <div class="search-header">
             <el-input
@@ -273,33 +500,61 @@
               size="large"
               @input="handleSearch"
             />
-            <el-button link class="close-search-btn" @click="showSearchPanel = false">
+            <el-button
+              link
+              class="close-search-btn"
+              @click="showSearchPanel = false"
+            >
               <el-icon><Close /></el-icon>
             </el-button>
           </div>
           
           <div class="search-body scrollbar-custom">
-             <div v-if="searchQuery && searchResults.length > 0" class="search-results-list">
-                <div 
-                  v-for="item in searchResults" 
-                  :key="item.id" 
-                  class="search-result-item"
-                  @click="selectItem(item); showSearchPanel = false"
-                >
-                   <DingtalkAvatar :src="item.avatar" :name="item.name" :size="40" />
-                   <div class="result-info">
-                     <span class="result-name" v-html="highlightText(item.name, searchQuery)"></span>
-                     <span class="result-type-tag" :class="item.type">{{ item.type === 'group' ? '群组' : '联系人' }}</span>
-                   </div>
-                   <el-icon class="arrow-right"><ArrowRight /></el-icon>
+            <div
+              v-if="searchQuery && searchResults.length > 0"
+              class="search-results-list"
+            >
+              <div 
+                v-for="item in searchResults" 
+                :key="item.id" 
+                class="search-result-item"
+                @click="selectItem(item); showSearchPanel = false"
+              >
+                <DingtalkAvatar
+                  :src="item.avatar"
+                  :name="item.name"
+                  :size="40"
+                />
+                <div class="result-info">
+                  <span
+                    class="result-name"
+                    v-html="highlightText(item.name, searchQuery)"
+                  />
+                  <span
+                    class="result-type-tag"
+                    :class="item.type"
+                  >{{ item.type === 'group' ? '群组' : '联系人' }}</span>
                 </div>
-             </div>
-             <div v-else-if="searchQuery" class="empty-search">
-               <el-empty description="未找到相关结果" :image-size="80" />
-             </div>
-             <div v-else class="search-history">
-               <!-- 可以在这里添加搜索历史 -->
-             </div>
+                <el-icon class="arrow-right">
+                  <ArrowRight />
+                </el-icon>
+              </div>
+            </div>
+            <div
+              v-else-if="searchQuery"
+              class="empty-search"
+            >
+              <el-empty
+                description="未找到相关结果"
+                :image-size="80"
+              />
+            </div>
+            <div
+              v-else
+              class="search-history"
+            >
+              <!-- 可以在这里添加搜索历史 -->
+            </div>
           </div>
         </div>
       </div>
@@ -324,8 +579,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showAddGroupDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleAddGroup">确定</el-button>
+        <el-button @click="showAddGroupDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleAddGroup"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -348,29 +610,66 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showRenameGroupDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleRenameGroup">确定</el-button>
+        <el-button @click="showRenameGroupDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleRenameGroup"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
+    <!-- 分组选择对话框 -->
+    <GroupSelectDialog
+      v-model="showGroupSelectDialog"
+      :selected-count="selectedContacts.size"
+      @confirm="handleGroupSelectConfirm"
+    />
+
+    <!-- 添加好友对话框 -->
+    <AddFriendDialog
+      v-model="showAddFriendDialog"
+      @success="handleAddFriendSuccess"
+    />
+
+    <!-- 批量操作栏 -->
+    <BatchOperationBar
+      :visible="batchMode"
+      :selected-count="selectedContacts.size"
+      :total-count="currentList.length"
+      :type="currentNav === 'groups' ? 'group' : currentNav === 'all' || currentNav.startsWith('group-') ? 'other' : 'friend'"
+      @select-all="handleSelectAll"
+      @cancel="exitBatchMode"
+      @move-group="handleBatchMoveGroup"
+      @send-message="handleBatchSendMessage"
+      @delete="handleBatchDelete"
+      @add-friends="handleBatchAddFriends"
+    />
   </div>
 </template>
 
 <script setup>
-import { getItem, removeItem, setJSON } from '@/utils/storage'
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useWindowSize, useDebounceFn } from '@vueuse/core'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import ContactDetail from '@/components/Contacts/ContactDetail.vue'
 import VirtualList from '@/components/Common/VirtualList.vue'
+import RecommendedContacts from '@/components/Contacts/RecommendedContacts.vue'
+import BatchOperationBar from '@/components/Contacts/BatchOperationBar.vue'
+import GroupSelectDialog from '@/components/Contacts/GroupSelectDialog.vue'
+import AddFriendDialog from '@/components/Contacts/AddFriendDialog.vue'
 import { getFriendRequests, getGroupedFriendList, searchContacts, handleFriendRequest, getGroupList, createGroup, renameGroup, deleteGroup, moveContactToGroup } from '@/api/im/contact'
 import { getGroups } from '@/api/im/group'
-import { getOrgTree, getDepartmentMembers } from '@/api/im/organization'
+import { getOrgTree, getDepartmentMembers, searchOrgMembers } from '@/api/im/organization'
+import { getAllUsers } from '@/api/im/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, User, Avatar, ChatDotSquare, OfficeBuilding,
-  ArrowRight, Plus, Close, Menu, ArrowLeft, MoreFilled
+  ArrowRight, Plus, Close, Menu, ArrowLeft, MoreFilled, Star
 } from '@element-plus/icons-vue'
 
 // 定义 emit，用于通知父组件切换模块或触发通话
@@ -386,30 +685,43 @@ const searchQuery = ref('')
 const showMobileSidebar = ref(false)
 const showSearchPanel = ref(false)
 const showAddMenu = ref(false)
-const showAddFriend = ref(false)
 const loading = ref(false)
 const searchInputRef = ref(null)
+const recommendedContactsRef = ref(null)
 
 // Data
 const friendGroups = ref([])
 const friendGroupNames = ref([]) // 好友分组名称列表
 const groupList = ref([])
 const orgMembers = ref([])
+const allUsers = ref([]) // 公司所有用户
 const friendRequests = ref([])
 const pendingCount = ref(0)
+const recommendedCount = ref(0)
 const searchResults = ref([])
 
 // 分组管理状态
-const showGroupManageMenu = ref(false)
 const showAddGroupDialog = ref(false)
 const showRenameGroupDialog = ref(false)
 const newGroupName = ref('')
 const renameGroupName = ref('')
 const selectedGroupName = ref('')
 
+// 分组选择对话框
+const showGroupSelectDialog = ref(false)
+
+// 添加好友对话框
+const showAddFriendDialog = ref(false)
+
+// 添加好友成功处理
+const handleAddFriendSuccess = () => {
+  ElMessage.success('好友请求已发送，请等待对方确认')
+  // 可以在这里刷新好友请求列表
+  fetchData('new')
+}
+
 // Selection
 const selectedItemId = ref(null)
-const selectedType = ref(null)
 const selectedItem = ref(null)
 
 // Org Tree
@@ -417,20 +729,39 @@ const orgExpanded = ref(true)
 const selectedDeptId = ref(null)
 const flatDepts = ref([])
 
+// 组织架构搜索
+const orgSearchQuery = ref('')
+const orgSearchResults = ref([])
+const orgSearching = ref(false)
+
+// 批量操作状态
+const batchMode = ref(false)
+const selectedContacts = ref(new Set())
+
 // Computed for Display Titles
 const listTitle = computed(() => {
-  if (searchQuery.value) return '搜索结果'
-  const map = { new: '新的朋友', friends: '我的好友', groups: '我的群组', org: '组织架构' }
-  if (map[currentNav.value]) return map[currentNav.value]
+  if (searchQuery.value) {return '搜索结果'}
+  const map = {
+    new: '新的朋友',
+    recommended: '可能认识的人',
+    all: '公司同事',
+    friends: '我的好友',
+    groups: '我的群组',
+    org: '组织架构'
+  }
+  if (map[currentNav.value]) {return map[currentNav.value]}
   // 如果是分组导航，返回分组名称
   const group = friendGroups.value.find(g => g.groupName === currentNav.value)
-  if (group) return group.groupName
+  if (group) {return group.groupName}
   return ''
 })
 
 const currentListTitle = computed(() => listTitle.value)
 
 const currentList = computed(() => {
+  if (currentNav.value === 'all') {
+    return allUsers.value
+  }
   if (currentNav.value === 'friends') {
     // 全部好友 - 展平所有分组
     return friendGroups.value.flatMap(g => g.friends)
@@ -440,19 +771,19 @@ const currentList = computed(() => {
   if (group) {
     return group.friends || []
   }
-  if (currentNav.value === 'groups') return groupList.value
-  if (currentNav.value === 'org') return orgMembers.value
+  if (currentNav.value === 'groups') {return groupList.value}
+  if (currentNav.value === 'org') {return orgMembers.value}
   return []
 })
 
 const getEmptyText = computed(() => `暂无${currentListTitle.value}`)
 
 // Methods
-const switchNav = (nav) => {
+const switchNav = nav => {
   currentNav.value = nav
   selectedItemId.value = null
   selectedItem.value = null
-  if (isMobile.value) showMobileSidebar.value = false
+  if (isMobile.value) {showMobileSidebar.value = false}
   fetchData(nav)
 }
 
@@ -460,7 +791,7 @@ const toggleOrg = () => {
   orgExpanded.value = !orgExpanded.value
 }
 
-const selectDept = async (dept) => {
+const selectDept = async dept => {
   selectedDeptId.value = dept.id
   currentNav.value = 'org'
   loading.value = true
@@ -474,7 +805,7 @@ const selectDept = async (dept) => {
   }
 }
 
-const selectItem = (item) => {
+const selectItem = item => {
   selectedItemId.value = item.id
   selectedItem.value = item
 }
@@ -492,13 +823,23 @@ const handleSearch = useDebounceFn(async () => {
   }
 }, 300)
 
+// 高亮搜索文本
 const highlightText = (text, query) => {
-  if (!query) return text
-  const reg = new RegExp(`(${query})`, 'gi')
-  return text.replace(reg, '<span class="highlight">$1</span>')
+  if (!query) {return escapeHtml(text)}
+  const keyword = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const reg = new RegExp(`(${keyword})`, 'gi')
+  return escapeHtml(text).replace(reg, '<span class="highlight">$1</span>')
 }
 
-const fetchData = async (nav) => {
+// 转义 HTML 特殊字符，防止 XSS 攻击
+const escapeHtml = str => {
+  if (!str) {return ''}
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
+}
+
+const fetchData = async nav => {
   loading.value = true
   try {
     if (nav === 'friends') {
@@ -511,6 +852,9 @@ const fetchData = async (nav) => {
       const res = await getFriendRequests()
       friendRequests.value = res.data || []
       pendingCount.value = (res.data || []).length
+    } else if (nav === 'all') {
+      const res = await getAllUsers()
+      allUsers.value = res.data || []
     }
   } catch (error) {
     console.error(error)
@@ -519,7 +863,7 @@ const fetchData = async (nav) => {
   }
 }
 
-const handleMessage = (contact) => {
+const handleMessage = contact => {
   // 切换到聊天模块并打开与该联系人的会话
   emit('switch-module', 'chat')
 
@@ -534,7 +878,7 @@ const handleMessage = (contact) => {
   }
 }
 
-const handleVoiceCall = (contact) => {
+const handleVoiceCall = contact => {
   // 触发语音通话
   emit('voice-call', {
     userId: contact.id,
@@ -543,7 +887,7 @@ const handleVoiceCall = (contact) => {
   })
 }
 
-const handleVideoCall = (contact) => {
+const handleVideoCall = contact => {
   // 触发视频通话
   emit('video-call', {
     userId: contact.id,
@@ -552,7 +896,7 @@ const handleVideoCall = (contact) => {
   })
 }
 
-const acceptRequest = async (req) => {
+const acceptRequest = async req => {
   try {
     loading.value = true
     await handleFriendRequest(req.id, true)
@@ -569,7 +913,7 @@ const acceptRequest = async (req) => {
   }
 }
 
-const ignoreRequest = async (req) => {
+const ignoreRequest = async req => {
   try {
     await ElMessageBox.confirm(
       `确定要忽略 ${req.nickname || req.fromUserNickname} 的好友请求吗？`,
@@ -645,7 +989,7 @@ const handleAddGroup = async () => {
 }
 
 // 打开重命名分组对话框
-const openRenameGroupDialog = (groupName) => {
+const openRenameGroupDialog = groupName => {
   selectedGroupName.value = groupName
   renameGroupName.value = groupName
   showRenameGroupDialog.value = true
@@ -681,7 +1025,7 @@ const handleRenameGroup = async () => {
 }
 
 // 删除好友分组
-const handleDeleteGroup = async (groupName) => {
+const handleDeleteGroup = async groupName => {
   try {
     await ElMessageBox.confirm(
       `删除分组"${groupName}"后，该分组下的好友将移至"未分组"，确定要删除吗？`,
@@ -730,7 +1074,7 @@ const handleMoveContactToGroup = async (contactId, groupName) => {
 }
 
 // 分组菜单命令处理
-const handleGroupCommand = (command) => {
+const handleGroupCommand = command => {
   if (command === 'add') {
     openAddGroupDialog()
   }
@@ -745,10 +1089,212 @@ const handleGroupItemCommand = (command, groupName) => {
   }
 }
 
+// 推荐更新处理
+const handleRecommendUpdate = () => {
+  // 可以在这里更新推荐计数或其他状态
+}
+
+// ==================== 批量操作 ====================
+
+// 进入批量模式
+const enterBatchMode = () => {
+  batchMode.value = true
+  selectedContacts.value.clear()
+}
+
+// 退出批量模式
+const exitBatchMode = () => {
+  batchMode.value = false
+  selectedContacts.value.clear()
+}
+
+// 切换联系人选择状态
+const toggleContactSelection = (contactId, selected) => {
+  if (selected) {
+    selectedContacts.value.add(contactId)
+  } else {
+    selectedContacts.value.delete(contactId)
+  }
+}
+
+// 处理列表项点击（批量模式下切换选择）
+const handleItemClick = item => {
+  if (batchMode.value) {
+    toggleContactSelection(item.id, !selectedContacts.value.has(item.id))
+  } else {
+    selectItem(item)
+  }
+}
+
+// 全选/取消全选
+const handleSelectAll = selected => {
+  if (selected) {
+    currentList.value.forEach(item => selectedContacts.value.add(item.id))
+  } else {
+    selectedContacts.value.clear()
+  }
+}
+
+// 批量移动到分组
+const handleBatchMoveGroup = async () => {
+  const contactIds = Array.from(selectedContacts.value)
+  if (contactIds.length === 0) {return}
+
+  showGroupSelectDialog.value = true
+}
+
+// 处理分组选择确认
+const handleGroupSelectConfirm = async groupName => {
+  const contactIds = Array.from(selectedContacts.value)
+  if (contactIds.length === 0) {return}
+
+  try {
+    // 调用批量移动API
+    // await batchMoveToGroup({ contactIds, groupName })
+
+    // 模拟调用
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    ElMessage.success(`已将 ${contactIds.length} 个联系人移动到"${groupName}"`)
+    exitBatchMode()
+    fetchData(currentNav.value)
+  } catch (error) {
+    ElMessage.error('移动失败')
+  }
+}
+
+// 批量发送消息
+const handleBatchSendMessage = () => {
+  const contactIds = Array.from(selectedContacts.value)
+  if (contactIds.length === 0) {return}
+
+  ElMessage.info(`将向 ${contactIds.length} 个联系人发送消息`)
+  // TODO: 实现批量发送消息
+}
+
+// 批量删除
+const handleBatchDelete = async () => {
+  const contactIds = Array.from(selectedContacts.value)
+  if (contactIds.length === 0) {return}
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${contactIds.length} 个联系人吗？`,
+      '批量删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    // 调用批量删除API
+    // await batchDeleteContacts(contactIds)
+
+    ElMessage.success('删除成功')
+    exitBatchMode()
+    fetchData(currentNav.value)
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+// 批量添加好友
+const handleBatchAddFriends = async () => {
+  const contactIds = Array.from(selectedContacts.value)
+  if (contactIds.length === 0) {return}
+
+  try {
+    await ElMessageBox.prompt('请输入验证消息', '批量添加好友', {
+      inputValue: '你好，我是...',
+      confirmButtonText: '发送',
+      cancelButtonText: '取消'
+    })
+
+    // 调用批量添加API
+    // await batchAddFriends({ userIds: contactIds, remark: reason })
+
+    ElMessage.success(`已向 ${contactIds.length} 个用户发送好友请求`)
+    exitBatchMode()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+// ==================== 组织架构搜索 ====================
+
+const handleOrgSearch = useDebounceFn(async () => {
+  const query = orgSearchQuery.value.trim()
+  if (!query) {
+    orgSearchResults.value = []
+    return
+  }
+
+  orgSearching.value = true
+  try {
+    // 同时搜索部门和成员
+    const [memberRes] = await Promise.all([
+      searchOrgMembers({ keyword: query })
+    ])
+
+    const results = []
+
+    // 添加成员结果
+    if (memberRes.code === 200 && memberRes.data) {
+      memberRes.data.forEach(user => {
+        results.push({
+          id: user.id,
+          type: 'user',
+          name: user.name || user.nickname,
+          avatar: user.avatar,
+          dept: user.dept,
+          position: user.position
+        })
+      })
+    }
+
+    // 搜索部门
+    const searchDepts = (depts, prefix = '') => {
+      depts.forEach(dept => {
+        if (dept.name && dept.name.toLowerCase().includes(query.toLowerCase())) {
+          results.push({
+            id: `dept-${dept.id}`,
+            type: 'dept',
+            name: prefix + dept.name,
+            userCount: dept.userCount,
+            originalDept: dept
+          })
+        }
+        if (dept.children && dept.children.length > 0) {
+          searchDepts(dept.children, prefix + dept.name + '/')
+        }
+      })
+    }
+    // 这里需要完整的部门树数据，暂时简化处理
+    if (flatDepts.value && flatDepts.value.length > 0) {
+      searchDepts(flatDepts.value)
+    }
+
+    orgSearchResults.value = results
+  } catch (error) {
+    console.error('组织架构搜索失败:', error)
+  } finally {
+    orgSearching.value = false
+  }
+}, 300)
+
 // Lifecycle
 onMounted(() => {
   fetchData('friends')
   loadFriendGroupNames()
+  // 预加载所有用户，用于显示数量
+  getAllUsers().then(res => {
+    allUsers.value = res.data || []
+  })
   // Load org tree
   getOrgTree().then(res => {
     // Flatten logic if needed, or just assign
@@ -756,7 +1302,7 @@ onMounted(() => {
   })
 })
 
-watch(showSearchPanel, (val) => {
+watch(showSearchPanel, val => {
   if (val) {
     nextTick(() => searchInputRef.value?.focus())
   }
@@ -764,26 +1310,39 @@ watch(showSearchPanel, (val) => {
 </script>
 
 <style scoped lang="scss">
-@use "sass:color";
-/* Variables */
-$sidebar-width: 260px;
-$list-width: 320px;
-$bg-color: #f5f7fa;
-$border-color: #e4e7ed;
-$primary-color: var(--el-color-primary);
-$text-primary: #303133;
-$text-secondary: #606266;
-$text-tertiary: #909399;
-$hover-bg: #f0f2f5;
-$active-bg: #e6f1fc; // Light blue for active states
+@use '@/styles/design-tokens.scss' as *;
+
+// ==================== 布局变量 ====================
+$sidebar-width: 240px;
+$list-width: 280px;
+$list-width-collapsed: 200px;
+$panel-min-width: 320px;
 
 .contacts-panel {
   display: flex;
   height: 100%;
   width: 100%;
-  background-color: #fff;
+  background-color: var(--dt-bg-page);
   overflow: hidden;
   position: relative;
+
+  // 滚动条统一样式
+  * {
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
 
   &.mobile-view {
     flex-direction: column;
@@ -835,75 +1394,89 @@ $active-bg: #e6f1fc; // Light blue for active states
   backdrop-filter: blur(2px);
 }
 
-/* Sidebar */
+/* ==================== 侧边栏 ==================== */
 .sidebar {
   width: $sidebar-width;
-  background: #fcfcfc;
-  border-right: 1px solid $border-color;
+  background: var(--dt-bg-sidebar);
+  border-right: 1px solid var(--dt-border-color);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
 }
 
 .sidebar-header {
-  padding: 16px;
+  padding: var(--dt-spacing-lg);
   border-bottom: 1px solid transparent;
-  
+
   .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    
+    margin-bottom: var(--dt-spacing-md);
+
     .sidebar-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: $text-primary;
+      font-size: var(--dt-font-size-xl);
+      font-weight: var(--dt-font-weight-semibold);
+      color: var(--dt-text-primary);
       margin: 0;
     }
+
+    :deep(.el-button) {
+      --el-button-bg-color: var(--dt-fill-color);
+      --el-button-border-color: transparent;
+      --el-button-text-color: var(--dt-text-secondary);
+      --el-button-hover-bg-color: var(--dt-fill-color-dark);
+      --el-button-hover-border-color: transparent;
+
+      &:hover {
+        color: var(--dt-text-primary);
+      }
+    }
   }
-  
+
   .search-box {
-    background: $hover-bg;
+    background: var(--dt-fill-color);
     border-radius: var(--dt-radius-md);
-    padding: 8px 12px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
     cursor: pointer;
-    transition: all 0.2s;
-    
+    transition: all var(--dt-transition-base);
+
     &:hover {
-      background: color.adjust($hover-bg, $lightness: -2%);
+      background: var(--dt-fill-color-dark);
     }
-    
+
     .search-icon {
-      color: $text-tertiary;
-      margin-right: 8px;
+      color: var(--dt-text-tertiary);
+      margin-right: 10px;
+      font-size: 16px;
     }
-    
+
     .placeholder {
-      font-size: 13px;
-      color: $text-tertiary;
+      font-size: var(--dt-font-size-sm);
+      color: var(--dt-text-tertiary);
     }
   }
 }
 
+/* ==================== 导航列表 ==================== */
 .nav-list {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: var(--dt-spacing-md);
 }
 
 .nav-group {
-  margin-bottom: 24px;
+  margin-bottom: var(--dt-spacing-xl);
 }
 
 .nav-group-title {
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: $text-tertiary;
-  margin-bottom: 8px;
+  padding: 0 var(--dt-spacing-md);
+  font-size: var(--dt-font-size-xs);
+  font-weight: var(--dt-font-weight-semibold);
+  color: var(--dt-text-tertiary);
+  margin-bottom: var(--dt-spacing-sm);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -911,23 +1484,27 @@ $active-bg: #e6f1fc; // Light blue for active states
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 10px var(--dt-spacing-md);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: all 0.2s;
-  color: $text-primary;
-  margin-bottom: 4px;
-  
+  transition: all var(--dt-transition-base);
+  color: var(--dt-text-primary);
+  margin-bottom: 2px;
+
   &:hover {
-    background-color: $hover-bg;
+    background-color: var(--dt-bg-hover);
   }
-  
+
   &.active {
-    background-color: $active-bg;
-    color: $primary-color;
-    font-weight: 500;
+    background-color: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+    font-weight: var(--dt-font-weight-medium);
+
+    .nav-text {
+      font-weight: var(--dt-font-weight-medium);
+    }
   }
-  
+
   .nav-icon-wrapper {
     width: 32px;
     height: 32px;
@@ -935,29 +1512,46 @@ $active-bg: #e6f1fc; // Light blue for active states
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 12px;
+    margin-right: var(--dt-spacing-md);
     color: #fff;
     font-size: 16px;
     flex-shrink: 0;
-    
-    &.bg-gradient-orange { background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%); color: #fff; }
-    &.bg-gradient-blue { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); color: #fff; }
-    &.bg-gradient-green { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #fff; }
-    &.bg-gradient-purple { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); color: #fff; }
+
+    &.bg-gradient-orange { background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%); }
+    &.bg-gradient-blue { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+    &.bg-gradient-green { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+    &.bg-gradient-purple { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
+    &.bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    &.bg-gradient-pink { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
   }
-  
+
   .nav-text {
     flex: 1;
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
   }
-  
+
   .nav-badge {
-    background: #ff4d4f;
+    background: var(--dt-danger-color);
     color: #fff;
-    font-size: 11px;
+    font-size: 10px;
     padding: 2px 6px;
-    border-radius: var(--dt-radius-lg);
+    border-radius: var(--dt-radius-full);
     line-height: 1;
+    font-weight: var(--dt-font-weight-medium);
+  }
+
+  .nav-count {
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-tertiary);
+    margin-left: auto;
+  }
+
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--dt-radius-full);
+    background-color: var(--dt-danger-color);
+    margin-left: auto;
   }
 
   // 分组菜单图标
@@ -967,10 +1561,12 @@ $active-bg: #e6f1fc; // Light blue for active states
     padding: 4px;
     border-radius: var(--dt-radius-sm);
     opacity: 0;
-    transition: all 0.2s;
+    transition: all var(--dt-transition-base);
+    color: var(--dt-text-tertiary);
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--dt-fill-color);
+      color: var(--dt-text-primary);
     }
   }
 
@@ -1002,9 +1598,30 @@ $active-bg: #e6f1fc; // Light blue for active states
   }
 }
 
-// 渐变背景色
+// ==================== 渐变背景色 ====================
 .bg-gradient-light {
   background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+}
+
+// ==================== 推荐内容 ==================== */
+.recommend-content {
+  padding: var(--dt-spacing-lg);
+}
+
+/* ==================== 滚动条优化 ==================== */
+.scrollbar-custom {
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--dt-border-color);
+    border-radius: 2px;
+
+    &:hover {
+      background-color: var(--dt-text-tertiary);
+    }
+  }
 }
 
 // 分组展开动画
@@ -1025,6 +1642,21 @@ $active-bg: #e6f1fc; // Light blue for active states
   height: 1px;
   background: $border-color;
   margin: 12px 16px 24px;
+}
+
+.org-search-box {
+  margin-bottom: 8px;
+  padding: 0 12px;
+
+  :deep(.el-input__wrapper) {
+    border-radius: var(--dt-radius-sm);
+    box-shadow: none;
+    background: var(--el-fill-color-light);
+
+    &.is-focus {
+      background: #fff;
+    }
+  }
 }
 
 .org-root {
@@ -1049,25 +1681,43 @@ $active-bg: #e6f1fc; // Light blue for active states
   cursor: pointer;
   transition: background-color 0.2s;
   border-radius: var(--dt-radius-md);
-  
+
   &:hover {
     background-color: $hover-bg;
   }
-  
+
   &.active {
     background-color: $active-bg;
-    
+
     .org-name {
       color: $primary-color;
       font-weight: 500;
     }
   }
-  
+
+  &.has-children {
+    .org-item-content {
+      padding-left: 0;
+    }
+  }
+
+  .org-expand-icon {
+    font-size: 12px;
+    color: $text-tertiary;
+    margin-right: 6px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+
+    &.expanded {
+      transform: rotate(90deg);
+    }
+  }
+
   .org-item-content {
     display: flex;
     align-items: center;
     position: relative;
-    
+
     .org-line {
       position: absolute;
       left: -12px;
@@ -1076,7 +1726,7 @@ $active-bg: #e6f1fc; // Light blue for active states
       height: 1px;
       background: $border-color;
     }
-    
+
     .org-name {
       font-size: 14px;
       color: $text-primary;
@@ -1085,43 +1735,70 @@ $active-bg: #e6f1fc; // Light blue for active states
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    
+
+    .org-stats {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 8px;
+    }
+
     .org-count {
       font-size: 12px;
       color: $text-tertiary;
-      margin-left: 8px;
+    }
+
+    .org-online {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      color: var(--el-color-success);
+
+      .online-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: var(--dt-radius-full);
+        background-color: var(--el-color-success);
+        animation: pulse 2s infinite;
+      }
     }
   }
 }
 
-/* List Panel */
+/* ==================== 列表面板 ==================== */
 .list-panel {
   width: $list-width;
-  border-right: 1px solid $border-color;
+  border-right: 1px solid var(--dt-border-color);
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--dt-bg-card);
   flex-shrink: 0;
 }
 
 .list-header {
-  height: 60px;
-  padding: 0 16px;
-  border-bottom: 1px solid $border-color;
+  height: 56px;
+  padding: 0 var(--dt-spacing-lg);
+  border-bottom: 1px solid var(--dt-border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  
+  background: var(--dt-bg-card);
+
   .header-left {
     display: flex;
     align-items: center;
-    gap: 8px;
-    
+    gap: var(--dt-spacing-sm);
+
     .list-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: $text-primary;
+      font-size: var(--dt-font-size-lg);
+      font-weight: var(--dt-font-weight-semibold);
+      color: var(--dt-text-primary);
       margin: 0;
+    }
+
+    :deep(.el-button) {
+      color: var(--dt-brand-color);
     }
   }
 }
@@ -1130,6 +1807,7 @@ $active-bg: #e6f1fc; // Light blue for active states
   flex: 1;
   position: relative;
   overflow: hidden;
+  background: var(--dt-bg-page);
 }
 
 .virtual-list {
@@ -1139,53 +1817,75 @@ $active-bg: #e6f1fc; // Light blue for active states
 .list-item {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   cursor: pointer;
-  transition: background-color 0.2s;
-  border-bottom: 1px solid transparent; // prevent jump
-  
+  transition: background-color var(--dt-transition-base);
+  border-bottom: 1px solid var(--dt-border-color-lighter);
+  background: var(--dt-bg-card);
+
   &:hover {
-    background-color: $hover-bg;
+    background-color: var(--dt-bg-hover);
   }
-  
+
   &.active {
-    background-color: $active-bg;
+    background-color: var(--dt-brand-bg);
+
+    .item-name {
+      color: var(--dt-brand-color);
+    }
   }
-  
+
+  &.batch-mode {
+    padding-left: var(--dt-spacing-md);
+  }
+
+  .item-checkbox {
+    margin-right: var(--dt-spacing-md);
+    flex-shrink: 0;
+  }
+
   .item-info {
-    margin-left: 12px;
+    margin-left: var(--dt-spacing-md);
     flex: 1;
     overflow: hidden;
-    
+
     .item-header {
       display: flex;
       align-items: center;
-      margin-bottom: 4px;
-      
+      margin-bottom: 2px;
+
       .item-name {
-        font-size: 15px;
-        font-weight: 500;
-        color: $text-primary;
-        margin-right: 8px;
+        font-size: var(--dt-font-size-base);
+        font-weight: var(--dt-font-weight-medium);
+        color: var(--dt-text-primary);
+        margin-right: var(--dt-spacing-sm);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       .role-tag {
         font-size: 10px;
-        padding: 1px 4px;
+        padding: 2px 6px;
         border-radius: var(--dt-radius-sm);
         white-space: nowrap;
-        
-        &.owner { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
-        &.admin { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        font-weight: var(--dt-font-weight-medium);
+
+        &.owner {
+          background: var(--dt-warning-bg);
+          color: var(--dt-warning-color);
+        }
+
+        &.admin {
+          background: var(--dt-brand-bg);
+          color: var(--dt-brand-color);
+        }
       }
     }
-    
+
     .item-desc {
-      font-size: 13px;
-      color: $text-tertiary;
+      font-size: var(--dt-font-size-sm);
+      color: var(--dt-text-secondary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1193,29 +1893,32 @@ $active-bg: #e6f1fc; // Light blue for active states
   }
 }
 
-/* Detail Panel */
+/* ==================== 详情面板 ==================== */
 .detail-panel {
   flex: 1;
-  background: $bg-color;
+  background: var(--dt-bg-page);
   display: flex;
   flex-direction: column;
   position: relative;
-  
+  min-width: $panel-min-width;
+
   .mobile-detail-header {
     height: 50px;
-    background: #fff;
-    border-bottom: 1px solid $border-color;
+    background: var(--dt-bg-card);
+    border-bottom: 1px solid var(--dt-border-color);
     display: flex;
     align-items: center;
-    padding: 0 8px;
-    font-weight: 600;
+    padding: 0 var(--dt-spacing-md);
+    font-weight: var(--dt-font-weight-semibold);
+    color: var(--dt-text-primary);
   }
 }
 
 .detail-content-wrapper {
   flex: 1;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  padding: var(--dt-spacing-xl);
 }
 
 .empty-selection {
@@ -1223,171 +1926,245 @@ $active-bg: #e6f1fc; // Light blue for active states
   display: flex;
   align-items: center;
   justify-content: center;
-  
+  flex-direction: column;
+
   .empty-content {
     text-align: center;
-    
+    padding: var(--dt-spacing-xl);
+
     .empty-bg {
-      width: 240px;
-      margin-bottom: 24px;
-      opacity: 0.8;
+      width: 200px;
+      height: 150px;
+      margin: 0 auto var(--dt-spacing-xl);
+      opacity: 0.6;
+      object-fit: contain;
     }
-    
+
     h3 {
-      font-size: 18px;
-      color: $text-primary;
-      margin-bottom: 8px;
+      font-size: var(--dt-font-size-lg);
+      font-weight: var(--dt-font-weight-semibold);
+      color: var(--dt-text-primary);
+      margin-bottom: var(--dt-spacing-sm);
     }
-    
+
     p {
-      color: $text-tertiary;
-      font-size: 14px;
+      color: var(--dt-text-secondary);
+      font-size: var(--dt-font-size-base);
+      margin-bottom: var(--dt-spacing-lg);
+    }
+
+    :deep(.el-button) {
+      min-width: 100px;
     }
   }
 }
 
-/* Friend Requests */
+/* ==================== 好友请求 ==================== */
+.friend-requests {
+  padding: var(--dt-spacing-lg);
+}
+
 .request-list {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacing-md);
 }
 
 .request-item {
   display: flex;
   align-items: center;
-  padding: 16px;
-  background: #fff;
-  border-radius: var(--dt-radius-md);
-  border: 1px solid $border-color;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-  
+  padding: var(--dt-spacing-lg);
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  border: 1px solid var(--dt-border-color);
+  box-shadow: var(--dt-shadow-sm);
+
   .request-info {
     flex: 1;
-    margin-left: 12px;
-    
+    margin-left: var(--dt-spacing-md);
+
     .request-name {
-      font-weight: 500;
-      color: $text-primary;
-      margin-bottom: 4px;
+      font-weight: var(--dt-font-weight-medium);
+      color: var(--dt-text-primary);
+      margin-bottom: var(--dt-spacing-xs);
     }
-    
+
     .request-msg {
-      font-size: 13px;
-      color: $text-tertiary;
+      font-size: var(--dt-font-size-sm);
+      color: var(--dt-text-secondary);
     }
   }
-  
+
   .request-actions {
     display: flex;
-    gap: 8px;
+    gap: var(--dt-spacing-sm);
+
+    :deep(.el-button) {
+      border-radius: var(--dt-radius-full);
+    }
   }
 }
 
-/* Search Modal */
+/* ==================== 搜索模态框 ==================== */
 .search-modal-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 200;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
   display: flex;
+  align-items: flex-start;
   justify-content: center;
-  padding-top: 80px;
+  padding-top: 15vh;
 }
 
 .search-modal {
-  width: 600px;
-  max-width: 90%;
-  background: #fff;
-  border-radius: var(--dt-radius-lg);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  width: 560px;
+  max-width: 90vw;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-xl);
+  box-shadow: var(--dt-shadow-dialog);
   display: flex;
   flex-direction: column;
   max-height: 70vh;
   animation: modal-in 0.3s ease;
-  
+  overflow: hidden;
+
   .search-header {
-    padding: 16px;
-    border-bottom: 1px solid $border-color;
+    padding: var(--dt-spacing-lg);
+    border-bottom: 1px solid var(--dt-border-color);
     display: flex;
     align-items: center;
-    gap: 12px;
-    
+    gap: var(--dt-spacing-md);
+
+    :deep(.el-input__wrapper) {
+      box-shadow: none;
+    }
+
     .close-search-btn {
       font-size: 20px;
-      color: $text-tertiary;
-      
-      &:hover { color: $text-primary; }
+      color: var(--dt-text-tertiary);
+
+      &:hover {
+        color: var(--dt-text-primary);
+      }
     }
   }
-  
+
   .search-body {
     flex: 1;
     overflow-y: auto;
-    padding: 16px 0;
+    padding: var(--dt-spacing-md) 0;
     min-height: 200px;
   }
+}
+
+.search-results-list {
+  padding: 0 var(--dt-spacing-md);
 }
 
 .search-result-item {
   display: flex;
   align-items: center;
-  padding: 12px 24px;
+  padding: var(--dt-spacing-md);
   cursor: pointer;
-  transition: background 0.2s;
-  
+  transition: all var(--dt-transition-base);
+  border-radius: var(--dt-radius-md);
+  margin-bottom: var(--dt-spacing-xs);
+
   &:hover {
-    background: $hover-bg;
-    
-    .arrow-right { opacity: 1; transform: translateX(0); }
+    background: var(--dt-bg-hover);
+
+    .arrow-right {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
-  
+
   .result-info {
     flex: 1;
-    margin-left: 12px;
+    margin-left: var(--dt-spacing-md);
     display: flex;
     flex-direction: column;
-    
+    gap: 2px;
+
     .result-name {
-      font-weight: 500;
-      color: $text-primary;
-      margin-bottom: 2px;
+      font-weight: var(--dt-font-weight-medium);
+      color: var(--dt-text-primary);
     }
-    
+
     .result-type-tag {
-      font-size: 11px;
-      color: $text-tertiary;
-      background: #f0f2f5;
-      padding: 1px 6px;
+      font-size: var(--dt-font-size-xs);
+      color: var(--dt-text-secondary);
+      background: var(--dt-fill-color);
+      padding: 2px 8px;
       border-radius: var(--dt-radius-sm);
       align-self: flex-start;
-      
-      &.group { color: #1890ff; background: #e6f7ff; }
-      &.contact { color: #52c41a; background: #f6ffed; }
+
+      &.group {
+        color: var(--dt-brand-color);
+        background: var(--dt-brand-bg);
+      }
+
+      &.contact {
+        color: var(--dt-success-color);
+        background: var(--dt-success-bg);
+      }
     }
   }
-  
+
   .arrow-right {
-    color: $text-tertiary;
+    color: var(--dt-text-tertiary);
     opacity: 0;
-    transform: translateX(-5px);
-    transition: all 0.2s;
+    transform: translateX(-4px);
+    transition: all var(--dt-transition-base);
   }
 }
 
-/* Animations */
+.empty-search {
+  padding: var(--dt-spacing-xl) 0;
+}
+
+/* ==================== 动画效果 ==================== */
 @keyframes modal-in {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity var(--dt-transition-base);
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -1395,15 +2172,83 @@ $active-bg: #e6f1fc; // Light blue for active states
 
 .expand-enter-active,
 .expand-leave-active {
-  transition: all 0.3s ease;
+  transition: all var(--dt-transition-base);
   max-height: 500px;
   opacity: 1;
 }
+
 .expand-enter-from,
 .expand-leave-to {
   max-height: 0;
   opacity: 0;
 }
 
-.mr-1 { margin-right: 4px; }
+/* ==================== 响应式布局 ==================== */
+@media (max-width: 1400px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .list-panel {
+    width: 240px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .contacts-panel {
+    &.mobile-view {
+      flex-direction: column;
+
+      .sidebar {
+        position: absolute;
+        z-index: 100;
+        height: 100%;
+        transform: translateX(-100%);
+        transition: transform var(--dt-transition-base);
+        box-shadow: var(--dt-shadow-lg);
+
+        &.sidebar-open {
+          transform: translateX(0);
+        }
+      }
+
+      .list-panel {
+        width: 100%;
+        border-right: none;
+      }
+
+      .detail-panel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 50;
+        transform: translateX(100%);
+        transition: transform var(--dt-transition-base);
+        background: var(--dt-bg-card);
+
+        &.detail-open {
+          transform: translateX(0);
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .contacts-panel {
+    &.mobile-view {
+      .list-header {
+        height: 50px;
+        padding: 0 var(--dt-spacing-md);
+      }
+
+      .sidebar {
+        width: 100%;
+        max-width: 280px;
+      }
+    }
+  }
+}
 </style>

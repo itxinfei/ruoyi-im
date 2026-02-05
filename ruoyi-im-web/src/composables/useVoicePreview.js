@@ -25,7 +25,7 @@ import { ref, onUnmounted } from 'vue'
  * @param {number} seconds - 秒数
  * @returns {string} 格式化后的时间字符串
  */
-export const formatVoiceTime = (seconds) => {
+export const formatVoiceTime = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
@@ -59,7 +59,7 @@ export function useVoicePreview(options = {}) {
    * 播放/暂停录音预览
    */
   const toggleVoicePlay = () => {
-    if (!voicePreview.value) return
+    if (!voicePreview.value) {return}
 
     if (!voiceAudioElement.value) {
       // 创建音频元素
@@ -143,7 +143,7 @@ export function useVoicePreview(options = {}) {
    * @returns {Object} 录音数据 { file, duration }
    */
   const sendVoicePreview = () => {
-    if (!voicePreview.value) return null
+    if (!voicePreview.value) {return null}
 
     const { blob, duration } = voicePreview.value
     const file = new File([blob], `voice_${Date.now()}.webm`, { type: 'audio/webm' })

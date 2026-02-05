@@ -1,5 +1,8 @@
 <template>
-  <div class="recalled-bubble" :class="{ 'is-own': message.isOwn }">
+  <div
+    class="recalled-bubble"
+    :class="{ 'is-own': message.isOwn }"
+  >
     <span class="recall-icon material-icons-outlined">history</span>
     <div class="recall-content">
       <span class="recall-text">

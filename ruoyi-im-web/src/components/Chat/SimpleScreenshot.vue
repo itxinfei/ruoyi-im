@@ -1,16 +1,25 @@
 <template>
   <teleport to="body">
     <transition name="fade">
-      <div v-if="visible" class="simple-screenshot-overlay">
+      <div
+        v-if="visible"
+        class="simple-screenshot-overlay"
+      >
         <div class="screenshot-hint">
           <p>1. 选择要截取的屏幕或窗口</p>
           <p>2. 系统会自动截取整个屏幕</p>
           <p>3. 截图完成后可直接发送</p>
-          <button class="start-btn" @click="startCapture">
+          <button
+            class="start-btn"
+            @click="startCapture"
+          >
             <span class="material-icons-outlined">screenshot</span>
             开始截图
           </button>
-          <button class="close-btn" @click="$emit('close')">
+          <button
+            class="close-btn"
+            @click="$emit('close')"
+          >
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -25,13 +34,28 @@
       :show-close="true"
       @close="handleCancel"
     >
-      <div v-if="previewImage" class="preview-container">
-        <img :src="previewImage" alt="截图预览" />
+      <div
+        v-if="previewImage"
+        class="preview-container"
+      >
+        <img
+          :src="previewImage"
+          alt="截图预览"
+        >
       </div>
       <template #footer>
-        <el-button @click="handleRetake">重新截图</el-button>
-        <el-button type="primary" @click="handleSend">发送</el-button>
-        <el-button @click="handleCancel">取消</el-button>
+        <el-button @click="handleRetake">
+          重新截图
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSend"
+        >
+          发送
+        </el-button>
+        <el-button @click="handleCancel">
+          取消
+        </el-button>
       </template>
     </el-dialog>
   </teleport>
@@ -112,8 +136,8 @@ const reset = () => {
   previewImage.value = null
 }
 
-watch(() => props.visible, (val) => {
-  if (!val) reset()
+watch(() => props.visible, val => {
+  if (!val) {reset()}
 })
 </script>
 

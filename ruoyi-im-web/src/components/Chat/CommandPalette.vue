@@ -21,8 +21,12 @@
               placeholder="搜索命令..."
               type="text"
               @keydown="handleKeydown"
-            />
-            <span v-if="searchQuery" class="clear-btn" @click="searchQuery = ''">
+            >
+            <span
+              v-if="searchQuery"
+              class="clear-btn"
+              @click="searchQuery = ''"
+            >
               <span class="material-icons-outlined">close</span>
             </span>
           </div>
@@ -40,21 +44,39 @@
               @click="handleSelectCommand(cmd)"
               @mouseenter="selectedIndex = index"
             >
-              <div class="command-icon" :class="cmd.iconClass">
-                <span v-if="cmd.materialIcon" class="material-icons-outlined">{{ cmd.materialIcon }}</span>
-                <el-icon v-else><component :is="cmd.icon" /></el-icon>
+              <div
+                class="command-icon"
+                :class="cmd.iconClass"
+              >
+                <span
+                  v-if="cmd.materialIcon"
+                  class="material-icons-outlined"
+                >{{ cmd.materialIcon }}</span>
+                <el-icon v-else>
+                  <component :is="cmd.icon" />
+                </el-icon>
               </div>
               <div class="command-info">
-                <div class="command-name">{{ cmd.name }}</div>
-                <div class="command-desc">{{ cmd.description }}</div>
+                <div class="command-name">
+                  {{ cmd.name }}
+                </div>
+                <div class="command-desc">
+                  {{ cmd.description }}
+                </div>
               </div>
-              <div class="command-shortcut" v-if="cmd.shortcut">
+              <div
+                v-if="cmd.shortcut"
+                class="command-shortcut"
+              >
                 {{ cmd.shortcut }}
               </div>
             </div>
 
             <!-- 无结果提示 -->
-            <div v-if="filteredCommands.length === 0" class="no-results">
+            <div
+              v-if="filteredCommands.length === 0"
+              class="no-results"
+            >
               <span class="material-icons-outlined">search_off</span>
               <p>没有找到匹配的命令</p>
             </div>
@@ -224,7 +246,7 @@ const positionStyle = computed(() => {
 })
 
 // 处理键盘事件
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   const count = filteredCommands.value.length
 
   switch (e.key) {
@@ -249,7 +271,7 @@ const handleKeydown = (e) => {
 }
 
 // 选择命令
-const handleSelectCommand = (command) => {
+const handleSelectCommand = command => {
   emit('select', command.id)
   handleClose()
 }
@@ -262,17 +284,17 @@ const handleClose = () => {
 }
 
 // 监听显示状态，自动聚焦搜索框
-watch(() => props.show, (show) => {
+watch(() => props.show, show => {
   if (show) {
     nextTick(() => {
-      if (isUnmounted.value) return
+      if (isUnmounted.value) {return}
       searchInputRef.value?.focus()
     })
   }
 })
 
 // 组件挂载时监听全局快捷键
-const handleGlobalKeydown = (e) => {
+const handleGlobalKeydown = e => {
   // Alt+/ 打开命令面板
   if (e.altKey && e.key === '/') {
     e.preventDefault()

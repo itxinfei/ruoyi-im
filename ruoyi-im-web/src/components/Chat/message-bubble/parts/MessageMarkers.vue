@@ -7,9 +7,18 @@
       :class="{ completed: marker.isCompleted }"
       :style="{ color: marker.color || '' }"
     >
-      <span v-if="marker.markerType === 'FLAG'" class="material-icons-outlined">flag</span>
-      <span v-else-if="marker.markerType === 'IMPORTANT'" class="material-icons-outlined">star</span>
-      <span v-else-if="marker.markerType === 'TODO'" class="material-icons-outlined">
+      <span
+        v-if="marker.markerType === 'FLAG'"
+        class="material-icons-outlined"
+      >flag</span>
+      <span
+        v-else-if="marker.markerType === 'IMPORTANT'"
+        class="material-icons-outlined"
+      >star</span>
+      <span
+        v-else-if="marker.markerType === 'TODO'"
+        class="material-icons-outlined"
+      >
         {{ marker.isCompleted ? 'check_circle' : 'check_circle_outline' }}
       </span>
     </span>

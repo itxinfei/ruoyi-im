@@ -1,42 +1,90 @@
 <template>
-  <div class="empty-state" :class="[variant, { dark: isDark, compact }]">
+  <div
+    class="empty-state"
+    :class="[variant, { dark: isDark, compact }]"
+  >
     <!-- 空状态图标 -->
-    <div class="empty-icon" :style="{ color: iconColor }">
+    <div
+      class="empty-icon"
+      :style="{ color: iconColor }"
+    >
       <slot name="icon">
         <!-- 默认使用 Material Icons -->
-        <span v-if="type === 'search'" class="material-icons-outlined">search_off</span>
-        <span v-else-if="type === 'chat'" class="material-icons-outlined">chat_bubble_outline</span>
-        <span v-else-if="type === 'file'" class="material-icons-outlined">folder_open</span>
-        <span v-else-if="type === 'user'" class="material-icons-outlined">person_outline</span>
-        <span v-else-if="type === 'notification'" class="material-icons-outlined">notifications_none</span>
-        <span v-else-if="type === 'network'" class="material-icons-outlined">wifi_off</span>
-        <span v-else-if="type === 'error'" class="material-icons-outlined">error_outline</span>
-        <span v-else class="material-icons-outlined">inbox</span>
+        <span
+          v-if="type === 'search'"
+          class="material-icons-outlined"
+        >search_off</span>
+        <span
+          v-else-if="type === 'chat'"
+          class="material-icons-outlined"
+        >chat_bubble_outline</span>
+        <span
+          v-else-if="type === 'file'"
+          class="material-icons-outlined"
+        >folder_open</span>
+        <span
+          v-else-if="type === 'user'"
+          class="material-icons-outlined"
+        >person_outline</span>
+        <span
+          v-else-if="type === 'notification'"
+          class="material-icons-outlined"
+        >notifications_none</span>
+        <span
+          v-else-if="type === 'network'"
+          class="material-icons-outlined"
+        >wifi_off</span>
+        <span
+          v-else-if="type === 'error'"
+          class="material-icons-outlined"
+        >error_outline</span>
+        <span
+          v-else
+          class="material-icons-outlined"
+        >inbox</span>
       </slot>
     </div>
 
     <!-- 空状态标题 -->
     <h3 class="empty-title">
-      <slot name="title">{{ title || '暂无数据' }}</slot>
+      <slot name="title">
+        {{ title || '暂无数据' }}
+      </slot>
     </h3>
 
     <!-- 空状态描述 -->
-    <p v-if="description || $slots.description" class="empty-description">
-      <slot name="description">{{ description }}</slot>
+    <p
+      v-if="description || $slots.description"
+      class="empty-description"
+    >
+      <slot name="description">
+        {{ description }}
+      </slot>
     </p>
 
     <!-- 操作按钮 -->
-    <div v-if="actionText || $slots.action" class="empty-action">
+    <div
+      v-if="actionText || $slots.action"
+      class="empty-action"
+    >
       <slot name="action">
-        <el-button v-if="actionText" :type="actionType || 'primary'" :icon="actionIcon" @click="handleAction">
+        <el-button
+          v-if="actionText"
+          :type="actionType || 'primary'"
+          :icon="actionIcon"
+          @click="handleAction"
+        >
           {{ actionText }}
         </el-button>
       </slot>
     </div>
 
     <!-- 装饰性插图（可选） -->
-    <div v-if="showIllustration" class="empty-illustration">
-      <slot name="illustration"></slot>
+    <div
+      v-if="showIllustration"
+      class="empty-illustration"
+    >
+      <slot name="illustration" />
     </div>
   </div>
 </template>
@@ -77,7 +125,7 @@ const handleAction = () => {
 
 // 根据类型自动设置图标颜色
 const autoIconColor = computed(() => {
-  if (props.iconColor) return props.iconColor
+  if (props.iconColor) {return props.iconColor}
 
   const colors = {
     search: '#94a3b8',

@@ -1,5 +1,8 @@
 <template>
-  <el-dropdown trigger="click" @command="handleTranslate">
+  <el-dropdown
+    trigger="click"
+    @command="handleTranslate"
+  >
     <span class="translate-trigger">
       <el-icon><ChatLineRound /></el-icon>
       <span class="translate-text">翻译</span>
@@ -13,7 +16,10 @@
         >
           {{ lang.name }}
         </el-dropdown-item>
-        <el-dropdown-item divided @click="showMoreLanguages = true">
+        <el-dropdown-item
+          divided
+          @click="showMoreLanguages = true"
+        >
           更多语言...
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -27,7 +33,10 @@
     width="400px"
     :modal="true"
   >
-    <el-radio-group v-model="selectedLanguage" class="language-list">
+    <el-radio-group
+      v-model="selectedLanguage"
+      class="language-list"
+    >
       <el-radio
         v-for="lang in allLanguages"
         :key="lang.code"
@@ -38,8 +47,15 @@
       </el-radio>
     </el-radio-group>
     <template #footer>
-      <el-button @click="showMoreLanguages = false">取消</el-button>
-      <el-button type="primary" @click="translateSelected">翻译</el-button>
+      <el-button @click="showMoreLanguages = false">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        @click="translateSelected"
+      >
+        翻译
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -93,7 +109,7 @@ const loadLanguages = async () => {
 }
 
 // 处理翻译
-const handleTranslate = async (targetLang) => {
+const handleTranslate = async targetLang => {
   try {
     ElMessage.info('正在翻译...')
     const res = await translate({

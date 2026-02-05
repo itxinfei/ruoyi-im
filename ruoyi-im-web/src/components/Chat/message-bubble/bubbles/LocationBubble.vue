@@ -1,5 +1,8 @@
 <template>
-  <div class="location-bubble" @click="openLocation">
+  <div
+    class="location-bubble"
+    @click="openLocation"
+  >
     <!-- 位置图标 -->
     <div class="location-icon">
       <span class="material-icons-outlined">location_on</span>
@@ -7,8 +10,12 @@
 
     <!-- 位置信息 -->
     <div class="location-info">
-      <div class="location-address">{{ address || '位置信息' }}</div>
-      <div class="location-coords">{{ formattedCoords }}</div>
+      <div class="location-address">
+        {{ address || '位置信息' }}
+      </div>
+      <div class="location-coords">
+        {{ formattedCoords }}
+      </div>
     </div>
 
     <!-- 打开箭头 -->
@@ -42,7 +49,7 @@ const longitude = computed(() => {
 })
 
 const formattedCoords = computed(() => {
-  if (!latitude.value || !longitude.value) return ''
+  if (!latitude.value || !longitude.value) {return ''}
   return `${latitude.value.toFixed(6)}, ${longitude.value.toFixed(6)}`
 })
 

@@ -15,13 +15,29 @@
       </el-button>
     </div>
 
-    <div v-if="announcements.length === 0" class="empty-state">
-      <el-icon :size="48" color="#dcdfe6"><Bell /></el-icon>
+    <div
+      v-if="announcements.length === 0"
+      class="empty-state"
+    >
+      <el-icon
+        :size="48"
+        color="#dcdfe6"
+      >
+        <Bell />
+      </el-icon>
       <p>暂无群公告</p>
-      <p v-if="canManage" class="empty-hint">点击上方按钮发布公告</p>
+      <p
+        v-if="canManage"
+        class="empty-hint"
+      >
+        点击上方按钮发布公告
+      </p>
     </div>
 
-    <div v-else class="announcement-list">
+    <div
+      v-else
+      class="announcement-list"
+    >
       <div
         v-for="announcement in announcements"
         :key="announcement.id"
@@ -30,19 +46,39 @@
       >
         <div class="announcement-header-row">
           <div class="announcement-title">
-            <el-icon v-if="announcement.isPinned" class="pin-icon"><Top /></el-icon>
+            <el-icon
+              v-if="announcement.isPinned"
+              class="pin-icon"
+            >
+              <Top />
+            </el-icon>
             {{ announcement.title }}
           </div>
           <span class="announcement-time">{{ formatTime(announcement.createTime) }}</span>
         </div>
-        <div class="announcement-content">{{ announcement.content }}</div>
+        <div class="announcement-content">
+          {{ announcement.content }}
+        </div>
         <div class="announcement-footer">
           <span class="publisher">{{ announcement.publisherName || '群主' }}</span>
-          <div v-if="canManage" class="announcement-actions">
-            <el-button link type="primary" size="small" @click="$emit('edit', announcement)">
+          <div
+            v-if="canManage"
+            class="announcement-actions"
+          >
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="$emit('edit', announcement)"
+            >
               编辑
             </el-button>
-            <el-button link type="danger" size="small" @click="handleDelete(announcement)">
+            <el-button
+              link
+              type="danger"
+              size="small"
+              @click="handleDelete(announcement)"
+            >
               删除
             </el-button>
           </div>
@@ -73,7 +109,7 @@ const emit = defineEmits(['create', 'edit', 'delete'])
 // 使用共享工具函数
 const formatTime = formatListItemTime
 
-const handleDelete = (announcement) => {
+const handleDelete = announcement => {
   ElMessageBox.confirm('确定要删除这条公告吗？', '删除公告', { type: 'warning' })
     .then(() => {
       emit('delete', announcement)

@@ -185,7 +185,7 @@ export function useKeyboardShortcuts(options = {}) {
    * 注销快捷键
    * @param {string} shortcut - 快捷键字符串
    */
-  const unregisterShortcut = (shortcut) => {
+  const unregisterShortcut = shortcut => {
     const key = shortcut.toLowerCase()
 
     if (global) {
@@ -218,7 +218,7 @@ export function useKeyboardShortcuts(options = {}) {
    * @param {string} shortcut - 快捷键字符串
    * @returns {boolean}
    */
-  const isRegistered = (shortcut) => {
+  const isRegistered = shortcut => {
     return localShortcuts.has(shortcut.toLowerCase())
   }
 
@@ -237,7 +237,7 @@ export function useKeyboardShortcuts(options = {}) {
   /**
    * 键盘事件处理函数
    */
-  const handleKeyDown = (event) => {
+  const handleKeyDown = event => {
     // 忽略在输入框中的按键（除非是特定快捷键）
     const target = event.target
     const isInputElement = target.tagName === 'INPUT' ||

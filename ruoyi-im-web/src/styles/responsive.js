@@ -80,28 +80,28 @@ export const useResponsive = () => {
   }
   
   // 检查是否小于断点
-  const isBreakpointDown = (bp) => {
+  const isBreakpointDown = bp => {
     return getScreenWidth() < breakpoints[bp]
   }
   
   // 检查是否大于断点
-  const isBreakpointUp = (bp) => {
+  const isBreakpointUp = bp => {
     return getScreenWidth() >= breakpoints[bp]
   }
   
   // 获取当前断点
   const getCurrentBreakpoint = () => {
     const width = getScreenWidth()
-    if (width < breakpoints.xs) return 'xs'
-    if (width < breakpoints.sm) return 'sm'
-    if (width < breakpoints.md) return 'md'
-    if (width < breakpoints.lg) return 'lg'
-    if (width < breakpoints.xl) return 'xl'
+    if (width < breakpoints.xs) {return 'xs'}
+    if (width < breakpoints.sm) {return 'sm'}
+    if (width < breakpoints.md) {return 'md'}
+    if (width < breakpoints.lg) {return 'lg'}
+    if (width < breakpoints.xl) {return 'xl'}
     return 'xxl'
   }
   
   // 响应式值
-  const responsiveValue = (values) => {
+  const responsiveValue = values => {
     const bp = getCurrentBreakpoint()
     return values[bp] || values.md || values.lg
   }

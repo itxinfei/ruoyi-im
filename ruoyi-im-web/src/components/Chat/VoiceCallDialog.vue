@@ -1,10 +1,17 @@
 <template>
   <teleport to="body">
     <transition name="call-fade">
-      <div v-if="visible" class="voice-call-overlay" @click.self="handleMinimize">
+      <div
+        v-if="visible"
+        class="voice-call-overlay"
+        @click.self="handleMinimize"
+      >
         <div class="voice-call-dialog">
           <!-- 背景模糊头像 -->
-          <div class="call-background" :class="{ pulse: isCalling }">
+          <div
+            class="call-background"
+            :class="{ pulse: isCalling }"
+          >
             <DingtalkAvatar
               :src="remoteUser?.avatar"
               :name="remoteUser?.name || remoteUser?.friendName"
@@ -25,9 +32,18 @@
                 class="user-avatar"
                 :class="{ pulse: isCalling }"
               />
-              <h2 class="user-name">{{ remoteUser?.name || remoteUser?.friendName }}</h2>
-              <p class="call-status">{{ callStatusText }}</p>
-              <p v-if="isConnected" class="call-duration">{{ formattedDuration }}</p>
+              <h2 class="user-name">
+                {{ remoteUser?.name || remoteUser?.friendName }}
+              </h2>
+              <p class="call-status">
+                {{ callStatusText }}
+              </p>
+              <p
+                v-if="isConnected"
+                class="call-duration"
+              >
+                {{ formattedDuration }}
+              </p>
             </div>
 
             <!-- 通话控制 -->
@@ -58,7 +74,10 @@
                 <span class="btn-label">最小化</span>
               </button>
 
-              <button class="control-btn hangup-btn" @click="handleHangup">
+              <button
+                class="control-btn hangup-btn"
+                @click="handleHangup"
+              >
                 <span class="material-icons-outlined">call_end</span>
                 <span class="btn-label">挂断</span>
               </button>
@@ -70,7 +89,11 @@
 
     <!-- 最小化的悬浮窗 -->
     <transition name="float-window">
-      <div v-if="isMinimized" class="call-float-window" :class="{ incoming: isIncoming }">
+      <div
+        v-if="isMinimized"
+        class="call-float-window"
+        :class="{ incoming: isIncoming }"
+      >
         <div class="float-content">
           <div class="float-avatar">
             <DingtalkAvatar
@@ -79,13 +102,19 @@
               :size="40"
               shape="circle"
             />
-            <div v-if="isCalling || isIncoming" class="call-indicator"></div>
+            <div
+              v-if="isCalling || isIncoming"
+              class="call-indicator"
+            />
           </div>
           <div class="float-info">
             <span class="float-name">{{ remoteUser?.name || remoteUser?.friendName }}</span>
             <span class="float-status">{{ minimizedStatusText }}</span>
           </div>
-          <button class="float-expand" @click="handleExpand">
+          <button
+            class="float-expand"
+            @click="handleExpand"
+          >
             <span class="material-icons-outlined">expand_more</span>
           </button>
         </div>
@@ -124,28 +153,25 @@ const isCalling = computed(() => callStatus.value === 'calling')
 const isConnected = computed(() => callStatus.value === 'connected')
 
 const callStatusText = computed(() => {
-  if (isIncoming.value) return '来电中...'
-  if (callStatus.value === 'calling') return '正在呼叫...'
-  if (callStatus.value === 'connected') return '通话中'
-  if (callStatus.value === 'ended') return '通话结束'
-  if (callStatus.value === 'rejected') return '对方拒绝'
+  if (isIncoming.value) {return '来电中...'}
+  if (callStatus.value === 'calling') {return '正在呼叫...'}
+  if (callStatus.value === 'connected') {return '通话中'}
+  if (callStatus.value === 'ended') {return '通话结束'}
+  if (callStatus.value === 'rejected') {return '对方拒绝'}
   return ''
 })
 
 const minimizedStatusText = computed(() => {
-  if (isIncoming.value) return '来电中'
-  if (callStatus.value === 'calling') return '呼叫中'
-  if (callStatus.value === 'connected') return formattedDuration.value
+  if (isIncoming.value) {return '来电中'}
+  if (callStatus.value === 'calling') {return '呼叫中'}
+  if (callStatus.value === 'connected') {return formattedDuration.value}
   return '语音通话'
 })
 
 // 使用共享工具函数格式化通话时长
 const formattedDuration = computed(() => formatDurationMMSS(callDuration.value))
 
-// 获取头像URL
-if (props.remoteUser) {
-  props.remoteUser.avatar = addTokenToUrl(props.remoteUser.avatar)
-}
+// 注意：头像 URL 的 token 处理由 DingtalkAvatar 组件内部处理，无需在此处修改 props
 
 // 方法
 const startDurationTimer = () => {
@@ -225,7 +251,7 @@ const stopAudioStream = () => {
 }
 
 // 监听可见性变化
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, newVal => {
   if (newVal) {
     callStatus.value = props.isIncoming ? 'calling' : 'calling'
     callDuration.value = 0

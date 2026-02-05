@@ -7,14 +7,26 @@
   >
     <div class="forward-dialog">
       <!-- 消息预览 -->
-      <div class="forward-message" v-if="messages.length === 1">
-        <div class="forward-message-label">转发消息：</div>
+      <div
+        v-if="messages.length === 1"
+        class="forward-message"
+      >
+        <div class="forward-message-label">
+          转发消息：
+        </div>
         <div class="forward-message-content">
           <div v-if="message.type === 'IMAGE'">
-            <img :src="parsedMessageContent.imageUrl" class="msg-img" />
+            <img
+              :src="parsedMessageContent.imageUrl"
+              class="msg-img"
+            >
           </div>
           <div v-if="message.type === 'VIDEO'">
-            <video :src="parsedMessageContent.videoUrl" class="msg-video" controls />
+            <video
+              :src="parsedMessageContent.videoUrl"
+              class="msg-video"
+              controls
+            />
           </div>
           <div v-else-if="message.type === 'FILE'">
             <div class="file-preview">
@@ -28,14 +40,26 @@
         </div>
       </div>
 
-      <div class="forward-message" v-else>
-        <div class="forward-message-label">转发 {{ messages.length }} 条消息：</div>
+      <div
+        v-else
+        class="forward-message"
+      >
+        <div class="forward-message-label">
+          转发 {{ messages.length }} 条消息：
+        </div>
         <div class="forward-message-content multi-message-preview">
-          <div v-for="(msg, index) in messages.slice(0, 3)" :key="msg.id" class="message-item">
+          <div
+            v-for="(msg, index) in messages.slice(0, 3)"
+            :key="msg.id"
+            class="message-item"
+          >
             <span class="message-sender">{{ msg.senderName }}:</span>
             <span class="message-text">{{ getMessagePreview(msg) }}</span>
           </div>
-          <div v-if="messages.length > 3" class="more-messages">
+          <div
+            v-if="messages.length > 3"
+            class="more-messages"
+          >
             还有 {{ messages.length - 3 }} 条消息...
           </div>
         </div>
@@ -44,19 +68,32 @@
       <el-divider />
 
       <!-- 转发方式选择（仅多条消息时显示） -->
-      <div v-if="messages.length > 1" class="forward-type-selector">
-        <div class="type-label">转发方式：</div>
+      <div
+        v-if="messages.length > 1"
+        class="forward-type-selector"
+      >
+        <div class="type-label">
+          转发方式：
+        </div>
         <el-radio-group v-model="forwardType">
           <el-radio value="batch">
             <div class="radio-content">
-              <div class="radio-title">逐条转发</div>
-              <div class="radio-desc">将每条消息单独发送</div>
+              <div class="radio-title">
+                逐条转发
+              </div>
+              <div class="radio-desc">
+                将每条消息单独发送
+              </div>
             </div>
           </el-radio>
           <el-radio value="combine">
             <div class="radio-content">
-              <div class="radio-title">合并为聊天记录</div>
-              <div class="radio-desc">合并成一个聊天记录卡片</div>
+              <div class="radio-title">
+                合并为聊天记录
+              </div>
+              <div class="radio-desc">
+                合并成一个聊天记录卡片
+              </div>
             </div>
           </el-radio>
         </el-radio-group>
@@ -83,16 +120,26 @@
             :class="{ active: selectedSessionId === session.id }"
             @click="selectSession(session)"
           >
-            <el-avatar :size="40" :src="addTokenToUrl(session.avatar)">
+            <el-avatar
+              :size="40"
+              :src="addTokenToUrl(session.avatar)"
+            >
               {{ session.name?.charAt(0) }}
             </el-avatar>
             <div class="session-info">
-              <div class="session-name">{{ session.name }}</div>
-              <div class="session-preview">{{ session.lastMessage || '暂无消息' }}</div>
+              <div class="session-name">
+                {{ session.name }}
+              </div>
+              <div class="session-preview">
+                {{ session.lastMessage || '暂无消息' }}
+              </div>
             </div>
           </div>
 
-          <div v-if="filteredSessions.length === 0" class="empty-sessions">
+          <div
+            v-if="filteredSessions.length === 0"
+            class="empty-sessions"
+          >
             <el-empty description="暂无匹配会话" />
           </div>
         </div>
@@ -100,8 +147,14 @@
     </div>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" :disabled="!selectedSessionId" @click="handleForward">
+      <el-button @click="handleClose">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        :disabled="!selectedSessionId"
+        @click="handleForward"
+      >
         {{ forwardType === 'combine' ? '合并转发' : '转发' }}
       </el-button>
     </template>
@@ -150,7 +203,7 @@ const parsedMessageContent = computed(() => {
 })
 
 // 获取消息预览
-const getMessagePreview = (msg) => {
+const getMessagePreview = msg => {
   switch (msg.type) {
     case 'IMAGE':
       return '[图片]'
@@ -167,7 +220,7 @@ const getMessagePreview = (msg) => {
 }
 
 // 打开对话框（单条或多条消息转发）
-const open = (msgs) => {
+const open = msgs => {
   messages.value = Array.isArray(msgs) ? msgs : [msgs]
   messageIds.value = []
   forwardType.value = 'batch'
@@ -187,7 +240,7 @@ const openForBatch = (msgIds, type) => {
 }
 
 // 选择会话
-const selectSession = (session) => {
+const selectSession = session => {
   selectedSessionId.value = session.id
 }
 

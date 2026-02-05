@@ -1,8 +1,9 @@
 ---
-title: 'RuoYi-IM 钉钉核心功能全面完善'
-slug: 'ruoyi-im-dingtalk-core-enhancement'
+title: 'RuoYi-IM 野火IM核心功能全面完善'
+slug: 'ruoyi-im-wildfire-core-enhancement'
 created: '2026-01-27T04:45:33Z'
 status: 'ready-for-dev'
+updated: '2026-02-05T00:00:00Z'
 stepsCompleted: [1, 2, 3, 4]
 tech_stack:
   - Vue 3.3.11
@@ -32,15 +33,15 @@ test_patterns:
   - WebRTC: 需要两端联调测试
 ---
 
-# Tech-Spec: RuoYi-IM 钉钉核心功能全面完善
+# Tech-Spec: RuoYi-IM 野火IM核心功能全面完善
 
-**Created:** 2026-01-27
+**Created:** 2026-01-27 | **Updated:** 2026-02-05
 
 ## Overview
 
 ### Problem Statement
 
-当前 RuoYi-IM 系统完成度约 70%，与钉钉核心功能存在显著差距。主要问题包括：
+当前 RuoYi-IM 系统完成度约 75%，参考野火IM标准，在核心交互和功能完整性上仍有提升空间。主要问题包括：
 
 1. **消息体验不完整**：缺少语音消息播放UI、链接卡片、发送状态反馈、失败重发机制
 2. **交互功能缺失**：缺少图片全屏预览、拖拽上传、粘贴上传、长按多选
@@ -50,7 +51,7 @@ test_patterns:
 
 ### Solution
 
-按照钉钉标准，分三个优先级阶段全面实现核心功能：
+参考野火IM的功能组织方式和交互体验，分三个优先级阶段全面实现核心功能：
 
 - **P0 阶段**：核心体验优化 - 消息状态管理、文件上传优化、预览功能
 - **P1 阶段**：重要功能完善 - 多选模式、合并转发、群文件、实时通话

@@ -6,11 +6,14 @@
     @dblclick="$emit('reset-height')"
   >
     <div class="resize-indicator">
-      <span class="resize-dots"></span>
+      <span class="resize-dots" />
     </div>
 
     <transition name="height-indicator">
-      <div v-if="isActive" class="height-indicator">
+      <div
+        v-if="isActive"
+        class="height-indicator"
+      >
         <span class="height-value">{{ displayHeight }}px</span>
         <span class="height-hint">拖拽调整高度</span>
       </div>

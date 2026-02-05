@@ -44,7 +44,7 @@ async function initDB() {
       resolve(db)
     }
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = event => {
       const database = event.target.result
 
       // 创建消息存储
@@ -141,7 +141,7 @@ async function clearConversationMessages(conversationId) {
 
     const deletePromises = []
 
-    request.onsuccess = (event) => {
+    request.onsuccess = event => {
       const cursor = event.target.result
       if (cursor) {
         deletePromises.push(cursor.delete())
@@ -248,7 +248,7 @@ export function useIndexedDB() {
   // 初始化
   initDB().then(() => {
     isReady.value = true
-  }).catch((err) => {
+  }).catch(err => {
     error.value = err
     console.error('IndexedDB 初始化失败:', err)
   })
@@ -275,7 +275,7 @@ export function useIndexedDB() {
   }
 
   // 缓存会话消息
-  const cacheMessages = async (messages) => {
+  const cacheMessages = async messages => {
     try {
       await putMessages(messages)
       console.log(`[IndexedDB] 缓存 ${messages.length} 条消息`)
@@ -285,7 +285,7 @@ export function useIndexedDB() {
   }
 
   // 缓存单条消息
-  const cacheSingleMessage = async (message) => {
+  const cacheSingleMessage = async message => {
     try {
       await putMessage(message)
     } catch (err) {
@@ -314,7 +314,7 @@ export function useIndexedDB() {
   }
 
   // 缓存会话列表
-  const cacheConversations = async (conversations) => {
+  const cacheConversations = async conversations => {
     try {
       await putConversations(conversations)
       console.log(`[IndexedDB] 缓存 ${conversations.length} 个会话`)
@@ -324,7 +324,7 @@ export function useIndexedDB() {
   }
 
   // 缓存单个会话
-  const cacheSingleConversation = async (conversation) => {
+  const cacheSingleConversation = async conversation => {
     try {
       await putConversation(conversation)
     } catch (err) {
@@ -333,7 +333,7 @@ export function useIndexedDB() {
   }
 
   // 删除会话
-  const removeConversation = async (conversationId) => {
+  const removeConversation = async conversationId => {
     try {
       await deleteConversation(conversationId)
       await clearConversationMessages(conversationId)

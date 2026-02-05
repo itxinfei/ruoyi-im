@@ -4,8 +4,16 @@
     :class="avatarClass"
     :style="{ width: size + 'px', height: size + 'px', fontSize: fontSize + 'px', backgroundColor: bgColor }"
   >
-    <img v-if="imageUrl && !imageError" :src="imageUrl" @error="handleImageError" class="avatar-img" />
-    <span v-else class="avatar-text">{{ displayName }}</span>
+    <img
+      v-if="imageUrl && !imageError"
+      :src="imageUrl"
+      class="avatar-img"
+      @error="handleImageError"
+    >
+    <span
+      v-else
+      class="avatar-text"
+    >{{ displayName }}</span>
   </div>
 </template>
 

@@ -1,22 +1,37 @@
 <template>
   <div class="friend-requests-panel">
     <template v-if="inline">
-      <div v-loading="loading" class="requests-list">
+      <div
+        v-loading="loading"
+        class="requests-list"
+      >
         <el-tabs v-model="activeTab">
-          <el-tab-pane label="收到的申请" name="received">
+          <el-tab-pane
+            label="收到的申请"
+            name="received"
+          >
             <div class="request-items">
               <div
                 v-for="request in receivedRequests"
                 :key="request.id"
                 class="request-item"
               >
-                <el-avatar :size="48" :src="addTokenToUrl(request.avatar)">
+                <el-avatar
+                  :size="48"
+                  :src="addTokenToUrl(request.avatar)"
+                >
                   {{ request.name?.charAt(0) }}
                 </el-avatar>
                 <div class="request-info">
-                  <div class="request-name">{{ request.name }}</div>
-                  <div class="request-message">{{ request.message || '请求添加你为好友' }}</div>
-                  <div class="request-time">{{ formatTime(request.createTime) }}</div>
+                  <div class="request-name">
+                    {{ request.name }}
+                  </div>
+                  <div class="request-message">
+                    {{ request.message || '请求添加你为好友' }}
+                  </div>
+                  <div class="request-time">
+                    {{ formatTime(request.createTime) }}
+                  </div>
                 </div>
                 <div class="request-actions">
                   <el-button
@@ -34,46 +49,84 @@
                   >
                     拒绝
                   </el-button>
-                  <el-tag v-if="request.status === 'ACCEPTED'" type="success" size="small">
+                  <el-tag
+                    v-if="request.status === 'ACCEPTED'"
+                    type="success"
+                    size="small"
+                  >
                     已接受
                   </el-tag>
-                  <el-tag v-if="request.status === 'REJECTED'" type="info" size="small">
+                  <el-tag
+                    v-if="request.status === 'REJECTED'"
+                    type="info"
+                    size="small"
+                  >
                     已拒绝
                   </el-tag>
                 </div>
               </div>
-              <el-empty v-if="receivedRequests.length === 0" description="暂无好友申请" />
+              <el-empty
+                v-if="receivedRequests.length === 0"
+                description="暂无好友申请"
+              />
             </div>
           </el-tab-pane>
 
-          <el-tab-pane label="发出的申请" name="sent">
+          <el-tab-pane
+            label="发出的申请"
+            name="sent"
+          >
             <div class="request-items">
               <div
                 v-for="request in sentRequests"
                 :key="request.id"
                 class="request-item"
               >
-                <el-avatar :size="48" :src="addTokenToUrl(request.avatar)">
+                <el-avatar
+                  :size="48"
+                  :src="addTokenToUrl(request.avatar)"
+                >
                   {{ request.name?.charAt(0) }}
                 </el-avatar>
                 <div class="request-info">
-                  <div class="request-name">{{ request.name }}</div>
-                  <div class="request-message">{{ request.message || '等待对方确认' }}</div>
-                  <div class="request-time">{{ formatTime(request.createTime) }}</div>
+                  <div class="request-name">
+                    {{ request.name }}
+                  </div>
+                  <div class="request-message">
+                    {{ request.message || '等待对方确认' }}
+                  </div>
+                  <div class="request-time">
+                    {{ formatTime(request.createTime) }}
+                  </div>
                 </div>
                 <div class="request-status">
-                  <el-tag v-if="request.status === 'PENDING'" type="warning" size="small">
+                  <el-tag
+                    v-if="request.status === 'PENDING'"
+                    type="warning"
+                    size="small"
+                  >
                     等待确认
                   </el-tag>
-                  <el-tag v-if="request.status === 'ACCEPTED'" type="success" size="small">
+                  <el-tag
+                    v-if="request.status === 'ACCEPTED'"
+                    type="success"
+                    size="small"
+                  >
                     已同意
                   </el-tag>
-                  <el-tag v-if="request.status === 'REJECTED'" type="danger" size="small">
+                  <el-tag
+                    v-if="request.status === 'REJECTED'"
+                    type="danger"
+                    size="small"
+                  >
                     已拒绝
                   </el-tag>
                 </div>
               </div>
-              <el-empty v-if="sentRequests.length === 0" description="暂无发出的申请" />
+              <el-empty
+                v-if="sentRequests.length === 0"
+                description="暂无发出的申请"
+              />
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -87,22 +140,37 @@
       :close-on-click-modal="true"
       @close="handleClose"
     >
-      <div v-loading="loading" class="requests-list">
+      <div
+        v-loading="loading"
+        class="requests-list"
+      >
         <el-tabs v-model="activeTab">
-          <el-tab-pane label="收到的申请" name="received">
+          <el-tab-pane
+            label="收到的申请"
+            name="received"
+          >
             <div class="request-items">
               <div
                 v-for="request in receivedRequests"
                 :key="request.id"
                 class="request-item"
               >
-                <el-avatar :size="48" :src="addTokenToUrl(request.avatar)">
+                <el-avatar
+                  :size="48"
+                  :src="addTokenToUrl(request.avatar)"
+                >
                   {{ request.name?.charAt(0) }}
                 </el-avatar>
                 <div class="request-info">
-                  <div class="request-name">{{ request.name }}</div>
-                  <div class="request-message">{{ request.message || '请求添加你为好友' }}</div>
-                  <div class="request-time">{{ formatTime(request.createTime) }}</div>
+                  <div class="request-name">
+                    {{ request.name }}
+                  </div>
+                  <div class="request-message">
+                    {{ request.message || '请求添加你为好友' }}
+                  </div>
+                  <div class="request-time">
+                    {{ formatTime(request.createTime) }}
+                  </div>
                 </div>
                 <div class="request-actions">
                   <el-button
@@ -120,46 +188,84 @@
                   >
                     拒绝
                   </el-button>
-                  <el-tag v-if="request.status === 'ACCEPTED'" type="success" size="small">
+                  <el-tag
+                    v-if="request.status === 'ACCEPTED'"
+                    type="success"
+                    size="small"
+                  >
                     已接受
                   </el-tag>
-                  <el-tag v-if="request.status === 'REJECTED'" type="info" size="small">
+                  <el-tag
+                    v-if="request.status === 'REJECTED'"
+                    type="info"
+                    size="small"
+                  >
                     已拒绝
                   </el-tag>
                 </div>
               </div>
-              <el-empty v-if="receivedRequests.length === 0" description="暂无好友申请" />
+              <el-empty
+                v-if="receivedRequests.length === 0"
+                description="暂无好友申请"
+              />
             </div>
           </el-tab-pane>
 
-          <el-tab-pane label="发出的申请" name="sent">
+          <el-tab-pane
+            label="发出的申请"
+            name="sent"
+          >
             <div class="request-items">
               <div
                 v-for="request in sentRequests"
                 :key="request.id"
                 class="request-item"
               >
-                <el-avatar :size="48" :src="request.avatar">
+                <el-avatar
+                  :size="48"
+                  :src="request.avatar"
+                >
                   {{ request.name?.charAt(0) }}
                 </el-avatar>
                 <div class="request-info">
-                  <div class="request-name">{{ request.name }}</div>
-                  <div class="request-message">{{ request.message || '等待对方确认' }}</div>
-                  <div class="request-time">{{ formatTime(request.createTime) }}</div>
+                  <div class="request-name">
+                    {{ request.name }}
+                  </div>
+                  <div class="request-message">
+                    {{ request.message || '等待对方确认' }}
+                  </div>
+                  <div class="request-time">
+                    {{ formatTime(request.createTime) }}
+                  </div>
                 </div>
                 <div class="request-status">
-                  <el-tag v-if="request.status === 'PENDING'" type="warning" size="small">
+                  <el-tag
+                    v-if="request.status === 'PENDING'"
+                    type="warning"
+                    size="small"
+                  >
                     等待确认
                   </el-tag>
-                  <el-tag v-if="request.status === 'ACCEPTED'" type="success" size="small">
+                  <el-tag
+                    v-if="request.status === 'ACCEPTED'"
+                    type="success"
+                    size="small"
+                  >
                     已同意
                   </el-tag>
-                  <el-tag v-if="request.status === 'REJECTED'" type="danger" size="small">
+                  <el-tag
+                    v-if="request.status === 'REJECTED'"
+                    type="danger"
+                    size="small"
+                  >
                     已拒绝
                   </el-tag>
                 </div>
               </div>
-              <el-empty v-if="sentRequests.length === 0" description="暂无发出的申请" />
+              <el-empty
+                v-if="sentRequests.length === 0"
+                description="暂无发出的申请"
+              />
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -213,7 +319,7 @@ const loadRequests = async () => {
 }
 
 // 接受申请
-const handleAccept = async (request) => {
+const handleAccept = async request => {
   try {
     await handleFriendRequest(request.id, true)
     request.status = 'ACCEPTED'
@@ -226,7 +332,7 @@ const handleAccept = async (request) => {
 }
 
 // 拒绝申请
-const handleReject = async (request) => {
+const handleReject = async request => {
   try {
     await handleFriendRequest(request.id, false)
     request.status = 'REJECTED'
@@ -246,14 +352,14 @@ const handleClose = () => {
 }
 
 // 监听显示状态
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     loadRequests()
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   if (!val) {
     emit('update:modelValue', false)
   }

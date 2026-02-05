@@ -9,8 +9,14 @@
     class="shortcuts-help-dialog"
   >
     <div class="shortcuts-container">
-      <div v-for="(group, index) in shortcutGroups" :key="index" class="shortcut-group">
-        <h4 class="group-title">{{ group.title }}</h4>
+      <div
+        v-for="(group, index) in shortcutGroups"
+        :key="index"
+        class="shortcut-group"
+      >
+        <h4 class="group-title">
+          {{ group.title }}
+        </h4>
         <div class="shortcuts-list">
           <div
             v-for="item in group.shortcuts"
@@ -36,7 +42,12 @@
     </div>
 
     <template #footer>
-      <el-button type="primary" @click="visible = false">知道了</el-button>
+      <el-button
+        type="primary"
+        @click="visible = false"
+      >
+        知道了
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -57,7 +68,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 /**

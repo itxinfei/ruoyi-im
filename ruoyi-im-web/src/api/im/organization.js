@@ -51,3 +51,41 @@ export function searchOrgMembers(params) {
         params
     })
 }
+
+/**
+ * 获取部门在线人数统计
+ * @param {number} deptId - 部门ID
+ * @returns {Promise}
+ */
+export function getDepartmentOnlineCount(deptId) {
+    return request({
+        url: `/api/im/organization/department/${deptId}/online-count`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取用户上级/下属关系
+ * @param {number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function getUserRelations(userId) {
+    return request({
+        url: `/api/im/organization/user/${userId}/relations`,
+        method: 'get'
+    })
+}
+
+/**
+ * 按部门搜索成员（支持模糊搜索部门名）
+ * @param {Object} params - 查询参数
+ * @param {string} params.keyword - 搜索关键词
+ * @returns {Promise}
+ */
+export function searchDepartmentMembers(params) {
+    return request({
+        url: '/api/im/organization/department/search-members',
+        method: 'get',
+        params
+    })
+}

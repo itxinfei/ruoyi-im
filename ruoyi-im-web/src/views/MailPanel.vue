@@ -1,28 +1,33 @@
 <template>
   <div class="mail-panel">
     <div class="panel-header">
-      <h2 class="panel-title">邮箱</h2>
+      <h2 class="panel-title">
+        邮箱
+      </h2>
       <div class="header-actions">
         <!-- 视图切换按钮 -->
         <div class="view-toggle">
           <button
             class="view-btn"
             :class="{ active: viewMode === 'list' }"
-            @click="setViewMode('list')"
             title="列表模式"
+            @click="setViewMode('list')"
           >
             <span class="material-icons-outlined">view_list</span>
           </button>
           <button
             class="view-btn"
             :class="{ active: viewMode === 'preview' }"
-            @click="setViewMode('preview')"
             title="预览模式"
+            @click="setViewMode('preview')"
           >
             <span class="material-icons-outlined">view_column</span>
           </button>
         </div>
-        <button class="compose-btn" @click="openComposeDialog">
+        <button
+          class="compose-btn"
+          @click="openComposeDialog"
+        >
           <span class="material-icons-outlined">edit</span>
           写邮件
         </button>
@@ -30,7 +35,10 @@
     </div>
 
     <div class="panel-content">
-      <div class="mail-layout" :class="`layout-${viewMode}`">
+      <div
+        class="mail-layout"
+        :class="`layout-${viewMode}`"
+      >
         <!-- 邮箱文件夹列表 -->
         <div class="mail-folders">
           <div
@@ -42,7 +50,10 @@
           >
             <span class="material-icons-outlined folder-icon">{{ folder.icon }}</span>
             <span class="folder-label">{{ folder.label }}</span>
-            <span v-if="folder.unreadCount > 0" class="folder-count">{{ folder.unreadCount }}</span>
+            <span
+              v-if="folder.unreadCount > 0"
+              class="folder-count"
+            >{{ folder.unreadCount }}</span>
           </div>
         </div>
 
@@ -55,45 +66,87 @@
               placeholder="搜索邮件..."
               :prefix-icon="Search"
               clearable
+              class="search-input"
               @clear="handleSearch"
               @keyup.enter="handleSearch"
-              class="search-input"
             >
               <template #append>
-                <el-button :icon="Search" @click="handleSearch">搜索</el-button>
+                <el-button
+                  :icon="Search"
+                  @click="handleSearch"
+                >
+                  搜索
+                </el-button>
               </template>
             </el-input>
           </div>
 
           <!-- 批量操作工具栏 -->
-          <div v-if="selectedEmails.length > 0" class="batch-toolbar">
+          <div
+            v-if="selectedEmails.length > 0"
+            class="batch-toolbar"
+          >
             <div class="selection-info">
               已选择 {{ selectedEmails.length }} 封邮件
             </div>
             <div class="batch-actions">
-              <el-button size="small" @click="batchMarkRead">标为已读</el-button>
-              <el-button size="small" @click="batchMarkUnread">标为未读</el-button>
-              <el-dropdown @command="handleBatchMove" trigger="click">
+              <el-button
+                size="small"
+                @click="batchMarkRead"
+              >
+                标为已读
+              </el-button>
+              <el-button
+                size="small"
+                @click="batchMarkUnread"
+              >
+                标为未读
+              </el-button>
+              <el-dropdown
+                trigger="click"
+                @command="handleBatchMove"
+              >
                 <el-button size="small">
                   移动到 <span class="material-icons-outlined">expand_more</span>
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="INBOX">收件箱</el-dropdown-item>
-                    <el-dropdown-item command="STARRED">星标邮件</el-dropdown-item>
-                    <el-dropdown-item command="TRASH">已删除</el-dropdown-item>
+                    <el-dropdown-item command="INBOX">
+                      收件箱
+                    </el-dropdown-item>
+                    <el-dropdown-item command="STARRED">
+                      星标邮件
+                    </el-dropdown-item>
+                    <el-dropdown-item command="TRASH">
+                      已删除
+                    </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-              <el-button size="small" type="danger" @click="batchDelete">删除</el-button>
-              <el-button size="small" link @click="clearSelection">取消选择</el-button>
+              <el-button
+                size="small"
+                type="danger"
+                @click="batchDelete"
+              >
+                删除
+              </el-button>
+              <el-button
+                size="small"
+                link
+                @click="clearSelection"
+              >
+                取消选择
+              </el-button>
             </div>
           </div>
 
           <!-- 邮件列表 -->
           <div class="mail-list">
             <!-- 列表头部 (全选) -->
-            <div v-if="emails.length > 0" class="email-list-header">
+            <div
+              v-if="emails.length > 0"
+              class="email-list-header"
+            >
               <el-checkbox
                 v-model="selectAll"
                 :indeterminate="isIndeterminate"
@@ -104,17 +157,30 @@
               <span class="list-count">{{ emails.length }} 封邮件</span>
             </div>
 
-            <div v-if="loading" class="loading-state">
-              <el-icon class="is-loading"><Loading /></el-icon>
+            <div
+              v-if="loading"
+              class="loading-state"
+            >
+              <el-icon class="is-loading">
+                <Loading />
+              </el-icon>
               <span>加载中...</span>
             </div>
 
-            <div v-else-if="emails.length === 0" class="empty-state">
+            <div
+              v-else-if="emails.length === 0"
+              class="empty-state"
+            >
               <span class="material-icons-outlined empty-icon">{{ searchKeyword ? 'search_off' : 'email' }}</span>
-              <p class="empty-text">{{ searchKeyword ? '未找到相关邮件' : '暂无邮件' }}</p>
+              <p class="empty-text">
+                {{ searchKeyword ? '未找到相关邮件' : '暂无邮件' }}
+              </p>
             </div>
 
-            <div v-else class="email-list">
+            <div
+              v-else
+              class="email-list"
+            >
               <div
                 v-for="email in emails"
                 :key="email.id"
@@ -133,26 +199,40 @@
                   @update:model-value="(checked) => toggleSelection(email.id, checked)"
                   @click.stop
                 />
-                <div class="email-avatar" :style="{ background: email.avatarColor }">
+                <div
+                  class="email-avatar"
+                  :style="{ background: email.avatarColor }"
+                >
                   {{ email.sender?.charAt(0) || '?' }}
                 </div>
                 <div class="email-content">
                   <div class="email-subject">
-                    <span v-if="email.starred" class="material-icons-outlined star-icon">star</span>
+                    <span
+                      v-if="email.starred"
+                      class="material-icons-outlined star-icon"
+                    >star</span>
                     {{ email.subject }}
                   </div>
-                  <div class="email-preview">{{ email.preview }}</div>
+                  <div class="email-preview">
+                    {{ email.preview }}
+                  </div>
                   <div class="email-meta">
                     <span class="email-sender">{{ email.sender }}</span>
                     <span class="email-time">{{ email.time }}</span>
                   </div>
                 </div>
-                <div v-if="!email.read" class="unread-dot"></div>
+                <div
+                  v-if="!email.read"
+                  class="unread-dot"
+                />
               </div>
             </div>
 
             <!-- 分页 -->
-            <div v-if="totalCount > pageSize" class="pagination-wrapper">
+            <div
+              v-if="totalCount > pageSize"
+              class="pagination-wrapper"
+            >
               <el-pagination
                 v-model:current-page="currentPage"
                 :page-size="pageSize"
@@ -166,40 +246,62 @@
         </div>
 
         <!-- 邮件预览面板 -->
-        <div v-if="viewMode === 'preview'" class="mail-preview-panel" :class="{ 'mobile-show': showMobilePreview }">
+        <div
+          v-if="viewMode === 'preview'"
+          class="mail-preview-panel"
+          :class="{ 'mobile-show': showMobilePreview }"
+        >
           <!-- 移动端返回按钮 -->
           <div class="mobile-back-header">
-            <button class="back-btn" @click="closeMobilePreview">
+            <button
+              class="back-btn"
+              @click="closeMobilePreview"
+            >
               <span class="material-icons-outlined">arrow_back</span>
               <span>返回列表</span>
             </button>
-            <button class="close-btn" @click="closeMobilePreview">
+            <button
+              class="close-btn"
+              @click="closeMobilePreview"
+            >
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
 
-          <div v-if="previewEmail" class="preview-content">
+          <div
+            v-if="previewEmail"
+            class="preview-content"
+          >
             <!-- 预览头部 -->
             <div class="preview-header">
               <div class="preview-title-row">
-                <h3 class="preview-subject">{{ previewEmail.subject }}</h3>
+                <h3 class="preview-subject">
+                  {{ previewEmail.subject }}
+                </h3>
                 <div class="preview-actions">
                   <button
                     class="icon-btn"
                     :class="{ active: previewEmail.starred }"
-                    @click="handlePreviewStar"
                     title="星标"
+                    @click="handlePreviewStar"
                   >
                     <span class="material-icons-outlined">{{ previewEmail.starred ? 'star' : 'star_border' }}</span>
                   </button>
-                  <button class="icon-btn" @click="openDetailDialog" title="查看详情">
+                  <button
+                    class="icon-btn"
+                    title="查看详情"
+                    @click="openDetailDialog"
+                  >
                     <span class="material-icons-outlined">open_in_full</span>
                   </button>
                 </div>
               </div>
               <div class="preview-meta">
                 <span class="preview-time">{{ previewEmail.time }}</span>
-                <span v-if="previewEmail.cc?.length" class="preview-cc">
+                <span
+                  v-if="previewEmail.cc?.length"
+                  class="preview-cc"
+                >
                   抄送: {{ previewEmail.cc.join(', ') }}
                 </span>
               </div>
@@ -207,12 +309,19 @@
 
             <!-- 发件人信息 -->
             <div class="preview-sender">
-              <div class="sender-avatar" :style="{ background: previewEmail.avatarColor }">
+              <div
+                class="sender-avatar"
+                :style="{ background: previewEmail.avatarColor }"
+              >
                 {{ previewEmail.sender?.charAt(0) || '?' }}
               </div>
               <div class="sender-info">
-                <div class="sender-name">{{ previewEmail.sender }}</div>
-                <div class="sender-email">{{ previewEmail.senderEmail || previewEmail.sender }}</div>
+                <div class="sender-name">
+                  {{ previewEmail.sender }}
+                </div>
+                <div class="sender-email">
+                  {{ previewEmail.senderEmail || previewEmail.sender }}
+                </div>
               </div>
             </div>
 
@@ -224,7 +333,10 @@
             </div>
 
             <!-- 附件 -->
-            <div v-if="previewEmail.attachments?.length" class="preview-attachments">
+            <div
+              v-if="previewEmail.attachments?.length"
+              class="preview-attachments"
+            >
               <div class="attachments-header">
                 <span class="material-icons-outlined">attach_file</span>
                 <span>附件 ({{ previewEmail.attachments.length }})</span>
@@ -235,15 +347,18 @@
                   :key="index"
                   class="attachment-item"
                 >
-                  <span class="material-icons-outlined file-icon" :style="{ color: getFileIconColor(file.name) }">
+                  <span
+                    class="material-icons-outlined file-icon"
+                    :style="{ color: getFileIconColor(file.name) }"
+                  >
                     {{ getFileIcon(file.name) }}
                   </span>
                   <span class="file-name">{{ file.name }}</span>
                   <span class="file-size">{{ formatFileSize(file.size) }}</span>
                   <button
                     class="download-btn"
-                    @click="downloadAttachment(file)"
                     title="下载"
+                    @click="downloadAttachment(file)"
                   >
                     <span class="material-icons-outlined">download</span>
                   </button>
@@ -253,32 +368,41 @@
 
             <!-- 预览操作栏 -->
             <div class="preview-toolbar">
-              <button class="toolbar-btn primary" @click="handlePreviewReply">
+              <button
+                class="toolbar-btn primary"
+                @click="handlePreviewReply"
+              >
                 <span class="material-icons-outlined">reply</span>
                 <span>回复</span>
               </button>
-              <button class="toolbar-btn" @click="handlePreviewForward">
+              <button
+                class="toolbar-btn"
+                @click="handlePreviewForward"
+              >
                 <span class="material-icons-outlined">forward</span>
                 <span>转发</span>
               </button>
-              <button class="toolbar-btn danger" @click="handlePreviewDelete">
+              <button
+                class="toolbar-btn danger"
+                @click="handlePreviewDelete"
+              >
                 <span class="material-icons-outlined">delete</span>
                 <span>删除</span>
               </button>
-              <div class="toolbar-spacer"></div>
+              <div class="toolbar-spacer" />
               <button
                 v-if="hasPrevPreview"
                 class="toolbar-btn icon-only"
-                @click="showPrevPreview"
                 title="上一封"
+                @click="showPrevPreview"
               >
                 <span class="material-icons-outlined">chevron_left</span>
               </button>
               <button
                 v-if="hasNextPreview"
                 class="toolbar-btn icon-only"
-                @click="showNextPreview"
                 title="下一封"
+                @click="showNextPreview"
               >
                 <span class="material-icons-outlined">chevron_right</span>
               </button>
@@ -286,10 +410,17 @@
           </div>
 
           <!-- 空状态 -->
-          <div v-else class="preview-empty">
+          <div
+            v-else
+            class="preview-empty"
+          >
             <span class="material-icons-outlined empty-icon">email</span>
-            <p class="empty-text">选择一封邮件预览</p>
-            <p class="empty-hint">点击邮件列表中的邮件查看详情</p>
+            <p class="empty-text">
+              选择一封邮件预览
+            </p>
+            <p class="empty-hint">
+              点击邮件列表中的邮件查看详情
+            </p>
           </div>
         </div>
       </div>
@@ -391,7 +522,7 @@ const isIndeterminate = computed(() => {
 })
 
 // 切换文件夹
-const switchFolder = (folderKey) => {
+const switchFolder = folderKey => {
   if (activeFolder.value !== folderKey) {
     activeFolder.value = folderKey
     currentPage.value = 1
@@ -467,7 +598,7 @@ const openComposeDialog = () => {
 }
 
 // 查看邮件
-const handleViewEmail = async (email) => {
+const handleViewEmail = async email => {
   // 标记为已读
   if (!email.read) {
     try {
@@ -522,7 +653,7 @@ const toggleSelection = (emailId, checked) => {
 }
 
 // 全选/取消全选
-const handleSelectAll = (checked) => {
+const handleSelectAll = checked => {
   if (checked) {
     selectedEmails.value = emails.value.map(e => e.id)
   } else {
@@ -538,7 +669,7 @@ const clearSelection = () => {
 
 // 批量标记已读
 const batchMarkRead = async () => {
-  if (selectedEmails.value.length === 0) return
+  if (selectedEmails.value.length === 0) {return}
   try {
     const res = await markAsRead(selectedEmails.value)
     if (res.code === 200) {
@@ -559,7 +690,7 @@ const batchMarkRead = async () => {
 
 // 批量标记未读
 const batchMarkUnread = async () => {
-  if (selectedEmails.value.length === 0) return
+  if (selectedEmails.value.length === 0) {return}
   try {
     const res = await markAsUnread(selectedEmails.value)
     if (res.code === 200) {
@@ -579,8 +710,8 @@ const batchMarkUnread = async () => {
 }
 
 // 批量移动
-const handleBatchMove = async (targetFolder) => {
-  if (selectedEmails.value.length === 0) return
+const handleBatchMove = async targetFolder => {
+  if (selectedEmails.value.length === 0) {return}
   try {
     const res = await moveToFolder(selectedEmails.value, targetFolder)
     if (res.code === 200) {
@@ -599,7 +730,7 @@ const handleBatchMove = async (targetFolder) => {
 
 // 批量删除
 const batchDelete = async () => {
-  if (selectedEmails.value.length === 0) return
+  if (selectedEmails.value.length === 0) {return}
   try {
     await ElMessageBox.confirm(`确定要删除选中的 ${selectedEmails.value.length} 封邮件吗？`, '确认删除', {
       type: 'warning'
@@ -620,7 +751,7 @@ const batchDelete = async () => {
 }
 
 // 回复邮件
-const handleReply = (email) => {
+const handleReply = email => {
   replyToEmail.value = {
     id: email.id,
     senderId: email.senderId,
@@ -633,7 +764,7 @@ const handleReply = (email) => {
 }
 
 // 转发邮件
-const handleForward = (email) => {
+const handleForward = email => {
   replyToEmail.value = {
     id: email.id,
     subject: `Fwd: ${email.subject}`,
@@ -646,7 +777,7 @@ const handleForward = (email) => {
 }
 
 // 删除邮件
-const handleDeleteEmail = async (email) => {
+const handleDeleteEmail = async email => {
   try {
     await ElMessageBox.confirm('确定要删除这封邮件吗？', '确认删除', {
       type: 'warning'
@@ -690,7 +821,7 @@ const showNextEmail = () => {
 }
 
 // 页码变更
-const handlePageChange = (page) => {
+const handlePageChange = page => {
   currentPage.value = page
   selectedEmails.value = []
   loadMails()
@@ -714,7 +845,7 @@ onMounted(() => {
 // ==================== 预览面板相关方法 ====================
 
 // 设置视图模式
-const setViewMode = (mode) => {
+const setViewMode = mode => {
   viewMode.value = mode
   if (mode === 'list') {
     previewEmail.value = null
@@ -722,7 +853,7 @@ const setViewMode = (mode) => {
 }
 
 // 获取文件图标
-const getFileIcon = (fileName) => {
+const getFileIcon = fileName => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || ''
   const iconMap = {
     jpg: 'image', jpeg: 'image', png: 'image', gif: 'image', bmp: 'image', svg: 'image', webp: 'image',
@@ -739,7 +870,7 @@ const getFileIcon = (fileName) => {
 }
 
 // 获取文件图标颜色
-const getFileIconColor = (fileName) => {
+const getFileIconColor = fileName => {
   const ext = fileName?.split('.').pop()?.toLowerCase() || ''
   const colorMap = {
     jpg: '#722ed1', jpeg: '#722ed1', png: '#722ed1', gif: '#722ed1', bmp: '#722ed1',
@@ -755,8 +886,8 @@ const getFileIconColor = (fileName) => {
 }
 
 // 格式化文件大小
-const formatFileSize = (bytes) => {
-  if (!bytes || bytes === 0) return '0 B'
+const formatFileSize = bytes => {
+  if (!bytes || bytes === 0) {return '0 B'}
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -764,7 +895,7 @@ const formatFileSize = (bytes) => {
 }
 
 // 下载附件
-const downloadAttachment = async (file) => {
+const downloadAttachment = async file => {
   try {
     const { downloadAttachment: downloadApi } = await import('@/api/im/mail')
     const blob = await downloadApi(file.id)
@@ -785,7 +916,7 @@ const downloadAttachment = async (file) => {
 
 // 预览面板星标操作
 const handlePreviewStar = async () => {
-  if (!previewEmail.value) return
+  if (!previewEmail.value) {return}
   try {
     const newStarred = !previewEmail.value.starred
     const res = await starMail(previewEmail.value.id, newStarred)
@@ -793,7 +924,7 @@ const handlePreviewStar = async () => {
       previewEmail.value.starred = newStarred
       // 同时更新列表中的状态
       const email = emails.value.find(e => e.id === previewEmail.value.id)
-      if (email) email.starred = newStarred
+      if (email) {email.starred = newStarred}
       ElMessage.success(newStarred ? '已标星' : '已取消标星')
     }
   } catch (error) {
@@ -810,7 +941,7 @@ const openDetailDialog = () => {
 
 // 预览面板回复
 const handlePreviewReply = () => {
-  if (!previewEmail.value) return
+  if (!previewEmail.value) {return}
   replyToEmail.value = {
     id: previewEmail.value.id,
     senderId: previewEmail.value.senderId,
@@ -823,7 +954,7 @@ const handlePreviewReply = () => {
 
 // 预览面板转发
 const handlePreviewForward = () => {
-  if (!previewEmail.value) return
+  if (!previewEmail.value) {return}
   replyToEmail.value = {
     id: previewEmail.value.id,
     subject: `Fwd: ${previewEmail.value.subject}`,
@@ -836,7 +967,7 @@ const handlePreviewForward = () => {
 
 // 预览面板删除
 const handlePreviewDelete = async () => {
-  if (!previewEmail.value) return
+  if (!previewEmail.value) {return}
   try {
     await ElMessageBox.confirm('确定要删除这封邮件吗？', '确认删除', {
       type: 'warning'
@@ -880,7 +1011,7 @@ const showNextPreview = () => {
 }
 
 // 选择邮件进行预览
-const selectEmailForPreview = async (email) => {
+const selectEmailForPreview = async email => {
   previewEmail.value = email
   // 标记为已读
   if (!email.read) {

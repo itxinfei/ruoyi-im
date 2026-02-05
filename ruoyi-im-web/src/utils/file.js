@@ -10,7 +10,7 @@ import { parseContentString } from './message'
  * @returns {String} 带token的URL
  */
 export function addTokenToUrl(url) {
-    if (!url) return ''
+    if (!url) {return ''}
 
     // 如果是完整的http/https URL且不是本域名，直接返回（外部资源）
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -48,7 +48,7 @@ export function addTokenToUrl(url) {
  * @returns {Array} 带token的URL数组
  */
 export function addTokenToUrls(urls) {
-    if (!Array.isArray(urls)) return []
+    if (!Array.isArray(urls)) {return []}
     return urls.map(url => addTokenToUrl(url))
 }
 
@@ -86,7 +86,7 @@ const URL_REGEX = /(https?:\/\/[^\s<>{}|^`[\]\\]+)/g
  * @returns {Array<string>} - 提取到的 URL 数组
  */
 export function extractUrls(text) {
-    if (!text || typeof text !== 'string') return []
+    if (!text || typeof text !== 'string') {return []}
 
     const urls = []
     let match
@@ -107,7 +107,7 @@ export function extractUrls(text) {
  * @returns {boolean} - 是否包含 URL
  */
 export function hasUrl(text) {
-    if (!text || typeof text !== 'string') return false
+    if (!text || typeof text !== 'string') {return false}
     URL_REGEX.lastIndex = 0
     return URL_REGEX.test(text)
 }

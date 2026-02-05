@@ -45,7 +45,7 @@ export function useMessageTransformation(options = {}) {
    * @param {Object} message - 原始消息对象
    * @returns {string}
    */
-  const getMessageType = (message) => {
+  const getMessageType = message => {
     return message.type || message.messageType || 'TEXT'
   }
 
@@ -79,7 +79,7 @@ export function useMessageTransformation(options = {}) {
    * @param {Object} message - 原始消息对象
    * @returns {number}
    */
-  const normalizeTimestamp = (message) => {
+  const normalizeTimestamp = message => {
     return message.sendTime || message.createTime || message.timestamp || Date.now()
   }
 
@@ -121,7 +121,7 @@ export function useMessageTransformation(options = {}) {
    * @returns {Array} 转换后的消息数组
    */
   const transformMessageList = (rawMessages, localMessages = []) => {
-    if (!Array.isArray(rawMessages)) return []
+    if (!Array.isArray(rawMessages)) {return []}
     return rawMessages.map(msg => transformMsg(msg, localMessages))
   }
 
@@ -159,10 +159,10 @@ export function useMessageTransformation(options = {}) {
    */
   const tempMessageFactories = {
     // 文本消息
-    text: (content) => createTempMessage({ type: 'TEXT', content }),
+    text: content => createTempMessage({ type: 'TEXT', content }),
 
     // 图片消息
-    image: (imageUrl) => createTempMessage({
+    image: imageUrl => createTempMessage({
       type: 'IMAGE',
       content: { imageUrl }
     }),

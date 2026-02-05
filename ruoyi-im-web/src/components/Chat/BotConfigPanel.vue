@@ -3,11 +3,38 @@
     <div class="panel-header">
       <div class="header-left">
         <div class="bot-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
-            <circle cx="9" cy="10" r="1.5" fill="currentColor"/>
-            <circle cx="15" cy="10" r="1.5" fill="currentColor"/>
-            <path d="M9 15C9 15 10.5 16 12 16C13.5 16 15 15 15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="3"
+              y="3"
+              width="18"
+              height="18"
+              rx="2"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <circle
+              cx="9"
+              cy="10"
+              r="1.5"
+              fill="currentColor"
+            />
+            <circle
+              cx="15"
+              cy="10"
+              r="1.5"
+              fill="currentColor"
+            />
+            <path
+              d="M9 15C9 15 10.5 16 12 16C13.5 16 15 15 15 15"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </div>
         <span class="panel-title">群机器人</span>
@@ -24,17 +51,36 @@
     </div>
 
     <div class="panel-content">
-      <div v-if="bots.length === 0" class="empty-state">
+      <div
+        v-if="bots.length === 0"
+        class="empty-state"
+      >
         <div class="empty-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#e5e7eb"/>
-            <circle cx="12" cy="16" r="6" stroke="#e5e7eb" stroke-width="2"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2L2 7L12 12L22 7L12 2Z"
+              fill="#e5e7eb"
+            />
+            <circle
+              cx="12"
+              cy="16"
+              r="6"
+              stroke="#e5e7eb"
+              stroke-width="2"
+            />
           </svg>
         </div>
         <p>暂无机器人，点击"添加机器人"创建</p>
       </div>
 
-      <div v-else class="bot-list">
+      <div
+        v-else
+        class="bot-list"
+      >
         <div
           v-for="bot in bots"
           :key="bot.id"
@@ -62,7 +108,12 @@
                   @change="handleToggleBot(bot)"
                 />
               </div>
-              <p v-if="bot.description" class="bot-description">{{ bot.description }}</p>
+              <p
+                v-if="bot.description"
+                class="bot-description"
+              >
+                {{ bot.description }}
+              </p>
               <div class="bot-stats">
                 <span>{{ bot.ruleCount || 0 }} 条规则</span>
               </div>
@@ -70,10 +121,16 @@
           </div>
           <div class="bot-actions">
             <el-button-group>
-              <el-button size="small" @click="handleEditBot(bot)">
+              <el-button
+                size="small"
+                @click="handleEditBot(bot)"
+              >
                 编辑
               </el-button>
-              <el-button size="small" @click="handleManageRules(bot)">
+              <el-button
+                size="small"
+                @click="handleManageRules(bot)"
+              >
                 规则
               </el-button>
               <el-button
@@ -102,7 +159,10 @@
         :rules="botRules"
         label-width="100px"
       >
-        <el-form-item label="机器人名称" prop="botName">
+        <el-form-item
+          label="机器人名称"
+          prop="botName"
+        >
           <el-input
             v-model="botForm.botName"
             placeholder="请输入机器人名称"
@@ -111,11 +171,20 @@
           />
         </el-form-item>
 
-        <el-form-item label="机器人类型" prop="botType">
+        <el-form-item
+          label="机器人类型"
+          prop="botType"
+        >
           <el-radio-group v-model="botForm.botType">
-            <el-radio label="SERVICE">客服机器人</el-radio>
-            <el-radio label="NOTIFY">通知机器人</el-radio>
-            <el-radio label="MANAGE">管理机器人</el-radio>
+            <el-radio label="SERVICE">
+              客服机器人
+            </el-radio>
+            <el-radio label="NOTIFY">
+              通知机器人
+            </el-radio>
+            <el-radio label="MANAGE">
+              管理机器人
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -125,8 +194,17 @@
             :show-file-list="false"
             :before-upload="beforeAvatarUpload"
           >
-            <img v-if="botForm.avatar" :src="botForm.avatar" class="avatar-preview" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            <img
+              v-if="botForm.avatar"
+              :src="botForm.avatar"
+              class="avatar-preview"
+            >
+            <el-icon
+              v-else
+              class="avatar-uploader-icon"
+            >
+              <Plus />
+            </el-icon>
           </el-upload>
         </el-form-item>
 
@@ -142,7 +220,9 @@
         </el-form-item>
 
         <!-- 规则列表 -->
-        <el-divider content-position="left">触发规则</el-divider>
+        <el-divider content-position="left">
+          触发规则
+        </el-divider>
 
         <div class="rules-list">
           <div
@@ -169,9 +249,19 @@
               />
             </el-form-item>
             <el-form-item label="触发类型">
-              <el-select v-model="rule.triggerType" size="small" style="width: 100%">
-                <el-option label="关键词触发" value="KEYWORD" />
-                <el-option label="命令触发" value="COMMAND" />
+              <el-select
+                v-model="rule.triggerType"
+                size="small"
+                style="width: 100%"
+              >
+                <el-option
+                  label="关键词触发"
+                  value="KEYWORD"
+                />
+                <el-option
+                  label="命令触发"
+                  value="COMMAND"
+                />
               </el-select>
             </el-form-item>
             <el-form-item label="触发内容">
@@ -182,10 +272,19 @@
               />
             </el-form-item>
             <el-form-item label="匹配模式">
-              <el-radio-group v-model="rule.matchMode" size="small">
-                <el-radio label="EXACT">精确匹配</el-radio>
-                <el-radio label="CONTAINS">包含匹配</el-radio>
-                <el-radio label="REGEX">正则表达式</el-radio>
+              <el-radio-group
+                v-model="rule.matchMode"
+                size="small"
+              >
+                <el-radio label="EXACT">
+                  精确匹配
+                </el-radio>
+                <el-radio label="CONTAINS">
+                  包含匹配
+                </el-radio>
+                <el-radio label="REGEX">
+                  正则表达式
+                </el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="回复内容">
@@ -209,15 +308,24 @@
           </div>
         </div>
 
-        <el-button @click="addRule" style="width: 100%">
+        <el-button
+          style="width: 100%"
+          @click="addRule"
+        >
           <el-icon><Plus /></el-icon>
           添加规则
         </el-button>
       </el-form>
 
       <template #footer>
-        <el-button @click="handleCloseBotDialog">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmitBot">
+        <el-button @click="handleCloseBotDialog">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmitBot"
+        >
           {{ editingBot ? '保存' : '创建' }}
         </el-button>
       </template>
@@ -231,30 +339,64 @@
     >
       <div class="rules-manage">
         <div class="rules-manage-header">
-          <el-button type="primary" size="small" @click="handleAddRule">
+          <el-button
+            type="primary"
+            size="small"
+            @click="handleAddRule"
+          >
             添加规则
           </el-button>
         </div>
-        <el-table :data="currentBotRules" style="width: 100%">
-          <el-table-column prop="ruleName" label="规则名称" width="120" />
-          <el-table-column prop="triggerType" label="触发类型" width="100">
+        <el-table
+          :data="currentBotRules"
+          style="width: 100%"
+        >
+          <el-table-column
+            prop="ruleName"
+            label="规则名称"
+            width="120"
+          />
+          <el-table-column
+            prop="triggerType"
+            label="触发类型"
+            width="100"
+          >
             <template #default="{ row }">
               <el-tag size="small">
                 {{ row.triggerType === 'KEYWORD' ? '关键词' : '命令' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="triggerContent" label="触发内容" />
-          <el-table-column prop="matchMode" label="匹配模式" width="100">
+          <el-table-column
+            prop="triggerContent"
+            label="触发内容"
+          />
+          <el-table-column
+            prop="matchMode"
+            label="匹配模式"
+            width="100"
+          >
             <template #default="{ row }">
               <span v-if="row.matchMode === 'EXACT'">精确</span>
               <span v-else-if="row.matchMode === 'CONTAINS'">包含</span>
               <span v-else>正则</span>
             </template>
           </el-table-column>
-          <el-table-column prop="replyContent" label="回复内容" show-overflow-tooltip />
-          <el-table-column prop="priority" label="优先级" width="80" />
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column
+            prop="replyContent"
+            label="回复内容"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="priority"
+            label="优先级"
+            width="80"
+          />
+          <el-table-column
+            label="操作"
+            width="150"
+            fixed="right"
+          >
             <template #default="{ row }">
               <el-button
                 type="primary"
@@ -345,7 +487,7 @@ const loadBots = async () => {
   }
 }
 
-const botTypeLabel = (type) => {
+const botTypeLabel = type => {
   const map = {
     'SERVICE': '客服',
     'NOTIFY': '通知',
@@ -366,7 +508,7 @@ const handleCreateBot = () => {
 }
 
 // 编辑机器人
-const handleEditBot = (bot) => {
+const handleEditBot = bot => {
   editingBot.value = bot
   botForm.botName = bot.botName
   botForm.botType = bot.botType
@@ -420,7 +562,7 @@ const handleCloseBotDialog = () => {
 }
 
 // 切换机器人状态
-const handleToggleBot = async (bot) => {
+const handleToggleBot = async bot => {
   try {
     await setBotEnabled(bot.id, !bot.isEnabled)
     ElMessage.success(bot.isEnabled ? '机器人已禁用' : '机器人已启用')
@@ -431,7 +573,7 @@ const handleToggleBot = async (bot) => {
 }
 
 // 删除机器人
-const handleDeleteBot = async (bot) => {
+const handleDeleteBot = async bot => {
   try {
     await ElMessageBox.confirm(
       `确定要删除机器人"${bot.botName}"吗？`,
@@ -450,7 +592,7 @@ const handleDeleteBot = async (bot) => {
 }
 
 // 管理规则
-const handleManageRules = async (bot) => {
+const handleManageRules = async bot => {
   currentBot.value = bot
   // 加载机器人详情以获取规则
   try {
@@ -481,12 +623,12 @@ const addRule = () => {
 }
 
 // 删除规则
-const removeRule = (index) => {
+const removeRule = index => {
   botForm.rules.splice(index, 1)
 }
 
 // 头像上传
-const beforeAvatarUpload = (file) => {
+const beforeAvatarUpload = file => {
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
@@ -501,7 +643,7 @@ const beforeAvatarUpload = (file) => {
 
   // 这里应该调用上传API，暂时使用本地预览
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = e => {
     botForm.avatar = e.target.result
   }
   reader.readAsDataURL(file)

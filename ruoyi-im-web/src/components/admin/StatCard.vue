@@ -6,7 +6,11 @@
   >
     <div class="stat-card__content">
       <!-- 图标 -->
-      <div v-if="icon || $slots.icon" class="stat-card__icon" :style="{ backgroundColor: iconColor }">
+      <div
+        v-if="icon || $slots.icon"
+        class="stat-card__icon"
+        :style="{ backgroundColor: iconColor }"
+      >
         <slot name="icon">
           <el-icon :size="iconSize">
             <component :is="icon" />
@@ -16,16 +20,28 @@
 
       <!-- 内容 -->
       <div class="stat-card__info">
-        <div class="stat-card__title">{{ title }}</div>
+        <div class="stat-card__title">
+          {{ title }}
+        </div>
         <div class="stat-card__value">
-          <span v-if="loading" class="stat-card__skeleton">--</span>
+          <span
+            v-if="loading"
+            class="stat-card__skeleton"
+          >--</span>
           <template v-else>
             <span class="stat-card__number">{{ formattedValue }}</span>
-            <span v-if="unit" class="stat-card__unit">{{ unit }}</span>
+            <span
+              v-if="unit"
+              class="stat-card__unit"
+            >{{ unit }}</span>
           </template>
         </div>
         <!-- 趋势 -->
-        <div v-if="trend !== undefined && !loading" class="stat-card__trend" :class="trendClass">
+        <div
+          v-if="trend !== undefined && !loading"
+          class="stat-card__trend"
+          :class="trendClass"
+        >
           <el-icon>
             <ArrowUp v-if="trend > 0" />
             <ArrowDown v-else-if="trend < 0" />
@@ -36,7 +52,10 @@
       </div>
 
       <!-- 额外信息 -->
-      <div v-if="$slots.extra" class="stat-card__extra">
+      <div
+        v-if="$slots.extra"
+        class="stat-card__extra"
+      >
         <slot name="extra" />
       </div>
     </div>
@@ -113,15 +132,15 @@ const emit = defineEmits(['click'])
 
 // 格式化数值
 const formattedValue = computed(() => {
-  if (props.loading) return '--'
-  if (props.formatter) return props.formatter(props.value)
+  if (props.loading) {return '--'}
+  if (props.formatter) {return props.formatter(props.value)}
   return props.value
 })
 
 // 趋势样式
 const trendClass = computed(() => {
-  if (props.trend > 0) return 'stat-card__trend--up'
-  if (props.trend < 0) return 'stat-card__trend--down'
+  if (props.trend > 0) {return 'stat-card__trend--up'}
+  if (props.trend < 0) {return 'stat-card__trend--down'}
   return 'stat-card__trend--flat'
 })
 

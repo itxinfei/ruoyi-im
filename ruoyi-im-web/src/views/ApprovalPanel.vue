@@ -1,16 +1,24 @@
 <template>
   <div class="approval-panel">
     <div class="panel-header">
-      <h2 class="panel-title">审批流程</h2>
+      <h2 class="panel-title">
+        审批流程
+      </h2>
       <div class="header-actions">
         <!-- 待我审批时的批量操作 -->
         <template v-if="activeTab === 'pending' && pendingApprovals.length > 0">
-          <button class="batch-btn batch-btn--approve" @click="batchApproveAll">
+          <button
+            class="batch-btn batch-btn--approve"
+            @click="batchApproveAll"
+          >
             <span class="material-icons-outlined">check_circle</span>
             <span>全部通过</span>
           </button>
         </template>
-        <button class="add-btn" @click="showCreateDialog = true">
+        <button
+          class="add-btn"
+          @click="showCreateDialog = true"
+        >
           <span class="material-icons-outlined">add</span>
           发起审批
         </button>
@@ -28,21 +36,37 @@
         >
           <span class="material-icons-outlined tab-icon">{{ tab.icon }}</span>
           {{ tab.label }}
-          <span v-if="getCount(tab.key) > 0" class="tab-count">{{ getCount(tab.key) }}</span>
+          <span
+            v-if="getCount(tab.key) > 0"
+            class="tab-count"
+          >{{ getCount(tab.key) }}</span>
         </button>
       </div>
 
-      <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
+      <div
+        v-if="loading"
+        class="loading-state"
+      >
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>加载中...</span>
       </div>
 
-      <div v-else-if="approvals.length === 0" class="empty-state">
+      <div
+        v-else-if="approvals.length === 0"
+        class="empty-state"
+      >
         <span class="material-icons-outlined empty-icon">{{ emptyIcon }}</span>
-        <p class="empty-text">{{ emptyText }}</p>
+        <p class="empty-text">
+          {{ emptyText }}
+        </p>
       </div>
 
-      <div v-else class="approval-list">
+      <div
+        v-else
+        class="approval-list"
+      >
         <div
           v-for="approval in approvals"
           :key="approval.id"
@@ -53,25 +77,45 @@
           }"
           @click="handleView(approval)"
         >
-          <div class="approval-avatar" :style="{ background: approval.bgColor }">
+          <div
+            class="approval-avatar"
+            :style="{ background: approval.bgColor }"
+          >
             {{ approval.title.charAt(0) }}
           </div>
           <div class="approval-content">
-            <div class="approval-title">{{ approval.title }}</div>
+            <div class="approval-title">
+              {{ approval.title }}
+            </div>
             <div class="approval-meta">
               <span class="approval-type">{{ approval.type }}</span>
               <span class="approval-time">{{ approval.time }}</span>
             </div>
           </div>
-          <div class="approval-status" :class="approval.status">
+          <div
+            class="approval-status"
+            :class="approval.status"
+          >
             {{ statusText(approval.status) }}
           </div>
           <!-- 待审批项的快捷操作 -->
-          <div v-if="approval.status === 'pending'" class="quick-actions" @click.stop>
-            <button class="quick-btn quick-btn--approve" @click="handleQuickApprove(approval)" title="通过">
+          <div
+            v-if="approval.status === 'pending'"
+            class="quick-actions"
+            @click.stop
+          >
+            <button
+              class="quick-btn quick-btn--approve"
+              title="通过"
+              @click="handleQuickApprove(approval)"
+            >
               <span class="material-icons-outlined">check</span>
             </button>
-            <button class="quick-btn quick-btn--reject" @click="handleQuickReject(approval)" title="拒绝">
+            <button
+              class="quick-btn quick-btn--reject"
+              title="拒绝"
+              @click="handleQuickReject(approval)"
+            >
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
@@ -184,13 +228,13 @@ const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
-const getCount = (tab) => {
-  if (tab === 'pending') return approvals.value.filter(a => a.status === 'pending').length
-  if (tab === 'processed') return approvals.value.filter(a => a.status !== 'pending').length
+const getCount = tab => {
+  if (tab === 'pending') {return approvals.value.filter(a => a.status === 'pending').length}
+  if (tab === 'processed') {return approvals.value.filter(a => a.status !== 'pending').length}
   return 0
 }
 
-const statusText = (status) => {
+const statusText = status => {
   const map = {
     pending: '待审批',
     approved: '已通过',
@@ -207,7 +251,7 @@ const handleApprovalCreated = () => {
 }
 
 // 查看审批详情
-const handleView = (approval) => {
+const handleView = approval => {
   selectedApproval.value = approval
   showDetailDialog.value = true
 }
@@ -221,7 +265,7 @@ const handleApprovalAction = () => {
 // ============================================================================
 // 快捷操作功能
 // ============================================================================
-const handleQuickApprove = async (approval) => {
+const handleQuickApprove = async approval => {
   try {
     await ElMessageBox.prompt('请输入审批意见（可选）', '通过审批', {
       confirmButtonText: '通过',
@@ -240,7 +284,7 @@ const handleQuickApprove = async (approval) => {
   }
 }
 
-const handleQuickReject = async (approval) => {
+const handleQuickReject = async approval => {
   try {
     await ElMessageBox.prompt('请输入拒绝原因（必填）', '拒绝审批', {
       confirmButtonText: '拒绝',
@@ -277,7 +321,7 @@ const processApproval = async (approvalId, action, comment) => {
 // 批量全部通过
 const batchApproveAll = async () => {
   const pending = pendingApprovals.value
-  if (pending.length === 0) return
+  if (pending.length === 0) {return}
 
   try {
     await ElMessageBox.confirm(`确定要全部通过 ${pending.length} 条待审批吗？`, '批量通过', {

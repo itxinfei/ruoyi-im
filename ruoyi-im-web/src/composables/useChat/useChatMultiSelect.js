@@ -37,7 +37,7 @@ export function useChatMultiSelect(messages) {
   /**
    * 切换消息选中状态
    */
-  const toggleMessageSelection = (messageId) => {
+  const toggleMessageSelection = messageId => {
     if (selectedMessageIds.value.has(messageId)) {
       selectedMessageIds.value.delete(messageId)
     } else {
@@ -67,7 +67,7 @@ export function useChatMultiSelect(messages) {
   /**
    * 判断消息是否被选中
    */
-  const isMessageSelected = (messageId) => {
+  const isMessageSelected = messageId => {
     return selectedMessageIds.value.has(messageId)
   }
 
@@ -88,7 +88,7 @@ export function useChatMultiSelect(messages) {
   /**
    * 批量删除
    */
-  const batchDelete = async (deleteFn) => {
+  const batchDelete = async deleteFn => {
     if (selectedCount.value === 0) {
       ElMessage.warning('请先选择要删除的消息')
       return
@@ -138,7 +138,7 @@ export function useChatMultiSelect(messages) {
   /**
    * 批量收藏
    */
-  const batchFavorite = async (favoriteFn) => {
+  const batchFavorite = async favoriteFn => {
     if (selectedCount.value === 0) {
       ElMessage.warning('请先选择要收藏的消息')
       return

@@ -2,11 +2,14 @@
   <header class="ding-header">
     <div class="header-left">
       <div class="header-logo">
-        <el-icon :size="24" color="#0089FF">
+        <el-icon
+          :size="24"
+          color="#0089FF"
+        >
           <ChatDotRound />
         </el-icon>
       </div>
-      <div class="header-divider"></div>
+      <div class="header-divider" />
       <div class="header-search">
         <el-input
           v-model="searchKeyword"
@@ -23,20 +26,48 @@
     </div>
 
     <div class="header-right">
-      <el-badge :value="5" :max="99" class="header-badge">
-        <el-tooltip content="通知" placement="bottom">
-          <el-button :icon="Bell" text class="header-action-btn" />
+      <el-badge
+        :value="5"
+        :max="99"
+        class="header-badge"
+      >
+        <el-tooltip
+          content="通知"
+          placement="bottom"
+        >
+          <el-button
+            :icon="Bell"
+            text
+            class="header-action-btn"
+          />
         </el-tooltip>
       </el-badge>
 
-      <el-tooltip content="发起聊天" placement="bottom">
-        <el-button :icon="Plus" text class="header-action-btn" />
+      <el-tooltip
+        content="发起聊天"
+        placement="bottom"
+      >
+        <el-button
+          :icon="Plus"
+          text
+          class="header-action-btn"
+        />
       </el-tooltip>
 
-      <el-dropdown trigger="click" placement="bottom-end">
+      <el-dropdown
+        trigger="click"
+        placement="bottom-end"
+      >
         <div class="header-action-wrapper">
-          <el-tooltip content="设置" placement="bottom">
-            <el-button :icon="Setting" text class="header-action-btn" />
+          <el-tooltip
+            content="设置"
+            placement="bottom"
+          >
+            <el-button
+              :icon="Setting"
+              text
+              class="header-action-btn"
+            />
           </el-tooltip>
         </div>
         <template #dropdown>
@@ -44,12 +75,18 @@
             <el-dropdown-item>主题切换</el-dropdown-item>
             <el-dropdown-item>消息通知</el-dropdown-item>
             <el-dropdown-item>隐私与安全</el-dropdown-item>
-            <el-dropdown-item divided>关于系统</el-dropdown-item>
+            <el-dropdown-item divided>
+              关于系统
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
 
-      <el-dropdown trigger="click" placement="bottom-end" @command="handleCommand">
+      <el-dropdown
+        trigger="click"
+        placement="bottom-end"
+        @command="handleCommand"
+      >
         <div class="header-user">
           <DingtalkAvatar 
             :src="currentUserAvatar" 
@@ -65,8 +102,15 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="profile">个人设置</el-dropdown-item>
-            <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+            <el-dropdown-item command="profile">
+              个人设置
+            </el-dropdown-item>
+            <el-dropdown-item
+              command="logout"
+              divided
+            >
+              退出登录
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -103,7 +147,7 @@ const currentUser = ref({
 
 // 当前用户头像（带 token）
 const currentUserAvatar = computed(() => {
-  if (!currentUser.value.avatar) return ''
+  if (!currentUser.value.avatar) {return ''}
   return addTokenToUrl(currentUser.value.avatar)
 })
 
@@ -152,7 +196,7 @@ const handleLogout = async () => {
 }
 
 // 处理下拉菜单点击
-const handleCommand = (command) => {
+const handleCommand = command => {
   switch (command) {
     case 'profile':
       // 跳转到个人设置页面

@@ -1,7 +1,11 @@
 <template>
   <teleport to="body">
     <transition name="search-fade">
-      <div v-if="visible" class="global-search-overlay" @click="handleOverlayClick">
+      <div
+        v-if="visible"
+        class="global-search-overlay"
+        @click="handleOverlayClick"
+      >
         <!-- 搜索弹窗容器 -->
         <div 
           class="search-modal" 
@@ -27,7 +31,7 @@
                 @focus="handleFocus"
                 @blur="handleBlur"
                 @keydown="handleKeyDown"
-              />
+              >
               
               <!-- 清除按钮 -->
               <transition name="fade-scale">
@@ -41,12 +45,18 @@
               </transition>
               
               <!-- 语音搜索按钮 -->
-              <button class="input-icon voice-btn" @click="handleVoiceSearch">
+              <button
+                class="input-icon voice-btn"
+                @click="handleVoiceSearch"
+              >
                 <el-icon><Microphone /></el-icon>
               </button>
               
               <!-- 搜索按钮 -->
-              <button class="search-submit-btn" @click="handleSearch">
+              <button
+                class="search-submit-btn"
+                @click="handleSearch"
+              >
                 <el-icon><ArrowRight /></el-icon>
               </button>
             </div>
@@ -68,10 +78,16 @@
           
           <!-- 搜索建议下拉面板 -->
           <transition name="slide-down">
-            <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-panel">
+            <div
+              v-if="showSuggestions && suggestions.length > 0"
+              class="suggestions-panel"
+            >
               <div class="suggestions-header">
                 <span class="suggestions-title">搜索建议</span>
-                <button class="close-suggestions" @click="showSuggestions = false">
+                <button
+                  class="close-suggestions"
+                  @click="showSuggestions = false"
+                >
                   <el-icon><Close /></el-icon>
                 </button>
               </div>
@@ -88,10 +104,18 @@
                     <el-icon><component :is="item.icon || 'Search'" /></el-icon>
                   </div>
                   <div class="suggestion-content">
-                    <span class="suggestion-text" v-html="highlightText(item.text)"></span>
-                    <span v-if="item.type" class="suggestion-type">{{ item.type }}</span>
+                    <span
+                      class="suggestion-text"
+                      v-html="highlightText(item.text)"
+                    />
+                    <span
+                      v-if="item.type"
+                      class="suggestion-type"
+                    >{{ item.type }}</span>
                   </div>
-                  <el-icon class="suggestion-arrow"><ArrowRight /></el-icon>
+                  <el-icon class="suggestion-arrow">
+                    <ArrowRight />
+                  </el-icon>
                 </div>
               </div>
             </div>
@@ -100,7 +124,10 @@
           <!-- 搜索主体内容 -->
           <div class="search-body">
             <!-- 左侧分类导航 -->
-            <aside class="category-sidebar" :class="{ collapsed: isMobile }">
+            <aside
+              class="category-sidebar"
+              :class="{ collapsed: isMobile }"
+            >
               <div class="category-list">
                 <button
                   v-for="cat in categories"
@@ -113,10 +140,16 @@
                     <el-icon><component :is="cat.icon" /></el-icon>
                   </div>
                   <span class="category-label">{{ cat.label }}</span>
-                  <span v-if="getCategoryCount(cat.key)" class="category-count">
+                  <span
+                    v-if="getCategoryCount(cat.key)"
+                    class="category-count"
+                  >
                     {{ getCategoryCount(cat.key) }}
                   </span>
-                  <div v-if="searchType === cat.key" class="active-indicator"></div>
+                  <div
+                    v-if="searchType === cat.key"
+                    class="active-indicator"
+                  />
                 </button>
               </div>
             </aside>
@@ -124,21 +157,31 @@
             <!-- 右侧结果区域 -->
             <main class="results-area">
               <!-- 加载状态 - 骨架屏 -->
-              <div v-if="searching" class="loading-state">
+              <div
+                v-if="searching"
+                class="loading-state"
+              >
                 <div class="skeleton-list">
-                  <div v-for="i in 6" :key="i" class="skeleton-card">
-                    <div class="skeleton-avatar"></div>
+                  <div
+                    v-for="i in 6"
+                    :key="i"
+                    class="skeleton-card"
+                  >
+                    <div class="skeleton-avatar" />
                     <div class="skeleton-content">
-                      <div class="skeleton-line title"></div>
-                      <div class="skeleton-line desc"></div>
-                      <div class="skeleton-line meta"></div>
+                      <div class="skeleton-line title" />
+                      <div class="skeleton-line desc" />
+                      <div class="skeleton-line meta" />
                     </div>
                   </div>
                 </div>
               </div>
               
               <!-- 默认状态 - 欢迎和历史记录 -->
-              <div v-else-if="!searchKeyword" class="default-state">
+              <div
+                v-else-if="!searchKeyword"
+                class="default-state"
+              >
                 <!-- 欢迎卡片 -->
                 <div class="welcome-section">
                   <div class="welcome-illustration">
@@ -146,30 +189,46 @@
                       <el-icon><Search /></el-icon>
                     </div>
                   </div>
-                  <h2 class="welcome-title">开始搜索</h2>
-                  <p class="welcome-desc">快速查找联系人、群组、消息记录和文件</p>
+                  <h2 class="welcome-title">
+                    开始搜索
+                  </h2>
+                  <p class="welcome-desc">
+                    快速查找联系人、群组、消息记录和文件
+                  </p>
                   
                   <!-- 快捷操作 -->
                   <div class="quick-actions">
-                    <div class="action-card" @click="handleQuickAction('contact')">
+                    <div
+                      class="action-card"
+                      @click="handleQuickAction('contact')"
+                    >
                       <div class="action-icon bg-blue">
                         <el-icon><User /></el-icon>
                       </div>
                       <span class="action-label">找联系人</span>
                     </div>
-                    <div class="action-card" @click="handleQuickAction('group')">
+                    <div
+                      class="action-card"
+                      @click="handleQuickAction('group')"
+                    >
                       <div class="action-icon bg-purple">
                         <el-icon><ChatDotRound /></el-icon>
                       </div>
                       <span class="action-label">找群组</span>
                     </div>
-                    <div class="action-card" @click="handleQuickAction('file')">
+                    <div
+                      class="action-card"
+                      @click="handleQuickAction('file')"
+                    >
                       <div class="action-icon bg-orange">
                         <el-icon><Document /></el-icon>
                       </div>
                       <span class="action-label">找文件</span>
                     </div>
-                    <div class="action-card" @click="handleQuickAction('message')">
+                    <div
+                      class="action-card"
+                      @click="handleQuickAction('message')"
+                    >
                       <div class="action-icon bg-green">
                         <el-icon><ChatLineRound /></el-icon>
                       </div>
@@ -179,13 +238,19 @@
                 </div>
                 
                 <!-- 最近搜索 -->
-                <div v-if="recentSearches.length > 0" class="recent-section">
+                <div
+                  v-if="recentSearches.length > 0"
+                  class="recent-section"
+                >
                   <div class="section-header">
                     <div class="section-title">
                       <el-icon><Clock /></el-icon>
                       <span>最近搜索</span>
                     </div>
-                    <button class="clear-btn" @click="clearRecentSearches">
+                    <button
+                      class="clear-btn"
+                      @click="clearRecentSearches"
+                    >
                       <el-icon><Delete /></el-icon>
                       <span>清空</span>
                     </button>
@@ -197,9 +262,14 @@
                       class="recent-item"
                       @click="handleRecentClick(item)"
                     >
-                      <el-icon class="recent-icon"><Timer /></el-icon>
+                      <el-icon class="recent-icon">
+                        <Timer />
+                      </el-icon>
                       <span class="recent-text">{{ item }}</span>
-                      <button class="remove-btn" @click.stop="removeRecentItem(item)">
+                      <button
+                        class="remove-btn"
+                        @click.stop="removeRecentItem(item)"
+                      >
                         <el-icon><Close /></el-icon>
                       </button>
                     </div>
@@ -230,7 +300,10 @@
               </div>
               
               <!-- 搜索结果列表 -->
-              <div v-else-if="hasResults" class="results-list">
+              <div
+                v-else-if="hasResults"
+                class="results-list"
+              >
                 <div
                   v-for="(section, type) in filteredResults"
                   :key="type"
@@ -273,7 +346,10 @@
                           />
                         </template>
                         <template v-else-if="type === 'files'">
-                          <div class="file-preview" :class="getFileTypeClass(item.fileName)">
+                          <div
+                            class="file-preview"
+                            :class="getFileTypeClass(item.fileName)"
+                          >
                             <el-icon><Document /></el-icon>
                             <span class="file-ext">{{ getFileExtension(item.fileName) }}</span>
                           </div>
@@ -296,16 +372,28 @@
                       <!-- 内容区域 -->
                       <div class="card-content">
                         <div class="content-header">
-                          <h4 class="content-title" v-html="highlightText(getItemTitle(item, type))"></h4>
+                          <h4
+                            class="content-title"
+                            v-html="highlightText(getItemTitle(item, type))"
+                          />
                           <span class="content-time">{{ formatTime(item.timestamp || item.updateTime) }}</span>
                         </div>
-                        <p class="content-desc" v-html="highlightText(getItemDesc(item, type))"></p>
+                        <p
+                          class="content-desc"
+                          v-html="highlightText(getItemDesc(item, type))"
+                        />
                         <div class="content-meta">
-                          <span class="meta-tag" :class="type">
+                          <span
+                            class="meta-tag"
+                            :class="type"
+                          >
                             <el-icon><component :is="getMetaIcon(type)" /></el-icon>
                             <span>{{ getMetaLabel(type) }}</span>
                           </span>
-                          <span v-if="item.sessionName" class="meta-source">
+                          <span
+                            v-if="item.sessionName"
+                            class="meta-source"
+                          >
                             来自: {{ item.sessionName }}
                           </span>
                         </div>
@@ -313,10 +401,16 @@
                       
                       <!-- 操作区域 -->
                       <div class="card-actions">
-                        <button class="action-btn preview" @click.stop="handlePreview(type, item)">
+                        <button
+                          class="action-btn preview"
+                          @click.stop="handlePreview(type, item)"
+                        >
                           <el-icon><View /></el-icon>
                         </button>
-                        <button class="action-btn more" @click.stop="handleMore(type, item)">
+                        <button
+                          class="action-btn more"
+                          @click.stop="handleMore(type, item)"
+                        >
                           <el-icon><MoreFilled /></el-icon>
                         </button>
                       </div>
@@ -326,22 +420,44 @@
               </div>
               
               <!-- 空状态 -->
-              <div v-else class="empty-state">
+              <div
+                v-else
+                class="empty-state"
+              >
                 <div class="empty-illustration">
                   <div class="empty-icon-wrapper">
                     <el-icon><Search /></el-icon>
                   </div>
                 </div>
-                <h3 class="empty-title">未找到相关结果</h3>
+                <h3 class="empty-title">
+                  未找到相关结果
+                </h3>
                 <p class="empty-desc">
                   没有找到与 "<strong>{{ searchKeyword }}</strong>" 相关的内容
                 </p>
                 <div class="empty-suggestions">
-                  <p class="suggestions-label">试试以下建议：</p>
+                  <p class="suggestions-label">
+                    试试以下建议：
+                  </p>
                   <div class="suggestion-chips">
-                    <button class="chip" @click="clearSearch">清除搜索词</button>
-                    <button class="chip" @click="handleCategoryChange('ALL')">查看全部</button>
-                    <button class="chip" @click="handleTypoFix">纠正拼写</button>
+                    <button
+                      class="chip"
+                      @click="clearSearch"
+                    >
+                      清除搜索词
+                    </button>
+                    <button
+                      class="chip"
+                      @click="handleCategoryChange('ALL')"
+                    >
+                      查看全部
+                    </button>
+                    <button
+                      class="chip"
+                      @click="handleTypoFix"
+                    >
+                      纠正拼写
+                    </button>
                   </div>
                 </div>
               </div>
@@ -365,7 +481,10 @@
                 <span>关闭</span>
               </span>
             </div>
-            <div v-if="totalCount > 0" class="footer-stats">
+            <div
+              v-if="totalCount > 0"
+              class="footer-stats"
+            >
               <el-icon><DataLine /></el-icon>
               <span>找到 <strong>{{ totalCount }}</strong> 条结果</span>
             </div>
@@ -454,7 +573,7 @@ const suggestions = ref([])
 
 // 计算属性
 const totalCount = computed(() => {
-  if (!searchResult.value) return 0
+  if (!searchResult.value) {return 0}
   return (searchResult.value.contacts?.length || 0) +
          (searchResult.value.groups?.length || 0) +
          (searchResult.value.messages?.length || 0) +
@@ -464,7 +583,7 @@ const totalCount = computed(() => {
 const hasResults = computed(() => totalCount.value > 0)
 
 const filteredResults = computed(() => {
-  if (!searchResult.value) return {}
+  if (!searchResult.value) {return {}}
   
   const sections = {
     contacts: { title: '联系人', data: searchResult.value.contacts || [] },
@@ -485,17 +604,17 @@ const filteredResults = computed(() => {
 })
 
 // 监听显示状态
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val) {
     nextTick(() => {
-      if (isUnmounted.value) return
+      if (isUnmounted.value) {return}
       searchInputRef.value?.focus()
     })
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   if (!val) {
     emit('update:modelValue', false)
     resetSearch()
@@ -503,13 +622,13 @@ watch(visible, (val) => {
 })
 
 // 方法
-const getCategoryCount = (key) => {
-  if (!searchResult.value || key === 'ALL') return 0
+const getCategoryCount = key => {
+  if (!searchResult.value || key === 'ALL') {return 0}
   const keyMap = { CONTACT: 'contacts', GROUP: 'groups', MESSAGE: 'messages', FILE: 'files' }
   return searchResult.value[keyMap[key]]?.length || 0
 }
 
-const getSectionIcon = (type) => {
+const getSectionIcon = type => {
   const iconMap = {
     contacts: 'User',
     groups: 'ChatDotRound',
@@ -519,7 +638,7 @@ const getSectionIcon = (type) => {
   return iconMap[type] || 'Search'
 }
 
-const getMetaIcon = (type) => {
+const getMetaIcon = type => {
   const iconMap = {
     contacts: 'User',
     groups: 'ChatDotRound',
@@ -529,7 +648,7 @@ const getMetaIcon = (type) => {
   return iconMap[type] || 'Search'
 }
 
-const getMetaLabel = (type) => {
+const getMetaLabel = type => {
   const labelMap = {
     contacts: '联系人',
     groups: '群组',
@@ -559,14 +678,14 @@ const getItemDesc = (item, type) => {
   return descMap[type] || ''
 }
 
-const getFileExtension = (fileName) => {
-  if (!fileName) return ''
+const getFileExtension = fileName => {
+  if (!fileName) {return ''}
   const ext = fileName.split('.').pop()
   return ext.length <= 4 ? ext.toUpperCase() : ext.slice(0, 4).toUpperCase()
 }
 
-const getFileTypeClass = (fileName) => {
-  if (!fileName) return 'default'
+const getFileTypeClass = fileName => {
+  if (!fileName) {return 'default'}
   const ext = fileName.split('.').pop().toLowerCase()
   const typeMap = {
     pdf: 'pdf',
@@ -581,10 +700,20 @@ const getFileTypeClass = (fileName) => {
   return typeMap[ext] || 'default'
 }
 
-const highlightText = (text) => {
-  if (!text || !searchKeyword.value) return text
-  const reg = new RegExp(`(${searchKeyword.value})`, 'gi')
-  return String(text).replace(reg, '<mark>$1</mark>')
+// 高亮搜索文本
+const highlightText = text => {
+  if (!text || !searchKeyword.value) {return escapeHtml(String(text))}
+  const keyword = searchKeyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const reg = new RegExp(`(${keyword})`, 'gi')
+  return escapeHtml(String(text)).replace(reg, '<mark>$1</mark>')
+}
+
+// 转义 HTML 特殊字符，防止 XSS 攻击
+const escapeHtml = str => {
+  if (!str) {return ''}
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
 }
 
 // 搜索处理
@@ -609,7 +738,7 @@ const handleInput = () => {
   searchTimer = setTimeout(() => performSearch(keyword), 300)
 }
 
-const generateSuggestions = (keyword) => {
+const generateSuggestions = keyword => {
   const historySuggestions = recentSearches.value
     .filter(item => item.toLowerCase().includes(keyword.toLowerCase()))
     .slice(0, 3)
@@ -626,8 +755,8 @@ const generateSuggestions = (keyword) => {
   activeSuggestionIndex.value = -1
 }
 
-const performSearch = async (keyword) => {
-  if (!keyword) return
+const performSearch = async keyword => {
+  if (!keyword) {return}
   
   searching.value = true
   showSuggestions.value = false
@@ -676,7 +805,7 @@ const handleSearch = () => {
   }
 }
 
-const saveToRecent = (keyword) => {
+const saveToRecent = keyword => {
   const index = recentSearches.value.indexOf(keyword)
   if (index > -1) {
     recentSearches.value.splice(index, 1)
@@ -699,7 +828,7 @@ const clearSearch = () => {
   suggestions.value = []
   showSuggestions.value = false
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     searchInputRef.value?.focus()
   })
 }
@@ -725,40 +854,40 @@ const handleBlur = () => {
   }, 200)
 }
 
-const selectSuggestion = (item) => {
+const selectSuggestion = item => {
   searchKeyword.value = item.text.replace(/^(联系人|群组|文件):\s*/, '')
   showSuggestions.value = false
   handleSearch()
 }
 
-const handleFilterClick = (key) => {
+const handleFilterClick = key => {
   activeFilter.value = key
   const typeMap = { all: 'ALL', contact: 'CONTACT', group: 'GROUP', file: 'FILE' }
   handleCategoryChange(typeMap[key])
 }
 
-const handleCategoryChange = (key) => {
+const handleCategoryChange = key => {
   searchType.value = key
   if (searchKeyword.value) {
     handleSearch()
   }
 }
 
-const handleQuickAction = (type) => {
+const handleQuickAction = type => {
   const prefixMap = { contact: '@', group: '#', file: 'file:', message: '' }
   searchKeyword.value = prefixMap[type] || ''
   nextTick(() => {
-    if (isUnmounted.value) return
+    if (isUnmounted.value) {return}
     searchInputRef.value?.focus()
   })
 }
 
-const handleRecentClick = (item) => {
+const handleRecentClick = item => {
   searchKeyword.value = item
   handleSearch()
 }
 
-const removeRecentItem = (item) => {
+const removeRecentItem = item => {
   recentSearches.value = recentSearches.value.filter(i => i !== item)
   setJSON('global_search_recent', recentSearches.value)
 }
@@ -768,7 +897,7 @@ const clearRecentSearches = () => {
   setJSON('global_search_recent', [])
 }
 
-const handleTrendingClick = (tag) => {
+const handleTrendingClick = tag => {
   searchKeyword.value = tag
   handleSearch()
 }
@@ -804,7 +933,7 @@ const handleMore = (type, item) => {
   }
 }
 
-const viewMore = (type) => {
+const viewMore = type => {
   // 跳转到更多结果页面
   if (type === 'message') {
     emit('view-all-messages', searchKeyword.value)
@@ -844,13 +973,13 @@ const handleVoiceSearch = async () => {
       ElMessage.info('正在聆听...')
     }
 
-    recognition.onresult = (event) => {
+    recognition.onresult = event => {
       const transcript = event.results[0][0].transcript
       searchKeyword.value = transcript
       handleSearch()
     }
 
-    recognition.onerror = (event) => {
+    recognition.onerror = event => {
       if (event.error === 'not-allowed') {
         ElMessage.warning('请允许麦克风访问权限以使用语音搜索')
       } else {
@@ -869,7 +998,7 @@ const handleVoiceSearch = async () => {
 }
 
 // 键盘导航
-const handleKeyDown = (e) => {
+const handleKeyDown = e => {
   if (showSuggestions.value && suggestions.value.length > 0) {
     switch (e.key) {
       case 'ArrowDown':
@@ -926,12 +1055,20 @@ onUnmounted(() => {
 <style scoped lang="scss">
 @use "sass:color";
 
-// 变量定义
+// 变量定义 - 现代化渐变色系统
 $primary-color: #0089FF;
 $primary-light: rgba(0, 137, 255, 0.1);
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+$success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 $border-radius: var(--dt-radius-xl);
 $border-radius-sm: var(--dt-radius-lg);
 $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// 毛玻璃效果变量
+$glass-bg: rgba(255, 255, 255, 0.75);
+$glass-border: rgba(255, 255, 255, 0.3);
+$glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 
 // 遮罩层动画
 .search-fade-enter-active,
@@ -968,15 +1105,16 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: scale(0.8);
 }
 
-// 遮罩层
+// 遮罩层 - 增强毛玻璃效果
 .global-search-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   z-index: 2000;
   display: flex;
   align-items: flex-start;
@@ -989,23 +1127,27 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// 搜索弹窗
+// 搜索弹窗 - 毛玻璃效果
 .search-modal {
   width: 900px;
   max-width: 90vw;
   max-height: 80vh;
-  background: #fff;
+  background: $glass-bg;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid $glass-border;
   border-radius: $border-radius;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   
   @keyframes modalSlideIn {
     from {
       opacity: 0;
-      transform: translateY(-20px) scale(0.98);
+      transform: translateY(-30px) scale(0.95);
     }
     to {
       opacity: 1;
@@ -1015,7 +1157,8 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   // 深色模式
   :global(.dark) & {
-    background: #1e293b;
+    background: rgba(30, 41, 59, 0.85);
+    border-color: rgba(255, 255, 255, 0.1);
   }
   
   // 移动端适配
@@ -1600,14 +1743,26 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   width: 80px;
   height: 80px;
   margin: 0 auto;
-  background: linear-gradient(135deg, $primary-color, #667eea);
+  background: $primary-gradient;
   border-radius: var(--dt-radius-3xl);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-size: 36px;
-  box-shadow: var(--dt-shadow-brand-strong);
+  box-shadow: var(--dt-shadow-brand-strong), 0 0 40px rgba(102, 126, 234, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: var(--dt-shadow-brand-strong), 0 0 40px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: var(--dt-shadow-brand-strong), 0 0 60px rgba(102, 126, 234, 0.6);
+    }
+  }
   
   @media (max-width: 768px) {
     width: 64px;

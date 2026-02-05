@@ -5,14 +5,25 @@
 -->
 <template>
   <div class="quick-actions">
-    <el-button type="primary" size="large" @click="$emit('send-message')">
+    <el-button
+      type="primary"
+      size="large"
+      @click="$emit('send-message')"
+    >
       <el-icon><ChatDotRound /></el-icon>发消息
     </el-button>
     <div class="secondary-actions">
-      <el-button size="large" @click="$emit('invite')">
+      <el-button
+        size="large"
+        @click="$emit('invite')"
+      >
         <el-icon><Plus /></el-icon>邀请
       </el-button>
-      <el-button v-if="isOwnerOrAdmin" size="large" @click="$emit('manage')">
+      <el-button
+        v-if="isOwnerOrAdmin"
+        size="large"
+        @click="$emit('manage')"
+      >
         <el-icon><Setting /></el-icon>管理
       </el-button>
     </div>

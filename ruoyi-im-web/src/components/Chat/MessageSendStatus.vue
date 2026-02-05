@@ -8,7 +8,9 @@
     <!-- 发送中：灰色圆圈 + 旋转动画 -->
     <template v-if="status === 'sending'">
       <div class="status-icon sending-icon">
-        <el-icon class="is-loading"><Loading /></el-icon>
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
       </div>
     </template>
 
@@ -24,7 +26,12 @@
       <div class="status-icon failed-icon">
         <el-icon><CircleClose /></el-icon>
       </div>
-      <div v-if="showRetryText" class="status-text">点击重试</div>
+      <div
+        v-if="showRetryText"
+        class="status-text"
+      >
+        点击重试
+      </div>
     </template>
   </div>
 </template>
@@ -43,7 +50,7 @@ const props = defineProps({
   status: {
     type: String,
     default: 'sending',
-    validator: (value) => ['sending', 'success', 'failed'].includes(value)
+    validator: value => ['sending', 'success', 'failed'].includes(value)
   },
   // 是否显示"点击重试"文字
   showRetryText: {
@@ -59,7 +66,7 @@ const visible = ref(true)
 let successTimer = null
 
 // 监听状态变化
-watch(() => props.status, (newStatus) => {
+watch(() => props.status, newStatus => {
   if (newStatus === 'success') {
     // 成功状态：0.5秒后自动隐藏
     visible.value = true

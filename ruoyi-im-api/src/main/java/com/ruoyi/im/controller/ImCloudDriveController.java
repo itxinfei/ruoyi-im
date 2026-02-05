@@ -310,14 +310,16 @@ public class ImCloudDriveController {
     /**
      * 获取文件列表
      */
-    @Operation(summary = "获取文件列表", description = "获取文件夹内的文件列表")
+    @Operation(summary = "获取文件列表", description = "获取文件夹内的文件列表，folderId为null或0时获取根目录")
     @GetMapping("/file/list")
     public Result<List<ImCloudFileVO>> getFileList(
-            @Parameter(description = "文件夹ID") @RequestParam Long folderId) {
+            @Parameter(description = "文件夹ID，null或0表示根目录") @RequestParam(required = false) Long folderId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            List<ImCloudFileVO> files = cloudDriveService.getFileList(folderId, userId);
+            // null或0表示根目录
+            Long actualFolderId = (folderId == null || folderId == 0) ? null : folderId;
+            List<ImCloudFileVO> files = cloudDriveService.getFileList(actualFolderId, userId);
             return Result.success(files);
         } catch (Exception e) {
             log.error("获取文件列表失败: folderId={}, userId={}", folderId, userId, e);

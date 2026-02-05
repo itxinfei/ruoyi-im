@@ -6,41 +6,66 @@
         class="message-summary-modal"
         @click.self="handleClose"
       >
-        <div class="summary-container" @click.stop>
+        <div
+          class="summary-container"
+          @click.stop
+        >
           <!-- 头部 -->
           <div class="summary-header">
             <div class="header-left">
               <span class="material-icons-outlined header-icon">summarize</span>
-              <h3 class="header-title">消息速读</h3>
+              <h3 class="header-title">
+                消息速读
+              </h3>
               <span class="message-count">{{ messages.length }} 条消息</span>
             </div>
             <div class="header-actions">
-              <button class="icon-btn" @click="handleRefresh" :class="{ loading }">
+              <button
+                class="icon-btn"
+                :class="{ loading }"
+                @click="handleRefresh"
+              >
                 <span class="material-icons-outlined">refresh</span>
               </button>
-              <button class="icon-btn" @click="handleClose">
+              <button
+                class="icon-btn"
+                @click="handleClose"
+              >
                 <span class="material-icons-outlined">close</span>
               </button>
             </div>
           </div>
 
           <!-- 生成进度 -->
-          <div v-if="loading" class="summary-loading">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">正在分析消息...</p>
+          <div
+            v-if="loading"
+            class="summary-loading"
+          >
+            <div class="loading-spinner" />
+            <p class="loading-text">
+              正在分析消息...
+            </p>
           </div>
 
           <!-- 摘要内容 -->
-          <div v-else class="summary-content">
+          <div
+            v-else
+            class="summary-content"
+          >
             <!-- 关键信息概览 -->
-            <div class="summary-overview" v-if="summary">
+            <div
+              v-if="summary"
+              class="summary-overview"
+            >
               <div class="overview-item">
                 <span class="overview-icon topic-icon">
                   <span class="material-icons-outlined">topic</span>
                 </span>
                 <div class="overview-content">
                   <span class="overview-label">讨论主题</span>
-                  <p class="overview-value">{{ summary.topic || '暂无明确主题' }}</p>
+                  <p class="overview-value">
+                    {{ summary.topic || '暂无明确主题' }}
+                  </p>
                 </div>
               </div>
               <div class="overview-item">
@@ -49,7 +74,9 @@
                 </span>
                 <div class="overview-content">
                   <span class="overview-label">时间跨度</span>
-                  <p class="overview-value">{{ summary.timeRange }}</p>
+                  <p class="overview-value">
+                    {{ summary.timeRange }}
+                  </p>
                 </div>
               </div>
               <div class="overview-item">
@@ -58,19 +85,28 @@
                 </span>
                 <div class="overview-content">
                   <span class="overview-label">参与人数</span>
-                  <p class="overview-value">{{ summary.participantCount }} 人</p>
+                  <p class="overview-value">
+                    {{ summary.participantCount }} 人
+                  </p>
                 </div>
               </div>
             </div>
 
             <!-- 关键要点 -->
-            <div class="summary-keypoints" v-if="summary.keyPoints && summary.keyPoints.length > 0">
+            <div
+              v-if="summary.keyPoints && summary.keyPoints.length > 0"
+              class="summary-keypoints"
+            >
               <div class="keypoints-header">
                 <span class="material-icons-outlined">lightbulb</span>
                 <span class="keypoints-title">关键要点</span>
               </div>
               <ul class="keypoints-list">
-                <li v-for="(point, index) in summary.keyPoints" :key="index" class="keypoint-item">
+                <li
+                  v-for="(point, index) in summary.keyPoints"
+                  :key="index"
+                  class="keypoint-item"
+                >
                   <span class="keypoint-bullet">{{ index + 1 }}</span>
                   <span class="keypoint-text">{{ point }}</span>
                 </li>
@@ -91,16 +127,28 @@
                   @click="handleScrollToMessage(item.messageId)"
                 >
                   <div class="timeline-avatar">
-                    <img v-if="item.avatar" :src="item.avatar" :alt="item.senderName" />
-                    <span v-else class="avatar-placeholder">{{ item.senderName?.charAt(0) || '?' }}</span>
+                    <img
+                      v-if="item.avatar"
+                      :src="item.avatar"
+                      :alt="item.senderName"
+                    >
+                    <span
+                      v-else
+                      class="avatar-placeholder"
+                    >{{ item.senderName?.charAt(0) || '?' }}</span>
                   </div>
                   <div class="timeline-content">
                     <div class="timeline-header">
                       <span class="timeline-name">{{ item.senderName }}</span>
                       <span class="timeline-time">{{ formatTime(item.timestamp) }}</span>
                     </div>
-                    <p class="timeline-text">{{ item.summary }}</p>
-                    <span v-if="item.attachment" class="timeline-attachment">
+                    <p class="timeline-text">
+                      {{ item.summary }}
+                    </p>
+                    <span
+                      v-if="item.attachment"
+                      class="timeline-attachment"
+                    >
                       <span class="material-icons-outlined">{{ getAttachmentIcon(item.type) }}</span>
                       {{ item.attachment }}
                     </span>
@@ -110,7 +158,10 @@
             </div>
 
             <!-- 待办事项 -->
-            <div class="summary-todos" v-if="summary.todos && summary.todos.length > 0">
+            <div
+              v-if="summary.todos && summary.todos.length > 0"
+              class="summary-todos"
+            >
               <div class="todos-header">
                 <span class="material-icons-outlined">check_circle</span>
                 <span class="todos-title">待办事项</span>
@@ -136,11 +187,17 @@
 
           <!-- 底部操作 -->
           <div class="summary-footer">
-            <button class="footer-btn secondary" @click="handleViewFullHistory">
+            <button
+              class="footer-btn secondary"
+              @click="handleViewFullHistory"
+            >
               <span class="material-icons-outlined">history</span>
               查看完整记录
             </button>
-            <button class="footer-btn primary" @click="handleClose">
+            <button
+              class="footer-btn primary"
+              @click="handleClose"
+            >
               <span class="material-icons-outlined">done</span>
               我知道了
             </button>
@@ -253,13 +310,13 @@ const handleClose = () => {
 }
 
 // 滚动到指定消息
-const handleScrollToMessage = (messageId) => {
+const handleScrollToMessage = messageId => {
   emit('scroll-to-message', messageId)
   handleClose()
 }
 
 // 创建待办
-const handleCreateTodo = (todoText) => {
+const handleCreateTodo = todoText => {
   emit('create-todo', todoText)
   ElMessage.success('已添加到待办')
 }
@@ -274,7 +331,7 @@ const handleViewFullHistory = () => {
 const formatTime = formatRelativeTime
 
 // 获取附件图标
-const getAttachmentIcon = (type) => {
+const getAttachmentIcon = type => {
   const icons = {
     IMAGE: 'image',
     FILE: 'insert_drive_file',
@@ -286,7 +343,7 @@ const getAttachmentIcon = (type) => {
 }
 
 // 监听显示状态
-watch(() => props.visible, (newVal) => {
+watch(() => props.visible, newVal => {
   if (newVal) {
     generateSummary()
   }

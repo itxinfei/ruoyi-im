@@ -19,16 +19,30 @@
       </el-input>
       <el-dropdown @command="handleFilterCommand">
         <el-button>
-          {{ currentFilterLabel }}<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          {{ currentFilterLabel }}<el-icon class="el-icon--right">
+            <ArrowDown />
+          </el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="all">全部文件</el-dropdown-item>
-            <el-dropdown-item command="image">图片</el-dropdown-item>
-            <el-dropdown-item command="document">文档</el-dropdown-item>
-            <el-dropdown-item command="video">视频</el-dropdown-item>
-            <el-dropdown-item command="audio">音频</el-dropdown-item>
-            <el-dropdown-item command="other">其他</el-dropdown-item>
+            <el-dropdown-item command="all">
+              全部文件
+            </el-dropdown-item>
+            <el-dropdown-item command="image">
+              图片
+            </el-dropdown-item>
+            <el-dropdown-item command="document">
+              文档
+            </el-dropdown-item>
+            <el-dropdown-item command="video">
+              视频
+            </el-dropdown-item>
+            <el-dropdown-item command="audio">
+              音频
+            </el-dropdown-item>
+            <el-dropdown-item command="other">
+              其他
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -40,13 +54,24 @@
     </div>
 
     <!-- 空状态 -->
-    <div v-if="filteredFiles.length === 0" class="empty-state">
-      <el-icon :size="48" color="#dcdfe6"><FolderOpened /></el-icon>
+    <div
+      v-if="filteredFiles.length === 0"
+      class="empty-state"
+    >
+      <el-icon
+        :size="48"
+        color="#dcdfe6"
+      >
+        <FolderOpened />
+      </el-icon>
       <p>{{ searchKeyword ? '未找到匹配的文件' : '群组暂无文件' }}</p>
     </div>
 
     <!-- 文件列表 -->
-    <div v-else class="files-list">
+    <div
+      v-else
+      class="files-list"
+    >
       <div
         v-for="file in filteredFiles"
         :key="file.id"
@@ -54,12 +79,17 @@
         @click="handleFileClick(file)"
       >
         <div class="file-icon">
-          <el-icon :size="32" :color="getFileColor(file.type)">
+          <el-icon
+            :size="32"
+            :color="getFileColor(file.type)"
+          >
             <component :is="getFileIcon(file.type)" />
           </el-icon>
         </div>
         <div class="file-info">
-          <div class="file-name">{{ file.name }}</div>
+          <div class="file-name">
+            {{ file.name }}
+          </div>
           <div class="file-meta">
             <span>{{ file.senderName }}</span>
             <span class="separator">·</span>
@@ -69,10 +99,18 @@
           </div>
         </div>
         <div class="file-actions">
-          <el-button link type="primary" @click.stop="handleDownload(file)">
+          <el-button
+            link
+            type="primary"
+            @click.stop="handleDownload(file)"
+          >
             <el-icon><Download /></el-icon>
           </el-button>
-          <el-button link type="primary" @click.stop="handleOpenInChat(file)">
+          <el-button
+            link
+            type="primary"
+            @click.stop="handleOpenInChat(file)"
+          >
             <el-icon><ChatDotRound /></el-icon>
           </el-button>
         </div>
@@ -80,8 +118,15 @@
     </div>
 
     <!-- 加载更多 -->
-    <div v-if="hasMore" class="load-more">
-      <el-button text @click="loadMore" :loading="loading">
+    <div
+      v-if="hasMore"
+      class="load-more"
+    >
+      <el-button
+        text
+        :loading="loading"
+        @click="loadMore"
+      >
         加载更多
       </el-button>
     </div>
@@ -147,7 +192,7 @@ const filteredFiles = computed(() => {
 })
 
 // 获取文件图标
-const getFileIcon = (type) => {
+const getFileIcon = type => {
   const iconMap = {
     image: Picture,
     document: Document,
@@ -159,7 +204,7 @@ const getFileIcon = (type) => {
 }
 
 // 获取文件颜色
-const getFileColor = (type) => {
+const getFileColor = type => {
   const colorMap = {
     image: '#409eff',
     document: '#67c23a',
@@ -180,12 +225,12 @@ const formatTotalSize = () => {
 const formatTime = formatListItemTime
 
 // 处理筛选命令
-const handleFilterCommand = (command) => {
+const handleFilterCommand = command => {
   currentFilter.value = command
 }
 
 // 处理文件点击
-const handleFileClick = (file) => {
+const handleFileClick = file => {
   if (file.category === 'image') {
     // 图片预览
     emit('preview-image', file)
@@ -196,7 +241,7 @@ const handleFileClick = (file) => {
 }
 
 // 处理下载
-const handleDownload = (file) => {
+const handleDownload = file => {
   const link = document.createElement('a')
   link.href = file.url
   link.download = file.name
@@ -205,7 +250,7 @@ const handleDownload = (file) => {
 }
 
 // 在聊天中打开
-const handleOpenInChat = (file) => {
+const handleOpenInChat = file => {
   emit('open-in-chat', file)
 }
 

@@ -4,8 +4,8 @@
     :title="dialogTitle"
     width="700px"
     :close-on-click-modal="false"
-    @close="handleClose"
     class="compose-mail-dialog"
+    @close="handleClose"
   >
     <el-form
       ref="formRef"
@@ -16,7 +16,10 @@
       class="compose-form"
     >
       <!-- 收件人 -->
-      <el-form-item label="收件人" prop="toIds">
+      <el-form-item
+        label="收件人"
+        prop="toIds"
+      >
         <el-select
           v-model="form.toIds"
           filterable
@@ -37,7 +40,11 @@
             :value="user.id"
           >
             <div class="user-option">
-              <DingtalkAvatar :src="user.avatar" :name="user.nickname || user.username" :size="24" />
+              <DingtalkAvatar
+                :src="user.avatar"
+                :name="user.nickname || user.username"
+                :size="24"
+              />
               <span class="user-name">{{ user.nickname || user.username }}</span>
             </div>
           </el-option>
@@ -66,7 +73,11 @@
             :value="user.id"
           >
             <div class="user-option">
-              <DingtalkAvatar :src="user.avatar" :name="user.nickname || user.username" :size="24" />
+              <DingtalkAvatar
+                :src="user.avatar"
+                :name="user.nickname || user.username"
+                :size="24"
+              />
               <span class="user-name">{{ user.nickname || user.username }}</span>
             </div>
           </el-option>
@@ -74,7 +85,10 @@
       </el-form-item>
 
       <!-- 主题 -->
-      <el-form-item label="主题" prop="subject">
+      <el-form-item
+        label="主题"
+        prop="subject"
+      >
         <el-input
           v-model="form.subject"
           placeholder="请输入邮件主题"
@@ -84,7 +98,10 @@
       </el-form-item>
 
       <!-- 正文 -->
-      <el-form-item label="正文" prop="content">
+      <el-form-item
+        label="正文"
+        prop="content"
+      >
         <el-input
           v-model="form.content"
           type="textarea"
@@ -116,15 +133,26 @@
             class="attachment-upload"
             drag
           >
-            <div class="upload-area" :class="{ 'is-dragging': isDragging }">
+            <div
+              class="upload-area"
+              :class="{ 'is-dragging': isDragging }"
+            >
               <div class="upload-icon-wrapper">
                 <span class="material-icons-outlined upload-icon">cloud_upload</span>
-                <div class="icon-glow"></div>
+                <div class="icon-glow" />
               </div>
-              <div class="upload-text">点击或拖拽文件到此处上传</div>
-              <div class="upload-tip">支持 doc、docx、xls、xlsx、pdf、jpg、png 等格式，单个文件不超过 10MB</div>
+              <div class="upload-text">
+                点击或拖拽文件到此处上传
+              </div>
+              <div class="upload-tip">
+                支持 doc、docx、xls、xlsx、pdf、jpg、png 等格式，单个文件不超过 10MB
+              </div>
               <div class="upload-types">
-                <div class="type-tag" v-for="(type, index) in supportedTypes" :key="index">
+                <div
+                  v-for="(type, index) in supportedTypes"
+                  :key="index"
+                  class="type-tag"
+                >
                   <span class="material-icons-outlined">{{ type.icon }}</span>
                   <span>{{ type.name }}</span>
                 </div>
@@ -133,7 +161,10 @@
           </el-upload>
 
           <!-- 上传进度 -->
-          <div v-if="uploadingFiles.length > 0" class="upload-progress-list">
+          <div
+            v-if="uploadingFiles.length > 0"
+            class="upload-progress-list"
+          >
             <div
               v-for="file in uploadingFiles"
               :key="file.uid"
@@ -142,19 +173,31 @@
             >
               <div class="file-header">
                 <div class="file-info">
-                  <span class="material-icons-outlined file-icon" :class="getFileIconClass(file.name)">
+                  <span
+                    class="material-icons-outlined file-icon"
+                    :class="getFileIconClass(file.name)"
+                  >
                     {{ getFileIcon(file.name) }}
                   </span>
                   <span class="file-name">{{ file.name }}</span>
                   <span class="file-size">{{ formatFileSize(file.size) }}</span>
                 </div>
                 <div class="file-status">
-                  <span v-if="file.percentage < 100" class="status-text uploading">{{ file.percentage }}%</span>
-                  <span v-else-if="file.percentage === 100" class="status-text success">
+                  <span
+                    v-if="file.percentage < 100"
+                    class="status-text uploading"
+                  >{{ file.percentage }}%</span>
+                  <span
+                    v-else-if="file.percentage === 100"
+                    class="status-text success"
+                  >
                     <span class="material-icons-outlined">check_circle</span>
                     完成
                   </span>
-                  <span v-else class="status-text error">
+                  <span
+                    v-else
+                    class="status-text error"
+                  >
                     <span class="material-icons-outlined">error</span>
                     失败
                   </span>
@@ -170,14 +213,20 @@
           </div>
 
           <!-- 已上传附件列表 -->
-          <div v-if="form.attachments.length > 0" class="attachment-list">
+          <div
+            v-if="form.attachments.length > 0"
+            class="attachment-list"
+          >
             <div
               v-for="(attachment, index) in form.attachments"
               :key="index"
               class="attachment-item"
             >
               <div class="attachment-icon-wrapper">
-                <span class="material-icons-outlined attachment-icon" :class="getFileIconClass(attachment.name)">
+                <span
+                  class="material-icons-outlined attachment-icon"
+                  :class="getFileIconClass(attachment.name)"
+                >
                   {{ getFileIcon(attachment.name) }}
                 </span>
               </div>
@@ -190,8 +239,8 @@
                   size="small"
                   :icon="Download"
                   link
-                  @click="downloadAttachment(attachment)"
                   title="下载"
+                  @click="downloadAttachment(attachment)"
                 >
                   <span class="material-icons-outlined">download</span>
                 </el-button>
@@ -200,8 +249,8 @@
                   :icon="Delete"
                   link
                   type="danger"
-                  @click="removeAttachment(index)"
                   title="删除"
+                  @click="removeAttachment(index)"
                 >
                   <span class="material-icons-outlined">delete</span>
                 </el-button>
@@ -215,8 +264,15 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button @click="handleSaveDraft" :loading="savingDraft">保存草稿</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+        <el-button
+          :loading="savingDraft"
+          @click="handleSaveDraft"
+        >保存草稿</el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="handleSubmit"
+        >
           发送
         </el-button>
       </span>
@@ -286,8 +342,8 @@ const acceptTypes = '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.gif,
 
 // 对话框标题
 const dialogTitle = computed(() => {
-  if (props.replyTo?.isReply) return '回复邮件'
-  if (props.replyTo?.isForward) return '转发邮件'
+  if (props.replyTo?.isReply) {return '回复邮件'}
+  if (props.replyTo?.isForward) {return '转发邮件'}
   return '写邮件'
 })
 
@@ -316,27 +372,27 @@ const rules = {
 }
 
 // 拖拽事件处理
-const handleDragEnter = (e) => {
+const handleDragEnter = e => {
   e.preventDefault()
   isDragging.value = true
 }
 
-const handleDragLeave = (e) => {
+const handleDragLeave = e => {
   e.preventDefault()
   isDragging.value = false
 }
 
-const handleDragOver = (e) => {
+const handleDragOver = e => {
   e.preventDefault()
 }
 
-const handleDrop = (e) => {
+const handleDrop = e => {
   e.preventDefault()
   isDragging.value = false
 }
 
 // 获取文件图标
-const getFileIcon = (fileName) => {
+const getFileIcon = fileName => {
   const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase()
   const iconMap = {
     '.doc': 'description',
@@ -360,7 +416,7 @@ const getFileIcon = (fileName) => {
 }
 
 // 获取文件图标样式类
-const getFileIconClass = (fileName) => {
+const getFileIconClass = fileName => {
   const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase()
   const colorMap = {
     '.doc': 'word-color',
@@ -384,7 +440,7 @@ const getFileIconClass = (fileName) => {
 }
 
 // 搜索用户
-const searchUsers = async (query) => {
+const searchUsers = async query => {
   if (!query || query.trim().length === 0) {
     userOptions.value = []
     return
@@ -403,7 +459,7 @@ const searchUsers = async (query) => {
 }
 
 // 上传前校验
-const beforeUpload = (file) => {
+const beforeUpload = file => {
   // 文件类型校验
   const fileName = file.name.toLowerCase()
   const allowedExtensions = ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.pdf', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.zip', '.rar', '.txt', '.csv']
@@ -477,7 +533,7 @@ const handleUploadError = (error, file) => {
 }
 
 // 移除上传组件中的文件
-const handleRemoveAttachment = (file) => {
+const handleRemoveAttachment = file => {
   const index = form.attachments.findIndex(a => a.id === file.response?.data?.id)
   if (index > -1) {
     form.attachments.splice(index, 1)
@@ -490,12 +546,12 @@ const handleExceed = () => {
 }
 
 // 移除附件
-const removeAttachment = (index) => {
+const removeAttachment = index => {
   form.attachments.splice(index, 1)
 }
 
 // 下载附件
-const downloadAttachment = (attachment) => {
+const downloadAttachment = attachment => {
   if (attachment.url) {
     const link = document.createElement('a')
     link.href = attachment.url
@@ -588,7 +644,7 @@ const resetForm = () => {
 }
 
 // 监听 modelValue 变化
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
   if (val && props.replyTo) {
     // 回复/转发模式：填充表单
@@ -607,7 +663,7 @@ watch(() => props.modelValue, (val) => {
   }
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
   if (!val) {
     resetForm()

@@ -238,3 +238,85 @@ export function refreshGroupQrcode(groupId) {
     method: 'post'
   })
 }
+
+/**
+ * 获取群公告列表
+ * @param {number} groupId - 群组ID
+ * @returns {Promise}
+ */
+export function getGroupAnnouncements(groupId) {
+  return request({
+    url: '/api/im/group/announcement/list',
+    method: 'get',
+    params: { groupId }
+  })
+}
+
+/**
+ * 创建群公告
+ * @param {Object} data - 公告数据
+ * @param {number} data.groupId - 群组ID
+ * @param {string} data.title - 公告标题
+ * @param {string} data.content - 公告内容
+ * @param {boolean} data.isPinned - 是否置顶
+ * @returns {Promise}
+ */
+export function createGroupAnnouncement(data) {
+  return request({
+    url: '/api/im/group/announcement/create',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新群公告
+ * @param {number} announcementId - 公告ID
+ * @param {string} content - 公告内容
+ * @returns {Promise}
+ */
+export function updateGroupAnnouncement(announcementId, content) {
+  return request({
+    url: `/api/im/group/announcement/${announcementId}`,
+    method: 'put',
+    params: { content }
+  })
+}
+
+/**
+ * 删除群公告
+ * @param {number} announcementId - 公告ID
+ * @returns {Promise}
+ */
+export function deleteGroupAnnouncement(announcementId) {
+  return request({
+    url: `/api/im/group/announcement/${announcementId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 撤回群公告
+ * @param {number} announcementId - 公告ID
+ * @returns {Promise}
+ */
+export function recallGroupAnnouncement(announcementId) {
+  return request({
+    url: `/api/im/group/announcement/recall/${announcementId}`,
+    method: 'put'
+  })
+}
+
+/**
+ * 设置群公告置顶状态
+ * @param {number} announcementId - 公告ID
+ * @param {boolean} isPinned - 是否置顶
+ * @returns {Promise}
+ */
+export function setAnnouncementPinned(announcementId, isPinned) {
+  return request({
+    url: `/api/im/group/announcement/pin/${announcementId}`,
+    method: 'put',
+    params: { isPinned }
+  })
+}

@@ -5,12 +5,15 @@
     width="600px"
     :close-on-click-modal="true"
     :show-close="true"
-    @close="handleClose"
     class="screenshot-preview-dialog"
+    @close="handleClose"
   >
     <div class="screenshot-container">
       <!-- 截图画布 -->
-      <div class="canvas-wrapper" :class="{ 'is-editing': isEditing }">
+      <div
+        class="canvas-wrapper"
+        :class="{ 'is-editing': isEditing }"
+      >
         <canvas
           ref="canvasRef"
           class="screenshot-canvas"
@@ -18,7 +21,7 @@
           @mousemove="handleMouseMove"
           @mouseup="handleMouseUp"
           @mouseleave="handleMouseUp"
-        ></canvas>
+        />
 
         <!-- 裁剪遮罩 -->
         <div
@@ -26,38 +29,41 @@
           class="crop-overlay"
           :style="cropOverlayStyle"
         >
-          <div class="crop-border"></div>
+          <div class="crop-border" />
         </div>
 
         <!-- 绘制工具栏 -->
-        <div v-if="isEditing" class="draw-toolbar">
+        <div
+          v-if="isEditing"
+          class="draw-toolbar"
+        >
           <button
             v-for="tool in drawTools"
             :key="tool.name"
             class="draw-tool-btn"
             :class="{ active: currentTool === tool.name }"
-            @click="selectTool(tool.name)"
             :title="tool.label"
+            @click="selectTool(tool.name)"
           >
             <span class="material-icons-outlined">{{ tool.icon }}</span>
           </button>
           <div class="color-picker-wrapper">
             <input
-              type="color"
               v-model="drawColor"
+              type="color"
               class="color-picker"
               title="选择颜色"
-            />
+            >
           </div>
           <div class="stroke-width-wrapper">
             <input
-              type="range"
               v-model.number="strokeWidth"
+              type="range"
               min="1"
               max="10"
               class="stroke-width"
               title="笔触粗细"
-            />
+            >
           </div>
         </div>
       </div>
@@ -91,11 +97,13 @@
           </el-button>
         </div>
         <div class="footer-right">
-          <el-button @click="handleClose">取消</el-button>
+          <el-button @click="handleClose">
+            取消
+          </el-button>
           <el-button
             type="primary"
-            @click="handleSend"
             :loading="sending"
+            @click="handleSend"
           >
             发送
           </el-button>
@@ -121,7 +129,7 @@ const isUnmounted = ref(false) // 标记组件是否已卸载
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const canvasRef = ref(null)
@@ -167,9 +175,9 @@ const cropOverlayStyle = computed(() => {
 // 初始化画布
 const initCanvas = async () => {
   await nextTick()
-  if (isUnmounted.value) return
+  if (isUnmounted.value) {return}
   const canvas = canvasRef.value
-  if (!canvas || !props.imageData) return
+  if (!canvas || !props.imageData) {return}
 
   const img = new Image()
   img.onload = () => {
@@ -197,8 +205,8 @@ const initCanvas = async () => {
 }
 
 // 鼠标事件处理
-const handleMouseDown = (e) => {
-  if (!isEditing.value) return
+const handleMouseDown = e => {
+  if (!isEditing.value) {return}
 
   const rect = canvasRef.value.getBoundingClientRect()
   const x = e.clientX - rect.left
@@ -215,8 +223,8 @@ const handleMouseDown = (e) => {
   }
 }
 
-const handleMouseMove = (e) => {
-  if (!isEditing.value) return
+const handleMouseMove = e => {
+  if (!isEditing.value) {return}
 
   const rect = canvasRef.value.getBoundingClientRect()
   const x = e.clientX - rect.left
@@ -294,7 +302,7 @@ const applyCrop = () => {
   const width = Math.abs(cropEnd.value.x - cropStart.value.x)
   const height = Math.abs(cropEnd.value.y - cropStart.value.y)
 
-  if (width < 10 || height < 10) return
+  if (width < 10 || height < 10) {return}
 
   const canvas = canvasRef.value
   const ctx = canvas.getContext('2d')
@@ -308,7 +316,7 @@ const applyCrop = () => {
 }
 
 // 选择工具
-const selectTool = (tool) => {
+const selectTool = tool => {
   currentTool.value = tool
 }
 
@@ -337,14 +345,14 @@ const clearDrawing = () => {
 // 发送截图
 const handleSend = async () => {
   const canvas = canvasRef.value
-  if (!canvas) return
+  if (!canvas) {return}
 
   sending.value = true
 
   try {
     // 转换为 blob
-    const blob = await new Promise((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), 'image/png')
+    const blob = await new Promise(resolve => {
+      canvas.toBlob(blob => resolve(blob), 'image/png')
     })
 
     // 发送图片消息
@@ -369,7 +377,7 @@ const handleClose = () => {
 }
 
 // 监听 dialog 打开
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   if (val) {
     initCanvas()
   }

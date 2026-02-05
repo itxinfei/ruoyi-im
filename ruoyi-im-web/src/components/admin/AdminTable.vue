@@ -1,9 +1,16 @@
 <template>
   <div class="admin-table">
     <!-- 搜索栏 -->
-    <div v-if="showSearch" class="admin-table__search">
+    <div
+      v-if="showSearch"
+      class="admin-table__search"
+    >
       <slot name="search">
-        <el-form :inline="true" :model="searchForm" class="search-form">
+        <el-form
+          :inline="true"
+          :model="searchForm"
+          class="search-form"
+        >
           <el-form-item>
             <el-input
               v-model="searchForm.keyword"
@@ -19,24 +26,55 @@
             </el-input>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-            <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+            <el-button
+              type="primary"
+              :icon="Search"
+              @click="handleSearch"
+            >
+              搜索
+            </el-button>
+            <el-button
+              :icon="Refresh"
+              @click="handleReset"
+            >
+              重置
+            </el-button>
           </el-form-item>
         </el-form>
       </slot>
     </div>
 
     <!-- 操作栏 -->
-    <div v-if="$slots.actions || showExport" class="admin-table__actions">
+    <div
+      v-if="$slots.actions || showExport"
+      class="admin-table__actions"
+    >
       <slot name="actions" />
-      <el-button v-if="showExport" :icon="Download" @click="handleExport">导出数据</el-button>
+      <el-button
+        v-if="showExport"
+        :icon="Download"
+        @click="handleExport"
+      >
+        导出数据
+      </el-button>
     </div>
 
     <!-- 批量操作栏 -->
-    <div v-if="showBatch && selectedRows.length > 0" class="admin-table__batch">
+    <div
+      v-if="showBatch && selectedRows.length > 0"
+      class="admin-table__batch"
+    >
       <span class="selected-count">已选择 {{ selectedRows.length }} 项</span>
-      <slot name="batch" :selected-rows="selectedRows" />
-      <el-button size="small" @click="clearSelection">取消选择</el-button>
+      <slot
+        name="batch"
+        :selected-rows="selectedRows"
+      />
+      <el-button
+        size="small"
+        @click="clearSelection"
+      >
+        取消选择
+      </el-button>
     </div>
 
     <!-- 表格 -->
@@ -54,15 +92,29 @@
       @sort-change="handleSortChange"
     >
       <!-- 复选框列 -->
-      <el-table-column v-if="showBatch" type="selection" width="55" :reserve-selection="true" />
+      <el-table-column
+        v-if="showBatch"
+        type="selection"
+        width="55"
+        :reserve-selection="true"
+      />
       <!-- 序号列 -->
-      <el-table-column v-if="showIndex" type="index" label="序号" width="60" :index="indexMethod" />
+      <el-table-column
+        v-if="showIndex"
+        type="index"
+        label="序号"
+        width="60"
+        :index="indexMethod"
+      />
       <!-- 自定义列 -->
       <slot />
     </el-table>
 
     <!-- 分页 -->
-    <div v-if="showPagination" class="admin-table__pagination">
+    <div
+      v-if="showPagination"
+      class="admin-table__pagination"
+    >
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -200,7 +252,7 @@ const searchForm = ref({ keyword: '' })
 const selectedRows = ref([])
 
 // 序号计算
-const indexMethod = (index) => {
+const indexMethod = index => {
   return (props.currentPage - 1) * props.pageSize + index + 1
 }
 
@@ -223,13 +275,13 @@ const handleExport = () => {
 }
 
 // 选择变化
-const handleSelectionChange = (selection) => {
+const handleSelectionChange = selection => {
   selectedRows.value = selection
   emit('selection-change', selection)
 }
 
 // 排序变化
-const handleSortChange = (sortInfo) => {
+const handleSortChange = sortInfo => {
   emit('sort-change', sortInfo)
 }
 
@@ -240,13 +292,13 @@ const clearSelection = () => {
 }
 
 // 页码变化
-const handlePageChange = (page) => {
+const handlePageChange = page => {
   emit('update:currentPage', page)
   emit('page-change', page)
 }
 
 // 每页数量变化
-const handleSizeChange = (size) => {
+const handleSizeChange = size => {
   emit('update:pageSize', size)
   emit('update:currentPage', 1)
   emit('size-change', size)
