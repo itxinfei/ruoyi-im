@@ -26,7 +26,14 @@ public class ImContactGroupVO implements Serializable {
     private Integer count;
 
     /**
-     * 好友列表
+     * 好友列表（前端使用 contacts 字段）
      */
+    private List<ImFriendVO> contacts;
+
+    /**
+     * 好友列表（兼容旧代码）
+     * @deprecated 使用 contacts 替代
+     */
+    @Deprecated
     private List<ImFriendVO> friends;
 }

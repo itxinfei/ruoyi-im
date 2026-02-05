@@ -526,10 +526,8 @@
                   :size="40"
                 />
                 <div class="result-info">
-                  <span
-                    class="result-name"
-                    v-html="highlightText(item.name, searchQuery)"
-                  />
+                  <!-- eslint-disable-next-line vue/no-v-html -->
+                  <span class="result-name" v-html="highlightText(item.name, searchQuery)" />
                   <span
                     class="result-type-tag"
                     :class="item.type"
@@ -662,7 +660,7 @@ import RecommendedContacts from '@/components/Contacts/RecommendedContacts.vue'
 import BatchOperationBar from '@/components/Contacts/BatchOperationBar.vue'
 import GroupSelectDialog from '@/components/Contacts/GroupSelectDialog.vue'
 import AddFriendDialog from '@/components/Contacts/AddFriendDialog.vue'
-import { getFriendRequests, getGroupedFriendList, searchContacts, handleFriendRequest, getGroupList, createGroup, renameGroup, deleteGroup, moveContactToGroup } from '@/api/im/contact'
+import { getFriendRequests, getGroupedFriendList, searchContacts, handleFriendRequest, getGroupList, createGroup, renameGroup, deleteGroup } from '@/api/im/contact'
 import { getGroups } from '@/api/im/group'
 import { getOrgTree, getDepartmentMembers, searchOrgMembers } from '@/api/im/organization'
 import { getAllUsers } from '@/api/im/user'
@@ -1057,21 +1055,7 @@ const handleDeleteGroup = async groupName => {
   }
 }
 
-// 移动联系人到分组
-const handleMoveContactToGroup = async (contactId, groupName) => {
-  try {
-    const res = await moveContactToGroup({ contactId, groupName })
-    if (res.code === 200) {
-      ElMessage.success('已移动到分组')
-      await fetchData('friends')
-    } else {
-      ElMessage.error(res.msg || '移动失败')
-    }
-  } catch (error) {
-    console.error('移动联系人失败:', error)
-    ElMessage.error('移动失败，请稍后重试')
-  }
-}
+// Unused function removed
 
 // 分组菜单命令处理
 const handleGroupCommand = command => {
@@ -1096,11 +1080,7 @@ const handleRecommendUpdate = () => {
 
 // ==================== 批量操作 ====================
 
-// 进入批量模式
-const enterBatchMode = () => {
-  batchMode.value = true
-  selectedContacts.value.clear()
-}
+// Unused function removed
 
 // 退出批量模式
 const exitBatchMode = () => {

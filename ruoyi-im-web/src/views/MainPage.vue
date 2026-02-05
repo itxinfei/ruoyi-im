@@ -81,7 +81,7 @@
       />
       <GlobalSearchDialog
         v-model="showGlobalSearch"
-        @select-message="handleSearchSelectMessage"
+        @select="handleSearchSelect"
       />
 
       <!-- 外部应用对话框 -->

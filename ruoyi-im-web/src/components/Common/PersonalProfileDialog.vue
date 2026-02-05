@@ -1,68 +1,84 @@
 <template>
   <el-dialog
     v-model="visible"
-    width="960px"
+    width="400px"
     class="personal-profile-dialog"
     destroy-on-close
     append-to-body
     :show-close="false"
     :close-on-click-modal="true"
   >
-    <div class="profile-layout">
-      <!-- 侧边导航栏 -->
-      <aside class="profile-sidebar">
-        <div class="sidebar-header">
-          <span class="material-icons-outlined header-icon">person</span>
-          <span class="header-title">个人资料</span>
+    <div class="user-profile-container">
+      <!-- 头部：头像 + 基本信息 -->
+      <div class="header">
+        <div class="desc">
+          <h2 class="user-name">{{ currentUser.nickname || currentUser.username }}</h2>
+          <label class="user-id">{{ currentUser.id || '' }}</label>
         </div>
-
-        <nav class="sidebar-nav scrollbar-custom">
-          <div
-            v-for="item in menuItems"
-            :key="item.id"
-            class="nav-item"
-            :class="{ active: activeMenu === item.id }"
-            @click="activeMenu = item.id"
-          >
-            <span class="material-icons-outlined nav-icon">{{ item.icon }}</span>
-            <span class="nav-label">{{ item.label }}</span>
-          </div>
-        </nav>
-
-        <div class="sidebar-footer">
-          <div class="user-info">
-            <el-avatar :size="32" :src="currentUser.avatar" class="user-avatar" />
-            <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
-          </div>
+        <div class="avatar-wrapper">
+          <DingtalkAvatar
+            :src="currentUser.avatar"
+            :name="currentUser.nickname || currentUser.username"
+            :size="64"
+            class="avatar"
+          />
         </div>
-      </aside>
+      </div>
 
-      <!-- 主内容区域 -->
-      <main class="profile-main">
-        <header class="main-header">
-          <div class="header-content">
-            <h2 class="header-title">{{ currentMenuLabel }}</h2>
-            <p class="header-subtitle">{{ currentUser.nickname || currentUser.username }}</p>
-          </div>
-          <div class="header-actions">
-            <el-button
-              v-if="showEditButton"
-              type="primary"
-              @click="handleEdit"
-            >
-              <span class="material-icons-outlined" style="font-size: 16px; margin-right: 4px;">edit</span>
-              编辑
-            </el-button>
-            <el-button circle text class="close-btn" @click="handleClose">
-              <span class="material-icons-outlined">close</span>
-            </el-button>
-          </div>
-        </header>
+      <!-- 内容：信息列表 -->
+      <div class="content">
+        <ul class="info-list">
+          <li v-if="currentUser.mobile">
+            <label>手机</label>
+            <div class="value-wrapper">
+              <span>{{ currentUser.mobile }}</span>
+              <span class="icon-btn" @click="copyText(currentUser.mobile)">
+                <span class="material-icons-outlined">content_copy</span>
+              </span>
+            </div>
+          </li>
+          <li v-if="currentUser.email">
+            <label>邮箱</label>
+            <div class="value-wrapper">
+              <span class="email-text">{{ currentUser.email }}</span>
+              <span class="icon-btn" @click="copyText(currentUser.email)">
+                <span class="material-icons-outlined">content_copy</span>
+              </span>
+            </div>
+          </li>
+          <li>
+            <label>部门</label>
+            <div>{{ currentUser.dept?.deptName || currentUser.department || '-' }}</div>
+          </li>
+          <li>
+            <label>职位</label>
+            <div>{{ currentUser.position || '-' }}</div>
+          </li>
+          <li>
+            <label>性别</label>
+            <div>{{ genderText }}</div>
+          </li>
+          <li v-if="currentUser.birthday">
+            <label>生日</label>
+            <div>{{ currentUser.birthday }}</div>
+          </li>
+        </ul>
+      </div>
 
-        <div class="main-content scrollbar-custom">
-          <component :is="currentComponent" :user="currentUser" @open-password="showChangePassword = true" />
-        </div>
-      </main>
+      <!-- 底部操作按钮 -->
+      <div class="footer">
+        <a href="#" class="action-btn" @click.prevent="handleEdit">
+          <span class="material-icons-outlined">edit</span>
+          <span>编辑资料</span>
+        </a>
+        <a href="#" class="action-btn" @click.prevent="showChangePassword = true">
+          <span class="material-icons-outlined">lock</span>
+          <span>修改密码</span>
+        </a>
+        <a href="#" class="action-btn close-btn" @click.prevent="handleClose">
+          <span class="material-icons-outlined">close</span>
+        </a>
+      </div>
     </div>
 
     <!-- 编辑资料弹窗 -->
@@ -77,16 +93,10 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, defineAsyncComponent } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
-
-// 动态导入子组件
-const ProfileOverview = defineAsyncComponent(() => import('../Profile/Overview.vue'))
-const ProfileBasicInfo = defineAsyncComponent(() => import('../Profile/BasicInfo.vue'))
-const ProfileContactInfo = defineAsyncComponent(() => import('../Profile/ContactInfo.vue'))
-const ProfileSecurity = defineAsyncComponent(() => import('../Profile/Security.vue'))
-
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import EditProfileDialog from './EditProfileDialog.vue'
 import ChangePasswordDialog from './ChangePasswordDialog.vue'
 
@@ -99,37 +109,28 @@ const emit = defineEmits(['update:modelValue'])
 const store = useStore()
 
 const visible = ref(false)
-const activeMenu = ref('overview')
 const showEditDialog = ref(false)
 const showChangePassword = ref(false)
-
-// 菜单配置
-const menuItems = [
-  { id: 'overview', label: '个人资料', icon: 'person' },
-  { id: 'basic', label: '基本信息', icon: 'badge' },
-  { id: 'contact', label: '联系方式', icon: 'contact_phone' },
-  { id: 'security', label: '账号安全', icon: 'security' }
-]
-
-const currentMenuLabel = computed(() => menuItems.find(i => i.id === activeMenu.value)?.label || '个人资料')
 
 // 数据源
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
-// 组件映射
-const componentMap = {
-  overview: ProfileOverview,
-  basic: ProfileBasicInfo,
-  contact: ProfileContactInfo,
-  security: ProfileSecurity
-}
-
-const currentComponent = computed(() => componentMap[activeMenu.value])
-
-// 是否显示编辑按钮
-const showEditButton = computed(() => {
-  return ['overview', 'basic'].includes(activeMenu.value)
+const genderText = computed(() => {
+  const gender = currentUser.value?.gender
+  if (gender === 1) return '男'
+  if (gender === 2) return '女'
+  return '保密'
 })
+
+// 复制文本
+const copyText = (text) => {
+  if (!text) return
+  navigator.clipboard.writeText(String(text)).then(() => {
+    ElMessage.success('已复制到剪贴板')
+  }).catch(() => {
+    ElMessage.error('复制失败')
+  })
+}
 
 // 处理方法
 const handleClose = () => emit('update:modelValue', false)
@@ -152,7 +153,6 @@ const handleSaveProfile = async (formData) => {
 watch(() => props.modelValue, (val) => visible.value = val)
 watch(visible, (val) => {
   if (!val) emit('update:modelValue', false)
-  if (val) activeMenu.value = 'overview' // 打开时重置为首页
 })
 </script>
 
@@ -161,11 +161,10 @@ watch(visible, (val) => {
 
 // 对话框样式
 :deep(.el-dialog) {
-  border-radius: var(--dt-radius-xl);
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: var(--dt-shadow-dialog);
-  margin-top: 5vh !important;
-  background: var(--dt-bg-body);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  background: #fcfcfc;
 }
 
 :deep(.el-dialog__header) {
@@ -174,226 +173,206 @@ watch(visible, (val) => {
 
 :deep(.el-dialog__body) {
   padding: 0;
-  height: 720px;
-  background: var(--dt-bg-body);
+  background: #fcfcfc;
 }
 
-.profile-layout {
-  display: flex;
-  height: 100%;
+.user-profile-container {
   width: 100%;
-  background: var(--dt-bg-body);
-}
-
-// 侧边栏样式
-.profile-sidebar {
-  width: 240px;
-  background: var(--dt-bg-card);
-  border-right: 1px solid var(--dt-border-color);
   display: flex;
   flex-direction: column;
+  background: #fcfcfc;
+  color: #292a2c;
+}
+
+// 头部
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.desc {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1;
+  padding-right: 16px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #292a2c;
+  margin: 0 0 4px 0;
+}
+
+.user-id {
+  font-size: 12px;
+  color: #7f7f7f;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar-wrapper .avatar {
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
-.sidebar-header {
-  height: 64px;
+// 内容区
+.content {
+  width: 100%;
+  text-align: left;
+}
+
+.info-list {
+  list-style: none;
+  margin: 16px 20px;
+  padding: 0;
+}
+
+.info-list li {
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--dt-border-color);
-  background: var(--dt-bg-card);
-  gap: 12px;
+  height: 36px;
+  line-height: 36px;
+  font-size: 13px;
+  border-bottom: 1px solid transparent;
 
-  .header-icon {
-    font-size: 24px;
-    color: var(--dt-brand-color);
-  }
-
-  .header-title {
-    font-size: 18px;
-    font-weight: var(--dt-font-weight-semibold);
-    color: var(--dt-text-primary);
+  &:last-child {
+    border-bottom: none;
   }
 }
 
-.sidebar-nav {
+.info-list li label {
+  min-width: 40px;
+  margin-right: 16px;
+  color: #7f7f7f;
+  font-size: 13px;
+  text-align: justify;
+  text-align-last: justify;
+}
+
+.info-list li > div {
   flex: 1;
-  padding: 12px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  overflow-y: auto;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: var(--dt-radius-md);
-  cursor: pointer;
-  color: var(--dt-text-secondary);
-  transition: all 0.2s ease;
-  user-select: none;
-  font-size: 14px;
-  gap: 12px;
-
-  &:hover {
-    background: var(--dt-bg-hover);
-    color: var(--dt-text-primary);
-  }
-
-  &.active {
-    background: var(--dt-brand-bg);
-    color: var(--dt-brand-color);
-    font-weight: var(--dt-font-weight-medium);
-  }
-}
-
-.nav-icon {
-  font-size: 20px;
-}
-
-.nav-label {
-  font-size: 14px;
-}
-
-.sidebar-footer {
-  padding: 12px;
-  border-top: 1px solid var(--dt-border-color);
-  background: var(--dt-bg-card);
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: var(--dt-radius-md);
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: var(--dt-bg-hover);
-  }
-
-  .user-avatar {
-    border: 2px solid var(--dt-border-light);
-  }
-
-  .user-name {
-    font-size: 14px;
-    font-weight: var(--dt-font-weight-medium);
-    color: var(--dt-text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-// 主内容区
-.profile-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  background: var(--dt-bg-body);
-}
-
-.main-header {
-  height: 64px;
-  padding: 0 24px;
+  color: #292a2c;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--dt-border-color);
-  background: var(--dt-bg-body);
-  flex-shrink: 0;
 }
 
-.header-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.header-title {
-  font-size: 18px;
-  font-weight: var(--dt-font-weight-semibold);
-  color: var(--dt-text-primary);
-  margin: 0;
-}
-
-.header-subtitle {
-  font-size: 13px;
-  color: var(--dt-text-secondary);
-}
-
-.header-actions {
+.value-wrapper {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  flex: 1;
+
+  .email-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+  }
 }
 
-.close-btn {
-  font-size: 20px;
-  color: var(--dt-text-secondary);
+.icon-btn {
+  margin-left: 8px;
+  cursor: pointer;
+  color: #7f7f7f;
+  transition: color 0.2s;
 
   &:hover {
-    color: var(--dt-text-primary);
-    background: var(--dt-bg-hover);
+    color: #4168e0;
+  }
+
+  .material-icons-outlined {
+    font-size: 16px;
   }
 }
 
-.main-content {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+// 底部操作区
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 16px 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e6e6e6;
+  gap: 8px;
 }
 
-// 滚动条样式
-.scrollbar-custom {
-  &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: #5d7ce8;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(93, 124, 232, 0.1);
   }
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
+  .material-icons-outlined {
+    font-size: 18px;
   }
 
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--dt-border-color);
-    border-radius: var(--dt-radius-sm);
+  &.close-btn {
+    color: #7f7f7f;
 
     &:hover {
-      background-color: var(--dt-text-quaternary);
+      background: rgba(0, 0, 0, 0.05);
+      color: #292a2c;
     }
   }
 }
 
 // 暗黑模式适配
 .dark {
-  .profile-sidebar {
-    background: var(--dt-bg-card-dark);
-    border-right-color: var(--dt-border-dark);
+  .user-profile-container,
+  :deep(.el-dialog) {
+    background: #1a1a1a;
   }
 
-  .sidebar-header,
-  .sidebar-footer {
-    border-color: var(--dt-border-dark);
+  .header {
+    border-bottom-color: #333;
   }
 
-  .nav-item.active {
-    background: var(--dt-brand-bg-dark);
+  .user-name {
+    color: #e5e5e5;
   }
 
-  .main-header {
-    border-bottom-color: var(--dt-border-dark);
+  .user-id,
+  .info-list li label {
+    color: #999;
   }
 
-  .user-info:hover {
-    background: var(--dt-bg-hover-dark);
+  .info-list li > div {
+    color: #e5e5e5;
+  }
+
+  .footer {
+    border-top-color: #333;
+  }
+
+  .action-btn {
+    &.close-btn {
+      color: #999;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #e5e5e5;
+      }
+    }
   }
 }
 </style>

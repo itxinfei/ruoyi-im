@@ -491,7 +491,8 @@ public class ImFriendServiceImpl implements ImFriendService {
         for (Map.Entry<String, List<ImFriendVO>> entry : groupMap.entrySet()) {
             ImContactGroupVO vo = new ImContactGroupVO();
             vo.setGroupName(entry.getKey());
-            vo.setFriends(entry.getValue());
+            vo.setContacts(entry.getValue());
+            vo.setFriends(entry.getValue()); // 兼容
             vo.setCount(entry.getValue().size());
             result.add(vo);
         }
