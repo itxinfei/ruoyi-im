@@ -37,9 +37,13 @@ public class DatabasePasswordFixer implements CommandLineRunner {
             log.info("正在修复 zhangsan 用户的密码...");
             log.info("BCrypt 哈希: {}", correctHash);
 
-            // 直接通过 SQL 更新
-            // 注意：这里使用原生 SQL 更新，绕过 MyBatis
-            int updated = userMapper.fixZhangsanPassword(correctHash);
+            // 检查 zhangsan 用户是否存在
+            com.ruoyi.im.domain.ImUser zhangsanUser = userMapper.selectImUserByUsername("zhangsan");
+            int updated = 0;
+            if (zhangsanUser != null) {
+                zhangsanUser.setPassword(correctHash);
+                updated = userMapper.updateImUser(zhangsanUser);
+            }
 
             if (updated > 0) {
                 log.info("密码修复成功！");

@@ -103,6 +103,7 @@ const emit = defineEmits(['close', 'select'])
 const searchQuery = ref('')
 const selectedIndex = ref(0)
 const searchInputRef = ref(null)
+const isUnmounted = ref(false) // 标记组件是否已卸载
 
 // 命令列表配置
 const commands = [
@@ -264,6 +265,7 @@ const handleClose = () => {
 watch(() => props.show, (show) => {
   if (show) {
     nextTick(() => {
+      if (isUnmounted.value) return
       searchInputRef.value?.focus()
     })
   }
@@ -283,6 +285,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
   document.removeEventListener('keydown', handleGlobalKeydown)
 })
 

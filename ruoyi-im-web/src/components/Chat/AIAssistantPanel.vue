@@ -83,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Delete, ArrowDown } from '@element-plus/icons-vue'
 import { chat, clearConversation as apiClearConversation, getSupportedModels } from '@/api/im'
@@ -91,6 +91,8 @@ import { useUserStore } from '@/store/modules/user'
 import { formatTime } from '@/utils/format'
 
 const userStore = useUserStore()
+
+const isUnmounted = ref(false) // 标记组件是否已卸载
 
 const messages = ref([])
 const inputText = ref('')
@@ -119,6 +121,7 @@ const sendMessage = async () => {
 
   // 滚动到底部
   await nextTick()
+  if (isUnmounted.value) return
   scrollToBottom()
 
   // 显示打字状态
@@ -154,6 +157,7 @@ const sendMessage = async () => {
   } finally {
     isTyping.value = false
     await nextTick()
+    if (isUnmounted.value) return
     scrollToBottom()
   }
 }
@@ -205,6 +209,10 @@ const loadModels = async () => {
 
 onMounted(() => {
   loadModels()
+})
+
+onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
 })
 </script>
 

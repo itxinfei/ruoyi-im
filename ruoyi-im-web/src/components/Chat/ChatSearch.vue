@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, nextTick, onUnmounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import dayjs from 'dayjs'
@@ -143,6 +143,7 @@ let searchTimer = null
 
 const searchInputRef = ref(null)
 const resultsListRef = ref(null)
+const isUnmounted = ref(false) // 标记组件是否已卸载
 
 // 对话框显示状态
 const dialogVisible = computed({
@@ -156,6 +157,7 @@ const totalCount = computed(() => searchResults.value.length)
 // 监听显示状态
 const handleOpen = () => {
   nextTick(() => {
+    if (isUnmounted.value) return
     searchInputRef.value?.focus()
   })
 }
@@ -290,6 +292,7 @@ const navigateNext = () => {
 // 滚动到当前结果
 const scrollToCurrentResult = () => {
   nextTick(() => {
+    if (isUnmounted.value) return
     const activeElement = resultsListRef.value?.querySelector('.result-item.active')
     if (activeElement) {
       activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
@@ -317,6 +320,14 @@ const handleEnter = () => {
     dialogVisible.value = false
   }
 }
+
+// 组件卸载时标记
+onUnmounted(() => {
+  isUnmounted.value = true
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+})
 </script>
 
 <style scoped lang="scss">

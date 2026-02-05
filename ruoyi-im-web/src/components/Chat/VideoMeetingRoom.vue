@@ -282,6 +282,7 @@ const isVideoEnabled = ref(true)
 const isAudioEnabled = ref(true)
 const isScreenSharing = ref(false)
 const isLocalSpeaking = ref(false)
+const isUnmounted = ref(false) // 标记组件是否已卸载
 
 // 参会者
 const participants = ref([])
@@ -375,6 +376,7 @@ const initLocalMedia = async () => {
     localStream.value = stream
 
     await nextTick()
+    if (isUnmounted.value) return
     if (localVideoRef.value) {
       localVideoRef.value.srcObject = stream
     }
@@ -582,6 +584,7 @@ const updateParticipantStream = (id, stream) => {
 
     // 绑定到 video 元素
     nextTick(() => {
+      if (isUnmounted.value) return
       const videoEl = videoRefs.get(id)
       if (videoEl && stream) {
         videoEl.srcObject = stream
@@ -621,7 +624,20 @@ defineExpose({
 })
 
 onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
   stopLocalMedia()
+  // 清理定时器
+  if (durationTimer) {
+    clearInterval(durationTimer)
+    durationTimer = null
+  }
+  // 清理媒体录制器
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop()
+    mediaRecorder = null
+  }
+  // 清理 video 引用
+  videoRefs.clear()
 })
 </script>
 

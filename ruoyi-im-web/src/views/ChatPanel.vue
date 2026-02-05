@@ -1213,6 +1213,7 @@ const handleReply = (message) => {
   cmdReply(message)
   // 聚焦输入框，提升用户体验
   nextTick(() => {
+    if (isUnmounted.value) return
     messageInputRef.value?.focus()
   })
 }
@@ -1295,6 +1296,7 @@ const handleReEdit = ({ content }) => {
 
   // 聚焦输入框
   nextTick(() => {
+    if (isUnmounted.value) return
     messageInputRef.value?.focus()
   })
 
@@ -1304,11 +1306,23 @@ const handleReEdit = ({ content }) => {
 // 通话功能
 const handleStartCall = () => {
   isIncomingCall.value = false
+  // 设置通话用户信息
+  remoteCallUser.value = {
+    userId: session.value?.targetId,
+    userName: session.value?.name,
+    avatar: session.value?.avatar
+  }
   showVoiceCall.value = true
 }
 
 const handleStartVideo = () => {
   isIncomingCall.value = false
+  // 设置通话用户信息
+  remoteCallUser.value = {
+    userId: session.value?.targetId,
+    userName: session.value?.name,
+    avatar: session.value?.avatar
+  }
   showVideoCall.value = true
 }
 
@@ -1924,6 +1938,7 @@ onMounted(() => {
 
   // 清理函数（在组件卸载时调用）
   onUnmounted(() => {
+    isUnmounted.value = true // 标记组件已卸载
     window.removeEventListener('keydown', handleKeydown)
     document.removeEventListener('click', handleClickOutside)
   })

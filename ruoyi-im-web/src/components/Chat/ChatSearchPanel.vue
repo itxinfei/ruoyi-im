@@ -155,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { searchMessages } from '@/api/im/message'
@@ -180,6 +180,7 @@ const searchResults = ref([])
 const hasMore = ref(false)
 const currentPage = ref(1)
 const activeFilter = ref('all')
+const isUnmounted = ref(false) // 标记组件是否已卸载
 
 // 搜索类型筛选
 const searchFilters = computed(() => [
@@ -380,9 +381,15 @@ watch(() => props.visible, (val) => {
     hasSearched.value = false
     activeFilter.value = 'all'
     nextTick(() => {
+      if (isUnmounted.value) return
       searchInputRef.value?.focus()
     })
   }
+})
+
+// 组件卸载时标记
+onUnmounted(() => {
+  isUnmounted.value = true
 })
 </script>
 

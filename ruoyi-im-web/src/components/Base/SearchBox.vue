@@ -241,6 +241,7 @@ const emit = defineEmits([
 
 // 状态
 const inputRef = ref(null)
+const isUnmounted = ref(false) // 标记组件是否已卸载
 const inputValue = ref(props.modelValue)
 const isFocused = ref(false)
 const isExpanded = ref(false)
@@ -327,7 +328,10 @@ const clearInput = () => {
   isExpanded.value = false
   activeIndex.value = -1
   emit('clear')
-  nextTick(() => focusInput())
+  nextTick(() => {
+    if (isUnmounted.value) return
+    focusInput()
+  })
 }
 
 const handleSearch = () => {
@@ -411,11 +415,15 @@ const handleKeyDown = (e) => {
 // 生命周期
 onMounted(() => {
   if (props.autofocus) {
-    nextTick(() => focusInput())
+    nextTick(() => {
+      if (isUnmounted.value) return
+      focusInput()
+    })
   }
 })
 
 onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
   clearTimeout(debounceTimer)
   clearTimeout(blurTimer)
 })

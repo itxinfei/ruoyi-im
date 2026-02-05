@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
@@ -147,6 +147,7 @@ const listRef = ref(null)
 const loading = ref(false)
 const hasMore = ref(true)
 const historyMessages = ref([])
+const isUnmounted = ref(false) // 标记组件是否已卸载
 const currentPage = ref(1)
 const pageSize = 50
 
@@ -263,6 +264,7 @@ const loadHistoryMessages = async () => {
 // 搜索处理
 const handleSearch = () => {
   nextTick(() => {
+    if (isUnmounted.value) return
     if (listRef.value) {
       listRef.value.scrollTop = 0
     }
@@ -313,6 +315,11 @@ watch(activeCategory, () => {
 const getConversationId = () => {
   return props.conversationId || props.session?.conversationId || props.session?.id
 }
+
+// 组件卸载时标记
+onUnmounted(() => {
+  isUnmounted.value = true
+})
 </script>
 
 <style scoped lang="scss">

@@ -193,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Search, ArrowDown, MoreFilled, Trophy, UserFilled, User } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -228,6 +228,7 @@ const emit = defineEmits([
 ])
 
 const searchKeyword = ref('')
+const isUnmounted = ref(false) // 标记组件是否已卸载
 const listRef = ref(null)
 const scrollTop = ref(0)
 const clientHeight = ref(400)
@@ -393,10 +394,15 @@ const handleMemberCommand = async (command, member) => {
 // 初始化
 onMounted(() => {
   nextTick(() => {
+    if (isUnmounted.value) return
     if (listRef.value) {
       clientHeight.value = listRef.value.clientHeight
     }
   })
+})
+
+onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
 })
 </script>
 

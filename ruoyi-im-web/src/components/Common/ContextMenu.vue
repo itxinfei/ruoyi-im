@@ -131,6 +131,7 @@ const isDark = useDark()
 
 // 内部显示状态
 const computedShow = ref(props.show)
+const isUnmounted = ref(false) // 标记组件是否已卸载
 const menuRef = ref(null)
 const focusedIndex = ref(-1)
 const isKeyboardMode = ref(false)
@@ -292,6 +293,7 @@ const handleKeydown = (e) => {
 // 滚动到聚焦的菜单项
 const scrollToFocusedItem = () => {
   nextTick(() => {
+    if (isUnmounted.value) return
     const focusedElement = menuRef.value?._elRef?.querySelector(`.context-menu__item--focused`)
     if (focusedElement) {
       focusedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
@@ -327,6 +329,7 @@ watch(() => props.show, (newVal) => {
   computedShow.value = newVal
   if (newVal) {
     nextTick(() => {
+      if (isUnmounted.value) return
       updateMenuSize()
       focusedIndex.value = -1
     })
@@ -335,7 +338,10 @@ watch(() => props.show, (newVal) => {
 
 // 监听 items 变化
 watch(() => props.items, () => {
-  nextTick(updateMenuSize)
+  nextTick(() => {
+    if (isUnmounted.value) return
+    updateMenuSize()
+  })
 }, { deep: true })
 
 // 生命周期
@@ -346,6 +352,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
   document.removeEventListener('click', handleOutsideClick)
   document.removeEventListener('keydown', handleKeydown)
   document.removeEventListener('scroll', handleScroll, true)

@@ -118,6 +118,8 @@ import { parseMessageContent } from '@/utils/message'
 
 const store = useStore()
 
+const emit = defineEmits(['forward', 'batch-forward'])
+
 const visible = ref(false)
 const messages = ref([])
 const messageIds = ref([])  // 用于批量转发的消息ID列表

@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Edit, Delete } from '@element-plus/icons-vue'
 
@@ -116,6 +116,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'send', 'close'])
+
+const isUnmounted = ref(false) // 标记组件是否已卸载
 
 const visible = computed({
   get: () => props.modelValue,
@@ -165,6 +167,7 @@ const cropOverlayStyle = computed(() => {
 // 初始化画布
 const initCanvas = async () => {
   await nextTick()
+  if (isUnmounted.value) return
   const canvas = canvasRef.value
   if (!canvas || !props.imageData) return
 
@@ -370,6 +373,10 @@ watch(() => props.modelValue, (val) => {
   if (val) {
     initCanvas()
   }
+})
+
+onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
 })
 </script>
 

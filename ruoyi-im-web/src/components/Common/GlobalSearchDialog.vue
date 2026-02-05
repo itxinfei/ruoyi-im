@@ -399,6 +399,8 @@ const emit = defineEmits(['update:modelValue', 'select'])
 
 const store = useStore()
 
+const isUnmounted = ref(false) // 标记组件是否已卸载
+
 // 状态
 const visible = ref(false)
 const searchKeyword = ref('')
@@ -487,6 +489,7 @@ watch(() => props.modelValue, (val) => {
   visible.value = val
   if (val) {
     nextTick(() => {
+      if (isUnmounted.value) return
       searchInputRef.value?.focus()
     })
   }
@@ -695,7 +698,10 @@ const clearSearch = () => {
   searchResult.value = null
   suggestions.value = []
   showSuggestions.value = false
-  nextTick(() => searchInputRef.value?.focus())
+  nextTick(() => {
+    if (isUnmounted.value) return
+    searchInputRef.value?.focus()
+  })
 }
 
 const resetSearch = () => {
@@ -741,7 +747,10 @@ const handleCategoryChange = (key) => {
 const handleQuickAction = (type) => {
   const prefixMap = { contact: '@', group: '#', file: 'file:', message: '' }
   searchKeyword.value = prefixMap[type] || ''
-  nextTick(() => searchInputRef.value?.focus())
+  nextTick(() => {
+    if (isUnmounted.value) return
+    searchInputRef.value?.focus()
+  })
 }
 
 const handleRecentClick = (item) => {
@@ -908,6 +917,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
   window.removeEventListener('resize', handleResize)
   clearTimeout(searchTimer)
 })

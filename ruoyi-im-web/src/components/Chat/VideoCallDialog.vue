@@ -189,6 +189,7 @@ const pipPosition = ref({ x: 20, y: 20 })
 
 let durationTimer = null
 let peerConnection = null
+const isUnmounted = ref(false) // 标记组件是否已卸载
 
 // 计算属性
 const isCalling = computed(() => callStatus.value === 'calling')
@@ -342,6 +343,7 @@ const initLocalMedia = async () => {
 
     // 设置本地视频预览
     await nextTick()
+    if (isUnmounted.value) return
     if (localVideoRef.value) {
       localVideoRef.value.srcObject = stream
     }
@@ -425,6 +427,7 @@ const handleExpand = () => {
   isMinimized.value = false
   emit('expand')
   nextTick(() => {
+    if (isUnmounted.value) return
     if (miniVideoRef.value && localStream.value) {
       miniVideoRef.value.srcObject = localStream.value
     }
@@ -488,6 +491,7 @@ watch(() => props.visible, (newVal) => {
 watch(isMinimized, (newVal) => {
   if (!newVal && localStream.value) {
     nextTick(() => {
+      if (isUnmounted.value) return
       if (localVideoRef.value) {
         localVideoRef.value.srcObject = localStream.value
       }
@@ -496,6 +500,7 @@ watch(isMinimized, (newVal) => {
 })
 
 onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
   stopDurationTimer()
   stopMediaStreams()
   document.removeEventListener('mousemove', onDrag)

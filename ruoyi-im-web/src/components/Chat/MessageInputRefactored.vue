@@ -19,13 +19,11 @@
       @toggle-emoji="toggleEmojiPicker"
       @upload-image="triggerImageUpload"
       @upload-file="triggerFileUpload"
-      @upload-video="triggerVideoUpload"
       @screenshot="handleScreenshot"
       @at-member="handleAtMember"
       @smart-reply="handleShowSmartReply"
-      @send-location="handleLocation"
-      @schedule-send="handleScheduleSend"
-      @create-todo="handleCreateTodo"
+      @voice-call="handleVoiceCall"
+      @video-call="handleVideoCall"
     />
 
     <!-- 录音动画区域 -->
@@ -95,34 +93,19 @@
         v-if="!isVoiceMode"
         class="input-footer"
       >
-        <span class="hint-text">{{ sendShortcutHint }}</span>
         <div class="footer-actions">
           <!-- 语音输入切换按钮 -->
           <el-tooltip
-            :content="isVoiceMode ? '切换到文字输入' : '按住说话'"
+            content="按住说话"
             placement="top"
           >
             <button
               class="footer-action-btn voice-btn"
-              :class="{ active: isVoiceMode }"
               @click="toggleVoiceMode"
             >
               <el-icon><Microphone /></el-icon>
             </button>
           </el-tooltip>
-
-          <button
-            class="send-btn"
-            :class="{ active: canSend }"
-            :disabled="!canSend || sending"
-            @click="handleSend"
-          >
-            <span
-              v-if="!sending"
-              class="material-icons-outlined send-icon"
-            >send</span>
-            <span>{{ sending ? '发送中' : '发送' }}</span>
-          </button>
         </div>
       </div>
     </div>
@@ -149,14 +132,6 @@
     />
 
     <!-- 隐藏的输入元素 -->
-    <input
-      ref="videoInputRef"
-      type="file"
-      accept="video/mp4,video/webm,video/ogg,video/quicktime"
-      style="display: none"
-      @change="handleVideoFileChange"
-    >
-
     <input
       ref="imageInputRef"
       type="file"
@@ -258,8 +233,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'send', 'send-voice', 'upload-image', 'upload-file', 'upload-video',
-  'send-location', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input',
+  'send', 'send-voice', 'upload-image', 'upload-file',
+  'cancel-reply', 'cancel-edit', 'edit-confirm', 'input',
   'start-call', 'start-video', 'send-screenshot', 'draft-change', 'create-announcement'
 ])
 
@@ -281,7 +256,6 @@ const { containerHeight, isResizing, startResize, resetHeight } = useInputResize
 // ========== 文件上传触发函数 ==========
 const triggerImageUpload = () => imageInputRef.value?.click()
 const triggerFileUpload = () => fileInputRef.value?.click()
-const triggerVideoUpload = () => videoInputRef.value?.click()
 
 // ========== 命令处理函数 ==========
 const handleCreateTodo = async () => {
@@ -423,7 +397,6 @@ const inputAreaRef = ref(null)
 const atMemberPickerRef = ref(null)
 const imageInputRef = ref(null)
 const fileInputRef = ref(null)
-const videoInputRef = ref(null)
 const isVoiceMode = ref(false)
 
 const showEmojiPicker = ref(false)
@@ -445,23 +418,6 @@ const isUnmounted = ref(false) // 标记组件是否已卸载
 let dragCounter = 0
 
 // ========== 计算属性 ==========
-
-const sendShortcutHint = computed(() => {
-  const shortcut = store.state.im.settings.shortcuts.send
-  return shortcut === 'ctrl-enter' ? '按 Ctrl + Enter 发送' : '按 Enter 发送'
-})
-
-// 优化发送条件：检查内容、文件、会话有效性、网络状态和发送状态
-const canSend = computed(() => {
-  const hasContent = messageContent.value.trim().length > 0
-  const hasFiles = pendingFiles.value.length > 0
-  const hasSession = !!props.session?.id
-  const isOnline = store.state.im.wsConnected
-  const notSending = !props.sending
-
-  // 有文本内容或者有文件都可以发送
-  return (hasContent || hasFiles) && hasSession && isOnline && notSending
-})
 
 // 输入框占位符（语音模式时显示不同的提示）
 const inputPlaceholder = computed(() => {
@@ -667,25 +623,6 @@ const handleFileInputChange = () => {
   }
 }
 
-const handleVideoFileChange = () => {
-  const file = videoInputRef.value?.files?.[0]
-  if (!file) {return}
-
-  const config = {
-    validTypes: ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'],
-    maxSize: 100 * 1024 * 1024,
-    typeError: '支持的视频格式：MP4、WebM、OGG',
-    sizeError: '视频大小不能超过100MB'
-  }
-
-  if (validateFile(file, config)) {
-    // 添加到待上传列表
-    pendingFiles.value = [...pendingFiles.value, file]
-    showFilePreview.value = true
-    videoInputRef.value.value = ''
-  }
-}
-
 // ========== 截图 ==========
 
 const handleScreenshot = () => {
@@ -839,8 +776,6 @@ const handleFileUploadConfirm = async ({ files, description }) => {
     try {
       if (file.type.startsWith('image/')) {
         await uploadFileWithDescription(file, description, 'image')
-      } else if (file.type.startsWith('video/')) {
-        await uploadFileWithDescription(file, description, 'video')
       } else if (file.type.startsWith('audio/')) {
         await uploadFileWithDescription(file, description, 'audio')
       } else {
@@ -891,9 +826,6 @@ const uploadFileWithDescription = async (file, description, type) => {
   if (type === 'image') {
     const res = await emitPromise('upload-image', formData)
     uploadUrl = res?.data?.fileUrl
-  } else if (type === 'video') {
-    const res = await emitPromise('upload-video', { file, url: URL.createObjectURL(file) })
-    uploadUrl = res?.url // 视频返回格式不同
   } else {
     const res = await emitPromise('upload-file', formData)
     uploadUrl = res?.data?.fileUrl
@@ -911,8 +843,8 @@ const uploadFileWithDescription = async (file, description, type) => {
   // 发送文件消息
   if (type === 'image') {
     emit('send', `[图片: ${file.name}]`)
-  } else if (type === 'video') {
-    emit('send', `[视频: ${file.name}]`)
+  } else if (type === 'audio') {
+    emit('send', `[音频: ${file.name}]`)
   } else {
     emit('send', `[文件: ${file.name}]`)
   }
@@ -955,6 +887,15 @@ const handleSelectSmartReply = replyText => {
 
 const handleScheduleSaved = () => {
   ElMessage.success('日程已创建')
+}
+
+// ========== 通话功能 ==========
+const handleVoiceCall = () => {
+  emit('start-call')
+}
+
+const handleVideoCall = () => {
+  emit('start-video')
 }
 
 // ========== 暴露方法 ==========
@@ -1150,16 +1091,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: var(--dt-space-3);
-  margin-top: var(--dt-space-2);
-
-  .hint-text {
-    font-size: var(--dt-font-size-sm);
-    color: var(--dt-text-tertiary);
-    user-select: none;
-
-    .dark & { color: var(--dt-text-quaternary-dark); }
-  }
+  padding: var(--dt-space-2) 0;
 
   .footer-actions {
     display: flex;
@@ -1173,73 +1105,30 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--dt-bg-card);
-    border: 1px solid var(--dt-border-color);
+    background: transparent;
+    border: none;
     border-radius: var(--dt-radius-sm);
-    color: var(--dt-text-secondary);
+    color: var(--dt-text-tertiary);
     cursor: pointer;
     transition: all var(--dt-transition-base);
 
-    .el-icon { font-size: 16px; }
+    .el-icon { font-size: 18px; }
 
     &:hover {
-      background: var(--dt-bg-tertiary);
+      background: rgba(0, 0, 0, 0.05);
       color: var(--dt-brand-color);
-      border-color: var(--dt-brand-color);
     }
 
-    &.active {
-      background: var(--dt-brand-color);
-      color: #fff;
-      border-color: var(--dt-brand-color);
+    &:active {
+      transform: scale(0.95);
     }
 
     .dark & {
-      background: var(--dt-bg-card-dark);
-      border-color: var(--dt-border-dark);
+      color: var(--dt-text-tertiary-dark);
 
       &:hover {
-        background: var(--dt-bg-hover-dark);
+        background: rgba(255, 255, 255, 0.08);
       }
-    }
-  }
-
-  .send-btn {
-    padding: var(--dt-space-2) var(--dt-space-5);
-    border-radius: var(--dt-radius-sm);
-    border: none;
-    background: var(--dt-border-color);
-    color: var(--dt-text-tertiary);
-    font-size: var(--dt-font-size-base);
-    font-weight: var(--dt-font-weight-medium);
-    cursor: default;
-    transition: all var(--dt-transition-base);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dt-space-1);
-
-    .send-icon {
-      font-size: 18px;
-    }
-
-    &.active {
-      background: var(--dt-brand-color);
-      color: #fff;
-      cursor: pointer;
-
-      &:hover {
-        background: var(--dt-brand-hover);
-      }
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .dark & {
-      background: var(--dt-bg-hover-dark);
     }
   }
 }

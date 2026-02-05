@@ -172,7 +172,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import DesktopSticker from './DesktopSticker.vue'
 import { getOCREngine } from '@/utils/ocr'
@@ -183,6 +183,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['confirm', 'close'])
+
+const isUnmounted = ref(false) // 标记组件是否已卸载
 
 // ==================== 基础状态 ====================
 const canvasRef = ref(null)
@@ -344,6 +346,7 @@ const enterEditMode = () => {
   editing.value = true
 
   nextTick(() => {
+    if (isUnmounted.value) return
     initEditorCanvas()
   })
 }
@@ -586,6 +589,7 @@ const handleTextToolClick = (e) => {
   showTextInput.value = true
 
   nextTick(() => {
+    if (isUnmounted.value) return
     textInputRef.value?.focus()
   })
 }
@@ -712,6 +716,7 @@ const startCapture = async () => {
       capturing.value = true
 
       nextTick(() => {
+        if (isUnmounted.value) return
         initCanvas(img, x, y, w, h)
       })
     }
@@ -876,6 +881,15 @@ watch(() => props.visible, (val) => {
     reset()
     document.removeEventListener('keydown', handleKeydown)
   }
+})
+
+onUnmounted(() => {
+  isUnmounted.value = true // 标记组件已卸载
+  // 清理事件监听器
+  document.removeEventListener('keydown', handleKeydown)
+  // 清理引用
+  ctx = null
+  baseImageData = null
 })
 </script>
 

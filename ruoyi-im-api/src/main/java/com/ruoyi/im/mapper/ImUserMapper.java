@@ -176,13 +176,4 @@ public interface ImUserMapper extends BaseMapper<ImUser> {
      * @return total user count
      */
     int countImUsers();
-
-    /**
-     * 修复 zhangsan 用户的密码 - 临时工具方法
-     *
-     * @param password BCrypt 加密的密码（123456）
-     * @return 更新行数
-     */
-    @org.apache.ibatis.annotations.Update("UPDATE im_user SET password = #{password} WHERE username = 'zhangsan'")
-    int fixZhangsanPassword(String password);
 }

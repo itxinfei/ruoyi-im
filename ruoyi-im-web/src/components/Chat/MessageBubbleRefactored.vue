@@ -18,6 +18,7 @@
       @mouseup="handleMouseRelease"
       @mouseleave="handleMouseRelease"
       @contextmenu.prevent="handleContextMenu"
+    >
       <!-- 消息内容区域 -->
       <div class="bubble-content">
         <!-- 文本消息 -->
