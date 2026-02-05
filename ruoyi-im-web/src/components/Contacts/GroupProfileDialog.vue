@@ -200,7 +200,10 @@ import AnnouncementList from './GroupProfile/AnnouncementList.vue'
 import GroupQRCode from './GroupProfile/GroupQRCode.vue'
 import GroupFiles from './GroupProfile/GroupFiles.vue'
 // API
-import { getGroup, getGroupMembers, setGroupAdmin, transferGroupOwner, dismissGroup, leaveGroup } from '@/api/im/group'
+import {
+  getGroup, getGroupMembers, setGroupAdmin, transferGroupOwner, dismissGroup, leaveGroup,
+  getGroupAnnouncements, createGroupAnnouncement, updateGroupAnnouncement, deleteGroupAnnouncement, setAnnouncementPinned
+} from '@/api/im/group'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -290,8 +293,19 @@ const loadGroupInfo = async () => {
   }
 }
 
-const loadAnnouncements = () => {
-  announcements.value = []
+const loadAnnouncements = async () => {
+  if (!props.groupId) return
+  try {
+    const res = await getGroupAnnouncements(props.groupId)
+    if (res.code === 200) {
+      announcements.value = res.data || []
+    } else {
+      announcements.value = []
+    }
+  } catch (error) {
+    console.error('加载公告失败', error)
+    announcements.value = []
+  }
 }
 
 // 监听弹窗打开
@@ -353,8 +367,36 @@ const handleCancelAdmin = async ({ member, memberId }) => {
   }
 }
 
-const handleMuteMember = (member) => {
-  // 实现禁言逻辑
+const handleMuteMember = async (member) => {
+  try {
+    const duration = 60 // 默认禁言60分钟
+    const memberName = member.nickname || member.username
+    const action = member.isMuted ? '解除禁言' : '禁言'
+
+    await ElMessageBox.confirm(
+      `确定要${action}成员 ${memberName} 吗？${!member.isMuted ? `（禁言${duration}分钟）` : ''}`,
+      `${action}成员`,
+      { type: 'warning' }
+    )
+
+    if (member.isMuted) {
+      // 解除禁言 - duration传null表示取消禁言
+      await muteGroupMember(props.groupId, member.userId || member.id, null)
+      ElMessage.success('已解除禁言')
+    } else {
+      // 禁言成员 - duration以分钟为单位
+      await muteGroupMember(props.groupId, member.userId || member.id, duration)
+      ElMessage.success(`已禁言${duration}分钟`)
+    }
+
+    // 重新加载成员列表
+    await loadGroupInfo()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('禁言操作失败', error)
+      ElMessage.error('操作失败')
+    }
+  }
 }
 
 const handleRemoveMember = async ({ member, memberId }) => {
@@ -384,7 +426,7 @@ const handleEditAnnouncement = (announcement) => {
   showAnnouncementDialog.value = true
 }
 
-const handleSaveAnnouncement = () => {
+const handleSaveAnnouncement = async () => {
   if (!announcementForm.value.title.trim()) {
     ElMessage.warning('请输入公告标题')
     return
@@ -394,36 +436,49 @@ const handleSaveAnnouncement = () => {
     return
   }
 
-  if (editingAnnouncement.value) {
-    const index = announcements.value.findIndex(a => a.id === editingAnnouncement.value.id)
-    if (index !== -1) {
-      announcements.value[index] = {
-        ...editingAnnouncement.value,
-        ...announcementForm.value
+  try {
+    if (editingAnnouncement.value) {
+      // 更新公告
+      await updateGroupAnnouncement(
+        editingAnnouncement.value.id,
+        announcementForm.value.content
+      )
+      // 更新置顶状态
+      if (editingAnnouncement.value.isPinned !== announcementForm.value.isPinned) {
+        await setAnnouncementPinned(editingAnnouncement.value.id, announcementForm.value.isPinned)
       }
+      ElMessage.success('公告已更新')
+    } else {
+      // 创建新公告
+      await createGroupAnnouncement({
+        groupId: props.groupId,
+        title: announcementForm.value.title,
+        content: announcementForm.value.content,
+        isPinned: announcementForm.value.isPinned
+      })
+      ElMessage.success('公告已发布')
     }
-    ElMessage.success('公告已更新')
-  } else {
-    announcements.value.unshift({
-      id: Date.now(),
-      ...announcementForm.value,
-      createTime: new Date().toISOString(),
-      publisherName: currentUser.value?.nickname || currentUser.value?.username
-    })
-    ElMessage.success('公告已发布')
+    // 重新加载公告列表
+    await loadAnnouncements()
+    showAnnouncementDialog.value = false
+  } catch (error) {
+    console.error('保存公告失败', error)
+    ElMessage.error('保存公告失败')
   }
-  showAnnouncementDialog.value = false
 }
 
-const handleDeleteAnnouncement = (announcement) => {
-  ElMessageBox.confirm('确定要删除这条公告吗？', '删除公告', { type: 'warning' })
-    .then(() => {
-      const index = announcements.value.findIndex(a => a.id === announcement.id)
-      if (index !== -1) {
-        announcements.value.splice(index, 1)
-      }
-      ElMessage.success('公告已删除')
-    }).catch(() => {})
+const handleDeleteAnnouncement = async (announcement) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这条公告吗？', '删除公告', { type: 'warning' })
+    await deleteGroupAnnouncement(announcement.id)
+    ElMessage.success('公告已删除')
+    await loadAnnouncements()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除公告失败', error)
+      ElMessage.error('删除公告失败')
+    }
+  }
 }
 
 const handleEditGroupName = () => {
@@ -570,6 +625,7 @@ const handlePreviewImage = (file) => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/group-common.scss' as *;
 
 .group-profile-dialog {
   :deep(.el-dialog) {
@@ -658,169 +714,11 @@ const handlePreviewImage = (file) => {
   }
 }
 
-.member-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: #fff;
-  border-radius: var(--dt-radius-lg);
-  border: 1px solid var(--dt-border-lighter);
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: var(--dt-brand-color);
-    box-shadow: var(--dt-shadow-md);
-  }
-
-  .member-avatar-wrapper {
-    position: relative;
-
-    .online-indicator {
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      width: 12px;
-      height: 12px;
-      background: #52c41a;
-      border: 2px solid #fff;
-      border-radius: var(--dt-radius-full);
-    }
-  }
-
-  .member-info {
-    flex: 1;
-    min-width: 0;
-
-    .member-name {
-      font-size: 14px;
-      color: var(--dt-text-primary);
-      margin-bottom: 2px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-
-      .member-remark {
-        color: var(--dt-text-secondary);
-        font-size: 12px;
-      }
-    }
-
-    .member-role {
-      :deep(.el-tag) {
-        height: 20px;
-        padding: 0 6px;
-      }
-
-      .role-text {
-        font-size: 12px;
-        color: var(--dt-text-tertiary);
-      }
-    }
-  }
-
-  .member-actions {
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  &:hover .member-actions {
-    opacity: 1;
-  }
-}
-
 // 公告区域
 .announcement-header {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 16px;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: var(--dt-text-secondary);
-
-  p {
-    margin-top: 16px;
-    font-size: 14px;
-  }
-
-  .empty-hint {
-    font-size: 12px;
-    color: var(--dt-text-tertiary);
-    margin-top: 8px;
-  }
-}
-
-.announcement-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.announcement-item {
-  padding: 16px;
-  background: #fff;
-  border-radius: var(--dt-radius-lg);
-  border: 1px solid var(--dt-border-lighter);
-
-  &.pinned {
-    background: rgba(var(--dt-brand-color-rgb), 0.05);
-    border-color: rgba(var(--dt-brand-color-rgb), 0.2);
-  }
-
-  .announcement-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-
-    .announcement-title {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--dt-text-primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-
-      .pin-icon {
-        color: var(--dt-brand-color);
-      }
-    }
-
-    .announcement-time {
-      font-size: 12px;
-      color: var(--dt-text-tertiary);
-    }
-  }
-
-  .announcement-content {
-    font-size: 14px;
-    color: var(--dt-text-secondary);
-    line-height: 1.6;
-    margin-bottom: 12px;
-  }
-
-  .announcement-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .publisher {
-      font-size: 12px;
-      color: var(--dt-text-tertiary);
-    }
-
-    .announcement-actions {
-      display: flex;
-      gap: 8px;
-    }
-  }
 }
 
 // 设置区域
@@ -829,143 +727,6 @@ const handlePreviewImage = (file) => {
 
   &:last-child {
     margin-bottom: 0;
-  }
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dt-text-primary);
-  margin-bottom: 12px;
-  padding-left: 12px;
-  border-left: 3px solid var(--dt-brand-color);
-}
-
-.settings-list {
-  background: #fff;
-  border-radius: var(--dt-radius-lg);
-  border: 1px solid var(--dt-border-lighter);
-  overflow: hidden;
-}
-
-.setting-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--dt-border-lighter);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  .setting-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-
-    .setting-name {
-      font-size: 14px;
-      color: var(--dt-text-primary);
-    }
-
-    .setting-value {
-      font-size: 13px;
-      color: var(--dt-text-secondary);
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .setting-desc {
-      font-size: 12px;
-      color: var(--dt-text-tertiary);
-    }
-  }
-}
-
-// 危险操作区域
-.danger-section {
-  .section-title {
-    border-left-color: #ff4d4f;
-  }
-}
-
-.action-list {
-  background: #fff;
-  border-radius: var(--dt-radius-lg);
-  border: 1px solid var(--dt-border-lighter);
-  overflow: hidden;
-}
-
-.action-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-bottom: 1px solid var(--dt-border-lighter);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background: var(--dt-bg-session-hover);
-  }
-
-  .action-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--dt-radius-lg);
-    background: var(--dt-bg-body);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-
-    .el-icon {
-      font-size: 20px;
-      color: var(--dt-text-secondary);
-    }
-  }
-
-  .action-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-
-    .action-name {
-      font-size: 14px;
-      color: var(--dt-text-primary);
-      font-weight: 500;
-    }
-
-    .action-desc {
-      font-size: 12px;
-      color: var(--dt-text-tertiary);
-    }
-  }
-
-  .action-arrow {
-    color: var(--dt-text-tertiary);
-  }
-
-  &.danger {
-    .action-icon {
-      background: #fff2f0;
-
-      .el-icon {
-        color: #ff4d4f;
-      }
-    }
-
-    .action-name {
-      color: #ff4d4f;
-    }
   }
 }
 

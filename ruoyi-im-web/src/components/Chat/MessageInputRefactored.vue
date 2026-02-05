@@ -65,6 +65,23 @@
       @cancel="$emit('cancel-edit')"
     />
 
+    <!-- 链接预览 -->
+    <div v-if="linkPreviewLoading || linkPreviewError || linkPreview" class="link-preview-wrapper">
+      <LinkCard
+        v-if="linkPreview"
+        :link="linkPreview"
+        :loading="linkPreviewLoading"
+        :error="linkPreviewError"
+      />
+      <button
+        v-if="linkPreview || linkPreviewError"
+        class="link-preview-close"
+        @click="clearLinkPreview"
+      >
+        <el-icon><Close /></el-icon>
+      </button>
+    </div>
+
     <!-- 输入核心区域 -->
     <div
       ref="inputAreaRef"
@@ -193,11 +210,12 @@
 <script setup>
 import { ref, nextTick, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { Microphone } from '@element-plus/icons-vue'
+import { Microphone, Close } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { isScreenshotSupported } from '@/utils/screenshot'
 import { formatMessagePreviewFromObject } from '@/utils/message'
+import { extractUrls, isInternalUrl, parseLink } from '@/utils/linkParser'
 
 // Composables
 import { useInputDraft } from '@/composables/useInputDraft'
@@ -208,6 +226,7 @@ import { useTypingIndicator } from '@/composables/useTypingIndicator'
 
 // 子组件
 import EmojiPicker from '@/components/Chat/EmojiPicker.vue'
+import LinkCard from '@/components/Chat/LinkCard.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
 import ScreenshotPreview from './ScreenshotPreview.vue'
@@ -411,6 +430,13 @@ const smartReplyPosition = ref({ x: 0, y: 0 })
 const showFilePreview = ref(false)
 const pendingFiles = ref([])
 
+// 链接预览相关
+const linkPreview = ref(null)
+const linkPreviewLoading = ref(false)
+const linkPreviewError = ref(false)
+const linkPreviewDebounceTimer = ref(null)
+const lastParsedUrls = ref([])
+
 // 拖拽状态
 const isDragOver = ref(false)
 const isFocused = ref(false)
@@ -459,8 +485,74 @@ const handleInput = () => {
   autoResize()
   emit('input', messageContent.value)
   checkCommandTrigger()
+  // 检测链接并显示预览
+  detectAndPreviewLinks()
   // 移除输入时的 typing 状态发送，只在发送消息时才发请求
   // handleTypingInput(messageContent.value)
+}
+
+// 检测并预览链接
+const detectAndPreviewLinks = () => {
+  // 清除之前的定时器
+  if (linkPreviewDebounceTimer.value) {
+    clearTimeout(linkPreviewDebounceTimer.value)
+  }
+
+  // 延迟500ms后检测
+  linkPreviewDebounceTimer.value = setTimeout(() => {
+    const urls = extractUrls(messageContent.value, 3)
+
+    // 如果没有URL，清除预览
+    if (urls.length === 0) {
+      clearLinkPreview()
+      return
+    }
+
+    // 如果URL没有变化，不重复解析
+    if (JSON.stringify(urls) === JSON.stringify(lastParsedUrls.value)) {
+      return
+    }
+
+    lastParsedUrls.value = urls
+
+    // 只解析第一个URL
+    const firstUrl = urls[0]
+    if (!isInternalUrl(firstUrl)) {
+      parseLinkPreview(firstUrl)
+    }
+  }, 500)
+}
+
+// 解析链接预览
+const parseLinkPreview = async (url) => {
+  linkPreviewLoading.value = true
+  linkPreviewError.value = false
+
+  try {
+    const result = await parseLink(url)
+    if (result) {
+      linkPreview.value = result
+    } else {
+      linkPreviewError.value = true
+    }
+  } catch (error) {
+    console.warn('链接预览失败:', error)
+    linkPreviewError.value = true
+  } finally {
+    linkPreviewLoading.value = false
+  }
+}
+
+// 清除链接预览
+const clearLinkPreview = () => {
+  linkPreview.value = null
+  linkPreviewLoading.value = false
+  linkPreviewError.value = false
+  lastParsedUrls.value = []
+  if (linkPreviewDebounceTimer.value) {
+    clearTimeout(linkPreviewDebounceTimer.value)
+    linkPreviewDebounceTimer.value = null
+  }
 }
 
 const handleKeydown = e => {
@@ -1176,6 +1268,45 @@ onUnmounted(() => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// 链接预览
+.link-preview-wrapper {
+  position: relative;
+  margin: 8px 0;
+  max-width: 320px;
+
+  .link-preview-close {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--el-fill-color-light);
+    border: 1px solid var(--el-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1;
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--el-fill-color);
+      border-color: var(--el-color-danger);
+      color: var(--el-color-danger);
+    }
+
+    .el-icon {
+      font-size: 12px;
+    }
+  }
+
+  :deep(.link-card) {
+    box-shadow: var(--dt-shadow-2);
+    animation: slideInUp 0.2s ease-out;
   }
 }
 </style>

@@ -29,6 +29,13 @@
           @scroll-to="$emit('scroll-to', $event)"
         />
 
+        <!-- 链接预览卡片 -->
+        <LinkCard
+          v-if="message.type === 'TEXT' && messageLinks.length > 0"
+          :link="messageLinks[0]"
+          class="message-link-card"
+        />
+
         <!-- 图片消息 -->
         <ImageBubble
           v-else-if="message.type === 'IMAGE'"
@@ -49,11 +56,13 @@
           :message="message"
         />
 
-        <!-- 语音消息 - 暂时禁用（未来考虑） -->
-        <!-- <VoiceBubble
+        <!-- 语音消息 -->
+        <VoiceBubble
           v-else-if="message.type === 'VOICE' || message.type === 'AUDIO'"
           :message="message"
-        /> -->
+          :is-read="message.isRead || message.readStatus === 'READ'"
+          @read="$emit('mark-read', message)"
+        />
 
         <!-- 位置消息 -->
         <LocationBubble
@@ -156,6 +165,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { CopyDocument, ChatLineSquare, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Top } from '@element-plus/icons-vue'
+import { extractUrls } from '@/utils/linkParser'
 
 // Composables
 import { useMessageBubble } from './message-bubble/composables/useMessageBubble.js'
@@ -164,9 +174,10 @@ import { useMessageReaction } from './message-bubble/composables/useMessageReact
 
 // 子组件
 import TextBubble from './message-bubble/bubbles/TextBubble.vue'
+import LinkCard from './LinkCard.vue'
 import ImageBubble from './message-bubble/bubbles/ImageBubble.vue'
 import FileBubble from './message-bubble/bubbles/FileBubble.vue'
-// VoiceBubble 已删除（语音功能未来考虑）
+import VoiceBubble from './message-bubble/bubbles/VoiceBubble.vue'
 import VideoBubble from './message-bubble/bubbles/VideoBubble.vue'
 import LocationBubble from './message-bubble/bubbles/LocationBubble.vue'
 import SystemBubble from './message-bubble/bubbles/SystemBubble.vue'
@@ -407,6 +418,21 @@ const enhancedHandleTouchStart = (e) => {
 }
 
 // ==================== 计算属性 ====================
+
+// 提取消息中的链接
+const messageLinks = computed(() => {
+  if (props.message.type !== 'TEXT' || !props.message.content) {
+    return []
+  }
+
+  // 先尝试从扩展数据中获取链接预览
+  if (props.message.linkPreview) {
+    return [props.message.linkPreview]
+  }
+
+  // 否则从内容中提取URL
+  return extractUrls(props.message.content, 3)
+})
 
 const bubbleClasses = computed(() => ({
   'is-own': props.message.isOwn,

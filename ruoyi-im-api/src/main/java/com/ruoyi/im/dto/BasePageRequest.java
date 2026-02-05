@@ -33,4 +33,9 @@ public class BasePageRequest implements Serializable {
      * 排序方向 asc/desc
      */
     private String orderByDirection = "asc";
+
+    /**
+     * 搜索关键词
+     */
+    private String keyword;
 }

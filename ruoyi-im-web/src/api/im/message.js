@@ -7,9 +7,10 @@ import request from '../request'
  * 发送消息
  * @param {Object} data - 消息数据
  * @param {number} data.conversationId - 会话ID
- * @param {string} data.messageType - 消息类型 TEXT/IMAGE/FILE/VOICE/VIDEO
+ * @param {string} data.type - 消息类型 TEXT/IMAGE/FILE/VOICE/VIDEO
  * @param {string} data.content - 消息内容
  * @param {number} data.replyToMessageId - 回复的消息ID（可选）
+ * @param {string} data.clientMsgId - 客户端消息ID（可选，用于去重）
  * @returns {Promise}
  */
 export function sendMessage(data) {
@@ -243,6 +244,19 @@ export function getUnreadMentions() {
   return request({
     url: '/api/im/message/mention/unread',
     method: 'get'
+  })
+}
+
+/**
+ * 解析链接预览
+ * @param {string} url - 链接地址
+ * @returns {Promise} 解析结果
+ */
+export function parseLinkPreview(url) {
+  return request({
+    url: '/api/im/link/preview',
+    method: 'post',
+    data: { url }
   })
 }
 
