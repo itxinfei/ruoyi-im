@@ -111,6 +111,7 @@ public class ImEmailController {
                     request.getBccIds(),
                     request.getSubject(),
                     request.getContent(),
+                    request.getAttachmentIds(),
                     userId
             );
             return Result.success("发送成功", emailId);

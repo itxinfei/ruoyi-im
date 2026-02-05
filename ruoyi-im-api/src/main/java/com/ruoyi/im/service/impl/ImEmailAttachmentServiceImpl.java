@@ -167,6 +167,36 @@ public class ImEmailAttachmentServiceImpl implements ImEmailAttachmentService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveEmailAttachmentsByIds(Long emailId, List<Long> attachmentIds) {
+        if (emailId == null || attachmentIds == null || attachmentIds.isEmpty()) {
+            return;
+        }
+
+        // 更新附件的 emailId
+        int count = 0;
+        for (Long id : attachmentIds) {
+            ImEmailAttachment attachment = attachmentMapper.selectAttachmentById(id);
+            if (attachment != null && attachment.getEmailId() == null) {
+                // 只更新未关联的附件
+                attachmentMapper.updateAttachmentEmailId(id, emailId);
+                count++;
+            }
+        }
+
+        // 更新邮件的附件数量
+        if (count > 0) {
+            ImEmail email = emailMapper.selectEmailById(emailId);
+            if (email != null) {
+                email.setAttachmentCount(count);
+                emailMapper.updateEmail(email);
+            }
+        }
+
+        log.info("保存邮件附件关联成功: emailId={}, count={}", emailId, count);
+    }
+
+    @Override
     public List<ImEmailAttachment> getEmailAttachments(Long emailId) {
         if (emailId == null) {
             return new ArrayList<>();

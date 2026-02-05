@@ -566,12 +566,15 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     submitting.value = true
 
+    // 提取附件ID列表
+    const attachmentIds = form.attachments.map(a => a.id).filter(id => id != null)
+
     const res = await sendMail({
       toIds: form.toIds,
       ccIds: form.ccIds,
       subject: form.subject,
       content: form.content,
-      attachments: form.attachments
+      attachmentIds
     })
 
     if (res.code === 200) {

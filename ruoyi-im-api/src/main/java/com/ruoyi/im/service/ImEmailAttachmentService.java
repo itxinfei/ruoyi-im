@@ -30,6 +30,14 @@ public interface ImEmailAttachmentService {
     void saveAttachments(Long emailId, List<ImEmailAttachment> attachments);
 
     /**
+     * 保存邮件附件关联（通过附件ID列表）
+     *
+     * @param emailId 邮件ID
+     * @param attachmentIds 附件ID列表
+     */
+    void saveEmailAttachmentsByIds(Long emailId, List<Long> attachmentIds);
+
+    /**
      * 获取邮件的所有附件
      *
      * @param emailId 邮件ID

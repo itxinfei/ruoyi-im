@@ -54,6 +54,20 @@ public interface ImEmailService {
     Long sendEmail(List<Long> toIds, List<Long> ccIds, List<Long> bccIds, String subject, String content, Long senderId);
 
     /**
+     * 发送邮件（支持附件）
+     *
+     * @param toIds 接收者ID列表
+     * @param ccIds 抄送ID列表
+     * @param bccIds 密送ID列表
+     * @param subject 主题
+     * @param content 内容
+     * @param attachmentIds 附件ID列表
+     * @param senderId 发送者ID
+     * @return 邮件ID
+     */
+    Long sendEmail(List<Long> toIds, List<Long> ccIds, List<Long> bccIds, String subject, String content, List<Long> attachmentIds, Long senderId);
+
+    /**
      * 保存草稿
      *
      * @param subject 主题

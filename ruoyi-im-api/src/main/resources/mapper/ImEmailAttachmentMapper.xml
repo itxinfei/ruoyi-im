@@ -66,6 +66,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </insert>
 
+    <update id="updateAttachmentEmailId">
+        update im_email_attachment
+        set email_id = #{emailId}
+        where id = #{id}
+          and email_id is null
+    </update>
+
     <delete id="deleteAttachmentById" parameterType="Long">
         delete from im_email_attachment where id = #{id}
     </delete>

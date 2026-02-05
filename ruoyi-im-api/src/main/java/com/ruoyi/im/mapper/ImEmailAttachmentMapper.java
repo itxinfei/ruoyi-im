@@ -47,6 +47,15 @@ public interface ImEmailAttachmentMapper {
     int batchInsertAttachments(@Param("attachments") List<ImEmailAttachment> attachments);
 
     /**
+     * 更新附件关联的邮件ID
+     * 
+     * @param id      附件ID
+     * @param emailId 邮件ID
+     * @return 结果
+     */
+    int updateAttachmentEmailId(@Param("id") Long id, @Param("emailId") Long emailId);
+
+    /**
      * 删除附件
      *
      * @param id 附件ID

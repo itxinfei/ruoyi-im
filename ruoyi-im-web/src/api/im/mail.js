@@ -46,7 +46,7 @@ export function getMailDetail(id) {
  * @param {Array<number>} data.bccIds - 密送ID列表
  * @param {string} data.subject - 邮件主题
  * @param {string} data.content - 邮件内容
- * @param {Array<Object>} data.attachments - 附件列表
+ * @param {Array<number>} data.attachmentIds - 附件ID列表
  * @returns {Promise}
  */
 export function sendMail(data) {
@@ -59,7 +59,7 @@ export function sendMail(data) {
       bccIds: data.bccIds || [],
       subject: data.subject,
       content: data.content,
-      attachments: data.attachments || []
+      attachmentIds: data.attachmentIds || []
     }
   })
 }

@@ -5,6 +5,7 @@ import com.ruoyi.im.domain.ImEmail;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImEmailMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.service.ImEmailAttachmentService;
 import com.ruoyi.im.service.ImEmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,9 @@ public class ImEmailServiceImpl implements ImEmailService {
     @Autowired
     private ImUserMapper userMapper;
 
+    @Autowired
+    private ImEmailAttachmentService attachmentService;
+
     @Override
     public List<ImEmail> getEmailList(Long userId, String folder) {
         return emailMapper.selectEmailsByUserIdAndFolder(userId, folder);
@@ -54,12 +58,18 @@ public class ImEmailServiceImpl implements ImEmailService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendEmail(List<Long> toIds, String subject, String content, Long senderId) {
-        return sendEmail(toIds, null, null, subject, content, senderId);
+        return sendEmail(toIds, null, null, subject, content, null, senderId);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendEmail(List<Long> toIds, List<Long> ccIds, List<Long> bccIds, String subject, String content, Long senderId) {
+        return sendEmail(toIds, ccIds, bccIds, subject, content, null, senderId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long sendEmail(List<Long> toIds, List<Long> ccIds, List<Long> bccIds, String subject, String content, List<Long> attachmentIds, Long senderId) {
         if (toIds == null || toIds.isEmpty()) {
             throw new BusinessException("接收者不能为空");
         }
@@ -70,6 +80,9 @@ public class ImEmailServiceImpl implements ImEmailService {
 
         List<ImEmail> emails = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
+
+        // 计算附件数量
+        int attachmentCount = (attachmentIds != null && !attachmentIds.isEmpty()) ? attachmentIds.size() : 0;
 
         // 转换抄送密送列表为JSON字符串
         String ccIdsJson = (ccIds != null && !ccIds.isEmpty()) ? JSON.toJSONString(ccIds) : null;
@@ -91,7 +104,7 @@ public class ImEmailServiceImpl implements ImEmailService {
             email.setIsDeleted(false);
             email.setIsStarred(false);
             email.setFolder("INBOX");
-            email.setAttachmentCount(0);
+            email.setAttachmentCount(attachmentCount);
             email.setSendTime(now);
             email.setReceiveTime(now);
             emails.add(email);
@@ -118,7 +131,7 @@ public class ImEmailServiceImpl implements ImEmailService {
                 email.setIsDeleted(false);
                 email.setIsStarred(false);
                 email.setFolder("INBOX");
-                email.setAttachmentCount(0);
+                email.setAttachmentCount(attachmentCount);
                 email.setSendTime(now);
                 email.setReceiveTime(now);
                 emails.add(email);
@@ -145,13 +158,23 @@ public class ImEmailServiceImpl implements ImEmailService {
         sentEmail.setIsDeleted(false);
         sentEmail.setIsStarred(false);
         sentEmail.setFolder("SENT");
-        sentEmail.setAttachmentCount(0);
+        sentEmail.setAttachmentCount(attachmentCount);
         sentEmail.setSendTime(now);
         sentEmail.setReceiveTime(now);
         emailMapper.insertEmail(sentEmail);
 
-        log.info("发送邮件: senderId={}, toIds={}, ccIds={}, bccIds={}, totalCount={}",
-                senderId, toIds, ccIds, bccIds, emails.size() + 1);
+        // 保存附件关联（将附件关联到所有邮件）
+        if (attachmentIds != null && !attachmentIds.isEmpty()) {
+            // 为每个收件人和抄送人的邮件关联附件
+            for (ImEmail email : emails) {
+                attachmentService.saveEmailAttachmentsByIds(email.getId(), attachmentIds);
+            }
+            // 为发送者的已发送邮件也关联附件
+            attachmentService.saveEmailAttachmentsByIds(sentEmail.getId(), attachmentIds);
+        }
+
+        log.info("发送邮件: senderId={}, toIds={}, ccIds={}, bccIds={}, attachmentCount={}, totalCount={}",
+                senderId, toIds, ccIds, bccIds, attachmentCount, emails.size() + 1);
 
         return emails.isEmpty() ? sentEmail.getId() : emails.get(0).getId();
     }
