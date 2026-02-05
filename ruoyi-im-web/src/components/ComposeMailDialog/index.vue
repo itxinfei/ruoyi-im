@@ -587,7 +587,8 @@ const handleSubmit = async () => {
   } catch (error) {
     if (error !== false) {
       console.error('发送邮件失败', error)
-      ElMessage.error('发送失败，请稍后重试')
+      const errorMsg = error?.response?.data?.msg || error?.message || error?.response?.data || '发送失败，请稍后重试'
+      ElMessage.error(typeof errorMsg === 'string' ? errorMsg : '发送失败，请稍后重试')
     }
   } finally {
     submitting.value = false
