@@ -53,18 +53,18 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
      * 构造器注入依赖
      */
     public ImGlobalSearchServiceImpl(ImMessageMapper messageMapper,
-                                      ImUserMapper userMapper,
-                                      ImFriendMapper friendMapper,
-                                      ImGroupMapper groupMapper,
-                                      ImGroupMemberMapper groupMemberMapper,
-                                      ImFileAssetMapper fileAssetMapper,
-                                      ImTodoItemMapper todoItemMapper,
-                                      ImTaskMapper taskMapper,
-                                      ImDocumentMapper documentMapper,
-                                      ImScheduleEventMapper scheduleEventMapper,
-                                      ImConversationMapper conversationMapper,
-                                      MessageEncryptionUtil encryptionUtil,
-                                      ImRedisUtil redisUtil) {
+            ImUserMapper userMapper,
+            ImFriendMapper friendMapper,
+            ImGroupMapper groupMapper,
+            ImGroupMemberMapper groupMemberMapper,
+            ImFileAssetMapper fileAssetMapper,
+            ImTodoItemMapper todoItemMapper,
+            ImTaskMapper taskMapper,
+            ImDocumentMapper documentMapper,
+            ImScheduleEventMapper scheduleEventMapper,
+            ImConversationMapper conversationMapper,
+            MessageEncryptionUtil encryptionUtil,
+            ImRedisUtil redisUtil) {
         this.messageMapper = messageMapper;
         this.userMapper = userMapper;
         this.friendMapper = friendMapper;
@@ -95,32 +95,40 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
         // 根据搜索类型决定搜索哪些内容
         String searchType = request.getSearchType();
-        if ("all".equals(searchType) || searchType == null) {
+        // 转为小写统一处理
+        String searchTypeLower = searchType != null ? searchType.toLowerCase() : "all";
+
+        if ("all".equals(searchTypeLower)) {
             // 搜索所有类型
-            result.setMessages(searchMessagesList(keyword, null));
-            result.setContacts(searchContactsList(keyword, null));
-            result.setGroups(searchGroupsList(keyword, null));
-            result.setFiles(searchFilesList(keyword, null));
-            result.setWorkbenchItems(searchWorkbenchList(keyword, null));
+            result.setMessages(searchMessagesList(keyword, userId));
+            result.setContacts(searchContactsList(keyword, userId));
+            result.setGroups(searchGroupsList(keyword, userId));
+            result.setFiles(searchFilesList(keyword, userId));
+            result.setWorkbenchItems(searchWorkbenchList(keyword, userId));
         } else {
-            switch (searchType) {
+            switch (searchTypeLower) {
                 case "message":
-                    result.setMessages(searchMessagesList(keyword, null));
+                    result.setMessages(searchMessagesList(keyword, userId));
                     break;
                 case "contact":
-                    result.setContacts(searchContactsList(keyword, null));
+                    result.setContacts(searchContactsList(keyword, userId));
                     break;
                 case "group":
-                    result.setGroups(searchGroupsList(keyword, null));
+                    result.setGroups(searchGroupsList(keyword, userId));
                     break;
                 case "file":
-                    result.setFiles(searchFilesList(keyword, null));
+                    result.setFiles(searchFilesList(keyword, userId));
                     break;
                 case "workbench":
-                    result.setWorkbenchItems(searchWorkbenchList(keyword, null));
+                    result.setWorkbenchItems(searchWorkbenchList(keyword, userId));
                     break;
                 default:
-                    result.setMessages(searchMessagesList(keyword, null));
+                    // 默认搜索所有类型
+                    result.setMessages(searchMessagesList(keyword, userId));
+                    result.setContacts(searchContactsList(keyword, userId));
+                    result.setGroups(searchGroupsList(keyword, userId));
+                    result.setFiles(searchFilesList(keyword, userId));
+                    result.setWorkbenchItems(searchWorkbenchList(keyword, userId));
                     break;
             }
         }
@@ -186,67 +194,69 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             // 前缀索引 LIKE 'keyword%' 可以使用索引，性能提升 100-1000 倍
             LambdaQueryWrapper<ImMessage> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.likeRight(ImMessage::getContent, keyword)
-                .eq(ImMessage::getIsRevoked, 0)
-                .eq(ImMessage::getIsDeleted, 0)
-                .orderByDesc(ImMessage::getCreateTime)
-                .last("LIMIT " + MAX_RESULTS_PER_TYPE);
+                    .eq(ImMessage::getIsRevoked, 0)
+                    .eq(ImMessage::getIsDeleted, 0)
+                    .orderByDesc(ImMessage::getCreateTime)
+                    .last("LIMIT " + MAX_RESULTS_PER_TYPE);
 
             List<ImMessage> messages = messageMapper.selectList(queryWrapper);
 
             // 获取会话信息用于显示
             Map<Long, ImConversation> conversationMap = new HashMap<>();
             List<Long> conversationIds = messages.stream()
-                .map(ImMessage::getConversationId)
-                .distinct()
-                .collect(Collectors.toList());
+                    .map(ImMessage::getConversationId)
+                    .distinct()
+                    .collect(Collectors.toList());
             if (!conversationIds.isEmpty()) {
                 List<ImConversation> conversations = conversationMapper.selectBatchIds(conversationIds);
                 conversationMap.putAll(conversations.stream()
-                    .collect(Collectors.toMap(ImConversation::getId, c -> c)));
+                        .collect(Collectors.toMap(ImConversation::getId, c -> c)));
             }
 
             // 获取用户信息
             Set<Long> userIds = new HashSet<>();
             userIds.addAll(messages.stream().map(ImMessage::getSenderId).collect(Collectors.toList()));
             userIds.addAll(conversationMap.values().stream()
-                .map(ImConversation::getTargetId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList()));
+                    .map(ImConversation::getTargetId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
 
             Map<Long, ImUser> userMap = new HashMap<>();
             if (!userIds.isEmpty()) {
                 List<ImUser> users = userMapper.selectImUserListByIds(new ArrayList<>(userIds));
                 userMap.putAll(users.stream()
-                    .collect(Collectors.toMap(ImUser::getId, u -> u)));
+                        .collect(Collectors.toMap(ImUser::getId, u -> u)));
             }
 
             return messages.stream()
-                .limit(MAX_RESULTS_PER_TYPE)
-                .map(msg -> {
-                    GlobalSearchResultVO.MessageResult result = new GlobalSearchResultVO.MessageResult();
-                    result.setId(msg.getId());
-                    result.setConversationId(msg.getConversationId());
+                    .limit(MAX_RESULTS_PER_TYPE)
+                    .map(msg -> {
+                        GlobalSearchResultVO.MessageResult result = new GlobalSearchResultVO.MessageResult();
+                        result.setId(msg.getId());
+                        result.setConversationId(msg.getConversationId());
 
-                    // 获取会话名称
-                    ImConversation conv = conversationMap.get(msg.getConversationId());
-                    if (conv != null) {
-                        result.setConversationName(conv.getType().equals(StatusConstants.ConversationType.GROUP) ?
-                            conv.getName() : getPrivateConversationName(conv, userMap));
-                    }
+                        // 获取会话名称
+                        ImConversation conv = conversationMap.get(msg.getConversationId());
+                        if (conv != null) {
+                            result.setConversationName(
+                                    conv.getType().equals(StatusConstants.ConversationType.GROUP) ? conv.getName()
+                                            : getPrivateConversationName(conv, userMap));
+                        }
 
-                    result.setSenderId(msg.getSenderId());
-                    ImUser sender = userMap.get(msg.getSenderId());
-                    result.setSenderName(sender != null ?
-                        (sender.getNickname() != null ? sender.getNickname() : sender.getUsername()) : "未知");
+                        result.setSenderId(msg.getSenderId());
+                        ImUser sender = userMap.get(msg.getSenderId());
+                        result.setSenderName(sender != null
+                                ? (sender.getNickname() != null ? sender.getNickname() : sender.getUsername())
+                                : "未知");
 
-                    // 解密并高亮消息内容
-                    String content = decryptContent(msg.getContent());
-                    result.setContent(highlightKeyword(content, keyword));
-                    result.setMessageType(msg.getMessageType());
-                    result.setSendTime(formatTime(msg.getCreateTime()));
-                    return result;
-                })
-                .collect(Collectors.toList());
+                        // 解密并高亮消息内容
+                        String content = decryptContent(msg.getContent());
+                        result.setContent(highlightKeyword(content, keyword));
+                        result.setMessageType(msg.getMessageType());
+                        result.setSendTime(formatTime(msg.getCreateTime()));
+                        return result;
+                    })
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("搜索消息失败: keyword={}", keyword, e);
             return new ArrayList<>();
@@ -261,14 +271,13 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             // 搜索用户（按用户名、昵称、手机号）
             LambdaQueryWrapper<ImUser> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.and(wrapper -> wrapper
-                .like(ImUser::getUsername, keyword)
-                .or()
-                .like(ImUser::getNickname, keyword)
-                .or()
-                .like(ImUser::getMobile, keyword)
-            )
-            .orderByDesc(ImUser::getCreateTime)
-            .last("LIMIT " + MAX_RESULTS_PER_TYPE);
+                    .like(ImUser::getUsername, keyword)
+                    .or()
+                    .like(ImUser::getNickname, keyword)
+                    .or()
+                    .like(ImUser::getMobile, keyword))
+                    .orderByDesc(ImUser::getCreateTime)
+                    .last("LIMIT " + MAX_RESULTS_PER_TYPE);
 
             List<ImUser> users = userMapper.selectImUserByKeyword(keyword);
 
@@ -287,20 +296,20 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
             Set<Long> finalFriendIds = friendIds;
             return users.stream()
-                .limit(MAX_RESULTS_PER_TYPE)
-                .map(user -> {
-                    GlobalSearchResultVO.ContactResult result = new GlobalSearchResultVO.ContactResult();
-                    result.setUserId(user.getId());
-                    result.setUserName(user.getUsername());
-                    result.setNickname(user.getNickname());
-                    result.setAvatar(user.getAvatar());
-                    result.setDepartment(user.getDepartment());
-                    result.setPosition(user.getPosition());
-                    result.setMobile(user.getMobile());
-                    result.setIsFriend(finalFriendIds.contains(user.getId()));
-                    return result;
-                })
-                .collect(Collectors.toList());
+                    .limit(MAX_RESULTS_PER_TYPE)
+                    .map(user -> {
+                        GlobalSearchResultVO.ContactResult result = new GlobalSearchResultVO.ContactResult();
+                        result.setUserId(user.getId());
+                        result.setUserName(user.getUsername());
+                        result.setNickname(user.getNickname());
+                        result.setAvatar(user.getAvatar());
+                        result.setDepartment(user.getDepartment());
+                        result.setPosition(user.getPosition());
+                        result.setMobile(user.getMobile());
+                        result.setIsFriend(finalFriendIds.contains(user.getId()));
+                        return result;
+                    })
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("搜索联系人失败: keyword={}", keyword, e);
             return new ArrayList<>();
@@ -318,17 +327,17 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             List<ImGroup> groups = groupMapper.selectImGroupList(queryWrapper);
 
             return groups.stream()
-                .limit(MAX_RESULTS_PER_TYPE)
-                .map(group -> {
-                    GlobalSearchResultVO.GroupResult result = new GlobalSearchResultVO.GroupResult();
-                    result.setGroupId(group.getId());
-                    result.setGroupName(group.getName());
-                    result.setAvatar(group.getAvatar());
-                    result.setMemberCount(group.getMemberCount());
-                    result.setDescription(group.getDescription());
-                    return result;
-                })
-                .collect(Collectors.toList());
+                    .limit(MAX_RESULTS_PER_TYPE)
+                    .map(group -> {
+                        GlobalSearchResultVO.GroupResult result = new GlobalSearchResultVO.GroupResult();
+                        result.setGroupId(group.getId());
+                        result.setGroupName(group.getName());
+                        result.setAvatar(group.getAvatar());
+                        result.setMemberCount(group.getMemberCount());
+                        result.setDescription(group.getDescription());
+                        return result;
+                    })
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("搜索群组失败: keyword={}", keyword, e);
             return new ArrayList<>();
@@ -343,41 +352,42 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             // 搜索文件资产（使用前缀匹配以利用索引）
             LambdaQueryWrapper<ImFileAsset> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.likeRight(ImFileAsset::getFileName, keyword)
-                .eq(ImFileAsset::getStatus, "ACTIVE")
-                .orderByDesc(ImFileAsset::getCreateTime)
-                .last("LIMIT " + MAX_RESULTS_PER_TYPE);
+                    .eq(ImFileAsset::getStatus, "ACTIVE")
+                    .orderByDesc(ImFileAsset::getCreateTime)
+                    .last("LIMIT " + MAX_RESULTS_PER_TYPE);
 
             List<ImFileAsset> files = fileAssetMapper.selectList(queryWrapper);
 
             // 获取用户信息
             Set<Long> uploaderIds = files.stream()
-                .map(ImFileAsset::getUploaderId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                    .map(ImFileAsset::getUploaderId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
 
             Map<Long, ImUser> userMap = new HashMap<>();
             if (!uploaderIds.isEmpty()) {
                 List<ImUser> users = userMapper.selectImUserListByIds(new ArrayList<>(uploaderIds));
                 userMap.putAll(users.stream()
-                    .collect(Collectors.toMap(ImUser::getId, u -> u)));
+                        .collect(Collectors.toMap(ImUser::getId, u -> u)));
             }
 
             return files.stream()
-                .limit(MAX_RESULTS_PER_TYPE)
-                .map(file -> {
-                    GlobalSearchResultVO.FileResult result = new GlobalSearchResultVO.FileResult();
-                    result.setFileId(file.getId());
-                    result.setFileName(file.getFileName());
-                    result.setFileType(file.getFileType());
-                    result.setFileSize(file.getFileSize());
-                    result.setUploaderId(file.getUploaderId());
-                    ImUser uploader = userMap.get(file.getUploaderId());
-                    result.setUploaderName(uploader != null ?
-                        (uploader.getNickname() != null ? uploader.getNickname() : uploader.getUsername()) : "未知");
-                    result.setUploadTime(formatTime(file.getCreateTime()));
-                    return result;
-                })
-                .collect(Collectors.toList());
+                    .limit(MAX_RESULTS_PER_TYPE)
+                    .map(file -> {
+                        GlobalSearchResultVO.FileResult result = new GlobalSearchResultVO.FileResult();
+                        result.setFileId(file.getId());
+                        result.setFileName(file.getFileName());
+                        result.setFileType(file.getFileType());
+                        result.setFileSize(file.getFileSize());
+                        result.setUploaderId(file.getUploaderId());
+                        ImUser uploader = userMap.get(file.getUploaderId());
+                        result.setUploaderName(uploader != null
+                                ? (uploader.getNickname() != null ? uploader.getNickname() : uploader.getUsername())
+                                : "未知");
+                        result.setUploadTime(formatTime(file.getCreateTime()));
+                        return result;
+                    })
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("搜索文件失败: keyword={}", keyword, e);
             return new ArrayList<>();
@@ -416,9 +426,9 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             ImTask taskQuery = new ImTask();
             taskQuery.setTitle(keyword);
             List<ImTask> tasks = taskMapper.selectList(new LambdaQueryWrapper<ImTask>()
-                .like(ImTask::getTitle, keyword)
-                .or().like(ImTask::getDescription, keyword)
-                .last("LIMIT 5"));
+                    .like(ImTask::getTitle, keyword)
+                    .or().like(ImTask::getDescription, keyword)
+                    .last("LIMIT 5"));
 
             tasks.forEach(task -> {
                 GlobalSearchResultVO.WorkbenchResult result = new GlobalSearchResultVO.WorkbenchResult();
@@ -440,9 +450,9 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             // 搜索文档（使用前缀匹配以利用索引）
             LambdaQueryWrapper<ImDocument> docQuery = new LambdaQueryWrapper<>();
             docQuery.likeRight(ImDocument::getTitle, keyword)
-                .or().likeRight(ImDocument::getContent, keyword)
-                .eq(ImDocument::getIsDeleted, 0)
-                .last("LIMIT 5");
+                    .or().likeRight(ImDocument::getContent, keyword)
+                    .eq(ImDocument::getIsDeleted, 0)
+                    .last("LIMIT 5");
             List<ImDocument> docs = documentMapper.selectList(docQuery);
 
             docs.forEach(doc -> {
@@ -463,9 +473,9 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
             // 搜索日程（使用前缀匹配以利用索引）
             LambdaQueryWrapper<ImScheduleEvent> scheduleQuery = new LambdaQueryWrapper<>();
             scheduleQuery.likeRight(ImScheduleEvent::getTitle, keyword)
-                .or().likeRight(ImScheduleEvent::getDescription, keyword)
-                .eq(ImScheduleEvent::getIsDeleted, 0)
-                .last("LIMIT 5");
+                    .or().likeRight(ImScheduleEvent::getDescription, keyword)
+                    .eq(ImScheduleEvent::getIsDeleted, 0)
+                    .last("LIMIT 5");
             List<ImScheduleEvent> schedules = scheduleEventMapper.selectList(scheduleQuery);
 
             schedules.forEach(schedule -> {
@@ -482,8 +492,8 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
         }
 
         return results.stream()
-            .limit(MAX_RESULTS_PER_TYPE)
-            .collect(Collectors.toList());
+                .limit(MAX_RESULTS_PER_TYPE)
+                .collect(Collectors.toList());
     }
 
     /**

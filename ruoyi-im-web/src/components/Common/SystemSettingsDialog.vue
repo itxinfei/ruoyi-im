@@ -1,14 +1,6 @@
 <template>
-  <el-dialog
-    v-model="visible"
-    :width="dialogWidth"
-    class="system-settings-dialog"
-    destroy-on-close
-    append-to-body
-    :fullscreen="isFullscreen"
-    :show-close="false"
-    :close-on-click-modal="true"
-  >
+  <el-dialog v-model="visible" width="900px" class="system-settings-dialog" destroy-on-close append-to-body
+    :fullscreen="isFullscreen" :show-close="false" :close-on-click-modal="true">
     <div class="settings-layout">
       <!-- 侧边导航栏 -->
       <aside class="settings-sidebar">
@@ -16,30 +8,18 @@
           <span class="material-icons-outlined header-icon">settings</span>
           <span class="header-title">设置</span>
         </div>
-        
+
         <nav class="sidebar-nav scrollbar-custom">
-          <div
-            v-for="item in menuItems"
-            :key="item.id"
-            class="nav-item"
-            :class="{ active: activeMenu === item.id }"
-            @click="activeMenu = item.id"
-          >
+          <div v-for="item in menuItems" :key="item.id" class="nav-item" :class="{ active: activeMenu === item.id }"
+            @click="activeMenu = item.id">
             <span class="material-icons-outlined nav-icon">{{ item.icon }}</span>
             <span class="nav-label">{{ item.label }}</span>
           </div>
         </nav>
-        
+
         <div class="sidebar-footer">
-          <div
-            class="user-info"
-            @click="activeMenu = 'account'"
-          >
-            <el-avatar
-              :size="32"
-              :src="currentUser.avatar"
-              class="user-avatar"
-            />
+          <div class="user-info" @click="activeMenu = 'account'">
+            <el-avatar :size="32" :src="currentUser.avatar" class="user-avatar" />
             <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
           </div>
         </div>
@@ -57,58 +37,34 @@
             </p>
           </div>
           <div class="header-actions">
-            <el-button
-              text
-              @click="resetToDefault"
-            >
-              <span
-                class="material-icons-outlined"
-                style="font-size: 16px; margin-right: 4px;"
-              >restart_alt</span>
+            <el-button text @click="resetToDefault">
+              <span class="material-icons-outlined" style="font-size: 16px; margin-right: 4px;">restart_alt</span>
               恢复默认
             </el-button>
-            <el-button
-              type="primary"
-              @click="onSave"
-            >
-              <span
-                class="material-icons-outlined"
-                style="font-size: 16px; margin-right: 4px;"
-              >save</span>
+            <el-button type="primary" @click="onSave">
+              <span class="material-icons-outlined" style="font-size: 16px; margin-right: 4px;">save</span>
               保存
             </el-button>
-            <el-button
-              circle
-              text
-              class="close-btn"
-              @click="visible = false"
-            >
+            <el-button circle text class="close-btn" @click="visible = false">
               <span class="material-icons-outlined">close</span>
             </el-button>
           </div>
         </header>
 
         <div class="main-content scrollbar-custom">
-          <component 
-            :is="currentComponent" 
-            v-bind="componentProps"
-            v-on="finalComponentEvents"
-          />
+          <component :is="currentComponent" v-bind="componentProps" v-on="finalComponentEvents" />
         </div>
       </main>
     </div>
 
     <!-- 全局弹窗 -->
     <ChangePasswordDialog v-model="showChangePassword" />
-    <EditProfileDialog
-      v-model="showEditProfile"
-      @success="handleProfileUpdate"
-    />
+    <EditProfileDialog v-model="showEditProfile" @success="handleProfileUpdate" />
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch, reactive, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
+import { ref, watch, computed, onMounted, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -139,17 +95,6 @@ const visible = ref(false)
 const activeMenu = ref('account')
 const showChangePassword = ref(false)
 const showEditProfile = ref(false)
-
-// 响应式布局
-const windowWidth = ref(window.innerWidth)
-const isMobile = computed(() => windowWidth.value < 768)
-const isFullscreen = computed(() => windowWidth.value < 640)
-
-const dialogWidth = computed(() => {
-  if (windowWidth.value < 768) {return '100%'}
-  if (windowWidth.value < 1024) {return '800px'}
-  return '900px'
-})
 
 // 菜单配置 - 使用 Material Icons
 const menuItems = [
@@ -226,7 +171,7 @@ const cacheSize = ref('0 MB')
 const calculateCacheSize = () => {
   let total = 0
   for (const key in localStorage) {
-    if (localStorage.hasOwnProperty(key)) {total += localStorage[key].length + key.length}
+    if (Object.prototype.hasOwnProperty.call(localStorage, key)) { total += localStorage[key].length + key.length }
   }
   cacheSize.value = `${(total / 1024 / 1024).toFixed(2)} MB`
 }
@@ -265,7 +210,7 @@ const realHandleSettingsUpdate = newSettings => {
 
 // 重新绑定事件
 watch(activeMenu, () => {
-  if (activeMenu.value === 'storage') {calculateCacheSize()}
+  if (activeMenu.value === 'storage') { calculateCacheSize() }
 })
 
 const finalComponentEvents = computed(() => {
@@ -281,7 +226,9 @@ const resetToDefault = () => {
   ElMessageBox.confirm('恢复默认设置将移除本地自定义项，是否继续？', '恢复默认', {
     confirmButtonText: '恢复',
     cancelButtonText: '取消',
-    type: 'warning'
+    type: 'warning',
+    appendTo: document.body,
+    center: true
   }).then(() => {
     try {
       localStorage.removeItem('im-system-settings')
@@ -304,10 +251,12 @@ const handleClearCache = () => {
   ElMessageBox.confirm('清理缓存将释放本地空间，但图片和文件需要重新下载。是否继续？', '清理缓存', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'warning'
+    type: 'warning',
+    appendTo: document.body,
+    center: true
   }).then(() => {
     const keep = ['im-system-settings', 'token', 'user-info']
-    Object.keys(localStorage).forEach(key => { if (!keep.includes(key)) {localStorage.removeItem(key)} })
+    Object.keys(localStorage).forEach(key => { if (!keep.includes(key)) { localStorage.removeItem(key) } })
     calculateCacheSize()
     ElMessage.success('缓存清理成功')
   })
@@ -328,12 +277,12 @@ const handleExportChat = () => {
 // 监听
 watch(() => props.modelValue, val => {
   visible.value = val
-  if (val && props.defaultMenu) {activeMenu.value = props.defaultMenu}
-  if (val) {calculateCacheSize()}
+  if (val && props.defaultMenu) { activeMenu.value = props.defaultMenu }
+  if (val) { calculateCacheSize() }
 })
-watch(visible, val => { if (!val) {emit('update:modelValue', false)} })
+watch(visible, val => { if (!val) { emit('update:modelValue', false) } })
 watch(() => settings.value.general?.theme, val => {
-  if (val && val !== themeMode.value) {setThemeMode(val)}
+  if (val && val !== themeMode.value) { setThemeMode(val) }
 }, { immediate: true })
 
 onMounted(() => {
@@ -353,52 +302,58 @@ onMounted(() => {
   background: var(--dt-bg-body);
 }
 
+:deep(.el-dialog) {
+  border: none;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
 :deep(.el-dialog__header) {
   display: none;
 }
 
 :deep(.el-dialog__body) {
   padding: 0;
-  height: 680px;
-  background: var(--dt-bg-body);
+  height: 650px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .settings-layout {
   display: flex;
-  height: 100%;
+  height: 650px;
   width: 100%;
-  background: var(--dt-bg-body);
+  background: #ffffff;
 }
 
 // 侧边栏样式
 .settings-sidebar {
-  width: 220px;
-  background: var(--dt-bg-card);
-  border-right: 1px solid var(--dt-border-color);
+  width: 240px;
+  background: #f9fafb;
+  border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  transition: width 0.3s ease;
 }
 
 .sidebar-header {
-  height: 64px;
+  height: 56px;
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--dt-border-color);
-  background: var(--dt-bg-card);
-  gap: 12px;
+  padding: 0 16px;
+  border-bottom: none;
+  background: #f9fafb;
+  gap: 10px;
 
   .header-icon {
-    font-size: 24px;
+    font-size: 22px;
     color: var(--dt-brand-color);
   }
 
   .header-title {
-    font-size: 18px;
-    font-weight: var(--dt-font-weight-semibold);
-    color: var(--dt-text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
   }
 }
 
@@ -409,39 +364,66 @@ onMounted(() => {
   flex-direction: column;
   gap: 4px;
   overflow-y: auto;
+  overflow-x: hidden;
+
+  // 自定义滚动条样式
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 2px;
+
+    &:hover {
+      background-color: #9ca3af;
+    }
+  }
 }
 
 .nav-item {
   display: flex;
+  flex-direction: row;
   align-items: center;
   height: 44px;
   padding: 0 16px;
-  border-radius: var(--dt-radius-md);
+  border-radius: 8px;
   cursor: pointer;
-  color: var(--dt-text-secondary);
+  color: #6b7280;
   transition: all 0.2s ease;
   user-select: none;
-  font-size: 14px;
   gap: 12px;
 
   &:hover {
-    background: var(--dt-bg-hover);
-    color: var(--dt-text-primary);
+    background: #f3f4f6;
+    color: #374151;
   }
 
   &.active {
-    background: var(--dt-brand-bg);
-    color: var(--dt-brand-color);
-    font-weight: var(--dt-font-weight-medium);
+    background: var(--dt-brand-color);
+    color: #ffffff;
+    font-weight: 500;
+
+    .nav-icon,
+    .nav-label {
+      color: #ffffff;
+    }
   }
 }
 
 .nav-icon {
   font-size: 20px;
+  flex-shrink: 0;
 }
 
 .nav-label {
   font-size: 14px;
+  font-weight: 500;
+  flex: 1;
 }
 
 .sidebar-footer {
@@ -483,17 +465,17 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: var(--dt-bg-body);
+  background: #ffffff;
 }
 
 .main-header {
-  height: 64px;
-  padding: 0 24px;
+  height: 56px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--dt-border-color);
-  background: var(--dt-bg-body);
+  border-bottom: 1px solid #f3f4f6;
+  background: #ffffff;
   flex-shrink: 0;
 }
 
@@ -504,9 +486,9 @@ onMounted(() => {
 }
 
 .header-title {
-  font-size: 18px;
-  font-weight: var(--dt-font-weight-semibold);
-  color: var(--dt-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
   margin: 0;
 }
 
@@ -524,7 +506,7 @@ onMounted(() => {
 .close-btn {
   font-size: 20px;
   color: var(--dt-text-secondary);
-  
+
   &:hover {
     color: var(--dt-text-primary);
     background: var(--dt-bg-hover);
@@ -533,9 +515,9 @@ onMounted(() => {
 
 .main-content {
   flex: 1;
-  padding: 24px;
+  padding: 20px;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  background: #fafbfc;
 }
 
 // 滚动条样式
@@ -556,64 +538,6 @@ onMounted(() => {
     &:hover {
       background-color: var(--dt-text-quaternary);
     }
-  }
-}
-
-// 移动端适配
-@media (max-width: 768px) {
-  :deep(.el-dialog) {
-    border-radius: 0;
-    margin: 0 !important;
-    height: 100vh;
-    
-    .el-dialog__body {
-      height: 100vh;
-    }
-  }
-
-  .settings-sidebar {
-    width: 64px;
-    
-    .sidebar-header {
-      justify-content: center;
-      padding: 0;
-      
-      .header-title {
-        display: none;
-      }
-    }
-    
-    .nav-item {
-      justify-content: center;
-      padding: 0;
-      height: 48px;
-    }
-    
-    .nav-icon {
-      font-size: 22px;
-    }
-    
-    .nav-label {
-      display: none;
-    }
-    
-    .sidebar-footer {
-      justify-content: center;
-      padding: 8px;
-    }
-    
-    .user-name {
-      display: none;
-    }
-  }
-  
-  .main-header {
-    padding: 0 16px;
-    height: 56px;
-  }
-  
-  .main-content {
-    padding: 16px;
   }
 }
 

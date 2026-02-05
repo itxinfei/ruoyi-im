@@ -193,9 +193,15 @@ public class ImFriendServiceImpl implements ImFriendService {
     public List<ImFriendVO> getFriendList(Long userId) {
         String cacheKey = "contact:list:" + userId;
 
-        // 尝试从缓存获取
-        @SuppressWarnings("unchecked")
-        List<ImFriendVO> cachedList = (List<ImFriendVO>) imRedisUtil.get(cacheKey);
+        // 尝试从缓存获取，如果Redis异常则跳过缓存
+        List<ImFriendVO> cachedList = null;
+        try {
+            @SuppressWarnings("unchecked")
+            List<ImFriendVO> temp = (List<ImFriendVO>) imRedisUtil.get(cacheKey);
+            cachedList = temp;
+        } catch (Exception e) {
+            log.debug("从缓存获取好友列表失败: userId={}, error={}", userId, e.getMessage());
+        }
         if (cachedList != null) {
             return cachedList;
         }
@@ -258,9 +264,13 @@ public class ImFriendServiceImpl implements ImFriendService {
                     // 设置拼音首字母，用于搜索
                     vo.setPinyin(PinyinUtil.getFirstLetter(friendName));
 
-                    // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
-                    // 实际在线状态应从Redis获取
-                    vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
+                    // 获取在线状态，如果Redis异常则默认为离线
+                    try {
+                        vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
+                    } catch (Exception e) {
+                        log.warn("获取用户在线状态失败: userId={}, error={}", friend.getFriendId(), e.getMessage());
+                        vo.setOnline(false);
+                    }
                 } else {
                     vo.setOnline(false);
                 }
@@ -268,8 +278,12 @@ public class ImFriendServiceImpl implements ImFriendService {
             }
         }
 
-        // 存入缓存，过期时间30分钟
-        imRedisUtil.set(cacheKey, voList, 30, java.util.concurrent.TimeUnit.MINUTES);
+        // 存入缓存，过期时间30分钟（如果Redis异常则跳过缓存）
+        try {
+            imRedisUtil.set(cacheKey, voList, 30, java.util.concurrent.TimeUnit.MINUTES);
+        } catch (Exception e) {
+            log.warn("缓存好友列表失败: userId={}, error={}", userId, e.getMessage());
+        }
 
         return voList;
     }
@@ -283,8 +297,12 @@ public class ImFriendServiceImpl implements ImFriendService {
     @Override
     public void clearFriendListCache(Long userId) {
         String cacheKey = "contact:list:" + userId;
-        imRedisUtil.delete(cacheKey);
-        log.info("清除好友列表缓存: userId={}", userId);
+        try {
+            imRedisUtil.delete(cacheKey);
+            log.info("清除好友列表缓存: userId={}", userId);
+        } catch (Exception e) {
+            log.warn("清除好友列表缓存失败: userId={}, error={}", userId, e.getMessage());
+        }
     }
 
     /**
@@ -526,8 +544,13 @@ public class ImFriendServiceImpl implements ImFriendService {
             // 设置拼音首字母
             vo.setPinyin(PinyinUtil.getFirstLetter(friendName));
 
-            // 根据用户状态判断是否在线
-            vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
+            // 根据用户状态判断是否在线，如果Redis异常则默认为离线
+            try {
+                vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
+            } catch (Exception e) {
+                log.warn("获取用户在线状态失败: userId={}, error={}", friend.getFriendId(), e.getMessage());
+                vo.setOnline(false);
+            }
         } else {
             vo.setOnline(false);
         }

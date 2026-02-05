@@ -5,15 +5,18 @@ import com.ruoyi.im.domain.ImFriendRequest;
 import com.ruoyi.im.dto.contact.ImFriendAddRequest;
 import com.ruoyi.im.dto.contact.ImFriendUpdateRequest;
 import com.ruoyi.im.service.ImFriendService;
+import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -28,14 +31,18 @@ import java.util.List;
 public class ImContactController {
 
     private final ImFriendService imFriendService;
+    private final JdbcTemplate jdbcTemplate;
+    private final ImRedisUtil imRedisUtil;
 
     /**
      * 构造器注入依赖
      *
      * @param imFriendService 好友服务
      */
-    public ImContactController(ImFriendService imFriendService) {
+    public ImContactController(ImFriendService imFriendService, JdbcTemplate jdbcTemplate, ImRedisUtil imRedisUtil) {
         this.imFriendService = imFriendService;
+        this.jdbcTemplate = jdbcTemplate;
+        this.imRedisUtil = imRedisUtil;
     }
 
     /**
@@ -686,5 +693,95 @@ public class ImContactController {
         public void setUserIds(java.util.List<Long> userIds) {
             this.userIds = userIds;
         }
+    }
+
+    /**
+     * 清理无效的好友关系（临时调试用）
+     */
+    @Operation(summary = "清理无效好友关系")
+    @GetMapping("/clean-invalid-friends")
+    public Result<HashMap<String, Object>> cleanInvalidFriends() {
+        HashMap<String, Object> result = new HashMap<>();
+        try {
+            // 1. 检查有多少无效记录
+            String checkSql = "SELECT COUNT(*) FROM im_friend WHERE friend_id NOT IN (SELECT id FROM im_user)";
+            Integer invalidCount = jdbcTemplate.queryForObject(checkSql, Integer.class);
+            result.put("invalid_count", invalidCount);
+
+            // 2. 删除无效记录
+            String deleteSql = "DELETE FROM im_friend WHERE friend_id NOT IN (SELECT id FROM im_user)";
+            int deleted = jdbcTemplate.update(deleteSql);
+            result.put("deleted", deleted);
+
+            // 3. 统计张三的好友数
+            Long zhangsanId = getUserId("zhangsan");
+            if (zhangsanId != null) {
+                String countSql = "SELECT COUNT(*) FROM im_friend WHERE user_id = ? AND is_deleted = 0";
+                Integer friendCount = jdbcTemplate.queryForObject(countSql, Integer.class, zhangsanId);
+                result.put("zhangsan_friend_count", friendCount);
+            }
+
+            // 4. 清除所有缓存
+            imRedisUtil.deletePattern("contact:list:*");
+            result.put("cache_cleared", true);
+
+            return Result.success("清理完成", result);
+        } catch (Exception e) {
+            result.put("error", e.getMessage());
+            result.put("error_type", e.getClass().getSimpleName());
+            return Result.success("清理失败", result);
+        }
+    }
+
+    private Long getUserId(String username) {
+        try {
+            return jdbcTemplate.queryForObject("SELECT id FROM im_user WHERE username = ?", Long.class, username);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 调试：测试张三的好友列表
+     */
+    @Operation(summary = "调试：测试张三好友列表")
+    @GetMapping("/debug-zhangsan-friends")
+    public Result<HashMap<String, Object>> debugZhangsanFriends() {
+        HashMap<String, Object> result = new HashMap<>();
+
+        Long zhangsanId = getUserId("zhangsan");
+        if (zhangsanId == null) {
+            result.put("error", "找不到用户 zhangsan");
+            return Result.success("失败", result);
+        }
+
+        try {
+            // 直接查询数据库
+            String sql = "SELECT f.id, f.user_id, f.friend_id, u.username, u.nickname, f.remark " +
+                         "FROM im_friend f " +
+                         "LEFT JOIN im_user u ON f.friend_id = u.id " +
+                         "WHERE f.user_id = ? AND f.is_deleted = 0";
+            result.put("friends_from_db", jdbcTemplate.queryForList(sql, zhangsanId));
+
+            // 调用 Service 方法
+            Object serviceResult = imFriendService.getGroupedFriendList(zhangsanId);
+            result.put("service_result", serviceResult);
+
+            return Result.success("成功", result);
+        } catch (Exception e) {
+            result.put("error", e.getMessage());
+            result.put("error_type", e.getClass().getSimpleName());
+            result.put("stack", getStackTrace(e));
+            return Result.success("失败", result);
+        }
+    }
+
+    private String getStackTrace(Exception e) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement element : e.getStackTrace()) {
+            sb.append(element.toString()).append("\n");
+            if (sb.length() > 1000) break;
+        }
+        return sb.toString();
     }
 }

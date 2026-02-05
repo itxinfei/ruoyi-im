@@ -1,27 +1,17 @@
 <template>
-  <el-dialog
-    v-model="visible"
-    width="400px"
-    class="personal-profile-dialog"
-    destroy-on-close
-    append-to-body
-    :show-close="false"
-    :close-on-click-modal="true"
-  >
+  <el-dialog v-model="visible" width="420px" class="personal-profile-dialog" destroy-on-close append-to-body
+    :show-close="false" :close-on-click-modal="true">
     <div class="user-profile-container">
       <!-- 头部：头像 + 基本信息 -->
       <div class="header">
-        <div class="desc">
-          <h2 class="user-name">{{ currentUser.nickname || currentUser.username }}</h2>
-          <label class="user-id">{{ currentUser.id || '' }}</label>
-        </div>
+        <div class="header-bg"></div>
         <div class="avatar-wrapper">
-          <DingtalkAvatar
-            :src="currentUser.avatar"
-            :name="currentUser.nickname || currentUser.username"
-            :size="64"
-            class="avatar"
-          />
+          <DingtalkAvatar :src="currentUser.avatar" :name="currentUser.nickname || currentUser.username" :size="80"
+            class="avatar" />
+        </div>
+        <div class="user-info">
+          <h2 class="user-name">{{ currentUser.nickname || currentUser.username }}</h2>
+          <label class="user-id">ID: {{ currentUser.id || '' }}</label>
         </div>
       </div>
 
@@ -29,38 +19,68 @@
       <div class="content">
         <ul class="info-list">
           <li v-if="currentUser.mobile">
-            <label>手机</label>
-            <div class="value-wrapper">
-              <span>{{ currentUser.mobile }}</span>
-              <span class="icon-btn" @click="copyText(currentUser.mobile)">
-                <span class="material-icons-outlined">content_copy</span>
-              </span>
+            <div class="info-item">
+              <span class="material-icons-outlined icon">phone</span>
+              <div class="info-content">
+                <label>手机</label>
+                <div class="value-wrapper">
+                  <span>{{ currentUser.mobile }}</span>
+                  <span class="icon-btn" @click="copyText(currentUser.mobile)">
+                    <span class="material-icons-outlined">content_copy</span>
+                  </span>
+                </div>
+              </div>
             </div>
           </li>
           <li v-if="currentUser.email">
-            <label>邮箱</label>
-            <div class="value-wrapper">
-              <span class="email-text">{{ currentUser.email }}</span>
-              <span class="icon-btn" @click="copyText(currentUser.email)">
-                <span class="material-icons-outlined">content_copy</span>
-              </span>
+            <div class="info-item">
+              <span class="material-icons-outlined icon">email</span>
+              <div class="info-content">
+                <label>邮箱</label>
+                <div class="value-wrapper">
+                  <span class="email-text">{{ currentUser.email }}</span>
+                  <span class="icon-btn" @click="copyText(currentUser.email)">
+                    <span class="material-icons-outlined">content_copy</span>
+                  </span>
+                </div>
+              </div>
             </div>
           </li>
           <li>
-            <label>部门</label>
-            <div>{{ currentUser.dept?.deptName || currentUser.department || '-' }}</div>
+            <div class="info-item">
+              <span class="material-icons-outlined icon">business</span>
+              <div class="info-content">
+                <label>部门</label>
+                <div>{{ currentUser.dept?.deptName || currentUser.department || '-' }}</div>
+              </div>
+            </div>
           </li>
           <li>
-            <label>职位</label>
-            <div>{{ currentUser.position || '-' }}</div>
+            <div class="info-item">
+              <span class="material-icons-outlined icon">badge</span>
+              <div class="info-content">
+                <label>职位</label>
+                <div>{{ currentUser.position || '-' }}</div>
+              </div>
+            </div>
           </li>
           <li>
-            <label>性别</label>
-            <div>{{ genderText }}</div>
+            <div class="info-item">
+              <span class="material-icons-outlined icon">{{ genderIcon }}</span>
+              <div class="info-content">
+                <label>性别</label>
+                <div>{{ genderText }}</div>
+              </div>
+            </div>
           </li>
           <li v-if="currentUser.birthday">
-            <label>生日</label>
-            <div>{{ currentUser.birthday }}</div>
+            <div class="info-item">
+              <span class="material-icons-outlined icon">cake</span>
+              <div class="info-content">
+                <label>生日</label>
+                <div>{{ currentUser.birthday }}</div>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
@@ -75,6 +95,14 @@
           <span class="material-icons-outlined">lock</span>
           <span>修改密码</span>
         </a>
+        <a v-if="isAdmin" href="#" class="action-btn admin-btn" @click.prevent="handleAdminPanel">
+          <span class="material-icons-outlined">admin_panel_settings</span>
+          <span>后台管理</span>
+        </a>
+        <a href="#" class="action-btn logout-btn" @click.prevent="handleLogout">
+          <span class="material-icons-outlined">logout</span>
+          <span>退出登录</span>
+        </a>
         <a href="#" class="action-btn close-btn" @click.prevent="handleClose">
           <span class="material-icons-outlined">close</span>
         </a>
@@ -82,10 +110,7 @@
     </div>
 
     <!-- 编辑资料弹窗 -->
-    <EditProfileDialog
-      v-model="showEditDialog"
-      @save="handleSaveProfile"
-    />
+    <EditProfileDialog v-model="showEditDialog" @save="handleSaveProfile" />
 
     <!-- 修改密码弹窗 -->
     <ChangePasswordDialog v-model="showChangePassword" />
@@ -95,7 +120,8 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
-import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import EditProfileDialog from './EditProfileDialog.vue'
 import ChangePasswordDialog from './ChangePasswordDialog.vue'
@@ -107,6 +133,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const store = useStore()
+const router = useRouter()
 
 const visible = ref(false)
 const showEditDialog = ref(false)
@@ -115,11 +142,25 @@ const showChangePassword = ref(false)
 // 数据源
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
+// 判断是否为admin用户
+const isAdmin = computed(() => {
+  const username = currentUser.value?.username
+  const roles = currentUser.value?.roles || []
+  return username === 'admin' || roles.some(role => role === 'admin' || role === 'ROLE_ADMIN')
+})
+
 const genderText = computed(() => {
   const gender = currentUser.value?.gender
   if (gender === 1) return '男'
   if (gender === 2) return '女'
   return '保密'
+})
+
+const genderIcon = computed(() => {
+  const gender = currentUser.value?.gender
+  if (gender === 1) return 'male'
+  if (gender === 2) return 'female'
+  return 'help'
 })
 
 // 复制文本
@@ -147,6 +188,34 @@ const handleSaveProfile = async (formData) => {
   } catch (error) {
     ElMessage.error(error.message || '更新失败')
   }
+}
+
+const handleAdminPanel = () => {
+  // 打开后台管理页面(新窗口)
+  const adminUrl = window.location.origin + '/admin'
+  window.open(adminUrl, '_blank')
+  ElMessage.success('正在打开后台管理...')
+}
+
+const handleLogout = () => {
+  ElMessageBox.confirm('确定要退出登录吗?', '退出登录', {
+    confirmButtonText: '退出',
+    cancelButtonText: '取消',
+    type: 'warning',
+    center: true,
+    appendTo: document.body
+  }).then(() => {
+    store.dispatch('user/logout').then(() => {
+      ElMessage.success('已退出登录')
+      handleClose()
+      router.push('/login')
+    }).catch(err => {
+      console.error('退出登录失败:', err)
+      ElMessage.error('退出失败')
+    })
+  }).catch(() => {
+    // 取消退出
+  })
 }
 
 // 监听
@@ -186,109 +255,148 @@ watch(visible, (val) => {
 
 // 头部
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e6e6e6;
-}
-
-.desc {
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  flex: 1;
-  padding-right: 16px;
+  align-items: center;
+  padding: 32px 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+}
+
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0.9;
+}
+
+.avatar-wrapper {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 12px;
+
+  .avatar {
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.user-info {
+  position: relative;
+  z-index: 1;
+  text-align: center;
 }
 
 .user-name {
-  font-size: 16px;
-  font-weight: 500;
-  color: #292a2c;
-  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .user-id {
-  font-size: 12px;
-  color: #7f7f7f;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.avatar-wrapper .avatar {
-  border-radius: 4px;
-  flex-shrink: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
 // 内容区
 .content {
   width: 100%;
   text-align: left;
+  padding: 0;
 }
 
 .info-list {
   list-style: none;
-  margin: 16px 20px;
-  padding: 0;
+  margin: 0;
+  padding: 16px;
 }
 
 .info-list li {
-  display: flex;
-  align-items: center;
-  height: 36px;
-  line-height: 36px;
-  font-size: 13px;
-  border-bottom: 1px solid transparent;
+  margin-bottom: 2px;
 
   &:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
   }
 }
 
-.info-list li label {
-  min-width: 40px;
-  margin-right: 16px;
-  color: #7f7f7f;
-  font-size: 13px;
-  text-align: justify;
-  text-align-last: justify;
-}
-
-.info-list li > div {
-  flex: 1;
-  color: #292a2c;
-  font-size: 13px;
+.info-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: #fafbfc;
+  border-radius: 8px;
+  transition: all 0.2s;
+  gap: 12px;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  .icon {
+    font-size: 20px;
+    color: #667eea;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .info-content {
+    flex: 1;
+    min-width: 0;
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    >div {
+      font-size: 14px;
+      color: #111827;
+      word-break: break-all;
+    }
+  }
 }
 
 .value-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex: 1;
+  gap: 8px;
 
   .email-text {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 200px;
+    flex: 1;
   }
 }
 
 .icon-btn {
-  margin-left: 8px;
   cursor: pointer;
-  color: #7f7f7f;
-  transition: color 0.2s;
+  color: #9ca3af;
+  transition: all 0.2s;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
-    color: #4168e0;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
   }
 
   .material-icons-outlined {
@@ -299,27 +407,35 @@ watch(visible, (val) => {
 // 底部操作区
 .footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
-  padding: 16px 20px;
-  padding-top: 20px;
+  padding: 20px;
   border-top: 1px solid #e6e6e6;
-  gap: 8px;
+  gap: 12px;
+  background: #ffffff;
 }
 
 .action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
   text-decoration: none;
   color: #5d7ce8;
   font-size: 13px;
-  padding: 6px 12px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  min-width: 90px;
+  background: #f5f7fa;
+  border: 1px solid transparent;
 
   &:hover {
-    background: rgba(93, 124, 232, 0.1);
+    background: #e8edf5;
+    border-color: #5d7ce8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(93, 124, 232, 0.15);
   }
 
   .material-icons-outlined {
@@ -328,16 +444,51 @@ watch(visible, (val) => {
 
   &.close-btn {
     color: #7f7f7f;
+    background: transparent;
+    min-width: 40px;
+    padding: 10px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: #f3f4f6;
+      border-color: #d1d5db;
       color: #292a2c;
+    }
+
+    span:last-child {
+      display: none;
+    }
+  }
+
+  &.logout-btn {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
+
+    &:hover {
+      background: #fee2e2;
+      border-color: #dc2626;
+      color: #b91c1c;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+    }
+  }
+
+  &.admin-btn {
+    color: #7c3aed;
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+
+    &:hover {
+      background: #ede9fe;
+      border-color: #7c3aed;
+      color: #6d28d9;
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
     }
   }
 }
 
 // 暗黑模式适配
 .dark {
+
   .user-profile-container,
   :deep(.el-dialog) {
     background: #1a1a1a;
@@ -356,7 +507,7 @@ watch(visible, (val) => {
     color: #999;
   }
 
-  .info-list li > div {
+  .info-list li>div {
     color: #e5e5e5;
   }
 

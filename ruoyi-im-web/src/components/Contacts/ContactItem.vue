@@ -1,53 +1,22 @@
 <template>
-  <div
-    class="contact-item"
-    :class="{ 
-      active: isActive,
-      'swiped-left': isSwipedLeft,
-      [size]: true
-    }"
-    @click="$emit('click', item)"
-    @contextmenu.prevent="$emit('contextmenu', $event, item)"
-    @touchstart="handleTouchStart"
-    @touchmove="handleTouchMove"
-    @touchend="handleTouchEnd"
-  >
+  <div class="contact-item" :class="{
+    active: isActive,
+    'swiped-left': isSwipedLeft,
+    [size]: true
+  }" @click="$emit('click', item)" @contextmenu.prevent="$emit('contextmenu', $event, item)">
     <!-- 主要内容 -->
     <div class="contact-content">
-      <DingtalkAvatar
-        :name="item.name || item.displayName"
-        :size="36"
-        :src="item.avatar"
-        :shape="item.type === 'group' ? 'square' : 'circle'"
-      />
+      <DingtalkAvatar :name="item.name || item.displayName" :size="36" :src="item.avatar"
+        :shape="item.type === 'group' ? 'square' : 'circle'" />
       <div class="item-info">
         <div class="item-header">
-          <span
-            class="item-name"
-            v-html="highlightName"
-          />
-          <span
-            v-if="item.tag"
-            class="item-tag"
-          >{{ item.tag }}</span>
+          <span class="item-name" v-html="highlightName" />
+          <span v-if="item.tag" class="item-tag">{{ item.tag }}</span>
         </div>
-        <div
-          v-if="item.description || item.dept || item.position"
-          class="item-desc"
-        >
+        <div v-if="item.description || item.dept || item.position" class="item-desc">
           {{ item.description || item.position || item.dept }}
         </div>
       </div>
-    </div>
-
-    <!-- 滑动操作菜单 (Mobile) -->
-    <div class="swipe-actions">
-      <button
-        class="action-btn delete"
-        @click.stop="$emit('delete', item)"
-      >
-        删除
-      </button>
     </div>
   </div>
 </template>
@@ -81,7 +50,7 @@ const emit = defineEmits(['click', 'contextmenu', 'delete'])
 // 高亮显示搜索关键词（转义特殊字符）
 const highlightName = computed(() => {
   const name = props.item.name || props.item.displayName || ''
-  if (!props.searchQuery) {return name}
+  if (!props.searchQuery) { return name }
 
   // 先转义 HTML 防止 XSS，再进行关键词高亮
   const escapedName = escapeHtml(name)
@@ -89,32 +58,6 @@ const highlightName = computed(() => {
   const reg = new RegExp(`(${escapedQuery})`, 'gi')
   return escapedName.replace(reg, '<span class="highlight">$1</span>')
 })
-
-// ========== Touch Swipe Logic ==========
-
-const SWIPE_THRESHOLD = 30 // 滑动阈值
-const touchStartX = ref(0)
-const touchStartY = ref(0)
-const isSwipedLeft = ref(false)
-
-const handleTouchStart = e => {
-  touchStartX.value = e.touches[0].clientX
-  touchStartY.value = e.touches[0].clientY
-}
-
-const handleTouchMove = e => {
-  const deltaX = e.touches[0].clientX - touchStartX.value
-  const deltaY = e.touches[0].clientY - touchStartY.value
-
-  // 水平滑动判定：水平移动距离 > 垂直移动距离 && 超过阈值
-  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-    isSwipedLeft.value = deltaX < 0
-  }
-}
-
-const handleTouchEnd = () => {
-  // 可选：添加回弹逻辑或速度检测
-}
 
 // 防止 XSS 攻击：对用户输入进行转义
 const escapeHtml = str => {
@@ -129,7 +72,8 @@ const escapeHtml = str => {
 
 .contact-item {
   position: relative;
-  height: 60px; /* 默认标准高度 */
+  height: 60px;
+  /* 默认标准高度 */
   overflow: hidden;
   background: #ffffff;
   cursor: pointer;
@@ -194,15 +138,12 @@ const escapeHtml = str => {
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 12px; /* 钉钉标准内边距 */
-  gap: 12px; /* 头像和内容之间的间距 */
+  padding: 0 12px;
+  /* 钉钉标准内边距 */
+  gap: 12px;
+  /* 头像和内容之间的间距 */
   background: inherit;
   transition: transform var(--dt-transition-base);
-}
-
-// 滑动删除效果
-.swiped-left .contact-content {
-  transform: translateX(-70px);
 }
 
 .item-info {
@@ -260,45 +201,14 @@ const escapeHtml = str => {
   }
 }
 
-// 滑动操作按钮
-.swipe-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 70px;
-  display: flex;
-  z-index: 1;
-}
-
-.action-btn {
-  flex: 1;
-  border: none;
-  font-size: var(--dt-font-size-sm);
-  font-weight: var(--dt-font-weight-medium);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: opacity var(--dt-transition-fast);
-
-  &:active {
-    opacity: 0.8;
-  }
-
-  &.delete {
-    background: var(--dt-error-color);
-  }
-}
-
 // ============================================================================
 // 响应式适配
 // ============================================================================
 
 @media (max-width: 768px) {
   .contact-item {
-    height: 56px; /* 移动端适配 */
+    height: 56px;
+    /* 移动端适配 */
   }
 
   .contact-content {

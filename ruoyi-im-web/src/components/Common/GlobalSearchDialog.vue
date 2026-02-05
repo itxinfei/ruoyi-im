@@ -6,31 +6,23 @@
           <!-- 搜索输入框 -->
           <div class="search-header">
             <div class="search-input-wrapper">
-              <el-icon class="search-icon"><Search /></el-icon>
-              <input
-                ref="searchInputRef"
-                v-model="searchKeyword"
-                type="text"
-                class="search-input"
-                placeholder="搜索联系人、群组、消息..."
-                @input="handleInput"
-                @keydown.enter="handleSearch"
-                @keydown.esc="visible = false"
-              >
+              <el-icon class="search-icon">
+                <Search />
+              </el-icon>
+              <input ref="searchInputRef" v-model="searchKeyword" type="text" class="search-input"
+                placeholder="搜索联系人、群组、消息..." @input="handleInput" @keydown.enter="handleSearch"
+                @keydown.esc="visible = false">
               <button v-if="searchKeyword" class="clear-btn" @click="clearSearch">
-                <el-icon><CircleClose /></el-icon>
+                <el-icon>
+                  <CircleClose />
+                </el-icon>
               </button>
             </div>
-            
+
             <!-- 分类筛选 -->
             <div class="filter-tabs">
-              <button
-                v-for="cat in categories"
-                :key="cat.key"
-                class="filter-tab"
-                :class="{ active: searchType === cat.key }"
-                @click="searchType = cat.key; handleSearch()"
-              >
+              <button v-for="cat in categories" :key="cat.key" class="filter-tab"
+                :class="{ active: searchType === cat.key }" @click="searchType = cat.key; handleSearch()">
                 {{ cat.label }}
               </button>
             </div>
@@ -40,7 +32,9 @@
           <div class="search-body">
             <!-- 加载中 -->
             <div v-if="searching" class="loading">
-              <el-icon class="is-loading"><Loading /></el-icon>
+              <el-icon class="is-loading">
+                <Loading />
+              </el-icon>
               <span>搜索中...</span>
             </div>
 
@@ -48,29 +42,40 @@
             <div v-else-if="hasResults" class="results">
               <div v-for="(section, type) in filteredResults" :key="type" class="result-section">
                 <div class="section-title">{{ section.title }} ({{ section.data.length }})</div>
-                <div
-                  v-for="item in section.data"
-                  :key="item.id"
-                  class="result-item"
-                  @click="handleResultClick(type, item)"
-                >
+                <div v-for="item in section.data" :key="item.id || item.userId || item.groupId || item.fileId"
+                  class="result-item" @click="handleResultClick(type, item)">
+                  <!-- 头像 (仅联系人和群组显示) -->
+                  <el-avatar v-if="type === 'contacts' || type === 'groups'" :size="40" :src="item.avatar"
+                    class="item-avatar">
+                    {{ getItemTitle(item, type).charAt(0) }}
+                  </el-avatar>
+
                   <div class="item-content">
                     <div class="item-title">{{ getItemTitle(item, type) }}</div>
                     <div class="item-desc">{{ getItemDesc(item, type) }}</div>
                   </div>
+
+                  <!-- 右侧箭头 -->
+                  <el-icon class="item-arrow">
+                    <ArrowRight />
+                  </el-icon>
                 </div>
               </div>
             </div>
 
             <!-- 空状态 -->
             <div v-else-if="searchKeyword" class="empty">
-              <el-icon><Search /></el-icon>
+              <el-icon>
+                <Search />
+              </el-icon>
               <p>未找到相关结果</p>
             </div>
 
             <!-- 默认状态 -->
             <div v-else class="default">
-              <el-icon><Search /></el-icon>
+              <el-icon>
+                <Search />
+              </el-icon>
               <p>输入关键词开始搜索</p>
             </div>
           </div>
@@ -83,7 +88,7 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Search, CircleClose, Loading } from '@element-plus/icons-vue'
+import { Search, CircleClose, Loading, ArrowRight } from '@element-plus/icons-vue'
 import { globalSearch } from '@/api/im/globalSearch'
 
 const props = defineProps({
@@ -113,27 +118,27 @@ const categories = [
 const hasResults = computed(() => {
   if (!searchResult.value) return false
   return (searchResult.value.contacts?.length || 0) +
-         (searchResult.value.groups?.length || 0) +
-         (searchResult.value.messages?.length || 0) +
-         (searchResult.value.files?.length || 0) > 0
+    (searchResult.value.groups?.length || 0) +
+    (searchResult.value.messages?.length || 0) +
+    (searchResult.value.files?.length || 0) > 0
 })
 
 const filteredResults = computed(() => {
   if (!searchResult.value) return {}
-  
+
   const sections = {
     contacts: { title: '联系人', data: searchResult.value.contacts || [] },
     groups: { title: '群组', data: searchResult.value.groups || [] },
     messages: { title: '消息', data: searchResult.value.messages || [] },
     files: { title: '文件', data: searchResult.value.files || [] }
   }
-  
+
   if (searchType.value !== 'ALL') {
     const keyMap = { CONTACT: 'contacts', GROUP: 'groups', MESSAGE: 'messages', FILE: 'files' }
     const targetKey = keyMap[searchType.value]
     return targetKey ? { [targetKey]: sections[targetKey] } : {}
   }
-  
+
   return Object.fromEntries(
     Object.entries(sections).filter(([_, s]) => s.data.length > 0)
   )
@@ -158,8 +163,8 @@ watch(visible, val => {
 // 方法
 const getItemTitle = (item, type) => {
   const titleMap = {
-    contacts: item.friendName || item.name || item.username,
-    groups: item.groupName || item.name,
+    contacts: item.nickname || item.userName || '未知用户',
+    groups: item.groupName || '未知群组',
     messages: item.senderName || '未知用户',
     files: item.fileName || '未命名文件'
   }
@@ -168,7 +173,7 @@ const getItemTitle = (item, type) => {
 
 const getItemDesc = (item, type) => {
   const descMap = {
-    contacts: item.remark || item.departmentName || '',
+    contacts: item.department || item.position || item.mobile || '',
     groups: `共 ${item.memberCount || 0} 人`,
     messages: item.content || '',
     files: item.fileSize ? `${(item.fileSize / 1024).toFixed(2)} KB` : ''
@@ -191,7 +196,7 @@ const handleInput = () => {
 const handleSearch = async () => {
   const keyword = searchKeyword.value.trim()
   if (!keyword) return
-  
+
   searching.value = true
   try {
     const res = await globalSearch({
@@ -200,9 +205,14 @@ const handleSearch = async () => {
       pageNum: 1,
       pageSize: 50
     })
-    
+
     if (res.code === 200) {
       searchResult.value = res.data || {}
+      // 调试日志
+      console.log('搜索结果:', res.data)
+      console.log('联系人数量:', res.data.contacts?.length || 0)
+      console.log('群组数量:', res.data.groups?.length || 0)
+      console.log('消息数量:', res.data.messages?.length || 0)
     }
   } catch (error) {
     console.error('搜索失败:', error)
@@ -250,9 +260,8 @@ const handleResultClick = (type, item) => {
 }
 
 .search-modal {
-  width: 100%;
-  max-width: 600px;
-  max-height: 80vh;
+  width: 700px;
+  height: 600px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -287,7 +296,7 @@ const handleResultClick = (type, item) => {
   background: transparent;
   font-size: 15px;
   outline: none;
-  
+
   &::placeholder {
     color: #9ca3af;
   }
@@ -300,7 +309,7 @@ const handleResultClick = (type, item) => {
   color: #6b7280;
   cursor: pointer;
   border-radius: 4px;
-  
+
   &:hover {
     background: #e5e7eb;
   }
@@ -320,11 +329,11 @@ const handleResultClick = (type, item) => {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover {
     background: #e5e7eb;
   }
-  
+
   &.active {
     background: #3b82f6;
     color: #fff;
@@ -346,12 +355,12 @@ const handleResultClick = (type, item) => {
   justify-content: center;
   padding: 60px 20px;
   color: #9ca3af;
-  
+
   .el-icon {
     font-size: 48px;
     margin-bottom: 12px;
   }
-  
+
   p {
     margin: 0;
     font-size: 14px;
@@ -381,7 +390,7 @@ const handleResultClick = (type, item) => {
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 8px;
-  
+
   &:hover {
     background: #f3f4f6;
     transform: translateX(4px);
@@ -395,7 +404,7 @@ const handleResultClick = (type, item) => {
     color: #111827;
     margin-bottom: 4px;
   }
-  
+
   .item-desc {
     font-size: 13px;
     color: #6b7280;

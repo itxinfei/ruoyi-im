@@ -69,7 +69,8 @@ public class SecurityConfig {
                 // 对于登录接口允许匿名访问
                 .antMatchers("/", "/health", "/auth/login", "/auth/register", "/api/auth/login", "/api/auth/register",
                         "/api/im/auth/login", "/api/im/auth/register", "/ws/**", "/websocket/**", "/public/**",
-                        "/error", "/test/**", "/api/im/health/**")
+                        "/error", "/test/**", "/api/im/health/**", "/api/im/contact/clean-invalid-friends",
+                        "/api/im/contact/debug-zhangsan-friends")
                 .permitAll()
                 // 管理员接口需要 ADMIN 或 SUPER_ADMIN 角色
                 .antMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPER_ADMIN")

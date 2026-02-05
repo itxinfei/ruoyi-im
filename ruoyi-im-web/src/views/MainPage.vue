@@ -237,14 +237,45 @@ const handleShowUser = userId => {
 }
 
 // 处理搜索结果点击
-const handleSearchSelectMessage = message => {
-  // 根据消息的会话ID切换到对应会话
-  if (message.conversationId) {
-    store.dispatch('im/session/selectSessionById', message.conversationId)
-      .then(() => {
-        activeModule.value = 'chat'
-        // 这里可以添加滚动到指定消息的逻辑
+const handleSearchSelect = ({ type, data }) => {
+  if (!type || !data) return
+  
+  switch (type) {
+    case 'contacts':
+      // 跳转到通讯录并打开联系人详情
+      activeModule.value = 'contacts'
+      handleShowUser(data.userId || data.id)
+      break
+      
+    case 'groups':
+      // 跳转到聊天并打开群组会话
+      activeModule.value = 'chat'
+      handleSelectSession({
+        id: data.groupId || data.id,
+        type: 'GROUP',
+        name: data.groupName || data.name
       })
+      break
+      
+    case 'messages':
+      // 跳转到聊天并定位消息
+      activeModule.value = 'chat'
+      if (data.conversationId) {
+        store.dispatch('im/session/selectSessionById', data.conversationId)
+          .then(() => {
+            // 这里可以添加滚动到指定消息的逻辑
+          })
+      }
+      break
+      
+    case 'files':
+      // 跳转到云盘
+      activeModule.value = 'drive'
+      ElMessage.info('已跳转到云盘')
+      break
+      
+    default:
+      console.warn('未知的搜索结果类型:', type)
   }
 }
 
