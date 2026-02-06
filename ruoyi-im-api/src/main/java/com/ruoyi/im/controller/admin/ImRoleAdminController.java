@@ -27,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/roles")
 @Validated
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImRoleAdminController {
 
     private final ImRoleService imRoleService;

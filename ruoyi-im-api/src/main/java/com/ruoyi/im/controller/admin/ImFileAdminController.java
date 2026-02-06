@@ -30,6 +30,7 @@ import java.util.Map;
 @Tag(name = "文件管理", description = "文件管理接口，用于管理用户上传的文件")
 @RestController
 @RequestMapping("/api/admin/files")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImFileAdminController {
 
     private final ImFileAssetMapper fileAssetMapper;
@@ -178,7 +179,7 @@ public class ImFileAdminController {
         // 聚合查询需要使用 QueryWrapper（Lambda 不支持字符串 SELECT 子句）
         QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         wrapper.select("file_type", "COUNT(*) as count", "SUM(file_size) as totalSize");
-        wrapper.eq("status", "ACTIVE");
+        wrapper.eq(ImFileAsset::getStatus, "ACTIVE");
         wrapper.groupBy("file_type");
 
         List<Map<String, Object>> statistics = fileAssetMapper.selectMaps(wrapper);
@@ -196,7 +197,7 @@ public class ImFileAdminController {
         // 聚合查询需要使用 QueryWrapper（Lambda 不支持字符串 SELECT 子句）
         QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         wrapper.select("uploader_id", "COUNT(*) as count", "SUM(file_size) as totalSize");
-        wrapper.eq("status", "ACTIVE");
+        wrapper.eq(ImFileAsset::getStatus, "ACTIVE");
         wrapper.groupBy("uploader_id");
         wrapper.orderByDesc("COUNT(*)");
         wrapper.last("LIMIT 10");

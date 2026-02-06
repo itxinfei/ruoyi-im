@@ -75,10 +75,9 @@ public class MessageValidator {
      * 从配置文件加载敏感词
      */
     private void loadSensitiveWordsFromFile() {
-        try {
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream("sensitive-words.txt");
-            if (is != null) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("sensitive-words.txt");
+        if (is != null) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     line = line.trim();
@@ -86,13 +85,12 @@ public class MessageValidator {
                         addSensitiveWord(line);
                     }
                 }
-                reader.close();
                 log.info("从配置文件加载敏感词成功");
-            } else {
-                log.info("未找到敏感词配置文件，使用默认敏感词库");
+            } catch (IOException e) {
+                log.warn("读取敏感词配置文件失败: {}", e.getMessage());
             }
-        } catch (IOException e) {
-            log.warn("加载敏感词配置文件失败: {}", e.getMessage());
+        } else {
+            log.info("未找到敏感词配置文件，使用默认敏感词库");
         }
     }
 

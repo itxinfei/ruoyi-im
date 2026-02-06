@@ -308,6 +308,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteUser(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
@@ -317,6 +318,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchDeleteUsers(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return;
@@ -358,7 +360,7 @@ public class ImUserServiceImpl implements ImUserService {
             try {
                 userIds.add(Long.parseLong(userIdStr));
             } catch (NumberFormatException e) {
-                // 忽略无效的用户ID
+                log.warn("无效的用户ID格式: userIdStr={}", userIdStr);
             }
         }
 

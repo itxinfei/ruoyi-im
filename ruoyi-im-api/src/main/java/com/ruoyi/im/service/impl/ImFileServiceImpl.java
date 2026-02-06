@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -95,6 +96,7 @@ public class ImFileServiceImpl implements ImFileService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void downloadFile(Long fileId, Long userId) {
         ImFileAsset fileAsset = imFileAssetMapper.selectById(fileId);
         if (fileAsset == null) {
@@ -106,6 +108,7 @@ public class ImFileServiceImpl implements ImFileService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteFile(Long fileId, Long userId) {
         ImFileAsset fileAsset = imFileAssetMapper.selectById(fileId);
         if (fileAsset == null) {

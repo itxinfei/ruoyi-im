@@ -141,6 +141,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateGroup(Long groupId, ImGroupUpdateRequest request, Long userId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -176,6 +177,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void dismissGroup(Long groupId, Long userId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -326,6 +328,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void removeMembers(Long groupId, List<Long> userIds, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -365,6 +368,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void quitGroup(Long groupId, Long userId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -391,6 +395,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void setAdmin(Long groupId, Long userId, Boolean isAdmin, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -424,6 +429,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void muteMember(Long groupId, Long userId, Long duration, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -462,6 +468,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void transferOwner(Long groupId, Long newOwnerId, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {

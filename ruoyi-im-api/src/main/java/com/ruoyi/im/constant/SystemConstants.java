@@ -111,6 +111,9 @@ public final class SystemConstants {
     /** 默认群组头像 */
     public static final String DEFAULT_GROUP_AVATAR = "/avatar/group_default.png";
 
-    /** 默认初始密码 */
+    /**
+     * 默认初始密码
+     * ⚠️ 安全警告：此常量仅用于开发/测试环境，生产环境必须修改为随机密码
+     */
     public static final String DEFAULT_PASSWORD = "123456";
 }

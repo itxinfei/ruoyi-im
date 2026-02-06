@@ -22,6 +22,7 @@ import java.util.Map;
 @Tag(name = "批量操作管理", description = "批量操作管理接口（管理员专用）")
 @RestController
 @RequestMapping("/api/admin/batch")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImBatchOperationAdminController {
 
     private final ImBatchOperationService batchOperationService;

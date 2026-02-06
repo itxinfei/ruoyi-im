@@ -25,6 +25,7 @@ import java.util.Map;
 @Tag(name = "系统监控", description = "系统监控接口")
 @RestController
 @RequestMapping("/api/admin/monitor")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImMonitorAdminController {
 
     private final ImOnlineUserService imOnlineUserService;
