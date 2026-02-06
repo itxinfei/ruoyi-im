@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * 认证控制器
@@ -27,6 +29,7 @@ import javax.validation.Valid;
 @Tag(name = "认证管理", description = "用户登录、注册、获取信息等接口")
 @RestController
 @RequestMapping("/api/im/auth")
+@Validated
 public class ImAuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(ImAuthController.class);
@@ -155,7 +158,7 @@ public class ImAuthController {
      */
     @Operation(summary = "刷新Token", description = "使用refresh token获取新的access token")
     @PostMapping("/refresh")
-    public Result<ImLoginVO> refreshToken(@RequestParam String refreshToken) {
+    public Result<ImLoginVO> refreshToken(@RequestParam @NotBlank(message = "刷新令牌不能为空") String refreshToken) {
         try {
             // 验证refresh token
             if (!jwtUtils.validateToken(refreshToken)) {
@@ -201,7 +204,7 @@ public class ImAuthController {
      */
     @Operation(summary = "验证Token", description = "验证token是否有效")
     @PostMapping("/validateToken")
-    public Result<Boolean> validateToken(@RequestParam String token) {
+    public Result<Boolean> validateToken(@RequestParam @NotBlank(message = "令牌不能为空") String token) {
         try {
             boolean valid = jwtUtils.validateToken(token);
             return Result.success(valid);

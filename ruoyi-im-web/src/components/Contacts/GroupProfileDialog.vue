@@ -1,198 +1,156 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    width="860px"
-    class="group-profile-dialog"
-    destroy-on-close
-    :show-close="false"
-    append-to-body
-    modal-class="group-profile-modal"
-  >
-    <div v-if="loading" class="loading-state">
-      <el-skeleton :rows="10" animated />
-    </div>
+  <!-- PC端侧边栏风格的群组详情 -->
+  <transition name="slide-right">
+    <div v-if="visible" class="group-profile-sidebar">
+      <div class="sidebar-overlay" @click="handleClose" />
 
-    <div v-else-if="groupInfo" class="gp">
-      <div class="gp-rail">
-        <button class="gp-close" @click="dialogVisible = false">
-          <el-icon><ArrowLeft /></el-icon>
-        </button>
-
-        <div class="gp-rail-top">
-          <div class="gp-avatar-ring">
-            <el-avatar
-              :size="78"
-              :src="groupInfo.avatar || ''"
-              shape="square"
-              class="gp-avatar"
-            >
-              {{ groupInfo.name?.charAt(0) || '群' }}
-            </el-avatar>
-          </div>
-
-          <div class="gp-title">
-            {{ groupInfo.name }}
-          </div>
-          <div class="gp-sub">
-            群组 ID · {{ groupInfo.id }}
-          </div>
-        </div>
-
-        <div class="gp-chips">
-          <span class="gp-chip" :class="{ 'is-strong': groupInfo.isPublic }">
-            {{ groupInfo.isPublic ? '公开群组' : '私有群组' }}
-          </span>
-          <span class="gp-chip">
-            {{ groupMembers.length }} 人
-          </span>
-          <span v-if="groupMembers.length > 50" class="gp-chip">
-            大型群组
-          </span>
-        </div>
-
-        <div class="gp-actions">
-          <button class="gp-btn gp-btn--primary" @click="copyGroupId">
-            <span class="material-icons-outlined">content_copy</span>
-            复制群号
-          </button>
-          <button class="gp-btn" @click="shareGroup">
-            <span class="material-icons-outlined">ios_share</span>
-            分享
+      <div class="sidebar-panel">
+        <!-- 头部 -->
+        <div class="sidebar-header">
+          <h3 class="header-title">群聊信息</h3>
+          <button class="close-btn" @click="handleClose">
+            <el-icon>
+              <Close />
+            </el-icon>
           </button>
         </div>
 
-        <div class="gp-rail-foot">
-          <div class="gp-foot-card">
-            <div class="gp-foot-title">小提示</div>
-            <div class="gp-foot-text">点击成员头像可查看资料</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="gp-main">
-        <div class="gp-topbar">
-          <div class="gp-tabs" role="tablist" aria-label="群组详情">
-            <button
-              class="gp-tab"
-              :class="{ active: activeTab === 'members' }"
-              role="tab"
-              :aria-selected="activeTab === 'members'"
-              @click="activeTab = 'members'"
-            >
-              成员
-              <span class="gp-count">{{ groupMembers.length }}</span>
-            </button>
-            <button
-              class="gp-tab"
-              :class="{ active: activeTab === 'settings' }"
-              role="tab"
-              :aria-selected="activeTab === 'settings'"
-              @click="activeTab = 'settings'"
-            >
-              群设置
-            </button>
-          </div>
-
-          <div class="gp-top-actions">
-            <el-tooltip content="复制群ID" placement="bottom">
-              <button class="gp-icon-btn" @click="copyGroupId">
-                <span class="material-icons-outlined">content_copy</span>
-              </button>
-            </el-tooltip>
-            <el-tooltip content="关闭" placement="bottom">
-              <button class="gp-icon-btn" @click="dialogVisible = false">
-                <span class="material-icons-outlined">close</span>
-              </button>
-            </el-tooltip>
-          </div>
+        <!-- 内容区 -->
+        <div v-if="loading" class="sidebar-body">
+          <el-skeleton :rows="10" animated />
         </div>
 
-        <div class="gp-body">
-          <div v-if="activeTab === 'members'" class="gp-pane">
-            <div class="members-head">
-              <div class="members-title">
-                成员列表
-              </div>
-              <div class="members-tools">
-                <el-input
-                  v-model="memberKeyword"
-                  placeholder="搜索成员"
-                  clearable
-                  class="member-search"
-                />
-                <button class="invite-btn" @click="handleAddMember">
-                  <span class="material-icons-outlined">person_add</span>
-                  邀请成员
-                </button>
+        <div v-else-if="groupInfo" class="sidebar-body">
+          <!-- 群组基本信息卡片 -->
+          <div class="info-card">
+            <div class="group-header-section">
+              <el-avatar :size="60" :src="groupInfo.avatar || ''" shape="square" class="group-avatar">
+                {{ groupInfo.name?.charAt(0) || '群' }}
+              </el-avatar>
+              <div class="group-basic-info">
+                <h4 class="group-name">{{ groupInfo.name }}</h4>
+                <p class="group-meta">{{ groupMembers.length }}人</p>
               </div>
             </div>
 
-            <div class="members-grid" role="list">
-              <button class="member-card member-card--add" @click="handleAddMember">
-                <span class="material-icons-outlined">add</span>
-                <span class="member-name">邀请</span>
+            <!-- 快捷操作按钮 -->
+            <div class="quick-actions">
+              <button class="action-item" @click="handleAddMember">
+                <el-icon>
+                  <UserFilled />
+                </el-icon>
+                <span>邀请</span>
               </button>
-
-              <button
-                v-for="member in filteredMembers"
-                :key="member.userId"
-                class="member-card"
-                role="listitem"
-                @click="viewMemberInfo(member.userId)"
-              >
-                <el-avatar :size="44" :src="member.avatar || ''" shape="square" class="member-avatar">
-                  {{ member.userName?.charAt(0) || '用' }}
-                </el-avatar>
-                <span class="member-name">{{ member.userName }}</span>
+              <button class="action-item" @click="shareGroup">
+                <el-icon>
+                  <Share />
+                </el-icon>
+                <span>分享</span>
+              </button>
+              <button class="action-item" @click="copyGroupId">
+                <el-icon>
+                  <CopyDocument />
+                </el-icon>
+                <span>复制ID</span>
               </button>
             </div>
           </div>
 
-          <div v-else class="gp-pane">
-            <div class="settings-card">
-              <div class="settings-title">
-                基础信息
-              </div>
-              <el-form :model="groupSettings" label-position="top" class="settings-form">
-                <el-form-item label="群名称">
-                  <el-input v-model="groupSettings.name" placeholder="请输入群组名称" />
-                </el-form-item>
-                <el-form-item label="群描述">
-                  <el-input
-                    v-model="groupSettings.description"
-                    type="textarea"
-                    placeholder="介绍一下这个群..."
-                    :rows="4"
-                  />
-                </el-form-item>
-
-                <div class="settings-row">
-                  <div class="settings-row-left">
-                    <div class="settings-row-title">公开群组</div>
-                    <div class="settings-row-desc">允许任何人搜索并申请加入</div>
-                  </div>
-                  <el-switch v-model="groupSettings.isPublic" />
-                </div>
-
-                <div class="settings-actions">
-                  <el-button type="primary" class="save-btn" @click="saveSettings">
-                    保存修改
-                  </el-button>
-                </div>
-              </el-form>
+          <!-- 群成员 -->
+          <div class="section-block">
+            <div class="section-header">
+              <span class="section-title">群成员 ({{ groupMembers.length }})</span>
+              <el-input v-model="memberKeyword" placeholder="搜索成员" size="small" clearable class="member-search">
+                <template #prefix>
+                  <el-icon>
+                    <Search />
+                  </el-icon>
+                </template>
+              </el-input>
             </div>
+
+            <div class="members-list">
+              <div v-for="member in filteredMembers" :key="member.userId" class="member-item"
+                @click="viewMemberInfo(member.userId)">
+                <DingtalkAvatar :src="member.avatar" :name="member.userName" :user-id="member.userId" :size="40"
+                  shape="square" custom-class="member-avatar" />
+                <div class="member-info">
+                  <span class="member-name">{{ member.userName }}</span>
+                  <span v-if="member.role === 'OWNER'" class="member-role owner">群主</span>
+                  <span v-else-if="member.role === 'ADMIN'" class="member-role admin">管理员</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 群设置 -->
+          <div class="section-block">
+            <div class="section-header">
+              <span class="section-title">群设置</span>
+            </div>
+
+            <div class="settings-list">
+              <div class="setting-item">
+                <span class="setting-label">群聊名称</span>
+                <span class="setting-value">{{ groupInfo.name }}</span>
+              </div>
+
+              <div class="setting-item">
+                <span class="setting-label">群组ID</span>
+                <span class="setting-value">{{ groupInfo.id }}</span>
+              </div>
+
+              <div class="setting-item">
+                <span class="setting-label">群组类型</span>
+                <span class="setting-value">{{ groupInfo.isPublic ? '公开群组' : '私有群组' }}</span>
+              </div>
+
+              <div v-if="groupInfo.description" class="setting-item vertical">
+                <span class="setting-label">群简介</span>
+                <p class="setting-desc">{{ groupInfo.description }}</p>
+              </div>
+
+              <div class="setting-item clickable" @click="handleFiles">
+                <span class="setting-label">群文件</span>
+                <el-icon class="setting-arrow">
+                  <ArrowRight />
+                </el-icon>
+              </div>
+
+              <div class="setting-item clickable" @click="handleAnnouncement">
+                <span class="setting-label">群公告</span>
+                <el-icon class="setting-arrow">
+                  <ArrowRight />
+                </el-icon>
+              </div>
+            </div>
+          </div>
+
+          <!-- 危险操作区 -->
+          <div class="section-block danger-zone">
+            <button class="danger-btn" @click="handleLeaveGroup">
+              退出群聊
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </el-dialog>
+  </transition>
 </template>
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { ElMessage } from 'element-plus'
-import { ArrowLeft } from '@element-plus/icons-vue'
-import { getGroup, getGroupMembers, updateGroup } from '@/api/im/group'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Close,
+  UserFilled,
+  Share,
+  CopyDocument,
+  Search,
+  ArrowRight
+} from '@element-plus/icons-vue'
+import { getGroup, getGroupMembers, leaveGroup } from '@/api/im/group'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -201,25 +159,19 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible', 'refresh-group', 'view-member'])
 
-const dialogVisible = ref(props.visible)
 const loading = ref(false)
 const groupInfo = ref(null)
 const groupMembers = ref([])
-const activeTab = ref('members')
-const groupSettings = ref({ name: '', description: '', isPublic: false })
 const memberKeyword = ref('')
 
-watch(() => props.visible, v => { dialogVisible.value = v })
-watch(dialogVisible, v => {
-  emit('update:visible', v)
+watch(() => props.visible, v => {
   if (v && props.groupId) {
-    activeTab.value = 'members'
-    memberKeyword.value = ''
     loadGroupInfo()
   }
 })
+
 watch(() => props.groupId, gid => {
-  if (gid && dialogVisible.value) {
+  if (gid && props.visible) {
     loadGroupInfo()
   }
 })
@@ -244,7 +196,6 @@ const loadGroupInfo = async () => {
     const [gRes, mRes] = await Promise.all([getGroup(props.groupId), getGroupMembers(props.groupId)])
     if (gRes.code === 200) {
       groupInfo.value = gRes.data
-      groupSettings.value = { name: gRes.data.name, description: gRes.data.description || '', isPublic: gRes.data.isPublic === 1 }
     }
     if (mRes.code === 200) {
       groupMembers.value = mRes.data
@@ -256,497 +207,436 @@ const loadGroupInfo = async () => {
   }
 }
 
+const handleClose = () => {
+  emit('update:visible', false)
+}
+
 const copyGroupId = () => {
   navigator.clipboard.writeText(groupInfo.value.id.toString())
   ElMessage.success('ID 已复制')
 }
 
-const saveSettings = async () => {
-  try {
-    const res = await updateGroup(props.groupId, { ...groupSettings.value, isPublic: groupSettings.value.isPublic ? 1 : 0 })
-    if (res.code === 200) {
-      ElMessage.success('设置已更新')
-      loadGroupInfo()
-      emit('refresh-group')
-    }
-  } catch (e) { ElMessage.error('更新失败') }
-}
-
 const viewMemberInfo = uid => { emit('view-member', uid) }
 const handleAddMember = () => { ElMessage.info('邀请功能开发中') }
 const shareGroup = () => { ElMessage.info('分享功能开发中') }
+const handleFiles = () => { ElMessage.info('群文件功能开发中') }
+const handleAnnouncement = () => { ElMessage.info('群公告功能开发中') }
+
+const handleLeaveGroup = async () => {
+  try {
+    await ElMessageBox.confirm('确定要退出该群聊吗?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const res = await leaveGroup(props.groupId)
+    if (res.code === 200) {
+      ElMessage.success('已退出群聊')
+      handleClose()
+      emit('refresh-group')
+    }
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('退出失败')
+    }
+  }
+}
 </script>
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
 
-:global(.group-profile-modal) {
-  background-color: rgba(0, 0, 0, 0.55) !important;
+// 侧边栏容器
+.group-profile-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+// 遮罩层
+.sidebar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(2px);
 }
 
-.group-profile-dialog {
-  :deep(.el-dialog) {
-    border-radius: var(--dt-radius-xl);
-    overflow: hidden;
-    padding: 0;
-    background: transparent;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
-  }
-
-  :deep(.el-dialog__header) {
-    display: none;
-  }
-
-  :deep(.el-dialog__body) {
-    padding: 0;
-  }
-}
-
-.gp {
-  height: 600px;
-  display: flex;
-  background:
-    radial-gradient(1200px 600px at -10% -20%, rgba(71, 128, 255, 0.55), rgba(71, 128, 255, 0) 55%),
-    radial-gradient(900px 600px at 80% 0%, rgba(255, 120, 120, 0.22), rgba(255, 120, 120, 0) 55%),
-    radial-gradient(800px 520px at 55% 110%, rgba(120, 255, 214, 0.15), rgba(120, 255, 214, 0) 55%),
-    #0b1020;
-  border-radius: var(--dt-radius-xl);
-  overflow: hidden;
-}
-
-.gp-rail {
-  width: 300px;
-  padding: 20px 18px 18px;
-  display: flex;
-  flex-direction: column;
+// 侧边栏面板
+.sidebar-panel {
   position: relative;
-  color: rgba(255, 255, 255, 0.92);
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
-    radial-gradient(700px 520px at 20% 20%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 60%);
-}
-
-.gp-close {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.18);
-  color: rgba(255, 255, 255, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.30);
-    border-color: rgba(255, 255, 255, 0.26);
-    transform: translateY(-1px);
-  }
-}
-
-.gp-rail-top {
-  padding: 22px 6px 0;
+  width: 360px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  z-index: 1;
 }
 
-.gp-avatar-ring {
-  padding: 8px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.gp-avatar {
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.40);
-}
-
-.gp-title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  text-align: center;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.gp-sub {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.66);
-  text-align: center;
-}
-
-.gp-chips {
-  margin-top: 16px;
-  padding: 0 6px;
+// 头部
+.sidebar-header {
+  height: 56px;
+  padding: 0 20px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-}
-
-.gp-chip {
-  font-size: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(6px);
-
-  &.is-strong {
-    border-color: rgba(120, 255, 214, 0.35);
-    background: rgba(120, 255, 214, 0.12);
-    color: rgba(235, 255, 250, 0.95);
-  }
-}
-
-.gp-actions {
-  margin-top: 18px;
-  padding: 0 6px;
-  display: grid;
-  gap: 10px;
-}
-
-.gp-btn {
-  height: 40px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.92);
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--dt-border-lighter);
+  flex-shrink: 0;
 
-  .material-icons-outlined {
-    font-size: 18px;
-    opacity: 0.95;
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin: 0;
   }
 
-  &:hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.09);
-    border-color: rgba(255, 255, 255, 0.26);
-  }
-
-  &.gp-btn--primary {
-    background: linear-gradient(135deg, rgba(71, 128, 255, 0.95), rgba(120, 255, 214, 0.55));
-    border-color: rgba(255, 255, 255, 0.12);
-    color: rgba(12, 18, 34, 0.95);
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dt-radius-md);
+    border: none;
+    background: transparent;
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--dt-ease-out);
 
     &:hover {
-      filter: saturate(1.08);
+      background: var(--dt-bg-hover);
+      color: var(--dt-text-primary);
     }
   }
 }
 
-.gp-rail-foot {
-  margin-top: auto;
-  padding: 12px 6px 0;
-}
-
-.gp-foot-card {
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.16);
-  padding: 12px 12px;
-}
-
-.gp-foot-title {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.82);
-  margin-bottom: 4px;
-}
-
-.gp-foot-text {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.62);
-}
-
-.gp-main {
+// 内容区
+.sidebar-body {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  background:
-    radial-gradient(1200px 700px at 70% 0%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 52%),
-    rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-}
+  overflow-y: auto;
+  padding: 16px;
 
-.gp-topbar {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.65);
-}
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
 
-.gp-tabs {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(15, 23, 42, 0.06);
-  padding: 6px;
-  border-radius: 16px;
-}
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
 
-.gp-tab {
-  height: 40px;
-  border-radius: 12px;
-  border: 0;
-  padding: 0 14px;
-  background: transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: rgba(15, 23, 42, 0.70);
-  font-weight: 600;
-  transition: background 0.15s ease, color 0.15s ease;
-
-  &.active {
-    background: rgba(255, 255, 255, 0.95);
-    color: rgba(15, 23, 42, 0.95);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
   }
 }
 
-.gp-count {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.08);
-  color: rgba(15, 23, 42, 0.72);
-}
-
-.gp-top-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.gp-icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.10);
-  background: rgba(255, 255, 255, 0.82);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-
-  .material-icons-outlined {
-    font-size: 18px;
-    color: rgba(15, 23, 42, 0.72);
-  }
-
-  &:hover {
-    transform: translateY(-1px);
-    border-color: rgba(15, 23, 42, 0.18);
-    background: rgba(255, 255, 255, 0.95);
-  }
-}
-
-.gp-body {
-  flex: 1;
-  overflow: hidden;
-}
-
-.gp-pane {
-  height: 100%;
-  padding: 18px 18px 18px;
-  overflow: auto;
-}
-
-.members-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+// 信息卡片
+.info-card {
+  background: #f8f9fb;
+  border-radius: var(--dt-radius-lg);
+  padding: 20px;
   margin-bottom: 16px;
 }
 
-.members-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: rgba(15, 23, 42, 0.92);
-}
-
-.members-tools {
+.group-header-section {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.member-search {
-  width: 260px;
-
-  :deep(.el-input__wrapper) {
-    border-radius: 12px;
-    box-shadow: none;
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    background: rgba(255, 255, 255, 0.85);
-  }
-}
-
-.invite-btn {
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.10);
-  background: rgba(15, 23, 42, 0.04);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  color: rgba(15, 23, 42, 0.78);
-  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-
-  .material-icons-outlined {
-    font-size: 18px;
-  }
-
-  &:hover {
-    transform: translateY(-1px);
-    background: rgba(71, 128, 255, 0.10);
-    border-color: rgba(71, 128, 255, 0.20);
-    color: rgba(15, 23, 42, 0.92);
-  }
-}
-
-.members-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: 12px;
-}
+  margin-bottom: 16px;
 
-.member-card {
-  height: 96px;
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.10);
-  background: rgba(255, 255, 255, 0.92);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 10px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    border-color: rgba(71, 128, 255, 0.22);
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  .group-avatar {
+    border-radius: var(--dt-radius-md);
+    flex-shrink: 0;
   }
 
-  &.member-card--add {
-    background: rgba(71, 128, 255, 0.06);
-    border-style: dashed;
-    color: rgba(71, 128, 255, 0.92);
+  .group-basic-info {
+    flex: 1;
+    min-width: 0;
 
-    .material-icons-outlined {
+    .group-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--dt-text-primary);
+      margin: 0 0 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .group-meta {
+      font-size: 13px;
+      color: var(--dt-text-tertiary);
+      margin: 0;
+    }
+  }
+}
+
+// 快捷操作
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+
+  .action-item {
+    height: 64px;
+    background: #fff;
+    border: 1px solid var(--dt-border-lighter);
+    border-radius: var(--dt-radius-md);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--dt-text-primary);
+    transition: all 0.2s var(--dt-ease-out);
+
+    &:hover {
+      background: var(--dt-bg-hover);
+      border-color: var(--dt-border);
+    }
+
+    .el-icon {
       font-size: 20px;
     }
   }
 }
 
-.member-avatar {
-  border-radius: 14px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+// 区块
+.section-block {
+  margin-bottom: 16px;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dt-text-primary);
+    }
+
+    .member-search {
+      width: 160px;
+    }
+  }
 }
 
-.member-name {
-  font-size: 12px;
-  color: rgba(15, 23, 42, 0.84);
-  max-width: 100%;
+// 成员列表
+.members-list {
+  background: #fff;
+  border: 1px solid var(--dt-border-lighter);
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+
+  .member-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.2s var(--dt-ease-out);
+    border-bottom: 1px solid var(--dt-border-lighter);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: var(--dt-bg-hover);
+    }
+
+    .member-avatar {
+      border-radius: var(--dt-radius-sm);
+      flex-shrink: 0;
+    }
+
+    .member-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .member-name {
+        font-size: 14px;
+        color: var(--dt-text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .member-role {
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        flex-shrink: 0;
+
+        &.owner {
+          background: #fff3e0;
+          color: #f57c00;
+        }
+
+        &.admin {
+          background: #e3f2fd;
+          color: #1976d2;
+        }
+      }
+    }
+  }
 }
 
-.settings-card {
-  max-width: 520px;
-  border-radius: 18px;
-  border: 1px solid rgba(15, 23, 42, 0.10);
-  background: rgba(255, 255, 255, 0.92);
-  padding: 16px 16px;
-  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.08);
+// 设置列表
+.settings-list {
+  background: #fff;
+  border: 1px solid var(--dt-border-lighter);
+  border-radius: var(--dt-radius-md);
+  overflow: hidden;
+
+  .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--dt-border-lighter);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.vertical {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    &.clickable {
+      cursor: pointer;
+      transition: background 0.2s var(--dt-ease-out);
+
+      &:hover {
+        background: var(--dt-bg-hover);
+      }
+    }
+
+    .setting-label {
+      font-size: 14px;
+      color: var(--dt-text-secondary);
+    }
+
+    .setting-value {
+      font-size: 14px;
+      color: var(--dt-text-primary);
+      text-align: right;
+    }
+
+    .setting-desc {
+      font-size: 13px;
+      color: var(--dt-text-secondary);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .setting-arrow {
+      color: var(--dt-text-tertiary);
+      font-size: 14px;
+    }
+  }
 }
 
-.settings-title {
-  font-size: 14px;
-  font-weight: 800;
-  color: rgba(15, 23, 42, 0.92);
-  margin-bottom: 10px;
+// 危险操作区
+.danger-zone {
+  .danger-btn {
+    width: 100%;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #f44336;
+    border-radius: var(--dt-radius-md);
+    color: #f44336;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s var(--dt-ease-out);
+
+    &:hover {
+      background: #f44336;
+      color: #fff;
+    }
+  }
 }
 
-.settings-form {
-  :deep(.el-form-item__label) {
-    color: rgba(15, 23, 42, 0.62);
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 6px;
+// 滑入动画
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.3s var(--dt-ease-out);
+
+  .sidebar-overlay {
+    transition: opacity 0.3s var(--dt-ease-out);
   }
 
-  :deep(.el-input__wrapper),
-  :deep(.el-textarea__inner) {
-    border-radius: 12px;
-    box-shadow: none;
-    border: 1px solid rgba(15, 23, 42, 0.10);
+  .sidebar-panel {
+    transition: transform 0.3s var(--dt-ease-out);
   }
 }
 
-.settings-row {
-  margin-top: 8px;
-  padding: 14px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(15, 23, 42, 0.03);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+.slide-right-enter-from,
+.slide-right-leave-to {
+  .sidebar-overlay {
+    opacity: 0;
+  }
+
+  .sidebar-panel {
+    transform: translateX(100%);
+  }
 }
 
-.settings-row-title {
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(15, 23, 42, 0.90);
-}
+// 暗色模式
+:global(.dark) {
+  .sidebar-panel {
+    background: var(--dt-bg-card-dark);
+    border-left: 1px solid var(--dt-border-dark);
+  }
 
-.settings-row-desc {
-  margin-top: 2px;
-  font-size: 12px;
-  color: rgba(15, 23, 42, 0.62);
-}
+  .info-card {
+    background: var(--dt-bg-dark);
+  }
 
-.settings-actions {
-  margin-top: 14px;
-  display: flex;
-  justify-content: flex-end;
-}
+  .quick-actions .action-item {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
 
-.save-btn {
-  border-radius: 12px;
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .members-list,
+  .settings-list {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+
+    .member-item,
+    .setting-item {
+      border-color: var(--dt-border-dark);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+  }
+
+  .danger-btn {
+    background: var(--dt-bg-card-dark);
+  }
 }
 </style>

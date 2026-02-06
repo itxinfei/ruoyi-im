@@ -26,7 +26,7 @@
 
     <div class="content-wrapper" :class="{ 'is-merged': message.isMerged }">
       <!-- 发送者姓名（仅群聊、非自己、且非合并连续消息时显示） -->
-      <div v-if="sessionType === 'GROUP' && !message.isOwn && !message.isMerged" class="sender-name">
+      <div v-if="showSenderName" class="sender-name">
         {{ message.senderName }}
       </div>
 
@@ -77,10 +77,15 @@ const store = useStore()
 
 // ==================== 计算属性 ====================
 
+const showSenderName = computed(() => {
+  return props.sessionType === 'GROUP' && !props.message.isOwn && !props.message.isMerged
+})
+
 const itemClasses = computed(() => ({
   'is-own': props.message.isOwn,
   'is-multi-select': props.multiSelectMode,
-  'is-merged': props.message.isMerged
+  'is-merged': props.message.isMerged,
+  'has-sender-name': showSenderName.value
 }))
 
 // 是否被选中
@@ -121,10 +126,11 @@ const handleNudge = () => {
 .message-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 16px; // 钉钉标准：16px 消息间距
+  margin-bottom: 12px; // 野火IM标准:消息间距12px
   position: relative;
   padding: 0;
-  animation: fadeInUp 0.3s var(--dt-ease-out) both;
+  transition: background var(--dt-transition-fast);
+  animation: messageFadeIn 0.2s var(--dt-ease-out) both;
 
   &.is-own {
     flex-direction: row-reverse;
@@ -165,6 +171,16 @@ const handleNudge = () => {
   }
 }
 
+.message-item.has-sender-name {
+  .avatar-wrapper {
+    margin-top: 18px;
+  }
+
+  .checkbox-wrapper {
+    padding-top: 26px;
+  }
+}
+
 // 多选模式样式
 .message-item.is-multi-select {
   padding: 0 8px;
@@ -185,13 +201,16 @@ const handleNudge = () => {
   flex-shrink: 0;
   cursor: pointer;
   transition: opacity var(--dt-transition-base);
+  display: flex;
+  align-items: flex-start; // 改为顶部对齐,确保头像和气泡在一条直线上
+  padding-top: 0; // 确保无额外padding
 
   &:hover {
     opacity: 0.85;
   }
 
   .message-avatar {
-    border-radius: var(--dt-radius-sm); // 钉钉方形头像，小圆角
+    border-radius: 4px; // 野火IM:方形头像,4px圆角
   }
 }
 
@@ -202,7 +221,7 @@ const handleNudge = () => {
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  margin: 0 12px; // 优化:头像与气泡间距从8px调整为12px,符合钉钉标准
+  margin: 0 12px; // 野火IM标准:头像与气泡间距12px
   padding-top: 0;
 
   &.is-merged {
@@ -227,7 +246,7 @@ const handleNudge = () => {
 // 气泡与状态行布局
 .bubble-row {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 4px;
   max-width: 100%;
 }
@@ -235,6 +254,7 @@ const handleNudge = () => {
 .status-container {
   flex-shrink: 0;
   margin-bottom: 2px; // 对齐气泡底部稍微抬起一点
+  align-self: flex-end;
 }
 
 // 发送者姓名样式

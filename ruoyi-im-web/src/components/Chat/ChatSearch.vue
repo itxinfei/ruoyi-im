@@ -1,125 +1,59 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    title="搜索聊天记录"
-    :width="600"
-    :close-on-click-modal="true"
-    :close-on-press-escape="true"
-    class="chat-search-dialog"
-    @open="handleOpen"
-    @close="handleClose"
-  >
+  <el-dialog v-model="dialogVisible" title="搜索聊天记录" :width="600" :close-on-click-modal="true"
+    :close-on-press-escape="true" class="chat-search-dialog" @open="handleOpen" @close="handleClose">
     <div class="chat-search">
       <!-- 搜索栏 -->
       <div class="search-bar">
         <div class="search-input-wrapper">
           <span class="material-icons-outlined search-icon">search</span>
-          <input
-            ref="searchInputRef"
-            v-model="searchKeyword"
-            class="search-input"
-            placeholder="搜索聊天记录..."
-            type="text"
-            @input="handleSearch"
-            @keydown.down="handleKeyDown"
-            @keydown.up="handleKeyUp"
-            @keydown.enter="handleEnter"
-          >
-          <span
-            v-if="searchKeyword"
-            class="clear-btn"
-            @click="handleClear"
-          >
+          <input ref="searchInputRef" v-model="searchKeyword" class="search-input" placeholder="搜索聊天记录..." type="text"
+            @input="handleSearch" @keydown.down="handleKeyDown" @keydown.up="handleKeyUp" @keydown.enter="handleEnter">
+          <span v-if="searchKeyword" class="clear-btn" @click="handleClear">
             <span class="material-icons-outlined">close</span>
           </span>
         </div>
         <div class="search-actions">
-          <button
-            v-if="totalCount > 0"
-            class="nav-btn"
-            title="上一个"
-            @click="navigatePrev"
-          >
+          <button v-if="totalCount > 0" class="nav-btn" title="上一个" @click="navigatePrev">
             <span class="material-icons-outlined">chevron_left</span>
           </button>
-          <span
-            v-if="totalCount > 0"
-            class="result-count"
-          >
+          <span v-if="totalCount > 0" class="result-count">
             {{ currentIndex + 1 }}&nbsp;/&nbsp;{{ totalCount }}
           </span>
-          <button
-            v-if="totalCount > 0"
-            class="nav-btn"
-            title="下一个"
-            @click="navigateNext"
-          >
+          <button v-if="totalCount > 0" class="nav-btn" title="下一个" @click="navigateNext">
             <span class="material-icons-outlined">chevron_right</span>
           </button>
         </div>
       </div>
 
       <!-- 搜索结果列表 -->
-      <div
-        v-if="!loading && searchResults.length > 0"
-        class="search-results"
-      >
+      <div v-if="!loading && searchResults.length > 0" class="search-results">
         <div class="results-header">
           <span class="results-title">找到 {{ totalCount }} 条结果</span>
         </div>
-        <div
-          ref="resultsListRef"
-          class="results-list"
-        >
-          <div
-            v-for="(result, index) in searchResults"
-            :key="result.id"
-            class="result-item"
-            :class="{ active: index === currentIndex }"
-            @click="handleSelectResult(result, index)"
-          >
+        <div ref="resultsListRef" class="results-list">
+          <div v-for="(result, index) in searchResults" :key="result.id" class="result-item"
+            :class="{ active: index === currentIndex }" @click="handleSelectResult(result, index)">
             <div class="result-header">
-              <DingtalkAvatar
-                :name="result.senderName"
-                :user-id="result.senderId"
-                :src="result.senderAvatar"
-                :size="28"
-                shape="square"
-              />
+              <DingtalkAvatar :name="result.senderName" :user-id="result.senderId" :src="result.senderAvatar" :size="28"
+                shape="square" />
               <span class="sender-name">{{ result.senderName }}</span>
               <span class="result-time">{{ formatTime(result.sendTime) }}</span>
             </div>
             <div class="result-content">
-              <div
-                v-if="result.type === 'TEXT'"
-                class="text-result"
-                v-html="highlightKeyword(result.content)"
-              />
-              <div
-                v-else-if="result.type === 'IMAGE'"
-                class="media-result"
-              >
+              <div v-if="result.type === 'TEXT'" class="text-result" v-html="highlightKeyword(result.content)" />
+              <div v-else-if="result.type === 'IMAGE'" class="media-result">
                 <span class="material-icons-outlined">image</span>
                 <span>[图片]</span>
               </div>
-              <div
-                v-else-if="result.type === 'FILE'"
-                class="media-result"
-              >
+              <div v-else-if="result.type === 'FILE'" class="media-result">
                 <span class="material-icons-outlined">insert_drive_file</span>
                 <span>[文件] {{ getFileName(result.content) }}</span>
               </div>
-              <div
-                v-else-if="result.type === 'VIDEO'"
-                class="media-result"
-              >
+              <div v-else-if="result.type === 'VIDEO'" class="media-result">
                 <span class="material-icons-outlined">videocam</span>
                 <span>[视频]</span>
               </div>
-              <div
-                v-else-if="result.type === 'VOICE'"
-                class="media-result"
-              >
+              <div v-else-if="result.type === 'VOICE'" class="media-result">
                 <span class="material-icons-outlined">mic</span>
                 <span>[语音]</span>
               </div>
@@ -129,20 +63,14 @@
       </div>
 
       <!-- 无结果 -->
-      <div
-        v-else-if="!loading && searchKeyword && searchResults.length === 0"
-        class="no-results"
-      >
+      <div v-else-if="!loading && searchKeyword && searchResults.length === 0" class="no-results">
         <span class="material-icons-outlined empty-icon">search_off</span>
         <p>未找到 "{{ searchKeyword }}" 相关消息</p>
         <span class="hint">试试其他关键词</span>
       </div>
 
       <!-- 搜索中 -->
-      <div
-        v-if="loading"
-        class="search-loading"
-      >
+      <div v-if="loading" class="search-loading">
         <el-icon class="is-loading">
           <Loading />
         </el-icon>
@@ -204,7 +132,7 @@ const totalCount = computed(() => searchResults.value.length)
 // 监听显示状态
 const handleOpen = () => {
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     searchInputRef.value?.focus()
   })
 }
@@ -262,7 +190,7 @@ const performSearch = () => {
 
 // 高亮关键词
 const highlightKeyword = text => {
-  if (!searchKeyword.value) {return escapeHtml(text)}
+  if (!searchKeyword.value) { return escapeHtml(text) }
   const keyword = searchKeyword.value.trim()
   const regex = new RegExp(`(${escapeRegExp(keyword)})`, 'gi')
   return escapeHtml(text).replace(regex, '<mark class="highlight">$1</mark>')
@@ -270,7 +198,7 @@ const highlightKeyword = text => {
 
 // 转义 HTML 特殊字符，防止 XSS 攻击
 const escapeHtml = str => {
-  if (!str) {return ''}
+  if (!str) { return '' }
   const div = document.createElement('div')
   div.textContent = str
   return div.innerHTML
@@ -293,7 +221,7 @@ const getFileName = content => {
 
 // 格式化时间
 const formatTime = time => {
-  if (!time) {return ''}
+  if (!time) { return '' }
   const date = dayjs(time)
   const now = dayjs()
   const diffDays = now.diff(date, 'day')
@@ -347,7 +275,7 @@ const navigateNext = () => {
 // 滚动到当前结果
 const scrollToCurrentResult = () => {
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     const activeElement = resultsListRef.value?.querySelector('.result-item.active')
     if (activeElement) {
       activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
@@ -417,8 +345,8 @@ onUnmounted(() => {
 
   &:focus-within {
     background: var(--dt-bg-card);
-    border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1);
+    border-color: #4168e0; // 野火IM蓝
+    box-shadow: 0 0 0 3px rgba(65, 104, 224, 0.1);
   }
 
   .search-icon {
@@ -554,10 +482,10 @@ onUnmounted(() => {
   }
 
   &.active {
-    background: var(--dt-brand-bg);
+    background: rgba(65, 104, 224, 0.1); // 野火IM蓝浅色背景
 
     .sender-name {
-      color: var(--dt-brand-color);
+      color: #4168e0; // 野火IM蓝
     }
   }
 
@@ -587,10 +515,11 @@ onUnmounted(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 
     :deep(.highlight) {
-      background: linear-gradient(180deg, transparent 40%, rgba(255, 230, 0, 0.4) 40%, rgba(255, 230, 0, 0.4) 60%, transparent 60%);
+      background-color: rgba(255, 235, 59, 0.4); // 纯色高亮
       color: inherit;
       padding: 0 2px;
       border-radius: var(--dt-radius-sm);
@@ -692,15 +621,15 @@ onUnmounted(() => {
   }
 
   .result-item.active {
-    background: rgba(0, 137, 255, 0.15);
+    background: rgba(65, 104, 224, 0.2);
 
     .sender-name {
-      color: var(--dt-brand-color);
+      color: #4168e0;
     }
   }
 
   :deep(.highlight) {
-    background: linear-gradient(180deg, transparent 40%, rgba(255, 230, 0, 0.3) 40%, rgba(255, 230, 0, 0.3) 60%, transparent 60%);
+    background-color: rgba(255, 235, 59, 0.3);
   }
 }
 </style>

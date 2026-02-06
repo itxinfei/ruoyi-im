@@ -18,7 +18,7 @@
     </div>
 
     <!-- 引用消息预览 -->
-    <ReplyPreview v-if="replyingMessage"
+    <ReplyPreview v-if="replyingMessage" :key="replyingMessage.id"
       :sender-name="replyingMessage.senderName || replyingMessage.senderNickname || replyingMessage.userName || '未知'"
       :content="replyPreviewContent" @cancel="$emit('cancel-reply')" />
 
@@ -347,7 +347,12 @@ const inputPlaceholder = computed(() => {
 // 格式化回复预览内容（处理各种消息类型）
 const replyPreviewContent = computed(() => {
   if (!props.replyingMessage) { return '' }
-  return formatMessagePreviewFromObject(props.replyingMessage)
+  try {
+    return formatMessagePreviewFromObject(props.replyingMessage) || '...'
+  } catch (error) {
+    console.error('格式化回复预览失败:', error)
+    return '...'
+  }
 })
 
 // ========== 工具方法 ==========

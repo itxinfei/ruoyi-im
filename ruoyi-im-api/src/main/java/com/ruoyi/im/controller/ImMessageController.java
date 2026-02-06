@@ -26,6 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +43,7 @@ import java.util.Map;
 @Tag(name = "消息管理", description = "消息发送、查询、撤回、转发、回复、表情反应等接口")
 @RestController
 @RequestMapping("/api/im/message")
+@Validated
 public class ImMessageController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageController.class);
@@ -108,9 +113,9 @@ public class ImMessageController {
 
     @GetMapping("/list/{conversationId}")
     public Result<List<ImMessageVO>> getMessages(
-            @PathVariable Long conversationId,
+            @PathVariable @Positive(message = "会话ID必须为正数") Long conversationId,
             @RequestParam(required = false) Long lastId,
-            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+            @RequestParam(required = false, defaultValue = "20") @Min(value = 1, message = "每页最少1条") @Max(value = 100, message = "每页最多100条") Integer limit) {
         Long userId = SecurityUtils.getLoginUserId();
         log.info("getMessages API - 当前登录用户 userId={}, conversationId={}", userId, conversationId);
         List<ImMessageVO> list = imMessageService.getMessages(conversationId, userId, lastId, limit);
@@ -118,14 +123,14 @@ public class ImMessageController {
     }
 
     @DeleteMapping("/{messageId}/recall")
-    public Result<Void> recall(@PathVariable Long messageId) {
+    public Result<Void> recall(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
         imMessageService.recallMessage(messageId, userId);
         return Result.success("消息已撤回");
     }
 
     @DeleteMapping("/{messageId}")
-    public Result<Void> deleteMessage(@PathVariable Long messageId) {
+    public Result<Void> deleteMessage(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
         imMessageService.deleteMessage(messageId, userId);
         return Result.success("消息已删除");
@@ -133,8 +138,8 @@ public class ImMessageController {
 
     @PutMapping("/{messageId}/edit")
     public Result<Void> edit(
-            @PathVariable Long messageId,
-            @RequestBody MessageEditRequest request) {
+            @PathVariable @Positive(message = "消息ID必须为正数") Long messageId,
+            @Valid @RequestBody MessageEditRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         imMessageService.editMessage(messageId, request.getNewContent(), userId);
         return Result.success("消息已编辑");
@@ -167,7 +172,7 @@ public class ImMessageController {
     @Operation(summary = "标记会话已读", description = "将会话中指定消息之前的所有消息标记为已读")
     @PutMapping("/read")
     public Result<Void> markConversationRead(
-            @RequestParam Long conversationId,
+            @RequestParam @Positive(message = "会话ID必须为正数") Long conversationId,
             @RequestParam(required = false) Long lastReadMessageId) {
         Long userId = SecurityUtils.getLoginUserId();
         // 通过 Service 层处理会话已读标记，符合分层架构
@@ -248,7 +253,7 @@ public class ImMessageController {
     @Operation(summary = "添加表情反应", description = "对消息添加emoji表情反应")
     @PostMapping("/{messageId}/reaction")
     public Result<ImMessageReactionVO> addReaction(
-            @PathVariable Long messageId,
+            @PathVariable @Positive(message = "消息ID必须为正数") Long messageId,
             @Valid @RequestBody ImMessageReactionAddRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         request.setMessageId(messageId);
@@ -274,7 +279,7 @@ public class ImMessageController {
      */
     @Operation(summary = "删除表情反应", description = "取消对消息的emoji表情反应")
     @DeleteMapping("/{messageId}/reaction")
-    public Result<Void> removeReaction(@PathVariable Long messageId) {
+    public Result<Void> removeReaction(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
         reactionService.removeReaction(messageId, userId);
 
@@ -296,7 +301,7 @@ public class ImMessageController {
      */
     @Operation(summary = "获取表情反应列表", description = "获取消息的所有表情反应")
     @GetMapping("/{messageId}/reactions")
-    public Result<List<ImMessageReactionVO>> getMessageReactions(@PathVariable Long messageId) {
+    public Result<List<ImMessageReactionVO>> getMessageReactions(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImMessageReactionVO> reactions = reactionService.getMessageReactions(messageId, userId);
         return Result.success(reactions);
@@ -311,7 +316,7 @@ public class ImMessageController {
      */
     @Operation(summary = "获取表情反应统计", description = "获取消息的表情反应统计")
     @GetMapping("/{messageId}/reactions/stats")
-    public Result<List<ImMessageReactionVO>> getReactionStats(@PathVariable Long messageId) {
+    public Result<List<ImMessageReactionVO>> getReactionStats(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImMessageReactionVO> stats = reactionService.getReactionStats(messageId, userId);
         return Result.success(stats);
@@ -359,7 +364,7 @@ public class ImMessageController {
      */
     @Operation(summary = "标记@提及已读", description = "标记指定消息的@提及为已读状态")
     @PutMapping("/{messageId}/mention/read")
-    public Result<Void> markMentionAsRead(@PathVariable Long messageId) {
+    public Result<Void> markMentionAsRead(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
         mentionService.markAsRead(messageId, userId);
         return Result.success("已标记为已读");
@@ -393,7 +398,7 @@ public class ImMessageController {
     @Operation(summary = "搜索消息", description = "支持关键词搜索、时间范围筛选、消息类型筛选等")
     @PostMapping("/search")
     public Result<ImMessageSearchResultVO> searchMessages(
-            @RequestBody ImMessageSearchRequest request) {
+            @Valid @RequestBody ImMessageSearchRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         ImMessageSearchResultVO result = imMessageService.searchMessages(
                 request.getConversationId(),
@@ -420,7 +425,7 @@ public class ImMessageController {
      */
     @Operation(summary = "获取会话未读消息数", description = "获取指定会话中当前用户的未读消息数量")
     @GetMapping("/unread/count/{conversationId}")
-    public Result<Integer> getUnreadCount(@PathVariable Long conversationId) {
+    public Result<Integer> getUnreadCount(@PathVariable @Positive(message = "会话ID必须为正数") Long conversationId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -442,8 +447,8 @@ public class ImMessageController {
     @Operation(summary = "获取消息已读状态", description = "获取指定消息的已读用户列表")
     @GetMapping("/read/status/{conversationId}/{messageId}")
     public Result<List<Map<String, Object>>> getReadStatus(
-            @PathVariable Long conversationId,
-            @PathVariable Long messageId) {
+            @PathVariable @Positive(message = "会话ID必须为正数") Long conversationId,
+            @PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -464,7 +469,7 @@ public class ImMessageController {
      */
     @Operation(summary = "清空会话聊天记录", description = "清空指定会话中的所有消息")
     @DeleteMapping("/clear/{conversationId}")
-    public Result<Void> clearConversationMessages(@PathVariable Long conversationId) {
+    public Result<Void> clearConversationMessages(@PathVariable @Positive(message = "会话ID必须为正数") Long conversationId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -492,10 +497,10 @@ public class ImMessageController {
     @Operation(summary = "按类型获取会话消息", description = "获取指定会话中特定类型的消息")
     @GetMapping("/{conversationId}/category/{category}")
     public Result<List<ImMessageVO>> getMessagesByCategory(
-            @PathVariable Long conversationId,
+            @PathVariable @Positive(message = "会话ID必须为正数") Long conversationId,
             @PathVariable String category,
             @RequestParam(required = false) Long lastId,
-            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+            @RequestParam(required = false, defaultValue = "20") @Min(value = 1, message = "每页最少1条") @Max(value = 100, message = "每页最多100条") Integer limit) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -524,14 +529,9 @@ public class ImMessageController {
     @GetMapping("/sync")
     public Result<SyncMessageResponse> syncMessages(
             @RequestParam(required = false) Long lastSyncTime,
-            @RequestParam String deviceId,
-            @RequestParam(required = false, defaultValue = "100") Integer limit) {
+            @RequestParam @NotBlank(message = "设备ID不能为空") String deviceId,
+            @RequestParam(required = false, defaultValue = "100") @Min(value = 1, message = "最少同步1条") @Max(value = 500, message = "最多同步500条") Integer limit) {
         Long userId = SecurityUtils.getLoginUserId();
-
-        // 参数校验
-        if (deviceId == null || deviceId.trim().isEmpty()) {
-            return Result.fail("设备ID不能为空");
-        }
 
         try {
             SyncMessageResponse response = syncService.syncMessages(userId, deviceId, lastSyncTime, limit);
@@ -578,7 +578,7 @@ public class ImMessageController {
      */
     @Operation(summary = "重置同步点", description = "删除设备的同步点，下次同步将从头开始")
     @DeleteMapping("/sync/point/{deviceId}")
-    public Result<Void> resetSyncPoint(@PathVariable String deviceId) {
+    public Result<Void> resetSyncPoint(@PathVariable @NotBlank(message = "设备ID不能为空") String deviceId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {

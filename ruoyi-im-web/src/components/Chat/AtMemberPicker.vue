@@ -128,13 +128,13 @@ defineExpose({ open })
     transition: background var(--dt-transition-fast);
 
     &:hover {
-      background-color: var(--dt-bg-hover); // 使用设计token
+      background-color: #f5f5f5; // 野火IM: 浅灰Hover
     }
 
     .avatar-all {
       width: 32px;
       height: 32px;
-      background-color: var(--dt-brand-color);
+      background-color: #4168e0; // 野火IM: 品牌蓝
       color: #fff;
       border-radius: var(--dt-radius-full);
       display: flex;

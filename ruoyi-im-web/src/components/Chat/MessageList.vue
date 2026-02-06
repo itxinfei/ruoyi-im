@@ -569,31 +569,28 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 
 .message-list {
   flex: 1;
-  overflow: hidden;
   overflow-y: auto;
-  padding: 16px;
-  background: var(--dt-bg-chat);
+  overflow-x: hidden;
+  padding: 20px; // 野火IM标准:20px padding
+  background: #f5f5f5; // 野火IM标准:浅灰背景
   position: relative;
-  min-height: 0;
-  word-break: break-word;
+  scroll-behavior: smooth;
+  // 性能优化
+  will-change: scroll-position;
+  contain: layout style paint;
 
-  // 钉钉风格滚动条：默认隐藏，悬停时显示
+  // 自定义滚动条 - 野火IM风格
   &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
+    width: 6px; // 野火IM:6px宽滚动条
   }
 
   &::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: var(--dt-radius-sm);
-    transition: background var(--dt-transition-base);
-  }
+    background: rgba(0, 0, 0, 0.2); // 浅灰色
+    border-radius: 3px;
 
-  &:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.12); // 修改为自然的灰色
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
   }
 
   &:hover::-webkit-scrollbar-thumb:hover {

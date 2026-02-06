@@ -39,10 +39,6 @@
               <span class="material-icons-outlined">screenshot</span>
               <span>截图</span>
             </el-dropdown-item>
-            <el-dropdown-item command="smart-reply">
-              <span class="material-icons-outlined">auto_awesome</span>
-              <span>AI 智能回复</span>
-            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -85,7 +81,6 @@ const emit = defineEmits([
   'upload-file',
   'screenshot',
   'at-member',
-  'smart-reply',
   'voice-call',
   'video-call'
 ])
@@ -118,81 +113,89 @@ const handleMoreCommand = (command) => {
     align-items: center;
     gap: 12px;
   }
+}
 
-  .toolbar-btn {
-    position: relative;
-    width: 32px;
-    height: 32px;
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: var(--dt-text-secondary);
-    border-radius: var(--dt-radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--dt-transition-fast);
+.toolbar-btn {
+  width: 32px; // 野火IM:32px按钮
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #666666; // 野火IM:灰色图标
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all var(--dt-transition-fast);
+  padding: 0;
 
-    .material-icons-outlined {
-      font-size: 22px;
-    }
+  .material-icons-outlined {
+    font-size: 20px; // 野火IM:20px图标
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #4168e0; // hover时变为野火IM蓝色
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  .dark & {
+    color: #999999;
 
     &:hover {
-      background: var(--dt-bg-hover); // 统一使用设计token
-      color: var(--dt-brand-color);
+      background: rgba(255, 255, 255, 0.08);
+      color: #4168e0;
     }
+  }
 
-    &:active {
-      transform: scale(0.95);
+  &:focus-visible {
+    outline: 2px solid var(--dt-brand-color);
+    outline-offset: 2px;
+  }
+
+  &.active {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+  }
+
+  // 更多按钮
+  &.more-btn {
+    &:hover {
+      background: var(--dt-bg-hover);
     }
+  }
 
-    &:focus-visible {
-      outline: 2px solid var(--dt-brand-color);
-      outline-offset: 2px;
-    }
+  // 通话按钮特殊样式
+  &.call-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--dt-radius-md);
 
-    &.active {
-      color: var(--dt-brand-color);
-      background: var(--dt-brand-light);
-    }
+    &.voice-call {
+      color: #22c55e;
 
-    // 更多按钮
-    &.more-btn {
       &:hover {
-        background: var(--dt-bg-hover);
+        background: rgba(34, 197, 94, 0.1);
       }
     }
 
-    // 通话按钮特殊样式
-    &.call-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--dt-radius-md);
+    &.video-call {
+      color: #3b82f6;
 
-      &.voice-call {
-        color: #22c55e;
-
-        &:hover {
-          background: rgba(34, 197, 94, 0.1);
-        }
-      }
-
-      &.video-call {
-        color: #3b82f6;
-
-        &:hover {
-          background: rgba(59, 130, 246, 0.1);
-        }
+      &:hover {
+        background: rgba(59, 130, 246, 0.1);
       }
     }
   }
+}
 
-  .call-buttons {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+.call-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 // 更多菜单样式

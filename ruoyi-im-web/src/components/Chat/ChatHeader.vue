@@ -206,19 +206,21 @@ const handleVideoCall = () => {
 // 容器
 // ============================================================================
 .chat-header {
-  height: 60px;
+  height: 60px; // 野火IM标准:60px高度
+  padding: 0 20px; // 野火IM:左右20px padding
+  background: #ffffff; // 野火IM:白色背景
+  border-bottom: 1px solid #e0e0e0; // 野火IM:灰色边框
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-light);
+  justify-content: space-between;
   flex-shrink: 0;
+  position: relative;
   z-index: 10;
+  transition: all var(--dt-transition-base);
 
   .dark & {
     background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
+    border-bottom-color: var(--dt-border-dark);
   }
 }
 
@@ -228,28 +230,20 @@ const handleVideoCall = () => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 12px; // 野火IM:头像与文字间距12px
+  flex: 1;
+  min-width: 0;
   cursor: pointer;
-  padding: 8px 12px 8px 8px;
-  margin: -8px -12px -8px -8px;
+  padding: 8px 0;
   border-radius: var(--dt-radius-md);
-  transition: background var(--dt-transition-base);
+  transition: background var(--dt-transition-fast);
 
   &:hover {
-    background: rgba(0, 0, 0, 0.04);
-
-    .header-avatar-wrapper {
-      transform: scale(1.02);
-    }
+    background: rgba(0, 0, 0, 0.03);
   }
 
-  &:focus-visible {
-    outline: 2px solid var(--dt-brand-color);
-    outline-offset: 2px;
-  }
-
-  &:active {
-    transform: scale(0.98);
+  .dark &:hover {
+    background: rgba(255, 255, 255, 0.05);
   }
 }
 
@@ -263,14 +257,23 @@ const handleVideoCall = () => {
 }
 
 .header-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--dt-radius-md);
-  box-shadow: var(--dt-shadow-2);
+  width: 40px;
+  height: 40px;
+  border-radius: 4px; // 野火IM:4px圆角
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  transition: opacity var(--dt-transition-base);
 
-  :deep(.dingtalk-avatar) {
-    border-radius: var(--dt-radius-md) !important;
+  &:hover {
+    opacity: 0.85;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px; // 野火IM:4px圆角
+    object-fit: cover;
   }
 }
 
@@ -389,42 +392,31 @@ const handleVideoCall = () => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding-right: 4px;
-
-  .header-divider {
-    width: 1px;
-    height: 16px;
-    background: var(--dt-border-light);
-    margin: 0 4px;
-
-    .dark & {
-      background: var(--dt-border-dark);
-    }
-  }
+  gap: 8px; // 野火IM:按钮间距8px
+  flex-shrink: 0;
 }
 
 .action-btn {
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border: none;
-  border-radius: var(--dt-radius-sm);
-  padding: 0;
-  color: #181818;
-  cursor: pointer;
+  width: 32px; // 野火IM:32px按钮
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s var(--dt-ease-out);
+  border: none;
+  background: transparent;
+  color: #666666; // 野火IM:灰色图标
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all var(--dt-transition-fast);
+  font-size: 18px; // 图标大小
 
   .material-icons-outlined {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.06);
-    color: #3f64e4;
+    background: rgba(0, 0, 0, 0.05);
+    color: #4168e0; // hover时变为野火IM蓝色
   }
 
   &:active {

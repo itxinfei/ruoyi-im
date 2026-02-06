@@ -9,7 +9,6 @@ export * as userApi from './user'
 export * as dingApi from './ding'
 export * as botApi from './bot'
 export * as translationApi from './translation'
-export * as aiApi from './ai'
 export * as favoriteApi from './favorite'
 export * as transcriptApi from './transcript'
 export * as globalSearchApi from './globalSearch'
@@ -110,13 +109,6 @@ export {
   getHotKeywords
 } from './globalSearch'
 
-// AI助手相关API
-export {
-  chat,
-  summarize,
-  clearConversation,
-  getSupportedModels
-} from './ai'
 
 // 消息标记相关API
 export {

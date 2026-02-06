@@ -102,11 +102,16 @@ export function formatRelativeTime(timestamp) {
 }
 
 /**
- * 聊天消息时间格式化（根据时间差智能显示）
+ * 智能时间格式化（内部统一实现）
  * @param {Number|String|Date} timestamp - 时间戳
+ * @param {Object} options - 格式化选项
+ * @param {String} options.style - 风格 'chat' | 'list'
+ * @param {Boolean} options.showWeekday - 是否显示星期（仅 chat 风格）
+ * @param {Boolean} options.showTime - 是否显示时间（仅 chat 风格）
  * @returns {String} 格式化后的时间
+ * @private
  */
-export function formatChatTime(timestamp) {
+function _formatTimeSmart(timestamp, options = {}) {
   if (!timestamp) {return ''}
   const date = new Date(timestamp)
   const now = new Date()
@@ -115,22 +120,45 @@ export function formatChatTime(timestamp) {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
   const diffDays = Math.floor((today - targetDate) / 86400000)
+  const style = options.style || 'chat'
 
-  if (diffDays === 0) {
-    // 今天：显示时间
-    return formatTime(date)
-  } else if (diffDays === 1) {
-    // 昨天：显示"昨天 HH:mm"
-    return `昨天 ${formatTime(date)}`
-  } else if (diffDays < 7) {
-    // 一周内：显示"周X HH:mm"
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    const weekday = weekdays[date.getDay()]
-    return `${weekday} ${formatTime(date)}`
+  if (style === 'chat') {
+    // 聊天风格：今天/昨天/周X/日期
+    if (diffDays === 0) {
+      return formatTime(date)
+    } else if (diffDays === 1) {
+      return `昨天 ${formatTime(date)}`
+    } else if (diffDays < 7) {
+      const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+      const weekday = weekdays[date.getDay()]
+      return `${weekday} ${formatTime(date)}`
+    } else {
+      return `${formatDate(date)} ${formatTime(date)}`
+    }
   } else {
-    // 更早：显示日期
-    return `${formatDate(date)} ${formatTime(date)}`
+    // 列表风格：时间/X天前/月日
+    if (diffDays === 0) {
+      return formatTime(date)
+    } else if (diffDays < 7) {
+      return `${diffDays}天前`
+    } else {
+      const month = date.toLocaleDateString('zh-CN', { month: 'short' })
+      return `${month}${date.getDate()}日`
+    }
   }
+}
+
+/**
+ * 聊天消息时间格式化（根据时间差智能显示）
+ * @param {Number|String|Date} timestamp - 时间戳
+ * @returns {String} 格式化后的时间
+ * @example
+ * formatChatTime(Date.now())           // "14:30" (今天)
+ * formatChatTime(Date.now() - 86400000) // "昨天 14:30"
+ * formatChatTime(Date.now() - 259200000) // "周一 14:30" (3天前)
+ */
+export function formatChatTime(timestamp) {
+  return _formatTimeSmart(timestamp, { style: 'chat' })
 }
 
 /**
@@ -299,31 +327,16 @@ export async function copyToClipboard(text, options = {}) {
 
 /**
  * 格式化列表项时间（适用于文件列表、公告列表等）
- * 24小时内显示 HH:mm，7天内显示 X天前，更早显示 月日
+ * 今天显示 HH:mm，7天内显示 X天前，更早显示 月日
  * @param {Number|String|Date} time - 时间
  * @returns {String} 格式化后的时间字符串
+ * @example
+ * formatListItemTime(Date.now())           // "14:30" (今天)
+ * formatListItemTime(Date.now() - 86400000) // "1天前"
+ * formatListItemTime(Date.now() - 604800000) // "2月5日" (7天前)
  */
 export function formatListItemTime(time) {
-  if (!time) {return ''}
-  const date = new Date(time)
-  const now = new Date()
-  const diff = now - date
-
-  if (diff < 86400000) {
-    // 24小时内：显示时间
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${hours}:${minutes}`
-  } else if (diff < 604800000) {
-    // 7天内：显示X天前
-    const days = Math.floor(diff / 86400000)
-    return `${days}天前`
-  } else {
-    // 更早：显示月日
-    const month = date.toLocaleDateString('zh-CN', { month: 'short' })
-    const day = date.getDate()
-    return `${month}${day}日`
-  }
+  return _formatTimeSmart(time, { style: 'list' })
 }
 
 /**

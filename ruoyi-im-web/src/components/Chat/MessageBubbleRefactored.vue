@@ -419,57 +419,56 @@ const canRecall = computed(() => {
 }
 
 .bubble-content {
-  padding: 8px 12px; // 钉钉标准：侧边 12px
-  border-radius: var(--dt-radius-md);
+  padding: 10px 12px; // 野火IM标准:上下10px,左右12px
+  border-radius: 8px; // 野火IM标准:统一8px圆角
   font-size: var(--dt-font-size-base);
-  line-height: 1.5; // 优化：提升行高
+  line-height: 1.5;
   word-break: break-all;
   overflow-wrap: anywhere;
   transition: all var(--dt-transition-base);
   display: flex;
   align-items: flex-start;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); // 钉钉风格：极细阴影
 }
 
-// 对方消息样式
+// 对方消息样式 - 野火IM风格
 .message-bubble:not(.is-own) {
   .bubble-content {
-    background: var(--dt-bubble-left-bg);
-    border: none; // 优化：移除边框
-    // 钉钉标准：对向圆角（左尖右圆）- 左上2px，其他14px
-    border-radius: 2px 14px 14px 14px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    background: #ffffff; // 野火IM:白色背景
+    border: 1px solid #e0e0e0; // 野火IM:灰色边框
+    border-radius: 8px; // 野火IM:统一圆角,不要非对称
+    color: #333333; // 野火IM:深灰文字
+    box-shadow: none; // 野火IM:无阴影或极浅阴影
     transition: background 0.2s;
 
     &:hover {
-      background: #fcfcfc; // 极细微的变暗
+      background: #f5f5f5; // hover时稍微变灰
     }
   }
 
   &:hover .bubble-content {
-    background: var(--dt-bg-card-hover);
+    background: #f5f5f5;
   }
 }
 
-// 自己消息样式
+// 自己消息样式 - 野火IM风格
 .message-bubble.is-own {
   flex-direction: row-reverse;
 
   .bubble-content {
-    background: var(--dt-bubble-right-bg);
-    color: var(--dt-bubble-right-text); // 白色文字
-    // 钉钉标准：对向圆角（左圆右尖）- 右上2px，其他14px
-    border-radius: 14px 2px 14px 14px;
-    box-shadow: 0 1px 4px rgba(0, 137, 255, 0.2); // 品牌色阴影
-    transition: filter 0.2s;
+    background: #4168e0; // 野火IM:蓝色背景
+    color: #ffffff; // 白色文字
+    border: none; // 无边框
+    border-radius: 8px; // 野火IM:统一圆角,不要非对称
+    box-shadow: none; // 野火IM:无阴影
+    transition: background 0.2s;
 
     &:hover {
-      filter: brightness(0.95); // 品牌色稍微压深一点
+      background: #3558d0; // hover时稍微变深
     }
   }
 
   &:hover .bubble-content {
-    background: var(--dt-bubble-right-bg-hover);
+    background: #3558d0;
   }
 
   // 确保所有子元素文字颜色都是白色
@@ -530,30 +529,31 @@ const canRecall = computed(() => {
   font-style: italic;
 }
 
-// 暗色模式适配（钉钉风格）
+// 暗色模式适配(野火IM风格)
 :global(.dark) {
 
-  // 对方消息：深灰背景
+  // 对方消息:深灰背景
   .message-bubble:not(.is-own) .bubble-content {
     background: #2c2c2c;
+    border-color: #444444;
     color: #e8e8e8;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
   }
 
-  // 自己消息：钉钉蓝（暗模式下稍亮）
+  // 自己消息:蓝色(暗模式下稍亮)
   .message-bubble.is-own .bubble-content {
-    background: #0089FF;
+    background: #4168e0;
     color: #FFFFFF;
   }
 
   // 悬停状态
   .message-bubble:not(.is-own):hover .bubble-content {
     background: #333333;
-    border-color: #444444;
+    border-color: #555555;
   }
 
   .message-bubble.is-own:hover .bubble-content {
-    background: #1A9FFF;
+    background: #3558d0;
   }
 }
 

@@ -1090,11 +1090,11 @@ const handleBatchForwardConfirm = async ({ messageIds, targetSessionId, forwardT
 
 const handleReply = message => {
   cmdReply(message)
-  // 聚焦输入框，提升用户体验
-  nextTick(() => {
+  // 使用 setTimeout 确保 DOM 更新完成后再聚焦，避免有些情况下 nextTick 过早触发
+  setTimeout(() => {
     if (isUnmounted.value) { return }
     messageInputRef.value?.focus()
-  })
+  }, 50)
 }
 
 const handleEdit = message => {
