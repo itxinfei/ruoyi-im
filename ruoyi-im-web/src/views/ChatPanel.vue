@@ -142,16 +142,16 @@ import MultiSelectToolbar from '@/components/Chat/MultiSelectToolbar.vue'
 import ImageViewerDialog from '@/components/Chat/ImageViewerDialog.vue'
 import { getMessages, batchForwardMessages, clearConversationMessages, retryMessage } from '@/api/im/message'
 import { pinConversation, muteConversation } from '@/api/im/conversation'
-import { uploadFile } from '@/api/im/file'
+import { uploadFile as uploadFileApi } from '@/api/im/file'
 import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useMessageRetry } from '@/composables/useMessageRetry'
 import {
   useChatMessages,
   useChatCommands,
-  useChatDialogs,
-  useChatUpload
+  useChatDialogs
 } from '@/composables/useChat'
+import { useFileUploadUnified } from '@/composables/useFileUploadUnified'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseMessageContent } from '@/utils/message'
 import { useMessageTransformation } from '@/composables/useMessageTransformation.js'
@@ -237,14 +237,14 @@ const {
   closeAllDialogs
 } = useChatDialogs()
 
-// 文件上传
+// 文件上传（使用统一模块，队列模式）
 const {
   uploadImage,
   uploadImages,
-  uploadCommonFile,
+  uploadFile,
   uploadVideo,
   uploading
-} = useChatUpload()
+} = useFileUploadUnified({ enableQueue: true })
 
 // ==================== 本地状态 ====================
 const showGroupDetail = ref(false)
@@ -466,7 +466,7 @@ const handleSendVoice = async ({ file, duration }) => {
     const formData = new FormData()
     formData.append('file', file)
 
-    const uploadRes = await uploadFile(formData)
+    const uploadRes = await uploadFileApi(formData)
     const voiceUrl = uploadRes.data?.fileUrl
 
     // 发送语音消息
@@ -916,7 +916,7 @@ const uploadFileFile = async file => {
 
   try {
     // 上传文件到服务器
-    const uploadResult = await uploadCommonFile(file, props.session.id)
+    const uploadResult = await uploadFile(file, props.session.id)
 
     if (uploadResult && uploadResult.fileUrl) {
       // 构建文件消息内容
@@ -1482,7 +1482,7 @@ const handleFileUpload = async payload => {
 
   try {
     // 2. 上传文件
-    const res = await uploadFile(formData)
+    const res = await uploadFileApi(formData)
     if (res.code === 200) {
       // 3. 发送消息
       const msg = await store.dispatch('im/message/sendMessage', {
@@ -1670,7 +1670,7 @@ const handleVideoUpload = async ({ file, url }) => {
     const formData = new FormData()
     formData.append('file', file)
 
-    const res = await uploadFile(formData)
+    const res = await uploadFileApi(formData)
     if (res.code === 200) {
       // 3. 发送视频消息
       const msg = await store.dispatch('im/message/sendMessage', {

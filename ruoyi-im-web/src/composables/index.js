@@ -24,7 +24,14 @@ export {
 
 // ========== 聊天相关 Composables ==========
 
-// 文件上传
+// 文件上传（推荐使用统一版本）
+export {
+  useFileUploadUnified,
+  useFileUploadQueue,
+  useFileUploadOptimistic
+} from './useFileUploadUnified'
+
+// @deprecated 请使用 useFileUploadUnified
 export { useFileUpload } from './useFileUpload'
 
 // 输入状态指示器
