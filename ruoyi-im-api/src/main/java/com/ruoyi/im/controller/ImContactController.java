@@ -17,6 +17,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,6 +33,7 @@ import java.util.List;
 @Tag(name = "联系人管理", description = "用户搜索、好友申请、好友管理、分组管理等接口")
 @RestController
 @RequestMapping("/api/im/contact")
+@Validated
 public class ImContactController {
 
     private final ImFriendService imFriendService;
@@ -63,7 +68,7 @@ public class ImContactController {
      */
     @Operation(summary = "搜索用户", description = "根据关键词搜索用户，支持用户名、昵称、手机号搜索")
     @GetMapping("/search")
-    public Result<List<ImUserVO>> search(@RequestParam String keyword) {
+    public Result<List<ImUserVO>> search(@RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImUserVO> list = imFriendService.searchUsers(keyword, userId);
         return Result.success(list);
@@ -132,8 +137,8 @@ public class ImContactController {
      */
     @Operation(summary = "处理好友申请", description = "同意或拒绝好友申请")
     @PostMapping("/request/{id}/handle")
-    public Result<Void> handleRequest(@PathVariable Long id,
-            @RequestParam Boolean approved) {
+    public Result<Void> handleRequest(@PathVariable @Positive(message = "申请ID必须为正数") Long id,
+            @RequestParam @NotNull(message = "处理结果不能为空") Boolean approved) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.handleFriendRequest(id, approved, userId);
         return Result.success(approved ? "已同意" : "已拒绝");
@@ -183,7 +188,7 @@ public class ImContactController {
      */
     @Operation(summary = "获取好友详情", description = "查询指定好友的详细信息")
     @GetMapping("/{id}")
-    public Result<ImFriendVO> getFriendById(@PathVariable Long id) {
+    public Result<ImFriendVO> getFriendById(@PathVariable @Positive(message = "好友ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         ImFriendVO vo = imFriendService.getFriendById(id, userId);
         return Result.success(vo);
@@ -202,7 +207,7 @@ public class ImContactController {
      */
     @Operation(summary = "更新好友信息", description = "更新好友的备注名、分组等信息")
     @PutMapping("/{id}")
-    public Result<Void> updateFriend(@PathVariable Long id,
+    public Result<Void> updateFriend(@PathVariable @Positive(message = "好友ID必须为正数") Long id,
             @Valid @RequestBody ImFriendUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.updateFriend(id, request, userId);
@@ -221,7 +226,7 @@ public class ImContactController {
      */
     @Operation(summary = "删除好友", description = "删除指定好友关系")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteFriend(@PathVariable Long id) {
+    public Result<Void> deleteFriend(@PathVariable @Positive(message = "好友ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.deleteFriend(id, userId);
         return Result.success("删除成功");
@@ -240,8 +245,8 @@ public class ImContactController {
      */
     @Operation(summary = "拉黑/解除拉黑好友", description = "拉黑好友后无法接收其消息")
     @PutMapping("/{id}/block")
-    public Result<Void> blockFriend(@PathVariable Long id,
-            @RequestParam Boolean blocked) {
+    public Result<Void> blockFriend(@PathVariable @Positive(message = "好友ID必须为正数") Long id,
+            @RequestParam @NotNull(message = "拉黑状态不能为空") Boolean blocked) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.blockFriend(id, blocked, userId);
         return Result.success(blocked ? "已拉黑" : "已解除拉黑");

@@ -26,6 +26,7 @@ import java.util.List;
 @Tag(name = "会话管理", description = "会话创建、管理、未读消息统计、会话置顶、免打扰等功能")
 @RestController
 @RequestMapping("/api/im/conversation")
+@Validated
 public class ImConversationController {
 
     private final ImConversationService imConversationService;
@@ -66,7 +67,7 @@ public class ImConversationController {
      */
     @Operation(summary = "获取会话详情", description = "查询指定会话的详细信息")
     @GetMapping("/{id}")
-    public Result<ImConversationVO> getConversationById(@PathVariable Long id) {
+    public Result<ImConversationVO> getConversationById(@PathVariable @Positive(message = "会话ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         ImConversationVO vo = imConversationService.getConversationById(id, userId);
         return Result.success(vo);
@@ -102,7 +103,7 @@ public class ImConversationController {
      */
     @Operation(summary = "更新会话设置", description = "更新会话的置顶、免打扰等设置")
     @PutMapping("/{id}")
-    public Result<Void> updateConversation(@PathVariable Long id,
+    public Result<Void> updateConversation(@PathVariable @Positive(message = "会话ID必须为正数") Long id,
                                          @Valid @RequestBody ImConversationUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         imConversationService.updateConversation(id, request, userId);
@@ -120,7 +121,7 @@ public class ImConversationController {
      */
     @Operation(summary = "删除会话", description = "从会话列表中删除指定会话（非物理删除）")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteConversation(@PathVariable Long id) {
+    public Result<Void> deleteConversation(@PathVariable @Positive(message = "会话ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         imConversationService.deleteConversation(id, userId);
         return Result.success("删除成功");
@@ -137,8 +138,8 @@ public class ImConversationController {
      */
     @Operation(summary = "置顶/取消置顶会话", description = "设置会话置顶状态")
     @PutMapping("/{id}/pinned")
-    public Result<Void> setPinned(@PathVariable Long id,
-                                @RequestParam Boolean pinned) {
+    public Result<Void> setPinned(@PathVariable @Positive(message = "会话ID必须为正数") Long id,
+                                @RequestParam @NotNull(message = "置顶状态不能为空") Boolean pinned) {
         Long userId = SecurityUtils.getLoginUserId();
         imConversationService.setPinned(id, pinned, userId);
         return Result.success(pinned ? "置顶成功" : "取消置顶成功");
@@ -155,8 +156,8 @@ public class ImConversationController {
      */
     @Operation(summary = "设置免打扰", description = "设置会话免打扰状态")
     @PutMapping("/{id}/muted")
-    public Result<Void> setMuted(@PathVariable Long id,
-                               @RequestParam Boolean muted) {
+    public Result<Void> setMuted(@PathVariable @Positive(message = "会话ID必须为正数") Long id,
+                               @RequestParam @NotNull(message = "免打扰状态不能为空") Boolean muted) {
         Long userId = SecurityUtils.getLoginUserId();
         imConversationService.setMuted(id, muted, userId);
         return Result.success(muted ? "免打扰设置成功" : "免打扰取消成功");
@@ -173,7 +174,7 @@ public class ImConversationController {
      */
     @Operation(summary = "搜索会话", description = "根据关键词搜索会话")
     @GetMapping("/search")
-    public Result<List<ImConversationVO>> search(@RequestParam String keyword) {
+    public Result<List<ImConversationVO>> search(@RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImConversationVO> list = imConversationService.searchConversations(keyword, userId);
         return Result.success(list);
@@ -190,7 +191,7 @@ public class ImConversationController {
      */
     @Operation(summary = "标记会话为已读", description = "将指定会话的所有未读消息标记为已读")
     @PutMapping("/{id}/markAsRead")
-    public Result<Void> markAsRead(@PathVariable Long id) {
+    public Result<Void> markAsRead(@PathVariable @Positive(message = "会话ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         imConversationService.markAsRead(userId, id);
         return Result.success("标记已读成功");

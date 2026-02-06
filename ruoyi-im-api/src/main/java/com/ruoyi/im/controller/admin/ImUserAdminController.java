@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import java.io.IOException;
 
 import java.util.HashMap;
@@ -28,6 +32,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/users")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+@Validated
 public class ImUserAdminController {
 
     private final ImUserService imUserService;
@@ -55,8 +60,8 @@ public class ImUserAdminController {
     public Result<Map<String, Object>> list(
             @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword,
             @Parameter(description = "角色筛选") @RequestParam(required = false) String role,
-            @Parameter(description = "页码") @RequestParam(required = false, defaultValue = "1") Integer pageNum,
-            @Parameter(description = "每页大小") @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
+            @Parameter(description = "页码") @RequestParam(required = false, defaultValue = "1") @Min(value = 1, message = "页码最小为1") Integer pageNum,
+            @Parameter(description = "每页大小") @RequestParam(required = false, defaultValue = "20") @Min(value = 1, message = "每页最少1条") @Max(value = 100, message = "每页最多100条") Integer pageSize) {
 
         // 计算偏移量
         int offset = (pageNum - 1) * pageSize;
@@ -84,7 +89,7 @@ public class ImUserAdminController {
      */
     @Operation(summary = "获取用户详情", description = "管理员获取指定用户的详细信息")
     @GetMapping("/{id}")
-    public Result<ImUserVO> getById(@Parameter(description = "用户ID") @PathVariable Long id) {
+    public Result<ImUserVO> getById(@Parameter(description = "用户ID") @PathVariable @Positive(message = "用户ID必须为正数") Long id) {
         ImUserVO vo = imUserService.getUserById(id);
         return Result.success(vo);
     }
@@ -99,7 +104,7 @@ public class ImUserAdminController {
     @Operation(summary = "修改用户状态", description = "管理员启用或禁用用户")
     @PutMapping("/{id}/status")
     public Result<Void> updateStatus(
-            @Parameter(description = "用户ID") @PathVariable Long id,
+            @Parameter(description = "用户ID") @PathVariable @Positive(message = "用户ID必须为正数") Long id,
             @Parameter(description = "状态：0=禁用，1=启用") @RequestParam Integer status) {
         imUserService.updateStatus(id, status);
         return Result.success("状态修改成功");
@@ -116,7 +121,7 @@ public class ImUserAdminController {
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/role")
     public Result<Void> updateRole(
-            @Parameter(description = "用户ID") @PathVariable Long id,
+            @Parameter(description = "用户ID") @PathVariable @Positive(message = "用户ID必须为正数") Long id,
             @Parameter(description = "角色：USER/ADMIN/SUPER_ADMIN") @RequestParam String role) {
         if (!UserRole.USER.equals(role) && !UserRole.ADMIN.equals(role) && !UserRole.SUPER_ADMIN.equals(role)) {
             return Result.fail("无效的角色");
@@ -133,7 +138,7 @@ public class ImUserAdminController {
      */
     @Operation(summary = "删除用户", description = "管理员删除指定用户")
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@Parameter(description = "用户ID") @PathVariable Long id) {
+    public Result<Void> delete(@Parameter(description = "用户ID") @PathVariable @Positive(message = "用户ID必须为正数") Long id) {
         imUserService.deleteUser(id);
         return Result.success("删除成功");
     }
@@ -172,7 +177,7 @@ public class ImUserAdminController {
      */
     @Operation(summary = "更新用户信息", description = "管理员更新用户信息")
     @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable Long id, @RequestBody Map<String, Object> data) {
+    public Result<Void> update(@PathVariable @Positive(message = "用户ID必须为正数") Long id, @RequestBody Map<String, Object> data) {
         imUserService.adminUpdateUser(id, data);
         return Result.success("更新成功");
     }

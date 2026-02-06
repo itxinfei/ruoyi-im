@@ -21,6 +21,8 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -161,15 +163,43 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Map<String, String>> handleBindException(BindException e) {
         log.warn("数据绑定失败: {}", e.getMessage());
-        
+
         Map<String, String> errors = new HashMap<>();
         e.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        
+
         return Result.error(400, "数据绑定失败", errors);
+    }
+
+    /**
+     * 处理约束违规异常
+     *
+     * 捕获并处理@Validated注解在方法参数上的验证失败异常
+     * 用于处理@PathVariable、@RequestParam等参数上的验证注解
+     *
+     * @param e 约束违规异常对象，包含验证错误信息
+     * @return 包含字段名和错误信息映射的响应对象
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<Map<String, String>> handleConstraintViolationException(ConstraintViolationException e) {
+        log.warn("参数验证失败: {}", e.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+            String propertyName = violation.getPropertyPath().toString();
+            // 获取最后一个节点作为字段名
+            String fieldName = propertyName.contains(".")
+                ? propertyName.substring(propertyName.lastIndexOf('.') + 1)
+                : propertyName;
+            String errorMessage = violation.getMessage();
+            errors.put(fieldName, errorMessage);
+        }
+
+        return Result.error(400, "参数验证失败", errors);
     }
 
     /**

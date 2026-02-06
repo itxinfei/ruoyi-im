@@ -17,6 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,6 +35,7 @@ import java.util.List;
 @Tag(name = "文件管理", description = "文件上传、下载、分享等接口")
 @RestController
 @RequestMapping("/api/im/file")
+@Validated
 public class ImFileController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImFileController.class);
@@ -102,7 +107,7 @@ public class ImFileController {
      */
     @Operation(summary = "下载文件", description = "根据文件ID下载文件")
     @GetMapping("/download/{fileId}")
-    public void downloadFile(@PathVariable Long fileId,
+    public void downloadFile(@PathVariable @Positive(message = "文件ID必须为正数") Long fileId,
             @RequestParam(required = false) String token,
             HttpServletResponse response) {
         // 从token参数中获取用户信息（用于文件下载时的JWT验证）
@@ -232,7 +237,7 @@ public class ImFileController {
      */
     @Operation(summary = "获取文件预览URL", description = "获取文件预览URL")
     @GetMapping("/preview/{fileId}")
-    public Result<String> getFilePreviewUrl(@PathVariable Long fileId) {
+    public Result<String> getFilePreviewUrl(@PathVariable @Positive(message = "文件ID必须为正数") Long fileId) {
         // 验证登录但不使用ID
         SecurityUtils.getLoginUserId();
 
@@ -253,7 +258,7 @@ public class ImFileController {
      */
     @Operation(summary = "获取文件详情", description = "根据文件ID获取文件详细信息")
     @GetMapping("/{fileId}")
-    public Result<ImFileVO> getFileById(@PathVariable Long fileId) {
+    public Result<ImFileVO> getFileById(@PathVariable @Positive(message = "文件ID必须为正数") Long fileId) {
         ImFileVO fileVO = imFileService.getFileById(fileId);
         return Result.success(fileVO);
     }
@@ -267,7 +272,7 @@ public class ImFileController {
      */
     @Operation(summary = "删除文件", description = "删除指定的文件")
     @DeleteMapping("/{fileId}")
-    public Result<Void> deleteFile(@PathVariable Long fileId) {
+    public Result<Void> deleteFile(@PathVariable @Positive(message = "文件ID必须为正数") Long fileId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         imFileService.deleteFile(fileId, userId);
@@ -283,7 +288,7 @@ public class ImFileController {
      */
     @Operation(summary = "批量删除文件", description = "批量删除多个文件")
     @DeleteMapping("/batch")
-    public Result<Void> batchDeleteFiles(@RequestBody List<Long> fileIds) {
+    public Result<Void> batchDeleteFiles(@RequestBody @NotEmpty(message = "文件ID列表不能为空") List<Long> fileIds) {
         Long userId = SecurityUtils.getLoginUserId();
 
         for (Long fileId : fileIds) {

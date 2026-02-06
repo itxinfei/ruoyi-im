@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +39,7 @@ import java.util.stream.Collectors;
 @Tag(name = "用户管理", description = "用户信息查询、更新、头像上传、密码修改等接口")
 @RestController
 @RequestMapping("/api/im/user")
+@Validated
 public class ImUserController {
 
     private static final Logger log = LoggerFactory.getLogger(ImUserController.class);
@@ -81,7 +85,7 @@ public class ImUserController {
      */
     @Operation(summary = "删除用户", description = "管理员删除指定用户账户及其关联数据")
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id) {
+    public Result<Void> delete(@PathVariable @Positive(message = "用户ID必须为正数") Long id) {
         imUserService.deleteUser(id);
         return Result.success("删除成功");
     }
@@ -96,7 +100,7 @@ public class ImUserController {
      */
     @Operation(summary = "搜索用户", description = "根据关键词搜索用户，支持用户名或昵称模糊匹配")
     @GetMapping("/search")
-    public Result<List<ImUserVO>> search(@RequestParam String keyword) {
+    public Result<List<ImUserVO>> search(@RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         List<ImUserVO> list = imUserService.searchUsers(keyword);
         return Result.success(list);
     }
@@ -111,7 +115,7 @@ public class ImUserController {
      */
     @Operation(summary = "批量获取用户信息", description = "根据用户ID列表批量获取用户基本信息")
     @GetMapping("/batch")
-    public Result<List<ImUserVO>> getBatch(@RequestParam String ids) {
+    public Result<List<ImUserVO>> getBatch(@RequestParam @NotBlank(message = "用户ID列表不能为空") String ids) {
         List<Long> idList = java.util.Arrays.stream(ids.split(","))
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
@@ -129,7 +133,7 @@ public class ImUserController {
      */
     @Operation(summary = "获取用户好友列表", description = "查询指定用户的所有好友信息")
     @GetMapping("/friends/{id}")
-    public Result<List<ImFriendVO>> getUserFriends(@PathVariable Long id) {
+    public Result<List<ImFriendVO>> getUserFriends(@PathVariable @Positive(message = "用户ID必须为正数") Long id) {
         List<ImFriendVO> list = imFriendService.getFriendList(id);
         return Result.success(list);
     }
@@ -161,7 +165,7 @@ public class ImUserController {
      */
     @Operation(summary = "获取指定用户信息", description = "根据用户ID获取用户详细信息")
     @GetMapping("/{id}")
-    public Result<ImUserVO> getById(@PathVariable Long id) {
+    public Result<ImUserVO> getById(@PathVariable @Positive(message = "用户ID必须为正数") Long id) {
         ImUserVO vo = imUserService.getUserById(id);
         return Result.success(vo);
     }
@@ -213,7 +217,7 @@ public class ImUserController {
      */
     @Operation(summary = "更新用户信息", description = "更新用户的昵称、头像、个性签名等信息")
     @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable Long id, @Valid @RequestBody ImUserUpdateRequest request) {
+    public Result<Void> update(@PathVariable @Positive(message = "用户ID必须为正数") Long id, @Valid @RequestBody ImUserUpdateRequest request) {
         imUserService.updateUser(id, request);
         return Result.success("更新成功");
     }
@@ -232,9 +236,9 @@ public class ImUserController {
     @Operation(summary = "修改密码", description = "验证旧密码后更新为新密码")
     @PutMapping("/{id}/password")
     public Result<Void> changePassword(
-            @PathVariable Long id,
-            @RequestParam String oldPassword,
-            @RequestParam String newPassword) {
+            @PathVariable @Positive(message = "用户ID必须为正数") Long id,
+            @RequestParam @NotBlank(message = "旧密码不能为空") String oldPassword,
+            @RequestParam @NotBlank(message = "新密码不能为空") String newPassword) {
         boolean success = imUserService.changePassword(id, oldPassword, newPassword);
         return success ? Result.success("密码修改成功") : Result.fail("旧密码错误");
     }
