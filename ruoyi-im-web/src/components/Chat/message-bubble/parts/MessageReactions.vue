@@ -8,6 +8,7 @@
       :key="reaction.emoji"
       class="reaction-item"
       :class="{ 'is-active': reaction.hasOwnReaction }"
+      :title="reaction.usersTitle"
       @click.stop="$emit('toggle', reaction.emoji)"
     >
       <span class="reaction-emoji">{{ reaction.emoji }}</span>
@@ -40,14 +41,19 @@ const reactions = computed(() => {
       grouped[r.emoji] = {
         emoji: r.emoji,
         count: 0,
-        hasOwnReaction: false
+        hasOwnReaction: false,
+        users: []
       }
     }
     grouped[r.emoji].count++
+    grouped[r.emoji].users.push(r.userName || r.userId)
     grouped[r.emoji].hasOwnReaction = r.userId === currentUser?.id
   })
 
-  return Object.values(grouped)
+  return Object.values(grouped).map(r => ({
+    ...r,
+    usersTitle: r.users.join('、')
+  }))
 })
 
 const hasReactions = computed(() => reactions.value.length > 0)

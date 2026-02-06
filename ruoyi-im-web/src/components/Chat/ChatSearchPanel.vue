@@ -1,11 +1,7 @@
 <template>
   <teleport to="body">
     <transition name="slide">
-      <div
-        v-if="visible"
-        class="chat-search-overlay"
-        @click.self="handleClose"
-      >
+      <div v-if="visible" class="chat-search-overlay" @click.self="handleClose">
         <div class="chat-search-panel">
           <!-- 头部 -->
           <div class="search-header">
@@ -13,25 +9,15 @@
               <span class="material-icons-outlined">search</span>
               <span>搜索聊天记录</span>
             </div>
-            <button
-              class="close-btn"
-              @click="handleClose"
-            >
+            <button class="close-btn" @click="handleClose">
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
 
           <!-- 搜索输入区域 -->
           <div class="search-input-area">
-            <el-input
-              ref="searchInputRef"
-              v-model="searchKeyword"
-              placeholder="搜索消息内容、发送人..."
-              size="large"
-              clearable
-              @input="handleSearch"
-              @keyup.enter="handleSearch"
-            >
+            <el-input ref="searchInputRef" v-model="searchKeyword" placeholder="搜索消息内容、发送人..." size="large" clearable
+              @input="handleSearch" @keyup.enter="handleSearch">
               <template #prefix>
                 <span class="material-icons-outlined">search</span>
               </template>
@@ -39,47 +25,35 @@
 
             <!-- 搜索类型筛选 -->
             <div class="search-filters">
-              <button
-                v-for="filter in searchFilters"
-                :key="filter.key"
-                class="filter-btn"
-                :class="{ active: activeFilter === filter.key }"
-                @click="activeFilter = filter.key"
-              >
+              <button v-for="filter in searchFilters" :key="filter.key" class="filter-btn"
+                :class="{ active: activeFilter === filter.key }" @click="activeFilter = filter.key">
                 <span class="material-icons-outlined">{{ filter.icon }}</span>
                 <span>{{ filter.label }}</span>
-                <span
-                  v-if="filter.count > 0"
-                  class="filter-count"
-                >{{ filter.count }}</span>
+                <span v-if="filter.count > 0" class="filter-count">{{ filter.count }}</span>
+              </button>
+            </div>
+
+            <!-- 时间范围筛选 -->
+            <div class="search-date-filters">
+              <button v-for="dateFilter in dateFilters" :key="dateFilter.key" class="date-filter-btn"
+                :class="{ active: activeDateFilter === dateFilter.key }" @click="activeDateFilter = dateFilter.key">
+                <span>{{ dateFilter.label }}</span>
               </button>
             </div>
           </div>
 
           <!-- 搜索结果 -->
-          <div
-            ref="resultsRef"
-            class="search-results"
-          >
+          <div ref="resultsRef" class="search-results">
             <!-- 加载状态 -->
-            <div
-              v-if="searching"
-              class="loading-state"
-            >
-              <el-icon
-                class="is-loading"
-                :size="32"
-              >
+            <div v-if="searching" class="loading-state">
+              <el-icon class="is-loading" :size="32">
                 <Loading />
               </el-icon>
               <span>搜索中...</span>
             </div>
 
             <!-- 空状态 - 未搜索 -->
-            <div
-              v-else-if="!hasSearched"
-              class="empty-initial"
-            >
+            <div v-else-if="!hasSearched" class="empty-initial">
               <div class="empty-icon">
                 <span class="material-icons-outlined">search</span>
               </div>
@@ -91,48 +65,28 @@
             </div>
 
             <!-- 空状态 - 无结果 -->
-            <div
-              v-else-if="searchResults.length === 0"
-              class="empty-no-result"
-            >
+            <div v-else-if="searchResults.length === 0" class="empty-no-result">
               <span class="material-icons-outlined">search_off</span>
               <p>未找到相关内容</p>
               <span class="hint">试试其他关键词</span>
             </div>
 
             <!-- 搜索结果列表 -->
-            <div
-              v-else
-              class="results-list"
-            >
+            <div v-else class="results-list">
               <div class="results-summary">
                 找到 <strong>{{ searchResults.length }}</strong> 条相关消息
               </div>
 
               <!-- 按日期分组的结果 -->
-              <div
-                v-for="(group, date) in groupedResults"
-                :key="date"
-                class="result-group"
-              >
+              <div v-for="(group, date) in groupedResults" :key="date" class="result-group">
                 <div class="group-date">
                   {{ formatDate(date) }}
                 </div>
 
-                <div
-                  v-for="item in group"
-                  :key="item.id"
-                  class="result-item"
-                  @click="handleResultClick(item)"
-                >
+                <div v-for="item in group" :key="item.id" class="result-item" @click="handleResultClick(item)">
                   <div class="result-avatar">
-                    <DingtalkAvatar
-                      :src="item.senderAvatar"
-                      :name="item.senderName"
-                      :user-id="item.senderId"
-                      :size="36"
-                      shape="square"
-                    />
+                    <DingtalkAvatar :src="item.senderAvatar" :name="item.senderName" :user-id="item.senderId" :size="36"
+                      shape="square" />
                   </div>
                   <div class="result-content">
                     <div class="result-header">
@@ -171,25 +125,15 @@
               </div>
 
               <!-- 加载更多 -->
-              <div
-                v-if="hasMore"
-                class="load-more"
-                @click="loadMore"
-              >
+              <div v-if="hasMore" class="load-more" @click="loadMore">
                 <span>加载更多</span>
               </div>
             </div>
           </div>
 
           <!-- 底部快捷操作 -->
-          <div
-            v-if="hasSearched && searchResults.length > 0"
-            class="search-footer"
-          >
-            <el-button
-              size="small"
-              @click="handleExportResults"
-            >
+          <div v-if="hasSearched && searchResults.length > 0" class="search-footer">
+            <el-button size="small" @click="handleExportResults">
               <span class="material-icons-outlined">download</span>
               导出结果
             </el-button>
@@ -226,7 +170,16 @@ const searchResults = ref([])
 const hasMore = ref(false)
 const currentPage = ref(1)
 const activeFilter = ref('all')
+const activeDateFilter = ref('all')
 const isUnmounted = ref(false) // 标记组件是否已卸载
+
+// 时间范围筛选
+const dateFilters = [
+  { key: 'all', label: '全部时间' },
+  { key: 'today', label: '今天' },
+  { key: 'week', label: '本周' },
+  { key: 'month', label: '本月' }
+]
 
 // 搜索类型筛选
 const searchFilters = computed(() => [
@@ -246,6 +199,28 @@ const groupedResults = computed(() => {
     results = results.filter(m => m.type === activeFilter.value)
   }
 
+  // 根据时间范围过滤
+  if (activeDateFilter.value !== 'all') {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    results = results.filter(item => {
+      const itemDate = new Date(item.timestamp)
+      if (activeDateFilter.value === 'today') {
+        return itemDate >= today
+      } else if (activeDateFilter.value === 'week') {
+        const weekAgo = new Date(today)
+        weekAgo.setDate(weekAgo.getDate() - 7)
+        return itemDate >= weekAgo
+      } else if (activeDateFilter.value === 'month') {
+        const monthAgo = new Date(today)
+        monthAgo.setMonth(monthAgo.getMonth() - 1)
+        return itemDate >= monthAgo
+      }
+      return true
+    })
+  }
+
   const groups = {}
   results.forEach(item => {
     const date = new Date(item.timestamp).toDateString()
@@ -259,9 +234,9 @@ const groupedResults = computed(() => {
 
 // 高亮关键词
 const highlightKeyword = text => {
-  if (!searchKeyword.value) {return escapeHtml(text)}
+  if (!searchKeyword.value) { return escapeHtml(text) }
   const keyword = searchKeyword.value.trim()
-  if (!keyword) {return escapeHtml(text)}
+  if (!keyword) { return escapeHtml(text) }
 
   const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp(`(${escapedKeyword})`, 'gi')
@@ -270,7 +245,7 @@ const highlightKeyword = text => {
 
 // 转义 HTML 特殊字符，防止 XSS 攻击
 const escapeHtml = str => {
-  if (!str) {return ''}
+  if (!str) { return '' }
   const div = document.createElement('div')
   div.textContent = str
   return div.innerHTML
@@ -385,7 +360,7 @@ const handleSearch = async () => {
 
 // 加载更多
 const loadMore = async () => {
-  if (!searchKeyword.value || searching.value) {return}
+  if (!searchKeyword.value || searching.value) { return }
 
   searching.value = true
   currentPage.value++
@@ -435,8 +410,9 @@ watch(() => props.visible, val => {
     searchResults.value = []
     hasSearched.value = false
     activeFilter.value = 'all'
+    activeDateFilter.value = 'all'
     nextTick(() => {
-      if (isUnmounted.value) {return}
+      if (isUnmounted.value) { return }
       searchInputRef.value?.focus()
     })
   }
@@ -549,7 +525,8 @@ onUnmounted(() => {
       box-shadow: var(--dt-shadow-3);
       padding: 8px 16px;
 
-      &:hover, &.is-focus {
+      &:hover,
+      &.is-focus {
         box-shadow: var(--dt-shadow-brand-light);
       }
     }
@@ -617,6 +594,46 @@ onUnmounted(() => {
         .filter-count {
           background: rgba(255, 255, 255, 0.25);
         }
+      }
+    }
+  }
+
+  .search-date-filters {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--dt-border);
+      border-radius: var(--dt-radius-sm);
+    }
+
+    .date-filter-btn {
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--dt-border-light);
+      border-radius: var(--dt-radius-lg);
+      font-size: 12px;
+      color: var(--dt-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+
+      &:hover {
+        border-color: var(--dt-brand-color);
+        color: var(--dt-brand-color);
+      }
+
+      &.active {
+        background: var(--dt-brand-bg);
+        border-color: var(--dt-brand-color);
+        color: var(--dt-brand-color);
       }
     }
   }
@@ -848,17 +865,6 @@ onUnmounted(() => {
       font-size: 16px;
       margin-right: 4px;
     }
-  }
-}
-
-// 响应式
-@media (max-width: 768px) {
-  .chat-search-panel {
-    width: 100%;
-  }
-
-  .search-filters {
-    justify-content: flex-start;
   }
 }
 </style>

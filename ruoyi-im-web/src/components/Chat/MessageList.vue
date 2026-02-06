@@ -30,7 +30,7 @@
 
       <!-- 可见消息列表 -->
       <div
-        v-for="msg in visibleMessages"
+        v-for="msg in visibleMessagesComputed"
         :key="msg.id || msg.timeText"
         :data-id="msg.id"
         class="message-wrapper"
@@ -63,6 +63,7 @@
             <MessageBubble
               :message="msg"
               :session-type="sessionType"
+              :is-large-group="isLargeGroup"
               @command="handleCommand($event, msg)"
               @at="$emit('at', msg)"
               @preview="previewImage"
@@ -180,9 +181,8 @@
 
 <script setup>
 import { computed, ref, nextTick, watch, onMounted, onUnmounted } from 'vue'
-import { Loading, ArrowDown, User } from '@element-plus/icons-vue'
+import { ArrowDown, User } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getMessageReadUsers, getBatchMessageReadUsers } from '@/api/im/message'
 import { sendNudge } from '@/api/im/nudge'
 import MessageItem from './MessageItemRefactored.vue'
 // 使用重构后的消息气泡组件
@@ -190,6 +190,11 @@ import MessageBubble from './MessageBubbleRefactored.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import { copyToClipboard } from '@/utils/format'
+
+// 组合式函数
+import { useMessageVirtualScroll } from './composables/useMessageVirtualScroll.js'
+import { useMessageReadUsers } from './composables/useMessageReadUsers.js'
+import { useMessageScroll } from './composables/useMessageScroll.js'
 
 const props = defineProps({
   messages: {
@@ -212,114 +217,50 @@ const props = defineProps({
 const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit', 'preview', 'nudge-success', 'long-press'])
 
 const listRef = ref(null)
-const readUsersMap = ref({})
-const loadingReadUsers = ref({})
-const showScrollToBottom = ref(false)
 const isUnmounted = ref(false) // 标记组件是否已卸载，防止卸载后执行 DOM 操作
 
 // ============================================================================
-// 性能优化：消息懒加载渲染
+// 组合式函数：虚拟滚动、已读用户、滚动处理
 // ============================================================================
 
-// 懒加载配置
-const ENABLE_LAZY_LOADING_THRESHOLD = 100 // 消息数超过此阈值时启用懒加载
-const BUFFER_ZONE = {
-  ABOVE: 200,  // 视口上方缓冲区（像素）
-  BELOW: 400,  // 视口下方缓冲区（像素）
-  MESSAGE_COUNT: 20  // 最少渲染消息数（即使不在缓冲区内）
+// 虚拟滚动（传递获取消息的函数，避免循环依赖）
+const {
+  isLargeGroup,
+  isLazyLoadingEnabled,
+  topSpacerHeight,
+  bottomSpacerHeight,
+  visibleMessages: visibleMessagesComputed,
+  updateScrollPosition,
+  scrollTop: scrollY,
+  clientHeight: containerHeight
+} = useMessageVirtualScroll(props, () => messagesWithDividers.value)
+
+// 已读用户管理
+const {
+  readUsersMap,
+  loadingReadUsers,
+  fetchReadUsers,
+  prefetchReadUsers
+} = useMessageReadUsers(computed(() => props.sessionId))
+
+// 滚动处理
+const {
+  showScrollToBottom,
+  scrollToBottom,
+  scrollToMsg: scrollToMsgFromComposable,
+  handleScroll: handleScrollFromComposable,
+  maintainScrollPosition
+} = useMessageScroll(listRef, emit, isUnmounted)
+
+// 使用本地增强版 scrollToMsg，但调用 composable 的基础功能
+const handleScroll = (event) => {
+  // 更新虚拟滚动的位置信息
+  if (listRef.value) {
+    updateScrollPosition(listRef.value)
+  }
+  // 调用 composable 的滚动处理
+  handleScrollFromComposable(event)
 }
-
-// 滚动位置跟踪
-const scrollTop = ref(0)
-const clientHeight = ref(600) // 初始估算值
-
-// 消息高度缓存（用于快速计算）
-const messageHeightCache = ref(new Map())
-
-// 平均消息高度（用于估算）
-const AVERAGE_MESSAGE_HEIGHT = 80 // 包含头像、内容、间距的估算高度
-
-// 是否启用懒加载
-const isLazyLoadingEnabled = computed(() => props.messages.length > ENABLE_LAZY_LOADING_THRESHOLD)
-
-// 计算顶部和底部占位符高度（虚拟滚动优化）
-const topSpacerHeight = computed(() => {
-  if (!isLazyLoadingEnabled.value) {return 0}
-  const { startIndex } = calculateVisibleRange()
-  // 估算顶部消息的总高度
-  return startIndex * AVERAGE_MESSAGE_HEIGHT
-})
-
-const bottomSpacerHeight = computed(() => {
-  if (!isLazyLoadingEnabled.value) {return 0}
-  const { endIndex } = calculateVisibleRange()
-  const allMessages = messagesWithDividers.value
-  // 估算底部未渲染消息的总高度
-  return (allMessages.length - endIndex) * AVERAGE_MESSAGE_HEIGHT
-})
-
-/**
- * 计算可见区域的消息范围
- * @returns {Object} { startIndex, endIndex } - 在 messagesWithDividers 中的索引范围
- */
-const calculateVisibleRange = () => {
-  if (!isLazyLoadingEnabled.value) {
-    // 不启用懒加载时，渲染全部消息
-    return { startIndex: 0, endIndex: messagesWithDividers.value.length }
-  }
-
-  const allMessages = messagesWithDividers.value
-  if (allMessages.length === 0) {
-    return { startIndex: 0, endIndex: 0 }
-  }
-
-  // 从滚动位置估算可见的消息索引
-  // scrollTop 是当前滚动位置，需要找到对应的消息索引
-  const viewportTop = scrollTop.value
-  const viewportBottom = scrollTop.value + clientHeight.value
-
-  // 扩展视口范围，包含缓冲区
-  const renderTop = Math.max(0, viewportTop - BUFFER_ZONE.ABOVE)
-  const renderBottom = viewportBottom + BUFFER_ZONE.BELOW
-
-  // 估算消息索引
-  let startIndex = Math.floor(renderTop / AVERAGE_MESSAGE_HEIGHT)
-  let endIndex = Math.ceil(renderBottom / AVERAGE_MESSAGE_HEIGHT)
-
-  // 确保在有效范围内
-  startIndex = Math.max(0, startIndex - BUFFER_ZONE.MESSAGE_COUNT) // 向上多取一些
-  endIndex = Math.min(allMessages.length, endIndex + BUFFER_ZONE.MESSAGE_COUNT) // 向下多取一些
-
-  // 确保至少渲染一定数量的消息
-  if (endIndex - startIndex < BUFFER_ZONE.MESSAGE_COUNT * 2) {
-    // 如果渲染的消息太少，扩展范围
-    const centerIndex = Math.floor((startIndex + endIndex) / 2)
-    startIndex = Math.max(0, centerIndex - BUFFER_ZONE.MESSAGE_COUNT)
-    endIndex = Math.min(allMessages.length, centerIndex + BUFFER_ZONE.MESSAGE_COUNT)
-  }
-
-  return { startIndex, endIndex }
-}
-
-// 可见消息列表（动态计算）
-const visibleMessages = computed(() => {
-  const allMessages = messagesWithDividers.value
-  if (allMessages.length === 0) {return []}
-
-  // 过滤掉无效的消息对象
-  const validMessages = allMessages.filter(msg => msg && (msg.id || msg.timeText))
-
-  // 不启用懒加载时，返回全部消息
-  if (!isLazyLoadingEnabled.value) {
-    return validMessages
-  }
-
-  // 计算可见范围
-  const { startIndex, endIndex } = calculateVisibleRange()
-
-  // 截取可见区域的消息
-  return validMessages.slice(startIndex, endIndex)
-})
 
 // 监听新消息，如果是自己的消息则滚动到底部
 watch(() => props.messages.length, (newLength, oldLength) => {
@@ -331,74 +272,9 @@ watch(() => props.messages.length, (newLength, oldLength) => {
   }
 
   // 批量预加载可见区域的已读用户
-  // 限制预加载数量为最近 20 条消息
-  const visibleMessages = props.messages.slice(-20)
-  prefetchReadUsers(visibleMessages)
+  const recentMessages = props.messages.slice(-20)
+  prefetchReadUsers(recentMessages)
 })
-
-// 获取已读用户列表（单条消息）
-const fetchReadUsers = async msg => {
-  if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) {return}
-
-  loadingReadUsers.value[msg.id] = true
-  try {
-    const res = await getMessageReadUsers(props.sessionId, msg.id)
-    if (res.code === 200) {
-      readUsersMap.value[msg.id] = res.data
-    }
-  } catch (error) {
-    console.error('获取已读用户失败', error)
-  } finally {
-    loadingReadUsers.value[msg.id] = false
-  }
-}
-
-/**
- * 批量预加载已读用户列表
- * 用于优化可见区域消息的已读状态查询
- * @param {Array} messages - 需要预加载的消息列表
- */
-const prefetchReadUsers = async messages => {
-  if (!messages || messages.length === 0) {return}
-
-  // 过滤出需要查询的消息（群聊、有已读数据、未加载过）
-  const messagesToFetch = messages.filter(msg =>
-    msg.groupMemberCount &&
-    (msg.readCount > 0 || msg.isRead) &&
-    !readUsersMap.value[msg.id] &&
-    !loadingReadUsers.value[msg.id]
-  )
-
-  if (messagesToFetch.length === 0) {return}
-
-  // 设置加载状态
-  messagesToFetch.forEach(msg => {
-    loadingReadUsers.value[msg.id] = true
-  })
-
-  try {
-    const messageIds = messagesToFetch.map(m => m.id)
-    const res = await getBatchMessageReadUsers(messageIds)
-
-    if (res.code === 200) {
-      // 将结果存入缓存
-      Object.keys(res.data).forEach(msgId => {
-        readUsersMap.value[msgId] = res.data[msgId]
-      })
-    }
-  } catch (error) {
-    console.error('批量获取已读用户失败', error)
-    // 批量失败时回退到单个查询
-    messagesToFetch.forEach(msg => {
-      loadingReadUsers.value[msg.id] = false
-    })
-  } finally {
-    // 清除加载状态
-    messagesToFetch.forEach(msg => {
-      loadingReadUsers.value[msg.id] = false
-    })
-  }
-}
 
 // 计算未读人数（群聊中需要知道群成员总数）
 const unreadCount = msg => {
@@ -550,19 +426,6 @@ const shouldAddTimeDivider = (currentMsg, prevMsg) => {
   return currentTime - prevTime > TIME_DIVIDER_THRESHOLD
 }
 
-// 滚动到底部
-const scrollToBottom = (smooth = true) => {
-  nextTick(() => {
-    if (isUnmounted.value) {return} // 组件已卸载，不执行 DOM 操作
-    if (listRef.value) {
-      listRef.value.scrollTo({
-        top: listRef.value.scrollHeight,
-        behavior: smooth ? 'smooth' : 'auto'
-      })
-    }
-  })
-}
-
 // 处理菜单命令
 const handleCommand = async (cmd, msg) => {
   if (cmd === 'copy') {
@@ -679,31 +542,10 @@ const scrollToMsg = param => {
   tempDisableLazyLoading()
 }
 
-// 监听滚动事件 - 性能优化版
-const handleScroll = () => {
-  if (!listRef.value || props.loading) {return}
-
-  const { scrollTop: newScrollTop, clientHeight: newClientHeight, scrollHeight } = listRef.value
-
-  // 更新滚动位置信息（用于懒加载计算）
-  scrollTop.value = newScrollTop
-  clientHeight.value = newClientHeight
-
-  // 滚动到顶部加载更多（带阈值，避免频繁触发）
-  if (newScrollTop < 50 && newScrollTop >= 0) {
-    emit('load-more')
-  }
-
-  // 检测是否接近底部
-  const distanceFromBottom = scrollHeight - newScrollTop - newClientHeight
-  showScrollToBottom.value = distanceFromBottom > 300
-
-  // 更新可见区域（用于已读上报）
-  updateVisibleRange(newScrollTop, newClientHeight)
-}
-
 // 可见区域跟踪（用于已读上报优化）
 const visibleRange = ref({ start: 0, end: 0 })
+
+// 更新可见区域（用于已读上报）
 const updateVisibleRange = (scrollPos, viewportHeight) => {
   const allMessages = messagesWithDividers.value
   if (allMessages.length === 0) {return}
@@ -801,11 +643,12 @@ onUnmounted(() => {
   if (observer.value) {observer.value.disconnect()}
 })
 
-defineExpose({ scrollToBottom, maintainScroll, scrollToMessage: scrollToMsg })
+defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToMessage: scrollToMsg })
 </script>
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/animations.scss' as *;
 
 .message-list {
   flex: 1;

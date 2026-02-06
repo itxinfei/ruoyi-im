@@ -1,9 +1,9 @@
 /**
- * 消息气泡组件 - 重构版本
- *
- * 将单一的大型组件拆分为多个子组件和组合式函数
- * 提高可维护性和可测试性
- */
+* 消息气泡组件 - 重构版本
+*
+* 将单一的大型组件拆分为多个子组件和组合式函数
+* 提高可维护性和可测试性
+*/
 <template>
   <div class="message-bubble-wrapper">
     <div
@@ -11,163 +11,95 @@
       class="message-bubble"
       :class="bubbleClasses"
       @click="handleClick"
-      @touchstart="enhancedHandleTouchStart"
-      @touchend="handleTouchEnd"
-      @touchcancel="handleTouchEnd"
       @mousedown="handleMouseHold"
       @mouseup="handleMouseRelease"
       @mouseleave="handleMouseRelease"
       @contextmenu.prevent="handleContextMenu"
+      @touchstart="handleTouchStart"
+      @touchend="handleTouchEnd"
+      @touchmove="handleTouchMove"
     >
       <!-- 消息内容区域 -->
       <div class="bubble-content">
         <!-- 文本消息 -->
-        <TextBubble
-          v-if="message.type === 'TEXT'"
-          :message="message"
-          :has-markers="hasMarkers"
-          @scroll-to="$emit('scroll-to', $event)"
-        />
+        <TextBubble v-if="message.type === 'TEXT'" :message="message" :has-markers="hasMarkers"
+          @scroll-to="$emit('scroll-to', $event)" />
 
         <!-- 链接预览卡片 -->
-        <LinkCard
-          v-if="message.type === 'TEXT' && messageLinks.length > 0"
-          :link="messageLinks[0]"
-          class="message-link-card"
-        />
+        <LinkCard v-if="message.type === 'TEXT' && messageLinks.length > 0" :link="messageLinks[0]"
+          class="message-link-card" />
 
         <!-- 图片消息 -->
-        <ImageBubble
-          v-else-if="message.type === 'IMAGE'"
-          :message="message"
-          @preview="$emit('preview', $event)"
-        />
+        <ImageBubble v-else-if="message.type === 'IMAGE'" :message="message" :is-large-group="isLargeGroup" @preview="$emit('preview', $event)" />
 
         <!-- 文件消息 -->
-        <FileBubble
-          v-else-if="message.type === 'FILE'"
-          :message="message"
-          @download="$emit('download', $event)"
-        />
+        <FileBubble v-else-if="message.type === 'FILE'" :message="message" @download="$emit('download', $event)" />
 
         <!-- 视频消息 -->
-        <VideoBubble
-          v-else-if="message.type === 'VIDEO'"
-          :message="message"
-        />
+        <VideoBubble v-else-if="message.type === 'VIDEO'" :message="message" />
 
         <!-- 语音消息 -->
-        <VoiceBubble
-          v-else-if="message.type === 'VOICE' || message.type === 'AUDIO'"
-          :message="message"
-          :is-read="message.isRead || message.readStatus === 'READ'"
-          @read="$emit('mark-read', message)"
-        />
+        <VoiceBubble v-else-if="message.type === 'VOICE' || message.type === 'AUDIO'" :message="message"
+          :is-read="message.isRead || message.readStatus === 'READ'" @read="$emit('mark-read', message)" />
 
         <!-- 位置消息 -->
-        <LocationBubble
-          v-else-if="message.type === 'LOCATION'"
-          :message="message"
-        />
+        <LocationBubble v-else-if="message.type === 'LOCATION'" :message="message" />
 
         <!-- 系统消息 -->
-        <SystemBubble
-          v-else-if="message.type === 'SYSTEM'"
-          :message="message"
-        />
+        <SystemBubble v-else-if="message.type === 'SYSTEM'" :message="message" />
 
         <!-- 撤回消息 -->
-        <RecalledBubble
-          v-else-if="message.type === 'RECALLED'"
-          :message="message"
-          @re-edit="$emit('re-edit', $event)"
-        />
+        <RecalledBubble v-else-if="message.type === 'RECALLED'" :message="message"
+          @re-edit="$emit('re-edit', $event)" />
 
         <!-- 拍一拍消息 -->
-        <NudgeMessageBubble
-          v-else-if="message.type === 'NUDGE'"
-          :nudge="{
-            id: message.id,
-            nudgerId: message.senderId,
-            nudgerName: message.senderName,
-            nudgerAvatar: message.senderAvatar,
-            nudgedUserId: message.nudgedUserId,
-            nudgedUserName: message.nudgedUserName,
-            nudgeCount: message.nudgeCount || 1,
-            createTime: message.createTime || message.timestamp
-          }"
-          @show-user="$emit('show-user', $event)"
-        />
+        <NudgeMessageBubble v-else-if="message.type === 'NUDGE'" :nudge="{
+          id: message.id,
+          nudgerId: message.senderId,
+          nudgerName: message.senderName,
+          nudgerAvatar: message.senderAvatar,
+          nudgedUserId: message.nudgedUserId,
+          nudgedUserName: message.nudgedUserName,
+          nudgeCount: message.nudgeCount || 1,
+          createTime: message.createTime || message.timestamp
+        }" @show-user="$emit('show-user', $event)" />
 
         <!-- 合并转发消息 -->
-        <CombineMessagePreview
-          v-else-if="message.type === 'COMBINE' || message.type === 'COMBINE_FORWARD'"
-          :messages="parsedContent.messages || []"
-          @click="handleCombineClick"
-        />
+        <CombineMessagePreview v-else-if="message.type === 'COMBINE' || message.type === 'COMBINE_FORWARD'"
+          :messages="parsedContent.messages || []" @click="handleCombineClick" />
 
         <!-- 未知消息类型 -->
-        <span
-          v-else
-          class="unknown-type"
-        >[{{ message.type }}]</span>
+        <span v-else class="unknown-type">[{{ message.type }}]</span>
       </div>
 
       <!-- 状态指示器 -->
-      <MessageStatus
-        v-if="showStatus"
-        :message="message"
-        :session-type="sessionType"
-        @retry="$emit('retry', message)"
-        @show-read-info="handleShowReadInfo"
-      />
+      <MessageStatus v-if="showStatus" :message="message" :session-type="sessionType" @retry="$emit('retry', message)"
+        @show-read-info="handleShowReadInfo" />
 
       <!-- 表情回应 -->
-      <MessageReactions
-        v-if="hasReactions"
-        :message="message"
-        @toggle="toggleReaction"
-      />
+      <MessageReactions v-if="hasReactions" :message="message" @toggle="toggleReaction" />
     </div>
   </div>
 
   <!-- 右键菜单 -->
-  <ContextMenu
-    :show="contextMenuVisible"
-    :x="contextMenuX"
-    :y="contextMenuY"
-    :items="contextMenuItems"
-    @select="handleContextMenuSelect"
-    @update:show="contextMenuVisible = $event"
-  />
+  <ContextMenu :show="contextMenuVisible" :x="contextMenuX" :y="contextMenuY" :items="contextMenuItems"
+    @select="handleContextMenuSelect" @update:show="contextMenuVisible = $event" />
 
   <!-- AI表情表态浮窗 -->
-  <AiEmojiReaction
-    :visible="showAiEmojiPanel"
-    :message="message"
-    :position="aiEmojiPosition"
-    @select="handleAiEmojiSelect"
-    @close="showAiEmojiPanel = false"
-  />
+  <AiEmojiReaction :visible="showAiEmojiPanel" :message="message" :position="aiEmojiPosition"
+    @select="handleAiEmojiSelect" @close="showAiEmojiPanel = false" />
 
   <!-- 已读详情弹窗 -->
-  <ReadInfoDialog
-    v-model:visible="showReadInfoDialog"
-    :message-id="message.id"
-    :read-count="message.readCount"
-    :read-by="message.readBy"
-    :read-time="message.readTime"
-    :is-group-chat="sessionType === 'GROUP'"
-    :total-members="message.totalMembers"
-    :all-members="message.allMembers || []"
+  <ReadInfoDialog v-model:visible="showReadInfoDialog" :message-id="message.id" :read-count="message.readCount"
+    :read-by="message.readBy" :read-time="message.readTime" :is-group-chat="sessionType === 'GROUP'"
+    :total-members="message.totalMembers" :all-members="message.allMembers || []"
     :conversation-id="message.conversationId || message.sessionId"
-    @remind-unread="(data) => $emit('remind-unread', data)"
-  />
+    @remind-unread="(data) => $emit('remind-unread', data)" />
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
-import { CopyDocument, ChatLineSquare, Share, RefreshLeft, Delete, Edit, InfoFilled, Checked, Top } from '@element-plus/icons-vue'
+import { Top } from '@element-plus/icons-vue'
 import { extractUrls } from '@/utils/linkParser'
 
 // Composables
@@ -197,13 +129,15 @@ import ContextMenu from '@/components/Common/ContextMenu.vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
-  sessionType: { type: String, default: 'PRIVATE' }
+  sessionType: { type: String, default: 'PRIVATE' },
+  isLargeGroup: { type: Boolean, default: false }
 })
 
 const emit = defineEmits([
   'command', 'preview', 'download', 'at', 'scroll-to',
   'retry', 'toggle-reaction', 'add-reaction', 're-edit',
-  'show-user', 'long-press', 'show-read-info', 'remind-unread'
+  'show-user', 'long-press', 'show-read-info', 'remind-unread',
+  'mark-read'
 ])
 
 // ==================== Composables ====================
@@ -218,8 +152,6 @@ const {
   handleClick,
   handleCommand,
   handleRetry,
-  handleTouchStart,
-  handleTouchEnd,
   handleMouseHold,
   handleMouseRelease
 } = useMessageBubble(props, emit)
@@ -242,6 +174,47 @@ const {
 const showAiEmojiPanel = ref(false)
 const aiEmojiPosition = ref({ x: 0, y: 0 })
 const showReadInfoDialog = ref(false)
+
+// ==================== 触摸支持 ====================
+let touchTimer = null
+const LONG_PRESS_DURATION = 500 // 长按触发时间
+
+/**
+ * 触摸开始 - 检测长按
+ */
+const handleTouchStart = e => {
+  touchTimer = setTimeout(() => {
+    // 触发右键菜单
+    const touch = e.touches[0]
+    contextMenuX.value = touch.clientX
+    contextMenuY.value = touch.clientY
+    contextMenuVisible.value = true
+    // 触觉反馈（如果设备支持）
+    if (navigator.vibrate) {
+      navigator.vibrate(50)
+    }
+  }, LONG_PRESS_DURATION)
+}
+
+/**
+ * 触摸移动 - 取消长按
+ */
+const handleTouchMove = () => {
+  if (touchTimer) {
+    clearTimeout(touchTimer)
+    touchTimer = null
+  }
+}
+
+/**
+ * 触摸结束 - 清理定时器
+ */
+const handleTouchEnd = () => {
+  if (touchTimer) {
+    clearTimeout(touchTimer)
+    touchTimer = null
+  }
+}
 
 const handleAiEmojiSelect = emoji => {
   addReaction(emoji)
@@ -392,33 +365,8 @@ const handleCombineClick = () => {
   emit('command', 'view-combine', combineData)
 }
 
-// 处理长按事件，显示AI表情面板
-const originalHandleTouchStart = handleTouchStart
-const enhancedHandleTouchStart = e => {
-  originalHandleTouchStart(e)
-  // 长按后显示AI表情面板
-  setTimeout(() => {
-    if (isLongPressing.value) {
-      const rect = e.currentTarget?.getBoundingClientRect()
-      if (rect) {
-        // AI 面板尺寸
-        const PANEL_WIDTH = 320
-        const PANEL_HEIGHT = 400
-        const PADDING = 20
-
-        // 计算安全位置，防止超出屏幕边界
-        const maxX = window.innerWidth - PANEL_WIDTH - PADDING
-        const maxY = window.innerHeight - PANEL_HEIGHT - PADDING
-
-        aiEmojiPosition.value = {
-          x: Math.min(Math.max(PADDING, rect.right + 10), maxX),
-          y: Math.max(PADDING, Math.min(rect.top, maxY))
-        }
-      }
-      showAiEmojiPanel.value = true
-    }
-  }, 500)
-}
+// 移除移动端触摸特有的 AI 表情面板处理，PC 端主要通过右键菜单或长按鼠标触发（如有需要）
+// 目前保持 isLongPressing 逻辑由 handleMouseHold 处理
 
 // ==================== 计算属性 ====================
 
@@ -468,16 +416,21 @@ const canRecall = computed(() => {
   display: inline-flex;
   align-items: flex-start;
   max-width: min(520px, calc(100vw - 400px));
+  // GPU 加速动画性能优化
+  contain: layout style paint;
+  will-change: transform, opacity;
   animation: messagePop 0.3s var(--dt-ease-bounce);
+  // 动画结束后移除性能提示
+  animation-fill-mode: both;
   margin-top: 0;
   padding-top: 0;
 }
 
 .bubble-content {
-  padding: 10px 12px;  // 钉钉标准：保持紧凑，不修改
+  padding: 10px 12px; // 钉钉标准：保持紧凑，不修改
   border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-base);
-  line-height: 1.4;  // 钉钉标准：保持 1.4 行高
+  line-height: 1.4; // 钉钉标准：保持 1.4 行高
   word-break: break-word;
   overflow-wrap: break-word;
   transition: background-color var(--dt-transition-base);
@@ -505,7 +458,7 @@ const canRecall = computed(() => {
 
   .bubble-content {
     background: var(--dt-bubble-right-bg);
-    color: var(--dt-bubble-right-text);  // 白色文字
+    color: var(--dt-bubble-right-text); // 白色文字
     border: none;
     // 钉钉标准：左圆右尖（左上12px 左下12px 右上4px 右下4px）
     border-radius: var(--dt-radius-lg) var(--dt-radius-sm) var(--dt-radius-sm) var(--dt-radius-lg);
@@ -571,6 +524,7 @@ const canRecall = computed(() => {
 
 // 暗色模式适配（钉钉风格）
 :global(.dark) {
+
   // 对方消息：深灰背景
   .message-bubble:not(.is-own) .bubble-content {
     background: #2a2a2a;
@@ -596,7 +550,7 @@ const canRecall = computed(() => {
 }
 
 // 钉钉风格：消息气泡之间的间距优化
-.message-bubble + .message-bubble {
+.message-bubble+.message-bubble {
   margin-top: 8px;
 }
 

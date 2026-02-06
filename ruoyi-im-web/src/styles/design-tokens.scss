@@ -866,6 +866,76 @@ $breakpoint-2xl: 1536px;
   }
 }
 
+// 消息撤回动画
+@keyframes messageRecall {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+// 表情回应弹出动画
+@keyframes reactionPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// 长按脉冲动画
+@keyframes longPressPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// 消息发送成功动画
+@keyframes messageSent {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// 消息失败抖动动画
+@keyframes messageError {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
 // 震动动画（用于错误提示等）
 @keyframes shake {
 
@@ -939,6 +1009,27 @@ $breakpoint-2xl: 1536px;
 
 @mixin animation-shake($duration: 0.5s) {
   animation: shake $duration var(--dt-ease-in-out);
+}
+
+// 消息相关动画
+@mixin animation-message-pop($duration: 0.3s) {
+  animation: messagePop $duration var(--dt-ease-bounce);
+}
+
+@mixin animation-message-recall($duration: 0.3s) {
+  animation: messageRecall $duration var(--dt-ease-out);
+}
+
+@mixin animation-reaction-pop($duration: 0.25s) {
+  animation: reactionPop $duration var(--dt-ease-bounce);
+}
+
+@mixin animation-message-sent($duration: 0.3s) {
+  animation: messageSent $duration var(--dt-ease-out);
+}
+
+@mixin animation-message-error($duration: 0.4s) {
+  animation: messageError $duration var(--dt-ease-in-out);
 }
 
 // 骨架屏效果

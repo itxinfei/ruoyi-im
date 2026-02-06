@@ -60,6 +60,7 @@
       class="image-content"
       :class="{ 'loaded': imageLoaded }"
       loading="lazy"
+      decoding="async"
       @load="handleImageLoad"
       @error="handleImageError"
     >
@@ -100,7 +101,9 @@ import { Loading, PictureFilled } from '@element-plus/icons-vue'
 import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
-  message: { type: Object, required: true }
+  message: { type: Object, required: true },
+  // 大群标识，用于优化加载策略
+  isLargeGroup: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['preview'])
@@ -150,6 +153,9 @@ const isUploading = computed(() => {
 const setupIntersectionObserver = () => {
   if (!('IntersectionObserver' in window)) {return}
 
+  // 大群使用更小的 rootMargin 以减少同时加载的图片数量
+  const rootMargin = props.isLargeGroup ? '20px' : '100px'
+
   observer = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
@@ -163,7 +169,7 @@ const setupIntersectionObserver = () => {
       })
     },
     {
-      rootMargin: '50px' // 提前 50px 开始加载
+      rootMargin // 大群 20px，普通群 100px
     }
   )
 
