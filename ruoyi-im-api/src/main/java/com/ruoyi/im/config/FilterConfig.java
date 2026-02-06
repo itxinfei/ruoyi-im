@@ -31,7 +31,7 @@ public class FilterConfig {
         registration.setFilter(requestLoggingFilter);
         registration.addUrlPatterns("/api/*"); // 拦截所有API接口
         registration.setName("requestLoggingFilter");
-        registration.setOrder(0); // 最高优先级
+        registration.setOrder(1); // 记录日志时优先保证 userId 已写入请求头
         return registration;
     }
 
@@ -45,7 +45,7 @@ public class FilterConfig {
         registration.setFilter(jwtToUserIdHeaderFilter);
         registration.addUrlPatterns("/api/im/*"); // 只拦截IM API接口
         registration.setName("jwtToUserIdHeaderFilter");
-        registration.setOrder(1); // 设置优先级
+        registration.setOrder(0); // 设置优先级
         return registration;
     }
 }

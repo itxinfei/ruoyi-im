@@ -46,7 +46,7 @@ export function useMessageTransformation(options = {}) {
    * @returns {string}
    */
   const getMessageType = message => {
-    return message.type || message.messageType || 'TEXT'
+    return (message.type || message.messageType || 'TEXT').toUpperCase()
   }
 
   /**

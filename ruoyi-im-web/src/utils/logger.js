@@ -16,8 +16,55 @@ const LogLevel = {
   NONE: 4
 }
 
-// 当前日志级别（生产环境设为 NONE）
-const currentLevel = isDevelopment ? LogLevel.DEBUG : LogLevel.NONE
+const normalizeLevel = value => {
+  if (value === null || value === undefined) {
+    return null
+  }
+  const v = String(value).trim().toLowerCase()
+  if (v === 'debug') {
+    return LogLevel.DEBUG
+  }
+  if (v === 'info') {
+    return LogLevel.INFO
+  }
+  if (v === 'warn' || v === 'warning') {
+    return LogLevel.WARN
+  }
+  if (v === 'error') {
+    return LogLevel.ERROR
+  }
+  if (v === 'none' || v === 'off') {
+    return LogLevel.NONE
+  }
+  const n = Number(v)
+  if (Number.isFinite(n)) {
+    return n
+  }
+  return null
+}
+
+const getStoredLevel = () => {
+  try {
+    return normalizeLevel(localStorage.getItem('im:logLevel'))
+  } catch (e) {
+    return null
+  }
+}
+
+const getRuntimeLevel = () => {
+  if (isDevelopment) {
+    return LogLevel.DEBUG
+  }
+  const globalLevel = normalizeLevel(globalThis?.__IM_LOG_LEVEL__)
+  if (globalLevel !== null) {
+    return globalLevel
+  }
+  const stored = getStoredLevel()
+  if (stored !== null) {
+    return stored
+  }
+  return LogLevel.NONE
+}
 
 /**
  * 格式化日志前缀
@@ -36,7 +83,7 @@ class Logger {
    * 调试日志
    */
   debug(tag, ...args) {
-    if (currentLevel <= LogLevel.DEBUG) {
+    if (getRuntimeLevel() <= LogLevel.DEBUG) {
       console.debug(formatPrefix('DEBUG', tag), ...args)
     }
   }
@@ -45,7 +92,7 @@ class Logger {
    * 信息日志
    */
   info(tag, ...args) {
-    if (currentLevel <= LogLevel.INFO) {
+    if (getRuntimeLevel() <= LogLevel.INFO) {
       console.info(formatPrefix('INFO', tag), ...args)
     }
   }
@@ -54,7 +101,7 @@ class Logger {
    * 警告日志
    */
   warn(tag, ...args) {
-    if (currentLevel <= LogLevel.WARN) {
+    if (getRuntimeLevel() <= LogLevel.WARN) {
       console.warn(formatPrefix('WARN', tag), ...args)
     }
   }
@@ -63,7 +110,7 @@ class Logger {
    * 错误日志
    */
   error(tag, ...args) {
-    if (currentLevel <= LogLevel.ERROR) {
+    if (getRuntimeLevel() <= LogLevel.ERROR) {
       console.error(formatPrefix('ERROR', tag), ...args)
     }
   }
@@ -72,7 +119,7 @@ class Logger {
    * 分组日志
    */
   group(tag, title) {
-    if (currentLevel <= LogLevel.DEBUG) {
+    if (getRuntimeLevel() <= LogLevel.DEBUG) {
       console.group(`${formatPrefix('DEBUG', tag)} ${title}`)
     }
   }
@@ -81,7 +128,7 @@ class Logger {
    * 分组结束
    */
   groupEnd() {
-    if (currentLevel <= LogLevel.DEBUG) {
+    if (getRuntimeLevel() <= LogLevel.DEBUG) {
       console.groupEnd()
     }
   }
@@ -90,7 +137,7 @@ class Logger {
    * 表格日志
    */
   table(tag, data) {
-    if (currentLevel <= LogLevel.DEBUG) {
+    if (getRuntimeLevel() <= LogLevel.DEBUG) {
       console.log(formatPrefix('DEBUG', tag))
       console.table(data)
     }
@@ -108,5 +155,37 @@ export const error = (tag, ...args) => logger.error(tag, ...args)
 export const group = (tag, title) => logger.group(tag, title)
 export const groupEnd = () => logger.groupEnd()
 export const table = (tag, data) => logger.table(tag, data)
+
+export const setLogLevel = level => {
+  const normalized = normalizeLevel(level)
+  if (normalized === null) {
+    return false
+  }
+  const value =
+    normalized === LogLevel.DEBUG
+      ? 'debug'
+      : normalized === LogLevel.INFO
+        ? 'info'
+        : normalized === LogLevel.WARN
+          ? 'warn'
+          : normalized === LogLevel.ERROR
+            ? 'error'
+            : 'none'
+  try {
+    localStorage.setItem('im:logLevel', value)
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
+export const clearLogLevel = () => {
+  try {
+    localStorage.removeItem('im:logLevel')
+    return true
+  } catch (e) {
+    return false
+  }
+}
 
 export default logger

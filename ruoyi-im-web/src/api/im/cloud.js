@@ -12,7 +12,7 @@ import request from '../request'
 export function uploadToCloud(folderId, file) {
   const formData = new FormData()
   formData.append('file', file)
-  if (folderId != null) {
+  if (folderId !== null) {
     formData.append('folderId', folderId)
   }
   return request({

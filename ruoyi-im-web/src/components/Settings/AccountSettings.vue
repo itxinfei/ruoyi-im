@@ -3,8 +3,12 @@
     <!-- 个人资料卡片 -->
     <section class="setting-section">
       <div class="section-header">
-        <h3 class="section-title">个人资料</h3>
-        <p class="section-desc">管理您的基本信息和头像</p>
+        <h3 class="section-title">
+          个人资料
+        </h3>
+        <p class="section-desc">
+          管理您的基本信息和头像
+        </p>
       </div>
 
       <div class="setting-card">
@@ -16,8 +20,15 @@
           </div>
           <div class="item-action">
             <div class="avatar-wrapper">
-              <el-avatar :size="64" :src="user.avatar" class="user-avatar" />
-              <div class="avatar-overlay" @click="$emit('edit-profile')">
+              <el-avatar
+                :size="64"
+                :src="user.avatar"
+                class="user-avatar"
+              />
+              <div
+                class="avatar-overlay"
+                @click="$emit('edit-profile')"
+              >
                 <span class="material-icons-outlined">edit</span>
               </div>
             </div>
@@ -33,8 +44,15 @@
           </div>
           <div class="item-action">
             <span class="item-value">{{ user.nickname || user.username }}</span>
-            <el-button link type="primary" @click="$emit('edit-profile')">
-              <span class="material-icons-outlined" style="font-size: 18px;">edit</span>
+            <el-button
+              link
+              type="primary"
+              @click="$emit('edit-profile')"
+            >
+              <span
+                class="material-icons-outlined"
+                style="font-size: 18px;"
+              >edit</span>
             </el-button>
           </div>
         </div>
@@ -48,8 +66,14 @@
           </div>
           <div class="item-action">
             <span class="item-value code-text">{{ user.username }}</span>
-            <el-button link @click="copyToClipboard(user.username)">
-              <span class="material-icons-outlined" style="font-size: 18px;">content_copy</span>
+            <el-button
+              link
+              @click="copyToClipboard(user.username)"
+            >
+              <span
+                class="material-icons-outlined"
+                style="font-size: 18px;"
+              >content_copy</span>
             </el-button>
           </div>
         </div>
@@ -63,8 +87,14 @@
           </div>
           <div class="item-action">
             <span class="item-value code-text">{{ user.id }}</span>
-            <el-button link @click="copyToClipboard(user.id)">
-              <span class="material-icons-outlined" style="font-size: 18px;">content_copy</span>
+            <el-button
+              link
+              @click="copyToClipboard(user.id)"
+            >
+              <span
+                class="material-icons-outlined"
+                style="font-size: 18px;"
+              >content_copy</span>
             </el-button>
           </div>
         </div>
@@ -86,8 +116,12 @@
     <!-- 联系信息卡片 -->
     <section class="setting-section">
       <div class="section-header">
-        <h3 class="section-title">联系方式</h3>
-        <p class="section-desc">用于找回密码和接收通知</p>
+        <h3 class="section-title">
+          联系方式
+        </h3>
+        <p class="section-desc">
+          用于找回密码和接收通知
+        </p>
       </div>
 
       <div class="setting-card">
@@ -96,10 +130,18 @@
             <span class="item-label">邮箱地址</span>
           </div>
           <div class="item-action">
-            <span class="item-value" :class="{ 'text-muted': !user.email }">
+            <span
+              class="item-value"
+              :class="{ 'text-muted': !user.email }"
+            >
               {{ user.email || '未绑定' }}
             </span>
-            <el-button v-if="!user.email" link type="primary" @click="$emit('edit-profile')">
+            <el-button
+              v-if="!user.email"
+              link
+              type="primary"
+              @click="$emit('edit-profile')"
+            >
               去绑定
             </el-button>
           </div>
@@ -112,10 +154,18 @@
             <span class="item-label">手机号码</span>
           </div>
           <div class="item-action">
-            <span class="item-value" :class="{ 'text-muted': !user.phonenumber }">
+            <span
+              class="item-value"
+              :class="{ 'text-muted': !user.phonenumber }"
+            >
               {{ user.phonenumber || '未绑定' }}
             </span>
-            <el-button v-if="!user.phonenumber" link type="primary" @click="$emit('edit-profile')">
+            <el-button
+              v-if="!user.phonenumber"
+              link
+              type="primary"
+              @click="$emit('edit-profile')"
+            >
               去绑定
             </el-button>
           </div>
@@ -126,12 +176,19 @@
     <!-- 账号安全卡片 -->
     <section class="setting-section">
       <div class="section-header">
-        <h3 class="section-title">账号安全</h3>
-        <p class="section-desc">保护您的账号安全</p>
+        <h3 class="section-title">
+          账号安全
+        </h3>
+        <p class="section-desc">
+          保护您的账号安全
+        </p>
       </div>
 
       <div class="setting-card">
-        <div class="setting-item clickable" @click="$emit('change-password')">
+        <div
+          class="setting-item clickable"
+          @click="$emit('change-password')"
+        >
           <div class="item-main">
             <span class="item-label">登录密码</span>
             <span class="item-desc">定期修改密码可以保护账号安全</span>
@@ -150,7 +207,10 @@
             <span class="item-desc">启用后登录时需要进行二次验证(即将推出)</span>
           </div>
           <div class="item-action">
-            <el-switch v-model="twoFactorEnabled" disabled />
+            <el-switch
+              v-model="twoFactorEnabled"
+              disabled
+            />
           </div>
         </div>
       </div>

@@ -158,30 +158,4 @@ defineEmits(['toggle'])
     }
   }
 }
-
-/* 响应式 */
-@media (max-width: 768px) {
-  .list-group-header {
-    height: 28px;
-    padding: 6px 12px;
-
-    .group-name {
-      font-size: 11px;
-    }
-
-    .group-count {
-      font-size: 11px;
-    }
-
-    .group-toggle {
-      width: 20px;
-      height: 20px;
-
-      svg {
-        width: 14px;
-        height: 14px;
-      }
-    }
-  }
-}
 </style>

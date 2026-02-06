@@ -1,6 +1,14 @@
 <template>
-  <el-dialog v-model="visible" width="900px" class="system-settings-dialog" destroy-on-close append-to-body
-    :fullscreen="isFullscreen" :show-close="false" :close-on-click-modal="true">
+  <el-dialog
+    v-model="visible"
+    width="900px"
+    class="system-settings-dialog"
+    destroy-on-close
+    append-to-body
+    :fullscreen="isFullscreen"
+    :show-close="false"
+    :close-on-click-modal="true"
+  >
     <div class="settings-layout">
       <!-- 侧边导航栏 -->
       <aside class="settings-sidebar">
@@ -10,16 +18,28 @@
         </div>
 
         <nav class="sidebar-nav scrollbar-custom">
-          <div v-for="item in menuItems" :key="item.id" class="nav-item" :class="{ active: activeMenu === item.id }"
-            @click="activeMenu = item.id">
+          <div
+            v-for="item in menuItems"
+            :key="item.id"
+            class="nav-item"
+            :class="{ active: activeMenu === item.id }"
+            @click="activeMenu = item.id"
+          >
             <span class="material-icons-outlined nav-icon">{{ item.icon }}</span>
             <span class="nav-label">{{ item.label }}</span>
           </div>
         </nav>
 
         <div class="sidebar-footer">
-          <div class="user-info" @click="activeMenu = 'account'">
-            <el-avatar :size="32" :src="currentUser.avatar" class="user-avatar" />
+          <div
+            class="user-info"
+            @click="activeMenu = 'account'"
+          >
+            <el-avatar
+              :size="32"
+              :src="currentUser.avatar"
+              class="user-avatar"
+            />
             <span class="user-name">{{ currentUser.nickname || currentUser.username }}</span>
           </div>
         </div>
@@ -37,29 +57,53 @@
             </p>
           </div>
           <div class="header-actions">
-            <el-button text @click="resetToDefault">
-              <span class="material-icons-outlined" style="font-size: 16px; margin-right: 4px;">restart_alt</span>
+            <el-button
+              text
+              @click="resetToDefault"
+            >
+              <span
+                class="material-icons-outlined"
+                style="font-size: 16px; margin-right: 4px;"
+              >restart_alt</span>
               恢复默认
             </el-button>
-            <el-button type="primary" @click="onSave">
-              <span class="material-icons-outlined" style="font-size: 16px; margin-right: 4px;">save</span>
+            <el-button
+              type="primary"
+              @click="onSave"
+            >
+              <span
+                class="material-icons-outlined"
+                style="font-size: 16px; margin-right: 4px;"
+              >save</span>
               保存
             </el-button>
-            <el-button circle text class="close-btn" @click="visible = false">
+            <el-button
+              circle
+              text
+              class="close-btn"
+              @click="visible = false"
+            >
               <span class="material-icons-outlined">close</span>
             </el-button>
           </div>
         </header>
 
         <div class="main-content scrollbar-custom">
-          <component :is="currentComponent" v-bind="componentProps" v-on="finalComponentEvents" />
+          <component
+            :is="currentComponent"
+            v-bind="componentProps"
+            v-on="finalComponentEvents"
+          />
         </div>
       </main>
     </div>
 
     <!-- 全局弹窗 -->
     <ChangePasswordDialog v-model="showChangePassword" />
-    <EditProfileDialog v-model="showEditProfile" @success="handleProfileUpdate" />
+    <EditProfileDialog
+      v-model="showEditProfile"
+      @success="handleProfileUpdate"
+    />
   </el-dialog>
 </template>
 
@@ -95,6 +139,8 @@ const visible = ref(false)
 const activeMenu = ref('account')
 const showChangePassword = ref(false)
 const showEditProfile = ref(false)
+const isFullscreen = ref(false)
+const windowWidth = ref(window.innerWidth)
 
 // 菜单配置 - 使用 Material Icons
 const menuItems = [

@@ -16,7 +16,6 @@ app:
 # Spring框架配置
 spring:
   # 数据源配置
-  # ⚠️ 安全提示：生产环境请使用环境变量配置敏感信息
   # 示例：password: ${DB_PASSWORD}
   datasource:
     url: jdbc:mysql://${DB_HOST:172.168.20.222}:${DB_PORT:3306}/${DB_NAME:im}?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8

@@ -506,7 +506,7 @@ const departmentTreeForSelect = computed(() => {
   const excludeId = deptForm.value.id
   const excludeTree = (nodes, id) => {
     return nodes.filter(node => {
-      if (node.id === id) {return false}
+      if (node.id === id) { return false }
       if (node.children) {
         node.children = excludeTree(node.children, id)
       }
@@ -517,7 +517,7 @@ const departmentTreeForSelect = computed(() => {
 })
 
 const filteredMembers = computed(() => {
-  if (!memberSearch.value) {return departmentMembers.value}
+  if (!memberSearch.value) { return departmentMembers.value }
   return departmentMembers.value.filter(m =>
     m.nickname?.toLowerCase().includes(memberSearch.value.toLowerCase())
   )
@@ -564,7 +564,7 @@ const handleNodeClick = async data => {
 
 // 树形过滤
 const filterNode = (value, data) => {
-  if (!value) {return true}
+  if (!value) { return true }
   return data.name.includes(value)
 }
 
@@ -707,7 +707,7 @@ const handleChangeLeader = async () => {
 
 // 搜索用户
 const searchUsers = async query => {
-  if (!query) {return}
+  if (!query) { return }
   try {
     const res = await searchUsersApi(query)
     if (res.code === 200) {
@@ -719,7 +719,7 @@ const searchUsers = async query => {
 }
 
 const searchUsersForAdd = async query => {
-  if (!query) {return}
+  if (!query) { return }
   searchUsersLoading.value = true
   try {
     const res = await searchUsersApi(query)
@@ -788,8 +788,6 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-
-
 /* ================================
    页面容器
    ================================ */
@@ -1043,15 +1041,4 @@ onMounted(() => {
 /* ================================
    响应式
    ================================ */
-@media (max-width: 768px) {
-  .department-content {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .dept-tree-card {
-    width: 100%;
-    max-height: 300px;
-  }
-}
 </style>

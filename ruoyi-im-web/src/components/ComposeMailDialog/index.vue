@@ -287,7 +287,8 @@ import { getToken } from '@/utils/storage'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import { sendMail, saveDraft, searchUsers as searchUsersApi, uploadAttachment } from '@/api/im/mail'
+import { sendMail, saveDraft, uploadAttachment } from '@/api/im/mail'
+import { searchUsers as searchUsersApi } from '@/api/im/user'
 import { formatFileSize } from '@/utils/format'
 
 const props = defineProps({
@@ -461,9 +462,19 @@ const searchUsers = async query => {
     const res = await searchUsersApi(query.trim())
     if (res.code === 200) {
       userOptions.value = res.data || []
+    } else {
+      ElMessage.warning(res.msg || '搜索用户失败')
+      userOptions.value = []
     }
   } catch (error) {
     console.error('搜索用户失败', error)
+    // 网络错误提示
+    if (error.message?.includes('Network Error') || error.code === 'ERR_CONNECTION_REFUSED') {
+      ElMessage.error('无法连接到服务器,请确认后端服务已启动')
+    } else {
+      ElMessage.error('搜索用户失败,请稍后重试')
+    }
+    userOptions.value = []
   } finally {
     userSearchLoading.value = false
   }

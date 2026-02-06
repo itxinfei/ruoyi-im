@@ -1,129 +1,62 @@
 <template>
-  <div
-    class="chat-input-container"
-    :class="{ 'is-resizing': isResizing }"
-    :style="{ minHeight: containerHeight + 'px' }"
-  >
+  <div class="chat-input-container" :class="{ 'is-resizing': isResizing }"
+    :style="{ minHeight: containerHeight + 'px' }">
     <!-- 调整高度手柄 -->
-    <ResizeHandle
-      :is-active="isResizing"
-      :container-height="containerHeight"
-      @start-resize="startResize"
-      @reset-height="resetHeight"
-    />
+    <ResizeHandle :is-active="isResizing" :container-height="containerHeight" @start-resize="startResize"
+      @reset-height="resetHeight" />
 
     <!-- 工具栏 -->
-    <InputToolbar
-      :show-emoji-picker="showEmojiPicker"
-      :show-at-button="session?.type === 'GROUP'"
-      @toggle-emoji="toggleEmojiPicker"
-      @upload-image="triggerImageUpload"
-      @upload-file="triggerFileUpload"
-      @screenshot="handleScreenshot"
-      @at-member="handleAtMember"
-      @smart-reply="handleShowSmartReply"
-      @voice-call="handleVoiceCall"
-      @video-call="handleVideoCall"
-    />
+    <InputToolbar :show-emoji-picker="showEmojiPicker" :show-at-button="session?.type === 'GROUP'"
+      @toggle-emoji="toggleEmojiPicker" @upload-image="triggerImageUpload" @upload-file="triggerFileUpload"
+      @screenshot="handleScreenshot" @at-member="handleAtMember" @smart-reply="handleShowSmartReply"
+      @voice-call="handleVoiceCall" @video-call="handleVideoCall" />
 
     <!-- 录音动画区域 -->
-    <div
-      v-if="isVoiceMode"
-      class="voice-recording-wrapper"
-    >
-      <VoiceRecorder
-        :max-length="60000"
-        :min-length="1000"
-        @record-complete="handleVoiceRecordComplete"
-        @cancel="handleVoiceCancel"
-      />
+    <div v-if="isVoiceMode" class="voice-recording-wrapper">
+      <VoiceRecorder :max-length="60000" :min-length="1000" @record-complete="handleVoiceRecordComplete"
+        @cancel="handleVoiceCancel" />
     </div>
 
     <!-- 引用消息预览 -->
-    <ReplyPreview
-      v-if="replyingMessage"
+    <ReplyPreview v-if="replyingMessage"
       :sender-name="replyingMessage.senderName || replyingMessage.senderNickname || replyingMessage.userName || '未知'"
-      :content="replyPreviewContent"
-      @cancel="$emit('cancel-reply')"
-    />
+      :content="replyPreviewContent" @cancel="$emit('cancel-reply')" />
 
     <!-- 录音预览区域 -->
-    <VoicePreviewPanel
-      v-if="voicePreview"
-      :duration="voicePreview.duration"
-      :is-playing="voicePreview.isPlaying"
-      :play-progress="voicePreview.playProgress || 0"
-      @toggle-play="toggleVoicePlay"
-      @delete="deleteVoicePreview"
-      @send="handleSendVoice"
-    />
+    <VoicePreviewPanel v-if="voicePreview" :duration="voicePreview.duration" :is-playing="voicePreview.isPlaying"
+      :play-progress="voicePreview.playProgress || 0" @toggle-play="toggleVoicePlay" @delete="deleteVoicePreview"
+      @send="handleSendVoice" />
 
     <!-- 编辑消息预览 -->
-    <EditPreview
-      v-if="editingMessage"
-      :content="editingMessage.content"
-      @cancel="$emit('cancel-edit')"
-    />
+    <EditPreview v-if="editingMessage" :content="editingMessage.content" @cancel="$emit('cancel-edit')" />
 
     <!-- 链接预览 -->
-    <div
-      v-if="linkPreviewLoading || linkPreviewError || linkPreview"
-      class="link-preview-wrapper"
-    >
-      <LinkCard
-        v-if="linkPreview"
-        :link="linkPreview"
-        :loading="linkPreviewLoading"
-        :error="linkPreviewError"
-      />
-      <button
-        v-if="linkPreview || linkPreviewError"
-        class="link-preview-close"
-        @click="clearLinkPreview"
-      >
-        <el-icon><Close /></el-icon>
+    <div v-if="linkPreviewLoading || linkPreviewError || linkPreview" class="link-preview-wrapper">
+      <LinkCard v-if="linkPreview" :link="linkPreview" :loading="linkPreviewLoading" :error="linkPreviewError" />
+      <button v-if="linkPreview || linkPreviewError" class="link-preview-close" @click="clearLinkPreview">
+        <el-icon>
+          <Close />
+        </el-icon>
       </button>
     </div>
 
     <!-- 输入核心区域 -->
-    <div
-      ref="inputAreaRef"
-      class="input-area"
+    <div ref="inputAreaRef" class="input-area"
       :class="{ 'is-drag-over': isDragOver, 'is-voice-mode': isVoiceMode, 'is-focused': isFocused }"
-      @dragenter="handleDragEnter"
-      @dragleave="handleDragLeave"
-      @dragover="handleDragOver"
-      @drop.prevent="handleDrop"
-    >
+      @dragenter="handleDragEnter" @dragleave="handleDragLeave" @dragover="handleDragOver" @drop.prevent="handleDrop">
       <!-- 文字输入区域 -->
-      <textarea
-        ref="textareaRef"
-        v-model="messageContent"
-        class="message-input"
-        :placeholder="inputPlaceholder"
-        :disabled="isVoiceMode"
-        @input="handleInput"
-        @keydown="handleKeydown"
-        @paste="handlePaste"
-        @focus="isFocused = true"
-        @blur="isFocused = false"
-      />
+      <textarea ref="textareaRef" v-model="messageContent" class="message-input" :placeholder="inputPlaceholder"
+        :disabled="isVoiceMode" @input="handleInput" @keydown="handleKeydown" @paste="handlePaste"
+        @focus="isFocused = true" @blur="isFocused = false" />
 
-      <div
-        v-if="!isVoiceMode"
-        class="input-footer"
-      >
+      <div v-if="!isVoiceMode" class="input-footer">
         <div class="footer-actions">
           <!-- 语音输入切换按钮 -->
-          <el-tooltip
-            content="按住说话"
-            placement="top"
-          >
-            <button
-              class="footer-action-btn voice-btn"
-              @click="toggleVoiceMode"
-            >
-              <el-icon><Microphone /></el-icon>
+          <el-tooltip content="按住说话" placement="top">
+            <button class="footer-action-btn voice-btn" @click="toggleVoiceMode">
+              <el-icon>
+                <Microphone />
+              </el-icon>
             </button>
           </el-tooltip>
         </div>
@@ -131,82 +64,37 @@
     </div>
 
     <!-- 子组件弹窗 -->
-    <EmojiPicker
-      v-if="showEmojiPicker"
-      :position="emojiPickerPosition"
-      @select="selectEmoji"
-      @close="showEmojiPicker = false"
-    />
+    <EmojiPicker v-if="showEmojiPicker" :position="emojiPickerPosition" @select="selectEmoji"
+      @close="showEmojiPicker = false" />
 
-    <AtMemberPicker
-      ref="atMemberPickerRef"
-      :session-id="session?.id"
-      @select="onAtSelect"
-    />
+    <AtMemberPicker ref="atMemberPickerRef" :session-id="session?.id" @select="onAtSelect" />
 
-    <CommandPalette
-      :show="showCommandPalette"
-      :position="commandPalettePosition"
-      @close="showCommandPalette = false"
-      @select="handleCommandSelect"
-    />
+    <CommandPalette :show="showCommandPalette" :position="commandPalettePosition" @close="showCommandPalette = false"
+      @select="handleCommandSelect" />
 
     <!-- 隐藏的输入元素 -->
-    <input
-      ref="imageInputRef"
-      type="file"
-      accept="image/*"
-      style="display: none"
-      @change="handleImageFileChange"
-    >
+    <input ref="imageInputRef" type="file" accept="image/*" style="display: none" @change="handleImageFileChange">
 
-    <input
-      ref="fileInputRef"
-      type="file"
-      style="display: none"
-      @change="handleFileInputChange"
-    >
+    <input ref="fileInputRef" type="file" style="display: none" @change="handleFileInputChange">
 
     <!-- 对话框 -->
-    <ScreenshotPreview
-      v-model="showScreenshotPreview"
-      :image-data="screenshotData"
-      @send="handleSendScreenshot"
-      @close="handleScreenshotPreviewClose"
-    />
+    <ScreenshotPreview v-model="showScreenshotPreview" :image-data="screenshotData" @send="handleSendScreenshot"
+      @close="handleScreenshotPreviewClose" />
 
-    <DingtalkScreenshot
-      :visible="showScreenshotGuide"
-      @confirm="handleSendScreenshotFromGuide"
-      @close="showScreenshotGuide = false"
-    />
+    <DingtalkScreenshot :visible="showScreenshotGuide" @confirm="handleSendScreenshotFromGuide"
+      @close="showScreenshotGuide = false" />
 
-    <AiSmartReply
-      v-model:visible="showSmartReply"
-      :trigger-message="lastReceivedMessage"
-      :position="smartReplyPosition"
-      @select="handleSelectSmartReply"
-    />
+    <AiSmartReply v-model:visible="showSmartReply" :trigger-message="lastReceivedMessage" :position="smartReplyPosition"
+      @select="handleSelectSmartReply" />
 
-    <ScheduleDialog
-      v-model="showScheduleDialog"
-      @saved="handleScheduleSaved"
-    />
+    <ScheduleDialog v-model="showScheduleDialog" @saved="handleScheduleSaved" />
 
     <!-- 定时消息对话框 -->
-    <ScheduledMessageDialog
-      v-model="showScheduledMessageDialog"
-      :message-content="messageContent"
-      :conversation-id="session?.id"
-      @scheduled="handleScheduledMessage"
-    />
+    <ScheduledMessageDialog v-model="showScheduledMessageDialog" :message-content="messageContent"
+      :conversation-id="session?.id" @scheduled="handleScheduledMessage" />
 
-    <FileUploadPreviewDialog
-      v-model="showFilePreview"
-      :files="pendingFiles"
-      @confirm="handleFileUploadConfirm"
-      @remove="handleRemovePendingFile"
-    />
+    <FileUploadPreviewDialog v-model="showFilePreview" :files="pendingFiles" @confirm="handleFileUploadConfirm"
+      @remove="handleRemovePendingFile" />
   </div>
 </template>
 
@@ -453,22 +341,46 @@ const inputPlaceholder = computed(() => {
   if (isVoiceMode.value) {
     return '正在录音...'
   }
-  return props.session?.type === 'GROUP' ? '发消息...' : '发消息...'
+  return props.session?.type === 'GROUP' ? '发消息... (输入 / 查看快捷命令)' : '发消息... (输入 / 查看快捷命令)'
 })
 
 // 格式化回复预览内容（处理各种消息类型）
 const replyPreviewContent = computed(() => {
-  if (!props.replyingMessage) {return ''}
+  if (!props.replyingMessage) { return '' }
   return formatMessagePreviewFromObject(props.replyingMessage)
 })
 
 // ========== 工具方法 ==========
 
+// 输入框高度限制常量
+const MIN_ROWS = 3 // 最小行数
+const MAX_ROWS = 8 // 最大行数
+const LINE_HEIGHT = 24 // 行高(px),与CSS中的line-height: 1.6 * font-size: 15px ≈ 24px对应
+
 const autoResize = () => {
   const tx = textareaRef.value
-  if (!tx) {return}
+  if (!tx) { return }
+
+  // 重置高度以获取真实的scrollHeight
   tx.style.height = 'auto'
-  tx.style.height = tx.scrollHeight + 'px'
+
+  // 计算最小和最大高度
+  const minHeight = MIN_ROWS * LINE_HEIGHT
+  const maxHeight = MAX_ROWS * LINE_HEIGHT
+
+  // 获取内容实际高度
+  const scrollHeight = tx.scrollHeight
+
+  // 应用高度限制
+  if (scrollHeight <= minHeight) {
+    tx.style.height = minHeight + 'px'
+  } else if (scrollHeight >= maxHeight) {
+    tx.style.height = maxHeight + 'px'
+    tx.style.overflowY = 'auto' // 超过最大高度时显示滚动条
+  } else {
+    tx.style.height = scrollHeight + 'px'
+    tx.style.overflowY = 'hidden' // 未超过时隐藏滚动条
+  }
 }
 
 const insertAt = nickname => {
@@ -476,7 +388,7 @@ const insertAt = nickname => {
   const pos = textareaRef.value?.selectionStart || messageContent.value.length
   messageContent.value = messageContent.value.slice(0, pos) + atText + messageContent.value.slice(pos)
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     textareaRef.value?.focus()
     autoResize()
   })
@@ -582,7 +494,7 @@ const handleKeydown = e => {
 
 const handleSend = async () => {
   const content = messageContent.value.trim()
-  if (!content) {return}
+  if (!content) { return }
 
   if (props.editingMessage) {
     emit('edit-confirm', content)
@@ -595,15 +507,15 @@ const handleSend = async () => {
 
   messageContent.value = ''
   nextTick(() => {
-    if (isUnmounted.value) {return}
-    if (textareaRef.value) {textareaRef.value.style.height = 'auto'}
+    if (isUnmounted.value) { return }
+    if (textareaRef.value) { textareaRef.value.style.height = 'auto' }
     textareaRef.value?.focus()
   })
 }
 
 const handleSendVoice = () => {
   const result = voicePreview.value
-    if (!result) {return}
+  if (!result) { return }
 
   emit('send-voice', { file: result.file, duration: result.duration })
   deleteVoicePreview()
@@ -630,7 +542,7 @@ const handleVoiceCancel = () => {
 const toggleVoiceMode = () => {
   isVoiceMode.value = !isVoiceMode.value
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     if (isVoiceMode.value) {
       textareaRef.value?.blur()
     } else {
@@ -662,7 +574,7 @@ const selectEmoji = emoji => {
   messageContent.value = messageContent.value.slice(0, pos) + emoji + messageContent.value.slice(pos)
   showEmojiPicker.value = false
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     textareaRef.value?.focus()
     autoResize()
   })
@@ -684,7 +596,7 @@ const validateFile = (file, config) => {
 
 const handleImageFileChange = () => {
   const file = imageInputRef.value?.files?.[0]
-  if (!file) {return}
+  if (!file) { return }
 
   const config = {
     validTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
@@ -703,7 +615,7 @@ const handleImageFileChange = () => {
 
 const handleFileInputChange = () => {
   const file = fileInputRef.value?.files?.[0]
-  if (!file) {return}
+  if (!file) { return }
 
   const config = {
     maxSize: 100 * 1024 * 1024,
@@ -737,7 +649,7 @@ const handleSendScreenshot = async blob => {
 }
 
 const handleSendScreenshotFromGuide = async dataURL => {
-  if (!dataURL) {return}
+  if (!dataURL) { return }
 
   try {
     const response = await fetch(dataURL)
@@ -783,7 +695,7 @@ const handleDrop = e => {
   isDragOver.value = false
 
   const files = Array.from(e.dataTransfer?.files || [])
-  if (files.length === 0) {return}
+  if (files.length === 0) { return }
 
   // 添加到待上传列表
   pendingFiles.value = [...pendingFiles.value, ...files]
@@ -792,7 +704,7 @@ const handleDrop = e => {
 
 const handlePaste = e => {
   const items = e.clipboardData?.items
-  if (!items) {return}
+  if (!items) { return }
 
   const files = []
 
@@ -825,7 +737,7 @@ const onAtSelect = member => insertAt(member.nickname || member.userName)
 
 const handleShowSmartReply = () => {
   const inputArea = document.querySelector('.chat-input-container')
-  if (!inputArea) {return}
+  if (!inputArea) { return }
 
   const rect = inputArea.getBoundingClientRect()
   smartReplyPosition.value = {
@@ -974,7 +886,7 @@ const handleRemovePendingFile = index => {
 const handleSelectSmartReply = replyText => {
   messageContent.value = replyText
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     autoResize()
     textareaRef.value?.focus()
   })
@@ -1002,7 +914,7 @@ const handleVideoCall = () => {
 const setContent = content => {
   messageContent.value = content || ''
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     autoResize()
     // 将光标移到末尾
     if (textareaRef.value) {
@@ -1076,7 +988,7 @@ onUnmounted(() => {
   z-index: 10;
   // 平滑高度过渡（对齐钉钉输入框体验）
   transition: min-height var(--dt-transition-base) var(--dt-ease-out),
-              border-color var(--dt-transition-fast) var(--dt-ease-out);
+    border-color var(--dt-transition-fast) var(--dt-ease-out);
 
   .dark & {
     background: var(--dt-bg-card-dark);
@@ -1132,7 +1044,9 @@ onUnmounted(() => {
       z-index: 10;
     }
 
-    .message-input { opacity: 0.3; }
+    .message-input {
+      opacity: 0.3;
+    }
   }
 
   &.is-voice-mode {
@@ -1153,14 +1067,16 @@ onUnmounted(() => {
   line-height: 1.6;
   color: var(--dt-text-primary);
   padding: var(--dt-space-3);
-  min-height: 80px;
+  min-height: 72px; // 3行 × 24px = 72px
+  max-height: 192px; // 8行 × 24px = 192px
   background: transparent !important;
   font-family: var(--dt-font-family);
-  // 移除所有可能的边框效果（包括 Element Plus 的 box-shadow inset）
+  overflow-y: hidden; // 默认隐藏滚动条,由JS控制
+  // 移除所有可能的边框效果(包括 Element Plus 的 box-shadow inset)
   box-shadow: none !important;
-  // 平滑高度过渡（对齐钉钉输入框体验）
+  // 平滑高度过渡(对齐钉钉输入框体验)
   transition: min-height var(--dt-transition-base) var(--dt-ease-out),
-              color var(--dt-transition-base);
+    color var(--dt-transition-base);
 
   &:focus,
   &:hover,
@@ -1176,9 +1092,38 @@ onUnmounted(() => {
     transition: color var(--dt-transition-base);
   }
 
+  // 自定义滚动条样式
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+
   .dark & {
     color: var(--dt-text-primary-dark);
-    &::placeholder { color: var(--dt-text-quaternary-dark); }
+
+    &::placeholder {
+      color: var(--dt-text-quaternary-dark);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
   }
 }
 
@@ -1207,7 +1152,9 @@ onUnmounted(() => {
     cursor: pointer;
     transition: all var(--dt-transition-base);
 
-    .el-icon { font-size: 18px; }
+    .el-icon {
+      font-size: 18px;
+    }
 
     &:hover {
       background: rgba(0, 0, 0, 0.05);
@@ -1268,6 +1215,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

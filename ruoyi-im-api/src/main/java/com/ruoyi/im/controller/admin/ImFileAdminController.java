@@ -65,28 +65,28 @@ public class ImFileAdminController {
             @Parameter(description = "开始时间") @RequestParam(required = false) LocalDateTime startTime,
             @Parameter(description = "结束时间") @RequestParam(required = false) LocalDateTime endTime) {
 
-        // 构建查询条件
-        QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
+        // 构建查询条件 - 使用 Lambda 查询确保类型安全
+        LambdaQueryWrapper<ImFileAsset> wrapper = new LambdaQueryWrapper<>();
         // 使用 status 字段过滤未删除的记录
-        wrapper.eq("status", "ACTIVE");
+        wrapper.eq(ImFileAsset::getStatus, "ACTIVE");
 
         if (fileName != null && !fileName.isEmpty()) {
-            wrapper.like("file_name", fileName);
+            wrapper.like(ImFileAsset::getFileName, fileName);
         }
         if (fileType != null && !fileType.isEmpty()) {
-            wrapper.eq("file_type", fileType);
+            wrapper.eq(ImFileAsset::getFileType, fileType);
         }
         if (uploaderId != null) {
-            wrapper.eq("uploader_id", uploaderId);
+            wrapper.eq(ImFileAsset::getUploaderId, uploaderId);
         }
         if (startTime != null) {
-            wrapper.ge("create_time", startTime);
+            wrapper.ge(ImFileAsset::getCreateTime, startTime);
         }
         if (endTime != null) {
-            wrapper.le("create_time", endTime);
+            wrapper.le(ImFileAsset::getCreateTime, endTime);
         }
 
-        wrapper.orderByDesc("create_time");
+        wrapper.orderByDesc(ImFileAsset::getCreateTime);
 
         // 分页查询
         IPage<ImFileAsset> page = new Page<>(pageNum, pageSize);
@@ -175,6 +175,7 @@ public class ImFileAdminController {
     @Operation(summary = "文件类型统计", description = "按文件类型统计文件数量和大小")
     @GetMapping("/statistics/by-type")
     public Result<List<Map<String, Object>>> getFileStatisticsByType() {
+        // 聚合查询需要使用 QueryWrapper（Lambda 不支持字符串 SELECT 子句）
         QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         wrapper.select("file_type", "COUNT(*) as count", "SUM(file_size) as totalSize");
         wrapper.eq("status", "ACTIVE");
@@ -192,6 +193,7 @@ public class ImFileAdminController {
     @Operation(summary = "上传者统计", description = "按上传者统计文件数量和大小")
     @GetMapping("/statistics/by-uploader")
     public Result<List<Map<String, Object>>> getFileStatisticsByUploader() {
+        // 聚合查询需要使用 QueryWrapper（Lambda 不支持字符串 SELECT 子句）
         QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         wrapper.select("uploader_id", "COUNT(*) as count", "SUM(file_size) as totalSize");
         wrapper.eq("status", "ACTIVE");

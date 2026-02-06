@@ -32,9 +32,9 @@ export function useMessageReadUsers (sessionId) {
    * @param {String} msgId - 消息 ID
    * @returns {Boolean}
    */
-  const isCacheValid = (msgId) => {
+  const isCacheValid = msgId => {
     const timestamp = cacheTimestamps.value[msgId]
-    if (!timestamp) return false
+    if (!timestamp) {return false}
     return Date.now() - timestamp < CACHE_TTL
   }
 
@@ -43,8 +43,8 @@ export function useMessageReadUsers (sessionId) {
    * @param {Object} msg - 消息对象
    * @returns {Promise<void>}
    */
-  const fetchReadUsers = async (msg) => {
-    if (!msg?.id) return
+  const fetchReadUsers = async msg => {
+    if (!msg?.id) {return}
 
     // 缓存有效或正在加载，跳过
     if (isCacheValid(msg.id) || loadingReadUsers.value[msg.id]) {
@@ -70,7 +70,7 @@ export function useMessageReadUsers (sessionId) {
    * @param {Array} messages - 需要预加载的消息列表
    * @returns {Promise<void>}
    */
-  const prefetchReadUsers = async (messages) => {
+  const prefetchReadUsers = async messages => {
     if (!messages || messages.length === 0) { return }
 
     // 过滤出需要查询的消息（群聊、有已读数据、缓存无效或未加载）
@@ -113,7 +113,7 @@ export function useMessageReadUsers (sessionId) {
    * @param {String} msgId - 消息 ID
    * @returns {Array|null}
    */
-  const getReadUsers = (msgId) => {
+  const getReadUsers = msgId => {
     return readUsersMap.value[msgId] || null
   }
 
@@ -122,7 +122,7 @@ export function useMessageReadUsers (sessionId) {
    * @param {String} msgId - 消息 ID
    * @returns {Boolean}
    */
-  const isLoading = (msgId) => {
+  const isLoading = msgId => {
     return !!loadingReadUsers.value[msgId]
   }
 
@@ -139,7 +139,7 @@ export function useMessageReadUsers (sessionId) {
    * 清除单个消息的缓存
    * @param {String} msgId - 消息 ID
    */
-  const clearMessageCache = (msgId) => {
+  const clearMessageCache = msgId => {
     delete readUsersMap.value[msgId]
     delete cacheTimestamps.value[msgId]
   }

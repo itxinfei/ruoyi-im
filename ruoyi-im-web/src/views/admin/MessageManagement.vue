@@ -369,7 +369,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Message, Warning, Files, Timer, Search, Refresh
 } from '@element-plus/icons-vue'
-import { getMessageList, recallMessage, getMessageAdminStats } from '@/api/admin'
+import { searchMessages, deleteMessage, getMessageAdminStats } from '@/api/admin'
 
 const loading = ref(false)
 const messageList = ref([])
@@ -406,7 +406,7 @@ const loadMessages = async () => {
       params.endTime = searchForm.dateRange[1]
     }
 
-    const res = await getMessageList(params)
+    const res = await searchMessages(params)
     if (res.code === 200) {
       messageList.value = res.data.list
       total.value = res.data.total
@@ -464,7 +464,7 @@ const handleRecall = row => {
   ElMessageBox.confirm('确定要强制撤回该消息吗？', '操作提醒', {
     type: 'warning'
   }).then(async () => {
-    const res = await recallMessage(row.id)
+    const res = await deleteMessage(row.id)
     if (res.code === 200) {
       ElMessage.success('撤回成功')
       loadMessages()

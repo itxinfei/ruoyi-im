@@ -182,10 +182,10 @@ const sendMessage = async () => {
     messages.value.pop()
   } finally {
     isTyping.value = false
-    await nextTick()
-    if (isUnmounted.value) {return}
-    scrollToBottom()
   }
+  await nextTick()
+  if (isUnmounted.value) {return}
+  scrollToBottom()
 }
 
 // 清空对话

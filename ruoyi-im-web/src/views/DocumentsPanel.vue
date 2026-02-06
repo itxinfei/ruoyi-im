@@ -462,10 +462,10 @@ const handleFileClick = file => {
     // 检查是否为文档类型
     const fileName = file.name?.toLowerCase() || ''
     const isDocument = fileName.endsWith('.doc') ||
-                       fileName.endsWith('.docx') ||
-                       fileName.endsWith('.txt') ||
-                       fileName.endsWith('.md') ||
-                       file.iconClass === 'icon-doc'
+      fileName.endsWith('.docx') ||
+      fileName.endsWith('.txt') ||
+      fileName.endsWith('.md') ||
+      file.iconClass === 'icon-doc'
 
     if (isDocument) {
       // 打开文档编辑器
@@ -497,30 +497,30 @@ const handleFileMenu = file => {
         // 显示更多选项
         ElMessageBox({
           title: '文件操作',
-            message: '',
-            showCancelButton: true,
-            confirmButtonText: '重命名',
-            cancelButtonText: '删除',
-            distinguishCancelAndClose: true
+          message: '',
+          showCancelButton: true,
+          confirmButtonText: '重命名',
+          cancelButtonText: '删除',
+          distinguishCancelAndClose: true
+        }).then(() => {
+          // 重命名
+          ElMessageBox.prompt('请输入新名称', '重命名', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputValue: file.name
+          }).then(({ value }) => {
+            file.name = value
+            ElMessage.success('重命名成功')
+          }).catch(() => { })
+        }).catch(() => {
+          // 删除
+          ElMessageBox.confirm('确定要删除这个文件吗？', '确认删除', {
+            type: 'warning'
           }).then(() => {
-            // 重命名
-            ElMessageBox.prompt('请输入新名称', '重命名', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              inputValue: file.name
-            }).then(({ value }) => {
-              file.name = value
-              ElMessage.success('重命名成功')
-            }).catch(() => {})
-          }).catch(() => {
-            // 删除
-            ElMessageBox.confirm('确定要删除这个文件吗？', '确认删除', {
-              type: 'warning'
-            }).then(() => {
-              files.value = files.value.filter(f => f.id !== file.id)
-              ElMessage.success('删除成功')
-            }).catch(() => {})
-          })
+            files.value = files.value.filter(f => f.id !== file.id)
+            ElMessage.success('删除成功')
+          }).catch(() => { })
+        })
         done()
       } else {
         done()
@@ -695,15 +695,15 @@ onMounted(() => {
   flex: 1;
   padding: 12px;
   overflow-y: auto;
-  
+
   &::-webkit-scrollbar {
     width: 4px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.1);
     border-radius: var(--dt-radius-sm);
@@ -921,7 +921,7 @@ onMounted(() => {
   width: 320px;
 }
 
-.search-input:focus + .search-icon {
+.search-input:focus+.search-icon {
   color: var(--dt-brand-color);
 }
 
@@ -1246,25 +1246,29 @@ onMounted(() => {
   left: 100%;
 }
 
-.icon-folder { 
-  background: linear-gradient(135deg, var(--dt-warning-bg), #fef3c7); 
-  color: var(--dt-warning-color); 
+.icon-folder {
+  background: linear-gradient(135deg, var(--dt-warning-bg), #fef3c7);
+  color: var(--dt-warning-color);
 }
-.icon-doc { 
-  background: linear-gradient(135deg, var(--dt-brand-bg), #dbeafe); 
-  color: var(--dt-brand-color); 
+
+.icon-doc {
+  background: linear-gradient(135deg, var(--dt-brand-bg), #dbeafe);
+  color: var(--dt-brand-color);
 }
-.icon-sheet { 
-  background: linear-gradient(135deg, var(--dt-success-bg), #d1fae5); 
-  color: var(--dt-success-color); 
+
+.icon-sheet {
+  background: linear-gradient(135deg, var(--dt-success-bg), #d1fae5);
+  color: var(--dt-success-color);
 }
-.icon-pdf { 
-  background: linear-gradient(135deg, var(--dt-error-bg), #fee2e2); 
-  color: var(--dt-error-color); 
+
+.icon-pdf {
+  background: linear-gradient(135deg, var(--dt-error-bg), #fee2e2);
+  color: var(--dt-error-color);
 }
-.icon-image { 
-  background: linear-gradient(135deg, #f3e8ff, #e9d5ff); 
-  color: #a855f7; 
+
+.icon-image {
+  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+  color: #a855f7;
 }
 
 .file-icon:hover {
@@ -1612,238 +1616,29 @@ onMounted(() => {
   .docs-sidebar {
     width: 200px;
   }
-  
+
   .sidebar-title {
     font-size: 16px;
     padding: 16px;
   }
-  
+
   .nav-item {
     padding: 12px 16px;
   }
-  
+
   .storage-info {
     padding: 16px;
     margin: 16px;
   }
-  
+
   .name-col {
     width: 45%;
   }
-  
+
   .file-icon {
     width: 40px;
     height: 40px;
     font-size: 16px;
-  }
-}
-
-@media (max-width: 768px) {
-  .docs-container {
-    flex-direction: column;
-  }
-  
-  .docs-sidebar {
-    width: 100%;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--dt-border-color);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  }
-  
-  .sidebar-content {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 12px;
-  }
-  
-  .nav-list {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
-  .nav-item {
-    padding: 8px 16px;
-    border-radius: var(--dt-radius-md);
-    font-size: 14px;
-    white-space: nowrap;
-  }
-  
-  .storage-info {
-    width: 100%;
-    margin: 12px 0 0 0;
-    padding: 12px;
-  }
-  
-  .docs-main {
-    flex: 1;
-  }
-  
-  .docs-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 16px;
-  }
-  
-  .header-left,
-  .header-right {
-    width: 100%;
-  }
-  
-  .header-title {
-    font-size: 18px;
-  }
-  
-  .search-box {
-    width: 100%;
-  }
-  
-  .view-controls {
-    justify-content: space-between;
-  }
-  
-  .files-table thead {
-    display: none;
-  }
-  
-  .files-table tbody tr {
-    display: block;
-    margin-bottom: 16px;
-    border: 1px solid var(--dt-border-color);
-    border-radius: var(--dt-radius-md);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  }
-  
-  .files-table tbody tr td {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    text-align: left;
-    border: none;
-  }
-  
-  .files-table tbody tr td::before {
-    content: attr(data-label);
-    font-weight: 500;
-    color: var(--dt-text-tertiary);
-    margin-right: 8px;
-  }
-  
-  .name-col {
-    width: 100%;
-  }
-  
-  .file-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .file-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
-  }
-  
-  .actions-col {
-    text-align: left;
-  }
-  
-  .action-btn {
-    opacity: 1;
-    margin-right: 8px;
-  }
-  
-  .pagination {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .page-buttons {
-    order: 1;
-  }
-  
-  .page-info {
-    order: 2;
-  }
-}
-
-@media (max-width: 480px) {
-  .sidebar-content {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .nav-list {
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .nav-item {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-  
-  .docs-header {
-    padding: 12px;
-  }
-  
-  .header-title {
-    font-size: 16px;
-  }
-  
-  .new-btn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-  
-  .toggle-btn {
-    padding: 6px 12px;
-    font-size: 13px;
-  }
-  
-  .upload-area {
-    padding: 24px 16px;
-  }
-  
-  .upload-icon {
-    font-size: 32px;
-  }
-  
-  .upload-text {
-    font-size: 14px;
-  }
-  
-  .files-table tbody tr td {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  
-  .file-name {
-    font-size: 14px;
-  }
-  
-  .file-meta {
-    font-size: 11px;
-  }
-  
-  .action-btn {
-    padding: 4px 6px;
-    font-size: 14px;
-  }
-  
-  .pagination {
-    padding: 8px 12px;
-  }
-  
-  .page-btn {
-    padding: 4px 8px;
-    font-size: 12px;
   }
 }
 </style>

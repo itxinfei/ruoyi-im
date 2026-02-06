@@ -12,8 +12,13 @@
   >
     <div class="forward-dialog">
       <!-- 转发模式选择 -->
-      <div v-if="showModeSelect" class="mode-select">
-        <div class="mode-title">选择转发方式</div>
+      <div
+        v-if="showModeSelect"
+        class="mode-select"
+      >
+        <div class="mode-title">
+          选择转发方式
+        </div>
         <div class="mode-options">
           <button
             class="mode-btn"
@@ -44,7 +49,10 @@
       <div class="session-select">
         <div class="section-title">
           <span>选择转发到</span>
-          <span v-if="selectedSessions.length > 0" class="selected-count">
+          <span
+            v-if="selectedSessions.length > 0"
+            class="selected-count"
+          >
             已选 {{ selectedSessions.length }} 个会话
           </span>
         </div>
@@ -77,15 +85,26 @@
               :size="40"
             />
             <div class="session-info">
-              <div class="session-name">{{ session.target?.name || '未知' }}</div>
-              <div v-if="session.lastMessage" class="session-preview">
+              <div class="session-name">
+                {{ session.target?.name || '未知' }}
+              </div>
+              <div
+                v-if="session.lastMessage"
+                class="session-preview"
+              >
                 {{ getSessionPreview(session) }}
               </div>
             </div>
-            <span v-if="session.type === 'GROUP'" class="session-tag">群</span>
+            <span
+              v-if="session.type === 'GROUP'"
+              class="session-tag"
+            >群</span>
           </div>
 
-          <div v-if="filteredSessions.length === 0" class="empty-state">
+          <div
+            v-if="filteredSessions.length === 0"
+            class="empty-state"
+          >
             <span class="material-icons-outlined">search_off</span>
             <p>未找到相关会话</p>
           </div>
@@ -93,7 +112,10 @@
       </div>
 
       <!-- 转发预览 -->
-      <div v-if="selectedSessions.length > 0" class="forward-preview">
+      <div
+        v-if="selectedSessions.length > 0"
+        class="forward-preview"
+      >
         <div class="preview-title">
           <span>将转发 {{ messageCount }} 条消息到 {{ selectedSessions.length }} 个会话</span>
         </div>
@@ -111,7 +133,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
+        <el-button @click="handleClose">
+          取消
+        </el-button>
         <el-button
           type="primary"
           :loading="forwarding"
@@ -177,11 +201,11 @@ const filteredSessions = computed(() => {
 })
 
 // 方法
-const isSelected = (sessionId) => {
+const isSelected = sessionId => {
   return selectedSessions.value.some(s => s.id === sessionId)
 }
 
-const toggleSession = (session) => {
+const toggleSession = session => {
   const index = selectedSessions.value.findIndex(s => s.id === session.id)
   if (index >= 0) {
     selectedSessions.value.splice(index, 1)
@@ -190,14 +214,14 @@ const toggleSession = (session) => {
   }
 }
 
-const getSessionPreview = (session) => {
+const getSessionPreview = session => {
   const msg = session.lastMessage
-  if (!msg) return '暂无消息'
-  if (msg.type === 'TEXT') return msg.content
-  if (msg.type === 'IMAGE') return '[图片]'
-  if (msg.type === 'FILE') return '[文件]'
-  if (msg.type === 'VOICE' || msg.type === 'AUDIO') return '[语音]'
-  if (msg.type === 'VIDEO') return '[视频]'
+  if (!msg) {return '暂无消息'}
+  if (msg.type === 'TEXT') {return msg.content}
+  if (msg.type === 'IMAGE') {return '[图片]'}
+  if (msg.type === 'FILE') {return '[文件]'}
+  if (msg.type === 'VOICE' || msg.type === 'AUDIO') {return '[语音]'}
+  if (msg.type === 'VIDEO') {return '[视频]'}
   return '[消息]'
 }
 
@@ -253,11 +277,11 @@ const handleForward = async () => {
 }
 
 // 监听 modelValue 变化
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, val => {
   visible.value = val
 })
 
-watch(visible, (val) => {
+watch(visible, val => {
   emit('update:modelValue', val)
 })
 </script>

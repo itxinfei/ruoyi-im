@@ -22,7 +22,7 @@
               IM
             </h1>
             <p class="app-desc">
-              企业即时通讯
+              即时通讯
             </p>
           </div>
           <div class="features">
@@ -51,18 +51,12 @@
 
       <!-- 右侧登录表单区 -->
       <div class="login-form-section">
-        <!-- Logo移动端显示 -->
-        <div class="mobile-logo">
-          <span class="material-icons-outlined">forum</span>
-          <span>IM</span>
-        </div>
-
         <div class="login-header">
           <h2 class="welcome-title">
             登录
           </h2>
           <p class="welcome-subtitle">
-            欢迎回到企业即时通讯平台
+            欢迎回到即时通讯平台
           </p>
         </div>
 
@@ -374,7 +368,7 @@ const handleLogin = async () => {
   const formRef = loginType.value === 'password' ? loginFormRef.value : smsFormRef.value
   const formData = loginType.value === 'password' ? loginForm : smsForm
 
-  if (!formRef) {return}
+  if (!formRef) { return }
 
   try {
     await formRef.validate()
@@ -557,10 +551,21 @@ onMounted(() => {
     .feature-item {
       animation: fadeInLeft 0.5s var(--dt-ease-out) both;
 
-      &:nth-child(1) { animation-delay: 0.1s; }
-      &:nth-child(2) { animation-delay: 0.2s; }
-      &:nth-child(3) { animation-delay: 0.3s; }
-      &:nth-child(4) { animation-delay: 0.4s; }
+      &:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      &:nth-child(4) {
+        animation-delay: 0.4s;
+      }
     }
   }
 
@@ -581,13 +586,24 @@ onMounted(() => {
   }
 
   .form-content-wrapper {
-    > * {
+    >* {
       animation: fadeInUp 0.4s var(--dt-ease-out) both;
 
-      &:nth-child(1) { animation-delay: 0.1s; }
-      &:nth-child(2) { animation-delay: 0.15s; }
-      &:nth-child(3) { animation-delay: 0.2s; }
-      &:nth-child(4) { animation-delay: 0.25s; }
+      &:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+
+      &:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(4) {
+        animation-delay: 0.25s;
+      }
     }
   }
 }
@@ -645,12 +661,16 @@ onMounted(() => {
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
+
   33% {
     transform: translate(20px, -20px) scale(1.05);
   }
+
   66% {
     transform: translate(-10px, 15px) scale(0.95);
   }
@@ -1186,9 +1206,6 @@ onMounted(() => {
     }
   }
 
-  .mobile-logo {
-    display: flex;
-  }
 
   .login-form-section {
     padding: 40px 32px;

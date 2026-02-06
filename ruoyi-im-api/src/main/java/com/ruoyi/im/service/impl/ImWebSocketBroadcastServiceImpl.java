@@ -215,7 +215,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             }
 
             String messageJson = objectMapper.writeValueAsString(recallNotification);
-            broadcastToMembers(members, messageJson, userId); // Exclude the sender/revoker themselves? Original logic excluded userId.
+            broadcastToMembers(members, messageJson, userId); // Exclude the sender/revoker themselves? Original logic
+                                                              // excluded userId.
         } catch (Exception e) {
             log.error("广播撤回通知失败: messageId={}", messageId, e);
         }
@@ -262,7 +263,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         data.put("conversationId", message.getConversationId());
         data.put("sessionId", message.getConversationId()); // 兼容旧版前端
         data.put("senderId", message.getSenderId());
-        data.put("type", message.getMessageType() != null ? message.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
+        data.put("type", message.getMessageType() != null ? message.getMessageType().toUpperCase()
+                : MessageStatusConstants.MESSAGE_TYPE_TEXT);
         data.put("content", encryptionUtil.decryptMessage(message.getContent()));
 
         // 尝试获取发送者信息
@@ -270,7 +272,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             if (sender == null) {
                 sender = imUserMapper.selectImUserById(message.getSenderId());
             }
-            
+
             if (sender != null) {
                 data.put("senderName", sender.getNickname());
                 data.put("senderAvatar", sender.getAvatar());
@@ -303,11 +305,12 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                     quotedData.put("id", replyToMessage.getId());
 
                     // 获取发送者信息
-                    com.ruoyi.im.domain.ImUser quotedSender = imUserMapper.selectImUserById(replyToMessage.getSenderId());
+                    com.ruoyi.im.domain.ImUser quotedSender = imUserMapper
+                            .selectImUserById(replyToMessage.getSenderId());
                     quotedData.put("senderName", quotedSender != null ? quotedSender.getNickname() : "未知用户");
 
-                    quotedData.put("type", replyToMessage.getMessageType() != null 
-                            ? replyToMessage.getMessageType().toUpperCase() 
+                    quotedData.put("type", replyToMessage.getMessageType() != null
+                            ? replyToMessage.getMessageType().toUpperCase()
                             : MessageStatusConstants.MESSAGE_TYPE_TEXT);
 
                     // 解密内容
@@ -453,7 +456,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     @Override
     public void broadcastMeetingRoomBooking(Long bookingId, String roomName, String startTime, String endTime,
-                                             Set<Long> targetUserIds, Long bookerId) {
+            Set<Long> targetUserIds, Long bookerId) {
         try {
             // 获取预订人信息
             com.ruoyi.im.domain.ImUser booker = imUserMapper.selectImUserById(bookerId);
@@ -516,7 +519,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                 data.put("nudgerName", nudger.getNickname() != null ? nudger.getNickname() : nudger.getUsername());
             }
             if (nudgedUser != null) {
-                data.put("nudgedUserName", nudgedUser.getNickname() != null ? nudgedUser.getNickname() : nudgedUser.getUsername());
+                data.put("nudgedUserName",
+                        nudgedUser.getNickname() != null ? nudgedUser.getNickname() : nudgedUser.getUsername());
             }
             data.put("timestamp", System.currentTimeMillis());
             nudgeNotification.put("data", data);
@@ -548,6 +552,35 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                     conversationId, nudgerId, nudgedUserId, sentCount);
         } catch (Exception e) {
             log.error("广播拍一拍消息失败: conversationId={}", conversationId, e);
+        }
+    }
+
+    @Override
+    public void broadcastToUserExcept(Long userId, Map<String, Object> message) {
+        try {
+            String messageJson = objectMapper.writeValueAsString(message);
+            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            javax.websocket.Session session = onlineUsers.get(userId);
+            if (session != null && session.isOpen()) {
+                session.getBasicRemote().sendText(messageJson);
+            }
+        } catch (Exception e) {
+            log.error("广播给用户异常: userId={}", userId, e);
+        }
+    }
+
+    @Override
+    public void broadcastToConversationExcept(Long conversationId, Long excludeUserId, Map<String, Object> message) {
+        try {
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) {
+                return;
+            }
+
+            String messageJson = objectMapper.writeValueAsString(message);
+            broadcastToMembers(members, messageJson, excludeUserId);
+        } catch (Exception e) {
+            log.error("广播给会话成员异常: conversationId={}", conversationId, e);
         }
     }
 }

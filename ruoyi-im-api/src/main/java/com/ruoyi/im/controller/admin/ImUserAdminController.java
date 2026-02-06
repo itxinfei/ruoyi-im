@@ -9,6 +9,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,9 +44,9 @@ public class ImUserAdminController {
     /**
      * 获取用户列表（分页）
      *
-     * @param keyword 搜索关键词
-     * @param role    角色筛选
-     * @param pageNum 页码
+     * @param keyword  搜索关键词
+     * @param role     角色筛选
+     * @param pageNum  页码
      * @param pageSize 每页大小
      * @return 用户列表
      */
@@ -214,5 +218,60 @@ public class ImUserAdminController {
             @Parameter(description = "搜索关键词") @RequestParam(required = false) String keyword) {
         List<Map<String, Object>> options = imUserService.getUserOptions(keyword);
         return Result.success(options);
+    }
+
+    /**
+     * 重置用户密码
+     *
+     * @param id          用户ID
+     * @param newPassword 新密码
+     * @return 操作结果
+     */
+    @Operation(summary = "重置用户密码", description = "管理员重置指定用户的密码")
+    @PutMapping("/{id}/password")
+    public Result<Void> resetPassword(
+            @Parameter(description = "用户ID") @PathVariable Long id,
+            @Parameter(description = "新密码") @RequestParam String newPassword) {
+        imUserService.resetPassword(id, newPassword);
+        return Result.success("密码重置成功");
+    }
+
+    /**
+     * 批量导入用户
+     *
+     * @param file Excel文件
+     * @return 操作结果
+     */
+    @Operation(summary = "批量导入用户", description = "通过Excel文件批量导入用户数据")
+    @PostMapping("/import")
+    public Result<java.util.Map<String, Object>> importUsers(@RequestParam("file") MultipartFile file) {
+        java.util.Map<String, Object> result = imUserService.importUsers(file);
+        return Result.success(result);
+    }
+
+    /**
+     * 下载导入模板
+     *
+     * @param response 响应
+     */
+    @Operation(summary = "下载导入模板", description = "下载用户批量导入的Excel模板")
+    @GetMapping("/template")
+    public void downloadTemplate(HttpServletResponse response) throws IOException {
+        imUserService.downloadTemplate(response);
+    }
+
+    /**
+     * 导出用户数据
+     *
+     * @param response 响应
+     * @param keyword  搜索关键词
+     * @param role     角色筛选
+     */
+    @Operation(summary = "导出用户数据", description = "将用户列表导出为Excel文件")
+    @GetMapping("/export")
+    public void exportUsers(HttpServletResponse response,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String role) throws IOException {
+        imUserService.exportUsers(response, keyword, role);
     }
 }

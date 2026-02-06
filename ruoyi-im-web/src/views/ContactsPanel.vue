@@ -1,22 +1,7 @@
 <template>
-  <div
-    class="contacts-panel"
-    :class="{ 'mobile-view': isMobile }"
-  >
-    <!-- Mobile Overlay -->
-    <Transition name="fade">
-      <div
-        v-if="isMobile && showMobileSidebar"
-        class="mobile-overlay"
-        @click="showMobileSidebar = false"
-      />
-    </Transition>
-
+  <div class="contacts-panel">
     <!-- 左侧导航栏 -->
-    <aside
-      class="sidebar"
-      :class="{ 'sidebar-open': showMobileSidebar }"
-    >
+    <aside class="sidebar">
       <!-- 顶部标题区 -->
       <div class="sidebar-header">
         <div class="header-content">
@@ -58,7 +43,9 @@
             @click="switchNav('new')"
           >
             <div class="nav-icon-wrapper bg-gradient-orange">
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
             </div>
             <span class="nav-text">新的朋友</span>
             <span
@@ -73,7 +60,9 @@
             @click="switchNav('recommended')"
           >
             <div class="nav-icon-wrapper bg-gradient-pink">
-              <el-icon><Star /></el-icon>
+              <el-icon>
+                <Star />
+              </el-icon>
             </div>
             <span class="nav-text">可能认识的人</span>
             <span
@@ -88,7 +77,9 @@
             @click="switchNav('all')"
           >
             <div class="nav-icon-wrapper bg-gradient-primary">
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
             </div>
             <span class="nav-text">公司同事</span>
             <span class="nav-count">{{ allUsers.length }}</span>
@@ -100,7 +91,9 @@
             @click="switchNav('friends')"
           >
             <div class="nav-icon-wrapper bg-gradient-blue">
-              <el-icon><Avatar /></el-icon>
+              <el-icon>
+                <Avatar />
+              </el-icon>
             </div>
             <span class="nav-text">我的好友</span>
             <el-dropdown
@@ -173,7 +166,9 @@
             @click="switchNav('groups')"
           >
             <div class="nav-icon-wrapper bg-gradient-green">
-              <el-icon><ChatDotSquare /></el-icon>
+              <el-icon>
+                <ChatDotSquare />
+              </el-icon>
             </div>
             <span class="nav-text">我的群组</span>
           </div>
@@ -210,7 +205,9 @@
                 <ArrowRight />
               </el-icon>
               <div class="nav-icon-wrapper bg-gradient-purple">
-                <el-icon><OfficeBuilding /></el-icon>
+                <el-icon>
+                  <OfficeBuilding />
+                </el-icon>
               </div>
               <span class="nav-text">企业组织</span>
             </div>
@@ -267,14 +264,6 @@
     <section class="list-panel">
       <div class="list-header">
         <div class="header-left">
-          <el-button
-            v-if="isMobile"
-            :icon="Menu"
-            circle
-            text
-            class="mobile-menu-btn"
-            @click="showMobileSidebar = true"
-          />
           <h3 class="list-title">
             {{ currentListTitle }}
           </h3>
@@ -292,7 +281,7 @@
           </el-button>
         </div>
       </div>
-      
+
       <div
         v-loading="loading"
         class="list-content-wrapper"
@@ -313,56 +302,10 @@
           v-else-if="currentNav === 'new'"
           class="friend-requests scrollbar-custom"
         >
-          <div
-            v-if="friendRequests.length === 0"
-            class="empty-state"
-          >
-            <el-empty
-              description="暂无新的好友请求"
-              :image-size="120"
-            />
-          </div>
-          <div
-            v-else
-            class="request-list"
-          >
-            <div
-              v-for="req in friendRequests"
-              :key="req.id"
-              class="request-item"
-            >
-              <DingtalkAvatar
-                :src="req.avatar"
-                :name="req.nickname"
-                :size="48"
-              />
-              <div class="request-info">
-                <div class="request-name">
-                  {{ req.nickname }}
-                </div>
-                <div class="request-msg">
-                  {{ req.reason || '请求添加好友' }}
-                </div>
-              </div>
-              <div class="request-actions">
-                <el-button
-                  type="primary"
-                  size="small"
-                  round
-                  @click="acceptRequest(req)"
-                >
-                  接受
-                </el-button>
-                <el-button
-                  size="small"
-                  round
-                  @click="ignoreRequest(req)"
-                >
-                  忽略
-                </el-button>
-              </div>
-            </div>
-          </div>
+          <NewFriendsView
+            ref="newFriendsViewRef"
+            @update-count="pendingCount = $event"
+          />
         </div>
 
         <!-- 通用列表 (好友/群组/部门成员) -->
@@ -416,7 +359,7 @@
             </div>
           </template>
         </VirtualList>
-        
+
         <div
           v-else
           class="empty-state"
@@ -432,35 +375,21 @@
     <!-- 右侧详情区 -->
     <main
       class="detail-panel"
-      :class="{ 'detail-open': selectedItem || isMobile }"
+      :class="{ 'detail-open': selectedItem }"
     >
-      <div
-        v-if="isMobile && selectedItem"
-        class="mobile-detail-header"
-      >
-        <el-button
-          :icon="ArrowLeft"
-          text
-          @click="selectedItem = null"
-        >
-          返回
-        </el-button>
-        <span>详情</span>
-      </div>
-      
       <div
         v-if="selectedItem"
         class="detail-content-wrapper"
       >
-        <ContactDetail 
-          v-if="currentNav === 'friends' || currentNav === 'org' || currentNav === 'new'" 
+        <ContactDetail
+          v-if="currentNav === 'friends' || currentNav === 'org' || currentNav === 'new'"
           :contact="selectedItem"
           @message="handleMessage"
           @voice-call="handleVoiceCall"
           @video-call="handleVideoCall"
         />
         <!-- 群组详情暂时复用ContactDetail或开发新的组件，这里假设ContactDetail能处理 -->
-        <ContactDetail 
+        <ContactDetail
           v-else-if="currentNav === 'groups'"
           :contact="{ ...selectedItem, isGroup: true }"
           @message="handleMessage"
@@ -505,18 +434,20 @@
               class="close-search-btn"
               @click="showSearchPanel = false"
             >
-              <el-icon><Close /></el-icon>
+              <el-icon>
+                <Close />
+              </el-icon>
             </el-button>
           </div>
-          
+
           <div class="search-body scrollbar-custom">
             <div
               v-if="searchQuery && searchResults.length > 0"
               class="search-results-list"
             >
-              <div 
-                v-for="item in searchResults" 
-                :key="item.id" 
+              <div
+                v-for="item in searchResults"
+                :key="item.id"
                 class="search-result-item"
                 @click="selectItem(item); showSearchPanel = false"
               >
@@ -527,7 +458,10 @@
                 />
                 <div class="result-info">
                   <!-- eslint-disable-next-line vue/no-v-html -->
-                  <span class="result-name" v-html="highlightText(item.name, searchQuery)" />
+                  <span
+                    class="result-name"
+                    v-html="highlightText(item.name, searchQuery)"
+                  />
                   <span
                     class="result-type-tag"
                     :class="item.type"
@@ -636,7 +570,7 @@
     <!-- 批量操作栏 -->
     <BatchOperationBar
       :visible="batchMode"
-      :selected-count="selectedContacts.size"
+      :selected-count="selectedCount"
       :total-count="currentList.length"
       :type="currentNav === 'groups' ? 'group' : currentNav === 'all' || currentNav.startsWith('group-') ? 'other' : 'friend'"
       @select-all="handleSelectAll"
@@ -652,7 +586,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
-import { useWindowSize, useDebounceFn } from '@vueuse/core'
+import { useDebounceFn } from '@vueuse/core'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import ContactDetail from '@/components/Contacts/ContactDetail.vue'
 import VirtualList from '@/components/Common/VirtualList.vue'
@@ -660,6 +594,7 @@ import RecommendedContacts from '@/components/Contacts/RecommendedContacts.vue'
 import BatchOperationBar from '@/components/Contacts/BatchOperationBar.vue'
 import GroupSelectDialog from '@/components/Contacts/GroupSelectDialog.vue'
 import AddFriendDialog from '@/components/Contacts/AddFriendDialog.vue'
+import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
 import { getFriendRequests, getGroupedFriendList, searchContacts, handleFriendRequest, getGroupList, createGroup, renameGroup, deleteGroup } from '@/api/im/contact'
 import { getGroups } from '@/api/im/group'
 import { getOrgTree, getDepartmentMembers, searchOrgMembers } from '@/api/im/organization'
@@ -669,18 +604,17 @@ import {
   Search, User, Avatar, ChatDotSquare, OfficeBuilding,
   ArrowRight, Plus, Close, Menu, ArrowLeft, MoreFilled, Star
 } from '@element-plus/icons-vue'
+import { useHighlightText } from '@/composables/useHighlightText'
+import { useContactBatch } from '@/composables/useContactBatch'
 
 // 定义 emit，用于通知父组件切换模块或触发通话
 const emit = defineEmits(['switch-module', 'voice-call', 'video-call'])
 
 const store = useStore()
-const { width } = useWindowSize()
-const isMobile = computed(() => width.value < 768)
 
 // State
-const currentNav = ref('friends')
+const currentNav = ref('new') // 当前导航项
 const searchQuery = ref('')
-const showMobileSidebar = ref(false)
 const showSearchPanel = ref(false)
 const showAddMenu = ref(false)
 const loading = ref(false)
@@ -732,13 +666,28 @@ const orgSearchQuery = ref('')
 const orgSearchResults = ref([])
 const orgSearching = ref(false)
 
-// 批量操作状态
-const batchMode = ref(false)
-const selectedContacts = ref(new Set())
+// ==================== Composables ====================
+// 搜索高亮
+const { highlightText } = useHighlightText(searchQuery)
+
+// 批量操作
+const {
+  batchMode,
+  selectedContacts,
+  selectedCount,
+  hasSelection,
+  exitBatchMode,
+  toggleContactSelection,
+  handleSelectAll: batchSelectAll,
+  handleBatchMoveGroup: batchMoveGroup,
+  handleBatchSendMessage: batchSendMessage,
+  handleBatchDelete: batchDelete,
+  handleBatchAddFriends: batchAddFriends
+} = useContactBatch()
 
 // Computed for Display Titles
 const listTitle = computed(() => {
-  if (searchQuery.value) {return '搜索结果'}
+  if (searchQuery.value) { return '搜索结果' }
   const map = {
     new: '新的朋友',
     recommended: '可能认识的人',
@@ -747,10 +696,10 @@ const listTitle = computed(() => {
     groups: '我的群组',
     org: '组织架构'
   }
-  if (map[currentNav.value]) {return map[currentNav.value]}
+  if (map[currentNav.value]) { return map[currentNav.value] }
   // 如果是分组导航，返回分组名称
   const group = friendGroups.value.find(g => g.groupName === currentNav.value)
-  if (group) {return group.groupName}
+  if (group) { return group.groupName }
   return ''
 })
 
@@ -769,8 +718,8 @@ const currentList = computed(() => {
   if (group) {
     return group.friends || []
   }
-  if (currentNav.value === 'groups') {return groupList.value}
-  if (currentNav.value === 'org') {return orgMembers.value}
+  if (currentNav.value === 'groups') { return groupList.value }
+  if (currentNav.value === 'org') { return orgMembers.value }
   return []
 })
 
@@ -781,7 +730,6 @@ const switchNav = nav => {
   currentNav.value = nav
   selectedItemId.value = null
   selectedItem.value = null
-  if (isMobile.value) {showMobileSidebar.value = false}
   fetchData(nav)
 }
 
@@ -820,22 +768,6 @@ const handleSearch = useDebounceFn(async () => {
     console.error(error)
   }
 }, 300)
-
-// 高亮搜索文本
-const highlightText = (text, query) => {
-  if (!query) {return escapeHtml(text)}
-  const keyword = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const reg = new RegExp(`(${keyword})`, 'gi')
-  return escapeHtml(text).replace(reg, '<span class="highlight">$1</span>')
-}
-
-// 转义 HTML 特殊字符，防止 XSS 攻击
-const escapeHtml = str => {
-  if (!str) {return ''}
-  const div = document.createElement('div')
-  div.textContent = str
-  return div.innerHTML
-}
 
 const fetchData = async nav => {
   loading.value = true
@@ -892,51 +824,6 @@ const handleVideoCall = contact => {
     userName: contact.name || contact.nickname,
     userAvatar: contact.avatar
   })
-}
-
-const acceptRequest = async req => {
-  try {
-    loading.value = true
-    await handleFriendRequest(req.id, true)
-    ElMessage.success('已接受好友请求')
-    // 重新加载好友请求列表
-    const res = await getFriendRequests()
-    friendRequests.value = res.data || []
-    pendingCount.value = (res.data || []).length
-  } catch (error) {
-    console.error('接受好友请求失败:', error)
-    ElMessage.error(error.msg || '操作失败，请稍后重试')
-  } finally {
-    loading.value = false
-  }
-}
-
-const ignoreRequest = async req => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要忽略 ${req.nickname || req.fromUserNickname} 的好友请求吗？`,
-      '忽略请求',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-    loading.value = true
-    await handleFriendRequest(req.id, false)
-    ElMessage.success('已忽略好友请求')
-    // 重新加载好友请求列表
-    const res = await getFriendRequests()
-    friendRequests.value = res.data || []
-    pendingCount.value = (res.data || []).length
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('忽略好友请求失败:', error)
-      ElMessage.error(error.msg || '操作失败，请稍后重试')
-    }
-  } finally {
-    loading.value = false
-  }
 }
 
 // ==================== 好友分组管理 ====================
@@ -1080,23 +967,6 @@ const handleRecommendUpdate = () => {
 
 // ==================== 批量操作 ====================
 
-// Unused function removed
-
-// 退出批量模式
-const exitBatchMode = () => {
-  batchMode.value = false
-  selectedContacts.value.clear()
-}
-
-// 切换联系人选择状态
-const toggleContactSelection = (contactId, selected) => {
-  if (selected) {
-    selectedContacts.value.add(contactId)
-  } else {
-    selectedContacts.value.delete(contactId)
-  }
-}
-
 // 处理列表项点击（批量模式下切换选择）
 const handleItemClick = item => {
   if (batchMode.value) {
@@ -1106,103 +976,58 @@ const handleItemClick = item => {
   }
 }
 
-// 全选/取消全选
+// 全选/取消全选 - 包装composable方法
 const handleSelectAll = selected => {
-  if (selected) {
-    currentList.value.forEach(item => selectedContacts.value.add(item.id))
-  } else {
-    selectedContacts.value.clear()
-  }
+  batchSelectAll(currentList.value, selected)
 }
 
 // 批量移动到分组
 const handleBatchMoveGroup = async () => {
-  const contactIds = Array.from(selectedContacts.value)
-  if (contactIds.length === 0) {return}
-
+  if (!hasSelection.value) {
+    ElMessage.warning('请先选择联系人')
+    return
+  }
   showGroupSelectDialog.value = true
 }
 
 // 处理分组选择确认
 const handleGroupSelectConfirm = async groupName => {
   const contactIds = Array.from(selectedContacts.value)
-  if (contactIds.length === 0) {return}
 
-  try {
+  await batchMoveGroup(async ids => {
     // 调用批量移动API
-    // await batchMoveToGroup({ contactIds, groupName })
-
-    // 模拟调用
+    // await batchMoveToGroup({ contactIds: ids, groupName })
     await new Promise(resolve => setTimeout(resolve, 500))
-
-    ElMessage.success(`已将 ${contactIds.length} 个联系人移动到"${groupName}"`)
-    exitBatchMode()
+    ElMessage.success(`已将 ${ids.length} 个联系人移动到"${groupName}"`)
     fetchData(currentNav.value)
-  } catch (error) {
-    ElMessage.error('移动失败')
-  }
+  })
 }
 
 // 批量发送消息
-const handleBatchSendMessage = () => {
-  const contactIds = Array.from(selectedContacts.value)
-  if (contactIds.length === 0) {return}
-
-  ElMessage.info(`将向 ${contactIds.length} 个联系人发送消息`)
-  // TODO: 实现批量发送消息
+const handleBatchSendMessage = async () => {
+  await batchSendMessage(async ids => {
+    ElMessage.info(`将向 ${ids.length} 个联系人发送消息`)
+    // TODO: 实现批量发送消息
+  })
 }
 
 // 批量删除
 const handleBatchDelete = async () => {
-  const contactIds = Array.from(selectedContacts.value)
-  if (contactIds.length === 0) {return}
-
-  try {
-    await ElMessageBox.confirm(
-      `确定要删除选中的 ${contactIds.length} 个联系人吗？`,
-      '批量删除',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-
+  await batchDelete(async ids => {
     // 调用批量删除API
-    // await batchDeleteContacts(contactIds)
-
-    ElMessage.success('删除成功')
-    exitBatchMode()
+    // await batchDeleteContacts(ids)
+    await new Promise(resolve => setTimeout(resolve, 500))
     fetchData(currentNav.value)
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败')
-    }
-  }
+  })
 }
 
 // 批量添加好友
 const handleBatchAddFriends = async () => {
-  const contactIds = Array.from(selectedContacts.value)
-  if (contactIds.length === 0) {return}
-
-  try {
-    await ElMessageBox.prompt('请输入验证消息', '批量添加好友', {
-      inputValue: '你好，我是...',
-      confirmButtonText: '发送',
-      cancelButtonText: '取消'
-    })
-
+  await batchAddFriends(async (ids, reason) => {
     // 调用批量添加API
-    // await batchAddFriends({ userIds: contactIds, remark: reason })
-
-    ElMessage.success(`已向 ${contactIds.length} 个用户发送好友请求`)
-    exitBatchMode()
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('操作失败')
-    }
-  }
+    // await batchAddFriends({ userIds: ids, remark: reason })
+    await new Promise(resolve => setTimeout(resolve, 500))
+  })
 }
 
 // ==================== 组织架构搜索 ====================
@@ -1312,12 +1137,15 @@ $panel-min-width: 320px;
       width: 6px;
       height: 6px;
     }
+
     &::-webkit-scrollbar-track {
       background: transparent;
     }
+
     &::-webkit-scrollbar-thumb {
       background-color: rgba(0, 0, 0, 0.1);
       border-radius: 3px;
+
       &:hover {
         background-color: rgba(0, 0, 0, 0.15);
       }
@@ -1326,25 +1154,25 @@ $panel-min-width: 320px;
 
   &.mobile-view {
     flex-direction: column;
-    
+
     .sidebar {
       position: absolute;
       z-index: 100;
       height: 100%;
       transform: translateX(-100%);
       transition: transform 0.3s ease;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-      
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+
       &.sidebar-open {
         transform: translateX(0);
       }
     }
-    
+
     .list-panel {
       width: 100%;
       border-right: none;
     }
-    
+
     .detail-panel {
       position: absolute;
       top: 0;
@@ -1355,7 +1183,7 @@ $panel-min-width: 320px;
       transform: translateX(100%);
       transition: transform 0.3s ease;
       background: #fff;
-      
+
       &.detail-open {
         transform: translateX(0);
       }
@@ -1369,7 +1197,7 @@ $panel-min-width: 320px;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 90;
   backdrop-filter: blur(2px);
 }
@@ -1497,12 +1325,29 @@ $panel-min-width: 320px;
     font-size: 16px;
     flex-shrink: 0;
 
-    &.bg-gradient-orange { background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%); }
-    &.bg-gradient-blue { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
-    &.bg-gradient-green { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
-    &.bg-gradient-purple { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
-    &.bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    &.bg-gradient-pink { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+    &.bg-gradient-orange {
+      background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
+    }
+
+    &.bg-gradient-blue {
+      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+    }
+
+    &.bg-gradient-green {
+      background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    }
+
+    &.bg-gradient-purple {
+      background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    }
+
+    &.bg-gradient-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    &.bg-gradient-pink {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    }
   }
 
   .nav-text {
@@ -1620,7 +1465,7 @@ $panel-min-width: 320px;
 
 .nav-divider {
   height: 1px;
-  background: $border-color;
+  background: var(--dt-border-color);
   margin: 12px 16px 24px;
 }
 
@@ -1642,10 +1487,10 @@ $panel-min-width: 320px;
 .org-root {
   .arrow-icon {
     font-size: 12px;
-    color: $text-tertiary;
+    color: var(--dt-text-tertiary);
     margin-right: 8px;
     transition: transform 0.2s;
-    
+
     &.rotated {
       transform: rotate(90deg);
     }
@@ -1663,14 +1508,14 @@ $panel-min-width: 320px;
   border-radius: var(--dt-radius-md);
 
   &:hover {
-    background-color: $hover-bg;
+    background-color: var(--dt-bg-hover);
   }
 
   &.active {
-    background-color: $active-bg;
+    background-color: var(--dt-brand-bg);
 
     .org-name {
-      color: $primary-color;
+      color: var(--dt-brand-color);
       font-weight: 500;
     }
   }
@@ -1683,7 +1528,7 @@ $panel-min-width: 320px;
 
   .org-expand-icon {
     font-size: 12px;
-    color: $text-tertiary;
+    color: var(--dt-text-tertiary);
     margin-right: 6px;
     transition: transform 0.2s;
     flex-shrink: 0;
@@ -1704,12 +1549,12 @@ $panel-min-width: 320px;
       top: 50%;
       width: 8px;
       height: 1px;
-      background: $border-color;
+      background: var(--dt-border-color);
     }
 
     .org-name {
       font-size: 14px;
-      color: $text-primary;
+      color: var(--dt-text-primary);
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1725,7 +1570,7 @@ $panel-min-width: 320px;
 
     .org-count {
       font-size: 12px;
-      color: $text-tertiary;
+      color: var(--dt-text-tertiary);
     }
 
     .org-online {
@@ -1941,48 +1786,7 @@ $panel-min-width: 320px;
 
 /* ==================== 好友请求 ==================== */
 .friend-requests {
-  padding: var(--dt-spacing-lg);
-}
-
-.request-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dt-spacing-md);
-}
-
-.request-item {
-  display: flex;
-  align-items: center;
-  padding: var(--dt-spacing-lg);
-  background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-lg);
-  border: 1px solid var(--dt-border-color);
-  box-shadow: var(--dt-shadow-sm);
-
-  .request-info {
-    flex: 1;
-    margin-left: var(--dt-spacing-md);
-
-    .request-name {
-      font-weight: var(--dt-font-weight-medium);
-      color: var(--dt-text-primary);
-      margin-bottom: var(--dt-spacing-xs);
-    }
-
-    .request-msg {
-      font-size: var(--dt-font-size-sm);
-      color: var(--dt-text-secondary);
-    }
-  }
-
-  .request-actions {
-    display: flex;
-    gap: var(--dt-spacing-sm);
-
-    :deep(.el-button) {
-      border-radius: var(--dt-radius-full);
-    }
-  }
+  height: 100%;
 }
 
 /* ==================== 搜索模态框 ==================== */
@@ -2114,6 +1918,7 @@ $panel-min-width: 320px;
     opacity: 0;
     transform: translateY(-20px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -2121,9 +1926,12 @@ $panel-min-width: 320px;
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.4;
   }
@@ -2134,6 +1942,7 @@ $panel-min-width: 320px;
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -2171,64 +1980,6 @@ $panel-min-width: 320px;
 
   .list-panel {
     width: 240px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .contacts-panel {
-    &.mobile-view {
-      flex-direction: column;
-
-      .sidebar {
-        position: absolute;
-        z-index: 100;
-        height: 100%;
-        transform: translateX(-100%);
-        transition: transform var(--dt-transition-base);
-        box-shadow: var(--dt-shadow-lg);
-
-        &.sidebar-open {
-          transform: translateX(0);
-        }
-      }
-
-      .list-panel {
-        width: 100%;
-        border-right: none;
-      }
-
-      .detail-panel {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 50;
-        transform: translateX(100%);
-        transition: transform var(--dt-transition-base);
-        background: var(--dt-bg-card);
-
-        &.detail-open {
-          transform: translateX(0);
-        }
-      }
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .contacts-panel {
-    &.mobile-view {
-      .list-header {
-        height: 50px;
-        padding: 0 var(--dt-spacing-md);
-      }
-
-      .sidebar {
-        width: 100%;
-        max-width: 280px;
-      }
-    }
   }
 }
 </style>

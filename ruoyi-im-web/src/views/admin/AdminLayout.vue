@@ -32,61 +32,81 @@
           class="sidebar-menu"
         >
           <el-menu-item index="/admin/dashboard">
-            <el-icon><Monitor /></el-icon>
+            <el-icon>
+              <Monitor />
+            </el-icon>
             <template #title>
               数据概览
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/users">
-            <el-icon><User /></el-icon>
+            <el-icon>
+              <User />
+            </el-icon>
             <template #title>
               用户管理
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/groups">
-            <el-icon><ChatDotRound /></el-icon>
+            <el-icon>
+              <ChatDotRound />
+            </el-icon>
             <template #title>
               群组管理
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/messages">
-            <el-icon><ChatLineSquare /></el-icon>
+            <el-icon>
+              <ChatLineSquare />
+            </el-icon>
             <template #title>
               消息管理
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/departments">
-            <el-icon><OfficeBuilding /></el-icon>
+            <el-icon>
+              <OfficeBuilding />
+            </el-icon>
             <template #title>
               部门管理
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/roles">
-            <el-icon><Lock /></el-icon>
+            <el-icon>
+              <Lock />
+            </el-icon>
             <template #title>
               角色权限
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/settings">
-            <el-icon><Setting /></el-icon>
+            <el-icon>
+              <Setting />
+            </el-icon>
             <template #title>
               系统设置
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/logs">
-            <el-icon><Document /></el-icon>
+            <el-icon>
+              <Document />
+            </el-icon>
             <template #title>
               操作日志
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/backup">
-            <el-icon><FolderOpened /></el-icon>
+            <el-icon>
+              <FolderOpened />
+            </el-icon>
             <template #title>
               数据备份
             </template>
           </el-menu-item>
           <el-menu-item index="/admin/monitor">
-            <el-icon><TrendCharts /></el-icon>
+            <el-icon>
+              <TrendCharts />
+            </el-icon>
             <template #title>
               系统监控
             </template>
@@ -167,12 +187,11 @@
                   :size="32"
                   class="user-avatar"
                 >
-                  <el-icon><User /></el-icon>
+                  <el-icon>
+                    <User />
+                  </el-icon>
                 </el-avatar>
-                <span
-                  v-if="!isMobile"
-                  class="user-name"
-                >{{ userName }}</span>
+                <span class="user-name">{{ userName }}</span>
                 <el-icon class="dropdown-icon">
                   <ArrowDown />
                 </el-icon>
@@ -180,25 +199,33 @@
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="profile">
-                    <el-icon><User /></el-icon>
+                    <el-icon>
+                      <User />
+                    </el-icon>
                     个人信息
                   </el-dropdown-item>
                   <el-dropdown-item command="settings">
-                    <el-icon><Setting /></el-icon>
+                    <el-icon>
+                      <Setting />
+                    </el-icon>
                     系统设置
                   </el-dropdown-item>
                   <el-dropdown-item
                     divided
                     command="back"
                   >
-                    <el-icon><ChatDotRound /></el-icon>
+                    <el-icon>
+                      <ChatDotRound />
+                    </el-icon>
                     返回聊天
                   </el-dropdown-item>
                   <el-dropdown-item
                     command="logout"
                     style="color: var(--dt-error);"
                   >
-                    <el-icon><SwitchButton /></el-icon>
+                    <el-icon>
+                      <SwitchButton />
+                    </el-icon>
                     退出登录
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -259,27 +286,15 @@ const sidebarWidth = computed(() => isCollapsed.value ? '64px' : '200px')
 const userName = ref('管理员')
 const notificationCount = ref(0)
 
-// 是否移动端
-const isMobile = ref(window.innerWidth < 768)
 
 // 主题管理
 const { isDark, toggleDark } = useTheme()
 const themeIcon = computed(() => isDark.value ? Moon : Sunny)
 const themeTooltip = computed(() => isDark.value ? '切换到浅色模式' : '切换到深色模式')
 
-// 监听窗口大小变化
-const handleResize = () => {
-  isMobile.value = window.innerWidth < 768
-  if (isMobile.value) {
-    isCollapsed.value = true
-  }
-}
 
 watch(() => route.path, () => {
-  // 移动端自动收起侧边栏
-  if (isMobile.value) {
-    isCollapsed.value = true
-  }
+  // 页面切换后的逻辑
 })
 
 // 当前激活的菜单
@@ -302,7 +317,7 @@ const pageTitleMap = {
 // 面包屑列表
 const breadcrumbList = computed(() => {
   const current = pageTitleMap[route.path]
-  if (!current) {return [{ title: '管理后台', path: '/admin/dashboard' }]}
+  if (!current) { return [{ title: '管理后台', path: '/admin/dashboard' }] }
   return [
     { title: '首页', path: '/admin/dashboard' },
     { title: current.title, path: route.path }
@@ -338,16 +353,9 @@ const logout = () => {
   router.push('/login')
 }
 
-// 初始化
-if (typeof window !== 'undefined') {
-  window.addEventListener('resize', handleResize)
-  handleResize()
-}
 </script>
 
 <style scoped lang="scss">
-
-
 /* ================================
    布局容器
    ================================ */
@@ -630,7 +638,7 @@ if (typeof window !== 'undefined') {
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity var(--dt-transition-slow) var(--dt-ease-out),
-              transform var(--dt-transition-slow) var(--dt-ease-out);
+    transform var(--dt-transition-slow) var(--dt-ease-out);
 }
 
 .fade-enter-from {
@@ -646,23 +654,7 @@ if (typeof window !== 'undefined') {
 /* ================================
    响应式适配
    ================================ */
-@media (max-width: 768px) {
-  .admin-header {
-    padding: 0 var(--dt-space-sm);
-  }
 
-  .header-left :deep(.el-breadcrumb) {
-    display: none;
-  }
-
-  .user-name {
-    display: none;
-  }
-
-  .admin-main {
-    padding: var(--dt-space-sm);
-  }
-}
 
 /* ================================
    Element Plus 样式覆盖

@@ -13,8 +13,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 import java.util.UUID;
 
 /**
@@ -34,6 +34,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     /** 请求开始时间的MDC键名 */
     private static final String START_TIME_KEY = "requestStartTime";
 
+    private static final String USER_ID_KEY = "userId";
+
     /** 不需要记录日志的路径前缀 */
     private static final String[] EXCLUDE_PATHS = {
             "/swagger",
@@ -42,6 +44,9 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             "/favicon.ico",
             "/static"
     };
+
+    private static final long SLOW_REQUEST_THRESHOLD_MS = 2000L;
+    private static final int MAX_BODY_LOG_LENGTH = 2000;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -58,6 +63,10 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         String traceId = generateTraceId();
         MDC.put(TRACE_ID_KEY, traceId);
         MDC.put(START_TIME_KEY, String.valueOf(System.currentTimeMillis()));
+        String userId = request.getHeader(USER_ID_KEY);
+        if (userId != null && !userId.isEmpty()) {
+            MDC.put(USER_ID_KEY, userId);
+        }
 
         // 包装请求和响应以支持多次读取
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
@@ -79,6 +88,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             // 清除MDC
             MDC.remove(TRACE_ID_KEY);
             MDC.remove(START_TIME_KEY);
+            MDC.remove(USER_ID_KEY);
         }
     }
 
@@ -118,9 +128,10 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         String queryString = request.getQueryString();
         String clientIp = getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
+        String userId = request.getHeader(USER_ID_KEY);
 
-        log.info("[请求开始] TraceId={}, Method={}, URI={}, QueryString={}, ClientIp={}, UserAgent={}",
-                traceId, method, uri, queryString, clientIp, userAgent);
+        log.info("[请求开始] TraceId={}, UserId={}, Method={}, URI={}, QueryString={}, ClientIp={}, UserAgent={}",
+                traceId, userId, method, uri, queryString, clientIp, userAgent);
     }
 
     /**
@@ -136,12 +147,13 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         int status = response.getStatus();
         String method = request.getMethod();
         String uri = request.getRequestURI();
+        String userId = request.getHeader(USER_ID_KEY);
 
         // 计算请求处理时长
         long duration = calculateDuration();
 
-        log.info("[请求结束] TraceId={}, Method={}, URI={}, Status={}, Duration={}ms",
-                traceId, method, uri, status, duration);
+        log.info("[请求结束] TraceId={}, UserId={}, Method={}, URI={}, Status={}, Duration={}ms",
+                traceId, userId, method, uri, status, duration);
 
         // 记录非2xx状态的响应详情
         if (status >= 400) {
@@ -149,6 +161,21 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             log.warn("[异常响应] TraceId={}, Status={}, Response={}",
                     traceId, status, abbreviate(responseBody, 500));
         }
+
+        if (shouldLogRequestBody(status, duration)) {
+            String requestBody = getRequestBody(request);
+            if (!requestBody.isEmpty()) {
+                log.warn("[请求体] TraceId={}, Method={}, URI={}, Body={}",
+                        traceId, method, uri, abbreviate(requestBody, MAX_BODY_LOG_LENGTH));
+            }
+        }
+    }
+
+    private boolean shouldLogRequestBody(int status, long durationMs) {
+        if (status >= 400) {
+            return true;
+        }
+        return durationMs >= 0 && durationMs >= SLOW_REQUEST_THRESHOLD_MS;
     }
 
     /**
@@ -202,6 +229,37 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         }
 
         return ip != null ? ip : "unknown";
+    }
+
+    private String getRequestBody(ContentCachingRequestWrapper request) {
+        String contentType = request.getContentType();
+        if (contentType != null) {
+            String lower = contentType.toLowerCase();
+            if (lower.startsWith("multipart/") || lower.contains("application/octet-stream")) {
+                return "";
+            }
+            boolean allowed =
+                    lower.contains("application/json") ||
+                            lower.startsWith("text/") ||
+                            lower.contains("application/x-www-form-urlencoded");
+            if (!allowed) {
+                return "";
+            }
+        }
+
+        byte[] content = request.getContentAsByteArray();
+        if (content.length == 0) {
+            return "";
+        }
+
+        String encoding = request.getCharacterEncoding();
+        Charset charset;
+        try {
+            charset = encoding != null ? Charset.forName(encoding) : StandardCharsets.UTF_8;
+        } catch (Exception e) {
+            charset = StandardCharsets.UTF_8;
+        }
+        return new String(content, charset);
     }
 
     /**

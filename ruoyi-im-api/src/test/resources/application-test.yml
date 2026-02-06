@@ -1,0 +1,98 @@
+# 测试环境配置
+app:
+  env: test
+  security:
+    enabled: false  # 测试环境禁用安全验证，方便测试
+  websocket:
+    enabled: false  # 测试环境禁用WebSocket
+  dev:
+    user-id: 1
+  upload:
+    path: uploads/test/
+
+# 数据源配置
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:172.168.20.222}:${DB_PORT:3306}/${DB_NAME:im}?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: ${DB_USER:im}
+    password: ${DB_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 2
+      min-idle: 2
+      max-active: 10
+      max-wait: 60000
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+
+  # Redis配置
+  redis:
+    host: ${REDIS_HOST:172.168.20.222}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:123456}
+    database: 15  # 使用独立的测试数据库
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+  # Jackson配置
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+  # 自动配置排除
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*Mapper.xml
+  type-aliases-package: com.ruoyi.im.domain
+  global-config:
+    db-config:
+      id-type: assign_id
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# IM模块配置
+im:
+  jwt:
+    secret: dGVzdF9zZWNyZXRfa2V5X2Zvcl9pbV90ZXN0aW5nXzIwMjQ=  # Base64编码的测试密钥
+    expiration: 3600000  # 测试环境1小时过期
+  message:
+    maxLength: 2000
+    expireDays: 30
+    recallWindowSeconds: 120
+  file:
+    maxSizeMb: 10
+  sensitive:
+    enabled: false  # 测试环境禁用敏感词过滤
+
+# 日志配置
+logging:
+  level:
+    com.ruoyi.im: DEBUG
+    org.springframework.test: INFO
+    org.springframework.boot.test: INFO
+    org.springframework.security: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

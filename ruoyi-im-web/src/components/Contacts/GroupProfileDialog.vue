@@ -1,693 +1,297 @@
 <template>
   <el-dialog
-    v-model="visible"
-    :width="640"
+    v-model="dialogVisible"
+    width="860px"
     class="group-profile-dialog"
-    :show-close="false"
-    :close-on-click-modal="true"
     destroy-on-close
+    :show-close="false"
     append-to-body
+    modal-class="group-profile-modal"
   >
-    <div
-      v-if="loading"
-      class="loading-state"
-    >
-      <el-skeleton
-        :rows="6"
-        animated
-      />
+    <div v-if="loading" class="loading-state">
+      <el-skeleton :rows="10" animated />
     </div>
 
-    <div
-      v-else-if="groupInfo"
-      class="profile-container"
-    >
-      <!-- 左侧：群组基本信息和快捷操作 -->
-      <GroupProfileHeader
-        :group-info="groupInfo"
-        :member-count="members.length"
-        :is-owner="isOwner"
-        :is-admin="isAdmin"
-        @close="handleClose"
-      />
+    <div v-else-if="groupInfo" class="gp">
+      <div class="gp-rail">
+        <button class="gp-close" @click="dialogVisible = false">
+          <el-icon><ArrowLeft /></el-icon>
+        </button>
 
-      <GroupActions
-        :is-owner-or-admin="isOwnerOrAdmin"
-        @send-message="handleSendMessage"
-        @invite="handleInviteMember"
-        @manage="handleManage"
-      />
+        <div class="gp-rail-top">
+          <div class="gp-avatar-ring">
+            <el-avatar
+              :size="78"
+              :src="groupInfo.avatar || ''"
+              shape="square"
+              class="gp-avatar"
+            >
+              {{ groupInfo.name?.charAt(0) || '群' }}
+            </el-avatar>
+          </div>
 
-      <!-- 右侧：详细信息和功能 -->
-      <div class="profile-main">
-        <el-tabs
-          v-model="activeTab"
-          class="profile-tabs"
-        >
-          <!-- 成员 Tab -->
-          <el-tab-pane name="members">
-            <template #label>
-              <span>成员</span>
-              <el-badge
-                :value="members.length"
-                :max="99"
-                class="tab-badge"
-              />
-            </template>
-            <GroupMemberList
-              :members="members"
-              :current-user="currentUser"
-              :is-owner="isOwner"
-              :is-admin="isAdmin"
-              @invite="handleInviteMember"
-              @mute-all="handleMuteAll"
-              @member-click="handleMemberClick"
-              @set-admin="handleSetAdmin"
-              @cancel-admin="handleCancelAdmin"
-              @mute-member="handleMuteMember"
-              @remove-member="handleRemoveMember"
-            />
-          </el-tab-pane>
+          <div class="gp-title">
+            {{ groupInfo.name }}
+          </div>
+          <div class="gp-sub">
+            群组 ID · {{ groupInfo.id }}
+          </div>
+        </div>
 
-          <!-- 公告 Tab -->
-          <el-tab-pane name="announcements">
-            <template #label>
-              <span>公告</span>
-              <el-badge
-                v-if="announcements.length > 0"
-                :value="announcements.length"
-                :max="99"
-                class="tab-badge"
-              />
-            </template>
-            <AnnouncementList
-              :announcements="announcements"
-              :can-manage="isOwnerOrAdmin"
-              @create="handleCreateAnnouncement"
-              @edit="handleEditAnnouncement"
-              @delete="handleDeleteAnnouncement"
-            />
-          </el-tab-pane>
+        <div class="gp-chips">
+          <span class="gp-chip" :class="{ 'is-strong': groupInfo.isPublic }">
+            {{ groupInfo.isPublic ? '公开群组' : '私有群组' }}
+          </span>
+          <span class="gp-chip">
+            {{ groupMembers.length }} 人
+          </span>
+          <span v-if="groupMembers.length > 50" class="gp-chip">
+            大型群组
+          </span>
+        </div>
 
-          <!-- 二维码 Tab -->
-          <el-tab-pane name="qrcode">
-            <template #label>
-              <span>二维码</span>
-              <el-icon><Grid /></el-icon>
-            </template>
-            <GroupQRCode :group-info="groupInfo" />
-          </el-tab-pane>
+        <div class="gp-actions">
+          <button class="gp-btn gp-btn--primary" @click="copyGroupId">
+            <span class="material-icons-outlined">content_copy</span>
+            复制群号
+          </button>
+          <button class="gp-btn" @click="shareGroup">
+            <span class="material-icons-outlined">ios_share</span>
+            分享
+          </button>
+        </div>
 
-          <!-- 文件 Tab -->
-          <el-tab-pane name="files">
-            <template #label>
-              <span>文件</span>
-              <el-icon><Folder /></el-icon>
-            </template>
-            <GroupFiles
-              :group-id="groupInfo?.id"
-              @open-in-chat="handleOpenFileInChat"
-              @preview-image="handlePreviewImage"
-            />
-          </el-tab-pane>
+        <div class="gp-rail-foot">
+          <div class="gp-foot-card">
+            <div class="gp-foot-title">小提示</div>
+            <div class="gp-foot-text">点击成员头像可查看资料</div>
+          </div>
+        </div>
+      </div>
 
-          <!-- 设置 Tab -->
-          <el-tab-pane
-            label="设置"
-            name="settings"
-          >
-            <GroupSettingsPanel
-              :group-info="groupInfo"
-              :settings="groupSettings"
-              :is-muted="isMuted"
-              :is-top="isTop"
-              :is-owner="isOwner"
-              :is-admin="isAdmin"
-              @edit-name="handleEditGroupName"
-              @edit-desc="handleEditGroupDesc"
-              @setting-change="handleSettingChange"
-              @mute-change="handleMuteChange"
-              @top-change="handleTopChange"
-              @transfer="handleTransfer"
-              @dismiss="handleDismiss"
-              @exit="handleExit"
-            />
-          </el-tab-pane>
-        </el-tabs>
+      <div class="gp-main">
+        <div class="gp-topbar">
+          <div class="gp-tabs" role="tablist" aria-label="群组详情">
+            <button
+              class="gp-tab"
+              :class="{ active: activeTab === 'members' }"
+              role="tab"
+              :aria-selected="activeTab === 'members'"
+              @click="activeTab = 'members'"
+            >
+              成员
+              <span class="gp-count">{{ groupMembers.length }}</span>
+            </button>
+            <button
+              class="gp-tab"
+              :class="{ active: activeTab === 'settings' }"
+              role="tab"
+              :aria-selected="activeTab === 'settings'"
+              @click="activeTab = 'settings'"
+            >
+              群设置
+            </button>
+          </div>
+
+          <div class="gp-top-actions">
+            <el-tooltip content="复制群ID" placement="bottom">
+              <button class="gp-icon-btn" @click="copyGroupId">
+                <span class="material-icons-outlined">content_copy</span>
+              </button>
+            </el-tooltip>
+            <el-tooltip content="关闭" placement="bottom">
+              <button class="gp-icon-btn" @click="dialogVisible = false">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            </el-tooltip>
+          </div>
+        </div>
+
+        <div class="gp-body">
+          <div v-if="activeTab === 'members'" class="gp-pane">
+            <div class="members-head">
+              <div class="members-title">
+                成员列表
+              </div>
+              <div class="members-tools">
+                <el-input
+                  v-model="memberKeyword"
+                  placeholder="搜索成员"
+                  clearable
+                  class="member-search"
+                />
+                <button class="invite-btn" @click="handleAddMember">
+                  <span class="material-icons-outlined">person_add</span>
+                  邀请成员
+                </button>
+              </div>
+            </div>
+
+            <div class="members-grid" role="list">
+              <button class="member-card member-card--add" @click="handleAddMember">
+                <span class="material-icons-outlined">add</span>
+                <span class="member-name">邀请</span>
+              </button>
+
+              <button
+                v-for="member in filteredMembers"
+                :key="member.userId"
+                class="member-card"
+                role="listitem"
+                @click="viewMemberInfo(member.userId)"
+              >
+                <el-avatar :size="44" :src="member.avatar || ''" shape="square" class="member-avatar">
+                  {{ member.userName?.charAt(0) || '用' }}
+                </el-avatar>
+                <span class="member-name">{{ member.userName }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="gp-pane">
+            <div class="settings-card">
+              <div class="settings-title">
+                基础信息
+              </div>
+              <el-form :model="groupSettings" label-position="top" class="settings-form">
+                <el-form-item label="群名称">
+                  <el-input v-model="groupSettings.name" placeholder="请输入群组名称" />
+                </el-form-item>
+                <el-form-item label="群描述">
+                  <el-input
+                    v-model="groupSettings.description"
+                    type="textarea"
+                    placeholder="介绍一下这个群..."
+                    :rows="4"
+                  />
+                </el-form-item>
+
+                <div class="settings-row">
+                  <div class="settings-row-left">
+                    <div class="settings-row-title">公开群组</div>
+                    <div class="settings-row-desc">允许任何人搜索并申请加入</div>
+                  </div>
+                  <el-switch v-model="groupSettings.isPublic" />
+                </div>
+
+                <div class="settings-actions">
+                  <el-button type="primary" class="save-btn" @click="saveSettings">
+                    保存修改
+                  </el-button>
+                </div>
+              </el-form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </el-dialog>
-
-  <!-- 发布公告弹窗 -->
-  <el-dialog
-    v-model="showAnnouncementDialog"
-    :title="editingAnnouncement ? '编辑公告' : '发布公告'"
-    width="480px"
-    class="announcement-dialog"
-    append-to-body
-  >
-    <el-form
-      :model="announcementForm"
-      label-position="top"
-    >
-      <el-form-item
-        label="标题"
-        required
-      >
-        <el-input
-          v-model="announcementForm.title"
-          placeholder="请输入公告标题"
-          maxlength="50"
-          show-word-limit
-        />
-      </el-form-item>
-      <el-form-item
-        label="内容"
-        required
-      >
-        <el-input
-          v-model="announcementForm.content"
-          type="textarea"
-          :rows="4"
-          placeholder="请输入公告内容"
-          maxlength="500"
-          show-word-limit
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-checkbox v-model="announcementForm.isPinned">
-          置顶公告
-        </el-checkbox>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="showAnnouncementDialog = false">
-        取消
-      </el-button>
-      <el-button
-        type="primary"
-        @click="handleSaveAnnouncement"
-      >
-        确定
-      </el-button>
-    </template>
-  </el-dialog>
-
-  <!-- 转让群主弹窗 -->
-  <el-dialog
-    v-model="showTransferDialog"
-    title="转让群主"
-    width="400px"
-    class="transfer-dialog"
-    append-to-body
-  >
-    <p class="transfer-hint">
-      请选择新的群主：
-    </p>
-    <div class="transfer-member-list">
-      <div
-        v-for="member in transferableMembers"
-        :key="member.id || member.userId"
-        class="transfer-member-item"
-        :class="{ selected: selectedNewOwner?.id === member.id }"
-        @click="selectedNewOwner = member"
-      >
-        <DingtalkAvatar
-          :src="member.avatar"
-          :name="member.nickname || member.username"
-          :size="40"
-          shape="circle"
-        />
-        <span class="member-name">{{ member.nickname || member.username }}</span>
-        <el-icon
-          v-if="selectedNewOwner?.id === member.id"
-          class="check-icon"
-        >
-          <Check />
-        </el-icon>
-      </div>
-    </div>
-    <template #footer>
-      <el-button @click="showTransferDialog = false">
-        取消
-      </el-button>
-      <el-button
-        type="primary"
-        :disabled="!selectedNewOwner"
-        @click="handleConfirmTransfer"
-      >
-        确定转让
-      </el-button>
-    </template>
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useStore } from 'vuex'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Grid, Folder } from '@element-plus/icons-vue'
-import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-// 子组件
-import GroupProfileHeader from './GroupProfile/GroupProfileHeader.vue'
-import GroupActions from './GroupProfile/GroupActions.vue'
-import GroupMemberList from './GroupProfile/GroupMemberList.vue'
-import GroupSettingsPanel from './GroupProfile/GroupSettingsPanel.vue'
-import AnnouncementList from './GroupProfile/AnnouncementList.vue'
-import GroupQRCode from './GroupProfile/GroupQRCode.vue'
-import GroupFiles from './GroupProfile/GroupFiles.vue'
-// API
-import {
-  getGroup, getGroupMembers, setGroupAdmin, transferGroupOwner, dismissGroup, leaveGroup,
-  getGroupAnnouncements, createGroupAnnouncement, updateGroupAnnouncement, deleteGroupAnnouncement, setAnnouncementPinned
-} from '@/api/im/group'
+import { ref, watch, computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
+import { getGroup, getGroupMembers, updateGroup } from '@/api/im/group'
 
 const props = defineProps({
-  modelValue: { type: Boolean, default: false },
-  groupId: { type: [String, Number], default: null }
+  visible: { type: Boolean, default: false },
+  groupId: { type: [Number, String], default: null }
 })
 
-const emit = defineEmits([
-  'update:modelValue', 'send-message', 'invite', 'manage',
-  'exit', 'dismiss', 'update-group', 'member-click'
-])
+const emit = defineEmits(['update:visible', 'refresh-group', 'view-member'])
 
-const store = useStore()
-const currentUser = computed(() => store.getters['user/currentUser'] || {})
-
-// 响应式数据
-const visible = ref(false)
-const groupInfo = ref(null)
+const dialogVisible = ref(props.visible)
 const loading = ref(false)
+const groupInfo = ref(null)
+const groupMembers = ref([])
 const activeTab = ref('members')
-const members = ref([])
-const isMuted = ref(false)
-const isTop = ref(false)
-const showAnnouncementDialog = ref(false)
-const showTransferDialog = ref(false)
-const editingAnnouncement = ref(null)
-const selectedNewOwner = ref(null)
-const announcementForm = ref({ title: '', content: '', isPinned: false })
-const groupSettings = ref({ needVerify: false, allowInvite: true, allMuted: false })
+const groupSettings = ref({ name: '', description: '', isPublic: false })
+const memberKeyword = ref('')
 
-// 模拟公告数据
-const announcements = ref([])
-
-// 计算属性
-const isOwner = computed(() => {
-  const myMember = members.value.find(m => (m.userId || m.id) == currentUser.value?.id)
-  return myMember?.role === 'OWNER'
+watch(() => props.visible, v => { dialogVisible.value = v })
+watch(dialogVisible, v => {
+  emit('update:visible', v)
+  if (v && props.groupId) {
+    activeTab.value = 'members'
+    memberKeyword.value = ''
+    loadGroupInfo()
+  }
+})
+watch(() => props.groupId, gid => {
+  if (gid && dialogVisible.value) {
+    loadGroupInfo()
+  }
 })
 
-const isAdmin = computed(() => {
-  const myMember = members.value.find(m => (m.userId || m.id) == currentUser.value?.id)
-  return myMember?.role === 'ADMIN'
+const filteredMembers = computed(() => {
+  const keyword = (memberKeyword.value || '').trim().toLowerCase()
+  if (!keyword) {
+    return groupMembers.value
+  }
+  return (groupMembers.value || []).filter(m => {
+    const name = (m?.userName || '').toString().toLowerCase()
+    return name.includes(keyword)
+  })
 })
 
-const isOwnerOrAdmin = computed(() => isOwner.value || isAdmin.value)
-
-const transferableMembers = computed(() => {
-  return members.value.filter(m => (m.userId || m.id) != currentUser.value?.id)
-})
-
-// 加载群组信息
 const loadGroupInfo = async () => {
-  if (!props.groupId) {return}
+  if (!props.groupId) {
+    return
+  }
   loading.value = true
   try {
-    const [groupRes, membersRes] = await Promise.all([
-      getGroup(props.groupId).catch(() => ({ code: 500, data: null })),
-      getGroupMembers(props.groupId).catch(() => ({ code: 500, data: [] }))
-    ])
-
-    if (groupRes.code === 200 && groupRes.data) {
-      groupInfo.value = groupRes.data
-      groupSettings.value = {
-        needVerify: groupRes.data.needVerify || false,
-        allowInvite: groupRes.data.allowInvite !== false,
-        allMuted: groupRes.data.allMuted || false
-      }
-    } else {
-      // 确保即使失败也有默认值
-      groupInfo.value = { name: '群聊' }
+    const [gRes, mRes] = await Promise.all([getGroup(props.groupId), getGroupMembers(props.groupId)])
+    if (gRes.code === 200) {
+      groupInfo.value = gRes.data
+      groupSettings.value = { name: gRes.data.name, description: gRes.data.description || '', isPublic: gRes.data.isPublic === 1 }
     }
-
-    // 确保 members 始终是数组
-    if (membersRes.code === 200 && Array.isArray(membersRes.data)) {
-      members.value = membersRes.data
-    } else {
-      members.value = []
+    if (mRes.code === 200) {
+      groupMembers.value = mRes.data
     }
-
-    loadAnnouncements()
-  } catch (error) {
-    console.error('加载群组信息失败', error)
-    // 确保错误情况下也有默认值
-    groupInfo.value = { name: '群聊' }
-    members.value = []
+  } catch (e) {
+    ElMessage.error('加载详情失败')
   } finally {
     loading.value = false
   }
 }
 
-const loadAnnouncements = async () => {
-  if (!props.groupId) {return}
+const copyGroupId = () => {
+  navigator.clipboard.writeText(groupInfo.value.id.toString())
+  ElMessage.success('ID 已复制')
+}
+
+const saveSettings = async () => {
   try {
-    const res = await getGroupAnnouncements(props.groupId)
+    const res = await updateGroup(props.groupId, { ...groupSettings.value, isPublic: groupSettings.value.isPublic ? 1 : 0 })
     if (res.code === 200) {
-      announcements.value = res.data || []
-    } else {
-      announcements.value = []
+      ElMessage.success('设置已更新')
+      loadGroupInfo()
+      emit('refresh-group')
     }
-  } catch (error) {
-    console.error('加载公告失败', error)
-    announcements.value = []
-  }
+  } catch (e) { ElMessage.error('更新失败') }
 }
 
-// 监听弹窗打开
-watch(() => props.modelValue, isOpen => {
-  visible.value = isOpen
-  if (isOpen) {
-    loadGroupInfo()
-    activeTab.value = 'members'
-  }
-})
-
-watch(visible, val => {
-  if (!val) {emit('update:modelValue', false)}
-})
-
-// 事件处理
-const handleClose = () => {
-  visible.value = false
-}
-
-const handleSendMessage = () => {
-  emit('send-message', groupInfo.value)
-  handleClose()
-}
-
-const handleInviteMember = () => {
-  emit('invite', groupInfo.value)
-}
-
-const handleManage = () => {
-  emit('manage', groupInfo.value)
-}
-
-const handleMemberClick = member => {
-  emit('member-click', member)
-}
-
-// 新的子组件事件处理方法
-const handleMuteAll = () => {
-  groupSettings.value.allMuted = !groupSettings.value.allMuted
-  handleSettingChange('allMuted', groupSettings.value.allMuted)
-}
-
-const handleSetAdmin = async ({ member, memberId }) => {
-  try {
-    await setGroupAdmin(props.groupId, memberId, true)
-    loadGroupInfo()
-  } catch (e) {
-    ElMessage.error('设置失败')
-  }
-}
-
-const handleCancelAdmin = async ({ member, memberId }) => {
-  try {
-    await setGroupAdmin(props.groupId, memberId, false)
-    loadGroupInfo()
-  } catch (e) {
-    ElMessage.error('取消失败')
-  }
-}
-
-const handleMuteMember = async member => {
-  try {
-    const duration = 60 // 默认禁言60分钟
-    const memberName = member.nickname || member.username
-    const action = member.isMuted ? '解除禁言' : '禁言'
-
-    await ElMessageBox.confirm(
-      `确定要${action}成员 ${memberName} 吗？${!member.isMuted ? `（禁言${duration}分钟）` : ''}`,
-      `${action}成员`,
-      { type: 'warning' }
-    )
-
-    if (member.isMuted) {
-      // 解除禁言 - duration传null表示取消禁言
-      await muteGroupMember(props.groupId, member.userId || member.id, null)
-      ElMessage.success('已解除禁言')
-    } else {
-      // 禁言成员 - duration以分钟为单位
-      await muteGroupMember(props.groupId, member.userId || member.id, duration)
-      ElMessage.success(`已禁言${duration}分钟`)
-    }
-
-    // 重新加载成员列表
-    await loadGroupInfo()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('禁言操作失败', error)
-      ElMessage.error('操作失败')
-    }
-  }
-}
-
-const handleRemoveMember = async ({ member, memberId }) => {
-  try {
-    const { removeGroupMember } = await import('@/api/im/group')
-    await removeGroupMember(props.groupId, [memberId])
-    ElMessage.success('已移出群聊')
-    loadGroupInfo()
-  } catch (e) {
-    ElMessage.error('操作失败')
-  }
-}
-
-const handleCreateAnnouncement = () => {
-  editingAnnouncement.value = null
-  announcementForm.value = { title: '', content: '', isPinned: false }
-  showAnnouncementDialog.value = true
-}
-
-const handleEditAnnouncement = announcement => {
-  editingAnnouncement.value = announcement
-  announcementForm.value = {
-    title: announcement.title,
-    content: announcement.content,
-    isPinned: announcement.isPinned
-  }
-  showAnnouncementDialog.value = true
-}
-
-const handleSaveAnnouncement = async () => {
-  if (!announcementForm.value.title.trim()) {
-    ElMessage.warning('请输入公告标题')
-    return
-  }
-  if (!announcementForm.value.content.trim()) {
-    ElMessage.warning('请输入公告内容')
-    return
-  }
-
-  try {
-    if (editingAnnouncement.value) {
-      // 更新公告
-      await updateGroupAnnouncement(
-        editingAnnouncement.value.id,
-        announcementForm.value.content
-      )
-      // 更新置顶状态
-      if (editingAnnouncement.value.isPinned !== announcementForm.value.isPinned) {
-        await setAnnouncementPinned(editingAnnouncement.value.id, announcementForm.value.isPinned)
-      }
-      ElMessage.success('公告已更新')
-    } else {
-      // 创建新公告
-      await createGroupAnnouncement({
-        groupId: props.groupId,
-        title: announcementForm.value.title,
-        content: announcementForm.value.content,
-        isPinned: announcementForm.value.isPinned
-      })
-      ElMessage.success('公告已发布')
-    }
-    // 重新加载公告列表
-    await loadAnnouncements()
-    showAnnouncementDialog.value = false
-  } catch (error) {
-    console.error('保存公告失败', error)
-    ElMessage.error('保存公告失败')
-  }
-}
-
-const handleDeleteAnnouncement = async announcement => {
-  try {
-    await ElMessageBox.confirm('确定要删除这条公告吗？', '删除公告', { type: 'warning' })
-    await deleteGroupAnnouncement(announcement.id)
-    ElMessage.success('公告已删除')
-    await loadAnnouncements()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('删除公告失败', error)
-      ElMessage.error('删除公告失败')
-    }
-  }
-}
-
-const handleEditGroupName = () => {
-  ElMessageBox.prompt('请输入新的群名称', '修改群名称', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputValue: groupInfo.value.name,
-    inputValidator: value => {
-      if (!value || value.trim() === '') {return '群名称不能为空'}
-      if (value.length > 50) {return '群名称不能超过50个字符'}
-      return true
-    }
-  }).then(async ({ value }) => {
-    try {
-      const { updateGroup } = await import('@/api/im/group')
-      await updateGroup(props.groupId, { name: value.trim() })
-      groupInfo.value.name = value.trim()
-      ElMessage.success('群名称已修改')
-      emit('update-group', groupInfo.value)
-    } catch (e) {
-      ElMessage.error('修改失败')
-    }
-  }).catch(() => {})
-}
-
-const handleEditGroupDesc = () => {
-  ElMessageBox.prompt('请输入新的群简介', '修改群简介', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputValue: groupInfo.value.description || '',
-    inputType: 'textarea',
-    inputValidator: value => {
-      if (value && value.length > 200) {return '群简介不能超过200个字符'}
-      return true
-    }
-  }).then(async ({ value }) => {
-    try {
-      const { updateGroup } = await import('@/api/im/group')
-      await updateGroup(props.groupId, { description: value.trim() })
-      groupInfo.value.description = value.trim()
-      ElMessage.success('群简介已修改')
-      emit('update-group', groupInfo.value)
-    } catch (e) {
-      ElMessage.error('修改失败')
-    }
-  }).catch(() => {})
-}
-
-const handleSettingChange = async (key, value) => {
-  try {
-    const { updateGroup } = await import('@/api/im/group')
-    const updateData = { [key]: value }
-    await updateGroup(props.groupId, updateData)
-    ElMessage.success('设置已保存')
-    emit('update-group', { ...groupInfo.value, ...updateData })
-  } catch (e) {
-    groupSettings.value[key] = !value
-    ElMessage.error('设置保存失败')
-  }
-}
-
-const handleMuteChange = val => {
-  ElMessage.success(val ? '已开启消息免打扰' : '已取消消息免打扰')
-}
-
-const handleTopChange = val => {
-  ElMessage.success(val ? '已置顶会话' : '已取消置顶')
-}
-
-const handleTransfer = () => {
-  selectedNewOwner.value = null
-  showTransferDialog.value = true
-}
-
-const handleConfirmTransfer = async () => {
-  if (!selectedNewOwner.value) {return}
-  const memberName = selectedNewOwner.value.nickname || selectedNewOwner.value.username
-
-  try {
-    await ElMessageBox.confirm(
-      `确定要将群主转让给 ${memberName} 吗？转让后您将变为普通成员。`,
-      '转让群主',
-      { type: 'warning' }
-    )
-    await transferGroupOwner(props.groupId, selectedNewOwner.value.userId || selectedNewOwner.value.id)
-    ElMessage.success('群主转让成功')
-    showTransferDialog.value = false
-    loadGroupInfo()
-  } catch (e) {
-    if (e !== 'cancel') {
-      ElMessage.error('转让失败')
-    }
-  }
-}
-
-const handleDismiss = async () => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要解散群聊 "${groupInfo.value.name}" 吗？此操作不可恢复！`,
-      '解散群聊',
-      { type: 'danger', confirmButtonText: '确定解散' }
-    )
-    await dismissGroup(props.groupId)
-    ElMessage.success('群聊已解散')
-    emit('dismiss', props.groupId)
-    handleClose()
-  } catch (e) {
-    if (e !== 'cancel') {
-      ElMessage.error('解散失败')
-    }
-  }
-}
-
-const handleExit = async () => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要退出群聊 "${groupInfo.value.name}" 吗？`,
-      '退出群聊',
-      { type: 'warning' }
-    )
-    await leaveGroup(props.groupId)
-    ElMessage.success('已退出群聊')
-    emit('exit', props.groupId)
-    handleClose()
-  } catch (e) {
-    if (e !== 'cancel') {
-      ElMessage.error('退出失败')
-    }
-  }
-}
-
-// 文件相关处理
-const handleOpenFileInChat = file => {
-  // 切换到对应会话并定位到消息
-  emit('send-message', groupInfo.value)
-  handleClose()
-  ElMessage.info('正在跳转到消息...')
-}
-
-const handlePreviewImage = file => {
-  // 预览图片
-  ElMessage.info('预览: ' + file.name)
-}</script>
+const viewMemberInfo = uid => { emit('view-member', uid) }
+const handleAddMember = () => { ElMessage.info('邀请功能开发中') }
+const shareGroup = () => { ElMessage.info('分享功能开发中') }
+</script>
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+
+:global(.group-profile-modal) {
+  background-color: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(2px);
+}
 
 .group-profile-dialog {
   :deep(.el-dialog) {
     border-radius: var(--dt-radius-xl);
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 0;
+    background: transparent;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
   }
 
   :deep(.el-dialog__header) {
@@ -699,184 +303,450 @@ const handlePreviewImage = file => {
   }
 }
 
-.loading-state {
-  padding: 60px 40px;
-}
-
-.profile-container {
+.gp {
+  height: 600px;
   display: flex;
-  min-height: 550px;
-  max-height: 750px;
+  background:
+    radial-gradient(1200px 600px at -10% -20%, rgba(71, 128, 255, 0.55), rgba(71, 128, 255, 0) 55%),
+    radial-gradient(900px 600px at 80% 0%, rgba(255, 120, 120, 0.22), rgba(255, 120, 120, 0) 55%),
+    radial-gradient(800px 520px at 55% 110%, rgba(120, 255, 214, 0.15), rgba(120, 255, 214, 0) 55%),
+    #0b1020;
+  border-radius: var(--dt-radius-xl);
+  overflow: hidden;
 }
 
-// 右侧主内容区
-.profile-main {
-  flex: 1;
-  background: var(--dt-bg-body);
+.gp-rail {
+  width: 300px;
+  padding: 20px 18px 18px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-
-  :deep(.profile-tabs) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-
-    .el-tabs__header {
-      margin: 0;
-      padding: 0 20px;
-      background: #fff;
-      border-bottom: 1px solid var(--dt-border-lighter);
-    }
-
-    .el-tabs__nav-wrap::after {
-      display: none;
-    }
-
-    .el-tabs__item {
-      height: 56px;
-      line-height: 56px;
-      font-size: 14px;
-      color: var(--dt-text-secondary);
-
-      &.is-active {
-        color: var(--dt-brand-color);
-        font-weight: 500;
-      }
-    }
-
-    .el-tabs__active-bar {
-      height: 3px;
-      border-radius: var(--dt-radius-sm);
-    }
-
-    .el-tabs__content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-    }
-  }
+  position: relative;
+  color: rgba(255, 255, 255, 0.92);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+    radial-gradient(700px 520px at 20% 20%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 60%);
 }
 
-.tab-content {
-  min-height: 100%;
-}
-
-// Tab 徽标
-.tab-badge {
-  :deep(.el-badge__content) {
-    margin-left: 6px;
-    margin-top: -2px;
-  }
-}
-
-// 公告区域
-.announcement-header {
+.gp-close {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.95);
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.30);
+    border-color: rgba(255, 255, 255, 0.26);
+    transform: translateY(-1px);
+  }
+}
+
+.gp-rail-top {
+  padding: 22px 6px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.gp-avatar-ring {
+  padding: 8px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.gp-avatar {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.40);
+}
+
+.gp-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gp-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.66);
+  text-align: center;
+}
+
+.gp-chips {
+  margin-top: 16px;
+  padding: 0 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.gp-chip {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+
+  &.is-strong {
+    border-color: rgba(120, 255, 214, 0.35);
+    background: rgba(120, 255, 214, 0.12);
+    color: rgba(235, 255, 250, 0.95);
+  }
+}
+
+.gp-actions {
+  margin-top: 18px;
+  padding: 0 6px;
+  display: grid;
+  gap: 10px;
+}
+
+.gp-btn {
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+
+  .material-icons-outlined {
+    font-size: 18px;
+    opacity: 0.95;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.26);
+  }
+
+  &.gp-btn--primary {
+    background: linear-gradient(135deg, rgba(71, 128, 255, 0.95), rgba(120, 255, 214, 0.55));
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(12, 18, 34, 0.95);
+
+    &:hover {
+      filter: saturate(1.08);
+    }
+  }
+}
+
+.gp-rail-foot {
+  margin-top: auto;
+  padding: 12px 6px 0;
+}
+
+.gp-foot-card {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.16);
+  padding: 12px 12px;
+}
+
+.gp-foot-title {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 4px;
+}
+
+.gp-foot-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.gp-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(1200px 700px at 70% 0%, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0) 52%),
+    rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+.gp-topbar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.gp-tabs {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.06);
+  padding: 6px;
+  border-radius: 16px;
+}
+
+.gp-tab {
+  height: 40px;
+  border-radius: 12px;
+  border: 0;
+  padding: 0 14px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(15, 23, 42, 0.70);
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &.active {
+    background: rgba(255, 255, 255, 0.95);
+    color: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+  }
+}
+
+.gp-count {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: rgba(15, 23, 42, 0.72);
+}
+
+.gp-top-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.gp-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+
+  .material-icons-outlined {
+    font-size: 18px;
+    color: rgba(15, 23, 42, 0.72);
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba(15, 23, 42, 0.18);
+    background: rgba(255, 255, 255, 0.95);
+  }
+}
+
+.gp-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+.gp-pane {
+  height: 100%;
+  padding: 18px 18px 18px;
+  overflow: auto;
+}
+
+.members-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
-// 设置区域
-.settings-section {
-  margin-bottom: 24px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-// 弹窗样式
-.announcement-dialog,
-.transfer-dialog {
-  :deep(.el-dialog__body) {
-    padding-top: 20px;
-  }
-}
-
-.transfer-hint {
-  margin: 0 0 16px;
-  color: var(--dt-text-secondary);
+.members-title {
   font-size: 14px;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.92);
 }
 
-.transfer-member-list {
-  max-height: 300px;
-  overflow-y: auto;
+.members-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  .transfer-member-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: var(--dt-radius-md);
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 4px;
+.member-search {
+  width: 260px;
 
-    &:hover,
-    &.selected {
-      background: var(--dt-bg-session-hover);
-    }
-
-    .member-name {
-      flex: 1;
-      font-size: 14px;
-      color: var(--dt-text-primary);
-    }
-
-    .check-icon {
-      color: var(--dt-brand-color);
-    }
+  :deep(.el-input__wrapper) {
+    border-radius: 12px;
+    box-shadow: none;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255, 255, 255, 0.85);
   }
 }
 
-// 响应式适配
-@media (max-width: 768px) {
-  .group-profile-dialog {
-    :deep(.el-dialog) {
-      width: 95% !important;
-      margin: 20px auto;
-    }
+.invite-btn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(15, 23, 42, 0.04);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: rgba(15, 23, 42, 0.78);
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+
+  .material-icons-outlined {
+    font-size: 18px;
   }
 
-  .profile-container {
-    flex-direction: column;
-    min-height: auto;
-    max-height: 85vh;
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(71, 128, 255, 0.10);
+    border-color: rgba(71, 128, 255, 0.20);
+    color: rgba(15, 23, 42, 0.92);
+  }
+}
+
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 12px;
+}
+
+.member-card {
+  height: 96px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba(71, 128, 255, 0.22);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
   }
 
-  .profile-sidebar {
-    width: 100%;
-    padding: 24px;
+  &.member-card--add {
+    background: rgba(71, 128, 255, 0.06);
+    border-style: dashed;
+    color: rgba(71, 128, 255, 0.92);
 
-    .sidebar-content {
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 20px;
-    }
-
-    .avatar-wrapper {
-      margin-bottom: 0;
-    }
-
-    .group-info {
-      flex: 1;
-      text-align: left;
-    }
-
-    .group-tags {
-      justify-content: flex-start;
-    }
-
-    .quick-actions {
-      width: auto;
-      margin-left: auto;
+    .material-icons-outlined {
+      font-size: 20px;
     }
   }
+}
 
-  .members-list {
-    grid-template-columns: 1fr;
+.member-avatar {
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+}
+
+.member-name {
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.84);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-card {
+  max-width: 520px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 16px 16px;
+  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.08);
+}
+
+.settings-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(15, 23, 42, 0.92);
+  margin-bottom: 10px;
+}
+
+.settings-form {
+  :deep(.el-form-item__label) {
+    color: rgba(15, 23, 42, 0.62);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
   }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-textarea__inner) {
+    border-radius: 12px;
+    box-shadow: none;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+  }
+}
+
+.settings-row {
+  margin-top: 8px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-row-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(15, 23, 42, 0.90);
+}
+
+.settings-row-desc {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.62);
+}
+
+.settings-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-btn {
+  border-radius: 12px;
 }
 </style>

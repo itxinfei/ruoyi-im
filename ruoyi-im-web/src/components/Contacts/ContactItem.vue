@@ -1,19 +1,37 @@
 <template>
-  <div class="contact-item" :class="{
-    active: isActive,
-    'swiped-left': isSwipedLeft,
-    [size]: true
-  }" @click="$emit('click', item)" @contextmenu.prevent="$emit('contextmenu', $event, item)">
+  <div
+    class="contact-item"
+    :class="{
+      active: isActive,
+      'swiped-left': isSwipedLeft,
+      [size]: true
+    }"
+    @click="$emit('click', item)"
+    @contextmenu.prevent="$emit('contextmenu', $event, item)"
+  >
     <!-- 主要内容 -->
     <div class="contact-content">
-      <DingtalkAvatar :name="item.name || item.displayName" :size="36" :src="item.avatar"
-        :shape="item.type === 'group' ? 'square' : 'circle'" />
+      <DingtalkAvatar
+        :name="item.name || item.displayName"
+        :size="36"
+        :src="item.avatar"
+        :shape="item.type === 'group' ? 'square' : 'circle'"
+      />
       <div class="item-info">
         <div class="item-header">
-          <span class="item-name" v-html="highlightName" />
-          <span v-if="item.tag" class="item-tag">{{ item.tag }}</span>
+          <span
+            class="item-name"
+            v-html="highlightName"
+          />
+          <span
+            v-if="item.tag"
+            class="item-tag"
+          >{{ item.tag }}</span>
         </div>
-        <div v-if="item.description || item.dept || item.position" class="item-desc">
+        <div
+          v-if="item.description || item.dept || item.position"
+          class="item-desc"
+        >
           {{ item.description || item.position || item.dept }}
         </div>
       </div>
@@ -198,21 +216,6 @@ const escapeHtml = str => {
 
   .dark & {
     color: var(--dt-text-secondary-dark);
-  }
-}
-
-// ============================================================================
-// 响应式适配
-// ============================================================================
-
-@media (max-width: 768px) {
-  .contact-item {
-    height: 56px;
-    /* 移动端适配 */
-  }
-
-  .contact-content {
-    padding: 0 12px;
   }
 }
 </style>

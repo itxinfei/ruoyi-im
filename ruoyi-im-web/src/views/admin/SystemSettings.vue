@@ -580,7 +580,9 @@
                   class="stat-icon"
                   style="background: linear-gradient(135deg, #0089FF 0%, #0066CC 100%)"
                 >
-                  <el-icon><Document /></el-icon>
+                  <el-icon>
+                    <Document />
+                  </el-icon>
                 </div>
                 <div class="stat-info">
                   <div class="stat-value">
@@ -596,7 +598,9 @@
                   class="stat-icon"
                   style="background: linear-gradient(135deg, #00C853 0%, #009624 100%)"
                 >
-                  <el-icon><Files /></el-icon>
+                  <el-icon>
+                    <Files />
+                  </el-icon>
                 </div>
                 <div class="stat-info">
                   <div class="stat-value">
@@ -612,7 +616,9 @@
                   class="stat-icon"
                   style="background: linear-gradient(135deg, #FFAB00 0%, #FF8F00 100%)"
                 >
-                  <el-icon><Folder /></el-icon>
+                  <el-icon>
+                    <Folder />
+                  </el-icon>
                 </div>
                 <div class="stat-info">
                   <div class="stat-value">
@@ -893,7 +899,7 @@ const advancedConfig = ref({
 
 // 敏感词数量
 const sensitiveWordCount = computed(() => {
-  if (!sensitiveWords.value) {return 0}
+  if (!sensitiveWords.value) { return 0 }
   return sensitiveWords.value.split('\n').filter(w => w.trim()).length
 })
 
@@ -902,11 +908,11 @@ const loadSystemConfig = async () => {
   const res = await getSystemConfig()
   if (res.code === 200) {
     const config = res.data
-    if (config.basic) {basicConfig.value = { ...basicConfig.value, ...config.basic }}
-    if (config.message) {messageConfig.value = { ...messageConfig.value, ...config.message }}
-    if (config.security) {securityConfig.value = { ...securityConfig.value, ...config.security }}
-    if (config.storage) {storageConfig.value = { ...storageConfig.value, ...config.storage }}
-    if (config.advanced) {advancedConfig.value = { ...advancedConfig.value, ...config.advanced }}
+    if (config.basic) { basicConfig.value = { ...basicConfig.value, ...config.basic } }
+    if (config.message) { messageConfig.value = { ...messageConfig.value, ...config.message } }
+    if (config.security) { securityConfig.value = { ...securityConfig.value, ...config.security } }
+    if (config.storage) { storageConfig.value = { ...storageConfig.value, ...config.storage } }
+    if (config.advanced) { advancedConfig.value = { ...advancedConfig.value, ...config.advanced } }
   }
 }
 
@@ -1028,8 +1034,6 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-
-
 /* ================================
    页面容器
    ================================ */
@@ -1233,18 +1237,4 @@ onMounted(() => {
 /* ================================
    响应式
    ================================ */
-@media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    gap: var(--dt-space-sm);
-  }
-
-  .storage-stats {
-    flex-direction: column;
-  }
-
-  .danger-actions {
-    flex-direction: column;
-  }
-}
 </style>

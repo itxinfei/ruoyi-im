@@ -49,7 +49,7 @@ export function useMessageScroll (listRef, emit, isUnmounted) {
    * 滚动到指定消息
    * @param {String|Number} messageId - 消息 ID
    */
-  const scrollToMsg = (messageId) => {
+  const scrollToMsg = messageId => {
     if (!messageId) { return }
 
     nextTick(() => {
@@ -114,7 +114,7 @@ export function useMessageScroll (listRef, emit, isUnmounted) {
    * 处理滚动事件
    * @param {Event} event - 滚动事件
    */
-  const handleScroll = (event) => {
+  const handleScroll = event => {
     const target = event.target
     const currentScrollTop = target.scrollTop
 

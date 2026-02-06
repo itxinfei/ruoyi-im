@@ -4,9 +4,7 @@
     class="voice-recorder-wrapper"
     :class="{ 'is-recording': isRecording }"
     @mousedown="handleStartRecord"
-    @touchstart.prevent="handleTouchStart"
     @mouseup="handleEndRecord"
-    @touchend.prevent="handleTouchEnd"
     @mouseleave="handleCancel"
   >
     <!-- 录音引导 -->
@@ -15,7 +13,7 @@
       class="voice-guide"
     >
       <span class="material-icons-outlined mic-icon">mic</span>
-      <span class="guide-text">{{ touchStarted ? '松开 发送' : '按住 说话' }}</span>
+      <span class="guide-text">按住 说话</span>
     </div>
 
     <!-- 录音中状态 -->
@@ -62,7 +60,6 @@ const emit = defineEmits(['record-complete', 'cancel'])
 
 const isRecording = ref(false)
 const recordingTime = ref(0)
-const touchStarted = ref(false)
 const mediaRecorder = ref(null)
 const audioChunks = ref([])
 const startTime = ref(0)
@@ -135,22 +132,10 @@ const stopRecording = () => {
 }
 
 const handleStartRecord = () => {
-  touchStarted.value = false
-  startRecording()
-}
-
-const handleTouchStart = () => {
-  touchStarted.value = true
   startRecording()
 }
 
 const handleEndRecord = () => {
-  if (!touchStarted.value) {
-    stopRecording()
-  }
-}
-
-const handleTouchEnd = () => {
   stopRecording()
 }
 
@@ -176,7 +161,6 @@ onUnmounted(() => {
   background: #fff;
   border-radius: var(--dt-radius-md);
   user-select: none;
-  touch-action: none;
   cursor: pointer;
   transition: all 0.15s ease;
   border: 1px solid #e8e8e8;
@@ -195,7 +179,10 @@ onUnmounted(() => {
     background: #2a2a2a;
     border-color: rgba(255, 255, 255, 0.1);
 
-    &:hover { background: #333; }
+    &:hover {
+      background: #333;
+    }
+
     &.is-recording {
       background: rgba(255, 77, 79, 0.1);
       border-color: rgba(255, 77, 79, 0.3);
@@ -243,9 +230,12 @@ onUnmounted(() => {
     height: 8px;
 
     @keyframes recordingWave {
-      0%, 100% {
+
+      0%,
+      100% {
         height: 8px;
       }
+
       50% {
         height: 24px;
       }
@@ -287,7 +277,9 @@ onUnmounted(() => {
   .dark & {
     background: rgba(255, 255, 255, 0.08);
 
-    &:hover { background: rgba(255, 77, 79, 0.2); }
+    &:hover {
+      background: rgba(255, 77, 79, 0.2);
+    }
   }
 }
 </style>

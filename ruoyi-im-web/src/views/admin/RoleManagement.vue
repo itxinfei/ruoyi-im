@@ -51,7 +51,9 @@
               class="role-icon"
               :style="{ background: role.color || getRoleColor(role.roleCode) }"
             >
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
             </div>
             <div class="role-info">
               <div class="role-name">
@@ -399,7 +401,9 @@
               class="role-icon-small"
               :style="{ background: currentRole.color || getRoleColor(currentRole.roleCode) }"
             >
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
             </div>
             <div>
               <h4>{{ currentRole.roleName }}</h4>
@@ -556,7 +560,7 @@ const currentRole = ref(null)
 const activeTab = ref('permissions')
 
 const filteredRoles = computed(() => {
-  if (!roleSearch.value) {return roles.value}
+  if (!roleSearch.value) { return roles.value }
   return roles.value.filter(r =>
     r.roleName?.toLowerCase().includes(roleSearch.value.toLowerCase()) ||
     r.roleCode?.toLowerCase().includes(roleSearch.value.toLowerCase())
@@ -647,7 +651,7 @@ const handleAdd = () => {
   roleForm.value = {
     roleName: '',
     roleCode: '',
-    color: '#' + Math.floor(Math.random()*16777215).toString(16),
+    color: '#' + Math.floor(Math.random() * 16777215).toString(16),
     sortOrder: 0,
     dataScope: 1,
     description: ''
@@ -723,7 +727,7 @@ const handleSavePermissions = async () => {
 
 // 加载角色成员
 const loadRoleMembers = async () => {
-  if (!currentRole.value) {return}
+  if (!currentRole.value) { return }
   membersLoading.value = true
   try {
     const res = await getRoleMembers(currentRole.value.id)
@@ -747,7 +751,7 @@ const loadRoleMembers = async () => {
 
 // 搜索用户
 const searchUsers = async query => {
-  if (!query) {return}
+  if (!query) { return }
   searchUsersLoading.value = true
   try {
     const res = await searchUsersApi(query)
@@ -815,8 +819,6 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-
-
 /* ================================
    页面容器
    ================================ */
@@ -1178,15 +1180,4 @@ onMounted(() => {
 /* ================================
    响应式
    ================================ */
-@media (max-width: 768px) {
-  .role-content {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .role-list-card {
-    width: 100%;
-    max-height: 300px;
-  }
-}
 </style>

@@ -222,7 +222,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ElLoading } from 'element-plus'
+import { ElLoading, ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { confirmDelete, messageSuccess } from '@/utils/ui'
 import { saveFileToCloud } from '@/api/im/cloud'
@@ -304,11 +304,11 @@ watch(fileList, files => {
       tab.count = files.length
     } else {
       tab.count = files.filter(f => {
-        if (tab.key === 'image') {return f.type === 'image'}
-        if (tab.key === 'document') {return ['document', 'text', 'pdf'].includes(f.type)}
-        if (tab.key === 'video') {return f.type === 'video'}
-        if (tab.key === 'audio') {return f.type === 'audio'}
-        if (tab.key === 'archive') {return f.type === 'archive'}
+        if (tab.key === 'image') { return f.type === 'image' }
+        if (tab.key === 'document') { return ['document', 'text', 'pdf'].includes(f.type) }
+        if (tab.key === 'video') { return f.type === 'video' }
+        if (tab.key === 'audio') { return f.type === 'audio' }
+        if (tab.key === 'archive') { return f.type === 'archive' }
         return false
       }).length
     }
@@ -369,11 +369,11 @@ const getFileType = fileName => {
   const audioExts = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a']
   const archiveExts = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2']
 
-  if (imageExts.includes(ext)) {return 'image'}
-  if (documentExts.includes(ext)) {return ext === 'pdf' ? 'pdf' : 'document'}
-  if (videoExts.includes(ext)) {return 'video'}
-  if (audioExts.includes(ext)) {return 'audio'}
-  if (archiveExts.includes(ext)) {return 'archive'}
+  if (imageExts.includes(ext)) { return 'image' }
+  if (documentExts.includes(ext)) { return ext === 'pdf' ? 'pdf' : 'document' }
+  if (videoExts.includes(ext)) { return 'video' }
+  if (audioExts.includes(ext)) { return 'audio' }
+  if (archiveExts.includes(ext)) { return 'archive' }
 
   return 'file'
 }
@@ -884,14 +884,4 @@ watch(() => props.visible, val => {
   }
 }
 
-// 响应式
-@media (max-width: 768px) {
-  .chat-files-panel {
-    width: 100%;
-  }
-
-  .file-type-tabs {
-    justify-content: flex-start;
-  }
-}
-</style>
+// 响应式</style>

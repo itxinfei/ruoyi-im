@@ -603,12 +603,12 @@ const onlineUsersCount = computed(() => {
 // 问候语
 const greetingText = computed(() => {
   const hour = new Date().getHours()
-  if (hour < 6) {return '凌晨好'}
-  if (hour < 9) {return '早上好'}
-  if (hour < 12) {return '上午好'}
-  if (hour < 14) {return '中午好'}
-  if (hour < 18) {return '下午好'}
-  if (hour < 22) {return '晚上好'}
+  if (hour < 6) { return '凌晨好' }
+  if (hour < 9) { return '早上好' }
+  if (hour < 12) { return '上午好' }
+  if (hour < 14) { return '中午好' }
+  if (hour < 18) { return '下午好' }
+  if (hour < 22) { return '晚上好' }
   return '夜深了'
 })
 
@@ -677,7 +677,7 @@ const loadTodoData = async () => {
           isCompleted: item.isCompleted !== false
         }))
         .sort((a, b) => {
-          if (a.isCompleted !== b.isCompleted) {return a.isCompleted ? 1 : -1}
+          if (a.isCompleted !== b.isCompleted) { return a.isCompleted ? 1 : -1 }
           return (b.priority || 2) - (a.priority || 2)
         })
     }
@@ -787,12 +787,12 @@ const refreshAllData = async () => {
 // ============================================================================
 
 const formatTime = time => {
-  if (!time) {return ''}
+  if (!time) { return '' }
   return dayjs(time).fromNow()
 }
 
 const formatDate = time => {
-  if (!time) {return ''}
+  if (!time) { return '' }
   const date = dayjs(time)
   const now = dayjs()
   const diffDays = date.diff(now, 'day')
@@ -811,44 +811,44 @@ const formatDate = time => {
 }
 
 const formatDeadline = time => {
-  if (!time) {return ''}
+  if (!time) { return '' }
   const date = dayjs(time)
   const now = dayjs()
   const diffDays = date.diff(now, 'day')
 
-  if (diffDays < 0) {return '已逾期'}
-  if (diffDays === 0) {return '今天'}
-  if (diffDays === 1) {return '明天'}
-  if (diffDays < 7) {return `${diffDays}天后`}
+  if (diffDays < 0) { return '已逾期' }
+  if (diffDays === 0) { return '今天' }
+  if (diffDays === 1) { return '明天' }
+  if (diffDays < 7) { return `${diffDays}天后` }
   return date.format('MM-DD')
 }
 
 const getPriorityClass = priority => {
   const p = parseInt(priority) || 2
-  if (p >= 3) {return 'high'}
-  if (p <= 1) {return 'low'}
+  if (p >= 3) { return 'high' }
+  if (p <= 1) { return 'low' }
   return 'medium'
 }
 
 const getPriorityLabel = priority => {
   const p = parseInt(priority) || 2
-  if (p >= 3) {return '高'}
-  if (p <= 1) {return '低'}
+  if (p >= 3) { return '高' }
+  if (p <= 1) { return '低' }
   return '中'
 }
 
 const getTypeClass = type => {
   const t = (type || '').toUpperCase()
-  if (t.includes('重要') || t === 'HIGH' || t === 'URGENT') {return 'important'}
-  if (t.includes('通知') || t === 'NOTICE') {return 'notice'}
+  if (t.includes('重要') || t === 'HIGH' || t === 'URGENT') { return 'important' }
+  if (t.includes('通知') || t === 'NOTICE') { return 'notice' }
   return 'normal'
 }
 
 const getTypeLabel = type => {
   const t = (type || '').toUpperCase()
-  if (t.includes('重要') || t === 'HIGH' || t === 'URGENT') {return '重要'}
-  if (t.includes('系统') || t === 'SYSTEM') {return '系统'}
-  if (t.includes('活动') || t === 'ACTIVITY') {return '活动'}
+  if (t.includes('重要') || t === 'HIGH' || t === 'URGENT') { return '重要' }
+  if (t.includes('系统') || t === 'SYSTEM') { return '系统' }
+  if (t.includes('活动') || t === 'ACTIVITY') { return '活动' }
   return '通知'
 }
 
@@ -1716,32 +1716,6 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 768px) {
-  .workbench-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px 20px;
-  }
-
-  .workbench-content {
-    padding: 16px;
-  }
-
-  .stats-overview-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .main-content-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .left-column,
-  .center-column,
-  .right-column {
-    gap: 16px;
-  }
-}
 
 // ============================================================================
 // 暗色模式

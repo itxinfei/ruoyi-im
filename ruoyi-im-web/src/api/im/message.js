@@ -489,3 +489,51 @@ export function getGroupSharedFiles(groupId, params = {}) {
     params
   })
 }
+
+// ==================== 消息同步 ====================
+
+/**
+ * 同步消息
+ * 用于断线重连后获取遗漏的消息
+ * @param {Object} params - 同步参数
+ * @param {number} params.lastSyncTime - 上次同步时间戳（毫秒），可选
+ * @param {string} params.deviceId - 设备ID（如：web_abc123）
+ * @param {number} params.limit - 单次同步最大条数，默认100，最大500
+ * @returns {Promise} 同步响应
+ * @returns {Array} messages - 消息列表
+ * @returns {boolean} hasMore - 是否还有更多消息
+ * @returns {number} newSyncTime - 新的同步时间戳
+ * @returns {number} lastMessageId - 最后一条消息ID
+ * @returns {number} totalCount - 本次同步的消息数量
+ */
+export function syncMessages(params) {
+  return request({
+    url: '/api/im/message/sync',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取用户的所有设备同步点
+ * @returns {Promise} 同步点列表
+ */
+export function getSyncPoints() {
+  return request({
+    url: '/api/im/message/sync/points',
+    method: 'get'
+  })
+}
+
+/**
+ * 重置设备的同步点
+ * 删除后下次同步将从头开始
+ * @param {string} deviceId - 设备ID
+ * @returns {Promise}
+ */
+export function resetSyncPoint(deviceId) {
+  return request({
+    url: `/api/im/message/sync/point/${deviceId}`,
+    method: 'delete'
+  })
+}

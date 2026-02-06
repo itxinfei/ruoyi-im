@@ -29,14 +29,14 @@ export function useMessageBubble(props, emit) {
 
   // 是否可以撤回
   const canRecall = computed(() => {
-    if (!props.message?.timestamp) {return false}
+    if (!props.message?.timestamp) { return false }
 
     // 检查时间限制
     const recallTimeLimit = store.state.im.settings.chat?.recallTimeLimit || 2
     const messageTime = new Date(props.message.timestamp).getTime()
     const elapsed = Date.now() - messageTime
     const timeLimit = recallTimeLimit * 60 * 1000
-    if (elapsed >= timeLimit) {return false}
+    if (elapsed >= timeLimit) { return false }
 
     // 单聊：只能撤回自己的消息
     if (props.sessionType === 'PRIVATE') {
@@ -49,7 +49,7 @@ export function useMessageBubble(props, emit) {
       const memberRole = props.message?.memberRole // 'OWNER', 'ADMIN', 'MEMBER'
 
       // 如果是自己的消息，可以撤回
-      if (props.message.isOwn) {return true}
+      if (props.message.isOwn) { return true }
 
       // 如果是群主或管理员，可以撤回任何人的消息
       if (memberRole === 'OWNER' || memberRole === 'ADMIN') {
@@ -87,7 +87,7 @@ export function useMessageBubble(props, emit) {
   // 范围选择
   const rangeSelection = () => {
     const currentSession = store.state.im.session?.currentSession
-    if (!currentSession) {return}
+    if (!currentSession) { return }
 
     const sessionId = currentSession.id
     const lastClickedId = store.state.im.message?.lastClickedMessageId
@@ -104,7 +104,7 @@ export function useMessageBubble(props, emit) {
     }
 
     const messages = store.state.im.message?.messages?.[sessionId] || []
-    if (messages.length === 0) {return}
+    if (messages.length === 0) { return }
 
     store.commit('im/message/SELECT_MESSAGE_RANGE', {
       sessionId,
@@ -117,7 +117,7 @@ export function useMessageBubble(props, emit) {
 
   // 处理右键菜单命令
   const handleCommand = cmd => {
-    if (!cmd) {return}
+    if (!cmd) { return }
     if (cmd === 'at') {
       emit('at', props.message)
     } else {
@@ -136,26 +136,8 @@ export function useMessageBubble(props, emit) {
   let longPressTimer = null
   const isLongPressing = ref(false)
 
-  const handleTouchStart = e => {
-    longPressTimer = setTimeout(() => {
-      isLongPressing.value = true
-      emit('long-press', { event: e, message: props.message })
-      if (navigator.vibrate) {
-        navigator.vibrate(50)
-      }
-    }, LONG_PRESS_DURATION)
-  }
-
-  const handleTouchEnd = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer)
-      longPressTimer = null
-    }
-    isLongPressing.value = false
-  }
-
   const handleMouseHold = e => {
-    if (e.button !== 0) {return}
+    if (e.button !== 0) { return }
     longPressTimer = setTimeout(() => {
       isLongPressing.value = true
       emit('long-press', { event: e, message: props.message })
@@ -195,8 +177,6 @@ export function useMessageBubble(props, emit) {
     rangeSelection,
     handleCommand,
     handleRetry,
-    handleTouchStart,
-    handleTouchEnd,
     handleMouseHold,
     handleMouseRelease
   }

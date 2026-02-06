@@ -5,12 +5,14 @@ import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.constant.UserRole;
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.domain.ImChatBackground;
 import com.ruoyi.im.dto.BasePageRequest;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.mapper.ImChatBackgroundMapper;
 import com.ruoyi.im.service.ImUserService;
 
 import com.ruoyi.im.util.FileUtils;
@@ -25,16 +27,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.annotation.Resource;
-import java.io.File;
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.time.LocalDate;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -52,6 +61,7 @@ public class ImUserServiceImpl implements ImUserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final ImRedisUtil imRedisUtil;
+    private final ImChatBackgroundMapper imChatBackgroundMapper;
 
     @Resource
     private FileUploadConfig fileUploadConfig;
@@ -59,19 +69,22 @@ public class ImUserServiceImpl implements ImUserService {
     /**
      * 构造器注入依赖
      *
-     * @param imUserMapper 用户Mapper
-     * @param passwordEncoder 密码加密器
-     * @param jwtUtils JWT工具类
-     * @param imRedisUtil Redis工具类
+     * @param imUserMapper           用户Mapper
+     * @param passwordEncoder        密码加密器
+     * @param jwtUtils               JWT工具类
+     * @param imRedisUtil            Redis工具类
+     * @param imChatBackgroundMapper 聊天背景Mapper
      */
     public ImUserServiceImpl(ImUserMapper imUserMapper,
-                              PasswordEncoder passwordEncoder,
-                              JwtUtils jwtUtils,
-                              ImRedisUtil imRedisUtil) {
+            PasswordEncoder passwordEncoder,
+            JwtUtils jwtUtils,
+            ImRedisUtil imRedisUtil,
+            ImChatBackgroundMapper imChatBackgroundMapper) {
         this.imUserMapper = imUserMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.imRedisUtil = imRedisUtil;
+        this.imChatBackgroundMapper = imChatBackgroundMapper;
     }
 
     @Override
@@ -100,7 +113,7 @@ public class ImUserServiceImpl implements ImUserService {
         logger.info("密码验证成功 - 用户名: {}, 用户ID: {}", request.getUsername(), user.getId());
 
         String token = jwtUtils.generateToken(user.getUsername(), user.getId(),
-            user.getRole() != null ? user.getRole() : "USER");
+                user.getRole() != null ? user.getRole() : "USER");
 
         user.setLastOnlineTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
@@ -149,7 +162,7 @@ public class ImUserServiceImpl implements ImUserService {
     public ImUserVO getUserById(Long userId) {
         // 尝试从缓存获取用户信息
         Object cachedObj = imRedisUtil.getUserInfo(userId);
-        
+
         if (cachedObj != null && cachedObj instanceof ImUserVO) {
             ImUserVO cachedVo = (ImUserVO) cachedObj;
             // 缓存命中，更新实时在线状态
@@ -164,10 +177,10 @@ public class ImUserServiceImpl implements ImUserService {
 
         ImUserVO vo = new ImUserVO();
         BeanUtils.copyProperties(user, vo);
-        
+
         // 缓存用户信息（不包含实时在线状态）
         imRedisUtil.cacheUserInfo(userId, vo);
-        
+
         // 设置实时在线状态
         vo.setOnline(imRedisUtil.isOnlineUser(userId));
         return vo;
@@ -184,7 +197,7 @@ public class ImUserServiceImpl implements ImUserService {
         BeanUtils.copyProperties(request, user);
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
-        
+
         // 清除缓存
         imRedisUtil.evictUserInfo(userId);
     }
@@ -200,7 +213,7 @@ public class ImUserServiceImpl implements ImUserService {
         user.setStatus(status);
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
-        
+
         // 清除缓存
         imRedisUtil.evictUserInfo(userId);
     }
@@ -220,7 +233,7 @@ public class ImUserServiceImpl implements ImUserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdateTime(LocalDateTime.now());
         int result = imUserMapper.updateImUser(user);
-        
+
         // 清除缓存
         imRedisUtil.evictUserInfo(userId);
         return result > 0;
@@ -313,17 +326,21 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void resetPassword(Long userId) {
+    public void resetPassword(Long userId, String newPassword) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
             throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
-        // 重置为默认密码
-        user.setPassword(passwordEncoder.encode(SystemConstants.DEFAULT_PASSWORD));
+        // 如果未提供新密码，使用系统默认密码
+        String password = (newPassword == null || newPassword.trim().isEmpty())
+                ? SystemConstants.DEFAULT_PASSWORD
+                : newPassword;
+
+        user.setPassword(passwordEncoder.encode(password));
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
-        
+
         // 清除缓存
         imRedisUtil.evictUserInfo(userId);
     }
@@ -466,15 +483,12 @@ public class ImUserServiceImpl implements ImUserService {
     @Override
     public List<ImUserVO> getUserListWithPagination(String keyword, String role, int offset, int limit) {
         ImUser query = new ImUser();
-        // 简单处理：将关键词作为昵称查询（实际可能需要Mapper支持专门的keyword字段）
-        if (keyword != null && !keyword.isEmpty()) {
-            query.setNickname(keyword);
-        }
+        // 传递关键词给 Mapper，由 Mapper 负责多字段匹配逻辑
         if (role != null && !role.isEmpty()) {
             query.setRole(role);
         }
-        
-        List<ImUser> users = imUserMapper.selectImUserListWithPagination(query, offset, limit);
+
+        List<ImUser> users = imUserMapper.selectImUserListWithPagination(query, offset, limit, keyword);
         List<ImUserVO> voList = new ArrayList<>();
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
@@ -488,13 +502,10 @@ public class ImUserServiceImpl implements ImUserService {
     @Override
     public int countUsers(String keyword, String role) {
         ImUser query = new ImUser();
-        if (keyword != null && !keyword.isEmpty()) {
-            query.setNickname(keyword);
-        }
         if (role != null && !role.isEmpty()) {
             query.setRole(role);
         }
-        return imUserMapper.selectImUserCount(query);
+        return imUserMapper.selectImUserCount(query, keyword);
     }
 
     @Override
@@ -624,5 +635,264 @@ public class ImUserServiceImpl implements ImUserService {
             options.add(option);
         }
         return options;
+    }
+
+    @Override
+    public java.util.Map<String, Object> getChatBackground(Long userId, Long conversationId) {
+        // 查询用户的聊天背景设置
+        ImChatBackground background = imChatBackgroundMapper.selectByUserIdAndConversationId(userId, conversationId);
+
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        if (background != null) {
+            result.put("type", background.getBackgroundType());
+            result.put("value", background.getBackgroundValue());
+            result.put("conversationId", background.getConversationId());
+        } else {
+            // 返回默认背景
+            result.put("type", "default");
+            result.put("value", null);
+            result.put("conversationId", conversationId);
+        }
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public java.util.Map<String, Object> importUsers(MultipartFile file) {
+        try {
+            ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
+            // 设置表头映射
+            reader.addHeaderAlias("用户名", "username");
+            reader.addHeaderAlias("昵称", "nickname");
+            reader.addHeaderAlias("邮箱", "email");
+            reader.addHeaderAlias("手机号", "mobile");
+            reader.addHeaderAlias("角色", "role");
+
+            List<ImUser> users = reader.readAll(ImUser.class);
+            java.util.Map<String, Object> result = new java.util.HashMap<>();
+            if (users == null || users.isEmpty()) {
+                result.put("successCount", 0);
+                result.put("failCount", 0);
+                result.put("message", "未找到合适的导入数据");
+                return result;
+            }
+
+            int successCount = 0;
+            int failureCount = 0;
+            List<String> errors = new java.util.ArrayList<>();
+
+            for (ImUser user : users) {
+                try {
+                    // 补全默认信息
+                    if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                        user.setPassword(passwordEncoder.encode(SystemConstants.DEFAULT_PASSWORD));
+                    } else {
+                        user.setPassword(passwordEncoder.encode(user.getPassword()));
+                    }
+
+                    if (user.getNickname() == null || user.getNickname().isEmpty()) {
+                        user.setNickname(user.getUsername());
+                    }
+
+                    user.setStatus(1);
+                    user.setCreateTime(LocalDateTime.now());
+                    user.setUpdateTime(LocalDateTime.now());
+
+                    if (imUserMapper.selectImUserByUsername(user.getUsername()) != null) {
+                        failureCount++;
+                        errors.add("用户 " + user.getUsername() + " 已存在");
+                        continue;
+                    }
+
+                    imUserMapper.insertImUser(user);
+                    successCount++;
+                } catch (Exception e) {
+                    failureCount++;
+                    errors.add("用户 " + user.getUsername() + " 导入失败: " + e.getMessage());
+                }
+            }
+
+            result.put("successCount", successCount);
+            result.put("failCount", failureCount);
+            result.put("errors", errors);
+            return result;
+        } catch (IOException e) {
+            logger.error("导入用户失败", e);
+            throw new BusinessException("导入失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void downloadTemplate(HttpServletResponse response) throws IOException {
+        ExcelWriter writer = ExcelUtil.getWriter(true);
+        // 写入表头
+        writer.addHeaderAlias("username", "用户名");
+        writer.addHeaderAlias("nickname", "昵称");
+        writer.addHeaderAlias("email", "邮箱");
+        writer.addHeaderAlias("mobile", "手机号");
+        writer.addHeaderAlias("role", "角色");
+
+        // 写入示例数据
+        List<Map<String, Object>> rows = new ArrayList<>();
+        Map<String, Object> row = new java.util.HashMap<>();
+        row.put("username", "zhangsan");
+        row.put("nickname", "张三");
+        row.put("email", "zhangsan@example.com");
+        row.put("mobile", "13800138000");
+        row.put("role", "USER");
+        rows.add(row);
+
+        writer.write(rows, true);
+
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+        String fileName = URLEncoder.encode("用户导入模板", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+
+        ServletOutputStream out = response.getOutputStream();
+        writer.flush(out, true);
+        writer.close();
+        out.close();
+    }
+
+    @Override
+    public void exportUsers(HttpServletResponse response, String keyword, String role) throws IOException {
+        ImUser query = new ImUser();
+        if (keyword != null && !keyword.isEmpty()) {
+            query.setNickname(keyword);
+        }
+        if (role != null && !role.isEmpty()) {
+            query.setRole(role);
+        }
+
+        // 导出全部（不分页）或者设置一个较大的限制
+        List<ImUser> users = imUserMapper.selectImUserListWithPagination(query, 0, 10000, keyword);
+
+        ExcelWriter writer = ExcelUtil.getWriter(true);
+        // 设置映射
+        writer.addHeaderAlias("id", "用户ID");
+        writer.addHeaderAlias("username", "用户名");
+        writer.addHeaderAlias("nickname", "昵称");
+        writer.addHeaderAlias("email", "邮箱");
+        writer.addHeaderAlias("mobile", "手机号");
+        writer.addHeaderAlias("role", "角色");
+        writer.addHeaderAlias("status", "状态");
+        writer.addHeaderAlias("createTime", "创建时间");
+
+        // 只导出指定字段
+        writer.setOnlyAlias(true);
+        writer.write(users, true);
+
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+        String fileName = URLEncoder.encode("用户列表", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+
+        ServletOutputStream out = response.getOutputStream();
+        writer.flush(out, true);
+        writer.close();
+        out.close();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void setChatBackground(Long userId, String type, String value, Long conversationId) {
+        // 验证背景类型
+        if (!"default".equals(type) && !"color".equals(type) && !"image".equals(type)) {
+            throw new BusinessException("INVALID_BACKGROUND_TYPE", "无效的背景类型");
+        }
+
+        // 查询现有设置
+        ImChatBackground background = imChatBackgroundMapper.selectByUserIdAndConversationId(userId, conversationId);
+
+        if (background != null) {
+            // 更新现有设置
+            background.setBackgroundType(type);
+            background.setBackgroundValue(value);
+            background.setUpdateTime(LocalDateTime.now());
+            imChatBackgroundMapper.updateById(background);
+        } else {
+            // 创建新设置
+            background = new ImChatBackground();
+            background.setUserId(userId);
+            background.setConversationId(conversationId);
+            background.setBackgroundType(type);
+            background.setBackgroundValue(value);
+            background.setCreateTime(LocalDateTime.now());
+            background.setUpdateTime(LocalDateTime.now());
+            imChatBackgroundMapper.insert(background);
+        }
+
+        logger.info("设置聊天背景成功，userId={}, type={}, conversationId={}", userId, type, conversationId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void clearChatBackground(Long userId, Long conversationId) {
+        // 删除用户的聊天背景设置
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImChatBackground> wrapper = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        wrapper.eq(ImChatBackground::getUserId, userId);
+        if (conversationId == null) {
+            wrapper.isNull(ImChatBackground::getConversationId);
+        } else {
+            wrapper.eq(ImChatBackground::getConversationId, conversationId);
+        }
+
+        imChatBackgroundMapper.delete(wrapper);
+        logger.info("清除聊天背景成功，userId={}, conversationId={}", userId, conversationId);
+    }
+
+    @Override
+    public java.util.Map<String, Object> scanQRCode(Long userId, String qrData) {
+        logger.info("用户扫描二维码，userId={}, qrData={}", userId, qrData);
+
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+
+        // 判断二维码类型
+        if (qrData == null || qrData.isEmpty()) {
+            throw new BusinessException("INVALID_QR_CODE", "无效的二维码");
+        }
+
+        // 检查是否是用户二维码（格式：user:userId）
+        if (qrData.startsWith("user:")) {
+            try {
+                Long targetUserId = Long.parseLong(qrData.substring(5));
+                ImUserVO targetUser = getUserById(targetUserId);
+                result.put("type", "user");
+                result.put("data", targetUser);
+            } catch (Exception e) {
+                logger.error("解析用户二维码失败", e);
+                throw new BusinessException("INVALID_USER_QR_CODE", "无效的用户二维码");
+            }
+        }
+        // 检查是否是群组二维码（格式：group:groupId）
+        else if (qrData.startsWith("group:")) {
+            try {
+                Long groupId = Long.parseLong(qrData.substring(6));
+                result.put("type", "group");
+                result.put("groupId", groupId);
+            } catch (Exception e) {
+                logger.error("解析群组二维码失败", e);
+                throw new BusinessException("INVALID_GROUP_QR_CODE", "无效的群组二维码");
+            }
+        }
+        // 检查是否是登录二维码（格式：login:token）
+        else if (qrData.startsWith("login:")) {
+            String token = qrData.substring(6);
+            result.put("type", "login");
+            result.put("token", token);
+        }
+        // 其他类型的URL
+        else if (qrData.startsWith("http://") || qrData.startsWith("https://")) {
+            result.put("type", "url");
+            result.put("url", qrData);
+        }
+        // 纯文本
+        else {
+            result.put("type", "text");
+            result.put("content", qrData);
+        }
+
+        return result;
     }
 }

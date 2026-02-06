@@ -1,83 +1,53 @@
 /**
- * 消息项组件 - 重构版本
- *
- * 职责：包裹消息气泡，处理头像、多选、布局方向
- * 消息内容的具体渲染由 MessageBubble 组件负责
- */
+* 消息项组件 - 重构版本
+*
+* 职责：包裹消息气泡，处理头像、多选、布局方向
+* 消息内容的具体渲染由 MessageBubble 组件负责
+*/
 <template>
   <!-- 时间分割线 -->
-  <div
-    v-if="message.isTimeDivider"
-    class="time-divider-wrapper"
-  >
+  <div v-if="message.isTimeDivider" class="time-divider-wrapper">
     <span class="time-text">{{ message.timeText }}</span>
   </div>
 
   <!-- 消息主体 -->
-  <div
-    v-else
-    class="message-item"
-    :class="itemClasses"
-    :data-id="message.id"
-  >
+  <div v-else class="message-item" :class="itemClasses" :data-id="message.id">
     <!-- 多选复选框 -->
-    <div
-      v-if="multiSelectMode"
-      class="checkbox-wrapper"
-    >
-      <el-checkbox
-        :model-value="isSelected"
-        @change="toggleSelection"
-        @click.stop
-      />
+    <div v-if="multiSelectMode" class="checkbox-wrapper">
+      <el-checkbox :model-value="isSelected" @change="toggleSelection" @click.stop />
     </div>
 
     <!-- 头像区域 -->
-    <div
-      class="avatar-wrapper"
-      title="右键@提及 | 查看资料 | 双击拍一拍"
-      @contextmenu.prevent="$emit('at', message)"
-      @click="$emit('show-user', message.senderId)"
-      @dblclick="handleNudge"
-    >
-      <DingtalkAvatar
-        :src="message.senderAvatar"
-        :name="message.senderName"
-        :user-id="message.senderId"
-        :size="40"
-        shape="square"
-        custom-class="message-avatar"
-      />
+    <div class="avatar-wrapper" title="右键@提及 | 查看资料 | 双击拍一拍" @contextmenu.prevent="$emit('at', message)"
+      @click="$emit('show-user', message.senderId)" @dblclick="handleNudge">
+      <DingtalkAvatar :src="message.senderAvatar" :name="message.senderName" :user-id="message.senderId" :size="40"
+        shape="square" custom-class="message-avatar" />
     </div>
 
-    <!-- 消息内容包裹层 -->
-    <div
-      class="content-wrapper"
-      :class="{ 'is-merged': message.isMerged }"
-    >
-      <!-- 消息气泡 -->
-      <slot name="bubble">
-        <MessageBubble
-          :message="message"
-          :session-type="sessionType"
-          @command="$emit('command', $event, message)"
-          @at="$emit('at', message)"
-          @preview="$emit('preview', $event)"
-          @download="$emit('download', $event)"
-          @retry="$emit('retry', message)"
-          @add-reaction="$emit('add-reaction', $event, message)"
-          @re-edit="$emit('re-edit', $event)"
-          @scroll-to="$emit('scroll-to', $event)"
-          @long-press="$emit('long-press', $event)"
-          @show-user="$emit('show-user', $event)"
-        />
-      </slot>
+    <div class="content-wrapper" :class="{ 'is-merged': message.isMerged }">
+      <!-- 发送者姓名（仅群聊、非自己、且非合并连续消息时显示） -->
+      <div v-if="sessionType === 'GROUP' && !message.isOwn && !message.isMerged" class="sender-name">
+        {{ message.senderName }}
+      </div>
+
+      <!-- 消息气泡与状态行 -->
+      <div class="bubble-row">
+        <slot name="bubble">
+          <MessageBubble :message="message" :session-type="sessionType" @command="$emit('command', $event, message)"
+            @at="$emit('at', message)" @preview="$emit('preview', $event)" @download="$emit('download', $event)"
+            @retry="$emit('retry', message)" @add-reaction="$emit('add-reaction', $event, message)"
+            @re-edit="$emit('re-edit', $event)" @scroll-to="$emit('scroll-to', $event)"
+            @long-press="$emit('long-press', $event)" @show-user="$emit('show-user', $event)" />
+        </slot>
+
+        <!-- 已读状态（仅发送方消息显示） -->
+        <div v-if="message.isOwn" class="status-container">
+          <slot name="read-status" />
+        </div>
+      </div>
 
       <!-- 消息页脚（时间） -->
-      <div
-        v-if="!hideFooter"
-        class="message-footer"
-      >
+      <div v-if="!hideFooter" class="message-footer">
         <span class="message-time">{{ formattedTime }}</span>
       </div>
     </div>
@@ -120,7 +90,7 @@ const isSelected = computed(() => {
 
 // 格式化时间
 const formattedTime = computed(() => {
-  if (!props.message.timestamp) {return ''}
+  if (!props.message.timestamp) { return '' }
   const date = new Date(props.message.timestamp)
   return date.toLocaleTimeString('zh-CN', {
     hour: '2-digit',
@@ -151,7 +121,7 @@ const handleNudge = () => {
 .message-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 16px;  // 钉钉标准：16px 消息间距
+  margin-bottom: 16px; // 钉钉标准：16px 消息间距
   position: relative;
   padding: 0;
   animation: fadeInUp 0.3s var(--dt-ease-out) both;
@@ -211,7 +181,7 @@ const handleNudge = () => {
 .avatar-wrapper {
   width: 40px;
   height: 40px;
-  margin: 0;  // 钉钉标准：头像与气泡紧贴，无间距
+  margin: 0;
   flex-shrink: 0;
   cursor: pointer;
   transition: opacity var(--dt-transition-base);
@@ -221,7 +191,7 @@ const handleNudge = () => {
   }
 
   .message-avatar {
-    border-radius: var(--dt-radius-sm);  // 钉钉方形头像，小圆角
+    border-radius: var(--dt-radius-sm); // 钉钉方形头像，小圆角
   }
 }
 
@@ -232,11 +202,11 @@ const handleNudge = () => {
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  margin-top: 0;
+  margin: 0 12px; // 优化:头像与气泡间距从8px调整为12px,符合钉钉标准
   padding-top: 0;
 
   &.is-merged {
-    margin-top: -8px;  // 钉钉标准：合并消息 -8px
+    margin-top: -8px; // 钉钉标准:合并消息 -8px
   }
 }
 
@@ -248,13 +218,42 @@ const handleNudge = () => {
 // 自己消息右对齐
 .message-item.is-own .content-wrapper {
   align-items: flex-end;
+
+  .bubble-row {
+    flex-direction: row-reverse;
+  }
+}
+
+// 气泡与状态行布局
+.bubble-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.status-container {
+  flex-shrink: 0;
+  margin-bottom: 2px; // 对齐气泡底部稍微抬起一点
+}
+
+// 发送者姓名样式
+.sender-name {
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-tertiary);
+  margin-bottom: 4px;
+  margin-left: 4px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 // 消息页脚
 .message-footer {
   display: flex;
   align-items: center;
-  margin-top: 4px;  // 钉钉标准：4px 间距
+  margin-top: 4px; // 钉钉标准：4px 间距
   font-size: var(--dt-font-size-xs);
 }
 

@@ -1,80 +1,42 @@
 /**
- * 文本消息气泡组件
- * 支持高亮显示@提及
- * 支持显示和点击引用消息
- */
+* 文本消息气泡组件
+* 支持高亮显示@提及
+* 支持显示和点击引用消息
+*/
 <template>
   <div class="text-bubble">
     <!-- 引用消息预览 -->
-    <MessageReplyRef
-      v-if="replyMessage"
-      :message="replyMessage"
-      @click="handleReplyClick"
-    />
+    <MessageReplyRef v-if="replyMessage" :message="replyMessage" @click="handleReplyClick" />
 
     <!-- 文本内容 -->
-    <div
-      class="text-content"
-      v-html="formattedContent"
-    />
+    <div class="text-content" v-html="formattedContent" />
 
     <!-- 链接预览卡片 -->
-    <div
-      v-if="extractedUrls.length > 0"
-      class="link-previews"
-    >
-      <LinkPreviewCard
-        v-for="url in extractedUrls"
-        :key="url"
-        :preview="getPreviewData(url)"
-        :is-loading="isLoadingUrl(url)"
-        @click="handleLinkClick"
-        @image-error="handleLinkImageError"
-      />
+    <div v-if="extractedUrls.length > 0" class="link-previews">
+      <LinkPreviewCard v-for="url in extractedUrls" :key="url" :preview="getPreviewData(url)"
+        :is-loading="isLoadingUrl(url)" @click="handleLinkClick" @image-error="handleLinkImageError" />
     </div>
 
     <!-- 已编辑标记 -->
-    <span
-      v-if="message.isEdited"
-      class="edited-tag"
-    >(已编辑)</span>
+    <span v-if="message.isEdited" class="edited-tag">(已编辑)</span>
 
     <!-- 标记图标 -->
-    <div
-      v-if="hasMarkers"
-      class="message-markers"
-    >
-      <span
-        v-for="marker in message.markers"
-        :key="marker.id || marker.markerType"
-        class="marker-icon"
-        :class="{ completed: marker.isCompleted }"
-        :style="{ color: marker.color || '' }"
-      >
-        <span
-          v-if="marker.markerType === 'FLAG'"
-          class="material-icons-outlined"
-        >flag</span>
-        <span
-          v-else-if="marker.markerType === 'IMPORTANT'"
-          class="material-icons-outlined"
-        >star</span>
-        <span
-          v-else-if="marker.markerType === 'TODO'"
-          class="material-icons-outlined"
-        >
+    <div v-if="hasMarkers" class="message-markers">
+      <span v-for="marker in message.markers" :key="marker.id || marker.markerType" class="marker-icon"
+        :class="{ completed: marker.isCompleted }" :style="{ color: marker.color || '' }">
+        <span v-if="marker.markerType === 'FLAG'" class="material-icons-outlined">flag</span>
+        <span v-else-if="marker.markerType === 'IMPORTANT'" class="material-icons-outlined">star</span>
+        <span v-else-if="marker.markerType === 'TODO'" class="material-icons-outlined">
           {{ marker.isCompleted ? 'check_circle' : 'check_circle_outline' }}
         </span>
       </span>
     </div>
 
     <!-- 置顶图标 -->
-    <div
-      v-if="message.isPinned"
-      class="message-pinned-badge"
-      title="已置顶"
-    >
-      <el-icon><Top /></el-icon>
+    <div v-if="message.isPinned" class="message-pinned-badge" title="已置顶">
+      <el-icon>
+        <Top />
+      </el-icon>
       <span>已置顶</span>
     </div>
   </div>
@@ -130,11 +92,11 @@ const isLoadingUrl = url => {
  */
 const loadLinkPreviews = async () => {
   const urls = extractedUrls.value
-  if (urls.length === 0) {return}
+  if (urls.length === 0) { return }
 
   for (const url of urls) {
-    if (linkPreviews.value.has(url) || loadingUrls.value.has(url)) {continue}
-    
+    if (linkPreviews.value.has(url) || loadingUrls.value.has(url)) { continue }
+
     loadingUrls.value.add(url)
     try {
       const preview = await fetchPreview(url)
@@ -181,7 +143,7 @@ watch(() => props.message?.content, () => {
  * 从消息列表中查找 replyToMessageId 对应的原始消息
  */
 const replyMessage = computed(() => {
-  if (!props.message.replyToMessageId) {return null}
+  if (!props.message.replyToMessageId) { return null }
 
   // 从当前会话的消息列表中查找
   const messages = store.getters['im/message/currentMessages'] || []
@@ -193,7 +155,7 @@ const replyMessage = computed(() => {
  * 触发滚动到原消息，并带高亮标记
  */
 const handleReplyClick = () => {
-  if (!replyMessage.value) {return}
+  if (!replyMessage.value) { return }
   emit('scroll-to', {
     messageId: props.message.replyToMessageId,
     highlight: true
@@ -220,7 +182,7 @@ const formattedContent = computed(() => {
     // 替换每个@提及
     for (const mention of sortedMentions) {
       const nickname = mention.nickname || mention.userName || ''
-      if (!nickname) {continue}
+      if (!nickname) { continue }
 
       const mentionText = `@${nickname}`
       const isCurrentUserMentioned = mention.mentionedUserId === currentUserId
@@ -276,32 +238,35 @@ function escapeRegExp(string) {
 }
 
 .text-content {
-  word-break: break-word;
+  word-break: break-all;
   white-space: pre-wrap;
-  line-height: 1.4;
+  line-height: 1.5; // 优化：钉钉风格 1.5 行高
+  font-size: var(--dt-font-size-base);
 
-  // @提及高亮样式
+  // @提及高亮样式 - 优化：更轻盈的视觉效果
   :deep(.mention-highlight) {
     color: var(--dt-brand-color);
     font-weight: 500;
-    background: rgba(0, 137, 255, 0.1);
-    padding: 2px 4px;
-    border-radius: var(--dt-radius-sm);
+    background: rgba(0, 137, 255, 0.08); // 优化：降低背景透明度
+    padding: 1px 4px; // 优化：更紧凑的边距
+    border-radius: 3px;
     cursor: pointer;
+    margin: 0 1px;
     transition: all var(--dt-transition-fast);
 
     &:hover {
-      background: rgba(0, 137, 255, 0.2);
+      background: rgba(0, 137, 255, 0.15);
+      text-decoration: underline;
     }
 
-    // 提及当前用户时，更加醒目
+    // 提及当前用户时
     &.is-current-user {
-      background: rgba(255, 77, 79, 0.15);
-      color: var(--dt-error-color);
+      background: rgba(255, 77, 79, 0.1);
+      color: #ff4d4f;
       font-weight: 600;
 
       &:hover {
-        background: rgba(255, 77, 79, 0.25);
+        background: rgba(255, 77, 79, 0.2);
       }
     }
   }

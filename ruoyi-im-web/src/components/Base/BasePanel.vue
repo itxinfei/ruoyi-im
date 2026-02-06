@@ -47,6 +47,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
   // 面板类型：default, with-sidebar
   type: {

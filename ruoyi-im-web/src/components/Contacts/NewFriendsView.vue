@@ -101,8 +101,8 @@ const loadRequests = async () => {
         .filter(r => r.direction === 'RECEIVED')
         .sort((a, b) => {
           // 待处理的排前面
-          if (a.status === 'PENDING' && b.status !== 'PENDING') {return -1}
-          if (a.status !== 'PENDING' && b.status === 'PENDING') {return 1}
+          if (a.status === 'PENDING' && b.status !== 'PENDING') { return -1 }
+          if (a.status !== 'PENDING' && b.status === 'PENDING') { return 1 }
           return 0
         })
 
@@ -327,22 +327,4 @@ defineExpose({ refresh: loadRequests })
 
 // ============================================================================
 // 响应式适配
-// ============================================================================
-
-@media (max-width: 768px) {
-  .dt-request-list {
-    padding: 4px;
-    gap: 4px;
-  }
-
-  .dt-request-item {
-    padding: 10px;
-  }
-
-  .dt-btn-deny,
-  .dt-btn-accept {
-    padding: 6px 12px;
-    font-size: var(--dt-font-size-xs);
-  }
-}
-</style>
+// ============================================================================</style>

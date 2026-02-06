@@ -1,9 +1,11 @@
 package com.ruoyi.im.config;
 
 import com.ruoyi.im.websocket.WebSocketHandshakeInterceptor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
@@ -23,11 +25,12 @@ public class ImWebSocketConfig {
     /**
      * 注册ServerEndpointExporter bean
      * 这个bean会自动注册使用@ServerEndpoint注解的WebSocket端点
-     * 仅在Web应用环境中创建此Bean
+     * 仅在Web应用环境中创建此Bean，且在测试环境中禁用
      */
     @Bean
     @ConditionalOnWebApplication
-    public ServerEndpointExporter serverEndpointExporter() {
+    @ConditionalOnProperty(name = "app.websocket.enabled", havingValue = "true", matchIfMissing = true)
+    public ServerEndpointExporter serverEndpointExporter(Environment env) {
         return new ServerEndpointExporter();
     }
 

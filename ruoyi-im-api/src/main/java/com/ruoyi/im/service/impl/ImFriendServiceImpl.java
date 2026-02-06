@@ -53,11 +53,11 @@ public class ImFriendServiceImpl implements ImFriendService {
      * 构造器注入依赖
      */
     public ImFriendServiceImpl(ImFriendMapper imFriendMapper,
-                                ImFriendRequestMapper imFriendRequestMapper,
-                                ImUserMapper imUserMapper,
-                                ImConversationService imConversationService,
-                                com.ruoyi.im.util.ImDistributedLock distributedLock,
-                                com.ruoyi.im.util.ImRedisUtil imRedisUtil) {
+            ImFriendRequestMapper imFriendRequestMapper,
+            ImUserMapper imUserMapper,
+            ImConversationService imConversationService,
+            com.ruoyi.im.util.ImDistributedLock distributedLock,
+            com.ruoyi.im.util.ImRedisUtil imRedisUtil) {
         this.imFriendMapper = imFriendMapper;
         this.imFriendRequestMapper = imFriendRequestMapper;
         this.imUserMapper = imUserMapper;
@@ -251,9 +251,14 @@ public class ImFriendServiceImpl implements ImFriendService {
                 // 从批量查询结果中获取用户信息
                 ImUser friendUser = userMap.get(friend.getFriendId());
                 if (friendUser != null) {
-                    String friendName = friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername();
+                    String friendName = friendUser.getNickname() != null ? friendUser.getNickname()
+                            : friendUser.getUsername();
                     vo.setFriendName(friendName);
                     vo.setFriendAvatar(friendUser.getAvatar());
+                    vo.setName(friendName); // 对齐前端
+                    vo.setAvatar(friendUser.getAvatar()); // 对齐前端
+                    vo.setNickname(
+                            friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername()); // 对齐前端
                     vo.setUsername(friendUser.getUsername());
                     vo.setEmail(friendUser.getEmail());
                     vo.setPhone(friendUser.getMobile());
@@ -758,8 +763,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
 
         // 将标签列表转换为逗号分隔的字符串
-        String tagsStr = (tags == null || tags.isEmpty()) ? null :
-                String.join(",", tags);
+        String tagsStr = (tags == null || tags.isEmpty()) ? null : String.join(",", tags);
 
         friend.setTags(tagsStr);
         friend.setUpdateTime(LocalDateTime.now());

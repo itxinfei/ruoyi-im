@@ -116,8 +116,8 @@
       class="admin-table__pagination"
     >
       <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
+        v-model:current-page="currentPageModel"
+        v-model:page-size="pageSizeModel"
         :page-sizes="pageSizes"
         :total="total"
         layout="total, sizes, prev, pager, next, jumper"
@@ -250,6 +250,14 @@ const emit = defineEmits([
 const tableRef = ref(null)
 const searchForm = ref({ keyword: '' })
 const selectedRows = ref([])
+const currentPageModel = computed({
+  get: () => props.currentPage,
+  set: value => emit('update:currentPage', value)
+})
+const pageSizeModel = computed({
+  get: () => props.pageSize,
+  set: value => emit('update:pageSize', value)
+})
 
 // 序号计算
 const indexMethod = index => {

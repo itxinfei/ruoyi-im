@@ -1,256 +1,115 @@
 <template>
-  <div
-    class="chat-panel"
-    :class="{ 'is-dragging': isDragging, 'is-drag-over': isDragOver }"
-    @dragover.prevent="handleDragOver"
-    @dragenter.prevent="handleDragEnter"
-    @dragleave.prevent="handleDragLeave"
-    @drop.prevent="handleDrop"
-    @paste="handlePaste"
-  >
-    <div
-      v-if="!session"
-      class="empty-placeholder"
-    >
-      <EmptyState
-        type="chat"
-        title="选择一个会话开始聊天"
-        description="从左侧列表选择联系人或群组，开始你的对话"
-        :compact="false"
-      />
+  <div class="chat-panel" :class="{ 'is-dragging': isDragging, 'is-drag-over': isDragOver }"
+    @dragover.prevent="handleDragOver" @dragenter.prevent="handleDragEnter" @dragleave.prevent="handleDragLeave"
+    @drop.prevent="handleDrop" @paste="handlePaste">
+    <div v-if="!session" class="empty-placeholder">
+      <EmptyState type="chat" title="选择一个会话开始聊天" description="从左侧列表选择联系人或群组，开始你的对话" :compact="false" />
     </div>
     <template v-else>
       <div class="main-container">
         <!-- 左侧聊天主体 -->
-        <div
-          class="chat-viewport"
-          :class="{ 'with-pinned-panel': showPinnedPanel }"
-        >
-          <ChatHeader
-            :session="session"
-            :typing-users="typingUsers"
-            :pinned-count="pinnedCount"
-            @show-detail="handleToggleDetail"
-            @toggle-sidebar="handleToggleSidebar"
-            @multiselect="handleToggleMultiSelect"
-            @toggle-multi-select="handleToggleMultiSelect"
-            @toggle-pinned="showPinnedPanel = !showPinnedPanel"
-            @clear-selection="handleClearSelection"
-            @announcement="showAnnouncementDialog = true"
-            @history="handleShowHistory"
-            @search="handleSearchMessages"
-            @files="handleShowFiles"
-            @pin="handlePinSession"
-            @mute="handleMuteSession"
-            @clear="handleClearMessages"
-            @voice-call="handleVoiceCall"
-            @video-call="handleVideoCall"
-            @scroll-to-message="handleScrollToMessage"
-          />
-          <MessageList
-            ref="msgListRef"
-            :session-id="session?.id"
-            :messages="messages"
-            :loading="loading"
-            :current-user="currentUser"
-            :session-type="session?.type"
-            :multi-select-mode="isMultiSelectMode"
-            @command="handleCommand"
-            @at="handleAt"
-            @load-more="handleLoadMore"
-            @show-user="handleShowUser"
-            @retry="handleRetry"
-            @remind-unread="handleRemindUnread"
-            @long-press="handleMultiSelect"
-            @preview="handleImagePreview"
-            @re-edit="handleReEdit"
-          />
-          <MessageInput
-            ref="messageInputRef"
-            :session="session"
-            :sending="sending"
-            :replying-message="replyingMessage"
-            :editing-message="editingMessage"
-            @send="handleSend"
-            @send-voice="handleSendVoice"
-            @cancel-reply="handleCancelReply"
-            @cancel-edit="handleCancelEdit"
-            @edit-confirm="handleEditConfirm"
-            @start-call="handleStartCall"
-            @start-video="handleStartVideo"
-            @upload-image="handleImageUpload"
-            @upload-file="handleFileUpload"
-            @upload-video="handleVideoUpload"
-            @send-location="handleSendLocation"
-            @send-screenshot="handleScreenshotUpload"
-            @input="handleInput"
-            @create-announcement="handleCreateAnnouncement"
-          />
+        <div class="chat-viewport" :class="{ 'with-pinned-panel': showPinnedPanel }">
+          <ChatHeader :session="session" :typing-users="typingUsers" :pinned-count="pinnedCount"
+            @show-detail="handleToggleDetail" @toggle-sidebar="handleToggleSidebar"
+            @multiselect="handleToggleMultiSelect" @toggle-multi-select="handleToggleMultiSelect"
+            @toggle-pinned="showPinnedPanel = !showPinnedPanel" @clear-selection="handleClearSelection"
+            @announcement="showAnnouncementDialog = true" @history="handleShowHistory" @search="handleSearchMessages"
+            @files="handleShowFiles" @pin="handlePinSession" @mute="handleMuteSession" @clear="handleClearMessages"
+            @voice-call="handleVoiceCall" @video-call="handleVideoCall" @scroll-to-message="handleScrollToMessage" />
+          <MessageList ref="msgListRef" :session-id="session?.id" :messages="messages" :loading="loading"
+            :current-user="currentUser" :session-type="session?.type" :multi-select-mode="isMultiSelectMode"
+            @command="handleCommand" @at="handleAt" @load-more="handleLoadMore" @show-user="handleShowUser"
+            @retry="handleRetry" @remind-unread="handleRemindUnread" @long-press="handleMultiSelect"
+            @preview="handleImagePreview" @re-edit="handleReEdit" />
+          <MessageInput ref="messageInputRef" :session="session" :sending="sending" :replying-message="replyingMessage"
+            :editing-message="editingMessage" @send="handleSend" @send-voice="handleSendVoice"
+            @cancel-reply="handleCancelReply" @cancel-edit="handleCancelEdit" @edit-confirm="handleEditConfirm"
+            @start-call="handleStartCall" @start-video="handleStartVideo" @upload-image="handleImageUpload"
+            @upload-file="handleFileUpload" @upload-video="handleVideoUpload" @send-location="handleSendLocation"
+            @send-screenshot="handleScreenshotUpload" @input="handleInput"
+            @create-announcement="handleCreateAnnouncement" />
         </div>
 
         <!-- 置顶消息面板 -->
         <Transition name="slide-left">
-          <PinnedMessagesPanel
-            v-if="showPinnedPanel"
-            :messages="messages"
-            @close="showPinnedPanel = false"
-            @scroll-to-message="handleScrollToPinnedMessage"
-            @update="handlePinnedUpdate"
-          />
+          <PinnedMessagesPanel v-if="showPinnedPanel" :messages="messages" @close="showPinnedPanel = false"
+            @scroll-to-message="handleScrollToPinnedMessage" @update="handlePinnedUpdate" />
         </Transition>
 
         <!-- 移除旧的侧边栏，改用全局弹窗 -->
       </div>
 
       <!-- 群组详情弹窗 -->
-      <GroupDetailDialog
-        v-model="showGroupDetail"
-        :group-id="session?.targetId"
-      />
+      <GroupDetailDialog v-model:visible="showGroupDetail" :group-id="session?.targetId" />
 
       <!-- 隐藏的文件上传 input -->
-      <input
-        ref="fileInputRef"
-        type="file"
-        style="display: none"
-        @change="handleFileUpload"
-      >
-      <input
-        ref="imageInputRef"
-        type="file"
-        style="display: none"
-        accept="image/*"
-        @change="handleImageUpload"
-      >
+      <input ref="fileInputRef" type="file" style="display: none" @change="handleFileUpload">
+      <input ref="imageInputRef" type="file" style="display: none" accept="image/*" @change="handleImageUpload">
 
       <!-- 转发对话框 -->
-      <ForwardDialog
-        ref="forwardDialogRef"
-        @forward="handleForwardConfirm"
-        @batch-forward="handleBatchForwardConfirm"
-      />
+      <ForwardDialog ref="forwardDialogRef" @forward="handleForwardConfirm"
+        @batch-forward="handleBatchForwardConfirm" />
 
       <!-- 语音通话 -->
-      <VoiceCallDialog
-        v-model:visible="showVoiceCall"
-        :remote-user="remoteCallUser"
-        :is-incoming="isIncomingCall"
-      />
+      <VoiceCallDialog v-model:visible="showVoiceCall" :remote-user="remoteCallUser" :is-incoming="isIncomingCall" />
 
       <!-- 视频通话 -->
-      <VideoCallDialog
-        v-model:visible="showVideoCall"
-        :remote-user="remoteCallUser"
-        :is-incoming="isIncomingCall"
-      />
+      <VideoCallDialog v-model:visible="showVideoCall" :remote-user="remoteCallUser" :is-incoming="isIncomingCall" />
 
       <!-- 聊天记录面板 -->
-      <ChatHistoryPanel
-        :visible="showChatHistory"
-        :conversation-id="session?.id"
-        @close="showChatHistory = false"
-        @jump-to-message="handleJumpToMessage"
-        @clear-history="handleClearHistory"
-      />
+      <ChatHistoryPanel :visible="showChatHistory" :conversation-id="session?.id" @close="showChatHistory = false"
+        @jump-to-message="handleJumpToMessage" @clear-history="handleClearHistory" />
 
       <!-- 群公告对话框 -->
-      <GroupAnnouncementDialog
-        v-model="showAnnouncementDialog"
-        :group-id="session?.targetId"
-        :can-manage="session?.type === 'GROUP' && session?.memberRole === 'ADMIN'"
-      />
+      <GroupAnnouncementDialog v-model="showAnnouncementDialog" :group-id="session?.targetId"
+        :can-manage="session?.type === 'GROUP' && session?.memberRole === 'ADMIN'" />
 
       <!-- 搜索聊天记录面板 -->
-      <ChatSearchPanel
-        :visible="showSearchPanel"
-        :session-id="session?.id"
-        :messages="messages"
-        @close="showSearchPanel = false"
-        @jump-to-message="handleJumpToMessage"
-      />
+      <ChatSearchPanel :visible="showSearchPanel" :session-id="session?.id" :messages="messages"
+        @close="showSearchPanel = false" @jump-to-message="handleJumpToMessage" />
 
       <!-- 聊天内搜索弹窗 -->
-      <ChatSearch
-        v-model:visible="showChatSearch"
-        :messages="messages"
-        @select-message="handleScrollToMessage"
-      />
+      <ChatSearch v-model:visible="showChatSearch" :messages="messages" @select-message="handleScrollToMessage" />
 
       <!-- 查看文件面板 -->
-      <ChatFilesPanel
-        :visible="showFilesPanel"
-        :session-id="session?.id"
-        :messages="messages"
-        @close="showFilesPanel = false"
-        @open-file="handleOpenFile"
-        @download-file="handleDownloadFile"
-        @forward-file="handleForwardFile"
-      />
+      <ChatFilesPanel :visible="showFilesPanel" :session-id="session?.id" :messages="messages"
+        @close="showFilesPanel = false" @open-file="handleOpenFile" @download-file="handleDownloadFile"
+        @forward-file="handleForwardFile" />
 
       <!-- 群文件面板 -->
-      <GroupFilePanel
-        v-if="showGroupFilesPanel && session?.type === 'GROUP'"
-        :group-id="session?.targetId"
-        class="group-files-drawer"
-      />
+      <GroupFilePanel v-if="showGroupFilesPanel && session?.type === 'GROUP'" :group-id="session?.targetId"
+        class="group-files-drawer" />
 
       <!-- 合并消息详情对话框 -->
-      <CombineDetailDialog
-        v-model="showCombineDetail"
-        :messages="combineMessages"
-        :conversation-title="combineConversationTitle"
-        @forward="handleCombineForwardDetail"
-      />
+      <CombineDetailDialog v-model="showCombineDetail" :messages="combineMessages"
+        :conversation-title="combineConversationTitle" @forward="handleCombineForwardDetail" />
 
       <!-- 导出聊天记录对话框 -->
-      <ExportChatDialog
-        v-model="showExportDialog"
-        :messages="messages"
-        :contact-name="session?.peerName || session?.groupName || '聊天'"
-      />
+      <ExportChatDialog v-model="showExportDialog" :messages="messages"
+        :contact-name="session?.peerName || session?.groupName || '聊天'" />
 
       <!-- 多选操作栏 -->
-      <MultiSelectToolbar
-        :active="isMultiSelectModeActive"
-        :count="selectedMessages?.length || 0"
-        @forward="handleBatchForward"
-        @combine="handleCombineForward"
-        @delete="handleBatchDelete"
-        @cancel="handleClearSelection"
-      />
+      <MultiSelectToolbar :active="isMultiSelectModeActive" :count="selectedMessages?.length || 0"
+        @forward="handleBatchForward" @combine="handleCombineForward" @delete="handleBatchDelete"
+        @cancel="handleClearSelection" />
     </template>
   </div>
 
   <!-- 图片预览器 -->
-  <ImageViewerDialog
-    v-model="showImagePreview"
-    :images="conversationImages"
-    :initial-index="imagePreviewIndex"
-  />
+  <ImageViewerDialog v-model="showImagePreview" :images="conversationImages" :initial-index="imagePreviewIndex" />
 
   <!-- 快捷表情选择器 -->
   <teleport to="body">
-    <div
-      v-if="showEmojiPopover"
-      class="emoji-popover"
-      :style="{ left: emojiPopoverPosition.x + 'px', top: emojiPopoverPosition.y + 'px' }"
-    >
+    <div v-if="showEmojiPopover" class="emoji-popover"
+      :style="{ left: emojiPopoverPosition.x + 'px', top: emojiPopoverPosition.y + 'px' }">
       <div class="emoji-popover-header">
         <span>添加表情回应</span>
-        <el-icon
-          class="close-icon"
-          @click="showEmojiPopover = false"
-        >
+        <el-icon class="close-icon" @click="showEmojiPopover = false">
           <Close />
         </el-icon>
       </div>
       <div class="emoji-grid">
-        <span
-          v-for="emoji in QUICK_EMOJIS"
-          :key="emoji"
-          class="emoji-item"
-          @click="handleSelectEmoji(emoji)"
-        >
+        <span v-for="emoji in QUICK_EMOJIS" :key="emoji" class="emoji-item" @click="handleSelectEmoji(emoji)">
           {{ emoji }}
         </span>
       </div>
@@ -259,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, h } from 'vue'
 import { useStore } from 'vuex'
 import { Share, Folder, Delete, Close } from '@element-plus/icons-vue'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
@@ -284,7 +143,7 @@ import ImageViewerDialog from '@/components/Chat/ImageViewerDialog.vue'
 import { getMessages, batchForwardMessages, clearConversationMessages, retryMessage } from '@/api/im/message'
 import { pinConversation, muteConversation } from '@/api/im/conversation'
 import { uploadFile } from '@/api/im/file'
-import { markMessage, unmarkMessage, completeTodo, getUserTodoCount } from '@/api/im/marker'
+import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useMessageRetry } from '@/composables/useMessageRetry'
 import {
@@ -302,7 +161,7 @@ const props = defineProps({
     type: Object,
     default: null,
     validator: value => {
-      if (value === null) {return true}
+      if (value === null) { return true }
       return typeof value.id === 'string' || typeof value.id === 'number'
     }
   }
@@ -399,10 +258,10 @@ const messageInputRef = ref(null)
 
 // 当前会话所有图片URL列表（用于预览时左右切换）
 const conversationImages = computed(() => {
-  if (!messages.value || !Array.isArray(messages.value)) {return []}
+  if (!messages.value || !Array.isArray(messages.value)) { return [] }
   return messages.value
     .filter(m => {
-      if (m.type !== 'IMAGE') {return false}
+      if (m.type !== 'IMAGE') { return false }
       const content = parseMessageContent(m)
       return content && (content.url || content.imageUrl)
     })
@@ -442,7 +301,7 @@ const TYPING_DEBOUNCE = 500 // 500ms 防抖
 
 // 发送正在输入状态（单聊和群聊都支持）
 const sendMyTypingStatus = () => {
-  if (!props.session) {return}
+  if (!props.session) { return }
 
   // 清除之前的定时器
   if (sendTypingTimer) {
@@ -457,7 +316,7 @@ const sendMyTypingStatus = () => {
 
 // 发送停止输入状态
 const sendMyStopTypingStatus = () => {
-  if (!props.session) {return}
+  if (!props.session) { return }
 
   if (sendTypingTimer) {
     clearTimeout(sendTypingTimer)
@@ -477,14 +336,14 @@ const handleInput = content => {
 }
 
 const handleLoadMore = async () => {
-  if (loading.value || noMore.value) {return}
-  
+  if (loading.value || noMore.value) { return }
+
   const firstMsg = messages.value[0]
-  if (!firstMsg) {return}
+  if (!firstMsg) { return }
 
   loading.value = true
   const oldHeight = msgListRef.value?.$refs.listRef.scrollHeight
-  
+
   try {
     const newMsgs = await store.dispatch('im/message/loadMessages', {
       sessionId: props.session.id,
@@ -492,7 +351,7 @@ const handleLoadMore = async () => {
       pageSize: 20,
       isLoadMore: true
     })
-    
+
     if (newMsgs && newMsgs.length > 0) {
       messages.value = [...newMsgs, ...messages.value]
       msgListRef.value?.maintainScroll(oldHeight)
@@ -556,6 +415,7 @@ const handleSend = async content => {
     if (index !== -1) {
       // 保持 status 为 success，且替换为真实数据
       const realMsg = transformMsg(msg)
+      console.log('Real message:', realMsg)
       messages.value.splice(index, 1, { ...realMsg, status: null })
     }
   } catch (error) {
@@ -641,17 +501,17 @@ onMessage(msg => {
     const transformedMsg = transformMsg(msg, messages.value)
     messages.value.push(transformedMsg)
     msgListRef.value?.scrollToBottom()
-    
+
     // 新消息提醒
     if (!transformedMsg.isOwn) {
       // 动态导入提醒工具,避免循环依赖
       import('@/utils/messageNotification').then(({ showMessageNotification, shouldNotify }) => {
         if (shouldNotify(msg, currentUser.value, props.session)) {
           let body = msg.content
-          if (msg.type === 'IMAGE') {body = '[图片]'}
-          else if (msg.type === 'FILE') {body = '[文件]'}
-          else if (msg.type === 'RECALLED') {body = '撤回了一条消息'}
-          
+          if (msg.type === 'IMAGE') { body = '[图片]' }
+          else if (msg.type === 'FILE') { body = '[文件]' }
+          else if (msg.type === 'RECALLED') { body = '撤回了一条消息' }
+
           showMessageNotification({
             title: msg.senderName || '新消息',
             body: body || '[消息]',
@@ -751,7 +611,7 @@ const handleShowEmojiPicker = msg => {
 
 // 选择表情反应
 const handleSelectEmoji = async emoji => {
-  if (!emojiTargetMessage.value) {return}
+  if (!emojiTargetMessage.value) { return }
 
   const msg = emojiTargetMessage.value
 
@@ -897,7 +757,7 @@ const handleCombineForwardDetail = messages => {
 // 批量转发 - 逐条转发
 const handleBatchForward = async () => {
   const messageIds = selectedMessages.value.map(msg => msg.id)
-  if (messageIds.length === 0) {return}
+  if (messageIds.length === 0) { return }
 
   // 使用 ForwardDialog 选择目标会话
   forwardDialogRef.value?.openForBatch(messageIds, 'batch')
@@ -906,7 +766,7 @@ const handleBatchForward = async () => {
 // 批量转发 - 合并转发
 const handleCombineForward = async () => {
   const messageIds = selectedMessages.value.map(msg => msg.id)
-  if (messageIds.length === 0) {return}
+  if (messageIds.length === 0) { return }
 
   // 使用 ForwardDialog 选择目标会话
   forwardDialogRef.value?.openForBatch(messageIds, 'combine')
@@ -915,7 +775,7 @@ const handleCombineForward = async () => {
 // 批量删除
 const handleBatchDelete = async () => {
   const selected = selectedMessages.value
-  if (selected.length === 0) {return}
+  if (selected.length === 0) { return }
 
   try {
     await ElMessageBox.confirm(
@@ -988,7 +848,7 @@ const handleDrop = async event => {
   dragEnterCounter = 0
 
   const files = event.dataTransfer?.files
-  if (!files || files.length === 0) {return}
+  if (!files || files.length === 0) { return }
 
   for (const file of files) {
     if (file.type.startsWith('image/')) {
@@ -1081,7 +941,7 @@ const uploadFileFile = async file => {
 
 const handlePaste = async event => {
   const items = event.clipboardData?.items
-  if (!items) {return}
+  if (!items) { return }
 
   for (const item of items) {
     if (item.type.startsWith('image/')) {
@@ -1109,9 +969,9 @@ const handleMarkRead = async msg => {
 }
 
 const handleToggleDetail = () => {
-  if (props.session.type === 'GROUP') {
+  if (props.session?.type === 'GROUP') {
     showGroupDetail.value = true
-  } else {
+  } else if (props.session) {
     // 触发父组件处理用户详情显示
     emit('show-user', props.session.targetId)
   }
@@ -1140,7 +1000,7 @@ const handleCancelEdit = () => {
 const handleRetry = async msg => {
   // 检查消息状态
   const status = msg.sendStatus || msg.status
-  if (status !== 4 && status !== 'FAILED' && status !== 'failed') {return}
+  if (status !== 4 && status !== 'FAILED' && status !== 'failed') { return }
 
   // 获取客户端消息ID
   const clientMsgId = msg.clientMsgId || msg.id
@@ -1232,7 +1092,7 @@ const handleReply = message => {
   cmdReply(message)
   // 聚焦输入框，提升用户体验
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     messageInputRef.value?.focus()
   })
 }
@@ -1242,7 +1102,7 @@ const handleEdit = message => {
 }
 
 const handleAt = message => {
-  if (!message) {return}
+  if (!message) { return }
   messageInputRef.value?.insertAt(message.senderName)
 }
 
@@ -1285,7 +1145,7 @@ const handleRemindUnread = async ({ conversationId, messageId, unreadMembers }) 
 }
 
 const handleEditConfirm = async content => {
-  if (!editingMessage.value) {return}
+  if (!editingMessage.value) { return }
 
   await confirmEdit(content)
 
@@ -1301,7 +1161,7 @@ const handleEditConfirm = async content => {
  * 处理撤回消息重新编辑
  */
 const handleReEdit = ({ content }) => {
-  if (!content) {return}
+  if (!content) { return }
 
   // 使用 composable 的编辑状态
   edit({
@@ -1315,7 +1175,7 @@ const handleReEdit = ({ content }) => {
 
   // 聚焦输入框
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     messageInputRef.value?.focus()
   })
 
@@ -1409,7 +1269,7 @@ const handleSearchMessages = () => {
 // 会话操作
 const handlePinSession = async () => {
   const currentSession = store.state.im.session?.currentSession
-  if (!currentSession) {return}
+  if (!currentSession) { return }
 
   const newState = !currentSession.isPinned
   try {
@@ -1426,7 +1286,7 @@ const handlePinSession = async () => {
 
 const handleMuteSession = async () => {
   const currentSession = store.state.im.session?.currentSession
-  if (!currentSession) {return}
+  if (!currentSession) { return }
 
   const newState = !currentSession.isMuted
   try {
@@ -1591,7 +1451,7 @@ const handleFileUpload = async payload => {
   } else {
     // 事件对象
     file = payload?.target?.files?.[0]
-    if (!file) {return}
+    if (!file) { return }
     formData = new FormData()
     formData.append('file', file)
     if (payload?.target) {
@@ -1635,7 +1495,7 @@ const handleFileUpload = async payload => {
           fileUrl: res.data.url
         })
       })
-      
+
       // 4. 更新状态
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
@@ -1667,7 +1527,7 @@ const handleImageUpload = async payload => {
   } else {
     // 事件对象
     file = payload?.target?.files?.[0]
-    if (!file) {return}
+    if (!file) { return }
     formData = new FormData()
     formData.append('file', file)
     if (payload?.target) {
@@ -1706,7 +1566,7 @@ const handleImageUpload = async payload => {
           imageUrl: res.data.url
         })
       })
-      
+
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
         messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
@@ -1729,7 +1589,7 @@ const handleImageUpload = async payload => {
 const handleScreenshotUpload = async formData => {
   sendMyStopTypingStatus()
   const file = formData.get('file')
-  if (!file) {return}
+  if (!file) { return }
 
   // 1. 乐观更新：立即显示截图
   const blobUrl = URL.createObjectURL(file)
@@ -1901,7 +1761,7 @@ onMounted(() => {
   // 初始化失败消息重试管理
   initMessageRetry()
 
-  if (props.session) {loadHistory()}
+  if (props.session) { loadHistory() }
 
   // 请求浏览器通知权限
   import('@/utils/messageNotification').then(({ requestNotificationPermission }) => {
@@ -1912,15 +1772,15 @@ onMounted(() => {
 
   // 监听输入状态事件
   onTyping(data => {
-    if (data.conversationId !== props.session?.id) {return}
-    if (data.userId === currentUser.value?.id) {return} // 忽略自己的输入状态
+    if (data.conversationId !== props.session?.id) { return }
+    if (data.userId === currentUser.value?.id) { return } // 忽略自己的输入状态
 
     handleTypingIndicator(data.userId, data.userName || data.senderName)
   })
 
   // 监听消息状态更新（发送成功/失败）
   onMessageStatus(data => {
-    if (data.conversationId !== props.session?.id) {return}
+    if (data.conversationId !== props.session?.id) { return }
 
     const index = messages.value.findIndex(m => m.id === data.messageId)
     if (index !== -1) {
@@ -1995,11 +1855,11 @@ onMounted(() => {
   height: 100%;
   flex: 1;
   min-width: 0;
-  min-height: 0;              // 修复 flex 子元素高度问题
-  overflow: hidden;           // 防止内容溢出
+  min-height: 0; // 修复 flex 子元素高度问题
+  overflow: hidden; // 防止内容溢出
   background: var(--dt-bg-body);
   position: relative;
-  z-index: var(--dt-z-base);  // 使用设计令牌替代魔法值
+  z-index: var(--dt-z-base); // 使用设计令牌替代魔法值
 
 
   &.is-dragging {
@@ -2063,7 +1923,7 @@ onMounted(() => {
 .main-container {
   display: flex;
   flex: 1;
-  min-height: 0;    // flex: 1 配合 min-height: 0 正确处理高度
+  min-height: 0; // flex: 1 配合 min-height: 0 正确处理高度
   overflow: hidden;
 }
 
@@ -2216,10 +2076,13 @@ onMounted(() => {
 
 // 拖拽动画
 @keyframes pulse-drag {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.6;
     transform: scale(1.02);
@@ -2299,6 +2162,7 @@ onMounted(() => {
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

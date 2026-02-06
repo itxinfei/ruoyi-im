@@ -36,7 +36,9 @@
         link
         @click="$emit('close')"
       >
-        <el-icon><Close /></el-icon>
+        <el-icon>
+          <Close />
+        </el-icon>
       </el-button>
     </div>
 
@@ -136,7 +138,8 @@
                       divided
                       :command="{ action: 'setAdmin', member: m }"
                     >
-                      <span class="material-icons-outlined menu-icon">{{ m.role === 'ADMIN' ? 'remove_moderator' : 'admin_panel_settings' }}</span>
+                      <span class="material-icons-outlined menu-icon">{{ m.role === 'ADMIN' ? 'remove_moderator' :
+                        'admin_panel_settings' }}</span>
                       {{ m.role === 'ADMIN' ? '取消管理员' : '设为管理员' }}
                     </el-dropdown-item>
                     <el-dropdown-item
@@ -156,7 +159,9 @@
                 @click="handleAddMember"
               >
                 <div class="add-icon">
-                  <el-icon><Plus /></el-icon>
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
                 </div>
                 <span class="m-name">添加</span>
               </div>
@@ -333,7 +338,9 @@
                     link
                     class="file-more"
                   >
-                    <el-icon><MoreFilled /></el-icon>
+                    <el-icon>
+                      <MoreFilled />
+                    </el-icon>
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
@@ -493,6 +500,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
 import { formatFileSize as utilsFormatFileSize, formatDateTimeISO } from '@/utils/format'
+import { parseMessageContent } from '@/utils/message'
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
@@ -537,7 +545,7 @@ const displayMembers = computed(() => {
 
 // 在线状态
 const isOnline = computed(() => {
-  if (isGroup.value) {return false}
+  if (isGroup.value) { return false }
   const userId = props.session?.targetId
   if (userId && store.state.im.contact?.userStatus?.[userId]) {
     return store.state.im.contact.userStatus[userId] === 'online'
@@ -547,7 +555,7 @@ const isOnline = computed(() => {
 
 // 判断是否有管理成员的权限
 const canManageMember = computed(() => {
-  if (!detail.value || !currentUser.value) {return false}
+  if (!detail.value || !currentUser.value) { return false }
   const memberRole = props.session?.memberRole
   return memberRole === 'OWNER' || memberRole === 'ADMIN'
 })
@@ -591,7 +599,7 @@ const searchPage = ref(1)
 
 // ========== 加载详情 ==========
 const loadDetail = async () => {
-  if (!props.session?.id) {return}
+  if (!props.session?.id) { return }
   loading.value = true
   try {
     if (isGroup.value) {
@@ -600,7 +608,7 @@ const loadDetail = async () => {
         getGroup(gId),
         getGroupMembers(gId)
       ])
-      if (gRes.code === 200) {detail.value = gRes.data}
+      if (gRes.code === 200) { detail.value = gRes.data }
       if (mRes.code === 200) {
         members.value = mRes.data.map(m => ({
           id: m.userId || m.id,
@@ -613,7 +621,7 @@ const loadDetail = async () => {
       loadFiles()
     } else {
       const res = await getUserInfo(props.session.targetId)
-      if (res.code === 200) {detail.value = res.data}
+      if (res.code === 200) { detail.value = res.data }
     }
   } catch (e) {
     console.error('加载详情失败', e)
@@ -710,7 +718,7 @@ const handleSearch = async () => {
 }
 
 const loadMoreResults = async () => {
-  if (!hasMoreResults.value) {return}
+  if (!hasMoreResults.value) { return }
 
   try {
     const res = await searchMessages({
@@ -734,7 +742,7 @@ const loadMoreResults = async () => {
  * 先转义 HTML 防止 XSS，再进行关键词高亮
  */
 const highlightKeyword = content => {
-  if (!searchKeyword.value) {return escapeHtml(content)}
+  if (!searchKeyword.value) { return escapeHtml(content) }
   const keyword = searchKeyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp(`(${keyword})`, 'gi')
   return escapeHtml(content).replace(regex, '<mark>$1</mark>')
@@ -744,7 +752,7 @@ const highlightKeyword = content => {
  * 转义 HTML 特殊字符，防止 XSS 攻击
  */
 const escapeHtml = text => {
-  if (!text) {return ''}
+  if (!text) { return '' }
   const div = document.createElement('div')
   div.textContent = text
   return div.innerHTML
@@ -772,7 +780,7 @@ const handleAddMember = async () => {
       }
     )
 
-    if (!value) {return}
+    if (!value) { return }
 
     const userIds = value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id))
     if (userIds.length === 0) {
@@ -821,7 +829,7 @@ const handleSetAdmin = async member => {
       confirmButtonText: '确定',
       cancelButtonText: '取消'
     })
-    await setGroupAdmin(groupDetail.value.id, member.userId, newRole === 'ADMIN')
+    await setGroupAdmin(detail.value.id, member.userId, newRole === 'ADMIN')
     ElMessage.success(`${action}成功`)
     loadDetail()
   } catch (err) {
@@ -1045,6 +1053,7 @@ watch(() => props.messages, () => {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1607,29 +1616,6 @@ watch(() => props.messages, () => {
 
   .sidebar-footer {
     border-top-color: var(--dt-border-dark);
-  }
-}
-
-// ========== 响应式 ==========
-@media (max-width: 768px) {
-  .chat-sidebar {
-    width: 100%;
-    position: fixed;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 1000;
-  }
-
-  .members-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-
-    .member-item {
-      .m-name {
-        font-size: 10px;
-      }
-    }
   }
 }
 </style>

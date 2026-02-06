@@ -1,110 +1,68 @@
 <template>
   <div class="input-toolbar">
-    <!-- 左侧工具组：媒体操作 -->
+    <!-- 左侧工具组:核心功能 -->
     <div class="toolbar-left">
-      <el-tooltip
-        content="表情"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          :class="{ active: showEmojiPicker }"
-          @click.stop="$emit('toggle-emoji')"
-        >
+      <el-tooltip content="表情" placement="top">
+        <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="$emit('toggle-emoji')">
           <span class="material-icons-outlined">sentiment_satisfied_alt</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip
-        content="图片"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          @click="$emit('upload-image')"
-        >
+      <el-tooltip content="图片" placement="top">
+        <button class="toolbar-btn" @click="$emit('upload-image')">
           <span class="material-icons-outlined">image</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip
-        content="文件"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          @click="$emit('upload-file')"
-        >
+      <el-tooltip content="文件" placement="top">
+        <button class="toolbar-btn" @click="$emit('upload-file')">
           <span class="material-icons-outlined">insert_drive_file</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip
-        content="截图"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          @click="$emit('screenshot')"
-        >
-          <span class="material-icons-outlined">screenshot</span>
-        </button>
-      </el-tooltip>
-
-      <el-tooltip
-        v-if="showAtButton"
-        content="@成员"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          @click="$emit('at-member')"
-        >
+      <el-tooltip v-if="showAtButton" content="@成员" placement="top">
+        <button class="toolbar-btn" @click="$emit('at-member')">
           <span class="material-icons-outlined">alternate_email</span>
         </button>
       </el-tooltip>
+
+      <!-- 更多功能下拉菜单 -->
+      <el-dropdown trigger="click" @command="handleMoreCommand">
+        <el-tooltip content="更多" placement="top">
+          <button class="toolbar-btn more-btn">
+            <span class="material-icons-outlined">more_horiz</span>
+          </button>
+        </el-tooltip>
+        <template #dropdown>
+          <el-dropdown-menu class="toolbar-more-menu">
+            <el-dropdown-item command="screenshot">
+              <span class="material-icons-outlined">screenshot</span>
+              <span>截图</span>
+            </el-dropdown-item>
+            <el-dropdown-item command="smart-reply">
+              <span class="material-icons-outlined">auto_awesome</span>
+              <span>AI 智能回复</span>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
 
-    <!-- 右侧工具组：通话+AI -->
+    <!-- 右侧工具组:通话 -->
     <div class="toolbar-right">
-      <!-- 通话按钮组 -->
       <div class="call-buttons">
-        <el-tooltip
-          content="语音通话"
-          placement="top"
-        >
-          <button
-            class="toolbar-btn call-btn voice-call"
-            @click="$emit('voice-call')"
-          >
+        <el-tooltip content="语音通话" placement="top">
+          <button class="toolbar-btn call-btn voice-call" @click="$emit('voice-call')">
             <span class="material-icons-outlined">phone</span>
           </button>
         </el-tooltip>
 
-        <el-tooltip
-          content="视频通话"
-          placement="top"
-        >
-          <button
-            class="toolbar-btn call-btn video-call"
-            @click="$emit('video-call')"
-          >
+        <el-tooltip content="视频通话" placement="top">
+          <button class="toolbar-btn call-btn video-call" @click="$emit('video-call')">
             <span class="material-icons-outlined">videocam</span>
           </button>
         </el-tooltip>
       </div>
-
-      <el-tooltip
-        content="AI 灵动回复"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn ai-reply-btn"
-          @click="$emit('smart-reply')"
-        >
-          <span class="material-icons-outlined">auto_awesome</span>
-        </button>
-      </el-tooltip>
     </div>
   </div>
 </template>
@@ -121,7 +79,7 @@ const props = defineProps({
   }
 })
 
-defineEmits([
+const emit = defineEmits([
   'toggle-emoji',
   'upload-image',
   'upload-file',
@@ -131,6 +89,11 @@ defineEmits([
   'voice-call',
   'video-call'
 ])
+
+// 处理更多菜单命令
+const handleMoreCommand = (command) => {
+  emit(command)
+}
 </script>
 
 <style scoped lang="scss">
@@ -147,7 +110,7 @@ defineEmits([
   .toolbar-left {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px; // 从20px调整为12px,更紧凑
   }
 
   .toolbar-right {
@@ -164,7 +127,7 @@ defineEmits([
     border: none;
     padding: 0;
     cursor: pointer;
-    color: #000b;
+    color: var(--dt-text-secondary);
     border-radius: var(--dt-radius-sm);
     display: flex;
     align-items: center;
@@ -176,8 +139,8 @@ defineEmits([
     }
 
     &:hover {
-      background: rgba(0, 0, 0, 0.06);
-      color: #3f64e4;
+      background: var(--dt-bg-hover); // 统一使用设计token
+      color: var(--dt-brand-color);
     }
 
     &:active {
@@ -191,7 +154,14 @@ defineEmits([
 
     &.active {
       color: var(--dt-brand-color);
-      background: rgba(63, 100, 228, 0.1);
+      background: var(--dt-brand-light);
+    }
+
+    // 更多按钮
+    &.more-btn {
+      &:hover {
+        background: var(--dt-bg-hover);
+      }
     }
 
     // 通话按钮特殊样式
@@ -216,21 +186,36 @@ defineEmits([
         }
       }
     }
-
-    // AI回复按钮
-    &.ai-reply-btn {
-      color: #7c3aed;
-
-      &:hover {
-        background: rgba(124, 58, 237, 0.1);
-      }
-    }
   }
 
   .call-buttons {
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+}
+
+// 更多菜单样式
+:global(.toolbar-more-menu) {
+  min-width: 160px;
+
+  .el-dropdown-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    font-size: 14px;
+
+    .material-icons-outlined {
+      font-size: 18px;
+      color: var(--dt-text-secondary);
+    }
+
+    &:hover {
+      .material-icons-outlined {
+        color: var(--dt-brand-color);
+      }
+    }
   }
 }
 
@@ -267,40 +252,19 @@ defineEmits([
           }
         }
       }
-
-      &.ai-reply-btn {
-        color: #a78bfa;
-
-        &:hover {
-          background: rgba(124, 58, 237, 0.15);
-        }
-      }
     }
   }
-}
 
-// 响应式设计 - 小屏幕时调整按钮大小
-@media (max-width: 768px) {
-  .input-toolbar {
-    .toolbar-left {
-      gap: 12px;
-    }
-
-    .toolbar-right {
-      gap: 8px;
-    }
-
-    .toolbar-btn {
-      width: 30px;
-      height: 30px;
-
+  .toolbar-more-menu {
+    .el-dropdown-menu__item {
       .material-icons-outlined {
-        font-size: 20px;
+        color: var(--dt-text-secondary-dark);
       }
 
-      &.call-btn {
-        width: 34px;
-        height: 34px;
+      &:hover {
+        .material-icons-outlined {
+          color: var(--dt-brand-color);
+        }
       }
     }
   }

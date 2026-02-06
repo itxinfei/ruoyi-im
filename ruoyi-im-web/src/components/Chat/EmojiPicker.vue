@@ -1,51 +1,27 @@
 <template>
-  <div
-    ref="pickerRef"
-    v-click-outside="close"
-    class="emoji-picker"
-    :style="positionStyle"
-  >
+  <div ref="pickerRef" v-click-outside="close" class="emoji-picker" :style="positionStyle">
     <!-- 分类标签 -->
     <div class="emoji-tabs">
-      <button
-        v-for="category in categories"
-        :key="category.id"
-        class="emoji-tab"
-        :class="{ active: activeCategory === category.id }"
-        @click="activeCategory = category.id"
-      >
+      <button v-for="category in categories" :key="category.id" class="emoji-tab"
+        :class="{ active: activeCategory === category.id }" @click="activeCategory = category.id">
         <span class="tab-icon">{{ category.icon }}</span>
       </button>
     </div>
 
     <!-- 表情列表 -->
     <div class="emoji-list">
-      <button
-        v-for="emoji in currentEmojis"
-        :key="emoji"
-        class="emoji-item"
-        :title="emoji"
-        @click="selectEmoji(emoji)"
-      >
+      <button v-for="emoji in currentEmojis" :key="emoji" class="emoji-item" :title="emoji" @click="selectEmoji(emoji)">
         {{ emoji }}
       </button>
     </div>
 
     <!-- 最近使用 -->
-    <div
-      v-if="recentEmojis.length > 0"
-      class="emoji-section"
-    >
+    <div v-if="recentEmojis.length > 0" class="emoji-section">
       <div class="section-title">
         最近使用
       </div>
       <div class="emoji-list">
-        <button
-          v-for="emoji in recentEmojis"
-          :key="emoji"
-          class="emoji-item"
-          @click="selectEmoji(emoji)"
-        >
+        <button v-for="emoji in recentEmojis" :key="emoji" class="emoji-item" @click="selectEmoji(emoji)">
           {{ emoji }}
         </button>
       </div>
@@ -249,9 +225,9 @@ watch(recentEmojis, newVal => {
 
 .emoji-list {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);  // 钉钉标准：8列网格
+  grid-template-columns: repeat(8, 1fr); // 钉钉标准:8列网格
   padding: 8px;
-  gap: 4px;
+  gap: 2px; // 从4px调整为2px,更紧凑
   max-height: 200px;
   overflow-y: auto;
 
@@ -266,17 +242,17 @@ watch(recentEmojis, newVal => {
 }
 
 .emoji-item {
-  width: 32px;
-  height: 32px;
+  width: 34px; // 从32px增大到34px
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px; // 从20px增大到22px,表情更清晰
   background: transparent;
   border: none;
   border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--dt-transition-fast); // 使用设计token
 
   &:hover {
     background: var(--dt-bg-hover);

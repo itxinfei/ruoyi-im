@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { ArrowLeft, Search, MoreFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({

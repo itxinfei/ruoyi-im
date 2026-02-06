@@ -77,9 +77,6 @@ module.exports = {
         'tooltip': 1060,
         'notification': 1070
       },
-      transitionDuration: {
-        '250': '250ms'
-      },
       fontSize: {
         '2xl': ['1.5rem', { lineHeight: '2rem' }],
         '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
@@ -261,6 +258,7 @@ module.exports = {
         '100': '100ms',
         '150': '150ms',
         '200': '200ms',
+        '250': '250ms',
         '300': '300ms',
         '500': '500ms',
         '700': '700ms',

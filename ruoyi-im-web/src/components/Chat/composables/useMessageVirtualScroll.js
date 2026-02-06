@@ -51,6 +51,9 @@ export function getLazyLoadingThreshold (isLargeGroup) {
   return isLargeGroup ? 50 : ENABLE_LAZY_LOADING_THRESHOLD
 }
 
+// 导出常量供外部使用
+export { AVERAGE_MESSAGE_HEIGHT }
+
 export function useMessageVirtualScroll (props, getAllMessages) {
   // 滚动位置跟踪
   const scrollTop = ref(0)
@@ -156,7 +159,7 @@ export function useMessageVirtualScroll (props, getAllMessages) {
    * 更新滚动位置
    * @param {HTMLElement} element - 滚动容器元素
    */
-  const updateScrollPosition = (element) => {
+  const updateScrollPosition = element => {
     if (element) {
       scrollTop.value = element.scrollTop
       clientHeight.value = element.clientHeight

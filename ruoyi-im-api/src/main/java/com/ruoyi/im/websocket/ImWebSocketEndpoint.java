@@ -2,14 +2,11 @@ package com.ruoyi.im.websocket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
-import com.ruoyi.im.service.ImConversationMemberService;
-import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImConversationSyncService;
+import com.ruoyi.im.service.ImDeviceService;
+import com.ruoyi.im.service.ImMessageAckService;
 import com.ruoyi.im.service.ImMessageService;
-import com.ruoyi.im.service.ImUserService;
-
-import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.JwtUtils;
@@ -61,8 +58,11 @@ public class ImWebSocketEndpoint {
     private static ImUserMapper staticImUserMapper;
     private static ImRedisUtil staticImRedisUtil;
     private static ImWebSocketBroadcastService staticBroadcastService;
+    private static ImDeviceService staticDeviceService;
+    private static ImMessageAckService staticMessageAckService;
+    private static ImConversationSyncService staticConversationSyncService;
     private static boolean staticSecurityEnabled;
-    private static Long staticDevUserId;
+    // staticDevUserId 已删除,未使用
 
     @Autowired
     public void setImMessageService(ImMessageService imMessageService) {
@@ -89,6 +89,21 @@ public class ImWebSocketEndpoint {
         staticImRedisUtil = imRedisUtil;
     }
 
+    @Autowired
+    public void setDeviceService(ImDeviceService deviceService) {
+        staticDeviceService = deviceService;
+    }
+
+    @Autowired
+    public void setMessageAckService(ImMessageAckService messageAckService) {
+        staticMessageAckService = messageAckService;
+    }
+
+    @Autowired
+    public void setConversationSyncService(ImConversationSyncService conversationSyncService) {
+        staticConversationSyncService = conversationSyncService;
+    }
+
     /**
      * 注入ApplicationContext（用于获取其他Bean）
      */
@@ -107,10 +122,6 @@ public class ImWebSocketEndpoint {
     @Value("${app.security.enabled:true}")
     public void setSecurityEnabled(boolean securityEnabled) {
         staticSecurityEnabled = securityEnabled;
-    }
-
-    public void setDevUserId(Long devUserId) {
-        staticDevUserId = devUserId;
     }
 
     /**
@@ -216,6 +227,31 @@ public class ImWebSocketEndpoint {
                 staticImRedisUtil.clearDisconnectInfo(userId);
             }
 
+            // 注册设备（从查询参数获取设备信息）
+            if (staticDeviceService != null) {
+                String deviceId = extractParamFromQuery(queryString, "deviceId");
+                String deviceType = extractParamFromQuery(queryString, "deviceType");
+                String deviceName = extractParamFromQuery(queryString, "deviceName");
+                String clientVersion = extractParamFromQuery(queryString, "clientVersion");
+                String osVersion = extractParamFromQuery(queryString, "osVersion");
+
+                // 如果没有提供deviceId，生成一个默认的
+                if (deviceId == null || deviceId.isEmpty()) {
+                    deviceId = "web_" + session.getId();
+                }
+
+                // 如果没有提供deviceType，默认为web
+                if (deviceType == null || deviceType.isEmpty()) {
+                    deviceType = "web";
+                }
+
+                // 获取客户端IP
+                String ipAddress = extractClientIpFromSession(session);
+
+                staticDeviceService.registerDevice(userId, deviceId, deviceType, deviceName,
+                        clientVersion, osVersion, ipAddress);
+            }
+
             log.info("用户上线: userId={}, sessionId={}, serverId={}", userId, session.getId(), serverId);
 
             // 广播用户上线消息
@@ -268,7 +304,7 @@ public class ImWebSocketEndpoint {
                     // 传入 data 字段的内容，而不是整个 messageMap
                     Object payload = messageMap.get("data");
                     if (payload instanceof Map) {
-                        //noinspection unchecked
+                        // noinspection unchecked
                         Map<String, Object> authData = (Map<String, Object>) payload;
                         handleAuthMessage(session, authData);
                     } else {
@@ -294,7 +330,7 @@ public class ImWebSocketEndpoint {
                     // 处理认证消息（允许重新认证）
                     // 注意：payload 是 data 字段的内容，包含 token、userId 等认证信息
                     if (payload instanceof Map) {
-                        //noinspection unchecked
+                        // noinspection unchecked
                         Map<String, Object> authData = (Map<String, Object>) payload;
                         handleAuthMessage(session, authData);
                     } else {
@@ -319,6 +355,14 @@ public class ImWebSocketEndpoint {
                         staticImRedisUtil.updateHeartbeat(userId);
                     }
                     sendMessage(session, buildStatusMessage("pong", userId, true));
+                    break;
+                case "ack":
+                    // 处理客户端ACK确认（送达、接收、已读）
+                    handleAckMessage(userId, payload, session);
+                    break;
+                case "conversation_event":
+                    // 处理会话同步事件（置顶、免打扰、归档、删除）
+                    handleConversationEvent(userId, payload, session);
                     break;
                 default:
                     log.warn("未知消息类型: type={}", type);
@@ -357,6 +401,14 @@ public class ImWebSocketEndpoint {
             }
 
             if (userId != null && userId != -1L) { // -1 表示未认证，不需要广播离线消息
+                // 设置设备离线
+                if (staticDeviceService != null) {
+                    String deviceId = extractDeviceIdFromSession(session);
+                    if (deviceId != null) {
+                        staticDeviceService.setDeviceOffline(userId, deviceId);
+                    }
+                }
+
                 // 同步更新Redis中的在线状态
                 if (staticImRedisUtil != null) {
                     staticImRedisUtil.removeOnlineUser(userId);
@@ -1026,6 +1078,24 @@ public class ImWebSocketEndpoint {
     }
 
     /**
+     * 从Session中提取设备ID
+     *
+     * @param session WebSocket会话
+     * @return 设备ID
+     */
+    private String extractDeviceIdFromSession(Session session) {
+        try {
+            String queryString = session.getQueryString();
+            if (queryString != null) {
+                return extractParamFromQuery(queryString, "deviceId");
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * 构建客户端信息
      * 从Session中提取客户端IP、User-Agent等信息
      *
@@ -1043,6 +1113,145 @@ public class ImWebSocketEndpoint {
         } catch (Exception e) {
             log.warn("构建客户端信息失败: sessionId={}", session.getId(), e);
             return "{}";
+        }
+    }
+
+    /**
+     * 从查询字符串中提取指定参数
+     *
+     * @param queryString 查询字符串
+     * @param paramName   参数名
+     * @return 参数值，不存在返回null
+     */
+    private String extractParamFromQuery(String queryString, String paramName) {
+        if (queryString == null || queryString.isEmpty() || paramName == null) {
+            return null;
+        }
+
+        String[] params = queryString.split("&");
+        for (String param : params) {
+            if (param.startsWith(paramName + "=")) {
+                try {
+                    return java.net.URLDecoder.decode(param.substring(paramName.length() + 1), "UTF-8");
+                } catch (Exception e) {
+                    log.warn("解码参数失败: {}", param, e);
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 从Session中提取客户端IP地址
+     *
+     * @param session WebSocket会话
+     * @return IP地址
+     */
+    private String extractClientIpFromSession(Session session) {
+        try {
+            Object remoteAddress = session.getUserProperties().get("javax.websocket.endpoint.remoteAddress");
+            if (remoteAddress != null) {
+                return remoteAddress.toString();
+            }
+            return session.getId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 处理客户端ACK确认消息
+     * 处理消息的送达、接收、已读确认
+     *
+     * @param userId  用户ID
+     * @param payload ACK数据
+     * @param session WebSocket会话
+     */
+    private void handleAckMessage(Long userId, Object payload, Session session) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> ackData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
+            });
+
+            String ackType = (String) ackData.get("ackType");
+            Object messageIdObj = ackData.get("messageId");
+            Object clientMsgIdObj = ackData.get("clientMsgId");
+            String clientMsgId = clientMsgIdObj != null ? clientMsgIdObj.toString() : null;
+            Object deviceIdObj = ackData.get("deviceId");
+            String deviceId = deviceIdObj != null ? deviceIdObj.toString() : null;
+
+            if (messageIdObj == null) {
+                log.warn("ACK消息缺少messageId字段");
+                return;
+            }
+
+            Long messageId = Long.valueOf(messageIdObj.toString());
+
+            // 调用ACK服务记录确认
+            if (staticMessageAckService != null) {
+                switch (ackType) {
+                    case "deliver":
+                        // 送达确认（服务器收到消息）
+                        staticMessageAckService.recordDeliverAck(messageId, clientMsgId, userId);
+                        log.debug("记录送达ACK: messageId={}, clientMsgId={}", messageId, clientMsgId);
+                        break;
+                    case "receive":
+                        // 接收确认（客户端收到消息）
+                        staticMessageAckService.recordReceiveAck(messageId, userId, deviceId);
+                        log.debug("记录接收ACK: messageId={}, userId={}", messageId, userId);
+                        break;
+                    case "read":
+                        // 已读确认
+                        staticMessageAckService.recordReadAck(messageId, userId);
+                        log.debug("记录已读ACK: messageId={}, userId={}", messageId, userId);
+                        break;
+                    default:
+                        log.warn("未知的ACK类型: ackType={}", ackType);
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("处理ACK消息异常", e);
+        }
+    }
+
+    /**
+     * 处理会话同步事件
+     * 处理置顶、免打扰、归档、删除等会话操作，并广播到其他设备
+     *
+     * @param userId  用户ID
+     * @param payload 事件数据
+     * @param session WebSocket会话
+     */
+    private void handleConversationEvent(Long userId, Object payload, Session session) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> eventData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
+            });
+
+            String eventType = (String) eventData.get("eventType");
+            Object conversationIdObj = eventData.get("conversationId");
+            String deviceId = extractDeviceIdFromSession(session);
+
+            if (conversationIdObj == null) {
+                log.warn("会话事件缺少conversationId字段");
+                return;
+            }
+
+            Long conversationId = Long.valueOf(conversationIdObj.toString());
+
+            // 调用会话同步服务广播事件
+            if (staticConversationSyncService != null) {
+                staticConversationSyncService.broadcastConversationEvent(
+                        userId, conversationId, eventType, eventData, deviceId);
+            }
+
+            log.info("处理会话事件: userId={}, conversationId={}, eventType={}",
+                    userId, conversationId, eventType);
+
+        } catch (Exception e) {
+            log.error("处理会话事件异常", e);
         }
     }
 }

@@ -101,18 +101,20 @@ const getMessagePreview = msg => {
       return '[图片]'
     case 'VIDEO':
       return '[视频]'
-    case 'FILE':
+    case 'FILE': {
       const content = parseMessageContent(msg) || {}
       return `[文件] ${content.fileName || '未知文件'}`
+    }
     case 'AUDIO':
     case 'VOICE':
       return '[语音]'
     case 'RECALLED':
       return '[撤回]'
-    default:
+    default: {
       // 文本消息截取
       const text = msg.content || ''
       return text.length > 20 ? text.substring(0, 20) + '...' : text
+    }
   }
 }
 

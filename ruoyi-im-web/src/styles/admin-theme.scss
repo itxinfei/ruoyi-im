@@ -111,9 +111,9 @@
      字体 (Typography)
      ================================ */
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                   'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
-                   'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-                   'Noto Color Emoji';
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
 
   --dt-font-size-xs: 12px;
   --dt-font-size-sm: 13px;
@@ -345,7 +345,7 @@
   color: var(--dt-text-regular);
 }
 
-[data-theme='dark'] .el-table--enable-row-hover .el-table__body tr:hover > td {
+[data-theme='dark'] .el-table--enable-row-hover .el-table__body tr:hover>td {
   background-color: var(--dt-table-row-hover) !important;
 }
 
@@ -353,7 +353,7 @@
   background-color: var(--dt-table-stripe) !important;
 }
 
-[data-theme='dark'] .el-table__body tr.current-row > td {
+[data-theme='dark'] .el-table__body tr.current-row>td {
   background-color: var(--dt-table-row-selected) !important;
 }
 
@@ -530,23 +530,239 @@
   transform: translateY(0);
 }
 
-// 钉钉风格：消息对话框标题样式
-.el-message-box__title {
-  font-weight: 600;
-  color: var(--dt-text-primary);
+/* ================================
+   MessageBox 样式优化（钉钉风格）
+   ================================ */
+// MessageBox 固定定位并居中显示
+.el-message-box {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  max-width: 520px;
+  width: 90vw;
+  max-height: 90vh;
+  z-index: 3000;
+  box-shadow: var(--dt-shadow-dark);
+  border-radius: var(--dt-radius-lg);
+  border: 1px solid var(--dt-border-light);
+  overflow: hidden;
+  animation: dtMessageBoxFadeIn 0.2s var(--dt-ease-out);
+  background-color: var(--dt-bg-card);
 }
 
-[data-theme='dark'] .el-message-box__title {
-  color: var(--dt-text-primary-dark);
+// 淡入动画
+@keyframes dtMessageBoxFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+// MessageBox 遮罩层样式美化（不强行覆盖定位和层级）
+.el-overlay:has(.el-message-box) {
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: dtOverlayFadeIn 0.2s ease-out;
+}
+
+@keyframes dtOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+// 确保 MessageBox 在遮罩层之上
+.el-overlay .el-message-box {
+  z-index: 3000;
+}
+
+// MessageBox 响应式优化
+@media (max-width: 768px) {
+  .el-message-box {
+    max-width: 95vw;
+    max-height: 85vh;
+    width: 95vw;
+  }
+}
+
+// 钉钉风格：消息对话框头部
+.el-message-box__header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--dt-divider);
+  background-color: var(--dt-bg-card);
+}
+
+// 钉钉风格：消息对话框标题样式
+.el-message-box__title {
+  font-weight: var(--dt-font-weight-semibold);
+  font-size: var(--dt-font-size-md);
+  color: var(--dt-text-primary);
+  margin: 0;
+  padding: 0;
 }
 
 // 钉钉风格：消息对话框内容样式
 .el-message-box__content {
+  padding: 24px;
   color: var(--dt-text-regular);
+  font-size: var(--dt-font-size-base);
+  line-height: var(--dt-line-height-loose);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  background-color: var(--dt-bg-card);
+}
+
+// 图标样式
+.el-message-box__content .el-icon {
+  font-size: 24px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.el-message-box__content .el-icon-warning {
+  color: var(--dt-warning);
+}
+
+.el-message-box__content .el-icon-error {
+  color: var(--dt-error);
+}
+
+.el-message-box__content .el-icon-success {
+  color: var(--dt-success);
+}
+
+.el-message-box__content .el-icon-info {
+  color: var(--dt-info);
+}
+
+// 钉钉风格：消息对话框底部
+.el-message-box__footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--dt-divider);
+  background-color: var(--dt-bg-card);
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+// 钉钉风格：消息对话框按钮
+.el-message-box__btns {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.el-message-box__btns .el-button {
+  min-width: 90px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
+  transition: all var(--dt-transition-base) var(--dt-ease-out);
+  flex: 0 0 auto;
+}
+
+.el-message-box__btns .el-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+}
+
+.el-message-box__btns .el-button:active {
+  transform: translateY(0);
+}
+
+// 确保按钮文字颜色正确
+.el-message-box__btns .el-button--primary {
+  color: #FFFFFF;
+}
+
+// 钉钉风格：消息对话框输入框
+.el-message-box__input {
+  margin-top: 16px;
+}
+
+.el-message-box__input .el-input {
+  width: 100%;
+}
+
+.el-message-box__input .el-input__wrapper {
+  border-radius: var(--dt-radius-md);
+}
+
+.el-message-box__input .el-input__inner {
+  font-size: var(--dt-font-size-base);
+}
+
+// 深色模式下的 MessageBox 样式
+[data-theme='dark'] .el-message-box {
+  background-color: var(--dt-bg-card);
+  border-color: var(--dt-border-base);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .el-message-box__header {
+  background-color: var(--dt-bg-card);
+  border-bottom-color: var(--dt-divider);
+}
+
+[data-theme='dark'] .el-message-box__title {
+  color: var(--dt-text-primary);
 }
 
 [data-theme='dark'] .el-message-box__content {
-  color: var(--dt-text-regular-dark);
+  background-color: var(--dt-bg-card);
+  color: var(--dt-text-regular);
+}
+
+[data-theme='dark'] .el-message-box__footer {
+  background-color: var(--dt-bg-card);
+  border-top-color: var(--dt-divider);
+}
+
+[data-theme='dark'] .el-overlay:has(.el-message-box) {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+// 响应式调整
+@media (max-width: 480px) {
+  .el-message-box__header {
+    padding: 16px 20px 12px;
+  }
+
+  .el-message-box__content {
+    padding: 20px;
+    min-height: 60px;
+  }
+
+  .el-message-box__footer {
+    padding: 12px 20px 16px;
+  }
+
+  .el-message-box__btns {
+    gap: 8px;
+  }
+
+  .el-message-box__btns .el-button {
+    min-width: 80px;
+    height: 32px;
+    padding: 0 12px;
+    font-size: var(--dt-font-size-sm);
+  }
 }
 
 [data-theme='dark'] .el-notification {
@@ -583,12 +799,10 @@
 }
 
 [data-theme='dark'] .el-skeleton__p {
-  background: linear-gradient(
-    90deg,
-    var(--dt-fill-color) 25%,
-    var(--dt-fill-color-light) 37%,
-    var(--dt-fill-color) 63%
-  );
+  background: linear-gradient(90deg,
+      var(--dt-fill-color) 25%,
+      var(--dt-fill-color-light) 37%,
+      var(--dt-fill-color) 63%);
 }
 
 /* 开关组件深色模式 */
@@ -859,11 +1073,11 @@
   color: var(--dt-text-regular);
 }
 
-[data-theme='dark'] .el-checkbox__input.is-checked + .el-checkbox__label {
+[data-theme='dark'] .el-checkbox__input.is-checked+.el-checkbox__label {
   color: var(--dt-text-primary);
 }
 
-[data-theme='dark'] .el-checkbox__input.is-disabled + .el-checkbox__label {
+[data-theme='dark'] .el-checkbox__input.is-disabled+.el-checkbox__label {
   color: var(--dt-text-disabled);
 }
 
@@ -874,11 +1088,11 @@
   color: var(--dt-text-regular);
 }
 
-[data-theme='dark'] .el-radio__input.is-checked + .el-radio__label {
+[data-theme='dark'] .el-radio__input.is-checked+.el-radio__label {
   color: var(--dt-text-primary);
 }
 
-[data-theme='dark'] .el-radio__input.is-disabled + .el-radio__label {
+[data-theme='dark'] .el-radio__input.is-disabled+.el-radio__label {
   color: var(--dt-text-disabled);
 }
 
@@ -920,7 +1134,7 @@
   background-color: var(--dt-bg-card);
 }
 
-[data-theme='dark'] .el-menu--collapse .el-sub-menu.is-opened > .el-sub-menu__title .el-sub-menu__icon-arrow {
+[data-theme='dark'] .el-menu--collapse .el-sub-menu.is-opened>.el-sub-menu__title .el-sub-menu__icon-arrow {
   color: var(--dt-text-secondary);
 }
 
@@ -1137,7 +1351,7 @@
   background-color: var(--dt-bg-hover);
 }
 
-[data-theme='dark'] .el-tree-node.is-current > .el-tree-node__content {
+[data-theme='dark'] .el-tree-node.is-current>.el-tree-node__content {
   background-color: var(--dt-bg-active);
   color: var(--dt-primary);
 }
@@ -1229,36 +1443,104 @@ a:hover {
    ================================ */
 
 /* 文字颜色 */
-.dt-text-primary { color: var(--dt-text-primary); }
-.dt-text-regular { color: var(--dt-text-regular); }
-.dt-text-secondary { color: var(--dt-text-secondary); }
-.dt-text-success { color: var(--dt-success); }
-.dt-text-warning { color: var(--dt-warning); }
-.dt-text-error { color: var(--dt-error); }
-.dt-text-link { color: var(--dt-text-link); }
+.dt-text-primary {
+  color: var(--dt-text-primary);
+}
+
+.dt-text-regular {
+  color: var(--dt-text-regular);
+}
+
+.dt-text-secondary {
+  color: var(--dt-text-secondary);
+}
+
+.dt-text-success {
+  color: var(--dt-success);
+}
+
+.dt-text-warning {
+  color: var(--dt-warning);
+}
+
+.dt-text-error {
+  color: var(--dt-error);
+}
+
+.dt-text-link {
+  color: var(--dt-text-link);
+}
 
 /* 背景色 */
-.dt-bg-page { background-color: var(--dt-bg-page); }
-.dt-bg-card { background-color: var(--dt-bg-card); }
-.dt-bg-primary { background-color: var(--dt-primary); }
-.dt-bg-success { background-color: var(--dt-success-bg); }
-.dt-bg-warning { background-color: var(--dt-warning-bg); }
-.dt-bg-error { background-color: var(--dt-error-bg); }
+.dt-bg-page {
+  background-color: var(--dt-bg-page);
+}
+
+.dt-bg-card {
+  background-color: var(--dt-bg-card);
+}
+
+.dt-bg-primary {
+  background-color: var(--dt-primary);
+}
+
+.dt-bg-success {
+  background-color: var(--dt-success-bg);
+}
+
+.dt-bg-warning {
+  background-color: var(--dt-warning-bg);
+}
+
+.dt-bg-error {
+  background-color: var(--dt-error-bg);
+}
 
 /* 间距 */
-.dt-m-xs { margin: var(--dt-space-xs); }
-.dt-m-sm { margin: var(--dt-space-sm); }
-.dt-m-md { margin: var(--dt-space-md); }
-.dt-m-lg { margin: var(--dt-space-lg); }
-.dt-p-xs { padding: var(--dt-space-xs); }
-.dt-p-sm { padding: var(--dt-space-sm); }
-.dt-p-md { padding: var(--dt-space-md); }
-.dt-p-lg { padding: var(--dt-space-lg); }
+.dt-m-xs {
+  margin: var(--dt-space-xs);
+}
+
+.dt-m-sm {
+  margin: var(--dt-space-sm);
+}
+
+.dt-m-md {
+  margin: var(--dt-space-md);
+}
+
+.dt-m-lg {
+  margin: var(--dt-space-lg);
+}
+
+.dt-p-xs {
+  padding: var(--dt-space-xs);
+}
+
+.dt-p-sm {
+  padding: var(--dt-space-sm);
+}
+
+.dt-p-md {
+  padding: var(--dt-space-md);
+}
+
+.dt-p-lg {
+  padding: var(--dt-space-lg);
+}
 
 /* 圆角 */
-.dt-radius-sm { border-radius: var(--dt-radius-sm); }
-.dt-radius-md { border-radius: var(--dt-radius-md); }
-.dt-radius-lg { border-radius: var(--dt-radius-lg); }
+.dt-radius-sm {
+  border-radius: var(--dt-radius-sm);
+}
+
+.dt-radius-md {
+  border-radius: var(--dt-radius-md);
+}
+
+.dt-radius-lg {
+  border-radius: var(--dt-radius-lg);
+}
 
 /* 卡片样式 */
 .dt-card {
@@ -1271,9 +1553,17 @@ a:hover {
 }
 
 /* 阴影 */
-.dt-shadow-light { box-shadow: var(--dt-shadow-light); }
-.dt-shadow-base { box-shadow: var(--dt-shadow-base); }
-.dt-shadow-card { box-shadow: var(--dt-shadow-card); }
+.dt-shadow-light {
+  box-shadow: var(--dt-shadow-light);
+}
+
+.dt-shadow-base {
+  box-shadow: var(--dt-shadow-base);
+}
+
+.dt-shadow-card {
+  box-shadow: var(--dt-shadow-card);
+}
 
 /* ================================
    滚动条样式

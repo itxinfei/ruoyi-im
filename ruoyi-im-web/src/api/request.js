@@ -5,6 +5,93 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { getToken, getUserInfo, clearAuth } from '@/utils/storage'
+import { debug, warn, error as logError } from '@/utils/logger'
+
+const LOG_TAG = 'API'
+const SENSITIVE_HEADER_KEYS = new Set(['authorization', 'cookie'])
+const SENSITIVE_BODY_KEYS = new Set([
+  'password',
+  'pwd',
+  'token',
+  'accessToken',
+  'refreshToken',
+  'authorization'
+])
+
+function createRequestId() {
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`
+}
+
+function nowMs() {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now()
+  }
+  return Date.now()
+}
+
+function abbreviate(value, maxLength = 1000) {
+  if (value === null || value === undefined) {
+    return value
+  }
+  const str = typeof value === 'string' ? value : String(value)
+  if (str.length <= maxLength) {
+    return str
+  }
+  return `${str.slice(0, maxLength)}...`
+}
+
+function safeHeaders(headers) {
+  if (!headers) {
+    return {}
+  }
+  const out = {}
+  const entries = Object.entries(headers)
+  for (const [key, value] of entries) {
+    const lower = String(key).toLowerCase()
+    if (SENSITIVE_HEADER_KEYS.has(lower)) {
+      out[key] = '[REDACTED]'
+    } else {
+      out[key] = value
+    }
+  }
+  return out
+}
+
+function safeData(data) {
+  if (data === null || data === undefined) {
+    return data
+  }
+  if (typeof FormData !== 'undefined' && data instanceof FormData) {
+    return '[FormData]'
+  }
+  if (typeof ArrayBuffer !== 'undefined' && data instanceof ArrayBuffer) {
+    return `[ArrayBuffer ${data.byteLength}]`
+  }
+  if (typeof Blob !== 'undefined' && data instanceof Blob) {
+    return `[Blob ${data.size}]`
+  }
+  if (typeof data === 'string') {
+    return abbreviate(data, 2000)
+  }
+  if (typeof data !== 'object') {
+    return data
+  }
+
+  try {
+    const json = JSON.stringify(data, (key, value) => {
+      if (!key) {
+        return value
+      }
+      if (SENSITIVE_BODY_KEYS.has(String(key))) {
+        return '[REDACTED]'
+      }
+      return value
+    })
+    return abbreviate(json, 2000)
+  } catch (e) {
+    return '[Unserializable]'
+  }
+}
 
 // 错误消息队列，防止重复弹窗
 const errorQueue = new Set()
@@ -90,6 +177,9 @@ service.interceptors.request.use(
   config => {
     requestCount++
 
+    config._requestId = createRequestId()
+    config._requestStart = nowMs()
+
     // 支持静默模式
     if (config.silent === true) {
       config._silent = true
@@ -107,6 +197,16 @@ service.interceptors.request.use(
       config.headers['userId'] = String(userInfo.id)
     }
 
+    debug(LOG_TAG, '->', {
+      id: config._requestId,
+      method: (config.method || 'GET').toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      params: safeData(config.params),
+      data: safeData(config.data),
+      headers: safeHeaders(config.headers)
+    })
+
     return config
   },
   error => {
@@ -118,10 +218,23 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   response => {
     const res = response.data
+    const duration = response.config?._requestStart
+      ? Math.round(nowMs() - response.config._requestStart)
+      : null
 
     // 如果返回的状态码不是 200，则判断为错误
     if (res.code !== undefined && res.code !== 200) {
       const errorMessage = res.msg || '请求失败'
+      warn(LOG_TAG, '<- business_error', {
+        id: response.config?._requestId,
+        method: (response.config?.method || 'GET').toUpperCase(),
+        url: response.config?.url,
+        status: response.status,
+        code: res.code,
+        msg: res.msg,
+        duration,
+        data: safeData(res.data)
+      })
 
       // 401: 未授权 - 总是显示并清除 token
       if (res.code === 401) {
@@ -141,6 +254,15 @@ service.interceptors.response.use(
       return Promise.reject(new Error(errorMessage))
     }
 
+    debug(LOG_TAG, '<-', {
+      id: response.config?._requestId,
+      method: (response.config?.method || 'GET').toUpperCase(),
+      url: response.config?.url,
+      status: response.status,
+      code: res.code,
+      duration
+    })
+
     return res
   },
   error => {
@@ -158,6 +280,17 @@ service.interceptors.response.use(
       }
       return Promise.reject(error)
     }
+
+    const duration = error.config?._requestStart ? Math.round(nowMs() - error.config._requestStart) : null
+    logError(LOG_TAG, '<- error', {
+      id: error.config?._requestId,
+      method: (error.config?.method || 'GET').toUpperCase(),
+      url: error.config?.url,
+      status: error.response?.status,
+      duration,
+      message: error.message,
+      data: safeData(error.response?.data)
+    })
 
     // 获取错误消息
     const errorMessage = getErrorMessage(error)

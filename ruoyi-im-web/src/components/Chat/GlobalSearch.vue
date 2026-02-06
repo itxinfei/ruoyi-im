@@ -144,6 +144,7 @@ import { getJSON, removeItem, setJSON } from '@/utils/storage'
 
 import { useStore } from 'vuex'
 import { Loading } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { searchMessages } from '@/api/im/message'
 import { createConversation } from '@/api/im/conversation'
 

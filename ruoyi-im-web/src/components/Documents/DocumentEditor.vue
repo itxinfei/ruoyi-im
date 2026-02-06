@@ -13,11 +13,17 @@
           placeholder="文档标题"
           @blur="saveTitle"
         >
-        <span v-if="saving" class="saving-status">
+        <span
+          v-if="saving"
+          class="saving-status"
+        >
           <span class="material-icons-outlined spinning">sync</span>
           保存中...
         </span>
-        <span v-else-if="lastSaved" class="saved-status">
+        <span
+          v-else-if="lastSaved"
+          class="saved-status"
+        >
           已保存 {{ lastSaved }}
         </span>
       </div>
@@ -35,7 +41,10 @@
           >
             {{ user.userName?.charAt(0) }}
           </el-avatar>
-          <span v-if="onlineUsers.length > 0" class="online-count">
+          <span
+            v-if="onlineUsers.length > 0"
+            class="online-count"
+          >
             {{ onlineUsers.length }} 人在线
           </span>
         </div>
@@ -51,7 +60,7 @@
         </el-button>
         <el-button
           size="small"
-          :icon="History"
+          :icon="Clock"
           @click="showHistoryPanel = !showHistoryPanel"
         >
           历史
@@ -93,7 +102,10 @@
         <div class="toolbar-divider" />
 
         <div class="toolbar-group">
-          <el-dropdown trigger="click" @command="handleFontSize">
+          <el-dropdown
+            trigger="click"
+            @command="handleFontSize"
+          >
             <button class="toolbar-btn">
               <span class="material-icons-outlined">format_size</span>
             </button>
@@ -182,9 +194,15 @@
       </div>
 
       <!-- 右侧面板：历史记录或评论 -->
-      <div v-if="showHistoryPanel || showCommentsPanel" class="editor-side-panel">
+      <div
+        v-if="showHistoryPanel || showCommentsPanel"
+        class="editor-side-panel"
+      >
         <!-- 历史记录 -->
-        <div v-if="showHistoryPanel" class="history-panel">
+        <div
+          v-if="showHistoryPanel"
+          class="history-panel"
+        >
           <div class="panel-header">
             <h3>版本历史</h3>
             <el-button
@@ -215,7 +233,10 @@
         </div>
 
         <!-- 评论区 -->
-        <div v-if="showCommentsPanel" class="comments-panel">
+        <div
+          v-if="showCommentsPanel"
+          class="comments-panel"
+        >
           <div class="panel-header">
             <h3>评论 ({{ comments.length }})</h3>
             <el-button
@@ -232,7 +253,10 @@
               :key="comment.id"
               class="comment-item"
             >
-              <el-avatar :size="32" :src="comment.creatorAvatar">
+              <el-avatar
+                :size="32"
+                :src="comment.creatorAvatar"
+              >
                 {{ comment.creatorName?.charAt(0) }}
               </el-avatar>
               <div class="comment-content">
@@ -240,7 +264,9 @@
                   <span class="comment-author">{{ comment.creatorName }}</span>
                   <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
                 </div>
-                <div class="comment-text">{{ comment.content }}</div>
+                <div class="comment-text">
+                  {{ comment.content }}
+                </div>
               </div>
             </div>
             <!-- 添加评论输入框 -->
@@ -289,7 +315,10 @@
                 :value="user.userId"
               >
                 <div class="user-option">
-                  <el-avatar :size="24" :src="user.avatar">
+                  <el-avatar
+                    :size="24"
+                    :src="user.avatar"
+                  >
                     {{ user.userName?.charAt(0) }}
                   </el-avatar>
                   <span>{{ user.userName }}</span>
@@ -299,9 +328,15 @@
           </el-form-item>
           <el-form-item label="权限">
             <el-radio-group v-model="collaboratorPermission">
-              <el-radio label="EDIT">可编辑</el-radio>
-              <el-radio label="COMMENT">可评论</el-radio>
-              <el-radio label="VIEW">仅查看</el-radio>
+              <el-radio label="EDIT">
+                可编辑
+              </el-radio>
+              <el-radio label="COMMENT">
+                可评论
+              </el-radio>
+              <el-radio label="VIEW">
+                仅查看
+              </el-radio>
             </el-radio-group>
           </el-form-item>
         </el-form>
@@ -314,11 +349,17 @@
               :key="collaborator.userId"
               class="collaborator-item"
             >
-              <el-avatar :size="32" :src="collaborator.avatar">
+              <el-avatar
+                :size="32"
+                :src="collaborator.avatar"
+              >
                 {{ collaborator.userName?.charAt(0) }}
               </el-avatar>
               <span class="collaborator-name">{{ collaborator.userName }}</span>
-              <el-tag :type="getPermissionType(collaborator.permission)" size="small">
+              <el-tag
+                :type="getPermissionType(collaborator.permission)"
+                size="small"
+              >
                 {{ getPermissionLabel(collaborator.permission) }}
               </el-tag>
               <el-button
@@ -335,8 +376,13 @@
         </div>
       </div>
       <template #footer>
-        <el-button @click="showShareDialog = false">取消</el-button>
-        <el-button type="primary" @click="addCollaborators">
+        <el-button @click="showShareDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="addCollaborators"
+        >
           添加
         </el-button>
       </template>
@@ -349,7 +395,7 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Share,
-  History,
+  Clock,
   Comment,
   Close
 } from '@element-plus/icons-vue'
@@ -367,7 +413,7 @@ import {
   getDocumentComments,
   addDocumentComment
 } from '@/api/im/document'
-import { useWebSocket } from '@/composables/useImWebSocket'
+import { useImWebSocket } from '@/composables/useImWebSocket'
 import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
@@ -549,7 +595,7 @@ function insertImage() {
   const input = document.createElement('input')
   input.type = 'file'
   input.accept = 'image/*'
-  input.onchange = async (e) => {
+  input.onchange = async e => {
     const file = e.target.files[0]
     if (file) {
       // TODO: 上传图片并插入
@@ -607,7 +653,7 @@ function scheduleSave() {
 }
 
 async function saveDocument() {
-  if (saving.value) return
+  if (saving.value) {return}
 
   saving.value = true
   try {
@@ -656,7 +702,7 @@ function setupWebSocketListeners() {
 
 // ========== 评论功能 ==========
 async function addComment() {
-  if (!newComment.value.trim()) return
+  if (!newComment.value.trim()) {return}
 
   try {
     const res = await addDocumentComment(props.documentId, {
@@ -752,14 +798,14 @@ function getPermissionLabel(permission) {
 
 // ========== 工具函数 ==========
 function formatTime(time) {
-  if (!time) return ''
+  if (!time) {return ''}
   const date = new Date(time)
   const now = new Date()
   const diff = now - date
 
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
-  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
+  if (diff < 60000) {return '刚刚'}
+  if (diff < 3600000) {return Math.floor(diff / 60000) + '分钟前'}
+  if (diff < 86400000) {return Math.floor(diff / 3600000) + '小时前'}
 
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString().slice(0, 5)
 }
@@ -773,7 +819,7 @@ function handleClose() {
       type: 'warning'
     }).then(() => {
       saveDocument().then(() => emit('close'))
-    }).catch((action) => {
+    }).catch(action => {
       if (action === 'cancel') {
         emit('close')
       }

@@ -1,177 +1,97 @@
 <template>
-  <div
-    ref="listRef"
-    class="message-list"
-    @scroll="handleScroll"
-  >
+  <div ref="listRef" class="message-list" @scroll="handleScroll">
     <!-- 首次加载骨架屏 -->
-    <SkeletonLoader
-      v-if="loading && messages.length === 0"
-      type="message"
-      :count="6"
-    />
+    <SkeletonLoader v-if="loading && messages.length === 0" type="message" :count="6" />
 
     <!-- 空状态 -->
-    <div
-      v-else-if="messages.length === 0 && !loading"
-      class="empty"
-    >
+    <div v-else-if="messages.length === 0 && !loading" class="empty">
       暂无消息
     </div>
 
     <!-- 消息内容 - 虚拟滚动优化 -->
     <template v-else>
       <!-- 顶部占位符：维持滚动高度 -->
-      <div
-        v-if="isLazyLoadingEnabled"
-        class="virtual-spacer-top"
-        :style="{ height: topSpacerHeight + 'px' }"
-      />
+      <div v-if="isLazyLoadingEnabled" class="virtual-spacer-top" :style="{ height: topSpacerHeight + 'px' }" />
 
       <!-- 可见消息列表 -->
-      <div
-        v-for="msg in visibleMessagesComputed"
-        :key="msg.id || msg.timeText"
-        :data-id="msg.id"
-        class="message-wrapper"
-      >
+      <div v-for="msg in visibleMessagesComputed" :key="msg.id || msg.timeText" :data-id="msg.id"
+        class="message-wrapper">
         <!-- 时间分隔符 -->
-        <div
-          v-if="msg.isTimeDivider"
-          class="time-divider"
-        >
+        <div v-if="msg.isTimeDivider" class="time-divider">
           <span class="time-text">{{ msg.timeText }}</span>
         </div>
 
         <!-- 消息项组件 -->
-        <MessageItem
-          v-else
-          :message="msg"
-          :multi-select-mode="multiSelectMode"
-          @reply="$emit('reply', $event)"
-          @reaction="handleReaction"
-          @command="handleCommand"
-          @scroll-to="scrollToMsg"
-          @at="$emit('at', $event)"
-          @show-user="$emit('show-user', $event)"
-          @retry="$emit('retry', $event)"
-          @nudge="handleNudge"
-          @long-press="$emit('long-press', $event)"
-        >
+        <MessageItem v-else :message="msg" :multi-select-mode="multiSelectMode" @reply="$emit('reply', $event)"
+          @reaction="handleReaction" @command="handleCommand" @scroll-to="scrollToMsg" @at="$emit('at', $event)"
+          @show-user="$emit('show-user', $event)" @retry="$emit('retry', $event)" @nudge="handleNudge"
+          @long-press="$emit('long-press', $event)">
           <!-- 消息气泡内容插槽 -->
           <template #bubble>
-            <MessageBubble
-              :message="msg"
-              :session-type="sessionType"
-              :is-large-group="isLargeGroup"
-              @command="handleCommand($event, msg)"
-              @at="$emit('at', msg)"
-              @preview="previewImage"
-              @download="downloadFile"
-              @retry="$emit('retry', $event)"
-              @add-reaction="handleAddReaction"
-              @re-edit="handleReEdit"
-            />
+            <MessageBubble :message="msg" :session-type="sessionType" :is-large-group="isLargeGroup"
+              @command="handleCommand($event, msg)" @at="$emit('at', msg)" @preview="previewImage"
+              @download="downloadFile" @retry="$emit('retry', $event)" @add-reaction="handleAddReaction"
+              @re-edit="handleReEdit" />
           </template>
 
           <!-- 已读状态插槽 -->
           <template #read-status>
             <!-- 群聊：显示已读人数，可悬停查看详情 -->
-            <el-popover
-              v-if="sessionType === 'GROUP' && (msg.readCount > 0 || msg.isRead)"
-              placement="top"
-              :width="220"
-              trigger="hover"
-              popper-class="read-receipt-popover"
-              @before-enter="fetchReadUsers(msg)"
-            >
+            <el-popover v-if="sessionType === 'GROUP' && (msg.readCount > 0 || msg.isRead)" placement="top" :width="220"
+              trigger="hover" popper-class="read-receipt-popover" @before-enter="fetchReadUsers(msg)">
               <template #reference>
                 <span class="read-count clickable">
                   {{ msg.readCount > 0 ? `${msg.readCount}人已读` : '已读' }}
                 </span>
               </template>
-              <div
-                v-loading="loadingReadUsers[msg.id]"
-                class="read-users-list"
-              >
+              <div v-loading="loadingReadUsers[msg.id]" class="read-users-list">
                 <div class="read-users-header">
                   <span class="read-title">已读成员</span>
-                  <span
-                    v-if="readUsersMap[msg.id]"
-                    class="read-count-badge"
-                  >{{ readUsersMap[msg.id].length }}</span>
+                  <span v-if="readUsersMap[msg.id] && readUsersMap[msg.id].length > 0" class="read-count-badge">{{
+                    readUsersMap[msg.id].length }}</span>
                 </div>
                 <div class="read-users-body">
-                  <div
-                    v-for="user in readUsersMap[msg.id]"
-                    :key="user.id"
-                    class="read-user-item"
-                  >
-                    <DingtalkAvatar
-                      :src="user.avatar"
-                      :name="user.name"
-                      :user-id="user.id"
-                      :size="32"
-                      shape="square"
-                    />
+                  <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
+                    <DingtalkAvatar :src="user.avatar" :name="user.name" :user-id="user.id" :size="32" shape="square" />
                     <span class="user-name">{{ user.name }}</span>
                   </div>
-                  <div
-                    v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)"
-                    class="empty-state"
-                  >
-                    <el-icon><User /></el-icon>
+                  <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)"
+                    class="empty-state">
+                    <el-icon>
+                      <User />
+                    </el-icon>
                     <span>暂无已读成员</span>
                   </div>
                 </div>
                 <!-- 显示未读人数 -->
-                <div
-                  v-if="unreadCount(msg)"
-                  class="unread-users-footer"
-                >
+                <div v-if="unreadCount(msg)" class="unread-users-footer">
                   <span>未读 {{ unreadCount(msg) }} 人</span>
                 </div>
               </div>
             </el-popover>
             <!-- 单聊：只显示已读/未读 -->
-            <span
-              v-else-if="sessionType === 'PRIVATE'"
-              class="read-status-simple"
-              :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }"
-            >
+            <span v-else-if="sessionType === 'PRIVATE'" class="read-status-simple"
+              :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }">
               {{ msg.isRead || msg.readCount > 0 ? '已读' : '未读' }}
             </span>
             <!-- 无已读数据时显示未读 -->
-            <span
-              v-else
-              class="unread"
-            >未读</span>
+            <span v-else class="unread">未读</span>
           </template>
         </MessageItem>
       </div>
 
       <!-- 底部占位符：维持滚动高度 -->
-      <div
-        v-if="isLazyLoadingEnabled"
-        class="virtual-spacer-bottom"
-        :style="{ height: bottomSpacerHeight + 'px' }"
-      />
+      <div v-if="isLazyLoadingEnabled" class="virtual-spacer-bottom" :style="{ height: bottomSpacerHeight + 'px' }" />
 
       <!-- 加载更多骨架屏 -->
-      <SkeletonLoader
-        v-if="loading && messages.length > 0"
-        type="message"
-        :count="3"
-      />
+      <SkeletonLoader v-if="loading && messages.length > 0" type="message" :count="3" />
 
       <!-- 滚动到底部按钮 -->
       <transition name="fade">
-        <div
-          v-if="showScrollToBottom"
-          class="scroll-to-bottom"
-          @click="scrollToBottom"
-        >
-          <el-icon><ArrowDown /></el-icon>
+        <div v-if="showScrollToBottom" class="scroll-to-bottom" @click="scrollToBottom">
+          <el-icon>
+            <ArrowDown />
+          </el-icon>
           <span>回到底部</span>
         </div>
       </transition>
@@ -192,7 +112,7 @@ import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import { copyToClipboard } from '@/utils/format'
 
 // 组合式函数
-import { useMessageVirtualScroll } from './composables/useMessageVirtualScroll.js'
+import { useMessageVirtualScroll, AVERAGE_MESSAGE_HEIGHT } from './composables/useMessageVirtualScroll.js'
 import { useMessageReadUsers } from './composables/useMessageReadUsers.js'
 import { useMessageScroll } from './composables/useMessageScroll.js'
 
@@ -253,7 +173,7 @@ const {
 } = useMessageScroll(listRef, emit, isUnmounted)
 
 // 使用本地增强版 scrollToMsg，但调用 composable 的基础功能
-const handleScroll = (event) => {
+const handleScroll = event => {
   // 更新虚拟滚动的位置信息
   if (listRef.value) {
     updateScrollPosition(listRef.value)
@@ -278,7 +198,7 @@ watch(() => props.messages.length, (newLength, oldLength) => {
 
 // 计算未读人数（群聊中需要知道群成员总数）
 const unreadCount = msg => {
-  if (!msg.groupMemberCount) {return null}
+  if (!msg.groupMemberCount) { return null }
   const readCount = msg.readCount || 0
   return Math.max(0, msg.groupMemberCount - readCount)
 }
@@ -290,7 +210,7 @@ const previewImage = clickedUrl => {
 
 // 下载文件
 const downloadFile = fileInfo => {
-  if (!fileInfo.fileUrl) {return}
+  if (!fileInfo.fileUrl) { return }
   window.open(fileInfo.fileUrl, '_blank')
 }
 
@@ -301,7 +221,7 @@ const handleReEdit = ({ content }) => {
 
 // 处理拍一拍
 const handleNudge = async nudgedUserId => {
-  if (!props.sessionId) {return}
+  if (!props.sessionId) { return }
 
   try {
     const res = await sendNudge({
@@ -340,9 +260,9 @@ const formatTimeDivider = timestamp => {
     hour12: false
   })
 
-  if (diffDays === 0) {return timeStr}
-  if (diffDays === 1) {return `昨天 ${timeStr}`}
-  if (diffDays === 2) {return `前天 ${timeStr}`}
+  if (diffDays === 0) { return timeStr }
+  if (diffDays === 1) { return `昨天 ${timeStr}` }
+  if (diffDays === 2) { return `前天 ${timeStr}` }
   if (diffDays < 7) {
     const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
     return `${weekDays[date.getDay()]} ${timeStr}`
@@ -362,23 +282,23 @@ const formatTimeDivider = timestamp => {
 // 3. 非特殊消息类型（如撤回消息、系统消息、拍一拍等）
 // 4. 自己的消息和对方的消息都可以合并
 const canMergeWith = (currentMsg, prevMsg) => {
-  if (!prevMsg) {return false}
+  if (!prevMsg) { return false }
 
   // 必须是同一发送者
-  if (currentMsg.senderId !== prevMsg.senderId) {return false}
+  if (currentMsg.senderId !== prevMsg.senderId) { return false }
 
   // 必须是同一消息归属（自己的/对方的）
-  if (currentMsg.isOwn !== prevMsg.isOwn) {return false}
+  if (currentMsg.isOwn !== prevMsg.isOwn) { return false }
 
   // 时间间隔小于 2 分钟（120000ms）
   const MERGE_TIME_THRESHOLD = 2 * 60 * 1000
   const timeDiff = currentMsg.timestamp - prevMsg.timestamp
-  if (timeDiff > MERGE_TIME_THRESHOLD) {return false}
+  if (timeDiff > MERGE_TIME_THRESHOLD) { return false }
 
   // 特殊消息类型不合并
   const nonMergeableTypes = ['RECALLED', 'SYSTEM', 'NOTICE', 'NUDGE']
-  if (nonMergeableTypes.includes(currentMsg.type)) {return false}
-  if (nonMergeableTypes.includes(prevMsg.type)) {return false}
+  if (nonMergeableTypes.includes(currentMsg.type)) { return false }
+  if (nonMergeableTypes.includes(prevMsg.type)) { return false }
 
   return true
 }
@@ -416,7 +336,7 @@ const messagesWithDividers = computed(() => {
 
 // 判断是否需要添加时间分割线
 const shouldAddTimeDivider = (currentMsg, prevMsg) => {
-  if (!prevMsg) {return true}
+  if (!prevMsg) { return true }
 
   const currentTime = currentMsg.timestamp
   const prevTime = prevMsg.timestamp
@@ -453,11 +373,8 @@ const handlePinMessage = async msg => {
       ElMessage.success('已置顶消息')
     }
 
-    // 更新本地消息状态
-    const index = props.messages.findIndex(m => m.id === msg.id)
-    if (index !== -1) {
-      props.messages[index].isPinned = !msg.isPinned
-    }
+    // 通过事件更新消息状态
+    emit('message-update', { ...msg, isPinned: !msg.isPinned })
   } catch (error) {
     console.error('置顶操作失败:', error)
     ElMessage.error(msg.isPinned ? '取消置顶失败' : '置顶失败')
@@ -499,7 +416,7 @@ const scrollToMsg = param => {
     }
 
     // 临时扩大渲染范围：找到目标消息的索引
-    const targetIndex = messagesWithDividers.value.findIndex(m => m.id == messageId)
+    const targetIndex = messagesWithDividers.value.findIndex(m => m.id === messageId)
     if (targetIndex === -1) {
       ElMessage.warning('消息不存在')
       return
@@ -520,7 +437,7 @@ const scrollToMsg = param => {
   const performScroll = () => {
     // 使用 nextTick 确保 DOM 更新
     nextTick(() => {
-      if (isUnmounted.value) {return} // 组件已卸载，不执行 DOM 操作
+      if (isUnmounted.value) { return } // 组件已卸载，不执行 DOM 操作
       const el = listRef.value?.querySelector(`[data-id="${messageId}"]`)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -548,7 +465,7 @@ const visibleRange = ref({ start: 0, end: 0 })
 // 更新可见区域（用于已读上报）
 const updateVisibleRange = (scrollPos, viewportHeight) => {
   const allMessages = messagesWithDividers.value
-  if (allMessages.length === 0) {return}
+  if (allMessages.length === 0) { return }
 
   const viewportTop = scrollPos
   const viewportBottom = scrollPos + viewportHeight
@@ -566,7 +483,7 @@ const updateVisibleRange = (scrollPos, viewportHeight) => {
 // 保持滚动偏移（用于加载更多）
 const maintainScroll = oldHeight => {
   nextTick(() => {
-    if (isUnmounted.value) {return} // 组件已卸载，不执行 DOM 操作
+    if (isUnmounted.value) { return } // 组件已卸载，不执行 DOM 操作
     if (listRef.value) {
       listRef.value.scrollTop = listRef.value.scrollHeight - oldHeight
     }
@@ -577,16 +494,16 @@ const observer = ref(null)
 
 // 初始化已读上报监听
 const initReadObserver = () => {
-  if (observer.value) {observer.value.disconnect()}
+  if (observer.value) { observer.value.disconnect() }
 
   observer.value = new IntersectionObserver(entries => {
     // 如果组件已卸载，不处理回调
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
 
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const msgId = entry.target.getAttribute('data-id')
-        const msg = props.messages.find(m => m.id == msgId)
+        const msg = props.messages.find(m => m.id === msgId)
         // 如果消息未读且不是自己发的
         if (msg && !msg.isOwn && !msg.isRead) {
           emit('command', 'mark-read', msg)
@@ -598,7 +515,7 @@ const initReadObserver = () => {
 
 const updateObserver = () => {
   nextTick(() => {
-    if (isUnmounted.value) {return} // 组件已卸载，不执行 DOM 操作
+    if (isUnmounted.value) { return } // 组件已卸载，不执行 DOM 操作
     const items = listRef.value?.querySelectorAll('.message-wrapper[data-id]')
     items?.forEach(el => observer.value?.observe(el))
   })
@@ -615,14 +532,14 @@ onMounted(() => {
 
   // 初始化视口高度
   if (listRef.value) {
-    clientHeight.value = listRef.value.clientHeight
+    containerHeight.value = listRef.value.clientHeight
   }
 
   // 监听容器大小变化
   const resizeObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
       if (entry.target === listRef.value) {
-        clientHeight.value = entry.contentRect.height
+        containerHeight.value = entry.contentRect.height
       }
     }
   })
@@ -640,7 +557,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   isUnmounted.value = true // 标记组件已卸载
-  if (observer.value) {observer.value.disconnect()}
+  if (observer.value) { observer.value.disconnect() }
 })
 
 defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToMessage: scrollToMsg })
@@ -676,11 +593,11 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   }
 
   &:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 137, 255, 0.2);
+    background: rgba(0, 0, 0, 0.12); // 修改为自然的灰色
   }
 
   &:hover::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 137, 255, 0.3);
+    background: rgba(0, 0, 0, 0.2);
   }
 
   // 暗色模式
@@ -776,9 +693,11 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   line-height: 1;
 
   .time-text {
-    background: var(--dt-bg-body);
-    padding: 4px 12px;
-    border-radius: var(--dt-radius-full);
+    background: rgba(0, 0, 0, 0.05); // 钉钉风格：极浅半透明底
+    color: var(--dt-text-tertiary);
+    padding: 2px 8px; // 优化：更窄的间距
+    font-size: 12px;
+    border-radius: 4px; // 钉钉风格：小圆角矩形，而非全圆角
     display: inline-block;
   }
 }
@@ -787,14 +706,20 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 // 已读状态样式 - 钉钉风格
 // ============================================================================
 .read-status {
-  font-size: 11px;
+  font-size: 12px; // 从11px增大到12px,提升可读性
   cursor: default;
   display: flex;
   align-items: center;
   gap: 4px;
 
-  .read { color: var(--dt-text-quaternary); }
-  .unread { color: var(--dt-brand-color); }
+  .read {
+    color: var(--dt-text-quaternary);
+  }
+
+  .unread {
+    color: var(--dt-brand-color);
+  }
+
   .read-count {
     color: var(--dt-brand-color);
     cursor: pointer;
@@ -827,7 +752,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   gap: 2px;
   padding: 2px 6px;
   border-radius: var(--dt-radius-lg);
-  font-size: 11px;
+  font-size: 12px; // 从11px增大到12px
   transition: all var(--dt-transition-fast);
 
   &.read {
@@ -841,7 +766,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 
 .unread {
   color: var(--dt-brand-color);
-  font-size: 11px;
+  font-size: 12px; // 从11px增大到12px
 }
 
 // ============================================================================

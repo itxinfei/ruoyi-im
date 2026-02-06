@@ -102,7 +102,7 @@ export function useErrorHandler (context = 'Unknown') {
     errorCount,
     // 方法
     handleError,
-    handleSilentError: (error) => handleSilentError(error, context),
+    handleSilentError: error => handleSilentError(error, context),
     handleBusinessError: (message, options) => handleBusinessError(message, { ...options, context }),
     withErrorHandling,
     createRetryable,
@@ -188,7 +188,7 @@ export function useApiErrorHandler () {
    */
   const retryableApi = (apiCall, options = {}) => {
     return base.createRetryable(apiCall, {
-      retryCondition: (error) => {
+      retryCondition: error => {
         // 仅对网络错误和 5xx 错误重试
         const status = error.response?.status
         return !status || status >= 500

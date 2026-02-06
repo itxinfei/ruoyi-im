@@ -1,7 +1,7 @@
 <template>
   <div :class="['im-app', isDark ? 'dark' : '']">
     <div class="app-container">
-      <!-- 新侧边导航 -->
+      <!-- 桌面端水平导航 -->
       <ImSideNavNew
         :active-module="activeModule"
         @switch-module="handleSwitchModule"
@@ -89,7 +89,7 @@
         v-model="showExternalApp"
         :title="externalApp?.name || '应用'"
         width="90%"
-        :fullscreen="isMobileScreen"
+        :fullscreen="false"
         :close-on-click-modal="false"
         class="external-app-dialog"
         @closed="externalApp = null"
@@ -146,7 +146,6 @@ import SessionPanel from './SessionPanel.vue'
 import ChatPanel from './ChatPanel.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 
-// 异步加载非聊天模块（延迟加载，减少首屏包体积）
 const WorkbenchPanel = defineAsyncComponent(() => import('./WorkbenchPanel.vue'))
 const ContactsPanel = defineAsyncComponent(() => import('./ContactsPanel.vue'))
 const DocumentsPanel = defineAsyncComponent(() => import('./DocumentsPanel.vue'))
@@ -157,7 +156,6 @@ const MailPanel = defineAsyncComponent(() => import('./MailPanel.vue'))
 const AppCenter = defineAsyncComponent(() => import('./AppCenter.vue'))
 const AssistantPanel = defineAsyncComponent(() => import('./AssistantPanel.vue'))
 
-// 异步加载弹窗组件（按需加载）
 const UserProfileDialog = defineAsyncComponent(() => import('@/components/Contacts/UserProfileDialog.vue'))
 const PersonalProfileDialog = defineAsyncComponent(() => import('@/components/Common/PersonalProfileDialog.vue'))
 const SystemSettingsDialog = defineAsyncComponent(() => import('@/components/Common/SystemSettingsDialog.vue'))
@@ -168,36 +166,32 @@ const VideoCallDialog = defineAsyncComponent(() => import('@/components/Chat/Vid
 
 const store = useStore()
 const activeModule = ref('chat')
-const currentSession = computed(() => store.state.im.session?.currentSession || null)
+const currentSession = computed(() => {
+  try {
+    return store.state.im?.session?.currentSession || null
+  } catch (e) {
+    console.warn('Error accessing currentSession:', e)
+    return null
+  }
+})
 const { isDark } = useTheme()
 
-// 弹窗状态控制
 const showProfile = ref(false)
 const showSettings = ref(false)
 const showHelp = ref(false)
 const showUserDetail = ref(false)
 const showGlobalSearch = ref(false)
 const detailSession = ref(null)
-const settingsDefaultMenu = ref('account') // 设置对话框默认菜单
-const showExternalApp = ref(false) // 外部应用对话框
-const externalApp = ref(null) // 当前打开的外部应用
+const settingsDefaultMenu = ref('account')
+const showExternalApp = ref(false)
+const externalApp = ref(null)
 
-// 通话相关状态
 const showVoiceCall = ref(false)
 const showVideoCall = ref(false)
 const isIncomingCall = ref(false)
-const remoteCallUser = ref(null) // 远端通话用户
+const remoteCallUser = ref(null)
 
 const { connect, onMessage, isConnected } = useImWebSocket()
-
-// 窗口大小响应式处理
-const windowWidth = ref(window.innerWidth)
-const isSmallScreen = computed(() => windowWidth.value < 1024)
-const isMobileScreen = computed(() => windowWidth.value < 768)
-
-const handleResize = () => {
-  windowWidth.value = window.innerWidth
-}
 
 const handleSwitchModule = module => {
   if (module === 'profile') {
@@ -212,7 +206,6 @@ const handleSwitchModule = module => {
   }
 }
 
-// 打开设置对话框，指定默认菜单页
 const handleOpenSettings = (menu = 'account') => {
   settingsDefaultMenu.value = menu
   showSettings.value = true
@@ -227,8 +220,7 @@ const handleSelectSession = session => {
 }
 
 const handleShowUser = userId => {
-  if (!userId) {return}
-  // 构造简易 session 对象供 UserProfileDialog 使用
+  if (!userId) { return }
   detailSession.value = {
     targetUserId: userId,
     type: 'PRIVATE'
@@ -236,19 +228,16 @@ const handleShowUser = userId => {
   showUserDetail.value = true
 }
 
-// 处理搜索结果点击
 const handleSearchSelect = ({ type, data }) => {
-  if (!type || !data) return
-  
+  if (!type || !data) {return}
+
   switch (type) {
     case 'contacts':
-      // 跳转到通讯录并打开联系人详情
       activeModule.value = 'contacts'
       handleShowUser(data.userId || data.id)
       break
-      
+
     case 'groups':
-      // 跳转到聊天并打开群组会话
       activeModule.value = 'chat'
       handleSelectSession({
         id: data.groupId || data.id,
@@ -256,36 +245,31 @@ const handleSearchSelect = ({ type, data }) => {
         name: data.groupName || data.name
       })
       break
-      
+
     case 'messages':
-      // 跳转到聊天并定位消息
       activeModule.value = 'chat'
       if (data.conversationId) {
         store.dispatch('im/session/selectSessionById', data.conversationId)
           .then(() => {
-            // 这里可以添加滚动到指定消息的逻辑
           })
       }
       break
-      
+
     case 'files':
-      // 跳转到云盘
       activeModule.value = 'drive'
       ElMessage.info('已跳转到云盘')
       break
-      
+
     default:
       console.warn('未知的搜索结果类型:', type)
   }
 }
 
-// 处理打开外部应用
 const handleOpenExternalApp = app => {
   externalApp.value = app
   showExternalApp.value = true
 }
 
-// 处理从通讯录发起的语音通话
 const handleVoiceCallFromContact = contact => {
   remoteCallUser.value = contact
   isIncomingCall.value = false
@@ -293,7 +277,6 @@ const handleVoiceCallFromContact = contact => {
   ElMessage.info(`正在呼叫 ${contact.userName}...`)
 }
 
-// 处理从通讯录发起的视频通话
 const handleVideoCallFromContact = contact => {
   remoteCallUser.value = contact
   isIncomingCall.value = false
@@ -301,14 +284,12 @@ const handleVideoCallFromContact = contact => {
   ElMessage.info(`正在呼叫 ${contact.userName}...`)
 }
 
-// Watch session change to auto-switch to chat
 watch(currentSession, sess => {
   if (sess) {
     activeModule.value = 'chat'
   }
 })
 
-// Global WebSocket Message Handler
 onMessage(msg => {
   store.dispatch('im/message/receiveMessage', msg)
 })
@@ -343,32 +324,19 @@ onMounted(async () => {
   if (!isConnected.value) {
     const token = getToken()
     if (token) {
-        connect(token)
+      connect(token)
     }
   }
 
-  // 添加键盘快捷键监听
   window.addEventListener('keydown', handleKeydown)
-
-  // 添加切换到聊天模块的事件监听
   window.addEventListener('switch-to-chat', handleSwitchToChat)
-
-  // 添加窗口大小变化监听
-  window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
-  // 移除键盘快捷键监听
   window.removeEventListener('keydown', handleKeydown)
-
-  // 移除切换到聊天模块的事件监听
   window.removeEventListener('switch-to-chat', handleSwitchToChat)
-
-  // 移除窗口大小变化监听
-  window.removeEventListener('resize', handleResize)
 })
 
-// 处理从通讯录发起聊天的切换
 const handleSwitchToChat = event => {
   const { conversationId } = event.detail
   if (conversationId) {
@@ -376,9 +344,7 @@ const handleSwitchToChat = event => {
   }
 }
 
-// 键盘快捷键处理
 const handleKeydown = e => {
-  // Ctrl/Cmd + K 打开全局搜索
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault()
     showGlobalSearch.value = true
@@ -392,9 +358,6 @@ const handleKeydown = e => {
   height: 100%;
 }
 
-// ============================================================================
-// 应用容器 - 统一使用flex布局
-// ============================================================================
 .app-container {
   display: flex;
   width: 100%;
@@ -404,9 +367,6 @@ const handleKeydown = e => {
   position: relative;
 }
 
-// ============================================================================
-// 主内容区布局 - 确保所有面板正确显示
-// ============================================================================
 .main-content-area {
   flex: 1;
   min-width: 0;
@@ -416,9 +376,6 @@ const handleKeydown = e => {
   background: var(--dt-bg-body);
 }
 
-// ============================================================================
-// 聊天模块特殊布局：SessionPanel + ChatPanel 并排
-// ============================================================================
 .chat-layout {
   display: flex;
   width: 100%;
@@ -427,13 +384,11 @@ const handleKeydown = e => {
 }
 
 .chat-layout > :first-child {
-  // SessionPanel - 使用设计令牌变量
   width: var(--dt-session-panel-width);
   flex-shrink: 0;
 }
 
 .chat-layout > :last-child {
-  // ChatPanel
   flex: 1;
   min-width: 0;
   height: 100%;
@@ -447,9 +402,6 @@ const handleKeydown = e => {
   background: var(--dt-bg-card);
 }
 
-// ============================================================================
-// 确保其他面板占满整个主内容区
-// ============================================================================
 .main-content-area > :not(.chat-layout) {
   width: 100%;
   height: 100%;
@@ -458,9 +410,6 @@ const handleKeydown = e => {
   overflow: hidden;
 }
 
-// ============================================================================
-// 暗色模式适配
-// ============================================================================
 .dark .app-container {
   background: var(--dt-bg-body-dark);
 }
@@ -473,9 +422,6 @@ const handleKeydown = e => {
   background: var(--dt-bg-card-dark);
 }
 
-// ============================================================================
-// 外部应用对话框
-// ============================================================================
 .external-app-dialog {
   :deep(.el-dialog__body) {
     padding: 0;

@@ -15,6 +15,8 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/im/user")
 public class ImUserController {
+
+    private static final Logger log = LoggerFactory.getLogger(ImUserController.class);
 
     private final ImUserService imUserService;
     private final ImFriendService imFriendService;
@@ -250,5 +254,93 @@ public class ImUserController {
         Long userId = SecurityUtils.getLoginUserId();
         String avatarUrl = imUserService.uploadAvatar(userId, file);
         return Result.success("头像上传成功", avatarUrl);
+    }
+
+    /**
+     * 获取聊天背景设置
+     * 获取用户的聊天背景设置，可针对特定会话或全局背景
+     *
+     * @param conversationId 会话ID（可选），不传则获取全局背景
+     * @return 背景设置信息
+     * @apiNote 返回背景类型和背景值（颜色值或图片URL）
+     */
+    @Operation(summary = "获取聊天背景", description = "获取用户的聊天背景设置")
+    @GetMapping("/background")
+    public Result<java.util.Map<String, Object>> getChatBackground(
+            @RequestParam(required = false) Long conversationId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        try {
+            java.util.Map<String, Object> background = imUserService.getChatBackground(userId, conversationId);
+            return Result.success(background);
+        } catch (Exception e) {
+            log.error("获取聊天背景失败: userId={}, conversationId={}", userId, conversationId, e);
+            return Result.fail("获取聊天背景失败");
+        }
+    }
+
+    /**
+     * 设置聊天背景
+     * 设置用户的聊天背景，支持纯色、图片或默认背景
+     *
+     * @param request 背景设置数据
+     * @return 操作结果
+     * @apiNote 支持设置全局背景或特定会话的背景
+     */
+    @Operation(summary = "设置聊天背景", description = "设置用户的聊天背景")
+    @PutMapping("/background")
+    public Result<Void> setChatBackground(@RequestBody java.util.Map<String, Object> request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        try {
+            String type = (String) request.get("type");
+            String value = (String) request.get("value");
+            Long conversationId = request.get("conversationId") != null ?
+                Long.parseLong(request.get("conversationId").toString()) : null;
+            imUserService.setChatBackground(userId, type, value, conversationId);
+            return Result.success("背景设置成功");
+        } catch (Exception e) {
+            log.error("设置聊天背景失败: userId={}", userId, e);
+            return Result.fail("设置背景失败");
+        }
+    }
+
+    /**
+     * 清除聊天背景
+     * 清除用户的聊天背景设置，恢复为默认背景
+     *
+     * @param conversationId 会话ID（可选），不传则清除全局背景
+     * @return 操作结果
+     */
+    @Operation(summary = "清除聊天背景", description = "清除用户的聊天背景设置")
+    @DeleteMapping("/background")
+    public Result<Void> clearChatBackground(
+            @RequestParam(required = false) Long conversationId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        try {
+            imUserService.clearChatBackground(userId, conversationId);
+            return Result.success("背景已清除");
+        } catch (Exception e) {
+            log.error("清除聊天背景失败: userId={}, conversationId={}", userId, conversationId, e);
+            return Result.fail("清除背景失败");
+        }
+    }
+
+    /**
+     * 扫描二维码
+     * 处理用户扫描二维码的请求
+     *
+     * @param qrData 二维码内容
+     * @return 扫描结果
+     */
+    @Operation(summary = "扫描二维码", description = "处理用户扫描二维码的请求")
+    @PostMapping("/scan-qrcode")
+    public Result<java.util.Map<String, Object>> scanQRCode(@RequestParam String qrData) {
+        Long userId = SecurityUtils.getLoginUserId();
+        try {
+            java.util.Map<String, Object> result = imUserService.scanQRCode(userId, qrData);
+            return Result.success(result);
+        } catch (Exception e) {
+            log.error("扫描二维码失败: userId={}, qrData={}", userId, qrData, e);
+            return Result.fail("扫描失败");
+        }
     }
 }

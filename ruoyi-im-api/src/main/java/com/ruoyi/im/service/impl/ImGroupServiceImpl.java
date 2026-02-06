@@ -51,11 +51,11 @@ public class ImGroupServiceImpl implements ImGroupService {
      * 构造器注入依赖
      */
     public ImGroupServiceImpl(ImGroupMapper imGroupMapper,
-                              ImGroupMemberMapper imGroupMemberMapper,
-                              ImUserMapper imUserMapper,
-                              ImConversationMapper imConversationMapper,
-                              com.ruoyi.im.util.ImRedisUtil imRedisUtil,
-                              ImConversationMemberMapper imConversationMemberMapper) {
+            ImGroupMemberMapper imGroupMemberMapper,
+            ImUserMapper imUserMapper,
+            ImConversationMapper imConversationMapper,
+            com.ruoyi.im.util.ImRedisUtil imRedisUtil,
+            ImConversationMemberMapper imConversationMemberMapper) {
         this.imGroupMapper = imGroupMapper;
         this.imGroupMemberMapper = imGroupMemberMapper;
         this.imUserMapper = imUserMapper;
@@ -77,7 +77,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setOwnerId(userId);
         group.setAvatar(request.getAvatar());
         group.setDescription(request.getDescription());
-        group.setType(request.getType() != null ? request.getType() : StatusConstants.ConversationType.PRIVATE);
+        group.setType(request.getType() != null ? request.getType() : StatusConstants.ConversationType.GROUP);
         group.setMaxMembers(request.getMemberLimit() != null ? request.getMemberLimit() : 500);
         group.setMemberCount(1);
         group.setStatus("NORMAL");
@@ -113,7 +113,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             // 过滤掉创建者自己的 ID，避免重复插入
             List<Long> validMemberIds = new ArrayList<>();
             for (Long memberId : request.getMemberIds()) {
-                if (!memberId.equals(userId)) {  // 排除创建者
+                if (!memberId.equals(userId)) { // 排除创建者
                     validMemberIds.add(memberId);
                 }
             }
@@ -236,7 +236,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         for (ImGroupMember member : memberList) {
             // 这里可以考虑优化，先不走缓存，或者批量获取
             ImGroup group = imGroupMapper.selectImGroupById(member.getGroupId());
-            if (group != null && group.getIsDeleted() == 0) {
+            if (group != null && java.util.Objects.equals(group.getIsDeleted(), 0)) {
                 ImGroupVO vo = new ImGroupVO();
                 BeanUtils.copyProperties(group, vo);
                 vo.setMyRole(member.getRole());
@@ -685,7 +685,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         List<ImGroupVO> result = new ArrayList<>();
         for (Long groupId : commonGroupIds) {
             ImGroup group = imGroupMapper.selectImGroupById(groupId);
-            if (group != null && (group.getIsDeleted() == null || group.getIsDeleted() == 0)) {
+            if (group != null && java.util.Objects.equals(group.getIsDeleted(), 0)) {
                 ImGroupVO vo = convertToVO(group);
                 // 添加成员数量
                 Integer memberCount = imGroupMemberMapper.countMembersByGroupId(groupId);
@@ -730,8 +730,7 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         java.util.Map<String, String> result = new java.util.HashMap<>();
         result.put("qrcodeUrl", qrcodeUrl);
-        result.put("expireTime", qrcodeExpireTime != null ?
-                qrcodeExpireTime.toString() : "");
+        result.put("expireTime", qrcodeExpireTime != null ? qrcodeExpireTime.toString() : "");
         return result;
     }
 

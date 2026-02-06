@@ -450,8 +450,8 @@ const isPinned = appId => pinnedAppIds.value.has(appId)
 
 // 格式化数量
 const formatCount = count => {
-  if (count >= 10000) {return (count / 10000).toFixed(1) + 'w'}
-  if (count >= 1000) {return (count / 1000).toFixed(1) + 'k'}
+  if (count >= 10000) { return (count / 10000).toFixed(1) + 'w' }
+  if (count >= 1000) { return (count / 1000).toFixed(1) + 'k' }
   return count
 }
 
@@ -1211,44 +1211,6 @@ onMounted(() => {
       display: flex;
       gap: 4px;
     }
-  }
-}
-
-@media (max-width: 767px) {
-  .app-header {
-    padding: 16px;
-  }
-
-  .category-tabs {
-    padding: 8px 16px 0;
-    gap: 4px;
-
-    .category-tab {
-      padding: 8px 12px;
-      font-size: 13px;
-
-      .tab-icon {
-        display: none;
-      }
-    }
-  }
-
-  .my-apps-section {
-    .section-header {
-      padding: 12px 16px;
-    }
-
-    .my-apps-list {
-      padding: 0 16px 12px;
-    }
-  }
-
-  .app-market-section {
-    padding: 16px;
-  }
-
-  .app-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>

@@ -4,9 +4,11 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImConversationSyncService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
+import com.ruoyi.im.vo.sync.ConversationSyncResponse;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,17 +27,21 @@ public class ImSessionController {
 
     private final ImConversationMemberService conversationMemberService;
     private final ImConversationService conversationService;
+    private final ImConversationSyncService conversationSyncService;
 
     /**
      * 构造器注入依赖
      *
      * @param conversationMemberService 会话成员服务
      * @param conversationService 会话服务
+     * @param conversationSyncService 会话同步服务
      */
     public ImSessionController(ImConversationMemberService conversationMemberService,
-                                ImConversationService conversationService) {
+                                ImConversationService conversationService,
+                                ImConversationSyncService conversationSyncService) {
         this.conversationMemberService = conversationMemberService;
         this.conversationService = conversationService;
+        this.conversationSyncService = conversationSyncService;
     }
 
     /**
@@ -159,5 +165,39 @@ public class ImSessionController {
         Long userId = SecurityUtils.getLoginUserId();
         conversationMemberService.toggleMute(id, userId, muted);
         return Result.success(muted == 1 ? "已设为免打扰" : "已取消免打扰");
+    }
+
+    /**
+     * 同步会话事件
+     * 获取自上次同步以来发生的会话事件（置顶、免打扰、删除、归档、已读等）
+     *
+     * @param deviceId 设备ID，从请求头获取
+     * @param lastSyncTime 上次同步时间戳，可选
+     * @return 会话事件列表和新的同步时间戳
+     * @apiNote 用于多设备间会话设置同步；首次同步时传0或不传
+     */
+    @GetMapping("/sync")
+    public Result<ConversationSyncResponse> syncConversations(
+            @RequestHeader(value = "X-Device-Id", required = false) String deviceId,
+            @RequestParam(required = false) Long lastSyncTime) {
+        Long userId = SecurityUtils.getLoginUserId();
+        ConversationSyncResponse response = conversationSyncService.syncConversations(userId, deviceId, lastSyncTime);
+        return Result.success(response);
+    }
+
+    /**
+     * 重置会话同步点
+     * 删除指定设备的同步点，下次同步将获取全部事件
+     *
+     * @param deviceId 设备ID
+     * @return 操作结果
+     * @apiNote 用于调试或解决同步问题
+     */
+    @DeleteMapping("/sync")
+    public Result<Void> resetSyncPoint(
+            @RequestHeader(value = "X-Device-Id", required = false) String deviceId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        conversationSyncService.resetSyncPoint(userId, deviceId);
+        return Result.success("已重置同步点");
     }
 }

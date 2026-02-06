@@ -273,21 +273,4 @@ const handleMoreAction = key => {
 /* ================================
    响应式
    ================================ */
-@media (max-width: 768px) {
-  .admin-action-bar {
-    flex-direction: column;
-    gap: var(--dt-space-sm);
-  }
-
-  .action-bar-right {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .action-stats {
-    flex-wrap: wrap;
-    gap: var(--dt-space-md);
-  }
-}
 </style>

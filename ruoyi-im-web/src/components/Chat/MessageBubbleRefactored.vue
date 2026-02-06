@@ -6,54 +6,46 @@
 */
 <template>
   <div class="message-bubble-wrapper">
-    <div
-      ref="bubbleRef"
-      class="message-bubble"
-      :class="bubbleClasses"
-      @click="handleClick"
-      @mousedown="handleMouseHold"
-      @mouseup="handleMouseRelease"
-      @mouseleave="handleMouseRelease"
-      @contextmenu.prevent="handleContextMenu"
-      @touchstart="handleTouchStart"
-      @touchend="handleTouchEnd"
-      @touchmove="handleTouchMove"
-    >
+    <div ref="bubbleRef" class="message-bubble" :class="bubbleClasses" @click="handleClick" @mousedown="handleMouseHold"
+      @mouseup="handleMouseRelease" @mouseleave="handleMouseRelease" @contextmenu.prevent="handleContextMenu"
+      @touchstart="handleTouchStart" @touchend="handleTouchEnd" @touchmove="handleTouchMove">
       <!-- 消息内容区域 -->
       <div class="bubble-content">
         <!-- 文本消息 -->
-        <TextBubble v-if="message.type === 'TEXT'" :message="message" :has-markers="hasMarkers"
-          @scroll-to="$emit('scroll-to', $event)" />
+        <TextBubble v-if="['text', 'raw'].includes(message.type?.toLowerCase())" :message="message"
+          :has-markers="hasMarkers" @scroll-to="$emit('scroll-to', $event)" />
 
         <!-- 链接预览卡片 -->
-        <LinkCard v-if="message.type === 'TEXT' && messageLinks.length > 0" :link="messageLinks[0]"
-          class="message-link-card" />
+        <LinkCard v-if="['text', 'raw'].includes(message.type?.toLowerCase()) && messageLinks.length > 0"
+          :link="messageLinks[0]" class="message-link-card" />
 
         <!-- 图片消息 -->
-        <ImageBubble v-else-if="message.type === 'IMAGE'" :message="message" :is-large-group="isLargeGroup" @preview="$emit('preview', $event)" />
+        <ImageBubble v-else-if="message.type?.toUpperCase() === 'IMAGE'" :message="message"
+          :is-large-group="isLargeGroup" @preview="$emit('preview', $event)" />
 
         <!-- 文件消息 -->
-        <FileBubble v-else-if="message.type === 'FILE'" :message="message" @download="$emit('download', $event)" />
+        <FileBubble v-else-if="message.type?.toUpperCase() === 'FILE'" :message="message"
+          @download="$emit('download', $event)" />
 
         <!-- 视频消息 -->
-        <VideoBubble v-else-if="message.type === 'VIDEO'" :message="message" />
+        <VideoBubble v-else-if="message.type?.toUpperCase() === 'VIDEO'" :message="message" />
 
         <!-- 语音消息 -->
-        <VoiceBubble v-else-if="message.type === 'VOICE' || message.type === 'AUDIO'" :message="message"
+        <VoiceBubble v-else-if="['voice', 'audio'].includes(message.type?.toLowerCase())" :message="message"
           :is-read="message.isRead || message.readStatus === 'READ'" @read="$emit('mark-read', message)" />
 
         <!-- 位置消息 -->
-        <LocationBubble v-else-if="message.type === 'LOCATION'" :message="message" />
+        <LocationBubble v-else-if="message.type?.toUpperCase() === 'LOCATION'" :message="message" />
 
         <!-- 系统消息 -->
-        <SystemBubble v-else-if="message.type === 'SYSTEM'" :message="message" />
+        <SystemBubble v-else-if="message.type?.toUpperCase() === 'SYSTEM'" :message="message" />
 
         <!-- 撤回消息 -->
-        <RecalledBubble v-else-if="message.type === 'RECALLED'" :message="message"
+        <RecalledBubble v-else-if="message.type?.toUpperCase() === 'RECALLED'" :message="message"
           @re-edit="$emit('re-edit', $event)" />
 
         <!-- 拍一拍消息 -->
-        <NudgeMessageBubble v-else-if="message.type === 'NUDGE'" :nudge="{
+        <NudgeMessageBubble v-else-if="message.type?.toUpperCase() === 'NUDGE'" :nudge="{
           id: message.id,
           nudgerId: message.senderId,
           nudgerName: message.senderName,
@@ -65,11 +57,11 @@
         }" @show-user="$emit('show-user', $event)" />
 
         <!-- 合并转发消息 -->
-        <CombineMessagePreview v-else-if="message.type === 'COMBINE' || message.type === 'COMBINE_FORWARD'"
+        <CombineMessagePreview v-else-if="['combine', 'combine_forward'].includes(message.type?.toLowerCase())"
           :messages="parsedContent.messages || []" @click="handleCombineClick" />
 
-        <!-- 未知消息类型 -->
-        <span v-else class="unknown-type">[{{ message.type }}]</span>
+        <!-- 未知消息类型 - 根据用户要求，不显示气泡 -->
+        <template v-else />
       </div>
 
       <!-- 状态指示器 -->
@@ -232,7 +224,7 @@ const contextMenuItems = computed(() => {
   const items = []
 
   // 复制（仅文本消息）
-  if (msg.type === 'TEXT') {
+  if (msg.type?.toUpperCase() === 'TEXT') {
     items.push({
       label: '复制',
       icon: 'content_copy',
@@ -311,7 +303,7 @@ const contextMenuItems = computed(() => {
   }
 
   // 编辑（仅自己消息且为文本消息）
-  if (msg.isOwn && msg.type === 'TEXT') {
+  if (msg.isOwn && msg.type?.toUpperCase() === 'TEXT') {
     items.push({
       label: '编辑',
       icon: 'edit',
@@ -427,24 +419,31 @@ const canRecall = computed(() => {
 }
 
 .bubble-content {
-  padding: 10px 12px; // 钉钉标准：保持紧凑，不修改
+  padding: 8px 12px; // 钉钉标准：侧边 12px
   border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-base);
-  line-height: 1.4; // 钉钉标准：保持 1.4 行高
-  word-break: break-word;
-  overflow-wrap: break-word;
-  transition: background-color var(--dt-transition-base);
+  line-height: 1.5; // 优化：提升行高
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  transition: all var(--dt-transition-base);
   display: flex;
   align-items: flex-start;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); // 钉钉风格：极细阴影
 }
 
 // 对方消息样式
 .message-bubble:not(.is-own) {
   .bubble-content {
     background: var(--dt-bubble-left-bg);
-    border: 1px solid var(--dt-bubble-left-border);
-    // 钉钉标准：左尖右圆（左上4px 左下4px 右上12px 右下12px）
-    border-radius: var(--dt-radius-sm) var(--dt-radius-lg) var(--dt-radius-lg) var(--dt-radius-sm);
+    border: none; // 优化：移除边框
+    // 钉钉标准：对向圆角（左尖右圆）- 左上2px，其他14px
+    border-radius: 2px 14px 14px 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: background 0.2s;
+
+    &:hover {
+      background: #fcfcfc; // 极细微的变暗
+    }
   }
 
   &:hover .bubble-content {
@@ -459,9 +458,14 @@ const canRecall = computed(() => {
   .bubble-content {
     background: var(--dt-bubble-right-bg);
     color: var(--dt-bubble-right-text); // 白色文字
-    border: none;
-    // 钉钉标准：左圆右尖（左上12px 左下12px 右上4px 右下4px）
-    border-radius: var(--dt-radius-lg) var(--dt-radius-sm) var(--dt-radius-sm) var(--dt-radius-lg);
+    // 钉钉标准：对向圆角（左圆右尖）- 右上2px，其他14px
+    border-radius: 14px 2px 14px 14px;
+    box-shadow: 0 1px 4px rgba(0, 137, 255, 0.2); // 品牌色阴影
+    transition: filter 0.2s;
+
+    &:hover {
+      filter: brightness(0.95); // 品牌色稍微压深一点
+    }
   }
 
   &:hover .bubble-content {
@@ -471,13 +475,17 @@ const canRecall = computed(() => {
   // 确保所有子元素文字颜色都是白色
   :deep(.message-text),
   :deep(.message-content),
-  :deep(.link-content) {
+  :deep(.link-content),
+  :deep(.text-content) {
     color: #FFFFFF !important;
   }
 
   :deep(a) {
     color: #FFFFFF !important;
+    font-weight: 500;
     text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
   }
 }
 
@@ -527,9 +535,9 @@ const canRecall = computed(() => {
 
   // 对方消息：深灰背景
   .message-bubble:not(.is-own) .bubble-content {
-    background: #2a2a2a;
-    border-color: #3a3a3a;
+    background: #2c2c2c;
     color: #e8e8e8;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
   // 自己消息：钉钉蓝（暗模式下稍亮）

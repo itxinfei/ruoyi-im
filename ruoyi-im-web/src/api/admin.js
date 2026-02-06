@@ -190,6 +190,21 @@ export function downloadUserTemplate() {
   })
 }
 
+/**
+ * 导出用户数据
+ * @param {String} keyword - 搜索关键词（可选）
+ * @param {String} role - 角色筛选（可选）
+ * @returns {Promise}
+ */
+export function exportUsers(keyword, role) {
+  return request({
+    url: '/api/admin/users/export',
+    method: 'get',
+    params: { keyword, role },
+    responseType: 'blob'
+  })
+}
+
 // ==================== 群组管理 ====================
 
 /**

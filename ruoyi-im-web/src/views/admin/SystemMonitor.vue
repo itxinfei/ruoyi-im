@@ -52,14 +52,16 @@
       </el-col>
       <el-col :span="6">
         <el-card class="status-card">
-          <div class="status-mini-icon">
-            <el-icon><Clock /></el-icon>
+          <div class="status-icon">
+            <el-icon :size="32">
+              <Clock />
+            </el-icon>
           </div>
-          <div class="status-mini-info">
-            <div class="status-mini-label">
+          <div class="status-info">
+            <div class="status-label">
               运行时间
             </div>
-            <div class="status-mini-value">
+            <div class="status-value">
               {{ systemStatus.uptime }}
             </div>
           </div>
@@ -67,14 +69,16 @@
       </el-col>
       <el-col :span="6">
         <el-card class="status-card">
-          <div class="status-mini-icon">
-            <el-icon><User /></el-icon>
+          <div class="status-icon">
+            <el-icon :size="32">
+              <User />
+            </el-icon>
           </div>
-          <div class="status-mini-info">
-            <div class="status-mini-label">
+          <div class="status-info">
+            <div class="status-label">
               在线用户
             </div>
-            <div class="status-mini-value">
+            <div class="status-value">
               {{ systemStatus.onlineUsers }}
             </div>
           </div>
@@ -82,14 +86,16 @@
       </el-col>
       <el-col :span="6">
         <el-card class="status-card">
-          <div class="status-mini-icon">
-            <el-icon><Connection /></el-icon>
+          <div class="status-icon">
+            <el-icon :size="32">
+              <Connection />
+            </el-icon>
           </div>
-          <div class="status-mini-info">
-            <div class="status-mini-label">
+          <div class="status-info">
+            <div class="status-label">
               QPS
             </div>
-            <div class="status-mini-value">
+            <div class="status-value">
               {{ systemStatus.qps }}
             </div>
           </div>
@@ -365,24 +371,53 @@
               <svg
                 class="trend-svg"
                 viewBox="0 0 600 150"
+                preserveAspectRatio="none"
               >
+                <defs>
+                  <linearGradient
+                    id="trendGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="0%"
+                      stop-color="var(--dt-primary)"
+                      stop-opacity="0.2"
+                    />
+                    <stop
+                      offset="100%"
+                      stop-color="var(--dt-primary)"
+                      stop-opacity="0"
+                    />
+                  </linearGradient>
+                </defs>
                 <!-- 网格线 -->
                 <line
-                  v-for="i in 6"
+                  v-for="i in 5"
                   :key="i"
-                  x1="40"
-                  :y1="20 + i * 20"
+                  x1="0"
+                  :y1="i * 25"
                   x2="600"
-                  :y2="20 + i * 20"
+                  :y2="i * 25"
                   stroke="var(--dt-border-lighter)"
                   stroke-dasharray="4 4"
                 />
+                <!-- 填充区域 -->
+                <path
+                  :d="trendAreaPath"
+                  fill="url(#trendGradient)"
+                  stroke="none"
+                />
                 <!-- 趋势线 -->
                 <polyline
-                  :points="trendPoints"
+                  :points="trendPolylinePoints"
                   fill="none"
                   stroke="var(--dt-primary)"
                   stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
                   vector-effect="non-scaling-stroke"
                 />
                 <!-- 数据点 -->
@@ -392,29 +427,11 @@
                   :cx="point.x"
                   :cy="point.y"
                   r="3"
-                  fill="var(--dt-primary)"
+                  fill="var(--dt-bg-page)"
+                  stroke="var(--dt-primary)"
+                  stroke-width="2"
                 />
               </svg>
-            </div>
-            <div class="trend-legend">
-              <div class="legend-item">
-                <span class="legend-dot" />
-                <span>请求数</span>
-              </div>
-              <div class="legend-item">
-                <span
-                  class="legend-dot"
-                  style="background: var(--dt-success)"
-                />
-                <span>成功</span>
-              </div>
-              <div class="legend-item">
-                <span
-                  class="legend-dot"
-                  style="background: var(--dt-error)"
-                />
-                <span>失败</span>
-              </div>
             </div>
           </div>
         </el-card>
@@ -429,27 +446,61 @@
             </div>
           </template>
           <div class="chart-container">
-            <div class="request-stats">
-              <div class="stat-row">
-                <span class="stat-row-label">今日请求</span>
-                <span class="stat-row-value">{{ requestStats.todayCount }}</span>
+            <div class="request-stats-list">
+              <div class="stat-list-item">
+                <div class="stat-icon-wrapper info-bg">
+                  <el-icon><Tickets /></el-icon>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-label">
+                    今日请求
+                  </div>
+                  <div class="stat-val">
+                    {{ requestStats.todayCount }}
+                  </div>
+                </div>
               </div>
-              <div class="stat-row">
-                <span class="stat-row-label">平均响应</span>
-                <span class="stat-row-value">{{ requestStats.avgResponse }}ms</span>
+              <div class="stat-list-item">
+                <div class="stat-icon-wrapper warning-bg">
+                  <el-icon><Timer /></el-icon>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-label">
+                    平均响应
+                  </div>
+                  <div class="stat-val">
+                    {{ requestStats.avgResponse }}ms
+                  </div>
+                </div>
               </div>
-              <div class="stat-row">
-                <span class="stat-row-label">成功率</span>
-                <span
-                  class="stat-row-value"
-                  :class="getSuccessClass(requestStats.successRate)"
-                >
-                  {{ requestStats.successRate }}%
-                </span>
+              <div class="stat-list-item">
+                <div class="stat-icon-wrapper success-bg">
+                  <el-icon><CircleCheck /></el-icon>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-label">
+                    成功率
+                  </div>
+                  <div
+                    class="stat-val"
+                    :class="getSuccessClass(requestStats.successRate)"
+                  >
+                    {{ requestStats.successRate }}%
+                  </div>
+                </div>
               </div>
-              <div class="stat-row">
-                <span class="stat-row-label">错误数</span>
-                <span class="stat-row-value stat-row-value--error">{{ requestStats.errorCount }}</span>
+              <div class="stat-list-item">
+                <div class="stat-icon-wrapper error-bg">
+                  <el-icon><CircleClose /></el-icon>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-label">
+                    错误数
+                  </div>
+                  <div class="stat-val error-text">
+                    {{ requestStats.errorCount }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -644,7 +695,11 @@ import {
   Upload,
   FolderOpened,
   Search,
-  Delete
+  Delete,
+  Tickets,
+  Timer,
+  CircleCheck,
+  CircleClose
 } from '@element-plus/icons-vue'
 import { formatFileSize } from '@/utils/format'
 import {
@@ -710,6 +765,18 @@ const requestStats = ref({
 // 趋势图数据（从API获取）
 const trendPeriod = ref('24h')
 const trendPoints = ref([])
+
+const trendPolylinePoints = computed(() => {
+  return trendPoints.value.map(p => `${p.x},${p.y}`).join(' ')
+})
+
+const trendAreaPath = computed(() => {
+  if (trendPoints.value.length === 0) {return ''}
+  const first = trendPoints.value[0]
+  const last = trendPoints.value[trendPoints.value.length - 1]
+  const points = trendPolylinePoints.value
+  return `M ${first.x},150 L ${points} L ${last.x},150 Z`
+})
 
 
 // 对话框状态
@@ -800,9 +867,11 @@ const refreshAll = async () => {
 
       // 更新趋势图数据
       if (data.trends && data.trends.length > 0) {
+        const width = 600
+        const step = width / (data.trends.length - 1 || 1)
         trendPoints.value = data.trends.map((point, index) => ({
-          x: 40 + (index * 70),
-          y: Math.max(20, 130 - point.value)
+          x: index * step,
+          y: Math.max(10, 140 - (point.value * 1.2))
         }))
       }
     }
@@ -1059,32 +1128,6 @@ onUnmounted(() => {
 
 .status-value {
   font-size: var(--dt-font-size-md);
-  font-weight: var(--dt-font-weight-medium);
-  color: var(--dt-text-primary);
-}
-
-.status-mini-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--dt-radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  background: var(--dt-primary-gradient);
-}
-
-.status-mini-info {
-  flex: 1;
-}
-
-.status-mini-label {
-  font-size: var(--dt-font-size-xs);
-  color: var(--dt-text-secondary);
-}
-
-.status-mini-value {
-  font-size: var(--dt-font-size-base);
   font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
 }
@@ -1358,34 +1401,79 @@ onUnmounted(() => {
 }
 
 /* 请求统计 */
-.request-stats {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  height: 100%;
-}
-
-.stat-row {
+.request-stats-list {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: var(--dt-space-xs) 0;
+}
+
+.stat-list-item {
+  display: flex;
   align-items: center;
+  gap: var(--dt-space-md);
+  padding: var(--dt-space-xs) var(--dt-space-sm);
+  border-radius: var(--dt-radius-sm);
+  transition: background-color 0.2s;
 }
 
-.stat-row-label {
-  font-size: var(--dt-font-size-sm);
+.stat-list-item:hover {
+  background-color: var(--dt-bg-page);
+}
+
+.stat-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--dt-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.stat-icon-wrapper.info-bg {
+  background: var(--dt-info-bg);
+  color: var(--dt-info);
+}
+
+.stat-icon-wrapper.warning-bg {
+  background: var(--dt-warning-bg);
+  color: var(--dt-warning);
+}
+
+.stat-icon-wrapper.success-bg {
+  background: var(--dt-success-bg);
+  color: var(--dt-success);
+}
+
+.stat-icon-wrapper.error-bg {
+  background: var(--dt-error-bg);
+  color: var(--dt-error);
+}
+
+.stat-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stat-label {
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
-.stat-row-value {
-  font-size: var(--dt-font-size-xl);
+.stat-val {
+  font-size: var(--dt-font-size-lg);
   font-weight: var(--dt-font-weight-bold);
   color: var(--dt-text-primary);
 }
 
-.stat-row-value--success { color: var(--dt-success); }
-.stat-row-value--warning { color: var(--dt-warning); }
-.stat-row-value--error { color: var(--dt-error); }
+.stat-val.stat-row-value--success { color: var(--dt-success); }
+.stat-val.stat-row-value--warning { color: var(--dt-warning); }
+.stat-val.error-text { color: var(--dt-error); }
 
 /* 趋势图 */
 .trend-chart {
@@ -1393,17 +1481,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .trend-svg {
   width: 100%;
-  height: 120px;
-}
-
-.trend-legend {
-  display: flex;
-  gap: var(--dt-space-md);
-  margin-top: var(--dt-space-sm);
+  height: 100%;
+  min-height: 120px;
 }
 
 /* 表格卡片 */

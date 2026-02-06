@@ -1,7 +1,11 @@
 <template>
   <teleport to="body">
     <transition name="slide">
-      <div v-if="visible" class="chat-search-overlay" @click.self="handleClose">
+      <div
+        v-if="visible"
+        class="chat-search-overlay"
+        @click.self="handleClose"
+      >
         <div class="chat-search-panel">
           <!-- 头部 -->
           <div class="search-header">
@@ -9,15 +13,25 @@
               <span class="material-icons-outlined">search</span>
               <span>搜索聊天记录</span>
             </div>
-            <button class="close-btn" @click="handleClose">
+            <button
+              class="close-btn"
+              @click="handleClose"
+            >
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
 
           <!-- 搜索输入区域 -->
           <div class="search-input-area">
-            <el-input ref="searchInputRef" v-model="searchKeyword" placeholder="搜索消息内容、发送人..." size="large" clearable
-              @input="handleSearch" @keyup.enter="handleSearch">
+            <el-input
+              ref="searchInputRef"
+              v-model="searchKeyword"
+              placeholder="搜索消息内容、发送人..."
+              size="large"
+              clearable
+              @input="handleSearch"
+              @keyup.enter="handleSearch"
+            >
               <template #prefix>
                 <span class="material-icons-outlined">search</span>
               </template>
@@ -25,35 +39,60 @@
 
             <!-- 搜索类型筛选 -->
             <div class="search-filters">
-              <button v-for="filter in searchFilters" :key="filter.key" class="filter-btn"
-                :class="{ active: activeFilter === filter.key }" @click="activeFilter = filter.key">
+              <button
+                v-for="filter in searchFilters"
+                :key="filter.key"
+                class="filter-btn"
+                :class="{ active: activeFilter === filter.key }"
+                @click="activeFilter = filter.key"
+              >
                 <span class="material-icons-outlined">{{ filter.icon }}</span>
                 <span>{{ filter.label }}</span>
-                <span v-if="filter.count > 0" class="filter-count">{{ filter.count }}</span>
+                <span
+                  v-if="filter.count > 0"
+                  class="filter-count"
+                >{{ filter.count }}</span>
               </button>
             </div>
 
             <!-- 时间范围筛选 -->
             <div class="search-date-filters">
-              <button v-for="dateFilter in dateFilters" :key="dateFilter.key" class="date-filter-btn"
-                :class="{ active: activeDateFilter === dateFilter.key }" @click="activeDateFilter = dateFilter.key">
+              <button
+                v-for="dateFilter in dateFilters"
+                :key="dateFilter.key"
+                class="date-filter-btn"
+                :class="{ active: activeDateFilter === dateFilter.key }"
+                @click="activeDateFilter = dateFilter.key"
+              >
                 <span>{{ dateFilter.label }}</span>
               </button>
             </div>
           </div>
 
           <!-- 搜索结果 -->
-          <div ref="resultsRef" class="search-results">
+          <div
+            ref="resultsRef"
+            class="search-results"
+          >
             <!-- 加载状态 -->
-            <div v-if="searching" class="loading-state">
-              <el-icon class="is-loading" :size="32">
+            <div
+              v-if="searching"
+              class="loading-state"
+            >
+              <el-icon
+                class="is-loading"
+                :size="32"
+              >
                 <Loading />
               </el-icon>
               <span>搜索中...</span>
             </div>
 
             <!-- 空状态 - 未搜索 -->
-            <div v-else-if="!hasSearched" class="empty-initial">
+            <div
+              v-else-if="!hasSearched"
+              class="empty-initial"
+            >
               <div class="empty-icon">
                 <span class="material-icons-outlined">search</span>
               </div>
@@ -65,28 +104,48 @@
             </div>
 
             <!-- 空状态 - 无结果 -->
-            <div v-else-if="searchResults.length === 0" class="empty-no-result">
+            <div
+              v-else-if="searchResults.length === 0"
+              class="empty-no-result"
+            >
               <span class="material-icons-outlined">search_off</span>
               <p>未找到相关内容</p>
               <span class="hint">试试其他关键词</span>
             </div>
 
             <!-- 搜索结果列表 -->
-            <div v-else class="results-list">
+            <div
+              v-else
+              class="results-list"
+            >
               <div class="results-summary">
                 找到 <strong>{{ searchResults.length }}</strong> 条相关消息
               </div>
 
               <!-- 按日期分组的结果 -->
-              <div v-for="(group, date) in groupedResults" :key="date" class="result-group">
+              <div
+                v-for="(group, date) in groupedResults"
+                :key="date"
+                class="result-group"
+              >
                 <div class="group-date">
                   {{ formatDate(date) }}
                 </div>
 
-                <div v-for="item in group" :key="item.id" class="result-item" @click="handleResultClick(item)">
+                <div
+                  v-for="item in group"
+                  :key="item.id"
+                  class="result-item"
+                  @click="handleResultClick(item)"
+                >
                   <div class="result-avatar">
-                    <DingtalkAvatar :src="item.senderAvatar" :name="item.senderName" :user-id="item.senderId" :size="36"
-                      shape="square" />
+                    <DingtalkAvatar
+                      :src="item.senderAvatar"
+                      :name="item.senderName"
+                      :user-id="item.senderId"
+                      :size="36"
+                      shape="square"
+                    />
                   </div>
                   <div class="result-content">
                     <div class="result-header">
@@ -125,15 +184,25 @@
               </div>
 
               <!-- 加载更多 -->
-              <div v-if="hasMore" class="load-more" @click="loadMore">
+              <div
+                v-if="hasMore"
+                class="load-more"
+                @click="loadMore"
+              >
                 <span>加载更多</span>
               </div>
             </div>
           </div>
 
           <!-- 底部快捷操作 -->
-          <div v-if="hasSearched && searchResults.length > 0" class="search-footer">
-            <el-button size="small" @click="handleExportResults">
+          <div
+            v-if="hasSearched && searchResults.length > 0"
+            class="search-footer"
+          >
+            <el-button
+              size="small"
+              @click="handleExportResults"
+            >
               <span class="material-icons-outlined">download</span>
               导出结果
             </el-button>

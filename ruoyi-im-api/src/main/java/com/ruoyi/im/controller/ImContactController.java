@@ -4,6 +4,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImFriendRequest;
 import com.ruoyi.im.dto.contact.ImFriendAddRequest;
 import com.ruoyi.im.dto.contact.ImFriendUpdateRequest;
+import com.ruoyi.im.service.ImBatchOperationService;
 import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.SecurityUtils;
@@ -33,16 +34,21 @@ public class ImContactController {
     private final ImFriendService imFriendService;
     private final JdbcTemplate jdbcTemplate;
     private final ImRedisUtil imRedisUtil;
+    private final ImBatchOperationService imBatchOperationService;
 
     /**
      * 构造器注入依赖
      *
      * @param imFriendService 好友服务
      */
-    public ImContactController(ImFriendService imFriendService, JdbcTemplate jdbcTemplate, ImRedisUtil imRedisUtil) {
+    public ImContactController(ImFriendService imFriendService,
+            JdbcTemplate jdbcTemplate,
+            ImRedisUtil imRedisUtil,
+            ImBatchOperationService imBatchOperationService) {
         this.imFriendService = imFriendService;
         this.jdbcTemplate = jdbcTemplate;
         this.imRedisUtil = imRedisUtil;
+        this.imBatchOperationService = imBatchOperationService;
     }
 
     /**
@@ -50,7 +56,7 @@ public class ImContactController {
      * 根据关键词搜索用户，支持按用户名、昵称、手机号搜索
      *
      * @param keyword 搜索关键词
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param userId  当前登录用户ID，从请求头中获取
      * @return 用户列表，不包含当前用户和已是好友的用户
      * @apiNote 搜索结果会排除当前用户和已经是好友的用户
      * @throws BusinessException 当搜索参数无效时抛出业务异常
@@ -68,7 +74,7 @@ public class ImContactController {
      * 向指定用户发送好友申请，对方同意后成为好友
      *
      * @param request 好友申请请求参数，包含目标用户ID、申请理由等
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param userId  当前登录用户ID，从请求头中获取
      * @return 申请结果，包含申请记录ID
      * @apiNote 使用 @Valid 注解进行参数校验；对方会收到好友申请通知
      * @throws BusinessException 当用户不存在、已是好友或申请已存在时抛出业务异常
@@ -117,9 +123,9 @@ public class ImContactController {
      * 处理好友申请
      * 同意或拒绝好友申请
      *
-     * @param id 好友申请ID
+     * @param id       好友申请ID
      * @param approved 是否同意，true表示同意，false表示拒绝
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param userId   当前登录用户ID，从请求头中获取
      * @return 处理结果
      * @apiNote 同意后会建立好友关系，并创建私聊会话；拒绝后申请状态更新为已拒绝
      * @throws BusinessException 当申请不存在或无权限处理时抛出业务异常
@@ -127,7 +133,7 @@ public class ImContactController {
     @Operation(summary = "处理好友申请", description = "同意或拒绝好友申请")
     @PostMapping("/request/{id}/handle")
     public Result<Void> handleRequest(@PathVariable Long id,
-                                      @RequestParam Boolean approved) {
+            @RequestParam Boolean approved) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.handleFriendRequest(id, approved, userId);
         return Result.success(approved ? "已同意" : "已拒绝");
@@ -169,7 +175,7 @@ public class ImContactController {
      * 获取好友详情
      * 查询指定好友的详细信息
      *
-     * @param id 好友关系ID
+     * @param id     好友关系ID
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 好友详细信息
      * @apiNote 只能查询自己的好友信息
@@ -187,9 +193,9 @@ public class ImContactController {
      * 更新好友信息
      * 更新好友的备注名、分组等信息
      *
-     * @param id 好友关系ID
+     * @param id      好友关系ID
      * @param request 更新请求参数，包含备注名、分组ID等
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param userId  当前登录用户ID，从请求头中获取
      * @return 更新结果
      * @apiNote 使用 @Valid 注解进行参数校验；只能更新自己的好友信息
      * @throws BusinessException 当好友关系不存在时抛出业务异常
@@ -197,7 +203,7 @@ public class ImContactController {
     @Operation(summary = "更新好友信息", description = "更新好友的备注名、分组等信息")
     @PutMapping("/{id}")
     public Result<Void> updateFriend(@PathVariable Long id,
-                                     @Valid @RequestBody ImFriendUpdateRequest request) {
+            @Valid @RequestBody ImFriendUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.updateFriend(id, request, userId);
         return Result.success("更新成功");
@@ -207,7 +213,7 @@ public class ImContactController {
      * 删除好友
      * 删除指定好友关系，删除后双方不再是好友
      *
-     * @param id 好友关系ID
+     * @param id     好友关系ID
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 删除结果
      * @apiNote 删除好友后，对应的私聊会话也会被删除
@@ -225,9 +231,9 @@ public class ImContactController {
      * 拉黑/解除拉黑好友
      * 拉黑好友后，将无法接收该好友的消息
      *
-     * @param id 好友关系ID
+     * @param id      好友关系ID
      * @param blocked 是否拉黑，true表示拉黑，false表示解除拉黑
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param userId  当前登录用户ID，从请求头中获取
      * @return 操作结果
      * @apiNote 拉黑是单向的，拉黑好友后，对方仍可以发送消息，但自己无法接收
      * @throws BusinessException 当好友关系不存在时抛出业务异常
@@ -235,7 +241,7 @@ public class ImContactController {
     @Operation(summary = "拉黑/解除拉黑好友", description = "拉黑好友后无法接收其消息")
     @PutMapping("/{id}/block")
     public Result<Void> blockFriend(@PathVariable Long id,
-                                    @RequestParam Boolean blocked) {
+            @RequestParam Boolean blocked) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.blockFriend(id, blocked, userId);
         return Result.success(blocked ? "已拉黑" : "已解除拉黑");
@@ -263,7 +269,7 @@ public class ImContactController {
      *
      * @param oldName 旧分组名称（URL编码）
      * @param request 重命名请求，包含新分组名称
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param userId  当前登录用户ID，从请求头中获取
      * @return 操作结果
      * @apiNote 此操作会更新所有使用该分组的好友关系
      * @throws BusinessException 当分组不存在时抛出业务异常
@@ -271,7 +277,7 @@ public class ImContactController {
     @Operation(summary = "重命名好友分组", description = "将指定的分组名称重命名为新名称")
     @PutMapping("/group/{oldName}")
     public Result<Void> renameGroup(@PathVariable String oldName,
-                                     @RequestBody GroupRenameRequest request) {
+            @RequestBody GroupRenameRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         try {
             String decodedName = java.net.URLDecoder.decode(oldName, "UTF-8");
@@ -288,7 +294,7 @@ public class ImContactController {
      * 删除指定分组，将该分组下的所有好友移至"默认分组"（清空分组名）
      *
      * @param groupName 分组名称（URL编码）
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param userId    当前登录用户ID，从请求头中获取
      * @return 操作结果
      * @apiNote 删除分组不会删除好友，只是清空好友的分组信息
      * @throws BusinessException 当分组不存在时抛出业务异常
@@ -312,7 +318,7 @@ public class ImContactController {
      * 批量移动好友到指定分组
      *
      * @param request 移动请求，包含好友ID列表和目标分组ID（分组名称）
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param userId  当前登录用户ID，从请求头中获取
      * @return 操作结果
      * @apiNote 分组ID实际是分组名称；如果分组名称为空，则移至默认分组
      * @throws BusinessException 当好友不存在时抛出业务异常
@@ -345,14 +351,14 @@ public class ImContactController {
      * 为指定好友设置标签
      *
      * @param friendId 好友用户ID
-     * @param tags 标签列表
+     * @param tags     标签列表
      * @return 更新结果
      * @apiNote 如果标签不存在，会自动创建
      */
     @Operation(summary = "更新好友标签", description = "为指定好友设置标签")
     @PutMapping("/{friendId}/tags")
     public Result<Void> updateFriendTags(@PathVariable Long friendId,
-                                           @Valid @RequestBody FriendTagsUpdateRequest request) {
+            @Valid @RequestBody FriendTagsUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.updateFriendTags(friendId, userId, request.getTags());
         return Result.success("标签更新成功");
@@ -489,7 +495,7 @@ public class ImContactController {
      * 获取推荐好友
      * 基于部门、手机号等推荐可能认识的人
      *
-     * @param type 推荐类型：department(同事)、phone(手机号)、all(全部)
+     * @param type  推荐类型：department(同事)、phone(手机号)、all(全部)
      * @param limit 返回数量限制
      * @return 推荐好友列表
      * @apiNote 推荐算法基于共同部门、通讯录匹配等
@@ -571,7 +577,8 @@ public class ImContactController {
      */
     @Operation(summary = "批量清除好友列表缓存", description = "批量清除多个用户的好友列表缓存")
     @PostMapping("/cache/clear-batch")
-    public Result<java.util.Map<String, Object>> batchClearFriendListCache(@RequestBody BatchClearCacheRequest request) {
+    public Result<java.util.Map<String, Object>> batchClearFriendListCache(
+            @RequestBody BatchClearCacheRequest request) {
         imFriendService.batchClearFriendListCache(request.getUserIds());
         java.util.Map<String, Object> result = new java.util.HashMap<>();
         result.put("cleared", request.getUserIds().size());
@@ -733,6 +740,18 @@ public class ImContactController {
         }
     }
 
+    /**
+     * 初始化测试账号数据（张三、李四）
+     * 为这两个账号建立全量好友关系并加入所有群组
+     */
+    @Operation(summary = "初始化测试数据", description = "为张三和李四账号初始化全量好友和群组")
+    @GetMapping("/debug/init-test-data")
+    public Result<java.util.Map<String, Object>> initTestData() {
+        String[] testUsers = { "张三", "李四" };
+        java.util.Map<String, Object> result = imBatchOperationService.executeBatchOperationsForUsers(testUsers);
+        return Result.success("测试数据初始化完成", result);
+    }
+
     private Long getUserId(String username) {
         try {
             return jdbcTemplate.queryForObject("SELECT id FROM im_user WHERE username = ?", Long.class, username);
@@ -758,9 +777,9 @@ public class ImContactController {
         try {
             // 直接查询数据库
             String sql = "SELECT f.id, f.user_id, f.friend_id, u.username, u.nickname, f.remark " +
-                         "FROM im_friend f " +
-                         "LEFT JOIN im_user u ON f.friend_id = u.id " +
-                         "WHERE f.user_id = ? AND f.is_deleted = 0";
+                    "FROM im_friend f " +
+                    "LEFT JOIN im_user u ON f.friend_id = u.id " +
+                    "WHERE f.user_id = ? AND f.is_deleted = 0";
             result.put("friends_from_db", jdbcTemplate.queryForList(sql, zhangsanId));
 
             // 调用 Service 方法
@@ -780,7 +799,8 @@ public class ImContactController {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement element : e.getStackTrace()) {
             sb.append(element.toString()).append("\n");
-            if (sb.length() > 1000) break;
+            if (sb.length() > 1000)
+                break;
         }
         return sb.toString();
     }

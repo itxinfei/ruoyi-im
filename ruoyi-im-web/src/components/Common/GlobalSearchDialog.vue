@@ -1,18 +1,36 @@
 <template>
   <teleport to="body">
     <transition name="fade">
-      <div v-if="visible" class="search-overlay" @click="visible = false">
-        <div class="search-modal" @click.stop>
+      <div
+        v-if="visible"
+        class="search-overlay"
+        @click="visible = false"
+      >
+        <div
+          class="search-modal"
+          @click.stop
+        >
           <!-- 搜索输入框 -->
           <div class="search-header">
             <div class="search-input-wrapper">
               <el-icon class="search-icon">
                 <Search />
               </el-icon>
-              <input ref="searchInputRef" v-model="searchKeyword" type="text" class="search-input"
-                placeholder="搜索联系人、群组、消息..." @input="handleInput" @keydown.enter="handleSearch"
-                @keydown.esc="visible = false">
-              <button v-if="searchKeyword" class="clear-btn" @click="clearSearch">
+              <input
+                ref="searchInputRef"
+                v-model="searchKeyword"
+                type="text"
+                class="search-input"
+                placeholder="搜索联系人、群组、消息..."
+                @input="handleInput"
+                @keydown.enter="handleSearch"
+                @keydown.esc="visible = false"
+              >
+              <button
+                v-if="searchKeyword"
+                class="clear-btn"
+                @click="clearSearch"
+              >
                 <el-icon>
                   <CircleClose />
                 </el-icon>
@@ -21,8 +39,13 @@
 
             <!-- 分类筛选 -->
             <div class="filter-tabs">
-              <button v-for="cat in categories" :key="cat.key" class="filter-tab"
-                :class="{ active: searchType === cat.key }" @click="searchType = cat.key; handleSearch()">
+              <button
+                v-for="cat in categories"
+                :key="cat.key"
+                class="filter-tab"
+                :class="{ active: searchType === cat.key }"
+                @click="searchType = cat.key; handleSearch()"
+              >
                 {{ cat.label }}
               </button>
             </div>
@@ -31,7 +54,10 @@
           <!-- 搜索结果 -->
           <div class="search-body">
             <!-- 加载中 -->
-            <div v-if="searching" class="loading">
+            <div
+              v-if="searching"
+              class="loading"
+            >
               <el-icon class="is-loading">
                 <Loading />
               </el-icon>
@@ -39,20 +65,41 @@
             </div>
 
             <!-- 结果列表 -->
-            <div v-else-if="hasResults" class="results">
-              <div v-for="(section, type) in filteredResults" :key="type" class="result-section">
-                <div class="section-title">{{ section.title }} ({{ section.data.length }})</div>
-                <div v-for="item in section.data" :key="item.id || item.userId || item.groupId || item.fileId"
-                  class="result-item" @click="handleResultClick(type, item)">
+            <div
+              v-else-if="hasResults"
+              class="results"
+            >
+              <div
+                v-for="(section, type) in filteredResults"
+                :key="type"
+                class="result-section"
+              >
+                <div class="section-title">
+                  {{ section.title }} ({{ section.data.length }})
+                </div>
+                <div
+                  v-for="item in section.data"
+                  :key="item.id || item.userId || item.groupId || item.fileId"
+                  class="result-item"
+                  @click="handleResultClick(type, item)"
+                >
                   <!-- 头像 (仅联系人和群组显示) -->
-                  <el-avatar v-if="type === 'contacts' || type === 'groups'" :size="40" :src="item.avatar"
-                    class="item-avatar">
+                  <el-avatar
+                    v-if="type === 'contacts' || type === 'groups'"
+                    :size="40"
+                    :src="item.avatar"
+                    class="item-avatar"
+                  >
                     {{ getItemTitle(item, type).charAt(0) }}
                   </el-avatar>
 
                   <div class="item-content">
-                    <div class="item-title">{{ getItemTitle(item, type) }}</div>
-                    <div class="item-desc">{{ getItemDesc(item, type) }}</div>
+                    <div class="item-title">
+                      {{ getItemTitle(item, type) }}
+                    </div>
+                    <div class="item-desc">
+                      {{ getItemDesc(item, type) }}
+                    </div>
                   </div>
 
                   <!-- 右侧箭头 -->
@@ -64,7 +111,10 @@
             </div>
 
             <!-- 空状态 -->
-            <div v-else-if="searchKeyword" class="empty">
+            <div
+              v-else-if="searchKeyword"
+              class="empty"
+            >
               <el-icon>
                 <Search />
               </el-icon>
@@ -72,7 +122,10 @@
             </div>
 
             <!-- 默认状态 -->
-            <div v-else class="default">
+            <div
+              v-else
+              class="default"
+            >
               <el-icon>
                 <Search />
               </el-icon>
@@ -116,7 +169,7 @@ const categories = [
 
 // 计算属性
 const hasResults = computed(() => {
-  if (!searchResult.value) return false
+  if (!searchResult.value) {return false}
   return (searchResult.value.contacts?.length || 0) +
     (searchResult.value.groups?.length || 0) +
     (searchResult.value.messages?.length || 0) +
@@ -124,7 +177,7 @@ const hasResults = computed(() => {
 })
 
 const filteredResults = computed(() => {
-  if (!searchResult.value) return {}
+  if (!searchResult.value) {return {}}
 
   const sections = {
     contacts: { title: '联系人', data: searchResult.value.contacts || [] },
@@ -195,7 +248,7 @@ const handleInput = () => {
 
 const handleSearch = async () => {
   const keyword = searchKeyword.value.trim()
-  if (!keyword) return
+  if (!keyword) {return}
 
   searching.value = true
   try {
@@ -408,13 +461,6 @@ const handleResultClick = (type, item) => {
   .item-desc {
     font-size: 13px;
     color: #6b7280;
-  }
-}
-
-@media (max-width: 768px) {
-  .search-modal {
-    max-width: 100%;
-    max-height: 90vh;
   }
 }
 </style>
