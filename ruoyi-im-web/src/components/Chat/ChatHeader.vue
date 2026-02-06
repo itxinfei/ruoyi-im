@@ -23,8 +23,24 @@
       </div>
     </div>
 
-    <!-- 右侧：操作区 -->
+    <!-- 右侧:操作区 -->
     <div class="header-actions">
+      <!-- 语音通话按钮 -->
+      <el-tooltip content="语音通话" placement="bottom">
+        <button class="action-btn" @click="handleVoiceCall">
+          <span class="material-icons-outlined">call</span>
+        </button>
+      </el-tooltip>
+
+      <!-- 视频通话按钮 -->
+      <el-tooltip content="视频通话" placement="bottom">
+        <button class="action-btn" @click="handleVideoCall">
+          <span class="material-icons-outlined">videocam</span>
+        </button>
+      </el-tooltip>
+
+      <div class="header-divider" />
+
       <!-- 搜索按钮 -->
       <el-tooltip content="搜索聊天内容" placement="bottom">
         <button class="action-btn" @click="$emit('search')">
@@ -32,7 +48,6 @@
         </button>
       </el-tooltip>
 
-      <!-- 置顶消息切换 (如果有置顶消息或群聊) -->
       <div class="header-divider" />
 
       <!-- 会话设置/详情 -->
@@ -49,6 +64,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
@@ -75,7 +91,9 @@ const emit = defineEmits([
   'show-user',
   'toggle-sidebar',
   'search',
-  'toggle-pinned'
+  'toggle-pinned',
+  'voice-call',
+  'video-call'
 ])
 
 const showConversationInfo = ref(false)
@@ -146,6 +164,38 @@ const clickConversationDesc = () => {
 const toggleConversationInfo = () => {
   showConversationInfo.value = !showConversationInfo.value
   emit('toggle-sidebar', showConversationInfo.value ? 'info' : null)
+}
+
+// 语音通话
+const handleVoiceCall = () => {
+  if (!props.session) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+
+  if (props.session.type === 'GROUP') {
+    ElMessage.info('群组语音通话功能开发中')
+    return
+  }
+
+  emit('voice-call', props.session)
+  ElMessage.info('语音通话功能开发中')
+}
+
+// 视频通话
+const handleVideoCall = () => {
+  if (!props.session) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+
+  if (props.session.type === 'GROUP') {
+    ElMessage.info('群组视频通话功能开发中')
+    return
+  }
+
+  emit('video-call', props.session)
+  ElMessage.info('视频通话功能开发中')
 }
 </script>
 
