@@ -27,7 +27,7 @@ public interface ImWebSocketBroadcastService {
     /**
      * 广播DING消息给目标用户
      *
-     * @param dingVO         DING消息VO
+     * @param dingVO        DING消息VO
      * @param targetUserIds 目标用户ID集合
      */
     void broadcastDingMessage(DingMessageVO dingVO, Set<Long> targetUserIds);
@@ -52,7 +52,7 @@ public interface ImWebSocketBroadcastService {
     /**
      * 广播会议邀请通知给目标用户
      *
-     * @param meetingId      会议ID
+     * @param meetingId     会议ID
      * @param targetUserIds 目标用户ID集合
      * @param inviterId     邀请人ID
      */
@@ -69,7 +69,7 @@ public interface ImWebSocketBroadcastService {
      * @param bookerId      预订人ID
      */
     void broadcastMeetingRoomBooking(Long bookingId, String roomName, String startTime, String endTime,
-                                      Set<Long> targetUserIds, Long bookerId);
+            Set<Long> targetUserIds, Long bookerId);
 
     /**
      * 广播拍一拍消息给会话成员
@@ -79,4 +79,21 @@ public interface ImWebSocketBroadcastService {
      * @param nudgedUserId   被拍者ID
      */
     void broadcastNudgeMessage(Long conversationId, Long nudgerId, Long nudgedUserId);
+
+    /**
+     * 广播消息给指定用户（排除特定设备/会话，当前版本简化为给该用户所有会话发送）
+     *
+     * @param userId  用户ID
+     * @param message 消息内容
+     */
+    void broadcastToUserExcept(Long userId, java.util.Map<String, Object> message);
+
+    /**
+     * 广播消息给会话所有成员（排除指定用户）
+     *
+     * @param conversationId 会话ID
+     * @param excludeUserId  排除的用户ID
+     * @param message        消息内容
+     */
+    void broadcastToConversationExcept(Long conversationId, Long excludeUserId, java.util.Map<String, Object> message);
 }

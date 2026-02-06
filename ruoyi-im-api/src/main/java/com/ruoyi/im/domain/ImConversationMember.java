@@ -69,6 +69,10 @@ public class ImConversationMember extends BaseEntity implements Serializable {
     @TableField("is_deleted")
     private Integer isDeleted;
 
+    /** 是否归档：0=否, 1=是 */
+    @TableField("is_archived")
+    private Integer isArchived;
+
     /** 删除时间 */
     @TableField("deleted_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

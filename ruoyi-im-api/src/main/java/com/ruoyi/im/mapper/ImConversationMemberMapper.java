@@ -135,4 +135,22 @@ public interface ImConversationMemberMapper extends BaseMapper<ImConversationMem
      * @return Map<会话ID, 成员数量>
      */
     List<java.util.Map<String, Object>> countMembersByConversationIds(@Param("conversationIds") List<Long> conversationIds);
+
+    /**
+     * 查询用户归档的会话列表
+     *
+     * @param userId 用户ID
+     * @return 归档的会话成员列表
+     */
+    List<ImConversationMember> selectArchivedByUserId(@Param("userId") Long userId);
+
+    /**
+     * 更新归档状态
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @param isArchived 是否归档，1为归档，0为不归档
+     * @return 更新行数
+     */
+    int updateArchived(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("isArchived") Integer isArchived);
 }

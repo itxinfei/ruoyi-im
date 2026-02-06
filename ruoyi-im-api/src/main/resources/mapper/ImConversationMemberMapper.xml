@@ -14,6 +14,7 @@
         <result column="last_read_message_id" property="lastReadMessageId" />
         <result column="last_read_time" property="lastReadTime" />
         <result column="is_deleted" property="isDeleted" />
+        <result column="is_archived" property="isArchived" />
         <result column="deleted_time" property="deletedTime" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
@@ -21,7 +22,7 @@
 
     <sql id="Base_Column_List">
         id, conversation_id, user_id, nickname, role, unread_count, is_pinned, is_muted,
-        last_read_message_id, last_read_time, is_deleted, deleted_time, create_time, update_time
+        last_read_message_id, last_read_time, is_deleted, is_archived, deleted_time, create_time, update_time
     </sql>
 
     <select id="selectByConversationIdAndUserId" resultMap="BaseResultMap">
@@ -116,5 +117,20 @@
         AND is_deleted = 0
         GROUP BY conversation_id
     </select>
+
+    <!-- 查询用户归档的会话列表 -->
+    <select id="selectArchivedByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM im_conversation_member
+        WHERE user_id = #{userId} AND is_archived = 1 AND is_deleted = 0
+        ORDER BY update_time DESC
+    </select>
+
+    <!-- 更新归档状态 -->
+    <update id="updateArchived">
+        UPDATE im_conversation_member
+        SET is_archived = #{isArchived}, update_time = NOW()
+        WHERE conversation_id = #{conversationId} AND user_id = #{userId}
+    </update>
 
 </mapper>

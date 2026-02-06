@@ -3,6 +3,8 @@ package com.ruoyi.im.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.im.domain.ImUser;
 
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.Set;
 
@@ -90,7 +92,7 @@ public interface ImUserMapper extends BaseMapper<ImUser> {
      * 批量更新用户状态 - 性能优化
      *
      * @param userIds 用户ID列表
-     * @param status 新状态
+     * @param status  新状态
      * @return 更新成功的数量
      */
     int batchUpdateUserStatus(List<Long> userIds, String status);
@@ -100,10 +102,11 @@ public interface ImUserMapper extends BaseMapper<ImUser> {
      *
      * @param imUser 查询条件
      * @param offset 偏移量
-     * @param limit 限制数量
+     * @param limit  限制数量
      * @return 用户列表
      */
-    List<ImUser> selectImUserListWithPagination(ImUser imUser, int offset, int limit);
+    List<ImUser> selectImUserListWithPagination(@Param("imUser") ImUser imUser, @Param("offset") int offset,
+            @Param("limit") int limit, @Param("keyword") String keyword);
 
     /**
      * 根据用户ID列表批量查询用户 - 性能优化
@@ -111,7 +114,7 @@ public interface ImUserMapper extends BaseMapper<ImUser> {
      * @param userIds 用户ID列表
      * @return 用户列表
      */
-    List<ImUser> selectImUserListByIds(List<Long> userIds);
+    List<ImUser> selectImUserListByIds(@Param("userIds") List<Long> userIds);
 
     /**
      * 查询用户总数（用于分页）
@@ -119,13 +122,13 @@ public interface ImUserMapper extends BaseMapper<ImUser> {
      * @param imUser 查询条件
      * @return 总数
      */
-    int selectImUserCount(ImUser imUser);
+    int selectImUserCount(@Param("imUser") ImUser imUser, @Param("keyword") String keyword);
 
     /**
      * 根据状态查询用户列表 - 性能优化
      *
      * @param status 用户状态
-     * @param limit 限制数量
+     * @param limit  限制数量
      * @return 用户列表
      */
     List<ImUser> selectImUserListByStatus(String status, int limit);

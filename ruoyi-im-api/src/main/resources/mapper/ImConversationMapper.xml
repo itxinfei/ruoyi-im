@@ -122,15 +122,19 @@
     </select>
 
     <!-- 批量获取会话的最后消息（一次性获取所有） -->
-    <select id="selectLastMessagesByConversationIds" resultType="com.ruoyi.im.domain.ImMessage">
-        SELECT id, conversation_id, sender_id, content, message_type,
-               create_time, update_time, is_revoked, is_edited
+    <select id="selectLastMessagesByConversationIds" resultMap="com.ruoyi.im.mapper.ImMessageMapper.ImMessageResult">
+        SELECT id, conversation_id, sender_id, message_type, content,
+               reply_to_message_id, forward_from_message_id,
+               file_url, file_name, file_size,
+               sensitive_level,
+               client_msg_id, send_status, send_retry_count,
+               send_error_code, send_error_msg, delivered_time,
+               is_revoked, revoked_time, revoker_id,
+               is_edited, edited_content, edit_count, edit_time,
+               is_deleted, deleted_time,
+               create_time, update_time
         FROM im_message
-        WHERE conversation_id IN
-        <foreach collection="conversationIds" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        AND id IN (
+        WHERE id IN (
             SELECT MAX(id) FROM im_message
             WHERE conversation_id IN
             <foreach collection="conversationIds" item="id" open="(" separator="," close=")">

@@ -14,6 +14,12 @@
         <result property="fileName" column="file_name"/>
         <result property="fileSize" column="file_size"/>
         <result property="sensitiveLevel" column="sensitive_level"/>
+        <result property="clientMsgId" column="client_msg_id"/>
+        <result property="sendStatus" column="send_status"/>
+        <result property="sendRetryCount" column="send_retry_count"/>
+        <result property="sendErrorCode" column="send_error_code"/>
+        <result property="sendErrorMsg" column="send_error_msg"/>
+        <result property="deliveredTime" column="delivered_time"/>
         <result property="isRevoked" column="is_revoked"/>
         <result property="revokedTime" column="revoked_time"/>
         <result property="revokerId" column="revoker_id"/>
@@ -32,6 +38,8 @@
                reply_to_message_id, forward_from_message_id,
                file_url, file_name, file_size,
                sensitive_level,
+               client_msg_id, send_status, send_retry_count,
+               send_error_code, send_error_msg, delivered_time,
                is_revoked, revoked_time, revoker_id,
                is_edited, edited_content, edit_count, edit_time,
                is_deleted, deleted_time,
@@ -122,6 +130,12 @@
             <if test="fileName != null">file_name = #{fileName},</if>
             <if test="fileSize != null">file_size = #{fileSize},</if>
             <if test="sensitiveLevel != null">sensitive_level = #{sensitiveLevel},</if>
+            <if test="clientMsgId != null">client_msg_id = #{clientMsgId},</if>
+            <if test="sendStatus != null">send_status = #{sendStatus},</if>
+            <if test="sendRetryCount != null">send_retry_count = #{sendRetryCount},</if>
+            <if test="sendErrorCode != null">send_error_code = #{sendErrorCode},</if>
+            <if test="sendErrorMsg != null">send_error_msg = #{sendErrorMsg},</if>
+            <if test="deliveredTime != null">delivered_time = #{deliveredTime},</if>
             <if test="isRevoked != null">is_revoked = #{isRevoked},</if>
             <if test="revokedTime != null">revoked_time = #{revokedTime},</if>
             <if test="revokerId != null">revoker_id = #{revokerId},</if>
@@ -131,6 +145,7 @@
             <if test="editTime != null">edit_time = #{editTime},</if>
             <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
             <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}
     </update>

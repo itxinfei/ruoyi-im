@@ -320,3 +320,104 @@ export function setAnnouncementPinned(announcementId, isPinned) {
     params: { isPinned }
   })
 }
+
+// ==================== 群组权限管理 ====================
+
+/**
+ * 获取群组权限配置
+ * @param {number} groupId - 群组ID
+ * @returns {Promise} 权限配置列表
+ */
+export function getGroupPermissions(groupId) {
+  return request({
+    url: `/api/im/group/${groupId}/permissions`,
+    method: 'get'
+  })
+}
+
+/**
+ * 更新群组角色权限
+ * 仅群主可以调用
+ * @param {number} groupId - 群组ID
+ * @param {string} role - 角色 (OWNER/ADMIN/MEMBER)
+ * @param {Object} permissions - 权限配置
+ * @param {number} permissions.canInvite - 邀请成员权限
+ * @param {number} permissions.canRemove - 移除成员权限
+ * @param {number} permissions.canMute - 禁言成员权限
+ * @param {number} permissions.canAnnounce - 发布公告权限
+ * @param {number} permissions.canUpload - 上传文件权限
+ * @param {number} permissions.canEditGroup - 修改群信息权限
+ * @param {number} permissions.canKick - 踢人权限
+ * @param {number} permissions.canSetAdmin - 设置管理员权限
+ * @param {number} permissions.canDisband - 解散群组权限
+ * @returns {Promise}
+ */
+export function updateGroupPermissions(groupId, role, permissions) {
+  return request({
+    url: `/api/im/group/${groupId}/permissions/${role}`,
+    method: 'put',
+    data: permissions
+  })
+}
+
+/**
+ * 重置群组权限为默认配置
+ * 仅群主可以调用
+ * @param {number} groupId - 群组ID
+ * @returns {Promise}
+ */
+export function resetGroupPermissions(groupId) {
+  return request({
+    url: `/api/im/group/${groupId}/permissions/reset`,
+    method: 'post'
+  })
+}
+
+/**
+ * 检查当前用户是否有指定权限
+ * @param {number} groupId - 群组ID
+ * @param {string} permission - 权限名称 (canInvite/canRemove/canMute等)
+ * @returns {Promise} { hasPermission: boolean, permission: string }
+ */
+export function checkGroupPermission(groupId, permission) {
+  return request({
+    url: `/api/im/group/${groupId}/permission/check`,
+    method: 'get',
+    params: { permission }
+  })
+}
+
+/**
+ * 获取当前用户在群组中的角色
+ * @param {number} groupId - 群组ID
+ * @returns {Promise} { isOwner: boolean, isAdminOrOwner: boolean }
+ */
+export function getUserGroupRole(groupId) {
+  return request({
+    url: `/api/im/group/${groupId}/role`,
+    method: 'get'
+  })
+}
+
+/**
+ * 批量检查多个权限
+ * @param {number} groupId - 群组ID
+ * @param {Array<string>} permissions - 权限名称列表
+ * @returns {Promise} Map<permission, boolean>
+ */
+export function checkMultiplePermissions(groupId, permissions) {
+  return Promise.all(
+    permissions.map(permission =>
+      checkGroupPermission(groupId, permission).then(res => ({
+        permission,
+        hasPermission: res.data?.hasPermission || false
+      }))
+    )
+  ).then(results => {
+    const permissionMap = {}
+    results.forEach(({ permission, hasPermission }) => {
+      permissionMap[permission] = hasPermission
+    })
+    return permissionMap
+  })
+}

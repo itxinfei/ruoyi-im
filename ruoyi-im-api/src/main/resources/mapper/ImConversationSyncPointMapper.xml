@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImConversationSyncPointMapper">
+
+    <!-- 结果映射 -->
+    <resultMap type="com.ruoyi.im.domain.ImConversationSyncPoint" id="ImConversationSyncPointResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="lastSyncTime" column="last_sync_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 删除同步点 -->
+    <delete id="deleteByUserAndDevice" parameterType="map">
+        DELETE FROM im_conversation_sync_point
+        WHERE user_id = #{userId} AND device_id = #{deviceId}
+    </delete>
+
+</mapper>

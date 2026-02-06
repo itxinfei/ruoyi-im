@@ -10,6 +10,10 @@
         <result property="description" column="description"/>
         <result property="maxMembers" column="max_members"/>
         <result property="allMuted" column="all_muted"/>
+        <result property="qrcodeUrl" column="qrcode_url"/>
+        <result property="qrcodeExpireTime" column="qrcode_expire_time"/>
+        <result property="allowUpload" column="allow_upload"/>
+        <result property="showMemberList" column="show_member_list"/>
         <result property="isDeleted" column="is_deleted"/>
         <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>
@@ -18,7 +22,9 @@
     </resultMap>
 
     <sql id="selectImGroupVo">
-        select id, name, owner_id, avatar, description, max_members, all_muted, is_deleted, deleted_time, create_time, update_time
+        select id, name, owner_id, avatar, description, max_members, all_muted,
+               qrcode_url, qrcode_expire_time, allow_upload, show_member_list,
+               is_deleted, deleted_time, create_time, update_time
         from im_group
     </sql>
 
@@ -50,6 +56,10 @@
             <if test="description != null">description,</if>
             <if test="maxMembers != null">max_members,</if>
             <if test="allMuted != null">all_muted,</if>
+            <if test="qrcodeUrl != null">qrcode_url,</if>
+            <if test="qrcodeExpireTime != null">qrcode_expire_time,</if>
+            <if test="allowUpload != null">allow_upload,</if>
+            <if test="showMemberList != null">show_member_list,</if>
             <if test="isDeleted != null">is_deleted,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
@@ -61,6 +71,10 @@
             <if test="description != null">#{description},</if>
             <if test="maxMembers != null">#{maxMembers},</if>
             <if test="allMuted != null">#{allMuted},</if>
+            <if test="qrcodeUrl != null">#{qrcodeUrl},</if>
+            <if test="qrcodeExpireTime != null">#{qrcodeExpireTime},</if>
+            <if test="allowUpload != null">#{allowUpload},</if>
+            <if test="showMemberList != null">#{showMemberList},</if>
             <if test="isDeleted != null">#{isDeleted},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
@@ -76,6 +90,10 @@
             <if test="description != null and description != ''">description = #{description},</if>
             <if test="maxMembers != null">max_members = #{maxMembers},</if>
             <if test="allMuted != null">all_muted = #{allMuted},</if>
+            <if test="qrcodeUrl != null">qrcode_url = #{qrcodeUrl},</if>
+            <if test="qrcodeExpireTime != null">qrcode_expire_time = #{qrcodeExpireTime},</if>
+            <if test="allowUpload != null">allow_upload = #{allowUpload},</if>
+            <if test="showMemberList != null">show_member_list = #{showMemberList},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}

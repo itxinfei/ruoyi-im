@@ -26,6 +26,21 @@ public class ImFriendVO implements Serializable {
     private Long friendId;
 
     /**
+     * 好友名称（对齐前端 name 字段）
+     */
+    private String name;
+
+    /**
+     * 好友头像（对齐前端 avatar 字段）
+     */
+    private String avatar;
+
+    /**
+     * 好友昵称（对齐前端 nickname 字段）
+     */
+    private String nickname;
+
+    /**
      * 好友名称
      */
     private String friendName;

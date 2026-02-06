@@ -7,7 +7,11 @@ import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
+import com.ruoyi.im.vo.user.ImUserVO;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +49,7 @@ public interface ImUserService {
     /**
      * 更新用户信息
      *
-     * @param userId 用户ID
+     * @param userId  用户ID
      * @param request 更新请求
      */
     void updateUser(Long userId, ImUserUpdateRequest request);
@@ -77,7 +81,7 @@ public interface ImUserService {
     /**
      * 修改密码
      *
-     * @param userId 用户ID
+     * @param userId      用户ID
      * @param oldPassword 旧密码
      * @param newPassword 新密码
      * @return 是否成功
@@ -124,9 +128,10 @@ public interface ImUserService {
     /**
      * 重置用户密码
      *
-     * @param userId 用户ID
+     * @param userId      用户ID
+     * @param newPassword 新密码
      */
-    void resetPassword(Long userId);
+    void resetPassword(Long userId, String newPassword);
 
     /**
      * 获取在线用户列表
@@ -140,7 +145,7 @@ public interface ImUserService {
      * 上传用户头像图片并更新用户头像字段
      *
      * @param userId 用户ID
-     * @param file 头像文件
+     * @param file   头像文件
      * @return 头像URL
      */
     String uploadAvatar(Long userId, MultipartFile file);
@@ -231,4 +236,66 @@ public interface ImUserService {
      * @return 用户选项列表
      */
     List<java.util.Map<String, Object>> getUserOptions(String keyword);
+
+    /**
+     * 获取聊天背景设置
+     *
+     * @param userId         用户ID
+     * @param conversationId 会话ID（可选）
+     * @return 背景设置信息
+     */
+    java.util.Map<String, Object> getChatBackground(Long userId, Long conversationId);
+
+    /**
+     * 设置聊天背景
+     *
+     * @param userId         用户ID
+     * @param type           背景类型：color/image/default
+     * @param value          背景值
+     * @param conversationId 会话ID（可选）
+     */
+    void setChatBackground(Long userId, String type, String value, Long conversationId);
+
+    /**
+     * 清除聊天背景
+     *
+     * @param userId         用户ID
+     * @param conversationId 会话ID（可选）
+     */
+    void clearChatBackground(Long userId, Long conversationId);
+
+    /**
+     * 扫描二维码
+     *
+     * @param userId 用户ID
+     * @param qrData 二维码内容
+     * @return 扫描结果
+     */
+    java.util.Map<String, Object> scanQRCode(Long userId, String qrData);
+
+    /**
+     * 导入用户数据
+     *
+     * @param file Excel文件
+     * @return 导入结果明细
+     */
+    java.util.Map<String, Object> importUsers(MultipartFile file);
+
+    /**
+     * 下载导入模板
+     *
+     * @param response 响应
+     * @throws IOException IO异常
+     */
+    void downloadTemplate(HttpServletResponse response) throws IOException;
+
+    /**
+     * 导出用户数据
+     *
+     * @param response 响应
+     * @param keyword  搜索关键词
+     * @param role     角色筛选
+     * @throws IOException IO异常
+     */
+    void exportUsers(HttpServletResponse response, String keyword, String role) throws IOException;
 }

@@ -16,6 +16,7 @@
         <result property="department" column="department"/>
         <result property="position" column="position"/>
         <result property="role" column="role"/>
+        <result property="birthday" column="birthday"/>
         <result property="lastOnlineTime" column="last_online_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
@@ -24,7 +25,7 @@
     <sql id="selectImUserVo">
         select id, username, password, nickname, email,
                mobile, avatar, status, gender, signature,
-               department, position, role,
+               department, position, role, birthday,
                last_online_time,
                create_time, update_time
         from im_user
@@ -60,6 +61,8 @@
             <if test="signature != null">signature,</if>
             <if test="department != null">department,</if>
             <if test="position != null">position,</if>
+            <if test="role != null">role,</if>
+            <if test="birthday != null">birthday,</if>
             <if test="lastOnlineTime != null">last_online_time,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
@@ -76,6 +79,8 @@
             <if test="signature != null">#{signature},</if>
             <if test="department != null">#{department},</if>
             <if test="position != null">#{position},</if>
+            <if test="role != null">#{role},</if>
+            <if test="birthday != null">#{birthday},</if>
             <if test="lastOnlineTime != null">#{lastOnlineTime},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
@@ -158,27 +163,43 @@
     <select id="selectImUserListWithPagination" resultMap="ImUserResult">
         <include refid="selectImUserVo"/>
         <where>
-            <if test="username != null and username != ''"> and username like concat('%', #{username}, '%') </if>
-            <if test="nickname != null and nickname != ''"> and nickname like concat('%', #{nickname}, '%') </if>
-            <if test="email != null and email != ''"> and email = #{email} </if>
-            <if test="mobile != null and mobile != ''"> and mobile = #{mobile} </if>
-            <if test="status != null"> and status = #{status} </if>
-            <if test="role != null and role != ''"> and role = #{role} </if>
+            <if test="imUser.username != null and imUser.username != ''"> and username like concat('%', #{imUser.username}, '%') </if>
+            <if test="imUser.nickname != null and imUser.nickname != ''"> and nickname like concat('%', #{imUser.nickname}, '%') </if>
+            <if test="imUser.email != null and imUser.email != ''"> and email = #{imUser.email} </if>
+            <if test="imUser.mobile != null and imUser.mobile != ''"> and mobile = #{imUser.mobile} </if>
+            <if test="imUser.status != null"> and status = #{imUser.status} </if>
+            <if test="imUser.role != null and imUser.role != ''"> and role = #{imUser.role} </if>
+            <if test="keyword != null and keyword != ''">
+                and (
+                    username like concat('%', #{keyword}, '%')
+                    or nickname like concat('%', #{keyword}, '%')
+                    or mobile like concat('%', #{keyword}, '%')
+                    or email like concat('%', #{keyword}, '%')
+                )
+            </if>
         </where>
         order by id desc
         limit #{limit} offset #{offset}
     </select>
 
     <!-- 查询用户总数（用于分页） -->
-    <select id="selectImUserCount" parameterType="com.ruoyi.im.domain.ImUser" resultType="java.lang.Integer">
+    <select id="selectImUserCount" resultType="java.lang.Integer">
         select count(*) from im_user
         <where>
-            <if test="username != null and username != ''"> and username like concat('%', #{username}, '%') </if>
-            <if test="nickname != null and nickname != ''"> and nickname like concat('%', #{nickname}, '%') </if>
-            <if test="email != null and email != ''"> and email = #{email} </if>
-            <if test="mobile != null and mobile != ''"> and mobile = #{mobile} </if>
-            <if test="status != null"> and status = #{status} </if>
-            <if test="role != null and role != ''"> and role = #{role} </if>
+            <if test="imUser.username != null and imUser.username != ''"> and username like concat('%', #{imUser.username}, '%') </if>
+            <if test="imUser.nickname != null and imUser.nickname != ''"> and nickname like concat('%', #{imUser.nickname}, '%') </if>
+            <if test="imUser.email != null and imUser.email != ''"> and email = #{imUser.email} </if>
+            <if test="imUser.mobile != null and imUser.mobile != ''"> and mobile = #{imUser.mobile} </if>
+            <if test="imUser.status != null"> and status = #{imUser.status} </if>
+            <if test="imUser.role != null and imUser.role != ''"> and role = #{imUser.role} </if>
+            <if test="keyword != null and keyword != ''">
+                and (
+                    username like concat('%', #{keyword}, '%')
+                    or nickname like concat('%', #{keyword}, '%')
+                    or mobile like concat('%', #{keyword}, '%')
+                    or email like concat('%', #{keyword}, '%')
+                )
+            </if>
         </where>
     </select>
     
@@ -238,14 +259,14 @@
 
     <!-- 根据用户ID列表批量查询用户 - 性能优化 -->
     <select id="selectImUserListByIds" resultMap="ImUserResult">
-        select id, username, password, nickname, email, 
+        select id, username, password, nickname, email,
                mobile, avatar, status, gender, signature,
                department, position,
                last_online_time,
-               create_time, update_time 
+               create_time, update_time
         from im_user
         where id in
-        <foreach collection="list" item="id" open="(" separator="," close=")">
+        <foreach collection="userIds" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
     </select>

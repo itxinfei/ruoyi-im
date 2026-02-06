@@ -12,14 +12,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="avatar"    column="avatar"    />
         <result property="description"    column="description"    />
         <result property="isEnabled"    column="is_enabled"    />
-        <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
     </resultMap>
 
     <sql id="selectImGroupBotVo">
-        select id, group_id, bot_name, bot_type, avatar, description, is_enabled, create_by, create_time, update_by, update_time from im_group_bot
+        select id, group_id, bot_name, bot_type, avatar, description, is_enabled, create_time, update_time from im_group_bot
     </sql>
 
     <select id="selectByGroupId" parameterType="Long" resultMap="ImGroupBotResult">

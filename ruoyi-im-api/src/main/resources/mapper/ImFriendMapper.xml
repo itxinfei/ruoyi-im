@@ -8,6 +8,7 @@
         <result property="friendId" column="friend_id"/>
         <result property="remark" column="remark"/>
         <result property="groupName" column="group_name"/>
+        <result property="tags" column="tags"/>
         <result property="isDeleted" column="is_deleted"/>
         <result property="deletedTime" column="deleted_time"/>
         <result property="createTime" column="create_time"/>

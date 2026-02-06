@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMessageAckMapper">
+
+    <!-- 结果映射 -->
+    <resultMap type="com.ruoyi.im.domain.ImMessageAck" id="ImMessageAckResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="messageId" column="message_id"/>
+        <result property="conversationId" column="conversation_id"/>
+        <result property="clientMsgId" column="client_msg_id"/>
+        <result property="ackType" column="ack_type"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="ackTimestamp" column="ack_timestamp"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!-- 查询用户的消息ACK记录 -->
+    <select id="selectByUserAndMessage" parameterType="com.ruoyi.im.domain.ImMessageAck"
+            resultMap="ImMessageAckResult">
+        SELECT * FROM im_message_ack
+        WHERE user_id = #{userId} AND message_id = #{messageId}
+        ORDER BY ack_timestamp DESC
+    </select>
+
+    <!-- 查询会话的ACK记录 -->
+    <select id="selectByConversation" parameterType="Long" resultMap="ImMessageAckResult">
+        SELECT * FROM im_message_ack
+        WHERE conversation_id = #{conversationId}
+        ORDER BY ack_timestamp DESC
+    </select>
+
+    <!-- 查询消息的最后已读ACK -->
+    <select id="selectLastReadAck" parameterType="map" resultMap="ImMessageAckResult">
+        SELECT * FROM im_message_ack
+        WHERE user_id = #{userId} AND conversation_id = #{conversationId} AND ack_type = 'read'
+        ORDER BY ack_timestamp DESC
+        LIMIT 1
+    </select>
+
+    <!-- 删除过期ACK记录 -->
+    <delete id="deleteExpiredAcks" parameterType="java.time.LocalDateTime">
+        DELETE FROM im_message_ack
+        WHERE create_time &lt; #{expireTime}
+    </delete>
+
+    <!-- 删除消息的所有确认记录 -->
+    <delete id="deleteByMessageId" parameterType="Long">
+        DELETE FROM im_message_ack
+        WHERE message_id = #{messageId}
+    </delete>
+
+</mapper>

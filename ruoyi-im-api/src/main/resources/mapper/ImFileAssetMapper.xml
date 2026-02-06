@@ -7,28 +7,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="com.ruoyi.im.domain.ImFileAsset" id="ImFileAssetResult">
         <result property="id" column="id" />
         <result property="fileName" column="file_name" />
-        <result property="originalName" column="original_name" />
         <result property="filePath" column="file_path" />
         <result property="fileSize" column="file_size" />
         <result property="fileType" column="file_type" />
-        <result property="mimeType" column="mime_type" />
+        <result property="fileExt" column="file_ext" />
+        <result property="md5" column="md5" />
         <result property="uploaderId" column="uploader_id" />
-        <result property="uploadTime" column="upload_time" />
         <result property="downloadCount" column="download_count" />
+        <result property="downloadExpireTime" column="download_expire_time" />
         <result property="status" column="status" />
-        <result property="remark" column="remark" />
         <result property="createTime" column="create_time" />
-        <result property="updateTime" column="update_time" />
     </resultMap>
 
     <sql id="selectImFileAssetVo">
-        select id, file_name, original_name, file_path, file_size, file_type, mime_type, 
-               uploader_id, upload_time, download_count, status, remark, create_time, update_time 
+        select id, file_name, file_path, file_size, file_type, file_ext, md5,
+               uploader_id, download_count, download_expire_time, status, create_time
         from im_file_asset
     </sql>
 
     <select id="countTotalFiles" resultType="java.lang.Long">
-        select count(*) 
+        select count(*)
         from im_file_asset
         <where>
             status = 1
@@ -42,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="countTodayUploads" resultType="java.lang.Long">
-        select count(*) 
+        select count(*)
         from im_file_asset
         where status = 1
         and date(create_time) = #{date}

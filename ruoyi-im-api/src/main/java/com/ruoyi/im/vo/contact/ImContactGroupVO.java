@@ -32,8 +32,10 @@ public class ImContactGroupVO implements Serializable {
 
     /**
      * 好友列表（兼容旧代码）
+     * 
      * @deprecated 使用 contacts 替代
      */
     @Deprecated
+    @com.fasterxml.jackson.annotation.JsonProperty("friends")
     private List<ImFriendVO> friends;
 }

@@ -148,3 +148,48 @@ export function unarchiveSession(conversationId) {
     method: 'put'
   })
 }
+
+// ==================== 会话同步 ====================
+
+/**
+ * 同步会话事件
+ * 获取自上次同步以来发生的会话事件（置顶、免打扰、删除、归档、已读等）
+ * 用于多设备间会话设置同步
+ * @param {Object} params - 同步参数
+ * @param {string} params.deviceId - 设备ID（从请求头X-Device-Id获取）
+ * @param {number} params.lastSyncTime - 上次同步时间戳（毫秒），可选
+ * @returns {Promise} 会话事件列表和新的同步时间戳
+ */
+export function syncSessions(params = {}) {
+  return request({
+    url: '/api/im/session/sync',
+    method: 'get',
+    params,
+    headers: params.deviceId ? { 'X-Device-Id': params.deviceId } : {}
+  })
+}
+
+/**
+ * 重置会话同步点
+ * 删除指定设备的同步点，下次同步将获取全部事件
+ * @param {string} deviceId - 设备ID
+ * @returns {Promise}
+ */
+export function resetSessionSyncPoint(deviceId) {
+  return request({
+    url: '/api/im/session/sync',
+    method: 'delete',
+    headers: { 'X-Device-Id': deviceId }
+  })
+}
+
+/**
+ * 获取会话同步点
+ * @returns {Promise} 同步点信息
+ */
+export function getSessionSyncPoints() {
+  return request({
+    url: '/api/im/session/sync/points',
+    method: 'get'
+  })
+}

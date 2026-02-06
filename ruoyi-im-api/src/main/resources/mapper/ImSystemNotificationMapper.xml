@@ -5,6 +5,7 @@
     <resultMap type="com.ruoyi.im.domain.ImSystemNotification" id="ImSystemNotificationResult">
         <id property="id" column="id"/>
         <result property="receiverId" column="receiver_id"/>
+        <result property="senderId" column="sender_id"/>
         <result property="type" column="type"/>
         <result property="title" column="title"/>
         <result property="content" column="content"/>
@@ -16,7 +17,7 @@
     </resultMap>
 
     <sql id="selectImSystemNotificationVo">
-        select id, receiver_id, type, title, content, related_id, related_type, is_read, read_time, create_time
+        select id, receiver_id, sender_id, type, title, content, related_id, related_type, is_read, read_time, create_time
         from im_system_notification
     </sql>
 
