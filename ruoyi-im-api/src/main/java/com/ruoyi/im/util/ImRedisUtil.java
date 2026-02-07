@@ -639,6 +639,7 @@ public class ImRedisUtil {
     // ==================== 群组信息缓存 ====================
     private static final String GROUP_PREFIX = "group:";
     private static final long GROUP_INFO_EXPIRE = 30; // 群组信息缓存30分钟
+    private static final long GROUP_MEMBERS_EXPIRE = 5; // 群组成员缓存5分钟
 
     /**
      * 缓存群组信息
@@ -685,6 +686,79 @@ public class ImRedisUtil {
         T loaded = loader.get();
         if (loaded != null) {
             cacheGroupInfo(groupId, loaded);
+        }
+        return loaded;
+    }
+
+    // ==================== 群组成员缓存 ====================
+
+    /**
+     * 缓存群组成员列表
+     *
+     * @param groupId 群组ID
+     * @param members 成员列表
+     */
+    @SuppressWarnings("unchecked")
+    public void cacheGroupMembers(Long groupId, List<?> members) {
+        if (redisTemplate == null || groupId == null || members == null) {
+            return;
+        }
+        String key = buildKey(GROUP_PREFIX, "members", String.valueOf(groupId));
+        redisTemplate.opsForValue().set(key, members, GROUP_MEMBERS_EXPIRE, TimeUnit.MINUTES);
+        log.debug("缓存群组成员列表: groupId={}, memberCount={}", groupId, members.size());
+    }
+
+    /**
+     * 获取群组成员列表
+     *
+     * @param groupId 群组ID
+     * @return 成员列表，不存在返回null
+     */
+    @SuppressWarnings("unchecked")
+    public <T> List<T> getGroupMembers(Long groupId, Class<T> clazz) {
+        if (redisTemplate == null || groupId == null) {
+            return null;
+        }
+        String key = buildKey(GROUP_PREFIX, "members", String.valueOf(groupId));
+        Object cached = redisTemplate.opsForValue().get(key);
+        if (cached instanceof List) {
+            return (List<T>) cached;
+        }
+        return null;
+    }
+
+    /**
+     * 删除群组成员缓存
+     * 在成员变更时调用
+     *
+     * @param groupId 群组ID
+     */
+    public void evictGroupMembers(Long groupId) {
+        if (redisTemplate == null || groupId == null) {
+            return;
+        }
+        String key = buildKey(GROUP_PREFIX, "members", String.valueOf(groupId));
+        redisTemplate.delete(key);
+        log.debug("清除群组成员缓存: groupId={}", groupId);
+    }
+
+    /**
+     * 获取群组成员列表，如果不存在则从数据库加载
+     *
+     * @param groupId 群组ID
+     * @param clazz   返回类型
+     * @param loader  数据加载器
+     * @return 成员列表
+     */
+    public <T> List<T> getOrLoadGroupMembers(Long groupId, Class<T> clazz, Supplier<List<T>> loader) {
+        List<T> cached = getGroupMembers(groupId, clazz);
+        if (cached != null) {
+            log.debug("命中群组成员缓存: groupId={}, memberCount={}", groupId, cached.size());
+            return cached;
+        }
+        List<T> loaded = loader.get();
+        if (loaded != null && !loaded.isEmpty()) {
+            cacheGroupMembers(groupId, loaded);
         }
         return loaded;
     }

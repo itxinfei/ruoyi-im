@@ -70,7 +70,9 @@ public class ImUserController {
     @Operation(summary = "创建用户", description = "管理员创建新用户账户")
     @PostMapping
     public Result<Long> create(@Valid @RequestBody ImRegisterRequest request) {
+        log.info("创建用户: username={}", request.getUsername());
         Long userId = imUserService.createUser(request);
+        log.info("用户创建成功: userId={}, username={}", userId, request.getUsername());
         return Result.success("创建成功", userId);
     }
 
@@ -86,7 +88,9 @@ public class ImUserController {
     @Operation(summary = "删除用户", description = "管理员删除指定用户账户及其关联数据")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable @Positive(message = "用户ID必须为正数") Long id) {
+        log.info("删除用户: userId={}", id);
         imUserService.deleteUser(id);
+        log.info("用户删除成功: userId={}", id);
         return Result.success("删除成功");
     }
 
@@ -119,6 +123,7 @@ public class ImUserController {
         List<Long> idList = java.util.Arrays.stream(ids.split(","))
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
+        log.debug("批量获取用户信息: ids={}, count={}", ids, idList.size());
         List<ImUserVO> list = imUserService.getUsersByIds(idList);
         return Result.success(list);
     }
@@ -201,7 +206,9 @@ public class ImUserController {
             Integer status = "ENABLED".equals(request.getStatus())
                 ? SystemConstants.USER_STATUS_ENABLED
                 : SystemConstants.USER_STATUS_DISABLED;
+        log.info("修改用户状态: userId={}, status={}", request.getId(), status);
         imUserService.updateStatus(request.getId(), status);
+        log.info("用户状态修改成功: userId={}, status={}", request.getId(), status);
         return Result.success("状态修改成功");
     }
 
@@ -239,7 +246,13 @@ public class ImUserController {
             @PathVariable @Positive(message = "用户ID必须为正数") Long id,
             @RequestParam @NotBlank(message = "旧密码不能为空") String oldPassword,
             @RequestParam @NotBlank(message = "新密码不能为空") String newPassword) {
+        log.info("修改密码: userId={}", id);
         boolean success = imUserService.changePassword(id, oldPassword, newPassword);
+        if (success) {
+            log.info("密码修改成功: userId={}", id);
+        } else {
+            log.warn("密码修改失败: userId={}, 原因: 旧密码错误", id);
+        }
         return success ? Result.success("密码修改成功") : Result.fail("旧密码错误");
     }
 
@@ -256,7 +269,9 @@ public class ImUserController {
     @PostMapping("/avatar")
     public Result<String> uploadAvatar(@RequestParam("avatarfile") MultipartFile file) {
         Long userId = SecurityUtils.getLoginUserId();
+        log.info("上传用户头像: userId={}, fileName={}, size={}", userId, file.getOriginalFilename(), file.getSize());
         String avatarUrl = imUserService.uploadAvatar(userId, file);
+        log.info("用户头像上传成功: userId={}, url={}", userId, avatarUrl);
         return Result.success("头像上传成功", avatarUrl);
     }
 

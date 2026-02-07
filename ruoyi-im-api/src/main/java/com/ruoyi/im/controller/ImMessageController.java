@@ -72,7 +72,11 @@ public class ImMessageController {
     @RateLimit(key = "send_message", time = 60, count = 300, limitType = RateLimit.LimitType.USER)
     public Result<ImMessageVO> send(@Valid @RequestBody ImMessageSendRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
+        log.info("发送消息: userId={}, conversationId={}, msgType={}",
+                userId, request.getConversationId(), request.getMessageType());
         ImMessageVO messageVO = imMessageService.sendMessage(request, userId);
+        log.info("消息发送成功: userId={}, messageId={}, conversationId={}",
+                userId, messageVO.getId(), request.getConversationId());
         return Result.success(messageVO);
     }
 
@@ -117,7 +121,9 @@ public class ImMessageController {
     @DeleteMapping("/{messageId}/recall")
     public Result<Void> recall(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
+        log.info("撤回消息: userId={}, messageId={}", userId, messageId);
         imMessageService.recallMessage(messageId, userId);
+        log.info("消息撤回成功: userId={}, messageId={}", userId, messageId);
         return Result.success("消息已撤回");
     }
 
@@ -133,7 +139,9 @@ public class ImMessageController {
             @PathVariable @Positive(message = "消息ID必须为正数") Long messageId,
             @Valid @RequestBody MessageEditRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
+        log.info("编辑消息: userId={}, messageId={}", userId, messageId);
         imMessageService.editMessage(messageId, request.getNewContent(), userId);
+        log.info("消息编辑成功: userId={}, messageId={}", userId, messageId);
         return Result.success("消息已编辑");
     }
 
@@ -184,12 +192,16 @@ public class ImMessageController {
     @PostMapping("/forward")
     public Result<Long> forward(@Valid @RequestBody ImMessageForwardRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
+        log.info("转发消息: userId={}, messageId={}, toConversationId={}",
+                userId, request.getMessageId(), request.getToConversationId());
         Long newMessageId = imMessageService.forwardMessage(
                 request.getMessageId(),
                 request.getToConversationId(),
                 request.getToUserId(),
                 request.getContent(),
                 userId);
+        log.info("消息转发成功: userId={}, originalMessageId={}, newMessageId={}",
+                userId, request.getMessageId(), newMessageId);
         return Result.success("转发成功", newMessageId);
     }
 
@@ -205,12 +217,15 @@ public class ImMessageController {
     @PostMapping("/forward/batch")
     public Result<java.util.List<Long>> batchForward(@Valid @RequestBody com.ruoyi.im.dto.message.ImMessageBatchForwardRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
+        log.info("批量转发消息: userId={}, messageIds={}, toConversationId={}, forwardType={}",
+                userId, request.getMessageIds().size(), request.getToConversationId(), request.getForwardType());
         java.util.List<Long> newMessageIds = imMessageService.batchForwardMessages(
                 request.getMessageIds(),
                 request.getToConversationId(),
                 request.getForwardType(),
                 request.getContent(),
                 userId);
+        log.info("批量消息转发成功: userId={}, count={}", userId, newMessageIds.size());
         return Result.success("转发成功", newMessageIds);
     }
 
@@ -226,10 +241,13 @@ public class ImMessageController {
     @PostMapping("/reply")
     public Result<Long> reply(@Valid @RequestBody ImMessageReplyRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
+        log.info("回复消息: userId={}, parentMessageId={}", userId, request.getMessageId());
         Long newMessageId = imMessageService.replyMessage(
                 request.getMessageId(),
                 request.getContent(),
                 userId);
+        log.info("消息回复成功: userId={}, parentMessageId={}, newMessageId={}",
+                userId, request.getMessageId(), newMessageId);
         return Result.success("回复成功", newMessageId);
     }
 
