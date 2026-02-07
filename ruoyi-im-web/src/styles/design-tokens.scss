@@ -29,6 +29,9 @@
   --dt-info-bg: #E5F2FF;
   --dt-info-border: #90CAF9;
 
+  // === Text Inverse (反色文本 - 用于深色背景) ===
+  --dt-text-inverse: #FFFFFF;
+
   // === Search Colors (搜索高亮) ===
   --dt-search-highlight-bg: #FFE066; // 搜索高亮背景（黄色，类似浏览器搜索）
   --dt-search-highlight-text: #171A1D; // 搜索高亮文字
@@ -44,6 +47,7 @@
   --dt-bg-chat: #F5F7FA;
   --dt-bg-session-hover: #F6F8FA;
   --dt-bg-session-active: #EBF2FF;
+  --dt-bg-pinned: rgba(0, 0, 0, 0.02);
   --dt-bg-input: #FFFFFF;
   --dt-bg-card: #FFFFFF;
   --dt-bg-card-hover: #FAFBFC;
@@ -105,11 +109,21 @@
   --dt-shadow-brand: 0 4px 12px rgba(0, 137, 255, 0.3); // 品牌色阴影
   --dt-shadow-brand-light: 0 2px 12px rgba(0, 137, 255, 0.2); // 浅品牌色阴影
   --dt-shadow-brand-strong: 0 6px 20px rgba(0, 137, 255, 0.4); // 强品牌色阴影
-  --dt-shadow-warning: 0 4px 12px rgba(255, 77, 79, 0.3); // 警告色阴影
-  --dt-shadow-warning-strong: 0 2px 8px rgba(255, 77, 79, 0.4); // 强警告色阴影
-  --dt-shadow-success: 0 6px 20px rgba(34, 197, 94, 0.4); // 成功色阴影
-  --dt-shadow-info: 0 6px 20px rgba(59, 130, 246, 0.4); // 信息色阴影
+  --dt-shadow-warning: 0 4px 12px rgba(255, 152, 0, 0.3); // 警告色阴影
+  --dt-shadow-warning-strong: 0 2px 8px rgba(255, 152, 0, 0.4); // 强警告色阴影
+  --dt-shadow-success: 0 4px 12px rgba(0, 200, 83, 0.35); // 成功色阴影
+  --dt-shadow-success-glow: 0 0 0 2px rgba(0, 200, 83, 0.2); // 成功色光晕
+  --dt-shadow-info: 0 4px 12px rgba(114, 46, 209, 0.35); // 信息色阴影
+  --dt-shadow-error: 0 2px 8px rgba(255, 77, 79, 0.4); // 错误色阴影
+  --dt-shadow-error-strong: 0 2px 12px rgba(255, 77, 79, 0.6); // 强错误色阴影
   --dt-shadow-dialog: 0 20px 40px rgba(0, 0, 0, 0.15); // 对话框专用
+
+  // === Gradient Colors (渐变色) ===
+  --dt-brand-gradient: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
+  --dt-success-gradient: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+  --dt-warning-gradient: linear-gradient(135deg, #faad14 0%, #d48806 100%);
+  --dt-info-gradient: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
+  --dt-error-gradient: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
 
   // === Typography (字体) ===
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -260,6 +274,12 @@
   --dt-bg-hover-dark: rgba(255, 255, 255, 0.05);
   --dt-bg-tertiary-dark: #2d2d2d;
   --dt-bg-input-dark: #2d2d2d;
+  --dt-bg-card-hover-dark: #252525;
+  --dt-bg-session-hover-dark: rgba(255, 255, 255, 0.06);
+  --dt-bg-session-active-dark: rgba(0, 137, 255, 0.15);
+  --dt-bg-pinned-dark: rgba(255, 255, 255, 0.03);
+  --dt-scrollbar-thumb: rgba(0, 0, 0, 0.1);
+  --dt-scrollbar-thumb-dark: rgba(255, 255, 255, 0.1);
 
   --dt-text-primary-dark: #E8E8E8;
   --dt-text-secondary-dark: #A0A8B8;

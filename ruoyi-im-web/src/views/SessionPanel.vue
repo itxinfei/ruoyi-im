@@ -1,7 +1,7 @@
 <template>
   <div
     class="session-panel"
-    :style="{ width: panelWidth + 'px' }"
+    :style="{ '--panel-width': panelWidth + 'px' }"
     @mouseleave="isResizing = false"
   >
     <!-- 拖拽调整宽度的手柄 -->
@@ -1089,7 +1089,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 .session-panel {
   display: flex;
   flex-direction: column;
-  width: var(--dt-session-panel-width, 280px);
+  width: var(--panel-width, var(--dt-session-panel-width, 280px));
   min-width: var(--dt-session-panel-min-width, 200px);
   max-width: var(--dt-session-panel-max-width, 400px);
   flex-shrink: 0; // 防止收缩，关键修复
@@ -1175,7 +1175,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   transform: translate(-50%, -50%);
   padding: 4px 8px;
   background: var(--dt-brand-color);
-  color: #fff;
+  color: var(--dt-text-inverse);
   font-size: 11px;
   font-weight: 600;
   border-radius: var(--dt-radius-sm);
@@ -1378,11 +1378,11 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   }
 
   &:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--dt-scrollbar-thumb);
   }
 
   .dark &:hover::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--dt-scrollbar-thumb-dark);
   }
 }
 
@@ -1464,7 +1464,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   }
 
   &.pinned {
-    background: rgba(0, 0, 0, 0.02);
+    background: var(--dt-bg-pinned);
   }
 
   &.pinned.active {
@@ -1482,15 +1482,15 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   }
 
   .dark &:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--dt-bg-session-hover-dark);
   }
 
   .dark &.active {
-    background: rgba(0, 137, 255, 0.15);
+    background: var(--dt-bg-session-active-dark);
   }
 
   .dark &.pinned {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--dt-bg-pinned-dark);
   }
 }
 
@@ -1515,7 +1515,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 
   &.group-avatar {
     background: var(--dt-brand-color);
-    color: #fff;
+    color: var(--dt-text-inverse);
     box-shadow: var(--dt-shadow-brand);
   }
 
@@ -1538,7 +1538,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 
   &.online {
     background: var(--dt-success-color);
-    box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
+    box-shadow: var(--dt-shadow-success-glow);
     animation: pulse 2s ease-in-out infinite;
   }
 }
@@ -1551,7 +1551,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   height: 16px;
   padding: 0 4px;
   background: var(--dt-error-color); // 使用设计令牌
-  color: #fff;
+  color: var(--dt-text-inverse);
   font-size: 10px;
   font-weight: 600;
   border-radius: var(--dt-radius-full);
@@ -1559,7 +1559,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   align-items: center;
   justify-content: center;
   border: 2px solid var(--dt-bg-card);
-  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  box-shadow: var(--dt-shadow-error);
   animation: scaleIn 0.3s var(--dt-ease-bounce);
   z-index: 2;
 
@@ -1581,8 +1581,8 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   left: -2px;
   width: 18px;
   height: 18px;
-  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
-  color: #fff;
+  background: var(--dt-error-gradient);
+  color: var(--dt-text-inverse);
   font-size: 12px;
   font-weight: 700;
   border-radius: 50%;
@@ -1590,7 +1590,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   align-items: center;
   justify-content: center;
   border: 2px solid var(--dt-bg-card);
-  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+  box-shadow: var(--dt-shadow-error);
   animation: mentionPulse 2s ease-in-out infinite;
   z-index: 3;
   cursor: pointer;
@@ -1609,7 +1609,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   border: 1px solid var(--dt-bg-card);
   animation: fadeInUp 0.3s var(--dt-ease-out);
   font-size: 10px;
-  color: #fff;
+  color: var(--dt-text-inverse);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1771,7 +1771,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 
 .add-menu-container {
   width: 320px;
-  background: #fff;
+  background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
   overflow: hidden;
 
@@ -1834,27 +1834,27 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 
     .material-icons-outlined {
       font-size: 24px;
-      color: #fff;
+      color: var(--dt-text-inverse);
     }
 
     &.primary {
-      background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
-      box-shadow: 0 4px 12px rgba(0, 137, 255, 0.35);
+      background: var(--dt-brand-gradient);
+      box-shadow: var(--dt-shadow-brand);
     }
 
     &.success {
-      background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
-      box-shadow: 0 4px 12px rgba(82, 196, 26, 0.35);
+      background: var(--dt-success-gradient);
+      box-shadow: var(--dt-shadow-success);
     }
 
     &.warning {
-      background: linear-gradient(135deg, #faad14 0%, #d48806 100%);
-      box-shadow: 0 4px 12px rgba(250, 173, 20, 0.35);
+      background: var(--dt-warning-gradient);
+      box-shadow: var(--dt-shadow-warning);
     }
 
     &.info {
-      background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
-      box-shadow: 0 4px 12px rgba(114, 46, 209, 0.35);
+      background: var(--dt-info-gradient);
+      box-shadow: var(--dt-shadow-info);
     }
   }
 
@@ -2051,11 +2051,11 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 @keyframes mentionPulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+    box-shadow: var(--dt-shadow-error);
   }
   50% {
     transform: scale(1.1);
-    box-shadow: 0 2px 12px rgba(255, 77, 79, 0.6);
+    box-shadow: var(--dt-shadow-error-strong);
   }
 }
 
