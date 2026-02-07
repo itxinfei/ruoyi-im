@@ -558,7 +558,7 @@ const canRecall = computed(() => {
     animation: bubbleInLeft 0.3s var(--dt-ease-out-bounce) both;
     // 微妙的悬停效果
     &:hover {
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+      box-shadow: var(--dt-shadow-card-hover);
       transform: translateY(-1px);
     }
   }
@@ -576,13 +576,13 @@ const canRecall = computed(() => {
       var(--dt-bubble-right-bg-end) 100%
     );
     // 白色文字
-    color: #FFFFFF;
+    color: var(--dt-bubble-right-text);
     // 无边框
     border: none;
     // 非对称圆角：靠近头像一侧圆角较小（右侧4px）
     border-radius: var(--dt-bubble-radius-right);
     // 钉钉风格蓝色阴影
-    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3), 0 1px 3px rgba(0, 137, 255, 0.2);
+    box-shadow: var(--dt-shadow-brand);
     // 气泡进入动画
     animation: bubbleInRight 0.3s var(--dt-ease-out-bounce) both;
     // 微妙的悬停效果
@@ -593,7 +593,7 @@ const canRecall = computed(() => {
         var(--dt-bubble-right-bg-end) 100%
       );
       filter: brightness(1.05);
-      box-shadow: 0 3px 12px rgba(0, 137, 255, 0.35), 0 2px 5px rgba(0, 137, 255, 0.25);
+      box-shadow: var(--dt-shadow-brand-strong);
     }
   }
 
@@ -602,11 +602,11 @@ const canRecall = computed(() => {
   :deep(.message-content),
   :deep(.link-content),
   :deep(.text-content) {
-    color: #FFFFFF !important;
+    color: var(--dt-bubble-right-text) !important;
   }
 
   :deep(a) {
-    color: #FFFFFF !important;
+    color: var(--dt-bubble-right-text) !important;
     font-weight: 500;
     text-decoration: underline;
     text-decoration-thickness: 1px;
@@ -620,15 +620,15 @@ const canRecall = computed(() => {
 
     .link-title,
     .link-desc {
-      color: #FFFFFF !important;
+      color: var(--dt-bubble-right-text) !important;
     }
   }
 }
 
 // 选中状态
 .message-bubble.is-selected .bubble-content {
-  border: 2px solid #4168E0 !important;
-  box-shadow: 0 0 0 3px rgba(65, 104, 224, 0.2) !important;
+  border: 2px solid var(--dt-brand-color) !important;
+  box-shadow: 0 0 0 3px var(--dt-brand-light) !important;
 }
 
 // 长按状态
@@ -648,7 +648,7 @@ const canRecall = computed(() => {
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
 }
 
 // 系统消息
@@ -675,7 +675,7 @@ const canRecall = computed(() => {
     box-shadow: var(--dt-bubble-shadow-dark);
 
     &:hover {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--dt-shadow-lg);
       transform: translateY(-1px);
     }
   }
@@ -687,12 +687,12 @@ const canRecall = computed(() => {
       var(--dt-bubble-right-bg-start) 0%,
       var(--dt-bubble-right-bg-end) 100%
     );
-    color: #FFFFFF;
-    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.4), 0 1px 3px rgba(0, 137, 255, 0.3);
+    color: var(--dt-bubble-right-text);
+    box-shadow: var(--dt-shadow-brand-strong);
 
     &:hover {
       filter: brightness(1.08);
-      box-shadow: 0 3px 12px rgba(0, 137, 255, 0.45), 0 2px 5px rgba(0, 137, 255, 0.35);
+      box-shadow: var(--dt-shadow-brand-strong);
     }
   }
 }
