@@ -16,12 +16,10 @@ app:
 # Spring框架配置
 spring:
   # 数据源配置
-  # ⚠️ 安全警告：生产环境必须通过环境变量配置密码！
-  # 启动参数示例：java -jar app.jar --spring.datasource.password=your_secure_password
   datasource:
-    url: jdbc:mysql://${DB_HOST:172.168.20.222}:${DB_PORT:3306}/${DB_NAME:im}?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: ${DB_USER:im}
-    password: ${DB_PASSWORD:}
+    url: jdbc:mysql://172.168.20.222:3306/im?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: im
+    password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -41,11 +39,10 @@ spring:
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
 
   # Redis配置
-  # ⚠️ 安全警告：生产环境必须通过环境变量配置Redis密码！
   redis:
-    host: ${REDIS_HOST:172.168.20.222}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:}
+    host: 172.168.20.222
+    port: 6379
+    password:
     database: 0
     timeout: 2000ms
     lettuce:
@@ -106,9 +103,8 @@ mybatis-plus:
 # IM模块配置
 im:
   # JWT配置
-  # ⚠️ 安全提示：生产环境请使用环境变量配置密钥
   jwt:
-    secret: ${JWT_SECRET:aW1fc2VjcmV0X2tleV8yMDI0X2Zvcl9pbV9zeXN0ZW1fdGhhdF9pc19sb25nX2Vub3VnaF9mb3JfSFMyNTZfYWxnb3JpdGhtX2FuZF9pc19zZWN1cmVfZW5vdWdoX2Zvcl9IUzUxMl9hbGdvcml0aG1fY2hhbmdlZF9mb3Jfc2VjdXJpdHlfcHVycG9zZQ==}
+    secret: aW1fc2VjcmV0X2tleV8yMDI0X2Zvcl9pbV9zeXN0ZW1fdGhhdF9pc19sb25nX2Vub3VnaF9mb3JfSFMyNTZfYWxnb3JpdGhtX2FuZF9pc19zZWN1cmVfZW5vdWdoX2Zvcl9IUzUxMl9hbGdvcml0aG1fY2hhbmdlZF9mb3Jfc2VjdXJpdHlfcHVycG9zZQ==
     expiration: 86400000
   # 消息配置
   message:
@@ -117,7 +113,7 @@ im:
     recallWindowSeconds: 120
     encryption:
       enabled: true
-      key: ${MESSAGE_ENCRYPTION_KEY:aW1fZW5jcnlwdGlvbl9rZXlfMjAyNF9mb3JfbWVzc2FnZV9lbmNyeXB0aW9u}
+      key: aW1fZW5jcnlwdGlvbl9rZXlfMjAyNF9mb3JfbWVzc2FnZV9lbmNyeXB0aW9u
   # 文件配置
   file:
     maxSizeMb: 20
@@ -143,9 +139,6 @@ im:
         thumbnail-dir: thumbnails/
 
 # 文件上传配置
-# 路径说明：
-# - 开发环境：文件上传到项目根目录下的 uploads/ 目录
-# - 生产环境：文件上传到 JAR 包所在目录下的 uploads/ 目录
 file:
   upload:
     path: uploads/
@@ -157,13 +150,11 @@ meeting:
     url: "https://meeting.example.com"
 
 # 日志配置
-# ⚠️ 安全提示：生产环境请使用 info 或 warn 级别
-# 示例：LOG_LEVEL=info
 logging:
   level:
-    com.ruoyi.im: ${LOG_LEVEL:info}
-    org.springframework.security: ${SEC_LOG_LEVEL:warn}
-    org.springframework.web: ${WEB_LOG_LEVEL:warn}
+    com.ruoyi.im: info
+    org.springframework.security: warn
+    org.springframework.web: warn
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
