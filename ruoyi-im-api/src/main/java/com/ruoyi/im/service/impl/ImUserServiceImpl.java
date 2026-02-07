@@ -897,4 +897,46 @@ public class ImUserServiceImpl implements ImUserService {
 
         return result;
     }
+
+    // ==================== 供其他Service调用的内部方法 ====================
+
+    @Override
+    public ImUser getUserEntityById(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+        return imUserMapper.selectImUserById(userId);
+    }
+
+    @Override
+    public List<ImUser> getUserEntitiesByIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return imUserMapper.selectImUserListByIds(userIds);
+    }
+
+    @Override
+    public ImUser getUserEntityByUsername(String username) {
+        if (username == null || username.isEmpty()) {
+            return null;
+        }
+        return imUserMapper.selectImUserByUsername(username);
+    }
+
+    @Override
+    public List<ImUser> searchUserEntities(String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return imUserMapper.selectImUserByKeyword(keyword.trim());
+    }
+
+    @Override
+    public List<ImUser> getUserEntities(ImUser query) {
+        if (query == null) {
+            return new ArrayList<>();
+        }
+        return imUserMapper.selectImUserList(query);
+    }
 }

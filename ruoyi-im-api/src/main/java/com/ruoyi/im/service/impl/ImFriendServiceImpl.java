@@ -10,9 +10,9 @@ import com.ruoyi.im.dto.conversation.ImPrivateConversationCreateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFriendMapper;
 import com.ruoyi.im.mapper.ImFriendRequestMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImFriendService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
@@ -44,7 +44,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
     private final ImFriendMapper imFriendMapper;
     private final ImFriendRequestMapper imFriendRequestMapper;
-    private final ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
     private final ImConversationService imConversationService;
     private final com.ruoyi.im.util.ImDistributedLock distributedLock;
     private final com.ruoyi.im.util.ImRedisUtil imRedisUtil;
@@ -54,13 +54,13 @@ public class ImFriendServiceImpl implements ImFriendService {
      */
     public ImFriendServiceImpl(ImFriendMapper imFriendMapper,
             ImFriendRequestMapper imFriendRequestMapper,
-            ImUserMapper imUserMapper,
+            ImUserService imUserService,
             ImConversationService imConversationService,
             com.ruoyi.im.util.ImDistributedLock distributedLock,
             com.ruoyi.im.util.ImRedisUtil imRedisUtil) {
         this.imFriendMapper = imFriendMapper;
         this.imFriendRequestMapper = imFriendRequestMapper;
-        this.imUserMapper = imUserMapper;
+        this.imUserService = imUserService;
         this.imConversationService = imConversationService;
         this.distributedLock = distributedLock;
         this.imRedisUtil = imRedisUtil;
@@ -75,7 +75,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
 
         // 查询目标用户是否存在
-        ImUser toUser = imUserMapper.selectImUserById(request.getTargetUserId());
+        ImUser toUser = imUserService.getUserEntityById(request.getTargetUserId());
         if (toUser == null) {
             throw new BusinessException("目标用户不存在");
         }
@@ -127,7 +127,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         for (ImFriendRequest request : requestList) {
             if (StatusConstants.FriendRequest.PENDING.equals(request.getStatus())) {
                 // 查询目标用户信息
-                ImUser toUser = imUserMapper.selectImUserById(request.getToUserId());
+                ImUser toUser = imUserService.getUserEntityById(request.getToUserId());
                 if (toUser != null) {
                     request.setFromUserName(toUser.getNickname() != null ? toUser.getNickname() : toUser.getUsername());
                     request.setFromUserAvatar(toUser.getAvatar());
@@ -339,7 +339,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
 
         try {
-            List<ImUser> users = imUserMapper.selectImUserListByIds(userIds);
+            List<ImUser> users = imUserService.getUserEntitiesByIds(userIds);
             if (users != null) {
                 for (ImUser user : users) {
                     userMap.put(user.getId(), user);
@@ -350,7 +350,7 @@ public class ImFriendServiceImpl implements ImFriendService {
             log.error("批量查询用户信息失败: {}", e.getMessage(), e);
             // 本地降级：逐个查询
             for (Long userId : userIds) {
-                ImUser user = imUserMapper.selectImUserById(userId);
+                ImUser user = imUserService.getUserEntityById(userId);
                 if (user != null) {
                     userMap.put(userId, user);
                 }
@@ -367,7 +367,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         List<ImFriendRequest> pendingList = new ArrayList<>();
         for (ImFriendRequest request : requestList) {
             if (StatusConstants.FriendRequest.PENDING.equals(request.getStatus())) {
-                ImUser fromUser = imUserMapper.selectImUserById(request.getFromUserId());
+                ImUser fromUser = imUserService.getUserEntityById(request.getFromUserId());
                 if (fromUser != null) {
                     request.setFromUserName(
                             fromUser.getNickname() != null ? fromUser.getNickname() : fromUser.getUsername());
@@ -537,7 +537,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         BeanConvertUtil.copyProperties(friend, vo);
 
         // 查询好友用户信息
-        ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
+        ImUser friendUser = imUserService.getUserEntityById(friend.getFriendId());
         if (friendUser != null) {
             String friendName = friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername();
             vo.setFriendName(friendName);
@@ -591,7 +591,7 @@ public class ImFriendServiceImpl implements ImFriendService {
     @Override
     public List<ImUserVO> searchUsers(String keyword, Long userId) {
         // 根据关键词搜索用户
-        List<ImUser> userList = imUserMapper.selectImUserByKeyword(keyword);
+        List<ImUser> userList = imUserService.searchUserEntities(keyword);
 
         List<ImUserVO> result = new ArrayList<>();
         for (ImUser user : userList) {
@@ -879,7 +879,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
         try {
             // 获取当前用户信息
-            ImUser currentUser = imUserMapper.selectImUserById(userId);
+            ImUser currentUser = imUserService.getUserEntityById(userId);
             if (currentUser == null) {
                 return recommendations;
             }
@@ -900,7 +900,7 @@ public class ImFriendServiceImpl implements ImFriendService {
                     // 查找同部门用户
                     ImUser deptQuery = new ImUser();
                     deptQuery.setDepartment(userDept);
-                    List<ImUser> deptUsers = imUserMapper.selectImUserList(deptQuery);
+                    List<ImUser> deptUsers = imUserService.getUserEntities(deptQuery);
                     for (ImUser user : deptUsers) {
                         if (!user.getId().equals(userId) && !friendIds.contains(user.getId())) {
                             ImUserVO vo = new ImUserVO();
@@ -954,7 +954,7 @@ public class ImFriendServiceImpl implements ImFriendService {
                 // 查找手机号匹配的用户
                 ImUser userQuery = new ImUser();
                 userQuery.setMobile(phone);
-                List<ImUser> matchedUserList = imUserMapper.selectImUserList(userQuery);
+                List<ImUser> matchedUserList = imUserService.getUserEntities(userQuery);
 
                 for (ImUser user : matchedUserList) {
                     if (!user.getId().equals(userId) && !friendIds.contains(user.getId())) {

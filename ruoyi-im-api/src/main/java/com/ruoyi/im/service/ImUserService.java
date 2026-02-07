@@ -298,4 +298,51 @@ public interface ImUserService {
      * @throws IOException IO异常
      */
     void exportUsers(HttpServletResponse response, String keyword, String role) throws IOException;
+
+    // ==================== 供其他Service调用的内部方法 ====================
+
+    /**
+     * 根据ID获取用户实体
+     * 供其他Service内部调用，返回Entity而非VO
+     *
+     * @param userId 用户ID
+     * @return 用户实体
+     */
+    ImUser getUserEntityById(Long userId);
+
+    /**
+     * 批量获取用户实体
+     * 供其他Service内部调用，返回Entity而非VO
+     *
+     * @param userIds 用户ID列表
+     * @return 用户实体列表
+     */
+    List<ImUser> getUserEntitiesByIds(List<Long> userIds);
+
+    /**
+     * 根据用户名获取用户实体
+     * 供其他Service内部调用
+     *
+     * @param username 用户名
+     * @return 用户实体
+     */
+    ImUser getUserEntityByUsername(String username);
+
+    /**
+     * 按关键词搜索用户实体
+     * 供其他Service内部调用
+     *
+     * @param keyword 搜索关键词
+     * @return 用户实体列表
+     */
+    List<ImUser> searchUserEntities(String keyword);
+
+    /**
+     * 条件查询用户实体
+     * 供其他Service内部调用
+     *
+     * @param query 查询条件
+     * @return 用户实体列表
+     */
+    List<ImUser> getUserEntities(ImUser query);
 }

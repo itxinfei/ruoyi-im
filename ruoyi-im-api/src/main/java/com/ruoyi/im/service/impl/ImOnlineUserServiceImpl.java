@@ -1,7 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.domain.ImUser;
-import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.service.ImOnlineUserService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.vo.online.OnlineUserVO;
@@ -25,11 +25,11 @@ public class ImOnlineUserServiceImpl implements ImOnlineUserService {
 
     private static final Logger log = LoggerFactory.getLogger(ImOnlineUserServiceImpl.class);
 
-    private final ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
     private final ImRedisUtil imRedisUtil;
 
-    public ImOnlineUserServiceImpl(ImUserMapper imUserMapper, ImRedisUtil imRedisUtil) {
-        this.imUserMapper = imUserMapper;
+    public ImOnlineUserServiceImpl(ImUserService imUserService, ImRedisUtil imRedisUtil) {
+        this.imUserService = imUserService;
         this.imRedisUtil = imRedisUtil;
     }
 
@@ -50,7 +50,7 @@ public class ImOnlineUserServiceImpl implements ImOnlineUserService {
 
             try {
                 // 获取用户信息
-                ImUser user = imUserMapper.selectImUserById(userId);
+                ImUser user = imUserService.getUserEntityById(userId);
                 if (user == null) {
                     continue;
                 }

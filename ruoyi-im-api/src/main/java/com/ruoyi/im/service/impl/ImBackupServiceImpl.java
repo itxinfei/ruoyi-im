@@ -8,7 +8,7 @@ import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.mapper.ImBackupMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.service.ImBackupService;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.util.ExceptionHandlerUtil;
@@ -53,7 +53,7 @@ public class ImBackupServiceImpl implements ImBackupService {
     private ImBackupMapper imBackupMapper;
 
     @Autowired
-    private ImUserMapper imUserMapper;
+    private ImUserService imUserService;
 
     @Autowired
     private ImMessageMapper imMessageMapper;
@@ -215,7 +215,7 @@ public class ImBackupServiceImpl implements ImBackupService {
 
         try {
             // 查询用户数据
-            ImUser user = imUserMapper.selectImUserById(userId);
+            ImUser user = imUserService.getUserEntityById(userId);
             if (user == null) {
                 ExceptionHandlerUtil.throwBusinessException("用户不存在");
             }

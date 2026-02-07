@@ -7,7 +7,7 @@ import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.mapper.ImFriendMapper;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.service.ImBatchOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class ImBatchOperationServiceImpl implements ImBatchOperationService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImBatchOperationServiceImpl.class);
 
-    private final ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
     private final ImFriendMapper imFriendMapper;
     private final ImGroupMapper imGroupMapper;
     private final ImGroupMemberMapper imGroupMemberMapper;
@@ -40,11 +40,11 @@ public class ImBatchOperationServiceImpl implements ImBatchOperationService {
     /**
      * 构造器注入依赖
      */
-    public ImBatchOperationServiceImpl(ImUserMapper imUserMapper,
+    public ImBatchOperationServiceImpl(ImUserService imUserService,
                                        ImFriendMapper imFriendMapper,
                                        ImGroupMapper imGroupMapper,
                                        ImGroupMemberMapper imGroupMemberMapper) {
-        this.imUserMapper = imUserMapper;
+        this.imUserService = imUserService;
         this.imFriendMapper = imFriendMapper;
         this.imGroupMapper = imGroupMapper;
         this.imGroupMemberMapper = imGroupMemberMapper;
@@ -172,7 +172,7 @@ public class ImBatchOperationServiceImpl implements ImBatchOperationService {
      */
     private ImUser findUserByNickname(String nickname) {
         // 使用 keyword 搜索
-        List<ImUser> users = imUserMapper.selectImUserByKeyword(nickname);
+        List<ImUser> users = imUserService.searchUserEntities(nickname);
         if (users != null && !users.isEmpty()) {
             // 精确匹配昵称
             for (ImUser user : users) {
@@ -193,7 +193,7 @@ public class ImBatchOperationServiceImpl implements ImBatchOperationService {
     private List<ImUser> getAllActiveUsers(Long excludeUserId) {
         // 获取所有用户列表，然后过滤
         ImUser queryParam = new ImUser();
-        List<ImUser> allUsers = imUserMapper.selectImUserList(queryParam);
+        List<ImUser> allUsers = imUserService.getUserEntities(queryParam);
 
         // 过滤掉排除的用户和已删除用户
         List<ImUser> result = new ArrayList<>();

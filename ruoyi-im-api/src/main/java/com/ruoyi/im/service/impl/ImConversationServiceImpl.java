@@ -13,8 +13,8 @@ import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
@@ -39,7 +39,7 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     private final ImConversationMapper imConversationMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
-    private final ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
     private final ImMessageMapper imMessageMapper;
     private final ImRedisUtil imRedisUtil;
     private final ImGroupMapper imGroupMapper;
@@ -50,14 +50,14 @@ public class ImConversationServiceImpl implements ImConversationService {
      */
     public ImConversationServiceImpl(ImConversationMapper imConversationMapper,
             ImConversationMemberMapper imConversationMemberMapper,
-            ImUserMapper imUserMapper,
+            ImUserService imUserService,
             ImMessageMapper imMessageMapper,
             ImRedisUtil imRedisUtil,
             ImGroupMapper imGroupMapper,
             com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
         this.imConversationMapper = imConversationMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
-        this.imUserMapper = imUserMapper;
+        this.imUserService = imUserService;
         this.imMessageMapper = imMessageMapper;
         this.imRedisUtil = imRedisUtil;
         this.imGroupMapper = imGroupMapper;
@@ -145,7 +145,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         // 批量查询用户信息
         java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();
         if (!userIds.isEmpty()) {
-            List<ImUser> users = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(userIds));
+            List<ImUser> users = imUserService.getUserEntitiesByIds(new java.util.ArrayList<>(userIds));
             for (ImUser user : users) {
                 userMap.put(user.getId(), user);
             }
@@ -471,7 +471,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             // 私聊会话，获取对方用户信息
             Long peerUserId = getPeerUserId(conversationId, userId);
             if (peerUserId != null) {
-                ImUser peerUser = imUserMapper.selectImUserById(peerUserId);
+                ImUser peerUser = imUserService.getUserEntityById(peerUserId);
                 if (peerUser != null) {
                     vo.setPeerName(peerUser.getNickname() != null ? peerUser.getNickname() : peerUser.getUsername());
                     vo.setPeerAvatar(peerUser.getAvatar());
@@ -512,7 +512,7 @@ public class ImConversationServiceImpl implements ImConversationService {
     public Long createPrivateConversation(Long userId, ImPrivateConversationCreateRequest request) {
         // ... (保持现有逻辑，仅添加缓存清除)
         // 检查对方用户是否存在
-        ImUser peerUser = imUserMapper.selectImUserById(request.getPeerUserId());
+        ImUser peerUser = imUserService.getUserEntityById(request.getPeerUserId());
         if (peerUser == null) {
             throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "对方用户不存在");
         }
@@ -587,7 +587,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         if (request.getMemberIds() != null) {
             for (Long memberId : request.getMemberIds()) {
                 if (!memberId.equals(userId)) {
-                    ImUser user = imUserMapper.selectImUserById(memberId);
+                    ImUser user = imUserService.getUserEntityById(memberId);
                     if (user != null) {
                         addMemberToConversation(conversationId, memberId);
                         // 清除成员缓存
@@ -685,7 +685,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                     // 私聊会话，获取对方用户信息
                     Long peerUserId = getPeerUserId(conversation.getId(), userId);
                     if (peerUserId != null) {
-                        ImUser peerUser = imUserMapper.selectImUserById(peerUserId);
+                        ImUser peerUser = imUserService.getUserEntityById(peerUserId);
                         if (peerUser != null) {
                             String peerName = peerUser.getNickname() != null ? peerUser.getNickname()
                                     : peerUser.getUsername();

@@ -16,8 +16,8 @@ import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageEditHistoryMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImSystemConfigService;
@@ -49,7 +49,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     private boolean useFullTextSearch;
 
     private final ImMessageMapper imMessageMapper;
-    private final ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
     private final ImConversationMapper imConversationMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
     private final ImConversationService imConversationService;
@@ -67,7 +67,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 构造器注入依赖
      */
     public ImMessageServiceImpl(ImMessageMapper imMessageMapper,
-                                  ImUserMapper imUserMapper,
+                                  ImUserService imUserService,
                                   ImConversationMapper imConversationMapper,
                                   ImConversationMemberMapper imConversationMemberMapper,
                                   ImConversationService imConversationService,
@@ -81,7 +81,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                                   ApplicationEventPublisher eventPublisher,
                                   @Lazy com.ruoyi.im.service.ImMessageRetryService retryService) {
         this.imMessageMapper = imMessageMapper;
-        this.imUserMapper = imUserMapper;
+        this.imUserService = imUserService;
         this.imConversationMapper = imConversationMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
         this.imConversationService = imConversationService;
@@ -111,7 +111,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                     BeanConvertUtil.copyProperties(existingMessage, vo);
                     vo.setContent(encryptionUtil.decryptMessage(existingMessage.getContent())); // 解密
                     vo.setIsSelf(existingMessage.getSenderId().equals(userId));
-                    ImUser sender = imUserMapper.selectImUserById(existingMessage.getSenderId());
+                    ImUser sender = imUserService.getUserEntityById(existingMessage.getSenderId());
                     if (sender != null) {
                         vo.setSenderName(sender.getNickname());
                         vo.setSenderAvatar(sender.getAvatar());
@@ -121,7 +121,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         }
 
-        ImUser sender = imUserMapper.selectImUserById(userId);
+        ImUser sender = imUserService.getUserEntityById(userId);
         if (sender == null) {
             throw new BusinessException("发送者不存在");
         }
@@ -450,7 +450,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         // 批量查询用户信息
         java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();
         if (!senderIds.isEmpty()) {
-            List<ImUser> users = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(senderIds));
+            List<ImUser> users = imUserService.getUserEntitiesByIds(new java.util.ArrayList<>(senderIds));
             for (ImUser user : users) {
                 userMap.put(user.getId(), user);
             }
@@ -464,7 +464,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                 replyToMessageMap.put(replyToId, replyToMsg);
                 // 补充被回复消息的发送者信息
                 if (replyToMsg.getSenderId() != null && !userMap.containsKey(replyToMsg.getSenderId())) {
-                    ImUser replyUser = imUserMapper.selectImUserById(replyToMsg.getSenderId());
+                    ImUser replyUser = imUserService.getUserEntityById(replyToMsg.getSenderId());
                     if (replyUser != null) {
                         userMap.put(replyUser.getId(), replyUser);
                     }
@@ -852,7 +852,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      */
     private String getSenderName(Long senderId) {
         // 简单实现，实际应从用户服务获取
-        com.ruoyi.im.domain.ImUser user = imUserMapper.selectImUserById(senderId);
+        com.ruoyi.im.domain.ImUser user = imUserService.getUserEntityById(senderId);
         return user != null ? user.getNickname() : "用户" + senderId;
     }
 
@@ -922,7 +922,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             for (ImMessage message : messageList) {
                 senderIds.add(message.getSenderId());
             }
-            List<ImUser> users = imUserMapper.selectImUserListByIds(new java.util.ArrayList<>(senderIds));
+            List<ImUser> users = imUserService.getUserEntitiesByIds(new java.util.ArrayList<>(senderIds));
             for (ImUser user : users) {
                 userMap.put(user.getId(), user);
             }

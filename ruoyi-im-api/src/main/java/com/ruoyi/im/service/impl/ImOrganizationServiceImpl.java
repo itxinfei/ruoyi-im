@@ -11,10 +11,10 @@ import com.ruoyi.im.dto.organization.ImDepartmentUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImDepartmentMapper;
 import com.ruoyi.im.mapper.ImDepartmentMemberMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.service.ImOrganizationService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.vo.organization.ImDepartmentMemberVO;
 import com.ruoyi.im.vo.organization.ImDepartmentTreeVO;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
 
     private final ImDepartmentMapper imDepartmentMapper;
     private final ImDepartmentMemberMapper imDepartmentMemberMapper;
-    private final ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
     private final ImRedisUtil imRedisUtil;
 
     /**
@@ -47,16 +47,16 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
      *
      * @param imDepartmentMapper        部门Mapper
      * @param imDepartmentMemberMapper  部门成员Mapper
-     * @param imUserMapper               用户Mapper
+     * @param imUserService             用户Service
      * @param imRedisUtil                Redis工具类
      */
     public ImOrganizationServiceImpl(ImDepartmentMapper imDepartmentMapper,
                                       ImDepartmentMemberMapper imDepartmentMemberMapper,
-                                      ImUserMapper imUserMapper,
+                                      ImUserService imUserService,
                                       ImRedisUtil imRedisUtil) {
         this.imDepartmentMapper = imDepartmentMapper;
         this.imDepartmentMemberMapper = imDepartmentMemberMapper;
-        this.imUserMapper = imUserMapper;
+        this.imUserService = imUserService;
         this.imRedisUtil = imRedisUtil;
     }
 
@@ -69,7 +69,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
             ImDepartmentTreeVO treeVO = new ImDepartmentTreeVO();
             BeanConvertUtil.copyProperties(department, treeVO);
 
-            ImUser leader = imUserMapper.selectImUserById(department.getLeaderId());
+            ImUser leader = imUserService.getUserEntityById(department.getLeaderId());
             if (leader != null) {
                 treeVO.setLeaderName(leader.getNickname());
             }
@@ -94,7 +94,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
                 ImDepartmentTreeVO treeVO = new ImDepartmentTreeVO();
                 BeanConvertUtil.copyProperties(department, treeVO);
 
-                ImUser leader = imUserMapper.selectImUserById(department.getLeaderId());
+                ImUser leader = imUserService.getUserEntityById(department.getLeaderId());
                 if (leader != null) {
                     treeVO.setLeaderName(leader.getNickname());
                 }
@@ -269,7 +269,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
             throw new BusinessException("DEPARTMENT_NOT_EXIST", "部门不存在");
         }
 
-        ImUser user = imUserMapper.selectImUserById(request.getUserId());
+        ImUser user = imUserService.getUserEntityById(request.getUserId());
         if (user == null) {
             throw new BusinessException("USER_NOT_EXIST", "User does not exist");
         }
@@ -391,7 +391,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
             throw new BusinessException("DEPARTMENT_NOT_EXIST", "部门不存在");
         }
 
-        ImUser leader = imUserMapper.selectImUserById(leaderId);
+        ImUser leader = imUserService.getUserEntityById(leaderId);
         if (leader == null) {
             throw new BusinessException("USER_NOT_EXIST", "指定的负责人用户不存在");
         }

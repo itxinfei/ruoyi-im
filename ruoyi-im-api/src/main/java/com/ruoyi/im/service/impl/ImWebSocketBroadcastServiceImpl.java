@@ -6,6 +6,7 @@ import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.vo.ding.DingMessageVO;
@@ -26,19 +27,19 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     private final ImConversationMemberMapper conversationMemberMapper;
     private final ImMessageMapper messageMapper;
-    private final com.ruoyi.im.mapper.ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
     private final MessageEncryptionUtil encryptionUtil;
     private final ObjectMapper objectMapper;
 
     public ImWebSocketBroadcastServiceImpl(
             ImConversationMemberMapper conversationMemberMapper,
             ImMessageMapper messageMapper,
-            com.ruoyi.im.mapper.ImUserMapper imUserMapper,
+            ImUserService imUserService,
             MessageEncryptionUtil encryptionUtil,
             ObjectMapper objectMapper) {
         this.conversationMemberMapper = conversationMemberMapper;
         this.messageMapper = messageMapper;
-        this.imUserMapper = imUserMapper;
+        this.imUserService = imUserService;
         this.encryptionUtil = encryptionUtil;
         this.objectMapper = objectMapper;
     }
@@ -202,7 +203,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             recallNotification.put("timestamp", java.time.LocalDateTime.now().toString());
 
             // 获取用户信息
-            com.ruoyi.im.domain.ImUser user = imUserMapper.selectImUserById(userId);
+            com.ruoyi.im.domain.ImUser user = imUserService.getUserEntityById(userId);
             if (user != null) {
                 recallNotification.put("userName",
                         user.getNickname() != null ? user.getNickname() : user.getUsername());
@@ -270,7 +271,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         // 尝试获取发送者信息
         try {
             if (sender == null) {
-                sender = imUserMapper.selectImUserById(message.getSenderId());
+                sender = imUserService.getUserEntityById(message.getSenderId());
             }
 
             if (sender != null) {
@@ -305,8 +306,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                     quotedData.put("id", replyToMessage.getId());
 
                     // 获取发送者信息
-                    com.ruoyi.im.domain.ImUser quotedSender = imUserMapper
-                            .selectImUserById(replyToMessage.getSenderId());
+                    com.ruoyi.im.domain.ImUser quotedSender = imUserService
+                            .getUserEntityById(replyToMessage.getSenderId());
                     quotedData.put("senderName", quotedSender != null ? quotedSender.getNickname() : "未知用户");
 
                     quotedData.put("type", replyToMessage.getMessageType() != null
@@ -415,7 +416,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastMeetingInvitation(Long meetingId, Set<Long> targetUserIds, Long inviterId) {
         try {
             // 获取邀请人信息
-            com.ruoyi.im.domain.ImUser inviter = imUserMapper.selectImUserById(inviterId);
+            com.ruoyi.im.domain.ImUser inviter = imUserService.getUserEntityById(inviterId);
 
             // 构建会议邀请消息
             Map<String, Object> invitationNotification = new HashMap<>();
@@ -459,7 +460,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             Set<Long> targetUserIds, Long bookerId) {
         try {
             // 获取预订人信息
-            com.ruoyi.im.domain.ImUser booker = imUserMapper.selectImUserById(bookerId);
+            com.ruoyi.im.domain.ImUser booker = imUserService.getUserEntityById(bookerId);
 
             // 构建会议室预订通知消息
             Map<String, Object> bookingNotification = new HashMap<>();
@@ -504,8 +505,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastNudgeMessage(Long conversationId, Long nudgerId, Long nudgedUserId) {
         try {
             // 获取用户信息
-            com.ruoyi.im.domain.ImUser nudger = imUserMapper.selectImUserById(nudgerId);
-            com.ruoyi.im.domain.ImUser nudgedUser = imUserMapper.selectImUserById(nudgedUserId);
+            com.ruoyi.im.domain.ImUser nudger = imUserService.getUserEntityById(nudgerId);
+            com.ruoyi.im.domain.ImUser nudgedUser = imUserService.getUserEntityById(nudgedUserId);
 
             // 构建拍一拍消息
             Map<String, Object> nudgeNotification = new HashMap<>();

@@ -15,8 +15,8 @@ import com.ruoyi.im.mapper.ImDocumentCommentMapper;
 import com.ruoyi.im.mapper.ImDocumentMapper;
 import com.ruoyi.im.mapper.ImDocumentShareMapper;
 import com.ruoyi.im.mapper.ImDocumentVersionMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImDocumentService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.vo.document.ImDocumentCommentVO;
 import com.ruoyi.im.vo.document.ImDocumentVersionVO;
 import com.ruoyi.im.vo.document.ImDocumentVO;
@@ -45,7 +45,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     private final ImDocumentShareMapper documentShareMapper;
     private final ImDocumentCommentMapper documentCommentMapper;
     private final ImDocumentVersionMapper documentVersionMapper;
-    private final ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
 
     /**
      * 构造器注入依赖
@@ -54,12 +54,12 @@ public class ImDocumentServiceImpl implements ImDocumentService {
                                   ImDocumentShareMapper documentShareMapper,
                                   ImDocumentCommentMapper documentCommentMapper,
                                   ImDocumentVersionMapper documentVersionMapper,
-                                  ImUserMapper imUserMapper) {
+                                  ImUserService imUserService) {
         this.documentMapper = documentMapper;
         this.documentShareMapper = documentShareMapper;
         this.documentCommentMapper = documentCommentMapper;
         this.documentVersionMapper = documentVersionMapper;
-        this.imUserMapper = imUserMapper;
+        this.imUserService = imUserService;
     }
 
     @Override
@@ -440,7 +440,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         // 批量查询用户信息
         java.util.Map<Long, ImUser> userMap = new java.util.HashMap<>();
         if (!userIds.isEmpty()) {
-            List<ImUser> users = imUserMapper.selectImUserListByIds(new ArrayList<>(userIds));
+            List<ImUser> users = imUserService.getUserEntitiesByIds(new ArrayList<>(userIds));
             users.forEach(user -> userMap.put(user.getId(), user));
         }
 
@@ -532,7 +532,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         int newVersion = (latestVersion != null ? latestVersion : 0) + 1;
 
         // 获取用户信息
-        ImUser user = imUserMapper.selectImUserById(userId);
+        ImUser user = imUserService.getUserEntityById(userId);
         String userName = user != null ? user.getNickname() : "用户" + userId;
 
         ImDocumentVersion version = new ImDocumentVersion();

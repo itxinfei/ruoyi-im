@@ -14,8 +14,8 @@ import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImGroupService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.group.ImGroupMemberVO;
 import com.ruoyi.im.vo.group.ImGroupVO;
@@ -42,7 +42,7 @@ public class ImGroupServiceImpl implements ImGroupService {
 
     private final ImGroupMapper imGroupMapper;
     private final ImGroupMemberMapper imGroupMemberMapper;
-    private final ImUserMapper imUserMapper;
+    private final ImUserService imUserService;
     private final ImConversationMapper imConversationMapper;
     private final com.ruoyi.im.util.ImRedisUtil imRedisUtil;
     private final ImConversationMemberMapper imConversationMemberMapper;
@@ -52,13 +52,13 @@ public class ImGroupServiceImpl implements ImGroupService {
      */
     public ImGroupServiceImpl(ImGroupMapper imGroupMapper,
             ImGroupMemberMapper imGroupMemberMapper,
-            ImUserMapper imUserMapper,
+            ImUserService imUserService,
             ImConversationMapper imConversationMapper,
             com.ruoyi.im.util.ImRedisUtil imRedisUtil,
             ImConversationMemberMapper imConversationMemberMapper) {
         this.imGroupMapper = imGroupMapper;
         this.imGroupMemberMapper = imGroupMemberMapper;
-        this.imUserMapper = imUserMapper;
+        this.imUserService = imUserService;
         this.imConversationMapper = imConversationMapper;
         this.imRedisUtil = imRedisUtil;
         this.imConversationMemberMapper = imConversationMemberMapper;
@@ -67,7 +67,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createGroup(ImGroupCreateRequest request, Long userId) {
-        ImUser owner = imUserMapper.selectImUserById(userId);
+        ImUser owner = imUserService.getUserEntityById(userId);
         if (owner == null) {
             throw new BusinessException("用户不存在");
         }
@@ -210,7 +210,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             ImGroupVO groupVO = new ImGroupVO();
             BeanConvertUtil.copyProperties(group, groupVO);
 
-            ImUser owner = imUserMapper.selectImUserById(group.getOwnerId());
+            ImUser owner = imUserService.getUserEntityById(group.getOwnerId());
             if (owner != null) {
                 groupVO.setOwnerName(owner.getNickname());
             }
@@ -260,7 +260,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             ImGroupMemberVO vo = new ImGroupMemberVO();
             BeanConvertUtil.copyProperties(member, vo);
 
-            ImUser user = imUserMapper.selectImUserById(member.getUserId());
+            ImUser user = imUserService.getUserEntityById(member.getUserId());
             if (user != null) {
                 vo.setUserName(user.getNickname());
                 vo.setUserAvatar(user.getAvatar());
