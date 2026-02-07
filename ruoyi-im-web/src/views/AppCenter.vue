@@ -69,7 +69,7 @@
         >
           <div
             class="app-icon"
-            :style="{ background: app.iconColor }"
+            :style="{ '--icon-color': app.iconColor }"
           >
             <img
               v-if="app.iconUrl"
@@ -127,7 +127,7 @@
           <div class="app-header">
             <div
               class="app-icon-wrapper"
-              :style="{ background: app.iconColor }"
+              :style="{ '--icon-color': app.iconColor }"
             >
               <img
                 v-if="app.iconUrl"
@@ -291,7 +291,7 @@
         >
           <div
             class="app-icon"
-            :style="{ background: app.iconColor }"
+            :style="{ '--icon-color': app.iconColor }"
           >
             <img
               v-if="app.iconUrl"
@@ -850,7 +850,7 @@ onMounted(() => {
 
   &.active {
     color: var(--dt-brand-color);
-    background: #fff;
+    background: var(--dt-bg-card);
 
     &::after {
       transform: scaleX(1);
@@ -915,11 +915,11 @@ onMounted(() => {
     width: 40px;
     height: 40px;
     border-radius: var(--dt-radius-lg);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--icon-color, var(--dt-info-gradient));
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--dt-text-inverse);
     font-size: 18px;
     font-weight: 600;
     flex-shrink: 0;
@@ -978,7 +978,7 @@ onMounted(() => {
   gap: 16px;
 
   &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dt-shadow-xl);
     transform: translateY(-4px);
     border-color: var(--dt-border-color);
   }
@@ -1005,6 +1005,7 @@ onMounted(() => {
   width: 56px;
   height: 56px;
   border-radius: var(--dt-radius-xl);
+  background: var(--icon-color, var(--dt-info-gradient));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1020,7 +1021,7 @@ onMounted(() => {
   .app-icon-text {
     font-size: 20px;
     font-weight: 700;
-    color: #fff;
+    color: var(--dt-text-inverse);
   }
 
   .hot-badge,
@@ -1031,18 +1032,18 @@ onMounted(() => {
     border-radius: var(--dt-radius-md);
     font-size: 10px;
     font-weight: 700;
-    color: #fff;
+    color: var(--dt-text-inverse);
     line-height: 1;
   }
 
   .hot-badge {
     right: -8px;
-    background: linear-gradient(135deg, #f5222d 0%, #f5222d 100%);
+    background: var(--dt-error-gradient);
   }
 
   .new-badge {
     left: -8px;
-    background: linear-gradient(135deg, #52c41a 0%, #52c41a 100%);
+    background: var(--dt-success-gradient);
   }
 }
 
@@ -1120,7 +1121,7 @@ onMounted(() => {
 
     &.install-btn {
       background: var(--dt-brand-color);
-      color: #fff;
+      color: var(--dt-text-inverse);
       border: none;
 
       &:hover {
@@ -1180,13 +1181,14 @@ onMounted(() => {
       width: 40px;
       height: 40px;
       border-radius: var(--dt-radius-md);
+      background: var(--icon-color, var(--dt-info-gradient));
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #fff;
+      color: var(--dt-text-inverse);
 
       img {
         width: 24px;
