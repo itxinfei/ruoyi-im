@@ -235,7 +235,14 @@ public class ImGroupServiceImpl implements ImGroupService {
         query.setUserId(userId);
         List<ImGroupMember> memberList = imGroupMemberMapper.selectImGroupMemberList(query);
 
+        java.util.HashSet<Long> seenGroupIds = new java.util.HashSet<>();
         for (ImGroupMember member : memberList) {
+            if (member == null || member.getGroupId() == null) {
+                continue;
+            }
+            if (!seenGroupIds.add(member.getGroupId())) {
+                continue;
+            }
             // 这里可以考虑优化，先不走缓存，或者批量获取
             ImGroup group = imGroupMapper.selectImGroupById(member.getGroupId());
             if (group != null && java.util.Objects.equals(group.getIsDeleted(), 0)) {
