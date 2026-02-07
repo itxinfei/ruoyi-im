@@ -163,5 +163,11 @@ public class ImCacheServiceImpl implements ImCacheService {
     public void clearAll() {
         // 清理所有 IM 前缀的缓存
         deleteByPattern(CACHE_KEY_PREFIX + "*");
+        // 清理联系人列表缓存（开发/测试环境需要）
+        deleteByPattern("contact:list:*");
+        // 清理会话相关缓存（如果有的话）
+        deleteByPattern("conversation:*");
+        // 清理用户相关缓存
+        deleteByPattern("user:*");
     }
 }
