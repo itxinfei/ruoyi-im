@@ -1,23 +1,42 @@
 <template>
-  <div ref="pickerRef" v-click-outside="close" class="emoji-picker" :style="positionStyle">
+  <div
+    ref="pickerRef"
+    v-click-outside="close"
+    class="emoji-picker"
+    :style="positionStyle"
+  >
     <!-- 分类标签 -->
     <div class="emoji-tabs">
-      <button v-for="category in categories" :key="category.id" class="emoji-tab"
-        :class="{ active: activeCategory === category.id }" @click="activeCategory = category.id"
-        :title="category.name">
+      <button
+        v-for="category in categories"
+        :key="category.id"
+        class="emoji-tab"
+        :class="{ active: activeCategory === category.id }"
+        :title="category.name"
+        @click="activeCategory = category.id"
+      >
         <span class="tab-icon">{{ category.icon }}</span>
       </button>
     </div>
 
     <!-- 表情列表 -->
     <div class="emoji-list">
-      <button v-for="emoji in currentEmojis" :key="emoji" class="emoji-item" :title="emoji" @click="selectEmoji(emoji)">
+      <button
+        v-for="emoji in currentEmojis"
+        :key="emoji"
+        class="emoji-item"
+        :title="emoji"
+        @click="selectEmoji(emoji)"
+      >
         {{ emoji }}
       </button>
     </div>
 
     <!-- 底部状态栏 (可选，WildFire IM通常有) -->
-    <div v-if="recentEmojis.length > 0 && activeCategory !== 'recent'" class="emoji-footer">
+    <div
+      v-if="recentEmojis.length > 0 && activeCategory !== 'recent'"
+      class="emoji-footer"
+    >
       <span class="footer-tip">最近使用: {{ recentEmojis.slice(0, 5).join(' ') }}</span>
     </div>
   </div>

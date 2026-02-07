@@ -1,30 +1,67 @@
 <template>
-  <nav :class="[
-    'dingtalk-nav',
-    'flex flex-col items-center z-[100] shrink-0 bg-nav-light'
-  ]" style="height: 100vh;" role="navigation" aria-label="主导航">
+  <nav
+    :class="[
+      'dingtalk-nav',
+      'flex flex-col items-center z-[100] shrink-0 bg-nav-light'
+    ]"
+    style="height: 100vh;"
+    role="navigation"
+    aria-label="主导航"
+  >
     <!-- Logo 区域 -->
     <div class="nav-logo-wrapper">
       <div class="nav-logo">
-        <img v-if="logoUrl" :src="logoUrl" class="nav-logo-image" alt="Logo">
-        <span v-else class="nav-logo-text">IM</span>
-        <span v-if="unreadCount > 0" class="nav-logo-badge">
+        <img
+          v-if="logoUrl"
+          :src="logoUrl"
+          class="nav-logo-image"
+          alt="Logo"
+        >
+        <span
+          v-else
+          class="nav-logo-text"
+        >IM</span>
+        <span
+          v-if="unreadCount > 0"
+          class="nav-logo-badge"
+        >
           {{ unreadCount > 99 ? '99+' : unreadCount }}
         </span>
       </div>
     </div>
 
     <!-- 导航项 -->
-    <div class="nav-items" role="menubar">
-      <el-tooltip v-for="item in navModules" :key="item.key" :content="item.label" placement="right" :show-after="500"
-        :hide-after="0">
-        <button :class="[
-          'nav-item',
-          activeModule === item.key ? 'nav-item-active' : ''
-        ]" :aria-label="item.label" :aria-current="activeModule === item.key ? 'page' : undefined" role="menuitem"
-          @click="handleSwitch(item.key)">
-          <component :is="item.icon" class="nav-item-icon" aria-hidden="true" />
-          <span v-if="item.badge" class="nav-item-badge">{{ item.badge }}</span>
+    <div
+      class="nav-items"
+      role="menubar"
+    >
+      <el-tooltip
+        v-for="item in navModules"
+        :key="item.key"
+        :content="item.label"
+        placement="right"
+        :show-after="500"
+        :hide-after="0"
+      >
+        <button
+          :class="[
+            'nav-item',
+            activeModule === item.key ? 'nav-item-active' : ''
+          ]"
+          :aria-label="item.label"
+          :aria-current="activeModule === item.key ? 'page' : undefined"
+          role="menuitem"
+          @click="handleSwitch(item.key)"
+        >
+          <component
+            :is="item.icon"
+            class="nav-item-icon"
+            aria-hidden="true"
+          />
+          <span
+            v-if="item.badge"
+            class="nav-item-badge"
+          >{{ item.badge }}</span>
         </button>
       </el-tooltip>
     </div>
@@ -32,31 +69,71 @@
     <!-- 底部操作区 -->
     <div class="nav-footer">
       <!-- 搜索按钮 -->
-      <el-tooltip content="全局搜索" placement="right" :show-after="500" :hide-after="0">
-        <button class="nav-item nav-item-action" aria-label="全局搜索" @click="handleOpenSearch">
-          <Search class="nav-icon" aria-hidden="true" />
+      <el-tooltip
+        content="全局搜索"
+        placement="right"
+        :show-after="500"
+        :hide-after="0"
+      >
+        <button
+          class="nav-item nav-item-action"
+          aria-label="全局搜索"
+          @click="handleOpenSearch"
+        >
+          <Search
+            class="nav-icon"
+            aria-hidden="true"
+          />
         </button>
       </el-tooltip>
 
 
 
       <!-- 设置按钮 -->
-      <el-tooltip content="设置" placement="right" :show-after="500" :hide-after="0">
-        <button class="nav-item nav-item-action" :class="{ 'nav-item-active': activeModule === 'settings' }"
-          aria-label="设置" @click="handleSwitch('settings')">
-          <Setting class="nav-icon" aria-hidden="true" />
+      <el-tooltip
+        content="设置"
+        placement="right"
+        :show-after="500"
+        :hide-after="0"
+      >
+        <button
+          class="nav-item nav-item-action"
+          :class="{ 'nav-item-active': activeModule === 'settings' }"
+          aria-label="设置"
+          @click="handleSwitch('settings')"
+        >
+          <Setting
+            class="nav-icon"
+            aria-hidden="true"
+          />
         </button>
       </el-tooltip>
 
       <!-- 用户头像 -->
-      <el-tooltip :content="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`" placement="right"
-        :show-after="500" :hide-after="0">
-        <button class="nav-avatar" :class="{ 'nav-avatar-active': activeModule === 'profile' }"
-          :aria-label="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`" @click="handleSwitch('profile')">
-          <DingtalkAvatar :src="currentUser.avatar" :name="currentUser.nickname || currentUser.username || '我'"
-            :user-id="currentUser.id" :size="42" shape="circle" />
+      <el-tooltip
+        :content="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`"
+        placement="right"
+        :show-after="500"
+        :hide-after="0"
+      >
+        <button
+          class="nav-avatar"
+          :class="{ 'nav-avatar-active': activeModule === 'profile' }"
+          :aria-label="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`"
+          @click="handleSwitch('profile')"
+        >
+          <DingtalkAvatar
+            :src="currentUser.avatar"
+            :name="currentUser.nickname || currentUser.username || '我'"
+            :user-id="currentUser.id"
+            :size="42"
+            shape="circle"
+          />
           <!-- 在线状态点 -->
-          <span class="nav-avatar-status" :class="{ 'online': isUserOnline }" />
+          <span
+            class="nav-avatar-status"
+            :class="{ 'online': isUserOnline }"
+          />
         </button>
       </el-tooltip>
     </div>

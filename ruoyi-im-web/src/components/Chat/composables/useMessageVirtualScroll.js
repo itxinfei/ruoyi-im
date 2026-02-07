@@ -101,7 +101,7 @@ export function useMessageVirtualScroll(props, getAllMessages) {
   /**
    * 获取消息的估算高度（支持缓存）
    */
-  const getMessageHeight = (msgId) => {
+  const getMessageHeight = msgId => {
     return messageHeightCache.value.get(msgId) || AVERAGE_MESSAGE_HEIGHT
   }
 

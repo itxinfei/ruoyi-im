@@ -62,7 +62,7 @@ export function useFileUploadUnified(options = {}) {
     messages = ref([]),
     session = ref(null),
     sendMessage = null,
-    transformMsg = (m) => m,
+    transformMsg = m => m,
     onUploadSuccess = null,
     onUploadError = null,
     currentUser = null,
@@ -125,7 +125,7 @@ export function useFileUploadUnified(options = {}) {
    * @param {Object} params - 消息参数
    * @returns {Object} 临时消息对象
    */
-  const createTempMessage = (params) => {
+  const createTempMessage = params => {
     const {
       type,
       content,
@@ -165,7 +165,7 @@ export function useFileUploadUnified(options = {}) {
    * 标记消息失败
    * @param {string} tempId - 临时消息ID
    */
-  const markMessageFailed = (tempId) => {
+  const markMessageFailed = tempId => {
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
       messages.value[index].status = 'failed'
@@ -183,7 +183,7 @@ export function useFileUploadUnified(options = {}) {
     category,
     uploadApi,
     messageType,
-    processContent = (data) => JSON.stringify(data),
+    processContent = data => JSON.stringify(data),
     useOptimisticUpdate = true
   }) => {
     // 验证文件
@@ -228,7 +228,7 @@ export function useFileUploadUnified(options = {}) {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await uploadApi(formData, (progress) => {
+      const response = await uploadApi(formData, progress => {
         uploadProgress.value[uploadId] = progress
       })
 
@@ -344,14 +344,14 @@ export function useFileUploadUnified(options = {}) {
       ? fileOrFormData.get('file')
       : fileOrFormData
 
-    if (!file) return null
+    if (!file) {return null}
 
     return handleUpload({
       file,
       category: 'image',
       uploadApi: uploadImageApi,
       messageType: 'IMAGE',
-      processContent: (data) => JSON.stringify({
+      processContent: data => JSON.stringify({
         fileId: data.fileId,
         imageUrl: data.imageUrl
       }),
@@ -370,7 +370,7 @@ export function useFileUploadUnified(options = {}) {
     for (const file of files) {
       try {
         const result = await uploadImage(file, conversationId)
-        if (result) results.push(result)
+        if (result) {results.push(result)}
       } catch (error) {
         console.error('图片上传失败:', error)
       }
@@ -397,14 +397,14 @@ export function useFileUploadUnified(options = {}) {
       ? fileOrFormData.get('file')
       : fileOrFormData
 
-    if (!file) return null
+    if (!file) {return null}
 
     return handleUpload({
       file,
       category: 'file',
       uploadApi: uploadFileApi,
       messageType: 'FILE',
-      processContent: (data) => JSON.stringify({
+      processContent: data => JSON.stringify({
         fileId: data.fileId,
         fileName: data.fileName,
         size: data.size,
@@ -517,7 +517,7 @@ export function useFileUploadUnified(options = {}) {
    * 取消上传
    * @param {string} uploadId - 上传任务ID
    */
-  const cancelUpload = (uploadId) => {
+  const cancelUpload = uploadId => {
     const index = uploadQueue.value.findIndex(item => item.uploadId === uploadId)
     if (index !== -1) {
       uploadQueue.value.splice(index, 1)
@@ -529,9 +529,9 @@ export function useFileUploadUnified(options = {}) {
    * 重试上传
    * @param {string} uploadId - 上传任务ID
    */
-  const retryUpload = async (uploadId) => {
+  const retryUpload = async uploadId => {
     const item = uploadQueue.value.find(item => item.uploadId === uploadId)
-    if (!item) return
+    if (!item) {return}
 
     item.status = 'uploading'
     item.progress = 0
@@ -555,7 +555,7 @@ export function useFileUploadUnified(options = {}) {
    * 获取上传进度
    * @param {string} uploadId - 上传任务ID
    */
-  const getUploadProgress = (uploadId) => {
+  const getUploadProgress = uploadId => {
     return uploadProgress.value[uploadId] || 0
   }
 

@@ -6,87 +6,161 @@
 */
 <template>
   <div class="message-bubble-wrapper">
-    <div ref="bubbleRef" class="message-bubble" :class="bubbleClasses" @click="handleClick" @mousedown="handleMouseHold"
-      @mouseup="handleMouseRelease" @mouseleave="handleMouseRelease" @contextmenu.prevent="handleContextMenu"
-      @touchstart="handleTouchStart" @touchend="handleTouchEnd" @touchmove="handleTouchMove">
+    <div
+      ref="bubbleRef"
+      class="message-bubble"
+      :class="bubbleClasses"
+      @click="handleClick"
+      @mousedown="handleMouseHold"
+      @mouseup="handleMouseRelease"
+      @mouseleave="handleMouseRelease"
+      @contextmenu.prevent="handleContextMenu"
+      @touchstart="handleTouchStart"
+      @touchend="handleTouchEnd"
+      @touchmove="handleTouchMove"
+    >
       <!-- 消息内容区域 -->
       <div class="bubble-content">
         <!-- 文本消息 -->
-        <TextBubble v-if="['text', 'raw'].includes(message.type?.toLowerCase())" :message="message"
-          :has-markers="hasMarkers" @scroll-to="$emit('scroll-to', $event)" />
+        <TextBubble
+          v-if="['text', 'raw'].includes(message.type?.toLowerCase())"
+          :message="message"
+          :has-markers="hasMarkers"
+          @scroll-to="$emit('scroll-to', $event)"
+        />
 
         <!-- 链接预览卡片 -->
-        <LinkCard v-if="['text', 'raw'].includes(message.type?.toLowerCase()) && messageLinks.length > 0"
-          :link="messageLinks[0]" class="message-link-card" />
+        <LinkCard
+          v-if="['text', 'raw'].includes(message.type?.toLowerCase()) && messageLinks.length > 0"
+          :link="messageLinks[0]"
+          class="message-link-card"
+        />
 
         <!-- 图片消息 -->
-        <ImageBubble v-else-if="message.type?.toUpperCase() === 'IMAGE'" :message="message"
-          :is-large-group="isLargeGroup" @preview="$emit('preview', $event)" />
+        <ImageBubble
+          v-else-if="message.type?.toUpperCase() === 'IMAGE'"
+          :message="message"
+          :is-large-group="isLargeGroup"
+          @preview="$emit('preview', $event)"
+        />
 
         <!-- 文件消息 -->
-        <FileBubble v-else-if="message.type?.toUpperCase() === 'FILE'" :message="message"
-          @download="$emit('download', $event)" />
+        <FileBubble
+          v-else-if="message.type?.toUpperCase() === 'FILE'"
+          :message="message"
+          @download="$emit('download', $event)"
+        />
 
         <!-- 视频消息 -->
-        <VideoBubble v-else-if="message.type?.toUpperCase() === 'VIDEO'" :message="message" />
+        <VideoBubble
+          v-else-if="message.type?.toUpperCase() === 'VIDEO'"
+          :message="message"
+        />
 
         <!-- 语音消息 -->
-        <VoiceBubble v-else-if="['voice', 'audio'].includes(message.type?.toLowerCase())" :message="message"
-          :is-read="message.isRead || message.readStatus === 'READ'" @read="$emit('mark-read', message)" />
+        <VoiceBubble
+          v-else-if="['voice', 'audio'].includes(message.type?.toLowerCase())"
+          :message="message"
+          :is-read="message.isRead || message.readStatus === 'READ'"
+          @read="$emit('mark-read', message)"
+        />
 
         <!-- 位置消息 -->
-        <LocationBubble v-else-if="message.type?.toUpperCase() === 'LOCATION'" :message="message" />
+        <LocationBubble
+          v-else-if="message.type?.toUpperCase() === 'LOCATION'"
+          :message="message"
+        />
 
         <!-- 系统消息 -->
-        <SystemBubble v-else-if="message.type?.toUpperCase() === 'SYSTEM'" :message="message" />
+        <SystemBubble
+          v-else-if="message.type?.toUpperCase() === 'SYSTEM'"
+          :message="message"
+        />
 
         <!-- 撤回消息 -->
-        <RecalledBubble v-else-if="message.type?.toUpperCase() === 'RECALLED'" :message="message"
-          @re-edit="$emit('re-edit', $event)" />
+        <RecalledBubble
+          v-else-if="message.type?.toUpperCase() === 'RECALLED'"
+          :message="message"
+          @re-edit="$emit('re-edit', $event)"
+        />
 
         <!-- 拍一拍消息 -->
-        <NudgeMessageBubble v-else-if="message.type?.toUpperCase() === 'NUDGE'" :nudge="{
-          id: message.id,
-          nudgerId: message.senderId,
-          nudgerName: message.senderName,
-          nudgerAvatar: message.senderAvatar,
-          nudgedUserId: message.nudgedUserId,
-          nudgedUserName: message.nudgedUserName,
-          nudgeCount: message.nudgeCount || 1,
-          createTime: message.createTime || message.timestamp
-        }" @show-user="$emit('show-user', $event)" />
+        <NudgeMessageBubble
+          v-else-if="message.type?.toUpperCase() === 'NUDGE'"
+          :nudge="{
+            id: message.id,
+            nudgerId: message.senderId,
+            nudgerName: message.senderName,
+            nudgerAvatar: message.senderAvatar,
+            nudgedUserId: message.nudgedUserId,
+            nudgedUserName: message.nudgedUserName,
+            nudgeCount: message.nudgeCount || 1,
+            createTime: message.createTime || message.timestamp
+          }"
+          @show-user="$emit('show-user', $event)"
+        />
 
         <!-- 合并转发消息 -->
-        <CombineMessagePreview v-else-if="['combine', 'combine_forward'].includes(message.type?.toLowerCase())"
-          :messages="parsedContent.messages || []" @click="handleCombineClick" />
+        <CombineMessagePreview
+          v-else-if="['combine', 'combine_forward'].includes(message.type?.toLowerCase())"
+          :messages="parsedContent.messages || []"
+          @click="handleCombineClick"
+        />
 
         <!-- 未知消息类型 - 根据用户要求，不显示气泡 -->
         <template v-else />
       </div>
 
       <!-- 状态指示器 -->
-      <MessageStatus v-if="showStatus" :message="message" :session-type="sessionType" @retry="$emit('retry', message)"
-        @show-read-info="handleShowReadInfo" />
+      <MessageStatus
+        v-if="showStatus"
+        :message="message"
+        :session-type="sessionType"
+        @retry="$emit('retry', message)"
+        @show-read-info="handleShowReadInfo"
+      />
 
       <!-- 表情回应 -->
-      <MessageReactions v-if="hasReactions" :message="message" @toggle="toggleReaction" />
+      <MessageReactions
+        v-if="hasReactions"
+        :message="message"
+        @toggle="toggleReaction"
+      />
     </div>
   </div>
 
   <!-- 右键菜单 -->
-  <ContextMenu :show="contextMenuVisible" :x="contextMenuX" :y="contextMenuY" :items="contextMenuItems"
-    @select="handleContextMenuSelect" @update:show="contextMenuVisible = $event" />
+  <ContextMenu
+    :show="contextMenuVisible"
+    :x="contextMenuX"
+    :y="contextMenuY"
+    :items="contextMenuItems"
+    @select="handleContextMenuSelect"
+    @update:show="contextMenuVisible = $event"
+  />
 
   <!-- AI表情表态浮窗 -->
-  <AiEmojiReaction :visible="showAiEmojiPanel" :message="message" :position="aiEmojiPosition"
-    @select="handleAiEmojiSelect" @close="showAiEmojiPanel = false" />
+  <AiEmojiReaction
+    :visible="showAiEmojiPanel"
+    :message="message"
+    :position="aiEmojiPosition"
+    @select="handleAiEmojiSelect"
+    @close="showAiEmojiPanel = false"
+  />
 
   <!-- 已读详情弹窗 -->
-  <ReadInfoDialog v-model:visible="showReadInfoDialog" :message-id="message.id" :read-count="message.readCount"
-    :read-by="message.readBy" :read-time="message.readTime" :is-group-chat="sessionType === 'GROUP'"
-    :total-members="message.totalMembers" :all-members="message.allMembers || []"
+  <ReadInfoDialog
+    v-model:visible="showReadInfoDialog"
+    :message-id="message.id"
+    :read-count="message.readCount"
+    :read-by="message.readBy"
+    :read-time="message.readTime"
+    :is-group-chat="sessionType === 'GROUP'"
+    :total-members="message.totalMembers"
+    :all-members="message.allMembers || []"
     :conversation-id="message.conversationId || message.sessionId"
-    @remind-unread="(data) => $emit('remind-unread', data)" />
+    @remind-unread="(data) => $emit('remind-unread', data)"
+  />
 </template>
 
 <script setup>

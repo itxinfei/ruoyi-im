@@ -1,8 +1,16 @@
 <template>
-  <div v-if="hasReactions" class="reaction-aggregate">
-    <div v-for="reaction in reactions" :key="reaction.emoji" class="reaction-item"
-      :class="{ 'is-active': reaction.hasOwnReaction }" :title="reaction.usersTitle"
-      @click.stop="$emit('toggle', reaction.emoji)">
+  <div
+    v-if="hasReactions"
+    class="reaction-aggregate"
+  >
+    <div
+      v-for="reaction in reactions"
+      :key="reaction.emoji"
+      class="reaction-item"
+      :class="{ 'is-active': reaction.hasOwnReaction }"
+      :title="reaction.usersTitle"
+      @click.stop="$emit('toggle', reaction.emoji)"
+    >
       <span class="reaction-emoji">{{ reaction.emoji }}</span>
       <span class="reaction-count">{{ reaction.count }}</span>
     </div>

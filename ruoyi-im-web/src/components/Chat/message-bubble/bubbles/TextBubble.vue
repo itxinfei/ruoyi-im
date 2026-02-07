@@ -6,34 +6,74 @@
 <template>
   <div class="text-bubble">
     <!-- 引用消息预览 -->
-    <MessageReplyRef v-if="replyMessage" :message="replyMessage" @click="handleReplyClick" />
+    <MessageReplyRef
+      v-if="replyMessage"
+      :message="replyMessage"
+      @click="handleReplyClick"
+    />
 
     <!-- 文本内容 -->
-    <div class="text-content" v-html="formattedContent" />
+    <div
+      class="text-content"
+      v-html="formattedContent"
+    />
 
     <!-- 链接预览卡片 -->
-    <div v-if="extractedUrls.length > 0" class="link-previews">
-      <LinkPreviewCard v-for="url in extractedUrls" :key="url" :preview="getPreviewData(url)"
-        :is-loading="isLoadingUrl(url)" @click="handleLinkClick" @image-error="handleLinkImageError" />
+    <div
+      v-if="extractedUrls.length > 0"
+      class="link-previews"
+    >
+      <LinkPreviewCard
+        v-for="url in extractedUrls"
+        :key="url"
+        :preview="getPreviewData(url)"
+        :is-loading="isLoadingUrl(url)"
+        @click="handleLinkClick"
+        @image-error="handleLinkImageError"
+      />
     </div>
 
     <!-- 已编辑标记 -->
-    <span v-if="message.isEdited" class="edited-tag">(已编辑)</span>
+    <span
+      v-if="message.isEdited"
+      class="edited-tag"
+    >(已编辑)</span>
 
     <!-- 标记图标 -->
-    <div v-if="hasMarkers" class="message-markers">
-      <span v-for="marker in message.markers" :key="marker.id || marker.markerType" class="marker-icon"
-        :class="{ completed: marker.isCompleted }" :style="{ color: marker.color || '' }">
-        <span v-if="marker.markerType === 'FLAG'" class="material-icons-outlined">flag</span>
-        <span v-else-if="marker.markerType === 'IMPORTANT'" class="material-icons-outlined">star</span>
-        <span v-else-if="marker.markerType === 'TODO'" class="material-icons-outlined">
+    <div
+      v-if="hasMarkers"
+      class="message-markers"
+    >
+      <span
+        v-for="marker in message.markers"
+        :key="marker.id || marker.markerType"
+        class="marker-icon"
+        :class="{ completed: marker.isCompleted }"
+        :style="{ color: marker.color || '' }"
+      >
+        <span
+          v-if="marker.markerType === 'FLAG'"
+          class="material-icons-outlined"
+        >flag</span>
+        <span
+          v-else-if="marker.markerType === 'IMPORTANT'"
+          class="material-icons-outlined"
+        >star</span>
+        <span
+          v-else-if="marker.markerType === 'TODO'"
+          class="material-icons-outlined"
+        >
           {{ marker.isCompleted ? 'check_circle' : 'check_circle_outline' }}
         </span>
       </span>
     </div>
 
     <!-- 置顶图标 -->
-    <div v-if="message.isPinned" class="message-pinned-badge" title="已置顶">
+    <div
+      v-if="message.isPinned"
+      class="message-pinned-badge"
+      title="已置顶"
+    >
       <el-icon>
         <Top />
       </el-icon>

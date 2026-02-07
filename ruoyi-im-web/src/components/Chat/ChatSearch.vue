@@ -1,59 +1,125 @@
 <template>
-  <el-dialog v-model="dialogVisible" title="搜索聊天记录" :width="600" :close-on-click-modal="true"
-    :close-on-press-escape="true" class="chat-search-dialog" @open="handleOpen" @close="handleClose">
+  <el-dialog
+    v-model="dialogVisible"
+    title="搜索聊天记录"
+    :width="600"
+    :close-on-click-modal="true"
+    :close-on-press-escape="true"
+    class="chat-search-dialog"
+    @open="handleOpen"
+    @close="handleClose"
+  >
     <div class="chat-search">
       <!-- 搜索栏 -->
       <div class="search-bar">
         <div class="search-input-wrapper">
           <span class="material-icons-outlined search-icon">search</span>
-          <input ref="searchInputRef" v-model="searchKeyword" class="search-input" placeholder="搜索聊天记录..." type="text"
-            @input="handleSearch" @keydown.down="handleKeyDown" @keydown.up="handleKeyUp" @keydown.enter="handleEnter">
-          <span v-if="searchKeyword" class="clear-btn" @click="handleClear">
+          <input
+            ref="searchInputRef"
+            v-model="searchKeyword"
+            class="search-input"
+            placeholder="搜索聊天记录..."
+            type="text"
+            @input="handleSearch"
+            @keydown.down="handleKeyDown"
+            @keydown.up="handleKeyUp"
+            @keydown.enter="handleEnter"
+          >
+          <span
+            v-if="searchKeyword"
+            class="clear-btn"
+            @click="handleClear"
+          >
             <span class="material-icons-outlined">close</span>
           </span>
         </div>
         <div class="search-actions">
-          <button v-if="totalCount > 0" class="nav-btn" title="上一个" @click="navigatePrev">
+          <button
+            v-if="totalCount > 0"
+            class="nav-btn"
+            title="上一个"
+            @click="navigatePrev"
+          >
             <span class="material-icons-outlined">chevron_left</span>
           </button>
-          <span v-if="totalCount > 0" class="result-count">
+          <span
+            v-if="totalCount > 0"
+            class="result-count"
+          >
             {{ currentIndex + 1 }}&nbsp;/&nbsp;{{ totalCount }}
           </span>
-          <button v-if="totalCount > 0" class="nav-btn" title="下一个" @click="navigateNext">
+          <button
+            v-if="totalCount > 0"
+            class="nav-btn"
+            title="下一个"
+            @click="navigateNext"
+          >
             <span class="material-icons-outlined">chevron_right</span>
           </button>
         </div>
       </div>
 
       <!-- 搜索结果列表 -->
-      <div v-if="!loading && searchResults.length > 0" class="search-results">
+      <div
+        v-if="!loading && searchResults.length > 0"
+        class="search-results"
+      >
         <div class="results-header">
           <span class="results-title">找到 {{ totalCount }} 条结果</span>
         </div>
-        <div ref="resultsListRef" class="results-list">
-          <div v-for="(result, index) in searchResults" :key="result.id" class="result-item"
-            :class="{ active: index === currentIndex }" @click="handleSelectResult(result, index)">
+        <div
+          ref="resultsListRef"
+          class="results-list"
+        >
+          <div
+            v-for="(result, index) in searchResults"
+            :key="result.id"
+            class="result-item"
+            :class="{ active: index === currentIndex }"
+            @click="handleSelectResult(result, index)"
+          >
             <div class="result-header">
-              <DingtalkAvatar :name="result.senderName" :user-id="result.senderId" :src="result.senderAvatar" :size="28"
-                shape="square" />
+              <DingtalkAvatar
+                :name="result.senderName"
+                :user-id="result.senderId"
+                :src="result.senderAvatar"
+                :size="28"
+                shape="square"
+              />
               <span class="sender-name">{{ result.senderName }}</span>
               <span class="result-time">{{ formatTime(result.sendTime) }}</span>
             </div>
             <div class="result-content">
-              <div v-if="result.type === 'TEXT'" class="text-result" v-html="highlightKeyword(result.content)" />
-              <div v-else-if="result.type === 'IMAGE'" class="media-result">
+              <div
+                v-if="result.type === 'TEXT'"
+                class="text-result"
+                v-html="highlightKeyword(result.content)"
+              />
+              <div
+                v-else-if="result.type === 'IMAGE'"
+                class="media-result"
+              >
                 <span class="material-icons-outlined">image</span>
                 <span>[图片]</span>
               </div>
-              <div v-else-if="result.type === 'FILE'" class="media-result">
+              <div
+                v-else-if="result.type === 'FILE'"
+                class="media-result"
+              >
                 <span class="material-icons-outlined">insert_drive_file</span>
                 <span>[文件] {{ getFileName(result.content) }}</span>
               </div>
-              <div v-else-if="result.type === 'VIDEO'" class="media-result">
+              <div
+                v-else-if="result.type === 'VIDEO'"
+                class="media-result"
+              >
                 <span class="material-icons-outlined">videocam</span>
                 <span>[视频]</span>
               </div>
-              <div v-else-if="result.type === 'VOICE'" class="media-result">
+              <div
+                v-else-if="result.type === 'VOICE'"
+                class="media-result"
+              >
                 <span class="material-icons-outlined">mic</span>
                 <span>[语音]</span>
               </div>
@@ -63,14 +129,20 @@
       </div>
 
       <!-- 无结果 -->
-      <div v-else-if="!loading && searchKeyword && searchResults.length === 0" class="no-results">
+      <div
+        v-else-if="!loading && searchKeyword && searchResults.length === 0"
+        class="no-results"
+      >
         <span class="material-icons-outlined empty-icon">search_off</span>
         <p>未找到 "{{ searchKeyword }}" 相关消息</p>
         <span class="hint">试试其他关键词</span>
       </div>
 
       <!-- 搜索中 -->
-      <div v-if="loading" class="search-loading">
+      <div
+        v-if="loading"
+        class="search-loading"
+      >
         <el-icon class="is-loading">
           <Loading />
         </el-icon>

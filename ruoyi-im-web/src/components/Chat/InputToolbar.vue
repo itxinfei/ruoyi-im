@@ -2,33 +2,65 @@
   <div class="input-toolbar">
     <!-- 左侧工具组:核心功能 -->
     <div class="toolbar-left">
-      <el-tooltip content="表情" placement="top">
-        <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="$emit('toggle-emoji')">
+      <el-tooltip
+        content="表情"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          :class="{ active: showEmojiPicker }"
+          @click.stop="$emit('toggle-emoji')"
+        >
           <span class="material-icons-outlined">sentiment_satisfied_alt</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip content="图片" placement="top">
-        <button class="toolbar-btn" @click="$emit('upload-image')">
+      <el-tooltip
+        content="图片"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('upload-image')"
+        >
           <span class="material-icons-outlined">image</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip content="文件" placement="top">
-        <button class="toolbar-btn" @click="$emit('upload-file')">
+      <el-tooltip
+        content="文件"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('upload-file')"
+        >
           <span class="material-icons-outlined">insert_drive_file</span>
         </button>
       </el-tooltip>
 
-      <el-tooltip v-if="showAtButton" content="@成员" placement="top">
-        <button class="toolbar-btn" @click="$emit('at-member')">
+      <el-tooltip
+        v-if="showAtButton"
+        content="@成员"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('at-member')"
+        >
           <span class="material-icons-outlined">alternate_email</span>
         </button>
       </el-tooltip>
 
       <!-- 更多功能下拉菜单 -->
-      <el-dropdown trigger="click" @command="handleMoreCommand">
-        <el-tooltip content="更多" placement="top">
+      <el-dropdown
+        trigger="click"
+        @command="handleMoreCommand"
+      >
+        <el-tooltip
+          content="更多"
+          placement="top"
+        >
           <button class="toolbar-btn more-btn">
             <span class="material-icons-outlined">more_horiz</span>
           </button>
@@ -47,14 +79,26 @@
     <!-- 右侧工具组:通话 -->
     <div class="toolbar-right">
       <div class="call-buttons">
-        <el-tooltip content="语音通话" placement="top">
-          <button class="toolbar-btn call-btn voice-call" @click="$emit('voice-call')">
+        <el-tooltip
+          content="语音通话"
+          placement="top"
+        >
+          <button
+            class="toolbar-btn call-btn voice-call"
+            @click="$emit('voice-call')"
+          >
             <span class="material-icons-outlined">phone</span>
           </button>
         </el-tooltip>
 
-        <el-tooltip content="视频通话" placement="top">
-          <button class="toolbar-btn call-btn video-call" @click="$emit('video-call')">
+        <el-tooltip
+          content="视频通话"
+          placement="top"
+        >
+          <button
+            class="toolbar-btn call-btn video-call"
+            @click="$emit('video-call')"
+          >
             <span class="material-icons-outlined">videocam</span>
           </button>
         </el-tooltip>
@@ -86,7 +130,7 @@ const emit = defineEmits([
 ])
 
 // 处理更多菜单命令
-const handleMoreCommand = (command) => {
+const handleMoreCommand = command => {
   emit(command)
 }
 </script>

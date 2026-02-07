@@ -12,6 +12,7 @@ import {
   forwardMessage as apiForwardMessage
 } from '@/api/im'
 import { formatMessagePreview, formatMessagePreviewFromObject } from '@/utils/message'
+import imWebSocket from '@/utils/websocket/imWebSocket'
 
 /**
  * 消息发送状态枚举（与后端 SendStatus 枚举对应）
@@ -549,12 +550,17 @@ export default {
       // 添加消息到列表
       commit('ADD_MESSAGE', { sessionId, message })
 
+      // 自动发送接收 ACK（如果是他人发送的消息）
+      const currentUser = rootState.im?.currentUser
+      if (message.id && message.senderId !== currentUser?.id) {
+        imWebSocket.sendAck(message.id, 'receive', rootState.im?.deviceId)
+      }
+
       // 如果不是当前正在查看的会话，则增加未读数
       const isCurrentSession = rootState.im?.session?.currentSession?.id === sessionId
       const session = rootState.im?.session?.sessions?.find(s => s.id === sessionId)
 
       // 检查是否有 @ 我
-      const currentUser = rootState.im?.currentUser
       const hasMention = message.atUserIds && currentUser?.id && message.atUserIds.includes(currentUser.id)
 
       commit('im/session/UPDATE_SESSION', {
@@ -614,6 +620,39 @@ export default {
             sessionId,
             message: { ...message, reactions }
           })
+          break
+        }
+      }
+    },
+
+    // 处理消息 ACK 确认（WebSocket 推送）
+    // 当其他设备确认接收/读取消息时更新消息状态
+    handleMessageAck({ commit, rootState }, { messageId, ackType }) {
+      // 遍历所有会话查找该消息
+      for (const sessionId in rootState.message.messages) {
+        const messages = rootState.message.messages[sessionId]
+        const index = messages.findIndex(m => m.id === messageId)
+
+        if (index !== -1) {
+          const message = messages[index]
+          let newStatus = message.sendStatus
+
+          // 根据 ACK 类型更新消息状态
+          if (ackType === 'read') {
+            newStatus = SEND_STATUS.READ
+          } else if (ackType === 'receive') {
+            // 如果当前状态是发送中，更新为已送达
+            if (message.sendStatus === SEND_STATUS.SENDING || message.sendStatus === SEND_STATUS.PENDING) {
+              newStatus = SEND_STATUS.DELIVERED
+            }
+          }
+
+          if (newStatus !== message.sendStatus) {
+            commit('UPDATE_MESSAGE', {
+              sessionId,
+              message: { ...message, sendStatus: newStatus }
+            })
+          }
           break
         }
       }

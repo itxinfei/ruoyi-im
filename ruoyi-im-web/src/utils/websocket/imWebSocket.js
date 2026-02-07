@@ -24,6 +24,7 @@ export const MESSAGE_TYPE = {
   AUTH: 'auth',           // 认证
   MESSAGE: 'message',     // 聊天消息
   MESSAGE_STATUS: 'message_status',  // 消息状态更新（发送状态变化）
+  MESSAGE_ACK: 'message_ack',        // 消息ACK确认
   PING: 'ping',           // 心跳请求
   PONG: 'pong',           // 心跳响应
   READ: 'read',           // 已读回执
@@ -172,6 +173,10 @@ class ImWebSocket {
         case MESSAGE_TYPE.MESSAGE_STATUS:
           // 消息状态更新
           this.emit('message_status', payload)
+          break
+        case MESSAGE_TYPE.MESSAGE_ACK:
+          // 消息ACK确认
+          this.emit('message_ack', payload)
           break
         case MESSAGE_TYPE.READ:
           // 已读回执 - 批量处理
@@ -407,6 +412,28 @@ class ImWebSocket {
         timestamp: Date.now()
       }
     })
+  }
+
+  /**
+   * 发送消息ACK确认
+   * @param {string} messageId - 消息ID
+   * @param {string} ackType - ACK类型：receive（已接收）/ read（已读）
+   * @param {string} [deviceId] - 设备ID
+   */
+  sendAck(messageId, ackType, deviceId) {
+    const data = {
+      messageId: messageId,
+      ackType: ackType,
+      timestamp: Date.now()
+    }
+    if (deviceId) {
+      data.deviceId = deviceId
+    }
+    this.send({
+      type: MESSAGE_TYPE.MESSAGE_ACK,
+      data
+    })
+    debug('ImWebSocket', '发送ACK:', data)
   }
 
   /**

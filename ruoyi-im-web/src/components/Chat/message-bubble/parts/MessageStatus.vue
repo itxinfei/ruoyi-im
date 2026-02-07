@@ -1,44 +1,75 @@
 <template>
-  <div v-if="message.isOwn" class="message-status" :class="`status-${uiStatus}`">
+  <div
+    v-if="message.isOwn"
+    class="message-status"
+    :class="`status-${uiStatus}`"
+  >
     <!-- 发送中：轻量级 CSS 转圈 -->
     <transition name="status-fade">
-      <div v-if="uiStatus === 'sending'" class="status-indicator status-sending" title="发送中">
+      <div
+        v-if="uiStatus === 'sending'"
+        class="status-indicator status-sending"
+        title="发送中"
+      >
         <div class="css-loader" />
       </div>
     </transition>
 
     <!-- 私聊-未读：蓝色小圆点 -->
     <transition name="status-scale">
-      <div v-if="uiStatus === 'delivered' && !isGroupChat" class="status-indicator status-unread-dot" title="未读" />
+      <div
+        v-if="uiStatus === 'delivered' && !isGroupChat"
+        class="status-indicator status-unread-dot"
+        title="未读"
+      />
     </transition>
 
     <!-- 私聊-已读：灰色文字 -->
     <transition name="status-fade">
-      <div v-if="uiStatus === 'read' && !isGroupChat" class="status-text-read" title="已读">
+      <div
+        v-if="uiStatus === 'read' && !isGroupChat"
+        class="status-text-read"
+        title="已读"
+      >
         已读
       </div>
     </transition>
 
     <!-- 群聊-未读：蓝色数字圆圈 -->
     <transition name="status-scale">
-      <div v-if="isGroupChat && !isAllRead" class="status-group-unread" :title="`${unreadCount}人未读`"
-        @click="handleShowReadInfo">
+      <div
+        v-if="isGroupChat && !isAllRead"
+        class="status-group-unread"
+        :title="`${unreadCount}人未读`"
+        @click="handleShowReadInfo"
+      >
         {{ unreadCount }}
       </div>
     </transition>
 
     <!-- 群聊-全部已读：灰色文字 -->
     <transition name="status-fade">
-      <div v-if="isGroupChat && isAllRead" class="status-text-read" title="全部已读" @click="handleShowReadInfo">
+      <div
+        v-if="isGroupChat && isAllRead"
+        class="status-text-read"
+        title="全部已读"
+        @click="handleShowReadInfo"
+      >
         全部已读
       </div>
     </transition>
 
     <!-- 发送失败：红色感叹号 -->
     <transition name="status-shake">
-      <div v-if="uiStatus === 'failed'" class="status-failed-container" @click="handleRetry">
+      <div
+        v-if="uiStatus === 'failed'"
+        class="status-failed-container"
+        @click="handleRetry"
+      >
         <span class="material-icons">error</span>
-        <div class="error-tooltip">{{ errorText }}</div>
+        <div class="error-tooltip">
+          {{ errorText }}
+        </div>
       </div>
     </transition>
   </div>

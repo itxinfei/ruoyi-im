@@ -1,39 +1,87 @@
 <template>
-  <div class="chat-input-container" :class="{ 'is-resizing': isResizing }"
-    :style="{ minHeight: containerHeight + 'px' }">
+  <div
+    class="chat-input-container"
+    :class="{ 'is-resizing': isResizing }"
+    :style="{ minHeight: containerHeight + 'px' }"
+  >
     <!-- 调整高度手柄 -->
-    <ResizeHandle :is-active="isResizing" :container-height="containerHeight" @start-resize="startResize"
-      @reset-height="resetHeight" />
+    <ResizeHandle
+      :is-active="isResizing"
+      :container-height="containerHeight"
+      @start-resize="startResize"
+      @reset-height="resetHeight"
+    />
 
     <!-- 工具栏 -->
-    <InputToolbar :show-emoji-picker="showEmojiPicker" :show-at-button="session?.type === 'GROUP'"
-      @toggle-emoji="toggleEmojiPicker" @upload-image="triggerImageUpload" @upload-file="triggerFileUpload"
-      @screenshot="handleScreenshot" @at-member="handleAtMember" @smart-reply="handleShowSmartReply"
-      @voice-call="handleVoiceCall" @video-call="handleVideoCall" />
+    <InputToolbar
+      :show-emoji-picker="showEmojiPicker"
+      :show-at-button="session?.type === 'GROUP'"
+      @toggle-emoji="toggleEmojiPicker"
+      @upload-image="triggerImageUpload"
+      @upload-file="triggerFileUpload"
+      @screenshot="handleScreenshot"
+      @at-member="handleAtMember"
+      @smart-reply="handleShowSmartReply"
+      @voice-call="handleVoiceCall"
+      @video-call="handleVideoCall"
+    />
 
     <!-- 录音动画区域 -->
-    <div v-if="isVoiceMode" class="voice-recording-wrapper">
-      <VoiceRecorder :max-length="60000" :min-length="1000" @record-complete="handleVoiceRecordComplete"
-        @cancel="handleVoiceCancel" />
+    <div
+      v-if="isVoiceMode"
+      class="voice-recording-wrapper"
+    >
+      <VoiceRecorder
+        :max-length="60000"
+        :min-length="1000"
+        @record-complete="handleVoiceRecordComplete"
+        @cancel="handleVoiceCancel"
+      />
     </div>
 
     <!-- 引用消息预览 -->
-    <ReplyPreview v-if="replyingMessage" :key="replyingMessage.id"
+    <ReplyPreview
+      v-if="replyingMessage"
+      :key="replyingMessage.id"
       :sender-name="replyingMessage.senderName || replyingMessage.senderNickname || replyingMessage.userName || '未知'"
-      :content="replyPreviewContent" @cancel="$emit('cancel-reply')" />
+      :content="replyPreviewContent"
+      @cancel="$emit('cancel-reply')"
+    />
 
     <!-- 录音预览区域 -->
-    <VoicePreviewPanel v-if="voicePreview" :duration="voicePreview.duration" :is-playing="voicePreview.isPlaying"
-      :play-progress="voicePreview.playProgress || 0" @toggle-play="toggleVoicePlay" @delete="deleteVoicePreview"
-      @send="handleSendVoice" />
+    <VoicePreviewPanel
+      v-if="voicePreview"
+      :duration="voicePreview.duration"
+      :is-playing="voicePreview.isPlaying"
+      :play-progress="voicePreview.playProgress || 0"
+      @toggle-play="toggleVoicePlay"
+      @delete="deleteVoicePreview"
+      @send="handleSendVoice"
+    />
 
     <!-- 编辑消息预览 -->
-    <EditPreview v-if="editingMessage" :content="editingMessage.content" @cancel="$emit('cancel-edit')" />
+    <EditPreview
+      v-if="editingMessage"
+      :content="editingMessage.content"
+      @cancel="$emit('cancel-edit')"
+    />
 
     <!-- 链接预览 -->
-    <div v-if="linkPreviewLoading || linkPreviewError || linkPreview" class="link-preview-wrapper">
-      <LinkCard v-if="linkPreview" :link="linkPreview" :loading="linkPreviewLoading" :error="linkPreviewError" />
-      <button v-if="linkPreview || linkPreviewError" class="link-preview-close" @click="clearLinkPreview">
+    <div
+      v-if="linkPreviewLoading || linkPreviewError || linkPreview"
+      class="link-preview-wrapper"
+    >
+      <LinkCard
+        v-if="linkPreview"
+        :link="linkPreview"
+        :loading="linkPreviewLoading"
+        :error="linkPreviewError"
+      />
+      <button
+        v-if="linkPreview || linkPreviewError"
+        class="link-preview-close"
+        @click="clearLinkPreview"
+      >
         <el-icon>
           <Close />
         </el-icon>
@@ -41,19 +89,43 @@
     </div>
 
     <!-- 输入核心区域 -->
-    <div ref="inputAreaRef" class="input-area"
+    <div
+      ref="inputAreaRef"
+      class="input-area"
       :class="{ 'is-drag-over': isDragOver, 'is-voice-mode': isVoiceMode, 'is-focused': isFocused }"
-      @dragenter="handleDragEnter" @dragleave="handleDragLeave" @dragover="handleDragOver" @drop.prevent="handleDrop">
+      @dragenter="handleDragEnter"
+      @dragleave="handleDragLeave"
+      @dragover="handleDragOver"
+      @drop.prevent="handleDrop"
+    >
       <!-- 文字输入区域 -->
-      <textarea ref="textareaRef" v-model="messageContent" class="message-input" :placeholder="inputPlaceholder"
-        :disabled="isVoiceMode" @input="handleInput" @keydown="handleKeydown" @paste="handlePaste"
-        @focus="isFocused = true" @blur="isFocused = false" />
+      <textarea
+        ref="textareaRef"
+        v-model="messageContent"
+        class="message-input"
+        :placeholder="inputPlaceholder"
+        :disabled="isVoiceMode"
+        @input="handleInput"
+        @keydown="handleKeydown"
+        @paste="handlePaste"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
+      />
 
-      <div v-if="!isVoiceMode" class="input-footer">
+      <div
+        v-if="!isVoiceMode"
+        class="input-footer"
+      >
         <div class="footer-actions">
           <!-- 语音输入切换按钮 -->
-          <el-tooltip content="按住说话" placement="top">
-            <button class="footer-action-btn voice-btn" @click="toggleVoiceMode">
+          <el-tooltip
+            content="按住说话"
+            placement="top"
+          >
+            <button
+              class="footer-action-btn voice-btn"
+              @click="toggleVoiceMode"
+            >
               <el-icon>
                 <Microphone />
               </el-icon>
@@ -64,37 +136,82 @@
     </div>
 
     <!-- 子组件弹窗 -->
-    <EmojiPicker v-if="showEmojiPicker" :position="emojiPickerPosition" @select="selectEmoji"
-      @close="showEmojiPicker = false" />
+    <EmojiPicker
+      v-if="showEmojiPicker"
+      :position="emojiPickerPosition"
+      @select="selectEmoji"
+      @close="showEmojiPicker = false"
+    />
 
-    <AtMemberPicker ref="atMemberPickerRef" :session-id="session?.id" @select="onAtSelect" />
+    <AtMemberPicker
+      ref="atMemberPickerRef"
+      :session-id="session?.id"
+      @select="onAtSelect"
+    />
 
-    <CommandPalette :show="showCommandPalette" :position="commandPalettePosition" @close="showCommandPalette = false"
-      @select="handleCommandSelect" />
+    <CommandPalette
+      :show="showCommandPalette"
+      :position="commandPalettePosition"
+      @close="showCommandPalette = false"
+      @select="handleCommandSelect"
+    />
 
     <!-- 隐藏的输入元素 -->
-    <input ref="imageInputRef" type="file" accept="image/*" style="display: none" @change="handleImageFileChange">
+    <input
+      ref="imageInputRef"
+      type="file"
+      accept="image/*"
+      style="display: none"
+      @change="handleImageFileChange"
+    >
 
-    <input ref="fileInputRef" type="file" style="display: none" @change="handleFileInputChange">
+    <input
+      ref="fileInputRef"
+      type="file"
+      style="display: none"
+      @change="handleFileInputChange"
+    >
 
     <!-- 对话框 -->
-    <ScreenshotPreview v-model="showScreenshotPreview" :image-data="screenshotData" @send="handleSendScreenshot"
-      @close="handleScreenshotPreviewClose" />
+    <ScreenshotPreview
+      v-model="showScreenshotPreview"
+      :image-data="screenshotData"
+      @send="handleSendScreenshot"
+      @close="handleScreenshotPreviewClose"
+    />
 
-    <DingtalkScreenshot :visible="showScreenshotGuide" @confirm="handleSendScreenshotFromGuide"
-      @close="showScreenshotGuide = false" />
+    <DingtalkScreenshot
+      :visible="showScreenshotGuide"
+      @confirm="handleSendScreenshotFromGuide"
+      @close="showScreenshotGuide = false"
+    />
 
-    <AiSmartReply v-model:visible="showSmartReply" :trigger-message="lastReceivedMessage" :position="smartReplyPosition"
-      @select="handleSelectSmartReply" />
+    <AiSmartReply
+      v-model:visible="showSmartReply"
+      :trigger-message="lastReceivedMessage"
+      :position="smartReplyPosition"
+      @select="handleSelectSmartReply"
+    />
 
-    <ScheduleDialog v-model="showScheduleDialog" @saved="handleScheduleSaved" />
+    <ScheduleDialog
+      v-model="showScheduleDialog"
+      @saved="handleScheduleSaved"
+    />
 
     <!-- 定时消息对话框 -->
-    <ScheduledMessageDialog v-model="showScheduledMessageDialog" :message-content="messageContent"
-      :conversation-id="session?.id" @scheduled="handleScheduledMessage" />
+    <ScheduledMessageDialog
+      v-model="showScheduledMessageDialog"
+      :message-content="messageContent"
+      :conversation-id="session?.id"
+      @scheduled="handleScheduledMessage"
+    />
 
-    <FileUploadPreviewDialog v-model="showFilePreview" :files="pendingFiles" @confirm="handleFileUploadConfirm"
-      @remove="handleRemovePendingFile" />
+    <FileUploadPreviewDialog
+      v-model="showFilePreview"
+      :files="pendingFiles"
+      @confirm="handleFileUploadConfirm"
+      @remove="handleRemovePendingFile"
+    />
   </div>
 </template>
 

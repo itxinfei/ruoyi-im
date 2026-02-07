@@ -48,7 +48,7 @@ export function useHighlightText(query = '') {
   /**
    * 计算属性版本的高亮函数，使用响应式 query
    */
-  const highlight = (text) => {
+  const highlight = text => {
     return highlightText(text, query.value || query)
   }
 

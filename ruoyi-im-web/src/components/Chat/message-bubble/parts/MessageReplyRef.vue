@@ -1,12 +1,30 @@
 <template>
-  <div class="message-reply-ref" @click.stop="handleClick">
+  <div
+    class="message-reply-ref"
+    @click.stop="handleClick"
+  >
     <div class="ref-header">
       <span class="ref-icon">
-        <span v-if="replyType === 'IMAGE'" class="material-icons-outlined">image</span>
-        <span v-else-if="replyType === 'FILE'" class="material-icons-outlined">insert_drive_file</span>
-        <span v-else-if="replyType === 'VIDEO'" class="material-icons-outlined">videocam</span>
-        <span v-else-if="replyType === 'VOICE' || replyType === 'AUDIO'" class="material-icons-outlined">mic</span>
-        <span v-else class="material-icons-outlined">format_quote</span>
+        <span
+          v-if="replyType === 'IMAGE'"
+          class="material-icons-outlined"
+        >image</span>
+        <span
+          v-else-if="replyType === 'FILE'"
+          class="material-icons-outlined"
+        >insert_drive_file</span>
+        <span
+          v-else-if="replyType === 'VIDEO'"
+          class="material-icons-outlined"
+        >videocam</span>
+        <span
+          v-else-if="replyType === 'VOICE' || replyType === 'AUDIO'"
+          class="material-icons-outlined"
+        >mic</span>
+        <span
+          v-else
+          class="material-icons-outlined"
+        >format_quote</span>
       </span>
       <span class="ref-user">{{ reply.senderName }}</span>
     </div>

@@ -1,24 +1,59 @@
 <template>
-  <el-dialog v-model="visible" title="选择提醒的人" width="400px" class="at-member-picker" append-to-body @open="loadMembers">
+  <el-dialog
+    v-model="visible"
+    title="选择提醒的人"
+    width="400px"
+    class="at-member-picker"
+    append-to-body
+    @open="loadMembers"
+  >
     <div class="search-box">
-      <el-input v-model="searchKeyword" placeholder="搜索成员" :prefix-icon="Search" clearable size="small" />
+      <el-input
+        v-model="searchKeyword"
+        placeholder="搜索成员"
+        :prefix-icon="Search"
+        clearable
+        size="small"
+      />
     </div>
 
-    <div v-loading="loading" class="member-list">
-      <div class="member-item all" @click="handleSelect({ id: 'all', name: '所有人' })">
+    <div
+      v-loading="loading"
+      class="member-list"
+    >
+      <div
+        class="member-item all"
+        @click="handleSelect({ id: 'all', name: '所有人' })"
+      >
         <div class="avatar-all">
           @
         </div>
         <span class="name">所有人</span>
       </div>
 
-      <div v-for="member in filteredMembers" :key="member.id" class="member-item" @click="handleSelect(member)">
-        <DingtalkAvatar :src="member.avatar" :name="member.nickname || member.username"
-          :user-id="member.userId || member.id" :size="32" shape="circle" />
-        <span class="name" v-html="highlightText(member.nickname || member.username)" />
+      <div
+        v-for="member in filteredMembers"
+        :key="member.id"
+        class="member-item"
+        @click="handleSelect(member)"
+      >
+        <DingtalkAvatar
+          :src="member.avatar"
+          :name="member.nickname || member.username"
+          :user-id="member.userId || member.id"
+          :size="32"
+          shape="circle"
+        />
+        <span
+          class="name"
+          v-html="highlightText(member.nickname || member.username)"
+        />
       </div>
 
-      <el-empty v-if="!loading && filteredMembers.length === 0" description="未找到成员" />
+      <el-empty
+        v-if="!loading && filteredMembers.length === 0"
+        description="未找到成员"
+      />
     </div>
   </el-dialog>
 </template>
@@ -45,7 +80,7 @@ const debouncedKeyword = ref('') // 防抖后的搜索关键词
 let debounceTimer = null
 
 // 监听搜索关键词变化,应用防抖
-watch(searchKeyword, (newVal) => {
+watch(searchKeyword, newVal => {
   if (debounceTimer) {
     clearTimeout(debounceTimer)
   }
@@ -80,8 +115,8 @@ const filteredMembers = computed(() => {
 })
 
 // 高亮搜索关键词
-const highlightText = (text) => {
-  if (!text || !debouncedKeyword.value) return text
+const highlightText = text => {
+  if (!text || !debouncedKeyword.value) {return text}
 
   const keyword = debouncedKeyword.value
   const regex = new RegExp(`(${keyword})`, 'gi')

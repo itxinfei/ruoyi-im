@@ -11,7 +11,9 @@
   >
     <template #header>
       <div class="dialog-header">
-        <h3 class="dialog-title">个人资料</h3>
+        <h3 class="dialog-title">
+          个人资料
+        </h3>
       </div>
     </template>
 
@@ -33,8 +35,12 @@
               <span class="material-icons-outlined">edit</span>
             </button>
           </div>
-          <h3 class="user-name">{{ currentUser.nickname || currentUser.username }}</h3>
-          <p class="user-id">ID: {{ currentUser.id || '-' }}</p>
+          <h3 class="user-name">
+            {{ currentUser.nickname || currentUser.username }}
+          </h3>
+          <p class="user-id">
+            ID: {{ currentUser.id || '-' }}
+          </p>
           <div class="user-tags">
             <span
               v-if="isAdmin"
@@ -89,11 +95,15 @@
           <div class="info-grid">
             <div class="info-item">
               <label>用户名</label>
-              <div class="info-value">{{ currentUser.username || '-' }}</div>
+              <div class="info-value">
+                {{ currentUser.username || '-' }}
+              </div>
             </div>
             <div class="info-item">
               <label>昵称</label>
-              <div class="info-value">{{ currentUser.nickname || '-' }}</div>
+              <div class="info-value">
+                {{ currentUser.nickname || '-' }}
+              </div>
             </div>
             <div class="info-item">
               <label>性别</label>
@@ -106,7 +116,9 @@
             </div>
             <div class="info-item">
               <label>生日</label>
-              <div class="info-value">{{ currentUser.birthday || '-' }}</div>
+              <div class="info-value">
+                {{ currentUser.birthday || '-' }}
+              </div>
             </div>
           </div>
         </div>
@@ -119,11 +131,15 @@
           <div class="info-grid">
             <div class="info-item">
               <label>部门</label>
-              <div class="info-value">{{ currentUser.dept?.deptName || currentUser.department || '-' }}</div>
+              <div class="info-value">
+                {{ currentUser.dept?.deptName || currentUser.department || '-' }}
+              </div>
             </div>
             <div class="info-item">
               <label>职位</label>
-              <div class="info-value">{{ currentUser.position || '-' }}</div>
+              <div class="info-value">
+                {{ currentUser.position || '-' }}
+              </div>
             </div>
           </div>
         </div>
@@ -175,11 +191,15 @@
           <div class="info-grid">
             <div class="info-item">
               <label>注册时间</label>
-              <div class="info-value">{{ formatDate(currentUser.createTime) }}</div>
+              <div class="info-value">
+                {{ formatDate(currentUser.createTime) }}
+              </div>
             </div>
             <div class="info-item">
               <label>最后登录</label>
-              <div class="info-value">{{ formatDate(currentUser.loginDate) }}</div>
+              <div class="info-value">
+                {{ formatDate(currentUser.loginDate) }}
+              </div>
             </div>
           </div>
         </div>

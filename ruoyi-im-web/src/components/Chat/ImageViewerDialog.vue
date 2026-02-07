@@ -1,9 +1,22 @@
 <template>
-  <el-dialog v-model="visible" :show-close="false" :close-on-click-modal="true" :close-on-press-escape="true" fullscreen
-    class="image-viewer-dialog" @close="handleClose">
-    <div class="image-viewer-container" @click.self="handleClose">
+  <el-dialog
+    v-model="visible"
+    :show-close="false"
+    :close-on-click-modal="true"
+    :close-on-press-escape="true"
+    fullscreen
+    class="image-viewer-dialog"
+    @close="handleClose"
+  >
+    <div
+      class="image-viewer-container"
+      @click.self="handleClose"
+    >
       <!-- 工具栏 -->
-      <div v-if="images.length > 0" class="viewer-toolbar">
+      <div
+        v-if="images.length > 0"
+        class="viewer-toolbar"
+      >
         <div class="toolbar-left">
           <span class="image-counter">{{ currentIndex + 1 }}&nbsp;/&nbsp;{{ images.length }}</span>
         </div>
@@ -11,30 +24,67 @@
           <span class="image-name">{{ currentImageName }}</span>
         </div>
         <div class="toolbar-right">
-          <el-button type="primary" :icon="Download" circle size="small" title="下载" @click.stop="downloadCurrent" />
-          <el-button type="default" :icon="CloseBold" circle size="small" title="关闭 (ESC)" @click.stop="handleClose" />
+          <el-button
+            type="primary"
+            :icon="Download"
+            circle
+            size="small"
+            title="下载"
+            @click.stop="downloadCurrent"
+          />
+          <el-button
+            type="default"
+            :icon="CloseBold"
+            circle
+            size="small"
+            title="关闭 (ESC)"
+            @click.stop="handleClose"
+          />
         </div>
       </div>
 
       <!-- 主图片区域 -->
-      <div class="viewer-main" @wheel.prevent="handleWheel">
-        <transition name="image-fade" mode="out-in">
-          <div :key="currentIndex" class="image-wrapper"
-            :style="{ transform: `scale(${scale}) rotate(${rotation}deg)` }">
-            <img :src="currentImage" :alt="`图片 ${currentIndex + 1}`" @mousedown="handleDragStart"
-              @load="handleImageLoad" @error="handleImageError">
+      <div
+        class="viewer-main"
+        @wheel.prevent="handleWheel"
+      >
+        <transition
+          name="image-fade"
+          mode="out-in"
+        >
+          <div
+            :key="currentIndex"
+            class="image-wrapper"
+            :style="{ transform: `scale(${scale}) rotate(${rotation}deg)` }"
+          >
+            <img
+              :src="currentImage"
+              :alt="`图片 ${currentIndex + 1}`"
+              @mousedown="handleDragStart"
+              @load="handleImageLoad"
+              @error="handleImageError"
+            >
           </div>
         </transition>
 
         <!-- 加载状态 -->
-        <div v-if="loading" class="image-loading">
-          <el-icon class="is-loading" :size="40">
+        <div
+          v-if="loading"
+          class="image-loading"
+        >
+          <el-icon
+            class="is-loading"
+            :size="40"
+          >
             <Loading />
           </el-icon>
         </div>
 
         <!-- 加载失败 -->
-        <div v-if="error" class="image-error">
+        <div
+          v-if="error"
+          class="image-error"
+        >
           <el-icon :size="48">
             <PictureFilled />
           </el-icon>
@@ -44,31 +94,77 @@
 
       <!-- 左右切换按钮 -->
       <template v-if="images.length > 1">
-        <el-button class="nav-btn nav-prev" :icon="ArrowLeft" circle size="large" :disabled="currentIndex === 0"
-          @click.stop="prevImage" />
-        <el-button class="nav-btn nav-next" :icon="ArrowRight" circle size="large"
-          :disabled="currentIndex === images.length - 1" @click.stop="nextImage" />
+        <el-button
+          class="nav-btn nav-prev"
+          :icon="ArrowLeft"
+          circle
+          size="large"
+          :disabled="currentIndex === 0"
+          @click.stop="prevImage"
+        />
+        <el-button
+          class="nav-btn nav-next"
+          :icon="ArrowRight"
+          circle
+          size="large"
+          :disabled="currentIndex === images.length - 1"
+          @click.stop="nextImage"
+        />
       </template>
 
       <!-- 缩放控制栏 -->
       <div class="zoom-controls">
         <el-button-group>
-          <el-button :icon="ZoomOut" :disabled="scale <= 0.3" @click.stop="zoomOut" />
-          <el-button disabled class="zoom-display">
+          <el-button
+            :icon="ZoomOut"
+            :disabled="scale <= 0.3"
+            @click.stop="zoomOut"
+          />
+          <el-button
+            disabled
+            class="zoom-display"
+          >
             {{ Math.round(scale * 100) }}%
           </el-button>
-          <el-button :icon="ZoomIn" :disabled="scale >= 3" @click.stop="zoomIn" />
+          <el-button
+            :icon="ZoomIn"
+            :disabled="scale >= 3"
+            @click.stop="zoomIn"
+          />
         </el-button-group>
-        <el-button :icon="RefreshLeft" title="向左旋转" @click.stop="rotateLeft" />
-        <el-button :icon="RefreshRight" title="向右旋转" @click.stop="rotateRight" />
-        <el-button :icon="FullScreen" title="重置视图" @click.stop="resetView" />
+        <el-button
+          :icon="RefreshLeft"
+          title="向左旋转"
+          @click.stop="rotateLeft"
+        />
+        <el-button
+          :icon="RefreshRight"
+          title="向右旋转"
+          @click.stop="rotateRight"
+        />
+        <el-button
+          :icon="FullScreen"
+          title="重置视图"
+          @click.stop="resetView"
+        />
       </div>
 
       <!-- 缩略图列表 -->
-      <div v-if="images.length > 1" class="thumbnail-list">
-        <div v-for="(img, index) in images" :key="index" class="thumbnail-item"
-          :class="{ active: index === currentIndex }" @click.stop="goToImage(index)">
-          <img :src="img" :alt="`缩略图 ${index + 1}`">
+      <div
+        v-if="images.length > 1"
+        class="thumbnail-list"
+      >
+        <div
+          v-for="(img, index) in images"
+          :key="index"
+          class="thumbnail-item"
+          :class="{ active: index === currentIndex }"
+          @click.stop="goToImage(index)"
+        >
+          <img
+            :src="img"
+            :alt="`缩略图 ${index + 1}`"
+          >
         </div>
       </div>
     </div>

@@ -1,6 +1,9 @@
 <template>
-  <div class="file-bubble" :class="{ 'is-downloading': isDownloading, 'is-uploading': isUploading }"
-    @click="handleClick">
+  <div
+    class="file-bubble"
+    :class="{ 'is-downloading': isDownloading, 'is-uploading': isUploading }"
+    @click="handleClick"
+  >
     <!-- 文件图标 -->
     <div class="file-icon">
       <el-icon>
@@ -8,24 +11,50 @@
       </el-icon>
 
       <!-- 下载进度环 -->
-      <div v-if="isDownloading" class="progress-ring">
+      <div
+        v-if="isDownloading"
+        class="progress-ring"
+      >
         <svg viewBox="0 0 36 36">
-          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
-            stroke="rgba(0, 137, 255, 0.15)" stroke-width="3" />
-          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
-            stroke="var(--dt-brand-color)" stroke-width="3" :stroke-dasharray="`${downloadProgress}, 100`"
-            stroke-linecap="round" />
+          <path
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none"
+            stroke="rgba(0, 137, 255, 0.15)"
+            stroke-width="3"
+          />
+          <path
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none"
+            stroke="var(--dt-brand-color)"
+            stroke-width="3"
+            :stroke-dasharray="`${downloadProgress}, 100`"
+            stroke-linecap="round"
+          />
         </svg>
       </div>
 
       <!-- 上传进度环 -->
-      <div v-if="isUploading" class="progress-ring">
+      <div
+        v-if="isUploading"
+        class="progress-ring"
+      >
         <svg viewBox="0 0 36 36">
-          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
-            stroke="rgba(0, 137, 255, 0.15)" stroke-width="3" />
-          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
-            stroke="var(--dt-brand-color)" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="25"
-            stroke-linecap="round" class="upload-spinner" />
+          <path
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none"
+            stroke="rgba(0, 137, 255, 0.15)"
+            stroke-width="3"
+          />
+          <path
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            fill="none"
+            stroke="var(--dt-brand-color)"
+            stroke-width="3"
+            stroke-dasharray="100"
+            stroke-dashoffset="25"
+            stroke-linecap="round"
+            class="upload-spinner"
+          />
         </svg>
       </div>
     </div>
@@ -53,7 +82,10 @@
       <el-icon v-if="!isUploading && !isDownloading">
         <Download />
       </el-icon>
-      <el-icon v-else class="is-spinning">
+      <el-icon
+        v-else
+        class="is-spinning"
+      >
         <Loading />
       </el-icon>
     </div>

@@ -134,6 +134,11 @@ export function useImWebSocket() {
     registerHandler('reaction', callback)
   }
 
+  // 监听消息 ACK 确认
+  const onMessageAck = callback => {
+    registerHandler('message_ack', callback)
+  }
+
   // 清理当前组件的所有监听器
   const cleanup = () => {
     registeredHandlers.forEach(({ event, callback }) => {
@@ -170,6 +175,7 @@ export function useImWebSocket() {
     onMessageStatus,
     onCall,
     onReaction,
+    onMessageAck,
 
     // WebSocket 实例
     ws: imWebSocket

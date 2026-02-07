@@ -1,14 +1,25 @@
 <template>
   <!-- PC端侧边栏风格的群组详情 -->
   <transition name="slide-right">
-    <div v-if="visible" class="group-profile-sidebar">
-      <div class="sidebar-overlay" @click="handleClose" />
+    <div
+      v-if="visible"
+      class="group-profile-sidebar"
+    >
+      <div
+        class="sidebar-overlay"
+        @click="handleClose"
+      />
 
       <div class="sidebar-panel">
         <!-- 头部 -->
         <div class="sidebar-header">
-          <h3 class="header-title">群聊信息</h3>
-          <button class="close-btn" @click="handleClose">
+          <h3 class="header-title">
+            群聊信息
+          </h3>
+          <button
+            class="close-btn"
+            @click="handleClose"
+          >
             <el-icon>
               <Close />
             </el-icon>
@@ -16,38 +27,65 @@
         </div>
 
         <!-- 内容区 -->
-        <div v-if="loading" class="sidebar-body">
-          <el-skeleton :rows="10" animated />
+        <div
+          v-if="loading"
+          class="sidebar-body"
+        >
+          <el-skeleton
+            :rows="10"
+            animated
+          />
         </div>
 
-        <div v-else-if="groupInfo" class="sidebar-body">
+        <div
+          v-else-if="groupInfo"
+          class="sidebar-body"
+        >
           <!-- 群组基本信息卡片 -->
           <div class="info-card">
             <div class="group-header-section">
-              <el-avatar :size="60" :src="groupInfo.avatar || ''" shape="square" class="group-avatar">
+              <el-avatar
+                :size="60"
+                :src="groupInfo.avatar || ''"
+                shape="square"
+                class="group-avatar"
+              >
                 {{ groupInfo.name?.charAt(0) || '群' }}
               </el-avatar>
               <div class="group-basic-info">
-                <h4 class="group-name">{{ groupInfo.name }}</h4>
-                <p class="group-meta">{{ groupMembers.length }}人</p>
+                <h4 class="group-name">
+                  {{ groupInfo.name }}
+                </h4>
+                <p class="group-meta">
+                  {{ groupMembers.length }}人
+                </p>
               </div>
             </div>
 
             <!-- 快捷操作按钮 -->
             <div class="quick-actions">
-              <button class="action-item" @click="handleAddMember">
+              <button
+                class="action-item"
+                @click="handleAddMember"
+              >
                 <el-icon>
                   <UserFilled />
                 </el-icon>
                 <span>邀请</span>
               </button>
-              <button class="action-item" @click="shareGroup">
+              <button
+                class="action-item"
+                @click="shareGroup"
+              >
                 <el-icon>
                   <Share />
                 </el-icon>
                 <span>分享</span>
               </button>
-              <button class="action-item" @click="copyGroupId">
+              <button
+                class="action-item"
+                @click="copyGroupId"
+              >
                 <el-icon>
                   <CopyDocument />
                 </el-icon>
@@ -60,7 +98,13 @@
           <div class="section-block">
             <div class="section-header">
               <span class="section-title">群成员 ({{ groupMembers.length }})</span>
-              <el-input v-model="memberKeyword" placeholder="搜索成员" size="small" clearable class="member-search">
+              <el-input
+                v-model="memberKeyword"
+                placeholder="搜索成员"
+                size="small"
+                clearable
+                class="member-search"
+              >
                 <template #prefix>
                   <el-icon>
                     <Search />
@@ -70,14 +114,30 @@
             </div>
 
             <div class="members-list">
-              <div v-for="member in filteredMembers" :key="member.userId" class="member-item"
-                @click="viewMemberInfo(member.userId)">
-                <DingtalkAvatar :src="member.avatar" :name="member.userName" :user-id="member.userId" :size="40"
-                  shape="square" custom-class="member-avatar" />
+              <div
+                v-for="member in filteredMembers"
+                :key="member.userId"
+                class="member-item"
+                @click="viewMemberInfo(member.userId)"
+              >
+                <DingtalkAvatar
+                  :src="member.avatar"
+                  :name="member.userName"
+                  :user-id="member.userId"
+                  :size="40"
+                  shape="square"
+                  custom-class="member-avatar"
+                />
                 <div class="member-info">
                   <span class="member-name">{{ member.userName }}</span>
-                  <span v-if="member.role === 'OWNER'" class="member-role owner">群主</span>
-                  <span v-else-if="member.role === 'ADMIN'" class="member-role admin">管理员</span>
+                  <span
+                    v-if="member.role === 'OWNER'"
+                    class="member-role owner"
+                  >群主</span>
+                  <span
+                    v-else-if="member.role === 'ADMIN'"
+                    class="member-role admin"
+                  >管理员</span>
                 </div>
               </div>
             </div>
@@ -105,19 +165,30 @@
                 <span class="setting-value">{{ groupInfo.isPublic ? '公开群组' : '私有群组' }}</span>
               </div>
 
-              <div v-if="groupInfo.description" class="setting-item vertical">
+              <div
+                v-if="groupInfo.description"
+                class="setting-item vertical"
+              >
                 <span class="setting-label">群简介</span>
-                <p class="setting-desc">{{ groupInfo.description }}</p>
+                <p class="setting-desc">
+                  {{ groupInfo.description }}
+                </p>
               </div>
 
-              <div class="setting-item clickable" @click="handleFiles">
+              <div
+                class="setting-item clickable"
+                @click="handleFiles"
+              >
                 <span class="setting-label">群文件</span>
                 <el-icon class="setting-arrow">
                   <ArrowRight />
                 </el-icon>
               </div>
 
-              <div class="setting-item clickable" @click="handleAnnouncement">
+              <div
+                class="setting-item clickable"
+                @click="handleAnnouncement"
+              >
                 <span class="setting-label">群公告</span>
                 <el-icon class="setting-arrow">
                   <ArrowRight />
@@ -128,7 +199,10 @@
 
           <!-- 危险操作区 -->
           <div class="section-block danger-zone">
-            <button class="danger-btn" @click="handleLeaveGroup">
+            <button
+              class="danger-btn"
+              @click="handleLeaveGroup"
+            >
               退出群聊
             </button>
           </div>

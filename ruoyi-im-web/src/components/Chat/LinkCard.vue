@@ -1,16 +1,26 @@
 <template>
   <!-- 加载状态 -->
-  <div v-if="loading" class="link-card link-card--loading">
+  <div
+    v-if="loading"
+    class="link-card link-card--loading"
+  >
     <div class="link-icon">
       <span class="material-icons-outlined loading-icon">language</span>
     </div>
     <div class="link-content">
-      <el-skeleton :rows="2" animated />
+      <el-skeleton
+        :rows="2"
+        animated
+      />
     </div>
   </div>
 
   <!-- 错误状态 -->
-  <div v-else-if="error" class="link-card link-card--error" @click="openLink">
+  <div
+    v-else-if="error"
+    class="link-card link-card--error"
+    @click="openLink"
+  >
     <div class="link-icon link-icon--error">
       <span class="material-icons-outlined">link_off</span>
     </div>
@@ -25,14 +35,35 @@
   </div>
 
   <!-- 正常状态 -->
-  <div v-else class="link-card" @click="openLink">
+  <div
+    v-else
+    class="link-card"
+    @click="openLink"
+  >
     <!-- 左侧图片/图标区 -->
     <div class="link-image-wrapper">
-      <img v-if="link.image" :src="link.image" :alt="link.title" class="link-image" loading="lazy"
-        @error="handleImageError">
-      <div v-else class="link-icon">
-        <img v-if="faviconUrl" :src="faviconUrl" class="favicon" @error="faviconError = true">
-        <span v-else class="material-icons-outlined">language</span>
+      <img
+        v-if="link.image"
+        :src="link.image"
+        :alt="link.title"
+        class="link-image"
+        loading="lazy"
+        @error="handleImageError"
+      >
+      <div
+        v-else
+        class="link-icon"
+      >
+        <img
+          v-if="faviconUrl"
+          :src="faviconUrl"
+          class="favicon"
+          @error="faviconError = true"
+        >
+        <span
+          v-else
+          class="material-icons-outlined"
+        >language</span>
       </div>
     </div>
 
@@ -41,7 +72,10 @@
       <div class="link-title">
         {{ link.title || link.url }}
       </div>
-      <div v-if="link.description" class="link-description">
+      <div
+        v-if="link.description"
+        class="link-description"
+      >
         {{ link.description }}
       </div>
       <div class="link-meta">
@@ -78,7 +112,7 @@ const faviconError = ref(false)
 
 // 获取 favicon URL
 const faviconUrl = computed(() => {
-  if (faviconError.value) return null
+  if (faviconError.value) {return null}
   try {
     const urlObj = new URL(props.link.url)
     return `${urlObj.origin}/favicon.ico`

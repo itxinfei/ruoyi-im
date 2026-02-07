@@ -1,23 +1,48 @@
 <template>
   <div class="chat-header">
     <!-- 左侧：头像+标题+状态 -->
-    <div class="header-left" role="button" tabindex="0" @click="handleShowDetail">
+    <div
+      class="header-left"
+      @click="handleShowDetail"
+    >
       <div class="header-avatar-wrapper">
         <!-- 群组使用图标，单聊使用钉钉风格头像 -->
-        <div v-if="session?.type === 'GROUP'" class="header-avatar group-avatar">
+        <div
+          v-if="session?.type === 'GROUP'"
+          class="header-avatar group-avatar"
+        >
           <span class="material-icons-outlined">groups</span>
         </div>
-        <DingtalkAvatar v-else :src="session?.avatar" :name="session?.name" :user-id="session?.targetId" :size="40"
-          shape="square" custom-class="header-avatar" />
-        <span v-if="session?.type !== 'GROUP' && isOnline" class="online-indicator" />
-        <span v-if="session?.type !== 'GROUP' && isOnline" class="online-pulse" />
+        <DingtalkAvatar
+          v-else
+          :src="session?.avatar"
+          :name="session?.name"
+          :user-id="session?.targetId"
+          :size="40"
+          shape="square"
+          custom-class="header-avatar"
+        />
+        <span
+          v-if="session?.type !== 'GROUP' && isOnline"
+          class="online-indicator"
+        />
+        <span
+          v-if="session?.type !== 'GROUP' && isOnline"
+          class="online-pulse"
+        />
       </div>
       <div class="header-info">
         <h2 class="header-name">
           {{ session?.name }}
-          <span v-if="session?.type === 'GROUP'" class="member-count">({{ session?.memberCount || 0 }}人)</span>
+          <span
+            v-if="session?.type === 'GROUP'"
+            class="member-count"
+          >({{ realMemberCount }}人)</span>
         </h2>
-        <p class="user-online-status" @click="clickConversationDesc">
+        <p
+          class="user-online-status"
+          @click="clickConversationDesc"
+        >
           {{ targetUserOnlineStateDesc }}
         </p>
       </div>
@@ -25,25 +50,15 @@
 
     <!-- 右侧:操作区 -->
     <div class="header-actions">
-      <!-- 语音通话按钮 -->
-      <el-tooltip content="语音通话" placement="bottom">
-        <button class="action-btn" @click="handleVoiceCall">
-          <span class="material-icons-outlined">call</span>
-        </button>
-      </el-tooltip>
-
-      <!-- 视频通话按钮 -->
-      <el-tooltip content="视频通话" placement="bottom">
-        <button class="action-btn" @click="handleVideoCall">
-          <span class="material-icons-outlined">videocam</span>
-        </button>
-      </el-tooltip>
-
-      <div class="header-divider" />
-
       <!-- 搜索按钮 -->
-      <el-tooltip content="搜索聊天内容" placement="bottom">
-        <button class="action-btn" @click="$emit('search')">
+      <el-tooltip
+        content="搜索聊天内容"
+        placement="bottom"
+      >
+        <button
+          class="action-btn"
+          @click="$emit('search')"
+        >
           <span class="material-icons-outlined">search</span>
         </button>
       </el-tooltip>
@@ -51,9 +66,15 @@
       <div class="header-divider" />
 
       <!-- 会话设置/详情 -->
-      <el-tooltip :content="session?.type === 'GROUP' ? '群管理' : '聊天设置'" placement="bottom">
-        <button class="action-btn setting-btn" :class="{ active: showConversationInfo }"
-          @click="toggleConversationInfo">
+      <el-tooltip
+        :content="session?.type === 'GROUP' ? '群管理' : '聊天设置'"
+        placement="bottom"
+      >
+        <button
+          class="action-btn setting-btn"
+          :class="{ active: showConversationInfo }"
+          @click="toggleConversationInfo"
+        >
           <span class="material-icons-outlined">more_horiz</span>
         </button>
       </el-tooltip>
@@ -91,9 +112,7 @@ const emit = defineEmits([
   'show-user',
   'toggle-sidebar',
   'search',
-  'toggle-pinned',
-  'voice-call',
-  'video-call'
+  'toggle-pinned'
 ])
 
 const showConversationInfo = ref(false)
@@ -109,6 +128,20 @@ const isOnline = computed(() => {
   }
 
   return props.session?.peerOnline ?? false
+})
+
+// 获取真实群成员数量
+const realMemberCount = computed(() => {
+  if (props.session?.type !== 'GROUP') {return 0}
+
+  // 优先从 store 获取最新的群组信息（数据更准确）
+  const group = store.getters['im/contact/groupById'](props.session?.targetId)
+  if (group && group.memberCount !== undefined) {
+    return group.memberCount
+  }
+
+  // 降级使用会话中的数据
+  return props.session?.memberCount || 0
 })
 
 // 是否有用户正在输入
@@ -164,38 +197,6 @@ const clickConversationDesc = () => {
 const toggleConversationInfo = () => {
   showConversationInfo.value = !showConversationInfo.value
   emit('toggle-sidebar', showConversationInfo.value ? 'info' : null)
-}
-
-// 语音通话
-const handleVoiceCall = () => {
-  if (!props.session) {
-    ElMessage.warning('请先选择会话')
-    return
-  }
-
-  if (props.session.type === 'GROUP') {
-    ElMessage.info('群组语音通话功能开发中')
-    return
-  }
-
-  emit('voice-call', props.session)
-  ElMessage.info('语音通话功能开发中')
-}
-
-// 视频通话
-const handleVideoCall = () => {
-  if (!props.session) {
-    ElMessage.warning('请先选择会话')
-    return
-  }
-
-  if (props.session.type === 'GROUP') {
-    ElMessage.info('群组视频通话功能开发中')
-    return
-  }
-
-  emit('video-call', props.session)
-  ElMessage.info('视频通话功能开发中')
 }
 </script>
 

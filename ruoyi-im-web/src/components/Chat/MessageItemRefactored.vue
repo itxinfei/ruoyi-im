@@ -6,48 +6,95 @@
 */
 <template>
   <!-- 时间分割线 -->
-  <div v-if="message.isTimeDivider" class="time-divider-wrapper">
+  <div
+    v-if="message.isTimeDivider"
+    class="time-divider-wrapper"
+  >
     <span class="time-text">{{ message.timeText }}</span>
   </div>
 
   <!-- 消息主体 -->
-  <div v-else class="message-item" :class="itemClasses" :data-id="message.id">
+  <div
+    v-else
+    class="message-item"
+    :class="itemClasses"
+    :data-id="message.id"
+  >
     <!-- 多选复选框 -->
-    <div v-if="multiSelectMode" class="checkbox-wrapper">
-      <el-checkbox :model-value="isSelected" @change="toggleSelection" @click.stop />
+    <div
+      v-if="multiSelectMode"
+      class="checkbox-wrapper"
+    >
+      <el-checkbox
+        :model-value="isSelected"
+        @change="toggleSelection"
+        @click.stop
+      />
     </div>
 
     <!-- 头像区域 -->
-    <div class="avatar-wrapper" title="右键@提及 | 查看资料 | 双击拍一拍" @contextmenu.prevent="$emit('at', message)"
-      @click="$emit('show-user', message.senderId)" @dblclick="handleNudge">
-      <DingtalkAvatar :src="message.senderAvatar" :name="message.senderName" :user-id="message.senderId" :size="40"
-        shape="square" custom-class="message-avatar" />
+    <div
+      class="avatar-wrapper"
+      title="右键@提及 | 查看资料 | 双击拍一拍"
+      @contextmenu.prevent="$emit('at', message)"
+      @click="$emit('show-user', message.senderId)"
+      @dblclick="handleNudge"
+    >
+      <DingtalkAvatar
+        :src="message.senderAvatar"
+        :name="message.senderName"
+        :user-id="message.senderId"
+        :size="40"
+        shape="square"
+        custom-class="message-avatar"
+      />
     </div>
 
-    <div class="content-wrapper" :class="{ 'is-merged': message.isMerged }">
+    <div
+      class="content-wrapper"
+      :class="{ 'is-merged': message.isMerged }"
+    >
       <!-- 发送者姓名（仅群聊、非自己、且非合并连续消息时显示） -->
-      <div v-if="showSenderName" class="sender-name">
+      <div
+        v-if="showSenderName"
+        class="sender-name"
+      >
         {{ message.senderName }}
       </div>
 
       <!-- 消息气泡与状态行 -->
       <div class="bubble-row">
         <slot name="bubble">
-          <MessageBubble :message="message" :session-type="sessionType" @command="$emit('command', $event, message)"
-            @at="$emit('at', message)" @preview="$emit('preview', $event)" @download="$emit('download', $event)"
-            @retry="$emit('retry', message)" @add-reaction="$emit('add-reaction', $event, message)"
-            @re-edit="$emit('re-edit', $event)" @scroll-to="$emit('scroll-to', $event)"
-            @long-press="$emit('long-press', $event)" @show-user="$emit('show-user', $event)" />
+          <MessageBubble
+            :message="message"
+            :session-type="sessionType"
+            @command="$emit('command', $event, message)"
+            @at="$emit('at', message)"
+            @preview="$emit('preview', $event)"
+            @download="$emit('download', $event)"
+            @retry="$emit('retry', message)"
+            @add-reaction="$emit('add-reaction', $event, message)"
+            @re-edit="$emit('re-edit', $event)"
+            @scroll-to="$emit('scroll-to', $event)"
+            @long-press="$emit('long-press', $event)"
+            @show-user="$emit('show-user', $event)"
+          />
         </slot>
 
         <!-- 已读状态（仅发送方消息显示） -->
-        <div v-if="message.isOwn" class="status-container">
+        <div
+          v-if="message.isOwn"
+          class="status-container"
+        >
           <slot name="read-status" />
         </div>
       </div>
 
       <!-- 消息页脚（时间） -->
-      <div v-if="!hideFooter" class="message-footer">
+      <div
+        v-if="!hideFooter"
+        class="message-footer"
+      >
         <span class="message-time">{{ formattedTime }}</span>
       </div>
     </div>

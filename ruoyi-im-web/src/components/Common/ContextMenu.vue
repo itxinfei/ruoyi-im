@@ -14,33 +14,71 @@
 <template>
   <Teleport to="body">
     <Transition name="context-menu-fade">
-      <div v-if="computedShow" ref="menuRef" class="context-menu" :class="{
-        'context-menu--dark': isDark,
-        'context-menu--keyboard': isKeyboardMode
-      }" :style="menuStyle" :tabindex="-1" @click="handleMenuClick" @contextmenu.prevent>
+      <div
+        v-if="computedShow"
+        ref="menuRef"
+        class="context-menu"
+        :class="{
+          'context-menu--dark': isDark,
+          'context-menu--keyboard': isKeyboardMode
+        }"
+        :style="menuStyle"
+        :tabindex="-1"
+        @click="handleMenuClick"
+        @contextmenu.prevent
+      >
         <!-- 菜单项列表 -->
-        <div class="context-menu__list" role="menu">
-          <template v-for="(item, index) in visibleItems" :key="index">
+        <div
+          class="context-menu__list"
+          role="menu"
+        >
+          <template
+            v-for="(item, index) in visibleItems"
+            :key="index"
+          >
             <!-- 分隔线 -->
-            <div v-if="item.divider" class="context-menu__divider"
-              :class="{ 'context-menu__divider--margin': hasAdjacentItem(index) }" role="separator"
-              :aria-hidden="true" />
+            <div
+              v-if="item.divider"
+              class="context-menu__divider"
+              :class="{ 'context-menu__divider--margin': hasAdjacentItem(index) }"
+              role="separator"
+              :aria-hidden="true"
+            />
             <!-- 菜单项 -->
-            <div v-else class="context-menu__item" :class="{
-              'context-menu__item--disabled': item.disabled,
-              'context-menu__item--danger': item.danger,
-              'context-menu__item--focused': focusedIndex === index
-            }" role="menuitem" :tabindex="item.disabled ? -1 : 0" @click.stop="handleItemClick(item, index)"
-              @mouseenter="handleItemMouseEnter(index)">
+            <div
+              v-else
+              class="context-menu__item"
+              :class="{
+                'context-menu__item--disabled': item.disabled,
+                'context-menu__item--danger': item.danger,
+                'context-menu__item--focused': focusedIndex === index
+              }"
+              role="menuitem"
+              :tabindex="item.disabled ? -1 : 0"
+              @click.stop="handleItemClick(item, index)"
+              @mouseenter="handleItemMouseEnter(index)"
+            >
               <!-- 图标 -->
-              <span v-if="item.icon" class="context-menu__icon">
-                <span v-if="isMaterialIcon(item.icon)" class="material-icons-outlined">{{ item.icon }}</span>
-                <component :is="item.icon" v-else />
+              <span
+                v-if="item.icon"
+                class="context-menu__icon"
+              >
+                <span
+                  v-if="isMaterialIcon(item.icon)"
+                  class="material-icons-outlined"
+                >{{ item.icon }}</span>
+                <component
+                  :is="item.icon"
+                  v-else
+                />
               </span>
               <!-- 标签 -->
               <span class="context-menu__label">{{ item.label }}</span>
               <!-- 快捷键提示 -->
-              <span v-if="item.shortcut" class="context-menu__shortcut">{{ item.shortcut }}</span>
+              <span
+                v-if="item.shortcut"
+                class="context-menu__shortcut"
+              >{{ item.shortcut }}</span>
             </div>
           </template>
         </div>

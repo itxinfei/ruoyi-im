@@ -2,19 +2,37 @@
   <div :class="['im-app', isDark ? 'dark' : '']">
     <div class="app-container">
       <!-- 桌面端水平导航 -->
-      <ImSideNavNew :active-module="activeModule" @switch-module="handleSwitchModule"
-        @open-search="showGlobalSearch = true" @open-settings="handleOpenSettings" />
+      <ImSideNavNew
+        :active-module="activeModule"
+        @switch-module="handleSwitchModule"
+        @open-search="showGlobalSearch = true"
+        @open-settings="handleOpenSettings"
+      />
 
       <!-- 主内容区 -->
       <main class="main-content-area">
         <!-- 聊天模块：左侧会话列表 + 右侧聊天面板 -->
         <template v-if="activeModule === 'chat'">
           <div class="chat-layout">
-            <SessionPanel :current-session="currentSession" @select-session="handleSelectSession"
-              @show-user="handleShowUser" />
-            <ChatPanel v-if="currentSession" :session="currentSession" @show-user="handleShowUser" />
-            <div v-else class="chat-placeholder">
-              <EmptyState type="chat" title="选择一个会话开始聊天" description="从左侧列表选择联系人或群组，开始你的对话" />
+            <SessionPanel
+              :current-session="currentSession"
+              @select-session="handleSelectSession"
+              @show-user="handleShowUser"
+            />
+            <ChatPanel
+              v-if="currentSession"
+              :session="currentSession"
+              @show-user="handleShowUser"
+            />
+            <div
+              v-else
+              class="chat-placeholder"
+            >
+              <EmptyState
+                type="chat"
+                title="选择一个会话开始聊天"
+                description="从左侧列表选择联系人或群组，开始你的对话"
+              />
             </div>
           </div>
         </template>
@@ -22,8 +40,12 @@
         <!-- 工作台 -->
         <WorkbenchPanel v-if="activeModule === 'workbench'" />
         <!-- 通讯录 -->
-        <ContactsPanel v-if="activeModule === 'contacts'" @switch-module="activeModule = $event"
-          @voice-call="handleVoiceCallFromContact" @video-call="handleVideoCallFromContact" />
+        <ContactsPanel
+          v-if="activeModule === 'contacts'"
+          @switch-module="activeModule = $event"
+          @voice-call="handleVoiceCallFromContact"
+          @video-call="handleVideoCallFromContact"
+        />
         <!-- 云盘 -->
         <DocumentsPanel v-if="activeModule === 'drive'" />
         <!-- 日历 -->
@@ -35,29 +57,59 @@
         <!-- 邮箱 -->
         <MailPanel v-if="activeModule === 'mail'" />
         <!-- 应用中心 -->
-        <AppCenter v-if="activeModule === 'appcenter'" @switch-module="activeModule = $event"
-          @open-external-app="handleOpenExternalApp" />
+        <AppCenter
+          v-if="activeModule === 'appcenter'"
+          @switch-module="activeModule = $event"
+          @open-external-app="handleOpenExternalApp"
+        />
         <!-- AI助理 -->
         <AssistantPanel v-if="activeModule === 'assistant'" />
       </main>
 
       <!-- 全局交互弹窗 (对齐钉钉模式) -->
       <PersonalProfileDialog v-model="showProfile" />
-      <SystemSettingsDialog v-model="showSettings" :default-menu="settingsDefaultMenu" />
+      <SystemSettingsDialog
+        v-model="showSettings"
+        :default-menu="settingsDefaultMenu"
+      />
       <HelpFeedbackDialog v-model="showHelp" />
-      <UserProfileDialog v-model="showUserDetail" :session="detailSession" layout-mode="compact"
-        @send-message="handleSelectSession" />
-      <GlobalSearchDialog v-model="showGlobalSearch" @select="handleSearchSelect" />
+      <UserProfileDialog
+        v-model="showUserDetail"
+        :session="detailSession"
+        layout-mode="compact"
+        @send-message="handleSelectSession"
+      />
+      <GlobalSearchDialog
+        v-model="showGlobalSearch"
+        @select="handleSearchSelect"
+      />
 
       <!-- 外部应用对话框 -->
-      <el-dialog v-model="showExternalApp" :title="externalApp?.name || '应用'" width="90%" :fullscreen="false"
-        :close-on-click-modal="false" class="external-app-dialog" @closed="externalApp = null">
-        <div v-if="externalApp" class="external-app-container">
-          <iframe v-if="externalApp.openMode === 'iframe' && externalApp.appUrl" :src="externalApp.appUrl"
-            class="external-app-iframe" frameborder="0"
+      <el-dialog
+        v-model="showExternalApp"
+        :title="externalApp?.name || '应用'"
+        width="90%"
+        :fullscreen="false"
+        :close-on-click-modal="false"
+        class="external-app-dialog"
+        @closed="externalApp = null"
+      >
+        <div
+          v-if="externalApp"
+          class="external-app-container"
+        >
+          <iframe
+            v-if="externalApp.openMode === 'iframe' && externalApp.appUrl"
+            :src="externalApp.appUrl"
+            class="external-app-iframe"
+            frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen />
-          <div v-else class="app-placeholder">
+            allowfullscreen
+          />
+          <div
+            v-else
+            class="app-placeholder"
+          >
             <span class="material-icons-outlined">extension</span>
             <p>该应用暂不支持在此打开</p>
           </div>
@@ -65,10 +117,18 @@
       </el-dialog>
 
       <!-- 语音通话对话框 -->
-      <VoiceCallDialog v-model:visible="showVoiceCall" :remote-user="remoteCallUser" :is-incoming="isIncomingCall" />
+      <VoiceCallDialog
+        v-model:visible="showVoiceCall"
+        :remote-user="remoteCallUser"
+        :is-incoming="isIncomingCall"
+      />
 
       <!-- 视频通话对话框 -->
-      <VideoCallDialog v-model:visible="showVideoCall" :remote-user="remoteCallUser" :is-incoming="isIncomingCall" />
+      <VideoCallDialog
+        v-model:visible="showVideoCall"
+        :remote-user="remoteCallUser"
+        :is-incoming="isIncomingCall"
+      />
     </div>
   </div>
 </template>
@@ -233,7 +293,7 @@ onMessage(msg => {
   store.dispatch('im/message/receiveMessage', msg)
 })
 
-const { onOnline, onOffline } = useImWebSocket()
+const { onOnline, onOffline, onMessageAck } = useImWebSocket()
 
 onOnline(data => {
   if (data.userId) {
@@ -245,6 +305,14 @@ onOffline(data => {
   if (data.userId) {
     store.commit('im/contact/SET_USER_STATUS', { userId: data.userId, status: 'offline' })
   }
+})
+
+onMessageAck(data => {
+  // WebSocket 推送的数据格式: { messageId, ackType }
+  store.dispatch('im/message/handleMessageAck', {
+    messageId: data.messageId,
+    ackType: data.ackType
+  })
 })
 
 onMounted(async () => {

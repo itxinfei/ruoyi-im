@@ -1,62 +1,126 @@
 <template>
-  <div ref="listRef" class="message-list" @scroll="handleScroll">
+  <div
+    ref="listRef"
+    class="message-list"
+    @scroll="handleScroll"
+  >
     <!-- 首次加载骨架屏 -->
-    <SkeletonLoader v-if="loading && messages.length === 0" type="message" :count="6" />
+    <SkeletonLoader
+      v-if="loading && messages.length === 0"
+      type="message"
+      :count="6"
+    />
 
     <!-- 空状态 -->
-    <div v-else-if="messages.length === 0 && !loading" class="empty">
+    <div
+      v-else-if="messages.length === 0 && !loading"
+      class="empty"
+    >
       暂无消息
     </div>
 
     <!-- 消息内容 - 虚拟滚动优化 -->
     <template v-else>
       <!-- 顶部占位符：维持滚动高度 -->
-      <div v-if="isLazyLoadingEnabled" class="virtual-spacer-top" :style="{ height: topSpacerHeight + 'px' }" />
+      <div
+        v-if="isLazyLoadingEnabled"
+        class="virtual-spacer-top"
+        :style="{ height: topSpacerHeight + 'px' }"
+      />
 
       <!-- 可见消息列表 -->
-      <div v-for="msg in visibleMessagesComputed" :key="msg.id || msg.timeText" :data-id="msg.id"
-        class="message-wrapper">
+      <div
+        v-for="msg in visibleMessagesComputed"
+        :key="msg.id || msg.timeText"
+        :data-id="msg.id"
+        class="message-wrapper"
+      >
         <!-- 时间分隔符 -->
-        <div v-if="msg.isTimeDivider" class="time-divider">
+        <div
+          v-if="msg.isTimeDivider"
+          class="time-divider"
+        >
           <span class="time-text">{{ msg.timeText }}</span>
         </div>
 
         <!-- 消息项组件 -->
-        <MessageItem v-else :message="msg" :multi-select-mode="multiSelectMode" @reply="$emit('reply', $event)"
-          @reaction="handleReaction" @command="handleCommand" @scroll-to="scrollToMsg" @at="$emit('at', $event)"
-          @show-user="$emit('show-user', $event)" @retry="$emit('retry', $event)" @nudge="handleNudge"
-          @long-press="$emit('long-press', $event)">
+        <MessageItem
+          v-else
+          :message="msg"
+          :multi-select-mode="multiSelectMode"
+          @reply="$emit('reply', $event)"
+          @reaction="handleReaction"
+          @command="handleCommand"
+          @scroll-to="scrollToMsg"
+          @at="$emit('at', $event)"
+          @show-user="$emit('show-user', $event)"
+          @retry="$emit('retry', $event)"
+          @nudge="handleNudge"
+          @long-press="$emit('long-press', $event)"
+        >
           <!-- 消息气泡内容插槽 -->
           <template #bubble>
-            <MessageBubble :message="msg" :session-type="sessionType" :is-large-group="isLargeGroup"
-              @command="handleCommand($event, msg)" @at="$emit('at', msg)" @preview="previewImage"
-              @download="downloadFile" @retry="$emit('retry', $event)" @add-reaction="handleAddReaction"
-              @re-edit="handleReEdit" />
+            <MessageBubble
+              :message="msg"
+              :session-type="sessionType"
+              :is-large-group="isLargeGroup"
+              @command="handleCommand($event, msg)"
+              @at="$emit('at', msg)"
+              @preview="previewImage"
+              @download="downloadFile"
+              @retry="$emit('retry', $event)"
+              @add-reaction="handleAddReaction"
+              @re-edit="handleReEdit"
+            />
           </template>
 
           <!-- 已读状态插槽 -->
           <template #read-status>
             <!-- 群聊：显示已读人数，可悬停查看详情 -->
-            <el-popover v-if="sessionType === 'GROUP' && (msg.readCount > 0 || msg.isRead)" placement="top" :width="220"
-              trigger="hover" popper-class="read-receipt-popover" @before-enter="fetchReadUsers(msg)">
+            <el-popover
+              v-if="sessionType === 'GROUP' && (msg.readCount > 0 || msg.isRead)"
+              placement="top"
+              :width="220"
+              trigger="hover"
+              popper-class="read-receipt-popover"
+              @before-enter="fetchReadUsers(msg)"
+            >
               <template #reference>
                 <span class="read-count clickable">
                   {{ msg.readCount > 0 ? `${msg.readCount}人已读` : '已读' }}
                 </span>
               </template>
-              <div v-loading="loadingReadUsers[msg.id]" class="read-users-list">
+              <div
+                v-loading="loadingReadUsers[msg.id]"
+                class="read-users-list"
+              >
                 <div class="read-users-header">
                   <span class="read-title">已读成员</span>
-                  <span v-if="readUsersMap[msg.id] && readUsersMap[msg.id].length > 0" class="read-count-badge">{{
+                  <span
+                    v-if="readUsersMap[msg.id] && readUsersMap[msg.id].length > 0"
+                    class="read-count-badge"
+                  >{{
                     readUsersMap[msg.id].length }}</span>
                 </div>
                 <div class="read-users-body">
-                  <div v-for="user in readUsersMap[msg.id]" :key="user.id" class="read-user-item">
-                    <DingtalkAvatar :src="user.avatar" :name="user.name" :user-id="user.id" :size="32" shape="square" />
+                  <div
+                    v-for="user in readUsersMap[msg.id]"
+                    :key="user.id"
+                    class="read-user-item"
+                  >
+                    <DingtalkAvatar
+                      :src="user.avatar"
+                      :name="user.name"
+                      :user-id="user.id"
+                      :size="32"
+                      shape="square"
+                    />
                     <span class="user-name">{{ user.name }}</span>
                   </div>
-                  <div v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)"
-                    class="empty-state">
+                  <div
+                    v-if="!loadingReadUsers[msg.id] && (!readUsersMap[msg.id] || readUsersMap[msg.id].length === 0)"
+                    class="empty-state"
+                  >
                     <el-icon>
                       <User />
                     </el-icon>
@@ -64,31 +128,52 @@
                   </div>
                 </div>
                 <!-- 显示未读人数 -->
-                <div v-if="unreadCount(msg)" class="unread-users-footer">
+                <div
+                  v-if="unreadCount(msg)"
+                  class="unread-users-footer"
+                >
                   <span>未读 {{ unreadCount(msg) }} 人</span>
                 </div>
               </div>
             </el-popover>
             <!-- 单聊：只显示已读/未读 -->
-            <span v-else-if="sessionType === 'PRIVATE'" class="read-status-simple"
-              :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }">
+            <span
+              v-else-if="sessionType === 'PRIVATE'"
+              class="read-status-simple"
+              :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }"
+            >
               {{ msg.isRead || msg.readCount > 0 ? '已读' : '未读' }}
             </span>
             <!-- 无已读数据时显示未读 -->
-            <span v-else class="unread">未读</span>
+            <span
+              v-else
+              class="unread"
+            >未读</span>
           </template>
         </MessageItem>
       </div>
 
       <!-- 底部占位符：维持滚动高度 -->
-      <div v-if="isLazyLoadingEnabled" class="virtual-spacer-bottom" :style="{ height: bottomSpacerHeight + 'px' }" />
+      <div
+        v-if="isLazyLoadingEnabled"
+        class="virtual-spacer-bottom"
+        :style="{ height: bottomSpacerHeight + 'px' }"
+      />
 
       <!-- 加载更多骨架屏 -->
-      <SkeletonLoader v-if="loading && messages.length > 0" type="message" :count="3" />
+      <SkeletonLoader
+        v-if="loading && messages.length > 0"
+        type="message"
+        :count="3"
+      />
 
       <!-- 滚动到底部按钮 -->
       <transition name="fade">
-        <div v-if="showScrollToBottom" class="scroll-to-bottom" @click="scrollToBottom">
+        <div
+          v-if="showScrollToBottom"
+          class="scroll-to-bottom"
+          @click="scrollToBottom"
+        >
           <el-icon>
             <ArrowDown />
           </el-icon>

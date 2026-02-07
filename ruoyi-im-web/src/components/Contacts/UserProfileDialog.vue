@@ -1,14 +1,25 @@
 <template>
   <!-- PC端侧边栏风格的用户详情 -->
   <transition name="slide-right">
-    <div v-if="visible" class="user-profile-sidebar">
-      <div class="sidebar-overlay" @click="handleClose" />
+    <div
+      v-if="visible"
+      class="user-profile-sidebar"
+    >
+      <div
+        class="sidebar-overlay"
+        @click="handleClose"
+      />
 
       <div class="sidebar-panel">
         <!-- 头部 -->
         <div class="sidebar-header">
-          <h3 class="header-title">个人信息</h3>
-          <button class="close-btn" @click="handleClose">
+          <h3 class="header-title">
+            个人信息
+          </h3>
+          <button
+            class="close-btn"
+            @click="handleClose"
+          >
             <el-icon>
               <Close />
             </el-icon>
@@ -16,50 +27,87 @@
         </div>
 
         <!-- 内容区 -->
-        <div v-if="loading" class="sidebar-body">
-          <el-skeleton :rows="10" animated />
+        <div
+          v-if="loading"
+          class="sidebar-body"
+        >
+          <el-skeleton
+            :rows="10"
+            animated
+          />
         </div>
 
-        <div v-else-if="userInfo" class="sidebar-body">
+        <div
+          v-else-if="userInfo"
+          class="sidebar-body"
+        >
           <!-- 用户基本信息卡片 -->
           <div class="info-card">
             <div class="user-header-section">
-              <DingtalkAvatar :src="userInfo.avatar" :name="userName" :user-id="targetUserId" :size="64" shape="square"
-                class="user-avatar" />
+              <DingtalkAvatar
+                :src="userInfo.avatar"
+                :name="userName"
+                :user-id="targetUserId"
+                :size="64"
+                shape="square"
+                class="user-avatar"
+              />
               <div class="user-basic-info">
-                <h4 class="user-name">{{ userName }}</h4>
-                <p class="user-id">ID: {{ userInfo.username || targetUserId }}</p>
+                <h4 class="user-name">
+                  {{ userName }}
+                </h4>
+                <p class="user-id">
+                  ID: {{ userInfo.username || targetUserId }}
+                </p>
                 <div class="user-status">
-                  <span v-if="userInfo.online" class="status-badge online">
-                    <span class="status-dot"></span>在线
+                  <span
+                    v-if="userInfo.online"
+                    class="status-badge online"
+                  >
+                    <span class="status-dot" />在线
                   </span>
-                  <span v-else class="status-badge offline">
-                    <span class="status-dot"></span>离线
+                  <span
+                    v-else
+                    class="status-badge offline"
+                  >
+                    <span class="status-dot" />离线
                   </span>
                 </div>
               </div>
             </div>
 
             <!-- 签名 -->
-            <div v-if="userInfo.signature" class="user-signature">
+            <div
+              v-if="userInfo.signature"
+              class="user-signature"
+            >
               {{ userInfo.signature }}
             </div>
 
             <!-- 快捷操作按钮 -->
             <div class="quick-actions">
-              <button class="action-item primary" @click="handleSendMessage">
+              <button
+                class="action-item primary"
+                @click="handleSendMessage"
+              >
                 <el-icon>
                   <ChatDotRound />
                 </el-icon>
                 <span>发消息</span>
               </button>
-              <button class="action-item" @click="handleVoiceCall">
+              <button
+                class="action-item"
+                @click="handleVoiceCall"
+              >
                 <el-icon>
                   <Phone />
                 </el-icon>
                 <span>语音</span>
               </button>
-              <button class="action-item" @click="handleVideoCall">
+              <button
+                class="action-item"
+                @click="handleVideoCall"
+              >
                 <el-icon>
                   <VideoCamera />
                 </el-icon>
@@ -75,27 +123,42 @@
             </div>
 
             <div class="info-list">
-              <div v-if="userInfo.department" class="info-item">
+              <div
+                v-if="userInfo.department"
+                class="info-item"
+              >
                 <span class="info-label">部门</span>
                 <span class="info-value">{{ userInfo.department }}</span>
               </div>
 
-              <div v-if="userInfo.position" class="info-item">
+              <div
+                v-if="userInfo.position"
+                class="info-item"
+              >
                 <span class="info-label">职位</span>
                 <span class="info-value">{{ userInfo.position }}</span>
               </div>
 
-              <div v-if="userInfo.email" class="info-item">
+              <div
+                v-if="userInfo.email"
+                class="info-item"
+              >
                 <span class="info-label">邮箱</span>
                 <span class="info-value">{{ userInfo.email }}</span>
               </div>
 
-              <div v-if="userInfo.phone" class="info-item">
+              <div
+                v-if="userInfo.phone"
+                class="info-item"
+              >
                 <span class="info-label">手机</span>
                 <span class="info-value">{{ userInfo.phone }}</span>
               </div>
 
-              <div v-if="remark" class="info-item">
+              <div
+                v-if="remark"
+                class="info-item"
+              >
                 <span class="info-label">备注</span>
                 <span class="info-value">{{ remark }}</span>
               </div>
@@ -109,7 +172,10 @@
             </div>
 
             <div class="action-list">
-              <div class="action-list-item" @click="handleSetRemark">
+              <div
+                class="action-list-item"
+                @click="handleSetRemark"
+              >
                 <el-icon>
                   <Edit />
                 </el-icon>
@@ -119,7 +185,10 @@
                 </el-icon>
               </div>
 
-              <div class="action-list-item" @click="handleToggleFavorite">
+              <div
+                class="action-list-item"
+                @click="handleToggleFavorite"
+              >
                 <el-icon>
                   <Star />
                 </el-icon>
@@ -129,7 +198,10 @@
                 </el-icon>
               </div>
 
-              <div class="action-list-item" @click="handleViewHistory">
+              <div
+                class="action-list-item"
+                @click="handleViewHistory"
+              >
                 <el-icon>
                   <Clock />
                 </el-icon>
@@ -139,7 +211,10 @@
                 </el-icon>
               </div>
 
-              <div class="action-list-item" @click="handleShareCard">
+              <div
+                class="action-list-item"
+                @click="handleShareCard"
+              >
                 <el-icon>
                   <Share />
                 </el-icon>
@@ -152,8 +227,14 @@
           </div>
 
           <!-- 危险操作区 -->
-          <div v-if="!isCurrentUser" class="section-block danger-zone">
-            <button class="danger-btn" @click="handleBlock">
+          <div
+            v-if="!isCurrentUser"
+            class="section-block danger-zone"
+          >
+            <button
+              class="danger-btn"
+              @click="handleBlock"
+            >
               加入黑名单
             </button>
           </div>
@@ -201,7 +282,7 @@ const isCurrentUser = computed(() => {
 })
 
 const userName = computed(() => {
-  if (remark.value) return remark.value
+  if (remark.value) {return remark.value}
   return userInfo.value?.nickname || userInfo.value?.username || '未知用户'
 })
 
@@ -218,7 +299,7 @@ watch(() => props.userId, uid => {
 })
 
 const loadUserInfo = async () => {
-  if (!props.userId) return
+  if (!props.userId) {return}
   loading.value = true
   try {
     const res = await getUserInfo(props.userId)

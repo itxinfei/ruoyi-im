@@ -1,18 +1,34 @@
 <template>
   <!-- 按住说话模式 -->
-  <div class="voice-recorder-wrapper" :class="{ 'is-recording': isRecording }" @mousedown="handleStartRecord"
-    @mouseup="handleEndRecord" @mouseleave="handleCancel">
+  <div
+    class="voice-recorder-wrapper"
+    :class="{ 'is-recording': isRecording }"
+    @mousedown="handleStartRecord"
+    @mouseup="handleEndRecord"
+    @mouseleave="handleCancel"
+  >
     <!-- 录音引导 -->
-    <div v-if="!isRecording" class="voice-guide">
+    <div
+      v-if="!isRecording"
+      class="voice-guide"
+    >
       <span class="material-icons-outlined mic-icon">mic</span>
       <span class="guide-text">按住 说话</span>
     </div>
 
     <!-- 录音中状态 -->
-    <div v-else class="recording-state">
+    <div
+      v-else
+      class="recording-state"
+    >
       <!-- 简化的录音动画波形 -->
       <div class="recording-waveform">
-        <span v-for="index in 5" :key="index" class="wave-bar" :style="{ animationDelay: `${index * 0.1}s` }" />
+        <span
+          v-for="index in 5"
+          :key="index"
+          class="wave-bar"
+          :style="{ animationDelay: `${index * 0.1}s` }"
+        />
       </div>
 
       <!-- 录音时长 -->
@@ -21,7 +37,10 @@
       </div>
 
       <!-- 取消按钮 -->
-      <div class="cancel-btn" @click.stop="handleCancel">
+      <div
+        class="cancel-btn"
+        @click.stop="handleCancel"
+      >
         <span class="material-icons-outlined">cancel</span>
       </div>
     </div>
