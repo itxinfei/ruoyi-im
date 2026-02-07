@@ -204,7 +204,7 @@ const handleNudge = () => {
 // 多选复选框 - 野火IM风格
 .checkbox-wrapper {
   display: flex;
-  align-items: center;
+  align-items: center; // 与头像垂直居中对齐
   margin: 0 8px;
   flex-shrink: 0;
   width: 20px;
@@ -241,16 +241,10 @@ const handleNudge = () => {
 }
 
 // 有发送者名字时的布局调整（群聊）
-// 使用负 margin 让头像下移，使其中心与气泡中心对齐
+// 发送者姓名使用绝对定位在气泡上方，不占用布局空间
 .message-item.has-sender-name {
-  .avatar-wrapper {
-    // sender-name 的高度约为 18px，下移一半使其不影响气泡对齐
-    margin-top: 9px;
-  }
-
-  .checkbox-wrapper {
-    padding-top: 17px; // checkbox 下移与头像对齐
-  }
+  // 头像不需要调整，因为 sender-name 使用绝对定位
+  // avatar-wrapper 和 bubble-row 都使用 align-items: center
 }
 
 // 多选模式样式
@@ -280,8 +274,6 @@ const handleNudge = () => {
   display: flex;
   align-items: center; // 垂直居中对齐，确保头像和气泡在一条水平直线上
   justify-content: center;
-  // 向下偏移，抵消 footer 高度对整体对齐的影响
-  margin-bottom: 8px;
 
   &:hover {
     opacity: 0.85;

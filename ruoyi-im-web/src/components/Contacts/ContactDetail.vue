@@ -110,6 +110,7 @@
             </div>
 
             <div
+              v-if="isFriend"
               class="action-item"
               @click="toggleFavorite"
             >
@@ -222,8 +223,10 @@
             </div>
           </div>
 
-          <!-- Settings / Danger Zone -->
-          <div class="section-card">
+          <div
+            v-if="isFriend"
+            class="section-card"
+          >
             <div class="card-title">
               更多操作
             </div>
@@ -309,6 +312,10 @@ const showGroupSettings = ref(false)
 
 // Computed Properties
 const isGroup = computed(() => props.contact?.isGroup || props.contact?.type === 'group')
+const isFriend = computed(() => {
+  if (isGroup.value) { return false }
+  return props.contact?.friendId !== undefined && props.contact?.friendId !== null
+})
 
 const getName = computed(() => {
   if (!props.contact) {return 'Unknown'}
@@ -332,7 +339,7 @@ const getSignature = computed(() => props.contact?.signature || props.contact?.s
 
 // Methods
 const checkFavoriteStatus = async () => {
-  if (!props.contact?.id || isGroup.value) {return}
+  if (!isFriend.value || !props.contact?.id) {return}
   try {
     const res = await isFavorited(props.contact.id)
     isFavorite.value = res.code === 200 && res.data === true
@@ -341,7 +348,7 @@ const checkFavoriteStatus = async () => {
   }
 }
 
-watch(() => props.contact?.id, checkFavoriteStatus, { immediate: true })
+watch([() => props.contact?.id, isFriend], checkFavoriteStatus, { immediate: true })
 watch(showGroupSettings, value => {
   emit('toggle-group-profile', value)
 })
@@ -354,7 +361,7 @@ const handleGroupConfig = () => {
 }
 
 const toggleFavorite = async () => {
-  if (!props.contact?.id) {return}
+  if (!isFriend.value || !props.contact?.id) {return}
   try {
     if (isFavorite.value) {
       await removeFavorite(props.contact.id)
@@ -375,6 +382,7 @@ const copyText = async text => {
 }
 
 const handleEditRemark = () => {
+  if (!isFriend.value || !props.contact?.id) {return}
   ElMessageBox.prompt('请输入新的备注名', '修改备注', {
     inputValue: props.contact.friendName,
     inputPlaceholder: '请输入备注',
@@ -388,6 +396,7 @@ const handleEditRemark = () => {
 }
 
 const handleDeleteContact = () => {
+  if (!isFriend.value || !props.contact?.id) {return}
   ElMessageBox.confirm('确定要删除该好友吗？此操作无法撤销。', '删除警告', {
     confirmButtonText: '确定删除',
     cancelButtonText: '取消',

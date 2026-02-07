@@ -272,6 +272,16 @@
           </h3>
         </div>
         <div class="list-actions">
+          <el-tooltip
+            content="刷新"
+            placement="bottom"
+          >
+            <el-button
+              link
+              :icon="Refresh"
+              @click="refreshCurrent"
+            />
+          </el-tooltip>
           <el-button
             v-if="currentNav === 'friends'"
             type="primary"
@@ -288,6 +298,7 @@
       <div
         v-loading="loading"
         class="list-content-wrapper"
+        ref="listContentRef"
       >
         <!-- 推荐联系人 -->
         <div
@@ -317,32 +328,33 @@
           class="virtual-list scrollbar-custom"
           :items="currentList"
           :item-size="72"
+          :height="virtualListHeight"
           :class="{ 'batch-mode': batchMode }"
         >
           <template #default="{ item }">
             <div
               class="list-item"
-              :class="{ active: selectedItemId === item.id, 'batch-mode': batchMode }"
+              :class="{ active: selectedItemId === getItemId(item), 'batch-mode': batchMode }"
               @click="handleItemClick(item)"
             >
               <!-- 批量选择复选框 -->
               <el-checkbox
                 v-if="batchMode"
-                :model-value="selectedContacts.has(item.id)"
+                :model-value="selectedContacts.has(getItemId(item))"
                 class="item-checkbox"
-                @change="(val) => toggleContactSelection(item.id, val)"
+                @change="(val) => toggleContactSelection(getItemId(item), val)"
                 @click.stop
               />
 
               <DingtalkAvatar
-                :src="item.avatar || item.groupAvatar"
-                :name="item.name || item.groupName || item.nickname"
+                :src="getItemAvatar(item)"
+                :name="getItemName(item)"
                 :size="44"
                 :shape="currentNav === 'groups' ? 'square' : 'circle'"
               />
               <div class="item-info">
                 <div class="item-header">
-                  <span class="item-name">{{ item.name || item.groupName || item.nickname }}</span>
+                  <span class="item-name">{{ getItemName(item) }}</span>
                   <span
                     v-if="item.role === 'OWNER'"
                     class="role-tag owner"
@@ -385,7 +397,7 @@
         class="detail-content-wrapper"
       >
         <ContactDetail
-          v-if="currentNav === 'friends' || currentNav === 'org' || currentNav === 'new'"
+          v-if="isFriendNav || currentNav === 'org'"
           :contact="selectedItem"
           @message="handleMessage"
           @voice-call="handleVoiceCall"
@@ -470,7 +482,7 @@
                   <span
                     class="result-type-tag"
                     :class="item.type"
-                  >{{ item.type === 'group' ? '群组' : '联系人' }}</span>
+                >{{ item.type === 'group' ? '群组' : item.type === 'dept' ? '部门' : '联系人' }}</span>
                 </div>
                 <el-icon class="arrow-right">
                   <ArrowRight />
@@ -591,7 +603,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
-import { useDebounceFn } from '@vueuse/core'
+import { useDebounceFn, useResizeObserver } from '@vueuse/core'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import ContactDetail from '@/components/Contacts/ContactDetail.vue'
 import VirtualList from '@/components/Common/VirtualList.vue'
@@ -600,14 +612,14 @@ import BatchOperationBar from '@/components/Contacts/BatchOperationBar.vue'
 import GroupSelectDialog from '@/components/Contacts/GroupSelectDialog.vue'
 import AddFriendDialog from '@/components/Contacts/AddFriendDialog.vue'
 import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
-import { getFriendRequests, getGroupedFriendList, searchContacts, handleFriendRequest, getGroupList, createGroup, renameGroup, deleteGroup } from '@/api/im/contact'
+import { getFriendRequests, getGroupedFriendList, getGroupList, createGroup, renameGroup, deleteGroup, clearFriendListCache } from '@/api/im/contact'
 import { getGroups } from '@/api/im/group'
 import { getOrgTree, getDepartmentMembers, searchOrgMembers } from '@/api/im/organization'
 import { getAllUsers } from '@/api/im/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, User, Avatar, ChatDotSquare, OfficeBuilding,
-  ArrowRight, Plus, Close, Menu, ArrowLeft, MoreFilled, Star
+  ArrowRight, Plus, Close, MoreFilled, Star, Refresh
 } from '@element-plus/icons-vue'
 import { useHighlightText } from '@/composables/useHighlightText'
 import { useContactBatch } from '@/composables/useContactBatch'
@@ -625,6 +637,9 @@ const showAddMenu = ref(false)
 const loading = ref(false)
 const searchInputRef = ref(null)
 const recommendedContactsRef = ref(null)
+const newFriendsViewRef = ref(null)
+const listContentRef = ref(null)
+const virtualListHeight = ref(400)
 
 // Data
 const friendGroups = ref([])
@@ -671,6 +686,25 @@ const flatDepts = ref([])
 const orgSearchQuery = ref('')
 const orgSearchResults = ref([])
 const orgSearching = ref(false)
+const fetchSeq = ref(0)
+const cache = ref({
+  friends: { ts: 0 },
+  groups: { ts: 0 },
+  new: { ts: 0 },
+  all: { ts: 0 }
+})
+
+const getItemId = item => {
+  return item?.id ?? item?.friendId ?? item?.userId ?? item?.groupId ?? null
+}
+
+const getItemName = item => {
+  return item?.remark || item?.friendName || item?.name || item?.groupName || item?.nickname || item?.username || ''
+}
+
+const getItemAvatar = item => {
+  return item?.avatar || item?.friendAvatar || item?.headImg || item?.groupAvatar || ''
+}
 
 // ==================== Composables ====================
 // 搜索高亮
@@ -711,18 +745,23 @@ const listTitle = computed(() => {
 
 const currentListTitle = computed(() => listTitle.value)
 
+const isFriendNav = computed(() => {
+  if (currentNav.value === 'friends') { return true }
+  return friendGroups.value.some(g => g.groupName === currentNav.value)
+})
+
 const currentList = computed(() => {
   if (currentNav.value === 'all') {
     return allUsers.value
   }
   if (currentNav.value === 'friends') {
     // 全部好友 - 展平所有分组
-    return friendGroups.value.flatMap(g => g.friends)
+    return friendGroups.value.flatMap(g => g.friends || g.contacts || [])
   }
   // 检查是否是分组导航
   const group = friendGroups.value.find(g => g.groupName === currentNav.value)
   if (group) {
-    return group.friends || []
+    return group.friends || group.contacts || []
   }
   if (currentNav.value === 'groups') { return groupList.value }
   if (currentNav.value === 'org') { return orgMembers.value }
@@ -736,6 +775,7 @@ const switchNav = nav => {
   currentNav.value = nav
   selectedItemId.value = null
   selectedItem.value = null
+  if (nav === 'recommended') { recommendedCount.value = 0 }
   fetchData(nav)
 }
 
@@ -758,44 +798,132 @@ const selectDept = async dept => {
 }
 
 const selectItem = item => {
-  selectedItemId.value = item.id
+  selectedItemId.value = getItemId(item)
   selectedItem.value = item
 }
 
-const handleSearch = useDebounceFn(async () => {
-  if (!searchQuery.value) {
+const handleSearch = useDebounceFn(() => {
+  const q = searchQuery.value?.trim()
+  if (!q) {
     searchResults.value = []
     return
   }
-  try {
-    const res = await searchContacts(searchQuery.value)
-    searchResults.value = res.data || []
-  } catch (error) {
-    console.error(error)
+
+  const keyword = q.toLowerCase()
+  const results = []
+
+  const pushUnique = item => {
+    const id = getItemId(item)
+    if (!id) { return }
+    if (results.some(r => getItemId(r) === id && r.type === item.type)) { return }
+    results.push(item)
   }
+
+  const friendIdSet = new Set()
+  friendGroups.value.forEach(g => {
+    const friends = g.friends || g.contacts || []
+    friends.forEach(friend => {
+      if (friend.friendId) { friendIdSet.add(friend.friendId) }
+      const hay = [
+        friend.remark,
+        friend.friendName,
+        friend.nickname,
+        friend.name,
+        friend.username,
+        friend.pinyin
+      ].filter(Boolean).join(' ').toLowerCase()
+      if (hay.includes(keyword)) {
+        pushUnique({
+          ...friend,
+          type: 'friend',
+          name: getItemName(friend),
+          avatar: getItemAvatar(friend)
+        })
+      }
+    })
+  })
+
+  groupList.value.forEach(group => {
+    const hay = [group.name, group.groupName, group.notice, group.description].filter(Boolean).join(' ').toLowerCase()
+    if (hay.includes(keyword)) {
+      pushUnique({
+        ...group,
+        type: 'group',
+        isGroup: true,
+        name: group.name || group.groupName,
+        avatar: group.avatar || group.groupAvatar
+      })
+    }
+  })
+
+  if (results.length < 30 && allUsers.value.length > 0) {
+    for (const user of allUsers.value) {
+      if (results.length >= 50) { break }
+      if (friendIdSet.has(user.id)) { continue }
+      const hay = [user.nickname, user.name, user.username, user.phone, user.email].filter(Boolean).join(' ').toLowerCase()
+      if (hay.includes(keyword)) {
+        pushUnique({
+          ...user,
+          type: 'user',
+          name: user.nickname || user.name || user.username,
+          avatar: user.avatar
+        })
+      }
+    }
+  }
+
+  searchResults.value = results.slice(0, 50)
 }, 300)
 
-const fetchData = async nav => {
+const shouldUseCache = nav => {
+  const entry = cache.value[nav]
+  if (!entry?.ts) { return false }
+  if (Date.now() - entry.ts > 30 * 1000) { return false }
+  if (nav === 'friends') { return friendGroups.value.length > 0 }
+  if (nav === 'groups') { return groupList.value.length > 0 }
+  if (nav === 'new') { return pendingCount.value > 0 }
+  if (nav === 'all') { return allUsers.value.length > 0 }
+  return false
+}
+
+const fetchData = async (nav, options = {}) => {
+  const force = Boolean(options.force)
+  if (!force && shouldUseCache(nav)) { return }
+
+  const seq = ++fetchSeq.value
   loading.value = true
   try {
     if (nav === 'friends') {
+      if (force) {
+        await clearFriendListCache().catch(() => null)
+      }
       const res = await getGroupedFriendList()
-      friendGroups.value = res.data || []
+      friendGroups.value = (res.data || []).map(g => {
+        if (!g) { return g }
+        const contacts = g.contacts || g.friends || []
+        return { ...g, contacts, friends: contacts }
+      })
+      cache.value.friends.ts = Date.now()
     } else if (nav === 'groups') {
       const res = await getGroups()
       groupList.value = res.data || []
+      cache.value.groups.ts = Date.now()
     } else if (nav === 'new') {
       const res = await getFriendRequests()
       friendRequests.value = res.data || []
-      pendingCount.value = (res.data || []).length
+      pendingCount.value = (res.data || []).filter(r => r.status === 'PENDING').length
+      cache.value.new.ts = Date.now()
     } else if (nav === 'all') {
       const res = await getAllUsers()
       allUsers.value = res.data || []
+      cache.value.all.ts = Date.now()
     }
   } catch (error) {
     console.error(error)
   } finally {
-    loading.value = false
+    if (seq === fetchSeq.value) {
+      loading.value = false
+    }
   }
 }
 
@@ -804,31 +932,37 @@ const handleMessage = contact => {
   emit('switch-module', 'chat')
 
   // 需要创建或切换到与该联系人的会话
-  if (contact.id) {
-    store.dispatch('im/session/createAndSwitchSession', {
-      type: 'PRIVATE',
-      targetId: contact.id
-    }).catch(error => {
-      console.error('创建会话失败:', error)
-    })
-  }
+  const isGroup = Boolean(contact?.isGroup || contact?.type === 'group')
+  const payload = isGroup
+    ? { type: 'GROUP', targetId: contact?.id ?? contact?.groupId }
+    : { type: 'PRIVATE', targetId: contact?.friendId ?? contact?.id }
+
+  if (!payload.targetId) { return }
+
+  store.dispatch('im/session/createAndSwitchSession', payload).catch(error => {
+    console.error('创建会话失败:', error)
+  })
 }
 
 const handleVoiceCall = contact => {
   // 触发语音通话
+  const targetUserId = contact?.friendId ?? contact?.id
+  if (!targetUserId) { return }
   emit('voice-call', {
-    userId: contact.id,
-    userName: contact.name || contact.nickname,
-    userAvatar: contact.avatar
+    userId: targetUserId,
+    userName: getItemName(contact),
+    userAvatar: getItemAvatar(contact)
   })
 }
 
 const handleVideoCall = contact => {
   // 触发视频通话
+  const targetUserId = contact?.friendId ?? contact?.id
+  if (!targetUserId) { return }
   emit('video-call', {
-    userId: contact.id,
-    userName: contact.name || contact.nickname,
-    userAvatar: contact.avatar
+    userId: targetUserId,
+    userName: getItemName(contact),
+    userAvatar: getItemAvatar(contact)
   })
 }
 
@@ -976,7 +1110,9 @@ const handleRecommendUpdate = () => {
 // 处理列表项点击（批量模式下切换选择）
 const handleItemClick = item => {
   if (batchMode.value) {
-    toggleContactSelection(item.id, !selectedContacts.value.has(item.id))
+    const id = getItemId(item)
+    if (!id) { return }
+    toggleContactSelection(id, !selectedContacts.value.has(id))
   } else {
     selectItem(item)
   }
@@ -1109,6 +1245,7 @@ onMounted(() => {
   // 预加载所有用户，用于显示数量
   getAllUsers().then(res => {
     allUsers.value = res.data || []
+    cache.value.all.ts = Date.now()
   })
   // Load org tree
   getOrgTree().then(res => {
@@ -1116,6 +1253,52 @@ onMounted(() => {
     flatDepts.value = res.data || []
   })
 })
+
+const updateVirtualListHeight = () => {
+  if (!listContentRef.value) { return }
+  const h = listContentRef.value.clientHeight
+  if (h > 0) { virtualListHeight.value = h }
+}
+
+useResizeObserver(listContentRef, () => {
+  updateVirtualListHeight()
+})
+
+watch([currentNav, loading], () => {
+  nextTick(() => updateVirtualListHeight())
+})
+
+const refreshCurrent = async () => {
+  if (currentNav.value === 'recommended') {
+    recommendedContactsRef.value?.refresh?.()
+    return
+  }
+  if (currentNav.value === 'new') {
+    newFriendsViewRef.value?.refresh?.()
+    await fetchData('new', { force: true })
+    return
+  }
+  if (currentNav.value === 'org') {
+    if (selectedDeptId.value) {
+      loading.value = true
+      try {
+        const res = await getDepartmentMembers(selectedDeptId.value)
+        orgMembers.value = res.data || []
+      } catch (error) {
+        console.error(error)
+      } finally {
+        loading.value = false
+      }
+      return
+    }
+    return
+  }
+  if (currentNav.value === 'friends' || isFriendNav.value) {
+    await fetchData('friends', { force: true })
+    return
+  }
+  await fetchData(currentNav.value, { force: true })
+}
 
 watch(showSearchPanel, val => {
   if (val) {
