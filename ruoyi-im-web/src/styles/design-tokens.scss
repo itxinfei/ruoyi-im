@@ -280,6 +280,20 @@
   --dt-bg-pinned-dark: rgba(255, 255, 255, 0.03);
   --dt-scrollbar-thumb: rgba(0, 0, 0, 0.1);
   --dt-scrollbar-thumb-dark: rgba(255, 255, 255, 0.1);
+  --dt-scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+  --dt-scrollbar-thumb-dark-hover: rgba(255, 255, 255, 0.25);
+  --dt-scrollbar-thumb-dingtalk: rgba(0, 137, 255, 0.2);
+  --dt-scrollbar-thumb-dingtalk-hover: rgba(0, 137, 255, 0.3);
+  --dt-scrollbar-thumb-dingtalk-dark: rgba(0, 137, 255, 0.3);
+  --dt-scrollbar-thumb-dingtalk-dark-hover: rgba(0, 137, 255, 0.4);
+
+  // === Semantic Colors Hover States ===
+  --dt-success-hover: #73d13d;
+  --dt-warning-hover: #ffc53d;
+  --dt-error-hover: #ff7875;
+
+  // === Tooltip Background ===
+  --dt-tooltip-bg-dark: rgba(0, 0, 0, 0.85);
 
   --dt-text-primary-dark: #E8E8E8;
   --dt-text-secondary-dark: #A0A8B8;
