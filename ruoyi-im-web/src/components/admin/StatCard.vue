@@ -9,7 +9,7 @@
       <div
         v-if="icon || $slots.icon"
         class="stat-card__icon"
-        :style="{ backgroundColor: iconColor }"
+        :style="{ '--icon-bg': iconColor }"
       >
         <slot name="icon">
           <el-icon :size="iconSize">
@@ -94,7 +94,7 @@ const props = defineProps({
   // 图标背景色
   iconColor: {
     type: String,
-    default: '#409eff'
+    default: 'var(--dt-brand-color)'
   },
   // 图标大小
   iconSize: {
@@ -153,6 +153,8 @@ const handleClick = () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 .stat-card {
   transition: all 0.3s ease;
 
@@ -181,7 +183,8 @@ const handleClick = () => {
     width: 56px;
     height: 56px;
     border-radius: var(--dt-radius-lg);
-    color: #fff;
+    background: var(--icon-bg, var(--dt-brand-color));
+    color: var(--dt-text-inverse);
     flex-shrink: 0;
   }
 
@@ -228,11 +231,11 @@ const handleClick = () => {
     font-weight: 500;
 
     &--up {
-      color: #67c23a;
+      color: var(--dt-success-color);
     }
 
     &--down {
-      color: #f56c6c;
+      color: var(--dt-error-color);
     }
 
     &--flat {
