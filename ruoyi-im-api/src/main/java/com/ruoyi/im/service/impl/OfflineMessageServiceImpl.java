@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.service.IOfflineMessageService;
 import com.ruoyi.im.service.ImMessagePushService;
-import com.ruoyi.im.websocket.ImWebSocketEndpoint;
+import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -34,13 +34,19 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
     private static final long OFFLINE_MESSAGE_EXPIRE_DAYS = 7;
     private static final int MAX_OFFLINE_MESSAGES = 1000;
 
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
+    private final ImMessagePushService messagePushService;
+    private final ImRedisUtil imRedisUtil;
 
     public OfflineMessageServiceImpl(RedisTemplate<String, Object> redisTemplate,
-                                      ObjectMapper objectMapper) {
+                                      ObjectMapper objectMapper,
+                                      ImMessagePushService messagePushService,
+                                      ImRedisUtil imRedisUtil) {
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
+        this.messagePushService = messagePushService;
+        this.imRedisUtil = imRedisUtil;
     }
 
     @Override
@@ -149,8 +155,9 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
             return 0;
         }
 
-        // 检查用户是否在线
-        if (!ImWebSocketEndpoint.isUserOnline(userId)) {
+        // 优先使用Redis检查用户在线状态
+        boolean isOnline = imRedisUtil.isOnlineUser(userId);
+        if (!isOnline) {
             log.warn("用户不在线，无法推送离线消息: userId={}", userId);
             return 0;
         }
@@ -176,8 +183,8 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
                 pushMsg.setCreateTime(message.getCreateTime());
                 pushMsg.setIsOffline(true);
 
-                // 推送给用户
-                ImWebSocketEndpoint.sendToUser(userId, pushMsg);
+                // 使用messagePushService推送给用户
+                messagePushService.pushToUser(userId, pushMsg);
                 pushedCount++;
             } catch (Exception e) {
                 log.error("推送离线消息失败: userId={}, messageId={}", userId, message.getId(), e);

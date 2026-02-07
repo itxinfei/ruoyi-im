@@ -17,7 +17,6 @@ import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.vo.meeting.ImVideoMeetingDetailVO;
 import com.ruoyi.im.vo.meeting.ImVideoMeetingVO;
-import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ruoyi.im.util.BeanConvertUtil;
@@ -763,19 +762,9 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             notification.put("isSharing", isSharing);
             notification.put("timestamp", System.currentTimeMillis());
 
-            String messageJson = new ObjectMapper().writeValueAsString(notification);
-
-            // 广播给所有在线的会议参与者
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            // 使用broadcastService广播给所有会议参与者
             for (ImVideoMeetingParticipant participant : participants) {
-                javax.websocket.Session session = onlineUsers.get(participant.getUserId());
-                if (session != null && session.isOpen()) {
-                    try {
-                        session.getBasicRemote().sendText(messageJson);
-                    } catch (Exception e) {
-                        log.error("发送屏幕共享通知失败: userId={}", participant.getUserId(), e);
-                    }
-                }
+                webSocketBroadcastService.broadcastToUserExcept(participant.getUserId(), notification);
             }
 
             log.info("屏幕共享事件已推送: meetingId={}, userId={}, sharing={}", meetingId, userId, isSharing);
