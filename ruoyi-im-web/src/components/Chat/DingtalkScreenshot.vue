@@ -793,7 +793,7 @@ const confirmTextInput = () => {
   const textWidth = metrics.width
   const textHeight = 14 + lineWidth.value * 2
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)' // Canvas 绘图用，保持 rgba
   ctx.fillRect(x - 2, y - 2, textWidth + 4, textHeight + 4)
 
   // 绘制文字
@@ -1384,13 +1384,13 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--dt-screenshot-border-dialog);
 }
 
 .ocr-result-title {
   font-size: 16px;
   font-weight: 500;
-  color: #fff;
+  color: var(--dt-text-inverse);
 }
 
 .ocr-close-btn {
@@ -1421,7 +1421,7 @@ onUnmounted(() => {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--dt-screenshot-text-muted-9);
   font-size: 14px;
   line-height: 1.8;
   white-space: pre-wrap;
@@ -1430,7 +1430,7 @@ onUnmounted(() => {
 
 .ocr-result-footer {
   padding: 12px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--dt-screenshot-border-dialog);
   display: flex;
   justify-content: flex-end;
 }
@@ -1440,8 +1440,8 @@ onUnmounted(() => {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #0089FF;
-  color: #fff;
+  background: var(--dt-brand-color);
+  color: var(--dt-text-inverse);
   border: none;
   border-radius: var(--dt-radius-md);
   font-size: 14px;
@@ -1450,7 +1450,7 @@ onUnmounted(() => {
 }
 
 .ocr-btn:hover {
-  background: #0e5fd6;
+  background: var(--dt-brand-hover);
 }
 
 .ocr-btn svg {

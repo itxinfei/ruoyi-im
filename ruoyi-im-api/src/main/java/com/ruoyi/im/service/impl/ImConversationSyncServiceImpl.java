@@ -10,7 +10,6 @@ import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.vo.sync.ConversationSyncEvent;
 import com.ruoyi.im.vo.sync.ConversationSyncResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,17 +58,6 @@ public class ImConversationSyncServiceImpl implements ImConversationSyncService 
         this.conversationMemberMapper = conversationMemberMapper;
         this.broadcastService = broadcastService;
     }
-
-    /**
-     * 会话事件存储（临时缓存，用于同步）
-     * 格式：userId -> List<ConversationSyncEvent>
-     */
-    private static final Map<Long, List<ConversationSyncEvent>> eventCache = new ConcurrentHashMap<>();
-
-    /**
-     * 事件保留时间（7天）
-     */
-    private static final long EVENT_RETENTION_DAYS = 7;
 
     @Override
     public ConversationSyncResponse syncConversations(Long userId, String deviceId, Long lastSyncTime) {
