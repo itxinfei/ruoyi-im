@@ -6,10 +6,12 @@ import com.ruoyi.im.dto.contact.ImFriendAddRequest;
 import com.ruoyi.im.dto.contact.ImFriendUpdateRequest;
 import com.ruoyi.im.service.ImBatchOperationService;
 import com.ruoyi.im.service.ImFriendService;
+import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
+import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,6 +42,7 @@ public class ImContactController {
     private final JdbcTemplate jdbcTemplate;
     private final ImRedisUtil imRedisUtil;
     private final ImBatchOperationService imBatchOperationService;
+    private final ImUserService imUserService;
 
     /**
      * 构造器注入依赖
@@ -49,11 +52,13 @@ public class ImContactController {
     public ImContactController(ImFriendService imFriendService,
             JdbcTemplate jdbcTemplate,
             ImRedisUtil imRedisUtil,
-            ImBatchOperationService imBatchOperationService) {
+            ImBatchOperationService imBatchOperationService,
+            ImUserService imUserService) {
         this.imFriendService = imFriendService;
         this.jdbcTemplate = jdbcTemplate;
         this.imRedisUtil = imRedisUtil;
         this.imBatchOperationService = imBatchOperationService;
+        this.imUserService = imUserService;
     }
 
     /**
@@ -726,7 +731,11 @@ public class ImContactController {
             result.put("deleted", deleted);
 
             // 3. 统计张三的好友数
-            Long zhangsanId = getUserId("zhangsan");
+            Long zhangsanId = null;
+            ImUser zhangsan = imUserService.findByUsername("zhangsan");
+            if (zhangsan != null) {
+                zhangsanId = zhangsan.getId();
+            }
             if (zhangsanId != null) {
                 String countSql = "SELECT COUNT(*) FROM im_friend WHERE user_id = ? AND is_deleted = 0";
                 Integer friendCount = jdbcTemplate.queryForObject(countSql, Integer.class, zhangsanId);

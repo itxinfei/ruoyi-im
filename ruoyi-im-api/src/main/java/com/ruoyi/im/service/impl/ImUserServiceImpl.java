@@ -360,7 +360,7 @@ public class ImUserServiceImpl implements ImUserService {
             try {
                 userIds.add(Long.parseLong(userIdStr));
             } catch (NumberFormatException e) {
-                log.warn("无效的用户ID格式: userIdStr={}", userIdStr);
+                logger.warn("无效的用户ID格式: userIdStr={}", userIdStr);
             }
         }
 

@@ -179,7 +179,7 @@ public class ImFileAdminController {
         // 聚合查询需要使用 QueryWrapper（Lambda 不支持字符串 SELECT 子句）
         QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         wrapper.select("file_type", "COUNT(*) as count", "SUM(file_size) as totalSize");
-        wrapper.eq(ImFileAsset::getStatus, "ACTIVE");
+        wrapper.eq("status", "ACTIVE");
         wrapper.groupBy("file_type");
 
         List<Map<String, Object>> statistics = fileAssetMapper.selectMaps(wrapper);
@@ -197,7 +197,7 @@ public class ImFileAdminController {
         // 聚合查询需要使用 QueryWrapper（Lambda 不支持字符串 SELECT 子句）
         QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
         wrapper.select("uploader_id", "COUNT(*) as count", "SUM(file_size) as totalSize");
-        wrapper.eq(ImFileAsset::getStatus, "ACTIVE");
+        wrapper.eq("status", "ACTIVE");
         wrapper.groupBy("uploader_id");
         wrapper.orderByDesc("COUNT(*)");
         wrapper.last("LIMIT 10");

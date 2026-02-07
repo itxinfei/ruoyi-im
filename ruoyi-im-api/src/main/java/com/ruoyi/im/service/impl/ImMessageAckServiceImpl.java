@@ -85,7 +85,12 @@ public class ImMessageAckServiceImpl implements ImMessageAckService {
         log.info("记录接收ACK: messageId={}, userId={}, deviceId={}", messageId, userId, deviceId);
 
         // 广播接收确认给其他设备
-        broadcastAckToOtherDevices(userId, messageId, ImMessageAck.ACK_TYPE_RECEIVE);
+        Map<String, Object> ackMessage = new HashMap<>();
+        ackMessage.put("type", "message_ack");
+        ackMessage.put("messageId", messageId);
+        ackMessage.put("ackType", ImMessageAck.ACK_TYPE_RECEIVE);
+        ackMessage.put("timestamp", System.currentTimeMillis());
+        broadcastService.broadcastToUserExcept(userId, ackMessage);
     }
 
     @Override
