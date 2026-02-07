@@ -116,38 +116,39 @@ const handleMoreCommand = command => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 50px;
-  min-height: 50px;
+  height: 42px;
+  min-height: 42px;
   padding-bottom: 0;
+  margin-bottom: 4px;
 
   .toolbar-left {
     display: flex;
     align-items: center;
-    gap: 12px; // 从20px调整为12px,更紧凑
+    gap: 8px;
   }
 }
 
 .toolbar-btn {
-  width: 32px; // 野火IM:32px按钮
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   background: transparent;
-  color: #666666; // 野火IM:灰色图标
+  color: #666666;
   cursor: pointer;
   border-radius: 4px;
-  transition: all var(--dt-transition-fast);
+  transition: all 0.15s ease;
   padding: 0;
 
   .material-icons-outlined {
-    font-size: 20px; // 野火IM:20px图标
+    font-size: 18px;
   }
 
   &:hover {
     background: rgba(0, 0, 0, 0.05);
-    color: #4168e0; // hover时变为野火IM蓝色
+    color: #0089ff;
   }
 
   &:active {
@@ -159,24 +160,24 @@ const handleMoreCommand = command => {
 
     &:hover {
       background: rgba(255, 255, 255, 0.08);
-      color: #4168e0;
+      color: #0089ff;
     }
   }
 
   &:focus-visible {
-    outline: 2px solid var(--dt-brand-color);
+    outline: 2px solid #0089ff;
     outline-offset: 2px;
   }
 
   &.active {
-    background: var(--dt-brand-bg);
-    color: var(--dt-brand-color);
+    background: #e6f4ff;
+    color: #0089ff;
   }
 
   // 更多按钮
   &.more-btn {
     &:hover {
-      background: var(--dt-bg-hover);
+      background: rgba(0, 0, 0, 0.05);
     }
   }
 
@@ -184,23 +185,23 @@ const handleMoreCommand = command => {
 
 // 更多菜单样式
 :global(.toolbar-more-menu) {
-  min-width: 160px;
+  min-width: 140px;
 
   .el-dropdown-menu__item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    font-size: 14px;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
 
     .material-icons-outlined {
-      font-size: 18px;
-      color: var(--dt-text-secondary);
+      font-size: 16px;
+      color: #5f6672;
     }
 
     &:hover {
       .material-icons-outlined {
-        color: var(--dt-brand-color);
+        color: #0089ff;
       }
     }
   }
@@ -210,16 +211,16 @@ const handleMoreCommand = command => {
 :global(.dark) {
   .input-toolbar {
     .toolbar-btn {
-      color: var(--dt-text-secondary-dark);
+      color: #a0a8b8;
 
       &:hover {
         background: rgba(255, 255, 255, 0.08);
-        color: var(--dt-brand-color);
+        color: #0089ff;
       }
 
       &.active {
         background: rgba(0, 137, 255, 0.15);
-        color: var(--dt-brand-color);
+        color: #0089ff;
       }
     }
   }

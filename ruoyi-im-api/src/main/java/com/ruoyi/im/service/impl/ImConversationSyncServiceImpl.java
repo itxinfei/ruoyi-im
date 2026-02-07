@@ -34,17 +34,31 @@ import java.util.stream.Collectors;
 @Service
 public class ImConversationSyncServiceImpl implements ImConversationSyncService {
 
-    @Autowired
-    private ImConversationSyncPointMapper syncPointMapper;
+    private final ImConversationSyncPointMapper syncPointMapper;
+    private final ImConversationMemberService conversationMemberService;
+    private final ImConversationMemberMapper conversationMemberMapper;
+    private final ImWebSocketBroadcastService broadcastService;
 
-    @Autowired
-    private ImConversationMemberService conversationMemberService;
+    /**
+     * 会话事件存储（临时缓存，用于同步）
+     * 格式：userId -> List<ConversationSyncEvent>
+     */
+    private static final Map<Long, List<ConversationSyncEvent>> eventCache = new ConcurrentHashMap<>();
 
-    @Autowired
-    private ImConversationMemberMapper conversationMemberMapper;
+    /**
+     * 事件保留时间（7天）
+     */
+    private static final long EVENT_RETENTION_DAYS = 7;
 
-    @Autowired
-    private ImWebSocketBroadcastService broadcastService;
+    public ImConversationSyncServiceImpl(ImConversationSyncPointMapper syncPointMapper,
+                                         ImConversationMemberService conversationMemberService,
+                                         ImConversationMemberMapper conversationMemberMapper,
+                                         ImWebSocketBroadcastService broadcastService) {
+        this.syncPointMapper = syncPointMapper;
+        this.conversationMemberService = conversationMemberService;
+        this.conversationMemberMapper = conversationMemberMapper;
+        this.broadcastService = broadcastService;
+    }
 
     /**
      * 会话事件存储（临时缓存，用于同步）

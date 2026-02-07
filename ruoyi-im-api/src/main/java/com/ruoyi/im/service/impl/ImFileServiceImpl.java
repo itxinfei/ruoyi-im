@@ -36,11 +36,14 @@ public class ImFileServiceImpl implements ImFileService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImFileServiceImpl.class);
 
-    @Autowired
-    private ImFileAssetMapper imFileAssetMapper;
+    private final ImFileAssetMapper imFileAssetMapper;
+    private final FileUploadConfig fileUploadConfig;
 
-    @Resource
-    private FileUploadConfig fileUploadConfig;
+    public ImFileServiceImpl(ImFileAssetMapper imFileAssetMapper,
+                             FileUploadConfig fileUploadConfig) {
+        this.imFileAssetMapper = imFileAssetMapper;
+        this.fileUploadConfig = fileUploadConfig;
+    }
 
     @Override
     public ImFileVO uploadFile(MultipartFile file, Long userId) {

@@ -43,17 +43,20 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMeetingRoomServiceImpl.class);
 
-    @Autowired
-    private ImMeetingRoomMapper roomMapper;
+    private final ImMeetingRoomMapper roomMapper;
+    private final ImMeetingBookingMapper bookingMapper;
+    private final ImWebSocketBroadcastService webSocketBroadcastService;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImMeetingBookingMapper bookingMapper;
-
-    @Autowired
-    private ImWebSocketBroadcastService webSocketBroadcastService;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    public ImMeetingRoomServiceImpl(ImMeetingRoomMapper roomMapper,
+                                    ImMeetingBookingMapper bookingMapper,
+                                    ImWebSocketBroadcastService webSocketBroadcastService,
+                                    ImUserMapper userMapper) {
+        this.roomMapper = roomMapper;
+        this.bookingMapper = bookingMapper;
+        this.webSocketBroadcastService = webSocketBroadcastService;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

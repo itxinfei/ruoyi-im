@@ -22,8 +22,11 @@ import java.util.Map;
 @Service
 public class ImGroupAnnouncementReadServiceImpl implements ImGroupAnnouncementReadService {
 
-    @Autowired
-    private ImGroupAnnouncementReadMapper announcementReadMapper;
+    private final ImGroupAnnouncementReadMapper announcementReadMapper;
+
+    public ImGroupAnnouncementReadServiceImpl(ImGroupAnnouncementReadMapper announcementReadMapper) {
+        this.announcementReadMapper = announcementReadMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

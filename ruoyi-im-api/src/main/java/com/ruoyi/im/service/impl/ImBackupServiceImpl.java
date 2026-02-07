@@ -49,32 +49,35 @@ public class ImBackupServiceImpl implements ImBackupService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImBackupServiceImpl.class);
 
-    @Autowired
-    private ImBackupMapper imBackupMapper;
+    private final ImBackupMapper imBackupMapper;
+    private final ImUserService imUserService;
+    private final ImMessageMapper imMessageMapper;
+    private final ImConversationMemberMapper imConversationMemberMapper;
+    private final ObjectMapper objectMapper;
+    private final String backupPath;
+    private final String datasourceUrl;
+    private final String datasourceUsername;
+    private final String datasourcePassword;
 
-    @Autowired
-    private ImUserService imUserService;
-
-    @Autowired
-    private ImMessageMapper imMessageMapper;
-
-    @Autowired
-    private ImConversationMemberMapper imConversationMemberMapper;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Value("${backup.path:/tmp/im-backup}")
-    private String backupPath;
-
-    @Value("${spring.datasource.url:jdbc:mysql://localhost:3306/ruoyi-im}")
-    private String datasourceUrl;
-
-    @Value("${spring.datasource.username:root}")
-    private String datasourceUsername;
-
-    @Value("${spring.datasource.password:}")
-    private String datasourcePassword;
+    public ImBackupServiceImpl(ImBackupMapper imBackupMapper,
+                              ImUserService imUserService,
+                              ImMessageMapper imMessageMapper,
+                              ImConversationMemberMapper imConversationMemberMapper,
+                              ObjectMapper objectMapper,
+                              @Value("${backup.path:/tmp/im-backup}") String backupPath,
+                              @Value("${spring.datasource.url:jdbc:mysql://localhost:3306/ruoyi-im}") String datasourceUrl,
+                              @Value("${spring.datasource.username:root}") String datasourceUsername,
+                              @Value("${spring.datasource.password:}") String datasourcePassword) {
+        this.imBackupMapper = imBackupMapper;
+        this.imUserService = imUserService;
+        this.imMessageMapper = imMessageMapper;
+        this.imConversationMemberMapper = imConversationMemberMapper;
+        this.objectMapper = objectMapper;
+        this.backupPath = backupPath;
+        this.datasourceUrl = datasourceUrl;
+        this.datasourceUsername = datasourceUsername;
+        this.datasourcePassword = datasourcePassword;
+    }
 
     @Override
     public List<Map<String, Object>> getBackupList() {

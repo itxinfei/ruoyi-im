@@ -221,7 +221,7 @@ function handleOpenSearch() {
   height: 100vh;
   max-height: 100vh;
   background: var(--dt-bg-sidebar-gradient);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 0 1px var(--dt-white-10), 0 4px 24px var(--dt-black-12);
   animation: slideInLeft 0.4s var(--dt-ease-out);
   overflow: hidden;
   z-index: var(--dt-z-sticky); // 使用设计令牌，确保在其他浮动元素之上
@@ -229,7 +229,7 @@ function handleOpenSearch() {
 }
 
 .bg-nav-light {
-  background: linear-gradient(180deg, #0089FF 0%, #006ECC 100%);
+  background: linear-gradient(180deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
 }
 
 .nav-logo-wrapper {
@@ -244,7 +244,7 @@ function handleOpenSearch() {
   position: relative;
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--dt-white-20);;
   border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
@@ -253,14 +253,14 @@ function handleOpenSearch() {
 }
 
 .nav-logo:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--dt-white-25);;
   transform: scale(1.05);
 }
 
 .nav-logo-text {
   font-size: 20px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--dt-text-inverse);
   letter-spacing: -0.5px;
   line-height: 1;
 }
@@ -287,7 +287,7 @@ function handleOpenSearch() {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px var(--dt-black-20);
   animation: scaleIn 0.3s var(--dt-ease-bounce), pulse 2s ease-in-out infinite;
 }
 
@@ -308,7 +308,7 @@ function handleOpenSearch() {
 }
 
 .nav-items::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--dt-white-20);;
   border-radius: var(--dt-radius-sm);
 }
 
@@ -324,7 +324,7 @@ function handleOpenSearch() {
   border: none;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--dt-white-85);
   animation: fadeInUp 0.4s var(--dt-ease-out) both;
 
   @for $i from 1 through 10 {
@@ -335,16 +335,16 @@ function handleOpenSearch() {
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--dt-white-15);
   color: #fff;
   transform: scale(1.05);
   backdrop-filter: blur(8px);
 }
 
 .nav-item-active {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--dt-white-20);;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--dt-black-15);
   animation: pulse 0.3s var(--dt-ease-out);
   backdrop-filter: blur(12px);
 }
@@ -358,7 +358,7 @@ function handleOpenSearch() {
   background: #fff;
   border-radius: 0 2px 2px 0;
   animation: slideInLeft 0.2s var(--dt-ease-out);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 8px var(--dt-white-50);
 }
 
 .nav-item-icon {
@@ -401,7 +401,7 @@ function handleOpenSearch() {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px var(--dt-black-20);
   animation: scaleIn 0.3s var(--dt-ease-bounce);
 }
 
@@ -428,21 +428,21 @@ function handleOpenSearch() {
   border: none;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--dt-white-65);
   position: relative;
 }
 
 .nav-item-action:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.9);
+  background: var(--dt-white-12);
+  color: var(--dt-white-90);
   transform: scale(1.05);
   backdrop-filter: blur(8px);
 }
 
 .nav-item-action.nav-item-active {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--dt-white-18);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--dt-black-10);
 }
 
 .auto-badge {
@@ -483,13 +483,13 @@ function handleOpenSearch() {
 }
 
 .nav-avatar:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--dt-white-15);
   transform: scale(1.05);
   backdrop-filter: blur(8px);
 }
 
 .nav-avatar-active {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--dt-white-20);;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(12px);
 }
@@ -505,7 +505,7 @@ function handleOpenSearch() {
 }
 
 .nav-avatar :deep(.avatar-inner) {
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--dt-white-30);
   transition: border-color 0.3s var(--dt-ease-out);
 }
 
@@ -514,7 +514,7 @@ function handleOpenSearch() {
 }
 
 .nav-avatar-active :deep(.avatar-inner) {
-  border-color: rgba(255, 255, 255, 0.9);
+  border-color: var(--dt-white-90);
 }
 
 .nav-avatar-status {

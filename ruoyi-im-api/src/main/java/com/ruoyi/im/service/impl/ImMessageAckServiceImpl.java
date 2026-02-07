@@ -29,14 +29,17 @@ import java.util.stream.Collectors;
 @Service
 public class ImMessageAckServiceImpl implements ImMessageAckService {
 
-    @Autowired
-    private ImMessageAckMapper ackMapper;
+    private final ImMessageAckMapper ackMapper;
+    private final ImUserDeviceMapper deviceMapper;
+    private final ImWebSocketBroadcastService broadcastService;
 
-    @Autowired
-    private ImUserDeviceMapper deviceMapper;
-
-    @Autowired
-    private ImWebSocketBroadcastService broadcastService;
+    public ImMessageAckServiceImpl(ImMessageAckMapper ackMapper,
+                                   ImUserDeviceMapper deviceMapper,
+                                   ImWebSocketBroadcastService broadcastService) {
+        this.ackMapper = ackMapper;
+        this.deviceMapper = deviceMapper;
+        this.broadcastService = broadcastService;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

@@ -32,14 +32,17 @@ import java.util.stream.Collectors;
 @Service
 public class ImScheduleEventServiceImpl implements ImScheduleEventService {
 
-    @Autowired
-    private ImScheduleEventMapper eventMapper;
+    private final ImScheduleEventMapper eventMapper;
+    private final ImScheduleParticipantMapper participantMapper;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImScheduleParticipantMapper participantMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    public ImScheduleEventServiceImpl(ImScheduleEventMapper eventMapper,
+                                      ImScheduleParticipantMapper participantMapper,
+                                      ImUserMapper userMapper) {
+        this.eventMapper = eventMapper;
+        this.participantMapper = participantMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

@@ -67,26 +67,29 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
      */
     private static final long COMPANY_QUOTA = 500L * 1024 * 1024 * 1024;
 
-    @Autowired
-    private ImCloudFolderMapper cloudFolderMapper;
+    private final ImCloudFolderMapper cloudFolderMapper;
+    private final ImCloudFileMapper cloudFileMapper;
+    private final ImCloudFileShareMapper cloudFileShareMapper;
+    private final ImCloudFileVersionMapper cloudFileVersionMapper;
+    private final ImFileAssetMapper fileAssetMapper;
+    private final ImUserMapper userMapper;
+    private final FileUploadConfig fileUploadConfig;
 
-    @Autowired
-    private ImCloudFileMapper cloudFileMapper;
-
-    @Autowired
-    private ImCloudFileShareMapper cloudFileShareMapper;
-
-    @Autowired
-    private ImCloudFileVersionMapper cloudFileVersionMapper;
-
-    @Autowired
-    private ImFileAssetMapper fileAssetMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Resource
-    private FileUploadConfig fileUploadConfig;
+    public ImCloudDriveServiceImpl(ImCloudFolderMapper cloudFolderMapper,
+                                   ImCloudFileMapper cloudFileMapper,
+                                   ImCloudFileShareMapper cloudFileShareMapper,
+                                   ImCloudFileVersionMapper cloudFileVersionMapper,
+                                   ImFileAssetMapper fileAssetMapper,
+                                   ImUserMapper userMapper,
+                                   FileUploadConfig fileUploadConfig) {
+        this.cloudFolderMapper = cloudFolderMapper;
+        this.cloudFileMapper = cloudFileMapper;
+        this.cloudFileShareMapper = cloudFileShareMapper;
+        this.cloudFileVersionMapper = cloudFileVersionMapper;
+        this.fileAssetMapper = fileAssetMapper;
+        this.userMapper = userMapper;
+        this.fileUploadConfig = fileUploadConfig;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

@@ -39,17 +39,20 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
 
     private static final Logger log = LoggerFactory.getLogger(ImDingMessageServiceImpl.class);
 
-    @Autowired
-    private ImDingMessageMapper dingMessageMapper;
+    private final ImDingMessageMapper dingMessageMapper;
+    private final ImDingReceiptMapper dingReceiptMapper;
+    private final ImDingTemplateMapper dingTemplateMapper;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImDingReceiptMapper dingReceiptMapper;
-
-    @Autowired
-    private ImDingTemplateMapper dingTemplateMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    public ImDingMessageServiceImpl(ImDingMessageMapper dingMessageMapper,
+                                    ImDingReceiptMapper dingReceiptMapper,
+                                    ImDingTemplateMapper dingTemplateMapper,
+                                    ImUserMapper userMapper) {
+        this.dingMessageMapper = dingMessageMapper;
+        this.dingReceiptMapper = dingReceiptMapper;
+        this.dingTemplateMapper = dingTemplateMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

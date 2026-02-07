@@ -48,26 +48,29 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
 
     private static final String DEFAULT_MEETING_SERVER_URL = "https://meeting.example.com";
 
-    @Autowired
-    private ImVideoMeetingMapper meetingMapper;
+    private final ImVideoMeetingMapper meetingMapper;
+    private final ImVideoMeetingParticipantMapper participantMapper;
+    private final ImUserMapper userMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ImRedisUtil redisUtil;
+    private final ImWebSocketBroadcastService webSocketBroadcastService;
+    private final String meetingServerUrl;
 
-    @Autowired
-    private ImVideoMeetingParticipantMapper participantMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-
-    @Autowired
-    private ImRedisUtil redisUtil;
-
-    @Autowired
-    private ImWebSocketBroadcastService webSocketBroadcastService;
-
-    @Value("${meeting.server.url:}")
-    private String meetingServerUrl;
+    public ImVideoMeetingServiceImpl(ImVideoMeetingMapper meetingMapper,
+                                     ImVideoMeetingParticipantMapper participantMapper,
+                                     ImUserMapper userMapper,
+                                     RedisTemplate<String, Object> redisTemplate,
+                                     ImRedisUtil redisUtil,
+                                     ImWebSocketBroadcastService webSocketBroadcastService,
+                                     @Value("${meeting.server.url:}") String meetingServerUrl) {
+        this.meetingMapper = meetingMapper;
+        this.participantMapper = participantMapper;
+        this.userMapper = userMapper;
+        this.redisTemplate = redisTemplate;
+        this.redisUtil = redisUtil;
+        this.webSocketBroadcastService = webSocketBroadcastService;
+        this.meetingServerUrl = meetingServerUrl;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

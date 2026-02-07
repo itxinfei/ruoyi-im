@@ -27,8 +27,11 @@ import java.util.stream.Collectors;
 @Service
 public class ImDeviceServiceImpl implements ImDeviceService {
 
-    @Autowired
-    private ImUserDeviceMapper deviceMapper;
+    private final ImUserDeviceMapper deviceMapper;
+
+    public ImDeviceServiceImpl(ImUserDeviceMapper deviceMapper) {
+        this.deviceMapper = deviceMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

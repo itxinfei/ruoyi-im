@@ -24,8 +24,11 @@ import java.util.List;
 @Service
 public class ImConversationMemberServiceImpl implements ImConversationMemberService {
 
-    @Autowired
-    private ImConversationMemberMapper conversationMemberMapper;
+    private final ImConversationMemberMapper conversationMemberMapper;
+
+    public ImConversationMemberServiceImpl(ImConversationMemberMapper conversationMemberMapper) {
+        this.conversationMemberMapper = conversationMemberMapper;
+    }
 
     @Override
     public List<ImConversationMemberVO> getConversationMemberList(Long userId) {

@@ -172,15 +172,19 @@ const handleNudge = () => {
 
 .message-item {
   display: flex;
-  align-items: center; // 垂直居中对齐，确保头像和气泡在一条水平直线上
-  margin-bottom: 12px; // 野火IM标准:消息间距12px
+  align-items: flex-start; // 顶部对齐，更自然
+  margin-bottom: 16px; // 消息间距16px，更舒适
   position: relative;
-  padding: 0;
-  transition: background var(--dt-transition-fast);
-  animation: messageFadeIn 0.2s var(--dt-ease-out) both;
+  padding: 4px 0;
+  transition: background 0.15s ease;
 
   &.is-own {
     flex-direction: row-reverse;
+  }
+
+  // 有发送者名字时增加顶部间距
+  &.has-sender-name {
+    padding-top: 20px;
   }
 }
 
@@ -229,15 +233,16 @@ const handleNudge = () => {
 // 发送者姓名 - 绝对定位，不影响气泡对齐
 .sender-name-absolute {
   position: absolute;
-  top: -22px; // 在气泡上方
+  top: -20px; // 在气泡上方
   left: 0;
-  font-size: var(--dt-font-size-xs);
-  color: var(--dt-text-tertiary);
+  font-size: 12px;
+  color: #86909c;
   white-space: nowrap;
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: none; // 避免点击事件冲突
+  line-height: 1.2;
 }
 
 // 有发送者名字时的布局调整（群聊）
@@ -286,15 +291,16 @@ const handleNudge = () => {
 
 // 内容包裹层 - 野火IM/钉钉风格
 .content-wrapper {
-  max-width: 85%;
+  max-width: 75%; // 稍微缩小最大宽度，更美观
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  margin: 0 12px; // 野火IM标准:头像与气泡间距12px
-  padding-top: 0; // 确保与头像顶部对齐
+  margin: 0 12px; // 头像与气泡间距12px
+  padding-top: 0;
+  position: relative; // 为发送者名字提供定位上下文
 
   &.is-merged {
-    margin-top: -8px; // 钉钉标准:合并消息 -8px
+    margin-top: -4px; // 合并消息间距稍微减小
   }
 }
 

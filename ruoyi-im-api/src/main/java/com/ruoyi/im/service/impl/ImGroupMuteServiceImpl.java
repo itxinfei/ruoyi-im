@@ -7,7 +7,6 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupMuteService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +21,13 @@ import java.util.List;
 @Service
 public class ImGroupMuteServiceImpl implements ImGroupMuteService {
 
-    @Autowired
-    private ImGroupMapper groupMapper;
+    private final ImGroupMapper groupMapper;
+    private final ImGroupMemberMapper groupMemberMapper;
 
-    @Autowired
-    private ImGroupMemberMapper groupMemberMapper;
+    public ImGroupMuteServiceImpl(ImGroupMapper groupMapper, ImGroupMemberMapper groupMemberMapper) {
+        this.groupMapper = groupMapper;
+        this.groupMemberMapper = groupMemberMapper;
+    }
 
     @Override
     @Transactional

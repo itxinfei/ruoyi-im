@@ -33,14 +33,17 @@ import java.util.stream.Collectors;
 @Service
 public class ImMessageSyncServiceImpl implements ImMessageSyncService {
 
-    @Autowired
-    private ImUserSyncPointMapper syncPointMapper;
+    private final ImUserSyncPointMapper syncPointMapper;
+    private final ImMessageMapper messageMapper;
+    private final ImConversationMemberService conversationMemberService;
 
-    @Autowired
-    private ImMessageMapper messageMapper;
-
-    @Autowired
-    private ImConversationMemberService conversationMemberService;
+    public ImMessageSyncServiceImpl(ImUserSyncPointMapper syncPointMapper,
+                                   ImMessageMapper messageMapper,
+                                   ImConversationMemberService conversationMemberService) {
+        this.syncPointMapper = syncPointMapper;
+        this.messageMapper = messageMapper;
+        this.conversationMemberService = conversationMemberService;
+    }
 
     @Override
     public ImUserSyncPoint getSyncPoint(Long userId, String deviceId) {

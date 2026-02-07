@@ -499,15 +499,15 @@ const canRecall = computed(() => {
 }
 
 .bubble-content {
-  padding: var(--dt-bubble-padding); // 钉钉/野火IM标准
-  border-radius: var(--dt-bubble-radius); // 钉钉/野火IM非对称圆角
-  font-size: var(--dt-font-size-content, 15px); // 钉钉标准:15px
-  line-height: 1.6; // 钉钉标准:1.6
+  padding: 10px 14px; // 钉钉/野火IM标准: 紧凑舒适的内边距
+  border-radius: 12px; // 钉钉风格圆角
+  font-size: 14px; // 标准字体大小
+  line-height: 1.5; // 舒适的行高
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
   min-width: 0;
-  transition: all var(--dt-transition-base);
+  transition: all 0.2s ease;
   display: flex;
   align-items: flex-start;
 
@@ -545,20 +545,18 @@ const canRecall = computed(() => {
 .message-bubble:not(.is-own) {
   .bubble-content {
     // 钉钉/野火IM: 白色背景，带微阴影
-    background: var(--dt-bubble-left-bg);
+    background: #ffffff;
     // 微妙边框
-    border: 1px solid var(--dt-bubble-left-border);
+    border: 1px solid #e8e8e8;
     // 非对称圆角：靠近头像一侧圆角较小（左侧4px）
-    border-radius: var(--dt-bubble-radius-left);
+    border-radius: 12px 12px 12px 4px;
     // 文字颜色
-    color: var(--dt-bubble-left-text);
+    color: #1f2329;
     // 钉钉风格阴影：微妙的立体感
-    box-shadow: var(--dt-bubble-shadow);
-    // 气泡进入动画
-    animation: bubbleInLeft 0.3s var(--dt-ease-out-bounce) both;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
     // 微妙的悬停效果
     &:hover {
-      box-shadow: var(--dt-shadow-card-hover);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       transform: translateY(-1px);
     }
   }
@@ -570,30 +568,20 @@ const canRecall = computed(() => {
 
   .bubble-content {
     // 钉钉: 蓝色渐变背景
-    background: linear-gradient(
-      135deg,
-      var(--dt-bubble-right-bg-start) 0%,
-      var(--dt-bubble-right-bg-end) 100%
-    );
+    background: linear-gradient(135deg, #0089ff 0%, #0066cc 100%);
     // 白色文字
-    color: var(--dt-bubble-right-text);
+    color: #ffffff;
     // 无边框
     border: none;
     // 非对称圆角：靠近头像一侧圆角较小（右侧4px）
-    border-radius: var(--dt-bubble-radius-right);
+    border-radius: 12px 12px 4px 12px;
     // 钉钉风格蓝色阴影
-    box-shadow: var(--dt-shadow-brand);
-    // 气泡进入动画
-    animation: bubbleInRight 0.3s var(--dt-ease-out-bounce) both;
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.25);
     // 微妙的悬停效果
     &:hover {
-      background: linear-gradient(
-        135deg,
-        var(--dt-bubble-right-bg-start) 0%,
-        var(--dt-bubble-right-bg-end) 100%
-      );
+      background: linear-gradient(135deg, #0089ff 0%, #0066cc 100%);
       filter: brightness(1.05);
-      box-shadow: var(--dt-shadow-brand-strong);
+      box-shadow: 0 4px 16px rgba(0, 137, 255, 0.35);
     }
   }
 
@@ -602,7 +590,7 @@ const canRecall = computed(() => {
   :deep(.message-content),
   :deep(.link-content),
   :deep(.text-content) {
-    color: var(--dt-bubble-right-text) !important;
+    color: #ffffff !important;
   }
 
   :deep(a) {
@@ -669,30 +657,26 @@ const canRecall = computed(() => {
 :global(.dark) {
   // 对方消息: 深灰背景
   .message-bubble:not(.is-own) .bubble-content {
-    background: var(--dt-bubble-left-bg-dark);
-    border-color: var(--dt-bubble-left-border-dark);
-    color: var(--dt-bubble-left-text-dark);
-    box-shadow: var(--dt-bubble-shadow-dark);
+    background: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #e8e8e8;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 
     &:hover {
-      box-shadow: var(--dt-shadow-lg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       transform: translateY(-1px);
     }
   }
 
   // 己方消息: 保持蓝色渐变
   .message-bubble.is-own .bubble-content {
-    background: linear-gradient(
-      135deg,
-      var(--dt-bubble-right-bg-start) 0%,
-      var(--dt-bubble-right-bg-end) 100%
-    );
-    color: var(--dt-bubble-right-text);
-    box-shadow: var(--dt-shadow-brand-strong);
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.3);
 
     &:hover {
       filter: brightness(1.08);
-      box-shadow: var(--dt-shadow-brand-strong);
+      box-shadow: 0 6px 20px rgba(0, 137, 255, 0.4);
     }
   }
 }

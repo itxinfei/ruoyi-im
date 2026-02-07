@@ -41,17 +41,20 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
      */
     private static final int ONLINE_TIMEOUT_MINUTES = 5;
 
-    @Autowired
-    private ImDocumentCollaboratorMapper documentCollaboratorMapper;
+    private final ImDocumentCollaboratorMapper documentCollaboratorMapper;
+    private final ImDocumentOperationLogMapper documentOperationLogMapper;
+    private final ImDocumentMapper documentMapper;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImDocumentOperationLogMapper documentOperationLogMapper;
-
-    @Autowired
-    private ImDocumentMapper documentMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    public ImDocumentCollaborationServiceImpl(ImDocumentCollaboratorMapper documentCollaboratorMapper,
+                                              ImDocumentOperationLogMapper documentOperationLogMapper,
+                                              ImDocumentMapper documentMapper,
+                                              ImUserMapper userMapper) {
+        this.documentCollaboratorMapper = documentCollaboratorMapper;
+        this.documentOperationLogMapper = documentOperationLogMapper;
+        this.documentMapper = documentMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

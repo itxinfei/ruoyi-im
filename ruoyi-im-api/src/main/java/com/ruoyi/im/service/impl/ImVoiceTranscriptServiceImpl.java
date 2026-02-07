@@ -43,17 +43,20 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
      */
     private static final String DEFAULT_LANGUAGE = "zh-CN";
 
-    @Autowired
-    private ImVoiceTranscriptMapper voiceTranscriptMapper;
+    private final ImVoiceTranscriptMapper voiceTranscriptMapper;
+    private final ImMessageMapper messageMapper;
+    private final Boolean transcriptEnabled;
+    private final String transcriptProvider;
 
-    @Autowired
-    private ImMessageMapper messageMapper;
-
-    @Value("${voice.transcript.enabled:false}")
-    private Boolean transcriptEnabled;
-
-    @Value("${voice.transcript.provider:ALIYUN}")
-    private String transcriptProvider;
+    public ImVoiceTranscriptServiceImpl(ImVoiceTranscriptMapper voiceTranscriptMapper,
+                                        ImMessageMapper messageMapper,
+                                        @Value("${voice.transcript.enabled:false}") Boolean transcriptEnabled,
+                                        @Value("${voice.transcript.provider:ALIYUN}") String transcriptProvider) {
+        this.voiceTranscriptMapper = voiceTranscriptMapper;
+        this.messageMapper = messageMapper;
+        this.transcriptEnabled = transcriptEnabled;
+        this.transcriptProvider = transcriptProvider;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

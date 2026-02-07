@@ -39,17 +39,20 @@ import java.util.stream.Collectors;
 @Service
 public class ImWorkReportServiceImpl implements ImWorkReportService {
 
-    @Autowired
-    private ImWorkReportMapper workReportMapper;
+    private final ImWorkReportMapper workReportMapper;
+    private final ImWorkReportCommentMapper commentMapper;
+    private final ImWorkReportLikeMapper likeMapper;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImWorkReportCommentMapper commentMapper;
-
-    @Autowired
-    private ImWorkReportLikeMapper likeMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    public ImWorkReportServiceImpl(ImWorkReportMapper workReportMapper,
+                                  ImWorkReportCommentMapper commentMapper,
+                                  ImWorkReportLikeMapper likeMapper,
+                                  ImUserMapper userMapper) {
+        this.workReportMapper = workReportMapper;
+        this.commentMapper = commentMapper;
+        this.likeMapper = likeMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

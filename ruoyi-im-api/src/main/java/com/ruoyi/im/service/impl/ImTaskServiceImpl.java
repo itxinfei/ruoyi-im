@@ -43,17 +43,20 @@ public class ImTaskServiceImpl implements ImTaskService {
     private static final Logger log = LoggerFactory.getLogger(ImTaskServiceImpl.class);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    @Autowired
-    private ImTaskMapper taskMapper;
+    private final ImTaskMapper taskMapper;
+    private final ImTaskCommentMapper taskCommentMapper;
+    private final ImTaskAttachmentMapper taskAttachmentMapper;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImTaskCommentMapper taskCommentMapper;
-
-    @Autowired
-    private ImTaskAttachmentMapper taskAttachmentMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    public ImTaskServiceImpl(ImTaskMapper taskMapper,
+                             ImTaskCommentMapper taskCommentMapper,
+                             ImTaskAttachmentMapper taskAttachmentMapper,
+                             ImUserMapper userMapper) {
+        this.taskMapper = taskMapper;
+        this.taskCommentMapper = taskCommentMapper;
+        this.taskAttachmentMapper = taskAttachmentMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

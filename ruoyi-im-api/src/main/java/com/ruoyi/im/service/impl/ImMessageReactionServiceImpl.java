@@ -28,14 +28,17 @@ import java.util.stream.Collectors;
 @Service
 public class ImMessageReactionServiceImpl implements ImMessageReactionService {
 
-    @Autowired
-    private ImMessageReactionMapper reactionMapper;
+    private final ImMessageReactionMapper reactionMapper;
+    private final ImMessageMapper messageMapper;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImMessageMapper messageMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    public ImMessageReactionServiceImpl(ImMessageReactionMapper reactionMapper,
+                                       ImMessageMapper messageMapper,
+                                       ImUserMapper userMapper) {
+        this.reactionMapper = reactionMapper;
+        this.messageMapper = messageMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional

@@ -1,7 +1,6 @@
 package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.service.ImCacheService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +17,17 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ImCacheServiceImpl implements ImCacheService {
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     // 缓存过期时间（秒）
     private static final long USER_INFO_EXPIRE = 3600;       // 用户信息缓存1小时
     private static final long CONVERSATION_EXPIRE = 1800;     // 会话信息缓存30分钟
     private static final long MESSAGE_EXPIRE = 600;           // 消息列表缓存10分钟
     private static final long UNREAD_EXPIRE = 86400;          // 未读数缓存24小时
+
+    public ImCacheServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     @Override
     public void set(String key, Object value) {

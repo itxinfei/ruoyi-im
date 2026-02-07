@@ -35,17 +35,20 @@ import java.util.List;
 @Service
 public class ImGroupFileServiceImpl implements ImGroupFileService {
 
-    @Autowired
-    private ImGroupFileMapper groupFileMapper;
+    private final ImGroupFileMapper groupFileMapper;
+    private final ImGroupMemberMapper groupMemberMapper;
+    private final ImFileAssetMapper fileAssetMapper;
+    private final ImUserMapper userMapper;
 
-    @Autowired
-    private ImGroupMemberMapper groupMemberMapper;
-
-    @Autowired
-    private ImFileAssetMapper fileAssetMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
+    public ImGroupFileServiceImpl(ImGroupFileMapper groupFileMapper,
+                                  ImGroupMemberMapper groupMemberMapper,
+                                  ImFileAssetMapper fileAssetMapper,
+                                  ImUserMapper userMapper) {
+        this.groupFileMapper = groupFileMapper;
+        this.groupMemberMapper = groupMemberMapper;
+        this.fileAssetMapper = fileAssetMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional
