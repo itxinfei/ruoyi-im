@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
+import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImConversationSyncService;

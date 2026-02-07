@@ -41,7 +41,7 @@ public class ImAIController {
      * @param request 对话请求，包含消息内容、会话ID、模型参数等
      * @return AI响应结果，包含AI回复内容和使用的token数量
      * @apiNote 对话上下文会根据conversationId进行记忆，支持多轮对话
-     * @throws IllegalArgumentException 当请求参数不合法时抛出异常
+     *          参数校验由Spring验证框架处理，校验失败返回400错误
      */
     @Operation(summary = "AI聊天", description = "与AI助手进行对话")
     @PostMapping("/chat")

@@ -24,10 +24,11 @@ import java.util.List;
  * 消息控制器
  * 提供消息发送、消息列表查询、消息撤回、消息转发、消息回复等核心功能
  *
- * 表情反应相关接口请使用: {@link ImMessageReactionController}
- * 已读回执相关接口请使用: {@link ImMessageReceiptController}
- * 消息搜索相关接口请使用: {@link ImMessageSearchController}
- * 消息同步相关接口请使用: {@link ImMessageSyncController}
+ * 相关接口:
+ * - 表情反应: {@link com.ruoyi.im.controller.ImMessageReactionController}
+ * - 已读回执: {@link com.ruoyi.im.controller.ImMessageReceiptController}
+ * - 消息搜索: {@link com.ruoyi.im.controller.ImMessageSearchController}
+ * - 消息同步: {@link com.ruoyi.im.controller.ImMessageSyncController}
  *
  * @author ruoyi
  */

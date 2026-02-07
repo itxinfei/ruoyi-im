@@ -42,7 +42,7 @@ public class ImTranslationController {
      * @param request 翻译请求，包含源文本、源语言、目标语言
      * @return 翻译结果，包含翻译后的文本和源语言检测信息
      * @apiNote 支持多种主流语言之间的互译，自动检测源语言时可不指定源语言
-     * @throws IllegalArgumentException 当文本长度超过限制或语言不支持时抛出异常
+     *          参数校验由Spring验证框架处理，校验失败返回400错误
      */
     @Operation(summary = "翻译文本", description = "将文本从一种语言翻译为另一种语言")
     @PostMapping("/translate")

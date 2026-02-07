@@ -3,6 +3,7 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.group.ImGroupCreateRequest;
 import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
+import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImGroupService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.group.ImGroupMemberVO;
