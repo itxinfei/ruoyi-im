@@ -13,6 +13,7 @@
   --dt-brand-bg: #E5F2FF;
   --dt-brand-light: rgba(0, 137, 255, 0.1);
   --dt-brand-lighter: rgba(0, 137, 255, 0.05);
+  --dt-brand-extra-light: rgba(0, 137, 255, 0.15);
 
   // === Semantic Colors (语义色 - 企业IM规范) ===
   --dt-success-color: #00C853;
@@ -294,6 +295,48 @@
 
   // === Tooltip Background ===
   --dt-tooltip-bg-dark: rgba(0, 0, 0, 0.85);
+
+  // === Border Alpha Colors ===
+  --dt-border-alpha-light: rgba(0, 0, 0, 0.04);
+  --dt-border-alpha-medium: rgba(0, 0, 0, 0.08);
+  --dt-border-alpha-dark: rgba(255, 255, 255, 0.1);
+  --dt-border-alpha-dark-2: rgba(255, 255, 255, 0.08);
+  --dt-border-alpha-dark-3: rgba(255, 255, 255, 0.06);
+  --dt-border-alpha-dark-4: rgba(255, 255, 255, 0.03);
+  --dt-border-alpha-white-3: rgba(255, 255, 255, 0.3);
+  --dt-border-alpha-white-2: rgba(255, 255, 255, 0.2);
+
+  // Dark Mode Priority Colors
+  --dt-success-dark-bg: rgba(82, 196, 26, 0.15);
+  --dt-success-dark-border: #52c41a;
+  --dt-success-dark-text: #86efac;
+  --dt-error-dark-bg: rgba(245, 74, 69, 0.15);
+  --dt-error-dark-border: #f54a45;
+  --dt-error-dark-text: #fca5a5;
+
+  // === Additional Text Colors ===
+  --dt-text-medium: #666666;
+  --dt-text-dark-gray: #1a1a1a;
+  --dt-text-light-gray: #999999;
+  --dt-text-lighter-gray: #cccccc;
+  --dt-text-dark-mode: #e8e8e8;
+  --dt-text-dark-muted: #888888;
+
+  // === Additional Background Colors ===
+  --dt-bg-subtle: #f8f9fa;
+  --dt-bg-subtle-hover: #f5f5f5;
+  --dt-bg-subtle-active: #e0e0e0;
+  --dt-bg-disabled: #fafafa;
+  --dt-bg-disabled-dark: #2d2d2d;
+  --dt-bg-dark-primary: #0a0e1a;
+  --dt-bg-dark-secondary: #1a1f2e;
+  --dt-bg-dark-tertiary: #0d1d2d;
+  --dt-bg-dark-border: #3d3d3d;
+
+  // === Priority Colors ===
+  --dt-priority-high: #f54a45;
+  --dt-priority-medium: #faad14;
+  --dt-priority-low: #52c41a;
 
   --dt-text-primary-dark: #E8E8E8;
   --dt-text-secondary-dark: #A0A8B8;

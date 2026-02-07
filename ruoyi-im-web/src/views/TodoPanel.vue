@@ -814,8 +814,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 24px 28px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, var(--dt-bg-card) 0%, var(--dt-bg-subtle) 100%);
+  border-bottom: 1px solid var(--dt-border-alpha-medium);
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
@@ -830,7 +830,7 @@ onMounted(() => {
 
 .selected-count {
   font-size: 14px;
-  color: #666;
+  color: var(--dt-text-medium);
   font-weight: 500;
   padding: 0 8px;
 }
@@ -845,7 +845,7 @@ onMounted(() => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--dt-border-alpha-medium);
 
   &:disabled {
     opacity: 0.4;
@@ -859,7 +859,7 @@ onMounted(() => {
 
     &:hover:not(:disabled) {
       background: var(--dt-success-color);
-      color: #fff;
+      color: var(--dt-text-inverse);
     }
   }
 
@@ -870,16 +870,16 @@ onMounted(() => {
 
     &:hover:not(:disabled) {
       background: var(--dt-error-color);
-      color: #fff;
+      color: var(--dt-text-inverse);
     }
   }
 
   &--cancel {
-    background: #f5f5f5;
-    color: #666;
+    background: var(--dt-bg-subtle-hover);
+    color: var(--dt-text-medium);
 
     &:hover:not(:disabled) {
-      background: #e0e0e0;
+      background: var(--dt-bg-subtle-active);
     }
   }
 }
@@ -889,12 +889,12 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--dt-text-inverse);
+  border: 1px solid var(--dt-border-alpha-medium);
   border-radius: var(--dt-radius-md);
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: var(--dt-text-medium);
   cursor: pointer;
   transition: all 0.3s;
 
@@ -926,7 +926,7 @@ onMounted(() => {
 .search-icon {
   position: absolute;
   left: 12px;
-  color: #999;
+  color: var(--dt-text-light-gray);
   font-size: 18px;
   pointer-events: none;
 }
@@ -935,25 +935,25 @@ onMounted(() => {
   width: 100%;
   height: 36px;
   padding: 0 12px 0 38px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--dt-text-inverse);
+  border: 1px solid var(--dt-border-alpha-medium);
   border-radius: 18px;
   font-size: 14px;
-  color: #1a1a1a;
+  color: var(--dt-text-dark-gray);
   outline: none;
   transition: all 0.3s;
 
   &::placeholder {
-    color: #999;
+    color: var(--dt-text-light-gray);
   }
 
   &:hover {
-    border-color: rgba(0, 137, 255, 0.3);
+    border-color: var(--dt-shadow-brand-glow);
   }
 
   &:focus {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1);
+    box-shadow: 0 0 0 3px var(--dt-brand-light);
   }
 }
 
@@ -966,7 +966,7 @@ onMounted(() => {
 .panel-title {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--dt-text-dark-gray);
   margin: 0;
   letter-spacing: -0.5px;
   position: relative;
@@ -994,7 +994,7 @@ onMounted(() => {
   padding: 6px 14px;
   background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-hover) 100%);
   border-radius: var(--dt-radius-2xl);
-  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
+  box-shadow: 0 4px 12px var(--dt-shadow-brand-light);
   position: relative;
   overflow: hidden;
 
@@ -1002,7 +1002,7 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 50%);
+    background: linear-gradient(45deg, transparent 30%, var(--dt-border-alpha-white-3) 50%, transparent 50%);
     animation: shimmer 3s infinite;
   }
 
@@ -1041,14 +1041,14 @@ onMounted(() => {
   gap: 8px;
   padding: 10px 20px;
   background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
-  color: #fff;
+  color: var(--dt-text-inverse);
   border: none;
   border-radius: var(--dt-radius-3xl);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(0, 137, 255, 0.3);
+  box-shadow: 0 4px 16px var(--dt-shadow-brand-glow);
   position: relative;
   overflow: hidden;
 
@@ -1056,14 +1056,14 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 50%);
+    background: linear-gradient(45deg, transparent 30%, var(--dt-border-alpha-white-2) 50%, transparent 50%);
     animation: shimmer 2s infinite;
   }
 
   &:hover {
-    background: linear-gradient(135deg, var(--dt-brand-hover) 0%, #4096ff 100%);
+    background: linear-gradient(135deg, var(--dt-brand-hover) 0%, var(--dt-brand-hover) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 137, 255, 0.4);
+    box-shadow: 0 8px 24px var(--dt-shadow-brand-strong);
   }
 
   &:active {
@@ -1079,8 +1079,8 @@ onMounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   padding: 20px 28px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, var(--dt-bg-card) 0%, var(--dt-bg-subtle) 100%);
+  border-bottom: 1px solid var(--dt-border-alpha-medium);
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
@@ -1101,9 +1101,9 @@ onMounted(() => {
   align-items: center;
   gap: 14px;
   padding: 16px 20px;
-  background: #fff;
+  background: var(--dt-text-inverse);
   border-radius: var(--dt-radius-xl);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--dt-border-alpha-medium);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -1119,7 +1119,7 @@ onMounted(() => {
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px var(--dt-border-alpha-medium);
 
     &::before {
       opacity: 1;
@@ -1141,7 +1141,7 @@ onMounted(() => {
 
   .stat-icon {
     font-size: 22px;
-    color: #fff;
+    color: var(--dt-text-inverse);
     position: relative;
     z-index: 1;
     display: flex;
@@ -1167,19 +1167,19 @@ onMounted(() => {
   }
 
   &--total .stat-icon {
-    color: #0089FF;
+    color: var(--dt-brand-color);
   }
 
   &--pending .stat-icon {
-    color: #faad14;
+    color: var(--dt-priority-medium);
   }
 
   &--high .stat-icon {
-    color: #f54a45;
+    color: var(--dt-priority-high);
   }
 
   &--done .stat-icon {
-    color: #52c41a;
+    color: var(--dt-priority-low);
   }
 
   .stat-info {
@@ -1192,7 +1192,7 @@ onMounted(() => {
   .stat-value {
     font-size: 20px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--dt-text-dark-gray);
     line-height: 1;
     letter-spacing: -0.5px;
   }
@@ -1209,7 +1209,7 @@ onMounted(() => {
     right: 0;
     width: 60px;
     height: 60px;
-    background: radial-gradient(circle at top right, rgba(0, 137, 255, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle at top right, var(--dt-brand-lighter) 0%, transparent 70%);
     pointer-events: none;
     opacity: 0.6;
   }
@@ -1221,8 +1221,8 @@ onMounted(() => {
 .filter-tabs {
   display: flex;
   padding: 16px 28px 0;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, var(--dt-bg-card) 0%, var(--dt-bg-subtle) 100%);
+  border-bottom: 1px solid var(--dt-border-alpha-medium);
   gap: 8px;
   flex-shrink: 0;
   position: relative;
@@ -1247,7 +1247,7 @@ onMounted(() => {
   border: none;
   border-radius: var(--dt-radius-2xl) var(--dt-radius-2xl) 0 0;
   font-size: 14px;
-  color: #666;
+  color: var(--dt-text-medium);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -1266,7 +1266,7 @@ onMounted(() => {
   .tab-count {
     padding: 2px 8px;
     background: rgba(0, 0, 0, 0.06);
-    color: #666;
+    color: var(--dt-text-medium);
     border-radius: var(--dt-radius-lg);
     font-size: 12px;
     font-weight: 600;
@@ -1287,8 +1287,8 @@ onMounted(() => {
   }
 
   &:hover {
-    color: #1a1a1a;
-    background: rgba(0, 0, 0, 0.04);
+    color: var(--dt-text-dark-gray);
+    background: var(--dt-border-alpha-light);
 
     .filter-tab-icon {
       transform: translateY(-2px);
@@ -1297,9 +1297,9 @@ onMounted(() => {
 
   &.active {
     color: var(--dt-brand-color);
-    background: #fff;
+    background: var(--dt-text-inverse);
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 12px var(--dt-border-alpha-light);
 
     .tab-count {
       background: var(--dt-brand-bg);
@@ -1343,7 +1343,7 @@ onMounted(() => {
 .spinner-ring {
   position: absolute;
   inset: 0;
-  border: 3px solid rgba(0, 137, 255, 0.1);
+  border: 3px solid var(--dt-brand-light);
   border-top-color: var(--dt-brand-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -1363,7 +1363,7 @@ onMounted(() => {
 
 .loading-text {
   font-size: 15px;
-  color: #999;
+  color: var(--dt-text-light-gray);
   font-weight: 500;
 }
 
@@ -1432,7 +1432,7 @@ onMounted(() => {
   transform: translateX(-50%);
   width: 80px;
   height: 8px;
-  background: rgba(0, 137, 255, 0.1);
+  background: var(--dt-brand-light);
   border-radius: 50%;
   opacity: 0.5;
 }
@@ -1440,14 +1440,14 @@ onMounted(() => {
 .empty-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--dt-text-dark-gray);
   margin: 0 0 12px 0;
   letter-spacing: -0.5px;
 }
 
 .empty-text {
   font-size: 15px;
-  color: #999;
+  color: var(--dt-text-light-gray);
   margin: 0 0 32px 0;
   max-width: 320px;
   line-height: 1.6;
@@ -1459,14 +1459,14 @@ onMounted(() => {
   gap: 8px;
   padding: 12px 24px;
   background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
-  color: #fff;
+  color: var(--dt-text-inverse);
   border: none;
   border-radius: var(--dt-radius-3xl);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(0, 137, 255, 0.3);
+  box-shadow: 0 4px 16px var(--dt-shadow-brand-glow);
   position: relative;
   overflow: hidden;
 
@@ -1474,14 +1474,14 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 50%);
+    background: linear-gradient(45deg, transparent 30%, var(--dt-border-alpha-white-2) 50%, transparent 50%);
     animation: shimmer 2s infinite;
   }
 
   &:hover {
-    background: linear-gradient(135deg, var(--dt-brand-hover) 0%, #4096ff 100%);
+    background: linear-gradient(135deg, var(--dt-brand-hover) 0%, var(--dt-brand-hover) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 137, 255, 0.4);
+    box-shadow: 0 8px 24px var(--dt-shadow-brand-strong);
   }
 }
 
@@ -1497,17 +1497,17 @@ onMounted(() => {
 
 .todo-item {
   position: relative;
-  background: #fff;
+  background: var(--dt-text-inverse);
   border-radius: var(--dt-radius-xl);
   padding: 18px 20px;
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px var(--dt-border-alpha-light);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--dt-border-alpha-light);
 
   &::before {
     content: '';
@@ -1519,9 +1519,9 @@ onMounted(() => {
   }
 
   &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px var(--dt-border-alpha-medium);
     transform: translateY(-2px);
-    border-color: rgba(0, 137, 255, 0.1);
+    border-color: var(--dt-brand-light);
 
     &::before {
       opacity: 1;
@@ -1537,7 +1537,7 @@ onMounted(() => {
 
     .todo-title {
       text-decoration: line-through;
-      color: #999;
+      color: var(--dt-text-light-gray);
     }
 
     .priority-indicator {
@@ -1549,7 +1549,7 @@ onMounted(() => {
     border-color: rgba(245, 74, 69, 0.2);
 
     .priority-indicator {
-      background: #f54a45;
+      background: var(--dt-priority-high);
     }
   }
 }
@@ -1579,15 +1579,15 @@ onMounted(() => {
   border-radius: 0 4px 0 0;
 
   &.priority-high {
-    background: #f54a45;
+    background: var(--dt-priority-high);
   }
 
   &.priority-medium {
-    background: #faad14;
+    background: var(--dt-priority-medium);
   }
 
   &.priority-low {
-    background: #52c41a;
+    background: var(--dt-priority-low);
   }
 
   .indicator-glow {
@@ -1612,20 +1612,20 @@ onMounted(() => {
 .batch-checkbox .checkbox-inner {
   width: 20px;
   height: 20px;
-  border: 2px solid #d0d0d0;
+  border: 2px solid var(--dt-border-color);
   border-radius: var(--dt-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  background: #fafafa;
+  background: var(--dt-bg-disabled);
 
   &.checked {
     background: var(--dt-brand-color);
     border-color: var(--dt-brand-color);
 
     .check-icon {
-      color: #fff;
+      color: var(--dt-text-inverse);
       font-size: 16px;
       animation: checkBounce 0.3s ease;
     }
@@ -1648,13 +1648,13 @@ onMounted(() => {
 .checkbox-inner {
   width: 24px;
   height: 24px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--dt-bg-subtle-active);
   border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #fafafa;
+  background: var(--dt-bg-disabled);
   position: relative;
   overflow: hidden;
 
@@ -1662,7 +1662,7 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(0, 137, 255, 0.1) 0%, transparent 50%);
+    background: linear-gradient(135deg, var(--dt-brand-light) 0%, transparent 50%);
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -1676,7 +1676,7 @@ onMounted(() => {
     border-color: var(--dt-brand-color);
 
     .check-icon {
-      color: #fff;
+      color: var(--dt-text-inverse);
       font-size: 18px;
       animation: checkBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
@@ -1690,7 +1690,7 @@ onMounted(() => {
     position: absolute;
     inset: 0;
     border-radius: var(--dt-radius-md);
-    background: rgba(0, 137, 255, 0.3);
+    background: var(--dt-shadow-brand-glow);
     transform: scale(0);
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1736,7 +1736,7 @@ onMounted(() => {
 .todo-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--dt-text-dark-gray);
   margin: 0;
   flex: 1;
   overflow: hidden;
@@ -1753,24 +1753,24 @@ onMounted(() => {
   flex-shrink: 0;
 
   &.priority-high {
-    background: #fff1f0;
-    color: #f54a45;
+    background: var(--dt-text-inverse)1f0;
+    color: var(--dt-priority-high);
   }
 
   &.priority-medium {
-    background: #fff7e6;
-    color: #faad14;
+    background: var(--dt-text-inverse)7e6;
+    color: var(--dt-priority-medium);
   }
 
   &.priority-low {
     background: #f6ffed;
-    color: #52c41a;
+    color: var(--dt-priority-low);
   }
 }
 
 .todo-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--dt-text-medium);
   margin: 0 0 10px 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1792,7 +1792,7 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #999;
+  color: var(--dt-text-light-gray);
   font-weight: 500;
 
   .date-icon {
@@ -1800,7 +1800,7 @@ onMounted(() => {
   }
 
   &.overdue {
-    color: #f54a45;
+    color: var(--dt-priority-high);
     font-weight: 600;
   }
 }
@@ -1815,7 +1815,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   cursor: grab;
-  color: #ccc;
+  color: var(--dt-text-lighter-gray);
   transition: all 0.2s;
 
   &:hover {
@@ -1851,14 +1851,14 @@ onMounted(() => {
   width: 36px;
   height: 36px;
   border-radius: var(--dt-radius-lg);
-  background: #f5f5f5;
+  background: var(--dt-bg-subtle-hover);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #666;
+  color: var(--dt-text-medium);
 
   &:hover {
     background: var(--dt-brand-bg);
@@ -1867,8 +1867,8 @@ onMounted(() => {
   }
 
   &--danger:hover {
-    background: #fff1f0;
-    color: #f54a45;
+    background: var(--dt-text-inverse)1f0;
+    color: var(--dt-priority-high);
   }
 
   .material-icons-outlined {
@@ -1880,145 +1880,145 @@ onMounted(() => {
 // 暗色模式
 // ============================================================================
 .dark .todo-panel {
-  background: #0a0e1a;
+  background: var(--dt-bg-dark-primary);
 }
 
 .dark .header-actions {
   .selected-count {
-    color: #999;
+    color: var(--dt-text-light-gray);
   }
 
   .batch-btn {
-    background: #1a1f2e;
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #999;
+    background: var(--dt-bg-dark-secondary);
+    border-color: var(--dt-border-alpha-dark);
+    color: var(--dt-text-light-gray);
 
     &--complete {
-      background: rgba(82, 196, 26, 0.15);
-      border-color: #52c41a;
-      color: #86efac;
+      background: var(--dt-success-dark-bg);
+      border-color: var(--dt-priority-low);
+      color: var(--dt-success-dark-text);
     }
 
     &--danger {
-      background: rgba(245, 74, 69, 0.15);
-      border-color: #f54a45;
-      color: #fca5a5;
+      background: var(--dt-error-dark-bg);
+      border-color: var(--dt-priority-high);
+      color: var(--dt-error-dark-text);
     }
 
     &--cancel {
-      background: #2d2d2d;
-      color: #999;
+      background: var(--dt-bg-disabled-dark);
+      color: var(--dt-text-light-gray);
     }
   }
 
   .icon-btn {
-    background: #1a1f2e;
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #999;
+    background: var(--dt-bg-dark-secondary);
+    border-color: var(--dt-border-alpha-dark);
+    color: var(--dt-text-light-gray);
   }
 }
 
 .dark .panel-header,
 .dark .filter-tabs,
 .dark .stats-row {
-  background: #1a1f2e;
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--dt-bg-dark-secondary);
+  border-color: var(--dt-border-alpha-dark);
 }
 
 .dark .panel-title {
-  color: #e8e8e8;
+  color: var(--dt-text-dark-mode);
 }
 
 .dark .stat-card {
-  background: #1a1f2e;
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--dt-bg-dark-secondary);
+  border-color: var(--dt-border-alpha-dark);
 
   &::before {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.03) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, var(--dt-border-alpha-dark-4) 100%);
   }
 }
 
 .dark .stat-value {
-  color: #e8e8e8;
+  color: var(--dt-text-dark-mode);
 }
 
 .dark .stat-label {
-  color: #888;
+  color: var(--dt-text-dark-muted);
 }
 
 .dark .filter-tab {
-  color: #999;
+  color: var(--dt-text-light-gray);
 }
 
 .dark .filter-tab:hover {
-  color: #e8e8e8;
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--dt-text-dark-mode);
+  background: var(--dt-border-alpha-dark-3);
 }
 
 .dark .filter-tab.active {
   color: var(--dt-brand-color);
-  background: #0d1d2d;
+  background: var(--dt-bg-dark-tertiary);
 }
 
 .dark .filter-tab.active .tab-count {
-  background: rgba(0, 137, 255, 0.15);
+  background: var(--dt-brand-extra-light);
 }
 
 .dark .todo-item {
-  background: #1a1f2e;
-  border-color: rgba(255, 255, 255, 0.08);
+  background: var(--dt-bg-dark-secondary);
+  border-color: var(--dt-border-alpha-dark-2);
 }
 
 .dark .todo-title {
-  color: #e8e8e8;
+  color: var(--dt-text-dark-mode);
 }
 
 .dark .todo-desc {
-  color: #999;
+  color: var(--dt-text-light-gray);
 }
 
 .dark .todo-date {
-  color: #888;
+  color: var(--dt-text-dark-muted);
 }
 
 .dark .todo-checkbox {
-  background: #0d1d2d;
-  border-color: #3d3d3d;
+  background: var(--dt-bg-dark-tertiary);
+  border-color: var(--dt-bg-dark-border);
 }
 
 .dark .action-btn {
-  background: #2d2d2d;
-  color: #999;
+  background: var(--dt-bg-disabled-dark);
+  color: var(--dt-text-light-gray);
 }
 
 .dark .empty-state {
-  background: #0a0e1a;
+  background: var(--dt-bg-dark-primary);
 }
 
 .dark .empty-icon {
-  color: #3d3d3d;
+  color: var(--dt-bg-dark-border);
 }
 
 .dark .empty-decoration {
-  background: rgba(0, 137, 255, 0.05);
+  background: var(--dt-brand-lighter);
 }
 
 .dark .empty-title {
-  color: #e8e8e8;
+  color: var(--dt-text-dark-mode);
 }
 
 .dark .empty-text {
-  color: #888;
+  color: var(--dt-text-dark-muted);
 }
 
 .dark .todo-item.batch-selected {
-  background: rgba(0, 137, 255, 0.15);
-  border-color: rgba(0, 137, 255, 0.3);
+  background: var(--dt-brand-extra-light);
+  border-color: var(--dt-shadow-brand-glow);
 }
 
 .dark .batch-checkbox .checkbox-inner {
-  background: #1a1f2e;
-  border-color: #3d3d3d;
+  background: var(--dt-bg-dark-secondary);
+  border-color: var(--dt-bg-dark-border);
 
   &.checked {
     background: var(--dt-brand-color);
@@ -2027,7 +2027,7 @@ onMounted(() => {
 }
 
 .dark .drag-handle {
-  color: #3d3d3d;
+  color: var(--dt-bg-dark-border);
 
   &:hover {
     color: var(--dt-brand-color);
@@ -2036,25 +2036,25 @@ onMounted(() => {
 
 .dark .search-wrapper {
   .search-icon {
-    color: #888;
+    color: var(--dt-text-dark-muted);
   }
 
   .search-input {
-    background: #1a1f2e;
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #e8e8e8;
+    background: var(--dt-bg-dark-secondary);
+    border-color: var(--dt-border-alpha-dark);
+    color: var(--dt-text-dark-mode);
 
     &::placeholder {
-      color: #888;
+      color: var(--dt-text-dark-muted);
     }
 
     &:hover {
-      border-color: rgba(0, 137, 255, 0.3);
+      border-color: var(--dt-shadow-brand-glow);
     }
 
     &:focus {
       border-color: var(--dt-brand-color);
-      box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.15);
+      box-shadow: 0 0 0 3px var(--dt-brand-extra-light);
     }
   }
 }
