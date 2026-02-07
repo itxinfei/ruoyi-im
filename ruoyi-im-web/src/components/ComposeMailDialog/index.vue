@@ -738,7 +738,7 @@ watch(visible, val => {
 
   &:hover {
     .upload-area {
-      background: linear-gradient(135deg, rgba(0, 137, 255, 0.05) 0%, rgba(0, 137, 255, 0.02) 100%);
+      background: linear-gradient(135deg, var(--dt-brand-05) 0%, var(--dt-brand-02) 100%);
     }
   }
 }
@@ -753,7 +753,7 @@ watch(visible, val => {
   border-radius: var(--dt-radius-lg);
 
   &.is-dragging {
-    background: linear-gradient(135deg, rgba(0, 137, 255, 0.1) 0%, rgba(0, 137, 255, 0.05) 100%);
+    background: linear-gradient(135deg, var(--dt-brand-light) 0%, var(--dt-brand-05) 100%);
     border-color: var(--el-color-primary);
     transform: scale(1.02);
 
@@ -782,7 +782,7 @@ watch(visible, val => {
   .icon-glow {
     position: absolute;
     inset: -8px;
-    background: radial-gradient(circle, rgba(0, 137, 255, 0.2) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--dt-shadow-brand-light) 0%, transparent 70%);
     border-radius: var(--dt-radius-full);
     animation: iconPulseFade 2s ease-in-out infinite;
   }
@@ -847,17 +847,17 @@ watch(visible, val => {
 
   &.uploading {
     border-color: var(--el-color-primary-light-5);
-    background: linear-gradient(135deg, rgba(0, 137, 255, 0.03) 0%, rgba(0, 137, 255, 0.01) 100%);
+    background: linear-gradient(135deg, var(--dt-brand-03) 0%, var(--dt-brand-01) 100%);
   }
 
   &.success {
     border-color: #52c41a;
-    background: linear-gradient(135deg, rgba(82, 196, 26, 0.05) 0%, rgba(82, 196, 26, 0.02) 100%);
+    background: linear-gradient(135deg, var(--dt-success-05) 0%, var(--dt-success-02) 100%);
   }
 
   &.error {
     border-color: #f54a45;
-    background: linear-gradient(135deg, rgba(245, 74, 69, 0.05) 0%, rgba(245, 74, 69, 0.02) 100%);
+    background: linear-gradient(135deg, var(--dt-error-05) 0%, var(--dt-error-02) 100%);
   }
 
   .file-header {
@@ -1096,12 +1096,12 @@ watch(visible, val => {
 /* 暗色模式 */
 .dark .attachment-upload {
   :deep(.el-upload-dragger) {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--dt-white-10);
     background: transparent;
 
     &:hover {
       .upload-area {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+        background: linear-gradient(135deg, var(--dt-white-03) 0%, var(--dt-white-01) 100%);
       }
     }
   }
@@ -1109,64 +1109,64 @@ watch(visible, val => {
 
 .dark .upload-area {
   .upload-icon {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--dt-white-60);
   }
 
   .upload-text {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--dt-white-90);
   }
 
   .upload-tip {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--dt-white-50);
   }
 
   .type-tag {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.6);
+    background: var(--dt-white-05);
+    color: var(--dt-white-60);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--dt-white-10);
     }
   }
 }
 
 .dark .upload-progress-item,
 .dark .attachment-item {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.05);
+  background: var(--dt-white-03);
+  border-color: var(--dt-white-05);
 
   &.uploading {
-    border-color: rgba(64, 158, 255, 0.3);
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.05) 0%, rgba(64, 158, 255, 0.02) 100%);
+    border-color: var(--dt-shadow-brand-glow);
+    background: linear-gradient(135deg, var(--dt-brand-hover-05) 0%, var(--dt-brand-hover-02) 100%);
   }
 
   &.success {
-    border-color: rgba(82, 196, 26, 0.3);
-    background: linear-gradient(135deg, rgba(82, 196, 26, 0.05) 0%, rgba(82, 196, 26, 0.02) 100%);
+    border-color: var(--dt-success-30);
+    background: linear-gradient(135deg, var(--dt-success-05) 0%, var(--dt-success-02) 100%);
   }
 
   &.error {
-    border-color: rgba(245, 74, 69, 0.3);
-    background: linear-gradient(135deg, rgba(245, 74, 69, 0.05) 0%, rgba(245, 74, 69, 0.02) 100%);
+    border-color: var(--dt-error-30);
+    background: linear-gradient(135deg, var(--dt-error-05) 0%, var(--dt-error-02) 100%);
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--dt-white-05);
+    border-color: var(--dt-white-10);
   }
 }
 
 .dark .attachment-icon-wrapper {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--dt-white-05);
 }
 
 .dark .file-name,
 .dark .attachment-name {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--dt-white-90);
 }
 
 .dark .file-size,
 .dark .attachment-size {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--dt-white-50);
 }
 </style>

@@ -314,6 +314,32 @@
   --dt-error-dark-border: #f54a45;
   --dt-error-dark-text: #fca5a5;
 
+  // Low-opacity brand colors
+  --dt-brand-01: rgba(0, 137, 255, 0.01);
+  --dt-brand-02: rgba(0, 137, 255, 0.02);
+  --dt-brand-03: rgba(0, 137, 255, 0.03);
+  --dt-brand-05: rgba(0, 137, 255, 0.05);
+  --dt-brand-hover-02: rgba(64, 158, 255, 0.02);
+  --dt-brand-hover-03: rgba(64, 158, 255, 0.03);
+  --dt-brand-hover-05: rgba(64, 158, 255, 0.05);
+  --dt-success-02: rgba(82, 196, 26, 0.02);
+  --dt-success-05: rgba(82, 196, 26, 0.05);
+  --dt-success-30: rgba(82, 196, 26, 0.3);
+  --dt-error-02: rgba(245, 74, 69, 0.02);
+  --dt-error-05: rgba(245, 74, 69, 0.05);
+  --dt-error-20: rgba(245, 74, 69, 0.2);
+  --dt-error-30: rgba(245, 74, 69, 0.3);
+
+  // White alpha colors for dark mode
+  --dt-white-03: rgba(255, 255, 255, 0.03);
+  --dt-white-01: rgba(255, 255, 255, 0.01);
+  --dt-white-05: rgba(255, 255, 255, 0.05);
+  --dt-white-06: rgba(255, 255, 255, 0.06);
+  --dt-white-10: rgba(255, 255, 255, 0.1);
+  --dt-white-50: rgba(255, 255, 255, 0.5);
+  --dt-white-60: rgba(255, 255, 255, 0.6);
+  --dt-white-90: rgba(255, 255, 255, 0.9);
+
   // === Additional Text Colors ===
   --dt-text-medium: #666666;
   --dt-text-dark-gray: #1a1a1a;
