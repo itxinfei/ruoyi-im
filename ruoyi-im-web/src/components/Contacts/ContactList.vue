@@ -7,6 +7,15 @@
         clearable
         :prefix-icon="Search"
       />
+      <el-button
+        :icon="Refresh"
+        circle
+        size="small"
+        :loading="loading"
+        class="refresh-btn"
+        title="刷新联系人列表"
+        @click="handleRefresh"
+      />
     </div>
 
     <div
@@ -323,7 +332,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Search, OfficeBuilding, User, MoreFilled, FolderOpened, Edit, Delete } from '@element-plus/icons-vue'
+import { Search, OfficeBuilding, User, MoreFilled, FolderOpened, Edit, Delete, Refresh } from '@element-plus/icons-vue'
 import ContextMenu from '@/components/Common/ContextMenu.vue'
 import { getContacts, getGroupedFriendList, getGroupList, renameGroup, deleteGroup, moveContactToGroup, updateContactRemark, deleteContact, getFriendRequests, clearFriendListCache } from '@/api/im/contact'
 import { getOrgTree } from '@/api/im/organization'
@@ -671,6 +680,23 @@ const confirmRemark = async () => {
   }
 }
 
+// 手动刷新联系人列表（清除缓存）
+const handleRefresh = async () => {
+  loading.value = true
+  try {
+    // 先清除缓存
+    await clearFriendListCache()
+    ElMessage.success('已刷新联系人列表')
+    // 重新加载数据
+    await loadData()
+    emit('refresh')
+  } catch (e) {
+    ElMessage.error('刷新失败')
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
   loadData()
 })
@@ -702,9 +728,20 @@ defineExpose({ reload: loadData })
 .search-box {
   padding: 12px;
   border-bottom: 1px solid var(--dt-border-lighter);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
   .dark & {
     border-bottom-color: var(--dt-border-dark);
+  }
+
+  .el-input {
+    flex: 1;
+  }
+
+  .refresh-btn {
+    flex-shrink: 0;
   }
 }
 

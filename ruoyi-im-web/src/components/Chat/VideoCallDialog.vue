@@ -24,7 +24,7 @@
             >
               <DingtalkAvatar
                 :src="remoteUser?.avatar"
-                :name="remoteUser?.name || remoteUser?.friendName"
+                :name="remoteUser?.name || remoteUser?.userName || remoteUser?.friendName"
                 :size="80"
                 shape="circle"
                 class="placeholder-avatar"
@@ -40,7 +40,7 @@
               v-if="remoteStream || isConnected"
               class="remote-info-overlay"
             >
-              <span class="remote-name">{{ remoteUser?.name || remoteUser?.friendName }}</span>
+              <span class="remote-name">{{ remoteUser?.name || remoteUser?.userName || remoteUser?.friendName }}</span>
               <span
                 v-if="isConnected"
                 class="call-timer"

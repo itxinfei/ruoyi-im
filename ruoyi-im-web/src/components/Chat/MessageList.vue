@@ -231,7 +231,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit', 'preview', 'nudge-success', 'long-press'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'reaction-update', 're-edit', 'preview', 'nudge-success', 'long-press', 'message-update'])
 
 const listRef = ref(null)
 const isUnmounted = ref(false) // 标记组件是否已卸载，防止卸载后执行 DOM 操作
@@ -760,7 +760,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   padding: 20px;
   // 增加底部内边距，防止滚动按钮遮挡消息
   padding-bottom: 60px; // 留出空间给 scroll-to-bottom 按钮
-  background: #f5f5f5; // 野火IM标准:浅灰背景
+  background: var(--dt-bg-chat);
   position: relative;
   min-height: 0; // flex 子元素高度修复
   width: 100%;
@@ -788,13 +788,16 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
     background: rgba(0, 0, 0, 0.2);
   }
 
-  // 暗色模式
-  .dark &:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 137, 255, 0.3);
-  }
+  .dark & {
+    background: var(--dt-bg-body-dark);
 
-  .dark &:hover::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 137, 255, 0.4);
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.28);
+      }
+    }
   }
 }
 

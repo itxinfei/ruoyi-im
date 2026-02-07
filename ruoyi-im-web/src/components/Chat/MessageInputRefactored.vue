@@ -129,6 +129,20 @@
               </el-icon>
             </button>
           </el-tooltip>
+
+          <el-tooltip
+            content="发送"
+            placement="top"
+          >
+            <button
+              class="footer-action-btn send-btn"
+              :disabled="!canSend"
+              @click="handleSend"
+            >
+              <span class="material-icons-outlined">send</span>
+              <span class="send-text">发送</span>
+            </button>
+          </el-tooltip>
         </div>
       </div>
     </div>
@@ -263,12 +277,18 @@ const props = defineProps({
 const emit = defineEmits([
   'send', 'send-voice', 'upload-image', 'upload-file',
   'cancel-reply', 'cancel-edit', 'edit-confirm', 'input',
-  'start-call', 'start-video', 'send-screenshot', 'draft-change', 'create-announcement'
+  'start-call', 'start-video', 'send-screenshot', 'draft-change', 'create-announcement',
+  'send-location'
 ])
 
 const store = useStore()
 const { sendMessage: wsSendMessage } = useImWebSocket()
 const currentUser = computed(() => store.getters['user/currentUser'])
+
+const canSend = computed(() => {
+  if (props.sending) { return false }
+  return Boolean(messageContent.value?.trim())
+})
 
 // 功能开关
 const isScheduledMessageEnabled = computed(() =>
@@ -1296,6 +1316,40 @@ onUnmounted(() => {
       &:hover {
         background: rgba(255, 255, 255, 0.08);
       }
+    }
+  }
+
+  .send-btn {
+    width: auto;
+    padding: 0 10px;
+    gap: 6px;
+    background: var(--dt-brand-color);
+    color: #fff;
+
+    .material-icons-outlined {
+      font-size: 16px;
+    }
+
+    .send-text {
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--dt-brand-hover);
+      color: #fff;
+    }
+
+    &:disabled {
+      background: var(--dt-border-light);
+      color: var(--dt-text-quaternary);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .dark &:disabled {
+      background: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.35);
     }
   }
 }

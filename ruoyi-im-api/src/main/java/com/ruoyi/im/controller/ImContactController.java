@@ -15,7 +15,6 @@ import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -39,7 +38,6 @@ import java.util.List;
 public class ImContactController {
 
     private final ImFriendService imFriendService;
-    private final JdbcTemplate jdbcTemplate;
     private final ImRedisUtil imRedisUtil;
     private final ImBatchOperationService imBatchOperationService;
     private final ImUserService imUserService;
@@ -50,12 +48,10 @@ public class ImContactController {
      * @param imFriendService 好友服务
      */
     public ImContactController(ImFriendService imFriendService,
-            JdbcTemplate jdbcTemplate,
             ImRedisUtil imRedisUtil,
             ImBatchOperationService imBatchOperationService,
             ImUserService imUserService) {
         this.imFriendService = imFriendService;
-        this.jdbcTemplate = jdbcTemplate;
         this.imRedisUtil = imRedisUtil;
         this.imBatchOperationService = imBatchOperationService;
         this.imUserService = imUserService;
@@ -712,45 +708,4 @@ public class ImContactController {
         }
     }
 
-    /**
-     * 清理无效的好友关系（临时调试用）
-     */
-    @Operation(summary = "清理无效好友关系")
-    @GetMapping("/clean-invalid-friends")
-    public Result<HashMap<String, Object>> cleanInvalidFriends() {
-        HashMap<String, Object> result = new HashMap<>();
-        try {
-            // 1. 检查有多少无效记录
-            String checkSql = "SELECT COUNT(*) FROM im_friend WHERE friend_id NOT IN (SELECT id FROM im_user)";
-            Integer invalidCount = jdbcTemplate.queryForObject(checkSql, Integer.class);
-            result.put("invalid_count", invalidCount);
-
-            // 2. 删除无效记录
-            String deleteSql = "DELETE FROM im_friend WHERE friend_id NOT IN (SELECT id FROM im_user)";
-            int deleted = jdbcTemplate.update(deleteSql);
-            result.put("deleted", deleted);
-
-            // 3. 统计张三的好友数
-            Long zhangsanId = null;
-            ImUser zhangsan = imUserService.findByUsername("zhangsan");
-            if (zhangsan != null) {
-                zhangsanId = zhangsan.getId();
-            }
-            if (zhangsanId != null) {
-                String countSql = "SELECT COUNT(*) FROM im_friend WHERE user_id = ? AND is_deleted = 0";
-                Integer friendCount = jdbcTemplate.queryForObject(countSql, Integer.class, zhangsanId);
-                result.put("zhangsan_friend_count", friendCount);
-            }
-
-            // 4. 清除所有缓存
-            imRedisUtil.deletePattern("contact:list:*");
-            result.put("cache_cleared", true);
-
-            return Result.success("清理完成", result);
-        } catch (Exception e) {
-            result.put("error", e.getMessage());
-            result.put("error_type", e.getClass().getSimpleName());
-            return Result.success("清理失败", result);
-        }
-    }
 }

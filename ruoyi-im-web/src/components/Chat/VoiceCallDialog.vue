@@ -14,7 +14,7 @@
           >
             <DingtalkAvatar
               :src="remoteUser?.avatar"
-              :name="remoteUser?.name || remoteUser?.friendName"
+              :name="remoteUser?.name || remoteUser?.userName || remoteUser?.friendName"
               :size="280"
               shape="circle"
             />
@@ -26,14 +26,14 @@
             <div class="user-info">
               <DingtalkAvatar
                 :src="remoteUser?.avatar"
-                :name="remoteUser?.name || remoteUser?.friendName"
+                :name="remoteUser?.name || remoteUser?.userName || remoteUser?.friendName"
                 :size="80"
                 shape="circle"
                 class="user-avatar"
                 :class="{ pulse: isCalling }"
               />
               <h2 class="user-name">
-                {{ remoteUser?.name || remoteUser?.friendName }}
+                {{ remoteUser?.name || remoteUser?.userName || remoteUser?.friendName }}
               </h2>
               <p class="call-status">
                 {{ callStatusText }}
@@ -98,7 +98,7 @@
           <div class="float-avatar">
             <DingtalkAvatar
               :src="remoteUser?.avatar"
-              :name="remoteUser?.name || remoteUser?.friendName"
+              :name="remoteUser?.name || remoteUser?.userName || remoteUser?.friendName"
               :size="40"
               shape="circle"
             />
@@ -108,7 +108,7 @@
             />
           </div>
           <div class="float-info">
-            <span class="float-name">{{ remoteUser?.name || remoteUser?.friendName }}</span>
+            <span class="float-name">{{ remoteUser?.name || remoteUser?.userName || remoteUser?.friendName }}</span>
             <span class="float-status">{{ minimizedStatusText }}</span>
           </div>
           <button

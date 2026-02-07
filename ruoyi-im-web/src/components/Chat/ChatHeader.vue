@@ -63,6 +63,33 @@
         </button>
       </el-tooltip>
 
+      <!-- 语音/视频通话（仅单聊） -->
+      <template v-if="isPrivateChat">
+        <el-tooltip
+          content="语音通话"
+          placement="bottom"
+        >
+          <button
+            class="action-btn"
+            @click="$emit('voice-call')"
+          >
+            <span class="material-icons-outlined">call</span>
+          </button>
+        </el-tooltip>
+
+        <el-tooltip
+          content="视频通话"
+          placement="bottom"
+        >
+          <button
+            class="action-btn"
+            @click="$emit('video-call')"
+          >
+            <span class="material-icons-outlined">videocam</span>
+          </button>
+        </el-tooltip>
+      </template>
+
       <div class="header-divider" />
 
       <!-- 会话设置/详情 -->
@@ -85,7 +112,6 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
-import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
@@ -112,7 +138,9 @@ const emit = defineEmits([
   'show-user',
   'toggle-sidebar',
   'search',
-  'toggle-pinned'
+  'toggle-pinned',
+  'voice-call',
+  'video-call'
 ])
 
 const showConversationInfo = ref(false)
@@ -148,6 +176,8 @@ const realMemberCount = computed(() => {
 const isTyping = computed(() => {
   return props.typingUsers && props.typingUsers.length > 0
 })
+
+const isPrivateChat = computed(() => props.session?.type !== 'GROUP')
 
 // 在线状态描述
 const targetUserOnlineStateDesc = computed(() => {
@@ -209,8 +239,8 @@ const toggleConversationInfo = () => {
 .chat-header {
   height: 60px; // 野火IM标准:60px高度
   padding: 0 20px; // 野火IM:左右20px padding
-  background: #ffffff; // 野火IM:白色背景
-  border-bottom: 1px solid #e0e0e0; // 野火IM:灰色边框
+  background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -354,7 +384,7 @@ const toggleConversationInfo = () => {
 .header-name {
   font-size: 16px;
   font-weight: normal;
-  color: #181818;
+  color: var(--dt-text-primary);
   margin: 0;
   line-height: 1.3;
   display: flex;
@@ -373,7 +403,7 @@ const toggleConversationInfo = () => {
 }
 
 .user-online-status {
-  color: gray;
+  color: var(--dt-text-tertiary);
   font-size: 12px;
   margin: 0;
   cursor: pointer;
