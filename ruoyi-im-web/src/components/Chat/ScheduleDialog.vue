@@ -320,7 +320,7 @@ watch(visible, val => {
 
     &.active {
       border-color: #303133;
-      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+      box-shadow: 0 0 0 2px var(--dt-brand-hover-03);
     }
 
     .material-icons-outlined {

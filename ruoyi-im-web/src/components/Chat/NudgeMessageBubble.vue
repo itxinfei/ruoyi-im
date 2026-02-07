@@ -147,7 +147,7 @@ const formattedTime = computed(() => {
       border-radius: var(--dt-radius-lg);
       font-size: 14px;
       color: var(--dt-text-primary);
-      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);
+      box-shadow: var(--dt-shadow-warning);
 
       .nudge-icon {
         font-size: 18px;

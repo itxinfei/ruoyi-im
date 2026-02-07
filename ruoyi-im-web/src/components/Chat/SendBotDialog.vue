@@ -239,7 +239,7 @@ watch(() => props.visible, val => {
 
     &:focus {
       border-color: var(--dt-brand-color);
-      box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
+      box-shadow: 0 0 0 2px var(--dt-brand-light);
     }
   }
 

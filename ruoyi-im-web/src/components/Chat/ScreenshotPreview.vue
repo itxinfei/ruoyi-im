@@ -428,7 +428,7 @@ onUnmounted(() => {
 .crop-overlay {
   position: absolute;
   border: 2px dashed var(--dt-brand-color);
-  background: rgba(0, 137, 255, 0.1);
+  background: var(--dt-brand-light);
   pointer-events: none;
 }
 

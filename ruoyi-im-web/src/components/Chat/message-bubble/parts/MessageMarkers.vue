@@ -46,7 +46,7 @@ defineProps({
     font-size: 14px;
     padding: 2px 4px;
     border-radius: var(--dt-radius-sm);
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--dt-black-05);
     transition: all var(--dt-transition-base);
     animation: scaleIn 0.2s var(--dt-ease-bounce);
 

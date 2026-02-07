@@ -67,7 +67,7 @@ const canReEdit = computed(() => {
   }
 
   &.is-own {
-    background: rgba(255, 59, 48, 0.05);
+    background: var(--dt-error-02);
 
     .recall-icon {
       color: #ff3b30;
