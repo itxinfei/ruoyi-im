@@ -212,14 +212,14 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
      * 离线消息推送DTO
      */
     public static class OfflineMessagePush {
-        private final String type;
-        private final Long messageId;
-        private final Long conversationId;
-        private final Long senderId;
-        private final String messageType;
-        private final String content;
+        private String type;
+        private Long messageId;
+        private Long conversationId;
+        private Long senderId;
+        private String messageType;
+        private String content;
         private java.time.LocalDateTime createTime;
-        private final Boolean isOffline;
+        private Boolean isOffline;
 
         // Getters and Setters
         public String getType() { return type; }

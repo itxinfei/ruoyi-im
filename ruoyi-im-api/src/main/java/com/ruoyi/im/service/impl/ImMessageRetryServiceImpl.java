@@ -212,11 +212,11 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
      * 失败消息数据结构
      */
     static class FailureData {
-        private final String clientMsgId;
-        private final ImMessageSendRequest request;
-        private final Long userId;
-        private final String errorMessage;
-        private final Long firstFailTime;
+        private String clientMsgId;
+        private ImMessageSendRequest request;
+        private Long userId;
+        private String errorMessage;
+        private Long firstFailTime;
 
         public String getClientMsgId() {
             return clientMsgId;
