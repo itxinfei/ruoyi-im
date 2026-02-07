@@ -16,6 +16,7 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageMentionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageMentionService;
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.constants.StatusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,19 +47,22 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
     private final ImConversationMemberMapper conversationMemberMapper;
     private final ImUserMapper userMapper;
     private final ImMessageMapper messageMapper;
+    private final ImWebSocketBroadcastService broadcastService;
 
     public ImMessageMentionServiceImpl(ImMessageMentionMapper mentionMapper,
                                         ImConversationMapper conversationMapper,
                                         ImGroupMemberMapper groupMemberMapper,
                                         ImConversationMemberMapper conversationMemberMapper,
                                         ImUserMapper userMapper,
-                                        ImMessageMapper messageMapper) {
+                                        ImMessageMapper messageMapper,
+                                        ImWebSocketBroadcastService broadcastService) {
         this.mentionMapper = mentionMapper;
         this.conversationMapper = conversationMapper;
         this.groupMemberMapper = groupMemberMapper;
         this.conversationMemberMapper = conversationMemberMapper;
         this.userMapper = userMapper;
         this.messageMapper = messageMapper;
+        this.broadcastService = broadcastService;
     }
 
     @Override
@@ -337,24 +341,12 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
                 notification.put("messagePreview", getMessagePreview(message.getContent()));
             }
 
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            String messageJson = mapper.writeValueAsString(notification);
-
-            // 获取在线用户
-            Map<Long, javax.websocket.Session> onlineUsers =
-                com.ruoyi.im.websocket.ImWebSocketEndpoint.getOnlineUsers();
-
-            // 向被@的在线用户发送通知
+            // 使用broadcastService发送@提及通知给各用户
             for (Long mentionedUserId : mentionedUserIds) {
-                javax.websocket.Session targetSession = onlineUsers.get(mentionedUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        log.info("已发送@提及通知: messageId={}, mentionedUserId={}", messageId, mentionedUserId);
-                    } catch (Exception e) {
-                        log.error("发送@提及通知失败: userId={}", mentionedUserId, e);
-                    }
-                }
+                Map<String, Object> userNotification = new HashMap<>(notification);
+                userNotification.put("targetUserId", mentionedUserId);
+                broadcastService.broadcastToUserExcept(mentionedUserId, userNotification);
+                log.info("已发送@提及通知: messageId={}, mentionedUserId={}", messageId, mentionedUserId);
             }
 
         } catch (Exception e) {

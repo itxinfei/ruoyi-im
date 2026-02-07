@@ -68,8 +68,14 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
     @Override
     public boolean pushToUser(Long userId, Object message) {
         try {
-            // 检查用户是否在线
-            if (ImWebSocketEndpoint.isUserOnline(userId)) {
+            // 优先使用Redis检查用户在线状态（支持分布式）
+            boolean isOnline = imRedisUtil.isOnlineUser(userId);
+            // 如果Redis显示离线，再检查本地WebSocket连接
+            if (!isOnline) {
+                isOnline = ImWebSocketEndpoint.isUserOnline(userId);
+            }
+
+            if (isOnline) {
                 ImWebSocketEndpoint.sendToUser(userId, message);
                 log.debug("推送消息成功: userId={}", userId);
                 return true;
@@ -175,7 +181,12 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
         int successCount = 0;
         for (ImGroupMember member : members) {
             Long userId = member.getUserId();
-            if (ImWebSocketEndpoint.isUserOnline(userId)) {
+            // 优先使用Redis检查在线状态
+            boolean isOnline = imRedisUtil.isOnlineUser(userId);
+            if (!isOnline) {
+                isOnline = ImWebSocketEndpoint.isUserOnline(userId);
+            }
+            if (isOnline) {
                 try {
                     ImWebSocketEndpoint.sendToUser(userId, message);
                     successCount++;
@@ -257,16 +268,19 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
 
     @Override
     public int getOnlineUserCount() {
-        // 返回当前服务器在线用户数量，如果需要全局数量，可以结合Redis数据
-        // 注意：这里返回的是当前服务器的在线用户数，而不是全局总数，避免重复计算
-        int currentServerCount = ImWebSocketEndpoint.getOnlineUserCount();
-        return currentServerCount;
+        // 优先返回Redis中的全局在线用户数（支持分布式）
+        Long redisCount = imRedisUtil.getOnlineUserCount();
+        if (redisCount != null && redisCount > 0) {
+            return redisCount.intValue();
+        }
+        // Redis为空时返回本地服务器在线用户数
+        return ImWebSocketEndpoint.getOnlineUserCount();
     }
 
     @Override
     public Set<Long> getOnlineUserIds() {
-        Set<Long> onlineUserIds = new HashSet<>(ImWebSocketEndpoint.getOnlineUserIds());
-        // 添加Redis中的在线用户（用于跨服务器的在线用户检测）
+        Set<Long> onlineUserIds = new HashSet<>();
+        // 优先从Redis获取在线用户（全局、分布式）
         Set<String> redisOnlineUsers = imRedisUtil.getOnlineUsers();
         for (String userIdStr : redisOnlineUsers) {
             try {
@@ -275,13 +289,15 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
                 // 忽略无法解析的用户ID
             }
         }
+        // 添加本地WebSocket连接的用户
+        onlineUserIds.addAll(ImWebSocketEndpoint.getOnlineUserIds());
         return onlineUserIds;
     }
 
     @Override
     public boolean isUserOnline(Long userId) {
-        // 检查WebSocket连接状态（当前服务器）和Redis在线状态（全局）
-        return ImWebSocketEndpoint.isUserOnline(userId) || imRedisUtil.isOnlineUser(userId);
+        // 优先检查Redis在线状态（全局、分布式），再检查本地WebSocket连接
+        return imRedisUtil.isOnlineUser(userId) || ImWebSocketEndpoint.isUserOnline(userId);
     }
 
     @Override

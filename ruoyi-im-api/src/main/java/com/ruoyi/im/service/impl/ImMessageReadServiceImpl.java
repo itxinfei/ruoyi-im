@@ -13,9 +13,9 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageReadMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageReadService;
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.constants.StatusConstants;
 import com.ruoyi.im.util.MessageEncryptionUtil;
-import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import com.ruoyi.im.vo.message.ImMessageReadDetailVO;
 import com.ruoyi.im.vo.message.ImMessageReadStatusVO;
 import org.slf4j.Logger;
@@ -46,19 +46,22 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
     private final ImConversationMemberMapper conversationMemberMapper;
     private final ImUserMapper userMapper;
     private final MessageEncryptionUtil encryptionUtil;
+    private final ImWebSocketBroadcastService broadcastService;
 
     public ImMessageReadServiceImpl(ImMessageReadMapper messageReadMapper,
                                      ImMessageMapper messageMapper,
                                      ImConversationMapper conversationMapper,
                                      ImConversationMemberMapper conversationMemberMapper,
                                      ImUserMapper userMapper,
-                                     MessageEncryptionUtil encryptionUtil) {
+                                     MessageEncryptionUtil encryptionUtil,
+                                     ImWebSocketBroadcastService broadcastService) {
         this.messageReadMapper = messageReadMapper;
         this.messageMapper = messageMapper;
         this.conversationMapper = conversationMapper;
         this.conversationMemberMapper = conversationMemberMapper;
         this.userMapper = userMapper;
         this.encryptionUtil = encryptionUtil;
+        this.broadcastService = broadcastService;
     }
 
     @Override
@@ -413,28 +416,22 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
      */
     private void broadcastReadStatus(Long messageId, Long readerUserId, Long senderId) {
         try {
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            javax.websocket.Session senderSession = onlineUsers.get(senderId);
+            // 获取读者信息
+            ImUser reader = userMapper.selectImUserById(readerUserId);
+            String readerName = reader != null ?
+                (reader.getNickname() != null ? reader.getNickname() : reader.getUsername()) : "未知用户";
 
-            if (senderSession != null && senderSession.isOpen()) {
-                // 获取读者信息
-                ImUser reader = userMapper.selectImUserById(readerUserId);
-                String readerName = reader != null ?
-                    (reader.getNickname() != null ? reader.getNickname() : reader.getUsername()) : "未知用户";
+            Map<String, Object> readNotification = new HashMap<>();
+            readNotification.put("type", "read");
+            readNotification.put("messageId", messageId);
+            readNotification.put("userId", readerUserId);
+            readNotification.put("userName", readerName);
+            readNotification.put("timestamp", LocalDateTime.now().toString());
 
-                Map<String, Object> readNotification = new HashMap<>();
-                readNotification.put("type", "read");
-                readNotification.put("messageId", messageId);
-                readNotification.put("userId", readerUserId);
-                readNotification.put("userName", readerName);
-                readNotification.put("timestamp", LocalDateTime.now().toString());
+            // 使用broadcastService发送给发送者
+            broadcastService.broadcastToUserExcept(senderId, readNotification);
 
-                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                String json = mapper.writeValueAsString(readNotification);
-                senderSession.getBasicRemote().sendText(json);
-
-                log.debug("已广播已读状态: messageId={}, readerId={}, senderId={}", messageId, readerUserId, senderId);
-            }
+            log.debug("已广播已读状态: messageId={}, readerId={}, senderId={}", messageId, readerUserId, senderId);
         } catch (Exception e) {
             log.error("广播已读状态失败: messageId={}, readerId={}", messageId, readerUserId, e);
         }
