@@ -25,7 +25,7 @@ import com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO;
 import com.ruoyi.im.vo.announcement.ImAnnouncementVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +72,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     @Transactional(rollbackFor = Exception.class)
     public Long createAnnouncement(ImAnnouncementCreateRequest request, Long userId) {
         ImAnnouncement announcement = new ImAnnouncement();
-        BeanUtils.copyProperties(request, announcement);
+        BeanConvertUtil.copyProperties(request, announcement);
 
         announcement.setStatus("DRAFT");
         announcement.setViewCount(0);
@@ -510,7 +510,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
      */
     private ImAnnouncementVO convertToVO(ImAnnouncement announcement, Long userId) {
         ImAnnouncementVO vo = new ImAnnouncementVO();
-        BeanUtils.copyProperties(announcement, vo);
+        BeanConvertUtil.copyProperties(announcement, vo);
 
         // 设置显示名称
         vo.setAnnouncementTypeDisplay(getTypeDisplay(announcement.getAnnouncementType()));
@@ -552,7 +552,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
      */
     private ImAnnouncementDetailVO convertToDetailVO(ImAnnouncement announcement, Long userId) {
         ImAnnouncementDetailVO vo = new ImAnnouncementDetailVO();
-        BeanUtils.copyProperties(announcement, vo);
+        BeanConvertUtil.copyProperties(announcement, vo);
 
         // 设置显示名称
         vo.setAnnouncementTypeDisplay(getTypeDisplay(announcement.getAnnouncementType()));

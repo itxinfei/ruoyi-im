@@ -3,10 +3,10 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.service.ImAuditService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.audit.ImAuditLogVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -43,7 +43,7 @@ public class ImAuditController {
             return new ImAuditLogVO();
         }
         ImAuditLogVO vo = new ImAuditLogVO();
-        BeanUtils.copyProperties(log, vo);
+        BeanConvertUtil.copyProperties(log, vo);
         return vo;
     }
 

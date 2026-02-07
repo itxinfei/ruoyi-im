@@ -16,10 +16,10 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.util.ImRedisUtil;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.conversation.ImConversationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -214,7 +214,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         ImMessage lastMessage = lastMessageMap.get(vo.getId());
         if (lastMessage != null) {
             com.ruoyi.im.vo.message.ImMessageVO messageVO = new com.ruoyi.im.vo.message.ImMessageVO();
-            BeanUtils.copyProperties(lastMessage, messageVO);
+            BeanConvertUtil.copyProperties(lastMessage, messageVO);
             // 解密消息内容
             if (lastMessage.getContent() != null) {
                 try {
@@ -460,7 +460,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         }
 
         ImConversationVO vo = new ImConversationVO();
-        BeanUtils.copyProperties(conversation, vo);
+        BeanConvertUtil.copyProperties(conversation, vo);
         vo.setUnreadCount(member.getUnreadCount());
         vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
         vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
@@ -672,7 +672,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             ImConversation conversation = imConversationMapper.selectById(member.getConversationId());
             if (conversation != null) {
                 ImConversationVO vo = new ImConversationVO();
-                BeanUtils.copyProperties(conversation, vo);
+                BeanConvertUtil.copyProperties(conversation, vo);
                 vo.setUnreadCount(member.getUnreadCount());
                 vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
                 vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);

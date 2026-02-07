@@ -7,7 +7,7 @@ import com.ruoyi.im.mapper.ImUserDeviceMapper;
 import com.ruoyi.im.service.ImDeviceService;
 import com.ruoyi.im.vo.device.DeviceVO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -246,7 +246,7 @@ public class ImDeviceServiceImpl implements ImDeviceService {
      */
     private DeviceVO convertToVO(ImUserDevice device) {
         DeviceVO vo = new DeviceVO();
-        BeanUtils.copyProperties(device, vo);
+        BeanConvertUtil.copyProperties(device, vo);
         return vo;
     }
 }

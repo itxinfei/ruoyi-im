@@ -162,7 +162,7 @@ public class ImMessageAckServiceImpl implements ImMessageAckService {
     }
 
     @Override
-    public void handleClientAck(Long userId, Long messageId, String ackType, String deviceId) {
+    public void processClientAck(Long userId, Long messageId, String ackType, String deviceId) {
         if ("receive".equals(ackType)) {
             recordReceiveAck(messageId, userId, deviceId);
         } else if ("read".equals(ackType)) {

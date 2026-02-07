@@ -16,7 +16,7 @@ import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.vo.marker.ImMessageMarkerVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -245,7 +245,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
 
         return markers.stream().map(marker -> {
             ImMessageMarkerVO vo = new ImMessageMarkerVO();
-            BeanUtils.copyProperties(marker, vo);
+            BeanConvertUtil.copyProperties(marker, vo);
 
             // 获取消息信息
             ImMessage message = messageMapper.selectById(marker.getMessageId());
@@ -291,7 +291,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
 
         return markers.stream().map(marker -> {
             ImMessageMarkerVO vo = new ImMessageMarkerVO();
-            BeanUtils.copyProperties(marker, vo);
+            BeanConvertUtil.copyProperties(marker, vo);
             return vo;
         }).collect(Collectors.toList());
     }

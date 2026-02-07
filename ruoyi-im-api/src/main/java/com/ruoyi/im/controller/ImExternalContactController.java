@@ -5,12 +5,12 @@ import com.ruoyi.im.domain.ImExternalContact;
 import com.ruoyi.im.domain.ImExternalContactGroup;
 import com.ruoyi.im.dto.contact.ExternalContactCreateRequest;
 import com.ruoyi.im.service.ImExternalContactService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.contact.ImExternalContactGroupVO;
 import com.ruoyi.im.vo.contact.ImExternalContactVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -50,7 +50,7 @@ public class ImExternalContactController {
             return new ImExternalContactVO();
         }
         ImExternalContactVO vo = new ImExternalContactVO();
-        BeanUtils.copyProperties(contact, vo);
+        BeanConvertUtil.copyProperties(contact, vo);
         return vo;
     }
 
@@ -80,7 +80,7 @@ public class ImExternalContactController {
             return new ImExternalContactGroupVO();
         }
         ImExternalContactGroupVO vo = new ImExternalContactGroupVO();
-        BeanUtils.copyProperties(group, vo);
+        BeanConvertUtil.copyProperties(group, vo);
         return vo;
     }
 

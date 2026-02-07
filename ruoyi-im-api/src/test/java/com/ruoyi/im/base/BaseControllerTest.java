@@ -3,6 +3,8 @@ package com.ruoyi.im.base;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.util.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +30,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Transactional
 @ActiveProfiles("test")
 public abstract class BaseControllerTest {
+
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
     protected MockMvc mockMvc;
@@ -214,7 +218,7 @@ public abstract class BaseControllerTest {
      * @param title 标题
      */
     protected void printSeparator(String title) {
-        System.out.println("\n========== " + title + " ==========\n");
+        log.info("========== {} ==========", title);
     }
 
     /**

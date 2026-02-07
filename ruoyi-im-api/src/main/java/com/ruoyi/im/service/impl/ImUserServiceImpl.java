@@ -18,11 +18,11 @@ import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.JwtUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -141,7 +141,7 @@ public class ImUserServiceImpl implements ImUserService {
         }
 
         ImUser user = new ImUser();
-        BeanUtils.copyProperties(request, user);
+        BeanConvertUtil.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus(1); // 1=启用
         user.setGender(0);
@@ -176,7 +176,7 @@ public class ImUserServiceImpl implements ImUserService {
         }
 
         ImUserVO vo = new ImUserVO();
-        BeanUtils.copyProperties(user, vo);
+        BeanConvertUtil.copyProperties(user, vo);
 
         // 缓存用户信息（不包含实时在线状态）
         imRedisUtil.cacheUserInfo(userId, vo);
@@ -194,7 +194,7 @@ public class ImUserServiceImpl implements ImUserService {
             throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
-        BeanUtils.copyProperties(request, user);
+        BeanConvertUtil.copyProperties(request, user);
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
 
@@ -274,7 +274,7 @@ public class ImUserServiceImpl implements ImUserService {
         List<ImUserVO> voList = new ArrayList<>();
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
-            BeanUtils.copyProperties(user, vo);
+            BeanConvertUtil.copyProperties(user, vo);
             vo.setOnline(true);
             voList.add(vo);
         }
@@ -290,7 +290,7 @@ public class ImUserServiceImpl implements ImUserService {
         }
 
         ImUser user = new ImUser();
-        BeanUtils.copyProperties(request, user);
+        BeanConvertUtil.copyProperties(request, user);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus(1); // 1=启用
         user.setGender(0);
@@ -373,7 +373,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
-            BeanUtils.copyProperties(user, vo);
+            BeanConvertUtil.copyProperties(user, vo);
             vo.setOnline(true);
             onlineUsers.add(vo);
         }
@@ -455,7 +455,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
-            BeanUtils.copyProperties(user, vo);
+            BeanConvertUtil.copyProperties(user, vo);
             vo.setOnline(imRedisUtil.isOnlineUser(user.getId()));
             voList.add(vo);
         }
@@ -474,7 +474,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
-            BeanUtils.copyProperties(user, vo);
+            BeanConvertUtil.copyProperties(user, vo);
             vo.setOnline(imRedisUtil.isOnlineUser(user.getId()));
             voList.add(vo);
         }
@@ -494,7 +494,7 @@ public class ImUserServiceImpl implements ImUserService {
         List<ImUserVO> voList = new ArrayList<>();
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
-            BeanUtils.copyProperties(user, vo);
+            BeanConvertUtil.copyProperties(user, vo);
             vo.setOnline(imRedisUtil.isOnlineUser(user.getId()));
             voList.add(vo);
         }

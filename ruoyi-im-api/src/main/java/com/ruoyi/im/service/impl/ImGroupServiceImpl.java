@@ -16,9 +16,9 @@ import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImGroupService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.group.ImGroupMemberVO;
 import com.ruoyi.im.vo.group.ImGroupVO;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -208,7 +208,7 @@ public class ImGroupServiceImpl implements ImGroupService {
                 throw new BusinessException("群组不存在");
             }
             ImGroupVO groupVO = new ImGroupVO();
-            BeanUtils.copyProperties(group, groupVO);
+            BeanConvertUtil.copyProperties(group, groupVO);
 
             ImUser owner = imUserMapper.selectImUserById(group.getOwnerId());
             if (owner != null) {
@@ -240,7 +240,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             ImGroup group = imGroupMapper.selectImGroupById(member.getGroupId());
             if (group != null && java.util.Objects.equals(group.getIsDeleted(), 0)) {
                 ImGroupVO vo = new ImGroupVO();
-                BeanUtils.copyProperties(group, vo);
+                BeanConvertUtil.copyProperties(group, vo);
                 vo.setMyRole(member.getRole());
                 vo.setIsMuted(member.getMuteEndTime() != null && member.getMuteEndTime().isAfter(LocalDateTime.now()));
                 voList.add(vo);
@@ -258,7 +258,7 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         for (ImGroupMember member : memberList) {
             ImGroupMemberVO vo = new ImGroupMemberVO();
-            BeanUtils.copyProperties(member, vo);
+            BeanConvertUtil.copyProperties(member, vo);
 
             ImUser user = imUserMapper.selectImUserById(member.getUserId());
             if (user != null) {
@@ -552,7 +552,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupVO vo = new ImGroupVO();
-        BeanUtils.copyProperties(group, vo);
+        BeanConvertUtil.copyProperties(group, vo);
 
         // 设置成员数量
         Integer memberCount = imGroupMemberMapper.countMembersByGroupId(groupId);
@@ -627,7 +627,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             throw new BusinessException("GROUP_NOT_EXIST", "群组不存在");
         }
 
-        BeanUtils.copyProperties(request, group);
+        BeanConvertUtil.copyProperties(request, group);
         group.setId(groupId);
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
@@ -709,7 +709,7 @@ public class ImGroupServiceImpl implements ImGroupService {
      */
     private ImGroupVO convertToVO(ImGroup group) {
         ImGroupVO vo = new ImGroupVO();
-        BeanUtils.copyProperties(group, vo);
+        BeanConvertUtil.copyProperties(group, vo);
         return vo;
     }
 

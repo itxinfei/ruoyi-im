@@ -18,7 +18,7 @@ import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.util.PinyinUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -246,7 +246,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
             for (ImFriend friend : uniqueFriendMap.values()) {
                 ImFriendVO vo = new ImFriendVO();
-                BeanUtils.copyProperties(friend, vo);
+                BeanConvertUtil.copyProperties(friend, vo);
 
                 // 从批量查询结果中获取用户信息
                 ImUser friendUser = userMap.get(friend.getFriendId());
@@ -382,7 +382,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void handleFriendRequest(Long requestId, Boolean approved, Long userId) {
+    public void processFriendRequest(Long requestId, Boolean approved, Long userId) {
         ImFriendRequest request = imFriendRequestMapper.selectImFriendRequestById(requestId);
         if (request == null) {
             throw new BusinessException("好友申请不存在");
@@ -534,7 +534,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         }
 
         ImFriendVO vo = new ImFriendVO();
-        BeanUtils.copyProperties(friend, vo);
+        BeanConvertUtil.copyProperties(friend, vo);
 
         // 查询好友用户信息
         ImUser friendUser = imUserMapper.selectImUserById(friend.getFriendId());
@@ -613,7 +613,7 @@ public class ImFriendServiceImpl implements ImFriendService {
             }
 
             ImUserVO vo = new ImUserVO();
-            BeanUtils.copyProperties(user, vo);
+            BeanConvertUtil.copyProperties(user, vo);
             // 可以添加额外的状态标识
             result.add(vo);
         }
@@ -904,7 +904,7 @@ public class ImFriendServiceImpl implements ImFriendService {
                     for (ImUser user : deptUsers) {
                         if (!user.getId().equals(userId) && !friendIds.contains(user.getId())) {
                             ImUserVO vo = new ImUserVO();
-                            BeanUtils.copyProperties(user, vo);
+                            BeanConvertUtil.copyProperties(user, vo);
                             // 将推荐信息放到扩展字段中
                             vo.setSignature("同部门: " + userDept);
                             recommendations.add(vo);
@@ -959,7 +959,7 @@ public class ImFriendServiceImpl implements ImFriendService {
                 for (ImUser user : matchedUserList) {
                     if (!user.getId().equals(userId) && !friendIds.contains(user.getId())) {
                         ImUserVO vo = new ImUserVO();
-                        BeanUtils.copyProperties(user, vo);
+                        BeanConvertUtil.copyProperties(user, vo);
                         String contactName = contact.get("name");
                         // 将匹配信息放到扩展字段中
                         vo.setSignature("来自通讯录: " + (contactName != null ? contactName : phone));

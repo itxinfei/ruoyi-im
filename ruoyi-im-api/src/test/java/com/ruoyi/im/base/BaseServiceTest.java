@@ -1,6 +1,8 @@
 package com.ruoyi.im.base;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("test")
 public abstract class BaseServiceTest {
 
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
     /**
      * 初始化测试环境
      * 在每个测试方法执行前调用
@@ -33,7 +37,7 @@ public abstract class BaseServiceTest {
      * @param title 标题
      */
     protected void printSeparator(String title) {
-        System.out.println("\n========== " + title + " ==========\n");
+        log.info("========== {} ==========", title);
     }
 
     /**
@@ -42,7 +46,7 @@ public abstract class BaseServiceTest {
      * @param testName 测试名称
      */
     protected void printTestStart(String testName) {
-        System.out.println("\n--- 测试开始: " + testName + " ---\n");
+        log.info("--- 测试开始: {} ---", testName);
     }
 
     /**
@@ -51,6 +55,6 @@ public abstract class BaseServiceTest {
      * @param testName 测试名称
      */
     protected void printTestEnd(String testName) {
-        System.out.println("\n--- 测试结束: " + testName + " ---\n");
+        log.info("--- 测试结束: {} ---", testName);
     }
 }

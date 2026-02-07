@@ -22,13 +22,13 @@ import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.AuditLogUtil;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.listener.BotMessageListener;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
@@ -108,7 +108,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                 ImMessage existingMessage = imMessageMapper.selectImMessageById(existingMessageId);
                 if (existingMessage != null) {
                     ImMessageVO vo = new ImMessageVO();
-                    BeanUtils.copyProperties(existingMessage, vo);
+                    BeanConvertUtil.copyProperties(existingMessage, vo);
                     vo.setContent(encryptionUtil.decryptMessage(existingMessage.getContent())); // 解密
                     vo.setIsSelf(existingMessage.getSenderId().equals(userId));
                     ImUser sender = imUserMapper.selectImUserById(existingMessage.getSenderId());
@@ -180,7 +180,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             updateConversationLastMessage(conversationId, message);
 
             // 4. 处理未读计数
-            handleUnreadCount(conversationId, userId);
+            updateUnreadCount(conversationId, userId);
 
             // 5. 处理@提及功能
             processMentions(request, conversationId, message.getId(), userId);
@@ -268,9 +268,9 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     /**
-     * 处理会话成员的未读计数
+     * 更新会话成员的未读计数
      */
-    private void handleUnreadCount(Long conversationId, Long senderId) {
+    private void updateUnreadCount(Long conversationId, Long senderId) {
         List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
                 .selectByConversationId(conversationId);
         boolean shouldEvictCache = members.size() <= 20;
@@ -361,7 +361,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         String plainContent = encryptionUtil.decryptMessage(message.getContent());
 
         ImMessageVO vo = new ImMessageVO();
-        BeanUtils.copyProperties(message, vo);
+        BeanConvertUtil.copyProperties(message, vo);
         vo.setContent(plainContent);
         vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
         vo.setIsSelf(true);
@@ -489,7 +489,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         for (ImMessage message : messageList) {
             ImMessageVO vo = new ImMessageVO();
-            BeanUtils.copyProperties(message, vo);
+            BeanConvertUtil.copyProperties(message, vo);
 
             // 解密内容
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
@@ -1052,7 +1052,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      */
     private ImMessageVO convertToVO(ImMessage message) {
         ImMessageVO vo = new ImMessageVO();
-        BeanUtils.copyProperties(message, vo);
+        BeanConvertUtil.copyProperties(message, vo);
         
         // 解密消息内容
         if (message.getContent() != null) {

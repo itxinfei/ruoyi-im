@@ -4,11 +4,11 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImGroupAnnouncement;
 import com.ruoyi.im.dto.group.ImGroupAnnouncementCreateRequest;
 import com.ruoyi.im.service.ImGroupAnnouncementService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.group.ImGroupAnnouncementVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -49,7 +49,7 @@ public class ImGroupAnnouncementController {
             return new ImGroupAnnouncementVO();
         }
         ImGroupAnnouncementVO vo = new ImGroupAnnouncementVO();
-        BeanUtils.copyProperties(announcement, vo);
+        BeanConvertUtil.copyProperties(announcement, vo);
         // 计算是否已过期
         if (announcement.getExpireTime() != null) {
             vo.setIsExpired(LocalDateTime.now().isAfter(announcement.getExpireTime()));

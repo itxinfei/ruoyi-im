@@ -10,7 +10,7 @@ import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -163,7 +163,7 @@ public class ImFileServiceImpl implements ImFileService {
 
     private ImFileVO convertToVO(ImFileAsset asset) {
         ImFileVO vo = new ImFileVO();
-        BeanUtils.copyProperties(asset, vo);
+        BeanConvertUtil.copyProperties(asset, vo);
         vo.setFileId(asset.getId());
         vo.setFileExtension(asset.getFileExt());
         vo.setFileUrl(fileUploadConfig.buildFileUrl(asset.getFilePath()));

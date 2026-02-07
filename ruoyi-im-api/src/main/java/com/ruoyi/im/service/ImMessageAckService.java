@@ -79,5 +79,5 @@ public interface ImMessageAckService {
      * @param ackType ACK类型（receive/read）
      * @param deviceId 设备ID
      */
-    void handleClientAck(Long userId, Long messageId, String ackType, String deviceId);
+    void processClientAck(Long userId, Long messageId, String ackType, String deviceId);
 }

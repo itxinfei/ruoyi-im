@@ -20,7 +20,7 @@ import com.ruoyi.im.vo.meeting.ImVideoMeetingVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -800,7 +800,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         ImVideoMeetingVO vo = new ImVideoMeetingVO();
-        BeanUtils.copyProperties(meeting, vo);
+        BeanConvertUtil.copyProperties(meeting, vo);
 
         // 设置发起人头像
         ImUser host = userMapper.selectImUserById(meeting.getHostId());
@@ -820,7 +820,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         ImVideoMeetingDetailVO vo = new ImVideoMeetingDetailVO();
-        BeanUtils.copyProperties(meeting, vo);
+        BeanConvertUtil.copyProperties(meeting, vo);
 
         // 设置发起人头像
         ImUser host = userMapper.selectImUserById(meeting.getHostId());

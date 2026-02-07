@@ -5,8 +5,8 @@ import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.service.ImConversationMemberService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,7 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
         List<ImConversationMember> memberList = conversationMemberMapper.selectByUserId(userId);
         for (ImConversationMember member : memberList) {
             ImConversationMemberVO vo = new ImConversationMemberVO();
-            BeanUtils.copyProperties(member, vo);
+            BeanConvertUtil.copyProperties(member, vo);
             voList.add(vo);
         }
         return voList;
@@ -46,7 +46,7 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
             throw new BusinessException("会话成员不存在");
         }
         ImConversationMemberVO vo = new ImConversationMemberVO();
-        BeanUtils.copyProperties(member, vo);
+        BeanConvertUtil.copyProperties(member, vo);
         return vo;
     }
 

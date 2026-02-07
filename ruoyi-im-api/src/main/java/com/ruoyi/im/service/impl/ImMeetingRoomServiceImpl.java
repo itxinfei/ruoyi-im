@@ -22,7 +22,7 @@ import com.ruoyi.im.vo.meeting.ImMeetingRoomScheduleVO;
 import com.ruoyi.im.vo.meeting.ImMeetingRoomVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +70,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         }
 
         ImMeetingRoom room = new ImMeetingRoom();
-        BeanUtils.copyProperties(request, room);
+        BeanConvertUtil.copyProperties(request, room);
 
         room.setStatus(MeetingRoomConstants.Status.AVAILABLE);
         room.setIsBookable(true);
@@ -260,7 +260,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
 
         // 创建预订
         ImMeetingBooking booking = new ImMeetingBooking();
-        BeanUtils.copyProperties(request, booking);
+        BeanConvertUtil.copyProperties(request, booking);
         booking.setBookingUserId(userId);
         booking.setStatus(MeetingRoomConstants.BookingStatus.CONFIRMED);
         booking.setReminderSent(false);
@@ -509,7 +509,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
      */
     private ImMeetingRoomVO convertToVO(ImMeetingRoom room) {
         ImMeetingRoomVO vo = new ImMeetingRoomVO();
-        BeanUtils.copyProperties(room, vo);
+        BeanConvertUtil.copyProperties(room, vo);
 
         vo.setStatusDisplay(getStatusDisplay(room.getStatus()));
 
@@ -543,7 +543,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
      */
     private ImMeetingBookingVO convertToBookingVO(ImMeetingBooking booking) {
         ImMeetingBookingVO vo = new ImMeetingBookingVO();
-        BeanUtils.copyProperties(booking, vo);
+        BeanConvertUtil.copyProperties(booking, vo);
 
         vo.setStatusDisplay(getStatusDisplay(booking.getStatus()));
         vo.setMeetingTypeDisplay(getMeetingTypeDisplay(booking.getMeetingType()));

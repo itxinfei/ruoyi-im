@@ -10,7 +10,7 @@ import com.ruoyi.im.service.ImEmojiService;
 import com.ruoyi.im.vo.emoji.ImEmojiVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -205,7 +205,7 @@ public class ImEmojiServiceImpl implements ImEmojiService {
      */
     private ImEmojiVO convertToVO(ImEmoji emoji, Long userId) {
         ImEmojiVO vo = new ImEmojiVO();
-        BeanUtils.copyProperties(emoji, vo);
+        BeanConvertUtil.copyProperties(emoji, vo);
 
         // 设置是否当前用户上传
         if (userId != null) {

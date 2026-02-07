@@ -145,7 +145,7 @@ public class ImContactController {
     public Result<Void> handleRequest(@PathVariable @Positive(message = "申请ID必须为正数") Long id,
             @RequestParam @NotNull(message = "处理结果不能为空") Boolean approved) {
         Long userId = SecurityUtils.getLoginUserId();
-        imFriendService.handleFriendRequest(id, approved, userId);
+        imFriendService.processFriendRequest(id, approved, userId);
         return Result.success(approved ? "已同意" : "已拒绝");
     }
 

@@ -6,13 +6,13 @@ import com.ruoyi.im.dto.groupbot.BotCreateRequest;
 import com.ruoyi.im.dto.groupbot.BotRuleRequest;
 import com.ruoyi.im.dto.groupbot.BotUpdateRequest;
 import com.ruoyi.im.service.ImGroupBotService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.group.ImGroupBotVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -51,7 +51,7 @@ public class ImGroupBotController {
             return new ImGroupBotVO();
         }
         ImGroupBotVO vo = new ImGroupBotVO();
-        BeanUtils.copyProperties(bot, vo);
+        BeanConvertUtil.copyProperties(bot, vo);
         return vo;
     }
 

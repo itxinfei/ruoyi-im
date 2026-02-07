@@ -12,7 +12,7 @@ import com.ruoyi.im.vo.organization.ImDepartmentVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +57,7 @@ public class ImDepartmentAdminController {
             return new ImDepartmentVO();
         }
         ImDepartmentVO vo = new ImDepartmentVO();
-        BeanUtils.copyProperties(department, vo);
+        BeanConvertUtil.copyProperties(department, vo);
         return vo;
     }
 

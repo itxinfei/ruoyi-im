@@ -16,7 +16,7 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImScheduleEventService;
 import com.ruoyi.im.vo.schedule.ScheduleEventDetailVO;
 import com.ruoyi.im.vo.schedule.ScheduleParticipantVO;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +45,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     @Transactional(rollbackFor = Exception.class)
     public Long createEvent(ScheduleEventCreateRequest request, Long userId) {
         ImScheduleEvent event = new ImScheduleEvent();
-        BeanUtils.copyProperties(request, event);
+        BeanConvertUtil.copyProperties(request, event);
         event.setUserId(userId);
         event.setIsAllDay(Boolean.TRUE.equals(request.getIsAllDay()) ? 1 : 0);
         event.setStatus(StatusConstants.Meeting.SCHEDULED);
@@ -80,7 +80,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
             throw new BusinessException("无权限操作");
         }
 
-        BeanUtils.copyProperties(request, event);
+        BeanConvertUtil.copyProperties(request, event);
         event.setIsAllDay(Boolean.TRUE.equals(request.getIsAllDay()) ? 1 : 0);
         eventMapper.updateById(event);
 
@@ -126,7 +126,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
         }
 
         ScheduleEventDetailVO vo = new ScheduleEventDetailVO();
-        BeanUtils.copyProperties(event, vo);
+        BeanConvertUtil.copyProperties(event, vo);
         vo.setIsAllDay(event.getIsAllDay() == 1);
 
         // 获取创建人信息
@@ -224,7 +224,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
      */
     private ScheduleEventDetailVO convertToDetailVO(ImScheduleEvent event) {
         ScheduleEventDetailVO vo = new ScheduleEventDetailVO();
-        BeanUtils.copyProperties(event, vo);
+        BeanConvertUtil.copyProperties(event, vo);
         vo.setIsAllDay(event.getIsAllDay() == 1);
 
         ImUser user = userMapper.selectImUserById(event.getUserId());

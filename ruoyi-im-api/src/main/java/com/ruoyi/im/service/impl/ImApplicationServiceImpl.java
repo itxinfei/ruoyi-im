@@ -4,6 +4,7 @@ import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImApplicationMapper;
 import com.ruoyi.im.service.ImApplicationService;
+import com.ruoyi.im.util.ValidationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,10 +54,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     @Override
     public ImApplication getApplicationById(Long appId) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
-        if (app == null) {
-            throw new BusinessException("应用不存在");
-        }
-        return app;
+        return ValidationUtils.checkExists(app, "应用");
     }
 
     @Override
@@ -87,9 +85,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     @Transactional(rollbackFor = Exception.class)
     public void updateApplication(Long appId, String name, String description, String icon) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
-        if (app == null) {
-            throw new BusinessException("应用不存在");
-        }
+        ValidationUtils.checkExists(app, "应用");
         app.setName(name);
         app.setDescription(description);
         app.setIcon(icon);
@@ -100,9 +96,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long appId) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
-        if (app == null) {
-            throw new BusinessException("应用不存在");
-        }
+        ValidationUtils.checkExists(app, "应用");
         if (app.getIsSystem() == 1) {
             throw new BusinessException("系统应用不能删除");
         }
@@ -113,9 +107,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     @Transactional(rollbackFor = Exception.class)
     public void setVisibility(Long appId, Boolean isVisible) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
-        if (app == null) {
-            throw new BusinessException("应用不存在");
-        }
+        ValidationUtils.checkExists(app, "应用");
         app.setIsVisible(isVisible ? 1 : 0);
         applicationMapper.updateImApplication(app);
     }

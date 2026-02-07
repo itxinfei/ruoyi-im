@@ -9,7 +9,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImExternalContactGroupMapper;
 import com.ruoyi.im.mapper.ImExternalContactMapper;
 import com.ruoyi.im.service.ImExternalContactService;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +50,7 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
         }
 
         ImExternalContact contact = new ImExternalContact();
-        BeanUtils.copyProperties(request, contact);
+        BeanConvertUtil.copyProperties(request, contact);
         contact.setUserId(userId);
         contact.setIsStarred(Boolean.TRUE.equals(request.getIsStarred()) ? 1 : 0);
         contact.setSource("MANUAL");
@@ -77,7 +77,7 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
             }
         }
 
-        BeanUtils.copyProperties(request, contact);
+        BeanConvertUtil.copyProperties(request, contact);
         if (request.getIsStarred() != null) {
             contact.setIsStarred(Boolean.TRUE.equals(request.getIsStarred()) ? 1 : 0);
         }

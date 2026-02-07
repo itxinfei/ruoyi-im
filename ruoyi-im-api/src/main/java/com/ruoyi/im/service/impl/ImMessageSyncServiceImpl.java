@@ -11,7 +11,7 @@ import com.ruoyi.im.service.ImMessageSyncService;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import com.ruoyi.im.vo.message.SyncMessageResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -222,7 +222,7 @@ public class ImMessageSyncServiceImpl implements ImMessageSyncService {
      */
     private ImMessageVO convertToVO(ImMessage message) {
         ImMessageVO vo = new ImMessageVO();
-        BeanUtils.copyProperties(message, vo);
+        BeanConvertUtil.copyProperties(message, vo);
         return vo;
     }
 }

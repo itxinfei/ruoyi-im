@@ -3,11 +3,11 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImAttendance;
 import com.ruoyi.im.service.ImAttendanceService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.attendance.ImAttendanceVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +52,7 @@ public class ImAttendanceController {
             return new ImAttendanceVO();
         }
         ImAttendanceVO vo = new ImAttendanceVO();
-        BeanUtils.copyProperties(attendance, vo);
+        BeanConvertUtil.copyProperties(attendance, vo);
 
         // 格式化工作时长文本
         if (attendance.getWorkMinutes() != null) {

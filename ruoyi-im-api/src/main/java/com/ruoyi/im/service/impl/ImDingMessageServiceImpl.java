@@ -19,7 +19,7 @@ import com.ruoyi.im.vo.ding.DingReceiptVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -145,7 +145,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
         }
 
         DingDetailVO vo = new DingDetailVO();
-        BeanUtils.copyProperties(ding, vo);
+        BeanConvertUtil.copyProperties(ding, vo);
 
         // 获取发送者信息
         ImUser sender = userMapper.selectImUserById(ding.getSenderId());
@@ -220,7 +220,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
         List<DingReceiptVO> voList = new ArrayList<>();
         for (ImDingReceipt receipt : receipts) {
             DingReceiptVO vo = new DingReceiptVO();
-            BeanUtils.copyProperties(receipt, vo);
+            BeanConvertUtil.copyProperties(receipt, vo);
 
             ImUser receiver = userMapper.selectImUserById(receipt.getReceiverId());
             if (receiver != null) {

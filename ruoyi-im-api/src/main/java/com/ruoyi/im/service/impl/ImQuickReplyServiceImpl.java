@@ -8,7 +8,7 @@ import com.ruoyi.im.service.ImQuickReplyService;
 import com.ruoyi.im.vo.quickreply.ImQuickReplyVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -172,7 +172,7 @@ public class ImQuickReplyServiceImpl implements ImQuickReplyService {
      */
     private ImQuickReplyVO convertToVO(ImQuickReply reply) {
         ImQuickReplyVO vo = new ImQuickReplyVO();
-        BeanUtils.copyProperties(reply, vo);
+        BeanConvertUtil.copyProperties(reply, vo);
         return vo;
     }
 }

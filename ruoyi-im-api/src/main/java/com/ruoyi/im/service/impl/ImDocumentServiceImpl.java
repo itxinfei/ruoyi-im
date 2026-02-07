@@ -22,7 +22,7 @@ import com.ruoyi.im.vo.document.ImDocumentVersionVO;
 import com.ruoyi.im.vo.document.ImDocumentVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -215,7 +215,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         }
 
         ImDocumentVO vo = new ImDocumentVO();
-        BeanUtils.copyProperties(document, vo);
+        BeanConvertUtil.copyProperties(document, vo);
 
         // 设置预览
         if (document.getContent() != null && document.getContent().length() > 100) {
@@ -272,7 +272,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         return documents.stream()
             .map(doc -> {
                 ImDocumentVO vo = new ImDocumentVO();
-                BeanUtils.copyProperties(doc, vo);
+                BeanConvertUtil.copyProperties(doc, vo);
                 return vo;
             })
             .collect(Collectors.toList());
@@ -284,7 +284,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         return documents.stream()
             .map(doc -> {
                 ImDocumentVO vo = new ImDocumentVO();
-                BeanUtils.copyProperties(doc, vo);
+                BeanConvertUtil.copyProperties(doc, vo);
                 return vo;
             })
             .collect(Collectors.toList());
@@ -450,7 +450,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         return comments.stream()
             .map(comment -> {
                 ImDocumentCommentVO vo = new ImDocumentCommentVO();
-                BeanUtils.copyProperties(comment, vo);
+                BeanConvertUtil.copyProperties(comment, vo);
                 ImUser user = userMap.get(comment.getUserId());
                 vo.setUserName(user != null ? user.getNickname() : "用户" + comment.getUserId());
                 vo.setUserAvatar(user != null ? user.getAvatar() : null);
@@ -483,7 +483,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         return versions.stream()
             .map(version -> {
                 ImDocumentVersionVO vo = new ImDocumentVersionVO();
-                BeanUtils.copyProperties(version, vo);
+                BeanConvertUtil.copyProperties(version, vo);
                 vo.setCanRestore(true);
                 return vo;
             })

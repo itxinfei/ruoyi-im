@@ -21,7 +21,7 @@ import com.ruoyi.im.vo.task.ImTaskDetailVO;
 import com.ruoyi.im.vo.task.ImTaskVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +59,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     @Transactional(rollbackFor = Exception.class)
     public Long createTask(ImTaskCreateRequest request, Long userId) {
         ImTask task = new ImTask();
-        BeanUtils.copyProperties(request, task);
+        BeanConvertUtil.copyProperties(request, task);
 
         // 生成任务编号
         task.setTaskNumber(generateTaskNumber());
@@ -502,7 +502,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         }
 
         ImTask newTask = new ImTask();
-        BeanUtils.copyProperties(sourceTask, newTask);
+        BeanConvertUtil.copyProperties(sourceTask, newTask);
         newTask.setId(null);
         newTask.setTaskNumber(generateTaskNumber());
         newTask.setTitle(sourceTask.getTitle() + " (副本)");
@@ -530,7 +530,7 @@ public class ImTaskServiceImpl implements ImTaskService {
      */
     private ImTaskVO convertToVO(ImTask task) {
         ImTaskVO vo = new ImTaskVO();
-        BeanUtils.copyProperties(task, vo);
+        BeanConvertUtil.copyProperties(task, vo);
 
         // 设置显示名称
         vo.setPriorityDisplay(getPriorityDisplay(task.getPriority()));
@@ -568,7 +568,7 @@ public class ImTaskServiceImpl implements ImTaskService {
      */
     private ImTaskDetailVO convertToDetailVO(ImTask task) {
         ImTaskDetailVO vo = new ImTaskDetailVO();
-        BeanUtils.copyProperties(task, vo);
+        BeanConvertUtil.copyProperties(task, vo);
 
         // 设置显示名称
         vo.setPriorityDisplay(getPriorityDisplay(task.getPriority()));

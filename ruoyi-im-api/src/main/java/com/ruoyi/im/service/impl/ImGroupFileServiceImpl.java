@@ -20,7 +20,7 @@ import com.ruoyi.im.dto.group.ImGroupFileUpdateRequest;
 import com.ruoyi.im.dto.group.ImGroupFileUploadRequest;
 import com.ruoyi.im.vo.group.ImGroupFileStatisticsVO;
 import com.ruoyi.im.vo.group.ImGroupFileVO;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,7 +108,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         Page<ImGroupFileVO> voPage = new Page<>(groupFilePage.getCurrent(), groupFilePage.getSize(), groupFilePage.getTotal());
         List<ImGroupFileVO> voList = groupFilePage.getRecords().stream().map(gf -> {
             ImGroupFileVO vo = new ImGroupFileVO();
-            BeanUtils.copyProperties(gf, vo);
+            BeanConvertUtil.copyProperties(gf, vo);
             vo.setFileSizeFormat(formatFileSize(gf.getFileSize()));
 
             // 判断权限

@@ -7,7 +7,7 @@ import com.ruoyi.im.vo.audit.ImAuditLogVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,7 +51,7 @@ public class ImAuditLogAdminController {
             return new ImAuditLogVO();
         }
         ImAuditLogVO vo = new ImAuditLogVO();
-        BeanUtils.copyProperties(log, vo);
+        BeanConvertUtil.copyProperties(log, vo);
         return vo;
     }
 

@@ -20,7 +20,7 @@ import com.ruoyi.im.service.ImWorkReportService;
 import com.ruoyi.im.vo.workreport.WorkReportCommentVO;
 import com.ruoyi.im.vo.workreport.WorkReportDetailVO;
 import com.ruoyi.im.vo.workreport.WorkReportLikeUserVO;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +55,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     @Transactional(rollbackFor = Exception.class)
     public Long createReport(WorkReportCreateRequest request, Long userId) {
         ImWorkReport report = new ImWorkReport();
-        BeanUtils.copyProperties(request, report);
+        BeanConvertUtil.copyProperties(request, report);
         report.setUserId(userId);
         report.setStatus(Boolean.TRUE.equals(request.getIsDraft()) ? "DRAFT" : "SUBMITTED");
         report.setSubmitTime(LocalDateTime.now());
@@ -77,7 +77,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
             throw new BusinessException("已提交的日志不能修改");
         }
 
-        BeanUtils.copyProperties(request, report);
+        BeanConvertUtil.copyProperties(request, report);
         workReportMapper.updateById(report);
     }
 
@@ -120,7 +120,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         }
 
         WorkReportDetailVO vo = new WorkReportDetailVO();
-        BeanUtils.copyProperties(report, vo);
+        BeanConvertUtil.copyProperties(report, vo);
 
         // 获取用户信息
         ImUser user = userMapper.selectImUserById(report.getUserId());
@@ -326,7 +326,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
      */
     private WorkReportDetailVO convertToDetailVO(ImWorkReport report) {
         WorkReportDetailVO vo = new WorkReportDetailVO();
-        BeanUtils.copyProperties(report, vo);
+        BeanConvertUtil.copyProperties(report, vo);
 
         ImUser user = userMapper.selectImUserById(report.getUserId());
         if (user != null) {
@@ -360,7 +360,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         return comments.stream()
                 .map(comment -> {
                     WorkReportCommentVO vo = new WorkReportCommentVO();
-                    BeanUtils.copyProperties(comment, vo);
+                    BeanConvertUtil.copyProperties(comment, vo);
                     vo.setUserName(comment.getUserName());
                     vo.setUserAvatar(comment.getUserAvatar());
 

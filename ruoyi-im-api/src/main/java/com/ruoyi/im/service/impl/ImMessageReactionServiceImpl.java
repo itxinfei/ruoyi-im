@@ -10,8 +10,8 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageReactionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageReactionService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -177,7 +177,7 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
      */
     private ImMessageReactionVO convertToVO(ImMessageReaction reaction, Long currentUserId) {
         ImMessageReactionVO vo = new ImMessageReactionVO();
-        BeanUtils.copyProperties(reaction, vo);
+        BeanConvertUtil.copyProperties(reaction, vo);
         vo.setIsMine(reaction.getUserId().equals(currentUserId));
         vo.setCount(1);
 

@@ -163,19 +163,19 @@ public class ImConversationSyncServiceImpl implements ImConversationSyncService 
         // 根据事件类型处理
         switch (event.getEventType()) {
             case "pin":
-                handlePinEvent(event);
+                onPinEvent(event);
                 break;
             case "mute":
-                handleMuteEvent(event);
+                onMuteEvent(event);
                 break;
             case "delete":
-                handleDeleteEvent(event);
+                onDeleteEvent(event);
                 break;
             case "archive":
-                handleArchiveEvent(event);
+                onArchiveEvent(event);
                 break;
             case "read":
-                handleReadEvent(event);
+                onReadEvent(event);
                 break;
             default:
                 log.warn("未知的会话事件类型: {}", event.getEventType());
@@ -226,7 +226,7 @@ public class ImConversationSyncServiceImpl implements ImConversationSyncService 
     /**
      * 处理置顶事件
      */
-    private void handlePinEvent(ConversationSyncEvent event) {
+    private void onPinEvent(ConversationSyncEvent event) {
         Map<?, ?> eventData = (Map<?, ?>) event.getEventData();
         if (eventData == null) {
             return;
@@ -243,7 +243,7 @@ public class ImConversationSyncServiceImpl implements ImConversationSyncService 
     /**
      * 处理免打扰事件
      */
-    private void handleMuteEvent(ConversationSyncEvent event) {
+    private void onMuteEvent(ConversationSyncEvent event) {
         Map<?, ?> eventData = (Map<?, ?>) event.getEventData();
         if (eventData == null) {
             return;
@@ -260,7 +260,7 @@ public class ImConversationSyncServiceImpl implements ImConversationSyncService 
     /**
      * 处理删除事件
      */
-    private void handleDeleteEvent(ConversationSyncEvent event) {
+    private void onDeleteEvent(ConversationSyncEvent event) {
         try {
             // 软删除（逻辑删除）
             ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(
@@ -282,7 +282,7 @@ public class ImConversationSyncServiceImpl implements ImConversationSyncService 
     /**
      * 处理归档事件
      */
-    private void handleArchiveEvent(ConversationSyncEvent event) {
+    private void onArchiveEvent(ConversationSyncEvent event) {
         Map<?, ?> eventData = (Map<?, ?>) event.getEventData();
         if (eventData == null) {
             return;
@@ -311,7 +311,7 @@ public class ImConversationSyncServiceImpl implements ImConversationSyncService 
     /**
      * 处理已读事件
      */
-    private void handleReadEvent(ConversationSyncEvent event) {
+    private void onReadEvent(ConversationSyncEvent event) {
         Map<?, ?> eventData = (Map<?, ?>) event.getEventData();
         if (eventData == null) {
             return;

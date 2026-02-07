@@ -16,7 +16,7 @@ import com.ruoyi.im.vo.document.ImDocumentCollaboratorVO;
 import com.ruoyi.im.vo.document.ImDocumentOperationLogVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -181,7 +181,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
 
         return collaborators.stream().map(collaborator -> {
             ImDocumentCollaboratorVO vo = new ImDocumentCollaboratorVO();
-            BeanUtils.copyProperties(collaborator, vo);
+            BeanConvertUtil.copyProperties(collaborator, vo);
             return vo;
         }).collect(Collectors.toList());
     }
@@ -246,7 +246,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
 
         return collaborators.stream().map(collaborator -> {
             ImDocumentCollaboratorVO vo = new ImDocumentCollaboratorVO();
-            BeanUtils.copyProperties(collaborator, vo);
+            BeanConvertUtil.copyProperties(collaborator, vo);
             return vo;
         }).collect(Collectors.toList());
     }
@@ -289,7 +289,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
 
         return logs.stream().map(log -> {
             ImDocumentOperationLogVO vo = new ImDocumentOperationLogVO();
-            BeanUtils.copyProperties(log, vo);
+            BeanConvertUtil.copyProperties(log, vo);
             return vo;
         }).collect(Collectors.toList());
     }

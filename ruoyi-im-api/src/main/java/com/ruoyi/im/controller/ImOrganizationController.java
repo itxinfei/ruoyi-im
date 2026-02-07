@@ -6,12 +6,12 @@ import com.ruoyi.im.dto.organization.ImDepartmentCreateRequest;
 import com.ruoyi.im.dto.organization.ImDepartmentMemberAddRequest;
 import com.ruoyi.im.dto.organization.ImDepartmentUpdateRequest;
 import com.ruoyi.im.service.ImOrganizationService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.vo.organization.ImDepartmentMemberVO;
 import com.ruoyi.im.vo.organization.ImDepartmentTreeVO;
 import com.ruoyi.im.vo.organization.ImDepartmentVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +49,7 @@ public class ImOrganizationController {
             return new ImDepartmentVO();
         }
         ImDepartmentVO vo = new ImDepartmentVO();
-        BeanUtils.copyProperties(department, vo);
+        BeanConvertUtil.copyProperties(department, vo);
         return vo;
     }
 

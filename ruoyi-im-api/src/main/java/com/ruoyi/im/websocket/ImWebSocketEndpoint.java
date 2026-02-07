@@ -306,7 +306,7 @@ public class ImWebSocketEndpoint {
                     if (payload instanceof Map) {
                         // noinspection unchecked
                         Map<String, Object> authData = (Map<String, Object>) payload;
-                        handleAuthMessage(session, authData);
+                        processAuthMessage(session, authData);
                     } else {
                         sendMessage(session, buildStatusMessage("error", null, "认证消息格式错误"));
                     }
@@ -332,22 +332,22 @@ public class ImWebSocketEndpoint {
                     if (payload instanceof Map) {
                         // noinspection unchecked
                         Map<String, Object> authData = (Map<String, Object>) payload;
-                        handleAuthMessage(session, authData);
+                        processAuthMessage(session, authData);
                     } else {
                         sendMessage(session, buildStatusMessage("error", null, "认证消息格式错误"));
                     }
                     break;
                 case "message":
                     // 处理聊天消息
-                    handleChatMessage(userId, payload);
+                    processChatMessage(userId, payload);
                     break;
                 case "typing":
                     // 处理正在输入状态
-                    handleTypingStatus(userId, payload);
+                    processTypingStatus(userId, payload);
                     break;
                 case "read":
                     // 处理消息已读
-                    handleReadReceipt(userId, payload);
+                    processReadReceipt(userId, payload);
                     break;
                 case "ping":
                     // 处理心跳并更新Redis中的心跳时间
@@ -358,11 +358,11 @@ public class ImWebSocketEndpoint {
                     break;
                 case "ack":
                     // 处理客户端ACK确认（送达、接收、已读）
-                    handleAckMessage(userId, payload, session);
+                    processAckMessage(userId, payload, session);
                     break;
                 case "conversation_event":
                     // 处理会话同步事件（置顶、免打扰、归档、删除）
-                    handleConversationEvent(userId, payload, session);
+                    processConversationEvent(userId, payload, session);
                     break;
                 default:
                     log.warn("未知消息类型: type={}", type);
@@ -460,7 +460,7 @@ public class ImWebSocketEndpoint {
      * @param userId  发送者用户ID
      * @param payload 消息数据
      */
-    private void handleChatMessage(Long userId, Object payload) {
+    private void processChatMessage(Long userId, Object payload) {
         Session senderSession = onlineUsers.get(userId);
         String clientMsgId = null;
 
@@ -590,7 +590,7 @@ public class ImWebSocketEndpoint {
      * @param userId  用户ID
      * @param payload 输入状态数据
      */
-    private void handleTypingStatus(Long userId, Object payload) {
+    private void processTypingStatus(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> typingData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
@@ -627,7 +627,7 @@ public class ImWebSocketEndpoint {
      * @param session     WebSocket会话
      * @param messageData 认证消息数据
      */
-    private void handleAuthMessage(Session session, Map<String, Object> messageData) {
+    private void processAuthMessage(Session session, Map<String, Object> messageData) {
         try {
             String token = (String) messageData.get("token");
             Long userId = null;
@@ -776,7 +776,7 @@ public class ImWebSocketEndpoint {
      * @param userId  用户ID
      * @param payload 已读数据
      */
-    private void handleReadReceipt(Long userId, Object payload) {
+    private void processReadReceipt(Long userId, Object payload) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> readData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
@@ -1168,7 +1168,7 @@ public class ImWebSocketEndpoint {
      * @param payload ACK数据
      * @param session WebSocket会话
      */
-    private void handleAckMessage(Long userId, Object payload, Session session) {
+    private void processAckMessage(Long userId, Object payload, Session session) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> ackData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
@@ -1224,7 +1224,7 @@ public class ImWebSocketEndpoint {
      * @param payload 事件数据
      * @param session WebSocket会话
      */
-    private void handleConversationEvent(Long userId, Object payload, Session session) {
+    private void processConversationEvent(Long userId, Object payload, Session session) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> eventData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {

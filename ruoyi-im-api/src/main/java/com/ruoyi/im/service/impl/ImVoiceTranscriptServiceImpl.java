@@ -11,7 +11,7 @@ import com.ruoyi.im.service.ImVoiceTranscriptService;
 import com.ruoyi.im.vo.transcript.ImVoiceTranscriptVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -100,7 +100,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
         }
 
         ImVoiceTranscriptVO vo = new ImVoiceTranscriptVO();
-        BeanUtils.copyProperties(transcript, vo);
+        BeanConvertUtil.copyProperties(transcript, vo);
         return vo;
     }
 
@@ -177,7 +177,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
 
         return transcripts.stream().map(transcript -> {
             ImVoiceTranscriptVO vo = new ImVoiceTranscriptVO();
-            BeanUtils.copyProperties(transcript, vo);
+            BeanConvertUtil.copyProperties(transcript, vo);
             return vo;
         }).collect(Collectors.toList());
     }

@@ -48,7 +48,7 @@ public interface ImFriendService {
      * @param approved 是否同意
      * @param userId 当前用户ID
      */
-    void handleFriendRequest(Long requestId, Boolean approved, Long userId);
+    void processFriendRequest(Long requestId, Boolean approved, Long userId);
 
     /**
      * 获取好友列表

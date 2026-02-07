@@ -27,7 +27,7 @@ import com.ruoyi.im.vo.cloud.ImCloudFolderVO;
 import com.ruoyi.im.vo.cloud.ImCloudStorageQuotaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import com.ruoyi.im.util.BeanConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.im.config.FileUploadConfig;
@@ -288,7 +288,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
 
         return folders.stream().map(folder -> {
             ImCloudFolderVO vo = new ImCloudFolderVO();
-            BeanUtils.copyProperties(folder, vo);
+            BeanConvertUtil.copyProperties(folder, vo);
 
             // 获取所有者信息
             ImUser owner = userMapper.selectImUserById(folder.getOwnerId());
@@ -313,7 +313,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         List<ImCloudFolder> folders = cloudFolderMapper.selectFolderPath(folderId);
         return folders.stream().map(folder -> {
             ImCloudFolderVO vo = new ImCloudFolderVO();
-            BeanUtils.copyProperties(folder, vo);
+            BeanConvertUtil.copyProperties(folder, vo);
             return vo;
         }).collect(Collectors.toList());
     }
@@ -578,7 +578,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         cloudFileShareMapper.insert(share);
 
         ImCloudFileShareVO vo = new ImCloudFileShareVO();
-        BeanUtils.copyProperties(share, vo);
+        BeanConvertUtil.copyProperties(share, vo);
         vo.setHasPassword(share.getAccessPassword() != null && !share.getAccessPassword().isEmpty());
 
         // 获取分享者信息
@@ -629,7 +629,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
 
         return shares.stream().map(share -> {
             ImCloudFileShareVO vo = new ImCloudFileShareVO();
-            BeanUtils.copyProperties(share, vo);
+            BeanConvertUtil.copyProperties(share, vo);
             vo.setHasPassword(share.getAccessPassword() != null && !share.getAccessPassword().isEmpty());
             vo.setIsExpired(share.getExpireTime() != null && share.getExpireTime().isBefore(LocalDateTime.now()));
 
@@ -677,7 +677,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         cloudFileShareMapper.incrementViewCount(share.getId());
 
         ImCloudFileShareVO vo = new ImCloudFileShareVO();
-        BeanUtils.copyProperties(share, vo);
+        BeanConvertUtil.copyProperties(share, vo);
         vo.setHasPassword(share.getAccessPassword() != null && !share.getAccessPassword().isEmpty());
 
         return vo;
@@ -723,7 +723,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
      */
     private ImCloudFileVO convertToVO(ImCloudFile cloudFile, Long currentUserId) {
         ImCloudFileVO vo = new ImCloudFileVO();
-        BeanUtils.copyProperties(cloudFile, vo);
+        BeanConvertUtil.copyProperties(cloudFile, vo);
 
         // 格式化文件大小
         vo.setFileSizeFormat(formatFileSize(cloudFile.getFileSize()));

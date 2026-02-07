@@ -13,12 +13,12 @@ import com.ruoyi.im.mapper.ImDepartmentMapper;
 import com.ruoyi.im.mapper.ImDepartmentMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.util.ImRedisUtil;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.service.ImOrganizationService;
 import com.ruoyi.im.vo.organization.ImDepartmentMemberVO;
 import com.ruoyi.im.vo.organization.ImDepartmentTreeVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +67,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
 
         for (ImDepartment department : allDepartments) {
             ImDepartmentTreeVO treeVO = new ImDepartmentTreeVO();
-            BeanUtils.copyProperties(department, treeVO);
+            BeanConvertUtil.copyProperties(department, treeVO);
 
             ImUser leader = imUserMapper.selectImUserById(department.getLeaderId());
             if (leader != null) {
@@ -92,7 +92,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
         for (ImDepartment department : allDepartments) {
             if (department.getParentId().equals(parentId)) {
                 ImDepartmentTreeVO treeVO = new ImDepartmentTreeVO();
-                BeanUtils.copyProperties(department, treeVO);
+                BeanConvertUtil.copyProperties(department, treeVO);
 
                 ImUser leader = imUserMapper.selectImUserById(department.getLeaderId());
                 if (leader != null) {
@@ -134,7 +134,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
                     }
                 }
         ImDepartment department = new ImDepartment();
-        BeanUtils.copyProperties(request, department);
+        BeanConvertUtil.copyProperties(request, department);
         department.setStatus(0);
         department.setDelFlag(0);
         department.setCreateTime(LocalDateTime.now());
@@ -195,7 +195,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
             updateChildrenAncestors(request.getId(), newAncestors);
         }
 
-        BeanUtils.copyProperties(request, department);
+        BeanConvertUtil.copyProperties(request, department);
         department.setUpdateTime(LocalDateTime.now());
 
         int result = imDepartmentMapper.updateById(department);
@@ -285,7 +285,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
         }
 
         ImDepartmentMember member = new ImDepartmentMember();
-        BeanUtils.copyProperties(request, member);
+        BeanConvertUtil.copyProperties(request, member);
         member.setJoinTime(LocalDateTime.now());
         member.setStatus(0);
         member.setCreateTime(LocalDateTime.now());
