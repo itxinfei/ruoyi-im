@@ -307,7 +307,7 @@ const emit = defineEmits([
   &.danger {
     .action-icon {
       color: #f56c6c;
-      background: rgba(245, 108, 108, 0.1);
+      background: var(--dt-error-dark-bg);
     }
 
     .action-name {

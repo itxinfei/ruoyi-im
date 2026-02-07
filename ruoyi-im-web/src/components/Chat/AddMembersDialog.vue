@@ -348,7 +348,7 @@ watch(() => props.modelValue, val => {
     }
 
     &.selected {
-      background: rgba(var(--dt-brand-rgb), 0.1);
+      background: var(--dt-brand-light);
 
       .contact-name {
         color: var(--dt-brand-color);

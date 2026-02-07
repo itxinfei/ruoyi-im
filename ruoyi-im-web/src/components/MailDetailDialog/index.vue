@@ -441,10 +441,10 @@ const getFileIconColor = fileName => {
 }
 
 .dark .attachment-item {
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--dt-attachment-bg-dark);
 
   &:hover {
-    background: rgba(51, 65, 85, 0.5);
+    background: var(--dt-attachment-hover-bg-dark);
   }
 }
 

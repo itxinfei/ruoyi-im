@@ -489,8 +489,8 @@ function handleOpenSearch() {
 }
 
 .nav-avatar-active {
-  background: var(--dt-white-20);;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--dt-white-20);
+  box-shadow: var(--dt-nav-avatar-ring-shadow);
   backdrop-filter: blur(12px);
 }
 
@@ -510,7 +510,7 @@ function handleOpenSearch() {
 }
 
 .nav-avatar:hover :deep(.avatar-inner) {
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: var(--dt-nav-avatar-hover-border);
 }
 
 .nav-avatar-active :deep(.avatar-inner) {
@@ -531,7 +531,7 @@ function handleOpenSearch() {
 
 .nav-avatar-status.online {
   background: var(--dt-success-color);
-  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+  box-shadow: var(--dt-nav-avatar-status-shadow);
   animation: pulse 2s ease-in-out infinite;
 }
 </style>

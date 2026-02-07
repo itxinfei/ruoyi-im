@@ -304,7 +304,7 @@ const handleResultClick = (type, item) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dt-overlay-50);
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -315,9 +315,9 @@ const handleResultClick = (type, item) => {
 .search-modal {
   width: 700px;
   height: 600px;
-  background: #fff;
+  background: var(--dt-bg-card);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--dt-shadow-2xl);
   display: flex;
   flex-direction: column;
   overflow: hidden;

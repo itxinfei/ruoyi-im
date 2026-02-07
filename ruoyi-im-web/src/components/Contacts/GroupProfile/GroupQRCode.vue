@@ -241,7 +241,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--dt-overlay-white-95);
   border-radius: var(--dt-radius-lg);
   color: var(--dt-text-secondary);
   font-size: 14px;

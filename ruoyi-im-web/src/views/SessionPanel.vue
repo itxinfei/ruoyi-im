@@ -1759,7 +1759,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   .el-dropdown__popper {
     padding: 0;
     border-radius: var(--dt-radius-xl);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--dt-shadow-dialog);
     border: none;
     overflow: hidden;
   }

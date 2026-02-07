@@ -722,7 +722,7 @@ $transition: all var(--dt-transition-base) var(--dt-ease-out);
     }
 
     &.is-recording {
-      background: rgba(244, 67, 54, 0.2);
+      background: var(--dt-error-bg-hover);
       color: var(--dt-error-color);
     }
   }

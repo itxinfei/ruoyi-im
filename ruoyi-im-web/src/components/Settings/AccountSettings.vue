@@ -280,7 +280,7 @@ const copyToClipboard = text => {
   border: none;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--dt-shadow-sm);
 }
 
 .item-divider {
@@ -368,7 +368,7 @@ const copyToClipboard = text => {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--dt-overlay);
     display: flex;
     align-items: center;
     justify-content: center;

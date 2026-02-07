@@ -1112,7 +1112,7 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, var(--dt-black-02) 100%);
+    background: linear-gradient(135deg, transparent 0%, var(--dt-black-02) 100%);
     transition: opacity 0.3s;
     opacity: 0;
   }
@@ -1513,7 +1513,7 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, var(--dt-black-01) 100%);
+    background: linear-gradient(135deg, transparent 0%, var(--dt-black-01) 100%);
     transition: opacity 0.3s;
     opacity: 0;
   }
@@ -1934,7 +1934,7 @@ onMounted(() => {
   border-color: var(--dt-border-alpha-dark);
 
   &::before {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, var(--dt-border-alpha-dark-4) 100%);
+    background: linear-gradient(135deg, transparent 0%, var(--dt-border-alpha-dark-4) 100%);
   }
 }
 

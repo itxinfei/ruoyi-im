@@ -589,10 +589,10 @@ onMounted(async () => {
 
 /* Loading 样式 */
 :deep(.el-loading-mask) {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: var(--dt-bg-overlay);
 }
 
 [data-theme='dark'] :deep(.el-loading-mask) {
-  background-color: rgba(42, 42, 42, 0.9);
+  background-color: var(--dt-bg-overlay);
 }
 </style>

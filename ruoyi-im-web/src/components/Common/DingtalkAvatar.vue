@@ -144,20 +144,20 @@ const handleImageError = () => {
 /* 方形头像（群聊） */
 .avatar-square {
   border-radius: var(--dt-radius-md);  // 钉钉群聊头像：小圆角方形
-  border: 1px solid rgba(0, 137, 255, 0.1);
+  border: 1px solid var(--dt-primary-alpha-10);
   box-shadow: var(--dt-shadow-2);
 }
 
 /* 消息中的特殊头像样式 */
 .dingtalk-avatar.message-avatar {
   border-radius: var(--dt-radius-md);
-  border: 1px solid rgba(0, 137, 255, 0.15);
+  border: 1px solid var(--dt-primary-alpha-15);
 }
 
 /* 用户信息头像 */
 .dingtalk-avatar.user-info-avatar {
   border-radius: var(--dt-radius-md);
-  border: 1px solid rgba(0, 137, 255, 0.15);
+  border: 1px solid var(--dt-primary-alpha-15);
 }
 
 /* 头像图片 */

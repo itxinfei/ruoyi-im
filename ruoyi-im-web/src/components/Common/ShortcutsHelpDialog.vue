@@ -225,7 +225,7 @@ registerShortcut(ShortcutKeys.SHOW_SHORTCUTS, () => {
   background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
   border: 1px solid #d4d4d4;
   border-radius: var(--dt-radius-md);
-  box-shadow: 0 2px 0 #a0a0a0, 0 3px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 0 #a0a0a0, 0 3px 1px var(--dt-shadow-light);
   font-size: 12px;
   font-weight: 600;
   font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
@@ -259,12 +259,12 @@ registerShortcut(ShortcutKeys.SHOW_SHORTCUTS, () => {
   .key {
     background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
     border-color: #555;
-    box-shadow: 0 2px 0 #000, 0 3px 1px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 0 #000, 0 3px 1px var(--dt-shadow-medium);
     color: #e0e0e0;
   }
 
   .tip-section {
-    background: rgba(0, 137, 255, 0.15);
+    background: var(--dt-brand-bg-subtle);
   }
 }
 

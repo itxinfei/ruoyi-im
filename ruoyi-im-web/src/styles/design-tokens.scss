@@ -496,6 +496,36 @@
   --dt-call-float-pulse-shadow-mid: rgba(64, 158, 255, 0.6);
   --dt-call-indicator-border: #fff;
 
+  // 多选工具栏暗色模式专用
+  --dt-multiselect-dark-bg-start: #2d2d2d;
+  --dt-multiselect-dark-bg-end: #1e1e1e;
+  --dt-multiselect-dark-border: rgba(255, 255, 255, 0.1);
+  --dt-multiselect-dark-shadow: rgba(0, 0, 0, 0.3);
+  --dt-multiselect-selection-info-bg: linear-gradient(135deg, rgba(0, 137, 255, 0.2) 0%, rgba(0, 137, 255, 0.15) 100%);
+  --dt-multiselect-selection-info-border: rgba(0, 137, 255, 0.3);
+  --dt-multiselect-forward-bg: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(2, 132, 199, 0.1) 100%);
+  --dt-multiselect-forward-border: rgba(2, 132, 199, 0.3);
+  --dt-multiselect-combine-bg: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+  --dt-multiselect-combine-border: rgba(217, 119, 6, 0.3);
+  --dt-multiselect-delete-bg: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+  --dt-multiselect-delete-border: rgba(220, 38, 38, 0.3);
+  --dt-multiselect-cancel-bg: rgba(255, 255, 255, 0.06);
+  --dt-multiselect-cancel-hover-bg: rgba(255, 255, 255, 0.1);
+  --dt-multiselect-divider-bg: rgba(255, 255, 255, 0.1);
+
+  // 错误阴影专用
+  --dt-shadow-error-red: rgba(255, 77, 79, 0.25);
+  --dt-shadow-error-red-light: rgba(255, 107, 107, 0.25);
+
+  // 导航头像专用
+  --dt-nav-avatar-ring-shadow: 0 0 0 2px var(--dt-white-25), 0 4px 12px var(--dt-black-15);
+  --dt-nav-avatar-hover-border: var(--dt-white-60);
+  --dt-nav-avatar-status-shadow: 0 0 0 2px var(--dt-success-05);
+
+  // 暗色模式附件背景
+  --dt-attachment-bg-dark: rgba(30, 41, 59, 0.5);
+  --dt-attachment-hover-bg-dark: rgba(51, 65, 85, 0.5);
+
   // ============================================================================
   // 响应式断点变量（与 Tailwind 配置保持一致）
   // ============================================================================

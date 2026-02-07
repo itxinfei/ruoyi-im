@@ -402,13 +402,13 @@ const handleSubmit = async () => {
   }
   
   &.bg-blue-light {
-    background: rgba(24, 144, 255, 0.1);
-    color: #1890ff;
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
   }
-  
+
   &.bg-red-light {
-    background: rgba(245, 34, 45, 0.1);
-    color: #f5222d;
+    background: var(--dt-error-bg);
+    color: var(--dt-error-color);
   }
 }
 
@@ -461,13 +461,13 @@ const handleSubmit = async () => {
   }
   
   &.bg-blue-light {
-    background: rgba(24, 144, 255, 0.1);
-    color: #1890ff;
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
   }
-  
+
   &.bg-green-light {
-    background: rgba(82, 196, 26, 0.1);
-    color: #52c41a;
+    background: var(--dt-success-bg);
+    color: var(--dt-success-color);
   }
 }
 

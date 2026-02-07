@@ -456,18 +456,18 @@ onMounted(() => {
       font-size: 24px;
 
       &.primary-bg {
-        background: rgba(0, 137, 255, 0.1);
-        color: #0089FF;
+        background: var(--dt-color-primary-bg-subtle);
+        color: var(--dt-color-primary-text);
       }
 
       &.success-bg {
-        background: rgba(43, 193, 123, 0.1);
-        color: #2BC17B;
+        background: var(--dt-color-success-bg-subtle);
+        color: var(--dt-color-success-text);
       }
 
       &.warning-bg {
-        background: rgba(255, 172, 0, 0.1);
-        color: #FFAC00;
+        background: var(--dt-color-warning-bg-subtle);
+        color: var(--dt-color-warning-text);
       }
     }
   }

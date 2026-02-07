@@ -108,12 +108,12 @@ const emit = defineEmits(['close'])
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--dt-white-20);
   border: none;
-  color: #fff;
+  color: var(--dt-text-inverse);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--dt-white-30);
   }
 }
 
@@ -135,7 +135,7 @@ const emit = defineEmits(['close'])
 .group-name {
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
+  color: var(--dt-text-inverse);
   margin: 0 0 8px 0;
   line-height: 1.4;
 }
@@ -144,13 +144,13 @@ const emit = defineEmits(['close'])
   display: flex;
   gap: 12px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--dt-white-80);
   margin: 0 0 12px 0;
 }
 
 .group-intro {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--dt-white-90);
   line-height: 1.5;
   margin: 0 0 16px 0;
   max-width: 200px;

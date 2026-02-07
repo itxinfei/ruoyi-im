@@ -18,6 +18,10 @@
   /* 主色渐变 */
   --dt-primary-gradient: linear-gradient(135deg, #0089FF 0%, #0066CC 100%);
 
+  /* 主色透明度变体 */
+  --dt-primary-alpha-10: rgba(0, 137, 255, 0.1);
+  --dt-primary-alpha-15: rgba(0, 137, 255, 0.15);
+
   /* 辅助色 - 2025 钉钉新增紫色系 */
   --dt-secondary: #7C4DFF;
   --dt-secondary-light: #A27BFF;
@@ -211,6 +215,10 @@
   --dt-primary: #33A1FF;
   --dt-primary-light: #66B8FF;
   --dt-primary-dark: #0089FF;
+
+  /* 主色透明度变体 */
+  --dt-primary-alpha-10: rgba(51, 161, 255, 0.1);
+  --dt-primary-alpha-15: rgba(51, 161, 255, 0.15);
 
   /* 背景色 */
   --dt-bg-page: #1A1A1A;

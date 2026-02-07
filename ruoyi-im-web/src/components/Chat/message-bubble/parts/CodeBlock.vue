@@ -101,8 +101,8 @@ const handleCopy = () => {
     transition: all var(--dt-transition-fast);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
+      background: var(--dt-white-10);
+      color: var(--dt-text-inverse);
     }
 
     .el-icon {

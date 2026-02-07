@@ -447,7 +447,7 @@ $dt-border-color: #E5E6EB;
     }
 
     &.clickable:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--dt-white-05);
     }
   }
 

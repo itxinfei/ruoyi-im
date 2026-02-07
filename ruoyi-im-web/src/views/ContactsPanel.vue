@@ -695,7 +695,9 @@ const cache = ref({
 })
 
 const getItemId = item => {
-  return item?.id ?? item?.friendId ?? item?.userId ?? item?.groupId ?? null
+  // 优先使用friendId（好友），其次是id，然后是groupId
+  // 确保与去重逻辑使用相同的ID字段
+  return item?.friendId ?? item?.id ?? item?.userId ?? item?.groupId ?? null
 }
 
 const getItemName = item => {
@@ -755,8 +757,16 @@ const currentList = computed(() => {
     return allUsers.value
   }
   if (currentNav.value === 'friends') {
-    // 全部好友 - 展平所有分组
-    return friendGroups.value.flatMap(g => g.friends || g.contacts || [])
+    // 全部好友 - 展平所有分组，并去重（通过friendId去重）
+    const allFriends = friendGroups.value.flatMap(g => g.friends || g.contacts || [])
+    const uniqueMap = new Map()
+    allFriends.forEach(friend => {
+      const id = friend.friendId || friend.id
+      if (id) {
+        uniqueMap.set(id, friend)
+      }
+    })
+    return Array.from(uniqueMap.values())
   }
   // 检查是否是分组导航
   const group = friendGroups.value.find(g => g.groupName === currentNav.value)

@@ -241,7 +241,7 @@ watch(() => props.modelValue, newVal => {
   .check-icon {
     color: white;
     font-size: 24px;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 1px 2px var(--dt-shadow-color));
   }
 }
 

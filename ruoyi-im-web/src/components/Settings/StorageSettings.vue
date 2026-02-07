@@ -258,7 +258,7 @@ const handleChange = () => {
   }
   
   &.bg-orange-light {
-    background: rgba(250, 140, 22, 0.1);
+    background: var(--dt-warning-bg);
   }
 }
 
@@ -341,7 +341,7 @@ const handleChange = () => {
   }
   
   &.bg-blue-light {
-    background: rgba(24, 144, 255, 0.1);
+    background: var(--dt-brand-light);
   }
 }
 

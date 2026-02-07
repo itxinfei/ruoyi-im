@@ -864,7 +864,7 @@ function handleClose() {
       border-radius: var(--dt-radius-sm);
 
       &:hover {
-        background: rgba(0, 0, 0, 0.05);
+        background: var(--dt-black-04);
       }
 
       &:focus {
@@ -964,7 +964,7 @@ function handleClose() {
     transition: all 0.2s;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--dt-black-04);
     }
 
     &.active {
@@ -1092,7 +1092,7 @@ function handleClose() {
     transition: background 0.2s;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--dt-black-04);
     }
 
     &.active {
@@ -1190,20 +1190,20 @@ function handleClose() {
 .dark {
   .editor-header {
     background: #1a1a1a;
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: var(--dt-white-10);
   }
 
   .editor-toolbar {
-    border-right-color: rgba(255, 255, 255, 0.1);
+    border-right-color: var(--dt-white-10);
 
     .toolbar-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--dt-white-10);
     }
   }
 
   .editor-side-panel {
     background: #1a1a1a;
-    border-left-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--dt-white-10);
   }
 }
 </style>

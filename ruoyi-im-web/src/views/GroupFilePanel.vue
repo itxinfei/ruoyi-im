@@ -845,7 +845,7 @@ onMounted(() => {
     justify-content: center;
     background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%);
     border-radius: var(--dt-radius-md);
-    box-shadow: 0 8px 24px rgba(255, 107, 107, 0.25);
+    box-shadow: 0 8px 24px var(--dt-shadow-error-red-light);
 
     .material-icons-outlined {
       font-size: 40px;
@@ -866,7 +866,7 @@ onMounted(() => {
       height: 36px;
       background: #fff;
       border-radius: var(--dt-radius-md);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--dt-shadow-3);
       animation: float 3s ease-in-out infinite;
 
       .material-icons-outlined {

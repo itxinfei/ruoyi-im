@@ -2040,68 +2040,68 @@ onMounted(() => {
 }
 
 .dark .multi-select-toolbar {
-  background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, var(--dt-multiselect-dark-bg-start) 0%, var(--dt-multiselect-dark-bg-end) 100%);
+  border-color: var(--dt-multiselect-dark-border);
+  box-shadow: 0 -8px 24px var(--dt-multiselect-dark-shadow);
 
   .selection-info {
-    background: linear-gradient(135deg, rgba(0, 137, 255, 0.2) 0%, rgba(0, 137, 255, 0.15) 100%);
-    border-color: rgba(0, 137, 255, 0.3);
+    background: var(--dt-multiselect-selection-info-bg);
+    border-color: var(--dt-multiselect-selection-info-border);
 
     .selection-text {
-      color: #ffffff;
+      color: var(--dt-text-inverse);
     }
   }
 
   .actions {
     .toolbar-btn {
       &--forward {
-        background: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(2, 132, 199, 0.1) 100%);
+        background: var(--dt-multiselect-forward-bg);
         color: #38bdf8;
-        border-color: rgba(2, 132, 199, 0.3);
+        border-color: var(--dt-multiselect-forward-border);
 
         &:hover:not(:disabled) {
           background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-          color: #fff;
+          color: var(--dt-text-inverse);
         }
       }
 
       &--combine {
-        background: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+        background: var(--dt-multiselect-combine-bg);
         color: #fbbf24;
-        border-color: rgba(217, 119, 6, 0.3);
+        border-color: var(--dt-multiselect-combine-border);
 
         &:hover:not(:disabled) {
           background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-          color: #fff;
+          color: var(--dt-text-inverse);
         }
       }
 
       &--delete {
-        background: linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+        background: var(--dt-multiselect-delete-bg);
         color: #f87171;
-        border-color: rgba(220, 38, 38, 0.3);
+        border-color: var(--dt-multiselect-delete-border);
 
         &:hover:not(:disabled) {
           background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-          color: #fff;
+          color: var(--dt-text-inverse);
         }
       }
 
       &--cancel {
-        background: rgba(255, 255, 255, 0.06);
-        color: #999;
+        background: var(--dt-multiselect-cancel-bg);
+        color: var(--dt-text-light-gray);
 
         &:hover {
-          background: rgba(255, 255, 255, 0.1);
-          color: #e8e8e8;
+          background: var(--dt-multiselect-cancel-hover-bg);
+          color: var(--dt-text-dark-mode);
         }
       }
     }
   }
 
   .toolbar-divider {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--dt-multiselect-divider-bg);
   }
 }
 

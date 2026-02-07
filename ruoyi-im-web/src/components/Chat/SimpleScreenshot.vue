@@ -158,7 +158,7 @@ watch(() => props.visible, val => {
 .simple-screenshot-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--dt-overlay-70);
   z-index: $z-tooltip;
   display: flex;
   align-items: center;
@@ -171,7 +171,7 @@ watch(() => props.visible, val => {
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
   text-align: center;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--dt-shadow-3xl);
   max-width: 400px;
 
   p {
@@ -219,7 +219,7 @@ watch(() => props.visible, val => {
     color: var(--dt-text-secondary);
 
     &:hover {
-      background: rgba(0, 0, 0, 0.1);
+      background: var(--dt-black-10);
     }
   }
 }

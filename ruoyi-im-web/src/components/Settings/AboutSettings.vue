@@ -143,7 +143,7 @@ const openWebsite = () => {
   justify-content: center;
   position: relative;
   z-index: 2;
-  box-shadow: 0 8px 24px rgba(22, 119, 255, 0.3);
+  box-shadow: var(--dt-shadow-brand);
 }
 
 .logo-text {
@@ -209,7 +209,7 @@ const openWebsite = () => {
   font-size: 14px;
   
   &.primary {
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+    box-shadow: var(--dt-shadow-brand-medium);
   }
 }
 

@@ -331,7 +331,7 @@ const handleDelete = async group => {
     }
 
     &.danger:hover {
-      background: rgba(255, 77, 79, 0.1);
+      background: var(--dt-error-dark-bg);
       color: var(--dt-error-color);
     }
   }

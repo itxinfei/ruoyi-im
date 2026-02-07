@@ -264,7 +264,7 @@ const handleNudge = () => {
   }
 
   &.is-selected {
-    background: rgba(65, 104, 224, 0.08);
+    background: var(--dt-brand-02);
   }
 }
 

@@ -146,7 +146,7 @@ const escapeHtml = str => {
   }
 
   &.active {
-    background: rgba(0, 137, 255, 0.15);
+    background: var(--dt-brand-bg-dark);
   }
 }
 

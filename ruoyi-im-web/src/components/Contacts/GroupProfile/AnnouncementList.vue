@@ -159,7 +159,7 @@ const handleDelete = announcement => {
 
   &.pinned {
     border-color: var(--dt-brand-color);
-    background: rgba(0, 137, 255, 0.02);
+    background: var(--dt-brand-02);
   }
 }
 

@@ -268,7 +268,7 @@ const handleDownload = () => {
 }
 
 :deep(.dark) .preview-placeholder {
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--dt-overlay-50);
 }
 
 :deep(.dark) .preview-placeholder p {
