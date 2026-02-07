@@ -352,6 +352,10 @@ public class ImFileController {
      * @return Content-Type
      */
     private String getContentType(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return "application/octet-stream";
+        }
+
         try {
             String contentType = Files.probeContentType(Paths.get(fileName));
             if (contentType != null) {
@@ -362,7 +366,11 @@ public class ImFileController {
         }
 
         // 默认根据扩展名判断
-        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex <= 0 || dotIndex == fileName.length() - 1) {
+            return "application/octet-stream";
+        }
+        String extension = fileName.substring(dotIndex + 1).toLowerCase();
         switch (extension) {
             case "jpg":
             case "jpeg":
@@ -409,9 +417,16 @@ public class ImFileController {
      * @return 是否为图片
      */
     private boolean isImageFile(String fileName) {
-        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        return extension.equals("jpg") || extension.equals("jpeg")
-                || extension.equals("png") || extension.equals("gif")
-                || extension.equals("webp") || extension.equals("bmp");
+        if (fileName == null || fileName.isEmpty()) {
+            return false;
+        }
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex <= 0 || dotIndex == fileName.length() - 1) {
+            return false;
+        }
+        String extension = fileName.substring(dotIndex + 1).toLowerCase();
+        return "jpg".equals(extension) || "jpeg".equals(extension)
+                || "png".equals(extension) || "gif".equals(extension)
+                || "webp".equals(extension) || "bmp".equals(extension);
     }
 }

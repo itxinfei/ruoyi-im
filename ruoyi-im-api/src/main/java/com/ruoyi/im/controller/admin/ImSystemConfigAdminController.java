@@ -68,6 +68,9 @@ public class ImSystemConfigAdminController {
             }
 
             String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.isEmpty()) {
+                return Result.error("文件名不能为空");
+            }
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             if (!extension.toLowerCase().matches("\\.(png|jpg|jpeg|gif|svg|webp)")) {
                 return Result.error("只支持图片格式：png、jpg、jpeg、gif、svg、webp");
