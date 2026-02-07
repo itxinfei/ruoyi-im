@@ -5,12 +5,10 @@ import com.ruoyi.im.config.FileUploadConfig;
 import com.ruoyi.im.service.ImSystemConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,11 +26,14 @@ import java.util.Map;
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ADMIN')")
 public class ImSystemConfigAdminController {
 
-    @Autowired
-    private ImSystemConfigService configService;
+    private final ImSystemConfigService configService;
+    private final FileUploadConfig fileUploadConfig;
 
-    @Resource
-    private FileUploadConfig fileUploadConfig;
+    public ImSystemConfigAdminController(ImSystemConfigService configService,
+                                          FileUploadConfig fileUploadConfig) {
+        this.configService = configService;
+        this.fileUploadConfig = fileUploadConfig;
+    }
 
     @Operation(summary = "获取所有系统配置")
     @GetMapping("/all")

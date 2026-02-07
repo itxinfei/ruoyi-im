@@ -4,7 +4,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImBackupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +20,11 @@ import java.util.Map;
 @RequestMapping("/api/im/backup")
 public class ImBackupController {
 
-    @Autowired
-    private ImBackupService imBackupService;
+    private final ImBackupService imBackupService;
+
+    public ImBackupController(ImBackupService imBackupService) {
+        this.imBackupService = imBackupService;
+    }
 
     /**
      * 获取备份列表
