@@ -1343,14 +1343,14 @@ onUnmounted(() => {
 
 /* ==================== OCR 按钮 ==================== */
 .tool-ocr-btn {
-  background: rgba(76, 217, 100, 0.2);
-  color: #4cd964;
+  background: var(--dt-screenshot-btn-ocr-bg);
+  color: var(--dt-success-color);
   padding: 0 12px;
   gap: 4px;
 }
 
 .tool-ocr-btn:hover {
-  background: rgba(76, 217, 100, 0.3);
+  background: var(--dt-screenshot-btn-ocr-hover);
 }
 
 .ocr-loading {
@@ -1365,16 +1365,16 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--dt-overlay-70);
 }
 
 .ocr-result-content {
   width: 500px;
   max-width: 80vw;
   max-height: 70vh;
-  background: rgba(30, 30, 30, 0.98);
+  background: var(--dt-overlay-98);
   border-radius: var(--dt-radius-lg);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 40px var(--dt-black-20);
   display: flex;
   flex-direction: column;
 }
