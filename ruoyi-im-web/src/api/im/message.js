@@ -164,7 +164,7 @@ export function markAsRead(data) {
  */
 export function getMessageReadUsers(conversationId, messageId) {
   return request({
-    url: `/api/im/message/read/status/${conversationId}/${messageId}`,
+    url: `/api/im/message/receipt/read-status/${conversationId}/${messageId}`,
     method: 'get'
   })
 }
@@ -206,7 +206,7 @@ export function replyMessage(data) {
  */
 export function addReaction(messageId, data) {
   return request({
-    url: `/api/im/message/${messageId}/reaction`,
+    url: `/api/im/message/reaction/${messageId}`,
     method: 'post',
     data
   })
@@ -219,7 +219,7 @@ export function addReaction(messageId, data) {
  */
 export function removeReaction(messageId) {
   return request({
-    url: `/api/im/message/${messageId}/reaction`,
+    url: `/api/im/message/reaction/${messageId}`,
     method: 'delete'
   })
 }
@@ -231,7 +231,7 @@ export function removeReaction(messageId) {
  */
 export function getMessageReactions(messageId) {
   return request({
-    url: `/api/im/message/${messageId}/reactions`,
+    url: `/api/im/message/reaction/${messageId}/list`,
     method: 'get'
   })
 }
@@ -242,7 +242,7 @@ export function getMessageReactions(messageId) {
  */
 export function getUnreadMentions() {
   return request({
-    url: '/api/im/message/mention/unread',
+    url: '/api/im/message/reaction/mention/unread',
     method: 'get'
   })
 }
@@ -266,7 +266,7 @@ export function parseLinkPreview(url) {
  */
 export function getUnreadMentionCount() {
   return request({
-    url: '/api/im/message/mention/unread/count',
+    url: '/api/im/message/reaction/mention/unread/count',
     method: 'get'
   })
 }
@@ -278,7 +278,7 @@ export function getUnreadMentionCount() {
  */
 export function markMentionAsRead(messageId) {
   return request({
-    url: `/api/im/message/${messageId}/mention/read`,
+    url: `/api/im/message/reaction/mention/${messageId}/read`,
     method: 'put'
   })
 }
@@ -290,7 +290,7 @@ export function markMentionAsRead(messageId) {
  */
 export function getUnreadCount(conversationId) {
   return request({
-    url: `/api/im/message/unread/count/${conversationId}`,
+    url: `/api/im/message/receipt/unread/${conversationId}`,
     method: 'get'
   })
 }
