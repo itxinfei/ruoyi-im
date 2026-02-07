@@ -100,9 +100,11 @@ public class ImUserController {
      *
      * @param keyword 搜索关键词
      * @return 用户列表
-     * @apiNote 支持模糊搜索，匹配用户名或昵称
+     * @deprecated 此接口已废弃，请使用 {@link ImGlobalSearchController#searchContacts(String)} 全局搜索接口
+     * @apiNote 支持模糊搜索，匹配用户名或昵称；推荐使用全局搜索以获得更好的搜索体验
      */
-    @Operation(summary = "搜索用户", description = "根据关键词搜索用户，支持用户名或昵称模糊匹配")
+    @Deprecated
+    @Operation(summary = "搜索用户（已废弃）", description = "根据关键词搜索用户，支持用户名或昵称模糊匹配。推荐使用全局搜索接口 /api/im/search/contacts")
     @GetMapping("/search")
     public Result<List<ImUserVO>> search(@RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         List<ImUserVO> list = imUserService.searchUsers(keyword);
