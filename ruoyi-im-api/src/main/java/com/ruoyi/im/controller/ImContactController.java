@@ -2,8 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImFriendRequest;
-import com.ruoyi.im.dto.contact.ImFriendAddRequest;
-import com.ruoyi.im.dto.contact.ImFriendUpdateRequest;
+import com.ruoyi.im.dto.contact.*;
 import com.ruoyi.im.service.ImBatchOperationService;
 import com.ruoyi.im.service.ImFriendService;
 import com.ruoyi.im.service.ImUserService;
@@ -11,7 +10,6 @@ import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
-import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +20,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import org.springframework.validation.annotation.Validated;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -62,10 +61,8 @@ public class ImContactController {
      * 根据关键词搜索用户，支持按用户名、昵称、手机号搜索
      *
      * @param keyword 搜索关键词
-     * @param userId  当前登录用户ID，从请求头中获取
      * @return 用户列表，不包含当前用户和已是好友的用户
      * @apiNote 搜索结果会排除当前用户和已经是好友的用户
-     * @throws BusinessException 当搜索参数无效时抛出业务异常
      */
     @Operation(summary = "搜索用户", description = "根据关键词搜索用户，支持用户名、昵称、手机号搜索")
     @GetMapping("/search")
@@ -80,10 +77,8 @@ public class ImContactController {
      * 向指定用户发送好友申请，对方同意后成为好友
      *
      * @param request 好友申请请求参数，包含目标用户ID、申请理由等
-     * @param userId  当前登录用户ID，从请求头中获取
      * @return 申请结果，包含申请记录ID
      * @apiNote 使用 @Valid 注解进行参数校验；对方会收到好友申请通知
-     * @throws BusinessException 当用户不存在、已是好友或申请已存在时抛出业务异常
      */
     @Operation(summary = "发送好友申请", description = "向指定用户发送好友申请")
     @PostMapping("/request/send")
@@ -97,7 +92,6 @@ public class ImContactController {
      * 获取收到的好友申请列表
      * 查询当前用户收到的好友申请，按申请时间倒序排列
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 好友申请列表
      * @apiNote 只返回待处理状态的申请，已处理的申请不在此列表中
      */
@@ -113,7 +107,6 @@ public class ImContactController {
      * 获取发送的好友申请列表
      * 查询当前用户发送的好友申请，按申请时间倒序排列
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 好友申请列表
      * @apiNote 包含所有状态的申请（待处理、已同意、已拒绝）
      */
@@ -131,10 +124,8 @@ public class ImContactController {
      *
      * @param id       好友申请ID
      * @param approved 是否同意，true表示同意，false表示拒绝
-     * @param userId   当前登录用户ID，从请求头中获取
      * @return 处理结果
      * @apiNote 同意后会建立好友关系，并创建私聊会话；拒绝后申请状态更新为已拒绝
-     * @throws BusinessException 当申请不存在或无权限处理时抛出业务异常
      */
     @Operation(summary = "处理好友申请", description = "同意或拒绝好友申请")
     @PostMapping("/request/{id}/handle")
@@ -149,7 +140,6 @@ public class ImContactController {
      * 获取好友列表
      * 查询当前用户的所有好友，按昵称排序
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 好友列表
      * @apiNote 返回的好友信息包含在线状态、最后活跃时间等
      */
@@ -165,7 +155,6 @@ public class ImContactController {
      * 获取分组好友列表
      * 查询当前用户的好友，按分组进行组织
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 分组好友列表，每个分组包含该分组下的好友
      * @apiNote 未分组的好友会放在"默认分组"中
      */
@@ -181,11 +170,9 @@ public class ImContactController {
      * 获取好友详情
      * 查询指定好友的详细信息
      *
-     * @param id     好友关系ID
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param id 好友关系ID
      * @return 好友详细信息
      * @apiNote 只能查询自己的好友信息
-     * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
     @Operation(summary = "获取好友详情", description = "查询指定好友的详细信息")
     @GetMapping("/{id}")
@@ -201,10 +188,8 @@ public class ImContactController {
      *
      * @param id      好友关系ID
      * @param request 更新请求参数，包含备注名、分组ID等
-     * @param userId  当前登录用户ID，从请求头中获取
      * @return 更新结果
      * @apiNote 使用 @Valid 注解进行参数校验；只能更新自己的好友信息
-     * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
     @Operation(summary = "更新好友信息", description = "更新好友的备注名、分组等信息")
     @PutMapping("/{id}")
@@ -219,11 +204,9 @@ public class ImContactController {
      * 删除好友
      * 删除指定好友关系，删除后双方不再是好友
      *
-     * @param id     好友关系ID
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param id 好友关系ID
      * @return 删除结果
      * @apiNote 删除好友后，对应的私聊会话也会被删除
-     * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
     @Operation(summary = "删除好友", description = "删除指定好友关系")
     @DeleteMapping("/{id}")
@@ -239,10 +222,8 @@ public class ImContactController {
      *
      * @param id      好友关系ID
      * @param blocked 是否拉黑，true表示拉黑，false表示解除拉黑
-     * @param userId  当前登录用户ID，从请求头中获取
      * @return 操作结果
      * @apiNote 拉黑是单向的，拉黑好友后，对方仍可以发送消息，但自己无法接收
-     * @throws BusinessException 当好友关系不存在时抛出业务异常
      */
     @Operation(summary = "拉黑/解除拉黑好友", description = "拉黑好友后无法接收其消息")
     @PutMapping("/{id}/block")
@@ -257,15 +238,14 @@ public class ImContactController {
      * 获取所有好友分组名称列表
      * 查询当前用户使用的所有好友分组
      *
-     * @param userId 当前登录用户ID，从请求头中获取
      * @return 分组名称列表
      * @apiNote 分组是从好友关系中动态提取的，返回所有使用过的分组名称
      */
     @Operation(summary = "获取好友分组列表", description = "查询当前用户使用的所有好友分组")
     @GetMapping("/group/list")
-    public Result<java.util.List<String>> getGroupList() {
+    public Result<List<String>> getGroupList() {
         Long userId = SecurityUtils.getLoginUserId();
-        java.util.List<String> list = imFriendService.getGroupNames(userId);
+        List<String> list = imFriendService.getGroupNames(userId);
         return Result.success(list);
     }
 
@@ -273,12 +253,10 @@ public class ImContactController {
      * 重命名好友分组
      * 将指定的分组名称重命名为新名称
      *
-     * @param oldName 旧分组名称（URL编码）
+     * @param oldName  旧分组名称（URL编码）
      * @param request 重命名请求，包含新分组名称
-     * @param userId  当前登录用户ID，从请求头中获取
      * @return 操作结果
      * @apiNote 此操作会更新所有使用该分组的好友关系
-     * @throws BusinessException 当分组不存在时抛出业务异常
      */
     @Operation(summary = "重命名好友分组", description = "将指定的分组名称重命名为新名称")
     @PutMapping("/group/{oldName}")
@@ -300,10 +278,8 @@ public class ImContactController {
      * 删除指定分组，将该分组下的所有好友移至"默认分组"（清空分组名）
      *
      * @param groupName 分组名称（URL编码）
-     * @param userId    当前登录用户ID，从请求头中获取
      * @return 操作结果
      * @apiNote 删除分组不会删除好友，只是清空好友的分组信息
-     * @throws BusinessException 当分组不存在时抛出业务异常
      */
     @Operation(summary = "删除好友分组", description = "删除指定分组，好友移至默认分组")
     @DeleteMapping("/group/{groupName}")
@@ -323,11 +299,9 @@ public class ImContactController {
      * 移动好友到分组
      * 批量移动好友到指定分组
      *
-     * @param request 移动请求，包含好友ID列表和目标分组ID（分组名称）
-     * @param userId  当前登录用户ID，从请求头中获取
+     * @param request 移动请求，包含好友ID列表和目标分组名称
      * @return 操作结果
-     * @apiNote 分组ID实际是分组名称；如果分组名称为空，则移至默认分组
-     * @throws BusinessException 当好友不存在时抛出业务异常
+     * @apiNote 如果分组名称为空，则移至默认分组
      */
     @Operation(summary = "移动好友到分组", description = "批量移动好友到指定分组")
     @PutMapping("/group/move")
@@ -357,7 +331,7 @@ public class ImContactController {
      * 为指定好友设置标签
      *
      * @param friendId 好友用户ID
-     * @param tags     标签列表
+     * @param request  标签更新请求
      * @return 更新结果
      * @apiNote 如果标签不存在，会自动创建
      */
@@ -387,63 +361,6 @@ public class ImContactController {
     }
 
     /**
-     * 重命名分组请求体
-     */
-    public static class GroupRenameRequest {
-        private String newName;
-
-        public String getNewName() {
-            return newName;
-        }
-
-        public void setNewName(String newName) {
-            this.newName = newName;
-        }
-    }
-
-    /**
-     * 移动到分组请求体
-     */
-    public static class MoveToGroupRequest {
-        private java.util.List<Long> friendIds;
-        private String groupName;
-
-        public java.util.List<Long> getFriendIds() {
-            return friendIds;
-        }
-
-        public void setFriendIds(java.util.List<Long> friendIds) {
-            this.friendIds = friendIds;
-        }
-
-        public String getGroupName() {
-            return groupName;
-        }
-
-        public void setGroupName(String groupName) {
-            this.groupName = groupName;
-        }
-    }
-
-    /**
-     * 更新好友标签请求体
-     */
-    public static class FriendTagsUpdateRequest {
-        /**
-         * 标签列表
-         */
-        private java.util.List<String> tags;
-
-        public java.util.List<String> getTags() {
-            return tags;
-        }
-
-        public void setTags(java.util.List<String> tags) {
-            this.tags = tags;
-        }
-    }
-
-    /**
      * 批量添加好友
      * 向多个用户发送好友申请
      *
@@ -453,12 +370,12 @@ public class ImContactController {
      */
     @Operation(summary = "批量添加好友", description = "向多个用户批量发送好友申请")
     @PostMapping("/batch-add")
-    public Result<java.util.Map<String, Object>> batchAddFriends(@RequestBody BatchAddRequest request) {
+    public Result<HashMap<String, Object>> batchAddFriends(@RequestBody BatchAddRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         java.util.Map<Long, String> results = imFriendService.batchSendFriendRequest(
                 request.getUserIds(), request.getRemark(), userId);
         // 转换为Map<String, Object>
-        java.util.Map<String, Object> resultData = new java.util.HashMap<>();
+        HashMap<String, Object> resultData = new HashMap<>();
         for (java.util.Map.Entry<Long, String> entry : results.entrySet()) {
             resultData.put(String.valueOf(entry.getKey()), entry.getValue());
         }
@@ -475,7 +392,7 @@ public class ImContactController {
      */
     @Operation(summary = "批量删除好友", description = "批量删除多个好友关系")
     @DeleteMapping("/batch-delete")
-    public Result<java.util.Map<String, Object>> batchDeleteFriends(@RequestBody BatchDeleteRequest request) {
+    public Result<Void> batchDeleteFriends(@RequestBody BatchDeleteRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.batchDeleteFriends(request.getContactIds(), userId);
         return Result.success("批量删除成功");
@@ -508,11 +425,11 @@ public class ImContactController {
      */
     @Operation(summary = "获取推荐好友", description = "基于部门、手机号等推荐可能认识的人")
     @GetMapping("/recommendations")
-    public Result<java.util.List<ImUserVO>> getRecommendedContacts(
+    public Result<List<ImUserVO>> getRecommendedContacts(
             @RequestParam(defaultValue = "all") String type,
             @RequestParam(defaultValue = "10") Integer limit) {
         Long userId = SecurityUtils.getLoginUserId();
-        java.util.List<ImUserVO> list = imFriendService.getRecommendedContacts(userId, type, limit);
+        List<ImUserVO> list = imFriendService.getRecommendedContacts(userId, type, limit);
         return Result.success(list);
     }
 
@@ -526,7 +443,7 @@ public class ImContactController {
      */
     @Operation(summary = "上传通讯录", description = "上传通讯录用于好友匹配")
     @PostMapping("/address-book/upload")
-    public Result<java.util.List<ImUserVO>> uploadAddressBook(@RequestBody AddressBookUploadRequest request) {
+    public Result<List<ImUserVO>> uploadAddressBook(@RequestBody AddressBookUploadRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         // 转换ContactItem为Map<String, String>
         java.util.List<java.util.Map<String, String>> contactsMap = new java.util.ArrayList<>();
@@ -538,8 +455,7 @@ public class ImContactController {
                 contactsMap.add(map);
             }
         }
-        java.util.List<ImUserVO> matchedUsers = imFriendService.matchAddressBookContacts(
-                userId, contactsMap);
+        List<ImUserVO> matchedUsers = imFriendService.matchAddressBookContacts(userId, contactsMap);
         return Result.success("上传成功", matchedUsers);
     }
 
@@ -552,9 +468,9 @@ public class ImContactController {
      */
     @Operation(summary = "获取通讯录匹配结果", description = "获取之前上传通讯录匹配到的用户")
     @GetMapping("/address-book/matches")
-    public Result<java.util.List<ImUserVO>> getAddressBookMatches() {
+    public Result<List<ImUserVO>> getAddressBookMatches() {
         Long userId = SecurityUtils.getLoginUserId();
-        java.util.List<ImUserVO> list = imFriendService.getAddressBookMatches(userId);
+        List<ImUserVO> list = imFriendService.getAddressBookMatches(userId);
         return Result.success(list);
     }
 
@@ -583,129 +499,12 @@ public class ImContactController {
      */
     @Operation(summary = "批量清除好友列表缓存", description = "批量清除多个用户的好友列表缓存")
     @PostMapping("/cache/clear-batch")
-    public Result<java.util.Map<String, Object>> batchClearFriendListCache(
+    public Result<HashMap<String, Object>> batchClearFriendListCache(
             @RequestBody BatchClearCacheRequest request) {
         imFriendService.batchClearFriendListCache(request.getUserIds());
-        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
         result.put("cleared", request.getUserIds().size());
         result.put("message", "已清除 " + request.getUserIds().size() + " 个用户的缓存");
         return Result.success(result);
     }
-
-    // ==================== 内部类 ====================
-
-    /**
-     * 批量添加请求体
-     */
-    public static class BatchAddRequest {
-        private java.util.List<Long> userIds;
-        private String remark;
-
-        public java.util.List<Long> getUserIds() {
-            return userIds;
-        }
-
-        public void setUserIds(java.util.List<Long> userIds) {
-            this.userIds = userIds;
-        }
-
-        public String getRemark() {
-            return remark;
-        }
-
-        public void setRemark(String remark) {
-            this.remark = remark;
-        }
-    }
-
-    /**
-     * 批量删除请求体
-     */
-    public static class BatchDeleteRequest {
-        private java.util.List<Long> contactIds;
-
-        public java.util.List<Long> getContactIds() {
-            return contactIds;
-        }
-
-        public void setContactIds(java.util.List<Long> contactIds) {
-            this.contactIds = contactIds;
-        }
-    }
-
-    /**
-     * 批量移动请求体
-     */
-    public static class BatchMoveRequest {
-        private java.util.List<Long> contactIds;
-        private String groupName;
-
-        public java.util.List<Long> getContactIds() {
-            return contactIds;
-        }
-
-        public void setContactIds(java.util.List<Long> contactIds) {
-            this.contactIds = contactIds;
-        }
-
-        public String getGroupName() {
-            return groupName;
-        }
-
-        public void setGroupName(String groupName) {
-            this.groupName = groupName;
-        }
-    }
-
-    /**
-     * 通讯录上传请求体
-     */
-    public static class AddressBookUploadRequest {
-        private java.util.List<ContactItem> contacts;
-
-        public java.util.List<ContactItem> getContacts() {
-            return contacts;
-        }
-
-        public void setContacts(java.util.List<ContactItem> contacts) {
-            this.contacts = contacts;
-        }
-
-        public static class ContactItem {
-            private String name;
-            private String phone;
-
-            public String getName() {
-                return name;
-            }
-
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            public String getPhone() {
-                return phone;
-            }
-
-            public void setPhone(String phone) {
-                this.phone = phone;
-            }
-        }
-    }
-
-    /**
-     * 批量清除缓存请求体
-     */
-    public static class BatchClearCacheRequest {
-        private java.util.List<Long> userIds;
-
-        public java.util.List<Long> getUserIds() {
-            return userIds;
-        }
-
-        public void setUserIds(java.util.List<Long> userIds) {
-            this.userIds = userIds;
-        }
-    }
-
 }
