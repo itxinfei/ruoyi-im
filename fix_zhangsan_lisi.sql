@@ -3,6 +3,9 @@
 -- 添加所有用户为好友，加入所有群组
 -- =============================================
 
+SET NAMES utf8mb4;
+SET SQL_SAFE_UPDATES = 0;
+
 -- 1. 确认当前用户数量
 SELECT '=== 当前用户总数 ===' as info;
 SELECT COUNT(*) as user_count FROM im_user;
@@ -44,14 +47,16 @@ WHERE u.id != 24
 
 -- 3. 确保 zhangsan 和 lisi 加入所有群组
 -- zhangsan (ID=23) 加入所有群组
-INSERT IGNORE INTO im_conversation_member (user_id, conversation_id, role, unread_count, is_pinned, is_muted, create_time, update_time)
+INSERT IGNORE INTO im_conversation_member (conversation_id, user_id, nickname, role, unread_count, is_pinned, is_muted, is_deleted, create_time, update_time)
 SELECT
-    23 as user_id,
     c.id as conversation_id,
+    23 as user_id,
+    NULL as nickname,
     'MEMBER' as role,
     0 as unread_count,
     0 as is_pinned,
     0 as is_muted,
+    0 as is_deleted,
     NOW() as create_time,
     NOW() as update_time
 FROM im_conversation c
@@ -63,14 +68,16 @@ WHERE c.type = 'GROUP'
   );
 
 -- lisi (ID=24) 加入所有群组
-INSERT IGNORE INTO im_conversation_member (user_id, conversation_id, role, unread_count, is_pinned, is_muted, create_time, update_time)
+INSERT IGNORE INTO im_conversation_member (conversation_id, user_id, nickname, role, unread_count, is_pinned, is_muted, is_deleted, create_time, update_time)
 SELECT
-    24 as user_id,
     c.id as conversation_id,
+    24 as user_id,
+    NULL as nickname,
     'MEMBER' as role,
     0 as unread_count,
     0 as is_pinned,
     0 as is_muted,
+    0 as is_deleted,
     NOW() as create_time,
     NOW() as update_time
 FROM im_conversation c
