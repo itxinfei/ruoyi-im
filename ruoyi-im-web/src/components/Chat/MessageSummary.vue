@@ -352,6 +352,7 @@ watch(() => props.visible, newVal => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
 
 // ============================================================================
 // 遮罩层
@@ -361,7 +362,7 @@ watch(() => props.visible, newVal => {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 10000;
+  z-index: $z-modal-top;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -500,11 +500,33 @@ const canRecall = computed(() => {
   border-radius: 8px; // 野火IM标准:统一8px圆角
   font-size: var(--dt-font-size-base);
   line-height: 1.5;
-  word-break: break-all;
-  overflow-wrap: anywhere;
+  word-break: break-word; // 改为 break-word，保留完整单词
+  overflow-wrap: break-word;
+  max-width: 100%; // 防止内容溢出
+  min-width: 0; // 允许 flex 子项收缩
   transition: all var(--dt-transition-base);
   display: flex;
   align-items: flex-start;
+
+  // 防止长链接溢出
+  :deep(a) {
+    word-break: break-all;
+    max-width: 100%;
+  }
+
+  // 防止代码块溢出
+  :deep(pre) {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  // 防止图片溢出
+  :deep(img) {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 // 对方消息样式 - 野火IM风格

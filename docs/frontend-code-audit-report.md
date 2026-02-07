@@ -389,40 +389,95 @@ const LINE_HEIGHT = 24
 
 ### P0 - 立即修复（影响功能）
 
-| 问题 | 位置 | 建议 |
-|------|------|------|
-| 文件上传假数据 | MessageInputRefactored.vue:983-990 | 修改 emit 返回实际 URL |
-| 未使用的监听器 | MessageList.vue:664 | 优化 observer 更新逻辑 |
+| 问题 | 位置 | 建议 | 状态 |
+|------|------|------|------|
+| 文件上传假数据 | MessageInputRefactored.vue:983-990 | 调用实际 API 上传 | ✅ 已修复 |
+| 未使用的监听器 | MessageList.vue:664 | 优化 observer 更新逻辑 | ✅ 已修复 |
 
 ### P1 - 短期修复（影响体验）
 
-| 问题 | 位置 | 建议 |
-|------|------|------|
-| Z-index 冲突 | 多个组件 | 统一 z-index 管理 |
-| 滚动条兼容性 | global.scss | 添加 Firefox 支持 |
-| 定时消息降级 | MessageInputRefactored.vue:198-206 | 添加功能开关 |
+| 问题 | 位置 | 建议 | 状态 |
+|------|------|------|------|
+| Z-index 冲突 | 多个组件 | 统一 z-index 管理 | ✅ 已修复 |
+| 滚动条兼容性 | global.scss | 添加 Firefox 支持 | ✅ 已修复 |
+| 定时消息降级 | MessageInputRefactored.vue:198-206 | 添加功能开关 | ✅ 已修复 |
 
 ### P2 - 中期改进（代码质量）
 
-| 问题 | 位置 | 建议 |
-|------|------|------|
-| 响应式布局缺失 | 多个组件 | 添加移动端适配 |
-| 长消息布局 | MessageList | 添加最大宽度限制 |
-| 注释不完整 | 多个文件 | 完善关键逻辑注释 |
+| 问题 | 位置 | 建议 | 状态 |
+|------|------|------|------|
+| 响应式布局缺失 | 多个组件 | 添加移动端适配 | ✅ 已修复（部分） |
+| 长消息布局 | MessageList | 添加最大宽度限制 | ✅ 已修复 |
+| 注释不完整 | 多个文件 | 完善关键逻辑注释 | ⏳ 待修复 |
 
 ---
 
-## 八、具体修复方案
+## 八、修复记录（2026-02-07 第二轮）
 
-### 修复1：统一 Z-index 管理
+### 8.1 新增修复项
 
-创建 `src/styles/z-index.scss`：
+#### ✅ 文件上传假数据修复
+- 位置：`MessageInputRefactored.vue`
+- 修复内容：
+  - 导入真实的文件上传 API：`uploadImage` 和 `uploadFile`
+  - 移除假的 `emitPromise` 函数
+  - 直接调用后端 API 获取实际文件 URL
+  - 保留事件通知用于父组件监听
 
-```scss
-// Z-index 层级标准
-$z-dropdown: 7000;
-$z-sticky: 6000;
-$z-fixed: 5000;
+#### ✅ 定时消息功能开关
+- 创建 `src/config/featureFlags.js` 功能开关配置文件
+- 在 `ScheduledMessageDialog.vue` 中：
+  - 添加 `featureEnabled` prop
+  - 在 API 调用前检查功能开关
+  - 优化错误提示信息
+- 在 `MessageInputRefactored.vue` 中：
+  - 导入功能开关模块
+  - 添加 `isScheduledMessageEnabled` 计算属性
+  - 传递功能状态给子组件
+
+#### ✅ 长消息布局限制
+- 在 `MessageBubbleRefactored.vue` 中：
+  - 改进 `.bubble-content` 样式
+  - 使用 `word-break: break-word` 替代 `break-all`
+  - 添加 `max-width: 100%` 和 `min-width: 0`
+  - 为链接、代码块、图片添加溢出保护
+- 在 `TextBubble.vue` 中：
+  - 改进 `.text-content` 样式
+  - 链接单独使用 `break-all` 防止溢出
+
+---
+
+## 九、完整修复记录（汇总）
+
+### 9.1 已完成修复（两轮）
+
+#### ✅ 统一 Z-index 管理
+- 创建 `src/styles/z-index.scss` 统一管理层级
+- 修复 11 个组件的 z-index 层级问题
+
+#### ✅ 滚动条兼容性
+- 在 `global.scss` 添加 Firefox 浏览器支持
+
+#### ✅ IntersectionObserver 性能优化
+- 在 `MessageList.vue` 中添加防抖和去重优化
+
+#### ✅ 响应式布局改进
+- 通话对话框添加移动端 `max-width` 限制
+
+#### ✅ 文件上传假数据修复
+- 直接调用后端 API，移除假数据返回
+
+#### ✅ 定时消息功能开关
+- 创建功能开关配置文件
+- 实现功能检查逻辑
+
+#### ✅ 长消息布局限制
+- 改进消息气泡和文本内容的换行策略
+- 添加溢出保护
+
+---
+
+## 十、具体修复方案（更新后）
 $z-modal-mask: 4000;
 $z-modal-above: 9000;
 $z-notification: 10000;

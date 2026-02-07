@@ -151,10 +151,13 @@ const loadLinkPreviews = async () => {
 
 /**
  * 处理链接点击
+ * @param {Object} preview - 链接预览数据
  */
 const handleLinkClick = preview => {
-  // 可以在这里添加点击统计或其他处理
-  console.log('Link clicked:', preview.url)
+  // 打开链接
+  if (preview?.url) {
+    window.open(preview.url, '_blank')
+  }
 }
 
 /**
@@ -278,17 +281,22 @@ function escapeRegExp(string) {
 }
 
 .text-content {
-  word-break: break-all;
+  word-break: break-word; // 改为 break-word，保留完整单词
+  overflow-wrap: break-word;
   white-space: pre-wrap;
   line-height: 1.5;
   font-size: 14px;
+  max-width: 100%; // 防止内容溢出
+  min-width: 0; // 允许 flex 子项收缩
 
-  // 链接样式 - 野火IM风格
+  // 防止长链接溢出
   :deep(a) {
     color: #4168e0;
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: all 0.2s;
+    word-break: break-all; // 链接使用 break-all 防止溢出
+    max-width: 100%;
 
     &:hover {
       border-bottom-color: #4168e0;

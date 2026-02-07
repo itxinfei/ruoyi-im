@@ -240,6 +240,7 @@ watch(() => props.visible, newVal => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
 
 // ============================================================================
 // AI表情面板
@@ -252,7 +253,7 @@ watch(() => props.visible, newVal => {
   border-radius: var(--dt-radius-xl);
   box-shadow: var(--dt-shadow-3xl);
   overflow: hidden;
-  z-index: 9999;
+  z-index: $z-popover;
   animation: emojiPanelIn 0.3s var(--dt-ease-out);
   display: flex;
   flex-direction: column;

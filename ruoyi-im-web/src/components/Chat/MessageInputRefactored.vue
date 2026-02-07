@@ -201,6 +201,7 @@
       v-model="showScheduledMessageDialog"
       :message-content="messageContent"
       :conversation-id="session?.id"
+      :feature-enabled="isScheduledMessageEnabled"
       @scheduled="handleScheduledMessage"
     />
 
@@ -222,6 +223,8 @@ import { useImWebSocket } from '@/composables/useImWebSocket'
 import { isScreenshotSupported } from '@/utils/screenshot'
 import { formatMessagePreviewFromObject } from '@/utils/message'
 import { extractUrls, isInternalUrl, parseLink } from '@/utils/linkParser'
+import { uploadImage, uploadFile as uploadFileApi } from '@/api/im/file'
+import { isFeatureEnabled, FeatureFlags } from '@/config/featureFlags'
 
 // Composables
 import { useInputDraft } from '@/composables/useInputDraft'
@@ -266,6 +269,11 @@ const emit = defineEmits([
 const store = useStore()
 const { sendMessage: wsSendMessage } = useImWebSocket()
 const currentUser = computed(() => store.getters['user/currentUser'])
+
+// 功能开关
+const isScheduledMessageEnabled = computed(() =>
+  isFeatureEnabled(FeatureFlags.SCHEDULED_MESSAGE)
+)
 
 // ========== 使用 Composables ==========
 
@@ -943,23 +951,40 @@ const handleFileUploadConfirm = async ({ files, description }) => {
 
 /**
  * 上传文件并发送
+ * @param {File} file - 要上传的文件
+ * @param {string} description - 文件描述
+ * @param {string} type - 文件类型（image/audio/file）
  */
 const uploadFileWithDescription = async (file, description, type) => {
   const formData = new FormData()
   formData.append('file', file)
 
-  // 上传文件
+  // 调用后端 API 上传文件
   let uploadUrl
-  if (type === 'image') {
-    const res = await emitPromise('upload-image', formData)
-    uploadUrl = res?.data?.fileUrl
-  } else {
-    const res = await emitPromise('upload-file', formData)
-    uploadUrl = res?.data?.fileUrl
+  try {
+    let res
+    if (type === 'image') {
+      res = await uploadImage(formData)
+    } else {
+      res = await uploadFileApi(formData)
+    }
+
+    // 根据后端响应结构获取 URL
+    uploadUrl = res?.data?.url || res?.url || res?.data?.fileUrl
+  } catch (error) {
+    console.error('[文件上传] 失败:', error)
+    throw new Error('上传失败: ' + (error.message || '未知错误'))
   }
 
   if (!uploadUrl) {
-    throw new Error('上传失败')
+    throw new Error('上传失败: 未获取到文件地址')
+  }
+
+  // 通知父组件上传成功（保留兼容性）
+  if (type === 'image') {
+    emit('upload-image', { file, url: uploadUrl })
+  } else {
+    emit('upload-file', { file, url: uploadUrl })
   }
 
   // 如果有描述，发送一条文本消息
@@ -975,18 +1000,6 @@ const uploadFileWithDescription = async (file, description, type) => {
   } else {
     emit('send', `[文件: ${file.name}]`)
   }
-}
-
-/**
- * 将 emit 转换为 Promise
- */
-function emitPromise(eventName, data) {
-  return new Promise((resolve, reject) => {
-    emit(eventName, data)
-    // 这里简化处理，实际应该通过事件返回结果
-    // 由于当前架构是通过 emit 触发父组件处理，需要父组件返回结果
-    resolve({ data: { fileUrl: 'temp-url' } })
-  })
 }
 
 /**

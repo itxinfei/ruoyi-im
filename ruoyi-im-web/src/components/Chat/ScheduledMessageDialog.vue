@@ -78,12 +78,15 @@
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { scheduleMessage } from '@/api/im/message'
+import { isFeatureEnabled, FeatureFlags } from '@/config/featureFlags'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   messageContent: { type: String, default: '' },
   conversationId: { type: [String, Number], default: null },
-  messageType: { type: String, default: 'TEXT' }
+  messageType: { type: String, default: 'TEXT' },
+  // 功能开关：定时消息是否启用
+  featureEnabled: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['update:modelValue', 'scheduled'])
@@ -172,6 +175,12 @@ const selectQuickTime = option => {
 const handleSchedule = async () => {
   if (!canSchedule.value) {return}
 
+  // 检查功能开关
+  if (!props.featureEnabled) {
+    ElMessage.warning('定时消息功能暂未开放，敬请期待')
+    return
+  }
+
   const scheduledTime = customTime.value
 
   // 校验会话ID
@@ -197,10 +206,13 @@ const handleSchedule = async () => {
   } catch (error) {
     // API 可能尚未实现，降级处理
     console.warn('[ScheduledMessage] API 调用失败，可能后端尚未实现:', error)
-    if (error?.msg) {
-      ElMessage.error(error.msg)
-    } else if (error?.response?.status === 404) {
+    const errorMsg = error?.msg || error?.message
+    const statusCode = error?.response?.status
+
+    if (statusCode === 404) {
       ElMessage.warning('定时消息功能开发中，敬请期待')
+    } else if (errorMsg) {
+      ElMessage.error('设置失败: ' + errorMsg)
     } else {
       ElMessage.error('设置定时发送失败，请稍后重试')
     }

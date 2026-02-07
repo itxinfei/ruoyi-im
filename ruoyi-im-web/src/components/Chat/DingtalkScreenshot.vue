@@ -1071,12 +1071,13 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use '@/styles/z-index.scss' as *;
 /* ==================== 截图选择层 ==================== */
 .dingtalk-screenshot {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: $z-tooltip;
   cursor: crosshair;
   user-select: none;
 }
@@ -1144,7 +1145,7 @@ onUnmounted(() => {
 .screenshot-editor {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: $z-tooltip;
   background: rgba(0, 0, 0, 0.8);
   user-select: none;
 }

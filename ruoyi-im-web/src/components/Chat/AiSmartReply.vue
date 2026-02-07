@@ -360,6 +360,7 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
 
 // ============================================================================
 // 遮罩层
@@ -371,7 +372,7 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.1);
-  z-index: 9998;
+  z-index: $z-popover;
   cursor: default;
 }
 
@@ -396,7 +397,7 @@ onUnmounted(() => {
   border-radius: var(--dt-radius-xl);
   box-shadow: var(--dt-shadow-3xl);
   overflow: hidden;
-  z-index: 9999;
+  z-index: $z-popover;
   animation: replyPanelIn 0.3s var(--dt-ease-out);
   display: flex;
   flex-direction: column;

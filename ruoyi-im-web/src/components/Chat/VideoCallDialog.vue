@@ -550,6 +550,7 @@ defineExpose({
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
 
 // ============================================================================
 // 视频通话遮罩层
@@ -562,7 +563,7 @@ defineExpose({
   bottom: 0;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
-  z-index: 10000;
+  z-index: $z-call-overlay;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -843,7 +844,7 @@ defineExpose({
   background: #000;
   border-radius: var(--dt-radius-lg);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  z-index: 9999;
+  z-index: $z-float-window;
   overflow: hidden;
   cursor: pointer;
 }

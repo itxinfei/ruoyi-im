@@ -417,10 +417,17 @@ const formatTimeDivider = timestamp => {
 
 // 判断两条消息是否可以合并显示（钉钉风格）
 // 规则：
-// 1. 同一发送者
-// 2. 时间间隔小于 2 分钟
-// 3. 非特殊消息类型（如撤回消息、系统消息、拍一拍等）
-// 4. 自己的消息和对方的消息都可以合并
+/**
+ * 判断当前消息是否可以与上一条消息合并显示
+ * 合并条件：
+ * 1. 同一发送者
+ * 2. 时间间隔小于 2 分钟
+ * 3. 非特殊消息类型（如撤回消息、系统消息、拍一拍等）
+ * 4. 自己的消息和对方的消息都可以合并
+ * @param {Object} currentMsg - 当前消息
+ * @param {Object} prevMsg - 上一条消息
+ * @returns {boolean}
+ */
 const canMergeWith = (currentMsg, prevMsg) => {
   if (!prevMsg) { return false }
 
@@ -474,7 +481,13 @@ const messagesWithDividers = computed(() => {
   return res
 })
 
-// 判断是否需要添加时间分割线
+/**
+ * 判断是否需要添加时间分割线
+ * 时间间隔超过 5 分钟时添加分割线
+ * @param {Object} currentMsg - 当前消息
+ * @param {Object} prevMsg - 上一条消息
+ * @returns {boolean}
+ */
 const shouldAddTimeDivider = (currentMsg, prevMsg) => {
   if (!prevMsg) { return true }
 
@@ -486,7 +499,11 @@ const shouldAddTimeDivider = (currentMsg, prevMsg) => {
   return currentTime - prevTime > TIME_DIVIDER_THRESHOLD
 }
 
-// 处理菜单命令
+/**
+ * 处理菜单命令
+ * @param {string} cmd - 命令类型（copy/at/pin/recall/delete等）
+ * @param {Object} msg - 消息对象
+ */
 const handleCommand = async (cmd, msg) => {
   if (cmd === 'copy') {
     copyToClipboard(msg.content)
@@ -602,7 +619,12 @@ const scrollToMsg = param => {
 // 可见区域跟踪（用于已读上报优化）
 const visibleRange = ref({ start: 0, end: 0 })
 
-// 更新可见区域（用于已读上报）
+/**
+ * 更新可见区域（用于已读上报优化）
+ * 根据滚动位置和视口高度计算当前可见的消息范围
+ * @param {number} scrollPos - 当前滚动位置
+ * @param {number} viewportHeight - 视口高度
+ */
 const updateVisibleRange = (scrollPos, viewportHeight) => {
   const allMessages = messagesWithDividers.value
   if (allMessages.length === 0) { return }
@@ -620,7 +642,10 @@ const updateVisibleRange = (scrollPos, viewportHeight) => {
   }
 }
 
-// 保持滚动偏移（用于加载更多）
+/**
+ * 保持滚动偏移（用于加载更多消息时保持位置）
+ * @param {number} oldHeight - 之前的滚动高度
+ */
 const maintainScroll = oldHeight => {
   nextTick(() => {
     if (isUnmounted.value) { return } // 组件已卸载，不执行 DOM 操作
@@ -633,7 +658,11 @@ const maintainScroll = oldHeight => {
 const observer = ref(null)
 const observedMessageIds = new Set() // 跟踪已观察的消息ID，避免重复观察
 
-// 初始化已读上报监听
+/**
+ * 初始化已读上报监听器
+ * 使用 IntersectionObserver 监听消息是否进入可视区域
+ * 消息进入可视区域时触发已读上报
+ */
 const initReadObserver = () => {
   if (observer.value) { observer.value.disconnect() }
   observedMessageIds.clear() // 清空已观察记录
@@ -724,6 +753,8 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 
 .message-list {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 20px;
@@ -732,6 +763,8 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   background: #f5f5f5; // 野火IM标准:浅灰背景
   position: relative;
   min-height: 0; // flex 子元素高度修复
+  width: 100%;
+  box-sizing: border-box;
   scroll-behavior: smooth;
   // 性能优化
   will-change: scroll-position;
@@ -999,6 +1032,9 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 // 消息高亮动画 - 野火IM风格
 // ============================================================================
 .message-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   &[data-id] {
     transition: background 0.2s;
   }

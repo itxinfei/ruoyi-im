@@ -143,6 +143,7 @@ watch(() => props.visible, val => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
 
 .fade-enter-active,
 .fade-leave-active {
@@ -158,7 +159,7 @@ watch(() => props.visible, val => {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
-  z-index: 10000;
+  z-index: $z-tooltip;
   display: flex;
   align-items: center;
   justify-content: center;

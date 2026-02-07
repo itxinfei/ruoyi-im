@@ -718,6 +718,7 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
 
 .video-meeting-room {
   position: fixed;
@@ -726,7 +727,7 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   background: #000;
-  z-index: 9999;
+  z-index: $z-call-overlay;
   display: flex;
   flex-direction: column;
 }

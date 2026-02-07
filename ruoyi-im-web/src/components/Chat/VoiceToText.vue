@@ -182,8 +182,7 @@ const handleStartTranscribe = async () => {
   } catch (err) {
     isTranscribing.value = false
     if (err.name === 'AbortError') {
-      // 用户主动取消，不显示错误
-      console.log('[VoiceToText] 转写已取消')
+      // 用户主动取消，不显示错误提示
       return
     }
     error.value = err.message || '转写失败，请重试'
