@@ -351,8 +351,6 @@ public class E2EEncryptionUtil {
         String encrypted = encryptMessage(plaintext, decryptedKey);
         String decrypted = decryptMessage(encrypted, decryptedKey);
 
-        System.out.println("原文: " + plaintext);
-        System.out.println("解密: " + decrypted);
-        System.out.println("测试结果: " + plaintext.equals(decrypted));
+        log.info("E2E加密测试 - 原文: {}, 解密: {}, 测试结果: {}", plaintext, decrypted, plaintext.equals(decrypted));
     }
 }
