@@ -84,6 +84,7 @@ export default {
     groupedSessions: (state, getters) => {
       const sortedGroups = getters.sortedGroups
       const sessionsByGroup = {}
+      const seenSessionIds = new Set() // 用于去重，记录已处理的会话ID
 
       // 初始化分组
       sortedGroups.forEach(group => {
@@ -93,8 +94,15 @@ export default {
         }
       })
 
-      // 分配会话到分组
+      // 分配会话到分组（去重）
       state.sessions.forEach(session => {
+        // 如果会话ID已处理过，跳过
+        if (seenSessionIds.has(session.id)) {
+          console.warn('[groupedSessions] 发现重复会话ID:', session.id)
+          return
+        }
+        seenSessionIds.add(session.id)
+
         // 置顶的会话优先进入置顶分组
         if (session.isPinned) {
           if (sessionsByGroup['pinned']) {
