@@ -5,7 +5,6 @@ import com.ruoyi.im.domain.ImTodoItem;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImTodoItemMapper;
 import com.ruoyi.im.service.ImTodoItemService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,8 +18,11 @@ import java.util.List;
 @Service
 public class ImTodoItemServiceImpl implements ImTodoItemService {
 
-    @Autowired
-    private ImTodoItemMapper todoItemMapper;
+    private final ImTodoItemMapper todoItemMapper;
+
+    public ImTodoItemServiceImpl(ImTodoItemMapper todoItemMapper) {
+        this.todoItemMapper = todoItemMapper;
+    }
 
     @Override
     public Long createTodo(String title, String description, String type, Long relatedId, Long userId) {

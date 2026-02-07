@@ -7,7 +7,6 @@ import com.ruoyi.im.service.ImMessagePushService;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +34,14 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
     private static final long OFFLINE_MESSAGE_EXPIRE_DAYS = 7;
     private static final int MAX_OFFLINE_MESSAGES = 1000;
 
-    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    public OfflineMessageServiceImpl(RedisTemplate<String, Object> redisTemplate,
+                                      ObjectMapper objectMapper) {
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public boolean storeOfflineMessage(Long userId, ImMessage message) {
@@ -210,14 +212,14 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
      * 离线消息推送DTO
      */
     public static class OfflineMessagePush {
-        private String type;
-        private Long messageId;
-        private Long conversationId;
-        private Long senderId;
-        private String messageType;
-        private String content;
+        private final String type;
+        private final Long messageId;
+        private final Long conversationId;
+        private final Long senderId;
+        private final String messageType;
+        private final String content;
         private java.time.LocalDateTime createTime;
-        private Boolean isOffline;
+        private final Boolean isOffline;
 
         // Getters and Setters
         public String getType() { return type; }

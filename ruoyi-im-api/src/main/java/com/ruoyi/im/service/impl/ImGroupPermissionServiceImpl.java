@@ -12,7 +12,6 @@ import com.ruoyi.im.service.ImGroupMemberService;
 import com.ruoyi.im.service.ImGroupPermissionService;
 import com.ruoyi.im.vo.group.GroupPermissionVO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,14 +30,17 @@ import java.util.Map;
 @Service
 public class ImGroupPermissionServiceImpl implements ImGroupPermissionService {
 
-    @Autowired
-    private ImGroupPermissionMapper permissionMapper;
+    private final ImGroupPermissionMapper permissionMapper;
+    private final ImGroupMemberMapper groupMemberMapper;
+    private final ImGroupMapper groupMapper;
 
-    @Autowired
-    private ImGroupMemberMapper groupMemberMapper;
-
-    @Autowired
-    private ImGroupMapper groupMapper;
+    public ImGroupPermissionServiceImpl(ImGroupPermissionMapper permissionMapper,
+                                        ImGroupMemberMapper groupMemberMapper,
+                                        ImGroupMapper groupMapper) {
+        this.permissionMapper = permissionMapper;
+        this.groupMemberMapper = groupMemberMapper;
+        this.groupMapper = groupMapper;
+    }
 
     /**
      * 默认权限配置

@@ -13,7 +13,6 @@ import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.constants.StatusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,17 +37,20 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     private static final String USER_CALL_KEY = "im:user_call:";
     private static final int CALL_TIMEOUT_SECONDS = 60; // 60秒超时
 
-    @Autowired
-    private ImVideoCallMapper videoCallMapper;
+    private final ImVideoCallMapper videoCallMapper;
+    private final ImVideoCallParticipantMapper participantMapper;
+    private final ImUserMapper userMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    @Autowired
-    private ImVideoCallParticipantMapper participantMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    public ImVideoCallServiceImpl(ImVideoCallMapper videoCallMapper,
+                                  ImVideoCallParticipantMapper participantMapper,
+                                  ImUserMapper userMapper,
+                                  RedisTemplate<String, Object> redisTemplate) {
+        this.videoCallMapper = videoCallMapper;
+        this.participantMapper = participantMapper;
+        this.userMapper = userMapper;
+        this.redisTemplate = redisTemplate;
+    }
 
     @Override
     public Long initiateCall(Long callerId, Long calleeId, Long conversationId, String callType) {

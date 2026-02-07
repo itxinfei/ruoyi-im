@@ -4,7 +4,6 @@ import com.ruoyi.im.domain.ImSystemNotification;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImSystemNotificationMapper;
 import com.ruoyi.im.service.ImSystemNotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,8 +18,11 @@ import java.util.List;
 @Service
 public class ImSystemNotificationServiceImpl implements ImSystemNotificationService {
 
-    @Autowired
-    private ImSystemNotificationMapper notificationMapper;
+    private final ImSystemNotificationMapper notificationMapper;
+
+    public ImSystemNotificationServiceImpl(ImSystemNotificationMapper notificationMapper) {
+        this.notificationMapper = notificationMapper;
+    }
 
     @Override
     public Long sendNotification(Long receiverId, String type, String title, String content, Long relatedId, String relatedType) {

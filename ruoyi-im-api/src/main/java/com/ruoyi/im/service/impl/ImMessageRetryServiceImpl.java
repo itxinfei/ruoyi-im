@@ -8,7 +8,6 @@ import com.ruoyi.im.util.ExceptionHandlerUtil;
 import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -33,24 +32,24 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
     private static final String RETRY_KEY_PREFIX = "message:retry:";
     private static final String RETRY_COUNT_PREFIX = "message:retry:count:";
     private static final String RETRY_DATA_PREFIX = "message:retry:data:";
-    private static final long RETRY_EXPIRE_HOURS = 24; // 重试记录保留24小时
+    private static final long RETRY_EXPIRE_HOURS = 24;
 
-    @Autowired
-    private ImRedisUtil redisUtil;
-
-    @Autowired
-    @Lazy
-    private ImMessageService messageService;
-
+    private final ImRedisUtil redisUtil;
+    private final ImMessageService messageService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // 用于延迟重试的线程池
     private final ScheduledExecutorService retryExecutor = Executors.newScheduledThreadPool(2,
             r -> {
                 Thread t = new Thread(r, "message-retry-" + System.currentTimeMillis());
                 t.setDaemon(true);
                 return t;
             });
+
+    public ImMessageRetryServiceImpl(ImRedisUtil redisUtil,
+                                     @Lazy ImMessageService messageService) {
+        this.redisUtil = redisUtil;
+        this.messageService = messageService;
+    }
 
     @Override
     public void recordSendFailure(String clientMsgId, ImMessageSendRequest request, Long userId, String errorMessage) {
@@ -213,11 +212,11 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
      * 失败消息数据结构
      */
     static class FailureData {
-        private String clientMsgId;
-        private ImMessageSendRequest request;
-        private Long userId;
-        private String errorMessage;
-        private Long firstFailTime;
+        private final String clientMsgId;
+        private final ImMessageSendRequest request;
+        private final Long userId;
+        private final String errorMessage;
+        private final Long firstFailTime;
 
         public String getClientMsgId() {
             return clientMsgId;

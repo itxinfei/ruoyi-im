@@ -20,7 +20,6 @@ import com.ruoyi.im.vo.message.ImMessageReadDetailVO;
 import com.ruoyi.im.vo.message.ImMessageReadStatusVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,23 +40,26 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageReadServiceImpl.class);
 
-    @Autowired
-    private ImMessageReadMapper messageReadMapper;
+    private final ImMessageReadMapper messageReadMapper;
+    private final ImMessageMapper messageMapper;
+    private final ImConversationMapper conversationMapper;
+    private final ImConversationMemberMapper conversationMemberMapper;
+    private final ImUserMapper userMapper;
+    private final MessageEncryptionUtil encryptionUtil;
 
-    @Autowired
-    private ImMessageMapper messageMapper;
-
-    @Autowired
-    private ImConversationMapper conversationMapper;
-
-    @Autowired
-    private ImConversationMemberMapper conversationMemberMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Autowired
-    private MessageEncryptionUtil encryptionUtil;
+    public ImMessageReadServiceImpl(ImMessageReadMapper messageReadMapper,
+                                     ImMessageMapper messageMapper,
+                                     ImConversationMapper conversationMapper,
+                                     ImConversationMemberMapper conversationMemberMapper,
+                                     ImUserMapper userMapper,
+                                     MessageEncryptionUtil encryptionUtil) {
+        this.messageReadMapper = messageReadMapper;
+        this.messageMapper = messageMapper;
+        this.conversationMapper = conversationMapper;
+        this.conversationMemberMapper = conversationMemberMapper;
+        this.userMapper = userMapper;
+        this.encryptionUtil = encryptionUtil;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

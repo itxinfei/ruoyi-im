@@ -19,7 +19,6 @@ import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.constants.StatusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,23 +40,26 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageMentionServiceImpl.class);
 
-    @Autowired
-    private ImMessageMentionMapper mentionMapper;
+    private final ImMessageMentionMapper mentionMapper;
+    private final ImConversationMapper conversationMapper;
+    private final ImGroupMemberMapper groupMemberMapper;
+    private final ImConversationMemberMapper conversationMemberMapper;
+    private final ImUserMapper userMapper;
+    private final ImMessageMapper messageMapper;
 
-    @Autowired
-    private ImConversationMapper conversationMapper;
-
-    @Autowired
-    private ImGroupMemberMapper groupMemberMapper;
-
-    @Autowired
-    private ImConversationMemberMapper conversationMemberMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Autowired
-    private ImMessageMapper messageMapper;
+    public ImMessageMentionServiceImpl(ImMessageMentionMapper mentionMapper,
+                                        ImConversationMapper conversationMapper,
+                                        ImGroupMemberMapper groupMemberMapper,
+                                        ImConversationMemberMapper conversationMemberMapper,
+                                        ImUserMapper userMapper,
+                                        ImMessageMapper messageMapper) {
+        this.mentionMapper = mentionMapper;
+        this.conversationMapper = conversationMapper;
+        this.groupMemberMapper = groupMemberMapper;
+        this.conversationMemberMapper = conversationMemberMapper;
+        this.userMapper = userMapper;
+        this.messageMapper = messageMapper;
+    }
 
     @Override
     @Transactional

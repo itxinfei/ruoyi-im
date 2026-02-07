@@ -7,7 +7,6 @@ import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,14 +43,17 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
      */
     private static final Integer DEFAULT_RECALL_TIME_LIMIT = 5;
 
-    @Autowired
-    private ImRedisUtil redisUtil;
+    private final ImRedisUtil redisUtil;
+    private final ImSystemConfigMapper configMapper;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private ImSystemConfigMapper configMapper;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    public ImSystemConfigServiceImpl(ImRedisUtil redisUtil,
+                                      ImSystemConfigMapper configMapper,
+                                      ObjectMapper objectMapper) {
+        this.redisUtil = redisUtil;
+        this.configMapper = configMapper;
+        this.objectMapper = objectMapper;
+    }
 
     @PostConstruct
     public void init() {

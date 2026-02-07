@@ -1094,14 +1094,14 @@ onUnmounted(() => {
 .screenshot-mask {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dt-screenshot-mask);
   pointer-events: none;
 }
 
 .selection-border {
   position: absolute;
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.5);
+  border: 2px solid var(--dt-text-inverse);
+  box-shadow: 0 0 0 1px var(--dt-screenshot-border-shadow), 0 4px 20px var(--dt-screenshot-shadow-card);
   pointer-events: none;
 }
 
@@ -1110,8 +1110,8 @@ onUnmounted(() => {
   top: -30px;
   left: 0;
   padding: 4px 10px;
-  background: rgba(0, 0, 0, 0.85);
-  color: #fff;
+  background: var(--dt-screenshot-size-bg);
+  color: var(--dt-text-inverse);
   font-size: 12px;
   font-family: monospace;
   border-radius: var(--dt-radius-sm);
@@ -1122,9 +1122,9 @@ onUnmounted(() => {
   display: flex;
   gap: 8px;
   padding: 6px;
-  background: rgba(30, 30, 30, 0.95);
+  background: var(--dt-screenshot-toolbar-bg);
   border-radius: var(--dt-radius-md);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px var(--dt-screenshot-shadow-strong);
   pointer-events: auto;
 }
 
@@ -1134,8 +1134,8 @@ onUnmounted(() => {
   left: 50%;
   transform: translateX(-50%);
   padding: 12px 24px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
+  background: var(--dt-overlay-80);
+  color: var(--dt-text-inverse);
   font-size: 14px;
   border-radius: var(--dt-radius-3xl);
   pointer-events: none;
@@ -1146,14 +1146,14 @@ onUnmounted(() => {
   position: fixed;
   inset: 0;
   z-index: $z-tooltip;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--dt-overlay-80);
   user-select: none;
 }
 
 .editor-canvas-container {
   position: absolute;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 8px 40px rgba(0, 0, 0, 0.5);
+  background: var(--dt-text-inverse);
+  box-shadow: 0 0 0 1px var(--dt-screenshot-border-shadow), 0 8px 40px var(--dt-screenshot-shadow-card);
 }
 
 .editor-canvas {
@@ -1171,9 +1171,9 @@ onUnmounted(() => {
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  background: rgba(30, 30, 30, 0.95);
+  background: var(--dt-screenshot-toolbar-bg);
   border-radius: var(--dt-radius-lg);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px var(--dt-screenshot-shadow-strong);
 }
 
 .tool-group {
@@ -1185,7 +1185,7 @@ onUnmounted(() => {
 .toolbar-divider {
   width: 1px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--dt-screenshot-border-white);
   margin: 0 4px;
 }
 
@@ -1200,17 +1200,17 @@ onUnmounted(() => {
   border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all 0.2s;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--dt-screenshot-text-white);
 }
 
 .tool-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--dt-screenshot-hover-white);
+  color: var(--dt-text-inverse);
 }
 
 .tool-btn.active {
-  background: rgba(0, 137, 255, 0.3);
-  color: #0089FF;
+  background: var(--dt-screenshot-active-brand);
+  color: var(--dt-brand-color);
 }
 
 .tool-btn:disabled {
@@ -1224,30 +1224,30 @@ onUnmounted(() => {
 }
 
 .cancel-btn:hover {
-  background: rgba(255, 59, 48, 0.2);
-  color: #ff3b30;
+  background: var(--dt-screenshot-btn-cancel-bg);
+  color: var(--dt-error-color);
 }
 
 .save-btn {
-  background: #0089FF;
-  color: #fff;
+  background: var(--dt-brand-color);
+  color: var(--dt-text-inverse);
   padding: 0 16px;
   gap: 6px;
 }
 
 .save-btn:hover {
-  background: #0e5fd6;
+  background: var(--dt-brand-hover);
 }
 
 .sticker-btn {
-  background: rgba(255, 149, 0, 0.2);
-  color: #ff9500;
+  background: var(--dt-screenshot-btn-sticker-bg);
+  color: var(--dt-warning-color);
   padding: 0 12px;
   gap: 4px;
 }
 
 .sticker-btn:hover {
-  background: rgba(255, 149, 0, 0.3);
+  background: var(--dt-screenshot-btn-sticker-hover);
 }
 
 /* ==================== 颜色选择器 ==================== */
@@ -1266,8 +1266,8 @@ onUnmounted(() => {
 }
 
 .color-btn.active {
-  border-color: #fff;
-  box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.5);
+  border-color: var(--dt-text-inverse);
+  box-shadow: 0 0 0 2px var(--dt-screenshot-shadow-brand);
 }
 
 .custom-color {
@@ -1295,7 +1295,7 @@ onUnmounted(() => {
 
 .line-width-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--dt-screenshot-text-white-60);
 }
 
 .line-width-slider {
@@ -1303,7 +1303,7 @@ onUnmounted(() => {
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--dt-screenshot-slider-track);
   border-radius: var(--dt-radius-sm);
   outline: none;
 }
@@ -1313,14 +1313,14 @@ onUnmounted(() => {
   appearance: none;
   width: 14px;
   height: 14px;
-  background: #fff;
+  background: var(--dt-text-inverse);
   border-radius: var(--dt-radius-full);
   cursor: pointer;
 }
 
 .line-width-value {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--dt-white-85);
   min-width: 20px;
   text-align: center;
 }
@@ -1334,11 +1334,11 @@ onUnmounted(() => {
 .text-input {
   padding: 6px 10px;
   font-size: 14px;
-  border: 2px solid #0089FF;
+  border: 2px solid var(--dt-brand-color);
   border-radius: var(--dt-radius-sm);
   outline: none;
   min-width: 150px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--dt-overlay-white-95);
 }
 
 /* ==================== OCR 按钮 ==================== */
@@ -1403,13 +1403,13 @@ onUnmounted(() => {
   border: none;
   border-radius: var(--dt-radius-md);
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--dt-screenshot-text-white-60);
   transition: all 0.2s;
 }
 
 .ocr-close-btn:hover {
-  background: rgba(255, 59, 48, 0.2);
-  color: #ff3b30;
+  background: var(--dt-screenshot-btn-cancel-bg);
+  color: var(--dt-error-color);
 }
 
 .ocr-close-btn svg {

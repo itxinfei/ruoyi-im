@@ -664,7 +664,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 0 20px var(--dt-black-02);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -705,11 +705,11 @@ onMounted(() => {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--dt-scrollbar-thumb-bg);
     border-radius: var(--dt-radius-sm);
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: var(--dt-scrollbar-thumb-hover-bg);
     }
   }
 }
@@ -743,7 +743,7 @@ onMounted(() => {
   background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
+  box-shadow: 0 2px 8px var(--dt-brand-extra-light);
 }
 
 .nav-item.active::before {
@@ -796,7 +796,7 @@ onMounted(() => {
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-md);
   padding: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px var(--dt-black-04);
 }
 
 .storage-header {
@@ -824,7 +824,7 @@ onMounted(() => {
   background: var(--dt-border-color);
   border-radius: var(--dt-radius-sm);
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 3px var(--dt-black-10);
 }
 
 .storage-fill {
@@ -832,7 +832,7 @@ onMounted(() => {
   background: linear-gradient(90deg, var(--dt-brand-color), var(--dt-brand-light));
   border-radius: var(--dt-radius-sm);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 8px rgba(0, 137, 255, 0.3);
+  box-shadow: 0 0 8px var(--dt-brand-30);
 }
 
 .storage-text {
@@ -860,7 +860,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 8px var(--dt-black-02);
   z-index: 10;
 }
 
@@ -911,13 +911,13 @@ onMounted(() => {
   color: var(--dt-text-primary);
   outline: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px var(--dt-black-04);
 }
 
 .search-input:focus {
   background: var(--dt-bg-card);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 0 0 3px var(--dt-brand-lighter), 0 2px 8px rgba(0, 137, 255, 0.15);
+  box-shadow: 0 0 0 3px var(--dt-brand-lighter), 0 2px 8px var(--dt-brand-extra-light);
   width: 320px;
 }
 
@@ -942,7 +942,7 @@ onMounted(() => {
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-xl);
   padding: 2px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 3px var(--dt-black-04);
 }
 
 .toggle-btn {
@@ -962,13 +962,13 @@ onMounted(() => {
 
 .toggle-btn:hover {
   color: var(--dt-text-secondary);
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--dt-black-02);
 }
 
 .toggle-btn.active {
   background: var(--dt-bg-card);
   color: var(--dt-brand-color);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px var(--dt-black-10);
   transform: translateY(-1px);
 }
 
@@ -985,7 +985,7 @@ onMounted(() => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.2);
+  box-shadow: 0 4px 12px var(--dt-brand-30);
   position: relative;
   overflow: hidden;
 }
@@ -993,7 +993,7 @@ onMounted(() => {
 .new-btn:hover {
   background: linear-gradient(135deg, var(--dt-brand-hover), var(--dt-brand-color));
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 137, 255, 0.3);
+  box-shadow: 0 6px 16px var(--dt-brand-30);
 }
 
 .new-btn:active {
@@ -1007,7 +1007,7 @@ onMounted(() => {
   left: 50%;
   width: 0;
   height: 0;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--dt-white-20);
   border-radius: var(--dt-radius-full);
   transform: translate(-50%, -50%);
   transition: width 0.6s, height 0.6s;
@@ -1043,7 +1043,7 @@ onMounted(() => {
 .upload-area:hover {
   border-color: var(--dt-brand-color);
   background: var(--dt-brand-bg);
-  box-shadow: 0 4px 16px rgba(0, 137, 255, 0.1);
+  box-shadow: 0 4px 16px var(--dt-brand-extra-light);
   transform: translateY(-2px);
 }
 
@@ -1126,14 +1126,14 @@ onMounted(() => {
 .files-table-wrapper {
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px var(--dt-black-04);
   border: 1px solid var(--dt-border-color);
   overflow: hidden;
   transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .files-table-wrapper:hover {
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 24px var(--dt-black-08);
 }
 
 .files-table {
@@ -1145,7 +1145,7 @@ onMounted(() => {
 .files-table thead {
   background: var(--dt-bg-body);
   border-bottom: 1px solid var(--dt-border-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px var(--dt-black-02);
 }
 
 .files-table th {
@@ -1190,7 +1190,7 @@ onMounted(() => {
 .files-table tbody tr:hover {
   background: var(--dt-bg-hover);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px var(--dt-black-04);
 }
 
 .files-table tbody tr:last-child {
@@ -1226,7 +1226,7 @@ onMounted(() => {
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px var(--dt-black-08);
   position: relative;
   overflow: hidden;
 }
@@ -1238,7 +1238,7 @@ onMounted(() => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, var(--dt-white-20), transparent);
   transition: left 0.6s ease;
 }
 
@@ -1267,13 +1267,13 @@ onMounted(() => {
 }
 
 .icon-image {
-  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
-  color: #a855f7;
+  background: linear-gradient(135deg, var(--dt-purple-gradient-start), var(--dt-purple-gradient-end));
+  color: var(--dt-purple-color);
 }
 
 .file-icon:hover {
   transform: scale(1.05) rotate(2deg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px var(--dt-black-12);
 }
 
 .file-name {
@@ -1320,7 +1320,7 @@ onMounted(() => {
   font-size: 12px;
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px var(--dt-black-10);
   position: relative;
   overflow: hidden;
 }
@@ -1332,7 +1332,7 @@ onMounted(() => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, var(--dt-white-20), transparent);
   transition: left 0.6s ease;
 }
 
@@ -1342,7 +1342,7 @@ onMounted(() => {
 
 .file-row:hover .owner-avatar {
   transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px var(--dt-black-15);
 }
 
 .file-time {
@@ -1370,7 +1370,7 @@ onMounted(() => {
   padding: 6px 8px;
   border-radius: var(--dt-radius-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px var(--dt-black-04);
   font-size: 16px;
   display: inline-flex;
   align-items: center;
@@ -1388,7 +1388,7 @@ onMounted(() => {
   color: var(--dt-brand-color);
   background: var(--dt-brand-bg);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
+  box-shadow: 0 2px 8px var(--dt-brand-extra-light);
 }
 
 .pagination {
@@ -1401,7 +1401,7 @@ onMounted(() => {
   color: var(--dt-text-tertiary);
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-lg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px var(--dt-black-04);
   border: 1px solid var(--dt-border-color);
 }
 
@@ -1420,14 +1420,14 @@ onMounted(() => {
   font-size: 13px;
   border-radius: var(--dt-radius-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px var(--dt-black-04);
 }
 
 .page-btn:hover:not([disabled]) {
   color: var(--dt-brand-color);
   background: var(--dt-brand-bg);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 2px 6px rgba(0, 137, 255, 0.15);
+  box-shadow: 0 2px 6px var(--dt-brand-extra-light);
   transform: translateY(-1px);
 }
 
@@ -1480,7 +1480,7 @@ onMounted(() => {
 
 .dark .search-input:focus {
   background: var(--dt-bg-card-dark);
-  box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1), 0 2px 8px rgba(0, 137, 255, 0.15);
+  box-shadow: 0 0 0 3px var(--dt-brand-light), 0 2px 8px var(--dt-brand-extra-light);
 }
 
 .dark .storage-info {
@@ -1497,7 +1497,7 @@ onMounted(() => {
 }
 
 .dark .files-table th::after {
-  background: linear-gradient(90deg, transparent, rgba(0, 137, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, var(--dt-brand-30), transparent);
 }
 
 .dark .files-table tbody tr:hover {
@@ -1518,21 +1518,21 @@ onMounted(() => {
 
 .dark .toggle-btn {
   color: var(--dt-text-quaternary-dark);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--dt-white-05);
 }
 
 .dark .toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--dt-white-10);
 }
 
 .dark .toggle-btn.active {
   background: var(--dt-bg-card-dark);
   color: var(--dt-brand-color);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px var(--dt-black-20);
 }
 
 .dark .action-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--dt-white-05);
   border-color: var(--dt-border-dark);
   color: var(--dt-text-quaternary-dark);
 }
@@ -1546,11 +1546,11 @@ onMounted(() => {
 .dark .pagination {
   background: var(--dt-bg-card-dark);
   border-color: var(--dt-border-dark);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--dt-black-10);
 }
 
 .dark .page-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--dt-white-05);
   border-color: var(--dt-border-dark);
   color: var(--dt-text-tertiary-dark);
 }
@@ -1562,14 +1562,14 @@ onMounted(() => {
 }
 
 .dark .upload-area {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--dt-white-03);
   border-color: var(--dt-border-dark);
 }
 
 .dark .upload-area:hover {
   background: var(--dt-brand-bg-dark);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 4px 16px rgba(0, 137, 255, 0.1);
+  box-shadow: 0 4px 16px var(--dt-brand-extra-light);
 }
 
 /* 应用动画效果 - 使用全局动画 */

@@ -4,7 +4,6 @@ import com.ruoyi.im.mapper.ImSensitiveWordMapper;
 import com.ruoyi.im.service.ISensitiveWordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -21,8 +20,11 @@ public class SensitiveWordServiceImpl implements ISensitiveWordService {
 
     private static final Logger logger = LoggerFactory.getLogger(SensitiveWordServiceImpl.class);
 
-    @Autowired
-    private ImSensitiveWordMapper sensitiveWordMapper;
+    private final ImSensitiveWordMapper sensitiveWordMapper;
+
+    public SensitiveWordServiceImpl(ImSensitiveWordMapper sensitiveWordMapper) {
+        this.sensitiveWordMapper = sensitiveWordMapper;
+    }
 
     /**
      * 敏感词字典（DFA模型）

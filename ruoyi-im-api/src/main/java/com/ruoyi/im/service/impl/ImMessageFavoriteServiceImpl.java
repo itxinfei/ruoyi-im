@@ -13,7 +13,6 @@ import com.ruoyi.im.service.ImMessageFavoriteService;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.vo.favorite.FavoriteMessageVO;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,17 +28,20 @@ import java.util.List;
 @Service
 public class ImMessageFavoriteServiceImpl implements ImMessageFavoriteService {
 
-    @Autowired
-    private ImMessageFavoriteMapper favoriteMapper;
+    private final ImMessageFavoriteMapper favoriteMapper;
+    private final ImMessageMapper messageMapper;
+    private final ImConversationMapper conversationMapper;
+    private final MessageEncryptionUtil encryptionUtil;
 
-    @Autowired
-    private ImMessageMapper messageMapper;
-
-    @Autowired
-    private ImConversationMapper conversationMapper;
-
-    @Autowired
-    private MessageEncryptionUtil encryptionUtil;
+    public ImMessageFavoriteServiceImpl(ImMessageFavoriteMapper favoriteMapper,
+                                        ImMessageMapper messageMapper,
+                                        ImConversationMapper conversationMapper,
+                                        MessageEncryptionUtil encryptionUtil) {
+        this.favoriteMapper = favoriteMapper;
+        this.messageMapper = messageMapper;
+        this.conversationMapper = conversationMapper;
+        this.encryptionUtil = encryptionUtil;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

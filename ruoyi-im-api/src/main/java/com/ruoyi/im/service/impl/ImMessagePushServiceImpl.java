@@ -19,7 +19,6 @@ import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -39,29 +38,32 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    private ImMessageService imMessageService;
+    private final ImMessageService imMessageService;
+    private final ImConversationMemberService conversationMemberService;
+    private final ImConversationService conversationService;
+    private final ImConversationMapper imConversationMapper;
+    private final ImGroupMemberService imGroupMemberService;
+    private final ImRedisUtil imRedisUtil;
+    private final IOfflineMessageService offlineMessageService;
+    private final ImMessageMapper imMessageMapper;
 
-    @Autowired
-    private ImConversationMemberService conversationMemberService;
-
-    @Autowired
-    private ImConversationService conversationService;
-
-    @Autowired
-    private ImConversationMapper imConversationMapper;
-
-    @Autowired
-    private ImGroupMemberService imGroupMemberService;
-
-    @Autowired
-    private ImRedisUtil imRedisUtil;
-
-    @Autowired
-    private IOfflineMessageService offlineMessageService;
-
-    @Autowired
-    private ImMessageMapper imMessageMapper;
+    public ImMessagePushServiceImpl(ImMessageService imMessageService,
+                                    ImConversationMemberService conversationMemberService,
+                                    ImConversationService conversationService,
+                                    ImConversationMapper imConversationMapper,
+                                    ImGroupMemberService imGroupMemberService,
+                                    ImRedisUtil imRedisUtil,
+                                    IOfflineMessageService offlineMessageService,
+                                    ImMessageMapper imMessageMapper) {
+        this.imMessageService = imMessageService;
+        this.conversationMemberService = conversationMemberService;
+        this.conversationService = conversationService;
+        this.imConversationMapper = imConversationMapper;
+        this.imGroupMemberService = imGroupMemberService;
+        this.imRedisUtil = imRedisUtil;
+        this.offlineMessageService = offlineMessageService;
+        this.imMessageMapper = imMessageMapper;
+    }
 
     @Override
     public boolean pushToUser(Long userId, Object message) {
