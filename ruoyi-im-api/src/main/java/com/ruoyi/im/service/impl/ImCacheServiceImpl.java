@@ -170,4 +170,14 @@ public class ImCacheServiceImpl implements ImCacheService {
         // 清理用户相关缓存
         deleteByPattern("user:*");
     }
+
+    @Override
+    public void warmup() {
+        // TODO: 缓存预热，预加载热点数据
+        // 例如：
+        // 1. 系统配置
+        // 2. 热门群组列表
+        // 3. 最近活跃用户
+        // 注意：此方法在启动后异步调用，避免阻塞启动流程
+    }
 }

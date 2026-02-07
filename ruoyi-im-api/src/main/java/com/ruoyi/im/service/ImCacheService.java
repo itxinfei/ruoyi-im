@@ -202,4 +202,10 @@ public interface ImCacheService {
      * 用于测试环境重启时清理旧数据
      */
     void clearAll();
+
+    /**
+     * 缓存预热
+     * 在清理缓存后预加载热点数据，避免首次请求性能问题
+     */
+    void warmup();
 }

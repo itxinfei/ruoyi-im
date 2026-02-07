@@ -54,4 +54,18 @@ public class AppConfig {
     public boolean isNonProd() {
         return isDev() || isTest();
     }
+
+    /**
+     * 启动时是否清理缓存
+     * 默认关闭，仅在显式配置为 true 时才清理
+     */
+    private boolean clearCacheOnStartup = false;
+
+    public boolean isClearCacheOnStartup() {
+        return clearCacheOnStartup;
+    }
+
+    public void setClearCacheOnStartup(boolean clearCacheOnStartup) {
+        this.clearCacheOnStartup = clearCacheOnStartup;
+    }
 }
