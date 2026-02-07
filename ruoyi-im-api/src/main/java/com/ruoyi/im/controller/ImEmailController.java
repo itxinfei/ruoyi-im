@@ -715,8 +715,9 @@ public class ImEmailController {
         Long userId = SecurityUtils.getLoginUserId();
 
         // 渲染模板内容
-        String content = emailTemplateService.renderTemplate(templateCode,
-                (Map<String, Object>) request.get("variables"));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> variables = (Map<String, Object>) request.get("variables");
+        String content = emailTemplateService.renderTemplate(templateCode, variables);
         String subject = (String) request.get("subject");
 
         @SuppressWarnings("unchecked")

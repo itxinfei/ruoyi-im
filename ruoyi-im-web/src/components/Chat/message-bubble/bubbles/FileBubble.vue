@@ -1,58 +1,31 @@
 <template>
-  <div
-    class="file-bubble"
-    :class="{ 'is-downloading': isDownloading, 'is-uploading': isUploading }"
-    @click="handleClick"
-  >
+  <div class="file-bubble" :class="{ 'is-downloading': isDownloading, 'is-uploading': isUploading }"
+    @click="handleClick">
     <!-- 文件图标 -->
     <div class="file-icon">
-      <el-icon><Document /></el-icon>
+      <el-icon>
+        <Document />
+      </el-icon>
 
       <!-- 下载进度环 -->
-      <div
-        v-if="isDownloading"
-        class="progress-ring"
-      >
+      <div v-if="isDownloading" class="progress-ring">
         <svg viewBox="0 0 36 36">
-          <path
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            fill="none"
-            stroke="rgba(0, 137, 255, 0.15)"
-            stroke-width="3"
-          />
-          <path
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            fill="none"
-            stroke="var(--dt-brand-color)"
-            stroke-width="3"
-            :stroke-dasharray="`${downloadProgress}, 100`"
-            stroke-linecap="round"
-          />
+          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+            stroke="rgba(0, 137, 255, 0.15)" stroke-width="3" />
+          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+            stroke="var(--dt-brand-color)" stroke-width="3" :stroke-dasharray="`${downloadProgress}, 100`"
+            stroke-linecap="round" />
         </svg>
       </div>
 
       <!-- 上传进度环 -->
-      <div
-        v-if="isUploading"
-        class="progress-ring"
-      >
+      <div v-if="isUploading" class="progress-ring">
         <svg viewBox="0 0 36 36">
-          <path
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            fill="none"
-            stroke="rgba(0, 137, 255, 0.15)"
-            stroke-width="3"
-          />
-          <path
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            fill="none"
-            stroke="var(--dt-brand-color)"
-            stroke-width="3"
-            stroke-dasharray="100"
-            stroke-dashoffset="25"
-            stroke-linecap="round"
-            class="upload-spinner"
-          />
+          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+            stroke="rgba(0, 137, 255, 0.15)" stroke-width="3" />
+          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+            stroke="var(--dt-brand-color)" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="25"
+            stroke-linecap="round" class="upload-spinner" />
         </svg>
       </div>
     </div>
@@ -80,10 +53,7 @@
       <el-icon v-if="!isUploading && !isDownloading">
         <Download />
       </el-icon>
-      <el-icon
-        v-else
-        class="is-spinning"
-      >
+      <el-icon v-else class="is-spinning">
         <Loading />
       </el-icon>
     </div>
@@ -124,7 +94,7 @@ const fileUrl = computed(() => {
 })
 
 const handleClick = async () => {
-  if (isDownloading.value || isUploading.value) {return}
+  if (isDownloading.value || isUploading.value) { return }
   if (!fileUrl.value) {
     emit('download', parsedContent.value)
     return
@@ -169,24 +139,24 @@ const handleClick = async () => {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/design-tokens.scss' as *;
+// 文件气泡组件 - 野火IM风格
 
 .file-bubble {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-md);
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all 0.2s;
   min-width: 240px;
   max-width: 400px;
 
   &:hover {
-    border-color: var(--dt-brand-color);
-    box-shadow: var(--dt-shadow-card);
+    border-color: #4168e0;
+    box-shadow: 0 2px 8px rgba(65, 104, 224, 0.15);
 
     .file-action {
       opacity: 1;
@@ -199,8 +169,8 @@ const handleClick = async () => {
   }
 
   &.is-downloading {
-    border-color: var(--dt-brand-color);
-    background: var(--dt-brand-bg);
+    border-color: #4168e0;
+    background: rgba(65, 104, 224, 0.05);
     cursor: wait;
 
     .file-icon {
@@ -224,8 +194,8 @@ const handleClick = async () => {
 
   .el-icon {
     font-size: 32px;
-    color: var(--dt-brand-color);
-    transition: transform var(--dt-transition-base);
+    color: #4168e0;
+    transition: transform 0.2s;
   }
 
   .progress-ring {
@@ -257,16 +227,16 @@ const handleClick = async () => {
 
 .file-name {
   font-weight: 600;
-  font-size: var(--dt-font-size-base);
-  color: var(--dt-text-primary);
+  font-size: 14px;
+  color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .file-meta {
-  font-size: var(--dt-font-size-xs);
-  color: var(--dt-text-tertiary);
+  font-size: 12px;
+  color: #999;
 }
 
 .file-action {
@@ -275,9 +245,9 @@ const handleClick = async () => {
   justify-content: center;
   width: 28px;
   height: 28px;
-  color: var(--dt-text-tertiary);
+  color: #999;
   opacity: 0.6;
-  transition: all var(--dt-transition-base);
+  transition: all 0.2s;
   transform: translateX(4px);
   flex-shrink: 0;
 
@@ -287,8 +257,53 @@ const handleClick = async () => {
 
   &.is-spinning .el-icon {
     animation: spin 1s linear infinite;
-    color: var(--dt-brand-color);
+    color: #4168e0;
   }
 }
 
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// 暗色模式
+:global(.dark) {
+  .file-bubble {
+    background: #1e1e1e;
+    border-color: #374151;
+
+    &:hover {
+      border-color: #4168e0;
+    }
+
+    &.is-downloading {
+      background: rgba(65, 104, 224, 0.1);
+    }
+  }
+
+  .file-name {
+    color: #e8e8e8;
+  }
+
+  .file-meta {
+    color: #6b7280;
+  }
+}
 </style>

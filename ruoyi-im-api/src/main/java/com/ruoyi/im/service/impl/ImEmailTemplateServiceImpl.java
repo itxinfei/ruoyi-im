@@ -162,7 +162,9 @@ public class ImEmailTemplateServiceImpl implements ImEmailTemplateService {
             JSONArray array = JSON.parseArray(variablesJson);
             for (Object item : array) {
                 if (item instanceof JSONObject) {
-                    result.add((Map<String, Object>) ((JSONObject) item).toJavaObject(Map.class));
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> map = (Map<String, Object>) ((JSONObject) item).toJavaObject(Map.class);
+                    result.add(map);
                 }
             }
             return result;

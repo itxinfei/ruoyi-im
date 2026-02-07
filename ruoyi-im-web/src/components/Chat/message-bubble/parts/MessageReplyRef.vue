@@ -1,30 +1,12 @@
 <template>
-  <div
-    class="message-reply-ref"
-    @click.stop="handleClick"
-  >
+  <div class="message-reply-ref" @click.stop="handleClick">
     <div class="ref-header">
       <span class="ref-icon">
-        <span
-          v-if="replyType === 'IMAGE'"
-          class="material-icons-outlined"
-        >image</span>
-        <span
-          v-else-if="replyType === 'FILE'"
-          class="material-icons-outlined"
-        >insert_drive_file</span>
-        <span
-          v-else-if="replyType === 'VIDEO'"
-          class="material-icons-outlined"
-        >videocam</span>
-        <span
-          v-else-if="replyType === 'VOICE' || replyType === 'AUDIO'"
-          class="material-icons-outlined"
-        >mic</span>
-        <span
-          v-else
-          class="material-icons-outlined"
-        >format_quote</span>
+        <span v-if="replyType === 'IMAGE'" class="material-icons-outlined">image</span>
+        <span v-else-if="replyType === 'FILE'" class="material-icons-outlined">insert_drive_file</span>
+        <span v-else-if="replyType === 'VIDEO'" class="material-icons-outlined">videocam</span>
+        <span v-else-if="replyType === 'VOICE' || replyType === 'AUDIO'" class="material-icons-outlined">mic</span>
+        <span v-else class="material-icons-outlined">format_quote</span>
       </span>
       <span class="ref-user">{{ reply.senderName }}</span>
     </div>
@@ -73,28 +55,26 @@ const handleClick = () => {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/design-tokens.scss' as *;
+// 引用消息组件 - 野火IM风格
 
 .message-reply-ref {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.4);
-  border-left: 3px solid var(--dt-brand-color);
+  background: rgba(0, 0, 0, 0.03);
+  border-left: 3px solid #4168e0; // 野火IM蓝
   padding: 8px 12px;
   margin: -6px -8px 8px -8px;
-  border-radius: var(--dt-radius-sm);
-  font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-secondary);
+  border-radius: 4px;
+  font-size: 13px;
+  color: #666;
   cursor: pointer;
   overflow: hidden;
   user-select: none;
-  transition: all var(--dt-transition-base);
-  animation: slideInDown 0.25s var(--dt-ease-out);
+  transition: all 0.2s;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.6);
-    border-left-color: var(--dt-brand-hover);
-    box-shadow: 0 2px 6px rgba(0, 137, 255, 0.1);
+    background: rgba(65, 104, 224, 0.08);
+    border-left-color: #3457c7;
 
     .ref-icon {
       transform: scale(1.05);
@@ -119,10 +99,11 @@ const handleClick = () => {
   justify-content: center;
   width: 16px;
   height: 16px;
-  background: var(--dt-brand-color);
+  background: #4168e0;
   color: #fff;
-  border-radius: var(--dt-radius-sm);
+  border-radius: 3px;
   font-size: 11px;
+  transition: transform 0.2s;
 
   .material-icons-outlined {
     font-size: 13px;
@@ -131,59 +112,53 @@ const handleClick = () => {
 
 .ref-user {
   font-weight: 600;
-  color: var(--dt-text-primary);
-  font-size: var(--dt-font-size-sm);
+  color: #333;
+  font-size: 13px;
 }
 
 .ref-content {
-  font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-secondary);
+  font-size: 13px;
+  color: #666;
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
 .ref-type-text {
-  color: var(--dt-brand-color);
+  color: #4168e0;
   font-weight: 500;
 }
 
 .ref-text {
-  color: var(--dt-text-secondary);
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  color: #666;
 }
 
 // 暗色模式适配
 :global(.dark) {
   .message-reply-ref {
     background: rgba(255, 255, 255, 0.05);
-    border-left-color: var(--dt-brand-color);
+    border-left-color: #4168e0;
 
     .ref-user {
-      color: var(--dt-text-primary);
+      color: #e8e8e8;
     }
 
     .ref-content {
-      color: var(--dt-text-secondary);
+      color: #a0a8b8;
     }
 
     &:hover {
-      background: rgba(0, 137, 255, 0.15);
-      border-left-color: var(--dt-brand-hover);
+      background: rgba(65, 104, 224, 0.15);
+      border-left-color: #5a7ce9;
     }
+  }
+
+  .ref-type-text {
+    color: #6b8cff;
   }
 }
 </style>

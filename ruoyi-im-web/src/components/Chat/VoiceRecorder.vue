@@ -1,34 +1,18 @@
 <template>
   <!-- 按住说话模式 -->
-  <div
-    class="voice-recorder-wrapper"
-    :class="{ 'is-recording': isRecording }"
-    @mousedown="handleStartRecord"
-    @mouseup="handleEndRecord"
-    @mouseleave="handleCancel"
-  >
+  <div class="voice-recorder-wrapper" :class="{ 'is-recording': isRecording }" @mousedown="handleStartRecord"
+    @mouseup="handleEndRecord" @mouseleave="handleCancel">
     <!-- 录音引导 -->
-    <div
-      v-if="!isRecording"
-      class="voice-guide"
-    >
+    <div v-if="!isRecording" class="voice-guide">
       <span class="material-icons-outlined mic-icon">mic</span>
       <span class="guide-text">按住 说话</span>
     </div>
 
     <!-- 录音中状态 -->
-    <div
-      v-else
-      class="recording-state"
-    >
+    <div v-else class="recording-state">
       <!-- 简化的录音动画波形 -->
       <div class="recording-waveform">
-        <span
-          v-for="index in 5"
-          :key="index"
-          class="wave-bar"
-          :style="{ animationDelay: `${index * 0.1}s` }"
-        />
+        <span v-for="index in 5" :key="index" class="wave-bar" :style="{ animationDelay: `${index * 0.1}s` }" />
       </div>
 
       <!-- 录音时长 -->
@@ -37,10 +21,7 @@
       </div>
 
       <!-- 取消按钮 -->
-      <div
-        class="cancel-btn"
-        @click.stop="handleCancel"
-      >
+      <div class="cancel-btn" @click.stop="handleCancel">
         <span class="material-icons-outlined">cancel</span>
       </div>
     </div>
@@ -159,33 +140,35 @@ onUnmounted(() => {
   justify-content: center;
   padding: 16px;
   background: #fff;
-  border-radius: var(--dt-radius-md);
+  border-radius: 8px; // 野火IM圆角
   user-select: none;
   cursor: pointer;
-  transition: all 0.15s ease;
-  border: 1px solid #e8e8e8;
+  transition: all 0.2s ease;
+  border: 1px solid #e0e0e0; // 野火IM边框
 
   &:hover {
-    background: #fafafa;
+    background: #f5f5f5;
+    border-color: #4168e0; // 野火IM蓝
   }
 
   &.is-recording {
     background: #fff1f0;
-    border-color: #ffccc7;
+    border-color: #ff6b6b;
     cursor: default;
   }
 
   .dark & {
-    background: #2a2a2a;
-    border-color: rgba(255, 255, 255, 0.1);
+    background: #1e1e1e;
+    border-color: #374151;
 
     &:hover {
-      background: #333;
+      background: #2d2d2d;
+      border-color: #4168e0;
     }
 
     &.is-recording {
-      background: rgba(255, 77, 79, 0.1);
-      border-color: rgba(255, 77, 79, 0.3);
+      background: rgba(255, 107, 107, 0.1);
+      border-color: rgba(255, 107, 107, 0.4);
     }
   }
 
@@ -198,12 +181,28 @@ onUnmounted(() => {
 
     .mic-icon {
       font-size: 28px;
-      color: #1890ff;
+      color: #4168e0; // 野火IM蓝
+      animation: micPulse 2s ease-in-out infinite;
     }
 
     .guide-text {
       font-size: 13px;
+      font-weight: 500;
     }
+  }
+}
+
+@keyframes micPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
   }
 }
 
@@ -224,61 +223,85 @@ onUnmounted(() => {
 
   .wave-bar {
     width: 4px;
-    background: #ff4d4f;
-    border-radius: var(--dt-radius-sm);
-    animation: recordingWave 0.6s ease-in-out infinite;
+    background: linear-gradient(180deg, #ff6b6b, #ff4757); // 渐变红色
+    border-radius: 2px;
+    animation: recordingWave 0.5s ease-in-out infinite;
     height: 8px;
+    transform-origin: center;
 
     @keyframes recordingWave {
 
       0%,
       100% {
         height: 8px;
+        opacity: 0.7;
       }
 
       50% {
-        height: 24px;
+        height: 28px;
+        opacity: 1;
       }
     }
   }
 }
 
 .recording-time {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: #ff4d4f;
+  color: #ff4757;
+  letter-spacing: 1px;
 }
 
 .cancel-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #f5f5f5;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &::before {
+    content: '松开取消';
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #999;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
 
   &:hover {
-    background: #ffe6e6;
+    background: #ffe0e0;
+    transform: scale(1.1);
+
+    &::before {
+      opacity: 1;
+    }
 
     .material-icons-outlined {
-      color: #ff4d4f;
+      color: #ff4757;
     }
   }
 
   .material-icons-outlined {
-    font-size: 18px;
+    font-size: 20px;
     color: #999;
+    transition: color 0.2s;
   }
 
   .dark & {
     background: rgba(255, 255, 255, 0.08);
 
     &:hover {
-      background: rgba(255, 77, 79, 0.2);
+      background: rgba(255, 71, 87, 0.2);
     }
   }
 }

@@ -838,20 +838,76 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 }
 
 // ============================================================================
-// 消息高亮动画
+// 消息高亮动画 - 野火IM风格
 // ============================================================================
 .message-wrapper {
   &[data-id] {
-    transition: background var(--dt-transition-fast);
+    transition: background 0.2s;
   }
 }
 
+// 普通高亮（滚动定位）
 .highlight-msg-active {
   animation: highlightPulseBg 1s ease-out;
 }
 
-// 消息引用跳转高亮（3次黄色闪烁）
+// 消息引用跳转高亮（3次闪烁）
 .message-highlight-flash {
   animation: messageHighlightFlash 1.5s ease-in-out;
+}
+
+// 搜索结果高亮
+.search-highlight {
+  animation: searchHighlight 2s ease-out;
+}
+
+// 动画定义
+@keyframes highlightPulseBg {
+  0% {
+    background: rgba(65, 104, 224, 0.2);
+  }
+
+  // 野火蓝
+  100% {
+    background: transparent;
+  }
+}
+
+@keyframes messageHighlightFlash {
+
+  0%,
+  20%,
+  40%,
+  60%,
+  80% {
+    background: rgba(255, 235, 59, 0.4);
+  }
+
+  // 黄色闪烁
+  10%,
+  30%,
+  50%,
+  70%,
+  90%,
+  100% {
+    background: transparent;
+  }
+}
+
+@keyframes searchHighlight {
+  0% {
+    background: rgba(65, 104, 224, 0.3);
+    box-shadow: 0 0 0 2px rgba(65, 104, 224, 0.3);
+  }
+
+  50% {
+    background: rgba(65, 104, 224, 0.15);
+    box-shadow: 0 0 0 4px rgba(65, 104, 224, 0.1);
+  }
+
+  100% {
+    background: transparent;
+    box-shadow: none;
+  }
 }
 </style>

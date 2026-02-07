@@ -240,33 +240,45 @@ function escapeRegExp(string) {
 .text-content {
   word-break: break-all;
   white-space: pre-wrap;
-  line-height: 1.5; // 优化：钉钉风格 1.5 行高
-  font-size: var(--dt-font-size-base);
+  line-height: 1.5;
+  font-size: 14px;
 
-  // @提及高亮样式 - 优化：更轻盈的视觉效果
+  // 链接样式 - 野火IM风格
+  :deep(a) {
+    color: #4168e0;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s;
+
+    &:hover {
+      border-bottom-color: #4168e0;
+    }
+  }
+
+  // @提及高亮样式 - 野火IM风格
   :deep(.mention-highlight) {
-    color: var(--dt-brand-color);
+    color: #4168e0;
     font-weight: 500;
-    background: rgba(0, 137, 255, 0.08); // 优化：降低背景透明度
-    padding: 1px 4px; // 优化：更紧凑的边距
+    background: rgba(65, 104, 224, 0.1);
+    padding: 1px 4px;
     border-radius: 3px;
     cursor: pointer;
     margin: 0 1px;
-    transition: all var(--dt-transition-fast);
+    transition: all 0.2s;
 
     &:hover {
-      background: rgba(0, 137, 255, 0.15);
+      background: rgba(65, 104, 224, 0.2);
       text-decoration: underline;
     }
 
-    // 提及当前用户时
+    // 提及当前用户时 - 红色高亮
     &.is-current-user {
-      background: rgba(255, 77, 79, 0.1);
-      color: #ff4d4f;
+      background: rgba(255, 71, 87, 0.1);
+      color: #ff4757;
       font-weight: 600;
 
       &:hover {
-        background: rgba(255, 77, 79, 0.2);
+        background: rgba(255, 71, 87, 0.2);
       }
     }
   }
@@ -275,7 +287,7 @@ function escapeRegExp(string) {
 .edited-tag {
   margin-left: 4px;
   font-size: 11px;
-  color: var(--dt-text-quaternary);
+  color: #999;
 }
 
 .link-previews {
@@ -306,32 +318,45 @@ function escapeRegExp(string) {
   gap: 2px;
   margin-top: 4px;
   padding: 2px 6px;
-  background: var(--dt-brand-bg);
-  border-radius: var(--dt-radius-sm);
+  background: rgba(65, 104, 224, 0.1);
+  border-radius: 4px;
   font-size: 11px;
-  color: var(--dt-brand-color);
+  color: #4168e0;
 }
 
 // 暗色模式适配
 :global(.dark) {
   .text-content {
-    :deep(.mention-highlight) {
-      background: rgba(0, 137, 255, 0.2);
-      color: #4da6ff;
+    :deep(a) {
+      color: #6b8cff;
 
       &:hover {
-        background: rgba(0, 137, 255, 0.3);
+        border-bottom-color: #6b8cff;
+      }
+    }
+
+    :deep(.mention-highlight) {
+      background: rgba(65, 104, 224, 0.25);
+      color: #6b8cff;
+
+      &:hover {
+        background: rgba(65, 104, 224, 0.35);
       }
 
       &.is-current-user {
-        background: rgba(255, 77, 79, 0.25);
+        background: rgba(255, 71, 87, 0.25);
         color: #ff7875;
 
         &:hover {
-          background: rgba(255, 77, 79, 0.35);
+          background: rgba(255, 71, 87, 0.35);
         }
       }
     }
+  }
+
+  .message-pinned-badge {
+    background: rgba(65, 104, 224, 0.2);
+    color: #6b8cff;
   }
 }
 </style>

@@ -1,84 +1,46 @@
 /**
- * 通用右键菜单组件
- *
- * 特性：
- * - 配置驱动：菜单项由数组定义
- * - 边界智能检测：自动反转方向防止超出视口
- * - 键盘导航：↑↓选择，Enter确认，Esc关闭
- * - 图标支持：Material Icons
- * - 分组分隔线：support divider
- * - 禁用状态：support disabled
- * - 快捷键提示：support shortcut 显示
- * - 暗色模式：自动适配
- */
+* 通用右键菜单组件
+*
+* 特性：
+* - 配置驱动：菜单项由数组定义
+* - 边界智能检测：自动反转方向防止超出视口
+* - 键盘导航：↑↓选择，Enter确认，Esc关闭
+* - 图标支持：Material Icons
+* - 分组分隔线：support divider
+* - 禁用状态：support disabled
+* - 快捷键提示：support shortcut 显示
+* - 暗色模式：自动适配
+*/
 <template>
   <Teleport to="body">
     <Transition name="context-menu-fade">
-      <div
-        v-if="computedShow"
-        ref="menuRef"
-        class="context-menu"
-        :class="{
-          'context-menu--dark': isDark,
-          'context-menu--keyboard': isKeyboardMode
-        }"
-        :style="menuStyle"
-        :tabindex="-1"
-        @click="handleMenuClick"
-        @contextmenu.prevent
-      >
+      <div v-if="computedShow" ref="menuRef" class="context-menu" :class="{
+        'context-menu--dark': isDark,
+        'context-menu--keyboard': isKeyboardMode
+      }" :style="menuStyle" :tabindex="-1" @click="handleMenuClick" @contextmenu.prevent>
         <!-- 菜单项列表 -->
-        <div
-          class="context-menu__list"
-          role="menu"
-        >
-          <template
-            v-for="(item, index) in visibleItems"
-            :key="index"
-          >
+        <div class="context-menu__list" role="menu">
+          <template v-for="(item, index) in visibleItems" :key="index">
             <!-- 分隔线 -->
-            <div
-              v-if="item.divider"
-              class="context-menu__divider"
-              :class="{ 'context-menu__divider--margin': hasAdjacentItem(index) }"
-              role="separator"
-              :aria-hidden="true"
-            />
+            <div v-if="item.divider" class="context-menu__divider"
+              :class="{ 'context-menu__divider--margin': hasAdjacentItem(index) }" role="separator"
+              :aria-hidden="true" />
             <!-- 菜单项 -->
-            <div
-              v-else
-              class="context-menu__item"
-              :class="{
-                'context-menu__item--disabled': item.disabled,
-                'context-menu__item--danger': item.danger,
-                'context-menu__item--focused': focusedIndex === index
-              }"
-              role="menuitem"
-              :tabindex="item.disabled ? -1 : 0"
-              @click.stop="handleItemClick(item, index)"
-              @mouseenter="handleItemMouseEnter(index)"
-            >
+            <div v-else class="context-menu__item" :class="{
+              'context-menu__item--disabled': item.disabled,
+              'context-menu__item--danger': item.danger,
+              'context-menu__item--focused': focusedIndex === index
+            }" role="menuitem" :tabindex="item.disabled ? -1 : 0" @click.stop="handleItemClick(item, index)"
+              @mouseenter="handleItemMouseEnter(index)">
               <!-- 图标 -->
-              <span
-                v-if="item.icon"
-                class="context-menu__icon"
-              >
-                <span
-                  v-if="isMaterialIcon(item.icon)"
-                  class="material-icons-outlined"
-                >{{ item.icon }}</span>
-                <component
-                  :is="item.icon"
-                  v-else
-                />
+              <span v-if="item.icon" class="context-menu__icon">
+                <span v-if="isMaterialIcon(item.icon)" class="material-icons-outlined">{{ item.icon }}</span>
+                <component :is="item.icon" v-else />
               </span>
               <!-- 标签 -->
               <span class="context-menu__label">{{ item.label }}</span>
               <!-- 快捷键提示 -->
-              <span
-                v-if="item.shortcut"
-                class="context-menu__shortcut"
-              >{{ item.shortcut }}</span>
+              <span v-if="item.shortcut" class="context-menu__shortcut">{{ item.shortcut }}</span>
             </div>
           </template>
         </div>
@@ -233,7 +195,7 @@ const handleMenuClick = () => {
 
 // 处理菜单项点击
 const handleItemClick = (item, index) => {
-  if (item.disabled) {return}
+  if (item.disabled) { return }
 
   focusedIndex.value = index
   emit('select', item)
@@ -257,7 +219,7 @@ const close = () => {
 
 // 键盘导航处理
 const handleKeydown = e => {
-  if (!computedShow.value) {return}
+  if (!computedShow.value) { return }
 
   switch (e.key) {
     case 'ArrowDown':
@@ -311,7 +273,7 @@ const handleKeydown = e => {
 // 滚动到聚焦的菜单项
 const scrollToFocusedItem = () => {
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     const focusedElement = menuRef.value?._elRef?.querySelector('.context-menu__item--focused')
     if (focusedElement) {
       focusedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
@@ -321,7 +283,7 @@ const scrollToFocusedItem = () => {
 
 // 外部点击处理
 const handleOutsideClick = e => {
-  if (!computedShow.value) {return}
+  if (!computedShow.value) { return }
   if (menuRef.value && !menuRef.value.contains(e.target)) {
     close()
   }
@@ -347,7 +309,7 @@ watch(() => props.show, newVal => {
   computedShow.value = newVal
   if (newVal) {
     nextTick(() => {
-      if (isUnmounted.value) {return}
+      if (isUnmounted.value) { return }
       updateMenuSize()
       focusedIndex.value = -1
     })
@@ -357,7 +319,7 @@ watch(() => props.show, newVal => {
 // 监听 items 变化
 watch(() => props.items, () => {
   nextTick(() => {
-    if (isUnmounted.value) {return}
+    if (isUnmounted.value) { return }
     updateMenuSize()
   })
 }, { deep: true })
@@ -378,13 +340,13 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/design-tokens.scss' as *;
+// 右键菜单组件 - 野火IM风格
 
 .context-menu {
-  background: var(--dt-bg-card, #ffffff);
-  border: 1px solid var(--dt-border-light, #e5e5e5);
-  border-radius: var(--dt-radius-md, 6px);
-  box-shadow: var(--dt-shadow-float);
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   padding: 4px 0;
   min-width: 160px;
   max-width: 240px;
@@ -397,10 +359,10 @@ onUnmounted(() => {
     border-color: #3d3d3d;
   }
 
-  // 键盘模式指示器（可选）
+  // 键盘模式指示器
   &--keyboard {
     .context-menu__item--focused {
-      background: var(--dt-bg-session-hover, #f5f5f5);
+      background: #f5f5f5;
     }
   }
 }
@@ -416,27 +378,27 @@ onUnmounted(() => {
   gap: 8px;
   padding: 8px 12px;
   font-size: 14px;
-  color: var(--dt-text-primary, #333333);
+  color: #333333;
   cursor: pointer;
   transition: background-color 0.15s ease;
-  border-radius: var(--dt-radius-sm);
+  border-radius: 4px;
   margin: 0 4px;
 
   &:hover {
-    background: var(--dt-bg-session-hover, #f5f5f5);
+    background: #f5f5f5;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--dt-brand-color, #0089ff);
+    outline: 2px solid #4168e0;
     outline-offset: -2px;
   }
 
   &--focused {
-    background: var(--dt-bg-session-hover, #f5f5f5);
+    background: #f5f5f5;
   }
 
   &--disabled {
-    color: var(--dt-text-tertiary, #999999);
+    color: #999999;
     cursor: not-allowed;
     opacity: 0.6;
 
@@ -446,10 +408,14 @@ onUnmounted(() => {
   }
 
   &--danger {
-    color: var(--dt-error-color, #ff4d4f);
+    color: #ff4757;
+
+    .context-menu__icon {
+      color: #ff4757;
+    }
 
     &:hover:not(.context-menu__item--disabled) {
-      background: rgba(255, 77, 79, 0.1);
+      background: rgba(255, 71, 87, 0.1);
     }
   }
 }
@@ -462,7 +428,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  color: var(--dt-text-secondary, #666666);
+  color: #666666;
 
   .material-icons-outlined {
     font-size: 18px;
@@ -479,13 +445,13 @@ onUnmounted(() => {
 .context-menu__shortcut {
   flex-shrink: 0;
   font-size: 12px;
-  color: var(--dt-text-tertiary, #999999);
+  color: #999999;
   margin-left: auto;
 }
 
 .context-menu__divider {
   height: 1px;
-  background: var(--dt-border-lighter, #e5e5e5);
+  background: #e5e5e5;
   margin: 4px 0;
 
   &--margin {

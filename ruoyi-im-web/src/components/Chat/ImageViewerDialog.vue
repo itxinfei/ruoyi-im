@@ -1,22 +1,9 @@
 <template>
-  <el-dialog
-    v-model="visible"
-    :show-close="false"
-    :close-on-click-modal="true"
-    :close-on-press-escape="true"
-    fullscreen
-    class="image-viewer-dialog"
-    @close="handleClose"
-  >
-    <div
-      class="image-viewer-container"
-      @click.self="handleClose"
-    >
+  <el-dialog v-model="visible" :show-close="false" :close-on-click-modal="true" :close-on-press-escape="true" fullscreen
+    class="image-viewer-dialog" @close="handleClose">
+    <div class="image-viewer-container" @click.self="handleClose">
       <!-- 工具栏 -->
-      <div
-        v-if="images.length > 0"
-        class="viewer-toolbar"
-      >
+      <div v-if="images.length > 0" class="viewer-toolbar">
         <div class="toolbar-left">
           <span class="image-counter">{{ currentIndex + 1 }}&nbsp;/&nbsp;{{ images.length }}</span>
         </div>
@@ -24,67 +11,30 @@
           <span class="image-name">{{ currentImageName }}</span>
         </div>
         <div class="toolbar-right">
-          <el-button
-            type="primary"
-            :icon="Download"
-            circle
-            size="small"
-            title="下载"
-            @click.stop="downloadCurrent"
-          />
-          <el-button
-            type="default"
-            :icon="CloseBold"
-            circle
-            size="small"
-            title="关闭 (ESC)"
-            @click.stop="handleClose"
-          />
+          <el-button type="primary" :icon="Download" circle size="small" title="下载" @click.stop="downloadCurrent" />
+          <el-button type="default" :icon="CloseBold" circle size="small" title="关闭 (ESC)" @click.stop="handleClose" />
         </div>
       </div>
 
       <!-- 主图片区域 -->
-      <div
-        class="viewer-main"
-        @wheel.prevent="handleWheel"
-      >
-        <transition
-          name="image-fade"
-          mode="out-in"
-        >
-          <div
-            :key="currentIndex"
-            class="image-wrapper"
-            :style="{ transform: `scale(${scale}) rotate(${rotation}deg)` }"
-          >
-            <img
-              :src="currentImage"
-              :alt="`图片 ${currentIndex + 1}`"
-              @mousedown="handleDragStart"
-              @load="handleImageLoad"
-              @error="handleImageError"
-            >
+      <div class="viewer-main" @wheel.prevent="handleWheel">
+        <transition name="image-fade" mode="out-in">
+          <div :key="currentIndex" class="image-wrapper"
+            :style="{ transform: `scale(${scale}) rotate(${rotation}deg)` }">
+            <img :src="currentImage" :alt="`图片 ${currentIndex + 1}`" @mousedown="handleDragStart"
+              @load="handleImageLoad" @error="handleImageError">
           </div>
         </transition>
 
         <!-- 加载状态 -->
-        <div
-          v-if="loading"
-          class="image-loading"
-        >
-          <el-icon
-            class="is-loading"
-            :size="40"
-          >
+        <div v-if="loading" class="image-loading">
+          <el-icon class="is-loading" :size="40">
             <Loading />
           </el-icon>
         </div>
 
         <!-- 加载失败 -->
-        <div
-          v-if="error"
-          class="image-error"
-        >
+        <div v-if="error" class="image-error">
           <el-icon :size="48">
             <PictureFilled />
           </el-icon>
@@ -94,77 +44,31 @@
 
       <!-- 左右切换按钮 -->
       <template v-if="images.length > 1">
-        <el-button
-          class="nav-btn nav-prev"
-          :icon="ArrowLeft"
-          circle
-          size="large"
-          :disabled="currentIndex === 0"
-          @click.stop="prevImage"
-        />
-        <el-button
-          class="nav-btn nav-next"
-          :icon="ArrowRight"
-          circle
-          size="large"
-          :disabled="currentIndex === images.length - 1"
-          @click.stop="nextImage"
-        />
+        <el-button class="nav-btn nav-prev" :icon="ArrowLeft" circle size="large" :disabled="currentIndex === 0"
+          @click.stop="prevImage" />
+        <el-button class="nav-btn nav-next" :icon="ArrowRight" circle size="large"
+          :disabled="currentIndex === images.length - 1" @click.stop="nextImage" />
       </template>
 
       <!-- 缩放控制栏 -->
       <div class="zoom-controls">
         <el-button-group>
-          <el-button
-            :icon="ZoomOut"
-            :disabled="scale <= 0.3"
-            @click.stop="zoomOut"
-          />
-          <el-button
-            disabled
-            class="zoom-display"
-          >
+          <el-button :icon="ZoomOut" :disabled="scale <= 0.3" @click.stop="zoomOut" />
+          <el-button disabled class="zoom-display">
             {{ Math.round(scale * 100) }}%
           </el-button>
-          <el-button
-            :icon="ZoomIn"
-            :disabled="scale >= 3"
-            @click.stop="zoomIn"
-          />
+          <el-button :icon="ZoomIn" :disabled="scale >= 3" @click.stop="zoomIn" />
         </el-button-group>
-        <el-button
-          :icon="RefreshLeft"
-          title="向左旋转"
-          @click.stop="rotateLeft"
-        />
-        <el-button
-          :icon="RefreshRight"
-          title="向右旋转"
-          @click.stop="rotateRight"
-        />
-        <el-button
-          :icon="FullScreen"
-          title="重置视图"
-          @click.stop="resetView"
-        />
+        <el-button :icon="RefreshLeft" title="向左旋转" @click.stop="rotateLeft" />
+        <el-button :icon="RefreshRight" title="向右旋转" @click.stop="rotateRight" />
+        <el-button :icon="FullScreen" title="重置视图" @click.stop="resetView" />
       </div>
 
       <!-- 缩略图列表 -->
-      <div
-        v-if="images.length > 1"
-        class="thumbnail-list"
-      >
-        <div
-          v-for="(img, index) in images"
-          :key="index"
-          class="thumbnail-item"
-          :class="{ active: index === currentIndex }"
-          @click.stop="goToImage(index)"
-        >
-          <img
-            :src="img"
-            :alt="`缩略图 ${index + 1}`"
-          >
+      <div v-if="images.length > 1" class="thumbnail-list">
+        <div v-for="(img, index) in images" :key="index" class="thumbnail-item"
+          :class="{ active: index === currentIndex }" @click.stop="goToImage(index)">
+          <img :src="img" :alt="`缩略图 ${index + 1}`">
         </div>
       </div>
     </div>
@@ -227,7 +131,7 @@ const currentImage = computed(() => {
 // 当前图片名称
 const currentImageName = computed(() => {
   const url = currentImage.value
-  if (!url) {return ''}
+  if (!url) { return '' }
   try {
     const pathname = new URL(url).pathname
     const filename = pathname.split('/').pop()
@@ -259,7 +163,7 @@ watch(() => props.initialIndex, val => {
 
 // 键盘事件
 const handleKeydown = e => {
-  if (!visible.value) {return}
+  if (!visible.value) { return }
 
   switch (e.key) {
     case 'ArrowLeft':
@@ -415,7 +319,7 @@ onUnmounted(() => {
   :deep(.el-dialog__body) {
     padding: 0;
     height: 100vh;
-    background: #000;
+    background: rgba(0, 0, 0, 0.95); // 稍微透明
   }
 }
 
@@ -476,7 +380,8 @@ onUnmounted(() => {
       color: #fff;
 
       &:hover {
-        background: rgba(255, 255, 255, 0.25);
+        background: #4168e0; // 野火IM蓝
+        border-color: #4168e0;
       }
 
       &.is-disabled {
@@ -501,7 +406,7 @@ onUnmounted(() => {
   }
 
   .image-wrapper {
-    transition: transform 0.3s ease-out;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); // 优化动画曲线
     max-width: 90%;
     max-height: 80%;
     display: flex;
@@ -514,6 +419,7 @@ onUnmounted(() => {
       object-fit: contain;
       user-select: none;
       -webkit-user-drag: none;
+      border-radius: 4px; // 野火IM风格圆角
     }
   }
 }
@@ -549,14 +455,16 @@ onUnmounted(() => {
   border-color: transparent;
   color: #fff;
   opacity: 0;
+  transition: all 0.2s;
 
-  .viewer-main:hover + &,
   .image-viewer-container:hover & {
     opacity: 1;
   }
 
   &:hover:not(.is-disabled) {
-    background: rgba(255, 255, 255, 0.25);
+    background: #4168e0; // 野火IM蓝
+    border-color: #4168e0;
+    transform: translateY(-50%) scale(1.1);
   }
 
   &.is-disabled {
@@ -581,11 +489,12 @@ onUnmounted(() => {
   display: flex;
   gap: 8px;
   z-index: 90;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   padding: 8px 12px;
-  border-radius: var(--dt-radius-md);
+  border-radius: 8px; // 野火IM圆角
   opacity: 0;
   transition: opacity 0.3s;
+  backdrop-filter: blur(8px);
 
   .image-viewer-container:hover & {
     opacity: 1;
@@ -597,7 +506,7 @@ onUnmounted(() => {
     color: #fff;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(65, 104, 224, 0.5); // 野火IM蓝
     }
 
     &.is-disabled {
@@ -607,6 +516,7 @@ onUnmounted(() => {
     &.zoom-display {
       min-width: 60px;
       color: #fff;
+      font-weight: 500;
     }
   }
 }
@@ -637,13 +547,13 @@ onUnmounted(() => {
 
   &::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.3);
-    border-radius: var(--dt-radius-sm);
+    border-radius: 2px;
   }
 
   .thumbnail-item {
     width: 56px;
     height: 56px;
-    border-radius: var(--dt-radius-sm);
+    border-radius: 4px; // 野火IM圆角
     overflow: hidden;
     cursor: pointer;
     opacity: 0.6;
@@ -653,11 +563,13 @@ onUnmounted(() => {
 
     &:hover {
       opacity: 0.9;
+      transform: scale(1.05);
     }
 
     &.active {
       opacity: 1;
-      border-color: var(--dt-brand-color);
+      border-color: #4168e0; // 野火IM蓝
+      box-shadow: 0 0 8px rgba(65, 104, 224, 0.5);
     }
 
     img {
@@ -671,11 +583,16 @@ onUnmounted(() => {
 // 图片切换动画
 .image-fade-enter-active,
 .image-fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.image-fade-enter-from,
+.image-fade-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
 .image-fade-leave-to {
   opacity: 0;
+  transform: scale(1.05);
 }
 </style>

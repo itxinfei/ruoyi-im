@@ -1,16 +1,8 @@
 <template>
-  <div
-    v-if="hasReactions"
-    class="reaction-aggregate"
-  >
-    <div
-      v-for="reaction in reactions"
-      :key="reaction.emoji"
-      class="reaction-item"
-      :class="{ 'is-active': reaction.hasOwnReaction }"
-      :title="reaction.usersTitle"
-      @click.stop="$emit('toggle', reaction.emoji)"
-    >
+  <div v-if="hasReactions" class="reaction-aggregate">
+    <div v-for="reaction in reactions" :key="reaction.emoji" class="reaction-item"
+      :class="{ 'is-active': reaction.hasOwnReaction }" :title="reaction.usersTitle"
+      @click.stop="$emit('toggle', reaction.emoji)">
       <span class="reaction-emoji">{{ reaction.emoji }}</span>
       <span class="reaction-count">{{ reaction.count }}</span>
     </div>
@@ -31,7 +23,7 @@ const store = useStore()
 
 // 按表情分组
 const reactions = computed(() => {
-  if (!props.message?.reactions) {return []}
+  if (!props.message?.reactions) { return [] }
 
   const currentUser = store.getters['user/currentUser']
   const grouped = {}
@@ -60,7 +52,7 @@ const hasReactions = computed(() => reactions.value.length > 0)
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/design-tokens.scss' as *;
+// 表情回应组件 - 野火IM风格
 
 .reaction-aggregate {
   display: flex;
@@ -75,11 +67,11 @@ const hasReactions = computed(() => reactions.value.length > 0)
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: rgba(0, 137, 255, 0.08);
-  border-radius: var(--dt-radius-lg);
+  background: rgba(65, 104, 224, 0.08); // 野火IM蓝
+  border-radius: 12px;
   font-size: 13px;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: all 0.2s;
   border: 1px solid transparent;
 
   .reaction-emoji {
@@ -89,63 +81,71 @@ const hasReactions = computed(() => reactions.value.length > 0)
   .reaction-count {
     font-size: 11px;
     font-weight: 500;
-    color: var(--dt-text-secondary);
+    color: #666;
     min-width: 12px;
   }
 
   &:hover {
-    background: rgba(0, 137, 255, 0.15);
+    background: rgba(65, 104, 224, 0.15);
 
     .reaction-count {
-      color: var(--dt-brand-color);
+      color: #4168e0;
     }
   }
 
   &.is-active {
-    background: var(--dt-brand-bg);
-    border-color: var(--dt-brand-color);
+    background: rgba(65, 104, 224, 0.15);
+    border-color: #4168e0;
 
     .reaction-emoji {
-      animation: bounce 0.3s var(--dt-ease-out);
+      animation: bounce 0.3s ease-out;
     }
 
     .reaction-count {
-      color: var(--dt-brand-color);
+      color: #4168e0;
+      font-weight: 600;
     }
   }
 }
 
 @keyframes bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.3); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.3);
+  }
 }
 
 // 暗色模式
 :global(.dark) {
   .reaction-item {
-    background: rgba(0, 137, 255, 0.1);
+    background: rgba(65, 104, 224, 0.12);
     border-color: transparent;
 
+    .reaction-count {
+      color: #a0a8b8;
+    }
+
     &:hover {
-      background: rgba(0, 137, 255, 0.2);
-      border-color: #0089FF;
+      background: rgba(65, 104, 224, 0.22);
+      border-color: #4168e0;
     }
 
     &.is-active {
-      background: rgba(0, 137, 255, 0.25);
-      border-color: #0089FF;
+      background: rgba(65, 104, 224, 0.25);
+      border-color: #4168e0;
     }
 
     .reaction-emoji {
       filter: brightness(1.1);
     }
 
-    .reaction-count {
-      color: var(--dt-text-secondary);
-    }
-
     &.is-active .reaction-count {
-      color: var(--dt-text-primary);
+      color: #6b8cff;
     }
   }
 }

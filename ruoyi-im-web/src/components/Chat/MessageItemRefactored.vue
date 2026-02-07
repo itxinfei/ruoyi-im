@@ -154,7 +154,7 @@ const handleNudge = () => {
   border-radius: var(--dt-radius-sm);
 }
 
-// 多选复选框
+// 多选复选框 - 野火IM风格
 .checkbox-wrapper {
   display: flex;
   align-items: flex-start;
@@ -165,8 +165,16 @@ const handleNudge = () => {
 
   :deep(.el-checkbox) {
     .el-checkbox__input.is-checked .el-checkbox__inner {
-      background-color: var(--dt-brand-color);
-      border-color: var(--dt-brand-color);
+      background-color: #4168e0; // 野火IM蓝
+      border-color: #4168e0;
+    }
+
+    .el-checkbox__input:focus .el-checkbox__inner {
+      border-color: #4168e0;
+    }
+
+    .el-checkbox__input.is-checked+.el-checkbox__label {
+      color: #4168e0;
     }
   }
 }
@@ -185,11 +193,15 @@ const handleNudge = () => {
 .message-item.is-multi-select {
   padding: 0 8px;
   cursor: pointer;
-  border-radius: var(--dt-radius-md);
-  transition: background var(--dt-transition-fast);
+  border-radius: 8px;
+  transition: background 0.2s;
 
   &:hover {
-    background: var(--dt-bg-hover);
+    background: #f5f5f5;
+  }
+
+  &.is-selected {
+    background: rgba(65, 104, 224, 0.08);
   }
 }
 

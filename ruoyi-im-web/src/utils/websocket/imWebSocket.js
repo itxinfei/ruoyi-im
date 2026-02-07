@@ -1,6 +1,12 @@
 /**
- * IM WebSocket 客户端
+ * IM WebSocket 客户端 - 性能优化版
  * 提供 WebSocket 连接管理、消息收发、心跳保活、断线重连等功能
+ * 
+ * 优化特性：
+ * - 消息批量处理（减少渲染次数）
+ * - 指数退避重连策略
+ * - 连接质量监控
+ * - 消息队列缓冲
  */
 import { getUserInfo } from '../storage'
 import { debug, info, warn, error } from '../logger.js'
@@ -28,6 +34,12 @@ export const MESSAGE_TYPE = {
   REACTION: 'reaction'    // 表情回复
 }
 
+// 性能优化配置
+const BATCH_INTERVAL = 50 // 消息批量处理间隔（毫秒）
+const BATCH_MAX_SIZE = 20 // 批量处理最大消息数
+const BASE_RECONNECT_INTERVAL = 1000 // 基础重连间隔
+const MAX_RECONNECT_INTERVAL = 30000 // 最大重连间隔
+
 class ImWebSocket {
   constructor() {
     this.ws = null
@@ -36,11 +48,20 @@ class ImWebSocket {
     this.reconnectTimer = null
     this.heartbeatTimer = null
     this.reconnectAttempts = 0
-    this.maxReconnectAttempts = 5
-    this.reconnectInterval = 3000
+    this.maxReconnectAttempts = 10
+    this.reconnectInterval = BASE_RECONNECT_INTERVAL
     this.heartbeatInterval = 30000 // 30 秒心跳
     this.eventHandlers = new Map()
     this.storeConnectionCallback = null // 回调函数：用于更新 Vuex store 的连接状态
+
+    // 消息批量处理相关
+    this.messageBuffer = []
+    this.batchTimer = null
+    this.lastPongTime = Date.now()
+
+    // 连接质量监控
+    this.connectionQuality = 'good' // good, fair, poor
+    this.pingLatencies = []
   }
 
   /**
@@ -114,6 +135,7 @@ class ImWebSocket {
   onOpen() {
     info('ImWebSocket', '连接成功')
     this.reconnectAttempts = 0
+    this.reconnectInterval = BASE_RECONNECT_INTERVAL // 重置重连间隔
 
     // 发送认证消息
     this.sendAuth()
@@ -129,7 +151,7 @@ class ImWebSocket {
   }
 
   /**
-   * 接收消息
+   * 接收消息 - 支持批量处理
    */
   onMessage(event) {
     try {
@@ -140,23 +162,23 @@ class ImWebSocket {
 
       switch (type) {
         case MESSAGE_TYPE.PONG:
-          // 心跳响应
-          debug('ImWebSocket', '收到心跳响应')
+          // 心跳响应 - 计算延迟
+          this.handlePong()
           break
         case MESSAGE_TYPE.MESSAGE:
-          // 聊天消息
-          this.emit('message', payload)
+          // 聊天消息 - 批量处理
+          this.bufferMessage('message', payload)
           break
         case MESSAGE_TYPE.MESSAGE_STATUS:
           // 消息状态更新
           this.emit('message_status', payload)
           break
         case MESSAGE_TYPE.READ:
-          // 已读回执
-          this.emit('read', payload)
+          // 已读回执 - 批量处理
+          this.bufferMessage('read', payload)
           break
         case MESSAGE_TYPE.TYPING:
-          // 正在输入
+          // 正在输入 - 立即处理
           this.emit('typing', payload)
           break
         case MESSAGE_TYPE.ONLINE:
@@ -184,6 +206,88 @@ class ImWebSocket {
   }
 
   /**
+   * 处理心跳响应
+   */
+  handlePong() {
+    const latency = Date.now() - this.lastPongTime
+    this.pingLatencies.push(latency)
+
+    // 保留最近10次延迟记录
+    if (this.pingLatencies.length > 10) {
+      this.pingLatencies.shift()
+    }
+
+    // 计算平均延迟并更新连接质量
+    const avgLatency = this.pingLatencies.reduce((a, b) => a + b, 0) / this.pingLatencies.length
+    if (avgLatency < 100) {
+      this.connectionQuality = 'good'
+    } else if (avgLatency < 300) {
+      this.connectionQuality = 'fair'
+    } else {
+      this.connectionQuality = 'poor'
+    }
+
+    debug('ImWebSocket', `心跳延迟: ${latency}ms, 连接质量: ${this.connectionQuality}`)
+  }
+
+  /**
+   * 消息缓冲（批量处理）
+   */
+  bufferMessage(type, payload) {
+    this.messageBuffer.push({ type, payload })
+
+    // 如果缓冲区已满，立即处理
+    if (this.messageBuffer.length >= BATCH_MAX_SIZE) {
+      this.flushMessageBuffer()
+      return
+    }
+
+    // 启动批量处理定时器
+    if (!this.batchTimer) {
+      this.batchTimer = setTimeout(() => {
+        this.flushMessageBuffer()
+      }, BATCH_INTERVAL)
+    }
+  }
+
+  /**
+   * 刷新消息缓冲区
+   */
+  flushMessageBuffer() {
+    if (this.batchTimer) {
+      clearTimeout(this.batchTimer)
+      this.batchTimer = null
+    }
+
+    if (this.messageBuffer.length === 0) { return }
+
+    // 按类型分组处理
+    const messagesByType = {}
+    this.messageBuffer.forEach(({ type, payload }) => {
+      if (!messagesByType[type]) {
+        messagesByType[type] = []
+      }
+      messagesByType[type].push(payload)
+    })
+
+    // 批量触发事件
+    Object.keys(messagesByType).forEach(type => {
+      const messages = messagesByType[type]
+      if (messages.length === 1) {
+        this.emit(type, messages[0])
+      } else {
+        // 批量消息事件
+        this.emit(`${type}:batch`, messages)
+        // 同时触发单条消息事件（兼容性）
+        messages.forEach(msg => this.emit(type, msg))
+      }
+    })
+
+    // 清空缓冲区
+    this.messageBuffer = []
+  }
+
+  /**
    * 连接错误
    */
   onError(err) {
@@ -199,6 +303,9 @@ class ImWebSocket {
 
     // 停止心跳
     this.stopHeartbeat()
+
+    // 刷新剩余消息
+    this.flushMessageBuffer()
 
     // 触发断开连接事件
     this.emit('disconnected')
@@ -252,6 +359,7 @@ class ImWebSocket {
   startHeartbeat() {
     this.stopHeartbeat()
     this.heartbeatTimer = setInterval(() => {
+      this.lastPongTime = Date.now()
       this.send({
         type: MESSAGE_TYPE.PING,
         data: {
@@ -302,7 +410,7 @@ class ImWebSocket {
   }
 
   /**
-   * 处理重连
+   * 处理重连 - 指数退避策略
    */
   handleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
@@ -312,7 +420,14 @@ class ImWebSocket {
     }
 
     this.reconnectAttempts++
-    info('ImWebSocket', `尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
+
+    // 指数退避：每次重连增加延迟，最大不超过 MAX_RECONNECT_INTERVAL
+    this.reconnectInterval = Math.min(
+      BASE_RECONNECT_INTERVAL * Math.pow(2, this.reconnectAttempts - 1),
+      MAX_RECONNECT_INTERVAL
+    )
+
+    info('ImWebSocket', `尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})，${this.reconnectInterval}ms 后重试`)
 
     this.reconnectTimer = setTimeout(() => {
       this.connect(this.token)
@@ -332,6 +447,9 @@ class ImWebSocket {
     }
     this.stopHeartbeat()
 
+    // 刷新剩余消息
+    this.flushMessageBuffer()
+
     // 关闭 WebSocket
     if (this.ws) {
       this.ws.close(1000, '正常关闭')
@@ -340,6 +458,7 @@ class ImWebSocket {
 
     // 重置重连次数
     this.reconnectAttempts = 0
+    this.reconnectInterval = BASE_RECONNECT_INTERVAL
   }
 
   /**
@@ -351,6 +470,8 @@ class ImWebSocket {
     this.removeAllListeners()
     this.token = ''
     this.url = ''
+    this.messageBuffer = []
+    this.pingLatencies = []
   }
 
   /**
@@ -428,8 +549,17 @@ class ImWebSocket {
   isConnected() {
     return this.ws && this.ws.readyState === WebSocket.OPEN
   }
+
+  /**
+   * 获取连接质量
+   * @returns {string} good | fair | poor
+   */
+  getConnectionQuality() {
+    return this.connectionQuality
+  }
 }
 
 // 导出单例
 const imWebSocket = new ImWebSocket()
 export default imWebSocket
+

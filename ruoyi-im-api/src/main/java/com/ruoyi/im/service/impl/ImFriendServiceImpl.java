@@ -515,7 +515,6 @@ public class ImFriendServiceImpl implements ImFriendService {
             ImContactGroupVO vo = new ImContactGroupVO();
             vo.setGroupName(entry.getKey());
             vo.setContacts(entry.getValue());
-            vo.setFriends(entry.getValue()); // 兼容
             vo.setCount(entry.getValue().size());
             result.add(vo);
         }
