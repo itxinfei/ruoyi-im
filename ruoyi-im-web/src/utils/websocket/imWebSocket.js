@@ -35,7 +35,7 @@ export const MESSAGE_TYPE = {
   ONLINE: 'online',       // 用户上线
   OFFLINE: 'offline',     // 用户下线
   CALL: 'call',           // 音视频通话
-  REACTION: 'reaction'    // 表情回复
+  REACTION: 'reaction',    // 表情回复
   CONVERSATION_EVENT: 'conversation_event' // 会话事件
 }
 
