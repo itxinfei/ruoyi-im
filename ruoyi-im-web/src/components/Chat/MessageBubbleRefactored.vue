@@ -473,6 +473,7 @@ const canRecall = computed(() => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/im-design-system.scss' as *;
 
 // 包装器
 .message-bubble-wrapper {
@@ -484,13 +485,13 @@ const canRecall = computed(() => {
 .message-bubble {
   position: relative;
   display: inline-flex;
-  align-items: flex-start;
+  align-items: center; // 垂直居中，与头像对齐
   max-width: min(520px, 70%); // 响应式最大宽度（野火IM标准）
   width: fit-content; // 根据内容自适应宽度
   min-width: 0; // 允许 flex 子项收缩
   // GPU 加速动画性能优化
   contain: layout style paint;
-  animation: messagePop 0.3s var(--dt-ease-bounce);
+  animation: bubblePop 0.3s var(--dt-ease-bounce);
   // 动画结束后移除性能提示
   animation-fill-mode: both;
   margin-top: 0;
@@ -498,10 +499,10 @@ const canRecall = computed(() => {
 }
 
 .bubble-content {
-  padding: 10px 14px; // 野火IM/钉钉标准:上下10px,左右14px
-  border-radius: 8px; // 统一圆角
-  font-size: 15px; // 钉钉标准:15px
-  line-height: 1.5;
+  padding: var(--dt-bubble-padding); // 钉钉/野火IM标准
+  border-radius: var(--dt-bubble-radius); // 钉钉/野火IM非对称圆角
+  font-size: var(--dt-font-size-content, 15px); // 钉钉标准:15px
+  line-height: 1.6; // 钉钉标准:1.6
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
@@ -540,35 +541,60 @@ const canRecall = computed(() => {
   }
 }
 
-// 对方消息样式 - 野火IM/钉钉风格
+// 对方消息样式 - 钉钉/野火IM风格
 .message-bubble:not(.is-own) {
   .bubble-content {
-    // 钉钉/野火IM: 白色背景
-    background: #FFFFFF;
-    // 浅灰边框
-    border: 1px solid #E5E7EB;
-    // 非对称圆角：靠近头像一侧圆角较小
-    border-radius: 4px 12px 12px 12px;
-    // 深灰文字
-    color: #171A1D;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    // 钉钉/野火IM: 白色背景，带微阴影
+    background: var(--dt-bubble-left-bg);
+    // 微妙边框
+    border: 1px solid var(--dt-bubble-left-border);
+    // 非对称圆角：靠近头像一侧圆角较小（左侧4px）
+    border-radius: var(--dt-bubble-radius-left);
+    // 文字颜色
+    color: var(--dt-bubble-left-text);
+    // 钉钉风格阴影：微妙的立体感
+    box-shadow: var(--dt-bubble-shadow);
+    // 气泡进入动画
+    animation: bubbleInLeft 0.3s var(--dt-ease-out-bounce) both;
+    // 微妙的悬停效果
+    &:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+      transform: translateY(-1px);
+    }
   }
 }
 
-// 己方消息样式 - 野火IM/钉钉风格
+// 己方消息样式 - 钉钉/野火IM风格
 .message-bubble.is-own {
   flex-direction: row-reverse;
 
   .bubble-content {
-    // 钉钉: 蓝色背景
-    background: #4168E0;
+    // 钉钉: 蓝色渐变背景
+    background: linear-gradient(
+      135deg,
+      var(--dt-bubble-right-bg-start) 0%,
+      var(--dt-bubble-right-bg-end) 100%
+    );
     // 白色文字
     color: #FFFFFF;
     // 无边框
     border: none;
-    // 非对称圆角：靠近头像一侧圆角较小
-    border-radius: 12px 4px 12px 12px;
-    box-shadow: 0 1px 2px rgba(65, 104, 224, 0.2);
+    // 非对称圆角：靠近头像一侧圆角较小（右侧4px）
+    border-radius: var(--dt-bubble-radius-right);
+    // 钉钉风格蓝色阴影
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3), 0 1px 3px rgba(0, 137, 255, 0.2);
+    // 气泡进入动画
+    animation: bubbleInRight 0.3s var(--dt-ease-out-bounce) both;
+    // 微妙的悬停效果
+    &:hover {
+      background: linear-gradient(
+        135deg,
+        var(--dt-bubble-right-bg-start) 0%,
+        var(--dt-bubble-right-bg-end) 100%
+      );
+      filter: brightness(1.05);
+      box-shadow: 0 3px 12px rgba(0, 137, 255, 0.35), 0 2px 5px rgba(0, 137, 255, 0.25);
+    }
   }
 
   // 确保所有子元素文字颜色都是白色
@@ -639,19 +665,59 @@ const canRecall = computed(() => {
   padding: 12px 16px;
 }
 
-// 暗色模式适配 - 野火IM/钉钉风格
+// 暗色模式适配 - 钉钉/野火IM风格
 :global(.dark) {
   // 对方消息: 深灰背景
   .message-bubble:not(.is-own) .bubble-content {
-    background: #2D2F33;
-    border-color: #3D3F43;
-    color: #E5E7EB;
+    background: var(--dt-bubble-left-bg-dark);
+    border-color: var(--dt-bubble-left-border-dark);
+    color: var(--dt-bubble-left-text-dark);
+    box-shadow: var(--dt-bubble-shadow-dark);
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
   }
 
-  // 己方消息: 保持蓝色
+  // 己方消息: 保持蓝色渐变
   .message-bubble.is-own .bubble-content {
-    background: #4168E0;
+    background: linear-gradient(
+      135deg,
+      var(--dt-bubble-right-bg-start) 0%,
+      var(--dt-bubble-right-bg-end) 100%
+    );
     color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.4), 0 1px 3px rgba(0, 137, 255, 0.3);
+
+    &:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 3px 12px rgba(0, 137, 255, 0.45), 0 2px 5px rgba(0, 137, 255, 0.35);
+    }
+  }
+}
+
+// 气泡进入动画 - 钉钉风格
+@keyframes bubblePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// 长按脉冲动画
+@keyframes longPressPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
   }
 }
 </style>

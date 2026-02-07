@@ -54,16 +54,16 @@
       class="content-wrapper"
       :class="{ 'is-merged': message.isMerged }"
     >
-      <!-- 发送者姓名（仅群聊、非自己、且非合并连续消息时显示） -->
-      <div
-        v-if="showSenderName"
-        class="sender-name"
-      >
-        {{ message.senderName }}
-      </div>
-
       <!-- 消息气泡与状态行 -->
       <div class="bubble-row">
+        <!-- 发送者姓名（仅群聊、非自己、且非合并连续消息时显示） -->
+        <!-- 使用绝对定位，避免影响气泡的布局和对齐 -->
+        <div
+          v-if="showSenderName"
+          class="sender-name-absolute"
+        >
+          {{ message.senderName }}
+        </div>
         <slot name="bubble">
           <MessageBubble
             :message="message"
@@ -172,7 +172,7 @@ const handleNudge = () => {
 
 .message-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center; // 垂直居中对齐，确保头像和气泡在一条水平直线上
   margin-bottom: 12px; // 野火IM标准:消息间距12px
   position: relative;
   padding: 0;
@@ -204,11 +204,11 @@ const handleNudge = () => {
 // 多选复选框 - 野火IM风格
 .checkbox-wrapper {
   display: flex;
-  align-items: flex-start;
-  padding-top: 8px;
+  align-items: center;
   margin: 0 8px;
   flex-shrink: 0;
   width: 20px;
+  height: 40px; // 与头像高度一致
 
   :deep(.el-checkbox) {
     .el-checkbox__input.is-checked .el-checkbox__inner {
@@ -226,14 +226,30 @@ const handleNudge = () => {
   }
 }
 
+// 发送者姓名 - 绝对定位，不影响气泡对齐
+.sender-name-absolute {
+  position: absolute;
+  top: -22px; // 在气泡上方
+  left: 0;
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-tertiary);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none; // 避免点击事件冲突
+}
+
 // 有发送者名字时的布局调整（群聊）
+// 使用负 margin 让头像下移，使其中心与气泡中心对齐
 .message-item.has-sender-name {
   .avatar-wrapper {
-    margin-top: 20px; // 头像下移，给名字留空间
+    // sender-name 的高度约为 18px，下移一半使其不影响气泡对齐
+    margin-top: 9px;
   }
 
   .checkbox-wrapper {
-    padding-top: 28px;
+    padding-top: 17px; // checkbox 下移与头像对齐
   }
 }
 
@@ -253,7 +269,7 @@ const handleNudge = () => {
   }
 }
 
-// 头像区域 - 野火IM/钉钉风格
+// 头像区域 - 钉钉/野火IM风格
 .avatar-wrapper {
   width: 40px;
   height: 40px;
@@ -262,15 +278,17 @@ const handleNudge = () => {
   cursor: pointer;
   transition: opacity var(--dt-transition-base);
   display: flex;
-  align-items: flex-start; // 顶部对齐，确保头像和气泡在一条直线上
+  align-items: center; // 垂直居中对齐，确保头像和气泡在一条水平直线上
   justify-content: center;
+  // 向下偏移，抵消 footer 高度对整体对齐的影响
+  margin-bottom: 8px;
 
   &:hover {
     opacity: 0.85;
   }
 
   :deep(.dingtalk-avatar) {
-    border-radius: 4px; // 野火IM/钉钉:方形头像,4px圆角
+    border-radius: 4px; // 钉钉/野火IM:方形头像,4px圆角
   }
 }
 
@@ -302,31 +320,20 @@ const handleNudge = () => {
   }
 }
 
-// 气泡与状态行布局 - 野火IM/钉钉风格
+// 气泡与状态行布局 - 钉钉/野火IM风格
 .bubble-row {
   display: flex;
-  align-items: flex-start; // 顶部对齐，确保气泡与头像在一条直线上
+  align-items: center; // 垂直居中对齐，确保气泡与头像在一条水平直线上
   gap: 4px;
   max-width: 100%;
   min-width: 0; // 允许收缩
+  position: relative; // 为绝对定位的 sender-name 提供参考
 }
 
 .status-container {
   flex-shrink: 0;
   margin-bottom: 2px; // 对齐气泡底部稍微抬起一点
   align-self: flex-end;
-}
-
-// 发送者姓名样式
-.sender-name {
-  font-size: var(--dt-font-size-xs);
-  color: var(--dt-text-tertiary);
-  margin-bottom: 4px;
-  margin-left: 4px;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 // 消息页脚

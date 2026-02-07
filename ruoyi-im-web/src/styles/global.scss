@@ -3,6 +3,7 @@
 @use './menu-standards.scss' as *;
 @use './tailwind-overrides.scss' as *;
 @use './icons.scss';
+@use './im-design-system.scss' as *; // 钉钉/野火IM对齐设计系统
 // 使用模块化动画 - 支持按需加载和代码分割
 @use './animations/index.scss' as *;
 

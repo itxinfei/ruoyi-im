@@ -275,9 +275,12 @@ function escapeRegExp(string) {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/im-design-system.scss' as *;
 
 .text-bubble {
   position: relative;
+  // 钉钉/野火IM标准：气泡进入动画
+  animation: bubbleIn 0.3s var(--dt-ease-out-bounce) both;
 }
 
 .text-content {
@@ -285,19 +288,22 @@ function escapeRegExp(string) {
   overflow-wrap: break-word;
   white-space: pre-wrap;
   line-height: 1.6; // 钉钉标准:1.6
-  font-size: 15px; // 钉钉标准:15px
+  font-size: var(--dt-font-size-content, 15px); // 钉钉标准:15px
   max-width: 100%;
   min-width: 0;
+  color: var(--dt-text-primary);
 
-  // 链接样式 - 野火IM/钉钉风格
+  // 链接样式 - 钉钉/野火IM风格
   :deep(a) {
-    color: #4168E0;
+    color: var(--dt-brand-color);
     text-decoration: none;
     word-break: break-all;
     max-width: 100%;
     overflow-wrap: break-word;
+    transition: color var(--dt-transition-fast);
 
     &:hover {
+      color: var(--dt-brand-hover);
       text-decoration: underline;
     }
   }
@@ -308,32 +314,37 @@ function escapeRegExp(string) {
     overflow-x: auto;
     white-space: pre-wrap;
     word-break: break-all;
+    background: var(--dt-bg-code);
+    padding: 8px 12px;
+    border-radius: var(--dt-radius-sm);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
   }
 
-  // @提及高亮样式 - 野火IM/钉钉风格
+  // @提及高亮样式 - 钉钉/野火IM风格
   :deep(.mention-highlight) {
     word-break: break-word;
-    color: #4168E0;
+    color: var(--dt-brand-color);
     font-weight: 500;
-    background: rgba(65, 104, 224, 0.1);
+    background: var(--dt-brand-bg);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-xs);
     cursor: pointer;
     margin: 0 1px;
-    transition: all 0.2s;
+    transition: all var(--dt-transition-fast);
 
     &:hover {
-      background: rgba(65, 104, 224, 0.2);
+      background: var(--dt-brand-bg-hover);
     }
 
     // 提及当前用户时 - 更明显的背景
     &.is-current-user {
-      background: rgba(255, 59, 48, 0.15);
-      color: #FF3B30;
+      background: var(--dt-error-bg);
+      color: var(--dt-error-color);
       font-weight: 600;
 
       &:hover {
-        background: rgba(255, 59, 48, 0.25);
+        background: var(--dt-error-bg-hover);
       }
     }
   }
@@ -342,6 +353,10 @@ function escapeRegExp(string) {
   :deep(.is-own) & {
     a {
       color: #FFFFFF;
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.9);
+      }
     }
 
     .mention-highlight {
@@ -362,25 +377,26 @@ function escapeRegExp(string) {
 
 .edited-tag {
   margin-left: 4px;
-  font-size: 11px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-quaternary);
 }
 
 .link-previews {
-  margin-top: 8px;
+  margin-top: var(--dt-spacing-xs);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--dt-spacing-xs);
 }
 
 .message-markers {
   display: flex;
-  gap: 4px;
-  margin-top: 4px;
+  gap: var(--dt-spacing-xs);
+  margin-top: var(--dt-spacing-xs);
 
   .marker-icon {
     font-size: 16px;
     opacity: 0.8;
+    transition: opacity var(--dt-transition-fast);
 
     &.completed {
       opacity: 0.5;
@@ -391,45 +407,73 @@ function escapeRegExp(string) {
 .message-pinned-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 4px;
+  gap: var(--dt-spacing-xs);
+  margin-top: var(--dt-spacing-xs);
   padding: 3px 8px;
-  background: rgba(65, 104, 224, 0.1);
-  border-radius: 4px;
-  font-size: 12px;
-  color: #4168E0;
+  background: var(--dt-brand-bg);
+  border-radius: var(--dt-radius-xs);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-brand-color);
   font-weight: 500;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-brand-bg-hover);
+  }
 
   .el-icon {
     font-size: 14px;
   }
 }
 
-// 暗色模式适配 - 野火IM/钉钉风格
+// 暗色模式适配 - 钉钉/野火IM风格
 :global(.dark) {
   .text-content {
+    color: var(--dt-text-primary-dark);
+
     a {
-      color: #5A9FFF;
+      color: var(--dt-brand-color-light);
+
+      &:hover {
+        color: var(--dt-brand-hover-light);
+      }
+    }
+
+    :deep(code) {
+      background: var(--dt-bg-code-dark);
     }
 
     .mention-highlight {
-      color: #5A9FFF;
-      background: rgba(90, 159, 255, 0.15);
+      color: var(--dt-brand-color-light);
+      background: rgba(0, 137, 255, 0.2);
 
       &:hover {
-        background: rgba(90, 159, 255, 0.25);
+        background: rgba(0, 137, 255, 0.3);
       }
 
       &.is-current-user {
-        background: rgba(255, 100, 100, 0.2);
-        color: #FF6464;
+        background: rgba(255, 100, 100, 0.25);
+        color: #FF8A80;
       }
     }
   }
 
   .message-pinned-badge {
-    background: rgba(65, 104, 224, 0.3);
-    color: #5A9FFF;
+    background: rgba(0, 137, 255, 0.25);
+    color: var(--dt-brand-color-light);
+  }
+}
+
+// 气泡进入动画 - 钉钉风格
+@keyframes bubbleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 </style>
