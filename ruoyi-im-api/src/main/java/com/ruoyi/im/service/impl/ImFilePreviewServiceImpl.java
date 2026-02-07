@@ -6,11 +6,8 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
 import com.ruoyi.im.service.ImFilePreviewService;
 import com.ruoyi.im.vo.file.ImFilePreviewInfoVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -34,14 +31,17 @@ import java.util.List;
 @Service
 public class ImFilePreviewServiceImpl implements ImFilePreviewService {
 
-    @Autowired
-    private ImFileAssetMapper fileAssetMapper;
+    private final ImFileAssetMapper fileAssetMapper;
+    private final FileUploadConfig fileUploadConfig;
+    private final String thumbnailDir;
 
-    @Resource
-    private FileUploadConfig fileUploadConfig;
-
-    @Value("${im.security.file.preview.thumbnail-dir:thumbnails/}")
-    private String thumbnailDir;
+    public ImFilePreviewServiceImpl(ImFileAssetMapper fileAssetMapper,
+                                    FileUploadConfig fileUploadConfig,
+                                    @Value("${im.security.file.preview.thumbnail-dir:thumbnails/}") String thumbnailDir) {
+        this.fileAssetMapper = fileAssetMapper;
+        this.fileUploadConfig = fileUploadConfig;
+        this.thumbnailDir = thumbnailDir;
+    }
 
     /** 支持预览的图片格式 */
     private static final Set<String> IMAGE_FORMATS = new HashSet<>(Arrays.asList(

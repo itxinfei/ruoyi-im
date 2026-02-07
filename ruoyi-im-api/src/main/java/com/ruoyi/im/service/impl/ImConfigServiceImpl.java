@@ -8,7 +8,6 @@ import com.ruoyi.im.service.ImConfigService;
 import com.ruoyi.im.util.ExceptionHandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,11 +27,13 @@ public class ImConfigServiceImpl implements ImConfigService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImConfigServiceImpl.class);
 
-    @Autowired
-    private ImUserConfigMapper imUserConfigMapper;
+    private final ImUserConfigMapper imUserConfigMapper;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    public ImConfigServiceImpl(ImUserConfigMapper imUserConfigMapper, ObjectMapper objectMapper) {
+        this.imUserConfigMapper = imUserConfigMapper;
+        this.objectMapper = objectMapper;
+    }
 
     // 默认通知设置
     private static final Map<String, Object> DEFAULT_NOTIFICATION_SETTINGS = new HashMap<>();

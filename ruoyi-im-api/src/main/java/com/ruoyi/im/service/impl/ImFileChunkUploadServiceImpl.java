@@ -14,12 +14,9 @@ import com.ruoyi.im.mapper.ImFileChunkUploadMapper;
 import com.ruoyi.im.service.ImFileChunkUploadService;
 import com.ruoyi.im.vo.file.ImFileChunkUploadInitVO;
 import com.ruoyi.im.vo.file.ImFileVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.Resource;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,17 +33,20 @@ import java.util.stream.Collectors;
 @Service
 public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
 
-    @Autowired
-    private ImFileChunkUploadMapper chunkUploadMapper;
+    private final ImFileChunkUploadMapper chunkUploadMapper;
+    private final ImFileChunkDetailMapper chunkDetailMapper;
+    private final ImFileAssetMapper fileAssetMapper;
+    private final FileUploadConfig fileUploadConfig;
 
-    @Autowired
-    private ImFileChunkDetailMapper chunkDetailMapper;
-
-    @Autowired
-    private ImFileAssetMapper fileAssetMapper;
-
-    @Resource
-    private FileUploadConfig fileUploadConfig;
+    public ImFileChunkUploadServiceImpl(ImFileChunkUploadMapper chunkUploadMapper,
+                                        ImFileChunkDetailMapper chunkDetailMapper,
+                                        ImFileAssetMapper fileAssetMapper,
+                                        FileUploadConfig fileUploadConfig) {
+        this.chunkUploadMapper = chunkUploadMapper;
+        this.chunkDetailMapper = chunkDetailMapper;
+        this.fileAssetMapper = fileAssetMapper;
+        this.fileUploadConfig = fileUploadConfig;
+    }
 
     /** 上传任务过期时间（小时） */
     private static final int EXPIRE_HOURS = 24;

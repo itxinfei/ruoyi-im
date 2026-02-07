@@ -9,7 +9,6 @@ import com.ruoyi.im.service.ImEmailAttachmentService;
 import com.ruoyi.im.service.ImEmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,14 +27,17 @@ public class ImEmailServiceImpl implements ImEmailService {
 
     private static final Logger log = LoggerFactory.getLogger(ImEmailServiceImpl.class);
 
-    @Autowired
-    private ImEmailMapper emailMapper;
+    private final ImEmailMapper emailMapper;
+    private final ImUserMapper userMapper;
+    private final ImEmailAttachmentService attachmentService;
 
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Autowired
-    private ImEmailAttachmentService attachmentService;
+    public ImEmailServiceImpl(ImEmailMapper emailMapper,
+                              ImUserMapper userMapper,
+                              ImEmailAttachmentService attachmentService) {
+        this.emailMapper = emailMapper;
+        this.userMapper = userMapper;
+        this.attachmentService = attachmentService;
+    }
 
     @Override
     public List<ImEmail> getEmailList(Long userId, String folder) {

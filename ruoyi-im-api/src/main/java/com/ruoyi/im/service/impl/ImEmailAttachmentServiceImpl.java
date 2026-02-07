@@ -13,12 +13,9 @@ import com.ruoyi.im.service.ImEmailAttachmentService;
 import com.ruoyi.im.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.Resource;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,17 +34,20 @@ public class ImEmailAttachmentServiceImpl implements ImEmailAttachmentService {
 
     private static final Logger log = LoggerFactory.getLogger(ImEmailAttachmentServiceImpl.class);
 
-    @Autowired
-    private ImEmailAttachmentMapper attachmentMapper;
+    private final ImEmailAttachmentMapper attachmentMapper;
+    private final ImEmailMapper emailMapper;
+    private final ImUserMapper userMapper;
+    private final FileUploadConfig fileUploadConfig;
 
-    @Autowired
-    private ImEmailMapper emailMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Resource
-    private FileUploadConfig fileUploadConfig;
+    public ImEmailAttachmentServiceImpl(ImEmailAttachmentMapper attachmentMapper,
+                                        ImEmailMapper emailMapper,
+                                        ImUserMapper userMapper,
+                                        FileUploadConfig fileUploadConfig) {
+        this.attachmentMapper = attachmentMapper;
+        this.emailMapper = emailMapper;
+        this.userMapper = userMapper;
+        this.fileUploadConfig = fileUploadConfig;
+    }
 
     /** 邮件附件存储子目录 */
     private static final String EMAIL_SUBDIR = "email";
