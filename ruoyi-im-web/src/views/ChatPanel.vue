@@ -114,13 +114,13 @@
       <input
         ref="fileInputRef"
         type="file"
-        style="display: none"
+        class="hidden-input"
         @change="handleFileUpload"
       >
       <input
         ref="imageInputRef"
         type="file"
-        style="display: none"
+        class="hidden-input"
         accept="image/*"
         @change="handleImageUpload"
       >
@@ -2010,8 +2010,8 @@ onMounted(() => {
 
 
   &.is-dragging {
-    background: #e6f7ff;
-    border: 2px dashed #1890ff;
+    background: var(--dt-brand-bg);
+    border: 2px dashed var(--dt-brand-color);
 
     &::after {
       content: '释放以上传文件';
@@ -2020,7 +2020,7 @@ onMounted(() => {
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 18px;
-      color: #1890ff;
+      color: var(--dt-brand-color);
       font-weight: 600;
       pointer-events: none;
     }
@@ -2028,15 +2028,15 @@ onMounted(() => {
 
   // 拖拽进入状态 - 更明显的视觉反馈
   &.is-drag-over {
-    background: rgba(24, 144, 255, 0.08);
-    box-shadow: inset 0 0 0 2px var(--dt-brand-color, #1890ff);
+    background: var(--dt-brand-light);
+    box-shadow: inset 0 0 0 2px var(--dt-brand-color);
     transition: all 0.2s ease;
 
     &::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(24, 144, 255, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle at center, var(--dt-brand-light) 0%, transparent 70%);
       pointer-events: none;
       animation: pulse-drag 1.5s ease-in-out infinite;
     }
@@ -2048,12 +2048,12 @@ onMounted(() => {
       left: 50%;
       transform: translate(-50%, -50%);
       padding: 16px 24px;
-      background: var(--dt-brand-color, #1890ff);
-      color: #fff;
+      background: var(--dt-brand-color);
+      color: var(--dt-bubble-right-text);
       font-size: 16px;
       font-weight: 500;
       border-radius: var(--dt-radius-md);
-      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+      box-shadow: var(--dt-shadow-brand);
       pointer-events: none;
       z-index: 100;
       display: flex;
@@ -2252,8 +2252,8 @@ onMounted(() => {
   animation: popoverFadeIn 0.2s var(--dt-ease-out);
 
   .dark & {
-    background: #2d2d2d;
-    border-color: #3e3e3e;
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
   }
 
   .emoji-popover-header {
@@ -2317,5 +2317,18 @@ onMounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+// 隐藏的文件输入框
+.hidden-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 </style>
