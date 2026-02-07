@@ -25,6 +25,8 @@
         <div
           class="chat-viewport"
           :class="{ 'with-pinned-panel': showPinnedPanel }"
+          role="region"
+          :aria-label="ARIA_LABELS.chatPanel"
         >
           <ChatHeader
             :session="session"
@@ -278,6 +280,7 @@ import ChatFilesPanel from '@/components/Chat/ChatFilesPanel.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 import CombineDetailDialog from '@/components/Chat/CombineDetailDialog.vue'
 import GroupFilePanel from '@/components/Chat/GroupFilePanel.vue'
+import { ARIA_LABELS } from '@/config/a11y'
 import ExportChatDialog from '@/components/Chat/ExportChatDialog.vue'
 import MultiSelectToolbar from '@/components/Chat/MultiSelectToolbar.vue'
 import ImageViewerDialog from '@/components/Chat/ImageViewerDialog.vue'
@@ -499,6 +502,8 @@ const handleLoadMore = async () => {
     } else {
       noMore.value = true
     }
+  } catch (error) {
+    ElMessage.error('历史消息加载失败，请稍后重试')
   } finally {
     loading.value = false
   }

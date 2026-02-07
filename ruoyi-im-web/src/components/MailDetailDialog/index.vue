@@ -192,9 +192,9 @@ const toggleStar = async () => {
     const newStarred = !props.email.starred
     const res = await starMail(props.email.id, newStarred)
     if (res.code === 200) {
-      props.email.starred = newStarred
       ElMessage.success(newStarred ? '已收藏' : '已取消收藏')
       emit('star', { id: props.email.id, starred: newStarred })
+      emit('update:email', { ...props.email, starred: newStarred })
     } else {
       ElMessage.error(res.msg || '操作失败')
     }

@@ -451,12 +451,15 @@ const messageLinks = computed(() => {
   return extractUrls(props.message.content, 3)
 })
 
-const bubbleClasses = computed(() => ({
-  'is-own': props.message.isOwn,
-  'is-selected': isSelected.value,
-  'is-long-press': isLongPressing.value,
-  [`type-${props.message.type.toLowerCase()}`]: true
-}))
+const bubbleClasses = computed(() => {
+  const type = (props.message.type || 'text').toLowerCase()
+  return {
+    'is-own': props.message.isOwn,
+    'is-selected': isSelected.value,
+    'is-long-press': isLongPressing.value,
+    [`type-${type}`]: true
+  }
+})
 
 const showStatus = computed(() => {
   return props.message.isOwn && (isSending.value || isFailed.value || isRead.value)
@@ -481,7 +484,7 @@ const canRecall = computed(() => {
   position: relative;
   display: inline-flex;
   align-items: flex-start;
-  max-width: min(520px, calc(100vw - 400px));
+  max-width: min(520px, 100%);
   // GPU 加速动画性能优化
   contain: layout style paint;
   will-change: transform, opacity;

@@ -2,7 +2,14 @@
   <div
     ref="listRef"
     class="message-list"
-    @scroll="handleScroll"
+    role="log"
+    aria-live="polite"
+    aria-relevant="additions text"
+    :aria-busy="loading ? 'true' : 'false'"
+    :aria-label="ARIA_LABELS.messageList"
+    tabindex="0"
+    @scroll.passive="handleScroll"
+    @keydown="handleKeydown"
   >
     <!-- 首次加载骨架屏 -->
     <SkeletonLoader
@@ -34,11 +41,14 @@
         :key="msg.id || msg.timeText"
         :data-id="msg.id"
         class="message-wrapper"
+        role="listitem"
       >
         <!-- 时间分隔符 -->
         <div
           v-if="msg.isTimeDivider"
           class="time-divider"
+          role="separator"
+          :aria-label="msg.timeText"
         >
           <span class="time-text">{{ msg.timeText }}</span>
         </div>
@@ -195,6 +205,8 @@ import MessageBubble from './MessageBubbleRefactored.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import { copyToClipboard } from '@/utils/format'
+import { ARIA_LABELS } from '@/config/a11y'
+import { debounce } from '@/utils/debounce'
 
 // 组合式函数
 import { useMessageVirtualScroll, AVERAGE_MESSAGE_HEIGHT } from './composables/useMessageVirtualScroll.js'
@@ -265,6 +277,49 @@ const handleScroll = event => {
   }
   // 调用 composable 的滚动处理
   handleScrollFromComposable(event)
+}
+
+const handleKeydown = event => {
+  if (!listRef.value) { return }
+  const key = event.key
+  const step = AVERAGE_MESSAGE_HEIGHT
+  const pageStep = Math.max(0, listRef.value.clientHeight - step)
+  const applyScroll = delta => {
+    if (typeof listRef.value.scrollBy === 'function') {
+      listRef.value.scrollBy({ top: delta, behavior: 'smooth' })
+    } else {
+      listRef.value.scrollTop += delta
+    }
+  }
+  if (key === 'ArrowDown') {
+    event.preventDefault()
+    applyScroll(step)
+    return
+  }
+  if (key === 'ArrowUp') {
+    event.preventDefault()
+    applyScroll(-step)
+    return
+  }
+  if (key === 'PageDown') {
+    event.preventDefault()
+    applyScroll(pageStep)
+    return
+  }
+  if (key === 'PageUp') {
+    event.preventDefault()
+    applyScroll(-pageStep)
+    return
+  }
+  if (key === 'Home') {
+    event.preventDefault()
+    listRef.value.scrollTop = 0
+    return
+  }
+  if (key === 'End') {
+    event.preventDefault()
+    listRef.value.scrollTop = listRef.value.scrollHeight
+  }
 }
 
 // 监听新消息，如果是自己的消息则滚动到底部
@@ -576,10 +631,12 @@ const maintainScroll = oldHeight => {
 }
 
 const observer = ref(null)
+const observedMessageIds = new Set() // 跟踪已观察的消息ID，避免重复观察
 
 // 初始化已读上报监听
 const initReadObserver = () => {
   if (observer.value) { observer.value.disconnect() }
+  observedMessageIds.clear() // 清空已观察记录
 
   observer.value = new IntersectionObserver(entries => {
     // 如果组件已卸载，不处理回调
@@ -602,13 +659,25 @@ const updateObserver = () => {
   nextTick(() => {
     if (isUnmounted.value) { return } // 组件已卸载，不执行 DOM 操作
     const items = listRef.value?.querySelectorAll('.message-wrapper[data-id]')
-    items?.forEach(el => observer.value?.observe(el))
+    items?.forEach(el => {
+      const msgId = el.getAttribute('data-id')
+      // 只观察未观察过的元素，避免重复观察
+      if (msgId && !observedMessageIds.has(msgId)) {
+        observer.value?.observe(el)
+        observedMessageIds.add(msgId)
+      }
+    })
   })
 }
 
+// 使用防抖优化 observer 更新频率
+const updateObserverDebounced = debounce(() => {
+  updateObserver()
+}, 200)
+
 watch(() => props.messages.length, () => {
   scrollToBottom()
-  updateObserver()
+  updateObserverDebounced()
 })
 
 onMounted(() => {
@@ -643,6 +712,7 @@ onMounted(() => {
 onUnmounted(() => {
   isUnmounted.value = true // 标记组件已卸载
   if (observer.value) { observer.value.disconnect() }
+  observedMessageIds.clear() // 清空观察记录
 })
 
 defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToMessage: scrollToMsg })
@@ -656,9 +726,12 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px; // 野火IM标准:20px padding
+  padding: 20px;
+  // 增加底部内边距，防止滚动按钮遮挡消息
+  padding-bottom: 60px; // 留出空间给 scroll-to-bottom 按钮
   background: #f5f5f5; // 野火IM标准:浅灰背景
   position: relative;
+  min-height: 0; // flex 子元素高度修复
   scroll-behavior: smooth;
   // 性能优化
   will-change: scroll-position;
@@ -705,9 +778,9 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 
 // 滚动到底部按钮 - 钉钉风格
 .scroll-to-bottom {
-  position: fixed;
-  right: calc(50% - 280px);
-  bottom: 80px;
+  position: absolute;  // 改为 absolute，相对于 message-list 容器定位
+  right: 20px;  // 固定距离容器右边缘 20px
+  bottom: 20px;  // 固定距离容器底边缘 20px
   display: flex;
   align-items: center;
   gap: 4px;
@@ -720,7 +793,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   cursor: pointer;
   box-shadow: var(--dt-shadow-sm);
   transition: all var(--dt-transition-fast);
-  z-index: 10;
+  z-index: 10;  // 在消息列表内部的层级
 
   .dark & {
     background: var(--dt-bg-card-dark);

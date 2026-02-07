@@ -22,8 +22,6 @@
       @screenshot="handleScreenshot"
       @at-member="handleAtMember"
       @smart-reply="handleShowSmartReply"
-      @voice-call="handleVoiceCall"
-      @video-call="handleVideoCall"
     />
 
     <!-- 录音动画区域 -->
@@ -1018,15 +1016,6 @@ const handleScheduleSaved = () => {
   ElMessage.success('日程已创建')
 }
 
-// ========== 通话功能 ==========
-const handleVoiceCall = () => {
-  emit('start-call')
-}
-
-const handleVideoCall = () => {
-  emit('start-video')
-}
-
 // ========== 暴露方法 ==========
 
 /**
@@ -1104,6 +1093,7 @@ onUnmounted(() => {
   background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
+  flex-shrink: 0; // 防止被 flex 布局压缩
   position: relative;
   border-top: 1px solid var(--dt-border-light);
   padding: 12px 16px 16px;

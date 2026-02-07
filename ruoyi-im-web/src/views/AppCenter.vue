@@ -568,7 +568,7 @@ const openApp = async app => {
     const appUrl = app.appUrl || ''
 
     switch (appType) {
-      case APP_TYPE.ROUTE:
+      case APP_TYPE.ROUTE: {
         // 内部路由跳转
         const routeKey = appUrl.toLowerCase()
         const targetModule = APP_ROUTE_MAP[routeKey]
@@ -581,6 +581,7 @@ const openApp = async app => {
           ElMessage.warning(`应用 "${app.name}" 的路由配置无效`)
         }
         break
+      }
 
       case APP_TYPE.IFRAME:
         // 嵌入式应用 - 通过事件通知父组件打开iframe对话框

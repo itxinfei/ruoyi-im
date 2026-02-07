@@ -23,9 +23,8 @@ import {
   deleteMessage as apiDeleteMessage,
   editMessage
 } from '@/api/im/message'
-import { setTodoReminder } from '@/api/im/marker'
+import { setTodoReminder, markMessage, unmarkMessage } from '@/api/im/marker'
 import { addFavorite, removeFavorite } from '@/api/im/favorite'
-import { markMessage, unmarkMessage } from '@/api/im/marker'
 
 export function useChatCommands(currentUser, sessionType) {
   const store = useStore()

@@ -28,9 +28,10 @@ function _formatMessageByType(type, content, options = {}) {
     const { showFileName = false } = options
 
     switch (type) {
-        case 'TEXT':
+        case 'TEXT': {
             const text = String(content)
             return text.length > 30 ? text.substring(0, 30) + '...' : text
+        }
 
         case 'IMAGE':
             return '[图片]'

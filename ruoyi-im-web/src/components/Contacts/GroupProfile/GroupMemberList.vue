@@ -415,7 +415,7 @@ const bottomSpacerHeight = computed(() => {
 const isOwnerOrAdmin = computed(() => props.isOwner || props.isAdmin)
 
 const isSelf = member => {
-  return (member.userId || member.id) == props.currentUser?.id
+  return (member.userId || member.id) === props.currentUser?.id
 }
 
 const isOnline = member => {

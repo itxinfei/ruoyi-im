@@ -54,8 +54,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { ShortcutKeys, ShortcutDescriptions, getShortcutLabel } from '@/composables/useKeyboardShortcuts'
-import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
+import { ShortcutKeys, ShortcutDescriptions, getShortcutLabel, useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 
 const props = defineProps({
   modelValue: {

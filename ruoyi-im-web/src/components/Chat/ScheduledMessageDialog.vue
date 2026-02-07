@@ -118,13 +118,14 @@ const getQuickTimeText = option => {
       targetTime.setDate(targetTime.getDate() + 1)
       targetTime.setHours(9, 0, 0, 0)
       break
-    case 'monday':
+    case 'monday': {
       targetTime = new Date(now)
       const day = targetTime.getDay()
       const diff = 7 - (day || 7)
       targetTime.setDate(targetTime.getDate() + diff)
       targetTime.setHours(9, 0, 0, 0)
       break
+    }
   }
 
   return formatDate(targetTime)
@@ -226,6 +227,16 @@ watch(visible, val => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
+
+// 设置定时消息弹窗的 z-index
+:deep(.el-dialog) {
+  z-index: $z-modal-above;
+}
+
+:deep(.el-overlay) {
+  z-index: $z-modal-above - 1;
+}
 
 .schedule-message-content {
   .message-preview {

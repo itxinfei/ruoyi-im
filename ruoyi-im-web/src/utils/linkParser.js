@@ -10,7 +10,7 @@ import { parseLinkPreview } from '@/api/im/message'
  * 匹配 http:// 或 https:// 开头的链接
  * 排除尾部标点符号 .,!?;:
  */
-const URL_PATTERN = /https?:\/\/[^\s<>"{}|\\^`\[\]]+[^\s<>"{}|\\^`\[\].,!?;:]/g
+const URL_PATTERN = /https?:\/\/[^\s<>"{}|\\^`[\]]+[^\s<>"{}|\\^`[\].,!?;:]/g
 
 /**
  * 内网地址检测正则

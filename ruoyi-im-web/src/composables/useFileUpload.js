@@ -23,7 +23,7 @@ export function useFileUpload(options = {}) {
   const {
     messages = ref([]),
     session = ref(null),
-    transformMsg = ((m) => m),
+    transformMsg = (m => m),
     onUploadSuccess = null,
     onUploadError = null
   } = options
@@ -58,7 +58,7 @@ export function useFileUpload(options = {}) {
    * @param {string} category - 文件类别 (image/video/file/voice)
    * @returns {Object} { valid: boolean, error?: string }
    */
-  const validateFile = (file, category = 'file') {
+  const validateFile = (file, category = 'file') => {
     const config = FILE_VALIDATION[category]
 
     // 检查文件类型
@@ -81,7 +81,7 @@ export function useFileUpload(options = {}) {
    * @param {Object} params - 消息参数
    * @returns {Object} 临时消息对象
    */
-  const createTempMessage = (params) => {
+  const createTempMessage = params => {
     const {
       type,
       content,
@@ -121,7 +121,7 @@ export function useFileUpload(options = {}) {
    * 标记消息失败
    * @param {string} tempId - 临时消息ID
    */
-  const markMessageFailed = (tempId) => {
+  const markMessageFailed = tempId => {
     const index = messages.value.findIndex(m => m.id === tempId)
     if (index !== -1) {
       messages.value[index].status = 'failed'
@@ -143,7 +143,7 @@ export function useFileUpload(options = {}) {
     uploadApi,
     sendApi,
     messageType,
-    processContent = (data) => JSON.stringify(data)
+    processContent = data => JSON.stringify(data)
   }) => {
     // 验证文件
     const validation = validateFile(file, category)
@@ -203,12 +203,12 @@ export function useFileUpload(options = {}) {
    * 上传图片
    * @param {File|FormData} fileOrFormData - 文件对象或FormData
    */
-  const uploadImageFile = async (fileOrFormData) => {
+  const uploadImageFile = async fileOrFormData => {
     const file = fileOrFormData instanceof FormData
       ? fileOrFormData.get('file')
       : fileOrFormData
 
-    if (!file) return
+    if (!file) {return}
 
     await handleUpload({
       file,
@@ -216,7 +216,7 @@ export function useFileUpload(options = {}) {
       uploadApi: uploadImage,
       sendApi: options.sendMessage,
       messageType: 'IMAGE',
-      processContent: (data) => JSON.stringify({
+      processContent: data => JSON.stringify({
         fileId: data.fileId,
         imageUrl: data.imageUrl
       })
@@ -227,12 +227,12 @@ export function useFileUpload(options = {}) {
    * 上传普通文件
    * @param {File|FormData} fileOrFormData - 文件对象或FormData
    */
-  const uploadNormalFile = async (fileOrFormData) => {
+  const uploadNormalFile = async fileOrFormData => {
     const file = fileOrFormData instanceof FormData
       ? fileOrFormData.get('file')
       : fileOrFormData
 
-    if (!file) return
+    if (!file) {return}
 
     await handleUpload({
       file,
@@ -240,7 +240,7 @@ export function useFileUpload(options = {}) {
       uploadApi: uploadFile,
       sendApi: options.sendMessage,
       messageType: 'FILE',
-      processContent: (data) => JSON.stringify({
+      processContent: data => JSON.stringify({
         fileId: data.fileId,
         fileName: data.fileName,
         size: data.size,

@@ -98,8 +98,14 @@ export function useInputResize(options = {}) {
       const saved = getItem(storageKey)
       if (saved) {
         const height = parseInt(saved, 10)
+        // 安全检查：确保高度在合理范围内，否则重置为默认值
         if (!isNaN(height) && height >= minHeight && height <= maxHeight) {
           containerHeight.value = height
+        } else {
+          // 值异常，清除缓存并使用默认值
+          console.warn(`[useInputResize] 缓存的高度值异常 (${height}px)，已重置为默认值`)
+          localStorage.removeItem(storageKey)
+          containerHeight.value = defaultHeight
         }
       }
     } catch (e) {

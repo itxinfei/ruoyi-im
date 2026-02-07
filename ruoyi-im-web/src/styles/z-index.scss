@@ -1,0 +1,42 @@
+// Z-index 层级标准
+// 使用时：@use '@/styles/z-index.scss' as *;
+
+// 基础层
+$z-base: 1;
+$z-sticky: 100;
+$z-fixed: 500;
+
+// 下拉层
+$z-dropdown: 2000;
+$z-popover: 2500;
+$z-picker: 3000;
+
+// 对话框层
+$z-modal-mask: 4000;
+$z-modal-base: 5000;
+$z-modal-above: 6000;
+$z-modal-top: 7000;
+
+// 浮动层
+$z-float-window: 8000;
+$z-notification: 9000;
+$z-call-overlay: 9500;
+$z-tooltip: 10000;
+
+// 全局导出
+:export {
+  zBase: $z-base;
+  zSticky: $z-sticky;
+  zFixed: $z-fixed;
+  zDropdown: $z-dropdown;
+  zPopover: $z-popover;
+  zPicker: $z-picker;
+  zModalMask: $z-modal-mask;
+  zModalBase: $z-modal-base;
+  zModalAbove: $z-modal-above;
+  zModalTop: $z-modal-top;
+  zFloatWindow: $z-float-window;
+  zNotification: $z-notification;
+  zCallOverlay: $z-call-overlay;
+  zTooltip: $z-tooltip;
+}

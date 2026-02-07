@@ -319,7 +319,7 @@ import {
   Plus, Search, Refresh, Delete, View, Edit,
   ChatLineRound, Compass
 } from '@element-plus/icons-vue'
-import { getGroupList, deleteGroup } from '@/api/admin'
+import { getGroupList, deleteGroup, getGroupStats } from '@/api/admin'
 
 const loading = ref(false)
 const groupList = ref([])

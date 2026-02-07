@@ -205,7 +205,7 @@ export function formatDuration(seconds) {
  * formatNumber(1234567) // "1,234,567"
  */
 export function formatNumber(num) {
-  if (num == null) {return ''}
+  if (num === null || num === undefined) {return ''}
   return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 

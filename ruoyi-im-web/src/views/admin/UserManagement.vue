@@ -536,7 +536,8 @@ import {
 import {
   getUserList, updateUserStatus, resetUserPassword,
   batchDeleteUsers, batchUpdateUserStatus, createUser,
-  updateUser, downloadUserTemplate, batchImportUsers, exportUsers
+  updateUser, downloadUserTemplate, batchImportUsers, exportUsers,
+  getUserStats
 } from '@/api/admin'
 
 // 数据定义

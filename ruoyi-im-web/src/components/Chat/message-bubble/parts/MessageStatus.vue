@@ -78,7 +78,6 @@
 <script setup>
 import { computed } from 'vue'
 import { formatRelativeTime } from '@/utils/message'
-import { MessageStatus } from '@/utils/message'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -112,6 +111,7 @@ const uiStatus = computed(() => {
 })
 
 // 未读人数（用于群聊）
+const isGroupChat = computed(() => props.sessionType === 'GROUP')
 const unreadCount = computed(() => {
   if (!isGroupChat.value) { return 0 }
   const total = props.message.totalMembers || 0
@@ -132,6 +132,9 @@ const isAllRead = computed(() => {
 const showReadInfo = computed(() => {
   return uiStatus.value === 'read' && (isGroupChat.value || props.message.readTime)
 })
+
+// readCount 计算属性
+const readCount = computed(() => props.message.readCount || 0)
 
 // 已读提示文本
 const readTooltip = computed(() => {

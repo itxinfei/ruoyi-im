@@ -71,38 +71,13 @@
               <span class="material-icons-outlined">screenshot</span>
               <span>截图</span>
             </el-dropdown-item>
+            <el-dropdown-item command="smart-reply">
+              <span class="material-icons-outlined">auto_awesome</span>
+              <span>智能回复</span>
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-    </div>
-
-    <!-- 右侧工具组:通话 -->
-    <div class="toolbar-right">
-      <div class="call-buttons">
-        <el-tooltip
-          content="语音通话"
-          placement="top"
-        >
-          <button
-            class="toolbar-btn call-btn voice-call"
-            @click="$emit('voice-call')"
-          >
-            <span class="material-icons-outlined">phone</span>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip
-          content="视频通话"
-          placement="top"
-        >
-          <button
-            class="toolbar-btn call-btn video-call"
-            @click="$emit('video-call')"
-          >
-            <span class="material-icons-outlined">videocam</span>
-          </button>
-        </el-tooltip>
-      </div>
     </div>
   </div>
 </template>
@@ -125,8 +100,7 @@ const emit = defineEmits([
   'upload-file',
   'screenshot',
   'at-member',
-  'voice-call',
-  'video-call'
+  'smart-reply'
 ])
 
 // 处理更多菜单命令
@@ -150,12 +124,6 @@ const handleMoreCommand = command => {
     display: flex;
     align-items: center;
     gap: 12px; // 从20px调整为12px,更紧凑
-  }
-
-  .toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
   }
 }
 
@@ -212,34 +180,6 @@ const handleMoreCommand = command => {
     }
   }
 
-  // 通话按钮特殊样式
-  &.call-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--dt-radius-md);
-
-    &.voice-call {
-      color: #22c55e;
-
-      &:hover {
-        background: rgba(34, 197, 94, 0.1);
-      }
-    }
-
-    &.video-call {
-      color: #3b82f6;
-
-      &:hover {
-        background: rgba(59, 130, 246, 0.1);
-      }
-    }
-  }
-}
-
-.call-buttons {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 // 更多菜单样式
@@ -280,24 +220,6 @@ const handleMoreCommand = command => {
       &.active {
         background: rgba(0, 137, 255, 0.15);
         color: var(--dt-brand-color);
-      }
-
-      &.call-btn {
-        &.voice-call {
-          color: #4ade80;
-
-          &:hover {
-            background: rgba(34, 197, 94, 0.15);
-          }
-        }
-
-        &.video-call {
-          color: #60a5fa;
-
-          &:hover {
-            background: rgba(59, 130, 246, 0.15);
-          }
-        }
       }
     }
   }

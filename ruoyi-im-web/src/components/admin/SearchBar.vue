@@ -264,14 +264,14 @@ const handleSearch = () => {
 // 重置
 const handleReset = () => {
   // 重置为初始值
-  items.value.forEach(item => {
+  props.items.forEach(item => {
     if (item.type === 'daterange') {
       internalForm.value[item.prop] = []
     } else {
       internalForm.value[item.prop] = item.defaultValue || (item.type === 'select' ? '' : '')
     }
   })
-  expandItems.value.forEach(item => {
+  props.expandItems.forEach(item => {
     if (item.type === 'daterange') {
       internalForm.value[item.prop] = []
     } else {

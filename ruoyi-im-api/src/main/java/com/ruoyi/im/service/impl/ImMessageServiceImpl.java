@@ -259,12 +259,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 更新会话的最后消息信息
      */
     private void updateConversationLastMessage(Long conversationId, ImMessage message) {
-        ImConversation conversationUpdate = new ImConversation();
-        conversationUpdate.setId(conversationId);
-        conversationUpdate.setLastMessageId(message.getId());
-        conversationUpdate.setLastMessageTime(message.getCreateTime());
-        conversationUpdate.setUpdateTime(LocalDateTime.now());
-        imConversationMapper.updateById(conversationUpdate);
+        imConversationMapper.updateLastMessage(conversationId, message.getId(), message.getCreateTime());
     }
 
     /**

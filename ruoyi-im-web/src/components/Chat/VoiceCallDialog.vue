@@ -153,7 +153,7 @@ const isCalling = computed(() => callStatus.value === 'calling')
 const isConnected = computed(() => callStatus.value === 'connected')
 
 const callStatusText = computed(() => {
-  if (isIncoming.value) {return '来电中...'}
+  if (props.isIncoming) {return '来电中...'}
   if (callStatus.value === 'calling') {return '正在呼叫...'}
   if (callStatus.value === 'connected') {return '通话中'}
   if (callStatus.value === 'ended') {return '通话结束'}
@@ -162,7 +162,7 @@ const callStatusText = computed(() => {
 })
 
 const minimizedStatusText = computed(() => {
-  if (isIncoming.value) {return '来电中'}
+  if (props.isIncoming) {return '来电中'}
   if (callStatus.value === 'calling') {return '呼叫中'}
   if (callStatus.value === 'connected') {return formattedDuration.value}
   return '语音通话'
@@ -300,6 +300,7 @@ defineExpose({
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
 
 // ============================================================================
 // 语音通话遮罩层
@@ -312,7 +313,7 @@ defineExpose({
   bottom: 0;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(10px);
-  z-index: 10000;
+  z-index: $z-call-overlay;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -334,6 +335,7 @@ defineExpose({
 .voice-call-dialog {
   position: relative;
   width: 380px;
+  max-width: 90vw; // 响应式：移动端最大宽度限制
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border-radius: var(--dt-radius-3xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -489,11 +491,12 @@ defineExpose({
   bottom: 100px;
   right: 30px;
   width: 280px;
+  max-width: calc(100vw - 60px); // 响应式：移动端最大宽度限制
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(20px);
   border-radius: var(--dt-radius-xl);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  z-index: 9999;
+  z-index: $z-float-window;
   overflow: hidden;
   cursor: pointer;
 

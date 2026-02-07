@@ -104,12 +104,8 @@ let expireTimer = null
 
 // 有效期文本
 const expireText = computed(() => {
-  if (isExpired.value) {return '已过期'}
   const remaining = expireTime.value - Date.now()
-  if (remaining <= 0) {
-    isExpired.value = true
-    return '已过期'
-  }
+  if (remaining <= 0 || isExpired.value) {return '已过期'}
   const days = Math.floor(remaining / (24 * 60 * 60 * 1000))
   if (days > 0) {return `${days}天后过期`}
   const hours = Math.floor(remaining / (60 * 60 * 1000))

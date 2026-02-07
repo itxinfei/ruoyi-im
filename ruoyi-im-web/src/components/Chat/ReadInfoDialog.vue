@@ -4,7 +4,7 @@
     title="已读详情"
     width="400px"
     :close-on-click-modal="true"
-    @update:model-value="visible = $event"
+    @update:model-value="emit('update:visible', $event)"
   >
     <div class="read-info-container">
       <!-- 单聊已读信息 -->
@@ -96,7 +96,7 @@
           <span>提醒未读 ({{ unreadMembers.length }})</span>
         </el-button>
 
-        <el-button @click="visible = false">
+        <el-button @click="emit('update:visible', false)">
           关闭
         </el-button>
       </div>
@@ -194,6 +194,16 @@ const unreadMembers = computed(() => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use '@/styles/z-index.scss' as *;
+
+// 设置已读详情弹窗的 z-index，避免被其他元素遮挡
+:deep(.el-dialog) {
+  z-index: $z-modal-above;
+}
+
+:deep(.el-overlay) {
+  z-index: $z-modal-above - 1;
+}
 
 .read-info-container {
   padding: 8px 0;

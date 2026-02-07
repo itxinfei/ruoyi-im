@@ -589,7 +589,7 @@ const handleSubmit = async () => {
     submitting.value = true
 
     // 提取附件ID列表
-    const attachmentIds = form.attachments.map(a => a.id).filter(id => id != null)
+    const attachmentIds = form.attachments.map(a => a.id).filter(id => id !== null && id !== undefined)
 
     const res = await sendMail({
       toIds: form.toIds,

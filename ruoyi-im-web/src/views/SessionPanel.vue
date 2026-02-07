@@ -1071,7 +1071,7 @@ const handleMoveSessionToGroup = groupId => {
     groupId
   })
   ElMessage.success('已移动会话')
-  hideContextMenu()
+  contextMenu.value.show = false
 }
 
 // 排序后的会话列表

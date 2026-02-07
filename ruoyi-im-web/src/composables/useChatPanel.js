@@ -272,7 +272,7 @@ export function useChatPanel(options = {}) {
    * 切换弹窗状态
    */
   const toggleDialog = (dialogName, forceState) => {
-    if (dialogStates.value.hasOwnProperty(dialogName)) {
+    if (Object.hasOwn(dialogStates.value, dialogName)) {
       dialogStates.value[dialogName] = forceState ?? !dialogStates.value[dialogName]
     }
   }

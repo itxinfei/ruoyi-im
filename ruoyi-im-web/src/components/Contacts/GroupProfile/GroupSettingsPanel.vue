@@ -173,6 +173,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Edit, Switch as SwitchIcon, Delete, CircleClose, ArrowRight } from '@element-plus/icons-vue'
 
 const props = defineProps({

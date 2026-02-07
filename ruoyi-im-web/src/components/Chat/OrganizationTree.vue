@@ -87,8 +87,7 @@ import { ref, watch, computed } from 'vue'
 import { Search, Folder, FolderOpened } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import { getDepartmentTree } from '@/api/organization'
-import { getDepartmentMembers } from '@/api/organization'
+import { getDepartmentTree, getDepartmentMembers } from '@/api/organization'
 
 const props = defineProps({
   // 是否显示搜索
