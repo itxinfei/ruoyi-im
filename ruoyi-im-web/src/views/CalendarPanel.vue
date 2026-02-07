@@ -76,7 +76,7 @@
             <el-checkbox v-model="cat.enabled" />
             <div
               class="color-dot"
-              :style="{ backgroundColor: cat.hex }"
+              :style="{ '--dot-color': cat.hex }"
             />
             <span class="name">{{ cat.name }}</span>
           </div>
@@ -292,7 +292,7 @@
           >
             <div
               class="color-bar"
-              :style="{ backgroundColor: getHexColor(event.color) }"
+              :style="{ '--event-color': getHexColor(event.color) }"
             />
             <div class="details">
               <div class="t">
@@ -335,7 +335,7 @@
       >
         <h3
           class="text-lg font-bold border-l-4 pl-3"
-          :style="{ borderColor: getHexColor(activeEvent.color) }"
+          :style="{ '--event-color': getHexColor(activeEvent.color) }"
         >
           {{ activeEvent.title }}
         </h3>
@@ -514,15 +514,17 @@ watch(currentDate, loadEvents)
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/design-tokens.scss' as *;
+
 // ============================================================================
 // PC 桌面端全局容器
 // ============================================================================
 .calendar-pc-container {
   display: flex;
   height: 100%;
-  background: #fff;
-  color: #334155;
-  .dark & { background: #0f172a; color: #cbd5e1; }
+  background: var(--dt-bg-card);
+  color: var(--dt-text-primary);
+  .dark & { background: var(--dt-bg-card-dark); color: var(--dt-text-primary-dark); }
 }
 
 // ============================================================================
@@ -530,24 +532,24 @@ watch(currentDate, loadEvents)
 // ============================================================================
 .calendar-aside {
   width: 240px;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid var(--dt-border-light);
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
-  .dark & { border-color: #1e293b; background: #0f172a; }
+  background: var(--dt-bg-body);
+  .dark & { border-color: var(--dt-border-dark); background: var(--dt-bg-sidebar-dark); }
 
   .aside-top { padding: 20px; }
   .create-btn {
     @apply w-full !h-10 !rounded-md !font-bold flex items-center justify-center gap-2;
-    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.15);
+    box-shadow: var(--dt-shadow-brand);
   }
 
   .mini-picker-wrapper {
     padding: 0 16px;
     .mini-cal-header {
       @apply flex items-center justify-between mb-3 px-2;
-      .year-month { font-size: 13px; font-weight: 800; color: #1e293b; .dark & { color: #f1f5f9; } }
-      .nav-ops { @apply flex gap-2 text-slate-400 cursor-pointer; i:hover { color: #0089FF; } }
+      .year-month { font-size: 13px; font-weight: 800; color: var(--dt-text-primary); .dark & { color: var(--dt-text-primary-dark); } }
+      .nav-ops { @apply flex gap-2 text-slate-400 cursor-pointer; i:hover { color: var(--dt-brand-color); } }
     }
     .mini-cal-grid {
       display: grid;
@@ -556,7 +558,7 @@ watch(currentDate, loadEvents)
       .week-label { @apply text-[10px] font-black text-slate-400 text-center py-1 uppercase; }
       .day-cell {
         @apply aspect-square flex items-center justify-center text-[11px] font-medium rounded cursor-pointer transition-all;
-        &:hover { background: #e2e8f0; .dark & { background: #1e293b; } }
+        &:hover { background: var(--dt-bg-hover); .dark & { background: var(--dt-bg-hover-dark); } }
         &.not-current { @apply text-slate-300 dark:text-slate-700; }
         &.is-today { @apply text-primary font-bold; }
         &.is-active { @apply bg-primary text-white font-black shadow-md; }
@@ -571,7 +573,7 @@ watch(currentDate, loadEvents)
     .list-title { @apply text-[10px] font-black uppercase tracking-widest mb-4; }
     .list-item {
       @apply flex items-center gap-3 mb-2 px-2 py-1.5 rounded cursor-pointer hover:bg-slate-200/50;
-      .color-dot { @apply w-2 h-2 rounded-full; }
+      .color-dot { @apply w-2 h-2 rounded-full; background: var(--dot-color, var(--dt-brand-color)); }
       .name { @apply text-sm font-medium text-slate-600 dark:text-slate-400; }
     }
   }
@@ -590,17 +592,17 @@ watch(currentDate, loadEvents)
 .main-header {
   height: 56px;
   padding: 0 24px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  .dark & { border-color: #1e293b; }
+  .dark & { border-color: var(--dt-border-dark); }
 
   .left-tools {
     display: flex;
     align-items: center;
     gap: 20px;
-    .current-date-text { font-size: 18px; font-weight: 800; color: #1e293b; .dark & { color: #f1f5f9; } }
+    .current-date-text { font-size: 18px; font-weight: 800; color: var(--dt-text-primary); .dark & { color: var(--dt-text-primary-dark); } }
     .tool-btn {
       @apply h-8 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center hover:bg-slate-50 transition-colors;
       &:first-child { border-radius: var(--dt-radius-sm) 0 0 var(--dt-radius-sm); }
@@ -634,14 +636,14 @@ watch(currentDate, loadEvents)
     .body-cell {
       @apply border-r border-b border-slate-100 dark:border-slate-800 p-2 flex flex-col relative transition-colors;
       &:hover {
-        background: #f8fafc;
+        background: var(--dt-bg-hover);
         .dark & {
-          background: rgba(30, 41, 59, 0.3);
+          background: var(--dt-bg-hover-dark);
         }
         .add-hover-btn { opacity: 1; }
       }
-      &.not-curr { background: #fafbfc; .dark & { background: rgba(15, 23, 42, 0.5); } .day-num { opacity: 0.3; } }
-      &.is-active { background: rgba(0, 137, 255, 0.02); }
+      &.not-curr { background: var(--dt-bg-body); .dark & { background: var(--dt-bg-tertiary-dark); } .day-num { opacity: 0.3; } }
+      &.is-active { background: var(--dt-brand-bg); }
       
       .cell-head {
         @apply flex justify-between items-start mb-1;
@@ -685,7 +687,7 @@ watch(currentDate, loadEvents)
       @apply flex-1 py-3 flex flex-col items-center border-l border-slate-50 dark:border-slate-800;
       .name { @apply text-[10px] font-black text-slate-400 uppercase; }
       .date { @apply text-lg font-black text-slate-700 dark:text-slate-200; }
-      &.is-today { .name, .date { color: #0089FF; } background: rgba(0, 137, 255, 0.02); }
+      &.is-today { .name, .date { color: var(--dt-brand-color); } background: var(--dt-brand-bg); }
     }
   }
   .week-body-container {
@@ -699,7 +701,7 @@ watch(currentDate, loadEvents)
       .week-col {
         @apply flex-1 relative border-l border-slate-50 dark:border-slate-800;
         .hour-block { @apply h-20 border-b border-slate-50 dark:border-slate-800/50; }
-        &:hover { background: rgba(0, 137, 255, 0.01); }
+        &:hover { background: var(--dt-brand-bg); }
       }
     }
   }
@@ -715,8 +717,8 @@ watch(currentDate, loadEvents)
 
 .pc-now-line {
   @apply absolute left-0 right-0 flex items-center z-10 pointer-events-none;
-  height: 2px; background: #ef4444;
-  .marker { @apply w-2 h-2 rounded-full bg-red-500 -ml-1 shadow-sm; }
+  height: 2px; background: var(--dt-error-color);
+  .marker { @apply w-2 h-2 rounded-full -ml-1 shadow-sm; background: var(--dt-error-color); }
 }
 
 // ============================================================================
@@ -735,7 +737,7 @@ watch(currentDate, loadEvents)
   
   .agenda-card {
     @apply mb-4 p-3 rounded-lg border border-slate-100 dark:border-slate-800 flex gap-3 cursor-pointer hover:shadow-md transition-all;
-    .color-bar { @apply w-1 rounded-full flex-shrink-0; }
+    .color-bar { @apply w-1 rounded-full flex-shrink-0; background: var(--event-color, var(--dt-brand-color)); }
     .details {
       .t { @apply text-sm font-bold mb-1; }
       .m { @apply text-[11px] text-slate-400; }
@@ -755,5 +757,6 @@ watch(currentDate, loadEvents)
 .pc-dialog {
   :deep(.el-dialog__header) { @apply font-bold border-b border-slate-100 dark:border-slate-800 p-4; }
   :deep(.el-dialog__body) { @apply p-6; }
+  :deep(.border-l-4) { border-color: var(--event-color, var(--dt-brand-color)) !important; }
 }
 </style>
