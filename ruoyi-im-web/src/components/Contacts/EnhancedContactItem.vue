@@ -159,11 +159,11 @@ const escapeHtml = str => {
 // 标签颜色生成
 const getTagColor = tag => {
   const colors = [
-    'rgba(64, 158, 255, 0.15)',
-    'rgba(103, 194, 58, 0.15)',
-    'rgba(230, 162, 60, 0.15)',
-    'rgba(245, 108, 108, 0.15)',
-    'rgba(121, 72, 234, 0.15)'
+    'var(--dt-brand-extra-light)',
+    'var(--dt-success-05)',
+    'var(--dt-warning-bg)',
+    'var(--dt-error-bg)',
+    'var(--dt-info-color)'
   ]
   let hash = 0
   for (let i = 0; i < tag.length; i++) {
@@ -255,7 +255,7 @@ const getTagColor = tag => {
 
   &.online .indicator-dot {
     background-color: var(--el-color-success);
-    box-shadow: 0 0 0 2px rgba(var(--el-color-success-rgb), 0.2);
+    box-shadow: 0 0 0 2px var(--dt-shadow-success-glow);
   }
 }
 

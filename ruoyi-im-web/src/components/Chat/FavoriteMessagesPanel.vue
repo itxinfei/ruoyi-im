@@ -418,7 +418,7 @@ watch(() => props.visible, newVal => {
   color: var(--dt-text-primary);
 
   .material-icons-outlined {
-    color: #FFD700;
+    color: var(--dt-warning-color);
     font-size: 20px;
   }
 }
@@ -555,14 +555,14 @@ watch(() => props.visible, newVal => {
   gap: 4px;
   margin-top: 8px;
   padding: 6px 8px;
-  background: rgba(255, 215, 0, 0.1);
+  background: var(--dt-warning-bg);
   border-radius: var(--dt-radius-sm);
   font-size: 12px;
   color: var(--dt-text-secondary);
 
   .material-icons-outlined {
     font-size: 14px;
-    color: #FFD700;
+    color: var(--dt-warning-color);
   }
 }
 
@@ -613,7 +613,7 @@ watch(() => props.visible, newVal => {
   }
 
   .favorite-remark {
-    background: rgba(255, 215, 0, 0.15);
+    background: var(--dt-warning-bg);
   }
 }
 </style>

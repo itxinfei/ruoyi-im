@@ -235,16 +235,16 @@ onUnmounted(() => {
 .desktop-sticker {
   position: fixed;
   min-width: 200px;
-  background: rgba(30, 30, 30, 0.95);
+  background: var(--dt-surface-elevated);
   border-radius: var(--dt-radius-md);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--dt-shadow-md);
   overflow: hidden;
   user-select: none;
   transition: box-shadow 0.2s;
 }
 
 .desktop-sticker:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--dt-shadow-lg);
 }
 
 .desktop-sticker.minimized {
@@ -257,14 +257,14 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--dt-surface-overlay);
   cursor: move;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--dt-border-color);
 }
 
 .sticker-title {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--dt-text-secondary);
   font-weight: 500;
 }
 
@@ -290,17 +290,17 @@ onUnmounted(() => {
   border-radius: var(--dt-radius-sm);
   cursor: pointer;
   transition: all 0.2s;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--dt-icon-secondary);
 }
 
 .control-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--dt-hover-bg);
+  color: var(--dt-text-primary);
 }
 
 .control-btn.close-btn:hover {
-  background: rgba(255, 59, 48, 0.3);
-  color: #ff3b30;
+  background: var(--dt-danger-bg-hover);
+  color: var(--dt-danger-primary);
 }
 
 .control-btn svg {
@@ -311,7 +311,7 @@ onUnmounted(() => {
 /* ==================== 内容区 ==================== */
 .sticker-content {
   padding: 8px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--dt-surface-base);
 }
 
 .sticker-content img {
@@ -332,8 +332,8 @@ onUnmounted(() => {
   left: 50%;
   transform: translateX(-50%);
   padding: 4px 12px;
-  background: rgba(0, 0, 0, 0.7);
-  color: rgba(255, 255, 255, 0.7);
+  background: var(--dt-surface-overlay);
+  color: var(--dt-text-secondary);
   font-size: 11px;
   border-radius: var(--dt-radius-lg);
   pointer-events: none;

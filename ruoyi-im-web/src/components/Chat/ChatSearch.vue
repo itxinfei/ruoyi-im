@@ -1,155 +1,97 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    title="搜索聊天记录"
-    :width="600"
-    :close-on-click-modal="true"
-    :close-on-press-escape="true"
-    class="chat-search-dialog"
-    @open="handleOpen"
-    @close="handleClose"
-  >
-    <div class="chat-search">
-      <!-- 搜索栏 -->
-      <div class="search-bar">
-        <div class="search-input-wrapper">
-          <span class="material-icons-outlined search-icon">search</span>
-          <input
-            ref="searchInputRef"
-            v-model="searchKeyword"
-            class="search-input"
-            placeholder="搜索聊天记录..."
-            type="text"
-            @input="handleSearch"
-            @keydown.down="handleKeyDown"
-            @keydown.up="handleKeyUp"
-            @keydown.enter="handleEnter"
-          >
-          <span
-            v-if="searchKeyword"
-            class="clear-btn"
-            @click="handleClear"
-          >
-            <span class="material-icons-outlined">close</span>
-          </span>
-        </div>
-        <div class="search-actions">
-          <button
-            v-if="totalCount > 0"
-            class="nav-btn"
-            title="上一个"
-            @click="navigatePrev"
-          >
-            <span class="material-icons-outlined">chevron_left</span>
-          </button>
-          <span
-            v-if="totalCount > 0"
-            class="result-count"
-          >
-            {{ currentIndex + 1 }}&nbsp;/&nbsp;{{ totalCount }}
-          </span>
-          <button
-            v-if="totalCount > 0"
-            class="nav-btn"
-            title="下一个"
-            @click="navigateNext"
-          >
-            <span class="material-icons-outlined">chevron_right</span>
-          </button>
-        </div>
-      </div>
+  <!-- 侧边搜索面板 -->
+  <transition name="slide-right">
+    <div v-if="dialogVisible" class="chat-search-sidebar">
+      <div class="sidebar-overlay" @click="handleClose" />
 
-      <!-- 搜索结果列表 -->
-      <div
-        v-if="!loading && searchResults.length > 0"
-        class="search-results"
-      >
-        <div class="results-header">
-          <span class="results-title">找到 {{ totalCount }} 条结果</span>
+      <div class="sidebar-panel">
+        <!-- 头部 -->
+        <div class="sidebar-header">
+          <h3 class="header-title">搜索聊天记录</h3>
+          <button class="close-btn" @click="handleClose">
+            <span class="material-icons-outlined">close</span>
+          </button>
         </div>
-        <div
-          ref="resultsListRef"
-          class="results-list"
-        >
-          <div
-            v-for="(result, index) in searchResults"
-            :key="result.id"
-            class="result-item"
-            :class="{ active: index === currentIndex }"
-            @click="handleSelectResult(result, index)"
-          >
-            <div class="result-header">
-              <DingtalkAvatar
-                :name="result.senderName"
-                :user-id="result.senderId"
-                :src="result.senderAvatar"
-                :size="28"
-                shape="square"
-              />
-              <span class="sender-name">{{ result.senderName }}</span>
-              <span class="result-time">{{ formatTime(result.sendTime) }}</span>
+        <div class="chat-search">
+          <!-- 搜索栏 -->
+          <div class="search-bar">
+            <div class="search-input-wrapper">
+              <span class="material-icons-outlined search-icon">search</span>
+              <input ref="searchInputRef" v-model="searchKeyword" class="search-input" placeholder="搜索聊天记录..."
+                type="text" @input="handleSearch" @keydown.down="handleKeyDown" @keydown.up="handleKeyUp"
+                @keydown.enter="handleEnter">
+              <span v-if="searchKeyword" class="clear-btn" @click="handleClear">
+                <span class="material-icons-outlined">close</span>
+              </span>
             </div>
-            <div class="result-content">
-              <div
-                v-if="result.type === 'TEXT'"
-                class="text-result"
-                v-html="highlightKeyword(result.content)"
-              />
-              <div
-                v-else-if="result.type === 'IMAGE'"
-                class="media-result"
-              >
-                <span class="material-icons-outlined">image</span>
-                <span>[图片]</span>
-              </div>
-              <div
-                v-else-if="result.type === 'FILE'"
-                class="media-result"
-              >
-                <span class="material-icons-outlined">insert_drive_file</span>
-                <span>[文件] {{ getFileName(result.content) }}</span>
-              </div>
-              <div
-                v-else-if="result.type === 'VIDEO'"
-                class="media-result"
-              >
-                <span class="material-icons-outlined">videocam</span>
-                <span>[视频]</span>
-              </div>
-              <div
-                v-else-if="result.type === 'VOICE'"
-                class="media-result"
-              >
-                <span class="material-icons-outlined">mic</span>
-                <span>[语音]</span>
+            <div class="search-actions">
+              <button v-if="totalCount > 0" class="nav-btn" title="上一个" @click="navigatePrev">
+                <span class="material-icons-outlined">chevron_left</span>
+              </button>
+              <span v-if="totalCount > 0" class="result-count">
+                {{ currentIndex + 1 }}&nbsp;/&nbsp;{{ totalCount }}
+              </span>
+              <button v-if="totalCount > 0" class="nav-btn" title="下一个" @click="navigateNext">
+                <span class="material-icons-outlined">chevron_right</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 搜索结果列表 -->
+          <div v-if="!loading && searchResults.length > 0" class="search-results">
+            <div class="results-header">
+              <span class="results-title">找到 {{ totalCount }} 条结果</span>
+            </div>
+            <div ref="resultsListRef" class="results-list">
+              <div v-for="(result, index) in searchResults" :key="result.id" class="result-item"
+                :class="{ active: index === currentIndex }" @click="handleSelectResult(result, index)">
+                <div class="result-header">
+                  <DingtalkAvatar :name="result.senderName" :user-id="result.senderId" :src="result.senderAvatar"
+                    :size="28" shape="square" />
+                  <span class="sender-name">{{ result.senderName }}</span>
+                  <span class="result-time">{{ formatTime(result.sendTime) }}</span>
+                </div>
+                <div class="result-content">
+                  <div v-if="result.type === 'TEXT'" class="text-result" v-html="highlightKeyword(result.content)" />
+                  <div v-else-if="result.type === 'IMAGE'" class="media-result">
+                    <span class="material-icons-outlined">image</span>
+                    <span>[图片]</span>
+                  </div>
+                  <div v-else-if="result.type === 'FILE'" class="media-result">
+                    <span class="material-icons-outlined">insert_drive_file</span>
+                    <span>[文件] {{ getFileName(result.content) }}</span>
+                  </div>
+                  <div v-else-if="result.type === 'VIDEO'" class="media-result">
+                    <span class="material-icons-outlined">videocam</span>
+                    <span>[视频]</span>
+                  </div>
+                  <div v-else-if="result.type === 'VOICE'" class="media-result">
+                    <span class="material-icons-outlined">mic</span>
+                    <span>[语音]</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- 无结果 -->
+          <div v-else-if="!loading && searchKeyword && searchResults.length === 0" class="no-results">
+            <span class="material-icons-outlined empty-icon">search_off</span>
+            <p>未找到 "{{ searchKeyword }}" 相关消息</p>
+            <span class="hint">试试其他关键词</span>
+          </div>
+
+          <!-- 搜索中 -->
+          <div v-if="loading" class="search-loading">
+            <el-icon class="is-loading">
+              <Loading />
+            </el-icon>
+            <span>搜索中...</span>
+          </div>
         </div>
       </div>
-
-      <!-- 无结果 -->
-      <div
-        v-else-if="!loading && searchKeyword && searchResults.length === 0"
-        class="no-results"
-      >
-        <span class="material-icons-outlined empty-icon">search_off</span>
-        <p>未找到 "{{ searchKeyword }}" 相关消息</p>
-        <span class="hint">试试其他关键词</span>
-      </div>
-
-      <!-- 搜索中 -->
-      <div
-        v-if="loading"
-        class="search-loading"
-      >
-        <el-icon class="is-loading">
-          <Loading />
-        </el-icon>
-        <span>搜索中...</span>
-      </div>
     </div>
-  </el-dialog>
+  </transition>
 </template>
 
 <script setup>
@@ -417,8 +359,8 @@ onUnmounted(() => {
 
   &:focus-within {
     background: var(--dt-bg-card);
-    border-color: #4168e0; // 野火IM蓝
-    box-shadow: 0 0 0 3px rgba(65, 104, 224, 0.1);
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 3px var(--dt-brand-light);
   }
 
   .search-icon {
@@ -554,10 +496,10 @@ onUnmounted(() => {
   }
 
   &.active {
-    background: rgba(65, 104, 224, 0.1); // 野火IM蓝浅色背景
+    background: var(--dt-brand-light);
 
     .sender-name {
-      color: #4168e0; // 野火IM蓝
+      color: var(--dt-brand-color);
     }
   }
 
@@ -591,7 +533,7 @@ onUnmounted(() => {
     -webkit-box-orient: vertical;
 
     :deep(.highlight) {
-      background-color: rgba(255, 235, 59, 0.4); // 纯色高亮
+      background-color: var(--dt-search-highlight-bg);
       color: inherit;
       padding: 0 2px;
       border-radius: var(--dt-radius-sm);
@@ -661,22 +603,131 @@ onUnmounted(() => {
 }
 
 // ============================================================================
-// 弹窗样式覆盖
+// 侧边栏容器
 // ============================================================================
-:deep(.chat-search-dialog) {
-  .el-dialog__header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--dt-border-light);
+.chat-search-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+// 遮罩层
+.sidebar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--dt-bg-overlay);
+  backdrop-filter: blur(2px);
+}
+
+// 侧边栏面板
+.sidebar-panel {
+  position: relative;
+  width: 360px;
+  height: 100%;
+  background: var(--dt-bg-card);
+  box-shadow: var(--dt-shadow-md);
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+// 头部
+.sidebar-header {
+  height: 56px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--dt-border-lighter);
+  flex-shrink: 0;
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin: 0;
   }
 
-  .el-dialog__body {
-    padding: 16px 20px;
-    max-height: 60vh;
-    overflow-y: auto;
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dt-radius-md);
+    border: none;
+    background: transparent;
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--dt-ease-out);
+
+    &:hover {
+      background: var(--dt-bg-hover);
+      color: var(--dt-text-primary);
+    }
+
+    .material-icons-outlined {
+      font-size: 20px;
+    }
+  }
+}
+
+// ============================================================================
+// 搜索内容区
+// ============================================================================
+.chat-search {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+
+  &::-webkit-scrollbar {
+    width: 6px;
   }
 
-  .el-dialog__footer {
-    display: none;
+  &::-webkit-scrollbar-thumb {
+    background: var(--dt-black-10);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--dt-black-20);
+    }
+  }
+}
+
+// ============================================================================
+// 滑入动画
+// ============================================================================
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .sidebar-overlay {
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-panel {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.slide-right-enter-from,
+.slide-right-leave-to {
+  .sidebar-overlay {
+    opacity: 0;
+  }
+
+  .sidebar-panel {
+    transform: translateX(100%);
   }
 }
 
@@ -684,8 +735,13 @@ onUnmounted(() => {
 // 暗色模式
 // ============================================================================
 .dark {
+  .sidebar-panel {
+    background: var(--dt-bg-card-dark);
+    border-left: 1px solid var(--dt-border-dark);
+  }
+
   .search-input-wrapper {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--dt-white-10);
 
     &:focus-within {
       background: var(--dt-bg-card-dark);
@@ -693,15 +749,15 @@ onUnmounted(() => {
   }
 
   .result-item.active {
-    background: rgba(65, 104, 224, 0.2);
+    background: var(--dt-brand-bg-dark);
 
     .sender-name {
-      color: #4168e0;
+      color: var(--dt-brand-color);
     }
   }
 
   :deep(.highlight) {
-    background-color: rgba(255, 235, 59, 0.3);
+    background-color: var(--dt-search-highlight-bg-dark);
   }
 }
 </style>

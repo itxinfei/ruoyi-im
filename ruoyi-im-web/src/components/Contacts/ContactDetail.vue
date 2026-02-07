@@ -785,11 +785,11 @@ const handleDeleteContact = () => {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--dt-scrollbar-thumb);
     border-radius: var(--dt-radius-sm);
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: var(--dt-scrollbar-thumb-hover);
     }
   }
 }

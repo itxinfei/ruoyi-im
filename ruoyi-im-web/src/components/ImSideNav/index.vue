@@ -160,7 +160,7 @@ const handleNavClick = moduleKey => {
 .logo-box {
   width: 40px;  // 钉钉标准：40px
   height: 40px;
-  background-color: rgba(255, 255, 255, 0.2);  // 半透明白色
+  background-color: var(--dt-bg-overlay-light);  // 半透明白色
   border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
@@ -198,13 +198,13 @@ const handleNavClick = moduleKey => {
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: var(--dt-bg-overlay-lighter);
     transform: scale(1.05);
   }
 
   &.active {
-    background-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background-color: var(--dt-bg-overlay-medium);
+    box-shadow: var(--dt-shadow-md);
   }
 
   &.active::before {
@@ -217,7 +217,7 @@ const handleNavClick = moduleKey => {
     height: 20px;
     background-color: #ffffff;
     border-radius: 0 2px 2px 0;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    box-shadow: var(--dt-glow-sm);
   }
 }
 
@@ -226,7 +226,7 @@ const handleNavClick = moduleKey => {
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--dt-text-tertiary);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1;  // 确保图标垂直居中
 }
@@ -236,7 +236,7 @@ const handleNavClick = moduleKey => {
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--dt-text-tertiary);
   line-height: 1;
   font-weight: 500;
   letter-spacing: 0.3px;
@@ -279,10 +279,10 @@ const handleNavClick = moduleKey => {
   cursor: pointer;
   transition: all 0.2s ease;
   margin-top: 8px;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--dt-bg-overlay-light);
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: var(--dt-bg-overlay-medium);
   }
 
   &.active {

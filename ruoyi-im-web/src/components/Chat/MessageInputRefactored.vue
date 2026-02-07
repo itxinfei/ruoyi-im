@@ -1153,6 +1153,8 @@ onUnmounted(() => {
   border-radius: 8px;
   background: #f5f7fa;
   transition: background 0.2s ease, box-shadow 0.2s ease;
+  margin: 0;
+  padding: 0;
 
   &.is-focused {
     background: #ffffff;
@@ -1160,7 +1162,7 @@ onUnmounted(() => {
   }
 
   .dark & {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--dt-white-05);
 
     &.is-focused {
       background: #1e1e1e;
@@ -1242,11 +1244,11 @@ onUnmounted(() => {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--dt-scrollbar-thumb);
     border-radius: 2px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--dt-scrollbar-thumb-hover);
     }
   }
 
@@ -1258,10 +1260,10 @@ onUnmounted(() => {
     }
 
     &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
+      background: var(--dt-scrollbar-thumb-dark);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.25);
+        background: var(--dt-scrollbar-thumb-dark-hover);
       }
     }
   }
@@ -1297,7 +1299,7 @@ onUnmounted(() => {
     }
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--dt-black-04);
       color: #0089ff;
     }
 
@@ -1332,7 +1334,7 @@ onUnmounted(() => {
       color: #6b7280;
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--dt-white-06);
       }
 
       &.send-btn {
@@ -1379,8 +1381,8 @@ onUnmounted(() => {
     }
 
     .dark &:disabled {
-      background: rgba(255, 255, 255, 0.12);
-      color: rgba(255, 255, 255, 0.35);
+      background: var(--dt-white-12);
+      color: var(--dt-white-25);
     }
   }
 }

@@ -165,7 +165,7 @@ watch(recentEmojis, newVal => {
   background: #ffffff; // 野火IM:纯白背景
   border: 1px solid #e0e0e0; // 野火IM:灰色边框
   border-radius: 8px; // 野火IM:8px圆角
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); // 野火IM:柔和阴影
+  box-shadow: var(--dt-shadow-lg); // 野火IM:柔和阴影
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -258,11 +258,11 @@ watch(recentEmojis, newVal => {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--dt-scrollbar-thumb);
     border-radius: 3px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--dt-scrollbar-thumb-hover);
     }
   }
 }
@@ -293,7 +293,7 @@ watch(recentEmojis, newVal => {
   }
 
   .dark &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--dt-bg-hover-dark);
   }
 }
 

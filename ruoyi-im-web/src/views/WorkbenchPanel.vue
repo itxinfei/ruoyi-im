@@ -1049,7 +1049,7 @@ onUnmounted(() => {
     top: -100px;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(0, 137, 255, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--dt-brand-lighter) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
   }
@@ -1160,7 +1160,7 @@ onUnmounted(() => {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--dt-shadow-card-hover);
   }
 
   .stat-icon {
@@ -1257,7 +1257,7 @@ onUnmounted(() => {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--dt-shadow-3);
   }
 
   .card-header {
@@ -1725,7 +1725,7 @@ onUnmounted(() => {
     background: linear-gradient(135deg, #0c4a6e 0%, #075985 50%, #0f172a 100%);
 
     &::before {
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+      background: radial-gradient(circle, var(--dt-cyan-05) 0%, transparent 70%);
     }
   }
 

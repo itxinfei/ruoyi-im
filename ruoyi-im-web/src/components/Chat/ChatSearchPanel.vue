@@ -514,7 +514,7 @@ onUnmounted(() => {
 .chat-search-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--dt-overlay-bg);
   z-index: 2000;
   display: flex;
   justify-content: flex-end;
@@ -527,7 +527,7 @@ onUnmounted(() => {
   background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 30px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--dt-shadow-xl);
 
   .dark & {
     background: var(--dt-bg-card-dark);
@@ -661,7 +661,7 @@ onUnmounted(() => {
         color: #fff;
 
         .filter-count {
-          background: rgba(255, 255, 255, 0.25);
+          background: var(--dt-overlay-light);
         }
       }
     }
@@ -883,7 +883,7 @@ onUnmounted(() => {
     }
 
     .dark & mark {
-      background: rgba(0, 137, 255, 0.2);
+      background: var(--dt-brand-bg-dark);
       color: #60a5fa;
     }
   }

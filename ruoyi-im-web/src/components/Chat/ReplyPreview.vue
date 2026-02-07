@@ -46,7 +46,7 @@ defineEmits(['cancel'])
   border-left: 3px solid var(--dt-brand-color);
 
   .dark & {
-    background: rgba(0, 137, 255, 0.08);
+    background: var(--dt-bg-session-active-dark);
     border-left-color: var(--dt-brand-color);
   }
 }
@@ -112,7 +112,7 @@ defineEmits(['cancel'])
     }
 
     .dark &:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--dt-bg-session-hover-dark);
     }
   }
 }

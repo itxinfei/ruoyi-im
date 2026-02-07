@@ -19,7 +19,7 @@
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke="rgba(0, 137, 255, 0.15)"
+            stroke="var(--dt-brand-extra-light)"
             stroke-width="3"
           />
           <path
@@ -42,7 +42,7 @@
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke="rgba(0, 137, 255, 0.15)"
+            stroke="var(--dt-brand-extra-light)"
             stroke-width="3"
           />
           <path
@@ -188,7 +188,7 @@ const handleClick = async () => {
 
   &:hover {
     border-color: #4168e0;
-    box-shadow: 0 2px 8px rgba(65, 104, 224, 0.15);
+    box-shadow: var(--dt-shadow-brand-light);
 
     .file-action {
       opacity: 1;
@@ -202,7 +202,7 @@ const handleClick = async () => {
 
   &.is-downloading {
     border-color: #4168e0;
-    background: rgba(65, 104, 224, 0.05);
+    background: var(--dt-brand-lighter);
     cursor: wait;
 
     .file-icon {
@@ -326,7 +326,7 @@ const handleClick = async () => {
     }
 
     &.is-downloading {
-      background: rgba(65, 104, 224, 0.1);
+      background: var(--dt-brand-light);
     }
   }
 

@@ -186,8 +186,8 @@ onUnmounted(() => {
     }
 
     &.is-recording {
-      background: rgba(255, 107, 107, 0.1);
-      border-color: rgba(255, 107, 107, 0.4);
+      background: var(--dt-error-02);
+      border-color: var(--dt-error-30);
     }
   }
 
@@ -317,10 +317,10 @@ onUnmounted(() => {
   }
 
   .dark & {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--dt-white-06);
 
     &:hover {
-      background: rgba(255, 71, 87, 0.2);
+      background: var(--dt-error-20);
     }
   }
 }

@@ -173,11 +173,11 @@ export default {
 :global(.dark) {
   .emoji-popover {
     background: var(--dt-bg-card-dark);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--dt-shadow-lg);
   }
 
   .emoji-item:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--dt-bg-hover-dark);
   }
 }
 </style>

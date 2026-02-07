@@ -1092,7 +1092,7 @@ onMounted(() => {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.06) 50%, transparent 50%);
+    background: linear-gradient(90deg, transparent 0%, var(--dt-black-08) 50%, transparent 50%);
   }
 }
 
@@ -1112,7 +1112,7 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, var(--dt-black-02) 100%);
     transition: opacity 0.3s;
     opacity: 0;
   }
@@ -1234,7 +1234,7 @@ onMounted(() => {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.06) 50%, transparent 50%);
+    background: linear-gradient(90deg, transparent 0%, var(--dt-black-08) 50%, transparent 50%);
   }
 }
 
@@ -1265,7 +1265,7 @@ onMounted(() => {
 
   .tab-count {
     padding: 2px 8px;
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--dt-black-08);
     color: var(--dt-text-medium);
     border-radius: var(--dt-radius-lg);
     font-size: 12px;
@@ -1513,7 +1513,7 @@ onMounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.01) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, var(--dt-black-01) 100%);
     transition: opacity 0.3s;
     opacity: 0;
   }
@@ -1546,7 +1546,7 @@ onMounted(() => {
   }
 
   &.overdue {
-    border-color: rgba(245, 74, 69, 0.2);
+    border-color: var(--dt-error-20);
 
     .priority-indicator {
       background: var(--dt-priority-high);

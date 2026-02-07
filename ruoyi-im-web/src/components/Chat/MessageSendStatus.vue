@@ -120,7 +120,7 @@ onUnmounted(() => {
     cursor: pointer;
 
     &:hover {
-      background: rgba(255, 73, 73, 0.1);
+      background: var(--dt-error-bg);
 
       .status-text {
         color: var(--dt-color-danger);
@@ -187,7 +187,7 @@ onUnmounted(() => {
   }
 
   .status-failed:hover {
-    background: rgba(255, 73, 73, 0.2);
+    background: var(--dt-error-dark-bg);
 
     .status-text {
       color: var(--dt-color-danger);

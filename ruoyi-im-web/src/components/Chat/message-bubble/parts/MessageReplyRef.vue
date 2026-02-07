@@ -78,7 +78,7 @@ const handleClick = () => {
 .message-reply-ref {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--dt-black-04);
   border-left: 3px solid #4168e0; // 野火IM蓝
   padding: 8px 12px;
   margin: -6px -8px 8px -8px;
@@ -91,7 +91,7 @@ const handleClick = () => {
   transition: all 0.2s;
 
   &:hover {
-    background: rgba(65, 104, 224, 0.08);
+    background: var(--dt-brand-extra-light);
     border-left-color: #3457c7;
 
     .ref-icon {
@@ -158,7 +158,7 @@ const handleClick = () => {
 // 暗色模式适配
 :global(.dark) {
   .message-reply-ref {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--dt-white-06);
     border-left-color: #4168e0;
 
     .ref-user {
@@ -170,7 +170,7 @@ const handleClick = () => {
     }
 
     &:hover {
-      background: rgba(65, 104, 224, 0.15);
+      background: var(--dt-brand-bg-hover);
       border-left-color: #5a7ce9;
     }
   }

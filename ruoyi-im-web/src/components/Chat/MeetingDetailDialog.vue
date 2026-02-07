@@ -228,23 +228,23 @@ watch(() => props.meeting, newMeeting => {
     font-weight: 500;
 
     &.status-scheduled {
-      background: rgba(0, 137, 255, 0.1);
+      background: var(--dt-brand-bg-weak);
       color: var(--dt-brand-color);
     }
 
     &.status-progress {
-      background: rgba(5, 150, 105, 0.1);
-      color: #059669;
+      background: var(--dt-success-bg-weak);
+      color: var(--dt-success-color);
     }
 
     &.status-completed {
-      background: rgba(107, 114, 128, 0.1);
-      color: #6b7280;
+      background: var(--dt-tertiary-bg-weak);
+      color: var(--dt-tertiary-color);
     }
 
     &.status-cancelled {
-      background: rgba(220, 38, 38, 0.1);
-      color: #dc2626;
+      background: var(--dt-danger-bg-weak);
+      color: var(--dt-danger-color);
     }
   }
 

@@ -880,23 +880,23 @@ onMounted(() => {
 }
 
 .batch-buttons .el-button {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--dt-overlay-light);
+  border-color: var(--dt-overlay-medium);
   color: white;
 }
 
 .batch-buttons .el-button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--dt-overlay-medium);
 }
 
 /* 深色模式下的按钮样式 */
 [data-theme='dark'] .batch-buttons .el-button {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--dt-overlay-light);
+  border-color: var(--dt-overlay-medium);
 }
 
 [data-theme='dark'] .batch-buttons .el-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--dt-overlay-medium);
 }
 
 .batch-buttons .el-button--danger {

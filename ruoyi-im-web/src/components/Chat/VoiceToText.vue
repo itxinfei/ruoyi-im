@@ -449,7 +449,7 @@ defineExpose({
   transition: all var(--dt-transition-fast);
 
   &:hover {
-    background: rgba(82, 196, 26, 0.1);
+    background: var(--dt-success-bg-hover);
   }
 
   .material-icons-outlined {
@@ -562,7 +562,7 @@ defineExpose({
     border-color: var(--dt-border-dark);
 
     &:hover {
-      background: rgba(0, 137, 255, 0.15);
+      background: var(--dt-brand-bg-hover-dark);
     }
   }
 
@@ -572,7 +572,7 @@ defineExpose({
   }
 
   .transcript-header {
-    background: rgba(82, 196, 26, 0.15);
+    background: var(--dt-success-bg-dark);
     border-color: var(--dt-border-dark);
   }
 
@@ -586,7 +586,7 @@ defineExpose({
   }
 
   .error-state {
-    background: rgba(239, 68, 68, 0.15);
+    background: var(--dt-error-bg-dark);
   }
 }
 </style>

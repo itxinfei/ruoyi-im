@@ -415,7 +415,7 @@ onUnmounted(() => {
   :deep(.el-dialog__body) {
     padding: 0;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.95); // 稍微透明
+    background: var(--dt-overlay-95); // 稍微透明
   }
 }
 
@@ -435,7 +435,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 56px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+  background: linear-gradient(180deg, var(--dt-overlay-70) 0%, transparent 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -471,7 +471,7 @@ onUnmounted(() => {
     gap: 8px;
 
     .el-button {
-      background: rgba(255, 255, 255, 0.15);
+      background: var(--dt-white-15);
       border-color: transparent;
       color: #fff;
 
@@ -526,7 +526,7 @@ onUnmounted(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--dt-white-70);
 }
 
 .image-error {
@@ -538,7 +538,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--dt-white-50);
 }
 
 // 导航按钮
@@ -547,7 +547,7 @@ onUnmounted(() => {
   top: 50%;
   transform: translateY(-50%);
   z-index: 90;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--dt-white-15);
   border-color: transparent;
   color: #fff;
   opacity: 0;
@@ -585,7 +585,7 @@ onUnmounted(() => {
   display: flex;
   gap: 8px;
   z-index: 90;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--dt-overlay-70);
   padding: 8px 12px;
   border-radius: 8px; // 野火IM圆角
   opacity: 0;
@@ -602,7 +602,7 @@ onUnmounted(() => {
     color: #fff;
 
     &:hover {
-      background: rgba(65, 104, 224, 0.5); // 野火IM蓝
+      background: var(--dt-brand-extra-light);
     }
 
     &.is-disabled {
@@ -624,7 +624,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 72px;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+  background: linear-gradient(0deg, var(--dt-overlay-80) 0%, transparent 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -642,7 +642,7 @@ onUnmounted(() => {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--dt-white-30);
     border-radius: 2px;
   }
 
@@ -664,8 +664,8 @@ onUnmounted(() => {
 
     &.active {
       opacity: 1;
-      border-color: #4168e0; // 野火IM蓝
-      box-shadow: 0 0 8px rgba(65, 104, 224, 0.5);
+      border-color: var(--dt-brand-color);
+      box-shadow: var(--dt-shadow-brand-light);
     }
 
     img {

@@ -1336,11 +1336,11 @@ $panel-min-width: 320px;
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: rgba(0, 0, 0, 0.1);
+      background-color: var(--dt-scrollbar-thumb);
       border-radius: 3px;
 
       &:hover {
-        background-color: rgba(0, 0, 0, 0.15);
+        background-color: var(--dt-scrollbar-thumb-hover);
       }
     }
   }
@@ -1354,7 +1354,7 @@ $panel-min-width: 320px;
       height: 100%;
       transform: translateX(-100%);
       transition: transform 0.3s ease;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--dt-shadow-lg);
 
       &.sidebar-open {
         transform: translateX(0);
@@ -1390,7 +1390,7 @@ $panel-min-width: 320px;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--dt-overlay);
   z-index: 90;
   backdrop-filter: blur(2px);
 }
@@ -2018,7 +2018,7 @@ $panel-min-width: 320px;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dt-overlay-dark);
   z-index: 200;
   backdrop-filter: blur(4px);
   display: flex;

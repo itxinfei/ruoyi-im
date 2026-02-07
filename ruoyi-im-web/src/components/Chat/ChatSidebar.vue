@@ -1272,7 +1272,7 @@ watch(() => props.messages, () => {
 
       &.online {
         color: var(--dt-success-color);
-        background: rgba(82, 196, 26, 0.1);
+        background: var(--dt-success-dark-bg);
 
         .dot {
           background: var(--dt-success-color);
@@ -1528,8 +1528,8 @@ watch(() => props.messages, () => {
         -webkit-box-orient: vertical;
 
         :deep(mark) {
-          background: rgba(255, 204, 0, 0.3);
-          color: inherit;
+          background: var(--dt-search-highlight-bg);
+          color: var(--dt-search-highlight-text);
           padding: 0 2px;
           border-radius: var(--dt-radius-sm);
         }

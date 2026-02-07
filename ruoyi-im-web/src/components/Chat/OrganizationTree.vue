@@ -356,7 +356,7 @@ $dt-border-color: #E5E6EB;
     }
 
     :deep(.el-tree-node.is-current > .el-tree-node__content) {
-      background: rgba(0, 137, 255, 0.1);
+      background: var(--dt-brand-light);
 
       .tree-node {
         color: $dt-blue;
@@ -445,12 +445,12 @@ $dt-border-color: #E5E6EB;
   .org-tree {
     :deep(.el-tree-node__content) {
       &:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--dt-bg-hover-dark);
       }
     }
 
     :deep(.el-tree-node.is-current > .el-tree-node__content) {
-      background: rgba(0, 137, 255, 0.2);
+      background: var(--dt-mention-bg-dark);
     }
   }
 

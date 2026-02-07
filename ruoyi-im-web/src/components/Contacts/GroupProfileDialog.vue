@@ -1,14 +1,8 @@
 <template>
   <!-- PC端侧边栏风格的群组详情 -->
   <transition name="slide-right">
-    <div
-      v-if="visible"
-      class="group-profile-sidebar"
-    >
-      <div
-        class="sidebar-overlay"
-        @click="handleClose"
-      />
+    <div v-if="visible" class="group-profile-sidebar">
+      <div class="sidebar-overlay" @click="handleClose" />
 
       <div class="sidebar-panel">
         <!-- 头部 -->
@@ -16,10 +10,7 @@
           <h3 class="header-title">
             群聊信息
           </h3>
-          <button
-            class="close-btn"
-            @click="handleClose"
-          >
+          <button class="close-btn" @click="handleClose">
             <el-icon>
               <Close />
             </el-icon>
@@ -27,29 +18,15 @@
         </div>
 
         <!-- 内容区 -->
-        <div
-          v-if="loading"
-          class="sidebar-body"
-        >
-          <el-skeleton
-            :rows="10"
-            animated
-          />
+        <div v-if="loading" class="sidebar-body">
+          <el-skeleton :rows="10" animated />
         </div>
 
-        <div
-          v-else-if="groupInfo"
-          class="sidebar-body"
-        >
+        <div v-else-if="groupInfo" class="sidebar-body">
           <!-- 群组基本信息卡片 -->
           <div class="info-card">
             <div class="group-header-section">
-              <el-avatar
-                :size="60"
-                :src="groupInfo.avatar || ''"
-                shape="square"
-                class="group-avatar"
-              >
+              <el-avatar :size="60" :src="groupInfo.avatar || ''" shape="square" class="group-avatar">
                 {{ groupInfo.name?.charAt(0) || '群' }}
               </el-avatar>
               <div class="group-basic-info">
@@ -64,28 +41,19 @@
 
             <!-- 快捷操作按钮 -->
             <div class="quick-actions">
-              <button
-                class="action-item"
-                @click="handleAddMember"
-              >
+              <button class="action-item" @click="handleAddMember">
                 <el-icon>
                   <UserFilled />
                 </el-icon>
                 <span>邀请</span>
               </button>
-              <button
-                class="action-item"
-                @click="shareGroup"
-              >
+              <button class="action-item" @click="shareGroup">
                 <el-icon>
                   <Share />
                 </el-icon>
                 <span>分享</span>
               </button>
-              <button
-                class="action-item"
-                @click="copyGroupId"
-              >
+              <button class="action-item" @click="copyGroupId">
                 <el-icon>
                   <CopyDocument />
                 </el-icon>
@@ -98,13 +66,7 @@
           <div class="section-block">
             <div class="section-header">
               <span class="section-title">群成员 ({{ groupMembers.length }})</span>
-              <el-input
-                v-model="memberKeyword"
-                placeholder="搜索成员"
-                size="small"
-                clearable
-                class="member-search"
-              >
+              <el-input v-model="memberKeyword" placeholder="搜索成员" size="small" clearable class="member-search">
                 <template #prefix>
                   <el-icon>
                     <Search />
@@ -114,30 +76,14 @@
             </div>
 
             <div class="members-list">
-              <div
-                v-for="member in filteredMembers"
-                :key="member.userId"
-                class="member-item"
-                @click="viewMemberInfo(member.userId)"
-              >
-                <DingtalkAvatar
-                  :src="member.avatar"
-                  :name="member.userName"
-                  :user-id="member.userId"
-                  :size="40"
-                  shape="square"
-                  custom-class="member-avatar"
-                />
+              <div v-for="member in filteredMembers" :key="member.userId" class="member-item"
+                @click="viewMemberInfo(member.userId)">
+                <DingtalkAvatar :src="member.avatar" :name="member.userName" :user-id="member.userId" :size="40"
+                  shape="square" custom-class="member-avatar" />
                 <div class="member-info">
                   <span class="member-name">{{ member.userName }}</span>
-                  <span
-                    v-if="member.role === 'OWNER'"
-                    class="member-role owner"
-                  >群主</span>
-                  <span
-                    v-else-if="member.role === 'ADMIN'"
-                    class="member-role admin"
-                  >管理员</span>
+                  <span v-if="member.role === 'OWNER'" class="member-role owner">群主</span>
+                  <span v-else-if="member.role === 'ADMIN'" class="member-role admin">管理员</span>
                 </div>
               </div>
             </div>
@@ -165,30 +111,21 @@
                 <span class="setting-value">{{ groupInfo.isPublic ? '公开群组' : '私有群组' }}</span>
               </div>
 
-              <div
-                v-if="groupInfo.description"
-                class="setting-item vertical"
-              >
+              <div v-if="groupInfo.description" class="setting-item vertical">
                 <span class="setting-label">群简介</span>
                 <p class="setting-desc">
                   {{ groupInfo.description }}
                 </p>
               </div>
 
-              <div
-                class="setting-item clickable"
-                @click="handleFiles"
-              >
+              <div class="setting-item clickable" @click="handleFiles">
                 <span class="setting-label">群文件</span>
                 <el-icon class="setting-arrow">
                   <ArrowRight />
                 </el-icon>
               </div>
 
-              <div
-                class="setting-item clickable"
-                @click="handleAnnouncement"
-              >
+              <div class="setting-item clickable" @click="handleAnnouncement">
                 <span class="setting-label">群公告</span>
                 <el-icon class="setting-arrow">
                   <ArrowRight />
@@ -199,10 +136,7 @@
 
           <!-- 危险操作区 -->
           <div class="section-block danger-zone">
-            <button
-              class="danger-btn"
-              @click="handleLeaveGroup"
-            >
+            <button class="danger-btn" @click="handleLeaveGroup">
               退出群聊
             </button>
           </div>
@@ -213,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Close,
@@ -225,18 +159,21 @@ import {
 } from '@element-plus/icons-vue'
 import { getGroup, getGroupMembers, leaveGroup } from '@/api/im/group'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { debounce } from '@/utils/debounce'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
   groupId: { type: [Number, String], default: null }
 })
 
-const emit = defineEmits(['update:visible', 'refresh-group', 'view-member'])
+const emit = defineEmits(['update:visible', 'refresh-group', 'view-member', 'show-files', 'show-announcement'])
 
 const loading = ref(false)
+const loadError = ref(null) // 加载错误信息
 const groupInfo = ref(null)
 const groupMembers = ref([])
 const memberKeyword = ref('')
+const isUnmounted = ref(false) // 组件卸载标记
 
 watch(() => props.visible, v => {
   if (v && props.groupId) {
@@ -250,8 +187,18 @@ watch(() => props.groupId, gid => {
   }
 })
 
+// 成员搜索防抖处理
+const debouncedMemberKeyword = ref('')
+const updateDebouncedKeyword = debounce((value) => {
+  debouncedMemberKeyword.value = value
+}, 300)
+
+watch(memberKeyword, (newVal) => {
+  updateDebouncedKeyword(newVal)
+})
+
 const filteredMembers = computed(() => {
-  const keyword = (memberKeyword.value || '').trim().toLowerCase()
+  const keyword = (debouncedMemberKeyword.value || '').trim().toLowerCase()
   if (!keyword) {
     return groupMembers.value
   }
@@ -261,21 +208,43 @@ const filteredMembers = computed(() => {
   })
 })
 
-const loadGroupInfo = async () => {
+const loadGroupInfo = async (isRetry = false) => {
   if (!props.groupId) {
     return
   }
   loading.value = true
+  loadError.value = null
+
   try {
-    const [gRes, mRes] = await Promise.all([getGroup(props.groupId), getGroupMembers(props.groupId)])
+    const [gRes, mRes] = await Promise.all([
+      getGroup(props.groupId),
+      getGroupMembers(props.groupId)
+    ])
+
     if (gRes.code === 200) {
       groupInfo.value = gRes.data
+    } else {
+      throw new Error(gRes.msg || '加载群组信息失败')
     }
+
     if (mRes.code === 200) {
       groupMembers.value = mRes.data
+    } else {
+      throw new Error(mRes.msg || '加载群成员失败')
     }
+
+    loadError.value = null
   } catch (e) {
-    ElMessage.error('加载详情失败')
+    console.error('加载群组详情失败:', e)
+    loadError.value = e.message || '加载详情失败'
+
+    // 显示错误提示,提供重试选项
+    ElMessage({
+      type: 'error',
+      message: loadError.value,
+      duration: 3000,
+      showClose: true
+    })
   } finally {
     loading.value = false
   }
@@ -291,10 +260,26 @@ const copyGroupId = () => {
 }
 
 const viewMemberInfo = uid => { emit('view-member', uid) }
-const handleAddMember = () => { ElMessage.info('邀请功能开发中') }
-const shareGroup = () => { ElMessage.info('分享功能开发中') }
-const handleFiles = () => { ElMessage.info('群文件功能开发中') }
-const handleAnnouncement = () => { ElMessage.info('群公告功能开发中') }
+
+const handleAddMember = () => {
+  // TODO: 实现邀请成员功能
+  ElMessage.info('邀请功能开发中')
+}
+
+const shareGroup = () => {
+  // TODO: 实现分享群组功能
+  ElMessage.info('分享功能开发中')
+}
+
+// 触发群文件面板显示
+const handleFiles = () => {
+  emit('show-files', props.groupId)
+}
+
+// 触发群公告对话框显示
+const handleAnnouncement = () => {
+  emit('show-announcement', props.groupId)
+}
 
 const handleLeaveGroup = async () => {
   try {
@@ -303,18 +288,27 @@ const handleLeaveGroup = async () => {
       cancelButtonText: '取消',
       type: 'warning'
     })
+
     const res = await leaveGroup(props.groupId)
     if (res.code === 200) {
       ElMessage.success('已退出群聊')
       handleClose()
       emit('refresh-group')
+    } else {
+      throw new Error(res.msg || '退出群聊失败')
     }
   } catch (e) {
     if (e !== 'cancel') {
-      ElMessage.error('退出失败')
+      console.error('退出群聊失败:', e)
+      ElMessage.error(e.message || '退出失败')
     }
   }
 }
+
+// 组件卸载时清理
+onUnmounted(() => {
+  isUnmounted.value = true
+})
 </script>
 
 <style scoped lang="scss">
@@ -339,7 +333,7 @@ const handleLeaveGroup = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--dt-bg-overlay);
   backdrop-filter: blur(2px);
 }
 
@@ -349,7 +343,7 @@ const handleLeaveGroup = async () => {
   width: 360px;
   height: 100%;
   background: #fff;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 8px var(--dt-black-08);
   display: flex;
   flex-direction: column;
   z-index: 1;
@@ -403,11 +397,11 @@ const handleLeaveGroup = async () => {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--dt-scrollbar-thumb);
     border-radius: 3px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--dt-scrollbar-thumb-hover);
     }
   }
 }
@@ -690,7 +684,7 @@ const handleLeaveGroup = async () => {
     border-color: var(--dt-border-dark);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--dt-white-06);
     }
   }
 
@@ -704,7 +698,7 @@ const handleLeaveGroup = async () => {
       border-color: var(--dt-border-dark);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--dt-white-05);
       }
     }
   }

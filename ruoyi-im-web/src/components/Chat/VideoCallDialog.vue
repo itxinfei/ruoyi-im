@@ -561,7 +561,7 @@ defineExpose({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--dt-call-overlay-bg);
   backdrop-filter: blur(10px);
   z-index: $z-call-overlay;
   display: flex;
@@ -586,9 +586,9 @@ defineExpose({
   position: relative;
   width: 700px;
   height: 480px;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, var(--dt-call-dialog-bg-start) 0%, var(--dt-call-dialog-bg-end) 100%);
   border-radius: var(--dt-radius-2xl);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--dt-call-dialog-shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -598,7 +598,7 @@ defineExpose({
 .remote-video-container {
   position: relative;
   flex: 1;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, var(--dt-call-dialog-bg-start) 0%, var(--dt-call-dialog-bg-end) 100%);
   overflow: hidden;
 }
 
@@ -622,7 +622,7 @@ defineExpose({
 }
 
 .placeholder-avatar {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--dt-call-avatar-shadow);
 
   &.pulse {
     animation: videoAvatarPulse 1.5s ease-in-out infinite;
@@ -631,7 +631,7 @@ defineExpose({
 
 .placeholder-status {
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--dt-call-text-white-8);
   margin: 0;
 }
 
@@ -644,7 +644,7 @@ defineExpose({
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dt-call-overlay-bg);
   backdrop-filter: blur(10px);
   border-radius: var(--dt-radius-3xl);
 }
@@ -652,12 +652,12 @@ defineExpose({
 .remote-name {
   font-size: 16px;
   font-weight: 600;
-  color: #fff;
+  color: var(--dt-text-inverse);
 }
 
 .call-timer {
   font-size: 14px;
-  color: #409eff;
+  color: var(--dt-brand-color);
   font-variant-numeric: tabular-nums;
 }
 
@@ -668,15 +668,15 @@ defineExpose({
   right: 16px;
   width: 140px;
   height: 105px;
-  background: #000;
+  background: var(--dt-call-float-bg);
   border-radius: var(--dt-radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--dt-call-avatar-shadow);
   cursor: move;
   transition: box-shadow 0.2s ease;
 
   &.dragging {
-    box-shadow: 0 8px 30px rgba(64, 158, 255, 0.5);
+    box-shadow: var(--dt-call-btn-active);
   }
 }
 
@@ -701,18 +701,18 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--dt-call-overlay-bg);
   border: none;
   border-radius: var(--dt-radius-md);
   cursor: pointer;
 
   .material-icons-outlined {
     font-size: 16px;
-    color: #fff;
+    color: var(--dt-text-inverse);
   }
 
   &.active {
-    background: rgba(245, 108, 108, 0.8);
+    background: var(--dt-call-btn-active);
   }
 }
 
@@ -728,7 +728,7 @@ defineExpose({
   align-items: center;
   justify-content: space-between;
   padding: 20px 30px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+  background: linear-gradient(to top, var(--dt-call-overlay-bg) 0%, transparent 100%);
 }
 
 .controls-left,
@@ -751,7 +751,7 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--dt-call-btn-bg);
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -760,19 +760,19 @@ defineExpose({
 
   .material-icons-outlined {
     font-size: 24px;
-    color: #fff;
+    color: var(--dt-text-inverse);
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--dt-call-btn-bg-hover);
     transform: scale(1.05);
   }
 
   &.active {
-    background: rgba(245, 108, 108, 0.8);
+    background: var(--dt-call-btn-active);
 
     .material-icons-outlined {
-      color: #fff;
+      color: var(--dt-text-inverse);
     }
   }
 
@@ -782,10 +782,10 @@ defineExpose({
   }
 
   &.hangup-btn {
-    background: rgba(245, 108, 108, 0.9);
+    background: var(--dt-call-btn-hangup);
 
     &:hover {
-      background: rgba(245, 108, 108, 1);
+      background: var(--dt-call-btn-hangup-hover);
       transform: scale(1.1);
     }
   }
@@ -806,29 +806,29 @@ defineExpose({
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dt-call-overlay-bg);
   border-radius: var(--dt-radius-xl);
 
   .material-icons-outlined {
     font-size: 16px;
-    color: #67c23a;
+    color: var(--dt-success-color);
 
     &.excellent {
-      color: #67c23a;
+      color: var(--dt-success-color);
     }
 
     &.good {
-      color: #e6a23c;
+      color: var(--dt-warning-color);
     }
 
     &.normal {
-      color: #f56c6c;
+      color: var(--dt-error-color);
     }
   }
 
   .quality-text {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--dt-call-text-white-8);
   }
 }
 
@@ -841,9 +841,9 @@ defineExpose({
   right: 30px;
   width: 200px;
   height: 150px;
-  background: #000;
+  background: var(--dt-call-float-bg);
   border-radius: var(--dt-radius-lg);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--dt-call-float-shadow);
   z-index: $z-float-window;
   overflow: hidden;
   cursor: pointer;
@@ -868,7 +868,7 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(135deg, var(--dt-call-dialog-bg-start) 0%, var(--dt-call-dialog-bg-end) 100%);
 }
 
 .float-info {
@@ -877,14 +877,14 @@ defineExpose({
   left: 8px;
   right: 8px;
   padding: 6px 12px;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--dt-call-overlay-bg);
   border-radius: var(--dt-radius-md);
   text-align: center;
 }
 
 .float-status {
   font-size: 12px;
-  color: #fff;
+  color: var(--dt-text-inverse);
 }
 
 .float-window-enter-active,

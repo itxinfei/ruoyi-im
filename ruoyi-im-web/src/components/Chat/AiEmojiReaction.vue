@@ -287,7 +287,7 @@ watch(() => props.visible, newVal => {
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--dt-border-light);
-  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, rgba(0, 137, 255, 0.05) 100%);
+  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-lighter) 100%);
 }
 
 .panel-title {
@@ -411,7 +411,7 @@ watch(() => props.visible, newVal => {
   height: 14px;
   background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
   border-radius: var(--dt-radius-full);
-  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+  box-shadow: var(--dt-shadow-warning);
 
   .material-icons-outlined {
     font-size: 10px;
@@ -549,7 +549,7 @@ watch(() => props.visible, newVal => {
   }
 
   .panel-header {
-    background: linear-gradient(135deg, rgba(0, 137, 255, 0.15) 0%, rgba(0, 137, 255, 0.05) 100%);
+    background: linear-gradient(135deg, var(--dt-brand-extra-light) 0%, var(--dt-brand-lighter) 100%);
     border-color: var(--dt-border-dark);
   }
 
@@ -565,7 +565,7 @@ watch(() => props.visible, newVal => {
   }
 
   .emoji-btn.is-recommended {
-    background: rgba(0, 137, 255, 0.2);
+    background: var(--dt-brand-bg-dark);
     border-color: var(--dt-brand-color);
   }
 
@@ -580,7 +580,7 @@ watch(() => props.visible, newVal => {
   }
 
   .context-hint {
-    background: linear-gradient(135deg, rgba(250, 140, 22, 0.2) 0%, rgba(250, 140, 22, 0.1) 100%);
+    background: var(--dt-warning-bg);
     color: #fdba74;
   }
 }

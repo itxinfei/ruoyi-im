@@ -404,7 +404,7 @@ const handleBlock = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--dt-overlay-30);
   backdrop-filter: blur(2px);
 }
 
@@ -414,7 +414,7 @@ const handleBlock = async () => {
   width: 360px;
   height: 100%;
   background: #fff;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 8px var(--dt-black-10);
   display: flex;
   flex-direction: column;
   z-index: 1;
@@ -468,11 +468,11 @@ const handleBlock = async () => {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--dt-scrollbar-thumb);
     border-radius: 3px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--dt-scrollbar-thumb-hover);
     }
   }
 }
@@ -763,7 +763,7 @@ const handleBlock = async () => {
     border-color: var(--dt-border-dark);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--dt-white-06);
     }
 
     &.primary {
@@ -786,7 +786,7 @@ const handleBlock = async () => {
       border-color: var(--dt-border-dark);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--dt-white-05);
       }
     }
   }

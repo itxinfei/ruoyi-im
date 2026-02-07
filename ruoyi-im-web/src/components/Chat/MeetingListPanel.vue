@@ -538,7 +538,7 @@ onMounted(() => {
       color: var(--dt-text-secondary);
 
       &.live {
-        background: rgba(var(--dt-error-rgb, 220, 38, 38), 0.1);
+        background: var(--dt-error-bg);
         color: var(--dt-error-color);
       }
     }
@@ -613,12 +613,12 @@ onMounted(() => {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.1);
+    box-shadow: 0 2px 8px var(--dt-brand-light);
   }
 
   &.is-live {
-    background: linear-gradient(135deg, rgba(0, 137, 255, 0.05) 0%, rgba(0, 137, 255, 0.02) 100%);
-    border-color: rgba(0, 137, 255, 0.2);
+    background: linear-gradient(135deg, var(--dt-brand-lighter) 0%, var(--dt-brand-02) 100%);
+    border-color: var(--dt-brand-extra-light);
   }
 
   .meeting-cover {
@@ -721,7 +721,7 @@ onMounted(() => {
 // 暗色模式适配
 .dark .meeting-card {
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+    box-shadow: 0 2px 8px var(--dt-brand-extra-light);
   }
 }
 </style>

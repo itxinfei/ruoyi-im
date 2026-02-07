@@ -384,7 +384,7 @@ onUnmounted(() => {
 .chat-history-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--dt-bg-overlay);
   z-index: 2000;
   display: flex;
   justify-content: flex-end;
@@ -398,7 +398,7 @@ onUnmounted(() => {
   background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-lg);
 
   .dark & {
     background: var(--dt-bg-card-dark);

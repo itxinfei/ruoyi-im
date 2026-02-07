@@ -1,23 +1,12 @@
 package com.ruoyi.im.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.ruoyi.im.domain.ImConversation;
-import com.ruoyi.im.domain.ImConversationMember;
-import com.ruoyi.im.domain.ImGroupMember;
-import com.ruoyi.im.domain.ImMessage;
-import com.ruoyi.im.domain.ImMessageMention;
-import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.constants.StatusConstants;
+import com.ruoyi.im.domain.*;
 import com.ruoyi.im.dto.mention.ImMentionInfo;
 import com.ruoyi.im.exception.BusinessException;
-import com.ruoyi.im.mapper.ImConversationMapper;
-import com.ruoyi.im.mapper.ImConversationMemberMapper;
-import com.ruoyi.im.mapper.ImGroupMemberMapper;
-import com.ruoyi.im.mapper.ImMessageMapper;
-import com.ruoyi.im.mapper.ImMessageMentionMapper;
-import com.ruoyi.im.mapper.ImUserMapper;
+import com.ruoyi.im.mapper.*;
 import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
-import com.ruoyi.im.constants.StatusConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * 消息@提及服务实现

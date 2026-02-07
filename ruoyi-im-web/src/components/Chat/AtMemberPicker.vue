@@ -184,7 +184,7 @@ defineExpose({ open })
 
       // 搜索高亮样式
       :deep(.highlight) {
-        background-color: rgba(255, 235, 59, 0.4); // 黄色高亮
+        background-color: var(--dt-search-highlight-bg);
         color: var(--dt-text-primary);
         font-weight: 600;
         padding: 0 2px;
@@ -206,7 +206,7 @@ defineExpose({ open })
         color: var(--dt-text-primary-dark);
 
         :deep(.highlight) {
-          background-color: rgba(255, 235, 59, 0.3);
+          background-color: var(--dt-search-highlight-bg-dark);
           color: var(--dt-text-primary-dark);
         }
       }

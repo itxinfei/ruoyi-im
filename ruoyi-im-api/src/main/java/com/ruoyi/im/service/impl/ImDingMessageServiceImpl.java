@@ -2,7 +2,6 @@ package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constants.StatusConstants;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.domain.ImDingMessage;
 import com.ruoyi.im.domain.ImDingReceipt;
 import com.ruoyi.im.domain.ImDingTemplate;
@@ -15,12 +14,12 @@ import com.ruoyi.im.mapper.ImDingTemplateMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImDingMessageService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
+import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.vo.ding.DingDetailVO;
+import com.ruoyi.im.vo.ding.DingReceiptVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.ruoyi.im.util.BeanConvertUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

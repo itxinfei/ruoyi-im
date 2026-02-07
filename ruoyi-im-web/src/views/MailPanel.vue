@@ -1073,7 +1073,7 @@ const selectEmailForPreview = async email => {
 .compose-btn:hover {
   background: var(--dt-brand-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.25);
+  box-shadow: 0 4px 12px var(--dt-shadow-dropdown);
 }
 
 .compose-btn:active {
@@ -1673,7 +1673,7 @@ const selectEmailForPreview = async email => {
 .view-btn.active {
   background: var(--dt-bg-card);
   color: var(--dt-brand-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--dt-shadow-light);
 }
 
 .view-btn .material-icons-outlined {
@@ -1811,7 +1811,7 @@ const selectEmailForPreview = async email => {
 }
 
 .dark .preview-sender {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--dt-bg-hover-dark);
 }
 
 .dark .sender-name {
@@ -1835,11 +1835,11 @@ const selectEmailForPreview = async email => {
 }
 
 .dark .attachment-item {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--dt-bg-hover-dark);
 }
 
 .dark .attachment-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--dt-bg-active-dark);
 }
 
 .dark .attachment-item:hover {
@@ -1851,7 +1851,7 @@ const selectEmailForPreview = async email => {
 }
 
 .dark .preview-toolbar {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--dt-bg-disabled-dark);
   border-color: var(--dt-border-dark);
 }
 
@@ -1861,12 +1861,12 @@ const selectEmailForPreview = async email => {
 }
 
 .dark .toolbar-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--dt-bg-active-dark);
   color: var(--dt-text-primary-dark);
 }
 
 .dark .view-toggle {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--dt-bg-hover-dark);
 }
 
 .dark .view-btn.active {

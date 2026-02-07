@@ -371,7 +371,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--dt-overlay-light);
   z-index: $z-popover;
   cursor: default;
 }
@@ -431,7 +431,7 @@ onUnmounted(() => {
   gap: 8px;
   padding: 12px 16px;
   border-bottom: 1px solid var(--dt-border-light);
-  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, rgba(0, 137, 255, 0.05) 100%);
+  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-bg-subtle) 100%);
 }
 
 .header-icon {
@@ -487,8 +487,8 @@ onUnmounted(() => {
 }
 
 .close-btn:hover {
-  background: rgba(245, 108, 108, 0.1);
-  color: #f56c6c;
+  background: var(--dt-danger-bg-subtle);
+  color: var(--dt-danger-color);
 }
 
 // 回复建议区域
@@ -660,7 +660,7 @@ onUnmounted(() => {
   }
 
   .panel-header {
-    background: linear-gradient(135deg, rgba(0, 137, 255, 0.15) 0%, rgba(0, 137, 255, 0.05) 100%);
+    background: linear-gradient(135deg, var(--dt-brand-bg-subtle-dark) 0%, var(--dt-brand-bg-faint) 100%);
     border-color: var(--dt-border-dark);
   }
 
@@ -675,7 +675,7 @@ onUnmounted(() => {
   }
 
   .quick-actions {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--dt-bg-elevated-dark);
     border-color: var(--dt-border-dark);
   }
 

@@ -270,11 +270,11 @@ const toggleConversationInfo = () => {
   transition: background var(--dt-transition-fast);
 
   &:hover {
-    background: rgba(0, 0, 0, 0.03);
+    background: var(--dt-bg-session-hover);
   }
 
   .dark &:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--dt-bg-hover-dark);
   }
 }
 
@@ -446,8 +446,8 @@ const toggleConversationInfo = () => {
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: #4168e0; // hover时变为野火IM蓝色
+    background: var(--dt-bg-card-hover);
+    color: var(--dt-brand-color);
   }
 
   &:active {
@@ -467,7 +467,7 @@ const toggleConversationInfo = () => {
     color: var(--dt-text-secondary-dark);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--dt-white-06);
     }
   }
 }

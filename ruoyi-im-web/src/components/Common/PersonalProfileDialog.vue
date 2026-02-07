@@ -358,7 +358,7 @@ watch(visible, val => {
 :deep(.el-dialog) {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-3xl);
   background: #ffffff;
 }
 
@@ -385,13 +385,13 @@ watch(visible, val => {
   right: 24px;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--dt-white-80);
+  border-radius: var(--dt-radius-md);
+  transition: all var(--dt-transition-base) var(--dt-ease-in-out);
   backdrop-filter: blur(8px);
 
   &:hover {
-    background: rgba(99, 102, 241, 0.1);
+    background: var(--dt-brand-light);
     transform: rotate(90deg);
   }
 
@@ -447,7 +447,7 @@ watch(visible, val => {
 .avatar {
   border-radius: 50%;
   border: 4px solid #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--dt-shadow-5);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
@@ -463,19 +463,19 @@ watch(visible, val => {
   height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  color: #ffffff;
-  border: 3px solid #ffffff;
+  color: var(--dt-text-inverse);
+  border: 3px solid var(--dt-text-inverse);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  transition: all var(--dt-transition-base) var(--dt-ease-in-out);
+  box-shadow: var(--dt-shadow-brand-strong);
 
   &:hover {
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     transform: scale(1.15);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 6px 20px var(--dt-brand-30);
   }
 
   .material-icons-outlined {
@@ -522,13 +522,13 @@ watch(visible, val => {
   &.admin-tag {
     background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
     color: #7c3aed;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+    box-shadow: 0 2px 8px var(--dt-brand-05);
   }
 
   &.online-tag {
     background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
     color: #16a34a;
-    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);
+    box-shadow: 0 2px 8px var(--dt-success-05);
 
     .material-icons-outlined {
       font-size: 8px;
@@ -558,14 +558,14 @@ watch(visible, val => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--dt-shadow-1);
 
   &:hover {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-color: #6366f1;
     color: #6366f1;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    box-shadow: var(--dt-shadow-brand-light);
   }
 
   &:active {
@@ -582,7 +582,7 @@ watch(visible, val => {
     &:hover {
       border-color: #7c3aed;
       color: #7c3aed;
-      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+      box-shadow: 0 4px 12px var(--dt-brand-20);
     }
   }
 }
@@ -693,7 +693,7 @@ watch(visible, val => {
   background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
   border-radius: 50%;
   color: #6366f1;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 2px 8px var(--dt-brand-05);
 
   .material-icons-outlined {
     font-size: 14px;
@@ -715,7 +715,7 @@ watch(visible, val => {
   flex-shrink: 0;
 
   &:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    background: linear-gradient(135deg, var(--dt-brand-light) 0%, var(--dt-brand-extra-light) 100%);
     color: #6366f1;
     transform: scale(1.1);
   }
@@ -745,13 +745,13 @@ watch(visible, val => {
   border: 1.5px solid #e5e7eb;
   background: #ffffff;
   color: #374151;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--dt-shadow-1);
 
   &:hover {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-color: #cbd5e1;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--dt-shadow-3);
   }
 
   &:active {
@@ -775,7 +775,7 @@ watch(visible, val => {
       background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
       border-color: #dc2626;
       color: #b91c1c;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+      box-shadow: 0 4px 12px var(--dt-error-20);
     }
   }
 }
@@ -792,10 +792,10 @@ watch(visible, val => {
   }
 
   :deep(.el-dialog__headerbtn) {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--dt-white-10);
 
     &:hover {
-      background: rgba(99, 102, 241, 0.2);
+      background: var(--dt-brand-20);
     }
 
     .el-dialog__close {
@@ -879,7 +879,7 @@ watch(visible, val => {
     &.logout-btn {
       background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
       border-color: #b91c1c;
-      color: #fecaca;
+      color: var(--dt-error-dark-text);
 
       &:hover {
         background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%);

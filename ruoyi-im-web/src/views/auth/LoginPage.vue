@@ -708,8 +708,8 @@ onMounted(() => {
     position: absolute;
     inset: 0;
     background-image:
-      radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
+      radial-gradient(circle at 20% 20%, var(--dt-white-08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, var(--dt-white-05) 0%, transparent 40%);
   }
 
   &::after {
@@ -719,7 +719,7 @@ onMounted(() => {
     left: 0;
     right: 0;
     height: 120px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+    background: linear-gradient(to top, var(--dt-black-10), transparent);
   }
 }
 
@@ -737,14 +737,14 @@ onMounted(() => {
     .logo {
       width: 72px;
       height: 72px;
-      background: rgba(255, 255, 255, 0.15);
+      background: var(--dt-white-15);
       border-radius: var(--dt-radius-xl);
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 20px;
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid var(--dt-border-alpha-white-2);
 
       .logo-icon {
         font-size: 36px;
@@ -781,7 +781,7 @@ onMounted(() => {
 
       &:hover {
         opacity: 1;
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--dt-white-10);
         transform: translateX(8px);
       }
 
@@ -800,7 +800,7 @@ onMounted(() => {
     margin-top: auto;
     text-align: center;
     padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid var(--dt-border-alpha-white-2);
 
     p {
       font-size: 13px;
@@ -911,7 +911,7 @@ onMounted(() => {
 
     &:hover:not(.active) {
       color: var(--dt-text-primary);
-      background: rgba(0, 0, 0, 0.03);
+      background: var(--dt-black-04);
     }
 
     &:active:not(.active) {
@@ -1083,12 +1083,12 @@ onMounted(() => {
   gap: 8px;
   transition: all var(--dt-transition-fast);
   margin-bottom: 28px;
-  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.25);
+  box-shadow: 0 2px 8px var(--dt-shadow-brand-light);
 
   &:hover:not(:disabled) {
     background: var(--dt-brand-hover);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 137, 255, 0.35);
+    box-shadow: 0 6px 20px var(--dt-shadow-brand-strong);
   }
 
   &:active:not(:disabled) {

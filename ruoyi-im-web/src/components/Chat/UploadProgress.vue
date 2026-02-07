@@ -340,7 +340,7 @@ function handleCancel() {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, var(--dt-white-30), transparent);
   animation: shine 1.5s infinite;
 }
 
@@ -417,17 +417,17 @@ function handleCancel() {
 
   &.is-uploading {
     border-color: var(--dt-brand-color);
-    background: rgba(0, 137, 255, 0.02);
+    background: var(--dt-brand-02);
   }
 
   &.is-completed {
     border-color: var(--dt-color-success);
-    background: rgba(82, 196, 26, 0.02);
+    background: var(--dt-success-02);
   }
 
   &.is-failed {
     border-color: var(--dt-color-danger);
-    background: rgba(239, 68, 68, 0.02);
+    background: var(--dt-error-02);
   }
 }
 
@@ -526,17 +526,17 @@ function handleCancel() {
 
     &.is-uploading {
       border-color: var(--dt-brand-color);
-      background: rgba(0, 137, 255, 0.1);
+      background: var(--dt-brand-light);
     }
 
     &.is-completed {
       border-color: var(--dt-color-success);
-      background: rgba(82, 196, 26, 0.1);
+      background: var(--dt-success-05);
     }
 
     &.is-failed {
       border-color: var(--dt-color-danger);
-      background: rgba(239, 68, 68, 0.1);
+      background: var(--dt-error-05);
     }
   }
 }

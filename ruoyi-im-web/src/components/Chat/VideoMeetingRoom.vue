@@ -737,7 +737,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--dt-bg-mask);
   backdrop-filter: blur(10px);
 
   .header-left {
@@ -753,7 +753,7 @@ onUnmounted(() => {
 
     .meeting-time {
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.7);
+      color: var(--dt-white-70);
       font-family: monospace;
     }
   }
@@ -768,7 +768,7 @@ onUnmounted(() => {
       align-items: center;
       gap: 4px;
       padding: 6px 12px;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--dt-white-10);
       border-radius: var(--dt-radius-xl);
       font-size: 13px;
       color: #fff;
@@ -821,7 +821,7 @@ onUnmounted(() => {
   transition: all 0.2s;
 
   &:hover {
-    border: 2px solid rgba(0, 137, 255, 0.5);
+    border: 2px solid var(--dt-brand-extra-light);
   }
 
   &.is-active {
@@ -875,7 +875,7 @@ onUnmounted(() => {
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--dt-white-30);
 
       .material-icons-outlined {
         font-size: 48px;
@@ -891,7 +891,7 @@ onUnmounted(() => {
     align-items: center;
     gap: 8px;
     padding: 4px 10px;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--dt-bg-mask);
     border-radius: var(--dt-radius-xl);
 
     .participant-name {
@@ -913,7 +913,7 @@ onUnmounted(() => {
       justify-content: center;
       width: 24px;
       height: 24px;
-      background: rgba(0, 0, 0, 0.6);
+      background: var(--dt-bg-mask);
       border-radius: 50%;
       color: #fff;
 
@@ -945,7 +945,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--dt-bg-mask);
   backdrop-filter: blur(10px);
 
   .controls-left,
@@ -961,12 +961,12 @@ onUnmounted(() => {
   }
 
   .el-button {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--dt-white-10);
     border: none;
     color: #fff;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: var(--dt-white-20);
     }
 
     &.el-button--danger {
@@ -993,9 +993,9 @@ onUnmounted(() => {
   right: 0;
   width: 280px;
   height: calc(100% - 56px - 80px);
-  background: rgba(30, 30, 30, 0.95);
+  background: var(--dt-overlay-30);
   backdrop-filter: blur(10px);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid var(--dt-white-10);
   display: flex;
   flex-direction: column;
   animation: slide-in 0.3s ease-out;
@@ -1014,7 +1014,7 @@ onUnmounted(() => {
     align-items: center;
     justify-content: space-between;
     padding: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--dt-white-10);
     font-size: 14px;
     font-weight: 500;
     color: #fff;
@@ -1030,7 +1030,7 @@ onUnmounted(() => {
     }
 
     &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
+      background: var(--dt-white-20);
       border-radius: var(--dt-radius-sm);
     }
   }
@@ -1044,7 +1044,7 @@ onUnmounted(() => {
     transition: background 0.2s;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--dt-white-05);
     }
 
     .participant-row-name {
@@ -1063,12 +1063,12 @@ onUnmounted(() => {
       transition: opacity 0.2s;
 
       .el-button {
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--dt-white-10);
         border: none;
         color: #fff;
 
         &:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: var(--dt-white-20);
         }
       }
     }

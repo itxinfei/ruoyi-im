@@ -849,23 +849,23 @@ onMounted(() => {
       font-size: 24px;
 
       &.primary-bg {
-        background: rgba(0, 137, 255, 0.1);
-        color: #0089FF;
+        background: var(--dt-brand-light);
+        color: var(--dt-brand-color);
       }
 
       &.success-bg {
-        background: rgba(43, 193, 123, 0.1);
-        color: #2BC17B;
+        background: var(--dt-success-02);
+        color: var(--dt-success-color);
       }
 
       &.warning-bg {
-        background: rgba(255, 172, 0, 0.1);
-        color: #FFAC00;
+        background: var(--dt-warning-bg);
+        color: var(--dt-warning-color);
       }
 
       &.info-bg {
-        background: rgba(140, 140, 140, 0.1);
-        color: #8C8C8C;
+        background: var(--dt-black-08);
+        color: var(--dt-read-color);
       }
     }
   }

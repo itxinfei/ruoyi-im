@@ -517,12 +517,12 @@ const handleReject = () => {
 .dark {
   .bot-message-bubble {
     background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--dt-border-dark, rgba(255, 255, 255, 0.1));
   }
 
   .bot-content {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.9);
+    background: var(--dt-bg-card-dark, rgba(255, 255, 255, 0.05));
+    color: var(--dt-text-primary-dark, rgba(255, 255, 255, 0.9));
   }
 }
 </style>

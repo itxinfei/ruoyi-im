@@ -776,26 +776,26 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2); // 浅灰色
+    background: var(--dt-black-20); // 浅灰色
     border-radius: 3px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--dt-black-20);
     }
   }
 
   &:hover::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--dt-black-20);
   }
 
   .dark & {
     background: var(--dt-bg-body-dark);
 
     &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.18);
+      background: var(--dt-white-18);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.28);
+        background: var(--dt-white-25);
       }
     }
   }
@@ -884,7 +884,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   line-height: 1;
 
   .time-text {
-    background: rgba(0, 0, 0, 0.05); // 钉钉风格：极浅半透明底
+    background: var(--dt-black-04); // 钉钉风格：极浅半透明底
     color: var(--dt-text-tertiary);
     padding: 2px 8px; // 优化：更窄的间距
     font-size: 12px;
@@ -1061,7 +1061,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 // 动画定义
 @keyframes highlightPulseBg {
   0% {
-    background: rgba(65, 104, 224, 0.2);
+    background: var(--dt-brand-extra-light);
   }
 
   // 野火蓝
@@ -1077,7 +1077,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   40%,
   60%,
   80% {
-    background: rgba(255, 235, 59, 0.4);
+    background: var(--dt-search-highlight-bg);
   }
 
   // 黄色闪烁
@@ -1093,13 +1093,13 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 
 @keyframes searchHighlight {
   0% {
-    background: rgba(65, 104, 224, 0.3);
-    box-shadow: 0 0 0 2px rgba(65, 104, 224, 0.3);
+    background: var(--dt-brand-light);
+    box-shadow: 0 0 0 2px var(--dt-brand-light);
   }
 
   50% {
-    background: rgba(65, 104, 224, 0.15);
-    box-shadow: 0 0 0 4px rgba(65, 104, 224, 0.1);
+    background: var(--dt-brand-lighter);
+    box-shadow: 0 0 0 4px var(--dt-brand-01);
   }
 
   100% {

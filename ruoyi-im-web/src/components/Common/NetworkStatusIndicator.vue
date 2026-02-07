@@ -216,19 +216,19 @@ const handleClick = () => {
 // 暗色模式
 :global(.dark) {
   .status-offline {
-    background: rgba(244, 67, 54, 0.2);
-    color: #EF5350;
+    background: var(--dt-error-bg);
+    color: var(--dt-error-color);
   }
 
   .status-disconnected,
   .status-has-failed {
-    background: rgba(255, 152, 0, 0.2);
-    color: #FFA726;
+    background: var(--dt-warning-bg);
+    color: var(--dt-warning-color);
   }
 
   .status-sending {
-    background: rgba(65, 104, 224, 0.2);
-    color: #5A9FFF;
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
   }
 }
 </style>

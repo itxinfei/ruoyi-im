@@ -323,7 +323,7 @@ defineExpose({
 .command-palette-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--dt-bg-overlay);
   backdrop-filter: blur(4px);
   z-index: 3000;
   display: flex;
@@ -422,7 +422,7 @@ defineExpose({
   }
 
   &.active {
-    background: rgba(0, 137, 255, 0.1);
+    background: var(--dt-brand-light);
 
     .command-name {
       color: var(--dt-brand-color);
@@ -440,14 +440,14 @@ defineExpose({
   font-size: 20px;
   flex-shrink: 0;
 
-  &.icon-blue { background: rgba(0, 137, 255, 0.1); color: #0089FF; }
-  &.icon-green { background: rgba(82, 196, 26, 0.1); color: #52c41a; }
-  &.icon-purple { background: rgba(114, 46, 209, 0.1); color: #722ed1; }
-  &.icon-orange { background: rgba(250, 140, 22, 0.1); color: #fa8c16; }
-  &.icon-red { background: rgba(255, 77, 79, 0.1); color: #ff4d4f; }
-  &.icon-cyan { background: rgba(13, 202, 240, 0.1); color: #13c2c2; }
-  &.icon-yellow { background: rgba(250, 219, 20, 0.1); color: #fadb14; }
-  &.icon-pink { background: rgba(235, 47, 150, 0.1); color: #eb2f96; }
+  &.icon-blue { background: var(--dt-brand-light); color: var(--dt-brand-color); }
+  &.icon-green { background: var(--dt-success-05); color: #52c41a; }
+  &.icon-purple { background: var(--dt-info-05); color: var(--dt-info-color); }
+  &.icon-orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+  &.icon-red { background: var(--dt-error-05); color: var(--dt-error-color); }
+  &.icon-cyan { background: var(--dt-cyan-05); color: var(--dt-cyan-color); }
+  &.icon-yellow { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+  &.icon-pink { background: var(--dt-pink-05); color: var(--dt-pink-color); }
 }
 
 .command-info {
@@ -551,7 +551,7 @@ defineExpose({
 
 // 暗色模式
 .dark .command-palette-overlay {
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--dt-bg-mask);
 }
 
 .dark .command-palette-container {

@@ -75,7 +75,7 @@
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke="rgba(255, 255, 255, 0.3)"
+            stroke="var(--dt-white-30)"
             stroke-width="3"
           />
           <path
@@ -335,7 +335,7 @@ onUnmounted(() => {
     z-index: 1;
     font-size: 13px;
     color: var(--dt-text-tertiary);
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--dt-black-20);
     padding: 4px 12px;
     border-radius: var(--dt-radius-lg);
   }
@@ -378,7 +378,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dt-overlay-50);
 }
 
 .progress-ring {

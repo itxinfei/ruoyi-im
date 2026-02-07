@@ -428,7 +428,7 @@ loadApprovals()
 .add-btn:hover {
   background: var(--dt-brand-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 137, 255, 0.25);
+  box-shadow: var(--dt-shadow-brand);
 }
 
 .add-btn:active {
@@ -704,12 +704,12 @@ loadApprovals()
     border-color: var(--dt-border-dark);
 
     &--approve {
-      background: rgba(82, 196, 26, 0.15);
-      border-color: #52c41a;
-      color: #86efac;
+      background: var(--dt-success-bg-dark);
+      border-color: var(--dt-success-color);
+      color: var(--dt-success-color-dark);
 
       &:hover {
-        background: #52c41a;
+        background: var(--dt-success-color);
         color: #fff;
       }
     }
@@ -718,21 +718,21 @@ loadApprovals()
 
 .dark .quick-btn {
   &--approve {
-    background: rgba(82, 196, 26, 0.15);
-    color: #86efac;
+    background: var(--dt-success-bg-dark);
+    color: var(--dt-success-color-dark);
 
     &:hover {
-      background: #52c41a;
+      background: var(--dt-success-color);
       color: #fff;
     }
   }
 
   &--reject {
-    background: rgba(245, 74, 69, 0.15);
-    color: #fca5a5;
+    background: var(--dt-error-bg-dark);
+    color: var(--dt-error-color-dark);
 
     &:hover {
-      background: #f54a45;
+      background: var(--dt-error-color);
       color: #fff;
     }
   }

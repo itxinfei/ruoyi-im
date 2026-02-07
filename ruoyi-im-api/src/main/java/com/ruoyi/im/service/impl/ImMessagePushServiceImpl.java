@@ -19,6 +19,7 @@ import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -53,7 +54,7 @@ public class ImMessagePushServiceImpl implements ImMessagePushService {
                                     ImConversationMapper imConversationMapper,
                                     ImGroupMemberService imGroupMemberService,
                                     ImRedisUtil imRedisUtil,
-                                    IOfflineMessageService offlineMessageService,
+                                    @Lazy IOfflineMessageService offlineMessageService,
                                     ImMessageMapper imMessageMapper) {
         this.imMessageService = imMessageService;
         this.conversationMemberService = conversationMemberService;

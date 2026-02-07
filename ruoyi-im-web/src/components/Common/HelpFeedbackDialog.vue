@@ -754,7 +754,7 @@ watch(visible, val => {
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 137, 255, 0.4); // 保持 hover 特效
+        box-shadow: var(--dt-shadow-brand-strong); // 保持 hover 特效
       }
 
       &:active {
@@ -769,7 +769,7 @@ watch(visible, val => {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--dt-black-15);
   border-radius: var(--dt-radius-sm);
 }
 
@@ -872,7 +872,7 @@ watch(visible, val => {
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--dt-white-15);
   }
 }
 </style>

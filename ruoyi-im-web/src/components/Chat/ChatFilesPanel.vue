@@ -459,7 +459,7 @@ const handleSaveToCloud = async file => {
     const loading = ElLoading.service({
       lock: true,
       text: '正在保存到云盘...',
-      background: 'rgba(0, 0, 0, 0.7)'
+      background: 'var(--dt-overlay-bg-dark)'
     })
 
     try {
@@ -518,7 +518,7 @@ watch(() => props.visible, val => {
 .chat-files-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dt-overlay-bg);
   z-index: 2000;
   display: flex;
   justify-content: flex-end;
@@ -531,7 +531,7 @@ watch(() => props.visible, val => {
   background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 30px rgba(0, 0, 0, 0.2);
+  box-shadow: -4px 0 30px var(--dt-shadow-lg);
 
   .dark & {
     background: var(--dt-bg-card-dark);
@@ -660,7 +660,7 @@ watch(() => props.visible, val => {
         color: #fff;
 
         .tab-count {
-          background: rgba(255, 255, 255, 0.25);
+          background: var(--dt-tint-light);
         }
       }
     }

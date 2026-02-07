@@ -32,6 +32,22 @@
 
   // === Text Inverse (反色文本 - 用于深色背景) ===
   --dt-text-inverse: #FFFFFF;
+  --dt-text-primary-inverted: #FFFFFF;
+  --dt-text-secondary-inverted: rgba(255, 255, 255, 0.9);
+  --dt-brand-bg-hover: rgba(0, 137, 255, 0.15);
+  --dt-error-bg-hover: rgba(244, 67, 54, 0.15);
+  --dt-brand-color-light: #4DA6FF;
+  --dt-brand-hover-light: #3399FF;
+  --dt-error-color-light: #FF8A80;
+  --dt-bg-code: #F5F7FA;
+  --dt-bg-code-dark: #2D2D2D;
+  --dt-mention-bg-own: rgba(255, 255, 255, 0.2);
+  --dt-mention-bg-own-hover: rgba(255, 255, 255, 0.3);
+  --dt-mention-current-user-bg-own: rgba(255, 200, 200, 0.3);
+  --dt-mention-bg-dark: rgba(0, 137, 255, 0.2);
+  --dt-mention-bg-dark-hover: rgba(0, 137, 255, 0.3);
+  --dt-mention-current-user-bg-dark: rgba(255, 100, 100, 0.25);
+  --dt-brand-bg-dark: rgba(0, 137, 255, 0.25);
 
   // === Search Colors (搜索高亮) ===
   --dt-search-highlight-bg: #FFE066; // 搜索高亮背景（黄色，类似浏览器搜索）
@@ -108,8 +124,8 @@
   --dt-shadow-2xl: 0 10px 40px rgba(0, 0, 0, 0.15); // 大弹出层
   --dt-shadow-3xl: 0 12px 48px rgba(0, 0, 0, 0.2);   // 超强阴影
   --dt-shadow-brand: 0 4px 12px rgba(0, 137, 255, 0.3); // 品牌色阴影
-  --dt-shadow-brand-light: 0 2px 12px rgba(0, 137, 255, 0.2); // 浅品牌色阴影
-  --dt-shadow-brand-strong: 0 6px 20px rgba(0, 137, 255, 0.4); // 强品牌色阴影
+  --dt-shadow-brand-light: 0 2px 8px rgba(0, 137, 255, 0.25); // 浅品牌色阴影
+  --dt-shadow-brand-strong: 0 6px 20px rgba(0, 137, 255, 0.35); // 强品牌色阴影
   --dt-shadow-warning: 0 4px 12px rgba(255, 152, 0, 0.3); // 警告色阴影
   --dt-shadow-warning-strong: 0 2px 8px rgba(255, 152, 0, 0.4); // 强警告色阴影
   --dt-shadow-success: 0 4px 12px rgba(0, 200, 83, 0.35); // 成功色阴影
@@ -329,6 +345,12 @@
   --dt-error-05: rgba(245, 74, 69, 0.05);
   --dt-error-20: rgba(245, 74, 69, 0.2);
   --dt-error-30: rgba(245, 74, 69, 0.3);
+  --dt-info-05: rgba(114, 46, 209, 0.1);
+  --dt-info-color: #722ed1;
+  --dt-cyan-05: rgba(13, 202, 240, 0.1);
+  --dt-cyan-color: #13c2c2;
+  --dt-pink-05: rgba(235, 47, 150, 0.1);
+  --dt-pink-color: #eb2f96;
 
   // White alpha colors for dark mode
   --dt-white-03: rgba(255, 255, 255, 0.03);
@@ -341,6 +363,7 @@
   --dt-white-90: rgba(255, 255, 255, 0.9);
 
   // Additional white alpha colors
+  --dt-white-08: rgba(255, 255, 255, 0.08);
   --dt-white-12: rgba(255, 255, 255, 0.12);
   --dt-white-15: rgba(255, 255, 255, 0.15);
   --dt-white-18: rgba(255, 255, 255, 0.18);
@@ -447,6 +470,31 @@
   --dt-scrollbar-thumb-bg: var(--dt-black-10);
   --dt-scrollbar-thumb-hover-bg: var(--dt-black-20);
   --dt-scrollbar-thumb-white-2: rgba(255, 255, 255, 0.2);
+
+  // 通话组件专用
+  --dt-call-overlay-bg: rgba(0, 0, 0, 0.75);
+  --dt-call-dialog-bg-start: #1a1a2e;
+  --dt-call-dialog-bg-mid: #16213e;
+  --dt-call-dialog-bg-end: #0f3460;
+  --dt-call-dialog-shadow: rgba(0, 0, 0, 0.5);
+  --dt-call-avatar-shadow: rgba(0, 0, 0, 0.3);
+  --dt-call-avatar-border: rgba(255, 255, 255, 0.1);
+  --dt-call-text-white: rgba(255, 255, 255, 0.7);
+  --dt-call-text-white-8: rgba(255, 255, 255, 0.8);
+  --dt-call-btn-bg: rgba(255, 255, 255, 0.1);
+  --dt-call-btn-bg-hover: rgba(255, 255, 255, 0.2);
+  --dt-call-btn-active: rgba(64, 158, 255, 0.3);
+  --dt-call-btn-minimize: rgba(103, 194, 58, 0.3);
+  --dt-call-btn-minimize-hover: rgba(103, 194, 58, 0.4);
+  --dt-call-btn-hangup: rgba(245, 108, 108, 0.2);
+  --dt-call-btn-hangup-hover: rgba(245, 108, 108, 0.4);
+  --dt-call-float-bg: rgba(0, 0, 0, 0.85);
+  --dt-call-float-shadow: rgba(0, 0, 0, 0.4);
+  --dt-call-float-incoming-start: rgba(64, 158, 255, 0.9);
+  --dt-call-float-incoming-end: rgba(0, 137, 255, 0.9);
+  --dt-call-float-pulse-shadow: rgba(64, 158, 255, 0.4);
+  --dt-call-float-pulse-shadow-mid: rgba(64, 158, 255, 0.6);
+  --dt-call-indicator-border: #fff;
 
   // ============================================================================
   // 响应式断点变量（与 Tailwind 配置保持一致）

@@ -633,11 +633,11 @@ watch(showCreateDialog, val => {
 .dark {
   .announcement-item {
     &.unread {
-      background: rgba(0, 137, 255, 0.1);
+      background: var(--dt-brand-bg);
     }
 
     &.pinned {
-      background: rgba(250, 173, 20, 0.1);
+      background: var(--dt-warning-bg);
     }
   }
 }

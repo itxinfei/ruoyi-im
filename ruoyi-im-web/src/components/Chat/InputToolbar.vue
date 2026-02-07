@@ -2,77 +2,59 @@
   <div class="input-toolbar">
     <!-- 左侧工具组:核心功能 -->
     <div class="toolbar-left">
-      <el-tooltip
-        content="表情"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          :class="{ active: showEmojiPicker }"
-          @click.stop="$emit('toggle-emoji')"
-        >
-          <span class="material-icons-outlined">sentiment_satisfied_alt</span>
+      <el-tooltip content="表情" placement="top">
+        <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="$emit('toggle-emoji')">
+          <el-icon>
+            <ChatDotRound />
+          </el-icon>
         </button>
       </el-tooltip>
 
-      <el-tooltip
-        content="图片"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          @click="$emit('upload-image')"
-        >
-          <span class="material-icons-outlined">image</span>
+      <el-tooltip content="图片" placement="top">
+        <button class="toolbar-btn" @click="$emit('upload-image')">
+          <el-icon>
+            <Picture />
+          </el-icon>
         </button>
       </el-tooltip>
 
-      <el-tooltip
-        content="文件"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          @click="$emit('upload-file')"
-        >
-          <span class="material-icons-outlined">insert_drive_file</span>
+      <el-tooltip content="文件" placement="top">
+        <button class="toolbar-btn" @click="$emit('upload-file')">
+          <el-icon>
+            <Document />
+          </el-icon>
         </button>
       </el-tooltip>
 
-      <el-tooltip
-        v-if="showAtButton"
-        content="@成员"
-        placement="top"
-      >
-        <button
-          class="toolbar-btn"
-          @click="$emit('at-member')"
-        >
-          <span class="material-icons-outlined">alternate_email</span>
+      <el-tooltip v-if="showAtButton" content="@成员" placement="top">
+        <button class="toolbar-btn" @click="$emit('at-member')">
+          <el-icon>
+            <User />
+          </el-icon>
         </button>
       </el-tooltip>
 
       <!-- 更多功能下拉菜单 -->
-      <el-dropdown
-        trigger="click"
-        @command="handleMoreCommand"
-      >
-        <el-tooltip
-          content="更多"
-          placement="top"
-        >
+      <el-dropdown trigger="click" @command="handleMoreCommand">
+        <el-tooltip content="更多" placement="top">
           <button class="toolbar-btn more-btn">
-            <span class="material-icons-outlined">more_horiz</span>
+            <el-icon>
+              <MoreFilled />
+            </el-icon>
           </button>
         </el-tooltip>
         <template #dropdown>
           <el-dropdown-menu class="toolbar-more-menu">
             <el-dropdown-item command="screenshot">
-              <span class="material-icons-outlined">screenshot</span>
+              <el-icon>
+                <Crop />
+              </el-icon>
               <span>截图</span>
             </el-dropdown-item>
             <el-dropdown-item command="smart-reply">
-              <span class="material-icons-outlined">auto_awesome</span>
+              <el-icon>
+                <MagicStick />
+              </el-icon>
               <span>智能回复</span>
             </el-dropdown-item>
           </el-dropdown-menu>
@@ -83,6 +65,7 @@
 </template>
 
 <script setup>
+import { ChatDotRound, Picture, Document, User, MoreFilled, Crop, MagicStick } from '@element-plus/icons-vue'
 const props = defineProps({
   showEmojiPicker: {
     type: Boolean,
@@ -142,13 +125,13 @@ const handleMoreCommand = command => {
   transition: all 0.15s ease;
   padding: 0;
 
-  .material-icons-outlined {
+  .el-icon {
     font-size: 18px;
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: #0089ff;
+    background: var(--dt-black-04);
+    color: var(--dt-brand-color);
   }
 
   &:active {
@@ -156,28 +139,28 @@ const handleMoreCommand = command => {
   }
 
   .dark & {
-    color: #999999;
+    color: var(--dt-text-light-gray);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #0089ff;
+      background: var(--dt-white-08);
+      color: var(--dt-brand-color);
     }
   }
 
   &:focus-visible {
-    outline: 2px solid #0089ff;
+    outline: 2px solid var(--dt-brand-color);
     outline-offset: 2px;
   }
 
   &.active {
-    background: #e6f4ff;
-    color: #0089ff;
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
   }
 
   // 更多按钮
   &.more-btn {
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--dt-black-04);
     }
   }
 
@@ -194,13 +177,13 @@ const handleMoreCommand = command => {
     padding: 8px 12px;
     font-size: 13px;
 
-    .material-icons-outlined {
+    .el-icon {
       font-size: 16px;
       color: #5f6672;
     }
 
     &:hover {
-      .material-icons-outlined {
+      .el-icon {
         color: #0089ff;
       }
     }
@@ -214,13 +197,13 @@ const handleMoreCommand = command => {
       color: #a0a8b8;
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: #0089ff;
+        background: var(--dt-white-08);
+        color: var(--dt-brand-color);
       }
 
       &.active {
-        background: rgba(0, 137, 255, 0.15);
-        color: #0089ff;
+        background: var(--dt-brand-extra-light);
+        color: var(--dt-brand-color);
       }
     }
   }

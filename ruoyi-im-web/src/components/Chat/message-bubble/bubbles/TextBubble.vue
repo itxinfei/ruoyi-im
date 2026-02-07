@@ -352,24 +352,24 @@ function escapeRegExp(string) {
   // 己方消息内的链接和提及样式调整为白色
   :deep(.is-own) & {
     a {
-      color: #FFFFFF;
+      color: var(--dt-text-primary-inverted);
 
       &:hover {
-        color: rgba(255, 255, 255, 0.9);
+        color: var(--dt-text-secondary-inverted);
       }
     }
 
     .mention-highlight {
-      color: #FFFFFF;
-      background: rgba(255, 255, 255, 0.2);
+      color: var(--dt-text-primary-inverted);
+      background: var(--dt-mention-bg-own);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: var(--dt-mention-bg-own-hover);
       }
 
       &.is-current-user {
-        background: rgba(255, 200, 200, 0.3);
-        color: #FFFFFF;
+        background: var(--dt-mention-current-user-bg-own);
+        color: var(--dt-text-primary-inverted);
       }
     }
   }
@@ -445,21 +445,21 @@ function escapeRegExp(string) {
 
     .mention-highlight {
       color: var(--dt-brand-color-light);
-      background: rgba(0, 137, 255, 0.2);
+      background: var(--dt-mention-bg-dark);
 
       &:hover {
-        background: rgba(0, 137, 255, 0.3);
+        background: var(--dt-mention-bg-dark-hover);
       }
 
       &.is-current-user {
-        background: rgba(255, 100, 100, 0.25);
-        color: #FF8A80;
+        background: var(--dt-mention-current-user-bg-dark);
+        color: var(--dt-error-color-light);
       }
     }
   }
 
   .message-pinned-badge {
-    background: rgba(0, 137, 255, 0.25);
+    background: var(--dt-brand-bg-dark);
     color: var(--dt-brand-color-light);
   }
 }

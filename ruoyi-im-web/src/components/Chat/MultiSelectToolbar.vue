@@ -89,13 +89,13 @@ defineEmits(['forward', 'combine', 'delete', 'cancel'])
   padding: 12px 24px;
   background: var(--dt-bg-card);
   border-top: 1px solid var(--dt-border-light);
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -2px 12px var(--dt-shadow-rgba);
   z-index: 100;
 
   .dark & {
     background: var(--dt-bg-card-dark);
     border-top-color: var(--dt-border-dark);
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -2px 12px var(--dt-shadow-rgba-dark);
   }
 }
 
@@ -157,21 +157,21 @@ defineEmits(['forward', 'combine', 'delete', 'cancel'])
 
   &--forward {
     &:hover:not(:disabled) {
-      background: rgba(0, 137, 255, 0.1);
+      background: var(--dt-brand-rgba);
       color: var(--dt-brand-color);
     }
   }
 
   &--combine {
     &:hover:not(:disabled) {
-      background: rgba(103, 58, 183, 0.1);
-      color: #673AB7;
+      background: var(--dt-purple-rgba);
+      color: var(--dt-purple-color);
     }
   }
 
   &--delete {
     &:hover:not(:disabled) {
-      background: rgba(255, 77, 79, 0.1);
+      background: var(--dt-error-rgba);
       color: var(--dt-error-color);
     }
   }

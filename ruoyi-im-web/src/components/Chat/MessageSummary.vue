@@ -360,7 +360,7 @@ watch(() => props.visible, newVal => {
 .message-summary-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dt-screenshot-mask);
   backdrop-filter: blur(4px);
   z-index: $z-modal-top;
   display: flex;
@@ -394,7 +394,7 @@ watch(() => props.visible, newVal => {
   max-height: 80vh;
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px var(--dt-screenshot-shadow-light);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -421,7 +421,7 @@ watch(() => props.visible, newVal => {
   justify-content: space-between;
   padding: 16px 20px;
   border-bottom: 1px solid var(--dt-border-light);
-  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, rgba(0, 137, 255, 0.03) 100%);
+  background: linear-gradient(135deg, var(--dt-brand-bg) 0%, var(--dt-brand-lighter) 100%);
 }
 
 .header-left {
@@ -555,9 +555,9 @@ watch(() => props.visible, newVal => {
   border-radius: var(--dt-radius-md);
   flex-shrink: 0;
 
-  &.topic-icon { background: rgba(0, 137, 255, 0.1); color: #0089FF; }
-  &.time-icon { background: rgba(82, 196, 26, 0.1); color: #52c41a; }
-  &.participant-icon { background: rgba(250, 140, 22, 0.1); color: #fa8c16; }
+  &.topic-icon { background: var(--dt-brand-light); color: var(--dt-brand-color); }
+  &.time-icon { background: var(--dt-success-05); color: var(--dt-success-color); }
+  &.participant-icon { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
 
   .material-icons-outlined {
     font-size: 16px;
@@ -820,7 +820,7 @@ watch(() => props.visible, newVal => {
 
   &:hover {
     background: var(--dt-warning-bg);
-    border-color: var(--dt-warning-color);
+    border-color: var(--dt-warning-border);
 
     .todo-action {
       opacity: 1;
@@ -845,7 +845,7 @@ watch(() => props.visible, newVal => {
 
 .todo-action {
   opacity: 0;
-  color: var(--dt-warning-color);
+  color: var(--dt-warning-hover);
   transition: opacity var(--dt-transition-fast);
 
   .material-icons-outlined {
@@ -907,12 +907,12 @@ watch(() => props.visible, newVal => {
 :global(.dark) {
   .summary-container {
     background: var(--dt-bg-card-dark);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 60px var(--dt-screenshot-shadow-card);
   }
 
   .summary-header {
     border-color: var(--dt-border-dark);
-    background: linear-gradient(135deg, rgba(0, 137, 255, 0.15) 0%, rgba(0, 137, 255, 0.05) 100%);
+    background: linear-gradient(135deg, var(--dt-brand-extra-light) 0%, var(--dt-brand-lighter) 100%);
   }
 
   .message-count {

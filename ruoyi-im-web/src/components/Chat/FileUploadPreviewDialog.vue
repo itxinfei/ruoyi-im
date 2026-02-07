@@ -278,13 +278,13 @@ function handleConfirm() {
     }
 
     &.video-icon {
-      background: rgba(0, 137, 255, 0.1);
+      background: var(--dt-brand-05);
       color: var(--dt-brand-color);
     }
 
     &.audio-icon {
-      background: rgba(82, 196, 26, 0.1);
-      color: #52c41a;
+      background: var(--dt-success-05);
+      color: var(--dt-success-color);
     }
   }
 }
@@ -324,7 +324,7 @@ function handleConfirm() {
   transition: all var(--dt-transition-fast);
 
   &:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: var(--dt-error-05);
     color: var(--dt-color-danger);
   }
 
@@ -361,7 +361,7 @@ function handleConfirm() {
 
     &:hover {
       border-color: var(--dt-brand-color);
-      box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+      box-shadow: var(--dt-shadow-brand-light);
     }
   }
 

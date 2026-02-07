@@ -553,10 +553,10 @@ const canRecall = computed(() => {
     // 文字颜色
     color: #1f2329;
     // 钉钉风格阴影：微妙的立体感
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+    box-shadow: var(--dt-shadow-1), var(--dt-shadow-2);
     // 微妙的悬停效果
     &:hover {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--dt-shadow-3);
       transform: translateY(-1px);
     }
   }
@@ -576,12 +576,12 @@ const canRecall = computed(() => {
     // 非对称圆角：靠近头像一侧圆角较小（右侧4px）
     border-radius: 12px 12px 4px 12px;
     // 钉钉风格蓝色阴影
-    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.25);
+    box-shadow: var(--dt-shadow-brand-light);
     // 微妙的悬停效果
     &:hover {
-      background: linear-gradient(135deg, #0089ff 0%, #0066cc 100%);
+      background: var(--dt-brand-gradient);
       filter: brightness(1.05);
-      box-shadow: 0 4px 16px rgba(0, 137, 255, 0.35);
+      box-shadow: var(--dt-shadow-brand-strong);
     }
   }
 
@@ -603,8 +603,8 @@ const canRecall = computed(() => {
 
   // 链接预览卡片样式
   :deep(.link-preview-card) {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--dt-white-15);
+    border-color: var(--dt-white-20);
 
     .link-title,
     .link-desc {
@@ -657,13 +657,13 @@ const canRecall = computed(() => {
 :global(.dark) {
   // 对方消息: 深灰背景
   .message-bubble:not(.is-own) .bubble-content {
-    background: #2d2d2d;
-    border-color: #3d3d3d;
-    color: #e8e8e8;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    background: var(--dt-bg-tertiary-dark);
+    border-color: var(--dt-bg-dark-border);
+    color: var(--dt-text-dark-mode);
+    box-shadow: var(--dt-black-20);
 
     &:hover {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--dt-black-20);
       transform: translateY(-1px);
     }
   }
@@ -672,11 +672,11 @@ const canRecall = computed(() => {
   .message-bubble.is-own .bubble-content {
     background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 137, 255, 0.3);
+    box-shadow: var(--dt-shadow-brand);
 
     &:hover {
       filter: brightness(1.08);
-      box-shadow: 0 6px 20px rgba(0, 137, 255, 0.4);
+      box-shadow: var(--dt-shadow-brand-strong);
     }
   }
 }

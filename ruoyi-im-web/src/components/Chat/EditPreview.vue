@@ -76,8 +76,8 @@ onUnmounted(() => {
   padding: 12px 16px;
   margin-bottom: 12px;
   border-radius: var(--dt-radius-md);
-  background: linear-gradient(135deg, rgba(82, 196, 26, 0.08) 0%, rgba(82, 196, 26, 0.04) 100%);
-  border: 1px solid rgba(82, 196, 26, 0.2);
+  background: linear-gradient(135deg, var(--dt-success-05) 0%, var(--dt-success-02) 100%);
+  border: 1px solid var(--dt-success-30);
 }
 
 .edit-header {
@@ -111,7 +111,7 @@ onUnmounted(() => {
 
   &:hover {
     color: var(--dt-error-color);
-    background: rgba(255, 77, 79, 0.1);
+    background: var(--dt-error-bg-hover);
   }
 
   .el-icon {
@@ -157,8 +157,8 @@ onUnmounted(() => {
 // 暗色模式
 :global(.dark) {
   .edit-preview-container {
-    background: linear-gradient(135deg, rgba(82, 196, 26, 0.12) 0%, rgba(82, 196, 26, 0.06) 100%);
-    border-color: rgba(82, 196, 26, 0.3);
+    background: linear-gradient(135deg, var(--dt-success-dark-bg) 0%, var(--dt-success-05) 100%);
+    border-color: var(--dt-success-dark-border);
   }
 
   .original-message {

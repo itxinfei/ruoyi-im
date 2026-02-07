@@ -633,8 +633,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #0089FF 0%, #0958d9 100%);
-  color: #fff;
+  background: var(--dt-brand-gradient);
+  color: var(--dt-text-inverse);
   border-radius: var(--dt-radius-md);
   margin-top: 16px;
 
@@ -649,13 +649,13 @@ onMounted(() => {
   }
 
   .el-button {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #fff;
+    background: var(--dt-white-20);
+    border-color: var(--dt-border-alpha-white-2);
+    color: var(--dt-text-inverse);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.3);
-      border-color: rgba(255, 255, 255, 0.5);
+      background: var(--dt-white-30);
+      border-color: var(--dt-white-50);
     }
 
     &.is-disabled {

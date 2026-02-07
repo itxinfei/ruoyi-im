@@ -158,7 +158,7 @@ const handleImageError = e => {
 
   &:hover {
     border-color: #4168e0; // 野火IM蓝
-    box-shadow: 0 2px 8px rgba(65, 104, 224, 0.15);
+    box-shadow: 0 2px 8px var(--dt-brand-extra-light);
 
     .link-arrow {
       opacity: 1;
@@ -346,13 +346,13 @@ const handleImageError = e => {
 
   &:hover {
     border-color: #4168e0;
-    box-shadow: 0 2px 8px rgba(65, 104, 224, 0.25);
+    box-shadow: 0 2px 8px var(--dt-brand-bg-dark);
   }
 }
 
 .dark .link-card--error {
   .link-icon--error {
-    background: rgba(255, 107, 107, 0.1);
+    background: var(--dt-error-02);
   }
 }
 </style>

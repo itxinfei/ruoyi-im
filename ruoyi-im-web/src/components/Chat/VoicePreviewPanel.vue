@@ -134,7 +134,7 @@ const handleProgressDragStart = event => {
   padding: 10px 12px;
   margin-bottom: 12px;
   border-radius: var(--dt-radius-md);
-  background: rgba(0, 137, 255, 0.05);
+  background: var(--dt-brand-lighter);
   border-left: 3px solid var(--dt-brand-color);
 }
 
@@ -233,11 +233,11 @@ const handleProgressDragStart = event => {
       border-radius: 50%;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--dt-shadow-2);
 
       &:hover {
         transform: translate(-50%, -50%) scale(1.1);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--dt-shadow-3);
       }
     }
   }
@@ -306,17 +306,17 @@ const handleProgressDragStart = event => {
     .voice-progress-handle {
       background: #1e293b;
       border-color: var(--dt-brand-color);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--dt-black-20);
 
       &:hover {
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+        box-shadow: var(--dt-black-20);
       }
     }
   }
 
   .voice-actions .voice-action-btn.delete-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #9ca3af;
+    background: var(--dt-white-10);
+    color: var(--dt-text-secondary-dark);
 
     &:hover {
       background: #ff4d4f;

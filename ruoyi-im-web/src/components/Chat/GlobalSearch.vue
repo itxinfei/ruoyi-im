@@ -391,7 +391,7 @@ onMounted(() => {
 
   &:hover {
     background: #f5f6f7;
-    .dark & { background: rgba(255, 255, 255, 0.05); }
+    .dark & { background: var(--dt-bg-hover); }
   }
 
   .avatar {
@@ -420,7 +420,7 @@ onMounted(() => {
 
   &:hover {
     background: #f5f6f7;
-    .dark & { background: rgba(255, 255, 255, 0.05); }
+    .dark & { background: var(--dt-bg-hover); }
   }
 
   .msg-header {
@@ -470,5 +470,5 @@ onMounted(() => {
 }
 
 .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: var(--dt-radius-sm); }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--dt-bg-scrollbar); border-radius: var(--dt-radius-sm); }
 </style>

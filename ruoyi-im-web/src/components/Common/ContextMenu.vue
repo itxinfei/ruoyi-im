@@ -384,7 +384,7 @@ onUnmounted(() => {
   background: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px var(--dt-shadow-color);
   padding: 4px 0;
   min-width: 160px;
   max-width: 240px;
@@ -453,7 +453,7 @@ onUnmounted(() => {
     }
 
     &:hover:not(.context-menu__item--disabled) {
-      background: rgba(255, 71, 87, 0.1);
+      background: var(--dt-error-bg);
     }
   }
 }

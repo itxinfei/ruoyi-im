@@ -253,7 +253,7 @@ watch(() => props.message?.id, () => {
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--dt-black-04);
   }
 
   &.is-playing {
@@ -275,7 +275,7 @@ watch(() => props.message?.id, () => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--dt-black-08);
   transition: all 0.2s;
 }
 
@@ -298,7 +298,7 @@ watch(() => props.message?.id, () => {
   min-width: 3px;
   max-width: 4px;
   height: 30%;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--dt-black-20);
   border-radius: 2px;
   transition: height 0.1s, background-color 0.2s;
 
@@ -341,15 +341,15 @@ watch(() => props.message?.id, () => {
 .dark {
   .voice-bubble {
     &:hover {
-      background-color: rgba(255, 255, 255, 0.08);
+      background-color: var(--dt-white-10);
     }
 
     .voice-play-btn {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: var(--dt-white-10);
     }
 
     .wave-bar {
-      background-color: rgba(255, 255, 255, 0.2);
+      background-color: var(--dt-white-20);
     }
   }
 }

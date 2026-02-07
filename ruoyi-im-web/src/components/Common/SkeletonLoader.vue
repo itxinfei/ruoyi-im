@@ -250,8 +250,8 @@ const { isDark } = useTheme()
       }
 
       .skeleton-bubble {
-        background: rgba(65, 104, 224, 0.1);
-        border: 1px solid rgba(65, 104, 224, 0.2);
+        background: var(--dt-brand-light);
+        border: 1px solid var(--dt-brand-extra-light);
       }
     }
   }
@@ -320,7 +320,7 @@ const { isDark } = useTheme()
   border-radius: 8px;
   background: #ffffff;
   border: 1px solid #e0e0e0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--dt-shadow-sm);
 
   .skeleton-card-header {
     display: flex;
@@ -375,8 +375,8 @@ const { isDark } = useTheme()
     }
 
     &.right .skeleton-bubble {
-      background: rgba(65, 104, 224, 0.2);
-      border-color: rgba(65, 104, 224, 0.3);
+      background: var(--dt-brand-bg-dark);
+      border-color: var(--dt-brand-extra-light);
     }
   }
 

@@ -311,7 +311,7 @@ defineExpose({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--dt-call-overlay-bg);
   backdrop-filter: blur(10px);
   z-index: $z-call-overlay;
   display: flex;
@@ -336,9 +336,9 @@ defineExpose({
   position: relative;
   width: 380px;
   max-width: 90vw; // 响应式：移动端最大宽度限制
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, var(--dt-call-dialog-bg-start) 0%, var(--dt-call-dialog-bg-mid) 50%, var(--dt-call-dialog-bg-end) 100%);
   border-radius: var(--dt-radius-3xl);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px var(--dt-call-dialog-shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -382,8 +382,8 @@ defineExpose({
 }
 
 .user-avatar {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  border: 3px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px var(--dt-call-avatar-shadow);
+  border: 3px solid var(--dt-call-avatar-border);
 
   &.pulse {
     animation: callAvatarPulse 1.5s ease-in-out infinite;
@@ -393,20 +393,20 @@ defineExpose({
 .user-name {
   font-size: 20px;
   font-weight: 600;
-  color: #fff;
+  color: var(--dt-text-inverse);
   margin: 0;
 }
 
 .call-status {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--dt-call-text-white);
   margin: 0;
 }
 
 .call-duration {
   font-size: 18px;
   font-weight: 500;
-  color: #409eff;
+  color: var(--dt-brand-color);
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
@@ -427,7 +427,7 @@ defineExpose({
   gap: 6px;
   width: 60px;
   padding: 12px 0;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--dt-call-btn-bg);
   border: none;
   border-radius: 14px;
   cursor: pointer;
@@ -436,16 +436,16 @@ defineExpose({
 
   .material-icons-outlined {
     font-size: 24px;
-    color: #fff;
+    color: var(--dt-text-inverse);
   }
 
   .btn-label {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--dt-call-text-white-8);
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--dt-call-btn-bg-hover);
     transform: translateY(-2px);
   }
 
@@ -454,30 +454,30 @@ defineExpose({
   }
 
   &.active {
-    background: rgba(64, 158, 255, 0.3);
+    background: var(--dt-call-btn-active);
 
     .material-icons-outlined {
-      color: #409eff;
+      color: var(--dt-brand-color);
     }
   }
 
   &.minimize-btn:hover {
-    background: rgba(103, 194, 58, 0.3);
+    background: var(--dt-call-btn-minimize);
 
     .material-icons-outlined {
-      color: #67c23a;
+      color: var(--dt-success-color);
     }
   }
 
   &.hangup-btn {
-    background: rgba(245, 108, 108, 0.2);
+    background: var(--dt-call-btn-hangup);
 
     .material-icons-outlined {
-      color: #f56c6c;
+      color: var(--dt-error-color);
     }
 
     &:hover {
-      background: rgba(245, 108, 108, 0.4);
+      background: var(--dt-call-btn-hangup-hover);
       transform: scale(1.05);
     }
   }
@@ -492,26 +492,26 @@ defineExpose({
   right: 30px;
   width: 280px;
   max-width: calc(100vw - 60px); // 响应式：移动端最大宽度限制
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--dt-call-float-bg);
   backdrop-filter: blur(20px);
   border-radius: var(--dt-radius-xl);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px var(--dt-call-float-shadow);
   z-index: $z-float-window;
   overflow: hidden;
   cursor: pointer;
 
   &.incoming {
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.9) 0%, rgba(0, 137, 255, 0.9) 100%);
+    background: linear-gradient(135deg, var(--dt-call-float-incoming-start) 0%, var(--dt-call-float-incoming-end) 100%);
     animation: floatPulse 1.5s ease-in-out infinite;
   }
 }
 
 @keyframes floatPulse {
   0%, 100% {
-    box-shadow: 0 8px 32px rgba(64, 158, 255, 0.4);
+    box-shadow: 0 8px 32px var(--dt-call-float-pulse-shadow);
   }
   50% {
-    box-shadow: 0 8px 48px rgba(64, 158, 255, 0.6);
+    box-shadow: 0 8px 48px var(--dt-call-float-pulse-shadow-mid);
   }
 }
 
@@ -543,8 +543,8 @@ defineExpose({
   right: 0;
   width: 12px;
   height: 12px;
-  background: #67c23a;
-  border: 2px solid #fff;
+  background: var(--dt-success-color);
+  border: 2px solid var(--dt-call-indicator-border);
   border-radius: 50%;
   animation: indicatorPulse 1s ease-in-out infinite;
 }
@@ -570,12 +570,12 @@ defineExpose({
 .float-name {
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: var(--dt-text-inverse);
 }
 
 .float-status {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--dt-call-text-white);
 }
 
 .float-expand {
@@ -584,18 +584,18 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--dt-call-btn-bg);
   border: none;
   border-radius: var(--dt-radius-md);
   cursor: pointer;
 
   .material-icons-outlined {
     font-size: 20px;
-    color: #fff;
+    color: var(--dt-text-inverse);
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--dt-call-btn-bg-hover);
   }
 }
 
@@ -604,7 +604,7 @@ defineExpose({
 // ============================================================================
 @media (prefers-color-scheme: dark) {
   .voice-call-overlay {
-    background: linear-gradient(135deg, #0a0a0f 0%, #0d1117 50%, #161b22 100%);
+    background: linear-gradient(135deg, var(--dt-call-dialog-bg-start) 0%, var(--dt-call-dialog-bg-mid) 50%, var(--dt-call-dialog-bg-end) 100%);
   }
 }
 </style>

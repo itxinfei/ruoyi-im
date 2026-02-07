@@ -209,7 +209,7 @@ function handleRetry() {
 .css-loader {
   width: 12px;
   height: 12px;
-  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  border: 1.5px solid var(--dt-divider-tertiary);
   border-top-color: var(--dt-brand-color);
   border-radius: 50%;
   animation: rotate 0.8s linear infinite;
@@ -271,8 +271,8 @@ function handleRetry() {
     bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    background: var(--dt-fill-surface-elevated);
+    color: var(--dt-text-primary-on-color);
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 11px;
@@ -339,7 +339,7 @@ function handleRetry() {
 
 :global(.dark) {
   .css-loader {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--dt-divider-tertiary-dark);
   }
 
   .status-text-read {
