@@ -1,5 +1,8 @@
 <template>
-  <div class="contacts-panel">
+  <div
+    class="contacts-panel"
+    :class="{ 'group-profile-open': groupProfileOpen }"
+  >
     <!-- 左侧导航栏 -->
     <aside class="sidebar">
       <!-- 顶部标题区 -->
@@ -387,12 +390,14 @@
           @message="handleMessage"
           @voice-call="handleVoiceCall"
           @video-call="handleVideoCall"
+          @toggle-group-profile="handleGroupProfileToggle"
         />
         <!-- 群组详情暂时复用ContactDetail或开发新的组件，这里假设ContactDetail能处理 -->
         <ContactDetail
           v-else-if="currentNav === 'groups'"
           :contact="{ ...selectedItem, isGroup: true }"
           @message="handleMessage"
+          @toggle-group-profile="handleGroupProfileToggle"
         />
       </div>
       <div
@@ -655,6 +660,7 @@ const handleAddFriendSuccess = () => {
 // Selection
 const selectedItemId = ref(null)
 const selectedItem = ref(null)
+const groupProfileOpen = ref(false)
 
 // Org Tree
 const orgExpanded = ref(true)
@@ -974,6 +980,10 @@ const handleItemClick = item => {
   } else {
     selectItem(item)
   }
+}
+
+const handleGroupProfileToggle = value => {
+  groupProfileOpen.value = value
 }
 
 // 全选/取消全选 - 包装composable方法
@@ -1714,6 +1724,35 @@ $panel-min-width: 320px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+  }
+}
+
+.group-profile-open {
+  .nav-item.active {
+    background-color: transparent;
+    color: var(--dt-text-primary);
+    font-weight: normal;
+
+    .nav-text {
+      font-weight: normal;
+    }
+  }
+
+  .org-item.active {
+    background-color: transparent;
+
+    .org-name {
+      color: var(--dt-text-primary);
+      font-weight: normal;
+    }
+  }
+
+  .list-item.active {
+    background-color: var(--dt-bg-card);
+
+    .item-name {
+      color: var(--dt-text-primary);
     }
   }
 }

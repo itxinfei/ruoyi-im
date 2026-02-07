@@ -342,9 +342,19 @@ public class ImWebSocketEndpoint {
                     processChatMessage(userId, payload);
                     break;
                 case "typing":
-                    // 处理正在输入状态
-                    processTypingStatus(userId, payload);
+                case "stop-typing": {
+                    // 处理正在输入状态（typing 和 stop-typing）
+                    // 对于 stop-typing，设置 isTyping 为 false
+                    Object typingPayload = payload;
+                    if ("stop-typing".equals(type) && payload instanceof Map) {
+                        // noinspection unchecked
+                        Map<String, Object> enhancedPayload = new HashMap<>((Map<String, Object>) payload);
+                        enhancedPayload.put("isTyping", false);
+                        typingPayload = enhancedPayload;
+                    }
+                    processTypingStatus(userId, typingPayload);
                     break;
+                }
                 case "read":
                     // 处理消息已读
                     processReadReceipt(userId, payload);

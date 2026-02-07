@@ -478,16 +478,18 @@ const canRecall = computed(() => {
 .message-bubble-wrapper {
   position: relative;
   display: inline-flex;
+  max-width: 100%; // 限制父容器宽度
 }
 
 .message-bubble {
   position: relative;
   display: inline-flex;
   align-items: flex-start;
-  max-width: min(520px, 100%);
+  max-width: min(520px, 70%); // 响应式最大宽度（野火IM标准）
+  width: fit-content; // 根据内容自适应宽度
+  min-width: 0; // 允许 flex 子项收缩
   // GPU 加速动画性能优化
   contain: layout style paint;
-  will-change: transform, opacity;
   animation: messagePop 0.3s var(--dt-ease-bounce);
   // 动画结束后移除性能提示
   animation-fill-mode: both;
@@ -496,14 +498,14 @@ const canRecall = computed(() => {
 }
 
 .bubble-content {
-  padding: 10px 12px; // 野火IM标准:上下10px,左右12px
-  border-radius: 8px; // 野火IM标准:统一8px圆角
-  font-size: var(--dt-font-size-base);
+  padding: 10px 14px; // 野火IM/钉钉标准:上下10px,左右14px
+  border-radius: 8px; // 统一圆角
+  font-size: 15px; // 钉钉标准:15px
   line-height: 1.5;
-  word-break: break-word; // 改为 break-word，保留完整单词
+  word-break: break-word;
   overflow-wrap: break-word;
-  max-width: 100%; // 防止内容溢出
-  min-width: 0; // 允许 flex 子项收缩
+  max-width: 100%;
+  min-width: 0;
   transition: all var(--dt-transition-base);
   display: flex;
   align-items: flex-start;
@@ -512,6 +514,7 @@ const canRecall = computed(() => {
   :deep(a) {
     word-break: break-all;
     max-width: 100%;
+    overflow-wrap: break-word;
   }
 
   // 防止代码块溢出
@@ -526,48 +529,46 @@ const canRecall = computed(() => {
   :deep(img) {
     max-width: 100%;
     height: auto;
+    display: block;
+  }
+
+  // 防止表格溢出
+  :deep(table) {
+    max-width: 100%;
+    overflow-x: auto;
+    table-layout: fixed;
   }
 }
 
-// 对方消息样式 - 野火IM风格
+// 对方消息样式 - 野火IM/钉钉风格
 .message-bubble:not(.is-own) {
   .bubble-content {
-    background: #ffffff; // 野火IM:白色背景
-    border: 1px solid #e0e0e0; // 野火IM:灰色边框
-    border-radius: 8px; // 野火IM:统一圆角,不要非对称
-    color: #333333; // 野火IM:深灰文字
-    box-shadow: none; // 野火IM:无阴影或极浅阴影
-    transition: background 0.2s;
-
-    &:hover {
-      background: #f5f5f5; // hover时稍微变灰
-    }
-  }
-
-  &:hover .bubble-content {
-    background: #f5f5f5;
+    // 钉钉/野火IM: 白色背景
+    background: #FFFFFF;
+    // 浅灰边框
+    border: 1px solid #E5E7EB;
+    // 非对称圆角：靠近头像一侧圆角较小
+    border-radius: 4px 12px 12px 12px;
+    // 深灰文字
+    color: #171A1D;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
 }
 
-// 自己消息样式 - 野火IM风格
+// 己方消息样式 - 野火IM/钉钉风格
 .message-bubble.is-own {
   flex-direction: row-reverse;
 
   .bubble-content {
-    background: #4168e0; // 野火IM:蓝色背景
-    color: #ffffff; // 白色文字
-    border: none; // 无边框
-    border-radius: 8px; // 野火IM:统一圆角,不要非对称
-    box-shadow: none; // 野火IM:无阴影
-    transition: background 0.2s;
-
-    &:hover {
-      background: #3558d0; // hover时稍微变深
-    }
-  }
-
-  &:hover .bubble-content {
-    background: #3558d0;
+    // 钉钉: 蓝色背景
+    background: #4168E0;
+    // 白色文字
+    color: #FFFFFF;
+    // 无边框
+    border: none;
+    // 非对称圆角：靠近头像一侧圆角较小
+    border-radius: 12px 4px 12px 12px;
+    box-shadow: 0 1px 2px rgba(65, 104, 224, 0.2);
   }
 
   // 确保所有子元素文字颜色都是白色
@@ -585,12 +586,23 @@ const canRecall = computed(() => {
     text-decoration-thickness: 1px;
     text-underline-offset: 2px;
   }
+
+  // 链接预览卡片样式
+  :deep(.link-preview-card) {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+
+    .link-title,
+    .link-desc {
+      color: #FFFFFF !important;
+    }
+  }
 }
 
 // 选中状态
 .message-bubble.is-selected .bubble-content {
-  border: 2px solid var(--dt-brand-color);
-  box-shadow: 0 0 0 2px var(--dt-brand-lighter);
+  border: 2px solid #4168E0 !important;
+  box-shadow: 0 0 0 3px rgba(65, 104, 224, 0.2) !important;
 }
 
 // 长按状态
@@ -598,84 +610,48 @@ const canRecall = computed(() => {
   animation: longPressPulse 0.3s ease-in-out;
 }
 
-// 消息类型特殊样式
+// 图片消息：透明背景，无边框
 .message-bubble.type-image .bubble-content {
   padding: 4px;
-  background: var(--dt-bg-card) !important;
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-sm);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
+// 视频消息
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: var(--dt-radius-sm);
+  border-radius: 8px;
 }
 
-.message-bubble.type-system .bubble-content {
-  background: transparent;
-  padding: 0;
-}
-
+// 系统消息
+.message-bubble.type-system .bubble-content,
 .message-bubble.type-recalled .bubble-content {
   background: transparent;
   padding: 0;
+  border: none;
+  box-shadow: none;
 }
 
-// 未知类型
-.unknown-type {
-  color: var(--dt-text-tertiary);
-  font-style: italic;
-}
-
-// 暗色模式适配(野火IM风格)
-:global(.dark) {
-
-  // 对方消息:深灰背景
-  .message-bubble:not(.is-own) .bubble-content {
-    background: #2c2c2c;
-    border-color: #444444;
-    color: #e8e8e8;
-    box-shadow: none;
-  }
-
-  // 自己消息:蓝色(暗模式下稍亮)
-  .message-bubble.is-own .bubble-content {
-    background: #4168e0;
-    color: #FFFFFF;
-  }
-
-  // 悬停状态
-  .message-bubble:not(.is-own):hover .bubble-content {
-    background: #333333;
-    border-color: #555555;
-  }
-
-  .message-bubble.is-own:hover .bubble-content {
-    background: #3558d0;
-  }
-}
-
-// 钉钉风格：消息气泡之间的间距优化
-.message-bubble+.message-bubble {
-  margin-top: 8px;
-}
-
-// 第一条消息不需要上边距
-.message-bubble:first-child {
-  margin-top: 0;
-}
-
-// 钉钉风格：图片/视频消息的特殊圆角
-.message-bubble.type-image .bubble-content,
-.message-bubble.type-video .bubble-content {
-  // 钉钉图片消息：圆角8px
-  border-radius: var(--dt-radius-md);
-  overflow: hidden;
-}
-
-// 钉钉风格：文件消息样式优化
+// 文件消息 - 野火IM/钉钉风格
 .message-bubble.type-file .bubble-content {
   padding: 12px 16px;
+}
+
+// 暗色模式适配 - 野火IM/钉钉风格
+:global(.dark) {
+  // 对方消息: 深灰背景
+  .message-bubble:not(.is-own) .bubble-content {
+    background: #2D2F33;
+    border-color: #3D3F43;
+    color: #E5E7EB;
+  }
+
+  // 己方消息: 保持蓝色
+  .message-bubble.is-own .bubble-content {
+    background: #4168E0;
+    color: #FFFFFF;
+  }
 }
 </style>

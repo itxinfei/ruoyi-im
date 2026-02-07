@@ -302,7 +302,7 @@ const props = defineProps({
   contact: Object
 })
 
-const emit = defineEmits(['update', 'voice-call', 'video-call', 'message'])
+const emit = defineEmits(['update', 'voice-call', 'video-call', 'message', 'toggle-group-profile'])
 
 const isFavorite = ref(false)
 const showGroupSettings = ref(false)
@@ -342,6 +342,9 @@ const checkFavoriteStatus = async () => {
 }
 
 watch(() => props.contact?.id, checkFavoriteStatus, { immediate: true })
+watch(showGroupSettings, value => {
+  emit('toggle-group-profile', value)
+})
 
 const startChat = () => emit('message', props.contact)
 const handleGroupConfig = () => {

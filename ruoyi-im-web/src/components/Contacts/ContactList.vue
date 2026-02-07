@@ -325,7 +325,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Search, OfficeBuilding, User, MoreFilled, FolderOpened, Edit, Delete } from '@element-plus/icons-vue'
 import ContextMenu from '@/components/Common/ContextMenu.vue'
-import { getContacts, getGroupedFriendList, getGroupList, renameGroup, deleteGroup, moveContactToGroup, updateContactRemark, deleteContact, getFriendRequests } from '@/api/im/contact'
+import { getContacts, getGroupedFriendList, getGroupList, renameGroup, deleteGroup, moveContactToGroup, updateContactRemark, deleteContact, getFriendRequests, clearFriendListCache } from '@/api/im/contact'
 import { getOrgTree } from '@/api/im/organization'
 import { getGroups } from '@/api/im/group'
 import { addTokenToUrl } from '@/utils/file'
@@ -346,6 +346,7 @@ const orgTree = ref([])
 const loading = ref(false)
 const activeNames = ref(['org', 'groups'])
 const unreadRequestCount = ref(0)
+const hasRetriedGrouped = ref(false)
 
 // 分组重命名
 const renameDialogVisible = ref(false)
@@ -383,6 +384,14 @@ const loadData = async () => {
     ])
     if (gcRes.code === 200 && gcRes.data) {
       groupedContacts.value = gcRes.data
+    }
+    if (groupedContacts.value.length === 0 && !hasRetriedGrouped.value) {
+      hasRetriedGrouped.value = true
+      await clearFriendListCache()
+      const retryRes = await getGroupedFriendList()
+      if (retryRes.code === 200 && retryRes.data) {
+        groupedContacts.value = retryRes.data
+      }
     }
     if (oRes && oRes.code === 200) {orgTree.value = oRes.data}
     if (gRes && gRes.code === 200) {groups.value = gRes.data}

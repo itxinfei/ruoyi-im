@@ -281,52 +281,80 @@ function escapeRegExp(string) {
 }
 
 .text-content {
-  word-break: break-word; // 改为 break-word，保留完整单词
+  word-break: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
-  line-height: 1.5;
-  font-size: 14px;
-  max-width: 100%; // 防止内容溢出
-  min-width: 0; // 允许 flex 子项收缩
+  line-height: 1.6; // 钉钉标准:1.6
+  font-size: 15px; // 钉钉标准:15px
+  max-width: 100%;
+  min-width: 0;
 
-  // 防止长链接溢出
+  // 链接样式 - 野火IM/钉钉风格
   :deep(a) {
-    color: #4168e0;
+    color: #4168E0;
     text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: all 0.2s;
-    word-break: break-all; // 链接使用 break-all 防止溢出
+    word-break: break-all;
     max-width: 100%;
+    overflow-wrap: break-word;
 
     &:hover {
-      border-bottom-color: #4168e0;
+      text-decoration: underline;
     }
   }
 
-  // @提及高亮样式 - 野火IM风格
+  // 防止代码块溢出
+  :deep(code) {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  // @提及高亮样式 - 野火IM/钉钉风格
   :deep(.mention-highlight) {
-    color: #4168e0;
+    word-break: break-word;
+    color: #4168E0;
     font-weight: 500;
     background: rgba(65, 104, 224, 0.1);
-    padding: 1px 4px;
-    border-radius: 3px;
+    padding: 2px 6px;
+    border-radius: 4px;
     cursor: pointer;
     margin: 0 1px;
     transition: all 0.2s;
 
     &:hover {
       background: rgba(65, 104, 224, 0.2);
-      text-decoration: underline;
     }
 
-    // 提及当前用户时 - 红色高亮
+    // 提及当前用户时 - 更明显的背景
     &.is-current-user {
-      background: rgba(255, 71, 87, 0.1);
-      color: #ff4757;
+      background: rgba(255, 59, 48, 0.15);
+      color: #FF3B30;
       font-weight: 600;
 
       &:hover {
-        background: rgba(255, 71, 87, 0.2);
+        background: rgba(255, 59, 48, 0.25);
+      }
+    }
+  }
+
+  // 己方消息内的链接和提及样式调整为白色
+  :deep(.is-own) & {
+    a {
+      color: #FFFFFF;
+    }
+
+    .mention-highlight {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      &.is-current-user {
+        background: rgba(255, 200, 200, 0.3);
+        color: #FFFFFF;
       }
     }
   }
@@ -335,7 +363,7 @@ function escapeRegExp(string) {
 .edited-tag {
   margin-left: 4px;
   font-size: 11px;
-  color: #999;
+  color: var(--dt-text-quaternary);
 }
 
 .link-previews {
@@ -363,48 +391,45 @@ function escapeRegExp(string) {
 .message-pinned-badge {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   margin-top: 4px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   background: rgba(65, 104, 224, 0.1);
   border-radius: 4px;
-  font-size: 11px;
-  color: #4168e0;
+  font-size: 12px;
+  color: #4168E0;
+  font-weight: 500;
+
+  .el-icon {
+    font-size: 14px;
+  }
 }
 
-// 暗色模式适配
+// 暗色模式适配 - 野火IM/钉钉风格
 :global(.dark) {
   .text-content {
-    :deep(a) {
-      color: #6b8cff;
-
-      &:hover {
-        border-bottom-color: #6b8cff;
-      }
+    a {
+      color: #5A9FFF;
     }
 
-    :deep(.mention-highlight) {
-      background: rgba(65, 104, 224, 0.25);
-      color: #6b8cff;
+    .mention-highlight {
+      color: #5A9FFF;
+      background: rgba(90, 159, 255, 0.15);
 
       &:hover {
-        background: rgba(65, 104, 224, 0.35);
+        background: rgba(90, 159, 255, 0.25);
       }
 
       &.is-current-user {
-        background: rgba(255, 71, 87, 0.25);
-        color: #ff7875;
-
-        &:hover {
-          background: rgba(255, 71, 87, 0.35);
-        }
+        background: rgba(255, 100, 100, 0.2);
+        color: #FF6464;
       }
     }
   }
 
   .message-pinned-badge {
-    background: rgba(65, 104, 224, 0.2);
-    color: #6b8cff;
+    background: rgba(65, 104, 224, 0.3);
+    color: #5A9FFF;
   }
 }
 </style>

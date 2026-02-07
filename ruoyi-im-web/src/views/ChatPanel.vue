@@ -2000,12 +2000,13 @@ onMounted(() => {
   flex-direction: column;
   height: 100%;
   flex: 1;
-  min-width: 0;
+  min-width: 0; // 允许收缩，关键修复
   min-height: 0; // 修复 flex 子元素高度问题
   overflow: hidden; // 防止内容溢出
   background: var(--dt-bg-body);
   position: relative;
   z-index: var(--dt-z-base); // 使用设计令牌替代魔法值
+  contain: layout style; // 性能优化：限制浏览器重排范围
 
 
   &.is-dragging {
@@ -2071,19 +2072,22 @@ onMounted(() => {
   flex: 1;
   min-height: 0; // flex: 1 配合 min-height: 0 正确处理高度
   overflow: hidden;
+  contain: layout; // 性能优化
 }
 
 .chat-viewport {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  min-height: 0;
+  min-width: 0; // 允许收缩，关键修复
+  min-height: 0; // 允许收缩，关键修复
   background: var(--dt-bg-card);
   transition: all 0.3s var(--dt-ease-out);
+  overflow: hidden; // 防止溢出
 
   &.with-pinned-panel {
-    flex: 0 0 calc(100% - 320px);
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }
 

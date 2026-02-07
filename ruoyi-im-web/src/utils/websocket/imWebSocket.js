@@ -1,12 +1,14 @@
 /**
- * IM WebSocket 客户端 - 性能优化版
+ * IM WebSocket 客户端 - 增强版
  * 提供 WebSocket 连接管理、消息收发、心跳保活、断线重连等功能
- * 
+ *
  * 优化特性：
  * - 消息批量处理（减少渲染次数）
  * - 指数退避重连策略
  * - 连接质量监控
  * - 消息队列缓冲
+ * - 离线消息暂存
+ * - 发送失败重试
  */
 import { getUserInfo } from '../storage'
 import { debug, info, warn, error } from '../logger.js'
@@ -29,10 +31,12 @@ export const MESSAGE_TYPE = {
   PONG: 'pong',           // 心跳响应
   READ: 'read',           // 已读回执
   TYPING: 'typing',       // 正在输入
+  STOP_TYPING: 'stop-typing', // 停止输入
   ONLINE: 'online',       // 用户上线
   OFFLINE: 'offline',     // 用户下线
   CALL: 'call',           // 音视频通话
   REACTION: 'reaction'    // 表情回复
+  CONVERSATION_EVENT: 'conversation_event' // 会话事件
 }
 
 // 性能优化配置
@@ -40,6 +44,7 @@ const BATCH_INTERVAL = 50 // 消息批量处理间隔（毫秒）
 const BATCH_MAX_SIZE = 20 // 批量处理最大消息数
 const BASE_RECONNECT_INTERVAL = 1000 // 基础重连间隔
 const MAX_RECONNECT_INTERVAL = 30000 // 最大重连间隔
+const PENDING_MESSAGES_MAX = 100 // 最大待发送消息数
 
 class ImWebSocket {
   constructor() {
@@ -63,6 +68,12 @@ class ImWebSocket {
     // 连接质量监控
     this.connectionQuality = 'good' // good, fair, poor
     this.pingLatencies = []
+
+    // ========== 新增：发送队列管理 ==========
+    // 待发送消息队列（网络断开时暂存）
+    this.pendingMessages = []
+    // 是否正在处理发送队列
+    this.isProcessingPending = false
   }
 
   /**
@@ -149,6 +160,15 @@ class ImWebSocket {
 
     // 更新 Vuex store 的连接状态
     this.updateStoreConnectionState(true)
+
+    // ========== 处理待发送消息队列 ==========
+    if (this.pendingMessages.length > 0) {
+      info('ImWebSocket', `有 ${this.pendingMessages.length} 条待发送消息`)
+      // 延迟处理，等待认证完成
+      setTimeout(() => {
+        this.processPendingMessages()
+      }, 500)
+    }
   }
 
   /**
@@ -342,8 +362,10 @@ class ImWebSocket {
    * @returns {boolean} 是否发送成功
    */
   send(message) {
+    // 如果未连接，将消息加入待发送队列
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      error('ImWebSocket', 'WebSocket 未连接')
+      warn('ImWebSocket', 'WebSocket 未连接，消息加入待发送队列')
+      this.addPendingMessage(message)
       return false
     }
 
@@ -354,6 +376,8 @@ class ImWebSocket {
       return true
     } catch (err) {
       error('ImWebSocket', '发送消息失败:', err)
+      // 发送失败，加入待发送队列
+      this.addPendingMessage(message)
       return false
     }
   }
@@ -583,6 +607,81 @@ class ImWebSocket {
    */
   getConnectionQuality() {
     return this.connectionQuality
+  }
+
+  // ========== 发送队列管理方法 ==========
+
+  /**
+   * 添加消息到待发送队列
+   * @param {Object} message - 消息对象
+   */
+  addPendingMessage(message) {
+    if (this.pendingMessages.length >= PENDING_MESSAGES_MAX) {
+      // 队列已满，移除最旧的消息
+      this.pendingMessages.shift()
+      warn('ImWebSocket', '待发送队列已满，移除最旧消息')
+    }
+    this.pendingMessages.push({
+      ...message,
+      timestamp: Date.now()
+    })
+    debug('ImWebSocket', '添加待发送消息，队列长度:', this.pendingMessages.length)
+  }
+
+  /**
+   * 处理待发送消息队列
+   * 在连接恢复时调用
+   */
+  async processPendingMessages() {
+    if (this.isProcessingPending || this.pendingMessages.length === 0) {
+      return
+    }
+
+    if (!this.isConnected()) {
+      warn('ImWebSocket', '未连接，无法处理待发送消息')
+      return
+    }
+
+    this.isProcessingPending = true
+    info('ImWebSocket', `开始处理 ${this.pendingMessages.length} 条待发送消息`)
+
+    const messagesToSend = [...this.pendingMessages]
+    this.pendingMessages = []
+
+    for (const msg of messagesToSend) {
+      if (!this.isConnected()) {
+        // 连接断开，将剩余消息放回队列
+        this.pendingMessages.unshift(...messagesToSend.slice(messagesToSend.indexOf(msg)))
+        break
+      }
+
+      // 重新发送消息
+      this.send(msg)
+      // 稍微延迟，避免消息堆积
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+
+    this.isProcessingPending = false
+
+    if (this.pendingMessages.length > 0) {
+      info('ImWebSocket', `还有 ${this.pendingMessages.length} 条消息待发送`)
+    }
+  }
+
+  /**
+   * 清空待发送队列
+   */
+  clearPendingMessages() {
+    const count = this.pendingMessages.length
+    this.pendingMessages = []
+    console.log(`[ImWebSocket] 清空待发送队列，移除 ${count} 条消息`)
+  }
+
+  /**
+   * 获取待发送消息数量
+   */
+  getPendingMessageCount() {
+    return this.pendingMessages.length
   }
 }
 

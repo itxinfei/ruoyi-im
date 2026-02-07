@@ -225,7 +225,7 @@ const handleClearAll = async () => {
 @use '@/styles/design-tokens.scss' as *;
 
 .pinned-messages-panel {
-  width: 320px;
+  width: var(--dt-contact-panel-width);
   height: 100%;
   display: flex;
   flex-direction: column;

@@ -1,6 +1,7 @@
 /**
- * 消息管理模块
+ * 消息管理模块 - 增强版
  * 管理消息列表、消息操作（发送、编辑、撤回等）
+ * 新增：消息去重、离线消息队列、失败重试机制
  */
 import {
   getMessages,
@@ -37,6 +38,15 @@ export const SENDING_QUEUE_CONFIG = {
   MAX_QUEUE_SIZE: 100, // 最大队列长度（防止内存溢出和滥用）
   CLEANUP_INTERVAL: 60 * 1000, // 清理间隔：1分钟
   EXPIRED_TIME: 10 * 60 * 1000 // 过期时间：10分钟
+}
+
+/**
+ * 离线消息队列配置
+ */
+export const OFFLINE_QUEUE_CONFIG = {
+  MAX_QUEUE_SIZE: 500, // 最大离线消息数量
+  FLUSH_INTERVAL: 5000, // 离线消息刷新间隔（毫秒）
+  MAX_RETRY_TIMES: 3 // 失败重试次数
 }
 
 /**
@@ -84,7 +94,27 @@ export default {
     selectedMessages: new Set(),
 
     // 最后点击的消息ID（用于连续选择）
-    lastClickedMessageId: null
+    lastClickedMessageId: null,
+
+    // ========== 新增：消息去重和离线处理 ==========
+
+    // 消息 ID 去重集合（防止重复消息）
+    // 使用 Set 存储已接收的消息 ID
+    receivedMessageIds: new Set(),
+
+    // 最大保留的消息 ID 数量（防止内存溢出）
+    maxReceivedIdsSize: 10000,
+
+    // 离线消息队列（网络断开时暂存消息）
+    // { messageId, sessionId, message, retryCount, timestamp }
+    offlineQueue: [],
+
+    // 是否处于离线模式
+    isOffline: false,
+
+    // 失败消息重试队列
+    // { clientMsgId, sessionId, message, retryCount, timestamp }
+    failedRetryQueue: []
   }),
 
   getters: {
@@ -136,6 +166,27 @@ export default {
     // 检查发送队列是否已满
     isSendingQueueFull: state => {
       return state.sendingMessages.size >= SENDING_QUEUE_CONFIG.MAX_QUEUE_SIZE
+    },
+
+    // ========== 离线和重试管理 ==========
+    // 获取离线队列大小
+    offlineQueueSize: state => {
+      return state.offlineQueue.length
+    },
+
+    // 获取失败重试队列大小
+    failedRetryQueueSize: state => {
+      return state.failedRetryQueue.length
+    },
+
+    // 是否处于离线状态
+    isOfflineMode: state => {
+      return state.isOffline
+    },
+
+    // 检查消息是否已接收（去重）
+    hasReceivedMessage: state => messageId => {
+      return state.receivedMessageIds.has(messageId)
     }
   },
 
@@ -323,6 +374,151 @@ export default {
       // 如果清理了消息，输出日志
       if (cleanedCount > 0) {
         console.log(`[发送队列清理] 清理了 ${cleanedCount} 条过期消息`)
+      }
+    },
+
+    // ========== 消息去重和离线处理 Mutations ==========
+
+    /**
+     * 添加消息 ID 到去重集合
+     * @param {Object} state - Vuex state
+     * @param {string} messageId - 消息 ID
+     */
+    ADD_RECEIVED_MESSAGE_ID(state, messageId) {
+      state.receivedMessageIds.add(messageId)
+
+      // 限制集合大小，防止内存溢出
+      if (state.receivedMessageIds.size > state.maxReceivedIdsSize) {
+        // 转换为数组，删除最旧的 10%
+        const idsArray = Array.from(state.receivedMessageIds)
+        const removeCount = Math.floor(state.maxReceivedIdsSize * 0.1)
+        for (let i = 0; i < removeCount; i++) {
+          state.receivedMessageIds.delete(idsArray[i])
+        }
+      }
+    },
+
+    /**
+     * 批量添加消息 ID 到去重集合
+     * @param {Object} state - Vuex state
+     * @param {Array<string>} messageIds - 消息 ID 数组
+     */
+    ADD_RECEIVED_MESSAGE_IDS(state, messageIds) {
+      messageIds.forEach(id => state.receivedMessageIds.add(id))
+
+      // 限制集合大小
+      if (state.receivedMessageIds.size > state.maxReceivedIdsSize) {
+        const idsArray = Array.from(state.receivedMessageIds)
+        const removeCount = Math.floor(state.maxReceivedIdsSize * 0.1)
+        for (let i = 0; i < removeCount; i++) {
+          state.receivedMessageIds.delete(idsArray[i])
+        }
+      }
+    },
+
+    /**
+     * 检查并清理过期的去重 ID
+     * @param {Object} state - Vuex state
+     */
+    CLEANUP_RECEIVED_IDS(state) {
+      if (state.receivedMessageIds.size > state.maxReceivedIdsSize * 0.8) {
+        const idsArray = Array.from(state.receivedMessageIds)
+        const removeCount = Math.floor(state.maxReceivedIdsSize * 0.3)
+        for (let i = 0; i < removeCount; i++) {
+          state.receivedMessageIds.delete(idsArray[i])
+        }
+        console.log(`[消息去重] 清理了 ${removeCount} 条过期记录`)
+      }
+    },
+
+    /**
+     * 设置离线状态
+     * @param {Object} state - Vuex state
+     * @param {boolean} isOffline - 是否离线
+     */
+    SET_OFFLINE_STATUS(state, isOffline) {
+      state.isOffline = isOffline
+      console.log(`[离线状态] ${isOffline ? '已进入离线模式' : '已恢复在线'}`)
+    },
+
+    /**
+     * 添加消息到离线队列
+     * @param {Object} state - Vuex state
+     * @param {Object} payload - { messageId, sessionId, message }
+     */
+    ADD_TO_OFFLINE_QUEUE(state, { messageId, sessionId, message }) {
+      // 检查队列是否已满
+      if (state.offlineQueue.length >= OFFLINE_QUEUE_CONFIG.MAX_QUEUE_SIZE) {
+        // 移除最旧的消息
+        state.offlineQueue.shift()
+        console.warn('[离线队列] 队列已满，移除最旧消息')
+      }
+
+      state.offlineQueue.push({
+        messageId,
+        sessionId,
+        message,
+        retryCount: 0,
+        timestamp: Date.now()
+      })
+    },
+
+    /**
+     * 清空离线队列
+     * @param {Object} state - Vuex state
+     */
+    CLEAR_OFFLINE_QUEUE(state) {
+      state.offlineQueue = []
+      console.log('[离线队列] 队列已清空')
+    },
+
+    /**
+     * 添加消息到失败重试队列
+     * @param {Object} state - Vuex state
+     * @param {Object} payload - { clientMsgId, sessionId, message }
+     */
+    ADD_TO_FAILED_RETRY_QUEUE(state, { clientMsgId, sessionId, message }) {
+      // 检查是否已在队列中
+      const existingIndex = state.failedRetryQueue.findIndex(
+        item => item.clientMsgId === clientMsgId
+      )
+
+      if (existingIndex === -1) {
+        state.failedRetryQueue.push({
+          clientMsgId,
+          sessionId,
+          message,
+          retryCount: 0,
+          timestamp: Date.now()
+        })
+      }
+    },
+
+    /**
+     * 从失败重试队列中移除
+     * @param {Object} state - Vuex state
+     * @param {string} clientMsgId - 客户端消息 ID
+     */
+    REMOVE_FROM_FAILED_RETRY_QUEUE(state, clientMsgId) {
+      const index = state.failedRetryQueue.findIndex(
+        item => item.clientMsgId === clientMsgId
+      )
+      if (index !== -1) {
+        state.failedRetryQueue.splice(index, 1)
+      }
+    },
+
+    /**
+     * 更新失败重试队列中的消息重试次数
+     * @param {Object} state - Vuex state
+     * @param {string} clientMsgId - 客户端消息 ID
+     */
+    INCREMENT_RETRY_COUNT(state, clientMsgId) {
+      const item = state.failedRetryQueue.find(
+        item => item.clientMsgId === clientMsgId
+      )
+      if (item) {
+        item.retryCount++
       }
     }
   },
@@ -533,10 +729,17 @@ export default {
       }
     },
 
-    // 接收消息（WebSocket 推送）
-    receiveMessage({ commit, rootState }, message) {
+    // 接收消息（WebSocket 推送）- 增强版：支持消息去重
+    receiveMessage({ commit, rootState, state }, message) {
       const sessionId = message.conversationId || message.sessionId
       if (!sessionId) {return}
+
+      // ========== 消息去重：检查消息是否已接收 ==========
+      const messageId = message.id || message.messageId
+      if (messageId && state.receivedMessageIds.has(messageId)) {
+        console.log(`[消息去重] 跳过重复消息: ${messageId}`)
+        return
+      }
 
       // 规范化消息类型为大写（兼容后端可能返回的小写类型）
       if (message.type) {
@@ -546,6 +749,11 @@ export default {
       // 规范化发送者信息
       message.senderName = message.senderName || message.senderNickname || message.nickname || message.userName || '未知用户'
       message.senderAvatar = message.senderAvatar || message.avatar || ''
+
+      // 添加消息 ID 到去重集合
+      if (messageId) {
+        commit('ADD_RECEIVED_MESSAGE_ID', messageId)
+      }
 
       // 添加消息到列表
       commit('ADD_MESSAGE', { sessionId, message })
@@ -728,6 +936,105 @@ export default {
      */
     cleanupExpiredMessages({ commit }) {
       commit('CLEANUP_EXPIRED_MESSAGES')
+    },
+
+    // ========== 离线消息和失败重试 Actions ==========
+
+    /**
+     * 设置离线状态
+     * @param {Object} context - Vuex context
+     * @param {boolean} isOffline - 是否离线
+     */
+    setOfflineStatus({ commit }, isOffline) {
+      commit('SET_OFFLINE_STATUS', isOffline)
+    },
+
+    /**
+     * 处理离线消息队列
+     * 当连接恢复时，批量发送离线期间的消息
+     * @param {Object} context - Vuex context
+     */
+    async processOfflineQueue({ commit, state, dispatch }) {
+      if (state.offlineQueue.length === 0) {
+        return
+      }
+
+      console.log(`[离线队列] 开始处理 ${state.offlineQueue.length} 条离线消息`)
+
+      // 获取队列中的所有消息
+      const messagesToProcess = [...state.offlineQueue]
+
+      // 清空离线队列
+      commit('CLEAR_OFFLINE_QUEUE')
+
+      // 批量发送消息
+      for (const item of messagesToProcess) {
+        try {
+          await dispatch('sendMessage', {
+            sessionId: item.sessionId,
+            type: item.message.type || 'TEXT',
+            content: item.message.content,
+            replyToMessageId: item.message.replyToMessageId
+          })
+        } catch (error) {
+          console.error('[离线队列] 发送消息失败:', error)
+          // 如果发送失败，重新加入队列
+          commit('ADD_TO_OFFLINE_QUEUE', {
+            messageId: item.messageId,
+            sessionId: item.sessionId,
+            message: item.message
+          })
+        }
+      }
+    },
+
+    /**
+     * 重试失败的消息
+     * @param {Object} context - Vuex context
+     */
+    async retryFailedMessages({ commit, state, dispatch }) {
+      if (state.failedRetryQueue.length === 0) {
+        return
+      }
+
+      console.log(`[失败重试] 开始重试 ${state.failedRetryQueue.length} 条失败消息`)
+
+      // 过滤出需要重试的消息
+      const messagesToRetry = state.failedRetryQueue.filter(
+        item => item.retryCount < OFFLINE_QUEUE_CONFIG.MAX_RETRY_TIMES
+      )
+
+      for (const item of messagesToRetry) {
+        try {
+          commit('INCREMENT_RETRY_COUNT', item.clientMsgId)
+
+          await dispatch('sendMessage', {
+            sessionId: item.sessionId,
+            type: item.message.type || 'TEXT',
+            content: item.message.content,
+            replyToMessageId: item.message.replyToMessageId
+          })
+
+          // 重试成功，从队列中移除
+          commit('REMOVE_FROM_FAILED_RETRY_QUEUE', item.clientMsgId)
+        } catch (error) {
+          console.error(`[失败重试] 重试消息 ${item.clientMsgId} 失败:`, error)
+
+          // 如果达到最大重试次数，从队列中移除
+          if (item.retryCount >= OFFLINE_QUEUE_CONFIG.MAX_RETRY_TIMES) {
+            commit('REMOVE_FROM_FAILED_RETRY_QUEUE', item.clientMsgId)
+            console.warn(`[失败重试] 消息 ${item.clientMsgId} 达到最大重试次数，放弃重试`)
+          }
+        }
+      }
+    },
+
+    /**
+     * 清理过期的去重 ID
+     * @param {Object} context - Vuex context
+     */
+    cleanupReceivedIds({ commit }) {
+      commit('CLEANUP_RECEIVED_IDS')
     }
   }
 }
@@ -737,7 +1044,7 @@ let cleanupTimer = null
 
 /**
  * 启动定期清理任务
- * 每隔配置时间清理一次过期的发送中消息
+ * 每隔配置时间清理一次过期的发送中消息和去重 ID
  */
 export function startCleanupTimer(store) {
   // 清除旧的定时器（如果存在）
@@ -748,7 +1055,8 @@ export function startCleanupTimer(store) {
   // 按配置的间隔时间清理
   cleanupTimer = setInterval(() => {
     store.dispatch('im/message/cleanupExpiredMessages')
-    console.log(`[im-message] 清理过期的发送中消息（队列大小: ${store.getters['im/message/sendingQueueSize']}）`)
+    store.dispatch('im/message/cleanupReceivedIds')
+    console.log(`[im-message] 定期清理完成（发送队列: ${store.getters['im/message/sendingQueueSize']}）`)
   }, SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL)
 
   console.log(`[im-message] 启动定期清理任务（间隔: ${SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL / 1000}秒）`)
@@ -763,4 +1071,43 @@ export function stopCleanupTimer() {
     cleanupTimer = null
     console.log('[im-message] 停止定期清理任务')
   }
+}
+
+/**
+ * 初始化消息模块
+ * 在应用启动时调用，初始化各种清理任务和监听器
+ * @param {Object} store - Vuex store 实例
+ */
+export function initMessageModule(store) {
+  // 启动定期清理任务
+  startCleanupTimer(store)
+
+  // 监听网络状态变化
+  if (typeof window !== 'undefined') {
+    const handleOnline = () => {
+      console.log('[网络状态] 网络已恢复')
+      store.dispatch('im/message/setOfflineStatus', false)
+
+      // 处理离线队列中的消息
+      store.dispatch('im/message/processOfflineQueue')
+
+      // 重试失败的消息
+      store.dispatch('im/message/retryFailedMessages')
+    }
+
+    const handleOffline = () => {
+      console.log('[网络状态] 网络已断开')
+      store.dispatch('im/message/setOfflineStatus', true)
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    // 初始化时检查网络状态
+    if (!navigator.onLine) {
+      handleOffline()
+    }
+  }
+
+  console.log('[im-message] 消息模块初始化完成')
 }

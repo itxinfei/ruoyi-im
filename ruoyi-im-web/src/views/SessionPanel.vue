@@ -1089,9 +1089,10 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 .session-panel {
   display: flex;
   flex-direction: column;
-  min-width: 220px;
-  max-width: 420px;
-  flex-shrink: 0;
+  width: var(--dt-session-panel-width, 280px);
+  min-width: var(--dt-session-panel-min-width, 200px);
+  max-width: var(--dt-session-panel-max-width, 400px);
+  flex-shrink: 0; // 防止收缩，关键修复
   border-right: 1px solid var(--dt-border-light);
   background: var(--dt-bg-card);
   height: 100%;
@@ -1099,6 +1100,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   position: relative;
   z-index: 10; // 确保在正常的 flex 流中
   transition: width 0.05s linear; // 拖拽时无延迟
+  overflow: hidden; // 防止内部内容溢出
 }
 
 // ============================================================================
@@ -1220,7 +1222,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   border: none;
   border-radius: var(--dt-radius-md);
   cursor: pointer;
-  color: #3b4252;
+  color: var(--dt-text-secondary);
   transition: all var(--dt-transition-fast);
   position: relative;
 
@@ -1316,7 +1318,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 
 .search-icon {
   font-size: 18px;
-  color: #8f959e;
+  color: var(--dt-text-tertiary);
   pointer-events: none;
   flex-shrink: 0;
 }
@@ -1344,13 +1346,13 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   justify-content: center;
   cursor: pointer;
   border-radius: var(--dt-radius-full);
-  color: #8f959e;
+  color: var(--dt-text-tertiary);
   transition: all var(--dt-transition-fast);
   flex-shrink: 0;
 
   &:hover {
     background: var(--dt-border-color);
-    color: #3b4252;
+    color: var(--dt-text-secondary);
   }
 }
 
@@ -1512,9 +1514,9 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   transition: transform 0.2s var(--dt-ease-out), box-shadow 0.2s var(--dt-ease-out);
 
   &.group-avatar {
-    background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
+    background: var(--dt-brand-color);
     color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
+    box-shadow: var(--dt-shadow-brand);
   }
 
   :deep(.dingtalk-avatar) {
@@ -1535,7 +1537,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   transition: all var(--dt-transition-base);
 
   &.online {
-    background: #00C853;
+    background: var(--dt-success-color);
     box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
     animation: pulse 2s ease-in-out infinite;
   }
@@ -1548,7 +1550,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  background: #ff4d4f; // 钉钉风格：更醒目的红色
+  background: var(--dt-error-color); // 使用设计令牌
   color: #fff;
   font-size: 10px;
   font-weight: 600;
@@ -1713,11 +1715,11 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 }
 
 .dark .search-container {
-  background: #3c3c3c;
-  border-color: #3e3e42;
+  background: var(--dt-bg-input-dark);
+  border-color: var(--dt-border-dark);
 
   &:focus-within {
-    background: #404040;
+    background: var(--dt-bg-card-hover-dark);
     border-color: var(--dt-brand-color);
   }
 }

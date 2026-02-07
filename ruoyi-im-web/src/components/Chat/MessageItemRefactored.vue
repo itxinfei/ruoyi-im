@@ -226,13 +226,14 @@ const handleNudge = () => {
   }
 }
 
+// 有发送者名字时的布局调整（群聊）
 .message-item.has-sender-name {
   .avatar-wrapper {
-    margin-top: 18px;
+    margin-top: 20px; // 头像下移，给名字留空间
   }
 
   .checkbox-wrapper {
-    padding-top: 26px;
+    padding-top: 28px;
   }
 }
 
@@ -252,7 +253,7 @@ const handleNudge = () => {
   }
 }
 
-// 头像区域
+// 头像区域 - 野火IM/钉钉风格
 .avatar-wrapper {
   width: 40px;
   height: 40px;
@@ -261,27 +262,26 @@ const handleNudge = () => {
   cursor: pointer;
   transition: opacity var(--dt-transition-base);
   display: flex;
-  align-items: flex-start; // 改为顶部对齐,确保头像和气泡在一条直线上
-  padding-top: 0; // 确保无额外padding
+  align-items: flex-start; // 顶部对齐，确保头像和气泡在一条直线上
+  justify-content: center;
 
   &:hover {
     opacity: 0.85;
   }
 
-  .message-avatar {
-    border-radius: 4px; // 野火IM:方形头像,4px圆角
+  :deep(.dingtalk-avatar) {
+    border-radius: 4px; // 野火IM/钉钉:方形头像,4px圆角
   }
 }
 
-// 内容包裹层
+// 内容包裹层 - 野火IM/钉钉风格
 .content-wrapper {
   max-width: 85%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: flex-start;
   margin: 0 12px; // 野火IM标准:头像与气泡间距12px
-  padding-top: 0;
+  padding-top: 0; // 确保与头像顶部对齐
 
   &.is-merged {
     margin-top: -8px; // 钉钉标准:合并消息 -8px
@@ -302,12 +302,13 @@ const handleNudge = () => {
   }
 }
 
-// 气泡与状态行布局
+// 气泡与状态行布局 - 野火IM/钉钉风格
 .bubble-row {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; // 顶部对齐，确保气泡与头像在一条直线上
   gap: 4px;
   max-width: 100%;
+  min-width: 0; // 允许收缩
 }
 
 .status-container {

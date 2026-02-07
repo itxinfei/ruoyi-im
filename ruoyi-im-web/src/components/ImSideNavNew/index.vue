@@ -217,13 +217,15 @@ function handleOpenSearch() {
 @use '@/styles/design-tokens.scss' as *;
 
 .dingtalk-nav {
-  width: 60px;
+  width: var(--dt-nav-sidebar-width);
   height: 100vh;
   max-height: 100vh;
   background: var(--dt-bg-sidebar-gradient);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 24px rgba(0, 0, 0, 0.12);
   animation: slideInLeft 0.4s var(--dt-ease-out);
   overflow: hidden;
+  z-index: var(--dt-z-sticky); // 使用设计令牌，确保在其他浮动元素之上
+  flex-shrink: 0; // 防止收缩
 }
 
 .bg-nav-light {

@@ -73,7 +73,7 @@ public class ImMessageController {
     public Result<ImMessageVO> send(@Valid @RequestBody ImMessageSendRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         log.info("发送消息: userId={}, conversationId={}, msgType={}",
-                userId, request.getConversationId(), request.getMessageType());
+                userId, request.getConversationId(), request.getType());
         ImMessageVO messageVO = imMessageService.sendMessage(request, userId);
         log.info("消息发送成功: userId={}, messageId={}, conversationId={}",
                 userId, messageVO.getId(), request.getConversationId());

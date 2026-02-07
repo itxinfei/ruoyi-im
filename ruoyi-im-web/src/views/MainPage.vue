@@ -363,6 +363,7 @@ const handleKeydown = e => {
 .im-app {
   width: 100%;
   height: 100%;
+  min-width: 0;
 }
 
 .app-container {
@@ -372,6 +373,7 @@ const handleKeydown = e => {
   overflow: hidden;
   background: var(--dt-bg-body);
   position: relative;
+  min-width: 0;
 }
 
 .main-content-area {
@@ -387,18 +389,29 @@ const handleKeydown = e => {
   display: flex;
   width: 100%;
   height: 100%;
+  overflow: hidden; // 防止整体溢出
+  min-width: 0;
+  min-height: 0;
+  contain: layout; // 性能优化：限制布局计算范围
+}
+
+// SessionPanel 容器 - 固定宽度，可拖拽调整
+.chat-layout > :deep(.session-panel) {
+  flex: 0 0 auto;
+  min-width: 200px; // 野火IM标准：最小 200px
+  max-width: 400px; // 野火IM标准：最大 400px
+  width: var(--dt-session-panel-width, 280px);
+  height: 100%;
   overflow: hidden;
 }
 
-.chat-layout> :first-child {
-  width: var(--dt-session-panel-width);
-  flex-shrink: 0;
-}
-
-.chat-layout> :last-child {
-  flex: 1;
-  min-width: 0;
+// ChatPanel 容器 - 自适应剩余空间
+.chat-layout > :deep(.chat-panel) {
+  flex: 1 1 auto;
+  min-width: 0; // 允许收缩，关键修复
+  min-height: 0; // 允许收缩
   height: 100%;
+  overflow: hidden;
 }
 
 .chat-placeholder {
@@ -409,7 +422,7 @@ const handleKeydown = e => {
   background: var(--dt-bg-card);
 }
 
-.main-content-area> :not(.chat-layout) {
+.main-content-area > :deep(:not(.chat-layout)) {
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -464,6 +477,52 @@ const handleKeydown = e => {
   p {
     font-size: 16px;
     margin: 0;
+  }
+}
+
+// ============================================================================
+// 响应式布局断点（野火IM规范）
+// ============================================================================
+@media (max-width: 1280px) {
+  .im-app {
+    --dt-session-panel-width: 260px;
+    --dt-contact-panel-width: 300px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .im-app {
+    --dt-session-panel-width: 240px;
+    --dt-contact-panel-width: 280px;
+  }
+}
+
+@media (max-width: 960px) {
+  .im-app {
+    --dt-nav-sidebar-width: 56px;
+    --dt-session-panel-width: 220px;
+    --dt-contact-panel-width: 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  // 移动端/小屏幕：会话面板可切换显示
+  .chat-layout {
+    position: relative;
+  }
+
+  .chat-layout > :deep(.session-panel) {
+    width: 100%;
+    max-width: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+  }
+
+  .chat-layout > :deep(.chat-panel) {
+    width: 100%;
   }
 }
 </style>
