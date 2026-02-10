@@ -17,209 +17,14 @@
 @use './design-tokens.scss' as *;
 
 // ============================================================================
-// 一、颜色系统（对标钉钉品牌色 #0089FF 和野火IM深蓝）
+// 一、颜色系统 - 使用 design-tokens.scss 中的变量，不再重复定义
 // ============================================================================
 
-:root {
-  // 1.1 品牌色 - 钉钉蓝（更亮更专业）
-  --dt-brand-color: #0089FF;
-  --dt-brand-hover: #0077E6;
-  --dt-brand-active: #0060B3;
-  --dt-brand-bg: #E6F4FF;
-  --dt-brand-light: rgba(0, 137, 255, 0.1);
-  --dt-brand-lighter: rgba(0, 137, 255, 0.05);
-
-  // 1.2 语义色 - 企业IM标准
-  --dt-success-color: #00C853;
-  --dt-success-bg: #E8F5E9;
-  --dt-success-border: #A5D6A7;
-
-  --dt-warning-color: #FAAD14;
-  --dt-warning-bg: #FFF3E0;
-  --dt-warning-border: #FFD66B;
-
-  --dt-error-color: #FF4D4F;
-  --dt-error-bg: #FFEDEE;
-  --dt-error-border: #FACFD0;
-
-  --dt-danger-color: #FF4D4F;
-
-  --dt-info-color: #0089FF;
-  --dt-info-bg: #E6F4FF;
-  --dt-info-border: #91CAFF;
-
-  // 1.3 中性色 - 野火IM风格
-  --dt-text-primary: #1F2329;
-  --dt-text-secondary: #4E596C;
-  --dt-text-tertiary: #86909C;
-  --dt-text-quaternary: #B9BBBE;
-  --dt-text-disabled: #C2C2C2;
-  --dt-text-link: #0089FF;
-  --dt-text-link-hover: #006ECC;
-
-  // 1.4 背景色 - 对标钉钉桌面版
-  --dt-bg-body: #F5F7FA;
-  --dt-bg-sidebar: #0089FF;
-  --dt-bg-sidebar-gradient: linear-gradient(180deg, #0089FF 0%, #006ECC 100%);
-  --dt-bg-card: #FFFFFF;
-  --dt-bg-card-hover: #F8FAFC;
-  --dt-bg-dropdown: #FFFFFF;
-  --dt-bg-overlay: rgba(0, 0, 0, 0.45);
-  --dt-bg-mask: rgba(0, 0, 0, 0.6);
-
-  // 1.5 消息气泡颜色（专业IM标准）
-  // 接收方气泡 - 纯白 + 微妙阴影
-  --dt-bubble-left-bg: #FFFFFF;
-  --dt-bubble-left-border: #E8E8E8;
-  --dt-bubble-left-shadow: 0 1px 2px rgba(0, 0, 0, 0.04),
-                               0 2px 4px rgba(0, 0, 0, 0.06);
-  --dt-bubble-left-shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.08),
-                                      0 4px 16px rgba(0, 0, 0, 0.04);
-
-  // 发送方气泡 - 钉钉蓝渐变
-  --dt-bubble-right-bg-start: #0089FF;
-  --dt-bubble-right-bg-end: #0066CC;
-  --dt-bubble-right-text: #FFFFFF;
-  --dt-bubble-right-shadow: 0 2px 8px rgba(0, 137, 255, 0.3),
-                                0 4px 12px rgba(0, 137, 255, 0.2);
-  --dt-bubble-right-shadow-hover: 0 4px 16px rgba(0, 137, 255, 0.4),
-                                     0 6px 24px rgba(0, 137, 255, 0.25);
-
-  // 1.6 特殊颜色
-  --dt-unread-color: #FF4D4F;
-  --dt-read-color: #8C8C8C;
-  --dt-mention-bg: rgba(0, 137, 255, 0.1);
-  --dt-mention-text: #0089FF;
-  --dt-at-me-bg: #FFF7E6;
-  --dt-at-me-text: #FA6400;
-
-  // 1.7 边框色
-  --dt-border-color: #E5E9EF;
-  --dt-border-light: #EEF1F6;
-  --dt-border-lighter: #F5F7FA;
-  --dt-border-dark: #CED4DB;
-  --dt-border-divider: #E5E9EF;
-  --dt-border-input: #D9D9D9;
-  --dt-border-input-hover: #0089FF;
-  --dt-border-input-focus: #0089FF;
-
-  // 1.8 阴影系统（对标野火IM）
-  --dt-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --dt-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.06);
-  --dt-shadow-3: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --dt-shadow-4: 0 6px 12px rgba(0, 0, 0, 0.1);
-  --dt-shadow-5: 0 8px 16px rgba(0, 0, 0, 0.12);
-  --dt-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04),
-                     0 2px 4px rgba(0, 0, 0, 0.02);
-  --dt-shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.08),
-                           0 4px 12px rgba(0, 0, 0, 0.04);
-  --dt-shadow-float: 0 4px 12px rgba(0, 0, 0, 0.12),
-                     0 2px 6px rgba(0, 0, 0, 0.08);
-  --dt-shadow-modal: 0 8px 24px rgba(0, 0, 0, 0.16),
-                    0 4px 12px rgba(0, 0, 0, 0.1);
-
-  // 品牌色阴影
-  --dt-shadow-brand: 0 4px 12px rgba(0, 137, 255, 0.25);
-  --dt-shadow-brand-hover: 0 6px 20px rgba(0, 137, 255, 0.35);
-  --dt-shadow-brand-strong: 0 8px 24px rgba(0, 137, 255, 0.4);
-}
-
 // ============================================================================
-// 二、尺寸系统（对标钉钉/野火IM）
+// 三、消息气泡组件样式（对标钉钉/野火IM）
 // ============================================================================
 
-:root {
-  // 2.1 布局尺寸
-  --dt-nav-sidebar-width: 60px;           // 导航栏：60px（紧凑）
-  --dt-nav-item-size: 44px;               // 导航项：44x44
-  --dt-nav-logo-size: 36px;               // Logo：36x36
-
-  --dt-session-panel-width: 260px;        // 会话面板：260px（优化）
-  --dt-session-panel-min-width: 200px;
-  --dt-session-panel-max-width: 380px;
-  --dt-session-item-height: 64px;          // 会话项：64px（紧凑）
-
-  --dt-chat-header-height: 56px;           // 聊天头部：56px
-  --dt-chat-input-height: 140px;           // 输入区域：140px
-  --dt-chat-input-min-height: 100px;
-
-  // 2.2 组件尺寸
-  --dt-avatar-size-xs: 24px;
-  --dt-avatar-size-sm: 32px;
-  --dt-avatar-size-md: 40px;
-  --dt-avatar-size: 44px;                // 会话列表头像：44px
-  --dt-avatar-size: 48px;
-  --dt-avatar-size-lg: 64px;
-
-  --dt-btn-height-sm: 28px;
-  --dt-btn-height-md: 32px;
-  --dt-btn-height-lg: 40px;
-
-  --dt-input-height-sm: 28px;
-  --dt-input-height-md: 34px;
-  --dt-input-height-lg: 40px;
-
-  // 2.3 间距系统（4px 基础单位）
-  --dt-space-xs: 4px;
-  --dt-space-sm: 8px;
-  --dt-space-md: 12px;
-  --dt-space-lg: 16px;
-  --dt-space-xl: 20px;
-  --dt-space-2xl: 24px;
-  --dt-space-3xl: 32px;
-  --dt-space-4xl: 40px;
-
-  // 2.4 圆角系统
-  --dt-radius-none: 0;
-  --dt-radius-xs: 2px;
-  --dt-radius-sm: 4px;
-  --dt-radius-md: 6px;
-  --dt-radius-lg: 8px;
-  --dt-radius-xl: 12px;
-  --dt-radius-2xl: 16px;
-  --dt-radius-full: 9999px;
-}
-
-// ============================================================================
-// 三、字体系统
-// ============================================================================
-
-:root {
-  --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
-    'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --dt-font-family-code: 'SF Mono', 'Monaco', 'Inconsolata',
-    'Fira Code', 'Droid Sans Mono', 'Source Code Pro',
-    monospace;
-
-  // 字号（16px 基准，类似钉钉）
-  --dt-font-size-xs: 12px;
-  --dt-font-size-sm: 13px;
-  --dt-font-size-base: 14px;
-  --dt-font-size-md: 15px;
-  --dt-font-size-lg: 16px;
-  --dt-font-size-xl: 18px;
-  --dt-font-size-2xl: 20px;
-  --dt-font-size-3xl: 24px;
-
-  // 字重
-  --dt-font-weight-light: 300;
-  --dt-font-weight-normal: 400;
-  --dt-font-weight-medium: 500;
-  --dt-font-weight-semibold: 600;
-  --dt-font-weight-bold: 700;
-
-  // 行高
-  --dt-line-height-tight: 1.25;
-  --dt-line-height-snug: 1.375;
-  --dt-line-height-base: 1.5;
-  --dt-line-height-relaxed: 1.625;
-}
-
-// ============================================================================
-// 四、消息气泡样式（核心优化）
-// ============================================================================
-
+// 注意：颜色值使用design-tokens.scss中的CSS变量
 .message-bubble-wrapper {
   display: inline-block;
   max-width: 70%;
@@ -236,33 +41,25 @@
     &.is-left {
       background: var(--dt-bubble-left-bg);
       border: 1px solid var(--dt-bubble-left-border);
-      border-radius: var(--dt-radius-lg) var(--dt-radius-lg) var(--dt-radius-lg) 4px;
-      box-shadow: var(--dt-bubble-left-shadow);
+      border-radius: 6px;
+      box-shadow: var(--dt-shadow-1);
       color: var(--dt-text-primary);
 
       &:hover {
-        box-shadow: var(--dt-bubble-left-shadow-hover);
-        transform: translateY(-1px);
+        box-shadow: var(--dt-shadow-2);
       }
     }
 
     // 发送方气泡
     &.is-right {
-      background: linear-gradient(135deg,
-        var(--dt-bubble-right-bg-start) 0%,
-        var(--dt-bubble-right-bg-end) 100%
-      );
-      border-radius: 4px var(--dt-radius-lg) var(--dt-radius-lg) var(--dt-radius-lg);
-      box-shadow: var(--dt-bubble-right-shadow);
+      background: var(--dt-bubble-right-bg);
+      border-radius: 6px;
+      box-shadow: var(--dt-shadow-1);
       color: var(--dt-bubble-right-text);
 
       &:hover {
-        background: linear-gradient(135deg,
-          var(--dt-brand-hover) 0%,
-          var(--dt-bubble-right-bg-end) 100%
-        );
-        box-shadow: var(--dt-bubble-right-shadow-hover);
-        transform: translateY(-1px);
+        background: var(--dt-bubble-right-bg-hover);
+        box-shadow: var(--dt-shadow-2);
       }
     }
   }
@@ -319,28 +116,11 @@
     // 悬停效果
     &:hover {
       background: var(--dt-bg-card-hover);
-      transform: translateX(2px);
     }
 
     // 激活状态
     &.active {
       background: var(--dt-bg-session-active);
-      border-left: 3px solid var(--dt-brand-color);
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 3px;
-        height: 60%;
-        background: linear-gradient(180deg,
-          var(--dt-brand-color) 0%,
-          var(--dt-brand-hover) 100%
-        );
-        border-radius: 0 2px 2px 0;
-      }
     }
 
     // 头像
@@ -350,13 +130,7 @@
       height: var(--dt-avatar-size-md);
       border-radius: var(--dt-radius-md);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-
-      &:hover {
-        transform: scale(1.05);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      }
 
       // 在线状态点
       .status-dot {
@@ -367,12 +141,9 @@
         height: 10px;
         border-radius: 50%;
         border: 2px solid var(--dt-bg-card);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
         &.online {
           background: var(--dt-success-color);
-          box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2);
-          animation: statusBreath 3s ease-in-out infinite;
         }
 
         &.offline {
@@ -424,7 +195,6 @@
       background: var(--dt-unread-color);
       border-radius: 10px;
       box-shadow: 0 2px 4px rgba(255, 77, 79, 0.3);
-      animation: badgePulse 2s ease-in-out infinite;
       flex-shrink: 0;
     }
   }
@@ -821,30 +591,11 @@
 }
 
 // ============================================================================
-// 十一、暗色模式
+// 十一、暗色模式（IM专用调整）
 // ============================================================================
 
-:root {
-  --dt-bg-body-dark: #0F172A;
-  --dt-bg-card-dark: #1E293B;
-  --dt-bg-card-hover-dark: #334155;
-  --dt-bg-input-dark: #1E293B;
-  --dt-bg-overlay-dark: rgba(0, 0, 0, 0.6);
-
-  --dt-text-primary-dark: #F1F5F9;
-  --dt-text-secondary-dark: #CBD5E1;
-  --dt-text-tertiary-dark: #94A3B8;
-  --dt-text-quaternary-dark: #64748B;
-
-  --dt-border-light-dark: #334155;
-  --dt-border-dark: #475569;
-
-  --dt-bubble-left-bg-dark: #2D2D2D;
-  --dt-bubble-left-border-dark: #3D3D3D;
-
-  --dt-bubble-right-bg-start-dark: #0284C7;
-  --dt-bubble-right-bg-end-dark: #0369A1;
-}
+// 注意：基础暗色变量已在design-tokens.scss中定义
+// 这里只定义IM组件的暗色模式调整
 
 .dark {
   background: var(--dt-bg-body-dark);

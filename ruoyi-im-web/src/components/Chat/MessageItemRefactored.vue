@@ -129,7 +129,7 @@ const showSenderName = computed(() => {
 })
 
 const itemClasses = computed(() => ({
-  'is-own': props.message.isOwn,
+  'is-right': props.message.isOwn,
   'is-multi-select': props.multiSelectMode,
   'is-merged': props.message.isMerged,
   'has-sender-name': showSenderName.value
@@ -172,145 +172,109 @@ const handleNudge = () => {
 
 .message-item {
   display: flex;
-  align-items: flex-start; // 顶部对齐，更自然
-  margin-bottom: 16px; // 消息间距16px，更舒适
+  align-items: flex-start;
+  margin-bottom: 24px; // 稍微增大间距
   position: relative;
-  padding: 4px 0;
-  transition: background 0.15s ease;
+  padding: 2px 0;
+  transition: all 0.2s var(--dt-ease-out);
 
-  &.is-own {
+  &.is-right {
     flex-direction: row-reverse;
   }
 
-  // 有发送者名字时增加顶部间距
   &.has-sender-name {
-    padding-top: 20px;
+    padding-top: 20px; 
   }
 }
 
-// 使用全局 fadeInUp 动画 (@/styles/animations.scss)
-
-// 时间分割线
 .time-divider-wrapper {
   width: 100%;
   text-align: center;
-  margin: 12px 0;
+  margin: 16px 0;
 }
 
 .time-text {
-  background: var(--dt-bg-body);
-  color: var(--dt-text-tertiary);
-  font-size: var(--dt-font-size-xs);
-  padding: 3px 10px;
-  border-radius: var(--dt-radius-sm);
+  background: var(--dt-bg-subtle-hover);
+  color: var(--dt-text-quaternary);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
-// 多选复选框 - 野火IM风格
 .checkbox-wrapper {
   display: flex;
-  align-items: center; // 与头像垂直居中对齐
-  margin: 0 8px;
+  align-items: center;
+  margin: 0 12px;
   flex-shrink: 0;
-  width: 20px;
-  height: 40px; // 与头像高度一致
+  height: 40px;
 
-  :deep(.el-checkbox) {
-    .el-checkbox__input.is-checked .el-checkbox__inner {
-      background-color: #4168e0; // 野火IM蓝
-      border-color: #4168e0;
-    }
-
-    .el-checkbox__input:focus .el-checkbox__inner {
-      border-color: #4168e0;
-    }
-
-    .el-checkbox__input.is-checked+.el-checkbox__label {
-      color: #4168e0;
-    }
+  :deep(.el-checkbox__inner) {
+    border-radius: 4px;
   }
 }
 
-// 发送者姓名 - 绝对定位，不影响气泡对齐
 .sender-name-absolute {
   position: absolute;
-  top: -20px; // 在气泡上方
+  top: -20px;
   left: 0;
   font-size: 12px;
-  color: #86909c;
+  color: var(--dt-text-tertiary);
   white-space: nowrap;
-  max-width: 200px;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
-  pointer-events: none; // 避免点击事件冲突
-  line-height: 1.2;
+  pointer-events: none;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
-// 有发送者名字时的布局调整（群聊）
-// 发送者姓名使用绝对定位在气泡上方，不占用布局空间
-.message-item.has-sender-name {
-  // 头像不需要调整，因为 sender-name 使用绝对定位
-  // avatar-wrapper 和 bubble-row 都使用 align-items: center
-}
-
-// 多选模式样式
 .message-item.is-multi-select {
-  padding: 0 8px;
+  padding: 0 12px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.2s;
-
+  border-radius: 12px;
+  
   &:hover {
-    background: #f5f5f5;
+    background: var(--dt-bg-subtle-hover);
   }
 
   &.is-selected {
-    background: var(--dt-brand-02);
+    background: var(--dt-brand-bg);
   }
 }
 
-// 头像区域 - 钉钉/野火IM风格
 .avatar-wrapper {
   width: 40px;
   height: 40px;
-  margin: 0;
   flex-shrink: 0;
   cursor: pointer;
-  transition: opacity var(--dt-transition-base);
   display: flex;
-  align-items: center; // 垂直居中对齐，确保头像和气泡在一条水平直线上
+  align-items: center;
   justify-content: center;
-
-  &:hover {
-    opacity: 0.85;
-  }
+  border-radius: 6px;
+  overflow: hidden;
 
   :deep(.dingtalk-avatar) {
-    border-radius: 4px; // 钉钉/野火IM:方形头像,4px圆角
+    border-radius: 6px !important;
   }
 }
 
-// 内容包裹层 - 野火IM/钉钉风格
 .content-wrapper {
-  max-width: 75%; // 稍微缩小最大宽度，更美观
+  max-width: calc(100% - 100px);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  margin: 0 12px; // 头像与气泡间距12px
-  padding-top: 0;
-  position: relative; // 为发送者名字提供定位上下文
+  margin: 0 12px;
+  position: relative;
 
   &.is-merged {
-    margin-top: -4px; // 合并消息间距稍微减小
+    margin-top: -12px;
   }
 }
 
-// 对方消息左对齐
-.message-item:not(.is-own) .content-wrapper {
+.message-item:not(.is-right) .content-wrapper {
   align-items: flex-start;
 }
 
-// 自己消息右对齐
-.message-item.is-own .content-wrapper {
+.message-item.is-right .content-wrapper {
   align-items: flex-end;
 
   .bubble-row {
@@ -318,44 +282,38 @@ const handleNudge = () => {
   }
 }
 
-// 气泡与状态行布局 - 钉钉/野火IM风格
 .bubble-row {
   display: flex;
-  align-items: center; // 垂直居中对齐，确保气泡与头像在一条水平直线上
-  gap: 4px;
+  align-items: flex-end; // 对齐气泡底部，状态图标在底部
+  gap: 6px;
   max-width: 100%;
-  min-width: 0; // 允许收缩
-  position: relative; // 为绝对定位的 sender-name 提供参考
 }
 
 .status-container {
   flex-shrink: 0;
-  margin-bottom: 2px; // 对齐气泡底部稍微抬起一点
-  align-self: flex-end;
+  margin-bottom: 2px;
 }
 
-// 消息页脚
 .message-footer {
   display: flex;
   align-items: center;
-  margin-top: 4px; // 钉钉标准：4px 间距
-  font-size: var(--dt-font-size-xs);
+  margin-top: 4px;
+  padding: 0 2px;
 }
 
 .message-time {
   color: var(--dt-text-quaternary);
-  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  font-family: var(--dt-font-family);
 }
 
-// 暗色模式适配
-:global(.dark) {
+.dark {
   .time-text {
-    background: var(--dt-bg-card-dark);
-    color: var(--dt-text-secondary);
+    background: var(--dt-white-10);
   }
-
+  
   .message-item.is-multi-select:hover {
-    background: var(--dt-bg-hover-dark);
+    background: var(--dt-white-05);
   }
 }
 </style>

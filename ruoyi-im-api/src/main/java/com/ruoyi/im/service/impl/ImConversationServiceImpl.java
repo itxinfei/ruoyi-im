@@ -121,13 +121,14 @@ public class ImConversationServiceImpl implements ImConversationService {
         // 收集所有需要批量查询的ID
         for (ImConversationVO vo : conversations) {
             conversationIds.add(vo.getId());
-            if (MessageStatusConstants.CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(vo.getType())
-                    || StatusConstants.ConversationType.SINGLE.equalsIgnoreCase(vo.getType())) {
+            // 统一识别 SINGLE 或 PRIVATE 私聊类型
+            if (isPrivateType(vo.getType())) {
                 Long peerUserId = getPeerUserId(vo.getId(), userId);
                 if (peerUserId != null) {
                     userIds.add(peerUserId);
                 }
-            } else if (StatusConstants.ConversationType.GROUP.equalsIgnoreCase(vo.getType()) && vo.getTargetId() != null) {
+            } else if (MessageStatusConstants.CONVERSATION_TYPE_GROUP.equalsIgnoreCase(vo.getType())
+                    && vo.getTargetId() != null) {
                 groupIds.add(vo.getTargetId());
             }
         }
@@ -161,7 +162,8 @@ public class ImConversationServiceImpl implements ImConversationService {
             }
 
             // 批量查询群组成员数量
-            List<java.util.Map<String, Object>> memberCounts = imConversationMemberMapper.countMembersByConversationIds(new java.util.ArrayList<>(groupIds));
+            List<java.util.Map<String, Object>> memberCounts = imConversationMemberMapper
+                    .countMembersByConversationIds(new java.util.ArrayList<>(groupIds));
             for (java.util.Map<String, Object> countMap : memberCounts) {
                 Long conversationId = ((Number) countMap.get("conversationId")).longValue();
                 Integer count = ((Number) countMap.get("memberCount")).intValue();
@@ -181,7 +183,7 @@ public class ImConversationServiceImpl implements ImConversationService {
      * 组装会话VO列表
      */
     private List<ImConversationVO> assembleConversationVOs(List<ImConversationVO> conversations,
-                                                            BatchData batchData, Long userId) {
+            BatchData batchData, Long userId) {
         List<ImConversationVO> voList = new ArrayList<>();
         java.util.Map<Long, ImConversationVO> privateConversationMap = new java.util.HashMap<>();
 
@@ -190,8 +192,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             setLastMessage(vo, batchData.lastMessageMap);
 
             // 根据会话类型处理
-            if (MessageStatusConstants.CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(vo.getType())
-                    || StatusConstants.ConversationType.SINGLE.equalsIgnoreCase(vo.getType())) {
+            if (isPrivateType(vo.getType())) {
                 processPrivateConversation(vo, userId, batchData.userMap, privateConversationMap);
             } else if (MessageStatusConstants.CONVERSATION_TYPE_GROUP.equalsIgnoreCase(vo.getType())) {
                 processGroupConversation(vo, batchData.groupMap, batchData.groupMemberCountMap, voList);
@@ -233,8 +234,8 @@ public class ImConversationServiceImpl implements ImConversationService {
      * 处理私聊会话
      */
     private void processPrivateConversation(ImConversationVO vo, Long userId,
-                                           java.util.Map<Long, ImUser> userMap,
-                                           java.util.Map<Long, ImConversationVO> privateConversationMap) {
+            java.util.Map<Long, ImUser> userMap,
+            java.util.Map<Long, ImConversationVO> privateConversationMap) {
         Long peerUserId = getPeerUserId(vo.getId(), userId);
         if (peerUserId == null) {
             return;
@@ -263,7 +264,7 @@ public class ImConversationServiceImpl implements ImConversationService {
      * 私聊会话去重，保留最后消息时间较新的
      */
     private void deduplicatePrivateConversation(java.util.Map<Long, ImConversationVO> privateConversationMap,
-                                               Long peerUserId, ImConversationVO newVo) {
+            Long peerUserId, ImConversationVO newVo) {
         ImConversationVO existing = privateConversationMap.get(peerUserId);
         if (existing == null) {
             privateConversationMap.put(peerUserId, newVo);
@@ -281,8 +282,8 @@ public class ImConversationServiceImpl implements ImConversationService {
      * 处理群聊会话
      */
     private void processGroupConversation(ImConversationVO vo, java.util.Map<Long, ImGroup> groupMap,
-                                         java.util.Map<Long, Integer> groupMemberCountMap,
-                                         List<ImConversationVO> voList) {
+            java.util.Map<Long, Integer> groupMemberCountMap,
+            List<ImConversationVO> voList) {
         Long groupId = vo.getTargetId();
         if (groupId == null) {
             return;
@@ -353,9 +354,9 @@ public class ImConversationServiceImpl implements ImConversationService {
         final java.util.Map<Long, Integer> groupMemberCountMap;
 
         BatchData(java.util.Map<Long, ImMessage> lastMessageMap,
-                 java.util.Map<Long, ImUser> userMap,
-                 java.util.Map<Long, ImGroup> groupMap,
-                 java.util.Map<Long, Integer> groupMemberCountMap) {
+                java.util.Map<Long, ImUser> userMap,
+                java.util.Map<Long, ImGroup> groupMap,
+                java.util.Map<Long, Integer> groupMemberCountMap) {
             this.lastMessageMap = lastMessageMap;
             this.userMap = userMap;
             this.groupMap = groupMap;
@@ -518,7 +519,8 @@ public class ImConversationServiceImpl implements ImConversationService {
         }
 
         // 检查是否已经存在私聊会话
-        ImConversation existingConversation = imConversationMapper.selectByTypeAndTarget(MessageStatusConstants.CONVERSATION_TYPE_PRIVATE,
+        ImConversation existingConversation = imConversationMapper.selectByTypeAndTarget(
+                MessageStatusConstants.CONVERSATION_TYPE_PRIVATE,
                 Math.min(userId, request.getPeerUserId()), Math.max(userId, request.getPeerUserId()));
         if (existingConversation == null) {
             existingConversation = imConversationMapper.selectByTypeAndTarget(
@@ -797,9 +799,23 @@ public class ImConversationServiceImpl implements ImConversationService {
             }
         }
 
-        log.warn("私聊会话中找不到对方用户: conversationId={}, currentUserId={}, memberCount={}", conversationId, currentUserId,
-                members.size());
+        // 容错处理：如果成员列表只有当前用户自己，尝试从会话 TargetId 推理（私聊会话创建时 targetId 会存 userId）
+        ImConversation conv = imConversationMapper.selectById(conversationId);
+        if (conv != null && isPrivateType(conv.getType())) {
+            // 私聊会话如果只有一个成员，可能需要补偿。这里返回 null 但可以在外部触发自愈
+            log.warn("私聊会话成员数据缺失，仅有当前用户: conversationId={}, userId={}", conversationId, currentUserId);
+        }
+
         return null;
+    }
+
+    /**
+     * 辅助方法：判断是否为私聊类型
+     */
+    private boolean isPrivateType(String type) {
+        return MessageStatusConstants.CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(type)
+                || StatusConstants.ConversationType.SINGLE.equalsIgnoreCase(type)
+                || StatusConstants.ConversationType.PRIVATE.equalsIgnoreCase(type);
     }
 
     /**
@@ -840,7 +856,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         // 获取会话所有成员
         List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
         List<Long> memberIds = new ArrayList<>();
-        
+
         if (members != null) {
             for (ImConversationMember member : members) {
                 if (member.getUserId() != null) {
@@ -848,13 +864,14 @@ public class ImConversationServiceImpl implements ImConversationService {
                 }
             }
         }
-        
+
         return memberIds;
     }
 
     @Override
     public Integer getUnreadCount(Long conversationId, Long userId) {
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
+                userId);
         if (member != null) {
             return member.getUnreadCount() != null ? member.getUnreadCount() : 0;
         }

@@ -763,13 +763,33 @@ defineExpose({ reload: loadData })
   .nav-item {
     display: flex;
     align-items: center;
-    padding: 10px 12px;
+    height: 56px;
+    padding: 0 12px;
     cursor: pointer;
     gap: 12px;
     transition: background var(--dt-transition-fast);
+    border-radius: 0;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 0;
+      background: var(--dt-brand-color);
+      border-radius: 0;
+      transition: height var(--dt-transition-fast);
+    }
 
     &:hover {
       background: var(--dt-bg-session-hover);
+
+      &::before {
+        height: 20px;
+      }
     }
 
     .nav-badge {
@@ -778,21 +798,22 @@ defineExpose({ reload: loadData })
     }
 
     .nav-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--dt-radius-md);
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-size: 20px;
+      color: var(--dt-text-inverse);
+      font-size: 22px;
 
-      &.new-friends { background: #FF9800; }
+      &.new-friends { background: var(--dt-warning-color); }
     }
 
     .nav-label {
-      font-size: var(--dt-font-size-base);
+      font-size: 14px;
       color: var(--dt-text-primary);
+      font-weight: 500;
     }
   }
 }
@@ -833,30 +854,57 @@ defineExpose({ reload: loadData })
 .friend-item {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  height: 60px;
+  padding: 0 12px;
   cursor: pointer;
   transition: background var(--dt-transition-fast);
+  border-radius: 0;
+  position: relative;
 
-  &:hover,
-  &.active {
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--dt-brand-color);
+    border-radius: 0;
+    transition: height var(--dt-transition-fast);
+  }
+
+  &:hover {
     background-color: var(--dt-bg-session-hover);
+
+    &::before {
+      height: 20px;
+    }
   }
 
   &.active {
     background-color: var(--dt-brand-bg);
+
+    &::before {
+      height: 32px;
+    }
+
+    &:hover {
+      background-color: var(--dt-brand-bg-hover);
+    }
   }
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--dt-radius-md);
-  margin-right: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  margin-right: 12px;
   background: var(--dt-brand-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--dt-text-inverse);
   font-size: var(--dt-font-size-base);
   overflow: hidden;
   flex-shrink: 0;
@@ -874,13 +922,14 @@ defineExpose({ reload: loadData })
 }
 
 .name {
-  font-size: var(--dt-font-size-base);
+  font-size: 14px;
   color: var(--dt-text-primary);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .desc {
-  font-size: var(--dt-font-size-sm);
+  font-size: 12px;
   color: var(--dt-text-tertiary);
   white-space: nowrap;
   overflow: hidden;

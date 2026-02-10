@@ -69,8 +69,7 @@ export { useKeyboardShortcuts } from './useKeyboardShortcuts'
 // IndexedDB
 export { useIndexedDB } from './useIndexedDB'
 
-// ========== 聊天功能模块 ==========
-
+// 聊天功能模块
 export {
   useChatMultiSelect,
   useChatUpload,
@@ -78,3 +77,21 @@ export {
   useChatMessages,
   useChatCommands
 } from './useChat'
+
+// 网络状态
+export { useNetworkStatus } from './useNetworkStatus'
+
+// 高亮文本
+export { useHighlightText } from './useHighlightText'
+
+// 错误处理
+export { useErrorHandler, useMessageErrorHandler, useApiErrorHandler } from './useErrorHandler'
+
+// 联系人批量操作
+export { useContactBatch } from './useContactBatch'
+
+// 链接预览
+export { useLinkPreview } from './useLinkPreview'
+
+// 消息队列
+export { useMessageQueue } from './useMessageQueue'

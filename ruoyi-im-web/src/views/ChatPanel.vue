@@ -1814,11 +1814,11 @@ onMounted(() => {
       // 映射后端 sendStatus 数值到前端状态字符串
       // 0=PENDING, 1=SENDING, 2=DELIVERED(不显示), 3=READ(已读), 4=FAILED
       const statusMap = {
-        0: 'sending',  // PENDING - 显示发送中
-        1: 'sending',  // SENDING - 显示发送中
-        2: null,       // DELIVERED - 不显示任何状态（已移除已送达显示）
-        3: 'read',     // READ - 显示已读
-        4: 'failed'    // FAILED - 显示失败
+        0: 'sending',    // PENDING - 显示发送中
+        1: 'sending',    // SENDING - 显示发送中
+        2: 'delivered',  // DELIVERED - 显示已送达
+        3: 'read',       // READ - 显示已读
+        4: 'failed'      // FAILED - 显示失败
       }
       const sendStatus = parseInt(data.sendStatus)
       messages.value[index].status = statusMap[sendStatus] ?? null

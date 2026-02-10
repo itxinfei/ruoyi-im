@@ -3,12 +3,14 @@
     class="nav-sidebar"
     :style="{ width: navWidth + 'px' }"
   >
+    <!-- Logo 区域 -->
     <div class="logo-area">
       <div class="logo-box">
         <span class="logo-text">钉</span>
       </div>
     </div>
 
+    <!-- 主菜单区域 -->
     <nav class="nav-list">
       <el-tooltip
         v-for="item in navModules"
@@ -34,7 +36,58 @@
       </el-tooltip>
     </nav>
 
+    <!-- 底部功能区域 -->
     <div class="nav-footer">
+      <!-- 设置 -->
+      <el-tooltip
+        content="设置"
+        placement="right"
+        :show-after="500"
+      >
+        <div
+          class="footer-item"
+          :class="{ active: activeModule === 'settings' }"
+          @click="handleNavClick('settings')"
+        >
+          <el-icon class="footer-icon">
+            <Setting />
+          </el-icon>
+        </div>
+      </el-tooltip>
+
+      <!-- 主题切换 -->
+      <el-tooltip
+        content="切换主题"
+        placement="right"
+        :show-after="500"
+      >
+        <div
+          class="footer-item"
+          @click="toggleTheme"
+        >
+          <el-icon class="footer-icon">
+            <component :is="isDarkMode ? Sunny : Moon" />
+          </el-icon>
+        </div>
+      </el-tooltip>
+
+      <!-- 退出登录 -->
+      <el-tooltip
+        content="退出登录"
+        placement="right"
+        :show-after="500"
+      >
+        <div
+          class="footer-item logout-item"
+          @click="handleLogout"
+        >
+          <el-icon class="footer-icon">
+            <SwitchButton />
+          </el-icon>
+        </div>
+      </el-tooltip>
+
+      <!-- 用户头像 -->
       <div
         class="user-avatar"
         :class="{ active: activeModule === 'profile' }"
@@ -44,7 +97,7 @@
           :src="currentUser.avatar"
           :name="currentUser.nickname || currentUser.username || '我'"
           :user-id="currentUser.id"
-          :size="40"
+          :size="36"
           shape="circle"
           custom-class="nav-avatar"
         />
@@ -66,7 +119,10 @@ import {
   Document,
   Setting,
   ChatLineSquare,
-  MagicStick
+  MagicStick,
+  Moon,
+  Sunny,
+  SwitchButton
 } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -77,11 +133,24 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['switchModule'])
+const emit = defineEmits(['switchModule', 'logout'])
 const store = useStore()
 const navWidth = ref(64)
 const unreadCount = computed(() => store.state.im.totalUnreadCount)
 const currentUser = computed(() => store.getters['user/currentUser'])
+
+// 主题模式
+const isDarkMode = computed(() => store.getters['settings/isDarkMode'])
+
+// 切换主题
+const toggleTheme = () => {
+  store.dispatch('settings/toggleDarkMode')
+}
+
+// 退出登录
+const handleLogout = () => {
+  emit('logout')
+}
 
 const navModules = ref([
   {
@@ -140,38 +209,39 @@ const handleNavClick = moduleKey => {
 .nav-sidebar {
   display: flex;
   flex-direction: column;
-  width: 60px;  // 钉钉标准：60px
-  min-width: 60px;
-  max-width: 60px;
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
   flex-shrink: 0;
-  background-color: #0089ff;
-  border-right: 1px solid #e8e8e8;
-  height: 100%;
+  background: linear-gradient(180deg, #1677ff 0%, #0958d9 100%);
+  height: 100vh;
+  position: relative;
 }
 
 .logo-area {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 0;
-  margin-bottom: 4px;
+  padding: 16px 0 12px 0;
+  flex-shrink: 0;
 }
 
 .logo-box {
-  width: 40px;  // 钉钉标准：40px
-  height: 40px;
-  background-color: var(--dt-bg-overlay-light);  // 半透明白色
-  border-radius: var(--dt-radius-md);
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 8px auto;  // 居中，上下8px间距
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .logo-text {
-  color: #0089ff;
-  font-size: 18px;
-  font-weight: bold;
+  color: #1677ff;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .nav-list {
@@ -182,6 +252,12 @@ const handleNavClick = moduleKey => {
   gap: 4px;
   flex: 1;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .nav-item {
@@ -190,34 +266,32 @@ const handleNavClick = moduleKey => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;  // 填满父容器宽度（60px）
-  height: 40px;  // 钉钉标准：40px
-  margin: 0 auto;  // 居中（虽然width是100%，但保留以确保）
-  border-radius: var(--dt-radius-md);  // 钉钉标准：8px 圆角
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: var(--dt-bg-overlay-lighter);
-    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   &.active {
-    background-color: var(--dt-bg-overlay-medium);
-    box-shadow: var(--dt-shadow-md);
-  }
-
-  &.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 20px;
-    background-color: #ffffff;
-    border-radius: 0 2px 2px 0;
-    box-shadow: var(--dt-glow-sm);
+    background-color: rgba(255, 255, 255, 0.2);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 20px;
+      background-color: #fff;
+      border-radius: 0 2px 2px 0;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
   }
 }
 
@@ -226,9 +300,9 @@ const handleNavClick = moduleKey => {
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  color: var(--dt-text-tertiary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  line-height: 1;  // 确保图标垂直居中
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+  line-height: 1;
 }
 
 .nav-label {
@@ -236,62 +310,130 @@ const handleNavClick = moduleKey => {
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: var(--dt-text-tertiary);
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1;
   font-weight: 500;
-  letter-spacing: 0.3px;
-  margin-top: 2px;  // 图标和文字之间的间距
+  letter-spacing: 0.2px;
+  margin-top: 4px;
 }
 
 .nav-item:hover .nav-icon,
-.nav-item:hover .nav-label,
+.nav-item:hover .nav-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .nav-item.active .nav-icon,
 .nav-item.active .nav-label {
-  color: #ffffff;
+  color: #fff;
+  font-weight: 600;
 }
 
 .nav-dot {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 10px;
-  height: 10px;
-  background: linear-gradient(135deg, #ff4d4f, #ff7875);
-  border-radius: var(--dt-radius-full);
-  border: 2px solid #0089ff;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #ff4d4f;
+  border-radius: 50%;
+  border: 2px solid #1677ff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .nav-footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 0 12px 0;
-  gap: 2px;
+  padding: 12px 0 16px 0;
+  gap: 8px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
 }
 
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--dt-radius-full);
+.footer-item {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 8px;
-  background-color: var(--dt-bg-overlay-light);
+  background-color: transparent;
 
   &:hover {
-    background-color: var(--dt-bg-overlay-medium);
+    background-color: rgba(255, 255, 255, 0.15);
   }
 
   &.active {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &.logout-item:hover {
+    background-color: rgba(255, 77, 79, 0.2);
+
+    .footer-icon {
+      color: #ff4d4f;
+    }
+  }
+}
+
+.footer-icon {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+}
+
+.footer-item:hover .footer-icon {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.footer-item.active .footer-icon {
+  color: #fff;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+  }
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   }
 }
 
 /* 导航头像组件样式覆盖 */
+.user-avatar :deep(.nav-avatar) {
+  width: 100%;
+  height: 100%;
+}
+
+.user-avatar :deep(.nav-avatar .avatar-text) {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .user-avatar.active :deep(.nav-avatar .avatar-text) {
-  color: #0089ff;
+  color: #1677ff;
 }
 </style>

@@ -379,16 +379,19 @@ const logout = () => {
   flex-direction: column;
   transition: width var(--dt-transition-base) var(--dt-ease-out);
   overflow: hidden;
+  box-shadow: 1px 0 8px rgba(0, 0, 0, 0.02); /* 增加轻微阴影 */
+  z-index: 10;
 }
 
 /* Logo区域 */
 .sidebar-logo {
-  height: var(--dt-header-height);
+  height: 64px; /* 增加高度 */
   display: flex;
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
+  background-color: var(--dt-sidebar-bg); /* 确保背景一致 */
 }
 
 .logo-content {
@@ -402,18 +405,25 @@ const logout = () => {
   font-weight: 600;
   color: var(--dt-primary);
   line-height: 1.2;
+  letter-spacing: 0.5px; /* 增加字间距 */
 }
 
 .logo-subtitle {
   font-size: 12px;
   color: var(--dt-text-secondary);
-  margin-top: 2px;
+  margin-top: 4px;
+  transform: scale(0.9); /* 稍微缩小副标题 */
 }
 
 .logo-icon {
-  font-size: 24px;
+  font-size: 28px; /* 图标稍大 */
   color: var(--dt-primary);
   cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.logo-icon:hover {
+  transform: scale(1.1);
 }
 
 /* 菜单样式 */
@@ -421,7 +431,7 @@ const logout = () => {
   flex: 1;
   border: none;
   background-color: transparent;
-  padding: var(--dt-space-sm) 0;
+  padding: 12px 0; /* 增加上下内边距 */
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -430,39 +440,44 @@ const logout = () => {
   width: 200px;
 }
 
-/* 菜单项 - 钉钉风格 */
+/* 菜单项 - 优化风格 */
 .sidebar-menu :deep(.el-menu-item) {
-  height: var(--dt-menu-item-height);
-  line-height: var(--dt-menu-item-height);
-  padding: 0 var(--dt-menu-item-padding);
-  margin: var(--dt-space-xs) var(--dt-space-sm);
-  border-radius: var(--dt-radius-sm);
-  color: var(--dt-sidebar-text);
-  transition: all var(--dt-transition-base) var(--dt-ease-out);
+  height: 48px; /* 增高 */
+  line-height: 48px;
+  padding: 0 16px !important; /* 调整内边距 */
+  margin: 4px 12px; /* 增加四周间距，形成悬浮感 */
+  border-radius: 8px; /* 圆角 */
+  color: var(--dt-text-secondary); /* 使用次级文本色，更柔和 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
-/* 选中状态 - 左侧蓝色指示条 */
+/* 选中状态 - 背景色块风格 */
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  color: var(--dt-sidebar-text-active);
-  background-color: var(--dt-sidebar-bg-active);
+  color: var(--dt-primary);
+  background-color: var(--el-color-primary-light-9); /* 使用 Element Plus 浅色变量 */
+  font-weight: 600;
 }
 
+/* 左侧指示条 - 改为圆角短条 */
 .sidebar-menu :deep(.el-menu-item.is-active::before) {
   content: '';
   position: absolute;
-  left: 0;
+  left: 6px;
   top: 50%;
   transform: translateY(-50%);
-  width: var(--dt-sidebar-indicator-width);
-  height: 20px;
+  width: 4px;
+  height: 18px;
   background-color: var(--dt-primary);
-  border-radius: 0 2px 2px 0;
+  border-radius: 2px;
+  opacity: 1;
 }
 
 /* 悬停效果 */
 .sidebar-menu :deep(.el-menu-item:hover) {
   background-color: var(--dt-bg-hover);
+  color: var(--dt-text-primary);
+  transform: translateX(2px); /* 轻微右移交互反馈 */
 }
 
 /* 折叠状态 */
@@ -471,22 +486,25 @@ const logout = () => {
 }
 
 .sidebar-menu.el-menu--collapse :deep(.el-menu-item) {
-  padding: 0;
+  padding: 0 !important;
+  margin: 4px 8px; /* 折叠时左右间距减小 */
   justify-content: center;
 }
 
 .sidebar-menu.el-menu--collapse :deep(.el-menu-item .el-icon) {
   margin: 0;
+  font-size: 20px;
 }
 
 /* 底部折叠按钮 */
 .sidebar-footer {
-  height: 48px;
+  height: 56px; /* 增加高度 */
   display: flex;
   align-items: center;
   justify-content: center;
   border-top: 1px solid var(--dt-border-light);
   flex-shrink: 0;
+  background-color: var(--dt-sidebar-bg);
 }
 
 .collapse-btn {

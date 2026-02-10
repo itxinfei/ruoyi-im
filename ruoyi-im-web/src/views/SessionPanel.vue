@@ -27,8 +27,8 @@
       </h1>
       <el-dropdown
         trigger="click"
-        placement="bottom-start"
-        popper-class="add-menu-dropdown"
+        placement="bottom-end"
+        popper-class="add-menu-dropdown-popper"
         :show-timeout="0"
         :hide-timeout="200"
         @command="handleCommand"
@@ -43,41 +43,27 @@
           <div class="add-menu-container">
             <!-- 快捷操作区 -->
             <div class="quick-actions-section">
-              <div class="section-title">
-                快捷操作
-              </div>
+              <div class="section-title">快捷操作</div>
               <div class="quick-actions-grid">
-                <div
-                  class="quick-action-item"
-                  @click="handleCommand('group')"
-                >
+                <div class="quick-action-item" @click="handleCommand('group')">
                   <div class="action-icon success">
                     <span class="material-icons-outlined">group_add</span>
                   </div>
                   <span class="action-label">发起群聊</span>
                 </div>
-                <div
-                  class="quick-action-item"
-                  @click="handleCommand('join')"
-                >
+                <div class="quick-action-item" @click="handleCommand('join')">
                   <div class="action-icon warning">
                     <span class="material-icons-outlined">search</span>
                   </div>
                   <span class="action-label">加入群组</span>
                 </div>
-                <div
-                  class="quick-action-item"
-                  @click="handleCommand('contacts')"
-                >
+                <div class="quick-action-item" @click="handleCommand('contacts')">
                   <div class="action-icon info">
                     <span class="material-icons-outlined">person_add</span>
                   </div>
                   <span class="action-label">添加联系人</span>
                 </div>
-                <div
-                  class="quick-action-item"
-                  @click="handleCommand('scan')"
-                >
+                <div class="quick-action-item" @click="handleCommand('scan')">
                   <div class="action-icon primary">
                     <span class="material-icons-outlined">qr_code_scanner</span>
                   </div>
@@ -88,21 +74,17 @@
 
             <div class="menu-divider" />
 
-            <!-- 常用功能 -->
+            <!-- 其他功能 -->
             <div class="common-actions-section">
-              <div class="section-title">
-                其他功能
-              </div>
-              <el-dropdown-item
-                command="invite"
-                class="menu-item-with-icon"
-              >
+              <div class="section-title">其他功能</div>
+              <div class="menu-item-simple" @click="handleCommand('invite')">
                 <span class="material-icons-outlined item-icon">share</span>
-                <div class="item-content">
-                  <span class="item-title">邀请好友</span>
-                  <span class="item-desc">分享邀请链接给好友</span>
-                </div>
-              </el-dropdown-item>
+                <span class="item-title">邀请好友</span>
+              </div>
+              <div class="menu-item-simple" @click="handleCommand('archived')">
+                <span class="material-icons-outlined item-icon">archive</span>
+                <span class="item-title">归档会话</span>
+              </div>
             </div>
           </div>
         </template>
@@ -116,7 +98,7 @@
         <input
           v-model="searchKeyword"
           class="search-input"
-          placeholder="搜索联系人、群组、消息..."
+          placeholder="搜索"
           type="text"
           @focus="showGlobalSearch = true"
         >
@@ -129,15 +111,13 @@
         </span>
       </div>
 
-      <!-- 归档入口按钮 -->
       <div
         v-if="archivedCount > 0"
-        class="archive-entry"
+        class="archive-entry-mini"
         @click="handleShowArchived"
+        title="归档会话"
       >
-        <span class="material-icons-outlined archive-icon">archive</span>
-        <span class="archive-text">归档 ({{ archivedCount }})</span>
-        <span class="archive-chevron material-icons-outlined">chevron_right</span>
+        <span class="material-icons-outlined">archive</span>
       </div>
 
       <!-- 全局搜索面板 -->
@@ -1261,6 +1241,11 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 // ============================================================================
 .search-section {
   padding: 0 12px 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 // ============================================================================
@@ -1299,28 +1284,31 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 }
 
 .search-container {
-  position: relative;
+  flex: 1;
+  height: 32px;
+  background: var(--dt-bg-subtle);
+  border: 1px solid var(--dt-border-light);
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  height: 34px;
-  background: var(--dt-bg-body);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-full);
-  padding: 0 12px;
-  transition: all var(--dt-transition-fast);
+  padding: 0 10px;
+  transition: all 0.2s ease;
 
   &:focus-within {
-    background: var(--dt-bg-card);
+    background: #fff;
     border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 3px var(--dt-brand-lighter);
+    box-shadow: 0 0 0 2px var(--dt-brand-light);
+
+    .search-icon {
+      color: var(--dt-brand-color);
+    }
   }
 }
 
 .search-icon {
   font-size: 18px;
-  color: var(--dt-text-tertiary);
-  pointer-events: none;
-  flex-shrink: 0;
+  color: var(--dt-text-quaternary);
+  margin-right: 6px;
 }
 
 .search-input {
@@ -1330,8 +1318,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   outline: none;
   font-size: 13px;
   color: var(--dt-text-primary);
-  padding: 0 10px;
-  font-family: var(--dt-font-family);
+  padding: 0;
 
   &::placeholder {
     color: var(--dt-text-quaternary);
@@ -1356,25 +1343,47 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   }
 }
 
+.archive-entry-mini {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--dt-bg-subtle);
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
+}
+
 // ============================================================================
 // 会话列表
 // ============================================================================
 .session-list {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 4px 0;
-
+  
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.05);
+    border-radius: 3px;
   }
 
   &::-webkit-scrollbar-track {
     background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: var(--dt-radius-sm);
   }
 
   &:hover::-webkit-scrollbar-thumb {
@@ -1412,14 +1421,13 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 .session-item {
   position: relative;
   display: flex;
-  height: 72px; // 钉钉标准：固定高度 72px
-  padding: 0 16px; // 钉钉标准：左右内边距 16px
+  height: 72px;
+  padding: 0 16px;
   cursor: pointer;
-  gap: 12px; // 增加间距，钉钉标准约 12px
-  transition: all var(--dt-transition-fast);
-  animation: fadeInLeft 0.3s var(--dt-ease-out) both;
-  border-radius: 0; // 钉钉风格：无圆角，方形设计
-  align-items: center; // 垂直居中
+  gap: 12px;
+  transition: background var(--dt-transition-fast);
+  border-radius: 0;
+  align-items: center;
 
   &::before {
     content: '';
@@ -1435,7 +1443,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   }
 
   &:hover {
-    background: var(--dt-bg-session-hover); // 钉钉标准：#F6F8FA
+    background: var(--dt-bg-session-hover);
 
     &::before {
       height: 24px;
@@ -1443,10 +1451,10 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   }
 
   &.active {
-    background: var(--dt-bg-session-active); // 钉钉标准：#EBF2FF
+    background: var(--dt-bg-session-active);
 
     &::before {
-      height: 32px;
+      height: 40px;
     }
 
     .session-name {
@@ -1455,7 +1463,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
     }
 
     .session-avatar {
-      box-shadow: 0 0 0 2px var(--dt-brand-color);
+      border: 2px solid var(--dt-brand-color);
     }
 
     .preview-text {
@@ -1463,12 +1471,8 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
     }
   }
 
-  &.pinned {
+  &.pinned:not(.active) {
     background: var(--dt-bg-pinned);
-  }
-
-  &.pinned.active {
-    background: var(--dt-bg-session-active); // 钉钉标准：#EBF2FF
   }
 
   &.unread {
@@ -1504,24 +1508,23 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 }
 
 .session-avatar {
-  width: 48px;  // 钉钉标准：会话列表头像 48px
+  width: 48px;
   height: 48px;
-  border-radius: var(--dt-radius-md);  // 钉钉方形头像，圆角 6px
+  border-radius: 6px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s var(--dt-ease-out), box-shadow 0.2s var(--dt-ease-out);
+  transition: transform var(--dt-transition-base);
 
   &.group-avatar {
     background: var(--dt-brand-color);
     color: var(--dt-text-inverse);
-    box-shadow: var(--dt-shadow-brand);
   }
 
   :deep(.dingtalk-avatar) {
-    border-radius: var(--dt-radius-md) !important;  // 统一圆角
-    transition: transform 0.2s var(--dt-ease-out);
+    border-radius: 6px !important;
+    transition: transform var(--dt-transition-base);
   }
 }
 

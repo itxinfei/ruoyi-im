@@ -80,7 +80,7 @@ const handleClick = () => {
   flex-direction: column;
   background: var(--dt-black-04);
   border-left: 3px solid #4168e0; // 野火IM蓝
-  padding: 8px 12px;
+  padding: 12px;
   margin: -6px -8px 8px -8px;
   border-radius: 4px;
   font-size: 13px;
@@ -88,7 +88,7 @@ const handleClick = () => {
   cursor: pointer;
   overflow: hidden;
   user-select: none;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-base);
 
   &:hover {
     background: var(--dt-brand-extra-light);
@@ -121,7 +121,7 @@ const handleClick = () => {
   color: #fff;
   border-radius: 3px;
   font-size: 11px;
-  transition: transform 0.2s;
+  transition: transform var(--dt-transition-base);
 
   .material-icons-outlined {
     font-size: 13px;

@@ -1,8 +1,6 @@
 package com.ruoyi.im.util;
 
 import com.ruoyi.im.domain.ImUser;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -98,16 +96,13 @@ public class SecurityUtils {
      * @param token JWT Token
      * @return 用户名
      */
-    @SuppressWarnings("deprecation")
     public static String getUsernameFromToken(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey("ruoyi-im-secret-key") // 应该从配置中获取
-                    .parseClaimsJws(token)
-                    .getBody();
-            return claims.getSubject();
+            // 获取 Spring 容器中的 JwtUtils
+            JwtUtils jwtUtils = SpringContextUtils.getBean(JwtUtils.class);
+            return jwtUtils.getUsernameFromToken(token);
         } catch (Exception e) {
-            LOGGER.error("解析Token失败", e);
+            LOGGER.error("通过JwtUtils解析Token失败", e);
             return null;
         }
     }

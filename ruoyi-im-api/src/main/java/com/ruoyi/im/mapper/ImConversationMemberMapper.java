@@ -153,4 +153,13 @@ public interface ImConversationMemberMapper extends BaseMapper<ImConversationMem
      * @return 更新行数
      */
     int updateArchived(@Param("conversationId") Long conversationId, @Param("userId") Long userId, @Param("isArchived") Integer isArchived);
+
+    /**
+     * 批量增加未读消息数（排除发送者）- 私有化部署优化
+     *
+     * @param conversationId 会话ID
+     * @param senderId 发送者ID（不增加其未读数）
+     * @return 更新行数
+     */
+    int incrementUnreadCountExcludeSender(@Param("conversationId") Long conversationId, @Param("senderId") Long senderId);
 }

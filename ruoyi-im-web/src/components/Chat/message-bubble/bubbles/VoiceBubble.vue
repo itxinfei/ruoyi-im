@@ -243,20 +243,25 @@ watch(() => props.message?.id, () => {
 .voice-bubble {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  min-width: 140px;
-  max-width: 240px;
+  gap: 12px;
+  padding: 12px;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
-  user-select: none;
-  position: relative;
-  transition: background-color 0.2s;
+  min-width: 160px;
+  max-width: 320px;
+  transition: all var(--dt-transition-base);
 
   &:hover {
     background-color: var(--dt-black-04);
   }
 
   &.is-playing {
+    background-color: var(--dt-brand-bg);
+    border-color: var(--dt-brand-color);
+    transition: background-color var(--dt-transition-base);
+
     .voice-play-btn {
       color: var(--el-color-primary);
     }
@@ -276,7 +281,7 @@ watch(() => props.message?.id, () => {
   justify-content: center;
   border-radius: 50%;
   background-color: var(--dt-black-08);
-  transition: all 0.2s;
+  transition: all var(--dt-transition-base);
 }
 
 .voice-waveform {
@@ -300,7 +305,7 @@ watch(() => props.message?.id, () => {
   height: 30%;
   background-color: var(--dt-black-20);
   border-radius: 2px;
-  transition: height 0.1s, background-color 0.2s;
+  transition: height var(--dt-transition-fast), background-color var(--dt-transition-base);
 
   &.active {
     background-color: var(--el-color-primary);

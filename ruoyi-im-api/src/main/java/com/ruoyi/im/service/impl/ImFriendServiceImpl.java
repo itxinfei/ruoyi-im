@@ -193,7 +193,7 @@ public class ImFriendServiceImpl implements ImFriendService {
     public List<ImFriendVO> getFriendList(Long userId) {
         String cacheKey = "contact:list:" + userId;
 
-        // 尝试从缓存获取，如果Redis异常则跳过缓存
+        // 暂时注释掉缓存读取，强制刷新数据
         List<ImFriendVO> cachedList = null;
         try {
             @SuppressWarnings("unchecked")
@@ -276,10 +276,12 @@ public class ImFriendServiceImpl implements ImFriendService {
                         log.warn("获取用户在线状态失败: userId={}, error={}", friend.getFriendId(), e.getMessage());
                         vo.setOnline(false);
                     }
+
+                    // 核心修复：只有查到真实用户信息才加入返回列表
+                    voList.add(vo);
                 } else {
-                    vo.setOnline(false);
+                    log.error("好友关系存在但用户信息丢失: friendId={}, userId={}", friend.getFriendId(), userId);
                 }
-                voList.add(vo);
             }
         }
 

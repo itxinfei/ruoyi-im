@@ -1,7 +1,7 @@
 <template>
   <div
     class="recalled-bubble"
-    :class="{ 'is-own': message.isOwn }"
+    :class="{ 'is-right': message.isOwn }"
   >
     <span class="recall-icon material-icons-outlined">history</span>
     <div class="recall-content">
@@ -44,7 +44,7 @@ const canReEdit = computed(() => {
   display: flex;
   align-items: center;
   gap: var(--dt-space-2);
-  padding: 8px 12px;
+  padding: 12px;
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-sm);
@@ -66,11 +66,11 @@ const canReEdit = computed(() => {
     color: var(--dt-text-secondary);
   }
 
-  &.is-own {
+  &.is-right {
     background: var(--dt-error-02);
 
     .recall-icon {
-      color: #ff3b30;
+      color: var(--dt-error-color);
     }
 
     .recall-text {

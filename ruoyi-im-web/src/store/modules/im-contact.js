@@ -154,9 +154,9 @@ export default {
 
   actions: {
     // 加载联系人列表
-    async loadContacts({ commit, state }) {
-      // 如果已经有数据，先不重新加载（避免重复请求）
-      if (state.contacts.length > 0) {return}
+    async loadContacts({ commit, state }, force = false) {
+      // 只有在非强制模式且已经有数据时才跳过
+      if (!force && state.contacts.length > 0) { return }
 
       commit('SET_LOADING', { key: 'contacts', value: true })
       try {
@@ -179,7 +179,7 @@ export default {
     // 加载群组列表
     async loadGroups({ commit, state }) {
       // 如果已经有数据，先不重新加载
-      if (state.groups.length > 0) {return}
+      if (state.groups.length > 0) { return }
 
       commit('SET_LOADING', { key: 'groups', value: true })
       try {

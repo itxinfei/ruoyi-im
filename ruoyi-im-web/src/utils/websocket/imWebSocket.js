@@ -23,28 +23,28 @@ export const WS_STATUS = {
 
 // 消息类型
 export const MESSAGE_TYPE = {
-  AUTH: 'auth',           // 认证
-  MESSAGE: 'message',     // 聊天消息
-  MESSAGE_STATUS: 'message_status',  // 消息状态更新（发送状态变化）
-  MESSAGE_ACK: 'message_ack',        // 消息ACK确认
-  PING: 'ping',           // 心跳请求
-  PONG: 'pong',           // 心跳响应
-  READ: 'read',           // 已读回执
-  TYPING: 'typing',       // 正在输入
-  STOP_TYPING: 'stop-typing', // 停止输入
-  ONLINE: 'online',       // 用户上线
-  OFFLINE: 'offline',     // 用户下线
-  CALL: 'call',           // 音视频通话
-  REACTION: 'reaction',    // 表情回复
-  CONVERSATION_EVENT: 'conversation_event' // 会话事件
+  AUTH: 'auth',
+  MESSAGE: 'message',
+  MESSAGE_STATUS: 'message_status',
+  MESSAGE_ACK: 'message_ack',
+  PING: 'ping',
+  PONG: 'pong',
+  READ: 'read',
+  TYPING: 'typing',
+  STOP_TYPING: 'stop-typing',
+  ONLINE: 'online',
+  OFFLINE: 'offline',
+  CALL: 'call',
+  REACTION: 'reaction',
+  CONVERSATION_EVENT: 'conversation_event'
 }
 
 // 性能优化配置
 const BATCH_INTERVAL = 50 // 消息批量处理间隔（毫秒）
 const BATCH_MAX_SIZE = 20 // 批量处理最大消息数
-const BASE_RECONNECT_INTERVAL = 1000 // 基础重连间隔
-const MAX_RECONNECT_INTERVAL = 30000 // 最大重连间隔
-const PENDING_MESSAGES_MAX = 100 // 最大待发送消息数
+const BASE_RECONNECT_INTERVAL = 1000
+const MAX_RECONNECT_INTERVAL = 30000
+const PENDING_MESSAGES_MAX = 100
 
 class ImWebSocket {
   constructor() {
@@ -56,23 +56,18 @@ class ImWebSocket {
     this.reconnectAttempts = 0
     this.maxReconnectAttempts = 10
     this.reconnectInterval = BASE_RECONNECT_INTERVAL
-    this.heartbeatInterval = 30000 // 30 秒心跳
+    this.heartbeatInterval = 30000
     this.eventHandlers = new Map()
-    this.storeConnectionCallback = null // 回调函数：用于更新 Vuex store 的连接状态
+    this.storeConnectionCallback = null
 
-    // 消息批量处理相关
     this.messageBuffer = []
     this.batchTimer = null
     this.lastPongTime = Date.now()
 
-    // 连接质量监控
-    this.connectionQuality = 'good' // good, fair, poor
+    this.connectionQuality = 'good'
     this.pingLatencies = []
 
-    // ========== 新增：发送队列管理 ==========
-    // 待发送消息队列（网络断开时暂存）
     this.pendingMessages = []
-    // 是否正在处理发送队列
     this.isProcessingPending = false
   }
 
@@ -84,10 +79,6 @@ class ImWebSocket {
     this.storeConnectionCallback = callback
   }
 
-  /**
-   * 更新 Vuex store 的连接状态
-   * @param {boolean} connected - 连接状态
-   */
   updateStoreConnectionState(connected) {
     if (this.storeConnectionCallback) {
       try {
@@ -187,39 +178,30 @@ class ImWebSocket {
           this.handlePong()
           break
         case MESSAGE_TYPE.MESSAGE:
-          // 聊天消息 - 批量处理
           this.bufferMessage('message', payload)
           break
         case MESSAGE_TYPE.MESSAGE_STATUS:
-          // 消息状态更新
           this.emit('message_status', payload)
           break
         case MESSAGE_TYPE.MESSAGE_ACK:
-          // 消息ACK确认
           this.emit('message_ack', payload)
           break
         case MESSAGE_TYPE.READ:
-          // 已读回执 - 批量处理
           this.bufferMessage('read', payload)
           break
         case MESSAGE_TYPE.TYPING:
-          // 正在输入 - 立即处理
           this.emit('typing', payload)
           break
         case MESSAGE_TYPE.ONLINE:
-          // 用户上线
           this.emit('online', payload)
           break
         case MESSAGE_TYPE.OFFLINE:
-          // 用户下线
           this.emit('offline', payload)
           break
         case MESSAGE_TYPE.CALL:
-          // 音视频通话
           this.emit('call', payload)
           break
         case MESSAGE_TYPE.REACTION:
-          // 表情回复
           this.emit('reaction', payload)
           break
         default:

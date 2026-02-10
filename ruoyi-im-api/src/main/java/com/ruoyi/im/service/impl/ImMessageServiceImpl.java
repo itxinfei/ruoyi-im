@@ -24,21 +24,18 @@ import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.AuditLogUtil;
 import com.ruoyi.im.util.BeanConvertUtil;
 import com.ruoyi.im.util.MessageEncryptionUtil;
-import com.ruoyi.im.listener.BotMessageListener;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import com.ruoyi.im.util.SecurityUtils;
 
 @Service
 public class ImMessageServiceImpl implements ImMessageService {
@@ -56,30 +53,24 @@ public class ImMessageServiceImpl implements ImMessageService {
     private final MessageEncryptionUtil encryptionUtil;
     private final ImMessageMentionService messageMentionService;
     private final ImMessageEditHistoryMapper editHistoryMapper;
-    private final com.ruoyi.im.util.ImDistributedLock distributedLock;
     private final com.ruoyi.im.util.ImRedisUtil redisUtil;
     private final com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
-    private final ImSystemConfigService systemConfigService;
-    private final ApplicationEventPublisher eventPublisher;
-    private final com.ruoyi.im.service.ImMessageRetryService retryService;
+    private final com.ruoyi.im.service.ImSystemConfigService systemConfigService;
 
     /**
-     * 构造器注入依赖
+     * 构造器注入依赖 - 简化后
      */
     public ImMessageServiceImpl(ImMessageMapper imMessageMapper,
-                                  ImUserService imUserService,
-                                  ImConversationMapper imConversationMapper,
-                                  ImConversationMemberMapper imConversationMemberMapper,
-                                  ImConversationService imConversationService,
-                                  MessageEncryptionUtil encryptionUtil,
-                                  ImMessageMentionService messageMentionService,
-                                  ImMessageEditHistoryMapper editHistoryMapper,
-                                  com.ruoyi.im.util.ImDistributedLock distributedLock,
-                                  com.ruoyi.im.util.ImRedisUtil redisUtil,
-                                  com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService,
-                                  ImSystemConfigService systemConfigService,
-                                  ApplicationEventPublisher eventPublisher,
-                                  @Lazy com.ruoyi.im.service.ImMessageRetryService retryService) {
+            ImUserService imUserService,
+            ImConversationMapper imConversationMapper,
+            ImConversationMemberMapper imConversationMemberMapper,
+            ImConversationService imConversationService,
+            MessageEncryptionUtil encryptionUtil,
+            ImMessageMentionService messageMentionService,
+            ImMessageEditHistoryMapper editHistoryMapper,
+            com.ruoyi.im.util.ImRedisUtil redisUtil,
+            com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService,
+            ImSystemConfigService systemConfigService) {
         this.imMessageMapper = imMessageMapper;
         this.imUserService = imUserService;
         this.imConversationMapper = imConversationMapper;
@@ -88,12 +79,9 @@ public class ImMessageServiceImpl implements ImMessageService {
         this.encryptionUtil = encryptionUtil;
         this.messageMentionService = messageMentionService;
         this.editHistoryMapper = editHistoryMapper;
-        this.distributedLock = distributedLock;
         this.redisUtil = redisUtil;
         this.broadcastService = broadcastService;
         this.systemConfigService = systemConfigService;
-        this.eventPublisher = eventPublisher;
-        this.retryService = retryService;
     }
 
     @Override
@@ -141,23 +129,17 @@ public class ImMessageServiceImpl implements ImMessageService {
             if (conversation == null) {
                 throw new BusinessException("会话不存在");
             }
-            
+
             // 权限检查：验证用户是否是会话成员
-            ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+            ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
+                    userId);
             if (member == null || (member.getIsDeleted() != null && member.getIsDeleted() == 1)) {
                 throw new BusinessException("您不是该会话成员，无法发送消息");
             }
         }
 
-        // 使用分布式锁防止并发发送消息导致的数据不一致
-        final Long finalConversationId = conversationId;
-        final String finalClientMsgId = clientMsgId;
-        ImMessageVO messageVO = distributedLock.executeWithLock(
-                com.ruoyi.im.util.ImDistributedLock.LockKeys.sendMessageKey(finalConversationId),
-                10, // 10秒过期时间足够
-                () -> doSendMessage(request, userId, finalConversationId, sender, finalClientMsgId));
-
-        return messageVO;
+        // 私有化部署：单机环境无需分布式锁，直接发送
+        return doSendMessage(request, userId, conversationId, sender, clientMsgId);
     }
 
     /**
@@ -165,7 +147,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 支持消息发送状态追踪和失败重试
      */
     private ImMessageVO doSendMessage(ImMessageSendRequest request, Long userId, Long conversationId,
-                                       ImUser sender, String clientMsgId) {
+            ImUser sender, String clientMsgId) {
         ImMessage message = null;
         try {
             // 1. 创建并保存消息
@@ -185,38 +167,22 @@ public class ImMessageServiceImpl implements ImMessageService {
             // 5. 处理@提及功能
             processMentions(request, conversationId, message.getId(), userId);
 
-            // 6. 记录审计日志
-            AuditLogUtil.logSendMessage(userId, message.getId(), conversationId, true);
-
-            // 7. 发布群组消息事件（触发机器人回复）
-            publishGroupMessageEvent(conversationId, message, sender);
-
-            // 8. 广播消息到会话成员
+            // 6. 广播消息到会话成员
             broadcastService.broadcastMessageToConversation(conversationId, message.getId(), sender);
 
             // 9. 更新消息状态为已送达
             updateMessageSendStatus(message.getId(), "DELIVERED", null);
 
-            // 10. 清除失败记录（如果是重试成功的消息）
-            if (clientMsgId != null && !clientMsgId.isEmpty()) {
-                retryService.clearFailureRecord(clientMsgId);
-            }
-
-            // 11. 构建返回VO
+            // 10. 构建返回VO
             return buildMessageVO(message, sender);
 
         } catch (Exception e) {
-            // 记录发送失败，触发重试机制
+            // 记录发送失败
             log.error("消息发送失败: clientMsgId={}, error={}", clientMsgId, e.getMessage(), e);
 
             // 如果消息已创建，更新状态为失败
             if (message != null && message.getId() != null) {
                 updateMessageSendStatus(message.getId(), "FAILED", e.getMessage());
-            }
-
-            // 记录失败信息用于重试
-            if (clientMsgId != null && !clientMsgId.isEmpty()) {
-                retryService.recordSendFailure(clientMsgId, request, userId, e.getMessage());
             }
 
             // 重新抛出异常，让上层处理
@@ -228,7 +194,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 创建并保存消息实体
      */
     private ImMessage createAndSaveMessage(ImMessageSendRequest request, Long userId, Long conversationId,
-                                           String clientMsgId) {
+            String clientMsgId) {
         ImMessage message = new ImMessage();
         message.setConversationId(conversationId);
         message.setSenderId(userId);
@@ -263,22 +229,17 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     /**
-     * 更新会话成员的未读计数
+     * 更新会话成员的未读计数 - 简化版：使用批量SQL更新
      */
     private void updateUnreadCount(Long conversationId, Long senderId) {
-        List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
-                .selectByConversationId(conversationId);
-        boolean shouldEvictCache = members.size() <= 20;
-
-        for (com.ruoyi.im.domain.ImConversationMember member : members) {
-            if (!member.getUserId().equals(senderId)) {
-                imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
-                if (shouldEvictCache) {
-                    redisUtil.delete("conversation:list:" + member.getUserId());
-                }
-            }
+        try {
+            // 批量更新未读数（一条SQL替代循环）
+            imConversationMemberMapper.incrementUnreadCountExcludeSender(conversationId, senderId);
+            // 清除缓存
+            redisUtil.delete("conversation:list:" + senderId);
+        } catch (Exception e) {
+            log.error("更新未读数失败: conversationId={}", conversationId, e);
         }
-        redisUtil.delete("conversation:list:" + senderId);
     }
 
     /**
@@ -298,31 +259,11 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     /**
-     * 发布群组消息事件（触发机器人自动回复）
-     */
-    private void publishGroupMessageEvent(Long conversationId, ImMessage message, ImUser sender) {
-        ImConversation conversation = imConversationMapper.selectById(conversationId);
-        if (conversation != null && StatusConstants.ConversationType.GROUP.equalsIgnoreCase(conversation.getType())) {
-            Long groupId = conversation.getTargetId();
-            if (groupId != null && "TEXT".equalsIgnoreCase(message.getMessageType())) {
-                try {
-                    String plainContent = encryptionUtil.decryptMessage(message.getContent());
-                    eventPublisher.publishEvent(
-                            new BotMessageListener.GroupMessageEvent(conversationId, groupId, sender.getId(), plainContent)
-                    );
-                } catch (Exception e) {
-                    log.error("发布群组消息事件失败: groupId={}", groupId, e);
-                }
-            }
-        }
-    }
-
-    /**
      * 更新消息发送状态
      *
-     * @param messageId   消息ID
-     * @param sendStatus  发送状态（SENDING/DELIVERED/FAILED）
-     * @param errorMsg    错误信息（失败时）
+     * @param messageId  消息ID
+     * @param sendStatus 发送状态（SENDING/DELIVERED/FAILED）
+     * @param errorMsg   错误信息（失败时）
      */
     private void updateMessageSendStatus(Long messageId, String sendStatus, String errorMsg) {
         try {
@@ -338,7 +279,8 @@ public class ImMessageServiceImpl implements ImMessageService {
                 // 增加重试计数
                 ImMessage existingMsg = imMessageMapper.selectImMessageById(messageId);
                 if (existingMsg != null) {
-                    int currentRetryCount = existingMsg.getSendRetryCount() != null ? existingMsg.getSendRetryCount() : 0;
+                    int currentRetryCount = existingMsg.getSendRetryCount() != null ? existingMsg.getSendRetryCount()
+                            : 0;
                     updateMsg.setSendRetryCount(currentRetryCount + 1);
                 }
             }
@@ -358,7 +300,8 @@ public class ImMessageServiceImpl implements ImMessageService {
         ImMessageVO vo = new ImMessageVO();
         BeanConvertUtil.copyProperties(message, vo);
         vo.setContent(plainContent);
-        vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
+        vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase()
+                : MessageStatusConstants.MESSAGE_TYPE_TEXT);
         vo.setIsSelf(true);
         vo.setSenderName(sender.getNickname());
         vo.setSenderAvatar(sender.getAvatar());
@@ -403,7 +346,8 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 验证用户是否有权访问会话消息
      */
     private void validateConversationAccess(Long conversationId, Long userId) {
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
+                userId);
         if (member == null || (member.getIsDeleted() != null && member.getIsDeleted() == 1)) {
             throw new BusinessException("无权查看该会话消息");
         }
@@ -479,7 +423,7 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 构建消息VO列表
      */
     private List<ImMessageVO> buildMessageVOList(List<ImMessage> messageList,
-                                                  MessageBatchData batchData, Long userId) {
+            MessageBatchData batchData, Long userId) {
         List<ImMessageVO> voList = new ArrayList<>();
 
         for (ImMessage message : messageList) {
@@ -489,7 +433,8 @@ public class ImMessageServiceImpl implements ImMessageService {
             // 解密内容
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
             vo.setContent(decryptedContent);
-            vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
+            vo.setType(message.getMessageType() != null ? message.getMessageType().toUpperCase()
+                    : MessageStatusConstants.MESSAGE_TYPE_TEXT);
 
             // 设置发送者信息
             ImUser sender = batchData.userMap.get(message.getSenderId());
@@ -561,7 +506,8 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
         quotedMessage.setId(originalMessage.getId());
-        quotedMessage.setType(originalMessage.getMessageType() != null ? originalMessage.getMessageType().toUpperCase() : MessageStatusConstants.MESSAGE_TYPE_TEXT);
+        quotedMessage.setType(originalMessage.getMessageType() != null ? originalMessage.getMessageType().toUpperCase()
+                : MessageStatusConstants.MESSAGE_TYPE_TEXT);
         quotedMessage.setSendTime(originalMessage.getCreateTime());
 
         // 从预加载的Map中获取发送者信息
@@ -777,7 +723,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public java.util.List<Long> batchForwardMessages(java.util.List<Long> messageIds, Long toConversationId,
-                                                        String forwardType, String content, Long userId) {
+            String forwardType, String content, Long userId) {
         if ("combine".equals(forwardType)) {
             // 合并转发：创建一条聊天记录类型的消息
             return combineForwardMessages(messageIds, toConversationId, content, userId);
@@ -791,8 +737,8 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 逐条转发消息
      */
     private java.util.List<Long> batchForwardMessagesIndividually(java.util.List<Long> messageIds,
-                                                                  Long toConversationId,
-                                                                  String content, Long userId) {
+            Long toConversationId,
+            String content, Long userId) {
         java.util.List<Long> newMessageIds = new java.util.ArrayList<>();
         for (Long messageId : messageIds) {
             Long newId = forwardMessage(messageId, toConversationId, null, content, userId);
@@ -806,8 +752,8 @@ public class ImMessageServiceImpl implements ImMessageService {
      * 将多条消息合并为一条聊天记录类型的消息
      */
     private java.util.List<Long> combineForwardMessages(java.util.List<Long> messageIds,
-                                                         Long toConversationId,
-                                                         String content, Long userId) {
+            Long toConversationId,
+            String content, Long userId) {
         // 获取所有原始消息
         java.util.List<ImMessage> originalMessages = imMessageMapper.selectBatchIds(messageIds);
         if (originalMessages == null || originalMessages.isEmpty()) {
@@ -1048,7 +994,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     private ImMessageVO convertToVO(ImMessage message) {
         ImMessageVO vo = new ImMessageVO();
         BeanConvertUtil.copyProperties(message, vo);
-        
+
         // 解密消息内容
         if (message.getContent() != null) {
             try {
@@ -1058,7 +1004,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                 vo.setContent("[加密消息]");
             }
         }
-        
+
         return vo;
     }
 
@@ -1116,19 +1062,24 @@ public class ImMessageServiceImpl implements ImMessageService {
         java.util.Map<String, Object> stats = new java.util.HashMap<>();
 
         // 统计各类型消息数量
-        int totalMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, false, false, false);
+        int totalMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, false, false,
+                false);
         stats.put("totalMessages", totalMessages);
 
-        int textMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_TEXT, null, startTime, endTime, false, false, false);
+        int textMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_TEXT,
+                null, startTime, endTime, false, false, false);
         stats.put("textMessages", textMessages);
 
-        int imageMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_IMAGE, null, startTime, endTime, false, false, false);
+        int imageMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_IMAGE,
+                null, startTime, endTime, false, false, false);
         stats.put("imageMessages", imageMessages);
 
-        int fileMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_FILE, null, startTime, endTime, false, false, false);
+        int fileMessages = imMessageMapper.countSearchResults(null, null, MessageStatusConstants.MESSAGE_TYPE_FILE,
+                null, startTime, endTime, false, false, false);
         stats.put("fileMessages", fileMessages);
 
-        int revokedMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, true, false, false);
+        int revokedMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, true,
+                false, false);
         stats.put("revokedMessages", revokedMessages);
 
         return stats;
@@ -1138,7 +1089,8 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Transactional(rollbackFor = Exception.class)
     public void clearConversationMessages(Long conversationId, Long userId) {
         // 验证用户是否有权限访问该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
+                userId);
         if (member == null) {
             throw new BusinessException("NO_PERMISSION", "无权限访问该会话");
         }
@@ -1150,9 +1102,11 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
-    public List<ImMessageVO> getMessagesByCategory(Long conversationId, String category, Long userId, Long lastId, Integer limit) {
+    public List<ImMessageVO> getMessagesByCategory(Long conversationId, String category, Long userId, Long lastId,
+            Integer limit) {
         // 验证用户是否有权限访问该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
+                userId);
         if (member == null) {
             throw new BusinessException("NO_PERMISSION", "无权限访问该会话");
         }

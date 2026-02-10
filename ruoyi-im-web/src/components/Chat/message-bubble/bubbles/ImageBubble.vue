@@ -294,7 +294,7 @@ onUnmounted(() => {
   pointer-events: none;
   opacity: 0;
   filter: blur(10px);
-  transition: opacity 0.4s ease, filter 0.4s ease;
+  transition: opacity var(--dt-transition-slow) var(--dt-ease-out), filter var(--dt-transition-slow) var(--dt-ease-out);
 
   &.loaded {
     opacity: 1;
@@ -400,7 +400,7 @@ onUnmounted(() => {
 
 .progress-text {
   position: absolute;
-  color: #fff;
+  color: var(--dt-text-inverse);
   font-size: 13px;
   font-weight: 600;
 }

@@ -355,16 +355,14 @@
         SELECT id, conversation_id, sender_id, content, message_type,
                create_time, update_time, is_revoked, is_edited
         FROM im_message
-        WHERE conversation_id IN
-        <foreach collection="conversationIds" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        AND id IN (
+        WHERE id IN (
             SELECT MAX(id) FROM im_message
             WHERE conversation_id IN
             <foreach collection="conversationIds" item="id" open="(" separator="," close=")">
                 #{id}
             </foreach>
+            AND is_revoked = 0
+            AND is_deleted = 0
             GROUP BY conversation_id
         )
     </select>

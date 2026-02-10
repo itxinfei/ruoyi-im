@@ -279,11 +279,10 @@ function escapeRegExp(string) {
 
 .text-bubble {
   position: relative;
-  // 钉钉/野火IM标准：气泡进入动画
-  animation: bubbleIn 0.3s var(--dt-ease-out-bounce) both;
 }
 
 .text-content {
+  padding: 12px;
   word-break: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
@@ -350,7 +349,7 @@ function escapeRegExp(string) {
   }
 
   // 己方消息内的链接和提及样式调整为白色
-  :deep(.is-own) & {
+  :deep(.is-right) & {
     a {
       color: var(--dt-text-primary-inverted);
 
@@ -461,19 +460,6 @@ function escapeRegExp(string) {
   .message-pinned-badge {
     background: var(--dt-brand-bg-dark);
     color: var(--dt-brand-color-light);
-  }
-}
-
-// 气泡进入动画 - 钉钉风格
-@keyframes bubbleIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.8) translateY(10px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
   }
 }
 </style>

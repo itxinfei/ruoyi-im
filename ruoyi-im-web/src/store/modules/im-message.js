@@ -35,18 +35,18 @@ export const SEND_STATUS = {
  * 发送队列配置
  */
 export const SENDING_QUEUE_CONFIG = {
-  MAX_QUEUE_SIZE: 100, // 最大队列长度（防止内存溢出和滥用）
-  CLEANUP_INTERVAL: 60 * 1000, // 清理间隔：1分钟
-  EXPIRED_TIME: 10 * 60 * 1000 // 过期时间：10分钟
+  MAX_QUEUE_SIZE: 100,
+  CLEANUP_INTERVAL: 60 * 1000,
+  EXPIRED_TIME: 10 * 60 * 1000
 }
 
 /**
  * 离线消息队列配置
  */
 export const OFFLINE_QUEUE_CONFIG = {
-  MAX_QUEUE_SIZE: 500, // 最大离线消息数量
-  FLUSH_INTERVAL: 5000, // 离线消息刷新间隔（毫秒）
-  MAX_RETRY_TIMES: 3 // 失败重试次数
+  MAX_QUEUE_SIZE: 500,
+  FLUSH_INTERVAL: 5000,
+  MAX_RETRY_TIMES: 3
 }
 
 /**
@@ -695,8 +695,14 @@ export default {
     },
 
     // 标记消息为已读
-    async markMessageAsRead({ commit }, { conversationId, messageId }) {
+    async markMessageAsRead({ commit, rootState }, { conversationId, messageId }) {
       await markAsRead({ conversationId, messageId })
+      
+      // 发送消息级别的已读确认
+      if (messageId) {
+        imWebSocket.sendAck(messageId, 'read', rootState.im?.deviceId)
+      }
+
       commit('im/session/UPDATE_SESSION', {
         id: conversationId,
         unreadCount: 0
@@ -834,9 +840,7 @@ export default {
     },
 
     // 处理消息 ACK 确认（WebSocket 推送）
-    // 当其他设备确认接收/读取消息时更新消息状态
     handleMessageAck({ commit, rootState }, { messageId, ackType }) {
-      // 遍历所有会话查找该消息
       for (const sessionId in rootState.message.messages) {
         const messages = rootState.message.messages[sessionId]
         const index = messages.findIndex(m => m.id === messageId)
@@ -845,11 +849,9 @@ export default {
           const message = messages[index]
           let newStatus = message.sendStatus
 
-          // 根据 ACK 类型更新消息状态
           if (ackType === 'read') {
             newStatus = SEND_STATUS.READ
           } else if (ackType === 'receive') {
-            // 如果当前状态是发送中，更新为已送达
             if (message.sendStatus === SEND_STATUS.SENDING || message.sendStatus === SEND_STATUS.PENDING) {
               newStatus = SEND_STATUS.DELIVERED
             }

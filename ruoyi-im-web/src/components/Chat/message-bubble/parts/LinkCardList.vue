@@ -50,7 +50,7 @@ const truncateUrl = url => {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 12px;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);

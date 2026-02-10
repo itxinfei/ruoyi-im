@@ -3,12 +3,11 @@ package com.ruoyi.im.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.im.domain.ImMessageAck;
 import com.ruoyi.im.mapper.ImMessageAckMapper;
-import com.ruoyi.im.mapper.ImUserDeviceMapper;
+import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.ImMessageAckService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.vo.message.MessageAckVO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,15 +29,15 @@ import java.util.stream.Collectors;
 public class ImMessageAckServiceImpl implements ImMessageAckService {
 
     private final ImMessageAckMapper ackMapper;
-    private final ImUserDeviceMapper deviceMapper;
     private final ImWebSocketBroadcastService broadcastService;
+    private final ImMessageMapper messageMapper;
 
     public ImMessageAckServiceImpl(ImMessageAckMapper ackMapper,
-                                   ImUserDeviceMapper deviceMapper,
-                                   ImWebSocketBroadcastService broadcastService) {
+            ImWebSocketBroadcastService broadcastService,
+            ImMessageMapper messageMapper) {
         this.ackMapper = ackMapper;
-        this.deviceMapper = deviceMapper;
         this.broadcastService = broadcastService;
+        this.messageMapper = messageMapper;
     }
 
     @Override
@@ -59,6 +58,15 @@ public class ImMessageAckServiceImpl implements ImMessageAckService {
 
         ackMapper.insert(ack);
         log.debug("记录送达ACK: messageId={}, clientMsgId={}", messageId, clientMsgId);
+
+        // 广播给用户的其他设备
+        Map<String, Object> ackMessage = new HashMap<>();
+        ackMessage.put("type", "message_ack");
+        ackMessage.put("messageId", messageId);
+        ackMessage.put("clientMsgId", clientMsgId);
+        ackMessage.put("ackType", ImMessageAck.ACK_TYPE_DELIVER);
+        ackMessage.put("timestamp", System.currentTimeMillis());
+        broadcastService.broadcastToUserExcept(userId, ackMessage);
     }
 
     @Override
@@ -87,13 +95,19 @@ public class ImMessageAckServiceImpl implements ImMessageAckService {
         ackMapper.insert(ack);
         log.info("记录接收ACK: messageId={}, userId={}, deviceId={}", messageId, userId, deviceId);
 
-        // 广播接收确认给其他设备
+        // 1. 广播给接收者的其他设备
         Map<String, Object> ackMessage = new HashMap<>();
         ackMessage.put("type", "message_ack");
         ackMessage.put("messageId", messageId);
         ackMessage.put("ackType", ImMessageAck.ACK_TYPE_RECEIVE);
         ackMessage.put("timestamp", System.currentTimeMillis());
         broadcastService.broadcastToUserExcept(userId, ackMessage);
+
+        // 2. 广播给发送者（通过会话广播）
+        com.ruoyi.im.domain.ImMessage message = messageMapper.selectImMessageById(messageId);
+        if (message != null) {
+            broadcastMessageAck(message.getConversationId(), messageId, userId);
+        }
     }
 
     @Override
@@ -119,6 +133,20 @@ public class ImMessageAckServiceImpl implements ImMessageAckService {
 
         ackMapper.insert(ack);
         log.info("记录已读ACK: messageId={}, userId={}", messageId, userId);
+
+        // 1. 广播给用户的其他设备
+        Map<String, Object> ackMessage = new HashMap<>();
+        ackMessage.put("type", "message_ack");
+        ackMessage.put("messageId", messageId);
+        ackMessage.put("ackType", ImMessageAck.ACK_TYPE_READ);
+        ackMessage.put("timestamp", System.currentTimeMillis());
+        broadcastService.broadcastToUserExcept(userId, ackMessage);
+
+        // 2. 广播给发送者
+        com.ruoyi.im.domain.ImMessage message = messageMapper.selectImMessageById(messageId);
+        if (message != null) {
+            broadcastMessageAck(message.getConversationId(), messageId, userId);
+        }
     }
 
     @Override
@@ -155,13 +183,29 @@ public class ImMessageAckServiceImpl implements ImMessageAckService {
         }
 
         Map<String, Object> ackMsg = new HashMap<>();
-        ackMsg.put("type", "message_ack_sync");
+        ackMsg.put("type", "message_ack"); // 统一使用 message_ack 类型
         ackMsg.put("conversationId", conversationId);
         ackMsg.put("messageId", messageId);
+        ackMsg.put("ackType", getAckType(messageId, excludeUserId)); // 自动获取 ACK 类型
         ackMsg.put("timestamp", System.currentTimeMillis());
 
         broadcastService.broadcastToConversationExcept(conversationId, excludeUserId, ackMsg);
         log.debug("广播消息ACK: conversationId={}, messageId={}", conversationId, messageId);
+    }
+
+    /**
+     * 获取指定用户对消息的最新 ACK 类型
+     */
+    private String getAckType(Long messageId, Long userId) {
+        int readCount = ackMapper.countAck(messageId, userId, ImMessageAck.ACK_TYPE_READ);
+        if (readCount > 0) {
+            return ImMessageAck.ACK_TYPE_READ;
+        }
+        int receiveCount = ackMapper.countAck(messageId, userId, ImMessageAck.ACK_TYPE_RECEIVE);
+        if (receiveCount > 0) {
+            return ImMessageAck.ACK_TYPE_RECEIVE;
+        }
+        return ImMessageAck.ACK_TYPE_DELIVER;
     }
 
     @Override
@@ -171,14 +215,6 @@ public class ImMessageAckServiceImpl implements ImMessageAckService {
         } else if ("read".equals(ackType)) {
             recordReadAck(messageId, userId);
         }
-    }
-
-    /**
-     * 广播ACK到用户的其他设备
-     */
-    private void syncAckToOtherDevices(Long userId, String messageId, String ackType) {
-        // 简化处理:当前未实际推送到设备
-        // TODO: 实现WebSocket推送到特定设备的逻辑
     }
 
     /**

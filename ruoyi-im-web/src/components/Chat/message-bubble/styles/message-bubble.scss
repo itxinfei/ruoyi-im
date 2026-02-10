@@ -24,7 +24,7 @@
 
 // 气泡内容基础样式
 .bubble-content {
-  padding: 10px 12px; // 钉钉标准：保持紧凑
+  padding: 12px; // 统一 padding 为 12px
   border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-base);
   line-height: 1.4; // 钉钉标准：保持 1.4 行高
@@ -39,12 +39,12 @@
 // 对方消息样式（钉钉：左尖右圆）
 // ============================================================================
 
-.message-bubble:not(.is-own) {
+.message-bubble:not(.is-right) {
   .bubble-content {
     background: var(--dt-bubble-left-bg);
     border: 1px solid var(--dt-bubble-left-border);
     // 钉钉标准：左上4px 左下4px 右上12px 右下12px
-    border-radius: var(--dt-radius-sm) var(--dt-radius-lg) var(--dt-radius-lg) var(--dt-radius-sm);
+    border-radius: var(--dt-radius-bubble-left);
   }
 
   &:hover .bubble-content {
@@ -56,7 +56,7 @@
 // 自己消息样式（钉钉：左圆右尖）
 // ============================================================================
 
-.message-bubble.is-own {
+.message-bubble.is-right {
   flex-direction: row-reverse;
 
   .bubble-content {
@@ -170,16 +170,6 @@
   }
 }
 
-// 进度条描边动画
-@keyframes spinSvgStroke {
-  0% {
-    stroke-dashoffset: 100;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
 // ============================================================================
 // 加载状态样式
 // ============================================================================
@@ -218,7 +208,7 @@
 
 // 钉钉风格：文件消息样式优化
 .message-bubble.type-file .bubble-content {
-  padding: 12px 16px;
+  padding: 12px;
 }
 
 // 未知类型
@@ -233,25 +223,25 @@
 
 :global(.dark) {
   // 对方消息：深灰背景
-  .message-bubble:not(.is-own) .bubble-content {
+  .message-bubble:not(.is-right) .bubble-content {
     background: #2a2a2a;
     border-color: #3a3a3a;
     color: #e8e8e8;
   }
 
   // 自己消息：钉钉蓝（暗模式下稍亮）
-  .message-bubble.is-own .bubble-content {
+  .message-bubble.is-right .bubble-content {
     background: #0089FF;
     color: #FFFFFF;
   }
 
   // 悬停状态
-  .message-bubble:not(.is-own):hover .bubble-content {
+  .message-bubble:not(.is-right):hover .bubble-content {
     background: #333333;
     border-color: #444444;
   }
 
-  .message-bubble.is-own:hover .bubble-content {
+  .message-bubble.is-right:hover .bubble-content {
     background: #1A9FFF;
   }
 }
@@ -259,37 +249,8 @@
 // ============================================================================
 // 长按脉冲动画
 // ============================================================================
-
-@keyframes longPressPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-// ============================================================================
 // 撤回动画
 // ============================================================================
-
-@keyframes messageRecall {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-}
 
 // 撤回消息动画类
 .message-recalling {
@@ -300,22 +261,8 @@
 // 表情回应动画
 // ============================================================================
 
-@keyframes reactionPop {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
 .reaction-item {
-  animation: reactionPop 0.25s var(--dt-ease-bounce);
+  animation: scaleInBounce 0.25s var(--dt-ease-bounce);
 }
 
 // ============================================================================

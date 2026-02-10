@@ -62,7 +62,6 @@ public class ImWebSocketEndpoint {
     private static ImMessageAckService staticMessageAckService;
     private static ImConversationSyncService staticConversationSyncService;
     private static boolean staticSecurityEnabled;
-    // staticDevUserId 已删除,未使用
 
     @Autowired
     public void setImMessageService(ImMessageService imMessageService) {
@@ -218,41 +217,12 @@ public class ImWebSocketEndpoint {
                 sessionUserMap.put(session, userId);
             }
 
-            // 同步更新Redis中的在线状态
+            // 同步更新Redis中的在线状态 - 简化版
             if (staticImRedisUtil != null) {
                 staticImRedisUtil.addOnlineUser(userId);
-                // 记录会话信息
-                staticImRedisUtil.recordSessionInfo(userId, serverId, session.getId(), clientInfo);
-                // 清除断线信息（如果有的话）
-                staticImRedisUtil.clearDisconnectInfo(userId);
             }
 
-            // 注册设备（从查询参数获取设备信息）
-            if (staticDeviceService != null) {
-                String deviceId = extractParamFromQuery(queryString, "deviceId");
-                String deviceType = extractParamFromQuery(queryString, "deviceType");
-                String deviceName = extractParamFromQuery(queryString, "deviceName");
-                String clientVersion = extractParamFromQuery(queryString, "clientVersion");
-                String osVersion = extractParamFromQuery(queryString, "osVersion");
-
-                // 如果没有提供deviceId，生成一个默认的
-                if (deviceId == null || deviceId.isEmpty()) {
-                    deviceId = "web_" + session.getId();
-                }
-
-                // 如果没有提供deviceType，默认为web
-                if (deviceType == null || deviceType.isEmpty()) {
-                    deviceType = "web";
-                }
-
-                // 获取客户端IP
-                String ipAddress = extractClientIpFromSession(session);
-
-                staticDeviceService.registerDevice(userId, deviceId, deviceType, deviceName,
-                        clientVersion, osVersion, ipAddress);
-            }
-
-            log.info("用户上线: userId={}, sessionId={}, serverId={}", userId, session.getId(), serverId);
+            log.info("用户上线: userId={}, sessionId={}", userId, session.getId());
 
             // 广播用户上线消息
             if (staticBroadcastService != null) {
@@ -411,20 +381,9 @@ public class ImWebSocketEndpoint {
             }
 
             if (userId != null && userId != -1L) { // -1 表示未认证，不需要广播离线消息
-                // 设置设备离线
-                if (staticDeviceService != null) {
-                    String deviceId = extractDeviceIdFromSession(session);
-                    if (deviceId != null) {
-                        staticDeviceService.setDeviceOffline(userId, deviceId);
-                    }
-                }
-
-                // 同步更新Redis中的在线状态
+                // 同步更新Redis中的在线状态 - 简化版
                 if (staticImRedisUtil != null) {
                     staticImRedisUtil.removeOnlineUser(userId);
-                    staticImRedisUtil.removeSessionInfo(userId);
-                    // 记录断线信息
-                    staticImRedisUtil.recordDisconnectInfo(userId, "client_close", System.currentTimeMillis());
                 }
 
                 log.info("用户离线: userId={}, sessionId={}", userId, session.getId());

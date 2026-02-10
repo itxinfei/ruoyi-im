@@ -79,7 +79,7 @@ const hasReactions = computed(() => reactions.value.length > 0)
   border-radius: 12px;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-base);
   border: 1px solid transparent;
 
   .reaction-emoji {
@@ -113,18 +113,6 @@ const hasReactions = computed(() => reactions.value.length > 0)
       color: var(--dt-brand-color);
       font-weight: 600;
     }
-  }
-}
-
-@keyframes bounce {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.3);
   }
 }
 

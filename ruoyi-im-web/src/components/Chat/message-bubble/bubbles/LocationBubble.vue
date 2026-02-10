@@ -74,16 +74,16 @@ const openLocation = () => {
   gap: 12px;
   min-width: 200px;
   max-width: 320px;
-  padding: 12px 16px;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  padding: 12px;
+  background: var(--dt-brand-bg);
+  border: 1px solid var(--dt-brand-light);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all var(--dt-transition-base);
 
   &:hover {
     border-color: var(--dt-brand-color);
-    background: #e0f2fe;
+    background: var(--dt-brand-light);
     transform: translateY(-1px);
     box-shadow: var(--dt-shadow-card);
   }
@@ -95,9 +95,9 @@ const openLocation = () => {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-brand-hover));
   border-radius: 50%;
-  color: #fff;
+  color: var(--dt-text-inverse);
   flex-shrink: 0;
   transition: transform var(--dt-transition-fast);
 
@@ -134,7 +134,7 @@ const openLocation = () => {
 }
 
 .location-arrow {
-  color: #0ea5e9;
+  color: var(--dt-brand-color);
   flex-shrink: 0;
 
   .material-icons-outlined {

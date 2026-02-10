@@ -454,7 +454,7 @@ const messageLinks = computed(() => {
 const bubbleClasses = computed(() => {
   const type = (props.message.type || 'text').toLowerCase()
   return {
-    'is-own': props.message.isOwn,
+    'is-right': props.message.isOwn,
     'is-selected': isSelected.value,
     'is-long-press': isLongPressing.value,
     [`type-${type}`]: true
@@ -473,235 +473,124 @@ const canRecall = computed(() => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
-@use '@/styles/im-design-system.scss' as *;
 
-// 包装器
 .message-bubble-wrapper {
   position: relative;
   display: inline-flex;
-  max-width: 100%; // 限制父容器宽度
+  max-width: 100%;
 }
 
 .message-bubble {
   position: relative;
   display: inline-flex;
-  align-items: center; // 垂直居中，与头像对齐
-  max-width: min(520px, 70%); // 响应式最大宽度（野火IM标准）
-  width: fit-content; // 根据内容自适应宽度
-  min-width: 0; // 允许 flex 子项收缩
-  // GPU 加速动画性能优化
+  align-items: center;
+  max-width: min(520px, 100%);
+  width: fit-content;
+  min-width: 0;
   contain: layout style paint;
-  animation: bubblePop 0.3s var(--dt-ease-bounce);
-  // 动画结束后移除性能提示
-  animation-fill-mode: both;
-  margin-top: 0;
-  padding-top: 0;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .bubble-content {
-  padding: 10px 14px; // 钉钉/野火IM标准: 紧凑舒适的内边距
-  border-radius: 12px; // 钉钉风格圆角
-  font-size: 14px; // 标准字体大小
-  line-height: 1.5; // 舒适的行高
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.5;
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
   min-width: 0;
-  transition: all 0.2s ease;
   display: flex;
   align-items: flex-start;
-
-  // 防止长链接溢出
-  :deep(a) {
-    word-break: break-all;
-    max-width: 100%;
-    overflow-wrap: break-word;
-  }
-
-  // 防止代码块溢出
-  :deep(pre) {
-    max-width: 100%;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-
-  // 防止图片溢出
-  :deep(img) {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  // 防止表格溢出
-  :deep(table) {
-    max-width: 100%;
-    overflow-x: auto;
-    table-layout: fixed;
-  }
 }
 
-// 对方消息样式 - 钉钉/野火IM风格
-.message-bubble:not(.is-own) {
+// 对方消息样式 (左侧)
+.message-bubble:not(.is-right) {
   .bubble-content {
-    // 钉钉/野火IM: 白色背景，带微阴影
-    background: #ffffff;
-    // 微妙边框
-    border: 1px solid #e8e8e8;
-    // 非对称圆角：靠近头像一侧圆角较小（左侧4px）
-    border-radius: 12px 12px 12px 4px;
-    // 文字颜色
-    color: #1f2329;
-    // 钉钉风格阴影：微妙的立体感
-    box-shadow: var(--dt-shadow-1), var(--dt-shadow-2);
-    // 微妙的悬停效果
-    &:hover {
-      box-shadow: var(--dt-shadow-3);
-      transform: translateY(-1px);
-    }
+    background: #FFFFFF;
+    border: 1px solid #E4E7ED;
+    border-radius: 2px 14px 14px 14px;
+    color: var(--dt-text-primary);
   }
 }
 
-// 己方消息样式 - 钉钉/野火IM风格
-.message-bubble.is-own {
+// 己方消息样式 (右侧)
+.message-bubble.is-right {
   flex-direction: row-reverse;
 
   .bubble-content {
-    // 钉钉: 蓝色渐变背景
-    background: linear-gradient(135deg, #0089ff 0%, #0066cc 100%);
-    // 白色文字
-    color: #ffffff;
-    // 无边框
+    background: var(--dt-brand-color);
+    color: #FFFFFF;
     border: none;
-    // 非对称圆角：靠近头像一侧圆角较小（右侧4px）
-    border-radius: 12px 12px 4px 12px;
-    // 钉钉风格蓝色阴影
-    box-shadow: var(--dt-shadow-brand-light);
-    // 微妙的悬停效果
-    &:hover {
-      background: var(--dt-brand-gradient);
-      filter: brightness(1.05);
-      box-shadow: var(--dt-shadow-brand-strong);
-    }
+    border-radius: 14px 2px 14px 14px;
   }
 
-  // 确保所有子元素文字颜色都是白色
   :deep(.message-text),
   :deep(.message-content),
-  :deep(.link-content),
   :deep(.text-content) {
-    color: #ffffff !important;
+    color: #FFFFFF !important;
   }
 
   :deep(a) {
-    color: var(--dt-bubble-right-text) !important;
-    font-weight: 500;
+    color: #FFFFFF !important;
     text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
-  }
-
-  // 链接预览卡片样式
-  :deep(.link-preview-card) {
-    background: var(--dt-white-15);
-    border-color: var(--dt-white-20);
-
-    .link-title,
-    .link-desc {
-      color: var(--dt-bubble-right-text) !important;
-    }
+    opacity: 0.95;
   }
 }
 
 // 选中状态
 .message-bubble.is-selected .bubble-content {
-  border: 2px solid var(--dt-brand-color) !important;
-  box-shadow: 0 0 0 3px var(--dt-brand-light) !important;
+  border: 2px solid var(--dt-brand-color);
 }
 
-// 长按状态
-.message-bubble.is-long-press {
-  animation: longPressPulse 0.3s ease-in-out;
-}
-
-// 图片消息：透明背景，无边框
+// 图片消息
 .message-bubble.type-image .bubble-content {
   padding: 4px;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+  background: #fff !important;
+  border: 1px solid #E4E7ED !important;
+  border-radius: 8px;
 }
 
 // 视频消息
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: var(--dt-radius-md);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-// 系统消息
-.message-bubble.type-system .bubble-content,
-.message-bubble.type-recalled .bubble-content {
-  background: transparent;
-  padding: 0;
-  border: none;
-  box-shadow: none;
-}
+// 系统消息 & 撤回消息
+.message-bubble.type-system,
+.message-bubble.type-recalled {
+  width: 100%;
+  justify-content: center;
+  margin: 12px 0;
 
-// 文件消息 - 野火IM/钉钉风格
-.message-bubble.type-file .bubble-content {
-  padding: 12px 16px;
-}
-
-// 暗色模式适配 - 钉钉/野火IM风格
-:global(.dark) {
-  // 对方消息: 深灰背景
-  .message-bubble:not(.is-own) .bubble-content {
-    background: var(--dt-bg-tertiary-dark);
-    border-color: var(--dt-bg-dark-border);
-    color: var(--dt-text-dark-mode);
-    box-shadow: var(--dt-black-20);
-
-    &:hover {
-      box-shadow: var(--dt-black-20);
-      transform: translateY(-1px);
-    }
-  }
-
-  // 己方消息: 保持蓝色渐变
-  .message-bubble.is-own .bubble-content {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    color: #ffffff;
-    box-shadow: var(--dt-shadow-brand);
-
-    &:hover {
-      filter: brightness(1.08);
-      box-shadow: var(--dt-shadow-brand-strong);
-    }
+  .bubble-content {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0;
+    color: var(--dt-text-quaternary);
+    font-size: 12px;
   }
 }
 
-// 气泡进入动画 - 钉钉风格
-@keyframes bubblePop {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(8px);
+// 暗色模式
+.dark {
+  .message-bubble:not(.is-right) .bubble-content {
+    background: #2A2D35;
+    border-color: #3F424A;
+    color: #E2E4E9;
   }
 
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-// 长按脉冲动画
-@keyframes longPressPulse {
-  0%, 100% {
-    transform: scale(1);
+  .message-bubble.is-right .bubble-content {
+    background: var(--dt-brand-color);
   }
 
-  50% {
-    transform: scale(1.02);
+  .message-bubble.type-image .bubble-content {
+    background: #1A1D24 !important;
+    border-color: #3F424A !important;
   }
 }
 </style>
+

@@ -158,16 +158,11 @@ const handleImageError = e => {
 
   &:hover {
     border-color: #4168e0; // 野火IM蓝
-    box-shadow: 0 2px 8px var(--dt-brand-extra-light);
 
     .link-arrow {
       opacity: 1;
       color: #4168e0;
     }
-  }
-
-  &:active {
-    transform: scale(0.99);
   }
 }
 

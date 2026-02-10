@@ -177,31 +177,26 @@ const handleClick = async () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  padding: 12px;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-base);
   min-width: 240px;
   max-width: 400px;
 
   &:hover {
-    border-color: #4168e0;
-    box-shadow: var(--dt-shadow-brand-light);
+    border-color: var(--dt-brand-color);
 
     .file-action {
       opacity: 1;
       transform: translateX(0);
     }
-
-    .file-icon .el-icon {
-      transform: scale(1.05);
-    }
   }
 
   &.is-downloading {
-    border-color: #4168e0;
+    border-color: var(--dt-brand-color);
     background: var(--dt-brand-lighter);
     cursor: wait;
 
@@ -226,8 +221,7 @@ const handleClick = async () => {
 
   .el-icon {
     font-size: 32px;
-    color: #4168e0;
-    transition: transform 0.2s;
+    color: var(--dt-brand-color);
   }
 
   .progress-ring {
@@ -260,7 +254,7 @@ const handleClick = async () => {
 .file-name {
   font-weight: 600;
   font-size: 14px;
-  color: #333;
+  color: var(--dt-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -268,7 +262,7 @@ const handleClick = async () => {
 
 .file-meta {
   font-size: 12px;
-  color: #999;
+  color: var(--dt-text-tertiary);
 }
 
 .file-action {
@@ -277,9 +271,9 @@ const handleClick = async () => {
   justify-content: center;
   width: 28px;
   height: 28px;
-  color: #999;
+  color: var(--dt-text-tertiary);
   opacity: 0.6;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-base);
   transform: translateX(4px);
   flex-shrink: 0;
 
@@ -289,40 +283,18 @@ const handleClick = async () => {
 
   &.is-spinning .el-icon {
     animation: spin 1s linear infinite;
-    color: #4168e0;
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.6;
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
+    color: var(--dt-brand-color);
   }
 }
 
 // 暗色模式
 :global(.dark) {
   .file-bubble {
-    background: #1e1e1e;
-    border-color: #374151;
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-light);
 
     &:hover {
-      border-color: #4168e0;
+      border-color: var(--dt-brand-color);
     }
 
     &.is-downloading {
@@ -331,11 +303,11 @@ const handleClick = async () => {
   }
 
   .file-name {
-    color: #e8e8e8;
+    color: var(--dt-text-primary-dark);
   }
 
   .file-meta {
-    color: #6b7280;
+    color: var(--dt-text-secondary-dark);
   }
 }
 </style>

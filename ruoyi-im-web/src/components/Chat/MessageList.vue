@@ -146,14 +146,13 @@
                 </div>
               </div>
             </el-popover>
-            <!-- 单聊：只显示已读/未读 -->
-            <span
+            <!-- 单聊：使用状态指示器（显示已送达、已读等状态） -->
+            <MessageStatusIndicator
               v-else-if="sessionType === 'PRIVATE'"
-              class="read-status-simple"
-              :class="{ read: msg.isRead || msg.readCount > 0, unread: !msg.isRead && msg.readCount === 0 }"
-            >
-              {{ msg.isRead || msg.readCount > 0 ? '已读' : '未读' }}
-            </span>
+              :status="msg.status || (msg.isRead ? 'read' : 'delivered')"
+              :message-id="msg.id"
+              @retry="$emit('retry', msg)"
+            />
             <!-- 无已读数据时显示未读 -->
             <span
               v-else
@@ -200,6 +199,7 @@ import { ArrowDown, User } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { sendNudge } from '@/api/im/nudge'
 import MessageItem from './MessageItemRefactored.vue'
+import MessageStatusIndicator from './MessageStatusIndicator.vue'
 // 使用重构后的消息气泡组件
 import MessageBubble from './MessageBubbleRefactored.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -757,9 +757,9 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px;
+  padding: 16px; // 钉钉/野火IM: 16px 内边距
   // 增加底部内边距，防止滚动按钮遮挡消息
-  padding-bottom: 60px; // 留出空间给 scroll-to-bottom 按钮
+  padding-bottom: 80px; // 留出更多空间给输入框和按钮
   background: var(--dt-bg-chat);
   position: relative;
   min-height: 0; // flex 子元素高度修复
@@ -770,32 +770,36 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   will-change: scroll-position;
   contain: layout style paint;
 
-  // 自定义滚动条 - 野火IM风格
+  // 自定义滚动条 - 钉钉风格
   &::-webkit-scrollbar {
-    width: 6px; // 野火IM:6px宽滚动条
+    width: 8px; // 钉钉:8px宽滚动条
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--dt-black-20); // 浅灰色
-    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.2); // 钉钉风格
+    border-radius: 4px;
 
     &:hover {
-      background: var(--dt-black-20);
+      background: rgba(0, 0, 0, 0.3);
     }
   }
 
-  &:hover::-webkit-scrollbar-thumb:hover {
-    background: var(--dt-black-20);
+  &:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.25);
   }
 
   .dark & {
     background: var(--dt-bg-body-dark);
 
     &::-webkit-scrollbar-thumb {
-      background: var(--dt-white-18);
+      background: rgba(255, 255, 255, 0.2);
 
       &:hover {
-        background: var(--dt-white-25);
+        background: rgba(255, 255, 255, 0.3);
       }
     }
   }
@@ -839,8 +843,6 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   &:hover {
     background: var(--dt-brand-bg);
     border-color: var(--dt-brand-color);
-    transform: translateY(-2px);
-    box-shadow: var(--dt-shadow-md);
   }
 
   .el-icon {
@@ -878,18 +880,25 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 
 .time-divider {
   text-align: center;
-  margin: 20px 0;
+  margin: 24px 0; // 钉钉/野火IM: 24px 上下间距
   color: var(--dt-text-tertiary);
   font-size: 12px;
   line-height: 1;
+  position: relative;
 
   .time-text {
-    background: var(--dt-black-04); // 钉钉风格：极浅半透明底
-    color: var(--dt-text-tertiary);
-    padding: 2px 8px; // 优化：更窄的间距
+    background: rgba(0, 0, 0, 0.08); // 钉钉风格：半透明黑底
+    color: var(--dt-text-secondary);
+    padding: 4px 12px; // 钉钉风格：更宽的间距
     font-size: 12px;
-    border-radius: 4px; // 钉钉风格：小圆角矩形，而非全圆角
+    border-radius: 12px; // 钉钉风格：全圆角
     display: inline-block;
+    font-weight: 500;
+  }
+
+  .dark & .time-text {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--dt-text-secondary-dark);
   }
 }
 
@@ -1032,79 +1041,39 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 }
 
 // ============================================================================
-// 消息高亮动画 - 野火IM风格
+// 消息高亮动画 - 钉钉风格（简洁）
 // ============================================================================
 .message-wrapper {
   width: 100%;
   display: flex;
   flex-direction: column;
   &[data-id] {
-    transition: background 0.2s;
+    transition: background 0.15s;
   }
 }
 
 // 普通高亮（滚动定位）
 .highlight-msg-active {
-  animation: highlightPulseBg 1s ease-out;
+  animation: highlightPulseBg 0.6s ease-out;
 }
 
-// 消息引用跳转高亮（3次闪烁）
+// 消息引用跳转高亮
 .message-highlight-flash {
-  animation: messageHighlightFlash 1.5s ease-in-out;
+  animation: highlightPulseBg 0.6s ease-out;
 }
 
 // 搜索结果高亮
 .search-highlight {
-  animation: searchHighlight 2s ease-out;
+  background: var(--dt-brand-extra-light);
 }
 
-// 动画定义
+// 动画定义 - 简洁淡入淡出
 @keyframes highlightPulseBg {
   0% {
     background: var(--dt-brand-extra-light);
   }
-
-  // 野火蓝
   100% {
     background: transparent;
-  }
-}
-
-@keyframes messageHighlightFlash {
-
-  0%,
-  20%,
-  40%,
-  60%,
-  80% {
-    background: var(--dt-search-highlight-bg);
-  }
-
-  // 黄色闪烁
-  10%,
-  30%,
-  50%,
-  70%,
-  90%,
-  100% {
-    background: transparent;
-  }
-}
-
-@keyframes searchHighlight {
-  0% {
-    background: var(--dt-brand-light);
-    box-shadow: 0 0 0 2px var(--dt-brand-light);
-  }
-
-  50% {
-    background: var(--dt-brand-lighter);
-    box-shadow: 0 0 0 4px var(--dt-brand-01);
-  }
-
-  100% {
-    background: transparent;
-    box-shadow: none;
   }
 }
 </style>

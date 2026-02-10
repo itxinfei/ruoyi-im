@@ -392,24 +392,26 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         return readReceipt;
     }
 
+    /**
+     * 广播给会话成员 - 简化版：异步发送避免阻塞
+     */
     private void broadcastToMembers(List<ImConversationMember> members, String messageJson, Long excludeUserId) {
         Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
 
-        for (ImConversationMember member : members) {
-            Long targetUserId = member.getUserId();
-            if (targetUserId.equals(excludeUserId)) {
-                continue;
-            }
-
-            javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-            if (targetSession != null && targetSession.isOpen()) {
-                try {
-                    targetSession.getBasicRemote().sendText(messageJson);
-                } catch (Exception e) {
-                    log.error("发送消息给用户失败: userId={}", targetUserId, e);
+        // 使用并行流异步发送，避免阻塞主线程
+        members.parallelStream()
+            .filter(member -> !member.getUserId().equals(excludeUserId))
+            .forEach(member -> {
+                Long targetUserId = member.getUserId();
+                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
+                if (targetSession != null && targetSession.isOpen()) {
+                    try {
+                        targetSession.getBasicRemote().sendText(messageJson);
+                    } catch (Exception e) {
+                        log.warn("发送消息给用户失败: userId={}", targetUserId);
+                    }
                 }
-            }
-        }
+            });
     }
 
     @Override

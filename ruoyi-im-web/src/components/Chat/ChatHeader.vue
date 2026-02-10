@@ -233,12 +233,9 @@ const toggleConversationInfo = () => {
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
 
-// ============================================================================
-// 容器
-// ============================================================================
 .chat-header {
-  height: 60px; // 野火IM标准:60px高度
-  padding: 0 20px; // 野火IM:左右20px padding
+  height: var(--dt-chat-header-height);
+  padding: 0 16px;
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
   display: flex;
@@ -247,34 +244,29 @@ const toggleConversationInfo = () => {
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  transition: all var(--dt-transition-base);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
 
   .dark & {
     background: var(--dt-bg-card-dark);
     border-bottom-color: var(--dt-border-dark);
+    box-shadow: none;
   }
 }
 
-// ============================================================================
-// 左侧区域
-// ============================================================================
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px; // 野火IM:头像与文字间距12px
+  gap: 10px;
   flex: 1;
   min-width: 0;
   cursor: pointer;
-  padding: 8px 0;
-  border-radius: var(--dt-radius-md);
-  transition: background var(--dt-transition-fast);
+  padding: 4px 8px;
+  border-radius: 8px;
+  margin-left: -4px;
+  transition: all 0.2s var(--dt-ease-out);
 
   &:hover {
-    background: var(--dt-bg-session-hover);
-  }
-
-  .dark &:hover {
-    background: var(--dt-bg-hover-dark);
+    background: var(--dt-bg-subtle-hover);
   }
 }
 
@@ -283,59 +275,41 @@ const toggleConversationInfo = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s var(--dt-ease-out);
   flex-shrink: 0;
 }
 
 .header-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px; // 野火IM:4px圆角
-  flex-shrink: 0;
-  position: relative;
-  cursor: pointer;
-  transition: opacity var(--dt-transition-base);
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  overflow: hidden;
 
-  &:hover {
-    opacity: 0.85;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    border-radius: 4px; // 野火IM:4px圆角
-    object-fit: cover;
+  :deep(.dingtalk-avatar) {
+    border-radius: 6px !important;
   }
 }
 
 .group-avatar {
+  background: linear-gradient(135deg, #0089FF 0%, #0076DB 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--dt-radius-md);
-  background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%);
   color: #fff;
 
   .material-icons-outlined {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 24px;
   }
 }
 
-// 在线状态指示器
 .online-indicator {
   position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 12px;
-  height: 12px;
+  bottom: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
   background: var(--dt-success-color);
-  border: 2px solid #f5f5f5;
-  border-radius: var(--dt-radius-full);
+  border: 2px solid #fff;
+  border-radius: 50%;
   z-index: 2;
 
   .dark & {
@@ -343,132 +317,98 @@ const toggleConversationInfo = () => {
   }
 }
 
-// 在线脉冲动画
 .online-pulse {
   position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 12px;
-  height: 12px;
+  bottom: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
   background: var(--dt-success-color);
-  border-radius: var(--dt-radius-full);
+  border-radius: 50%;
   z-index: 1;
-  animation: onlinePulse 2s ease-out infinite;
+  animation: onlinePulse 2.5s var(--dt-ease-out) infinite;
 }
 
 @keyframes onlinePulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-
-  50% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 0;
-  }
+  0% { transform: scale(1); opacity: 0.6; }
+  70% { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
 }
 
 .header-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: center;
   min-width: 0;
-  flex: 1;
+  gap: 2px;
 }
 
 .header-name {
   font-size: 16px;
-  font-weight: normal;
+  font-weight: 600;
   color: var(--dt-text-primary);
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.2;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 
   .member-count {
-    font-size: 12px;
-    color: var(--dt-text-tertiary);
+    font-size: 13px;
+    color: var(--dt-text-quaternary);
     font-weight: normal;
-  }
-
-  .dark & {
-    color: var(--dt-text-primary-dark);
   }
 }
 
 .user-online-status {
-  color: var(--dt-text-tertiary);
   font-size: 12px;
+  color: var(--dt-text-tertiary);
   margin: 0;
-  cursor: pointer;
+  line-height: 1;
 
   &:hover {
     color: var(--dt-brand-color);
   }
-
-  .dark & {
-    color: var(--dt-text-tertiary-dark);
-  }
 }
 
-// ============================================================================
-// 右侧操作区
-// ============================================================================
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px; // 野火IM:按钮间距8px
-  flex-shrink: 0;
+  gap: 4px;
 }
 
 .action-btn {
-  width: 32px; // 野火IM:32px按钮
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 6px;
   border: none;
   background: transparent;
-  color: #666666; // 野火IM:灰色图标
+  color: var(--dt-text-secondary);
   cursor: pointer;
-  border-radius: 4px;
-  transition: all var(--dt-transition-fast);
-  font-size: 18px; // 图标大小
-
-  .material-icons-outlined {
-    font-size: 18px;
-  }
+  transition: all 0.2s;
 
   &:hover {
-    background: var(--dt-bg-card-hover);
+    background: var(--dt-bg-subtle-hover);
     color: var(--dt-brand-color);
   }
 
-  &:active {
-    transform: scale(0.95);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--dt-brand-color);
-    outline-offset: 2px;
-  }
-
   &.active {
-    color: #3f64e4;
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
   }
 
-  .dark & {
-    color: var(--dt-text-secondary-dark);
-
-    &:hover {
-      background: var(--dt-white-06);
-    }
+  .material-icons-outlined {
+    font-size: 20px;
   }
+}
+
+.header-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--dt-border-light);
+  margin: 0 4px;
 }
 </style>

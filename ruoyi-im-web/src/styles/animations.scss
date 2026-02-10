@@ -1656,6 +1656,22 @@ $duration-slower: 750ms;
   }
 }
 
+// 消息撤回动画 - 用于消息撤回
+@keyframes messageRecall {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
 // 消息弹性滑入 - 用于新发送消息的弹性动画（对齐钉钉）
 @keyframes messageSlideInElastic {
   0% {

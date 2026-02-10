@@ -107,17 +107,16 @@
   }
   
   // 气泡区域
-  .content-wrapper {
-    flex: 1;
-    min-width: 0;
-  display: flex;
-    align-items: center;
-  }
-  
+    .content-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+    }  
   // 气泡
   .message-bubble {
     &.is-left {
-      margin-top: 8px; // 谔泡顶部间距
+      margin-top: 8px; // 气泡顶部间距
       margin-bottom: 12px;
     }
     
@@ -142,7 +141,7 @@
   &.is-left {
     background: var(--dt-bubble-left-bg);
     border: 1px solid var(--dt-bubble-left-border);
-    border-radius: var(--dt-radius-lg) var(--dt-radius-lg) 4px; // 左侧锐角
+    border-radius: var(--dt-radius-bubble-left);
     box-shadow: var(--dt-bubble-left-shadow);
     color: var(--dt-text-primary);
     
@@ -158,7 +157,7 @@
                   var(--dt-bubble-right-bg-start) 0%,
                   var(--dt-bubble-right-bg-end) 100%
     );
-    border-radius: 4px var(--dt-radius-lg) var(--dt-radius-lg); // 右侧锐角
+    border-radius: var(--dt-radius-bubble-right);
     box-shadow: var(--dt-bubble-right-shadow);
     color: var(--dt-bubble-right-text);
     
@@ -275,7 +274,7 @@
       &.is-left {
         background: var(--dt-bubble-left-bg);
         border: 1px solid var(--dt-bubble-left-border);
-        border-radius: 8px 8px 8px 4px;
+        border-radius: var(--dt-radius-bubble-left);
         box-shadow: var(--dt-bubble-left-shadow);
         color: var(--dt-text-primary);
         
@@ -290,7 +289,7 @@
                       var(--dt-bubble-right-bg-start) 0%,
                       var(--dt-bubble-right-bg-end) 100%
         );
-        border-radius: 4px 8px 8px 8px;
+        border-radius: var(--dt-radius-bubble-right);
         box-shadow: var(--dt-bubble-right-shadow);
         color: var(--dt-bubble-right-text);
         

@@ -140,6 +140,8 @@
             <foreach collection="conversationIds" item="id" open="(" separator="," close=")">
                 #{id}
             </foreach>
+            AND is_revoked = 0
+            AND is_deleted = 0
             GROUP BY conversation_id
         )
     </select>

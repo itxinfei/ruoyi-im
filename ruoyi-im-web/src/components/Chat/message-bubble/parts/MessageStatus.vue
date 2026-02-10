@@ -246,7 +246,7 @@ function handleRetry() {
   justify-content: center;
   font-weight: 500;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform var(--dt-transition-base);
 
   &:hover {
     transform: scale(1.1);
@@ -287,20 +287,9 @@ function handleRetry() {
   }
 }
 
-// 动画
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .status-fade-enter-active,
 .status-fade-leave-active {
-  transition: opacity 0.2s;
+  transition: opacity var(--dt-transition-fast);
 }
 
 .status-fade-enter-from,
@@ -319,22 +308,6 @@ function handleRetry() {
 
 .status-shake-enter-active {
   animation: shake 0.5s;
-}
-
-@keyframes shake {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-2px);
-  }
-
-  75% {
-    transform: translateX(2px);
-  }
 }
 
 :global(.dark) {

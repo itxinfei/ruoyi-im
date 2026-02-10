@@ -10,11 +10,11 @@ module.exports = {
       colors: {
         // 钉钉品牌色 DingTalk Blue
         primary: {
-          DEFAULT: '#0089FF',
-          hover: '#006ECC',
-          active: '#0057A3',
-          light: 'rgba(0, 137, 255, 0.1)',
-          bg: '#E5F2FF'
+          DEFAULT: '#3296FA',
+          hover: '#1A7FE8',
+          active: '#0D6ED6',
+          light: 'rgba(50, 150, 250, 0.1)',
+          bg: '#EBF5FF'
         },
         // 背景色
         background: {

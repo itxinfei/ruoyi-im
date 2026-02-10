@@ -44,7 +44,7 @@ const posterUrl = computed(() => {
 .video-bubble {
   border-radius: var(--dt-radius-md);
   overflow: hidden;
-  background: #000;
+  background: var(--dt-bg-dark);
 }
 
 .video-content {

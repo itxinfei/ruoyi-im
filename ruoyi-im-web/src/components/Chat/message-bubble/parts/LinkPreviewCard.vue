@@ -159,6 +159,7 @@ const handleFaviconError = e => {
 
 .link-preview-card {
   margin-top: 8px;
+  padding: 12px;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-lg);
@@ -211,7 +212,7 @@ const handleFaviconError = e => {
 
 .link-preview-info {
   flex: 1;
-  padding: 12px 16px;
+  padding: 12px;
   min-width: 0;
 }
 
@@ -345,7 +346,7 @@ const handleFaviconError = e => {
   }
   
   .link-preview-info {
-    padding: 10px 12px;
+    padding: 12px;
   }
   
   .link-title {
