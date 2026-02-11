@@ -62,17 +62,9 @@ public class ImAuthController {
     @RateLimit(key = "login", time = 60, count = 5, limitType = RateLimit.LimitType.IP)
     public Result<ImLoginVO> login(@Valid @RequestBody ImLoginRequest request) {
         logger.info("收到登录请求 - 用户名: {}, 客户端: {}", request.getUsername(), request.getClientType());
-        try {
-            ImLoginVO vo = imUserService.login(request);
-            logger.info("登录成功 - 用户名: {}", request.getUsername());
-            return Result.success(vo);
-        } catch (BusinessException e) {
-            logger.warn("登录业务异常 - 用户名: {}, 错误: {}", request.getUsername(), e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            logger.error("登录系统异常 - 用户名: {}, 异常: {}", request.getUsername(), e.getMessage(), e);
-            throw e;
-        }
+        ImLoginVO vo = imUserService.login(request);
+        logger.info("登录成功 - 用户名: {}", request.getUsername());
+        return Result.success(vo);
     }
 
     /**
@@ -159,39 +151,35 @@ public class ImAuthController {
     @Operation(summary = "刷新Token", description = "使用refresh token获取新的access token")
     @PostMapping("/refresh")
     public Result<ImLoginVO> refreshToken(@RequestParam @NotBlank(message = "刷新令牌不能为空") String refreshToken) {
-        try {
-            // 验证refresh token
-            if (!jwtUtils.validateToken(refreshToken)) {
-                throw new BusinessException("刷新令牌无效或已过期");
-            }
-
-            // 从token中获取用户信息
-            Long userId = jwtUtils.getUserIdFromToken(refreshToken);
-
-            // 获取用户详细信息
-            ImUserVO userVO = imUserService.getUserById(userId);
-            if (userVO == null) {
-                throw new BusinessException("用户不存在");
-            }
-
-            // 生成新的JWT令牌
-            String newToken = jwtUtils.generateToken(userVO.getUsername(), userVO.getId());
-
-            ImLoginVO loginVO = new ImLoginVO();
-            loginVO.setToken(newToken);
-
-            // 设置用户信息
-            ImLoginVO.UserInfo userInfo = new ImLoginVO.UserInfo();
-            userInfo.setId(userVO.getId());
-            userInfo.setUsername(userVO.getUsername());
-            userInfo.setNickname(userVO.getNickname());
-            userInfo.setAvatar(userVO.getAvatar());
-            loginVO.setUserInfo(userInfo);
-
-            return Result.success(loginVO);
-        } catch (Exception e) {
-            throw new BusinessException("刷新Token失败: " + e.getMessage());
+        // 验证refresh token
+        if (!jwtUtils.validateToken(refreshToken)) {
+            throw new BusinessException("刷新令牌无效或已过期");
         }
+
+        // 从token中获取用户信息
+        Long userId = jwtUtils.getUserIdFromToken(refreshToken);
+
+        // 获取用户详细信息
+        ImUserVO userVO = imUserService.getUserById(userId);
+        if (userVO == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 生成新的JWT令牌
+        String newToken = jwtUtils.generateToken(userVO.getUsername(), userVO.getId());
+
+        ImLoginVO loginVO = new ImLoginVO();
+        loginVO.setToken(newToken);
+
+        // 设置用户信息
+        ImLoginVO.UserInfo userInfo = new ImLoginVO.UserInfo();
+        userInfo.setId(userVO.getId());
+        userInfo.setUsername(userVO.getUsername());
+        userInfo.setNickname(userVO.getNickname());
+        userInfo.setAvatar(userVO.getAvatar());
+        loginVO.setUserInfo(userInfo);
+
+        return Result.success(loginVO);
     }
 
     /**
@@ -205,11 +193,7 @@ public class ImAuthController {
     @Operation(summary = "验证Token", description = "验证token是否有效")
     @PostMapping("/validateToken")
     public Result<Boolean> validateToken(@RequestParam @NotBlank(message = "令牌不能为空") String token) {
-        try {
-            boolean valid = jwtUtils.validateToken(token);
-            return Result.success(valid);
-        } catch (Exception e) {
-            return Result.success(false);
-        }
+        boolean valid = jwtUtils.validateToken(token);
+        return Result.success(valid);
     }
 }

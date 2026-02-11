@@ -119,6 +119,7 @@
                 <Search />
               </el-icon>
               <p>未找到相关结果</p>
+              <p class="empty-hint">试试在通讯录中搜索，或检查关键词</p>
             </div>
 
             <!-- 默认状态 -->
@@ -417,6 +418,12 @@ const handleResultClick = (type, item) => {
   p {
     margin: 0;
     font-size: 14px;
+  }
+
+  .empty-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--dt-text-quaternary, #bbb);
   }
 }
 

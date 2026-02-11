@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Tag(name = "群组禁言管理", description = "群组禁言相关接口")
 @RestController
-@RequestMapping("/api/im/group/mute")
+@RequestMapping("/api/im/groups/mutes")
 public class ImGroupMuteController {
 
     private final ImGroupMuteService groupMuteService;

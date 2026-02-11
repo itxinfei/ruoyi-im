@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Tag(name = "DING消息", description = "DING消息管理接口")
 @RestController
-@RequestMapping("/api/im/ding")
+@RequestMapping("/api/im/ding-messages")
 public class ImDingMessageController {
 
     private final ImDingMessageService dingMessageService;

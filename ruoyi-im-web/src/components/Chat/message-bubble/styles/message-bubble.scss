@@ -34,7 +34,7 @@
 .message-bubble:not(.is-right) {
   .bubble-content {
     background: var(--dt-bubble-left-bg);
-    border: 1px solid var(--dt-bubble-left-border);
+    border: none;
     // 统一圆角
     border-radius: 6px;
   }
@@ -115,8 +115,9 @@
 // ============================================================================
 
 .message-bubble.is-selected .bubble-content {
-  border: 2px solid var(--dt-brand-color);
-  box-shadow: 0 0 0 2px var(--dt-brand-lighter);
+  background: var(--dt-brand-bg);
+  outline: 2px solid var(--dt-brand-color);
+  outline-offset: -2px;
 }
 
 // ============================================================================
@@ -270,7 +271,6 @@
   // 对方消息：深灰背景
   .message-bubble:not(.is-right) .bubble-content {
     background: var(--dt-bg-tertiary-dark, #2a2a2a);
-    border-color: var(--dt-border-dark, #3a3a3a);
     color: #e8e8e8;
   }
 
@@ -283,7 +283,6 @@
   // 悬停状态
   .message-bubble:not(.is-right):hover .bubble-content {
     background: var(--dt-bg-card-hover-dark, #333333);
-    border-color: #444444;
   }
 
   .message-bubble.is-right:hover .bubble-content {

@@ -16,7 +16,7 @@ export function uploadToCloud(folderId, file) {
     formData.append('folderId', folderId)
   }
   return request({
-    url: '/api/im/cloud/file/upload',
+    url: '/api/im/cloud-drive/file/upload',
     method: 'post',
     data: formData,
     headers: { 'Content-Type': 'multipart/form-data' }
@@ -33,7 +33,7 @@ export function uploadToCloud(folderId, file) {
  */
 export function saveFileToCloud(data) {
   return request({
-    url: '/api/im/cloud/file/save',
+    url: '/api/im/cloud-drive/file/save',
     method: 'post',
     data
   })
@@ -47,7 +47,7 @@ export function saveFileToCloud(data) {
  */
 export function getFolderList(parentId = null, ownerType = 'PERSONAL') {
   return request({
-    url: '/api/im/cloud/folder/list',
+    url: '/api/im/cloud-drive/folder/list',
     method: 'get',
     params: { parentId, ownerType }
   })
@@ -63,7 +63,7 @@ export function getFolderList(parentId = null, ownerType = 'PERSONAL') {
  */
 export function createFolder(data) {
   return request({
-    url: '/api/im/cloud/folder/create',
+    url: '/api/im/cloud-drive/folder/create',
     method: 'post',
     data
   })
@@ -76,7 +76,7 @@ export function createFolder(data) {
  */
 export function getFileList(folderId = null) {
   return request({
-    url: '/api/im/cloud/file/list',
+    url: '/api/im/cloud-drive/file/list',
     method: 'get',
     params: { folderId: folderId ?? '' }
   })
@@ -88,7 +88,7 @@ export function getFileList(folderId = null) {
  */
 export function getStorageQuota() {
   return request({
-    url: '/api/im/cloud/quota',
+    url: '/api/im/cloud-drive/quota',
     method: 'get'
   })
 }
@@ -99,7 +99,7 @@ export function getStorageQuota() {
  */
 export function getRecentFiles() {
   return request({
-    url: '/api/im/cloud/file/recent',
+    url: '/api/im/cloud-drive/file/recent',
     method: 'get'
   })
 }
@@ -111,7 +111,7 @@ export function getRecentFiles() {
  */
 export function searchFiles(keyword) {
   return request({
-    url: '/api/im/cloud/file/search',
+    url: '/api/im/cloud-drive/file/search',
     method: 'get',
     params: { keyword }
   })

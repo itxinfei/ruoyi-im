@@ -6,6 +6,7 @@ import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,9 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Tag(name = "会话成员管理", description = "用户与会话关系管理接口")
 @RestController
-@RequestMapping("/api/im/conversationMember")
+@RequestMapping("/api/im/conversations/members")
 public class ImConversationMemberController {
 
     private final ImConversationMemberService conversationMemberService;

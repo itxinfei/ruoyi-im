@@ -8,12 +8,12 @@ import request from '../request'
 export function getUserInfo(userId) {
   if (userId) {
     return request({
-      url: `/api/im/user/${userId}`,
+      url: `/api/im/users/${userId}`,
       method: 'get'
     })
   }
   return request({
-    url: '/api/im/user/info',
+    url: '/api/im/users/me',
     method: 'get'
   })
 }
@@ -26,7 +26,7 @@ export function getUserInfo(userId) {
  */
 export function updateUser(userId, data) {
   return request({
-    url: `/api/im/user/${userId}`,
+    url: `/api/im/users/${userId}`,
     method: 'put',
     data
   })
@@ -39,7 +39,7 @@ export function updateUser(userId, data) {
  */
 export function searchUsers(keyword) {
   return request({
-    url: '/api/im/user/search',
+    url: '/api/im/users/search',
     method: 'get',
     params: {
       keyword
@@ -54,7 +54,7 @@ export function searchUsers(keyword) {
  */
 export function getUserDetail(userId) {
   return request({
-    url: `/api/im/user/${userId}`,
+    url: `/api/im/users/${userId}`,
     method: 'get'
   })
 }
@@ -66,7 +66,7 @@ export function getUserDetail(userId) {
  */
 export function uploadAvatar(data) {
   return request({
-    url: '/api/im/user/avatar',
+    url: '/api/im/users/avatar',
     method: 'post',
     data,
     headers: {
@@ -83,7 +83,7 @@ export function uploadAvatar(data) {
  */
 export function updateUserPassword(oldPassword, newPassword) {
   return request({
-    url: '/api/im/user/password',
+    url: '/api/im/users/password',
     method: 'put',
     data: {
       oldPassword,

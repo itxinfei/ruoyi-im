@@ -11,17 +11,33 @@
           <h2 class="sidebar-title">
             通讯录
           </h2>
-          <el-tooltip
-            content="添加朋友/群组"
-            placement="bottom"
+          <el-dropdown
+            trigger="click"
+            placement="bottom-end"
+            @command="handleAddMenuCommand"
           >
             <el-button
               circle
               size="small"
               :icon="Plus"
-              @click="showAddMenu = true"
             />
-          </el-tooltip>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="addFriend">
+                  <el-icon><User /></el-icon>
+                  添加联系人
+                </el-dropdown-item>
+                <el-dropdown-item command="createGroup">
+                  <el-icon><ChatDotSquare /></el-icon>
+                  发起群聊
+                </el-dropdown-item>
+                <el-dropdown-item command="joinGroup">
+                  <el-icon><Search /></el-icon>
+                  加入群组
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
         <div
           class="search-box"
@@ -382,7 +398,16 @@
           <el-empty
             :description="getEmptyText"
             :image-size="120"
-          />
+          >
+            <el-button
+              type="primary"
+              size="small"
+              @click="refreshCurrent"
+            >
+              <el-icon class="mr-1"><Refresh /></el-icon>
+              刷新重试
+            </el-button>
+          </el-empty>
         </div>
       </div>
     </section>
@@ -584,6 +609,12 @@
       @success="handleAddFriendSuccess"
     />
 
+    <!-- 创建群聊对话框 -->
+    <CreateGroupDialog
+      v-model="showCreateGroupDialog"
+      @success="handleCreateGroupSuccess"
+    />
+
     <!-- 批量操作栏 -->
     <BatchOperationBar
       :visible="batchMode"
@@ -611,6 +642,7 @@ import RecommendedContacts from '@/components/Contacts/RecommendedContacts.vue'
 import BatchOperationBar from '@/components/Contacts/BatchOperationBar.vue'
 import GroupSelectDialog from '@/components/Contacts/GroupSelectDialog.vue'
 import AddFriendDialog from '@/components/Contacts/AddFriendDialog.vue'
+import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
 import { getFriendRequests, getGroupedFriendList, getGroupList, createGroup, renameGroup, deleteGroup, clearFriendListCache } from '@/api/im/contact'
 import { getGroups } from '@/api/im/group'
@@ -633,7 +665,7 @@ const store = useStore()
 const currentNav = ref('new') // 当前导航项
 const searchQuery = ref('')
 const showSearchPanel = ref(false)
-const showAddMenu = ref(false)
+const showCreateGroupDialog = ref(false)
 const loading = ref(false)
 const searchInputRef = ref(null)
 const recommendedContactsRef = ref(null)
@@ -670,6 +702,37 @@ const handleAddFriendSuccess = () => {
   ElMessage.success('好友请求已发送，请等待对方确认')
   // 可以在这里刷新好友请求列表
   fetchData('new')
+}
+
+// 创建群聊成功处理
+const handleCreateGroupSuccess = () => {
+  fetchData('groups')
+}
+
+// "+"号下拉菜单命令处理
+const handleAddMenuCommand = command => {
+  if (command === 'addFriend') {
+    showAddFriendDialog.value = true
+  } else if (command === 'createGroup') {
+    showCreateGroupDialog.value = true
+  } else if (command === 'joinGroup') {
+    ElMessageBox.prompt('请输入群号', '加入群组', {
+      confirmButtonText: '加入',
+      cancelButtonText: '取消',
+      inputPattern: /\S+/,
+      inputErrorMessage: '请输入群号'
+    }).then(({ value }) => {
+      store.dispatch('im/session/createAndSwitchSession', {
+        type: 'GROUP',
+        targetId: value.trim()
+      }).then(() => {
+        ElMessage.success('已加入群组')
+        emit('switch-module', 'chat')
+      }).catch(error => {
+        ElMessage.error('加入群组失败：' + (error.message || '请检查群号是否正确'))
+      })
+    }).catch(() => {})
+  }
 }
 
 // Selection

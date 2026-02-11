@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 
 /**
  * 全局搜索控制器
@@ -50,17 +51,12 @@ public class ImGlobalSearchController {
             @Valid @RequestBody GlobalSearchRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
-        try {
-            // 记录搜索日志
-            log.info("全局搜索: userId={}, keyword={}, type={}",
+        // 记录搜索日志
+        log.info("全局搜索: userId={}, keyword={}, type={}",
                 userId, request.getKeyword(), request.getSearchType());
 
-            GlobalSearchResultVO result = globalSearchService.globalSearch(request, userId);
-            return Result.success(result);
-        } catch (Exception e) {
-            log.error("全局搜索失败: keyword={}", request.getKeyword(), e);
-            return Result.fail("搜索失败: " + e.getMessage());
-        }
+        GlobalSearchResultVO result = globalSearchService.globalSearch(request, userId);
+        return Result.success(result);
     }
 
     /**
@@ -72,16 +68,10 @@ public class ImGlobalSearchController {
     @Operation(summary = "搜索消息", description = "搜索聊天消息")
     @GetMapping("/messages")
     public Result<GlobalSearchResultVO> searchMessages(
-            @RequestParam String keyword) {
+            @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
-
-        try {
-            GlobalSearchResultVO result = globalSearchService.searchMessages(keyword, userId);
-            return Result.success(result);
-        } catch (Exception e) {
-            log.error("搜索消息失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
-        }
+        GlobalSearchResultVO result = globalSearchService.searchMessages(keyword, userId);
+        return Result.success(result);
     }
 
     /**
@@ -93,16 +83,10 @@ public class ImGlobalSearchController {
     @Operation(summary = "搜索联系人", description = "搜索联系人")
     @GetMapping("/contacts")
     public Result<GlobalSearchResultVO> searchContacts(
-            @RequestParam String keyword) {
+            @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
-
-        try {
-            GlobalSearchResultVO result = globalSearchService.searchContacts(keyword, userId);
-            return Result.success(result);
-        } catch (Exception e) {
-            log.error("搜索联系人失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
-        }
+        GlobalSearchResultVO result = globalSearchService.searchContacts(keyword, userId);
+        return Result.success(result);
     }
 
     /**
@@ -114,16 +98,10 @@ public class ImGlobalSearchController {
     @Operation(summary = "搜索群组", description = "搜索群组")
     @GetMapping("/groups")
     public Result<GlobalSearchResultVO> searchGroups(
-            @RequestParam String keyword) {
+            @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
-
-        try {
-            GlobalSearchResultVO result = globalSearchService.searchGroups(keyword, userId);
-            return Result.success(result);
-        } catch (Exception e) {
-            log.error("搜索群组失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
-        }
+        GlobalSearchResultVO result = globalSearchService.searchGroups(keyword, userId);
+        return Result.success(result);
     }
 
     /**
@@ -135,16 +113,10 @@ public class ImGlobalSearchController {
     @Operation(summary = "搜索文件", description = "搜索文件")
     @GetMapping("/files")
     public Result<GlobalSearchResultVO> searchFiles(
-            @RequestParam String keyword) {
+            @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
-
-        try {
-            GlobalSearchResultVO result = globalSearchService.searchFiles(keyword, userId);
-            return Result.success(result);
-        } catch (Exception e) {
-            log.error("搜索文件失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
-        }
+        GlobalSearchResultVO result = globalSearchService.searchFiles(keyword, userId);
+        return Result.success(result);
     }
 
     /**
@@ -156,16 +128,10 @@ public class ImGlobalSearchController {
     @Operation(summary = "搜索工作台", description = "搜索工作台内容（任务、文档、日程等）")
     @GetMapping("/workbench")
     public Result<GlobalSearchResultVO> searchWorkbench(
-            @RequestParam String keyword) {
+            @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
-
-        try {
-            GlobalSearchResultVO result = globalSearchService.searchWorkbench(keyword, userId);
-            return Result.success(result);
-        } catch (Exception e) {
-            log.error("搜索工作台内容失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
-        }
+        GlobalSearchResultVO result = globalSearchService.searchWorkbench(keyword, userId);
+        return Result.success(result);
     }
 
     /**
@@ -178,13 +144,7 @@ public class ImGlobalSearchController {
     @GetMapping("/hot-keywords")
     public Result<java.util.List<String>> getHotKeywords() {
         Long userId = SecurityUtils.getLoginUserId();
-
-        try {
-            java.util.List<String> hotKeywords = globalSearchService.getHotKeywords(userId);
-            return Result.success(hotKeywords);
-        } catch (Exception e) {
-            log.error("获取热门搜索失败: userId={}", userId, e);
-            return Result.fail("获取失败");
-        }
+        java.util.List<String> hotKeywords = globalSearchService.getHotKeywords(userId);
+        return Result.success(hotKeywords);
     }
 }

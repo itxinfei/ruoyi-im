@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Tag(name = "消息标记", description = "消息标记管理接口")
 @RestController
-@RequestMapping("/api/im/message/marker")
+@RequestMapping("/api/im/messages/markers")
 public class ImMessageMarkerController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageMarkerController.class);

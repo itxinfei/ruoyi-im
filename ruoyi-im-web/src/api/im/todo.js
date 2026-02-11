@@ -12,7 +12,7 @@ import request from '../request'
  */
 export function getTodoList(markerType) {
   return request({
-    url: '/api/im/message/marker/list',
+    url: '/api/im/messages/markers',
     method: 'get',
     params: { markerType }
   })
@@ -24,7 +24,7 @@ export function getTodoList(markerType) {
  */
 export function getTodoCount() {
   return request({
-    url: '/api/im/message/marker/todo/count',
+    url: '/api/im/messages/markers/todos/count',
     method: 'get'
   })
 }
@@ -39,7 +39,7 @@ export function getTodoCount() {
  */
 export function setTodoReminder(data) {
   return request({
-    url: '/api/im/message/marker/todo',
+    url: '/api/im/messages/markers/todos',
     method: 'post',
     data
   })
@@ -52,7 +52,7 @@ export function setTodoReminder(data) {
  */
 export function completeTodo(markerId) {
   return request({
-    url: `/api/im/message/marker/todo/${markerId}/complete`,
+    url: `/api/im/messages/markers/todos/${markerId}/complete`,
     method: 'post'
   })
 }
@@ -64,7 +64,7 @@ export function completeTodo(markerId) {
  */
 export function reopenTodo(markerId) {
   return request({
-    url: `/api/im/message/marker/todo/${markerId}/reopen`,
+    url: `/api/im/messages/markers/todos/${markerId}/reopen`,
     method: 'post'
   })
 }
@@ -76,7 +76,7 @@ export function reopenTodo(markerId) {
  */
 export function deleteTodo(markerId) {
   return request({
-    url: `/api/im/message/marker/${markerId}`,
+    url: `/api/im/messages/markers/${markerId}`,
     method: 'delete'
   })
 }
@@ -91,7 +91,7 @@ export function deleteTodo(markerId) {
  */
 export function markMessage(data) {
   return request({
-    url: '/api/im/message/marker/mark',
+    url: '/api/im/messages/markers',
     method: 'post',
     data
   })
@@ -106,7 +106,7 @@ export function markMessage(data) {
  */
 export function unmarkMessage(params) {
   return request({
-    url: '/api/im/message/marker/unmark',
+    url: '/api/im/messages/markers',
     method: 'delete',
     params
   })
@@ -119,7 +119,7 @@ export function unmarkMessage(params) {
  */
 export function getMessageMarkers(messageId) {
   return request({
-    url: `/api/im/message/marker/message/${messageId}`,
+    url: `/api/im/messages/markers/messages/${messageId}`,
     method: 'get'
   })
 }

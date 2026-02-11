@@ -19,7 +19,7 @@ import java.util.Set;
  */
 @Tag(name = "敏感词管理", description = "敏感词管理、检测、过滤等接口")
 @RestController
-@RequestMapping("/api/im/sensitiveWord")
+@RequestMapping("/api/im/sensitive-words")
 public class ImSensitiveWordController {
 
     private final ISensitiveWordService sensitiveWordService;

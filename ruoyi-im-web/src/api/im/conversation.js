@@ -9,7 +9,7 @@ import request from '../request'
  */
 export function getConversations() {
   return request({
-    url: '/api/im/conversation/list',
+    url: '/api/im/conversations/list',
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getConversations() {
  */
 export function getConversation(conversationId) {
   return request({
-    url: `/api/im/conversation/${conversationId}`,
+    url: `/api/im/conversations/${conversationId}`,
     method: 'get'
   })
 }
@@ -35,7 +35,7 @@ export function getConversation(conversationId) {
  */
 export function createConversation(data) {
   return request({
-    url: '/api/im/conversation/create',
+    url: '/api/im/conversations/create',
     method: 'post',
     data
   })
@@ -48,7 +48,7 @@ export function createConversation(data) {
  */
 export function deleteConversation(conversationId) {
   return request({
-    url: `/api/im/conversation/${conversationId}`,
+    url: `/api/im/conversations/${conversationId}`,
     method: 'delete'
   })
 }
@@ -62,7 +62,7 @@ export function deleteConversation(conversationId) {
  */
 export function pinConversation(conversationId, pinned) {
   return request({
-    url: `/api/im/conversation/${conversationId}/pinned`,
+    url: `/api/im/conversations/${conversationId}/pinned`,
     method: 'put',
     params: { pinned }
   })
@@ -77,7 +77,7 @@ export function pinConversation(conversationId, pinned) {
  */
 export function muteConversation(conversationId, muted) {
   return request({
-    url: `/api/im/conversation/${conversationId}/muted`,
+    url: `/api/im/conversations/${conversationId}/muted`,
     method: 'put',
     params: { muted }
   })
@@ -85,7 +85,7 @@ export function muteConversation(conversationId, muted) {
 
 export function markConversationAsRead(conversationId) {
   return request({
-    url: `/api/im/conversation/${conversationId}/markAsRead`,
+    url: `/api/im/conversations/${conversationId}/markAsRead`,
     method: 'put'
   })
 }
@@ -97,7 +97,7 @@ export function markConversationAsRead(conversationId) {
  */
 export function searchConversations(keyword) {
   return request({
-    url: '/api/im/conversation/search',
+    url: '/api/im/conversations/search',
     method: 'get',
     params: { keyword }
   })
@@ -109,7 +109,7 @@ export function searchConversations(keyword) {
  */
 export function getTotalUnreadCount() {
   return request({
-    url: '/api/im/conversation/unreadCount',
+    url: '/api/im/conversations/unreadCount',
     method: 'get'
   })
 }
@@ -120,7 +120,7 @@ export function getTotalUnreadCount() {
  */
 export function getArchivedSessions() {
   return request({
-    url: '/api/im/conversation/archived',
+    url: '/api/im/conversations/archived',
     method: 'get'
   })
 }
@@ -132,7 +132,7 @@ export function getArchivedSessions() {
  */
 export function archiveSession(conversationId) {
   return request({
-    url: `/api/im/conversation/${conversationId}/archive`,
+    url: `/api/im/conversations/${conversationId}/archive`,
     method: 'put'
   })
 }
@@ -144,7 +144,7 @@ export function archiveSession(conversationId) {
  */
 export function unarchiveSession(conversationId) {
   return request({
-    url: `/api/im/conversation/${conversationId}/unarchive`,
+    url: `/api/im/conversations/${conversationId}/unarchive`,
     method: 'put'
   })
 }

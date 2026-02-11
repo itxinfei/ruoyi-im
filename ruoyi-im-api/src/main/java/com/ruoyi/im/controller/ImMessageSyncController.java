@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Tag(name = "消息同步", description = "消息同步、同步点管理等接口")
 @RestController
-@RequestMapping("/api/im/message/sync")
+@RequestMapping("/api/im/messages/sync")
 @Validated
 public class ImMessageSyncController {
 

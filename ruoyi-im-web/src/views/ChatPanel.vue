@@ -532,11 +532,7 @@ onMessage(msg => {
   }
 })
 
-watch(() => props.session, () => {
-  // 清空消息列表
-  messages.value.splice(0, messages.value.length)
-  loadHistory()
-})
+// 会话切换由 useChatMessages composable 内部 watch 处理，无需额外 watcher
 
 const handleDelete = async message => {
   await deleteMessage(message)
@@ -1809,7 +1805,10 @@ onMounted(() => {
   onMessageStatus(data => {
     if (data.conversationId !== props.session?.id) { return }
 
-    const index = messages.value.findIndex(m => m.id === data.messageId)
+    // 支持通过 messageId 或 clientMsgId 查找消息
+    const index = messages.value.findIndex(
+      m => m.id === data.messageId || (data.clientMsgId && m.clientMsgId === data.clientMsgId)
+    )
     if (index !== -1) {
       // 映射后端 sendStatus 数值到前端状态字符串
       // 0=PENDING, 1=SENDING, 2=DELIVERED(不显示), 3=READ(已读), 4=FAILED
@@ -1820,8 +1819,10 @@ onMounted(() => {
         3: 'read',       // READ - 显示已读
         4: 'failed'      // FAILED - 显示失败
       }
-      const sendStatus = parseInt(data.sendStatus)
-      messages.value[index].status = statusMap[sendStatus] ?? null
+      const sendStatus = data.sendStatus != null ? Number(data.sendStatus) : -1
+      if (statusMap[sendStatus]) {
+        messages.value[index].status = statusMap[sendStatus]
+      }
     }
   })
 

@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Tag(name = "消息已读回执", description = "消息已读状态查询、标记已读等接口")
 @RestController
-@RequestMapping("/api/im/message/read")
+@RequestMapping("/api/im/messages/read-status")
 public class ImMessageReadController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageReadController.class);

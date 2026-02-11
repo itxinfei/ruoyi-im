@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "群机器人", description = "群机器人管理接口")
 @RestController
-@RequestMapping("/api/im/group/bot")
+@RequestMapping("/api/im/groups/bots")
 public class ImGroupBotController {
 
     private static final Logger log = LoggerFactory.getLogger(ImGroupBotController.class);

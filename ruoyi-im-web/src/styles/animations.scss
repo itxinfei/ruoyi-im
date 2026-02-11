@@ -304,12 +304,8 @@ $duration-slower: 750ms;
 
 // 消息高亮闪烁（3次黄色闪烁）- 用于引用消息跳转
 @keyframes messageHighlightFlash {
-  0%, 100% { background: transparent; }
-  16.67% { background: rgba(255, 235, 59, 0.4); }
-  33.33% { background: transparent; }
-  50% { background: rgba(255, 235, 59, 0.4); }
-  66.67% { background: transparent; }
-  83.33% { background: rgba(255, 235, 59, 0.4); }
+  0% { background: rgba(50, 150, 250, 0.15); }
+  100% { background: transparent; }
 }
 
 // ============================================================================

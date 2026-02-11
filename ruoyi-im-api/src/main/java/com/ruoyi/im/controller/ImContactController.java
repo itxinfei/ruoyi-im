@@ -32,7 +32,7 @@ import java.util.List;
  */
 @Tag(name = "联系人管理", description = "用户搜索、好友申请、好友管理、分组管理等接口")
 @RestController
-@RequestMapping("/api/im/contact")
+@RequestMapping("/api/im/contacts")
 @Validated
 public class ImContactController {
 

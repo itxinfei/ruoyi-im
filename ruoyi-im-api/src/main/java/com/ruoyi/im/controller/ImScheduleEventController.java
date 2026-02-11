@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Tag(name = "日程管理", description = "日程管理接口")
 @RestController
-@RequestMapping("/api/im/schedule")
+@RequestMapping("/api/im/schedule-events")
 public class ImScheduleEventController {
 
     private final ImScheduleEventService scheduleEventService;

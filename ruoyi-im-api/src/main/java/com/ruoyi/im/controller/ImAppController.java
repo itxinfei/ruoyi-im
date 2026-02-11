@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "应用中心", description = "应用列表、安装卸载、配置管理等接口")
 @RestController
-@RequestMapping("/api/im/app")
+@RequestMapping("/api/im/apps")
 public class ImAppController {
 
     private final ImApplicationService applicationService;

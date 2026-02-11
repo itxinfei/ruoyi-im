@@ -551,7 +551,7 @@ import {
   addRoleMembers,
   removeRoleMember
 } from '@/api/admin'
-import { searchUsersApi, getUserInfo } from '@/api/im/user'
+import { searchUsers as searchUsersApi, getUserInfo } from '@/api/im/user'
 
 // 角色列表
 const roles = ref([])

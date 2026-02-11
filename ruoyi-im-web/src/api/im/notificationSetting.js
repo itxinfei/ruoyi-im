@@ -10,7 +10,7 @@ import request from '../request'
  */
 export function getNotificationSetting() {
   return request({
-    url: '/api/im/user/notification',
+    url: '/api/im/users/notification-settings',
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function getNotificationSetting() {
  */
 export function updateNotificationSetting(setting) {
   return request({
-    url: '/api/im/user/notification',
+    url: '/api/im/users/notification-settings',
     method: 'put',
     data: setting
   })
@@ -32,7 +32,7 @@ export function updateNotificationSetting(setting) {
  */
 export function initDefaultNotificationSetting() {
   return request({
-    url: '/api/im/user/notification/init',
+    url: '/api/im/users/notification-settings/init',
     method: 'post'
   })
 }

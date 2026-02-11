@@ -449,7 +449,7 @@ import {
   addDepartmentMembers,
   removeDepartmentMember
 } from '@/api/admin'
-import { searchUsersApi } from '@/api/im/user'
+import { searchUsers as searchUsersApi } from '@/api/im/user'
 
 // 树形数据
 const treeLoading = ref(false)

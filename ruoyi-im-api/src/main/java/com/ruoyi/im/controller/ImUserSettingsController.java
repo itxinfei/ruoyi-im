@@ -22,7 +22,7 @@ import javax.validation.Valid;
  */
 @Tag(name = "用户设置", description = "用户个人设置管理接口")
 @RestController
-@RequestMapping("/api/im/user/settings")
+@RequestMapping("/api/im/user-settings")
 public class ImUserSettingsController {
 
     private static final Logger log = LoggerFactory.getLogger(ImUserSettingsController.class);

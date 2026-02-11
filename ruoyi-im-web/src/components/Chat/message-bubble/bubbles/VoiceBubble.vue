@@ -263,11 +263,11 @@ watch(() => props.message?.id, () => {
     transition: background-color var(--dt-transition-base);
 
     .voice-play-btn {
-      color: var(--el-color-primary);
+      color: var(--dt-brand-color);
     }
 
     .wave-bar.active {
-      background-color: var(--el-color-primary);
+      background-color: var(--dt-brand-color);
     }
   }
 }
@@ -308,7 +308,7 @@ watch(() => props.message?.id, () => {
   transition: height var(--dt-transition-fast), background-color var(--dt-transition-base);
 
   &.active {
-    background-color: var(--el-color-primary);
+    background-color: var(--dt-brand-color);
   }
 }
 

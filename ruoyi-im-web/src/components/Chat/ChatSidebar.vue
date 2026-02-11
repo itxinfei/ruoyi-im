@@ -538,9 +538,9 @@ const tabs = computed(() => {
   return baseTabs
 })
 
-// 显示成员（取前8个）
+// 显示成员（取前12个）
 const displayMembers = computed(() => {
-  return members.value.slice(0, 8)
+  return members.value.slice(0, 12)
 })
 
 // 在线状态
@@ -1068,7 +1068,6 @@ watch(() => props.messages, () => {
 
   .avatar {
     border-radius: var(--dt-radius-md);
-    box-shadow: var(--dt-shadow-3);
   }
 
   .name {
@@ -1131,12 +1130,12 @@ watch(() => props.messages, () => {
       border-radius: var(--dt-radius-sm);
 
       &.owner {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+        background: #ff6b6b;
         color: #fff;
       }
 
       &.admin {
-        background: linear-gradient(135deg, #3296FA 0%, #40a9ff 100%);
+        background: #3296FA;
         color: #fff;
       }
     }
@@ -1219,7 +1218,6 @@ watch(() => props.messages, () => {
 
   .avatar-large {
     border-radius: var(--dt-radius-md);
-    box-shadow: var(--dt-shadow-lg);
   }
 
   .user-main {
@@ -1387,17 +1385,17 @@ watch(() => props.messages, () => {
       }
 
       &.type-image {
-        background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+        background: #e6f7ff;
         color: var(--dt-brand-color);
       }
 
       &.type-pdf {
-        background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%);
+        background: #fff1f0;
         color: #ff4d4f;
       }
 
       &.type-doc {
-        background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+        background: #f6ffed;
         color: #52c41a;
       }
     }

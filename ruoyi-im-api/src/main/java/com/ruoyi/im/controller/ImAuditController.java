@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "审计日志", description = "审计日志查询、统计、导出等接口")
 @RestController
-@RequestMapping("/api/im/audit")
+@RequestMapping("/api/im/audit-logs")
 public class ImAuditController {
 
     private final ImAuditService imAuditService;

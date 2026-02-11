@@ -28,7 +28,7 @@ import java.util.Map;
  */
 @Tag(name = "系统监控", description = "系统运行状态和性能指标接口")
 @RestController
-@RequestMapping("/api/im/monitor")
+@RequestMapping("/api/im/system-monitors")
 public class ImMonitorController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMonitorController.class);

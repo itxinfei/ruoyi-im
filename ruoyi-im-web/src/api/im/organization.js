@@ -9,7 +9,7 @@ import request from '../request'
  */
 export function getOrgTree() {
     return request({
-        url: '/api/im/organization/department/tree',
+        url: '/api/im/organizations/departments/tree',
         method: 'get'
     })
 }
@@ -21,7 +21,7 @@ export function getOrgTree() {
  */
 export function getDepartment(deptId) {
     return request({
-        url: `/api/im/organization/department/${deptId}`,
+        url: `/api/im/organizations/departments/${deptId}`,
         method: 'get'
     })
 }
@@ -33,7 +33,7 @@ export function getDepartment(deptId) {
  */
 export function getDepartmentMembers(deptId) {
     return request({
-        url: `/api/im/organization/department/${deptId}/members`,
+        url: `/api/im/organizations/departments/${deptId}/members`,
         method: 'get'
     })
 }
@@ -46,7 +46,7 @@ export function getDepartmentMembers(deptId) {
  */
 export function searchOrgMembers(params) {
     return request({
-        url: '/api/im/organization/search',
+        url: '/api/im/organizations/search',
         method: 'get',
         params
     })
@@ -59,7 +59,7 @@ export function searchOrgMembers(params) {
  */
 export function getDepartmentOnlineCount(deptId) {
     return request({
-        url: `/api/im/organization/department/${deptId}/online-count`,
+        url: `/api/im/organizations/departments/${deptId}/online-count`,
         method: 'get'
     })
 }
@@ -71,7 +71,7 @@ export function getDepartmentOnlineCount(deptId) {
  */
 export function getUserRelations(userId) {
     return request({
-        url: `/api/im/organization/user/${userId}/relations`,
+        url: `/api/im/organizations/users/${userId}/relations`,
         method: 'get'
     })
 }
@@ -84,7 +84,7 @@ export function getUserRelations(userId) {
  */
 export function searchDepartmentMembers(params) {
     return request({
-        url: '/api/im/organization/department/search-members',
+        url: '/api/im/organizations/departments/search-members',
         method: 'get',
         params
     })

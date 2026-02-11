@@ -4,6 +4,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImGroupPermissionService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.group.GroupPermissionVO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -15,8 +16,9 @@ import java.util.Map;
  *
  * @author ruoyi
  */
+@Tag(name = "群组权限管理", description = "群组权限配置相关接口")
 @RestController
-@RequestMapping("/api/im/group")
+@RequestMapping("/api/im/groups/permissions")
 public class ImGroupPermissionController {
 
     private final ImGroupPermissionService groupPermissionService;

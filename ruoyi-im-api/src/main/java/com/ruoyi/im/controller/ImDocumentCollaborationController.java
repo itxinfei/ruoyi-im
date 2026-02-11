@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Tag(name = "文档协作", description = "文档协作管理接口")
 @RestController
-@RequestMapping("/api/im/document/collaboration")
+@RequestMapping("/api/im/document-collaborations")
 public class ImDocumentCollaborationController {
 
     private static final Logger log = LoggerFactory.getLogger(ImDocumentCollaborationController.class);

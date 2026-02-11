@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Tag(name = "会话管理", description = "会话创建、管理、未读消息统计、会话置顶、免打扰等功能")
 @RestController
-@RequestMapping("/api/im/conversation")
+@RequestMapping("/api/im/conversations")
 @Validated
 public class ImConversationController {
 

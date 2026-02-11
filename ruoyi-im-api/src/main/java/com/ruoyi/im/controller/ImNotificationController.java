@@ -1,12 +1,17 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.dto.notification.NotificationSendRequest;
 import com.ruoyi.im.service.ImSystemNotificationService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 /**
@@ -17,7 +22,7 @@ import java.util.List;
  */
 @Tag(name = "通知管理", description = "系统通知接口")
 @RestController
-@RequestMapping("/api/im/notification")
+@RequestMapping("/api/im/notifications")
 public class ImNotificationController {
 
     private final ImSystemNotificationService notificationService;
@@ -57,7 +62,7 @@ public class ImNotificationController {
     @Operation(summary = "获取通知详情", description = "查询指定通知的详细信息")
     @GetMapping("/{id}")
     public Result<com.ruoyi.im.domain.ImSystemNotification> getNotificationById(
-            @PathVariable Long id) {
+            @PathVariable @NotNull(message = "通知ID不能为空") @Positive(message = "通知ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         com.ruoyi.im.domain.ImSystemNotification notification = notificationService.getNotificationById(id);
         return Result.success(notification);
@@ -87,7 +92,7 @@ public class ImNotificationController {
     @Operation(summary = "标记通知为已读", description = "将指定通知标记为已读")
     @PutMapping("/{id}/read")
     public Result<Void> markAsRead(
-            @PathVariable Long id) {
+            @PathVariable @NotNull(message = "通知ID不能为空") @Positive(message = "通知ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         notificationService.markAsRead(id, userId);
         return Result.success("标记已读成功");
@@ -117,7 +122,7 @@ public class ImNotificationController {
     @Operation(summary = "删除通知", description = "删除指定的通知")
     @DeleteMapping("/{id}")
     public Result<Void> deleteNotification(
-            @PathVariable Long id) {
+            @PathVariable @NotNull(message = "通知ID不能为空") @Positive(message = "通知ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         notificationService.deleteNotification(id, userId);
         return Result.success("删除成功");
@@ -133,7 +138,7 @@ public class ImNotificationController {
     @Operation(summary = "批量删除通知", description = "批量删除多条通知")
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteNotifications(
-            @RequestBody List<Long> ids) {
+            @RequestBody @NotEmpty(message = "通知ID列表不能为空") List<Long> ids) {
         Long userId = SecurityUtils.getLoginUserId();
         for (Long id : ids) {
             notificationService.deleteNotification(id, userId);
@@ -159,24 +164,20 @@ public class ImNotificationController {
      * 发送通知
      * 向指定用户发送通知（管理员或系统调用）
      *
-     * @param receiverId 接收者ID
-     * @param type 通知类型
-     * @param title 通知标题
-     * @param content 通知内容
-     * @param relatedId 关联ID
-     * @param relatedType 关联类型
+     * @param request 发送通知请求
      * @return 通知ID
      */
     @Operation(summary = "发送通知", description = "向指定用户发送通知")
     @PostMapping("/send")
-    public Result<Long> sendNotification(
-            @RequestParam Long receiverId,
-            @RequestParam String type,
-            @RequestParam String title,
-            @RequestParam String content,
-            @RequestParam(required = false) Long relatedId,
-            @RequestParam(required = false) String relatedType) {
-        Long notificationId = notificationService.sendNotification(receiverId, type, title, content, relatedId, relatedType);
+    public Result<Long> sendNotification(@Valid @RequestBody NotificationSendRequest request) {
+        Long notificationId = notificationService.sendNotification(
+                request.getReceiverId(),
+                request.getType(),
+                request.getTitle(),
+                request.getContent(),
+                request.getRelatedId(),
+                request.getRelatedType()
+        );
         return Result.success("发送成功", notificationId);
     }
 }

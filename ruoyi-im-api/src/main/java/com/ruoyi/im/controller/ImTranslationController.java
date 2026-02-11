@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Tag(name = "消息翻译", description = "消息翻译接口")
 @RestController
-@RequestMapping("/api/im/translation")
+@RequestMapping("/api/im/translations")
 public class ImTranslationController {
 
     private final ImTranslationService translationService;

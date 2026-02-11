@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Tag(name = "群组文件管理", description = "群组文件上传、查询、编辑、删除等接口")
 @RestController
-@RequestMapping("/api/im/group/file")
+@RequestMapping("/api/im/groups/files")
 public class ImGroupFileController {
 
     private final ImGroupFileService groupFileService;

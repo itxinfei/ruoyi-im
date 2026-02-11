@@ -17,7 +17,7 @@ import java.util.Map;
  */
 @Tag(name = "数据备份", description = "数据备份、恢复、导出等接口")
 @RestController
-@RequestMapping("/api/im/backup")
+@RequestMapping("/api/im/backups")
 public class ImBackupController {
 
     private final ImBackupService imBackupService;

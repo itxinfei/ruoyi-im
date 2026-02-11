@@ -21,7 +21,7 @@ import javax.validation.Valid;
  */
 @Tag(name = "链接预览", description = "链接预览解析接口")
 @RestController
-@RequestMapping("/api/im/link")
+@RequestMapping("/api/im/link-previews")
 public class ImLinkPreviewController {
 
     private static final Logger log = LoggerFactory.getLogger(ImLinkPreviewController.class);

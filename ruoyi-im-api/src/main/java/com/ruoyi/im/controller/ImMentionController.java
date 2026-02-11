@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Tag(name = "@提及管理", description = "群组@用户、@所有人等功能接口")
 @RestController
-@RequestMapping("/api/im/mention")
+@RequestMapping("/api/im/mentions")
 public class ImMentionController {
 
     private static final Logger log = LoggerFactory.getLogger(ImMentionController.class);

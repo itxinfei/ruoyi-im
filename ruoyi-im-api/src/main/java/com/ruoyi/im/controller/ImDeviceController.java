@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @Tag(name = "设备管理", description = "设备注册、心跳、状态查询等接口")
 @RestController
-@RequestMapping("/api/im/device")
+@RequestMapping("/api/im/devices")
 public class ImDeviceController {
 
     private static final Logger log = LoggerFactory.getLogger(ImDeviceController.class);

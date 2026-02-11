@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "群组公告管理", description = "群组公告发布、查询、编辑、删除等接口")
 @RestController
-@RequestMapping("/api/im/group/announcement")
+@RequestMapping("/api/im/groups/announcements")
 public class ImGroupAnnouncementController {
 
     private final ImGroupAnnouncementService groupAnnouncementService;

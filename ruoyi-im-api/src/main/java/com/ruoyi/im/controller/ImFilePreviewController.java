@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "文件预览管理", description = "文件在线预览、缩略图生成等接口")
 @RestController
-@RequestMapping("/api/im/file/preview")
+@RequestMapping("/api/im/file-previews")
 public class ImFilePreviewController {
 
     private final ImFilePreviewService filePreviewService;

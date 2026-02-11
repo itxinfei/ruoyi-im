@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "外部联系人", description = "外部联系人管理接口")
 @RestController
-@RequestMapping("/api/im/external-contact")
+@RequestMapping("/api/im/external-contacts")
 public class ImExternalContactController {
 
     private final ImExternalContactService externalContactService;

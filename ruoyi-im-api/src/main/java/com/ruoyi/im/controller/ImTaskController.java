@@ -27,7 +27,7 @@ import java.util.Map;
  */
 @Tag(name = "任务管理", description = "任务创建、分配、跟踪、统计等接口")
 @RestController
-@RequestMapping("/api/im/task")
+@RequestMapping("/api/im/tasks")
 public class ImTaskController {
 
     private final ImTaskService taskService;

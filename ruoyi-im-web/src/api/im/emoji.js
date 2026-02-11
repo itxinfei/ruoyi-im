@@ -6,7 +6,7 @@ import request from '@/api/request'
 // 获取用户的表情列表
 export function getEmojiList() {
   return request({
-    url: '/api/im/emoji/list',
+    url: '/api/im/emojis/list',
     method: 'get'
   })
 }
@@ -14,7 +14,7 @@ export function getEmojiList() {
 // 获取指定分类的表情列表
 export function getEmojisByCategory(category) {
   return request({
-    url: `/api/im/emoji/category/${category}`,
+    url: `/api/im/emojis/category/${category}`,
     method: 'get'
   })
 }
@@ -22,7 +22,7 @@ export function getEmojisByCategory(category) {
 // 获取公开的表情列表
 export function getPublicEmojis() {
   return request({
-    url: '/api/im/emoji/public',
+    url: '/api/im/emojis/public',
     method: 'get'
   })
 }
@@ -30,7 +30,7 @@ export function getPublicEmojis() {
 // 上传自定义表情
 export function uploadEmoji(data) {
   return request({
-    url: '/api/im/emoji/upload',
+    url: '/api/im/emojis/upload',
     method: 'post',
     data: data
   })
@@ -39,7 +39,7 @@ export function uploadEmoji(data) {
 // 删除自定义表情
 export function deleteEmoji(emojiId) {
   return request({
-    url: `/api/im/emoji/${emojiId}`,
+    url: `/api/im/emojis/${emojiId}`,
     method: 'delete'
   })
 }
@@ -47,7 +47,7 @@ export function deleteEmoji(emojiId) {
 // 使用表情（增加使用次数）
 export function useEmoji(emojiId) {
   return request({
-    url: `/api/im/emoji/use/${emojiId}`,
+    url: `/api/im/emojis/use/${emojiId}`,
     method: 'post'
   })
 }
@@ -55,7 +55,7 @@ export function useEmoji(emojiId) {
 // 分享表情
 export function shareEmoji(emojiId) {
   return request({
-    url: `/api/im/emoji/share/${emojiId}`,
+    url: `/api/im/emojis/share/${emojiId}`,
     method: 'post'
   })
 }

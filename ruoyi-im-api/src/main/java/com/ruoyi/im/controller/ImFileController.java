@@ -34,7 +34,7 @@ import java.util.List;
  */
 @Tag(name = "文件管理", description = "文件上传、下载、分享等接口")
 @RestController
-@RequestMapping("/api/im/file")
+@RequestMapping("/api/im/files")
 @Validated
 public class ImFileController {
 

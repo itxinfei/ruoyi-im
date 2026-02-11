@@ -6,6 +6,7 @@ import com.ruoyi.im.dto.meeting.ImMeetingBookingRequest;
 import com.ruoyi.im.dto.meeting.ImMeetingRoomCreateRequest;
 import com.ruoyi.im.dto.meeting.ImMeetingRoomQueryRequest;
 import com.ruoyi.im.dto.meeting.ImMeetingRoomUpdateRequest;
+import com.ruoyi.im.dto.meeting.MeetingFeedbackRequest;
 import com.ruoyi.im.service.ImMeetingRoomService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.meeting.ImMeetingBookingVO;
@@ -16,6 +17,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +31,7 @@ import java.util.Map;
  */
 @Tag(name = "会议室管理", description = "会议室管理、预订、签到等接口")
 @RestController
-@RequestMapping("/api/im/meeting-room")
+@RequestMapping("/api/im/meeting-rooms")
 public class ImMeetingRoomController {
 
     private final ImMeetingRoomService meetingRoomService;
@@ -80,7 +84,7 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "删除会议室", description = "删除指定会议室")
     @DeleteMapping("/{roomId}")
-    public Result<Void> deleteRoom(@PathVariable Long roomId) {
+    public Result<Void> deleteRoom(@PathVariable @NotNull(message = "会议室ID不能为空") @Positive(message = "会议室ID必须为正数") Long roomId) {
         Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.deleteRoom(roomId, userId);
         return Result.success("删除成功");
@@ -95,7 +99,7 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "获取会议室详情", description = "查询指定会议室的详细信息")
     @GetMapping("/{roomId}")
-    public Result<ImMeetingRoomVO> getRoomDetail(@PathVariable Long roomId) {
+    public Result<ImMeetingRoomVO> getRoomDetail(@PathVariable @NotNull(message = "会议室ID不能为空") @Positive(message = "会议室ID必须为正数") Long roomId) {
         ImMeetingRoomVO detail = meetingRoomService.getRoomDetail(roomId);
         return Result.success(detail);
     }
@@ -151,7 +155,7 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "取消预订", description = "取消指定的预订")
     @PostMapping("/booking/{bookingId}/cancel")
-    public Result<Void> cancelBooking(@PathVariable Long bookingId) {
+    public Result<Void> cancelBooking(@PathVariable @NotNull(message = "预订ID不能为空") @Positive(message = "预订ID必须为正数") Long bookingId) {
         Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.cancelBooking(bookingId, userId);
         return Result.success("取消成功");
@@ -166,7 +170,7 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "确认预订", description = "确认待确认的预订")
     @PostMapping("/booking/{bookingId}/confirm")
-    public Result<Void> confirmBooking(@PathVariable Long bookingId) {
+    public Result<Void> confirmBooking(@PathVariable @NotNull(message = "预订ID不能为空") @Positive(message = "预订ID必须为正数") Long bookingId) {
         Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.confirmBooking(bookingId, userId);
         return Result.success("确认成功");
@@ -181,7 +185,7 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "签到", description = "会议开始时签到")
     @PostMapping("/booking/{bookingId}/check-in")
-    public Result<Void> checkIn(@PathVariable Long bookingId) {
+    public Result<Void> checkIn(@PathVariable @NotNull(message = "预订ID不能为空") @Positive(message = "预订ID必须为正数") Long bookingId) {
         Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.checkIn(bookingId, userId);
         return Result.success("签到成功");
@@ -196,7 +200,7 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "签退", description = "会议结束时签退")
     @PostMapping("/booking/{bookingId}/check-out")
-    public Result<Void> checkOut(@PathVariable Long bookingId) {
+    public Result<Void> checkOut(@PathVariable @NotNull(message = "预订ID不能为空") @Positive(message = "预订ID必须为正数") Long bookingId) {
         Long userId = SecurityUtils.getLoginUserId();
         meetingRoomService.checkOut(bookingId, userId);
         return Result.success("签退成功");
@@ -211,7 +215,7 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "获取预订详情", description = "查询指定预订的详细信息")
     @GetMapping("/booking/{bookingId}")
-    public Result<ImMeetingBookingVO> getBookingDetail(@PathVariable Long bookingId) {
+    public Result<ImMeetingBookingVO> getBookingDetail(@PathVariable @NotNull(message = "预订ID不能为空") @Positive(message = "预订ID必须为正数") Long bookingId) {
         Long userId = SecurityUtils.getLoginUserId();
         ImMeetingBookingVO detail = meetingRoomService.getBookingDetail(bookingId, userId);
         return Result.success(detail);
@@ -241,8 +245,8 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "获取会议室日程", description = "查询指定会议室在某一天的日程安排")
     @GetMapping("/{roomId}/schedule")
-    public Result<ImMeetingRoomScheduleVO> getRoomSchedule(@PathVariable Long roomId,
-                                                             @RequestParam String date) {
+    public Result<ImMeetingRoomScheduleVO> getRoomSchedule(@PathVariable @NotNull(message = "会议室ID不能为空") @Positive(message = "会议室ID必须为正数") Long roomId,
+                                                             @RequestParam @NotBlank(message = "日期不能为空") String date) {
         ImMeetingRoomScheduleVO schedule = meetingRoomService.getRoomSchedule(roomId, date);
         return Result.success(schedule);
     }
@@ -258,9 +262,9 @@ public class ImMeetingRoomController {
      */
     @Operation(summary = "检查会议室可用性", description = "检查指定时间段会议室是否可用")
     @GetMapping("/{roomId}/availability")
-    public Result<Boolean> checkAvailability(@PathVariable Long roomId,
-                                              @RequestParam String startTime,
-                                              @RequestParam String endTime) {
+    public Result<Boolean> checkAvailability(@PathVariable @NotNull(message = "会议室ID不能为空") @Positive(message = "会议室ID必须为正数") Long roomId,
+                                              @RequestParam @NotBlank(message = "开始时间不能为空") String startTime,
+                                              @RequestParam @NotBlank(message = "结束时间不能为空") String endTime) {
         boolean available = meetingRoomService.checkAvailability(
                 roomId,
                 java.time.LocalDateTime.parse(startTime, java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME),
@@ -274,17 +278,15 @@ public class ImMeetingRoomController {
      * 提交会议后的反馈和评分
      *
      * @param bookingId 预订ID
-     * @param feedback 反馈内容
-     * @param rating 评分（1-5分）
+     * @param request 反馈请求
      * @return 操作结果
      */
     @Operation(summary = "提交会议反馈", description = "提交会议后的反馈和评分")
     @PostMapping("/booking/{bookingId}/feedback")
-    public Result<Void> submitFeedback(@PathVariable Long bookingId,
-                                        @RequestParam String feedback,
-                                        @RequestParam Integer rating) {
+    public Result<Void> submitFeedback(@PathVariable @NotNull(message = "预订ID不能为空") @Positive(message = "预订ID必须为正数") Long bookingId,
+                                        @Valid @RequestBody MeetingFeedbackRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        meetingRoomService.submitFeedback(bookingId, feedback, rating, userId);
+        meetingRoomService.submitFeedback(bookingId, request.getFeedback(), request.getRating(), userId);
         return Result.success("提交成功");
     }
 

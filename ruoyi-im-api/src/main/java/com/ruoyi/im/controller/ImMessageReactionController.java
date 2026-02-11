@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Tag(name = "消息反应管理", description = "消息表情反应、@提及等接口")
 @RestController
-@RequestMapping("/api/im/message/reaction")
+@RequestMapping("/api/im/messages/reactions")
 @Validated
 public class ImMessageReactionController {
 

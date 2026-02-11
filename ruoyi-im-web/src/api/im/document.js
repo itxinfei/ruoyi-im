@@ -8,7 +8,7 @@ import request from '../request'
  */
 export function getDocumentList(params) {
   return request({
-    url: '/api/im/document/list',
+    url: '/api/im/documents/list',
     method: 'get',
     params
   })
@@ -19,7 +19,7 @@ export function getDocumentList(params) {
  */
 export function getDocumentDetail(id) {
   return request({
-    url: `/api/im/document/${id}`,
+    url: `/api/im/documents/${id}`,
     method: 'get'
   })
 }
@@ -29,7 +29,7 @@ export function getDocumentDetail(id) {
  */
 export function createDocument(data) {
   return request({
-    url: '/api/im/document/create',
+    url: '/api/im/documents/create',
     method: 'post',
     data
   })
@@ -40,7 +40,7 @@ export function createDocument(data) {
  */
 export function updateDocument(id, data) {
   return request({
-    url: `/api/im/document/${id}`,
+    url: `/api/im/documents/${id}`,
     method: 'put',
     data
   })
@@ -51,7 +51,7 @@ export function updateDocument(id, data) {
  */
 export function deleteDocument(id) {
   return request({
-    url: `/api/im/document/${id}`,
+    url: `/api/im/documents/${id}`,
     method: 'delete'
   })
 }
@@ -61,7 +61,7 @@ export function deleteDocument(id) {
  */
 export function getDocumentVersions(id) {
   return request({
-    url: `/api/im/document/${id}/versions`,
+    url: `/api/im/documents/${id}/versions`,
     method: 'get'
   })
 }
@@ -71,7 +71,7 @@ export function getDocumentVersions(id) {
  */
 export function restoreDocumentVersion(id, versionId) {
   return request({
-    url: `/api/im/document/${id}/versions/${versionId}/restore`,
+    url: `/api/im/documents/${id}/versions/${versionId}/restore`,
     method: 'post'
   })
 }
@@ -81,7 +81,7 @@ export function restoreDocumentVersion(id, versionId) {
  */
 export function shareDocument(data) {
   return request({
-    url: '/api/im/document/share',
+    url: '/api/im/documents/share',
     method: 'post',
     data
   })
@@ -92,7 +92,7 @@ export function shareDocument(data) {
  */
 export function getDocumentComments(id) {
   return request({
-    url: `/api/im/document/${id}/comments`,
+    url: `/api/im/documents/${id}/comments`,
     method: 'get'
   })
 }
@@ -102,7 +102,7 @@ export function getDocumentComments(id) {
  */
 export function addDocumentComment(id, data) {
   return request({
-    url: `/api/im/document/${id}/comments`,
+    url: `/api/im/documents/${id}/comments`,
     method: 'post',
     data
   })
@@ -115,7 +115,7 @@ export function addDocumentComment(id, data) {
  */
 export function addCollaborators(data) {
   return request({
-    url: '/api/im/document/collaboration/collaborators/add',
+    url: '/api/im/documents/collaboration/collaborators/add',
     method: 'post',
     data
   })
@@ -126,7 +126,7 @@ export function addCollaborators(data) {
  */
 export function removeCollaborator(documentId, targetUserId) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/collaborators/${targetUserId}`,
+    url: `/api/im/documents/collaboration/${documentId}/collaborators/${targetUserId}`,
     method: 'delete'
   })
 }
@@ -136,7 +136,7 @@ export function removeCollaborator(documentId, targetUserId) {
  */
 export function updateCollaboratorPermission(documentId, targetUserId, permission) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/collaborators/${targetUserId}/permission`,
+    url: `/api/im/documents/collaboration/${documentId}/collaborators/${targetUserId}/permission`,
     method: 'put',
     params: { permission }
   })
@@ -147,7 +147,7 @@ export function updateCollaboratorPermission(documentId, targetUserId, permissio
  */
 export function getCollaborators(documentId) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/collaborators`,
+    url: `/api/im/documents/collaboration/${documentId}/collaborators`,
     method: 'get'
   })
 }
@@ -157,7 +157,7 @@ export function getCollaborators(documentId) {
  */
 export function joinDocument(documentId) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/join`,
+    url: `/api/im/documents/collaboration/${documentId}/join`,
     method: 'post'
   })
 }
@@ -167,7 +167,7 @@ export function joinDocument(documentId) {
  */
 export function leaveDocument(documentId) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/leave`,
+    url: `/api/im/documents/collaboration/${documentId}/leave`,
     method: 'post'
   })
 }
@@ -177,7 +177,7 @@ export function leaveDocument(documentId) {
  */
 export function updateCursor(documentId, position, selection) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/cursor`,
+    url: `/api/im/documents/collaboration/${documentId}/cursor`,
     method: 'put',
     params: { position, selection }
   })
@@ -188,7 +188,7 @@ export function updateCursor(documentId, position, selection) {
  */
 export function getOnlineEditors(documentId) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/online`,
+    url: `/api/im/documents/collaboration/${documentId}/online`,
     method: 'get'
   })
 }
@@ -198,7 +198,7 @@ export function getOnlineEditors(documentId) {
  */
 export function sendHeartbeat(documentId) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/heartbeat`,
+    url: `/api/im/documents/collaboration/${documentId}/heartbeat`,
     method: 'post'
   })
 }
@@ -208,7 +208,7 @@ export function sendHeartbeat(documentId) {
  */
 export function getOperationLogs(documentId, limit = 100) {
   return request({
-    url: `/api/im/document/collaboration/${documentId}/logs`,
+    url: `/api/im/documents/collaboration/${documentId}/logs`,
     method: 'get',
     params: { limit }
   })

@@ -8,12 +8,35 @@ import request from '../request'
 export function getUserInfo(userId) {
   if (userId) {
     return request({
-      url: `/api/im/user/${userId}`,
+      url: `/api/im/users/${userId}`,
       method: 'get'
     })
   }
   return request({
-    url: '/api/im/user/info',
+    url: '/api/im/users/me',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取当前用户信息
+ * @returns {Promise}
+ */
+export function getCurrentUser() {
+  return request({
+    url: '/api/im/users/me',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取用户详情
+ * @param {string|number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function getUserDetail(userId) {
+  return request({
+    url: `/api/im/users/${userId}`,
     method: 'get'
   })
 }
@@ -26,20 +49,36 @@ export function getUserInfo(userId) {
  */
 export function updateUser(userId, data) {
   return request({
-    url: `/api/im/user/${userId}`,
+    url: `/api/im/users/${userId}`,
     method: 'put',
     data
   })
 }
 
 /**
- * 搜索用户
+ * 修改用户状态
+ * @param {string|number} userId - 用户ID
+ * @param {Object} data - 状态数据
+ * @param {string} data.status - 状态: ENABLED/DISABLED
+ * @returns {Promise}
+ */
+export function changeUserStatus(userId, data) {
+  return request({
+    url: `/api/im/users/${userId}/status`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 搜索用户（已废弃）
+ * @deprecated 请使用全局搜索接口 /api/im/search/contacts
  * @param {string} keyword - 搜索关键词
  * @returns {Promise}
  */
 export function searchUsers(keyword) {
   return request({
-    url: '/api/im/user/search',
+    url: '/api/im/users/search',
     method: 'get',
     params: {
       keyword
@@ -48,22 +87,56 @@ export function searchUsers(keyword) {
 }
 
 /**
- * 搜索用户（API 别名）
- * @param {string} keyword - 搜索关键词
+ * 获取用户列表
+ * @param {Object} params - 查询参数
+ * @param {string} params.keyword - 搜索关键词
+ * @param {number} params.pageNum - 页码
+ * @param {number} params.pageSize - 每页数量
  * @returns {Promise}
  */
-export function searchUsersApi(keyword) {
-  return searchUsers(keyword)
+export function getUserList(params) {
+  return request({
+    url: '/api/im/users',
+    method: 'get',
+    params
+  })
 }
 
 /**
- * 获取用户详情
+ * 获取所有用户列表
+ * @param {string} keyword - 可选，搜索关键词
+ * @returns {Promise}
+ */
+export function getAllUsers(keyword) {
+  return request({
+    url: '/api/im/users',
+    method: 'get',
+    params: { keyword }
+  })
+}
+
+/**
+ * 批量获取用户信息
+ * @param {Array<number>|string} ids - 用户ID列表或逗号分隔的字符串
+ * @returns {Promise}
+ */
+export function getBatchUsers(ids) {
+  const idsStr = Array.isArray(ids) ? ids.join(',') : ids
+  return request({
+    url: '/api/im/users/batch',
+    method: 'get',
+    params: { ids: idsStr }
+  })
+}
+
+/**
+ * 获取用户的好友列表
  * @param {string|number} userId - 用户ID
  * @returns {Promise}
  */
-export function getUserDetail(userId) {
+export function getUserFriends(userId) {
   return request({
-    url: `/api/im/user/${userId}`,
+    url: `/api/im/users/${userId}/friends`,
     method: 'get'
   })
 }
@@ -75,7 +148,7 @@ export function getUserDetail(userId) {
  */
 export function uploadAvatar(data) {
   return request({
-    url: '/api/im/user/avatar',
+    url: '/api/im/users/avatar',
     method: 'post',
     data,
     headers: {
@@ -86,13 +159,14 @@ export function uploadAvatar(data) {
 
 /**
  * 获取聊天背景设置
- * @param {string|number} userId - 用户ID，不传则获取当前用户
+ * @param {string|number} conversationId - 可选，会话ID
  * @returns {Promise}
  */
-export function getChatBackground(userId) {
+export function getChatBackground(conversationId) {
   return request({
-    url: userId ? `/api/im/user/${userId}/background` : '/api/im/user/background',
-    method: 'get'
+    url: '/api/im/users/me/background',
+    method: 'get',
+    params: conversationId ? { conversationId } : {}
   })
 }
 
@@ -106,7 +180,7 @@ export function getChatBackground(userId) {
  */
 export function setChatBackground(data) {
   return request({
-    url: '/api/im/user/background',
+    url: '/api/im/users/me/background',
     method: 'put',
     data
   })
@@ -119,9 +193,22 @@ export function setChatBackground(data) {
  */
 export function clearChatBackground(conversationId) {
   return request({
-    url: '/api/im/user/background',
+    url: '/api/im/users/me/background',
     method: 'delete',
     params: conversationId ? { conversationId } : {}
+  })
+}
+
+/**
+ * 扫描二维码
+ * @param {string} qrData - 二维码内容
+ * @returns {Promise}
+ */
+export function scanQRCode(qrData) {
+  return request({
+    url: '/api/im/users/scan-qrcode',
+    method: 'post',
+    data: { qrData }
   })
 }
 
@@ -152,31 +239,5 @@ export function sendSmsCode(data) {
     url: '/api/im/auth/sms-code',
     method: 'post',
     data
-  })
-}
-
-/**
- * 扫描二维码
- * @param {string} qrData - 二维码内容
- * @returns {Promise}
- */
-export function scanQRCode(qrData) {
-  return request({
-    url: '/api/im/user/scan-qrcode',
-    method: 'post',
-    data: { qrData }
-  })
-}
-
-/**
- * 获取所有用户列表
- * @param {string} keyword - 可选，搜索关键词
- * @returns {Promise}
- */
-export function getAllUsers(keyword) {
-  return request({
-    url: '/api/im/user/list',
-    method: 'get',
-    params: { keyword }
   })
 }

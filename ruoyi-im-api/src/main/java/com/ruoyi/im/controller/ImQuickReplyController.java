@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Tag(name = "快捷回复", description = "快捷回复管理接口")
 @RestController
-@RequestMapping("/api/im/quick-reply")
+@RequestMapping("/api/im/quick-replies")
 public class ImQuickReplyController {
 
     private static final Logger log = LoggerFactory.getLogger(ImQuickReplyController.class);

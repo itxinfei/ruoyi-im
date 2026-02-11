@@ -22,7 +22,7 @@ import javax.validation.Valid;
  */
 @Tag(name = "拍一拍", description = "拍一拍互动接口")
 @RestController
-@RequestMapping("/api/im/nudge")
+@RequestMapping("/api/im/nudges")
 public class ImNudgeController {
 
     private static final Logger log = LoggerFactory.getLogger(ImNudgeController.class);

@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "考勤打卡", description = "考勤打卡、打卡记录、统计等接口")
 @RestController
-@RequestMapping("/api/im/attendance")
+@RequestMapping("/api/im/attendances")
 public class ImAttendanceController {
 
     private final ImAttendanceService attendanceService;

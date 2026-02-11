@@ -17,7 +17,7 @@ import request from '../request'
  */
 export function getMailList(folder, params) {
   return request({
-    url: '/api/im/email/list',
+    url: '/api/im/emails',
     method: 'get',
     params: {
       ...params,
@@ -33,7 +33,7 @@ export function getMailList(folder, params) {
  */
 export function getMailDetail(id) {
   return request({
-    url: `/api/im/email/${id}`,
+    url: `/api/im/emails/${id}`,
     method: 'get'
   })
 }
@@ -51,7 +51,7 @@ export function getMailDetail(id) {
  */
 export function sendMail(data) {
   return request({
-    url: '/api/im/email/send',
+    url: '/api/im/emails',
     method: 'post',
     data: {
       toIds: data.toIds || [],
@@ -67,26 +67,33 @@ export function sendMail(data) {
 /**
  * 保存草稿
  * @param {Object} data - 草稿数据
+ * @param {string} data.subject - 邮件主题
+ * @param {string} data.content - 邮件内容
  * @returns {Promise}
  */
 export function saveDraft(data) {
   return request({
-    url: '/api/im/email/draft',
+    url: '/api/im/emails/draft',
     method: 'post',
-    data
+    data: {
+      subject: data.subject,
+      content: data.content
+    }
   })
 }
 
 /**
- * 删除邮件
+ * 删除邮件（移至垃圾箱）
  * @param {number|Array<number>} id - 邮件ID或ID数组
  * @returns {Promise}
  */
 export function deleteMail(id) {
   return request({
-    url: '/api/im/email/delete',
-    method: 'post',
-    data: { ids: Array.isArray(id) ? id : [id] }
+    url: '/api/im/emails',
+    method: 'delete',
+    data: {
+      ids: Array.isArray(id) ? id : [id]
+    }
   })
 }
 
@@ -97,9 +104,11 @@ export function deleteMail(id) {
  */
 export function markAsRead(id) {
   return request({
-    url: '/api/im/email/read',
-    method: 'post',
-    data: { ids: Array.isArray(id) ? id : [id] }
+    url: '/api/im/emails/read',
+    method: 'put',
+    data: {
+      ids: Array.isArray(id) ? id : [id]
+    }
   })
 }
 
@@ -110,9 +119,11 @@ export function markAsRead(id) {
  */
 export function markAsUnread(id) {
   return request({
-    url: '/api/im/email/unread',
-    method: 'post',
-    data: { ids: Array.isArray(id) ? id : [id] }
+    url: '/api/im/emails/unread',
+    method: 'put',
+    data: {
+      ids: Array.isArray(id) ? id : [id]
+    }
   })
 }
 
@@ -124,11 +135,14 @@ export function markAsUnread(id) {
  */
 export function moveToFolder(id, folder) {
   return request({
-    url: '/api/im/email/move',
-    method: 'post',
-    data: {
+    url: '/api/im/emails/move',
+    method: 'put',
+    params: {
       ids: Array.isArray(id) ? id : [id],
       folder: folder?.toUpperCase()
+    },
+    data: {
+      ids: Array.isArray(id) ? id : [id]
     }
   })
 }
@@ -141,9 +155,9 @@ export function moveToFolder(id, folder) {
  */
 export function starMail(id, starred) {
   return request({
-    url: `/api/im/email/${id}/star`,
+    url: `/api/im/emails/${id}/star`,
     method: 'put',
-    data: { starred }
+    params: { starred }
   })
 }
 
@@ -156,7 +170,7 @@ export function starMail(id, starred) {
  */
 export function uploadAttachment(formData) {
   return request({
-    url: '/api/im/email/attachment/upload',
+    url: '/api/im/emails/attachment/upload',
     method: 'post',
     data: formData,
     headers: {
@@ -172,7 +186,7 @@ export function uploadAttachment(formData) {
  */
 export function downloadAttachment(attachmentId) {
   return request({
-    url: `/api/im/email/attachment/${attachmentId}/download`,
+    url: `/api/im/emails/attachment/${attachmentId}/download`,
     method: 'get',
     responseType: 'blob'
   })
@@ -185,7 +199,19 @@ export function downloadAttachment(attachmentId) {
  */
 export function deleteAttachment(attachmentId) {
   return request({
-    url: `/api/im/email/attachment/${attachmentId}`,
+    url: `/api/im/emails/attachment/${attachmentId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 永久删除邮件
+ * @param {number} id - 邮件ID
+ * @returns {Promise}
+ */
+export function permanentlyDeleteMail(id) {
+  return request({
+    url: `/api/im/emails/${id}/permanent`,
     method: 'delete'
   })
 }
@@ -203,7 +229,7 @@ export function deleteAttachment(attachmentId) {
  */
 export function searchMail(params) {
   return request({
-    url: '/api/im/email/search',
+    url: '/api/im/emails/search',
     method: 'get',
     params
   })
@@ -217,7 +243,7 @@ export function searchMail(params) {
  */
 export function getUnreadCount() {
   return request({
-    url: '/api/im/email/unread-count',
+    url: '/api/im/emails/unread-count',
     method: 'get'
   })
 }
@@ -228,7 +254,123 @@ export function getUnreadCount() {
  */
 export function getFolderStats() {
   return request({
-    url: '/api/im/email/folder-stats',
+    url: '/api/im/emails/folder-stats',
+    method: 'get'
+  })
+}
+
+// ==================== 邮件模板管理 ====================
+
+/**
+ * 获取邮件模板列表
+ * @param {string} category - 分类（可选）
+ * @returns {Promise}
+ */
+export function getEmailTemplates(category) {
+  return request({
+    url: '/api/im/emails/template/list',
+    method: 'get',
+    params: category ? { category } : {}
+  })
+}
+
+/**
+ * 获取邮件模板详情
+ * @param {string} templateCode - 模板编码
+ * @returns {Promise}
+ */
+export function getEmailTemplate(templateCode) {
+  return request({
+    url: `/api/im/emails/template/${templateCode}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 预览邮件模板
+ * @param {string} templateCode - 模板编码
+ * @returns {Promise}
+ */
+export function previewEmailTemplate(templateCode) {
+  return request({
+    url: `/api/im/emails/template/${templateCode}/preview`,
+    method: 'get'
+  })
+}
+
+/**
+ * 创建邮件模板
+ * @param {Object} data - 模板数据
+ * @returns {Promise}
+ */
+export function createEmailTemplate(data) {
+  return request({
+    url: '/api/im/emails/template',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新邮件模板
+ * @param {number} templateId - 模板ID
+ * @param {Object} data - 模板数据
+ * @returns {Promise}
+ */
+export function updateEmailTemplate(templateId, data) {
+  return request({
+    url: `/api/im/emails/template/${templateId}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 删除邮件模板
+ * @param {number} templateId - 模板ID
+ * @returns {Promise}
+ */
+export function deleteEmailTemplate(templateId) {
+  return request({
+    url: `/api/im/emails/template/${templateId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 启用/禁用邮件模板
+ * @param {number} templateId - 模板ID
+ * @param {boolean} enabled - 是否启用
+ * @returns {Promise}
+ */
+export function setEmailTemplateEnabled(templateId, enabled) {
+  return request({
+    url: `/api/im/emails/template/${templateId}/enabled`,
+    method: 'put',
+    params: { enabled }
+  })
+}
+
+/**
+ * 复制邮件模板
+ * @param {number} templateId - 模板ID
+ * @returns {Promise}
+ */
+export function copyEmailTemplate(templateId) {
+  return request({
+    url: `/api/im/emails/template/${templateId}/copy`,
+    method: 'post'
+  })
+}
+
+/**
+ * 获取模板变量说明
+ * @param {string} templateCode - 模板编码
+ * @returns {Promise}
+ */
+export function getEmailTemplateVariables(templateCode) {
+  return request({
+    url: `/api/im/emails/template/${templateCode}/variables`,
     method: 'get'
   })
 }

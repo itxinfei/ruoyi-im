@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.dto.announcement.AnnouncementCommentRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementCreateRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementQueryRequest;
 import com.ruoyi.im.dto.announcement.ImAnnouncementUpdateRequest;
@@ -25,7 +26,7 @@ import java.util.Map;
  */
 @Tag(name = "公告管理", description = "公告发布、管理、已读统计等接口")
 @RestController
-@RequestMapping("/api/im/announcement")
+@RequestMapping("/api/im/announcements")
 public class ImAnnouncementController {
 
     private final ImAnnouncementService announcementService;
@@ -237,16 +238,15 @@ public class ImAnnouncementController {
      * 为指定公告添加评论
      *
      * @param announcementId 公告ID
-     * @param content 评论内容
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param request 评论请求
      * @return 评论ID
      */
     @Operation(summary = "添加公告评论", description = "为指定公告添加评论")
     @PostMapping("/{announcementId}/comment")
     public Result<Long> addComment(@PathVariable Long announcementId,
-                                  @RequestParam String content) {
+                                  @Valid @RequestBody AnnouncementCommentRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        Long commentId = announcementService.addComment(announcementId, content, userId);
+        Long commentId = announcementService.addComment(announcementId, request.getContent(), userId);
         return Result.success("评论成功", commentId);
     }
 

@@ -20,7 +20,7 @@ import javax.validation.Valid;
  */
 @Tag(name = "消息搜索", description = "消息搜索接口")
 @RestController
-@RequestMapping("/api/im/message/search")
+@RequestMapping("/api/im/messages/search")
 @Validated
 public class ImMessageSearchController {
 

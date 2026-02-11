@@ -67,13 +67,13 @@
   --dt-bg-pinned: rgba(0, 0, 0, 0.02);
   --dt-bg-input: #FFFFFF;
   --dt-bg-card: #FFFFFF;
-  --dt-bg-card-hover: #FAFBFC;
+  --dt-bg-card-hover: rgba(0, 0, 0, 0.04);
   --dt-bg-dropdown: #FFFFFF;
   --dt-bg-overlay: rgba(0, 0, 0, 0.45);
   --dt-bg-mask: rgba(0, 0, 0, 0.6);
 
   // === DingTalk Special (企业IM特殊颜色) ===
-  --dt-bubble-left-bg: #FFFFFF; // 接收消息背景（企业IM纯白）
+  --dt-bubble-left-bg: #F5F5F5; // 接收消息背景（钉钉浅灰底）
   --dt-bubble-left-border: #F0F0F0; // 接收消息边框（极浅灰，几乎看不见）
   --dt-bubble-right-bg: #3296FA; // 发送消息背景（企业IM蓝，纯色无渐变）
   --dt-bubble-right-text: #FFFFFF; // 发送消息文字（白色）
@@ -135,12 +135,12 @@
   --dt-shadow-error-strong: 0 2px 12px rgba(255, 77, 79, 0.6); // 强错误色阴影
   --dt-shadow-dialog: 0 20px 40px rgba(0, 0, 0, 0.15); // 对话框专用
 
-  // === Gradient Colors (渐变色) ===
+  // === Gradient Colors (纯色，钉钉扁平风格) ===
   --dt-brand-gradient: #3296FA;
-  --dt-success-gradient: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
-  --dt-warning-gradient: linear-gradient(135deg, #faad14 0%, #d48806 100%);
-  --dt-info-gradient: linear-gradient(135deg, #722ed1 0%, #531dab 100%);
-  --dt-error-gradient: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  --dt-success-gradient: #52c41a;
+  --dt-warning-gradient: #faad14;
+  --dt-info-gradient: #722ed1;
+  --dt-error-gradient: #ff4d4f;
 
   // === Typography (字体) ===
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',

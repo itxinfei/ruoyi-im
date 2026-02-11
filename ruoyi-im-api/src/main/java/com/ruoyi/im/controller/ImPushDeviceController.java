@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Tag(name = "推送设备", description = "推送设备管理接口")
 @RestController
-@RequestMapping("/api/im/push-device")
+@RequestMapping("/api/im/push-devices")
 public class ImPushDeviceController {
 
     private static final Logger log = LoggerFactory.getLogger(ImPushDeviceController.class);

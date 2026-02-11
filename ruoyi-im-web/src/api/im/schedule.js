@@ -14,7 +14,7 @@ import request from '../request'
  */
 export function getEventsByTimeRange(startTime, endTime) {
   return request({
-    url: '/api/im/schedule/range',
+    url: '/api/im/schedule-events/range',
     method: 'get',
     params: { startTime, endTime }
   })
@@ -35,7 +35,7 @@ export function getEventsByTimeRange(startTime, endTime) {
  */
 export function createEvent(data) {
   return request({
-    url: '/api/im/schedule',
+    url: '/api/im/schedule-events',
     method: 'post',
     data
   })
@@ -49,7 +49,7 @@ export function createEvent(data) {
  */
 export function updateEvent(eventId, data) {
   return request({
-    url: `/api/im/schedule/${eventId}`,
+    url: `/api/im/schedule-events/${eventId}`,
     method: 'put',
     data
   })
@@ -62,7 +62,7 @@ export function updateEvent(eventId, data) {
  */
 export function deleteEvent(eventId) {
   return request({
-    url: `/api/im/schedule/${eventId}`,
+    url: `/api/im/schedule-events/${eventId}`,
     method: 'delete'
   })
 }
@@ -74,7 +74,7 @@ export function deleteEvent(eventId) {
  */
 export function getEventDetail(eventId) {
   return request({
-    url: `/api/im/schedule/${eventId}`,
+    url: `/api/im/schedule-events/${eventId}`,
     method: 'get'
   })
 }
@@ -86,7 +86,7 @@ export function getEventDetail(eventId) {
  */
 export function getEventPage(params) {
   return request({
-    url: '/api/im/schedule/page',
+    url: '/api/im/schedule-events/page',
     method: 'post',
     data: params
   })
@@ -100,7 +100,7 @@ export function getEventPage(params) {
  */
 export function respondToInvite(eventId, accepted) {
   return request({
-    url: `/api/im/schedule/${eventId}/respond`,
+    url: `/api/im/schedule-events/${eventId}/respond`,
     method: 'put',
     params: { accepted }
   })
@@ -113,7 +113,7 @@ export function respondToInvite(eventId, accepted) {
  */
 export function getParticipants(eventId) {
   return request({
-    url: `/api/im/schedule/${eventId}/participants`,
+    url: `/api/im/schedule-events/${eventId}/participants`,
     method: 'get'
   })
 }
@@ -125,7 +125,7 @@ export function getParticipants(eventId) {
  */
 export function cancelEvent(eventId) {
   return request({
-    url: `/api/im/schedule/${eventId}/cancel`,
+    url: `/api/im/schedule-events/${eventId}/cancel`,
     method: 'put'
   })
 }

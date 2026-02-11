@@ -2,6 +2,8 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImTodoItem;
+import com.ruoyi.im.dto.workbench.TodoCreateRequest;
+import com.ruoyi.im.dto.workbench.TodoUpdateRequest;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImNoticeService;
@@ -11,6 +13,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,14 +35,6 @@ public class ImWorkbenchController {
     private final ImConversationService conversationService;
     private final ImNoticeService noticeService;
 
-    /**
-     * 构造器注入依赖
-     *
-     * @param todoItemService 待办事项服务
-     * @param messageService 消息服务
-     * @param conversationService 会话服务
-     * @param noticeService 通知服务
-     */
     public ImWorkbenchController(ImTodoItemService todoItemService,
                                   ImMessageService messageService,
                                   ImConversationService conversationService,
@@ -49,87 +45,33 @@ public class ImWorkbenchController {
         this.noticeService = noticeService;
     }
 
+    // ==================== 工作台概览 ====================
+
     /**
      * 获取工作台数据概览
-     * 返回用户相关的各种统计数据
-     *
-     * @return 工作台概览数据
      */
-    @Operation(summary = "获取工作台数据概览", description = "获取用户相关的统计数据，如待办数量、消息数量等")
+    @Operation(summary = "获取工作台数据概览", description = "获取用户相关的统计数据")
     @GetMapping("/overview")
     public Result<Map<String, Object>> getOverview() {
         Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> overview = new HashMap<>();
 
-        // 待办数量
-        int todoCount = todoItemService.getUncompletedCount(userId);
-        overview.put("todoCount", todoCount);
-
-        // 未读消息数量
-        int unreadMessageCount = 0;
-        try {
-            unreadMessageCount = conversationService.getTotalUnreadCount(userId);
-        } catch (Exception e) {
-            // 如果获取失败，使用0
-        }
-        overview.put("unreadMessageCount", unreadMessageCount);
-
-        // 今日消息数量
-        int todayMessageCount = 0;
-        try {
-            todayMessageCount = messageService.getTodayMessageCount(userId);
-        } catch (Exception e) {
-            // 如果获取失败，使用0
-        }
-        overview.put("todayMessageCount", todayMessageCount);
-
-        // 会话数量
-        int conversationCount = 0;
-        try {
-            conversationCount = conversationService.getUserConversationCount(userId);
-        } catch (Exception e) {
-            // 如果获取失败，使用0
-        }
-        overview.put("conversationCount", conversationCount);
-
-        // 未读通知数量
-        int noticeCount = 0;
-        try {
-            noticeCount = noticeService.getUnreadCount(userId);
-        } catch (Exception e) {
-            // 如果获取失败，使用0
-        }
-        overview.put("noticeCount", noticeCount);
-
-        // 审批数量（待办事项中类型为APPROVAL的数量）
-        int approvalCount = 0;
-        try {
-            approvalCount = todoItemService.getUncompletedCountByType(userId, "APPROVAL");
-        } catch (Exception e) {
-            // 如果获取失败，使用0
-        }
-        overview.put("approvalCount", approvalCount);
-
-        // DING消息未读数量
-        int dingCount = 0;
-        try {
-            dingCount = todoItemService.getUncompletedCountByType(userId, "DING");
-        } catch (Exception e) {
-            // 如果获取失败，使用0
-        }
-        overview.put("dingCount", dingCount);
-
-        // 在线状态
+        overview.put("todoCount", todoItemService.getUncompletedCount(userId));
+        overview.put("unreadMessageCount", conversationService.getTotalUnreadCount(userId));
+        overview.put("todayMessageCount", messageService.getTodayMessageCount(userId));
+        overview.put("conversationCount", conversationService.getUserConversationCount(userId));
+        overview.put("noticeCount", noticeService.getUnreadCount(userId));
+        overview.put("approvalCount", todoItemService.getUncompletedCountByType(userId, "APPROVAL"));
+        overview.put("dingCount", todoItemService.getUncompletedCountByType(userId, "DING"));
         overview.put("isOnline", com.ruoyi.im.websocket.ImWebSocketEndpoint.isUserOnline(userId));
 
         return Result.success(overview);
     }
 
+    // ==================== 待办事项管理 ====================
+
     /**
      * 获取待办列表
-     * 返回用户的待办事项列表
-     *
-     * @return 待办事项列表
      */
     @Operation(summary = "获取待办列表", description = "获取用户的待办事项列表")
     @GetMapping("/todos")
@@ -141,79 +83,61 @@ public class ImWorkbenchController {
 
     /**
      * 创建待办
-     * 创建新的待办事项
-     *
-     * @param title 待办标题
-     * @param description 待办描述
-     * @param type 待办类型
-     * @param relatedId 关联ID
-     * @param priority 优先级（1=低, 2=中, 3=高）
-     * @return 创建结果，包含待办ID
      */
-    @Operation(summary = "创建待办", description = "创建新的待办事项，支持优先级")
+    @Operation(summary = "创建待办", description = "创建新的待办事项")
     @PostMapping("/todos")
-    public Result<Long> createTodo(@RequestParam String title,
-                                   @RequestParam(required = false) String description,
-                                   @RequestParam(required = false, defaultValue = "TASK") String type,
-                                   @RequestParam(required = false) Long relatedId,
-                                   @RequestParam(required = false) Integer priority) {
+    public Result<Long> createTodo(@Valid @RequestBody TodoCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        // 如果提供了优先级参数，使用带优先级的方法
         Long todoId;
-        if (priority != null) {
-            todoId = todoItemService.createTodoWithPriority(title, description, priority, userId);
+        if (request.getPriority() != null) {
+            todoId = todoItemService.createTodoWithPriority(
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getPriority(),
+                    userId);
         } else {
-            todoId = todoItemService.createTodo(title, description, type, relatedId, userId);
+            todoId = todoItemService.createTodo(
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getType(),
+                    request.getRelatedId(),
+                    userId);
         }
         return Result.success("创建成功", todoId);
     }
 
     /**
      * 完成待办
-     * 将待办事项标记为已完成
-     *
-     * @param id 待办ID
-     * @return 操作结果
      */
     @Operation(summary = "完成待办", description = "将待办事项标记为已完成")
     @PutMapping("/todos/{id}/complete")
-    public Result<Void> completeTodo(@PathVariable Long id) {
+    public Result<Void> completeTodo(@PathVariable @Positive(message = "待办ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         todoItemService.markAsCompleted(id, userId);
         return Result.success("已完成");
     }
 
     /**
-     * 删除待办
-     * 删除指定的待办事项
-     *
-     * @param id 待办ID
-     * @return 操作结果
-     */
-    @Operation(summary = "删除待办", description = "删除指定的待办事项")
-    @DeleteMapping("/todos/{id}")
-    public Result<Void> deleteTodo(@PathVariable Long id) {
-        Long userId = SecurityUtils.getLoginUserId();
-        todoItemService.deleteTodo(id, userId);
-        return Result.success("删除成功");
-    }
-
-    /**
      * 更新待办
-     * 更新待办事项的标题和描述
-     *
-     * @param id 待办ID
-     * @param title 待办标题
-     * @param description 待办描述
-     * @return 操作结果
      */
     @Operation(summary = "更新待办", description = "更新待办事项的标题和描述")
     @PutMapping("/todos/{id}")
-    public Result<Void> updateTodo(@PathVariable Long id,
-                                  @RequestParam String title,
-                                  @RequestParam(required = false) String description) {
+    public Result<Void> updateTodo(
+            @PathVariable @Positive(message = "待办ID必须为正数") Long id,
+            @Valid @RequestBody TodoUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        todoItemService.updateTodo(id, title, description, userId);
+        todoItemService.updateTodo(id, request.getTitle(), request.getDescription(), userId);
         return Result.success("更新成功");
+    }
+
+    /**
+     * 删除待办
+     */
+    @Operation(summary = "删除待办", description = "删除指定的待办事项")
+    @DeleteMapping("/todos/{id}")
+    public Result<Void> deleteTodo(@PathVariable @Positive(message = "待办ID必须为正数") Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
+        todoItemService.deleteTodo(id, userId);
+        return Result.success("删除成功");
     }
 }

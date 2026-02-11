@@ -22,7 +22,7 @@ import java.util.Map;
  */
 @Tag(name = "消息已读回执", description = "消息已读状态查询、未读数统计等接口")
 @RestController
-@RequestMapping("/api/im/message/receipt")
+@RequestMapping("/api/im/messages/receipts")
 @Validated
 public class ImMessageReceiptController {
 

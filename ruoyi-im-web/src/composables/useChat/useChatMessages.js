@@ -27,8 +27,15 @@ export function useChatMessages(sessionId, currentUser) {
   const currentPage = ref(1)
   const pageSize = 50
 
-  // 当前会话ID
-  const currentSessionId = ref(sessionId)
+  // 当前会话ID（响应式跟踪传入的 sessionId）
+  const currentSessionId = ref(null)
+
+  // 同步追踪外部传入的 sessionId（可能是 computed ref）
+  watch(
+    () => sessionId?.value ?? sessionId,
+    newId => { currentSessionId.value = newId },
+    { immediate: true }
+  )
 
   // 获取本地缓存
   const { getConversationMessages, cacheMessages, cacheSingleMessage } = useIndexedDB()
@@ -36,14 +43,17 @@ export function useChatMessages(sessionId, currentUser) {
   /**
    * 加载历史消息
    */
-  const loadHistory = async (sessionId = currentSessionId.value) => {
+  const loadHistory = async (targetSessionId = currentSessionId.value) => {
     if (loading.value || noMore.value) {return}
 
     loading.value = true
 
     try {
       // 1. 先尝试从本地缓存加载
-      const localResult = await getConversationMessages(sessionId, pageSize)
+      const localResult = await getConversationMessages(targetSessionId, pageSize)
+
+      // 竞态守卫：异步操作期间会话已切换，丢弃过期结果
+      if (currentSessionId.value !== targetSessionId) {return}
 
       if (localResult.fromLocal && localResult.messages.length > 0) {
         messages.value = localResult.messages
@@ -51,15 +61,18 @@ export function useChatMessages(sessionId, currentUser) {
         console.log(`[useChatMessages] 从本地加载 ${localResult.messages.length} 条消息`)
 
         // 后台从服务器获取最新消息
-        syncMessagesFromServer(sessionId)
+        syncMessagesFromServer(targetSessionId)
         return
       }
 
       // 2. 从服务器加载
-      const response = await getMessages(sessionId, {
+      const response = await getMessages(targetSessionId, {
         page: currentPage.value,
         size: pageSize
       })
+
+      // 竞态守卫：异步操作期间会话已切换，丢弃过期结果
+      if (currentSessionId.value !== targetSessionId) {return}
 
       if (response.code === 200) {
         const newMessages = response.data.records || []
@@ -76,22 +89,30 @@ export function useChatMessages(sessionId, currentUser) {
         }
       }
     } catch (error) {
+      // 会话已切换，不显示旧会话的错误提示
+      if (currentSessionId.value !== targetSessionId) {return}
       console.error('加载消息失败:', error)
       ElMessage.error('加载消息失败')
     } finally {
-      loading.value = false
+      // 仅在会话未切换时重置 loading
+      if (currentSessionId.value === targetSessionId) {
+        loading.value = false
+      }
     }
   }
 
   /**
    * 从服务器同步最新消息
    */
-  const syncMessagesFromServer = async sessionId => {
+  const syncMessagesFromServer = async targetSessionId => {
     try {
-      const response = await getMessages(sessionId, {
+      const response = await getMessages(targetSessionId, {
         page: 1,
         size: 50
       })
+
+      // 竞态守卫：异步操作期间会话已切换，丢弃过期结果
+      if (currentSessionId.value !== targetSessionId) {return}
 
       if (response.code === 200) {
         const serverMessages = response.data.records || []
@@ -265,12 +286,13 @@ export function useChatMessages(sessionId, currentUser) {
     await loadHistory()
   }
 
-  // 监听会话ID变化
-  watch(() => currentSessionId.value, (newId, oldId) => {
+  // 监听会话ID变化，重置状态并重新加载
+  watch(currentSessionId, (newId, oldId) => {
     if (newId !== oldId) {
       messages.value = []
       currentPage.value = 1
       noMore.value = false
+      loading.value = false
       if (newId) {
         loadHistory(newId)
       }

@@ -1822,19 +1822,14 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   padding: 12px 4px;
   border-radius: var(--dt-radius-lg);
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.15s ease;
 
   &:hover {
     background: var(--dt-bg-session-hover);
-    transform: translateY(-2px);
-
-    .action-icon {
-      transform: scale(1.1);
-    }
   }
 
   &:active {
-    transform: translateY(0);
+    opacity: 0.8;
   }
 
   .action-icon {
@@ -1844,7 +1839,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.25s ease;
+    transition: background-color 0.15s ease;
 
     .material-icons-outlined {
       font-size: 24px;
@@ -1852,23 +1847,19 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
     }
 
     &.primary {
-      background: var(--dt-brand-gradient);
-      box-shadow: var(--dt-shadow-brand);
+      background: var(--dt-brand-color);
     }
 
     &.success {
-      background: var(--dt-success-gradient);
-      box-shadow: var(--dt-shadow-success);
+      background: #52c41a;
     }
 
     &.warning {
-      background: var(--dt-warning-gradient);
-      box-shadow: var(--dt-shadow-warning);
+      background: #faad14;
     }
 
     &.info {
-      background: var(--dt-info-gradient);
-      box-shadow: var(--dt-shadow-info);
+      background: #722ed1;
     }
   }
 

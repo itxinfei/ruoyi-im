@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Tag(name = "工作日志", description = "工作日志管理接口")
 @RestController
-@RequestMapping("/api/im/work-report")
+@RequestMapping("/api/im/work-reports")
 public class ImWorkReportController {
 
     private final ImWorkReportService workReportService;

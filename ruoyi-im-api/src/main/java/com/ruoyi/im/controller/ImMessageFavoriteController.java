@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Tag(name = "消息收藏", description = "消息收藏管理接口")
 @RestController
-@RequestMapping("/api/im/message/favorite")
+@RequestMapping("/api/im/messages/favorites")
 public class ImMessageFavoriteController {
 
     private final ImMessageFavoriteService messageFavoriteService;

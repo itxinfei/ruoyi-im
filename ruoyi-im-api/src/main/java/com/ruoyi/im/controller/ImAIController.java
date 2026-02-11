@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "AI助手", description = "AI智能助手接口")
 @RestController
-@RequestMapping("/api/im/ai")
+@RequestMapping("/api/im/ai-assistants")
 public class ImAIController {
 
     private final ImAIService aiService;

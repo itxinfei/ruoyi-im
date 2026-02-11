@@ -21,7 +21,7 @@ import java.util.Map;
  */
 @Tag(name = "语音转文字", description = "语音消息转文字接口")
 @RestController
-@RequestMapping("/api/im/voice/transcript")
+@RequestMapping("/api/im/voice-transcripts")
 public class ImVoiceTranscriptController {
 
     private static final Logger log = LoggerFactory.getLogger(ImVoiceTranscriptController.class);

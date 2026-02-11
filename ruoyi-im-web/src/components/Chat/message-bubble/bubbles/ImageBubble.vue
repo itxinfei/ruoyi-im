@@ -291,12 +291,10 @@ onUnmounted(() => {
   object-fit: contain;
   pointer-events: none;
   opacity: 0;
-  filter: blur(10px);
-  transition: opacity var(--dt-transition-slow) var(--dt-ease-out), filter var(--dt-transition-slow) var(--dt-ease-out);
+  transition: opacity var(--dt-transition-base) ease;
 
   &.loaded {
     opacity: 1;
-    filter: blur(0);
   }
 }
 
@@ -366,7 +364,6 @@ onUnmounted(() => {
 
   .image-content {
     opacity: 0.7;
-    filter: blur(4px);
   }
 }
 

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Tag(name = "通知设置", description = "用户通知偏好设置管理接口")
 @RestController
-@RequestMapping("/api/im/user/notification")
+@RequestMapping("/api/im/users/notification-settings")
 public class ImNotificationSettingController {
 
     private static final Logger log = LoggerFactory.getLogger(ImNotificationSettingController.class);

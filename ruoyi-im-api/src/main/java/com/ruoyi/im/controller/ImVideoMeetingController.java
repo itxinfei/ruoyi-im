@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @Tag(name = "视频会议", description = "视频会议管理接口")
 @RestController
-@RequestMapping("/api/im/meeting")
+@RequestMapping("/api/im/video-meetings")
 public class ImVideoMeetingController {
 
     private static final Logger log = LoggerFactory.getLogger(ImVideoMeetingController.class);

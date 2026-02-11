@@ -561,18 +561,18 @@ const canRecall = computed(() => {
 
   .bubble-content {
     background: var(--dt-brand-color);
-    color: #FFFFFF;
+    color: var(--dt-bubble-right-text);
     border: none;
   }
 
   :deep(.message-text),
   :deep(.message-content),
   :deep(.text-content) {
-    color: #FFFFFF !important;
+    color: var(--dt-bubble-right-text) !important;
   }
 
   :deep(a) {
-    color: #FFFFFF !important;
+    color: var(--dt-bubble-right-text) !important;
     text-decoration: underline;
     opacity: 0.95;
   }

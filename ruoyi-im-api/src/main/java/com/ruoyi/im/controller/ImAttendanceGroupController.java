@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Tag(name = "考勤组管理", description = "考勤组管理接口")
 @RestController
-@RequestMapping("/api/im/attendance/group")
+@RequestMapping("/api/im/attendance-groups")
 public class ImAttendanceGroupController {
 
     private static final Logger log = LoggerFactory.getLogger(ImAttendanceGroupController.class);

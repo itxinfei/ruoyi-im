@@ -3,12 +3,14 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImApproval;
 import com.ruoyi.im.domain.ImApprovalTemplate;
+import com.ruoyi.im.dto.approval.ApprovalCreateRequest;
 import com.ruoyi.im.service.ImApprovalService;
 import com.ruoyi.im.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +22,7 @@ import java.util.Map;
  */
 @Tag(name = "审批中心", description = "审批发起、查询、处理等接口")
 @RestController
-@RequestMapping("/api/im/approval")
+@RequestMapping("/api/im/approvals")
 public class ImApprovalController {
 
     private final ImApprovalService approvalService;
@@ -38,18 +40,14 @@ public class ImApprovalController {
      * 发起审批
      * 创建新的审批申请
      *
-     * @param templateId 审批模板ID
-     * @param title 审批标题
-     * @param formData 表单数据
+     * @param request 创建请求
      * @return 创建结果，包含审批ID
      */
     @Operation(summary = "发起审批", description = "创建新的审批申请")
-    @PostMapping("/create")
-    public Result<Long> createApproval(@RequestParam Long templateId,
-                                      @RequestParam String title,
-                                      @RequestBody Map<String, Object> formData) {
+    @PostMapping
+    public Result<Long> createApproval(@Valid @RequestBody ApprovalCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        Long approvalId = approvalService.createApproval(templateId, title, formData, userId);
+        Long approvalId = approvalService.createApproval(request.getTemplateId(), request.getTitle(), request.getFormData(), userId);
         return Result.success("提交成功", approvalId);
     }
 

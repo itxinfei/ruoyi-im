@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Tag(name = "自定义表情包", description = "自定义表情包管理接口")
 @RestController
-@RequestMapping("/api/im/emoji")
+@RequestMapping("/api/im/emojis")
 public class ImEmojiController {
 
     private static final Logger log = LoggerFactory.getLogger(ImEmojiController.class);

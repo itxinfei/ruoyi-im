@@ -17,7 +17,7 @@ import java.util.Map;
  */
 @Tag(name = "系统配置", description = "用户配置管理接口，提供通知设置、隐私设置、通用配置等功能")
 @RestController
-@RequestMapping("/api/im/config")
+@RequestMapping("/api/im/user-configs")
 public class ImConfigController {
 
     private final ImConfigService imConfigService;

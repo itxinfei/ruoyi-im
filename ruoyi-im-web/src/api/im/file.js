@@ -10,7 +10,7 @@ import request from '../request'
  */
 export function uploadImage(formData) {
     return request({
-        url: '/api/im/file/upload',
+        url: '/api/im/files/upload',
         method: 'post',
         data: formData,
         headers: {
@@ -26,7 +26,7 @@ export function uploadImage(formData) {
  */
 export function uploadFile(formData) {
     return request({
-        url: '/api/im/file/upload',
+        url: '/api/im/files/upload',
         method: 'post',
         data: formData,
         headers: {
@@ -42,7 +42,7 @@ export function uploadFile(formData) {
  */
 export function downloadFile(fileId) {
     return request({
-        url: `/api/im/file/download/${fileId}`,
+        url: `/api/im/files/download/${fileId}`,
         method: 'get',
         responseType: 'blob'
     })
@@ -55,7 +55,7 @@ export function downloadFile(fileId) {
  */
 export function getFileInfo(fileId) {
     return request({
-        url: `/api/im/file/${fileId}`,
+        url: `/api/im/files/${fileId}`,
         method: 'get'
     })
 }
@@ -67,7 +67,7 @@ export function getFileInfo(fileId) {
  */
 export function deleteFile(fileId) {
     return request({
-        url: `/api/im/file/${fileId}`,
+        url: `/api/im/files/${fileId}`,
         method: 'delete'
     })
 }

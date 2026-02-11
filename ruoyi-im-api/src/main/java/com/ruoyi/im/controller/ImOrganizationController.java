@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "组织架构", description = "组织架构管理接口，提供部门管理、部门成员管理等功能")
 @RestController
-@RequestMapping("/api/im/organization")
+@RequestMapping("/api/im/organizations")
 @Validated
 public class ImOrganizationController {
 

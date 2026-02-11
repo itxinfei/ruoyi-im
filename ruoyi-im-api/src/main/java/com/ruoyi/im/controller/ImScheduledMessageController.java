@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Tag(name = "定时消息", description = "定时消息管理接口")
 @RestController
-@RequestMapping("/api/im/scheduled-message")
+@RequestMapping("/api/im/scheduled-messages")
 public class ImScheduledMessageController {
 
     private static final Logger log = LoggerFactory.getLogger(ImScheduledMessageController.class);

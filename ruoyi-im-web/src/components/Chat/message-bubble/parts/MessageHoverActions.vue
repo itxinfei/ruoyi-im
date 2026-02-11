@@ -62,11 +62,10 @@ defineEmits(['action', 'keep-hover', 'leave-hover'])
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 4px;
+  padding: 2px;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-radius: 16px;
-  box-shadow: var(--dt-shadow-sm);
+  border-radius: 4px;
   z-index: 10;
 
   // 对方消息：操作栏在右上方
@@ -92,10 +91,10 @@ defineEmits(['action', 'keep-hover', 'leave-hover'])
   justify-content: center;
   border: none;
   background: transparent;
-  border-radius: 50%;
+  border-radius: 4px;
   cursor: pointer;
   color: var(--dt-text-secondary);
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
 
   .material-icons-outlined {
     font-size: 16px;

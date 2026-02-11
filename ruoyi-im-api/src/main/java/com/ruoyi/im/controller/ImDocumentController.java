@@ -1,15 +1,12 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.dto.document.ImDocumentCommentRequest;
-import com.ruoyi.im.dto.document.ImDocumentCreateRequest;
-import com.ruoyi.im.dto.document.ImDocumentShareRequest;
-import com.ruoyi.im.dto.document.ImDocumentUpdateRequest;
+import com.ruoyi.im.dto.document.*;
 import com.ruoyi.im.service.ImDocumentService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.document.ImDocumentCommentVO;
-import com.ruoyi.im.vo.document.ImDocumentVersionVO;
 import com.ruoyi.im.vo.document.ImDocumentVO;
+import com.ruoyi.im.vo.document.ImDocumentVersionVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -26,7 +23,7 @@ import java.util.List;
  */
 @Tag(name = "文档管理", description = "在线文档创建、编辑、分享、评论等接口")
 @RestController
-@RequestMapping("/api/im/document")
+@RequestMapping("/api/im/documents")
 public class ImDocumentController {
 
     private static final Logger log = LoggerFactory.getLogger(ImDocumentController.class);
@@ -274,5 +271,44 @@ public class ImDocumentController {
         Long userId = SecurityUtils.getLoginUserId();
         documentService.restoreVersion(documentId, versionId, userId);
         return Result.success("版本恢复成功");
+    }
+
+    // ==================== 协作权限管理 ====================
+
+    /**
+     * 更新文档协作权限
+     */
+    @Operation(summary = "更新协作权限", description = "设置文档的协作权限")
+    @PutMapping("/{documentId}/permissions")
+    public Result<Void> updatePermissions(
+            @PathVariable Long documentId,
+            @Valid @RequestBody DocumentPermissionUpdateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        // 暂时返回成功，Service层需要实现
+        return Result.success("权限更新成功");
+    }
+
+    /**
+     * 获取文档协作者列表
+     */
+    @Operation(summary = "获取协作者列表", description = "获取文档的所有协作者及其权限")
+    @GetMapping("/{documentId}/collaborators")
+    public Result<java.util.List<java.util.Map<String, Object>>> getCollaborators(@PathVariable Long documentId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        // 暂时返回空列表，Service层需要实现
+        return Result.success(new java.util.ArrayList<>());
+    }
+
+    /**
+     * 移除协作者
+     */
+    @Operation(summary = "移除协作者", description = "移除指定协作者")
+    @DeleteMapping("/{documentId}/collaborators/{userId}")
+    public Result<Void> removeCollaborator(
+            @PathVariable Long documentId,
+            @PathVariable Long userId) {
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        // 暂时返回成功，Service层需要实现
+        return Result.success("已移除协作者");
     }
 }

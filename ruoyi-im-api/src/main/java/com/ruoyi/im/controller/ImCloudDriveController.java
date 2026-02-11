@@ -1,6 +1,9 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.dto.cloud.CloudFileRenameRequest;
+import com.ruoyi.im.dto.cloud.CloudFileSearchRequest;
+import com.ruoyi.im.dto.cloud.CloudFolderListRequest;
 import com.ruoyi.im.dto.cloud.ImCloudFileMoveRequest;
 import com.ruoyi.im.dto.cloud.ImCloudFileShareRequest;
 import com.ruoyi.im.dto.cloud.ImCloudFolderCreateRequest;
@@ -19,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 /**
@@ -29,7 +35,7 @@ import java.util.List;
  */
 @Tag(name = "企业云盘", description = "企业云盘管理接口")
 @RestController
-@RequestMapping("/api/im/cloud")
+@RequestMapping("/api/im/cloud-drive")
 public class ImCloudDriveController {
 
     private static final Logger log = LoggerFactory.getLogger(ImCloudDriveController.class);

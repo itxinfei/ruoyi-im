@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Tag(name = "端到端加密", description = "E2E加密密钥管理接口")
 @RestController
-@RequestMapping("/api/im/e2e")
+@RequestMapping("/api/im/e2e-keys")
 public class ImE2EKeyController {
 
     private static final Logger log = LoggerFactory.getLogger(ImE2EKeyController.class);

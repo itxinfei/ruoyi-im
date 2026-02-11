@@ -30,7 +30,7 @@ import java.util.Map;
  */
 @Tag(name = "健康检查", description = "系统健康状态检查接口")
 @RestController
-@RequestMapping("/api/im/health")
+@RequestMapping("/api/im/health-check")
 public class ImHealthCheckController {
 
     private static final Logger log = LoggerFactory.getLogger(ImHealthCheckController.class);

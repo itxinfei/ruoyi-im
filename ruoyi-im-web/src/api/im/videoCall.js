@@ -17,7 +17,7 @@ import request from '../request'
  */
 export function initiateCall(data) {
   return request({
-    url: '/api/im/video-call/initiate',
+    url: '/api/im/video-calls/initiate',
     method: 'post',
     params: data
   })
@@ -30,7 +30,7 @@ export function initiateCall(data) {
  */
 export function acceptCall(callId) {
   return request({
-    url: `/api/im/video-call/${callId}/accept`,
+    url: `/api/im/video-calls/${callId}/accept`,
     method: 'post'
   })
 }
@@ -43,7 +43,7 @@ export function acceptCall(callId) {
  */
 export function rejectCall(callId, reason) {
   return request({
-    url: `/api/im/video-call/${callId}/reject`,
+    url: `/api/im/video-calls/${callId}/reject`,
     method: 'post',
     params: { reason }
   })
@@ -56,7 +56,7 @@ export function rejectCall(callId, reason) {
  */
 export function endCall(callId) {
   return request({
-    url: `/api/im/video-call/${callId}/end`,
+    url: `/api/im/video-calls/${callId}/end`,
     method: 'post'
   })
 }
@@ -68,7 +68,7 @@ export function endCall(callId) {
  */
 export function getCallInfo(callId) {
   return request({
-    url: `/api/im/video-call/${callId}`,
+    url: `/api/im/video-calls/${callId}`,
     method: 'get'
   })
 }
@@ -79,7 +79,7 @@ export function getCallInfo(callId) {
  */
 export function getUserActiveCall() {
   return request({
-    url: '/api/im/video-call/active',
+    url: '/api/im/video-calls/active',
     method: 'get'
   })
 }
@@ -93,7 +93,7 @@ export function getUserActiveCall() {
  */
 export function sendSignal(callId, signalType, signalData) {
   return request({
-    url: '/api/im/video-call/signal',
+    url: '/api/im/video-calls/signal',
     method: 'post',
     params: { callId, signalType },
     data: signalData,
@@ -108,7 +108,7 @@ export function sendSignal(callId, signalType, signalData) {
  */
 export function getCallHistory(limit = 20) {
   return request({
-    url: '/api/im/video-call/history',
+    url: '/api/im/video-calls/history',
     method: 'get',
     params: { limit }
   })
@@ -127,7 +127,7 @@ export function getCallHistory(limit = 20) {
  */
 export function initiateGroupCall(data) {
   return request({
-    url: '/api/im/video-call/group/initiate',
+    url: '/api/im/video-calls/group/initiate',
     method: 'post',
     data
   })
@@ -140,7 +140,7 @@ export function initiateGroupCall(data) {
  */
 export function joinGroupCall(callId) {
   return request({
-    url: `/api/im/video-call/group/${callId}/join`,
+    url: `/api/im/video-calls/group/${callId}/join`,
     method: 'post'
   })
 }
@@ -152,7 +152,7 @@ export function joinGroupCall(callId) {
  */
 export function leaveGroupCall(callId) {
   return request({
-    url: `/api/im/video-call/group/${callId}/leave`,
+    url: `/api/im/video-calls/group/${callId}/leave`,
     method: 'post'
   })
 }
@@ -164,7 +164,7 @@ export function leaveGroupCall(callId) {
  */
 export function getParticipants(callId) {
   return request({
-    url: `/api/im/video-call/group/${callId}/participants`,
+    url: `/api/im/video-calls/group/${callId}/participants`,
     method: 'get'
   })
 }
@@ -177,7 +177,7 @@ export function getParticipants(callId) {
  */
 export function toggleMute(callId, muted) {
   return request({
-    url: `/api/im/video-call/group/${callId}/mute`,
+    url: `/api/im/video-calls/group/${callId}/mute`,
     method: 'post',
     params: { muted }
   })
@@ -191,7 +191,7 @@ export function toggleMute(callId, muted) {
  */
 export function toggleCamera(callId, cameraOff) {
   return request({
-    url: `/api/im/video-call/group/${callId}/camera`,
+    url: `/api/im/video-calls/group/${callId}/camera`,
     method: 'post',
     params: { cameraOff }
   })

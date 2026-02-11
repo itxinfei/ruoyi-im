@@ -16,7 +16,7 @@ import request from '../request'
  */
 export function registerDevice(data) {
   return request({
-    url: '/api/im/device/register',
+    url: '/api/im/devices/register',
     method: 'post',
     data
   })
@@ -31,7 +31,7 @@ export function registerDevice(data) {
  */
 export function sendHeartbeat(data) {
   return request({
-    url: '/api/im/device/heartbeat',
+    url: '/api/im/devices/heartbeat',
     method: 'post',
     data
   })
@@ -43,7 +43,7 @@ export function sendHeartbeat(data) {
  */
 export function getDeviceList() {
   return request({
-    url: '/api/im/device/list',
+    url: '/api/im/devices/list',
     method: 'get'
   })
 }
@@ -54,7 +54,7 @@ export function getDeviceList() {
  */
 export function getOnlineDevices() {
   return request({
-    url: '/api/im/device/online',
+    url: '/api/im/devices/online',
     method: 'get'
   })
 }
@@ -66,7 +66,7 @@ export function getOnlineDevices() {
  */
 export function removeDevice(deviceId) {
   return request({
-    url: `/api/im/device/${deviceId}`,
+    url: `/api/im/devices/${deviceId}`,
     method: 'delete'
   })
 }
@@ -77,7 +77,7 @@ export function removeDevice(deviceId) {
  */
 export function getDeviceStats() {
   return request({
-    url: '/api/im/device/stats',
+    url: '/api/im/devices/stats',
     method: 'get'
   })
 }
