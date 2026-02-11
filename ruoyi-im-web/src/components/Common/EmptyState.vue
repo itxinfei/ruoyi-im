@@ -64,17 +64,17 @@
 
     <!-- 操作按钮 -->
     <div
-      v-if="actionText || $slots.action"
+      v-if="(actionText || autoActionText) || $slots.action"
       class="empty-action"
     >
       <slot name="action">
         <el-button
-          v-if="actionText"
+          v-if="actionText || autoActionText"
           :type="actionType || 'primary'"
-          :icon="actionIcon"
+          :icon="actionIcon || autoActionIcon"
           @click="handleAction"
         >
-          {{ actionText }}
+          {{ actionText || autoActionText }}
         </el-button>
       </slot>
     </div>
@@ -138,6 +138,36 @@ const autoIconColor = computed(() => {
     default: '#94a3b8'
   }
   return colors[props.type] || colors.default
+})
+
+// 根据类型自动生成操作按钮文案
+const autoActionText = computed(() => {
+  if (props.actionText) {return props.actionText}
+
+  const actions = {
+    chat: '发起聊天',
+    user: '添加联系人',
+    file: '上传文件',
+    search: '', // 搜索结果不需要操作按钮
+    network: '刷新',
+    error: '重试',
+    default: ''
+  }
+  return actions[props.type] || actions.default
+})
+
+// 根据类型自动生成操作按钮图标
+const autoActionIcon = computed(() => {
+  if (props.actionIcon) {return props.actionIcon}
+
+  const icons = {
+    chat: 'chat',
+    user: 'person_add',
+    file: 'upload',
+    network: 'refresh',
+    error: 'refresh'
+  }
+  return icons[props.type] || ''
 })
 </script>
 

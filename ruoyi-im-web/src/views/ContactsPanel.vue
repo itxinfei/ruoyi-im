@@ -1424,7 +1424,7 @@ $panel-min-width: 320px;
 /* ==================== 侧边栏 ==================== */
 .sidebar {
   width: $sidebar-width;
-  background: var(--dt-bg-sidebar);
+  background: var(--dt-bg-session-list);
   border-right: 1px solid var(--dt-border-color);
   display: flex;
   flex-direction: column;
@@ -1532,7 +1532,7 @@ $panel-min-width: 320px;
     }
     
     .nav-icon-wrapper {
-       box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+       box-shadow: 0 2px 8px rgba(50, 150, 250, 0.2);
     }
   }
 
@@ -1549,12 +1549,12 @@ $panel-min-width: 320px;
     flex-shrink: 0;
     transition: all 0.2s;
 
-    &.bg-gradient-orange { background: linear-gradient(135deg, #FF9B44 0%, #FF8F2F 100%); }
-    &.bg-gradient-blue { background: linear-gradient(135deg, #0089FF 0%, #0076DB 100%); }
-    &.bg-gradient-green { background: linear-gradient(135deg, #15BD66 0%, #0DA857 100%); }
-    &.bg-gradient-purple { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); }
-    &.bg-gradient-primary { background: linear-gradient(135deg, #0089FF 0%, #006ECC 100%); }
-    &.bg-gradient-pink { background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%); }
+    &.bg-gradient-orange { background: #FF9B44; }
+    &.bg-gradient-blue { background: #3296FA; }
+    &.bg-gradient-green { background: #15BD66; }
+    &.bg-gradient-purple { background: #8B5CF6; }
+    &.bg-gradient-primary { background: #3296FA; }
+    &.bg-gradient-pink { background: #F43F5E; }
   }
 
   .nav-text {
@@ -1634,8 +1634,8 @@ $panel-min-width: 320px;
 
   .bg-gradient-light {
     background: #EBF5FF;
-    color: #0089FF;
-    .group-initial { color: #0089FF; font-weight: 600; }
+    color: #3296FA;
+    .group-initial { color: #3296FA; font-weight: 600; }
   }
 }
 

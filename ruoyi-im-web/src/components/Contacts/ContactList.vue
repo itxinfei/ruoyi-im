@@ -731,9 +731,14 @@ defineExpose({ reload: loadData })
   display: flex;
   align-items: center;
   gap: 8px;
+  position: sticky;
+  top: 0;
+  background: var(--dt-bg-card);
+  z-index: 10;
 
   .dark & {
     border-bottom-color: var(--dt-border-dark);
+    background: var(--dt-bg-card-dark);
   }
 
   .el-input {
@@ -771,25 +776,8 @@ defineExpose({ reload: loadData })
     border-radius: 0;
     position: relative;
 
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 0;
-      background: var(--dt-brand-color);
-      border-radius: 0;
-      transition: height var(--dt-transition-fast);
-    }
-
     &:hover {
       background: var(--dt-bg-session-hover);
-
-      &::before {
-        height: 20px;
-      }
     }
 
     .nav-badge {
@@ -861,33 +849,12 @@ defineExpose({ reload: loadData })
   border-radius: 0;
   position: relative;
 
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 0;
-    background: var(--dt-brand-color);
-    border-radius: 0;
-    transition: height var(--dt-transition-fast);
-  }
-
   &:hover {
     background-color: var(--dt-bg-session-hover);
-
-    &::before {
-      height: 20px;
-    }
   }
 
   &.active {
     background-color: var(--dt-brand-bg);
-
-    &::before {
-      height: 32px;
-    }
 
     &:hover {
       background-color: var(--dt-brand-bg-hover);
@@ -908,11 +875,36 @@ defineExpose({ reload: loadData })
   font-size: var(--dt-font-size-base);
   overflow: hidden;
   flex-shrink: 0;
+  position: relative;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* 在线状态点 */
+  .status-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--dt-bg-card);
+    transition: all var(--dt-transition-base);
+
+    &.online {
+      background: #00C853; /* 绿色 - 在线 */
+    }
+
+    &.offline {
+      background: transparent; /* 离线不显示 */
+    }
+
+    .dark & {
+      border-color: var(--dt-bg-card-dark);
+    }
   }
 }
 
@@ -965,14 +957,30 @@ defineExpose({ reload: loadData })
   font-size: var(--dt-font-size-base);
   font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
+  transition: background var(--dt-transition-fast);
+  
+  &:hover {
+    background: var(--dt-bg-session-hover);
+  }
 }
 
 :deep(.el-collapse-item__wrap) {
   border-bottom: none;
+  transition: max-height 0.2s ease;
 }
 
 :deep(.el-collapse-item__content) {
   padding-bottom: 0;
+}
+
+/* 折叠/展开图标 */
+:deep(.el-collapse-item__arrow) {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+:deep(.el-collapse-item__arrow.is-active) {
+  transform: rotate(90deg);
 }
 
 /* Element Plus 暗色模式适配 */
