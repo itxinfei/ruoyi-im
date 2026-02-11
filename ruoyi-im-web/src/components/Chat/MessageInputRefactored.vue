@@ -1158,7 +1158,7 @@ onUnmounted(() => {
 
   &.is-focused {
     background: var(--dt-bg-card);
-    box-shadow: 0 0 0 2px var(--dt-brand-color);
+    box-shadow: 0 0 0 1px var(--dt-brand-lighter);
   }
 
   .dark & {
@@ -1166,16 +1166,17 @@ onUnmounted(() => {
 
     &.is-focused {
       background: var(--dt-bg-card-dark);
-      box-shadow: 0 0 0 2px var(--dt-brand-color);
+      box-shadow: 0 0 0 1px var(--dt-brand-lighter);
     }
   }
 
   &.is-drag-over {
-    background: var(--dt-brand-bg);
+    background: rgba(50, 150, 250, 0.08);
     box-shadow: inset 0 0 0 2px var(--dt-brand-color);
+    border: 2px dashed var(--dt-brand-color);
 
     &::after {
-      content: '松开发送';
+      content: '松开上传文件';
       position: absolute;
       top: 50%;
       left: 50%;
@@ -1184,7 +1185,7 @@ onUnmounted(() => {
       background: var(--dt-brand-color);
       color: #fff;
       font-size: var(--dt-font-size-base);
-      border-radius: var(--dt-radius-sm);
+      border-radius: var(--dt-radius-md);
       pointer-events: none;
       z-index: 10;
     }
@@ -1300,11 +1301,11 @@ onUnmounted(() => {
 
     &:hover {
       background: var(--dt-black-04);
-      color: #0089ff;
+      color: #3296FA;
     }
 
     &:active {
-      transform: scale(0.95);
+      background: var(--dt-black-08);
     }
 
     &.send-btn {
@@ -1339,15 +1340,15 @@ onUnmounted(() => {
       }
 
       &.send-btn {
-        background: #0089ff;
+        background: var(--dt-brand-color);
         color: #ffffff;
 
         &:hover {
-          background: #0077e6;
+          background: var(--dt-brand-hover);
         }
 
         &:disabled {
-          background: #4b5563;
+          background: var(--dt-border-dark, #4b5563);
         }
       }
     }
@@ -1355,27 +1356,46 @@ onUnmounted(() => {
 }
 
 .reply-preview-wrapper {
-  margin: 0 16px 8px;
+  margin: 0 0 8px;
   position: relative;
-  max-width: 400px;
+  max-width: 100%;
 }
 
 .reply-preview {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--dt-bg-subtle);
-  border-radius: 6px;
+  gap: 10px;
+  padding: 10px 12px;
+  height: 40px;
+  background: var(--dt-bg-tertiary);
+  border-radius: 4px;
   border-left: 3px solid var(--dt-brand-color);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--dt-bg-subtle-hover);
+  }
+
+  .reply-icon {
+    color: var(--dt-brand-color);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
 
   .reply-content {
     flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 13px;
     color: var(--dt-text-secondary);
+
+    .reply-sender {
+      font-weight: 600;
+      color: var(--dt-text-primary);
+      margin-right: 6px;
+    }
   }
 
   .reply-close {
@@ -1386,11 +1406,17 @@ onUnmounted(() => {
     justify-content: center;
     border-radius: 50%;
     cursor: pointer;
-    color: var(--dt-text-tertiary);
+    color: var(--dt-text-quaternary);
+    transition: all 0.2s;
+    flex-shrink: 0;
 
     &:hover {
       background: var(--dt-bg-hover);
       color: var(--dt-text-primary);
+    }
+
+    .el-icon {
+      font-size: 14px;
     }
   }
 }

@@ -26,10 +26,6 @@
           v-if="session?.type !== 'GROUP' && isOnline"
           class="online-indicator"
         />
-        <span
-          v-if="session?.type !== 'GROUP' && isOnline"
-          class="online-pulse"
-        />
       </div>
       <div class="header-info">
         <h2 class="header-name">
@@ -290,7 +286,7 @@ const toggleConversationInfo = () => {
 }
 
 .group-avatar {
-  background: linear-gradient(135deg, #0089FF 0%, #0076DB 100%);
+  background: #3296FA;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -315,24 +311,6 @@ const toggleConversationInfo = () => {
   .dark & {
     border-color: var(--dt-bg-card-dark);
   }
-}
-
-.online-pulse {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 11px;
-  height: 11px;
-  background: var(--dt-success-color);
-  border-radius: 50%;
-  z-index: 1;
-  animation: onlinePulse 2.5s var(--dt-ease-out) infinite;
-}
-
-@keyframes onlinePulse {
-  0% { transform: scale(1); opacity: 0.6; }
-  70% { transform: scale(2.2); opacity: 0; }
-  100% { transform: scale(1); opacity: 0; }
 }
 
 .header-info {
