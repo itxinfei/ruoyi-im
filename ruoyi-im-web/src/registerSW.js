@@ -132,12 +132,14 @@ function showUpdatePrompt() {
     }
     
     .sw-update-btn--refresh {
-      background: #0089ff;
+      background: #3296FA;
+      background: var(--dt-brand-color);
       color: white;
     }
     
     .sw-update-btn--refresh:hover {
-      background: #0077e6;
+      background: #1A7FE8;
+      background: var(--dt-brand-hover);
     }
     
     .sw-update-btn--close {
@@ -149,7 +151,7 @@ function showUpdatePrompt() {
       background: #e5e7eb;
     }
   `
-  
+
   document.head.appendChild(style)
   document.body.appendChild(prompt)
 

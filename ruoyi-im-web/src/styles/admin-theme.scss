@@ -9,18 +9,18 @@
    ================================ */
 :root {
   /* 主品牌色 - 钉钉蓝 */
-  --dt-primary: #0089FF;
+  --dt-primary: #3296FA;
   --dt-primary-light: #33A1FF;
   --dt-primary-lighter: #66B8FF;
-  --dt-primary-dark: #0066CC;
-  --dt-primary-darker: #004499;
+  --dt-primary-dark: #1A7FE8;
+  --dt-primary-darker: #0D6ED6;
 
   /* 主色渐变 */
-  --dt-primary-gradient: linear-gradient(135deg, #0089FF 0%, #0066CC 100%);
+  --dt-primary-gradient: #3296FA;
 
   /* 主色透明度变体 */
-  --dt-primary-alpha-10: rgba(0, 137, 255, 0.1);
-  --dt-primary-alpha-15: rgba(0, 137, 255, 0.15);
+  --dt-primary-alpha-10: rgba(50, 150, 250, 0.1);
+  --dt-primary-alpha-15: rgba(50, 150, 250, 0.15);
 
   /* 辅助色 - 2025 钉钉新增紫色系 */
   --dt-secondary: #7C4DFF;
@@ -45,7 +45,7 @@
   --dt-error-dark: #D50000;
   --dt-error-bg: #FFEBEE;
 
-  --dt-info: #0089FF;
+  --dt-info: #3296FA;
   --dt-info-bg: #E3F2FD;
 
   /* ================================
@@ -70,7 +70,7 @@
   --dt-text-placeholder: #C0C4CC;
   --dt-text-disabled: #C0C4CC;
   --dt-text-white: #FFFFFF;
-  --dt-text-link: #0089FF;
+  --dt-text-link: #3296FA;
 
   /* ================================
      边框色 (Border Colors)
@@ -162,7 +162,7 @@
   /* 侧边栏 */
   --dt-sidebar-bg: #FFFFFF;
   --dt-sidebar-text: #606266;
-  --dt-sidebar-text-active: #0089FF;
+  --dt-sidebar-text-active: #3296FA;
   --dt-sidebar-bg-active: #ECF5FF;
   --dt-sidebar-indicator-width: 3px;
 
@@ -214,7 +214,7 @@
   /* 品牌色 - 暗色模式下略微降低饱和度 */
   --dt-primary: #33A1FF;
   --dt-primary-light: #66B8FF;
-  --dt-primary-dark: #0089FF;
+  --dt-primary-dark: #3296FA;
 
   /* 主色透明度变体 */
   --dt-primary-alpha-10: rgba(51, 161, 255, 0.1);
@@ -261,7 +261,7 @@
   --dt-success-bg: rgba(0, 200, 83, 0.15);
   --dt-warning-bg: rgba(255, 171, 0, 0.15);
   --dt-error-bg: rgba(255, 61, 0, 0.15);
-  --dt-info-bg: rgba(0, 137, 255, 0.15);
+  --dt-info-bg: rgba(50, 150, 250, 0.15);
 
   /* 组件特定 */
   --dt-table-header-bg: #333333;
@@ -529,11 +529,11 @@
 // 钉钉风格：按钮悬停效果优化
 .el-button:not(.is-disabled):hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(50, 150, 250, 0.2);
 }
 
 .el-button--primary:not(.is-disabled):hover {
-  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(50, 150, 250, 0.3);
 }
 
 // 钉钉风格：按钮点击反馈
@@ -690,7 +690,7 @@
 
 .el-message-box__btns .el-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 137, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(50, 150, 250, 0.2);
 }
 
 .el-message-box__btns .el-button:active {
@@ -890,8 +890,8 @@
 }
 
 [data-theme='dark'] .el-alert--info {
-  --el-alert-bg-color: rgba(0, 137, 255, 0.1);
-  --el-alert-border-color: rgba(0, 137, 255, 0.3);
+  --el-alert-bg-color: rgba(50, 150, 250, 0.1);
+  --el-alert-border-color: rgba(50, 150, 250, 0.3);
 }
 
 /* ================================
@@ -1072,8 +1072,8 @@
 }
 
 [data-theme='dark'] .el-tag--info {
-  --el-tag-bg-color: rgba(0, 137, 255, 0.2);
-  --el-tag-border-color: rgba(0, 137, 255, 0.3);
+  --el-tag-bg-color: rgba(50, 150, 250, 0.2);
+  --el-tag-border-color: rgba(50, 150, 250, 0.3);
   --el-tag-text-color: var(--dt-info);
 }
 

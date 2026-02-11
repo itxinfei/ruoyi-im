@@ -211,7 +211,7 @@
   flex-direction: column;
   align-items: center;
   padding: var(--dt-space-md) 0 var(--dt-space-lg);
-  background: var(--dt-bg-sidebar-gradient);
+  background: var(--dt-brand-color);
   color: white;
   z-index: 100;
 
@@ -227,11 +227,9 @@
       justify-content: center;
       border-radius: var(--dt-radius-md);
       background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s var(--dt-ease-in-out);
+      transition: background 0.2s var(--dt-ease-in-out);
 
       &:hover {
-        transform: scale(1.05);
         background: rgba(255, 255, 255, 0.15);
       }
 
@@ -268,13 +266,11 @@
       &:hover {
         background: rgba(255, 255, 255, 0.1);
         color: white;
-        transform: scale(1.05);
       }
 
       &.nav-item-active {
         background: rgba(255, 255, 255, 0.15);
         color: white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
         &::before {
           content: '';
@@ -357,11 +353,10 @@
       &:hover {
         background: var(--dt-bg-card-hover);
         color: var(--dt-brand-color);
-        transform: scale(1.05);
       }
 
       &:active {
-        transform: scale(0.95);
+        background: var(--dt-brand-bg);
       }
 
       &.is-active {
@@ -405,80 +400,10 @@
 }
 
 // ============================================================================
-// 八、动画系统（对标钉钉/野火IM）
+// 八、动画系统（保留功能性动画）
 // ============================================================================
 
-// 8.1 消息气泡动画
-@keyframes bubbleInRight {
-  0% {
-    opacity: 0;
-    transform: translateX(20px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes bubbleInLeft {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes bubbleRecall {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.85);
-  }
-}
-
-@keyframes messageSendSuccess {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-// 8.2 状态动画
-@keyframes badgePulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-@keyframes statusBreath {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1);
-  }
-}
-
+// 输入指示器动画（功能性，保留）
 @keyframes typingDot {
   0%, 80%, 100% {
     opacity: 0.3;
@@ -487,31 +412,6 @@
   40% {
     opacity: 1;
     transform: scale(1);
-  }
-}
-
-// 8.3 动画应用
-.message-bubble {
-  &.is-right {
-    animation: bubbleInRight 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  &.is-left {
-    animation: bubbleInLeft 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  &.is-recalling {
-    animation: bubbleRecall 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-.unread-badge {
-  animation: badgePulse 2s ease-in-out infinite;
-}
-
-.status-dot {
-  &.online {
-    animation: statusBreath 3s ease-in-out infinite;
   }
 }
 
@@ -537,58 +437,8 @@
 }
 
 // ============================================================================
-// 九、滚动条样式（对标钉钉/野火IM）
+// 十、工具类 Mixins - 使用 design-tokens.scss 中的定义，不再重复
 // ============================================================================
-
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 3px;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.25);
-  }
-}
-
-// 钉钉风格滚动条
-.scrollbar-dingtalk::-webkit-scrollbar-thumb {
-  background: rgba(0, 137, 255, 0.2);
-  border-radius: 3px;
-
-  &:hover {
-    background: rgba(0, 137, 255, 0.3);
-  }
-}
-
-// ============================================================================
-// 十、工具类 Mixins
-// ============================================================================
-
-@mixin text-ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
 // ============================================================================
 // 十一、暗色模式（IM专用调整）
@@ -609,19 +459,13 @@
     }
 
     &.is-right {
-      background: linear-gradient(135deg,
-        var(--dt-bubble-right-bg-start-dark) 0%,
-        var(--dt-bubble-right-bg-end-dark) 100%
-      );
+      background: var(--dt-brand-color);
       color: var(--dt-bubble-right-text);
     }
   }
 
   .dingtalk-nav {
-    background: linear-gradient(180deg,
-      #1E3A8A 0%,
-      #1E40AF 100%
-    );
+    background: #1E3A8A;
   }
 }
 

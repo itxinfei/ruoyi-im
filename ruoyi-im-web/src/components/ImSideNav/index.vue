@@ -213,7 +213,7 @@ const handleNavClick = moduleKey => {
   min-width: 64px;
   max-width: 64px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #1677ff 0%, #0958d9 100%);
+  background: #3296FA;
   height: 100vh;
   position: relative;
 }
@@ -349,7 +349,7 @@ const handleNavClick = moduleKey => {
   flex-shrink: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin-top: auto;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+  background: transparent;
 }
 
 .footer-item {
@@ -411,7 +411,6 @@ const handleNavClick = moduleKey => {
   &:hover {
     background-color: rgba(255, 255, 255, 0.25);
     border-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.05);
   }
 
   &.active {

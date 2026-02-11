@@ -55,8 +55,8 @@
 
   // === Background Colors (亮色模式 - 企业IM规范) ===
   --dt-bg-body: #F5F7FA;
-  --dt-bg-sidebar: #3296FA;
-  --dt-bg-sidebar-gradient: #3296FA;
+  --dt-bg-sidebar: #F0F2F5;
+  --dt-bg-sidebar-gradient: #F0F2F5;
   --dt-bg-sidebar-item: transparent;
   --dt-bg-sidebar-item-hover: rgba(255, 255, 255, 0.12);
   --dt-bg-sidebar-item-active: rgba(255, 255, 255, 0.2);
@@ -889,20 +889,6 @@
   font: inherit;
 }
 
-@mixin interactive {
-  cursor: pointer;
-  transition: all var(--dt-transition-base);
-
-  &:hover {
-    opacity: 0.85;
-  }
-
-  &:active {
-    opacity: 0.7;
-    transform: scale(0.98);
-  }
-}
-
 // ============================================================================
 // 响应式断点
 // ============================================================================
@@ -1018,27 +1004,6 @@ $breakpoint-2xl: 1536px;
   }
 }
 
-// 弹跳进入
-@keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
-
-  70% {
-    transform: scale(0.9);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 // 滑入从左
 @keyframes slideInLeft {
   from {
@@ -1058,34 +1023,6 @@ $breakpoint-2xl: 1536px;
 
   to {
     transform: translateX(0);
-  }
-}
-
-// 脉冲动画
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
-  }
-}
-
-// 呼吸动画（用于在线状态等）
-@keyframes breathe {
-
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
   }
 }
 
@@ -1140,19 +1077,6 @@ $breakpoint-2xl: 1536px;
   }
 }
 
-// 消息气泡弹出动画
-@keyframes messagePop {
-  0% {
-    opacity: 0;
-    transform: scale(0.8) translateY(10px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
 // 消息撤回动画
 @keyframes messageRecall {
   0% {
@@ -1166,47 +1090,6 @@ $breakpoint-2xl: 1536px;
   100% {
     opacity: 0;
     transform: scale(0.9);
-  }
-}
-
-// 表情回应弹出动画
-@keyframes reactionPop {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-// 长按脉冲动画
-@keyframes longPressPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-// 消息发送成功动画
-@keyframes messageSent {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
   }
 }
 
@@ -1282,41 +1165,12 @@ $breakpoint-2xl: 1536px;
   animation: scaleIn $duration var(--dt-ease-bounce);
 }
 
-@mixin animation-bounce-in($duration: 0.5s) {
-  animation: bounceIn $duration var(--dt-ease-bounce);
-}
-
-@mixin animation-pulse($duration: 2s, $infinite: true) {
-  animation: pulse $duration var(--dt-ease-in-out) if(sass($infinite): infinite; else: null);
-}
-
 @mixin animation-spin($duration: 1s, $infinite: true) {
   animation: spin $duration linear if(sass($infinite): infinite; else: null);
 }
 
 @mixin animation-shake($duration: 0.5s) {
   animation: shake $duration var(--dt-ease-in-out);
-}
-
-// 消息相关动画
-@mixin animation-message-pop($duration: 0.3s) {
-  animation: messagePop $duration var(--dt-ease-bounce);
-}
-
-@mixin animation-message-recall($duration: 0.3s) {
-  animation: messageRecall $duration var(--dt-ease-out);
-}
-
-@mixin animation-reaction-pop($duration: 0.25s) {
-  animation: reactionPop $duration var(--dt-ease-bounce);
-}
-
-@mixin animation-message-sent($duration: 0.3s) {
-  animation: messageSent $duration var(--dt-ease-out);
-}
-
-@mixin animation-message-error($duration: 0.4s) {
-  animation: messageError $duration var(--dt-ease-in-out);
 }
 
 // 骨架屏效果
@@ -1330,73 +1184,6 @@ $breakpoint-2xl: 1536px;
   border-radius: var(--dt-radius-sm);
   color: transparent !important;
   pointer-events: none;
-}
-
-// 悬停提升效果
-@mixin hover-lift($translate-y: -2px) {
-  transition: transform var(--dt-transition-base), box-shadow var(--dt-transition-base);
-
-  &:hover {
-    transform: translateY($translate-y);
-    box-shadow: var(--dt-shadow-card-hover);
-  }
-}
-
-// 涟漪效果
-@mixin ripple-effect($color: var(--dt-brand-color), $duration: 0.6s) {
-  position: relative;
-  overflow: hidden;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: $color;
-    transform: translate(-50%, -50%);
-    transition: width $duration var(--dt-ease-out), height $duration var(--dt-ease-out);
-    opacity: 0.3;
-  }
-
-  &:active::after {
-    width: 200px;
-    height: 200px;
-  }
-}
-
-// 平滑过渡（所有属性）
-@mixin smooth-transition($properties: all) {
-  transition: $properties var(--dt-transition-base) var(--dt-ease-in-out);
-}
-
-// 玻璃态效果
-@mixin glass-effect($blur: 10px, $opacity: 0.8) {
-  background: rgba(255, 255, 255, $opacity);
-  backdrop-filter: blur($blur);
-  -webkit-backdrop-filter: blur($blur);
-}
-
-// 暗色玻璃态
-@mixin glass-dark($blur: 10px, $opacity: 0.6) {
-  background: rgba(15, 23, 42, $opacity);
-  backdrop-filter: blur($blur);
-  -webkit-backdrop-filter: blur($blur);
-}
-
-// 渐变背景（企业IM蓝）
-@mixin gradient-bg($start: #3296FA, $end: #1A7FE8, $direction: 135deg) {
-  background: linear-gradient($direction, $start, $end);
-}
-
-// 文本渐变（企业IM蓝）
-@mixin text-gradient($start: #3296FA, $end: #4096ff) {
-  background: linear-gradient(135deg, $start, $end);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 // 阴影层次
@@ -2387,7 +2174,9 @@ $breakpoint-2xl: 1536px;
 
 // 玻璃态卡片
 .dt-card--glass {
-  @include glass-effect(10px, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -2446,37 +2235,6 @@ $breakpoint-2xl: 1536px;
 }
 
 // 常用交互动画
-// 悬停提升
-.hover-lift {
-  @include hover-lift(-2px);
-}
-
-.hover-lift--strong {
-  transition: transform var(--dt-transition-base), box-shadow var(--dt-transition-base);
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--dt-shadow-lg);
-  }
-}
-
-// 悬停放大
-.hover-scale {
-  transition: transform var(--dt-transition-base);
-
-  &:hover {
-    transform: scale(1.02);
-  }
-}
-
-.hover-scale--strong {
-  transition: transform var(--dt-transition-base);
-
-  &:hover {
-    transform: scale(1.05);
-  }
-}
-
 // 悬停淡入
 .hover-fade {
   opacity: 0.8;
@@ -2505,12 +2263,6 @@ $breakpoint-2xl: 1536px;
 .click-shrink {
   &:active {
     transform: scale(0.97);
-  }
-}
-
-.click-pulse {
-  &:active {
-    animation: pulse 0.3s var(--dt-ease-out);
   }
 }
 
