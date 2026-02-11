@@ -9,6 +9,7 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.workreport.WorkReportCommentVO;
 import com.ruoyi.im.vo.workreport.WorkReportDetailVO;
 import com.ruoyi.im.vo.workreport.WorkReportLikeUserVO;
+import com.ruoyi.im.vo.workreport.WorkReportStatsVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
@@ -196,9 +197,9 @@ public class ImWorkReportController {
      */
     @Operation(summary = "获取统计信息")
     @GetMapping("/statistics")
-    public Result<Object> getStatistics() {
+    public Result<WorkReportStatsVO> getStatistics() {
         Long userId = SecurityUtils.getLoginUserId();
-        Object stats = workReportService.getStatistics(userId);
+        WorkReportStatsVO stats = workReportService.getStatistics(userId);
         return Result.success(stats);
     }
 }

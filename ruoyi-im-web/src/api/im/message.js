@@ -15,7 +15,7 @@ import request from '../request'
  */
 export function sendMessage(data) {
   return request({
-    url: '/api/im/message/send',
+    url: '/api/im/messages',
     method: 'post',
     data
   })
@@ -29,7 +29,7 @@ export function sendMessage(data) {
  */
 export function retryMessage(clientMsgId) {
   return request({
-    url: `/api/im/message/retry/${clientMsgId}`,
+    url: `/api/im/messages/retry/${clientMsgId}`,
     method: 'post'
   })
 }
@@ -44,7 +44,7 @@ export function retryMessage(clientMsgId) {
  */
 export function getMessages(conversationId, params = {}) {
   return request({
-    url: `/api/im/message/list/${conversationId}`,
+    url: `/api/im/messages/conversations/${conversationId}`,
     method: 'get',
     params
   })
@@ -57,7 +57,7 @@ export function getMessages(conversationId, params = {}) {
  */
 export function recallMessage(messageId) {
   return request({
-    url: `/api/im/message/${messageId}/recall`,
+    url: `/api/im/messages/${messageId}/recall`,
     method: 'delete'
   })
 }
@@ -71,7 +71,7 @@ export function recallMessage(messageId) {
  */
 export function editMessage(messageId, data) {
   return request({
-    url: `/api/im/message/${messageId}/edit`,
+    url: `/api/im/messages/${messageId}/edit`,
     method: 'put',
     data
   })
@@ -84,7 +84,7 @@ export function editMessage(messageId, data) {
  */
 export function deleteMessage(messageId) {
   return request({
-    url: `/api/im/message/${messageId}`,
+    url: `/api/im/messages/${messageId}`,
     method: 'delete'
   })
 }
@@ -98,7 +98,7 @@ export function deleteMessage(messageId) {
  */
 export function forwardMessage(data) {
   return request({
-    url: '/api/im/message/forward',
+    url: `/api/im/messages/${data.messageId}/forward`,
     method: 'post',
     data
   })
@@ -115,7 +115,7 @@ export function forwardMessage(data) {
  */
 export function batchForwardMessages(data) {
   return request({
-    url: '/api/im/message/forward/batch',
+    url: '/api/im/messages/forward/batch',
     method: 'post',
     data
   })
@@ -132,7 +132,7 @@ export function batchForwardMessages(data) {
  */
 export function searchMessages(data) {
   return request({
-    url: '/api/im/message/search',
+    url: '/api/im/messages/search',
     method: 'post',
     data
   })
@@ -147,12 +147,9 @@ export function searchMessages(data) {
  */
 export function markAsRead(data) {
   return request({
-    url: '/api/im/message/read',
+    url: '/api/im/messages/mark-read',
     method: 'put',
-    params: {
-      conversationId: data.conversationId,
-      lastReadMessageId: data.messageId
-    }
+    data
   })
 }
 
@@ -164,7 +161,7 @@ export function markAsRead(data) {
  */
 export function getMessageReadUsers(conversationId, messageId) {
   return request({
-    url: `/api/im/message/receipt/read-status/${conversationId}/${messageId}`,
+    url: `/api/im/messages/receipts/${conversationId}/${messageId}`,
     method: 'get'
   })
 }
@@ -176,7 +173,7 @@ export function getMessageReadUsers(conversationId, messageId) {
  */
 export function getBatchMessageReadUsers(messageIds) {
   return request({
-    url: '/api/im/message/read/batch/users',
+    url: '/api/im/messages/read-status/batch/users',
     method: 'post',
     data: { messageIds }
   })
@@ -191,7 +188,7 @@ export function getBatchMessageReadUsers(messageIds) {
  */
 export function replyMessage(data) {
   return request({
-    url: '/api/im/message/reply',
+    url: `/api/im/messages/${data.messageId}/reply`,
     method: 'post',
     data
   })
@@ -206,7 +203,7 @@ export function replyMessage(data) {
  */
 export function addReaction(messageId, data) {
   return request({
-    url: `/api/im/message/reaction/${messageId}`,
+    url: `/api/im/messages/${messageId}/reactions`,
     method: 'post',
     data
   })
@@ -217,10 +214,11 @@ export function addReaction(messageId, data) {
  * @param {number} messageId - 消息ID
  * @returns {Promise}
  */
-export function removeReaction(messageId) {
+export function removeReaction(messageId, emoji) {
   return request({
-    url: `/api/im/message/reaction/${messageId}`,
-    method: 'delete'
+    url: `/api/im/messages/${messageId}/reactions`,
+    method: 'delete',
+    params: { emoji }
   })
 }
 
@@ -231,7 +229,7 @@ export function removeReaction(messageId) {
  */
 export function getMessageReactions(messageId) {
   return request({
-    url: `/api/im/message/reaction/${messageId}/list`,
+    url: `/api/im/messages/${messageId}/reactions`,
     method: 'get'
   })
 }
@@ -242,7 +240,7 @@ export function getMessageReactions(messageId) {
  */
 export function getUnreadMentions() {
   return request({
-    url: '/api/im/message/reaction/mention/unread',
+    url: '/api/im/mentions/unread',
     method: 'get'
   })
 }
@@ -254,7 +252,7 @@ export function getUnreadMentions() {
  */
 export function parseLinkPreview(url) {
   return request({
-    url: '/api/im/link/preview',
+    url: '/api/im/link-previews',
     method: 'post',
     data: { url }
   })
@@ -266,7 +264,7 @@ export function parseLinkPreview(url) {
  */
 export function getUnreadMentionCount() {
   return request({
-    url: '/api/im/message/reaction/mention/unread/count',
+    url: '/api/im/mentions/unread/count',
     method: 'get'
   })
 }
@@ -278,7 +276,7 @@ export function getUnreadMentionCount() {
  */
 export function markMentionAsRead(messageId) {
   return request({
-    url: `/api/im/message/reaction/mention/${messageId}/read`,
+    url: `/api/im/mentions/${messageId}/read`,
     method: 'put'
   })
 }
@@ -290,8 +288,9 @@ export function markMentionAsRead(messageId) {
  */
 export function getUnreadCount(conversationId) {
   return request({
-    url: `/api/im/message/receipt/unread/${conversationId}`,
-    method: 'get'
+    url: `/api/im/messages/unread-count`,
+    method: 'get',
+    params: { conversationId }
   })
 }
 
@@ -302,7 +301,7 @@ export function getUnreadCount(conversationId) {
  */
 export function pinMessage(messageId) {
   return request({
-    url: `/api/im/message/${messageId}/pin`,
+    url: `/api/im/messages/${messageId}/pin`,
     method: 'post'
   })
 }
@@ -314,7 +313,7 @@ export function pinMessage(messageId) {
  */
 export function unpinMessage(messageId) {
   return request({
-    url: `/api/im/message/${messageId}/pin`,
+    url: `/api/im/messages/${messageId}/pin`,
     method: 'delete'
   })
 }
@@ -326,8 +325,9 @@ export function unpinMessage(messageId) {
  */
 export function getPinnedMessages(conversationId) {
   return request({
-    url: `/api/im/message/pinned/${conversationId}`,
-    method: 'get'
+    url: `/api/im/messages/pinned`,
+    method: 'get',
+    params: { conversationId }
   })
 }
 
@@ -338,8 +338,9 @@ export function getPinnedMessages(conversationId) {
  */
 export function clearConversationMessages(conversationId) {
   return request({
-    url: `/api/im/message/clear/${conversationId}`,
-    method: 'delete'
+    url: `/api/im/messages/clear`,
+    method: 'delete',
+    params: { conversationId }
   })
 }
 
@@ -354,8 +355,9 @@ export function clearConversationMessages(conversationId) {
  */
 export function exportChatMessages(conversationId, options) {
   return request({
-    url: `/api/im/message/export/${conversationId}`,
+    url: '/api/im/messages/export',
     method: 'post',
+    params: { conversationId },
     data: options,
     responseType: 'blob'
   })
@@ -369,9 +371,9 @@ export function exportChatMessages(conversationId, options) {
  */
 export function getExportableMessages(conversationId, params) {
   return request({
-    url: `/api/im/message/export/list/${conversationId}`,
+    url: '/api/im/messages/export/list',
     method: 'get',
-    params
+    params: { ...params, conversationId }
   })
 }
 
@@ -387,9 +389,9 @@ export function getExportableMessages(conversationId, params) {
  */
 export function getMessagesByCategory(conversationId, category, params = {}) {
   return request({
-    url: `/api/im/message/${conversationId}/category/${category}`,
+    url: `/api/im/messages/category/${category}`,
     method: 'get',
-    params
+    params: { ...params, conversationId }
   })
 }
 
@@ -407,7 +409,7 @@ export function getMessagesByCategory(conversationId, category, params = {}) {
  */
 export function scheduleMessage(data) {
   return request({
-    url: '/api/im/message/schedule',
+    url: '/api/im/scheduled-messages',
     method: 'post',
     data
   })
@@ -422,7 +424,7 @@ export function scheduleMessage(data) {
  */
 export function getScheduledMessages(params = {}) {
   return request({
-    url: '/api/im/message/schedule/list',
+    url: '/api/im/scheduled-messages',
     method: 'get',
     params
   })
@@ -435,7 +437,7 @@ export function getScheduledMessages(params = {}) {
  */
 export function cancelScheduledMessage(scheduledMessageId) {
   return request({
-    url: `/api/im/message/schedule/${scheduledMessageId}/cancel`,
+    url: `/api/im/scheduled-messages/${scheduledMessageId}/cancel`,
     method: 'put'
   })
 }
@@ -448,7 +450,7 @@ export function cancelScheduledMessage(scheduledMessageId) {
  */
 export function rescheduleMessage(scheduledMessageId, scheduledTime) {
   return request({
-    url: `/api/im/message/schedule/${scheduledMessageId}/reschedule`,
+    url: `/api/im/scheduled-messages/${scheduledMessageId}/reschedule`,
     method: 'put',
     data: { scheduledTime }
   })
@@ -467,9 +469,9 @@ export function rescheduleMessage(scheduledMessageId, scheduledTime) {
  */
 export function getSharedFiles(contactId, params = {}) {
   return request({
-    url: `/api/im/message/shared-files/${contactId}`,
+    url: '/api/im/messages/shared-files',
     method: 'get',
-    params
+    params: { ...params, contactId }
   })
 }
 
@@ -484,7 +486,7 @@ export function getSharedFiles(contactId, params = {}) {
  */
 export function getGroupSharedFiles(groupId, params = {}) {
   return request({
-    url: `/api/im/message/group-files/${groupId}`,
+    url: `/api/im/groups/${groupId}/files/shared`,
     method: 'get',
     params
   })
@@ -508,7 +510,7 @@ export function getGroupSharedFiles(groupId, params = {}) {
  */
 export function syncMessages(params) {
   return request({
-    url: '/api/im/message/sync',
+    url: '/api/im/messages/sync',
     method: 'get',
     params
   })
@@ -520,7 +522,7 @@ export function syncMessages(params) {
  */
 export function getSyncPoints() {
   return request({
-    url: '/api/im/message/sync/points',
+    url: '/api/im/messages/sync/points',
     method: 'get'
   })
 }
@@ -533,7 +535,7 @@ export function getSyncPoints() {
  */
 export function resetSyncPoint(deviceId) {
   return request({
-    url: `/api/im/message/sync/point/${deviceId}`,
+    url: `/api/im/messages/sync/points/${deviceId}`,
     method: 'delete'
   })
 }

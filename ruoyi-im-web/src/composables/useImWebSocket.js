@@ -57,6 +57,16 @@ export function useImWebSocket() {
     imWebSocket.setStoreConnectionCallback(connected => {
       if (store) {
         store.commit('im/SET_WS_CONNECTED', connected)
+        // 同步消息模块的离线状态
+        store.commit('im/message/SET_OFFLINE_STATUS', !connected)
+
+        // WebSocket 重连成功后，处理离线队列中积压的消息
+        if (connected) {
+          setTimeout(() => {
+            store.dispatch('im/message/processOfflineQueue')
+            store.dispatch('im/message/retryFailedMessages')
+          }, 1000)
+        }
       }
     })
 

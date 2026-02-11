@@ -11,7 +11,7 @@ import request from '../request'
  */
 export function getContacts(params) {
   return request({
-    url: '/api/im/contact/list',
+    url: '/api/im/contacts/list',
     method: 'get',
     params
   })
@@ -25,7 +25,7 @@ export function getContacts(params) {
  */
 export function searchContacts(params) {
   return request({
-    url: '/api/im/contact/search',
+    url: '/api/im/contacts/search',
     method: 'get',
     params
   })
@@ -38,7 +38,7 @@ export function searchContacts(params) {
  */
 export function getContact(contactId) {
   return request({
-    url: `/api/im/contact/${contactId}`,
+    url: `/api/im/contacts/${contactId}`,
     method: 'get'
   })
 }
@@ -52,7 +52,7 @@ export function getContact(contactId) {
  */
 export function sendFriendRequest(data) {
   return request({
-    url: '/api/im/contact/request/send',
+    url: '/api/im/contacts/request/send',
     method: 'post',
     data
   })
@@ -66,7 +66,7 @@ export function sendFriendRequest(data) {
  */
 export function handleFriendRequest(requestId, approved) {
   return request({
-    url: `/api/im/contact/request/${requestId}/handle`,
+    url: `/api/im/contacts/request/${requestId}/handle`,
     method: 'post',
     params: { approved }
   })
@@ -78,7 +78,7 @@ export function handleFriendRequest(requestId, approved) {
  */
 export function getFriendRequests() {
   return request({
-    url: '/api/im/contact/request/received',
+    url: '/api/im/contacts/request/received',
     method: 'get'
   })
 }
@@ -92,7 +92,7 @@ export function getFriendRequests() {
  */
 export function updateContactRemark(contactId, data) {
   return request({
-    url: `/api/im/contact/${contactId}`,
+    url: `/api/im/contacts/${contactId}`,
     method: 'put',
     data
   })
@@ -105,7 +105,7 @@ export function updateContactRemark(contactId, data) {
  */
 export function deleteContact(contactId) {
   return request({
-    url: `/api/im/contact/${contactId}`,
+    url: `/api/im/contacts/${contactId}`,
     method: 'delete'
   })
 }
@@ -119,7 +119,7 @@ export function deleteContact(contactId) {
  */
 export function moveContactToGroup(data) {
   return request({
-    url: '/api/im/contact/group/move',
+    url: '/api/im/contacts/group/move',
     method: 'put',
     data
   })
@@ -131,7 +131,7 @@ export function moveContactToGroup(data) {
  */
 export function getGroupedFriendList() {
   return request({
-    url: '/api/im/contact/grouped',
+    url: '/api/im/contacts/grouped',
     method: 'get'
   })
 }
@@ -144,7 +144,7 @@ export function getGroupedFriendList() {
  */
 export function blockFriend(contactId, blocked) {
   return request({
-    url: `/api/im/contact/${contactId}/block`,
+    url: `/api/im/contacts/${contactId}/block`,
     method: 'put',
     params: { blocked }
   })
@@ -156,7 +156,7 @@ export function blockFriend(contactId, blocked) {
  */
 export function getGroupList() {
   return request({
-    url: '/api/im/contact/group/list',
+    url: '/api/im/contacts/group/list',
     method: 'get'
   })
 }
@@ -169,7 +169,7 @@ export function getGroupList() {
  */
 export function createGroup(data) {
   return request({
-    url: '/api/im/contact/group',
+    url: '/api/im/contacts/groups',
     method: 'post',
     data
   })
@@ -183,7 +183,7 @@ export function createGroup(data) {
  */
 export function renameGroup(oldName, newName) {
   return request({
-    url: `/api/im/contact/group/${encodeURIComponent(oldName)}`,
+    url: `/api/im/contacts/group/${encodeURIComponent(oldName)}`,
     method: 'put',
     data: { newName }
   })
@@ -196,7 +196,7 @@ export function renameGroup(oldName, newName) {
  */
 export function deleteGroup(groupName) {
   return request({
-    url: `/api/im/contact/group/${encodeURIComponent(groupName)}`,
+    url: `/api/im/contacts/group/${encodeURIComponent(groupName)}`,
     method: 'delete'
   })
 }
@@ -207,7 +207,7 @@ export function deleteGroup(groupName) {
  */
 export function getSentRequests() {
   return request({
-    url: '/api/im/contact/request/sent',
+    url: '/api/im/contacts/request/sent',
     method: 'get'
   })
 }
@@ -219,7 +219,7 @@ export function getSentRequests() {
  */
 export function getUserTags() {
   return request({
-    url: '/api/im/contact/tags',
+    url: '/api/im/contacts/tags',
     method: 'get'
   })
 }
@@ -233,7 +233,7 @@ export function getUserTags() {
  */
 export function updateUserTags(userId, tags) {
   return request({
-    url: `/api/im/contact/${userId}/tags`,
+    url: `/api/im/contacts/${userId}/tags`,
     method: 'put',
     data: { tags }
   })
@@ -247,7 +247,7 @@ export function updateUserTags(userId, tags) {
  */
 export function getContactsByTag(tag) {
   return request({
-    url: `/api/im/contact/tag/${encodeURIComponent(tag)}`,
+    url: `/api/im/contacts/tag/${encodeURIComponent(tag)}`,
     method: 'get'
   })
 }
@@ -262,7 +262,7 @@ export function getContactsByTag(tag) {
  */
 export function getRecommendedContacts(params) {
   return request({
-    url: '/api/im/contact/recommendations',
+    url: '/api/im/contacts/recommendations',
     method: 'get',
     params
   })
@@ -276,7 +276,7 @@ export function getRecommendedContacts(params) {
  */
 export function uploadAddressBook(data) {
   return request({
-    url: '/api/im/contact/address-book/upload',
+    url: '/api/im/contacts/address-book/upload',
     method: 'post',
     data
   })
@@ -288,7 +288,7 @@ export function uploadAddressBook(data) {
  */
 export function getAddressBookMatches() {
   return request({
-    url: '/api/im/contact/address-book/matches',
+    url: '/api/im/contacts/address-book/matches',
     method: 'get'
   })
 }
@@ -302,7 +302,7 @@ export function getAddressBookMatches() {
  */
 export function batchAddFriends(data) {
   return request({
-    url: '/api/im/contact/batch-add',
+    url: '/api/im/contacts/batch-add',
     method: 'post',
     data
   })
@@ -317,7 +317,7 @@ export function batchAddFriends(data) {
  */
 export function batchMoveToGroup(data) {
   return request({
-    url: '/api/im/contact/batch-move',
+    url: '/api/im/contacts/batch-move',
     method: 'put',
     data
   })
@@ -330,7 +330,7 @@ export function batchMoveToGroup(data) {
  */
 export function batchDeleteContacts(contactIds) {
   return request({
-    url: '/api/im/contact/batch-delete',
+    url: '/api/im/contacts/batch-delete',
     method: 'delete',
     data: { contactIds }
   })
@@ -343,7 +343,7 @@ export function batchDeleteContacts(contactIds) {
  */
 export function clearFriendListCache() {
   return request({
-    url: '/api/im/contact/cache/clear',
+    url: '/api/im/contacts/cache/clear',
     method: 'post'
   })
 }
@@ -355,7 +355,7 @@ export function clearFriendListCache() {
  */
 export function batchClearFriendListCache(userIds) {
   return request({
-    url: '/api/im/contact/cache/clear-batch',
+    url: '/api/im/contacts/cache/clear-batch',
     method: 'post',
     data: { userIds }
   })

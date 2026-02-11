@@ -196,6 +196,8 @@ export function useVirtualScroll(options = {}) {
   const isNearBottom = (threshold = 100) => {
     if (!containerRef.value) return true
     const { scrollTop, scrollHeight, clientHeight } = containerRef.value
+    // 容器未渲染完成时视为在底部
+    if (!scrollHeight || !clientHeight) return true
     return scrollHeight - scrollTop - clientHeight < threshold
   }
 
@@ -332,6 +334,7 @@ export function useVirtualScrollOptimization(options = {}) {
     if (!element) return true
 
     const { scrollTop, scrollHeight, clientHeight } = element
+    if (!scrollHeight || !clientHeight) return true
     return scrollHeight - scrollTop - clientHeight < threshold
   }
 

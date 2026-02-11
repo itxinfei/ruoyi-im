@@ -9,7 +9,7 @@ import request from '../request'
  */
 export function getVisibleApplications() {
     return request({
-        url: '/api/im/app/visible',
+        url: '/api/im/apps/visible',
         method: 'get'
     })
 }
@@ -20,7 +20,7 @@ export function getVisibleApplications() {
  */
 export function getMyApplications() {
     return request({
-        url: '/api/im/app/my',
+        url: '/api/im/apps/installed',
         method: 'get'
     })
 }
@@ -31,7 +31,7 @@ export function getMyApplications() {
  */
 export function getApplicationsByCategory() {
     return request({
-        url: '/api/im/app/category',
+        url: '/api/im/apps/categories',
         method: 'get'
     })
 }
@@ -43,7 +43,7 @@ export function getApplicationsByCategory() {
  */
 export function getApplicationById(appId) {
     return request({
-        url: `/api/im/app/${appId}`,
+        url: `/api/im/apps/${appId}`,
         method: 'get'
     })
 }
@@ -55,7 +55,7 @@ export function getApplicationById(appId) {
  */
 export function getInstalledApp(appId) {
     return request({
-        url: `/api/im/app/installed/${appId}`,
+        url: `/api/im/apps/installed/${appId}`,
         method: 'get'
     })
 }
@@ -71,7 +71,7 @@ export function getInstalledApp(appId) {
  */
 export function installApplication(data) {
     return request({
-        url: '/api/im/app/install',
+        url: '/api/im/apps',
         method: 'post',
         data
     })
@@ -84,8 +84,8 @@ export function installApplication(data) {
  */
 export function uninstallApplication(appId) {
     return request({
-        url: `/api/im/app/uninstall/${appId}`,
-        method: 'post'
+        url: `/api/im/apps/${appId}`,
+        method: 'delete'
     })
 }
 
@@ -97,7 +97,7 @@ export function uninstallApplication(appId) {
  */
 export function updateAppConfig(appId, config) {
     return request({
-        url: `/api/im/app/${appId}/config`,
+        url: `/api/im/apps/${appId}/config`,
         method: 'post',
         data: { config }
     })
@@ -110,7 +110,7 @@ export function updateAppConfig(appId, config) {
  */
 export function getAppConfig(appId) {
     return request({
-        url: `/api/im/app/${appId}/config`,
+        url: `/api/im/apps/${appId}/config`,
         method: 'get'
     })
 }
@@ -123,7 +123,7 @@ export function getAppConfig(appId) {
  */
 export function pinApp(appId, pinned) {
     return request({
-        url: `/api/im/app/${appId}/pin`,
+        url: `/api/im/apps/${appId}/pin`,
         method: 'post',
         data: { pinned }
     })
@@ -136,7 +136,7 @@ export function pinApp(appId, pinned) {
  */
 export function updateAppSort(sortList) {
     return request({
-        url: '/api/im/app/sort',
+        url: '/api/im/apps/sort',
         method: 'post',
         data: { sortList }
     })
@@ -150,7 +150,7 @@ export function updateAppSort(sortList) {
  */
 export function setAppEnabled(appId, enabled) {
     return request({
-        url: `/api/im/app/${appId}/enabled`,
+        url: `/api/im/apps/${appId}/enabled`,
         method: 'post',
         data: { enabled }
     })
@@ -163,7 +163,7 @@ export function setAppEnabled(appId, enabled) {
  */
 export function recordAppUsage(appId) {
     return request({
-        url: `/api/im/app/${appId}/usage`,
+        url: `/api/im/apps/${appId}/usage`,
         method: 'post'
     })
 }
@@ -175,7 +175,7 @@ export function recordAppUsage(appId) {
  */
 export function getAppStatistics(appId) {
     return request({
-        url: `/api/im/app/${appId}/statistics`,
+        url: `/api/im/apps/${appId}/statistics`,
         method: 'get'
     })
 }

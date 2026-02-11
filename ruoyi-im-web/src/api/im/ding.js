@@ -17,7 +17,7 @@ import request from '../request'
  */
 export function sendDing(data) {
   return request({
-    url: '/api/im/ding/send',
+    url: '/api/im/ding-messages/send',
     method: 'post',
     data
   })
@@ -37,7 +37,7 @@ export function sendDing(data) {
  */
 export function queryDings(data) {
   return request({
-    url: '/api/im/ding/list',
+    url: '/api/im/ding-messages',
     method: 'post',
     data
   })
@@ -50,7 +50,7 @@ export function queryDings(data) {
  */
 export function getDingDetail(dingId) {
   return request({
-    url: `/api/im/ding/${dingId}`,
+    url: `/api/im/ding-messages/${dingId}`,
     method: 'get'
   })
 }
@@ -62,7 +62,7 @@ export function getDingDetail(dingId) {
  */
 export function markDingAsRead(dingId) {
   return request({
-    url: `/api/im/ding/${dingId}/read`,
+    url: `/api/im/ding-messages/${dingId}/read`,
     method: 'put'
   })
 }
@@ -74,7 +74,7 @@ export function markDingAsRead(dingId) {
  */
 export function batchMarkDingAsRead(dingIds) {
   return request({
-    url: '/api/im/ding/read/batch',
+    url: '/api/im/ding-messages/read/batch',
     method: 'put',
     data: dingIds
   })
@@ -87,7 +87,7 @@ export function batchMarkDingAsRead(dingIds) {
  */
 export function cancelDing(dingId) {
   return request({
-    url: `/api/im/ding/${dingId}/cancel`,
+    url: `/api/im/ding-messages/${dingId}/cancel`,
     method: 'put'
   })
 }
@@ -98,7 +98,7 @@ export function cancelDing(dingId) {
  */
 export function getUnreadDingCount() {
   return request({
-    url: '/api/im/ding/unread/count',
+    url: '/api/im/ding-messages/unread/count',
     method: 'get'
   })
 }
@@ -110,7 +110,7 @@ export function getUnreadDingCount() {
  */
 export function getDingReadUsers(dingId) {
   return request({
-    url: `/api/im/ding/${dingId}/read-users`,
+    url: `/api/im/ding-messages/${dingId}/read-users`,
     method: 'get'
   })
 }
@@ -122,7 +122,7 @@ export function getDingReadUsers(dingId) {
  */
 export function getDingReadStatus(dingId) {
   return request({
-    url: `/api/im/ding/${dingId}/status`,
+    url: `/api/im/ding-messages/${dingId}/status`,
     method: 'get'
   })
 }
@@ -135,7 +135,7 @@ export function getDingReadStatus(dingId) {
  */
 export function confirmDing(dingId, remark = '') {
   return request({
-    url: `/api/im/ding/${dingId}/confirm`,
+    url: `/api/im/ding-messages/${dingId}/confirm`,
     method: 'put',
     data: { remark }
   })

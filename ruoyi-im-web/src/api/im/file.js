@@ -80,7 +80,7 @@ export function deleteFile(fileId) {
  */
 export function uploadGroupAvatar(groupId, formData) {
     return request({
-        url: `/api/im/group/${groupId}/avatar`,
+        url: `/api/im/groups/${groupId}/avatar`,
         method: 'post',
         data: formData,
         headers: {

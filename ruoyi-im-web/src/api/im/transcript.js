@@ -15,7 +15,7 @@ import request from '../request'
  */
 export function createTranscript(data) {
   return request({
-    url: '/api/im/voice/transcript/create',
+    url: '/api/im/voice-transcripts',
     method: 'post',
     params: {
       messageId: data.messageId,
@@ -33,7 +33,7 @@ export function createTranscript(data) {
  */
 export function getTranscript(messageId) {
   return request({
-    url: '/api/im/voice/transcript/result/' + messageId,
+    url: `/api/im/voice-transcripts/${messageId}`,
     method: 'get'
   })
 }
@@ -45,7 +45,7 @@ export function getTranscript(messageId) {
  */
 export function reTranscribe(messageId) {
   return request({
-    url: '/api/im/voice/transcript/retranscribe/' + messageId,
+    url: `/api/im/voice-transcripts/${messageId}/retranscribe`,
     method: 'post'
   })
 }
@@ -56,7 +56,7 @@ export function reTranscribe(messageId) {
  */
 export function getUserTranscripts() {
   return request({
-    url: '/api/im/voice/transcript/list',
+    url: '/api/im/voice-transcripts',
     method: 'get'
   })
 }
@@ -67,7 +67,7 @@ export function getUserTranscripts() {
  */
 export function getTranscriptStats() {
   return request({
-    url: '/api/im/voice/transcript/stats',
+    url: '/api/im/voice-transcripts/stats',
     method: 'get'
   })
 }

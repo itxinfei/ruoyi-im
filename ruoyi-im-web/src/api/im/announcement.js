@@ -17,7 +17,7 @@ import request from '../request'
  */
 export function createAnnouncement(data) {
   return request({
-    url: '/api/im/announcement/create',
+    url: '/api/im/announcements',
     method: 'post',
     data
   })
@@ -34,7 +34,7 @@ export function createAnnouncement(data) {
  */
 export function updateAnnouncement(data) {
   return request({
-    url: '/api/im/announcement',
+    url: '/api/im/announcements',
     method: 'put',
     data
   })
@@ -47,7 +47,7 @@ export function updateAnnouncement(data) {
  */
 export function deleteAnnouncement(announcementId) {
   return request({
-    url: `/api/im/announcement/${announcementId}`,
+    url: `/api/im/announcements/${announcementId}`,
     method: 'delete'
   })
 }
@@ -59,7 +59,7 @@ export function deleteAnnouncement(announcementId) {
  */
 export function getAnnouncementDetail(announcementId) {
   return request({
-    url: `/api/im/announcement/${announcementId}`,
+    url: `/api/im/announcements/${announcementId}`,
     method: 'get'
   })
 }
@@ -76,7 +76,7 @@ export function getAnnouncementDetail(announcementId) {
  */
 export function getAnnouncementPage(data) {
   return request({
-    url: '/api/im/announcement/page',
+    url: '/api/im/announcements/page',
     method: 'post',
     data
   })
@@ -88,7 +88,7 @@ export function getAnnouncementPage(data) {
  */
 export function getPinnedAnnouncements() {
   return request({
-    url: '/api/im/announcement/pinned',
+    url: '/api/im/announcements/pinned',
     method: 'get'
   })
 }
@@ -100,7 +100,7 @@ export function getPinnedAnnouncements() {
  */
 export function getLatestAnnouncements(limit = 10) {
   return request({
-    url: '/api/im/announcement/latest',
+    url: '/api/im/announcements/latest',
     method: 'get',
     params: { limit }
   })
@@ -113,7 +113,7 @@ export function getLatestAnnouncements(limit = 10) {
  */
 export function publishAnnouncement(announcementId) {
   return request({
-    url: `/api/im/announcement/${announcementId}/publish`,
+    url: `/api/im/announcements/${announcementId}/publish`,
     method: 'post'
   })
 }
@@ -125,7 +125,7 @@ export function publishAnnouncement(announcementId) {
  */
 export function withdrawAnnouncement(announcementId) {
   return request({
-    url: `/api/im/announcement/${announcementId}/withdraw`,
+    url: `/api/im/announcements/${announcementId}/withdraw`,
     method: 'post'
   })
 }
@@ -137,7 +137,7 @@ export function withdrawAnnouncement(announcementId) {
  */
 export function markAnnouncementAsRead(announcementId) {
   return request({
-    url: `/api/im/announcement/${announcementId}/read`,
+    url: `/api/im/announcements/${announcementId}/read`,
     method: 'post'
   })
 }
@@ -148,7 +148,7 @@ export function markAnnouncementAsRead(announcementId) {
  */
 export function markAllAnnouncementsAsRead() {
   return request({
-    url: '/api/im/announcement/read-all',
+    url: '/api/im/announcements/read-all',
     method: 'post'
   })
 }
@@ -160,7 +160,7 @@ export function markAllAnnouncementsAsRead() {
  */
 export function toggleLikeAnnouncement(announcementId) {
   return request({
-    url: `/api/im/announcement/${announcementId}/like`,
+    url: `/api/im/announcements/${announcementId}/like`,
     method: 'post'
   })
 }
@@ -173,7 +173,7 @@ export function toggleLikeAnnouncement(announcementId) {
  */
 export function addAnnouncementComment(announcementId, content) {
   return request({
-    url: `/api/im/announcement/${announcementId}/comment`,
+    url: `/api/im/announcements/${announcementId}/comments`,
     method: 'post',
     params: { content }
   })
@@ -185,7 +185,7 @@ export function addAnnouncementComment(announcementId, content) {
  */
 export function getAnnouncementStatistics() {
   return request({
-    url: '/api/im/announcement/statistics',
+    url: '/api/im/announcements/statistics',
     method: 'get'
   })
 }
@@ -197,7 +197,7 @@ export function getAnnouncementStatistics() {
  */
 export function getAnnouncementReadUsers(announcementId) {
   return request({
-    url: `/api/im/announcement/${announcementId}/read-users`,
+    url: `/api/im/announcements/${announcementId}/read-users`,
     method: 'get'
   })
 }
@@ -209,7 +209,7 @@ export function getAnnouncementReadUsers(announcementId) {
  */
 export function getAnnouncementLikedUsers(announcementId) {
   return request({
-    url: `/api/im/announcement/${announcementId}/liked-users`,
+    url: `/api/im/announcements/${announcementId}/liked-users`,
     method: 'get'
   })
 }
@@ -222,7 +222,7 @@ export function getAnnouncementLikedUsers(announcementId) {
  */
 export function setAnnouncementPinned(announcementId, pinned) {
   return request({
-    url: `/api/im/announcement/${announcementId}/pinned`,
+    url: `/api/im/announcements/${announcementId}/pin`,
     method: 'put',
     params: { pinned }
   })

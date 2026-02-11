@@ -6,6 +6,7 @@ import com.ruoyi.im.dto.workreport.WorkReportQueryRequest;
 import com.ruoyi.im.vo.workreport.WorkReportCommentVO;
 import com.ruoyi.im.vo.workreport.WorkReportDetailVO;
 import com.ruoyi.im.vo.workreport.WorkReportLikeUserVO;
+import com.ruoyi.im.vo.workreport.WorkReportStatsVO;
 
 import java.util.List;
 
@@ -134,5 +135,5 @@ public interface ImWorkReportService {
      * @param userId 用户ID
      * @return 统计信息
      */
-    Object getStatistics(Long userId);
+    WorkReportStatsVO getStatistics(Long userId);
 }

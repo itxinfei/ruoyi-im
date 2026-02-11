@@ -9,7 +9,7 @@ import request from '../request'
  */
 export function createApproval(params, data) {
     return request({
-        url: '/api/im/approval/create',
+        url: '/api/im/approvals',
         method: 'post',
         params, // templateId, title
         data
@@ -22,7 +22,7 @@ export function createApproval(params, data) {
  */
 export function getApproval(id) {
     return request({
-        url: `/api/im/approval/${id}`,
+        url: `/api/im/approvals/${id}`,
         method: 'get'
     })
 }
@@ -32,7 +32,7 @@ export function getApproval(id) {
  */
 export function getPendingApprovals() {
     return request({
-        url: '/api/im/approval/pending',
+        url: '/api/im/approvals/pending',
         method: 'get'
     })
 }
@@ -42,7 +42,7 @@ export function getPendingApprovals() {
  */
 export function getMyApprovals() {
     return request({
-        url: '/api/im/approval/my',
+        url: '/api/im/approvals/my',
         method: 'get'
     })
 }
@@ -52,7 +52,7 @@ export function getMyApprovals() {
  */
 export function getProcessedApprovals() {
     return request({
-        url: '/api/im/approval/processed',
+        url: '/api/im/approvals/processed',
         method: 'get'
     })
 }
@@ -64,7 +64,7 @@ export function getProcessedApprovals() {
  */
 export function approve(id, comment) {
     return request({
-        url: `/api/im/approval/${id}/approve`,
+        url: `/api/im/approvals/${id}/approve`,
         method: 'post',
         params: { comment }
     })
@@ -77,7 +77,7 @@ export function approve(id, comment) {
  */
 export function reject(id, comment) {
     return request({
-        url: `/api/im/approval/${id}/reject`,
+        url: `/api/im/approvals/${id}/reject`,
         method: 'post',
         params: { comment }
     })
@@ -88,7 +88,7 @@ export function reject(id, comment) {
  */
 export function getTemplates() {
     return request({
-        url: '/api/im/approval/templates/active',
+        url: '/api/im/approvals/templates/active',
         method: 'get'
     })
 }
@@ -102,7 +102,7 @@ export function getTemplates() {
  */
 export function handleApproval(data) {
     return request({
-        url: `/api/im/approval/${data.approvalId}/${data.action.toLowerCase()}`,
+        url: `/api/im/approvals/${data.approvalId}/${data.action.toLowerCase()}`,
         method: 'post',
         data: {
             comment: data.comment

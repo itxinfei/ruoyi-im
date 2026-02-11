@@ -158,22 +158,15 @@ export function useChatCommands(currentUser, sessionType) {
 
     try {
       await editMessage(editingMessage.value.id, { content: newContent })
-
-      // 更新消息内容
-      store.commit('im/message/UPDATE_MESSAGE', {
-        index: store.getters['im/message/currentMessages'].findIndex(m => m.id === editingMessage.value.id),
-        message: {
-          ...editingMessage.value,
-          content: newContent,
-          isEdited: true
-        }
-      })
-
       ElMessage.success('编辑成功')
+
+      const messageId = editingMessage.value.id
       editingMessage.value = null
+      return messageId
     } catch (error) {
       console.error('编辑失败:', error)
       ElMessage.error(error.msg || '编辑失败')
+      throw error
     }
   }
 

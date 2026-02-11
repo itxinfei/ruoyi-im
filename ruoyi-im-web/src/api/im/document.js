@@ -115,7 +115,7 @@ export function addDocumentComment(id, data) {
  */
 export function addCollaborators(data) {
   return request({
-    url: '/api/im/documents/collaboration/collaborators/add',
+    url: '/api/im/document-collaborations/collaborators',
     method: 'post',
     data
   })
@@ -126,7 +126,7 @@ export function addCollaborators(data) {
  */
 export function removeCollaborator(documentId, targetUserId) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/collaborators/${targetUserId}`,
+    url: `/api/im/document-collaborations/${documentId}/collaborators/${targetUserId}`,
     method: 'delete'
   })
 }
@@ -136,7 +136,7 @@ export function removeCollaborator(documentId, targetUserId) {
  */
 export function updateCollaboratorPermission(documentId, targetUserId, permission) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/collaborators/${targetUserId}/permission`,
+    url: `/api/im/document-collaborations/${documentId}/collaborators/${targetUserId}/permission`,
     method: 'put',
     params: { permission }
   })
@@ -147,7 +147,7 @@ export function updateCollaboratorPermission(documentId, targetUserId, permissio
  */
 export function getCollaborators(documentId) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/collaborators`,
+    url: `/api/im/document-collaborations/${documentId}/collaborators`,
     method: 'get'
   })
 }
@@ -157,7 +157,7 @@ export function getCollaborators(documentId) {
  */
 export function joinDocument(documentId) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/join`,
+    url: `/api/im/document-collaborations/${documentId}/join`,
     method: 'post'
   })
 }
@@ -167,7 +167,7 @@ export function joinDocument(documentId) {
  */
 export function leaveDocument(documentId) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/leave`,
+    url: `/api/im/document-collaborations/${documentId}/leave`,
     method: 'post'
   })
 }
@@ -177,7 +177,7 @@ export function leaveDocument(documentId) {
  */
 export function updateCursor(documentId, position, selection) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/cursor`,
+    url: `/api/im/document-collaborations/${documentId}/cursor`,
     method: 'put',
     params: { position, selection }
   })
@@ -188,7 +188,7 @@ export function updateCursor(documentId, position, selection) {
  */
 export function getOnlineEditors(documentId) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/online`,
+    url: `/api/im/document-collaborations/${documentId}/online`,
     method: 'get'
   })
 }
@@ -198,7 +198,7 @@ export function getOnlineEditors(documentId) {
  */
 export function sendHeartbeat(documentId) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/heartbeat`,
+    url: `/api/im/document-collaborations/${documentId}/heartbeat`,
     method: 'post'
   })
 }
@@ -208,7 +208,7 @@ export function sendHeartbeat(documentId) {
  */
 export function getOperationLogs(documentId, limit = 100) {
   return request({
-    url: `/api/im/documents/collaboration/${documentId}/logs`,
+    url: `/api/im/document-collaborations/${documentId}/logs`,
     method: 'get',
     params: { limit }
   })

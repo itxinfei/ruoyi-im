@@ -15,9 +15,10 @@ import request from '../request'
  */
 export function addFavorite(data) {
   return request({
-    url: '/api/im/message/favorite/' + data.messageId,
+    url: '/api/im/messages/favorites',
     method: 'post',
     params: {
+      messageId: data.messageId,
       conversationId: data.conversationId,
       remark: data.remark,
       tags: data.tags
@@ -32,8 +33,9 @@ export function addFavorite(data) {
  */
 export function removeFavorite(messageId) {
   return request({
-    url: '/api/im/message/favorite/' + messageId,
-    method: 'delete'
+    url: '/api/im/messages/favorites',
+    method: 'delete',
+    params: { messageId }
   })
 }
 
@@ -44,8 +46,9 @@ export function removeFavorite(messageId) {
  */
 export function isFavorited(messageId) {
   return request({
-    url: '/api/im/message/favorite/' + messageId + '/check',
-    method: 'get'
+    url: '/api/im/messages/favorites/check',
+    method: 'get',
+    params: { messageId }
   })
 }
 
@@ -55,7 +58,7 @@ export function isFavorited(messageId) {
  */
 export function getUserFavorites() {
   return request({
-    url: '/api/im/message/favorite/list',
+    url: '/api/im/messages/favorites',
     method: 'get'
   })
 }
@@ -67,8 +70,9 @@ export function getUserFavorites() {
  */
 export function getConversationFavorites(conversationId) {
   return request({
-    url: '/api/im/message/favorite/conversation/' + conversationId,
-    method: 'get'
+    url: '/api/im/messages/favorites/conversations',
+    method: 'get',
+    params: { conversationId }
   })
 }
 
@@ -79,8 +83,9 @@ export function getConversationFavorites(conversationId) {
  */
 export function getFavoritesByTag(tag) {
   return request({
-    url: '/api/im/message/favorite/tag/' + tag,
-    method: 'get'
+    url: '/api/im/messages/favorites/tags',
+    method: 'get',
+    params: { tag }
   })
 }
 
@@ -94,9 +99,10 @@ export function getFavoritesByTag(tag) {
  */
 export function updateFavorite(data) {
   return request({
-    url: '/api/im/message/favorite/' + data.messageId,
+    url: '/api/im/messages/favorites',
     method: 'put',
     params: {
+      messageId: data.messageId,
       remark: data.remark,
       tags: data.tags
     }

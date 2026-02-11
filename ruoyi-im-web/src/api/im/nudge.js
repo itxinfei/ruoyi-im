@@ -12,7 +12,7 @@ import request from '../request'
  */
 export function sendNudge(data) {
   return request({
-    url: '/im/nudge/send',
+    url: '/api/im/nudges/send',
     method: 'post',
     data
   })
@@ -24,7 +24,7 @@ export function sendNudge(data) {
  */
 export function getNudgeConfig() {
   return request({
-    url: '/im/nudge/config',
+    url: '/api/im/nudges/config',
     method: 'get'
   })
 }
@@ -36,7 +36,7 @@ export function getNudgeConfig() {
  */
 export function updateNudgeConfig(data) {
   return request({
-    url: '/im/nudge/config',
+    url: '/api/im/nudges/config',
     method: 'put',
     data
   })

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * WebSocket 实时通信端点
@@ -39,14 +40,19 @@ public class ImWebSocketEndpoint {
     private static final Logger log = LoggerFactory.getLogger(ImWebSocketEndpoint.class);
 
     /**
-     * 存储所有在线用户的 WebSocket 会话（用户ID -> 会话）
+     * 存储所有在线用户的 WebSocket 会话（用户ID -> 会话列表，支持多设备同时在线）
      */
-    private static final Map<Long, Session> onlineUsers = new ConcurrentHashMap<>();
+    private static final Map<Long, List<Session>> onlineUsers = new ConcurrentHashMap<>();
 
     /**
      * 存储会话到用户ID的映射（会话 -> 用户ID）
      */
     private static final Map<Session, Long> sessionUserMap = new ConcurrentHashMap<>();
+
+    /**
+     * 存储会话到设备ID的映射（会话 -> 设备ID，用于设备识别）
+     */
+    private static final Map<Session, String> sessionDeviceMap = new ConcurrentHashMap<>();
 
     /**
      * Spring ApplicationContext（用于获取Bean）
@@ -114,8 +120,41 @@ public class ImWebSocketEndpoint {
     /**
      * 获取在线用户集合（供 ImMessageController 使用）
      */
-    public static Map<Long, Session> getOnlineUsers() {
+    public static Map<Long, List<Session>> getOnlineUsers() {
         return onlineUsers;
+    }
+
+    /**
+     * 获取用户的所有在线会话
+     */
+    public static List<Session> getUserSessions(Long userId) {
+        return onlineUsers.getOrDefault(userId, new ArrayList<>());
+    }
+
+    /**
+     * 添加用户会话（支持多设备）
+     */
+    private static void addUserSession(Long userId, Session session, String deviceId) {
+        onlineUsers.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(session);
+        sessionUserMap.put(session, userId);
+        sessionDeviceMap.put(session, deviceId);
+    }
+
+    /**
+     * 移除用户会话
+     */
+    private static void removeUserSession(Session session) {
+        Long userId = sessionUserMap.remove(session);
+        sessionDeviceMap.remove(session);
+        if (userId != null) {
+            List<Session> sessions = onlineUsers.get(userId);
+            if (sessions != null) {
+                sessions.remove(session);
+                if (sessions.isEmpty()) {
+                    onlineUsers.remove(userId);
+                }
+            }
+        }
     }
 
     @Value("${app.security.enabled:true}")
@@ -196,25 +235,35 @@ public class ImWebSocketEndpoint {
                 return;
             }
 
+            // 获取设备ID（从查询参数或默认）
+            String deviceId = extractDeviceIdFromQuery(queryString);
+            if (deviceId == null) {
+                deviceId = "unknown";
+            }
+
             // 使用同步块确保连接更新的原子性，防止竞态条件
             synchronized (onlineUsers) {
-                // 检查用户是否已存在在线连接，如果存在则关闭旧连接
-                Session oldSession = onlineUsers.get(userId);
-                if (oldSession != null && oldSession.isOpen()) {
-                    log.info("用户已存在连接，关闭旧连接: userId={}, oldSessionId={}, newSessionId={}",
-                            userId, oldSession.getId(), session.getId());
-                    try {
-                        // 先从映射中移除，防止并发问题
-                        sessionUserMap.remove(oldSession);
-                        oldSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "新连接建立"));
-                    } catch (IOException e) {
-                        log.error("关闭旧连接异常: userId={}", userId, e);
+                // 多设备支持：不关闭旧连接，允许同一用户多个设备同时在线
+                // 只关闭相同设备的旧连接（如果有）
+                List<Session> existingSessions = onlineUsers.get(userId);
+                if (existingSessions != null) {
+                    for (Session oldSession : existingSessions) {
+                        String oldDeviceId = sessionDeviceMap.get(oldSession);
+                        if (deviceId.equals(oldDeviceId) && oldSession.isOpen()) {
+                            log.info("设备已存在连接，关闭旧连接: userId={}, deviceId={}, oldSessionId={}, newSessionId={}",
+                                    userId, deviceId, oldSession.getId(), session.getId());
+                            try {
+                                removeUserSession(oldSession);
+                                oldSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "新连接建立"));
+                            } catch (IOException e) {
+                                log.error("关闭旧连接异常: userId={}, deviceId={}", userId, deviceId, e);
+                            }
+                        }
                     }
                 }
 
-                // 保存用户会话
-                onlineUsers.put(userId, session);
-                sessionUserMap.put(session, userId);
+                // 添加新会话（支持多设备）
+                addUserSession(userId, session, deviceId);
             }
 
             // 同步更新Redis中的在线状态 - 简化版
@@ -222,7 +271,7 @@ public class ImWebSocketEndpoint {
                 staticImRedisUtil.addOnlineUser(userId);
             }
 
-            log.info("用户上线: userId={}, sessionId={}", userId, session.getId());
+            log.info("用户上线: userId={}, sessionId={}, deviceId={}", userId, session.getId(), deviceId);
 
             // 广播用户上线消息
             if (staticBroadcastService != null) {
@@ -363,33 +412,36 @@ public class ImWebSocketEndpoint {
     public void onClose(Session session) {
         try {
             Long userId = null;
+            String deviceId = null;
             // 使用同步块确保原子性操作
             synchronized (onlineUsers) {
-                userId = sessionUserMap.remove(session);
-                if (userId != null && userId != -1L) { // -1 表示未认证，不需要处理在线状态
-                    // 检查当前session是否是该用户的活跃连接
-                    Session currentSession = onlineUsers.get(userId);
-                    // 只有当关闭的session是当前活跃连接时才清理
-                    if (currentSession != null && currentSession.getId().equals(session.getId())) {
-                        onlineUsers.remove(userId);
-                    } else if (currentSession == null) {
-                        // 如果没有找到连接，也清理
-                        onlineUsers.remove(userId);
-                    }
-                    // 如果是其他session，说明用户已经在新连接上，不需要清理onlineUsers
-                }
+                userId = sessionUserMap.get(session);
+                deviceId = sessionDeviceMap.get(session);
+                
+                // 移除该会话（多设备支持）
+                removeUserSession(session);
             }
 
-            if (userId != null && userId != -1L) { // -1 表示未认证，不需要广播离线消息
-                // 同步更新Redis中的在线状态 - 简化版
-                if (staticImRedisUtil != null) {
-                    staticImRedisUtil.removeOnlineUser(userId);
-                }
+            if (userId != null && userId != -1L) { // -1 表示未认证，不需要处理在线状态
+                // 检查用户是否还有其他设备在线
+                List<Session> remainingSessions = onlineUsers.get(userId);
+                boolean isCompletelyOffline = (remainingSessions == null || remainingSessions.isEmpty());
 
-                log.info("用户离线: userId={}, sessionId={}", userId, session.getId());
-                // 广播用户离线消息
-                if (staticBroadcastService != null) {
-                    staticBroadcastService.broadcastOnlineStatus(userId, false);
+                // 只有当用户完全离线时才更新Redis和广播
+                if (isCompletelyOffline) {
+                    // 同步更新Redis中的在线状态
+                    if (staticImRedisUtil != null) {
+                        staticImRedisUtil.removeOnlineUser(userId);
+                    }
+
+                    log.info("用户完全离线: userId={}, sessionId={}, deviceId={}", userId, session.getId(), deviceId);
+                    // 广播用户离线消息
+                    if (staticBroadcastService != null) {
+                        staticBroadcastService.broadcastOnlineStatus(userId, false);
+                    }
+                } else {
+                    log.info("用户设备离线（仍有其他设备在线）: userId={}, sessionId={}, deviceId={}, remaining={}", 
+                            userId, session.getId(), deviceId, remainingSessions.size());
                 }
             } else if (userId != null && userId == -1L) {
                 log.info("未认证会话关闭: sessionId={}", session.getId());
@@ -410,11 +462,13 @@ public class ImWebSocketEndpoint {
     public void onError(Session session, Throwable error) {
         log.error("WebSocket 异常: sessionId={}", session.getId(), error);
         try {
-            Long userId = sessionUserMap.remove(session);
-            // 只有当userId不是-1（未认证标记）时，才从onlineUsers中移除
-            if (userId != null && userId != -1L) {
-                onlineUsers.remove(userId);
-            }
+            Long userId = sessionUserMap.get(session);
+            // 移除异常会话
+            removeUserSession(session);
+        } catch (Exception e) {
+            log.error("清理异常会话失败", e);
+        }
+    }
             session.close();
         } catch (IOException e) {
             log.error("关闭异常连接失败", e);
@@ -864,6 +918,26 @@ public class ImWebSocketEndpoint {
     }
 
     /**
+     * 从查询字符串中提取设备ID
+     *
+     * @param queryString 查询字符串（格式：token=xxx&deviceId=yyy）
+     * @return 设备ID，如果未找到则返回 null
+     */
+    private String extractDeviceIdFromQuery(String queryString) {
+        if (queryString == null || queryString.isEmpty()) {
+            return null;
+        }
+
+        String[] params = queryString.split("&");
+        for (String param : params) {
+            if (param.startsWith("deviceId=")) {
+                return param.substring(9);
+            }
+        }
+        return null;
+    }
+
+    /**
      * 获取在线用户数
      * 统计当前在线用户的总数
      *
@@ -895,19 +969,23 @@ public class ImWebSocketEndpoint {
     }
 
     /**
-     * 发送消息给指定用户
-     * 向指定在线用户发送消息，如果用户不在线则忽略
+     * 发送消息给指定用户（支持多设备）
+     * 向指定在线用户的所有设备发送消息，如果用户不在线则忽略
      *
      * @param userId  目标用户ID
      * @param message 消息对象
      */
     public static void sendToUser(Long userId, Object message) {
-        Session session = onlineUsers.get(userId);
-        if (session != null && session.isOpen()) {
+        List<Session> sessions = onlineUsers.get(userId);
+        if (sessions != null && !sessions.isEmpty()) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 String messageJson = mapper.writeValueAsString(message);
-                session.getBasicRemote().sendText(messageJson);
+                for (Session session : sessions) {
+                    if (session.isOpen()) {
+                        session.getBasicRemote().sendText(messageJson);
+                    }
+                }
             } catch (Exception e) {
                 LoggerFactory.getLogger(ImWebSocketEndpoint.class).error("发送消息给用户失败: userId={}", userId, e);
             }

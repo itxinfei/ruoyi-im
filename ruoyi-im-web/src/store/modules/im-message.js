@@ -229,7 +229,11 @@ export default {
       if (!state.messages[sessionId]) {
         return
       }
-      const index = state.messages[sessionId].findIndex(m => m.id === message.id)
+      // 先按 id 查找，找不到再按 clientMsgId 查找（兼容临时消息更新）
+      let index = state.messages[sessionId].findIndex(m => m.id === message.id)
+      if (index === -1 && message.clientMsgId) {
+        index = state.messages[sessionId].findIndex(m => m.clientMsgId === message.clientMsgId)
+      }
       if (index !== -1) {
         state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...message }
       }
@@ -651,6 +655,16 @@ export default {
             sendErrorCode: 'NETWORK_ERROR'
           }
         })
+
+        // 网络错误时加入离线队列，网络恢复后自动重试
+        if (state.isOffline || !navigator.onLine) {
+          commit('ADD_TO_OFFLINE_QUEUE', {
+            messageId: clientMsgId,
+            sessionId,
+            message: { type, content, replyToMessageId }
+          })
+        }
+
         throw error
       }
     },

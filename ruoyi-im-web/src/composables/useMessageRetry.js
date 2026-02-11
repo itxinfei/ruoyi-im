@@ -72,7 +72,7 @@ export function useMessageRetry() {
    * @param {Object} message - 失败的消息对象
    */
   function recordFailedMessage(message) {
-    const tempId = message.id || message.tempId
+    const tempId = message.clientMsgId || message.id || message.tempId
     if (!tempId) {
       console.warn('消息缺少ID，无法记录失败消息')
       return

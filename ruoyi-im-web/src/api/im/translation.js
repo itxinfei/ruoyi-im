@@ -13,7 +13,7 @@ import request from '../request'
  */
 export function translate(data) {
   return request({
-    url: '/im/translation/translate',
+    url: '/api/im/translations/translate',
     method: 'post',
     data
   })
@@ -24,7 +24,7 @@ export function translate(data) {
  */
 export function getSupportedLanguages() {
   return request({
-    url: '/im/translation/languages',
+    url: '/api/im/translations/languages',
     method: 'get'
   })
 }
@@ -35,7 +35,7 @@ export function getSupportedLanguages() {
  */
 export function detectLanguage(text) {
   return request({
-    url: '/im/translation/detect',
+    url: '/api/im/translations/detect',
     method: 'get',
     params: { text }
   })

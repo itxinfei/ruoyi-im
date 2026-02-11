@@ -120,8 +120,10 @@
           @click="handleCombineClick"
         />
 
-        <!-- 未知消息类型 - 根据用户要求，不显示气泡 -->
-        <template v-else />
+        <!-- 未知消息类型 - 显示提示文字 -->
+        <div v-else class="unknown-type-bubble">
+          [不支持的消息类型]
+        </div>
       </div>
 
       <!-- 状态指示器 -->
@@ -516,6 +518,13 @@ const canRecall = computed(() => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+
+.unknown-type-bubble {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--dt-text-tertiary, #999);
+  font-style: italic;
+}
 
 .message-bubble-wrapper {
   position: relative;

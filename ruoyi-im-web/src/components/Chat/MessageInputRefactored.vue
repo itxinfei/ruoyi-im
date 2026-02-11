@@ -636,7 +636,11 @@ const handleKeydown = e => {
   }
 
   if (e.key === '@' && props.session?.type === 'GROUP') {
-    setTimeout(() => atMemberPickerRef.value?.open(textareaRef.value.selectionStart), 50)
+    setTimeout(() => {
+      if (!isUnmounted.value) {
+        atMemberPickerRef.value?.open(textareaRef.value?.selectionStart)
+      }
+    }, 50)
   }
 }
 
@@ -1109,6 +1113,12 @@ onUnmounted(() => {
   isUnmounted.value = true // 标记组件已卸载，防止后续 DOM 操作
 
   cleanupVoice()
+
+  // 清理链接预览定时器
+  if (linkPreviewDebounceTimer.value) {
+    clearTimeout(linkPreviewDebounceTimer.value)
+    linkPreviewDebounceTimer.value = null
+  }
 
   // 移除全局键盘事件
   if (globalKeydownHandler) {

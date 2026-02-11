@@ -600,6 +600,7 @@ const searchPage = ref(1)
 // ========== 加载详情 ==========
 const loadDetail = async () => {
   if (!props.session?.id) { return }
+  const targetSessionId = props.session.id
   loading.value = true
   try {
     if (isGroup.value) {
@@ -608,6 +609,8 @@ const loadDetail = async () => {
         getGroup(gId),
         getGroupMembers(gId)
       ])
+      // 竞态守卫：异步期间会话已切换，丢弃过期结果
+      if (props.session?.id !== targetSessionId) { return }
       if (gRes.code === 200) { detail.value = gRes.data }
       if (mRes.code === 200) {
         members.value = mRes.data.map(m => ({
@@ -621,13 +624,18 @@ const loadDetail = async () => {
       loadFiles()
     } else {
       const res = await getUserInfo(props.session.targetId)
+      // 竞态守卫
+      if (props.session?.id !== targetSessionId) { return }
       if (res.code === 200) { detail.value = res.data }
     }
   } catch (e) {
+    if (props.session?.id !== targetSessionId) { return }
     console.error('加载详情失败', e)
     ElMessage.error('加载详情失败')
   } finally {
-    loading.value = false
+    if (props.session?.id === targetSessionId) {
+      loading.value = false
+    }
   }
 }
 

@@ -174,13 +174,15 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
             String messageJson = objectMapper.writeValueAsString(wsMessage);
 
-            // 发送给目标用户
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            // 发送给目标用户（支持多设备）
+            Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            int sentCount = 0;
             for (Long targetUserId : targetUserIds) {
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
+                List<javax.websocket.Session> sessions = onlineUsers.get(targetUserId);
+                if (sessions != null && !sessions.isEmpty()) {
+                    for (javax.websocket.Session session : sessions) {
+                        if (session.isOpen()) {
+                            try {
                         log.debug("DING消息已推送给用户: userId={}, dingId={}", targetUserId, dingVO.getId());
                     } catch (Exception e) {
                         log.error("发送DING消息给用户失败: userId={}", targetUserId, e);
@@ -393,23 +395,28 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     }
 
     /**
-     * 广播给会话成员 - 简化版：异步发送避免阻塞
+     * 广播给会话成员 - 支持多设备推送
      */
     private void broadcastToMembers(List<ImConversationMember> members, String messageJson, Long excludeUserId) {
-        Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+        Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
 
         // 使用并行流异步发送，避免阻塞主线程
         members.parallelStream()
             .filter(member -> !member.getUserId().equals(excludeUserId))
             .forEach(member -> {
                 Long targetUserId = member.getUserId();
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                    } catch (Exception e) {
-                        log.warn("发送消息给用户失败: userId={}", targetUserId);
-                    }
+                // 获取用户的所有在线会话（支持多设备）
+                List<javax.websocket.Session> sessions = onlineUsers.get(targetUserId);
+                if (sessions != null && !sessions.isEmpty()) {
+                    sessions.forEach(session -> {
+                        if (session.isOpen()) {
+                            try {
+                                session.getBasicRemote().sendText(messageJson);
+                            } catch (Exception e) {
+                                log.warn("发送消息给用户失败: userId={}, sessionId={}", targetUserId, session.getId());
+                            }
+                        }
+                    });
                 }
             });
     }

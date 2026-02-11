@@ -16,7 +16,7 @@ import request from '../request'
  */
 export function createBot(data) {
   return request({
-    url: '/api/im/group/bot/create',
+    url: '/api/im/groups/bots',
     method: 'post',
     data
   })
@@ -34,7 +34,7 @@ export function createBot(data) {
  */
 export function updateBot(data) {
   return request({
-    url: '/api/im/group/bot/update',
+    url: '/api/im/groups/bots',
     method: 'put',
     data
   })
@@ -47,7 +47,7 @@ export function updateBot(data) {
  */
 export function deleteBot(botId) {
   return request({
-    url: `/api/im/group/bot/${botId}`,
+    url: `/api/im/groups/bots/${botId}`,
     method: 'delete'
   })
 }
@@ -59,7 +59,7 @@ export function deleteBot(botId) {
  */
 export function getGroupBots(groupId) {
   return request({
-    url: `/api/im/group/bot/list/${groupId}`,
+    url: `/api/im/groups/bots/list/${groupId}`,
     method: 'get'
   })
 }
@@ -71,7 +71,7 @@ export function getGroupBots(groupId) {
  */
 export function getBotDetail(botId) {
   return request({
-    url: `/api/im/group/bot/${botId}`,
+    url: `/api/im/groups/bots/${botId}`,
     method: 'get'
   })
 }
@@ -91,7 +91,7 @@ export function getBotDetail(botId) {
  */
 export function addBotRule(botId, data) {
   return request({
-    url: `/api/im/group/bot/${botId}/rule`,
+    url: `/api/im/groups/bots/${botId}/rules`,
     method: 'post',
     data
   })
@@ -105,7 +105,7 @@ export function addBotRule(botId, data) {
  */
 export function updateBotRule(ruleId, data) {
   return request({
-    url: `/api/im/group/bot/rule/${ruleId}`,
+    url: `/api/im/groups/bots/rules/${ruleId}`,
     method: 'put',
     data
   })
@@ -118,7 +118,7 @@ export function updateBotRule(ruleId, data) {
  */
 export function deleteBotRule(ruleId) {
   return request({
-    url: `/api/im/group/bot/rule/${ruleId}`,
+    url: `/api/im/groups/bots/rules/${ruleId}`,
     method: 'delete'
   })
 }
@@ -131,7 +131,7 @@ export function deleteBotRule(ruleId) {
  */
 export function setBotEnabled(botId, enabled) {
   return request({
-    url: `/api/im/group/bot/${botId}/enabled`,
+    url: `/api/im/groups/bots/${botId}/enabled`,
     method: 'put',
     params: { enabled }
   })

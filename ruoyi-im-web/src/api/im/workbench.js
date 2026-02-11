@@ -100,7 +100,7 @@ export function deleteTodo(todoId) {
  */
 export function getApprovals(params) {
   return request({
-    url: '/api/im/approval/pending',
+    url: '/api/im/approvals/pending',
     method: 'get',
     params
   })
@@ -116,7 +116,7 @@ export function getApprovals(params) {
  */
 export function handleApproval(data) {
   return request({
-    url: '/api/im/approval/handle',
+    url: '/api/im/approvals/handle',
     method: 'post',
     data
   })
@@ -131,7 +131,7 @@ export function handleApproval(data) {
  */
 export function checkIn(data) {
   return request({
-    url: '/api/im/attendance/checkIn',
+    url: '/api/im/attendances/checkIn',
     method: 'post',
     data
   })
@@ -145,7 +145,7 @@ export function checkIn(data) {
  */
 export function getAttendance(params) {
   return request({
-    url: '/api/im/attendance/records',
+    url: '/api/im/attendances/records',
     method: 'get',
     params
   })
@@ -157,7 +157,7 @@ export function getAttendance(params) {
  */
 export function getAnnouncements() {
   return request({
-    url: '/api/im/announcement/latest',
+    url: '/api/im/announcements/latest',
     method: 'get'
   })
 }
@@ -168,7 +168,7 @@ export function getAnnouncements() {
  */
 export function getStatistics() {
   return request({
-    url: '/api/im/workbench/statistics',
+    url: '/api/im/workbench/overview',
     method: 'get'
   })
 }

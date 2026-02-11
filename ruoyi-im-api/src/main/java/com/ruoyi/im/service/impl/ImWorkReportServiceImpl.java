@@ -20,17 +20,15 @@ import com.ruoyi.im.service.ImWorkReportService;
 import com.ruoyi.im.vo.workreport.WorkReportCommentVO;
 import com.ruoyi.im.vo.workreport.WorkReportDetailVO;
 import com.ruoyi.im.vo.workreport.WorkReportLikeUserVO;
+import com.ruoyi.im.vo.workreport.WorkReportStatsVO;
 import com.ruoyi.im.util.BeanConvertUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -45,9 +43,9 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     private final ImUserMapper userMapper;
 
     public ImWorkReportServiceImpl(ImWorkReportMapper workReportMapper,
-                                  ImWorkReportCommentMapper commentMapper,
-                                  ImWorkReportLikeMapper likeMapper,
-                                  ImUserMapper userMapper) {
+            ImWorkReportCommentMapper commentMapper,
+            ImWorkReportLikeMapper likeMapper,
+            ImUserMapper userMapper) {
         this.workReportMapper = workReportMapper;
         this.commentMapper = commentMapper;
         this.likeMapper = likeMapper;
@@ -187,7 +185,8 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         Page<ImWorkReport> page = new Page<>(request.getPageNum(), request.getPageSize());
         IPage<ImWorkReport> reportPage = workReportMapper.selectReportPage(page, request);
 
-        Page<WorkReportDetailVO> resultPage = new Page<>(reportPage.getCurrent(), reportPage.getSize(), reportPage.getTotal());
+        Page<WorkReportDetailVO> resultPage = new Page<>(reportPage.getCurrent(), reportPage.getSize(),
+                reportPage.getTotal());
         List<WorkReportDetailVO> voList = reportPage.getRecords().stream()
                 .map(this::convertToDetailVO)
                 .collect(Collectors.toList());
@@ -301,7 +300,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     }
 
     @Override
-    public Object getStatistics(Long userId) {
+    public WorkReportStatsVO getStatistics(Long userId) {
         Integer totalCount = workReportMapper.countByUserId(userId);
         List<ImWorkReport> reports = workReportMapper.selectByUserId(userId);
 
@@ -312,14 +311,14 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         int draftCount = (int) reports.stream().filter(r -> "DRAFT".equals(r.getStatus())).count();
         int approvedCount = (int) reports.stream().filter(r -> "APPROVED".equals(r.getStatus())).count();
 
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalCount", totalCount);
-        stats.put("dailyCount", dailyCount);
-        stats.put("weeklyCount", weeklyCount);
-        stats.put("monthlyCount", monthlyCount);
-        stats.put("submittedCount", submittedCount);
-        stats.put("draftCount", draftCount);
-        stats.put("approvedCount", approvedCount);
+        WorkReportStatsVO stats = new WorkReportStatsVO();
+        stats.setTotalCount(totalCount);
+        stats.setDailyCount(dailyCount);
+        stats.setWeeklyCount(weeklyCount);
+        stats.setMonthlyCount(monthlyCount);
+        stats.setSubmittedCount(submittedCount);
+        stats.setDraftCount(draftCount);
+        stats.setApprovedCount(approvedCount);
 
         return stats;
     }

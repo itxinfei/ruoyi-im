@@ -13,7 +13,7 @@ import request from '@/api/request'
  */
 export function uploadGroupFile(data) {
   return request({
-    url: '/im/group/file',
+    url: '/api/im/groups/files',
     method: 'post',
     data
   })
@@ -31,7 +31,7 @@ export function uploadGroupFile(data) {
  */
 export function getGroupFileList(data) {
   return request({
-    url: '/im/group/file/list',
+    url: '/api/im/groups/files/list',
     method: 'post',
     data
   })
@@ -43,7 +43,7 @@ export function getGroupFileList(data) {
  */
 export function getGroupFileStatistics(groupId) {
   return request({
-    url: `/im/group/file/statistics/${groupId}`,
+    url: `/api/im/groups/files/statistics/${groupId}`,
     method: 'get'
   })
 }
@@ -54,7 +54,7 @@ export function getGroupFileStatistics(groupId) {
  */
 export function getGroupFileCategories(groupId) {
   return request({
-    url: `/im/group/file/categories/${groupId}`,
+    url: `/api/im/groups/files/categories/${groupId}`,
     method: 'get'
   })
 }
@@ -69,7 +69,7 @@ export function getGroupFileCategories(groupId) {
  */
 export function updateGroupFile(groupFileId, data) {
   return request({
-    url: `/im/group/file/${groupFileId}`,
+    url: `/api/im/groups/files/${groupFileId}`,
     method: 'put',
     data
   })
@@ -81,7 +81,7 @@ export function updateGroupFile(groupFileId, data) {
  */
 export function deleteGroupFile(groupFileId) {
   return request({
-    url: `/im/group/file/${groupFileId}`,
+    url: `/api/im/groups/files/${groupFileId}`,
     method: 'delete'
   })
 }
@@ -92,7 +92,7 @@ export function deleteGroupFile(groupFileId) {
  */
 export function batchDeleteGroupFiles(groupFileIds) {
   return request({
-    url: '/im/group/file/batch',
+    url: '/api/im/groups/files/batch',
     method: 'delete',
     data: groupFileIds
   })
@@ -104,7 +104,7 @@ export function batchDeleteGroupFiles(groupFileIds) {
  */
 export function downloadGroupFile(groupFileId) {
   return request({
-    url: `/im/group/file/download/${groupFileId}`,
+    url: `/api/im/groups/files/${groupFileId}/download`,
     method: 'get'
   })
 }
@@ -116,7 +116,7 @@ export function downloadGroupFile(groupFileId) {
  */
 export function moveGroupFile(groupFileId, category) {
   return request({
-    url: `/im/group/file/move/${groupFileId}`,
+    url: `/api/im/groups/files/${groupFileId}/move`,
     method: 'put',
     params: { category }
   })

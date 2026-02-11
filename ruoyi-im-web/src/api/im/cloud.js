@@ -33,7 +33,7 @@ export function uploadToCloud(folderId, file) {
  */
 export function saveFileToCloud(data) {
   return request({
-    url: '/api/im/cloud-drive/file/save',
+    url: '/api/im/cloud-drives/files/save',
     method: 'post',
     data
   })

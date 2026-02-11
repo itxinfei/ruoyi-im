@@ -452,6 +452,12 @@ class ImWebSocket {
       return
     }
 
+    // 清除已有的重连定时器，防止堆叠
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer)
+      this.reconnectTimer = null
+    }
+
     this.reconnectAttempts++
 
     // 指数退避：每次重连增加延迟，最大不超过 MAX_RECONNECT_INTERVAL
@@ -463,6 +469,7 @@ class ImWebSocket {
     info('ImWebSocket', `尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})，${this.reconnectInterval}ms 后重试`)
 
     this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null
       this.connect(this.token)
     }, this.reconnectInterval)
   }

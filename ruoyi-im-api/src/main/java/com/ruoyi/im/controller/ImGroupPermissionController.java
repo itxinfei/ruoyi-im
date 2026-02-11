@@ -3,11 +3,12 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImGroupPermissionService;
 import com.ruoyi.im.util.SecurityUtils;
+import com.ruoyi.im.vo.group.GroupPermissionCheckVO;
 import com.ruoyi.im.vo.group.GroupPermissionVO;
+import com.ruoyi.im.vo.group.GroupUserRoleVO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,8 +44,8 @@ public class ImGroupPermissionController {
      * 更新群组角色权限
      * 仅群主可以调用
      *
-     * @param groupId 群组ID
-     * @param role 角色
+     * @param groupId     群组ID
+     * @param role        角色
      * @param permissions 权限配置
      * @return 操作结果
      */
@@ -79,21 +80,21 @@ public class ImGroupPermissionController {
     /**
      * 检查当前用户是否有指定权限
      *
-     * @param groupId 群组ID
+     * @param groupId    群组ID
      * @param permission 权限名称
      * @return 权限检查结果
      */
     @GetMapping("/{groupId}/permission/check")
-    public Result<Map<String, Object>> checkPermission(
+    public Result<GroupPermissionCheckVO> checkPermission(
             @PathVariable Long groupId,
             @RequestParam String permission) {
         Long userId = SecurityUtils.getLoginUserId();
         boolean hasPermission = groupPermissionService.hasPermission(groupId, userId, permission);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("hasPermission", hasPermission);
-        result.put("permission", permission);
-        return Result.success(result);
+        return Result.success(GroupPermissionCheckVO.builder()
+                .hasPermission(hasPermission)
+                .permission(permission)
+                .build());
     }
 
     /**
@@ -103,13 +104,12 @@ public class ImGroupPermissionController {
      * @return 用户角色信息
      */
     @GetMapping("/{groupId}/role")
-    public Result<Map<String, Object>> getUserRole(@PathVariable Long groupId) {
+    public Result<GroupUserRoleVO> getUserRole(@PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("isOwner", groupPermissionService.isOwner(groupId, userId));
-        result.put("isAdminOrOwner", groupPermissionService.isAdminOrOwner(groupId, userId));
-
-        return Result.success(result);
+        return Result.success(GroupUserRoleVO.builder()
+                .isOwner(groupPermissionService.isOwner(groupId, userId))
+                .isAdminOrOwner(groupPermissionService.isAdminOrOwner(groupId, userId))
+                .build());
     }
 }

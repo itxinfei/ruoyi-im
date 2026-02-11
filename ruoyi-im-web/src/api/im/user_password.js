@@ -83,7 +83,7 @@ export function uploadAvatar(data) {
  */
 export function updateUserPassword(oldPassword, newPassword) {
   return request({
-    url: '/api/im/users/password',
+    url: '/api/im/users/me/password',
     method: 'put',
     data: {
       oldPassword,

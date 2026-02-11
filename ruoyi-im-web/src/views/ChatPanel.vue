@@ -453,6 +453,7 @@ const handleSendVoice = async ({ file, duration }) => {
   const tempId = `temp-${Date.now()}`
   const tempMsg = {
     id: tempId,
+    clientMsgId: tempId,
     content: JSON.stringify({ duration }),
     type: 'VOICE',
     senderId: currentUser.value?.id,
@@ -503,36 +504,49 @@ const handleSendVoice = async ({ file, duration }) => {
 
 // Websocket handling
 onMessage(msg => {
-  if (msg.conversationId === props.session?.id) {
-    const transformedMsg = transformMsg(msg, messages.value)
-    messages.value.push(transformedMsg)
-    msgListRef.value?.scrollToBottom()
+  try {
+    if (msg.conversationId === props.session?.id) {
+      const transformedMsg = transformMsg(msg, messages.value)
+      messages.value.push(transformedMsg)
+      msgListRef.value?.scrollToBottom()
 
-    // 新消息提醒
-    if (!transformedMsg.isOwn) {
-      // 动态导入提醒工具,避免循环依赖
-      import('@/utils/messageNotification').then(({ showMessageNotification, shouldNotify }) => {
-        if (shouldNotify(msg, currentUser.value, props.session)) {
-          let body = msg.content
-          if (msg.type === 'IMAGE') { body = '[图片]' }
-          else if (msg.type === 'FILE') { body = '[文件]' }
-          else if (msg.type === 'RECALLED') { body = '撤回了一条消息' }
+      // 新消息提醒
+      if (!transformedMsg.isOwn) {
+        // 动态导入提醒工具,避免循环依赖
+        import('@/utils/messageNotification').then(({ showMessageNotification, shouldNotify }) => {
+          if (shouldNotify(msg, currentUser.value, props.session)) {
+            let body = msg.content
+            if (msg.type === 'IMAGE') { body = '[图片]' }
+            else if (msg.type === 'FILE') { body = '[文件]' }
+            else if (msg.type === 'RECALLED') { body = '撤回了一条消息' }
 
-          showMessageNotification({
-            title: msg.senderName || '新消息',
-            body: body || '[消息]',
-            icon: msg.senderAvatar || '',
-            sound: true,
-            notification: true,
-            titleFlash: true
-          })
-        }
-      })
+            showMessageNotification({
+              title: msg.senderName || '新消息',
+              body: body || '[消息]',
+              icon: msg.senderAvatar || '',
+              sound: true,
+              notification: true,
+              titleFlash: true
+            })
+          }
+        }).catch(() => {})
+      }
     }
+  } catch (err) {
+    console.error('处理WebSocket消息失败:', err)
   }
 })
 
 // 会话切换由 useChatMessages composable 内部 watch 处理，无需额外 watcher
+// 但需要清理输入状态等会话级别的 UI 状态
+watch(() => props.session?.id, () => {
+  // 清理所有输入状态定时器
+  Object.keys(typingTimers).forEach(uid => {
+    clearTimeout(typingTimers[uid])
+    delete typingTimers[uid]
+  })
+  typingUsers.value = []
+})
 
 const handleDelete = async message => {
   await deleteMessage(message)
@@ -1170,13 +1184,29 @@ const handleRemindUnread = async ({ conversationId, messageId, unreadMembers }) 
 const handleEditConfirm = async content => {
   if (!editingMessage.value) { return }
 
-  await confirmEdit(content)
+  const messageId = editingMessage.value.id
+  try {
+    await confirmEdit(content)
 
-  // 更新本地消息列表
-  const index = messages.value.findIndex(m => m.id === editingMessage.value.id)
-  if (index !== -1) {
-    messages.value[index].content = content
-    messages.value[index].isEdited = true
+    // 更新本地消息列表
+    const index = messages.value.findIndex(m => m.id === messageId)
+    if (index !== -1) {
+      messages.value[index] = {
+        ...messages.value[index],
+        content,
+        isEdited: true
+      }
+    }
+
+    // 同步更新 Store
+    if (props.session?.id) {
+      store.commit('im/message/UPDATE_MESSAGE', {
+        sessionId: props.session.id,
+        message: { id: messageId, content, isEdited: true }
+      })
+    }
+  } catch {
+    // confirmEdit 已处理错误提示
   }
 }
 
@@ -1484,8 +1514,10 @@ const handleFileUpload = async payload => {
 
   // 1. 乐观更新：立即显示文件消息
   const tempId = `temp-file-${Date.now()}`
+  const uploadSessionId = props.session.id
   const tempMsg = {
     id: tempId,
+    clientMsgId: tempId,
     type: 'FILE',
     content: {
       fileName: file.name,
@@ -1506,6 +1538,8 @@ const handleFileUpload = async payload => {
   try {
     // 2. 上传文件
     const res = await uploadFileApi(formData)
+    // 竞态守卫：上传期间会话已切换
+    if (props.session?.id !== uploadSessionId) { return }
     if (res.code === 200) {
       // 3. 发送消息
       const msg = await store.dispatch('im/message/sendMessage', {
@@ -1561,8 +1595,10 @@ const handleImageUpload = async payload => {
   // 1. 乐观更新：立即显示图片
   const blobUrl = URL.createObjectURL(file)
   const tempId = `temp-img-${Date.now()}`
+  const uploadSessionId = props.session.id
   const tempMsg = {
     id: tempId,
+    clientMsgId: tempId,
     type: 'IMAGE',
     content: {
       imageUrl: blobUrl // 使用本地 Blob URL 预览
@@ -1580,9 +1616,11 @@ const handleImageUpload = async payload => {
 
   try {
     const res = await uploadImage(formData)
+    // 竞态守卫：上传期间会话已切换
+    if (props.session?.id !== uploadSessionId) { URL.revokeObjectURL(blobUrl); return }
     if (res.code === 200) {
       const msg = await store.dispatch('im/message/sendMessage', {
-        sessionId: props.session.id,
+        sessionId: uploadSessionId,
         type: 'IMAGE',
         content: JSON.stringify({
           fileId: res.data.id,
@@ -1604,6 +1642,7 @@ const handleImageUpload = async payload => {
     if (index !== -1) {
       messages.value[index].status = 'failed'
     }
+    URL.revokeObjectURL(blobUrl)
     ElMessage.error('图片发送失败')
   }
 }
@@ -1617,8 +1656,10 @@ const handleScreenshotUpload = async formData => {
   // 1. 乐观更新：立即显示截图
   const blobUrl = URL.createObjectURL(file)
   const tempId = `temp-screenshot-${Date.now()}`
+  const uploadSessionId = props.session.id
   const tempMsg = {
     id: tempId,
+    clientMsgId: tempId,
     type: 'IMAGE',
     content: {
       imageUrl: blobUrl
@@ -1636,9 +1677,11 @@ const handleScreenshotUpload = async formData => {
 
   try {
     const res = await uploadImage(formData)
+    // 竞态守卫：上传期间会话已切换
+    if (props.session?.id !== uploadSessionId) { URL.revokeObjectURL(blobUrl); return }
     if (res.code === 200) {
       const msg = await store.dispatch('im/message/sendMessage', {
-        sessionId: props.session.id,
+        sessionId: uploadSessionId,
         type: 'IMAGE',
         content: JSON.stringify({
           fileId: res.data.id,
@@ -1659,6 +1702,7 @@ const handleScreenshotUpload = async formData => {
     if (index !== -1) {
       messages.value[index].status = 'failed'
     }
+    URL.revokeObjectURL(blobUrl)
     ElMessage.error('截图发送失败')
   }
 }
@@ -1668,8 +1712,10 @@ const handleVideoUpload = async ({ file, url }) => {
   sendMyStopTypingStatus()
   // 1. 乐观更新：立即显示视频消息
   const tempId = `temp-video-${Date.now()}`
+  const uploadSessionId = props.session.id
   const tempMsg = {
     id: tempId,
+    clientMsgId: tempId,
     type: 'VIDEO',
     content: {
       videoUrl: url, // 使用本地 Blob URL 预览
@@ -1694,10 +1740,12 @@ const handleVideoUpload = async ({ file, url }) => {
     formData.append('file', file)
 
     const res = await uploadFileApi(formData)
+    // 竞态守卫：上传期间会话已切换
+    if (props.session?.id !== uploadSessionId) { URL.revokeObjectURL(url); return }
     if (res.code === 200) {
       // 3. 发送视频消息
       const msg = await store.dispatch('im/message/sendMessage', {
-        sessionId: props.session.id,
+        sessionId: uploadSessionId,
         type: 'VIDEO',
         content: JSON.stringify({
           fileId: res.data.id,
@@ -1723,6 +1771,7 @@ const handleVideoUpload = async ({ file, url }) => {
     if (index !== -1) {
       messages.value[index].status = 'failed'
     }
+    URL.revokeObjectURL(url)
     ElMessage.error('视频发送失败')
     console.error('视频上传失败', error)
   }
@@ -1733,8 +1782,10 @@ const handleSendLocation = async ({ latitude, longitude, address }) => {
   sendMyStopTypingStatus()
   // 1. 乐观更新：立即显示位置消息
   const tempId = `temp-location-${Date.now()}`
+  const uploadSessionId = props.session.id
   const tempMsg = {
     id: tempId,
+    clientMsgId: tempId,
     type: 'LOCATION',
     content: {
       latitude,
@@ -1755,7 +1806,7 @@ const handleSendLocation = async ({ latitude, longitude, address }) => {
   try {
     // 2. 发送位置消息
     const msg = await store.dispatch('im/message/sendMessage', {
-      sessionId: props.session.id,
+      sessionId: uploadSessionId,
       type: 'LOCATION',
       content: JSON.stringify({
         latitude,
@@ -1867,6 +1918,15 @@ onMounted(() => {
   // 清理函数（在组件卸载时调用）
   onUnmounted(() => {
     isUnmounted.value = true // 标记组件已卸载
+    // 清理 typing 定时器
+    if (sendTypingTimer) {
+      clearTimeout(sendTypingTimer)
+      sendTypingTimer = null
+    }
+    Object.keys(typingTimers).forEach(uid => {
+      clearTimeout(typingTimers[uid])
+      delete typingTimers[uid]
+    })
     window.removeEventListener('keydown', handleKeydown)
     document.removeEventListener('click', handleClickOutside)
   })

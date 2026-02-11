@@ -14,7 +14,7 @@ import request from '../request'
  */
 export function markMessage(params) {
   return request({
-    url: '/api/im/message/marker/mark',
+    url: '/api/im/messages/markers',
     method: 'post',
     params
   })
@@ -29,7 +29,7 @@ export function markMessage(params) {
  */
 export function unmarkMessage(params) {
   return request({
-    url: '/api/im/message/marker/unmark',
+    url: '/api/im/messages/markers',
     method: 'delete',
     params
   })
@@ -45,7 +45,7 @@ export function unmarkMessage(params) {
  */
 export function setTodoReminder(params) {
   return request({
-    url: '/api/im/message/marker/todo',
+    url: '/api/im/messages/markers/todos',
     method: 'post',
     params
   })
@@ -58,7 +58,7 @@ export function setTodoReminder(params) {
  */
 export function completeTodo(markerId) {
   return request({
-    url: `/api/im/message/marker/todo/${markerId}/complete`,
+    url: `/api/im/messages/markers/todos/${markerId}/complete`,
     method: 'post'
   })
 }
@@ -70,7 +70,7 @@ export function completeTodo(markerId) {
  */
 export function reopenTodo(markerId) {
   return request({
-    url: `/api/im/message/marker/todo/${markerId}/reopen`,
+    url: `/api/im/messages/markers/todos/${markerId}/reopen`,
     method: 'post'
   })
 }
@@ -82,7 +82,7 @@ export function reopenTodo(markerId) {
  */
 export function getUserMarkers(markerType) {
   return request({
-    url: '/api/im/message/marker/list',
+    url: '/api/im/messages/markers',
     method: 'get',
     params: { markerType }
   })
@@ -95,7 +95,7 @@ export function getUserMarkers(markerType) {
  */
 export function getMessageMarkers(messageId) {
   return request({
-    url: `/api/im/message/marker/message/${messageId}`,
+    url: `/api/im/messages/markers/messages/${messageId}`,
     method: 'get'
   })
 }
@@ -106,7 +106,7 @@ export function getMessageMarkers(messageId) {
  */
 export function getUserTodoCount() {
   return request({
-    url: '/api/im/message/marker/todo/count',
+    url: '/api/im/messages/markers/todos/count',
     method: 'get'
   })
 }

@@ -162,7 +162,7 @@ export function unarchiveSession(conversationId) {
  */
 export function syncSessions(params = {}) {
   return request({
-    url: '/api/im/session/sync',
+    url: '/api/im/conversations/sync',
     method: 'get',
     params,
     headers: params.deviceId ? { 'X-Device-Id': params.deviceId } : {}
@@ -177,7 +177,7 @@ export function syncSessions(params = {}) {
  */
 export function resetSessionSyncPoint(deviceId) {
   return request({
-    url: '/api/im/session/sync',
+    url: '/api/im/conversations/sync',
     method: 'delete',
     headers: { 'X-Device-Id': deviceId }
   })

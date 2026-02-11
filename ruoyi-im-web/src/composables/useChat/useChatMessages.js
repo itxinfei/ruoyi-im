@@ -282,7 +282,6 @@ export function useChatMessages(sessionId, currentUser) {
    */
   const loadMore = async () => {
     if (loading.value || noMore.value) {return}
-    currentPage.value++
     await loadHistory()
   }
 
