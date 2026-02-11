@@ -342,7 +342,7 @@ onMounted(() => {
 }
 
 .search-section {
-  margin-bottom: 16px;
+  margin: 0;
 
   .section-header {
     display: flex;
@@ -438,7 +438,7 @@ onMounted(() => {
     .dark & { color: #f1f5f9; }
     
     :deep(.highlight) {
-      color: #0089ff;
+      color: var(--dt-brand-color);
       font-weight: 600;
     }
   }
@@ -464,7 +464,7 @@ onMounted(() => {
 .clear-btn {
   background: none;
   border: none;
-  color: #0089ff;
+  color: var(--dt-brand-color);
   font-size: 12px;
   cursor: pointer;
 }

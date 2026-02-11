@@ -804,7 +804,7 @@ const handleRemoveMember = async member => {
 const getRoleColor = code => {
   const colors = {
     SUPER_ADMIN: '#FF3D00',
-    ADMIN: '#0089FF',
+    ADMIN: '#3296FA',
     USER: '#00C853',
     EDITOR: '#9C27B0',
     AUDITOR: '#FFAB00'

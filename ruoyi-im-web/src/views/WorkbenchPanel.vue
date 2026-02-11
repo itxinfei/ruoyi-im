@@ -256,7 +256,7 @@
                 v-for="event in scheduleList.slice(0, 4)"
                 :key="event.id"
                 class="schedule-item"
-                :style="{ borderLeftColor: event.color || '#0089FF' }"
+                :style="{ borderLeftColor: event.color || '#3296FA' }"
               >
                 <div class="schedule-time">
                   <span class="time-start">{{ formatTime(event.startTime) }}</span>
@@ -1194,11 +1194,11 @@ onUnmounted(() => {
   }
 
   &.stat-card-primary .stat-icon {
-    background: linear-gradient(135deg, #0089FF 0%, #0958d9 100%);
+    background: linear-gradient(135deg, var(--dt-brand-color) 0%, #0958d9 100%);
   }
 
   &.stat-card-primary .stat-value {
-    color: #0089FF;
+    color: var(--dt-brand-color);
   }
 
   &.stat-card-success .stat-icon {
@@ -1412,7 +1412,7 @@ onUnmounted(() => {
 
     &.priority-low {
       background: #e6f7ff;
-      color: #0089FF;
+      color: var(--dt-brand-color);
     }
   }
 }
@@ -1611,7 +1611,7 @@ onUnmounted(() => {
 
     &.tag-notice {
       background: #e6f7ff;
-      color: #0089FF;
+      color: var(--dt-brand-color);
     }
 
     &.tag-normal {

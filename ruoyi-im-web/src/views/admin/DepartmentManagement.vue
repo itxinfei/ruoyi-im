@@ -118,7 +118,7 @@
               <el-icon
                 class="dept-icon"
                 :size="32"
-                color="#0089FF"
+                color="#3296FA"
               >
                 <OfficeBuilding />
               </el-icon>
@@ -778,7 +778,7 @@ const handleMemberAction = async (command, member) => {
 
 // 图标颜色
 const getIconColor = level => {
-  const colors = ['#0089FF', '#00C853', '#FFAB00', '#FF3D00', '#9C27B0']
+  const colors = ['#3296FA', '#00C853', '#FFAB00', '#FF3D00', '#9C27B0']
   return colors[level % colors.length]
 }
 

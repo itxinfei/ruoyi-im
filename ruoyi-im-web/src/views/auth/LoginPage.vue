@@ -514,7 +514,7 @@ onMounted(() => {
   :deep(.el-input__wrapper.is-focus),
   :deep(.el-input:hover .el-input__wrapper),
   :deep(.el-input.is-active .el-input__wrapper) {
-    border: 1.5px solid #0089FF !important;
+    border: 1.5px solid #3296FA !important;
     box-shadow: none !important;
   }
 

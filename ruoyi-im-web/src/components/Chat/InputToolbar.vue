@@ -184,7 +184,7 @@ const handleMoreCommand = command => {
 
     &:hover {
       .el-icon {
-        color: #0089ff;
+        color: var(--dt-brand-color);
       }
     }
   }

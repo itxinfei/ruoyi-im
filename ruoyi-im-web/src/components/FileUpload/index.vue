@@ -250,7 +250,7 @@ defineExpose({
 
     .file-icon {
       font-size: 40px;
-      color: #0089ff;
+      color: var(--dt-brand-color);
     }
 
     .file-details {

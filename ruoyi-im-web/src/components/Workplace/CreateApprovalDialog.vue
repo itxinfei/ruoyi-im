@@ -229,7 +229,7 @@ watch(visible, val => {
   transition: all 0.2s;
 
   &:hover {
-    border-color: #0089ff;
+    border-color: var(--dt-brand-color);
     background: #f0f7ff;
     transform: translateY(-2px);
   }

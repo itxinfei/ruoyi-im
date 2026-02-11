@@ -244,7 +244,7 @@ const handleReject = () => {
   height: 2px;
   background: linear-gradient(90deg,
     transparent 0%,
-    var(--dt-brand-color, #0089FF) 50%,
+    var(--dt-brand-color) 50%,
     transparent 100%
   );
   border-radius: 1px;
@@ -278,7 +278,7 @@ const handleReject = () => {
   justify-content: center;
   border-radius: 10px;
   background: var(--dt-brand-bg, #E5F2FF);
-  color: var(--dt-brand-color, #0089FF);
+  color: var(--dt-brand-color);
 
   &.priority-urgent {
     background: var(--dt-warning-bg, #FFF3E0);
@@ -322,14 +322,14 @@ const handleReject = () => {
 .bot-label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--dt-brand-color, #0089FF);
+  color: var(--dt-brand-color);
   letter-spacing: 0.5px;
 }
 
 .label-glow {
   position: absolute;
   inset: -2px;
-  background: var(--dt-brand-color, #0089FF);
+  background: var(--dt-brand-color);
   opacity: 0.2;
   filter: blur(4px);
   z-index: -1;
@@ -421,7 +421,7 @@ const handleReject = () => {
 .read-percentage {
   font-size: 12px;
   font-weight: 600;
-  color: var(--dt-brand-color, #0089FF);
+  color: var(--dt-brand-color);
 }
 
 .progress-wrapper {
@@ -439,7 +439,7 @@ const handleReject = () => {
 .progress-fill {
   height: 100%;
   border-radius: 2px;
-  background: var(--dt-brand-color, #0089FF);
+  background: var(--dt-brand-color);
   transition: width 0.3s ease;
 
   &.priority-urgent {
@@ -484,7 +484,7 @@ const handleReject = () => {
   transition: all 0.2s;
 
   &--primary {
-    background: var(--dt-brand-color, #0089FF);
+    background: var(--dt-brand-color);
     color: white;
 
     &:hover {

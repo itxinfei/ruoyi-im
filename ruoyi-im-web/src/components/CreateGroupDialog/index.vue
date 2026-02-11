@@ -278,7 +278,7 @@ watch(visible, val => {
     transition: all 0.3s;
 
     &:hover {
-      border-color: #0089ff;
+      border-color: var(--dt-brand-color);
     }
   }
 }

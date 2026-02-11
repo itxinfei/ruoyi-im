@@ -1136,7 +1136,7 @@ watch(() => props.messages, () => {
       }
 
       &.admin {
-        background: linear-gradient(135deg, #0089FF 0%, #40a9ff 100%);
+        background: linear-gradient(135deg, #3296FA 0%, #40a9ff 100%);
         color: #fff;
       }
     }
@@ -1388,7 +1388,7 @@ watch(() => props.messages, () => {
 
       &.type-image {
         background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
-        color: #0089FF;
+        color: var(--dt-brand-color);
       }
 
       &.type-pdf {

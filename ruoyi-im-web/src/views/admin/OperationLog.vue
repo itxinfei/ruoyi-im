@@ -934,7 +934,7 @@ onMounted(() => {
 }
 
 .stat-card--total .stat-icon {
-  background: linear-gradient(135deg, #0089FF 0%, #0066CC 100%);
+  background: linear-gradient(135deg, #3296FA 0%, #0066CC 100%);
 }
 
 .stat-card--success .stat-icon {

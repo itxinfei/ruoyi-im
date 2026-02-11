@@ -124,7 +124,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   height: $panel-header-height;
-  padding: 0 $spacing-lg;
+  padding: 0;
   background: var(--el-bg-color);
   border-bottom: 1px solid var(--el-border-color-light);
   

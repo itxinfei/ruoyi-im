@@ -578,7 +578,7 @@
               <div class="stat-item">
                 <div
                   class="stat-icon"
-                  style="background: linear-gradient(135deg, #0089FF 0%, #0066CC 100%)"
+                  style="background: linear-gradient(135deg, #3296FA 0%, #0066CC 100%)"
                 >
                   <el-icon>
                     <Document />

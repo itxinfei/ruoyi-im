@@ -221,7 +221,7 @@ const handleMemberClick = member => {
 
 <style scoped lang="scss">
 // 钉钉颜色变量
-$dt-blue: #0089FF;
+$dt-blue: #3296FA;
 $dt-text-primary: #1F2329;
 $dt-text-secondary: #646A73;
 $dt-text-tertiary: #8F959E;

@@ -767,7 +767,7 @@ onMounted(() => {
       border-radius: var(--dt-radius-md);
       flex-shrink: 0;
 
-      .image-icon { color: #0089FF; }
+      .image-icon { color: #3296FA; }
       .video-icon { color: #722ed1; }
       .doc-icon { color: #52c41a; }
       .default-icon { color: #8c8c8c; }
@@ -876,7 +876,7 @@ onMounted(() => {
       &.icon-1 {
         top: 8px;
         left: 16px;
-        color: #0089FF;
+        color: #3296FA;
         animation-delay: 0s;
       }
 

@@ -4,7 +4,7 @@
       <div class="header-logo">
         <el-icon
           :size="24"
-          color="#0089FF"
+          color="#3296FA"
         >
           <ChatDotRound />
         </el-icon>

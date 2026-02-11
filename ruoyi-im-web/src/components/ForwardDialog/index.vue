@@ -320,7 +320,7 @@ defineExpose({
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #0089ff;
+        color: var(--dt-brand-color);
 
         .el-icon {
           font-size: 24px;

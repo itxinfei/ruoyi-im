@@ -740,7 +740,7 @@ onMounted(() => {
   color: white;
 }
 
-.stat-icon--blue { background: linear-gradient(135deg, #0089FF 0%, #0066CC 100%); }
+.stat-icon--blue { background: linear-gradient(135deg, #3296FA 0%, #0066CC 100%); }
 .stat-icon--green { background: linear-gradient(135deg, #00C853 0%, #009624 100%); }
 .stat-icon--orange { background: linear-gradient(135deg, #FFAB00 0%, #FF8F00 100%); }
 .stat-icon--purple { background: linear-gradient(135deg, #7C4DFF 0%, #5E32CC 100%); }

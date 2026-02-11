@@ -399,7 +399,7 @@ const viewOptions = [
 ]
 
 const calendarCategories = ref([
-  { name: '工作日程', hex: '#0089FF', enabled: true },
+  { name: '工作日程', hex: 'var(--dt-brand-color)', enabled: true },
   { name: '会议安排', hex: '#722ed1', enabled: true },
   { name: '个人生活', hex: '#52c41a', enabled: true }
 ])
@@ -473,7 +473,7 @@ const getEventStyle = e => {
   const s = p(e.startTime), end = p(e.endTime)
   return { top: `${(s - START_HOUR) * 80}px`, height: `${(end - s) * 80}px` }
 }
-const getHexColor = c => ({ blue: '#0089FF', purple: '#722ed1', emerald: '#52c41a', orange: '#f97316', red: '#ff4d4f' }[c] || '#0089FF')
+const getHexColor = c => ({ blue: 'var(--dt-brand-color)', purple: '#722ed1', emerald: '#52c41a', orange: '#f97316', red: '#ff4d4f' }[c] || 'var(--dt-brand-color)')
 const formatDateDisplay = d => `${d.getMonth()+1}月${d.getDate()}日 ${['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]}`
 
 const updateTimeLine = () => {

@@ -81,7 +81,7 @@ const visible = ref(false)
 
 // 预设配色方案
 const presetColors = [
-  { name: '默认蓝', primary: '#0089FF', accent: '#1890FF' },
+  { name: '默认蓝', primary: '#3296FA', accent: '#1890FF' },
   { name: '科技绿', primary: '#52C41A', accent: '#73D13D' },
   { name: '优雅紫', primary: '#722ED1', accent: '#9254DE' },
   { name: '活力橙', primary: '#FA8C16', accent: '#FFA940' }
@@ -89,7 +89,7 @@ const presetColors = [
 
 // 自定义颜色
 const customColors = reactive({
-  primary: '#0089FF',
+  primary: '#3296FA',
   accent: '#1890FF'
 })
 
@@ -103,7 +103,7 @@ const handleCustomColorChange = () => {
 }
 
 const handleReset = () => {
-  customColors.primary = '#0089FF'
+  customColors.primary = '#3296FA'
   customColors.accent = '#1890FF'
   ElMessage.success('已重置为默认颜色')
 }
