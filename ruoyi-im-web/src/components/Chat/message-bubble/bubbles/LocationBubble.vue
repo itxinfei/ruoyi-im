@@ -84,8 +84,6 @@ const openLocation = () => {
   &:hover {
     border-color: var(--dt-brand-color);
     background: var(--dt-brand-light);
-    transform: translateY(-1px);
-    box-shadow: var(--dt-shadow-card);
   }
 }
 
@@ -95,15 +93,10 @@ const openLocation = () => {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-brand-hover));
+  background: var(--dt-brand-color);
   border-radius: 50%;
   color: var(--dt-text-inverse);
   flex-shrink: 0;
-  transition: transform var(--dt-transition-fast);
-
-  .location-bubble:hover & {
-    transform: scale(1.05);
-  }
 
   .material-icons-outlined {
     font-size: 24px;

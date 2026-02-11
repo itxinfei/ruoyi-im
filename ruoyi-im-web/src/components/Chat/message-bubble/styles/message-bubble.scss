@@ -11,20 +11,12 @@
 
 .bubble-base {
   position: relative;
-  // GPU 加速优化：使用 transform 和 opacity
-  // CSS containment 隔离渲染，提升性能
   contain: layout style paint;
-  will-change: transform, opacity;
-  animation: messagePop 0.3s var(--dt-ease-bounce);
-
-  // 动画结束后移除 will-change 提示
-  animation-fill-mode: both;
-  animation-delay: 0s;
 }
 
 // 气泡内容基础样式
 .bubble-content {
-  padding: 12px; // 统一 padding 为 12px
+  padding: 8px 12px;
   border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-base);
   line-height: 1.4; // 钉钉标准：保持 1.4 行高
@@ -43,12 +35,29 @@
   .bubble-content {
     background: var(--dt-bubble-left-bg);
     border: 1px solid var(--dt-bubble-left-border);
-    // 钉钉标准：左上4px 左下4px 右上12px 右下12px
-    border-radius: var(--dt-radius-bubble-left);
+    // 统一圆角
+    border-radius: 6px;
   }
 
   &:hover .bubble-content {
     background: var(--dt-bg-card-hover);
+  }
+
+  // 分组圆角样式
+  &.group-single .bubble-content {
+    border-radius: 6px;
+  }
+
+  &.group-first .bubble-content {
+    border-radius: 6px 6px 6px 2px;
+  }
+
+  &.group-middle .bubble-content {
+    border-radius: 2px 6px 6px 2px;
+  }
+
+  &.group-last .bubble-content {
+    border-radius: 2px 6px 6px 6px;
   }
 }
 
@@ -63,12 +72,29 @@
     background: var(--dt-bubble-right-bg);
     color: var(--dt-bubble-right-text); // 白色文字
     border: none;
-    // 钉钉标准：左上12px 左下12px 右上4px 右下4px
-    border-radius: var(--dt-radius-lg) var(--dt-radius-sm) var(--dt-radius-sm) var(--dt-radius-lg);
+    // 统一圆角
+    border-radius: 6px;
   }
 
   &:hover .bubble-content {
     background: var(--dt-bubble-right-bg-hover);
+  }
+
+  // 分组圆角样式
+  &.group-single .bubble-content {
+    border-radius: 6px;
+  }
+
+  &.group-first .bubble-content {
+    border-radius: 6px 6px 2px 6px;
+  }
+
+  &.group-middle .bubble-content {
+    border-radius: 6px 2px 2px 6px;
+  }
+
+  &.group-last .bubble-content {
+    border-radius: 6px 2px 6px 6px;
   }
 
   // 确保所有子元素文字颜色都是白色
@@ -98,7 +124,7 @@
 // ============================================================================
 
 .message-bubble.is-long-press {
-  animation: longPressPulse 0.3s ease-in-out;
+  opacity: 0.9;
 }
 
 // ============================================================================
@@ -143,8 +169,7 @@
   transition: all var(--dt-transition-base);
 
   &:hover {
-    box-shadow: var(--dt-shadow-lg);
-    transform: translateY(-2px);
+    opacity: 0.95;
   }
 }
 
@@ -199,6 +224,26 @@
   margin-top: 0;
 }
 
+// ============================================================================
+// 分组内消息间距缩小（钉钉风格）
+// ============================================================================
+
+// 中间和末尾消息的间距缩小
+.message-bubble.group-middle,
+.message-bubble.group-last {
+  margin-top: 2px !important;
+}
+
+// 首条消息保持正常间距
+.message-bubble.group-first {
+  margin-top: 8px;
+}
+
+// 单条消息保持正常间距
+.message-bubble.group-single {
+  margin-top: 8px;
+}
+
 // 钉钉风格：图片/视频消息的特殊圆角
 .message-bubble.type-image .bubble-content,
 .message-bubble.type-video .bubble-content {
@@ -224,25 +269,25 @@
 :global(.dark) {
   // 对方消息：深灰背景
   .message-bubble:not(.is-right) .bubble-content {
-    background: #2a2a2a;
-    border-color: #3a3a3a;
+    background: var(--dt-bg-tertiary-dark, #2a2a2a);
+    border-color: var(--dt-border-dark, #3a3a3a);
     color: #e8e8e8;
   }
 
   // 自己消息：钉钉蓝（暗模式下稍亮）
   .message-bubble.is-right .bubble-content {
-    background: #0089FF;
+    background: #3296FA;
     color: #FFFFFF;
   }
 
   // 悬停状态
   .message-bubble:not(.is-right):hover .bubble-content {
-    background: #333333;
+    background: var(--dt-bg-card-hover-dark, #333333);
     border-color: #444444;
   }
 
   .message-bubble.is-right:hover .bubble-content {
-    background: #1A9FFF;
+    background: var(--dt-brand-hover, #1A9FFF);
   }
 }
 
@@ -262,7 +307,7 @@
 // ============================================================================
 
 .reaction-item {
-  animation: scaleInBounce 0.25s var(--dt-ease-bounce);
+  animation: scaleIn 0.25s ease-out;
 }
 
 // ============================================================================

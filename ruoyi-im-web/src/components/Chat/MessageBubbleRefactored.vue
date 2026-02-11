@@ -5,7 +5,20 @@
 * 提高可维护性和可测试性
 */
 <template>
-  <div class="message-bubble-wrapper">
+  <div
+    class="message-bubble-wrapper"
+    @mouseenter="showHoverActions = true"
+    @mouseleave="handleWrapperMouseLeave"
+  >
+    <!-- 悬停操作栏 -->
+    <MessageHoverActions
+      :visible="showHoverActions && !contextMenuVisible"
+      :is-own="message.isOwn"
+      @action="handleHoverAction"
+      @keep-hover="showHoverActions = true"
+      @leave-hover="showHoverActions = false"
+    />
+
     <div
       ref="bubbleRef"
       class="message-bubble"
@@ -185,6 +198,7 @@ import SystemBubble from './message-bubble/bubbles/SystemBubble.vue'
 import RecalledBubble from './message-bubble/bubbles/RecalledBubble.vue'
 import MessageStatus from './message-bubble/parts/MessageStatus.vue'
 import MessageReactions from './message-bubble/parts/MessageReactions.vue'
+import MessageHoverActions from './message-bubble/parts/MessageHoverActions.vue'
 
 // 已有的组件（保持不变）
 import NudgeMessageBubble from './NudgeMessageBubble.vue'
@@ -196,7 +210,8 @@ import ContextMenu from '@/components/Common/ContextMenu.vue'
 const props = defineProps({
   message: { type: Object, required: true },
   sessionType: { type: String, default: 'PRIVATE' },
-  isLargeGroup: { type: Boolean, default: false }
+  isLargeGroup: { type: Boolean, default: false },
+  groupPosition: { type: String, default: 'single' } // 'single' | 'first' | 'middle' | 'last'
 })
 
 const emit = defineEmits([
@@ -240,6 +255,33 @@ const {
 const showAiEmojiPanel = ref(false)
 const aiEmojiPosition = ref({ x: 0, y: 0 })
 const showReadInfoDialog = ref(false)
+
+// ==================== 悬停操作栏 ====================
+
+const showHoverActions = ref(false)
+
+const handleWrapperMouseLeave = () => {
+  showHoverActions.value = false
+}
+
+const handleHoverAction = action => {
+  showHoverActions.value = false
+  if (action === 'reply') {
+    handleCommand('reply', props.message)
+  } else if (action === 'emoji') {
+    handleCommand('emoji', props.message)
+  } else if (action === 'forward') {
+    handleCommand('forward', props.message)
+  } else if (action === 'more') {
+    // 触发右键菜单：使用气泡元素的位置
+    const rect = bubbleRef.value?.getBoundingClientRect()
+    if (rect) {
+      contextMenuX.value = props.message.isOwn ? rect.left : rect.right
+      contextMenuY.value = rect.top
+      contextMenuVisible.value = true
+    }
+  }
+}
 
 // ==================== 触摸支持 ====================
 let touchTimer = null
@@ -457,7 +499,8 @@ const bubbleClasses = computed(() => {
     'is-right': props.message.isOwn,
     'is-selected': isSelected.value,
     'is-long-press': isLongPressing.value,
-    [`type-${type}`]: true
+    [`type-${type}`]: true,
+    [`group-${props.groupPosition}`]: true
   }
 })
 
@@ -492,7 +535,7 @@ const canRecall = computed(() => {
 }
 
 .bubble-content {
-  padding: 10px 14px;
+  padding: 8px 12px;
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
@@ -506,9 +549,8 @@ const canRecall = computed(() => {
 // 对方消息样式 (左侧)
 .message-bubble:not(.is-right) {
   .bubble-content {
-    background: #FFFFFF;
-    border: 1px solid #E4E7ED;
-    border-radius: 2px 14px 14px 14px;
+    background: var(--dt-bubble-left-bg);
+    border: 1px solid var(--dt-bubble-left-border);
     color: var(--dt-text-primary);
   }
 }
@@ -521,7 +563,6 @@ const canRecall = computed(() => {
     background: var(--dt-brand-color);
     color: #FFFFFF;
     border: none;
-    border-radius: 14px 2px 14px 14px;
   }
 
   :deep(.message-text),
@@ -578,9 +619,9 @@ const canRecall = computed(() => {
 // 暗色模式
 .dark {
   .message-bubble:not(.is-right) .bubble-content {
-    background: #2A2D35;
-    border-color: #3F424A;
-    color: #E2E4E9;
+    background: var(--dt-bg-tertiary-dark, #2A2D35);
+    border-color: var(--dt-border-dark, #3F424A);
+    color: var(--dt-text-primary-dark, #E2E4E9);
   }
 
   .message-bubble.is-right .bubble-content {
@@ -588,9 +629,25 @@ const canRecall = computed(() => {
   }
 
   .message-bubble.type-image .bubble-content {
-    background: #1A1D24 !important;
-    border-color: #3F424A !important;
+    background: var(--dt-bg-card-dark, #1A1D24) !important;
+    border-color: var(--dt-border-dark, #3F424A) !important;
   }
+}
+
+// 分组圆角 - 左侧（scoped 优先级高于 import）
+.message-bubble:not(.is-right) {
+  &.group-single .bubble-content { border-radius: 6px; }
+  &.group-first .bubble-content { border-radius: 6px 6px 6px 2px; }
+  &.group-middle .bubble-content { border-radius: 2px 6px 6px 2px; }
+  &.group-last .bubble-content { border-radius: 2px 6px 6px 6px; }
+}
+
+// 分组圆角 - 右侧
+.message-bubble.is-right {
+  &.group-single .bubble-content { border-radius: 6px; }
+  &.group-first .bubble-content { border-radius: 6px 6px 2px 6px; }
+  &.group-middle .bubble-content { border-radius: 6px 2px 2px 6px; }
+  &.group-last .bubble-content { border-radius: 6px 2px 6px 6px; }
 }
 </style>
 

@@ -270,8 +270,7 @@ onUnmounted(() => {
   min-height: 150px;
 
   &:hover {
-    box-shadow: var(--dt-shadow-lg);
-    transform: translateY(-2px);
+    opacity: 0.95;
   }
 
   &.is-loading,
@@ -280,8 +279,7 @@ onUnmounted(() => {
     pointer-events: none;
 
     &:hover {
-      transform: none;
-      box-shadow: none;
+      opacity: 1;
     }
   }
 }

@@ -58,6 +58,9 @@
           v-else
           :message="msg"
           :multi-select-mode="multiSelectMode"
+          :session-type="sessionType"
+          :group-position="msg.groupPosition || 'single'"
+          :hide-footer="msg.groupPosition === 'first' || msg.groupPosition === 'middle'"
           @reply="$emit('reply', $event)"
           @reaction="handleReaction"
           @command="handleCommand"
@@ -456,7 +459,22 @@ const messagesWithDividers = computed(() => {
   // 保存已处理的最后一条真实消息（用于判断合并）
   let lastRealMessage = null
 
-  props.messages.forEach((msg, index) => {
+  // 先处理所有消息，计算出每条消息的合并状态
+  const processedMessages = props.messages.map((msg, index) => {
+    // 判断是否需要与上一条消息合并
+    let isMerged = false
+    if (lastRealMessage && canMergeWith(msg, lastRealMessage)) {
+      isMerged = true
+    }
+
+    // 更新最后一条真实消息
+    lastRealMessage = msg
+
+    return { ...msg, isMerged }
+  })
+
+  // 第二次遍历：计算 groupPosition
+  processedMessages.forEach((msg, index) => {
     // 添加时间分割线
     if (index === 0 || shouldAddTimeDivider(msg, props.messages[index - 1])) {
       res.push({
@@ -466,18 +484,31 @@ const messagesWithDividers = computed(() => {
       })
     }
 
-    // 判断是否需要与上一条消息合并
-    // 直接使用 lastRealMessage 判断，避免在 res 数组中查找
-    let isMerged = false
-    if (lastRealMessage && canMergeWith(msg, lastRealMessage)) {
-      isMerged = true
+    // 计算 groupPosition
+    const prevMsg = processedMessages[index - 1]
+    const nextMsg = processedMessages[index + 1]
+
+    let groupPosition = 'single'
+
+    if (!msg.isMerged) {
+      // 不与上一条合并，检查是否与下一条合并
+      if (nextMsg && nextMsg.isMerged && canMergeWith(nextMsg, msg)) {
+        groupPosition = 'first'
+      } else {
+        groupPosition = 'single'
+      }
+    } else {
+      // 与上一条合并，检查是否与下一条合并
+      if (nextMsg && nextMsg.isMerged && canMergeWith(nextMsg, msg)) {
+        groupPosition = 'middle'
+      } else {
+        groupPosition = 'last'
+      }
     }
 
-    // 更新最后一条真实消息
-    lastRealMessage = msg
-
-    res.push({ ...msg, isMerged })
+    res.push({ ...msg, isMerged: msg.isMerged || false, groupPosition })
   })
+
   return res
 })
 

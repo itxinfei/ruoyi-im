@@ -35,12 +35,14 @@
     <!-- 头像区域 -->
     <div
       class="avatar-wrapper"
+      :class="{ 'avatar-hidden': groupPosition === 'middle' || groupPosition === 'last' }"
       title="右键@提及 | 查看资料 | 双击拍一拍"
       @contextmenu.prevent="$emit('at', message)"
       @click="$emit('show-user', message.senderId)"
       @dblclick="handleNudge"
     >
       <DingtalkAvatar
+        v-if="groupPosition === 'single' || groupPosition === 'first'"
         :src="message.senderAvatar"
         :name="message.senderName"
         :user-id="message.senderId"
@@ -68,6 +70,7 @@
           <MessageBubble
             :message="message"
             :session-type="sessionType"
+            :group-position="groupPosition"
             @command="$emit('command', $event, message)"
             @at="$emit('at', message)"
             @preview="$emit('preview', $event)"
@@ -111,7 +114,8 @@ const props = defineProps({
   message: { type: Object, required: true },
   multiSelectMode: { type: Boolean, default: false },
   sessionType: { type: String, default: 'PRIVATE' },
-  hideFooter: { type: Boolean, default: false }
+  hideFooter: { type: Boolean, default: false },
+  groupPosition: { type: String, default: 'single' } // 'single' | 'first' | 'middle' | 'last'
 })
 
 const emit = defineEmits([
@@ -173,9 +177,9 @@ const handleNudge = () => {
 .message-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 24px; // 稍微增大间距
+  margin-bottom: 12px;
   position: relative;
-  padding: 2px 0;
+  padding: 0;
   transition: all 0.2s var(--dt-ease-out);
 
   &.is-right {
@@ -183,7 +187,11 @@ const handleNudge = () => {
   }
 
   &.has-sender-name {
-    padding-top: 20px; 
+    padding-top: 18px;
+  }
+
+  &.is-merged {
+    margin-bottom: 2px;
   }
 }
 
@@ -253,6 +261,11 @@ const handleNudge = () => {
   border-radius: 6px;
   overflow: hidden;
 
+  &.avatar-hidden {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   :deep(.dingtalk-avatar) {
     border-radius: 6px !important;
   }
@@ -266,7 +279,7 @@ const handleNudge = () => {
   position: relative;
 
   &.is-merged {
-    margin-top: -12px;
+    margin-top: 0;
   }
 }
 

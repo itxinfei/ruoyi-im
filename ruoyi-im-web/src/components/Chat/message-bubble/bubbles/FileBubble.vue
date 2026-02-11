@@ -274,7 +274,6 @@ const handleClick = async () => {
   color: var(--dt-text-tertiary);
   opacity: 0.6;
   transition: all var(--dt-transition-base);
-  transform: translateX(4px);
   flex-shrink: 0;
 
   .el-icon {
