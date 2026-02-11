@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,6 +67,7 @@ public class ImFileController {
      * @return 上传结果，包含文件信息
      */
     @Operation(summary = "上传文件", description = "上传文件到服务器")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/upload")
     @RateLimit(key = "file_upload", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<ImFileVO> uploadFile(@RequestParam("file") MultipartFile file) {
@@ -86,6 +88,7 @@ public class ImFileController {
      * @return 上传结果，包含文件信息列表
      */
     @Operation(summary = "批量上传文件", description = "批量上传多个文件")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/upload/batch")
     @RateLimit(key = "file_upload_batch", time = 60, count = 5, limitType = RateLimit.LimitType.USER)
     public Result<List<ImFileVO>> uploadFiles(@RequestParam("files") List<MultipartFile> files) {

@@ -108,12 +108,30 @@ public class ImMeetingRoomController {
      * 分页查询会议室列表
      * 按条件分页查询会议室列表
      *
-     * @param request 查询条件
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @param name 会议室名称（可选）
+     * @param location 位置（可选）
+     * @param capacity 容量（可选）
+     * @param status 状态（可选）
      * @return 分页结果
      */
     @Operation(summary = "分页查询会议室列表", description = "按条件分页查询会议室列表")
-    @PostMapping("/page")
-    public Result<IPage<ImMeetingRoomVO>> getRoomPage(@RequestBody ImMeetingRoomQueryRequest request) {
+    @GetMapping("/page")
+    public Result<IPage<ImMeetingRoomVO>> getRoomPage(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Integer capacity,
+            @RequestParam(required = false) String status) {
+        ImMeetingRoomQueryRequest request = new ImMeetingRoomQueryRequest();
+        request.setPageNum(pageNum);
+        request.setPageSize(pageSize);
+        request.setName(name);
+        request.setLocation(location);
+        request.setCapacity(capacity);
+        request.setStatus(status);
         IPage<ImMeetingRoomVO> page = meetingRoomService.getRoomPage(request);
         return Result.success(page);
     }

@@ -2,6 +2,7 @@ package com.ruoyi.im.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
@@ -96,6 +97,7 @@ public class ImGroupAdminController {
      */
     @Operation(summary = "解散群组", description = "管理员解散指定群组")
     @DeleteMapping("/{id}")
+    @RateLimit(key = "admin_group_dismiss", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<Void> delete(@Parameter(description = "群组ID") @PathVariable Long id) {
         imGroupService.adminDismissGroup(id);
         return Result.success("群组已解散");
@@ -109,6 +111,7 @@ public class ImGroupAdminController {
      */
     @Operation(summary = "批量解散群组", description = "管理员批量解散群组")
     @DeleteMapping("/batch")
+    @RateLimit(key = "admin_group_batch_dismiss", time = 60, count = 5, limitType = RateLimit.LimitType.USER)
     public Result<Map<String, Integer>> batchDelete(
             @Parameter(description = "群组ID列表") @RequestBody List<Long> ids) {
         Map<String, Integer> result = imGroupService.adminBatchDismissGroups(ids);
@@ -124,6 +127,7 @@ public class ImGroupAdminController {
      */
     @Operation(summary = "更新群组信息", description = "管理员更新群组信息")
     @PutMapping("/{id}")
+    @RateLimit(key = "admin_group_update", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<Void> update(
             @Parameter(description = "群组ID") @PathVariable Long id,
             @RequestBody ImGroupUpdateRequest request) {

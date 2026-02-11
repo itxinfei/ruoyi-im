@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.conversation.ImConversationCreateRequest;
 import com.ruoyi.im.dto.conversation.ImConversationUpdateRequest;
@@ -10,6 +11,7 @@ import com.ruoyi.im.vo.conversation.ImConversationVO;
 import com.ruoyi.im.vo.sync.ConversationSyncResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -89,7 +91,9 @@ public class ImConversationController {
      * @apiNote 使用 @Valid 注解进行参数校验；会话类型包括PRIVATE(单聊)、GROUP(群聊)
      */
     @Operation(summary = "创建会话", description = "创建一个新的会话，支持单聊和群聊")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/create")
+    @RateLimit(key = "conversation_create", time = 60, count = 50, limitType = RateLimit.LimitType.USER)
     public Result<ImConversationVO> createConversation(@Valid @RequestBody ImConversationCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         Long conversationId = imConversationService.createConversation(request, userId);
@@ -126,6 +130,7 @@ public class ImConversationController {
      * @apiNote 删除后会话不再显示在会话列表中，但历史消息仍保留
      */
     @Operation(summary = "删除会话", description = "从会话列表中删除指定会话（非物理删除）")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public Result<Void> deleteConversation(@PathVariable @Positive(message = "会话ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -143,6 +148,7 @@ public class ImConversationController {
      * @apiNote 置顶的会话会一直显示在会话列表顶部
      */
     @Operation(summary = "置顶/取消置顶会话", description = "设置会话置顶状态")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/pinned")
     public Result<Void> setPinned(@PathVariable @Positive(message = "会话ID必须为正数") Long id,
                                 @RequestParam @NotNull(message = "置顶状态不能为空") Boolean pinned) {
@@ -161,6 +167,7 @@ public class ImConversationController {
      * @apiNote 设置免打扰后，该会话的消息不会触发通知提醒
      */
     @Operation(summary = "设置免打扰", description = "设置会话免打扰状态")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/muted")
     public Result<Void> setMuted(@PathVariable @Positive(message = "会话ID必须为正数") Long id,
                                @RequestParam @NotNull(message = "免打扰状态不能为空") Boolean muted) {
@@ -180,6 +187,7 @@ public class ImConversationController {
      */
     @Operation(summary = "搜索会话", description = "根据关键词搜索会话")
     @GetMapping("/search")
+    @RateLimit(key = "conversation_search", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<List<ImConversationVO>> search(@RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImConversationVO> list = imConversationService.searchConversations(keyword, userId);
@@ -196,6 +204,7 @@ public class ImConversationController {
      * @apiNote 标记后该会话的未读消息数将变为0
      */
     @Operation(summary = "标记会话为已读", description = "将指定会话的所有未读消息标记为已读")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/markAsRead")
     public Result<Void> markAsRead(@PathVariable @Positive(message = "会话ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();

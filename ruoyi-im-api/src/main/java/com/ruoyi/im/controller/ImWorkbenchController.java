@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImTodoItem;
 import com.ruoyi.im.dto.workbench.TodoCreateRequest;
@@ -86,6 +87,7 @@ public class ImWorkbenchController {
      */
     @Operation(summary = "创建待办", description = "创建新的待办事项")
     @PostMapping("/todos")
+    @RateLimit(key = "workbench_todo_create", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<Long> createTodo(@Valid @RequestBody TodoCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         Long todoId;

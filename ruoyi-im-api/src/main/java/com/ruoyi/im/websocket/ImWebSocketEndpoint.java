@@ -469,11 +469,6 @@ public class ImWebSocketEndpoint {
             log.error("清理异常会话失败", e);
         }
     }
-            session.close();
-        } catch (IOException e) {
-            log.error("关闭异常连接失败", e);
-        }
-    }
 
     /**
      * 处理聊天消息
@@ -484,7 +479,9 @@ public class ImWebSocketEndpoint {
      * @param payload 消息数据
      */
     private void processChatMessage(Long userId, Object payload) {
-        Session senderSession = onlineUsers.get(userId);
+        // 获取用户的第一个会话（用于获取 senderSession）
+        List<Session> sessions = onlineUsers.get(userId);
+        Session senderSession = (sessions != null && !sessions.isEmpty()) ? sessions.get(0) : null;
         String clientMsgId = null;
 
         try {
@@ -724,23 +721,28 @@ public class ImWebSocketEndpoint {
                 // 使用同步块确保连接更新的原子性，防止竞态条件
                 synchronized (onlineUsers) {
                     // 检查用户是否已存在在线连接，如果存在则关闭旧连接
-                    Session oldSession = onlineUsers.get(userId);
-                    if (oldSession != null && oldSession.isOpen() && !oldSession.getId().equals(session.getId())) {
-                        log.info("用户已存在连接，关闭旧连接: userId={}, oldSessionId={}, newSessionId={}",
-                                userId, oldSession.getId(), session.getId());
-                        try {
-                            // 从sessionUserMap中删除旧会话
-                            sessionUserMap.remove(oldSession);
-                            onlineUsers.remove(userId);
-                            oldSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "新连接建立"));
-                        } catch (IOException e) {
-                            log.error("关闭旧连接异常: userId={}", userId, e);
+                    List<Session> oldSessions = onlineUsers.get(userId);
+                    if (oldSessions != null && !oldSessions.isEmpty()) {
+                        // 关闭所有旧连接
+                        for (Session oldSession : oldSessions) {
+                            if (oldSession.isOpen() && !oldSession.getId().equals(session.getId())) {
+                                log.info("用户已存在连接，关闭旧连接: userId={}, oldSessionId={}, newSessionId={}",
+                                        userId, oldSession.getId(), session.getId());
+                                try {
+                                    sessionUserMap.remove(oldSession);
+                                    oldSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "新连接建立"));
+                                } catch (IOException e) {
+                                    log.error("关闭旧连接异常: userId={}", userId, e);
+                                }
+                            }
                         }
                     }
 
                     // 保存用户会话
                     sessionUserMap.put(session, userId);
-                    onlineUsers.put(userId, session);
+                    List<Session> sessions = new CopyOnWriteArrayList<>();
+                    sessions.add(session);
+                    onlineUsers.put(userId, sessions);
                 }
 
                 // 同步更新Redis中的在线状态
@@ -884,8 +886,11 @@ public class ImWebSocketEndpoint {
      * @param messageJson JSON 格式的消息内容
      */
     public static void broadcastToAllOnline(String messageJson) {
-        List<Session> sessions = new ArrayList<>(onlineUsers.values());
-        for (Session session : sessions) {
+        List<Session> allSessions = new ArrayList<>();
+        for (List<Session> sessions : onlineUsers.values()) {
+            allSessions.addAll(sessions);
+        }
+        for (Session session : allSessions) {
             if (session.isOpen()) {
                 try {
                     session.getBasicRemote().sendText(messageJson);

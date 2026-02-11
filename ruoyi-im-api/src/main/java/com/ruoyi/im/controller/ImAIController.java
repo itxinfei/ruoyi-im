@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.ai.ChatRequest;
 import com.ruoyi.im.dto.ai.ChatResponse;
@@ -45,6 +46,7 @@ public class ImAIController {
      */
     @Operation(summary = "AI聊天", description = "与AI助手进行对话")
     @PostMapping("/chat")
+    @RateLimit(key = "ai_chat", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<ChatResponse> chat(@Validated @RequestBody ChatRequest request) {
         ChatResponse response = aiService.chat(request);
         return Result.success(response);
@@ -60,6 +62,7 @@ public class ImAIController {
      */
     @Operation(summary = "生成摘要", description = "使用AI生成文档摘要")
     @PostMapping("/summarize")
+    @RateLimit(key = "ai_summarize", time = 60, count = 10, limitType = RateLimit.LimitType.USER)
     public Result<SummaryResponse> summarize(@Validated @RequestBody SummaryRequest request) {
         SummaryResponse response = aiService.summarize(request);
         return Result.success(response);

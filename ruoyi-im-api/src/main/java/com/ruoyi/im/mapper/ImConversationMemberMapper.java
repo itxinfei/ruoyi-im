@@ -162,4 +162,14 @@ public interface ImConversationMemberMapper extends BaseMapper<ImConversationMem
      * @return 更新行数
      */
     int incrementUnreadCountExcludeSender(@Param("conversationId") Long conversationId, @Param("senderId") Long senderId);
+
+    /**
+     * 同步未读数（用于 Redis 同步到数据库）
+     *
+     * @param userId 用户ID
+     * @param conversationId 会话ID
+     * @param unreadCount 未读数
+     * @return 更新行数
+     */
+    int syncUnreadCount(@Param("userId") Long userId, @Param("conversationId") Long conversationId, @Param("unreadCount") Integer unreadCount);
 }

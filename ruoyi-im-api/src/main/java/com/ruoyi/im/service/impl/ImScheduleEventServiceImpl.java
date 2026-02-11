@@ -37,8 +37,8 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     private final ImUserMapper userMapper;
 
     public ImScheduleEventServiceImpl(ImScheduleEventMapper eventMapper,
-                                      ImScheduleParticipantMapper participantMapper,
-                                      ImUserMapper userMapper) {
+            ImScheduleParticipantMapper participantMapper,
+            ImUserMapper userMapper) {
         this.eventMapper = eventMapper;
         this.participantMapper = participantMapper;
         this.userMapper = userMapper;
@@ -118,7 +118,12 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
         if (!event.getUserId().equals(userId)) {
             throw new BusinessException("无权限操作");
         }
-        eventMapper.deleteById(eventId);
+        // 逻辑删除
+        ImScheduleEvent updateEvent = new ImScheduleEvent();
+        updateEvent.setId(eventId);
+        updateEvent.setIsDeleted(1);
+        updateEvent.setDeletedTime(LocalDateTime.now());
+        eventMapper.updateById(updateEvent);
     }
 
     @Override
@@ -166,7 +171,8 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
         Page<ImScheduleEvent> page = new Page<>(request.getPageNum(), request.getPageSize());
         IPage<ImScheduleEvent> eventPage = eventMapper.selectEventPage(page, request, userId);
 
-        Page<ScheduleEventDetailVO> resultPage = new Page<>(eventPage.getCurrent(), eventPage.getSize(), eventPage.getTotal());
+        Page<ScheduleEventDetailVO> resultPage = new Page<>(eventPage.getCurrent(), eventPage.getSize(),
+                eventPage.getTotal());
         List<ScheduleEventDetailVO> voList = eventPage.getRecords().stream()
                 .map(this::convertToDetailVO)
                 .collect(Collectors.toList());
@@ -176,7 +182,8 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     }
 
     @Override
-    public List<ScheduleEventDetailVO> getEventsByTimeRange(LocalDateTime startTime, LocalDateTime endTime, Long userId) {
+    public List<ScheduleEventDetailVO> getEventsByTimeRange(LocalDateTime startTime, LocalDateTime endTime,
+            Long userId) {
         List<ImScheduleEvent> events = eventMapper.selectByTimeRange(userId, startTime, endTime);
         return events.stream()
                 .map(this::convertToDetailVO)

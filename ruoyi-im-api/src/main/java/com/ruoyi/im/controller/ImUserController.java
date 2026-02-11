@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.dto.base.BasePageRequest;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,6 +62,7 @@ public class ImUserController {
      */
     @Operation(summary = "创建用户", description = "管理员创建新用户账户")
     @PostMapping
+    @RateLimit(key = "user_create", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<Long> create(@Valid @RequestBody ImRegisterRequest request) {
         log.info("创建用户: username={}", request.getUsername());
         Long userId = imUserService.createUser(request);
@@ -72,6 +75,7 @@ public class ImUserController {
      * 管理员删除指定用户
      */
     @Operation(summary = "删除用户", description = "管理员删除指定用户账户及其关联数据")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable @Positive(message = "用户ID必须为正数") Long id) {
         log.info("删除用户: userId={}", id);
@@ -117,6 +121,7 @@ public class ImUserController {
     @Deprecated
     @Operation(summary = "搜索用户（已废弃）", description = "请使用全局搜索接口 /api/im/search/contacts")
     @GetMapping("/search")
+    @RateLimit(key = "user_search", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<List<ImUserVO>> search(@RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         List<ImUserVO> list = imUserService.searchUsers(keyword);
         return Result.success(list);
@@ -162,6 +167,7 @@ public class ImUserController {
      */
     @Operation(summary = "更新用户信息", description = "更新用户的昵称、头像、个性签名等信息")
     @PutMapping("/{id}")
+    @RateLimit(key = "user_update", time = 60, count = 50, limitType = RateLimit.LimitType.USER)
     public Result<Void> update(
             @PathVariable @Positive(message = "用户ID必须为正数") Long id,
             @Valid @RequestBody ImUserUpdateRequest request) {
@@ -190,6 +196,7 @@ public class ImUserController {
      * 修改密码
      */
     @Operation(summary = "修改密码", description = "验证旧密码后更新为新密码")
+    @PreAuthorize("#id == authentication.principal.userId")
     @PutMapping("/{id}/password")
     public Result<Void> changePassword(
             @PathVariable @Positive(message = "用户ID必须为正数") Long id,
@@ -212,6 +219,7 @@ public class ImUserController {
      */
     @Operation(summary = "上传用户头像", description = "上传用户头像图片并更新用户头像字段")
     @PostMapping("/avatar")
+    @RateLimit(key = "user_avatar_upload", time = 60, count = 10, limitType = RateLimit.LimitType.USER)
     public Result<String> uploadAvatar(@RequestParam("avatarfile") MultipartFile file) {
         Long userId = SecurityUtils.getLoginUserId();
         log.info("上传用户头像: userId={}, fileName={}, size={}", userId, file.getOriginalFilename(), file.getSize());
@@ -263,6 +271,7 @@ public class ImUserController {
      */
     @Operation(summary = "扫描二维码", description = "处理用户扫描二维码的请求")
     @PostMapping("/scan-qrcode")
+    @RateLimit(key = "user_scan_qrcode", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<Map<String, Object>> scanQRCode(@RequestParam String qrData) {
         Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> result = imUserService.scanQRCode(userId, qrData);

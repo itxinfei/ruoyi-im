@@ -179,15 +179,16 @@ const handleClick = async () => {
   gap: 12px;
   padding: 12px;
   background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
+  border: none;
+  border-radius: var(--dt-radius-lg, 12px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   transition: all var(--dt-transition-base);
   min-width: 240px;
   max-width: 400px;
 
   &:hover {
-    border-color: var(--dt-brand-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 
     .file-action {
       opacity: 1;
@@ -196,7 +197,7 @@ const handleClick = async () => {
   }
 
   &.is-downloading {
-    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 1px var(--dt-brand-color), 0 1px 2px rgba(0, 0, 0, 0.06);
     background: var(--dt-brand-lighter);
     cursor: wait;
 
@@ -290,10 +291,12 @@ const handleClick = async () => {
 :global(.dark) {
   .file-bubble {
     background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-light);
+    box-shadow: none;
+    border: 1px solid var(--dt-border-dark, #3F424A);
 
     &:hover {
       border-color: var(--dt-brand-color);
+      box-shadow: none;
     }
 
     &.is-downloading {

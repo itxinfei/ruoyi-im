@@ -177,7 +177,7 @@ const handleNudge = () => {
 .message-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   position: relative;
   padding: 0;
   transition: all 0.2s var(--dt-ease-out);
@@ -191,7 +191,7 @@ const handleNudge = () => {
   }
 
   &.is-merged {
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 }
 
@@ -258,7 +258,7 @@ const handleNudge = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
 
   &.avatar-hidden {
@@ -267,7 +267,7 @@ const handleNudge = () => {
   }
 
   :deep(.dingtalk-avatar) {
-    border-radius: 6px !important;
+    border-radius: 8px !important;
   }
 }
 

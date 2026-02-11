@@ -73,8 +73,11 @@
   --dt-bg-mask: rgba(0, 0, 0, 0.6);
 
   // === DingTalk Special (企业IM特殊颜色) ===
-  --dt-bubble-left-bg: #F5F5F5; // 接收消息背景（钉钉浅灰底）
-  --dt-bubble-left-border: #F0F0F0; // 接收消息边框（极浅灰，几乎看不见）
+  --dt-bubble-left-bg: #FFFFFF; // 接收消息背景（纯白，钉钉8.0风格）
+  --dt-bubble-left-border: transparent; // 接收消息边框（去掉边框，用阴影替代）
+  --dt-bubble-left-shadow: 0 1px 2px rgba(0, 0, 0, 0.06); // 左侧气泡微阴影
+  --dt-bubble-padding: 10px 14px; // 气泡统一内边距
+  --dt-bubble-radius-merge: 4px; // 分组合并圆角
   --dt-bubble-right-bg: #3296FA; // 发送消息背景（企业IM蓝，纯色无渐变）
   --dt-bubble-right-text: #FFFFFF; // 发送消息文字（白色）
   --dt-bubble-right-bg-hover: #1A7FE8; // 发送消息悬停（企业IM蓝加深）
@@ -256,9 +259,9 @@
   --dt-radius-3xl: 24px;
   --dt-radius-full: 9999px;
 
-  // === Border Radius - Bubbles (气泡专用圆角 - 钉钉风格) ===
-  --dt-radius-bubble-left: 6px; // 左侧气泡圆角
-  --dt-radius-bubble-right: 6px; // 右侧气泡圆角
+  // === Border Radius - Bubbles (气泡专用圆角 - 钉钉8.0风格) ===
+  --dt-radius-bubble-left: 12px; // 左侧气泡圆角
+  --dt-radius-bubble-right: 12px; // 右侧气泡圆角
 
   // === Z-Index (层级) ===
   --dt-z-base: 0;

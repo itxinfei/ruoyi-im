@@ -34,20 +34,21 @@
     >
       <!-- 消息内容区域 -->
       <div class="bubble-content">
-        <!-- 文本消息 -->
-        <TextBubble
-          v-if="['text', 'raw'].includes(message.type?.toLowerCase())"
-          :message="message"
-          :has-markers="hasMarkers"
-          @scroll-to="$emit('scroll-to', $event)"
-        />
+        <!-- 文本消息 + 可选链接预览 -->
+        <template v-if="['text', 'raw'].includes((message.type || 'TEXT').toLowerCase())">
+          <TextBubble
+            :message="message"
+            :has-markers="hasMarkers"
+            @scroll-to="$emit('scroll-to', $event)"
+          />
 
-        <!-- 链接预览卡片 -->
-        <LinkCard
-          v-if="['text', 'raw'].includes(message.type?.toLowerCase()) && messageLinks.length > 0"
-          :link="messageLinks[0]"
-          class="message-link-card"
-        />
+          <!-- 链接预览卡片 -->
+          <LinkCard
+            v-if="messageLinks.length > 0"
+            :link="messageLinks[0]"
+            class="message-link-card"
+          />
+        </template>
 
         <!-- 图片消息 -->
         <ImageBubble
@@ -544,7 +545,7 @@ const canRecall = computed(() => {
 }
 
 .bubble-content {
-  padding: 8px 12px;
+  padding: var(--dt-bubble-padding, 10px 14px);
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
@@ -561,6 +562,7 @@ const canRecall = computed(() => {
     background: var(--dt-bubble-left-bg);
     border: 1px solid var(--dt-bubble-left-border);
     color: var(--dt-text-primary);
+    box-shadow: var(--dt-bubble-left-shadow);
   }
 }
 
@@ -594,17 +596,19 @@ const canRecall = computed(() => {
 
 // 图片消息
 .message-bubble.type-image .bubble-content {
-  padding: 4px;
-  background: #fff !important;
-  border: 1px solid #E4E7ED !important;
-  border-radius: 8px;
+  padding: 0;
+  background: transparent !important;
+  border: none !important;
+  border-radius: var(--dt-radius-lg, 12px);
+  box-shadow: none;
+  overflow: hidden;
 }
 
 // 视频消息
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg, 12px);
   overflow: hidden;
 }
 
@@ -631,6 +635,7 @@ const canRecall = computed(() => {
     background: var(--dt-bg-tertiary-dark, #2A2D35);
     border-color: var(--dt-border-dark, #3F424A);
     color: var(--dt-text-primary-dark, #E2E4E9);
+    box-shadow: none;
   }
 
   .message-bubble.is-right .bubble-content {
@@ -638,25 +643,25 @@ const canRecall = computed(() => {
   }
 
   .message-bubble.type-image .bubble-content {
-    background: var(--dt-bg-card-dark, #1A1D24) !important;
-    border-color: var(--dt-border-dark, #3F424A) !important;
+    background: transparent !important;
+    border-color: transparent !important;
   }
 }
 
 // 分组圆角 - 左侧（scoped 优先级高于 import）
 .message-bubble:not(.is-right) {
-  &.group-single .bubble-content { border-radius: 6px; }
-  &.group-first .bubble-content { border-radius: 6px 6px 6px 2px; }
-  &.group-middle .bubble-content { border-radius: 2px 6px 6px 2px; }
-  &.group-last .bubble-content { border-radius: 2px 6px 6px 6px; }
+  &.group-single .bubble-content { border-radius: 12px; }
+  &.group-first .bubble-content { border-radius: 12px 12px 12px 4px; }
+  &.group-middle .bubble-content { border-radius: 4px 12px 12px 4px; }
+  &.group-last .bubble-content { border-radius: 4px 12px 12px 12px; }
 }
 
 // 分组圆角 - 右侧
 .message-bubble.is-right {
-  &.group-single .bubble-content { border-radius: 6px; }
-  &.group-first .bubble-content { border-radius: 6px 6px 2px 6px; }
-  &.group-middle .bubble-content { border-radius: 6px 2px 2px 6px; }
-  &.group-last .bubble-content { border-radius: 6px 2px 6px 6px; }
+  &.group-single .bubble-content { border-radius: 12px; }
+  &.group-first .bubble-content { border-radius: 12px 12px 4px 12px; }
+  &.group-middle .bubble-content { border-radius: 12px 4px 4px 12px; }
+  &.group-last .bubble-content { border-radius: 12px 4px 12px 12px; }
 }
 </style>
 

@@ -35,7 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ImMessageServiceImpl implements ImMessageService {
@@ -229,14 +232,35 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     /**
-     * 更新会话成员的未读计数 - 简化版：使用批量SQL更新
+     * 更新会话成员的未读计数 - 优化版：使用 Redis 缓存 + 定时同步
      */
     private void updateUnreadCount(Long conversationId, Long senderId) {
         try {
-            // 批量更新未读数（一条SQL替代循环）
-            imConversationMemberMapper.incrementUnreadCountExcludeSender(conversationId, senderId);
-            // 清除缓存
-            redisUtil.delete("conversation:list:" + senderId);
+            // 获取会话所有成员
+            List<ImConversationMember> members = imConversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) {
+                return;
+            }
+
+            // 1. 立即更新 Redis 缓存（快速响应）
+            for (ImConversationMember member : members) {
+                if (!member.getUserId().equals(senderId)) {
+                    // 增加未读数到 Redis
+                    redisUtil.incrementUnreadCount(member.getUserId(), conversationId);
+                }
+            }
+
+            // 2. 异步更新数据库（避免阻塞消息发送）
+            CompletableFuture.runAsync(() -> {
+                try {
+                    imConversationMemberMapper.incrementUnreadCountExcludeSender(conversationId, senderId);
+                    // 清除会话列表缓存
+                    redisUtil.delete("conversation:list:" + senderId);
+                } catch (Exception e) {
+                    log.error("异步更新未读数到数据库失败: conversationId={}", conversationId, e);
+                }
+            });
+
         } catch (Exception e) {
             log.error("更新未读数失败: conversationId={}", conversationId, e);
         }
@@ -677,11 +701,24 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 减少未读消息数
         if (readCount > 0) {
-            imConversationMemberMapper.decrementUnreadCount(conversationId, userId, readCount);
-            // 更新最后已读消息ID
-            if (maxMessageId != null) {
-                imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, maxMessageId);
-            }
+            final int finalReadCount = readCount;
+            final Long finalMaxMessageId = maxMessageId;
+
+            // 1. 立即更新 Redis 缓存
+            redisUtil.decrementUnreadCount(userId, conversationId, finalReadCount);
+
+            // 2. 异步更新数据库
+            CompletableFuture.runAsync(() -> {
+                try {
+                    imConversationMemberMapper.decrementUnreadCount(conversationId, userId, finalReadCount);
+                    // 更新最后已读消息ID
+                    if (finalMaxMessageId != null) {
+                        imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, finalMaxMessageId);
+                    }
+                } catch (Exception e) {
+                    log.error("异步更新已读状态到数据库失败: conversationId={}, userId={}", conversationId, userId, e);
+                }
+            });
         }
     }
 

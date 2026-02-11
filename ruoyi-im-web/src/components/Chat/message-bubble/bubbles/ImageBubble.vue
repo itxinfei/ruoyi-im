@@ -262,7 +262,7 @@ onUnmounted(() => {
   position: relative;
   display: inline-block;
   cursor: zoom-in;
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
   background: var(--dt-bg-card);
   transition: all var(--dt-transition-base);
@@ -312,7 +312,7 @@ onUnmounted(() => {
   max-width: 320px;
   max-height: 400px;
   background: var(--dt-bg-hover);
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
 
   &.with-thumb {

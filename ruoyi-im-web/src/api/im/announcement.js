@@ -66,19 +66,19 @@ export function getAnnouncementDetail(announcementId) {
 
 /**
  * 分页查询公告列表
- * @param {Object} data - 查询条件
- * @param {string} data.keyword - 关键词
- * @param {string} data.announcementType - 公告类型
- * @param {string} data.status - 状态：DRAFT/PUBLISHED/WITHDRAWN
- * @param {number} data.pageNum - 页码
- * @param {number} data.pageSize - 每页数量
+ * @param {Object} params - 查询条件
+ * @param {string} params.keyword - 关键词
+ * @param {string} params.type - 公告类型
+ * @param {string} params.status - 状态：DRAFT/PUBLISHED/WITHDRAWN
+ * @param {number} params.pageNum - 页码
+ * @param {number} params.pageSize - 每页数量
  * @returns {Promise}
  */
-export function getAnnouncementPage(data) {
+export function getAnnouncementPage(params) {
   return request({
     url: '/api/im/announcements/page',
-    method: 'post',
-    data
+    method: 'get',
+    params
   })
 }
 

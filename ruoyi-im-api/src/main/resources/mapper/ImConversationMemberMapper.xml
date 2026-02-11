@@ -142,4 +142,13 @@
           AND is_deleted = 0
     </update>
 
+    <!-- 同步未读数（用于 Redis 同步到数据库） -->
+    <update id="syncUnreadCount">
+        UPDATE im_conversation_member
+        SET unread_count = #{unreadCount}, update_time = NOW()
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+          AND is_deleted = 0
+    </update>
+
 </mapper>

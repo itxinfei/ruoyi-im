@@ -1,4 +1,6 @@
 /**
+ * @deprecated 已被 useChatSend 替代，不再使用
+ *
  * ChatPanel - 文件上传 Composable
  *
  * 职责：

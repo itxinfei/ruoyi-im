@@ -8,7 +8,7 @@
     <!-- 引用消息预览 -->
     <MessageReplyRef
       v-if="replyMessage"
-      :message="replyMessage"
+      :reply="replyMessage"
       @click="handleReplyClick"
     />
 
@@ -282,7 +282,7 @@ function escapeRegExp(string) {
 }
 
 .text-content {
-  padding: 12px;
+  padding: 0;
   word-break: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;

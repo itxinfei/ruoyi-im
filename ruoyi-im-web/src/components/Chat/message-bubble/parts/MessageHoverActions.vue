@@ -58,23 +58,24 @@ defineEmits(['action', 'keep-hover', 'leave-hover'])
 
 .message-hover-actions {
   position: absolute;
-  top: -32px;
+  top: 50%;
+  transform: translateY(-50%);
+  left: calc(100% + 4px);
+  right: auto;
   display: flex;
   align-items: center;
   gap: 2px;
   padding: 2px;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
 
-  // 对方消息：操作栏在右上方
-  right: 0;
-
-  // 自己消息：操作栏在左上方
+  // 自己消息：操作栏在气泡左侧
   &.is-right {
-    right: auto;
-    left: 0;
+    left: auto;
+    right: calc(100% + 4px);
   }
 
   .dark & {
@@ -126,10 +127,11 @@ defineEmits(['action', 'keep-hover', 'leave-hover'])
 
 .hover-actions-fade-enter-from {
   opacity: 0;
-  transform: translateY(4px);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .hover-actions-fade-leave-to {
   opacity: 0;
+  transform: translateY(-50%) scale(0.95);
 }
 </style>

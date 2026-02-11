@@ -117,15 +117,33 @@ public class ImTaskController {
      * 分页查询任务列表
      * 按条件分页查询任务列表
      *
-     * @param request 查询条件
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @param keyword 关键词（可选）
+     * @param status 状态（可选）
+     * @param priority 优先级（可选）
+     * @param assigneeId 负责人ID（可选）
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 分页结果
      * @apiNote 支持按关键词、状态、优先级、负责人等条件筛选
      */
     @Operation(summary = "分页查询任务列表", description = "按条件分页查询任务列表")
-    @PostMapping("/page")
-    public Result<IPage<ImTaskVO>> getTaskPage(@RequestBody ImTaskQueryRequest request) {
+    @GetMapping("/page")
+    public Result<IPage<ImTaskVO>> getTaskPage(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) Long assigneeId) {
         Long userId = SecurityUtils.getLoginUserId();
+        ImTaskQueryRequest request = new ImTaskQueryRequest();
+        request.setPageNum(pageNum);
+        request.setPageSize(pageSize);
+        request.setKeyword(keyword);
+        request.setStatus(status);
+        request.setPriority(priority);
+        request.setAssigneeId(assigneeId);
         IPage<ImTaskVO> page = taskService.getTaskPage(request, userId);
         return Result.success(page);
     }

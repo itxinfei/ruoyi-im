@@ -72,10 +72,14 @@ export { useIndexedDB } from './useIndexedDB'
 // 聊天功能模块
 export {
   useChatMultiSelect,
-  useChatUpload,
   useChatDialogs,
   useChatMessages,
-  useChatCommands
+  useChatCommands,
+  useChatSend,
+  useChatWebSocket,
+  useChatTyping,
+  useChatSessionOps,
+  useChatDragDrop
 } from './useChat'
 
 // 网络状态
@@ -93,5 +97,5 @@ export { useContactBatch } from './useContactBatch'
 // 链接预览
 export { useLinkPreview } from './useLinkPreview'
 
-// 消息队列
-export { useMessageQueue } from './useMessageQueue'
+// @deprecated 已被 useChatSend (store + useChatSend.retryMessage) 替代
+// export { useMessageQueue } from './useMessageQueue'

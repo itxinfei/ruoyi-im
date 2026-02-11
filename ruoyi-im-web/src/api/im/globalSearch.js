@@ -7,18 +7,18 @@ import request from '../request'
 /**
  * 全局搜索
  * 根据关键词搜索消息、联系人、群组、文件、工作台内容
- * @param {Object} data - 搜索请求参数
- * @param {string} data.keyword - 搜索关键词
- * @param {string} data.searchType - 搜索类型：ALL/MESSAGE/CONTACT/GROUP/FILE/WORKBENCH
- * @param {number} data.pageNum - 页码
- * @param {number} data.pageSize - 每页数量
+ * @param {Object} params - 搜索请求参数
+ * @param {string} params.keyword - 搜索关键词
+ * @param {string} params.searchType - 搜索类型：ALL/MESSAGE/CONTACT/GROUP/FILE/WORKBENCH
+ * @param {number} params.pageNum - 页码
+ * @param {number} params.pageSize - 每页数量
  * @returns {Promise}
  */
-export function globalSearch(data) {
+export function globalSearch(params) {
   return request({
     url: '/api/im/search/global',
-    method: 'post',
-    data
+    method: 'get',
+    params
   })
 }
 

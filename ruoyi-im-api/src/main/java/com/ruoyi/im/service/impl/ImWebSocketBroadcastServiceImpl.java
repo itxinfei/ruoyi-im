@@ -148,14 +148,16 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
             String messageJson = objectMapper.writeValueAsString(statusMap);
 
-            // 广播给所有在线用户
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            for (javax.websocket.Session session : onlineUsers.values()) {
-                if (session.isOpen()) {
-                    try {
-                        session.getBasicRemote().sendText(messageJson);
-                    } catch (Exception e) {
-                        // 忽略单个发送失败
+            // 广播给所有在线用户（支持多设备）
+            Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            for (List<javax.websocket.Session> sessions : onlineUsers.values()) {
+                for (javax.websocket.Session session : sessions) {
+                    if (session.isOpen()) {
+                        try {
+                            session.getBasicRemote().sendText(messageJson);
+                        } catch (Exception e) {
+                            // 忽略单个发送失败
+                        }
                     }
                 }
             }
@@ -183,9 +185,13 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                     for (javax.websocket.Session session : sessions) {
                         if (session.isOpen()) {
                             try {
-                        log.debug("DING消息已推送给用户: userId={}, dingId={}", targetUserId, dingVO.getId());
-                    } catch (Exception e) {
-                        log.error("发送DING消息给用户失败: userId={}", targetUserId, e);
+                                session.getBasicRemote().sendText(messageJson);
+                                sentCount++;
+                                log.debug("DING消息已推送给用户: userId={}, dingId={}", targetUserId, dingVO.getId());
+                            } catch (Exception e) {
+                                log.error("发送DING消息给用户失败: userId={}", targetUserId, e);
+                            }
+                        }
                     }
                 }
             }
@@ -239,17 +245,21 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
             String messageJson = objectMapper.writeValueAsString(announcementNotification);
 
-            // 发送给目标用户
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            // 发送给目标用户（支持多设备）
+            Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
             int sentCount = 0;
             for (Long targetUserId : targetUserIds) {
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        sentCount++;
-                    } catch (Exception e) {
-                        log.error("发送公告通知给用户失败: userId={}, announcementId={}", targetUserId, announcementId, e);
+                List<javax.websocket.Session> sessions = onlineUsers.get(targetUserId);
+                if (sessions != null && !sessions.isEmpty()) {
+                    for (javax.websocket.Session targetSession : sessions) {
+                        if (targetSession.isOpen()) {
+                            try {
+                                targetSession.getBasicRemote().sendText(messageJson);
+                                sentCount++;
+                            } catch (Exception e) {
+                                log.error("发送公告通知给用户失败: userId={}, announcementId={}", targetUserId, announcementId, e);
+                            }
+                        }
                     }
                 }
             }
@@ -443,17 +453,21 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
             String messageJson = objectMapper.writeValueAsString(invitationNotification);
 
-            // 发送给目标用户
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            // 发送给目标用户（支持多设备）
+            Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
             int sentCount = 0;
             for (Long targetUserId : targetUserIds) {
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        sentCount++;
-                    } catch (Exception e) {
-                        log.error("发送会议邀请给用户失败: userId={}, meetingId={}", targetUserId, meetingId, e);
+                List<javax.websocket.Session> sessions = onlineUsers.get(targetUserId);
+                if (sessions != null && !sessions.isEmpty()) {
+                    for (javax.websocket.Session targetSession : sessions) {
+                        if (targetSession.isOpen()) {
+                            try {
+                                targetSession.getBasicRemote().sendText(messageJson);
+                                sentCount++;
+                            } catch (Exception e) {
+                                log.error("发送会议邀请给用户失败: userId={}, meetingId={}", targetUserId, meetingId, e);
+                            }
+                        }
                     }
                 }
             }
@@ -489,17 +503,21 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
             String messageJson = objectMapper.writeValueAsString(bookingNotification);
 
-            // 发送给目标用户
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            // 发送给目标用户（支持多设备）
+            Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
             int sentCount = 0;
             for (Long targetUserId : targetUserIds) {
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        sentCount++;
-                    } catch (Exception e) {
-                        log.error("发送会议室预订通知给用户失败: userId={}, bookingId={}", targetUserId, bookingId, e);
+                List<javax.websocket.Session> sessions = onlineUsers.get(targetUserId);
+                if (sessions != null && !sessions.isEmpty()) {
+                    for (javax.websocket.Session targetSession : sessions) {
+                        if (targetSession.isOpen()) {
+                            try {
+                                targetSession.getBasicRemote().sendText(messageJson);
+                                sentCount++;
+                            } catch (Exception e) {
+                                log.error("发送会议室预订通知给用户失败: userId={}, bookingId={}", targetUserId, bookingId, e);
+                            }
+                        }
                     }
                 }
             }
@@ -543,18 +561,22 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                 return;
             }
 
-            // 广播给会话所有成员（不排除拍人者）
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            // 广播给会话所有成员（不排除拍人者，支持多设备）
+            Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
             int sentCount = 0;
             for (ImConversationMember member : members) {
                 Long targetUserId = member.getUserId();
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        sentCount++;
-                    } catch (Exception e) {
-                        log.error("发送拍一拍消息给用户失败: userId={}", targetUserId, e);
+                List<javax.websocket.Session> sessions = onlineUsers.get(targetUserId);
+                if (sessions != null && !sessions.isEmpty()) {
+                    for (javax.websocket.Session targetSession : sessions) {
+                        if (targetSession.isOpen()) {
+                            try {
+                                targetSession.getBasicRemote().sendText(messageJson);
+                                sentCount++;
+                            } catch (Exception e) {
+                                log.error("发送拍一拍消息给用户失败: userId={}", targetUserId, e);
+                            }
+                        }
                     }
                 }
             }
@@ -569,10 +591,14 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastToUserExcept(Long userId, Map<String, Object> message) {
         try {
             String messageJson = objectMapper.writeValueAsString(message);
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            javax.websocket.Session session = onlineUsers.get(userId);
-            if (session != null && session.isOpen()) {
-                session.getBasicRemote().sendText(messageJson);
+            Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            List<javax.websocket.Session> sessions = onlineUsers.get(userId);
+            if (sessions != null && !sessions.isEmpty()) {
+                for (javax.websocket.Session session : sessions) {
+                    if (session.isOpen()) {
+                        session.getBasicRemote().sendText(messageJson);
+                    }
+                }
             }
         } catch (Exception e) {
             log.error("广播给用户异常: userId={}", userId, e);

@@ -37,13 +37,19 @@ public class ImOnlineUserServiceImpl implements ImOnlineUserService {
     public List<OnlineUserVO> getOnlineUsers() {
         List<OnlineUserVO> result = new ArrayList<>();
 
-        // 从内存中的在线用户获取
-        Map<Long, Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+        // 从内存中的在线用户获取（支持多设备）
+        Map<Long, List<Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
 
-        for (Map.Entry<Long, Session> entry : onlineUsers.entrySet()) {
+        for (Map.Entry<Long, List<Session>> entry : onlineUsers.entrySet()) {
             Long userId = entry.getKey();
-            Session session = entry.getValue();
+            List<Session> sessions = entry.getValue();
 
+            if (sessions == null || sessions.isEmpty()) {
+                continue;
+            }
+
+            // 只显示用户的第一个会话
+            Session session = sessions.get(0);
             if (session == null || !session.isOpen()) {
                 continue;
             }
@@ -96,12 +102,16 @@ public class ImOnlineUserServiceImpl implements ImOnlineUserService {
     @Override
     public boolean kickUser(Long userId) {
         try {
-            Map<Long, Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            Session session = onlineUsers.get(userId);
+            Map<Long, List<Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            List<Session> sessions = onlineUsers.get(userId);
 
-            if (session != null && session.isOpen()) {
-                // 关闭会话
-                session.close();
+            if (sessions != null && !sessions.isEmpty()) {
+                // 关闭所有会话
+                for (Session session : sessions) {
+                    if (session != null && session.isOpen()) {
+                        session.close();
+                    }
+                }
 
                 // 从 Redis 移除在线状态
                 if (imRedisUtil != null) {
@@ -123,14 +133,16 @@ public class ImOnlineUserServiceImpl implements ImOnlineUserService {
     @Override
     public boolean kickBySessionId(String sessionId) {
         try {
-            Map<Long, Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
+            Map<Long, List<Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
 
             // 查找对应会话的用户
-            for (Map.Entry<Long, Session> entry : onlineUsers.entrySet()) {
-                Session session = entry.getValue();
-                if (session != null && session.getId().equals(sessionId)) {
-                    Long userId = entry.getKey();
-                    return kickUser(userId);
+            for (Map.Entry<Long, List<Session>> entry : onlineUsers.entrySet()) {
+                List<Session> sessions = entry.getValue();
+                for (Session session : sessions) {
+                    if (session != null && session.getId().equals(sessionId)) {
+                        Long userId = entry.getKey();
+                        return kickUser(userId);
+                    }
                 }
             }
 

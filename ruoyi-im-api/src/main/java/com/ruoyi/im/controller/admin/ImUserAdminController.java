@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller.admin;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.constant.UserRole;
 import com.ruoyi.im.service.ImUserService;
@@ -103,6 +104,7 @@ public class ImUserAdminController {
      */
     @Operation(summary = "修改用户状态", description = "管理员启用或禁用用户")
     @PutMapping("/{id}/status")
+    @RateLimit(key = "admin_user_update_status", time = 60, count = 50, limitType = RateLimit.LimitType.USER)
     public Result<Void> updateStatus(
             @Parameter(description = "用户ID") @PathVariable @Positive(message = "用户ID必须为正数") Long id,
             @Parameter(description = "状态：0=禁用，1=启用") @RequestParam Integer status) {
@@ -120,6 +122,7 @@ public class ImUserAdminController {
     @Operation(summary = "修改用户角色", description = "超级管理员修改用户角色")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/role")
+    @RateLimit(key = "admin_user_update_role", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<Void> updateRole(
             @Parameter(description = "用户ID") @PathVariable @Positive(message = "用户ID必须为正数") Long id,
             @Parameter(description = "角色：USER/ADMIN/SUPER_ADMIN") @RequestParam String role) {
@@ -138,6 +141,7 @@ public class ImUserAdminController {
      */
     @Operation(summary = "删除用户", description = "管理员删除指定用户")
     @DeleteMapping("/{id}")
+    @RateLimit(key = "admin_user_delete", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<Void> delete(@Parameter(description = "用户ID") @PathVariable @Positive(message = "用户ID必须为正数") Long id) {
         imUserService.deleteUser(id);
         return Result.success("删除成功");

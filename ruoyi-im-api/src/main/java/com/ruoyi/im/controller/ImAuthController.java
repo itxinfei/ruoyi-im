@@ -150,6 +150,7 @@ public class ImAuthController {
      */
     @Operation(summary = "刷新Token", description = "使用refresh token获取新的access token")
     @PostMapping("/refresh")
+    @RateLimit(key = "auth_refresh_token", time = 60, count = 30, limitType = RateLimit.LimitType.IP)
     public Result<ImLoginVO> refreshToken(@RequestParam @NotBlank(message = "刷新令牌不能为空") String refreshToken) {
         // 验证refresh token
         if (!jwtUtils.validateToken(refreshToken)) {
@@ -192,6 +193,7 @@ public class ImAuthController {
      */
     @Operation(summary = "验证Token", description = "验证token是否有效")
     @PostMapping("/validateToken")
+    @RateLimit(key = "auth_validate_token", time = 60, count = 100, limitType = RateLimit.LimitType.IP)
     public Result<Boolean> validateToken(@RequestParam @NotBlank(message = "令牌不能为空") String token) {
         boolean valid = jwtUtils.validateToken(token);
         return Result.success(valid);

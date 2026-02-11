@@ -112,15 +112,30 @@ public class ImAnnouncementController {
      * 分页查询公告列表
      * 按条件分页查询公告列表
      *
-     * @param request 查询条件
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @param keyword 关键词（可选）
+     * @param type 公告类型（可选）
+     * @param status 状态（可选）
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 分页结果
      * @apiNote 支持按关键词、类型、状态等条件筛选
      */
     @Operation(summary = "分页查询公告列表", description = "按条件分页查询公告列表")
-    @PostMapping("/page")
-    public Result<IPage<ImAnnouncementVO>> getAnnouncementPage(@RequestBody ImAnnouncementQueryRequest request) {
+    @GetMapping("/page")
+    public Result<IPage<ImAnnouncementVO>> getAnnouncementPage(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status) {
         Long userId = SecurityUtils.getLoginUserId();
+        ImAnnouncementQueryRequest request = new ImAnnouncementQueryRequest();
+        request.setPageNum(pageNum);
+        request.setPageSize(pageSize);
+        request.setKeyword(keyword);
+        request.setType(type);
+        request.setStatus(status);
         IPage<ImAnnouncementVO> page = announcementService.getAnnouncementPage(request, userId);
         return Result.success(page);
     }

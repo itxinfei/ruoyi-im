@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImFriendRequest;
 import com.ruoyi.im.dto.contact.*;
@@ -66,6 +67,7 @@ public class ImContactController {
      */
     @Operation(summary = "搜索用户", description = "根据关键词搜索用户，支持用户名、昵称、手机号搜索")
     @GetMapping("/search")
+    @RateLimit(key = "contact_search", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<List<ImUserVO>> search(@RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
         List<ImUserVO> list = imFriendService.searchUsers(keyword, userId);
@@ -82,6 +84,7 @@ public class ImContactController {
      */
     @Operation(summary = "发送好友申请", description = "向指定用户发送好友申请")
     @PostMapping("/request/send")
+    @RateLimit(key = "contact_request_send", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<Long> sendRequest(@Valid @RequestBody ImFriendAddRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         Long requestId = imFriendService.sendFriendRequest(request, userId);
@@ -370,6 +373,7 @@ public class ImContactController {
      */
     @Operation(summary = "批量添加好友", description = "向多个用户批量发送好友申请")
     @PostMapping("/batch-add")
+    @RateLimit(key = "contact_batch_add", time = 60, count = 10, limitType = RateLimit.LimitType.USER)
     public Result<HashMap<String, Object>> batchAddFriends(@RequestBody BatchAddRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         java.util.Map<Long, String> results = imFriendService.batchSendFriendRequest(
@@ -443,6 +447,7 @@ public class ImContactController {
      */
     @Operation(summary = "上传通讯录", description = "上传通讯录用于好友匹配")
     @PostMapping("/address-book/upload")
+    @RateLimit(key = "contact_address_book_upload", time = 60, count = 5, limitType = RateLimit.LimitType.USER)
     public Result<List<ImUserVO>> uploadAddressBook(@RequestBody AddressBookUploadRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         // 转换ContactItem为Map<String, String>

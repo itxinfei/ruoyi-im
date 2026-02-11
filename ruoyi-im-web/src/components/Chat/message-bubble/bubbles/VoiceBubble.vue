@@ -246,8 +246,9 @@ watch(() => props.message?.id, () => {
   gap: 12px;
   padding: 12px;
   background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-md);
+  border: none;
+  border-radius: var(--dt-radius-lg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   min-width: 160px;
   max-width: 320px;
@@ -259,7 +260,7 @@ watch(() => props.message?.id, () => {
 
   &.is-playing {
     background-color: var(--dt-brand-bg);
-    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 1px var(--dt-brand-color), 0 1px 2px rgba(0, 0, 0, 0.06);
     transition: background-color var(--dt-transition-base);
 
     .voice-play-btn {
@@ -345,8 +346,16 @@ watch(() => props.message?.id, () => {
 // 深色主题适配
 .dark {
   .voice-bubble {
+    box-shadow: none;
+    border: 1px solid var(--dt-border-dark, #3F424A);
+
     &:hover {
       background-color: var(--dt-white-10);
+    }
+
+    &.is-playing {
+      border-color: var(--dt-brand-color);
+      box-shadow: none;
     }
 
     .voice-play-btn {

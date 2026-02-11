@@ -1,7 +1,9 @@
 /**
-* 消息发送队列管理 Composable
-* 处理消息发送、重试、队列管理等功能
-*/
+ * @deprecated 已被 useChatSend (store + retryMessage) 替代，不再使用
+ *
+ * 消息发送队列管理 Composable
+ * 处理消息发送、重试、队列管理等功能
+ */
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 

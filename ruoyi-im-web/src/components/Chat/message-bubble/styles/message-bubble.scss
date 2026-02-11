@@ -16,8 +16,8 @@
 
 // 气泡内容基础样式
 .bubble-content {
-  padding: 8px 12px;
-  border-radius: var(--dt-radius-md);
+  padding: var(--dt-bubble-padding, 10px 14px);
+  border-radius: var(--dt-radius-lg);
   font-size: var(--dt-font-size-base);
   line-height: 1.4; // 钉钉标准：保持 1.4 行高
   word-break: break-word;
@@ -36,7 +36,7 @@
     background: var(--dt-bubble-left-bg);
     border: none;
     // 统一圆角
-    border-radius: 6px;
+    border-radius: 12px;
   }
 
   &:hover .bubble-content {
@@ -45,19 +45,19 @@
 
   // 分组圆角样式
   &.group-single .bubble-content {
-    border-radius: 6px;
+    border-radius: 12px;
   }
 
   &.group-first .bubble-content {
-    border-radius: 6px 6px 6px 2px;
+    border-radius: 12px 12px 12px 4px;
   }
 
   &.group-middle .bubble-content {
-    border-radius: 2px 6px 6px 2px;
+    border-radius: 4px 12px 12px 4px;
   }
 
   &.group-last .bubble-content {
-    border-radius: 2px 6px 6px 6px;
+    border-radius: 4px 12px 12px 12px;
   }
 }
 
@@ -73,7 +73,7 @@
     color: var(--dt-bubble-right-text); // 白色文字
     border: none;
     // 统一圆角
-    border-radius: 6px;
+    border-radius: 12px;
   }
 
   &:hover .bubble-content {
@@ -82,19 +82,19 @@
 
   // 分组圆角样式
   &.group-single .bubble-content {
-    border-radius: 6px;
+    border-radius: 12px;
   }
 
   &.group-first .bubble-content {
-    border-radius: 6px 6px 2px 6px;
+    border-radius: 12px 12px 4px 12px;
   }
 
   &.group-middle .bubble-content {
-    border-radius: 6px 2px 2px 6px;
+    border-radius: 12px 4px 4px 12px;
   }
 
   &.group-last .bubble-content {
-    border-radius: 6px 2px 6px 6px;
+    border-radius: 12px 4px 12px 12px;
   }
 
   // 确保所有子元素文字颜色都是白色
@@ -134,17 +134,17 @@
 
 // 图片消息
 .message-bubble.type-image .bubble-content {
-  padding: 4px;
-  background: var(--dt-bg-card) !important;
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-sm);
+  padding: 0;
+  background: transparent !important;
+  border: none;
+  border-radius: var(--dt-radius-lg);
 }
 
 // 视频消息
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: var(--dt-radius-sm);
+  border-radius: var(--dt-radius-lg);
 }
 
 // 系统消息
@@ -232,7 +232,7 @@
 // 中间和末尾消息的间距缩小
 .message-bubble.group-middle,
 .message-bubble.group-last {
-  margin-top: 2px !important;
+  margin-top: 4px !important;
 }
 
 // 首条消息保持正常间距
@@ -248,7 +248,7 @@
 // 钉钉风格：图片/视频消息的特殊圆角
 .message-bubble.type-image .bubble-content,
 .message-bubble.type-video .bubble-content {
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
 }
 

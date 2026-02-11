@@ -26,7 +26,7 @@
           class="material-icons-outlined"
         >format_quote</span>
       </span>
-      <span class="ref-user">{{ reply.senderName }}</span>
+      <span class="ref-user">{{ reply?.senderName || '未知用户' }}</span>
     </div>
     <div class="ref-content">
       <template v-if="replyType === 'IMAGE'">
@@ -42,7 +42,7 @@
         <span class="ref-type-text">[语音]</span>
       </template>
       <template v-else>
-        <span class="ref-text">{{ reply.content }}</span>
+        <span class="ref-text">{{ reply?.content || '' }}</span>
       </template>
     </div>
   </div>
@@ -53,13 +53,13 @@ import { computed } from 'vue'
 import { parseMessageContent } from '@/utils/message'
 
 const props = defineProps({
-  reply: { type: Object, required: true }
+  reply: { type: Object, default: () => ({}) }
 })
 
 const emit = defineEmits(['click'])
 
 const replyType = computed(() => {
-  return props.reply.type || 'TEXT'
+  return props.reply?.type || 'TEXT'
 })
 
 const fileName = computed(() => {
@@ -73,18 +73,18 @@ const handleClick = () => {
 </script>
 
 <style scoped lang="scss">
-// 引用消息组件 - 野火IM风格
+// 引用消息组件 - 钉钉8.0风格
 
 .message-reply-ref {
   display: flex;
   flex-direction: column;
   background: var(--dt-black-04);
-  border-left: 3px solid #4168e0; // 野火IM蓝
+  border-left: 3px solid var(--dt-brand-color);
   padding: 12px;
   margin: -6px -8px 8px -8px;
   border-radius: 4px;
   font-size: 13px;
-  color: #666;
+  color: var(--dt-text-secondary);
   cursor: pointer;
   overflow: hidden;
   user-select: none;
@@ -92,7 +92,7 @@ const handleClick = () => {
 
   &:hover {
     background: var(--dt-brand-extra-light);
-    border-left-color: #3457c7;
+    border-left-color: var(--dt-brand-hover);
 
     .ref-icon {
       transform: scale(1.05);
@@ -117,7 +117,7 @@ const handleClick = () => {
   justify-content: center;
   width: 16px;
   height: 16px;
-  background: #4168e0;
+  background: var(--dt-brand-color);
   color: #fff;
   border-radius: 3px;
   font-size: 11px;
@@ -130,13 +130,13 @@ const handleClick = () => {
 
 .ref-user {
   font-weight: 600;
-  color: #333;
+  color: var(--dt-text-primary);
   font-size: 13px;
 }
 
 .ref-content {
   font-size: 13px;
-  color: #666;
+  color: var(--dt-text-secondary);
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -147,36 +147,36 @@ const handleClick = () => {
 }
 
 .ref-type-text {
-  color: #4168e0;
+  color: var(--dt-brand-color);
   font-weight: 500;
 }
 
 .ref-text {
-  color: #666;
+  color: var(--dt-text-secondary);
 }
 
 // 暗色模式适配
 :global(.dark) {
   .message-reply-ref {
     background: var(--dt-white-06);
-    border-left-color: #4168e0;
+    border-left-color: var(--dt-brand-color);
 
     .ref-user {
-      color: #e8e8e8;
+      color: var(--dt-text-primary-dark);
     }
 
     .ref-content {
-      color: #a0a8b8;
+      color: var(--dt-text-secondary-dark);
     }
 
     &:hover {
       background: var(--dt-brand-bg-hover);
-      border-left-color: #5a7ce9;
+      border-left-color: var(--dt-brand-color-light);
     }
   }
 
   .ref-type-text {
-    color: #6b8cff;
+    color: var(--dt-brand-color-light);
   }
 }
 </style>

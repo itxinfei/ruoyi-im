@@ -224,6 +224,77 @@ public class ImRedisUtil {
         redisTemplate.delete(key);
     }
 
+    /**
+     * 减少未读数（批量）
+     * @param userId 用户ID
+     * @param conversationId 会话ID
+     * @param delta 减少的数量（通常为1）
+     */
+    public void decrementUnreadCount(Long userId, Long conversationId, int delta) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        redisTemplate.opsForHash().increment(key, conversationId.toString(), -delta);
+        redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 设置未读数（直接设置值）
+     * @param userId 用户ID
+     * @param conversationId 会话ID
+     * @param count 未读数
+     */
+    public void setUnreadCount(Long userId, Long conversationId, int count) {
+        if (redisTemplate == null) {
+            return;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        redisTemplate.opsForHash().put(key, conversationId.toString(), String.valueOf(count));
+        redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 获取用户所有会话的未读数（用于同步到数据库）
+     * @return Map<conversationId, unreadCount>
+     */
+    public Map<Long, Integer> getAllUnreadCounts(Long userId) {
+        if (redisTemplate == null) {
+            return new HashMap<>();
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        Map<Object, Object> rawMap = redisTemplate.opsForHash().entries(key);
+        Map<Long, Integer> result = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : rawMap.entrySet()) {
+            try {
+                Long conversationId = Long.parseLong(entry.getKey().toString());
+                Integer count = Integer.parseInt(entry.getValue().toString());
+                result.put(conversationId, count);
+            } catch (Exception e) {
+                log.warn("解析未读数失败: {}", entry, e);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 批量设置未读数（用于数据库同步后更新缓存）
+     * @param userId 用户ID
+     * @param counts Map<conversationId, unreadCount>
+     */
+    public void batchSetUnreadCounts(Long userId, Map<Long, Integer> counts) {
+        if (redisTemplate == null || counts == null || counts.isEmpty()) {
+            return;
+        }
+        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        Map<String, String> stringMap = new HashMap<>();
+        for (Map.Entry<Long, Integer> entry : counts.entrySet()) {
+            stringMap.put(entry.getKey().toString(), entry.getValue().toString());
+        }
+        redisTemplate.opsForHash().putAll(key, stringMap);
+        redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
+    }
+
     // ==================== 在线状态管理 ====================
 
     /**
@@ -280,6 +351,30 @@ public class ImRedisUtil {
             for (Object member : members) {
                 if (member != null) {
                     result.add(member.toString());
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取在线用户ID集合（返回 Long 类型）
+     */
+    public Set<Long> getOnlineUserIds() {
+        if (redisTemplate == null) {
+            return new HashSet<>();
+        }
+        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        Set<Object> members = redisTemplate.opsForSet().members(onlineUsersKey);
+        Set<Long> result = new HashSet<>();
+        if (members != null) {
+            for (Object member : members) {
+                if (member != null) {
+                    try {
+                        result.add(Long.parseLong(member.toString()));
+                    } catch (NumberFormatException e) {
+                        log.warn("解析在线用户ID失败: {}", member, e);
+                    }
                 }
             }
         }

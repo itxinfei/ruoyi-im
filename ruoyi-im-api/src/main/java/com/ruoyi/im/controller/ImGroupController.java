@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.group.ImGroupCreateRequest;
 import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
@@ -43,6 +44,7 @@ public class ImGroupController {
      */
     @Operation(summary = "创建群组", description = "创建新群组，创建者自动成为群主")
     @PostMapping
+    @RateLimit(key = "group_create", time = 60, count = 10, limitType = RateLimit.LimitType.USER)
     public Result<Long> create(@Valid @RequestBody ImGroupCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         Long groupId = imGroupService.createGroup(request, userId);
@@ -75,7 +77,7 @@ public class ImGroupController {
      * 更新群组信息
      */
     @Operation(summary = "更新群组信息", description = "更新群组的名称、头像、公告、描述等信息")
-    @PreAuthorize("hasAuthority('GROUP:EDIT') or #groupMember(#id, 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                @Valid @RequestBody ImGroupUpdateRequest request) {
@@ -88,7 +90,7 @@ public class ImGroupController {
      * 解散群组
      */
     @Operation(summary = "解散群组", description = "解散指定群组，所有成员将被移除")
-    @PreAuthorize("hasAuthority('GROUP:DISMISS') or #resourceOwner(#id, 'GROUP')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public Result<Void> dismiss(@PathVariable @Positive(message = "群组ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -113,8 +115,9 @@ public class ImGroupController {
      * 添加群组成员
      */
     @Operation(summary = "添加群组成员", description = "批量添加用户到群组")
-    @PreAuthorize("hasAuthority('GROUP:ADD_MEMBER') or #groupMember(#id, 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/{id}/members")
+    @RateLimit(key = "group_add_members", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<Void> addMembers(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                    @RequestBody @NotEmpty(message = "用户ID列表不能为空") List<Long> userIds) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -126,7 +129,7 @@ public class ImGroupController {
      * 移除群组成员
      */
     @Operation(summary = "移除群组成员", description = "批量移除群组成员")
-    @PreAuthorize("hasAuthority('GROUP:REMOVE_MEMBER') or #groupMember(#id, 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}/members")
     public Result<Void> removeMembers(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                       @RequestBody @NotEmpty(message = "用户ID列表不能为空") List<Long> userIds) {
@@ -152,7 +155,7 @@ public class ImGroupController {
      * 设置/取消管理员
      */
     @Operation(summary = "设置/取消管理员", description = "设置或取消指定成员的管理员权限")
-    @PreAuthorize("hasAuthority('GROUP:SET_ADMIN') or #resourceOwner(#id, 'GROUP')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/admin/{userId}")
     public Result<Void> setAdmin(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                  @PathVariable @Positive(message = "用户ID必须为正数") Long targetUserId,
@@ -166,7 +169,7 @@ public class ImGroupController {
      * 禁言/取消禁言成员
      */
     @Operation(summary = "禁言/取消禁言成员", description = "对指定成员进行禁言或取消禁言")
-    @PreAuthorize("hasAuthority('GROUP:MUTE_MEMBER') or #groupMember(#id, 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/mute/{userId}")
     public Result<Void> muteMember(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                    @PathVariable @Positive(message = "用户ID必须为正数") Long targetUserId,
@@ -180,7 +183,7 @@ public class ImGroupController {
      * 转让群主
      */
     @Operation(summary = "转让群主", description = "将群主权限转让给指定成员")
-    @PreAuthorize("#resourceOwner(#id, 'GROUP')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/transfer/{userId}")
     public Result<Void> transferOwner(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                       @PathVariable @Positive(message = "新群主ID必须为正数") Long newOwnerId) {
@@ -218,6 +221,7 @@ public class ImGroupController {
      */
     @Operation(summary = "刷新群二维码", description = "重新生成群二维码")
     @PostMapping("/{id}/qrcode/refresh")
+    @RateLimit(key = "group_qrcode_refresh", time = 60, count = 10, limitType = RateLimit.LimitType.USER)
     public Result<java.util.Map<String, String>> refreshGroupQrcode(@PathVariable @Positive(message = "群组ID必须为正数") Long id) {
         Long currentUserId = SecurityUtils.getLoginUserId();
         java.util.Map<String, String> qrcodeInfo = imGroupService.refreshGroupQrcode(id, currentUserId);

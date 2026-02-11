@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,6 +63,7 @@ public class ImMessageController {
      * 发送消息
      */
     @Operation(summary = "发送消息", description = "发送文本、图片、文件、语音等各类消息")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping
     @RateLimit(key = "send_message", time = 60, count = 300, limitType = RateLimit.LimitType.USER)
     public Result<ImMessageVO> send(@Valid @RequestBody ImMessageSendRequest request) {
@@ -125,6 +127,7 @@ public class ImMessageController {
      * 撤回消息
      */
     @Operation(summary = "撤回消息", description = "撤回已发送的消息（发送后2分钟内可撤回）")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/{messageId}/recall")
     public Result<Void> recall(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -136,6 +139,7 @@ public class ImMessageController {
      * 删除消息
      */
     @Operation(summary = "删除消息", description = "删除指定消息（仅删除本地记录）")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{messageId}")
     public Result<Void> deleteMessage(@PathVariable @Positive(message = "消息ID必须为正数") Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -147,6 +151,7 @@ public class ImMessageController {
      * 批量删除消息
      */
     @Operation(summary = "批量删除消息", description = "批量删除指定消息")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteMessages(@RequestBody @Valid MessagesBatchDeleteRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -172,6 +177,7 @@ public class ImMessageController {
      * 编辑消息
      */
     @Operation(summary = "编辑消息", description = "编辑已发送的文本消息")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{messageId}/edit")
     public Result<Void> edit(
             @PathVariable @Positive(message = "消息ID必须为正数") Long messageId,
@@ -187,6 +193,7 @@ public class ImMessageController {
      * 转发消息
      */
     @Operation(summary = "转发消息", description = "将消息转发到其他会话或用户")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/{messageId}/forward")
     public Result<Long> forward(
             @PathVariable @Positive(message = "消息ID必须为正数") Long messageId,
@@ -206,6 +213,7 @@ public class ImMessageController {
      * 批量转发消息
      */
     @Operation(summary = "批量转发消息", description = "批量转发消息，支持逐条转发或合并转发")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/forward/batch")
     public Result<List<Long>> batchForward(@Valid @RequestBody ImMessageBatchForwardRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -222,6 +230,7 @@ public class ImMessageController {
      * 回复消息
      */
     @Operation(summary = "回复消息", description = "引用原消息进行回复")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/{messageId}/reply")
     public Result<Long> reply(
             @PathVariable @Positive(message = "消息ID必须为正数") Long messageId,

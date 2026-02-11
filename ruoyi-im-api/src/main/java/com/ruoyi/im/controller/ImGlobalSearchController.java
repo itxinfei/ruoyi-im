@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.search.GlobalSearchRequest;
 import com.ruoyi.im.service.ImGlobalSearchService;
@@ -42,19 +43,25 @@ public class ImGlobalSearchController {
      * 全局搜索
      * 根据关键词搜索消息、联系人、群组、文件、工作台内容
      *
-     * @param request 搜索请求
+     * @param keyword 搜索关键词
+     * @param searchType 搜索类型（可选：ALL, MESSAGES, CONTACTS, GROUPS, FILES, WORKBENCH）
      * @return 搜索结果
      */
     @Operation(summary = "全局搜索", description = "根据关键词搜索所有内容")
-    @PostMapping("/global")
+    @GetMapping("/global")
+    @RateLimit(key = "search_global", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<GlobalSearchResultVO> globalSearch(
-            @Valid @RequestBody GlobalSearchRequest request) {
+            @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword,
+            @RequestParam(required = false, defaultValue = "ALL") String searchType) {
         Long userId = SecurityUtils.getLoginUserId();
 
         // 记录搜索日志
         log.info("全局搜索: userId={}, keyword={}, type={}",
-                userId, request.getKeyword(), request.getSearchType());
+                userId, keyword, searchType);
 
+        GlobalSearchRequest request = new GlobalSearchRequest();
+        request.setKeyword(keyword);
+        request.setSearchType(searchType);
         GlobalSearchResultVO result = globalSearchService.globalSearch(request, userId);
         return Result.success(result);
     }
@@ -67,6 +74,7 @@ public class ImGlobalSearchController {
      */
     @Operation(summary = "搜索消息", description = "搜索聊天消息")
     @GetMapping("/messages")
+    @RateLimit(key = "search_messages", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<GlobalSearchResultVO> searchMessages(
             @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -82,6 +90,7 @@ public class ImGlobalSearchController {
      */
     @Operation(summary = "搜索联系人", description = "搜索联系人")
     @GetMapping("/contacts")
+    @RateLimit(key = "search_contacts", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<GlobalSearchResultVO> searchContacts(
             @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -97,6 +106,7 @@ public class ImGlobalSearchController {
      */
     @Operation(summary = "搜索群组", description = "搜索群组")
     @GetMapping("/groups")
+    @RateLimit(key = "search_groups", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<GlobalSearchResultVO> searchGroups(
             @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -112,6 +122,7 @@ public class ImGlobalSearchController {
      */
     @Operation(summary = "搜索文件", description = "搜索文件")
     @GetMapping("/files")
+    @RateLimit(key = "search_files", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<GlobalSearchResultVO> searchFiles(
             @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -127,6 +138,7 @@ public class ImGlobalSearchController {
      */
     @Operation(summary = "搜索工作台", description = "搜索工作台内容（任务、文档、日程等）")
     @GetMapping("/workbench")
+    @RateLimit(key = "search_workbench", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<GlobalSearchResultVO> searchWorkbench(
             @RequestParam @NotBlank(message = "搜索关键词不能为空") String keyword) {
         Long userId = SecurityUtils.getLoginUserId();

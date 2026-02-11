@@ -1,5 +1,6 @@
 package com.ruoyi.im.controller;
 
+import com.ruoyi.im.annotation.RateLimit;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.document.*;
 import com.ruoyi.im.service.ImDocumentService;
@@ -47,6 +48,7 @@ public class ImDocumentController {
      */
     @Operation(summary = "创建文档", description = "创建新的在线文档")
     @PostMapping("/create")
+    @RateLimit(key = "document_create", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<Long> createDocument(@Valid @RequestBody ImDocumentCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         Long documentId = documentService.createDocument(request, userId);
@@ -61,6 +63,7 @@ public class ImDocumentController {
      */
     @Operation(summary = "更新文档", description = "更新文档内容和标题")
     @PutMapping("/update")
+    @RateLimit(key = "document_update", time = 60, count = 60, limitType = RateLimit.LimitType.USER)
     public Result<Void> updateDocument(@Valid @RequestBody ImDocumentUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         documentService.updateDocument(request, userId);
@@ -207,6 +210,7 @@ public class ImDocumentController {
      */
     @Operation(summary = "添加评论", description = "给文档添加评论")
     @PostMapping("/comment")
+    @RateLimit(key = "document_add_comment", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<Long> addComment(@Valid @RequestBody ImDocumentCommentRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         Long commentId = documentService.addComment(request, userId);
