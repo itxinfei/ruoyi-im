@@ -123,7 +123,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick, h } from 'vue'
 import { useStore } from 'vuex'
-import { Share, Folder, Delete, Close } from '@element-plus/icons-vue'
+import { Close } from '@element-plus/icons-vue'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInputRefactored.vue'
@@ -144,21 +144,20 @@ import { ARIA_LABELS } from '@/config/a11y'
 import ExportChatDialog from '@/components/Chat/ExportChatDialog.vue'
 import MultiSelectToolbar from '@/components/Chat/MultiSelectToolbar.vue'
 import ImageViewerDialog from '@/components/Chat/ImageViewerDialog.vue'
-import { getMessages, batchForwardMessages, clearConversationMessages, retryMessage } from '@/api/im/message'
-import { pinConversation, muteConversation } from '@/api/im/conversation'
-import { uploadFile as uploadFileApi } from '@/api/im/file'
-import { markMessage, unmarkMessage, setTodoReminder, completeTodo, getUserTodoCount } from '@/api/im/marker'
-import { useImWebSocket } from '@/composables/useImWebSocket'
-import { useMessageRetry } from '@/composables/useMessageRetry'
+import { batchForwardMessages } from '@/api/im/message'
+import { markMessage, setTodoReminder } from '@/api/im/marker'
 import {
   useChatMessages,
   useChatCommands,
-  useChatDialogs
+  useChatDialogs,
+  useChatSend,
+  useChatWebSocket,
+  useChatTyping,
+  useChatSessionOps,
+  useChatDragDrop
 } from '@/composables/useChat'
-import { useFileUploadUnified } from '@/composables/useFileUploadUnified'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { parseMessageContent } from '@/utils/message'
-import { useMessageTransformation } from '@/composables/useMessageTransformation.js'
 
 const props = defineProps({
   session: {
@@ -173,94 +172,56 @@ const props = defineProps({
 
 const store = useStore()
 const currentUser = computed(() => store.getters['user/currentUser'])
+const sessionId = computed(() => props.session?.id)
 
 // ==================== Composables ====================
-// 消息管理（加载、发送、重试）
-const {
-  messages,
-  loading,
-  sending,
-  noMore,
-  loadHistory,
-  send: sendMessage,
-  retry,
-  removeMessage,
-  markAsRead,
-  loadMore
-} = useChatMessages(computed(() => props.session?.id), currentUser)
+const { messages, loading, noMore, loadHistory, loadMore } = useChatMessages(sessionId, currentUser)
 
-// 消息转换（统一消息格式）
-const { transformMsg } = useMessageTransformation({ currentUser })
-
-// 消息命令（复制、回复、转发、撤回、删除、编辑等）
 const {
-  replyingMessage,
-  editingMessage,
-  forwardingMessages,
-  copy,
-  reply: cmdReply,
-  cancelReply,
-  forward,
-  batchForward,
-  recall,
-  deleteMessage,
-  edit,
-  cancelEdit,
-  confirmEdit,
-  at,
-  addReaction,
-  addToTodo,
-  favorite,
-  unfavorite,
-  pin
+  sending, sendText, sendImage, sendFile, sendVideo,
+  sendVoice, sendScreenshot, sendLocation, retryMessage
+} = useChatSend(sessionId, currentUser)
+
+const {
+  replyingMessage, editingMessage,
+  copy, reply: cmdReply, cancelReply, forward, batchForward,
+  recall, deleteMessage, edit, cancelEdit, confirmEdit,
+  at, addReaction, addToTodo, favorite, unfavorite, pin
 } = useChatCommands(currentUser, computed(() => props.session?.type))
 
-// 弹窗状态管理
 const {
-  showVoiceCall,
-  showVideoCall,
-  isIncomingCall,
-  remoteCallUser,
-  showChatSearch,
-  showFilesPanel,
-  showChatHistory,
-  showAnnouncementDialog,
-  showExportDialog,
-  showGroupFilesPanel,
-  showCombineDetail,
-  combineMessages,
-  combineConversationTitle,
-  showImagePreview,
-  imagePreviewIndex,
-  openVoiceCall,
-  openVideoCall,
-  closeAllCalls,
-  openCombineDetail,
-  openContactDetail,
-  openImagePreview,
-  closeAllDialogs
+  showVoiceCall, showVideoCall, isIncomingCall, remoteCallUser,
+  showChatSearch, showFilesPanel, showChatHistory, showAnnouncementDialog,
+  showExportDialog, showGroupFilesPanel, showCombineDetail,
+  combineMessages, combineConversationTitle,
+  showImagePreview, imagePreviewIndex,
+  openVoiceCall, openVideoCall, openCombineDetail, openImagePreview
 } = useChatDialogs()
 
-// 文件上传（使用统一模块，队列模式）
 const {
-  uploadImage,
-  uploadImages,
-  uploadFile,
-  uploadVideo,
-  uploading
-} = useFileUploadUnified({ enableQueue: true })
+  typingUsers, handleInput, sendMyStopTypingStatus,
+  initTypingListener, resetTypingState, cleanup: cleanupTyping
+} = useChatTyping(sessionId)
+
+const { initListeners } = useChatWebSocket(sessionId, currentUser)
+const { pinSession, muteSession, clearMessages } = useChatSessionOps(computed(() => props.session))
+const { isDragging, isDragOver, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, handlePaste } = useChatDragDrop(sendImage, sendFile)
 
 // ==================== 本地状态 ====================
 const showGroupDetail = ref(false)
 const msgListRef = ref(null)
 const forwardDialogRef = ref(null)
-const isUnmounted = ref(false) // 标记组件是否已卸载
-const showSearchPanel = ref(false)  // 搜索面板（与聊天内搜索区分）
+const isUnmounted = ref(false)
+const showSearchPanel = ref(false)
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
 const messageInputRef = ref(null)
+const showPinnedPanel = ref(false)
+const isMultiSelectModeActive = ref(false)
 
-// 当前会话所有图片URL列表（用于预览时左右切换）
+const emit = defineEmits(['show-user'])
+
+// ==================== Computed ====================
 const conversationImages = computed(() => {
   if (!messages.value || !Array.isArray(messages.value)) { return [] }
   return messages.value
@@ -276,398 +237,309 @@ const conversationImages = computed(() => {
     .filter(url => url)
 })
 
-// 多选模式状态（由头部按钮触发，而非基于选中状态判断）
-const isMultiSelectModeActive = ref(false)
-
-// 置顶消息面板状态
-const showPinnedPanel = ref(false)
 const pinnedCount = computed(() => messages.value.filter(m => m.isPinned).length)
+const isMultiSelectMode = computed(() => (store.getters['im/message/selectedMessageCount'] || 0) > 0)
+const selectedMessages = computed(() => store.getters['im/message/selectedMessageList'] || [])
 
-const emit = defineEmits(['show-user'])
-
-const { onMessage, onTyping, onMessageStatus, onReaction, sendTyping, sendStopTyping } = useImWebSocket()
-
-// 失败消息重试管理
-const {
-  init: initMessageRetry,
-  recordFailedMessage,
-  removeFailedMessage,
-  canRetry
-} = useMessageRetry()
-
-// 输入状态用户列表（用于显示"xxx正在输入..."）
-const typingUsers = ref([])
-const typingTimers = {} // userId -> timerId
-
-// 发送输入状态（防抖）
-let sendTypingTimer = null
-const TYPING_DEBOUNCE = 500 // 500ms 防抖
-
-// 发送正在输入状态（单聊和群聊都支持）
-const sendMyTypingStatus = () => {
-  if (!props.session) { return }
-
-  // 清除之前的定时器
-  if (sendTypingTimer) {
-    clearTimeout(sendTypingTimer)
-  }
-
-  // 防抖：500ms 后才发送 typing 事件
-  sendTypingTimer = setTimeout(() => {
-    sendTyping(props.session.id)
-  }, TYPING_DEBOUNCE)
-}
-
-// 发送停止输入状态
-const sendMyStopTypingStatus = () => {
-  if (!props.session) { return }
-
-  if (sendTypingTimer) {
-    clearTimeout(sendTypingTimer)
-    sendTypingTimer = null
-  }
-
-  sendStopTyping(props.session.id)
-}
-
-// 处理输入事件（防抖发送 typing 状态）
-const handleInput = content => {
-  if (content && content.trim().length > 0) {
-    sendMyTypingStatus()
-  } else {
-    sendMyStopTypingStatus()
-  }
-}
-
-const handleLoadMore = async () => {
-  if (loading.value || noMore.value) { return }
-
-  const firstMsg = messages.value[0]
-  if (!firstMsg) { return }
-
-  loading.value = true
-  const oldHeight = msgListRef.value?.$refs.listRef.scrollHeight
-
-  try {
-    const newMsgs = await store.dispatch('im/message/loadMessages', {
-      sessionId: props.session.id,
-      lastMessageId: firstMsg.id,
-      pageSize: 20,
-      isLoadMore: true
-    })
-
-    if (newMsgs && newMsgs.length > 0) {
-      messages.value = [...newMsgs, ...messages.value]
-      msgListRef.value?.maintainScroll(oldHeight)
-    } else {
-      noMore.value = true
-    }
-  } catch (error) {
-    ElMessage.error('历史消息加载失败，请稍后重试')
-  } finally {
-    loading.value = false
-  }
-}
-
-const handleSend = async content => {
-  // 发送消息时停止输入状态
-  sendMyStopTypingStatus()
-
-  // 先检查队列是否已满（避免添加临时消息后才发现队列满）
-  const queueSize = store.getters['im/message/sendingQueueSize'] || 0
-  const maxSize = 100 // 与 store 配置一致
-
-  if (queueSize >= maxSize) {
-    ElMessage.warning({
-      message: `发送队列已满（${maxSize}条），请稍后重试`,
-      duration: 3000,
-      showClose: true
-    })
-    return
-  }
-
-  // 乐观更新：先显示消息，状态为 sending
-  const tempId = `temp-${Date.now()}`
-  const tempMsg = {
-    id: tempId,
-    clientMsgId: tempId,
-    content,
-    type: 'TEXT',
-    senderId: currentUser.value?.id,
-    senderName: currentUser.value?.nickName || currentUser.value?.userName || '我',
-    senderAvatar: currentUser.value?.avatar,
-    timestamp: Date.now(),
-    isOwn: true,
-    status: 'sending',
-    sendStatus: 1, // SENDING
-    readCount: 0
-  }
-
-  messages.value.push(tempMsg)
-  store.commit('im/message/SET_REPLYING_MESSAGE', null)
-  msgListRef.value?.scrollToBottom()
-
-  try {
-    // 发送消息到服务器
-    const msg = await store.dispatch('im/message/sendMessage', {
-      sessionId: props.session.id,
-      type: 'TEXT',
-      content,
-      replyToMessageId: replyingMessage.value?.id
-    })
-
-    // 发送成功，更新消息状态和ID
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      // 保持 status 为 success，且替换为真实数据
-      const realMsg = transformMsg(msg)
-      console.log('Real message:', realMsg)
-      messages.value.splice(index, 1, { ...realMsg, status: null })
-    }
-  } catch (error) {
-    // 发送失败，标记状态
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      messages.value[index].status = 'failed'
-      messages.value[index].sendStatus = 4 // FAILED
-
-      // 记录失败消息到缓存（使用 tempId 作为 clientMsgId）
-      recordFailedMessage({
-        id: tempId,
-        clientMsgId: tempId,
-        sessionId: props.session.id,
-        type: 'TEXT',
-        content,
-        timestamp: Date.now()
-      })
-    }
-
-    console.error('发送失败', error)
-    ElMessage.error(error.message || '发送失败，请检查网络连接')
-  }
-}
-
-// 发送语音消息
-const handleSendVoice = async ({ file, duration }) => {
-  sendMyStopTypingStatus()
-  const tempId = `temp-${Date.now()}`
-  const tempMsg = {
-    id: tempId,
-    clientMsgId: tempId,
-    content: JSON.stringify({ duration }),
-    type: 'VOICE',
-    senderId: currentUser.value?.id,
-    senderName: currentUser.value?.nickName || currentUser.value?.userName || '我',
-    senderAvatar: currentUser.value?.avatar,
-    timestamp: Date.now(),
-    isOwn: true,
-    status: 'uploading',
-    readCount: 0
-  }
-
-  messages.value.push(tempMsg)
-  msgListRef.value?.scrollToBottom()
-
-  try {
-    // 上传语音文件
-    const formData = new FormData()
-    formData.append('file', file)
-
-    const uploadRes = await uploadFileApi(formData)
-    const voiceUrl = uploadRes.data?.fileUrl
-
-    // 发送语音消息
-    const msg = await store.dispatch('im/message/sendMessage', {
-      sessionId: props.session.id,
-      type: 'VOICE',
-      content: JSON.stringify({ voiceUrl, duration }),
-      replyToMessageId: replyingMessage.value?.id
-    })
-
-    // 发送成功，更新消息状态和ID
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      const realMsg = transformMsg(msg)
-      messages.value.splice(index, 1, { ...realMsg, status: null })
-    }
-  } catch (error) {
-    // 发送失败，标记状态
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      messages.value[index].status = 'failed'
-    }
-    console.error('语音发送失败', error)
-    ElMessage.error('语音发送失败')
-  }
-}
-
-
-// Websocket handling
-onMessage(msg => {
-  try {
-    if (msg.conversationId === props.session?.id) {
-      const transformedMsg = transformMsg(msg, messages.value)
-      messages.value.push(transformedMsg)
-      msgListRef.value?.scrollToBottom()
-
-      // 新消息提醒
-      if (!transformedMsg.isOwn) {
-        // 动态导入提醒工具,避免循环依赖
-        import('@/utils/messageNotification').then(({ showMessageNotification, shouldNotify }) => {
-          if (shouldNotify(msg, currentUser.value, props.session)) {
-            let body = msg.content
-            if (msg.type === 'IMAGE') { body = '[图片]' }
-            else if (msg.type === 'FILE') { body = '[文件]' }
-            else if (msg.type === 'RECALLED') { body = '撤回了一条消息' }
-
-            showMessageNotification({
-              title: msg.senderName || '新消息',
-              body: body || '[消息]',
-              icon: msg.senderAvatar || '',
-              sound: true,
-              notification: true,
-              titleFlash: true
-            })
-          }
-        }).catch(() => {})
-      }
-    }
-  } catch (err) {
-    console.error('处理WebSocket消息失败:', err)
-  }
-})
-
-// 会话切换由 useChatMessages composable 内部 watch 处理，无需额外 watcher
-// 但需要清理输入状态等会话级别的 UI 状态
-watch(() => props.session?.id, () => {
-  // 清理所有输入状态定时器
-  Object.keys(typingTimers).forEach(uid => {
-    clearTimeout(typingTimers[uid])
-    delete typingTimers[uid]
-  })
-  typingUsers.value = []
-})
-
-const handleDelete = async message => {
-  await deleteMessage(message)
-  // 移除本地消息（composable 中已处理 store，这里只需处理本地列表）
-  const index = messages.value.findIndex(m => m.id === message.id)
-  if (index !== -1) {
-    messages.value.splice(index, 1)
-  }
-}
-
-const handleRecall = async message => {
-  await recall(message)
-  // 更新本地消息状态已在 recall 中处理
-  const index = messages.value.findIndex(m => m.id === message.id)
-  if (index !== -1) {
-    messages.value[index].type = 'RECALLED'
-    messages.value[index].content = ''
-  }
-}
-
-// 处理菜单命令
-const handleCommand = (cmd, msg) => {
-  if (cmd === 'forward') {
-    forwardDialogRef.value?.open(msg)
-  } else if (cmd === 'reply') {
-    handleReply(msg)
-  } else if (cmd === 'recall') {
-    handleRecall(msg)
-  } else if (cmd === 'delete') {
-    handleDelete(msg)
-  } else if (cmd === 'edit') {
-    handleEdit(msg)
-  } else if (cmd === 'mark-read') {
-    handleMarkRead(msg)
-  } else if (cmd === 'todo') {
-    handleAddToTodo(msg)
-  } else if (cmd === 'favorite') {
-    handleFavorite(msg)
-  } else if (cmd === 'mark') {
-    handleMarkMessage(msg)
-  } else if (cmd === 'multi-select') {
-    handleMultiSelect(msg)
-  } else if (cmd === 'view-combine') {
-    handleViewCombine(msg)
-  } else if (cmd === 'export') {
-    // useChatDialogs 已提供 showExportDialog 状态
-  } else if (cmd === 'emoji') {
-    handleShowEmojiPicker(msg)
-  }
-}
-
-// 快捷表情列表（钉钉风格）
+// ==================== 快捷表情 ====================
 const QUICK_EMOJIS = ['👍', '👏', '❤️', '😂', '😮', '😢', '😡', '🎉']
 const showEmojiPopover = ref(false)
 const emojiPopoverPosition = ref({ x: 0, y: 0 })
 const emojiTargetMessage = ref(null)
 
-// 显示表情选择器
 const handleShowEmojiPicker = msg => {
   emojiTargetMessage.value = msg
-  // 计算位置：显示在输入框上方
   const inputArea = document.querySelector('.chat-input-container')
   if (inputArea) {
     const rect = inputArea.getBoundingClientRect()
-    emojiPopoverPosition.value = {
-      x: rect.right - 300,
-      y: rect.top - 220
-    }
+    emojiPopoverPosition.value = { x: rect.right - 300, y: rect.top - 220 }
   } else {
-    // 默认位置：屏幕中央
-    emojiPopoverPosition.value = {
-      x: window.innerWidth / 2 - 140,
-      y: window.innerHeight / 2 - 110
-    }
+    emojiPopoverPosition.value = { x: window.innerWidth / 2 - 140, y: window.innerHeight / 2 - 110 }
   }
   showEmojiPopover.value = true
 }
 
-// 选择表情反应
 const handleSelectEmoji = async emoji => {
   if (!emojiTargetMessage.value) { return }
-
-  const msg = emojiTargetMessage.value
-
-  // 使用 composable 的 addReaction 方法
-  await addReaction(msg, emoji, 'EMOJI')
-
+  await addReaction(emojiTargetMessage.value, emoji, 'EMOJI')
   showEmojiPopover.value = false
   emojiTargetMessage.value = null
 }
 
-// 处理设为待办
-const handleAddToTodo = async msg => {
-  await addToTodo(msg)
-  // 更新本地消息标记状态
-  if (msg.markers) {
-    msg.markers.push({ markerType: 'TODO', isCompleted: false })
-  } else {
-    msg.markers = [{ markerType: 'TODO', isCompleted: false }]
+// ==================== 消息发送代理 ====================
+const handleSend = content => {
+  sendMyStopTypingStatus()
+  sendText(content, { replyToMessageId: replyingMessage.value?.id })
+}
+
+const handleSendVoice = ({ file, duration }) => {
+  sendMyStopTypingStatus()
+  sendVoice({ file, duration }, { replyToMessageId: replyingMessage.value?.id })
+}
+
+const handleImageUpload = payload => { sendMyStopTypingStatus(); sendImage(payload) }
+const handleFileUpload = payload => { sendMyStopTypingStatus(); sendFile(payload) }
+const handleVideoUpload = payload => { sendMyStopTypingStatus(); sendVideo(payload, { replyToMessageId: replyingMessage.value?.id }) }
+const handleScreenshotUpload = formData => { sendMyStopTypingStatus(); sendScreenshot(formData) }
+const handleSendLocation = location => { sendMyStopTypingStatus(); sendLocation(location, { replyToMessageId: replyingMessage.value?.id }) }
+
+const handleRetry = msg => retryMessage(msg)
+const handleCancelReply = () => cancelReply()
+const handleCancelEdit = () => cancelEdit()
+
+const handleLoadMore = async () => {
+  const oldHeight = msgListRef.value?.$refs?.listRef?.scrollHeight
+  const result = await loadMore()
+  if (result && result.length > 0) {
+    msgListRef.value?.maintainScroll(oldHeight)
   }
 }
 
-// 处理收藏消息
-const handleFavorite = async msg => {
-  await favorite(msg)
+// ==================== 通话处理 ====================
+const handleStartCall = () => {
+  if (!props.session) { return ElMessage.warning('请先选择会话') }
+  const user = { userId: props.session.targetId, userName: props.session.name, avatar: props.session.avatar }
+  openVoiceCall(user, false)
 }
 
-// 处理标记消息
-const handleMarkMessage = async msg => {
-  // 使用 ElMessageBox 显示标记选项
+const handleStartVideo = () => {
+  if (!props.session) { return ElMessage.warning('请先选择会话') }
+  const user = { userId: props.session.targetId, userName: props.session.name, avatar: props.session.avatar }
+  openVideoCall(user, false)
+}
+
+const handleVoiceCall = () => handleStartCall()
+const handleVideoCall = () => handleStartVideo()
+
+// ==================== 会话操作代理 ====================
+const handlePinSession = () => pinSession()
+const handleMuteSession = () => muteSession()
+const handleClearMessages = () => clearMessages()
+
+// ==================== 页面事件处理 ====================
+const handleToggleDetail = () => {
+  if (props.session?.type === 'GROUP') {
+    showGroupDetail.value = true
+  } else if (props.session) {
+    emit('show-user', props.session.targetId)
+  }
+}
+
+const handleToggleSidebar = tab => { console.log('toggle-sidebar:', tab) }
+const handleShowUser = userId => emit('show-user', userId)
+const handleSearchMessages = () => { showChatSearch.value = true }
+const handleShowHistory = () => { showChatHistory.value = true }
+
+const handleShowFiles = () => {
+  if (props.session?.type === 'GROUP') {
+    showGroupFilesPanel.value = true
+  } else {
+    showFilesPanel.value = true
+  }
+}
+
+const handleCreateAnnouncement = () => {
+  if (props.session?.type === 'GROUP') {
+    showAnnouncementDialog.value = true
+  } else {
+    ElMessage.warning('只有群聊可以发布公告')
+  }
+}
+
+const handleRefreshGroup = async () => {
   try {
-    const result = await ElMessageBox({
+    await store.dispatch('im/conversation/loadConversations')
+    ElMessage.success('群组信息已刷新')
+  } catch (error) {
+    console.error('刷新群组信息失败:', error)
+  }
+}
+
+const handleShowGroupFiles = () => { showGroupFilesPanel.value = true }
+const handleShowGroupAnnouncement = () => { showAnnouncementDialog.value = true }
+
+// ==================== 图片预览 ====================
+const handleImagePreview = imageUrl => {
+  const index = conversationImages.value.indexOf(imageUrl)
+  openImagePreview(index, conversationImages.value)
+}
+
+// ==================== 滚动定位 ====================
+const handleScrollToMessage = messageId => { msgListRef.value?.scrollToMessage(messageId) }
+const handleScrollToPinnedMessage = messageId => { msgListRef.value?.scrollToMessage(messageId) }
+
+const handleJumpToMessage = message => {
+  msgListRef.value?.scrollToMessage(message.id || message.messageId)
+  showSearchPanel.value = false
+  showChatHistory.value = false
+}
+
+// ==================== 置顶消息更新 ====================
+const handlePinnedUpdate = ({ messageId, isPinned }) => {
+  if (props.session?.id) {
+    store.commit('im/message/UPDATE_MESSAGE', {
+      sessionId: props.session.id,
+      message: { id: messageId, isPinned }
+    })
+  }
+}
+
+// ==================== 回复和编辑 ====================
+const handleReply = message => {
+  cmdReply(message)
+  setTimeout(() => {
+    if (isUnmounted.value) { return }
+    messageInputRef.value?.focus()
+  }, 50)
+}
+
+const handleEdit = message => edit(message)
+
+const handleEditConfirm = async content => {
+  if (!editingMessage.value) { return }
+  const messageId = editingMessage.value.id
+  try {
+    await confirmEdit(content)
+    if (props.session?.id) {
+      store.commit('im/message/UPDATE_MESSAGE', {
+        sessionId: props.session.id,
+        message: { id: messageId, content, isEdited: true }
+      })
+    }
+  } catch {
+    // confirmEdit 已处理错误提示
+  }
+}
+
+const handleReEdit = ({ content }) => {
+  if (!content) { return }
+  edit({ id: `reedit-${Date.now()}`, content, isReEdit: true })
+  messageInputRef.value?.setContent(content)
+  nextTick(() => {
+    if (isUnmounted.value) { return }
+    messageInputRef.value?.focus()
+  })
+  ElMessage.info('已恢复消息内容，修改后点击发送')
+}
+
+const handleAt = message => {
+  if (!message) { return }
+  messageInputRef.value?.insertAt(message.senderName)
+}
+
+// ==================== 已读上报 ====================
+const handleMarkRead = async msg => {
+  try {
+    await store.dispatch('im/message/markMessageAsRead', {
+      conversationId: props.session.id,
+      messageId: msg.id
+    })
+    msg.isRead = true
+  } catch (e) {
+    console.warn('上报已读状态失败', e)
+  }
+}
+
+// ==================== 消息操作 ====================
+const handleDelete = async message => {
+  await deleteMessage(message)
+}
+
+const handleRecall = async message => {
+  await recall(message)
+}
+
+// ==================== 多选操作 ====================
+const handleMultiSelect = msg => {
+  store.commit('im/message/TOGGLE_MESSAGE_SELECTION', msg.id)
+  if (!isMultiSelectModeActive.value && store.getters['im/message/selectedMessageCount'] > 0) {
+    isMultiSelectModeActive.value = true
+    if (navigator.vibrate) { navigator.vibrate(50) }
+  }
+}
+
+const handleToggleMultiSelect = active => {
+  isMultiSelectModeActive.value = active
+  if (!active) { store.commit('im/message/CLEAR_MESSAGE_SELECTION') }
+}
+
+const handleClearSelection = () => {
+  store.commit('im/message/CLEAR_MESSAGE_SELECTION')
+  isMultiSelectModeActive.value = false
+}
+
+const handleBatchForward = () => {
+  const messageIds = selectedMessages.value.map(msg => msg.id)
+  if (messageIds.length > 0) { forwardDialogRef.value?.openForBatch(messageIds, 'batch') }
+}
+
+const handleCombineForward = () => {
+  const messageIds = selectedMessages.value.map(msg => msg.id)
+  if (messageIds.length > 0) { forwardDialogRef.value?.openForBatch(messageIds, 'combine') }
+}
+
+const handleBatchDelete = async () => {
+  const selected = selectedMessages.value
+  if (selected.length === 0) { return }
+  try {
+    await ElMessageBox.confirm(`确定要删除选中的 ${selected.length} 条消息吗？`, '批量删除', { type: 'warning' })
+    for (const msg of selected) { await deleteMessage(msg) }
+    ElMessage.success(`已删除 ${selected.length} 条消息`)
+    handleClearSelection()
+  } catch (e) {
+    if (e !== 'cancel') { ElMessage.error('删除失败') }
+  }
+}
+
+// ==================== 转发处理 ====================
+const handleForwardConfirm = async ({ message, targetSessionId }) => {
+  try {
+    await store.dispatch('im/message/forwardMessage', { messageId: message.id, targetConversationId: targetSessionId })
+    ElMessage.success('转发成功')
+  } catch (error) {
+    ElMessage.error('转发失败')
+    console.error(error)
+  }
+}
+
+const handleBatchForwardConfirm = async ({ messageIds, targetSessionId, forwardType }) => {
+  try {
+    await batchForwardMessages({ messageIds, toConversationId: targetSessionId, forwardType, content: '' })
+    ElMessage.success(`${forwardType === 'combine' ? '合并转发' : '逐条转发'}成功`)
+    handleClearSelection()
+  } catch (error) {
+    ElMessage.error('转发失败')
+    console.error(error)
+  }
+}
+
+// ==================== 合并消息详情 ====================
+const handleViewCombine = msg => {
+  if (msg.messages && msg.messages.length > 0) {
+    openCombineDetail(msg.messages, `${msg.senderName}的聊天记录`)
+  } else {
+    ElMessage.warning('无法查看聊天记录详情')
+  }
+}
+
+const handleCombineForwardDetail = messages => {
+  const messageIds = messages.map(m => m.id)
+  if (messageIds.length > 0) { forwardDialogRef.value?.openForBatch(messageIds, 'combine') }
+}
+
+// ==================== 标记消息 ====================
+const handleAddToTodo = async msg => await addToTodo(msg)
+const handleFavorite = async msg => await favorite(msg)
+
+const handleMarkMessage = async msg => {
+  try {
+    await ElMessageBox({
       title: '标记消息',
       message: h('div', { class: 'marker-options' }, [
         h('p', { style: 'margin-bottom: 16px; color: #64748b;' }, '请选择标记类型：'),
         h('div', { class: 'marker-buttons', style: 'display: flex; gap: 8px; flex-wrap: wrap;' }, [
           h('el-button', {
-            onClick: () => {
-              markMessageAction(msg, 'FLAG', '#ff4d4f')
-              ElMessageBox.close(result)
-            },
+            onClick: () => { markMessageAction(msg, 'FLAG', '#ff4d4f'); ElMessageBox.close() },
             style: 'flex: 1; min-width: 80px;'
           }, () => [
             h('span', { class: 'material-icons-outlined', style: 'vertical-align: middle; margin-right: 4px; color: #ff4d4f;' }, 'flag'),
@@ -675,10 +547,7 @@ const handleMarkMessage = async msg => {
           ]),
           h('el-button', {
             type: 'warning',
-            onClick: () => {
-              markMessageAction(msg, 'IMPORTANT', '#faad14')
-              ElMessageBox.close(result)
-            },
+            onClick: () => { markMessageAction(msg, 'IMPORTANT', '#faad14'); ElMessageBox.close() },
             style: 'flex: 1; min-width: 80px;'
           }, () => [
             h('span', { class: 'material-icons-outlined', style: 'vertical-align: middle; margin-right: 4px;' }, 'star'),
@@ -687,12 +556,8 @@ const handleMarkMessage = async msg => {
           h('el-button', {
             type: 'success',
             onClick: () => {
-              setTodoReminder({
-                messageId: msg.id,
-                remindTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-                remark: msg.content?.substring(0, 50) || '消息待办'
-              })
-              ElMessageBox.close(result)
+              setTodoReminder({ messageId: msg.id, remindTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), remark: msg.content?.substring(0, 50) || '消息待办' })
+              ElMessageBox.close()
               ElMessage.success('已添加到待办')
             },
             style: 'flex: 1; min-width: 80px;'
@@ -707,21 +572,15 @@ const handleMarkMessage = async msg => {
       closeOnClickModal: true,
       closeOnPressEscape: true
     })
-  } catch (e) {
-    // 用户取消，不做处理
+  } catch {
+    // 用户取消
   }
 }
 
-// 执行标记操作
 const markMessageAction = async (msg, markerType, color) => {
   try {
-    await markMessage({
-      messageId: msg.id,
-      markerType,
-      color
-    })
+    await markMessage({ messageId: msg.id, markerType, color })
     ElMessage.success(markerType === 'FLAG' ? '已标记消息' : '已标记为重要')
-    // 更新消息标记状态
     if (msg.markers) {
       msg.markers.push({ markerType, color })
     } else {
@@ -733,447 +592,18 @@ const markMessageAction = async (msg, markerType, color) => {
   }
 }
 
-// 处理多选
-const isMultiSelectMode = computed(() => (store.getters['im/message/selectedMessageCount'] || 0) > 0)
-const selectedMessages = computed(() => store.getters['im/message/selectedMessageList'] || [])
-
-const handleMultiSelect = msg => {
-  // 切换选中状态
-  store.commit('im/message/TOGGLE_MESSAGE_SELECTION', msg.id)
-
-  // 如果是第一次选中（之前没有选中消息），进入多选模式
-  if (!isMultiSelectModeActive.value && store.getters['im/message/selectedMessageCount'] > 0) {
-    isMultiSelectModeActive.value = true
-
-    // 触感反馈
-    if (navigator.vibrate) {
-      navigator.vibrate(50) // 轻微震动 50ms
-    }
-  }
-}
-
-// 查看合并转发消息详情
-const handleViewCombine = msg => {
-  // msg 包含 messages 数组（合并的消息内容）
-  if (msg.messages && msg.messages.length > 0) {
-    openCombineDetail(msg.messages, `${msg.senderName}的聊天记录`)
-  } else {
-    ElMessage.warning('无法查看聊天记录详情')
-  }
-}
-
-// 合并消息详情中的转发
-const handleCombineForwardDetail = messages => {
-  const messageIds = messages.map(m => m.id)
-  if (messageIds.length > 0) {
-    forwardDialogRef.value?.openForBatch(messageIds, 'combine')
-  }
-}
-
-// 批量转发 - 逐条转发
-const handleBatchForward = async () => {
-  const messageIds = selectedMessages.value.map(msg => msg.id)
-  if (messageIds.length === 0) { return }
-
-  // 使用 ForwardDialog 选择目标会话
-  forwardDialogRef.value?.openForBatch(messageIds, 'batch')
-}
-
-// 批量转发 - 合并转发
-const handleCombineForward = async () => {
-  const messageIds = selectedMessages.value.map(msg => msg.id)
-  if (messageIds.length === 0) { return }
-
-  // 使用 ForwardDialog 选择目标会话
-  forwardDialogRef.value?.openForBatch(messageIds, 'combine')
-}
-
-// 批量删除
-const handleBatchDelete = async () => {
-  const selected = selectedMessages.value
-  if (selected.length === 0) { return }
-
-  try {
-    await ElMessageBox.confirm(
-      `确定要删除选中的 ${selected.length} 条消息吗？`,
-      '批量删除',
-      { type: 'warning' }
-    )
-
-    // 调用删除 API
-    for (const msg of selected) {
-      // 使用已有的删除消息 API
-      await deleteMessage(msg.id)
-    }
-
-    ElMessage.success(`已删除 ${selected.length} 条消息`)
-    handleClearSelection()
-  } catch (e) {
-    if (e !== 'cancel') {
-      ElMessage.error('删除失败')
-    }
-  }
-}
-
-// 切换多选模式
-const handleToggleMultiSelect = active => {
-  isMultiSelectModeActive.value = active
-  if (!active) {
-    // 退出多选时清空选择
-    store.commit('im/message/CLEAR_MESSAGE_SELECTION')
-  }
-}
-
-const handleClearSelection = () => {
-  store.commit('im/message/CLEAR_MESSAGE_SELECTION')
-  isMultiSelectModeActive.value = false
-}
-
-// 拖拽上传相关
-const isDragging = ref(false)
-const isDragOver = ref(false)
-let dragEnterCounter = 0 // 用于防止子元素触发 dragleave
-
-const handleDragEnter = event => {
-  dragEnterCounter++
-  const files = event.dataTransfer?.files
-  if (files && files.length > 0) {
-    isDragOver.value = true
-  }
-}
-
-const handleDragOver = event => {
-  const files = event.dataTransfer?.files
-  if (files && files.length > 0) {
-    isDragging.value = true
-  }
-}
-
-const handleDragLeave = event => {
-  dragEnterCounter--
-  if (dragEnterCounter <= 0) {
-    dragEnterCounter = 0
-    isDragging.value = false
-    isDragOver.value = false
-  }
-}
-
-const handleDrop = async event => {
-  isDragging.value = false
-  isDragOver.value = false
-  dragEnterCounter = 0
-
-  const files = event.dataTransfer?.files
-  if (!files || files.length === 0) { return }
-
-  for (const file of files) {
-    if (file.type.startsWith('image/')) {
-      await uploadImageFile(file)
-    } else {
-      await uploadFileFile(file)
-    }
-  }
-}
-
-const uploadImageFile = async file => {
-  try {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('type', 'image')
-
-    // 创建本地预览
-    const blobUrl = URL.createObjectURL(file)
-
-    // 发送消息
-    const tempMessage = {
-      id: Date.now(),
-      type: 'IMAGE',
-      content: JSON.stringify({ imageUrl: blobUrl }),
-      senderId: currentUser.value?.id,
-      senderName: currentUser.value?.name,
-      timestamp: new Date().toISOString(),
-      isOwn: true,
-      status: 'sending'
-    }
-
-    messages.value.push(transformMsg(tempMessage))
-
-    // 上传图片
-    const res = await uploadImage(formData)
-    if (res.code === 200 && res.data) {
-      // 更新消息
-      const index = messages.value.findIndex(m => m.id === tempMessage.id)
-      if (index !== -1) {
-        messages.value[index] = {
-          ...messages.value[index],
-          content: JSON.stringify({ imageUrl: res.data.url }),
-          status: null
-        }
-      }
-    }
-  } catch (error) {
-    ElMessage.error('上传失败')
-    console.error(error)
-  }
-}
-
-const uploadFileFile = async file => {
-  if (!props.session?.id) {
-    ElMessage.warning('请先选择一个会话')
-    return
-  }
-
-  // 验证文件大小（限制 100MB）
-  const maxSize = 100 * 1024 * 1024
-  if (file.size > maxSize) {
-    ElMessage.error('文件大小不能超过 100MB')
-    return
-  }
-
-  try {
-    // 上传文件到服务器
-    const uploadResult = await uploadFile(file, props.session.id)
-
-    if (uploadResult && uploadResult.fileUrl) {
-      // 构建文件消息内容
-      const fileContent = {
-        fileName: file.name,
-        fileUrl: uploadResult.fileUrl,
-        fileId: uploadResult.fileId,
-        fileSize: file.size,
-        fileType: file.type || 'application/octet-stream'
-      }
-
-      // 发送文件消息
-      await handleSend(JSON.stringify(fileContent), 'FILE')
-
-      ElMessage.success(`文件 "${file.name}" 上传成功`)
-    }
-  } catch (error) {
-    console.error('文件上传失败:', error)
-    ElMessage.error(error.message || '文件上传失败')
-  }
-}
-
-const handlePaste = async event => {
-  const items = event.clipboardData?.items
-  if (!items) { return }
-
-  for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      const file = item.getAsFile()
-      if (file) {
-        await uploadImageFile(file)
-        break // 只处理第一张图片
-      }
-    }
-  }
-}
-
-// 处理已读上报
-const handleMarkRead = async msg => {
-  try {
-    await store.dispatch('im/message/markMessageAsRead', {
-      conversationId: props.session.id,
-      messageId: msg.id
-    })
-    // 本地标记已读，避免重复触发
-    msg.isRead = true
-  } catch (e) {
-    console.warn('上报已读状态失败', e)
-  }
-}
-
-const handleToggleDetail = () => {
-  if (props.session?.type === 'GROUP') {
-    showGroupDetail.value = true
-  } else if (props.session) {
-    // 触发父组件处理用户详情显示
-    emit('show-user', props.session.targetId)
-  }
-}
-
-// 处理群组数据刷新
-const handleRefreshGroup = async () => {
-  try {
-    // 刷新会话列表
-    await store.dispatch('im/conversation/loadConversations')
-    ElMessage.success('群组信息已刷新')
-  } catch (error) {
-    console.error('刷新群组信息失败:', error)
-  }
-}
-
-// 处理显示群文件面板
-const handleShowGroupFiles = (groupId) => {
-  showGroupFilesPanel.value = true
-}
-
-// 处理显示群公告对话框
-const handleShowGroupAnnouncement = (groupId) => {
-  showAnnouncementDialog.value = true
-}
-
-// 处理侧边栏切换（成员列表等），当前 ChatPanel 无此功能
-const handleToggleSidebar = tab => {
-  // 侧边栏切换逻辑（如成员列表），暂无实现
-  console.log('toggle-sidebar:', tab)
-}
-
-// 图片预览处理
-const handleImagePreview = imageUrl => {
-  const index = conversationImages.value.indexOf(imageUrl)
-  openImagePreview(index, conversationImages.value)
-}
-
-const handleCancelReply = () => {
-  cancelReply()
-}
-
-const handleCancelEdit = () => {
-  cancelEdit()
-}
-
-const handleRetry = async msg => {
-  // 检查消息状态
-  const status = msg.sendStatus || msg.status
-  if (status !== 4 && status !== 'FAILED' && status !== 'failed') { return }
-
-  // 获取客户端消息ID
-  const clientMsgId = msg.clientMsgId || msg.id
-  if (!clientMsgId) {
-    ElMessage.error('无法重试：缺少消息标识')
-    return
-  }
-
-  // 检查是否可以重试
-  if (!canRetry(clientMsgId)) {
-    ElMessage.warning('重试次数已达上限（最多3次）')
-    return
-  }
-
-  // 重置为发送中（使用数字状态：1 = SENDING）
-  msg.sendStatus = 1
-  msg.status = 'sending'
-
-  try {
-    // 调用后端重试 API（支持自动重试：1s, 2s, 4s）
-    const res = await retryMessage(clientMsgId)
-
-    if (res.code === 200) {
-      ElMessage.success({
-        message: '正在重试发送...',
-        duration: 2000
-      })
-
-      // 注意：实际发送结果是异步的，后端会通过 WebSocket 推送更新
-      // 这里只需更新 UI 状态为"发送中"
-      msg.sendStatus = 1
-    } else {
-      // 服务端返回错误（如已达重试上限）
-      throw new Error(res.msg || '重试失败')
-    }
-  } catch (error) {
-    // 重置为失败状态（使用数字状态：4 = FAILED）
-    msg.sendStatus = 4
-    msg.status = 'failed'
-
-    ElMessage.error(error.message || '重试失败，请稍后重试')
-    console.error('消息重试失败:', error)
-  }
-}
-
-const handleMemberClick = member => {
-  // 触发父组件显示用户详情
-  emit('show-user', member.id)
-}
-
-// 处理 MessageList 组件中的用户显示请求
-const handleShowUser = userId => {
-  emit('show-user', userId)
-}
-
-// 处理转发确认
-const handleForwardConfirm = async ({ message, targetSessionId }) => {
-  try {
-    await store.dispatch('im/message/forwardMessage', {
-      messageId: message.id,
-      targetConversationId: targetSessionId
-    })
-    ElMessage.success('转发成功')
-  } catch (error) {
-    ElMessage.error('转发失败')
-    console.error(error)
-  }
-}
-
-// 批量转发确认处理
-const handleBatchForwardConfirm = async ({ messageIds, targetSessionId, forwardType }) => {
-  try {
-    await batchForwardMessages({
-      messageIds: messageIds,
-      toConversationId: targetSessionId,
-      forwardType: forwardType,
-      content: ''
-    })
-    const typeText = forwardType === 'combine' ? '合并转发' : '逐条转发'
-    ElMessage.success(`${typeText}成功`)
-    handleClearSelection()
-  } catch (error) {
-    ElMessage.error('转发失败')
-    console.error(error)
-  }
-}
-
-const handleReply = message => {
-  cmdReply(message)
-  // 使用 setTimeout 确保 DOM 更新完成后再聚焦，避免有些情况下 nextTick 过早触发
-  setTimeout(() => {
-    if (isUnmounted.value) { return }
-    messageInputRef.value?.focus()
-  }, 50)
-}
-
-const handleEdit = message => {
-  edit(message)
-}
-
-const handleAt = message => {
-  if (!message) { return }
-  messageInputRef.value?.insertAt(message.senderName)
-}
-
-/**
- * 一键提醒未读成员
- * 发送 @ 提醒消息给所有未读成员
- */
+// ==================== 提醒未读 ====================
 const handleRemindUnread = async ({ conversationId, messageId, unreadMembers }) => {
-  if (!unreadMembers || unreadMembers.length === 0) {
-    ElMessage.info('暂无未读成员')
-    return
-  }
-
+  if (!unreadMembers || unreadMembers.length === 0) { return ElMessage.info('暂无未读成员') }
   try {
-    // 构建消息内容：@所有未读成员
-    const mentions = unreadMembers.map(m => ({
-      userId: m.userId,
-      nickname: m.nickname || m.userName
-    }))
-
-    // 构建 @ 提及文本
-    const mentionText = unreadMembers
-      .map(m => `@${m.nickname || m.userName}`)
-      .join(' ')
-
-    // 发送提醒消息
+    const mentionText = unreadMembers.map(m => `@${m.nickname || m.userName}`).join(' ')
     await store.dispatch('im/message/sendMessage', {
       sessionId: conversationId,
       type: 'TEXT',
       content: `${mentionText} 请查看上方消息`,
-      replyToMessageId: messageId, // 引用原消息
-      atUserIds: mentions.map(m => m.userId) // @ 提及的用户ID列表
+      replyToMessageId: messageId,
+      atUserIds: unreadMembers.map(m => m.userId)
     })
-
     ElMessage.success(`已提醒 ${unreadMembers.length} 位成员`)
   } catch (error) {
     console.error('提醒失败:', error)
@@ -1181,724 +611,73 @@ const handleRemindUnread = async ({ conversationId, messageId, unreadMembers }) 
   }
 }
 
-const handleEditConfirm = async content => {
-  if (!editingMessage.value) { return }
+// ==================== 文件操作 ====================
+const handleOpenFile = file => { if (file.url) { window.open(file.url, '_blank') } }
 
-  const messageId = editingMessage.value.id
-  try {
-    await confirmEdit(content)
-
-    // 更新本地消息列表
-    const index = messages.value.findIndex(m => m.id === messageId)
-    if (index !== -1) {
-      messages.value[index] = {
-        ...messages.value[index],
-        content,
-        isEdited: true
-      }
-    }
-
-    // 同步更新 Store
-    if (props.session?.id) {
-      store.commit('im/message/UPDATE_MESSAGE', {
-        sessionId: props.session.id,
-        message: { id: messageId, content, isEdited: true }
-      })
-    }
-  } catch {
-    // confirmEdit 已处理错误提示
-  }
-}
-
-/**
- * 处理撤回消息重新编辑
- */
-const handleReEdit = ({ content }) => {
-  if (!content) { return }
-
-  // 使用 composable 的编辑状态
-  edit({
-    id: `reedit-${Date.now()}`,
-    content,
-    isReEdit: true
-  })
-
-  // 将内容填充到输入框
-  messageInputRef.value?.setContent(content)
-
-  // 聚焦输入框
-  nextTick(() => {
-    if (isUnmounted.value) { return }
-    messageInputRef.value?.focus()
-  })
-
-  ElMessage.info('已恢复消息内容，修改后点击发送')
-}
-
-// 通话功能
-const handleStartCall = () => {
-  if (!props.session) {
-    ElMessage.warning('请先选择会话')
-    return
-  }
-  isIncomingCall.value = false
-  // 设置通话用户信息
-  remoteCallUser.value = {
-    userId: props.session?.targetId,
-    userName: props.session?.name,
-    avatar: props.session?.avatar
-  }
-  showVoiceCall.value = true
-}
-
-const handleStartVideo = () => {
-  if (!props.session) {
-    ElMessage.warning('请先选择会话')
-    return
-  }
-  isIncomingCall.value = false
-  // 设置通话用户信息
-  remoteCallUser.value = {
-    userId: props.session?.targetId,
-    userName: props.session?.name,
-    avatar: props.session?.avatar
-  }
-  showVideoCall.value = true
-}
-
-// ChatHeader 通话按钮事件
-const handleVoiceCall = () => {
-  if (!props.session) {
-    ElMessage.warning('请先选择会话')
-    return
-  }
-  // 构建通话用户信息
-  const user = {
-    userId: props.session?.targetId,
-    userName: props.session?.name,
-    avatar: props.session?.avatar
-  }
-  openVoiceCall(user, false)
-}
-
-const handleVideoCall = () => {
-  if (!props.session) {
-    ElMessage.warning('请先选择会话')
-    return
-  }
-  // 构建通话用户信息
-  const user = {
-    userId: props.session?.targetId,
-    userName: props.session?.name,
-    avatar: props.session?.avatar
-  }
-  openVideoCall(user, false)
-}
-
-// 创建公告
-const handleCreateAnnouncement = () => {
-  if (props.session?.type === 'GROUP') {
-    showAnnouncementDialog.value = true
-  } else {
-    ElMessage.warning('只有群聊可以发布公告')
-  }
-}
-
-// 查看文件
-const handleShowFiles = () => {
-  // 群组显示群文件面板，单聊显示会话文件面板
-  if (props.session?.type === 'GROUP') {
-    showGroupFilesPanel.value = true
-  } else {
-    showFilesPanel.value = true
-  }
-}
-
-// 搜索消息
-const handleSearchMessages = () => {
-  showChatSearch.value = true
-}
-
-// 会话操作
-const handlePinSession = async () => {
-  const currentSession = store.state.im.session?.currentSession
-  if (!currentSession) { return }
-
-  const newState = !currentSession.isPinned
-  try {
-    await pinConversation(currentSession.id, newState)
-    store.commit('im/session/UPDATE_SESSION', {
-      id: currentSession.id,
-      isPinned: newState
-    })
-    ElMessage.success(newState ? '已置顶' : '已取消置顶')
-  } catch (e) {
-    ElMessage.error('操作失败，请重试')
-  }
-}
-
-const handleMuteSession = async () => {
-  const currentSession = store.state.im.session?.currentSession
-  if (!currentSession) { return }
-
-  const newState = !currentSession.isMuted
-  try {
-    await muteConversation(currentSession.id, newState)
-    store.commit('im/session/UPDATE_SESSION', {
-      id: currentSession.id,
-      isMuted: newState
-    })
-    ElMessage.success(newState ? '已开启免打扰' : '已关闭免打扰')
-  } catch (e) {
-    ElMessage.error('操作失败，请重试')
-  }
-}
-
-const handleClearMessages = async () => {
-  if (!props.session) {
-    ElMessage.warning('请先选择会话')
-    return
-  }
-
-  try {
-    await ElMessageBox.confirm(
-      `确定要清空与 ${props.session?.name} 的聊天记录吗？`,
-      '清空聊天记录',
-      {
-        type: 'warning',
-        confirmButtonText: '确定清空',
-        cancelButtonText: '取消',
-        confirmButtonClass: 'el-button--danger',
-        dangerouslyUseHTMLString: false
-      }
-    )
-
-    // 调用 API 清空消息
-    await clearConversationMessages(props.session?.id)
-
-    // 清空本地消息列表
-    messages.value.splice(0, messages.value.length)
-
-    // 重置分页状态
-    noMore.value = false
-
-    ElMessage.success('聊天记录已清空')
-  } catch {
-    // 用户取消或出错
-  }
-}
-
-// 滚动到置顶消息
-const handleScrollToPinnedMessage = messageId => {
-  if (msgListRef.value) {
-    msgListRef.value.scrollToMessage(messageId)
-  }
-}
-
-// 处理搜索结果滚动
-const handleScrollToMessage = messageId => {
-  if (msgListRef.value) {
-    msgListRef.value.scrollToMessage(messageId)
-  }
-}
-
-// 处理置顶状态更新
-const handlePinnedUpdate = ({ messageId, isPinned }) => {
-  const index = messages.value.findIndex(m => m.id === messageId)
-  if (index !== -1) {
-    messages.value[index].isPinned = isPinned
-  }
-}
-
-// 显示聊天记录
-const handleShowHistory = () => {
-  showChatHistory.value = true
-}
-
-// 跳转到指定消息
-const handleJumpToMessage = message => {
-  if (msgListRef.value) {
-    msgListRef.value.scrollToMessage(message.id || message.messageId)
-  }
-  showSearchPanel.value = false
-  showChatHistory.value = false
-}
-
-// 打开文件
-const handleOpenFile = file => {
-  if (file.url) {
-    window.open(file.url, '_blank')
-  }
-}
-
-// 下载文件
 const handleDownloadFile = file => {
   if (Array.isArray(file)) {
-    // 批量下载
     ElMessage.info(`正在下载 ${file.length} 个文件...`)
-  } else {
-    if (file.url) {
-      const link = document.createElement('a')
-      link.href = file.url
-      link.download = file.name
-      link.target = '_blank'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      ElMessage.success('开始下载')
-    }
+  } else if (file.url) {
+    const link = document.createElement('a')
+    link.href = file.url
+    link.download = file.name
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    ElMessage.success('开始下载')
   }
 }
 
-// 转发文件
-const handleForwardFile = file => {
-  if (forwardDialogRef.value) {
-    forwardDialogRef.value.open([{ type: 'FILE', content: JSON.stringify(file) }])
+const handleForwardFile = file => { forwardDialogRef.value?.open([{ type: 'FILE', content: JSON.stringify(file) }]) }
+const handleClearHistory = async () => { await clearMessages(); showChatHistory.value = false }
+
+// ==================== 命令分发器 ====================
+const handleCommand = (cmd, msg) => {
+  const commands = {
+    forward: () => forwardDialogRef.value?.open(msg),
+    reply: () => handleReply(msg),
+    recall: () => handleRecall(msg),
+    delete: () => handleDelete(msg),
+    edit: () => handleEdit(msg),
+    'mark-read': () => handleMarkRead(msg),
+    todo: () => handleAddToTodo(msg),
+    favorite: () => handleFavorite(msg),
+    mark: () => handleMarkMessage(msg),
+    'multi-select': () => handleMultiSelect(msg),
+    'view-combine': () => handleViewCombine(msg),
+    emoji: () => handleShowEmojiPicker(msg)
   }
+  commands[cmd]?.()
 }
 
-// 清空历史记录
-const handleClearHistory = async () => {
-  // 复用 handleClearMessages 函数
-  await handleClearMessages()
-  showChatHistory.value = false
-}
+// ==================== 会话切换 ====================
+watch(() => props.session?.id, () => {
+  resetTypingState()
+})
 
-// 处理输入状态指示
-const handleTypingIndicator = (userId, userName) => {
-  // 清除该用户的旧定时器
-  if (typingTimers[userId]) {
-    clearTimeout(typingTimers[userId])
-  }
-
-  // 添加到正在输入的用户列表
-  if (!typingUsers.value.find(u => u.userId === userId)) {
-    typingUsers.value.push({ userId, userName })
-  }
-
-  // 设置5秒后移除输入状态
-  typingTimers[userId] = setTimeout(() => {
-    const index = typingUsers.value.findIndex(u => u.userId === userId)
-    if (index !== -1) {
-      typingUsers.value.splice(index, 1)
-    }
-    delete typingTimers[userId]
-  }, 5000)
-}
-
-// 文件上传相关
-const triggerFileUpload = () => fileInputRef.value?.click()
-const triggerImageUpload = () => imageInputRef.value?.click()
-
-const handleFileUpload = async payload => {
-  sendMyStopTypingStatus()
-  let file, formData
-  if (payload instanceof FormData) {
-    formData = payload
-    file = payload.get('file')
-  } else if (payload instanceof File) {
-    // 直接是 File 对象（来自 MessageInput 的 emit）
-    file = payload
-    formData = new FormData()
-    formData.append('file', file)
-  } else {
-    // 事件对象
-    file = payload?.target?.files?.[0]
-    if (!file) { return }
-    formData = new FormData()
-    formData.append('file', file)
-    if (payload?.target) {
-      payload.target.value = ''
-    }
-  }
-
-  // 1. 乐观更新：立即显示文件消息
-  const tempId = `temp-file-${Date.now()}`
-  const uploadSessionId = props.session.id
-  const tempMsg = {
-    id: tempId,
-    clientMsgId: tempId,
-    type: 'FILE',
-    content: {
-      fileName: file.name,
-      size: file.size,
-      fileUrl: '' // 上传中暂无 URL
-    },
-    senderId: currentUser.value?.id,
-    senderName: currentUser.value?.nickName || '我',
-    senderAvatar: currentUser.value?.avatar,
-    timestamp: Date.now(),
-    isOwn: true,
-    status: 'uploading', // 新状态: 上传中
-    readCount: 0
-  }
-  messages.value.push(tempMsg)
-  msgListRef.value?.scrollToBottom()
-
-  try {
-    // 2. 上传文件
-    const res = await uploadFileApi(formData)
-    // 竞态守卫：上传期间会话已切换
-    if (props.session?.id !== uploadSessionId) { return }
-    if (res.code === 200) {
-      // 3. 发送消息
-      const msg = await store.dispatch('im/message/sendMessage', {
-        sessionId: props.session.id,
-        type: 'FILE',
-        content: JSON.stringify({
-          fileId: res.data.id,
-          fileName: file.name,
-          size: file.size,
-          fileUrl: res.data.url
-        })
-      })
-
-      // 4. 更新状态
-      const index = messages.value.findIndex(m => m.id === tempId)
-      if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
-      }
-    } else {
-      throw new Error(res.msg || 'Upload failed')
-    }
-  } catch (error) {
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      messages.value[index].status = 'failed'
-    }
-    ElMessage.error('文件发送失败')
-  }
-}
-
-const handleImageUpload = async payload => {
-  sendMyStopTypingStatus()
-  let file, formData
-  if (payload instanceof FormData) {
-    formData = payload
-    file = payload.get('file')
-  } else if (payload instanceof File) {
-    // 直接是 File 对象（来自 MessageInput 的 emit）
-    file = payload
-    formData = new FormData()
-    formData.append('file', file)
-  } else {
-    // 事件对象
-    file = payload?.target?.files?.[0]
-    if (!file) { return }
-    formData = new FormData()
-    formData.append('file', file)
-    if (payload?.target) {
-      payload.target.value = ''
-    }
-  }
-
-  // 1. 乐观更新：立即显示图片
-  const blobUrl = URL.createObjectURL(file)
-  const tempId = `temp-img-${Date.now()}`
-  const uploadSessionId = props.session.id
-  const tempMsg = {
-    id: tempId,
-    clientMsgId: tempId,
-    type: 'IMAGE',
-    content: {
-      imageUrl: blobUrl // 使用本地 Blob URL 预览
-    },
-    senderId: currentUser.value?.id,
-    senderName: currentUser.value?.nickName || '我',
-    senderAvatar: currentUser.value?.avatar,
-    timestamp: Date.now(),
-    isOwn: true,
-    status: 'uploading',
-    readCount: 0
-  }
-  messages.value.push(tempMsg)
-  msgListRef.value?.scrollToBottom()
-
-  try {
-    const res = await uploadImage(formData)
-    // 竞态守卫：上传期间会话已切换
-    if (props.session?.id !== uploadSessionId) { URL.revokeObjectURL(blobUrl); return }
-    if (res.code === 200) {
-      const msg = await store.dispatch('im/message/sendMessage', {
-        sessionId: uploadSessionId,
-        type: 'IMAGE',
-        content: JSON.stringify({
-          fileId: res.data.id,
-          imageUrl: res.data.url
-        })
-      })
-
-      const index = messages.value.findIndex(m => m.id === tempId)
-      if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
-      }
-      // 释放 blob
-      URL.revokeObjectURL(blobUrl)
-    } else {
-      throw new Error(res.msg || 'Upload failed')
-    }
-  } catch (error) {
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      messages.value[index].status = 'failed'
-    }
-    URL.revokeObjectURL(blobUrl)
-    ElMessage.error('图片发送失败')
-  }
-}
-
-// 截图上传处理
-const handleScreenshotUpload = async formData => {
-  sendMyStopTypingStatus()
-  const file = formData.get('file')
-  if (!file) { return }
-
-  // 1. 乐观更新：立即显示截图
-  const blobUrl = URL.createObjectURL(file)
-  const tempId = `temp-screenshot-${Date.now()}`
-  const uploadSessionId = props.session.id
-  const tempMsg = {
-    id: tempId,
-    clientMsgId: tempId,
-    type: 'IMAGE',
-    content: {
-      imageUrl: blobUrl
-    },
-    senderId: currentUser.value?.id,
-    senderName: currentUser.value?.nickName || '我',
-    senderAvatar: currentUser.value?.avatar,
-    timestamp: Date.now(),
-    isOwn: true,
-    status: 'uploading',
-    readCount: 0
-  }
-  messages.value.push(tempMsg)
-  msgListRef.value?.scrollToBottom()
-
-  try {
-    const res = await uploadImage(formData)
-    // 竞态守卫：上传期间会话已切换
-    if (props.session?.id !== uploadSessionId) { URL.revokeObjectURL(blobUrl); return }
-    if (res.code === 200) {
-      const msg = await store.dispatch('im/message/sendMessage', {
-        sessionId: uploadSessionId,
-        type: 'IMAGE',
-        content: JSON.stringify({
-          fileId: res.data.id,
-          imageUrl: res.data.url
-        })
-      })
-
-      const index = messages.value.findIndex(m => m.id === tempId)
-      if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
-      }
-      URL.revokeObjectURL(blobUrl)
-    } else {
-      throw new Error(res.msg || 'Upload failed')
-    }
-  } catch (error) {
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      messages.value[index].status = 'failed'
-    }
-    URL.revokeObjectURL(blobUrl)
-    ElMessage.error('截图发送失败')
-  }
-}
-
-// 视频上传处理
-const handleVideoUpload = async ({ file, url }) => {
-  sendMyStopTypingStatus()
-  // 1. 乐观更新：立即显示视频消息
-  const tempId = `temp-video-${Date.now()}`
-  const uploadSessionId = props.session.id
-  const tempMsg = {
-    id: tempId,
-    clientMsgId: tempId,
-    type: 'VIDEO',
-    content: {
-      videoUrl: url, // 使用本地 Blob URL 预览
-      fileName: file.name,
-      size: file.size,
-      duration: 0 // 可以后续获取视频时长
-    },
-    senderId: currentUser.value?.id,
-    senderName: currentUser.value?.nickName || '我',
-    senderAvatar: currentUser.value?.avatar,
-    timestamp: Date.now(),
-    isOwn: true,
-    status: 'uploading',
-    readCount: 0
-  }
-  messages.value.push(tempMsg)
-  msgListRef.value?.scrollToBottom()
-
-  try {
-    // 2. 上传视频文件
-    const formData = new FormData()
-    formData.append('file', file)
-
-    const res = await uploadFileApi(formData)
-    // 竞态守卫：上传期间会话已切换
-    if (props.session?.id !== uploadSessionId) { URL.revokeObjectURL(url); return }
-    if (res.code === 200) {
-      // 3. 发送视频消息
-      const msg = await store.dispatch('im/message/sendMessage', {
-        sessionId: uploadSessionId,
-        type: 'VIDEO',
-        content: JSON.stringify({
-          fileId: res.data.id,
-          videoUrl: res.data.url,
-          fileName: file.name,
-          size: file.size
-        }),
-        replyToMessageId: replyingMessage.value?.id
-      })
-
-      // 4. 更新状态
-      const index = messages.value.findIndex(m => m.id === tempId)
-      if (index !== -1) {
-        messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
-      }
-      // 释放 blob
-      URL.revokeObjectURL(url)
-    } else {
-      throw new Error(res.msg || 'Upload failed')
-    }
-  } catch (error) {
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      messages.value[index].status = 'failed'
-    }
-    URL.revokeObjectURL(url)
-    ElMessage.error('视频发送失败')
-    console.error('视频上传失败', error)
-  }
-}
-
-// 发送位置消息
-const handleSendLocation = async ({ latitude, longitude, address }) => {
-  sendMyStopTypingStatus()
-  // 1. 乐观更新：立即显示位置消息
-  const tempId = `temp-location-${Date.now()}`
-  const uploadSessionId = props.session.id
-  const tempMsg = {
-    id: tempId,
-    clientMsgId: tempId,
-    type: 'LOCATION',
-    content: {
-      latitude,
-      longitude,
-      address: address || '未知位置'
-    },
-    senderId: currentUser.value?.id,
-    senderName: currentUser.value?.nickName || '我',
-    senderAvatar: currentUser.value?.avatar,
-    timestamp: Date.now(),
-    isOwn: true,
-    status: 'sending',
-    readCount: 0
-  }
-  messages.value.push(tempMsg)
-  msgListRef.value?.scrollToBottom()
-
-  try {
-    // 2. 发送位置消息
-    const msg = await store.dispatch('im/message/sendMessage', {
-      sessionId: uploadSessionId,
-      type: 'LOCATION',
-      content: JSON.stringify({
-        latitude,
-        longitude,
-        address: address || '未知位置'
-      }),
-      replyToMessageId: replyingMessage.value?.id
-    })
-
-    // 3. 更新状态
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      messages.value.splice(index, 1, { ...transformMsg(msg), status: null })
-    }
-  } catch (error) {
-    const index = messages.value.findIndex(m => m.id === tempId)
-    if (index !== -1) {
-      messages.value[index].status = 'failed'
-    }
-    ElMessage.error('位置发送失败')
-    console.error('位置发送失败', error)
-  }
-}
-
+// ==================== 生命周期 ====================
 onMounted(() => {
-  // 初始化失败消息重试管理
-  initMessageRetry()
-
   if (props.session) { loadHistory() }
+
+  // 初始化 WebSocket 监听
+  initListeners({
+    onNewMessage: () => nextTick(() => msgListRef.value?.scrollToBottom())
+  })
+
+  // 初始化输入状态监听
+  initTypingListener(currentUser)
 
   // 请求浏览器通知权限
   import('@/utils/messageNotification').then(({ requestNotificationPermission }) => {
-    requestNotificationPermission().then(permission => {
-      // 权限结果静默处理
-    })
-  })
-
-  // 监听输入状态事件
-  onTyping(data => {
-    if (data.conversationId !== props.session?.id) { return }
-    if (data.userId === currentUser.value?.id) { return } // 忽略自己的输入状态
-
-    handleTypingIndicator(data.userId, data.userName || data.senderName)
-  })
-
-  // 监听消息状态更新（发送成功/失败）
-  onMessageStatus(data => {
-    if (data.conversationId !== props.session?.id) { return }
-
-    // 支持通过 messageId 或 clientMsgId 查找消息
-    const index = messages.value.findIndex(
-      m => m.id === data.messageId || (data.clientMsgId && m.clientMsgId === data.clientMsgId)
-    )
-    if (index !== -1) {
-      // 映射后端 sendStatus 数值到前端状态字符串
-      // 0=PENDING, 1=SENDING, 2=DELIVERED(不显示), 3=READ(已读), 4=FAILED
-      const statusMap = {
-        0: 'sending',    // PENDING - 显示发送中
-        1: 'sending',    // SENDING - 显示发送中
-        2: 'delivered',  // DELIVERED - 显示已送达
-        3: 'read',       // READ - 显示已读
-        4: 'failed'      // FAILED - 显示失败
-      }
-      const sendStatus = data.sendStatus != null ? Number(data.sendStatus) : -1
-      if (statusMap[sendStatus]) {
-        messages.value[index].status = statusMap[sendStatus]
-      }
-    }
-  })
-
-  // 监听表情回复更新
-  onReaction(data => {
-    // WebSocket 推送的数据格式: { messageId, emoji, userId, userName, userAvatar, isAdd }
-    store.dispatch('im/message/handleReactionUpdate', {
-      messageId: data.messageId,
-      emoji: data.emoji,
-      userId: data.userId,
-      userName: data.userName,
-      userAvatar: data.userAvatar,
-      isAdd: data.isAdd !== false // 默认为添加
-    })
+    requestNotificationPermission().catch(() => {})
   })
 
   // 键盘快捷键：Ctrl/Cmd + Alt + A 截图
   const handleKeydown = e => {
-    // Ctrl/Cmd + Alt + A 触发截图
     if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'a' || e.key === 'A')) {
       e.preventDefault()
-      // 只在有会话时触发截图
-      if (props.session) {
-        messageInputRef.value?.triggerScreenshot?.()
-      }
+      if (props.session) { messageInputRef.value?.triggerScreenshot?.() }
     }
   }
   window.addEventListener('keydown', handleKeydown)
@@ -1915,18 +694,9 @@ onMounted(() => {
   }
   document.addEventListener('click', handleClickOutside)
 
-  // 清理函数（在组件卸载时调用）
   onUnmounted(() => {
-    isUnmounted.value = true // 标记组件已卸载
-    // 清理 typing 定时器
-    if (sendTypingTimer) {
-      clearTimeout(sendTypingTimer)
-      sendTypingTimer = null
-    }
-    Object.keys(typingTimers).forEach(uid => {
-      clearTimeout(typingTimers[uid])
-      delete typingTimers[uid]
-    })
+    isUnmounted.value = true
+    cleanupTyping()
     window.removeEventListener('keydown', handleKeydown)
     document.removeEventListener('click', handleClickOutside)
   })

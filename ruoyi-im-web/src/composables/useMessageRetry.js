@@ -1,201 +1,89 @@
 /**
- * 消息重试管理 Composable
- * 管理失败消息的缓存、重试和清理
+ * 消息重试管理 Composable（简化版）
+ *
+ * 仅保留 localStorage 持久化层：
+ * - 重试计数持久化
+ * - 检查是否可重试
+ * - 记录/清除重试次数
+ *
+ * 失败消息的管理已移至 Vuex store (im/message)
+ * 重试逻辑已移至 useChatSend.js
  */
-import { ref, computed } from 'vue'
 import { MAX_RETRIES } from '@/constants/retry.js'
 
-// LocalStorage 键
-const FAILED_MESSAGES_KEY = 'im_failed_messages'
-const CACHE_TTL = 5 * 60 * 1000 // 5分钟缓存时间
+const RETRY_COUNTS_KEY = 'im_retry_counts'
+
+// 单例缓存（避免每个组件实例各持一份）
+let retryCounts = null
 
 /**
- * 失败消息缓存结构
- * {
- *   [tempId]: {
- *     tempId: string,
- *     sessionId: string,
- *     type: string,
- *     content: string,
- *     retryCount: number,
- *     timestamp: number
- *   }
- * }
+ * 从 localStorage 加载重试计数
  */
+function loadRetryCounts() {
+  if (retryCounts !== null) { return }
+  try {
+    const stored = localStorage.getItem(RETRY_COUNTS_KEY)
+    retryCounts = stored ? JSON.parse(stored) : {}
+  } catch (error) {
+    console.error('加载重试计数失败:', error)
+    retryCounts = {}
+  }
+}
+
+/**
+ * 保存重试计数到 localStorage
+ */
+function saveRetryCounts() {
+  try {
+    localStorage.setItem(RETRY_COUNTS_KEY, JSON.stringify(retryCounts))
+  } catch (error) {
+    console.error('保存重试计数失败:', error)
+  }
+}
 
 export function useMessageRetry() {
-  const failedMessages = ref({})
-  const cleanupTimer = ref(null)
-
   /**
-   * 初始化：从 localStorage 加载失败消息
+   * 初始化：加载重试计数
    */
   function init() {
-    try {
-      const stored = localStorage.getItem(FAILED_MESSAGES_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        // 清理过期的消息
-        const now = Date.now()
-        const cleaned = {}
-
-        for (const [tempId, msg] of Object.entries(parsed)) {
-          if (now - msg.timestamp < CACHE_TTL) {
-            cleaned[tempId] = msg
-          }
-        }
-
-        failedMessages.value = cleaned
-        saveFailedMessages()
-
-        // 启动定时清理
-        startCleanupTimer()
-      }
-    } catch (error) {
-      console.error('加载失败消息缓存出错:', error)
-    }
+    loadRetryCounts()
   }
 
   /**
-   * 保存失败消息到 localStorage
+   * 检查是否可以重试
+   * @param {string} clientMsgId - 客户端消息ID
+   * @returns {boolean}
    */
-  function saveFailedMessages() {
-    try {
-      localStorage.setItem(FAILED_MESSAGES_KEY, JSON.stringify(failedMessages.value))
-    } catch (error) {
-      console.error('保存失败消息缓存出错:', error)
-    }
+  function canRetry(clientMsgId) {
+    loadRetryCounts()
+    const count = retryCounts[clientMsgId] || 0
+    return count < MAX_RETRIES
   }
 
   /**
-   * 记录失败消息
-   * @param {Object} message - 失败的消息对象
+   * 记录一次重试尝试
+   * @param {string} clientMsgId - 客户端消息ID
    */
-  function recordFailedMessage(message) {
-    const tempId = message.clientMsgId || message.id || message.tempId
-    if (!tempId) {
-      console.warn('消息缺少ID，无法记录失败消息')
-      return
-    }
-
-    // 检查是否已存在
-    const existing = failedMessages.value[tempId]
-    const retryCount = existing ? existing.retryCount + 1 : 1
-
-    // 检查重试次数限制
-    if (retryCount > MAX_RETRIES) {
-      console.warn('消息重试次数已达上限:', tempId)
-      removeFailedMessage(tempId)
-      return false
-    }
-
-    // 记录失败消息
-    failedMessages.value[tempId] = {
-      tempId,
-      sessionId: message.sessionId || message.conversationId,
-      type: message.type || 'TEXT',
-      content: message.content,
-      retryCount,
-      timestamp: Date.now()
-    }
-
-    saveFailedMessages()
-    return true
+  function recordRetryAttempt(clientMsgId) {
+    loadRetryCounts()
+    retryCounts[clientMsgId] = (retryCounts[clientMsgId] || 0) + 1
+    saveRetryCounts()
   }
 
   /**
-   * 获取失败消息
-   * @param {string} tempId - 临时消息ID
+   * 发送成功时清除重试记录
+   * @param {string} clientMsgId - 客户端消息ID
    */
-  function getFailedMessage(tempId) {
-    return failedMessages.value[tempId]
-  }
-
-  /**
-   * 移除失败消息
-   * @param {string} tempId - 临时消息ID
-   */
-  function removeFailedMessage(tempId) {
-    delete failedMessages.value[tempId]
-    saveFailedMessages()
-  }
-
-  /**
-   * 清理过期的失败消息
-   */
-  function cleanupExpiredMessages() {
-    const now = Date.now()
-    let hasChanges = false
-
-    for (const tempId in failedMessages.value) {
-      if (now - failedMessages.value[tempId].timestamp >= CACHE_TTL) {
-        delete failedMessages.value[tempId]
-        hasChanges = true
-      }
-    }
-
-    if (hasChanges) {
-      saveFailedMessages()
-    }
-  }
-
-  /**
-   * 启动定时清理任务
-   */
-  function startCleanupTimer() {
-    stopCleanupTimer()
-    cleanupTimer.value = setInterval(() => {
-      cleanupExpiredMessages()
-    }, 60 * 1000) // 每分钟清理一次
-  }
-
-  /**
-   * 停止定时清理任务
-   */
-  function stopCleanupTimer() {
-    if (cleanupTimer.value) {
-      clearInterval(cleanupTimer.value)
-      cleanupTimer.value = null
-    }
-  }
-
-  /**
-   * 清空所有失败消息
-   */
-  function clearAll() {
-    failedMessages.value = {}
-    saveFailedMessages()
-  }
-
-  /**
-   * 计算属性：失败消息数量
-   */
-  const failedCount = computed(() => {
-    return Object.keys(failedMessages.value).length
-  })
-
-  /**
-   * 计算属性：是否可以重试
-   * @param {string} tempId - 临时消息ID
-   */
-  function canRetry(tempId) {
-    const msg = failedMessages.value[tempId]
-    return msg && msg.retryCount < MAX_RETRIES
+  function removeRetryRecord(clientMsgId) {
+    loadRetryCounts()
+    delete retryCounts[clientMsgId]
+    saveRetryCounts()
   }
 
   return {
-    // 状态
-    failedMessages,
-    failedCount,
-
-    // 方法
     init,
-    recordFailedMessage,
-    getFailedMessage,
-    removeFailedMessage,
     canRetry,
-    cleanupExpiredMessages,
-    clearAll,
-    stopCleanupTimer
+    recordRetryAttempt,
+    removeRetryRecord
   }
 }

@@ -10,12 +10,16 @@
  *   useChatCommands,
  *   useChatDialogs,
  *   useChatMultiSelect,
- *   useChatUpload
+ *   useChatSend,
+ *   useChatWebSocket,
+ *   useChatTyping,
+ *   useChatSessionOps,
+ *   useChatDragDrop
  * } from '@/composables/useChat'
  * ```
  */
 
-// 消息管理（加载、发送、重试）
+// 消息管理（加载、分页 — Store 薄包装）
 export { useChatMessages } from './useChatMessages.js'
 
 // 消息命令（复制、回复、转发、撤回、删除、编辑等）
@@ -27,5 +31,17 @@ export { useChatDialogs } from './useChatDialogs.js'
 // 消息多选（批量操作）
 export { useChatMultiSelect } from './useChatMultiSelect.js'
 
-// 文件上传（图片、文件、视频）
-export { useChatUpload } from './useChatUpload.js'
+// 统一发送 + 上传 + 重试
+export { useChatSend } from './useChatSend.js'
+
+// WebSocket 事件处理
+export { useChatWebSocket } from './useChatWebSocket.js'
+
+// 输入状态管理
+export { useChatTyping } from './useChatTyping.js'
+
+// 会话级操作（置顶、免打扰、清空）
+export { useChatSessionOps } from './useChatSessionOps.js'
+
+// 拖拽上传
+export { useChatDragDrop } from './useChatDragDrop.js'

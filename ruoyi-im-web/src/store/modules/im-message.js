@@ -334,6 +334,43 @@ export default {
       }
     },
 
+    /**
+     * 替换临时消息为真实消息（乐观更新完成后）
+     * 按 tempId 查找（匹配 id 或 clientMsgId），整体替换
+     * @param {Object} state - Vuex state
+     * @param {Object} payload - { sessionId, tempId, realMessage }
+     */
+    REPLACE_TEMP_MESSAGE(state, { sessionId, tempId, realMessage }) {
+      if (!state.messages[sessionId]) { return }
+      const messages = state.messages[sessionId]
+      const index = messages.findIndex(m => m.id === tempId || m.clientMsgId === tempId)
+      if (index !== -1) {
+        state.messages[sessionId] = [
+          ...messages.slice(0, index),
+          { ...realMessage },
+          ...messages.slice(index + 1)
+        ]
+      }
+    },
+
+    /**
+     * 标记消息状态（sending/failed/uploading 等）
+     * @param {Object} state - Vuex state
+     * @param {Object} payload - { sessionId, messageId, status }
+     */
+    MARK_MESSAGE_STATUS(state, { sessionId, messageId, status }) {
+      if (!state.messages[sessionId]) { return }
+      const messages = state.messages[sessionId]
+      const index = messages.findIndex(m => m.id === messageId || m.clientMsgId === messageId)
+      if (index !== -1) {
+        state.messages[sessionId] = [
+          ...messages.slice(0, index),
+          { ...messages[index], status },
+          ...messages.slice(index + 1)
+        ]
+      }
+    },
+
     // ========== 发送中消息管理 Mutations ==========
 
     /**
