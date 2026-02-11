@@ -188,6 +188,9 @@
                     v-if="session.unreadCount > 0"
                     class="unread-badge"
                     :class="{ 'badge-dot': session.isMuted }"
+                    :data-count-single="!session.isMuted && session.unreadCount >= 1 && session.unreadCount <= 9"
+                    :data-count-multi="!session.isMuted && session.unreadCount >= 10 && session.unreadCount <= 99"
+                    :data-count-over="!session.isMuted && session.unreadCount > 99"
                   >
                     {{ session.isMuted ? '' : (session.unreadCount > 99 ? '99+' : session.unreadCount) }}
                   </span>
@@ -226,8 +229,10 @@
                       v-if="getSessionStatus(session) === 'typing'"
                       class="typing-indicator"
                     >
-                      <span class="material-icons-outlined typing-icon">edit</span>
-                      正在输入...
+                      <span class="typing-dots">
+                        <span class="dot" /><span class="dot" /><span class="dot" />
+                      </span>
+                      <span class="typing-text">正在输入...</span>
                     </span>
                     <span
                       v-else-if="getSessionStatus(session) === 'draft'"
@@ -1171,7 +1176,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 16px 14px;
+  padding: 12px 16px 8px;
   flex-shrink: 0;
 }
 
@@ -1188,7 +1193,6 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   .title-icon {
     font-size: 19px;
     color: var(--dt-brand-color);
-    animation: breathe 3s ease-in-out infinite;
   }
 }
 
@@ -1240,8 +1244,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 // 搜索
 // ============================================================================
 .search-section {
-  padding: 0 12px 14px;
-  padding: 12px 16px;
+  padding: 6px 16px 8px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1429,41 +1432,20 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   border-radius: 0;
   align-items: center;
 
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 0;
-    background: var(--dt-brand-color);
-    border-radius: 0;
-    transition: height var(--dt-transition-fast);
+  // 会话分割线 - 钉钉风格
+  & + .session-item:not(.pinned) {
+    border-top: 1px solid var(--dt-border-lighter);
   }
 
   &:hover {
     background: var(--dt-bg-session-hover);
-
-    &::before {
-      height: 24px;
-    }
   }
 
   &.active {
     background: var(--dt-bg-session-active);
 
-    &::before {
-      height: 40px;
-    }
-
     .session-name {
-      color: var(--dt-brand-color);
-      font-weight: 600;
-    }
-
-    .session-avatar {
-      border: 2px solid var(--dt-brand-color);
+      font-weight: 500;
     }
 
     .preview-text {
@@ -1473,6 +1455,18 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 
   &.pinned:not(.active) {
     background: var(--dt-bg-pinned);
+
+    // 置顶图标 - 右上角小钉子
+    &::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 6px;
+      height: 6px;
+      background: var(--dt-text-quaternary);
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%); // 三角形
+    }
   }
 
   &.unread {
@@ -1541,8 +1535,6 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 
   &.online {
     background: var(--dt-success-color);
-    box-shadow: var(--dt-shadow-success-glow);
-    animation: pulse 2s ease-in-out infinite;
   }
 }
 
@@ -1550,14 +1542,11 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   position: absolute;
   top: -2px;
   right: -2px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  background: var(--dt-error-color); // 使用设计令牌
+  height: 18px;
+  background: var(--dt-error-color);
   color: var(--dt-text-inverse);
   font-size: 10px;
   font-weight: 600;
-  border-radius: var(--dt-radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1566,6 +1555,29 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   animation: scaleIn 0.3s var(--dt-ease-bounce);
   z-index: 2;
 
+  // 数字 1-9：圆形
+  &[data-count-single="true"] {
+    min-width: 18px;
+    width: 18px;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  // 数字 10-99：药丸形
+  &[data-count-multi="true"] {
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+  }
+
+  // 99+：固定宽度药丸形
+  &[data-count-over="true"] {
+    min-width: 28px;
+    padding: 0 5px;
+    border-radius: 9px;
+  }
+
+  // 免打扰会话：灰色小圆点
   &.badge-dot {
     min-width: 10px;
     width: 10px;
@@ -1574,7 +1586,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
     top: 0;
     right: 0;
     border-radius: 50%;
-    animation: pulse 1.5s ease-in-out infinite;
+    background: var(--dt-text-quaternary);
   }
 }
 
@@ -1584,7 +1596,7 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   left: -2px;
   width: 18px;
   height: 18px;
-  background: var(--dt-error-gradient);
+  background: var(--dt-error-color);
   color: var(--dt-text-inverse);
   font-size: 12px;
   font-weight: 700;
@@ -1594,7 +1606,6 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
   justify-content: center;
   border: 2px solid var(--dt-bg-card);
   box-shadow: var(--dt-shadow-error);
-  animation: mentionPulse 2s ease-in-out infinite;
   z-index: 3;
   cursor: pointer;
 }
@@ -2032,33 +2043,52 @@ const sortedSessions = computed(() => store.getters['im/session/sortedSessions']
 }
 
 // ============================================================================
-// 输入状态样式
+// 输入状态样式 - 钉钉风格三点跳动动画
 // ============================================================================
 .typing-indicator {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   font-size: 13px;
   color: var(--dt-brand-color);
   font-weight: 500;
-  animation: typingPulse 1.5s ease-in-out infinite;
+
+  // 三点跳动动画
+  .typing-dots {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--dt-brand-color);
+      animation: typingBounce 1.4s infinite;
+
+      &:nth-child(1) { animation-delay: 0s; }
+      &:nth-child(2) { animation-delay: 0.2s; }
+      &:nth-child(3) { animation-delay: 0.4s; }
+    }
+  }
+
+  .typing-text {
+    margin-left: 4px;
+  }
 
   .typing-icon {
     font-size: 14px;
+    display: none; // 使用三点动画替代图标
   }
 }
 
-// ============================================================================
-// @提及动画
-// ============================================================================
-@keyframes mentionPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: var(--dt-shadow-error);
+// 三点跳动动画
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
   }
-  50% {
-    transform: scale(1.1);
-    box-shadow: var(--dt-shadow-error-strong);
+  30% {
+    transform: translateY(-4px);
   }
 }
 
