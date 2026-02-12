@@ -698,7 +698,7 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   background: var(--dt-bg-overlay);
-  backdrop-filter: blur(2px);
+  // 注意：移除 backdrop-filter 以提高滚动性能
 }
 
 // 侧边栏面板

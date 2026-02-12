@@ -388,7 +388,7 @@ onUnmounted(() => {
   z-index: 2000;
   display: flex;
   justify-content: flex-end;
-  backdrop-filter: blur(4px);
+  // 注意：移除 backdrop-filter 以提高滚动性能
 }
 
 // 面板

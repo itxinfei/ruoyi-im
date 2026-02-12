@@ -176,16 +176,16 @@ const handleClick = async () => {
 .file-bubble {
   display: flex;
   align-items: center;
-  gap: 10px; // 钉钉标准：10px
-  padding: 10px 12px; // 钉钉标准：10px 上下，12px 左右
+  gap: 8px; // 钉钉紧凑标准：8px
+  padding: 8px 10px; // 钉钉紧凑标准：8px 上下，10px 左右
   background: var(--dt-bg-card);
   border: none;
-  border-radius: 8px; // 钉钉标准：8px 圆角
+  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   transition: all var(--dt-transition-base);
-  min-width: 200px; // 钉钉标准：200px 最小宽度
-  max-width: 300px; // 钉钉标准：300px 最大宽度
+  min-width: 180px; // 钉钉紧凑标准：180px 最小宽度
+  max-width: 260px; // 钉钉紧凑标准：260px 最大宽度
 
   &:hover {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -213,15 +213,15 @@ const handleClick = async () => {
 
 .file-icon {
   position: relative;
-  width: 36px; // 优化：36px
-  height: 36px; // 优化：36px
+  width: 32px; // 钉钉紧凑标准：32px
+  height: 32px; // 钉钉紧凑标准：32px
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
   .el-icon {
-    font-size: 28px; // 优化：28px
+    font-size: 24px; // 钉钉紧凑标准：24px
     color: var(--dt-brand-color);
   }
 

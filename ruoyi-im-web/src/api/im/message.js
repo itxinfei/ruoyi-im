@@ -58,7 +58,7 @@ export function getMessages(conversationId, params = {}) {
 export function recallMessage(messageId) {
   return request({
     url: `/api/im/messages/${messageId}/recall`,
-    method: 'delete'
+    method: 'post'
   })
 }
 
@@ -338,9 +338,8 @@ export function getPinnedMessages(conversationId) {
  */
 export function clearConversationMessages(conversationId) {
   return request({
-    url: '/api/im/messages/clear',
-    method: 'delete',
-    params: { conversationId }
+    url: `/api/im/messages/conversations/${conversationId}`,
+    method: 'delete'
   })
 }
 
@@ -389,9 +388,9 @@ export function getExportableMessages(conversationId, params) {
  */
 export function getMessagesByCategory(conversationId, category, params = {}) {
   return request({
-    url: `/api/im/messages/category/${category}`,
+    url: `/api/im/messages/conversations/${conversationId}/category/${category}`,
     method: 'get',
-    params: { ...params, conversationId }
+    params
   })
 }
 

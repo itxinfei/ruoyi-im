@@ -267,6 +267,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick, h } from 'vue'
 import { useStore } from 'vuex'
 import { Close } from '@element-plus/icons-vue'
+import { debug, warn, error as logError } from '@/utils/logger.js'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInputRefactored.vue'
@@ -468,7 +469,7 @@ const handleToggleDetail = () => {
   }
 }
 
-const handleToggleSidebar = tab => { console.log('toggle-sidebar:', tab) }
+const handleToggleSidebar = tab => { debug('ChatPanel', 'toggle-sidebar:', tab) }
 const handleShowUser = userId => emit('show-user', userId)
 const handleSearchMessages = () => { showChatSearch.value = true }
 const handleShowHistory = () => { showChatHistory.value = true }
@@ -494,7 +495,7 @@ const handleRefreshGroup = async () => {
     await store.dispatch('im/conversation/loadConversations')
     ElMessage.success('群组信息已刷新')
   } catch (error) {
-    console.error('刷新群组信息失败:', error)
+    logError('ChatPanel', '刷新群组信息失败:', error)
   }
 }
 
@@ -579,7 +580,7 @@ const handleMarkRead = async msg => {
     })
     msg.isRead = true
   } catch (e) {
-    console.warn('上报已读状态失败', e)
+    warn('ChatPanel', '上报已读状态失败', e)
   }
 }
 
@@ -641,7 +642,7 @@ const handleForwardConfirm = async ({ message, targetSessionId }) => {
     ElMessage.success('转发成功')
   } catch (error) {
     ElMessage.error('转发失败')
-    console.error(error)
+    logError('ChatPanel', '转发失败:', error)
   }
 }
 
@@ -652,7 +653,7 @@ const handleBatchForwardConfirm = async ({ messageIds, targetSessionId, forwardT
     handleClearSelection()
   } catch (error) {
     ElMessage.error('转发失败')
-    console.error(error)
+    logError('ChatPanel', '批量转发失败:', error)
   }
 }
 
@@ -730,7 +731,7 @@ const markMessageAction = async (msg, markerType, color) => {
       msg.markers = [{ markerType, color }]
     }
   } catch (e) {
-    console.error('标记失败', e)
+    logError('ChatPanel', '标记失败:', e)
     ElMessage.error('标记失败')
   }
 }
@@ -749,7 +750,7 @@ const handleRemindUnread = async ({ conversationId, messageId, unreadMembers }) 
     })
     ElMessage.success(`已提醒 ${unreadMembers.length} 位成员`)
   } catch (error) {
-    console.error('提醒失败:', error)
+    logError('ChatPanel', '提醒失败:', error)
     ElMessage.error('提醒失败，请稍后重试')
   }
 }
@@ -800,6 +801,9 @@ watch(() => props.session?.id, () => {
 })
 
 // ==================== 生命周期 ====================
+let _handleKeydown = null
+let _handleClickOutside = null
+
 onMounted(() => {
   if (props.session) { loadHistory() }
 
@@ -817,16 +821,16 @@ onMounted(() => {
   })
 
   // 键盘快捷键：Ctrl/Cmd + Alt + A 截图
-  const handleKeydown = e => {
+  _handleKeydown = e => {
     if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'a' || e.key === 'A')) {
       e.preventDefault()
       if (props.session) { messageInputRef.value?.triggerScreenshot?.() }
     }
   }
-  window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('keydown', _handleKeydown)
 
   // 点击外部关闭表情弹窗
-  const handleClickOutside = e => {
+  _handleClickOutside = e => {
     if (showEmojiPopover.value) {
       const popover = document.querySelector('.emoji-popover')
       if (popover && !popover.contains(e.target)) {
@@ -835,14 +839,18 @@ onMounted(() => {
       }
     }
   }
-  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('click', _handleClickOutside)
+})
 
-  onUnmounted(() => {
-    isUnmounted.value = true
-    cleanupTyping()
-    window.removeEventListener('keydown', handleKeydown)
-    document.removeEventListener('click', handleClickOutside)
-  })
+onUnmounted(() => {
+  isUnmounted.value = true
+  cleanupTyping()
+  if (_handleKeydown) {
+    window.removeEventListener('keydown', _handleKeydown)
+  }
+  if (_handleClickOutside) {
+    document.removeEventListener('click', _handleClickOutside)
+  }
 })
 </script>
 

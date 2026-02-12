@@ -9,10 +9,7 @@ import com.ruoyi.im.util.ImRedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 import java.util.concurrent.*;
 
 /**
@@ -49,6 +46,22 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
                                      @Lazy ImMessageService messageService) {
         this.redisUtil = redisUtil;
         this.messageService = messageService;
+    }
+
+    /**
+     * 应用关闭时释放线程池资源
+     */
+    @javax.annotation.PreDestroy
+    public void shutdown() {
+        retryExecutor.shutdown();
+        try {
+            if (!retryExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                retryExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            retryExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override
@@ -145,7 +158,6 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
     }
 
     @Override
-    @Async
     public void retrySendWithDelay(String clientMsgId) {
         int retryCount = getRetryCount(clientMsgId);
         long delay = calculateRetryDelay(retryCount);

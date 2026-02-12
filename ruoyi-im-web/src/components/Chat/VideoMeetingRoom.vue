@@ -738,7 +738,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 12px 20px;
   background: var(--dt-bg-mask);
-  backdrop-filter: blur(10px);
+  // 注意：移除 backdrop-filter 以提高性能
 
   .header-left {
     display: flex;
@@ -946,7 +946,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 16px 20px;
   background: var(--dt-bg-mask);
-  backdrop-filter: blur(10px);
+  // 注意：移除 backdrop-filter 以提高性能
 
   .controls-left,
   .controls-right {
@@ -994,7 +994,7 @@ onUnmounted(() => {
   width: 280px;
   height: calc(100% - 56px - 80px);
   background: var(--dt-overlay-30);
-  backdrop-filter: blur(10px);
+  // 注意：移除 backdrop-filter 以提高性能
   border-left: 1px solid var(--dt-white-10);
   display: flex;
   flex-direction: column;

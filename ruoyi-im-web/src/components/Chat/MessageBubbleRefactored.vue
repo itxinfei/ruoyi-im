@@ -547,29 +547,34 @@ const canRecall = computed(() => {
   max-width: min(500px, 70vw); // 钉钉标准：500px 最大宽度，70vw 视口宽度
   width: fit-content;
   min-width: 0;
-  contain: layout style paint;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  padding: 0 !important; // 强制覆盖 im-design-system.scss 中的全局 padding
+  border: none !important; // 强制覆盖可能存在的边框
+  background: transparent !important; // 背景由内部的 bubble-content 控制
+  box-shadow: none !important; // 阴影由内部的 bubble-content 控制
+  // 注意：移除 contain 以避免性能问题
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease;
 }
 
 // 气泡内容：纵向堆叠（文本 + 链接预览 + 标记等）
 .bubble-content {
-  padding: 8px 12px;
-  font-size: 14px;
-  line-height: 1.5;
+  padding: 4px 10px; // 统一使用 4px 上下，10px 左右
+  font-size: 13px; // 统一 13px
+  line-height: 1.35; // 统一 1.35
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
   min-width: 0;
-  border-radius: 8px; // 钉钉标准：8px 圆角
+  border-radius: 4px; // 统一 4px
 }
 
 // 对方消息样式 (左侧) - 白底微阴影
 .message-bubble:not(.is-right) {
   .bubble-content {
     background: var(--dt-bubble-left-bg, #FFFFFF);
-    border: none;
+    border: 1px solid var(--dt-bubble-left-border, transparent);
     color: var(--dt-text-primary);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--dt-bubble-left-shadow, 0 1px 2px rgba(0, 0, 0, 0.06));
+    border-radius: 4px;
   }
 }
 
@@ -578,10 +583,11 @@ const canRecall = computed(() => {
   flex-direction: row-reverse;
 
   .bubble-content {
-    background: var(--dt-brand-color);
-    color: #FFFFFF;
+    background: var(--dt-bubble-right-bg, var(--dt-brand-color));
+    color: var(--dt-bubble-right-text, #FFFFFF);
     border: none;
     box-shadow: none;
+    border-radius: 4px;
   }
 
   // 确保所有子元素文字颜色都是白色（提高选择器优先级）
@@ -613,7 +619,7 @@ const canRecall = computed(() => {
   padding: 0;
   background: transparent !important;
   border: none !important;
-  border-radius: 8px; // 钉钉标准：8px 圆角
+  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
   box-shadow: none;
   overflow: hidden;
 }
@@ -622,7 +628,7 @@ const canRecall = computed(() => {
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: 8px; // 钉钉标准：8px 圆角
+  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
   overflow: hidden;
 }
 
@@ -681,30 +687,30 @@ const canRecall = computed(() => {
   }
 }
 
-// 分组圆角 - 左侧消息（优化：连续消息内侧收窄为2px）
+// 分组圆角 - 左侧消息
 .message-bubble:not(.is-right) {
-  &.group-single .bubble-content { border-radius: 8px; }
-  &.group-first .bubble-content { border-radius: 8px 8px 8px 2px; }
-  &.group-middle .bubble-content { border-radius: 2px 8px 8px 2px; }
-  &.group-last .bubble-content { border-radius: 2px 8px 8px 8px; }
+  &.group-single .bubble-content { border-radius: 4px; }
+  &.group-first .bubble-content { border-radius: 4px 4px 4px 2px; }
+  &.group-middle .bubble-content { border-radius: 2px 4px 4px 2px; }
+  &.group-last .bubble-content { border-radius: 2px 4px 4px 4px; }
 }
 
 // 分组圆角 - 右侧消息
 .message-bubble.is-right {
-  &.group-single .bubble-content { border-radius: 8px; }
-  &.group-first .bubble-content { border-radius: 8px 8px 2px 8px; }
-  &.group-middle .bubble-content { border-radius: 8px 2px 2px 8px; }
-  &.group-last .bubble-content { border-radius: 8px 2px 8px 8px; }
+  &.group-single .bubble-content { border-radius: 4px; }
+  &.group-first .bubble-content { border-radius: 4px 4px 2px 4px; }
+  &.group-middle .bubble-content { border-radius: 4px 2px 2px 4px; }
+  &.group-last .bubble-content { border-radius: 4px 2px 4px 4px; }
 }
 
-// 分组间距（钉钉标准）
+// 分组间距
 .message-bubble.group-middle,
 .message-bubble.group-last {
-  margin-top: 2px;
+  margin-top: 1px; // 进一步收窄
 }
 
 .message-bubble.group-first,
 .message-bubble.group-single {
-  margin-top: 8px;
+  margin-top: 4px; // 进一步收窄
 }
 </style>

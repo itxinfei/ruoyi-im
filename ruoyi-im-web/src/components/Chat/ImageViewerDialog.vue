@@ -590,7 +590,7 @@ onUnmounted(() => {
   border-radius: 8px; // 野火IM圆角
   opacity: 0;
   transition: opacity 0.3s;
-  backdrop-filter: blur(8px);
+  // 注意：移除 backdrop-filter 以提高滚动性能
 
   .image-viewer-container:hover & {
     opacity: 1;

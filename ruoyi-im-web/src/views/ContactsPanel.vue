@@ -806,6 +806,42 @@ const {
 } = useContactBatch()
 
 // Computed for Display Titles
+const normalizedFriendGroups = computed(() => {
+  const rawGroups = friendGroups.value || []
+  const groups = Array.isArray(rawGroups) ? rawGroups : (rawGroups.data || [])
+  return groups.map(g => {
+    if (!g) { return g }
+    const contacts = g.contacts || g.friends || []
+    return { ...g, contacts, friends: contacts }
+  })
+})
+
+const friendGroupMap = computed(() => {
+  const map = new Map()
+  normalizedFriendGroups.value.forEach(group => {
+    const name = group?.groupName
+    if (name) { map.set(name, group) }
+  })
+  return map
+})
+
+const flatFriendList = computed(() => {
+  const groups = normalizedFriendGroups.value
+  const allFriends = groups.flatMap(g => g?.friends || g?.contacts || (Array.isArray(g) ? g : []))
+  if (allFriends.length === 0 && groups.length > 0 && !groups[0]?.groupName) {
+    return groups
+  }
+  const uniqueMap = new Map()
+  allFriends.forEach(friend => {
+    if (!friend) {return}
+    const id = friend.friendId || friend.id || friend.userId
+    if (id) {
+      uniqueMap.set(id, friend)
+    }
+  })
+  return Array.from(uniqueMap.values())
+})
+
 const listTitle = computed(() => {
   if (searchQuery.value) { return '搜索结果' }
   const map = {
@@ -818,7 +854,7 @@ const listTitle = computed(() => {
   }
   if (map[currentNav.value]) { return map[currentNav.value] }
   // 如果是分组导航，返回分组名称
-  const group = friendGroups.value.find(g => g.groupName === currentNav.value)
+  const group = friendGroupMap.value.get(currentNav.value)
   if (group) { return group.groupName }
   return ''
 })
@@ -834,35 +870,8 @@ const currentList = computed(() => {
   if (currentNav.value === 'all') {
     return allUsers.value
   }
-  if (currentNav.value === 'friends') {
-    // 全部好友 - 重点加固：处理后端返回的多种可能的结构
-    const rawGroups = friendGroups.value || []
-    
-    // 如果返回的不是列表而是对象，尝试提取数据
-    const normalizedGroups = Array.isArray(rawGroups) ? rawGroups : (rawGroups.data || [])
-    
-    const allFriends = normalizedGroups.flatMap(g => {
-      // 兼顾后端可能返回的不同字段名
-      return g.friends || g.contacts || (Array.isArray(g) ? g : [])
-    })
-    
-    // 如果全部分组展平后为空，且 rawGroups 本身就是好友列表
-    if (allFriends.length === 0 && normalizedGroups.length > 0 && !normalizedGroups[0].groupName) {
-      return normalizedGroups
-    }
-
-    const uniqueMap = new Map()
-    allFriends.forEach(friend => {
-      if (!friend) {return}
-      const id = friend.friendId || friend.id || friend.userId
-      if (id) {
-        uniqueMap.set(id, friend)
-      }
-    })
-    return Array.from(uniqueMap.values())
-  }
-  // 检查是否是分组导航
-  const group = friendGroups.value.find(g => g.groupName === currentNav.value)
+  if (currentNav.value === 'friends') { return flatFriendList.value }
+  const group = friendGroupMap.value.get(currentNav.value)
   if (group) {
     return group.friends || group.contacts || []
   }
@@ -977,8 +986,8 @@ const handleSearch = useDebounceFn(() => {
   }
 
   const friendIdSet = new Set()
-  friendGroups.value.forEach(g => {
-    const friends = g.friends || g.contacts || []
+  normalizedFriendGroups.value.forEach(g => {
+    const friends = g?.friends || g?.contacts || []
     friends.forEach(friend => {
       if (friend.friendId) { friendIdSet.add(friend.friendId) }
       const hay = [
@@ -1899,6 +1908,7 @@ $panel-min-width: 320px;
   align-items: center;
   padding: 0 14px;
   height: 56px;
+  box-sizing: border-box;
   cursor: pointer;
   transition: all 0.15s;
   background: var(--dt-bg-card);

@@ -361,7 +361,7 @@ watch(() => props.visible, newVal => {
   position: fixed;
   inset: 0;
   background: var(--dt-screenshot-mask);
-  backdrop-filter: blur(4px);
+  // 注意：移除 backdrop-filter 以提高滚动性能
   z-index: $z-modal-top;
   display: flex;
   align-items: center;

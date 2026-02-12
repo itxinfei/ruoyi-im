@@ -39,6 +39,8 @@ public class ImWebSocketEndpoint {
 
     private static final Logger log = LoggerFactory.getLogger(ImWebSocketEndpoint.class);
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     /**
      * 存储所有在线用户的 WebSocket 会话（用户ID -> 会话列表，支持多设备同时在线）
      */
@@ -315,7 +317,7 @@ public class ImWebSocketEndpoint {
             // 检查是否为未认证状态（-1表示未认证）
             if (userId == -1L) {
                 // 只允许认证消息通过
-                ObjectMapper mapper = new ObjectMapper();
+                ObjectMapper mapper = OBJECT_MAPPER;
                 Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {
                 });
                 String type = (String) messageMap.get("type");
@@ -337,7 +339,7 @@ public class ImWebSocketEndpoint {
 
             log.debug("收到消息: userId={}, message={}", userId, message);
 
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = OBJECT_MAPPER;
             Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {
             });
 
@@ -485,7 +487,7 @@ public class ImWebSocketEndpoint {
         String clientMsgId = null;
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = OBJECT_MAPPER;
             Map<String, Object> messageData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -612,7 +614,7 @@ public class ImWebSocketEndpoint {
      */
     private void processTypingStatus(Long userId, Object payload) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = OBJECT_MAPPER;
             Map<String, Object> typingData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -714,8 +716,8 @@ public class ImWebSocketEndpoint {
                     // 移除未认证标记
                     sessionUserMap.remove(session);
                 } else if (oldUserId != null && !oldUserId.equals(userId)) {
-                    // 如果当前会话绑定了其他用户ID，移除旧映射
-                    onlineUsers.remove(oldUserId);
+                    // 如果当前会话绑定了其他用户ID，仅移除当前会话的旧映射
+                    removeUserSession(session);
                 }
 
                 // 使用同步块确保连接更新的原子性，防止竞态条件
@@ -787,7 +789,7 @@ public class ImWebSocketEndpoint {
                 response.put("success", false);
                 response.put("message", "认证异常: " + e.getMessage());
 
-                session.getBasicRemote().sendText(new ObjectMapper().writeValueAsString(response));
+                session.getBasicRemote().sendText(OBJECT_MAPPER.writeValueAsString(response));
             } catch (Exception ex) {
                 log.error("发送认证失败消息异常", ex);
             }
@@ -803,7 +805,7 @@ public class ImWebSocketEndpoint {
      */
     private void processReadReceipt(Long userId, Object payload) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = OBJECT_MAPPER;
             Map<String, Object> readData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -870,7 +872,7 @@ public class ImWebSocketEndpoint {
     private void sendMessage(Session session, Object message) {
         try {
             if (session != null && session.isOpen()) {
-                ObjectMapper mapper = new ObjectMapper();
+                ObjectMapper mapper = OBJECT_MAPPER;
                 String messageJson = mapper.writeValueAsString(message);
                 session.getBasicRemote().sendText(messageJson);
             }
@@ -984,7 +986,7 @@ public class ImWebSocketEndpoint {
         List<Session> sessions = onlineUsers.get(userId);
         if (sessions != null && !sessions.isEmpty()) {
             try {
-                ObjectMapper mapper = new ObjectMapper();
+                ObjectMapper mapper = OBJECT_MAPPER;
                 String messageJson = mapper.writeValueAsString(message);
                 for (Session session : sessions) {
                     if (session.isOpen()) {
@@ -1063,7 +1065,7 @@ public class ImWebSocketEndpoint {
             signalMessage.put("timestamp", System.currentTimeMillis());
 
             // 广播给所有在线用户（实际应该只发给通话参与者）
-            broadcastToAllOnline(new ObjectMapper().writeValueAsString(signalMessage));
+            broadcastToAllOnline(OBJECT_MAPPER.writeValueAsString(signalMessage));
 
             log.debug("转发WebRTC信令: callId={}, type={}, from={}", callId, signalType, fromUserId);
 
@@ -1161,7 +1163,7 @@ public class ImWebSocketEndpoint {
             clientInfo.put("remoteAddress", session.getUserProperties().get("javax.websocket.endpoint.remoteAddress"));
             clientInfo.put("userAgent", session.getUserProperties().get("http.userAgent"));
             clientInfo.put("connectTime", System.currentTimeMillis());
-            return new ObjectMapper().writeValueAsString(clientInfo);
+            return OBJECT_MAPPER.writeValueAsString(clientInfo);
         } catch (Exception e) {
             log.warn("构建客户端信息失败: sessionId={}", session.getId(), e);
             return "{}";
@@ -1222,7 +1224,7 @@ public class ImWebSocketEndpoint {
      */
     private void processAckMessage(Long userId, Object payload, Session session) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = OBJECT_MAPPER;
             Map<String, Object> ackData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -1278,7 +1280,7 @@ public class ImWebSocketEndpoint {
      */
     private void processConversationEvent(Long userId, Object payload, Session session) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = OBJECT_MAPPER;
             Map<String, Object> eventData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 

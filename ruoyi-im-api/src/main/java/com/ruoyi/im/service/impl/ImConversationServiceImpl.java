@@ -117,6 +117,8 @@ public class ImConversationServiceImpl implements ImConversationService {
         java.util.Set<Long> conversationIds = new java.util.HashSet<>();
         java.util.Set<Long> userIds = new java.util.HashSet<>();
         java.util.Set<Long> groupIds = new java.util.HashSet<>();
+        java.util.Set<Long> groupConversationIds = new java.util.HashSet<>();
+        java.util.Map<Long, Long> conversationIdToGroupIdMap = new java.util.HashMap<>();
 
         // 收集所有需要批量查询的ID
         for (ImConversationVO vo : conversations) {
@@ -130,6 +132,8 @@ public class ImConversationServiceImpl implements ImConversationService {
             } else if (MessageStatusConstants.CONVERSATION_TYPE_GROUP.equalsIgnoreCase(vo.getType())
                     && vo.getTargetId() != null) {
                 groupIds.add(vo.getTargetId());
+                groupConversationIds.add(vo.getId());
+                conversationIdToGroupIdMap.put(vo.getId(), vo.getTargetId());
             }
         }
 
@@ -161,17 +165,21 @@ public class ImConversationServiceImpl implements ImConversationService {
                 groupMap.put(group.getId(), group);
             }
 
-            // 批量查询群组成员数量
-            List<java.util.Map<String, Object>> memberCounts = imConversationMemberMapper
-                    .countMembersByConversationIds(new java.util.ArrayList<>(groupIds));
-            for (java.util.Map<String, Object> countMap : memberCounts) {
-                Long conversationId = ((Number) countMap.get("conversationId")).longValue();
-                Integer count = ((Number) countMap.get("memberCount")).intValue();
-                groupMemberCountMap.put(conversationId, count);
-                // 同时设置到 group 对象中
-                ImGroup group = groupMap.get(conversationId);
-                if (group != null) {
-                    group.setMemberCount(count);
+            // 批量查询群组成员数量（使用会话ID查询，再映射回群组ID）
+            if (!groupConversationIds.isEmpty()) {
+                List<java.util.Map<String, Object>> memberCounts = imConversationMemberMapper
+                        .countMembersByConversationIds(new java.util.ArrayList<>(groupConversationIds));
+                for (java.util.Map<String, Object> countMap : memberCounts) {
+                    Long convId = ((Number) countMap.get("conversationId")).longValue();
+                    Integer count = ((Number) countMap.get("memberCount")).intValue();
+                    Long groupId = conversationIdToGroupIdMap.get(convId);
+                    if (groupId != null) {
+                        groupMemberCountMap.put(groupId, count);
+                        ImGroup group = groupMap.get(groupId);
+                        if (group != null) {
+                            group.setMemberCount(count);
+                        }
+                    }
                 }
             }
         }

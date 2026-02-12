@@ -324,7 +324,7 @@ defineExpose({
   position: fixed;
   inset: 0;
   background: var(--dt-bg-overlay);
-  backdrop-filter: blur(4px);
+  // 注意：移除 backdrop-filter 以提高滚动性能
   z-index: 3000;
   display: flex;
   align-items: flex-start;

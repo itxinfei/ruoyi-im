@@ -447,6 +447,68 @@ const ws = new WebSocket(`ws://localhost:8888/im/websocket/${userId}`)
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 ```
 
-# 八、许可证
+---
+
+# 八、开发规范（强制）
+
+## 8.1 语言规范
+
+**⚠️ 强制要求：所有代码注释、文档、提交信息必须使用中文**
+
+### 必须使用中文的场景
+- ✅ 代码注释
+- ✅ 函数/类文档注释
+- ✅ Git 提交信息
+- ✅ Markdown 文档
+- ✅ 用户界面文本
+- ✅ 错误提示信息
+- ✅ 日志输出
+
+### 示例
+
+```javascript
+// ✅ 正确：中文注释
+// 获取消息列表
+const fetchMessages = async () => {
+  // 验证消息内容不能为空
+  if (!content.value.trim()) {
+    ElMessage.warning('请输入消息内容')
+    return
+  }
+}
+
+// ❌ 错误：英文注释
+// fetch message list
+const fetchMessages = async () => {}
+```
+
+```bash
+# ✅ 正确：中文提交信息
+git commit -m "修复消息气泡圆角样式"
+git commit -m "优化消息列表滚动性能"
+
+# ❌ 错误：英文提交信息
+git commit -m "fix message bubble style"
+```
+
+**详细规范请参考**：`docs/LANGUAGE_SPEC.md`
+
+## 8.2 代码规范
+
+- **后端**：遵循《阿里巴巴Java开发手册》
+- **前端**：遵循《阿里巴巴前端开发手册》Vue专项 + 本项目 STYLE_GUIDE.md
+- **数据库**：遵循《阿里巴巴数据库设计规范》
+
+## 8.3 性能规范
+
+- 禁止使用 `will-change`、`contain` 等性能杀手属性
+- `transition` 必须指定具体属性
+- 谨慎使用 `backdrop-filter`（建议 ≤4px）
+
+**详细规范请参考**：`docs/PERFORMANCE_OPTIMIZATION.md`
+
+---
+
+# 九、许可证
 
 MIT License

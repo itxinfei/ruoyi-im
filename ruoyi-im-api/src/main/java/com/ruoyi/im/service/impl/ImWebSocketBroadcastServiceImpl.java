@@ -203,19 +203,23 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     @Override
     public void broadcastRecallNotification(Long conversationId, Long messageId, Long userId) {
         try {
-            Map<String, Object> recallNotification = new HashMap<>();
-            recallNotification.put("type", "recall");
-            recallNotification.put("conversationId", conversationId);
-            recallNotification.put("messageId", messageId);
-            recallNotification.put("userId", userId);
-            recallNotification.put("timestamp", java.time.LocalDateTime.now().toString());
+            // 构建标准推送格式: {type: 'recall', data: {...}}
+            Map<String, Object> data = new HashMap<>();
+            data.put("conversationId", conversationId);
+            data.put("messageId", messageId);
+            data.put("userId", userId);
+            data.put("timestamp", System.currentTimeMillis());
 
             // 获取用户信息
             com.ruoyi.im.domain.ImUser user = imUserService.getUserEntityById(userId);
             if (user != null) {
-                recallNotification.put("userName",
+                data.put("userName",
                         user.getNickname() != null ? user.getNickname() : user.getUsername());
             }
+
+            Map<String, Object> recallNotification = new HashMap<>();
+            recallNotification.put("type", "recall");
+            recallNotification.put("data", data);
 
             // 获取会话成员
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
@@ -224,8 +228,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             }
 
             String messageJson = objectMapper.writeValueAsString(recallNotification);
-            broadcastToMembers(members, messageJson, userId); // Exclude the sender/revoker themselves? Original logic
-                                                              // excluded userId.
+            // 不排除发送者，确保多设备同步撤回
+            broadcastToMembers(members, messageJson, null);
         } catch (Exception e) {
             log.error("广播撤回通知失败: messageId={}", messageId, e);
         }
@@ -381,26 +385,32 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     private Map<String, Object> createReactionMessage(Long conversationId, Long messageId, Long userId, String emoji,
             String action) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("action", action);
+        data.put("conversationId", conversationId);
+        data.put("messageId", messageId);
+        data.put("userId", userId);
+        if (emoji != null) {
+            data.put("emoji", emoji);
+        }
+        data.put("timestamp", System.currentTimeMillis());
+
         Map<String, Object> reactionMessage = new HashMap<>();
         reactionMessage.put("type", "reaction");
-        reactionMessage.put("action", action);
-        reactionMessage.put("conversationId", conversationId);
-        reactionMessage.put("messageId", messageId);
-        reactionMessage.put("userId", userId);
-        if (emoji != null) {
-            reactionMessage.put("emoji", emoji);
-        }
-        reactionMessage.put("timestamp", System.currentTimeMillis());
+        reactionMessage.put("data", data);
         return reactionMessage;
     }
 
     private Map<String, Object> createReadReceiptMessage(Long conversationId, Long lastReadMessageId, Long userId) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("conversationId", conversationId);
+        data.put("lastReadMessageId", lastReadMessageId);
+        data.put("userId", userId);
+        data.put("timestamp", System.currentTimeMillis());
+
         Map<String, Object> readReceipt = new HashMap<>();
         readReceipt.put("type", "read");
-        readReceipt.put("conversationId", conversationId);
-        readReceipt.put("lastReadMessageId", lastReadMessageId);
-        readReceipt.put("userId", userId);
-        readReceipt.put("timestamp", System.currentTimeMillis());
+        readReceipt.put("data", data);
         return readReceipt;
     }
 

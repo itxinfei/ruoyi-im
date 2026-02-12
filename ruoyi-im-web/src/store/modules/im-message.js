@@ -250,7 +250,12 @@ export default {
         index = state.messages[sessionId].findIndex(m => m.clientMsgId === message.clientMsgId)
       }
       if (index !== -1) {
-        state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...message }
+        // 创建新数组触发响应式更新
+        state.messages[sessionId] = [
+          ...state.messages[sessionId].slice(0, index),
+          { ...state.messages[sessionId][index], ...message },
+          ...state.messages[sessionId].slice(index + 1)
+        ]
       }
     },
 

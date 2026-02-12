@@ -796,9 +796,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   width: 100%;
   box-sizing: border-box;
   scroll-behavior: smooth;
-  // 性能优化
-  will-change: scroll-position;
-  contain: layout style paint;
+  // 注意：移除 will-change 和 contain 以避免性能问题
 
   // 自定义滚动条 - 钉钉风格
   &::-webkit-scrollbar {
@@ -863,7 +861,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   font-size: 12px;
   cursor: pointer;
   box-shadow: var(--dt-shadow-sm);
-  transition: all var(--dt-transition-fast);
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   z-index: 10;  // 在消息列表内部的层级
 
   &:hover {
@@ -968,7 +966,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   .read-count {
     color: var(--dt-brand-color);
     cursor: pointer;
-    transition: all var(--dt-transition-fast);
+    transition: background-color 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 2px;
@@ -998,7 +996,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   padding: 2px 6px;
   border-radius: var(--dt-radius-lg);
   font-size: 12px; // 从11px增大到12px
-  transition: all var(--dt-transition-fast);
+  transition: color 0.2s ease;
 
   &.read {
     color: var(--dt-text-quaternary);

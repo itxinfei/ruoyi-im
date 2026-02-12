@@ -562,7 +562,7 @@ defineExpose({
   right: 0;
   bottom: 0;
   background: var(--dt-call-overlay-bg);
-  backdrop-filter: blur(10px);
+  // 注意：移除 backdrop-filter 以提高性能
   z-index: $z-call-overlay;
   display: flex;
   align-items: center;

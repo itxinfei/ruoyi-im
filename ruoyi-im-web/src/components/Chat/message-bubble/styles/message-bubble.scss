@@ -9,17 +9,28 @@
 // 消息气泡基础样式（钉钉规范）
 // ============================================================================
 
-.bubble-base {
+.message-bubble {
   position: relative;
-  contain: layout style paint;
+  display: inline-flex;
+  align-items: center;
+  max-width: min(500px, 70vw);
+  width: fit-content;
+  min-width: 0;
+  padding: 0 !important; // 覆盖全局 padding
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transition: transform 0.2s var(--dt-ease-out), opacity 0.2s ease;
+  will-change: transform;
+  pointer-events: auto;
 }
 
 // 气泡内容基础样式
 .bubble-content {
-  padding: 8px 12px; // 钉钉标准：8px 上下，12px 左右
-  border-radius: 8px; // 钉钉8.0标准：8px 圆角
-  font-size: 14px; // 钉钉标准：14px
-  line-height: 1.5; // 钉钉标准：1.5 行高
+  padding: 4px 10px; // 进一步缩小：4px 上下，10px 左右
+  border-radius: 4px; // 进一步缩小：4px 圆角
+  font-size: 13px; // 缩小字号：13px
+  line-height: 1.35; // 紧凑行高：1.35
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
@@ -33,17 +44,16 @@
 .message-bubble:not(.is-right) {
   .bubble-content {
     background: var(--dt-bubble-left-bg, #FFFFFF);
-    border: none;
+    border: 1px solid var(--dt-bubble-left-border, transparent);
     color: var(--dt-text-primary);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-    border-radius: 8px; // 钉钉标准：8px 圆角
+    box-shadow: var(--dt-bubble-left-shadow, 0 1px 2px rgba(0, 0, 0, 0.06));
+    border-radius: 4px; 
   }
 
-  // 分组圆角样式
-  &.group-single .bubble-content { border-radius: 8px; }
-  &.group-first .bubble-content { border-radius: 8px 8px 8px 2px; }
-  &.group-middle .bubble-content { border-radius: 2px 8px 8px 2px; }
-  &.group-last .bubble-content { border-radius: 2px 8px 8px 8px; }
+  &.group-single .bubble-content { border-radius: 4px; }
+  &.group-first .bubble-content { border-radius: 4px 4px 4px 2px; }
+  &.group-middle .bubble-content { border-radius: 2px 4px 4px 2px; }
+  &.group-last .bubble-content { border-radius: 2px 4px 4px 4px; }
 }
 
 // ============================================================================
@@ -55,17 +65,16 @@
 
   .bubble-content {
     background: var(--dt-bubble-right-bg, var(--dt-brand-color));
-    color: #FFFFFF;
+    color: var(--dt-bubble-right-text, #FFFFFF);
     border: none;
     box-shadow: none;
-    border-radius: 8px; // 钉钉标准：8px 圆角
+    border-radius: 4px; 
   }
 
-  // 分组圆角样式
-  &.group-single .bubble-content { border-radius: 8px; }
-  &.group-first .bubble-content { border-radius: 8px 8px 2px 8px; }
-  &.group-middle .bubble-content { border-radius: 8px 2px 2px 8px; }
-  &.group-last .bubble-content { border-radius: 8px 2px 8px 8px; }
+  &.group-single .bubble-content { border-radius: 4px; }
+  &.group-first .bubble-content { border-radius: 4px 4px 2px 4px; }
+  &.group-middle .bubble-content { border-radius: 4px 2px 2px 4px; }
+  &.group-last .bubble-content { border-radius: 4px 2px 4px 4px; }
 
   // 确保所有子元素文字颜色都是白色（提高选择器优先级，不使用 !important）
   .message-text,
@@ -112,7 +121,7 @@
   padding: 0;
   background: transparent !important;
   border: none !important;
-  border-radius: 8px; // 钉钉标准：8px 圆角
+  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
   box-shadow: none;
   overflow: hidden;
 }
@@ -121,7 +130,7 @@
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: 8px; // 钉钉标准：8px 圆角
+  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
   overflow: hidden;
 }
 
@@ -143,9 +152,9 @@
 
 .media-bubble {
   display: inline-block;
-  border-radius: 8px; // 钉钉标准：8px 圆角
+  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
   overflow: hidden;
-  transition: all var(--dt-transition-base);
+  transition: opacity 0.2s ease;
 
   &:hover {
     opacity: 0.95;
@@ -206,21 +215,21 @@
 // ============================================================================
 // 分组内消息间距缩小（钉钉风格）
 // ============================================================================
-
-// 中间和末尾消息的间距缩小（钉钉标准：2px）
+// 分组内消息间距缩小
+// 中间和末尾消息的间距缩小
 .message-bubble.group-middle,
 .message-bubble.group-last {
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 // 首条消息保持正常间距
 .message-bubble.group-first {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 // 单条消息保持正常间距
 .message-bubble.group-single {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 // 钉钉风格：图片/视频消息的特殊圆角

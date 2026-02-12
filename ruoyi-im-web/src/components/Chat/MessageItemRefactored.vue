@@ -42,12 +42,11 @@
       @dblclick="handleNudge"
     >
       <DingtalkAvatar
-        v-if="groupPosition === 'single' || groupPosition === 'first'"
         :src="message.senderAvatar"
         :name="message.senderName"
         :user-id="message.senderId"
-        :size="40"
-        shape="square"
+        :size="32"
+        :shape="sessionType === 'GROUP' ? 'square' : 'circle'"
         custom-class="message-avatar"
       />
     </div>
@@ -176,24 +175,24 @@ const handleNudge = () => {
 
 .message-item {
   display: flex;
-  align-items: center;
-  min-height: 48px;
-  gap: 10px; // 优化：10px 间距
-  margin-bottom: 8px; // 钉钉标准：8px 消息间距
+  align-items: flex-start;
+  min-height: 32px;
+  gap: 6px;
+  margin-bottom: 6px; 
   position: relative;
   padding: 0;
-  transition: all 0.2s var(--dt-ease-out);
+  transition: background-color 0.2s var(--dt-ease-out), opacity 0.2s ease;
 
   &.is-right {
     flex-direction: row-reverse;
   }
 
   &.has-sender-name {
-    padding-top: 18px; // 钉钉标准：18px 顶部间距
+    padding-top: 14px; 
   }
 
   &.is-merged {
-    margin-bottom: 2px; // 钉钉标准：合并消息间距 2px
+    margin-bottom: 2px; 
   }
 }
 
@@ -225,17 +224,17 @@ const handleNudge = () => {
 
 .sender-name-absolute {
   position: absolute;
-  top: -20px;
+  top: -16px;
   left: 0;
-  font-size: 12px; // 钉钉标准：12px
-  color: var(--dt-text-tertiary); // 钉钉标准：使用次级文本色
+  font-size: 11px; 
+  color: var(--dt-text-tertiary); 
   white-space: nowrap;
-  max-width: 200px; // 钉钉标准：200px 最大宽度
+  max-width: 160px; 
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: none;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 .message-item.is-multi-select {
@@ -253,28 +252,32 @@ const handleNudge = () => {
 }
 
 .avatar-wrapper {
-  width: 40px; // 钉钉标准：40px
-  height: 40px; // 钉钉标准：40px
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px; // 钉钉标准：6px 圆角
+  border-radius: 4px;
   overflow: hidden;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 
   &.avatar-hidden {
-    width: 0;
+    width: 32px;
     height: 0;
     margin: 0;
     visibility: hidden;
     pointer-events: none;
     overflow: hidden;
+
+    .message-avatar {
+      opacity: 0;
+    }
   }
 
   :deep(.dingtalk-avatar) {
-    border-radius: 6px !important;
+    border-radius: 4px;
   }
 }
 
@@ -282,7 +285,7 @@ const handleNudge = () => {
   max-width: 60%; // 钉钉标准：60% 最大宽度
   display: flex;
   flex-direction: column;
-  margin: 0 8px; // 钉钉标准：8px 边距
+  margin: 0 6px;
   position: relative;
 
   &.is-merged {

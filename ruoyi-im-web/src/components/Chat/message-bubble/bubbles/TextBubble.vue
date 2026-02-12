@@ -288,8 +288,8 @@ function escapeRegExp(string) {
   word-break: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
-  line-height: 1.6; // 钉钉标准:1.6
-  font-size: var(--dt-font-size-content, 15px); // 钉钉标准:15px
+  line-height: 1.35; 
+  font-size: 13px; 
   max-width: 100%;
   min-width: 0;
   color: var(--dt-text-primary);

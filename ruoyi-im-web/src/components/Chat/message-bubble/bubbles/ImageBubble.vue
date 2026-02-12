@@ -99,6 +99,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { Loading, PictureFilled } from '@element-plus/icons-vue'
 import { parseMessageContent } from '@/utils/message'
+import { warn } from '@/utils/logger.js'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -190,7 +191,7 @@ const handleImageError = () => {
   isLoading.value = false
   imageLoaded.value = false
   hasError.value = true
-  console.warn('图片加载失败:', currentImageUrl.value)
+  warn('ImageBubble', '图片加载失败:', currentImageUrl.value)
 }
 
 // 重试加载图片
@@ -248,9 +249,11 @@ onMounted(() => {
 onUnmounted(() => {
   if (progressTimer) {
     clearInterval(progressTimer)
+    progressTimer = null
   }
   if (observer) {
     observer.disconnect()
+    observer = null
   }
 })
 </script>
@@ -262,12 +265,12 @@ onUnmounted(() => {
   position: relative;
   display: inline-block;
   cursor: zoom-in;
-  border-radius: 8px; // 钉钉标准：8px 圆角
+  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
   overflow: hidden;
   background: var(--dt-bg-card);
   transition: all var(--dt-transition-base);
-  min-width: 120px; // 钉钉标准：120px 最小宽度
-  min-height: 90px; // 钉钉标准：90px 最小高度
+  min-width: 100px; // 钉钉紧凑标准：100px 最小宽度
+  min-height: 80px; // 钉钉紧凑标准：80px 最小高度
 
   &:hover {
     opacity: 0.95;
@@ -286,8 +289,8 @@ onUnmounted(() => {
 
 .image-content {
   display: block;
-  max-width: 300px; // 钉钉标准：300px 最大宽度
-  max-height: 400px; // 钉钉标准：400px 最大高度
+  max-width: 260px; // 钉钉紧凑标准：260px 最大宽度
+  max-height: 350px; // 钉钉紧凑标准：350px 最大高度
   object-fit: contain;
   pointer-events: none;
   opacity: 0;
@@ -305,14 +308,14 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px; // 优化：10px
-  padding: 24px; // 优化：24px
-  min-width: 140px; // 优化：140px
-  min-height: 100px; // 优化：100px
-  max-width: 280px; // 优化：280px
-  max-height: 320px; // 优化：320px
+  gap: 6px; // 钉钉紧凑标准：6px
+  padding: 16px; // 钉钉紧凑标准：16px
+  min-width: 100px; // 钉钉紧凑标准：100px
+  min-height: 80px; // 钉钉紧凑标准：80px
+  max-width: 260px; // 钉钉紧凑标准：260px
+  max-height: 350px; // 钉钉紧凑标准：350px
   background: var(--dt-bg-hover);
-  border-radius: 8px; // 优化：8px
+  border-radius: 6px; // 钉钉紧凑标准：6px
   overflow: hidden;
 
   &.with-thumb {
@@ -354,8 +357,9 @@ onUnmounted(() => {
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: blur(20px);
+  filter: blur(10px); // 优化：降低模糊程度以提高性能
   transform: scale(1.1);
+  will-change: transform; // 优化：提示浏览器优化 transform
 }
 
 .image-bubble.is-uploading {

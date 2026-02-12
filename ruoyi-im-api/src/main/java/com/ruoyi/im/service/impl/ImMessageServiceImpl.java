@@ -174,7 +174,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             broadcastService.broadcastMessageToConversation(conversationId, message.getId(), sender);
 
             // 9. 更新消息状态为已送达
-            updateMessageSendStatus(message.getId(), "DELIVERED", null);
+            updateMessageSendStatus(message.getId(), MessageStatusConstants.STATUS_DELIVERED, null);
 
             // 10. 构建返回VO
             return buildMessageVO(message, sender);
@@ -185,7 +185,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
             // 如果消息已创建，更新状态为失败
             if (message != null && message.getId() != null) {
-                updateMessageSendStatus(message.getId(), "FAILED", e.getMessage());
+                updateMessageSendStatus(message.getId(), MessageStatusConstants.STATUS_FAILED, e.getMessage());
             }
 
             // 重新抛出异常，让上层处理
@@ -216,7 +216,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setCreateTime(LocalDateTime.now());
         message.setUpdateTime(LocalDateTime.now());
         message.setClientMsgId(clientMsgId);
-        message.setSendStatus("SENDING");
+        message.setSendStatus(MessageStatusConstants.STATUS_SENDING);
         message.setSendRetryCount(0);
         message.setDeliveredTime(LocalDateTime.now());
 
@@ -296,9 +296,9 @@ public class ImMessageServiceImpl implements ImMessageService {
             updateMsg.setSendStatus(sendStatus);
             updateMsg.setUpdateTime(LocalDateTime.now());
 
-            if ("DELIVERED".equals(sendStatus)) {
+            if (MessageStatusConstants.STATUS_DELIVERED.equals(sendStatus)) {
                 updateMsg.setDeliveredTime(LocalDateTime.now());
-            } else if ("FAILED".equals(sendStatus)) {
+            } else if (MessageStatusConstants.STATUS_FAILED.equals(sendStatus)) {
                 updateMsg.setSendErrorMsg(errorMsg);
                 // 增加重试计数
                 ImMessage existingMsg = imMessageMapper.selectImMessageById(messageId);
@@ -332,7 +332,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         vo.setSendTime(message.getCreateTime());
         // 使用 Entity 中的 sendStatus，不要硬编码
         if (vo.getSendStatus() == null) {
-            vo.setSendStatus(message.getSendStatus() != null ? message.getSendStatus() : "SENDING");
+            vo.setSendStatus(message.getSendStatus() != null ? message.getSendStatus() : MessageStatusConstants.STATUS_SENDING);
         }
         return vo;
     }
