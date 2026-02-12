@@ -51,232 +51,235 @@
       </div>
 
       <!-- 导航菜单 -->
-      <nav class="nav-list scrollbar-custom">
-        <div class="nav-group">
-          <div class="nav-group-title">
-            常用
-          </div>
-          <div
-            class="nav-item"
-            :class="{ active: currentNav === 'new' }"
-            @click="switchNav('new')"
-          >
-            <div class="nav-icon-wrapper bg-gradient-orange">
-              <el-icon>
-                <User />
-              </el-icon>
+      <el-scrollbar class="sidebar-nav-scroll">
+        <nav class="nav-list">
+          <div class="nav-group">
+            <div class="nav-group-title">
+              常用
             </div>
-            <span class="nav-text">新的朋友</span>
-            <span
-              v-if="pendingCount > 0"
-              class="nav-badge"
-            >{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
-          </div>
-
-          <div
-            class="nav-item"
-            :class="{ active: currentNav === 'recommended' }"
-            @click="switchNav('recommended')"
-          >
-            <div class="nav-icon-wrapper bg-gradient-pink">
-              <el-icon>
-                <Star />
-              </el-icon>
-            </div>
-            <span class="nav-text">可能认识的人</span>
-            <span
-              v-if="recommendedCount > 0"
-              class="nav-dot"
-            />
-          </div>
-
-          <div
-            class="nav-item"
-            :class="{ active: currentNav === 'all' }"
-            @click="switchNav('all')"
-          >
-            <div class="nav-icon-wrapper bg-gradient-primary">
-              <el-icon>
-                <User />
-              </el-icon>
-            </div>
-            <span class="nav-text">公司同事</span>
-            <span class="nav-count">{{ allUsers.length }}</span>
-          </div>
-
-          <div
-            class="nav-item"
-            :class="{ active: currentNav === 'friends' }"
-            @click="switchNav('friends')"
-          >
-            <div class="nav-icon-wrapper bg-gradient-blue">
-              <el-icon>
-                <Avatar />
-              </el-icon>
-            </div>
-            <span class="nav-text">我的好友</span>
-            <el-dropdown
-              trigger="click"
-              @command="handleGroupCommand"
-              @click.stop
-            >
-              <el-icon class="group-menu-icon">
-                <MoreFilled />
-              </el-icon>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="add">
-                    <span class="material-icons-outlined">add</span>
-                    添加分组
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
-
-          <!-- 好友分组列表 -->
-          <Transition name="expand">
             <div
-              v-if="friendGroupNames.length > 0"
-              class="friend-groups-list"
+              class="nav-item"
+              :class="{ active: currentNav === 'new' }"
+              @click="switchNav('new')"
             >
-              <div
-                v-for="groupName in friendGroupNames"
-                :key="groupName"
-                class="nav-item nav-item-sub"
-                :class="{ active: currentNav === groupName }"
-                @click="switchNav(groupName)"
-              >
-                <div class="nav-icon-wrapper bg-gradient-light">
-                  <span class="group-initial">{{ groupName.charAt(0) }}</span>
-                </div>
-                <span class="nav-text">{{ groupName }}</span>
-                <el-dropdown
-                  trigger="click"
-                  @command="(cmd) => handleGroupItemCommand(cmd, groupName)"
-                  @click.stop
-                >
-                  <el-icon class="group-item-menu-icon">
-                    <MoreFilled />
-                  </el-icon>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item command="rename">
-                        <span class="material-icons-outlined">edit</span>
-                        重命名
-                      </el-dropdown-item>
-                      <el-dropdown-item
-                        command="delete"
-                        divided
-                      >
-                        <span class="material-icons-outlined">delete</span>
-                        删除分组
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
+              <div class="nav-icon-wrapper bg-gradient-orange">
+                <el-icon>
+                  <UserFilled />
+                </el-icon>
               </div>
+              <span class="nav-text">新的朋友</span>
+              <span
+                v-if="pendingCount > 0"
+                class="nav-badge"
+              >{{ pendingCount > 99 ? '99+' : pendingCount }}</span>
             </div>
-          </Transition>
 
-          <div
-            class="nav-item"
-            :class="{ active: currentNav === 'groups' }"
-            @click="switchNav('groups')"
-          >
-            <div class="nav-icon-wrapper bg-gradient-green">
-              <el-icon>
-                <ChatDotSquare />
-              </el-icon>
-            </div>
-            <span class="nav-text">我的群组</span>
-          </div>
-        </div>
-
-        <div class="nav-divider" />
-
-        <!-- 组织架构 -->
-        <div class="nav-group">
-          <div class="nav-group-title">
-            组织架构
-          </div>
-          <!-- 组织架构搜索 -->
-          <div class="org-search-box">
-            <el-input
-              v-model="orgSearchQuery"
-              placeholder="搜索部门/人员..."
-              :prefix-icon="Search"
-              size="small"
-              clearable
-              @input="handleOrgSearch"
-            />
-          </div>
-          <div class="org-tree-container">
             <div
-              class="nav-item org-root"
-              :class="{ expanded: orgExpanded }"
-              @click="toggleOrg"
+              class="nav-item"
+              :class="{ active: currentNav === 'recommended' }"
+              @click="switchNav('recommended')"
             >
-              <el-icon
-                class="arrow-icon"
-                :class="{ rotated: orgExpanded }"
-              >
-                <ArrowRight />
-              </el-icon>
-              <div class="nav-icon-wrapper bg-gradient-purple">
+              <div class="nav-icon-wrapper bg-gradient-pink">
+                <el-icon>
+                  <StarFilled />
+                </el-icon>
+              </div>
+              <span class="nav-text">可能认识的人</span>
+              <span
+                v-if="recommendedCount > 0"
+                class="nav-dot"
+              />
+            </div>
+
+            <div
+              class="nav-item"
+              :class="{ active: currentNav === 'all' }"
+              @click="switchNav('all')"
+            >
+              <div class="nav-icon-wrapper bg-gradient-blue">
                 <el-icon>
                   <OfficeBuilding />
                 </el-icon>
               </div>
-              <span class="nav-text">企业组织</span>
+              <span class="nav-text">全部联系人</span>
+              <span class="nav-count">{{ allUsers.length }}</span>
             </div>
 
+            <div
+              class="nav-item"
+              :class="{ active: currentNav === 'friends' }"
+              @click="switchNav('friends')"
+            >
+              <div class="nav-icon-wrapper bg-gradient-green">
+                <el-icon>
+                  <Avatar />
+                </el-icon>
+              </div>
+              <span class="nav-text">我的好友</span>
+              <el-dropdown
+                trigger="click"
+                @command="handleGroupCommand"
+                @click.stop
+              >
+                <el-icon class="group-menu-icon">
+                  <MoreFilled />
+                </el-icon>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="add">
+                      <el-icon><Plus /></el-icon>
+                      添加分组
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+
+            <!-- 好友分组列表 -->
             <Transition name="expand">
               <div
-                v-show="orgExpanded"
-                class="org-list"
+                v-if="friendGroupNames.length > 0"
+                class="friend-groups-list"
               >
                 <div
-                  v-for="dept in flatDepts"
-                  :key="dept.id"
-                  class="org-item"
-                  :class="{
-                    active: selectedDeptId === dept.id,
-                    'has-children': dept.hasChildren
-                  }"
-                  :style="{ paddingLeft: `${20 + (dept.level || 0) * 16}px` }"
-                  @click="selectDept(dept)"
+                  v-for="groupName in friendGroupNames"
+                  :key="groupName"
+                  class="nav-item nav-item-sub"
+                  :class="{ active: currentNav === groupName }"
+                  @click="switchNav(groupName)"
                 >
-                  <div class="org-item-content">
-                    <el-icon
-                      v-if="dept.hasChildren"
-                      class="org-expand-icon"
-                      :class="{ expanded: dept.expanded }"
-                    >
-                      <ArrowRight />
-                    </el-icon>
-                    <span
-                      v-if="dept.level > 0 && !dept.hasChildren"
-                      class="org-line"
-                    />
-                    <span class="org-name">{{ dept.name }}</span>
-                    <span class="org-stats">
-                      <span class="org-count">{{ dept.userCount || 0 }}人</span>
-                      <span
-                        v-if="dept.onlineCount > 0"
-                        class="org-online"
-                      >
-                        <span class="online-dot" />
-                        {{ dept.onlineCount }}
-                      </span>
-                    </span>
+                  <div class="nav-icon-wrapper bg-gradient-light">
+                    <span class="group-initial">{{ groupName.charAt(0) }}</span>
                   </div>
+                  <span class="nav-text">{{ groupName }}</span>
+                  <el-dropdown
+                    trigger="click"
+                    @command="(cmd) => handleGroupItemCommand(cmd, groupName)"
+                    @click.stop
+                  >
+                    <el-icon class="group-item-menu-icon">
+                      <MoreFilled />
+                    </el-icon>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item command="rename">
+                          <el-icon><EditPen /></el-icon>
+                          重命名
+                        </el-dropdown-item>
+                        <el-dropdown-item
+                          command="delete"
+                          divided
+                        >
+                          <el-icon><Delete /></el-icon>
+                          删除分组
+                        </el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
                 </div>
               </div>
             </Transition>
+
+            <div
+              class="nav-item"
+              :class="{ active: currentNav === 'groups' }"
+              @click="switchNav('groups')"
+            >
+              <div class="nav-icon-wrapper bg-gradient-teal">
+                <el-icon>
+                  <ChatLineRound />
+                </el-icon>
+              </div>
+              <span class="nav-text">我的群组</span>
+            </div>
           </div>
-        </div>
-      </nav>
+
+          <div class="nav-divider" />
+
+          <!-- 组织架构 -->
+          <div class="nav-group">
+            <div class="nav-group-title">
+              组织架构
+            </div>
+            <!-- 组织架构搜索 -->
+            <div class="org-search-box">
+              <el-input
+                v-model="orgSearchQuery"
+                placeholder="搜索部门/人员..."
+                :prefix-icon="Search"
+                size="small"
+                clearable
+                @input="handleOrgSearch"
+              />
+            </div>
+            <div class="org-tree-container">
+              <div
+                class="nav-item org-root"
+                :class="{ expanded: orgExpanded }"
+                @click="toggleOrg"
+              >
+                <el-icon
+                  class="arrow-icon"
+                  :class="{ rotated: orgExpanded }"
+                >
+                  <ArrowRight />
+                </el-icon>
+                <div class="nav-icon-wrapper bg-gradient-purple">
+                  <el-icon>
+                    <OfficeBuilding />
+                  </el-icon>
+                </div>
+                <span class="nav-text">企业组织</span>
+              </div>
+
+              <!-- 部门树 -->
+              <Transition name="expand">
+                <div
+                  v-show="orgExpanded"
+                  class="org-list"
+                >
+                  <div
+                    v-for="dept in flatDepts"
+                    :key="dept.id"
+                    class="org-item"
+                    :class="{
+                      active: selectedDeptId === dept.id,
+                      'has-children': dept.hasChildren
+                    }"
+                    :style="{ paddingLeft: `${20 + (dept.level || 0) * 16}px` }"
+                    @click="selectDept(dept)"
+                  >
+                    <div class="org-item-content">
+                      <el-icon
+                        v-if="dept.hasChildren"
+                        class="org-expand-icon"
+                        :class="{ expanded: dept.expanded }"
+                      >
+                        <ArrowRight />
+                      </el-icon>
+                      <span
+                        v-if="dept.level > 0 && !dept.hasChildren"
+                        class="org-line"
+                      />
+                      <span class="org-name">{{ dept.name }}</span>
+                      <span class="org-stats">
+                        <span class="org-count">{{ dept.userCount || 0 }}人</span>
+                        <span
+                          v-if="dept.onlineCount > 0"
+                          class="org-online"
+                        >
+                          <span class="online-dot" />
+                          {{ dept.onlineCount }}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+          </div>
+        </nav>
+      </el-scrollbar>
     </aside>
 
     <!-- 中间列表区 -->
@@ -316,34 +319,36 @@
         class="list-content-wrapper"
         ref="listContentRef"
       >
-        <!-- 推荐联系人 -->
         <div
           v-if="currentNav === 'recommended'"
-          class="recommend-content scrollbar-custom"
+          class="recommend-content"
         >
-          <RecommendedContacts
-            ref="recommendedContactsRef"
-            @update="handleRecommendUpdate"
-          />
+          <el-scrollbar>
+            <RecommendedContacts
+              ref="recommendedContactsRef"
+              @update="handleRecommendUpdate"
+            />
+          </el-scrollbar>
         </div>
 
-        <!-- 新的朋友列表 -->
         <div
           v-else-if="currentNav === 'new'"
-          class="friend-requests scrollbar-custom"
+          class="friend-requests"
         >
-          <NewFriendsView
-            ref="newFriendsViewRef"
-            @update-count="pendingCount = $event"
-          />
+          <el-scrollbar>
+            <NewFriendsView
+              ref="newFriendsViewRef"
+              @update-count="pendingCount = $event"
+            />
+          </el-scrollbar>
         </div>
 
         <!-- 通用列表 (好友/群组/部门成员) -->
         <VirtualList
           v-else-if="currentList.length > 0"
-          class="virtual-list scrollbar-custom"
+          class="virtual-list"
           :items="currentList"
-          :item-size="72"
+          :item-size="64"
           :height="virtualListHeight"
           :class="{ 'batch-mode': batchMode }"
         >
@@ -365,7 +370,7 @@
               <DingtalkAvatar
                 :src="getItemAvatar(item)"
                 :name="getItemName(item)"
-                :size="44"
+                :size="40"
                 :shape="currentNav === 'groups' ? 'square' : 'circle'"
               />
               <div class="item-info">
@@ -651,7 +656,8 @@ import { getAllUsers } from '@/api/im/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, User, Avatar, ChatDotSquare, OfficeBuilding,
-  ArrowRight, Plus, Close, MoreFilled, Star, Refresh
+  ArrowRight, Plus, Close, MoreFilled, Star, Refresh,
+  UserFilled, StarFilled, ChatLineRound
 } from '@element-plus/icons-vue'
 import { useHighlightText } from '@/composables/useHighlightText'
 import { useContactBatch } from '@/composables/useContactBatch'
@@ -1595,37 +1601,43 @@ $panel-min-width: 320px;
     }
     
     .nav-icon-wrapper {
-       box-shadow: 0 2px 8px rgba(50, 150, 250, 0.2);
+      box-shadow: 0 2px 8px var(--dt-brand-light);
     }
   }
 
   .nav-icon-wrapper {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 12px;
-    color: #fff;
-    font-size: 16px;
-    flex-shrink: 0;
-    transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  color: #fff;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: all 0.3s;
 
-    &.bg-gradient-orange { background: #FF9B44; }
-    &.bg-gradient-blue { background: #3296FA; }
-    &.bg-gradient-green { background: #15BD66; }
-    &.bg-gradient-purple { background: #8B5CF6; }
-    &.bg-gradient-primary { background: #3296FA; }
-    &.bg-gradient-pink { background: #F43F5E; }
+  &.bg-gradient-orange { background: linear-gradient(135deg, #FF943D 0%, #FF7A18 100%); }
+  &.bg-gradient-pink { background: linear-gradient(135deg, #F54A45 0%, #D8211B 100%); }
+  &.bg-gradient-blue { background: var(--dt-brand-color); }
+  &.bg-gradient-primary { background: var(--dt-brand-color); }
+  &.bg-gradient-green { background: linear-gradient(135deg, #00CC70 0%, #00B362 100%); }
+  &.bg-gradient-teal { background: linear-gradient(135deg, #47C7D0 0%, #2AB5BF 100%); }
+  &.bg-gradient-purple { background: linear-gradient(135deg, #722ED1 0%, #531DAB 100%); }
+  &.bg-gradient-light { 
+    background: var(--dt-fill-color);
+    color: var(--dt-text-secondary);
+    .group-initial { font-size: 14px; font-weight: 600; }
   }
+}
 
   .nav-text {
     flex: 1;
-    font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 14px;
   }
 
   .nav-badge {
@@ -1696,9 +1708,9 @@ $panel-min-width: 320px;
   }
 
   .bg-gradient-light {
-    background: #EBF5FF;
-    color: #3296FA;
-    .group-initial { color: #3296FA; font-weight: 600; }
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
+    .group-initial { color: var(--dt-brand-color); font-weight: 600; }
   }
 }
 
@@ -1826,19 +1838,36 @@ $panel-min-width: 320px;
 .list-item {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  padding: 0 16px;
+  height: 64px;
   cursor: pointer;
   transition: all 0.2s;
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-lighter);
+  position: relative;
 
   &:hover {
     background-color: var(--dt-bg-subtle-hover);
   }
 
   &.active {
-    background-color: var(--dt-brand-bg);
-    .item-name { color: var(--dt-brand-color); }
+    background-color: var(--dt-bg-session-active);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 15%;
+      height: 70%;
+      width: 3px;
+      background: var(--dt-brand-color);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .item-name { 
+      color: var(--dt-brand-color);
+      font-weight: 600;
+    }
   }
 
   .item-info {

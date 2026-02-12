@@ -54,7 +54,7 @@
   flex-direction: row-reverse;
 
   .bubble-content {
-    background: var(--dt-bubble-right-bg, #3296FA);
+    background: var(--dt-bubble-right-bg, var(--dt-brand-color));
     color: #FFFFFF;
     border: none;
     box-shadow: none;
@@ -263,7 +263,7 @@
 
   // 自己消息：钉钉蓝
   .message-bubble.is-right .bubble-content {
-    background: var(--dt-brand-color, #3296FA);
+    background: var(--dt-brand-color);
     color: #FFFFFF;
   }
 

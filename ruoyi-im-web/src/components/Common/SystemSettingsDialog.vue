@@ -26,18 +26,20 @@
           >
         </div>
 
-        <nav class="sidebar-nav scrollbar-custom">
-          <div
-            v-for="item in filteredMenuItems"
-            :key="item.id"
-            class="nav-item"
-            :class="{ active: activeMenu === item.id }"
-            @click="activeMenu = item.id"
-          >
-            <span class="material-icons-outlined nav-icon">{{ item.icon }}</span>
-            <span class="nav-label">{{ item.label }}</span>
-          </div>
-        </nav>
+        <el-scrollbar class="sidebar-nav-scroll">
+          <nav class="sidebar-nav">
+            <div
+              v-for="item in filteredMenuItems"
+              :key="item.id"
+              class="nav-item"
+              :class="{ active: activeMenu === item.id }"
+              @click="activeMenu = item.id"
+            >
+              <span class="material-icons-outlined nav-icon">{{ item.icon }}</span>
+              <span class="nav-label">{{ item.label }}</span>
+            </div>
+          </nav>
+        </el-scrollbar>
 
         <div class="sidebar-footer">
           <div
@@ -97,13 +99,15 @@
           </div>
         </header>
 
-        <div class="main-content scrollbar-custom">
-          <component
-            :is="currentComponent"
-            v-bind="componentProps"
-            v-on="finalComponentEvents"
-          />
-        </div>
+        <el-scrollbar class="main-content-scroll">
+          <div class="main-content">
+            <component
+              :is="currentComponent"
+              v-bind="componentProps"
+              v-on="finalComponentEvents"
+            />
+          </div>
+        </el-scrollbar>
       </main>
     </div>
 
@@ -470,32 +474,16 @@ onUnmounted(() => {
   }
 }
 
-.sidebar-nav {
+.sidebar-nav-scroll {
   flex: 1;
+  overflow: hidden;
+}
+
+.sidebar-nav {
   padding: 12px 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  // 自定义滚动条样式
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: #d1d5db;
-    border-radius: 2px;
-
-    &:hover {
-      background-color: #9ca3af;
-    }
-  }
 }
 
 .nav-item {
@@ -626,11 +614,14 @@ onUnmounted(() => {
   }
 }
 
-.main-content {
+.main-content-scroll {
   flex: 1;
-  padding: 20px;
-  overflow-y: auto;
   background: #fafbfc;
+  overflow: hidden;
+}
+
+.main-content {
+  padding: 20px;
 }
 
 @media (max-width: 1024px) {
@@ -674,27 +665,6 @@ onUnmounted(() => {
 
   .sidebar-footer {
     display: none;
-  }
-}
-
-// 滚动条样式
-.scrollbar-custom {
-  &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--dt-border-color);
-    border-radius: var(--dt-radius-sm);
-
-    &:hover {
-      background-color: var(--dt-text-quaternary);
-    }
   }
 }
 

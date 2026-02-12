@@ -40,10 +40,12 @@
         <!-- 移除旧的侧边栏，改用全局弹窗 -->
       </div>
 
-      <!-- 群组详情弹窗 -->
-      <GroupDetailDialog v-model:visible="showGroupDetail" :group-id="session?.targetId"
-        @refresh-group="handleRefreshGroup" @show-files="handleShowGroupFiles"
-        @show-announcement="handleShowGroupAnnouncement" />
+      <!-- 群组详情弹窗 - Teleport 到 body 避免 contain: layout 限制 fixed 定位 -->
+      <Teleport to="body">
+        <GroupDetailDialog v-model:visible="showGroupDetail" :group-id="session?.targetId"
+          @refresh-group="handleRefreshGroup" @show-files="handleShowGroupFiles"
+          @show-announcement="handleShowGroupAnnouncement" />
+      </Teleport>
 
       <!-- 隐藏的文件上传 input -->
       <input ref="fileInputRef" type="file" class="hidden-input" @change="handleFileUpload">

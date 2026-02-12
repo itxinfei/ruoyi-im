@@ -148,7 +148,7 @@ const handleClick = () => {
 
     .material-icons-outlined {
       font-size: 16px;
-      color: var(--dt-brand-color, #3296FA);
+      color: var(--dt-brand-color);
     }
 
     .header-title {
@@ -176,7 +176,7 @@ const handleClick = () => {
 
       .msg-sender {
         font-weight: 500;
-        color: var(--dt-brand-color, #3296FA);
+        color: var(--dt-brand-color);
         flex-shrink: 0;
       }
 

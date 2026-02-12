@@ -212,7 +212,7 @@ const isUserOnline = computed(() => {
 
 // 导航模块 — 每个模块独立配色 + Material Icons Outlined
 const navModules = ref([
-  { key: 'chat', label: '消息', icon: 'chat', color: '#3296FA' },
+  { key: 'chat', label: '消息', icon: 'chat', color: 'var(--dt-brand-color)' },
   { key: 'contacts', label: '通讯录', icon: 'people', color: '#00C853' },
   { key: 'workbench', label: '工作台', icon: 'grid_view', color: '#FF9800' },
   { key: 'drive', label: '云盘', icon: 'cloud', color: '#7C4DFF' },
@@ -266,7 +266,7 @@ function handleOpenSearch() {
   }
 
   .active-bar {
-    background: #3296FA;
+    background: var(--dt-brand-color);
   }
 
   .nav-footer {
@@ -282,7 +282,7 @@ function handleOpenSearch() {
     }
 
     &.is-active {
-      color: #3296FA;
+      color: var(--dt-brand-color);
     }
   }
 
@@ -383,13 +383,14 @@ function handleOpenSearch() {
   align-items: center;
   justify-content: center;
   border: none;
-  background: #3296FA;
+  background: var(--dt-brand-color);
   cursor: pointer;
   border-radius: 10px;
   transition: all 0.2s ease;
 
   &:hover {
-    background: #1A7FE8;
+    background: var(--dt-brand-color);
+    filter: brightness(1.1);
     transform: scale(1.05);
   }
 

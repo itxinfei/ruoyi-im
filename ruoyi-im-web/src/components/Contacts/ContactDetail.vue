@@ -434,8 +434,8 @@ const handleDeleteContact = () => {
 
 .profile-header {
   position: relative;
-  padding-top: var(--dt-spacing-4xl);
-  margin-bottom: var(--dt-spacing-2xl);
+  padding-top: var(--dt-spacing-5xl);
+  margin-bottom: var(--dt-spacing-xl);
   background-color: var(--dt-bg-card);
   overflow: hidden;
 
@@ -444,13 +444,12 @@ const handleDeleteContact = () => {
     top: 0;
     left: 0;
     right: 0;
-    height: 200px;
+    height: 240px;
     background-size: cover;
     background-position: center;
-    filter: blur(30px) saturate(1.2);
-    opacity: 0.5;
+    filter: blur(40px) saturate(1.4);
+    opacity: 0.15; /* Subtler blur background */
     z-index: 0;
-    transform: scale(1.1);
 
     .header-overlay {
       position: absolute;
@@ -460,8 +459,7 @@ const handleDeleteContact = () => {
       height: 100%;
       background: linear-gradient(
         to bottom,
-        transparent 0%,
-        transparent 40%,
+        rgba(255, 255, 255, 0) 0%,
         var(--dt-bg-card) 100%
       );
     }
@@ -478,39 +476,26 @@ const handleDeleteContact = () => {
 
     .avatar-wrapper {
       position: relative;
-      margin-bottom: var(--dt-spacing-lg);
+      margin-bottom: var(--dt-spacing-xl);
 
       .main-avatar {
-        border: 4px solid var(--dt-bg-card);
-        box-shadow: var(--dt-shadow-dialog);
-        background: var(--dt-color-primary-light);
-        color: var(--dt-color-primary);
-        font-size: 48px;
-        font-weight: 600;
+        border: 4px solid #fff;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        background: var(--dt-bg-body);
+        transition: transform 0.3s ease;
+        
+        &:hover {
+          transform: scale(1.02);
+        }
       }
 
       .status-indicator {
         position: absolute;
-        bottom: 6px;
-        right: 6px;
+        bottom: 8px;
+        right: 8px;
         width: 24px;
         height: 24px;
-
-        .status-pulse {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          border-radius: var(--dt-radius-full);
-          background-color: var(--dt-color-success);
-          opacity: 0.3;
-          animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-
-          &.offline {
-            display: none;
-          }
-        }
+        z-index: 2;
 
         .status-dot {
           position: absolute;
@@ -518,39 +503,41 @@ const handleDeleteContact = () => {
           right: 2px;
           width: 18px;
           height: 18px;
-          border-radius: var(--dt-radius-full);
-          background-color: var(--dt-color-info);
-          border: 3px solid var(--dt-bg-card);
+          border-radius: 50%;
+          background-color: var(--dt-text-quaternary);
+          border: 3px solid #fff;
           transition: all 0.3s;
         }
 
         &.online .status-dot {
-          background-color: var(--dt-color-success);
-          box-shadow: 0 0 0 3px var(--dt-bg-card), 0 0 12px var(--dt-color-success);
+          background-color: var(--dt-success-color);
+          box-shadow: 0 0 10px rgba(0, 200, 83, 0.4);
         }
       }
     }
 
     .user-identity {
       .display-name {
-        margin: 0 0 var(--dt-spacing-md);
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--dt-color-text-primary);
+        margin: 0 0 8px;
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--dt-text-primary);
+        letter-spacing: -0.5px;
       }
 
       .signature {
-        margin: 0 0 var(--dt-spacing-lg);
-        color: var(--dt-color-text-secondary);
+        margin: 0 0 16px;
+        color: var(--dt-text-tertiary);
         font-size: 14px;
-        max-width: 480px;
-        line-height: 1.5;
+        max-width: 500px;
+        line-height: 1.6;
       }
 
       .tags-container {
         display: flex;
-        gap: var(--dt-spacing-md);
+        gap: 8px;
         justify-content: center;
+        margin-bottom: 8px;
       }
     }
   }
@@ -559,105 +546,87 @@ const handleDeleteContact = () => {
 .quick-actions {
   display: flex;
   justify-content: center;
-  gap: var(--dt-spacing-2xl);
-  margin-bottom: var(--dt-spacing-4xl);
-  padding: 0 var(--dt-spacing-xl);
-  flex-wrap: wrap;
+  gap: 32px;
+  margin-bottom: 40px;
+  padding: 0 24px;
 
   .action-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--dt-spacing-md);
+    gap: 8px;
     cursor: pointer;
-    group: true;
+    transition: all 0.2s;
 
     .icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--dt-radius-xl);
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      background-color: var(--dt-bg-hover);
-      color: var(--dt-color-text-regular);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 26px;
+      background-color: #f5f6f7;
+      color: #646a73;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-      &.primary {
-        &:hover {
-          background-color: var(--dt-color-primary);
-          color: #fff;
-        }
-      }
-      &.success {
-        &:hover {
-          background-color: var(--dt-color-success);
-          color: #fff;
-        }
-      }
-      &.warning {
-        &:hover {
-          background-color: var(--dt-color-warning);
-          color: #fff;
-        }
-      }
-      &.info {
-        &:hover {
-          background-color: var(--dt-color-info);
-          color: #fff;
-        }
-      }
+      &.primary:hover { background-color: var(--dt-brand-color); color: #fff; box-shadow: 0 6px 16px rgba(50, 150, 250, 0.3); }
+      &.success:hover { background-color: #00CC70; color: #fff; box-shadow: 0 6px 16px rgba(0, 204, 112, 0.3); }
+      &.warning:hover { background-color: #FF943F; color: #fff; box-shadow: 0 6px 16px rgba(255, 148, 63, 0.3); }
+      &.info:hover { background-color: #722ED1; color: #fff; box-shadow: 0 6px 16px rgba(114, 46, 209, 0.3); }
 
       &.star.active {
-        background-color: var(--dt-color-warning-light);
-        color: var(--dt-color-warning);
+        background-color: #FFF7E6;
+        color: #FA8C16;
+        border: 1px solid #FFD591;
       }
     }
 
     span {
-      font-size: 12px;
-      color: var(--dt-color-text-secondary);
-      transition: color 0.2s;
+      font-size: 13px;
+      color: var(--dt-text-secondary);
+      font-weight: 500;
     }
 
     &:hover span {
-      color: var(--dt-color-text-primary);
+      color: var(--dt-text-primary);
     }
   }
 }
 
 .info-sections {
-  max-width: 800px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 0 var(--dt-spacing-xl);
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: var(--dt-spacing-2xl);
+  gap: 24px;
 }
 
 .section-card {
-  background-color: var(--dt-bg-card);
-  border-radius: var(--dt-radius-xl);
-  padding: var(--dt-spacing-2xl);
-  box-shadow: var(--dt-shadow-card);
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid var(--dt-border-lighter);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
 
   .card-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
-    margin-bottom: var(--dt-spacing-lg);
-    color: var(--dt-color-text-primary);
+    margin-bottom: 20px;
+    color: var(--dt-text-primary);
     display: flex;
     align-items: center;
+    opacity: 0.85;
 
     &::before {
       content: '';
       display: block;
-      width: 4px;
-      height: 16px;
-      background-color: var(--dt-color-primary);
-      border-radius: var(--dt-radius-sm);
-      margin-right: var(--dt-spacing-md);
+      width: 3px;
+      height: 14px;
+      background-color: var(--dt-brand-color);
+      border-radius: 2px;
+      margin-right: 10px;
     }
   }
 }
@@ -665,40 +634,37 @@ const handleDeleteContact = () => {
 .info-list {
   display: flex;
   flex-direction: column;
-  gap: var(--dt-spacing-lg);
+  gap: 16px;
 
   .info-item {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     font-size: 14px;
 
     .label {
-      width: 100px;
-      color: var(--dt-color-text-secondary);
+      width: 120px;
+      color: var(--dt-text-tertiary);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       flex-shrink: 0;
+      
+      .el-icon { font-size: 16px; }
     }
 
     .value {
       flex: 1;
-      color: var(--dt-color-text-regular);
-      line-height: 1.5;
-      word-break: break-all;
-
+      color: var(--dt-text-primary);
+      font-weight: 500;
+      
       &.announcement {
         white-space: pre-wrap;
-        background-color: var(--dt-bg-hover);
-        padding: var(--dt-spacing-md) var(--dt-spacing-lg);
-        border-radius: var(--dt-radius-md);
+        background-color: #f7f8f9;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: normal;
+        color: var(--dt-text-secondary);
       }
-    }
-
-    .copy-btn {
-      margin-left: var(--dt-spacing-md);
-      padding: 0;
-      height: auto;
     }
   }
 }
@@ -708,10 +674,10 @@ const handleDeleteContact = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--dt-spacing-lg) 0;
+    padding: 14px 0;
     cursor: pointer;
-    border-bottom: 1px solid var(--dt-border-color-light);
-    transition: background-color 0.2s;
+    border-bottom: 1px solid var(--dt-border-lighter);
+    transition: all 0.2s;
 
     &:last-child {
       border-bottom: none;
@@ -720,22 +686,25 @@ const handleDeleteContact = () => {
     .left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       font-size: 14px;
-      color: var(--dt-color-text-regular);
+      color: var(--dt-text-primary);
+      font-weight: 500;
     }
 
     .arrow {
-      color: var(--dt-color-text-placeholder);
-      font-size: 16px;
+      color: var(--dt-text-quaternary);
+      font-size: 14px;
+      transition: transform 0.2s;
     }
 
     &.danger {
-      .left { color: var(--dt-color-danger); }
+      .left { color: var(--dt-error-color); }
     }
 
     &:hover {
-      .left { opacity: 0.8; }
+      background: #fcfdfe;
+      .arrow { transform: translateX(2px); }
     }
   }
 }
@@ -745,19 +714,18 @@ const handleDeleteContact = () => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--dt-color-text-placeholder);
-
+  
   .empty-illustration {
-    width: 120px;
-    height: 120px;
-    border-radius: var(--dt-radius-full);
-    background-color: var(--dt-bg-hover);
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background-color: #f5f6f7;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 48px;
-    color: var(--dt-color-text-placeholder);
-    margin: 0 auto;
+    font-size: 56px;
+    color: var(--dt-text-quaternary);
+    margin: 0 auto 20px;
   }
 }
 

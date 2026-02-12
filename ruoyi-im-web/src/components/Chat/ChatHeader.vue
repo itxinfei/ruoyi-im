@@ -286,7 +286,7 @@ const toggleConversationInfo = () => {
 }
 
 .group-avatar {
-  background: #3296FA;
+  background: var(--dt-brand-color);
   display: flex;
   align-items: center;
   justify-content: center;

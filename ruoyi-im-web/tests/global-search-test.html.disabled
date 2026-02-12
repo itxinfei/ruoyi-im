@@ -96,8 +96,8 @@
         }
 
         .modern-input.is-focus {
-            box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
-            border-color: #0089FF;
+            box-shadow: 0 0 0 3px rgba(50, 150, 250, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-color: #3296FA;
             background: #fff;
         }
 
@@ -118,7 +118,7 @@
         }
 
         .search-button {
-            background: #0089FF;
+            background: #3296FA;
             color: #fff;
             border: none;
             border-radius: 20px;
@@ -202,9 +202,9 @@
 
         .cat-tab.active {
             background: #fff;
-            color: #0089FF;
+            color: #3296FA;
             font-weight: 600;
-            border-right: 3px solid #0089FF;
+            border-right: 3px solid #3296FA;
             box-shadow: inset 0 0 0 1px #e2e8f0;
             transform: translateX(4px);
         }
@@ -334,7 +334,7 @@
 
         .section-icon {
             font-size: 18px;
-            color: #0089FF;
+            color: #3296FA;
         }
 
         .section-title {
@@ -420,9 +420,9 @@
 
         .trending-tag:hover {
             background: #f0f9ff;
-            color: #0089FF;
+            color: #3296FA;
             transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0, 137, 255, 0.15);
+            box-shadow: 0 2px 8px rgba(50, 150, 250, 0.15);
         }
 
         .tag-rank {
@@ -432,7 +432,7 @@
             width: 18px;
             height: 18px;
             border-radius: 9px;
-            background: #0089FF;
+            background: #3296FA;
             color: #fff;
             font-size: 11px;
             font-weight: bold;
@@ -642,7 +642,7 @@
         }
 
         .empty-title strong {
-            color: #0089FF;
+            color: #3296FA;
         }
 
         .empty-desc {
@@ -675,7 +675,7 @@
 
         .suggestion-item {
             font-size: 13px;
-            color: #0089FF;
+            color: #3296FA;
             cursor: pointer;
             text-align: left;
             padding: 6px 8px;
@@ -754,7 +754,7 @@
 
         .test-container.dark .modern-input.is-focus {
             background: #0f172a;
-            box-shadow: 0 0 0 3px rgba(0, 137, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 0 3px rgba(50, 150, 250, 0.2), 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .test-container.dark .classic-aside {
@@ -773,7 +773,7 @@
 
         .test-container.dark .cat-tab.active {
             background: #0f172a;
-            color: #0089FF;
+            color: #3296FA;
         }
 
         .test-container.dark .count-badge {
@@ -801,7 +801,7 @@
 
         .test-container.dark .trending-tag:hover {
             background: #1e40af;
-            box-shadow: 0 2px 8px rgba(0, 137, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(50, 150, 250, 0.3);
         }
 
         .test-container.dark .skeleton-item,
@@ -908,7 +908,7 @@
             width: 100%;
             padding: 10px 16px;
             margin-bottom: 8px;
-            background: #0089FF;
+            background: #3296FA;
             color: #fff;
             border: none;
             border-radius: 8px;

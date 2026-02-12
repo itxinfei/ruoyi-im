@@ -17,46 +17,48 @@
       />
 
       <!-- 分组列表 -->
-      <div class="group-list scrollbar-custom">
-        <div
-          v-for="group in filteredGroups"
-          :key="group"
-          class="group-item"
-          :class="{ selected: selectedGroup === group }"
-          @click="selectGroup(group)"
-        >
-          <div class="group-icon">
-            <span class="group-initial">{{ group.charAt(0) }}</span>
-          </div>
-          <span class="group-name">{{ group }}</span>
-          <el-icon
-            v-if="selectedGroup === group"
-            class="check-icon"
-            color="var(--el-color-primary)"
+      <el-scrollbar class="group-list-scroll">
+        <div class="group-list">
+          <div
+            v-for="group in filteredGroups"
+            :key="group"
+            class="group-item"
+            :class="{ selected: selectedGroup === group }"
+            @click="selectGroup(group)"
           >
-            <Check />
-          </el-icon>
-        </div>
-
-        <!-- 创建新分组入口 -->
-        <div
-          v-if="searchQuery && !filteredGroups.length"
-          class="group-item create-new"
-          @click="createNewGroup"
-        >
-          <div class="group-icon add">
-            <el-icon><Plus /></el-icon>
+            <div class="group-icon">
+              <span class="group-initial">{{ group.charAt(0) }}</span>
+            </div>
+            <span class="group-name">{{ group }}</span>
+            <el-icon
+              v-if="selectedGroup === group"
+              class="check-icon"
+              color="var(--el-color-primary)"
+            >
+              <Check />
+            </el-icon>
           </div>
-          <span class="group-name">创建"{{ searchQuery }}"分组</span>
-        </div>
 
-        <!-- 空状态 -->
-        <el-empty
-          v-if="!searchQuery && !groups.length"
-          description="暂无分组"
-          :image-size="80"
-        />
-      </div>
+          <!-- 创建新分组入口 -->
+          <div
+            v-if="searchQuery && !filteredGroups.length"
+            class="group-item create-new"
+            @click="createNewGroup"
+          >
+            <div class="group-icon add">
+              <el-icon><Plus /></el-icon>
+            </div>
+            <span class="group-name">创建"{{ searchQuery }}"分组</span>
+          </div>
+
+          <!-- 空状态 -->
+          <el-empty
+            v-if="!searchQuery && !groups.length"
+            description="暂无分组"
+            :image-size="80"
+          />
+        </div>
+      </el-scrollbar>
 
       <!-- 快速添加新分组 -->
       <div class="add-group-section">
@@ -238,9 +240,11 @@ const handleConfirm = () => {
   flex-shrink: 0;
 }
 
-.group-list {
+.group-list-scroll {
   max-height: 300px;
-  overflow-y: auto;
+}
+
+.group-list {
   display: flex;
   flex-direction: column;
   gap: 4px;

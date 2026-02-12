@@ -1143,7 +1143,7 @@ watch(() => props.messages, () => {
       }
 
       &.admin {
-        background: #3296FA;
+        background: var(--dt-brand-color);
         color: #fff;
       }
     }

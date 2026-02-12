@@ -185,46 +185,51 @@ defineExpose({
 @use '@/styles/design-tokens.scss' as *;
 
 .recommended-contacts {
-  padding: var(--dt-spacing-lg);
+  padding: 24px;
 }
 
 .recommend-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--dt-spacing-lg);
-  padding-bottom: var(--dt-spacing-md);
-  border-bottom: 1px solid var(--dt-border-color-light);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--dt-border-lighter);
 
   .header-title {
     display: flex;
     align-items: center;
-    gap: var(--dt-spacing-md);
-    font-size: 15px;
+    gap: 10px;
+    font-size: 16px;
     font-weight: 600;
-    color: var(--dt-color-text-primary);
+    color: var(--dt-text-primary);
     margin: 0;
+    
+    .el-icon { color: var(--dt-brand-color); }
   }
 }
 
 .recommend-list {
   display: flex;
   flex-direction: column;
-  gap: var(--dt-spacing-md);
+  gap: 12px;
 }
 
 .recommend-item {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-md);
-  padding: var(--dt-spacing-md);
-  background: var(--dt-bg-hover);
-  border-radius: var(--dt-radius-md);
+  gap: 16px;
+  padding: 16px;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-lighter);
+  border-radius: 12px;
   transition: all var(--dt-transition-fast);
 
   &:hover {
-    background: var(--dt-bg-card);
-    transform: translateX(4px);
+    background: var(--dt-bg-session-hover);
+    border-color: var(--dt-brand-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -237,56 +242,60 @@ defineExpose({
 }
 
 .recommend-name {
-  font-size: var(--dt-font-size-sm);
-  font-weight: 500;
-  color: var(--dt-color-text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
 }
 
 .recommend-reason {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--dt-font-size-xs);
-  color: var(--dt-color-primary);
+  font-size: 12px;
+  color: var(--dt-brand-color);
+  font-weight: 500;
 
   .reason-icon {
-    font-size: var(--dt-font-size-sm);
+    font-size: 14px;
   }
 }
 
 .recommend-dept {
-  font-size: var(--dt-font-size-xs);
-  color: var(--dt-color-text-secondary);
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
 }
 
 .recommend-actions {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-md);
+  gap: 12px;
 
   .dismiss-btn {
-    color: var(--dt-color-text-placeholder);
+    color: var(--dt-text-quaternary);
+    border-color: transparent;
+    background: transparent;
 
     &:hover {
-      color: var(--dt-color-danger);
+      color: var(--dt-error-color);
+      background: var(--dt-error-bg);
     }
   }
 }
 
 .empty-recommendations {
-  padding: var(--dt-spacing-2xl) 0;
+  padding: 60px 0;
 
   .empty-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto var(--dt-spacing-lg);
-    border-radius: var(--dt-radius-full);
-    background: var(--dt-bg-hover);
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--dt-bg-body);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 40px;
-    color: var(--dt-color-text-placeholder);
+    color: var(--dt-text-quaternary);
   }
 }
 

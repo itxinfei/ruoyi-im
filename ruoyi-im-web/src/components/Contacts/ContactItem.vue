@@ -90,49 +90,56 @@ const escapeHtml = str => {
 
 .contact-item {
   position: relative;
-  height: 60px;
-  /* 默认标准高度 */
+  height: 64px; /* DingTalk Standard Height */
   overflow: hidden;
-  background: #ffffff;
+  background: var(--dt-bg-card);
   cursor: pointer;
-  transition: background var(--dt-transition-fast), height var(--dt-transition-fast);
+  transition: all var(--dt-transition-fast);
+  border-bottom: 1px solid var(--dt-border-lighter);
 
   &:hover {
     background: var(--dt-bg-session-hover);
   }
 
   &.active {
-    background: var(--dt-brand-bg);
+    background: var(--dt-bg-session-active);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 15%;
+      height: 70%;
+      width: 3px;
+      background: var(--dt-brand-color);
+      border-radius: 0 4px 4px 0;
+    }
 
     .item-name {
       color: var(--dt-brand-color);
+      font-weight: 600;
     }
   }
 
-  /* 紧凑模式 - 48px */
+  /* 紧凑模式 */
   &.compact {
-    height: 48px;
+    height: 52px;
 
     .item-desc {
       display: none;
     }
 
     .contact-content {
-      padding: 0 12px;
+      padding: 0 16px;
     }
   }
 
-  /* 展开模式 - 72px */
+  /* 展开模式 */
   &.expanded {
     height: 72px;
 
     .item-info {
-      gap: 6px;
-    }
-
-    .item-desc {
-      font-size: var(--dt-font-size-xs);
-      line-height: 1.3;
+      gap: 4px;
     }
   }
 }
@@ -140,28 +147,23 @@ const escapeHtml = str => {
 // 暗色模式适配
 .dark .contact-item {
   background: var(--dt-bg-card-dark);
+  border-bottom-color: var(--dt-border-dark);
 
   &:hover {
     background: var(--dt-bg-hover-dark);
   }
 
   &.active {
-    background: var(--dt-brand-bg-dark);
+    background: var(--dt-bg-session-active-dark);
   }
 }
 
 .contact-content {
-  position: relative;
-  z-index: 2;
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 12px;
-  /* 钉钉标准内边距 */
+  padding: 0 16px;
   gap: 12px;
-  /* 头像和内容之间的间距 */
-  background: inherit;
-  transition: transform var(--dt-transition-base);
 }
 
 .item-info {
@@ -169,53 +171,46 @@ const escapeHtml = str => {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 .item-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .item-name {
-  font-size: var(--dt-font-size-base);
-  font-weight: var(--dt-font-weight-medium);
+  font-size: 15px;
+  font-weight: 500;
   color: var(--dt-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
-  .dark & {
-    color: var(--dt-text-primary-dark);
-  }
-
   :deep(.highlight) {
     color: var(--dt-brand-color);
-    font-weight: var(--dt-font-weight-semibold);
+    font-weight: 600;
+    background: var(--dt-search-highlight-bg);
   }
 }
 
 .item-tag {
   font-size: 10px;
-  padding: 2px 6px;
-  border-radius: var(--dt-radius-sm);
+  padding: 1px 6px;
+  border-radius: 4px;
   background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
-  font-weight: var(--dt-font-weight-medium);
   flex-shrink: 0;
+  border: 1px solid var(--dt-brand-light);
 }
 
 .item-desc {
-  font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-secondary);
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 2px;
-
-  .dark & {
-    color: var(--dt-text-secondary-dark);
-  }
 }
 </style>

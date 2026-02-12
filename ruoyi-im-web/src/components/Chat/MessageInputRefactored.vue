@@ -1281,7 +1281,7 @@ onUnmounted(() => {
 
     &:hover {
       background: var(--dt-black-04);
-      color: #3296FA;
+      color: var(--dt-brand-color);
     }
 
     &:active {
