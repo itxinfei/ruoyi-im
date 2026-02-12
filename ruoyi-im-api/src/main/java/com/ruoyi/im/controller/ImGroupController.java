@@ -77,7 +77,7 @@ public class ImGroupController {
      * 更新群组信息
      */
     @Operation(summary = "更新群组信息", description = "更新群组的名称、头像、公告、描述等信息")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                @Valid @RequestBody ImGroupUpdateRequest request) {
@@ -90,7 +90,7 @@ public class ImGroupController {
      * 解散群组
      */
     @Operation(summary = "解散群组", description = "解散指定群组，所有成员将被移除")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public Result<Void> dismiss(@PathVariable @Positive(message = "群组ID必须为正数") Long id) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -115,7 +115,7 @@ public class ImGroupController {
      * 添加群组成员
      */
     @Operation(summary = "添加群组成员", description = "批量添加用户到群组")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/{id}/members")
     @RateLimit(key = "group_add_members", time = 60, count = 30, limitType = RateLimit.LimitType.USER)
     public Result<Void> addMembers(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
@@ -129,7 +129,7 @@ public class ImGroupController {
      * 移除群组成员
      */
     @Operation(summary = "移除群组成员", description = "批量移除群组成员")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}/members")
     public Result<Void> removeMembers(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                       @RequestBody @NotEmpty(message = "用户ID列表不能为空") List<Long> userIds) {
@@ -155,8 +155,8 @@ public class ImGroupController {
      * 设置/取消管理员
      */
     @Operation(summary = "设置/取消管理员", description = "设置或取消指定成员的管理员权限")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
-    @PutMapping("/{id}/admin/{userId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    @PutMapping("/{id}/admin/{targetUserId}")
     public Result<Void> setAdmin(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                  @PathVariable @Positive(message = "用户ID必须为正数") Long targetUserId,
                                  @RequestParam @NotNull(message = "管理员标识不能为空") Boolean isAdmin) {
@@ -169,8 +169,8 @@ public class ImGroupController {
      * 禁言/取消禁言成员
      */
     @Operation(summary = "禁言/取消禁言成员", description = "对指定成员进行禁言或取消禁言")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
-    @PutMapping("/{id}/mute/{userId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    @PutMapping("/{id}/mute/{targetUserId}")
     public Result<Void> muteMember(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                    @PathVariable @Positive(message = "用户ID必须为正数") Long targetUserId,
                                    @RequestParam(required = false) Long duration) {
@@ -183,8 +183,8 @@ public class ImGroupController {
      * 转让群主
      */
     @Operation(summary = "转让群主", description = "将群主权限转让给指定成员")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
-    @PutMapping("/{id}/transfer/{userId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    @PutMapping("/{id}/transfer/{newOwnerId}")
     public Result<Void> transferOwner(@PathVariable @Positive(message = "群组ID必须为正数") Long id,
                                       @PathVariable @Positive(message = "新群主ID必须为正数") Long newOwnerId) {
         Long userId = SecurityUtils.getLoginUserId();

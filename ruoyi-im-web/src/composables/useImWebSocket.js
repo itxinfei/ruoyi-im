@@ -144,6 +144,10 @@ export function useImWebSocket() {
     registerHandler('reaction', callback)
   }
 
+  const onRecall = callback => {
+    registerHandler('recall', callback)
+  }
+
   // 监听消息 ACK 确认
   const onMessageAck = callback => {
     registerHandler('message_ack', callback)
@@ -185,6 +189,7 @@ export function useImWebSocket() {
     onMessageStatus,
     onCall,
     onReaction,
+    onRecall,
     onMessageAck,
 
     // WebSocket 实例

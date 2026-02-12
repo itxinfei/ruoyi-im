@@ -127,7 +127,7 @@ const resolveThemeMode = value => {
 }
 
 const resolvePrimaryColor = value => {
-  return value?.theme?.primaryColor || value?.primaryColor || '#1677ff'
+  return value?.theme?.primaryColor || value?.primaryColor || '#3296FA'
 }
 
 const localSettings = ref({
@@ -144,7 +144,7 @@ const themeModes = [
 ]
 
 const themeColors = [
-  { value: '#1677ff', name: '科技蓝' },
+  { value: '#3296FA', name: '企业蓝' },
   { value: '#52c41a', name: '生机绿' },
   { value: '#f5222d', name: '活力红' },
   { value: '#fa8c16', name: '温暖橙' },

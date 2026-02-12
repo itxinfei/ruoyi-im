@@ -7,9 +7,9 @@
     <Transition name="fade">
       <div
         v-if="visible"
+        v-click-outside="handleClose"
         class="emoji-popover"
         :style="{ left: position.x + 'px', top: position.y + 'px' }"
-        v-click-outside="handleClose"
       >
         <div class="emoji-popover-header">
           <span>添加表情回应</span>

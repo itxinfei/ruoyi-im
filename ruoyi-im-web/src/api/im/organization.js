@@ -9,83 +9,107 @@ import request from '../request'
  */
 export function getOrgTree() {
     return request({
-        url: '/api/im/organizations/departments/tree',
+        url: '/api/im/organizations/department/tree',
         method: 'get'
     })
 }
 
 /**
  * 获取部门详情
- * @param {number} deptId - 部门ID
- * @returns {Promise}
  */
 export function getDepartment(deptId) {
     return request({
-        url: `/api/im/organizations/departments/${deptId}`,
+        url: `/api/im/organizations/department/${deptId}`,
         method: 'get'
     })
 }
 
 /**
- * 获取部门成员
- * @param {number} deptId - 部门ID
- * @returns {Promise}
+ * 获取部门成员列表
  */
 export function getDepartmentMembers(deptId) {
     return request({
-        url: `/api/im/organizations/departments/${deptId}/members`,
+        url: `/api/im/organizations/department/${deptId}/members`,
         method: 'get'
-    })
-}
-
-/**
- * 搜索组织成员
- * @param {Object} params - 查询参数
- * @param {string} params.keyword - 搜索关键词
- * @returns {Promise}
- */
-export function searchOrgMembers(params) {
-    return request({
-        url: '/api/im/organizations/search',
-        method: 'get',
-        params
     })
 }
 
 /**
  * 获取部门在线人数统计
- * @param {number} deptId - 部门ID
- * @returns {Promise}
+ * 注意：后端暂未实现该接口，前端暂时降级处理
  */
 export function getDepartmentOnlineCount(deptId) {
+    // 暂时返回 mock 数据或抛出错误，等待后端实现
+    return Promise.resolve({ code: 200, data: 0 })
+    /*
     return request({
-        url: `/api/im/organizations/departments/${deptId}/online-count`,
+        url: `/api/im/organizations/department/${deptId}/online-count`,
         method: 'get'
+    })
+    */
+}
+
+/**
+ * 搜索组织架构成员
+ * @param {Object} params - 搜索参数
+ * @param {string} params.keyword - 关键词
+ * @returns {Promise}
+ */
+export function searchOrgMembers(params) {
+    return request({
+        url: '/api/im/search/contacts',
+        method: 'get',
+        params
     })
 }
 
 /**
- * 获取用户上级/下属关系
- * @param {number} userId - 用户ID
+ * 搜索部门成员
+ * @param {number} deptId - 部门ID
+ * @param {Object} params - 搜索参数
+ * @param {string} params.keyword - 关键词
  * @returns {Promise}
  */
+export function searchDepartmentMembers(deptId, params) {
+    // 后端目前没有按部门搜索成员的专用接口，暂使用全局搜索
+    return request({
+        url: '/api/im/search/contacts',
+        method: 'get',
+        params
+    })
+}
+
+/**
+ * 获取用户关系链 (同事、上下级等)
+ * 注意：后端暂未实现该接口
+ */
 export function getUserRelations(userId) {
+    return Promise.resolve({ code: 200, data: {} })
+    /*
     return request({
         url: `/api/im/organizations/users/${userId}/relations`,
         method: 'get'
     })
+    */
 }
 
 /**
- * 按部门搜索成员（支持模糊搜索部门名）
- * @param {Object} params - 查询参数
- * @param {string} params.keyword - 搜索关键词
- * @returns {Promise}
+ * 添加部门成员 (管理员功能)
  */
-export function searchDepartmentMembers(params) {
+export function addDepartmentMember(data) {
     return request({
-        url: '/api/im/organizations/departments/search-members',
-        method: 'get',
-        params
+        url: '/api/im/organizations/department/member',
+        method: 'post',
+        data
+    })
+}
+
+/**
+ * 移除部门成员 (管理员功能)
+ */
+export function removeDepartmentMember(deptId, userId) {
+    return request({
+        url: `/api/im/organizations/department/${deptId}/member/${userId}`,
+        method: 'delete'
     })
 }

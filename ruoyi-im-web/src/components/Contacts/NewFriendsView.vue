@@ -213,7 +213,7 @@ defineExpose({ refresh: loadRequests })
   display: flex;
   align-items: center;
   padding: 12px;
-  background: #ffffff;
+  background: var(--dt-bg-card);
   border-radius: var(--dt-radius-md);
   border: 1px solid var(--dt-border-light);
   transition: all var(--dt-transition-fast);
@@ -277,7 +277,7 @@ defineExpose({ refresh: loadRequests })
 }
 
 .dt-btn-deny {
-  background: #ffffff;
+  background: var(--dt-bg-card);
   color: var(--dt-text-secondary);
   border: 1px solid var(--dt-border-color);
 

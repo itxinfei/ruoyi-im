@@ -155,10 +155,7 @@ public class ImMessageController {
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteMessages(@RequestBody @Valid MessagesBatchDeleteRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        // 暂时逐个删除，Service层可以后续实现批量删除优化
-        for (Long messageId : request.getMessageIds()) {
-            imMessageService.deleteMessage(messageId, userId);
-        }
+        imMessageService.batchDeleteMessages(request.getMessageIds(), userId);
         return Result.success("批量删除成功");
     }
 
@@ -277,6 +274,7 @@ public class ImMessageController {
      */
     @Operation(summary = "检测敏感词", description = "检测文本中是否包含敏感词")
     @PostMapping("/sensitive-word/check")
+    @RateLimit(key = "sensitive_word_check", time = 60, count = 60, limitType = RateLimit.LimitType.USER)
     public Result<java.util.Map<String, Object>> checkSensitiveWord(@RequestBody @Valid MessageSensitiveWordCheckRequest request) {
         boolean contains = sensitiveWordService.containsSensitiveWord(request.getText());
         java.util.Set<String> words = sensitiveWordService.detectSensitiveWords(request.getText());
@@ -294,6 +292,7 @@ public class ImMessageController {
      */
     @Operation(summary = "过滤敏感词", description = "过滤文本中的敏感词")
     @PostMapping("/sensitive-word/filter")
+    @RateLimit(key = "sensitive_word_filter", time = 60, count = 60, limitType = RateLimit.LimitType.USER)
     public Result<java.util.Map<String, String>> filterSensitiveWord(@RequestBody @Valid MessageSensitiveWordFilterRequest request) {
         String filtered = request.getReplacement() != null 
             ? sensitiveWordService.filter(request.getText(), request.getReplacement())

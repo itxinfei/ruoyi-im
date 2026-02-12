@@ -221,7 +221,6 @@ const handleMemberClick = member => {
 
 <style scoped lang="scss">
 // 钉钉颜色变量
-$dt-blue: #3296FA;
 $dt-text-primary: #1F2329;
 $dt-text-secondary: #646A73;
 $dt-text-tertiary: #8F959E;
@@ -360,8 +359,8 @@ $dt-border-color: #E5E6EB;
     cursor: pointer;
 
     &:hover .add-avatar {
-      border-color: $dt-blue;
-      color: $dt-blue;
+      border-color: var(--dt-brand-color);
+      color: var(--dt-brand-color);
     }
   }
 
@@ -456,8 +455,8 @@ $dt-border-color: #E5E6EB;
     color: #94a3b8;
 
     &:hover {
-      border-color: $dt-blue;
-      color: $dt-blue;
+      border-color: var(--dt-brand-color);
+      color: var(--dt-brand-color);
     }
   }
 

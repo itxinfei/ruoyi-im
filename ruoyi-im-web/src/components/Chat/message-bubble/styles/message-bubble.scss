@@ -16,10 +16,10 @@
 
 // 气泡内容基础样式
 .bubble-content {
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: var(--dt-font-size-base);
-  line-height: 1.5;
+  padding: 8px 12px; // 钉钉标准：8px 上下，12px 左右
+  border-radius: 8px; // 钉钉8.0标准：8px 圆角
+  font-size: 14px; // 钉钉标准：14px
+  line-height: 1.5; // 钉钉标准：1.5 行高
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
@@ -36,14 +36,14 @@
     border: none;
     color: var(--dt-text-primary);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-    border-radius: 12px;
+    border-radius: 8px; // 钉钉标准：8px 圆角
   }
 
   // 分组圆角样式
-  &.group-single .bubble-content { border-radius: 12px; }
-  &.group-first .bubble-content { border-radius: 12px 12px 12px 4px; }
-  &.group-middle .bubble-content { border-radius: 4px 12px 12px 4px; }
-  &.group-last .bubble-content { border-radius: 4px 12px 12px 12px; }
+  &.group-single .bubble-content { border-radius: 8px; }
+  &.group-first .bubble-content { border-radius: 8px 8px 8px 2px; }
+  &.group-middle .bubble-content { border-radius: 2px 8px 8px 2px; }
+  &.group-last .bubble-content { border-radius: 2px 8px 8px 8px; }
 }
 
 // ============================================================================
@@ -58,26 +58,30 @@
     color: #FFFFFF;
     border: none;
     box-shadow: none;
-    border-radius: 12px;
+    border-radius: 8px; // 钉钉标准：8px 圆角
   }
 
   // 分组圆角样式
-  &.group-single .bubble-content { border-radius: 12px; }
-  &.group-first .bubble-content { border-radius: 12px 12px 4px 12px; }
-  &.group-middle .bubble-content { border-radius: 12px 4px 4px 12px; }
-  &.group-last .bubble-content { border-radius: 12px 4px 12px 12px; }
+  &.group-single .bubble-content { border-radius: 8px; }
+  &.group-first .bubble-content { border-radius: 8px 8px 2px 8px; }
+  &.group-middle .bubble-content { border-radius: 8px 2px 2px 8px; }
+  &.group-last .bubble-content { border-radius: 8px 2px 8px 8px; }
 
-  // 确保所有子元素文字颜色都是白色
-  :deep(.message-text),
-  :deep(.message-content),
-  :deep(.text-content) {
-    color: #FFFFFF !important;
+  // 确保所有子元素文字颜色都是白色（提高选择器优先级，不使用 !important）
+  .message-text,
+  .message-content,
+  .text-content {
+    color: #FFFFFF;
   }
 
-  :deep(a) {
-    color: #FFFFFF !important;
+  a {
+    color: #FFFFFF;
     text-decoration: underline;
     opacity: 0.9;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
@@ -108,7 +112,7 @@
   padding: 0;
   background: transparent !important;
   border: none !important;
-  border-radius: 12px;
+  border-radius: 8px; // 钉钉标准：8px 圆角
   box-shadow: none;
   overflow: hidden;
 }
@@ -117,7 +121,7 @@
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: 12px;
+  border-radius: 8px; // 钉钉标准：8px 圆角
   overflow: hidden;
 }
 
@@ -139,7 +143,7 @@
 
 .media-bubble {
   display: inline-block;
-  border-radius: 12px;
+  border-radius: 8px; // 钉钉标准：8px 圆角
   overflow: hidden;
   transition: all var(--dt-transition-base);
 
@@ -222,7 +226,7 @@
 // 钉钉风格：图片/视频消息的特殊圆角
 .message-bubble.type-image .bubble-content,
 .message-bubble.type-video .bubble-content {
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
 }
 

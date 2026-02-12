@@ -147,6 +147,8 @@ const handleImageError = e => {
 .link-card {
   display: flex;
   align-items: stretch;
+  gap: 8px;
+  padding: 8px;
   background: #ffffff;
   border: 1px solid #e0e0e0; // 野火IM边框
   border-radius: 8px; // 野火IM圆角
@@ -154,7 +156,7 @@ const handleImageError = e => {
   cursor: pointer;
   transition: all 0.2s ease;
   max-width: 360px;
-  min-height: 72px;
+  min-height: 64px; // 优化：64px 最小高度
 
   &:hover {
     border-color: #4168e0; // 野火IM蓝
@@ -168,8 +170,8 @@ const handleImageError = e => {
 
 // 左侧图片/图标区
 .link-image-wrapper {
-  width: 72px;
-  min-height: 72px;
+  width: 64px;
+  min-height: 64px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -184,21 +186,21 @@ const handleImageError = e => {
 }
 
 .link-icon {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f5f5f5;
 
   .material-icons-outlined {
-    font-size: 28px;
+    font-size: 24px;
     color: #999;
   }
 
   .favicon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 4px;
   }
 
@@ -214,10 +216,10 @@ const handleImageError = e => {
 // 右侧内容区
 .link-content {
   flex: 1;
-  padding: 10px 12px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
   justify-content: center;
 }

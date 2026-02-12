@@ -213,7 +213,7 @@ const handleNavClick = moduleKey => {
   min-width: 64px;
   max-width: 64px;
   flex-shrink: 0;
-  background: #3296FA;
+  background: var(--dt-brand-color);
   height: 100vh;
   position: relative;
 }
@@ -238,7 +238,7 @@ const handleNavClick = moduleKey => {
 }
 
 .logo-text {
-  color: #1677ff;
+  color: var(--dt-brand-color);
   font-size: 20px;
   font-weight: 700;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -336,7 +336,7 @@ const handleNavClick = moduleKey => {
   height: 8px;
   background: #ff4d4f;
   border-radius: 50%;
-  border: 2px solid #1677ff;
+  border: 2px solid var(--dt-brand-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 

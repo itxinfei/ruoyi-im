@@ -207,7 +207,12 @@ const currentUser = computed(() => {
 
 const isUserOnline = computed(() => {
   if (!currentUser.value?.id) { return false }
-  return store.state.im?.userStatus?.[currentUser.value.id] === 'online'
+  // 检查联系人模块中的状态
+  const status = store.state.im?.contact?.userStatus?.[currentUser.value.id]
+  if (status === 'online') {return true}
+
+  // 如果联系人模块没查到，同时本端 WebSocket 已连接，则认为是在线的
+  return store.state.im?.wsConnected || false
 })
 
 // 导航模块 — 每个模块独立配色 + Material Icons Outlined
@@ -377,15 +382,15 @@ function handleOpenSearch() {
 
 .nav-logo {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   background: var(--dt-brand-color);
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 8px;
   transition: all 0.2s ease;
 
   &:hover {
@@ -440,7 +445,7 @@ function handleOpenSearch() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
 }
 
@@ -449,8 +454,8 @@ function handleOpenSearch() {
 // ============================================================================
 .nav-item {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -481,9 +486,9 @@ function handleOpenSearch() {
 // 彩色图标背景方块
 // ============================================================================
 .nav-icon-bg {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -492,9 +497,9 @@ function handleOpenSearch() {
 }
 
 .nav-icon {
-  font-size: 18px !important;
-  min-width: 18px !important;
-  height: 18px !important;
+  font-size: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
   color: #fff;
   line-height: 1;
 }
@@ -502,8 +507,8 @@ function handleOpenSearch() {
 // 未读角标
 .nav-badge {
   position: absolute;
-  top: 4px;
-  right: 2px;
+  top: 2px;
+  right: 0px;
   background: #FF4D4F;
   color: #fff;
   font-size: 10px;
@@ -524,7 +529,7 @@ function handleOpenSearch() {
   position: absolute;
   left: -8px;
   width: 3px;
-  height: 18px;
+  height: 14px;
   border-radius: 0 3px 3px 0;
   opacity: 0;
   transform: scaleY(0.4);
@@ -608,23 +613,6 @@ function handleOpenSearch() {
 
   .nav-footer {
     padding: 6px 0 10px;
-  }
-
-  .nav-item {
-    width: 38px;
-    height: 38px;
-  }
-
-  .nav-icon-bg {
-    width: 26px;
-    height: 26px;
-    border-radius: 6px;
-  }
-
-  .nav-icon {
-    font-size: 16px !important;
-    min-width: 16px !important;
-    height: 16px !important;
   }
 }
 </style>

@@ -43,39 +43,31 @@ const canReEdit = computed(() => {
 .recalled-bubble {
   display: flex;
   align-items: center;
-  gap: var(--dt-space-2);
-  padding: 12px;
-  background: var(--dt-bg-body);
-  border-radius: var(--dt-radius-md);
-  font-size: var(--dt-font-size-sm);
-  max-width: 280px;
+  justify-content: center;
+  gap: var(--dt-space-1);
+  padding: 4px 12px;
+  background: transparent;
+  font-size: 12px;
+  color: var(--dt-text-quaternary);
   animation: fadeIn 0.3s var(--dt-ease-out);
 
   .recall-icon {
-    color: var(--dt-text-tertiary);
-    font-size: 16px;
+    display: none;
   }
 
   .recall-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
   }
 
   .recall-text {
-    color: var(--dt-text-secondary);
+    color: inherit;
   }
 
   &.is-right {
-    background: var(--dt-error-02);
-
-    .recall-icon {
-      color: var(--dt-error-color);
-    }
-
-    .recall-text {
-      color: var(--dt-text-primary);
-    }
+    background: transparent;
   }
 }
 
@@ -91,5 +83,4 @@ const canReEdit = computed(() => {
   }
 }
 
-// 使用全局 fadeInUp 动画 (@/styles/animations.scss)
 </style>

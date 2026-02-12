@@ -612,6 +612,17 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void batchDeleteMessages(List<Long> messageIds, Long userId) {
+        if (messageIds == null || messageIds.isEmpty()) {
+            return;
+        }
+        for (Long messageId : messageIds) {
+            deleteMessage(messageId, userId);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void editMessage(Long messageId, String newContent, Long userId) {
         ImMessage message = imMessageMapper.selectImMessageById(messageId);
         if (message == null) {

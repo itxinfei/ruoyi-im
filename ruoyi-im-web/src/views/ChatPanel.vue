@@ -1,120 +1,261 @@
 <template>
-  <div class="chat-panel" :class="{ 'is-dragging': isDragging, 'is-drag-over': isDragOver }"
-    @dragover.prevent="handleDragOver" @dragenter.prevent="handleDragEnter" @dragleave.prevent="handleDragLeave"
-    @drop.prevent="handleDrop" @paste="handlePaste">
-    <div v-if="!session" class="empty-placeholder">
-      <EmptyState type="chat" title="选择一个会话开始聊天" description="从左侧列表选择联系人或群组，开始你的对话" :compact="false" />
+  <div
+    class="chat-panel"
+    :class="{ 'is-dragging': isDragging, 'is-drag-over': isDragOver }"
+    @dragover.prevent="handleDragOver"
+    @dragenter.prevent="handleDragEnter"
+    @dragleave.prevent="handleDragLeave"
+    @drop.prevent="handleDrop"
+    @paste="handlePaste"
+  >
+    <div
+      v-if="!session"
+      class="empty-placeholder"
+    >
+      <EmptyState
+        type="chat"
+        title="选择一个会话开始聊天"
+        description="从左侧列表选择联系人或群组，开始你的对话"
+        :compact="false"
+      />
     </div>
     <template v-else>
       <div class="main-container">
         <!-- 左侧聊天主体 -->
-        <div class="chat-viewport" :class="{ 'with-pinned-panel': showPinnedPanel }" role="region"
-          :aria-label="ARIA_LABELS.chatPanel">
-          <ChatHeader :session="session" :typing-users="typingUsers" :pinned-count="pinnedCount"
-            @show-detail="handleToggleDetail" @toggle-sidebar="handleToggleSidebar"
-            @multiselect="handleToggleMultiSelect" @toggle-multi-select="handleToggleMultiSelect"
-            @toggle-pinned="showPinnedPanel = !showPinnedPanel" @clear-selection="handleClearSelection"
-            @announcement="showAnnouncementDialog = true" @history="handleShowHistory" @search="handleSearchMessages"
-            @files="handleShowFiles" @pin="handlePinSession" @mute="handleMuteSession" @clear="handleClearMessages"
-            @voice-call="handleVoiceCall" @video-call="handleVideoCall" @scroll-to-message="handleScrollToMessage" />
-          <MessageList ref="msgListRef" :session-id="session?.id" :messages="messages" :loading="loading"
-            :current-user="currentUser" :session-type="session?.type" :multi-select-mode="isMultiSelectMode"
-            @command="handleCommand" @at="handleAt" @load-more="handleLoadMore" @show-user="handleShowUser"
-            @retry="handleRetry" @remind-unread="handleRemindUnread" @long-press="handleMultiSelect"
-            @preview="handleImagePreview" @re-edit="handleReEdit" />
-          <MessageInput ref="messageInputRef" :session="session" :sending="sending" :replying-message="replyingMessage"
-            :editing-message="editingMessage" @send="handleSend" @send-voice="handleSendVoice"
-            @cancel-reply="handleCancelReply" @cancel-edit="handleCancelEdit" @edit-confirm="handleEditConfirm"
-            @start-call="handleStartCall" @start-video="handleStartVideo" @upload-image="handleImageUpload"
-            @upload-file="handleFileUpload" @upload-video="handleVideoUpload" @send-location="handleSendLocation"
-            @send-screenshot="handleScreenshotUpload" @input="handleInput"
-            @create-announcement="handleCreateAnnouncement" />
+        <div
+          class="chat-viewport"
+          :class="{ 'with-pinned-panel': showPinnedPanel }"
+          role="region"
+          :aria-label="ARIA_LABELS.chatPanel"
+        >
+          <ChatHeader
+            :session="session"
+            :typing-users="typingUsers"
+            :pinned-count="pinnedCount"
+            @show-detail="handleToggleDetail"
+            @toggle-sidebar="handleToggleSidebar"
+            @multiselect="handleToggleMultiSelect"
+            @toggle-multi-select="handleToggleMultiSelect"
+            @toggle-pinned="showPinnedPanel = !showPinnedPanel"
+            @clear-selection="handleClearSelection"
+            @announcement="showAnnouncementDialog = true"
+            @history="handleShowHistory"
+            @search="handleSearchMessages"
+            @files="handleShowFiles"
+            @pin="handlePinSession"
+            @mute="handleMuteSession"
+            @clear="handleClearMessages"
+            @voice-call="handleVoiceCall"
+            @video-call="handleVideoCall"
+            @scroll-to-message="handleScrollToMessage"
+          />
+          <MessageList
+            ref="msgListRef"
+            :session-id="session?.id"
+            :messages="messages"
+            :loading="loading"
+            :current-user="currentUser"
+            :session-type="session?.type"
+            :multi-select-mode="isMultiSelectMode"
+            @command="handleCommand"
+            @at="handleAt"
+            @load-more="handleLoadMore"
+            @show-user="handleShowUser"
+            @retry="handleRetry"
+            @remind-unread="handleRemindUnread"
+            @long-press="handleMultiSelect"
+            @preview="handleImagePreview"
+            @re-edit="handleReEdit"
+          />
+          <MessageInput
+            ref="messageInputRef"
+            :session="session"
+            :sending="sending"
+            :replying-message="replyingMessage"
+            :editing-message="editingMessage"
+            @send="handleSend"
+            @send-voice="handleSendVoice"
+            @cancel-reply="handleCancelReply"
+            @cancel-edit="handleCancelEdit"
+            @edit-confirm="handleEditConfirm"
+            @start-call="handleStartCall"
+            @start-video="handleStartVideo"
+            @upload-image="handleImageUpload"
+            @upload-file="handleFileUpload"
+            @upload-video="handleVideoUpload"
+            @send-location="handleSendLocation"
+            @send-screenshot="handleScreenshotUpload"
+            @input="handleInput"
+            @create-announcement="handleCreateAnnouncement"
+          />
         </div>
 
         <!-- 置顶消息面板 -->
         <Transition name="slide-left">
-          <PinnedMessagesPanel v-if="showPinnedPanel" :messages="messages" @close="showPinnedPanel = false"
-            @scroll-to-message="handleScrollToPinnedMessage" @update="handlePinnedUpdate" />
+          <PinnedMessagesPanel
+            v-if="showPinnedPanel"
+            :messages="messages"
+            @close="showPinnedPanel = false"
+            @scroll-to-message="handleScrollToPinnedMessage"
+            @update="handlePinnedUpdate"
+          />
         </Transition>
 
         <!-- 移除旧的侧边栏，改用全局弹窗 -->
       </div>
 
-      <!-- 群组详情弹窗 - Teleport 到 body 避免 contain: layout 限制 fixed 定位 -->
-      <Teleport to="body">
-        <GroupDetailDialog v-model:visible="showGroupDetail" :group-id="session?.targetId"
-          @refresh-group="handleRefreshGroup" @show-files="handleShowGroupFiles"
-          @show-announcement="handleShowGroupAnnouncement" />
-      </Teleport>
+      <!-- 群组详情弹窗 -->
+      <GroupDetailDialog
+        v-model:visible="showGroupDetail"
+        :group-id="session?.targetId"
+        @refresh-group="handleRefreshGroup"
+        @show-files="handleShowGroupFiles"
+        @show-announcement="handleShowGroupAnnouncement"
+      />
 
       <!-- 隐藏的文件上传 input -->
-      <input ref="fileInputRef" type="file" class="hidden-input" @change="handleFileUpload">
-      <input ref="imageInputRef" type="file" class="hidden-input" accept="image/*" @change="handleImageUpload">
+      <input
+        ref="fileInputRef"
+        type="file"
+        class="hidden-input"
+        @change="handleFileUpload"
+      >
+      <input
+        ref="imageInputRef"
+        type="file"
+        class="hidden-input"
+        accept="image/*"
+        @change="handleImageUpload"
+      >
 
       <!-- 转发对话框 -->
-      <ForwardDialog ref="forwardDialogRef" @forward="handleForwardConfirm"
-        @batch-forward="handleBatchForwardConfirm" />
+      <ForwardDialog
+        ref="forwardDialogRef"
+        @forward="handleForwardConfirm"
+        @batch-forward="handleBatchForwardConfirm"
+      />
 
       <!-- 语音通话 -->
-      <VoiceCallDialog v-model:visible="showVoiceCall" :remote-user="remoteCallUser" :is-incoming="isIncomingCall" />
+      <VoiceCallDialog
+        v-model:visible="showVoiceCall"
+        :remote-user="remoteCallUser"
+        :is-incoming="isIncomingCall"
+      />
 
       <!-- 视频通话 -->
-      <VideoCallDialog v-model:visible="showVideoCall" :remote-user="remoteCallUser" :is-incoming="isIncomingCall" />
+      <VideoCallDialog
+        v-model:visible="showVideoCall"
+        :remote-user="remoteCallUser"
+        :is-incoming="isIncomingCall"
+      />
 
       <!-- 聊天记录面板 -->
-      <ChatHistoryPanel :visible="showChatHistory" :conversation-id="session?.id" @close="showChatHistory = false"
-        @jump-to-message="handleJumpToMessage" @clear-history="handleClearHistory" />
+      <ChatHistoryPanel
+        :visible="showChatHistory"
+        :conversation-id="session?.id"
+        @close="showChatHistory = false"
+        @jump-to-message="handleJumpToMessage"
+        @clear-history="handleClearHistory"
+      />
 
       <!-- 群公告对话框 -->
-      <GroupAnnouncementDialog v-model="showAnnouncementDialog" :group-id="session?.targetId"
-        :can-manage="session?.type === 'GROUP' && session?.memberRole === 'ADMIN'" />
+      <GroupAnnouncementDialog
+        v-model="showAnnouncementDialog"
+        :group-id="session?.targetId"
+        :can-manage="session?.type === 'GROUP' && session?.memberRole === 'ADMIN'"
+      />
 
       <!-- 搜索聊天记录面板 -->
-      <ChatSearchPanel :visible="showSearchPanel" :session-id="session?.id" :messages="messages"
-        @close="showSearchPanel = false" @jump-to-message="handleJumpToMessage" />
+      <ChatSearchPanel
+        :visible="showSearchPanel"
+        :session-id="session?.id"
+        :messages="messages"
+        @close="showSearchPanel = false"
+        @jump-to-message="handleJumpToMessage"
+      />
 
       <!-- 聊天内搜索弹窗 -->
-      <ChatSearch v-model:visible="showChatSearch" :messages="messages" @select-message="handleScrollToMessage" />
+      <ChatSearch
+        v-model:visible="showChatSearch"
+        :messages="messages"
+        @select-message="handleScrollToMessage"
+      />
 
       <!-- 查看文件面板 -->
-      <ChatFilesPanel :visible="showFilesPanel" :session-id="session?.id" :messages="messages"
-        @close="showFilesPanel = false" @open-file="handleOpenFile" @download-file="handleDownloadFile"
-        @forward-file="handleForwardFile" />
+      <ChatFilesPanel
+        :visible="showFilesPanel"
+        :session-id="session?.id"
+        :messages="messages"
+        @close="showFilesPanel = false"
+        @open-file="handleOpenFile"
+        @download-file="handleDownloadFile"
+        @forward-file="handleForwardFile"
+      />
 
       <!-- 群文件面板 -->
-      <GroupFilePanel v-if="showGroupFilesPanel && session?.type === 'GROUP'" :group-id="session?.targetId"
-        class="group-files-drawer" />
+      <GroupFilePanel
+        v-if="showGroupFilesPanel && session?.type === 'GROUP'"
+        :group-id="session?.targetId"
+        class="group-files-drawer"
+      />
 
       <!-- 合并消息详情对话框 -->
-      <CombineDetailDialog v-model="showCombineDetail" :messages="combineMessages"
-        :conversation-title="combineConversationTitle" @forward="handleCombineForwardDetail" />
+      <CombineDetailDialog
+        v-model="showCombineDetail"
+        :messages="combineMessages"
+        :conversation-title="combineConversationTitle"
+        @forward="handleCombineForwardDetail"
+      />
 
       <!-- 导出聊天记录对话框 -->
-      <ExportChatDialog v-model="showExportDialog" :messages="messages"
-        :contact-name="session?.peerName || session?.groupName || '聊天'" />
+      <ExportChatDialog
+        v-model="showExportDialog"
+        :messages="messages"
+        :contact-name="session?.peerName || session?.groupName || '聊天'"
+      />
 
       <!-- 多选操作栏 -->
-      <MultiSelectToolbar :active="isMultiSelectModeActive" :count="selectedMessages?.length || 0"
-        @forward="handleBatchForward" @combine="handleCombineForward" @delete="handleBatchDelete"
-        @cancel="handleClearSelection" />
+      <MultiSelectToolbar
+        :active="isMultiSelectModeActive"
+        :count="selectedMessages?.length || 0"
+        @forward="handleBatchForward"
+        @combine="handleCombineForward"
+        @delete="handleBatchDelete"
+        @cancel="handleClearSelection"
+      />
     </template>
   </div>
 
   <!-- 图片预览器 -->
-  <ImageViewerDialog v-model="showImagePreview" :images="conversationImages" :initial-index="imagePreviewIndex" />
+  <ImageViewerDialog
+    v-model="showImagePreview"
+    :images="conversationImages"
+    :initial-index="imagePreviewIndex"
+  />
 
   <!-- 快捷表情选择器 -->
   <teleport to="body">
-    <div v-if="showEmojiPopover" class="emoji-popover"
-      :style="{ left: emojiPopoverPosition.x + 'px', top: emojiPopoverPosition.y + 'px' }">
+    <div
+      v-if="showEmojiPopover"
+      class="emoji-popover"
+      :style="{ left: emojiPopoverPosition.x + 'px', top: emojiPopoverPosition.y + 'px' }"
+    >
       <div class="emoji-popover-header">
         <span>添加表情回应</span>
-        <el-icon class="close-icon" @click="showEmojiPopover = false">
+        <el-icon
+          class="close-icon"
+          @click="showEmojiPopover = false"
+        >
           <Close />
         </el-icon>
       </div>
       <div class="emoji-grid">
-        <span v-for="emoji in QUICK_EMOJIS" :key="emoji" class="emoji-item" @click="handleSelectEmoji(emoji)">
+        <span
+          v-for="emoji in QUICK_EMOJIS"
+          :key="emoji"
+          class="emoji-item"
+          @click="handleSelectEmoji(emoji)"
+        >
           {{ emoji }}
         </span>
       </div>
@@ -720,7 +861,7 @@ onMounted(() => {
   background: var(--dt-bg-body);
   position: relative;
   z-index: var(--dt-z-base); // 使用设计令牌替代魔法值
-  contain: layout style; // 性能优化：限制浏览器重排范围
+  // contain: layout style; // 已移除：会创建新的包含块，导致内部 position: fixed 元素无法覆盖全屏
 
 
   &.is-dragging {
@@ -786,7 +927,7 @@ onMounted(() => {
   flex: 1;
   min-height: 0; // flex: 1 配合 min-height: 0 正确处理高度
   overflow: hidden;
-  contain: layout; // 性能优化
+  // contain: layout; // 已移除：同上原因
 }
 
 .chat-viewport {

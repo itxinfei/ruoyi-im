@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="message.isOwn"
+    v-if="message.isOwn && uiStatus !== 'recalled'"
     class="message-status"
     :class="`status-${uiStatus}`"
   >
@@ -90,21 +90,26 @@ const emit = defineEmits(['retry', 'show-read-info'])
 const uiStatus = computed(() => {
   const sendStatus = props.message.sendStatus || props.message.status
 
-  // 如果是字符串，直接使用
   if (typeof sendStatus === 'string') {
-    if (sendStatus === 'PENDING' || sendStatus === 'SENDING') { return 'sending' }
-    if (sendStatus === 'DELIVERED') { return 'delivered' }
-    if (sendStatus === 'READ') { return 'read' }
-    if (sendStatus === 'FAILED') { return 'failed' }
+    const normalized = sendStatus.toUpperCase()
+    if (normalized === 'PENDING' || normalized === 'SENDING') { return 'sending' }
+    if (normalized === 'DELIVERED') { return 'delivered' }
+    if (normalized === 'READ') { return 'read' }
+    if (normalized === 'FAILED') { return 'failed' }
+    if (normalized === 'RECALLED' || normalized === 'RECALL') { return 'recalled' }
   }
 
-  // 如果是数字，映射到对应状态
   const statusMap = {
-    0: 'sending',  // PENDING
-    1: 'sending',  // SENDING
-    2: 'delivered', // DELIVERED
-    3: 'read',     // READ
-    4: 'failed'    // FAILED
+    0: 'sending',
+    1: 'sending',
+    2: 'delivered',
+    3: 'read',
+    4: 'failed',
+    5: 'recalled'
+  }
+
+  if (props.message?.isRevoked || props.message?.type?.toUpperCase() === 'RECALLED') {
+    return 'recalled'
   }
 
   return statusMap[sendStatus] || 'delivered'

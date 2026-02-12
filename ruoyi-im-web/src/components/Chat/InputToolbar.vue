@@ -2,32 +2,58 @@
   <div class="input-toolbar">
     <!-- 左侧工具组:核心功能 -->
     <div class="toolbar-left">
-      <el-tooltip content="表情" placement="top">
-        <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="$emit('toggle-emoji')">
+      <el-tooltip
+        content="表情"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          :class="{ active: showEmojiPicker }"
+          @click.stop="$emit('toggle-emoji')"
+        >
           <el-icon>
             <ChatDotRound />
           </el-icon>
         </button>
       </el-tooltip>
 
-      <el-tooltip content="图片" placement="top">
-        <button class="toolbar-btn" @click="$emit('upload-image')">
+      <el-tooltip
+        content="图片"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('upload-image')"
+        >
           <el-icon>
             <Picture />
           </el-icon>
         </button>
       </el-tooltip>
 
-      <el-tooltip content="文件" placement="top">
-        <button class="toolbar-btn" @click="$emit('upload-file')">
+      <el-tooltip
+        content="文件"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('upload-file')"
+        >
           <el-icon>
             <Document />
           </el-icon>
         </button>
       </el-tooltip>
 
-      <el-tooltip v-if="showAtButton" content="@成员" placement="top">
-        <button class="toolbar-btn" @click="$emit('at-member')">
+      <el-tooltip
+        v-if="showAtButton"
+        content="@成员"
+        placement="top"
+      >
+        <button
+          class="toolbar-btn"
+          @click="$emit('at-member')"
+        >
           <el-icon>
             <User />
           </el-icon>
@@ -35,8 +61,14 @@
       </el-tooltip>
 
       <!-- 更多功能下拉菜单 -->
-      <el-dropdown trigger="click" @command="handleMoreCommand">
-        <el-tooltip content="更多" placement="top">
+      <el-dropdown
+        trigger="click"
+        @command="handleMoreCommand"
+      >
+        <el-tooltip
+          content="更多"
+          placement="top"
+        >
           <button class="toolbar-btn more-btn">
             <el-icon>
               <MoreFilled />

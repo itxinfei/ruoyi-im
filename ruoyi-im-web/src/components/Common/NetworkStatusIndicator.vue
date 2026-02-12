@@ -62,10 +62,10 @@ const showIndicator = computed(() => {
 
 // 连接状态
 const connectionStatus = computed(() => {
-  if (!isOnline.value) return 'offline'
-  if (!wsConnected.value) return 'disconnected'
-  if (queueInfo.value.failed > 0) return 'has-failed'
-  if (queueInfo.value.sending > 0) return 'sending'
+  if (!isOnline.value) {return 'offline'}
+  if (!wsConnected.value) {return 'disconnected'}
+  if (queueInfo.value.failed > 0) {return 'has-failed'}
+  if (queueInfo.value.sending > 0) {return 'sending'}
   return 'connected'
 })
 

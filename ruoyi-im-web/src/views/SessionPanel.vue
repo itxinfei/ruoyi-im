@@ -43,27 +43,41 @@
           <div class="add-menu-container">
             <!-- 快捷操作区 -->
             <div class="quick-actions-section">
-              <div class="section-title">快捷操作</div>
+              <div class="section-title">
+                快捷操作
+              </div>
               <div class="quick-actions-grid">
-                <div class="quick-action-item" @click="handleCommand('group')">
+                <div
+                  class="quick-action-item"
+                  @click="handleCommand('group')"
+                >
                   <div class="action-icon success">
                     <span class="material-icons-outlined">group_add</span>
                   </div>
                   <span class="action-label">发起群聊</span>
                 </div>
-                <div class="quick-action-item" @click="handleCommand('join')">
+                <div
+                  class="quick-action-item"
+                  @click="handleCommand('join')"
+                >
                   <div class="action-icon warning">
                     <span class="material-icons-outlined">search</span>
                   </div>
                   <span class="action-label">加入群组</span>
                 </div>
-                <div class="quick-action-item" @click="handleCommand('contacts')">
+                <div
+                  class="quick-action-item"
+                  @click="handleCommand('contacts')"
+                >
                   <div class="action-icon info">
                     <span class="material-icons-outlined">person_add</span>
                   </div>
                   <span class="action-label">添加联系人</span>
                 </div>
-                <div class="quick-action-item" @click="handleCommand('scan')">
+                <div
+                  class="quick-action-item"
+                  @click="handleCommand('scan')"
+                >
                   <div class="action-icon primary">
                     <span class="material-icons-outlined">qr_code_scanner</span>
                   </div>
@@ -76,12 +90,20 @@
 
             <!-- 其他功能 -->
             <div class="common-actions-section">
-              <div class="section-title">其他功能</div>
-              <div class="menu-item-simple" @click="handleCommand('invite')">
+              <div class="section-title">
+                其他功能
+              </div>
+              <div
+                class="menu-item-simple"
+                @click="handleCommand('invite')"
+              >
                 <span class="material-icons-outlined item-icon">share</span>
                 <span class="item-title">邀请好友</span>
               </div>
-              <div class="menu-item-simple" @click="handleCommand('archived')">
+              <div
+                class="menu-item-simple"
+                @click="handleCommand('archived')"
+              >
                 <span class="material-icons-outlined item-icon">archive</span>
                 <span class="item-title">归档会话</span>
               </div>
@@ -114,8 +136,8 @@
       <div
         v-if="archivedCount > 0"
         class="archive-entry-mini"
-        @click="handleShowArchived"
         title="归档会话"
+        @click="handleShowArchived"
       >
         <span class="material-icons-outlined">archive</span>
       </div>

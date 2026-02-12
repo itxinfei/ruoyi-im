@@ -178,7 +178,8 @@ const handleNudge = () => {
   display: flex;
   align-items: center;
   min-height: 48px;
-  margin-bottom: 16px;
+  gap: 10px; // 优化：10px 间距
+  margin-bottom: 8px; // 钉钉标准：8px 消息间距
   position: relative;
   padding: 0;
   transition: all 0.2s var(--dt-ease-out);
@@ -188,26 +189,26 @@ const handleNudge = () => {
   }
 
   &.has-sender-name {
-    padding-top: 18px;
+    padding-top: 18px; // 钉钉标准：18px 顶部间距
   }
 
   &.is-merged {
-    margin-bottom: 4px;
+    margin-bottom: 2px; // 钉钉标准：合并消息间距 2px
   }
 }
 
 .time-divider-wrapper {
   width: 100%;
   text-align: center;
-  margin: 12px 0; // 钉钉标准：12px 上下间距
+  margin: 20px 0; // 优化：20px 上下间距
 }
 
 .time-text {
   background: var(--dt-bg-subtle-hover);
   color: var(--dt-text-quaternary);
   font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 3px 10px; // 优化：3px 上下，10px 左右
+  border-radius: 8px; // 优化：8px 圆角
 }
 
 .checkbox-wrapper {
@@ -226,10 +227,10 @@ const handleNudge = () => {
   position: absolute;
   top: -20px;
   left: 0;
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
+  font-size: 12px; // 钉钉标准：12px
+  color: var(--dt-text-tertiary); // 钉钉标准：使用次级文本色
   white-space: nowrap;
-  max-width: 180px;
+  max-width: 200px; // 钉钉标准：200px 最大宽度
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: none;
@@ -252,14 +253,14 @@ const handleNudge = () => {
 }
 
 .avatar-wrapper {
-  width: 40px;
-  height: 40px;
+  width: 40px; // 钉钉标准：40px
+  height: 40px; // 钉钉标准：40px
   flex-shrink: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px; // 钉钉标准：6px 圆角
   overflow: hidden;
   transition: all 0.2s ease;
 
@@ -273,15 +274,15 @@ const handleNudge = () => {
   }
 
   :deep(.dingtalk-avatar) {
-    border-radius: 8px !important;
+    border-radius: 6px !important;
   }
 }
 
 .content-wrapper {
-  max-width: calc(100% - 100px);
+  max-width: 60%; // 钉钉标准：60% 最大宽度
   display: flex;
   flex-direction: column;
-  margin: 0 12px;
+  margin: 0 8px; // 钉钉标准：8px 边距
   position: relative;
 
   &.is-merged {
@@ -316,13 +317,13 @@ const handleNudge = () => {
 .message-footer {
   display: flex;
   align-items: center;
-  margin-top: 4px;
-  padding: 0 2px;
+  margin-top: 4px; // 钉钉标准：4px 顶部间距
+  padding: 0 4px; // 钉钉标准：4px 左右内边距
 }
 
 .message-time {
-  color: var(--dt-text-quaternary);
-  font-size: 11px;
+  color: var(--dt-text-quaternary); // 钉钉标准：使用四级文本色
+  font-size: 11px; // 钉钉标准：11px
   font-family: var(--dt-font-family);
 }
 

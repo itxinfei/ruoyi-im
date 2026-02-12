@@ -179,8 +179,8 @@ const initAudio = async () => {
     audio.value.addEventListener('loadedmetadata', handleLoadedMetadata)
     audio.value.addEventListener('timeupdate', handleTimeUpdate)
     audio.value.addEventListener('ended', handleEnded)
-    audio.value.addEventListener('play', () => { isPlaying.value = true })
-    audio.value.addEventListener('pause', () => { isPlaying.value = false })
+    audio.value.addEventListener('play', handlePlay)
+    audio.value.addEventListener('pause', handlePause)
   } catch (error) {
     console.error('初始化音频失败:', error)
   }
@@ -219,12 +219,24 @@ onMounted(() => {
 onUnmounted(() => {
   if (audio.value) {
     audio.value.pause()
+    // 移除所有事件监听器
     audio.value.removeEventListener('loadedmetadata', handleLoadedMetadata)
     audio.value.removeEventListener('timeupdate', handleTimeUpdate)
     audio.value.removeEventListener('ended', handleEnded)
+    audio.value.removeEventListener('play', handlePlay)
+    audio.value.removeEventListener('pause', handlePause)
+    // 清空音频源以释放资源
+    audio.value.src = ''
+    audio.value.load()
     audio.value = null
   }
 })
+
+// 播放事件处理
+const handlePlay = () => { isPlaying.value = true }
+
+// 暂停事件处理
+const handlePause = () => { isPlaying.value = false }
 
 // 监听消息变化，重新初始化
 watch(() => props.message?.id, () => {

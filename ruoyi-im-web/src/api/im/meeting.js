@@ -10,7 +10,7 @@ import request from '../request'
  */
 export function getMeetingList(status) {
   return request({
-    url: '/api/meeting-rooms/list',
+    url: '/api/im/video-meetings/list',
     method: 'get',
     params: { status }
   })
@@ -23,7 +23,7 @@ export function getMeetingList(status) {
  */
 export function getMeetingDetail(meetingId) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}`,
+    url: `/api/im/video-meetings/${meetingId}`,
     method: 'get'
   })
 }
@@ -35,7 +35,7 @@ export function getMeetingDetail(meetingId) {
  */
 export function createMeeting(data) {
   return request({
-    url: '/api/meeting-rooms',
+    url: '/api/im/video-meetings/create',
     method: 'post',
     data
   })
@@ -49,7 +49,7 @@ export function createMeeting(data) {
  */
 export function updateMeeting(meetingId, data) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}`,
+    url: `/api/im/video-meetings/${meetingId}`,
     method: 'put',
     data
   })
@@ -62,7 +62,7 @@ export function updateMeeting(meetingId, data) {
  */
 export function cancelMeeting(meetingId) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/cancel`,
+    url: `/api/im/video-meetings/${meetingId}/cancel`,
     method: 'post'
   })
 }
@@ -74,7 +74,7 @@ export function cancelMeeting(meetingId) {
  */
 export function deleteMeeting(meetingId) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}`,
+    url: `/api/im/video-meetings/${meetingId}`,
     method: 'delete'
   })
 }
@@ -86,7 +86,7 @@ export function deleteMeeting(meetingId) {
  */
 export function startMeeting(meetingId) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/start`,
+    url: `/api/im/video-meetings/${meetingId}/start`,
     method: 'post'
   })
 }
@@ -98,7 +98,7 @@ export function startMeeting(meetingId) {
  */
 export function endMeeting(meetingId) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/end`,
+    url: `/api/im/video-meetings/${meetingId}/end`,
     method: 'post'
   })
 }
@@ -111,7 +111,7 @@ export function endMeeting(meetingId) {
  */
 export function joinMeeting(meetingId, password) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/join`,
+    url: `/api/im/video-meetings/${meetingId}/join`,
     method: 'post',
     params: { password }
   })
@@ -124,7 +124,7 @@ export function joinMeeting(meetingId, password) {
  */
 export function leaveMeeting(meetingId) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/leave`,
+    url: `/api/im/video-meetings/${meetingId}/leave`,
     method: 'post'
   })
 }
@@ -136,7 +136,7 @@ export function leaveMeeting(meetingId) {
  */
 export function getParticipants(meetingId) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/participants`,
+    url: `/api/im/video-meetings/${meetingId}/participants`,
     method: 'get'
   })
 }
@@ -149,7 +149,7 @@ export function getParticipants(meetingId) {
  */
 export function inviteUsers(meetingId, userIds) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/invite`,
+    url: `/api/im/video-meetings/${meetingId}/invite`,
     method: 'post',
     data: userIds
   })
@@ -163,7 +163,7 @@ export function inviteUsers(meetingId, userIds) {
  */
 export function removeParticipant(meetingId, userId) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/remove`,
+    url: `/api/im/video-meetings/${meetingId}/remove`,
     method: 'post',
     params: { userId }
   })
@@ -178,7 +178,7 @@ export function removeParticipant(meetingId, userId) {
  */
 export function muteParticipant(meetingId, userId, muted) {
   return request({
-    url: `/api/meeting-rooms/${meetingId}/mute`,
+    url: `/api/im/video-meetings/${meetingId}/mute`,
     method: 'post',
     params: { userId, muted }
   })

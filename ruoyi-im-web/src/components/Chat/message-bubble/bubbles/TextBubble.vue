@@ -237,12 +237,13 @@ const formattedContent = computed(() => {
       )
     }
 
-    // XSS 防护：过滤 HTML
+    // XSS 防护：过滤 HTML，禁止 javascript: 等危险协议
     return DOMPurify.sanitize(formatted, {
       ALLOWED_TAGS: ['p', 'br', 'span', 'strong', 'em', 'u', 'a'],
       ALLOWED_ATTR: ['class', 'href', 'target', 'rel'],
       ALLOW_DATA_ATTR: false,
-      KEEP_CONTENT: true
+      KEEP_CONTENT: true,
+      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i
     })
   }
 
@@ -256,12 +257,13 @@ const formattedContent = computed(() => {
     }
   )
 
-  // XSS 防护：过滤 HTML
+  // XSS 防护：过滤 HTML，禁止 javascript: 等危险协议
   return DOMPurify.sanitize(formatted, {
     ALLOWED_TAGS: ['p', 'br', 'span', 'strong', 'em', 'u', 'a'],
     ALLOWED_ATTR: ['class', 'href', 'target', 'rel'],
     ALLOW_DATA_ATTR: false,
-    KEEP_CONTENT: true
+    KEEP_CONTENT: true,
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i
   })
 })
 

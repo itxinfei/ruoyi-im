@@ -43,10 +43,16 @@ export function useContactBatch() {
    * 全选/取消全选
    * @param {Array} list - 当前列表数据
    * @param {boolean} selected - 是否全选
+   * @param {Function} getIdFn - 获取ID的函数，默认为 item => item.id
    */
-  const handleSelectAll = (list, selected) => {
+  const handleSelectAll = (list, selected, getIdFn = item => item.id) => {
     if (selected) {
-      list.forEach(item => selectedContacts.value.add(item.id))
+      list.forEach(item => {
+        const id = getIdFn(item)
+        if (id) {
+          selectedContacts.value.add(id)
+        }
+      })
     } else {
       selectedContacts.value.clear()
     }

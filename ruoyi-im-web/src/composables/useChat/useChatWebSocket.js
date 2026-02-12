@@ -15,7 +15,7 @@ import { useMessageTransformation } from '@/composables/useMessageTransformation
 
 export function useChatWebSocket(sessionId, currentUser) {
   const store = useStore()
-  const { onMessage, onMessageStatus, onReaction } = useImWebSocket()
+  const { onMessage, onMessageStatus, onReaction, onRecall } = useImWebSocket()
   const { transformMsg } = useMessageTransformation({ currentUser })
 
   const currentSessionId = computed(() => sessionId?.value ?? sessionId)
@@ -78,9 +78,21 @@ export function useChatWebSocket(sessionId, currentUser) {
         1: 'sending',
         2: 'delivered',
         3: 'read',
-        4: 'failed'
+        4: 'failed',
+        5: 'recalled'
       }
       const sendStatus = data.sendStatus != null ? Number(data.sendStatus) : -1
+
+      if (sendStatus === 5) {
+        const messageId = data.messageId || data.clientMsgId
+        if (messageId) {
+          store.dispatch('im/message/applyRecallUpdate', {
+            sessionId: sid,
+            messageId
+          })
+        }
+        return
+      }
 
       if (statusMap[sendStatus]) {
         // 通过 messageId 或 clientMsgId 定位消息
@@ -104,6 +116,17 @@ export function useChatWebSocket(sessionId, currentUser) {
         userName: data.userName,
         userAvatar: data.userAvatar,
         isAdd: data.isAdd !== false
+      })
+    })
+
+    onRecall(data => {
+      const sid = currentSessionId.value
+      if (data.conversationId && data.conversationId !== sid) { return }
+      const messageId = data.messageId || data.id || data.clientMsgId
+      if (!messageId) { return }
+      store.dispatch('im/message/applyRecallUpdate', {
+        sessionId: data.conversationId ? sid : null,
+        messageId
       })
     })
   }

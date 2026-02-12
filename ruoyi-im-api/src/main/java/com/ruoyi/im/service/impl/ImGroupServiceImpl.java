@@ -38,7 +38,7 @@ import com.ruoyi.im.constants.StatusConstants;
 @Service
 public class ImGroupServiceImpl implements ImGroupService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImGroupServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ImGroupServiceImpl.class);
 
     private final ImGroupMapper imGroupMapper;
     private final ImGroupMemberMapper imGroupMemberMapper;
@@ -610,7 +610,7 @@ public class ImGroupServiceImpl implements ImGroupService {
                     failCount++;
                 }
             } catch (Exception e) {
-                logger.error("解散群组失败，groupId={}", groupId, e);
+                log.error("解散群组失败，groupId={}", groupId, e);
                 failCount++;
             }
         }
@@ -814,7 +814,7 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new RuntimeException("群组不存在");
+            throw new BusinessException("GROUP_NOT_EXIST", "群组不存在");
         }
 
         for (Long userId : userIds) {
@@ -854,7 +854,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void adminToggleGroupMute(Long groupId, Boolean muted) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new RuntimeException("群组不存在");
+            throw new BusinessException("GROUP_NOT_EXIST", "群组不存在");
         }
 
         group.setAllMuted(muted ? 1 : 0);
@@ -914,12 +914,12 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void adminTransferOwner(Long groupId, Long newOwnerId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new RuntimeException("群组不存在");
+            throw new BusinessException("GROUP_NOT_EXIST", "群组不存在");
         }
 
         ImGroupMember newOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, newOwnerId);
         if (newOwner == null) {
-            throw new RuntimeException("用户不在群组中");
+            throw new BusinessException("USER_NOT_IN_GROUP", "用户不在群组中");
         }
 
         ImGroupMember oldOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, group.getOwnerId());

@@ -176,16 +176,16 @@ const handleClick = async () => {
 .file-bubble {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 10px; // 钉钉标准：10px
+  padding: 10px 12px; // 钉钉标准：10px 上下，12px 左右
   background: var(--dt-bg-card);
   border: none;
-  border-radius: var(--dt-radius-lg, 12px);
+  border-radius: 8px; // 钉钉标准：8px 圆角
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   transition: all var(--dt-transition-base);
-  min-width: 240px;
-  max-width: 400px;
+  min-width: 200px; // 钉钉标准：200px 最小宽度
+  max-width: 300px; // 钉钉标准：300px 最大宽度
 
   &:hover {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -197,7 +197,7 @@ const handleClick = async () => {
   }
 
   &.is-downloading {
-    box-shadow: 0 0 0 1px var(--dt-brand-color), 0 1px 2px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0 0 2px var(--dt-brand-color), 0 1px 2px rgba(0, 0, 0, 0.06);
     background: var(--dt-brand-lighter);
     cursor: wait;
 
@@ -213,15 +213,15 @@ const handleClick = async () => {
 
 .file-icon {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 36px; // 优化：36px
+  height: 36px; // 优化：36px
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
   .el-icon {
-    font-size: 32px;
+    font-size: 28px; // 优化：28px
     color: var(--dt-brand-color);
   }
 

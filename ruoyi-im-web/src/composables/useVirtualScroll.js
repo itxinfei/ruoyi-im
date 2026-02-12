@@ -72,7 +72,7 @@ export function useVirtualScroll(options = {}) {
   /**
    * 处理滚动事件
    */
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     scrollTop.value = e.target.scrollTop
     isScrolling.value = true
 
@@ -89,7 +89,7 @@ export function useVirtualScroll(options = {}) {
    * 添加消息到列表
    * @param {Array} newMessages - 新消息数组
    */
-  const addMessages = (newMessages) => {
+  const addMessages = newMessages => {
     if (!Array.isArray(newMessages)) {
       newMessages = [newMessages]
     }
@@ -106,7 +106,7 @@ export function useVirtualScroll(options = {}) {
    * 在列表开头添加消息（加载更多）
    * @param {Array} newMessages - 新消息数组
    */
-  const prependMessages = (newMessages) => {
+  const prependMessages = newMessages => {
     if (!Array.isArray(newMessages)) {
       newMessages = [newMessages]
     }
@@ -141,7 +141,7 @@ export function useVirtualScroll(options = {}) {
    * 删除消息
    * @param {string|Function} predicate - 消息 ID 或查找函数
    */
-  const removeMessage = (predicate) => {
+  const removeMessage = predicate => {
     const index = typeof predicate === 'function'
       ? messages.value.findIndex(predicate)
       : messages.value.findIndex(m => m.id === predicate)
@@ -172,7 +172,7 @@ export function useVirtualScroll(options = {}) {
    * @param {string} behavior - 滚动行为
    */
   const scrollToIndex = (index, behavior = 'smooth') => {
-    if (!containerRef.value) return
+    if (!containerRef.value) {return}
 
     const targetScrollTop = index * config.estimatedItemHeight
     containerRef.value.scrollTo({
@@ -185,7 +185,7 @@ export function useVirtualScroll(options = {}) {
    * 滚动到底部
    */
   const scrollToBottom = () => {
-    if (!containerRef.value) return
+    if (!containerRef.value) {return}
     containerRef.value.scrollTop = containerRef.value.scrollHeight
   }
 
@@ -194,10 +194,10 @@ export function useVirtualScroll(options = {}) {
    * @param {number} threshold - 阈值（像素）
    */
   const isNearBottom = (threshold = 100) => {
-    if (!containerRef.value) return true
+    if (!containerRef.value) {return true}
     const { scrollTop, scrollHeight, clientHeight } = containerRef.value
     // 容器未渲染完成时视为在底部
-    if (!scrollHeight || !clientHeight) return true
+    if (!scrollHeight || !clientHeight) {return true}
     return scrollHeight - scrollTop - clientHeight < threshold
   }
 
@@ -290,7 +290,7 @@ export function useVirtualScrollOptimization(options = {}) {
    * @param {Array} messages - 消息列表
    * @returns {Array} 清理后的消息列表
    */
-  const cleanupMessages = (messages) => {
+  const cleanupMessages = messages => {
     if (!messages || messages.length <= config.maxMessages) {
       return messages
     }
@@ -329,12 +329,12 @@ export function useVirtualScrollOptimization(options = {}) {
    * 检查是否在底部
    */
   const isNearBottom = (threshold = 100) => {
-    if (!messageListRef.value) return true
+    if (!messageListRef.value) {return true}
     const element = messageListRef.value.$el || messageListRef.value
-    if (!element) return true
+    if (!element) {return true}
 
     const { scrollTop, scrollHeight, clientHeight } = element
-    if (!scrollHeight || !clientHeight) return true
+    if (!scrollHeight || !clientHeight) {return true}
     return scrollHeight - scrollTop - clientHeight < threshold
   }
 

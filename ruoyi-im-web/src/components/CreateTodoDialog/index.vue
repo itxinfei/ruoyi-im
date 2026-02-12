@@ -2,8 +2,10 @@
   <el-dialog
     v-model="visible"
     :title="isEdit ? '编辑待办' : '新建待办'"
-    width="500px"
+    width="480px"
+    class="todo-dialog"
     :close-on-click-modal="true"
+    destroy-on-close
     @close="handleClose"
   >
     <el-form
@@ -11,84 +13,102 @@
       :model="form"
       :rules="rules"
       label-width="80px"
-      label-position="left"
+      label-position="top"
+      class="todo-form"
     >
       <el-form-item
-        label="标题"
+        label="待办标题"
         prop="title"
       >
         <el-input
           v-model="form.title"
-          placeholder="请输入待办标题"
+          placeholder="想要做点什么？"
           maxlength="50"
           show-word-limit
         />
       </el-form-item>
 
       <el-form-item
-        label="内容"
+        label="详细描述"
         prop="content"
       >
         <el-input
           v-model="form.content"
           type="textarea"
-          placeholder="请输入待办内容"
-          :rows="4"
+          placeholder="添加补充说明（可选）"
+          :rows="3"
           maxlength="200"
           show-word-limit
         />
       </el-form-item>
 
-      <el-form-item
-        label="优先级"
-        prop="priority"
-      >
-        <el-select
-          v-model="form.priority"
-          placeholder="请选择优先级"
-          style="width: 100%"
+      <div class="form-row">
+        <el-form-item
+          label="优先级"
+          prop="priority"
+          class="flex-1"
         >
-          <el-option
-            label="紧急"
-            value="high"
-          />
-          <el-option
-            label="普通"
-            value="medium"
-          />
-          <el-option
-            label="低"
-            value="low"
-          />
-        </el-select>
-      </el-form-item>
+          <el-select
+            v-model="form.priority"
+            placeholder="请选择"
+          >
+            <el-option
+              label="紧急"
+              value="high"
+            >
+              <div class="priority-option high">
+                <span class="dot" /> 紧急
+              </div>
+            </el-option>
+            <el-option
+              label="普通"
+              value="medium"
+            >
+              <div class="priority-option medium">
+                <span class="dot" /> 普通
+              </div>
+            </el-option>
+            <el-option
+              label="低"
+              value="low"
+            >
+              <div class="priority-option low">
+                <span class="dot" /> 低
+              </div>
+            </el-option>
+          </el-select>
+        </el-form-item>
 
-      <el-form-item
-        label="截止日期"
-        prop="dueDate"
-      >
-        <el-date-picker
-          v-model="form.dueDate"
-          type="datetime"
-          placeholder="选择截止日期"
-          format="YYYY-MM-DD HH:mm"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          style="width: 100%"
-        />
-      </el-form-item>
+        <el-form-item
+          label="截止时间"
+          prop="dueDate"
+          class="flex-1"
+        >
+          <el-date-picker
+            v-model="form.dueDate"
+            type="datetime"
+            placeholder="点击选择"
+            format="YYYY-MM-DD HH:mm"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            :shortcuts="dateShortcuts"
+          />
+        </el-form-item>
+      </div>
     </el-form>
 
     <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
+      <div class="dialog-footer">
+        <el-button @click="handleClose">
+          取消
+        </el-button>
         <el-button
           type="primary"
           :loading="submitting"
           @click="handleSubmit"
         >
-          {{ isEdit ? '保存' : '确定' }}
+          {{ isEdit ? '保存修改' : '立即创建' }}
         </el-button>
-      </span>
+      </div>
     </template>
   </el-dialog>
 </template>
@@ -115,10 +135,8 @@ const visible = ref(false)
 const formRef = ref(null)
 const submitting = ref(false)
 
-// 判断是否为编辑模式
 const isEdit = computed(() => !!props.todo)
 
-// 表单数据
 const form = reactive({
   title: '',
   content: '',
@@ -126,25 +144,23 @@ const form = reactive({
   dueDate: ''
 })
 
-// 表单校验规则
 const rules = {
   title: [
-    { required: true, message: '请输入待办标题', trigger: 'blur' },
-    { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
+    { required: true, message: '请输入标题', trigger: 'blur' },
+    { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
   ],
-  priority: [
-    { required: true, message: '请选择优先级', trigger: 'change' }
-  ],
-  dueDate: [
-    { required: true, message: '请选择截止日期', trigger: 'change' }
-  ]
+  priority: [{ required: true, message: '请选择优先级', trigger: 'change' }]
 }
 
-// 监听 modelValue 变化
+const dateShortcuts = [
+  { text: '今天', value: new Date() },
+  { text: '明天', value: () => { const date = new Date(); date.setTime(date.getTime() + 3600 * 1000 * 24); return date } },
+  { text: '一周后', value: () => { const date = new Date(); date.setTime(date.getTime() + 3600 * 1000 * 24 * 7); return date } }
+]
+
 watch(() => props.modelValue, val => {
   visible.value = val
   if (val && props.todo) {
-    // 编辑模式：填充表单
     form.title = props.todo.title || ''
     form.content = props.todo.content || ''
     form.priority = props.todo.priority || 'medium'
@@ -154,69 +170,42 @@ watch(() => props.modelValue, val => {
 
 watch(visible, val => {
   emit('update:modelValue', val)
-  if (!val) {
-    resetForm()
-  }
+  if (!val) {resetForm()}
 })
 
-// 数据转换：前端 -> 后端
-const transformTodoToApi = todo => {
-  const priorityMap = { low: 1, medium: 2, high: 3 }
-  return {
-    title: todo.title,
-    description: todo.content,
-    priority: priorityMap[todo.priority] || 2,
-    dueDate: todo.dueDate || null
-  }
-}
-
-// 提交表单
 const handleSubmit = async () => {
   try {
     await formRef.value.validate()
     submitting.value = true
 
-    let res
-    if (isEdit.value) {
-      // 编辑模式
-      const apiData = transformTodoToApi(form)
-      res = await updateTodo(props.todo.id, apiData)
-      if (res.code === 200) {
-        ElMessage.success('保存成功')
-      } else {
-        ElMessage.error(res.msg || '保存失败')
-      }
-    } else {
-      // 新建模式
-      const apiData = transformTodoToApi(form)
-      res = await createTodo(apiData)
-      if (res.code === 200) {
-        ElMessage.success('创建成功')
-      } else {
-        ElMessage.error(res.msg || '创建失败')
-      }
+    const priorityMap = { low: 1, medium: 2, high: 3 }
+    const apiData = {
+      title: form.title,
+      description: form.content,
+      priority: priorityMap[form.priority],
+      dueDate: form.dueDate || null
     }
 
+    const res = isEdit.value 
+      ? await updateTodo(props.todo.id, apiData)
+      : await createTodo(apiData)
+
     if (res.code === 200) {
+      ElMessage.success(isEdit.value ? '保存成功' : '创建成功')
       emit('success', res.data)
       handleClose()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
     }
   } catch (error) {
-    if (error !== false) { // 表单验证失败时 error 为 false
-      console.error(isEdit.value ? '更新待办失败' : '创建待办失败', error)
-      ElMessage.error(isEdit.value ? '保存失败，请稍后重试' : '创建失败，请稍后重试')
-    }
+    if (error !== false) {console.error('Todo operation failed:', error)}
   } finally {
     submitting.value = false
   }
 }
 
-// 关闭对话框
-const handleClose = () => {
-  visible.value = false
-}
+const handleClose = () => { visible.value = false }
 
-// 重置表单
 const resetForm = () => {
   formRef.value?.resetFields()
   form.title = ''
@@ -226,10 +215,81 @@ const resetForm = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.todo-dialog {
+  :deep(.el-dialog) {
+    border-radius: var(--dt-radius-xl);
+    overflow: hidden;
+    
+    .el-dialog__header {
+      padding: 20px 24px;
+      margin-right: 0;
+      border-bottom: 1px solid var(--dt-border-light);
+      .el-dialog__title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--dt-text-primary);
+      }
+    }
+    
+    .el-dialog__body {
+      padding: 24px;
+    }
+
+    .el-dialog__footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--dt-border-light);
+      background: var(--dt-bg-subtle);
+    }
+  }
+}
+
+.todo-form {
+  :deep(.el-form-item__label) {
+    font-size: 13px;
+    color: var(--dt-text-secondary);
+    font-weight: 500;
+    margin-bottom: 4px;
+    padding: 0;
+  }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-textarea__inner) {
+    box-shadow: none !important;
+    border: 1px solid var(--dt-border-medium);
+    border-radius: var(--dt-radius-md);
+    transition: all 0.2s;
+    background: var(--dt-bg-body);
+
+    &:hover { border-color: var(--dt-brand-color); }
+    &.is-focus { border-color: var(--dt-brand-color); box-shadow: 0 0 0 2px var(--dt-brand-bg) !important; }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  .flex-1 { flex: 1; }
+  :deep(.el-date-editor.el-input) { width: 100%; }
+}
+
+.priority-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  &.high .dot { background: var(--dt-priority-high); }
+  &.medium .dot { background: var(--dt-priority-medium); }
+  &.low .dot { background: var(--dt-priority-low); }
+}
+
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 12px;
 }
 </style>

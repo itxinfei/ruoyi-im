@@ -53,10 +53,8 @@
       <!-- 导航菜单 -->
       <el-scrollbar class="sidebar-nav-scroll">
         <nav class="nav-list">
-          <div class="nav-group">
-            <div class="nav-group-title">
-              常用
-            </div>
+          <!-- 主导航：不需要分组标题，直接列出 -->
+          <div class="nav-group nav-group--primary">
             <div
               class="nav-item"
               :class="{ active: currentNav === 'new' }"
@@ -89,6 +87,15 @@
                 v-if="recommendedCount > 0"
                 class="nav-dot"
               />
+            </div>
+          </div>
+
+          <div class="nav-divider" />
+
+          <!-- 联系人 & 群组 -->
+          <div class="nav-group">
+            <div class="nav-group-title">
+              联系人
             </div>
 
             <div
@@ -201,7 +208,6 @@
             <div class="nav-group-title">
               组织架构
             </div>
-            <!-- 组织架构搜索 -->
             <div class="org-search-box">
               <el-input
                 v-model="orgSearchQuery"
@@ -315,9 +321,9 @@
       </div>
 
       <div
+        ref="listContentRef"
         v-loading="loading"
         class="list-content-wrapper"
-        ref="listContentRef"
       >
         <div
           v-if="currentNav === 'recommended'"
@@ -348,7 +354,7 @@
           v-else-if="currentList.length > 0"
           class="virtual-list"
           :items="currentList"
-          :item-size="64"
+          :item-size="56"
           :height="virtualListHeight"
           :class="{ 'batch-mode': batchMode }"
         >
@@ -370,7 +376,7 @@
               <DingtalkAvatar
                 :src="getItemAvatar(item)"
                 :name="getItemName(item)"
-                :size="40"
+                :size="36"
                 :shape="currentNav === 'groups' ? 'square' : 'circle'"
               />
               <div class="item-info">
@@ -409,7 +415,9 @@
               size="small"
               @click="refreshCurrent"
             >
-              <el-icon class="mr-1"><Refresh /></el-icon>
+              <el-icon class="mr-1">
+                <Refresh />
+              </el-icon>
               刷新重试
             </el-button>
           </el-empty>
@@ -512,7 +520,7 @@
                   <span
                     class="result-type-tag"
                     :class="item.type"
-                >{{ item.type === 'group' ? '群组' : item.type === 'dept' ? '部门' : '联系人' }}</span>
+                  >{{ item.type === 'group' ? '群组' : item.type === 'dept' ? '部门' : '联系人' }}</span>
                 </div>
                 <el-icon class="arrow-right">
                   <ArrowRight />
@@ -649,7 +657,7 @@ import GroupSelectDialog from '@/components/Contacts/GroupSelectDialog.vue'
 import AddFriendDialog from '@/components/Contacts/AddFriendDialog.vue'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
 import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
-import { getFriendRequests, getGroupedFriendList, getGroupList, createGroup, renameGroup, deleteGroup, clearFriendListCache } from '@/api/im/contact'
+import { getFriendRequests, getGroupedFriendList, getGroupList, createGroup, renameGroup, deleteGroup, clearFriendListCache, batchMoveToGroup, batchDeleteContacts, batchAddFriends as batchAddFriendsApi } from '@/api/im/contact'
 import { getGroups } from '@/api/im/group'
 import { getOrgTree, getDepartmentMembers, searchOrgMembers } from '@/api/im/organization'
 import { getAllUsers } from '@/api/im/user'
@@ -657,7 +665,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search, User, Avatar, ChatDotSquare, OfficeBuilding,
   ArrowRight, Plus, Close, MoreFilled, Star, Refresh,
-  UserFilled, StarFilled, ChatLineRound
+  UserFilled, StarFilled, ChatLineRound, EditPen, Delete
 } from '@element-plus/icons-vue'
 import { useHighlightText } from '@/composables/useHighlightText'
 import { useContactBatch } from '@/composables/useContactBatch'
@@ -685,7 +693,7 @@ const friendGroupNames = ref([]) // 好友分组名称列表
 const groupList = ref([])
 const orgMembers = ref([])
 const allUsers = ref([]) // 公司所有用户
-const friendRequests = ref([])
+const friendRequests = ref(null)
 const pendingCount = ref(0)
 const recommendedCount = ref(0)
 const searchResults = ref([])
@@ -749,7 +757,8 @@ const groupProfileOpen = ref(false)
 // Org Tree
 const orgExpanded = ref(true)
 const selectedDeptId = ref(null)
-const flatDepts = ref([])
+const orgTreeData = ref([]) // 原始树形数据
+const flatDepts = ref([]) // 扁平化后的显示数据
 
 // 组织架构搜索
 const orgSearchQuery = ref('')
@@ -844,7 +853,7 @@ const currentList = computed(() => {
 
     const uniqueMap = new Map()
     allFriends.forEach(friend => {
-      if (!friend) return
+      if (!friend) {return}
       const id = friend.friendId || friend.id || friend.userId
       if (id) {
         uniqueMap.set(id, friend)
@@ -877,7 +886,61 @@ const toggleOrg = () => {
   orgExpanded.value = !orgExpanded.value
 }
 
+// 递归构建扁平化的部门树（只包含展开的节点）
+const buildFlatDepts = (depts, level = 0, result = []) => {
+  if (!depts || !Array.isArray(depts)) {return result}
+
+  depts.forEach(dept => {
+    // 添加当前部门
+    result.push({
+      ...dept,
+      level,
+      hasChildren: dept.children && dept.children.length > 0
+    })
+
+    // 如果有子部门且已展开，递归添加
+    if (dept.children && dept.children.length > 0 && dept.expanded) {
+      buildFlatDepts(dept.children, level + 1, result)
+    }
+  })
+
+  return result
+}
+
+// 递归查找并更新部门展开状态
+const toggleDeptExpanded = (depts, deptId) => {
+  if (!depts || !Array.isArray(depts)) {return false}
+
+  for (const dept of depts) {
+    if (dept.id === deptId) {
+      // 找到目标部门，切换展开状态
+      dept.expanded = !dept.expanded
+      return true
+    }
+    // 递归查找子部门
+    if (dept.children && dept.children.length > 0) {
+      if (toggleDeptExpanded(dept.children, deptId)) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
+// 从原始树数据重新计算扁平列表
+const refreshFlatDepts = () => {
+  flatDepts.value = buildFlatDepts(orgTreeData.value)
+}
+
 const selectDept = async dept => {
+  // 如果点击的是有子节点的部门，切换展开/折叠状态
+  if (dept.hasChildren) {
+    toggleDeptExpanded(orgTreeData.value, dept.id)
+    // 重新计算扁平化的部门树
+    refreshFlatDepts()
+  }
+
+  // 加载部门成员
   selectedDeptId.value = dept.id
   currentNav.value = 'org'
   loading.value = true
@@ -975,7 +1038,7 @@ const shouldUseCache = nav => {
   if (Date.now() - entry.ts > 30 * 1000) { return false }
   if (nav === 'friends') { return friendGroups.value.length > 0 }
   if (nav === 'groups') { return groupList.value.length > 0 }
-  if (nav === 'new') { return pendingCount.value > 0 }
+  if (nav === 'new') { return friendRequests.value !== null }
   if (nav === 'all') { return allUsers.value.length > 0 }
   return false
 }
@@ -1219,7 +1282,7 @@ const handleGroupProfileToggle = value => {
 
 // 全选/取消全选 - 包装composable方法
 const handleSelectAll = selected => {
-  batchSelectAll(currentList.value, selected)
+  batchSelectAll(currentList.value, selected, getItemId)
 }
 
 // 批量移动到分组
@@ -1237,8 +1300,7 @@ const handleGroupSelectConfirm = async groupName => {
 
   await batchMoveGroup(async ids => {
     // 调用批量移动API
-    // await batchMoveToGroup({ contactIds: ids, groupName })
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await batchMoveToGroup({ contactIds: ids, groupName })
     ElMessage.success(`已将 ${ids.length} 个联系人移动到"${groupName}"`)
     fetchData(currentNav.value)
   })
@@ -1256,8 +1318,7 @@ const handleBatchSendMessage = async () => {
 const handleBatchDelete = async () => {
   await batchDelete(async ids => {
     // 调用批量删除API
-    // await batchDeleteContacts(ids)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await batchDeleteContacts(ids)
     fetchData(currentNav.value)
   })
 }
@@ -1266,8 +1327,7 @@ const handleBatchDelete = async () => {
 const handleBatchAddFriends = async () => {
   await batchAddFriends(async (ids, reason) => {
     // 调用批量添加API
-    // await batchAddFriends({ userIds: ids, remark: reason })
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await batchAddFriendsApi({ userIds: ids, remark: reason })
   })
 }
 
@@ -1344,8 +1404,8 @@ onMounted(() => {
   })
   // Load org tree
   getOrgTree().then(res => {
-    // Flatten logic if needed, or just assign
-    flatDepts.value = res.data || []
+    orgTreeData.value = res.data || []
+    flatDepts.value = buildFlatDepts(orgTreeData.value)
   })
 })
 
@@ -1406,8 +1466,8 @@ watch(showSearchPanel, val => {
 @use '@/styles/design-tokens.scss' as *;
 
 // ==================== 布局变量 ====================
-$sidebar-width: 240px;
-$list-width: 280px;
+$sidebar-width: 220px;
+$list-width: 260px;
 $list-width-collapsed: 200px;
 $panel-min-width: 320px;
 
@@ -1470,7 +1530,7 @@ $panel-min-width: 320px;
       z-index: 50;
       transform: translateX(100%);
       transition: transform 0.3s ease;
-      background: #fff;
+      background: var(--dt-bg-card);
 
       &.detail-open {
         transform: translateX(0);
@@ -1501,18 +1561,18 @@ $panel-min-width: 320px;
 }
 
 .sidebar-header {
-  padding: var(--dt-spacing-lg);
+  padding: 12px 12px 8px;
   border-bottom: 1px solid transparent;
 
   .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--dt-spacing-md);
+    margin-bottom: 8px;
 
     .sidebar-title {
-      font-size: var(--dt-font-size-xl);
-      font-weight: var(--dt-font-weight-semibold);
+      font-size: 16px;
+      font-weight: 600;
       color: var(--dt-text-primary);
       margin: 0;
     }
@@ -1532,8 +1592,8 @@ $panel-min-width: 320px;
 
   .search-box {
     background: var(--dt-fill-color);
-    border-radius: var(--dt-radius-md);
-    padding: 10px 14px;
+    border-radius: 6px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -1545,12 +1605,12 @@ $panel-min-width: 320px;
 
     .search-icon {
       color: var(--dt-text-tertiary);
-      margin-right: 10px;
-      font-size: 16px;
+      margin-right: 8px;
+      font-size: 14px;
     }
 
     .placeholder {
-      font-size: var(--dt-font-size-sm);
+      font-size: 13px;
       color: var(--dt-text-tertiary);
     }
   }
@@ -1560,32 +1620,36 @@ $panel-min-width: 320px;
 .nav-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 4px 8px;
 }
 
 .nav-group {
-  margin-bottom: 20px;
+  margin-bottom: 4px;
+
+  // 无标题的主导航组，紧凑排列
+  &--primary {
+    margin-bottom: 0;
+  }
 }
 
 .nav-group-title {
-  padding: 0 12px;
+  padding: 6px 10px 4px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--dt-text-quaternary);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  height: 36px;
+  padding: 0 10px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   color: var(--dt-text-primary);
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   position: relative;
 
   &:hover {
@@ -1599,74 +1663,69 @@ $panel-min-width: 320px;
     .nav-text {
       font-weight: 600;
     }
-    
-    .nav-icon-wrapper {
-      box-shadow: 0 2px 8px var(--dt-brand-light);
+  }
+
+  // 钉钉风格：浅色底 + 彩色图标（非饱和渐变）
+  .nav-icon-wrapper {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-size: 15px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+
+    &.bg-gradient-orange { background: #FFF3E0; color: #F57C00; }
+    &.bg-gradient-pink { background: #FFEBEE; color: #E53935; }
+    &.bg-gradient-blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+    &.bg-gradient-primary { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+    &.bg-gradient-green { background: #E8F5E9; color: #2E7D32; }
+    &.bg-gradient-teal { background: #E0F7FA; color: #00838F; }
+    &.bg-gradient-purple { background: #F3E5F5; color: #7B1FA2; }
+    &.bg-gradient-light {
+      background: var(--dt-fill-color);
+      color: var(--dt-text-secondary);
+      .group-initial { font-size: 12px; font-weight: 600; }
     }
   }
-
-  .nav-icon-wrapper {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-  color: #fff;
-  font-size: 18px;
-  flex-shrink: 0;
-  transition: all 0.3s;
-
-  &.bg-gradient-orange { background: linear-gradient(135deg, #FF943D 0%, #FF7A18 100%); }
-  &.bg-gradient-pink { background: linear-gradient(135deg, #F54A45 0%, #D8211B 100%); }
-  &.bg-gradient-blue { background: var(--dt-brand-color); }
-  &.bg-gradient-primary { background: var(--dt-brand-color); }
-  &.bg-gradient-green { background: linear-gradient(135deg, #00CC70 0%, #00B362 100%); }
-  &.bg-gradient-teal { background: linear-gradient(135deg, #47C7D0 0%, #2AB5BF 100%); }
-  &.bg-gradient-purple { background: linear-gradient(135deg, #722ED1 0%, #531DAB 100%); }
-  &.bg-gradient-light { 
-    background: var(--dt-fill-color);
-    color: var(--dt-text-secondary);
-    .group-initial { font-size: 14px; font-weight: 600; }
-  }
-}
 
   .nav-text {
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .nav-badge {
     background: var(--dt-error-color);
     color: #fff;
     font-size: 10px;
-    min-width: 18px;
-    height: 18px;
+    min-width: 16px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: 8px;
     font-weight: 600;
-    padding: 0 5px;
+    padding: 0 4px;
   }
 
   .nav-count {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--dt-text-quaternary);
-    margin-left: 8px;
+    margin-left: 6px;
   }
 
   .nav-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background-color: var(--dt-error-color);
-    margin-left: 8px;
-    box-shadow: 0 0 0 2px #fff;
+    margin-left: 6px;
   }
 
   .group-menu-icon,
@@ -1688,20 +1747,20 @@ $panel-min-width: 320px;
 }
 
 .friend-groups-list {
-  padding-left: 8px;
-  margin-bottom: 8px;
+  padding-left: 4px;
+  margin-bottom: 4px;
 
   .nav-item-sub {
-    padding-left: 44px;
+    padding-left: 38px;
     font-size: 13px;
-    margin-bottom: 1px;
-    
+    margin-bottom: 0;
+
     &::before {
       content: '';
       position: absolute;
-      left: 20px;
+      left: 18px;
       top: 50%;
-      width: 12px;
+      width: 10px;
       height: 1px;
       background: var(--dt-border-light);
     }
@@ -1717,14 +1776,14 @@ $panel-min-width: 320px;
 .nav-divider {
   height: 1px;
   background: var(--dt-border-light);
-  margin: 12px 12px 20px;
+  margin: 4px 10px;
 }
 
 /* ==================== 组织架构 ==================== */
 .org-search-box {
-  margin-bottom: 8px;
-  padding: 0 8px;
-  
+  margin-bottom: 4px;
+  padding: 0 4px;
+
   :deep(.el-input__wrapper) {
     background: var(--dt-bg-card);
     border-radius: 6px;
@@ -1814,15 +1873,15 @@ $panel-min-width: 320px;
 }
 
 .list-header {
-  height: 56px;
-  padding: 0 16px;
+  height: 48px;
+  padding: 0 14px;
   border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   .list-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--dt-text-primary);
     margin: 0;
@@ -1838,10 +1897,10 @@ $panel-min-width: 320px;
 .list-item {
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  height: 64px;
+  padding: 0 14px;
+  height: 56px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-lighter);
   position: relative;
@@ -1852,26 +1911,26 @@ $panel-min-width: 320px;
 
   &.active {
     background-color: var(--dt-bg-session-active);
-    
+
     &::before {
       content: '';
       position: absolute;
       left: 0;
-      top: 15%;
-      height: 70%;
+      top: 20%;
+      height: 60%;
       width: 3px;
       background: var(--dt-brand-color);
-      border-radius: 0 4px 4px 0;
+      border-radius: 0 3px 3px 0;
     }
 
-    .item-name { 
+    .item-name {
       color: var(--dt-brand-color);
       font-weight: 600;
     }
   }
 
   .item-info {
-    margin-left: 12px;
+    margin-left: 10px;
     flex: 1;
     min-width: 0;
 
@@ -1881,18 +1940,18 @@ $panel-min-width: 320px;
       margin-bottom: 2px;
 
       .item-name {
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 13px;
+        font-weight: 500;
         color: var(--dt-text-primary);
-        margin-right: 8px;
+        margin-right: 6px;
       }
 
       .role-tag {
         font-size: 10px;
-        padding: 1px 6px;
-        border-radius: 4px;
-        font-weight: 600;
-        
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-weight: 500;
+
         &.owner { background: #FEF3C7; color: #D97706; }
         &.admin { background: #E0F2FE; color: #0369A1; }
       }
@@ -1901,6 +1960,9 @@ $panel-min-width: 320px;
     .item-desc {
       font-size: 12px;
       color: var(--dt-text-quaternary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }
@@ -1908,7 +1970,7 @@ $panel-min-width: 320px;
 /* ==================== 详情面板 ==================== */
 .detail-panel {
   flex: 1;
-  background: #fff;
+  background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -1919,7 +1981,6 @@ $panel-min-width: 320px;
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  padding: 32px;
 }
 
 .empty-selection {
@@ -1928,7 +1989,7 @@ $panel-min-width: 320px;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background: #fcfdfe;
+  background: var(--dt-bg-page);
 
   .empty-content {
     text-align: center;
@@ -1962,7 +2023,7 @@ $panel-min-width: 320px;
 
 .search-modal {
   width: 600px;
-  background: #fff;
+  background: var(--dt-bg-card);
   border-radius: 12px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
   display: flex;
@@ -2018,11 +2079,26 @@ $panel-min-width: 320px;
 }
 
 .dark {
-  .sidebar, .list-panel, .detail-panel { background: #1A1D24; border-color: #2D3139; }
-  .nav-item:hover, .org-item:hover, .list-item:hover { background: #242831; }
-  .nav-text, .org-name, .item-name, .sidebar-title, h3 { color: #E2E4E9; }
-  .search-modal { background: #2A2D35; }
-  .search-header { border-color: #3F424A; }
+  .sidebar, .list-panel, .detail-panel { background: var(--dt-bg-card-dark); border-color: var(--dt-border-dark); }
+  .nav-item:hover, .org-item:hover, .list-item:hover { background: var(--dt-bg-hover-dark); }
+  .nav-text, .org-name, .item-name, .sidebar-title, h3 { color: var(--dt-text-primary-dark); }
+  .search-modal { background: var(--dt-bg-card-dark); }
+  .search-header { border-color: var(--dt-border-dark); }
+
+  // 暗色模式下导航图标使用降低透明度的背景
+  .nav-icon-wrapper {
+    &.bg-gradient-orange { background: rgba(245, 124, 0, 0.15); color: #FFB74D; }
+    &.bg-gradient-pink { background: rgba(229, 57, 53, 0.15); color: #EF9A9A; }
+    &.bg-gradient-blue { background: rgba(var(--dt-brand-color-rgb, 64, 158, 255), 0.15); }
+    &.bg-gradient-primary { background: rgba(var(--dt-brand-color-rgb, 64, 158, 255), 0.15); }
+    &.bg-gradient-green { background: rgba(46, 125, 50, 0.15); color: #81C784; }
+    &.bg-gradient-teal { background: rgba(0, 131, 143, 0.15); color: #80DEEA; }
+    &.bg-gradient-purple { background: rgba(123, 31, 162, 0.15); color: #CE93D8; }
+  }
+
+  .role-tag {
+    &.owner { background: rgba(217, 119, 6, 0.15) !important; }
+    &.admin { background: rgba(3, 105, 161, 0.15) !important; }
+  }
 }
 </style>
-```

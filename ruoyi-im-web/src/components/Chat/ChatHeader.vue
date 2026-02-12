@@ -231,7 +231,7 @@ const toggleConversationInfo = () => {
 
 .chat-header {
   height: var(--dt-chat-header-height);
-  padding: 0 16px;
+  padding: 0 16px; // 钉钉标准：16px 左右内边距
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
   display: flex;
@@ -240,7 +240,7 @@ const toggleConversationInfo = () => {
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); // 钉钉标准：更轻的阴影
 
   .dark & {
     background: var(--dt-bg-card-dark);
@@ -252,11 +252,11 @@ const toggleConversationInfo = () => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 10px; // 优化：10px 间距
   flex: 1;
   min-width: 0;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px 8px; // 优化：4px 上下，8px 左右
   border-radius: 8px;
   margin-left: -4px;
   transition: all 0.2s var(--dt-ease-out);
@@ -275,9 +275,9 @@ const toggleConversationInfo = () => {
 }
 
 .header-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 6px;
+  width: 40px; // 钉钉标准：40px
+  height: 40px; // 钉钉标准：40px
+  border-radius: 6px; // 钉钉标准：6px 圆角
   overflow: hidden;
 
   :deep(.dingtalk-avatar) {
@@ -352,16 +352,16 @@ const toggleConversationInfo = () => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 4px; // 钉钉标准：4px 间距
 }
 
 .action-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px; // 钉钉标准：32px
+  height: 32px; // 钉钉标准：32px
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 6px; // 钉钉标准：6px 圆角
   border: none;
   background: transparent;
   color: var(--dt-text-secondary);
@@ -376,10 +376,6 @@ const toggleConversationInfo = () => {
   &.active {
     background: var(--dt-brand-bg);
     color: var(--dt-brand-color);
-  }
-
-  .material-icons-outlined {
-    font-size: 20px;
   }
 }
 

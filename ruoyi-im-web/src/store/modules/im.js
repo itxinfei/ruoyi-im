@@ -4,6 +4,7 @@
  */
 import { getUserSettingsMap, updateUserSetting, batchUpdateUserSettings } from '@/api/im/userSettings'
 import { getJSON, setJSON } from '@/utils/storage'
+import { warn, error } from '@/utils/logger'
 import session from './im-session'
 import message from './im-message'
 import contact from './im-contact'
@@ -26,7 +27,7 @@ const flushSettingsUpdate = async dispatch => {
   } catch (e) {
     // 409 冲突可以忽略（设置可能已存在），其他错误记录日志
     if (e.response?.status !== 409) {
-      console.error('批量更新设置到服务器失败', e)
+      error('IMStore', '批量更新设置到服务器失败', e)
     }
   }
 }
@@ -144,7 +145,7 @@ export default {
           state.settings = { ...state.settings, ...local }
         }
       } catch (e) {
-        console.warn('加载设置失败', e)
+        warn('IMStore', '加载设置失败', e)
       }
     },
 
@@ -191,7 +192,7 @@ export default {
       try {
         await dispatch('syncServerSettings')
       } catch (e) {
-        console.warn('从服务器同步设置失败', e)
+        warn('IMStore', '从服务器同步设置失败', e)
       }
     },
 
@@ -212,7 +213,7 @@ export default {
           settingType: type
         })
       } catch (e) {
-        console.error('更新设置到服务器失败', e)
+        error('IMStore', '更新设置到服务器失败', e)
         throw e
       }
     },

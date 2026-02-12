@@ -514,8 +514,8 @@ onMounted(() => {
   :deep(.el-input__wrapper.is-focus),
   :deep(.el-input:hover .el-input__wrapper),
   :deep(.el-input.is-active .el-input__wrapper) {
-    border: 1.5px solid #3296FA !important;
-    box-shadow: none !important;
+    border: 1.5px solid var(--dt-brand-color) !important;
+    box-shadow: 0 0 0 1px var(--dt-brand-lighter) !important;
   }
 
   // 覆盖 Element Plus 默认的 box-shadow inset 效果

@@ -20,7 +20,7 @@ export function getVisibleApplications() {
  */
 export function getMyApplications() {
     return request({
-        url: '/api/im/apps/installed',
+        url: '/api/im/apps/my',
         method: 'get'
     })
 }
@@ -31,7 +31,7 @@ export function getMyApplications() {
  */
 export function getApplicationsByCategory() {
     return request({
-        url: '/api/im/apps/categories',
+        url: '/api/im/apps/category',
         method: 'get'
     })
 }
@@ -71,7 +71,7 @@ export function getInstalledApp(appId) {
  */
 export function installApplication(data) {
     return request({
-        url: '/api/im/apps',
+        url: '/api/im/apps/install',
         method: 'post',
         data
     })
@@ -84,7 +84,7 @@ export function installApplication(data) {
  */
 export function uninstallApplication(appId) {
     return request({
-        url: `/api/im/apps/${appId}`,
+        url: `/api/im/apps/uninstall/${appId}`,
         method: 'delete'
     })
 }
@@ -124,8 +124,8 @@ export function getAppConfig(appId) {
 export function pinApp(appId, pinned) {
     return request({
         url: `/api/im/apps/${appId}/pin`,
-        method: 'post',
-        data: { pinned }
+        method: 'put',
+        params: { pinned }
     })
 }
 
@@ -135,10 +135,17 @@ export function pinApp(appId, pinned) {
  * @returns {Promise}
  */
 export function updateAppSort(sortList) {
+    const list = Array.isArray(sortList) ? sortList : (sortList?.sortList || [])
+    const appOrders = list.reduce((acc, item) => {
+        if (item?.appId != null) {
+            acc[item.appId] = item.sortOrder ?? 0
+        }
+        return acc
+    }, {})
     return request({
         url: '/api/im/apps/sort',
-        method: 'post',
-        data: { sortList }
+        method: 'put',
+        data: appOrders
     })
 }
 
@@ -151,8 +158,8 @@ export function updateAppSort(sortList) {
 export function setAppEnabled(appId, enabled) {
     return request({
         url: `/api/im/apps/${appId}/enabled`,
-        method: 'post',
-        data: { enabled }
+        method: 'put',
+        params: { enabled }
     })
 }
 

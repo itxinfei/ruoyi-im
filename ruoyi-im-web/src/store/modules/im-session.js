@@ -13,6 +13,7 @@ import {
 } from '@/api/im'
 import { formatMessagePreviewFromObject } from '@/utils/message'
 import { getJSON, setJSON } from '@/utils/storage'
+import { info, warn, error } from '@/utils/logger'
 
 // 默认分组配置
 const DEFAULT_GROUPS = [
@@ -98,7 +99,7 @@ export default {
       state.sessions.forEach(session => {
         // 如果会话ID已处理过，跳过
         if (seenSessionIds.has(session.id)) {
-          console.warn('[groupedSessions] 发现重复会话ID:', session.id)
+          warn('SessionStore', '[groupedSessions] 发现重复会话ID:', session.id)
           return
         }
         seenSessionIds.add(session.id)
@@ -253,7 +254,7 @@ export default {
       try {
         setJSON(STORAGE_KEY_GROUPS, groups)
       } catch (e) {
-        console.warn('保存分组失败', e)
+        warn('SessionStore', '保存分组失败', e)
       }
     },
 
@@ -263,7 +264,7 @@ export default {
       try {
         setJSON(STORAGE_KEY_GROUPS, state.groups)
       } catch (e) {
-        console.warn('保存分组失败', e)
+        warn('SessionStore', '保存分组失败', e)
       }
     },
 
@@ -275,7 +276,7 @@ export default {
         try {
           setJSON(STORAGE_KEY_GROUPS, state.groups)
         } catch (e) {
-          console.warn('保存分组失败', e)
+          warn('SessionStore', '保存分组失败', e)
         }
       }
     },
@@ -297,7 +298,7 @@ export default {
           setJSON(STORAGE_KEY_GROUPS, state.groups)
           setJSON(STORAGE_KEY_CONVERSATION_GROUP, newMap)
         } catch (e) {
-          console.warn('保存分组失败', e)
+          warn('SessionStore', '保存分组失败', e)
         }
       }
     },
@@ -310,7 +311,7 @@ export default {
         try {
           setJSON(STORAGE_KEY_GROUPS, state.groups)
         } catch (e) {
-          console.warn('保存分组状态失败', e)
+          warn('SessionStore', '保存分组状态失败', e)
         }
       }
     },
@@ -324,7 +325,7 @@ export default {
       try {
         setJSON(STORAGE_KEY_CONVERSATION_GROUP, state.conversationGroupMap)
       } catch (e) {
-        console.warn('保存会话分组失败', e)
+        warn('SessionStore', '保存会话分组失败', e)
       }
     },
 
@@ -337,7 +338,7 @@ export default {
       try {
         setJSON(STORAGE_KEY_CONVERSATION_GROUP, state.conversationGroupMap)
       } catch (e) {
-        console.warn('保存会话分组失败', e)
+        warn('SessionStore', '保存会话分组失败', e)
       }
     },
 
@@ -358,7 +359,7 @@ export default {
           state.conversationGroupMap = map
         }
       } catch (e) {
-        console.warn('加载分组数据失败', e)
+        warn('SessionStore', '加载分组数据失败', e)
         state.groups = [...DEFAULT_GROUPS]
         state.conversationGroupMap = {}
       }
@@ -457,7 +458,7 @@ export default {
         }
       } catch (error) {
         // 网络错误时设置空数组，避免 UI 报错
-        console.warn('加载会话失败，使用空列表:', error.message)
+        warn('SessionStore', '加载会话失败，使用空列表:', error.message)
         commit('SET_SESSIONS', [])
       } finally {
         commit('SET_LOADING', false)
@@ -490,9 +491,9 @@ export default {
 
     // 选择会话
     async selectSession({ commit, dispatch }, session) {
-      console.log('[Store] selectSession called with:', session)
+      info('SessionStore', 'selectSession called with:', session)
       if (!session || !session.id) {
-        console.error('[Store] Invalid session object:', session)
+        error('SessionStore', 'Invalid session object:', session)
         return
       }
       commit('SET_CURRENT_SESSION', session)
@@ -502,9 +503,9 @@ export default {
       })
       try {
         await markConversationAsRead(session.id)
-        console.log('[Store] Session selected successfully, currentSession:', session)
+        info('SessionStore', 'Session selected successfully, currentSession:', session)
       } catch (e) {
-        console.warn('标记已读失败', e)
+        warn('SessionStore', '标记已读失败', e)
       }
     },
 
@@ -526,7 +527,7 @@ export default {
             commit('UPDATE_SESSION', session)
           }
         } catch (e) {
-          console.error('获取会话详情失败', e)
+          error('SessionStore', '获取会话详情失败', e)
           throw e
         }
       }
@@ -552,9 +553,9 @@ export default {
         }
 
         // 创建新会话
-        console.log('[createAndSwitchSession] 创建新会话:', { type, targetId })
+        info('SessionStore', '[createAndSwitchSession] 创建新会话:', { type, targetId })
         const res = await createConversation({ type, targetId })
-        console.log('[createAndSwitchSession] 创建会话响应:', res)
+        info('SessionStore', '[createAndSwitchSession] 创建会话响应:', res)
         if (res.code === 200 && res.data) {
           const newSession = {
             ...res.data,
@@ -562,7 +563,7 @@ export default {
             type: type, // 确保 type 被保存
             lastMessage: '[暂无消息]'
           }
-          console.log('[createAndSwitchSession] 新会话数据:', newSession)
+          info('SessionStore', '[createAndSwitchSession] 新会话数据:', newSession)
           // 添加到会话列表
           commit('UPDATE_SESSION', newSession)
           // 设置为当前会话
@@ -572,7 +573,7 @@ export default {
           throw new Error(res.msg || '创建会话失败')
         }
       } catch (e) {
-        console.error('创建会话失败:', e)
+        error('SessionStore', '创建会话失败:', e)
         throw e
       }
     },
@@ -652,7 +653,7 @@ export default {
       try {
         setJSON(STORAGE_KEY_DRAFTS, state.drafts)
       } catch (e) {
-        console.warn('保存草稿到 localStorage 失败', e)
+        warn('SessionStore', '保存草稿到 localStorage 失败', e)
       }
     },
 
@@ -664,7 +665,7 @@ export default {
           commit('SET_DRAFT', { conversationId, content: draft.content })
         })
       } catch (e) {
-        console.warn('从 localStorage 加载草稿失败', e)
+        warn('SessionStore', '从 localStorage 加载草稿失败', e)
       }
     },
 
@@ -676,7 +677,7 @@ export default {
       try {
         setJSON(STORAGE_KEY_DRAFTS, state.drafts)
       } catch (e) {
-        console.warn('清除草稿到 localStorage 失败', e)
+        warn('SessionStore', '清除草稿到 localStorage 失败', e)
       }
     },
 
@@ -688,7 +689,7 @@ export default {
       try {
         setJSON(STORAGE_KEY_DRAFTS, state.drafts)
       } catch (e) {
-        console.warn('清空草稿到 localStorage 失败', e)
+        warn('SessionStore', '清空草稿到 localStorage 失败', e)
       }
     },
 

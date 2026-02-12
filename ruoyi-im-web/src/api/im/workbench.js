@@ -46,7 +46,7 @@ export function createTodo(data) {
   return request({
     url: '/api/im/workbench/todos',
     method: 'post',
-    params: data
+    data
   })
 }
 
@@ -76,7 +76,7 @@ export function updateTodo(todoId, data) {
   return request({
     url: `/api/im/workbench/todos/${todoId}`,
     method: 'put',
-    params: data
+    data
   })
 }
 

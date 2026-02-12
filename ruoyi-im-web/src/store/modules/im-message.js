@@ -14,6 +14,7 @@ import {
 } from '@/api/im'
 import { formatMessagePreview, formatMessagePreviewFromObject } from '@/utils/message'
 import imWebSocket from '@/utils/websocket/imWebSocket'
+import { info, warn, error } from '@/utils/logger'
 
 /**
  * 消息发送状态枚举（与后端 SendStatus 枚举对应）
@@ -28,7 +29,8 @@ export const SEND_STATUS = {
   SENDING: 1,
   DELIVERED: 2,
   READ: 3,
-  FAILED: 4
+  FAILED: 4,
+  RECALLED: 5
 }
 
 /**
@@ -60,7 +62,8 @@ function mapSendStatusToUi(sendStatus) {
     [SEND_STATUS.SENDING]: 'sending',
     [SEND_STATUS.DELIVERED]: 'delivered',
     [SEND_STATUS.READ]: 'read',
-    [SEND_STATUS.FAILED]: 'failed'
+    [SEND_STATUS.FAILED]: 'failed',
+    [SEND_STATUS.RECALLED]: 'recalled'
   }
   return statusMap[sendStatus] || 'pending'
 }
@@ -426,7 +429,7 @@ export default {
 
       // 如果清理了消息，输出日志
       if (cleanedCount > 0) {
-        console.log(`[发送队列清理] 清理了 ${cleanedCount} 条过期消息`)
+        info('MessageStore', `[发送队列清理] 清理了 ${cleanedCount} 条过期消息`)
       }
     },
 
@@ -480,7 +483,7 @@ export default {
         for (let i = 0; i < removeCount; i++) {
           state.receivedMessageIds.delete(idsArray[i])
         }
-        console.log(`[消息去重] 清理了 ${removeCount} 条过期记录`)
+        info('MessageStore', `[消息去重] 清理了 ${removeCount} 条过期记录`)
       }
     },
 
@@ -491,7 +494,7 @@ export default {
      */
     SET_OFFLINE_STATUS(state, isOffline) {
       state.isOffline = isOffline
-      console.log(`[离线状态] ${isOffline ? '已进入离线模式' : '已恢复在线'}`)
+      info('MessageStore', `[离线状态] ${isOffline ? '已进入离线模式' : '已恢复在线'}`)
     },
 
     /**
@@ -504,7 +507,7 @@ export default {
       if (state.offlineQueue.length >= OFFLINE_QUEUE_CONFIG.MAX_QUEUE_SIZE) {
         // 移除最旧的消息
         state.offlineQueue.shift()
-        console.warn('[离线队列] 队列已满，移除最旧消息')
+        warn('MessageStore', '[离线队列] 队列已满，移除最旧消息')
       }
 
       state.offlineQueue.push({
@@ -522,7 +525,7 @@ export default {
      */
     CLEAR_OFFLINE_QUEUE(state) {
       state.offlineQueue = []
-      console.log('[离线队列] 队列已清空')
+      info('MessageStore', '[离线队列] 队列已清空')
     },
 
     /**
@@ -787,36 +790,64 @@ export default {
     },
 
     // 撤回消息
-    async recallMessage({ commit, state, rootState }, messageId) {
+    async recallMessage({ commit, dispatch, state, rootState }, messageId) {
       await recallMessage(messageId)
-      // 需要找到该消息所属的会话ID并更新为撤回状态
       const sessionId = rootState.im?.session?.currentSession?.id
       if (sessionId && state.messages[sessionId]) {
         const msg = state.messages[sessionId].find(m => m.id === messageId)
         if (msg) {
+          await dispatch('applyRecallUpdate', { sessionId, messageId })
+        }
+      }
+    },
+
+    applyRecallUpdate({ commit, state }, { sessionId, messageId }) {
+      const sessionIds = sessionId ? [sessionId] : Object.keys(state.messages)
+      for (const sid of sessionIds) {
+        const messages = state.messages[sid] || []
+        const index = messages.findIndex(m => m.id === messageId || m.clientMsgId === messageId)
+        if (index !== -1) {
+          const message = messages[index]
+          const originalContent = message.originalContent || message.content || ''
           commit('UPDATE_MESSAGE', {
-            sessionId,
-            message: { ...msg, isRevoked: true, content: '' }
+            sessionId: sid,
+            message: {
+              ...message,
+              isRevoked: true,
+              sendStatus: SEND_STATUS.RECALLED,
+              status: 'recalled',
+              content: '',
+              type: 'RECALLED',
+              originalContent
+            }
           })
+          break
         }
       }
     },
 
     // 接收消息（WebSocket 推送）- 增强版：支持消息去重
-    receiveMessage({ commit, rootState, state }, message) {
+    receiveMessage({ commit, dispatch, rootState, state }, message) {
       const sessionId = message.conversationId || message.sessionId
       if (!sessionId) {return}
 
       // ========== 消息去重：检查消息是否已接收 ==========
-      const messageId = message.id || message.messageId
+      const messageId = message.id || message.messageId || message.clientMsgId
       if (messageId && state.receivedMessageIds.has(messageId)) {
-        console.log(`[消息去重] 跳过重复消息: ${messageId}`)
+        info('MessageStore', `[消息去重] 跳过重复消息: ${messageId}`)
         return
       }
 
       // 规范化消息类型为大写（兼容后端可能返回的小写类型）
       if (message.type) {
         message.type = message.type.toUpperCase()
+      }
+      if (message.type === 'RECALL' || message.status === 'recalled' || message.isRevoked) {
+        const recallId = message.messageId || message.recallMessageId || message.recalledMessageId
+        if (recallId) {
+          dispatch('applyRecallUpdate', { sessionId, messageId: recallId })
+        }
+        return
       }
 
       // 规范化发送者信息
@@ -1033,7 +1064,7 @@ export default {
         return
       }
 
-      console.log(`[离线队列] 开始处理 ${state.offlineQueue.length} 条离线消息`)
+      info('MessageStore', `[离线队列] 开始处理 ${state.offlineQueue.length} 条离线消息`)
 
       // 获取队列中的所有消息
       const messagesToProcess = [...state.offlineQueue]
@@ -1051,7 +1082,7 @@ export default {
             replyToMessageId: item.message.replyToMessageId
           })
         } catch (error) {
-          console.error('[离线队列] 发送消息失败:', error)
+          error('MessageStore', '[离线队列] 发送消息失败:', error)
           // 如果发送失败，重新加入队列
           commit('ADD_TO_OFFLINE_QUEUE', {
             messageId: item.messageId,
@@ -1071,7 +1102,7 @@ export default {
         return
       }
 
-      console.log(`[失败重试] 开始重试 ${state.failedRetryQueue.length} 条失败消息`)
+      info('MessageStore', `[失败重试] 开始重试 ${state.failedRetryQueue.length} 条失败消息`)
 
       // 过滤出需要重试的消息
       const messagesToRetry = state.failedRetryQueue.filter(
@@ -1092,12 +1123,12 @@ export default {
           // 重试成功，从队列中移除
           commit('REMOVE_FROM_FAILED_RETRY_QUEUE', item.clientMsgId)
         } catch (error) {
-          console.error(`[失败重试] 重试消息 ${item.clientMsgId} 失败:`, error)
+          error('MessageStore', `[失败重试] 重试消息 ${item.clientMsgId} 失败:`, error)
 
           // 如果达到最大重试次数，从队列中移除
           if (item.retryCount >= OFFLINE_QUEUE_CONFIG.MAX_RETRY_TIMES) {
             commit('REMOVE_FROM_FAILED_RETRY_QUEUE', item.clientMsgId)
-            console.warn(`[失败重试] 消息 ${item.clientMsgId} 达到最大重试次数，放弃重试`)
+            warn('MessageStore', `[失败重试] 消息 ${item.clientMsgId} 达到最大重试次数，放弃重试`)
           }
         }
       }
@@ -1130,10 +1161,10 @@ export function startCleanupTimer(store) {
   cleanupTimer = setInterval(() => {
     store.dispatch('im/message/cleanupExpiredMessages')
     store.dispatch('im/message/cleanupReceivedIds')
-    console.log(`[im-message] 定期清理完成（发送队列: ${store.getters['im/message/sendingQueueSize']}）`)
+    info('MessageStore', `定期清理完成（发送队列: ${store.getters['im/message/sendingQueueSize']}）`)
   }, SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL)
 
-  console.log(`[im-message] 启动定期清理任务（间隔: ${SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL / 1000}秒）`)
+  info('MessageStore', `启动定期清理任务（间隔: ${SENDING_QUEUE_CONFIG.CLEANUP_INTERVAL / 1000}秒）`)
 }
 
 /**
@@ -1143,7 +1174,7 @@ export function stopCleanupTimer() {
   if (cleanupTimer) {
     clearInterval(cleanupTimer)
     cleanupTimer = null
-    console.log('[im-message] 停止定期清理任务')
+    info('MessageStore', '停止定期清理任务')
   }
 }
 
@@ -1159,7 +1190,7 @@ export function initMessageModule(store) {
   // 监听网络状态变化
   if (typeof window !== 'undefined') {
     const handleOnline = () => {
-      console.log('[网络状态] 网络已恢复')
+      info('MessageStore', '网络已恢复')
       store.dispatch('im/message/setOfflineStatus', false)
 
       // 处理离线队列中的消息
@@ -1170,7 +1201,7 @@ export function initMessageModule(store) {
     }
 
     const handleOffline = () => {
-      console.log('[网络状态] 网络已断开')
+      info('MessageStore', '网络已断开')
       store.dispatch('im/message/setOfflineStatus', true)
     }
 
@@ -1183,5 +1214,5 @@ export function initMessageModule(store) {
     }
   }
 
-  console.log('[im-message] 消息模块初始化完成')
+  info('MessageStore', '消息模块初始化完成')
 }

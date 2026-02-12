@@ -804,7 +804,7 @@ const handleRemoveMember = async member => {
 const getRoleColor = code => {
   const colors = {
     SUPER_ADMIN: '#FF3D00',
-    ADMIN: '#3296FA', // TODO: 考虑使用 CSS 变量，但在 JS 对象中需谨慎
+    ADMIN: 'var(--dt-brand-color)',
     USER: '#00C853',
     EDITOR: '#9C27B0',
     AUDITOR: '#FFAB00'

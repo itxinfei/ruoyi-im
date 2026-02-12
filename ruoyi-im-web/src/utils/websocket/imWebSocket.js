@@ -36,6 +36,7 @@ export const MESSAGE_TYPE = {
   OFFLINE: 'offline',
   CALL: 'call',
   REACTION: 'reaction',
+  RECALL: 'recall',
   CONVERSATION_EVENT: 'conversation_event'
 }
 
@@ -203,6 +204,9 @@ class ImWebSocket {
           break
         case MESSAGE_TYPE.REACTION:
           this.emit('reaction', payload)
+          break
+        case MESSAGE_TYPE.RECALL:
+          this.emit('recall', payload)
           break
         default:
           warn('ImWebSocket', '未知消息类型:', type)
@@ -411,10 +415,9 @@ class ImWebSocket {
    */
   sendStopTyping(conversationId) {
     this.send({
-      type: MESSAGE_TYPE.TYPING,
+      type: MESSAGE_TYPE.STOP_TYPING,
       data: {
         conversationId,
-        isTyping: false,
         timestamp: Date.now()
       }
     })
@@ -637,20 +640,24 @@ class ImWebSocket {
     const messagesToSend = [...this.pendingMessages]
     this.pendingMessages = []
 
-    for (const msg of messagesToSend) {
-      if (!this.isConnected()) {
-        // 连接断开，将剩余消息放回队列
-        this.pendingMessages.unshift(...messagesToSend.slice(messagesToSend.indexOf(msg)))
-        break
+    try {
+      for (let i = 0; i < messagesToSend.length; i++) {
+        if (!this.isConnected()) {
+          // 连接断开，将剩余消息放回队列
+          this.pendingMessages.unshift(...messagesToSend.slice(i))
+          break
+        }
+
+        // 重新发送消息
+        this.send(messagesToSend[i])
+        // 稍微延迟，避免消息堆积
+        await new Promise(resolve => setTimeout(resolve, 50))
       }
-
-      // 重新发送消息
-      this.send(msg)
-      // 稍微延迟，避免消息堆积
-      await new Promise(resolve => setTimeout(resolve, 50))
+    } catch (e) {
+      error('ImWebSocket', '处理待发送消息失败:', e)
+    } finally {
+      this.isProcessingPending = false
     }
-
-    this.isProcessingPending = false
 
     if (this.pendingMessages.length > 0) {
       info('ImWebSocket', `还有 ${this.pendingMessages.length} 条消息待发送`)
@@ -663,7 +670,7 @@ class ImWebSocket {
   clearPendingMessages() {
     const count = this.pendingMessages.length
     this.pendingMessages = []
-    console.log(`[ImWebSocket] 清空待发送队列，移除 ${count} 条消息`)
+    info('ImWebSocket', `清空待发送队列，移除 ${count} 条消息`)
   }
 
   /**

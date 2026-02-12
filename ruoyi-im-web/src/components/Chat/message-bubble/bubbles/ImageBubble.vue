@@ -262,12 +262,12 @@ onUnmounted(() => {
   position: relative;
   display: inline-block;
   cursor: zoom-in;
-  border-radius: var(--dt-radius-lg);
+  border-radius: 8px; // 钉钉标准：8px 圆角
   overflow: hidden;
   background: var(--dt-bg-card);
   transition: all var(--dt-transition-base);
-  min-width: 200px;
-  min-height: 150px;
+  min-width: 120px; // 钉钉标准：120px 最小宽度
+  min-height: 90px; // 钉钉标准：90px 最小高度
 
   &:hover {
     opacity: 0.95;
@@ -286,8 +286,8 @@ onUnmounted(() => {
 
 .image-content {
   display: block;
-  max-width: 320px;
-  max-height: 400px;
+  max-width: 300px; // 钉钉标准：300px 最大宽度
+  max-height: 400px; // 钉钉标准：400px 最大高度
   object-fit: contain;
   pointer-events: none;
   opacity: 0;
@@ -305,14 +305,14 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 32px;
-  min-width: 200px;
-  min-height: 150px;
-  max-width: 320px;
-  max-height: 400px;
+  gap: 10px; // 优化：10px
+  padding: 24px; // 优化：24px
+  min-width: 140px; // 优化：140px
+  min-height: 100px; // 优化：100px
+  max-width: 280px; // 优化：280px
+  max-height: 320px; // 优化：320px
   background: var(--dt-bg-hover);
-  border-radius: var(--dt-radius-lg);
+  border-radius: 8px; // 优化：8px
   overflow: hidden;
 
   &.with-thumb {

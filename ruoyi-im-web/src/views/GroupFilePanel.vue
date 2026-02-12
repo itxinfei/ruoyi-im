@@ -767,7 +767,7 @@ onMounted(() => {
       border-radius: var(--dt-radius-md);
       flex-shrink: 0;
 
-      .image-icon { color: #3296FA; }
+      .image-icon { color: var(--dt-brand-color); }
       .video-icon { color: #722ed1; }
       .doc-icon { color: #52c41a; }
       .default-icon { color: #8c8c8c; }

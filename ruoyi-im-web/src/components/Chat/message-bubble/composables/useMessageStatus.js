@@ -56,9 +56,13 @@ export function useMessageStatus(props) {
         'sending': 1,  // SENDING
         'sent': 2,      // DELIVERED
         'read': 3,      // READ
-        'failed': 4     // FAILED
+        'failed': 4,
+        'recalled': 5
       }
       return statusMap[props.message.status] || 2
+    }
+    if (props.message?.isRevoked || props.message?.type?.toUpperCase() === 'RECALLED') {
+      return 5
     }
     // 默认为已送达
     return 2
@@ -73,6 +77,11 @@ export function useMessageStatus(props) {
   // 是否显示发送失败状态
   const isFailed = computed(() => {
     return messageStatus.value === 4 // FAILED
+  })
+
+  // 是否已撤回
+  const isRecalled = computed(() => {
+    return messageStatus.value === 5
   })
 
   // 是否已送达/已读
@@ -90,6 +99,7 @@ export function useMessageStatus(props) {
   const statusText = computed(() => {
     if (isSending.value) {return '发送中'}
     if (isFailed.value) {return '发送失败'}
+    if (isRecalled.value) {return '已撤回'}
     if (isRead.value) {return '已读'}
     if (isDelivered.value) {return '已送达'}
     return '未读'
@@ -117,9 +127,11 @@ export function useMessageStatus(props) {
     recallTimeDisplay,
     isSending,
     isFailed,
+    isRecalled,
     isRead,
     isDelivered,
     statusText,
-    messageStatus  // 导出发送状态值
+    messageStatus,
+    updateRecallCountdown
   }
 }

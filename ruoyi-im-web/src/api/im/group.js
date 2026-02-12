@@ -156,17 +156,16 @@ export function getGroupMembers(groupId) {
 }
 
 /**
- * 设置群禁言
- * @param {Object} data - 禁言数据
- * @param {number} data.groupId - 群组ID
- * @param {boolean} data.isAllMuted - 是否全员禁言
+ * 设置全员禁言
+ * @param {number} groupId - 群组ID
+ * @param {boolean} allMuted - 是否全员禁言
  * @returns {Promise}
  */
-export function setGroupMute(data) {
+export function setGroupMute(groupId, allMuted) {
   return request({
-    url: '/api/im/groups/mutes/all',
+    url: `/api/im/groups/mutes/all/${groupId}`,
     method: 'put',
-    data
+    params: { allMuted }
   })
 }
 
@@ -329,7 +328,7 @@ export function setAnnouncementPinned(announcementId, isPinned) {
  */
 export function getGroupPermissions(groupId) {
   return request({
-    url: `/api/im/groups/permissions`,
+    url: '/api/im/groups/permissions',
     method: 'get',
     params: { groupId }
   })

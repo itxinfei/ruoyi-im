@@ -1,367 +1,160 @@
 <template>
   <div class="todo-panel">
     <!-- 头部区域 -->
-    <div class="panel-header">
+    <header class="panel-header">
       <div class="header-left">
         <div class="title-wrapper">
           <h2 class="panel-title">
             待办事项
           </h2>
           <div class="title-badge">
-            <div class="badge-icon-wrapper">
-              <span class="material-icons-outlined badge-icon">task_alt</span>
-              <div class="icon-glow" />
-            </div>
-            <span class="badge-count">{{ todos.filter(t => !t.completed).length }}</span>
+            <span class="badge-dot" />
+            <span class="badge-text">{{ getCount('pending') }} 进行中</span>
           </div>
         </div>
-        <!-- 搜索框 -->
-        <div
-          v-if="!batchMode"
-          class="search-wrapper"
-        >
+        <div class="search-box">
           <span class="material-icons-outlined search-icon">search</span>
           <input
             v-model="searchInput"
             type="text"
             class="search-input"
-            placeholder="搜索待办..."
+            placeholder="搜索待办标题或内容..."
             @input="handleSearchInput"
           >
+          <span
+            v-if="searchInput"
+            class="material-icons-outlined clear-icon"
+            @click="clearSearch"
+          >cancel</span>
         </div>
       </div>
+
       <div class="header-actions">
         <!-- 批量操作按钮 -->
         <template v-if="batchMode">
           <span class="selected-count">已选 {{ selectedTodos.size }} 项</span>
-          <button
-            class="batch-btn batch-btn--complete"
-            :disabled="selectedTodos.size === 0"
+          <el-button
+            type="success"
+            plain
             @click="batchComplete"
           >
-            <span class="material-icons-outlined">check_circle</span>
-            <span>完成</span>
-          </button>
-          <button
-            class="batch-btn batch-btn--danger"
-            :disabled="selectedTodos.size === 0"
+            批量完成
+          </el-button>
+          <el-button
+            type="danger"
+            plain
             @click="batchDelete"
           >
-            <span class="material-icons-outlined">delete</span>
-            <span>删除</span>
-          </button>
-          <button
-            class="batch-btn batch-btn--cancel"
-            @click="exitBatchMode"
+            批量删除
+          </el-button>
+          <el-button
+            link
+            @click="toggleBatchMode"
           >
-            <span class="material-icons-outlined">close</span>
-            <span>取消</span>
-          </button>
+            取消
+          </el-button>
         </template>
+        <!-- 普通操作按钮 -->
         <template v-else>
-          <button
-            class="icon-btn"
-            title="批量操作"
-            @click="enterBatchMode"
+          <el-tooltip
+            content="批量操作"
+            placement="bottom"
           >
-            <span class="material-icons-outlined">checklist</span>
-            <span>批量</span>
-          </button>
-          <button
+            <button
+              class="icon-btn"
+              @click="toggleBatchMode"
+            >
+              <span class="material-icons-outlined">checklist</span>
+            </button>
+          </el-tooltip>
+          <el-tooltip
+            content="刷新"
+            placement="bottom"
+          >
+            <button
+              class="icon-btn"
+              @click="loadTodos"
+            >
+              <span class="material-icons-outlined">refresh</span>
+            </button>
+          </el-tooltip>
+          <el-button
+            type="primary"
             class="add-btn"
             @click="showAddDialog = true"
           >
-            <span class="material-icons-outlined">add</span>
-            <span>新建待办</span>
-          </button>
+            <el-icon class="mr-1">
+              <Plus />
+            </el-icon>
+            新建待办
+          </el-button>
         </template>
       </div>
-    </div>
+    </header>
 
     <!-- 统计卡片 -->
-    <div class="stats-row">
-      <div class="stat-card stat-card--total">
-        <div class="stat-icon-wrapper">
-          <span class="material-icons-outlined stat-icon">
-            <div class="icon-bg" />
-            list
-          </span>
-          <div class="icon-glow icon-glow--primary" />
-        </div>
-        <div class="stat-info">
-          <span class="stat-value">{{ todos.length }}</span>
-          <span class="stat-label">全部待办</span>
-        </div>
-        <div class="stat-decoration" />
-      </div>
-      <div class="stat-card stat-card--pending">
-        <div class="stat-icon-wrapper">
-          <span class="material-icons-outlined stat-icon">
-            <div class="icon-bg" />
-            schedule
-          </span>
-          <div class="icon-glow icon-glow--warning" />
-        </div>
-        <div class="stat-info">
-          <span class="stat-value">{{ todos.filter(t => !t.completed).length }}</span>
-          <span class="stat-label">进行中</span>
-        </div>
-        <div class="stat-decoration" />
-      </div>
-      <div class="stat-card stat-card--high">
-        <div class="stat-icon-wrapper">
-          <span class="material-icons-outlined stat-icon">
-            <div class="icon-bg" />
-            priority_high
-          </span>
-          <div class="icon-glow icon-glow--danger" />
-        </div>
-        <div class="stat-info">
-          <span class="stat-value">{{ todos.filter(t => t.priority === 'high' && !t.completed).length }}</span>
-          <span class="stat-label">紧急</span>
-        </div>
-        <div class="stat-decoration" />
-      </div>
-      <div class="stat-card stat-card--done">
-        <div class="stat-icon-wrapper">
-          <span class="material-icons-outlined stat-icon">
-            <div class="icon-bg" />
-            check_circle
-          </span>
-          <div class="icon-glow icon-glow--success" />
-        </div>
-        <div class="stat-info">
-          <span class="stat-value">{{ todos.filter(t => t.completed).length }}</span>
-          <span class="stat-label">已完成</span>
-        </div>
-        <div class="stat-decoration" />
-      </div>
-    </div>
+    <TodoStats :todos="todos" />
 
     <!-- 筛选标签 -->
-    <div class="filter-tabs">
-      <button
-        v-for="tab in filterTabs"
-        :key="tab.key"
-        class="filter-tab"
-        :class="{ active: activeFilter === tab.key }"
-        @click="activeFilter = tab.key"
-      >
-        <span class="filter-tab-icon material-icons-outlined">{{ tab.icon }}</span>
-        <span class="filter-tab-label">{{ tab.label }}</span>
-        <span
-          v-if="getCount(tab.key) > 0"
-          class="tab-count"
-        >{{ getCount(tab.key) }}</span>
-        <div class="tab-indicator" />
-      </button>
-    </div>
+    <TodoFilter
+      v-model:active-filter="activeFilter"
+      :filter-tabs="filterTabs"
+      :counts="tabCounts"
+    />
 
     <!-- 内容区域 -->
-    <div class="panel-content">
-      <div
-        v-if="loading"
-        class="loading-state"
-      >
-        <div class="loading-spinner">
-          <div class="spinner-ring" />
-          <div class="spinner-dot" />
-        </div>
-        <span class="loading-text">加载中...</span>
-      </div>
-
-      <div
-        v-else-if="filteredTodos.length === 0"
-        class="empty-state"
-      >
-        <div class="empty-illustration">
-          <div class="empty-icon-wrapper">
-            <span class="material-icons-outlined empty-icon">{{ emptyIcon }}</span>
-            <div class="icon-rings">
-              <div class="ring" />
-              <div class="ring" />
-              <div class="ring" />
-            </div>
-          </div>
-          <div class="empty-decoration" />
-        </div>
-        <h3 class="empty-title">
-          {{ emptyTitle }}
-        </h3>
-        <p class="empty-text">
-          {{ emptyText }}
-        </p>
-        <button
-          v-if="activeFilter === 'all'"
-          class="empty-action"
-          @click="showAddDialog = true"
+    <el-scrollbar class="panel-scrollbar">
+      <div class="panel-content">
+        <div
+          v-if="loading"
+          class="loading-state"
         >
-          <span class="material-icons-outlined">add</span>
-          创建第一个待办
-        </button>
-      </div>
-
-      <div
-        v-else
-        class="todo-list"
-      >
-        <transition-group name="todo-item">
-          <div
-            v-for="todo in filteredTodos"
-            :key="todo.id"
-            class="todo-item"
-            :class="{
-              completed: todo.completed,
-              overdue: isOverdue(todo.dueDate),
-              [`priority-${todo.priority}`]: true,
-              'batch-selected': selectedTodos.has(todo.id),
-              'is-dragging': draggingTodo === todo.id
-            }"
-            draggable="true"
-            @dragstart="handleDragStart($event, todo)"
-            @dragend="handleDragEnd"
-            @dragover="handleDragOver($event, todo)"
-            @drop="handleDrop($event, todo)"
-            @click="handleItemClick(todo)"
+          <el-icon
+            class="is-loading"
+            size="24"
           >
-            <!-- 优先级指示条 -->
-            <div
-              class="priority-indicator"
-              :class="`priority-${todo.priority}`"
-            >
-              <div class="indicator-glow" />
-            </div>
+            <Loading />
+          </el-icon>
+          <span class="loading-text">正在加载待办...</span>
+        </div>
 
-            <!-- 批量选择复选框 -->
-            <div
-              v-if="batchMode"
-              class="batch-checkbox"
-              @click.stop="toggleSelectTodo(todo)"
-            >
-              <div
-                class="checkbox-inner"
-                :class="{ checked: selectedTodos.has(todo.id) }"
-              >
-                <span
-                  v-if="selectedTodos.has(todo.id)"
-                  class="material-icons-outlined check-icon"
-                >check</span>
-              </div>
-            </div>
-
-            <!-- 完成复选框 -->
-            <div
-              v-else
-              class="todo-checkbox"
-              @click.stop="toggleComplete(todo)"
-            >
-              <div
-                class="checkbox-inner"
-                :class="{ checked: todo.completed }"
-              >
-                <span
-                  v-if="todo.completed"
-                  class="material-icons-outlined check-icon"
-                >check</span>
-                <div class="checkbox-ripple" />
-              </div>
-            </div>
-
-            <!-- 内容 -->
-            <div class="todo-content">
-              <div class="todo-header">
-                <h4 class="todo-title">
-                  {{ todo.title }}
-                </h4>
-                <span
-                  class="todo-priority-badge"
-                  :class="`priority-${todo.priority}`"
-                >
-                  {{ priorityText(todo.priority) }}
-                </span>
-              </div>
-              <p
-                v-if="todo.content"
-                class="todo-desc"
-              >
-                {{ todo.content }}
-              </p>
-              <div class="todo-meta">
-                <span
-                  class="todo-date"
-                  :class="{ overdue: isOverdue(todo.dueDate) }"
-                >
-                  <span class="material-icons-outlined date-icon">{{ dateIcon(todo.dueDate) }}</span>
-                  {{ formatDate(todo.dueDate) }}
-                </span>
-              </div>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div
-              class="todo-actions"
-              @click.stop
-            >
-              <span
-                v-if="!batchMode"
-                class="drag-handle"
-                title="拖拽排序"
-              >
-                <span class="material-icons-outlined">drag_indicator</span>
-              </span>
-              <el-tooltip
-                content="编辑"
-                placement="top"
-              >
-                <button
-                  class="action-btn"
-                  @click="handleEdit(todo)"
-                >
-                  <span class="material-icons-outlined">edit</span>
-                </button>
-              </el-tooltip>
-              <el-tooltip
-                content="删除"
-                placement="top"
-              >
-                <button
-                  class="action-btn action-btn--danger"
-                  @click="deleteTodo(todo)"
-                >
-                  <span class="material-icons-outlined">delete</span>
-                </button>
-              </el-tooltip>
-            </div>
+        <div
+          v-else-if="filteredTodos.length === 0"
+          class="empty-state"
+        >
+          <div class="empty-illustration">
+            <span class="material-icons-outlined empty-icon">{{ emptyIcon }}</span>
           </div>
-        </transition-group>
+        </div>
+
+        <!-- 新建待办对话框 -->
+        <CreateTodoDialog
+          v-model="showAddDialog"
+          :todo="editingTodo"
+          @success="handleTodoCreated"
+        />
+
+        <!-- 待办详情对话框 -->
+        <TodoDetailDialog
+          v-model="showDetailDialog"
+          :todo="selectedTodo"
+          @edit="handleEditFromDetail"
+          @delete="deleteTodo"
+          @complete="toggleComplete"
+        />
       </div>
-    </div>
-
-    <!-- 新建待办对话框 -->
-    <CreateTodoDialog
-      v-model="showAddDialog"
-      :todo="editingTodo"
-      @success="handleTodoCreated"
-    />
-
-    <!-- 待办详情对话框 -->
-    <TodoDetailDialog
-      v-model="showDetailDialog"
-      :todo="selectedTodo"
-      @edit="handleEditFromDetail"
-      @delete="deleteTodo"
-      @complete="toggleComplete"
-    />
+    </el-scrollbar>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { Loading } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { confirmDelete, deleteSuccess, messageError, messageSuccess } from '@/utils/ui'
 import CreateTodoDialog from '@/components/CreateTodoDialog/index.vue'
 import TodoDetailDialog from '@/components/TodoDetailDialog/index.vue'
+import TodoItem from '@/components/Todo/TodoItem.vue'
+import TodoStats from '@/components/Todo/TodoStats.vue'
+import TodoFilter from '@/components/Todo/TodoFilter.vue'
 import { getTodos, completeTodo, deleteTodo as deleteTodoApi, updateTodo } from '@/api/im/workbench'
 
 // ============================================================================
@@ -385,6 +178,126 @@ const activeFilter = ref('all')
 const searchKeyword = ref('') // 搜索关键词
 const searchInput = ref('') // 搜索输入框的值（用于防抖）
 
+// ============================================================================
+// 操作处理
+// ============================================================================
+const editTodo = todo => {
+  editingTodo.value = { ...todo }
+  showAddDialog.value = true
+}
+
+const handleEditFromDetail = todo => {
+  showDetailDialog.value = false
+  editTodo(todo)
+}
+
+const handleViewDetail = todo => {
+  selectedTodo.value = todo
+  showDetailDialog.value = true
+}
+
+const handleItemClick = todo => {
+  if (batchMode.value) {
+    toggleSelectTodo(todo)
+  } else {
+    handleViewDetail(todo)
+  }
+}
+
+const handleDialogSuccess = () => {
+  loadTodos()
+  editingTodo.value = null
+}
+
+const toggleBatchMode = () => {
+  batchMode.value = !batchMode.value
+  if (!batchMode.value) {
+    selectedTodos.value.clear()
+  }
+}
+
+const toggleSelectTodo = todo => {
+  if (selectedTodos.value.has(todo.id)) {
+    selectedTodos.value.delete(todo.id)
+  } else {
+    selectedTodos.value.add(todo.id)
+  }
+}
+
+const batchComplete = async () => {
+  if (selectedTodos.value.size === 0) {return}
+  try {
+    const promises = Array.from(selectedTodos.value).map(id => completeTodo(id))
+    await Promise.all(promises)
+    ElMessage.success('批量完成成功')
+    toggleBatchMode()
+    loadTodos()
+  } catch (error) {
+    ElMessage.error('部分任务操作失败')
+  }
+}
+
+const batchDelete = async () => {
+  if (selectedTodos.value.size === 0) {return}
+  try {
+    await ElMessageBox.confirm(`确定删除选中的 ${selectedTodos.value.size} 项待办吗？`, '批量删除', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
+    })
+    const promises = Array.from(selectedTodos.value).map(id => deleteTodoApi(id))
+    await Promise.all(promises)
+    ElMessage.success('批量删除成功')
+    toggleBatchMode()
+    loadTodos()
+  } catch (error) {
+    // 用户取消或删除失败
+  }
+}
+
+const deleteTodo = async todo => {
+  try {
+    await ElMessageBox.confirm(`确定删除待办 "${todo.title}" 吗？`, '删除提醒', {
+      type: 'warning',
+      confirmButtonText: '删除',
+      cancelButtonText: '取消'
+    })
+    const res = await deleteTodoApi(todo.id)
+    if (res.code === 200) {
+      ElMessage.success('内容已删除')
+      showDetailDialog.value = false
+      loadTodos()
+    }
+  } catch (error) {
+    // 取消删除
+  }
+}
+
+// ============================================================================
+// 拖拽排序 (保留基本逻辑)
+// ============================================================================
+const handleDragStart = (e, todo) => {
+  draggingTodo.value = todo
+  e.dataTransfer.effectAllowed = 'move'
+}
+
+const handleDragEnd = () => {
+  draggingTodo.value = null
+  dragOverTodo.value = null
+}
+
+const handleDragOver = (e, todo) => {
+  e.preventDefault()
+  dragOverTodo.value = todo
+}
+
+const handleDrop = (e, todo) => {
+  e.preventDefault()
+  if (!draggingTodo.value || draggingTodo.value.id === todo.id) {return}
+  // TODO: 实现排序 API 调用
+  ElMessage.info('排序功能开发中...')
+}
+
 // 批量操作状态
 const batchMode = ref(false)
 const selectedTodos = ref(new Set())
@@ -400,8 +313,13 @@ const debouncedSearch = debounce(value => {
   searchKeyword.value = value
 }, 300)
 
-const handleSearchInput = e => {
-  debouncedSearch(e.target.value)
+const handleSearchInput = () => {
+  debouncedSearch(searchInput.value)
+}
+
+const clearSearch = () => {
+  searchInput.value = ''
+  searchKeyword.value = ''
 }
 
 // 筛选标签配置
@@ -481,13 +399,15 @@ const emptyTitle = computed(() => emptyConfig.value.title)
 const emptyText = computed(() => emptyConfig.value.text)
 
 // 获取筛选条件数量
-const getCount = filter => {
-  if (filter === 'all') {return todos.value.length}
-  if (filter === 'pending') {return todos.value.filter(t => !t.completed).length}
-  if (filter === 'completed') {return todos.value.filter(t => t.completed).length}
-  if (filter === 'high') {return todos.value.filter(t => t.priority === 'high' && !t.completed).length}
-  return 0
-}
+// 获取各标签数量
+const tabCounts = computed(() => ({
+  all: todos.value.length,
+  pending: todos.value.filter(t => !t.completed).length,
+  completed: todos.value.filter(t => t.completed).length,
+  high: todos.value.filter(t => t.priority === 'high' && !t.completed).length
+}))
+
+const getCount = filter => tabCounts.value[filter] || 0
 
 // 判断是否过期
 const isOverdue = dueDate => {
@@ -604,198 +524,12 @@ const toggleComplete = async todo => {
   }
 }
 
-const deleteTodo = async todo => {
-  if (!await confirmDelete('这个待办')) {
-    return
-  }
-  try {
-    const res = await deleteTodoApi(todo.id)
-    if (res.code === 200) {
-      todos.value = todos.value.filter(t => t.id !== todo.id)
-      deleteSuccess()
-      showDetailDialog.value = false
-    } else {
-      messageError(res.msg || '删除失败')
-    }
-  } catch (error) {
-    console.error('删除待办失败', error)
-    messageError('操作失败，请稍后重试')
-  }
-}
-
-const handleViewDetail = todo => {
-  selectedTodo.value = todo
-  showDetailDialog.value = true
-}
-
-const handleEdit = todo => {
-  editingTodo.value = todo
-  showAddDialog.value = true
-}
-
-const handleEditFromDetail = todo => {
-  showDetailDialog.value = false
-  handleEdit(todo)
-}
-
-const handleTodoCreated = () => {
-  editingTodo.value = null
-  loadTodos()
-}
-
-// ============================================================================
-// 批量操作功能
-// ============================================================================
-const enterBatchMode = () => {
-  batchMode.value = true
-  selectedTodos.value.clear()
-  searchInput.value = ''
-  searchKeyword.value = ''
-}
-
-const exitBatchMode = () => {
-  batchMode.value = false
-  selectedTodos.value.clear()
-}
-
-const toggleSelectTodo = todo => {
-  if (selectedTodos.value.has(todo.id)) {
-    selectedTodos.value.delete(todo.id)
-  } else {
-    selectedTodos.value.add(todo.id)
-  }
-  // 触发响应式更新
-  selectedTodos.value = new Set(selectedTodos.value)
-}
-
-const selectAllTodos = () => {
-  if (selectedTodos.value.size === filteredTodos.value.length) {
-    selectedTodos.value.clear()
-  } else {
-    filteredTodos.value.forEach(todo => selectedTodos.value.add(todo.id))
-  }
-  selectedTodos.value = new Set(selectedTodos.value)
-}
-
-const batchComplete = async () => {
-  if (selectedTodos.value.size === 0) {return}
-
-  try {
-    await ElMessageBox.confirm(`确定要完成选中的 ${selectedTodos.value.size} 个待办吗？`, '批量完成', {
-      type: 'warning',
-      confirmButtonText: '确定',
-      cancelButtonText: '取消'
-    })
-
-    const promises = Array.from(selectedTodos.value).map(id => completeTodo(id))
-    await Promise.all(promises)
-
-    // 更新本地状态
-    todos.value = todos.value.map(todo => {
-      if (selectedTodos.value.has(todo.id)) {
-        return { ...todo, completed: true }
-      }
-      return todo
-    })
-
-    ElMessage.success(`已完成 ${selectedTodos.value.size} 个待办`)
-    exitBatchMode()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('批量完成失败', error)
-      ElMessage.error('操作失败，请稍后重试')
-    }
-  }
-}
-
-const batchDelete = async () => {
-  if (selectedTodos.value.size === 0) {return}
-
-  if (!await confirmDelete(`选中的 ${selectedTodos.value.size} 个待办`, `确定要删除选中的 ${selectedTodos.value.size} 个待办吗？此操作不可恢复。`)) {
-    return
-  }
-
-  try {
-    const promises = Array.from(selectedTodos.value).map(id => deleteTodoApi(id))
-    await Promise.all(promises)
-
-    // 从列表中移除已删除的待办
-    todos.value = todos.value.filter(todo => !selectedTodos.value.has(todo.id))
-
-    messageSuccess(`已删除 ${selectedTodos.value.size} 个待办`)
-    exitBatchMode()
-  } catch (error) {
-    console.error('批量删除失败', error)
-    messageError('操作失败，请稍后重试')
-  }
-}
-
-// ============================================================================
-// 拖拽排序功能
-// ============================================================================
-const handleDragStart = (e, todo) => {
-  if (batchMode.value) {
-    e.preventDefault()
-    return
-  }
-  draggingTodo.value = todo.id
-  e.dataTransfer.effectAllowed = 'move'
-  e.target.classList.add('is-dragging')
-}
-
-const handleDragEnd = e => {
-  draggingTodo.value = null
-  dragOverTodo.value = null
-  e.target.classList.remove('is-dragging')
-}
-
-const handleDragOver = (e, todo) => {
-  e.preventDefault()
-  if (!draggingTodo.value || draggingTodo.value === todo.id || batchMode.value) {return}
-  dragOverTodo.value = todo.id
-}
-
-const handleDrop = async (e, targetTodo) => {
-  e.preventDefault()
-  if (!draggingTodo.value || draggingTodo.value === targetTodo.id || batchMode.value) {return}
-
-  // 交换数组位置
-  const draggingIndex = todos.value.findIndex(t => t.id === draggingTodo.value)
-  const targetIndex = todos.value.findIndex(t => t.id === targetTodo.id)
-
-  if (draggingIndex !== -1 && targetIndex !== -1) {
-    const temp = todos.value[draggingIndex]
-    todos.value.splice(draggingIndex, 1)
-    todos.value.splice(targetIndex, 0, temp)
-
-    // 保存顺序到后端（如果有相关API）
-    ElMessage.success('排序已更新')
-  }
-
-  draggingTodo.value = null
-  dragOverTodo.value = null
-}
-
-// ============================================================================
-// 点击处理（批量模式和普通模式）
-// ============================================================================
-const handleItemClick = todo => {
-  if (batchMode.value) {
-    toggleSelectTodo(todo)
-  } else {
-    handleViewDetail(todo)
-  }
-}
-
 onMounted(() => {
   loadTodos()
 })
 </script>
 
 <style scoped lang="scss">
-// ============================================================================
-// 容器
-// ============================================================================
 .todo-panel {
   display: flex;
   flex-direction: column;
@@ -803,34 +537,16 @@ onMounted(() => {
   flex: 1;
   min-width: 0;
   background: var(--dt-bg-body);
-  position: relative;
 }
 
-// ============================================================================
-// 头部区域
-// ============================================================================
 .panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 28px;
-  background: linear-gradient(135deg, var(--dt-bg-card) 0%, var(--dt-bg-subtle) 100%);
-  border-bottom: 1px solid var(--dt-border-alpha-medium);
+  padding: 16px 28px;
+  background: var(--dt-bg-body);
+  border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-  gap: 16px;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.selected-count {
-  font-size: 14px;
-  color: var(--dt-text-medium);
   font-weight: 500;
   padding: 0 8px;
 }

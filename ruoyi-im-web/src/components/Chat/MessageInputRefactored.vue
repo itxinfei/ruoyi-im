@@ -1139,7 +1139,7 @@ onUnmounted(() => {
   flex-shrink: 0;
   position: relative;
   border-top: 1px solid var(--dt-border-light);
-  padding: 12px 16px 16px; // 钉钉风格：增加底部内边距
+  padding: 8px 16px 12px; // 钉钉标准：8px 顶部，16px 左右，12px 底部
   z-index: 10;
   transition: min-height var(--dt-transition-base), border-color var(--dt-transition-fast);
 
@@ -1155,7 +1155,7 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 0;
   position: relative;
-  border-radius: 8px;
+  border-radius: 6px; // 钉钉标准：6px 圆角
   background: var(--dt-bg-tertiary);
   transition: background var(--dt-transition-base), box-shadow var(--dt-transition-base);
   margin: 0;
@@ -1163,7 +1163,7 @@ onUnmounted(() => {
 
   &.is-focused {
     background: var(--dt-bg-card);
-    box-shadow: 0 0 0 1px var(--dt-brand-lighter);
+    box-shadow: 0 0 0 2px var(--dt-brand-lighter);
   }
 
   &.is-drag-over {
@@ -1202,28 +1202,28 @@ onUnmounted(() => {
 .message-input {
   flex: 1;
   width: 100%;
-  border: none !important;
-  outline: none !important;
+  border: none;
+  outline: none;
   resize: none;
   font-size: 14px;
-  line-height: 1.6; // 钉钉风格：增加行高
+  line-height: 1.6;
   color: var(--dt-text-primary);
-  padding: 12px; // 钉钉风格：增加内边距
-  min-height: 60px;
+  padding: 8px 10px; // 钉钉标准：8px 上下，10px 左右
+  min-height: 52px; // 钉钉标准：52px 最小高度
   max-height: 160px;
-  background: transparent !important;
+  background: transparent;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   overflow-y: auto;
-  box-shadow: none !important;
+  box-shadow: none;
   transition: min-height 0.2s ease, color 0.2s ease;
 
   &:focus,
   &:hover,
   &:active,
   &:focus-visible {
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
+    border: none;
+    outline: none;
+    box-shadow: none;
   }
 
   &::placeholder {

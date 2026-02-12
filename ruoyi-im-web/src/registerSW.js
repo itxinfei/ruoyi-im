@@ -132,13 +132,11 @@ function showUpdatePrompt() {
     }
     
     .sw-update-btn--refresh {
-      background: #3296FA;
       background: var(--dt-brand-color);
       color: white;
     }
     
     .sw-update-btn--refresh:hover {
-      background: #1A7FE8;
       background: var(--dt-brand-hover);
     }
     

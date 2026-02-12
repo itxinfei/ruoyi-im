@@ -293,7 +293,15 @@ onMessage(msg => {
   store.dispatch('im/message/receiveMessage', msg)
 })
 
-const { onOnline, onOffline, onMessageAck } = useImWebSocket()
+const { onOnline, onOffline, onMessageAck, isConnected: wsConnectedStatus } = useImWebSocket()
+
+// 监听连接状态，确保当前端连接成功后，本地状态也同步为在线
+watch(wsConnectedStatus, newVal => {
+  const userId = store.getters['user/currentUserId']
+  if (newVal && userId) {
+    store.commit('im/contact/SET_USER_STATUS', { userId, status: 'online' })
+  }
+}, { immediate: true })
 
 onOnline(data => {
   if (data.userId) {
@@ -392,11 +400,11 @@ const handleKeydown = e => {
   overflow: hidden; // 防止整体溢出
   min-width: 0;
   min-height: 0;
-  contain: layout; // 性能优化：限制布局计算范围
+  // contain: layout; // 已移除：会导致子组件 position: fixed 无法覆盖全屏
 }
 
 // SessionPanel 容器 - 固定宽度，可拖拽调整
-.chat-layout > :deep(.session-panel) {
+.chat-layout> :deep(.session-panel) {
   flex: 0 0 auto;
   min-width: 200px; // 野火IM标准：最小 200px
   max-width: 400px; // 野火IM标准：最大 400px
@@ -406,7 +414,7 @@ const handleKeydown = e => {
 }
 
 // ChatPanel 容器 - 自适应剩余空间
-.chat-layout > :deep(.chat-panel) {
+.chat-layout> :deep(.chat-panel) {
   flex: 1 1 auto;
   min-width: 0; // 允许收缩，关键修复
   min-height: 0; // 允许收缩
@@ -422,7 +430,7 @@ const handleKeydown = e => {
   background: var(--dt-bg-card);
 }
 
-.main-content-area > :deep(:not(.chat-layout)) {
+.main-content-area> :deep(:not(.chat-layout)) {
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -506,12 +514,13 @@ const handleKeydown = e => {
 }
 
 @media (max-width: 768px) {
+
   // 移动端/小屏幕：会话面板可切换显示
   .chat-layout {
     position: relative;
   }
 
-  .chat-layout > :deep(.session-panel) {
+  .chat-layout> :deep(.session-panel) {
     width: 100%;
     max-width: none;
     position: absolute;
@@ -521,7 +530,7 @@ const handleKeydown = e => {
     z-index: 10;
   }
 
-  .chat-layout > :deep(.chat-panel) {
+  .chat-layout> :deep(.chat-panel) {
     width: 100%;
   }
 }

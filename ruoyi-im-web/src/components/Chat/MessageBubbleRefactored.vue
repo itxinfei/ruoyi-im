@@ -93,7 +93,7 @@
 
         <!-- 撤回消息 -->
         <RecalledBubble
-          v-else-if="message.type?.toUpperCase() === 'RECALLED'"
+          v-else-if="isRecalled"
           :message="message"
           @re-edit="$emit('re-edit', $event)"
         />
@@ -122,7 +122,10 @@
         />
 
         <!-- 未知消息类型 - 显示提示文字 -->
-        <div v-else class="unknown-type-bubble">
+        <div
+          v-else
+          class="unknown-type-bubble"
+        >
           [不支持的消息类型]
         </div>
       </div>
@@ -242,10 +245,11 @@ const {
 
 const {
   recallTimeDisplay,
-  isSending,
-  isFailed,
-  isRead
-} = useMessageStatus(props)
+    isSending,
+    isFailed,
+    isRecalled,
+    isRead
+  } = useMessageStatus(props)
 
 const {
   hasReactions,
@@ -503,13 +507,14 @@ const bubbleClasses = computed(() => {
     'is-right': props.message.isOwn,
     'is-selected': isSelected.value,
     'is-long-press': isLongPressing.value,
+    'is-recalled': isRecalled.value,
     [`type-${type}`]: true,
     [`group-${props.groupPosition}`]: true
   }
 })
 
 const showStatus = computed(() => {
-  return props.message.isOwn && (isSending.value || isFailed.value || isRead.value)
+  return props.message.isOwn && !isRecalled.value && (isSending.value || isFailed.value || isRead.value)
 })
 
 // 合并可撤回状态
@@ -539,7 +544,7 @@ const canRecall = computed(() => {
   position: relative;
   display: inline-flex;
   align-items: center;
-  max-width: min(520px, 70vw);
+  max-width: min(500px, 70vw); // 钉钉标准：500px 最大宽度，70vw 视口宽度
   width: fit-content;
   min-width: 0;
   contain: layout style paint;
@@ -548,14 +553,14 @@ const canRecall = computed(() => {
 
 // 气泡内容：纵向堆叠（文本 + 链接预览 + 标记等）
 .bubble-content {
-  padding: 10px 14px;
+  padding: 8px 12px;
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
   min-width: 0;
-  border-radius: 12px;
+  border-radius: 8px; // 钉钉标准：8px 圆角
 }
 
 // 对方消息样式 (左侧) - 白底微阴影
@@ -573,22 +578,27 @@ const canRecall = computed(() => {
   flex-direction: row-reverse;
 
   .bubble-content {
-    background: var(--dt-brand-color, #3296FA);
+    background: var(--dt-brand-color);
     color: #FFFFFF;
     border: none;
     box-shadow: none;
   }
 
-  :deep(.message-text),
-  :deep(.message-content),
-  :deep(.text-content) {
-    color: #FFFFFF !important;
+  // 确保所有子元素文字颜色都是白色（提高选择器优先级）
+  .message-text,
+  .message-content,
+  .text-content {
+    color: #FFFFFF;
   }
 
-  :deep(a) {
-    color: #FFFFFF !important;
+  a {
+    color: #FFFFFF;
     text-decoration: underline;
     opacity: 0.9;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
@@ -603,7 +613,7 @@ const canRecall = computed(() => {
   padding: 0;
   background: transparent !important;
   border: none !important;
-  border-radius: 12px;
+  border-radius: 8px; // 钉钉标准：8px 圆角
   box-shadow: none;
   overflow: hidden;
 }
@@ -612,7 +622,7 @@ const canRecall = computed(() => {
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: 12px;
+  border-radius: 8px; // 钉钉标准：8px 圆角
   overflow: hidden;
 }
 
@@ -634,10 +644,12 @@ const canRecall = computed(() => {
 
 // 系统消息 & 撤回消息 - 居中显示
 .message-bubble.type-system,
-.message-bubble.type-recalled {
+.message-bubble.type-recalled,
+.message-bubble.is-recalled {
   width: 100%;
   justify-content: center;
   margin: 8px 0;
+  flex-direction: row;
 
   .bubble-content {
     background: transparent !important;
@@ -660,7 +672,7 @@ const canRecall = computed(() => {
   }
 
   .message-bubble.is-right .bubble-content {
-    background: var(--dt-brand-color, #3296FA);
+    background: var(--dt-brand-color);
   }
 
   .message-bubble.type-image .bubble-content {
@@ -669,20 +681,20 @@ const canRecall = computed(() => {
   }
 }
 
-// 分组圆角 - 左侧消息（钉钉风格：连续消息内侧收窄为4px）
+// 分组圆角 - 左侧消息（优化：连续消息内侧收窄为2px）
 .message-bubble:not(.is-right) {
-  &.group-single .bubble-content { border-radius: 12px; }
-  &.group-first .bubble-content { border-radius: 12px 12px 12px 4px; }
-  &.group-middle .bubble-content { border-radius: 4px 12px 12px 4px; }
-  &.group-last .bubble-content { border-radius: 4px 12px 12px 12px; }
+  &.group-single .bubble-content { border-radius: 8px; }
+  &.group-first .bubble-content { border-radius: 8px 8px 8px 2px; }
+  &.group-middle .bubble-content { border-radius: 2px 8px 8px 2px; }
+  &.group-last .bubble-content { border-radius: 2px 8px 8px 8px; }
 }
 
 // 分组圆角 - 右侧消息
 .message-bubble.is-right {
-  &.group-single .bubble-content { border-radius: 12px; }
-  &.group-first .bubble-content { border-radius: 12px 12px 4px 12px; }
-  &.group-middle .bubble-content { border-radius: 12px 4px 4px 12px; }
-  &.group-last .bubble-content { border-radius: 12px 4px 12px 12px; }
+  &.group-single .bubble-content { border-radius: 8px; }
+  &.group-first .bubble-content { border-radius: 8px 8px 2px 8px; }
+  &.group-middle .bubble-content { border-radius: 8px 2px 2px 8px; }
+  &.group-last .bubble-content { border-radius: 8px 2px 8px 8px; }
 }
 
 // 分组间距（钉钉标准）
@@ -696,4 +708,3 @@ const canRecall = computed(() => {
   margin-top: 8px;
 }
 </style>
-

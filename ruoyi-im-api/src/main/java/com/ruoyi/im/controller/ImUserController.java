@@ -61,6 +61,7 @@ public class ImUserController {
      * 管理员创建新用户
      */
     @Operation(summary = "创建用户", description = "管理员创建新用户账户")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping
     @RateLimit(key = "user_create", time = 60, count = 20, limitType = RateLimit.LimitType.USER)
     public Result<Long> create(@Valid @RequestBody ImRegisterRequest request) {
@@ -104,6 +105,7 @@ public class ImUserController {
      * 批量获取用户信息
      */
     @Operation(summary = "批量获取用户信息", description = "根据用户ID列表批量获取用户基本信息")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @GetMapping("/batch")
     public Result<List<ImUserVO>> getBatch(@RequestParam @NotBlank(message = "用户ID列表不能为空") String ids) {
         List<Long> idList = java.util.Arrays.stream(ids.split(","))
@@ -166,6 +168,7 @@ public class ImUserController {
      * 更新用户信息
      */
     @Operation(summary = "更新用户信息", description = "更新用户的昵称、头像、个性签名等信息")
+    @PreAuthorize("#id == authentication.principal.userId or hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}")
     @RateLimit(key = "user_update", time = 60, count = 50, limitType = RateLimit.LimitType.USER)
     public Result<Void> update(

@@ -6,6 +6,7 @@ import {
   getContacts,
   getGroups
 } from '@/api/im'
+import { warn } from '@/utils/logger'
 
 export default {
   namespaced: true,
@@ -169,7 +170,7 @@ export default {
         }
       } catch (error) {
         // 网络错误时设置空数组，避免 UI 报错
-        console.warn('加载联系人失败，使用空列表:', error.message)
+        warn('ContactStore', '加载联系人失败，使用空列表:', error.message)
         commit('SET_CONTACTS', [])
       } finally {
         commit('SET_LOADING', { key: 'contacts', value: false })
@@ -191,7 +192,7 @@ export default {
         }
       } catch (error) {
         // 网络错误时设置空数组
-        console.warn('加载群组失败，使用空列表:', error.message)
+        warn('ContactStore', '加载群组失败，使用空列表:', error.message)
         commit('SET_GROUPS', [])
       } finally {
         commit('SET_LOADING', { key: 'groups', value: false })

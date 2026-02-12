@@ -1,6 +1,7 @@
 import { login, logout } from '@/api/im/auth'
 import { getUserInfo, updateUser } from '@/api/im/user'
 import { getToken, setToken, getUserInfo as getStoredUserInfo, getUserRole, setUserInfo, setUserRole, clearAuth } from '@/utils/storage'
+import { warn, error } from '@/utils/logger'
 
 export default {
     namespaced: true,
@@ -74,7 +75,7 @@ export default {
                     return defaultUser
                 }
             } catch (error) {
-                console.warn('获取用户信息失败，使用默认值:', error.message)
+                warn('UserStore', '获取用户信息失败，使用默认值:', error.message)
                 // 网络错误时使用默认用户对象，避免 UI 报错
                 const defaultUser = state.userInfo || { id: '', nickname: '未登录', username: 'guest' }
                 commit('SET_USER_INFO', defaultUser)
@@ -87,7 +88,7 @@ export default {
             try {
                 await logout()
             } catch (error) {
-                console.error('Logout error:', error)
+                error('UserStore', 'Logout error:', error)
             } finally {
                 commit('CLEAR_USER')
                 // Disconnect WebSocket if exists (handled in IM store usually)

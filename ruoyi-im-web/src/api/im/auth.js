@@ -28,22 +28,30 @@ export function logout() {
 
 /**
  * 刷新 Token
+ * @param {string} refreshTokenVal - 刷新令牌
  * @returns {Promise}
  */
-export function refreshToken() {
+export function refreshToken(refreshTokenVal) {
   return request({
     url: '/api/im/auth/refresh',
-    method: 'post'
+    method: 'post',
+    params: {
+      refreshToken: refreshTokenVal
+    }
   })
 }
 
 /**
  * 验证 Token
+ * @param {string} token - 令牌
  * @returns {Promise}
  */
-export function validateToken() {
+export function validateToken(token) {
   return request({
     url: '/api/im/auth/validateToken',
-    method: 'post'
+    method: 'post',
+    params: {
+      token
+    }
   })
 }

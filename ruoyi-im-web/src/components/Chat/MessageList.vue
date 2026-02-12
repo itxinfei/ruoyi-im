@@ -788,9 +788,8 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px; // 钉钉/野火IM: 16px 内边距
-  // 增加底部内边距，防止滚动按钮遮挡消息
-  padding-bottom: 80px; // 留出更多空间给输入框和按钮
+  padding: 12px 16px; // 优化：左右16px，上下12px
+  padding-bottom: 80px; // 钉钉标准：80px 底部间距
   background: var(--dt-bg-chat);
   position: relative;
   min-height: 0; // flex 子元素高度修复
@@ -803,7 +802,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 
   // 自定义滚动条 - 钉钉风格
   &::-webkit-scrollbar {
-    width: 8px; // 钉钉:8px宽滚动条
+    width: 6px; // 钉钉标准：6px 宽滚动条
   }
 
   &::-webkit-scrollbar-track {
@@ -811,16 +810,16 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2); // 钉钉风格
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.15); // 钉钉标准：更淡的滚动条
+    border-radius: 3px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.25);
     }
   }
 
   &:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -913,20 +912,33 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
 
 .time-divider {
   text-align: center;
-  margin: 24px 0; // 钉钉/野火IM: 24px 上下间距
+  margin: 16px 0; // 钉钉标准：16px 间距
   color: var(--dt-text-tertiary);
-  font-size: 12px;
+  font-size: 11px; // 优化：11px
   line-height: 1;
   position: relative;
 
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: var(--dt-border-lighter);
+    z-index: 1;
+  }
+
   .time-text {
-    background: rgba(0, 0, 0, 0.08); // 钉钉风格：半透明黑底
-    color: var(--dt-text-secondary);
-    padding: 4px 12px; // 钉钉风格：更宽的间距
-    font-size: 12px;
-    border-radius: 16px; // 钉钉8.0风格：全圆角
+    background: var(--dt-bg-body); // 钉钉标准：与背景同色
+    color: var(--dt-text-tertiary);
+    padding: 3px 10px; // 优化：3px 上下，10px 左右
+    font-size: 11px; // 优化：11px
+    border-radius: 8px; // 优化：8px 圆角
     display: inline-block;
     font-weight: 500;
+    position: relative;
+    z-index: 2;
   }
 
   .dark & .time-text {

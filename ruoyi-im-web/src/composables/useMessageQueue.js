@@ -78,7 +78,7 @@ export function useMessageQueue() {
   /**
    * 判断是否为网络错误
    */
-  const isNetworkError = (error) => {
+  const isNetworkError = error => {
     return error?.code === 'NETWORK_ERROR' ||
       error?.code === 'ECONNABORTED' ||
       error?.message?.includes('网络') ||
@@ -119,7 +119,7 @@ export function useMessageOperations() {
    * 撤回消息
    * @param {string} messageId - 消息ID
    */
-  const recall = async (messageId) => {
+  const recall = async messageId => {
     try {
       await store.dispatch('im/message/recallMessage', messageId)
       return { success: true }
@@ -133,7 +133,7 @@ export function useMessageOperations() {
    * 删除消息
    * @param {string} messageId - 消息ID
    */
-  const remove = async (messageId) => {
+  const remove = async messageId => {
     try {
       await store.dispatch('im/message/deleteMessage', messageId)
       return { success: true }

@@ -4,7 +4,10 @@
 * 对标钉钉/野火IM的设计风格
 */
 <template>
-  <div class="message-status-indicator" :class="statusClass">
+  <div
+    class="message-status-indicator"
+    :class="statusClass"
+  >
     <!-- 发送中 -->
     <template v-if="status === 'sending'">
       <el-icon class="status-icon spinning">
@@ -29,7 +32,10 @@
           :style="{ backgroundImage: `url(${avatar.avatar})` }"
           :title="avatar.userName"
         />
-        <span v-if="readCount > 3" class="read-more">+{{ readCount - 3 }}</span>
+        <span
+          v-if="readCount > 3"
+          class="read-more"
+        >+{{ readCount - 3 }}</span>
       </div>
     </template>
 

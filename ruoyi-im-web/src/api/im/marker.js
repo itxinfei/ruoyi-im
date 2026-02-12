@@ -14,7 +14,7 @@ import request from '../request'
  */
 export function markMessage(params) {
   return request({
-    url: '/api/im/messages/markers',
+    url: '/api/im/messages/markers/mark',
     method: 'post',
     params
   })
@@ -29,7 +29,7 @@ export function markMessage(params) {
  */
 export function unmarkMessage(params) {
   return request({
-    url: '/api/im/messages/markers',
+    url: '/api/im/messages/markers/unmark',
     method: 'delete',
     params
   })
@@ -45,7 +45,7 @@ export function unmarkMessage(params) {
  */
 export function setTodoReminder(params) {
   return request({
-    url: '/api/im/messages/markers/todos',
+    url: '/api/im/messages/markers/todo',
     method: 'post',
     params
   })
@@ -58,7 +58,7 @@ export function setTodoReminder(params) {
  */
 export function completeTodo(markerId) {
   return request({
-    url: `/api/im/messages/markers/todos/${markerId}/complete`,
+    url: `/api/im/messages/markers/todo/${markerId}/complete`,
     method: 'post'
   })
 }
@@ -70,7 +70,7 @@ export function completeTodo(markerId) {
  */
 export function reopenTodo(markerId) {
   return request({
-    url: `/api/im/messages/markers/todos/${markerId}/reopen`,
+    url: `/api/im/messages/markers/todo/${markerId}/reopen`,
     method: 'post'
   })
 }
@@ -82,7 +82,7 @@ export function reopenTodo(markerId) {
  */
 export function getUserMarkers(markerType) {
   return request({
-    url: '/api/im/messages/markers',
+    url: '/api/im/messages/markers/list',
     method: 'get',
     params: { markerType }
   })
@@ -95,7 +95,7 @@ export function getUserMarkers(markerType) {
  */
 export function getMessageMarkers(messageId) {
   return request({
-    url: `/api/im/messages/markers/messages/${messageId}`,
+    url: `/api/im/messages/markers/message/${messageId}`,
     method: 'get'
   })
 }
@@ -106,7 +106,7 @@ export function getMessageMarkers(messageId) {
  */
 export function getUserTodoCount() {
   return request({
-    url: '/api/im/messages/markers/todos/count',
+    url: '/api/im/messages/markers/todo/count',
     method: 'get'
   })
 }

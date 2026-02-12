@@ -288,7 +288,7 @@ export function markMentionAsRead(messageId) {
  */
 export function getUnreadCount(conversationId) {
   return request({
-    url: `/api/im/messages/unread-count`,
+    url: '/api/im/messages/unread-count',
     method: 'get',
     params: { conversationId }
   })
@@ -325,7 +325,7 @@ export function unpinMessage(messageId) {
  */
 export function getPinnedMessages(conversationId) {
   return request({
-    url: `/api/im/messages/pinned`,
+    url: '/api/im/messages/pinned',
     method: 'get',
     params: { conversationId }
   })
@@ -338,7 +338,7 @@ export function getPinnedMessages(conversationId) {
  */
 export function clearConversationMessages(conversationId) {
   return request({
-    url: `/api/im/messages/clear`,
+    url: '/api/im/messages/clear',
     method: 'delete',
     params: { conversationId }
   })

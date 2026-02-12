@@ -14,7 +14,7 @@
       ref="formRef"
       :model="form"
       :rules="rules"
-      label-width="80px"
+      label-position="top"
     >
       <!-- 头像上传 -->
       <el-form-item label="头像">
@@ -285,22 +285,125 @@ const handleOpened = () => {
 </script>
 
 <style scoped lang="scss">
-.edit-profile-dialog {
-  :deep(.el-dialog__header) {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--dt-border-light);
+@use '@/styles/design-tokens.scss' as *;
+
+:deep(.el-dialog) {
+  border-radius: var(--dt-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--dt-shadow-3xl);
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+}
+
+:deep(.el-dialog__header) {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-subtle);
+  margin: 0;
+
+  .el-dialog__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
   }
+}
+
+:deep(.el-dialog__body) {
+  padding: 24px 32px;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 16px 24px;
+  border-top: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-subtle);
 }
 
 .avatar-upload {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
+  padding: 8px 0;
 }
 
 .avatar-uploader {
   :deep(.el-upload) {
     display: block;
+  }
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 20px;
+
+  .el-form-item__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dt-text-secondary);
+    padding-bottom: 8px;
+  }
+
+  .el-input__wrapper {
+    box-shadow: 0 0 0 1px var(--dt-border-light) inset;
+    background: var(--dt-bg-input);
+    padding: 2px 12px;
+    border-radius: var(--dt-radius-md);
+    transition: all 0.2s;
+
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--dt-brand-color) inset;
+      background: #fff;
+    }
+  }
+
+  .el-textarea__inner {
+    background: var(--dt-bg-input);
+    border-radius: var(--dt-radius-md);
+    box-shadow: 0 0 0 1px var(--dt-border-light) inset;
+    padding: 8px 12px;
+
+    &:focus {
+      box-shadow: 0 0 0 1px var(--dt-brand-color) inset;
+      background: #fff;
+    }
+  }
+}
+
+:deep(.el-radio-group) {
+  .el-radio {
+    margin-right: 24px;
+    height: 32px;
+
+    .el-radio__label {
+      font-size: 13px;
+    }
+  }
+}
+
+.dark {
+  .avatar-upload {
+    :deep(.el-avatar) {
+      background: var(--dt-bg-subtle-dark);
+    }
+  }
+
+  :deep(.el-dialog__header),
+  :deep(.el-dialog__footer) {
+    background: var(--dt-bg-subtle-dark);
+  }
+}
+
+@media (max-width: 540px) {
+  :deep(.el-dialog) {
+    width: 90% !important;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 20px;
+  }
+
+  .avatar-upload {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
 }
 </style>

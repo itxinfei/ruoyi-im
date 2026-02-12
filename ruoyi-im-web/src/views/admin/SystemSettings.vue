@@ -576,9 +576,9 @@
             </h3>
             <div class="storage-stats">
               <div class="stat-item">
-                <div
+                <div 
                   class="stat-icon"
-                  style="background: linear-gradient(135deg, #3296FA 0%, #0066CC 100%)"
+                  style="background: linear-gradient(135deg, var(--dt-brand-color) 0%, #0066CC 100%)"
                 >
                   <el-icon>
                     <Document />

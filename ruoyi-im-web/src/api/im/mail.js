@@ -260,120 +260,21 @@ export function getFolderStats() {
 }
 
 // ==================== 邮件模板管理 ====================
-
-/**
- * 获取邮件模板列表
- * @param {string} category - 分类（可选）
- * @returns {Promise}
- */
-export function getEmailTemplates(category) {
-  return request({
-    url: '/api/im/emails/template/list',
-    method: 'get',
-    params: category ? { category } : {}
-  })
-}
-
-/**
- * 获取邮件模板详情
- * @param {string} templateCode - 模板编码
- * @returns {Promise}
- */
-export function getEmailTemplate(templateCode) {
-  return request({
-    url: `/api/im/emails/template/${templateCode}`,
-    method: 'get'
-  })
-}
-
-/**
- * 预览邮件模板
- * @param {string} templateCode - 模板编码
- * @returns {Promise}
- */
-export function previewEmailTemplate(templateCode) {
-  return request({
-    url: `/api/im/emails/template/${templateCode}/preview`,
-    method: 'get'
-  })
-}
-
-/**
- * 创建邮件模板
- * @param {Object} data - 模板数据
- * @returns {Promise}
- */
-export function createEmailTemplate(data) {
-  return request({
-    url: '/api/im/emails/template',
-    method: 'post',
-    data
-  })
-}
-
-/**
- * 更新邮件模板
- * @param {number} templateId - 模板ID
- * @param {Object} data - 模板数据
- * @returns {Promise}
- */
-export function updateEmailTemplate(templateId, data) {
-  return request({
-    url: `/api/im/emails/template/${templateId}`,
-    method: 'put',
-    data
-  })
-}
-
-/**
- * 删除邮件模板
- * @param {number} templateId - 模板ID
- * @returns {Promise}
- */
-export function deleteEmailTemplate(templateId) {
-  return request({
-    url: `/api/im/emails/template/${templateId}`,
-    method: 'delete'
-  })
-}
-
-/**
- * 启用/禁用邮件模板
- * @param {number} templateId - 模板ID
- * @param {boolean} enabled - 是否启用
- * @returns {Promise}
- */
-export function setEmailTemplateEnabled(templateId, enabled) {
-  return request({
-    url: `/api/im/emails/template/${templateId}/enabled`,
-    method: 'put',
-    params: { enabled }
-  })
-}
-
-/**
- * 复制邮件模板
- * @param {number} templateId - 模板ID
- * @returns {Promise}
- */
-export function copyEmailTemplate(templateId) {
-  return request({
-    url: `/api/im/emails/template/${templateId}/copy`,
-    method: 'post'
-  })
-}
-
-/**
- * 获取模板变量说明
- * @param {string} templateCode - 模板编码
- * @returns {Promise}
- */
-export function getEmailTemplateVariables(templateCode) {
-  return request({
-    url: `/api/im/emails/template/${templateCode}/variables`,
-    method: 'get'
-  })
-}
+// 注意: 邮件模板管理功能已迁移到独立的模板管理模块
+// 以下接口已废弃，请使用新的模板管理API
+// 
+// 废弃接口列表:
+// - getEmailTemplates() - 已废弃
+// - getEmailTemplate() - 已废弃
+// - previewEmailTemplate() - 已废弃
+// - createEmailTemplate() - 已废弃
+// - updateEmailTemplate() - 已废弃
+// - deleteEmailTemplate() - 已废弃
+// - setEmailTemplateEnabled() - 已废弃
+// - copyEmailTemplate() - 已废弃
+// - getEmailTemplateVariables() - 已废弃
+//
+// 新的模板管理API请参考: src/api/im/emailTemplate.js
 
 // ==================== 用户相关 ====================
 

@@ -274,7 +274,7 @@ const getFileIconColor = fileName => {
     // 图片 - 蓝紫色
     jpg: '#722ed1', jpeg: '#722ed1', png: '#722ed1', gif: '#722ed1', bmp: '#722ed1', svg: '#722ed1',
     // 文档 - 蓝色
-    doc: '#3296FA', docx: '#3296FA',
+    doc: 'var(--dt-brand-color)', docx: 'var(--dt-brand-color)',
     xls: '#52c41a', xlsx: '#52c41a',
     ppt: '#fa8c16', pptx: '#fa8c16',
     pdf: '#f5222d',
