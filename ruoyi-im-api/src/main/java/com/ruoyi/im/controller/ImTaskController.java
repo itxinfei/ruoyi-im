@@ -142,7 +142,13 @@ public class ImTaskController {
         request.setPageSize(pageSize);
         request.setKeyword(keyword);
         request.setStatus(status);
-        request.setPriority(priority);
+        if (priority != null && !priority.isEmpty()) {
+            try {
+                request.setPriority(Integer.parseInt(priority));
+            } catch (NumberFormatException e) {
+                // 忽略无效的优先级值
+            }
+        }
         request.setAssigneeId(assigneeId);
         IPage<ImTaskVO> page = taskService.getTaskPage(request, userId);
         return Result.success(page);

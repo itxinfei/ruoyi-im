@@ -105,8 +105,20 @@ public class ImUserServiceImpl implements ImUserService {
                 password != null ? password.length() : "null",
                 dbPassword != null ? dbPassword.length() : "null");
 
-        if (password == null || dbPassword == null || !passwordEncoder.matches(password, dbPassword)) {
-            logger.error("密码验证失败 - 用户名: {}", request.getUsername());
+        // 详细的空值检查
+        if (password == null) {
+            logger.warn("密码验证失败 - 用户名: {}, 原因: 请求密码为空", request.getUsername());
+            throw new BusinessException(ImErrorCode.PASSWORD_ERROR, "密码不能为空");
+        }
+
+        if (dbPassword == null) {
+            logger.error("密码验证失败 - 用户名: {}, 原因: 数据库密码为空, 用户ID: {}", request.getUsername(), user.getId());
+            throw new BusinessException(ImErrorCode.ACCOUNT_ERROR, "账号异常，请联系管理员");
+        }
+
+        // 验证密码
+        if (!passwordEncoder.matches(password, dbPassword)) {
+            logger.error("密码验证失败 - 用户名: {}, 原因: 密码不匹配", request.getUsername());
             throw new BusinessException(ImErrorCode.PASSWORD_ERROR, "密码错误");
         }
 
@@ -561,7 +573,8 @@ public class ImUserServiceImpl implements ImUserService {
         // 创建用户
         ImUser user = new ImUser();
         user.setUsername(username);
-        user.setPassword(password); // 这里应该加密，实际项目中需要使用 BCryptPasswordEncoder
+        // 强制加密密码，使用 BCryptPasswordEncoder
+        user.setPassword(passwordEncoder.encode(password));
         user.setNickname(nickname != null ? nickname : username);
         user.setMobile(mobile);
         user.setEmail(email);

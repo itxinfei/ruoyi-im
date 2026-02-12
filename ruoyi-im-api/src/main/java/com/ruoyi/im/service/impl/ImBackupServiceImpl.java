@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 数据备份服务实现
@@ -48,6 +50,15 @@ import java.util.Optional;
 public class ImBackupServiceImpl implements ImBackupService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImBackupServiceImpl.class);
+
+    /**
+     * 备份任务线程池（单线程，避免并发备份）
+     */
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "backup-task-thread");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private final ImBackupMapper imBackupMapper;
     private final ImUserService imUserService;
@@ -290,10 +301,11 @@ public class ImBackupServiceImpl implements ImBackupService {
     }
 
     /**
-     * 执行数据库备份
+     * 执行数据库备份（异步）
      */
     private void performBackup(ImBackup backup) {
-        new Thread(() -> {
+        // 使用线程池执行备份任务，避免频繁创建销毁线程
+        executorService.submit(() -> {
             try {
                 logger.info("开始执行备份任务，ID: {}", backup.getId());
 
@@ -338,7 +350,7 @@ public class ImBackupServiceImpl implements ImBackupService {
                 ExceptionHandlerUtil.logError(logger, "备份执行异常: backupId={}", e, backup.getId());
                 imBackupMapper.updateStatus(backup.getId(), "failed", e.getMessage());
             }
-        }).start();
+        });
     }
 
     /**

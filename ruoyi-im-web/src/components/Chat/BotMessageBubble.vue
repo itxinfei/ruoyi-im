@@ -340,7 +340,7 @@ const handleReject = () => {
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 12px;
+  border-radius: 16px;
   font-size: 11px;
   font-weight: 500;
 
@@ -362,7 +362,7 @@ const handleReject = () => {
 .priority-pulse {
   position: absolute;
   inset: 0;
-  border-radius: 12px;
+  border-radius: 16px;
   background: var(--dt-warning-color, #FF9800);
   animation: pulse 2s ease-in-out infinite;
 }

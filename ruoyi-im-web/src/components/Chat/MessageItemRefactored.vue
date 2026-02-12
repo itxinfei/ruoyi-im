@@ -176,7 +176,8 @@ const handleNudge = () => {
 
 .message-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  min-height: 48px;
   margin-bottom: 16px;
   position: relative;
   padding: 0;
@@ -198,7 +199,7 @@ const handleNudge = () => {
 .time-divider-wrapper {
   width: 100%;
   text-align: center;
-  margin: 16px 0;
+  margin: 12px 0; // 钉钉标准：12px 上下间距
 }
 
 .time-text {
@@ -239,8 +240,8 @@ const handleNudge = () => {
 .message-item.is-multi-select {
   padding: 0 12px;
   cursor: pointer;
-  border-radius: 12px;
-  
+  border-radius: 16px;
+
   &:hover {
     background: var(--dt-bg-subtle-hover);
   }
@@ -260,10 +261,15 @@ const handleNudge = () => {
   justify-content: center;
   border-radius: 8px;
   overflow: hidden;
+  transition: all 0.2s ease;
 
   &.avatar-hidden {
+    width: 0;
+    height: 0;
+    margin: 0;
     visibility: hidden;
     pointer-events: none;
+    overflow: hidden;
   }
 
   :deep(.dingtalk-avatar) {
@@ -297,7 +303,7 @@ const handleNudge = () => {
 
 .bubble-row {
   display: flex;
-  align-items: flex-end; // 对齐气泡底部，状态图标在底部
+  align-items: center;
   gap: 6px;
   max-width: 100%;
 }
@@ -320,7 +326,8 @@ const handleNudge = () => {
   font-family: var(--dt-font-family);
 }
 
-.dark {
+// 暗色模式（统一使用 :global(.dark) 选择器）
+:global(.dark) {
   .time-text {
     background: var(--dt-white-10);
   }

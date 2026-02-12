@@ -66,8 +66,8 @@ defineEmits(['action', 'keep-hover', 'leave-hover'])
   align-items: center;
   gap: 2px;
   padding: 2px;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card, #FFFFFF);
+  border: 1px solid var(--dt-border-light, #E4E7ED);
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;

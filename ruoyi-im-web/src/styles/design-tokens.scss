@@ -76,7 +76,7 @@
   --dt-bubble-left-bg: #FFFFFF; // 接收消息背景（纯白，钉钉8.0风格）
   --dt-bubble-left-border: transparent; // 接收消息边框（去掉边框，用阴影替代）
   --dt-bubble-left-shadow: 0 1px 2px rgba(0, 0, 0, 0.06); // 左侧气泡微阴影
-  --dt-bubble-padding: 10px 14px; // 气泡统一内边距
+  --dt-bubble-padding: 10px 14px; // 气泡统一内边距（钉钉8.0标准）
   --dt-bubble-radius-merge: 4px; // 分组合并圆角
   --dt-bubble-right-bg: #3296FA; // 发送消息背景（企业IM蓝，纯色无渐变）
   --dt-bubble-right-text: #FFFFFF; // 发送消息文字（白色）
@@ -254,14 +254,14 @@
   --dt-radius-sm: 4px;
   --dt-radius-md: 8px;
   --dt-radius-lg: 12px;
-  --dt-radius-xl: 16px;
-  --dt-radius-2xl: 20px;
-  --dt-radius-3xl: 24px;
+  --dt-radius-xl: 20px;
+  --dt-radius-2xl: 24px;
+  --dt-radius-3xl: 28px;
   --dt-radius-full: 9999px;
 
   // === Border Radius - Bubbles (气泡专用圆角 - 钉钉8.0风格) ===
-  --dt-radius-bubble-left: 12px; // 左侧气泡圆角
-  --dt-radius-bubble-right: 12px; // 右侧气泡圆角
+  --dt-radius-bubble-left: 12px; // 左侧气泡圆角（钉钉8.0标准）
+  --dt-radius-bubble-right: 12px; // 右侧气泡圆角（钉钉8.0标准）
 
   // === Z-Index (层级) ===
   --dt-z-base: 0;

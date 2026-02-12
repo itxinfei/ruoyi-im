@@ -65,6 +65,18 @@ function mapSendStatusToUi(sendStatus) {
   return statusMap[sendStatus] || 'pending'
 }
 
+/**
+ * 判断消息是否为当前用户发送
+ * 优先使用后端返回的 isSelf 字段，降级通过 senderId 比较
+ */
+function isOwnMessage(message, currentUserId) {
+  if (message.isSelf === true) { return true }
+  if (message.isSelf === false) { return false }
+  const senderId = String(message.senderId || '')
+  const userId = String(currentUserId || '')
+  return senderId !== '' && senderId === userId
+}
+
 // 简单UUID生成
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -566,17 +578,19 @@ export default {
 
   actions: {
     // 加载消息列表
-    async loadMessages({ commit }, { sessionId, lastMessageId = null, pageSize = 20, isLoadMore = false }) {
+    async loadMessages({ commit, rootState }, { sessionId, lastMessageId = null, pageSize = 20, isLoadMore = false }) {
       commit('SET_LOADING', true)
       try {
         const res = await getMessages(sessionId, { lastId: lastMessageId, pageSize })
         if (res.code === 200 && res.data) {
+          const currentUserId = rootState.im?.currentUser?.id
           // 规范化消息字段
           const normalized = res.data.map(msg => ({
             ...msg,
             type: (msg.type || '').toUpperCase(),
             senderName: msg.senderName || msg.senderNickname || msg.nickname || msg.userName || '未知用户',
-            senderAvatar: msg.senderAvatar || msg.avatar || ''
+            senderAvatar: msg.senderAvatar || msg.avatar || '',
+            isOwn: isOwnMessage(msg, currentUserId)
           }))
           // 后端已经按时间升序返回(oldest first, newest at bottom),无需反转
           const transformed = normalized
@@ -615,7 +629,8 @@ export default {
         content,
         replyToMessageId,
         sendStatus: SEND_STATUS.PENDING, // 发送中状态
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        isOwn: true
       }
 
       // 添加到发送队列（用于内存泄漏防护）
@@ -646,6 +661,7 @@ export default {
           const normalizedMessage = {
             ...res.data,
             type: (res.data.type || '').toUpperCase(),
+            isOwn: true,
             // 移除临时状态，使用服务器返回的状态
             sendStatus: res.data.sendStatus
           }
@@ -707,13 +723,13 @@ export default {
     },
 
     // 编辑消息
-    async editMessage({ commit, rootState }, { messageId, content }) {
+    async editMessage({ commit, state, rootState }, { messageId, content }) {
       const res = await apiEditMessage(messageId, { content })
       if (res.code === 200) {
         // 查找该消息在哪个会话中 (通常是当前会话)
         const sessionId = rootState.im?.session?.currentSession?.id
-        if (sessionId && rootState.message.messages[sessionId]) {
-          const editedMsg = { ...rootState.message.messages[sessionId].find(m => m.id === messageId), content, isEdited: true }
+        if (sessionId && state.messages[sessionId]) {
+          const editedMsg = { ...state.messages[sessionId].find(m => m.id === messageId), content, isEdited: true }
           commit('UPDATE_MESSAGE', { sessionId, message: editedMsg })
 
           // 如果是最后一条消息，更新会话列表
@@ -771,12 +787,12 @@ export default {
     },
 
     // 撤回消息
-    async recallMessage({ commit, rootState }, messageId) {
+    async recallMessage({ commit, state, rootState }, messageId) {
       await recallMessage(messageId)
       // 需要找到该消息所属的会话ID并更新为撤回状态
       const sessionId = rootState.im?.session?.currentSession?.id
-      if (sessionId && rootState.message.messages[sessionId]) {
-        const msg = rootState.message.messages[sessionId].find(m => m.id === messageId)
+      if (sessionId && state.messages[sessionId]) {
+        const msg = state.messages[sessionId].find(m => m.id === messageId)
         if (msg) {
           commit('UPDATE_MESSAGE', {
             sessionId,
@@ -807,6 +823,12 @@ export default {
       message.senderName = message.senderName || message.senderNickname || message.nickname || message.userName || '未知用户'
       message.senderAvatar = message.senderAvatar || message.avatar || ''
 
+      // 设置 isOwn 标记（判断是否为当前用户发送）
+      const currentUser = rootState.im?.currentUser
+      if (message.isOwn === undefined) {
+        message.isOwn = isOwnMessage(message, currentUser?.id)
+      }
+
       // 添加消息 ID 到去重集合
       if (messageId) {
         commit('ADD_RECEIVED_MESSAGE_ID', messageId)
@@ -816,7 +838,6 @@ export default {
       commit('ADD_MESSAGE', { sessionId, message })
 
       // 自动发送接收 ACK（如果是他人发送的消息）
-      const currentUser = rootState.im?.currentUser
       if (message.id && message.senderId !== currentUser?.id) {
         imWebSocket.sendAck(message.id, 'receive', rootState.im?.deviceId)
       }
@@ -850,10 +871,10 @@ export default {
     },
 
     // 处理表情回复更新（WebSocket 推送）
-    handleReactionUpdate({ commit, rootState }, { messageId, emoji, userId, userName, userAvatar, isAdd }) {
+    handleReactionUpdate({ commit, state }, { messageId, emoji, userId, userName, userAvatar, isAdd }) {
       // 遍历所有会话查找该消息
-      for (const sessionId in rootState.message.messages) {
-        const messages = rootState.message.messages[sessionId]
+      for (const sessionId in state.messages) {
+        const messages = state.messages[sessionId]
         const index = messages.findIndex(m => m.id === messageId)
 
         if (index !== -1) {
@@ -891,9 +912,9 @@ export default {
     },
 
     // 处理消息 ACK 确认（WebSocket 推送）
-    handleMessageAck({ commit, rootState }, { messageId, ackType }) {
-      for (const sessionId in rootState.message.messages) {
-        const messages = rootState.message.messages[sessionId]
+    handleMessageAck({ commit, state }, { messageId, ackType }) {
+      for (const sessionId in state.messages) {
+        const messages = state.messages[sessionId]
         const index = messages.findIndex(m => m.id === messageId)
 
         if (index !== -1) {

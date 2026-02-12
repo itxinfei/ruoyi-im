@@ -327,9 +327,9 @@ export default {
         localStorage.removeItem('im-system-settings')
       }
       commit('CLEAR_ALL_STATE')
-      commit('session/CLEAR_STATE', null, { root: true })
-      commit('message/CLEAR_STATE', null, { root: true })
-      commit('contact/CLEAR_STATE', null, { root: true })
+      commit('session/CLEAR_STATE')
+      commit('message/CLEAR_STATE')
+      commit('contact/CLEAR_STATE')
     }
   }
 }

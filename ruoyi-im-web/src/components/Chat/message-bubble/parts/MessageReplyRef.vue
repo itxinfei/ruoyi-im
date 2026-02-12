@@ -81,7 +81,7 @@ const handleClick = () => {
   background: var(--dt-black-04);
   border-left: 3px solid var(--dt-brand-color);
   padding: 12px;
-  margin: -6px -8px 8px -8px;
+  margin: -10px -14px 8px -14px;
   border-radius: 4px;
   font-size: 13px;
   color: var(--dt-text-secondary);

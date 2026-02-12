@@ -36,6 +36,9 @@ public class ImErrorCode {
     /** 密码错误 */
     public static final int PASSWORD_ERROR = 4003;
 
+    /** 账号异常 */
+    public static final int ACCOUNT_ERROR = 4030;
+
     /** 注册失败 */
     public static final int REGISTER_FAILED = 4011;
 

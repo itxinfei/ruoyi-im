@@ -342,7 +342,7 @@ onUnmounted(() => {
   position: relative;
   width: 360px;
   height: 100%;
-  background: #fff;
+  background: var(--dt-bg-card);
   box-shadow: -2px 0 8px var(--dt-black-08);
   display: flex;
   flex-direction: column;

@@ -1,5 +1,37 @@
 <template>
   <div class="theme-settings">
+    <section class="setting-section">
+      <div class="section-header">
+        <div class="section-icon-wrapper bg-gradient-blue">
+          <span class="material-icons-outlined">contrast</span>
+        </div>
+        <div class="section-title-group">
+          <h3 class="section-title">
+            显示模式
+          </h3>
+          <p class="section-desc">
+            选择浅色、深色或跟随系统
+          </p>
+        </div>
+      </div>
+
+      <div class="setting-card mode-grid">
+        <button
+          v-for="mode in themeModes"
+          :key="mode.value"
+          class="mode-card"
+          :class="{ active: localSettings.themeMode === mode.value }"
+          @click="handleThemeModeChange(mode.value)"
+        >
+          <span class="material-icons-outlined mode-icon">{{ mode.icon }}</span>
+          <div class="mode-text">
+            <span class="mode-title">{{ mode.label }}</span>
+            <span class="mode-desc">{{ mode.desc }}</span>
+          </div>
+        </button>
+      </div>
+    </section>
+
     <!-- 主题色设置 -->
     <section class="setting-section">
       <div class="section-header">
@@ -88,14 +120,28 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { setThemeMode } = useTheme()
+const { setThemeMode, themeMode } = useTheme()
+
+const resolveThemeMode = value => {
+  return value?.general?.theme || value?.theme || themeMode.value || 'auto'
+}
+
+const resolvePrimaryColor = value => {
+  return value?.theme?.primaryColor || value?.primaryColor || '#1677ff'
+}
 
 const localSettings = ref({
-  theme: props.modelValue?.theme || 'light',
-  primaryColor: props.modelValue?.primaryColor || '#1677ff'
+  themeMode: resolveThemeMode(props.modelValue),
+  primaryColor: resolvePrimaryColor(props.modelValue)
 })
 
-const customColor = ref(props.modelValue?.primaryColor || '#1677ff')
+const customColor = ref(resolvePrimaryColor(props.modelValue))
+
+const themeModes = [
+  { value: 'light', label: '浅色', desc: '明亮界面，阅读更清晰', icon: 'light_mode' },
+  { value: 'dark', label: '深色', desc: '夜间使用更舒适', icon: 'dark_mode' },
+  { value: 'auto', label: '跟随系统', desc: '自动匹配系统外观', icon: 'settings_suggest' }
+]
 
 const themeColors = [
   { value: '#1677ff', name: '科技蓝' },
@@ -114,18 +160,35 @@ const handleColorChange = color => {
   emitChanges()
 }
 
+const handleThemeModeChange = mode => {
+  localSettings.value.themeMode = mode
+  setThemeMode(mode)
+  emitChanges()
+}
+
 const emitChanges = () => {
+  const incomingSettings = props.modelValue && typeof props.modelValue === 'object' ? props.modelValue : {}
+  const incomingGeneral = incomingSettings.general || {}
+  const incomingTheme = incomingSettings.theme || {}
+
   emit('update:modelValue', {
-    theme: localSettings.value.theme,
-    primaryColor: localSettings.value.primaryColor
+    ...incomingSettings,
+    general: {
+      ...incomingGeneral,
+      theme: localSettings.value.themeMode
+    },
+    theme: {
+      ...incomingTheme,
+      primaryColor: localSettings.value.primaryColor
+    }
   })
 }
 
 watch(() => props.modelValue, newVal => {
   if (newVal) {
-    localSettings.value.theme = newVal.theme || 'light'
-    localSettings.value.primaryColor = newVal.primaryColor || '#1677ff'
-    customColor.value = newVal.primaryColor || '#1677ff'
+    localSettings.value.themeMode = resolveThemeMode(newVal)
+    localSettings.value.primaryColor = resolvePrimaryColor(newVal)
+    customColor.value = resolvePrimaryColor(newVal)
   }
 }, { deep: true })
 </script>
@@ -166,9 +229,13 @@ watch(() => props.modelValue, newVal => {
   &.bg-gradient-pink {
     background: linear-gradient(135deg, #eb2f96 0%, #ff85c0 100%);
   }
-  
+
   &.bg-gradient-purple {
     background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);
+  }
+
+  &.bg-gradient-blue {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   }
 }
 
@@ -194,6 +261,58 @@ watch(() => props.modelValue, newVal => {
   border: 1px solid var(--dt-border-color);
   border-radius: var(--dt-radius-lg);
   padding: 24px;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mode-card {
+  border: 1px solid var(--dt-border-color);
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: var(--dt-brand-color);
+  }
+
+  &.active {
+    border-color: var(--dt-brand-color);
+    background: color-mix(in srgb, var(--dt-brand-color) 10%, var(--dt-bg-body));
+  }
+}
+
+.mode-icon {
+  font-size: 20px;
+  color: var(--dt-brand-color);
+}
+
+.mode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mode-title {
+  font-size: 13px;
+  font-weight: var(--dt-font-weight-semibold);
+  color: var(--dt-text-primary);
+}
+
+.mode-desc {
+  font-size: 12px;
+  color: var(--dt-text-secondary);
+  line-height: 1.35;
 }
 
 // 颜色网格
@@ -267,6 +386,12 @@ watch(() => props.modelValue, newVal => {
     font-family: monospace;
     font-size: 14px;
     color: var(--dt-text-secondary);
+  }
+}
+
+@media (max-width: 900px) {
+  .mode-grid {
+    grid-template-columns: 1fr;
   }
 }
 

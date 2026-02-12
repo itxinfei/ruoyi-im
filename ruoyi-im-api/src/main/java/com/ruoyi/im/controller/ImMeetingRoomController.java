@@ -128,10 +128,11 @@ public class ImMeetingRoomController {
         ImMeetingRoomQueryRequest request = new ImMeetingRoomQueryRequest();
         request.setPageNum(pageNum);
         request.setPageSize(pageSize);
-        request.setName(name);
-        request.setLocation(location);
-        request.setCapacity(capacity);
+        request.setKeyword(name);
         request.setStatus(status);
+        if (capacity != null) {
+            request.setMinCapacity(capacity);
+        }
         IPage<ImMeetingRoomVO> page = meetingRoomService.getRoomPage(request);
         return Result.success(page);
     }

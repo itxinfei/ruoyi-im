@@ -145,7 +145,7 @@ const props = defineProps({
   conversationId: [String, Number]
 })
 
-const emit = defineEmits(['remind-unread'])
+const emit = defineEmits(['update:visible', 'remind-unread'])
 
 // 格式化已读时间
 const formatReadTime = computed(() => {

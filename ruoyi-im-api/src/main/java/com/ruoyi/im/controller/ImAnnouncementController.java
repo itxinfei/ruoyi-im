@@ -134,7 +134,7 @@ public class ImAnnouncementController {
         request.setPageNum(pageNum);
         request.setPageSize(pageSize);
         request.setKeyword(keyword);
-        request.setType(type);
+        request.setAnnouncementType(type);
         request.setStatus(status);
         IPage<ImAnnouncementVO> page = announcementService.getAnnouncementPage(request, userId);
         return Result.success(page);

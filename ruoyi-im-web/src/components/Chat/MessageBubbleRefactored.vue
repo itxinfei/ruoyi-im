@@ -483,7 +483,8 @@ const handleCombineClick = () => {
 
 // 提取消息中的链接
 const messageLinks = computed(() => {
-  if (props.message.type !== 'TEXT' || !props.message.content) {
+  const type = (props.message.type || 'TEXT').toUpperCase()
+  if (type !== 'TEXT' || !props.message.content) {
     return []
   }
 
@@ -519,6 +520,7 @@ const canRecall = computed(() => {
 
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
+@use './message-bubble/styles/message-bubble.scss' as *;
 
 .unknown-type-bubble {
   padding: 8px 12px;
@@ -537,69 +539,71 @@ const canRecall = computed(() => {
   position: relative;
   display: inline-flex;
   align-items: center;
-  max-width: min(520px, 100%);
+  max-width: min(520px, 70vw);
   width: fit-content;
   min-width: 0;
   contain: layout style paint;
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+// 气泡内容：纵向堆叠（文本 + 链接预览 + 标记等）
 .bubble-content {
-  padding: var(--dt-bubble-padding, 10px 14px);
+  padding: 10px 14px;
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
   min-width: 0;
-  display: flex;
-  align-items: flex-start;
+  border-radius: 12px;
 }
 
-// 对方消息样式 (左侧)
+// 对方消息样式 (左侧) - 白底微阴影
 .message-bubble:not(.is-right) {
   .bubble-content {
-    background: var(--dt-bubble-left-bg);
-    border: 1px solid var(--dt-bubble-left-border);
+    background: var(--dt-bubble-left-bg, #FFFFFF);
+    border: none;
     color: var(--dt-text-primary);
-    box-shadow: var(--dt-bubble-left-shadow);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   }
 }
 
-// 己方消息样式 (右侧)
+// 己方消息样式 (右侧) - 蓝底白字
 .message-bubble.is-right {
   flex-direction: row-reverse;
 
   .bubble-content {
-    background: var(--dt-brand-color);
-    color: var(--dt-bubble-right-text);
+    background: var(--dt-brand-color, #3296FA);
+    color: #FFFFFF;
     border: none;
+    box-shadow: none;
   }
 
   :deep(.message-text),
   :deep(.message-content),
   :deep(.text-content) {
-    color: var(--dt-bubble-right-text) !important;
+    color: #FFFFFF !important;
   }
 
   :deep(a) {
-    color: var(--dt-bubble-right-text) !important;
+    color: #FFFFFF !important;
     text-decoration: underline;
-    opacity: 0.95;
+    opacity: 0.9;
   }
 }
 
 // 选中状态
 .message-bubble.is-selected .bubble-content {
-  border: 2px solid var(--dt-brand-color);
+  outline: 2px solid var(--dt-brand-color);
+  outline-offset: -2px;
 }
 
-// 图片消息
+// 图片消息 - 无包裹，直接圆角裁切
 .message-bubble.type-image .bubble-content {
   padding: 0;
   background: transparent !important;
   border: none !important;
-  border-radius: var(--dt-radius-lg, 12px);
+  border-radius: 12px;
   box-shadow: none;
   overflow: hidden;
 }
@@ -608,47 +612,64 @@ const canRecall = computed(() => {
 .message-bubble.type-video .bubble-content {
   padding: 0;
   background: #000 !important;
-  border-radius: var(--dt-radius-lg, 12px);
+  border-radius: 12px;
   overflow: hidden;
 }
 
-// 系统消息 & 撤回消息
+// 卡片类消息（自带 padding 和背景，父级不再包裹）
+.message-bubble.type-file,
+.message-bubble.type-voice,
+.message-bubble.type-audio,
+.message-bubble.type-location,
+.message-bubble.type-nudge,
+.message-bubble.type-combine,
+.message-bubble.type-combine_forward {
+  .bubble-content {
+    padding: 0;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// 系统消息 & 撤回消息 - 居中显示
 .message-bubble.type-system,
 .message-bubble.type-recalled {
   width: 100%;
   justify-content: center;
-  margin: 12px 0;
+  margin: 8px 0;
 
   .bubble-content {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 0;
+    padding: 4px 12px;
     color: var(--dt-text-quaternary);
     font-size: 12px;
+    border-radius: 0;
   }
 }
 
-// 暗色模式
-.dark {
+// 暗色模式（统一使用 :global(.dark) 选择器）
+:global(.dark) {
   .message-bubble:not(.is-right) .bubble-content {
     background: var(--dt-bg-tertiary-dark, #2A2D35);
-    border-color: var(--dt-border-dark, #3F424A);
+    border: 1px solid var(--dt-border-dark, #3F424A);
     color: var(--dt-text-primary-dark, #E2E4E9);
     box-shadow: none;
   }
 
   .message-bubble.is-right .bubble-content {
-    background: var(--dt-brand-color);
+    background: var(--dt-brand-color, #3296FA);
   }
 
   .message-bubble.type-image .bubble-content {
     background: transparent !important;
-    border-color: transparent !important;
+    border: none !important;
   }
 }
 
-// 分组圆角 - 左侧（scoped 优先级高于 import）
+// 分组圆角 - 左侧消息（钉钉风格：连续消息内侧收窄为4px）
 .message-bubble:not(.is-right) {
   &.group-single .bubble-content { border-radius: 12px; }
   &.group-first .bubble-content { border-radius: 12px 12px 12px 4px; }
@@ -656,12 +677,23 @@ const canRecall = computed(() => {
   &.group-last .bubble-content { border-radius: 4px 12px 12px 12px; }
 }
 
-// 分组圆角 - 右侧
+// 分组圆角 - 右侧消息
 .message-bubble.is-right {
   &.group-single .bubble-content { border-radius: 12px; }
   &.group-first .bubble-content { border-radius: 12px 12px 4px 12px; }
   &.group-middle .bubble-content { border-radius: 12px 4px 4px 12px; }
   &.group-last .bubble-content { border-radius: 12px 4px 12px 12px; }
+}
+
+// 分组间距（钉钉标准）
+.message-bubble.group-middle,
+.message-bubble.group-last {
+  margin-top: 2px;
+}
+
+.message-bubble.group-first,
+.message-bubble.group-single {
+  margin-top: 8px;
 }
 </style>
 

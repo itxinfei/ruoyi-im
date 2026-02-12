@@ -17,9 +17,18 @@
           <span class="header-title">设置</span>
         </div>
 
+        <div class="sidebar-search">
+          <span class="material-icons-outlined">search</span>
+          <input
+            v-model.trim="menuFilterKeyword"
+            type="text"
+            placeholder="搜索设置项"
+          >
+        </div>
+
         <nav class="sidebar-nav scrollbar-custom">
           <div
-            v-for="item in menuItems"
+            v-for="item in filteredMenuItems"
             :key="item.id"
             class="nav-item"
             :class="{ active: activeMenu === item.id }"
@@ -108,7 +117,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, defineAsyncComponent } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -141,6 +150,12 @@ const showChangePassword = ref(false)
 const showEditProfile = ref(false)
 const isFullscreen = ref(false)
 const windowWidth = ref(window.innerWidth)
+const menuFilterKeyword = ref('')
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+  isFullscreen.value = window.innerWidth < 900
+}
 
 // 菜单配置 - 使用 Material Icons
 const menuItems = [
@@ -154,6 +169,11 @@ const menuItems = [
 ]
 
 const currentMenuLabel = computed(() => menuItems.find(i => i.id === activeMenu.value)?.label || '设置')
+const filteredMenuItems = computed(() => {
+  const keyword = menuFilterKeyword.value.toLowerCase()
+  if (!keyword) { return menuItems }
+  return menuItems.filter(item => item.label.toLowerCase().includes(keyword))
+})
 
 // 数据源
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
@@ -183,6 +203,8 @@ const componentProps = computed(() => {
       return { modelValue: settings.value }
     case 'storage':
       return { modelValue: settings.value, cacheSize: cacheSize.value }
+    case 'theme':
+      return { modelValue: settings.value }
     default:
       return {}
   }
@@ -225,7 +247,7 @@ const calculateCacheSize = () => {
 // 业务逻辑处理
 const handleProfileUpdate = () => store.dispatch('user/getInfo')
 
-const handleSettingsUpdate = newSettings => {
+const handleSettingsUpdate = _newSettings => {
   // 实时更新 store
 }
 
@@ -257,6 +279,13 @@ const realHandleSettingsUpdate = newSettings => {
 // 重新绑定事件
 watch(activeMenu, () => {
   if (activeMenu.value === 'storage') { calculateCacheSize() }
+})
+
+watch(menuFilterKeyword, () => {
+  const exists = filteredMenuItems.value.some(item => item.id === activeMenu.value)
+  if (!exists && filteredMenuItems.value.length > 0) {
+    activeMenu.value = filteredMenuItems.value[0].id
+  }
 })
 
 const finalComponentEvents = computed(() => {
@@ -332,9 +361,12 @@ watch(() => settings.value.general?.theme, val => {
 }, { immediate: true })
 
 onMounted(() => {
-  window.addEventListener('resize', () => {
-    windowWidth.value = window.innerWidth
-  })
+  handleResize()
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
@@ -400,6 +432,41 @@ onMounted(() => {
     font-size: 16px;
     font-weight: 600;
     color: #111827;
+  }
+}
+
+.sidebar-search {
+  margin: 6px 10px 2px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  transition: border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: var(--dt-brand-color);
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
+    color: #9ca3af;
+  }
+
+  input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-size: 13px;
+    color: #111827;
+    outline: none;
+
+    &::placeholder {
+      color: #9ca3af;
+    }
   }
 }
 
@@ -566,6 +633,50 @@ onMounted(() => {
   background: #fafbfc;
 }
 
+@media (max-width: 1024px) {
+  :deep(.el-dialog) {
+    width: min(96vw, 900px) !important;
+    margin-top: 2vh !important;
+  }
+
+  :deep(.el-dialog__body),
+  .settings-layout {
+    height: min(82vh, 700px);
+  }
+
+  .settings-sidebar {
+    width: 210px;
+  }
+}
+
+@media (max-width: 900px) {
+  .settings-layout {
+    flex-direction: column;
+  }
+
+  .settings-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px;
+  }
+
+  .nav-item {
+    min-width: 140px;
+    height: 40px;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+}
+
 // 滚动条样式
 .scrollbar-custom {
   &::-webkit-scrollbar {
@@ -592,6 +703,15 @@ onMounted(() => {
   .settings-sidebar {
     background: var(--dt-bg-card-dark);
     border-right-color: var(--dt-border-dark);
+  }
+
+  .sidebar-search {
+    background: #1f2937;
+    border-color: #374151;
+
+    input {
+      color: #e5e7eb;
+    }
   }
 
   .sidebar-header,

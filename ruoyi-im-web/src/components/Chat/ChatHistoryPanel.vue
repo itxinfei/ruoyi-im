@@ -282,7 +282,7 @@ const loadHistoryMessages = async () => {
       const newMessages = response.data.records || response.data || []
       const messagesWithOwner = newMessages.map(msg => ({
         ...msg,
-        isOwn: msg.senderId === currentUserId.value
+        isOwn: String(msg.senderId || '') === String(currentUserId.value || '')
       }))
 
       if (currentPage.value === 1) {

@@ -76,13 +76,14 @@ const openLocation = () => {
   max-width: 320px;
   padding: 12px;
   background: var(--dt-brand-bg);
-  border: 1px solid var(--dt-brand-light);
-  border-radius: var(--dt-radius-md);
+  border: none;
+  border-radius: var(--dt-radius-lg, 12px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   transition: all var(--dt-transition-base);
 
   &:hover {
-    border-color: var(--dt-brand-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     background: var(--dt-brand-light);
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    width="720px"
+    width="920px"
     class="personal-profile-dialog"
     destroy-on-close
     append-to-body
@@ -417,18 +417,20 @@ watch(visible, val => {
 }
 
 .profile-container {
-  display: flex;
-  min-height: 480px;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 560px;
 }
 
 .profile-sidebar {
-  width: 240px;
+  width: 100%;
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   border-right: 1px solid #e5e7eb;
   padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
 }
 
 .avatar-section {
@@ -589,9 +591,9 @@ watch(visible, val => {
 
 .profile-main {
   flex: 1;
-  padding: 24px;
+  padding: 24px 26px;
   overflow-y: auto;
-  max-height: 480px;
+  max-height: 560px;
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -614,6 +616,11 @@ watch(visible, val => {
 
 .info-section {
   margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
 
   &:last-child {
     margin-bottom: 0;
@@ -727,8 +734,65 @@ watch(visible, val => {
 
 .dialog-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 10px;
+}
+
+@media (max-width: 980px) {
+  :deep(.el-dialog) {
+    width: min(96vw, 920px) !important;
+  }
+
+  .profile-container {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-sidebar {
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    align-items: flex-start;
+  }
+
+  .avatar-section {
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .user-tags {
+    justify-content: flex-start;
+  }
+
+  .quick-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .quick-btn {
+    width: auto;
+    min-width: 130px;
+    flex: 1;
+  }
+
+  .profile-main {
+    max-height: 56vh;
+  }
+}
+
+@media (max-width: 680px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .footer-btn {
+    width: 100%;
+  }
 }
 
 .footer-btn {
@@ -849,6 +913,11 @@ watch(visible, val => {
   .section-title {
     color: #d1d5db;
     border-bottom-color: #374151;
+  }
+
+  .info-section {
+    background: #1f2937;
+    border-color: #374151;
   }
 
   .info-item label {

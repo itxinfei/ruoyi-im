@@ -822,16 +822,17 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   &:hover::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.25);
   }
+}
 
-  .dark & {
-    background: var(--dt-bg-body-dark);
+// 暗色模式（统一使用 :global(.dark) 选择器）
+:global(.dark) .message-list {
+  background: var(--dt-bg-body-dark);
 
-    &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
 
-      &:hover {
-        background: rgba(255, 255, 255, 0.3);
-      }
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
     }
   }
 }
@@ -866,11 +867,6 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   transition: all var(--dt-transition-fast);
   z-index: 10;  // 在消息列表内部的层级
 
-  .dark & {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-
   &:hover {
     background: var(--dt-brand-bg);
     border-color: var(--dt-brand-color);
@@ -879,6 +875,12 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   .el-icon {
     font-size: 14px;
   }
+}
+
+// 暗色模式 - 滚动到底部按钮
+:global(.dark) .scroll-to-bottom {
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 }
 
 // ============================================================================
@@ -922,7 +924,7 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
     color: var(--dt-text-secondary);
     padding: 4px 12px; // 钉钉风格：更宽的间距
     font-size: 12px;
-    border-radius: 12px; // 钉钉风格：全圆角
+    border-radius: 16px; // 钉钉8.0风格：全圆角
     display: inline-block;
     font-weight: 500;
   }

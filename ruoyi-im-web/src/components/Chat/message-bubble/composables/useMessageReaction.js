@@ -61,7 +61,7 @@ export function useMessageReaction(props, emit) {
       const { addReaction, removeReaction } = await import('@/api/im/message')
 
       if (alreadyReacted) {
-        await removeReaction(props.message.id)
+        await removeReaction(props.message.id, emoji)
         // 更新本地状态
         if (props.message.reactions) {
           props.message.reactions = props.message.reactions.filter(
