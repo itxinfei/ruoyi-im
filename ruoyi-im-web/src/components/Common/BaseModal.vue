@@ -23,10 +23,10 @@
           <button
             v-if="showClose"
             class="modal-close"
-            @click="closeModal"
             :aria-label="closeAriaLabel"
+            @click="closeModal"
           >
-            <i class="el-icon-close"></i>
+            <i class="el-icon-close" />
           </button>
         </div>
 
@@ -63,7 +63,7 @@
                 <span
                   v-if="loading"
                   class="loading-spinner"
-                ></span>
+                />
                 {{ loading ? loadingText : confirmText }}
               </button>
             </div>
@@ -90,7 +90,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'default', // 'small', 'default', 'large', 'full'
-    validator: (value) => ['small', 'default', 'large', 'full'].includes(value)
+    validator: value => ['small', 'default', 'large', 'full'].includes(value)
   },
   showClose: {
     type: Boolean,

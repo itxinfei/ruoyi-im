@@ -7,6 +7,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.ruoyi.im.domain.ImFileAsset;
+import java.time.LocalDateTime;
+import java.util.Map;
+
 /**
  * 文件服务接口
  *
@@ -49,6 +54,12 @@ public interface ImFileService {
     void deleteFile(Long fileId, Long userId);
 
     /**
+     * 批量删除文件
+     * @param ids ID列表
+     */
+    void deleteFiles(List<Long> ids);
+
+    /**
      * 获取文件列表
      *
      * @param userId 用户ID
@@ -56,6 +67,13 @@ public interface ImFileService {
      * @return 文件列表
      */
     List<ImFileVO> getFileList(Long userId, String fileType);
+
+    /**
+     * 管理端获取文件列表（分页）
+     */
+    IPage<ImFileAsset> getAdminFileList(Integer pageNum, Integer pageSize, String fileName, 
+                                       String fileType, Long uploaderId, LocalDateTime startTime, 
+                                       LocalDateTime endTime);
 
     /**
      * 获取文件详情
@@ -71,4 +89,14 @@ public interface ImFileService {
      * @return 存储统计信息
      */
     ImFileStatisticsVO getStorageStatistics();
+
+    /**
+     * 按文件类型统计
+     */
+    List<Map<String, Object>> getFileStatisticsByType();
+
+    /**
+     * 按上传者统计
+     */
+    List<Map<String, Object>> getFileStatisticsByUploader();
 }

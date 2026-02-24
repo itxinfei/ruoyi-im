@@ -38,16 +38,20 @@
     >
       <!-- 引用/编辑预览逻辑保持在文本框上方 -->
       <div class="previews-container">
-        <ReplyPreview
+        <CommonPreview
           v-if="replyingMessage"
-          :key="replyingMessage.id"
+          type="reply"
           :sender-name="replyingMessage.senderName || '对方'"
           :content="replyPreviewContent"
+          :show-preview="true"
           @cancel="$emit('cancel-reply')"
         />
-        <EditPreview
+        <CommonPreview
           v-if="editingMessage"
+          type="edit"
+          title="正在编辑消息"
           :content="editingMessage.content"
+          :show-preview="true"
           @cancel="$emit('cancel-edit')"
         />
       </div>
@@ -67,13 +71,18 @@
         <div class="action-hints">
           <span class="hint-text">Enter 发送，Ctrl+Enter 换行</span>
         </div>
-        <button
-          class="send-btn-v2"
-          :disabled="!canSend"
-          @click="handleSend"
-        >
-          <span>发送</span>
-        </button>
+
+        <!-- 钉钉风格的发送按钮，包含表情按钮 -->
+        <div class="send-controls">
+          <button
+            class="send-btn-v2"
+            :disabled="!canSend"
+            @click="handleSend"
+          >
+            <span class="material-icons-outlined">send</span>
+            <span class="btn-text">发送</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -191,8 +200,7 @@ import ScheduledMessageDialog from './ScheduledMessageDialog.vue'
 import FileUploadPreviewDialog from './FileUploadPreviewDialog.vue'
 import ResizeHandle from './ResizeHandle.vue'
 import InputToolbar from './InputToolbar.vue'
-import ReplyPreview from './ReplyPreview.vue'
-import EditPreview from './EditPreview.vue'
+import CommonPreview from '@/components/Common/CommonPreview.vue'
 import VoicePreviewPanel from './VoicePreviewPanel.vue'
 
 // Props / Emits
@@ -1144,31 +1152,44 @@ onUnmounted(() => {
     }
   }
 
-  .send-btn-v2 {
-    height: 32px;
-    padding: 0 24px;
-    background: #165DFF;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  .send-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-    &:hover:not(:disabled) {
-      background: #3471FF;
-      box-shadow: 0 4px 12px rgba(22, 93, 255, 0.2);
-    }
+    .send-btn-v2 {
+      height: 32px;
+      padding: 0 16px;
+      background: #165DFF;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
 
-    &:active:not(:disabled) {
-      transform: scale(0.96);
-    }
+      .btn-text {
+        margin-left: 2px; // 调整间距
+      }
 
-    &:disabled {
-      background: #F2F3F5;
-      color: #C9CDD4;
-      cursor: not-allowed;
+      &:hover:not(:disabled) {
+        background: #3471FF;
+        box-shadow: 0 4px 12px rgba(22, 93, 255, 0.2);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.96);
+      }
+
+      &:disabled {
+        background: #F2F3F5;
+        color: #C9CDD4;
+        cursor: not-allowed;
+      }
     }
   }
 }
@@ -1178,7 +1199,6 @@ onUnmounted(() => {
   .real-textarea { color: #F2F3F5; }
   .send-btn-v2:disabled { background: #2E3238; color: #4E5969; }
 }
-</style>
 
 .reply-preview-wrapper {
   margin: 0 0 8px;
@@ -1273,7 +1293,7 @@ onUnmounted(() => {
   &.voice-btn {
     width: 32px;
     color: var(--dt-text-secondary);
-    
+
     &:hover {
       background: var(--dt-bg-subtle-hover);
       color: var(--dt-brand-color);
@@ -1315,7 +1335,7 @@ onUnmounted(() => {
   margin: 0 16px 8px;
   position: relative;
   max-width: 400px;
-  
+
   .link-preview-close {
     position: absolute;
     top: -8px;
@@ -1332,7 +1352,7 @@ onUnmounted(() => {
     cursor: pointer;
     font-size: 12px;
     z-index: 5;
-    
+
     &:hover {
       background: #f56c6c;
     }

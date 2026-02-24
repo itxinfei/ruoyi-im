@@ -201,61 +201,55 @@ function handleRetry() {
 .message-status {
   display: flex;
   align-items: center;
-  margin-left: 4px;
-  margin-bottom: 2px;
-  font-size: 12px;
+  margin-left: 6px;
   align-self: flex-end;
   pointer-events: auto;
-  min-width: 12px;
-  min-height: 12px;
+  min-width: 14px;
+  height: 14px;
+  position: relative;
+  bottom: 2px; // 对齐气泡底部
 }
 
-// 发送中：CSS Loader
+// 发送中：更精致的 Loader
 .css-loader {
   width: 12px;
   height: 12px;
-  border: 1.5px solid var(--dt-divider-tertiary);
-  border-top-color: var(--dt-brand-color);
+  border: 1.5px solid #F2F3F5;
+  border-top-color: #165DFF;
   border-radius: 50%;
   animation: rotate 0.8s linear infinite;
 }
 
-// 私聊未读：蓝色小点
+// 私聊未读：精致的蓝色小圆点
 .status-unread-dot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--dt-brand-color);
+  width: 6px;
+  height: 6px;
+  background-color: #165DFF;
   border-radius: 50%;
-  margin: 2px;
+  box-shadow: 0 0 4px rgba(22, 93, 255, 0.3);
 }
 
-// 已读文本样式
+// 已读文本：极致灰调
 .status-text-read {
   font-size: 11px;
-  color: var(--dt-text-quaternary);
-  user-select: none;
-  white-space: nowrap;
+  color: #86909C; // 钉钉标准四级文本色
+  letter-spacing: -0.2px;
 }
 
-// 群聊未读：蓝色遮罩圆圈
+// 群聊未读：数字圆点
 .status-group-unread {
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  background-color: var(--dt-brand-color);
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  background-color: #165DFF;
   color: #fff;
-  font-size: 10px;
-  border-radius: 9px;
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 500;
   cursor: pointer;
-  transition: transform var(--dt-transition-base);
-
-  &:hover {
-    transform: scale(1.1);
-  }
 }
 
 // 发送失败样式

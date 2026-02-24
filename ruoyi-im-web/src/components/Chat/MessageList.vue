@@ -26,18 +26,11 @@
       暂无消息
     </div>
 
-    <!-- 消息内容 - 虚拟滚动优化 -->
+    <!-- 消息内容 -->
     <template v-else>
-      <!-- 顶部占位符：维持滚动高度 -->
+      <!-- 可见消息列表 (直接渲染，依靠原生滚动性能) -->
       <div
-        v-if="isLazyLoadingEnabled"
-        class="virtual-spacer-top"
-        :style="{ height: topSpacerHeight + 'px' }"
-      />
-
-      <!-- 可见消息列表 -->
-      <div
-        v-for="msg in visibleMessagesComputed"
+        v-for="msg in messagesWithDividers"
         :key="msg.id || msg.timeText"
         :data-id="msg.id"
         class="message-wrapper"
@@ -60,7 +53,6 @@
           :multi-select-mode="multiSelectMode"
           :session-type="sessionType"
           :group-position="msg.groupPosition || 'single'"
-          :hide-footer="msg.groupPosition === 'first' || msg.groupPosition === 'middle'"
           @reply="$emit('reply', $event)"
           @reaction="handleReaction"
           @command="handleCommand"
@@ -153,8 +145,12 @@
             <MessageStatusIndicator
               v-else-if="sessionType === 'PRIVATE'"
               :status="msg.status || (msg.isRead ? 'read' : 'delivered')"
+              :message="msg"
+              :session-type="sessionType"
               :message-id="msg.id"
+              :show="true"
               @retry="$emit('retry', msg)"
+              @show-read-info="$emit('show-read-info', $event)"
             />
             <!-- 无已读数据时显示未读 -->
             <span
@@ -242,26 +238,6 @@ const isUnmounted = ref(false) // 标记组件是否已卸载，防止卸载后�
 // 组合式函数：虚拟滚动、已读用户、滚动处理
 // ============================================================================
 
-// 虚拟滚动（传递获取消息的函数，避免循环依赖）
-const {
-  isLargeGroup,
-  isLazyLoadingEnabled,
-  topSpacerHeight,
-  bottomSpacerHeight,
-  visibleMessages: visibleMessagesComputed,
-  updateScrollPosition,
-  scrollTop: scrollY,
-  clientHeight: containerHeight
-} = useMessageVirtualScroll(props, () => messagesWithDividers.value)
-
-// 已读用户管理
-const {
-  readUsersMap,
-  loadingReadUsers,
-  fetchReadUsers,
-  prefetchReadUsers
-} = useMessageReadUsers(computed(() => props.sessionId))
-
 // 滚动处理
 const {
   showScrollToBottom,
@@ -271,12 +247,7 @@ const {
   maintainScrollPosition
 } = useMessageScroll(listRef, emit, isUnmounted)
 
-// 使用本地增强版 scrollToMsg，但调用 composable 的基础功能
 const handleScroll = event => {
-  // 更新虚拟滚动的位置信息
-  if (listRef.value) {
-    updateScrollPosition(listRef.value)
-  }
   // 调用 composable 的滚动处理
   handleScrollFromComposable(event)
 }
@@ -461,58 +432,43 @@ const canMergeWith = (currentMsg, prevMsg) => {
 // 计算带时间分割线和合并标记的消息列表
 const messagesWithDividers = computed(() => {
   const res = []
-  // 保存已处理的最后一条真实消息（用于判断合并）
-  let lastRealMessage = null
+  const msgs = props.messages
+  if (!msgs.length) {return []}
 
-  // 先处理所有消息，计算出每条消息的合并状态
-  const processedMessages = props.messages.map((msg, index) => {
-    // 判断是否需要与上一条消息合并
-    let isMerged = false
-    if (lastRealMessage && canMergeWith(msg, lastRealMessage)) {
-      isMerged = true
-    }
+  for (let i = 0; i < msgs.length; i++) {
+    const current = msgs[i]
+    const prev = msgs[i - 1]
+    const next = msgs[i + 1]
 
-    // 更新最后一条真实消息
-    lastRealMessage = msg
-
-    return { ...msg, isMerged }
-  })
-
-  // 第二次遍历：计算 groupPosition
-  processedMessages.forEach((msg, index) => {
-    // 添加时间分割线
-    if (index === 0 || shouldAddTimeDivider(msg, props.messages[index - 1])) {
+    // 1. 判定是否需要时间分割线
+    if (i === 0 || shouldAddTimeDivider(current, prev)) {
       res.push({
-        id: `time-${msg.id}`,
+        id: `time-${current.id}`,
         isTimeDivider: true,
-        timeText: formatTimeDivider(msg.timestamp)
+        timeText: formatTimeDivider(current.timestamp)
       })
     }
 
-    // 计算 groupPosition
-    const prevMsg = processedMessages[index - 1]
-    const nextMsg = processedMessages[index + 1]
+    // 2. 判定群组位置 (钉钉逻辑)
+    // 判定规则：同一人、短时间内发送的连续消息
+    const isSameSenderAsPrev = prev && prev.senderId === current.senderId && prev.isOwn === current.isOwn && !shouldAddTimeDivider(current, prev)
+    const isSameSenderAsNext = next && next.senderId === current.senderId && next.isOwn === current.isOwn && !shouldAddTimeDivider(next, current)
 
     let groupPosition = 'single'
-
-    if (!msg.isMerged) {
-      // 不与上一条合并，检查是否与下一条合并
-      if (nextMsg && nextMsg.isMerged && canMergeWith(nextMsg, msg)) {
-        groupPosition = 'first'
-      } else {
-        groupPosition = 'single'
-      }
-    } else {
-      // 与上一条合并，检查是否与下一条合并
-      if (nextMsg && nextMsg.isMerged && canMergeWith(nextMsg, msg)) {
-        groupPosition = 'middle'
-      } else {
-        groupPosition = 'last'
-      }
+    if (isSameSenderAsPrev && isSameSenderAsNext) {
+      groupPosition = 'middle'
+    } else if (isSameSenderAsPrev && !isSameSenderAsNext) {
+      groupPosition = 'last'
+    } else if (!isSameSenderAsPrev && isSameSenderAsNext) {
+      groupPosition = 'first'
     }
 
-    res.push({ ...msg, isMerged: msg.isMerged || false, groupPosition })
-  })
+    res.push({
+      ...current,
+      groupPosition,
+      isMerged: isSameSenderAsPrev // 如果跟上一条是同一个人，标记为已合并
+    })
+  }
 
   return res
 })
@@ -820,46 +776,32 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px 24px; // 钉钉标准：更大的左右内边距
-  padding-bottom: 100px; // 留出足够的底部呼吸空间
-  background-color: #F5F6F7; // 钉钉标准：更柔和的背景灰
+  padding: 24px 32px; 
+  padding-bottom: 120px;
+  background-color: #F5F6F7; 
   position: relative;
   min-height: 0;
   width: 100%;
   box-sizing: border-box;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+  will-change: scroll-position;
 
-  // 极简滚动条设计 - 对齐钉钉/野火
   &::-webkit-scrollbar {
-    width: 4px; // 极细
+    width: 4px;
   }
-
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-
   &::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.05);
     border-radius: 2px;
-    transition: background 0.3s;
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  &:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
+    &:hover { background: rgba(0, 0, 0, 0.15); }
   }
 }
 
-// 消息包装器间距控制
 .message-wrapper {
-  margin-bottom: 16px; // 标准间距
-  
-  &:has(.group-middle), &:has(.group-last) {
-    margin-top: -12px; // 合并消息向上紧缩
-  }
+  margin-bottom: 20px;
+  width: 100%;
 }
 
 // “回到底部”按钮 - 毛玻璃质感

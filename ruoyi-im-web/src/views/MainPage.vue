@@ -75,7 +75,7 @@
       <HelpFeedbackDialog v-model="showHelp" />
       <UserProfileDialog
         v-model="showUserDetail"
-        :session="detailSession"
+        :user-id="detailSession?.targetUserId"
         layout-mode="compact"
         @send-message="handleSelectSession"
       />
@@ -154,6 +154,7 @@ const TodoPanel = defineAsyncComponent(() => import('./TodoPanel.vue'))
 const ApprovalPanel = defineAsyncComponent(() => import('./ApprovalPanel.vue'))
 const MailPanel = defineAsyncComponent(() => import('./MailPanel.vue'))
 const AppCenter = defineAsyncComponent(() => import('./AppCenter.vue'))
+const AssistantPanel = defineAsyncComponent(() => import('./AssistantPanel.vue'))
 
 const UserProfileDialog = defineAsyncComponent(() => import('@/components/Contacts/UserProfileDialog.vue'))
 const PersonalProfileDialog = defineAsyncComponent(() => import('@/components/Common/PersonalProfileDialog.vue'))

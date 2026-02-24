@@ -59,31 +59,33 @@
         </button>
       </el-tooltip>
 
-      <!-- 语音/视频通话（仅单聊） -->
+      <!-- 钉钉风格通话按钮布局 -->
       <template v-if="isPrivateChat">
-        <el-tooltip
-          content="语音通话"
-          placement="bottom"
-        >
-          <button
-            class="action-btn"
-            @click="$emit('voice-call')"
+        <div class="call-buttons">
+          <el-tooltip
+            content="语音通话"
+            placement="bottom"
           >
-            <span class="material-icons-outlined">call</span>
-          </button>
-        </el-tooltip>
+            <button
+              class="action-btn call-btn voice-btn"
+              @click="$emit('voice-call')"
+            >
+              <span class="material-icons-outlined">call</span>
+            </button>
+          </el-tooltip>
 
-        <el-tooltip
-          content="视频通话"
-          placement="bottom"
-        >
-          <button
-            class="action-btn"
-            @click="$emit('video-call')"
+          <el-tooltip
+            content="视频通话"
+            placement="bottom"
           >
-            <span class="material-icons-outlined">videocam</span>
-          </button>
-        </el-tooltip>
+            <button
+              class="action-btn call-btn video-btn"
+              @click="$emit('video-call')"
+            >
+              <span class="material-icons-outlined">videocam</span>
+            </button>
+          </el-tooltip>
+        </div>
       </template>
 
       <div class="header-divider" />
@@ -98,7 +100,7 @@
           :class="{ active: showConversationInfo }"
           @click="toggleConversationInfo"
         >
-          <span class="material-icons-outlined">more_horiz</span>
+          <span class="material-icons-outlined">more_vert</span>
         </button>
       </el-tooltip>
     </div>
@@ -284,7 +286,7 @@ const toggleConversationInfo = () => {
   background: #00B42A;
   border: 2px solid #fff;
   border-radius: 50%;
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -338,6 +340,28 @@ const toggleConversationInfo = () => {
   &:hover {
     background: #F2F3F5;
     color: #165DFF;
+  }
+}
+
+.call-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.call-btn {
+  &:hover {
+    background: #F2F3F5;
+    color: #165DFF;
+  }
+
+  &.voice-btn:hover {
+    background: #FFF2E8;
+    color: #FF7D00;
+  }
+
+  &.video-btn:hover {
+    background: #E8F7FF;
+    color: #00B4FF;
   }
 }
 

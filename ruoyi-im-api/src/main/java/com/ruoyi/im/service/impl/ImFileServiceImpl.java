@@ -26,6 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.Map;
+
 /**
  * 文件服务实现
  *
@@ -43,6 +49,64 @@ public class ImFileServiceImpl implements ImFileService {
                              FileUploadConfig fileUploadConfig) {
         this.imFileAssetMapper = imFileAssetMapper;
         this.fileUploadConfig = fileUploadConfig;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteFiles(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        for (Long id : ids) {
+            deleteFile(id, null);
+        }
+    }
+
+    @Override
+    public IPage<ImFileAsset> getAdminFileList(Integer pageNum, Integer pageSize, String fileName, 
+                                              String fileType, Long uploaderId, LocalDateTime startTime, 
+                                              LocalDateTime endTime) {
+        LambdaQueryWrapper<ImFileAsset> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ImFileAsset::getStatus, "ACTIVE");
+
+        if (fileName != null && !fileName.isEmpty()) {
+            wrapper.like(ImFileAsset::getFileName, fileName);
+        }
+        if (fileType != null && !fileType.isEmpty()) {
+            wrapper.eq(ImFileAsset::getFileType, fileType);
+        }
+        if (uploaderId != null) {
+            wrapper.eq(ImFileAsset::getUploaderId, uploaderId);
+        }
+        if (startTime != null) {
+            wrapper.ge(ImFileAsset::getCreateTime, startTime);
+        }
+        if (endTime != null) {
+            wrapper.le(ImFileAsset::getCreateTime, endTime);
+        }
+
+        wrapper.orderByDesc(ImFileAsset::getCreateTime);
+        return imFileAssetMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
+    }
+
+    @Override
+    public List<Map<String, Object>> getFileStatisticsByType() {
+        QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
+        wrapper.select("file_type", "COUNT(*) as count", "SUM(file_size) as totalSize");
+        wrapper.eq("status", "ACTIVE");
+        wrapper.groupBy("file_type");
+        return imFileAssetMapper.selectMaps(wrapper);
+    }
+
+    @Override
+    public List<Map<String, Object>> getFileStatisticsByUploader() {
+        QueryWrapper<ImFileAsset> wrapper = new QueryWrapper<>();
+        wrapper.select("uploader_id", "COUNT(*) as count", "SUM(file_size) as totalSize");
+        wrapper.eq("status", "ACTIVE");
+        wrapper.groupBy("uploader_id");
+        wrapper.orderByDesc("COUNT(*)");
+        wrapper.last("LIMIT 10");
+        return imFileAssetMapper.selectMaps(wrapper);
     }
 
     @Override

@@ -206,7 +206,7 @@ export default {
     hasReceivedMessage: state => messageId => {
       // 检查是否存在且未过期
       const item = state.receivedMessageIds.get(messageId)
-      if (!item) return false
+      if (!item) {return false}
       // 检查是否过期
       if (Date.now() - item.timestamp > state.receivedIdsExpireTime) {
         state.receivedMessageIds.delete(messageId)
@@ -232,16 +232,26 @@ export default {
 
     // 添加单条消息
     ADD_MESSAGE(state, { sessionId, message }) {
+      if (!sessionId) {
+        warn('MessageStore', 'ADD_MESSAGE 缺少 sessionId，消息被丢弃', message)
+        return
+      }
+      
       if (!state.messages[sessionId]) {
         state.messages[sessionId] = []
       }
-      // 避免重复添加 (通过消息ID判断)
+      
+      // 严格校验消息是否属于该会话
+      const msgSessionId = message.conversationId || message.sessionId
+      if (msgSessionId && String(msgSessionId) !== String(sessionId)) {
+        warn('MessageStore', `检测到跨会话消息注入！试图将 ${msgSessionId} 的消息推入 ${sessionId}`)
+        return
+      }
+
       const index = state.messages[sessionId].findIndex(m => m.id === message.id)
       if (index === -1) {
-        // 创建新数组触发响应式更新
         state.messages[sessionId] = [...state.messages[sessionId], message]
       } else {
-        // 如果已存在，则更新 (比如编辑后) - 创建新数组触发响应式更新
         state.messages[sessionId] = [
           ...state.messages[sessionId].slice(0, index),
           { ...state.messages[sessionId][index], ...message },
@@ -481,7 +491,7 @@ export default {
         const deleteCount = Math.floor(state.maxReceivedIdsSize * 0.1)
         let deleted = 0
         for (const key of state.receivedMessageIds.keys()) {
-          if (deleted >= deleteCount) break
+          if (deleted >= deleteCount) {break}
           state.receivedMessageIds.delete(key)
           deleted++
         }
@@ -504,7 +514,7 @@ export default {
         const deleteCount = Math.floor(state.maxReceivedIdsSize * 0.1)
         let deleted = 0
         for (const key of state.receivedMessageIds.keys()) {
-          if (deleted >= deleteCount) break
+          if (deleted >= deleteCount) {break}
           state.receivedMessageIds.delete(key)
           deleted++
         }
@@ -880,58 +890,42 @@ export default {
       }
     },
 
-    // 接收消息（WebSocket 推送）- 增强版：支持消息去重
+    // 接收消息（WebSocket 推送）
     receiveMessage({ commit, dispatch, rootState, state }, message) {
       const sessionId = message.conversationId || message.sessionId
-      if (!sessionId) {return}
+      if (!sessionId) { return }
 
-      // ========== 消息去重：检查消息是否已接收 ==========
+      const currentSessionId = rootState.im?.session?.currentSession?.id
+
+      // 1. 消息去重
       const messageId = message.id || message.messageId || message.clientMsgId
       if (messageId && state.receivedMessageIds.has(messageId)) {
-        info('MessageStore', `[消息去重] 跳过重复消息: ${messageId}`)
         return
       }
 
-      // 规范化消息类型为大写（兼容后端可能返回的小写类型）
-      if (message.type) {
-        message.type = message.type.toUpperCase()
-      }
-      if (message.type === 'RECALL' || message.status === 'recalled' || message.isRevoked) {
-        const recallId = message.messageId || message.recallMessageId || message.recalledMessageId
-        if (recallId) {
-          dispatch('applyRecallUpdate', { sessionId, messageId: recallId })
-        }
-        return
-      }
-
-      // 规范化发送者信息
-      message.senderName = message.senderName || message.senderNickname || message.nickname || message.userName || '未知用户'
-      message.senderAvatar = message.senderAvatar || message.avatar || ''
-
-      // 设置 isOwn 标记（判断是否为当前用户发送）
+      // 2. 规范化处理
+      if (message.type) { message.type = message.type.toUpperCase() }
+      message.senderName = message.senderName || message.senderNickname || message.nickname || '未知用户'
+      message.senderAvatar = message.senderAvatar || ''
+      
       const currentUser = rootState.im?.currentUser
       if (message.isOwn === undefined) {
         message.isOwn = isOwnMessage(message, currentUser?.id)
       }
 
-      // 添加消息 ID 到去重集合
-      if (messageId) {
-        commit('ADD_RECEIVED_MESSAGE_ID', messageId)
+      // 3. 分发逻辑：
+      // 如果消息属于当前正在查看的会话，则推入列表
+      if (String(sessionId) === String(currentSessionId)) {
+        commit('ADD_MESSAGE', { sessionId, message })
+        // 自动发送接收 ACK
+        if (message.id && !message.isOwn) {
+          imWebSocket.sendAck(message.id, 'receive', rootState.im?.deviceId)
+        }
       }
 
-      // 添加消息到列表
-      commit('ADD_MESSAGE', { sessionId, message })
-
-      // 自动发送接收 ACK（如果是他人发送的消息）
-      if (message.id && message.senderId !== currentUser?.id) {
-        imWebSocket.sendAck(message.id, 'receive', rootState.im?.deviceId)
-      }
-
-      // 如果不是当前正在查看的会话，则增加未读数
-      const isCurrentSession = rootState.im?.session?.currentSession?.id === sessionId
-      const session = rootState.im?.session?.sessions?.find(s => s.id === sessionId)
-
-      // 检查是否有 @ 我
+      // 4. 无论是否为当前会话，都更新会话列表（未读数、最后消息预览）
+      const isCurrentSession = String(sessionId) === String(currentSessionId)
+      const session = rootState.im?.session?.sessions?.find(s => String(s.id) === String(sessionId))
       const hasMention = message.atUserIds && currentUser?.id && message.atUserIds.includes(currentUser.id)
 
       commit('im/session/UPDATE_SESSION', {
@@ -943,6 +937,8 @@ export default {
         unreadCount: isCurrentSession ? 0 : ((session?.unreadCount || 0) + 1),
         hasMention: hasMention || (isCurrentSession ? false : session?.hasMention)
       }, { root: true })
+
+      if (messageId) { commit('ADD_RECEIVED_MESSAGE_ID', messageId) }
     },
 
     // 设置回复消息

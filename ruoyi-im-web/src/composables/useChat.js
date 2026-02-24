@@ -269,7 +269,7 @@ export function useChat(sessionId, currentUser) {
   /**
    * 处理 WebSocket 推送的编辑更新（用于同步其他端的编辑）
    */
-  const handleEditUpdate = (data) => {
+  const handleEditUpdate = data => {
     if (!data?.messageId || !data?.content) {return}
     store.commit('im/message/UPDATE_MESSAGE', {
       sessionId: data.conversationId || currentSessionId.value,

@@ -1,8 +1,11 @@
 <template>
-  <div class="common-search" :class="{ focused: isFocused, empty: !query }">
+  <div
+    class="common-search"
+    :class="{ focused: isFocused, empty: !query }"
+  >
     <div class="search-input-container">
       <div class="search-icon">
-        <i class="el-icon-search"></i>
+        <i class="el-icon-search" />
       </div>
       <input
         ref="inputRef"
@@ -14,13 +17,13 @@
         @blur="handleBlur"
         @keyup.enter="handleSearch"
         @keyup.esc="handleClear"
-      />
+      >
       <div
         v-if="query"
         class="clear-icon"
         @click="handleClear"
       >
-        <i class="el-icon-circle-close"></i>
+        <i class="el-icon-circle-close" />
       </div>
     </div>
 
@@ -68,7 +71,7 @@
       >
         <span
           v-html="highlightMatch(suggestion.text, query)"
-        ></span>
+        />
         <span
           v-if="suggestion.type"
           class="suggestion-type"
@@ -130,7 +133,7 @@ const emit = defineEmits(['update:modelValue', 'search', 'clear', 'select-sugges
 
 const query = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  set: value => emit('update:modelValue', value)
 })
 
 const inputRef = ref(null)
@@ -140,7 +143,7 @@ const highlightedIndex = ref(-1)
 let debounceTimer = null
 
 // 监听筛选器变化
-watch(selectedFilter, (newVal) => {
+watch(selectedFilter, newVal => {
   emit('filter-change', newVal)
 })
 
@@ -171,7 +174,7 @@ const handleClear = () => {
   inputRef.value?.focus()
 }
 
-const selectSuggestion = (suggestion) => {
+const selectSuggestion = suggestion => {
   query.value = suggestion.text
   emit('select-suggestion', suggestion)
   emit('search', { query: query.value, filter: selectedFilter.value })
@@ -179,14 +182,14 @@ const selectSuggestion = (suggestion) => {
 }
 
 const highlightMatch = (text, searchTerm) => {
-  if (!searchTerm) return text
+  if (!searchTerm) {return text}
   const regex = new RegExp(`(${searchTerm})`, 'gi')
   return text.replace(regex, '<strong>$1</strong>')
 }
 
 // 键盘导航
-const handleKeyDown = (e) => {
-  if (!props.showSuggestions || props.suggestions.length === 0) return
+const handleKeyDown = e => {
+  if (!props.showSuggestions || props.suggestions.length === 0) {return}
 
   switch (e.key) {
     case 'ArrowDown':

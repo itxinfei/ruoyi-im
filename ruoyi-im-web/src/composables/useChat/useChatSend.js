@@ -75,12 +75,22 @@ export function useChatSend(sessionId, currentUser) {
     store.commit('im/message/SET_REPLYING_MESSAGE', null)
 
     try {
-      const msg = await store.dispatch('im/message/sendMessage', {
+      // 设置超时机制以防止长时间挂起
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('消息发送超时，请检查网络连接'))
+        }, 30000) // 30秒超时
+      });
+
+      // 使用Promise.race来处理可能挂起的情况
+      const msgPromise = store.dispatch('im/message/sendMessage', {
         sessionId: sid,
         type: 'TEXT',
         content,
         replyToMessageId: options.replyToMessageId || null
-      })
+      });
+
+      const msg = await Promise.race([msgPromise, timeoutPromise]);
 
       // 替换临时消息为真实消息
       const realMsg = transformMsg(msg)
@@ -100,7 +110,14 @@ export function useChatSend(sessionId, currentUser) {
       console.error('发送失败', error)
       ElMessage.error(error.message || '发送失败，请检查网络连接')
     } finally {
-      sending.value = false
+      // 确保发送状态始终被重置，即使是异常情况
+      setTimeout(() => {
+        if (sending.value) {
+          console.warn('发送状态异常：检测到发送状态未正常重置，强制重置');
+          sending.value = false;
+        }
+      }, 500); // 500ms后再次检查并强制重置
+      sending.value = false;
     }
   }
 
@@ -142,14 +159,25 @@ export function useChatSend(sessionId, currentUser) {
         throw new Error(uploadRes.msg || '上传失败')
       }
 
-      // 4. 构建消息内容并发送
+      // 4. 构建消息内容并发送（带超时机制）
       const messageContent = buildContent(uploadRes.data)
-      const msg = await store.dispatch('im/message/sendMessage', {
+
+      // 设置超时机制以防止长时间挂起
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('消息发送超时，请检查网络连接'))
+        }, 30000) // 30秒超时
+      });
+
+      // 使用Promise.race来处理可能挂起的情况
+      const msgPromise = store.dispatch('im/message/sendMessage', {
         sessionId: uploadSessionId,
         type,
         content: typeof messageContent === 'string' ? messageContent : JSON.stringify(messageContent),
         replyToMessageId: options.replyToMessageId || null
       })
+
+      const msg = await Promise.race([msgPromise, timeoutPromise])
 
       // 5. 替换临时消息
       const realMsg = transformMsg(msg)
@@ -318,12 +346,22 @@ export function useChatSend(sessionId, currentUser) {
     store.commit('im/message/ADD_MESSAGE', { sessionId: sid, message: tempMsg })
 
     try {
-      const msg = await store.dispatch('im/message/sendMessage', {
+      // 设置超时机制以防止长时间挂起
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('位置发送超时，请检查网络连接'))
+        }, 30000) // 30秒超时
+      });
+
+      // 使用Promise.race来处理可能挂起的情况
+      const msgPromise = store.dispatch('im/message/sendMessage', {
         sessionId: sid,
         type: 'LOCATION',
         content: JSON.stringify({ latitude, longitude, address: address || '未知位置' }),
         replyToMessageId: options.replyToMessageId || null
       })
+
+      const msg = await Promise.race([msgPromise, timeoutPromise])
 
       const realMsg = transformMsg(msg)
       store.commit('im/message/REPLACE_TEMP_MESSAGE', {
@@ -376,7 +414,17 @@ export function useChatSend(sessionId, currentUser) {
     })
 
     try {
-      const res = await retryMessageApi(clientMsgId)
+      // 设置超时机制以防止长时间挂起
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('重试超时，请稍后重试'))
+        }, 30000) // 30秒超时
+      });
+
+      // 使用Promise.race来处理可能挂起的情况
+      const retryPromise = retryMessageApi(clientMsgId)
+
+      const res = await Promise.race([retryPromise, timeoutPromise])
 
       if (res.code === 200) {
         ElMessage.success({ message: '正在重试发送...', duration: 2000 })

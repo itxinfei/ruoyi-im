@@ -6,7 +6,7 @@
       v-if="isTextMessage"
       class="text-content"
       v-html="formattedText"
-    ></div>
+    />
 
     <!-- 图片消息 -->
     <div
@@ -16,9 +16,9 @@
       <img
         :src="message.content"
         :alt="message.alt || '图片'"
-        @click="handleImageClick"
         class="message-image"
-      />
+        @click="handleImageClick"
+      >
     </div>
 
     <!-- 文件消息 -->
@@ -27,11 +27,15 @@
       class="file-content"
     >
       <div class="file-icon">
-        <i class="el-icon-document"></i>
+        <i class="el-icon-document" />
       </div>
       <div class="file-info">
-        <div class="file-name">{{ message.fileName }}</div>
-        <div class="file-size">{{ formatFileSize(message.fileSize) }}</div>
+        <div class="file-name">
+          {{ message.fileName }}
+        </div>
+        <div class="file-size">
+          {{ formatFileSize(message.fileSize) }}
+        </div>
       </div>
       <button
         class="file-download-btn"
@@ -51,14 +55,20 @@
           class="play-btn"
           @click="togglePlayback"
         >
-          <i class="el-icon-video-play" v-if="!isPlaying"></i>
-          <i class="el-icon-video-pause" v-else></i>
+          <i
+            v-if="!isPlaying"
+            class="el-icon-video-play"
+          />
+          <i
+            v-else
+            class="el-icon-video-pause"
+          />
         </button>
         <div class="voice-progress">
           <div
             class="progress-bar"
             :style="{ width: playbackProgress + '%' }"
-          ></div>
+          />
         </div>
         <span class="voice-duration">{{ formatDuration(message.duration) }}</span>
       </div>
@@ -77,7 +87,7 @@
       v-else-if="isRecalledMessage"
       class="recalled-content"
     >
-      <i class="el-icon-delete"></i>
+      <i class="el-icon-delete" />
       <span>此消息已被撤回</span>
     </div>
 
@@ -86,14 +96,14 @@
       v-else
       class="unknown-content"
     >
-      <i class="el-icon-question"></i>
+      <i class="el-icon-question" />
       <span>不支持的消息类型</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   message: {
@@ -129,9 +139,9 @@ const isRecalledMessage = computed(() => {
 
 // 格式化文本内容（处理换行和链接）
 const formattedText = computed(() => {
-  if (!props.message.content) return ''
+  if (!props.message.content) {return ''}
   // 简单的换行处理
-  let content = props.message.content.replace(/\n/g, '<br/>')
+  const content = props.message.content.replace(/\n/g, '<br/>')
   // 可以扩展链接识别和点击事件
   return content
 })
@@ -141,7 +151,7 @@ const isPlaying = ref(false)
 const playbackProgress = ref(0)
 
 // 方法
-const handleImageClick = (event) => {
+const handleImageClick = event => {
   // 触发查看大图事件
   emit('preview-image', props.message.content)
 }
@@ -160,15 +170,15 @@ const togglePlayback = () => {
   }
 }
 
-const formatFileSize = (bytes) => {
-  if (bytes === undefined || bytes === null) return ''
-  if (bytes < 1024) return bytes + ' B'
-  else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB'
-  else return (bytes / 1048576).toFixed(1) + ' MB'
+const formatFileSize = bytes => {
+  if (bytes === undefined || bytes === null) {return ''}
+  if (bytes < 1024) {return bytes + ' B'}
+  else if (bytes < 1048576) {return (bytes / 1024).toFixed(1) + ' KB'}
+  else {return (bytes / 1048576).toFixed(1) + ' MB'}
 }
 
-const formatDuration = (milliseconds) => {
-  if (!milliseconds) return '0:00'
+const formatDuration = milliseconds => {
+  if (!milliseconds) {return '0:00'}
   const seconds = Math.floor(milliseconds / 1000)
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60

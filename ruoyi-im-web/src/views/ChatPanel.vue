@@ -224,6 +224,15 @@
         @cancel="handleClearSelection"
       />
     </template>
+
+    <!-- 钉钉风格用户详情弹窗 -->
+    <DingtalkUserDetailDialog
+      v-model:visible="showUserDetail"
+      :user-id="detailUserId"
+      @send-message="handleSelectSessionForUser"
+      @voice-call="handleVoiceCallForUser"
+      @video-call="handleVideoCallForUser"
+    />
   </div>
 
   <!-- 图片预览器 -->
@@ -284,6 +293,7 @@ import ChatFilesPanel from '@/components/Chat/ChatFilesPanel.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'
 import CombineDetailDialog from '@/components/Chat/CombineDetailDialog.vue'
 import GroupFilePanel from '@/components/Chat/GroupFilePanel.vue'
+import DingtalkUserDetailDialog from '@/components/Chat/DingtalkUserDetailDialog.vue'
 import { ARIA_LABELS } from '@/config/a11y'
 import ExportChatDialog from '@/components/Chat/ExportChatDialog.vue'
 import MultiSelectToolbar from '@/components/Chat/MultiSelectToolbar.vue'
@@ -362,6 +372,8 @@ const imageInputRef = ref(null)
 const messageInputRef = ref(null)
 const showPinnedPanel = ref(false)
 const isMultiSelectModeActive = ref(false)
+const showUserDetail = ref(false)
+const detailUserId = ref(null)
 
 const emit = defineEmits(['show-user'])
 
@@ -470,7 +482,11 @@ const handleToggleDetail = () => {
 }
 
 const handleToggleSidebar = tab => { debug('ChatPanel', 'toggle-sidebar:', tab) }
-const handleShowUser = userId => emit('show-user', userId)
+const handleShowUser = userId => {
+  if (!userId) { return }
+  detailUserId.value = userId
+  showUserDetail.value = true
+}
 const handleSearchMessages = () => { showChatSearch.value = true }
 const handleShowHistory = () => { showChatHistory.value = true }
 
@@ -845,11 +861,15 @@ onMounted(() => {
 onUnmounted(() => {
   isUnmounted.value = true
   cleanupTyping()
+  
+  // 关键修复：彻底移除全局监听器，防止内存泄漏
   if (_handleKeydown) {
     window.removeEventListener('keydown', _handleKeydown)
+    _handleKeydown = null
   }
   if (_handleClickOutside) {
     document.removeEventListener('click', _handleClickOutside)
+    _handleClickOutside = null
   }
 })
 </script>

@@ -576,43 +576,44 @@ onUnmounted(() => {
   right: 24px;
 }
 
-// 缩放控制
+// 缩放控制 - 毛玻璃风格
 .zoom-controls {
   position: absolute;
-  bottom: 80px;
+  bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 8px;
-  z-index: 90;
-  background: var(--dt-overlay-70);
-  padding: 8px 12px;
-  border-radius: 8px; // 野火IM圆角
+  gap: 12px;
+  z-index: 95;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 16px;
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   opacity: 0;
-  transition: opacity 0.3s;
-  // 注意：移除 backdrop-filter 以提高滚动性能
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 
   .image-viewer-container:hover & {
     opacity: 1;
+    bottom: 90px;
   }
 
   .el-button {
     background: transparent;
-    border-color: transparent;
-    color: #fff;
-
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    height: auto;
+    
     &:hover {
-      background: var(--dt-brand-extra-light);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
     }
 
     &.is-disabled {
-      opacity: 0.3;
-    }
-
-    &.zoom-display {
-      min-width: 60px;
-      color: #fff;
-      font-weight: 500;
+      color: rgba(255, 255, 255, 0.3);
     }
   }
 }
@@ -623,49 +624,38 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 72px;
-  background: linear-gradient(0deg, var(--dt-overlay-80) 0%, transparent 100%);
+  height: 80px;
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 8px 24px;
+  padding: 0 24px;
   overflow-x: auto;
   z-index: 90;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--dt-white-30);
-    border-radius: 2px;
-  }
+  backdrop-filter: blur(20px);
 
   .thumbnail-item {
-    width: 56px;
-    height: 56px;
-    border-radius: 4px; // 野火IM圆角
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
     overflow: hidden;
     cursor: pointer;
-    opacity: 0.6;
-    transition: all 0.2s;
+    opacity: 0.4;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     border: 2px solid transparent;
     flex-shrink: 0;
 
     &:hover {
-      opacity: 0.9;
-      transform: scale(1.05);
+      opacity: 0.8;
+      transform: translateY(-2px);
     }
 
     &.active {
       opacity: 1;
-      border-color: var(--dt-brand-color);
-      box-shadow: var(--dt-shadow-brand-light);
+      border-color: #165DFF;
+      box-shadow: 0 0 8px rgba(22, 93, 255, 0.5);
+      transform: scale(1.1);
     }
 
     img {

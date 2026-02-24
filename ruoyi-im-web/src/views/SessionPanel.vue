@@ -310,7 +310,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, reactive, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CreateGroupDialog from '@/components/CreateGroupDialog/index.vue'
@@ -321,8 +321,7 @@ import EmptyState from '@/components/Common/EmptyState.vue'
 import ContextMenu from '@/components/Common/ContextMenu.vue'
 import { sendFriendRequest } from '@/api/im/contact'
 import { joinGroup } from '@/api/im/group'
-import { getArchivedSessions, archiveSession, unarchiveSession } from '@/api/im/conversation'
-import { scanQRCode } from '@/api/im/user'
+import { getArchivedSessions } from '@/api/im/conversation'
 import { formatChatTime } from '@/utils/format'
 import { useMentions } from '@/composables/useMentions.js'
 

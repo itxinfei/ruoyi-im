@@ -239,19 +239,5 @@ const handleMoreCommand = command => {
       }
     }
   }
-
-  .toolbar-more-menu {
-    .el-dropdown-menu__item {
-      .material-icons-outlined {
-        color: var(--dt-text-secondary-dark);
-      }
-
-      &:hover {
-        .material-icons-outlined {
-          color: var(--dt-brand-color);
-        }
-      }
-    }
-  }
 }
 </style>

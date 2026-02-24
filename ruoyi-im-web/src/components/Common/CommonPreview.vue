@@ -10,7 +10,7 @@
         class="preview-close"
         @click="handleCancel"
       >
-        <i class="el-icon-close"></i>
+        <i class="el-icon-close" />
       </button>
     </div>
 
@@ -21,23 +21,33 @@
           v-if="type === 'reply'"
           class="reply-content"
         >
-          <div class="reply-sender">@{{ senderName }}</div>
-          <div class="reply-text">{{ formatPreviewContent(content) }}</div>
+          <div class="reply-sender">
+            @{{ senderName }}
+          </div>
+          <div class="reply-text">
+            {{ formatPreviewContent(content) }}
+          </div>
         </div>
 
         <div
           v-else-if="type === 'edit'"
           class="edit-content"
         >
-          <div class="edit-label">正在编辑:</div>
-          <div class="edit-text">{{ formatPreviewContent(content) }}</div>
+          <div class="edit-label">
+            正在编辑:
+          </div>
+          <div class="edit-text">
+            {{ formatPreviewContent(content) }}
+          </div>
         </div>
 
         <div
           v-else-if="type === 'voice'"
           class="voice-content"
         >
-          <div class="voice-duration">{{ formatDuration(duration) }}</div>
+          <div class="voice-duration">
+            {{ formatDuration(duration) }}
+          </div>
           <div class="voice-controls">
             <button
               class="play-btn"
@@ -83,7 +93,7 @@ const props = defineProps({
   type: {
     type: String,
     required: true,
-    validator: (value) => ['reply', 'edit', 'voice', 'file', 'image'].includes(value)
+    validator: value => ['reply', 'edit', 'voice', 'file', 'image'].includes(value)
   },
   title: {
     type: String,
@@ -121,7 +131,7 @@ const emit = defineEmits(['confirm', 'cancel', 'delete', 'play', 'stop'])
 const isPlaying = ref(false)
 
 // 格式化预览内容
-const formatPreviewContent = (content) => {
+const formatPreviewContent = content => {
   if (typeof content === 'string') {
     return content.length > 50 ? content.substring(0, 50) + '...' : content
   }
@@ -132,7 +142,7 @@ const formatPreviewContent = (content) => {
 }
 
 // 格式化持续时间
-const formatDuration = (milliseconds) => {
+const formatDuration = milliseconds => {
   const seconds = Math.floor(milliseconds / 1000)
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60

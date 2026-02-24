@@ -15,8 +15,16 @@ export { default as MultiSelectToolbar } from './MultiSelectToolbar.vue'
 export { default as ResizeHandle } from './ResizeHandle.vue'
 
 // ========== 预览组件 ==========
-export { default as ReplyPreview } from './ReplyPreview.vue'
-export { default as EditPreview } from './EditPreview.vue'
+export { default as CommonPreview } from '../Common/CommonPreview.vue'
+// 向后兼容旧组件名称，实际上使用新的通用组件
+export { default as ReplyPreview } from '../Common/CommonPreview.vue'
+export { default as EditPreview } from '../Common/CommonPreview.vue'
+export { default as VoicePreviewPanel } from './VoicePreviewPanel.vue'
+
+// ========== 状态指示组件 ==========
+export { default as MessageStatusIndicator } from './MessageStatusIndicator.vue'
+// 旧组件名称向后兼容
+export { default as MessageStatus } from './MessageStatusIndicator.vue'
 export { default as VoicePreviewPanel } from './VoicePreviewPanel.vue'
 
 // ========== 功能组件 ==========

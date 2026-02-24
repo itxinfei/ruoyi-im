@@ -160,19 +160,21 @@
                 <span class="setting-value">{{ groupInfo.id }}</span>
               </div>
 
+              <!-- 新增：开关设置 -->
               <div class="setting-item">
-                <span class="setting-label">群组类型</span>
-                <span class="setting-value">{{ groupInfo.isPublic ? '公开群组' : '私有群组' }}</span>
+                <span class="setting-label">消息免打扰</span>
+                <el-switch
+                  v-model="isMuted"
+                  @change="handleToggleMute"
+                />
               </div>
 
-              <div
-                v-if="groupInfo.description"
-                class="setting-item vertical"
-              >
-                <span class="setting-label">群简介</span>
-                <p class="setting-desc">
-                  {{ groupInfo.description }}
-                </p>
+              <div class="setting-item">
+                <span class="setting-label">置顶聊天</span>
+                <el-switch
+                  v-model="isPinned"
+                  @change="handleTogglePin"
+                />
               </div>
 
               <div
@@ -203,17 +205,25 @@
               class="danger-btn"
               @click="handleLeaveGroup"
             >
-              退出群聊
+              {{ isOwner ? '解散群聊' : '退出群聊' }}
             </button>
           </div>
         </div>
       </div>
     </div>
   </transition>
+
+  <!-- 邀请成员弹窗 -->
+  <AddMembersDialog
+    v-model="showInviteDialog"
+    :group-id="groupId"
+    @success="handleInviteSuccess"
+  />
 </template>
 
 <script setup>
 import { ref, watch, computed, onUnmounted } from 'vue'
+import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Close,
@@ -223,8 +233,9 @@ import {
   Search,
   ArrowRight
 } from '@element-plus/icons-vue'
-import { getGroup, getGroupMembers, leaveGroup } from '@/api/im/group'
+import { getGroup, getGroupMembers, leaveGroup, dismissGroup } from '@/api/im/group'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import AddMembersDialog from '@/components/Chat/AddMembersDialog.vue'
 import { debounce } from '@/utils/debounce'
 
 const props = defineProps({
@@ -233,17 +244,62 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:visible', 'refresh-group', 'view-member', 'show-files', 'show-announcement'])
+const store = useStore()
 
 const loading = ref(false)
-const loadError = ref(null) // 加载错误信息
+const loadError = ref(null)
 const groupInfo = ref(null)
 const groupMembers = ref([])
 const memberKeyword = ref('')
-const isUnmounted = ref(false) // 组件卸载标记
+const isUnmounted = ref(false)
+const showInviteDialog = ref(false)
+
+// 设置状态
+const isMuted = ref(false)
+const isPinned = ref(false)
+
+const currentUser = computed(() => store.getters['user/currentUser'])
+const isOwner = computed(() => groupInfo.value?.ownerId === currentUser.value?.id)
+
+// 初始化设置状态
+const initSettings = () => {
+  const session = store.getters['im/session/sessionById'](props.groupId)
+  if (session) {
+    isMuted.value = session.isMuted || false
+    isPinned.value = session.isPinned || false
+  }
+}
+
+const handleToggleMute = async val => {
+  try {
+    await store.dispatch('im/session/muteSession', { 
+      sessionId: props.groupId, 
+      isMuted: val 
+    })
+    ElMessage.success(val ? '已开启免打扰' : '已关闭免打扰')
+  } catch (e) {
+    isMuted.value = !val // 回滚
+    ElMessage.error('设置失败')
+  }
+}
+
+const handleTogglePin = async val => {
+  try {
+    await store.dispatch('im/session/pinSession', { 
+      sessionId: props.groupId, 
+      isPinned: val 
+    })
+    ElMessage.success(val ? '已置顶' : '已取消置顶')
+  } catch (e) {
+    isPinned.value = !val // 回滚
+    ElMessage.error('设置失败')
+  }
+}
 
 watch(() => props.visible, v => {
   if (v && props.groupId) {
     loadGroupInfo()
+    initSettings()
   }
 })
 
@@ -328,8 +384,12 @@ const copyGroupId = () => {
 const viewMemberInfo = uid => { emit('view-member', uid) }
 
 const handleAddMember = () => {
-  // TODO: 实现邀请成员功能
-  ElMessage.info('邀请功能开发中')
+  showInviteDialog.value = true
+}
+
+const handleInviteSuccess = () => {
+  loadGroupInfo()
+  emit('refresh-group')
 }
 
 const shareGroup = () => {
@@ -348,25 +408,31 @@ const handleAnnouncement = () => {
 }
 
 const handleLeaveGroup = async () => {
+  const actionText = isOwner.value ? '解散' : '退出'
   try {
-    await ElMessageBox.confirm('确定要退出该群聊吗?', '提示', {
+    await ElMessageBox.confirm(`确定要${actionText}该群聊吗?`, '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
 
-    const res = await leaveGroup(props.groupId)
+    const res = isOwner.value 
+      ? await dismissGroup(props.groupId) 
+      : await leaveGroup(props.groupId)
+
     if (res.code === 200) {
-      ElMessage.success('已退出群聊')
+      ElMessage.success(`已${actionText}群聊`)
       handleClose()
       emit('refresh-group')
+      // 跳转回首页或清空当前会话
+      store.commit('im/session/SET_CURRENT_SESSION', null)
     } else {
-      throw new Error(res.msg || '退出群聊失败')
+      throw new Error(res.msg || `${actionText}群聊失败`)
     }
   } catch (e) {
     if (e !== 'cancel') {
-      console.error('退出群聊失败:', e)
-      ElMessage.error(e.message || '退出失败')
+      console.error(`${actionText}群聊失败:`, e)
+      ElMessage.error(e.message || '操作失败')
     }
   }
 }

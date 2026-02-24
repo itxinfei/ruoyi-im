@@ -13,8 +13,8 @@
       <button
         v-if="showEmojiButton"
         class="toolbar-btn emoji-btn"
-        @click="toggleEmojiPicker"
         title="表情"
+        @click="toggleEmojiPicker"
       >
         <i class="material-icons">mood</i>
       </button>
@@ -22,8 +22,8 @@
       <button
         v-if="showAtButton && isGroupChat"
         class="toolbar-btn at-btn"
-        @click="handleAtClick"
         title="@提及"
+        @click="handleAtClick"
       >
         <i class="material-icons">alternate_email</i>
       </button>
@@ -31,8 +31,8 @@
       <button
         v-if="showFileButton"
         class="toolbar-btn file-btn"
-        @click="triggerFileUpload"
         title="发送文件"
+        @click="triggerFileUpload"
       >
         <i class="material-icons">attach_file</i>
       </button>
@@ -40,8 +40,8 @@
       <button
         v-if="showImageButton"
         class="toolbar-btn image-btn"
-        @click="triggerImageUpload"
         title="发送图片"
+        @click="triggerImageUpload"
       >
         <i class="material-icons">image</i>
       </button>
@@ -105,10 +105,10 @@
           v-if="showVoiceButton"
           class="voice-btn"
           :class="{ 'recording': isRecording }"
+          title="按住说话"
           @mousedown="startRecording"
           @mouseup="stopRecording"
           @mouseleave="cancelRecording"
-          title="按住说话"
         >
           <i class="material-icons">{{ isRecording ? 'mic' : 'mic_none' }}</i>
         </button>
@@ -118,8 +118,8 @@
           class="send-btn"
           :class="{ disabled: !canSend }"
           :disabled="!canSend"
-          @click="handleSend"
           title="发送"
+          @click="handleSend"
         >
           <i class="material-icons">send</i>
         </button>
@@ -226,7 +226,7 @@ const activeCategory = ref('people')
 // Local state
 const localValue = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  set: value => emit('update:modelValue', value)
 })
 
 const hasContent = computed(() => !!props.modelValue.trim())
@@ -271,7 +271,7 @@ const handleInput = () => {
   // 通知父组件输入变化
 }
 
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   emit('keydown', e)
   // 处理发送快捷键
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -302,7 +302,7 @@ const handleSend = () => {
 }
 
 const autoResize = () => {
-  if (!textareaRef.value || !props.autoResize) return
+  if (!textareaRef.value || !props.autoResize) {return}
 
   const ta = textareaRef.value
   ta.style.height = 'auto'
@@ -327,7 +327,7 @@ const hideEmojiPicker = () => {
   showEmojiPickerInternal.value = false
 }
 
-const insertEmoji = (emoji) => {
+const insertEmoji = emoji => {
   const startPos = textareaRef.value?.selectionStart || localValue.value.length
   const newValue = localValue.value.substring(0, startPos) + emoji + localValue.value.substring(startPos)
   emit('update:modelValue', newValue)
@@ -343,7 +343,7 @@ const insertEmoji = (emoji) => {
   hideEmojiPicker()
 }
 
-const getEmojisByCategory = (categoryId) => {
+const getEmojisByCategory = categoryId => {
   return emojiMap.value[categoryId] || emojiMap.value.people
 }
 
@@ -359,7 +359,7 @@ const handleAtClick = () => {
   emit('at-click')
 }
 
-const handlePaste = (e) => {
+const handlePaste = e => {
   emit('paste', e)
 }
 
@@ -396,7 +396,7 @@ defineExpose({
   blur: () => {
     textareaRef.value?.blur()
   },
-  insertText: (text) => {
+  insertText: text => {
     const startPos = textareaRef.value?.selectionStart || localValue.value.length
     const newValue = localValue.value.substring(0, startPos) + text + localValue.value.substring(startPos)
     emit('update:modelValue', newValue)

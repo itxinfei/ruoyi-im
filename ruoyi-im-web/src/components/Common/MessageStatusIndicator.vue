@@ -20,7 +20,9 @@
       @click="handleRetry"
     >
       <span class="material-icons">error</span>
-      <div class="error-tooltip">{{ errorText }}</div>
+      <div class="error-tooltip">
+        {{ errorText }}
+      </div>
     </div>
 
     <!-- 已撤回状态 -->
