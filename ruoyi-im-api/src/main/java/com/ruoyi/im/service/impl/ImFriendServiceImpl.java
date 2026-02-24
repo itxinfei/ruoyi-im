@@ -978,10 +978,187 @@ public class ImFriendServiceImpl implements ImFriendService {
         return matchedUsers;
     }
 
-    @Override
+@Override
     public List<ImUserVO> getAddressBookMatches(Long userId) {
         // TODO: 实现获取之前上传通讯录匹配结果的功能
         // 这需要保存通讯录匹配结果，可以考虑添加一个缓存表或使用Redis
         return new ArrayList<>();
+    }
+
+    @Override
+    public Map<String, Object> getFriendStats(Long userId) {
+        Map<String, Object> stats = new HashMap<>();
+        
+        try {
+            ImFriend query = new ImFriend();
+            query.setUserId(userId);
+            List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
+            
+            int totalFriends = friendList.size();
+            int onlineCount = 0;
+            Map<String, Integer> groupStats = new HashMap<>();
+            
+            for (ImFriend friend : friendList) {
+                try {
+                    if (imRedisUtil.isOnlineUser(friend.getFriendId())) {
+                        onlineCount++;
+                    }
+                } catch (Exception e) {
+                    log.debug("获取在线状态失败: friendId={}", friend.getFriendId());
+                }
+                
+                String groupName = friend.getGroupName();
+                if (groupName == null || groupName.isEmpty()) {
+                    groupName = "默认分组";
+                }
+                groupStats.merge(groupName, 1, Integer::sum);
+            }
+            
+            stats.put("totalFriends", totalFriends);
+            stats.put("onlineCount", onlineCount);
+            stats.put("offlineCount", totalFriends - onlineCount);
+            stats.put("groupStats", groupStats);
+            stats.put("groupCount", groupStats.size());
+            
+            log.debug("获取好友统计: userId={}, total={}, online={}", userId, totalFriends, onlineCount);
+        } catch (Exception e) {
+            log.error("获取好友统计失败: userId={}", userId, e);
+            stats.put("totalFriends", 0);
+            stats.put("onlineCount", 0);
+            stats.put("offlineCount", 0);
+            stats.put("groupStats", new HashMap<>());
+            stats.put("groupCount", 0);
+        }
+        
+        return stats;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeFromGroup(Long friendId, Long userId, String groupName) {
+        if (friendId == null || userId == null) {
+            throw new BusinessException("参数不能为空");
+        }
+        
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        query.setFriendId(friendId);
+        List<ImFriend> friends = imFriendMapper.selectImFriendList(query);
+        
+        if (friends == null || friends.isEmpty()) {
+            throw new BusinessException("好友关系不存在");
+        }
+        
+        ImFriend friend = friends.get(0);
+        if (groupName != null && !groupName.equals(friend.getGroupName())) {
+            throw new BusinessException("好友不在指定分组中");
+        }
+        
+        friend.setGroupName(null);
+        friend.setUpdateTime(LocalDateTime.now());
+        imFriendMapper.updateImFriend(friend);
+        
+        clearFriendListCache(userId);
+        log.info("移出分组: userId={}, friendId={}, groupName={}", userId, friendId, groupName);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void addToGroup(Long friendId, Long userId, String groupName) {
+        if (friendId == null || userId == null || groupName == null || groupName.isEmpty()) {
+            throw new BusinessException("参数不能为空");
+        }
+        
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        query.setFriendId(friendId);
+        List<ImFriend> friends = imFriendMapper.selectImFriendList(query);
+        
+        if (friends == null || friends.isEmpty()) {
+            throw new BusinessException("好友关系不存在");
+        }
+        
+        ImFriend friend = friends.get(0);
+        friend.setGroupName(groupName);
+        friend.setUpdateTime(LocalDateTime.now());
+        imFriendMapper.updateImFriend(friend);
+        
+        clearFriendListCache(userId);
+        log.info("添加到分组: userId={}, friendId={}, groupName={}", userId, friendId, groupName);
+    }
+
+    @Override
+    public void updateFriendRemark(Long friendId, Long userId, String remark) {
+        if (friendId == null || userId == null) {
+            throw new BusinessException("参数不能为空");
+        }
+        
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        query.setFriendId(friendId);
+        List<ImFriend> friends = imFriendMapper.selectImFriendList(query);
+        
+        if (friends == null || friends.isEmpty()) {
+            throw new BusinessException("好友关系不存在");
+        }
+        
+        ImFriend friend = friends.get(0);
+        friend.setRemark(remark);
+        friend.setUpdateTime(LocalDateTime.now());
+        imFriendMapper.updateImFriend(friend);
+        
+        clearFriendListCache(userId);
+        log.info("更新好友备注: userId={}, friendId={}", userId, friendId);
+    }
+
+    @Override
+    public boolean isFriend(Long userId1, Long userId2) {
+        if (userId1 == null || userId2 == null) {
+            return false;
+        }
+        
+        ImFriend query = new ImFriend();
+        query.setUserId(userId1);
+        query.setFriendId(userId2);
+        List<ImFriend> friends = imFriendMapper.selectImFriendList(query);
+        
+        return friends != null && !friends.isEmpty();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void addFriend(Long userId1, Long userId2) {
+        if (userId1 == null || userId2 == null) {
+            throw new BusinessException("参数不能为空");
+        }
+        
+        if (isFriend(userId1, userId2)) {
+            log.warn("好友关系已存在: userId1={}, userId2={}", userId1, userId2);
+            return;
+        }
+        
+        LocalDateTime now = LocalDateTime.now();
+        
+        ImFriend friend1 = new ImFriend();
+        friend1.setUserId(userId1);
+        friend1.setFriendId(userId2);
+        friend1.setRemark("");
+        friend1.setGroupName("默认分组");
+        friend1.setCreateTime(now);
+        friend1.setUpdateTime(now);
+        imFriendMapper.insertImFriend(friend1);
+        
+        ImFriend friend2 = new ImFriend();
+        friend2.setUserId(userId2);
+        friend2.setFriendId(userId1);
+        friend2.setRemark("");
+        friend2.setGroupName("默认分组");
+        friend2.setCreateTime(now);
+        friend2.setUpdateTime(now);
+        imFriendMapper.insertImFriend(friend2);
+        
+        clearFriendListCache(userId1);
+        clearFriendListCache(userId2);
+        log.info("添加好友成功: userId1={}, userId2={}", userId1, userId2);
     }
 }

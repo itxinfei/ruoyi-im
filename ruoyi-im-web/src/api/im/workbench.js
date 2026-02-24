@@ -4,6 +4,7 @@
  * @author ruoyi
  */
 import request from '../request'
+import { checkIn as attendanceCheckIn, getAttendanceRecords as getAttendance } from './attendance'
 
 /**
  * 获取待办列表

@@ -5,7 +5,7 @@
 
 // ==================== 主组件 ====================
 // 导入父目录的消息气泡组件
-export { default as MessageBubble } from '../MessageBubbleRefactored.vue'
+export { default as MessageBubble } from '../MessageBubble.vue'
 
 // ==================== 气泡类型组件 ====================
 export { default as TextBubble } from './bubbles/TextBubble.vue'

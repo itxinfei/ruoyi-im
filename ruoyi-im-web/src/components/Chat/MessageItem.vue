@@ -55,16 +55,16 @@
       class="content-wrapper"
       :class="{ 'is-merged': message.isMerged }"
     >
+      <!-- 发送者姓名（仅群聊、非自己、且非合并连续消息时显示） -->
+      <div
+        v-if="showSenderName"
+        class="sender-name-container"
+      >
+        {{ message.senderName }}
+      </div>
+
       <!-- 消息气泡与状态行 -->
       <div class="bubble-row">
-        <!-- 发送者姓名（仅群聊、非自己、且非合并连续消息时显示） -->
-        <!-- 使用绝对定位，避免影响气泡的布局和对齐 -->
-        <div
-          v-if="showSenderName"
-          class="sender-name-absolute"
-        >
-          {{ message.senderName }}
-        </div>
         <slot name="bubble">
           <MessageBubble
             :message="message"
@@ -107,7 +107,7 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import MessageBubble from './MessageBubbleRefactored.vue'
+import MessageBubble from './MessageBubble.vue'
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -128,7 +128,10 @@ const store = useStore()
 // ==================== 计算属性 ====================
 
 const showSenderName = computed(() => {
-  return props.sessionType === 'GROUP' && !props.message.isOwn && !props.message.isMerged
+  // 钉钉标准：仅群聊、非自己、且是消息组的第一条或单条消息时显示名字
+  return props.sessionType === 'GROUP' && 
+         !props.message.isOwn && 
+         (props.groupPosition === 'first' || props.groupPosition === 'single')
 })
 
 const itemClasses = computed(() => ({
@@ -177,77 +180,18 @@ const handleNudge = () => {
   display: flex;
   align-items: flex-start;
   min-height: 32px;
-  gap: 6px;
-  margin-bottom: 6px; 
+  gap: 8px;
+  margin-bottom: 4px; // 钉钉标准间距
   position: relative;
   padding: 0;
-  transition: background-color 0.2s var(--dt-ease-out), opacity 0.2s ease;
+  transition: background-color 0.2s ease;
 
   &.is-right {
     flex-direction: row-reverse;
   }
 
-  &.has-sender-name {
-    padding-top: 14px; 
-  }
-
   &.is-merged {
-    margin-bottom: 2px; 
-  }
-}
-
-.time-divider-wrapper {
-  width: 100%;
-  text-align: center;
-  margin: 20px 0; // 优化：20px 上下间距
-}
-
-.time-text {
-  background: var(--dt-bg-subtle-hover);
-  color: var(--dt-text-quaternary);
-  font-size: 11px;
-  padding: 3px 10px; // 优化：3px 上下，10px 左右
-  border-radius: 8px; // 优化：8px 圆角
-}
-
-.checkbox-wrapper {
-  display: flex;
-  align-items: center;
-  margin: 0 12px;
-  flex-shrink: 0;
-  height: 40px;
-
-  :deep(.el-checkbox__inner) {
-    border-radius: 4px;
-  }
-}
-
-.sender-name-absolute {
-  position: absolute;
-  top: -16px;
-  left: 0;
-  font-size: 11px; 
-  color: var(--dt-text-tertiary); 
-  white-space: nowrap;
-  max-width: 160px; 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.message-item.is-multi-select {
-  padding: 0 12px;
-  cursor: pointer;
-  border-radius: 16px;
-
-  &:hover {
-    background: var(--dt-bg-subtle-hover);
-  }
-
-  &.is-selected {
-    background: var(--dt-brand-bg);
+    margin-bottom: 2px; // 合并消息间距更小
   }
 }
 
@@ -256,24 +200,13 @@ const handleNudge = () => {
   height: 32px;
   flex-shrink: 0;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 4px;
   overflow: hidden;
-  transition: transform 0.2s ease, opacity 0.2s ease;
 
   &.avatar-hidden {
-    width: 32px;
-    height: 0;
-    margin: 0;
-    visibility: hidden;
+    opacity: 0;
     pointer-events: none;
-    overflow: hidden;
-
-    .message-avatar {
-      opacity: 0;
-    }
+    // 关键：保持高度不塌陷，防止抖动
   }
 
   :deep(.dingtalk-avatar) {
@@ -282,52 +215,50 @@ const handleNudge = () => {
 }
 
 .content-wrapper {
-  max-width: 60%; // 钉钉标准：60% 最大宽度
+  max-width: 70%; // 钉钉标准
   display: flex;
   flex-direction: column;
-  margin: 0 6px;
-  position: relative;
-
-  &.is-merged {
-    margin-top: 0;
-  }
+  min-width: 0;
 }
 
-.message-item:not(.is-right) .content-wrapper {
-  align-items: flex-start;
+.sender-name-container {
+  font-size: 11px;
+  color: var(--dt-text-tertiary);
+  margin-bottom: 2px;
+  margin-left: 2px;
+  font-weight: 500;
 }
 
-.message-item.is-right .content-wrapper {
-  align-items: flex-end;
-
-  .bubble-row {
-    flex-direction: row-reverse;
-  }
+.message-item.is-right .sender-name-container {
+  text-align: right;
+  margin-right: 2px;
 }
 
 .bubble-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end; // 对齐气泡底部
   gap: 6px;
-  max-width: 100%;
+}
+
+.message-item.is-right .bubble-row {
+  flex-direction: row-reverse;
 }
 
 .status-container {
   flex-shrink: 0;
-  margin-bottom: 2px;
+  margin-bottom: 4px; // 微调与气泡底部的对齐
 }
 
 .message-footer {
   display: flex;
   align-items: center;
-  margin-top: 4px; // 钉钉标准：4px 顶部间距
-  padding: 0 4px; // 钉钉标准：4px 左右内边距
+  margin-top: 2px;
+  padding: 0 4px;
 }
 
 .message-time {
-  color: var(--dt-text-quaternary); // 钉钉标准：使用四级文本色
-  font-size: 11px; // 钉钉标准：11px
-  font-family: var(--dt-font-family);
+  color: var(--dt-text-quaternary);
+  font-size: 10px;
 }
 
 // 暗色模式（统一使用 :global(.dark) 选择器）

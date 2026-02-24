@@ -201,10 +201,9 @@ import { computed, ref, nextTick, watch, onMounted, onUnmounted } from 'vue'
 import { ArrowDown, User } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { sendNudge } from '@/api/im/nudge'
-import MessageItem from './MessageItemRefactored.vue'
+import MessageItem from './MessageItem.vue'
 import MessageStatusIndicator from './MessageStatusIndicator.vue'
-// 使用重构后的消息气泡组件
-import MessageBubble from './MessageBubbleRefactored.vue'
+import MessageBubble from './MessageBubble.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 import { copyToClipboard } from '@/utils/format'
@@ -372,6 +371,9 @@ const handleNudge = async nudgedUserId => {
       nudgedUserId
     })
 
+    // 组件已卸载，不处理结果
+    if (isUnmounted.value) { return }
+
     if (res.code === 200) {
       ElMessage.success(`${res.data.nudgerName} 拍了拍 ${res.data.nudgedUserName}`)
       emit('nudge-success', res.data)
@@ -379,6 +381,9 @@ const handleNudge = async nudgedUserId => {
       ElMessage.warning(res.msg || '拍一拍失败')
     }
   } catch (error) {
+    // 组件已卸载，不处理错误
+    if (isUnmounted.value) { return }
+    
     if (error.message) {
       ElMessage.warning(error.message)
     } else {
@@ -561,9 +566,15 @@ const handlePinMessage = async msg => {
       ElMessage.success('已置顶消息')
     }
 
+    // 组件已卸载，不更新状态
+    if (isUnmounted.value) { return }
+
     // 通过事件更新消息状态
     emit('message-update', { ...msg, isPinned: !msg.isPinned })
   } catch (error) {
+    // 组件已卸载，不处理错误
+    if (isUnmounted.value) { return }
+    
     console.error('置顶操作失败:', error)
     ElMessage.error(msg.isPinned ? '取消置顶失败' : '置顶失败')
   }
@@ -689,10 +700,25 @@ const maintainScroll = oldHeight => {
 const observer = ref(null)
 const observedMessageIds = new Set() // 跟踪已观察的消息ID，避免重复观察
 
+// 待上报已读的消息队列
+const pendingReadIds = new Set()
+const reportReadDebounced = debounce(() => {
+  if (pendingReadIds.size === 0) {return}
+  
+  // 获取队列中的消息对象
+  const messagesToMark = props.messages.filter(m => pendingReadIds.has(m.id))
+  
+  // 批量触发或逐个触发（父组件可能支持批量，这里先保持语义兼容）
+  messagesToMark.forEach(msg => {
+    emit('command', 'mark-read', msg)
+  })
+  
+  pendingReadIds.clear()
+}, 500)
+
 /**
  * 初始化已读上报监听器
  * 使用 IntersectionObserver 监听消息是否进入可视区域
- * 消息进入可视区域时触发已读上报
  */
 const initReadObserver = () => {
   if (observer.value) { observer.value.disconnect() }
@@ -708,7 +734,8 @@ const initReadObserver = () => {
         const msg = props.messages.find(m => m.id === msgId)
         // 如果消息未读且不是自己发的
         if (msg && !msg.isOwn && !msg.isRead) {
-          emit('command', 'mark-read', msg)
+          pendingReadIds.add(msg.id)
+          reportReadDebounced()
         }
       }
     })
@@ -732,10 +759,12 @@ const updateObserver = () => {
 
 // 使用防抖优化 observer 更新频率
 const updateObserverDebounced = debounce(() => {
+  if (isUnmounted.value) { return } // 组件已卸载，不执行
   updateObserver()
 }, 200)
 
 watch(() => props.messages.length, () => {
+  if (isUnmounted.value) { return } // 组件已卸载，不执行
   scrollToBottom()
   updateObserverDebounced()
 })
@@ -751,6 +780,9 @@ onMounted(() => {
 
   // 监听容器大小变化
   const resizeObserver = new ResizeObserver(entries => {
+    // 组件已卸载，不处理回调
+    if (isUnmounted.value) { return }
+    
     for (const entry of entries) {
       if (entry.target === listRef.value) {
         containerHeight.value = entry.contentRect.height
@@ -788,19 +820,18 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px 16px; // 优化：左右16px，上下12px
-  padding-bottom: 80px; // 钉钉标准：80px 底部间距
-  background: var(--dt-bg-chat);
+  padding: 20px 24px; // 钉钉标准：更大的左右内边距
+  padding-bottom: 100px; // 留出足够的底部呼吸空间
+  background-color: #F5F6F7; // 钉钉标准：更柔和的背景灰
   position: relative;
-  min-height: 0; // flex 子元素高度修复
+  min-height: 0;
   width: 100%;
   box-sizing: border-box;
   scroll-behavior: smooth;
-  // 注意：移除 will-change 和 contain 以避免性能问题
 
-  // 自定义滚动条 - 钉钉风格
+  // 极简滚动条设计 - 对齐钉钉/野火
   &::-webkit-scrollbar {
-    width: 6px; // 钉钉标准：6px 宽滚动条
+    width: 4px; // 极细
   }
 
   &::-webkit-scrollbar-track {
@@ -808,140 +839,86 @@ defineExpose({ scrollToBottom, maintainScroll: maintainScrollPosition, scrollToM
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15); // 钉钉标准：更淡的滚动条
-    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+    transition: background 0.3s;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(0, 0, 0, 0.15);
     }
   }
 
   &:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.1);
   }
 }
 
-// 暗色模式（统一使用 :global(.dark) 选择器）
-:global(.dark) .message-list {
-  background: var(--dt-bg-body-dark);
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
+// 消息包装器间距控制
+.message-wrapper {
+  margin-bottom: 16px; // 标准间距
+  
+  &:has(.group-middle), &:has(.group-last) {
+    margin-top: -12px; // 合并消息向上紧缩
   }
 }
 
-.loading-wrapper {
-  text-align: center;
-  padding: 20px;
-  color: var(--dt-text-tertiary);
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-// 滚动到底部按钮 - 钉钉风格
+// “回到底部”按钮 - 毛玻璃质感
 .scroll-to-bottom {
-  position: absolute;  // 改为 absolute，相对于 message-list 容器定位
-  right: 20px;  // 固定距离容器右边缘 20px
-  bottom: 20px;  // 固定距离容器底边缘 20px
+  position: absolute;
+  right: 24px;
+  bottom: 32px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-full);
-  color: var(--dt-brand-color);
-  font-size: 12px;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  color: #165DFF;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: var(--dt-shadow-sm);
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-  z-index: 10;  // 在消息列表内部的层级
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
 
   &:hover {
-    background: var(--dt-brand-bg);
-    border-color: var(--dt-brand-color);
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   .el-icon {
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 
-// 暗色模式 - 滚动到底部按钮
-:global(.dark) .scroll-to-bottom {
-  background: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-}
-
-// ============================================================================
-// 虚拟滚动占位符 - 维持正确的滚动条高度
-// ============================================================================
-.virtual-spacer-top,
-.virtual-spacer-bottom {
-  width: 100%;
-  pointer-events: none;
-  flex-shrink: 0;
-}
-
-// 淡入淡出动画
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity var(--dt-transition-fast);
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.empty {
-  text-align: center;
-  padding: 40px;
-  color: var(--dt-text-quaternary);
-  font-size: 13px;
-}
-
+// 时间分割线重构 - 更轻量
 .time-divider {
-  text-align: center;
-  margin: 16px 0; // 钉钉标准：16px 间距
-  color: var(--dt-text-tertiary);
-  font-size: 11px; // 优化：11px
-  line-height: 1;
-  position: relative;
-
-  &::before {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 0;
+  
+  &::before, &::after {
     content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 100%;
+    flex: 1;
     height: 1px;
-    background: var(--dt-border-lighter);
-    z-index: 1;
+    background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.03), transparent);
   }
 
   .time-text {
-    background: var(--dt-bg-body); // 钉钉标准：与背景同色
-    color: var(--dt-text-tertiary);
-    padding: 3px 10px; // 优化：3px 上下，10px 左右
-    font-size: 11px; // 优化：11px
-    border-radius: 8px; // 优化：8px 圆角
-    display: inline-block;
-    font-weight: 500;
-    position: relative;
-    z-index: 2;
-  }
-
-  .dark & .time-text {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--dt-text-secondary-dark);
+    padding: 0 16px;
+    color: #86909C;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
   }
 }
 

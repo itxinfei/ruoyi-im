@@ -5,9 +5,9 @@
  */
 
 // ========== 主重构组件 ==========
-export { default as MessageBubble } from './MessageBubbleRefactored.vue'
-export { default as MessageItem } from './MessageItemRefactored.vue'
-export { default as MessageInput } from './MessageInputRefactored.vue'
+export { default as MessageBubble } from './MessageBubble.vue'
+export { default as MessageItem } from './MessageItem.vue'
+export { default as MessageInput } from './MessageInput.vue'
 
 // ========== 工具栏组件 ==========
 export { default as InputToolbar } from './InputToolbar.vue'

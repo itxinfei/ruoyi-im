@@ -12,138 +12,68 @@
       @reset-height="resetHeight"
     />
 
-    <!-- 工具栏 -->
-    <InputToolbar
-      :show-emoji-picker="showEmojiPicker"
-      :show-at-button="session?.type === 'GROUP'"
-      @toggle-emoji="toggleEmojiPicker"
-      @upload-image="triggerImageUpload"
-      @upload-file="triggerFileUpload"
-      @screenshot="handleScreenshot"
-      @at-member="handleAtMember"
-      @smart-reply="handleShowSmartReply"
-    />
-
-    <!-- 录音动画区域 -->
-    <div
-      v-if="isVoiceMode"
-      class="voice-recording-wrapper"
-    >
-      <VoiceRecorder
-        :max-length="60000"
-        :min-length="1000"
-        @record-complete="handleVoiceRecordComplete"
-        @cancel="handleVoiceCancel"
+    <!-- 顶部工具栏 (钉钉风格：轻量化图标) -->
+    <div class="input-toolbar-outer">
+      <InputToolbar
+        :show-emoji-picker="showEmojiPicker"
+        :show-at-button="session?.type === 'GROUP'"
+        @toggle-emoji="toggleEmojiPicker"
+        @upload-image="triggerImageUpload"
+        @upload-file="triggerFileUpload"
+        @screenshot="handleScreenshot"
+        @at-member="handleAtMember"
+        @smart-reply="handleShowSmartReply"
       />
-    </div>
-
-    <!-- 引用消息预览 -->
-    <ReplyPreview
-      v-if="replyingMessage"
-      :key="replyingMessage.id"
-      :sender-name="replyingMessage.senderName || replyingMessage.senderNickname || replyingMessage.userName || '未知'"
-      :content="replyPreviewContent"
-      @cancel="$emit('cancel-reply')"
-    />
-
-    <!-- 录音预览区域 -->
-    <VoicePreviewPanel
-      v-if="voicePreview"
-      :duration="voicePreview.duration"
-      :is-playing="voicePreview.isPlaying"
-      :play-progress="voicePreview.playProgress || 0"
-      @toggle-play="toggleVoicePlay"
-      @delete="deleteVoicePreview"
-      @send="handleSendVoice"
-    />
-
-    <!-- 编辑消息预览 -->
-    <EditPreview
-      v-if="editingMessage"
-      :content="editingMessage.content"
-      @cancel="$emit('cancel-edit')"
-    />
-
-    <!-- 链接预览 -->
-    <div
-      v-if="linkPreviewLoading || linkPreviewError || linkPreview"
-      class="link-preview-wrapper"
-    >
-      <LinkCard
-        v-if="linkPreview"
-        :link="linkPreview"
-        :loading="linkPreviewLoading"
-        :error="linkPreviewError"
-      />
-      <button
-        v-if="linkPreview || linkPreviewError"
-        class="link-preview-close"
-        @click="clearLinkPreview"
-      >
-        <el-icon>
-          <Close />
-        </el-icon>
-      </button>
     </div>
 
     <!-- 输入核心区域 -->
     <div
       ref="inputAreaRef"
-      class="input-area"
-      :class="{ 'is-drag-over': isDragOver, 'is-voice-mode': isVoiceMode, 'is-focused': isFocused }"
+      class="input-main-area"
+      :class="{ 'is-drag-over': isDragOver, 'is-focused': isFocused }"
       @dragenter="handleDragEnter"
       @dragleave="handleDragLeave"
       @dragover="handleDragOver"
       @drop.prevent="handleDrop"
     >
-      <!-- 文字输入区域 -->
+      <!-- 引用/编辑预览逻辑保持在文本框上方 -->
+      <div class="previews-container">
+        <ReplyPreview
+          v-if="replyingMessage"
+          :key="replyingMessage.id"
+          :sender-name="replyingMessage.senderName || '对方'"
+          :content="replyPreviewContent"
+          @cancel="$emit('cancel-reply')"
+        />
+        <EditPreview
+          v-if="editingMessage"
+          :content="editingMessage.content"
+          @cancel="$emit('cancel-edit')"
+        />
+      </div>
+
       <textarea
         ref="textareaRef"
         v-model="messageContent"
-        class="message-input"
+        class="real-textarea"
         :placeholder="inputPlaceholder"
-        :disabled="isVoiceMode"
         @input="handleInput"
         @keydown="handleKeydown"
-        @paste="handlePaste"
         @focus="isFocused = true"
         @blur="isFocused = false"
       />
 
-      <div
-        v-if="!isVoiceMode"
-        class="input-footer"
-      >
-        <div class="footer-actions">
-          <!-- 语音输入切换按钮 -->
-          <el-tooltip
-            content="按住说话"
-            placement="top"
-          >
-            <button
-              class="footer-action-btn voice-btn"
-              @click="toggleVoiceMode"
-            >
-              <el-icon>
-                <Microphone />
-              </el-icon>
-            </button>
-          </el-tooltip>
-
-          <el-tooltip
-            content="发送"
-            placement="top"
-          >
-            <button
-              class="footer-action-btn send-btn"
-              :disabled="!canSend"
-              @click="handleSend"
-            >
-              <span class="material-icons-outlined">send</span>
-              <span class="send-text">发送</span>
-            </button>
-          </el-tooltip>
+      <div class="input-bottom-actions">
+        <div class="action-hints">
+          <span class="hint-text">Enter 发送，Ctrl+Enter 换行</span>
         </div>
+        <button
+          class="send-btn-v2"
+          :disabled="!canSend"
+          @click="handleSend"
+        >
+          <span>发送</span>
+        </button>
       </div>
     </div>
 
@@ -1131,188 +1061,124 @@ onUnmounted(() => {
 <style scoped lang="scss">
 @use '@/styles/design-tokens.scss' as *;
 
-// 容器
 .chat-input-container {
-  background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  background: #FFFFFF;
+  border-top: 1px solid #F2F3F5;
+  padding: 0; // 移除外层 padding，改为内部精确控制
   position: relative;
-  border-top: 1px solid var(--dt-border-light);
-  padding: 8px 16px 12px; // 钉钉标准：8px 顶部，16px 左右，12px 底部
-  z-index: 10;
-  transition: min-height var(--dt-transition-base), border-color var(--dt-transition-fast);
-
-  &.is-resizing {
-    border-top-color: var(--dt-brand-color);
-  }
+  min-height: 180px;
 }
 
-// 输入区域
-.input-area {
+// 顶部工具栏外壳
+.input-toolbar-outer {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid transparent; // 默认透明，聚焦时可变色
+}
+
+// 输入主区域
+.input-main-area {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  padding: 4px 16px 12px;
   position: relative;
-  border-radius: 6px; // 钉钉标准：6px 圆角
-  background: var(--dt-bg-tertiary);
-  transition: background var(--dt-transition-base), box-shadow var(--dt-transition-base);
-  margin: 0;
-  padding: 0;
-
-  &.is-focused {
-    background: var(--dt-bg-card);
-    box-shadow: 0 0 0 2px var(--dt-brand-lighter);
-  }
+  transition: background 0.2s;
 
   &.is-drag-over {
-    background: rgba(50, 150, 250, 0.08);
-    box-shadow: inset 0 0 0 2px var(--dt-brand-color);
-    border: 2px dashed var(--dt-brand-color);
-
+    background: rgba(22, 93, 255, 0.05);
+    outline: 2px dashed #165DFF;
+    outline-offset: -10px;
+    border-radius: 8px;
+    
     &::after {
-      content: '松开上传文件';
+      content: '松开鼠标即刻发送文件';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: var(--dt-space-2) var(--dt-space-4);
-      background: var(--dt-brand-color);
-      color: #fff;
-      font-size: var(--dt-font-size-base);
-      border-radius: var(--dt-radius-md);
-      pointer-events: none;
-      z-index: 10;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #165DFF; color: #fff;
+      padding: 8px 20px; border-radius: 20px;
+      font-weight: 600; pointer-events: none;
     }
+  }
+}
 
-    .message-input {
-      opacity: 0.3;
+.previews-container {
+  margin-bottom: 8px;
+}
+
+.real-textarea {
+  flex: 1;
+  width: 100%;
+  border: none !important;
+  outline: none !important;
+  resize: none;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #1D2129;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  
+  &::placeholder {
+    color: #C9CDD4;
+  }
+}
+
+// 底部操作行
+.input-bottom-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+
+  .action-hints {
+    .hint-text {
+      font-size: 12px;
+      color: #86909C;
+      opacity: 0.8;
     }
   }
 
-  &.is-voice-mode {
-    .message-input {
-      background: var(--dt-brand-lighter);
+  .send-btn-v2 {
+    height: 32px;
+    padding: 0 24px;
+    background: #165DFF;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover:not(:disabled) {
+      background: #3471FF;
+      box-shadow: 0 4px 12px rgba(22, 93, 255, 0.2);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    &:disabled {
+      background: #F2F3F5;
+      color: #C9CDD4;
       cursor: not-allowed;
     }
   }
 }
 
-.message-input {
-  flex: 1;
-  width: 100%;
-  border: none;
-  outline: none;
-  resize: none;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--dt-text-primary);
-  padding: 8px 10px; // 钉钉标准：8px 上下，10px 左右
-  min-height: 52px; // 钉钉标准：52px 最小高度
-  max-height: 160px;
-  background: transparent;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  overflow-y: auto;
-  box-shadow: none;
-  transition: min-height 0.2s ease, color 0.2s ease;
-
-  &:focus,
-  &:hover,
-  &:active,
-  &:focus-visible {
-    border: none;
-    outline: none;
-    box-shadow: none;
-  }
-
-  &::placeholder {
-    color: #a0a8b8;
-    transition: color 0.2s ease;
-  }
-
-  // 自定义滚动条样式
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--dt-scrollbar-thumb);
-    border-radius: 2px;
-
-    &:hover {
-      background: var(--dt-scrollbar-thumb-hover);
-    }
-  }
+.dark {
+  .chat-input-container { background: #1D2129; border-top-color: #2E3238; }
+  .real-textarea { color: #F2F3F5; }
+  .send-btn-v2:disabled { background: #2E3238; color: #4E5969; }
 }
-
-.input-footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 6px 8px;
-
-  .footer-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .footer-action-btn {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: 4px;
-    color: #86909c;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    .el-icon {
-      font-size: 16px;
-    }
-
-    &:hover {
-      background: var(--dt-black-04);
-      color: var(--dt-brand-color);
-    }
-
-    &:active {
-      background: var(--dt-black-08);
-    }
-
-    &.send-btn {
-      width: auto;
-      padding: 0 16px; // 钉钉风格：增加内边距
-      background: var(--dt-brand-color);
-      color: var(--dt-text-inverse);
-      font-size: 14px; // 钉钉风格：增加字号
-      font-weight: 500;
-      border-radius: 6px; // 钉钉风格：圆角6px
-
-      &:hover {
-        background: var(--dt-brand-hover);
-      }
-
-      &:disabled {
-        background: var(--dt-border-light);
-        color: var(--dt-text-quaternary);
-        cursor: not-allowed;
-      }
-
-      .send-text {
-        margin-left: 4px;
-      }
-    }
-  }
-}
+</style>
 
 .reply-preview-wrapper {
   margin: 0 0 8px;

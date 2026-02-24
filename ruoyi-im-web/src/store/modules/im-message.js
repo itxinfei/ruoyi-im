@@ -113,12 +113,15 @@ export default {
 
     // ========== 新增：消息去重和离线处理 ==========
 
-    // 消息 ID 去重集合（防止重复消息）
-    // 使用 Set 存储已接收的消息 ID
-    receivedMessageIds: new Set(),
+    // 消息 ID 去重缓存（使用 Map 实现 LRU 策略）
+    // key: messageId, value: { timestamp } - 记录接收时间用于过期清理
+    receivedMessageIds: new Map(),
 
     // 最大保留的消息 ID 数量（防止内存溢出）
     maxReceivedIdsSize: 10000,
+
+    // 消息 ID 过期时间（30分钟）
+    receivedIdsExpireTime: 30 * 60 * 1000,
 
     // 离线消息队列（网络断开时暂存消息）
     // { messageId, sessionId, message, retryCount, timestamp }
@@ -201,7 +204,15 @@ export default {
 
     // 检查消息是否已接收（去重）
     hasReceivedMessage: state => messageId => {
-      return state.receivedMessageIds.has(messageId)
+      // 检查是否存在且未过期
+      const item = state.receivedMessageIds.get(messageId)
+      if (!item) return false
+      // 检查是否过期
+      if (Date.now() - item.timestamp > state.receivedIdsExpireTime) {
+        state.receivedMessageIds.delete(messageId)
+        return false
+      }
+      return true
     }
   },
 
@@ -365,9 +376,16 @@ export default {
       const messages = state.messages[sessionId]
       const index = messages.findIndex(m => m.id === tempId || m.clientMsgId === tempId)
       if (index !== -1) {
+        // 关键：保留 tempMessage 中的 UI 状态，合并 realMessage 的数据
+        const updatedMessage = {
+          ...messages[index],
+          ...realMessage,
+          status: mapSendStatusToUi(realMessage.sendStatus)
+        }
+        
         state.messages[sessionId] = [
           ...messages.slice(0, index),
-          { ...realMessage },
+          updatedMessage,
           ...messages.slice(index + 1)
         ]
       }
@@ -441,20 +459,31 @@ export default {
     // ========== 消息去重和离线处理 Mutations ==========
 
     /**
-     * 添加消息 ID 到去重集合
+     * 添加消息 ID 到去重集合（LRU 缓存策略）
      * @param {Object} state - Vuex state
      * @param {string} messageId - 消息 ID
      */
     ADD_RECEIVED_MESSAGE_ID(state, messageId) {
-      state.receivedMessageIds.add(messageId)
+      const now = Date.now()
 
-      // 限制集合大小，防止内存溢出
+      // 如果已存在，更新时间戳（刷新 LRU）
+      if (state.receivedMessageIds.has(messageId)) {
+        state.receivedMessageIds.set(messageId, { timestamp: now })
+        return
+      }
+
+      // 添加新记录
+      state.receivedMessageIds.set(messageId, { timestamp: now })
+
+      // 限制集合大小（LRU 淘汰）
       if (state.receivedMessageIds.size > state.maxReceivedIdsSize) {
-        // 转换为数组，删除最旧的 10%
-        const idsArray = Array.from(state.receivedMessageIds)
-        const removeCount = Math.floor(state.maxReceivedIdsSize * 0.1)
-        for (let i = 0; i < removeCount; i++) {
-          state.receivedMessageIds.delete(idsArray[i])
+        // 删除最旧的 10%（Map 保持插入顺序，最早的在前面）
+        const deleteCount = Math.floor(state.maxReceivedIdsSize * 0.1)
+        let deleted = 0
+        for (const key of state.receivedMessageIds.keys()) {
+          if (deleted >= deleteCount) break
+          state.receivedMessageIds.delete(key)
+          deleted++
         }
       }
     },
@@ -465,30 +494,42 @@ export default {
      * @param {Array<string>} messageIds - 消息 ID 数组
      */
     ADD_RECEIVED_MESSAGE_IDS(state, messageIds) {
-      messageIds.forEach(id => state.receivedMessageIds.add(id))
+      const now = Date.now()
+      messageIds.forEach(id => {
+        state.receivedMessageIds.set(id, { timestamp: now })
+      })
 
       // 限制集合大小
       if (state.receivedMessageIds.size > state.maxReceivedIdsSize) {
-        const idsArray = Array.from(state.receivedMessageIds)
-        const removeCount = Math.floor(state.maxReceivedIdsSize * 0.1)
-        for (let i = 0; i < removeCount; i++) {
-          state.receivedMessageIds.delete(idsArray[i])
+        const deleteCount = Math.floor(state.maxReceivedIdsSize * 0.1)
+        let deleted = 0
+        for (const key of state.receivedMessageIds.keys()) {
+          if (deleted >= deleteCount) break
+          state.receivedMessageIds.delete(key)
+          deleted++
         }
       }
     },
 
     /**
-     * 检查并清理过期的去重 ID
+     * 清理过期的去重 ID（基于时间戳）
      * @param {Object} state - Vuex state
      */
     CLEANUP_RECEIVED_IDS(state) {
-      if (state.receivedMessageIds.size > state.maxReceivedIdsSize * 0.8) {
-        const idsArray = Array.from(state.receivedMessageIds)
-        const removeCount = Math.floor(state.maxReceivedIdsSize * 0.3)
-        for (let i = 0; i < removeCount; i++) {
-          state.receivedMessageIds.delete(idsArray[i])
+      const now = Date.now()
+      const expireTime = state.receivedIdsExpireTime
+      let cleanedCount = 0
+
+      // 遍历并删除过期记录
+      for (const [id, data] of state.receivedMessageIds.entries()) {
+        if (now - data.timestamp > expireTime) {
+          state.receivedMessageIds.delete(id)
+          cleanedCount++
         }
-        info('MessageStore', `[消息去重] 清理了 ${removeCount} 条过期记录`)
+      }
+
+      if (cleanedCount > 0) {
+        info('MessageStore', `[消息去重] 清理了 ${cleanedCount} 条过期记录`)
       }
     },
 
@@ -777,6 +818,14 @@ export default {
       if (messageId) {
         imWebSocket.sendAck(messageId, 'read', rootState.im?.deviceId)
       }
+
+      // 关键：触发多端同步，通知其他在线设备也清除未读
+      imWebSocket.send({
+        type: 'READ_SYNC',
+        conversationId,
+        lastReadMessageId: messageId,
+        deviceId: rootState.im?.deviceId
+      })
 
       commit('im/session/UPDATE_SESSION', {
         id: conversationId,

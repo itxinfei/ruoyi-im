@@ -197,15 +197,14 @@ service.interceptors.request.use(
       config.headers['userId'] = String(userInfo.id)
     }
 
-    debug(LOG_TAG, '->', {
-      id: config._requestId,
-      method: (config.method || 'GET').toUpperCase(),
-      url: config.url,
-      baseURL: config.baseURL,
-      params: safeData(config.params),
-      data: safeData(config.data),
-      headers: safeHeaders(config.headers)
-    })
+    // 仅在非静默请求且明确需要调试时打印精简日志
+    if (!config._silent) {
+      debug(LOG_TAG, `-> [${(config.method || 'GET').toUpperCase()}] ${config.url}`, {
+        id: config._requestId,
+        params: config.params ? '[Params]' : undefined,
+        hasData: !!config.data
+      })
+    }
 
     return config
   },
@@ -254,14 +253,12 @@ service.interceptors.response.use(
       return Promise.reject(new Error(errorMessage))
     }
 
-    debug(LOG_TAG, '<-', {
-      id: response.config?._requestId,
-      method: (response.config?.method || 'GET').toUpperCase(),
-      url: response.config?.url,
-      status: response.status,
-      code: res.code,
-      duration
-    })
+    if (!response.config._silent) {
+      debug(LOG_TAG, `<- [${res.code}] ${response.config?.url}`, {
+        id: response.config?._requestId,
+        duration
+      })
+    }
 
     return res
   },

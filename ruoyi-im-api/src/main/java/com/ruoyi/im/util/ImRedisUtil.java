@@ -1,5 +1,6 @@
 package com.ruoyi.im.util;
 
+import com.ruoyi.im.constant.RedisKeyConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +69,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(USER_PREFIX, "info", String.valueOf(userId));
+        String key = RedisKeyConstants.buildUserInfoKey(userId);
         redisTemplate.opsForValue().set(key, userInfo, USER_INFO_EXPIRE, TimeUnit.MINUTES);
         log.debug("缓存用户信息: userId={}", userId);
     }
@@ -80,7 +81,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return null;
         }
-        String key = buildKey(USER_PREFIX, "info", String.valueOf(userId));
+        String key = RedisKeyConstants.buildUserInfoKey(userId);
         return redisTemplate.opsForValue().get(key);
     }
 
@@ -91,7 +92,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(USER_PREFIX, "info", String.valueOf(userId));
+        String key = RedisKeyConstants.buildUserInfoKey(userId);
         redisTemplate.delete(key);
         log.debug("清除用户信息缓存: userId={}", userId);
     }
@@ -121,7 +122,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(CONVERSATION_PREFIX, "info", String.valueOf(conversationId));
+        String key = RedisKeyConstants.CONVERSATION_INFO_PREFIX + conversationId;
         redisTemplate.opsForValue().set(key, conversationInfo, CONVERSATION_INFO_EXPIRE, TimeUnit.MINUTES);
     }
 
@@ -132,7 +133,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return null;
         }
-        String key = buildKey(CONVERSATION_PREFIX, "info", String.valueOf(conversationId));
+        String key = RedisKeyConstants.CONVERSATION_INFO_PREFIX + conversationId;
         return redisTemplate.opsForValue().get(key);
     }
 
@@ -143,7 +144,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(CONVERSATION_PREFIX, "info", String.valueOf(conversationId));
+        String key = RedisKeyConstants.CONVERSATION_INFO_PREFIX + conversationId;
         redisTemplate.delete(key);
     }
 
@@ -156,7 +157,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         redisTemplate.opsForHash().put(key, conversationId.toString(), count.toString());
         redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
     }
@@ -168,7 +169,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return null;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         Object count = redisTemplate.opsForHash().get(key, conversationId.toString());
         return count != null ? Integer.parseInt(count.toString()) : null;
     }
@@ -180,7 +181,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return null;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         Long total = 0L;
         for (Object count : redisTemplate.opsForHash().values(key)) {
             if (count != null) {
@@ -197,7 +198,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         redisTemplate.opsForHash().increment(key, conversationId.toString(), 1);
         redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
     }
@@ -209,7 +210,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         redisTemplate.opsForHash().delete(key, conversationId.toString());
     }
 
@@ -220,7 +221,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         redisTemplate.delete(key);
     }
 
@@ -234,7 +235,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         redisTemplate.opsForHash().increment(key, conversationId.toString(), -delta);
         redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
     }
@@ -249,7 +250,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         redisTemplate.opsForHash().put(key, conversationId.toString(), String.valueOf(count));
         redisTemplate.expire(key, UNREAD_COUNT_EXPIRE, TimeUnit.MINUTES);
     }
@@ -262,7 +263,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return new HashMap<>();
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         Map<Object, Object> rawMap = redisTemplate.opsForHash().entries(key);
         Map<Long, Integer> result = new HashMap<>();
         for (Map.Entry<Object, Object> entry : rawMap.entrySet()) {
@@ -286,7 +287,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || counts == null || counts.isEmpty()) {
             return;
         }
-        String key = buildKey(UNREAD_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.CONVERSATION_UNREAD_PREFIX + userId;
         Map<String, String> stringMap = new HashMap<>();
         for (Map.Entry<Long, Integer> entry : counts.entrySet()) {
             stringMap.put(entry.getKey().toString(), entry.getValue().toString());
@@ -304,12 +305,12 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        String onlineUsersKey = RedisKeyConstants.ONLINE_USERS_KEY;
         redisTemplate.opsForSet().add(onlineUsersKey, userId.toString());
         redisTemplate.expire(onlineUsersKey, ONLINE_STATUS_EXPIRE, TimeUnit.MINUTES);
 
         // 同时记录用户上线时间
-        String onlineTimeKey = buildKey(ONLINE_PREFIX, "time", String.valueOf(userId));
+        String onlineTimeKey = RedisKeyConstants.buildUserOnlineKey(userId);
         redisTemplate.opsForValue().set(onlineTimeKey, System.currentTimeMillis(), ONLINE_STATUS_EXPIRE,
                 TimeUnit.MINUTES);
 
@@ -324,15 +325,15 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        String onlineUsersKey = RedisKeyConstants.ONLINE_USERS_KEY;
         redisTemplate.opsForSet().remove(onlineUsersKey, userId.toString());
 
         // 同时删除上线时间记录
-        String onlineTimeKey = buildKey(ONLINE_PREFIX, "time", String.valueOf(userId));
+        String onlineTimeKey = RedisKeyConstants.buildUserOnlineKey(userId);
         redisTemplate.delete(onlineTimeKey);
 
         // 删除心跳时间记录
-        String heartbeatKey = buildKey(ONLINE_PREFIX, "heartbeat", String.valueOf(userId));
+        String heartbeatKey = RedisKeyConstants.KEY_PREFIX + "user:online:heartbeat:" + userId;
         redisTemplate.delete(heartbeatKey);
     }
 
@@ -344,7 +345,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return new HashSet<>();
         }
-        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        String onlineUsersKey = RedisKeyConstants.ONLINE_USERS_KEY;
         Set<Object> members = redisTemplate.opsForSet().members(onlineUsersKey);
         Set<String> result = new HashSet<>();
         if (members != null) {
@@ -364,7 +365,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return new HashSet<>();
         }
-        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        String onlineUsersKey = RedisKeyConstants.ONLINE_USERS_KEY;
         Set<Object> members = redisTemplate.opsForSet().members(onlineUsersKey);
         Set<Long> result = new HashSet<>();
         if (members != null) {
@@ -388,7 +389,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return false;
         }
-        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        String onlineUsersKey = RedisKeyConstants.ONLINE_USERS_KEY;
         Boolean isMember = redisTemplate.opsForSet().isMember(onlineUsersKey, userId.toString());
         return isMember != null && isMember;
     }
@@ -400,7 +401,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return 0L;
         }
-        String onlineUsersKey = buildKey(ONLINE_PREFIX, "users");
+        String onlineUsersKey = RedisKeyConstants.ONLINE_USERS_KEY;
         return redisTemplate.opsForSet().size(onlineUsersKey);
     }
 
@@ -424,7 +425,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || userId == null) {
             return;
         }
-        String heartbeatKey = buildKey(ONLINE_PREFIX, "heartbeat", String.valueOf(userId));
+        String heartbeatKey = RedisKeyConstants.KEY_PREFIX + "user:online:heartbeat:" + userId;
         redisTemplate.opsForValue().set(heartbeatKey, System.currentTimeMillis(), HEARTBEAT_EXPIRE, TimeUnit.MINUTES);
         log.debug("更新用户心跳时间: userId={}", userId);
     }
@@ -439,7 +440,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || userId == null) {
             return null;
         }
-        String heartbeatKey = buildKey(ONLINE_PREFIX, "heartbeat", String.valueOf(userId));
+        String heartbeatKey = RedisKeyConstants.KEY_PREFIX + "user:online:heartbeat:" + userId;
         Object heartbeat = redisTemplate.opsForValue().get(heartbeatKey);
         return heartbeat != null ? Long.parseLong(heartbeat.toString()) : null;
     }
@@ -475,7 +476,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || userId == null) {
             return;
         }
-        String sessionKey = buildKey(ONLINE_PREFIX, "session", String.valueOf(userId));
+        String sessionKey = RedisKeyConstants.KEY_PREFIX + "user:online:session:" + userId;
         Map<String, Object> sessionInfo = new java.util.HashMap<>();
         sessionInfo.put("userId", userId);
         sessionInfo.put("serverId", serverId);
@@ -499,7 +500,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || userId == null) {
             return null;
         }
-        String sessionKey = buildKey(ONLINE_PREFIX, "session", String.valueOf(userId));
+        String sessionKey = RedisKeyConstants.KEY_PREFIX + "user:online:session:" + userId;
         Object sessionInfo = redisTemplate.opsForValue().get(sessionKey);
         return sessionInfo != null ? (Map<String, Object>) sessionInfo : null;
     }
@@ -513,7 +514,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || userId == null) {
             return;
         }
-        String sessionKey = buildKey(ONLINE_PREFIX, "session", String.valueOf(userId));
+        String sessionKey = RedisKeyConstants.KEY_PREFIX + "user:online:session:" + userId;
         redisTemplate.delete(sessionKey);
         log.debug("删除用户会话信息: userId={}", userId);
     }
@@ -529,7 +530,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || userId == null) {
             return;
         }
-        String disconnectKey = buildKey(ONLINE_PREFIX, "disconnect", String.valueOf(userId));
+        String disconnectKey = RedisKeyConstants.KEY_PREFIX + "user:online:disconnect:" + userId;
         Map<String, Object> disconnectInfo = new java.util.HashMap<>();
         disconnectInfo.put("userId", userId);
         disconnectInfo.put("reason", reason);
@@ -550,7 +551,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || userId == null) {
             return null;
         }
-        String disconnectKey = buildKey(ONLINE_PREFIX, "disconnect", String.valueOf(userId));
+        String disconnectKey = RedisKeyConstants.KEY_PREFIX + "user:online:disconnect:" + userId;
         Object disconnectInfo = redisTemplate.opsForValue().get(disconnectKey);
         return disconnectInfo != null ? (Map<String, Object>) disconnectInfo : null;
     }
@@ -564,7 +565,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || userId == null) {
             return;
         }
-        String disconnectKey = buildKey(ONLINE_PREFIX, "disconnect", String.valueOf(userId));
+        String disconnectKey = RedisKeyConstants.KEY_PREFIX + "user:online:disconnect:" + userId;
         redisTemplate.delete(disconnectKey);
         log.debug("清除断线信息: userId={}", userId);
     }
@@ -578,7 +579,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(OFFLINE_MSG_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.KEY_PREFIX + "message:offline:" + userId;
         redisTemplate.opsForZSet().add(key, message, System.currentTimeMillis());
         redisTemplate.expire(key, OFFLINE_MSG_EXPIRE, TimeUnit.DAYS);
     }
@@ -591,7 +592,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return new ArrayList<>();
         }
-        String key = buildKey(OFFLINE_MSG_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.KEY_PREFIX + "message:offline:" + userId;
         Set<Object> messageObjects = redisTemplate.opsForZSet().range(key, 0, -1);
 
         List<T> messages = new ArrayList<>();
@@ -616,7 +617,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(OFFLINE_MSG_PREFIX, String.valueOf(userId));
+        String key = RedisKeyConstants.KEY_PREFIX + "message:offline:" + userId;
         redisTemplate.delete(key);
     }
 
@@ -687,10 +688,6 @@ public class ImRedisUtil {
 
     // ==================== 消息幂等性 ====================
     /**
-     * 消息幂等性键前缀
-     */
-    private static final String IDEMPOTENT_MSG_PREFIX = "message:idempotent:";
-    /**
      * 消息幂等性缓存过期时间（24小时）
      */
     private static final long IDEMPOTENT_MSG_EXPIRE = 24;
@@ -707,7 +704,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || clientMsgId == null || clientMsgId.isEmpty()) {
             return null;
         }
-        String key = buildKey(IDEMPOTENT_MSG_PREFIX, clientMsgId);
+        String key = RedisKeyConstants.KEY_PREFIX + "message:idempotent:" + clientMsgId;
         Object cachedMsgId = redisTemplate.opsForValue().get(key);
         if (cachedMsgId != null) {
             log.debug("消息幂等性命中: clientMsgId={}, messageId={}", clientMsgId, cachedMsgId);
@@ -726,13 +723,12 @@ public class ImRedisUtil {
         if (redisTemplate == null || clientMsgId == null || clientMsgId.isEmpty()) {
             return;
         }
-        String key = buildKey(IDEMPOTENT_MSG_PREFIX, clientMsgId);
+        String key = RedisKeyConstants.KEY_PREFIX + "message:idempotent:" + clientMsgId;
         redisTemplate.opsForValue().set(key, messageId.toString(), IDEMPOTENT_MSG_EXPIRE, TimeUnit.HOURS);
         log.debug("记录客户端消息ID映射: clientMsgId={}, messageId={}", clientMsgId, messageId);
     }
 
     // ==================== 群组信息缓存 ====================
-    private static final String GROUP_PREFIX = "group:";
     private static final long GROUP_INFO_EXPIRE = 30; // 群组信息缓存30分钟
     private static final long GROUP_MEMBERS_EXPIRE = 5; // 群组成员缓存5分钟
 
@@ -743,7 +739,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(GROUP_PREFIX, "info", String.valueOf(groupId));
+        String key = RedisKeyConstants.GROUP_INFO_PREFIX + groupId;
         redisTemplate.opsForValue().set(key, groupInfo, GROUP_INFO_EXPIRE, TimeUnit.MINUTES);
     }
 
@@ -754,7 +750,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return null;
         }
-        String key = buildKey(GROUP_PREFIX, "info", String.valueOf(groupId));
+        String key = RedisKeyConstants.GROUP_INFO_PREFIX + groupId;
         return redisTemplate.opsForValue().get(key);
     }
 
@@ -765,7 +761,7 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        String key = buildKey(GROUP_PREFIX, "info", String.valueOf(groupId));
+        String key = RedisKeyConstants.GROUP_INFO_PREFIX + groupId;
         redisTemplate.delete(key);
     }
 
@@ -798,7 +794,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || groupId == null || members == null) {
             return;
         }
-        String key = buildKey(GROUP_PREFIX, "members", String.valueOf(groupId));
+        String key = RedisKeyConstants.buildGroupMembersKey(groupId);
         redisTemplate.opsForValue().set(key, members, GROUP_MEMBERS_EXPIRE, TimeUnit.MINUTES);
         log.debug("缓存群组成员列表: groupId={}, memberCount={}", groupId, members.size());
     }
@@ -814,7 +810,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || groupId == null) {
             return null;
         }
-        String key = buildKey(GROUP_PREFIX, "members", String.valueOf(groupId));
+        String key = RedisKeyConstants.buildGroupMembersKey(groupId);
         Object cached = redisTemplate.opsForValue().get(key);
         if (cached instanceof List) {
             return (List<T>) cached;
@@ -832,7 +828,7 @@ public class ImRedisUtil {
         if (redisTemplate == null || groupId == null) {
             return;
         }
-        String key = buildKey(GROUP_PREFIX, "members", String.valueOf(groupId));
+        String key = RedisKeyConstants.buildGroupMembersKey(groupId);
         redisTemplate.delete(key);
         log.debug("清除群组成员缓存: groupId={}", groupId);
     }
@@ -856,30 +852,6 @@ public class ImRedisUtil {
             cacheGroupMembers(groupId, loaded);
         }
         return loaded;
-    }
-
-    // ==================== 私有方法 ====================
-
-    /**
-     * 构建简单缓存Key
-     */
-    private String buildSimpleKey(String... parts) {
-        StringBuilder sb = new StringBuilder(KEY_PREFIX);
-        for (String part : parts) {
-            sb.append(part);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 构建缓存Key（带前缀）
-     */
-    private String buildKey(String prefix, String... parts) {
-        StringBuilder sb = new StringBuilder(KEY_PREFIX).append(prefix);
-        for (String part : parts) {
-            sb.append(":").append(part);
-        }
-        return sb.toString();
     }
 
     // ==================== 有序集合操作 ====================
@@ -935,5 +907,17 @@ public class ImRedisUtil {
             return 0L;
         }
         return redisTemplate.opsForZSet().removeRange(buildSimpleKey(key), start, end);
+    }
+
+    // ==================== 辅助方法 ====================
+
+    /**
+     * 构建简单的 Redis 键
+     *
+     * @param key 原始键
+     * @return 构建后的键
+     */
+    private String buildSimpleKey(String key) {
+        return KEY_PREFIX + key;
     }
 }

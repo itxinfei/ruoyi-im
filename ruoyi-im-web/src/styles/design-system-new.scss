@@ -1,0 +1,150 @@
+/**
+ * RuoYi-IM Design System v3.0
+ * 现代化设计系统 - 对标钉钉/飞书体验
+ * 更新日期：2026-02-24
+ * 
+ * 注意：CSS 变量已统一到 design-tokens.scss
+ * 本文件仅保留 SCSS 变量和工具 mixins
+ */
+
+// ==================== 颜色系统 ====================
+
+// 主色调 - Electric Blue (更年轻、更科技)
+$im-primary-50: #eff6ff;
+$im-primary-100: #dbeafe;
+$im-primary-200: #bfdbfe;
+$im-primary-300: #93c5fd;
+$im-primary-400: #60a5fa;
+$im-primary-500: #3296FA;  // 主色（Electric Blue）
+$im-primary-600: #2563eb;
+$im-primary-700: #1d4ed8;
+$im-primary-800: #1e40af;
+$im-primary-900: #1e3a8a;
+
+// 保留钉钉蓝用于强调元素
+$im-dingtalk-blue: #1677ff;
+
+// 中性色
+$im-gray-50: #fafafa;
+$im-gray-100: #f5f5f5;
+$im-gray-200: #f0f0f0;
+$im-gray-300: #d9d9d9;
+$im-gray-400: #bfbfbf;
+$im-gray-500: #8c8c8c;
+$im-gray-600: #595959;
+$im-gray-700: #434343;
+$im-gray-800: #262626;
+$im-gray-900: #1f1f1f;
+
+// 功能色 - 更鲜艳、更现代
+$im-success: #00C853;      // Vibrant Green
+$im-warning: #FFAB00;      // Amber
+$im-error: #FF3D00;        // Deep Orange
+$im-info: #3296FA;         // 与主色一致
+
+// 功能色梯度
+$im-success-light: #69f0ae;
+$im-success-dark: #00a844;
+$im-warning-light: #ffd149;
+$im-warning-dark: #c77c00;
+$im-error-light: #ff6e40;
+$im-error-dark: #d63200;
+
+// ==================== 组件混入 ====================
+
+// 卡片样式
+@mixin im-card {
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-card);
+  border: none;
+  transition: box-shadow var(--dt-transition-base);
+}
+
+// 卡片悬停效果
+@mixin im-card-hover {
+  &:hover {
+    box-shadow: var(--dt-shadow-card-hover);
+    transform: translateY(-2px);
+    transition: all var(--dt-transition-base);
+  }
+}
+
+// 毛玻璃效果
+@mixin im-glass($blur: md) {
+  background: var(--dt-bg-overlay, rgba(255, 255, 255, 0.95));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+// 毛玻璃卡片
+@mixin im-glass-card {
+  @include im-glass(lg);
+  border-radius: var(--dt-radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+// 按钮基础样式
+@mixin im-button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dt-space-2);
+  padding: var(--dt-space-2) var(--dt-space-3);
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--dt-transition-fast);
+  border: none;
+  outline: none;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// 主要按钮
+@mixin im-button-primary {
+  @include im-button-base;
+  background: var(--dt-brand-color);
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: var(--dt-brand-hover);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--dt-brand-active);
+  }
+}
+
+// 次要按钮
+@mixin im-button-secondary {
+  @include im-button-base;
+  background: var(--dt-bg-hover, #f5f5f5);
+  color: var(--dt-text-primary);
+}
+
+// 输入框样式
+@mixin im-input {
+  width: 100%;
+  padding: var(--dt-space-2) var(--dt-space-3);
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-font-size-base);
+  background: var(--dt-bg-card);
+  color: var(--dt-text-primary);
+  transition: var(--dt-transition-fast);
+
+  &:focus {
+    outline: none;
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 2px var(--dt-brand-bg);
+  }
+
+  &::placeholder {
+    color: var(--dt-text-quaternary);
+  }
+}

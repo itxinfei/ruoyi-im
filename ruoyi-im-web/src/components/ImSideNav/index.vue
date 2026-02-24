@@ -107,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, markRaw } from 'vue'
 import { useStore } from 'vuex'
 import {
   ChatDotRound,
@@ -156,47 +156,47 @@ const navModules = ref([
   {
     key: 'chat',
     label: '消息',
-    icon: ChatDotRound
+    icon: markRaw(ChatDotRound)
   },
   {
     key: 'contacts',
-    label: '联系人',
-    icon: User
+    label: '通讯录',
+    icon: markRaw(User)
   },
   {
     key: 'workbench',
     label: '工作台',
-    icon: Grid
+    icon: markRaw(Grid)
   },
   {
     key: 'drive',
     label: '云盘',
-    icon: FolderOpened
+    icon: markRaw(FolderOpened)
   },
   {
     key: 'calendar',
     label: '日历',
-    icon: Calendar
+    icon: markRaw(Calendar)
   },
   {
     key: 'todo',
     label: '待办',
-    icon: Clock
+    icon: markRaw(Clock)
   },
   {
     key: 'approval',
     label: '审批',
-    icon: Document
+    icon: markRaw(Document)
   },
   {
     key: 'mail',
     label: '邮箱',
-    icon: ChatLineSquare
+    icon: markRaw(ChatLineSquare)
   },
   {
     key: 'assistant',
     label: 'AI助理',
-    icon: MagicStick
+    icon: markRaw(MagicStick)
   }
 ])
 

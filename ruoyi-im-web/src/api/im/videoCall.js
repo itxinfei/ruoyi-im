@@ -1,34 +1,32 @@
 /**
- * 视频通话 API
+ * 视频通话相关 API
+ * 对应后端 ImVideoCallController
  * @author ruoyi
  */
-
 import request from '../request'
 
-// ==================== 单人通话 ====================
-
 /**
- * 发起通话
- * @param {Object} data - 通话参数
- * @param {Number} data.calleeId - 接收者ID
- * @param {Number} [data.conversationId] - 会话ID
- * @param {String} [data.callType] - 通话类型: VOICE/VIDEO
+ * 发起视频通话
+ * @param {Object} data - 通话数据
+ * @param {number} data.receiverId - 接收者ID
+ * @param {string} data.callType - 通话类型 VIDEO/AUDIO
+ * @param {number} data.conversationId - 会话ID
  * @returns {Promise}
  */
-export function initiateCall(data) {
+export function initiateVideoCall(data) {
   return request({
     url: '/api/im/video-calls/initiate',
     method: 'post',
-    params: data
+    data
   })
 }
 
 /**
- * 接听通话
- * @param {Number} callId - 通话ID
+ * 接受视频通话
+ * @param {number} callId - 通话ID
  * @returns {Promise}
  */
-export function acceptCall(callId) {
+export function acceptVideoCall(callId) {
   return request({
     url: `/api/im/video-calls/${callId}/accept`,
     method: 'post'
@@ -36,25 +34,23 @@ export function acceptCall(callId) {
 }
 
 /**
- * 拒绝通话
- * @param {Number} callId - 通话ID
- * @param {String} [reason] - 拒绝原因
+ * 拒绝视频通话
+ * @param {number} callId - 通话ID
  * @returns {Promise}
  */
-export function rejectCall(callId, reason) {
+export function rejectVideoCall(callId) {
   return request({
     url: `/api/im/video-calls/${callId}/reject`,
-    method: 'post',
-    params: { reason }
+    method: 'post'
   })
 }
 
 /**
- * 结束通话
- * @param {Number} callId - 通话ID
+ * 结束视频通话
+ * @param {number} callId - 通话ID
  * @returns {Promise}
  */
-export function endCall(callId) {
+export function endVideoCall(callId) {
   return request({
     url: `/api/im/video-calls/${callId}/end`,
     method: 'post'
@@ -62,11 +58,27 @@ export function endCall(callId) {
 }
 
 /**
- * 获取通话信息
- * @param {Number} callId - 通话ID
+ * 获取通话记录
+ * @param {Object} params - 查询参数
+ * @param {number} params.pageNum - 页码
+ * @param {number} params.pageSize - 每页数量
+ * @param {number} params.userId - 用户ID（可选）
  * @returns {Promise}
  */
-export function getCallInfo(callId) {
+export function getVideoCallHistory(params) {
+  return request({
+    url: '/api/im/video-calls/history',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取当前通话信息
+ * @param {number} callId - 通话ID
+ * @returns {Promise}
+ */
+export function getCurrentCallInfo(callId) {
   return request({
     url: `/api/im/video-calls/${callId}`,
     method: 'get'
@@ -74,125 +86,88 @@ export function getCallInfo(callId) {
 }
 
 /**
- * 获取用户当前通话状态
+ * 邀请用户加入通话
+ * @param {Object} data - 邀请数据
+ * @param {number} data.callId - 通话ID
+ * @param {Array<number>} data.invitedUserIds - 被邀请用户ID列表
  * @returns {Promise}
  */
-export function getUserActiveCall() {
+export function inviteToVideoCall(data) {
   return request({
-    url: '/api/im/video-calls/active',
-    method: 'get'
-  })
-}
-
-/**
- * 发送WebRTC信令
- * @param {Number} callId - 通话ID
- * @param {String} signalType - 信令类型: offer/answer/ice-candidate
- * @param {String} signalData - 信令数据
- * @returns {Promise}
- */
-export function sendSignal(callId, signalType, signalData) {
-  return request({
-    url: '/api/im/video-calls/signal',
-    method: 'post',
-    params: { callId, signalType },
-    data: signalData,
-    headers: { 'Content-Type': 'application/json' }
-  })
-}
-
-/**
- * 获取通话历史
- * @param {Number} [limit] - 限制数量
- * @returns {Promise}
- */
-export function getCallHistory(limit = 20) {
-  return request({
-    url: '/api/im/video-calls/history',
-    method: 'get',
-    params: { limit }
-  })
-}
-
-// ==================== 群组通话 ====================
-
-/**
- * 发起群组通话
- * @param {Object} data - 通话参数
- * @param {Number} data.conversationId - 会话ID
- * @param {String} [data.callType] - 通话类型
- * @param {Number} [data.maxParticipants] - 最大参与者数
- * @param {Array<Number>} data.invitedUserIds - 被邀请用户ID列表
- * @returns {Promise}
- */
-export function initiateGroupCall(data) {
-  return request({
-    url: '/api/im/video-calls/group/initiate',
+    url: '/api/im/video-calls/invite',
     method: 'post',
     data
   })
 }
 
 /**
- * 加入群组通话
- * @param {Number} callId - 通话ID
+ * 静音/取消静音
+ * @param {Object} data - 静音数据
+ * @param {number} data.callId - 通话ID
+ * @param {boolean} data.muted - 是否静音
  * @returns {Promise}
  */
-export function joinGroupCall(callId) {
+export function toggleMute(data) {
   return request({
-    url: `/api/im/video-calls/group/${callId}/join`,
-    method: 'post'
+    url: '/api/im/video-calls/toggle-mute',
+    method: 'post',
+    data
   })
 }
 
 /**
- * 离开群组通话
- * @param {Number} callId - 通话ID
+ * 切换摄像头
+ * @param {Object} data - 切换数据
+ * @param {number} data.callId - 通话ID
+ * @param {boolean} data.videoOn - 是否开启视频
  * @returns {Promise}
  */
-export function leaveGroupCall(callId) {
+export function toggleVideo(data) {
   return request({
-    url: `/api/im/video-calls/group/${callId}/leave`,
-    method: 'post'
+    url: '/api/im/video-calls/toggle-video',
+    method: 'post',
+    data
   })
 }
 
 /**
- * 获取通话参与者列表
- * @param {Number} callId - 通话ID
+ * 获取通话质量报告
+ * @param {number} callId - 通话ID
  * @returns {Promise}
  */
-export function getParticipants(callId) {
+export function getCallQualityReport(callId) {
   return request({
-    url: `/api/im/video-calls/group/${callId}/participants`,
+    url: `/api/im/video-calls/${callId}/quality`,
     method: 'get'
   })
 }
 
 /**
- * 切换麦克风状态
- * @param {Number} callId - 通话ID
- * @param {Boolean} muted - 是否静音
+ * 发送通话信令
+ * @param {Object} data - 信令数据
+ * @param {number} data.callId - 通话ID
+ * @param {string} data.signalType - 信令类型
+ * @param {Object} data.payload - 信令内容
  * @returns {Promise}
  */
-export function toggleMute(callId, muted) {
+export function sendCallSignal(data) {
   return request({
-    url: `/api/im/video-calls/group/${callId}/mute`,
+    url: '/api/im/video-calls/signal',
     method: 'post',
-    params: { muted }
+    data
   })
 }
 
-/**
- * 切换摄像头状态
- * @param {Number} callId - 通话ID
- * @param {Boolean} cameraOff - 是否关闭摄像头
- * @returns {Promise}
- */
-export function toggleCamera(callId, cameraOff) {
-  return request({
-    url: `/api/im/video-calls/group/${callId}/camera`,
-    method: 'post',
-    params: { cameraOff }
-  })
+export default {
+  initiateVideoCall,
+  acceptVideoCall,
+  rejectVideoCall,
+  endVideoCall,
+  getVideoCallHistory,
+  getCurrentCallInfo,
+  inviteToVideoCall,
+  toggleMute,
+  toggleVideo,
+  getCallQualityReport,
+  sendCallSignal
 }

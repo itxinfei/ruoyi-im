@@ -14,8 +14,8 @@
     >
       <EmptyState
         type="chat"
-        title="选择一个会话开始聊天"
-        description="从左侧列表选择联系人或群组，开始你的对话"
+        title="选择一个聊天，开始沟通吧"
+        description="在这里，你可以通过消息、文件和协作工具与团队保持高效沟通。"
         :compact="false"
       />
     </div>
@@ -270,7 +270,7 @@ import { Close } from '@element-plus/icons-vue'
 import { debug, warn, error as logError } from '@/utils/logger.js'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
-import MessageInput from '@/components/Chat/MessageInputRefactored.vue'
+import MessageInput from '@/components/Chat/MessageInput.vue'
 import PinnedMessagesPanel from '@/components/Chat/PinnedMessagesPanel.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import VoiceCallDialog from '@/components/Chat/VoiceCallDialog.vue'
@@ -935,22 +935,23 @@ onUnmounted(() => {
   flex: 1;
   min-height: 0; // flex: 1 配合 min-height: 0 正确处理高度
   overflow: hidden;
-  // contain: layout; // 已移除：同上原因
+  background: #FFFFFF;
 }
 
 .chat-viewport {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; // 允许收缩，关键修复
-  min-height: 0; // 允许收缩，关键修复
-  background: var(--dt-bg-card);
-  transition: all 0.3s var(--dt-ease-out);
-  overflow: hidden; // 防止溢出
+  min-width: 0; 
+  min-height: 0; 
+  background: #FFFFFF;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden; 
+  position: relative;
+  box-shadow: inset 1px 0 0 #F2F3F5;
 
   &.with-pinned-panel {
-    flex: 1 1 auto;
-    min-width: 0;
+    border-right: 1px solid #F2F3F5;
   }
 }
 
@@ -982,10 +983,13 @@ onUnmounted(() => {
   flex: 1;
   padding: 60px 20px;
   text-align: center;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F7F8F9 100%);
 
   :deep(.empty-state) {
     width: 100%;
-    max-width: 400px;
+    max-width: 480px;
+    opacity: 0.9;
+    transform: translateY(-20px);
   }
 }
 

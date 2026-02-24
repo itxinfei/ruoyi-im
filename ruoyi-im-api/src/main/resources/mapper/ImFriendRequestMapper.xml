@@ -80,4 +80,14 @@
         where to_user_id = #{toUserId}
         order by create_time desc
     </select>
+
+    <select id="selectImFriendRequestListByToUserIdAndStatus" resultMap="ImFriendRequestResult">
+        select id, from_user_id, to_user_id, message, status, create_time, handled_time
+        from im_friend_request
+        where to_user_id = #{toUserId}
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        order by create_time desc
+    </select>
 </mapper>

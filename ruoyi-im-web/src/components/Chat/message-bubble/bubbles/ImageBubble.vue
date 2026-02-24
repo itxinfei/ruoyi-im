@@ -6,6 +6,7 @@
       'is-loading': isLoading,
       'has-error': hasError
     }"
+    :style="containerStyle"
     @click="handleClick"
   >
     <!-- 加载占位符（带模糊缩略图） -->
@@ -13,6 +14,7 @@
       v-if="isLoading && !imageLoaded"
       class="image-placeholder"
       :class="{ 'with-thumb': thumbUrl }"
+      :style="containerStyle"
     >
       <!-- 模糊缩略图背景 -->
       <div
@@ -34,6 +36,7 @@
     <div
       v-else-if="hasError"
       class="image-placeholder error-placeholder"
+      :style="containerStyle"
     >
       <el-icon
         class="error-icon"
@@ -59,6 +62,7 @@
       :alt="`${message.senderName}的图片`"
       class="image-content"
       :class="{ 'loaded': imageLoaded }"
+      :style="containerStyle"
       loading="lazy"
       decoding="async"
       @load="handleImageLoad"
@@ -121,6 +125,46 @@ let observer = null
 const imageUrl = computed(() => {
   const parsed = parseMessageContent(props.message)
   return parsed?.imageUrl || parsed?.url || ''
+})
+
+// 图片原始尺寸（用于计算占位比例）
+const imageSize = computed(() => {
+  const parsed = parseMessageContent(props.message)
+  const width = parseInt(parsed?.width) || 0
+  const height = parseInt(parsed?.height) || 0
+  
+  if (width > 0 && height > 0) {
+    // 限制最大/最小比例，防止过度拉伸
+    const ratio = width / height
+    // 钉钉标准：最大比例 2:1，最小比例 1:2
+    const safeRatio = Math.max(0.5, Math.min(2, ratio))
+    
+    // 计算显示尺寸（在 max-width 260px 和 max-height 350px 限制下）
+    let displayWidth = 260
+    let displayHeight = 260 / safeRatio
+    
+    if (displayHeight > 350) {
+      displayHeight = 350
+      displayWidth = 350 * safeRatio
+    }
+    
+    return {
+      width: Math.round(displayWidth),
+      height: Math.round(displayHeight),
+      ratio: safeRatio
+    }
+  }
+  
+  // 默认比例
+  return { width: 200, height: 150, ratio: 1.33 }
+})
+
+const containerStyle = computed(() => {
+  return {
+    width: `${imageSize.value.width}px`,
+    height: `${imageSize.value.height}px`,
+    aspectRatio: `${imageSize.value.ratio}`
+  }
 })
 
 // 缩略图 URL（用于模糊预览）
@@ -268,9 +312,7 @@ onUnmounted(() => {
   border-radius: 6px; // 钉钉紧凑标准：6px 圆角
   overflow: hidden;
   background: var(--dt-bg-card);
-  transition: all var(--dt-transition-base);
-  min-width: 100px; // 钉钉紧凑标准：100px 最小宽度
-  min-height: 80px; // 钉钉紧凑标准：80px 最小高度
+  transition: opacity var(--dt-transition-base);
 
   &:hover {
     opacity: 0.95;
@@ -289,9 +331,7 @@ onUnmounted(() => {
 
 .image-content {
   display: block;
-  max-width: 260px; // 钉钉紧凑标准：260px 最大宽度
-  max-height: 350px; // 钉钉紧凑标准：350px 最大高度
-  object-fit: contain;
+  object-fit: cover; // 优化：cover 配合 aspect-ratio 效果更好
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--dt-transition-base) ease;
@@ -308,14 +348,9 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px; // 钉钉紧凑标准：6px
-  padding: 16px; // 钉钉紧凑标准：16px
-  min-width: 100px; // 钉钉紧凑标准：100px
-  min-height: 80px; // 钉钉紧凑标准：80px
-  max-width: 260px; // 钉钉紧凑标准：260px
-  max-height: 350px; // 钉钉紧凑标准：350px
+  gap: 6px; 
   background: var(--dt-bg-hover);
-  border-radius: 6px; // 钉钉紧凑标准：6px
+  border-radius: 6px;
   overflow: hidden;
 
   &.with-thumb {

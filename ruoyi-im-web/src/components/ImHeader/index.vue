@@ -13,7 +13,7 @@
       <div class="header-search">
         <el-input
           v-model="searchKeyword"
-          placeholder="搜索联系人、群聊、消息..."
+          placeholder="搜索消息、通讯录、群聊..."
           :prefix-icon="Search"
           class="global-search-input"
           clearable

@@ -5,6 +5,10 @@
  *
  * 使用方式：
  * ```js
+ * // 方式1：使用主入口（推荐，获取所有功能）
+ * import { useChat } from '@/composables/useChat'
+ *
+ * // 方式2：按需导入子 composables
  * import {
  *   useChatMessages,
  *   useChatCommands,

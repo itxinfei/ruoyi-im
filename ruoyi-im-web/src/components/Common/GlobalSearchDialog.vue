@@ -37,7 +37,7 @@
                 v-model="searchKeyword"
                 type="text"
                 class="search-input"
-                placeholder="搜索联系人、群组、消息..."
+                placeholder="搜索消息、通讯录、群组..."
                 @input="handleInput"
                 @keydown.enter="handleSearch"
                 @keydown.esc="visible = false"

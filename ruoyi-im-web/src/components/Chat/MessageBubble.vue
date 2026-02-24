@@ -557,14 +557,50 @@ const canRecall = computed(() => {
 
 // 气泡内容：纵向堆叠（文本 + 链接预览 + 标记等）
 .bubble-content {
-  padding: 4px 10px; // 统一使用 4px 上下，10px 左右
-  font-size: 13px; // 统一 13px
-  line-height: 1.35; // 统一 1.35
+  padding: 8px 12px; // 钉钉标准内边距
+  font-size: 14px; 
+  line-height: 1.5;
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
   min-width: 0;
-  border-radius: 4px; // 统一 4px
+  border-radius: 8px;
+  position: relative; // 为尖角定位
+}
+
+// ==================== 气泡尖角 (Bubble Tails) ====================
+.message-bubble:not(.is-right) {
+  // 仅在单条消息或第一条消息时显示尖角
+  &.group-single, &.group-first {
+    .bubble-content::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 10px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 8px solid var(--dt-bubble-left-bg, #FFFFFF);
+      filter: drop-shadow(-1px 1px 1px rgba(0, 0, 0, 0.05));
+    }
+  }
+}
+
+.message-bubble.is-right {
+  &.group-single, &.group-first {
+    .bubble-content::before {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 10px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid var(--dt-bubble-right-bg, var(--dt-brand-color));
+    }
+  }
 }
 
 // 对方消息样式 (左侧) - 白底微阴影
@@ -615,21 +651,19 @@ const canRecall = computed(() => {
 }
 
 // 图片消息 - 无包裹，直接圆角裁切
-.message-bubble.type-image .bubble-content {
+.message-bubble.type-image .bubble-content,
+.message-bubble.type-video .bubble-content {
   padding: 0;
   background: transparent !important;
   border: none !important;
-  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
+  border-radius: 8px;
   box-shadow: none;
   overflow: hidden;
-}
 
-// 视频消息
-.message-bubble.type-video .bubble-content {
-  padding: 0;
-  background: #000 !important;
-  border-radius: 6px; // 钉钉紧凑标准：6px 圆角
-  overflow: hidden;
+  // 多媒体消息不显示尖角
+  &::before {
+    display: none !important;
+  }
 }
 
 // 卡片类消息（自带 padding 和背景，父级不再包裹）

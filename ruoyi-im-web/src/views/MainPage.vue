@@ -2,7 +2,7 @@
   <div :class="['im-app', isDark ? 'dark' : '']">
     <div class="app-container">
       <!-- 桌面端水平导航 -->
-      <ImSideNavNew
+      <ImSideNav
         :active-module="activeModule"
         @switch-module="handleSwitchModule"
         @open-search="showGlobalSearch = true"
@@ -30,8 +30,8 @@
             >
               <EmptyState
                 type="chat"
-                title="选择一个会话开始聊天"
-                description="从左侧列表选择联系人或群组，开始你的对话"
+                title="选择一个聊天，开始沟通吧"
+                description="在这里，你可以通过消息、文件和协作工具与团队保持高效沟通。"
               />
             </div>
           </div>
@@ -141,7 +141,7 @@ import { useStore } from 'vuex'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage } from 'element-plus'
-import ImSideNavNew from '../components/ImSideNavNew/index.vue'
+import ImSideNav from '../components/ImSideNav/index.vue'
 import SessionPanel from './SessionPanel.vue'
 import ChatPanel from './ChatPanel.vue'
 import EmptyState from '@/components/Common/EmptyState.vue'

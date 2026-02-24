@@ -250,7 +250,7 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:8888',
+        target: 'http://localhost:9999',
         changeOrigin: true,
         // 代理超时配置
         timeout: 30000
