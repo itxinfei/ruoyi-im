@@ -14,16 +14,29 @@ import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.DisposableBean;
 
+import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastService {
+public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastService, DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(ImWebSocketBroadcastServiceImpl.class);
+
+    // 广播线程池，避免 parallelStream 导致的线程池耗尽
+    private static final int BROADCAST_THREAD_COUNT =
+        Runtime.getRuntime().availableProcessors() * 2;
+    private final ExecutorService broadcastExecutor =
+        Executors.newFixedThreadPool(BROADCAST_THREAD_COUNT);
 
     private final ImConversationMemberMapper conversationMemberMapper;
     private final ImMessageMapper messageMapper;
@@ -416,29 +429,56 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     /**
      * 广播给会话成员 - 支持多设备推送
+     * 优化：使用分批处理 + 异步发送，避免大群广播时线程池耗尽
      */
     private void broadcastToMembers(List<ImConversationMember> members, String messageJson, Long excludeUserId) {
         Map<Long, List<javax.websocket.Session>> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
 
-        // 使用并行流异步发送，避免阻塞主线程
-        members.parallelStream()
-            .filter(member -> !member.getUserId().equals(excludeUserId))
-            .forEach(member -> {
-                Long targetUserId = member.getUserId();
-                // 获取用户的所有在线会话（支持多设备）
-                List<javax.websocket.Session> sessions = onlineUsers.get(targetUserId);
-                if (sessions != null && !sessions.isEmpty()) {
-                    sessions.forEach(session -> {
-                        if (session.isOpen()) {
-                            try {
-                                session.getBasicRemote().sendText(messageJson);
-                            } catch (Exception e) {
-                                log.warn("发送消息给用户失败: userId={}, sessionId={}", targetUserId, session.getId());
+        // 大群广播限流：每批最多 50 人，避免同时创建大量任务
+        final int BATCH_SIZE = 50;
+        List<CompletableFuture<Void>> futures = new java.util.ArrayList<>();
+
+        for (int i = 0; i < members.size(); i += BATCH_SIZE) {
+            final int batchStart = i;
+            final int batchEnd = Math.min(i + BATCH_SIZE, members.size());
+
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                try {
+                    List<ImConversationMember> batch = members.subList(batchStart, batchEnd);
+                    for (ImConversationMember member : batch) {
+                        if (member.getUserId().equals(excludeUserId)) {
+                            continue;
+                        }
+                        Long targetUserId = member.getUserId();
+                        // 获取用户的所有在线会话（支持多设备）
+                        List<javax.websocket.Session> sessions = onlineUsers.get(targetUserId);
+                        if (sessions != null && !sessions.isEmpty()) {
+                            for (javax.websocket.Session session : sessions) {
+                                if (session.isOpen()) {
+                                    try {
+                                        // 性能优化：使用异步发送，避免阻塞线程
+                                        // getAsyncRemote() 是非阻塞的，适合大群广播
+                                        session.getAsyncRemote().sendText(messageJson);
+                                    } catch (Exception e) {
+                                        log.warn("发送消息给用户失败: userId={}, sessionId={}", targetUserId, session.getId());
+                                    }
+                                }
                             }
                         }
-                    });
+                    }
+                } catch (Exception e) {
+                    log.error("广播批次失败: start={}, end={}", batchStart, batchEnd, e);
                 }
-            });
+            }, broadcastExecutor);
+            futures.add(future);
+        }
+
+        // 异步等待所有批次完成（不阻塞主线程）
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).whenComplete((v, e) -> {
+            if (e != null) {
+                log.error("群消息广播完成但有异常", e);
+            }
+        });
     }
 
     @Override
@@ -628,5 +668,29 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         } catch (Exception e) {
             log.error("广播给会话成员异常: conversationId={}", conversationId, e);
         }
+    }
+
+    /**
+     * 应用关闭时销毁线程池
+     * 使用 @PreDestroy 注解，在 Spring 容器关闭时自动调用
+     */
+    @PreDestroy
+    public void destroy() {
+        log.info("正在关闭广播线程池...");
+        broadcastExecutor.shutdown();
+        try {
+            if (!broadcastExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                log.warn("广播线程池在 5 秒内未能安全关闭，强制关闭...");
+                broadcastExecutor.shutdownNow();
+                if (!broadcastExecutor.awaitTermination(3, TimeUnit.SECONDS)) {
+                    log.error("广播线程池强制关闭失败");
+                }
+            }
+        } catch (InterruptedException e) {
+            log.error("广播线程池关闭被中断", e);
+            broadcastExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        log.info("广播线程池已关闭");
     }
 }

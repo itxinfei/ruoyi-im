@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -83,6 +84,24 @@ public class ImRedisUtil {
         }
         String key = RedisKeyConstants.buildUserInfoKey(userId);
         return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 设置键值对（仅当键不存在时设置）
+     * 用于实现分布式锁
+     *
+     * @param key   键
+     * @param value 值
+     * @param timeout 过期时间
+     * @param unit 时间单位
+     * @return true 表示设置成功，false 表示键已存在
+     */
+    public boolean setIfAbsent(String key, String value, long timeout, TimeUnit unit) {
+        if (redisTemplate == null) {
+            return false;
+        }
+        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, value, timeout, unit);
+        return Boolean.TRUE.equals(result);
     }
 
     /**
@@ -705,27 +724,44 @@ public class ImRedisUtil {
             return null;
         }
         String key = RedisKeyConstants.KEY_PREFIX + "message:idempotent:" + clientMsgId;
+
+        // 先检查是否存在
         Object cachedMsgId = redisTemplate.opsForValue().get(key);
         if (cachedMsgId != null) {
             log.debug("消息幂等性命中: clientMsgId={}, messageId={}", clientMsgId, cachedMsgId);
-            return Long.parseLong(cachedMsgId.toString());
+            try {
+                return Long.parseLong(cachedMsgId.toString());
+            } catch (NumberFormatException e) {
+                log.warn("解析缓存消息ID失败: clientMsgId={}, value={}", clientMsgId, cachedMsgId);
+            }
         }
         return null;
     }
 
     /**
      * 记录客户端消息ID与服务器消息ID的映射关系
+     * 使用 SETNX 确保原子性
      *
      * @param clientMsgId 客户端消息ID
      * @param messageId   服务器消息ID
+     * @return true 表示成功记录，false 表示已存在
      */
-    public void recordClientMsgId(String clientMsgId, Long messageId) {
+    public boolean recordClientMsgId(String clientMsgId, Long messageId) {
         if (redisTemplate == null || clientMsgId == null || clientMsgId.isEmpty()) {
-            return;
+            return false;
         }
         String key = RedisKeyConstants.KEY_PREFIX + "message:idempotent:" + clientMsgId;
-        redisTemplate.opsForValue().set(key, messageId.toString(), IDEMPOTENT_MSG_EXPIRE, TimeUnit.HOURS);
-        log.debug("记录客户端消息ID映射: clientMsgId={}, messageId={}", clientMsgId, messageId);
+
+        // 使用 setIfAbsent (SETNX) 确保原子性
+        boolean success = redisTemplate.opsForValue().setIfAbsent(key, messageId.toString(), IDEMPOTENT_MSG_EXPIRE, TimeUnit.HOURS);
+
+        if (success) {
+            log.debug("记录客户端消息ID映射: clientMsgId={}, messageId={}", clientMsgId, messageId);
+        } else {
+            log.warn("客户端消息ID已存在: clientMsgId={}, messageId={}", clientMsgId, messageId);
+        }
+
+        return success;
     }
 
     // ==================== 群组信息缓存 ====================
