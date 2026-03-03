@@ -1,33 +1,48 @@
 installation:
   version: 6.0.4
   installDate: 2026-02-25T01:35:52.753Z
-  lastUpdated: 2026-03-03T06:21:55.942Z
+  lastUpdated: 2026-03-03T06:23:01.919Z
 modules:
   - name: core
     version: 6.0.4
     installDate: 2026-02-25T01:35:52.753Z
-    lastUpdated: 2026-03-03T06:21:54.479Z
+    lastUpdated: 2026-03-03T06:22:57.815Z
     source: built-in
     npmPackage: null
     repoUrl: null
   - name: bmm
     version: 6.0.4
     installDate: 2026-02-25T01:37:06.771Z
-    lastUpdated: 2026-03-03T06:22:42.772Z
+    lastUpdated: 2026-03-03T06:22:57.815Z
     source: built-in
     npmPackage: null
     repoUrl: null
   - name: tea
     version: 1.5.0
     installDate: 2026-02-25T01:37:09.807Z
-    lastUpdated: 2026-03-03T06:22:46.042Z
+    lastUpdated: 2026-03-03T06:22:59.116Z
     source: external
     npmPackage: bmad-method-test-architecture-enterprise
     repoUrl: https://github.com/bmad-code-org/bmad-method-test-architecture-enterprise
+  - name: bmb
+    version: 0.1.6
+    installDate: 2026-03-03T06:22:49.401Z
+    lastUpdated: 2026-03-03T06:23:00.482Z
+    source: external
+    npmPackage: bmad-builder
+    repoUrl: https://github.com/bmad-code-org/bmad-builder
+  - name: cis
+    version: 0.1.8
+    installDate: 2026-03-03T06:22:52.603Z
+    lastUpdated: 2026-03-03T06:23:01.919Z
+    source: external
+    npmPackage: bmad-creative-intelligence-suite
+    repoUrl: https://github.com/bmad-code-org/bmad-module-creative-intelligence-suite
 ides:
   - claude-code
   - iflow
-  - kiro
   - kilo
-  - qwen
+  - kiro
   - opencode
+  - qwen
+  - trae
