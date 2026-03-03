@@ -61,3 +61,15 @@ Thumbs.db
 sql/
 ruoyi-im-web/src/nul
 nul
+/.agent/
+/.iflow/
+/.kilocode/
+/.kiro/
+/.opencode/
+/.qwen/
+/.sisyphus/
+/.trae/
+/.vscode/
+/_bmad/
+/_bmad-output/
+/BMAD-METHOD/

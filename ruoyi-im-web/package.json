@@ -4,6 +4,7 @@
   "description": "RuoYi IM UI - DingTalk Style",
   "author": "RuoYi",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
