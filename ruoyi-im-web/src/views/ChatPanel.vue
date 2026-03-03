@@ -91,6 +91,10 @@
       <CallDialog
         ref="callDialogRef"
         :session="session"
+        @accept="handleCallAccept"
+        @reject="handleCallReject"
+        @cancel="handleCallCancel"
+        @hangup="handleCallHangup"
       />
       <!-- 多选操作栏 -->
       <Transition name="slide-up">
@@ -110,7 +114,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { Share, Collection, Delete } from '@element-plus/icons-vue'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
@@ -119,7 +123,6 @@ import MessageInput from '@/components/Chat/MessageInput.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
-import { getMessages } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -147,15 +150,14 @@ let typingTimer = null
 
 // 处理对方正在输入状态
 const handleTyping = (isTyping) => {
-  // 通过WebSocket发送 typing 状态
-  const ws = window.ws
-  if (ws && ws.readyState === WebSocket.OPEN && props.session?.id) {
-    ws.send(JSON.stringify({
-      type: 'typing',
+  if (!props.session?.id) return
+  sendWsMessage({
+    type: 'typing',
+    data: {
       sessionId: props.session.id,
       isTyping
-    }))
-  }
+    }
+  })
 }
 
 // 接收对方正在输入的状态（通过WebSocket）
@@ -181,7 +183,17 @@ const messageInputRef = ref(null)
 const emit = defineEmits(['show-user'])
 const handleShowUser = (userId) => emit('show-user', userId)
 
-const { onMessage } = useImWebSocket()
+const { onMessage, onCall, sendMessage: sendWsMessage } = useImWebSocket()
+const activeCall = ref(null)
+
+const handleStartCallEvent = (event) => {
+  const sessionId = event?.detail?.sessionId
+  const callType = event?.detail?.callType
+  if (!sessionId || !callType) return
+  if (`${sessionId}` !== `${props.session?.id}`) return
+  if (callType === 'video') handleStartVideo()
+  else handleStartCall()
+}
 
 const loadHistory = async () => {
   if (!props.session?.id) return
@@ -340,8 +352,66 @@ onMessage((msg) => {
   }
 })
 
+onCall((payload) => {
+  if (!payload) return
+  const action = payload.action || payload.event || payload.status
+  const peerUserId = props.session?.targetId || props.session?.targetUserId
+
+  // 仅处理当前会话相关通话，或明确发给当前用户的通话邀请
+  if (action === 'invite') {
+    if (payload.fromUserId === currentUser.value?.id) return
+    if (payload.sessionId && payload.sessionId !== props.session?.id) return
+    if (payload.toUserId && payload.toUserId !== currentUser.value?.id) return
+
+    activeCall.value = {
+      callId: payload.callId,
+      peerId: payload.fromUserId,
+      type: payload.callType || 'voice'
+    }
+
+    callDialogRef.value?.open(payload.callType || 'voice', {
+      status: 'incoming',
+      callId: payload.callId,
+      peerId: payload.fromUserId,
+      peerName: payload.fromName || payload.fromNickname || props.session?.name || '来电联系人',
+      peerAvatar: payload.fromAvatar || props.session?.avatar || ''
+    })
+    return
+  }
+
+  if (!activeCall.value || payload.callId !== activeCall.value.callId) return
+
+  if (action === 'accept') {
+    callDialogRef.value?.setTalking()
+    ElMessage.success('对方已接听')
+    return
+  }
+
+  if (['reject', 'cancel', 'hangup', 'end'].includes(action)) {
+    callDialogRef.value?.end()
+    const textMap = {
+      reject: '对方已拒绝',
+      cancel: '对方已取消通话',
+      hangup: '通话已结束',
+      end: '通话已结束'
+    }
+    ElMessage.info(textMap[action] || '通话结束')
+    activeCall.value = null
+    return
+  }
+
+  // 当前会话发生变更时自动关闭无关通话状态
+  if (peerUserId && payload.fromUserId && payload.fromUserId !== peerUserId && payload.toUserId && payload.toUserId !== peerUserId) {
+    activeCall.value = null
+  }
+})
+
 watch(() => props.session, () => {
   messages.value = []
+  if (activeCall.value) {
+    callDialogRef.value?.close()
+    activeCall.value = null
+  }
   loadHistory()
 })
 
@@ -401,11 +471,9 @@ const handleFavorite = async (msg) => {
     // 调用收藏API
     await store.dispatch('im/message/addToFavorite', msg)
     ElMessage.success('已添加到收藏')
-    console.log('收藏消息:', msg)
   } catch (e) {
     // 模拟成功（API未实现时）
     ElMessage.success('已添加到收藏')
-    console.log('收藏消息(模拟):', msg)
   }
 }
 
@@ -414,7 +482,6 @@ const handleAddToTodo = async (msg) => {
   try {
     // 这里应调用待办 API，暂时模拟提示
     ElMessage.success('已添加到待办事项')
-    console.log('添加到待办:', msg)
   } catch (e) {
     ElMessage.error('添加失败')
   }
@@ -550,10 +617,6 @@ const handleRetry = async (msg) => {
   }
 }
 
-const handleMemberClick = (member) => {
-  handleShowUser(member.id)
-}
-
 const handleSearchMessages = () => {
   ElMessage.info('消息搜索入口已开启，可在左侧搜索框输入关键词')
 }
@@ -659,28 +722,98 @@ const handleEditConfirm = async (content) => {
 
 // 通话功能
 const handleStartCall = () => {
-  callDialogRef.value?.open('voice')
+  startCall('voice')
 }
 
 const handleStartVideo = () => {
-  callDialogRef.value?.open('video')
+  startCall('video')
 }
 
-// 文件上传相关
 const triggerFileUpload = () => fileInputRef.value?.click()
 const triggerImageUpload = () => imageInputRef.value?.click()
 
+const startCall = (callType) => {
+  if (!props.session) return
+  if (props.session.type === 'GROUP') {
+    ElMessage.warning('当前版本暂不支持群组通话')
+    return
+  }
+
+  const peerId = props.session.targetId || props.session.targetUserId
+  if (!peerId) {
+    ElMessage.warning('无法识别对方账号，暂不可发起通话')
+    return
+  }
+
+  const callId = `call-${Date.now()}-${currentUser.value?.id || 'unknown'}`
+  activeCall.value = { callId, peerId, type: callType }
+
+  callDialogRef.value?.open(callType, {
+    status: 'calling',
+    callId,
+    peerId,
+    peerName: props.session.name,
+    peerAvatar: props.session.avatar
+  })
+
+  sendCallSignal('invite', { callId, peerId, callType })
+}
+
+const sendCallSignal = (action, payload = {}) => {
+  const peerId = payload.peerId || props.session?.targetId || props.session?.targetUserId
+  if (!peerId) return
+  sendWsMessage({
+    type: 'call',
+    data: {
+      action,
+      callId: payload.callId || activeCall.value?.callId,
+      callType: payload.callType || activeCall.value?.type || 'voice',
+      sessionId: props.session?.id,
+      fromUserId: currentUser.value?.id,
+      fromName: currentUser.value?.nickName || currentUser.value?.userName || '我',
+      fromAvatar: currentUser.value?.avatar || '',
+      toUserId: peerId,
+      timestamp: Date.now()
+    }
+  })
+}
+
+const handleCallAccept = ({ callId, callType, peerId }) => {
+  activeCall.value = { callId, type: callType, peerId }
+  sendCallSignal('accept', { callId, callType, peerId })
+}
+
+const handleCallReject = ({ callId, callType, peerId }) => {
+  sendCallSignal('reject', { callId, callType, peerId })
+  activeCall.value = null
+}
+
+const handleCallCancel = ({ callId, callType, peerId }) => {
+  sendCallSignal('cancel', { callId, callType, peerId })
+  activeCall.value = null
+}
+
+const handleCallHangup = ({ callId, callType, peerId }) => {
+  sendCallSignal('hangup', { callId, callType, peerId })
+  activeCall.value = null
+}
+
 const handleFileUpload = async (payload) => {
+  if (!payload) {
+    triggerFileUpload()
+    return
+  }
+
   let file, formData
   if (payload instanceof FormData) {
     formData = payload
     file = payload.get('file')
   } else {
-    file = payload.target.files[0]
+    file = payload?.target?.files?.[0]
     if (!file) return
     formData = new FormData()
     formData.append('file', file)
-    payload.target.value = ''
+    if (payload.target) payload.target.value = ''
   }
 
   // 1. 乐观更新：立即显示文件消息
@@ -738,16 +871,21 @@ const handleFileUpload = async (payload) => {
 }
 
 const handleImageUpload = async (payload) => {
+  if (!payload) {
+    triggerImageUpload()
+    return
+  }
+
   let file, formData
   if (payload instanceof FormData) {
     formData = payload
     file = payload.get('file')
   } else {
-    file = payload.target.files[0]
+    file = payload?.target?.files?.[0]
     if (!file) return
     formData = new FormData()
     formData.append('file', file)
-    payload.target.value = ''
+    if (payload.target) payload.target.value = ''
   }
 
   // 1. 乐观更新：立即显示图片
@@ -801,6 +939,8 @@ const handleImageUpload = async (payload) => {
 }
 
 onMounted(() => {
+  window.addEventListener('im-start-call', handleStartCallEvent)
+
   if (props.session) loadHistory()
   
   // 请求浏览器通知权限
@@ -812,6 +952,15 @@ onMounted(() => {
       }
     })
   })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('im-start-call', handleStartCallEvent)
+
+  if (activeCall.value) {
+    sendCallSignal('cancel', { callId: activeCall.value.callId, callType: activeCall.value.type, peerId: activeCall.value.peerId })
+    activeCall.value = null
+  }
 })
 </script>
 

@@ -38,16 +38,24 @@
       <PersonalProfileDialog v-model="showProfile" />
       <SystemSettingsDialog v-model="showSettings" />
       <HelpFeedbackDialog v-model="showHelp" />
-      <UserDetailDrawer v-model="showUserDetail" :session="detailSession" @send-message="handleSelectSession" />
+      <UserDetailDrawer
+        v-model="showUserDetail"
+        :session="detailSession"
+        @send-message="handleSendMessageFromDrawer"
+        @voice-call="handleVoiceCallFromDrawer"
+        @video-call="handleVideoCallFromDrawer"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useTheme } from '@/composables/useTheme'
+import { createConversation } from '@/api/im'
+import { ElMessage } from 'element-plus'
 import ImSideNavNew from '../components/ImSideNavNew/index.vue'
 import SessionPanel from './SessionPanel.vue'
 import WorkbenchPanel from './WorkbenchPanel.vue'
@@ -94,6 +102,7 @@ const handleSwitchModule = (module) => {
 }
 
 const handleSelectSession = (session) => {
+  if (!session?.id) return
   store.dispatch('im/session/selectSession', session)
 }
 
@@ -105,6 +114,74 @@ const handleShowUser = (userId) => {
     type: 'PRIVATE'
   }
   showUserDetail.value = true
+}
+
+const ensurePrivateSession = async (userId) => {
+  const sessions = store.state.im.session?.sessions || []
+  const existed = sessions.find(
+    s => s.type === 'PRIVATE' && `${s.targetId}` === `${userId}`
+  )
+  if (existed) return existed
+
+  const res = await createConversation({
+    type: 'PRIVATE',
+    targetId: userId
+  })
+  if (res.code !== 200 || !res.data) {
+    throw new Error(res.msg || '创建会话失败')
+  }
+
+  await store.dispatch('im/session/loadSessions')
+  const latestSessions = store.state.im.session?.sessions || []
+  return latestSessions.find(s => `${s.id}` === `${res.data.id}`) || res.data
+}
+
+const handleSendMessageFromDrawer = async (sessionLike) => {
+  const userId = sessionLike?.targetUserId || sessionLike?.targetId || sessionLike?.userId
+  if (!userId) return
+
+  try {
+    const targetSession = await ensurePrivateSession(userId)
+    handleSelectSession(targetSession)
+    activeModule.value = 'chat'
+  } catch (error) {
+    ElMessage.error('发起会话失败，请稍后重试')
+  }
+}
+
+const triggerCallFromDrawer = async (sessionLike, callType) => {
+  const userId = sessionLike?.targetUserId || sessionLike?.targetId || sessionLike?.userId
+  if (!userId) return
+
+  try {
+    const targetSession = await ensurePrivateSession(userId)
+    handleSelectSession(targetSession)
+    activeModule.value = 'chat'
+    window.dispatchEvent(new CustomEvent('im-start-call', {
+      detail: { sessionId: targetSession.id, callType }
+    }))
+  } catch (error) {
+    ElMessage.error('通话发起失败，请稍后重试')
+  }
+}
+
+const handleVoiceCallFromDrawer = async (sessionLike) => {
+  await triggerCallFromDrawer(sessionLike, 'voice')
+}
+
+const handleVideoCallFromDrawer = async (sessionLike) => {
+  await triggerCallFromDrawer(sessionLike, 'video')
+}
+
+const handleSwitchToChatEvent = async (event) => {
+  const session = event?.detail?.conversation
+  if (!session?.id) return
+
+  activeModule.value = 'chat'
+  await store.dispatch('im/session/loadSessions')
+  const sessions = store.state.im.session?.sessions || []
+  const target = sessions.find(s => `${s.id}` === `${session.id}`) || session
+  handleSelectSession(target)
 }
 
 // Watch session change to auto-switch to chat
@@ -134,6 +211,8 @@ onOffline((data) => {
 })
 
 onMounted(async () => {
+  window.addEventListener('switch-to-chat', handleSwitchToChatEvent)
+
   try {
     await store.dispatch('user/getUserInfo')
   } catch (error) {
@@ -142,6 +221,10 @@ onMounted(async () => {
 
   try {
     await store.dispatch('im/session/loadSessions')
+    const sessions = store.state.im.session?.sessions || []
+    if (!store.state.im.session?.currentSession && sessions.length > 0) {
+      handleSelectSession(sessions[0])
+    }
   } catch (error) {
     console.warn('加载会话列表失败', error)
   }
@@ -152,6 +235,10 @@ onMounted(async () => {
         connect(token)
     }
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('switch-to-chat', handleSwitchToChatEvent)
 })
 </script>
 

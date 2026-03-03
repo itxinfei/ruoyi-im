@@ -121,10 +121,9 @@ export default {
     async loadMessages({ commit }, { sessionId, lastMessageId = null, pageSize = 20, isLoadMore = false }) {
       commit('SET_LOADING', true)
       try {
-        const res = await getMessages(sessionId, { lastId: lastMessageId, pageSize })
+        const res = await getMessages(sessionId, { lastId: lastMessageId, limit: pageSize })
         if (res.code === 200 && res.data) {
-          // 后端返回是按时间倒序的 (newest first)，前端需要 newest at bottom
-          const transformed = res.data.reverse()
+          const transformed = res.data
           if (isLoadMore) {
             commit('PREPEND_MESSAGES', { sessionId, messages: transformed })
           } else {

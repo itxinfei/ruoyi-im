@@ -11,19 +11,19 @@
     <div class="call-content">
       <div class="user-info">
         <!-- 群组使用图标，单聊使用钉钉风格头像 -->
-        <div v-if="session?.type === 'GROUP'" class="call-avatar group-avatar">
+        <div v-if="isGroupCall" class="call-avatar group-avatar">
           <span class="material-icons-outlined">groups</span>
         </div>
         <DingtalkAvatar
           v-else
-          :src="session?.avatar"
-          :name="session?.name"
-          :user-id="session?.targetId || session?.targetUserId"
+          :src="peerAvatar"
+          :name="peerName"
+          :user-id="peerId"
           :size="80"
           shape="circle"
           custom-class="call-avatar"
         />
-        <h3 class="call-name">{{ session?.name }}</h3>
+        <h3 class="call-name">{{ peerName }}</h3>
         <p class="call-status">{{ statusText }}</p>
       </div>
 
@@ -70,12 +70,18 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 const props = defineProps({
   session: Object
 })
+const emit = defineEmits(['accept', 'reject', 'cancel', 'hangup', 'closed'])
 
 const visible = ref(false)
 const status = ref('calling') // calling, incoming, talking, hanging_up
 const type = ref('voice') // voice, video
 const duration = ref(0)
+const callId = ref('')
+const peerId = ref(null)
+const peerName = ref('')
+const peerAvatar = ref('')
 let timer = null
+const isGroupCall = computed(() => props.session?.type === 'GROUP')
 
 const title = computed(() => type.value === 'voice' ? '语音通话' : '视频通话')
 
@@ -95,28 +101,36 @@ const formattedDuration = computed(() => {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
 })
 
-const open = (callType, initialStatus = 'calling') => {
+const open = (callType, options = {}) => {
   type.value = callType
-  status.value = initialStatus
+  status.value = options.status || 'calling'
+  callId.value = options.callId || `call-${Date.now()}`
+  peerId.value = options.peerId ?? props.session?.targetId ?? props.session?.targetUserId ?? null
+  peerName.value = options.peerName || props.session?.name || '未知联系人'
+  peerAvatar.value = options.peerAvatar || props.session?.avatar || ''
   visible.value = true
   duration.value = 0
   if (status.value === 'talking') startTimer()
 }
 
 const handleAccept = () => {
+  emit('accept', { callId: callId.value, callType: type.value, peerId: peerId.value })
   status.value = 'talking'
   startTimer()
 }
 
 const handleReject = () => {
+  emit('reject', { callId: callId.value, callType: type.value, peerId: peerId.value })
   close()
 }
 
 const handleCancel = () => {
+  emit('cancel', { callId: callId.value, callType: type.value, peerId: peerId.value })
   close()
 }
 
 const handleHangup = () => {
+  emit('hangup', { callId: callId.value, callType: type.value, peerId: peerId.value })
   close()
 }
 
@@ -137,13 +151,27 @@ const stopTimer = () => {
 const close = () => {
   stopTimer()
   visible.value = false
+  emit('closed', { callId: callId.value })
+}
+
+const setTalking = () => {
+  status.value = 'talking'
+  startTimer()
+}
+
+const end = () => {
+  status.value = 'hanging_up'
+  stopTimer()
+  setTimeout(() => {
+    visible.value = false
+  }, 600)
 }
 
 onUnmounted(() => {
   stopTimer()
 })
 
-defineExpose({ open, close })
+defineExpose({ open, close, setTalking, end })
 </script>
 
 <style scoped lang="scss">

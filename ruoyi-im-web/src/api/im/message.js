@@ -29,10 +29,18 @@ export function sendMessage(data) {
  * @returns {Promise}
  */
 export function getMessages(conversationId, params = {}) {
+  const requestParams = { ...params }
+  if (requestParams.lastMessageId !== undefined && requestParams.lastId === undefined) {
+    requestParams.lastId = requestParams.lastMessageId
+  }
+  if (requestParams.pageSize !== undefined && requestParams.limit === undefined) {
+    requestParams.limit = requestParams.pageSize
+  }
+
   return request({
     url: `/api/im/message/list/${conversationId}`,
     method: 'get',
-    params
+    params: requestParams
   })
 }
 
@@ -56,10 +64,16 @@ export function recallMessage(messageId) {
  * @returns {Promise}
  */
 export function editMessage(messageId, data) {
+  const payload = { ...data }
+  payload.messageId = messageId
+  if (payload.content !== undefined && payload.newContent === undefined) {
+    payload.newContent = payload.content
+  }
+
   return request({
     url: `/api/im/message/${messageId}/edit`,
     method: 'put',
-    data
+    data: payload
   })
 }
 
@@ -83,10 +97,15 @@ export function deleteMessage(messageId) {
  * @returns {Promise}
  */
 export function forwardMessage(data) {
+  const payload = { ...data }
+  if (payload.targetConversationId !== undefined && payload.toConversationId === undefined) {
+    payload.toConversationId = payload.targetConversationId
+  }
+
   return request({
     url: '/api/im/message/forward',
     method: 'post',
-    data
+    data: payload
   })
 }
 

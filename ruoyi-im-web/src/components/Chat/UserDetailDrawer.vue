@@ -102,7 +102,6 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
 import { ChatDotRound, Phone, VideoCamera, Close, Male, Female } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { getUserInfo } from '@/api/im/user'
@@ -174,11 +173,13 @@ const handleSendMessage = () => {
 }
 
 const handleVoiceCall = () => {
-  ElMessage.info('语音通话功能开发中')
+  emit('voice-call', props.session)
+  handleClose()
 }
 
 const handleVideoCall = () => {
-  ElMessage.info('视频通话功能开发中')
+  emit('video-call', props.session)
+  handleClose()
 }
 </script>
 

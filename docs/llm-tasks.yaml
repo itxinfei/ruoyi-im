@@ -1,0 +1,375 @@
+version: "1.0.0"
+updated_at: "2026-03-03"
+project: "RuoYi-IM"
+workspace_root: "D:/MyCode/im"
+docs:
+  requirement: "D:/MyCode/im/docs/需求文档.md"
+  llm_spec: "D:/MyCode/im/docs/大模型研发规范.md"
+  task_template: "D:/MyCode/im/docs/LLM任务模板.md"
+  prompt_library: "D:/MyCode/im/docs/Claude提示词库.md"
+  ui_benchmark: "D:/MyCode/im/docs/UI对标设计规范.md"
+  bmad_spec: "D:/MyCode/im/docs/BMAD使用规范.md"
+  java_vue_spec: "D:/MyCode/im/docs/Java+Vue双端开发规范.md"
+  java_api_breakdown: "D:/MyCode/im/docs/Java后端子任务拆解.md"
+  java_vue_doc_mode: "D:/MyCode/im/docs/Java+Vue文档执行手册.md"
+  chat_ui_gap_report: "D:/MyCode/im/docs/消息模块对标评估报告.md"
+
+stack_baseline:
+  jdk: "1.8"
+  vue: "3.x"
+  mysql: "5.7"
+  node: "18 LTS"
+  dev_os: "Windows 11"
+  prod_os: "CentOS 7"
+
+execution_policy:
+  single_task_only: true
+  must_respect_scope: true
+  must_run_verify_cmd: true
+  forbidden:
+    - "占位文案替代真实功能（如：开发中）"
+    - "范围外文件修改"
+    - "不执行验证命令直接宣称完成"
+    - "Java代码使用魔法值硬编码"
+    - "Java代码使用多层三元或复杂表达式链"
+  done_definition:
+    - "代码已落地"
+    - "verify_cmd 全通过"
+    - "AC 全量对照"
+    - "输出遗留风险"
+
+status_enum:
+  - "todo"
+  - "doing"
+  - "done"
+  - "blocked"
+
+priority_enum:
+  - "P0"
+  - "P1"
+  - "P2"
+
+tasks:
+  - task_id: "IM-A-001"
+    title: "语音通话链路闭环"
+    priority: "P0"
+    status: "doing"
+    owner: "llm"
+    goal: "打通语音通话邀请、接听、拒绝、挂断和结束状态同步"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/CallDialog.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/UserDetailDrawer.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/utils/websocket/imWebSocket.js"
+    scope_out:
+      - "D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/views/DocumentsPanel.vue"
+    acceptance:
+      - id: "AC1"
+        text: "头部与用户详情入口均可发起语音通话"
+      - id: "AC2"
+        text: "对端可接听、拒绝、取消和挂断"
+      - id: "AC3"
+        text: "链路中不出现“开发中”占位提示"
+      - id: "AC4"
+        text: "通话状态可在弹窗中正确反映"
+    verify_cmd:
+      - "npm run build"
+    risk: "high"
+    rollback: "回滚 CallDialog/ChatPanel/UserDetailDrawer 对 call 事件的改动"
+    notes:
+      - "当前已完成信令状态机第一阶段，后续需接入真实 WebRTC 媒体流"
+
+  - task_id: "IM-A-002"
+    title: "视频通话链路闭环"
+    priority: "P0"
+    status: "todo"
+    owner: "llm"
+    goal: "打通视频通话邀请、接听、挂断并处理异常状态"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/CallDialog.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/UserDetailDrawer.vue"
+    scope_out:
+      - "D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue"
+    acceptance:
+      - id: "AC1"
+        text: "可从聊天头部与详情抽屉发起视频通话"
+      - id: "AC2"
+        text: "双方可接听和挂断，状态一致"
+      - id: "AC3"
+        text: "异常断线有提示并可恢复"
+    verify_cmd:
+      - "npm run build"
+    risk: "high"
+    rollback: "恢复为仅语音状态，移除视频入口事件"
+
+  - task_id: "IM-B-001"
+    title: "语音消息录制与播放闭环"
+    priority: "P0"
+    status: "todo"
+    owner: "llm"
+    goal: "实现录音、上传、播放、进度拖动与失败重试"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageInput.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/VoiceMessageBubble.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue"
+    scope_out:
+      - "D:/MyCode/im/ruoyi-im-web/src/views/ContactsPanel.vue"
+    acceptance:
+      - id: "AC1"
+        text: "支持录制并发送语音消息"
+      - id: "AC2"
+        text: "支持播放、暂停、拖拽进度"
+      - id: "AC3"
+        text: "失败可重试并有反馈"
+    verify_cmd:
+      - "npm run build"
+    risk: "high"
+    rollback: "保留语音播放组件，回退录制入口行为"
+
+  - task_id: "IM-C-001"
+    title: "群文件面板与入口完善"
+    priority: "P1"
+    status: "todo"
+    owner: "llm"
+    goal: "完善群文件查看、上传、下载、筛选能力"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-web/src/components/GroupDetailDrawer/index.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue"
+    acceptance:
+      - id: "AC1"
+        text: "群聊内可进入群文件面板"
+      - id: "AC2"
+        text: "可上传和下载群文件"
+      - id: "AC3"
+        text: "可按文件类型筛选"
+    verify_cmd:
+      - "npm run build"
+    risk: "medium"
+    rollback: "回退群文件入口并保留只读列表"
+
+  - task_id: "IM-D-001"
+    title: "消息收藏全链路"
+    priority: "P1"
+    status: "todo"
+    owner: "llm"
+    goal: "打通收藏、取消收藏、收藏列表查询"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/store/modules/im-message.js"
+      - "D:/MyCode/im/ruoyi-im-web/src/api/im/message.js"
+    acceptance:
+      - id: "AC1"
+        text: "可收藏和取消收藏消息"
+      - id: "AC2"
+        text: "收藏列表可查看"
+      - id: "AC3"
+        text: "状态与服务端一致"
+    verify_cmd:
+      - "npm run build"
+    risk: "medium"
+    rollback: "保留本地入口但移除服务端写入逻辑"
+
+  - task_id: "IM-D-002"
+    title: "链接卡片自动识别与预览"
+    priority: "P1"
+    status: "todo"
+    owner: "llm"
+    goal: "将URL自动识别升级为链接卡片（标题/摘要/缩略图）"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageBubble.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/LinkCardMessage.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue"
+    acceptance:
+      - id: "AC1"
+        text: "URL可自动识别并优先展示卡片"
+      - id: "AC2"
+        text: "解析失败时降级为可点击链接"
+      - id: "AC3"
+        text: "暗色模式下视觉可读"
+    verify_cmd:
+      - "npm run build"
+    risk: "medium"
+    rollback: "降级为纯文本链接渲染"
+
+  - task_id: "IM-UI-001"
+    title: "聊天主界面对标钉钉布局重构"
+    priority: "P0"
+    status: "todo"
+    owner: "llm"
+    goal: "按钉钉主对标重构聊天页面信息架构与交互密度"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-web/src/views/MainPage.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/views/SessionPanel.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageList.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageInput.vue"
+    acceptance:
+      - id: "AC1"
+        text: "三段式布局稳定，信息层级清晰"
+      - id: "AC2"
+        text: "常用动作2次点击内可达"
+      - id: "AC3"
+        text: "无会话空态可引导动作，非空白占位"
+      - id: "AC4"
+        text: "暗色模式可读且不崩布局"
+    verify_cmd:
+      - "npm run build"
+    risk: "high"
+    rollback: "回退 MainPage/SessionPanel/ChatPanel 样式与结构改动"
+
+  - task_id: "IM-UI-002"
+    title: "聊天可用性细节对标（飞书/野火补充）"
+    priority: "P1"
+    status: "todo"
+    owner: "llm"
+    goal: "补齐消息阅读效率与交互反馈细节"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageBubble.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageList.vue"
+      - "D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageInput.vue"
+    acceptance:
+      - id: "AC1"
+        text: "时间分割语义化（今天/昨天/日期）"
+      - id: "AC2"
+        text: "上传/发送失败反馈和重试路径清晰"
+      - id: "AC3"
+        text: "链接可点击且支持卡片化降级"
+    verify_cmd:
+      - "npm run build"
+    risk: "medium"
+    rollback: "恢复原时间分割与消息渲染逻辑"
+
+  - task_id: "IM-API-001"
+    title: "通话信令后端接口与状态存储"
+    priority: "P0"
+    status: "todo"
+    owner: "llm"
+    goal: "为语音/视频通话提供后端信令接口、状态落库和异常处理"
+    depends_on:
+      - "IM-A-001"
+      - "IM-A-002"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/controller"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/service"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/mapper"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/resources/mapper"
+      - "D:/MyCode/im/sql/im.sql"
+    acceptance:
+      - id: "AC1"
+        text: "提供发起/接听/拒绝/挂断接口并有统一错误码"
+      - id: "AC2"
+        text: "会话状态可追踪，异常断线可恢复"
+      - id: "AC3"
+        text: "Java代码符合JDK8且无魔法值、无复杂表达式链"
+    verify_cmd:
+      - "mvn -DskipTests compile"
+    risk: "high"
+    rollback: "回退通话接口与状态表相关改动，保留现有消息能力"
+    sub_tasks:
+      - "API-001-A DTO/VO与错误码常量定义"
+      - "API-001-B Controller接口实现"
+      - "API-001-C Service状态机实现"
+      - "API-001-D Mapper/XML落库查询"
+      - "API-001-E 异常与权限分支"
+      - "API-001-F 前后端联调与回归"
+
+  - task_id: "IM-API-002"
+    title: "会话状态统一写入im_user_session"
+    priority: "P0"
+    status: "todo"
+    owner: "llm"
+    goal: "将置顶/免打扰/未读/已读游标统一到im_user_session并保持兼容读"
+    depends_on:
+      - "IM-UI-001"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/service/impl/ImConversationServiceImpl.java"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/service/impl/ImMessageServiceImpl.java"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/resources/mapper/ImConversationMapper.xml"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/resources/mapper/ImUserSessionMapper.xml"
+    acceptance:
+      - id: "AC1"
+        text: "会话状态类写操作优先写im_user_session"
+      - id: "AC2"
+        text: "查询链路兼容历史数据，不出现空会话"
+      - id: "AC3"
+        text: "代码可维护、异常可诊断、事务边界清晰"
+    verify_cmd:
+      - "mvn -DskipTests compile"
+    risk: "high"
+    rollback: "恢复旧写路径并保留兼容查询"
+    sub_tasks:
+      - "API-002-A 状态写路径审计"
+      - "API-002-B 统一状态更新方法"
+      - "API-002-C 迁移期双写与回写"
+      - "API-002-D 查询优先级统一"
+      - "API-002-E 边界与空值保护"
+      - "API-002-F 联调与数据一致性验证"
+
+  - task_id: "IM-API-003"
+    title: "消息收藏后端闭环"
+    priority: "P1"
+    status: "todo"
+    owner: "llm"
+    goal: "打通消息收藏、取消收藏、分页查询接口并与前端联调"
+    depends_on:
+      - "IM-D-001"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/controller/ImMessageController.java"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/service"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/mapper"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/resources/mapper"
+    acceptance:
+      - id: "AC1"
+        text: "收藏与取消收藏幂等，重复请求不报错"
+      - id: "AC2"
+        text: "收藏列表分页稳定，排序正确"
+      - id: "AC3"
+        text: "接口错误信息可读且可定位问题"
+    verify_cmd:
+      - "mvn -DskipTests compile"
+    risk: "medium"
+    rollback: "回退收藏写接口，仅保留查询"
+    sub_tasks:
+      - "API-003-A 收藏DTO/VO与分页模型"
+      - "API-003-B 收藏相关Controller接口"
+      - "API-003-C 幂等收藏/取消收藏逻辑"
+      - "API-003-D Mapper/XML分页排序"
+      - "API-003-E 错误处理与权限校验"
+      - "API-003-F 与前端收藏联调"
+
+  - task_id: "IM-API-004"
+    title: "文件上传与消息落库一致性"
+    priority: "P1"
+    status: "todo"
+    owner: "llm"
+    goal: "规范文件上传、消息发送、失败补偿与重试策略"
+    depends_on:
+      - "IM-B-001"
+      - "IM-C-001"
+    scope_in:
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/service/impl/ImMessageServiceImpl.java"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/java/com/ruoyi/im/service"
+      - "D:/MyCode/im/ruoyi-im-api/src/main/resources/mapper/ImMessageMapper.xml"
+    acceptance:
+      - id: "AC1"
+        text: "上传成功才允许消息状态置为成功"
+      - id: "AC2"
+        text: "上传失败可重试且不会脏写消息记录"
+      - id: "AC3"
+        text: "代码无魔法值、无复杂表达式链"
+    verify_cmd:
+      - "mvn -DskipTests compile"
+    risk: "medium"
+    rollback: "回退失败补偿逻辑，保留基础上传"
+    sub_tasks:
+      - "API-004-A 上传状态常量与错误码"
+      - "API-004-B 上传与消息事务策略"
+      - "API-004-C Mapper/XML状态更新"
+      - "API-004-D 重试接口与重试上限"
+      - "API-004-E 异常恢复策略"
+      - "API-004-F 上传链路联调验证"
