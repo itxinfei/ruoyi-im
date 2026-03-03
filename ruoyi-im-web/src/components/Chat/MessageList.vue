@@ -4,10 +4,10 @@
     <div v-if="loading" class="loading-wrapper">
       <el-icon class="is-loading"><Loading /></el-icon>数据加载中...
     </div>
-    
+
     <!-- 空状态 -->
     <div v-else-if="messages.length === 0" class="empty">暂无消息</div>
-    
+
     <!-- 消息内容 -->
     <template v-else>
       <div v-for="msg in messagesWithDividers" :key="msg.id || msg.timeText" :data-id="msg.id" class="message-wrapper">
@@ -17,8 +17,8 @@
         </div>
 
         <!-- 消息项组件 -->
-        <MessageItem 
-          v-else 
+        <MessageItem
+          v-else
           :message="msg"
           @reply="$emit('reply', $event)"
           @reaction="handleReaction"
@@ -27,15 +27,17 @@
           @at="$emit('at', $event)"
           @show-user="$emit('show-user', $event)"
           @retry="$emit('retry', $event)"
+          @multi-select="handleMultiSelect"
         >
           <!-- 消息气泡内容插槽 -->
           <template #bubble>
-            <MessageBubble 
-              :message="msg" 
+            <MessageBubble
+              :message="msg"
               :session-type="sessionType"
+              :class="{ 'selected': isMultiSelectMode && selectedMessages.includes(msg.id) }"
               @command="handleCommand($event, msg)"
               @at="$emit('at', msg)"
-              @preview="previewImage"
+              @preview="openImagePreview"
               @download="downloadFile"
             />
           </template>
@@ -76,6 +78,14 @@
         <span>回到最新</span>
       </div>
     </Transition>
+
+    <!-- 图片全屏预览组件 -->
+    <ImagePreviewDialog
+      v-model:visible="showImagePreview"
+      :image-list="imagePreviewList"
+      :initial-index="imagePreviewIndex"
+      @close="showImagePreview = false"
+    />
   </div>
 </template>
 
@@ -87,6 +97,7 @@ import { getMessageReadUsers } from '@/api/im/message'
 import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import ImagePreviewDialog from '@/components/Common/ImagePreviewDialog.vue'
 
 const props = defineProps({
   messages: {
@@ -102,17 +113,26 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry'])
+const emit = defineEmits(['delete', 'recall', 'reply', 'load-more', 'edit', 'command', 'at', 'show-user', 'retry', 'multi-select'])
 
 const listRef = ref(null)
 const readUsersMap = ref({})
 const loadingReadUsers = ref({})
 const showScrollToBottom = ref(false)
 
+// 图片预览状态
+const showImagePreview = ref(false)
+const imagePreviewList = ref([])
+const imagePreviewIndex = ref(0)
+
+// 多选模式状态
+const isMultiSelectMode = ref(false)
+const selectedMessages = ref([])
+
 // 获取已读用户列表
 const fetchReadUsers = async (msg) => {
   if (readUsersMap.value[msg.id] || loadingReadUsers.value[msg.id]) return
-  
+
   loadingReadUsers.value[msg.id] = true
   try {
     const res = await getMessageReadUsers(props.sessionId, msg.id)
@@ -126,16 +146,54 @@ const fetchReadUsers = async (msg) => {
   }
 }
 
-// 图片预览
-const previewImage = (url) => {
-  // 实际项目中应调用全局预览组件
-  window.open(url, '_blank')
+// 打开图片预览
+const openImagePreview = (url) => {
+  // 收集当前会话所有图片消息
+  const imageMessages = props.messages.filter(m => m.type === 'IMAGE')
+  const imageUrls = imageMessages.map(m => {
+    try {
+      const content = typeof m.content === 'string' ? JSON.parse(m.content) : m.content
+      return content.imageUrl || content
+    } catch {
+      return m.content
+    }
+  }).filter(Boolean)
+
+  // 找到当前图片的索引
+  const currentUrl = typeof url === 'string' ? url : url?.imageUrl || url
+  const index = imageUrls.findIndex(u => u === currentUrl || u?.imageUrl === currentUrl)
+
+  imagePreviewList.value = imageUrls
+  imagePreviewIndex.value = index >= 0 ? index : 0
+  showImagePreview.value = true
 }
 
 // 下载文件
 const downloadFile = (fileInfo) => {
   if (!fileInfo.fileUrl) return
   window.open(fileInfo.fileUrl, '_blank')
+}
+
+// 处理多选
+const handleMultiSelect = (msg) => {
+  isMultiSelectMode.value = true
+  toggleMessageSelection(msg.id)
+}
+
+// 切换消息选中状态
+const toggleMessageSelection = (msgId) => {
+  const index = selectedMessages.value.indexOf(msgId)
+  if (index === -1) {
+    selectedMessages.value.push(msgId)
+  } else {
+    selectedMessages.value.splice(index, 1)
+  }
+}
+
+// 退出多选模式
+const exitMultiSelectMode = () => {
+  isMultiSelectMode.value = false
+  selectedMessages.value = []
 }
 
 // 格式化时间分隔符文案
@@ -181,10 +239,10 @@ const messagesWithDividers = computed(() => {
     }
 
     if (showDivider) {
-      res.push({ 
-        isTimeDivider: true, 
-        timeText: formatTimeDivider(msg.timestamp), 
-        id: 'divider-' + msg.timestamp + '-' + index 
+      res.push({
+        isTimeDivider: true,
+        timeText: formatTimeDivider(msg.timestamp),
+        id: 'divider-' + msg.timestamp + '-' + index
       })
     }
     res.push(msg)
@@ -214,6 +272,8 @@ const handleCommand = (cmd, msg) => {
     ElMessage.success('已复制')
   } else if (cmd === 'at') {
     emit('at', msg)
+  } else if (cmd === 'multi-select') {
+    handleMultiSelect(msg)
   } else {
     emit('command', cmd, msg)
   }
@@ -241,14 +301,14 @@ const scrollToMsg = (id) => {
 // 监听滚动事件
 const handleScroll = () => {
   if (!listRef.value || props.loading) return
-  
+
   const { scrollTop, clientHeight, scrollHeight } = listRef.value
-  
+
   // 滚动到顶部加载更多
   if (scrollTop === 0) {
     emit('load-more')
   }
-  
+
   // 检测是否接近底部
   const distanceFromBottom = scrollHeight - scrollTop - clientHeight
   showScrollToBottom.value = distanceFromBottom > 300
@@ -268,7 +328,7 @@ const observer = ref(null)
 // 初始化已读上报监听
 const initReadObserver = () => {
   if (observer.value) observer.value.disconnect()
-  
+
   observer.value = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -304,7 +364,13 @@ onUnmounted(() => {
   if (observer.value) observer.value.disconnect()
 })
 
-defineExpose({ scrollToBottom, maintainScroll })
+defineExpose({ 
+  scrollToBottom, 
+  maintainScroll,
+  isMultiSelectMode,
+  selectedMessages,
+  exitMultiSelectMode
+})
 </script>
 
 <style scoped lang="scss">
@@ -312,7 +378,7 @@ defineExpose({ scrollToBottom, maintainScroll })
   flex: 1;
   overflow-y: auto;
   padding: 16px;
-  background: var(--dt-bg-chat);
+  background: #fff;
   position: relative;
 }
 
@@ -340,7 +406,7 @@ defineExpose({ scrollToBottom, maintainScroll })
   color: #b3b3b3;
   font-size: 12px;
   line-height: 1;
-  
+
   .time-text {
     background: rgba(0, 0, 0, 0.05);
     padding: 4px 12px;
@@ -365,14 +431,14 @@ defineExpose({ scrollToBottom, maintainScroll })
 .read-users-list {
   max-height: 200px;
   overflow-y: auto;
-  
+
   .read-user-item {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
     font-size: 13px;
-    
+
     &:hover { background-color: #f8fafc; }
     &:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
   }
@@ -395,11 +461,19 @@ defineExpose({ scrollToBottom, maintainScroll })
   color: #595959;
   z-index: 10;
   transition: all 0.2s;
-  
+
   &:hover {
     background: #f8fafc;
     border-color: #1677ff;
     color: #1677ff;
+  }
+}
+
+// 多选模式下的选中状态
+.message-wrapper {
+  :deep(.bubble.selected) {
+    box-shadow: 0 0 0 2px var(--dt-brand-color);
+    background: var(--dt-brand-bg) !important;
   }
 }
 
@@ -409,6 +483,29 @@ defineExpose({ scrollToBottom, maintainScroll })
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+
+// 暗色模式
+.dark {
+  .time-divider .time-text {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .scroll-to-bottom-btn {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+    color: var(--dt-text-primary-dark);
+    
+    &:hover {
+      background: var(--dt-bg-hover-dark);
+      border-color: var(--dt-brand-color);
+      color: var(--dt-brand-color);
+    }
+  }
+  
+  .message-wrapper :deep(.bubble.selected) {
+    background: rgba(22, 119, 255, 0.2) !important;
+  }
 }
 </style>
 

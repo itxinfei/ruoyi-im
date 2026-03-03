@@ -13,6 +13,7 @@
       <main class="flex-1 min-w-0 overflow-hidden flex">
         <SessionPanel 
           v-if="activeModule === 'chat'" 
+          :current-session="currentSession"
           @select-session="handleSelectSession" 
           @show-user="handleShowUser"
         />
@@ -27,7 +28,7 @@
         
         <!-- 核心聊天面板 -->
         <ChatPanel 
-          v-if="activeModule === 'chat' && currentSession" 
+          v-if="activeModule === 'chat'" 
           :session="currentSession" 
           @show-user="handleShowUser"
         />

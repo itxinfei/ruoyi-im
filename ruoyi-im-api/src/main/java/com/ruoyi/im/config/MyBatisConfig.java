@@ -21,7 +21,15 @@ public class MyBatisConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+
+        // 分页插件
+        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor(DbType.MYSQL);
+        // 设置最大单页限制数量，-1不受限制
+        paginationInterceptor.setMaxLimit(500L);
+        // 溢出总页数后是否进行处理
+        paginationInterceptor.setOverflow(false);
+
+        interceptor.addInnerInterceptor(paginationInterceptor);
         return interceptor;
     }
 }

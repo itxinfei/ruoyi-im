@@ -23,24 +23,49 @@
     <select id="selectConversationsByUserId" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List" />
         FROM im_conversation c
-        JOIN im_conversation_member cm ON c.id = cm.conversation_id
-        WHERE cm.user_id = #{userId} AND cm.is_deleted = 0
-        ORDER BY cm.is_pinned DESC, c.last_message_time DESC
+        LEFT JOIN im_user_session us
+               ON c.id = us.conversation_id
+              AND us.user_id = #{userId}
+              AND us.is_deleted = 0
+        LEFT JOIN im_conversation_member cm
+               ON c.id = cm.conversation_id
+              AND cm.user_id = #{userId}
+              AND cm.is_deleted = 0
+        WHERE (us.id IS NOT NULL OR cm.id IS NOT NULL)
+          AND c.is_deleted = 0
+        ORDER BY COALESCE(us.is_pinned, cm.is_pinned, 0) DESC, c.last_message_time DESC
     </select>
 
     <select id="selectByUserId" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List" />
         FROM im_conversation c
-        JOIN im_conversation_member cm ON c.id = cm.conversation_id
-        WHERE cm.user_id = #{userId} AND cm.is_deleted = 0
-        ORDER BY cm.is_pinned DESC, c.last_message_time DESC
+        LEFT JOIN im_user_session us
+               ON c.id = us.conversation_id
+              AND us.user_id = #{userId}
+              AND us.is_deleted = 0
+        LEFT JOIN im_conversation_member cm
+               ON c.id = cm.conversation_id
+              AND cm.user_id = #{userId}
+              AND cm.is_deleted = 0
+        WHERE (us.id IS NOT NULL OR cm.id IS NOT NULL)
+          AND c.is_deleted = 0
+        ORDER BY COALESCE(us.is_pinned, cm.is_pinned, 0) DESC, c.last_message_time DESC
     </select>
 
     <select id="selectConversationByUserIdAndTargetId" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List" />
         FROM im_conversation c
-        JOIN im_conversation_member cm ON c.id = cm.conversation_id
-        WHERE cm.user_id = #{userId} AND c.target_id = #{targetId}
+        LEFT JOIN im_user_session us
+               ON c.id = us.conversation_id
+              AND us.user_id = #{userId}
+              AND us.is_deleted = 0
+        LEFT JOIN im_conversation_member cm
+               ON c.id = cm.conversation_id
+              AND cm.user_id = #{userId}
+              AND cm.is_deleted = 0
+        WHERE (us.id IS NOT NULL OR cm.id IS NOT NULL)
+          AND c.target_id = #{targetId}
+          AND c.is_deleted = 0
     </select>
 
     <select id="selectByTypeAndTarget" resultMap="BaseResultMap">
@@ -63,18 +88,35 @@
     <select id="searchConversations" resultMap="BaseResultMap">
         SELECT DISTINCT c.*
         FROM im_conversation c
-        JOIN im_conversation_member cm ON c.id = cm.conversation_id
+        LEFT JOIN im_user_session us
+               ON c.id = us.conversation_id
+              AND us.user_id = #{userId}
+              AND us.is_deleted = 0
+        LEFT JOIN im_conversation_member cm
+               ON c.id = cm.conversation_id
+              AND cm.user_id = #{userId}
+              AND cm.is_deleted = 0
         LEFT JOIN im_message m ON c.last_message_id = m.id
-        WHERE cm.user_id = #{userId} AND cm.is_deleted = 0
+        WHERE (us.id IS NOT NULL OR cm.id IS NOT NULL)
+          AND c.is_deleted = 0
           AND (c.name LIKE CONCAT('%', #{keyword}, '%')
                OR m.content LIKE CONCAT('%', #{keyword}, '%'))
-        ORDER BY cm.is_pinned DESC, c.last_message_time DESC
+        ORDER BY COALESCE(us.is_pinned, cm.is_pinned, 0) DESC, c.last_message_time DESC
     </select>
 
     <select id="getTotalUnreadCount" resultType="java.lang.Integer">
-        SELECT COALESCE(SUM(unread_count), 0)
-        FROM im_conversation_member
-        WHERE user_id = #{userId} AND is_deleted = 0
+        SELECT COALESCE(SUM(COALESCE(us.unread_count, cm.unread_count, 0)), 0)
+        FROM im_conversation c
+        LEFT JOIN im_user_session us
+               ON c.id = us.conversation_id
+              AND us.user_id = #{userId}
+              AND us.is_deleted = 0
+        LEFT JOIN im_conversation_member cm
+               ON c.id = cm.conversation_id
+              AND cm.user_id = #{userId}
+              AND cm.is_deleted = 0
+        WHERE (us.id IS NOT NULL OR cm.id IS NOT NULL)
+          AND c.is_deleted = 0
     </select>
 
     <select id="selectImConversationList" resultMap="BaseResultMap">
@@ -105,11 +147,22 @@
         SELECT
             c.id, c.type, c.target_id, c.name, c.avatar, c.last_message_id, c.last_message_time,
             c.is_deleted, c.deleted_time, c.create_time, c.update_time,
-            cm.unread_count, cm.is_pinned, cm.is_muted, cm.last_read_message_id
+            COALESCE(us.unread_count, cm.unread_count, 0) AS unread_count,
+            COALESCE(us.is_pinned, cm.is_pinned, 0) AS is_pinned,
+            COALESCE(us.is_muted, cm.is_muted, 0) AS is_muted,
+            COALESCE(us.last_read_message_id, cm.last_read_message_id) AS last_read_message_id
         FROM im_conversation c
-        JOIN im_conversation_member cm ON c.id = cm.conversation_id
-        WHERE cm.user_id = #{userId} AND cm.is_deleted = 0 AND c.is_deleted = 0
-        ORDER BY cm.is_pinned DESC, c.last_message_time DESC
+        LEFT JOIN im_user_session us
+               ON c.id = us.conversation_id
+              AND us.user_id = #{userId}
+              AND us.is_deleted = 0
+        LEFT JOIN im_conversation_member cm
+               ON c.id = cm.conversation_id
+              AND cm.user_id = #{userId}
+              AND cm.is_deleted = 0
+        WHERE (us.id IS NOT NULL OR cm.id IS NOT NULL)
+          AND c.is_deleted = 0
+        ORDER BY COALESCE(us.is_pinned, cm.is_pinned, 0) DESC, c.last_message_time DESC
     </select>
 
     <!-- 批量获取会话的最后消息（一次性获取所有） -->

@@ -132,6 +132,10 @@ public class ImMessage extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deletedTime;
 
+    /** 版本号（乐观锁） */
+    @TableField("version")
+    private Integer version;
+
     // ==================== 以下字段为非数据库字段 ====================
 
     /**

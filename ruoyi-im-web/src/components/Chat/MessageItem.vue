@@ -133,7 +133,7 @@ const formattedTime = computed(() => {
 // ============================================================================
 .message-item {
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   position: relative;
   padding: 0 16px;
   transition: opacity 0.2s;
@@ -153,7 +153,7 @@ const formattedTime = computed(() => {
   // 发送失败状态样式
   &.is-failed {
     .bubble {
-      border: 1px solid var(--dt-error-color);
+      border: 1px solid #ff4d4f;
       box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
     }
   }
@@ -213,7 +213,7 @@ const formattedTime = computed(() => {
       content: '';
       position: absolute;
       inset: -2px;
-      border: 2px solid var(--dt-brand-color);
+      border: 2px solid #1677ff;
       border-radius: 8px;
       animation: pulse-ring 1.5s ease-out infinite;
     }

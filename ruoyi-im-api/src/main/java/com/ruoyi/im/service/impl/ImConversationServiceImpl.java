@@ -11,6 +11,7 @@ import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.mapper.ImUserSessionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.util.ImRedisUtil;
@@ -37,6 +38,7 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     private final ImConversationMapper imConversationMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
+    private final ImUserSessionMapper imUserSessionMapper;
     private final ImUserMapper imUserMapper;
     private final ImMessageMapper imMessageMapper;
     private final ImRedisUtil imRedisUtil;
@@ -48,6 +50,7 @@ public class ImConversationServiceImpl implements ImConversationService {
      */
     public ImConversationServiceImpl(ImConversationMapper imConversationMapper,
             ImConversationMemberMapper imConversationMemberMapper,
+            ImUserSessionMapper imUserSessionMapper,
             ImUserMapper imUserMapper,
             ImMessageMapper imMessageMapper,
             ImRedisUtil imRedisUtil,
@@ -55,6 +58,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
         this.imConversationMapper = imConversationMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
+        this.imUserSessionMapper = imUserSessionMapper;
         this.imUserMapper = imUserMapper;
         this.imMessageMapper = imMessageMapper;
         this.imRedisUtil = imRedisUtil;
@@ -240,16 +244,11 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteConversation(Long userId, Long conversationId) {
-        // ... (unchanged part)
-        // 检查用户是否属于该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
-                userId);
-        if (member == null) {
-            throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
-        }
+        assertConversationAccess(conversationId, userId);
 
-        // 从会话成员表中删除该用户，相当于删除会话（软删除）
+        // 迁移期双写：成员关系表 + 用户会话状态表都标记删除
         imConversationMemberMapper.markAsDeleted(conversationId, userId);
+        imUserSessionMapper.markDeleted(userId, conversationId);
 
         // 清除缓存
         clearConversationListCache(userId);
@@ -258,14 +257,11 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void pinConversation(Long userId, Long conversationId, Boolean isPinned) {
-        // ... (unchanged part)
-        // 检查用户是否属于该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
-                userId);
-        if (member == null) {
-            throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
-        }
+        assertConversationAccess(conversationId, userId);
+        ensureUserSession(conversationId, userId);
 
+        imUserSessionMapper.updatePinned(userId, conversationId, isPinned ? 1 : 0);
+        // 迁移期回写旧表，避免历史路径读到脏数据
         imConversationMemberMapper.updatePinned(conversationId, userId, isPinned ? 1 : 0);
 
         // 清除缓存
@@ -275,14 +271,11 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void muteConversation(Long userId, Long conversationId, Boolean isMuted) {
-        // ... (unchanged part)
-        // 检查用户是否属于该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
-                userId);
-        if (member == null) {
-            throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
-        }
+        assertConversationAccess(conversationId, userId);
+        ensureUserSession(conversationId, userId);
 
+        imUserSessionMapper.updateMuted(userId, conversationId, isMuted ? 1 : 0);
+        // 迁移期回写旧表，避免历史路径读到脏数据
         imConversationMemberMapper.updateMuted(conversationId, userId, isMuted ? 1 : 0);
 
         // 清除缓存
@@ -292,20 +285,17 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long userId, Long conversationId) {
-        // ... (unchanged part)
-        // 检查用户是否属于该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
-                userId);
-        if (member == null) {
-            throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
-        }
+        assertConversationAccess(conversationId, userId);
+        ensureUserSession(conversationId, userId);
 
-        // 将未读消息数设为0
+        // 将未读消息数设为0（新表 + 旧表）
+        imUserSessionMapper.updateUnreadCount(userId, conversationId, 0);
         imConversationMemberMapper.updateUnreadCount(conversationId, userId, 0);
 
         // 获取会话最后一条消息ID作为最后已读消息ID
         com.ruoyi.im.domain.ImMessage lastMessage = imMessageMapper.selectLastMessageByConversationId(conversationId);
         if (lastMessage != null) {
+            imUserSessionMapper.updateLastReadMessage(userId, conversationId, lastMessage.getId());
             imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, lastMessage.getId());
         }
 
@@ -315,12 +305,7 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     @Override
     public ImConversationVO getConversationById(Long conversationId, Long userId) {
-        // 检查用户是否属于该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
-                userId);
-        if (member == null) {
-            throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
-        }
+        assertConversationAccess(conversationId, userId);
 
         // 使用BaseMapper的selectById方法
         ImConversation conversation = imConversationMapper.selectById(conversationId);
@@ -330,10 +315,7 @@ public class ImConversationServiceImpl implements ImConversationService {
 
         ImConversationVO vo = new ImConversationVO();
         BeanUtils.copyProperties(conversation, vo);
-        vo.setUnreadCount(member.getUnreadCount());
-        vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
-        vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
-        vo.setLastReadMessageId(member.getLastReadMessageId());
+        applyConversationState(vo, conversationId, userId);
 
         // 设置会话相关信息
         if ("PRIVATE".equalsIgnoreCase(conversation.getType())) {
@@ -359,15 +341,11 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void clearUnreadCount(Long userId, Long conversationId) {
-        // ... (unchanged part)
-        // 检查用户是否属于该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
-                userId);
-        if (member == null) {
-            throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
-        }
+        assertConversationAccess(conversationId, userId);
+        ensureUserSession(conversationId, userId);
 
-        // 将未读消息数设为0
+        // 将未读消息数设为0（新表 + 旧表）
+        imUserSessionMapper.updateUnreadCount(userId, conversationId, 0);
         imConversationMemberMapper.updateUnreadCount(conversationId, userId, 0);
 
         // 清除缓存
@@ -470,12 +448,8 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     @Override
     public Integer getTotalUnreadCount(Long userId) {
-        List<ImConversationMember> members = imConversationMemberMapper.selectByUserId(userId);
-        int totalUnread = 0;
-        for (ImConversationMember member : members) {
-            totalUnread += member.getUnreadCount();
-        }
-        return totalUnread;
+        Integer totalUnread = imConversationMapper.getTotalUnreadCount(userId);
+        return totalUnread == null ? 0 : totalUnread;
     }
 
     @Override
@@ -502,18 +476,14 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateConversation(Long id, ImConversationUpdateRequest request, Long userId) {
-        // 检查用户是否属于该会话
-        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(id, userId);
-        if (member == null) {
-            throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
-        }
+        assertConversationAccess(id, userId);
 
         // 更新会话设置
         if (request.getIsPinned() != null) {
-            imConversationMemberMapper.updatePinned(id, userId, request.getIsPinned() ? 1 : 0);
+            pinConversation(userId, id, request.getIsPinned());
         }
         if (request.getIsMuted() != null) {
-            imConversationMemberMapper.updateMuted(id, userId, request.getIsMuted() ? 1 : 0);
+            muteConversation(userId, id, request.getIsMuted());
         }
     }
 
@@ -531,19 +501,23 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     @Override
     public List<ImConversationVO> searchConversations(String keyword, Long userId) {
-        // 搜索用户参与的会话，根据关键词匹配会话名称或最近消息内容
-        List<ImConversationMember> memberList = imConversationMemberMapper.selectByUserId(userId);
+        List<ImConversation> conversations;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            conversations = imConversationMapper.selectByUserId(userId);
+        } else {
+            conversations = imConversationMapper.searchConversations(userId, keyword);
+        }
         List<ImConversationVO> voList = new ArrayList<>();
 
-        for (ImConversationMember member : memberList) {
-            ImConversation conversation = imConversationMapper.selectById(member.getConversationId());
+        if (conversations == null || conversations.isEmpty()) {
+            return voList;
+        }
+
+        for (ImConversation conversation : conversations) {
             if (conversation != null) {
                 ImConversationVO vo = new ImConversationVO();
                 BeanUtils.copyProperties(conversation, vo);
-                vo.setUnreadCount(member.getUnreadCount());
-                vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
-                vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
-                vo.setLastReadMessageId(member.getLastReadMessageId());
+                applyConversationState(vo, conversation.getId(), userId);
 
                 // 设置会话相关信息
                 // 兼容PRIVATE和SINGLE类型（历史数据可能使用SINGLE）
@@ -597,11 +571,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                     vo.setAvatar(groupAvatar);
                 }
 
-                // 检查关键词匹配
-                if (keyword == null || keyword.isEmpty() ||
-                        (vo.getPeerName() != null && vo.getPeerName().contains(keyword))) {
-                    voList.add(vo);
-                }
+                voList.add(vo);
             }
         }
 
@@ -627,6 +597,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         member.setUpdateTime(LocalDateTime.now());
 
         imConversationMemberMapper.insertImConversationMember(member);
+        ensureUserSession(conversationId, userId);
     }
 
     /**
@@ -643,6 +614,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             return null;
         }
 
+        // 处理只有一个成员的异常情况
         // 处理只有一个成员的异常情况
         if (members.size() == 1) {
             ImConversationMember onlyMember = members.get(0);
@@ -686,19 +658,76 @@ public class ImConversationServiceImpl implements ImConversationService {
             existingMember.setIsDeleted(0);
             existingMember.setUpdateTime(LocalDateTime.now());
             imConversationMemberMapper.updateById(existingMember);
+            ensureUserSession(conversationId, userId);
+            ImUserSession userSession = imUserSessionMapper.selectByUserIdAndConversationId(userId, conversationId);
+            if (userSession != null && userSession.getIsDeleted() != null && userSession.getIsDeleted() == 1) {
+                userSession.setIsDeleted(0);
+                userSession.setDeletedTime(null);
+                userSession.setUpdateTime(LocalDateTime.now());
+                imUserSessionMapper.updateById(userSession);
+            }
+        } else {
+            ensureUserSession(conversationId, userId);
         }
     }
 
     @Override
     public int getUserConversationCount(Long userId) {
-        // 获取用户参与的会话数量（排除已删除的）
-        List<ImConversationMember> members = imConversationMemberMapper.selectByUserId(userId);
-        int count = 0;
-        for (ImConversationMember member : members) {
-            if (member.getIsDeleted() == null || member.getIsDeleted() == 0) {
-                count++;
-            }
+        List<ImConversation> conversations = imConversationMapper.selectByUserId(userId);
+        return conversations == null ? 0 : conversations.size();
+    }
+
+    private void assertConversationAccess(Long conversationId, Long userId) {
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (member != null && (member.getIsDeleted() == null || member.getIsDeleted() == 0)) {
+            return;
         }
-        return count;
+        ImUserSession userSession = imUserSessionMapper.selectByUserIdAndConversationId(userId, conversationId);
+        if (userSession != null && (userSession.getIsDeleted() == null || userSession.getIsDeleted() == 0)) {
+            return;
+        }
+        throw new BusinessException(ImErrorCode.CONVERSATION_NOT_FOUND, "会话不存在或无权限访问");
+    }
+
+    private void ensureUserSession(Long conversationId, Long userId) {
+        ImUserSession userSession = imUserSessionMapper.selectByUserIdAndConversationId(userId, conversationId);
+        if (userSession != null) {
+            return;
+        }
+        ImUserSession newSession = new ImUserSession();
+        newSession.setConversationId(conversationId);
+        newSession.setUserId(userId);
+        newSession.setIsPinned(0);
+        newSession.setIsMuted(0);
+        newSession.setIsArchived(0);
+        newSession.setUnreadCount(0);
+        newSession.setIsDeleted(0);
+        newSession.setCreateTime(LocalDateTime.now());
+        newSession.setUpdateTime(LocalDateTime.now());
+        imUserSessionMapper.insert(newSession);
+    }
+
+    private void applyConversationState(ImConversationVO vo, Long conversationId, Long userId) {
+        ImUserSession userSession = imUserSessionMapper.selectByUserIdAndConversationId(userId, conversationId);
+        if (userSession != null && (userSession.getIsDeleted() == null || userSession.getIsDeleted() == 0)) {
+            vo.setUnreadCount(userSession.getUnreadCount());
+            vo.setIsPinned(userSession.getIsPinned() != null && userSession.getIsPinned() == 1);
+            vo.setIsMuted(userSession.getIsMuted() != null && userSession.getIsMuted() == 1);
+            vo.setLastReadMessageId(userSession.getLastReadMessageId());
+            return;
+        }
+
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (member == null) {
+            vo.setUnreadCount(0);
+            vo.setIsPinned(false);
+            vo.setIsMuted(false);
+            vo.setLastReadMessageId(null);
+            return;
+        }
+        vo.setUnreadCount(member.getUnreadCount());
+        vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
+        vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
+        vo.setLastReadMessageId(member.getLastReadMessageId());
     }
 }

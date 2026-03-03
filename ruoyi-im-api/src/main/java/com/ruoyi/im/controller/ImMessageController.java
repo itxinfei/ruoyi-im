@@ -80,10 +80,17 @@ public class ImMessageController {
     public Result<List<ImMessageVO>> getMessages(
             @PathVariable Long conversationId,
             @RequestParam(required = false) Long lastId,
-            @RequestParam(required = false, defaultValue = "20") Integer limit) {
+            @RequestParam(required = false) Long lastMessageId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Integer pageSize) {
         Long userId = SecurityUtils.getLoginUserId();
+        Long effectiveLastId = lastId != null ? lastId : lastMessageId;
+        Integer effectiveLimit = limit != null ? limit : pageSize;
+        if (effectiveLimit == null) {
+            effectiveLimit = 20;
+        }
         log.info("getMessages API - 当前登录用户 userId={}, conversationId={}", userId, conversationId);
-        List<ImMessageVO> list = imMessageService.getMessages(conversationId, userId, lastId, limit);
+        List<ImMessageVO> list = imMessageService.getMessages(conversationId, userId, effectiveLastId, effectiveLimit);
         return Result.success(list);
     }
 

@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +64,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
             int memberCount = imDepartmentMemberMapper.countMembersByDepartmentId(department.getId());
             treeVO.setMemberCount(memberCount);
 
-            if (department.getParentId().equals(0L)) {
+            if (department.getParentId() != null && department.getParentId() == 0L) {
                 treeVO.setChildren(buildChildrenTree(department.getId(), allDepartments));
                 treeList.add(treeVO);
             }
@@ -113,7 +114,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
         }
 
                     ImDepartment parentDepartment = null;
-                if (!request.getParentId().equals(0L)) {
+                if (request.getParentId() != null && request.getParentId() != 0L) {
                     parentDepartment = imDepartmentMapper.selectById(request.getParentId());
                     if (parentDepartment == null) {
                         throw new BusinessException("PARENT_DEPARTMENT_NOT_EXIST", "Parent department does not exist");
@@ -156,7 +157,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
             throw new BusinessException("DEPARTMENT_NAME_EXISTS", "部门名称已存在");
         }
 
-        if (!request.getParentId().equals(department.getParentId())) {
+        if (!Objects.equals(request.getParentId(), department.getParentId())) {
             if (request.getId().equals(request.getParentId())) {
                 throw new BusinessException("CANNOT_SET_SELF_AS_PARENT", "Cannot set self as parent department");
             }
@@ -172,7 +173,7 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
             }
 
             String newAncestors;
-            if (request.getParentId().equals(0L)) {
+            if (request.getParentId() != null && request.getParentId() == 0L) {
                 newAncestors = "0";
             } else {
                 newAncestors = newParent.getAncestors() + "," + newParent.getId();

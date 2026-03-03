@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImMessageReadDetailMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImMessageReadDetail">
+        <id column="id" property="id"/>
+        <result column="message_id" property="messageId"/>
+        <result column="conversation_id" property="conversationId"/>
+        <result column="user_id" property="userId"/>
+        <result column="read_time" property="readTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, message_id, conversation_id, user_id, read_time, create_time
+    </sql>
+
+    <select id="selectByMessageIdAndUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM im_message_read_detail
+        WHERE message_id = #{messageId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="selectByMessageId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM im_message_read_detail
+        WHERE message_id = #{messageId}
+        ORDER BY read_time ASC
+    </select>
+
+    <insert id="upsertReadDetail">
+        INSERT INTO im_message_read_detail (message_id, conversation_id, user_id, read_time, create_time)
+        VALUES (#{messageId}, #{conversationId}, #{userId}, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE
+            read_time = VALUES(read_time)
+    </insert>
+
+</mapper>
+

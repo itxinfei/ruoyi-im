@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImTypingStatusMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImTypingStatus">
+        <id column="id" property="id"/>
+        <result column="conversation_id" property="conversationId"/>
+        <result column="user_id" property="userId"/>
+        <result column="typing_type" property="typingType"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, conversation_id, user_id, typing_type, create_time, update_time
+    </sql>
+
+    <select id="selectByConversationIdAndUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM im_typing_status
+        WHERE conversation_id = #{conversationId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="selectByConversationId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM im_typing_status
+        WHERE conversation_id = #{conversationId}
+    </select>
+
+    <insert id="upsertTypingStatus">
+        INSERT INTO im_typing_status (conversation_id, user_id, typing_type, create_time, update_time)
+        VALUES (#{conversationId}, #{userId}, #{typingType}, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE
+            typing_type = VALUES(typing_type),
+            update_time = NOW()
+    </insert>
+
+    <delete id="deleteByConversationIdAndUserId">
+        DELETE FROM im_typing_status
+        WHERE conversation_id = #{conversationId}
+          AND user_id = #{userId}
+    </delete>
+
+</mapper>
+

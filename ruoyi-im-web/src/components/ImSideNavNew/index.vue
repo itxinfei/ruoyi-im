@@ -195,27 +195,27 @@ function handleHelp() {
 
 <style scoped lang="scss">
 // ============================================================================
-// 导航容器
+// 导航容器 - 钉钉风格
 // ============================================================================
 .dingtalk-nav {
-  width: 72px;
-  background: var(--dt-bg-sidebar-gradient);
-  box-shadow: var(--dt-shadow-3);
+  width: 68px;
+  background: linear-gradient(180deg, #1677ff 0%, #0b5ed7 100%);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
 .bg-nav-light {
-  background: linear-gradient(180deg, #1677ff 0%, #0e5fd9 100%);
+  background: linear-gradient(180deg, #1677ff 0%, #0b5ed7 100%);
 }
 
 .bg-nav-dark {
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%);
 }
 
 // ============================================================================
 // Logo 区域
 // ============================================================================
 .nav-logo-wrapper {
-  padding: 12px 0;
+  padding: 10px 0;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -224,46 +224,42 @@ function handleHelp() {
 
 .nav-logo {
   position: relative;
-  width: 56px;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: var(--dt-radius-xl);
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  transition: all var(--dt-transition-base);
+  transition: all 0.2s;
 }
 
 .nav-logo:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.02);
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .nav-logo-text {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.5px;
-  line-height: 1;
 }
 
 .nav-logo-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: var(--dt-error-color);
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: #ff4d4f;
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  border-radius: 9px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 // ============================================================================
@@ -272,99 +268,90 @@ function handleHelp() {
 .nav-items {
   flex: 1;
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .nav-items::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .nav-items::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 2px;
 }
 
 // ============================================================================
-// 导航项
+// 导航项 - 钉钉风格
 // ============================================================================
 .nav-item {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--dt-radius-lg);
+  border-radius: 10px;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
-  color: rgba(255, 255, 255, 0.75);
+  transition: all 0.15s;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .nav-item:hover {
-  background: var(--dt-bg-sidebar-item-hover);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
-  transform: scale(1.05);
 }
 
 .nav-item-active {
-  background: var(--dt-bg-sidebar-item-active);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item-active::before {
   content: '';
   position: absolute;
-  left: -12px;
-  width: 4px;
-  height: 24px;
+  left: -10px;
+  width: 3px;
+  height: 20px;
   background: #fff;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 2px 2px 0;
 }
 
 .nav-item-icon {
   font-size: 22px;
-  transition: transform var(--dt-transition-base);
-}
-
-.nav-item:hover .nav-item-icon {
-  transform: scale(1.1);
 }
 
 .nav-item-badge {
   position: absolute;
   top: 6px;
   right: 6px;
-  min-width: 16px;
-  height: 16px;
+  min-width: 14px;
+  height: 14px;
   padding: 0 4px;
-  background: var(--dt-error-color);
+  background: #ff4d4f;
   color: #fff;
   font-size: 10px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 // ============================================================================
 // 底部操作区
 // ============================================================================
 .nav-footer {
-  padding: 8px 12px 16px;
+  padding: 6px 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
   flex-shrink: 0;
 }
@@ -376,18 +363,17 @@ function handleHelp() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--dt-radius-lg);
+  border-radius: 10px;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all var(--dt-transition-base);
-  color: rgba(255, 255, 255, 0.65);
-  position: relative;
+  transition: all 0.15s;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .nav-item-action:hover {
-  background: var(--dt-bg-sidebar-item-hover);
-  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .nav-item-action.nav-item-active {

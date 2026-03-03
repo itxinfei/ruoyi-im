@@ -218,11 +218,12 @@ const handleCommand = (command) => {
   if (command === 'group') {
     showCreateGroupDialog.value = true
   } else if (command === 'chat') {
-    ElMessage.info('发起单聊请前往联系人页面选择好友')
+    ElMessage.info('请在通讯录中选择成员发起单聊')
   } else if (command === 'join') {
-    ElMessage.info('加入群组功能开发中')
+    showGlobalSearch.value = true
+    ElMessage.info('可通过搜索群组名称加入群聊')
   } else if (command === 'contacts') {
-    ElMessage.info('添加好友功能开发中')
+    ElMessage.info('请在通讯录中发起好友申请')
   }
 }
 
@@ -350,15 +351,15 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 // ============================================================================
-// 容器
+// 容器 - 钉钉风格
 // ============================================================================
 .session-panel {
   display: flex;
   flex-direction: column;
-  width: 280px;
+  width: 320px;
   flex-shrink: 0;
-  border-right: 1px solid var(--dt-border-light);
-  background: var(--dt-bg-card);
+  border-right: 1px solid #e5e5e5;
+  background: #fcfdff;
   height: 100%;
 }
 
@@ -376,34 +377,34 @@ onUnmounted(() => {
 .panel-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 18px;
   font-weight: 600;
-  color: var(--dt-text-primary);
+  color: #262626;
   margin: 0;
 
   .title-icon {
-    font-size: 20px;
-    color: var(--dt-brand-color);
+    font-size: 18px;
+    color: #1677ff;
   }
 }
 
 .add-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  border-radius: var(--dt-radius-md);
+  border-radius: 6px;
   cursor: pointer;
-  color: var(--dt-text-secondary);
-  transition: all var(--dt-transition-base);
+  color: #666;
+  transition: all 0.15s;
 
   &:hover {
-    background: var(--dt-bg-body);
-    color: var(--dt-brand-color);
+    background: #f2f3f5;
+    color: #1677ff;
   }
 
   .material-icons-outlined {
@@ -422,23 +423,23 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   align-items: center;
-  height: 36px;
-  background: var(--dt-bg-body);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-full);
-  padding: 0 12px;
-  transition: all var(--dt-transition-base);
+  height: 38px;
+  background: #f7f9fc;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0 10px;
+  transition: all 0.2s;
 
   &:focus-within {
-    background: var(--dt-bg-card);
-    border-color: var(--dt-brand-color);
-    box-shadow: 0 0 0 2px var(--dt-brand-lighter);
+    background: #fff;
+    border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
   }
 }
 
 .search-icon {
-  font-size: 18px;
-  color: var(--dt-text-quaternary);
+  font-size: 16px;
+  color: #999;
   pointer-events: none;
 }
 
@@ -447,33 +448,33 @@ onUnmounted(() => {
   border: none;
   background: transparent;
   outline: none;
-  font-size: 13px;
-  color: var(--dt-text-primary);
+  font-size: 14px;
+  color: #262626;
   padding: 0 8px;
 
   &::placeholder {
-    color: var(--dt-text-quaternary);
+    color: #bfbfbf;
   }
 }
 
 .clear-btn {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   border-radius: 50%;
-  color: var(--dt-text-quaternary);
-  transition: all var(--dt-transition-base);
+  color: #999;
+  transition: all 0.15s;
 
   &:hover {
-    background: var(--dt-border-color);
-    color: var(--dt-text-secondary);
+    background: #e5e5e5;
+    color: #666;
   }
 
   .material-icons-outlined {
-    font-size: 14px;
+    font-size: 12px;
   }
 }
 
@@ -483,74 +484,68 @@ onUnmounted(() => {
 .session-list {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 0;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 2px;
-  }
-
-  &:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
-  }
-
-  .dark &:hover::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-  }
+  padding: 2px 0;
 }
 
+.session-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.session-list::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 2px;
+}
+
+.session-list:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+// ============================================================================
+// 会话项 - 钉钉风格
+// ============================================================================
 .session-item {
   position: relative;
   display: flex;
-  padding: 10px 16px;
+  padding: 12px 14px;
   cursor: pointer;
   gap: 12px;
-  transition: all var(--dt-transition-base);
+  transition: background 0.15s;
 
   &:hover {
-    background: var(--dt-bg-session-hover);
+    background: #fafafa;
   }
 
   &.active {
-    background: var(--dt-bg-session-active);
+    background: #e6f0fb;
 
     .active-indicator {
       opacity: 1;
     }
 
     .session-name {
-      color: var(--dt-text-primary);
       font-weight: 600;
     }
   }
 
   &.pinned {
-    background: var(--dt-bg-body);
+    background: #f8f8f8;
   }
 
   &.pinned.active {
-    background: var(--dt-bg-session-active);
+    background: #e6f0fb;
   }
 }
 
 .active-indicator {
   position: absolute;
   left: 0;
-  top: 12px;
-  bottom: 12px;
+  top: 14px;
+  bottom: 14px;
   width: 3px;
-  background: var(--dt-brand-color);
-  border-radius: 0 4px 4px 0;
+  background: #1677ff;
+  border-radius: 0 2px 2px 0;
   opacity: 0;
-  transition: opacity var(--dt-transition-base);
+  transition: opacity 0.15s;
 }
 
 // 头像区域
@@ -560,43 +555,36 @@ onUnmounted(() => {
 }
 
 .session-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: var(--dt-radius-lg);
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &.group-avatar {
-    background: linear-gradient(135deg, #1677ff 0%, #0e5fd9 100%);
+    background: linear-gradient(135deg, #1677ff 0%, #0b5ed7 100%);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
 
     .material-icons-outlined {
-      font-size: 22px;
+      font-size: 20px;
     }
-  }
-
-  :deep(.dingtalk-avatar) {
-    border-radius: var(--dt-radius-lg) !important;
   }
 }
 
 .status-dot {
   position: absolute;
-  bottom: 1px;
-  right: 1px;
+  bottom: 0;
+  right: 0;
   width: 10px;
   height: 10px;
-  background: var(--dt-text-quaternary);
-  border: 2px solid var(--dt-bg-card);
+  background: #bfbfbf;
+  border: 2px solid #fff;
   border-radius: 50%;
-  transition: all var(--dt-transition-base);
 
   &.online {
-    background: var(--dt-success-color);
-    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+    background: #52c41a;
   }
 }
 
@@ -606,17 +594,16 @@ onUnmounted(() => {
   right: -4px;
   min-width: 16px;
   height: 16px;
-  padding: 0 4px;
-  background: var(--dt-error-color);
+  padding: 0 5px;
+  background: #ff4d4f;
   color: #fff;
   font-size: 10px;
   font-weight: 600;
-  border-radius: var(--dt-radius-full);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--dt-bg-card);
-  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  border: 2px solid #fff;
 
   &.badge-dot {
     min-width: 8px;
@@ -654,7 +641,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
 }
 
 .session-header {
@@ -672,13 +659,12 @@ onUnmounted(() => {
 }
 
 .session-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
-  color: var(--dt-text-primary);
+  color: #262626;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: all var(--dt-transition-base);
 }
 
 .mute-icon {
@@ -687,17 +673,16 @@ onUnmounted(() => {
   align-items: center;
 
   .material-icons-outlined {
-    font-size: 14px;
-    color: var(--dt-text-quaternary);
+    font-size: 12px;
+    color: #999;
   }
 }
 
 .session-time {
-  font-size: 11px;
-  color: var(--dt-text-quaternary);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 12px;
+  color: #999;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-left: 6px;
 }
 
 .session-preview {
@@ -707,20 +692,20 @@ onUnmounted(() => {
 }
 
 .mention-tag {
-  color: var(--dt-error-color);
-  font-size: 13px;
+  color: #ff4d4f;
+  font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
 }
 
 .sender-name {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--dt-text-secondary);
   flex-shrink: 0;
 }
 
 .preview-text {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--dt-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;

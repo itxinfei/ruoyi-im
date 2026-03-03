@@ -3,6 +3,7 @@ package com.ruoyi.im.service.impl;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageEditHistory;
+import com.ruoyi.im.domain.ImUserSession;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.conversation.ImPrivateConversationCreateRequest;
 import com.ruoyi.im.dto.mention.ImMentionInfo;
@@ -12,6 +13,7 @@ import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImMessageEditHistoryMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.mapper.ImUserSessionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageMentionService;
@@ -42,6 +44,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     private final ImUserMapper imUserMapper;
     private final ImConversationMapper imConversationMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
+    private final ImUserSessionMapper imUserSessionMapper;
     private final ImConversationService imConversationService;
     private final MessageEncryptionUtil encryptionUtil;
     private final ImMessageMentionService messageMentionService;
@@ -59,6 +62,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                                  ImUserMapper imUserMapper,
                                  ImConversationMapper imConversationMapper,
                                  ImConversationMemberMapper imConversationMemberMapper,
+                                 ImUserSessionMapper imUserSessionMapper,
                                  ImConversationService imConversationService,
                                  MessageEncryptionUtil encryptionUtil,
                                  ImMessageMentionService messageMentionService,
@@ -72,6 +76,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         this.imUserMapper = imUserMapper;
         this.imConversationMapper = imConversationMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
+        this.imUserSessionMapper = imUserSessionMapper;
         this.imConversationService = imConversationService;
         this.encryptionUtil = encryptionUtil;
         this.messageMentionService = messageMentionService;
@@ -186,6 +191,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         for (com.ruoyi.im.domain.ImConversationMember member : members) {
             if (!member.getUserId().equals(userId)) {
+                incrementSessionUnread(conversationId, member.getUserId(), 1);
                 imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
 
                 if (shouldEvictCache) {
@@ -536,9 +542,11 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 减少未读消息数
         if (readCount > 0) {
+            decrementSessionUnread(conversationId, userId, readCount);
             imConversationMemberMapper.decrementUnreadCount(conversationId, userId, readCount);
             // 更新最后已读消息ID
             if (maxMessageId != null) {
+                updateSessionLastRead(conversationId, userId, maxMessageId);
                 imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, maxMessageId);
             }
         }
@@ -812,5 +820,46 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 统计用户今日发送的消息数量
         return imMessageMapper.countBySenderIdAndTimeRange(userId, todayStart, todayEnd);
+    }
+
+    private void incrementSessionUnread(Long conversationId, Long userId, int delta) {
+        ImUserSession userSession = ensureUserSession(conversationId, userId);
+        int current = userSession.getUnreadCount() == null ? 0 : userSession.getUnreadCount();
+        int target = current + Math.max(delta, 0);
+        imUserSessionMapper.updateUnreadCount(userId, conversationId, target);
+    }
+
+    private void decrementSessionUnread(Long conversationId, Long userId, int delta) {
+        ImUserSession userSession = ensureUserSession(conversationId, userId);
+        int current = userSession.getUnreadCount() == null ? 0 : userSession.getUnreadCount();
+        int target = current - Math.max(delta, 0);
+        if (target < 0) {
+            target = 0;
+        }
+        imUserSessionMapper.updateUnreadCount(userId, conversationId, target);
+    }
+
+    private void updateSessionLastRead(Long conversationId, Long userId, Long lastReadMessageId) {
+        ensureUserSession(conversationId, userId);
+        imUserSessionMapper.updateLastReadMessage(userId, conversationId, lastReadMessageId);
+    }
+
+    private ImUserSession ensureUserSession(Long conversationId, Long userId) {
+        ImUserSession userSession = imUserSessionMapper.selectByUserIdAndConversationId(userId, conversationId);
+        if (userSession != null) {
+            return userSession;
+        }
+        ImUserSession newSession = new ImUserSession();
+        newSession.setConversationId(conversationId);
+        newSession.setUserId(userId);
+        newSession.setIsPinned(0);
+        newSession.setIsMuted(0);
+        newSession.setIsArchived(0);
+        newSession.setUnreadCount(0);
+        newSession.setIsDeleted(0);
+        newSession.setCreateTime(LocalDateTime.now());
+        newSession.setUpdateTime(LocalDateTime.now());
+        imUserSessionMapper.insert(newSession);
+        return newSession;
     }
 }

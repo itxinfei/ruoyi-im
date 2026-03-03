@@ -82,4 +82,22 @@ public class ImConversationMember extends BaseEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
+    /** 是否归档：0=否, 1=是 */
+    @TableField("is_archived")
+    private Integer isArchived;
+
+    /** 置顶时间 */
+    @TableField("pinned_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime pinnedTime;
+
+    /** 草稿内容 */
+    @TableField("draft_content")
+    private String draftContent;
+
+    /** 草稿保存时间 */
+    @TableField("draft_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime draftTime;
+
 }

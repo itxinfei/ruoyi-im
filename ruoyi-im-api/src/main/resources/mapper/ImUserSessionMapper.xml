@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImUserSessionMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.im.domain.ImUserSession">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="conversation_id" property="conversationId"/>
+        <result column="is_pinned" property="isPinned"/>
+        <result column="pinned_time" property="pinnedTime"/>
+        <result column="is_muted" property="isMuted"/>
+        <result column="is_archived" property="isArchived"/>
+        <result column="unread_count" property="unreadCount"/>
+        <result column="last_read_message_id" property="lastReadMessageId"/>
+        <result column="draft_content" property="draftContent"/>
+        <result column="draft_time" property="draftTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="deleted_time" property="deletedTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, conversation_id, is_pinned, pinned_time, is_muted, is_archived, unread_count,
+        last_read_message_id, draft_content, draft_time, is_deleted, deleted_time, create_time, update_time
+    </sql>
+
+    <select id="selectByUserIdAndConversationId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM im_user_session
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+          AND is_deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM im_user_session
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+        ORDER BY is_pinned DESC, update_time DESC
+    </select>
+
+    <update id="updateUnreadCount">
+        UPDATE im_user_session
+        SET unread_count = #{unreadCount},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+    <update id="updateLastReadMessage">
+        UPDATE im_user_session
+        SET last_read_message_id = #{lastReadMessageId},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+    <update id="updatePinned">
+        UPDATE im_user_session
+        SET is_pinned = #{isPinned},
+            pinned_time = CASE WHEN #{isPinned} = 1 THEN NOW() ELSE NULL END,
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+    <update id="updateMuted">
+        UPDATE im_user_session
+        SET is_muted = #{isMuted},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+    <update id="updateArchived">
+        UPDATE im_user_session
+        SET is_archived = #{isArchived},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+    <update id="updateDraft">
+        UPDATE im_user_session
+        SET draft_content = #{draftContent},
+            draft_time = CASE WHEN #{draftContent} IS NULL OR #{draftContent} = '' THEN NULL ELSE NOW() END,
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+    <update id="markDeleted">
+        UPDATE im_user_session
+        SET is_deleted = 1,
+            deleted_time = NOW(),
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+</mapper>
+

@@ -10,7 +10,11 @@
         <result column="role" property="role" />
         <result column="unread_count" property="unreadCount" />
         <result column="is_pinned" property="isPinned" />
+        <result column="pinned_time" property="pinnedTime" />
         <result column="is_muted" property="isMuted" />
+        <result column="is_archived" property="isArchived" />
+        <result column="draft_content" property="draftContent" />
+        <result column="draft_time" property="draftTime" />
         <result column="last_read_message_id" property="lastReadMessageId" />
         <result column="last_read_time" property="lastReadTime" />
         <result column="is_deleted" property="isDeleted" />
@@ -20,8 +24,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, conversation_id, user_id, nickname, role, unread_count, is_pinned, is_muted,
-        last_read_message_id, last_read_time, is_deleted, deleted_time, create_time, update_time
+        id, conversation_id, user_id, nickname, role, unread_count, is_pinned, pinned_time, is_muted, is_archived,
+        draft_content, draft_time, last_read_message_id, last_read_time, is_deleted, deleted_time, create_time, update_time
     </sql>
 
     <select id="selectByConversationIdAndUserId" resultMap="BaseResultMap">
@@ -71,7 +75,9 @@
 
     <update id="updatePinned">
         UPDATE im_conversation_member
-        SET is_pinned = #{isPinned}, update_time = NOW()
+        SET is_pinned = #{isPinned},
+            pinned_time = CASE WHEN #{isPinned} = 1 THEN NOW() ELSE NULL END,
+            update_time = NOW()
         WHERE conversation_id = #{conversationId} AND user_id = #{userId}
     </update>
 
@@ -95,11 +101,13 @@
     <insert id="insertImConversationMember" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO im_conversation_member (
             conversation_id, user_id, nickname, role, unread_count,
-            is_pinned, is_muted, is_deleted, create_time, update_time
+            is_pinned, pinned_time, is_muted, is_archived, draft_content, draft_time,
+            is_deleted, create_time, update_time
         )
         VALUES (
             #{conversationId}, #{userId}, #{nickname}, #{role}, #{unreadCount},
-            #{isPinned}, #{isMuted}, #{isDeleted}, NOW(), NOW()
+            #{isPinned}, #{pinnedTime}, #{isMuted}, #{isArchived}, #{draftContent}, #{draftTime},
+            #{isDeleted}, NOW(), NOW()
         )
     </insert>
 

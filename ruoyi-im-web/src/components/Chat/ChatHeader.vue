@@ -94,7 +94,6 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
-import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import UserDetailDrawer from './UserDetailDrawer.vue'
 
@@ -109,7 +108,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'pin', 'mute', 'clear', 'toggle-sidebar'])
+const emit = defineEmits(['show-detail', 'voice-call', 'video-call', 'search', 'files', 'pin', 'mute', 'clear', 'toggle-sidebar'])
 
 // 用户详情抽屉显示状态
 const showUserDetail = ref(false)
@@ -135,18 +134,16 @@ const handleShowDetail = () => {
 
 // 发送消息
 const handleSendMessage = () => {
-  ElMessage.success('已切换到聊天')
+  emit('show-detail', props.session)
 }
 
 // 语音通话
 const handleVoiceCall = () => {
-  ElMessage.info('语音通话功能开发中')
   emit('voice-call', props.session)
 }
 
 // 视频通话
 const handleVideoCall = () => {
-  ElMessage.info('视频通话功能开发中')
   emit('video-call', props.session)
 }
 
@@ -157,7 +154,7 @@ const handleMenuCommand = (command) => {
       emit('search', props.session)
       break
     case 'files':
-      ElMessage.info('查看文件功能开发中')
+      emit('files', props.session)
       break
     case 'pin':
       emit('pin', props.session)
@@ -295,25 +292,25 @@ const handleMenuCommand = (command) => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .action-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: transparent;
   border: none;
-  border-radius: var(--dt-radius-md);
+  border-radius: 6px;
   padding: 0;
-  color: var(--dt-text-secondary);
+  color: #5c5c5c;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--dt-transition-base);
+  transition: all 0.15s;
 
   &:hover {
-    background: var(--dt-bg-body);
+    background: #f2f3f5;
     color: var(--dt-brand-color);
   }
 
@@ -332,7 +329,14 @@ const handleMenuCommand = (command) => {
   }
 
   .material-icons-outlined {
-    font-size: 20px;
+    font-size: 18px;
+  }
+
+  .dark & {
+    color: #a1a1a1;
+    &:hover {
+      background: #3a3a3a;
+    }
   }
 }
 

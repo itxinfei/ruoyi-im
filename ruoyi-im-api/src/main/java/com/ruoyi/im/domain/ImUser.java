@@ -72,4 +72,8 @@ public class ImUser extends BaseEntity implements Serializable {
     /** 登录状态（非数据库字段，用于会话管理） */
     @TableField(exist = false)
     private Boolean online;
+
+    /** 生日 */
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private java.time.LocalDate birthday;
 }

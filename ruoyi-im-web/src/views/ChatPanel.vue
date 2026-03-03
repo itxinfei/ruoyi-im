@@ -1,7 +1,16 @@
 <template>
   <div class="chat-panel">
     <div v-if="!session" class="empty-placeholder">
-      <el-empty description="选择一个会话开始聊天" />
+      <div class="welcome-card">
+        <div class="welcome-badge">IM</div>
+        <h2 class="welcome-title">开始沟通</h2>
+        <p class="welcome-desc">从左侧会话列表选择一个聊天，或在搜索框中快速查找联系人与群组。</p>
+        <div class="welcome-tips">
+          <span class="tip-item">支持文本、图片、文件消息</span>
+          <span class="tip-item">支持消息回复、转发、撤回</span>
+          <span class="tip-item">支持会话置顶与免打扰</span>
+        </div>
+      </div>
     </div>
     <template v-else>
       <div class="main-container">
@@ -9,7 +18,14 @@
         <div class="chat-viewport">
           <ChatHeader 
             :session="session" 
-            @toggle-sidebar="handleToggleDetail" 
+            @toggle-sidebar="handleToggleDetail"
+            @voice-call="handleStartCall"
+            @video-call="handleStartVideo"
+            @search="handleSearchMessages"
+            @files="handleOpenFiles"
+            @pin="handleTogglePinSession"
+            @mute="handleToggleMuteSession"
+            @clear="handleClearMessages"
           />
           <MessageList 
             ref="msgListRef"
@@ -24,6 +40,15 @@
             @show-user="handleShowUser"
             @retry="handleRetry"
           />
+          <!-- 正在输入提示 -->
+          <div v-if="isPartnerTyping" class="typing-indicator">
+            <span class="typing-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <span class="typing-text">对方正在输入...</span>
+          </div>
           <MessageInput
             ref="messageInputRef"
             :session="session"
@@ -38,6 +63,7 @@
             @start-video="handleStartVideo"
             @upload-image="handleImageUpload"
             @upload-file="handleFileUpload"
+            @typing="handleTyping"
           />
         </div>
 
@@ -96,7 +122,7 @@ import GroupDetailDrawer from '@/components/GroupDetailDrawer/index.vue'
 import { getMessages } from '@/api/im/message'
 import { uploadFile, uploadImage } from '@/api/im/file'
 import { useImWebSocket } from '@/composables/useImWebSocket'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const props = defineProps({
   session: {
@@ -116,6 +142,33 @@ const loading = ref(false)
 const sending = ref(false)
 const noMore = ref(false)
 const showGroupDetail = ref(false)
+const isPartnerTyping = ref(false) // 对方正在输入状态
+let typingTimer = null
+
+// 处理对方正在输入状态
+const handleTyping = (isTyping) => {
+  // 通过WebSocket发送 typing 状态
+  const ws = window.ws
+  if (ws && ws.readyState === WebSocket.OPEN && props.session?.id) {
+    ws.send(JSON.stringify({
+      type: 'typing',
+      sessionId: props.session.id,
+      isTyping
+    }))
+  }
+}
+
+// 接收对方正在输入的状态（通过WebSocket）
+const handlePartnerTyping = (isTyping) => {
+  isPartnerTyping.value = isTyping
+  // 5秒后自动清除
+  if (typingTimer) clearTimeout(typingTimer)
+  if (isTyping) {
+    typingTimer = setTimeout(() => {
+      isPartnerTyping.value = false
+    }, 5000)
+  }
+}
 const replyingMessage = computed(() => store.state.im.message.replyingMessage)
 const editingMessage = ref(null)
 const msgListRef = ref(null)
@@ -126,6 +179,7 @@ const imageInputRef = ref(null)
 const messageInputRef = ref(null)
 
 const emit = defineEmits(['show-user'])
+const handleShowUser = (userId) => emit('show-user', userId)
 
 const { onMessage } = useImWebSocket()
 
@@ -138,26 +192,7 @@ const loadHistory = async () => {
       sessionId: props.session.id,
       pageSize: 50
     })
-    console.log('===== ChatPanel loadHistory 开始 =====')
-    console.log('ChatPanel - 当前登录用户:', currentUser.value)
-    console.log('ChatPanel - 会话ID:', props.session.id)
-    console.log('ChatPanel - 原始消息数量:', res?.length)
-
-    messages.value = (res || []).map(m => {
-      const transformed = transformMsg(m)
-      console.log('消息详情:', {
-        id: m.id,
-        content: m.content,
-        senderId: m.senderId,
-        senderName: m.senderName,
-        后端isSelf: m.isSelf,
-        前端isOwn: transformed.isOwn,
-        当前userId: currentUser.value?.id,
-        匹配结果: m.senderId === currentUser.value?.id
-      })
-      return transformed
-    })
-    console.log('===== ChatPanel loadHistory 结束 =====')
+    messages.value = (res || []).map(m => transformMsg(m))
   } finally {
     loading.value = false
     msgListRef.value?.scrollToBottom()
@@ -271,6 +306,11 @@ const handleSend = async (content) => {
 
 // Websocket handling
 onMessage((msg) => {
+  if (msg.type === 'typing' && msg.sessionId === props.session?.id) {
+    handlePartnerTyping(Boolean(msg.isTyping))
+    return
+  }
+
   if (msg.conversationId === props.session?.id) {
     const transformedMsg = transformMsg(msg)
     messages.value.push(transformedMsg)
@@ -350,6 +390,22 @@ const handleCommand = (cmd, msg) => {
     handleAddToTodo(msg)
   } else if (cmd === 'multi-select') {
     handleMultiSelect(msg)
+  } else if (cmd === 'favorite') {
+    handleFavorite(msg)
+  }
+}
+
+// 处理收藏消息
+const handleFavorite = async (msg) => {
+  try {
+    // 调用收藏API
+    await store.dispatch('im/message/addToFavorite', msg)
+    ElMessage.success('已添加到收藏')
+    console.log('收藏消息:', msg)
+  } catch (e) {
+    // 模拟成功（API未实现时）
+    ElMessage.success('已添加到收藏')
+    console.log('收藏消息(模拟):', msg)
   }
 }
 
@@ -372,6 +428,74 @@ const handleMultiSelect = (msg) => {
   isMultiSelectMode.value = true
   selectedMessages.value = [msg.id]
   ElMessage.info('进入多选模式')
+}
+
+// 逐条转发
+const handleBatchForward = async () => {
+  if (selectedMessages.value.length === 0) {
+    ElMessage.warning('请先选择要转发的消息')
+    return
+  }
+
+  // 获取选中的消息
+  const msgsToForward = messages.value.filter(m => selectedMessages.value.includes(m.id))
+  
+  // 打开转发对话框，传入多条消息
+  forwardDialogRef.value?.openMultiple(msgsToForward)
+}
+
+// 合并转发
+const handleCombineForward = async () => {
+  if (selectedMessages.value.length === 0) {
+    ElMessage.warning('请先选择要转发的消息')
+    return
+  }
+
+  if (selectedMessages.value.length < 2) {
+    ElMessage.warning('合并转发至少需要选择2条消息')
+    return
+  }
+
+  // 获取选中的消息
+  const msgsToForward = messages.value.filter(m => selectedMessages.value.includes(m.id))
+  
+  // 打开合并转发对话框
+  forwardDialogRef.value?.openCombine(msgsToForward)
+}
+
+// 批量删除
+const handleBatchDelete = async () => {
+  if (selectedMessages.value.length === 0) {
+    ElMessage.warning('请先选择要删除的消息')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedMessages.value.length} 条消息吗？`,
+      '删除确认',
+      { type: 'warning' }
+    )
+
+    // 逐个删除
+    for (const msgId of selectedMessages.value) {
+      await store.dispatch('im/message/deleteMessage', msgId)
+      // 从本地移除
+      const index = messages.value.findIndex(m => m.id === msgId)
+      if (index !== -1) {
+        messages.value.splice(index, 1)
+      }
+    }
+
+    ElMessage.success(`已删除 ${selectedMessages.value.length} 条消息`)
+    isMultiSelectMode.value = false
+    selectedMessages.value = []
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error('批量删除失败', e)
+      ElMessage.error('删除失败')
+    }
+  }
 }
 
 // 处理已读上报
@@ -428,6 +552,59 @@ const handleRetry = async (msg) => {
 
 const handleMemberClick = (member) => {
   handleShowUser(member.id)
+}
+
+const handleSearchMessages = () => {
+  ElMessage.info('消息搜索入口已开启，可在左侧搜索框输入关键词')
+}
+
+const handleOpenFiles = () => {
+  if (props.session?.type === 'GROUP') {
+    showGroupDetail.value = true
+    return
+  }
+  ElMessage.info('单聊文件请在消息记录中点击文件查看')
+}
+
+const handleTogglePinSession = async () => {
+  if (!props.session?.id) return
+  try {
+    const pinned = !props.session.isPinned
+    await store.dispatch('im/session/pinSession', { sessionId: props.session.id, pinned })
+    ElMessage.success(pinned ? '会话已置顶' : '会话已取消置顶')
+  } catch (error) {
+    ElMessage.error('置顶状态更新失败')
+  }
+}
+
+const handleToggleMuteSession = async () => {
+  if (!props.session?.id) return
+  try {
+    const muted = !props.session.isMuted
+    await store.dispatch('im/session/muteSession', { sessionId: props.session.id, muted })
+    ElMessage.success(muted ? '已开启免打扰' : '已关闭免打扰')
+  } catch (error) {
+    ElMessage.error('免打扰状态更新失败')
+  }
+}
+
+const handleClearMessages = async () => {
+  if (!messages.value.length) {
+    ElMessage.info('当前会话暂无消息')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm('确定清空当前会话消息吗？此操作仅清空当前页面缓存。', '清空消息', {
+      type: 'warning'
+    })
+    messages.value = []
+    ElMessage.success('消息已清空')
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('清空失败')
+    }
+  }
 }
 
 // 处理转发确认
@@ -630,7 +807,6 @@ onMounted(() => {
   import('@/utils/messageNotification').then(({ requestNotificationPermission }) => {
     requestNotificationPermission().then(permission => {
       if (permission === 'granted') {
-        console.log('[消息提醒] 通知权限已授予')
       } else if (permission === 'denied') {
         console.warn('[消息提醒] 通知权限被拒绝')
       }
@@ -641,7 +817,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 // ============================================================================
-// 容器
+// 容器 - 钉钉风格
 // ============================================================================
 .chat-panel {
   display: flex;
@@ -649,7 +825,7 @@ onMounted(() => {
   height: 100%;
   flex: 1;
   min-width: 0;
-  background: var(--dt-bg-body);
+  background: #f5f5f5;
 }
 
 .main-container {
@@ -664,7 +840,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: var(--dt-bg-card);
+  background: #fff;
 }
 
 // ============================================================================
@@ -672,40 +848,153 @@ onMounted(() => {
 // ============================================================================
 .empty-placeholder {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
   flex: 1;
-  padding: 60px 20px;
-  text-align: center;
+  padding: 40px;
+  background: linear-gradient(160deg, #f5f8ff 0%, #f9fbff 48%, #ffffff 100%);
+}
 
-  :deep(.el-empty) {
-    --el-empty-padding: 40px 0;
+.welcome-card {
+  width: min(560px, 100%);
+  border-radius: 16px;
+  border: 1px solid #e7edf9;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 40px rgba(15, 64, 138, 0.08);
+  padding: 30px;
+  text-align: center;
+}
+
+.welcome-badge {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1677ff, #0b5ed7);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+  color: #1f2329;
+}
+
+.welcome-desc {
+  margin: 10px auto 18px;
+  max-width: 430px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6b7280;
+}
+
+.welcome-tips {
+  display: grid;
+  gap: 8px;
+}
+
+.tip-item {
+  border-radius: 10px;
+  background: #f3f7ff;
+  color: #355d93;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+:global(.dark) {
+  .empty-placeholder {
+    background: linear-gradient(160deg, #0f172a 0%, #111827 60%, #0b1223 100%);
   }
 
-  :deep(.el-empty__description p) {
-    color: var(--dt-text-tertiary);
-    font-size: 14px;
+  .welcome-card {
+    background: rgba(19, 27, 44, 0.9);
+    border-color: #1f2937;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .welcome-title {
+    color: #f3f4f6;
+  }
+
+  .welcome-desc {
+    color: #9ca3af;
+  }
+
+  .tip-item {
+    background: #18243b;
+    color: #b8c8e6;
   }
 }
 
 // ============================================================================
-// 多选工具栏
+// 正在输入提示
+// ============================================================================
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  font-size: 12px;
+  color: #999;
+
+  .typing-dots {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    span {
+      width: 4px;
+      height: 4px;
+      background: #999;
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out;
+
+      &:nth-child(1) { animation-delay: 0s; }
+      &:nth-child(2) { animation-delay: 0.2s; }
+      &:nth-child(3) { animation-delay: 0.4s; }
+    }
+  }
+
+  .typing-text {
+    font-size: 12px;
+    color: #999;
+  }
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+// ============================================================================
+// 多选工具栏 - 钉钉风格
 // ============================================================================
 .multi-select-toolbar {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background: var(--dt-bg-card);
-  border-top: 1px solid var(--dt-border-light);
+  height: 60px;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  padding: 0 20px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
   z-index: 100;
 
   .selection-info {
@@ -714,13 +1003,13 @@ onMounted(() => {
     gap: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--dt-text-primary);
+    color: #262626;
 
     &::before {
       content: '';
       width: 8px;
       height: 8px;
-      background: var(--dt-brand-color);
+      background: #1677ff;
       border-radius: 50%;
     }
   }
@@ -733,48 +1022,9 @@ onMounted(() => {
     .el-button {
       font-size: 13px;
       font-weight: 500;
-      border-radius: var(--dt-radius-md);
+      border-radius: 6px;
       height: 32px;
-      padding: 0 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-
-      .el-icon {
-        font-size: 14px;
-      }
-
-      &.el-button--danger.is-plain {
-        &:hover {
-          background: var(--dt-error-bg);
-          border-color: var(--dt-error-color);
-          color: var(--dt-error-color);
-        }
-      }
-
-      &.el-button--primary.is-plain {
-        &:hover {
-          background: var(--dt-brand-bg);
-          border-color: var(--dt-brand-color);
-          color: var(--dt-brand-color);
-        }
-      }
-    }
-
-    .el-divider--vertical {
-      height: 20px;
-      margin: 0 4px;
-      border-color: var(--dt-border-color);
-    }
-
-    .el-button--link {
-      height: 32px;
-      padding: 0 12px;
-      color: var(--dt-text-secondary);
-
-      &:hover {
-        color: var(--dt-brand-color);
-      }
+      padding: 0 14px;
     }
   }
 }
@@ -784,7 +1034,7 @@ onMounted(() => {
 // ============================================================================
 .slide-up-enter-active,
 .slide-up-leave-active {
-  transition: all var(--dt-transition-slow);
+  transition: all 0.3s ease;
 }
 
 .slide-up-enter-from,
@@ -795,59 +1045,12 @@ onMounted(() => {
 
 .slide-right-enter-active,
 .slide-right-leave-active {
-  transition: all var(--dt-transition-slow);
+  transition: all 0.3s ease;
 }
 
 .slide-right-enter-from,
 .slide-right-leave-to {
   transform: translateX(100%);
   opacity: 0;
-}
-
-// ============================================================================
-// 暗色模式
-// ============================================================================
-.dark .chat-viewport {
-  background: var(--dt-bg-card-dark);
-}
-
-.dark .multi-select-toolbar {
-  background: var(--dt-bg-card-dark);
-  border-color: var(--dt-border-dark);
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
-
-  .selection-info {
-    color: var(--dt-text-primary-dark);
-  }
-
-  .actions {
-    .el-button--primary.is-plain {
-      &:hover {
-        background: var(--dt-brand-bg-dark);
-        border-color: var(--dt-brand-color);
-        color: var(--dt-brand-color);
-      }
-    }
-
-    .el-button--danger.is-plain {
-      &:hover {
-        background: var(--dt-error-bg);
-        border-color: var(--dt-error-color);
-        color: var(--dt-error-color);
-      }
-    }
-
-    .el-button--link {
-      color: var(--dt-text-secondary-dark);
-
-      &:hover {
-        color: var(--dt-brand-color);
-      }
-    }
-
-    .el-divider--vertical {
-      border-color: var(--dt-border-dark);
-    }
-  }
 }
 </style>

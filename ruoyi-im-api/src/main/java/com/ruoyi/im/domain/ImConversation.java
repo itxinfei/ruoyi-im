@@ -58,4 +58,20 @@ public class ImConversation extends BaseEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("deleted_time")
     private LocalDateTime deletedTime;
+
+    /** 是否敏感会话：0=否, 1=是 */
+    @TableField("is_sensitive")
+    private Integer isSensitive;
+
+    /** 敏感级别：NORMAL=普通, CONFIDENTIAL=机密, SECRET=绝密 */
+    @TableField("sensitive_level")
+    private String sensitiveLevel;
+
+    /** 禁止转发：0=允许, 1=禁止 */
+    @TableField("no_forward")
+    private Integer noForward;
+
+    /** 禁止复制：0=允许, 1=禁止 */
+    @TableField("no_copy")
+    private Integer noCopy;
 }
