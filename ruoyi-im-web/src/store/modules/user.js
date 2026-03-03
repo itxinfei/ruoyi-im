@@ -69,8 +69,10 @@ export default {
                     commit('SET_ONLINE_STATUS', true)
                     return res.data
                 }
+                throw new Error(res.msg || '获取用户信息失败')
             } catch (error) {
                 console.error('Failed to get user info:', error)
+                throw error
             }
         },
 

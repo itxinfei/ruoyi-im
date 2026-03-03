@@ -1,7 +1,1 @@
-feat: optimize log config, fix ServletUtils, enhance pagination
-
-- logback-spring.xml: enable Spring Boot native color logging
-- ServletUtils.java: add missing cn.hutool.core.convert.Convert import
-- MyBatisConfig.java: configure pagination max limit to 500
-- Add: TraceIdUtil, LogUtil, BusinessLog, BusinessLogAspect
-- Add: ImMessageReadDetail, ImTypingStatus, ImUserSession entities
+chore: add im-ui-test.jpg to .gitignore

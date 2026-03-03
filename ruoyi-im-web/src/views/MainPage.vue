@@ -52,6 +52,7 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { useTheme } from '@/composables/useTheme'
 import { createConversation } from '@/api/im'
@@ -75,6 +76,7 @@ import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
 import HelpFeedbackDialog from '@/components/Common/HelpFeedbackDialog.vue'
 
 const store = useStore()
+const router = useRouter()
 const activeModule = ref('chat')
 const isSidebarCollapsed = ref(false)
 const currentSession = computed(() => store.state.im.session?.currentSession || null)
@@ -214,9 +216,17 @@ onMounted(async () => {
   window.addEventListener('switch-to-chat', handleSwitchToChatEvent)
 
   try {
-    await store.dispatch('user/getUserInfo')
+    const userInfo = await store.dispatch('user/getUserInfo')
+    if (!userInfo?.id) {
+      throw new Error('登录状态无效')
+    }
   } catch (error) {
-    console.warn('获取用户信息失败', error)
+    ElMessage.warning('登录已失效，请重新登录')
+    localStorage.removeItem('im_token')
+    localStorage.removeItem('im_user_info')
+    localStorage.removeItem('im_user_role')
+    router.replace('/login')
+    return
   }
 
   try {
@@ -226,6 +236,7 @@ onMounted(async () => {
       handleSelectSession(sessions[0])
     }
   } catch (error) {
+    ElMessage.error('加载会话失败，请刷新重试')
     console.warn('加载会话列表失败', error)
   }
 
