@@ -149,7 +149,7 @@ export default {
 
       if (res.code === 200 && res.data) {
         commit('ADD_MESSAGE', { sessionId, message: res.data })
-        commit('session/UPDATE_SESSION', {
+        commit('im/session/UPDATE_SESSION', {
           id: sessionId,
           lastMessage: formatMessagePreviewFromObject(res.data),
           lastMessageTime: res.data.timestamp,
@@ -173,7 +173,7 @@ export default {
           // 如果是最后一条消息，更新会话列表
           const session = rootState.session.sessions.find(s => s.id === sessionId)
           if (session && session.lastMessageId === messageId) {
-            commit('session/UPDATE_SESSION', {
+            commit('im/session/UPDATE_SESSION', {
               id: sessionId,
               lastMessage: formatMessagePreview('TEXT', content)
             }, { root: true })
@@ -188,7 +188,7 @@ export default {
     async forwardMessage({ commit }, { messageId, targetConversationId }) {
       const res = await apiForwardMessage({ messageId, targetConversationId })
       if (res.code === 200 && res.data) {
-        commit('session/UPDATE_SESSION', {
+        commit('im/session/UPDATE_SESSION', {
           id: targetConversationId,
           lastMessage: formatMessagePreviewFromObject(res.data),
           lastMessageTime: res.data.timestamp,
@@ -202,7 +202,7 @@ export default {
     // 标记消息为已读
     async markMessageAsRead({ commit }, { conversationId, messageId }) {
       await markAsRead({ conversationId, messageId })
-      commit('session/UPDATE_SESSION', {
+      commit('im/session/UPDATE_SESSION', {
         id: conversationId,
         unreadCount: 0
       }, { root: true })
@@ -250,7 +250,7 @@ export default {
       const currentUser = rootState.im?.currentUser
       const hasMention = message.atUserIds && currentUser?.id && message.atUserIds.includes(currentUser.id)
 
-      commit('session/UPDATE_SESSION', {
+      commit('im/session/UPDATE_SESSION', {
         id: sessionId,
         lastMessage: formatMessagePreview(message.type, message.content),
         lastMessageTime: message.timestamp,

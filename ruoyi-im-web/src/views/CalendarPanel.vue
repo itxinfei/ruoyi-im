@@ -124,7 +124,11 @@
       </div>
 
       <div v-else class="view-placeholder">
-        暂未实现 {{ currentView }} 视图
+        <div class="coming-soon">
+          <span class="material-icons-outlined">calendar_today</span>
+          <p>{{ currentView }}视图开发中</p>
+          <p class="hint">请切换到周视图或月视图</p>
+        </div>
       </div>
     </div>
 

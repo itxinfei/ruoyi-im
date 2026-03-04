@@ -10,6 +10,7 @@ export * as dingApi from './ding'
 export * as botApi from './bot'
 export * as translationApi from './translation'
 export * as aiApi from './ai'
+export * as videoCallApi from './videoCall'
 
 // 直接导出常用方法
 export {
@@ -101,3 +102,21 @@ export {
   clearConversation,
   getSupportedModels
 } from './ai'
+
+// 视频通话相关API
+export {
+  initiateCall,
+  acceptCall,
+  rejectCall,
+  endCall,
+  getCallInfo,
+  getActiveCall,
+  sendSignal,
+  getCallHistory,
+  initiateGroupCall,
+  joinGroupCall,
+  leaveGroupCall,
+  getCallParticipants,
+  toggleMute,
+  toggleCamera
+} from './videoCall'

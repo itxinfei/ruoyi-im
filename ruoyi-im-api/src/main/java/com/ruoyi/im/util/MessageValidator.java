@@ -1,5 +1,6 @@
 package com.ruoyi.im.util;
 
+import com.ruoyi.im.constant.SystemConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class MessageValidator {
 
     private static final Logger log = LoggerFactory.getLogger(MessageValidator.class);
 
-    private static final int MAX_TEXT_LENGTH = 5000;
+    private static final int MAX_TEXT_LENGTH = SystemConstants.MAX_MESSAGE_LENGTH;
     private static final int MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
     /**

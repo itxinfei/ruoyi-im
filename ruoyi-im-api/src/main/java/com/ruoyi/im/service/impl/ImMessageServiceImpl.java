@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageEditHistory;
@@ -167,7 +168,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setUpdateTime(LocalDateTime.now());
 
         message.setClientMsgId(clientMsgId);
-        message.setSendStatus("SENDING");
+        message.setSendStatus(SystemConstants.MESSAGE_STATUS_SENDING);
         message.setSendRetryCount(0);
         message.setDeliveredTime(LocalDateTime.now());
 
@@ -187,15 +188,17 @@ public class ImMessageServiceImpl implements ImMessageService {
         List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
                 .selectByConversationId(conversationId);
 
-        boolean shouldEvictCache = members.size() <= 20;
+        if (members != null && !members.isEmpty()) {
+            boolean shouldEvictCache = members.size() <= 20;
 
-        for (com.ruoyi.im.domain.ImConversationMember member : members) {
-            if (!member.getUserId().equals(userId)) {
-                incrementSessionUnread(conversationId, member.getUserId(), 1);
-                imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
+            for (com.ruoyi.im.domain.ImConversationMember member : members) {
+                if (member != null && member.getUserId() != null && !member.getUserId().equals(userId)) {
+                    incrementSessionUnread(conversationId, member.getUserId(), 1);
+                    imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
 
-                if (shouldEvictCache) {
-                    redisUtil.delete("conversation:list:" + member.getUserId());
+                    if (shouldEvictCache) {
+                        redisUtil.delete("conversation:list:" + member.getUserId());
+                    }
                 }
             }
         }
@@ -256,10 +259,10 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 参数校验和默认值
         if (limit == null || limit <= 0) {
-            limit = 20;
+            limit = SystemConstants.DEFAULT_PAGE_SIZE;
         }
-        if (limit > 100) {
-            limit = 100; // 限制最大返回数量
+        if (limit > SystemConstants.MAX_PAGE_SIZE) {
+            limit = SystemConstants.MAX_PAGE_SIZE; // 限制最大返回数量
         }
 
         // 构建查询条件
@@ -473,9 +476,9 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        // 限制：消息发送超过15分钟不能编辑
-        if (message.getCreateTime().plusMinutes(15).isBefore(now)) {
-            throw new BusinessException("消息发送超过15分钟，无法编辑");
+        // 限制：消息发送超过指定时间不能编辑
+        if (message.getCreateTime().plusMinutes(SystemConstants.MESSAGE_EDIT_TIME_LIMIT).isBefore(now)) {
+            throw new BusinessException("消息发送超过" + SystemConstants.MESSAGE_EDIT_TIME_LIMIT + "分钟，无法编辑");
         }
 
         // 保存编辑历史
@@ -548,6 +551,13 @@ public class ImMessageServiceImpl implements ImMessageService {
             if (maxMessageId != null) {
                 updateSessionLastRead(conversationId, userId, maxMessageId);
                 imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, maxMessageId);
+                
+                // [核心同步点] 通知该用户的所有终端同步已读状态
+                try {
+                    broadcastService.broadcastReadReceipt(conversationId, maxMessageId, userId);
+                } catch (Exception e) {
+                    log.error("广播已读同步失败: userId={}, conversationId={}", userId, conversationId, e);
+                }
             }
         }
     }
@@ -620,8 +630,8 @@ public class ImMessageServiceImpl implements ImMessageService {
         if (pageNum == null || pageNum < 1) {
             pageNum = 1;
         }
-        if (pageSize == null || pageSize < 1 || pageSize > 100) {
-            pageSize = 20;
+        if (pageSize == null || pageSize < 1 || pageSize > SystemConstants.MAX_PAGE_SIZE) {
+            pageSize = SystemConstants.DEFAULT_PAGE_SIZE;
         }
         if (includeRevoked == null) {
             includeRevoked = false;

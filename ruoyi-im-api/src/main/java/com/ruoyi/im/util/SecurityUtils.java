@@ -148,4 +148,14 @@ public class SecurityUtils {
 
         return false;
     }
+
+    /**
+     * 获取当前登录用户的角色
+     *
+     * @return 用户角色 (USER/ADMIN/SUPER_ADMIN)，如果未登录则返回 null
+     */
+    public static String getLoginUserRole() {
+        ImUser user = getCurrentUser();
+        return user != null ? user.getRole() : null;
+    }
 }

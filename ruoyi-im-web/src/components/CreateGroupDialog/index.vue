@@ -3,78 +3,87 @@
     <el-dialog
       v-model="visible"
       title="创建群组"
-      width="600px"
+      width="560px"
       :close-on-click-modal="false"
+      :close-on-press-escape="true"
+      class="dingtalk-dialog"
       @close="handleClose"
     >
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="80px"
-      >
-        <el-form-item label="群组名称" prop="name">
-          <el-input
-            v-model="form.name"
-            placeholder="请输入群组名称"
-            maxlength="50"
-            show-word-limit
-          />
-        </el-form-item>
+      <div class="dialog-scroll-container">
+        <el-form
+          ref="formRef"
+          :model="form"
+          :rules="rules"
+          label-position="top"
+        >
+          <el-form-item label="群组名称" prop="name">
+            <el-input
+              v-model="form.name"
+              placeholder="起个好听的名字"
+              maxlength="50"
+              show-word-limit
+            />
+          </el-form-item>
 
-        <el-form-item label="群组头像" prop="avatar">
-          <el-upload
-            class="avatar-uploader"
-            :show-file-list="false"
-            :before-upload="beforeAvatarUpload"
-          >
-            <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-          </el-upload>
-        </el-form-item>
-
-        <el-form-item label="群组公告" prop="announcement">
-          <el-input
-            v-model="form.announcement"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入群组公告"
-            maxlength="200"
-            show-word-limit
-          />
-        </el-form-item>
-
-        <el-form-item label="选择成员" prop="members">
-          <el-select
-            v-model="form.members"
-            multiple
-            filterable
-            placeholder="请选择群组成员"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="contact in contacts"
-              :key="contact.id"
-              :label="contact.name"
-              :value="contact.id"
+          <el-form-item label="群组头像" prop="avatar">
+            <el-upload
+              class="avatar-uploader"
+              :show-file-list="false"
+              :before-upload="beforeAvatarUpload"
             >
-              <div class="contact-option">
-                <el-avatar :size="24" :src="addTokenToUrl(contact.avatar)">
-                  {{ contact.name?.charAt(0) }}
-                </el-avatar>
-                <span>{{ contact.name }}</span>
+              <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar" />
+              <div v-else class="avatar-placeholder">
+                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+                <span>上传头像</span>
               </div>
-            </el-option>
-          </el-select>
-          <div class="member-count">已选择 {{ form.members.length }} 人</div>
-        </el-form-item>
-      </el-form>
+            </el-upload>
+          </el-form-item>
+
+          <el-form-item label="群组公告" prop="announcement">
+            <el-input
+              v-model="form.announcement"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入群组公告（可选）"
+              maxlength="200"
+              show-word-limit
+            />
+          </el-form-item>
+
+          <el-form-item label="选择成员" prop="members">
+            <el-select
+              v-model="form.members"
+              multiple
+              filterable
+              collapse-tags
+              collapse-tags-tooltip
+              placeholder="搜索并选择成员"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="contact in contacts"
+                :key="contact.id"
+                :label="contact.name"
+                :value="contact.id"
+              >
+                <div class="contact-option">
+                  <DingtalkAvatar :name="contact.name" :user-id="contact.id" :size="24" shape="square" />
+                  <span>{{ contact.name }}</span>
+                </div>
+              </el-option>
+            </el-select>
+            <div class="member-count">当前选择: <b>{{ form.members.length }}</b> 人</div>
+          </el-form-item>
+        </el-form>
+      </div>
 
       <template #footer>
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="handleSubmit">
-          创建群组
-        </el-button>
+        <div class="dialog-footer">
+          <el-button @click="handleClose">取消</el-button>
+          <el-button type="primary" :loading="loading" @click="handleSubmit">
+            立即创建
+          </el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -224,46 +233,28 @@ watch(visible, (val) => {
 </script>
 
 <style scoped lang="scss">
-.contact-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.member-count {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #8c8c8c;
+.dialog-scroll-container {
+  max-height: 450px;
+  overflow-y: auto;
+  padding: 0 4px; // 留出滚动条空间
+  margin: -10px 0; // 补偿 Form 的内边距
 }
 
 .avatar-uploader {
-  :deep(.el-upload) {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s;
-
-    &:hover {
-      border-color: #0089ff;
-    }
+  .avatar-placeholder {
+    width: 100px; height: 100px; border: 1px dashed #d9d9d9; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: #8f959e; font-size: 12px; transition: all 0.2s;
+    &:hover { border-color: #1677ff; color: #1677ff; background: #f9fbff; }
+    .avatar-uploader-icon { font-size: 24px; margin: 0; }
   }
 }
 
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c8c8c;
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.contact-option {
+  display: flex; align-items: center; gap: 10px; padding: 4px 0;
 }
 
-.avatar {
-  width: 100px;
-  height: 100px;
-  display: block;
+.member-count {
+  margin-top: 10px; font-size: 13px; color: #646a73; b { color: #1677ff; }
 }
 </style>

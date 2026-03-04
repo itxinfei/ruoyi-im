@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.domain.ImFileChunkDetail;
 import com.ruoyi.im.domain.ImFileChunkUpload;
@@ -70,7 +71,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
                 vo.setUploadedChunks(Collections.emptyList());
                 vo.setNeedUpload(false);
                 vo.setFileUrl(existingUpload.getFileUrl());
-                vo.setStatus("COMPLETED");
+                vo.setStatus(SystemConstants.STATUS_COMPLETED);
                 return vo;
             }
         }
@@ -142,14 +143,14 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         if (chunkDetail == null) {
             throw new BusinessException("分片信息不存在");
         }
-        if ("COMPLETED".equals(chunkDetail.getStatus())) {
+        if (SystemConstants.STATUS_COMPLETED.equals(chunkDetail.getStatus())) {
             // 分片已上传，直接返回成功
             return true;
         }
 
         try {
             // 保存分片文件
-            String dateDir = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String dateDir = LocalDateTime.now().format(SystemConstants.DATE_FORMAT_COMPACT);
             String chunkDir = uploadPath + CHUNK_TEMP_DIR + uploadId + "/";
             Path chunkPath = Paths.get(chunkDir);
             if (!Files.exists(chunkPath)) {
@@ -161,7 +162,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             file.transferTo(new File(fullChunkPath));
 
             // 更新分片状态
-            chunkDetailMapper.updateChunkStatus(uploadId, chunkNumber, "COMPLETED", fullChunkPath);
+            chunkDetailMapper.updateChunkStatus(uploadId, chunkNumber, SystemConstants.STATUS_COMPLETED, fullChunkPath);
 
             // 更新已上传分片数
             List<ImFileChunkDetail> completedChunks = chunkDetailMapper.selectCompletedByUploadId(uploadId);
@@ -175,7 +176,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             return true;
         } catch (IOException e) {
             // 更新分片状态为失败
-            chunkDetailMapper.updateChunkStatus(uploadId, chunkNumber, "FAILED", null);
+            chunkDetailMapper.updateChunkStatus(uploadId, chunkNumber, SystemConstants.STATUS_FAILED, null);
             throw new BusinessException("分片上传失败: " + e.getMessage());
         }
     }
@@ -203,7 +204,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             chunkDetails.sort(Comparator.comparingInt(ImFileChunkDetail::getChunkNumber));
 
             // 创建最终文件目录
-            String dateDir = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+            String dateDir = LocalDateTime.now().format(SystemConstants.DATE_FORMAT_SLASH);
             String targetDir = uploadPath + dateDir + "/";
             Path targetPath = Paths.get(targetDir);
             if (!Files.exists(targetPath)) {
@@ -256,7 +257,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             fileAssetMapper.insert(fileAsset);
 
             // 更新上传任务状态
-            chunkUploadMapper.updateStatus(request.getUploadId(), "COMPLETED", finalFilePath, fileUrl);
+            chunkUploadMapper.updateStatus(request.getUploadId(), SystemConstants.STATUS_COMPLETED, finalFilePath, fileUrl);
 
             // 删除临时分片文件
             cleanupChunks(request.getUploadId());
@@ -350,7 +351,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             throw new BusinessException("上传任务不存在");
         }
 
-        if ("COMPLETED".equals(chunkUpload.getStatus())) {
+        if (SystemConstants.STATUS_COMPLETED.equals(chunkUpload.getStatus())) {
             return 100;
         }
 

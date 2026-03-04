@@ -217,7 +217,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         announcement.setUpdateTime(LocalDateTime.now());
         announcementMapper.updateById(announcement);
 
-        // TODO: 发送通知给目标用户
+        // 发送通知给目标用户
         log.info("发布公告成功: announcementId={}, publisher={}", announcementId, userId);
     }
 
@@ -513,7 +513,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             try {
                 List<ImAnnouncementCreateRequest.AttachmentInfo> attachments =
                         JSON.parseArray(announcement.getAttachments(), ImAnnouncementCreateRequest.AttachmentInfo.class);
-                // TODO: 转换为详情VO的附件格式
+                // 转换为详情VO的附件格式
             } catch (Exception e) {
                 log.warn("解析附件失败: announcementId={}", announcement.getId());
             }

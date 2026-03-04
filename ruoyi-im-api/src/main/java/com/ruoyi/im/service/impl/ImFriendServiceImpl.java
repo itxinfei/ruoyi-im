@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -316,10 +317,23 @@ public class ImFriendServiceImpl implements ImFriendService {
     public List<ImFriendRequest> getReceivedRequests(Long userId) {
         List<ImFriendRequest> requestList = imFriendRequestMapper.selectImFriendRequestListByToUserId(userId);
 
+        // 批量查询用户信息，避免N+1查询
+        List<Long> fromUserIds = requestList.stream()
+                .map(ImFriendRequest::getFromUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (!fromUserIds.isEmpty()) {
+            List<ImUser> users = imUserMapper.selectImUserListByIds(fromUserIds);
+            users.forEach(user -> userMap.put(user.getId(), user));
+        }
+
         List<ImFriendRequest> pendingList = new ArrayList<>();
         for (ImFriendRequest request : requestList) {
             if ("PENDING".equals(request.getStatus())) {
-                ImUser fromUser = imUserMapper.selectImUserById(request.getFromUserId());
+                ImUser fromUser = userMap.get(request.getFromUserId());
                 if (fromUser != null) {
                     request.setFromUserName(
                             fromUser.getNickname() != null ? fromUser.getNickname() : fromUser.getUsername());

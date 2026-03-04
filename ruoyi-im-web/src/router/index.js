@@ -47,6 +47,12 @@ const routes = [
         name: 'AdminSystemConfig',
         component: () => import('../views/admin/SystemConfig.vue'),
         meta: { title: '系统配置' }
+      },
+      {
+        path: 'audit-log',
+        name: 'AdminAuditLog',
+        component: () => import('../views/admin/AuditLog.vue'),
+        meta: { title: '审计日志' }
       }
     ]
   }

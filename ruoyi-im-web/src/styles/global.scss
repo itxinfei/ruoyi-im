@@ -31,12 +31,22 @@ body {
 body {
   font-family: var(--dt-font-family);
   font-size: var(--dt-font-size-base);
-  line-height: var(--dt-line-height-base);
+  line-height: 1.6; // 钉钉标准行高
   color: var(--dt-text-primary);
   background-color: var(--dt-bg-body);
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased; // 强制抗锯齿，使文字更清晰
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   transition: background-color var(--dt-transition-base), color var(--dt-transition-base);
+}
+
+// 统一图标字体渲染
+.material-icons-outlined {
+  font-weight: 300 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }
 
 a {

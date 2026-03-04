@@ -11,6 +11,7 @@ import com.ruoyi.im.vo.ding.DingMessageVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -18,51 +19,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 分布式 WebSocket 广播服务实现
+ * 通过 Redis Pub/Sub 实现跨节点消息转发
+ */
 @Service
 public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastService {
 
     private static final Logger log = LoggerFactory.getLogger(ImWebSocketBroadcastServiceImpl.class);
+    private static final String IM_WS_CHANNEL = "im:ws:broadcast";
 
     private final ImConversationMemberMapper conversationMemberMapper;
     private final ImMessageMapper messageMapper;
     private final com.ruoyi.im.mapper.ImUserMapper imUserMapper;
     private final MessageEncryptionUtil encryptionUtil;
     private final ObjectMapper objectMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public ImWebSocketBroadcastServiceImpl(
             ImConversationMemberMapper conversationMemberMapper,
             ImMessageMapper messageMapper,
             com.ruoyi.im.mapper.ImUserMapper imUserMapper,
             MessageEncryptionUtil encryptionUtil,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            RedisTemplate<String, Object> redisTemplate) {
         this.conversationMemberMapper = conversationMemberMapper;
         this.messageMapper = messageMapper;
         this.imUserMapper = imUserMapper;
         this.encryptionUtil = encryptionUtil;
         this.objectMapper = objectMapper;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
     public void broadcastMessageToConversation(Long conversationId, Long messageId, Long senderId) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) {
-                return;
-            }
+            if (members == null || members.isEmpty()) return;
 
             ImMessage message = messageMapper.selectImMessageById(messageId);
-            if (message == null) {
-                return;
-            }
+            if (message == null) return;
 
-            // 构建标准推送格式: {type: 'message', data: {...}}
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", "message");
             wsMessage.put("data", createMessageData(message));
 
-            String messageJson = objectMapper.writeValueAsString(wsMessage);
-
-            broadcastToMembers(members, messageJson, senderId);
+            publishToMembers(members, wsMessage, senderId);
         } catch (Exception e) {
             log.error("广播消息异常: conversationId={}, messageId={}", conversationId, messageId, e);
         }
@@ -72,17 +74,12 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastReactionUpdate(Long conversationId, Long messageId, Long userId, String emoji, String action) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) {
-                return;
-            }
+            if (members == null || members.isEmpty()) return;
 
-            Map<String, Object> reactionMessage = createReactionMessage(conversationId, messageId, userId, emoji,
-                    action);
-            String messageJson = objectMapper.writeValueAsString(reactionMessage);
-
-            broadcastToMembers(members, messageJson, userId);
+            Map<String, Object> msg = createReactionMessage(conversationId, messageId, userId, emoji, action);
+            publishToMembers(members, msg, userId);
         } catch (Exception e) {
-            log.error("广播反应更新异常: conversationId={}, messageId={}", conversationId, messageId, e);
+            log.error("广播反应更新异常", e);
         }
     }
 
@@ -90,16 +87,12 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastReadReceipt(Long conversationId, Long lastReadMessageId, Long userId) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) {
-                return;
-            }
+            if (members == null || members.isEmpty()) return;
 
-            Map<String, Object> readReceipt = createReadReceiptMessage(conversationId, lastReadMessageId, userId);
-            String messageJson = objectMapper.writeValueAsString(readReceipt);
-
-            broadcastToMembers(members, messageJson, userId);
+            Map<String, Object> msg = createReadReceiptMessage(conversationId, lastReadMessageId, userId);
+            publishToMembers(members, msg, userId);
         } catch (Exception e) {
-            log.error("广播已读回执异常: conversationId={}", conversationId, e);
+            log.error("广播已读回执异常", e);
         }
     }
 
@@ -107,9 +100,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) {
-                return;
-            }
+            if (members == null || members.isEmpty()) return;
 
             Map<String, Object> statusMap = new HashMap<>();
             statusMap.put("type", "typing");
@@ -120,10 +111,9 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             data.put("timestamp", System.currentTimeMillis());
             statusMap.put("data", data);
 
-            String messageJson = objectMapper.writeValueAsString(statusMap);
-            broadcastToMembers(members, messageJson, userId);
+            publishToMembers(members, statusMap, userId);
         } catch (Exception e) {
-            log.error("广播输入状态异常: conversationId={}", conversationId, e);
+            log.error("广播输入状态异常", e);
         }
     }
 
@@ -132,146 +122,145 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         try {
             Map<String, Object> statusMap = new HashMap<>();
             statusMap.put("type", online ? "online" : "offline");
-
             Map<String, Object> data = new HashMap<>();
             data.put("userId", userId);
             data.put("online", online);
             data.put("timestamp", System.currentTimeMillis());
             statusMap.put("data", data);
 
+            // 在线状态属于全局广播
             String messageJson = objectMapper.writeValueAsString(statusMap);
-
-            // 广播给所有在线用户
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            for (javax.websocket.Session session : onlineUsers.values()) {
-                if (session.isOpen()) {
-                    try {
-                        session.getBasicRemote().sendText(messageJson);
-                    } catch (Exception e) {
-                        // 忽略单个发送失败
-                    }
-                }
-            }
+            
+            // 1. 本地全量发送
+            ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
+            
+            // 2. Redis 全量广播 (让其他节点也执行本地全量发送)
+            Map<String, Object> redisPayload = new HashMap<>();
+            redisPayload.put("broadcastAll", true);
+            redisPayload.put("messageJson", messageJson);
+            redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
         } catch (Exception e) {
             log.error("广播在线状态异常: userId={}", userId, e);
         }
     }
 
     @Override
-    public void broadcastDingMessage(DingMessageVO dingVO, Set<Long> targetUserIds) {
+    public void sendCallSignal(Long toUserId, Object signal) {
+        Map<String, Object> wsMessage = new HashMap<>();
+        wsMessage.put("type", "call");
+        wsMessage.put("data", signal);
+        wsMessage.put("timestamp", System.currentTimeMillis());
+        sendToUser(toUserId, wsMessage);
+    }
+
+    @Override
+    public void sendToUser(Long userId, Object message) {
+        if (userId == null) return;
         try {
-            // 构建DING消息格式
-            Map<String, Object> wsMessage = new HashMap<>();
-            wsMessage.put("type", "ding");
-            wsMessage.put("data", dingVO);
+            String messageJson = objectMapper.writeValueAsString(message);
+            // 优先本地发送
+            boolean localSent = sendToLocalUser(userId, messageJson);
+            
+            // 广播到 Redis 供分布式节点消费
+            Map<String, Object> redisPayload = new HashMap<>();
+            redisPayload.put("targetUserId", userId);
+            redisPayload.put("messageJson", messageJson);
+            redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
+            
+            if (localSent) log.debug("消息已成功在本节点发送给用户: {}", userId);
+        } catch (Exception e) {
+            log.error("分布式发送消息失败: userId={}", userId, e);
+        }
+    }
 
-            String messageJson = objectMapper.writeValueAsString(wsMessage);
+    @Override
+    public void broadcastDingMessage(DingMessageVO dingVO, Set<Long> targetUserIds) {
+        if (targetUserIds == null || targetUserIds.isEmpty()) return;
+        Map<String, Object> wsMessage = new HashMap<>();
+        wsMessage.put("type", "ding");
+        wsMessage.put("data", dingVO);
+        
+        for (Long targetUserId : targetUserIds) {
+            sendToUser(targetUserId, wsMessage);
+        }
+    }
 
-            // 发送给目标用户
-            Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-            for (Long targetUserId : targetUserIds) {
-                javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-                if (targetSession != null && targetSession.isOpen()) {
-                    try {
-                        targetSession.getBasicRemote().sendText(messageJson);
-                        log.debug("DING消息已推送给用户: userId={}, dingId={}", targetUserId, dingVO.getId());
-                    } catch (Exception e) {
-                        log.error("发送DING消息给用户失败: userId={}", targetUserId, e);
-                    }
-                }
+    private void publishToMembers(List<ImConversationMember> members, Object message, Long excludeUserId) {
+        try {
+            String messageJson = objectMapper.writeValueAsString(message);
+            for (ImConversationMember member : members) {
+                Long tid = member.getUserId();
+                if (tid == null || tid.equals(excludeUserId)) continue;
+                
+                // 本地发送
+                sendToLocalUser(tid, messageJson);
+                
+                // 转发给 Redis 供其他节点消费
+                Map<String, Object> redisPayload = new HashMap<>();
+                redisPayload.put("targetUserId", tid);
+                redisPayload.put("messageJson", messageJson);
+                redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
             }
         } catch (Exception e) {
-            log.error("广播DING消息异常: dingId={}", dingVO.getId(), e);
+            log.error("Redis 消息发布失败", e);
         }
+    }
+
+    private boolean sendToLocalUser(Long userId, String messageJson) {
+        javax.websocket.Session session = ImWebSocketEndpoint.getOnlineUsers().get(userId);
+        if (session != null && session.isOpen()) {
+            try {
+                session.getBasicRemote().sendText(messageJson);
+                return true;
+            } catch (Exception e) {
+                log.warn("本地 Session 发送失败: userId={}", userId);
+            }
+        }
+        return false;
     }
 
     private Map<String, Object> createMessageData(ImMessage message) {
         Map<String, Object> data = new HashMap<>();
         data.put("id", message.getId());
         data.put("conversationId", message.getConversationId());
-        data.put("sessionId", message.getConversationId()); // 兼容旧版前端
         data.put("senderId", message.getSenderId());
         data.put("type", message.getMessageType() != null ? message.getMessageType().toUpperCase() : "TEXT");
         data.put("content", encryptionUtil.decryptMessage(message.getContent()));
-
-        // 尝试获取发送者信息
+        
         try {
             com.ruoyi.im.domain.ImUser sender = imUserMapper.selectImUserById(message.getSenderId());
             if (sender != null) {
                 data.put("senderName", sender.getNickname());
                 data.put("senderAvatar", sender.getAvatar());
             }
-        } catch (Exception e) {
-            log.warn("构建WS消息时获取发送者信息失败: userId={}", message.getSenderId());
-        }
+        } catch (Exception e) {}
 
-        // 统一时间戳为毫秒数
-        long timestamp = System.currentTimeMillis();
-        if (message.getCreateTime() != null) {
-            timestamp = message.getCreateTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
-        }
+        long timestamp = message.getCreateTime() != null 
+            ? message.getCreateTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli() 
+            : System.currentTimeMillis();
         data.put("timestamp", timestamp);
-
-        if (message.getFileUrl() != null) {
-            data.put("fileUrl", message.getFileUrl());
-            data.put("fileName", message.getFileName());
-            data.put("fileSize", message.getFileSize());
-        }
-
-        if (message.getReplyToMessageId() != null) {
-            data.put("replyToMessageId", message.getReplyToMessageId());
-        }
-
-        if (message.getIsRevoked() != null && message.getIsRevoked() == 1) {
-            data.put("isRevoked", 1);
-            data.put("content", "[消息已撤回]");
-        }
-
         return data;
     }
 
-    private Map<String, Object> createReactionMessage(Long conversationId, Long messageId, Long userId, String emoji,
-            String action) {
-        Map<String, Object> reactionMessage = new HashMap<>();
-        reactionMessage.put("type", "reaction");
-        reactionMessage.put("action", action);
-        reactionMessage.put("conversationId", conversationId);
-        reactionMessage.put("messageId", messageId);
-        reactionMessage.put("userId", userId);
-        if (emoji != null) {
-            reactionMessage.put("emoji", emoji);
-        }
-        reactionMessage.put("timestamp", System.currentTimeMillis());
-        return reactionMessage;
+    private Map<String, Object> createReactionMessage(Long conversationId, Long messageId, Long userId, String emoji, String action) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("type", "reaction");
+        m.put("action", action);
+        m.put("conversationId", conversationId);
+        m.put("messageId", messageId);
+        m.put("userId", userId);
+        m.put("emoji", emoji);
+        m.put("timestamp", System.currentTimeMillis());
+        return m;
     }
 
     private Map<String, Object> createReadReceiptMessage(Long conversationId, Long lastReadMessageId, Long userId) {
-        Map<String, Object> readReceipt = new HashMap<>();
-        readReceipt.put("type", "read");
-        readReceipt.put("conversationId", conversationId);
-        readReceipt.put("lastReadMessageId", lastReadMessageId);
-        readReceipt.put("userId", userId);
-        readReceipt.put("timestamp", System.currentTimeMillis());
-        return readReceipt;
-    }
-
-    private void broadcastToMembers(List<ImConversationMember> members, String messageJson, Long excludeUserId) {
-        Map<Long, javax.websocket.Session> onlineUsers = ImWebSocketEndpoint.getOnlineUsers();
-
-        for (ImConversationMember member : members) {
-            Long targetUserId = member.getUserId();
-            if (targetUserId.equals(excludeUserId)) {
-                continue;
-            }
-
-            javax.websocket.Session targetSession = onlineUsers.get(targetUserId);
-            if (targetSession != null && targetSession.isOpen()) {
-                try {
-                    targetSession.getBasicRemote().sendText(messageJson);
-                } catch (Exception e) {
-                    log.error("发送消息给用户失败: userId={}", targetUserId, e);
-                }
-            }
-        }
+        Map<String, Object> m = new HashMap<>();
+        m.put("type", "read");
+        m.put("conversationId", conversationId);
+        m.put("lastReadMessageId", lastReadMessageId);
+        m.put("userId", userId);
+        m.put("timestamp", System.currentTimeMillis());
+        return m;
     }
 }

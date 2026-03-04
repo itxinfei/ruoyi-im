@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.constant.ImErrorCode;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.BasePageRequest;
 import com.ruoyi.im.dto.user.ImLoginRequest;
@@ -27,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -333,15 +333,15 @@ public class ImUserServiceImpl implements ImUserService {
             throw new BusinessException("FILE_TYPE_ERROR", "只支持图片格式的头像");
         }
 
-        // 验证文件大小（最大2MB）
-        long maxSize = 2 * 1024 * 1024;
+        // 验证文件大小（最大配置值）
+        long maxSize = SystemConstants.MAX_AVATAR_SIZE_MB * 1024 * 1024;
         if (file.getSize() > maxSize) {
-            throw new BusinessException("FILE_SIZE_ERROR", "头像文件大小不能超过2MB");
+            throw new BusinessException("FILE_SIZE_ERROR", "头像文件大小不能超过" + SystemConstants.MAX_AVATAR_SIZE_MB + "MB");
         }
 
         // 生成文件名和路径
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
-        String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        String datePath = LocalDate.now().format(SystemConstants.DATE_FORMAT_SLASH);
         String relativePath = "avatar/" + datePath + "/" + fileName;
         String filePath = uploadPath + relativePath;
 

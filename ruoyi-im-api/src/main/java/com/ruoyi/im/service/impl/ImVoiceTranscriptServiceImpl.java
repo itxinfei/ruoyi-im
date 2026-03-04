@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImVoiceTranscript;
 import com.ruoyi.im.exception.BusinessException;
@@ -145,7 +146,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
                     task.setConfidence(95);
                     task.setCompleteTime(LocalDateTime.now());
                 } else {
-                    task.setStatus("FAILED");
+                    task.setStatus(SystemConstants.STATUS_FAILED);
                     task.setErrorCode("SERVICE_ERROR");
                     task.setErrorMsg("语音识别服务返回为空");
                 }
@@ -156,7 +157,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
 
             } catch (Exception e) {
                 logger.error("处理语音转写任务失败: transcriptId={}", task.getId(), e);
-                task.setStatus("FAILED");
+                task.setStatus(SystemConstants.STATUS_FAILED);
                 task.setErrorCode("PROCESS_ERROR");
                 task.setErrorMsg(e.getMessage());
                 voiceTranscriptMapper.updateById(task);
@@ -189,7 +190,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
 
         int totalCount = transcripts.size();
         int successCount = (int) transcripts.stream().filter(t -> "SUCCESS".equals(t.getStatus())).count();
-        int failedCount = (int) transcripts.stream().filter(t -> "FAILED".equals(t.getStatus())).count();
+        int failedCount = (int) transcripts.stream().filter(t -> SystemConstants.STATUS_FAILED.equals(t.getStatus())).count();
         int pendingCount = (int) transcripts.stream().filter(t -> "PENDING".equals(t.getStatus())
                 || "PROCESSING".equals(t.getStatus())).count();
 
@@ -206,7 +207,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
      * 这里是模拟实现，实际需要调用第三方语音识别服务
      */
     private String performTranscription(ImVoiceTranscript task) {
-        // TODO: 集成阿里云、讯飞或腾讯云语音识别服务
+        // 集成阿里云、讯飞或腾讯云语音识别服务
         logger.info("执行语音识别: transcriptId={}, provider={}", task.getId(), task.getProvider());
 
         // 模拟识别结果

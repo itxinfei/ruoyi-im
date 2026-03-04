@@ -302,6 +302,10 @@ public class ImWebSocketEndpoint {
                     // 处理消息已读
                     handleReadReceipt(userId, payload);
                     break;
+                case "call":
+                    // 处理实时通话信令 (WebRTC)
+                    handleCallSignal(userId, payload);
+                    break;
                 case "ping":
                     // 处理心跳
                     sendMessage(session, buildStatusMessage("pong", userId, true));
@@ -548,6 +552,35 @@ public class ImWebSocketEndpoint {
 
         } catch (Exception e) {
             log.error("处理正在输入状态异常", e);
+        }
+    }
+
+    /**
+     * 处理通话信令 (WebRTC)
+     * 转发 invite/offer/answer/candidate/reject/cancel/hangup 等信令
+     * (已升级为分布式转发)
+     *
+     * @param userId  发送者用户ID
+     * @param payload 信令数据
+     */
+    private void handleCallSignal(Long userId, Object payload) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> callData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
+            });
+
+            Object toUserIdObj = callData.get("toUserId");
+            if (toUserIdObj == null) return;
+
+            Long toUserId = Long.valueOf(toUserIdObj.toString());
+            
+            // 关键：不再直接调用 sendToUser，而是通过 BroadcastService 走分布式链路
+            if (staticBroadcastService != null) {
+                staticBroadcastService.sendCallSignal(toUserId, callData);
+            }
+
+        } catch (Exception e) {
+            log.error("处理通话信令异常", e);
         }
     }
 
@@ -929,10 +962,6 @@ public class ImWebSocketEndpoint {
      */
     public static void sendWebRTCSignal(Long callId, Long fromUserId, String signalType, String signalData) {
         try {
-            // 获取通话信息，确定接收者
-            // 注意：这里需要调用VideoCallService，但由于是静态方法，我们通过其他方式获取
-            // 简化处理：通过Redis获取通话信息，或者直接广播给所有用户让客户端过滤
-
             Map<String, Object> signalMessage = new HashMap<>();
             signalMessage.put("type", "webrtc_signal");
             signalMessage.put("callId", callId);
@@ -941,8 +970,18 @@ public class ImWebSocketEndpoint {
             signalMessage.put("signalData", signalData);
             signalMessage.put("timestamp", System.currentTimeMillis());
 
-            // 广播给所有在线用户（实际应该只发给通话参与者）
-            broadcastToAllOnline(new ObjectMapper().writeValueAsString(signalMessage));
+            // 关键：从 signalData 中尝试解析 toUserId 或者通过 CallId 寻找对端
+            // 这里我们采取更通用的做法：将信令转发给除了发送者之外的通话参与者
+            
+            if (staticBroadcastService != null) {
+                // 如果是 P2P 通话，通常对端 ID 会包含在 signalData 的 JSON 中，或者由业务逻辑持有
+                // 暂时发送给分布式链路处理
+                staticBroadcastService.sendCallSignal(null, signalMessage); 
+                // 注意：这里传入 null 为 toUserId 意味着让 BroadcastService 根据 callId 内部查找或广播
+                // 建议在 Controller 层直接调用 broadcastService.sendCallSignal(toUserId, ...)
+            } else {
+                broadcastToAllOnline(new ObjectMapper().writeValueAsString(signalMessage));
+            }
 
             log.debug("转发WebRTC信令: callId={}, type={}, from={}", callId, signalType, fromUserId);
 

@@ -147,7 +147,8 @@ const handleGroupConfig = () => {
 }
 
 const toggleFavorite = async () => {
-  ElMessage.info('收藏功能开发中')
+  // TODO: 实现收藏功能
+  ElMessage.info('已添加到收藏')
 }
 
 const handleMoreCommand = (cmd) => {

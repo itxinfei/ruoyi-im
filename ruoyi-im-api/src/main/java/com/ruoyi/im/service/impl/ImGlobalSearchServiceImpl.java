@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.dto.search.GlobalSearchRequest;
 import com.ruoyi.im.domain.*;
 import com.ruoyi.im.mapper.*;
@@ -15,7 +16,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -537,7 +537,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
         if (time == null) {
             return "";
         }
-        return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        return time.format(SystemConstants.DATETIME_FORMAT_STANDARD);
     }
 
     /**
@@ -547,7 +547,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
         if (date == null) {
             return "";
         }
-        return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return date.format(SystemConstants.DATE_FORMAT_COMPACT);
     }
 
     @Override

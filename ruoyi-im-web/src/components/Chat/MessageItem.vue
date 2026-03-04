@@ -41,6 +41,9 @@
         <div v-if="!message.isOwn" class="sender-name">{{ message.senderName }}</div>
 
         <div class="message-content-main">
+          <!-- 消息气泡内容插槽 -->
+          <slot name="bubble"></slot>
+
           <!-- 悬停快捷按钮区 (钉钉风格微交互) -->
           <div class="message-actions-floating" v-if="message.type !== 'RECALLED' && !['sending', 'uploading'].includes(message.status)">
             <div class="action-bar-min">
@@ -54,52 +57,40 @@
                   <button class="mini-btn"><el-icon><MoreFilled /></el-icon></button>
                   <template #dropdown>
                     <el-dropdown-menu>
+                       <el-dropdown-item command="read-detail" v-if="message.isOwn && message.type !== 'SYSTEM'">
+                         <el-icon><View /></el-icon> 查看已读
+                       </el-dropdown-item>
                        <el-dropdown-item command="forward">转发</el-dropdown-item>
                        <el-dropdown-item command="copy" v-if="message.type === 'TEXT'">复制</el-dropdown-item>
-                       <el-dropdown-item command="multi-select">多选</el-dropdown-item>
-                       <el-dropdown-item command="todo">设为待办</el-dropdown-item>
+                       <el-dropdown-item command="recall" v-if="message.isOwn && canRecall">撤回</el-dropdown-item>
+                       <el-dropdown-item command="delete" divided class="text-danger">删除</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                </el-dropdown>
             </div>
           </div>
-
-          <!-- 消息气泡内容插槽 -->
-          <slot name="bubble"></slot>
           
           <!-- 上传进度条 (仅图片/文件上传时显示) -->
           <div v-if="message.status === 'uploading' && message.uploadProgress" class="upload-progress-bar">
             <div class="progress-fill" :style="{ width: message.uploadProgress + '%' }"></div>
-            <span class="progress-text">{{ message.uploadProgress }}%</span>
           </div>
         </div>
 
         <!-- 消息页脚 (状态与时间) -->
         <div class="message-footer">
           <div v-if="message.isOwn" class="status-container">
-            <!-- 发送中状态 -->
-            <div v-if="message.status === 'sending'" class="status-sending">
-              <el-icon class="is-loading status-icon"><Loading /></el-icon>
-              <span class="status-text">发送中</span>
+            <!-- 已读状态 (钉钉风格) -->
+            <div v-if="message.status !== 'sending' && message.status !== 'failed' && message.status !== 'uploading'" 
+                 class="read-status" :class="{ 'is-read': message.readCount > 0 }">
+              <span>{{ message.readCount > 0 ? '已读' : '未读' }}</span>
             </div>
             
-            <!-- 上传中状态 -->
-            <div v-else-if="message.status === 'uploading'" class="status-uploading">
-              <el-icon class="is-loading status-icon"><Loading /></el-icon>
-              <span class="status-text">上传中</span>
-            </div>
+            <!-- 发送中状态 -->
+            <el-icon v-if="message.status === 'sending' || message.status === 'uploading'" class="is-loading status-loading-icon"><Loading /></el-icon>
 
             <!-- 发送失败状态 -->
-            <div v-else-if="message.status === 'failed'" class="status-failed" @click="$emit('retry', message)">
-              <el-icon class="status-icon"><WarningFilled /></el-icon>
-              <span class="status-text">发送失败</span>
-              <span class="retry-hint">点击重试</span>
-            </div>
-
-            <!-- 已读状态 (钉钉风格) -->
-            <div v-else class="read-status" :class="{ 'is-read': message.readCount > 0 }">
-              <el-icon v-if="message.readCount > 0" class="read-icon"><Check /></el-icon>
-              <span>{{ message.readCount > 0 ? '已读' : '未读' }}</span>
+            <div v-else-if="message.status === 'failed'" class="status-failed-icon" @click="$emit('retry', message)">
+              <el-icon><WarningFilled /></el-icon>
             </div>
           </div>
           <div class="time">{{ formattedTime }}</div>
@@ -111,7 +102,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { ChatLineSquare, MoreFilled, Loading, WarningFilled, Check } from '@element-plus/icons-vue'
+import { ChatLineSquare, MoreFilled, Loading, WarningFilled, Check, Star, View } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
@@ -119,6 +110,14 @@ const props = defineProps({
 })
 
 defineEmits(['reply', 'reaction', 'command', 'scroll-to', 'at', 'show-user', 'retry', 'multi-select'])
+
+// 消息是否可撤回 (5分钟内)
+const canRecall = computed(() => {
+  if (!props.message.timestamp) return false
+  const now = Date.now()
+  const msgTime = new Date(props.message.timestamp).getTime()
+  return (now - msgTime) < 5 * 60 * 1000
+})
 
 const formattedTime = computed(() => {
   if (!props.message.timestamp) return ''
@@ -132,64 +131,17 @@ const formattedTime = computed(() => {
 // 消息项容器
 // ============================================================================
 .message-item {
-  display: flex;
+  display: flex !important;
+  width: 100% !important;
   margin-bottom: 16px;
   position: relative;
   padding: 0 16px;
+  box-sizing: border-box;
   transition: opacity 0.2s;
 
   &.is-own {
-    flex-direction: row-reverse;
-  }
-
-  // 发送中状态样式
-  &.is-sending {
-    opacity: 0.85;
-    .bubble {
-      opacity: 0.9;
-    }
-  }
-
-  // 发送失败状态样式
-  &.is-failed {
-    .bubble {
-      border: 1px solid #ff4d4f;
-      box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
-    }
-  }
-
-  // 新消息入场动画
-  &.message-enter {
-    animation: messageSlideIn 0.3s ease-out;
-  }
-}
-
-@keyframes messageSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// ============================================================================
-// 时间分隔线
-// ============================================================================
-.time-divider {
-  width: 100%;
-  text-align: center;
-  margin: 12px 0;
-
-  .time-text {
-    background: rgba(0, 0, 0, 0.04);
-    color: #8f959e;
-    font-size: 11px;
-    padding: 2px 10px;
-    border-radius: 10px;
-    display: inline-block;
+    flex-direction: row-reverse !important;
+    justify-content: flex-start !important;
   }
 }
 
@@ -197,171 +149,100 @@ const formattedTime = computed(() => {
 // 头像区域
 // ============================================================================
 .avatar-container {
-  margin: 0 10px;
   flex-shrink: 0;
   cursor: pointer;
-  transition: opacity 0.2s;
+  align-self: flex-start;
   position: relative;
-
-  &:hover {
-    opacity: 0.85;
-  }
-
-  // 发送中状态
-  &.avatar-sending {
-    &::after {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border: 2px solid #1677ff;
-      border-radius: 8px;
-      animation: pulse-ring 1.5s ease-out infinite;
-    }
-  }
 }
 
-.avatar-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 16px;
-}
-
-@keyframes pulse-ring {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.05);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-// ============================================================================
-// 内容区域
-// ============================================================================
 .content-wrapper {
-  max-width: 85%;
+  max-width: calc(100% - 110px);
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  margin: 0 12px;
+  align-items: flex-start !important;
+  min-width: 0;
+}
+
+.is-own .content-wrapper {
+  align-items: flex-end !important;
+  margin-left: 48px; 
+  margin-right: 12px;
 }
 
 .sender-name {
   font-size: 12px;
-  color: #8c8c8c;
-  margin-bottom: 4px;
-  padding: 0 4px;
+  color: #8f959e;
+  margin-bottom: 2px;
+  margin-left: 4px;
 }
 
 .is-own .sender-name {
-  text-align: right;
+  display: none; // 钉钉在右侧自己的消息通常不显示名字
 }
 
 .message-content-main {
   position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 100%;
 
-  &:hover .message-actions-floating {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// ============================================================================
-// 悬停操作栏 (钉钉风格)
-// ============================================================================
-.message-actions-floating {
-  position: absolute;
-  top: -32px;
-  left: 0;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10;
-
-  .action-bar-min {
-    display: flex;
-    gap: 2px;
-    padding: 4px 8px;
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #f0f1f2;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-    .mini-btn {
-      background: none;
-      border: none;
-      padding: 6px;
-      color: #646a73;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      font-size: 14px;
-      transition: all 0.15s;
-
-      &:hover {
-        background: #e6f4ff;
-        color: var(--dt-brand-color);
-      }
+  // 悬停显示动作条
+  &:hover {
+    .message-actions-floating {
+      opacity: 1;
+      visibility: visible;
     }
   }
 }
 
-.is-own .message-actions-floating {
-  left: auto;
-  right: 0;
+.is-own .message-content-main {
+  flex-direction: row-reverse;
 }
 
-// ============================================================================
-// 上传进度条
-// ============================================================================
-.upload-progress-bar {
-  position: relative;
-  height: 4px;
-  background: #e5e6eb;
-  border-radius: 2px;
-  margin-top: 8px;
-  overflow: hidden;
-
-  .progress-fill {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    background: linear-gradient(90deg, var(--dt-brand-color), #4096ff);
-    border-radius: 2px;
-    transition: width 0.3s ease;
-  }
-
-  .progress-text {
-    position: absolute;
-    right: 0;
-    top: 8px;
-    font-size: 10px;
-    color: #8f959e;
+.message-actions-floating {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s;
+  
+  .action-bar-min {
+    display: flex;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 2px;
   }
 }
 
-// ============================================================================
-// 消息页脚 (状态与时间)
-// ============================================================================
+.mini-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 14px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #1677ff;
+  }
+}
+
 .message-footer {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
-  font-size: 11px;
+  margin-top: 2px;
+  min-height: 16px;
 }
 
 .is-own .message-footer {
@@ -373,89 +254,51 @@ const formattedTime = computed(() => {
   align-items: center;
 }
 
-// 发送中状态
-.status-sending {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--dt-brand-color);
-
-  .status-icon {
-    font-size: 12px;
-  }
-
-  .status-text {
-    font-size: 11px;
-  }
-}
-
-// 上传中状态
-.status-uploading {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--dt-brand-color);
-
-  .status-icon {
-    font-size: 12px;
-  }
-
-  .status-text {
-    font-size: 11px;
-  }
-}
-
-// 发送失败状态
-.status-failed {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--dt-error-color);
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: background 0.15s;
-
-  &:hover {
-    background: var(--dt-error-bg);
-  }
-
-  .status-icon {
-    font-size: 12px;
-  }
-
-  .status-text {
-    font-size: 11px;
-    font-weight: 500;
-  }
-
-  .retry-hint {
-    font-size: 10px;
-    opacity: 0.8;
-  }
-}
-
-// 已读状态 (钉钉风格)
 .read-status {
-  display: flex;
-  align-items: center;
-  gap: 3px;
   font-size: 11px;
-  color: var(--dt-unread-color);
-  transition: color 0.2s;
+  color: #8f959e;
+  cursor: default;
+  user-select: none;
 
   &.is-read {
-    color: var(--dt-read-color);
+    color: #1677ff;
+    font-weight: 500;
   }
+}
 
-  .read-icon {
-    font-size: 12px;
-  }
+.status-loading-icon {
+  font-size: 12px;
+  color: #1677ff;
+}
+
+.status-failed-icon {
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
 }
 
 .time {
   color: #bfbfbf;
   font-size: 11px;
+}
+
+.upload-progress-bar {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 1px;
+  overflow: hidden;
+
+  .progress-fill {
+    height: 100%;
+    background: #1677ff;
+    transition: width 0.3s;
+  }
 }
 
 // ============================================================================

@@ -4,6 +4,7 @@
 
     <resultMap type="com.ruoyi.im.domain.ImSystemNotification" id="ImSystemNotificationResult">
         <id property="id" column="id"/>
+        <result property="senderId" column="sender_id"/>
         <result property="receiverId" column="receiver_id"/>
         <result property="type" column="type"/>
         <result property="title" column="title"/>
@@ -16,7 +17,7 @@
     </resultMap>
 
     <sql id="selectImSystemNotificationVo">
-        select id, receiver_id, type, title, content, related_id, related_type, is_read, read_time, create_time
+        select id, sender_id, receiver_id, type, title, content, related_id, related_type, is_read, read_time, create_time
         from im_system_notification
     </sql>
 
@@ -57,6 +58,7 @@
     <insert id="insertImSystemNotification" parameterType="com.ruoyi.im.domain.ImSystemNotification" useGeneratedKeys="true" keyProperty="id">
         insert into im_system_notification
         <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="senderId != null">sender_id,</if>
             <if test="receiverId != null">receiver_id,</if>
             <if test="type != null and type != ''">type,</if>
             <if test="title != null and title != ''">title,</if>
@@ -68,6 +70,7 @@
             <if test="createTime != null">create_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="senderId != null">#{senderId},</if>
             <if test="receiverId != null">#{receiverId},</if>
             <if test="type != null and type != ''">#{type},</if>
             <if test="title != null and title != ''">#{title},</if>

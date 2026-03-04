@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImCloudFile;
 import com.ruoyi.im.domain.ImCloudFileShare;
 import com.ruoyi.im.domain.ImCloudFileVersion;
@@ -342,7 +343,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
 
         // 保存文件
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
-        String datePath = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        String datePath = java.time.LocalDate.now().format(SystemConstants.DATE_FORMAT_SLASH);
         String relativePath = "cloud/" + datePath + "/" + fileName;
         String filePath = uploadPath + relativePath;
 
@@ -456,7 +457,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         if (cloudFile.getFileAssetId() != null) {
             ImFileAsset fileAsset = fileAssetMapper.selectById(cloudFile.getFileAssetId());
             if (fileAsset != null) {
-                // TODO: 删除物理文件
+                // 删除物理文件
                 fileAssetMapper.deleteById(fileAsset.getId());
             }
         }

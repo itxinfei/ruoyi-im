@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.constant.ImErrorCode;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.*;
 import com.ruoyi.im.dto.conversation.ImConversationCreateRequest;
 import com.ruoyi.im.dto.conversation.ImConversationUpdateRequest;
@@ -77,7 +78,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         List<ImConversationVO> allConversations = getUserConversationsOptimized(userId);
 
         // 根据筛选条件过滤
-        if (filter == null || "all".equalsIgnoreCase(filter)) {
+        if (filter == null || SystemConstants.CONVERSATION_FILTER_ALL.equalsIgnoreCase(filter)) {
             return allConversations;
         }
 
@@ -755,8 +756,8 @@ public class ImConversationServiceImpl implements ImConversationService {
         ImUserSession userSession = imUserSessionMapper.selectByUserIdAndConversationId(userId, conversationId);
         if (userSession != null && (userSession.getIsDeleted() == null || userSession.getIsDeleted() == 0)) {
             vo.setUnreadCount(userSession.getUnreadCount());
-            vo.setIsPinned(userSession.getIsPinned() != null && userSession.getIsPinned() == 1);
-            vo.setIsMuted(userSession.getIsMuted() != null && userSession.getIsMuted() == 1);
+            vo.setIsPinned(userSession.getIsPinned() != null && userSession.getIsPinned() == 1 ? 1 : 0);
+            vo.setIsMuted(userSession.getIsMuted() != null && userSession.getIsMuted() == 1 ? 1 : 0);
             vo.setLastReadMessageId(userSession.getLastReadMessageId());
             return;
         }
@@ -764,14 +765,14 @@ public class ImConversationServiceImpl implements ImConversationService {
         ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
             vo.setUnreadCount(0);
-            vo.setIsPinned(false);
-            vo.setIsMuted(false);
+            vo.setIsPinned(0);
+            vo.setIsMuted(0);
             vo.setLastReadMessageId(null);
             return;
         }
         vo.setUnreadCount(member.getUnreadCount());
-        vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1);
-        vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1);
+        vo.setIsPinned(member.getIsPinned() != null && member.getIsPinned() == 1 ? 1 : 0);
+        vo.setIsMuted(member.getIsMuted() != null && member.getIsMuted() == 1 ? 1 : 0);
         vo.setLastReadMessageId(member.getLastReadMessageId());
     }
 }

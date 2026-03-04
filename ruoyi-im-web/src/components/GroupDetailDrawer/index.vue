@@ -240,7 +240,10 @@ const handleLeave = () => {
   }).catch(() => {})
 }
 
-const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
+const handleAddMembers = () => {
+  // TODO: 打开邀请成员弹窗
+  ElMessage.info('请在群聊中邀请成员')
+}
 
 // 打开群文件面板
 const handleOpenFiles = () => {

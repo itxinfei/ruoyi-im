@@ -38,4 +38,12 @@ public interface ImSystemConfigService {
      * @param configValue 配置值
      */
     void updateSystemConfig(String configKey, Object configValue);
+
+    /**
+     * 检查配置是否需要 SUPER_ADMIN 权限
+     *
+     * @param configKey 配置键
+     * @return true 表示需要 SUPER_ADMIN 权限
+     */
+    boolean requiresSuperAdmin(String configKey);
 }

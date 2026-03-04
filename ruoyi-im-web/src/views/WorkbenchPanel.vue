@@ -578,95 +578,41 @@ onMounted(() => {
 
 .apps-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 20px;
 }
 
 .apps-grid-sm {
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
 }
 
-@media (max-width: 1400px) {
-  .apps-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .apps-grid-sm {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 1024px) {
-  .workbench-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
-
-  .apps-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .apps-grid-sm {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .workbench-header {
-    padding: 20px;
-  }
-
-  .greeting-title {
-    font-size: 22px;
-  }
-
-  .search-input {
-    width: 200px;
-  }
-
-  .workbench-content {
-    padding: 16px 20px;
-  }
-
-  .apps-grid,
-  .apps-grid-sm {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .custom-btn span:not(.material-icons-outlined) {
-    display: none;
-  }
-}
+// 移除干扰 PC 端布局的旧媒体查询
+// ...
 
 // ============================================================================
-// 应用卡片
+// 应用卡片 (钉钉 8.2 风格：更轻量，固定比例)
 // ============================================================================
 .app-card {
   position: relative;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-xl);
-  padding: 20px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  height: 120px;
+  gap: 8px;
+  height: 100px;
   cursor: pointer;
-  transition: all var(--dt-transition-slow);
-  box-shadow: var(--dt-shadow-card);
-}
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
 
-.app-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--dt-shadow-card-hover);
-  border-color: var(--dt-brand-color);
-}
-
-.app-card:active {
-  transform: translateY(-2px);
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+    .app-icon { transform: scale(1.05); }
+  }
 }
 
 .app-icon {

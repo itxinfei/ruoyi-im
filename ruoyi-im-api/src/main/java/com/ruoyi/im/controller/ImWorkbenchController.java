@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImTodoItem;
+import com.ruoyi.im.dto.todo.ImTodoCreateRequest;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImNoticeService;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,27 +145,27 @@ public class ImWorkbenchController {
      * 创建待办
      * 创建新的待办事项
      *
-     * @param title 待办标题
-     * @param description 待办描述
-     * @param type 待办类型
-     * @param relatedId 关联ID
-     * @param priority 优先级（1=低, 2=中, 3=高）
+     * @param request 待办创建请求
      * @return 创建结果，包含待办ID
      */
     @Operation(summary = "创建待办", description = "创建新的待办事项，支持优先级")
     @PostMapping("/todos")
-    public Result<Long> createTodo(@RequestParam String title,
-                                   @RequestParam(required = false) String description,
-                                   @RequestParam(required = false, defaultValue = "TASK") String type,
-                                   @RequestParam(required = false) Long relatedId,
-                                   @RequestParam(required = false) Integer priority) {
+    public Result<Long> createTodo(@Valid @RequestBody ImTodoCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        // 如果提供了优先级参数，使用带优先级的方法
+        
+        String title = request.getTitle();
+        String description = request.getDescription();
+        String type = request.getType();
+        if (type == null || type.isEmpty()) {
+            type = "TASK";
+        }
+        Integer priority = request.getPriority();
+        
         Long todoId;
         if (priority != null) {
             todoId = todoItemService.createTodoWithPriority(title, description, priority, userId);
         } else {
-            todoId = todoItemService.createTodo(title, description, type, relatedId, userId);
+            todoId = todoItemService.createTodo(title, description, type, null, userId);
         }
         return Result.success("创建成功", todoId);
     }

@@ -2,21 +2,36 @@
   <div
     class="dingtalk-avatar"
     :class="avatarClass"
-    :style="{ width: size + 'px', height: size + 'px', fontSize: fontSize + 'px', backgroundColor: bgColor }"
+    :style="{ width: size + 'px', height: size + 'px', fontSize: fontSize + 'px', backgroundColor: isGroup ? '#f0f0f0' : bgColor }"
   >
-    <img v-if="imageUrl && !imageError" :src="imageUrl" @error="handleImageError" class="avatar-img" />
-    <span v-else class="avatar-text">{{ displayName }}</span>
+    <!-- 群组聚合头像 -->
+    <div v-if="isGroup" class="group-avatar-grid" :class="'grid-' + displayMembers.length">
+      <div 
+        v-for="(m, index) in displayMembers" 
+        :key="m.userId || index"
+        class="grid-item"
+        :style="{ backgroundColor: getMemberBgColor(m) }"
+      >
+        <img v-if="m.avatar && !m.error" :src="addTokenToUrl(m.avatar)" @error="m.error = true" class="grid-img" />
+        <span v-else class="grid-text">{{ getMemberName(m) }}</span>
+      </div>
+    </div>
+
+    <!-- 普通单人头像 -->
+    <template v-else>
+      <img v-if="imageUrl && !imageError" :src="imageUrl" @error="handleImageError" class="avatar-img" />
+      <span v-else class="avatar-text">{{ displayName }}</span>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { addTokenToUrl } from '@/utils/file'
 
 const props = defineProps({
   // 头像URL
   src: String,
-  // ... (keeping other props matching original, but defineProps is reactive anyway)
   name: {
     type: String,
     default: ''
@@ -30,40 +45,58 @@ const props = defineProps({
     type: String,
     default: 'circle'
   },
-  customClass: String
+  customClass: String,
+  // 是否为群组
+  isGroup: {
+    type: Boolean,
+    default: false
+  },
+  // 群成员列表 (用于聚合头像)
+  members: {
+    type: Array,
+    default: () => []
+  }
 })
 
 const imageError = ref(false)
 const imageUrl = computed(() => addTokenToUrl(props.src))
+
+// 处理聚合头像的成员显示 (最多9个)
+const displayMembers = computed(() => {
+  if (!props.isGroup) return []
+  return props.members.slice(0, 9).map(m => reactive({ ...m, error: false }))
+})
+
+const getMemberName = (m) => {
+  const name = m.name || m.nickname || '?'
+  return name.charAt(0).toUpperCase()
+}
+
 const displayName = computed(() => {
   const name = props.name || '?'
   return name.charAt(0).toUpperCase()
 })
 
 // 字体大小为头像尺寸的 40%
-const fontSize = computed(() => Math.max(14, Math.floor(props.size * 0.4)))
+const fontSize = computed(() => Math.max(12, Math.floor(props.size * (props.isGroup ? 0.25 : 0.4))))
 
-// 钉钉风格的颜色盘（根据用户ID计算固定颜色）
+const colorPalette = [
+  '#F5A623', '#6DD400', '#44B6AE', '#4A90E2', '#9013FE',
+  '#F5E066', '#FF6B6B', '#6BCF7F', '#4ECDC4', '#45B7D1',
+  '#96CEB4', '#FFEAA7', '#DFE6E9', '#74B9FF', '#A29BFE'
+]
+
+const getMemberBgColor = (m) => {
+  const id = String(m.userId || m.id || m.name || '')
+  let hash = 0
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash) + id.charCodeAt(i)
+    hash |= 0
+  }
+  return colorPalette[Math.abs(hash) % colorPalette.length]
+}
+
 const bgColor = computed(() => {
-  const colors = [
-    '#F5A623', // 橙色
-    '#6DD400', // 绿色
-    '#44B6AE', // 青色
-    '#4A90E2', // 蓝色
-    '#9013FE', // 紫色
-    '#F5E066', // 黄色
-    '#FF6B6B', // 红色
-    '#6BCF7F', // 薄荷绿
-    '#4ECDC4', // 青绿
-    '#45B7D1', // 天蓝
-    '#96CEB4', // 浅绿
-    '#FFEAA7', // 浅黄
-    '#DFE6E9', // 浅灰
-    '#74B9FF', // 浅蓝
-    '#A29BFE'  // 浅紫
-  ]
-
-  // 如果有 userId，根据 userId 计算颜色索引（确保同一用户颜色一致）
   if (props.userId) {
     const id = String(props.userId)
     let hash = 0
@@ -71,35 +104,16 @@ const bgColor = computed(() => {
       hash = ((hash << 5) - hash) + id.charCodeAt(i)
       hash |= 0
     }
-    const index = Math.abs(hash) % colors.length
-    return colors[index]
+    return colorPalette[Math.abs(hash) % colorPalette.length]
   }
-
-  // 如果没有 userId，根据名字计算
-  if (props.name) {
-    let hash = 0
-    for (let i = 0; i < props.name.length; i++) {
-      hash = ((hash << 5) - hash) + props.name.charCodeAt(i)
-      hash |= 0
-    }
-    const index = Math.abs(hash) % colors.length
-    return colors[index]
-  }
-
-  // 默认颜色
   return '#4A90E2'
 })
 
 const avatarClass = computed(() => {
   const classes = []
-  if (props.shape === 'square') {
-    classes.push('avatar-square')
-  } else {
-    classes.push('avatar-circle')
-  }
-  if (props.customClass) {
-    classes.push(props.customClass)
-  }
+  classes.push(props.shape === 'square' ? 'avatar-square' : 'avatar-circle')
+  if (props.isGroup) classes.push('is-group')
+  if (props.customClass) classes.push(props.customClass)
   return classes.join(' ')
 })
 
@@ -110,7 +124,7 @@ const handleImageError = () => {
 
 <style scoped lang="scss">
 .dingtalk-avatar {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
@@ -118,32 +132,50 @@ const handleImageError = () => {
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
-  box-shadow: var(--dt-shadow-2);
-  transition: all var(--dt-transition-fast);
+  transition: all 0.2s;
+  line-height: 1;
+  box-sizing: border-box;
+  background-color: #e5e7eb;
 
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: var(--dt-shadow-3);
+  &.is-group {
+    padding: 2px;
+    background-color: #f3f4f6;
   }
 }
 
-.avatar-circle {
-  border-radius: 50%;
-}
+.avatar-circle { border-radius: 50%; }
+.avatar-square { border-radius: 4px; }
 
-.avatar-square {
-  border-radius: var(--dt-radius-md); /* 钉钉标准的圆角 */
-}
+.avatar-img { width: 100%; height: 100%; object-fit: cover; }
 
-.avatar-img {
+// 群组网格布局
+.group-avatar-grid {
+  display: grid;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
+  gap: 1px;
+  background: #f3f4f6;
 
-.avatar-text {
-  white-space: nowrap;
-  user-select: none;
-  text-transform: uppercase;
+  .grid-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #fff;
+    font-size: 0.8em;
+  }
+
+  .grid-img { width: 100%; height: 100%; object-fit: cover; }
+
+  // 不同人数的网格分布
+  &.grid-1 { grid-template-columns: 1fr; }
+  &.grid-2 { grid-template-columns: 1fr 1fr; .grid-item { height: 100%; } }
+  &.grid-3 { 
+    grid-template-columns: 1fr 1fr;
+    .grid-item:first-child { grid-column: 1 / 3; }
+  }
+  &.grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  &.grid-5, &.grid-6 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  &.grid-7, &.grid-8, &.grid-9 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
 }
 </style>

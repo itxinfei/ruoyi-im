@@ -1,5 +1,7 @@
 package com.ruoyi.im.constant;
 
+import java.time.format.DateTimeFormatter;
+
 /**
  * 系统级常量
  * 定义缓存过期时间、文件限制、心跳间隔等系统配置常量
@@ -11,6 +13,26 @@ public final class SystemConstants {
     private SystemConstants() {
         // 防止实例化
     }
+
+    // ========== 日期时间格式化 ==========
+
+    /** 日期格式：yyyyMMdd */
+    public static final DateTimeFormatter DATE_FORMAT_COMPACT = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+    /** 日期格式：yyyy/MM/dd */
+    public static final DateTimeFormatter DATE_FORMAT_SLASH = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+    /** 日期时间格式：yyyyMMdd_HHmmss */
+    public static final DateTimeFormatter DATETIME_FORMAT_COMPACT = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+
+    /** 日期时间格式：yyyy-MM-dd HH:mm:ss */
+    public static final DateTimeFormatter DATETIME_FORMAT_STANDARD = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /** 日期格式：yyyy-MM-dd */
+    public static final DateTimeFormatter DATE_FORMAT_STANDARD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    /** 时间格式：HH:mm */
+    public static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
     // ========== 缓存过期时间（秒） ==========
 
@@ -102,4 +124,72 @@ public final class SystemConstants {
 
     /** 已删除 */
     public static final int DELETED = 1;
+
+    // ========== 音视频通话配置 ==========
+
+    /** 视频通话最大人数 */
+    public static final int VIDEO_CALL_MAX_PARTICIPANTS = 9;
+
+    // ========== 用户配置 ==========
+
+    /** 头像文件最大大小（MB） */
+    public static final int MAX_AVATAR_SIZE_MB = 2;
+
+    // ========== 消息配置 ==========
+
+    /** 消息编辑时间限制（分钟） */
+    public static final int MESSAGE_EDIT_TIME_LIMIT = 15;
+
+    /** 消息内容最大长度 */
+    public static final int MAX_MESSAGE_LENGTH = 2000;
+
+    // ========== 会话配置 ==========
+
+    /** 会话过滤类型：全部 */
+    public static final String CONVERSATION_FILTER_ALL = "all";
+
+    // ========== 任务配置 ==========
+
+    /** 任务完成百分比 */
+    public static final int TASK_COMPLETE_PERCENT = 100;
+
+    // ========== 文档配置 ==========
+
+    /** 文档摘要最大长度 */
+    public static final int DOCUMENT_SUMMARY_MAX_LENGTH = 100;
+
+    // ========== 系统配置限制 ==========
+
+    /** 系统配置最小值 */
+    public static final int CONFIG_MIN_VALUE = 100;
+
+    /** 系统配置最大值 */
+    public static final int CONFIG_MAX_VALUE = 10000;
+
+    /** 系统配置最大值（周） */
+    public static final int CONFIG_MAX_WEEKS = 10080;
+
+    // ========== 任务/备份状态 ==========
+
+    /** 任务状态：进行中 */
+    public static final String STATUS_IN_PROGRESS = "in_progress";
+
+    /** 任务状态：已完成 */
+    public static final String STATUS_COMPLETED = "completed";
+
+    /** 任务状态：失败 */
+    public static final String STATUS_FAILED = "failed";
+
+    // ========== 消息状态 ==========
+
+    /** 消息状态：发送中 */
+    public static final String MESSAGE_STATUS_SENDING = "SENDING";
+
+    // ========== 视频会议状态 ==========
+
+    /** 视频会议状态：进行中 */
+    public static final String MEETING_STATUS_IN_PROGRESS = "IN_PROGRESS";
+
+    /** 视频会议状态：已结束 */
+    public static final String MEETING_STATUS_ENDED = "ENDED";
 }

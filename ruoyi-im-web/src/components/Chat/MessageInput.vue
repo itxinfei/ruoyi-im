@@ -5,145 +5,116 @@
     :style="{ minHeight: containerHeight + 'px' }"
     @dragover.prevent="handleDragOver"
     @dragleave.prevent="handleDragLeave"
+    @drop.prevent="handleDrop"
   >
-    <div
-      class="resize-handle"
-      @mousedown="startResize"
-      @dblclick="resetHeight"
-    >
-      <div class="resize-indicator"></div>
-    </div>
-
-    <!-- 拖拽上传提示层 -->
-    <Transition name="fade">
-      <div v-if="isDragOver" class="drop-overlay">
-        <div class="drop-hint">
-          <el-icon class="drop-icon"><Upload /></el-icon>
-          <span class="drop-text">释放以上传文件</span>
-          <span class="drop-subtext">支持图片、文档等多种格式</span>
-        </div>
-      </div>
-    </Transition>
-
-    <!-- 工具栏 -->
-    <div class="input-toolbar">
-      <div class="toolbar-left">
-        <el-tooltip content="表情" placement="top">
-          <button class="toolbar-btn" :class="{ active: showEmojiPicker }" @click.stop="toggleEmojiPicker">
-            <el-icon><ChatDotRound /></el-icon>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip content="图片" placement="top">
-          <button class="toolbar-btn" @click="$emit('upload-image')">
-            <el-icon><Picture /></el-icon>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip content="文件" placement="top">
-          <button class="toolbar-btn" @click="$emit('upload-file')">
-            <el-icon><FolderOpened /></el-icon>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip content="截图" placement="top">
-          <button class="toolbar-btn" @click="handleScreenshot">
-             <span class="material-icons-outlined">content_cut</span>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip v-if="session?.type === 'GROUP'" content="@成员" placement="top">
-          <button class="toolbar-btn" @click="handleAtMember">
-            <span class="material-icons-outlined">alternate_email</span>
-          </button>
-        </el-tooltip>
-
-        <el-divider direction="vertical" />
-
-        <el-tooltip content="语音消息" placement="top">
-          <button class="toolbar-btn" @click="handleVoiceRecord">
-            <el-icon><Microphone /></el-icon>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip content="位置" placement="top">
-          <button class="toolbar-btn" @click="handleLocation">
-            <span class="material-icons-outlined">location_on</span>
-          </button>
-        </el-tooltip>
-
-        <el-tooltip content="语音通话" placement="top">
-          <button class="toolbar-btn" @click="$emit('start-call')">
-            <el-icon><Phone /></el-icon>
-          </button>
-        </el-tooltip>
-      </div>
-
-      <div class="toolbar-right">
-        <el-button link class="history-btn">
-          <el-icon><Clock /></el-icon> 聊天记录
-        </el-button>
-      </div>
-    </div>
-
-    <!-- 引用消息/正在回复 预览区 (钉钉样式) -->
+    <!-- 回复/编辑预览区 -->
     <div v-if="replyingMessage" class="reply-preview-container">
-      <div class="reply-content-box">
-        <span class="reply-user">{{ replyingMessage.senderName }}:</span>
-        <span class="reply-text">{{ replyingMessage.content }}</span>
-        <el-icon class="cancel-reply" @click="clearReply"><Close /></el-icon>
+      <div class="preview-content">
+        <span class="label">回复 {{ replyingMessage.senderName }}:</span>
+        <span class="text">{{ replyingMessage.content }}</span>
       </div>
+      <el-button link @click="$emit('cancel-reply')"><el-icon><Close /></el-icon></el-button>
     </div>
 
     <div v-if="editingMessage" class="edit-preview-container">
-      <div class="edit-content-box">
-        <span class="edit-label">正在编辑:</span>
-        <span class="edit-text">{{ editingMessage.content }}</span>
-        <el-icon class="cancel-edit" @click="$emit('cancel-edit')"><Close /></el-icon>
+      <div class="preview-content">
+        <span class="label">编辑消息:</span>
+        <span class="text">{{ editingMessage.content }}</span>
+      </div>
+      <el-button link @click="$emit('cancel-edit')"><el-icon><Close /></el-icon></el-button>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="input-toolbar">
+      <div class="left-tools">
+        <el-popover v-model:visible="showEmojiPicker" trigger="click" placement="top-start" :width="320">
+          <template #reference>
+            <button class="tool-btn" title="表情"><span class="material-icons-outlined">sentiment_satisfied</span></button>
+          </template>
+          <div class="emoji-picker-content">
+            <!-- 表情选择器组件占位 -->
+            <div class="emoji-grid">
+              <span v-for="emoji in ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🙈','🙉','🙊','💋','💌','💘','💝','💖','💗','💓','💞','💕','💟','❣️','💔','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💯','💢','💥','💫','💦','💨','🕳️','💣','💬','👁️‍🗨️','🗨️','🗯️','💭','💤']" 
+                    :key="emoji" class="emoji-item" @click="insertEmoji(emoji)">{{ emoji }}</span>
+            </div>
+          </div>
+        </el-popover>
+        
+        <button class="tool-btn" title="图片" @click="triggerImageUpload"><span class="material-icons-outlined">image</span></button>
+        <button class="tool-btn" title="文件" @click="triggerFileUpload"><span class="material-icons-outlined">attach_file</span></button>
+        <button class="tool-btn" title="语音" @click="showVoiceRecorder = true"><span class="material-icons-outlined">mic</span></button>
+        <button class="tool-btn" title="视频通话" @click="$emit('start-video')"><span class="material-icons-outlined">videocam</span></button>
+        <button class="tool-btn" title="截图" @click="handleScreenshot"><span class="material-icons-outlined">screenshot</span></button>
+      </div>
+      <div class="right-tools">
+        <el-dropdown trigger="click" @command="handleShortcutChange">
+          <span class="shortcut-tip">{{ shortcut === 'enter' ? 'Enter 发送' : 'Ctrl+Enter 发送' }}</span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="enter" :disabled="shortcut === 'enter'">Enter 发送, Ctrl+Enter 换行</el-dropdown-item>
+              <el-dropdown-item command="ctrl-enter" :disabled="shortcut === 'ctrl-enter'">Ctrl+Enter 发送, Enter 换行</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
 
-    <!-- 输入核心区域 -->
+    <!-- 输入区 -->
     <div class="input-area">
       <textarea
         ref="textareaRef"
-        v-model="messageContent"
-        class="message-input"
+        v-model="content"
+        class="chat-textarea"
         :placeholder="getInputPlaceholder"
-        @input="handleInput"
-        @keydown="handleKeydown"
+        @keydown="handleKeyDown"
         @paste="handlePaste"
-        @drop.prevent="handleDrop"
+        @input="handleInput"
       ></textarea>
-
-      <div class="input-footer">
-        <span class="hint-text">{{ sendShortcutHint }}</span>
-        <button
-          class="send-btn"
-          :class="{ active: canSend }"
-          :disabled="!canSend || sending"
-          @click="handleSend"
-        >
-          <el-icon v-if="sending" class="is-loading"><Loading /></el-icon>
-          {{ sending ? '发送中' : '发送' }}
-        </button>
-      </div>
     </div>
 
-    <EmojiPicker v-if="showEmojiPicker" @select="selectEmoji" ref="emojiPickerRef" />
-    <AtMemberPicker ref="atMemberPickerRef" :session-id="session?.id" @select="onAtSelect" />
-    <VoiceRecorder ref="voiceRecorderRef" @send="handleSendVoice" />
+    <!-- URL 解析预览提示 -->
+    <div v-if="detectedUrl" class="url-preview-tip">
+      <span class="material-icons-outlined">link</span>
+      <span>检测到链接，发送时将自动抓取预览信息</span>
+      <span class="url-text">{{ detectedUrl }}</span>
+    </div>
+
+    <!-- 发送按钮 -->
+    <div class="input-footer">
+      <div class="footer-tip">使用钉钉 8.2 对齐版</div>
+      <button 
+        class="send-btn" 
+        :class="{ active: content.trim() || hasMedia }" 
+        :disabled="sending || (!content.trim() && !hasMedia)"
+        @click="send"
+      >
+        {{ sending ? '发送中...' : '发送' }}
+      </button>
+    </div>
+
+    <!-- 隐藏的上传入口 -->
+    <input type="file" ref="imageInput" hidden accept="image/*" @change="onImageFileChange" />
+    <input type="file" ref="fileInput" hidden @change="onFileChange" />
+
+    <!-- 语音录制 -->
+    <VoiceRecorder v-if="showVoiceRecorder" @close="showVoiceRecorder = false" @send="handleVoiceSend" />
+
+    <!-- @成员选择器 -->
+    <AtMemberPicker
+      ref="atMemberPickerRef"
+      :session-id="session?.targetId"
+      @select="handleAtSelect"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, computed, onMounted, watch } from 'vue'
-import { useStore } from 'vuex'
-import { Close, ChatDotRound, Picture, FolderOpened, Phone, Clock, Upload, Microphone, Loading } from '@element-plus/icons-vue'
+import { ref, computed, nextTick, watch } from 'vue'
+import { Close } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import EmojiPicker from '@/components/EmojiPicker/index.vue'
-import AtMemberPicker from './AtMemberPicker.vue'
+import { parseUrlMetadata } from '../../api/im/urlMetadata'
 import VoiceRecorder from './VoiceRecorder.vue'
+import AtMemberPicker from './AtMemberPicker.vue'
 
 const props = defineProps({
   session: Object,
@@ -152,616 +123,239 @@ const props = defineProps({
   editingMessage: Object
 })
 
-const emit = defineEmits(['send', 'upload-image', 'upload-file', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-location', 'typing', 'send-voice'])
+const emit = defineEmits([
+  'send', 'cancel-reply', 'cancel-edit', 'edit-confirm', 
+  'start-call', 'start-video', 'upload-image', 'upload-file',
+  'typing', 'send-voice'
+])
 
-const store = useStore()
-const messageContent = ref('')
-const sendShortcutHint = computed(() => {
-  const shortcut = store.state.im.settings?.shortcuts?.send || 'enter'
-  return shortcut === 'ctrl-enter' ? '按 Ctrl + Enter 发送' : '按 Enter 发送'
-})
+const content = ref('')
+const shortcut = ref('enter')
+const isDragOver = ref(false)
+const containerHeight = ref(160)
+const showEmojiPicker = ref(false)
+const showVoiceRecorder = ref(false)
+const textareaRef = ref(null)
+const atMemberPickerRef = ref(null)
+const imageInput = ref(null)
+const fileInput = ref(null)
+
+const mentionUserIds = ref([])
+const mentionAll = ref(false)
+
+const hasMedia = computed(() => false) // 暂未实现多媒体预览
+
+// URL 链接正则
+const URL_REGEX = /(https?:\/\/[^\s]+)/g
+
+// 检测输入中的链接
+const detectUrl = (text) => {
+  if (!text) return null
+  const match = text.match(URL_REGEX)
+  return match ? match[0] : null
+}
+
+// 解析链接元数据
+const parsingUrl = ref(false)
+const detectedUrl = ref(null)
 
 const getInputPlaceholder = computed(() => {
   if (props.session?.type === 'GROUP') {
-    return '输入消息，@成员可提醒TA...'
+    return '发送给群聊，按 Enter 发送，输入 @ 提及成员'
   }
-  return '输入消息...'
+  return '发送给 ' + (props.session?.name || '联系人') + '，按 Enter 发送'
 })
 
-const showEmojiPicker = ref(false)
-const textareaRef = ref(null)
-const atMemberPickerRef = ref(null)
-const voiceRecorderRef = ref(null)
-
-// 拖拽状态
-const isDragOver = ref(false)
-
-// 钉钉风格高度逻辑
-const containerHeight = ref(200)
-const minHeight = 160
-const maxHeight = 600
-let isResizing = false
-let startY = 0
-let startHeight = 0
-
-const startResize = (e) => {
-  isResizing = true
-  startY = e.clientY
-  startHeight = containerHeight.value
-  document.addEventListener('mousemove', handleResize)
-  document.addEventListener('mouseup', stopResize)
-  document.body.style.cursor = 'ns-resize'
-}
-
-const handleResize = (e) => {
-  if (!isResizing) return
-  const delta = startY - e.clientY
-  const newH = startHeight + delta
-  if (newH >= minHeight && newH <= maxHeight) containerHeight.value = newH
-}
-
-const stopResize = () => {
-  isResizing = false
-  document.body.style.cursor = ''
-  localStorage.setItem('im_input_height', containerHeight.value)
-  document.removeEventListener('mousemove', handleResize)
-  document.removeEventListener('mouseup', stopResize)
-}
-
-const resetHeight = () => containerHeight.value = 200
-
-const insertAt = (nickname) => {
-  const atText = `@${nickname} `
-  const pos = textareaRef.value?.selectionStart || messageContent.value.length
-  messageContent.value = messageContent.value.slice(0, pos) + atText + messageContent.value.slice(pos)
-  nextTick(() => { textareaRef.value?.focus(); autoResize() })
-}
-defineExpose({ insertAt })
-
-const canSend = computed(() => messageContent.value.trim().length > 0)
-
-const autoResize = () => {
-  const tx = textareaRef.value
-  if (!tx) return
-  tx.style.height = 'auto'
-  tx.style.height = Math.min(tx.scrollHeight, 200) + 'px'
-}
-
-const handleInput = () => {
-  autoResize()
-  emit('input', messageContent.value)
-  // 发送正在输入状态（防抖）
-  sendTypingStatus()
-}
-
-// 防抖发送正在输入状态
-let typingTimer = null
-const sendTypingStatus = () => {
-  if (typingTimer) clearTimeout(typingTimer)
-  typingTimer = setTimeout(() => {
-    emit('typing', true)
-    // 3秒后自动停止 typing 状态
-    setTimeout(() => {
-      emit('typing', false)
-    }, 3000)
-  }, 500) // 500ms 防抖
-}
-
-const handleKeydown = (e) => {
-  const sendShortcut = store.state.im.settings?.shortcuts?.send || 'enter'
-
+const handleKeyDown = (e) => {
   if (e.key === 'Enter') {
-    if (sendShortcut === 'enter') {
-      if (!e.shiftKey && !e.ctrlKey) {
-        e.preventDefault()
-        handleSend()
+    if ((shortcut.value === 'enter' && !e.ctrlKey && !e.shiftKey) || 
+        (shortcut.value === 'ctrl-enter' && e.ctrlKey)) {
+      e.preventDefault()
+      send()
+    }
+  }
+  
+  if (e.key === '@' && props.session?.type === 'GROUP') {
+    setTimeout(() => {
+      atMemberPickerRef.value?.open()
+    }, 50)
+  }
+}
+
+const handleAtSelect = (member) => {
+  const nickname = member.id === 'all' ? '所有人' : (member.nickname || member.username)
+  const atText = `${nickname} `
+  
+  if (member.id === 'all') {
+    mentionAll.value = true
+  } else {
+    const uid = member.userId || member.id
+    if (!mentionUserIds.value.includes(uid)) mentionUserIds.value.push(uid)
+  }
+
+  // 补全 @ 文本
+  if (content.value.endsWith('@')) {
+    content.value += atText
+  } else {
+    content.value += `@${atText}`
+  }
+  textareaRef.value?.focus()
+}
+
+const send = async () => {
+  const text = content.value.trim()
+  if (!text && !hasMedia.value) return
+
+  // 检测是否包含链接，如果包含则解析 URL 元数据
+  const url = detectUrl(text)
+  let messageContent = text
+  let messageType = 'TEXT'
+
+  if (url) {
+    try {
+      parsingUrl.value = true
+      const result = await parseUrlMetadata(url)
+      // result 已经是 response.data，结构为 { code, msg, data }
+      if (result.code === 200 && result.data) {
+        // 构建 LINK 类型的消息内容
+        messageContent = JSON.stringify({
+          url: url,
+          title: result.data.title || '',
+          description: result.data.description || '',
+          imageUrl: result.data.imageUrl || '',
+          siteName: result.data.siteName || ''
+        })
+        messageType = 'LINK'
       }
-    } else if (sendShortcut === 'ctrl-enter') {
-      if (e.ctrlKey) {
-        e.preventDefault()
-        handleSend()
-      }
+    } catch (e) {
+      console.error('解析 URL 失败:', e)
+      // 解析失败时降级为普通文本消息
+    } finally {
+      parsingUrl.value = false
     }
   }
 
-  if (e.key === '@' && props.session?.type === 'GROUP') {
-    setTimeout(() => atMemberPickerRef.value?.open(textareaRef.value.selectionStart), 50)
+  const payload = {
+    content: messageContent,
+    type: messageType,
+    mentionInfo: {
+      userIds: mentionUserIds.value,
+      mentionAll: mentionAll.value
+    }
   }
-}
-
-const handleSend = () => {
-  const content = messageContent.value.trim()
-  if (!content) return
 
   if (props.editingMessage) {
-    emit('edit-confirm', content)
+    emit('edit-confirm', { ...payload, id: props.editingMessage.id })
   } else {
-    emit('send', content)
+    emit('send', payload)
   }
 
-  messageContent.value = ''
-  nextTick(() => {
-    if (textareaRef.value) textareaRef.value.style.height = 'auto'
-    textareaRef.value?.focus()
-  })
+  content.value = ''
+  mentionUserIds.value = []
+  mentionAll.value = false
 }
 
-const clearReply = () => {
-  emit('cancel-reply')
+const insertEmoji = (emoji) => {
+  content.value += emoji
+  showEmojiPicker.value = false
+  textareaRef.value?.focus()
 }
 
-// 拖拽处理
-const handleDragOver = (e) => {
-  isDragOver.value = true
-}
-
-const handleDragLeave = (e) => {
-  isDragOver.value = false
-}
-
-// 粘贴处理 (优化版)
 const handlePaste = (e) => {
   const items = e.clipboardData?.items
   if (!items) return
-  
-  let hasFile = false
+  let hasImage = false
   for (const item of items) {
-    if (item.kind === 'file') {
-      hasFile = true
+    if (item.type.indexOf('image') !== -1) {
       const file = item.getAsFile()
       if (file) {
-        e.preventDefault()
-        processFile(file, 'paste')
+        hasImage = true; e.preventDefault()
+        emit('upload-image', file)
       }
     }
   }
-  
-  // 如果粘贴了文件，显示提示
-  if (hasFile) {
-    ElMessage.success('正在上传...')
-  }
+  if (hasImage) ElMessage.success('正在识别图片...')
 }
 
-// 拖拽放下处理
+const triggerImageUpload = () => imageInput.value?.click()
+const triggerFileUpload = () => fileInput.value?.click()
+const onImageFileChange = (e) => {
+  if (e.target.files[0]) emit('upload-image', e.target.files[0])
+}
+const onFileChange = (e) => {
+  if (e.target.files[0]) emit('upload-file', e.target.files[0])
+}
+
+const handleScreenshot = () => ElMessage.info('截图功能需浏览器权限支持，请使用系统快捷键 Alt+A')
+const handleShortcutChange = (cmd) => { shortcut.value = cmd }
+const handleDragOver = () => isDragOver.value = true
+const handleDragLeave = () => isDragOver.value = false
 const handleDrop = (e) => {
   isDragOver.value = false
   const files = e.dataTransfer?.files
-  if (!files || files.length === 0) return
-  
-  ElMessage.info(`正在上传 ${files.length} 个文件...`)
-  
-  for (const file of files) {
-    processFile(file, 'drop')
-  }
+  if (files?.length) emit('upload-file', files[0])
 }
 
-// 统一处理文件
-const processFile = (file, source = 'upload') => {
-  const formData = new FormData()
-  formData.append('file', file)
-  
-  // 根据文件类型分发
-  if (file.type.startsWith('image/')) {
-    emit('upload-image', formData)
-  } else {
-    emit('upload-file', formData)
-  }
+const handleVoiceSend = (blob) => emit('send-voice', blob)
+
+const handleInput = () => {
+  if (content.value.length > 0) emit('typing', true)
+  // 检测链接并显示预览提示
+  const url = detectUrl(content.value)
+  detectedUrl.value = url
 }
 
-// 截图功能
-const handleScreenshot = () => {
-  // 检查是否支持截图API
-  if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-    navigator.mediaDevices.getDisplayMedia({ video: true })
-      .then(stream => {
-        const track = stream.getVideoTracks()[0]
-        const imageCapture = new ImageCapture(track)
-        return imageCapture.takePhoto()
-      })
-      .then(blob => {
-        const file = new File([blob], `screenshot_${Date.now()}.png`, { type: 'image/png' })
-        processFile(file, 'screenshot')
-        ElMessage.success('截图已上传')
-      })
-      .catch(err => {
-        if (err.name !== 'AbortError') {
-          ElMessage.info('请使用系统截图工具 (如 Win+Shift+S)')
-        }
-      })
-  } else {
-    ElMessage.info('请使用系统截图工具后粘贴')
-  }
-}
-
-// 语音录制
-const handleVoiceRecord = () => {
-  voiceRecorderRef.value?.open()
-}
-
-// 发送语音消息
-const handleSendVoice = ({ blob, duration }) => {
-  emit('send-voice', { blob, duration })
-}
-
-// 位置消息
-const handleLocation = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords
-        const locationData = {
-          latitude,
-          longitude,
-          address: '当前定位'
-        }
-        emit('send-location', locationData)
-        ElMessage.success('位置已发送')
-      },
-      (error) => {
-        ElMessage.warning('无法获取位置，请检查定位权限')
-      }
-    )
-  } else {
-    ElMessage.warning('您的浏览器不支持定位功能')
-  }
-}
-
-const toggleEmojiPicker = () => { showEmojiPicker.value = !showEmojiPicker.value }
-
-const selectEmoji = (emoji) => {
-  const pos = textareaRef.value?.selectionStart || messageContent.value.length
-  messageContent.value = messageContent.value.slice(0, pos) + emoji + messageContent.value.slice(pos)
-  showEmojiPicker.value = false
-  nextTick(() => { textareaRef.value?.focus(); autoResize() })
-}
-
-const handleAtMember = () => {
-  if (props.session?.type === 'GROUP') {
-    atMemberPickerRef.value?.open(textareaRef.value.selectionStart || 0)
-  }
-}
-
-const onAtSelect = (m) => insertAt(m.nickname || m.userName)
-
-// 监听回复消息，自动获取焦点
-watch(() => props.replyingMessage, (val) => {
-  if (val) nextTick(() => textareaRef.value?.focus())
+watch(() => props.editingMessage, (val) => {
+  if (val) content.value = val.content
 })
 
-onMounted(() => {
-  const saved = localStorage.getItem('im_input_height')
-  if (saved) containerHeight.value = parseInt(saved)
-})
+defineExpose({ focus: () => textareaRef.value?.focus() })
 </script>
 
 <style scoped lang="scss">
-.chat-input-container {
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  border-top: 1px solid #f0f1f2;
-  padding: 4px 16px 16px;
-  transition: all 0.2s;
-
-  &.drag-over {
-    border-color: #1677ff;
-    box-shadow: inset 0 0 0 2px rgba(22, 119, 255, 0.1);
-  }
-
-  .dark & { border-top-color: #334155; }
+.chat-input-container { background: #fff; border-top: 1px solid #f0f0f0; display: flex; flex-direction: column; padding: 0 16px 12px; transition: all 0.2s;
+  &.drag-over { background: #f8fafc; border-top-color: #1677ff; }
 }
-
-// ============================================================================
-// 拖拽上传提示层
-// ============================================================================
-.drop-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(22, 119, 255, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  border: 2px dashed #1677ff;
-  border-radius: 8px;
-  margin: 4px;
-
-  .drop-hint {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: #1677ff;
-
-    .drop-icon {
-      font-size: 48px;
-    }
-
-    .drop-text {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .drop-subtext {
-      font-size: 13px;
-      opacity: 0.7;
-    }
-  }
+.reply-preview-container, .edit-preview-container { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #f5f5f5; border-radius: 4px; margin-top: 8px;
+  .preview-content { font-size: 12px; color: #5c5c5c; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; .label { font-weight: 600; margin-right: 4px; } }
 }
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-
-// ============================================================================
-// 调整大小手柄
-// ============================================================================
-.resize-handle {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  cursor: ns-resize;
-  z-index: 10;
-
-  &:hover {
-    background: rgba(0, 137, 255, 0.1);
-  }
-}
-
-.resize-indicator {
-  width: 40px;
-  height: 3px;
-  background: #d9d9d9;
-  border-radius: 2px;
-  margin: 0 auto;
-  transition: background 0.2s;
-
-  .resize-handle:hover & {
-    background: #1677ff;
-  }
-}
-
-// ============================================================================
-// 工具栏
-// ============================================================================
 .input-toolbar {
+  height: 44px; // 略微加高，更从容
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-
-  .toolbar-left {
+  padding: 0 4px;
+  .left-tools {
     display: flex;
     align-items: center;
-    gap: 2px;
-  }
-
-  .toolbar-btn {
-    background: none;
-    border: none;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    cursor: pointer;
-    color: #5c5c5c;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-
-    &:hover {
-      background: #f2f3f5;
-      color: #1677ff;
-    }
-
-    &.active {
-      color: #1677ff;
-      background: #e8f4ff;
-    }
-
-    .el-icon, .material-icons-outlined {
-      font-size: 18px;
-    }
-
-    .dark & {
-      color: #a1a1a1;
-      &:hover {
-        background: #3a3a3a;
-      }
-    }
-  }
-
-  .history-btn {
-    font-size: 12px;
-    color: #999;
-
-    &:hover {
-      color: #1677ff;
-    }
-  }
-
-  .el-divider--vertical {
-    height: 18px;
-    margin: 0 4px;
-    border-color: #e5e5e5;
-  }
-}
-
-// ============================================================================
-// 回复/编辑预览区
-// ============================================================================
-.reply-preview-container,
-.edit-preview-container {
-  padding: 10px 14px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  background: #f8fafc;
-  border-left: 3px solid #1677ff;
-
-  .dark & {
-    background: rgba(30, 41, 59, 0.5);
-  }
-
-  .reply-content-box,
-  .edit-content-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-
-    .reply-user,
-    .edit-label {
-      color: #1677ff;
-      font-weight: 600;
-    }
-
-    .reply-text,
-    .edit-text {
-      flex: 1;
-      color: #64748b;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .cancel-reply,
-    .cancel-edit {
-      cursor: pointer;
-      color: #8f959e;
-      font-size: 16px;
-
-      &:hover {
-        color: #ff4d4f;
-      }
+    gap: 8px; // 严格对齐间距
+    .tool-btn {
+      width: 34px;
+      height: 34px;
+      color: #646a73;
+      .material-icons-outlined { font-size: 22px; }
+      &:hover { background: #f2f3f5; color: #1677ff; }
     }
   }
 }
-
-.edit-preview-container {
-  border-left-color: #52c41a;
-
-  .edit-label {
-    color: #52c41a;
+.input-area { flex: 1; padding: 4px 0;
+  .chat-textarea { width: 100%; height: 100%; min-height: 60px; border: none; outline: none; resize: none; font-size: 14px; line-height: 1.6; color: #1f2329; background: transparent;
+    &::placeholder { color: #8f959e; }
   }
 }
-
-// ============================================================================
-// 输入区域
-// ============================================================================
-.input-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.url-preview-tip {
+  display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: rgba(22, 119, 255, 0.08);
+  border-radius: 4px; margin-top: 8px; font-size: 12px; color: #1677ff;
+  .material-icons-outlined { font-size: 16px; }
+  .url-text { color: #1677ff; text-decoration: underline; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 }
-
-.message-input {
-  flex: 1;
-  width: 100%;
-  border: none;
-  outline: none;
-  resize: none;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #1f2329;
-  padding: 0;
-  min-height: 60px;
-  max-height: 200px;
-  background: transparent;
-
-  .dark & {
-    color: #f1f5f9;
-  }
-
-  &::placeholder {
-    color: #bbbfc4;
+.input-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px;
+  .footer-tip { font-size: 11px; color: #c9cdd4; }
+  .send-btn { padding: 6px 20px; border: none; border-radius: 4px; background: #f2f3f5; color: #8f959e; font-size: 14px; cursor: default; transition: all 0.2s;
+    &.active { background: #1677ff; color: #fff; cursor: pointer; &:hover { background: #0056b3; } }
   }
 }
-
-.input-footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-
-  .hint-text {
-    font-size: 12px;
-    color: #999;
-    user-select: none;
-  }
-
-  .send-btn {
-    min-width: 68px;
-    height: 28px;
-    padding: 0 16px;
-    border-radius: 4px;
-    border: none;
-    background: #e5e5e5;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: not-allowed;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-
-    &.active {
-      background: var(--dt-brand-color);
-      color: #fff;
-      cursor: pointer;
-
-      &:hover {
-        background: #4096ff;
-      }
-
-      &:active {
-        background: #0958d9;
-      }
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
-}
-
-// ============================================================================
-// 暗色模式
-// ============================================================================
-.dark {
-  .chat-input-container {
-    background: var(--dt-bg-input-dark);
-  }
-
-  .drop-overlay {
-    background: rgba(22, 119, 255, 0.1);
-  }
-
-  .toolbar-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .reply-preview-container,
-  .edit-preview-container {
-    background: rgba(30, 41, 59, 0.5);
-  }
-
-  .send-btn {
-    background: #334155;
-
-    &.active {
-      background: var(--dt-brand-color);
-    }
-  }
+.emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; padding: 10px; max-height: 240px; overflow-y: auto;
+  .emoji-item { font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: background 0.2s; &:hover { background: #f2f3f5; } }
 }
 </style>

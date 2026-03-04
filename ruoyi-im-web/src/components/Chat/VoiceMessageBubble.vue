@@ -6,13 +6,16 @@
       <span v-else class="material-icons-outlined">pause</span>
     </button>
 
-    <!-- 波形图 -->
+    <!-- 动态波形图 -->
     <div class="waveform-container" ref="waveformRef">
       <div 
         class="waveform-bar" 
-        v-for="i in 30" 
+        v-for="i in 24" 
         :key="i"
-        :style="{ height: getBarHeight(i) + '%' }"
+        :style="{ 
+          height: getBarHeight(i) + '%',
+          opacity: progress >= (i/24)*100 ? 1 : 0.4
+        }"
       ></div>
     </div>
 
@@ -140,6 +143,8 @@ const getBarHeight = (index) => {
 </script>
 
 <style scoped lang="scss">
+@use "sass:math";
+
 .voice-message {
   display: flex;
   align-items: center;
@@ -188,27 +193,28 @@ const getBarHeight = (index) => {
     overflow: hidden;
 
     .waveform-bar {
-      width: 3px;
-      background: var(--dt-text-tertiary);
-      border-radius: 2px;
-      transition: height 0.1s;
+      width: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
     }
   }
 
-  // 播放时波形动画
+  // 播放时波形动画 (钉钉风格：非对称随机跳动)
   &.playing .waveform-bar {
-    animation: waveform-pulse 0.5s ease-in-out infinite alternate;
+    animation: waveform-jump 0.6s ease-in-out infinite alternate;
     
-    @for $i from 1 through 30 {
+    @for $i from 1 through 24 {
       &:nth-child(#{$i}) {
-        animation-delay: #{$i * 0.02}s;
+        animation-delay: #{$i * 0.03}s;
+        animation-duration: #{0.4 + math.div(random(4), 10)}s;
       }
     }
   }
 
-  @keyframes waveform-pulse {
-    from { height: 20%; }
-    to { height: 100%; }
+  @keyframes waveform-jump {
+    from { transform: scaleY(0.5); }
+    to { transform: scaleY(1.2); }
   }
 
   // 时长

@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.domain.ImVideoCall;
 import com.ruoyi.im.domain.ImVideoCallParticipant;
@@ -10,6 +11,7 @@ import com.ruoyi.im.mapper.ImVideoCallMapper;
 import com.ruoyi.im.mapper.ImVideoCallParticipantMapper;
 import com.ruoyi.im.service.ImVideoCallService;
 import com.ruoyi.im.util.ImRedisUtil;
+import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +88,9 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
 
         log.info("发起通话: callId={}, caller={}, callee={}, type={}", call.getId(), callerId, calleeId, callType);
 
+        // 发送通知给接收者
+        ImWebSocketEndpoint.sendCallNotification(calleeId, call.getId(), callType, callerId);
+
         return call.getId();
     }
 
@@ -119,6 +124,9 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         redisTemplate.opsForValue().set(USER_CALL_KEY + call.getCalleeId(), callId, 3600, TimeUnit.SECONDS);
 
         log.info("接听通话: callId={}, user={}", callId, userId);
+
+        // 通知对方已接听
+        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), "CONNECTED");
     }
 
     @Override
@@ -142,6 +150,9 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         call.setRejectReason(reason);
         call.setEndTime(LocalDateTime.now());
         videoCallMapper.updateImVideoCall(call);
+
+        // 通知对方已拒绝
+        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), "REJECTED");
 
         // 清除通话状态
         clearCallState(callId);
@@ -177,6 +188,9 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         call.setEndTime(endTime);
         call.setDuration(duration);
         videoCallMapper.updateImVideoCall(call);
+
+        // 通知对方已结束
+        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), "ENDED");
 
         // 清除通话状态
         clearCallState(callId);
@@ -290,10 +304,10 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     @Override
     public List<?> getCallHistory(Long userId, Integer limit) {
         if (limit == null || limit <= 0) {
-            limit = 20;
+            limit = SystemConstants.DEFAULT_PAGE_SIZE;
         }
-        if (limit > 100) {
-            limit = 100; // 最多返回100条
+        if (limit > SystemConstants.MAX_PAGE_SIZE) {
+            limit = SystemConstants.MAX_PAGE_SIZE; // 最多返回100条
         }
 
         List<ImVideoCall> calls = videoCallMapper.selectCallsByUserId(userId, limit);
@@ -310,10 +324,10 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
                                    Integer maxParticipants, List<Long> invitedUserIds) {
         // 验证最大参与者数
         if (maxParticipants == null || maxParticipants <= 0) {
-            maxParticipants = 9; // 默认9人
+            maxParticipants = SystemConstants.VIDEO_CALL_MAX_PARTICIPANTS;
         }
-        if (maxParticipants > 9) {
-            throw new BusinessException("最多支持9人同时通话");
+        if (maxParticipants > SystemConstants.VIDEO_CALL_MAX_PARTICIPANTS) {
+            throw new BusinessException("最多支持" + SystemConstants.VIDEO_CALL_MAX_PARTICIPANTS + "人同时通话");
         }
 
         if (invitedUserIds == null || invitedUserIds.isEmpty()) {

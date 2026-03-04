@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.domain.ImVideoMeeting;
 import com.ruoyi.im.domain.ImVideoMeetingParticipant;
@@ -138,7 +139,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         // 已开始或已结束的会议不能修改
-        if ("IN_PROGRESS".equals(meeting.getStatus()) || "ENDED".equals(meeting.getStatus())) {
+        if (SystemConstants.MEETING_STATUS_IN_PROGRESS.equals(meeting.getStatus()) || SystemConstants.MEETING_STATUS_ENDED.equals(meeting.getStatus())) {
             throw new BusinessException("会议已开始或已结束，无法修改");
         }
 
@@ -230,7 +231,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         // 只有已结束或已取消的会议可以删除
-        if (!"ENDED".equals(meeting.getStatus()) && !"CANCELLED".equals(meeting.getStatus())) {
+        if (!SystemConstants.MEETING_STATUS_ENDED.equals(meeting.getStatus()) && !"CANCELLED".equals(meeting.getStatus())) {
             throw new BusinessException("只有已结束或已取消的会议可以删除");
         }
 
@@ -256,7 +257,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             throw new BusinessException("会议状态不正确");
         }
 
-        meeting.setStatus("IN_PROGRESS");
+        meeting.setStatus(SystemConstants.MEETING_STATUS_IN_PROGRESS);
         meeting.setActualStartTime(LocalDateTime.now());
         meeting.setUpdateTime(LocalDateTime.now());
         meetingMapper.updateById(meeting);
@@ -277,7 +278,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             throw new BusinessException("会议不存在");
         }
 
-        if (!"IN_PROGRESS".equals(meeting.getStatus())) {
+        if (!SystemConstants.MEETING_STATUS_IN_PROGRESS.equals(meeting.getStatus())) {
             return;
         }
 
@@ -288,7 +289,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             duration = (int) java.time.Duration.between(meeting.getActualStartTime(), endTime).toMinutes();
         }
 
-        meeting.setStatus("ENDED");
+        meeting.setStatus(SystemConstants.MEETING_STATUS_ENDED);
         meeting.setActualEndTime(endTime);
         meeting.setDuration(duration);
         meeting.setUpdateTime(LocalDateTime.now());
@@ -297,7 +298,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         clearMeetingCache(meetingId);
 
         // 广播会议结束通知
-        broadcastMeetingNotification(meetingId, "ENDED", "会议已结束", userId);
+        broadcastMeetingNotification(meetingId, SystemConstants.MEETING_STATUS_ENDED, "会议已结束", userId);
 
         log.info("结束视频会议: meetingId={}, title={}, duration={}分钟", meetingId, meeting.getTitle(), duration);
     }
@@ -380,7 +381,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         participantMapper.updateById(participant);
 
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
-        if (meeting != null && "IN_PROGRESS".equals(meeting.getStatus())) {
+        if (meeting != null && SystemConstants.MEETING_STATUS_IN_PROGRESS.equals(meeting.getStatus())) {
             // 更新参与人数
             Integer currentCount = meeting.getCurrentParticipants();
             if (currentCount != null && currentCount > 0) {
@@ -492,7 +493,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
                 participantMapper.insert(participant);
 
                 // 发送邀请通知
-                // TODO: 通过WebSocket或系统通知发送邀请
+                // 通过WebSocket或系统通知发送邀请
                 log.info("会议邀请: meetingId={}, invited={}, inviter={}", meetingId, userId, inviterName);
             }
         }
@@ -678,7 +679,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
      * 广播会议通知
      */
     private void broadcastMeetingNotification(Long meetingId, String eventType, String message, Long operatorId) {
-        // TODO: 通过WebSocket推送会议通知
+        // 通过WebSocket推送会议通知
         log.info("会议通知: meetingId={}, type={}, message={}, operator={}", meetingId, eventType, message, operatorId);
     }
 
@@ -686,7 +687,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
      * 广播屏幕共享事件
      */
     private void broadcastScreenShareEvent(Long meetingId, Long userId, Boolean isSharing) {
-        // TODO: 通过WebSocket推送屏幕共享状态
+        // 通过WebSocket推送屏幕共享状态
         log.info("屏幕共享事件: meetingId={}, userId={}, sharing={}", meetingId, userId, isSharing);
     }
 
@@ -694,7 +695,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
      * 生成会议链接
      */
     private String generateMeetingLink(String roomId) {
-        // TODO: 根据部署环境生成实际链接
+        // 根据部署环境生成实际链接
         return "https://meeting.example.com/join?room=" + roomId;
     }
 

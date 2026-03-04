@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImUrlMetadataMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImUrlMetadata" id="ImUrlMetadataResult">
+        <id property="id" column="id"/>
+        <result property="url" column="url"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="siteName" column="site_name"/>
+        <result property="faviconUrl" column="favicon_url"/>
+        <result property="contentType" column="content_type"/>
+        <result property="rawHtml" column="raw_html"/>
+        <result property="fetchStatus" column="fetch_status"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="expireTime" column="expire_time"/>
+    </resultMap>
+
+    <sql id="selectImUrlMetadataVo">
+        select id, url, title, description, image_url, site_name, favicon_url,
+               content_type, raw_html, fetch_status, error_message, create_time, update_time, expire_time
+        from im_url_metadata
+    </sql>
+
+    <select id="selectByUrl" parameterType="String" resultMap="ImUrlMetadataResult">
+        <include refid="selectImUrlMetadataVo"/>
+        where url = #{url}
+        order by create_time desc
+        limit 1
+    </select>
+
+    <insert id="insertImUrlMetadata" parameterType="com.ruoyi.im.domain.ImUrlMetadata" useGeneratedKeys="true" keyProperty="id">
+        insert into im_url_metadata
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="url != null">url,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="imageUrl != null">image_url,</if>
+            <if test="siteName != null">site_name,</if>
+            <if test="faviconUrl != null">favicon_url,</if>
+            <if test="contentType != null">content_type,</if>
+            <if test="rawHtml != null">raw_html,</if>
+            <if test="fetchStatus != null">fetch_status,</if>
+            <if test="errorMessage != null">error_message,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="expireTime != null">expire_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="url != null">#{url},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="imageUrl != null">#{imageUrl},</if>
+            <if test="siteName != null">#{siteName},</if>
+            <if test="faviconUrl != null">#{faviconUrl},</if>
+            <if test="contentType != null">#{contentType},</if>
+            <if test="rawHtml != null">#{rawHtml},</if>
+            <if test="fetchStatus != null">#{fetchStatus},</if>
+            <if test="errorMessage != null">#{errorMessage},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="expireTime != null">#{expireTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateImUrlMetadata" parameterType="com.ruoyi.im.domain.ImUrlMetadata">
+        update im_url_metadata
+        <trim prefix="set" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="siteName != null">site_name = #{siteName},</if>
+            <if test="faviconUrl != null">favicon_url = #{faviconUrl},</if>
+            <if test="contentType != null">content_type = #{contentType},</if>
+            <if test="rawHtml != null">raw_html = #{rawHtml},</if>
+            <if test="fetchStatus != null">fetch_status = #{fetchStatus},</if>
+            <if test="errorMessage != null">error_message = #{errorMessage},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteExpiredMetadata" parameterType="java.time.LocalDateTime">
+        delete from im_url_metadata
+        where expire_time &lt; #{beforeDate}
+    </delete>
+
+</mapper>

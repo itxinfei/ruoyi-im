@@ -25,10 +25,14 @@
           class="group-item"
           @click="handleSelectGroup(group)"
         >
-          <div class="group-avatar">
-            <img v-if="group.avatar" :src="addTokenToUrl(group.avatar)" :alt="`${group.name} 的群头像`" />
-            <span v-else class="material-icons-outlined" aria-hidden="true">group</span>
-          </div>
+          <DingtalkAvatar
+            :src="group.avatar"
+            :name="group.name"
+            :is-group="true"
+            :members="group.members || []"
+            :size="48"
+            shape="square"
+          />
           <div class="group-info">
             <div class="group-name">{{ group.name }}</div>
             <div class="group-desc">
@@ -176,29 +180,6 @@ onMounted(() => {
 
 .group-item:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.group-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.group-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.group-avatar .material-icons-outlined {
-  font-size: 24px;
 }
 
 .group-info {

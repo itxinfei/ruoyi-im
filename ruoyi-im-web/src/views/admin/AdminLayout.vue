@@ -34,9 +34,13 @@
             <el-icon><ChatLineSquare /></el-icon>
             <span>消息管理</span>
           </el-menu-item>
-          <el-menu-item index="/admin/system-config">
+          <el-menu-item v-if="isSuperAdmin" index="/admin/system-config">
             <el-icon><Setting /></el-icon>
             <span>系统配置</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/audit-log">
+            <el-icon><Document /></el-icon>
+            <span>审计日志</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -46,7 +50,7 @@
           <div class="header-left">
             <div class="title-row">
               <h1 class="page-title">{{ pageTitle }}</h1>
-              <el-tag size="small" type="info" effect="plain">Admin</el-tag>
+              <el-tag size="small" :type="roleTagType" effect="plain">{{ roleLabel }}</el-tag>
             </div>
             <p class="page-desc">统一管理用户、群组、消息与系统配置</p>
           </div>
@@ -69,7 +73,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Monitor, User, ChatDotRound, ChatLineSquare, Setting } from '@element-plus/icons-vue'
+import { Monitor, User, ChatDotRound, ChatLineSquare, Setting, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -81,7 +85,8 @@ const pageTitleMap = {
   '/admin/users': '用户管理',
   '/admin/groups': '群组管理',
   '/admin/messages': '消息管理',
-  '/admin/system-config': '系统配置'
+  '/admin/system-config': '系统配置',
+  '/admin/audit-log': '审计日志'
 }
 
 const pageTitle = computed(() => pageTitleMap[route.path] || '管理后台')
@@ -96,6 +101,23 @@ const adminName = computed(() => {
     return '管理员'
   }
 })
+
+// 获取用户角色
+const userRole = computed(() => {
+  try {
+    const role = localStorage.getItem('im_user_role')
+    return role || 'ADMIN'
+  } catch (e) {
+    return 'ADMIN'
+  }
+})
+
+// 是否是超级管理员
+const isSuperAdmin = computed(() => userRole.value === 'SUPER_ADMIN')
+
+// 角色标签显示
+const roleTagType = computed(() => isSuperAdmin.value ? 'danger' : 'info')
+const roleLabel = computed(() => isSuperAdmin.value ? '超级管理员' : '管理员')
 
 const goToChat = () => {
   router.push('/')

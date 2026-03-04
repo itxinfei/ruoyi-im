@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.domain.ImDocument;
 import com.ruoyi.im.domain.ImDocumentComment;
@@ -218,8 +219,8 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         BeanUtils.copyProperties(document, vo);
 
         // 设置预览
-        if (document.getContent() != null && document.getContent().length() > 100) {
-            vo.setPreview(document.getContent().substring(0, 100) + "...");
+        if (document.getContent() != null && document.getContent().length() > SystemConstants.DOCUMENT_SUMMARY_MAX_LENGTH) {
+            vo.setPreview(document.getContent().substring(0, SystemConstants.DOCUMENT_SUMMARY_MAX_LENGTH) + "...");
         } else {
             vo.setPreview(document.getContent());
         }

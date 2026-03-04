@@ -5,6 +5,7 @@ import com.ruoyi.im.constant.UserRole;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.im.vo.admin.BatchOperationResult;
 import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,12 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 管理员-用户管理控制器
+ * 管理员 - 用户管理控制器
  * 提供用户管理、状态修改、角色管理等管理员功能
  *
  * @author ruoyi
  */
-@Tag(name = "管理员-用户管理", description = "管理员用户管理接口")
+@Tag(name = "管理员 - 用户管理", description = "管理员用户管理接口")
 @RestController
 @RequestMapping("/api/admin/users")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
@@ -35,7 +36,7 @@ public class ImUserAdminController {
      * 构造器注入依赖
      *
      * @param imUserService 用户服务
-     * @param imUserMapper 用户Mapper
+     * @param imUserMapper 用户 Mapper
      */
     public ImUserAdminController(ImUserService imUserService, ImUserMapper imUserMapper) {
         this.imUserService = imUserService;
@@ -62,7 +63,7 @@ public class ImUserAdminController {
         // 构建查询条件
         ImUser queryUser = new ImUser();
         if (keyword != null && !keyword.trim().isEmpty()) {
-            queryUser.setUsername(keyword); // 简化处理，实际可以通过 XML 实现更复杂的查询
+            queryUser.setUsername(keyword);
         }
         if (role != null && !role.trim().isEmpty()) {
             queryUser.setRole(role);
@@ -97,7 +98,7 @@ public class ImUserAdminController {
     /**
      * 获取用户详情
      *
-     * @param id 用户ID
+     * @param id 用户 ID
      * @return 用户详情
      */
     @Operation(summary = "获取用户详情", description = "管理员获取指定用户的详细信息")
@@ -115,7 +116,7 @@ public class ImUserAdminController {
     /**
      * 修改用户状态
      *
-     * @param id     用户ID
+     * @param id     用户 ID
      * @param status 状态：0=禁用，1=启用
      * @return 操作结果
      */
@@ -134,7 +135,7 @@ public class ImUserAdminController {
     /**
      * 修改用户角色
      *
-     * @param id   用户ID
+     * @param id   用户 ID
      * @param role 角色：USER/ADMIN/SUPER_ADMIN
      * @return 操作结果
      */
@@ -157,7 +158,7 @@ public class ImUserAdminController {
     /**
      * 删除用户
      *
-     * @param id 用户ID
+     * @param id 用户 ID
      * @return 操作结果
      */
     @Operation(summary = "删除用户", description = "管理员删除指定用户")
@@ -172,6 +173,30 @@ public class ImUserAdminController {
     }
 
     /**
+     * 批量删除用户
+     *
+     * @param ids 用户 ID 列表
+     * @return 批量操作结果
+     */
+    @Operation(summary = "批量删除用户", description = "管理员批量删除用户，返回成功/失败数量及失败明细")
+    @DeleteMapping("/batch")
+    public Result<BatchOperationResult> batchDelete(@RequestBody List<Long> ids) {
+        BatchOperationResult result = new BatchOperationResult();
+
+        for (Long id : ids) {
+            ImUser user = imUserMapper.selectImUserById(id);
+            if (user == null) {
+                result.addFailedItem(id, "用户不存在");
+            } else {
+                imUserMapper.deleteImUserById(id);
+                result.setSuccessCount(result.getSuccessCount() + 1);
+            }
+        }
+
+        return Result.success(result);
+    }
+
+    /**
      * 获取用户统计
      *
      * @return 统计数据
@@ -180,7 +205,7 @@ public class ImUserAdminController {
     @GetMapping("/stats")
     public Result<Map<String, Object>> getStats() {
         long total = imUserMapper.countImUsers();
-        // 状态为1的用户表示启用/在线
+        // 状态为 1 的用户表示启用/在线
         ImUser queryUser = new ImUser();
         queryUser.setStatus(1);
         long online = imUserMapper.selectImUserCount(queryUser);

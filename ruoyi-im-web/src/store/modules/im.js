@@ -148,9 +148,9 @@ export default {
     // 登出 - 清空所有状态
     logout({ commit }) {
       commit('CLEAR_ALL_STATE')
-      commit('session/CLEAR_STATE', null, { root: true })
-      commit('message/CLEAR_STATE', null, { root: true })
-      commit('contact/CLEAR_STATE', null, { root: true })
+      commit('im/session/CLEAR_STATE', null, { root: true })
+      commit('im/message/CLEAR_STATE', null, { root: true })
+      commit('im/contact/CLEAR_STATE', null, { root: true })
     }
   }
 }

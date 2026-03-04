@@ -69,12 +69,12 @@ public class ImConversationVO implements Serializable {
     /**
      * 是否置顶
      */
-    private Boolean isPinned;
+    private Integer pinned;
 
     /**
      * 是否免打扰
      */
-    private Boolean isMuted;
+    private Integer muted;
 
     /**
      * 备注
@@ -96,9 +96,49 @@ public class ImConversationVO implements Serializable {
      */
     private LocalDateTime updateTime;
 
+    /**
+     * 是否删除
+     */
+    private Integer deleted;
+
+    /**
+     * 删除时间
+     */
+    private LocalDateTime deletedTime;
+
+    /**
+     * 是否敏感
+     */
+    private Integer sensitive;
+
+    /**
+     * 敏感级别
+     */
+    private String sensitiveLevel;
+
+    /**
+     * 禁止转发
+     */
+    private Integer noForward;
+
+    /**
+     * 禁止复制
+     */
+    private Integer noCopy;
+
     // 以下为新增的缺失字段
     private Long lastReadMessageId; // 最后已读消息ID
     private String peerName; // 对方姓名
     private String peerAvatar; // 对方头像
     private Boolean peerOnline; // 对方是否在线
+
+    // 显式提供符合 MyBatis 预期的 Setter (Double Check)
+    public void setIsDeleted(Integer deleted) { this.deleted = deleted; }
+    public void setIsSensitive(Integer sensitive) { this.sensitive = sensitive; }
+    public void setIsPinned(Integer pinned) { this.pinned = pinned; }
+    public void setIsMuted(Integer muted) { this.muted = muted; }
+    public Integer getIsDeleted() { return this.deleted; }
+    public Integer getIsSensitive() { return this.sensitive; }
+    public Integer getIsPinned() { return this.pinned; }
+    public Integer getIsMuted() { return this.muted; }
 }

@@ -22,13 +22,14 @@ export function getTodos(params) {
  * 创建待办
  * @param {Object} data - 待办数据
  * @param {string} data.title - 标题
- * @param {string} data.content - 内容
- * @param {string} data.dueDate - 截止日期
+ * @param {string} data.description - 描述
+ * @param {string} data.type - 类型（可选，默认TASK）
+ * @param {number} data.priority - 优先级（可选，1=低, 2=中, 3=高）
  * @returns {Promise}
  */
 export function createTodo(data) {
     return request({
-        url: '/api/im/workbench/todo',
+        url: '/api/im/workbench/todos',
         method: 'post',
         data
     })
@@ -41,7 +42,7 @@ export function createTodo(data) {
  */
 export function completeTodo(todoId) {
     return request({
-        url: `/api/im/workbench/todo/${todoId}/complete`,
+        url: `/api/im/workbench/todos/${todoId}/complete`,
         method: 'put'
     })
 }
@@ -50,13 +51,18 @@ export function completeTodo(todoId) {
  * 更新待办
  * @param {number} todoId - 待办ID
  * @param {Object} data - 待办数据
+ * @param {string} data.title - 标题
+ * @param {string} data.description - 描述
  * @returns {Promise}
  */
 export function updateTodo(todoId, data) {
     return request({
-        url: `/api/im/workbench/todo/${todoId}`,
+        url: `/api/im/workbench/todos/${todoId}`,
         method: 'put',
-        data
+        params: {
+            title: data.title,
+            description: data.description
+        }
     })
 }
 
@@ -67,7 +73,7 @@ export function updateTodo(todoId, data) {
  */
 export function deleteTodo(todoId) {
     return request({
-        url: `/api/im/workbench/todo/${todoId}`,
+        url: `/api/im/workbench/todos/${todoId}`,
         method: 'delete'
     })
 }

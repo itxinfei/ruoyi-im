@@ -1,275 +1,317 @@
 ---
-stepsCompleted: [1, 2, 3, 4, 5, 6, 7]
+stepsCompleted: [1, 2, 3, 4, 5]
 inputDocuments:
-  - _bmad-output/planning-artifacts/prd.md
-  - docs/UI优化计划.md
   - docs/需求文档.md
+  - docs/项目总规划-钉钉对齐V1.md
+  - docs/P0执行任务卡-第一批.md
+  - docs/plans/2026-03-04-P0-执行排期与里程碑.md
+  - docs/钉钉聊天功能差距分析.md
 workflowType: 'architecture'
-project_name: im
-user_name: Itxinfei
-date: 2026-02-28
+project_name: 'im'
+user_name: 'Itxinfei'
+date: '2026-03-04'
 ---
 
 # Architecture Decision Document
 
 _This document builds collaboratively through step-by-step discovery. Sections are appended as we work through each architectural decision together._
 
----
-
 ## Project Context Analysis
 
 ### Requirements Overview
 
-**Functional Requirements (from PRD):**
+**Functional Requirements:**
 
-| FR ID | 功能 | 架构影响 |
-|-------|------|----------|
-| FR-WT-01 | 快捷入口 | 需要用户配置存储、拖拽排序UI、多端同步 |
-| FR-WT-02 | 通知中心 | 需要未读消息聚合、实时推送、跳转到会话 |
-| FR-WT-03 | 待办事项 | 需要任务列表、截止时间、完成状态管理 |
-| FR-WT-04 | 搜索入口 | 需要全局搜索、多类型内容搜索、历史记录 |
-| FR-WT-05 | 日程概览 | 需要日程显示、日历集成、快速创建 |
-
-**Core IM Features (from Code Analysis):**
-
-| 功能模块 | 实现状态 | 关键组件 |
-|---------|---------|---------|
-| 会话列表 | 完整 | SessionPanel, 会话分组、置顶、未读计数 |
-| 聊天窗口 | 完整 | ChatPanel, 消息列表、输入框、工具栏 |
-| 消息气泡 | 完整 | MessageBubble, Text/Image/File/Bubble |
-| 联系人列表 | 完整 | ContactsPanel, 部门树、成员网格 |
-| 已读回执 | 完整 | 单聊状态指示器、群聊已读计数 |
+核心功能域：
+1. **消息域** - 会话列表与筛选、消息收发（文本/图片/文件/语音/视频）、消息操作（撤回/编辑/转发/回复/收藏）、二级菜单筛选、三级弹窗交互
+2. **通讯录域** - 组织架构、我的好友、群组管理、最近联系人
+3. **工作台域** - 待办、审批、日程、公告、文档入口
 
 **Non-Functional Requirements:**
 
-| NFR | 要求 | 架构影响 |
-|-----|------|----------|
-| 性能 | 首屏 ≤1秒、消息延迟 ≤300ms | 需要虚拟滚动、消息增量同步 |
-| 安全 | 私有化部署、WSS 加密、文件水印 | 内网部署、传输加密 |
-| 兼容性 | Chrome/Edge/Firefox/Safari 最新版 | 现代浏览器特性可用 |
+| 类别 | 要求 |
+|------|------|
+| 性能 | 100并发（峰值500），消息延迟P95 ≤ 300ms，首屏加载 ≤ 3s |
+| 安全 | JWT鉴权、RBAC权限、敏感词过滤、AES-256-GCM消息加密 |
+| 稳定性 | WebSocket断线重连 ≥ 99%，发送失败重试 ≥ 95% |
+| 部署 | 内网部署、HTTPS/WSS、操作审计 |
 
-### Scale & Complexity
+**Scale & Complexity:**
 
-- **Primary domain**: Web Application (SPA) - 前端 IM 系统
-- **Complexity level**: Medium-High (企业级即时通讯系统)
-- **Estimated architectural components**: 15+ 核心组件模块
-
-**Complexity Indicators:**
-- Real-time features: WebSocket 消息推送、已读上报
-- Multi-tenancy: 会话隔离、用户数据隔离
-- Regulatory: 内网部署、审计日志
-- Integration: 与现有 OA/LDAP/AD 集成
-- User interaction: 6+ 消息类型、群聊、文件传输
-- Data complexity: 消息历史、已读状态、附件存储
+- Primary domain: 全栈Web应用（前端Vue3 + 后端Spring Boot）
+- Complexity level: 中等偏高
+- Estimated architectural components: 
+  - 前端：~50个Vue组件、~10个Store模块
+  - 后端：~20个Controller、~30个Service、~40个Mapper
 
 ### Technical Constraints & Dependencies
 
-**技术栈:**
-- 前端: Vue 3 + Vite + Element Plus + Vuex
-- 后端: Spring Boot 2.7 + MyBatis Plus + MySQL
-- 通信: WebSocket (WSS 加密)
-- 设计系统: Design Tokens (--dt-* 变量)
+**强制约束：**
+- JDK 1.8（禁止Java 9+语法）
+- Vue 3 + Composition API
+- MySQL 5.7
+- Redis 6+
+- WebRTC（浏览器标准能力）
+- 开发环境：Windows 11
+- 生产环境：CentOS 7
 
-**已知约束:**
-- 内网部署，无需外网连接
-- 现有代码库：ruoyi-im-web (Vue 3)
-- 现有后端：ruoyi-im-api (Java 1.8 + Spring Boot)
-- 两套设计系统并存：`--dt-*` 和 `--im-*` 变量冲突
-- Chat 组件目录中发现 646 处硬编码颜色值
-
-**数据模型:**
-- 会话模型: ImConversation (PRIVATE/GROUP 类型)
-- 消息模型: ImMessage (TEXT/FILE/IMAGE/VOICE/VIDEO 类型)
-- 用户模型: ImUser (部门、职位、联系方式)
+**依赖服务：**
+- 文件存储服务
+- WebSocket服务
+- WebRTC信令服务
+- 敏感词过滤服务
 
 ### Cross-Cutting Concerns Identified
 
-1. **样式系统统一** - Design Tokens 迁移和统一 (高优先级)
-2. **实时通信** - WebSocket 消息推送、已读上报
-3. **状态管理** - 多组件共享状态 (Vuex)
-4. **性能优化** - 虚拟滚动、懒加载、消息去重
-5. **消息滚动问题** - 会话切换时滚动到底部不生效 (需要修复)
+1. **消息状态管理** - 统一的状态机设计，覆盖发送/已读/撤回等状态
+2. **实时通讯** - WebSocket连接池管理、心跳检测、断线重连
+3. **权限控制** - RBAC模型、组织架构权限继承、群组权限
+4. **错误处理** - 统一异常处理、失败重试策略、用户友好提示
+5. **审计日志** - 操作追踪、安全审计、合规要求
+6. **数据一致性** - 前后端字段映射、数据库与Mapper一致性
 
 ---
 
-## Architecture Design Goals
+## UI/UX Architecture Decisions
 
-### Current State Analysis
+### 1. 左侧导航栏设计规范
 
-**已实现功能:**
-- ✅ 消息气泡组件 (MessageBubble)
-- ✅ 悬停操作栏 (MessageHoverActions)
-- ✅ 消息列表 (MessageList)
-- ✅ 消息输入框 (MessageInput)
-- ✅ 会话侧边栏 (ChatSidebar)
-- ✅ 会话导航栏 (ImSideNav)
+**设计目标：** 对齐钉钉桌面端左侧导航栏设计语言
 
-**当前UI风格:**
-- ✅ 基本实现钉钉8.0风格（8px圆角、12px内边距、蓝色品牌色）
-- ✅ 已有合并消息显示逻辑
-- ✅ 已有时间分隔符
-- ✅ 已有悬停操作栏
+**视觉规范：**
 
-**需要优化的问题:**
-1. ❌ **联系人列表展示内容不够全** - 可能缺少搜索、最近聊天、群组入口
-2. ❌ **点击联系人后不是最新消息** - 会话切换时消息滚动问题
+| 属性 | 钉钉标准 | 说明 |
+|------|----------|------|
+| 宽度 | 64px | 从当前52px调整，符合人体工学 |
+| 菜单项高度 | 48px | 触摸友好，避免误触 |
+| 图标尺寸 | 24×24px | 清晰可辨 |
+| 图标线宽 | 1.5px | 精致现代感 |
+| 选中背景 | #1677FF | 品牌蓝色 |
+| 默认图标色 | #646A73 | 中性灰色 |
+| 悬停背景 | #E8E8E8 | 微妙交互反馈 |
+| 导航背景 | #F5F6F7 | 浅灰底色 |
+
+**菜单项设计：**
+
+```
+┌────────────────┐
+│                │
+│   💬 消息      │ ← 选中态（蓝色背景+白色图标）
+│                │
+│   👥 通讯录    │
+│                │
+│   📋 工作台    │
+│                │
+│   📅 日程      │
+│                │
+│   ────────     │
+│                │
+│   👤 头像      │ ← 底部用户区域
+│   ⚙️ 设置      │
+│                │
+└────────────────┘
+```
+
+**交互规范：**
+- 选中态：蓝色圆角矩形背景（border-radius: 8px）+ 白色图标
+- 悬停态：浅灰背景 + Tooltip 显示菜单名称
+- 未读提示：消息图标右上角红色徽章（数字或圆点）
+- 在线状态：用户头像右下角绿色圆点（8px）
+
+**组件架构：**
+
+```
+src/components/ImSideNav/
+├── index.vue              # 主容器
+├── NavItem.vue            # 菜单项组件
+├── NavIcon/               # SVG图标组件集
+│   ├── MessageIcon.vue
+│   ├── ContactsIcon.vue
+│   ├── WorkbenchIcon.vue
+│   ├── CalendarIcon.vue
+│   └── SettingsIcon.vue
+└── UserArea.vue           # 底部用户区域
+```
 
 ---
 
-## Starter Template Evaluation
+### 2. 消息功能模块设计规范
 
-### Primary Technology Domain
+#### 2.1 会话列表（SessionPanel）
 
-**Web Application (SPA)** - 基于项目需求分析和现有技术栈判断
+**二级菜单筛选：**
 
-### Current Technology Stack (Verified)
+```
+┌─────────────────────────────────────────────────┐
+│  消息                                           │
+├─────────────────────────────────────────────────┤
+│  [全部] [未读] [置顶] [免打扰] [群聊] [文件链接] │
+└─────────────────────────────────────────────────┘
+```
 
-**前端技术栈 (来自 package.json 和 tailwind.config.js):**
+| 筛选项 | 筛选逻辑 | 徽章显示 |
+|--------|----------|----------|
+| 全部 | 显示所有会话 | 无 |
+| 未读 | 仅显示有未读消息的会话 | 显示未读总数 |
+| 置顶 | 仅显示置顶会话 | 无 |
+| 免打扰 | 仅显示免打扰会话 | 无 |
+| 群聊 | 仅显示群组会话 | 无 |
+| 文件链接 | 显示包含文件/链接的会话 | 无 |
 
-| 技术 | 版本 | 用途 |
+**会话卡片设计：**
+
+```
+┌─────────────────────────────────────────────┐
+│  ┌────┐  会话名称              14:30       │
+│  │头像│  [消息预览内容...]      🔴 3       │
+│  └────┘  📌 🔇                          │
+└─────────────────────────────────────────────┘
+
+尺寸规范：
+• 头像：40×40px，圆角8px
+• 名称：15px 粗体，#1F2329
+• 预览：14px 常规，#646A73，单行截断
+• 时间：12px 常规，#8F959E，右对齐
+• 未读徽章：红色圆点或数字
+• 状态图标：置顶📌 免打扰🔇
+```
+
+**群组头像拼接算法：**
+
+| 成员数 | 布局 | 说明 |
+|--------|------|------|
+| 1人 | 单头像 | 显示对方头像 |
+| 2人 | 左右各1 | 两个头像左右排列 |
+| 3人 | 左1右2 | 左侧1个，右侧上下2个 |
+| 4人 | 2×2四宫格 | 四个头像均匀分布 |
+| >4人 | 默认群图标 | 显示群组默认图标 |
+
+**排序规则：**
+1. 置顶会话优先（按置顶时间倒序）
+2. 未读会话次之（按最后消息时间倒序）
+3. 普通会话最后（按最后消息时间倒序）
+
+#### 2.2 聊天区域（ChatPanel）
+
+**三段式布局：**
+
+```
+┌─────────────────────────────────────────────┐
+│  ChatHeader                                 │
+│  会话名称        📞 📹 🔍 ⋯               │
+│  成员数/在线状态                             │
+├─────────────────────────────────────────────┤
+│  MessageList                                │
+│  ── 今天 ──                                 │
+│                                             │
+│  ┌────┐ 你好！                              │
+│  │头像│ 10:30                               │
+│  └────┘                                     │
+│                                             │
+│              收到了！  ┌────┐               │
+│              10:31    │头像│               │
+│                       └────┘               │
+├─────────────────────────────────────────────┤
+│  MessageInput                               │
+│  😀 📎 📷 🎤 📁 @                          │
+│  ┌─────────────────────────────────────┐   │
+│  │ 输入消息...                          │   │
+│  └─────────────────────────────────────┘   │
+│                              [发送]         │
+└─────────────────────────────────────────────┘
+```
+
+**ChatHeader 功能：**
+
+| 功能 | 图标 | 行为 |
 |------|------|------|
-| Vue | 3.3.11 | 主框架 |
-| Vite | 5.0.7 | 构建工具 |
-| TypeScript | 5.3.3 | 类型系统 |
-| Tailwind CSS | 3.4.0 | 样式 framework |
-| Element Plus | 2.4.4 | UI 组件库 |
-| Vue Router | 4.2.5 | 路由 |
-| Vuex | 4.1.0 | 状态管理 |
-| VueUse | 11.3.0 | 组合式工具 |
-| Vitest | 4.0.18 | 测试框架 |
+| 语音通话 | 📞 | 发起语音通话 |
+| 视频通话 | 📹 | 发起视频通话 |
+| 搜索 | 🔍 | 搜索会话内消息 |
+| 更多 | ⋯ | 下拉菜单：置顶、免打扰、清空消息、删除会话 |
 
-**后端技术栈:**
-| 技术 | 版本 | 用途 |
+**MessageBubble 设计：**
+
+```
+对方消息气泡：                    自己消息气泡：
+┌──────────────────┐              ┌──────────────────┐
+│ 消息内容         │              │ 消息内容         │
+│                  │              │                  │
+└──────────────────┘              └──────────────────┘ ✓✓
+圆角：2px 12px 12px 2px           圆角：12px 12px 2px 12px
+背景：#F5F6F7                     背景：#1677FF（蓝色）
+文字：#1F2329                     文字：#FFFFFF（白色）
+
+悬停操作栏：
+[回复] [转发] [收藏] [多选] [撤回/删除]
+```
+
+**消息状态：**
+
+| 状态 | 图标 | 说明 |
 |------|------|------|
-| Spring Boot | 2.7 | 后端框架 |
-| MySQL | 5.7 | 数据库 |
-| MyBatis Plus | - | ORM |
-| Redis | 3.0+ | 缓存 |
-| WebSocket | - | 实时通信 |
+| 发送中 | ⏳ 旋转动画 | 消息正在发送 |
+| 发送成功 | ✓ | 单灰勾，已送达服务器 |
+| 已读 | ✓✓ | 双蓝勾，对方已阅读 |
+| 发送失败 | ❌ | 红色感叹号，点击重试 |
 
-### Starter Template Analysis
+**MessageInput 工具栏：**
 
-**现有项目结构评估:**
+| 工具 | 图标 | 功能 |
+|------|------|------|
+| 表情 | 😀 | 表情选择器 |
+| 附件 | 📎 | 文件选择上传 |
+| 图片 | 📷 | 图片选择上传 |
+| 语音 | 🎤 | 语音消息录制 |
+| 文件 | 📁 | 文件选择上传 |
+| @成员 | @ | 群聊@成员选择 |
 
-您的项目已经拥有一个**生产就绪的starter模板**，包含：
+**输入行为：**
+- Enter 发送消息
+- Shift+Enter 换行
+- 支持拖拽文件到输入区上传
+- 支持 Ctrl+V 粘贴图片上传
 
-**Technology Decisions Already Made:**
+#### 2.3 状态管理架构
 
-**Language & Runtime:**
-- Vue 3 (Composition API with `<script setup>`)
-- TypeScript 5.3.3 (可选类型检查)
-- Node.js environment via Vite
+**消息状态机：**
 
-**Styling Solution:**
-- Tailwind CSS 3.4.0 (全程使用)
-- 自定义设计令牌系统 (`--dt-*` 变量)
-- SCSS 用于复杂样式
-- Element Plus UI 组件库
+```
+┌─────────┐    发送    ┌─────────┐    成功    ┌─────────┐
+│  编辑中  │ ────────> │  发送中  │ ────────> │  已发送  │
+└─────────┘           └─────────┘           └─────────┘
+                           │                     │
+                           │ 失败                │ 对方已读
+                           ↓                     ↓
+                      ┌─────────┐           ┌─────────┐
+                      │  失败   │           │  已读   │
+                      └─────────┘           └─────────┘
+                           │
+                           │ 重试
+                           ↓
+                      返回发送中
+```
 
-**Build Tooling:**
-- Vite 5.0.7 (极速开发体验)
-- terser for production minification
-- Vite PWA plugin for offline support
+**Store 模块设计：**
 
-**Testing Framework:**
-- Vitest 4.0.18 (单元测试)
-- Vue Test Utils 2.4.6
-- JSOM for DOM testing
+```javascript
+// store/modules/im-session.js
+state: {
+  sessions: [],           // 会话列表
+  activeSessionId: null,  // 当前激活会话
+  filters: {
+    type: 'all',          // 筛选类型
+    keyword: ''           // 搜索关键词
+  }
+}
 
-**Code Organization:**
-- Vue SFC pattern (`.vue` files)
-- BEM-style naming in SCSS
-- Component-based structure
-- Composables pattern for logic reuse
-
-**Development Experience:**
-- Hot module replacement (HMR)
-- Type checking with vue-tsc
-- ESLint + Prettier + Stylelint
-- Auto-import with unplugin
-
-### Selected Starter: **Self-Hosted Vue 3 + Vite**
-
-**Rationale for Selection:**
-
-您现有的项目已经是一个**生产就绪的、企业级的 Vue 3 starter**：
-
-1. **现代技术栈** - Vue 3 + Vite + TypeScript + Tailwind
-2. **完整工具链** - 测试、构建、类型检查全部配置
-3. **设计系统** - 已实现钉钉风格的设计令牌
-4. **企业级特性** - 工作流配置、代码规范齐全
-5. **无需迁移** - 直接基于现有代码继续开发
-
-**Note:** Project initialization using this command should be the first implementation story.
-
-**Architectural Decisions Provided by Starter:**
-
-**Language & Runtime:**
-- Vue 3 Composition API with `<script setup>` syntactic sugar
-- TypeScript 5.3.3 for type safety
-- Vite development server with native ES modules
-
-**Styling Solution:**
-- Tailwind CSS as primary styling framework
-- Design Tokens system (`--dt-*` variables)
-- SCSS for complex component styles
-- CSS Modules for local scoping
-
-**Build Tooling:**
-- Vite for lightning-fast development and optimized builds
-- Terser for production minification
-- Autoprefixer for browser compatibility
-
-**Testing Framework:**
-- Vitest for unit and component testing
-- Vue Test Utils for component rendering
-- jsdom for DOM simulation
-
-**Code Organization:**
-- Single File Components (.vue)
-- BEM-style SCSS naming
-- Composables pattern for logic
-- Store pattern for state management
-
-**Development Experience:**
-- HMR for instant feedback
-- Type checking in dev server
-- ESLint + Prettier + Stylelint integration
-- Auto-import for Vue and Element Plus APIs
-
----
-
-## Architecture Design Goals
-
-### Current State Analysis
-
-**已实现功能:**
-- ✅ 消息气泡组件 (MessageBubble)
-- ✅ 悬停操作栏 (MessageHoverActions)
-- ✅ 消息列表 (MessageList)
-- ✅ 消息输入框 (MessageInput)
-- ✅ 会话侧边栏 (ChatSidebar)
-- ✅ 会话导航栏 (ImSideNav)
-
-**当前UI风格:**
-- ✅ 基本实现钉钉8.0风格（8px圆角、12px内边距、蓝色品牌色）
-- ✅ 已有合并消息显示逻辑
-- ✅ 已有时间分隔符
-- ✅ 已有悬停操作栏
-
-**需要优化的问题:**
-1. ❌ **联系人列表展示内容不够全** - 可能缺少搜索、最近聊天、群组入口
-2. ❌ **点击联系人后不是最新消息** - 会话切换时消息滚动问题
-
----
-
-## Next Steps
-
-本架构文档将继续通过以下步骤完善:
-- Step 4: Architecture Decisions (技术决策) - 进行中
-- Step 5: Architecture Patterns (架构模式)
-- Step 6: Component Structure (组件结构)
-- Step 7: Validation (验证)
+// store/modules/im-message.js
+state: {
+  messages: {},           // 消息字典 { sessionId: [messages] }
+  sendingQueue: [],       // 发送中队列
+  failedQueue: []         // 失败队列（待重试）
+}
+```
 
 ---
 
@@ -277,96 +319,418 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 
 ### Decision Priority Analysis
 
-**Critical Decisions (Block Implementation):**
-- 消息滚动问题修复 - 严重影响用户体验
-- 样式系统统一 - 高优先级技术债务
-- 联系人列表功能补充 - 影响核心功能完整性
+**Critical Decisions (已确定):**
+- 后端框架：Spring Boot 2.7.18 + JDK 1.8
+- 前端框架：Vue 3.3.11 + Composition API
+- 数据库：MySQL 8.0.33
+- 缓存：Redis 6+
+- ORM：MyBatis Plus 3.5.2
+- UI组件库：Element Plus 2.4.4
+- 状态管理：Vuex 4.1.0
+- 构建工具：Vite 5.0.7
 
-**Important Decisions (Shape Architecture):**
-- Vue 3 Composition API + `<script setup>` - 现代化开发
-- Tailwind CSS + Design Tokens - 统一样式系统
-- Vuex for state management - 状态持久化
+**Important Decisions (基于现有代码):**
+- 认证方案：JWT (jjwt 0.11.5)
+- 实时通讯：WebSocket (Spring WebSocket)
+- 连接池：Druid 1.2.23
+- 敏感词过滤：sensitive-word 0.25.0
+- API文档：SpringDoc OpenAPI 1.7.0
 
-**Deferred Decisions (Post-MVP):**
-- PWA 离线支持 - MVP 后扩展
-- SSR/SSG - 当前不需要 (内网应用)
-- 微前端架构 - 多应用时考虑
+---
 
 ### Data Architecture
 
-**已决策 (来自 Starter):**
-- **Database**: MySQL 5.7 (已配置)
-- **ORM**: MyBatis Plus (已使用)
-- **Caching**: Redis 3.0+ (已配置)
+**数据库设计规范：**
 
-**需要决策:**
-- 数据库连接池: HikariCP (Spring Boot 默认)
-- 分库分表: MVP 阶段不需要，后续考虑
-- 数据迁移:Flyway/Liquibase
+| 表名 | 用途 | 关键字段 |
+|------|------|----------|
+| `im_conversation` | 会话表 | id, type, target_id, name, avatar |
+| `im_message` | 消息表 | id, conversation_id, sender_id, message_type, content |
+| `im_user` | 用户表 | id, username, password, avatar, status |
+| `im_user_session` | 用户会话状态 | user_id, online_status, last_active_time |
+| `im_group` | 群组表 | id, name, avatar, owner_id |
+| `im_group_member` | 群成员表 | group_id, user_id, role |
+| `im_friend` | 好友关系表 | user_id, friend_id, status |
+
+**消息类型枚举：**
+
+```java
+public enum MessageType {
+    TEXT,       // 文本消息
+    IMAGE,      // 图片消息
+    FILE,       // 文件消息
+    VOICE,      // 语音消息
+    VIDEO,      // 视频消息
+    SYSTEM,     // 系统消息
+    LINK        // 链接卡片
+}
+```
+
+**消息状态枚举：**
+
+```java
+public enum MessageStatus {
+    PENDING(0),     // 发送中
+    DELIVERED(1),   // 已送达
+    READ(2),        // 已读
+    FAILED(3),      // 发送失败
+    REVOKED(5)      // 已撤回
+}
+```
+
+**缓存策略：**
+
+| 缓存类型 | Redis Key | 过期时间 | 说明 |
+|----------|-----------|----------|------|
+| 在线用户 | `im:online:{userId}` | 5分钟 | 用户在线状态 |
+| 会话信息 | `im:conversation:{id}` | 30分钟 | 会话详情缓存 |
+| 用户信息 | `im:user:{id}` | 1小时 | 用户基本信息 |
+| 未读消息 | `im:unread:{userId}` | 永久 | 未读消息计数 |
+
+---
 
 ### Authentication & Security
 
-**已决策 (来自项目约束):**
-- **Authentication**: 内网部署，已有用户体系 (ImUser)
-- **Authorization**: 基于角色的访问控制 (RBAC)
-- **Encryption**: WSS (WebSocket Secure) for real-time communication
-- **Data at Rest**: 数据库加密存储
+**认证流程：**
 
-**需要补充:**
-- JWT Token 过期时间: 2小时 (标准)
-- Token 刷新机制: 自动刷新
-- 敏感数据加密: AES-256
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   登录请求   │ ──> │  验证用户   │ ──> │  生成JWT    │
+└─────────────┘     └─────────────┘     └─────────────┘
+                                              │
+                                              ↓
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   访问资源   │ <── │  携带Token  │ <── │  返回Token  │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │
+       ↓
+┌─────────────┐     ┌─────────────┐
+│  JWT验证    │ ──> │  权限检查   │
+└─────────────┘     └─────────────┘
+```
+
+**JWT配置：**
+
+```yaml
+# application.yml
+jwt:
+  secret: ${JWT_SECRET:your-secret-key}
+  expiration: 86400000  # 24小时
+  header: Authorization
+  prefix: "Bearer "
+```
+
+**权限角色：**
+
+| 角色 | 权限范围 |
+|------|----------|
+| `ROLE_USER` | 普通用户，访问IM功能 |
+| `ROLE_ADMIN` | 管理员，访问管理接口 |
+| `ROLE_SUPER_ADMIN` | 超级管理员，全部权限 |
+
+**安全配置要点：**
+
+1. **密码加密**：BCryptPasswordEncoder
+2. **CSRF保护**：禁用（前后端分离）
+3. **CORS配置**：允许指定域名跨域
+4. **接口权限**：
+   - `/api/auth/**` - 公开访问
+   - `/api/im/**` - 需要认证
+   - `/api/admin/**` - 需要管理员权限
+
+---
 
 ### API & Communication Patterns
 
-**已决策 (来自 Starter):**
-- **API Style**: RESTful API (Spring Boot)
-- **Real-time**: WebSocket (WSS)
-- **API Documentation**: Spring Boot + Swagger (可选)
+**REST API 设计规范：**
 
-**需要决策:**
-- API 版本控制: `/api/v1/`
-- 统一响应格式: Result<T>
-- 错误处理: ErrorCode 枚举
+```
+基础路径: /api/im
+
+会话接口:
+GET    /conversation/list           # 获取会话列表
+GET    /conversation/{id}           # 获取会话详情
+PUT    /conversation/{id}/pin       # 置顶会话
+PUT    /conversation/{id}/mute      # 免打扰
+DELETE /conversation/{id}           # 删除会话
+
+消息接口:
+GET    /message/list/{conversationId}  # 获取消息列表
+POST   /message/send                 # 发送消息
+PUT    /message/{id}/recall          # 撤回消息
+PUT    /message/{id}/edit            # 编辑消息
+DELETE /message/{id}                 # 删除消息
+
+用户接口:
+GET    /user/info                   # 获取当前用户信息
+PUT    /user/info                   # 更新用户信息
+GET    /user/online/{userId}        # 获取用户在线状态
+```
+
+**统一响应格式：**
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": { },
+  "timestamp": 1709529600000
+}
+```
+
+**WebSocket 消息协议：**
+
+```json
+// 客户端 -> 服务端
+{
+  "type": "message",
+  "data": {
+    "conversationId": 123,
+    "type": "TEXT",
+    "content": "你好",
+    "clientMsgId": "uuid-xxx"
+  }
+}
+
+// 服务端 -> 客户端 (ACK)
+{
+  "type": "message_ack",
+  "clientMsgId": "uuid-xxx",
+  "messageId": 456,
+  "timestamp": 1709529600000
+}
+
+// 心跳
+{
+  "type": "ping"
+}
+// 响应
+{
+  "type": "pong"
+}
+```
+
+**WebSocket 消息类型：**
+
+| 类型 | 方向 | 说明 |
+|------|------|------|
+| `auth` | C→S | 认证消息 |
+| `message` | C→S | 发送消息 |
+| `message_ack` | S→C | 消息确认 |
+| `message_error` | S→C | 消息错误 |
+| `typing` | 双向 | 输入状态 |
+| `read` | C→S | 已读回执 |
+| `call` | 双向 | 通话信令 |
+| `ping/pong` | 双向 | 心跳 |
+
+---
 
 ### Frontend Architecture
 
-**已决策 (来自 Starter):**
-- **State Management**: Vuex (已配置)
-- **Component Pattern**: SFC + `<script setup>`
-- **Routing**: Vue Router 4.x
-- **Styling**: Tailwind CSS + Design Tokens
-- **Composables**: VueUse + 自定义 composable
+**状态管理架构：**
 
-**需要补充:**
-- 组件库组织: 기능 기반 (chat/, contacts/, common/)
-- 状态管理模块化: im/session, im/message, im/user
-- 路由懒加载: 所有路由使用 import()
+```javascript
+// Vuex Store 模块划分
+store/
+├── index.js              # Store 入口
+└── modules/
+    ├── user.js           # 用户状态（登录信息、个人资料）
+    ├── im-session.js     # 会话状态（会话列表、当前会话、筛选）
+    ├── im-message.js     # 消息状态（消息列表、发送状态）
+    ├── im-contact.js     # 通讯录状态（联系人、群组）
+    └── im.js             # IM全局状态（WebSocket连接）
+```
+
+**核心 Store 状态：**
+
+```javascript
+// im-session.js
+state: {
+  sessions: [],           // 会话列表
+  currentSession: null,   // 当前选中会话
+  totalUnreadCount: 0,    // 未读总数
+  currentFilter: 'all'    // 当前筛选类型
+}
+
+// im-message.js
+state: {
+  messages: {},           // 消息字典 { sessionId: [messages] }
+  sendingQueue: [],       // 发送中队列
+  failedQueue: []         // 失败队列
+}
+```
+
+**组件通信模式：**
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    MainPage.vue                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │
+│  │ ImSideNav    │  │ SessionPanel │  │ ChatPanel │ │
+│  │              │  │              │  │           │ │
+│  │  菜单切换    │  │  会话选择    │  │  消息收发 │ │
+│  │    ↓         │  │    ↓         │  │    ↓      │ │
+│  └──────────────┘  └──────────────┘  └───────────┘ │
+│         │                 │                │       │
+│         └─────────────────┼────────────────┘       │
+│                           ↓                        │
+│                    Vuex Store                       │
+│              (im-session, im-message)              │
+└─────────────────────────────────────────────────────┘
+```
+
+**API 请求封装：**
+
+```javascript
+// api/request.js
+// Axios 实例配置
+const service = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  timeout: 15000
+})
+
+// 请求拦截器：自动添加 Token 和 userId
+service.interceptors.request.use(config => {
+  const token = localStorage.getItem('im_token')
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`
+  }
+  return config
+})
+
+// 响应拦截器：统一错误处理
+service.interceptors.response.use(
+  response => response.data,
+  error => {
+    // 401: 跳转登录
+    // 其他错误: 显示提示
+  }
+)
+```
+
+---
 
 ### Infrastructure & Deployment
 
-**已决策 (来自约束):**
-- **Deployment**: 内网私有化部署
-- **Hosting**: 客户端自有服务器
-- **SSL**: WSS for WebSocket
+**部署架构：**
 
-**需要补充:**
-- 构建输出: `dist/` 目录
-- 静态资源 CDN: 可选
-- 环境配置: `.env` 文件
+```
+┌─────────────────────────────────────────────────────┐
+│                    生产环境                          │
+│                    CentOS 7                          │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  ┌─────────────┐     ┌─────────────┐               │
+│  │   Nginx     │────>│ Spring Boot │               │
+│  │  (反向代理)  │     │   (8080)    │               │
+│  └─────────────┘     └─────────────┘               │
+│        │                    │                       │
+│        │              ┌─────┴─────┐                 │
+│        │              │           │                 │
+│        │         ┌────┴────┐ ┌────┴────┐           │
+│        │         │  MySQL  │ │  Redis  │           │
+│        │         │  (3306) │ │ (6379)  │           │
+│        │         └─────────┘ └─────────┘           │
+│        │                                           │
+│        └──────> 静态资源 (Vue构建产物)              │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+**环境配置：**
+
+```yaml
+# application-prod.yml
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/im?useSSL=false
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+
+# 安全配置
+app:
+  security:
+    enabled: true
+```
+
+**CI/CD 建议：**
+
+```yaml
+# .gitlab-ci.yml 或 GitHub Actions
+stages:
+  - build
+  - test
+  - deploy
+
+build-frontend:
+  stage: build
+  script:
+    - cd ruoyi-im-web
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - ruoyi-im-web/dist/
+
+build-backend:
+  stage: build
+  script:
+    - cd ruoyi-im-api
+    - mvn clean package -DskipTests
+  artifacts:
+    paths:
+      - ruoyi-im-api/target/*.jar
+
+deploy:
+  stage: deploy
+  script:
+    - scp ruoyi-im-api/target/ruoyi-im-api.jar user@server:/app/
+    - scp -r ruoyi-im-web/dist/* user@server:/var/www/html/
+    - ssh user@server "systemctl restart im-api"
+```
+
+---
 
 ### Decision Impact Analysis
 
-**Implementation Sequence:**
-1. 样式系统统一 (设计令牌迁移) - P0
-2. 消息滚动问题修复 - P0
-3. 联系人列表功能补充 - P1
-4. 根据需要添加 PWA 等高级特性
+**实现顺序：**
 
-**Cross-Component Dependencies:**
-- 样式系统统一影响所有组件
-- 消息滚动修复影响 ChatPanel 和 MessageList
-- 联系人列表影响 ContactsPanel
+1. **数据层** - 数据库表结构、Mapper、Entity
+2. **服务层** - Service 接口与实现
+3. **控制层** - Controller、API 接口
+4. **前端状态** - Vuex Store 模块
+5. **前端组件** - Vue 组件实现
+6. **实时通讯** - WebSocket 集成
+7. **测试验证** - 单元测试、集成测试
+
+**跨组件依赖：**
+
+```
+数据库表结构
+    ↓
+Entity/Domain
+    ↓
+Mapper (MyBatis Plus)
+    ↓
+Service
+    ↓
+Controller (REST API)
+    ↓
+前端 API 封装
+    ↓
+Vuex Store
+    ↓
+Vue 组件
+```
 
 ---
 
@@ -374,500 +738,565 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 
 ### Pattern Categories Defined
 
-**Critical Conflict Points Identified:** 8+ areas where AI agents could make different choices
+**Critical Conflict Points Identified:** 6个主要冲突区域
+
+---
 
 ### Naming Patterns
 
-**Database Naming Conventions:**
-- Table naming: `im_{name}` (小写，下划线分隔) - 例如: `im_user`, `im_message`, `im_conversation`
-- Column naming: `snake_case` - 例如: `user_id`, `message_id`, `created_time`
-- Foreign key: `fk_{table}_{field}` - 例如: `fk_message_sender_id`
-- Index naming: `idx_{table}_{field}` - 例如: `idx_message_conversation_id`
+#### Database Naming Conventions
 
-**API Naming Conventions:**
-- REST endpoint: `/api/v1/{resource` - 复数形式 - 例如: `/api/v1/messages`, `/api/v1/conversations`
-- Route parameter: `:id` - 例如: `/api/v1/messages/:id`
-- Query parameter: `snake_case` - 例如: `page_size`, `sort_field`
+| 类型 | 规则 | 示例 |
+|------|------|------|
+| 表名 | `im_` 前缀 + snake_case | `im_conversation`, `im_message`, `im_user` |
+| 列名 | snake_case | `user_id`, `conversation_id`, `message_type` |
+| 主键 | `id` (自增) | `id BIGINT AUTO_INCREMENT` |
+| 外键 | `{table}_id` | `conversation_id`, `sender_id` |
+| 索引 | `idx_{table}_{columns}` | `idx_message_conversation_time` |
+| 布尔字段 | `is_{action}` | `is_deleted`, `is_revoked`, `is_pinned` |
 
-**Code Naming Conventions:**
-- Component naming: `PascalCase.vue` - 例如: `MessageBubble.vue`, `ChatPanel.vue`
-- File naming: `PascalCase.js/ts` - 例如: `useChatSend.js`, `chatApi.js`
-- Function naming: `camelCase` - 例如: `sendMessage`, `getMessageList`
-- Variable naming: `camelCase` - 例如: `userId`, `sessionId`
+#### API Naming Conventions
+
+| 类型 | 规则 | 示例 |
+|------|------|------|
+| REST路径 | 复数名词 | `/api/im/conversations`, `/api/im/messages` |
+| 路径参数 | camelCase | `/{conversationId}`, `/{messageId}` |
+| 查询参数 | camelCase | `?lastId=xxx&limit=20` |
+| HTTP方法 | 标准REST | GET查询, POST创建, PUT更新, DELETE删除 |
+
+**API路径规范：**
+
+```
+# 正确示例
+GET    /api/im/conversations           # 获取会话列表
+GET    /api/im/conversations/{id}      # 获取单个会话
+POST   /api/im/messages                # 发送消息
+PUT    /api/im/messages/{id}/recall    # 撤回消息
+
+# 错误示例
+GET    /api/im/getConversationList     # ❌ 不使用动词前缀
+GET    /api/im/conversation            # ❌ 使用复数
+POST   /api/im/message/send            # ❌ 资源路径不含动词
+```
+
+#### Code Naming Conventions
+
+| 类型 | 规则 | 示例 |
+|------|------|------|
+| Java类 | PascalCase | `ImConversationService`, `ImMessageController` |
+| Java方法 | camelCase | `getConversationById()`, `sendMessage()` |
+| Java常量 | UPPER_SNAKE | `MAX_RETRY_COUNT`, `DEFAULT_PAGE_SIZE` |
+| Vue组件 | PascalCase | `ChatPanel.vue`, `MessageBubble.vue` |
+| Vue文件 | PascalCase | `ChatHeader.vue`, `SessionItem.vue` |
+| Vuex模块 | kebab-case | `im-session.js`, `im-message.js` |
+| CSS类 | kebab-case | `.chat-panel`, `.message-bubble` |
+| 变量 | camelCase | `conversationId`, `messageList` |
+
+---
 
 ### Structure Patterns
 
-**Project Organization:**
-- Frontend: 기능 기반 - `src/views/{feature}/`, `src/components/{feature}/`
-- Backend: 계층 기반 - `com/ruoyi/im/{controller,service,mapper,domain}/`
-- Tests: `src/__tests__/{feature}/` for E2E, `src/{component}.test.vue` for unit
+#### Project Organization
 
-**File Structure Patterns:**
-- Config: `src/config/{name}.js`, `ruoyi-im-api/src/main/resources/{name}.yml`
-- Static assets: `public/{images,fonts,files}/`
-- Documentation: `docs/{topic}.md` (不在 src 中)
+**后端项目结构：**
+
+```
+ruoyi-im-api/
+├── src/main/java/com/ruoyi/im/
+│   ├── controller/           # REST控制器
+│   │   └── admin/            # 管理端控制器
+│   ├── service/              # 业务服务接口
+│   │   └── impl/             # 服务实现
+│   ├── mapper/               # MyBatis Mapper接口
+│   ├── domain/               # 实体类（数据库映射）
+│   ├── vo/                   # 视图对象（响应）
+│   ├── dto/                  # 数据传输对象（请求）
+│   ├── config/               # 配置类
+│   ├── security/             # 安全相关
+│   ├── websocket/            # WebSocket端点
+│   ├── util/                 # 工具类
+│   ├── constant/             # 常量定义
+│   └── aspect/               # AOP切面
+│
+├── src/main/resources/
+│   ├── mapper/               # MyBatis XML映射文件
+│   ├── application.yml       # 主配置
+│   └── application-prod.yml  # 生产配置
+│
+└── src/test/                 # 测试代码
+```
+
+**前端项目结构：**
+
+```
+ruoyi-im-web/
+├── src/
+│   ├── views/                # 页面组件
+│   ├── components/           # 可复用组件
+│   │   ├── Chat/             # 聊天相关组件
+│   │   ├── Contacts/         # 通讯录组件
+│   │   └── Common/           # 通用组件
+│   ├── store/                # Vuex状态管理
+│   │   └── modules/          # 状态模块
+│   ├── api/                  # API请求封装
+│   │   └── im/               # IM相关API
+│   ├── router/               # 路由配置
+│   ├── utils/                # 工具函数
+│   ├── styles/               # 全局样式
+│   └── assets/               # 静态资源
+│
+└── public/                   # 公共资源
+```
+
+#### File Naming Rules
+
+| 文件类型 | 命名规则 | 示例 |
+|----------|----------|------|
+| Vue组件 | PascalCase | `ChatPanel.vue` |
+| Vuex模块 | kebab-case | `im-session.js` |
+| API模块 | camelCase | `conversation.js` |
+| 工具函数 | camelCase | `message.js` |
+| 样式文件 | kebab-case | `chat-panel.scss` |
+| 测试文件 | 同名+.test | `ChatPanel.test.js` |
+
+---
 
 ### Format Patterns
 
-**API Response Formats:**
+#### API Response Format
+
+**统一响应结构：**
+
 ```json
-// 成功响应
 {
   "code": 200,
   "msg": "操作成功",
-  "data": { ... }
-}
-
-// 错误响应
-{
-  "code": 400,
-  "msg": "错误描述",
-  "data": null
+  "data": { },
+  "timestamp": 1709529600000
 }
 ```
 
-**Data Exchange Formats:**
-- JSON field: `camelCase` for frontend, `snake_case` for backend
-- Boolean: `true/false`
-- Null: 允许 null
-- Array: 单项也使用数组
+**状态码定义：**
+
+| code | 含义 | 使用场景 |
+|------|------|----------|
+| 200 | 成功 | 请求成功 |
+| 400 | 参数错误 | 请求参数验证失败 |
+| 401 | 未授权 | Token无效或过期 |
+| 403 | 禁止访问 | 无权限 |
+| 404 | 未找到 | 资源不存在 |
+| 500 | 服务器错误 | 内部异常 |
+
+**错误响应格式：**
+
+```json
+{
+  "code": 400,
+  "msg": "参数验证失败",
+  "data": {
+    "errors": [
+      { "field": "content", "message": "消息内容不能为空" }
+    ]
+  },
+  "timestamp": 1709529600000
+}
+```
+
+#### Data Exchange Formats
+
+**日期时间格式：**
+
+| 场景 | 格式 | 示例 |
+|------|------|------|
+| 后端存储 | LocalDateTime | `2026-03-04T14:30:00` |
+| API传输 | 字符串 | `"2026-03-04 14:30:00"` |
+| 前端显示 | 格式化 | `今天 14:30` |
+| 时间戳 | 毫秒 | `1709529600000` |
+
+**JSON字段命名：**
+
+| 场景 | 规则 | 示例 |
+|------|------|------|
+| API请求/响应 | camelCase | `conversationId`, `messageType` |
+| 数据库映射 | snake_case | `conversation_id`, `message_type` |
+| WebSocket消息 | camelCase | `clientMsgId`, `sendTime` |
+
+**布尔值表示：**
+
+| 场景 | 表示方式 | 示例 |
+|------|----------|------|
+| 数据库 | TINYINT(0/1) | `is_deleted = 1` |
+| Java | Boolean | `Boolean isDeleted` |
+| JSON | boolean | `"isDeleted": true` |
+
+---
 
 ### Communication Patterns
 
-**Event System Patterns:**
-- Event naming: `camelCase` - 例如: `messageSent`, `userOnline`, `sessionSwitched`
-- Event payload: 包含必要上下文信息
-- WebSocket events: `{type: 'EVENT_NAME', data: {...}}`
+#### WebSocket Message Format
 
-**State Management Patterns:**
-- State update: 直接 mutation (Vuex)
-- Action naming: `verb/noun` - 例如: `im/message/loadMessages`
-- State organization: 按模块划分 - `im/session`, `im/message`, `im/user`
+**消息结构：**
+
+```json
+{
+  "type": "message",
+  "data": {
+    "conversationId": 123,
+    "type": "TEXT",
+    "content": "你好",
+    "clientMsgId": "uuid-xxx"
+  }
+}
+```
+
+**消息类型定义：**
+
+| type | 方向 | 用途 |
+|------|------|------|
+| `auth` | C→S | 认证 |
+| `message` | C→S | 发送消息 |
+| `message_ack` | S→C | 消息确认 |
+| `message_error` | S→C | 消息错误 |
+| `typing` | 双向 | 输入状态 |
+| `read` | C→S | 已读回执 |
+| `call` | 双向 | 通话信令 |
+| `ping/pong` | 双向 | 心跳 |
+
+#### State Management Patterns
+
+**Vuex State更新规则：**
+
+```javascript
+// ✅ 正确：使用 mutations 更新状态
+commit('UPDATE_SESSION', { id: sessionId, unreadCount: 0 })
+
+// ❌ 错误：直接修改状态
+state.sessions[0].unreadCount = 0
+```
+
+**Action命名规范：**
+
+```javascript
+// ✅ 正确：动词开头，描述清晰
+async loadSessions({ commit }) { }
+async selectSession({ commit }, session) { }
+async markSessionAsRead({ commit }, sessionId) { }
+
+// ❌ 错误：命名不清晰
+async get({ commit }) { }
+async doSomething({ commit }) { }
+```
+
+**Getter命名规范：**
+
+```javascript
+// ✅ 正确：名词或形容词
+getters: {
+  sortedSessions(state) { },
+  currentSessionUnread(state) { },
+  sessionById: (state) => (id) => { }
+}
+```
+
+---
 
 ### Process Patterns
 
-**Error Handling Patterns:**
-- Global: 捕获并显示用户友好的错误信息
-- User-facing: 简洁的错误描述，避免技术细节
-- Logging: 控制台错误 + 后端日志
-- Retry: 智能重试机制 (指数退避)
+#### Error Handling Patterns
 
-**Loading State Patterns:**
-- Loading naming: `{feature}Loading` - 例如: `sending`, `loadingMessages`
-- Global vs local: 局部加载状态优先
-- Loading UI: Skeleton screen for list, spinner for button
+**后端异常处理：**
+
+```java
+// 统一异常处理
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(BusinessException.class)
+    public Result<?> handleBusinessException(BusinessException e) {
+        return Result.error(e.getCode(), e.getMessage());
+    }
+    
+    @ExceptionHandler(Exception.class)
+    public Result<?> handleException(Exception e) {
+        log.error("系统异常", e);
+        return Result.error(500, "系统繁忙，请稍后重试");
+    }
+}
+```
+
+**前端错误处理：**
+
+```javascript
+// API请求错误处理
+service.interceptors.response.use(
+  response => response.data,
+  error => {
+    const { status, data } = error.response || {}
+    
+    switch (status) {
+      case 401:
+        // 清除token，跳转登录
+        localStorage.removeItem('im_token')
+        window.location.href = '/login'
+        break
+      case 500:
+        ElMessage.error('服务器错误')
+        break
+      default:
+        ElMessage.error(data?.msg || '请求失败')
+    }
+    
+    return Promise.reject(error)
+  }
+)
+```
+
+#### Loading State Patterns
+
+**加载状态管理：**
+
+```javascript
+// Vuex State
+state: {
+  loading: false,
+  sessions: []
+}
+
+// Actions
+async loadSessions({ commit }) {
+  commit('SET_LOADING', true)
+  try {
+    const res = await getConversations()
+    commit('SET_SESSIONS', res.data)
+  } finally {
+    commit('SET_LOADING', false)
+  }
+}
+```
+
+**组件中使用：**
+
+```vue
+<template>
+  <div v-loading="loading">
+    <!-- 内容 -->
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+
+const store = useStore()
+const loading = computed(() => store.state.imSession.loading)
+</script>
+```
+
+---
 
 ### Enforcement Guidelines
 
 **All AI Agents MUST:**
-- 遵循数据库 `im_{name}` 前缀命名
-- 遵循 API `/api/v1/{resource` 路径格式
-- 遵循组件 PascalCase.vue 命名
-- 使用统一的 Result 响应格式
-- 遵循 camelCase JavaScript 命名
 
-**Pattern Enforcement:**
-- 代码审查 (Code Review)
-- Stylelint + ESLint 配置
-- PR 模板检查
+1. **遵循命名规范** - 数据库用snake_case，代码用camelCase/PascalCase
+2. **使用统一响应格式** - 所有API返回 `{code, msg, data}` 结构
+3. **通过Vuex管理状态** - 禁止直接修改state，必须通过mutations
+4. **处理错误和加载状态** - 每个异步操作都要处理loading和error
+5. **添加适当的日志** - 关键操作记录日志，便于调试
+6. **编写可读代码** - 优先可读性，避免复杂表达式链
+
+**Java代码强制规则：**
+
+```java
+// ✅ 正确
+if (user != null && user.isActive()) {
+    return user.getName();
+}
+
+// ❌ 错误：复杂表达式链
+return Optional.ofNullable(user).filter(User::isActive).map(User::getName).orElse(null);
+```
+
+**Vue代码强制规则：**
+
+```vue
+<!-- ✅ 正确：使用v-if/v-else清晰表达 -->
+<div v-if="loading">加载中...</div>
+<div v-else-if="sessions.length === 0">暂无会话</div>
+<div v-else>
+  <SessionItem v-for="session in sessions" :key="session.id" />
+</div>
+
+<!-- ❌ 错误：复杂三元表达式 -->
+<div>{{ loading ? '加载中...' : sessions.length === 0 ? '暂无会话' : '' }}</div>
+```
+
+---
 
 ### Pattern Examples
 
-**Good Examples:**
-- API: `GET /api/v1/messages?conversationId=123`
-- Component: `src/components/Chat/MessageBubble.vue`
-- State: `store.commit('im/message/SET_MESSAGES', messages)`
-- Database: `INSERT INTO im_message (...) VALUES (...)`
+#### Good Examples
 
-**Anti-Patterns:**
-- ❌ API: `/api/message/:userId` (缺少版本，单数形式)
-- ❌ Component: `src/components/chat/message-bubble.vue` (小写)
-- ❌ State: `store.commit('SET_MESSAGES', messages)` (命名空间缺失)
-- ❌ Database: `imUser` (驼峰命名)
+**API接口定义：**
+
+```java
+@RestController
+@RequestMapping("/api/im/conversations")
+public class ImConversationController {
+    
+    @GetMapping
+    public Result<List<ImConversationVO>> list(
+            @RequestParam(defaultValue = "all") String filter) {
+        return Result.success(conversationService.listConversations(filter));
+    }
+    
+    @PutMapping("/{id}/pin")
+    public Result<Void> pin(@PathVariable Long id, @RequestParam Boolean pinned) {
+        conversationService.pinConversation(id, pinned);
+        return Result.success();
+    }
+}
+```
+
+**Vuex模块定义：**
+
+```javascript
+export default {
+  namespaced: true,
+  
+  state: () => ({
+    sessions: [],
+    currentSession: null,
+    loading: false
+  }),
+  
+  mutations: {
+    SET_SESSIONS(state, sessions) {
+      state.sessions = sessions
+    },
+    SET_LOADING(state, loading) {
+      state.loading = loading
+    }
+  },
+  
+  actions: {
+    async loadSessions({ commit }, filter = 'all') {
+      commit('SET_LOADING', true)
+      try {
+        const res = await getConversations(filter)
+        commit('SET_SESSIONS', res.data)
+      } finally {
+        commit('SET_LOADING', false)
+      }
+    }
+  }
+}
+```
+
+#### Anti-Patterns
+
+**避免的做法：**
+
+```java
+// ❌ 魔法值
+if (status == 1) { }
+
+// ✅ 使用常量或枚举
+if (status == MessageStatus.DELIVERED.getCode()) { }
+```
+
+```javascript
+// ❌ 直接修改state
+state.sessions.push(newSession)
+
+// ✅ 通过mutation
+commit('ADD_SESSION', newSession)
+```
+
+```java
+// ❌ 复杂表达式链
+users.stream().filter(u -> u.getStatus() == 1).map(User::getName).collect(Collectors.toList());
+
+// ✅ 清晰的代码
+List<String> activeUserNames = new ArrayList<>();
+for (User user : users) {
+    if (user.getStatus() == UserStatus.ACTIVE.getCode()) {
+        activeUserNames.add(user.getName());
+    }
+}
+```
 
 ---
 
-## Project Structure & Boundaries
+## Component Architecture
 
-### Complete Project Directory Structure
+### 前端组件结构
 
 ```
-im/
-├── ruoyi-im-api/                          # 后端 API 模块
-│   ├── src/main/java/com/ruoyi/im/
-│   │   ├── controller/                    # 控制器层
-│   │   │   ├── ImMessageController.java
-│   │   │   ├── ImConversationController.java
-│   │   │   ├── ImUserController.java
-│   │   │   └── ImGroupController.java
-│   │   ├── service/                       # 服务层
-│   │   │   ├── ImMessageService.java
-│   │   │   ├── ImConversationService.java
-│   │   │   └── impl/
-│   │   ├── mapper/                        # 数据访问层
-│   │   │   ├── ImMessageMapper.java
-│   │   │   └── ImConversationMapper.java
-│   │   ├── domain/                        # 领域模型
-│   │   │   ├── ImMessage.java
-│   │   │   ├── ImConversation.java
-│   │   │   └── ImUser.java
-│   │   └── constant/                      # 常量定义
-│   │       ├── ImErrorCode.java
-│   │       └── MessageType.java
-│   ├── src/main/resources/
-│   │   ├── mapper/                        # MyBatis Mapper XML
-│   │   │   └── ImMessageMapper.xml
-│   │   └── application.yml                # 应用配置
-│   └── pom.xml
+src/
+├── components/
+│   ├── ImSideNav/              # 左侧导航
+│   │   ├── index.vue
+│   │   ├── NavItem.vue
+│   │   ├── NavIcon/
+│   │   └── UserArea.vue
+│   │
+│   ├── Chat/                   # 聊天模块
+│   │   ├── SessionPanel.vue    # 会话列表
+│   │   ├── SessionItem.vue     # 会话卡片
+│   │   ├── GroupAvatar.vue     # 群组头像
+│   │   ├── ChatPanel.vue       # 聊天主区
+│   │   ├── ChatHeader.vue      # 聊天头部
+│   │   ├── MessageList.vue     # 消息流
+│   │   ├── MessageBubble.vue   # 消息气泡
+│   │   ├── MessageInput.vue    # 输入区
+│   │   └── CallDialog.vue      # 通话弹窗
+│   │
+│   └── common/                 # 通用组件
+│       ├── Avatar.vue
+│       └── Badge.vue
 │
-├── ruoyi-im-web/                          # 前端 Web 模块
-│   ├── src/
-│   │   ├── api/im/                        # API 服务层
-│   │   │   ├── message.js                 # 消息 API
-│   │   │   ├── conversation.js            # 会话 API
-│   │   │   └── user.js                    # 用户 API
-│   │   ├── components/                    # 组件
-│   │   │   ├── Chat/                      # 聊天组件
-│   │   │   │   ├── MessageBubble.vue
-│   │   │   │   ├── MessageList.vue
-│   │   │   │   ├── MessageInput.vue
-│   │   │   │   └── message-bubble/
-│   │   │   ├── Contacts/                  # 联系人组件
-│   │   │   │   ├── DeptTreeItem.vue
-│   │   │   │   └── MemberGrid.vue
-│   │   │   └── ImSideNav/                 # 侧边导航
-│   │   │       ├── index.vue
-│   │   │       └── ImSideNavNew/
-│   │   ├── views/                         # 页面视图
-│   │   │   ├── ChatPanel.vue              # 聊天主面板
-│   │   │   ├── SessionPanel.vue           # 会话列表面板
-│   │   │   ├── ContactsPanel.vue          # 联系人面板
-│   │   │   └── MainPage.vue               # 主页面
-│   │   ├── store/modules/                 # Vuex 模块
-│   │   │   ├── im-message.js
-│   │   │   ├── im-session.js
-│   │   │   └── im-user.js
-│   │   ├── composables/useChat/           # 组合式函数
-│   │   │   └── useChatSend.js
-│   │   ├── styles/                        # 样式文件
-│   │   │   ├── design-tokens.scss         # 设计令牌
-│   │   │   └── global.scss
-│   │   ├── router/index.js                # 路由配置
-│   │   ├── App.vue                        # 根组件
-│   │   └── main.js                        # 入口文件
-│   ├── public/                            # 静态资源
-│   │   ├── favicon.ico
-│   │   └── assets/
-│   ├── tests/                             # 测试
-│   │   ├── unit/                          # 单元测试
-│   │   └── e2e/                           # E2E 测试
-│   ├── vite.config.js                     # Vite 配置
-│   ├── tailwind.config.js                 # Tailwind 配置
-│   ├── package.json
-│   └── README.md
+├── store/modules/
+│   ├── im-session.js           # 会话状态
+│   ├── im-message.js           # 消息状态
+│   └── im-user.js              # 用户状态
 │
-├── docs/                                  # 项目文档
-│   ├── 需求文档.md
-│   ├── UI优化计划.md
-│   └── BMAD使用教程.md
+├── api/im/
+│   ├── conversation.js         # 会话API
+│   ├── message.js              # 消息API
+│   └── user.js                 # 用户API
 │
-├── _bmad/                                 # BMAD 配置
-│   └── bmm/
-│       └── workflows/
-│
-├── _bmad-output/                          # BMAD 输出
-│   └── planning-artifacts/
-│       ├── prd.md                         # 产品需求文档
-│       ├── architecture.md                # 架构设计文档
-│       └── implementation-readiness-report-*.md
-│
-├── README.md                              # 项目说明
-├── BMAD-METHOD                            # BMAD 方法库
-└── pom.xml                                # 父模块 POM
+└── utils/websocket/
+    └── imWebSocket.js          # WebSocket管理
 ```
 
-### Architectural Boundaries
+### 后端模块结构
 
-**API Boundaries:**
-- REST API: `/api/v1/*` (Spring Boot Controller)
-- WebSocket: `/ws/*` (WebSocket Handler)
-- Authentication: JWT Token in Header
-- Rate Limiting: per-user based
-
-**Component Boundaries:**
-- Chat Module: `components/Chat/` + `store/modules/im-message.js`
-- Session Module: `views/SessionPanel.vue` + `store/modules/im-session.js`
-- Contacts Module: `views/ContactsPanel.vue` + `components/Contacts/`
-- Communication:Evt Emitter + Vuex shared state
-
-**Service Boundaries:**
-- Message Service: `service/ImMessageService.java`
-- Conversation Service: `service/ImConversationService.java`
-- User Service: `service/ImUserService.java`
-
-**Data Boundaries:**
-- Database: MySQL with MyBatis Plus
-- Cache: Redis for session/token caching
-- File Storage: Local file system or OSS
-
-### Requirements to Structure Mapping
-
-**Feature/Epic Mapping:**
-
-| 功能 | 前端位置 | 后端位置 |
-|------|---------|---------|
-| 消息发送 | `components/Chat/MessageInput.vue` | `controller/ImMessageController.java` |
-| 消息列表 | `components/Chat/MessageList.vue` | `service/ImMessageService.java` |
-| 会话管理 | `views/SessionPanel.vue` | `service/ImConversationService.java` |
-| 联系人列表 | `views/ContactsPanel.vue` | `service/ImUserService.java` |
-| 群组管理 | `components/Chat/ChatSidebar.vue` | `controller/ImGroupController.java` |
-| 已读回执 | `components/Chat/MessageStatus.vue` | `service/ImMessageService.java` |
-
-**Cross-Cutting Concerns:**
-
-- Authentication: `composables/useAuth.js` + `api/im/user.js`
-- Error Handling: Global error interceptor + `constant/ImErrorCode.java`
-- Loading States: `useLoading()` composable + backend timeout config
-- Design Tokens: `styles/design-tokens.scss` (shared by all components)
-
-### Integration Points
-
-**Internal Communication:**
-- Frontend: Vuex + Composition API + Event Emitter
-- Backend: Spring events + Redis pub/sub for real-time
-
-**External Integrations:**
-- OAuth: Internal LDAP/AD integration
-- File Storage: Local or OSS (Alibaba Cloud)
-- Email: SMTP integration for notifications
-
-**Data Flow:**
 ```
-User Action → API Call → Service → Mapper → Database
-              ↓
-         WebSocket Push → Other Clients
+com.ruoyi.im/
+├── controller/
+│   ├── ImConversationController.java
+│   ├── ImMessageController.java
+│   └── ImUserController.java
+│
+├── service/
+│   ├── ImConversationService.java
+│   ├── ImMessageService.java
+│   └── ImWebSocketService.java
+│
+├── mapper/
+│   ├── ImConversationMapper.java
+│   ├── ImMessageMapper.java
+│   └── ImUserSessionMapper.java
+│
+├── domain/
+│   ├── ImConversation.java
+│   ├── ImMessage.java
+│   └── ImUserSession.java
+│
+└── vo/
+    ├── conversation/
+    │   └── ImConversationVO.java
+    └── message/
+        └── ImMessageVO.java
 ```
-
-### File Organization Patterns
-
-**Configuration Files:**
-- Frontend: `ruoyi-im-web/vite.config.js`, `tailwind.config.js`
-- Backend: `ruoyi-im-api/src/main/resources/application.yml`
-- Shared: None (separated by module)
-
-**Source Organization:**
-- Frontend: Feature-based - `components/{feature}/`, `views/`
-- Backend: Layer-based - `controller/`, `service/`, `mapper/`, `domain/`
-
-**Test Organization:**
-- Frontend: `tests/unit/` + `tests/e2e/`
-- Backend: `src/test/java/com/ruoyi/im/`
-
-**Asset Organization:**
-- Images: `public/assets/images/`
-- Fonts: `public/assets/fonts/`
-- Documents: `docs/`
-
-### Development Workflow Integration
-
-**Development Server Structure:**
-- Frontend: `npm run dev` → Vite dev server
-- Backend: `mvn spring-boot:run` → Spring Boot embedded server
-
-**Build Process Structure:**
-- Frontend: `npm run build` → `dist/` directory
-- Backend: `mvn package` → JAR file
-
-**Deployment Structure:**
-- Frontend: static files (nginx/Apache)
-- Backend: JAR file with embedded server
-- Database: MySQL (separate container or server)
-- Cache: Redis (separate container or server)
-
----
-
-## Architecture Validation Results
-
-### Coherence Validation ✅
-
-**Decision Compatibility:**
-- Vue 3 + Vite + Tailwind CSS + Element Plus - All compatible
-- MySQL + MyBatis Plus + Redis - Established stack compatibility
-- Spring Boot 2.7 + Vue 3 - Proven backend-frontend integration
-- All versions verified and compatible
-
-**Pattern Consistency:**
-- Naming conventions apply consistently across database, API, and code
-- Structure patterns align with technology stack
-- Communication patterns work with chosen architecture
-- Process patterns (error handling, loading) complement all layers
-
-**Structure Alignment:**
-- Project structure supports all architectural decisions
-- Boundaries properly defined (API, Component, Service, Data)
-- Structure enables chosen patterns (SFC, composable, Vuex)
-- Integration points properly structured (internal, external, data flow)
-
-### Requirements Coverage Validation ✅
-
-**Epic/Feature Coverage:**
-- All 5 FR features from PRD are mapped to specific components:
-  - FR-WT-01 (快捷入口): `views/MainPage.vue` + `components/Workbench/`
-  - FR-WT-02 (通知中心): `components/Chat/MessageItem.vue` + `store/modules/im-message.js`
-  - FR-WT-03 (待办事项): `views/TodoPanel.vue` + `components/Todo/`
-  - FR-WT-04 (搜索入口): `components/Chat/GlobalSearch.vue` + backend search API
-  - FR-WT-05 (日程概览): `views/CalendarPanel.vue` + `components/Workplace/`
-
-**Functional Requirements Coverage:**
-- All functional requirements have architectural support:
-  - Session management → `SessionPanel.vue` + `im-session` store
-  - Message sending/receiving → `MessageInput.vue` + `MessageList.vue`
-  - Contact management → `ContactsPanel.vue` + user service
-  - Group chat → `ChatSidebar.vue` + group API
-
-**Non-Functional Requirements Coverage:**
-- Performance: Virtual scroll (MessageList), lazy loading (ImageBubble), incremental sync
-- Security: WSS encryption, JWT auth, audit logging
-- Compatibility: Tailwind config covers all target browsers
-
-### Implementation Readiness Validation ✅
-
-**Decision Completeness:**
-- All critical decisions documented with versions
-- Implementation patterns comprehensive
-- Consistency rules clear and enforceable
-- Examples provided for all major patterns
-
-**Structure Completeness:**
-- Complete directory structure defined
-- All key files and directories specified
-- Integration points clearly specified
-- Component boundaries well-defined
-
-**Pattern Completeness:**
-- All potential conflict points addressed
-- Naming conventions comprehensive
-- Communication patterns fully specified
-- Process patterns complete (error handling, loading states)
-
-### Gap Analysis Results
-
-**Critical Gaps:** None identified
-
-**Important Gaps:**
-1. **具体实现细节** - 需要创建史诗和故事来细化实现
-2. **API 规范文档** - 需要补充 OpenAPI/Swagger 文档
-3. **测试策略** - 需要详细定义测试范围和覆盖率目标
-
-**Nice-to-Have Gaps:**
-1. PWA 离线支持 (MVP 后)
-2. SSR/SSG (当前不需要)
-3. 更详细的性能基准测试
-
-### Validation Issues Addressed
-
-No critical issues found. Architecture is coherent and ready for implementation.
-
-### Architecture Completeness Checklist
-
-**✅ Requirements Analysis**
-
-- [x] Project context thoroughly analyzed
-- [x] Scale and complexity assessed
-- [x] Technical constraints identified
-- [x] Cross-cutting concerns mapped
-
-**✅ Architectural Decisions**
-
-- [x] Critical decisions documented with versions
-- [x] Technology stack fully specified
-- [x] Integration patterns defined
-- [x] Performance considerations addressed
-
-**✅ Implementation Patterns**
-
-- [x] Naming conventions established
-- [x] Structure patterns defined
-- [x] Communication patterns specified
-- [x] Process patterns documented
-
-**✅ Project Structure**
-
-- [x] Complete directory structure defined
-- [x] Component boundaries established
-- [x] Integration points mapped
-- [x] Requirements to structure mapping complete
-
-### Architecture Readiness Assessment
-
-**Overall Status:** READY FOR IMPLEMENTATION
-
-**Confidence Level:** HIGH based on validation results
-
-**Key Strengths:**
-1. 现代技术栈 (Vue 3 + Vite + TypeScript + Tailwind)
-2. 完整的工具链 (测试、构建、类型检查)
-3. 明确的项目结构和边界
-4. 一致的命名和代码规范
-5. 已实现钉钉风格的设计令牌系统
-
-**Areas for Future Enhancement:**
-1. PWA 离线支持 (MVP 后扩展)
-2. SSR/SSG (当前不需要 - 内网应用)
-3. 更详细的 API 规范文档 (OpenAPI/Swagger)
-4. 微前端架构 (多应用时考虑)
-
-### Implementation Handoff
-
-**AI Agent Guidelines:**
-
-- Follow all architectural decisions exactly as documented
-- Use implementation patterns consistently across all components
-- Respect project structure and boundaries
-- Refer to this document for all architectural questions
-- Use Composition API with `<script setup>` for all Vue components
-- Follow naming conventions (PascalCase for components, camelCase for functions)
-- Use design tokens (`--dt-*`) for all styling
-- Follow error handling patterns (ErrorCode enum, Result wrapper)
-
-**First Implementation Priority:**
-
-根据项目现状，建议按以下优先级顺序实现：
-
-**P0 - Critical (当前必须):**
-1. **样式系统统一** - Design Tokens 迁移和统一
-2. **消息滚动问题修复** - 会话切换时滚动到底部
-3. **联系人列表功能补充** - 添加搜索、最近聊天、群组入口
-
-**P1 - Important (短期):**
-4. **快捷入口优化** - 工作台可配置入口
-5. **通知中心完善** - 未读消息聚合
-
-**P2 -Nice to have (长期):**
-6. **日程概览** - 日历集成
-7. **搜索入口优化** - 全局搜索增强
-8. **PWA 离线支持** - MVP 后扩展
-
-**架构文档使用指南:**
-- 开发前阅读: `Project Structure & Boundaries` 章节
-- 编码参考: `Implementation Patterns & Consistency Rules` 章节
-- 问题查询: `Architecture Validation Results` 章节
-- 验收标准: `Architecture Completeness Checklist`
-
----
-
-## Architecture Workflow Complete
-
-**Steps Completed:** [1, 2, 3, 4, 5, 6, 7]
-**Total Steps:** 7/7
-**Status:** ✅ COMPLETE
-
-**Next Steps for Implementation:**
-
-1. 运行 `/bmad-bmm-create-epics-and-stories` 创建史诗和故事
-2. 运行 `/bmad-bmm-quick-spec` 为第一轮迭代创建技术规格
-3. 开始 P0 优先级任务实现
-
-**文档版本:** 1.0
-**最后更新:** 2026-02-28
-**维护者:** Itxinfei

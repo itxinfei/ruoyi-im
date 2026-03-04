@@ -8,113 +8,73 @@
     </div>
 
     <div class="sidebar-content" v-loading="loading">
-      <!-- 群聊详情展示 -->
-      <template v-if="isGroup && detail">
-        <!-- 群组信息 -->
-        <div class="section group-info">
-          <el-avatar :size="64" :src="addTokenToUrl(detail.avatar)" shape="square" class="avatar">
-            {{ detail.name?.charAt(0) }}
-          </el-avatar>
-          <div class="info">
-            <div class="name">{{ detail.name }}</div>
-            <div class="id">群号: {{ detail.id }}</div>
-          </div>
-        </div>
-
-        <el-divider />
-
-        <!-- 成员列表 -->
-        <div class="section members-section">
-          <div class="section-title">
-            <span>群成员 ({{ detail.memberCount || members.length }})</span>
-            <el-button link @click="showAllMembers = true">查看全部</el-button>
-          </div>
-          <div class="members-grid">
-            <div 
-              v-for="m in members.slice(0, 7)" 
-              :key="m.id" 
-              class="member-item" 
-              @click="$emit('member-click', m)"
-            >
-              <DingtalkAvatar 
-                :name="m.name" 
-                :user-id="m.id" 
-                :src="addTokenToUrl(m.avatar)" 
-                :size="36" 
-                shape="square" 
-              />
-              <span class="m-name">{{ m.name }}</span>
+      <el-tabs v-model="activeTab" class="sidebar-tabs" stretch>
+        <!-- 成员标签页 -->
+        <el-tab-pane label="成员" name="members">
+          <template v-if="isGroup && detail">
+            <!-- 搜索成员 -->
+            <div class="search-box">
+              <el-input v-model="memberSearch" placeholder="搜索成员" :prefix-icon="Search" size="small" clearable />
             </div>
-            <div class="member-item add-btn" @click="handleAddMember">
-              <div class="add-icon"><el-icon><Plus /></el-icon></div>
-              <span class="m-name">添加</span>
+            <!-- 成员网格 -->
+            <div class="section members-section">
+              <div class="members-grid">
+                <div v-for="m in filteredMembers" :key="m.id" class="member-item" @click="$emit('member-click', m)">
+                  <DingtalkAvatar :name="m.name" :user-id="m.id" :src="addTokenToUrl(m.avatar)" :size="36" shape="square" />
+                  <span class="m-name">{{ m.name }}</span>
+                </div>
+                <div class="member-item add-btn" @click="handleAddMember">
+                  <div class="add-icon"><el-icon><Plus /></el-icon></div>
+                  <span class="m-name">添加</span>
+                </div>
+              </div>
+            </div>
+          </template>
+          
+          <!-- 单聊个人资料 -->
+          <template v-else-if="detail">
+            <div class="section user-info-card">
+              <DingtalkAvatar :name="detail.nickname || detail.username" :user-id="detail.id" :src="addTokenToUrl(detail.avatar)" :size="80" shape="square" />
+              <h3 class="card-name">{{ detail.nickname || detail.username }}</h3>
+              <p class="card-sub">职位: {{ detail.position || '暂无' }}</p>
+            </div>
+            <div class="section info-list">
+              <div class="info-item"><span class="label">部门</span><span class="value">{{ detail.departmentName || '未分配' }}</span></div>
+              <div class="info-item"><span class="label">手机</span><span class="value">{{ detail.mobile || '-' }}</span></div>
+            </div>
+          </template>
+        </el-tab-pane>
+
+        <!-- 文件标签页 -->
+        <el-tab-pane label="文件" name="files">
+          <div class="section files-section">
+            <div v-if="files.length === 0" class="empty-files">
+              <span class="material-icons-outlined">folder_open</span>
+              <p>暂无群文件</p>
+            </div>
+            <div v-else class="file-list">
+              <div v-for="file in files" :key="file.id" class="file-row">
+                <el-icon><Document /></el-icon>
+                <div class="file-info">
+                  <div class="f-name">{{ file.name }}</div>
+                  <div class="f-meta">{{ file.size }} · {{ file.time }}</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </el-tab-pane>
 
-        <el-divider />
-
-        <!-- 群公告 -->
-        <div class="section">
-          <div class="section-title">群公告</div>
-          <div class="announcement-card" :class="{ empty: !detail.announcement }">
-            {{ detail.announcement || '暂无群公告' }}
+        <!-- 设置标签页 -->
+        <el-tab-pane label="设置" name="settings">
+          <div v-if="detail" class="section settings-list">
+            <div class="setting-item"><span>置顶聊天</span><el-switch v-model="detail.isPinned" size="small" /></div>
+            <div class="setting-item"><span>消息免打扰</span><el-switch v-model="detail.isMuted" size="small" /></div>
+            <div class="setting-item" v-if="isGroup"><span>全员禁言</span><el-switch v-model="detail.allMuted" size="small" /></div>
+            <div class="setting-item" v-if="isGroup"><span>保存到通讯录</span><el-switch v-model="detail.isSaved" size="small" /></div>
           </div>
-        </div>
-
-        <el-divider />
-
-        <!-- 群设置预览 (只读或简化) -->
-        <div class="section settings">
-          <div class="setting-item">
-            <span>置顶聊天</span>
-            <el-switch v-model="detail.isPinned" size="small" />
-          </div>
-          <div class="setting-item">
-            <span>消息免打扰</span>
-            <el-switch v-model="detail.isMuted" size="small" />
-          </div>
-        </div>
-      </template>
-
-      <!-- 单聊详情展示 -->
-      <template v-else-if="detail">
-        <div class="section user-info">
-          <DingtalkAvatar 
-            :name="detail.nickname || detail.username" 
-            :user-id="detail.id" 
-            :src="addTokenToUrl(detail.avatar)" 
-            :size="80" 
-            shape="square" 
-            class="avatar-large"
-          />
-          <div class="user-main">
-            <div class="name-row">
-              <span class="nickname">{{ detail.nickname || detail.username }}</span>
-              <el-icon v-if="detail.gender === 1" class="male"><Male /></el-icon>
-              <el-icon v-else-if="detail.gender === 2" class="female"><Female /></el-icon>
-            </div>
-            <div class="sub">账号: {{ detail.username }}</div>
-          </div>
-        </div>
-
-        <el-divider />
-
-        <div class="section info-list">
-          <div class="info-item">
-            <span class="label">职位</span>
-            <span class="value">{{ detail.position || '暂无' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">部门</span>
-            <span class="value">{{ detail.departmentName || detail.department || '未分配' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">手机</span>
-            <span class="value">{{ detail.mobile || '-' }}</span>
-          </div>
-        </div>
-      </template>
+          <div v-else class="p-4 text-center text-gray-400">正在加载...</div>
+        </el-tab-pane>
+      </el-tabs>
     </div>
 
     <!-- 底部操作区域 -->
@@ -127,8 +87,18 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { Close, Plus, Male, Female } from '@element-plus/icons-vue'
+import { Close, Plus, Male, Female, Search, Document } from '@element-plus/icons-vue'
 import { getGroup, getGroupMembers, leaveGroup } from '@/api/im/group'
+// ...
+
+const activeTab = ref('members')
+const memberSearch = ref('')
+const files = ref([]) // 模拟文件列表
+
+const filteredMembers = computed(() => {
+  if (!memberSearch.value) return members.value
+  return members.value.filter(m => m.name.toLowerCase().includes(memberSearch.value.toLowerCase()))
+})
 import { getUserInfo } from '@/api/im/user'
 import { addTokenToUrl } from '@/utils/file'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -177,7 +147,10 @@ const loadDetail = async () => {
   }
 }
 
-const handleAddMember = () => ElMessage.info('邀请功能开发中...')
+const handleAddMember = () => {
+  // TODO: 打开邀请成员弹窗
+  ElMessage.info('请在群聊设置中邀请成员')
+}
 const handleLeave = async () => {
   try {
     await ElMessageBox.confirm('确定退出群组吗？', '提示', { type: 'warning' })
@@ -214,36 +187,43 @@ watch(() => props.session?.id, () => {
   }
 }
 
-.group-info {
-  display: flex; gap: 12px; align-items: center;
-  .avatar { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-  .name { font-size: 16px; font-weight: 600; color: #1f2329; margin-bottom: 4px; }
-  .id { font-size: 12px; color: #8f959e; }
+.sidebar-tabs {
+  :deep(.el-tabs__header) { margin-bottom: 0; padding: 0 8px; }
+  :deep(.el-tabs__nav-wrap::after) { height: 1px; background-color: #f2f3f5; }
 }
 
-.members-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-  .member-item {
-    display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
-    .m-name { font-size: 11px; color: #646a73; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    &.add-btn {
-      .add-icon { 
-        width: 36px; height: 36px; border: 1px dashed #d9d9d9; border-radius: 4px;
-        display: flex; align-items: center; justify-content: center; color: #8f959e;
-        &:hover { border-color: #1677ff; color: #1677ff; }
-      }
+.search-box { padding: 12px 0; }
+
+.user-info-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
+  .card-name { font-size: 18px; font-weight: 600; color: #1f2329; margin: 0; }
+  .card-sub { font-size: 13px; color: #8f959e; margin: 0; }
+}
+
+.files-section {
+  .empty-files {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; color: #8f959e;
+    .material-icons-outlined { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    p { font-size: 13px; }
+  }
+  .file-list {
+    display: flex; flex-direction: column; gap: 4px;
+    .file-row {
+      display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; cursor: pointer;
+      &:hover { background: #f5f5f5; }
+      .el-icon { font-size: 32px; color: #1677ff; }
+      .f-name { font-size: 13px; color: #1f2329; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .f-meta { font-size: 11px; color: #8f959e; }
     }
   }
 }
 
-.announcement-card {
-  padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; color: #1f2329; line-height: 1.6;
-  &.empty { color: #8f959e; font-style: italic; }
-}
-
-.settings {
+.settings-list {
+  display: flex; flex-direction: column; gap: 4px;
   .setting-item {
-    display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px;
+    display: flex; justify-content: space-between; align-items: center; padding: 12px 8px; border-radius: 6px;
+    &:hover { background: #f8fafc; }
+    span { font-size: 14px; color: #1f2329; }
   }
 }
 

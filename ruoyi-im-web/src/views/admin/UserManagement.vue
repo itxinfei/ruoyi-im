@@ -60,8 +60,10 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" fixed="right" width="170">
+        <el-table-column label="操作" fixed="right" width="280">
           <template #default="{ row }">
+            <el-button size="small" @click="handleViewDetail(row)">详情</el-button>
+            <el-button size="small" @click="handleToggleRole(row)">角色</el-button>
             <el-button size="small" @click="handleToggleStatus(row)">{{ row.status === 1 ? '禁用' : '启用' }}</el-button>
             <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
@@ -83,10 +85,71 @@
 
     <el-dialog v-model="failedDialogVisible" title="批量失败明细" width="520px">
       <el-table :data="failedItems" border>
-        <el-table-column prop="id" label="用户ID" width="120" />
+        <el-table-column prop="id" label="用户 ID" width="120" />
         <el-table-column prop="reason" label="失败原因" min-width="260" />
       </el-table>
     </el-dialog>
+
+    <!-- 角色变更对话框 -->
+    <el-dialog v-model="roleDialogVisible" title="修改用户角色" width="420px">
+      <el-form :model="roleForm" label-width="80px">
+        <el-form-item label="当前角色">
+          <el-tag :type="getRoleTagType(currentRoleData.role)">{{ getRoleLabel(currentRoleData.role) }}</el-tag>
+        </el-form-item>
+        <el-form-item label="目标角色">
+          <el-select v-model="roleForm.targetRole" placeholder="请选择角色" style="width: 100%">
+            <el-option label="普通用户" value="USER" />
+            <el-option label="管理员" value="ADMIN" />
+            <el-option label="超级管理员" value="SUPER_ADMIN" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="roleDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="roleChanging" @click="confirmRoleChange">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 用户详情抽屉 -->
+    <el-drawer v-model="detailDrawerVisible" title="用户详情" size="520px">
+      <template #default>
+        <div v-if="currentDetail" class="detail-content">
+          <el-descriptions title="基本信息" :column="1" border>
+            <el-descriptions-item label="用户 ID">{{ currentDetail.id }}</el-descriptions-item>
+            <el-descriptions-item label="用户名">{{ currentDetail.username }}</el-descriptions-item>
+            <el-descriptions-item label="昵称">{{ currentDetail.nickname || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="手机号">{{ currentDetail.mobile || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="邮箱">{{ currentDetail.email || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="角色">
+              <el-tag :type="getRoleTagType(currentDetail.role)">{{ getRoleLabel(currentDetail.role) }}</el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="状态">
+              <el-tag :type="currentDetail.status === 1 ? 'success' : 'danger'">
+                {{ currentDetail.status === 1 ? '启用' : '禁用' }}
+              </el-tag>
+            </el-descriptions-item>
+          </el-descriptions>
+
+          <el-descriptions title="扩展信息" :column="1" border style="margin-top: 16px">
+            <el-descriptions-item label="头像">
+              <el-avatar v-if="currentDetail.avatar" :size="64" :src="currentDetail.avatar" />
+              <span v-else class="text-secondary">未设置</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="性别">
+              {{ getGenderLabel(currentDetail.gender) }}
+            </el-descriptions-item>
+            <el-descriptions-item label="生日">{{ currentDetail.birthday || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="签名">{{ currentDetail.signature || '-' }}</el-descriptions-item>
+          </el-descriptions>
+
+          <el-descriptions title="时间信息" :column="1" border style="margin-top: 16px">
+            <el-descriptions-item label="创建时间">{{ currentDetail.createTime }}</el-descriptions-item>
+            <el-descriptions-item label="更新时间">{{ currentDetail.updateTime }}</el-descriptions-item>
+            <el-descriptions-item label="最后登录时间">{{ currentDetail.lastLoginTime || '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
@@ -94,7 +157,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import { getUserList, updateUserStatus, deleteUser } from '@/api/admin'
+import { getUserList, getUserDetail, updateUserStatus, updateUserRole, deleteUser } from '@/api/admin'
 
 const loading = ref(false)
 const userList = ref([])
@@ -106,6 +169,17 @@ const searchRole = ref('')
 const pageNum = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
+
+// 角色变更相关
+const roleDialogVisible = ref(false)
+const roleChanging = ref(false)
+const currentRoleData = ref({ role: '' })
+const roleForm = ref({ targetRole: '' })
+const roleTargetRow = ref(null)
+
+// 详情抽屉相关
+const detailDrawerVisible = ref(false)
+const currentDetail = ref(null)
 
 const loadUsers = async () => {
   loading.value = true
@@ -151,6 +225,94 @@ const handleSizeChange = (val) => {
 const handleCurrentChange = (val) => {
   pageNum.value = val
   loadUsers()
+}
+
+/**
+ * 获取角色标签文字
+ */
+const getRoleLabel = (role) => {
+  if (role === 'SUPER_ADMIN') return '超级管理员'
+  if (role === 'ADMIN') return '管理员'
+  return '普通用户'
+}
+
+/**
+ * 获取角色标签类型
+ */
+const getRoleTagType = (role) => {
+  if (role === 'SUPER_ADMIN') return 'danger'
+  if (role === 'ADMIN') return 'warning'
+  return 'info'
+}
+
+/**
+ * 获取性别标签
+ */
+const getGenderLabel = (gender) => {
+  if (gender === 1) return '男'
+  if (gender === 2) return '女'
+  return '未知'
+}
+
+/**
+ * 查看详情
+ */
+const handleViewDetail = async (row) => {
+  try {
+    const res = await getUserDetail(row.id)
+    if (res.code === 200) {
+      currentDetail.value = res.data
+      detailDrawerVisible.value = true
+    } else {
+      ElMessage.error('获取用户详情失败')
+    }
+  } catch (error) {
+    ElMessage.error('获取用户详情失败')
+  }
+}
+
+/**
+ * 打开角色变更对话框
+ */
+const handleToggleRole = (row) => {
+  currentRoleData.value = { role: row.role }
+  roleForm.value.targetRole = row.role
+  roleTargetRow.value = row
+  roleDialogVisible.value = true
+}
+
+/**
+ * 确认角色变更
+ */
+const confirmRoleChange = async () => {
+  const newRole = roleForm.value.targetRole
+  if (!newRole || newRole === currentRoleData.value.role) {
+    ElMessage.warning('请选择不同的角色')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(`确定要将用户 ${roleTargetRow.value.nickname || roleTargetRow.value.username} 的角色变更为 ${getRoleLabel(newRole)} 吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    roleChanging.value = true
+    const res = await updateUserRole(roleTargetRow.value.id, newRole)
+    if (res.code === 200) {
+      ElMessage.success('角色修改成功')
+      roleTargetRow.value.role = newRole
+      roleDialogVisible.value = false
+      loadUsers()
+    } else {
+      ElMessage.error(res.msg || '角色修改失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') ElMessage.error('角色修改失败')
+  } finally {
+    roleChanging.value = false
+  }
 }
 
 const handleToggleStatus = async (row) => {
@@ -311,6 +473,16 @@ onMounted(loadUsers)
   margin-top: 14px;
   display: flex;
   justify-content: flex-end;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.text-secondary {
+  color: #94a3b8;
 }
 
 @media (max-width: 768px) {

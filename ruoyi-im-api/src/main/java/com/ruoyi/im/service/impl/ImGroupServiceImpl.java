@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImGroup;
@@ -24,7 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 群组服务实现
@@ -72,7 +77,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setAvatar(request.getAvatar());
         group.setDescription(request.getDescription());
         group.setType(request.getType() != null ? request.getType() : "PRIVATE");
-        group.setMaxMembers(request.getMemberLimit() != null ? request.getMemberLimit() : 500);
+        group.setMaxMembers(request.getMemberLimit() != null ? request.getMemberLimit() : SystemConstants.DEFAULT_GROUP_MEMBER_LIMIT);
         group.setMemberCount(1);
         group.setStatus("NORMAL");
         group.setCreateTime(LocalDateTime.now());
@@ -217,9 +222,22 @@ public class ImGroupServiceImpl implements ImGroupService {
         query.setUserId(userId);
         List<ImGroupMember> memberList = imGroupMemberMapper.selectImGroupMemberList(query);
 
+        // 批量查询群组信息，避免N+1查询
+        List<Long> groupIds = memberList.stream()
+                .map(ImGroupMember::getGroupId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<Long, ImGroup> groupMap = new HashMap<>();
+        if (!groupIds.isEmpty()) {
+            // 使用BaseMapper的selectBatchIds方法
+            List<ImGroup> groups = imGroupMapper.selectBatchIds(groupIds);
+            groups.forEach(group -> groupMap.put(group.getId(), group));
+        }
+
         for (ImGroupMember member : memberList) {
-            // 这里可以考虑优化，先不走缓存，或者批量获取
-            ImGroup group = imGroupMapper.selectImGroupById(member.getGroupId());
+            ImGroup group = groupMap.get(member.getGroupId());
             if (group != null && group.getIsDeleted() == 0) {
                 ImGroupVO vo = new ImGroupVO();
                 BeanUtils.copyProperties(group, vo);
@@ -238,11 +256,24 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         List<ImGroupMember> memberList = imGroupMemberMapper.selectImGroupMemberListByGroupId(groupId);
 
+        // 批量查询用户信息，避免N+1查询
+        List<Long> userIds = memberList.stream()
+                .map(ImGroupMember::getUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<ImUser> users = imUserMapper.selectImUserListByIds(userIds);
+            users.forEach(user -> userMap.put(user.getId(), user));
+        }
+
         for (ImGroupMember member : memberList) {
             ImGroupMemberVO vo = new ImGroupMemberVO();
             BeanUtils.copyProperties(member, vo);
 
-            ImUser user = imUserMapper.selectImUserById(member.getUserId());
+            ImUser user = userMap.get(member.getUserId());
             if (user != null) {
                 vo.setUserName(user.getNickname());
                 vo.setUserAvatar(user.getAvatar());

@@ -8,6 +8,7 @@ import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupService;
+import com.ruoyi.im.vo.admin.BatchOperationResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,12 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 管理员-群组管理控制器
+ * 管理员 - 群组管理控制器
  * 提供群组管理、解散、成员管理等管理员功能
  *
  * @author ruoyi
  */
-@Tag(name = "管理员-群组管理", description = "管理员群组管理接口")
+@Tag(name = "管理员 - 群组管理", description = "管理员群组管理接口")
 @RestController
 @RequestMapping("/api/admin/groups")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
@@ -40,8 +41,8 @@ public class ImGroupAdminController {
      * 构造器注入依赖
      *
      * @param imGroupService 群组服务
-     * @param imGroupMapper 群组Mapper
-     * @param imGroupMemberMapper 群组成员Mapper
+     * @param imGroupMapper 群组 Mapper
+     * @param imGroupMemberMapper 群组成员 Mapper
      */
     public ImGroupAdminController(ImGroupService imGroupService,
                                     ImGroupMapper imGroupMapper,
@@ -86,7 +87,7 @@ public class ImGroupAdminController {
     /**
      * 获取群组详情
      *
-     * @param id 群组ID
+     * @param id 群组 ID
      * @return 群组详情
      */
     @Operation(summary = "获取群组详情", description = "管理员获取指定群组的详细信息")
@@ -107,7 +108,7 @@ public class ImGroupAdminController {
     /**
      * 解散群组
      *
-     * @param id 群组ID
+     * @param id 群组 ID
      * @return 操作结果
      */
     @Operation(summary = "解散群组", description = "管理员解散指定群组")
@@ -133,35 +134,32 @@ public class ImGroupAdminController {
     /**
      * 批量解散群组
      *
-     * @param ids 群组ID列表
-     * @return 操作结果
+     * @param ids 群组 ID 列表
+     * @return 批量操作结果
      */
-    @Operation(summary = "批量解散群组", description = "管理员批量解散群组")
+    @Operation(summary = "批量解散群组", description = "管理员批量解散群组，返回成功/失败数量及失败明细")
     @DeleteMapping("/batch")
-    public Result<Map<String, Object>> batchDelete(@RequestBody List<Long> ids) {
-        int successCount = 0;
-        int failCount = 0;
+    public Result<BatchOperationResult> batchDelete(@RequestBody List<Long> ids) {
+        BatchOperationResult result = new BatchOperationResult();
+        List<Long> successIds = new java.util.ArrayList<>();
 
         for (Long id : ids) {
             ImGroup group = imGroupMapper.selectImGroupById(id);
-            if (group != null) {
+            if (group == null) {
+                result.addFailedItem(id, "群组不存在");
+            } else {
                 group.setIsDeleted(1);
                 group.setDeletedTime(LocalDateTime.now());
                 imGroupMapper.updateImGroup(group);
-                successCount++;
-            } else {
-                failCount++;
+                successIds.add(id);
+                result.setSuccessCount(result.getSuccessCount() + 1);
             }
         }
 
-        // 删除群组成员关系
-        if (!ids.isEmpty()) {
-            imGroupMemberMapper.deleteByGroupIds(ids);
+        // 删除成功群组的成员关系
+        if (!successIds.isEmpty()) {
+            imGroupMemberMapper.deleteByGroupIds(successIds);
         }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("successCount", successCount);
-        result.put("failCount", failCount);
 
         return Result.success(result);
     }
@@ -169,7 +167,7 @@ public class ImGroupAdminController {
     /**
      * 更新群组信息
      *
-     * @param id 群组ID
+     * @param id 群组 ID
      * @param request 群组更新请求
      * @return 操作结果
      */
@@ -181,7 +179,7 @@ public class ImGroupAdminController {
             return Result.fail("群组不存在");
         }
 
-        // 将DTO属性复制到Entity
+        // 将 DTO 属性复制到 Entity
         BeanUtils.copyProperties(request, existGroup);
         existGroup.setId(id);
         existGroup.setUpdateTime(LocalDateTime.now());
@@ -213,7 +211,7 @@ public class ImGroupAdminController {
     /**
      * 获取群组成员列表
      *
-     * @param id 群组ID
+     * @param id 群组 ID
      * @return 成员列表
      */
     @Operation(summary = "获取群组成员列表", description = "管理员获取群组成员列表")
@@ -239,8 +237,8 @@ public class ImGroupAdminController {
     /**
      * 移除群组成员
      *
-     * @param groupId 群组ID
-     * @param userId 用户ID
+     * @param groupId 群组 ID
+     * @param userId 用户 ID
      * @return 操作结果
      */
     @Operation(summary = "移除群组成员", description = "管理员移除群组成员")

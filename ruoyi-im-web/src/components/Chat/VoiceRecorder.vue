@@ -2,7 +2,7 @@
   <el-dialog
     v-model="visible"
     title="语音消息"
-    width="320px"
+    width="400px"
     :close-on-click-modal="false"
     :show-close="true"
     class="voice-recorder-dialog"
@@ -13,19 +13,28 @@
       <div class="recorder-status">
         <div class="status-icon" :class="recordingState">
           <span v-if="recordingState === 'idle'" class="material-icons-outlined">mic</span>
-          <span v-else-if="recordingState === 'recording'" class="material-icons-outlined recording-icon">fiber_manual_record</span>
+          <div v-else-if="recordingState === 'recording'" class="recording-animation">
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring delay"></div>
+            <span class="material-icons-outlined">mic</span>
+          </div>
           <span v-else class="material-icons-outlined">check_circle</span>
         </div>
         <div class="status-text">
           {{ statusText }}
         </div>
-        <div v-if="recordingState === 'recording'" class="duration">
+        <div v-if="recordingState === 'recording'" class="duration recording">
+          {{ formattedDuration }}
+          <span class="duration-max">/ 1:00</span>
+        </div>
+        <div v-else-if="recordingState === 'recorded'" class="duration">
           {{ formattedDuration }}
         </div>
       </div>
 
       <!-- 波形可视化 -->
       <div v-if="recordingState === 'recording'" class="waveform-visual">
+        <div class="waveform-bg"></div>
         <div
           v-for="(bar, index) in waveformBars"
           :key="index"
@@ -41,48 +50,54 @@
             <span v-if="!isPreviewPlaying" class="material-icons-outlined">play_arrow</span>
             <span v-else class="material-icons-outlined">pause</span>
           </button>
-          <div class="preview-info">
-            <span class="preview-duration">{{ formattedDuration }}</span>
-            <div class="preview-progress">
-              <div class="progress-fill" :style="{ width: previewProgress + '%' }"></div>
-            </div>
+          <div class="preview-waveform">
+            <div
+              v-for="i in 30"
+              :key="i"
+              class="preview-bar"
+              :style="{ height: getPreviewBarHeight(i) + '%' }"
+            ></div>
           </div>
+          <span class="preview-duration">{{ formattedDuration }}</span>
+        </div>
+        <div class="preview-progress-bar" @click="seekPreview">
+          <div class="progress-fill" :style="{ width: previewProgress + '%' }"></div>
         </div>
       </div>
 
       <!-- 操作按钮 -->
       <div class="recorder-actions">
         <template v-if="recordingState === 'idle'">
-          <el-button type="primary" @click="startRecording">
+          <el-button type="primary" size="large" @click="startRecording">
             <span class="material-icons-outlined">mic</span>
             开始录音
           </el-button>
         </template>
         <template v-else-if="recordingState === 'recording'">
-          <el-button type="danger" @click="stopRecording">
+          <el-button type="danger" size="large" @click="stopRecording">
             <span class="material-icons-outlined">stop</span>
-            停止录音
+            完成录音
           </el-button>
-          <el-button @click="cancelRecording">
-            <span class="material-icons-outlined">close</span>
+          <el-button size="large" @click="cancelRecording">
             取消
           </el-button>
         </template>
         <template v-else-if="recordingState === 'recorded'">
-          <el-button type="primary" @click="sendVoice">
+          <el-button type="primary" size="large" @click="sendVoice">
             <span class="material-icons-outlined">send</span>
             发送
           </el-button>
-          <el-button @click="reRecord">
+          <el-button size="large" @click="reRecord">
             <span class="material-icons-outlined">refresh</span>
-            重录
+            重新录制
           </el-button>
         </template>
       </div>
 
       <!-- 提示信息 -->
       <div class="recorder-tips">
-        <span>最长可录制60秒</span>
+        <span class="material-icons-outlined tips-icon">info</span>
+        <span>最长可录制60秒，点击完成或等待自动结束</span>
       </div>
     </div>
   </el-dialog>

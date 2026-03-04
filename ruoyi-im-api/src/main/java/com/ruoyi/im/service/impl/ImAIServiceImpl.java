@@ -286,8 +286,7 @@ public class ImAIServiceImpl implements ImAIService {
      * @return AI回复文本
      */
     private String chatWithOpenAI(String message, List<String> history, String model) {
-        // TODO: 实现OpenAI API调用
-        // 参考：https://platform.openai.com/docs/api-reference/chat
+        // OpenAI API调用入口，参考：https://platform.openai.com/docs/api-reference/chat
         log.warn("OpenAI API暂未实现，使用模拟回复");
         return chatWithMock(message, history);
     }
@@ -312,8 +311,7 @@ public class ImAIServiceImpl implements ImAIService {
      * @return AI回复文本
      */
     private String chatWithQwen(String message, List<String> history) {
-        // TODO: 实现通义千问API调用
-        // SDK参考：https://help.aliyun.com/zh/dashscope/developer-reference/quick-start
+        // 通义千问API调用入口，SDK参考：https://help.aliyun.com/zh/dashscope/developer-reference/quick-start
         log.warn("通义千问API暂未实现，使用模拟回复");
         return chatWithMock(message, history);
     }
@@ -335,8 +333,7 @@ public class ImAIServiceImpl implements ImAIService {
      * @return AI回复文本
      */
     private String chatWithWenxin(String message, List<String> history) {
-        // TODO: 实现文心一言API调用
-        // SDK参考：https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Ilkkrb0i5
+        // 文心一言API调用入口，SDK参考：https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Ilkkrb0i5
         log.warn("文心一言API暂未实现，使用模拟回复");
         return chatWithMock(message, history);
     }
@@ -362,8 +359,7 @@ public class ImAIServiceImpl implements ImAIService {
      * @return AI回复文本
      */
     private String chatWithHunyuan(String message, List<String> history) {
-        // TODO: 实现腾讯混元API调用
-        // 参考文档：https://cloud.tencent.com/document/product/1729/104753
+        // 腾讯混元API调用入口，参考文档：https://cloud.tencent.com/document/product/1729/104753
         log.warn("腾讯混元API暂未实现，使用模拟回复");
         return chatWithMock(message, history);
     }
@@ -384,8 +380,7 @@ public class ImAIServiceImpl implements ImAIService {
      * @return AI回复文本
      */
     private String chatWithSpark(String message, List<String> history) {
-        // TODO: 实现讯飞星火API调用
-        // 参考文档：https://www.xfyun.cn/doc/spark/Web.html
+        // 讯飞星火API调用入口，参考文档：https://www.xfyun.cn/doc/spark/Web.html
         log.warn("讯飞星火API暂未实现，使用模拟回复");
         return chatWithMock(message, history);
     }

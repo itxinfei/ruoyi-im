@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
@@ -20,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
@@ -168,7 +168,7 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
             g.dispose();
 
             // 保存缩略图
-            String dateDir = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+            String dateDir = LocalDateTime.now().format(SystemConstants.DATE_FORMAT_SLASH);
             String thumbnailPathDir = uploadPath + thumbnailDir + dateDir + "/";
             Path thumbnailPath = Paths.get(thumbnailPathDir);
             if (!Files.exists(thumbnailPath)) {

@@ -161,7 +161,10 @@ const handleStartChat = async () => {
   } catch (e) { ElMessage.error('进入群聊失败') }
 }
 
-const handleAddMember = () => { ElMessage.info('邀请功能开发中...') }
+const handleAddMember = () => {
+  // TODO: 打开邀请成员弹窗
+  ElMessage.info('请在群聊设置中邀请成员')
+}
 
 const handleDismiss = async () => {
   try {

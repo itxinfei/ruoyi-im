@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImBackup;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
@@ -101,7 +102,7 @@ public class ImBackupServiceImpl implements ImBackupService {
     public Map<String, Object> createBackup(String description) {
         logger.info("开始创建数据备份，描述: {}", description);
 
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String timestamp = LocalDateTime.now().format(SystemConstants.DATETIME_FORMAT_COMPACT);
         String fileName = "im_backup_" + timestamp + ".sql";
 
         // 创建备份记录
@@ -109,7 +110,7 @@ public class ImBackupServiceImpl implements ImBackupService {
         backup.setFileName(fileName);
         backup.setDescription(description != null && !description.isEmpty() ? description : "手动备份");
         backup.setBackupType("full");
-        backup.setStatus("in_progress");
+        backup.setStatus(SystemConstants.STATUS_IN_PROGRESS);
         backup.setCreateTime(LocalDateTime.now());
         backup.setCreatorId(1L);
         backup.setCreatorName("系统管理员");
@@ -140,7 +141,7 @@ public class ImBackupServiceImpl implements ImBackupService {
             throw new RuntimeException("备份文件不存在");
         }
 
-        if (!"completed".equals(backup.getStatus())) {
+        if (!SystemConstants.STATUS_COMPLETED.equals(backup.getStatus())) {
             throw new RuntimeException("备份文件状态异常，无法恢复");
         }
 
@@ -267,12 +268,12 @@ public class ImBackupServiceImpl implements ImBackupService {
         stats.put("totalBackups", backups.size());
         stats.put("totalSize", backups.stream().mapToLong(b -> b.getFileSize() != null ? b.getFileSize() : 0L).sum());
 
-        long completedCount = backups.stream().filter(b -> "completed".equals(b.getStatus())).count();
+        long completedCount = backups.stream().filter(b -> SystemConstants.STATUS_COMPLETED.equals(b.getStatus())).count();
         stats.put("completedCount", completedCount);
 
         if (!backups.isEmpty()) {
             Optional<ImBackup> latestBackup = backups.stream()
-                    .filter(b -> "completed".equals(b.getStatus()))
+                    .filter(b -> SystemConstants.STATUS_COMPLETED.equals(b.getStatus()))
                     .max(Comparator.comparing(ImBackup::getCreateTime));
             latestBackup.ifPresent(backup -> {
                 stats.put("lastBackupTime", backup.getCreateTime());
@@ -325,13 +326,13 @@ public class ImBackupServiceImpl implements ImBackupService {
                     logger.info("备份执行成功，ID: {}, 文件大小: {} bytes", backup.getId(), backupFile.length());
                 } else {
                     // 备份失败
-                    imBackupMapper.updateStatus(backup.getId(), "failed", "mysqldump退出码: " + exitCode);
+                    imBackupMapper.updateStatus(backup.getId(), SystemConstants.STATUS_FAILED, "mysqldump退出码: " + exitCode);
                     logger.error("备份执行失败，退出码: {}", exitCode);
                 }
 
             } catch (Exception e) {
                 logger.error("备份执行异常，ID: {}", backup.getId(), e);
-                imBackupMapper.updateStatus(backup.getId(), "failed", e.getMessage());
+                imBackupMapper.updateStatus(backup.getId(), SystemConstants.STATUS_FAILED, e.getMessage());
             }
         }).start();
     }

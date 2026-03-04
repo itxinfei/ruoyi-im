@@ -323,3 +323,29 @@ export function getConversationFavorites(conversationId) {
   })
 }
 
+// ==================== 消息已读回执详情 ====================
+
+/**
+ * 获取消息已读详情（已读/未读人员列表）
+ * @param {number} messageId - 消息 ID
+ * @returns {Promise}
+ */
+export function getMessageReadDetail(messageId) {
+  return request({
+    url: `/api/im/message/read/detail/${messageId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取消息已读状态（已读人数和百分比）
+ * @param {number} messageId - 消息 ID
+ * @returns {Promise}
+ */
+export function getMessageReadStatus(messageId) {
+  return request({
+    url: `/api/im/message/read/status/${messageId}`,
+    method: 'get'
+  })
+}
+

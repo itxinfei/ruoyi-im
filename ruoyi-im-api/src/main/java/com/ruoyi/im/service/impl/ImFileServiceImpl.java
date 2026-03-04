@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
@@ -19,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -54,7 +54,7 @@ public class ImFileServiceImpl implements ImFileService {
         String fileType = FileUtils.getFileType(fileExtension);
 
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
-        String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+        String datePath = LocalDate.now().format(SystemConstants.DATE_FORMAT_SLASH);
         String relativePath = datePath + "/" + fileName;
         String filePath = uploadPath + relativePath;
 
@@ -166,7 +166,7 @@ public class ImFileServiceImpl implements ImFileService {
         vo.setFileId(asset.getId());
         vo.setFileExtension(asset.getFileExt());
         vo.setFileUrl(urlPrefix + asset.getFilePath());
-        vo.setUploadTime(asset.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        vo.setUploadTime(asset.getCreateTime().format(SystemConstants.DATETIME_FORMAT_STANDARD));
         vo.setDeleted("DELETED".equals(asset.getStatus()));
         return vo;
     }

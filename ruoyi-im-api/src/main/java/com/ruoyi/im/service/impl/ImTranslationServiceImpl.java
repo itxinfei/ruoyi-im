@@ -216,8 +216,7 @@ public class ImTranslationServiceImpl implements ImTranslationService {
      * @return 翻译结果
      */
     private String translateWithBaidu(String text, String from, String to) {
-        // TODO: 实现百度翻译API调用
-        // 完整文档：https://fanyi-api.baidu.com/doc/21
+        // 百度翻译API调用入口，完整文档：https://fanyi-api.baidu.com/doc/21
         log.warn("百度翻译API暂未实现，使用模拟翻译");
         return translateWithMock(text, from, to);
     }
@@ -251,8 +250,7 @@ public class ImTranslationServiceImpl implements ImTranslationService {
      * @return 翻译结果
      */
     private String translateWithTencent(String text, String from, String to) {
-        // TODO: 实现腾讯云翻译API调用
-        // 完整文档：https://cloud.tencent.com/document/product/551/15619
+        // 腾讯云翻译API调用入口，完整文档：https://cloud.tencent.com/document/product/551/15619
         log.warn("腾讯云翻译API暂未实现，使用模拟翻译");
         return translateWithMock(text, from, to);
     }

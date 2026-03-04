@@ -1,511 +1,250 @@
 <template>
-  <nav
-    :class="[
-      'dingtalk-nav',
-      'flex flex-col items-center z-20 shrink-0 transition-colors duration-300',
-      isDark ? 'bg-nav-dark' : 'bg-nav-light'
-    ]"
-    style="height: 100vh;"
-    role="navigation"
-    aria-label="主导航"
-  >
-    <!-- Logo 区域 -->
-    <div class="nav-logo-wrapper">
-      <div class="nav-logo">
-        <span class="nav-logo-text">IM</span>
-        <span class="nav-logo-badge" v-if="unreadCount > 0">
-          {{ unreadCount > 99 ? '99+' : unreadCount }}
-        </span>
+  <nav class="premium-nav-bar">
+    <!-- 顶部 Logo -->
+    <div class="nav-brand-cell">
+      <div class="logo-text">IM</div>
+    </div>
+
+    <!-- 功能导航 (全图标显示) -->
+    <div class="nav-menu-list">
+      <div 
+        v-for="item in navModules" 
+        :key="item.key" 
+        class="nav-icon-cell"
+        :class="{ 'active': activeModule === item.key }"
+        @click="$emit('switch-module', item.key)"
+      >
+        <div class="icon-frame">
+          <span class="material-icons-outlined">{{ item.icon }}</span>
+          <div v-if="item.badge" class="red-dot"></div>
+        </div>
+        <span class="icon-label">{{ item.label }}</span>
       </div>
     </div>
 
-    <!-- 导航项 -->
-    <div class="nav-items" role="menubar">
-      <el-tooltip
-        v-for="item in navModules"
-        :key="item.key"
-        :content="item.label"
-        placement="right"
-        :show-after="500"
-        :hide-after="0"
-      >
-        <button
-          @click="handleSwitch(item.key)"
-          :class="[
-            'nav-item',
-            activeModule === item.key ? 'nav-item-active' : ''
-          ]"
-          :aria-label="item.label"
-          :aria-current="activeModule === item.key ? 'page' : undefined"
-          role="menuitem"
-        >
-          <span class="nav-item-icon material-icons-outlined" aria-hidden="true">
-            {{ item.icon }}
-          </span>
-          <span v-if="item.badge" class="nav-item-badge">{{ item.badge }}</span>
-        </button>
-      </el-tooltip>
-    </div>
-
-    <!-- 底部操作区 -->
-    <div class="nav-footer">
-      <!-- 主题切换按钮 -->
-      <el-tooltip :content="themeTooltip" placement="right" :show-after="500" :hide-after="0">
-        <button
-          @click="handleToggleTheme"
-          class="nav-item nav-item-action"
-          :aria-label="themeTooltip"
-        >
-          <span class="material-icons-outlined" aria-hidden="true">
-            {{ themeIcon }}
-          </span>
-          <span v-if="themeMode === 'auto'" class="auto-badge">A</span>
-        </button>
-      </el-tooltip>
-
-      <!-- 帮助与反馈 -->
-      <el-tooltip content="帮助与反馈" placement="right" :show-after="500" :hide-after="0">
-        <button
-          @click="handleHelp"
-          class="nav-item nav-item-action"
-          aria-label="帮助与反馈"
-        >
-          <span class="material-icons-outlined" aria-hidden="true">help_outline</span>
-        </button>
-      </el-tooltip>
-
-      <!-- 设置按钮 -->
-      <el-tooltip content="设置" placement="right" :show-after="500" :hide-after="0">
-        <button
-          @click="handleSwitch('settings')"
-          class="nav-item nav-item-action"
-          :class="{ 'nav-item-active': activeModule === 'settings' }"
-          aria-label="设置"
-        >
-          <span class="material-icons-outlined" aria-hidden="true">settings</span>
-        </button>
-      </el-tooltip>
-
-      <!-- 用户头像 -->
-      <el-tooltip
-        :content="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`"
-        placement="right"
-        :show-after="500"
-        :hide-after="0"
-      >
-        <button
-          @click="handleSwitch('profile')"
-          class="nav-avatar"
-          :class="{ 'nav-avatar-active': activeModule === 'profile' }"
-          :aria-label="`个人资料: ${currentUser.nickname || currentUser.username || '我'}`"
-        >
-          <DingtalkAvatar
-            :src="currentUser.avatar"
-            :name="currentUser.nickname || currentUser.username || '我'"
-            :user-id="currentUser.id"
-            :size="48"
-            shape="circle"
-          />
-          <!-- 在线状态点 -->
-          <span class="nav-avatar-status" :class="{ 'online': isUserOnline }"></span>
-        </button>
-      </el-tooltip>
+    <!-- 底部功能 -->
+    <div class="nav-footer-cell">
+      <div class="footer-btn" title="全局搜索" @click="handleGlobalSearch">
+        <span class="material-icons-outlined">search</span>
+      </div>
+      <div class="footer-btn" title="切换主题" @click="toggleTheme">
+        <span class="material-icons-outlined">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+      </div>
+      <div class="footer-btn" title="系统设置" @click="$emit('switch-module', 'settings')">
+        <span class="material-icons-outlined">settings</span>
+      </div>
+      <div class="user-avatar-trigger" title="个人资料" @click="$emit('switch-module', 'profile')">
+        <DingtalkAvatar :src="currentUser.avatar" :name="currentUser.nickname" :user-id="currentUser.id" :size="40" shape="square" />
+      </div>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
-import { useTheme } from '@/composables/useTheme'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { ElMessage } from 'element-plus'
 
-const props = defineProps({
-  activeModule: {
-    type: String,
-    default: 'chat'
-  },
-  collapsed: {
-    type: Boolean,
-    default: false
-  }
-})
-
-const emit = defineEmits(['switch-module', 'toggle-collapse'])
+const props = defineProps({ activeModule: String })
 const store = useStore()
-const { isDark, themeMode, toggleTheme } = useTheme()
+const currentUser = computed(() => store.getters['user/currentUser'])
 
-const themeIcon = computed(() => {
-  if (themeMode.value === 'auto') return 'brightness_auto'
-  return themeMode.value === 'dark' ? 'dark_mode' : 'light_mode'
+// 主题状态
+const isDark = ref(false)
+
+// 切换主题
+const toggleTheme = () => {
+  isDark.value = !isDark.value
+  ElMessage.success(isDark.value ? '已切换到深色模式' : '已切换到浅色模式')
+}
+
+// 全局搜索
+const handleGlobalSearch = () => {
+  emit('switch-module', 'search')
+}
+
+// 判断是否为管理员
+const isAdmin = computed(() => {
+  const role = localStorage.getItem('im_user_role')
+  return role === 'ADMIN' || role === 'SUPER_ADMIN'
 })
 
-const themeTooltip = computed(() => {
-  const currentLabel = themeMode.value === 'auto' ? '跟随系统' : (themeMode.value === 'dark' ? '深色模式' : '浅色模式')
-  return `外观模式: ${currentLabel} (点击切换)`
+const navModules = computed(() => {
+  const modules = [
+    { key: 'chat', label: '消息', icon: 'chat', badge: true },
+    { key: 'contacts', label: '通讯录', icon: 'people_alt', badge: false },
+    { key: 'workbench', label: '工作台', icon: 'apps', badge: false },
+    { key: 'todo', label: '待办', icon: 'task_alt', badge: false },
+    { key: 'approval', label: '审批', icon: 'approval', badge: false },
+    { key: 'calendar', label: '日历', icon: 'calendar_today', badge: false },
+    { key: 'drive', label: '云文档', icon: 'cloud_queue', badge: false }
+  ]
+  // 只有管理员可见管理入口
+  if (isAdmin.value) {
+    modules.push({ key: 'admin', label: '管理', icon: 'admin_panel_settings', badge: false })
+  }
+  return modules
 })
-
-// 未读消息数
-const unreadCount = computed(() => store.state.im?.totalUnreadCount || 0)
-
-// 当前用户
-const currentUser = computed(() => store.getters['user/currentUser'] || {})
-
-// 用户在线状态
-const isUserOnline = computed(() => store.state.im?.userStatus?.[currentUser.value.id] === 'online')
-
-// 导航模块配置
-const navModules = ref([
-  { key: 'chat', label: '消息', icon: 'chat_bubble' },
-  { key: 'contacts', label: '通讯录', icon: 'group' },
-  { key: 'workbench', label: '工作台', icon: 'grid_view' },
-  { key: 'drive', label: '云盘', icon: 'cloud' },
-  { key: 'calendar', label: '日历', icon: 'calendar_today' },
-  { key: 'todo', label: '待办', icon: 'check_circle' },
-  { key: 'approval', label: '审批', icon: 'approval' },
-  { key: 'mail', label: '邮箱', icon: 'email' },
-  { key: 'assistant', label: 'AI助理', icon: 'smart_toy' }
-])
-
-/**
- * 处理主题切换并同步 Store
- */
-function handleToggleTheme() {
-  toggleTheme()
-  const newSettings = { ...store.state.im.settings }
-  if (!newSettings.general) newSettings.general = {}
-  newSettings.general.theme = themeMode.value
-  store.commit('im/UPDATE_SETTINGS', newSettings)
-}
-
-/**
- * 切换模块
- */
-function handleSwitch(key) {
-  emit('switch-module', key)
-}
-
-/**
- * 处理帮助与反馈
- */
-function handleHelp() {
-  handleSwitch('help')
-}
 </script>
 
 <style scoped lang="scss">
-// ============================================================================
-// 导航容器 - 钉钉风格
-// ============================================================================
-.dingtalk-nav {
-  width: 68px;
-  background: linear-gradient(180deg, #1677ff 0%, #0b5ed7 100%);
+// 设计方向：现代、专业、精致
+// 主色调：#1677ff（钉钉蓝）
+// 悬停/激活态增强视觉反馈
+
+.premium-nav-bar { 
+  width: 64px; 
+  height: 100%; 
+  background: linear-gradient(180deg, #1a88ff 0%, #1565d8 100%);
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  padding: 12px 0; 
+  flex-shrink: 0;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-.bg-nav-light {
-  background: linear-gradient(180deg, #1677ff 0%, #0b5ed7 100%);
+// Logo区域
+.nav-brand-cell { 
+  margin-bottom: 16px; 
+  .logo-text { 
+    width: 40px; 
+    height: 40px; 
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border-radius: 10px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: #fff; 
+    font-weight: 700; 
+    font-size: 16px; 
+    letter-spacing: 1px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  } 
 }
 
-.bg-nav-dark {
-  background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%);
-}
-
-// ============================================================================
-// Logo 区域
-// ============================================================================
-.nav-logo-wrapper {
-  padding: 10px 0;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.nav-logo {
-  position: relative;
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 10px;
-  display: flex;
+// 导航菜单
+.nav-menu-list { 
+  flex: 1; 
+  width: 100%; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 2px; 
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+  
+  .nav-icon-cell { 
+    width: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding: 4px 0; 
+    cursor: pointer; 
+    transition: all 0.2s;
+    position: relative;
+    
+    .icon-frame { 
+      width: 48px; 
+      height: 48px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      border-radius: 12px; 
+      position: relative; 
+      transition: all 0.2s;
+      background: transparent;
+      
+      span { 
+        color: #fff; 
+        font-size: 26px; 
+        font-weight: 400 !important; 
+      }
+      
+      .red-dot { 
+        position: absolute; 
+        top: 4px; 
+        right: 4px; 
+        width: 10px; 
+        height: 10px; 
+        background: #fff; 
+        border-radius: 50%; 
+        animation: pulse 2s infinite;
+      }
+    }
+    
+    .icon-label { 
+      font-size: 11px; 
+      color: #fff; 
+      margin-top: 2px; 
+      font-weight: 500;
+    }
+    
+    &:hover { 
+      .icon-frame { 
+        background: rgba(255, 255, 255, 0.2);
+        span { color: #fff; }
+      }
+      .icon-label { color: #fff; }
+    }
+    
+    &.active {
+      .icon-frame { 
+        background: #fff; 
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        span { color: #1677ff; }
+        .red-dot { background: #1677ff; animation: none; }
+      }
+      .icon-label { color: #fff; font-weight: 600; }
+    }
+  }
 }
 
-.nav-logo:hover {
-  background: rgba(255, 255, 255, 0.35);
+// 底部功能区
+.nav-footer-cell { 
+  margin-top: auto; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 2px; 
+  width: 100%; 
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .footer-btn { 
+    color: #fff; 
+    cursor: pointer; 
+    padding: 6px;
+    border-radius: 10px;
+    transition: all 0.2s;
+    
+    &:hover { 
+      color: #fff; 
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .material-icons-outlined { 
+      font-size: 24px; 
+    }
+  }
+  
+  .user-avatar-trigger { 
+    cursor: pointer; 
+    margin-top: 6px; 
+    transition: all 0.25s ease;
+    overflow: hidden;
+    border-radius: 8px;
+    
+    &:hover { 
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+  }
 }
 
-.nav-logo-text {
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-}
-
-.nav-logo-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  background: #ff4d4f;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-// ============================================================================
-// 导航项区域
-// ============================================================================
-.nav-items {
-  flex: 1;
-  width: 100%;
-  padding: 6px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  overflow-y: auto;
-}
-
-.nav-items::-webkit-scrollbar {
-  width: 3px;
-}
-
-.nav-items::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-}
-
-// ============================================================================
-// 导航项 - 钉钉风格
-// ============================================================================
-.nav-item {
-  position: relative;
-  width: 44px;
-  height: 44px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
-
-.nav-item-active {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-.nav-item-active::before {
-  content: '';
-  position: absolute;
-  left: -10px;
-  width: 3px;
-  height: 20px;
-  background: #fff;
-  border-radius: 0 2px 2px 0;
-}
-
-.nav-item-icon {
-  font-size: 22px;
-}
-
-.nav-item-badge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  min-width: 14px;
-  height: 14px;
-  padding: 0 4px;
-  background: #ff4d4f;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-// ============================================================================
-// 底部操作区
-// ============================================================================
-.nav-footer {
-  padding: 6px 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: 100%;
-  flex-shrink: 0;
-}
-
-.nav-item-action {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.nav-item-action:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
-
-.nav-item-action.nav-item-active {
-  background: var(--dt-bg-sidebar-item-active);
-  color: #fff;
-}
-
-.auto-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 12px;
-  height: 12px;
-  background: #fff;
-  color: var(--dt-brand-color);
-  font-size: 9px;
-  font-weight: 700;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-// ============================================================================
-// 用户头像
-// ============================================================================
-.nav-avatar {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  margin: 4px auto 0;
-  padding: 3px;
-  border-radius: 50%;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all var(--dt-transition-base);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-avatar:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: scale(1.05);
-}
-
-.nav-avatar-active {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
-}
-
-.nav-avatar :deep(.dingtalk-avatar) {
-  width: 100%;
-  height: 100%;
-}
-
-.nav-avatar :deep(.avatar-inner) {
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: border-color var(--dt-transition-base);
-}
-
-.nav-avatar:hover :deep(.avatar-inner) {
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
-.nav-avatar-active :deep(.avatar-inner) {
-  border-color: rgba(255, 255, 255, 0.9);
-}
-
-.nav-avatar-status {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 12px;
-  height: 12px;
-  background: var(--dt-text-tertiary);
-  border: 2px solid var(--dt-bg-sidebar);
-  border-radius: 50%;
-  transition: all var(--dt-transition-base);
-}
-
-.nav-avatar-status.online {
-  background: var(--dt-success-color);
-  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
-}
-
-// ============================================================================
-// 暗色模式适配
-// ============================================================================
-.dark .dingtalk-nav {
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-}
-
-.dark .nav-logo {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.dark .nav-logo:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.dark .nav-item {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.dark .nav-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.dark .nav-item-active {
-  background: rgba(22, 119, 255, 0.2);
-}
-
-.dark .nav-item-active::before {
-  background: var(--dt-brand-color);
-}
-
-.dark .nav-item-action {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.dark .nav-item-action:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.dark .nav-avatar-status {
-  border-color: #1e293b;
-}
-
-.dark .nav-avatar-active {
-  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.3);
+// 呼吸动画
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
 }
 </style>

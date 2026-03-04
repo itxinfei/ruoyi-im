@@ -81,6 +81,19 @@ export function getUserStats() {
   })
 }
 
+/**
+ * 批量删除用户
+ * @param {Array} ids - 用户 ID 列表
+ * @returns {Promise}
+ */
+export function batchDeleteUsers(ids) {
+  return request({
+    url: '/api/admin/users/batch',
+    method: 'delete',
+    data: ids
+  })
+}
+
 // ==================== 群组管理 ====================
 
 /**
@@ -348,5 +361,72 @@ export function updateSystemConfig(configKey, configValue) {
     url: `/api/admin/system-config/${configKey}`,
     method: 'put',
     data: configValue
+  })
+}
+
+// ==================== 审计日志 ====================
+
+/**
+ * 获取审计日志列表（分页）
+ * @param {Object} params - 查询参数 { pageNum, pageSize, userId, operationType, operationResult, startTime, endTime }
+ * @returns {Promise}
+ */
+export function getAuditLogList(params) {
+  return request({
+    url: '/api/im/audit/list',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取审计日志详情
+ * @param {Number} id - 日志 ID
+ * @returns {Promise}
+ */
+export function getAuditLogDetail(id) {
+  return request({
+    url: `/api/im/audit/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取审计统计信息
+ * @param {Object} params - { startTime, endTime }
+ * @returns {Promise}
+ */
+export function getAuditStatistics(params) {
+  return request({
+    url: '/api/im/audit/statistics',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取用户操作日志
+ * @param {Number} userId - 用户 ID
+ * @param {Object} params - { startTime, endTime }
+ * @returns {Promise}
+ */
+export function getUserAuditLogs(userId, params) {
+  return request({
+    url: `/api/im/audit/user/${userId}`,
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 删除过期日志
+ * @param {string} beforeDate - 删除此日期之前的日志
+ * @returns {Promise}
+ */
+export function deleteExpiredAuditLogs(beforeDate) {
+  return request({
+    url: '/api/im/audit/clean',
+    method: 'delete',
+    params: { beforeDate }
   })
 }

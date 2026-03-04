@@ -3,6 +3,7 @@ package com.ruoyi.im.controller.admin;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.vo.admin.BatchOperationResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 管理员-消息管理控制器
+ * 管理员 - 消息管理控制器
  * 提供消息查询、删除、撤回等管理员功能
  *
  * @author ruoyi
  */
-@Tag(name = "管理员-消息管理", description = "管理员消息管理接口")
+@Tag(name = "管理员 - 消息管理", description = "管理员消息管理接口")
 @RestController
 @RequestMapping("/api/admin/messages")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
@@ -31,7 +32,7 @@ public class ImMessageAdminController {
     /**
      * 构造器注入依赖
      *
-     * @param imMessageMapper 消息Mapper
+     * @param imMessageMapper 消息 Mapper
      */
     public ImMessageAdminController(ImMessageMapper imMessageMapper) {
         this.imMessageMapper = imMessageMapper;
@@ -42,8 +43,8 @@ public class ImMessageAdminController {
      *
      * @param keyword 搜索关键词
      * @param messageType 消息类型
-     * @param senderId 发送者ID
-     * @param conversationId 会话ID
+     * @param senderId 发送者 ID
+     * @param conversationId 会话 ID
      * @param startTime 开始时间
      * @param endTime 结束时间
      * @param pageNum 页码
@@ -73,8 +74,8 @@ public class ImMessageAdminController {
                 senderId,
                 startTime,
                 endTime,
-                false, // 不包含已撤回消息
-                false, // 非精确匹配
+                false,
+                false,
                 offset,
                 pageSize
         );
@@ -105,7 +106,7 @@ public class ImMessageAdminController {
     /**
      * 获取消息详情
      *
-     * @param id 消息ID
+     * @param id 消息 ID
      * @return 消息详情
      */
     @Operation(summary = "获取消息详情", description = "管理员获取指定消息的详细信息")
@@ -121,7 +122,7 @@ public class ImMessageAdminController {
     /**
      * 删除消息
      *
-     * @param id 消息ID
+     * @param id 消息 ID
      * @return 操作结果
      */
     @Operation(summary = "删除消息", description = "管理员删除指定消息")
@@ -139,28 +140,23 @@ public class ImMessageAdminController {
     /**
      * 批量删除消息
      *
-     * @param ids 消息ID列表
-     * @return 操作结果
+     * @param ids 消息 ID 列表
+     * @return 批量操作结果
      */
-    @Operation(summary = "批量删除消息", description = "管理员批量删除消息")
+    @Operation(summary = "批量删除消息", description = "管理员批量删除消息，返回成功/失败数量及失败明细")
     @DeleteMapping("/batch")
-    public Result<Map<String, Object>> batchDelete(@RequestBody List<Long> ids) {
-        int successCount = 0;
-        int failCount = 0;
+    public Result<BatchOperationResult> batchDelete(@RequestBody List<Long> ids) {
+        BatchOperationResult result = new BatchOperationResult();
 
         for (Long id : ids) {
             ImMessage message = imMessageMapper.selectImMessageById(id);
-            if (message != null) {
-                imMessageMapper.deleteImMessageById(id);
-                successCount++;
+            if (message == null) {
+                result.addFailedItem(id, "消息不存在");
             } else {
-                failCount++;
+                imMessageMapper.deleteImMessageById(id);
+                result.setSuccessCount(result.getSuccessCount() + 1);
             }
         }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("successCount", successCount);
-        result.put("failCount", failCount);
 
         return Result.success(result);
     }
@@ -178,7 +174,7 @@ public class ImMessageAdminController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
 
-        // 默认统计最近7天
+        // 默认统计最近 7 天
         if (endTime == null) {
             endTime = LocalDateTime.now();
         }

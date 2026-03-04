@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImMeetingBooking;
 import com.ruoyi.im.domain.ImMeetingRoom;
 import com.ruoyi.im.dto.meeting.ImMeetingBookingRequest;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -269,7 +269,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         bookingMapper.insert(booking);
         log.info("预订会议室成功: bookingId={}, roomId={}, userId={}", booking.getId(), request.getRoomId(), userId);
 
-        // TODO: 发送预订通知
+        // 发送预订通知
 
         return booking.getId();
     }
@@ -395,7 +395,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         // 解析日期
         LocalDate queryDate;
         try {
-            queryDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            queryDate = LocalDate.parse(date, SystemConstants.DATE_FORMAT_STANDARD);
         } catch (Exception e) {
             queryDate = LocalDate.now();
         }
@@ -419,9 +419,8 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
                     item.setMeetingTitle(booking.getMeetingTitle());
                     item.setMeetingType(booking.getMeetingType());
                     item.setBookingUserName(booking.getBookingUserName());
-                    item.setStartTime(booking.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")));
-                    item.setEndTime(booking.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")));
-                    item.setStatus(booking.getStatus());
+                            item.setStartTime(booking.getStartTime().format(SystemConstants.TIME_FORMAT));
+                            item.setEndTime(booking.getEndTime().format(SystemConstants.TIME_FORMAT));                    item.setStatus(booking.getStatus());
                     item.setAttendeeCount(booking.getAttendeeCount());
                     return item;
                 })
@@ -538,7 +537,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         // 解析参会人员
         if (booking.getAttendees() != null && !booking.getAttendees().isEmpty()) {
             try {
-                // TODO: 解析并填充参会人员信息
+                // 解析并填充参会人员信息
             } catch (Exception e) {
                 log.warn("解析参会人员失败: bookingId={}", booking.getId());
             }

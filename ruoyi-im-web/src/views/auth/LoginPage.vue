@@ -344,7 +344,7 @@ const handleLogin = async () => {
         localStorage.removeItem('remembered_username')
       }
     } else {
-      ElMessage.info('短信登录功能开发中')
+      ElMessage.info('短信登录暂未开放，请使用账号密码登录')
       return
     }
 

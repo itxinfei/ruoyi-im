@@ -16,6 +16,22 @@ public interface ImWebSocketBroadcastService {
     void broadcastOnlineStatus(Long userId, boolean online);
 
     /**
+     * 发送通话信令给目标用户 (支持分布式)
+     *
+     * @param toUserId 目标用户ID
+     * @param signal   信令数据
+     */
+    void sendCallSignal(Long toUserId, Object signal);
+
+    /**
+     * 精准发送WebSocket消息给指定用户 (支持分布式)
+     *
+     * @param userId 目标用户ID
+     * @param message 消息对象
+     */
+    void sendToUser(Long userId, Object message);
+
+    /**
      * 广播DING消息给目标用户
      *
      * @param dingVO         DING消息VO

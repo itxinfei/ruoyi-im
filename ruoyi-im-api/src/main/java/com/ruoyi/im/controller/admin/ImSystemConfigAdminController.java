@@ -16,6 +16,9 @@ import java.util.Map;
 /**
  * 系统配置管理控制器（管理员）
  * 提供系统级别配置的管理接口，需要管理员权限
+ * 权限说明：
+ * - ADMIN: 可修改基础配置（撤回时限、文件上限、会话过期）
+ * - SUPER_ADMIN: 可修改所有配置，包括安全策略
  *
  * @author ruoyi
  */
@@ -32,7 +35,7 @@ public class ImSystemConfigAdminController {
     /**
      * 获取所有系统配置
      *
-     * @return 系统配置Map
+     * @return 系统配置 Map
      */
     @Operation(summary = "获取系统配置", description = "获取所有系统配置")
     @GetMapping
@@ -58,7 +61,7 @@ public class ImSystemConfigAdminController {
     /**
      * 设置消息撤回时间限制
      *
-     * @param minutes 时间限制（分钟），0表示不限制
+     * @param minutes 时间限制（分钟），0 表示不限制
      * @return 操作结果
      */
     @Operation(summary = "设置撤回时间限制", description = "设置消息撤回时间限制")
@@ -66,7 +69,7 @@ public class ImSystemConfigAdminController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public Result<Void> setRecallTimeLimit(@RequestParam Integer minutes) {
         Long userId = SecurityUtils.getLoginUserId();
-        log.info("管理员设置消息撤回时间限制: userId={}, minutes={}", userId, minutes);
+        log.info("管理员设置消息撤回时间限制：userId={}, minutes={}", userId, minutes);
 
         systemConfigService.setMessageRecallTimeLimit(minutes);
         return Result.success("设置成功");
@@ -74,19 +77,31 @@ public class ImSystemConfigAdminController {
 
     /**
      * 更新系统配置
+     * 根据配置键判断是否需要 SUPER_ADMIN 权限
      *
      * @param configKey   配置键
      * @param configValue 配置值
      * @return 操作结果
      */
-    @Operation(summary = "更新系统配置", description = "更新指定的系统配置")
+    @Operation(summary = "更新系统配置", description = "更新指定的系统配置，安全策略相关配置仅 SUPER_ADMIN 可修改")
     @PutMapping("/{configKey}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public Result<Void> updateConfig(
             @PathVariable String configKey,
             @RequestBody Object configValue) {
+
+        // 检查是否需要 SUPER_ADMIN 权限
+        if (systemConfigService.requiresSuperAdmin(configKey)) {
+            String userRole = SecurityUtils.getLoginUserRole();
+            if (!"SUPER_ADMIN".equals(userRole)) {
+                log.warn("用户权限不足，尝试修改 SUPER_ADMIN 专属配置：userId={}, configKey={}",
+                    SecurityUtils.getLoginUserId(), configKey);
+                return Result.error("权限不足：该配置仅 SUPER_ADMIN 可修改");
+            }
+        }
+
         Long userId = SecurityUtils.getLoginUserId();
-        log.info("管理员更新系统配置: userId={}, configKey={}", userId, configKey);
+        log.info("管理员更新系统配置：userId={}, configKey={}, value={}", userId, configKey, configValue);
 
         systemConfigService.updateSystemConfig(configKey, configValue);
         return Result.success("更新成功");

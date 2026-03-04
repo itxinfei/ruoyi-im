@@ -65,12 +65,15 @@ export default {
     UPDATE_SESSION(state, session) {
       const index = state.sessions.findIndex(s => s.id === session.id)
       if (index !== -1) {
+        // 合并更新现有会话
         state.sessions[index] = { ...state.sessions[index], ...session }
       } else {
-        state.sessions.push(session)
+        // 新会话，插入到列表首部
+        state.sessions.unshift(session)
       }
+      
       // 更新未读总数
-      state.totalUnreadCount = state.sessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
+      state.totalUnreadCount = state.sessions.reduce((sum, s) => sum + (Number(s.unreadCount) || 0), 0)
     },
 
     // 设置当前会话
@@ -132,7 +135,7 @@ export default {
           })
 
           if (Object.keys(userStatusMap).length > 0) {
-            commit('contact/SET_ALL_USER_STATUS', userStatusMap, { root: true })
+            commit('im/contact/SET_ALL_USER_STATUS', userStatusMap, { root: true })
           }
         }
       } finally {

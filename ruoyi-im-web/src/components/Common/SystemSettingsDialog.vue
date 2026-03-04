@@ -310,7 +310,8 @@ const testSound = () => {
 }
 
 const handleEditProfile = () => {
-  ElMessage.info('编辑资料功能开发中...')
+  // TODO: 打开编辑资料弹窗
+  ElMessage.info('请在个人中心编辑资料')
 }
 
 const checkUpdate = () => {

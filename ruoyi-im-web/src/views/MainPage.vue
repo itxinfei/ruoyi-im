@@ -1,64 +1,64 @@
 <template>
   <div :class="['dingtalk-app', isDark ? 'dark' : '']">
-    <div class="flex h-screen bg-background-light dark:bg-background-dark overflow-hidden">
-      <!-- 新侧边导航 -->
+    <div class="layout-wrapper">
+      <!-- 1. 左侧一级导航 (固定 68px) -->
       <ImSideNavNew
         :active-module="activeModule"
-        :collapsed="isSidebarCollapsed"
         @switch-module="handleSwitchModule"
-        @toggle-collapse="isSidebarCollapsed = !isSidebarCollapsed"
       />
 
-      <!-- 主内容区 -->
-      <main class="flex-1 min-w-0 overflow-hidden flex">
-        <SessionPanel 
-          v-if="activeModule === 'chat'" 
-          :current-session="currentSession"
-          @select-session="handleSelectSession" 
-          @show-user="handleShowUser"
-        />
-        <WorkbenchPanel v-if="activeModule === 'workbench'" />
-        <ContactsPanel v-if="activeModule === 'contacts'" />
-        <DocumentsPanel v-if="activeModule === 'drive'" />
-        <CalendarPanel v-if="activeModule === 'calendar'" />
-        <TodoPanel v-if="activeModule === 'todo'" />
-        <ApprovalPanel v-if="activeModule === 'approval'" />
-        <MailPanel v-if="activeModule === 'mail'" />
-        <AssistantPanel v-if="activeModule === 'assistant'" />
-        
-        <!-- 核心聊天面板 -->
-        <ChatPanel 
-          v-if="activeModule === 'chat'" 
-          :session="currentSession" 
-          @show-user="handleShowUser"
-        />
+      <!-- 2. 中间二级列表与右侧主区 (Flex 1) -->
+      <main class="content-container">
+        <!-- 消息模块专用：双栏布局 -->
+        <template v-if="activeModule === 'chat'">
+          <SessionPanel 
+            :current-session="currentSession"
+            @select-session="handleSelectSession" 
+            @show-user="handleShowUser"
+          />
+          <ChatPanel 
+            :session="currentSession" 
+            @show-user="handleShowUser"
+          />
+        </template>
+
+        <!-- 其他模块：单面板布局 -->
+        <template v-else>
+          <div class="module-panel">
+            <WorkbenchPanel v-if="activeModule === 'workbench'" />
+            <ContactsPanel v-if="activeModule === 'contacts'" @show-user="handleShowUser" />
+            <DocumentsPanel v-if="activeModule === 'drive'" />
+            <CalendarPanel v-if="activeModule === 'calendar'" />
+            <TodoPanel v-if="activeModule === 'todo'" />
+            <ApprovalPanel v-if="activeModule === 'approval'" />
+            <MailPanel v-if="activeModule === 'mail'" />
+            <AssistantPanel v-if="activeModule === 'assistant'" />
+            <AdminLayout v-if="activeModule === 'admin'" />
+            <SearchPanel v-if="activeModule === 'search'" @show-user="handleShowUser" @go-to-session="handleGoToSession" @go-to-group="handleGoToGroup" />
+            <SettingsPanel v-if="activeModule === 'settings'" />
+            <ProfilePanel v-if="activeModule === 'profile'" />
+          </div>
+        </template>
       </main>
 
-      <!-- 全局交互弹窗 (对齐钉钉模式) -->
-      <PersonalProfileDialog v-model="showProfile" />
-      <SystemSettingsDialog v-model="showSettings" />
-      <HelpFeedbackDialog v-model="showHelp" />
-      <UserDetailDrawer
-        v-model="showUserDetail"
-        :session="detailSession"
-        @send-message="handleSendMessageFromDrawer"
-        @voice-call="handleVoiceCallFromDrawer"
-        @video-call="handleVideoCallFromDrawer"
+      <!-- 全局交互层 (防御性数据处理) -->
+      <UserDetailDrawer 
+        v-model="showUserDetail" 
+        :session="detailSession" 
+        @send-message="handleSendMessageFromDrawer" 
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
-import { useImWebSocket } from '@/composables/useImWebSocket'
-import { useTheme } from '@/composables/useTheme'
-import { createConversation } from '@/api/im'
 import { ElMessage } from 'element-plus'
-import ImSideNavNew from '../components/ImSideNavNew/index.vue'
+import { useImWebSocket } from '@/composables/useImWebSocket'
+import ImSideNavNew from '@/components/ImSideNavNew/index.vue'
 import SessionPanel from './SessionPanel.vue'
+import ChatPanel from './ChatPanel.vue'
 import WorkbenchPanel from './WorkbenchPanel.vue'
 import ContactsPanel from './ContactsPanel.vue'
 import DocumentsPanel from './DocumentsPanel.vue'
@@ -67,195 +67,113 @@ import TodoPanel from './TodoPanel.vue'
 import ApprovalPanel from './ApprovalPanel.vue'
 import MailPanel from './MailPanel.vue'
 import AssistantPanel from './AssistantPanel.vue'
-import ChatPanel from './ChatPanel.vue'
+import SearchPanel from './SearchPanel.vue'
+import SettingsPanel from './SettingsPanel.vue'
+import ProfilePanel from './ProfilePanel.vue'
 import UserDetailDrawer from '@/components/Chat/UserDetailDrawer.vue'
-
-// 新增弹窗组件
-import PersonalProfileDialog from '@/components/Common/PersonalProfileDialog.vue'
-import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
-import HelpFeedbackDialog from '@/components/Common/HelpFeedbackDialog.vue'
+import AdminLayout from './admin/AdminLayout.vue'
 
 const store = useStore()
-const router = useRouter()
 const activeModule = ref('chat')
-const isSidebarCollapsed = ref(false)
-const currentSession = computed(() => store.state.im.session?.currentSession || null)
-const { isDark } = useTheme()
-
-// 弹窗状态控制
-const showProfile = ref(false)
-const showSettings = ref(false)
-const showHelp = ref(false)
 const showUserDetail = ref(false)
 const detailSession = ref(null)
 
-const { connect, onMessage, isConnected } = useImWebSocket()
+const { connect, disconnect, onMessage, onRead, onOnline, onOffline } = useImWebSocket()
 
-const handleSwitchModule = (module) => {
-  if (module === 'profile') {
-    showProfile.value = true
-  } else if (module === 'settings') {
-    showSettings.value = true
-  } else if (module === 'help') {
-    showHelp.value = true
-  } else {
-    activeModule.value = module
-  }
+const currentSession = computed(() => store.state.im?.session?.currentSession || null)
+// 修复点：增加防御性检查，防止 state.app 未定义导致崩溃
+const isDark = computed(() => false) 
+
+const handleSwitchModule = (m) => { 
+  activeModule.value = m 
+}
+const handleSelectSession = (s) => { store.commit('im/session/SET_CURRENT_SESSION', s) }
+
+// 跳转到会话
+const handleGoToSession = ({ targetId, type }) => {
+  activeModule.value = 'chat'
+  // 查找或创建会话
+  store.dispatch('im/session/findSession', { targetId, type }).then(session => {
+    if (session) {
+      handleSelectSession(session)
+    }
+  })
 }
 
-const handleSelectSession = (session) => {
-  if (!session?.id) return
-  store.dispatch('im/session/selectSession', session)
+// 跳转到群组
+const handleGoToGroup = (groupId) => {
+  activeModule.value = 'chat'
+  store.dispatch('im/session/findSession', { targetId: groupId, type: 'GROUP' }).then(session => {
+    if (session) {
+      handleSelectSession(session)
+    }
+  })
 }
 
+// 通用：显示用户详情逻辑
 const handleShowUser = (userId) => {
   if (!userId) return
-  // 构造简易 session 对象供 UserDetailDrawer 使用
-  detailSession.value = {
-    targetUserId: userId,
-    type: 'PRIVATE'
-  }
+  detailSession.value = { targetId: userId, type: 'PRIVATE' }
   showUserDetail.value = true
 }
 
-const ensurePrivateSession = async (userId) => {
-  const sessions = store.state.im.session?.sessions || []
-  const existed = sessions.find(
-    s => s.type === 'PRIVATE' && `${s.targetId}` === `${userId}`
-  )
-  if (existed) return existed
-
-  const res = await createConversation({
-    type: 'PRIVATE',
-    targetId: userId
-  })
-  if (res.code !== 200 || !res.data) {
-    throw new Error(res.msg || '创建会话失败')
-  }
-
-  await store.dispatch('im/session/loadSessions')
-  const latestSessions = store.state.im.session?.sessions || []
-  return latestSessions.find(s => `${s.id}` === `${res.data.id}`) || res.data
-}
-
-const handleSendMessageFromDrawer = async (sessionLike) => {
-  const userId = sessionLike?.targetUserId || sessionLike?.targetId || sessionLike?.userId
-  if (!userId) return
-
-  try {
-    const targetSession = await ensurePrivateSession(userId)
-    handleSelectSession(targetSession)
-    activeModule.value = 'chat'
-  } catch (error) {
-    ElMessage.error('发起会话失败，请稍后重试')
-  }
-}
-
-const triggerCallFromDrawer = async (sessionLike, callType) => {
-  const userId = sessionLike?.targetUserId || sessionLike?.targetId || sessionLike?.userId
-  if (!userId) return
-
-  try {
-    const targetSession = await ensurePrivateSession(userId)
-    handleSelectSession(targetSession)
-    activeModule.value = 'chat'
-    window.dispatchEvent(new CustomEvent('im-start-call', {
-      detail: { sessionId: targetSession.id, callType }
-    }))
-  } catch (error) {
-    ElMessage.error('通话发起失败，请稍后重试')
-  }
-}
-
-const handleVoiceCallFromDrawer = async (sessionLike) => {
-  await triggerCallFromDrawer(sessionLike, 'voice')
-}
-
-const handleVideoCallFromDrawer = async (sessionLike) => {
-  await triggerCallFromDrawer(sessionLike, 'video')
-}
-
-const handleSwitchToChatEvent = async (event) => {
-  const session = event?.detail?.conversation
-  if (!session?.id) return
-
+// 通用：从抽屉发起消息
+const handleSendMessageFromDrawer = (session) => {
+  showUserDetail.value = false
   activeModule.value = 'chat'
-  await store.dispatch('im/session/loadSessions')
-  const sessions = store.state.im.session?.sessions || []
-  const target = sessions.find(s => `${s.id}` === `${session.id}`) || session
-  handleSelectSession(target)
+  handleSelectSession(session)
 }
 
-// Watch session change to auto-switch to chat
-watch(currentSession, (sess) => {
-  if (sess) {
-    activeModule.value = 'chat'
-  }
-})
+// 初始化 WebSocket 监听
+const initWebSocket = () => {
+  const token = store.state.user?.token
+  if (!token) return
 
-// Global WebSocket Message Handler
-onMessage((msg) => {
-  store.dispatch('im/message/receiveMessage', msg)
-})
+  connect(token)
 
-const { onOnline, onOffline } = useImWebSocket()
+  // 监听新消息
+  onMessage((message) => {
+    store.dispatch('im/message/receiveMessage', message)
+  })
 
-onOnline((data) => {
-  if (data.userId) {
-    store.commit('im/contact/SET_USER_STATUS', { userId: data.userId, status: 'online' })
-  }
-})
-
-onOffline((data) => {
-  if (data.userId) {
-    store.commit('im/contact/SET_USER_STATUS', { userId: data.userId, status: 'offline' })
-  }
-})
-
-onMounted(async () => {
-  window.addEventListener('switch-to-chat', handleSwitchToChatEvent)
-
-  try {
-    const userInfo = await store.dispatch('user/getUserInfo')
-    if (!userInfo?.id) {
-      throw new Error('登录状态无效')
+  // 监听已读状态（含多端同步）
+  onRead((payload) => {
+    // 如果是自己其他端发送的已读，同步更新本地未读数
+    if (payload.userId === store.state.user?.currentUser?.id) {
+      store.commit('im/session/UPDATE_SESSION', {
+        id: payload.conversationId,
+        unreadCount: 0
+      })
     }
-  } catch (error) {
-    ElMessage.warning('登录已失效，请重新登录')
-    localStorage.removeItem('im_token')
-    localStorage.removeItem('im_user_info')
-    localStorage.removeItem('im_user_role')
-    router.replace('/login')
-    return
-  }
+  })
 
-  try {
-    await store.dispatch('im/session/loadSessions')
-    const sessions = store.state.im.session?.sessions || []
-    if (!store.state.im.session?.currentSession && sessions.length > 0) {
-      handleSelectSession(sessions[0])
-    }
-  } catch (error) {
-    ElMessage.error('加载会话失败，请刷新重试')
-    console.warn('加载会话列表失败', error)
-  }
+  // 监听在线状态
+  onOnline((payload) => {
+    store.commit('im/contact/SET_USER_STATUS', { userId: payload.userId, status: 'online' })
+  })
 
-  if (!isConnected.value) {
-    const token = localStorage.getItem('im_token')
-    if (token) {
-        connect(token)
-    }
+  onOffline((payload) => {
+    store.commit('im/contact/SET_USER_STATUS', { userId: payload.userId, status: 'offline' })
+  })
+}
+
+onMounted(() => { 
+  if (store.state.user?.token) {
+    store.dispatch('im/session/loadSessions').catch(err => {
+      console.warn('会话加载失败', err)
+    })
+    initWebSocket()
   }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('switch-to-chat', handleSwitchToChatEvent)
+  disconnect()
 })
 </script>
 
 <style lang="scss" scoped>
-.dingtalk-app {
-  width: 100%;
-  height: 100%;
-}
+.dingtalk-app { width: 100vw; height: 100vh; overflow: hidden; background: #fff; }
+.layout-wrapper { display: flex; width: 100%; height: 100%; }
+.content-container { flex: 1; display: flex; height: 100%; min-width: 0; overflow: hidden; }
+.module-panel { flex: 1; height: 100%; overflow: hidden; background: #fff; }
 </style>

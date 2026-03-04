@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.domain.ImWorkReport;
 import com.ruoyi.im.domain.ImWorkReportComment;
@@ -388,9 +389,9 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     }
 
     private String getCompletionStatusName(String status) {
-        if ("COMPLETED".equals(status)) {
+        if (SystemConstants.STATUS_COMPLETED.equals(status)) {
             return "已完成";
-        } else if ("IN_PROGRESS".equals(status)) {
+        } else if (SystemConstants.STATUS_IN_PROGRESS.equals(status)) {
             return "进行中";
         } else if ("PENDING".equals(status)) {
             return "待处理";
