@@ -11,7 +11,7 @@
         :key="msg.id || index"
         :message="msg"
         @reply="(m) => $emit('reply', m)"
-        @command="(c, m) => $emit('command', c, m)"
+        @command="handleCommand"
         @show-user="(uid) => $emit('show-user', uid)"
       >
         <template #bubble>
