@@ -198,6 +198,7 @@
     <UserProfileDialog
       v-model="showUserDialog"
       :user-id="selectedUserId"
+      @start-call="handleStartCallFromProfile"
     />
 
     <!-- 群组详情弹窗 -->
@@ -261,6 +262,19 @@ const handleDeptSelect = async (dept) => {
 const handleMemberClick = (member) => {
   selectedUserId.value = member.id || member.userId
   showUserDialog.value = true
+}
+
+// 从用户详情弹窗发起通话
+const handleStartCallFromProfile = ({ userId, userDetail }) => {
+  // 触发全局通话事件，由 ChatPanel 处理
+  window.dispatchEvent(new CustomEvent('im-start-call', {
+    detail: {
+      peerId: userId,
+      peerName: userDetail?.nickname || userDetail?.username || '联系人',
+      peerAvatar: userDetail?.avatar,
+      callType: 'voice'
+    }
+  }))
 }
 
 const handleChat = async (member) => {

@@ -97,7 +97,20 @@ public class LogUtil
 
     public static void error(Logger logger, Throwable throwable, String msg, Object... args)
     {
-        logger.error(msg, throwable);
+        if (throwable == null)
+        {
+            logger.error(msg, args);
+            return;
+        }
+        if (args == null || args.length == 0)
+        {
+            logger.error(msg, throwable);
+            return;
+        }
+        Object[] params = new Object[args.length + 1];
+        System.arraycopy(args, 0, params, 0, args.length);
+        params[args.length] = throwable;
+        logger.error(msg, params);
     }
 
     public static class Performance

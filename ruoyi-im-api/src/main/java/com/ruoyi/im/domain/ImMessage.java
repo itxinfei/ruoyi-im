@@ -136,6 +136,14 @@ public class ImMessage extends BaseEntity {
     @TableField("version")
     private Integer version;
 
+    /** 是否加密：0否 1是 */
+    @TableField("is_encrypted")
+    private Integer isEncrypted;
+
+    /** 加密密钥版本 */
+    @TableField("encryption_key_version")
+    private Integer encryptionKeyVersion;
+
     // ==================== 以下字段为非数据库字段 ====================
 
     /**

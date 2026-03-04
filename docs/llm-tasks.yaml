@@ -56,7 +56,7 @@ tasks:
   - task_id: "IM-A-001"
     title: "语音通话链路闭环"
     priority: "P0"
-    status: "doing"
+    status: "done"
     owner: "llm"
     goal: "打通语音通话邀请、接听、拒绝、挂断和结束状态同步"
     scope_in:
@@ -87,7 +87,7 @@ tasks:
   - task_id: "IM-A-002"
     title: "视频通话链路闭环"
     priority: "P0"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "打通视频通话邀请、接听、挂断并处理异常状态"
     scope_in:

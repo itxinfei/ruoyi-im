@@ -90,7 +90,7 @@ const props = defineProps({
   userId: [String, Number]
 })
 
-const emit = defineEmits(['update:modelValue', 'chat'])
+const emit = defineEmits(['update:modelValue', 'chat', 'start-call'])
 
 const store = useStore()
 const visible = ref(false)
@@ -133,7 +133,9 @@ const handleStartChat = async () => {
 }
 
 const handleStartCall = () => {
-  ElMessage.info('语音通话功能开发中...')
+  // 触发通话事件，由父组件处理
+  emit('start-call', { userId: props.userId, userDetail: userDetail.value })
+  handleClose()
 }
 
 const handleMore = () => {

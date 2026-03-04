@@ -30,6 +30,8 @@
         <result property="editTime" column="edit_time"/>
         <result property="isDeleted" column="is_deleted"/>
         <result property="deletedTime" column="deleted_time"/>
+        <result property="isEncrypted" column="is_encrypted"/>
+        <result property="encryptionKeyVersion" column="encryption_key_version"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -43,6 +45,7 @@
                is_revoked, revoked_time, revoker_id,
                is_edited, edited_content, edit_count, edit_time,
                is_deleted, deleted_time,
+               is_encrypted, encryption_key_version,
                create_time, update_time
         from im_message
     </sql>
@@ -96,6 +99,8 @@
             <if test="editTime != null">edit_time,</if>
             <if test="isDeleted != null">is_deleted,</if>
             <if test="deletedTime != null">deleted_time,</if>
+            <if test="isEncrypted != null">is_encrypted,</if>
+            <if test="encryptionKeyVersion != null">encryption_key_version,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -126,6 +131,8 @@
             <if test="editTime != null">#{editTime},</if>
             <if test="isDeleted != null">#{isDeleted},</if>
             <if test="deletedTime != null">#{deletedTime},</if>
+            <if test="isEncrypted != null">#{isEncrypted},</if>
+            <if test="encryptionKeyVersion != null">#{encryptionKeyVersion},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -160,6 +167,8 @@
             <if test="editTime != null">edit_time = #{editTime},</if>
             <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
             <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
+            <if test="isEncrypted != null">is_encrypted = #{isEncrypted},</if>
+            <if test="encryptionKeyVersion != null">encryption_key_version = #{encryptionKeyVersion},</if>
         </trim>
         where id = #{id}
     </update>
@@ -219,6 +228,7 @@
                                is_revoked, revoked_time, revoker_id,
                                is_edited, edited_content, edit_count, edit_time,
                                is_deleted, deleted_time,
+                               is_encrypted, encryption_key_version,
                                create_time, update_time)
         values
         <foreach collection="list" item="message" separator=",">
@@ -230,6 +240,7 @@
              #{message.isRevoked}, #{message.revokedTime}, #{message.revokerId},
              #{message.isEdited}, #{message.editedContent}, #{message.editCount}, #{message.editTime},
              #{message.isDeleted}, #{message.deletedTime},
+             #{message.isEncrypted}, #{message.encryptionKeyVersion},
              #{message.createTime}, #{message.updateTime})
         </foreach>
     </insert>

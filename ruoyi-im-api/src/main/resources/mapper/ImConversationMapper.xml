@@ -12,12 +12,18 @@
         <result column="last_message_time" property="lastMessageTime" />
         <result column="is_deleted" property="isDeleted" />
         <result column="deleted_time" property="deletedTime" />
+        <result column="is_sensitive" property="isSensitive" />
+        <result column="sensitive_level" property="sensitiveLevel" />
+        <result column="no_forward" property="noForward" />
+        <result column="no_copy" property="noCopy" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, type, target_id, name, avatar, last_message_id, last_message_time, is_deleted, deleted_time, create_time, update_time
+        id, type, target_id, name, avatar, last_message_id, last_message_time, is_deleted, deleted_time, 
+        is_sensitive, sensitive_level, no_forward, no_copy,
+        create_time, update_time
     </sql>
 
     <select id="selectConversationsByUserId" resultMap="BaseResultMap">
@@ -146,7 +152,8 @@
     <select id="selectUserConversationsWithMembers" resultMap="ConversationWithMemberVO">
         SELECT
             c.id, c.type, c.target_id, c.name, c.avatar, c.last_message_id, c.last_message_time,
-            c.is_deleted, c.deleted_time, c.create_time, c.update_time,
+            c.is_deleted, c.deleted_time, c.is_sensitive, c.sensitive_level, c.no_forward, c.no_copy,
+            c.create_time, c.update_time,
             COALESCE(us.unread_count, cm.unread_count, 0) AS unread_count,
             COALESCE(us.is_pinned, cm.is_pinned, 0) AS is_pinned,
             COALESCE(us.is_muted, cm.is_muted, 0) AS is_muted,

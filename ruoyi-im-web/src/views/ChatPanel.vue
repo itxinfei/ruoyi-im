@@ -187,8 +187,28 @@ const { onMessage, onCall, sendMessage: sendWsMessage } = useImWebSocket()
 const activeCall = ref(null)
 
 const handleStartCallEvent = (event) => {
-  const sessionId = event?.detail?.sessionId
-  const callType = event?.detail?.callType
+  const detail = event?.detail || {}
+
+  // 从通讯录发起的通话（有 peerId）
+  if (detail.peerId) {
+    const callId = `call-${Date.now()}-${currentUser.value?.id || 'unknown'}`
+    activeCall.value = { callId, peerId: detail.peerId, type: detail.callType || 'voice' }
+
+    callDialogRef.value?.open(detail.callType || 'voice', {
+      status: 'calling',
+      callId,
+      peerId: detail.peerId,
+      peerName: detail.peerName || '联系人',
+      peerAvatar: detail.peerAvatar || ''
+    })
+
+    sendCallSignal('invite', { callId, peerId: detail.peerId, callType: detail.callType || 'voice' })
+    return
+  }
+
+  // 从当前会话发起的通话
+  const sessionId = detail.sessionId
+  const callType = detail.callType
   if (!sessionId || !callType) return
   if (`${sessionId}` !== `${props.session?.id}`) return
   if (callType === 'video') handleStartVideo()

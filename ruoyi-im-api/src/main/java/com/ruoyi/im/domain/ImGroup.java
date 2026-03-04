@@ -79,6 +79,30 @@ public class ImGroup implements Serializable {
     @TableField("update_time")
     private LocalDateTime updateTime;
 
+    /**
+     * 群二维码URL
+     */
+    @TableField("qrcode_url")
+    private String qrcodeUrl;
+
+    /**
+     * 二维码过期时间
+     */
+    @TableField("qrcode_expire_time")
+    private LocalDateTime qrcodeExpireTime;
+
+    /**
+     * 允许上传文件：0=否, 1=是
+     */
+    @TableField("allow_upload")
+    private Integer allowUpload;
+
+    /**
+     * 显示成员列表：0=否, 1=是
+     */
+    @TableField("show_member_list")
+    private Integer showMemberList;
+
     // ==================== 以下字段为非数据库字段 ====================
 
     /**

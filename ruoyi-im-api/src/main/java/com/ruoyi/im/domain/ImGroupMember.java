@@ -9,6 +9,16 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import lombok.EqualsAndHashCode;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.ruoyi.im.common.BaseEntity;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 /**
  * 群组成员实体
  *
@@ -19,7 +29,8 @@ import java.time.LocalDateTime;
  */
 @TableName("im_group_member")
 @Data
-public class ImGroupMember implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class ImGroupMember extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -76,15 +87,7 @@ public class ImGroupMember implements Serializable {
     @TableField("reply_to_message_id")
     private Long replyToMessageId;
 
-    /**
-     * 创建时间，群组成员记录创建的时间
-     */
-    private LocalDateTime createTime;
-
-    /**
-     * 更新时间，群组成员信息最后更新的时间
-     */
-    private LocalDateTime updateTime;
+    // createTime 和 updateTime 继承自 BaseEntity
 
     // ==================== 以下字段为非数据库字段 ====================
 
