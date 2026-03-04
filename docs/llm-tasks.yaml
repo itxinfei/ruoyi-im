@@ -472,7 +472,7 @@ tasks:
   - task_id: "IM-P0-005"
     title: "sql/im.sql 与 Mapper 全量一致性核查"
     priority: "P0"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "按 sql/im.sql 统一 domain/mapper/xml，输出差异清单并完成关键修复"
     scope_in:

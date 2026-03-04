@@ -29,11 +29,5 @@ public class PasswordUtil {
         return encoder.matches(password, hash);
     }
     
-    public static void main(String[] args) {
-        String password = "123456";
-        String hash = encode(password);
-        System.out.println("密码: " + password);
-        System.out.println("哈希值: " + hash);
-        System.out.println("验证: " + matches(password, hash));
-    }
+    // 留空：避免误执行输出到控制台
 }

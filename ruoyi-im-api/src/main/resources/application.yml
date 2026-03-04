@@ -13,6 +13,11 @@ app:
 
 # Spring框架配置
 spring:
+  profiles:
+    active: dev
+  output:
+    ansi:
+      enabled: never
   # 数据源配置
   datasource:
     url: jdbc:mysql://172.168.20.222:3306/im?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
@@ -146,7 +151,5 @@ file:
 logging:
   level:
     com.ruoyi.im: debug
-    org.springframework.security: debug
-    org.springframework.web: debug
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    org.springframework.security: info
+    org.springframework.web: info

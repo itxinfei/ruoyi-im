@@ -45,9 +45,9 @@ public class ConfigValidator {
         try {
             String port = env.getProperty("server.port");
             String address = env.getProperty("server.address");
-            log.info("✓ 服务器配置 - 端口: {}, 地址: {}", port, address);
+            log.info("[OK] 服务器配置 - 端口: {}, 地址: {}", port, address);
         } catch (Exception e) {
-            log.error("✗ 服务器配置验证失败", e);
+            log.error("[FAIL] 服务器配置验证失败", e);
         }
     }
 
@@ -56,9 +56,9 @@ public class ConfigValidator {
             String appEnv = env.getProperty("app.env");
             Boolean securityEnabled = env.getProperty("app.security.enabled", Boolean.class);
             Long devUserId = env.getProperty("app.dev.user-id", Long.class);
-            log.info("✓ 应用配置 - 环境: {}, 安全: {}, 开发用户ID: {}", appEnv, securityEnabled, devUserId);
+            log.info("[OK] 应用配置 - 环境: {}, 安全: {}, 开发用户ID: {}", appEnv, securityEnabled, devUserId);
         } catch (Exception e) {
-            log.error("✗ 应用配置验证失败", e);
+            log.error("[FAIL] 应用配置验证失败", e);
         }
     }
 
@@ -71,13 +71,13 @@ public class ConfigValidator {
             String jacksonDateFormat = env.getProperty("spring.jackson.date-format");
             String multipartMaxFileSize = env.getProperty("spring.servlet.multipart.max-file-size");
             
-            log.info("✓ Spring配置");
+            log.info("[OK] Spring配置");
             log.info("  - 数据源URL: {}", datasourceUrl != null ? datasourceUrl.substring(0, Math.min(50, datasourceUrl.length())) + "..." : "null");
             log.info("  - Redis: {}:{}", redisHost, redisPort);
             log.info("  - Jackson时区: {}, 格式: {}", jacksonTimezone, jacksonDateFormat);
             log.info("  - 文件上传大小: {}", multipartMaxFileSize);
         } catch (Exception e) {
-            log.error("✗ Spring配置验证失败", e);
+            log.error("[FAIL] Spring配置验证失败", e);
         }
     }
 
@@ -97,7 +97,7 @@ public class ConfigValidator {
             Integer heartbeatInterval = env.getProperty("im.security.heartbeatInterval", Integer.class);
             Integer maxConnections = env.getProperty("im.security.maxConnections", Integer.class);
 
-            log.info("✓ IM模块配置");
+            log.info("[OK] IM模块配置");
             log.info("  - JWT密钥: {}", jwtSecret != null ? "已配置" : "未配置");
             log.info("  - JWT过期时间: {}ms", jwtExpiration);
             log.info("  - 消息最大长度: {}", messageMaxLength);
@@ -112,14 +112,14 @@ public class ConfigValidator {
             log.info("  - WebSocket心跳间隔: {}秒", heartbeatInterval);
             log.info("  - 最大连接数: {}", maxConnections);
 
-            log.info("✓ ImConfig注入验证");
+            log.info("[OK] ImConfig注入验证");
             log.info("  - Jwt配置: {}", imConfig.getJwt() != null ? "已注入" : "未注入");
             log.info("  - Message配置: {}", imConfig.getMessage() != null ? "已注入" : "未注入");
             log.info("  - File配置: {}", imConfig.getFile() != null ? "已注入" : "未注入");
             log.info("  - Sensitive配置: {}", imConfig.getSensitive() != null ? "已注入" : "未注入");
             log.info("  - Security配置: {}", imConfig.getSecurity() != null ? "已注入" : "未注入");
         } catch (Exception e) {
-            log.error("✗ IM模块配置验证失败", e);
+            log.error("[FAIL] IM模块配置验证失败", e);
         }
     }
 
@@ -130,13 +130,13 @@ public class ConfigValidator {
             Boolean swaggerUiEnabled = env.getProperty("springdoc.swagger-ui.enabled", Boolean.class);
             String swaggerUiPath = env.getProperty("springdoc.swagger-ui.path");
             
-            log.info("✓ Swagger配置");
+            log.info("[OK] Swagger配置");
             log.info("  - Swagger启用: {}", swaggerEnabled);
             log.info("  - API文档启用: {}", apiDocsEnabled);
             log.info("  - SwaggerUI启用: {}", swaggerUiEnabled);
             log.info("  - SwaggerUI路径: {}", swaggerUiPath);
         } catch (Exception e) {
-            log.error("✗ Swagger配置验证失败", e);
+            log.error("[FAIL] Swagger配置验证失败", e);
         }
     }
 
@@ -147,13 +147,13 @@ public class ConfigValidator {
             String idType = env.getProperty("mybatis-plus.global-config.db-config.id-type");
             String logicDeleteField = env.getProperty("mybatis-plus.global-config.db-config.logic-delete-field");
             
-            log.info("✓ MyBatis-Plus配置");
+            log.info("[OK] MyBatis-Plus配置");
             log.info("  - Mapper位置: {}", mapperLocations);
             log.info("  - 类型别名包: {}", typeAliasesPackage);
             log.info("  - ID类型: {}", idType);
             log.info("  - 逻辑删除字段: {}", logicDeleteField);
         } catch (Exception e) {
-            log.error("✗ MyBatis-Plus配置验证失败", e);
+            log.error("[FAIL] MyBatis-Plus配置验证失败", e);
         }
     }
 
@@ -162,11 +162,11 @@ public class ConfigValidator {
             String uploadPath = env.getProperty("file.upload.path");
             String urlPrefix = env.getProperty("file.upload.url-prefix");
             
-            log.info("✓ 文件上传配置");
+            log.info("[OK] 文件上传配置");
             log.info("  - 上传路径: {}", uploadPath);
             log.info("  - URL前缀: {}", urlPrefix);
         } catch (Exception e) {
-            log.error("✗ 文件上传配置验证失败", e);
+            log.error("[FAIL] 文件上传配置验证失败", e);
         }
     }
 
@@ -177,13 +177,14 @@ public class ConfigValidator {
             String webLogLevel = env.getProperty("logging.level.org.springframework.web");
             String consolePattern = env.getProperty("logging.pattern.console");
             
-            log.info("✓ 日志配置");
+            log.info("[OK] 日志配置");
             log.info("  - IM日志级别: {}", imLogLevel);
             log.info("  - Security日志级别: {}", securityLogLevel);
             log.info("  - Web日志级别: {}", webLogLevel);
             log.info("  - 控制台格式: {}", consolePattern != null ? "已配置" : "未配置");
         } catch (Exception e) {
-            log.error("✗ 日志配置验证失败", e);
+            log.error("[FAIL] 日志配置验证失败", e);
         }
     }
 }
+
