@@ -111,7 +111,7 @@ tasks:
   - task_id: "IM-B-001"
     title: "语音消息录制与播放闭环"
     priority: "P0"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "实现录音、上传、播放、进度拖动与失败重试"
     scope_in:

@@ -132,6 +132,7 @@
 
     <EmojiPicker v-if="showEmojiPicker" @select="selectEmoji" ref="emojiPickerRef" />
     <AtMemberPicker ref="atMemberPickerRef" :session-id="session?.id" @select="onAtSelect" />
+    <VoiceRecorder ref="voiceRecorderRef" @send="handleSendVoice" />
   </div>
 </template>
 
@@ -142,6 +143,7 @@ import { Close, ChatDotRound, Picture, FolderOpened, Phone, Clock, Upload, Micro
 import { ElMessage } from 'element-plus'
 import EmojiPicker from '@/components/EmojiPicker/index.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
+import VoiceRecorder from './VoiceRecorder.vue'
 
 const props = defineProps({
   session: Object,
@@ -150,7 +152,7 @@ const props = defineProps({
   editingMessage: Object
 })
 
-const emit = defineEmits(['send', 'upload-image', 'upload-file', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-location', 'typing'])
+const emit = defineEmits(['send', 'upload-image', 'upload-file', 'cancel-reply', 'cancel-edit', 'edit-confirm', 'input', 'start-call', 'start-video', 'send-location', 'typing', 'send-voice'])
 
 const store = useStore()
 const messageContent = ref('')
@@ -169,6 +171,7 @@ const getInputPlaceholder = computed(() => {
 const showEmojiPicker = ref(false)
 const textareaRef = ref(null)
 const atMemberPickerRef = ref(null)
+const voiceRecorderRef = ref(null)
 
 // 拖拽状态
 const isDragOver = ref(false)
@@ -370,9 +373,14 @@ const handleScreenshot = () => {
   }
 }
 
-// 语音录制 (UI入口)
+// 语音录制
 const handleVoiceRecord = () => {
-  ElMessage.info('语音消息功能开发中，敬请期待')
+  voiceRecorderRef.value?.open()
+}
+
+// 发送语音消息
+const handleSendVoice = ({ blob, duration }) => {
+  emit('send-voice', { blob, duration })
 }
 
 // 位置消息

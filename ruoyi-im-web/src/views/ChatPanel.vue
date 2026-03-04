@@ -64,6 +64,7 @@
             @upload-image="handleImageUpload"
             @upload-file="handleFileUpload"
             @typing="handleTyping"
+            @send-voice="handleSendVoice"
           />
         </div>
 
@@ -955,6 +956,69 @@ const handleImageUpload = async (payload) => {
       messages.value[index].status = 'failed'
     }
     ElMessage.error('图片发送失败')
+  }
+}
+
+// 发送语音消息
+const handleSendVoice = async ({ blob, duration }) => {
+  if (!props.session?.id) return
+
+  // 1. 创建预览 URL
+  const blobUrl = URL.createObjectURL(blob)
+  const tempId = `temp-voice-${Date.now()}`
+
+  // 2. 乐观更新：立即显示语音消息
+  const tempMsg = {
+    id: tempId,
+    type: 'VOICE',
+    content: JSON.stringify({
+      url: blobUrl,
+      duration: duration
+    }),
+    senderId: currentUser.value?.id,
+    senderName: currentUser.value?.nickName || '我',
+    senderAvatar: currentUser.value?.avatar,
+    timestamp: Date.now(),
+    isOwn: true,
+    status: 'uploading',
+    readCount: 0
+  }
+  messages.value.push(tempMsg)
+  msgListRef.value?.scrollToBottom()
+
+  try {
+    // 3. 上传语音文件
+    const formData = new FormData()
+    formData.append('file', blob, `voice-${Date.now()}.webm`)
+    const res = await uploadFile(formData)
+
+    if (res.code === 200) {
+      // 4. 发送消息
+      const msg = await store.dispatch('im/message/sendMessage', {
+        sessionId: props.session.id,
+        type: 'VOICE',
+        content: JSON.stringify({
+          fileId: res.data.id,
+          url: res.data.url,
+          duration: duration
+        })
+      })
+
+      // 5. 更新状态
+      const index = messages.value.findIndex(m => m.id === tempId)
+      if (index !== -1) {
+        messages.value.splice(index, 1, { ...transformMsg(msg), status: 'success' })
+      }
+      URL.revokeObjectURL(blobUrl)
+    } else {
+      throw new Error(res.msg || 'Upload failed')
+    }
+  } catch (error) {
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      messages.value[index].status = 'failed'
+    }
+    ElMessage.error('语音发送失败')
   }
 }
 

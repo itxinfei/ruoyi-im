@@ -12,9 +12,6 @@ import java.time.LocalDateTime;
 /**
  * 群组实体
  *
- * 用于存储IM系统中的群组信息，包括群组基本信息、成员管理、权限控制等
- * 支持公开群和私密群两种类型，可设置成员数量限制和群组描述
- *
  * @author ruoyi
  */
 @TableName("im_group")
@@ -23,121 +20,81 @@ public class ImGroup implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 群组ID，主键，唯一标识群组
-     */
+    /** 群组ID */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 群组名称，群组的显示名称
-     */
+    /** 群组名称 */
     private String name;
 
-    /**
-     * 群头像，群组的头像图片URL
-     */
+    /** 群头像 */
     private String avatar;
 
-    /**
-     * 群主用户ID，群组的创建者和拥有者
-     */
+    /** 群主用户ID */
     private Long ownerId;
 
-    /**
-     * 群组描述，群组的详细介绍信息
-     */
+    /** 群组描述 */
     private String description;
 
-    /**
-     * 成员数量限制，群组允许的最大成员数
-     */
+    /** 成员数量限制 */
     @TableField("max_members")
     private Integer maxMembers;
 
-    /**
-     * 是否删除：0=否, 1=是
-     */
+    /** 是否删除：0=否 1=是 */
     @TableField("is_deleted")
     private Integer isDeleted;
 
-    /**
-     * 删除时间
-     */
+    /** 删除时间 */
     @TableField("deleted_time")
     private LocalDateTime deletedTime;
 
-    /**
-     * 创建时间，群组创建的时间
-     */
+    /** 创建时间 */
     @TableField("create_time")
     private LocalDateTime createTime;
 
-    /**
-     * 更新时间，群组信息最后更新的时间
-     */
+    /** 更新时间 */
     @TableField("update_time")
     private LocalDateTime updateTime;
 
-    /**
-     * 群二维码URL
-     */
+    /** 群二维码URL */
     @TableField("qrcode_url")
     private String qrcodeUrl;
 
-    /**
-     * 二维码过期时间
-     */
+    /** 二维码过期时间 */
     @TableField("qrcode_expire_time")
     private LocalDateTime qrcodeExpireTime;
 
-    /**
-     * 允许上传文件：0=否, 1=是
-     */
+    /** 允许上传文件：0=否 1=是 */
     @TableField("allow_upload")
     private Integer allowUpload;
 
-    /**
-     * 显示成员列表：0=否, 1=是
-     */
+    /** 显示成员列表：0=否 1=是 */
     @TableField("show_member_list")
     private Integer showMemberList;
 
-    // ==================== 以下字段为非数据库字段 ====================
+    // ==================== 非数据库字段 ====================
 
-    /**
-     * 群公告（非数据库字段，从im_group_announcement表获取）
-     */
+    /** 群公告 */
     @TableField(exist = false)
     private String notice;
 
-    /**
-     * 状态（非数据库字段）
-     */
+    /** 状态 */
     @TableField(exist = false)
     private String status;
 
-    /**
-     * 成员数量（非数据库字段，从im_group_member统计）
-     */
+    /** 成员数量 */
     @TableField(exist = false)
     private Integer memberCount;
 
-    /**
-     * 群组类型（非数据库字段）
-     */
+    /** 群组类型 */
     @TableField(exist = false)
     private String type;
 
-    /**
-     * 全员禁言：0=否, 1=是
-     */
+    /** 全员禁言：0=否 1=是 */
     @TableField("all_muted")
     private Integer allMuted;
 
-    /**
-     * 群主名称，非数据库字段，用于显示群主的昵称
-     */
+    /** 群主名称 */
     @TableField(exist = false)
     private String ownerName;
 }

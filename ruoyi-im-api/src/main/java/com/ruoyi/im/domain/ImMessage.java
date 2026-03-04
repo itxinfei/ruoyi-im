@@ -14,9 +14,6 @@ import java.time.LocalDateTime;
 /**
  * IM消息实体
  *
- * 用于存储IM系统中的消息信息，包括文本、图片、文件、语音、视频等多种类型的消息
- * 支持消息撤回、回复、转发等功能
- *
  * @author ruoyi
  */
 @TableName("im_message")
@@ -25,11 +22,11 @@ public class ImMessage extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    /** 消息ID，主键 */
+    /** 消息ID */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** 客户端消息ID，用于去重和状态追踪 */
+    /** 客户端消息ID */
     @TableField("client_msg_id")
     private String clientMsgId;
 
@@ -54,10 +51,10 @@ public class ImMessage extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deliveredTime;
 
-    /** 会话ID，关联到im_conversation表 */
+    /** 会话ID */
     private Long conversationId;
 
-    /** 发送者用户ID，关联到im_user表 */
+    /** 发送者用户ID */
     private Long senderId;
 
     /** 消息类型：TEXT文本 FILE文件 IMAGE图片 VOICE语音 VIDEO视频 */
@@ -113,13 +110,13 @@ public class ImMessage extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime editTime;
 
-    // createTime 和 updateTime 继承自 BaseEntity
+    // createTime、updateTime 继承自 BaseEntity
 
-    /** 回复的消息ID（支持回复/引用功能） */
+    /** 回复的消息ID */
     @TableField("reply_to_message_id")
     private Long replyToMessageId;
 
-    /** 转发来源消息ID（支持转发功能） */
+    /** 转发来源消息ID */
     @TableField("forward_from_message_id")
     private Long forwardFromMessageId;
 
@@ -132,7 +129,7 @@ public class ImMessage extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deletedTime;
 
-    /** 版本号（乐观锁） */
+    /** 版本号 */
     @TableField("version")
     private Integer version;
 
@@ -144,41 +141,29 @@ public class ImMessage extends BaseEntity {
     @TableField("encryption_key_version")
     private Integer encryptionKeyVersion;
 
-    // ==================== 以下字段为非数据库字段 ====================
+    // ==================== 非数据库字段 ====================
 
-    /**
-     * 接收者用户ID（非数据库字段，通过conversation获取）
-     */
+    /** 接收者用户ID */
     @TableField(exist = false)
     private Long receiverId;
 
-    /**
-     * 父消息ID（非数据库字段，用于回复和转发）
-     */
+    /** 父消息ID */
     @TableField(exist = false)
     private Long parentId;
 
-    /**
-     * 消息状态（非数据库字段）
-     */
+    /** 消息状态 */
     @TableField(exist = false)
     private Integer status;
 
-    /**
-     * 发送时间（非数据库字段，使用createTime）
-     */
+    /** 发送时间 */
     @TableField(exist = false)
     private LocalDateTime sendTime;
 
-    /**
-     * 撤回时间（非数据库字段，使用revokedTime）
-     */
+    /** 撤回时间 */
     @TableField(exist = false)
     private LocalDateTime revokeTime;
 
-    /**
-     * 消息类型（非数据库字段，使用messageType）
-     */
+    /** 消息类型 */
     @TableField(exist = false)
     private String type;
 

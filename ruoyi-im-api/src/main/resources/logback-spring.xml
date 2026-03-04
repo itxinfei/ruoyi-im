@@ -4,13 +4,14 @@
 
     <property name="LOG_PATH" value="${LOG_PATH:-./logs}"/>
     
-    <!-- 控制台日志格式 - 使用 Spring Boot 的默认颜色转换器 -->
+    <!-- 控制台日志格式 - 钉钉风格 -->
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
     <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
     <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
     
-    <property name="LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(%-5p) %clr([%t]){faint} %clr(%logger{36}){cyan} %clr([traceId=%X{traceId:-} userId=%X{userId:-} ip=%X{ipAddr:-}]){yellow} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
-    <property name="LOG_PATTERN_FILE" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] traceId=%X{traceId:-} userId=%X{userId:-} ip=%X{ipAddr:-} %logger{50} - %msg%n"/>
+    <!-- 钉钉风格日志格式：时间 级别 [线程] 类名 - 消息 -->
+    <property name="LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%-5p){highlight} %clr([%t]){faint} %clr(%logger{36}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <property name="LOG_PATTERN_FILE" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{50} - %msg%n"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -58,7 +59,7 @@
 
     <springProfile name="dev">
         <logger name="com.ruoyi.im" level="DEBUG"/>
-        <root level="DEBUG">
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
@@ -74,7 +75,7 @@
 
     <springProfile name="prod">
         <logger name="com.ruoyi.im" level="INFO"/>
-        <root level="INFO">
+        <root level="WARN">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE_ALL"/>
             <appender-ref ref="FILE_ERROR"/>
@@ -82,8 +83,8 @@
     </springProfile>
 
     <springProfile name="default">
-        <logger name="com.ruoyi.im" level="DEBUG"/>
-        <root level="DEBUG">
+        <logger name="com.ruoyi.im" level="INFO"/>
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE_ALL"/>
             <appender-ref ref="FILE_ERROR"/>
