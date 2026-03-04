@@ -157,7 +157,7 @@ tasks:
   - task_id: "IM-D-001"
     title: "消息收藏全链路"
     priority: "P1"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "打通收藏、取消收藏、收藏列表查询"
     scope_in:

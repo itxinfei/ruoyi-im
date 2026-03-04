@@ -257,3 +257,69 @@ export function getUnreadCount(conversationId) {
   })
 }
 
+// ==================== 消息收藏相关 ====================
+
+/**
+ * 收藏消息
+ * @param {Object} data - 收藏数据
+ * @param {number} data.messageId - 消息ID
+ * @param {number} data.conversationId - 会话ID
+ * @param {string} data.remark - 备注（可选）
+ * @param {string} data.tags - 标签（可选）
+ * @returns {Promise}
+ */
+export function addMessageFavorite(data) {
+  return request({
+    url: '/api/im/message/favorite/add',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 取消收藏消息
+ * @param {number} messageId - 消息ID
+ * @returns {Promise}
+ */
+export function removeMessageFavorite(messageId) {
+  return request({
+    url: `/api/im/message/favorite/remove/${messageId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 检查消息是否已收藏
+ * @param {number} messageId - 消息ID
+ * @returns {Promise}
+ */
+export function checkMessageFavorited(messageId) {
+  return request({
+    url: `/api/im/message/favorite/check/${messageId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取用户收藏的消息列表
+ * @returns {Promise}
+ */
+export function getUserFavorites() {
+  return request({
+    url: '/api/im/message/favorite/list',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取会话中收藏的消息列表
+ * @param {number} conversationId - 会话ID
+ * @returns {Promise}
+ */
+export function getConversationFavorites(conversationId) {
+  return request({
+    url: `/api/im/message/favorite/conversation/${conversationId}`,
+    method: 'get'
+  })
+}
+

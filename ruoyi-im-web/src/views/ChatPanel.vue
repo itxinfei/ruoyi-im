@@ -490,11 +490,32 @@ const handleCommand = (cmd, msg) => {
 const handleFavorite = async (msg) => {
   try {
     // 调用收藏API
-    await store.dispatch('im/message/addToFavorite', msg)
-    ElMessage.success('已添加到收藏')
+    const { addMessageFavorite, removeMessageFavorite } = await import('@/api/im/message')
+
+    // 检查是否已收藏
+    if (msg.isFavorited) {
+      await removeMessageFavorite(msg.id)
+      ElMessage.success('已取消收藏')
+      // 更新本地状态
+      const index = messages.value.findIndex(m => m.id === msg.id)
+      if (index !== -1) {
+        messages.value[index].isFavorited = false
+      }
+    } else {
+      await addMessageFavorite({
+        messageId: msg.id,
+        conversationId: props.session?.id
+      })
+      ElMessage.success('已添加到收藏')
+      // 更新本地状态
+      const index = messages.value.findIndex(m => m.id === msg.id)
+      if (index !== -1) {
+        messages.value[index].isFavorited = true
+      }
+    }
   } catch (e) {
-    // 模拟成功（API未实现时）
-    ElMessage.success('已添加到收藏')
+    console.error('收藏操作失败', e)
+    ElMessage.error('操作失败')
   }
 }
 
