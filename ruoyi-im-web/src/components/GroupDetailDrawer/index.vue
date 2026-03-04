@@ -72,6 +72,10 @@
 
       <!-- 配置项 -->
       <div class="configs-section">
+        <div class="config-item clickable" @click="handleOpenFiles">
+          <span>群文件</span>
+          <el-icon><ArrowRight /></el-icon>
+        </div>
         <div class="config-item">
           <span>消息免打扰</span>
           <el-switch v-model="groupInfo.isMuted" @change="handleMuteChange" />
@@ -92,14 +96,18 @@
         <el-button v-else type="danger" plain class="wide-btn" @click="handleLeave">退出群聊</el-button>
       </div>
     </div>
+
+    <!-- 群文件面板 -->
+    <GroupFilePanel ref="groupFilePanelRef" :group-id="groupId" />
   </el-dialog>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Bell, User, Setting, MoreFilled, Edit, Plus } from '@element-plus/icons-vue'
+import { Bell, User, Setting, MoreFilled, Edit, Plus, ArrowRight } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import GroupFilePanel from './GroupFilePanel.vue'
 import {
   getGroup,
   getGroupMembers,
@@ -125,6 +133,7 @@ const loading = ref(false)
 const groupInfo = ref(null)
 const members = ref([])
 const currentUserId = ref(null)
+const groupFilePanelRef = ref(null)
 
 const loadCurrentUser = () => {
   const info = localStorage.getItem('user_info')
@@ -232,6 +241,11 @@ const handleLeave = () => {
 }
 
 const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
+
+// 打开群文件面板
+const handleOpenFiles = () => {
+  groupFilePanelRef.value?.open()
+}
 </script>
 
 <style scoped lang="scss">
@@ -314,6 +328,11 @@ const handleAddMembers = () => ElMessage.info('邀请功能正在开发中...')
   .config-item {
     display: flex; justify-content: space-between; align-items: center; padding: 12px 0;
     span { font-size: 14px; color: #1f2329; .dark & { color: #e2e8f0; } }
+
+    &.clickable {
+      cursor: pointer;
+      &:hover { background: var(--dt-bg-body); margin: 0 -20px; padding: 12px 20px; }
+    }
   }
 }
 

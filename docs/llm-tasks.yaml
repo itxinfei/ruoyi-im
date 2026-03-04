@@ -135,7 +135,7 @@ tasks:
   - task_id: "IM-C-001"
     title: "群文件面板与入口完善"
     priority: "P1"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "完善群文件查看、上传、下载、筛选能力"
     scope_in:
