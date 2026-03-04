@@ -21,7 +21,7 @@
         <div class="avatar-floating-wrapper">
           <DingtalkAvatar
             v-if="!isGroup"
-            :src="userInfo?.avatar"
+            :src="userAvatar"
             :name="userName"
             :user-id="session?.targetId || session?.targetUserId"
             :size="80"
@@ -31,7 +31,7 @@
           <div v-else class="avatar-large group-avatar">
             <span class="material-icons-outlined">groups</span>
           </div>
-          <span v-if="!isGroup && userInfo.online" class="online-status-dot"></span>
+          <span v-if="!isGroup && userOnline" class="online-status-dot"></span>
         </div>
 
         <div class="info-content">
@@ -124,7 +124,11 @@ const loading = ref(false)
 const isGroup = computed(() => props.session?.type === 'GROUP')
 const userName = computed(() => {
   if (!userInfo.value) return ''
-  return isGroup.value ? userInfo.value.name : userInfo.value.nickname || userInfo.value.username
+  // 优先使用 peerName，其次 name，最后 nickname/username
+  if (isGroup.value) {
+    return userInfo.value.name || userInfo.value.peerName || '群聊'
+  }
+  return userInfo.value.peerName || userInfo.value.name || userInfo.value.nickname || userInfo.value.username || '用户'
 })
 
 // 根据名字计算一个温和的背景色
@@ -136,23 +140,54 @@ const avatarBgColor = computed(() => {
   return colors[hash % colors.length] + '22' // 15% opacity
 })
 
+// 用户头像：优先使用 peerAvatar，其次 avatar
+const userAvatar = computed(() => {
+  if (!userInfo.value) return ''
+  return userInfo.value.peerAvatar || userInfo.value.avatar || ''
+})
+
+// 用户在线状态
+const userOnline = computed(() => {
+  if (!userInfo.value) return false
+  return userInfo.value.peerOnline === true || userInfo.value.online === true
+})
+
 const loadUserInfo = async () => {
   if (!props.session) return
   loading.value = true
   try {
     if (isGroup.value) {
-      userInfo.value = { ...props.session, online: false }
+      // 群聊：直接使用 session 信息
+      userInfo.value = {
+        ...props.session,
+        name: props.session.name || props.session.peerName || '群聊',
+        avatar: props.session.avatar || props.session.peerAvatar,
+        memberCount: props.session.memberCount || 0
+      }
     } else {
-      const targetUserId = props.session.targetUserId || props.session.userId || props.session.targetId
+      // 单聊：获取对方用户信息
+      const targetUserId = props.session.targetId || props.session.targetUserId
       if (targetUserId) {
         const res = await getUserInfo(targetUserId)
-        if (res.code === 200) userInfo.value = { ...res.data, online: Math.random() > 0.3 }
+        if (res.code === 200 && res.data) {
+          // 合并 session 和 API 返回的用户信息
+          userInfo.value = {
+            ...res.data,
+            // 优先使用 session 中的 peerName/peerAvatar（后端已处理好）
+            peerName: props.session.peerName || res.data.nickname || res.data.username,
+            peerAvatar: props.session.peerAvatar || res.data.avatar,
+            peerOnline: props.session.peerOnline !== undefined ? props.session.peerOnline : res.data.online
+          }
+        }
       } else {
-        userInfo.value = { ...props.session, online: false }
+        // 没有 targetUserId，使用 session 信息
+        userInfo.value = { ...props.session }
       }
     }
   } catch (error) {
     console.error('加载用户信息失败:', error)
+    // 失败时使用 session 信息
+    userInfo.value = { ...props.session }
   } finally {
     loading.value = false
   }

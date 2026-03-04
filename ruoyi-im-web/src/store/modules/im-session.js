@@ -25,7 +25,10 @@ export default {
     totalUnreadCount: 0,
 
     // 加载状态
-    loading: false
+    loading: false,
+
+    // 当前筛选类型
+    currentFilter: 'all'
   }),
 
   getters: {
@@ -97,21 +100,28 @@ export default {
       state.sessions = []
       state.currentSession = null
       state.totalUnreadCount = 0
+      state.currentFilter = 'all'
+    },
+
+    // 设置筛选类型
+    SET_FILTER(state, filter) {
+      state.currentFilter = filter
     }
   },
 
   actions: {
     // 加载会话列表
-    async loadSessions({ commit, rootState }) {
+    async loadSessions({ commit, rootState }, filter = 'all') {
       commit('SET_LOADING', true)
       try {
-        const res = await getConversations()
+        const res = await getConversations(filter)
         if (res.code === 200 && res.data) {
           const sessions = res.data.map(session => ({
             ...session,
             lastMessage: session.lastMessage ? formatMessagePreviewFromObject(session.lastMessage) : '[暂无消息]'
           }))
           commit('SET_SESSIONS', sessions)
+          commit('SET_FILTER', filter)
 
           // 同步所有私聊用户的在线状态
           const userStatusMap = {}

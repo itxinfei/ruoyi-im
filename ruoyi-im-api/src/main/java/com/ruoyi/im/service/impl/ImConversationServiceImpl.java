@@ -71,6 +71,48 @@ public class ImConversationServiceImpl implements ImConversationService {
         return getUserConversationsOptimized(userId);
     }
 
+    @Override
+    public List<ImConversationVO> getUserConversations(Long userId, String filter) {
+        // 先获取全部会话
+        List<ImConversationVO> allConversations = getUserConversationsOptimized(userId);
+
+        // 根据筛选条件过滤
+        if (filter == null || "all".equalsIgnoreCase(filter)) {
+            return allConversations;
+        }
+
+        List<ImConversationVO> filteredList = new java.util.ArrayList<>();
+        for (ImConversationVO vo : allConversations) {
+            boolean match = false;
+            switch (filter.toLowerCase()) {
+                case "unread":
+                    match = vo.getUnreadCount() != null && vo.getUnreadCount() > 0;
+                    break;
+                case "pinned":
+                    match = Boolean.TRUE.equals(vo.getIsPinned());
+                    break;
+                case "muted":
+                    match = Boolean.TRUE.equals(vo.getIsMuted());
+                    break;
+                case "group":
+                    match = "GROUP".equalsIgnoreCase(vo.getType());
+                    break;
+                case "file":
+                    // 文件筛选：最后消息类型为FILE或IMAGE
+                    String lastMsgType = vo.getLastMessageType();
+                    match = "FILE".equalsIgnoreCase(lastMsgType) || "IMAGE".equalsIgnoreCase(lastMsgType);
+                    break;
+                default:
+                    match = true;
+                    break;
+            }
+            if (match) {
+                filteredList.add(vo);
+            }
+        }
+        return filteredList;
+    }
+
     /**
      * 优化版本的会话列表查询 - 使用批量查询避免N+1问题
      *
@@ -156,6 +198,8 @@ public class ImConversationServiceImpl implements ImConversationService {
                 }
                 vo.setLastMessage(messageVO);
                 vo.setLastMessageTime(lastMessage.getCreateTime());
+                // 设置最后消息类型
+                vo.setLastMessageType(lastMessage.getMessageType());
             }
 
             // 设置会话相关信息

@@ -39,15 +39,16 @@ public class ImConversationController {
      * 获取会话列表
      * 查询当前用户的所有会话，包括单聊和群聊会话
      *
-     * @param userId 当前登录用户ID，从请求头中获取
+     * @param filter 筛选类型：all-全部，unread-未读，pinned-置顶，muted-免打扰，group-群聊，file-文件链接
      * @return 会话列表，按最后消息时间倒序排列
      * @apiNote 返回的会话信息包含未读消息数、最后消息、会话置顶状态等
      */
-    @Operation(summary = "获取会话列表", description = "查询当前用户的所有会话，包括单聊和群聊")
+    @Operation(summary = "获取会话列表", description = "查询当前用户的所有会话，支持多种筛选条件")
     @GetMapping("/list")
-    public Result<List<ImConversationVO>> getUserConversations() {
+    public Result<List<ImConversationVO>> getUserConversations(
+            @RequestParam(value = "filter", required = false, defaultValue = "all") String filter) {
         Long userId = SecurityUtils.getLoginUserId();
-        List<ImConversationVO> list = imConversationService.getUserConversations(userId);
+        List<ImConversationVO> list = imConversationService.getUserConversations(userId, filter);
         return Result.success(list);
     }
 

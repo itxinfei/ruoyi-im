@@ -57,6 +57,11 @@ public class ImConversationVO implements Serializable {
     private LocalDateTime lastMessageTime;
 
     /**
+     * 最后消息类型：TEXT/IMAGE/FILE/VOICE/VIDEO等
+     */
+    private String lastMessageType;
+
+    /**
      * 未读消息数
      */
     private Integer unreadCount;

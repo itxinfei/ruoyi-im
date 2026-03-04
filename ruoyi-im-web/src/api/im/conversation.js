@@ -5,12 +5,14 @@ import request from '../request'
 
 /**
  * 获取会话列表
+ * @param {string} filter - 筛选类型：all-全部，unread-未读，pinned-置顶，muted-免打扰，group-群聊，file-文件链接
  * @returns {Promise}
  */
-export function getConversations() {
+export function getConversations(filter = 'all') {
   return request({
     url: '/api/im/conversation/list',
-    method: 'get'
+    method: 'get',
+    params: { filter }
   })
 }
 

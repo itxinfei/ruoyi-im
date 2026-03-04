@@ -299,3 +299,54 @@ export function getMessageStats(params) {
     params
   })
 }
+
+// ==================== 系统配置 ====================
+
+/**
+ * 获取系统配置
+ * @returns {Promise}
+ */
+export function getSystemConfigs() {
+  return request({
+    url: '/api/admin/system-config',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取消息撤回时间限制（分钟）
+ * @returns {Promise}
+ */
+export function getRecallTimeLimit() {
+  return request({
+    url: '/api/admin/system-config/recall-time-limit',
+    method: 'get'
+  })
+}
+
+/**
+ * 设置消息撤回时间限制（分钟）
+ * @param {number} minutes
+ * @returns {Promise}
+ */
+export function setRecallTimeLimit(minutes) {
+  return request({
+    url: '/api/admin/system-config/recall-time-limit',
+    method: 'put',
+    params: { minutes }
+  })
+}
+
+/**
+ * 更新系统配置
+ * @param {string} configKey
+ * @param {any} configValue
+ * @returns {Promise}
+ */
+export function updateSystemConfig(configKey, configValue) {
+  return request({
+    url: `/api/admin/system-config/${configKey}`,
+    method: 'put',
+    data: configValue
+  })
+}

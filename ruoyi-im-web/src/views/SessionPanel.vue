@@ -33,6 +33,20 @@
       </el-dropdown>
     </div>
 
+    <!-- 二级菜单筛选 -->
+    <div class="sub-menu-tabs">
+      <div
+        v-for="tab in subMenuTabs"
+        :key="tab.key"
+        class="tab-item"
+        :class="{ active: activeFilter === tab.key }"
+        @click="handleFilterChange(tab.key)"
+      >
+        <span class="tab-text">{{ tab.label }}</span>
+        <span v-if="tab.count > 0" class="tab-count">{{ tab.count > 99 ? '99+' : tab.count }}</span>
+      </div>
+    </div>
+
     <!-- 搜索 -->
     <div class="search-section">
       <div class="search-container">
@@ -195,10 +209,63 @@ const store = useStore()
 const searchKeyword = ref('')
 const showCreateGroupDialog = ref(false)
 const showGlobalSearch = ref(false)
+const activeFilter = ref('all')
+
+// 二级菜单筛选标签
+const subMenuTabs = computed(() => [
+  { key: 'all', label: '全部', count: 0 },
+  { key: 'unread', label: '未读', count: unreadCount.value },
+  { key: 'pinned', label: '置顶', count: pinnedCount.value },
+  { key: 'muted', label: '免打扰', count: mutedCount.value },
+  { key: 'group', label: '群聊', count: groupCount.value },
+  { key: 'file', label: '文件', count: 0 }
+])
 
 const sessions = computed(() => store.state.im.session?.sessions || [])
 const loading = computed(() => store.state.im.session?.loading || false)
 const userStatus = computed(() => store.state.im.contact?.userStatus || {})
+
+// 未读会话数量
+const unreadCount = computed(() => sessions.value.filter(s => s.unreadCount > 0).length)
+// 置顶会话数量
+const pinnedCount = computed(() => sessions.value.filter(s => s.isPinned).length)
+// 免打扰会话数量
+const mutedCount = computed(() => sessions.value.filter(s => s.isMuted).length)
+// 群聊会话数量
+const groupCount = computed(() => sessions.value.filter(s => s.type === 'GROUP').length)
+
+// 处理筛选切换
+const handleFilterChange = (filterKey) => {
+  activeFilter.value = filterKey
+  // 调用 store 加载筛选后的会话列表
+  store.dispatch('im/session/loadSessions', filterKey)
+}
+
+// 筛选后的会话列表
+const filteredSessions = computed(() => {
+  let result = sessions.value
+  switch (activeFilter.value) {
+    case 'unread':
+      result = result.filter(s => s.unreadCount > 0)
+      break
+    case 'pinned':
+      result = result.filter(s => s.isPinned)
+      break
+    case 'muted':
+      result = result.filter(s => s.isMuted)
+      break
+    case 'group':
+      result = result.filter(s => s.type === 'GROUP')
+      break
+    case 'file':
+      // 文件筛选：包含文件消息的会话
+      result = result.filter(s => s.lastMessageType === 'FILE' || s.lastMessageType === 'IMAGE')
+      break
+    default:
+      break
+  }
+  return result
+})
 
 // 判断用户是否在线
 const isUserOnline = (userId) => {
@@ -334,12 +401,20 @@ const handleDeleteSession = () => {
   }).catch(() => {})
 }
 
-// 排序后的会话列表
-const sortedSessions = computed(() => store.getters['im/session/sortedSessions'])
+// 排序后的会话列表（基于筛选后的列表）
+const sortedSessions = computed(() => {
+  return [...filteredSessions.value].sort((a, b) => {
+    // 置顶优先
+    if (a.isPinned && !b.isPinned) return -1
+    if (!a.isPinned && b.isPinned) return 1
+    // 按最后消息时间排序
+    return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0)
+  })
+})
 
 onMounted(() => {
   if (sessions.value.length === 0) {
-    store.dispatch('im/session/loadSessions')
+    store.dispatch('im/session/loadSessions', activeFilter.value)
   }
   window.addEventListener('click', hideContextMenu)
 })
@@ -410,6 +485,69 @@ onUnmounted(() => {
   .material-icons-outlined {
     font-size: 20px;
   }
+}
+
+// ============================================================================
+// 二级菜单筛选
+// ============================================================================
+.sub-menu-tabs {
+  display: flex;
+  align-items: center;
+  padding: 0 12px 8px;
+  gap: 4px;
+  flex-shrink: 0;
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #666;
+  background: transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #f2f3f5;
+    color: #333;
+  }
+
+  &.active {
+    background: #e6f4ff;
+    color: #1677ff;
+    font-weight: 500;
+  }
+
+  .tab-text {
+    line-height: 1;
+  }
+
+  .tab-count {
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: #ff4d4f;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.tab-item.active .tab-count {
+  background: #1677ff;
 }
 
 // ============================================================================
@@ -838,6 +976,20 @@ onUnmounted(() => {
 
   &:hover {
     background: var(--dt-bg-hover-dark);
+  }
+}
+
+.dark .sub-menu-tabs .tab-item {
+  color: var(--dt-text-secondary-dark);
+
+  &:hover {
+    background: var(--dt-bg-hover-dark);
+    color: var(--dt-text-primary-dark);
+  }
+
+  &.active {
+    background: rgba(22, 119, 255, 0.15);
+    color: #409eff;
   }
 }
 

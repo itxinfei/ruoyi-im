@@ -1,22 +1,29 @@
 <template>
-  <div class="message-management">
-    <el-card>
-      <!-- 搜索栏 -->
-      <el-row :gutter="20" class="search-bar">
-        <el-col :span="5">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索消息内容"
-            clearable
-            @clear="handleSearch"
-          >
+  <div class="admin-page message-management">
+    <el-card class="panel" shadow="never">
+      <template #header>
+        <div class="panel-header">
+          <div>
+            <h3>消息管理</h3>
+            <p>按类型、时间与关键字检索并治理消息</p>
+          </div>
+          <el-space>
+            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="loadMessages">刷新</el-button>
+          </el-space>
+        </div>
+      </template>
+
+      <el-row :gutter="12" class="toolbar-row">
+        <el-col :xs="24" :sm="10" :md="8" :lg="6">
+          <el-input v-model="searchKeyword" placeholder="搜索消息内容" clearable @keyup.enter="handleSearch" @clear="handleSearch">
             <template #append>
               <el-button :icon="Search" @click="handleSearch" />
             </template>
           </el-input>
         </el-col>
-        <el-col :span="3">
-          <el-select v-model="searchMessageType" placeholder="消息类型" clearable @change="handleSearch">
+        <el-col :xs="24" :sm="8" :md="6" :lg="4">
+          <el-select v-model="searchMessageType" placeholder="消息类型" clearable style="width: 100%" @change="handleSearch">
             <el-option label="文本" value="TEXT" />
             <el-option label="图片" value="IMAGE" />
             <el-option label="文件" value="FILE" />
@@ -24,7 +31,7 @@
             <el-option label="视频" value="VIDEO" />
           </el-select>
         </el-col>
-        <el-col :span="6">
+        <el-col :xs="24" :sm="24" :md="10" :lg="8">
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -33,56 +40,42 @@
             end-placeholder="结束时间"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%"
             @change="handleSearch"
           />
         </el-col>
-        <el-col :span="4" :offset="6">
-          <el-button type="primary" @click="handleRefresh">刷新</el-button>
-          <el-button @click="handleReset">重置</el-button>
-        </el-col>
       </el-row>
 
-      <!-- 消息列表 -->
-      <el-table
-        :data="messageList"
-        v-loading="loading"
-        border
-        style="width: 100%; margin-top: 20px"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="id" label="消息ID" width="80" />
-        <el-table-column prop="senderId" label="发送者ID" width="100" />
-        <el-table-column prop="messageType" label="类型" width="80">
+      <div v-if="selectedMessages.length" class="batch-actions">
+        <span>已选择 {{ selectedMessages.length }} 条消息</span>
+        <el-space>
+          <el-button size="small" type="danger" @click="handleBatchDelete">批量删除</el-button>
+          <el-button v-if="failedItems.length" size="small" @click="failedDialogVisible = true">查看失败项</el-button>
+        </el-space>
+      </div>
+
+      <el-table :data="messageList" v-loading="loading" border @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="48" />
+        <el-table-column prop="id" label="消息ID" width="88" />
+        <el-table-column prop="senderId" label="发送者ID" width="98" />
+        <el-table-column prop="messageType" label="类型" width="90">
           <template #default="{ row }">
-            <el-tag v-if="row.messageType === 'TEXT'" type="primary">文本</el-tag>
-            <el-tag v-else-if="row.messageType === 'IMAGE'" type="success">图片</el-tag>
-            <el-tag v-else-if="row.messageType === 'FILE'" type="warning">文件</el-tag>
-            <el-tag v-else-if="row.messageType === 'VOICE'" type="info">语音</el-tag>
-            <el-tag v-else-if="row.messageType === 'VIDEO'" type="danger">视频</el-tag>
-            <el-tag v-else type="info">{{ row.messageType }}</el-tag>
+            <el-tag :type="getTypeTag(row.messageType)">{{ getTypeLabel(row.messageType) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="content" label="消息内容" show-overflow-tooltip>
-          <template #default="{ row }">
-            <span v-if="row.messageType === 'TEXT'">{{ row.content }}</span>
-            <span v-else-if="row.messageType === 'IMAGE'">[图片] {{ row.fileName }}</span>
-            <span v-else-if="row.messageType === 'FILE'">[文件] {{ row.fileName }}</span>
-            <span v-else-if="row.messageType === 'VOICE'">[语音] {{ row.content }}</span>
-            <span v-else-if="row.messageType === 'VIDEO'">[视频] {{ row.fileName }}</span>
-            <span v-else>{{ row.content }}</span>
-          </template>
+        <el-table-column prop="content" label="消息内容" min-width="280" show-overflow-tooltip>
+          <template #default="{ row }">{{ renderPreview(row) }}</template>
         </el-table-column>
-        <el-table-column prop="conversationId" label="会话ID" width="100" />
+        <el-table-column prop="conversationId" label="会话ID" width="98" />
         <el-table-column prop="createTime" label="发送时间" width="180" />
-        <el-table-column label="状态" width="80">
+        <el-table-column label="状态" width="90">
           <template #default="{ row }">
             <el-tag v-if="row.isRevoked === 1" type="info">已撤回</el-tag>
             <el-tag v-else-if="row.isDeleted === 1" type="danger">已删除</el-tag>
             <el-tag v-else type="success">正常</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" fixed="right" width="150">
+        <el-table-column label="操作" fixed="right" width="130">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="handleViewDetail(row)">详情</el-button>
             <el-button
@@ -91,76 +84,44 @@
               type="danger"
               link
               @click="handleDelete(row)"
-            >
-              删除
-            </el-button>
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <!-- 批量操作 -->
-      <div v-if="selectedMessages.length > 0" class="batch-actions">
-        <span class="selected-info">已选择 {{ selectedMessages.length }} 条消息</span>
-        <el-button type="danger" size="small" @click="handleBatchDelete">批量删除</el-button>
+      <div class="pager-wrap">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pageNum"
+          :page-sizes="[10, 20, 50, 100]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+        />
       </div>
-
-      <!-- 分页 -->
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="pageNum"
-        :page-sizes="[10, 20, 50, 100]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        style="margin-top: 20px; text-align: right"
-      />
     </el-card>
 
-    <!-- 消息详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="消息详情" width="600px">
+    <el-dialog v-model="detailDialogVisible" title="消息详情" width="640px">
       <el-descriptions :column="2" border v-if="currentMessage">
         <el-descriptions-item label="消息ID">{{ currentMessage.id }}</el-descriptions-item>
         <el-descriptions-item label="会话ID">{{ currentMessage.conversationId }}</el-descriptions-item>
         <el-descriptions-item label="发送者ID">{{ currentMessage.senderId }}</el-descriptions-item>
         <el-descriptions-item label="消息类型">
-          <el-tag v-if="currentMessage.messageType === 'TEXT'" type="primary">文本</el-tag>
-          <el-tag v-else-if="currentMessage.messageType === 'IMAGE'" type="success">图片</el-tag>
-          <el-tag v-else-if="currentMessage.messageType === 'FILE'" type="warning">文件</el-tag>
-          <el-tag v-else-if="currentMessage.messageType === 'VOICE'" type="info">语音</el-tag>
-          <el-tag v-else-if="currentMessage.messageType === 'VIDEO'" type="danger">视频</el-tag>
-          <el-tag v-else type="info">{{ currentMessage.messageType }}</el-tag>
+          <el-tag :type="getTypeTag(currentMessage.messageType)">{{ getTypeLabel(currentMessage.messageType) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="发送时间" :span="2">{{ currentMessage.createTime }}</el-descriptions-item>
         <el-descriptions-item label="消息内容" :span="2">
-          <div v-if="currentMessage.messageType === 'TEXT'" class="message-content">{{ currentMessage.content }}</div>
-          <div v-else-if="currentMessage.messageType === 'IMAGE'">
-            [图片] {{ currentMessage.fileName }}
-            <el-image
-              v-if="currentMessage.fileUrl"
-              :src="currentMessage.fileUrl"
-              style="width: 100px; height: 100px; margin-top: 10px"
-              fit="cover"
-              :preview-src-list="[currentMessage.fileUrl]"
-            />
-          </div>
-          <div v-else-if="currentMessage.messageType === 'FILE'">
-            [文件] {{ currentMessage.fileName }} ({{ formatFileSize(currentMessage.fileSize) }})
-            <el-button v-if="currentMessage.fileUrl" type="primary" link size="small" style="margin-left: 10px">下载</el-button>
-          </div>
-          <div v-else>{{ currentMessage.content }}</div>
-        </el-descriptions-item>
-        <el-descriptions-item label="是否撤回">
-          <el-tag :type="currentMessage.isRevoked === 1 ? 'info' : 'success'">
-            {{ currentMessage.isRevoked === 1 ? '已撤回' : '未撤回' }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="是否删除">
-          <el-tag :type="currentMessage.isDeleted === 1 ? 'danger' : 'success'">
-            {{ currentMessage.isDeleted === 1 ? '已删除' : '正常' }}
-          </el-tag>
+          <div class="message-content">{{ currentMessage.content || renderPreview(currentMessage) }}</div>
         </el-descriptions-item>
       </el-descriptions>
+    </el-dialog>
+
+    <el-dialog v-model="failedDialogVisible" title="批量失败明细" width="520px">
+      <el-table :data="failedItems" border>
+        <el-table-column prop="id" label="消息ID" width="120" />
+        <el-table-column prop="reason" label="失败原因" min-width="260" />
+      </el-table>
     </el-dialog>
   </div>
 </template>
@@ -169,12 +130,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import {
-  searchMessages,
-  deleteMessage,
-  batchDeleteMessages,
-  getMessageDetail
-} from '@/api/admin'
+import { searchMessages, deleteMessage, batchDeleteMessages, getMessageDetail } from '@/api/admin'
 
 const loading = ref(false)
 const messageList = ref([])
@@ -185,10 +141,33 @@ const pageNum = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const selectedMessages = ref([])
-
-// 详情对话框
 const detailDialogVisible = ref(false)
 const currentMessage = ref(null)
+const failedDialogVisible = ref(false)
+const failedItems = ref([])
+
+const getTypeLabel = (type) => {
+  const map = {
+    TEXT: '文本', IMAGE: '图片', FILE: '文件', VOICE: '语音', VIDEO: '视频'
+  }
+  return map[type] || type || '未知'
+}
+
+const getTypeTag = (type) => {
+  const map = {
+    TEXT: 'primary', IMAGE: 'success', FILE: 'warning', VOICE: 'info', VIDEO: 'danger'
+  }
+  return map[type] || 'info'
+}
+
+const renderPreview = (row) => {
+  if (!row) return ''
+  if (row.messageType === 'IMAGE') return `[图片] ${row.fileName || ''}`
+  if (row.messageType === 'FILE') return `[文件] ${row.fileName || ''}`
+  if (row.messageType === 'VOICE') return '[语音消息]'
+  if (row.messageType === 'VIDEO') return `[视频] ${row.fileName || ''}`
+  return row.content || ''
+}
 
 const loadMessages = async () => {
   loading.value = true
@@ -199,8 +178,6 @@ const loadMessages = async () => {
       pageNum: pageNum.value,
       pageSize: pageSize.value
     }
-
-    // 添加时间范围
     if (dateRange.value && dateRange.value.length === 2) {
       params.startTime = dateRange.value[0]
       params.endTime = dateRange.value[1]
@@ -213,7 +190,6 @@ const loadMessages = async () => {
     }
   } catch (error) {
     ElMessage.error('加载消息列表失败')
-    console.error(error)
   } finally {
     loading.value = false
   }
@@ -221,10 +197,6 @@ const loadMessages = async () => {
 
 const handleSearch = () => {
   pageNum.value = 1
-  loadMessages()
-}
-
-const handleRefresh = () => {
   loadMessages()
 }
 
@@ -263,13 +235,12 @@ const handleDelete = async (row) => {
       loadMessages()
     }
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败')
-    }
+    if (error !== 'cancel') ElMessage.error('删除失败')
   }
 }
 
 const handleBatchDelete = async () => {
+  if (!selectedMessages.value.length) return
   try {
     await ElMessageBox.confirm(`确定要删除选中的 ${selectedMessages.value.length} 条消息吗？`, '警告', {
       confirmButtonText: '确定',
@@ -279,14 +250,19 @@ const handleBatchDelete = async () => {
     const ids = selectedMessages.value.map(m => m.id)
     const res = await batchDeleteMessages(ids)
     if (res.code === 200) {
-      ElMessage.success(`成功删除 ${res.data.successCount} 条消息`)
+      const successCount = res.data?.successCount ?? ids.length
+      const failedCount = res.data?.failedCount ?? 0
+      failedItems.value = (res.data?.failedItems || []).map(item => ({
+        id: item.id || item.messageId || '未知',
+        reason: item.reason || item.msg || '未知原因'
+      }))
+      ElMessage.success(`批量删除完成：成功 ${successCount}，失败 ${failedCount}`)
+      if (failedCount > 0) failedDialogVisible.value = true
       selectedMessages.value = []
       loadMessages()
     }
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('批量删除失败')
-    }
+    if (error !== 'cancel') ElMessage.error('批量删除失败')
   }
 }
 
@@ -302,47 +278,77 @@ const handleViewDetail = async (row) => {
   }
 }
 
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
-}
-
-onMounted(() => {
-  loadMessages()
-})
+onMounted(loadMessages)
 </script>
 
 <style scoped>
-.message-management {
-  padding: 20px;
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.search-bar {
-  margin-bottom: 20px;
+.panel {
+  border-radius: 12px;
+  border: 1px solid #e6ebf3;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.panel-header p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.toolbar-row {
+  margin-bottom: 12px;
 }
 
 .batch-actions {
+  margin-bottom: 12px;
+  background: #f8fafc;
+  border: 1px solid #e6ebf3;
+  border-radius: 8px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-  padding: 10px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
+  justify-content: space-between;
 }
 
-.selected-info {
-  color: #606266;
-  font-size: 14px;
+.pager-wrap {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .message-content {
   white-space: pre-wrap;
   word-break: break-all;
-  max-height: 200px;
+  max-height: 220px;
   overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .batch-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
 </style>

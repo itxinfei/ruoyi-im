@@ -58,6 +58,16 @@
             </button>
           </div>
         </template>
+
+        <!-- 超时状态 -->
+        <template v-else-if="status === 'timeout'">
+          <div class="timeout-actions">
+            <button class="action-btn reject" @click="close">
+              <span class="material-icons-outlined">close</span>
+              <span>关闭</span>
+            </button>
+          </div>
+        </template>
       </div>
     </div>
   </el-dialog>
@@ -70,10 +80,10 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 const props = defineProps({
   session: Object
 })
-const emit = defineEmits(['accept', 'reject', 'cancel', 'hangup', 'closed'])
+const emit = defineEmits(['accept', 'reject', 'cancel', 'hangup', 'timeout', 'closed'])
 
 const visible = ref(false)
-const status = ref('calling') // calling, incoming, talking, hanging_up
+const status = ref('calling') // calling, incoming, talking, hanging_up, timeout
 const type = ref('voice') // voice, video
 const duration = ref(0)
 const callId = ref('')
@@ -81,6 +91,8 @@ const peerId = ref(null)
 const peerName = ref('')
 const peerAvatar = ref('')
 let timer = null
+let timeoutTimer = null
+const CALL_TIMEOUT = 60000 // 60秒超时
 const isGroupCall = computed(() => props.session?.type === 'GROUP')
 
 const title = computed(() => type.value === 'voice' ? '语音通话' : '视频通话')
@@ -91,6 +103,7 @@ const statusText = computed(() => {
     case 'incoming': return '邀请你进行通话...'
     case 'talking': return '正在通话中...'
     case 'hanging_up': return '通话已结束'
+    case 'timeout': return '对方无应答'
     default: return ''
   }
 })
@@ -111,20 +124,25 @@ const open = (callType, options = {}) => {
   visible.value = true
   duration.value = 0
   if (status.value === 'talking') startTimer()
+  // 呼叫状态启动超时计时器
+  if (status.value === 'calling') startTimeout()
 }
 
 const handleAccept = () => {
+  stopTimeout()
   emit('accept', { callId: callId.value, callType: type.value, peerId: peerId.value })
   status.value = 'talking'
   startTimer()
 }
 
 const handleReject = () => {
+  stopTimeout()
   emit('reject', { callId: callId.value, callType: type.value, peerId: peerId.value })
   close()
 }
 
 const handleCancel = () => {
+  stopTimeout()
   emit('cancel', { callId: callId.value, callType: type.value, peerId: peerId.value })
   close()
 }
@@ -148,13 +166,33 @@ const stopTimer = () => {
   }
 }
 
+const startTimeout = () => {
+  stopTimeout()
+  timeoutTimer = setTimeout(() => {
+    status.value = 'timeout'
+    emit('timeout', { callId: callId.value, callType: type.value, peerId: peerId.value })
+    setTimeout(() => {
+      visible.value = false
+    }, 2000)
+  }, CALL_TIMEOUT)
+}
+
+const stopTimeout = () => {
+  if (timeoutTimer) {
+    clearTimeout(timeoutTimer)
+    timeoutTimer = null
+  }
+}
+
 const close = () => {
   stopTimer()
+  stopTimeout()
   visible.value = false
   emit('closed', { callId: callId.value })
 }
 
 const setTalking = () => {
+  stopTimeout()
   status.value = 'talking'
   startTimer()
 }
@@ -162,6 +200,7 @@ const setTalking = () => {
 const end = () => {
   status.value = 'hanging_up'
   stopTimer()
+  stopTimeout()
   setTimeout(() => {
     visible.value = false
   }, 600)
@@ -169,6 +208,7 @@ const end = () => {
 
 onUnmounted(() => {
   stopTimer()
+  stopTimeout()
 })
 
 defineExpose({ open, close, setTalking, end })
@@ -226,7 +266,7 @@ defineExpose({ open, close, setTalking, end })
   padding: 0 40px;
 }
 
-.incoming-actions, .calling-actions, .talking-actions {
+.incoming-actions, .calling-actions, .talking-actions, .timeout-actions {
   display: flex;
   justify-content: space-around;
   align-items: center;

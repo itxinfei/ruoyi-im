@@ -24,6 +24,15 @@ public interface ImConversationService {
     List<ImConversationVO> getUserConversations(Long userId);
 
     /**
+     * 获取用户会话列表（支持筛选）
+     *
+     * @param userId 用户ID
+     * @param filter 筛选类型：all-全部，unread-未读，pinned-置顶，muted-免打扰，group-群聊，file-文件链接
+     * @return 会话列表
+     */
+    List<ImConversationVO> getUserConversations(Long userId, String filter);
+
+    /**
      * 获取会话详情
      *
      * @param conversationId 会话ID

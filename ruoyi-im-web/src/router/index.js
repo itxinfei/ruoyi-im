@@ -41,6 +41,12 @@ const routes = [
         name: 'AdminMessages',
         component: () => import('../views/admin/MessageManagement.vue'),
         meta: { title: '消息管理' }
+      },
+      {
+        path: 'system-config',
+        name: 'AdminSystemConfig',
+        component: () => import('../views/admin/SystemConfig.vue'),
+        meta: { title: '系统配置' }
       }
     ]
   }
