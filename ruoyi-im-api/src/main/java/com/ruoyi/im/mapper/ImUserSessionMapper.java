@@ -22,6 +22,30 @@ public interface ImUserSessionMapper extends BaseMapper<ImUserSession> {
                           @Param("conversationId") Long conversationId,
                           @Param("unreadCount") Integer unreadCount);
 
+    /**
+     * 原子性地增加未读消息数
+     *
+     * @param userId 用户ID
+     * @param conversationId 会话ID
+     * @param count 增加的数量
+     * @return 更新行数
+     */
+    int incrementUnreadCount(@Param("userId") Long userId,
+                             @Param("conversationId") Long conversationId,
+                             @Param("count") Integer count);
+
+    /**
+     * 原子性地减少未读消息数（不会小于0）
+     *
+     * @param userId 用户ID
+     * @param conversationId 会话ID
+     * @param count 减少的数量
+     * @return 更新行数
+     */
+    int decrementUnreadCount(@Param("userId") Long userId,
+                             @Param("conversationId") Long conversationId,
+                             @Param("count") Integer count);
+
     int updateLastReadMessage(@Param("userId") Long userId,
                               @Param("conversationId") Long conversationId,
                               @Param("lastReadMessageId") Long lastReadMessageId);

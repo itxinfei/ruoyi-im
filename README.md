@@ -391,9 +391,10 @@ grep "ERROR" /usr/local/im/logs/im-api.log`
 
 ## 7.2 尺寸规范
 
-- 侧边栏宽度：80px（w-20）
-- 会话面板宽度：280px（w-72）
-- 圆角：8px（默认）、12px（xl）、16px（2xl）
+- 侧边栏宽度：64px（对标钉钉）
+- 会话面板宽度：240px（黄金比例）
+- 圆角：10px（全站统一，对标钉钉 8.0+）
+- 栅格系统：8pt Grid (n * 4px)
 - 滚动条宽度：6px
 
 ## 7.3 图标使用
@@ -425,6 +426,15 @@ grep "ERROR" /usr/local/im/logs/im-api.log`
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 ```
 
-# 八、许可证
+# 八、大模型研发规范 (LLM Engineering)
+
+本项目采用 **AI-First** 研发流程，所有大模型（Claude/Gemini/Cursor等）接入开发必须遵守以下约束：
+
+1. **核心指令文件**：根目录下的 `GEMINI.md` 是最高优先级指令，AI 必须首先阅读并强制执行。
+2. **详细规范指南**：参考 `docs/大模型研发规范.md`（v6.1+），包含 UI 审美、Java 1.8 限制、Vue 3 语法糖等。
+3. **任务驱动模式**：参考 `docs/llm-tasks.yaml` 任务池，遵循 `Think -> Act -> Verify` 执行周期。
+4. **技术栈锁定**：禁止使用 JDK 9+ 语法，禁止在 Vue 组件中硬编码色值。
+
+# 九、许可证
 
 MIT License

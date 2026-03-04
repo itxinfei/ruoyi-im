@@ -369,23 +369,24 @@ onMounted(() => {
       font-size: 10px;
       min-width: 16px;
       height: 16px;
-      padding: 0 2px;
+      padding: 0 4px;
       border-radius: var(--dt-radius-full);
       @include flex-center;
-      border: 1.5px solid #ffffff;
-      box-shadow: var(--dt-shadow-1);
+      border: 1.5px solid #ffffff; // 钉钉对标：白色描边
+      box-shadow: 0 2px 4px rgba(245, 74, 69, 0.2);
       font-weight: 600;
+      z-index: 1;
     }
   }
 
   .item-content {
     flex: 1;
-    margin-left: var(--dt-spacing-sm);
-    min-width: 0; // 防崩核心
+    margin-left: var(--dt-spacing-md);
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 4px;
+    gap: 2px;
 
     .content-top {
       display: flex;
@@ -393,7 +394,7 @@ onMounted(() => {
       align-items: baseline;
 
       .session-name {
-        font-size: var(--dt-font-size-base);
+        font-size: var(--dt-font-size-md);
         font-weight: var(--dt-font-weight-medium);
         color: var(--dt-text-primary);
         margin: 0;
@@ -404,6 +405,7 @@ onMounted(() => {
         font-size: var(--dt-font-size-xs);
         color: var(--dt-text-tertiary);
         flex-shrink: 0;
+        margin-left: 8px;
       }
     }
 
@@ -411,6 +413,7 @@ onMounted(() => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-top: 2px;
 
       .preview-wrapper {
         display: flex;
@@ -418,16 +421,17 @@ onMounted(() => {
         gap: 4px;
         min-width: 0;
         flex: 1;
-        font-size: var(--dt-font-size-sm);
+        font-size: 13px;
         color: var(--dt-text-tertiary);
+        line-height: 1.4;
         @include text-ellipsis;
 
-        .mention-text { color: var(--dt-error-color); font-weight: 500; }
+        .mention-text { color: var(--dt-error-color); font-weight: 500; font-size: 12px; }
         .sender-prefix { color: var(--dt-text-secondary); }
       }
 
       .mute-icon {
-        font-size: 14px;
+        font-size: 12px;
         color: var(--dt-text-quaternary);
         margin-left: 4px;
       }

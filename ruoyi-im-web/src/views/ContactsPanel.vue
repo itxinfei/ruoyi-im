@@ -1,270 +1,327 @@
 <template>
-  <div class="contacts-panel-premium">
-    <!-- 1. 左侧树导航 (240px 黄金中轴) -->
-    <aside class="org-sidebar">
+  <div class="contacts-panel-v2">
+    <!-- 1. 中栏：分类导航与组织树 (280px) -->
+    <aside class="contacts-sidebar">
       <div class="sidebar-header">
-        <span class="title">通讯录</span>
-        <button class="action-btn"><span class="material-icons-outlined">search</span></button>
+        <div class="search-wrap">
+          <el-icon class="search-icon"><Search /></el-icon>
+          <input v-model="sidebarSearch" placeholder="搜索联系人/部门" class="inner-input" />
+        </div>
       </div>
-      
-      <div class="sidebar-content custom-scrollbar">
-        <!-- 核心入口 -->
-        <div class="quick-links">
-          <div class="link-item" :class="{ active: view === 'friends' }" @click="view = 'friends'">
-            <span class="material-icons-outlined icon green">person</span>
-            <span class="label">我的好友</span>
+
+      <div class="sidebar-scroll custom-scrollbar">
+        <!-- 固定分类 -->
+        <div class="nav-list">
+          <div class="nav-item" :class="{ active: view === 'new' }" @click="switchView('new')">
+            <div class="icon-box orange"><el-icon><UserFilled /></el-icon></div>
+            <span>新的联系人</span>
           </div>
-          <div class="link-item" :class="{ active: view === 'frequent' }" @click="view = 'frequent'">
-            <span class="material-icons-outlined icon purple">star</span>
-            <span class="label">常用联系人</span>
+          <div class="nav-item" :class="{ active: view === 'groups' }" @click="switchView('groups')">
+            <div class="icon-box blue"><el-icon><Menu /></el-icon></div>
+            <span>我的群组</span>
           </div>
-          <div class="link-item" :class="{ active: view === 'new' }" @click="view = 'new'">
-            <span class="material-icons-outlined icon orange">person_add_alt</span>
-            <span class="label">新的朋友</span>
-          </div>
-          <div class="link-item" :class="{ active: view === 'groups' }" @click="view = 'groups'">
-            <span class="material-icons-outlined icon blue">groups</span>
-            <span class="label">我的群组</span>
+          <div class="nav-item" :class="{ active: view === 'friends' }" @click="switchView('friends')">
+            <div class="icon-box green"><el-icon><StarFilled /></el-icon></div>
+            <span>我的好友</span>
           </div>
         </div>
 
-        <div class="org-tree-section">
-          <div class="section-label">组织架构</div>
+        <div class="tree-divider">组织架构</div>
+        
+        <!-- 组织树组件 -->
+        <div class="org-tree-wrap">
           <OrganizationTree @select="handleDeptSelect" />
         </div>
       </div>
     </aside>
 
-    <!-- 2. 中间内容区域 (根据视图切换) -->
-    <main class="members-main">
-      <!-- 部门成员视图 -->
-      <template v-if="view === 'dept'">
-        <header class="main-header">
-          <div class="header-left">
-            <h2 class="dept-title">{{ selectedDept?.name || '所有成员' }}</h2>
-            <span class="member-count">{{ deptMembers.length }} 人</span>
-          </div>
-          <div class="header-right">
-            <el-button size="small" type="primary" plain @click="handleAddContact"><el-icon><Plus /></el-icon> 添加成员</el-button>
-          </div>
-        </header>
+    <!-- 2. 主栏：动态内容区 (面包屑 + 混合列表) -->
+    <main class="contacts-main">
+      <!-- 只有在组织架构视图下才显示面包屑 -->
+      <header v-if="view === 'dept'" class="main-header">
+        <div class="breadcrumb-container">
+          <el-breadcrumb separator-icon="ArrowRight">
+            <el-breadcrumb-item @click="handleBreadcrumbClick(null)">公司通讯录</el-breadcrumb-item>
+            <el-breadcrumb-item 
+              v-for="(node, index) in breadcrumbs" 
+              :key="node.id"
+              @click="handleBreadcrumbClick(node)"
+            >
+              {{ node.name }}
+            </el-breadcrumb-item>
+          </el-breadcrumb>
+        </div>
+        <div class="header-actions">
+          <el-button :icon="Plus" type="primary" plain size="small">邀请成员</el-button>
+        </div>
+      </header>
 
-        <div class="members-scroller custom-scrollbar">
+      <div class="main-content-scroller custom-scrollbar">
+        <!-- A. 组织架构混合视图 -->
+        <template v-if="view === 'dept'">
+          <!-- 下级部门列表 (文件夹样式) -->
+          <div v-if="subDepartments.length > 0" class="sub-dept-list">
+            <div 
+              v-for="dept in subDepartments" 
+              :key="dept.id" 
+              class="dept-folder-card"
+              @click="handleDeptSelect(dept)"
+            >
+              <div class="folder-icon"><el-icon><FolderOpened /></el-icon></div>
+              <div class="folder-info">
+                <span class="folder-name">{{ dept.name }}</span>
+                <span class="folder-count">{{ dept.memberCount || 0 }}人</span>
+              </div>
+              <el-icon class="arrow"><ArrowRight /></el-icon>
+            </div>
+          </div>
+
+          <!-- 成员列表 (网格卡片样式) -->
+          <div class="section-divider" v-if="subDepartments.length > 0 && deptMembers.length > 0">
+            <span>直属成员</span>
+          </div>
+
           <div v-if="deptMembers.length > 0" class="members-grid">
-            <el-dropdown
+            <div 
               v-for="m in deptMembers" 
               :key="m.id" 
-              trigger="contextmenu"
-              placement="bottom-start"
-              class="m-card-dropdown"
-              @command="(c) => handleMenuCommand(c, m)"
+              class="member-card-ding"
+              @click="handleMemberClick(m)"
             >
-              <div 
-                class="m-card" 
-                @click="handleMemberClick(m)"
-              >
-                <DingtalkAvatar :src="m.avatar" :name="m.name || m.userName" :user-id="m.id" :size="48" shape="square" />
-                <div class="m-info">
-                  <div class="m-name">{{ m.name || m.userName }}</div>
-                  <div class="m-sub">{{ m.position || '成员' }} · {{ m.deptName || m.departmentName || '组织' }}</div>
-                </div>
-                <div class="m-actions">
-                  <el-tooltip content="发消息" placement="top">
-                    <button class="circle-btn blue" @click.stop="handleChat(m)"><span class="material-icons-outlined">chat_bubble</span></button>
-                  </el-tooltip>
-                </div>
+              <DingtalkAvatar :src="m.avatar" :name="m.name || m.userName" :user-id="m.id" :size="44" shape="square" />
+              <div class="m-body">
+                <div class="m-name">{{ m.name || m.userName }}</div>
+                <div class="m-position">{{ m.position || '成员' }}</div>
               </div>
-              <template #dropdown>
-                <el-dropdown-menu class="contact-context-menu">
-                  <el-dropdown-item command="chat"><el-icon><ChatDotRound /></el-icon> 发送消息</el-dropdown-item>
-                  <el-dropdown-item command="profile"><el-icon><User /></el-icon> 查看资料</el-dropdown-item>
-                  <el-dropdown-item command="pin" divided><el-icon><Top /></el-icon> 置顶联系人</el-dropdown-item>
-                  <el-dropdown-item command="delete" class="text-danger"><el-icon><Delete /></el-icon> 删除好友</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              <button class="chat-shortcut" @click.stop="handleChat(m)">
+                <el-icon><ChatDotRound /></el-icon>
+              </button>
+            </div>
           </div>
-          <el-empty v-else description="该部门暂无成员" />
-        </div>
-      </template>
 
-      <!-- 新的朋友视图 -->
-      <template v-else-if="view === 'new'">
-        <NewFriendsView @back="view = 'dept'" />
-      </template>
-
-      <!-- 我的群组视图 -->
-      <template v-else-if="view === 'groups'">
-        <GroupsView @back="view = 'dept'" @select-group="handleGroupSelect" />
-      </template>
-<!-- 我的好友/常用联系人视图 -->
-<template v-else>
-  <header class="main-header">
-    <div class="header-left">
-      <h2 class="dept-title">{{ view === 'friends' ? '我的好友' : '常用联系人' }}</h2>
-      <span class="member-count">{{ view === 'friends' ? friends.length : 0 }} 人</span>
-    </div>
-  </header>
-
-  <div class="members-scroller custom-scrollbar">
-    <div v-if="view === 'friends' && friends.length > 0" class="members-grid">
-      <el-dropdown
-        v-for="f in friends" 
-        :key="f.id" 
-        trigger="contextmenu"
-        placement="bottom-start"
-        class="m-card-dropdown"
-        @command="(c) => handleMenuCommand(c, f)"
-      >
-        <div class="m-card" @click="handleMemberClick(f)">
-          <DingtalkAvatar :src="f.friendAvatar" :name="f.friendName" :user-id="f.friendId" :size="48" shape="square" />
-          <div class="m-info">
-            <div class="m-name">{{ f.friendName }}</div>
-            <div class="m-sub">{{ f.position || '好友' }}</div>
-          </div>
-          <div class="m-actions">
-            <button class="circle-btn blue" @click.stop="handleChat(f)"><span class="material-icons-outlined">chat_bubble</span></button>
-          </div>
-        </div>
-        <template #dropdown>
-          <el-dropdown-menu class="contact-context-menu">
-            <el-dropdown-item command="chat"><el-icon><ChatDotRound /></el-icon> 发送消息</el-dropdown-item>
-            <el-dropdown-item command="profile"><el-icon><User /></el-icon> 查看资料</el-dropdown-item>
-            <el-dropdown-item command="delete" class="text-danger"><el-icon><Delete /></el-icon> 删除好友</el-dropdown-item>
-          </el-dropdown-menu>
+          <el-empty v-if="subDepartments.length === 0 && deptMembers.length === 0" description="该目录下暂无内容" />
         </template>
-      </el-dropdown>
-    </div>
-    <el-empty v-else :description="view === 'friends' ? '暂无好友' : '暂无数据'" />
-  </div>
-</template>
-</main>
 
-<!-- 成员详情弹窗 -->
-<UserProfileDialog v-model="showProfile" :user="activeUser" @chat="handleChat" />
-</div>
+        <!-- B. 其他视图 (复用统一逻辑) -->
+        <NewFriendsView v-else-if="view === 'new'" />
+        <GroupsView v-else-if="view === 'groups'" @select-group="handleGroupSelect" />
+        <div v-else-if="view === 'friends'" class="friends-panel">
+           <div class="view-title">我的好友 ({{ friends.length }})</div>
+           <div class="members-grid">
+              <div v-for="f in friends" :key="f.id" class="member-card-ding" @click="handleMemberClick(f)">
+                <DingtalkAvatar :src="f.friendAvatar" :name="f.friendName" :user-id="f.friendId" :size="44" shape="square" />
+                <div class="m-body">
+                  <div class="m-name">{{ f.friendName }}</div>
+                  <div class="m-position">在线好友</div>
+                </div>
+                <button class="chat-shortcut" @click.stop="handleChat(f)"><el-icon><ChatDotRound /></el-icon></button>
+              </div>
+           </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 统一详情弹窗 -->
+    <UserProfileDialog v-model="showProfile" :user-id="activeUserId" />
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useStore } from 'vuex'
-import { getDepartmentMembers } from '@/api/im/organization'
+import { 
+  Search, Plus, UserFilled, Menu, StarFilled, 
+  FolderOpened, ArrowRight, ChatDotRound 
+} from '@element-plus/icons-vue'
+import { getDepartment, getDepartmentMembers } from '@/api/im/organization'
 import { getContacts } from '@/api/im/contact'
 import OrganizationTree from '@/components/Contacts/OrganizationTree.vue'
 import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
 import GroupsView from '@/components/Contacts/GroupsView.vue'
 import UserProfileDialog from '@/components/Contacts/UserProfileDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import { Plus, ChatDotRound, User, Top, Delete } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 const store = useStore()
-const view = ref('dept') 
+const sidebarSearch = ref('')
+const view = ref('dept')
+const currentDeptId = ref(null)
 const selectedDept = ref(null)
+const subDepartments = ref([])
 const deptMembers = ref([])
+const breadcrumbs = ref([])
 const friends = ref([])
 const showProfile = ref(false)
-const activeUser = ref(null)
+const activeUserId = ref(null)
 
-const loadFriends = async () => {
-try {
-const res = await getContacts()
-if (res.code === 200) friends.value = res.data || []
-} catch (e) { console.error('加载好友失败', e) }
-}
+// 视图切换逻辑
+const switchView = (v) => { view.value = v; if (v === 'friends') loadFriends() }
 
-watch(view, (newView) => {
-if (newView === 'friends') loadFriends()
-})
-
+// 处理部门选择
 const handleDeptSelect = async (dept) => {
   view.value = 'dept'
+  currentDeptId.value = dept.id
   selectedDept.value = dept
+  
+  // 更新面包屑逻辑
+  updateBreadcrumbs(dept)
+
   try {
-    const res = await getDepartmentMembers(dept.id)
-    if (res.code === 200) deptMembers.value = res.data
-  } catch (e) { ElMessage.error('加载失败') }
+    const [deptRes, memberRes] = await Promise.all([
+      getDepartment(dept.id),
+      getDepartmentMembers(dept.id)
+    ])
+    if (deptRes.code === 200) subDepartments.value = deptRes.data.children || []
+    if (memberRes.code === 200) deptMembers.value = memberRes.data || []
+  } catch (e) { ElMessage.error('加载部门数据失败') }
 }
 
-const handleMemberClick = (m) => {
-  activeUser.value = m
-  showProfile.value = true
+const updateBreadcrumbs = (node) => {
+  // 这里简化处理，实际应根据 tree 节点的 path 获取全路径
+  // 仅作为演示，目前采用“点击追加”或“点击回退”模拟
+  const idx = breadcrumbs.value.findIndex(b => b.id === node.id)
+  if (idx !== -1) {
+    breadcrumbs.value = breadcrumbs.value.slice(0, idx + 1)
+  } else {
+    // 假设 node 携带了 parent 信息或当前是层级进入
+    breadcrumbs.value.push(node)
+  }
 }
 
+const handleBreadcrumbClick = (node) => {
+  if (!node) { breadcrumbs.value = []; view.value = 'dept'; subDepartments.value = []; deptMembers.value = []; return }
+  handleDeptSelect(node)
+}
+
+const loadFriends = async () => {
+  try {
+    const res = await getContacts()
+    if (res.code === 200) friends.value = res.data || []
+  } catch (e) { console.error(e) }
+}
+
+const handleMemberClick = (m) => { activeUserId.value = m.userId || m.friendId || m.id; showProfile.value = true }
 const handleChat = (m) => {
-  const session = {
-    id: m.id || m.userId,
-    targetId: m.id || m.userId,
-    name: m.name || m.userName || m.nickname,
-    avatar: m.avatar,
-    type: 'PRIVATE'
-  }
-  store.commit('im/session/SET_CURRENT_SESSION', session)
-  ElMessage.success(`正在进入对话: ${session.name}`)
+  store.commit('im/session/SET_CURRENT_SESSION', { id: m.userId || m.friendId || m.id, name: m.name || m.friendName, type: 'PRIVATE' })
+  ElMessage.success(`发起会话: ${m.name || m.friendName}`)
 }
+const handleGroupSelect = (g) => store.commit('im/session/SET_CURRENT_SESSION', { ...g, type: 'GROUP' })
 
-const handleMenuCommand = (command, user) => {
-  switch(command) {
-    case 'chat': handleChat(user); break;
-    case 'profile': handleMemberClick(user); break;
-    case 'delete':
-      ElMessageBox.confirm(`确定要删除好友 ${user.name || user.userName} 吗？`, '提示', { type: 'warning' })
-        .then(() => { ElMessage.success('已模拟删除') });
-      break;
-  }
-}
-
-const handleGroupSelect = (group) => {
-  const session = { ...group, type: 'GROUP' }
-  store.commit('im/session/SET_CURRENT_SESSION', session)
-}
-
-const handleAddContact = () => { /* 弹窗逻辑 */ }
+onMounted(() => { if (store.state.user?.token) loadFriends() })
 </script>
 
 <style scoped lang="scss">
-.contacts-panel-premium { display: flex; height: 100%; flex: 1; background: #fff; overflow: hidden; }
-.org-sidebar { width: 240px; border-right: 1px solid #f2f3f5; display: flex; flex-direction: column; flex-shrink: 0; min-width: 0;
-  .title { font-size: 16px; font-weight: 600; color: #1f2329; }
-  .action-btn { border: none; background: transparent; cursor: pointer; color: #8f959e; &:hover { color: #1677ff; } }
+.contacts-panel-v2 {
+  display: flex; height: 100%; width: 100%; background: var(--dt-bg-body); overflow: hidden;
 }
-.sidebar-content { flex: 1; padding: 12px 8px; overflow-y: auto;
-  .link-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
-    &:hover { background: #f5f6f7; }
-    &.active { background: #e8f4ff; color: #1677ff; .label { font-weight: 600; } }
-    .icon { font-size: 20px; &.green { color: #52c41a; } &.purple { color: #722ed1; } &.orange { color: #fa8c16; } &.blue { color: #1677ff; } }
-    .label { font-size: 14px; color: #1f2329; }
-  }
-  .org-tree-section { margin-top: 24px; .section-label { padding: 0 12px 8px; font-size: 11px; color: #8f959e; text-transform: uppercase; letter-spacing: 1px; } }
-}
-.members-main { flex: 1; display: flex; flex-direction: column; background: #f5f5f5;
-  .main-header { height: 60px; padding: 0 24px; background: #fff; border-bottom: 1px solid #f2f3f5; display: flex; align-items: center; justify-content: space-between;
-    .dept-title { font-size: 18px; font-weight: 600; color: #1f2329; margin: 0; }
-    .member-count { font-size: 12px; color: #8f959e; margin-left: 12px; }
-  }
-}
-.members-scroller { flex: 1; padding: 24px; overflow-y: auto; }
-.members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-.member-card { background: #fff; padding: 16px; border-radius: 10px; border: 1px solid rgba(31,35,41,0.08); display: flex; align-items: center; gap: 16px; cursor: pointer; transition: all 0.2s;
-  &:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); .member-actions { opacity: 1; } }
-  .member-info { flex: 1; min-width: 0; .member-name { font-size: 15px; font-weight: 600; color: #1f2329; } .member-sub { font-size: 12px; color: #8f959e; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
-  .member-actions { opacity: 0; transition: opacity 0.2s; .circle-btn { width: 32px; height: 32px; border-radius: 50%; border: none; background: #e8f4ff; color: #1677ff; cursor: pointer; display: flex; align-items: center; justify-content: center; &:hover { background: #1677ff; color: #fff; } .material-icons-outlined { font-size: 18px; } } }
-}
-.contact-context-menu {
-  width: 180px;
-  border-radius: 8px;
-  padding: 4px;
-  :deep(.el-dropdown-menu__item) { 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-    padding: 10px 16px; 
-    font-size: 14px;
-    border-radius: 4px;
-    margin: 2px 0;
-    .el-icon { font-size: 16px; }
-    &:hover { background-color: #f5f7fa; color: #1677ff; }
-    &.text-danger { color: #ff4d4f; &:hover { background-color: #fff1f0; } }
+
+// ============================================================================
+// 中栏：侧边导航 (280px)
+// ============================================================================
+.contacts-sidebar {
+  width: var(--dt-session-panel-width);
+  height: 100%; background: #ffffff;
+  border-right: 1px solid var(--dt-border-light);
+  display: flex; flex-direction: column; flex-shrink: 0;
+
+  .sidebar-header {
+    height: var(--dt-chat-header-height); padding: 0 var(--dt-spacing-md);
+    @include flex-center; border-bottom: 1px solid var(--dt-border-lighter);
+    .search-wrap {
+      width: 100%; height: 32px; background: var(--dt-bg-body); border-radius: 6px;
+      display: flex; align-items: center; padding: 0 10px; gap: 8px;
+      .search-icon { color: var(--dt-text-tertiary); font-size: 14px; }
+      .inner-input { border: none; background: transparent; outline: none; font-size: 13px; width: 100%; }
+    }
   }
 }
+
+.sidebar-scroll { flex: 1; overflow-y: auto; padding: var(--dt-spacing-md) var(--dt-spacing-sm); }
+
+.nav-list {
+  display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--dt-spacing-lg);
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    border-radius: var(--dt-radius-md); cursor: pointer; transition: all var(--dt-transition-base);
+    &:hover { background: var(--dt-bg-session-hover); }
+    &.active { background: var(--dt-bg-session-active); color: var(--dt-brand-color); font-weight: 600; }
+    
+    .icon-box {
+      width: 32px; height: 32px; border-radius: 8px; @include flex-center; color: #fff; font-size: 18px;
+      &.orange { background: #ff9c6e; } &.blue { background: #69c0ff; } &.green { background: #95de64; }
+    }
+    span { font-size: 14px; color: var(--dt-text-primary); }
+  }
+}
+
+.tree-divider {
+  padding: 0 var(--dt-spacing-md) var(--dt-spacing-sm); font-size: 12px; color: var(--dt-text-tertiary);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+
+// ============================================================================
+// 主栏：内容区域
+// ============================================================================
+.contacts-main {
+  flex: 1; display: flex; flex-direction: column; background: #ffffff; min-width: 0;
+
+  .main-header {
+    height: var(--dt-chat-header-height); padding: 0 var(--dt-spacing-xl);
+    border-bottom: 1px solid var(--dt-border-light); @include flex-between;
+    .breadcrumb-container { :deep(.el-breadcrumb__item) { cursor: pointer; &:hover { color: var(--dt-brand-color); } } }
+  }
+}
+
+.main-content-scroller { flex: 1; padding: var(--dt-spacing-xl); overflow-y: auto; }
+
+// 下级部门文件夹样式
+.sub-dept-list {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--dt-spacing-md);
+  margin-bottom: var(--dt-spacing-xl);
+}
+
+.dept-folder-card {
+  background: var(--dt-bg-body); padding: 12px 16px; border-radius: 8px;
+  display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;
+  &:hover { background: var(--dt-bg-session-hover); transform: translateY(-1px); box-shadow: var(--dt-shadow-1); }
+  
+  .folder-icon { font-size: 24px; color: var(--dt-brand-color); }
+  .folder-info { flex: 1; display: flex; flex-direction: column; 
+    .folder-name { font-size: 14px; font-weight: 500; color: var(--dt-text-primary); }
+    .folder-count { font-size: 12px; color: var(--dt-text-tertiary); }
+  }
+  .arrow { font-size: 14px; color: var(--dt-text-quaternary); }
+}
+
+.section-divider {
+  padding: var(--dt-spacing-md) 0; border-bottom: 1px solid var(--dt-border-lighter);
+  margin-bottom: var(--dt-spacing-lg); span { font-size: 13px; color: var(--dt-text-tertiary); font-weight: 600; }
+}
+
+// 成员卡片对标
+.members-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--dt-spacing-lg);
+}
+
+.member-card-ding {
+  background: #ffffff; padding: 16px; border-radius: 10px; border: 1px solid var(--dt-border-light);
+  display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s;
+  &:hover { 
+    box-shadow: var(--dt-shadow-card-hover); border-color: var(--dt-brand-light);
+    .chat-shortcut { opacity: 1; transform: scale(1); }
+  }
+
+  .m-body { flex: 1; min-width: 0;
+    .m-name { font-size: 15px; font-weight: 600; color: var(--dt-text-primary); }
+    .m-position { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 2px; }
+  }
+
+  .chat-shortcut {
+    @include button-reset; width: 32px; height: 32px; border-radius: 50%; background: var(--dt-brand-bg);
+    color: var(--dt-brand-color); @include flex-center; opacity: 0; transform: scale(0.8);
+    transition: all 0.2s; &:hover { background: var(--dt-brand-color); color: #fff; }
+  }
+}
+
+.view-title { font-size: 18px; font-weight: 700; color: var(--dt-text-primary); margin-bottom: var(--dt-spacing-xl); }
 </style>

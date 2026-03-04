@@ -97,6 +97,27 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     }
 
     @Override
+    public void broadcastRecallNotification(Long conversationId, Long messageId, Long userId) {
+        try {
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) return;
+
+            Map<String, Object> recallMap = new HashMap<>();
+            recallMap.put("type", "message_recall");
+            Map<String, Object> data = new HashMap<>();
+            data.put("conversationId", conversationId);
+            data.put("messageId", messageId);
+            data.put("userId", userId);
+            data.put("timestamp", System.currentTimeMillis());
+            recallMap.put("data", data);
+
+            publishToMembers(members, recallMap, userId);
+        } catch (Exception e) {
+            log.error("广播消息撤回通知异常", e);
+        }
+    }
+
+    @Override
     public void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);

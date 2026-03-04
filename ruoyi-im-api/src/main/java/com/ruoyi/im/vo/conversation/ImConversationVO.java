@@ -131,6 +131,7 @@ public class ImConversationVO implements Serializable {
     private String peerName; // 对方姓名
     private String peerAvatar; // 对方头像
     private Boolean peerOnline; // 对方是否在线
+    private Long peerUserId; // 对方用户ID（私聊时使用）
 
     // 显式提供符合 MyBatis 预期的 Setter (Double Check)
     public void setIsDeleted(Integer deleted) { this.deleted = deleted; }

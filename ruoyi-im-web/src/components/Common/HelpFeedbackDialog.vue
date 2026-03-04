@@ -142,7 +142,7 @@
                       功能异常
                     </el-radio-button>
                     <el-radio-button label="suggestion">
-                      <el-icon><Lightbulb /></el-icon>
+                      <el-icon><Sunny /></el-icon>
                       产品建议
                     </el-radio-button>
                     <el-radio-button label="other">
@@ -211,7 +211,8 @@ import {
   Cloudy,
   Warning,
   Message,
-  Position
+  Position,
+  Sunny
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 

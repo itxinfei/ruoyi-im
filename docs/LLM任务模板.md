@@ -9,6 +9,7 @@
 ```yaml
 task_id: IM-X-001
 type: planning
+mandate_ref: "GEMINI.md" (Must read first, highest priority)
 goal: 一句话描述目标
 stack_constraints:
   jdk: "1.8"
@@ -48,6 +49,7 @@ output_required:
 ```yaml
 task_id: IM-X-002
 type: development
+mandate_ref: "GEMINI.md" (Must read first, highest priority)
 goal: 一句话描述目标
 stack_constraints:
   jdk: "1.8"
@@ -90,6 +92,7 @@ output_required:
 ```yaml
 task_id: IM-X-003
 type: review
+mandate_ref: "GEMINI.md" (Must read first, highest priority)
 stack_constraints:
   jdk: "1.8"
   vue: "3.x"
@@ -126,7 +129,9 @@ output_required:
 ```text
 task_id: IM-A-001
 goal: 打通语音通话链路
-stack_constraints: jdk=1.8, vue=3.x, node=18, mysql=5.7, dev_os=Windows11, prod_os=CentOS7
+mandate_ref: "GEMINI.md"
+stack_constraints:
+ jdk=1.8, vue=3.x, node=18, mysql=5.7, dev_os=Windows11, prod_os=CentOS7
 l1/l2/l3: 消息/最近会话/发起通话弹窗
 scope_in: ChatHeader.vue, CallDialog.vue, UserDetailDrawer.vue, ChatPanel.vue
 acceptance: AC1入口可发起, AC2可接听/挂断, AC3无“开发中”文案

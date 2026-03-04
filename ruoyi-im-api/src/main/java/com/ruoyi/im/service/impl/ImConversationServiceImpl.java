@@ -144,7 +144,10 @@ public class ImConversationServiceImpl implements ImConversationService {
         for (ImConversationVO vo : conversations) {
             conversationIds.add(vo.getId());
             if ("PRIVATE".equalsIgnoreCase(vo.getType()) || "SINGLE".equalsIgnoreCase(vo.getType())) {
-                userIds.add(getPeerUserId(vo.getId(), userId));
+                Long peerUserId = getPeerUserId(vo.getId(), userId);
+                if (peerUserId != null) {
+                    userIds.add(peerUserId);
+                }
             } else if ("GROUP".equalsIgnoreCase(vo.getType())) {
                 if (vo.getTargetId() != null) {
                     groupIds.add(vo.getTargetId());
@@ -217,6 +220,10 @@ public class ImConversationServiceImpl implements ImConversationService {
                         vo.setPeerAvatar(peerAvatar);
                         vo.setName(peerName);
                         vo.setAvatar(peerAvatar);
+                        // 修复：targetId 应该是对方用户的 ID，而不是两个用户 ID 中较小的那个
+                        vo.setTargetId(peerUserId);
+                        // 新增：peerUserId 字段，方便前端直接使用
+                        vo.setPeerUserId(peerUserId);
 
                         // 私聊会话去重
                         ImConversationVO existing = privateConversationMap.get(peerUserId);
@@ -363,14 +370,20 @@ public class ImConversationServiceImpl implements ImConversationService {
         applyConversationState(vo, conversationId, userId);
 
         // 设置会话相关信息
-        if ("PRIVATE".equalsIgnoreCase(conversation.getType())) {
+        if ("PRIVATE".equalsIgnoreCase(conversation.getType()) || "SINGLE".equalsIgnoreCase(conversation.getType())) {
             // 私聊会话，获取对方用户信息
             Long peerUserId = getPeerUserId(conversationId, userId);
             if (peerUserId != null) {
                 ImUser peerUser = imUserMapper.selectImUserById(peerUserId);
                 if (peerUser != null) {
-                    vo.setPeerName(peerUser.getNickname() != null ? peerUser.getNickname() : peerUser.getUsername());
+                    String peerName = peerUser.getNickname() != null ? peerUser.getNickname() : peerUser.getUsername();
+                    vo.setPeerName(peerName);
                     vo.setPeerAvatar(peerUser.getAvatar());
+                    vo.setName(peerName);
+                    vo.setAvatar(peerUser.getAvatar());
+                    // 修复：targetId 应该是对方用户的 ID
+                    vo.setTargetId(peerUserId);
+                    vo.setPeerUserId(peerUserId);
                     vo.setPeerOnline(imRedisUtil.isOnlineUser(peerUserId));
                 }
             }
@@ -582,6 +595,9 @@ public class ImConversationServiceImpl implements ImConversationService {
                             // 同时设置name和avatar字段（前端兼容）
                             vo.setName(peerName);
                             vo.setAvatar(peerAvatar);
+                            // 修复：targetId 应该是对方用户的 ID
+                            vo.setTargetId(peerUserId);
+                            vo.setPeerUserId(peerUserId);
                         }
                     }
                 } else if ("GROUP".equalsIgnoreCase(conversation.getType())) {

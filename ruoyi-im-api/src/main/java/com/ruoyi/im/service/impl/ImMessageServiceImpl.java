@@ -527,6 +527,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long conversationId, Long userId, List<Long> messageIds) {
         if (messageIds == null || messageIds.isEmpty()) {
             return;
@@ -535,14 +536,13 @@ public class ImMessageServiceImpl implements ImMessageService {
         int readCount = 0;
         Long maxMessageId = null;
 
-        for (Long messageId : messageIds) {
-            ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        // 批量查询消息，避免 N+1 查询问题
+        List<ImMessage> messages = imMessageMapper.selectImMessageListByIds(messageIds);
+        for (ImMessage message : messages) {
             if (message != null && !message.getSenderId().equals(userId)) {
-                // 不再更新消息状态（status是非数据库字段）
-                // 已读状态通过im_message_read表记录
                 readCount++;
-                if (maxMessageId == null || messageId > maxMessageId) {
-                    maxMessageId = messageId;
+                if (maxMessageId == null || message.getId() > maxMessageId) {
+                    maxMessageId = message.getId();
                 }
             }
         }
@@ -774,20 +774,15 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     private void incrementSessionUnread(Long conversationId, Long userId, int delta) {
-        ImUserSession userSession = ensureUserSession(conversationId, userId);
-        int current = userSession.getUnreadCount() == null ? 0 : userSession.getUnreadCount();
-        int target = current + Math.max(delta, 0);
-        imUserSessionMapper.updateUnreadCount(userId, conversationId, target);
+        ensureUserSession(conversationId, userId);
+        int incrementValue = Math.max(delta, 0);
+        imUserSessionMapper.incrementUnreadCount(userId, conversationId, incrementValue);
     }
 
     private void decrementSessionUnread(Long conversationId, Long userId, int delta) {
-        ImUserSession userSession = ensureUserSession(conversationId, userId);
-        int current = userSession.getUnreadCount() == null ? 0 : userSession.getUnreadCount();
-        int target = current - Math.max(delta, 0);
-        if (target < 0) {
-            target = 0;
-        }
-        imUserSessionMapper.updateUnreadCount(userId, conversationId, target);
+        ensureUserSession(conversationId, userId);
+        int decrementValue = Math.max(delta, 0);
+        imUserSessionMapper.decrementUnreadCount(userId, conversationId, decrementValue);
     }
 
     private void updateSessionLastRead(Long conversationId, Long userId, Long lastReadMessageId) {

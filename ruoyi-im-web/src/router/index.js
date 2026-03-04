@@ -84,7 +84,6 @@ router.beforeEach((to, from, next) => {
     if (to.meta.roles && to.meta.roles.length > 0) {
       if (!to.meta.roles.includes(userRole)) {
         // 权限不足，跳转到首页
-        console.warn('权限不足，需要角色:', to.meta.roles)
         next('/')
         return
       }

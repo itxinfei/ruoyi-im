@@ -70,6 +70,14 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
     List<ImMessage> selectImMessageListByConversationId(Long conversationId);
 
     /**
+     * 根据消息ID列表批量查询消息
+     *
+     * @param messageIds 消息ID列表
+     * @return 消息集合
+     */
+    List<ImMessage> selectImMessageListByIds(@Param("messageIds") List<Long> messageIds);
+
+    /**
      * 获取会话最后一条消息
      *
      * @param conversationId 会话ID

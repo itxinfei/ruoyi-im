@@ -11,6 +11,8 @@ public interface ImWebSocketBroadcastService {
 
     void broadcastReadReceipt(Long conversationId, Long lastReadMessageId, Long userId);
 
+    void broadcastRecallNotification(Long conversationId, Long messageId, Long userId);
+
     void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping);
 
     void broadcastOnlineStatus(Long userId, boolean online);

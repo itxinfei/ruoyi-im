@@ -15,7 +15,7 @@ import request from '../request'
  */
 export function chat(data) {
   return request({
-    url: '/im/ai/chat',
+    url: '/api/im/ai/chat',
     method: 'post',
     data
   })
@@ -30,7 +30,7 @@ export function chat(data) {
  */
 export function summarize(data) {
   return request({
-    url: '/im/ai/summarize',
+    url: '/api/im/ai/summarize',
     method: 'post',
     data
   })
@@ -43,7 +43,7 @@ export function summarize(data) {
  */
 export function clearConversation(conversationId, userId) {
   return request({
-    url: `/im/ai/conversation/${conversationId}`,
+    url: `/api/im/ai/conversation/${conversationId}`,
     method: 'delete',
     params: { userId }
   })
@@ -54,7 +54,7 @@ export function clearConversation(conversationId, userId) {
  */
 export function getSupportedModels() {
   return request({
-    url: '/im/ai/models',
+    url: '/api/im/ai/models',
     method: 'get'
   })
 }

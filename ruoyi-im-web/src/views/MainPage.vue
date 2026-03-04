@@ -11,13 +11,13 @@
       <main class="content-container">
         <!-- 消息模块专用：双栏布局 -->
         <template v-if="activeModule === 'chat'">
-          <SessionPanel 
+          <SessionPanel
             :current-session="currentSession"
-            @select-session="handleSelectSession" 
+            @select-session="handleSelectSession"
             @show-user="handleShowUser"
           />
-          <ChatPanel 
-            :session="currentSession" 
+          <ChatPanel
+            :session="currentSession"
             @show-user="handleShowUser"
           />
         </template>
@@ -41,11 +41,11 @@
         </template>
       </main>
 
-      <!-- 全局交互层 (防御性数据处理) -->
-      <UserDetailDrawer 
-        v-model="showUserDetail" 
-        :session="detailSession" 
-        @send-message="handleSendMessageFromDrawer" 
+      <!-- 全局交互层 -->
+      <UserProfileDialog
+        v-model="showUserDetail"
+        :user-id="detailUserId"
+        @start-call="handleStartCall"
       />
     </div>
   </div>
@@ -70,22 +70,22 @@ import AssistantPanel from './AssistantPanel.vue'
 import SearchPanel from './SearchPanel.vue'
 import SettingsPanel from './SettingsPanel.vue'
 import ProfilePanel from './ProfilePanel.vue'
-import UserDetailDrawer from '@/components/Chat/UserDetailDrawer.vue'
+import UserProfileDialog from '@/components/Contacts/UserProfileDialog.vue'
 import AdminLayout from './admin/AdminLayout.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
 const showUserDetail = ref(false)
-const detailSession = ref(null)
+const detailUserId = ref(null)
 
 const { connect, disconnect, onMessage, onRead, onOnline, onOffline } = useImWebSocket()
 
 const currentSession = computed(() => store.state.im?.session?.currentSession || null)
 // 从 localStorage 读取主题状态
-const isDark = computed(() => localStorage.getItem('im_theme') === 'dark') 
+const isDark = computed(() => localStorage.getItem('im_theme_dark') === 'true')
 
-const handleSwitchModule = (m) => { 
-  activeModule.value = m 
+const handleSwitchModule = (m) => {
+  activeModule.value = m
 }
 const handleSelectSession = (s) => { store.commit('im/session/SET_CURRENT_SESSION', s) }
 
@@ -113,15 +113,13 @@ const handleGoToGroup = (groupId) => {
 // 通用：显示用户详情逻辑
 const handleShowUser = (userId) => {
   if (!userId) return
-  detailSession.value = { targetId: userId, type: 'PRIVATE' }
+  detailUserId.value = userId
   showUserDetail.value = true
 }
 
-// 通用：从抽屉发起消息
-const handleSendMessageFromDrawer = (session) => {
-  showUserDetail.value = false
-  activeModule.value = 'chat'
-  handleSelectSession(session)
+// 处理通话
+const handleStartCall = (payload) => {
+  ElMessage.info(`${payload.type === 'video' ? '视频' : '语音'}通话功能开发中`)
 }
 
 // 初始化 WebSocket 监听
@@ -157,7 +155,7 @@ const initWebSocket = () => {
   })
 }
 
-onMounted(() => { 
+onMounted(() => {
   if (store.state.user?.token) {
     store.dispatch('im/session/loadSessions').catch(err => {
       console.warn('会话加载失败', err)
@@ -172,8 +170,47 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.dingtalk-app { width: 100vw; height: 100vh; overflow: hidden; background: #fff; }
-.layout-wrapper { display: flex; width: 100%; height: 100%; }
-.content-container { flex: 1; display: flex; height: 100%; min-width: 0; overflow: hidden; }
-.module-panel { flex: 1; height: 100%; overflow: hidden; background: #fff; }
+.dingtalk-app {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--dt-bg-body);
+  display: flex;
+}
+
+.layout-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.content-container {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  min-width: 0; // 防崩红线
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.module-panel {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--dt-bg-card);
+}
+
+// 统一过度动画
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--dt-transition-base);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
