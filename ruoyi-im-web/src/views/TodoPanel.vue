@@ -152,6 +152,15 @@ const handleDelete = (todo) => {
   })
 }
 
+const handleEdit = (todo) => {
+  editingTodo.value = todo
+  showAddDialog.value = true
+}
+
+const handleViewDetail = (todo) => {
+  ElMessage.info(`查看任务: ${todo.title}`)
+}
+
 const isOverdue = (date) => date && new Date(date) < new Date()
 const formatDate = (date) => date ? new Date(date).toLocaleDateString() : '暂无截止日期'
 

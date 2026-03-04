@@ -81,8 +81,8 @@ const detailSession = ref(null)
 const { connect, disconnect, onMessage, onRead, onOnline, onOffline } = useImWebSocket()
 
 const currentSession = computed(() => store.state.im?.session?.currentSession || null)
-// 修复点：增加防御性检查，防止 state.app 未定义导致崩溃
-const isDark = computed(() => false) 
+// 从 localStorage 读取主题状态
+const isDark = computed(() => localStorage.getItem('im_theme') === 'dark') 
 
 const handleSwitchModule = (m) => { 
   activeModule.value = m 

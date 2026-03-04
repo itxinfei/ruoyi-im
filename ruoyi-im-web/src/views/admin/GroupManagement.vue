@@ -364,18 +364,4 @@ onMounted(loadGroups)
 .muted {
   color: #9ca3af;
 }
-
-@media (max-width: 768px) {
-  .panel-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .batch-actions {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-}
 </style>

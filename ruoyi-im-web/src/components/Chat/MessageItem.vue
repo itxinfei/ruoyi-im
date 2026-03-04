@@ -60,6 +60,9 @@
                        <el-dropdown-item command="read-detail" v-if="message.isOwn && message.type !== 'SYSTEM'">
                          <el-icon><View /></el-icon> 查看已读
                        </el-dropdown-item>
+                       <el-dropdown-item command="edit-history" v-if="message.isEdited === 1 && message.type === 'TEXT'">
+                         <el-icon><Document /></el-icon> 编辑历史
+                       </el-dropdown-item>
                        <el-dropdown-item command="forward">转发</el-dropdown-item>
                        <el-dropdown-item command="copy" v-if="message.type === 'TEXT'">复制</el-dropdown-item>
                        <el-dropdown-item command="recall" v-if="message.isOwn && canRecall">撤回</el-dropdown-item>
@@ -102,7 +105,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { ChatLineSquare, MoreFilled, Loading, WarningFilled, Check, Star, View } from '@element-plus/icons-vue'
+import { ChatLineSquare, MoreFilled, Loading, WarningFilled, View, Document } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
@@ -122,22 +125,28 @@ const canRecall = computed(() => {
 const formattedTime = computed(() => {
   if (!props.message.timestamp) return ''
   const date = new Date(props.message.timestamp)
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+  return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
 })
 </script>
 
 <style scoped lang="scss">
 // ============================================================================
-// 消息项容器
+// 消息项容器 - 强制布局血统
 // ============================================================================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .message-item {
   display: flex !important;
   width: 100% !important;
-  margin-bottom: 16px;
+  margin-bottom: var(--dt-spacing-lg) !important;
   position: relative;
-  padding: 0 16px;
+  padding: 0 var(--dt-spacing-lg);
   box-sizing: border-box;
-  transition: opacity 0.2s;
+  transition: opacity var(--dt-transition-base);
 
   &.is-own {
     flex-direction: row-reverse !important;
@@ -146,50 +155,83 @@ const formattedTime = computed(() => {
 }
 
 // ============================================================================
-// 头像区域
+// 时间分割线
+// ============================================================================
+.time-divider {
+  width: 100%;
+  text-align: center;
+  margin: var(--dt-spacing-md) 0;
+
+  .time-text {
+    background: var(--dt-brand-lighter);
+    color: var(--dt-text-tertiary);
+    font-size: var(--dt-font-size-xs);
+    padding: 2px var(--dt-spacing-sm);
+    border-radius: var(--dt-radius-full);
+    display: inline-block;
+  }
+}
+
+// ============================================================================
+// 头像区域 - 头像顶部与气泡文本首行对齐 (钉钉红线)
 // ============================================================================
 .avatar-container {
   flex-shrink: 0;
   cursor: pointer;
   align-self: flex-start;
   position: relative;
+  margin-top: 2px; 
 }
 
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--dt-bg-mask);
+  border-radius: var(--dt-radius-sm);
+  @include flex-center;
+  color: #fff;
+}
+
+// ============================================================================
+// 内容包装层 - 防崩防撑爆 (min-width: 0)
+// ============================================================================
 .content-wrapper {
   max-width: calc(100% - 110px);
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin: 0 12px;
+  gap: var(--dt-spacing-xs);
+  margin: 0 var(--dt-spacing-md);
   align-items: flex-start !important;
-  min-width: 0;
+  min-width: 0; 
 }
 
 .is-own .content-wrapper {
   align-items: flex-end !important;
-  margin-left: 48px; 
-  margin-right: 12px;
+  margin-left: var(--dt-spacing-12); // 给左侧预留操作空间
+  margin-right: var(--dt-spacing-md);
 }
 
 .sender-name {
-  font-size: 12px;
-  color: #8f959e;
-  margin-bottom: 2px;
-  margin-left: 4px;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+  margin-bottom: var(--dt-spacing-xs);
+  margin-left: var(--dt-spacing-xs);
 }
 
 .is-own .sender-name {
-  display: none; // 钉钉在右侧自己的消息通常不显示名字
+  display: none; // 钉钉风格：己方右侧隐藏昵称
 }
 
+// ============================================================================
+// 消息核心主区
+// ============================================================================
 .message-content-main {
   position: relative;
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: var(--dt-spacing-sm);
   max-width: 100%;
 
-  // 悬停显示动作条
   &:hover {
     .message-actions-floating {
       opacity: 1;
@@ -202,46 +244,52 @@ const formattedTime = computed(() => {
   flex-direction: row-reverse;
 }
 
+// ============================================================================
+// 悬停操作条 (微交互质感)
+// ============================================================================
 .message-actions-floating {
   opacity: 0;
   visibility: hidden;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
   
   .action-bar-min {
     display: flex;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: var(--dt-bg-card);
+    border: 1px solid var(--dt-border-light);
+    border-radius: var(--dt-radius-md);
+    box-shadow: var(--dt-shadow-float);
     padding: 2px;
   }
 }
 
 .mini-btn {
-  width: 28px;
-  height: 28px;
+  width: var(--dt-btn-height-sm);
+  height: var(--dt-btn-height-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   background: transparent;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   cursor: pointer;
-  color: #64748b;
-  font-size: 14px;
-  transition: all 0.2s;
+  color: var(--dt-text-secondary);
+  font-size: var(--dt-font-size-base);
+  transition: all var(--dt-transition-fast);
 
   &:hover {
-    background: #f1f5f9;
-    color: #1677ff;
+    background: var(--dt-bg-session-hover);
+    color: var(--dt-brand-color);
   }
 }
 
+// ============================================================================
+// 消息页脚 (状态与时间)
+// ============================================================================
 .message-footer {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 2px;
+  gap: var(--dt-spacing-sm);
+  margin-top: var(--dt-spacing-xs);
   min-height: 16px;
 }
 
@@ -255,24 +303,24 @@ const formattedTime = computed(() => {
 }
 
 .read-status {
-  font-size: 11px;
-  color: #8f959e;
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-tertiary);
   cursor: default;
   user-select: none;
 
   &.is-read {
-    color: #1677ff;
-    font-weight: 500;
+    color: var(--dt-unread-color);
+    font-weight: var(--dt-font-weight-medium);
   }
 }
 
 .status-loading-icon {
   font-size: 12px;
-  color: #1677ff;
+  color: var(--dt-brand-color);
 }
 
 .status-failed-icon {
-  color: #ff4d4f;
+  color: var(--dt-error-color);
   cursor: pointer;
   font-size: 14px;
   display: flex;
@@ -280,55 +328,45 @@ const formattedTime = computed(() => {
 }
 
 .time {
-  color: #bfbfbf;
-  font-size: 11px;
+  color: var(--dt-text-quaternary);
+  font-size: var(--dt-font-size-xs);
 }
 
+// ============================================================================
+// 上传进度条
+// ============================================================================
 .upload-progress-bar {
   position: absolute;
   bottom: -4px;
   left: 0;
   right: 0;
   height: 2px;
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--dt-brand-lighter);
   border-radius: 1px;
   overflow: hidden;
 
   .progress-fill {
     height: 100%;
-    background: #1677ff;
+    background: var(--dt-brand-color);
     transition: width 0.3s;
   }
 }
 
 // ============================================================================
-// 暗色模式
+// 暗色模式适配
 // ============================================================================
 :global(.dark) {
   .message-actions-floating .action-bar-min {
-    background: #1e293b;
-    border-color: #334155;
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
   }
 
   .mini-btn:hover {
-    background: rgba(22, 119, 255, 0.15) !important;
-  }
-
-  .time-divider .time-text {
-    background: rgba(255, 255, 255, 0.08);
-    color: #94a3b8;
-  }
-
-  .avatar-overlay {
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--dt-bg-active-dark) !important;
   }
 
   .upload-progress-bar {
-    background: #334155;
-  }
-
-  .status-failed:hover {
-    background: rgba(255, 77, 79, 0.15);
+    background: var(--dt-bg-input-dark);
   }
 }
 </style>

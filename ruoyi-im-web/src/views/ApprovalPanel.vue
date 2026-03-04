@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CreateApprovalDialog from '@/components/CreateApprovalDialog/index.vue'
@@ -168,7 +168,9 @@ const handleApprovalAction = () => {
 }
 
 // 组件加载时初始加载数据
-loadApprovals()
+onMounted(() => {
+  loadApprovals()
+})
 </script>
 
 <style scoped lang="scss">

@@ -86,59 +86,61 @@ const formatSize = (s) => {
 }
 
 .text-bubble {
-  background: #ffffff;
-  padding: 10px 14px;
-  border-radius: 4px 12px 12px 12px;
-  border: 1px solid rgba(31, 35, 41, 0.12);
-  color: #1f2329;
-  font-size: 15px;
-  line-height: 1.5;
+  background: var(--dt-bubble-left-bg);
+  padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
+  border-radius: var(--dt-bubble-radius);
+  border: 1px solid var(--dt-border-light);
+  color: var(--dt-text-primary);
+  font-size: var(--dt-font-size-md);
+  line-height: var(--dt-line-height-base);
   position: relative;
   word-wrap: break-word;
   word-break: break-word;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--dt-shadow-1);
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    box-shadow: var(--dt-shadow-2);
+    border-color: var(--dt-border-color);
+  }
 
   &.is-own {
-    background: #e8f4ff;
-    border-color: rgba(0, 126, 255, 0.2);
-    border-radius: 12px 4px 12px 12px;
+    background: var(--dt-bubble-right-bg);
+    border-color: var(--dt-brand-light);
+    border-radius: var(--dt-bubble-radius);
     box-shadow: 0 1px 2px rgba(0, 126, 255, 0.06);
+
+    &:hover {
+      background: var(--dt-bubble-right-bg-hover);
+    }
   }
 
   .reply-ref {
-    background: rgba(0, 0, 0, 0.05);
-    border-left: 3px solid #1677ff;
-    padding: 6px 10px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    font-size: 13px;
-    color: #646a73;
+    background: var(--dt-brand-lighter);
+    border-left: 3px solid var(--dt-brand-color);
+    padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
+    margin-bottom: var(--dt-spacing-sm);
+    border-radius: var(--dt-radius-sm);
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background var(--dt-transition-fast);
 
     &:hover {
-      background: rgba(0, 0, 0, 0.08);
+      background: var(--dt-brand-light);
     }
 
     .ref-user {
-      font-weight: 500;
-      margin-right: 4px;
-      color: #1f2329;
-    }
-
-    .ref-text {
-      opacity: 0.8;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      font-weight: var(--dt-font-weight-medium);
+      margin-right: var(--dt-spacing-xs);
+      color: var(--dt-text-primary);
     }
   }
 
   .msg-text {
     white-space: pre-wrap;
     :deep(.msg-link) {
-      color: #1677ff;
+      color: var(--dt-text-link);
       text-decoration: none;
       &:hover {
         text-decoration: underline;
@@ -147,8 +149,8 @@ const formatSize = (s) => {
   }
 
   .edited-flag {
-    font-size: 11px;
-    color: #8f959e;
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-tertiary);
     margin-top: 4px;
     display: block;
     text-align: right;

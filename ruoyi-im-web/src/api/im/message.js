@@ -349,3 +349,17 @@ export function getMessageReadStatus(messageId) {
   })
 }
 
+// ==================== 消息编辑历史 ====================
+
+/**
+ * 获取消息编辑历史列表
+ * @param {number} messageId - 消息 ID
+ * @returns {Promise}
+ */
+export function getMessageEditHistory(messageId) {
+  return request({
+    url: `/api/im/message/edit-history/${messageId}`,
+    method: 'get'
+  })
+}
+

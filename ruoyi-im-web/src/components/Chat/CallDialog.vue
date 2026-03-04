@@ -1,105 +1,116 @@
 <template>
   <el-dialog
     v-model="visible"
-    :title="title"
-    :width="type === 'video' && (status === 'talking' || status === 'calling') ? '600px' : '400px'"
+    :width="dialogWidth"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     :show-close="false"
-    class="call-dialog"
-    :class="{'video-mode': type === 'video' && status === 'talking'}"
+    class="call-dialog-immersive"
+    :class="{ 'is-video': type === 'video', 'is-talking': status === 'talking' }"
   >
-    <div class="call-content">
-      <!-- 视频流展示区 -->
-      <div v-if="type === 'video' && (status === 'talking' || status === 'calling')" class="video-container">
-        <div class="remote-video-wrapper">
-          <video ref="remoteVideoRef" autoplay playsinline class="remote-video"></video>
-          <div v-if="status !== 'talking'" class="video-placeholder">
-            <span class="material-icons-outlined">videocam_off</span>
-            <p>等待对方接听...</p>
+    <div class="call-stage">
+      <!-- 1. 视频流容器 (沉浸式全屏) -->
+      <div v-if="type === 'video'" class="video-canvas">
+        <div class="remote-track">
+          <video ref="remoteVideoRef" autoplay playsinline class="video-element"></video>
+          <!-- 未接通/对端关闭摄像头 占位 -->
+          <div v-if="status !== 'talking' || remoteVideoOff" class="video-mask">
+            <DingtalkAvatar :src="peerAvatar" :name="peerName" :size="120" shape="circle" />
+            <p class="mask-status">{{ statusText }}</p>
           </div>
         </div>
-        <div class="local-video-wrapper">
-          <video ref="localVideoRef" autoplay playsinline muted class="local-video"></video>
+        
+        <!-- 本地预览 (小窗) -->
+        <div class="local-track" v-show="!localVideoOff">
+          <video ref="localVideoRef" autoplay playsinline muted class="video-element mirror"></video>
         </div>
       </div>
 
-      <div v-else class="user-info">
-        <div v-if="isGroupCall" class="call-avatar group-avatar">
-          <span class="material-icons-outlined">groups</span>
+      <!-- 2. 语音/呼叫信息区 -->
+      <div v-if="type === 'voice' || status !== 'talking'" class="calling-info">
+        <div class="avatar-ripple" :class="{ 'animating': status === 'calling' }">
+          <DingtalkAvatar
+            :src="peerAvatar"
+            :name="peerName"
+            :user-id="peerId"
+            :size="100"
+            shape="circle"
+            custom-class="main-avatar"
+          />
         </div>
-        <DingtalkAvatar
-          v-else
-          :src="peerAvatar"
-          :name="peerName"
-          :user-id="peerId"
-          :size="80"
-          shape="circle"
-          custom-class="call-avatar"
-        />
-        <h3 class="call-name">{{ peerName }}</h3>
-        <p class="call-status">{{ statusText }}</p>
+        <h2 class="peer-name">{{ peerName }}</h2>
+        <p class="call-status-tag">{{ statusText }}</p>
+        <div v-if="status === 'talking'" class="call-timer">{{ formattedDuration }}</div>
       </div>
 
-      <audio ref="remoteAudioRef" autoplay></audio>
+      <!-- 3. 控制控制台 (底栏) -->
+      <div class="call-console">
+        <!-- 呼入状态 -->
+        <div v-if="status === 'incoming'" class="console-group">
+          <button class="console-btn accept" @click="handleAccept">
+            <div class="icon-circle"><el-icon><PhoneFilled /></el-icon></div>
+            <span>接听</span>
+          </button>
+          <button class="console-btn hangup" @click="handleReject">
+            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
+            <span>拒绝</span>
+          </button>
+        </div>
 
-      <div class="call-actions">
-        <template v-if="status === 'calling' || status === 'incoming'">
-          <div v-if="status === 'incoming'" class="incoming-actions">
-            <button class="action-btn accept" @click="handleAccept">
-              <span class="material-icons-outlined">phone</span>
-              <span>接听</span>
-            </button>
-            <button class="action-btn reject" @click="handleReject">
-              <span class="material-icons-outlined">call_end</span>
-              <span>挂断</span>
-            </button>
-          </div>
-          <div v-else class="calling-actions">
-            <button class="action-btn reject" @click="handleCancel">
-              <span class="material-icons-outlined">call_end</span>
-              <span>取消</span>
-            </button>
-          </div>
-        </template>
+        <!-- 呼出状态 -->
+        <div v-else-if="status === 'calling'" class="console-group">
+          <button class="console-btn hangup" @click="handleCancel">
+            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
+            <span>取消</span>
+          </button>
+        </div>
 
-        <template v-else-if="status === 'talking'">
-          <div class="talking-actions">
-            <div class="duration">{{ formattedDuration }}</div>
-            <button class="action-btn reject" @click="handleHangup">
-              <span class="material-icons-outlined">call_end</span>
-              <span>挂断</span>
-            </button>
-          </div>
-        </template>
+        <!-- 通话中状态 -->
+        <div v-else-if="status === 'talking'" class="console-group talking">
+          <button class="console-btn" :class="{ active: isMuted }" @click="toggleMute">
+            <div class="icon-circle"><el-icon><Microphone v-if="!isMuted" /><Mute v-else /></el-icon></div>
+            <span>{{ isMuted ? '取消静音' : '静音' }}</span>
+          </button>
+          
+          <button v-if="type === 'video'" class="console-btn" :class="{ active: localVideoOff }" @click="toggleVideo">
+            <div class="icon-circle"><el-icon><VideoCamera v-if="!localVideoOff" /><VideoCameraFilled v-else /></el-icon></div>
+            <span>摄像头</span>
+          </button>
 
-        <template v-else-if="status === 'timeout'">
-          <div class="timeout-actions">
-            <button class="action-btn reject" @click="close">
-              <span class="material-icons-outlined">close</span>
-              <span>关闭</span>
-            </button>
-          </div>
-        </template>
+          <button class="console-btn hangup" @click="handleHangup">
+            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
+            <span>挂断</span>
+          </button>
+        </div>
+
+        <!-- 结束/超时 -->
+        <div v-else class="console-group">
+          <button class="console-btn" @click="close">
+            <div class="icon-circle gray"><el-icon><Close /></el-icon></div>
+            <span>关闭</span>
+          </button>
+        </div>
       </div>
     </div>
+    
+    <audio ref="remoteAudioRef" autoplay></audio>
   </el-dialog>
 </template>
 
 <script setup>
 import { ref, computed, onUnmounted, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { 
+  PhoneFilled, CloseBold, Microphone, VideoCamera, 
+  VideoCameraFilled, Close, Mute 
+} from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { useWebRTC } from '@/composables/useWebRTC'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
-const props = defineProps({
-  session: Object
-})
-const emit = defineEmits(['accept', 'reject', 'cancel', 'hangup', 'timeout', 'closed'])
+const props = defineProps({ session: Object })
+const emit = defineEmits(['accept', 'reject', 'cancel', 'hangup', 'closed'])
 
 const { sendMessage, onCall } = useImWebSocket()
-
 const visible = ref(false)
 const status = ref('calling')
 const type = ref('voice')
@@ -108,6 +119,9 @@ const callId = ref('')
 const peerId = ref(null)
 const peerName = ref('')
 const peerAvatar = ref('')
+const isMuted = ref(false)
+const localVideoOff = ref(false)
+const remoteVideoOff = ref(false)
 const pendingOffer = ref(null)
 
 const localVideoRef = ref(null)
@@ -116,62 +130,19 @@ const remoteAudioRef = ref(null)
 let localStream = null
 let timer = null
 let timeoutTimer = null
-const CALL_TIMEOUT = 60000
 
-const isGroupCall = computed(() => props.session?.type === 'GROUP')
-const title = computed(() => type.value === 'voice' ? '语音通话' : '视频通话')
+const dialogWidth = computed(() => type.value === 'video' ? '800px' : '360px')
 
-const { 
-  createOffer, 
-  createAnswer, 
-  handleAnswer, 
-  handleCandidate, 
-  closePeerConnection 
-} = useWebRTC({
-  sendSignal: (action, data) => {
-    sendMessage({ type: 'call', data: { action, ...data } })
-  },
-  localVideo: localVideoRef,
-  remoteVideo: remoteVideoRef,
-  remoteAudio: remoteAudioRef
+const { createOffer, createAnswer, handleAnswer, handleCandidate, closePeerConnection } = useWebRTC({
+  sendSignal: (action, data) => sendMessage({ type: 'call', data: { action, ...data } }),
+  localVideo: localVideoRef, remoteVideo: remoteVideoRef, remoteAudio: remoteAudioRef
 })
-
-const getMediaStream = async (isVideo) => {
-  try {
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop())
-    }
-    localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: isVideo ? { width: 1280, height: 720 } : false
-    })
-    if (isVideo) {
-      nextTick(() => {
-        if (localVideoRef.value) localVideoRef.value.srcObject = localStream
-      })
-    }
-    return true
-  } catch (error) {
-    ElMessage.error('无法访问麦克风或摄像头')
-    return false
-  }
-}
-
-const stopMediaStream = () => {
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop())
-    localStream = null
-  }
-  if (localVideoRef.value) localVideoRef.value.srcObject = null
-  if (remoteVideoRef.value) remoteVideoRef.value.srcObject = null
-  if (remoteAudioRef.value) remoteAudioRef.value.srcObject = null
-}
 
 const statusText = computed(() => {
   switch (status.value) {
-    case 'calling': return '正在等待对方接受...'
-    case 'incoming': return '邀请你进行通话...'
-    case 'talking': return '正在通话中...'
+    case 'calling': return '正在呼叫对方...'
+    case 'incoming': return '邀请你进行通话'
+    case 'talking': return '正在通话'
     case 'hanging_up': return '通话已结束'
     case 'timeout': return '对方无应答'
     default: return ''
@@ -179,146 +150,124 @@ const statusText = computed(() => {
 })
 
 const formattedDuration = computed(() => {
-  const m = Math.floor(duration.value / 60)
-  const s = duration.value % 60
+  const m = Math.floor(duration.value / 60); const s = duration.value % 60
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
 })
 
-onCall((msg) => {
-  if (!visible.value || msg.data.callId !== callId.value) return
-  const { action, sdp, candidate } = msg.data
-  switch (action) {
-    case 'offer': pendingOffer.value = sdp; break
-    case 'answer': handleAnswer(sdp); break
-    case 'candidate': handleCandidate(candidate); break
-    case 'reject': case 'cancel': case 'hangup': end(); break
-  }
-})
+const getMediaStream = async (isVideo) => {
+  try {
+    if (localStream) localStream.getTracks().forEach(t => t.stop())
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo })
+    if (isVideo && localVideoRef.value) localVideoRef.value.srcObject = localStream
+    return true
+  } catch { return false }
+}
+
+const toggleMute = () => { if (localStream) { isMuted.value = !isMuted.value; localStream.getAudioTracks()[0].enabled = !isMuted.value } }
+const toggleVideo = () => { if (localStream && type.value === 'video') { localVideoOff.value = !localVideoOff.value; localStream.getVideoTracks()[0].enabled = !localVideoOff.value } }
 
 const open = async (callType, options = {}) => {
-  type.value = callType
-  status.value = options.status || 'calling'
-  callId.value = options.callId || `call-${Date.now()}`
-  peerId.value = options.peerId ?? props.session?.targetId ?? props.session?.targetUserId ?? null
-  peerName.value = options.peerName || props.session?.name || '未知'
-  peerAvatar.value = options.peerAvatar || props.session?.avatar || ''
-  visible.value = true
-  duration.value = 0
-  
-  if (status.value === 'calling') {
-    const success = await getMediaStream(callType === 'video')
-    if (success) await createOffer(callId.value, peerId.value, localStream)
-    else close()
-    startTimeout()
-  }
+  type.value = callType; status.value = options.status || 'calling'; callId.value = options.callId || `call-${Date.now()}`
+  peerId.value = options.peerId ?? props.session?.targetId; peerName.value = options.peerName || props.session?.name; peerAvatar.value = options.peerAvatar || props.session?.avatar
+  visible.value = true; duration.value = 0
+  if (status.value === 'calling') { if (await getMediaStream(callType === 'video')) await createOffer(callId.value, peerId.value, localStream); else close() }
   if (status.value === 'talking') startTimer()
 }
 
-const handleAccept = async () => {
-  stopTimeout()
-  const success = await getMediaStream(type.value === 'video')
-  if (!success) { handleReject(); return }
-  if (pendingOffer.value) {
-    await createAnswer(callId.value, peerId.value, pendingOffer.value, localStream)
-  }
-  status.value = 'talking'
-  startTimer()
-  emit('accept', { callId: callId.value, callType: type.value, peerId: peerId.value })
-}
+const handleAccept = async () => { if (await getMediaStream(type.value === 'video')) { if (pendingOffer.value) await createAnswer(callId.value, peerId.value, pendingOffer.value, localStream); status.value = 'talking'; startTimer() } else handleReject() }
+const handleReject = () => { end(); sendMessage({ type: 'call', data: { action: 'reject', callId: callId.value, peerId: peerId.value } }) }
+const handleHangup = () => { end(); sendMessage({ type: 'call', data: { action: 'hangup', callId: callId.value, peerId: peerId.value } }) }
+const handleCancel = () => { end(); sendMessage({ type: 'call', data: { action: 'cancel', callId: callId.value, peerId: peerId.value } }) }
 
-const handleReject = () => {
-  stopTimeout(); stopMediaStream(); closePeerConnection()
-  emit('reject', { callId: callId.value, peerId: peerId.value })
-  close()
-}
+const startTimer = () => { timer = setInterval(() => { duration.value++ }, 1000) }
+const end = () => { clearInterval(timer); if (localStream) localStream.getTracks().forEach(t => t.stop()); closePeerConnection(); status.value = 'hanging_up'; setTimeout(() => { visible.value = false }, 1500) }
+const close = () => { visible.value = false }
 
-const handleCancel = () => {
-  stopTimeout(); stopMediaStream(); closePeerConnection()
-  emit('cancel', { callId: callId.value, peerId: peerId.value })
-  close()
-}
-
-const handleHangup = () => {
-  stopMediaStream(); closePeerConnection()
-  emit('hangup', { callId: callId.value, peerId: peerId.value })
-  close()
-}
-
-const startTimer = () => {
-  stopTimer()
-  timer = setInterval(() => { duration.value++ }, 1000)
-}
-
-const stopTimer = () => { if (timer) { clearInterval(timer); timer = null } }
-
-const startTimeout = () => {
-  stopTimeout()
-  timeoutTimer = setTimeout(() => {
-    status.value = 'timeout'
-    setTimeout(() => { close() }, 2000)
-  }, CALL_TIMEOUT)
-}
-
-const stopTimeout = () => { if (timeoutTimer) { clearTimeout(timeoutTimer); timeoutTimer = null } }
-
-const close = () => {
-  stopTimer(); stopTimeout(); stopMediaStream(); closePeerConnection()
-  visible.value = false
-  emit('closed', { callId: callId.value })
-}
-
-const end = () => {
-  status.value = 'hanging_up'
-  stopTimer(); stopTimeout(); stopMediaStream(); closePeerConnection()
-  setTimeout(() => { visible.value = false }, 1000)
-}
-
-onUnmounted(() => { stopTimer(); stopTimeout(); stopMediaStream() })
-
-defineExpose({ open, close, end })
+onUnmounted(() => { clearInterval(timer); if (localStream) localStream.getTracks().forEach(t => t.stop()) })
+defineExpose({ open, end })
 </script>
 
 <style scoped lang="scss">
-.call-dialog {
-  :deep(.el-dialog__header) { display: none; }
-  :deep(.el-dialog__body) { padding: 40px 0; transition: padding 0.3s; }
-  &.video-mode { :deep(.el-dialog__body) { padding: 0; } }
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.video-container {
-  width: 100%; height: 450px; position: relative; background: #1f2329; overflow: hidden;
-  .remote-video-wrapper {
-    width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center;
-    .remote-video { width: 100%; height: 100%; object-fit: cover; }
-    .video-placeholder {
-      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #fff; background: #1f2329;
-      .material-icons-outlined { font-size: 48px; margin-bottom: 12px; opacity: 0.8; }
+@mixin button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.call-dialog-immersive {
+  background: #1a1d21 !important;
+  :deep(.el-dialog) { background: #1a1d21; border-radius: var(--dt-radius-xl); overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+  :deep(.el-dialog__header) { display: none; }
+  :deep(.el-dialog__body) { padding: 0 !important; }
+}
+
+.call-stage {
+  position: relative; width: 100%; height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: var(--dt-spacing-2xl) 0; color: #fff;
+}
+
+.video-canvas {
+  position: absolute; inset: 0; background: #000; z-index: 1;
+  .remote-track { 
+    width: 100%; height: 100%; position: relative; 
+    .video-element { width: 100%; height: 100%; object-fit: cover; }
+    .video-mask { position: absolute; inset: 0; @include flex-center; flex-direction: column; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); }
+  }
+  .local-track {
+    position: absolute; top: var(--dt-spacing-lg); right: var(--dt-spacing-lg); width: 140px; height: 180px;
+    border-radius: var(--dt-radius-md); overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: var(--dt-shadow-modal);
+    .video-element { width: 100%; height: 100%; object-fit: cover; &.mirror { transform: scaleX(-1); } }
+  }
+}
+
+.calling-info {
+  position: relative; z-index: 2; text-align: center; margin-top: var(--dt-spacing-xl);
+  .avatar-ripple {
+    position: relative; margin-bottom: var(--dt-spacing-xl);
+    &.animating::after {
+      content: ''; position: absolute; inset: -15px; border-radius: 50%; border: 2px solid var(--dt-brand-color);
+      animation: ripple 2s infinite; opacity: 0;
     }
   }
-  .local-video-wrapper {
-    position: absolute; top: 16px; right: 16px; width: 120px; height: 160px; background: #000;
-    border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10;
-    border: 2px solid rgba(255,255,255,0.1);
-    .local-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+  .peer-name { font-size: 24px; font-weight: 600; margin: var(--dt-spacing-md) 0; }
+  .call-status-tag { font-size: 14px; color: rgba(255,255,255,0.7); }
+  .call-timer { font-size: 20px; font-family: monospace; margin-top: var(--dt-spacing-md); color: var(--dt-brand-color); }
+}
+
+.call-console {
+  position: relative; z-index: 2; width: 100%; padding: 0 var(--dt-spacing-2xl);
+  .console-group { display: flex; justify-content: center; gap: 40px; 
+    &.talking { gap: 32px; }
   }
 }
 
-.call-content { display: flex; flex-direction: column; align-items: center; gap: 32px; }
-.user-info { text-align: center;
-  .call-avatar { margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-  .group-avatar { width: 80px; height: 80px; border-radius: 50%; background-color: #1677ff; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 16px; }
-  .call-name { font-size: 20px; font-weight: 600; margin: 8px 0; color: #1f2329; }
-  .call-status { font-size: 14px; color: #8f959e; }
+.console-btn {
+  @include button-reset; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  .icon-circle {
+    width: 64px; height: 64px; border-radius: 50%; @include flex-center; font-size: 28px;
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); transition: all 0.2s;
+    &:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+  }
+  span { font-size: 13px; color: rgba(255,255,255,0.8); }
+  
+  &.accept .icon-circle { background: var(--dt-success-color); &:hover { background: var(--dt-brand-hover); } }
+  &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: #ff7875; } .el-icon { transform: rotate(135deg); } }
+  &.active .icon-circle { background: #fff; color: var(--dt-text-primary); }
+  .icon-circle.gray { background: #434343; }
 }
-.call-actions { width: 100%; padding: 0 40px; }
-.incoming-actions, .calling-actions, .talking-actions, .timeout-actions { display: flex; justify-content: space-around; align-items: center; }
-.talking-actions { flex-direction: column; gap: 16px; .duration { font-size: 18px; font-weight: 500; color: #1f2329; } }
-.action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; transition: transform 0.2s;
-  &:hover { transform: scale(1.1); }
-  .material-icons-outlined { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; }
-  span:not(.material-icons-outlined) { font-size: 13px; color: #646a73; }
-  &.accept .material-icons-outlined { background-color: #52c41a; }
-  &.reject .material-icons-outlined { background-color: #f54a45; }
+
+@keyframes ripple {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 0; }
 }
 </style>

@@ -132,6 +132,9 @@
                 <div class="chat-preview">{{ chat.preview }}</div>
               </div>
               <span class="chat-time">{{ chat.time }}</span>
+              <button class="delete-btn" @click="deleteChat(chat, $event)">
+                <span class="material-icons-outlined">delete</span>
+              </button>
             </div>
           </div>
         </div>
@@ -144,37 +147,29 @@
 import { ref, computed, nextTick, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
+import { chat, getSupportedModels, clearConversation } from '@/api/im/ai'
 
 const store = useStore()
 const messagesContainer = ref(null)
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const currentUserNickname = computed(() => currentUser.value.nickname || currentUser.value.username || '我')
+const currentUserId = computed(() => currentUser.value.id)
 
 // 状态
 const currentChat = ref(null)
 const inputMessage = ref('')
 const isSending = ref(false)
 const isTyping = ref(false)
+const conversationId = ref(null)
+const availableModels = ref([])
+const selectedModel = ref('default')
 
 // 消息列表
 const messages = ref([])
 
-// 对话历史
-const chatHistory = ref([
-  {
-    id: 1,
-    title: '周报总结',
-    preview: '帮我生成本周工作总结',
-    time: '昨天'
-  },
-  {
-    id: 2,
-    title: '代码优化',
-    preview: '这段代码如何优化',
-    time: '3天前'
-  }
-])
+// 对话历史（从localStorage加载）
+const chatHistory = ref([])
 
 // 快捷功能
 const quickActions = [
@@ -186,66 +181,135 @@ const quickActions = [
   { id: 6, label: '创意', icon: 'lightbulb', bgColor: '#8b5cf6', prompt: '请给我一些创意想法：' }
 ]
 
+// 加载对话历史
+const loadChatHistory = () => {
+  try {
+    const history = localStorage.getItem('ai_chat_history')
+    if (history) {
+      chatHistory.value = JSON.parse(history)
+    }
+  } catch (e) {
+    console.error('加载对话历史失败', e)
+  }
+}
+
+// 保存对话历史
+const saveChatHistory = () => {
+  try {
+    localStorage.setItem('ai_chat_history', JSON.stringify(chatHistory.value))
+  } catch (e) {
+    console.error('保存对话历史失败', e)
+  }
+}
+
+// 加载AI模型列表
+const loadModels = async () => {
+  try {
+    const res = await getSupportedModels()
+    if (res.code === 200 && res.data) {
+      availableModels.value = res.data
+    }
+  } catch (e) {
+    console.error('加载AI模型失败', e)
+  }
+}
+
 // 开始新对话
 const startNewChat = () => {
+  // 保存当前对话到历史
+  if (messages.value.length > 0) {
+    const title = messages.value[0]?.content?.substring(0, 20) || '新对话'
+    const newChat = {
+      id: Date.now(),
+      title: title + '...',
+      preview: messages.value[0]?.content || '',
+      time: new Date().toLocaleDateString(),
+      conversationId: conversationId.value
+    }
+    chatHistory.value.unshift(newChat)
+    saveChatHistory()
+  }
+  
   currentChat.value = null
   messages.value = []
   inputMessage.value = ''
+  conversationId.value = null
 }
 
 // 快捷功能点击
 const handleQuickAction = (action) => {
   inputMessage.value = action.prompt
-  sendMessage()
 }
 
 // 加载历史对话
-const loadChat = (chat) => {
-  currentChat.value = chat
+const loadChat = (chatItem) => {
+  currentChat.value = chatItem
+  conversationId.value = chatItem.conversationId
   messages.value = [
-    { role: 'user', content: chat.preview },
-    { role: 'assistant', content: '这是历史对话的回复内容...' }
+    { role: 'user', content: chatItem.preview },
+    { role: 'assistant', content: '已加载历史对话...' }
   ]
 }
 
 // 发送消息
 const sendMessage = async () => {
   const content = inputMessage.value.trim()
-  if (!content) return
+  if (!content || isSending.value) return
 
   // 添加用户消息
   messages.value.push({ role: 'user', content })
   inputMessage.value = ''
+  isSending.value = true
 
   // 滚动到底部
   await nextTick()
   scrollToBottom()
 
-  // 模拟 AI 响应
+  // 调用AI API
   isTyping.value = true
-  setTimeout(() => {
+  try {
+    const res = await chat({
+      content: content,
+      conversationId: conversationId.value || `conv_${Date.now()}`,
+      userId: currentUserId.value,
+      model: selectedModel.value
+    })
+    
     isTyping.value = false
-    const response = generateMockResponse(content)
-    messages.value.push({ role: 'assistant', content: response })
-    nextTick(() => scrollToBottom())
-  }, 1500 + Math.random() * 1000)
-}
-
-// 生成模拟回复
-const generateMockResponse = (input) => {
-  const responses = [
-    `我理解你说的"${input}"。这是一个很有趣的问题，让我来帮你分析一下。\n\n首先，我们可以从以下几个方面来考虑：\n1. 问题的核心是什么\n2. 有哪些可能的解决方案\n3. 每种方案的优缺点\n\n你希望我详细展开哪个方面呢？`,
-    `关于"${input}"，我的看法是：\n\n这是一个很好的问题。根据我的分析，建议你可以尝试以下方法：\n• 方法一：循序渐进\n• 方法二：寻求帮助\n• 方法三：持续学习\n\n有什么需要我进一步解释的吗？`,
-    `"${input}" - 这个问题很有意思！\n\n让我为你整理一下思路：\n\n1. 首先明确目标\n2. 然后制定计划\n3. 最后执行和验证\n\n你觉得这个思路如何？`
-  ]
-  return responses[Math.floor(Math.random() * responses.length)]
+    
+    if (res.code === 200 && res.data) {
+      conversationId.value = res.data.conversationId || conversationId.value
+      messages.value.push({ 
+        role: 'assistant', 
+        content: res.data.content || res.data.message || '抱歉，我无法生成回复'
+      })
+    } else {
+      messages.value.push({ 
+        role: 'assistant', 
+        content: res.msg || '抱歉，服务暂时不可用'
+      })
+      ElMessage.error(res.msg || 'AI回复失败')
+    }
+  } catch (e) {
+    isTyping.value = false
+    console.error('AI对话失败', e)
+    messages.value.push({ 
+      role: 'assistant', 
+      content: '抱歉，请求失败，请稍后重试'
+    })
+    ElMessage.error('AI对话失败')
+  }
+  
+  await nextTick()
+  scrollToBottom()
+  isSending.value = false
 }
 
 // 重新生成
 const regenerateMessage = () => {
   // 找到最后的用户消息，重新生成
   const lastUserMessage = [...messages.value].reverse().find(m => m.role === 'user')
-  if (lastUserMessage) {
+  if (lastUserMessage && !isSending.value) {
     messages.value = messages.value.slice(0, messages.value.length - 1)
     inputMessage.value = lastUserMessage.content
     sendMessage()
@@ -277,11 +341,17 @@ const scrollToBottom = () => {
   }
 }
 
+// 删除历史对话
+const deleteChat = (chatItem, event) => {
+  event.stopPropagation()
+  chatHistory.value = chatHistory.value.filter(c => c.id !== chatItem.id)
+  saveChatHistory()
+  ElMessage.success('已删除')
+}
+
 onMounted(() => {
-  // 组件加载后滚动到底部
-  if (messages.value.length > 0) {
-    nextTick(() => scrollToBottom())
-  }
+  loadChatHistory()
+  loadModels()
 })
 </script>
 
@@ -727,6 +797,26 @@ onMounted(() => {
 .chat-time {
   font-size: 11px;
   color: var(--dt-text-quaternary);
+}
+
+.delete-btn {
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--dt-text-quaternary);
+  cursor: pointer;
+  border-radius: var(--dt-radius-sm);
+  opacity: 0;
+  transition: all var(--dt-transition-fast);
+}
+
+.chat-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.delete-btn:hover {
+  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.1);
 }
 
 /* 暗色模式 */

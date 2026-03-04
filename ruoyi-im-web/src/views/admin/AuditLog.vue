@@ -392,16 +392,4 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
 }
-
-@media (max-width: 768px) {
-  .panel-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .filter-row {
-    flex-direction: column;
-  }
-}
 </style>

@@ -82,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ComposeMailDialog from '@/components/ComposeMailDialog/index.vue'
@@ -220,7 +220,9 @@ const handleMailSent = () => {
 }
 
 // 组件加载时初始加载数据
-loadMails()
+onMounted(() => {
+  loadMails()
+})
 </script>
 
 <style scoped lang="scss">

@@ -139,35 +139,34 @@
   --dt-space-20: 80px;
 
   // === Layout Dimensions (布局尺寸) ===
-  --dt-nav-sidebar-width: 72px;
-  --dt-nav-sidebar-collapsed-width: 64px;
-  --dt-session-panel-width: 280px;
-  --dt-session-panel-collapsed-width: 60px;
-  --dt-contact-panel-width: 320px;
-  --dt-header-height: 48px;
+  --dt-nav-sidebar-width: 64px;
+  --dt-session-panel-width: 280px; // 修正为 280px 以对标钉钉/飞书
+  --dt-contact-panel-width: 280px;
+  --dt-chat-min-width: 400px;
+  --dt-header-height: 56px;
   --dt-chat-header-height: 60px;
-  --dt-chat-input-height: 120px;
-  --dt-chat-input-min-height: 80px;
-  --dt-nav-item-height: 48px;
-  --dt-session-item-height: 72px;
-  --dt-message-max-width: 520px;
+  --dt-chat-input-height: 160px;
 
-  // === Component Sizes (组件尺寸) ===
-  --dt-avatar-size-xs: 24px;
-  --dt-avatar-size-sm: 32px;
-  --dt-avatar-size-md: 40px;
-  --dt-avatar-size: 48px;
-  --dt-avatar-size-lg: 64px;
-  --dt-avatar-size-xl: 96px;
+  // === Spacing System (8px 网格系统) ===
+  --dt-spacing-xs: 4px;
+  --dt-spacing-sm: 8px;
+  --dt-spacing-md: 12px;
+  --dt-spacing-lg: 16px;
+  --dt-spacing-xl: 24px;
+  --dt-spacing-2xl: 32px;
 
-  --dt-btn-height-sm: 28px;
-  --dt-btn-height-md: 34px;
-  --dt-btn-height-lg: 40px;
-  --dt-btn-height-xl: 48px;
+  // === Component Specific Tokens ===
+  // 头像尺寸
+  --dt-avatar-size-sm: 28px;
+  --dt-avatar-size-md: 36px;
+  --dt-avatar-size-lg: 44px;
+  --dt-avatar-radius: 8px;
 
-  --dt-input-height-sm: 28px;
-  --dt-input-height-md: 34px;
-  --dt-input-height-lg: 40px;
+  // 气泡令牌
+  --dt-bubble-radius: 10px;
+  --dt-bubble-max-width: 520px;
+  --dt-bubble-padding-v: 10px;
+  --dt-bubble-padding-h: 14px;
 
   // === Border Radius (圆角) ===
   --dt-radius-none: 0;

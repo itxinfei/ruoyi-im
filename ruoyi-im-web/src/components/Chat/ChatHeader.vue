@@ -2,60 +2,92 @@
   <div class="chat-header">
     <div class="header-left" @click="handleShowDetail" role="button" tabindex="0">
       <div class="header-avatar-wrapper">
-        <div v-if="session?.type === 'GROUP'" class="header-avatar group-avatar">
-          <span class="material-icons-outlined">groups</span>
-        </div>
         <DingtalkAvatar
-          v-else
           :src="session?.avatar"
           :name="session?.name"
           :user-id="session?.targetId"
+          :is-group="session?.type === 'GROUP'"
+          :members="session?.members || []"
           :size="40"
           shape="square"
           custom-class="header-avatar"
         />
-        <span v-if="session?.type !== 'GROUP' && isOnline" class="online-indicator"></span>
+        <!-- 在线状态指示器 (钉钉标准) -->
+        <span v-if="session?.type !== 'GROUP'" class="online-indicator" :class="{ online: isOnline }"></span>
       </div>
       <div class="header-info">
         <h2 class="header-name">{{ session?.name }}</h2>
         <div class="meta-row">
           <span v-if="session?.type === 'GROUP'" class="meta-info">
-            <span class="material-icons-outlined meta-icon">people</span>
+            <el-icon class="meta-icon"><User /></el-icon>
             {{ session?.memberCount || 0 }} 人
           </span>
           <span v-else class="meta-info" :class="{ online: isOnline }">
-            <span class="material-icons-outlined meta-icon">circle</span>
-            {{ isOnline ? '在线' : '离线' }}
+            {{ isOnline ? '手机在线' : '离线' }}
           </span>
         </div>
       </div>
     </div>
+
     <div class="header-actions">
-      <el-tooltip content="语音通话" placement="bottom"><button class="action-btn" @click="handleVoiceCall"><span class="material-icons-outlined">phone</span></button></el-tooltip>
-      <el-tooltip content="视频通话" placement="bottom"><button class="action-btn" @click="handleVideoCall"><span class="material-icons-outlined">videocam</span></button></el-tooltip>
-      <el-dropdown trigger="click" @command="handleMenuCommand" placement="bottom-end">
-        <button class="action-btn"><span class="material-icons-outlined">more_horiz</span></button>
-        <template #dropdown>
-          <el-dropdown-menu class="header-dropdown">
-            <el-dropdown-item command="search"><span class="material-icons-outlined item-icon">search</span> 搜索聊天记录</el-dropdown-item>
-            <el-dropdown-item command="files"><span class="material-icons-outlined item-icon">folder</span> 查看文件</el-dropdown-item>
-            <el-dropdown-item divided command="pin"><span class="material-icons-outlined item-icon">push_pin</span> {{ session?.isPinned ? '取消置顶' : '置顶会话' }}</el-dropdown-item>
-            <el-dropdown-item command="mute"><span class="material-icons-outlined item-icon">notifications_off</span> {{ session?.isMuted ? '取消免打扰' : '消息免打扰' }}</el-dropdown-item>
-            <el-dropdown-item divided command="clear" class="danger-item"><span class="material-icons-outlined item-icon">delete_outline</span> 清空聊天记录</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      <div class="action-group">
+        <el-tooltip content="语音通话" placement="bottom">
+          <button class="action-btn" @click="handleVoiceCall"><el-icon><Phone /></el-icon></button>
+        </el-tooltip>
+        <el-tooltip content="视频通话" placement="bottom">
+          <button class="action-btn" @click="handleVideoCall"><el-icon><VideoCamera /></el-icon></button>
+        </el-tooltip>
+      </div>
+
       <div class="divider"></div>
-      <button class="action-btn info-btn" :class="{active: showDetail}" @click="$emit('toggle-sidebar')"><span class="material-icons-outlined">info</span></button>
+
+      <div class="action-group">
+        <el-tooltip content="搜索消息" placement="bottom">
+          <button class="action-btn" @click="handleMenuCommand('search')"><el-icon><Search /></el-icon></button>
+        </el-tooltip>
+        <el-dropdown trigger="click" @command="handleMenuCommand" placement="bottom-end">
+          <button class="action-btn"><el-icon><MoreFilled /></el-icon></button>
+          <template #dropdown>
+            <el-dropdown-menu class="header-dropdown">
+              <el-dropdown-item command="search"><el-icon><Search /></el-icon> 搜索聊天记录</el-dropdown-item>
+              <el-dropdown-item command="files"><el-icon><Folder /></el-icon> 查看文件</el-dropdown-item>
+              <el-dropdown-item divided command="pin"><el-icon><Top /></el-icon> {{ session?.isPinned ? '取消置顶' : '置顶会话' }}</el-dropdown-item>
+              <el-dropdown-item command="mute"><el-icon><BellFilled /></el-icon> {{ session?.isMuted ? '取消免打扰' : '消息免打扰' }}</el-dropdown-item>
+              <el-dropdown-item divided command="clear" class="text-danger"><el-icon><Delete /></el-icon> 清空聊天记录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+
+      <div class="divider"></div>
+
+      <button 
+        class="action-btn info-btn" 
+        :class="{ active: showDetail }" 
+        @click="$emit('toggle-sidebar')"
+        title="会话详情"
+      >
+        <el-icon><InfoFilled /></el-icon>
+      </button>
     </div>
 
-    <UserDetailDrawer v-model="showUserDetail" :session="session" @send-message="handleSendMessage" @voice-call="handleVoiceCall" @video-call="handleVideoCall" />
+    <UserDetailDrawer 
+      v-model="showUserDetail" 
+      :session="session" 
+      @send-message="handleSendMessage" 
+      @voice-call="handleVoiceCall" 
+      @video-call="handleVideoCall" 
+    />
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
+import { 
+  Phone, VideoCamera, Search, MoreFilled, 
+  Folder, Top, BellFilled, Delete, InfoFilled, User 
+} from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import UserDetailDrawer from './UserDetailDrawer.vue'
 
@@ -82,33 +114,183 @@ const handleMenuCommand = (command) => { emit(command, props.session) }
 </script>
 
 <style scoped lang="scss">
-.chat-header { height: 60px; border-bottom: 1px solid #f2f3f5; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #fff; flex-shrink: 0; z-index: 10; }
-.header-left { display: flex; align-items: center; gap: 12px; cursor: pointer; border-radius: 6px; transition: background 0.2s;
-  &:hover { background: #f5f6f7; }
+// ============================================================================
+// 聊天头部容器 - 强制高度 60px
+// ============================================================================
+.chat-header {
+  height: var(--dt-chat-header-height);
+  border-bottom: 1px solid var(--dt-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--dt-spacing-lg);
+  background: var(--dt-bg-input);
+  flex-shrink: 0;
+  z-index: var(--dt-z-sticky);
 }
-.header-avatar { border-radius: 4px; }
-.group-avatar { width: 40px; height: 40px; border-radius: 4px; background: #1677ff; color: #fff; display: flex; align-items: center; justify-content: center; .material-icons-outlined { font-size: 24px; } }
-.header-info { display: flex; flex-direction: column; gap: 2px;
-  .header-name { font-size: 16px; font-weight: 600; color: #1f2329; margin: 0; line-height: 1.4; }
-  .meta-row { display: flex; align-items: center; gap: 8px;
-    .meta-info { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8f959e; 
-      .meta-icon { font-size: 10px; }
-      &.online { color: #52c41a; }
+
+// ============================================================================
+// 左侧会话信息
+// ============================================================================
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-md);
+  cursor: pointer;
+  padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
+  border-radius: var(--dt-radius-md);
+  transition: background var(--dt-transition-base);
+  min-width: 0;
+
+  &:hover {
+    background: var(--dt-bg-session-hover);
+  }
+}
+
+.header-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+
+  .online-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #c9cdd4;
+    border: 2px solid #fff;
+    
+    &.online {
+      background: var(--dt-success-color);
     }
   }
 }
-.header-actions { display: flex; align-items: center; gap: 4px;
-  .action-btn { width: 34px; height: 34px; border: none; background: transparent; border-radius: 6px; color: #646a73; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-    &:hover { background: #f2f3f5; color: #1677ff; }
-    &.info-btn.active { color: #1677ff; background: #e8f4ff; }
-    .material-icons-outlined { font-size: 22px; }
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  .header-name {
+    font-size: var(--dt-font-size-lg);
+    font-weight: var(--dt-font-weight-semibold);
+    color: var(--dt-text-primary);
+    margin: 0;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  .divider { width: 1px; height: 16px; background: #f2f3f5; margin: 0 8px; }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: var(--dt-spacing-sm);
+
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: var(--dt-font-size-xs);
+      color: var(--dt-text-tertiary);
+      
+      .meta-icon {
+        font-size: 12px;
+      }
+
+      &.online {
+        color: var(--dt-success-color);
+      }
+    }
+  }
 }
+
+// ============================================================================
+// 右侧操作区
+// ============================================================================
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-xs);
+
+  .action-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .action-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    border-radius: var(--dt-radius-sm);
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--dt-transition-base);
+
+    &:hover {
+      background: var(--dt-bg-session-hover);
+      color: var(--dt-brand-color);
+    }
+
+    &:active {
+      transform: scale(0.92);
+    }
+
+    &.info-btn.active {
+      color: var(--dt-brand-color);
+      background: var(--dt-brand-lighter);
+    }
+
+    .el-icon {
+      font-size: 20px;
+    }
+  }
+
+  .divider {
+    width: 1px;
+    height: 16px;
+    background: var(--dt-border-light);
+    margin: 0 var(--dt-spacing-sm);
+  }
+}
+
+// ============================================================================
+// 下拉菜单定制
+// ============================================================================
 :deep(.header-dropdown) {
-  .el-dropdown-menu__item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 14px;
-    .item-icon { font-size: 18px; color: #646a73; }
-    &:hover .item-icon { color: #1677ff; }
+  border-radius: var(--dt-radius-md);
+  padding: 4px;
+  
+  .el-dropdown-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: var(--dt-font-size-base);
+    border-radius: var(--dt-radius-sm);
+    
+    .el-icon {
+      font-size: 16px;
+      color: var(--dt-text-secondary);
+    }
+
+    &:hover {
+      background-color: var(--dt-bg-session-hover);
+      color: var(--dt-brand-color);
+      .el-icon { color: var(--dt-brand-color); }
+    }
+
+    &.text-danger {
+      color: var(--dt-error-color);
+      &:hover { background-color: var(--dt-error-bg); }
+    }
   }
 }
 </style>

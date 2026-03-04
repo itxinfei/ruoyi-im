@@ -162,20 +162,26 @@ const handleImageError = () => {
     justify-content: center;
     overflow: hidden;
     color: #fff;
-    font-size: 0.8em;
+    font-size: 10px; // 对于聚合头像，字体需要极小
+    line-height: 1;
+    font-weight: 600;
   }
 
   .grid-img { width: 100%; height: 100%; object-fit: cover; }
 
   // 不同人数的网格分布
-  &.grid-1 { grid-template-columns: 1fr; }
-  &.grid-2 { grid-template-columns: 1fr 1fr; .grid-item { height: 100%; } }
+  &.grid-0 { background-color: #1677ff; display: flex; align-items: center; justify-content: center; 
+    &::after { content: 'G'; color: #fff; font-size: 20px; }
+  }
+  &.grid-1 { grid-template-columns: 1fr; .grid-item { font-size: 16px; } }
+  &.grid-2 { grid-template-columns: 1fr 1fr; .grid-item { height: 100%; font-size: 14px; } }
   &.grid-3 { 
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     .grid-item:first-child { grid-column: 1 / 3; }
   }
   &.grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-  &.grid-5, &.grid-6 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
-  &.grid-7, &.grid-8, &.grid-9 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+  &.grid-5, &.grid-6 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; .grid-item { font-size: 9px; } }
+  &.grid-7, &.grid-8, &.grid-9 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; .grid-item { font-size: 8px; } }
 }
 </style>

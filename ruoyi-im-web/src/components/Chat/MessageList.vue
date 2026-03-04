@@ -41,6 +41,14 @@
       :conversation-id="conversationId"
       :sender-id="currentSenderId"
     />
+
+    <!-- 消息编辑历史对话框 -->
+    <MessageEditHistoryDialog
+      v-model:visible="showEditHistory"
+      :message-id="currentEditHistoryMessageId"
+      :current-content="currentMessageContent"
+      :edit-count="currentMessageEditCount"
+    />
   </div>
 </template>
 
@@ -51,6 +59,7 @@ import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
 import ImagePreviewDialog from '@/components/Common/ImagePreviewDialog.vue'
 import MessageReadDetailDialog from './MessageReadDetailDialog.vue'
+import MessageEditHistoryDialog from './MessageEditHistoryDialog.vue'
 
 const props = defineProps({ messages: Array, loading: Boolean, sessionType: String, conversationId: Number })
 const emit = defineEmits(['command', 'reply', 'load-more', 'show-user'])
@@ -67,12 +76,23 @@ const showReadDetail = ref(false)
 const currentMessageId = ref(null)
 const currentSenderId = ref(null)
 
+// 编辑历史相关
+const showEditHistory = ref(false)
+const currentEditHistoryMessageId = ref(null)
+const currentMessageContent = ref('')
+const currentMessageEditCount = ref(0)
+
 // 处理命令
 const handleCommand = (command, message) => {
   if (command === 'read-detail') {
     currentMessageId.value = message.id
     currentSenderId.value = message.senderId
     showReadDetail.value = true
+  } else if (command === 'edit-history') {
+    currentEditHistoryMessageId.value = message.id
+    currentMessageContent.value = message.content
+    currentMessageEditCount.value = message.editCount || 0
+    showEditHistory.value = true
   } else {
     emit('command', command, message)
   }

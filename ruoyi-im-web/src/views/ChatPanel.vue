@@ -23,12 +23,13 @@
           />
 
           <!-- 消息流 (极致流畅) -->
-          <MessageList 
+          <MessageList
             ref="msgListRef"
+            :conversation-id="session?.id"
             :session-id="session?.id"
-            :messages="messages" 
-            :loading="loading" 
-            :current-user="currentUser" 
+            :messages="messages"
+            :loading="loading"
+            :current-user="currentUser"
             :session-type="session?.type"
             @command="handleCommand"
             @load-more="handleLoadMore"
@@ -64,6 +65,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
 import MessageList from '@/components/Chat/MessageList.vue'
 import MessageInput from '@/components/Chat/MessageInput.vue'
@@ -195,6 +197,25 @@ const handleSend = async (payload) => {
 }
 
 const handleToggleDetail = () => { showDetail.value = !showDetail.value }
+
+// 缺失的回调函数实现
+const handleCommand = (command) => {
+  console.log('Command:', command)
+  // 根据命令类型执行不同操作
+}
+
+const handleLoadMore = () => {
+  console.log('Load more messages')
+  // 加载更多历史消息
+}
+
+const handleStartCall = () => {
+  ElMessage.info('语音通话功能开发中')
+}
+
+const handleStartVideo = () => {
+  ElMessage.info('视频通话功能开发中')
+}
 
 watch(() => props.session, () => {
   messages.value = []

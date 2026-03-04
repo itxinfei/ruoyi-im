@@ -477,12 +477,4 @@ onMounted(() => {
   color: #94a3b8;
   font-size: 12px;
 }
-
-@media (max-width: 768px) {
-  .panel-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-}
 </style>

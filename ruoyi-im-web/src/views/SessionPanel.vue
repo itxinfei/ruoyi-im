@@ -1,10 +1,10 @@
 <template>
   <div class="session-panel">
-    <!-- 头部搜索与过滤 (极致对标钉钉 8.2) -->
+    <!-- 1. 头部搜索与过滤 -->
     <div class="panel-header">
       <div class="header-action-row">
         <div class="search-box-unified">
-          <span class="material-icons-outlined search-icon">search</span>
+          <el-icon class="search-icon"><Search /></el-icon>
           <input
             v-model="searchKeyword"
             class="search-input"
@@ -14,7 +14,7 @@
           />
         </div>
         <button class="icon-add-btn" @click="handleCreateGroup" title="发起群聊">
-          <span class="material-icons-outlined">add</span>
+          <el-icon><Plus /></el-icon>
         </button>
       </div>
 
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <!-- 会话列表 (极致流畅滚动) -->
+    <!-- 2. 会话列表 (极致流畅滚动) -->
     <div v-loading="loading" class="session-list custom-scrollbar">
       <div
         v-for="session in sortedSessions"
@@ -44,11 +44,18 @@
         @contextmenu.prevent="handleContextMenu($event, session)"
       >
         <div class="item-avatar-wrapper">
-          <div v-if="session.type === 'GROUP'" class="avatar-icon-group">
-            <span class="material-icons-outlined">groups</span>
-          </div>
-          <DingtalkAvatar v-else :src="session.avatar" :name="session.name" :user-id="session.targetId" :size="40" shape="square" />
-          <span v-if="session.unreadCount > 0" class="unread-count-badge">{{ session.unreadCount > 99 ? '99+' : session.unreadCount }}</span>
+          <DingtalkAvatar 
+            :src="session.avatar" 
+            :name="session.name" 
+            :user-id="session.targetId" 
+            :is-group="session.type === 'GROUP'"
+            :members="session.members || []"
+            :size="40" 
+            shape="square" 
+          />
+          <span v-if="session.unreadCount > 0" class="unread-count-badge">
+            {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
+          </span>
         </div>
 
         <div class="item-content">
@@ -63,7 +70,7 @@
               <span class="preview-msg">{{ session.lastMessage || '暂无消息' }}</span>
             </div>
             <div class="status-icons">
-              <span v-if="session.isMuted" class="material-icons-outlined mute-icon">notifications_off</span>
+              <el-icon v-if="session.isMuted" class="mute-icon"><BellFilled /></el-icon>
             </div>
           </div>
         </div>
@@ -71,14 +78,15 @@
       </div>
     </div>
 
+    <!-- 全局搜索弹窗 -->
     <GlobalSearch v-model:visible="showGlobalSearch" :keyword="searchKeyword" @select="handleSearchSelect" />
 
-    <!-- 右键菜单 -->
-    <div v-if="contextMenu.show" class="context-menu-layer shadow-xl" :style="contextMenuStyle" @click.stop>
-      <div class="menu-item" @click="doAction('mark-read')"><span class="material-icons-outlined">done_all</span> 标记已读</div>
-      <div class="menu-item" @click="doAction('toggle-pin')"><span class="material-icons-outlined">push_pin</span> {{ contextMenu.session?.isPinned ? '取消置顶' : '置顶会话' }}</div>
+    <!-- 右键菜单 (Element Plus 改版) -->
+    <div v-if="contextMenu.show" class="context-menu-layer" :style="contextMenuStyle" @click.stop>
+      <div class="menu-item" @click="doAction('mark-read')"><el-icon><Check /></el-icon> 标记已读</div>
+      <div class="menu-item" @click="doAction('toggle-pin')"><el-icon><Top /></el-icon> {{ contextMenu.session?.isPinned ? '取消置顶' : '置顶会话' }}</div>
       <div class="menu-divider"></div>
-      <div class="menu-item danger" @click="doAction('delete')"><span class="material-icons-outlined">delete</span> 删除会话</div>
+      <div class="menu-item danger" @click="doAction('delete')"><el-icon><Delete /></el-icon> 删除会话</div>
     </div>
   </div>
 </template>
@@ -87,6 +95,7 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
+import { Search, Plus, BellFilled, Check, Top, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 
@@ -109,7 +118,9 @@ const sessions = computed(() => store.state.im.session.sessions)
 const sortedSessions = computed(() => {
   return [...sessions.value].sort((a, b) => {
     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1
-    return new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
+    const timeA = new Date(a.lastMessageTime || 0).getTime()
+    const timeB = new Date(b.lastMessageTime || 0).getTime()
+    return timeB - timeA
   })
 })
 
@@ -117,67 +128,354 @@ const formatTime = (time) => {
   if (!time) return ''
   const date = new Date(time)
   const now = new Date()
-  if (date.toDateString() === now.toDateString()) return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
+  if (date.toDateString() === now.toDateString()) {
+    return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
+  }
   return (date.getMonth() + 1) + '-' + date.getDate()
 }
 
 const contextMenu = reactive({ show: false, x: 0, y: 0, session: null })
 const contextMenuStyle = computed(() => ({ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }))
+
 const handleContextMenu = (e, session) => {
-  contextMenu.show = true; contextMenu.x = e.clientX; contextMenu.y = e.clientY; contextMenu.session = session
+  contextMenu.show = true
+  contextMenu.x = e.clientX
+  contextMenu.y = e.clientY
+  contextMenu.session = session
   const hide = () => { contextMenu.show = false; document.removeEventListener('click', hide) }
   setTimeout(() => document.addEventListener('click', hide), 10)
 }
 
-const handleFilterChange = (key) => { activeFilter.value = key; store.dispatch('im/session/loadSessions', { filter: key }) }
-const handleCreateGroup = () => {
-  // TODO: 打开创建群组弹窗
-  ElMessage.info('请通过通讯录创建群组')
+const handleFilterChange = (key) => { 
+  activeFilter.value = key
+  store.dispatch('im/session/loadSessions', key) 
 }
-const doAction = (cmd) => { contextMenu.show = false; ElMessage.success('操作已执行') }
 
-onMounted(() => store.dispatch('im/session/loadSessions'))
+const handleCreateGroup = () => {
+  ElMessage.info('功能开发中，请从通讯录发起')
+}
+
+const handleSearchSelect = (result) => {
+  showGlobalSearch.value = false
+  if (result.sessionId) {
+    const session = sessions.value.find(s => s.id === result.sessionId)
+    if (session) emit('select-session', session)
+  }
+}
+
+const doAction = (cmd) => { 
+  contextMenu.show = false
+  if (!contextMenu.session) return
+  
+  switch(cmd) {
+    case 'mark-read':
+      store.dispatch('im/session/markSessionAsRead', contextMenu.session.id)
+      break
+    case 'toggle-pin':
+      store.dispatch('im/session/pinSession', { 
+        sessionId: contextMenu.session.id, 
+        pinned: !contextMenu.session.isPinned 
+      })
+      break
+    case 'delete':
+      store.dispatch('im/session/deleteSession', contextMenu.session.id)
+      break
+  }
+}
+
+onMounted(() => {
+  if (store.state.user?.token) {
+    store.dispatch('im/session/loadSessions')
+  }
+})
 </script>
 
 <style scoped lang="scss">
-.session-panel { width: 280px; height: 100%; border-right: 1px solid #f2f3f5; background: #fff; display: flex; flex-direction: column; }
-.panel-header { padding: 12px 12px 8px; flex-shrink: 0;
-  .header-action-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-    .search-box-unified { flex: 1; position: relative; height: 32px; background: #f3f3f3; border-radius: 6px; display: flex; align-items: center;
-      .search-icon { position: absolute; left: 10px; font-size: 16px; color: #8f959e; }
-      .search-input { width: 100%; border: none; background: transparent; padding: 0 34px; font-size: 13px; outline: none; }
+// ============================================================================
+// 会话面板容器 - 锁定 280px 黄金中轴
+// ============================================================================
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-panel {
+  width: var(--dt-session-panel-width);
+  height: 100%;
+  border-right: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-session-list);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+// ============================================================================
+// 头部搜索区
+// ============================================================================
+.panel-header {
+  padding: var(--dt-spacing-md) var(--dt-spacing-md) var(--dt-spacing-sm);
+  flex-shrink: 0;
+
+  .header-action-row {
+    display: flex;
+    align-items: center;
+    gap: var(--dt-spacing-sm);
+    margin-bottom: var(--dt-spacing-md);
+  }
+
+  .search-box-unified {
+    flex: 1;
+    position: relative;
+    height: var(--dt-btn-height-sm);
+    background: var(--dt-bg-body);
+    border-radius: var(--dt-radius-sm);
+    display: flex;
+    align-items: center;
+    transition: all var(--dt-transition-base);
+
+    &:focus-within {
+      background: var(--dt-bg-input);
+      box-shadow: 0 0 0 1px var(--dt-brand-color);
     }
-    .icon-add-btn { width: 32px; height: 32px; border: none; background: #f3f3f3; border-radius: 6px; cursor: pointer; color: #1f2329; display: flex; align-items: center; justify-content: center; &:hover { background: #e8e8e8; } }
-  }
-}
-.sub-tabs-compact { display: flex; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid #f2f3f5;
-  .tab-pill { padding: 4px 10px; font-size: 12px; color: #1f2329; border-radius: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px;
-    &:hover { background: #f5f6f7; }
-    &.active { background: #f2f3f5; color: #1677ff; font-weight: 600; }
-    .tab-badge { background: #ff4d4f; color: #fff; padding: 0 5px; border-radius: 10px; transform: scale(0.8); }
-  }
-}
-.session-list { flex: 1; overflow-y: auto; }
-.session-item { display: flex; padding: 12px; cursor: pointer; position: relative; transition: background 0.2s;
-  &:hover { background: #f5f6f7; }
-  &.active { background: #e8f4ff; .session-name { color: #1677ff; } }
-  .item-avatar-wrapper { position: relative; flex-shrink: 0; .avatar-icon-group { width: 40px; height: 40px; background: #1677ff; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; .material-icons-outlined { font-size: 24px; } }
-    .unread-count-badge { position: absolute; top: -6px; right: -6px; background: #ff4d4f; color: #fff; font-size: 10px; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
-  }
-  .item-content { flex: 1; margin-left: 12px; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 4px;
-    .content-top { display: flex; justify-content: space-between; align-items: baseline; .session-name { font-size: 14px; font-weight: 500; color: #1f2329; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .session-time { font-size: 11px; color: #8f959e; } }
-    .content-bottom { display: flex; justify-content: space-between; align-items: center; .preview-wrapper { display: flex; align-items: center; gap: 4px; min-width: 0; flex: 1; font-size: 12px; color: #8f959e; overflow: hidden; white-space: nowrap; .mention-text { color: #ff4d4f; } }
-      .mute-icon { font-size: 14px; color: #c9cdd4; }
+
+    .search-icon {
+      position: absolute;
+      left: var(--dt-spacing-sm);
+      font-size: 14px;
+      color: var(--dt-text-tertiary);
+    }
+
+    .search-input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 0 32px;
+      font-size: var(--dt-font-size-sm);
+      outline: none;
+      color: var(--dt-text-primary);
+      &::placeholder { color: var(--dt-text-quaternary); }
     }
   }
-  .pin-tag { position: absolute; top: 0; left: 0; width: 0; height: 0; border-top: 6px solid #1677ff; border-right: 6px solid transparent; }
-}
-.context-menu-layer { position: fixed; background: #fff; border: 1px solid #f2f3f5; border-radius: 8px; padding: 4px; min-width: 140px; z-index: 3000;
-  .menu-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; font-size: 13px; color: #1f2329; cursor: pointer; border-radius: 4px; &:hover { background: #1677ff; color: #fff; }
-    &.danger { color: #ff4d4f; &:hover { background: #ff4d4f; color: #fff; } }
+
+  .icon-add-btn {
+    width: var(--dt-btn-height-sm);
+    height: var(--dt-btn-height-sm);
+    border: none;
+    background: var(--dt-bg-body);
+    border-radius: var(--dt-radius-sm);
+    cursor: pointer;
+    color: var(--dt-text-primary);
+    @include flex-center;
+    transition: all var(--dt-transition-fast);
+
+    &:hover { background: var(--dt-border-light); color: var(--dt-brand-color); }
+    &:active { transform: scale(0.95); }
   }
 }
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: transparent; border-radius: 2px; }
-.session-list:hover.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); }
+
+// ============================================================================
+// 导航页签
+// ============================================================================
+.sub-tabs-compact {
+  display: flex;
+  gap: var(--dt-spacing-xs);
+  padding-bottom: var(--dt-spacing-xs);
+  border-bottom: 1px solid var(--dt-border-lighter);
+
+  .tab-pill {
+    padding: 4px var(--dt-spacing-sm);
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-secondary);
+    border-radius: var(--dt-radius-full);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all var(--dt-transition-fast);
+
+    &:hover { background: var(--dt-bg-session-hover); }
+    &.active { 
+      background: var(--dt-brand-lighter); 
+      color: var(--dt-brand-color); 
+      font-weight: var(--dt-font-weight-medium); 
+    }
+
+    .tab-badge {
+      background: var(--dt-error-color);
+      color: #ffffff;
+      padding: 0 4px;
+      border-radius: var(--dt-radius-full);
+      font-size: 10px;
+      transform: scale(0.85);
+    }
+  }
+}
+
+// ============================================================================
+// 列表项渲染
+// ============================================================================
+.session-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.session-item {
+  display: flex;
+  padding: var(--dt-spacing-md);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--dt-transition-base);
+  border-bottom: 1px solid transparent;
+
+  &:hover {
+    background: var(--dt-bg-session-hover);
+  }
+
+  &.active {
+    background: var(--dt-bg-session-active);
+    .session-name { color: var(--dt-brand-color); }
+  }
+
+  &.pinned {
+    background: var(--dt-bg-body);
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-top: 6px solid var(--dt-brand-color);
+      border-right: 6px solid transparent;
+    }
+  }
+
+  .item-avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+
+    .unread-count-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--dt-error-color);
+      color: #ffffff;
+      font-size: 10px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 2px;
+      border-radius: var(--dt-radius-full);
+      @include flex-center;
+      border: 1.5px solid #ffffff;
+      box-shadow: var(--dt-shadow-1);
+      font-weight: 600;
+    }
+  }
+
+  .item-content {
+    flex: 1;
+    margin-left: var(--dt-spacing-sm);
+    min-width: 0; // 防崩核心
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+
+    .content-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+
+      .session-name {
+        font-size: var(--dt-font-size-base);
+        font-weight: var(--dt-font-weight-medium);
+        color: var(--dt-text-primary);
+        margin: 0;
+        @include text-ellipsis;
+      }
+
+      .session-time {
+        font-size: var(--dt-font-size-xs);
+        color: var(--dt-text-tertiary);
+        flex-shrink: 0;
+      }
+    }
+
+    .content-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .preview-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+        flex: 1;
+        font-size: var(--dt-font-size-sm);
+        color: var(--dt-text-tertiary);
+        @include text-ellipsis;
+
+        .mention-text { color: var(--dt-error-color); font-weight: 500; }
+        .sender-prefix { color: var(--dt-text-secondary); }
+      }
+
+      .mute-icon {
+        font-size: 14px;
+        color: var(--dt-text-quaternary);
+        margin-left: 4px;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// 右键菜单
+// ============================================================================
+.context-menu-layer {
+  position: fixed;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
+  padding: 4px;
+  min-width: 160px;
+  z-index: var(--dt-z-max);
+  box-shadow: var(--dt-shadow-modal);
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--dt-spacing-sm);
+    padding: 8px var(--dt-spacing-md);
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-primary);
+    cursor: pointer;
+    border-radius: var(--dt-radius-sm);
+    transition: all var(--dt-transition-fast);
+
+    &:hover {
+      background: var(--dt-brand-lighter);
+      color: var(--dt-brand-color);
+    }
+
+    &.danger {
+      color: var(--dt-error-color);
+      &:hover { background: var(--dt-error-bg); color: var(--dt-error-color); }
+    }
+
+    .el-icon { font-size: 16px; }
+  }
+
+  .menu-divider {
+    height: 1px;
+    background: var(--dt-border-lighter);
+    margin: 4px 0;
+  }
+}
 </style>

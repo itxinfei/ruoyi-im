@@ -171,8 +171,8 @@ const handleNavClick = (moduleKey) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 0;
-  gap: 2px;
+  padding: 6px 0;
+  gap: 1px;
   flex: 1;
   overflow-y: auto;
 }
@@ -184,7 +184,7 @@ const handleNavClick = (moduleKey) => {
   align-items: center;
   justify-content: center;
   width: 48px;
-  height: 48px;
+  height: 46px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -204,7 +204,7 @@ const handleNavClick = (moduleKey) => {
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 24px;
+    height: 20px;
     background-color: #ffffff;
     border-radius: 0 2px 2px 0;
   }
