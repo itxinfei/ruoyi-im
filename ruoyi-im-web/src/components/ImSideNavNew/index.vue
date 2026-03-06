@@ -144,7 +144,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
   width: 64px; height: 100vh;
   background: linear-gradient(180deg, #1a88ff 0%, #1565d8 100%);
   display: flex; flex-direction: column; align-items: center;
-  padding: 16px 0; flex-shrink: 0; z-index: 100;
+  padding: 8px 0; flex-shrink: 0; z-index: 100;
 }
 
 .nav-brand-cell {
