@@ -403,7 +403,7 @@ onMounted(() => {
   }
 
   &.dark {
-    background: linear-gradient(135deg, #0a1628 0%, #162032 100%);
+    background: linear-gradient(135deg, var(--dt-bg-body-dark) 0%, var(--dt-bg-card-dark) 100%);
   }
 }
 
@@ -494,7 +494,7 @@ onMounted(() => {
   flex: 0 0 380px;
   background: linear-gradient(160deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
   padding: 48px 40px;
-  color: #fff;
+  color: var(--dt-text-primary);
   position: relative;
   overflow: hidden;
 
@@ -864,14 +864,14 @@ onMounted(() => {
   border-radius: var(--dt-radius-lg);
   background: var(--dt-brand-color);
   border: none;
-  color: #fff;
+  color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   transition: all var(--dt-transition-fast);
   margin-bottom: 28px;
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
+  box-shadow: var(--dt-shadow-float);
 
   &:hover:not(:disabled) {
     background: var(--dt-brand-hover);
@@ -949,7 +949,7 @@ onMounted(() => {
       &.wechat:hover {
         border-color: #07c160;
         color: #07c160;
-        background: #f6ffed;
+        background: var(--dt-success-bg);
       }
 
       &.dingtalk:hover {

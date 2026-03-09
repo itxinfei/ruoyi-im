@@ -129,7 +129,7 @@ const loadApprovals = async () => {
 
 // 随机颜色
 const getRandomColor = () => {
-  const colors = ['#1677ff', '#52c41a', '#fa8c16', '#722ed1', '#eb2f96']
+  const colors = ['var(--dt-brand-color)', 'var(--dt-success-color)', 'var(--dt-warning-color)', 'var(--dt-info-color)', 'var(--dt-error-color)']
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
@@ -206,7 +206,7 @@ onMounted(() => {
   gap: 6px;
   padding: 8px 16px;
   background: var(--dt-brand-color);
-  color: #fff;
+  color: var(--dt-text-primary);
   border: none;
   border-radius: var(--dt-radius-lg);
   font-size: 14px;
@@ -218,7 +218,7 @@ onMounted(() => {
 .add-btn:hover {
   background: var(--dt-brand-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+  box-shadow: var(--dt-shadow-float);
 }
 
 .add-btn:active {
@@ -266,7 +266,7 @@ onMounted(() => {
   margin-left: 4px;
   padding: 2px 8px;
   background: var(--dt-brand-color);
-  color: #fff;
+  color: var(--dt-bg-card);
   border-radius: var(--dt-radius-full);
   font-size: 11px;
   font-weight: 500;
@@ -323,7 +323,7 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: var(--dt-radius-lg);
-  color: #fff;
+  color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;

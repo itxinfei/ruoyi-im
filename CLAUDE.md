@@ -45,13 +45,19 @@
   6. `SessionPanel.vue` - 未读数角标颜色
 - 改动：所有硬编码色值替换为 CSS 变量 (`var(--dt-bg-card)`, `var(--dt-border-light)`, etc.)
 
-### P2 优先级 (待修复)
-以下文件仍存在硬编码色值，待后续修复：
-- WorkbenchPanel.vue (13 处)
-- LoginPage.vue (6 处)
-- ApprovalPanel.vue (4 处)
-- ContactsPanel.vue (3 处)
-- admin/Dashboard.vue (10+ 处)
+### P2 优先级 (已修复)
+**修复文件**:
+- WorkbenchPanel.vue - 背景/图标颜色/角标
+- LoginPage.vue - 暗色背景/文字颜色
+- ApprovalPanel.vue - 按钮颜色/计数badge
+- ContactsPanel.vue - 侧边栏背景/图标颜色
+- admin/Dashboard.vue - 卡片边框/指标颜色/图表颜色
+
+### P2 优先级 (剩余待修复)
+以下文件仍存在少量硬编码色值 (第三方品牌色/渐变)，待后续修复：
+- AdminLayout.vue, AssistantPanel.vue, CalendarPanel.vue
+- DocumentsPanel.vue, MailPanel.vue, ProfilePanel.vue
+- SearchPanel.vue, SettingsPanel.vue, TodoPanel.vue
 
 ### 设计规范验证
 - [x] 气泡圆角统一为 12px (`var(--dt-radius-lg)`)

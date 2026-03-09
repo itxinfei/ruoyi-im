@@ -166,10 +166,10 @@ const formatDate = (d) => d
 // 头部欢迎区 - 飞书呼吸感 (白底无边框)
 // ============================================================================
 .wb-header {
-  background: #ffffff; padding: var(--dt-spacing-2xl) 40px; 
+  background: var(--dt-bg-card); padding: var(--dt-spacing-2xl) 40px;
   border-bottom: 1px solid var(--dt-border-light);
   &__content { max-width: 1200px; margin: 0 auto; @include flex-between; }
-  
+
   .greeting-box {
     &__title { font-size: 26px; font-weight: 700; color: var(--dt-text-primary); margin: 0; letter-spacing: -0.5px; }
     &__date { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin-top: 8px; }
@@ -185,7 +185,7 @@ const formatDate = (d) => d
     width: 100%; height: 36px; padding: 0 16px 0 36px; background: var(--dt-bg-body);
     border: 1px solid transparent; border-radius: var(--dt-radius-md); outline: none;
     font-size: 14px; transition: all var(--dt-transition-base);
-    &:focus { background: #fff; border-color: var(--dt-brand-color); box-shadow: var(--dt-shadow-1); }
+    &:focus { background: var(--dt-bg-card); border-color: var(--dt-brand-color); box-shadow: var(--dt-shadow-1); }
   }
 }
 
@@ -221,26 +221,26 @@ const formatDate = (d) => d
 
   &__icon {
     width: 52px; height: 52px; border-radius: 12px; @include flex-center; font-size: 24px;
-    background: #fff; box-shadow: var(--dt-shadow-1); transition: all var(--dt-transition-base);
+    background: var(--dt-bg-card); box-shadow: var(--dt-shadow-1); transition: all var(--dt-transition-base);
     &--sm { width: 44px; height: 44px; font-size: 20px; }
-    
-    &.icon-orange { background: #fff7e6; color: #fa8c16; }
-    &.icon-blue { background: #e6f4ff; color: #1677ff; }
-    &.icon-green { background: #f6ffed; color: #52c41a; }
-    &.icon-purple { background: #f9f0ff; color: #722ed1; }
-    &.icon-pink { background: #fff0f6; color: #eb2f96; }
-    &.icon-teal { background: #e6fffa; color: #13c2c2; }
-    &.icon-indigo { background: #eef0ff; color: #594efc; }
-    &.icon-amber { background: #fffbe6; color: #faad14; }
-    &.icon-rose { background: #fff1f0; color: #f74a5c; }
+
+    &.icon-orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+    &.icon-blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+    &.icon-green { background: var(--dt-success-bg); color: var(--dt-success-color); }
+    &.icon-purple { background: var(--dt-info-bg); color: var(--dt-info-color); }
+    &.icon-pink { background: var(--dt-error-bg); color: var(--dt-error-color); }
+    &.icon-teal { background: var(--dt-brand-bg); color: #08979c; }
+    &.icon-indigo { background: var(--dt-brand-lighter); color: var(--dt-brand-color); }
+    &.icon-amber { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+    &.icon-rose { background: var(--dt-error-bg); color: var(--dt-error-color); }
     &.icon-cyan { background: #e6fffe; color: #08bdb2; }
   }
 
   &__label { font-size: 13px; color: var(--dt-text-primary); font-weight: 500; }
-  &__badge { 
+  &__badge {
     position: absolute; top: 10px; right: 20px; background: var(--dt-error-color);
-    color: #fff; font-size: 10px; min-width: 16px; height: 16px; border-radius: 8px;
-    @include flex-center; border: 1.5px solid #fff; font-weight: 600;
+    color: var(--dt-bg-card); font-size: 10px; min-width: 16px; height: 16px; border-radius: 8px;
+    @include flex-center; border: 1.5px solid var(--dt-bg-card); font-weight: 600;
   }
 }
 
@@ -263,10 +263,10 @@ const formatDate = (d) => d
 .todo-stack, .notice-stack { display: flex; flex-direction: column; gap: 8px; }
 
 .todo-tile, .notice-tile {
-  background: var(--dt-bg-body); padding: var(--dt-spacing-md); border-radius: 8px;
+  background: var(--dt-bg-body); padding: var(--dt-spacing-md); border-radius: var(--dt-radius-md);
   cursor: pointer; transition: all var(--dt-transition-base); display: flex; align-items: center; gap: 12px;
   &:hover { background: var(--dt-bg-session-hover); transform: translateX(2px); }
-  
+
   &__status { width: 4px; height: 32px; border-radius: 2px; &.high { background: var(--dt-error-color); } &.medium { background: var(--dt-warning-color); } &.low { background: var(--dt-brand-color); } }
   &__info { flex: 1; min-width: 0; }
   &__title { font-size: 14px; font-weight: 500; color: var(--dt-text-primary); @include text-ellipsis; }

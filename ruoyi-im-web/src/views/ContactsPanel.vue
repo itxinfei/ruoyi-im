@@ -220,7 +220,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 // ============================================================================
 .contacts-sidebar {
   width: var(--dt-session-panel-width);
-  height: 100%; background: #ffffff;
+  height: 100%; background: var(--dt-bg-card);
   border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column; flex-shrink: 0;
 
@@ -247,8 +247,8 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
     &.active { background: var(--dt-bg-session-active); color: var(--dt-brand-color); font-weight: 600; }
     
     .icon-box {
-      width: 32px; height: 32px; border-radius: 8px; @include flex-center; color: #fff; font-size: 18px;
-      &.orange { background: #ff9c6e; } &.blue { background: #69c0ff; } &.green { background: #95de64; }
+      width: 32px; height: 32px; border-radius: 8px; @include flex-center; color: var(--dt-text-primary); font-size: 18px;
+      &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); } &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); } &.green { background: var(--dt-success-bg); color: var(--dt-success-color); }
     }
     span { font-size: 14px; color: var(--dt-text-primary); }
   }
@@ -263,7 +263,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 // 主栏：内容区域
 // ============================================================================
 .contacts-main {
-  flex: 1; display: flex; flex-direction: column; background: #ffffff; min-width: 0;
+  flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); min-width: 0;
 
   .main-header {
     height: var(--dt-chat-header-height); padding: 0 var(--dt-spacing-xl);
@@ -281,7 +281,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 }
 
 .dept-folder-card {
-  background: var(--dt-bg-body); padding: 12px 16px; border-radius: 8px;
+  background: var(--dt-bg-body); padding: 12px 16px; border-radius: var(--dt-radius-md);
   display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;
   &:hover { background: var(--dt-bg-session-hover); transform: translateY(-1px); box-shadow: var(--dt-shadow-1); }
   
@@ -304,7 +304,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 }
 
 .member-card-ding {
-  background: #ffffff; padding: 16px; border-radius: 10px; border: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card); padding: 16px; border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light);
   display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s;
   &:hover { 
     box-shadow: var(--dt-shadow-card-hover); border-color: var(--dt-brand-light);
@@ -319,7 +319,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
   .chat-shortcut {
     @include button-reset; width: 32px; height: 32px; border-radius: 50%; background: var(--dt-brand-bg);
     color: var(--dt-brand-color); @include flex-center; opacity: 0; transform: scale(0.8);
-    transition: all 0.2s; &:hover { background: var(--dt-brand-color); color: #fff; }
+    transition: all 0.2s; &:hover { background: var(--dt-brand-color); color: var(--dt-text-primary); }
   }
 }
 
