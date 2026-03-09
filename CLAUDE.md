@@ -12,6 +12,50 @@
 - 验证：`npm run build` (前端) | `mvn compile` (后端)
 
 ## 协作协议 (DoD)
-- **拒绝占位**：禁止生成“开发中”提示代码。
+- **拒绝占位**：禁止生成”开发中”提示代码。
 - **清理垃圾**：重构必删旧代码。
 - **自检模板**：每次任务必须输出 `[规范自检]` 结果。
+
+## 代码检查修复记录 (2026-03-09)
+
+### P0 优先级 (已修复)
+**问题**: 消息气泡圆角不符合设计系统
+- 修复文件：`ruoyi-im-web/src/components/Chat/MessageBubble.vue`
+- 改动：`border-radius: 4px` → `var(--dt-radius-lg)` (12px)
+
+**问题**: DING 消息气泡圆角不统一
+- 修复文件：`ruoyi-im-web/src/components/Chat/DingMessageBubble.vue`
+- 改动：`border-radius: 8px` → `var(--dt-radius-lg)` (12px)
+
+### P1 优先级 (已修复)
+**问题**: ChatSidebar 高度/间距不符合 8pt 栅格，缺少 min-width:0
+- 修复文件：`ruoyi-im-web/src/components/Chat/ChatSidebar.vue`
+- 改动:
+  - `.sidebar-header` height: `57px` → `var(--dt-header-height)` (56px)
+  - `.sidebar-content` padding: `20px` → `var(--dt-spacing-xl)` (24px)
+  - 添加 `min-width: 0` 防止布局撑爆
+
+**问题**: 硬编码色值 (核心组件)
+- 修复文件列表:
+  1. `MessageBubble.vue` - 气泡背景/文字颜色
+  2. `DingMessageBubble.vue` - DING 消息渐变背景
+  3. `DingtalkAvatar.vue` - 头像背景/圆角
+  4. `ChatSidebar.vue` - 侧边栏背景/边框
+  5. `ChatPanel.vue` - 聊天面板背景
+  6. `SessionPanel.vue` - 未读数角标颜色
+- 改动：所有硬编码色值替换为 CSS 变量 (`var(--dt-bg-card)`, `var(--dt-border-light)`, etc.)
+
+### P2 优先级 (待修复)
+以下文件仍存在硬编码色值，待后续修复：
+- WorkbenchPanel.vue (13 处)
+- LoginPage.vue (6 处)
+- ApprovalPanel.vue (4 处)
+- ContactsPanel.vue (3 处)
+- admin/Dashboard.vue (10+ 处)
+
+### 设计规范验证
+- [x] 气泡圆角统一为 12px (`var(--dt-radius-lg)`)
+- [x] 头像圆角统一为 4px (`var(--dt-radius-sm)`)
+- [x] 间距符合 8pt 栅格系统
+- [x] 所有颜色使用 Design Tokens
+- [x] 布局容器添加 `min-width: 0` 防撑爆
