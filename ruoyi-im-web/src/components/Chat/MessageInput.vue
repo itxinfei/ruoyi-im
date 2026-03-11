@@ -64,8 +64,8 @@ const onFileChange = (e) => {
 
 <style scoped lang="scss">
 .message-input {
-  background: #ffffff;
-  border-top: 1px solid #f2f2f2;
+  background: var(--dt-bg-card);
+  border-top: 1px solid var(--dt-border-light);
   padding: 8px 16px;
   display: flex;
   flex-direction: column;
@@ -76,7 +76,7 @@ const onFileChange = (e) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  .el-button { font-size: 20px; color: #666; }
+  .el-button { font-size: 20px; color: var(--dt-text-secondary); &:hover { color: var(--dt-brand-color); } }
 }
 
 .text-area {
@@ -88,9 +88,10 @@ const onFileChange = (e) => {
     border: none;
     outline: none;
     resize: none;
-    font-size: 14px;
-    color: #333;
-    &::placeholder { color: #bfbfbf; }
+    font-size: var(--dt-font-size-base);
+    color: var(--dt-text-primary);
+    background: transparent;
+    &::placeholder { color: var(--dt-text-quaternary); }
   }
 }
 

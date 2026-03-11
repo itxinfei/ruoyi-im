@@ -168,92 +168,77 @@ watch(() => props.session?.id, () => {
 
 <style scoped lang="scss">
 .chat-sidebar {
-  width: 280px; height: 100%; border-left: 1px solid #f0f0f0; background: #fff;
-  display: flex; flex-direction: column; flex-shrink: 0;
+  width: 280px; height: 100%; border-left: 1px solid var(--dt-border-light); background: var(--dt-bg-card);
+  display: flex; flex-direction: column; flex-shrink: 0; min-width: 0;
 }
 
 .sidebar-header {
-  height: 57px; padding: 0 16px; border-bottom: 1px solid #f2f3f5;
+  height: var(--dt-header-height); padding: 0 var(--dt-spacing-lg); border-bottom: 1px solid var(--dt-border-lighter);
   display: flex; align-items: center; justify-content: space-between;
-  .title { font-size: 15px; font-weight: 600; color: #1f2329; margin: 0; }
+  .title { font-size: var(--dt-font-size-md); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); margin: 0; }
 }
 
 .sidebar-content {
-  flex: 1; overflow-y: auto; padding: 20px 16px;
-  .section { margin-bottom: 24px; }
+  flex: 1; overflow-y: auto; padding: var(--dt-spacing-xl) var(--dt-spacing-lg);
+  .section { margin-bottom: var(--dt-spacing-2xl); }
   .section-title {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
-    font-size: 13px; font-weight: 600; color: #1f2329;
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--dt-spacing-md);
+    font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary);
   }
 }
 
 .sidebar-tabs {
-  :deep(.el-tabs__header) { margin-bottom: 0; padding: 0 8px; }
-  :deep(.el-tabs__nav-wrap::after) { height: 1px; background-color: #f2f3f5; }
+  :deep(.el-tabs__header) { margin-bottom: 0; padding: 0 var(--dt-spacing-sm); }
+  :deep(.el-tabs__nav-wrap::after) { height: 1px; background-color: var(--dt-border-lighter); }
 }
 
-.search-box { padding: 12px 0; }
+.search-box { padding: var(--dt-spacing-md) 0; }
 
 .user-info-card {
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
-  .card-name { font-size: 18px; font-weight: 600; color: #1f2329; margin: 0; }
-  .card-sub { font-size: 13px; color: #8f959e; margin: 0; }
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--dt-spacing-md);
+  .card-name { font-size: var(--dt-font-size-xl); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); margin: 0; }
+  .card-sub { font-size: var(--dt-font-size-sm); color: var(--dt-text-tertiary); margin: 0; }
 }
 
 .files-section {
   .empty-files {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; color: #8f959e;
-    .material-icons-outlined { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
-    p { font-size: 13px; }
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; color: var(--dt-text-tertiary);
+    .material-icons-outlined { font-size: 48px; margin-bottom: var(--dt-spacing-md); opacity: 0.5; }
+    p { font-size: var(--dt-font-size-sm); }
   }
   .file-list {
-    display: flex; flex-direction: column; gap: 4px;
+    display: flex; flex-direction: column; gap: var(--dt-spacing-xs);
     .file-row {
-      display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; cursor: pointer;
-      &:hover { background: #f5f5f5; }
-      .el-icon { font-size: 32px; color: #1677ff; }
-      .f-name { font-size: 13px; color: #1f2329; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .f-meta { font-size: 11px; color: #8f959e; }
+      display: flex; align-items: center; gap: var(--dt-spacing-md); padding: var(--dt-spacing-md); border-radius: var(--dt-radius-md); cursor: pointer;
+      &:hover { background: var(--dt-bg-session-hover); }
+      .el-icon { font-size: 32px; color: var(--dt-brand-color); }
+      .f-name { font-size: var(--dt-font-size-sm); color: var(--dt-text-primary); font-weight: var(--dt-font-weight-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .f-meta { font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); }
     }
   }
 }
 
 .settings-list {
-  display: flex; flex-direction: column; gap: 4px;
+  display: flex; flex-direction: column; gap: var(--dt-spacing-xs);
   .setting-item {
-    display: flex; justify-content: space-between; align-items: center; padding: 12px 8px; border-radius: 6px;
-    &:hover { background: #f8fafc; }
-    span { font-size: 14px; color: #1f2329; }
-  }
-}
-
-.user-info {
-  display: flex; flex-direction: column; align-items: center; gap: 16px;
-  .avatar-large { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-  .user-main {
-    text-align: center;
-    .name-row {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      .nickname { font-size: 18px; font-weight: 600; color: #1f2329; }
-      .male { color: #1677ff; } .female { color: #ff4d4f; }
-    }
-    .sub { font-size: 12px; color: #8f959e; margin-top: 4px; }
+    display: flex; justify-content: space-between; align-items: center; padding: var(--dt-spacing-md) var(--dt-spacing-sm); border-radius: var(--dt-radius-md);
+    &:hover { background: var(--dt-bg-session-hover); }
+    span { font-size: var(--dt-font-size-base); color: var(--dt-text-primary); }
   }
 }
 
 .info-list {
   .info-item {
-    display: flex; justify-content: space-between; padding: 10px 0; font-size: 14px;
-    .label { color: #8f959e; } .value { color: #1f2329; }
+    display: flex; justify-content: space-between; padding: var(--dt-spacing-md) 0; font-size: var(--dt-font-size-base);
+    .label { color: var(--dt-text-tertiary); } .value { color: var(--dt-text-primary); }
   }
 }
 
-.sidebar-footer { padding: 16px; border-top: 1px solid #f2f3f5; }
+.sidebar-footer { padding: var(--dt-spacing-lg); border-top: 1px solid var(--dt-border-lighter); }
 
 :global(.dark) {
-  .chat-sidebar { background: #1e293b; border-color: #334155; }
-  .sidebar-header { border-bottom-color: #334155; .title { color: #f1f5f9; } }
-  .announcement-card { background: #0f172a; color: #cbd5e1; }
-  .section-title, .name, .nickname, .value, .setting-item { color: #f1f5f9; }
+  .chat-sidebar { background: var(--dt-bg-card-dark); border-color: var(--dt-border-dark); }
+  .sidebar-header { border-bottom-color: var(--dt-border-dark); .title { color: var(--dt-text-primary); } }
+  .section-title, .name, .nickname, .value, .setting-item { color: var(--dt-text-primary); }
 }
 </style>

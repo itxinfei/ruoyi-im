@@ -2,7 +2,7 @@
   <div
     class="dingtalk-avatar"
     :class="avatarClass"
-    :style="{ width: size + 'px', height: size + 'px', fontSize: fontSize + 'px', backgroundColor: isGroup ? '#f0f0f0' : bgColor }"
+    :style="{ width: size + 'px', height: size + 'px', fontSize: fontSize + 'px', backgroundColor: isGroup ? 'var(--dt-bg-body)' : bgColor }"
   >
     <!-- 群组聚合头像 -->
     <div v-if="isGroup" class="group-avatar-grid" :class="'grid-' + displayMembers.length">
@@ -132,19 +132,19 @@ const handleImageError = () => {
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
   line-height: 1;
   box-sizing: border-box;
-  background-color: #e5e7eb;
+  background-color: var(--dt-border-light);
 
   &.is-group {
     padding: 2px;
-    background-color: #f3f4f6;
+    background-color: var(--dt-bg-body);
   }
 }
 
 .avatar-circle { border-radius: 50%; }
-.avatar-square { border-radius: 4px; }
+.avatar-square { border-radius: var(--dt-radius-sm); }
 
 .avatar-img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -154,7 +154,7 @@ const handleImageError = () => {
   width: 100%;
   height: 100%;
   gap: 1px;
-  background: #f3f4f6;
+  background: var(--dt-bg-body);
 
   .grid-item {
     display: flex;
@@ -162,7 +162,7 @@ const handleImageError = () => {
     justify-content: center;
     overflow: hidden;
     color: #fff;
-    font-size: 10px; // 对于聚合头像，字体需要极小
+    font-size: 10px;
     line-height: 1;
     font-weight: 600;
   }
@@ -170,12 +170,12 @@ const handleImageError = () => {
   .grid-img { width: 100%; height: 100%; object-fit: cover; }
 
   // 不同人数的网格分布
-  &.grid-0 { background-color: #1677ff; display: flex; align-items: center; justify-content: center; 
+  &.grid-0 { background-color: var(--dt-brand-color); display: flex; align-items: center; justify-content: center;
     &::after { content: 'G'; color: #fff; font-size: 20px; }
   }
   &.grid-1 { grid-template-columns: 1fr; .grid-item { font-size: 16px; } }
   &.grid-2 { grid-template-columns: 1fr 1fr; .grid-item { height: 100%; font-size: 14px; } }
-  &.grid-3 { 
+  &.grid-3 {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     .grid-item:first-child { grid-column: 1 / 3; }

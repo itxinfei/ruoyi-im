@@ -310,7 +310,7 @@ onMounted(() => {
 
     .tab-badge {
       background: var(--dt-error-color);
-      color: #ffffff;
+      color: var(--dt-bg-card);
       padding: 0 4px;
       border-radius: var(--dt-radius-full);
       font-size: 10px;
@@ -365,14 +365,14 @@ onMounted(() => {
       top: -4px;
       right: -4px;
       background: var(--dt-error-color);
-      color: #ffffff;
+      color: var(--dt-bg-card);
       font-size: 10px;
       min-width: 16px;
       height: 16px;
       padding: 0 4px;
       border-radius: var(--dt-radius-full);
       @include flex-center;
-      border: 1.5px solid #ffffff; // 钉钉对标：白色描边
+      border: 1.5px solid var(--dt-bg-card);
       box-shadow: 0 2px 4px rgba(245, 74, 69, 0.2);
       font-weight: 600;
       z-index: 1;

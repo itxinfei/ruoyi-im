@@ -81,28 +81,28 @@ const openLink = () => {
   display: flex;
   flex-direction: column;
   max-width: 280px;
-  background: #f5f5f5;
-  border-radius: 8px;
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid #e5e5e5;
+  transition: all var(--dt-transition-base);
+  border: 1px solid var(--dt-border-light);
 
   &:hover {
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: var(--dt-bg-card);
+    box-shadow: var(--dt-shadow-2);
   }
 
   &.is-own {
     background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(22, 119, 255, 0.3);
+    border-color: var(--dt-brand-light);
 
     .link-title {
-      color: #1677ff;
+      color: var(--dt-brand-color);
     }
 
     .link-url {
-      color: #1677ff;
+      color: var(--dt-brand-color);
     }
   }
 
@@ -110,7 +110,7 @@ const openLink = () => {
     width: 100%;
     height: 120px;
     overflow: hidden;
-    background: #e5e5e5;
+    background: var(--dt-border-lighter);
 
     img {
       width: 100%;
@@ -124,9 +124,9 @@ const openLink = () => {
   }
 
   .link-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: #262626;
+    font-size: var(--dt-font-size-base);
+    font-weight: var(--dt-font-weight-medium);
+    color: var(--dt-text-primary);
     margin-bottom: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -134,8 +134,8 @@ const openLink = () => {
   }
 
   .link-desc {
-    font-size: 12px;
-    color: #666;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
     line-height: 1.4;
     margin-bottom: 6px;
     display: -webkit-box;
@@ -148,8 +148,8 @@ const openLink = () => {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 11px;
-    color: #999;
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-tertiary);
 
     .material-icons-outlined {
       font-size: 14px;
@@ -159,6 +159,30 @@ const openLink = () => {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+  }
+}
+
+// 暗色模式适配
+:global(.dark) {
+  .link-card {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+
+    &:hover {
+      background: var(--dt-bg-active-dark);
+    }
+
+    .link-title {
+      color: var(--dt-text-primary-dark);
+    }
+
+    .link-desc {
+      color: var(--dt-text-secondary-dark);
+    }
+
+    .link-url {
+      color: var(--dt-text-tertiary-dark);
     }
   }
 }

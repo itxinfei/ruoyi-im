@@ -78,6 +78,7 @@
   --dt-radius-md: 8px;
   --dt-radius-lg: 12px;
   --dt-radius-xl: 16px;
+  --dt-radius-2xl: 20px;
   --dt-radius-full: 9999px;
   --dt-bubble-radius: 10px;
 
@@ -98,8 +99,8 @@
 
   // === Layout Dimensions (黄金比例) ===
   --dt-nav-sidebar-width: 64px;
-  --dt-session-panel-width: 280px; 
-  --dt-contact-panel-width: 280px;
+  --dt-session-panel-width: 240px;
+  --dt-contact-panel-width: 240px;
   --dt-chat-min-width: 400px;
   --dt-header-height: 56px;
   --dt-chat-header-height: 60px;
@@ -122,6 +123,19 @@
   --dt-btn-height-sm: 32px;
   --dt-btn-height-md: 36px;
   --dt-btn-height-lg: 40px;
+
+  // === Dark Mode Variables (暗色模式专用) ===
+  --dt-text-primary-dark: #f1f5f9;
+  --dt-text-secondary-dark: #94a3b8;
+  --dt-text-tertiary-dark: #64748b;
+  --dt-text-quaternary-dark: #475569;
+  --dt-bg-body-dark: #0f172a;
+  --dt-bg-hover-dark: #1e293b;
+  --dt-bg-active-dark: #334155;
+  --dt-border-input-hover: #3b82f6;
+
+  // === Font Family ===
+  --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 // SCSS 辅助 Mixins

@@ -134,7 +134,7 @@ const logout = () => {
 <style scoped>
 .admin-layout {
   height: 100vh;
-  background: #f4f6fb;
+  background: var(--dt-bg-body);
 }
 
 .layout-shell {
@@ -201,8 +201,8 @@ const logout = () => {
 }
 
 .admin-header {
-  background: #fff;
-  border-bottom: 1px solid #e8edf5;
+  background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -219,12 +219,12 @@ const logout = () => {
 .page-title {
   margin: 0;
   font-size: 20px;
-  color: #111827;
+  color: var(--dt-text-primary);
 }
 
 .page-desc {
   margin: 2px 0 0;
-  color: #6b7280;
+  color: var(--dt-text-secondary);
   font-size: 12px;
 }
 
@@ -235,12 +235,12 @@ const logout = () => {
 }
 
 .admin-user {
-  color: #4b5563;
+  color: var(--dt-text-secondary);
   font-weight: 500;
 }
 
 .admin-main {
-  background: #f4f6fb;
+  background: var(--dt-bg-body);
   padding: 16px;
 }
 

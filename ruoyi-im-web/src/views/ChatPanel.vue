@@ -36,6 +36,7 @@
             @command="handleMessageCommand"
             @load-more="handleLoadMore"
             @show-user="handleShowUserProfile"
+            @retry="handleRetryMessage"
           />
 
           <!-- 输入框 -->
@@ -169,6 +170,27 @@ const handleLoadMore = () => {}
 const handleUploadFile = (f) => {}
 const handleUploadImage = (f) => {}
 
+const handleRetryMessage = async (msg) => {
+  if (!msg) return
+  // 更新消息状态为发送中
+  const index = messages.value.findIndex(m => m.id === msg.id)
+  if (index !== -1) {
+    messages.value[index].status = 'sending'
+  }
+  try {
+    const result = await store.dispatch('im/message/sendMessage', { sessionId: props.session.id, content: msg.content, type: msg.type })
+    if (result && index !== -1) {
+      messages.value[index].status = 'sent'
+      messages.value[index].id = result.id
+    }
+  } catch (error) {
+    if (index !== -1) {
+      messages.value[index].status = 'failed'
+    }
+    ElMessage.error('消息发送失败，请重试')
+  }
+}
+
 watch(() => props.session, (newSession) => {
   messages.value = []
   if (newSession) {
@@ -181,8 +203,8 @@ watch(() => props.session, (newSession) => {
 </script>
 
 <style scoped lang="scss">
-.chat-panel-container { height: 100%; flex: 1; min-width: 0; background: #ffffff; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-.welcome-logo-box { width: 64px; height: 64px; background: var(--dt-brand-color); border-radius: 16px; color: #fff; font-size: 24px; font-weight: 800; @include flex-center; margin: 0 auto 20px; box-shadow: var(--dt-shadow-3); }
+.chat-panel-container { height: 100%; flex: 1; min-width: 0; background: var(--dt-bg-card); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+.welcome-logo-box { width: 64px; height: 64px; background: var(--dt-brand-color); border-radius: var(--dt-radius-xl); color: #ffffff; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--dt-spacing-xl); box-shadow: var(--dt-shadow-3); }
 .chat-main-canvas { height: 100%; width: 100%; display: flex; flex-direction: column; overflow: hidden; &__body { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--dt-bg-chat); overflow: hidden; } }
-.chat-input-area { flex-shrink: 0; background: #ffffff; border-top: 1px solid var(--dt-border-light); min-height: 140px; z-index: 10; display: flex; flex-direction: column; }
+.chat-input-area { flex-shrink: 0; background: var(--dt-bg-card); border-top: 1px solid var(--dt-border-light); min-height: 140px; z-index: 10; display: flex; flex-direction: column; }
 </style>

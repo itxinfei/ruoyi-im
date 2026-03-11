@@ -164,39 +164,39 @@ const handleViewDetail = () => {
 
 <style lang="scss" scoped>
 .ding-message-bubble {
-  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
-  border: 1px solid #ffd6d6;
-  border-radius: 8px;
-  padding: 12px;
+  background: linear-gradient(135deg, var(--dt-error-bg) 0%, #fff 100%);
+  border: 1px solid var(--dt-error-color);
+  border-radius: var(--dt-radius-lg);
+  padding: var(--dt-spacing-md);
   min-width: 280px;
   max-width: 400px;
 
   &.ding-APP {
-    background: linear-gradient(135deg, #e8f4ff 0%, #fff 100%);
-    border-color: #b3d8ff;
+    background: linear-gradient(135deg, var(--dt-brand-bg) 0%, #fff 100%);
+    border-color: var(--dt-brand-light);
   }
 
   &.ding-SMS {
-    background: linear-gradient(135deg, #fff7e6 0%, #fff 100%);
-    border-color: #ffd591;
+    background: linear-gradient(135deg, var(--dt-warning-bg) 0%, #fff 100%);
+    border-color: var(--dt-warning-color);
   }
 
   &.ding-CALL {
-    background: linear-gradient(135deg, #fff1f0 0%, #fff 100%);
-    border-color: #ffccc7;
+    background: linear-gradient(135deg, var(--dt-error-bg) 0%, #fff 100%);
+    border-color: var(--dt-error-color);
   }
 
   .ding-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: var(--dt-spacing-md);
+    margin-bottom: var(--dt-spacing-md);
 
     .ding-icon {
       width: 32px;
       height: 32px;
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-      border-radius: 6px;
+      background: linear-gradient(135deg, var(--dt-error-color) 0%, var(--dt-error-color) 100%);
+      border-radius: var(--dt-radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -211,44 +211,44 @@ const handleViewDetail = () => {
     .ding-title {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 500;
+      gap: var(--dt-spacing-sm);
+      font-size: var(--dt-font-size-base);
+      font-weight: var(--dt-font-weight-medium);
 
       .ding-label {
-        font-weight: 700;
-        font-size: 16px;
-        color: #ee5a6f;
+        font-weight: var(--dt-font-weight-bold);
+        font-size: var(--dt-font-size-md);
+        color: var(--dt-error-color);
       }
 
       .priority-urgent {
-        padding: 2px 8px;
-        background: #fef0f0;
-        color: #f56c6c;
-        border-radius: 4px;
-        font-size: 12px;
+        padding: 2px var(--dt-spacing-sm);
+        background: var(--dt-error-bg);
+        color: var(--dt-error-color);
+        border-radius: var(--dt-radius-sm);
+        font-size: var(--dt-font-size-xs);
       }
 
       .priority-normal {
-        padding: 2px 8px;
-        background: #f0f9ff;
-        color: #409eff;
-        border-radius: 4px;
-        font-size: 12px;
+        padding: 2px var(--dt-spacing-sm);
+        background: var(--dt-brand-bg);
+        color: var(--dt-brand-color);
+        border-radius: var(--dt-radius-sm);
+        font-size: var(--dt-font-size-xs);
       }
 
       .ding-type-label {
-        color: #909399;
-        font-size: 12px;
+        color: var(--dt-text-tertiary);
+        font-size: var(--dt-font-size-xs);
       }
     }
   }
 
   .ding-content {
-    color: #303133;
-    font-size: 14px;
+    color: var(--dt-text-primary);
+    font-size: var(--dt-font-size-base);
     line-height: 1.6;
-    margin-bottom: 12px;
+    margin-bottom: var(--dt-spacing-md);
     white-space: pre-wrap;
     word-break: break-word;
   }
@@ -257,12 +257,12 @@ const handleViewDetail = () => {
     .read-status {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: var(--dt-spacing-md);
+      margin-bottom: var(--dt-spacing-md);
 
       .read-count {
-        font-size: 12px;
-        color: #909399;
+        font-size: var(--dt-font-size-xs);
+        color: var(--dt-text-tertiary);
         min-width: 100px;
       }
 
@@ -273,15 +273,15 @@ const handleViewDetail = () => {
 
     .ding-actions {
       display: flex;
-      gap: 8px;
+      gap: var(--dt-spacing-sm);
       flex-wrap: wrap;
     }
   }
 
   .ding-expire {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #909399;
+    margin-top: var(--dt-spacing-sm);
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-tertiary);
   }
 }
 </style>

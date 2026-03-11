@@ -2,13 +2,19 @@
   <div class="message-bubble" :class="{ 'is-own': message.isOwn }">
     <!-- 文本消息 -->
     <div v-if="message.type === 'TEXT'" class="text-content">
-      {{ message.content }}
+      <template v-for="(part, index) in parsedTextParts" :key="index">
+        <a v-if="part.isLink" :href="part.text" target="_blank" class="text-link">{{ part.text }}</a>
+        <span v-else>{{ part.text }}</span>
+      </template>
     </div>
+
+    <!-- 链接卡片消息 -->
+    <LinkCardMessage v-else-if="message.type === 'LINK'" :message="message" />
 
     <!-- 图片消息 -->
     <div v-else-if="message.type === 'IMAGE'" class="image-content">
-      <el-image 
-        :src="message.content" 
+      <el-image
+        :src="message.content"
         :preview-src-list="[message.content]"
         fit="cover"
         class="img"
@@ -60,9 +66,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Document } from '@element-plus/icons-vue'
 import DocumentPreviewDrawer from './DocumentPreviewDrawer.vue'
+import LinkCardMessage from './LinkCardMessage.vue'
 import { formatTime } from '@/utils/format'
 
 const props = defineProps({
@@ -70,6 +77,36 @@ const props = defineProps({
 })
 
 const documentPreviewRef = ref(null)
+
+// URL 正则匹配
+const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g
+
+// 解析文本中的链接
+const parsedTextParts = computed(() => {
+  const content = props.message?.content || ''
+  if (!content) return []
+
+  const parts = []
+  let lastIndex = 0
+  let match
+
+  while ((match = urlPattern.exec(content)) !== null) {
+    // 添加链接前的文本
+    if (match.index > lastIndex) {
+      parts.push({ text: content.slice(lastIndex, match.index), isLink: false })
+    }
+    // 添加链接
+    parts.push({ text: match[0], isLink: true })
+    lastIndex = match.index + match[0].length
+  }
+
+  // 添加剩余文本
+  if (lastIndex < content.length) {
+    parts.push({ text: content.slice(lastIndex), isLink: false })
+  }
+
+  return parts
+})
 
 // 获取文档图标
 const getDocumentIcon = (type) => {
@@ -110,23 +147,39 @@ const handlePreviewClose = () => {
 
 <style scoped lang="scss">
 .message-bubble {
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
+  border-radius: var(--dt-bubble-radius);
+  font-size: var(--dt-font-size-base);
   line-height: 1.5;
   word-break: break-all;
-  background: #ffffff;
-  border: 1px solid #e8e8e8;
-  color: #1f1f1f;
+  background: var(--dt-bubble-left-bg);
+  border: 1px solid var(--dt-border-light);
+  color: var(--dt-text-primary);
+  transition: all var(--dt-transition-fast);
+  max-width: 520px;
 
   &.is-own {
-    background: #e7f3ff;
-    border-color: #cce5ff;
+    background: var(--dt-bubble-right-bg);
+    border-color: var(--dt-border-light);
+  }
+
+  &:hover {
+    box-shadow: var(--dt-shadow-1);
+  }
+
+  .text-link {
+    color: var(--dt-brand-color);
+    text-decoration: none;
+    word-break: break-all;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
 .image-content {
-  border-radius: 4px;
+  border-radius: var(--dt-radius-md);
   overflow: hidden;
   .img { max-width: 240px; display: block; }
 }
@@ -134,68 +187,98 @@ const handlePreviewClose = () => {
 .file-content {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #1677ff;
+  gap: var(--dt-spacing-sm);
+  color: var(--dt-brand-color);
   .file-name { text-decoration: underline; cursor: pointer; }
 }
 
 .document-content {
   cursor: pointer;
-  transition: all 0.2s;
-  
+  transition: all var(--dt-transition-base);
+
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dt-shadow-2);
   }
-  
+
   .doc-card {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: #f8fafc;
-    border-radius: 8px;
+    gap: var(--dt-spacing-md);
+    padding: var(--dt-spacing-md);
+    background: var(--dt-bg-body);
+    border-radius: var(--dt-radius-md);
     min-width: 240px;
-    
+
     .doc-icon {
       width: 40px;
       height: 40px;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 20px;
-      
-      &.icon-doc { background: #e6f4ff; color: #1677ff; }
-      &.icon-image { background: #f0f5ff; color: #1890ff; }
-      &.icon-video { background: #fff0f6; color: #eb2f96; }
-      &.icon-voice { background: #fffbe6; color: #fa8c16; }
+
+      &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+      &.icon-image { background: var(--dt-brand-lighter); color: var(--dt-brand-color); }
+      &.icon-video { background: var(--dt-error-bg); color: var(--dt-error-color); }
+      &.icon-voice { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
     }
-    
+
     .doc-info {
       flex: 1;
-      
+
       .doc-title {
-        font-size: 14px;
-        font-weight: 500;
-        color: #1f2329;
+        font-size: var(--dt-font-size-base);
+        font-weight: var(--dt-font-weight-medium);
+        color: var(--dt-text-primary);
         margin-bottom: 4px;
       }
-      
+
       .doc-meta {
-        font-size: 12px;
-        color: #8f959e;
+        font-size: var(--dt-font-size-sm);
+        color: var(--dt-text-tertiary);
       }
     }
-    
+
     .doc-action {
-      color: #8f959e;
+      color: var(--dt-text-tertiary);
     }
   }
 }
 
 .recalled {
-  color: #bfbfbf;
-  font-size: 12px;
+  color: var(--dt-text-tertiary);
+  font-size: var(--dt-font-size-sm);
+}
+
+// 暗色模式适配
+:global(.dark) {
+  .message-bubble {
+    background: var(--dt-bg-hover-dark);
+    border-color: var(--dt-border-dark);
+    color: var(--dt-text-primary-dark);
+
+    &.is-own {
+      background: var(--dt-brand-active);
+      color: #ffffff;
+    }
+  }
+
+  .document-content .doc-card {
+    background: var(--dt-bg-hover-dark);
+
+    .doc-info .doc-title {
+      color: var(--dt-text-primary-dark);
+    }
+
+    .doc-info .doc-meta {
+      color: var(--dt-text-tertiary-dark);
+    }
+
+    .doc-action {
+      color: var(--dt-text-tertiary-dark);
+    }
+  }
 }
 </style>
