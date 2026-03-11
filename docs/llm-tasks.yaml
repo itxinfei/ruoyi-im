@@ -179,7 +179,7 @@ tasks:
   - task_id: "IM-D-002"
     title: "链接卡片自动识别与预览"
     priority: "P1"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "将URL自动识别升级为链接卡片（标题/摘要/缩略图）"
     scope_in:
@@ -201,7 +201,7 @@ tasks:
   - task_id: "IM-UI-001"
     title: "聊天主界面对标钉钉布局重构"
     priority: "P0"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "按钉钉主对标重构聊天页面信息架构与交互密度"
     scope_in:
@@ -228,7 +228,7 @@ tasks:
   - task_id: "IM-UI-002"
     title: "聊天可用性细节对标（飞书/野火补充）"
     priority: "P1"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "补齐消息阅读效率与交互反馈细节"
     scope_in:
@@ -250,7 +250,7 @@ tasks:
   - task_id: "IM-API-001"
     title: "通话信令后端接口与状态存储"
     priority: "P0"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "为语音/视频通话提供后端信令接口、状态落库和异常处理"
     depends_on:
@@ -284,7 +284,7 @@ tasks:
   - task_id: "IM-API-002"
     title: "会话状态统一写入im_user_session"
     priority: "P0"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "将置顶/免打扰/未读/已读游标统一到im_user_session并保持兼容读"
     depends_on:
@@ -316,7 +316,7 @@ tasks:
   - task_id: "IM-API-003"
     title: "消息收藏后端闭环"
     priority: "P1"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "打通消息收藏、取消收藏、分页查询接口并与前端联调"
     depends_on:
@@ -348,7 +348,7 @@ tasks:
   - task_id: "IM-API-004"
     title: "文件上传与消息落库一致性"
     priority: "P1"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "规范文件上传、消息发送、失败补偿与重试策略"
     depends_on:
@@ -495,7 +495,7 @@ tasks:
   - task_id: "IM-ADM-001"
     title: "后台系统配置页面与参数治理闭环"
     priority: "P0"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "补齐管理端系统配置页面，打通参数读取、编辑、校验、保存和回滚"
     scope_in:
@@ -522,7 +522,7 @@ tasks:
   - task_id: "IM-ADM-002"
     title: "后台批量操作结果标准化"
     priority: "P0"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "统一用户/群组/消息批量接口返回结构与前端反馈展示"
     scope_in:
@@ -547,7 +547,7 @@ tasks:
   - task_id: "IM-ADM-003"
     title: "用户管理增强（角色变更+详情抽屉）"
     priority: "P1"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "补齐用户管理的角色治理和用户详情运营视图"
     scope_in:
@@ -570,7 +570,7 @@ tasks:
   - task_id: "IM-ADM-004"
     title: "后台审计日志可视化（基础版）"
     priority: "P1"
-    status: "todo"
+    status: "done"
     owner: "llm"
     goal: "提供后台操作审计查询能力，支持问题追踪与责任定位"
     scope_in:
