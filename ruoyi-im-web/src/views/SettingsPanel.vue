@@ -148,7 +148,7 @@ onMounted(loadSettings)
 <style scoped lang="scss">
 .desktop-settings-panel {
   height: 100%;
-  background: #f8fafc;
+  background: var(--dt-bg-body);
   display: flex;
   flex-direction: column;
 }
@@ -165,7 +165,7 @@ onMounted(loadSettings)
   .group-title {
     font-size: 13px;
     font-weight: 600;
-    color: #64748b;
+    color: var(--dt-text-secondary);
     margin-bottom: 8px;
     padding-left: 4px;
     text-transform: uppercase;
@@ -174,25 +174,25 @@ onMounted(loadSettings)
 }
 
 .settings-card {
-  background: #fff;
+  background: var(--dt-bg-card);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--dt-border-light);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--dt-shadow-1);
 
   .setting-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 16px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--dt-border-lighter);
     transition: background 0.2s;
 
     &:last-child { border-bottom: none; }
 
     &.clickable {
       cursor: pointer;
-      &:hover { background: #f8fafc; }
+      &:hover { background: var(--dt-bg-body); }
     }
 
     .label-box {
@@ -203,17 +203,17 @@ onMounted(loadSettings)
       .title {
         font-size: 14px;
         font-weight: 600;
-        color: #1e293b;
+        color: var(--dt-text-primary);
       }
 
       .desc {
         font-size: 12px;
-        color: #94a3b8;
+        color: var(--dt-text-tertiary);
       }
     }
 
     .arrow {
-      color: #cbd5e1;
+      color: var(--dt-border-color);
       font-size: 20px;
     }
   }
@@ -230,7 +230,7 @@ onMounted(loadSettings)
   .app-brand {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #1677ff 0%, #0284c7 100%);
+    background: linear-gradient(135deg, var(--dt-brand-color) 0%, #0284c7 100%);
     border-radius: 12px;
     color: #fff;
     display: flex;
@@ -238,34 +238,34 @@ onMounted(loadSettings)
     justify-content: center;
     font-weight: 800;
     font-size: 18px;
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.2);
+    box-shadow: var(--dt-shadow-2);
   }
 
   .app-version {
     font-size: 13px;
     font-weight: 600;
-    color: #475569;
+    color: var(--dt-text-secondary);
   }
 
   .copyright {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--dt-text-tertiary);
   }
 }
 
 // 暗色模式兼容
 :global(.dark) .desktop-settings-panel {
-  background: #0f172a;
+  background: var(--dt-bg-body-dark);
   .settings-card {
-    background: #1e293b;
-    border-color: #334155;
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
     .setting-row {
-      border-color: #334155;
-      .label-box .title { color: #f1f5f9; }
-      .label-box .desc { color: #64748b; }
-      &.clickable:hover { background: #334155; }
+      border-color: var(--dt-border-dark);
+      .label-box .title { color: var(--dt-text-primary-dark); }
+      .label-box .desc { color: var(--dt-text-tertiary-dark); }
+      &.clickable:hover { background: var(--dt-bg-hover-dark); }
     }
   }
-  .about-footer .app-version { color: #94a3b8; }
+  .about-footer .app-version { color: var(--dt-text-tertiary-dark); }
 }
 </style>

@@ -22,6 +22,7 @@
         type="primary" 
         size="small" 
         :disabled="!content.trim()"
+        :loading="sending"
         @click="handleSend"
       >
         发送
@@ -35,16 +36,60 @@
 <script setup>
 import { ref } from 'vue'
 import { Orange, Picture, Files } from '@element-plus/icons-vue'
+import { parseUrlMetadata } from '@/api/im/urlMetadata'
 
-const props = defineProps({ session: Object })
+const props = defineProps({ session: Object, sending: Boolean })
 const emit = defineEmits(['send', 'upload'])
 
 const content = ref('')
 const fileRef = ref(null)
 
-const handleSend = () => {
+// URL 正则匹配
+const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g
+
+/**
+ * 提取文本中的第一个 URL
+ */
+const extractFirstUrl = (text) => {
+  const match = text.match(urlPattern)
+  return match ? match[0] : null
+}
+
+/**
+ * 发送消息
+ */
+const handleSend = async () => {
   if (!content.value.trim()) return
-  emit('send', { content: content.value.trim(), type: 'TEXT' })
+  
+  const text = content.value.trim()
+  const url = extractFirstUrl(text)
+  
+  // 如果文本只包含 URL（或主要是 URL），尝试获取元数据并发送链接卡片
+  if (url && text.trim() === url) {
+    try {
+      const res = await parseUrlMetadata(url)
+      if (res.code === 200 && res.data) {
+        // 发送链接卡片消息
+        emit('send', {
+          content: JSON.stringify({
+            url: url,
+            title: res.data.title || '',
+            description: res.data.description || '',
+            imageUrl: res.data.imageUrl || res.data.thumbnail || ''
+          }),
+          type: 'LINK'
+        })
+        content.value = ''
+        return
+      }
+    } catch (e) {
+      // 解析失败，降级为普通文本
+      console.warn('URL 元数据解析失败，降级为文本消息:', e)
+    }
+  }
+  
+  // 普通文本消息
+  emit('send', { content: text, type: 'TEXT' })
   content.value = ''
 }
 
@@ -98,5 +143,18 @@ const onFileChange = (e) => {
 .footer {
   display: flex;
   justify-content: flex-end;
+}
+
+// 暗色模式适配
+:global(.dark) {
+  .message-input {
+    background: var(--dt-bg-card-dark);
+    border-color: var(--dt-border-dark);
+  }
+
+  .text-area textarea {
+    color: var(--dt-text-primary-dark);
+    &::placeholder { color: var(--dt-text-quaternary-dark); }
+  }
 }
 </style>

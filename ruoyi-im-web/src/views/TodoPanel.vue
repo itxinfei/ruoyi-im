@@ -168,44 +168,44 @@ onMounted(() => loadTodos())
 </script>
 
 <style scoped lang="scss">
-.todo-panel { display: flex; height: 100%; flex: 1; background: #fff; }
-.todo-sidebar { width: 240px; border-right: 1px solid #f2f3f5; display: flex; flex-direction: column; flex-shrink: 0; }
-.sidebar-header { padding: 16px 20px; .sidebar-title { font-size: 16px; font-weight: 600; color: #1f2329; } }
+.todo-panel { display: flex; height: 100%; flex: 1; background: var(--dt-bg-card); }
+.todo-sidebar { width: 240px; border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-header { padding: 16px 20px; .sidebar-title { font-size: 16px; font-weight: 600; color: var(--dt-text-primary); } }
 .sidebar-content { flex: 1; padding: 8px 12px;
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin: 2px 0; border-radius: 6px; cursor: pointer; color: #1f2329; transition: all 0.2s;
-    &:hover { background: #f5f6f7; }
-    &.active { background: #e8f4ff; color: #1677ff; font-weight: 600; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin: 2px 0; border-radius: 6px; cursor: pointer; color: var(--dt-text-primary); transition: all 0.2s;
+    &:hover { background: var(--dt-bg-session-hover); }
+    &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
     .nav-icon { font-size: 18px; }
     .nav-label { flex: 1; font-size: 13px; }
-    .nav-badge { background: #ff4d4f; color: #fff; padding: 0 6px; border-radius: 10px; font-size: 10px; transform: scale(0.85); }
+    .nav-badge { background: var(--dt-error-color); color: #fff; padding: 0 6px; border-radius: 10px; font-size: 10px; transform: scale(0.85); }
   }
 }
-.sidebar-footer { padding: 16px; border-top: 1px solid #f2f3f5;
-  .add-todo-btn { width: 100%; height: 36px; background: #1677ff; color: #fff; border: none; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
-    &:hover { background: #0056b3; box-shadow: 0 4px 12px rgba(22,119,255,0.2); }
+.sidebar-footer { padding: 16px; border-top: 1px solid var(--dt-border-light);
+  .add-todo-btn { width: 100%; height: 36px; background: var(--dt-brand-color); color: #fff; border: none; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    &:hover { background: var(--dt-brand-hover); box-shadow: var(--dt-shadow-2); }
   }
 }
-.todo-main { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
-.todo-header { height: 56px; padding: 0 24px; border-bottom: 1px solid #f2f3f5; display: flex; align-items: center; justify-content: space-between;
-  .header-title { font-size: 16px; font-weight: 600; color: #1f2329; }
-  .search-box { position: relative; .search-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 16px; color: #8f959e; }
-    .search-input { width: 200px; height: 32px; background: #f3f3f3; border: none; border-radius: 6px; padding: 0 32px; font-size: 13px; outline: none; &:focus { background: #fff; box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1); } }
+.todo-main { flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); overflow: hidden; }
+.todo-header { height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light); display: flex; align-items: center; justify-content: space-between;
+  .header-title { font-size: 16px; font-weight: 600; color: var(--dt-text-primary); }
+  .search-box { position: relative; .search-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--dt-text-tertiary); }
+    .search-input { width: 200px; height: 32px; background: var(--dt-bg-body); border: none; border-radius: 6px; padding: 0 32px; font-size: 13px; outline: none; &:focus { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); } }
   }
 }
-.todo-content-scroller { flex: 1; padding: 20px 24px; overflow-y: auto; background: #f5f5f5; }
+.todo-content-scroller { flex: 1; padding: 20px 24px; overflow-y: auto; background: var(--dt-bg-body); }
 .todo-list { display: flex; flex-direction: column; gap: 12px; }
-.todo-card { background: #fff; border-radius: 8px; padding: 16px; display: flex; align-items: flex-start; gap: 14px; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 1px 2px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s;
-  &:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); .todo-actions { opacity: 1; } }
+.todo-card { background: var(--dt-bg-card); border-radius: 8px; padding: 16px; display: flex; align-items: flex-start; gap: 14px; border: 1px solid var(--dt-border-lighter); box-shadow: var(--dt-shadow-1); cursor: pointer; transition: all 0.2s;
+  &:hover { transform: translateY(-1px); box-shadow: var(--dt-shadow-2); .todo-actions { opacity: 1; } }
   &.completed { opacity: 0.6; .title-text { text-decoration: line-through; } }
 }
-.todo-checkbox { flex-shrink: 0; .checkbox-inner { width: 20px; height: 20px; border: 2px solid #d9d9d9; border-radius: 4px; display: flex; align-items: center; justify-content: center;
-  &.checked { background: #1677ff; border-color: #1677ff; color: #fff; .material-icons-outlined { font-size: 14px; } } }
+.todo-checkbox { flex-shrink: 0; .checkbox-inner { width: 20px; height: 20px; border: 2px solid var(--dt-border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: #fff; .material-icons-outlined { font-size: 14px; } } }
 }
 .todo-main-info { flex: 1; min-width: 0;
-  .todo-title-row { display: flex; align-items: center; gap: 8px; .title-text { font-size: 14px; font-weight: 500; color: #1f2329; }
-    .priority-tag { background: #fff1f0; color: #f5222d; padding: 0 6px; border-radius: 4px; font-size: 11px; } }
-  .todo-meta-row { margin-top: 6px; .meta-date { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8f959e; .material-icons-outlined { font-size: 14px; } &.overdue { color: #f5222d; } } }
+  .todo-title-row { display: flex; align-items: center; gap: 8px; .title-text { font-size: 14px; font-weight: 500; color: var(--dt-text-primary); }
+    .priority-tag { background: var(--dt-error-bg); color: var(--dt-error-color); padding: 0 6px; border-radius: 4px; font-size: 11px; } }
+  .todo-meta-row { margin-top: 6px; .meta-date { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--dt-text-tertiary); .material-icons-outlined { font-size: 14px; } &.overdue { color: var(--dt-error-color); } } }
 }
-.todo-actions { opacity: 0; display: flex; gap: 4px; transition: all 0.2s; .action-icon { border: none; background: transparent; cursor: pointer; color: #8f959e; &:hover { color: #1677ff; } &.danger:hover { color: #ff4d4f; } } }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; color: #8f959e; .material-icons-outlined { font-size: 48px; margin-bottom: 12px; opacity: 0.3; } }
+.todo-actions { opacity: 0; display: flex; gap: 4px; transition: all 0.2s; .action-icon { border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); &:hover { color: var(--dt-brand-color); } &.danger:hover { color: var(--dt-error-color); } } }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; color: var(--dt-text-tertiary); .material-icons-outlined { font-size: 48px; margin-bottom: 12px; opacity: 0.3; } }
 </style>

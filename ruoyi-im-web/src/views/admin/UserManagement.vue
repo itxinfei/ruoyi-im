@@ -63,7 +63,7 @@
         <el-table-column label="操作" fixed="right" width="280">
           <template #default="{ row }">
             <el-button size="small" @click="handleViewDetail(row)">详情</el-button>
-            <el-button size="small" @click="handleToggleRole(row)">角色</el-button>
+            <el-button v-if="isSuperAdmin" size="small" @click="handleToggleRole(row)">角色</el-button>
             <el-button size="small" @click="handleToggleStatus(row)">{{ row.status === 1 ? '禁用' : '启用' }}</el-button>
             <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
@@ -90,8 +90,11 @@
       </el-table>
     </el-dialog>
 
-    <!-- 角色变更对话框 -->
+    <!-- 角色变更对话框（仅 SUPER_ADMIN 可用） -->
     <el-dialog v-model="roleDialogVisible" title="修改用户角色" width="420px">
+      <el-alert type="warning" :closable="false" style="margin-bottom: 16px">
+        <template #title>仅超级管理员可修改用户角色</template>
+      </el-alert>
       <el-form :model="roleForm" label-width="80px">
         <el-form-item label="当前角色">
           <el-tag :type="getRoleTagType(currentRoleData.role)">{{ getRoleLabel(currentRoleData.role) }}</el-tag>
@@ -142,10 +145,18 @@
             <el-descriptions-item label="签名">{{ currentDetail.signature || '-' }}</el-descriptions-item>
           </el-descriptions>
 
+          <el-descriptions title="最近活动" :column="1" border style="margin-top: 16px">
+            <el-descriptions-item label="会话数">{{ currentDetail.sessionCount ?? '-' }}</el-descriptions-item>
+            <el-descriptions-item label="好友数">{{ currentDetail.friendCount ?? '-' }}</el-descriptions-item>
+            <el-descriptions-item label="群组数">{{ currentDetail.groupCount ?? '-' }}</el-descriptions-item>
+            <el-descriptions-item label="消息数">{{ currentDetail.messageCount ?? '-' }}</el-descriptions-item>
+          </el-descriptions>
+
           <el-descriptions title="时间信息" :column="1" border style="margin-top: 16px">
             <el-descriptions-item label="创建时间">{{ currentDetail.createTime }}</el-descriptions-item>
             <el-descriptions-item label="更新时间">{{ currentDetail.updateTime }}</el-descriptions-item>
             <el-descriptions-item label="最后登录时间">{{ currentDetail.lastLoginTime || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="登录IP">{{ currentDetail.lastLoginIp || '-' }}</el-descriptions-item>
           </el-descriptions>
         </div>
       </template>
@@ -180,6 +191,9 @@ const roleTargetRow = ref(null)
 // 详情抽屉相关
 const detailDrawerVisible = ref(false)
 const currentDetail = ref(null)
+
+// 当前用户是否是超级管理员
+const isSuperAdmin = ref(false)
 
 const loadUsers = async () => {
   loading.value = true
@@ -272,9 +286,13 @@ const handleViewDetail = async (row) => {
 }
 
 /**
- * 打开角色变更对话框
+ * 打开角色变更对话框（仅 SUPER_ADMIN 可用）
  */
 const handleToggleRole = (row) => {
+  if (!isSuperAdmin.value) {
+    ElMessage.warning('仅超级管理员可修改用户角色')
+    return
+  }
   currentRoleData.value = { role: row.role }
   roleForm.value.targetRole = row.role
   roleTargetRow.value = row
@@ -422,7 +440,16 @@ const handleBatchDelete = async () => {
   }
 }
 
-onMounted(loadUsers)
+onMounted(() => {
+  // 检查当前用户是否是超级管理员
+  try {
+    const userRole = localStorage.getItem('im_user_role')
+    isSuperAdmin.value = userRole === 'SUPER_ADMIN'
+  } catch (e) {
+    isSuperAdmin.value = false
+  }
+  loadUsers()
+})
 </script>
 
 <style scoped>

@@ -716,7 +716,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 36px;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--dt-shadow-2);
 }
 
 .hero-title {
@@ -766,7 +766,7 @@ onMounted(() => {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 4px 12px rgba(22, 119, 255, 0.1);
+    box-shadow: var(--dt-shadow-2);
     transform: translateY(-2px);
   }
 }

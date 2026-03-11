@@ -152,7 +152,7 @@ onMounted(loadUser)
 <style scoped lang="scss">
 .desktop-profile-panel {
   height: 100%;
-  background: #f1f5f9;
+  background: var(--dt-bg-body);
   display: flex;
   flex-direction: column;
 }
@@ -160,13 +160,13 @@ onMounted(loadUser)
 .profile-hero-card {
   position: relative;
   height: 180px;
-  background: #fff;
+  background: var(--dt-bg-card);
   flex-shrink: 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--dt-border-light);
 
   .hero-bg {
     height: 100px;
-    background: linear-gradient(120deg, #1677ff 0%, #6366f1 100%);
+    background: linear-gradient(120deg, var(--dt-brand-color) 0%, #6366f1 100%);
   }
 
   .hero-content {
@@ -179,16 +179,16 @@ onMounted(loadUser)
 
     .avatar-container {
       position: relative;
-      border: 4px solid #fff;
+      border: 4px solid var(--dt-bg-card);
       border-radius: 12px;
       cursor: pointer;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: var(--dt-shadow-2);
 
       .avatar-mask {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.4);
+        background: var(--dt-bg-mask);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -206,9 +206,9 @@ onMounted(loadUser)
         align-items: center;
         gap: 8px;
         margin-bottom: 4px;
-        .nickname { font-size: 20px; font-weight: 800; color: #1e293b; }
+        .nickname { font-size: 20px; font-weight: 800; color: var(--dt-text-primary); }
       }
-      .username-id { font-size: 12px; color: #64748b; font-weight: 500; }
+      .username-id { font-size: 12px; color: var(--dt-text-secondary); font-weight: 500; }
     }
   }
 }
@@ -221,56 +221,56 @@ onMounted(loadUser)
 
 .info-group {
   margin-bottom: 24px;
-  .group-header { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px; padding-left: 4px; }
+  .group-header { font-size: 13px; font-weight: 700; color: var(--dt-text-secondary); margin-bottom: 8px; padding-left: 4px; }
 }
 
 .info-card {
-  background: #fff;
+  background: var(--dt-bg-card);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--dt-border-light);
   overflow: hidden;
 
   .info-row {
     display: flex;
     align-items: center;
     padding: 14px 16px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--dt-border-lighter);
     min-height: 56px;
 
     &:last-child { border-bottom: none; }
 
     &.clickable {
       cursor: pointer;
-      &:hover { background: #f8fafc; }
+      &:hover { background: var(--dt-bg-body); }
     }
 
-    .label { width: 100px; font-size: 13px; color: #64748b; font-weight: 500; }
-    
+    .label { width: 100px; font-size: 13px; color: var(--dt-text-secondary); font-weight: 500; }
+
     .value-box {
       flex: 1;
       :deep(.el-input__wrapper) { box-shadow: none !important; padding: 0; background: transparent; }
-      :deep(.el-input__inner) { font-weight: 600; color: #1e293b; }
+      :deep(.el-input__inner) { font-weight: 600; color: var(--dt-text-primary); }
     }
 
-    .readonly-value { font-weight: 600; color: #1e293b; font-size: 14px; }
-    .arrow { color: #cbd5e1; margin-left: auto; }
+    .readonly-value { font-weight: 600; color: var(--dt-text-primary); font-size: 14px; }
+    .arrow { color: var(--dt-border-color); margin-left: auto; }
   }
 }
 
 // 暗色模式兼容
 :global(.dark) .desktop-profile-panel {
-  background: #0f172a;
+  background: var(--dt-bg-body-dark);
   .profile-hero-card {
-    background: #1e293b; border-color: #334155;
-    .user-basic .nickname-row .nickname { color: #f1f5f9; }
+    background: var(--dt-bg-card-dark); border-color: var(--dt-border-dark);
+    .user-basic .nickname-row .nickname { color: var(--dt-text-primary-dark); }
   }
   .info-card {
-    background: #1e293b; border-color: #334155;
+    background: var(--dt-bg-card-dark); border-color: var(--dt-border-dark);
     .info-row {
-      border-color: #334155;
-      .readonly-value { color: #f1f5f9; }
-      .value-box :deep(.el-input__inner) { color: #f1f5f9; }
-      &.clickable:hover { background: #334155; }
+      border-color: var(--dt-border-dark);
+      .readonly-value { color: var(--dt-text-primary-dark); }
+      .value-box :deep(.el-input__inner) { color: var(--dt-text-primary-dark); }
+      &.clickable:hover { background: var(--dt-bg-hover-dark); }
     }
   }
 }

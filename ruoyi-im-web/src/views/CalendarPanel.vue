@@ -753,7 +753,7 @@ onUnmounted(() => {
 /* Themes */
 .event-blue { background-color: var(--dt-brand-bg); border-left-color: var(--dt-brand-color); color: var(--dt-brand-color); }
 .event-orange { background-color: var(--dt-warning-bg); border-left-color: var(--dt-warning-color); color: var(--dt-warning-color); }
-.event-purple { background-color: #f3e8ff; border-left-color: #a855f7; color: #6b21a8; }
+.event-purple { background-color: var(--dt-brand-lighter); border-left-color: #a855f7; color: #6b21a8; }
 .event-emerald { background-color: var(--dt-success-bg); border-left-color: var(--dt-success-color); color: var(--dt-success-color); }
 .event-slate { background-color: var(--dt-bg-body); border-left-color: var(--dt-text-tertiary); color: var(--dt-text-secondary); }
 
@@ -868,7 +868,7 @@ onUnmounted(() => {
 
   &.event-bg-blue { background-color: var(--dt-brand-bg); color: var(--dt-brand-color); border-left: 2px solid var(--dt-brand-color); }
   &.event-bg-orange { background-color: var(--dt-warning-bg); color: var(--dt-warning-color); border-left: 2px solid var(--dt-warning-color); }
-  &.event-bg-purple { background-color: #f3e8ff; color: #6b21a8; border-left: 2px solid #a855f7; }
+  &.event-bg-purple { background-color: var(--dt-brand-lighter); color: #6b21a8; border-left: 2px solid #a855f7; }
   &.event-bg-emerald { background-color: var(--dt-success-bg); color: var(--dt-success-color); border-left: 2px solid var(--dt-success-color); }
   &.event-bg-slate { background-color: var(--dt-bg-body); color: var(--dt-text-secondary); border-left: 2px solid var(--dt-text-tertiary); }
 }
@@ -937,7 +937,7 @@ onUnmounted(() => {
   .dot { width: 12px; height: 12px; border-radius: 50%; }
   .dot-blue { background-color: var(--dt-brand-color); box-shadow: 0 0 0 4px var(--dt-brand-bg); }
   .dot-orange { background-color: var(--dt-warning-color); box-shadow: 0 0 0 4px var(--dt-warning-bg); }
-  .dot-purple { background-color: #a855f7; box-shadow: 0 0 0 4px #f3e8ff; }
+  .dot-purple { background-color: #a855f7; box-shadow: 0 0 0 4px var(--dt-brand-lighter); }
   .dot-emerald { background-color: var(--dt-success-color); box-shadow: 0 0 0 4px var(--dt-success-bg); }
   .dot-slate { background-color: var(--dt-text-tertiary); box-shadow: 0 0 0 4px var(--dt-bg-body); }
 

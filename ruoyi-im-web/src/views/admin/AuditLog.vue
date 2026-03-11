@@ -88,6 +88,11 @@
     <!-- 日志表格 -->
     <el-card class="panel" shadow="never">
       <el-table :data="logList" v-loading="loading" border>
+        <template #empty>
+          <el-empty description="暂无审计日志">
+            <el-button type="primary" @click="handleReset">重置筛选</el-button>
+          </el-empty>
+        </template>
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="userName" label="用户" min-width="120">
           <template #default="{ row }">

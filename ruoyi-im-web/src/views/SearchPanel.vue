@@ -358,46 +358,46 @@ loadHotKeywords()
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--dt-bg-card);
 }
 
 .search-header {
   padding: 16px;
-  border-bottom: 1px solid #e8e8e8;
-  background: #fafafa;
+  border-bottom: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-body);
 }
 
 .search-input-wrapper {
   display: flex;
   align-items: center;
-  background: #fff;
-  border: 1px solid #d9d9d9;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-color);
   border-radius: 8px;
   padding: 8px 12px;
-  
+
   .search-icon {
-    color: #999;
+    color: var(--dt-text-tertiary);
     margin-right: 8px;
   }
-  
+
   .search-input {
     flex: 1;
     border: none;
     outline: none;
     font-size: 14px;
-    
+
     &::placeholder {
-      color: #999;
+      color: var(--dt-text-tertiary);
     }
   }
-  
+
   .clear-icon {
-    color: #999;
+    color: var(--dt-text-tertiary);
     cursor: pointer;
     font-size: 18px;
-    
+
     &:hover {
-      color: #666;
+      color: var(--dt-text-secondary);
     }
   }
 }
@@ -406,22 +406,22 @@ loadHotKeywords()
   display: flex;
   gap: 8px;
   margin-top: 12px;
-  
+
   .type-tab {
     padding: 6px 12px;
     border-radius: 16px;
     font-size: 13px;
     cursor: pointer;
-    color: #666;
+    color: var(--dt-text-secondary);
     transition: all 0.2s;
-    
+
     &:hover {
-      background: #e6f7ff;
-      color: #1677ff;
+      background: var(--dt-brand-bg);
+      color: var(--dt-brand-color);
     }
-    
+
     &.active {
-      background: #1677ff;
+      background: var(--dt-brand-color);
       color: #fff;
     }
   }
@@ -436,31 +436,31 @@ loadHotKeywords()
 .hot-searches {
   .section-title {
     font-size: 14px;
-    color: #999;
+    color: var(--dt-text-tertiary);
     margin-bottom: 12px;
   }
-  
+
   .hot-keyword-list {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    
+
     .hot-keyword {
       padding: 6px 16px;
-      background: #f5f5f5;
+      background: var(--dt-bg-body);
       border-radius: 16px;
       font-size: 13px;
       cursor: pointer;
       transition: all 0.2s;
-      
+
       &:hover {
-        background: #e6f7ff;
-        color: #1677ff;
+        background: var(--dt-brand-bg);
+        color: var(--dt-brand-color);
       }
     }
-    
+
     .empty-tip {
-      color: #999;
+      color: var(--dt-text-tertiary);
       font-size: 13px;
     }
   }
@@ -468,24 +468,24 @@ loadHotKeywords()
 
 .result-section {
   margin-bottom: 24px;
-  
+
   .section-title {
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: var(--dt-text-primary);
     margin-bottom: 12px;
-    
+
     .material-icons-outlined {
       font-size: 18px;
-      color: #1677ff;
+      color: var(--dt-brand-color);
     }
-    
+
     .count {
       font-weight: normal;
-      color: #999;
+      color: var(--dt-text-tertiary);
     }
   }
 }
@@ -498,53 +498,53 @@ loadHotKeywords()
     border-radius: 8px;
     cursor: pointer;
     transition: background 0.2s;
-    
+
     &:hover {
-      background: #f5f5f5;
+      background: var(--dt-bg-body);
     }
-    
+
     .item-content {
       flex: 1;
       margin-left: 12px;
       min-width: 0;
-      
+
       .item-title {
         font-size: 14px;
         font-weight: 500;
-        color: #333;
+        color: var(--dt-text-primary);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      
+
       .item-desc {
         font-size: 12px;
-        color: #999;
+        color: var(--dt-text-tertiary);
         margin-top: 4px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      
+
       .item-time {
         font-size: 12px;
-        color: #999;
+        color: var(--dt-text-tertiary);
         margin-top: 4px;
       }
     }
-    
+
     .group-avatar,
     .file-icon {
       width: 36px;
       height: 36px;
       border-radius: 8px;
-      background: #e6f7ff;
+      background: var(--dt-brand-bg);
       display: flex;
       align-items: center;
       justify-content: center;
-      
+
       .material-icons-outlined {
-        color: #1677ff;
+        color: var(--dt-brand-color);
       }
     }
   }
@@ -553,13 +553,13 @@ loadHotKeywords()
 .empty-results {
   text-align: center;
   padding: 60px 0;
-  color: #999;
-  
+  color: var(--dt-text-tertiary);
+
   .material-icons-outlined {
     font-size: 48px;
     opacity: 0.5;
   }
-  
+
   p {
     margin-top: 12px;
     font-size: 14px;

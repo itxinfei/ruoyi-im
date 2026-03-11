@@ -270,7 +270,7 @@ onMounted(() => {
 .compose-btn:hover {
   background: var(--dt-brand-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
+  box-shadow: var(--dt-shadow-2);
 }
 
 .compose-btn:active {
