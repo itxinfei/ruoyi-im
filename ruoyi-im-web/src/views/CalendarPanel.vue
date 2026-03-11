@@ -1,43 +1,60 @@
 <template>
   <div class="calendar-panel">
-    <!-- Main Content Area -->
-    <div class="calendar-main">
-      <header class="calendar-header">
-        <div class="header-left">
-          <div class="date-range">
-            <h2 class="range-title">{{ weekRangeString }}</h2>
-            <button class="expand-btn">
-              <span class="material-icons-outlined">expand_more</span>
-            </button>
+    <!-- 左侧二级导航栏 -->
+    <aside class="calendar-sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">日历</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <div
+          v-for="menu in viewMenus"
+          :key="menu.key"
+          class="nav-item"
+          :class="{ active: currentView === menu.key }"
+          @click="currentView = menu.key"
+        >
+          <el-icon class="nav-icon"><component :is="menu.icon" /></el-icon>
+          <span class="nav-label">{{ menu.label }}</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 右侧内容区 -->
+    <main class="calendar-main">
+      <!-- 日视图/周视图/月视图 -->
+      <div v-if="['day', 'week', 'month'].includes(currentView)" class="view-content">
+        <header class="calendar-header">
+          <div class="header-left">
+            <div class="date-range">
+              <h2 class="range-title">{{ dateRangeString }}</h2>
+            </div>
+
+            <div class="nav-controls">
+              <button class="nav-btn" @click="previousPeriod" title="上一个">
+                <el-icon><ArrowLeft /></el-icon>
+              </button>
+              <button class="today-btn" @click="goToToday">今天</button>
+              <button class="nav-btn" @click="nextPeriod" title="下一个">
+                <el-icon><ArrowRight /></el-icon>
+              </button>
+            </div>
           </div>
 
-          <div class="nav-controls">
-            <button class="nav-btn" @click="previousWeek" title="上一周">
-               <span class="material-icons-outlined text-lg">chevron_left</span>
-            </button>
-            <button class="today-btn" @click="goToToday">今天</button>
-            <button class="nav-btn" @click="nextWeek" title="下一周">
-               <span class="material-icons-outlined text-lg">chevron_right</span>
-            </button>
+          <div class="header-actions">
+            <el-button type="primary" @click="handleAddSchedule">
+              <el-icon><Plus /></el-icon>
+              新建日程
+            </el-button>
           </div>
-        </div>
+        </header>
 
-        <div class="view-switcher">
-          <button
-            v-for="view in ['月', '周', '日', '日程']"
-            :key="view"
-            class="switch-btn"
-            :class="{ active: currentView === view }"
-            @click="currentView = view"
-          >
-            {{ view }}
-          </button>
-        </div>
-      </header>
-
-      <!-- Week View Grid -->
-      <div v-if="currentView === '周'" class="week-view">
-        <div class="week-header">
+      <!-- Day View (占位符) -->
+              <div v-if="currentView === 'day'" class="day-view">
+                <el-empty :image-size="80" description="日视图功能开发中" />
+              </div>
+      
+              <!-- Week View Grid -->
+              <div v-if="currentView === 'week'" class="week-view">        <div class="week-header">
           <div class="time-column-header"></div>
           <div
             v-for="(day, index) in weekHeaders"
@@ -87,144 +104,114 @@
       </div>
 
       <!-- Month View Grid -->
-      <div v-else-if="currentView === '月'" class="month-view">
+      </div>
+
+      <!-- Month View Grid -->
+      <div v-if="currentView === 'month'" class="month-view">
         <div class="month-grid-header">
-           <div v-for="day in ['一', '二', '三', '四', '五', '六', '日']" :key="day" class="weekday-label">
-             {{ day }}
-           </div>
+          <div v-for="day in ['一', '二', '三', '四', '五', '六', '日']" :key="day" class="weekday-label">
+            {{ day }}
+          </div>
         </div>
         <div class="month-grid">
-           <div
-             v-for="(day, index) in monthDays"
-             :key="index"
-             class="month-day-cell"
-             :class="{
-               'not-current-month': !day.isCurrentMonth,
-               'is-today': isToday(day.date),
-               'is-selected': isSameDay(day.date, selectedDate)
-             }"
-             @click="selectedDate = day.date"
-           >
-             <div class="cell-top">
-                <span class="day-num">{{ day.date.getDate() }}</span>
-                <span v-if="isToday(day.date)" class="today-label">今</span>
-             </div>
-             <div class="day-events">
-               <div
-                 v-for="event in getEventsForDay(day.date)"
-                 :key="event.id"
-                 class="mini-event"
-                 :class="`event-bg-${event.color}`"
-               >
-                 {{ event.title }}
-               </div>
-             </div>
-           </div>
-        </div>
-      </div>
-
-      <div v-else class="view-placeholder">
-        <div class="coming-soon">
-          <span class="material-icons-outlined">calendar_today</span>
-          <p>{{ currentView }}视图开发中</p>
-          <p class="hint">请切换到周视图或月视图</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Sidebar -->
-    <aside class="right-panel">
-      <div class="panel-header">
-        <div class="date-info">
-          <div>
-            <h3 class="date-title">{{ formatDate(selectedDate) }}</h3>
-            <p class="date-subtitle">{{ formatLunarDate(selectedDate) }}</p>
-          </div>
-          <div class="date-badge">
-            {{ selectedDate.getDate() }}
-          </div>
-        </div>
-
-        <button class="add-btn" @click="handleAddSchedule">
-          <span class="material-icons-outlined">add</span>
-          新建日程
-        </button>
-      </div>
-
-      <div class="panel-content">
-        <h4 class="section-title">今日日程</h4>
-
-        <div v-if="selectedDateEvents.length > 0" class="schedule-list">
           <div
-            v-for="event in selectedDateEvents"
-            :key="event.id"
-            class="schedule-item"
-            @click="handleEventClick(event)"
+            v-for="(day, index) in monthDays"
+            :key="index"
+            class="month-day-cell"
+            :class="{
+              'not-current-month': !day.isCurrentMonth,
+              'is-today': isToday(day.date),
+              'is-selected': isSameDay(day.date, selectedDate)
+            }"
+            @click="selectedDate = day.date"
           >
-            <div class="timeline-indicator">
-              <div class="dot" :class="`dot-${event.color}`"></div>
-              <div class="line"></div>
+            <div class="cell-top">
+              <span class="day-num">{{ day.date.getDate() }}</span>
+              <span v-if="isToday(day.date)" class="today-label">今</span>
             </div>
-
-            <div class="event-card">
-              <div class="card-header">
-                <span class="card-title">{{ event.title }}</span>
-              </div>
-              <div class="card-time">
-                <span class="time-tag">{{ event.startTime }} - {{ event.endTime }}</span>
-              </div>
-
-              <div v-if="event.location" class="card-location">
-                <span class="material-icons-outlined text-[14px]">location_on</span>
-                {{ event.location }}
-              </div>
-
-              <div v-if="event.attendees && event.attendees.length" class="attendees">
-                <div
-                  v-for="(person, idx) in event.attendees.slice(0, 3)"
-                  :key="idx"
-                  class="avatar"
-                  :class="getAvatarClass(idx)"
-                >
-                  {{ person.name ? person.name[0] : person[0] }}
-                </div>
-                 <div v-if="event.attendees.length > 3" class="avatar more">
-                  +{{ event.attendees.length - 3 }}
-                 </div>
+            <div class="day-events">
+              <div
+                v-for="event in getEventsForDay(day.date)"
+                :key="event.id"
+                class="mini-event"
+                :class="`event-bg-${event.color}`"
+              >
+                {{ event.title }}
               </div>
             </div>
-          </div>
-        </div>
-        <div v-else class="empty-state">
-          暂无日程
-        </div>
-
-        <div class="todos-section">
-          <h4 class="section-title">待办事项</h4>
-          <div v-for="todo in todos" :key="todo.id" class="todo-item">
-            <input type="checkbox" class="todo-checkbox" :checked="todo.completed"/>
-            <span class="todo-text">{{ todo.text }}</span>
           </div>
         </div>
       </div>
-    </aside>
+      </div>
+
+      <!-- Schedule List View -->
+      <div v-if="currentView === 'list'" class="list-view">
+        <header class="list-header">
+          <h3 class="list-title">日程列表</h3>
+          <el-button type="primary" @click="handleAddSchedule">
+            <el-icon><Plus /></el-icon>
+            新建日程
+          </el-button>
+        </header>
+        <div class="schedule-list-content">
+          <div v-if="allEvents.length > 0" class="schedule-list">
+            <div
+              v-for="event in allEvents"
+              :key="event.id"
+              class="schedule-item"
+              @click="handleEventClick(event)"
+            >
+              <div class="event-date">
+                <div class="date-day">{{ new Date(event.date).getDate() }}</div>
+                <div class="date-month">{{ monthNames[new Date(event.date).getMonth()] }}</div>
+              </div>
+              <div class="event-card">
+                <div class="card-header">
+                  <span class="card-title">{{ event.title }}</span>
+                </div>
+                <div class="card-time">
+                  <span class="time-tag">{{ event.startTime }} - {{ event.endTime }}</span>
+                </div>
+                <div v-if="event.location" class="card-location">
+                  <el-icon><Location /></el-icon>
+                  {{ event.location }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <el-empty v-else :image-size="80" description="暂无日程" />
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { ArrowLeft, ArrowRight, Plus, Location, Calendar, CalendarDays, List } from '@element-plus/icons-vue'
 
 // --- State ---
 const currentDate = ref(new Date())
 const selectedDate = ref(new Date())
-const currentView = ref('周')
+const currentView = ref('week')
 const currentTimeTop = ref(0)
 let timer = null
 
-const todos = ref([
-  { id: 1, text: '审核 UI 设计稿', completed: false },
-  { id: 2, text: '回复客户邮件', completed: false }
-])
+// 视图菜单配置
+const viewMenus = [
+  { key: 'day', label: '日视图', icon: Calendar },
+  { key: 'week', label: '周视图', icon: CalendarDays },
+  { key: 'month', label: '月视图', icon: Calendar },
+  { key: 'list', label: '日程列表', icon: List }
+]
+
+// 显示的视图名称映射
+const viewNameMap = {
+  'day': '日',
+  'week': '周',
+  'month': '月'
+}
 
 const allEvents = ref([
   {
@@ -319,6 +306,23 @@ const initMockData = () => {
 initMockData();
 
 // --- Computed ---
+const dateRangeString = computed(() => {
+  const year = currentDate.value.getFullYear()
+  const month = currentDate.value.getMonth() + 1
+
+  if (currentView.value === 'day') {
+    return `${year}年${month}月${currentDate.value.getDate()}日`
+  } else if (currentView.value === 'week') {
+    if (!weekHeaders.value.length) return ''
+    const start = weekHeaders.value[0].date
+    const end = weekHeaders.value[6].date
+    return `${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日 - ${end.getMonth() + 1}月${end.getDate()}日`
+  } else if (currentView.value === 'month') {
+    return `${year}年${month}月`
+  }
+  return ''
+})
+
 const weekHeaders = computed(() => {
   const curr = new Date(currentDate.value)
   const day = curr.getDay()
@@ -338,13 +342,6 @@ const weekHeaders = computed(() => {
     })
   }
   return days
-})
-
-const weekRangeString = computed(() => {
-  if (!weekHeaders.value.length) return ''
-  const start = weekHeaders.value[0].date
-  const end = weekHeaders.value[6].date
-  return `${start.getFullYear()}年 ${start.getMonth() + 1}月${start.getDate()}日 - ${end.getMonth() + 1}月${end.getDate()}日`
 })
 
 const selectedDateEvents = computed(() => {
@@ -449,15 +446,27 @@ const updateCurrentTime = () => {
 }
 
 // Actions
-const previousWeek = () => {
+const previousPeriod = () => {
   const d = new Date(currentDate.value)
-  d.setDate(d.getDate() - 7)
+  if (currentView.value === 'day') {
+    d.setDate(d.getDate() - 1)
+  } else if (currentView.value === 'week') {
+    d.setDate(d.getDate() - 7)
+  } else if (currentView.value === 'month') {
+    d.setMonth(d.getMonth() - 1)
+  }
   currentDate.value = d
 }
 
-const nextWeek = () => {
+const nextPeriod = () => {
   const d = new Date(currentDate.value)
-  d.setDate(d.getDate() + 7)
+  if (currentView.value === 'day') {
+    d.setDate(d.getDate() + 1)
+  } else if (currentView.value === 'week') {
+    d.setDate(d.getDate() + 7)
+  } else if (currentView.value === 'month') {
+    d.setMonth(d.getMonth() + 1)
+  }
   currentDate.value = d
 }
 
@@ -468,9 +477,12 @@ const goToToday = () => {
 
 const handleEventClick = (event) => {
   selectedDate.value = new Date(event.date)
+  ElMessage.info(`查看日程: ${event.title}`)
 }
 
-const handleAddSchedule = () => {}
+const handleAddSchedule = () => {
+  ElMessage.info('新建日程功能开发中')
+}
 
 // Lifecycle
 onMounted(() => {
@@ -484,6 +496,18 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* Main Layout */
 .calendar-panel {
   display: flex;
@@ -491,14 +515,283 @@ onUnmounted(() => {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  background-color: var(--dt-bg-card);
+  background: var(--dt-bg-body);
 }
 
+/* 左侧导航栏 */
+.calendar-sidebar {
+  width: 200px;
+  background: var(--dt-bg-card);
+  border-right: 1px solid var(--dt-border-light);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: var(--dt-spacing-lg) var(--dt-spacing-md);
+  border-bottom: 1px solid var(--dt-border-lighter);
+}
+
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  margin: 0;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: var(--dt-spacing-md) 0;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-md);
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-bg-session-hover);
+  }
+
+  &.active {
+    background: var(--dt-brand-lighter);
+    color: var(--dt-brand-color);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--dt-brand-color);
+    }
+
+    .nav-label {
+      font-weight: 500;
+    }
+  }
+}
+
+.nav-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  flex: 1;
+  font-size: 14px;
+  color: var(--dt-text-primary);
+}
+
+/* 主内容区 */
 .calendar-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+}
+
+.view-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.list-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--dt-spacing-2xl) 40px;
+}
+
+.list-header {
+  @include flex-between;
+  margin-bottom: var(--dt-spacing-xl);
+}
+
+.list-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  margin: 0;
+}
+
+.schedule-list-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacing-md);
+}
+
+.schedule-item {
+  display: flex;
+  gap: var(--dt-spacing-lg);
+  padding: var(--dt-spacing-lg);
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  border: 1px solid var(--dt-border-light);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    box-shadow: var(--dt-shadow-card);
+    transform: translateY(-2px);
+  }
+}
+
+.event-date {
+  width: 60px;
+  height: 60px;
+  background: var(--dt-brand-bg);
+  border-radius: var(--dt-radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.date-day {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dt-brand-color);
+  line-height: 1;
+}
+
+.date-month {
+  font-size: 12px;
+  color: var(--dt-brand-color);
+  margin-top: 4px;
+}
+
+.event-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacing-sm);
+}
+
+.card-header {
+  @include flex-between;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+}
+
+.card-time {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-sm);
+}
+
+.time-tag {
+  font-size: var(--dt-font-size-sm);
+  font-weight: 500;
+  color: var(--dt-brand-color);
+  background: var(--dt-brand-lighter);
+  padding: 4px 8px;
+  border-radius: var(--dt-radius-sm);
+}
+
+.card-location {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-xs);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-secondary);
+}
+
+/* Header */
+.calendar-header {
+  height: 64px;
+  padding: 0 var(--dt-spacing-2xl);
+  border-bottom: 1px solid var(--dt-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--dt-bg-card);
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-xl);
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+}
+
+.range-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  margin: 0;
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  background-color: var(--dt-bg-body);
+  border-radius: var(--dt-radius-md);
+  padding: 2px;
+}
+
+.nav-btn {
+  padding: 6px;
+  border: none;
+  background: transparent;
+  color: var(--dt-text-secondary);
+  border-radius: var(--dt-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all var(--dt-transition-fast);
+
+  &:hover { background-color: var(--dt-bg-card); }
+}
+
+.today-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dt-text-secondary);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-md);
+}
+
+/* Day View */
+.day-view {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dt-bg-card);
 }
 
 /* Header */

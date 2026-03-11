@@ -3,6 +3,7 @@
     <!-- 工具栏 -->
     <div class="toolbar">
       <el-button :icon="Orange" link @click="insertEmoji('😀')" />
+      <el-button :icon="UserFilled" link @click="handleAtMemberClick" :disabled="!isGroupSession" />
       <el-button :icon="Picture" link @click="triggerUpload('image')" />
       <el-button :icon="Files" link @click="triggerUpload('file')" />
     </div>
@@ -12,7 +13,8 @@
       <textarea
         v-model="content"
         placeholder="请输入消息..."
-        @keydown.enter.prevent="handleSend"
+        @keydown="handleKeydown"
+        @input="handleInput"
       ></textarea>
     </div>
 
@@ -29,20 +31,46 @@
       </el-button>
     </div>
 
-    <input type="file" ref="fileRef" hidden @change="onFileChange" />
+    <input 
+      type="file" 
+      ref="fileRef" 
+      hidden 
+      :accept="uploadType === 'image' ? 'image/*' : '*/*'"
+      @change="onFileChange" 
+    />
+    
+    <!-- @成员选择器 -->
+    <AtMemberPicker
+      ref="atMemberPickerRef"
+      :session-id="session?.id || session?.targetId"
+      @select="handleAtMemberSelect"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Orange, Picture, Files } from '@element-plus/icons-vue'
+import { ref, nextTick, watch } from 'vue'
+import { Orange, Picture, Files, UserFilled } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { parseUrlMetadata } from '@/api/im/urlMetadata'
+import AtMemberPicker from './AtMemberPicker.vue'
 
-const props = defineProps({ session: Object, sending: Boolean })
-const emit = defineEmits(['send', 'upload'])
+const props = defineProps({ 
+  session: Object, 
+  sending: Boolean 
+})
+const emit = defineEmits(['send', 'upload-file', 'upload-image', 'typing'])
 
 const content = ref('')
 const fileRef = ref(null)
+const atMemberPickerRef = ref(null)
+const uploadType = ref(null) // 记录当前上传类型
+let typingDebounceTimer = null // 输入防抖定时器
+
+// 判断是否为群聊会话
+const isGroupSession = computed(() => {
+  return props.session?.type === 'GROUP' || props.session?.sessionType === 'GROUP'
+})
 
 // URL 正则匹配
 const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g
@@ -53,6 +81,87 @@ const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g
 const extractFirstUrl = (text) => {
   const match = text.match(urlPattern)
   return match ? match[0] : null
+}
+
+/**
+ * 处理 @ 成员按钮点击
+ */
+const handleAtMemberClick = () => {
+  if (!isGroupSession.value) {
+    ElMessage.info('只能在群聊中@成员')
+    return
+  }
+  atMemberPickerRef.value?.open()
+}
+
+/**
+ * 处理键盘事件
+ */
+const handleKeydown = (e) => {
+  if (e.key === 'Enter') {
+    if (e.ctrlKey || e.metaKey) {
+      // Ctrl+Enter 或 Cmd+Enter：换行
+      e.preventDefault()
+      const textarea = e.target
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const value = content.value
+      content.value = value.substring(0, start) + '\n' + value.substring(end)
+      // 将光标移动到换行后
+      nextTick(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 1
+      })
+    } else {
+      // Enter：发送消息
+      e.preventDefault()
+      handleSend()
+    }
+  }
+}
+
+/**
+ * 处理文本输入
+ */
+const handleInput = (e) => {
+  const text = e.target.value
+  const cursorPosition = e.target.selectionStart
+  
+  // 检测是否输入了 @ 符号
+  if (e.data === '@') {
+    // 判断是否在群聊中
+    if (props.session?.type === 'GROUP' || props.session?.sessionType === 'GROUP') {
+      nextTick(() => {
+        atMemberPickerRef.value?.open()
+      })
+    }
+  }
+  
+  // 发送正在输入信号（防抖处理）
+  emit('typing')
+}
+
+/**
+ * 处理 @ 成员选择
+ */
+const handleAtMemberSelect = (member) => {
+  if (member.id === 'all') {
+    // @所有人
+    content.value += '@所有人 '
+  } else {
+    // @具体成员
+    content.value += `@${member.nickname || member.username} `
+  }
+  
+  // 重新聚焦到输入框
+  nextTick(() => {
+    const textarea = document.querySelector('.text-area textarea')
+    if (textarea) {
+      textarea.focus()
+      // 将光标移到末尾
+      const length = content.value.length
+      textarea.setSelectionRange(length, length)
+    }
+  })
 }
 
 /**
@@ -98,12 +207,39 @@ const insertEmoji = (emoji) => {
 }
 
 const triggerUpload = (type) => {
+  uploadType.value = type
   fileRef.value.click()
 }
 
 const onFileChange = (e) => {
   const file = e.target.files[0]
-  if (file) emit('upload', file)
+  if (!file) return
+  
+  // 验证文件类型
+  if (uploadType.value === 'image') {
+    // 检查是否为图片
+    if (!file.type.startsWith('image/')) {
+      ElMessage.warning('请选择图片文件')
+      return
+    }
+    // 检查文件大小（限制 10MB）
+    if (file.size > 10 * 1024 * 1024) {
+      ElMessage.warning('图片大小不能超过 10MB')
+      return
+    }
+    emit('upload-image', file)
+  } else {
+    // 文件上传
+    // 检查文件大小（限制 100MB）
+    if (file.size > 100 * 1024 * 1024) {
+      ElMessage.warning('文件大小不能超过 100MB')
+      return
+    }
+    emit('upload-file', file)
+  }
+  
+  // 重置 input 以便重复选择同一文件
+  fileRef.value.value = ''
 }
 </script>
 

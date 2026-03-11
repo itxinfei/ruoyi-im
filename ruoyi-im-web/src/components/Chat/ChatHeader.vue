@@ -20,7 +20,15 @@
       <div class="session-info">
         <div class="name">{{ session?.name }}</div>
         <div class="status">
-          <template v-if="session?.type === 'GROUP'">
+          <template v-if="isTyping">
+            <span class="typing-indicator">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </span>
+            对方正在输入...
+          </template>
+          <template v-else-if="session?.type === 'GROUP'">
             <i class="el-icon-user-group"></i>
             {{ session?.memberCount || 0 }} 人
           </template>
@@ -67,9 +75,16 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { Phone, VideoCamera, Search, MoreFilled, Folder, Top, Delete } from '@element-plus/icons-vue'
 
-defineProps({ session: Object })
+const props = defineProps({ 
+  session: Object,
+  isTyping: {
+    type: Boolean,
+    default: false
+  }
+})
 defineEmits(['toggle-sidebar', 'files', 'pin', 'clear'])
 </script>
 
@@ -151,6 +166,25 @@ defineEmits(['toggle-sidebar', 'files', 'pin', 'clear'])
         color: var(--dt-text-tertiary);
         margin-top: 2px;
 
+        .typing-indicator {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          margin-right: 4px;
+
+          .typing-dot {
+            width: 4px;
+            height: 4px;
+            background: var(--dt-brand-color);
+            border-radius: 50%;
+            animation: typing-bounce 1.4s infinite ease-in-out both;
+
+            &:nth-child(1) { animation-delay: -0.32s; }
+            &:nth-child(2) { animation-delay: -0.16s; }
+            &:nth-child(3) { animation-delay: 0s; }
+          }
+        }
+
         .status-dot {
           width: 8px;
           height: 8px;
@@ -214,6 +248,15 @@ defineEmits(['toggle-sidebar', 'files', 'pin', 'clear'])
         background: var(--dt-bg-session-hover);
       }
     }
+  }
+}
+
+@keyframes typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
   }
 }
 </style>

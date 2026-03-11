@@ -81,6 +81,12 @@
     <!-- 全局搜索弹窗 -->
     <GlobalSearch v-model:visible="showGlobalSearch" :keyword="searchKeyword" @select="handleSearchSelect" />
 
+    <!-- 创建群聊对话框 -->
+    <CreateGroupDialog
+      v-model="showCreateGroupDialog"
+      @created="handleGroupCreated"
+    />
+
     <!-- 右键菜单 (Element Plus 改版) -->
     <div v-if="contextMenu.show" class="context-menu-layer" :style="contextMenuStyle" @click.stop>
       <div class="menu-item" @click="doAction('mark-read')"><el-icon><Check /></el-icon> 标记已读</div>
@@ -94,10 +100,11 @@
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useStore } from 'vuex'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElDialog } from 'element-plus'
 import { Search, Plus, BellFilled, Check, Top, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
+import CreateGroupDialog from '@/components/Chat/CreateGroupDialog.vue'
 
 const props = defineProps({ currentSession: Object })
 const emit = defineEmits(['select-session', 'show-user'])
@@ -107,6 +114,7 @@ const loading = ref(false)
 const searchKeyword = ref('')
 const showGlobalSearch = ref(false)
 const activeFilter = ref('all')
+const showCreateGroupDialog = ref(false)
 
 const subMenuTabs = ref([
   { key: 'all', label: '全部', count: 0 },
@@ -152,7 +160,16 @@ const handleFilterChange = (key) => {
 }
 
 const handleCreateGroup = () => {
-  ElMessage.info('功能开发中，请从通讯录发起')
+  showCreateGroupDialog.value = true
+}
+
+const handleGroupCreated = (group) => {
+  showCreateGroupDialog.value = false
+  // 刷新会话列表
+  store.dispatch('im/session/loadSessions')
+  // 选择新创建的群聊
+  emit('select-session', group)
+  ElMessage.success('群聊创建成功')
 }
 
 const handleSearchSelect = (result) => {
@@ -421,7 +438,7 @@ onMounted(() => {
         gap: 4px;
         min-width: 0;
         flex: 1;
-        font-size: 13px;
+        font-size: var(--dt-font-size-sm);
         color: var(--dt-text-tertiary);
         line-height: 1.4;
         @include text-ellipsis;

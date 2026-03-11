@@ -106,6 +106,7 @@ import {
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { useWebRTC } from '@/composables/useWebRTC'
 import { useImWebSocket } from '@/composables/useImWebSocket'
+import { acceptCall, rejectCall, endCall } from '@/api/im/videoCall'
 
 const props = defineProps({ session: Object })
 const emit = defineEmits(['accept', 'reject', 'cancel', 'hangup', 'closed'])
@@ -129,6 +130,7 @@ const remoteVideoRef = ref(null)
 const remoteAudioRef = ref(null)
 let localStream = null
 let timer = null
+let timeoutTimer = null
 let timeoutTimer = null
 
 const dialogWidth = computed(() => type.value === 'video' ? '800px' : '360px')
@@ -170,21 +172,139 @@ const open = async (callType, options = {}) => {
   type.value = callType; status.value = options.status || 'calling'; callId.value = options.callId || `call-${Date.now()}`
   peerId.value = options.peerId ?? props.session?.targetId; peerName.value = options.peerName || props.session?.name; peerAvatar.value = options.peerAvatar || props.session?.avatar
   visible.value = true; duration.value = 0
-  if (status.value === 'calling') { if (await getMediaStream(callType === 'video')) await createOffer(callId.value, peerId.value, localStream); else close() }
+  
+  // 保存 pending offer（如果有）
+  if (options.pendingOffer) {
+    pendingOffer.value = options.pendingOffer
+  }
+  
+  if (status.value === 'calling') { 
+    if (await getMediaStream(callType === 'video')) {
+      await createOffer(callId.value, peerId.value, localStream)
+      // 设置超时
+      startTimeout()
+    } else {
+      close()
+    }
+  }
+  
   if (status.value === 'talking') startTimer()
 }
 
-const handleAccept = async () => { if (await getMediaStream(type.value === 'video')) { if (pendingOffer.value) await createAnswer(callId.value, peerId.value, pendingOffer.value, localStream); status.value = 'talking'; startTimer() } else handleReject() }
-const handleReject = () => { end(); sendMessage({ type: 'call', data: { action: 'reject', callId: callId.value, peerId: peerId.value } }) }
-const handleHangup = () => { end(); sendMessage({ type: 'call', data: { action: 'hangup', callId: callId.value, peerId: peerId.value } }) }
-const handleCancel = () => { end(); sendMessage({ type: 'call', data: { action: 'cancel', callId: callId.value, peerId: peerId.value } }) }
+/**
+ * 处理 WebRTC 信令
+ */
+const handleWebRTCSignal = async (action, data) => {
+  if (!visible.value || data.callId !== callId.value) return
+
+  switch (action) {
+    case 'offer':
+      // 收到对方 offer（已通过 handleCallEvent 处理）
+      break
+      
+    case 'answer':
+      // 收到对方应答
+      if (data.sdp) {
+        await handleAnswer(data.sdp)
+        // 清除超时
+        clearTimeout(timeoutTimer)
+      }
+      break
+      
+    case 'candidate':
+      // 收到 ICE 候选者
+      if (data.candidate) {
+        await handleCandidate(data.candidate)
+      }
+      break
+  }
+}
+
+/**
+ * 启动超时计时器
+ */
+const startTimeout = () => {
+  timeoutTimer = setTimeout(() => {
+    status.value = 'timeout'
+    ElMessage.warning('对方无应答')
+    setTimeout(() => {
+      end()
+      sendMessage({ type: 'call', data: { action: 'hangup', callId: callId.value, peerId: peerId.value } })
+    }, 2000)
+  }, 60000) // 60秒超时
+}
+
+const handleAccept = async () => {
+  try {
+    // 先通过后端 API 接听通话
+    const res = await acceptCall(callId.value)
+    if (res.code !== 200) {
+      throw new Error(res.message || '接听通话失败')
+    }
+
+    // 获取媒体流并建立 WebRTC 连接
+    if (await getMediaStream(type.value === 'video')) {
+      if (pendingOffer.value) {
+        await createAnswer(callId.value, peerId.value, pendingOffer.value, localStream)
+        status.value = 'talking'
+        startTimer()
+      }
+    } else {
+      handleReject()
+    }
+  } catch (error) {
+    console.error('接听通话失败:', error)
+    ElMessage.error(error.message || '接听通话失败')
+    handleReject()
+  }
+}
+
+const handleReject = async () => {
+  try {
+    // 通过后端 API 拒绝通话
+    await rejectCall(callId.value, '用户拒绝')
+  } catch (error) {
+    console.error('拒绝通话失败:', error)
+  } finally {
+    end()
+    sendMessage({ type: 'call', data: { action: 'reject', callId: callId.value, peerId: peerId.value } })
+  }
+}
+
+const handleHangup = async () => {
+  try {
+    // 通过后端 API 结束通话
+    await endCall(callId.value)
+  } catch (error) {
+    console.error('结束通话失败:', error)
+  } finally {
+    end()
+    sendMessage({ type: 'call', data: { action: 'hangup', callId: callId.value, peerId: peerId.value } })
+  }
+}
+
+const handleCancel = async () => {
+  try {
+    // 通过后端 API 取消通话
+    await endCall(callId.value)
+  } catch (error) {
+    console.error('取消通话失败:', error)
+  } finally {
+    end()
+    sendMessage({ type: 'call', data: { action: 'cancel', callId: callId.value, peerId: peerId.value } })
+  }
+}
 
 const startTimer = () => { timer = setInterval(() => { duration.value++ }, 1000) }
 const end = () => { clearInterval(timer); if (localStream) localStream.getTracks().forEach(t => t.stop()); closePeerConnection(); status.value = 'hanging_up'; setTimeout(() => { visible.value = false }, 1500) }
 const close = () => { visible.value = false }
 
-onUnmounted(() => { clearInterval(timer); if (localStream) localStream.getTracks().forEach(t => t.stop()) })
-defineExpose({ open, end })
+onUnmounted(() => { 
+  clearInterval(timer); 
+  clearTimeout(timeoutTimer)
+  if (localStream) localStream.getTracks().forEach(t => t.stop()) 
+})
+defineExpose({ open, end, handleWebRTCSignal })
 </script>
 
 <style scoped lang="scss">

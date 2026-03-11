@@ -131,15 +131,12 @@ const loading = ref(false)
 const files = ref([])
 
 const mainNavItems = ref([
-  { id: 'recent', label: '最近使用', icon: 'schedule' },
-  { id: 'my', label: '我创建的', icon: 'folder_special' },
-  { id: 'shared', label: '分享给我', icon: 'share' },
-  { id: 'starred', label: '收藏夹', icon: 'star_border' }
-])
-const storageNavItems = ref([
-  { id: 'all', label: '全部文档', icon: 'description' },
+  { id: 'my', label: '我的文件', icon: 'folder' },
+  { id: 'shared', label: '共享文件', icon: 'people' },
+  { id: 'recent', label: '最近访问', icon: 'schedule' },
   { id: 'trash', label: '回收站', icon: 'delete_outline' }
 ])
+const storageNavItems = ref([])
 
 const currentViewTitle = computed(() => {
   const item = [...mainNavItems.value, ...storageNavItems.value].find(i => i.id === activeNav.value)
@@ -149,14 +146,12 @@ const currentViewTitle = computed(() => {
 // 映射导航到API的type参数
 const getApiType = () => {
   const map = {
-    'recent': 'all',
     'my': 'my',
     'shared': 'shared',
-    'starred': 'starred',
-    'all': 'all',
+    'recent': 'recent',
     'trash': 'trash'
   }
-  return map[activeNav.value] || 'all'
+  return map[activeNav.value] || 'my'
 }
 
 // 加载文档列表
@@ -357,17 +352,21 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .documents-panel { display: flex; height: 100%; flex: 1; background: var(--dt-bg-card); }
-.docs-sidebar { width: 240px; border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; }
-.sidebar-header { padding: 16px 20px; .sidebar-title { font-size: 16px; font-weight: 600; color: var(--dt-text-primary); } }
-.sidebar-content { flex: 1; padding: 4px 8px;
-  .nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; margin: 1px 0; border-radius: 6px; cursor: pointer; color: var(--dt-text-primary); transition: all 0.2s;
+.docs-sidebar { width: 200px; border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; background: var(--dt-bg-card); }
+.sidebar-header { padding: var(--dt-spacing-lg) var(--dt-spacing-md); border-bottom: 1px solid var(--dt-border-lighter);
+  .sidebar-title { font-size: 16px; font-weight: 600; color: var(--dt-text-primary); margin: 0; }
+}
+.sidebar-content { flex: 1; padding: var(--dt-spacing-md) 0; overflow-y: auto;
+  .nav-item { display: flex; align-items: center; gap: var(--dt-spacing-md); padding: var(--dt-spacing-md) var(--dt-spacing-lg); margin: 2px 0; border-radius: var(--dt-radius-sm); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-fast); position: relative;
     &:hover { background: var(--dt-bg-session-hover); }
-    &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
-    .nav-icon { font-size: 18px; }
-    .nav-label { font-size: 13px; }
+    &.active { background: var(--dt-brand-lighter); color: var(--dt-brand-color); font-weight: 500;
+      &::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--dt-brand-color); }
+    }
+    .nav-icon { font-size: 18px; flex-shrink: 0; }
+    .nav-label { font-size: 14px; flex: 1; }
   }
-  .nav-divider { height: 1px; background: var(--dt-border-light); margin: 12px 8px; }
-  .nav-section-label { padding: 8px 12px; font-size: 11px; color: var(--dt-text-tertiary); text-transform: uppercase; }
+  .nav-divider { height: 1px; background: var(--dt-border-light); margin: var(--dt-spacing-md) var(--dt-spacing-md); }
+  .nav-section-label { padding: var(--dt-spacing-sm) var(--dt-spacing-lg); font-size: 11px; color: var(--dt-text-tertiary); text-transform: uppercase; font-weight: 500; }
 }
 .sidebar-footer { padding: 16px; border-top: 1px solid var(--dt-border-light);
   .storage-info { background: var(--dt-bg-body); padding: 12px; border-radius: 8px;

@@ -121,13 +121,13 @@ defineExpose({ open })
     transition: background 0.2s;
     
     &:hover {
-      background-color: #f5f5f5;
+      background-color: var(--dt-bg-hover);
     }
     
     .avatar-all {
       width: 32px;
       height: 32px;
-      background-color: #0089ff;
+      background-color: var(--dt-brand-color);
       color: #fff;
       border-radius: 50%;
       display: flex;
@@ -137,8 +137,8 @@ defineExpose({ open })
     }
     
     .name {
-      font-size: 14px;
-      color: #262626;
+      font-size: var(--dt-font-size-base);
+      color: var(--dt-text-primary);
     }
   }
 }

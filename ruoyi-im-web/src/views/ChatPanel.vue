@@ -19,6 +19,7 @@
           <ChatHeader 
             :key="session.id"
             :session="session" 
+            :is-typing="isTyping"
             @toggle-sidebar="handleHeaderClick"
             @voice-call="handleVoiceCall"
             @video-call="handleVideoCall"
@@ -48,6 +49,7 @@
               @send="handleSend"
               @upload-file="handleUploadFile"
               @upload-image="handleUploadImage"
+              @typing="handleInputTyping"
             />
           </footer>
         </div>
@@ -74,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ChatHeader from '@/components/Chat/ChatHeader.vue'
@@ -86,6 +88,9 @@ import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import ImEmpty from '@/components/Common/ImEmpty.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
+import { uploadImage, uploadFile } from '@/api/im/file'
+import { initiateCall } from '@/api/im/videoCall'
+import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const props = defineProps({ session: Object })
 const store = useStore()
@@ -102,6 +107,10 @@ const showGlobalSearch = ref(false)
 const msgListRef = ref(null)
 const callDialogRef = ref(null)
 const forwardDialogRef = ref(null)
+const isTyping = ref(false) // 对方正在输入状态
+let typingTimeout = null
+
+const { sendMessage, onCall, onTyping } = useImWebSocket()
 
 const loadHistory = async () => {
   if (!props.session?.id) return
@@ -110,6 +119,93 @@ const loadHistory = async () => {
     const res = await store.dispatch('im/message/loadMessages', { sessionId: props.session.id, pageSize: 50 })
     messages.value = (res || []).map(m => ({ ...m, isOwn: m.senderId === currentUser.value?.id || m.isSelf }))
   } finally { loading.value = false; nextTick(() => msgListRef.value?.scrollToBottom()) }
+}
+
+/**
+ * 处理正在输入事件
+ */
+const handleTypingEvent = (data) => {
+  // 检查是否是当前会话
+  if (data.conversationId === props.session?.id) {
+    isTyping.value = true
+    
+    // 清除之前的超时
+    if (typingTimeout) {
+      clearTimeout(typingTimeout)
+    }
+    
+    // 设置 3 秒后自动消退
+    typingTimeout = setTimeout(() => {
+      isTyping.value = false
+    }, 3000)
+  }
+}
+
+/**
+ * 发送正在输入信号
+ */
+const handleInputTyping = () => {
+  if (!props.session?.id) return
+  
+  // 通过 WebSocket 发送正在输入信号
+  sendMessage({
+    type: 'typing',
+    data: {
+      conversationId: props.session.id,
+      targetId: props.session.targetId
+    }
+  })
+}
+
+/**
+ * 处理通话事件
+ */
+const handleCallEvent = (data) => {
+  if (!callDialogRef.value) return
+
+  switch (data.action) {
+    case 'offer':
+      // 收到通话邀请
+      ElMessage.info(`${data.callerName} 邀请你进行${data.type === 'video' ? '视频' : '语音'}通话`)
+      callDialogRef.value?.open(data.type === 'video' ? 'video' : 'voice', {
+        status: 'incoming',
+        callId: data.callId,
+        peerId: data.callerId,
+        peerName: data.callerName,
+        peerAvatar: data.callerAvatar,
+        pendingOffer: data.sdp
+      })
+      break
+
+    case 'answer':
+      // 对方接听了通话
+      ElMessage.success('对方已接听')
+      callDialogRef.value?.handleWebRTCSignal('answer', data)
+      break
+
+    case 'candidate':
+      // 收到 ICE 候选者
+      callDialogRef.value?.handleWebRTCSignal('candidate', data)
+      break
+
+    case 'reject':
+      // 对方拒绝通话
+      ElMessage.info('对方拒绝了通话')
+      callDialogRef.value?.end()
+      break
+
+    case 'cancel':
+      // 对方取消通话
+      ElMessage.info('对方取消了通话')
+      callDialogRef.value?.end()
+      break
+
+    case 'hangup':
+      // 对方挂断
+      ElMessage.info('对方已挂断')
+      callDialogRef.value?.end()
+      break
+  }
 }
 
 const handleHeaderClick = () => {
@@ -129,20 +225,96 @@ const handleShowUserProfile = (userId) => {
   showUserDetail.value = true
 }
 
-const handleVoiceCall = (s) => {
+const handleVoiceCall = async (s) => {
   const peerId = s.peerUserId || s.targetId
-  console.log('Trigger Voice Call for:', peerId)
-  callDialogRef.value?.open('voice', { peerId, peerName: s.name, peerAvatar: s.avatar })
+  if (!peerId) {
+    ElMessage.warning('无法获取对方ID')
+    return
+  }
+
+  try {
+    // 先通过后端 API 发起通话
+    const res = await initiateCall({
+      calleeId: peerId,
+      conversationId: props.session?.id,
+      callType: 'VOICE'
+    })
+
+    if (res.code === 200) {
+      // 打开通话对话框
+      callDialogRef.value?.open('voice', {
+        status: 'calling',
+        callId: res.data.callId,
+        peerId: peerId,
+        peerName: s.name,
+        peerAvatar: s.avatar
+      })
+    } else {
+      throw new Error(res.message || '发起通话失败')
+    }
+  } catch (error) {
+    console.error('发起语音通话失败:', error)
+    ElMessage.error(error.message || '发起语音通话失败')
+  }
 }
 
-const handleVideoCall = (s) => {
+const handleVideoCall = async (s) => {
   const peerId = s.peerUserId || s.targetId
-  console.log('Trigger Video Call for:', peerId)
-  callDialogRef.value?.open('video', { peerId, peerName: s.name, peerAvatar: s.avatar })
+  if (!peerId) {
+    ElMessage.warning('无法获取对方ID')
+    return
+  }
+
+  try {
+    // 先通过后端 API 发起通话
+    const res = await initiateCall({
+      calleeId: peerId,
+      conversationId: props.session?.id,
+      callType: 'VIDEO'
+    })
+
+    if (res.code === 200) {
+      // 打开通话对话框
+      callDialogRef.value?.open('video', {
+        status: 'calling',
+        callId: res.data.callId,
+        peerId: peerId,
+        peerName: s.name,
+        peerAvatar: s.avatar
+      })
+    } else {
+      throw new Error(res.message || '发起通话失败')
+    }
+  } catch (error) {
+    console.error('发起视频通话失败:', error)
+    ElMessage.error(error.message || '发起视频通话失败')
+  }
 }
 
-const handleStartCallFromProfile = (p) => {
-  callDialogRef.value?.open(p.type, { peerId: p.user.userId, peerName: p.user.nickname, peerAvatar: p.user.avatar })
+const handleStartCallFromProfile = async (p) => {
+  try {
+    // 先通过后端 API 发起通话
+    const res = await initiateCall({
+      calleeId: p.user.userId,
+      callType: p.type === 'video' ? 'VIDEO' : 'VOICE'
+    })
+
+    if (res.code === 200) {
+      // 打开通话对话框
+      callDialogRef.value?.open(p.type === 'video' ? 'video' : 'voice', {
+        status: 'calling',
+        callId: res.data.callId,
+        peerId: p.user.userId,
+        peerName: p.user.nickname,
+        peerAvatar: p.user.avatar
+      })
+    } else {
+      throw new Error(res.message || '发起通话失败')
+    }
+  } catch (error) {
+    console.error('发起通话失败:', error)
+    ElMessage.error(error.message || '发起通话失败')
+  }
 }
 
 const handleOpenSearch = () => { showGlobalSearch.value = true }
@@ -167,8 +339,158 @@ const handleClearMessages = () => {
 
 const handleOpenCreateGroup = () => ElMessage.info('请通过通讯录发起')
 const handleLoadMore = () => {}
-const handleUploadFile = (f) => {}
-const handleUploadImage = (f) => {}
+
+/**
+ * 上传文件
+ */
+const handleUploadFile = async (file) => {
+  if (!props.session?.id) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+
+  // 创建临时消息显示上传状态
+  const tempId = `upload_${Date.now()}`
+  const tempMsg = {
+    id: tempId,
+    type: 'FILE',
+    status: 'uploading',
+    fileName: file.name,
+    fileSize: formatFileSize(file.size),
+    progress: 0
+  }
+  messages.value.push(tempMsg)
+  nextTick(() => msgListRef.value?.scrollToBottom())
+
+  // 创建 FormData
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('type', 'file')
+  formData.append('sessionId', props.session.id)
+
+  try {
+    const res = await uploadFile(formData)
+    if (res.code === 200) {
+      // 上传成功，发送文件消息
+      const msg = await store.dispatch('im/message/sendMessage', {
+        sessionId: props.session.id,
+        content: JSON.stringify({
+          fileId: res.data.fileId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileUrl: res.data.fileUrl || res.data.url
+        }),
+        type: 'FILE'
+      })
+      
+      // 移除临时消息，添加实际消息
+      const index = messages.value.findIndex(m => m.id === tempId)
+      if (index !== -1) {
+        messages.value.splice(index, 1)
+      }
+      
+      if (msg) {
+        msg.isOwn = true
+        messages.value.push(msg)
+        nextTick(() => msgListRef.value?.scrollToBottom())
+      }
+      
+      ElMessage.success('文件上传成功')
+    } else {
+      throw new Error(res.message || '上传失败')
+    }
+  } catch (error) {
+    console.error('文件上传失败:', error)
+    // 更新临时消息状态为失败
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      messages.value[index].status = 'failed'
+    }
+    ElMessage.error(error.message || '文件上传失败')
+  }
+}
+
+/**
+ * 上传图片
+ */
+const handleUploadImage = async (file) => {
+  if (!props.session?.id) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+
+  // 创建临时消息显示上传状态
+  const tempId = `upload_${Date.now()}`
+  const tempMsg = {
+    id: tempId,
+    type: 'IMAGE',
+    status: 'uploading',
+    fileName: file.name,
+    fileSize: formatFileSize(file.size),
+    progress: 0
+  }
+  messages.value.push(tempMsg)
+  nextTick(() => msgListRef.value?.scrollToBottom())
+
+  // 创建 FormData
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('type', 'image')
+  formData.append('sessionId', props.session.id)
+
+  try {
+    const res = await uploadImage(formData)
+    if (res.code === 200) {
+      // 上传成功，发送图片消息
+      const msg = await store.dispatch('im/message/sendMessage', {
+        sessionId: props.session.id,
+        content: JSON.stringify({
+          fileId: res.data.fileId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileUrl: res.data.fileUrl || res.data.url,
+          thumbnailUrl: res.data.thumbnailUrl || res.data.url
+        }),
+        type: 'IMAGE'
+      })
+      
+      // 移除临时消息，添加实际消息
+      const index = messages.value.findIndex(m => m.id === tempId)
+      if (index !== -1) {
+        messages.value.splice(index, 1)
+      }
+      
+      if (msg) {
+        msg.isOwn = true
+        messages.value.push(msg)
+        nextTick(() => msgListRef.value?.scrollToBottom())
+      }
+      
+      ElMessage.success('图片上传成功')
+    } else {
+      throw new Error(res.message || '上传失败')
+    }
+  } catch (error) {
+    console.error('图片上传失败:', error)
+    // 更新临时消息状态为失败
+    const index = messages.value.findIndex(m => m.id === tempId)
+    if (index !== -1) {
+      messages.value[index].status = 'failed'
+    }
+    ElMessage.error(error.message || '图片上传失败')
+  }
+}
+
+/**
+ * 格式化文件大小
+ */
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i]
+}
 
 const handleRetryMessage = async (msg) => {
   if (!msg) return
@@ -200,6 +522,20 @@ watch(() => props.session, (newSession) => {
     showGroupDetail.value = false
   }
 }, { immediate: true })
+
+// 注册通话事件监听
+onMounted(() => {
+  onCall(handleCallEvent)
+  onTyping(handleTypingEvent)
+})
+
+// 清理通话事件监听
+onUnmounted(() => {
+  // 清理逻辑由 useImWebSocket 自动处理
+  if (typingTimeout) {
+    clearTimeout(typingTimeout)
+  }
+})
 </script>
 
 <style scoped lang="scss">
