@@ -168,7 +168,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import { getUserList, getUserDetail, updateUserStatus, updateUserRole, deleteUser } from '@/api/admin'
+import { getUserList, getUserDetail, updateUserStatus, updateUserRole, deleteUser, batchDeleteUsers } from '@/api/admin'
 import tokenManager from '@/utils/tokenManager'
 
 const store = useStore()
@@ -417,25 +417,20 @@ const handleBatchDelete = async () => {
       type: 'warning'
     })
 
-    let success = 0
-    let failed = 0
-    failedItems.value = []
-    for (const user of selectedUsers.value) {
-      try {
-        const res = await deleteUser(user.id)
-        if (res.code === 200) {
-          success++
-        } else {
-          failed++
-          failedItems.value.push({ id: user.id, reason: res.msg || '失败' })
-        }
-      } catch (e) {
-        failed++
-        failedItems.value.push({ id: user.id, reason: '请求失败' })
+    const ids = selectedUsers.value.map(u => u.id)
+    const res = await batchDeleteUsers(ids)
+
+    if (res.code === 200 && res.data) {
+      const { successCount, failCount, failedItems: items } = res.data
+      ElMessage.success(`批量删除完成：成功 ${successCount}，失败 ${failCount}`)
+      if (failCount > 0) {
+        failedItems.value = items || []
+        failedDialogVisible.value = true
       }
+    } else {
+      ElMessage.error(res.msg || '批量删除失败')
     }
-    ElMessage.success(`批量删除完成：成功 ${success}，失败 ${failed}`)
-    if (failed > 0) failedDialogVisible.value = true
+
     selectedUsers.value = []
     loadUsers()
   } catch (error) {
