@@ -163,6 +163,13 @@ const handleInputTyping = () => {
 const handleCallEvent = (data) => {
   if (!callDialogRef.value) return
 
+  // 幂等检查：避免重复处理相同的 callId
+  const currentCallId = callDialogRef.value?.callId
+  if (currentCallId && currentCallId !== data.callId) {
+    // 如果已有通话在进行，且不是当前callId，先结束当前通话
+    callDialogRef.value?.end()
+  }
+
   switch (data.action) {
     case 'offer':
       // 收到通话邀请

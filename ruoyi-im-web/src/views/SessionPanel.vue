@@ -119,10 +119,42 @@ const showCreateGroupDialog = ref(false)
 const subMenuTabs = ref([
   { key: 'all', label: '全部', count: 0 },
   { key: 'unread', label: '未读', count: 0 },
-  { key: 'mentions', label: '@我', count: 0 }
+  { key: 'pinned', label: '置顶', count: 0 },
+  { key: 'muted', label: '免打扰', count: 0 },
+  { key: 'group', label: '群聊', count: 0 },
+  { key: 'file', label: '文件', count: 0 }
 ])
 
 const sessions = computed(() => store.state.im.session.sessions)
+
+// 保存全部会话（用于统计各筛选类型的数量）
+const allSessions = ref([])
+
+// 各筛选类型的数量
+const filterCounts = computed(() => {
+  const all = allSessions.value
+  return {
+    all: all.length,
+    unread: all.filter(s => s.unreadCount > 0).length,
+    pinned: all.filter(s => s.isPinned).length,
+    muted: all.filter(s => s.isMuted).length,
+    group: all.filter(s => s.type === 'GROUP').length,
+    file: all.filter(s => {
+      const type = s.lastMessageType?.toUpperCase()
+      return type === 'FILE' || type === 'IMAGE'
+    }).length
+  }
+})
+
+// 更新筛选菜单的数量显示
+const updateFilterCounts = () => {
+  const counts = filterCounts.value
+  subMenuTabs.value = subMenuTabs.value.map(tab => ({
+    ...tab,
+    count: counts[tab.key] || 0
+  }))
+}
+
 const sortedSessions = computed(() => {
   return [...sessions.value].sort((a, b) => {
     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1
@@ -156,7 +188,13 @@ const handleContextMenu = (e, session) => {
 
 const handleFilterChange = (key) => { 
   activeFilter.value = key
-  store.dispatch('im/session/loadSessions', key) 
+  store.dispatch('im/session/loadSessions', key).then(() => {
+    // 切换到"全部"时更新 allSessions 以保持计数准确
+    if (key === 'all') {
+      allSessions.value = store.state.im.session.sessions
+    }
+    updateFilterCounts()
+  })
 }
 
 const handleCreateGroup = () => {
@@ -200,9 +238,14 @@ const doAction = (cmd) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (store.state.user?.token) {
-    store.dispatch('im/session/loadSessions')
+    // 先加载全部会话（用于统计数量）
+    await store.dispatch('im/session/loadSessions', 'all')
+    // 保存全部会话用于统计
+    allSessions.value = store.state.im.session.sessions
+    // 更新筛选计数
+    updateFilterCounts()
   }
 })
 </script>

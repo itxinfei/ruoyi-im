@@ -303,7 +303,7 @@ onUnmounted(() => {
   clearTimeout(timeoutTimer)
   if (localStream) localStream.getTracks().forEach(t => t.stop()) 
 })
-defineExpose({ open, end, handleWebRTCSignal })
+defineExpose({ open, end, handleWebRTCSignal, callId })
 </script>
 
 <style scoped lang="scss">

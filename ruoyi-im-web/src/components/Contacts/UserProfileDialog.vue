@@ -32,7 +32,7 @@
         <div class="profile-right">
           <div class="user-base-info">
             <h2 class="user-name">{{ userDetail.nickname || userDetail.username }}</h2>
-            <div class="user-dept">{{ userDetail.departmentName || '公司组织' }}</div>
+            <div class="user-dept">{{ userDetail.departmentName || userDetail.department || '公司组织' }}</div>
             <div class="user-position">{{ userDetail.position || '成员' }}</div>
           </div>
 
