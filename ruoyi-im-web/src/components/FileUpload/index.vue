@@ -53,6 +53,7 @@
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Upload, Document } from '@element-plus/icons-vue'
+import tokenManager from '@/utils/tokenManager'
 
 const props = defineProps({
   // 上传类型: image, file
@@ -112,7 +113,7 @@ const uploadUrl = computed(() => {
 
 // 上传请求头
 const uploadHeaders = computed(() => {
-  const token = localStorage.getItem('access_token')
+  const token = tokenManager.getToken()
   return {
     'Authorization': token ? `Bearer ${token}` : ''
   }

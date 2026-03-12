@@ -131,7 +131,6 @@ const remoteAudioRef = ref(null)
 let localStream = null
 let timer = null
 let timeoutTimer = null
-let timeoutTimer = null
 
 const dialogWidth = computed(() => type.value === 'video' ? '800px' : '360px')
 

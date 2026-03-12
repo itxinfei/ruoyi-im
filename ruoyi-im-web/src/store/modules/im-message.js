@@ -2,6 +2,7 @@
  * 消息管理模块
  * 管理消息列表、消息操作（发送、编辑、撤回等）
  */
+
 import {
   getMessages,
   sendMessage as apiSendMessage,
@@ -10,8 +11,70 @@ import {
   recallMessage,
   editMessage as apiEditMessage,
   forwardMessage as apiForwardMessage
-} from '@/api/im'
+} from '@/api/im/index'
 import { formatMessagePreview, formatMessagePreviewFromObject } from '@/utils/message'
+
+// ==================== 消息状态定义 ====================
+/**
+ * 消息发送状态枚举
+ * @readonly
+ * @enum {string}
+ */
+export const MESSAGE_SEND_STATUS = {
+  SENDING: 'sending',   // 发送中 - 消息已创建但尚未确认发送成功
+  SENT: 'sent',         // 发送成功 - 消息已成功发送到服务器
+  FAILED: 'failed'      // 发送失败 - 消息发送失败，可能需要重试
+}
+
+/**
+ * 消息阅读状态枚举
+ * @readonly
+ * @enum {string}
+ */
+export const MESSAGE_READ_STATUS = {
+  UNREAD: 'unread',     // 未读 - 对方未查看
+  READ: 'read'          // 已读 - 对方已查看
+}
+
+/**
+ * 消息特殊状态枚举
+ * @readonly
+ * @enum {string}
+ */
+export const MESSAGE_SPECIAL_STATUS = {
+  RECALLED: 'recalled'  // 已撤回 - 消息已被发送者撤回
+}
+
+// ==================== 状态转换规则 ====================
+/**
+ * 有效的状态转换映射
+ * @type {Object.<string, string[]>}
+ */
+const VALID_STATUS_TRANSITIONS = {
+  [MESSAGE_SEND_STATUS.SENDING]: [MESSAGE_SEND_STATUS.SENT, MESSAGE_SEND_STATUS.FAILED],
+  [MESSAGE_SEND_STATUS.SENT]: [MESSAGE_READ_STATUS.READ, MESSAGE_SPECIAL_STATUS.RECALLED],
+  [MESSAGE_READ_STATUS.UNREAD]: [MESSAGE_READ_STATUS.READ],
+  [MESSAGE_READ_STATUS.READ]: [MESSAGE_SPECIAL_STATUS.RECALLED]
+}
+
+/**
+ * 验证状态转换是否有效
+ * @param {string} currentStatus - 当前状态
+ * @param {string} newStatus - 新状态
+ * @returns {boolean} 状态转换是否有效
+ */
+function isValidStatusTransition(currentStatus, newStatus) {
+  if (!currentStatus || !newStatus) return true // 允许初始化
+  const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus]
+  return allowedTransitions ? allowedTransitions.includes(newStatus) : false
+}
+
+/**
+ * 消息 ID 字段名常量（统一使用 messageId）
+ * @readonly
+ * @enum {string}
+ */
+export const MESSAGE_ID_FIELD = 'messageId'
 
 // 简单UUID生成
 function generateUUID() {
@@ -45,6 +108,12 @@ export default {
     // 获取指定会话的消息列表
     messagesBySessionId: (state) => (sessionId) => {
       return state.messages[sessionId] || []
+    },
+
+    // 根据消息ID获取消息
+    getMessageById: (state) => (sessionId, messageId) => {
+      const messages = state.messages[sessionId] || []
+      return messages.find(m => (m.messageId || m.id) === messageId)
     }
   },
 
@@ -68,7 +137,8 @@ export default {
         state.messages[sessionId] = []
       }
       // 避免重复添加 (通过消息ID判断)
-      const index = state.messages[sessionId].findIndex(m => m.id === message.id)
+      const msgId = message.messageId || message.id
+      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === msgId)
       if (index === -1) {
         state.messages[sessionId].push(message)
       } else {
@@ -82,7 +152,8 @@ export default {
       if (!state.messages[sessionId]) {
         return
       }
-      const index = state.messages[sessionId].findIndex(m => m.id === message.id)
+      const msgId = message.messageId || message.id
+      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === msgId)
       if (index !== -1) {
         state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...message }
       }
@@ -93,9 +164,31 @@ export default {
       if (!state.messages[sessionId]) {
         return
       }
-      const index = state.messages[sessionId].findIndex(m => m.id === messageId)
+      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === messageId)
       if (index !== -1) {
         state.messages[sessionId].splice(index, 1)
+      }
+    },
+
+    // 更新消息状态
+    UPDATE_MESSAGE_STATUS(state, { sessionId, messageId, status }) {
+      if (!state.messages[sessionId]) {
+        return
+      }
+      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === messageId)
+      if (index !== -1) {
+        const currentStatus = state.messages[sessionId][index].status
+        // 验证状态转换
+        if (isValidStatusTransition(currentStatus, status)) {
+          state.messages[sessionId][index] = {
+            ...state.messages[sessionId][index],
+            status,
+            // 兼容旧字段 isRevoked
+            isRevoked: status === MESSAGE_SPECIAL_STATUS.RECALLED ? 1 : state.messages[sessionId][index].isRevoked
+          }
+        } else {
+          console.warn(`Invalid status transition: ${currentStatus} -> ${status}`)
+        }
       }
     },
 
@@ -139,25 +232,64 @@ export default {
     // 发送消息
     async sendMessage({ commit }, { sessionId, type = 'TEXT', content, replyToMessageId = null }) {
       const clientMsgId = generateUUID()
-      const res = await apiSendMessage({
+      // 创建临时消息，状态为 sending
+      const tempMessage = {
+        clientMsgId,
         conversationId: sessionId,
         type,
         content,
         replyToMessageId,
-        clientMsgId
-      })
-
-      if (res.code === 200 && res.data) {
-        commit('ADD_MESSAGE', { sessionId, message: res.data })
-        commit('im/session/UPDATE_SESSION', {
-          id: sessionId,
-          lastMessage: formatMessagePreviewFromObject(res.data),
-          lastMessageTime: res.data.timestamp,
-          lastMessageType: type
-        }, { root: true })
-        return res.data
+        status: MESSAGE_SEND_STATUS.SENDING,
+        timestamp: Date.now(),
+        senderId: null, // 将在服务器响应后填充
+        senderName: null,
+        messageId: clientMsgId // 使用 clientMsgId 作为临时 messageId
       }
-      throw new Error('发送消息失败')
+
+      // 先添加到列表（发送中状态）
+      commit('ADD_MESSAGE', { sessionId, message: tempMessage })
+
+      try {
+        const res = await apiSendMessage({
+          conversationId: sessionId,
+          type,
+          content,
+          replyToMessageId,
+          clientMsgId
+        })
+
+        if (res.code === 200 && res.data) {
+          // 更新为发送成功状态
+          const finalMessage = {
+            ...res.data,
+            status: MESSAGE_SEND_STATUS.SENT
+          }
+          commit('UPDATE_MESSAGE', { sessionId, message: finalMessage })
+          commit('im/session/UPDATE_SESSION', {
+            id: sessionId,
+            lastMessage: formatMessagePreviewFromObject(res.data),
+            lastMessageTime: res.data.timestamp,
+            lastMessageType: type
+          }, { root: true })
+          return res.data
+        } else {
+          // 发送失败，更新状态
+          commit('UPDATE_MESSAGE_STATUS', {
+            sessionId,
+            messageId: clientMsgId,
+            status: MESSAGE_SEND_STATUS.FAILED
+          })
+          throw new Error('发送消息失败')
+        }
+      } catch (error) {
+        // 发送异常，更新状态
+        commit('UPDATE_MESSAGE_STATUS', {
+          sessionId,
+          messageId: clientMsgId,
+          status: MESSAGE_SEND_STATUS.FAILED
+        })
+        throw error
+      }
     },
 
     // 编辑消息
@@ -167,12 +299,12 @@ export default {
         // 查找该消息在哪个会话中 (通常是当前会话)
         const sessionId = rootState.session.currentSession?.id
         if (sessionId && rootState.message.messages[sessionId]) {
-          const editedMsg = { ...rootState.message.messages[sessionId].find(m => m.id === messageId), content, isEdited: true }
+          const editedMsg = { ...rootState.message.messages[sessionId].find(m => (m.messageId || m.id) === messageId), content, isEdited: true }
           commit('UPDATE_MESSAGE', { sessionId, message: editedMsg })
 
           // 如果是最后一条消息，更新会话列表
           const session = rootState.session.sessions.find(s => s.id === sessionId)
-          if (session && session.lastMessageId === messageId) {
+          if (session && (session.lastMessageId === messageId || session.lastMessageId === editedMsg.messageId)) {
             commit('im/session/UPDATE_SESSION', {
               id: sessionId,
               lastMessage: formatMessagePreview('TEXT', content)
@@ -224,11 +356,12 @@ export default {
       // 需要找到该消息所属的会话ID并更新为撤回状态
       const sessionId = rootState.session.currentSession?.id
       if (sessionId && rootState.message.messages[sessionId]) {
-        const msg = rootState.message.messages[sessionId].find(m => m.id === messageId)
+        const msg = rootState.message.messages[sessionId].find(m => (m.messageId || m.id) === messageId)
         if (msg) {
-          commit('UPDATE_MESSAGE', {
+          commit('UPDATE_MESSAGE_STATUS', {
             sessionId,
-            message: { ...msg, isRevoked: true, content: '' }
+            messageId,
+            status: MESSAGE_SPECIAL_STATUS.RECALLED
           })
         }
       }

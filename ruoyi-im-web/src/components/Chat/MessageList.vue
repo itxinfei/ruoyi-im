@@ -87,7 +87,7 @@ watch(() => props.messages?.length, () => {
 })
 
 onMounted(() => scrollToBottom())
-defineExpose({ scrollToBottom })
+defineExpose({ scrollToBottom, listRef })
 </script>
 
 <style scoped lang="scss">

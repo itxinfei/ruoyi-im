@@ -5,6 +5,7 @@
 import { onUnmounted, ref } from 'vue'
 import { error } from '@/utils/logger'
 import imWebSocket, { WS_STATUS } from '@/utils/websocket/imWebSocket'
+import tokenManager from '@/utils/tokenManager'
 
 /**
  * 使用 WebSocket
@@ -26,7 +27,7 @@ export function useImWebSocket() {
   // 连接 WebSocket
   const connect = (token) => {
     if (!token) {
-      token = localStorage.getItem('im_token')
+      token = tokenManager.getToken()
     }
 
     if (!token) {

@@ -95,6 +95,7 @@ import { useStore } from 'vuex'
 import { Loading } from '@element-plus/icons-vue'
 import { searchMessages } from '@/api/im/message'
 import { createConversation } from '@/api/im/conversation'
+import { highlightText } from '@/utils/htmlSanitizer'
 
 const props = defineProps({
   visible: Boolean,
@@ -224,9 +225,8 @@ const handleMessageClick = (msg) => {
 }
 
 const highlight = (content) => {
-  if (!props.keyword) return content
-  const reg = new RegExp(`(${props.keyword})`, 'gi')
-  return content.replace(reg, '<span class="highlight">$1</span>')
+  // 使用安全的高亮函数，防止 XSS 攻击
+  return highlightText(content, props.keyword, 'span', 'highlight')
 }
 
 const formatTime = (ts) => {

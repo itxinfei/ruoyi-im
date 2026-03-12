@@ -494,7 +494,7 @@ onMounted(() => {
   flex: 0 0 380px;
   background: linear-gradient(160deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
   padding: 48px 40px;
-  color: var(--dt-text-primary);
+  color: #ffffff;
   position: relative;
   overflow: hidden;
 
@@ -653,15 +653,15 @@ onMounted(() => {
   margin-bottom: 32px;
 
   .welcome-title {
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--dt-text-primary);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dt-brand-color);
     margin: 0 0 8px 0;
   }
 
   .welcome-subtitle {
     font-size: 14px;
-    color: var(--dt-text-tertiary);
+    color: var(--dt-text-secondary);
     margin: 0;
   }
 }

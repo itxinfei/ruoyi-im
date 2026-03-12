@@ -188,6 +188,7 @@ import {
   Sunny, Compass
 } from '@element-plus/icons-vue'
 import { chat, getSupportedModels } from '@/api/im/ai'
+import { formatAIMessage } from '@/utils/htmlSanitizer'
 
 const store = useStore()
 const messagesContainer = ref(null)
@@ -377,13 +378,10 @@ const copyMessage = (content) => {
   })
 }
 
-// 格式化消息
+// 格式化消息（安全版本，防止 XSS 攻击）
 const formatMessage = (content) => {
-  if (!content) return ''
-  return content
-    .replace(/\n/g, '<br>')
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
+  // 使用安全的消息格式化函数，防止 XSS 攻击
+  return formatAIMessage(content)
 }
 
 // 格式化时间

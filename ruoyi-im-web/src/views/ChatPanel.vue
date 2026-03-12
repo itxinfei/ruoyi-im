@@ -338,7 +338,62 @@ const handleClearMessages = () => {
 }
 
 const handleOpenCreateGroup = () => ElMessage.info('请通过通讯录发起')
-const handleLoadMore = () => {}
+
+/**
+ * 加载更多历史消息（分页）
+ */
+const handleLoadMore = async () => {
+  if (loading.value || !props.session?.id) return
+  
+  // 获取当前消息列表中最早的消息ID
+  const lastMessage = messages.value.length > 0 ? messages.value[0] : null
+  const lastMessageId = lastMessage?.id || lastMessage?.messageId
+  
+  // 如果没有消息ID，说明没有更多可加载
+  if (!lastMessageId) {
+    ElMessage.info('没有更多消息了')
+    return
+  }
+
+  loading.value = true
+  try {
+    // 保存当前滚动高度，以便加载后保持位置
+    const scrollHeight = msgListRef.value?.listRef?.scrollHeight || 0
+    
+    const res = await store.dispatch('im/message/loadMessages', { 
+      sessionId: props.session.id, 
+      lastMessageId: lastMessageId,
+      pageSize: 20,
+      isLoadMore: true
+    })
+    
+    if (res && res.length > 0) {
+      // 更新本地消息列表（保持原有的 isOwn 标记）
+      const newMessages = (res || []).map(m => ({ 
+        ...m, 
+        isOwn: m.senderId === currentUser.value?.id || m.isSelf 
+      }))
+      
+      // 将新消息添加到列表开头
+      messages.value = [...newMessages, ...messages.value]
+      
+      // 恢复滚动位置
+      nextTick(() => {
+        if (msgListRef.value?.listRef) {
+          const newScrollHeight = msgListRef.value.listRef.scrollHeight
+          msgListRef.value.listRef.scrollTop = newScrollHeight - scrollHeight
+        }
+      })
+    } else {
+      ElMessage.info('没有更多消息了')
+    }
+  } catch (error) {
+    console.error('加载历史消息失败:', error)
+    ElMessage.error('加载历史消息失败')
+  } finally {
+    loading.value = false
+  }
+}
 
 /**
  * 上传文件

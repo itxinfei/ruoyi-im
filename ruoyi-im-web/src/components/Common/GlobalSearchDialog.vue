@@ -105,6 +105,7 @@
 import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { highlightText } from '@/utils/htmlSanitizer'
 
 const props = defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue'])
@@ -139,7 +140,10 @@ const handleSearch = () => {
   ).slice(0, 5) || []
 }
 
-const highlight = (text) => text.replace(new RegExp(query.value, 'gi'), m => `<mark>${m}</mark>`)
+const highlight = (text) => {
+  // 使用安全的高亮函数，防止 XSS 攻击
+  return highlightText(text, query.value, 'mark', '')
+}
 
 const moveNext = () => currentIdx.value++
 const movePrev = () => currentIdx.value = Math.max(0, currentIdx.value - 1)

@@ -3,6 +3,7 @@
  * 提供 WebSocket 连接管理、消息收发、心跳保活、断线重连等功能
  */
 import { debug, info, warn, error } from '../logger.js'
+import tokenManager from '@/utils/tokenManager'
 
 // WebSocket 连接状态
 export const WS_STATUS = {
@@ -52,18 +53,9 @@ class ImWebSocket {
     this.token = token
     const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8080'
 
-    // 从 localStorage 获取 userId
-    let userId = ''
-    try {
-      const userInfo = localStorage.getItem('im_user_info')
-      if (userInfo) {
-        const user = JSON.parse(userInfo)
-        userId = user.id || ''
-        debug('ImWebSocket', '用户ID:', userId)
-      }
-    } catch (e) {
-      warn('ImWebSocket', '获取用户ID失败:', e)
-    }
+    // 从 tokenManager 获取 userId
+    const userId = tokenManager.getUserId() || ''
+    debug('ImWebSocket', '用户ID:', userId)
 
     // 同时发送 token 和 userId
     this.url = `${wsBaseUrl}/ws/im?token=${token}&userId=${userId}`

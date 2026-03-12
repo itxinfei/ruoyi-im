@@ -169,6 +169,9 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { getUserList, getUserDetail, updateUserStatus, updateUserRole, deleteUser } from '@/api/admin'
+import tokenManager from '@/utils/tokenManager'
+
+const store = useStore()
 
 const loading = ref(false)
 const userList = ref([])
@@ -443,7 +446,7 @@ const handleBatchDelete = async () => {
 onMounted(() => {
   // 检查当前用户是否是超级管理员
   try {
-    const userRole = localStorage.getItem('im_user_role')
+    const userRole = tokenManager.getRole()
     isSuperAdmin.value = userRole === 'SUPER_ADMIN'
   } catch (e) {
     isSuperAdmin.value = false

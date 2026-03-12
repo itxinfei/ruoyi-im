@@ -184,6 +184,9 @@ import {
   setRecallTimeLimit,
   updateSystemConfig
 } from '@/api/admin'
+import tokenManager from '@/utils/tokenManager'
+
+const store = useStore()
 
 // 配置键常量
 const CONFIG_KEYS = {
@@ -232,7 +235,7 @@ const saveStateText = computed(() => saveState.value)
  */
 const checkUserRole = () => {
   try {
-    const userRole = localStorage.getItem('im_user_role')
+    const userRole = tokenManager.getRole()
     isSuperAdmin.value = userRole === 'SUPER_ADMIN'
   } catch (e) {
     isSuperAdmin.value = false

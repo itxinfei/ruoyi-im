@@ -73,10 +73,12 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import { Monitor, User, ChatDotRound, ChatLineSquare, Setting, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
+const store = useStore()
 
 const activeMenu = computed(() => route.path)
 
@@ -92,24 +94,12 @@ const pageTitleMap = {
 const pageTitle = computed(() => pageTitleMap[route.path] || '管理后台')
 
 const adminName = computed(() => {
-  try {
-    const raw = localStorage.getItem('im_user_info')
-    if (!raw) return '管理员'
-    const user = JSON.parse(raw)
-    return user.nickname || user.username || '管理员'
-  } catch (e) {
-    return '管理员'
-  }
+  return store.getters['user/userName']
 })
 
 // 获取用户角色
 const userRole = computed(() => {
-  try {
-    const role = localStorage.getItem('im_user_role')
-    return role || 'ADMIN'
-  } catch (e) {
-    return 'ADMIN'
-  }
+  return store.getters['user/userRole']
 })
 
 // 是否是超级管理员
