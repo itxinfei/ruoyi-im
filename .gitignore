@@ -65,6 +65,7 @@ sql/
 ruoyi-im-web/src/nul
 nul
 /.agent/
+/.agents/
 /.iflow/
 /.kilocode/
 /.kiro/
@@ -73,6 +74,8 @@ nul
 /.sisyphus/
 /.trae/
 /.vscode/
+/.cursor/
+/.windsurf/
 /_bmad/
 /_bmad-output/
 /BMAD-METHOD/
