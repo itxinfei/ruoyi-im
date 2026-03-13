@@ -56,10 +56,16 @@
       </div>
       <!-- 正常显示 -->
       <div v-else class="file-normal" @click="handleFileDownload">
-        <el-icon><Document /></el-icon>
+        <div class="file-icon" :class="getFileIconClass(getFileName(message))">
+          <el-icon :size="24"><component :is="getFileIcon(getFileName(message))" /></el-icon>
+        </div>
         <div class="file-info">
           <div class="file-name">{{ getFileName(message) }}</div>
-          <div class="file-meta">{{ getFileSize(message) }}</div>
+          <div class="file-meta">
+            <span class="file-size">{{ getFileSize(message) }}</span>
+            <span class="file-divider">·</span>
+            <span class="file-action">点击下载</span>
+          </div>
         </div>
       </div>
     </div>
@@ -104,7 +110,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Document, Loading, WarningFilled } from '@element-plus/icons-vue'
+import { Document, Loading, WarningFilled, DocumentCopy, Picture, VideoCamera, Headset, Grid, Tickets } from '@element-plus/icons-vue'
 import DocumentPreviewDrawer from './DocumentPreviewDrawer.vue'
 import LinkCardMessage from './LinkCardMessage.vue'
 import { formatTime, formatFileSize } from '@/utils/format'
@@ -211,7 +217,45 @@ const getFileSize = (msg) => {
   }
 }
 
-// 处理文件下载
+// 获取文件图标组件
+const getFileIcon = (fileName) => {
+  const ext = fileName?.split('.').pop()?.toLowerCase() || ''
+  const iconMap = {
+    // 图片
+    'jpg': Picture, 'jpeg': Picture, 'png': Picture, 'gif': Picture, 'webp': Picture, 'svg': Picture,
+    // 视频
+    'mp4': VideoCamera, 'avi': VideoCamera, 'mov': VideoCamera, 'wmv': VideoCamera, 'flv': VideoCamera,
+    // 音频
+    'mp3': Headset, 'wav': Headset, 'ogg': Headset, 'flac': Headset, 'aac': Headset,
+    // 文档
+    'pdf': DocumentCopy, 'doc': DocumentCopy, 'docx': DocumentCopy, 'txt': Tickets,
+    // 表格
+    'xls': Grid, 'xlsx': Grid, 'csv': Grid,
+    // 演示
+    'ppt': DocumentCopy, 'pptx': DocumentCopy
+  }
+  return iconMap[ext] || Document
+}
+
+// 获取文件图标样式类
+const getFileIconClass = (fileName) => {
+  const ext = fileName?.split('.').pop()?.toLowerCase() || ''
+  const classMap = {
+    // 图片
+    'jpg': 'icon-image', 'jpeg': 'icon-image', 'png': 'icon-image', 'gif': 'icon-image',
+    // 视频
+    'mp4': 'icon-video', 'avi': 'icon-video', 'mov': 'icon-video',
+    // 音频
+    'mp3': 'icon-audio', 'wav': 'icon-audio', 'ogg': 'icon-audio',
+    // 文档
+    'pdf': 'icon-pdf', 'doc': 'icon-doc', 'docx': 'icon-doc', 'txt': 'icon-text',
+    // 表格
+    'xls': 'icon-sheet', 'xlsx': 'icon-sheet', 'csv': 'icon-sheet',
+    // 演示
+    'ppt': 'icon-ppt', 'pptx': 'icon-ppt'
+  }
+  return classMap[ext] || 'icon-default'
+}
 const handleFileDownload = () => {
   try {
     const content = JSON.parse(props.message.content)
@@ -312,9 +356,30 @@ const handleFileDownload = () => {
 
 .file-normal {
   cursor: pointer;
+  min-width: 200px;
 
   &:hover {
     background: var(--dt-bg-session-hover);
+  }
+
+  .file-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--dt-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &.icon-image { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+    &.icon-video { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+    &.icon-audio { background: var(--dt-success-bg); color: var(--dt-success-color); }
+    &.icon-pdf { background: var(--dt-error-bg); color: var(--dt-error-color); }
+    &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+    &.icon-sheet { background: var(--dt-success-bg); color: var(--dt-success-color); }
+    &.icon-ppt { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+    &.icon-text { background: var(--dt-bg-body); color: var(--dt-text-secondary); }
+    &.icon-default { background: var(--dt-bg-body); color: var(--dt-text-secondary); }
   }
 }
 
@@ -341,7 +406,16 @@ const handleFileDownload = () => {
   color: var(--dt-text-tertiary);
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm);
+  gap: var(--dt-spacing-xs);
+
+  .file-divider {
+    color: var(--dt-text-quaternary);
+  }
+
+  .file-action {
+    color: var(--dt-brand-color);
+    font-weight: var(--dt-font-weight-medium);
+  }
 }
 
 .file-size {
@@ -422,7 +496,7 @@ const handleFileDownload = () => {
 
     &.is-own {
       background: var(--dt-brand-active);
-      color: #ffffff;
+      color: var(--dt-text-primary);
     }
   }
 

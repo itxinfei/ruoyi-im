@@ -21,15 +21,21 @@
       </template>
     </div>
 
-    <!-- 极简的新消息提示 -->
-    <div v-if="showScrollBottom" class="new-msg-tip" @click="scrollToBottom">
-      有新消息
+    <!-- 新消息提示 -->
+    <div v-if="showScrollBottom && newMessageCount > 0" class="new-msg-tip" @click="scrollToBottom">
+      <el-icon><ArrowDown /></el-icon>
+      <span>{{ newMessageCount }} 条新消息</span>
+    </div>
+    <div v-else-if="showScrollBottom" class="new-msg-tip" @click="scrollToBottom">
+      <el-icon><ArrowDown /></el-icon>
+      <span>回到底部</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue'
+import { ArrowDown } from '@element-plus/icons-vue'
 import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
 
@@ -38,6 +44,8 @@ const emit = defineEmits(['load-more', 'show-user', 'retry'])
 
 const listRef = ref(null)
 const showScrollBottom = ref(false)
+const newMessageCount = ref(0)
+let lastMessageLength = 0
 
 const showTimeDivider = (msg, index) => {
   if (index === 0) return true
@@ -72,6 +80,7 @@ const scrollToBottom = () => {
   nextTick(() => {
     if (listRef.value) {
       listRef.value.scrollTop = listRef.value.scrollHeight
+      newMessageCount.value = 0
     }
   })
 }
@@ -82,8 +91,17 @@ const handleScroll = (e) => {
   if (scrollTop === 0 && !props.loading) emit('load-more')
 }
 
-watch(() => props.messages?.length, () => {
-  if (!showScrollBottom.value) scrollToBottom()
+watch(() => props.messages?.length, (newLength, oldLength) => {
+  // 计算新增消息数量
+  if (newLength > oldLength && oldLength !== undefined) {
+    newMessageCount.value += (newLength - oldLength)
+  }
+
+  if (!showScrollBottom.value) {
+    scrollToBottom()
+    newMessageCount.value = 0
+  }
+  lastMessageLength = newLength
 })
 
 onMounted(() => scrollToBottom())
@@ -106,10 +124,28 @@ defineExpose({ scrollToBottom, listRef })
 }
 
 .time-divider {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0;
   font-size: var(--dt-font-size-sm);
   color: var(--dt-text-quaternary);
-  margin: 8px 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--dt-border-color) 20%,
+      var(--dt-border-color) 80%,
+      transparent
+    );
+  }
 }
 
 .loading-status {
@@ -124,17 +160,25 @@ defineExpose({ scrollToBottom, listRef })
   bottom: 20px;
   right: 20px;
   background: var(--dt-brand-color);
-  color: #ffffff;
-  padding: 6px 16px;
+  color: var(--dt-text-primary);
+  padding: 8px 16px;
   border-radius: var(--dt-radius-full);
   font-size: var(--dt-font-size-sm);
   cursor: pointer;
   box-shadow: var(--dt-shadow-2);
   transition: all var(--dt-transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
   &:hover {
     background: var(--dt-brand-hover);
     transform: translateY(-1px);
+    box-shadow: var(--dt-shadow-3);
+  }
+
+  .el-icon {
+    font-size: 14px;
   }
 }
 </style>

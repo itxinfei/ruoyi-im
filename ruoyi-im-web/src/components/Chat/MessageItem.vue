@@ -19,18 +19,24 @@
       <div class="bubble-wrapper">
         <slot name="bubble"></slot>
 
-        <!-- 状态标识 (己方才显示) -->
-        <div v-if="message.isOwn" class="status">
-          <span v-if="message.status === 'sending'" class="loading">
+        <!-- 状态标识 (己方才显示) - 移至气泡内右下角 -->
+        <div v-if="message.isOwn" class="status-badge">
+          <template v-if="message.status === 'sending'">
             <el-icon class="is-loading"><Loading /></el-icon>
-          </span>
-          <span v-else-if="message.status === 'failed'" class="failed" @click="handleRetry">
-            <el-icon><WarningFilled /></el-icon>
-            重试
-          </span>
-          <span v-else :class="{ 'read': message.readCount > 0 }">
-            {{ message.readCount > 0 ? '已读' : '未读' }}
-          </span>
+          </template>
+          <template v-else-if="message.status === 'failed'">
+            <span class="failed-indicator" @click.stop="handleRetry">
+              <el-icon><WarningFilled /></el-icon>
+            </span>
+          </template>
+          <template v-else>
+            <span class="read-indicator" :class="{ 'is-read': message.readCount > 0 }">
+              <svg viewBox="0 0 24 24" class="check-icon">
+                <path v-if="message.readCount > 0" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                <path v-else d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+            </span>
+          </template>
         </div>
       </div>
     </div>
@@ -89,7 +95,61 @@ const handleRetry = () => {
 .bubble-wrapper {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  position: relative;
+}
+
+.status-badge {
+  position: absolute;
+  bottom: 4px;
+  right: -20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .is-loading {
+    font-size: 12px;
+    color: var(--dt-text-quaternary);
+  }
+
+  .failed-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: var(--dt-error-color);
+    border-radius: 50%;
+    cursor: pointer;
+
+    .el-icon {
+      font-size: 10px;
+      color: var(--dt-text-primary);
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .read-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .check-icon {
+      width: 14px;
+      height: 14px;
+      fill: var(--dt-text-quaternary);
+
+      &.is-read {
+        fill: var(--dt-brand-color);
+      }
+    }
+
+    &.is-read .check-icon {
+      fill: var(--dt-brand-color);
+    }
+  }
 }
 
 .status {
