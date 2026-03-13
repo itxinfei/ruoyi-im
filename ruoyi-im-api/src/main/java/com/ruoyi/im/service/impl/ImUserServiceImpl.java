@@ -22,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -40,6 +41,7 @@ import java.util.UUID;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImUserServiceImpl implements ImUserService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImUserServiceImpl.class);
@@ -54,6 +56,9 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Value("${file.upload.url-prefix}")
     private String urlPrefix;
+
+    @Value("${user.default-password:}")
+    private String defaultPassword;
 
     /**
      * 构造器注入依赖
@@ -225,13 +230,20 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public List<ImUserVO> getUserList(BasePageRequest request) {
+        int pageNum = request.getPageNum() != null && request.getPageNum() > 0 ? request.getPageNum() : 1;
+        int pageSize = request.getPageSize() != null && request.getPageSize() > 0 ? request.getPageSize() : 10;
+        if (pageSize > SystemConstants.MAX_PAGE_SIZE) {
+            pageSize = SystemConstants.MAX_PAGE_SIZE;
+        }
+        int offset = (pageNum - 1) * pageSize;
+
         ImUser queryUser = new ImUser();
-        List<ImUser> users = imUserMapper.selectImUserList(queryUser);
+        List<ImUser> users = imUserMapper.selectImUserListWithPagination(queryUser, offset, pageSize);
         List<ImUserVO> voList = new ArrayList<>();
         for (ImUser user : users) {
             ImUserVO vo = new ImUserVO();
             BeanUtils.copyProperties(user, vo);
-            vo.setOnline(true);
+            vo.setOnline(imRedisUtil.isOnlineUser(user.getId()));
             voList.add(vo);
         }
         return voList;
@@ -276,9 +288,8 @@ public class ImUserServiceImpl implements ImUserService {
         if (userIds == null || userIds.isEmpty()) {
             return;
         }
-        for (Long userId : userIds) {
-            imUserMapper.deleteImUserById(userId);
-        }
+        // 批量删除优化：使用Mapper的批量删除方法
+        imUserMapper.deleteImUserByIds(userIds.toArray(new Long[0]));
     }
 
     @Override
@@ -288,9 +299,10 @@ public class ImUserServiceImpl implements ImUserService {
             throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
-        // 重置为默认密码 123456
-        String defaultPassword = "123456";
-        user.setPassword(passwordEncoder.encode(defaultPassword));
+        // 重置为默认密码，从配置读取或使用随机密码
+        String pwd = (defaultPassword != null && !defaultPassword.isEmpty())
+                ? defaultPassword : UUID.randomUUID().toString().substring(0, 8);
+        user.setPassword(passwordEncoder.encode(pwd));
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
     }
@@ -328,42 +340,41 @@ public class ImUserServiceImpl implements ImUserService {
         String originalFilename = file.getOriginalFilename();
         String fileExtension = FileUtils.getFileExtension(originalFilename);
 
-        // 验证文件类型
         if (!FileUtils.isImage(originalFilename)) {
             throw new BusinessException("FILE_TYPE_ERROR", "只支持图片格式的头像");
         }
 
-        // 验证文件大小（最大配置值）
         long maxSize = SystemConstants.MAX_AVATAR_SIZE_MB * 1024 * 1024;
         if (file.getSize() > maxSize) {
             throw new BusinessException("FILE_SIZE_ERROR", "头像文件大小不能超过" + SystemConstants.MAX_AVATAR_SIZE_MB + "MB");
         }
 
-        // 生成文件名和路径
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
         String datePath = LocalDate.now().format(SystemConstants.DATE_FORMAT_SLASH);
         String relativePath = "avatar/" + datePath + "/" + fileName;
-        String filePath = uploadPath + relativePath;
 
-        // 确保目录存在
-        File targetFile = new File(filePath);
-        File parentDir = targetFile.getParentFile();
-        if (!parentDir.exists()) {
-            parentDir.mkdirs();
-        }
-
-        // 保存文件
         try {
+            File canonicalUploadPath = new File(uploadPath).getCanonicalFile();
+            File targetFile = new File(canonicalUploadPath, relativePath);
+            
+            String canonicalPath = targetFile.getCanonicalPath();
+            if (!canonicalPath.startsWith(canonicalUploadPath.getCanonicalPath() + File.separator)) {
+                throw new BusinessException("FILE_PATH_ERROR", "无效的文件路径");
+            }
+
+            File parentDir = targetFile.getParentFile();
+            if (!parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
             file.transferTo(targetFile);
         } catch (IOException e) {
             logger.error("头像上传失败: {}", e.getMessage(), e);
             throw new BusinessException("UPLOAD_FAILED", "头像上传失败");
         }
 
-        // 生成访问URL
         String avatarUrl = urlPrefix + relativePath;
 
-        // 更新用户头像
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
             throw new BusinessException("USER_NOT_EXIST", "用户不存在");
@@ -373,7 +384,6 @@ public class ImUserServiceImpl implements ImUserService {
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
 
-        // 清除缓存
         imRedisUtil.evictUserInfo(userId);
 
         logger.info("用户头像上传成功，userId={}, avatarUrl={}", userId, avatarUrl);

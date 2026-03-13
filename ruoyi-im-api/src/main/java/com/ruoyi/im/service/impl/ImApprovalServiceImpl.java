@@ -32,6 +32,7 @@ import java.util.Map;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImApprovalServiceImpl implements ImApprovalService {
 
     private static final Logger log = LoggerFactory.getLogger(ImApprovalServiceImpl.class);

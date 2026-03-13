@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.Set;
  * 通过 Redis Pub/Sub 实现跨节点消息转发
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastService {
 
     private static final Logger log = LoggerFactory.getLogger(ImWebSocketBroadcastServiceImpl.class);

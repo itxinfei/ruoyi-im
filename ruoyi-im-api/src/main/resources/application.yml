@@ -147,6 +147,14 @@ file:
     path: src/main/resources/uploads/
     url-prefix: /api/im/file/download/
 
+# CORS配置
+cors:
+  allowed-origins: http://localhost:3000,http://127.0.0.1:3000
+
+# 用户默认密码配置
+user:
+  default-password: ""
+
 # 日志配置
 logging:
   level:

@@ -85,6 +85,11 @@ const showDetailDialog = ref(false)
 const selectedApproval = ref(null)
 const activeTab = ref('pending')
 const approvals = ref([])
+const tabCounts = ref({
+  pending: 0,
+  processed: 0,
+  initiated: 0
+})
 
 
 const tabs = [
@@ -103,11 +108,12 @@ const loadApprovals = async () => {
   loading.value = true
   try {
     let res
-    if (activeTab.value === 'pending') {
+    const currentTab = activeTab.value
+    if (currentTab === 'pending') {
       res = await getPendingApprovals()
-    } else if (activeTab.value === 'processed') {
+    } else if (currentTab === 'processed') {
       res = await getProcessedApprovals()
-    } else if (activeTab.value === 'initiated') {
+    } else if (currentTab === 'initiated') {
       res = await getMyApprovals()
     }
 
@@ -116,6 +122,8 @@ const loadApprovals = async () => {
         ...item,
         bgColor: getRandomColor()
       }))
+      // 更新当前 tab 的计数
+      tabCounts.value[currentTab] = approvals.value.length
     } else {
       ElMessage.error(res.msg || '加载失败')
     }
@@ -134,9 +142,7 @@ const getRandomColor = () => {
 }
 
 const getCount = (tab) => {
-  if (tab === 'pending') return approvals.value.filter(a => a.status === 'pending').length
-  if (tab === 'processed') return approvals.value.filter(a => a.status !== 'pending').length
-  return 0
+  return tabCounts.value[tab] || 0
 }
 
 const statusText = (status) => {

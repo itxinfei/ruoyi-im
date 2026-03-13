@@ -1,8 +1,8 @@
 <template>
   <div class="chat-header">
     <!-- 左侧：头像 + 名称 + 状态 -->
-    <div class="header-left" @click="$emit('toggle-sidebar')">
-      <div class="avatar-wrapper">
+    <div class="header-left">
+      <div class="avatar-wrapper" @click="$emit('show-profile')">
         <el-avatar
           shape="square"
           :size="44"
@@ -17,24 +17,27 @@
           class="online-indicator"
         ></span>
       </div>
-      <div class="session-info">
+      <div class="session-info" @click="$emit('toggle-sidebar')">
         <div class="name">{{ session?.name }}</div>
         <div class="status">
+          <!-- 在线状态/成员数 -->
+          <template v-if="session?.type !== 'GROUP'">
+            <span class="status-dot" :class="session?.peerOnline ? 'online' : 'offline'"></span>
+            <span class="status-text">{{ session?.peerOnline ? '在线' : '离线' }}</span>
+          </template>
+          <template v-else>
+            <span class="status-text">{{ session?.memberCount || 0 }} 人</span>
+          </template>
+
+          <!-- 正在输入 -->
           <template v-if="isTyping">
+            <span class="status-separator">·</span>
             <span class="typing-indicator">
               <span class="typing-dot"></span>
               <span class="typing-dot"></span>
               <span class="typing-dot"></span>
             </span>
-            对方正在输入...
-          </template>
-          <template v-else-if="session?.type === 'GROUP'">
-            <i class="el-icon-user-group"></i>
-            {{ session?.memberCount || 0 }} 人
-          </template>
-          <template v-else>
-            <span class="status-dot" :class="session?.peerOnline ? 'online' : 'offline'"></span>
-            {{ session?.peerOnline ? '在线' : '离线' }}
+            <span class="typing-text">正在输入...</span>
           </template>
         </div>
       </div>
@@ -42,20 +45,22 @@
 
     <!-- 右侧：操作按钮 -->
     <div class="header-right">
-      <el-tooltip content="语音通话" placement="bottom">
-        <el-button :icon="Phone" link class="header-btn" @click="$emit('voice-call', session)" />
-      </el-tooltip>
-      <el-tooltip content="视频通话" placement="bottom">
-        <el-button :icon="VideoCamera" link class="header-btn" @click="$emit('video-call', session)" />
-      </el-tooltip>
-      <el-tooltip content="搜索" placement="bottom">
+      <el-tooltip content="搜索聊天记录" placement="bottom">
         <el-button :icon="Search" link class="header-btn" @click="$emit('search', session)" />
       </el-tooltip>
       <el-dropdown trigger="click" @command="(c) => $emit(c, session)">
         <el-button :icon="MoreFilled" link class="header-btn" />
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="files">
+            <el-dropdown-item command="voice-call">
+              <el-icon><Phone /></el-icon>
+              语音通话
+            </el-dropdown-item>
+            <el-dropdown-item command="video-call">
+              <el-icon><VideoCamera /></el-icon>
+              视频通话
+            </el-dropdown-item>
+            <el-dropdown-item command="files" divided>
               <el-icon><Folder /></el-icon>
               聊天文件
             </el-dropdown-item>
@@ -85,7 +90,7 @@ const props = defineProps({
     default: false
   }
 })
-defineEmits(['toggle-sidebar', 'files', 'pin', 'clear'])
+defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'search', 'files', 'pin', 'clear'])
 </script>
 
 <style scoped lang="scss">
@@ -108,20 +113,19 @@ defineEmits(['toggle-sidebar', 'files', 'pin', 'clear'])
     display: flex;
     align-items: center;
     gap: 12px;
-    cursor: pointer;
     min-width: 0;
-    padding: 8px 12px;
-    margin: -8px -12px;
-    border-radius: var(--dt-radius-md);
-    transition: background var(--dt-transition-fast);
-
-    &:hover {
-      background: var(--dt-bg-session-active);
-    }
 
     .avatar-wrapper {
       position: relative;
       flex-shrink: 0;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--dt-radius-md);
+      transition: background var(--dt-transition-fast);
+
+      &:hover {
+        background: var(--dt-brand-bg);
+      }
 
       .header-avatar {
         border-radius: var(--dt-radius-md);
@@ -147,6 +151,15 @@ defineEmits(['toggle-sidebar', 'files', 'pin', 'clear'])
       display: flex;
       flex-direction: column;
       min-width: 0;
+      cursor: pointer;
+      padding: 6px 10px;
+      margin: -6px -10px;
+      border-radius: var(--dt-radius-md);
+      transition: background var(--dt-transition-fast);
+
+      &:hover {
+        background: var(--dt-bg-session-active);
+      }
 
       .name {
         font-size: var(--dt-font-size-lg);
@@ -165,6 +178,16 @@ defineEmits(['toggle-sidebar', 'files', 'pin', 'clear'])
         font-size: var(--dt-font-size-sm);
         color: var(--dt-text-tertiary);
         margin-top: 2px;
+
+        .status-separator {
+          margin: 0 4px;
+          color: var(--dt-text-quaternary);
+        }
+
+        .typing-text {
+          color: var(--dt-brand-color);
+          font-size: var(--dt-font-size-sm);
+        }
 
         .typing-indicator {
           display: flex;
@@ -198,6 +221,10 @@ defineEmits(['toggle-sidebar', 'files', 'pin', 'clear'])
           &.offline {
             background: var(--dt-text-quaternary);
           }
+        }
+
+        .status-text {
+          flex-shrink: 0;
         }
 
         .el-icon {

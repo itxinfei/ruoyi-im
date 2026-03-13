@@ -19,6 +19,7 @@
           <ChatPanel
             :session="currentSession"
             @show-user="handleShowUser"
+            @create-group="handleCreateGroupFromChat"
           />
         </template>
 
@@ -117,9 +118,24 @@ const handleShowUser = (userId) => {
   showUserDetail.value = true
 }
 
-// 处理通话
+// 从聊天面板创建群聊
+const handleCreateGroupFromChat = () => {
+  activeModule.value = 'contacts'
+}
+
+// 处理通话 - 跳转到聊天页面发起通话
 const handleStartCall = (payload) => {
-  ElMessage.info(`${payload.type === 'video' ? '视频' : '语音'}通话功能开发中`)
+  if (payload?.user?.userId) {
+    activeModule.value = 'chat'
+    store.dispatch('im/session/findSession', { 
+      targetId: payload.user.userId, 
+      type: 'PRIVATE' 
+    }).then(session => {
+      if (session) {
+        store.commit('im/session/SET_CURRENT_SESSION', session)
+      }
+    })
+  }
 }
 
 // 初始化 WebSocket 监听

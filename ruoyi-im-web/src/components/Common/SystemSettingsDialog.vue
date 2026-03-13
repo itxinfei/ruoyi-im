@@ -250,6 +250,7 @@
       </div>
     </div>
     <ChangePasswordDialog v-model="showChangePassword" />
+    <EditProfileDialog v-model="showEditProfile" @success="handleProfileUpdated" />
   </el-dialog>
 </template>
 
@@ -260,6 +261,7 @@ import { useTheme } from '@/composables/useTheme'
 import { ElMessage } from 'element-plus'
 import { VideoPlay, Lock, Edit, Bell, Camera, Position, View, Document, Sunny, Moon, Monitor, Refresh } from '@element-plus/icons-vue'
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
+import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
 
 const props = defineProps({
   modelValue: Boolean
@@ -270,6 +272,7 @@ const emit = defineEmits(['update:modelValue'])
 const store = useStore()
 const visible = ref(false)
 const showChangePassword = ref(false)
+const showEditProfile = ref(false)
 const activeMenu = ref('account')
 const { isDark, themeMode, setThemeMode } = useTheme()
 
@@ -310,12 +313,16 @@ const testSound = () => {
 }
 
 const handleEditProfile = () => {
-  // TODO: 打开编辑资料弹窗
-  ElMessage.info('请在个人中心编辑资料')
+  showEditProfile.value = true
 }
 
 const checkUpdate = () => {
   ElMessage.success('当前已是最新版本')
+}
+
+const handleProfileUpdated = () => {
+  // 资料已更新，可以在这里刷新用户信息
+  ElMessage.success('个人资料已更新')
 }
 
 watch(() => props.modelValue, (val) => {

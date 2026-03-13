@@ -37,9 +37,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImMessageServiceImpl implements ImMessageService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageServiceImpl.class);
+
+    private static final String CACHE_KEY_CONVERSATION_LIST = "conversation:list:";
+    private static final int CACHE_EVICT_THRESHOLD = 20;
 
     private final ImMessageMapper imMessageMapper;
     private final ImUserMapper imUserMapper;
@@ -189,7 +193,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                 .selectByConversationId(conversationId);
 
         if (members != null && !members.isEmpty()) {
-            boolean shouldEvictCache = members.size() <= 20;
+            boolean shouldEvictCache = members.size() <= CACHE_EVICT_THRESHOLD;
 
             for (com.ruoyi.im.domain.ImConversationMember member : members) {
                 if (member != null && member.getUserId() != null && !member.getUserId().equals(userId)) {
@@ -197,13 +201,13 @@ public class ImMessageServiceImpl implements ImMessageService {
                     imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
 
                     if (shouldEvictCache) {
-                        redisUtil.delete("conversation:list:" + member.getUserId());
+                        redisUtil.delete(CACHE_KEY_CONVERSATION_LIST + member.getUserId());
                     }
                 }
             }
         }
 
-        redisUtil.delete("conversation:list:" + userId);
+        redisUtil.delete(CACHE_KEY_CONVERSATION_LIST + userId);
 
         ImMentionInfo mentionInfo = request.getMentionInfo();
         if (mentionInfo == null && request.getContent() != null) {
@@ -536,7 +540,6 @@ public class ImMessageServiceImpl implements ImMessageService {
         int readCount = 0;
         Long maxMessageId = null;
 
-        // 批量查询消息，避免 N+1 查询问题
         List<ImMessage> messages = imMessageMapper.selectImMessageListByIds(messageIds);
         for (ImMessage message : messages) {
             if (message != null && !message.getSenderId().equals(userId)) {
@@ -547,16 +550,13 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         }
 
-        // 减少未读消息数
         if (readCount > 0) {
             decrementSessionUnread(conversationId, userId, readCount);
             imConversationMemberMapper.decrementUnreadCount(conversationId, userId, readCount);
-            // 更新最后已读消息ID
             if (maxMessageId != null) {
                 updateSessionLastRead(conversationId, userId, maxMessageId);
                 imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, maxMessageId);
                 
-                // [核心同步点] 通知该用户的所有终端同步已读状态
                 try {
                     broadcastService.broadcastReadReceipt(conversationId, maxMessageId, userId);
                 } catch (Exception e) {
@@ -728,28 +728,25 @@ public class ImMessageServiceImpl implements ImMessageService {
             return "";
         }
 
-        // 查找关键词位置
-        int keywordIndex = content.toLowerCase().indexOf(keyword.toLowerCase());
+        String lowerContent = content.toLowerCase();
+        String lowerKeyword = keyword.toLowerCase();
+        int keywordIndex = lowerContent.indexOf(lowerKeyword);
         if (keywordIndex == -1) {
-            // 未找到关键词，返回前N个字符
             if (content.length() > snippetLength) {
                 return content.substring(0, snippetLength) + "...";
             }
             return content;
         }
 
-        // 计算片段起始位置
         int start = Math.max(0, keywordIndex - snippetLength / 2);
         int end = Math.min(content.length(), start + snippetLength);
 
-        // 调整起始位置以确保片段包含完整关键词
         if (end - start < snippetLength && start > 0) {
             start = Math.max(0, end - snippetLength);
         }
 
         String snippet = content.substring(start, end);
 
-        // 添加省略号
         if (start > 0) {
             snippet = "..." + snippet;
         }
@@ -757,8 +754,6 @@ public class ImMessageServiceImpl implements ImMessageService {
             snippet = snippet + "...";
         }
 
-        // 高亮关键词（使用简单的标记，前端可以进一步处理）
-        // 注意：这里只是简单的标记，实际高亮由前端CSS实现
         return snippet;
     }
 

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImFriendServiceImpl implements ImFriendService {
 
     private static final Logger log = LoggerFactory.getLogger(ImFriendServiceImpl.class);
@@ -188,7 +190,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
     @Override
     public List<ImFriendVO> getFriendList(Long userId) {
-        String cacheKey = "contact:list:" + userId;
+        String cacheKey = com.ruoyi.im.constant.SystemConstants.CACHE_KEY_CONTACT_LIST + userId;
 
         // 尝试从缓存获取
         @SuppressWarnings("unchecked")
@@ -269,16 +271,10 @@ public class ImFriendServiceImpl implements ImFriendService {
     }
 
     private void clearFriendListCache(Long userId) {
-        String cacheKey = "contact:list:" + userId;
+        String cacheKey = com.ruoyi.im.constant.SystemConstants.CACHE_KEY_CONTACT_LIST + userId;
         imRedisUtil.delete(cacheKey);
     }
 
-    /**
-     * 批量获取用户信息，避免N+1查询问题
-     * 
-     * @param userIds 用户ID列表
-     * @return 用户ID -> 用户信息的映射
-     */
     /**
      * 批量获取用户信息，避免N+1查询问题
      * 
@@ -546,31 +542,40 @@ public class ImFriendServiceImpl implements ImFriendService {
 
     @Override
     public List<ImUserVO> searchUsers(String keyword, Long userId) {
-        // 根据关键词搜索用户
         List<ImUser> userList = imUserMapper.selectImUserByKeyword(keyword);
+        
+        if (userList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Long> searchUserIds = userList.stream()
+                .map(ImUser::getId)
+                .filter(id -> !id.equals(userId))
+                .collect(Collectors.toList());
+        
+        if (searchUserIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        ImFriend query = new ImFriend();
+        query.setUserId(userId);
+        List<ImFriend> allFriends = imFriendMapper.selectImFriendList(query);
+        Set<Long> friendIds = allFriends.stream()
+                .filter(f -> f.getIsDeleted() == null || f.getIsDeleted() == 0)
+                .map(ImFriend::getFriendId)
+                .collect(Collectors.toSet());
 
         List<ImUserVO> result = new ArrayList<>();
         for (ImUser user : userList) {
-            // 排除自己和已经是好友的用户
             if (user.getId().equals(userId)) {
                 continue;
             }
-
-            // 检查是否已经是好友（SQL已过滤is_deleted=0）
-            ImFriend query = new ImFriend();
-            query.setUserId(userId);
-            query.setFriendId(user.getId());
-            List<ImFriend> existingFriends = imFriendMapper.selectImFriendList(query);
-
-            // 如果已经是好友，则跳过
-            boolean isFriend = existingFriends != null && !existingFriends.isEmpty();
-            if (isFriend) {
+            if (friendIds.contains(user.getId())) {
                 continue;
             }
 
             ImUserVO vo = new ImUserVO();
             BeanUtils.copyProperties(user, vo);
-            // 可以添加额外的状态标识
             result.add(vo);
         }
 

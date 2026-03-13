@@ -2,10 +2,22 @@
   <div class="message-input">
     <!-- 工具栏 -->
     <div class="toolbar">
-      <el-button :icon="Orange" link @click="insertEmoji('😀')" />
-      <el-button :icon="UserFilled" link @click="handleAtMemberClick" :disabled="!isGroupSession" />
-      <el-button :icon="Picture" link @click="triggerUpload('image')" />
-      <el-button :icon="Files" link @click="triggerUpload('file')" />
+      <button class="toolbar-btn" @click="insertEmoji('😀')">
+        <el-icon><ChatDotRound /></el-icon>
+        <span class="btn-label">表情</span>
+      </button>
+      <button class="toolbar-btn" @click="handleAtMemberClick" :disabled="!isGroupSession" :title="isGroupSession ? '@提及' : '只能在群聊中@成员'">
+        <el-icon><UserFilled /></el-icon>
+        <span class="btn-label">@</span>
+      </button>
+      <button class="toolbar-btn" @click="triggerUpload('image')">
+        <el-icon><Picture /></el-icon>
+        <span class="btn-label">图片</span>
+      </button>
+      <button class="toolbar-btn" @click="triggerUpload('file')">
+        <el-icon><Files /></el-icon>
+        <span class="btn-label">文件</span>
+      </button>
     </div>
 
     <!-- 输入区 -->
@@ -49,8 +61,8 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue'
-import { Orange, Picture, Files, UserFilled } from '@element-plus/icons-vue'
+import { ref, nextTick, watch, computed } from 'vue'
+import { ChatDotRound, Picture, Files, UserFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { parseUrlMetadata } from '@/api/im/urlMetadata'
 import AtMemberPicker from './AtMemberPicker.vue'
@@ -253,22 +265,65 @@ const onFileChange = (e) => {
 }
 
 .toolbar {
-  height: 32px;
+  height: 36px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  .el-button { font-size: 20px; color: var(--dt-text-secondary); &:hover { color: var(--dt-brand-color); } }
+  gap: 4px;
+
+  .toolbar-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 12px;
+    border: none;
+    background: transparent;
+    border-radius: var(--dt-radius-sm);
+    cursor: pointer;
+    color: var(--dt-text-secondary);
+    transition: all var(--dt-transition-fast);
+
+    .el-icon {
+      font-size: 18px;
+    }
+
+    .btn-label {
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    &:hover {
+      background: var(--dt-brand-bg);
+      color: var(--dt-brand-color);
+    }
+
+    &:active {
+      background: var(--dt-brand-lighter);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      &:hover {
+        background: transparent;
+        color: var(--dt-text-secondary);
+      }
+    }
+  }
 }
 
 .text-area {
   flex: 1;
   padding: 8px 0;
+  min-height: 40px;
   textarea {
     width: 100%;
-    height: 80px;
+    min-height: 40px;
+    max-height: 200px;
     border: none;
     outline: none;
-    resize: none;
+    resize: vertical;
     font-size: var(--dt-font-size-base);
     color: var(--dt-text-primary);
     background: transparent;
@@ -279,6 +334,14 @@ const onFileChange = (e) => {
 .footer {
   display: flex;
   justify-content: flex-end;
+  padding-top: 8px;
+
+  .el-button {
+    min-width: 100px;
+    height: 36px;
+    font-size: 14px;
+    font-weight: 500;
+  }
 }
 
 // 暗色模式适配

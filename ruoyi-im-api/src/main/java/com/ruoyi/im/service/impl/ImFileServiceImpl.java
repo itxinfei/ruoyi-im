@@ -56,15 +56,21 @@ public class ImFileServiceImpl implements ImFileService {
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
         String datePath = LocalDate.now().format(SystemConstants.DATE_FORMAT_SLASH);
         String relativePath = datePath + "/" + fileName;
-        String filePath = uploadPath + relativePath;
-
-        File targetFile = new File(filePath);
-        File parentDir = targetFile.getParentFile();
-        if (!parentDir.exists()) {
-            parentDir.mkdirs();
-        }
 
         try {
+            File canonicalUploadPath = new File(uploadPath).getCanonicalFile();
+            File targetFile = new File(canonicalUploadPath, relativePath);
+            
+            String canonicalPath = targetFile.getCanonicalPath();
+            if (!canonicalPath.startsWith(canonicalUploadPath.getCanonicalPath() + File.separator)) {
+                throw new BusinessException("无效的文件路径");
+            }
+
+            File parentDir = targetFile.getParentFile();
+            if (!parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
             file.transferTo(targetFile);
         } catch (IOException e) {
             logger.error("文件上传失败: {}", e.getMessage(), e);

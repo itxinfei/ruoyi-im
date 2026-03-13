@@ -57,6 +57,20 @@ public final class SystemConstants {
     /** 1分钟（秒） */
     public static final int CACHE_EXPIRE_1_MINUTE = 60;
 
+    // ========== 缓存 Key 前缀 ==========
+
+    /** 会话列表缓存 Key 前缀 */
+    public static final String CACHE_KEY_CONVERSATION_LIST = "conversation:list:";
+
+    /** 联系人/好友列表缓存 Key 前缀 */
+    public static final String CACHE_KEY_CONTACT_LIST = "contact:list:";
+
+    /** 用户信息缓存 Key 前缀 */
+    public static final String CACHE_KEY_USER_INFO = "user:info:";
+
+    /** 群组信息缓存 Key 前缀 */
+    public static final String CACHE_KEY_GROUP_INFO = "group:info:";
+
     // ========== 文件限制 ==========
 
     /** 最大文件大小（MB） */

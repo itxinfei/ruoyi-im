@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImDocumentServiceImpl implements ImDocumentService {
 
     private static final Logger log = LoggerFactory.getLogger(ImDocumentServiceImpl.class);

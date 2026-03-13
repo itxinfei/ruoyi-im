@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImVideoCallServiceImpl implements ImVideoCallService {
 
     private static final Logger log = LoggerFactory.getLogger(ImVideoCallServiceImpl.class);

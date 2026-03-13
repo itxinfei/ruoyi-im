@@ -27,7 +27,7 @@
           </div>
         </header>
         <div v-if="currentView === 'day'" class="day-view">
-          <el-empty :image-size="80" description="日视图功能开发中" />
+          <el-empty :image-size="80" description="日视图即将推出" />
         </div>
         <div v-if="currentView === 'week'" class="week-view">
           <div class="week-header">

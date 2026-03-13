@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImTaskServiceImpl implements ImTaskService {
 
     private static final Logger log = LoggerFactory.getLogger(ImTaskServiceImpl.class);

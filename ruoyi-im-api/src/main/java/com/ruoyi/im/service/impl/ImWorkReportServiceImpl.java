@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
  * 工作日志服务实现
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImWorkReportServiceImpl implements ImWorkReportService {
 
     @Autowired

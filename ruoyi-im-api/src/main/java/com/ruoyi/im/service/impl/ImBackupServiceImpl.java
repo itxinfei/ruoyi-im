@@ -44,6 +44,7 @@ import java.util.Optional;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImBackupServiceImpl implements ImBackupService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImBackupServiceImpl.class);
@@ -72,6 +73,10 @@ public class ImBackupServiceImpl implements ImBackupService {
     @Value("${spring.datasource.username:root}")
     private String datasourceUsername;
 
+    /**
+     * 数据库密码 - 通过环境变量或安全配置获取
+     * 警告: 避免在日志中打印此值
+     */
     @Value("${spring.datasource.password:}")
     private String datasourcePassword;
 
@@ -165,17 +170,17 @@ public class ImBackupServiceImpl implements ImBackupService {
             throw new RuntimeException("备份文件不存在");
         }
 
-        // 删除物理文件
         if (backup.getFilePath() != null && !backup.getFilePath().isEmpty()) {
             try {
-                Files.deleteIfExists(Paths.get(backup.getFilePath()));
-                logger.info("已删除备份文件: {}", backup.getFilePath());
+                Path filePath = Paths.get(backup.getFilePath());
+                if (Files.deleteIfExists(filePath)) {
+                    logger.info("已删除备份文件: {}", backup.getFilePath());
+                }
             } catch (IOException e) {
-                logger.warn("删除备份文件失败: {}", backup.getFilePath(), e);
+                logger.warn("删除备份文件失败: {}, 将继续删除数据库记录", backup.getFilePath(), e);
             }
         }
 
-        // 删除数据库记录
         imBackupMapper.deleteById(backupId);
 
         logger.info("备份删除完成，ID: {}", backupId);

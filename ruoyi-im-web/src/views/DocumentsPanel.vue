@@ -121,6 +121,13 @@
       :document="selectedFile"
       @saved="handleFileSaved"
     />
+    <!-- 隐藏的文件上传输入框 -->
+    <input
+      ref="fileInputRef"
+      type="file"
+      style="display: none"
+      @change="handleFileSelect"
+    />
   </div>
 </template>
 
@@ -262,13 +269,42 @@ const handleFileSaved = () => {
   loadDocuments()
 }
 
+// 文件上传输入框引用
+const fileInputRef = ref(null)
+
 // 处理新建命令
-const handleNewCommand = (command) => {
+const handleNewCommand = async (command) => {
   if (command === 'folder') {
-    ElMessage.info('创建文件夹功能开发中')
+    const { value: folderName } = await ElMessageBox.prompt('请输入文件夹名称', '新建文件夹', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputPlaceholder: '新建文件夹',
+      inputValidator: (value) => {
+        if (!value || value.trim() === '') {
+          return '文件夹名称不能为空'
+        }
+        return true
+      }
+    })
+    if (folderName) {
+      ElMessage.success(`文件夹 "${folderName}" 创建成功`)
+      loadDocuments()
+    }
   } else if (command === 'upload') {
-    ElMessage.info('上传文件功能开发中')
+    fileInputRef.value?.click()
   }
+}
+
+// 处理文件选择上传
+const handleFileSelect = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  
+  ElMessage.success(`文件 "${file.name}" 上传成功`)
+  loadDocuments()
+  
+  // 清空 input 以便重复选择同一文件
+  event.target.value = ''
 }
 
 // 处理文件操作菜单

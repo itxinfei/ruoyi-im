@@ -35,17 +35,18 @@ public class JwtUtils {
 
     private String secret;
     private long expiration;
+    private SecretKey signingKey;
 
     @PostConstruct
     public void init() {
-        if (imConfig != null && imConfig.getJwt() != null) {
+        if (imConfig != null && imConfig.getJwt() != null && imConfig.getJwt().getSecret() != null) {
             this.secret = imConfig.getJwt().getSecret();
             this.expiration = imConfig.getJwt().getExpiration();
+            this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
             LOGGER.info("JWT配置已加载 - 过期时间: {}ms", expiration);
         } else {
-            LOGGER.warn("JWT配置未正确加载，使用默认值");
-            this.secret = "default_secret_key_2024_for_im_system";
-            this.expiration = 86400000L;
+            LOGGER.error("JWT配置未正确加载，请配置JWT密钥");
+            throw new IllegalStateException("JWT secret must be configured. Please set 'jwt.secret' in application.yml");
         }
     }
 
@@ -56,8 +57,7 @@ public class JwtUtils {
      * @return 签名密钥
      */
     private SecretKey getSigningKey() {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return signingKey;
     }
 
     /**

@@ -33,6 +33,7 @@ import java.util.List;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImConversationServiceImpl implements ImConversationService {
 
     private static final Logger log = LoggerFactory.getLogger(ImConversationServiceImpl.class);
@@ -121,7 +122,7 @@ public class ImConversationServiceImpl implements ImConversationService {
      * @return 会话列表
      */
     private List<ImConversationVO> getUserConversationsOptimized(Long userId) {
-        String cacheKey = "conversation:list:" + userId;
+        String cacheKey = SystemConstants.CACHE_KEY_CONVERSATION_LIST + userId;
 
         // 尝试从缓存获取
         @SuppressWarnings("unchecked")

@@ -76,6 +76,13 @@
         </div>
         <div v-if="session.isPinned" class="pin-tag"></div>
       </div>
+
+      <!-- 空状态 -->
+      <div v-if="!loading && sortedSessions.length === 0" class="empty-state">
+        <span class="material-icons-outlined empty-icon">chat_bubble_outline</span>
+        <p class="empty-text">暂无会话</p>
+        <p class="empty-hint">开始对话或创建群聊吧</p>
+      </div>
     </div>
 
     <!-- 全局搜索弹窗 -->
@@ -88,20 +95,39 @@
     />
 
     <!-- 右键菜单 (Element Plus 改版) -->
-    <div v-if="contextMenu.show" class="context-menu-layer" :style="contextMenuStyle" @click.stop>
-      <div class="menu-item" @click="doAction('mark-read')"><el-icon><Check /></el-icon> 标记已读</div>
-      <div class="menu-item" @click="doAction('toggle-pin')"><el-icon><Top /></el-icon> {{ contextMenu.session?.isPinned ? '取消置顶' : '置顶会话' }}</div>
-      <div class="menu-divider"></div>
-      <div class="menu-item danger" @click="doAction('delete')"><el-icon><Delete /></el-icon> 删除会话</div>
-    </div>
+    <teleport to="body">
+      <div
+        v-if="contextMenu.show"
+        class="context-menu-layer"
+        :style="contextMenuStyle"
+        @click.stop
+        v-click-outside="closeContextMenu"
+        @keydown.esc="closeContextMenu"
+      >
+        <div class="menu-item" @click="doAction('mark-read')">
+          <el-icon><Check /></el-icon>
+          <span>标记已读</span>
+        </div>
+        <div class="menu-item" @click="doAction('toggle-pin')">
+          <el-icon><Top /></el-icon>
+          <span>{{ contextMenu.session?.isPinned ? '取消置顶' : '置顶会话' }}</span>
+        </div>
+        <div class="menu-divider"></div>
+        <div class="menu-item danger" @click="doAction('delete')">
+          <el-icon><Delete /></el-icon>
+          <span>删除会话</span>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElDialog } from 'element-plus'
 import { Search, Plus, BellFilled, Check, Top, Delete } from '@element-plus/icons-vue'
+import { ClickOutside as vClickOutside } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import CreateGroupDialog from '@/components/Chat/CreateGroupDialog.vue'
@@ -119,10 +145,7 @@ const showCreateGroupDialog = ref(false)
 const subMenuTabs = ref([
   { key: 'all', label: '全部', count: 0 },
   { key: 'unread', label: '未读', count: 0 },
-  { key: 'pinned', label: '置顶', count: 0 },
-  { key: 'muted', label: '免打扰', count: 0 },
-  { key: 'group', label: '群聊', count: 0 },
-  { key: 'file', label: '文件', count: 0 }
+  { key: 'pinned', label: '置顶', count: 0 }
 ])
 
 const sessions = computed(() => store.state.im.session.sessions)
@@ -136,13 +159,7 @@ const filterCounts = computed(() => {
   return {
     all: all.length,
     unread: all.filter(s => s.unreadCount > 0).length,
-    pinned: all.filter(s => s.isPinned).length,
-    muted: all.filter(s => s.isMuted).length,
-    group: all.filter(s => s.type === 'GROUP').length,
-    file: all.filter(s => {
-      const type = s.lastMessageType?.toUpperCase()
-      return type === 'FILE' || type === 'IMAGE'
-    }).length
+    pinned: all.filter(s => s.isPinned).length
   }
 })
 
@@ -178,12 +195,46 @@ const contextMenu = reactive({ show: false, x: 0, y: 0, session: null })
 const contextMenuStyle = computed(() => ({ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }))
 
 const handleContextMenu = (e, session) => {
+  // 计算菜单位置，确保不超出视窗
+  const menuWidth = 180
+  const menuHeight = 140
+  const windowWidth = window.innerWidth
+  const windowHeight = window.innerHeight
+
+  let x = e.clientX
+  let y = e.clientY
+
+  // 右边界检测
+  if (x + menuWidth > windowWidth) {
+    x = windowWidth - menuWidth - 8
+  }
+  // 下边界检测
+  if (y + menuHeight > windowHeight) {
+    y = windowHeight - menuHeight - 8
+  }
+
   contextMenu.show = true
-  contextMenu.x = e.clientX
-  contextMenu.y = e.clientY
+  contextMenu.x = x
+  contextMenu.y = y
   contextMenu.session = session
-  const hide = () => { contextMenu.show = false; document.removeEventListener('click', hide) }
-  setTimeout(() => document.addEventListener('click', hide), 10)
+
+  // 添加键盘监听
+  document.addEventListener('keydown', handleEscKey)
+  // 点击外部关闭
+  setTimeout(() => {
+    document.addEventListener('click', closeContextMenu, { once: true })
+  }, 10)
+}
+
+const closeContextMenu = () => {
+  contextMenu.show = false
+  document.removeEventListener('keydown', handleEscKey)
+}
+
+const handleEscKey = (e) => {
+  if (e.key === 'Escape') {
+    closeContextMenu()
+  }
 }
 
 const handleFilterChange = (key) => { 
@@ -233,7 +284,11 @@ const doAction = (cmd) => {
       })
       break
     case 'delete':
-      store.dispatch('im/session/deleteSession', contextMenu.session.id)
+      ElMessageBox.confirm('确定删除该会话吗？', '提示', { type: 'warning' })
+        .then(() => {
+          store.dispatch('im/session/deleteSession', contextMenu.session.id)
+        })
+        .catch(() => {})
       break
   }
 }
@@ -387,6 +442,32 @@ onMounted(async () => {
   overflow-y: auto;
 }
 
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dt-spacing-xl);
+  color: var(--dt-text-tertiary);
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: var(--dt-spacing-md);
+    opacity: 0.5;
+  }
+
+  .empty-text {
+    font-size: var(--dt-font-size-md);
+    margin: 0;
+  }
+
+  .empty-hint {
+    font-size: var(--dt-font-size-sm);
+    margin: var(--dt-spacing-xs) 0 0;
+    opacity: 0.7;
+  }
+}
+
 .session-item {
   display: flex;
   padding: var(--dt-spacing-md);
@@ -406,13 +487,24 @@ onMounted(async () => {
 
   &.pinned {
     background: var(--dt-bg-body);
-    &::after {
-      content: "";
+    border-left: 3px solid var(--dt-brand-color);
+
+    &::before {
+      content: '\e6a1'; // Element Plus 置顶图标
+      font-family: 'element-icons';
       position: absolute;
-      top: 0;
-      left: 0;
-      border-top: 6px solid var(--dt-brand-color);
-      border-right: 6px solid transparent;
+      top: 4px;
+      right: 4px;
+      font-size: 10px;
+      color: var(--dt-brand-color);
+      opacity: 0.7;
+    }
+
+    .session-name::before {
+      content: '[置顶] ';
+      color: var(--dt-brand-color);
+      font-weight: 600;
+      font-size: 12px;
     }
   }
 
@@ -422,8 +514,8 @@ onMounted(async () => {
 
     .unread-count-badge {
       position: absolute;
-      top: -4px;
-      right: -4px;
+      top: -2px;
+      right: -2px;
       background: var(--dt-error-color);
       color: var(--dt-bg-card);
       font-size: 10px;
@@ -432,7 +524,7 @@ onMounted(async () => {
       padding: 0 4px;
       border-radius: var(--dt-radius-full);
       @include flex-center;
-      border: 1.5px solid var(--dt-bg-card);
+      border: 2px solid var(--dt-bg-session-list);
       box-shadow: 0 2px 4px rgba(245, 74, 69, 0.2);
       font-weight: 600;
       z-index: 1;
@@ -534,6 +626,17 @@ onMounted(async () => {
     }
 
     .el-icon { font-size: 16px; }
+
+    span {
+      flex: 1;
+    }
+
+    .shortcut {
+      font-size: 11px;
+      color: var(--dt-text-quaternary);
+      margin-left: auto;
+      padding-left: var(--dt-spacing-md);
+    }
   }
 
   .menu-divider {

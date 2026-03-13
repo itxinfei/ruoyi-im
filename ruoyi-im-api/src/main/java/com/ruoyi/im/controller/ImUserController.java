@@ -14,6 +14,7 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @Tag(name = "用户管理", description = "用户信息查询、更新、头像上传、密码修改等接口")
+@Validated
 @RestController
 @RequestMapping("/api/im/user")
 public class ImUserController {
@@ -107,9 +109,20 @@ public class ImUserController {
     @Operation(summary = "批量获取用户信息", description = "根据用户ID列表批量获取用户基本信息")
     @GetMapping("/batch")
     public Result<List<ImUserVO>> getBatch(@RequestParam String ids) {
+        if (ids == null || ids.trim().isEmpty()) {
+            return Result.fail("参数不能为空");
+        }
         List<Long> idList = java.util.Arrays.stream(ids.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
+        if (idList.isEmpty()) {
+            return Result.fail("无效的用户ID");
+        }
+        if (idList.size() > 100) {
+            return Result.fail("单次查询不能超过100个用户");
+        }
         List<ImUserVO> list = imUserService.getUsersByIds(idList);
         return Result.success(list);
     }

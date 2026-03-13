@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
 
     private static final Logger logger = LoggerFactory.getLogger(ImVoiceTranscriptServiceImpl.class);

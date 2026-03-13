@@ -99,6 +99,14 @@
 
     <!-- 群文件面板 -->
     <GroupFilePanel ref="groupFilePanelRef" :group-id="groupId" />
+
+    <!-- 邀请成员弹窗 -->
+    <InviteMemberDialog
+      v-model="showInviteDialog"
+      :group-id="groupId"
+      :existing-members="members"
+      @success="handleInviteSuccess"
+    />
   </el-dialog>
 </template>
 
@@ -116,6 +124,7 @@ import {
   updateGroup,
   setGroupMute
 } from '@/api/im/group'
+import InviteMemberDialog from './InviteMemberDialog.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -134,6 +143,7 @@ const groupInfo = ref(null)
 const members = ref([])
 const currentUserId = ref(null)
 const groupFilePanelRef = ref(null)
+const showInviteDialog = ref(false)
 
 const loadCurrentUser = () => {
   const info = localStorage.getItem('user_info')
@@ -241,8 +251,12 @@ const handleLeave = () => {
 }
 
 const handleAddMembers = () => {
-  // TODO: 打开邀请成员弹窗
-  ElMessage.info('请在群聊中邀请成员')
+  showInviteDialog.value = true
+}
+
+const handleInviteSuccess = () => {
+  // 刷新成员列表
+  loadGroupDetail()
 }
 
 // 打开群文件面板

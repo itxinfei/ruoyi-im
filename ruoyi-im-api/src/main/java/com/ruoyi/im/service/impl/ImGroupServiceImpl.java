@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
  * @author ruoyi
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ImGroupServiceImpl implements ImGroupService {
 
     private final ImGroupMapper imGroupMapper;
@@ -299,15 +300,17 @@ public class ImGroupServiceImpl implements ImGroupService {
             throw new BusinessException("无权限添加成员");
         }
 
-        if (group.getMemberCount() + userIds.size() > group.getMaxMembers()) {
-            throw new BusinessException("群组成员数量已达上限");
-        }
-
         // 查找群组对应的会话
         ImConversation conversation = imConversationMapper.selectByTypeAndTarget("GROUP", groupId, null);
 
         int addedCount = 0;
         for (Long userId : userIds) {
+            // 检查成员数量上限（每次添加前检查，防止超限）
+            ImGroup currentGroup = imGroupMapper.selectImGroupById(groupId);
+            if (currentGroup.getMemberCount() + addedCount >= currentGroup.getMaxMembers()) {
+                break;
+            }
+
             ImGroupMember existing = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
             if (existing != null) {
                 continue;
@@ -330,12 +333,15 @@ public class ImGroupServiceImpl implements ImGroupService {
             }
         }
 
-        group.setMemberCount(group.getMemberCount() + addedCount);
-        group.setUpdateTime(LocalDateTime.now());
-        imGroupMapper.updateImGroup(group);
+        if (addedCount > 0) {
+            group = imGroupMapper.selectImGroupById(groupId);
+            group.setMemberCount(group.getMemberCount() + addedCount);
+            group.setUpdateTime(LocalDateTime.now());
+            imGroupMapper.updateImGroup(group);
 
-        // 清除缓存
-        imRedisUtil.evictGroupInfo(groupId);
+            // 清除缓存
+            imRedisUtil.evictGroupInfo(groupId);
+        }
     }
 
     @Override
@@ -515,11 +521,9 @@ public class ImGroupServiceImpl implements ImGroupService {
      * @param userId         用户ID
      */
     private void addConversationMember(Long conversationId, Long userId) {
-        // ... (unchanged)
         ImConversationMember existing = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId,
                 userId);
         if (existing != null) {
-            // 用户已存在，恢复状态（如果被删除）
             if (existing.getIsDeleted() != null && existing.getIsDeleted() == 1) {
                 existing.setIsDeleted(0);
                 existing.setUpdateTime(LocalDateTime.now());

@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -33,6 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  * 消息控制器
  * 提供消息发送、消息列表查询、消息撤回、消息已读标记、表情反应等功能
@@ -40,6 +44,7 @@ import java.util.Map;
  * @author ruoyi
  */
 @Tag(name = "消息管理", description = "消息发送、查询、撤回、转发、回复、表情反应等接口")
+@Validated
 @RestController
 @RequestMapping("/api/im/message")
 public class ImMessageController {

@@ -209,17 +209,17 @@ const getIconClass = (type) => {
 
 // 编辑文档
 const handleEdit = () => {
-  ElMessage.info('编辑功能开发中')
+  ElMessage.info('文档编辑功能即将推出')
 }
 
 // 分享文档
 const handleShare = () => {
-  ElMessage.info('分享功能开发中')
+  ElMessage.info('文档分享功能即将推出，请使用复制链接方式分享')
 }
 
 // 下载文档
 const handleDownload = () => {
-  ElMessage.info('下载功能开发中')
+  ElMessage.info('文档下载功能即将推出')
 }
 
 // 关闭

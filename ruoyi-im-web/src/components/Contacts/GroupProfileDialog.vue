@@ -210,11 +210,32 @@ const handleToggleMute = async (val) => {
 
 const handleMemberClick = (m) => { emit('show-user', m.userId) }
 const handleAddMember = () => { emit('add-member', props.groupId) }
-const handleEditName = () => { ElMessage.info('功能开发中') }
-const handleViewAnnouncement = () => { ElMessage.info('功能开发中') }
-const handleEditNickname = () => { ElMessage.info('功能开发中') }
-const handleGroupManage = () => { ElMessage.info('功能开发中') }
-const handleMemberManage = () => { ElMessage.info('功能开发中') }
+
+const handleEditName = () => {
+  ElMessage.info('请在群聊中发送消息呼唤AI助手修改群名称')
+}
+
+const handleViewAnnouncement = () => {
+  if (groupDetail.value?.announcement) {
+    ElMessageBox.alert(groupDetail.value.announcement, '群公告', {
+      confirmButtonText: '确定'
+    })
+  } else {
+    ElMessage.info('暂无群公告')
+  }
+}
+
+const handleEditNickname = () => {
+  ElMessage.info('请在群聊中发送消息呼唤AI助手修改群昵称')
+}
+
+const handleGroupManage = () => {
+  ElMessage.info('群管理功能请使用通讯录-群管理')
+}
+
+const handleMemberManage = () => {
+  ElMessage.info('成员管理：点击上方成员列表进行管理')
+}
 
 const handleExitGroup = async () => {
   try {

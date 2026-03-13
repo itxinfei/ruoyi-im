@@ -1,10 +1,9 @@
 package com.ruoyi.im.util;
 
 import com.ruoyi.im.domain.ImUser;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -20,6 +19,13 @@ import org.springframework.stereotype.Component;
 public class SecurityUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtils.class);
+
+    private static JwtUtils jwtUtils;
+
+    @Autowired
+    public void setJwtUtils(JwtUtils jwtUtils) {
+        SecurityUtils.jwtUtils = jwtUtils;
+    }
 
     /**
      * 获取当前认证用户
@@ -67,17 +73,15 @@ public class SecurityUtils {
                 if (principal instanceof ImUser) {
                     return ((ImUser) principal).getId();
                 } else if (principal instanceof String && "anonymousUser".equals(principal)) {
-                    // 匿名用户
                     return null;
                 } else {
-                    // 其他类型的principal，记录日志
                     LOGGER.warn("未知的principal类型: {}", principal != null ? principal.getClass().getName() : "null");
                     return null;
                 }
             }
         } catch (Exception e) {
             LOGGER.error("获取当前用户ID时发生异常", e);
-            throw new RuntimeException("获取用户信息失败", e);
+            return null;
         }
         return null;
     }
@@ -100,11 +104,12 @@ public class SecurityUtils {
      */
     public static String getUsernameFromToken(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey("ruoyi-im-secret-key") // 应该从配置中获取
-                    .parseClaimsJws(token)
-                    .getBody();
-            return claims.getSubject();
+            // 复用 JwtUtils 的方法，避免硬编码密钥
+            if (jwtUtils == null) {
+                LOGGER.error("JwtUtils 未初始化，无法解析Token");
+                return null;
+            }
+            return jwtUtils.getUsernameFromToken(token);
         } catch (Exception e) {
             LOGGER.error("解析Token失败", e);
             return null;
