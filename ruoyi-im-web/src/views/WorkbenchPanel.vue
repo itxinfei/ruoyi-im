@@ -579,9 +579,9 @@ onUnmounted(() => {
     &.icon-green { background: var(--dt-success-bg); color: var(--dt-success-color); }
     &.icon-purple { background: var(--dt-info-bg); color: var(--dt-info-color); }
     &.icon-pink { background: var(--dt-error-bg); color: var(--dt-error-color); }
-    &.icon-teal { background: var(--dt-brand-bg); color: #08979c; }
+    &.icon-teal { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
     &.icon-indigo { background: var(--dt-brand-lighter); color: var(--dt-brand-color); }
-    &.icon-cyan { background: #e6fffe; color: #08bdb2; }
+    &.icon-cyan { background: var(--dt-info-bg); color: var(--dt-info-color); }
   }
 
   &__label {

@@ -156,11 +156,11 @@ onMounted(loadSettings)
 .settings-scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: var(--dt-spacing-xl);
 }
 
 .settings-group {
-  margin-bottom: 24px;
+  margin-bottom: var(--dt-spacing-xl);
 
   .group-title {
     font-size: 13px;
@@ -230,9 +230,9 @@ onMounted(loadSettings)
   .app-brand {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--dt-brand-color) 0%, #0284c7 100%);
+    background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
     border-radius: 12px;
-    color: #fff;
+    color: var(--dt-text-primary);
     display: flex;
     align-items: center;
     justify-content: center;

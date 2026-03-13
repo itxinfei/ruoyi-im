@@ -166,7 +166,7 @@ onMounted(loadUser)
 
   .hero-bg {
     height: 100px;
-    background: linear-gradient(120deg, var(--dt-brand-color) 0%, #6366f1 100%);
+    background: linear-gradient(120deg, var(--dt-brand-color) 0%, var(--dt-info-color) 100%);
   }
 
   .hero-content {
@@ -192,7 +192,7 @@ onMounted(loadUser)
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #fff;
+        color: var(--dt-text-primary);
         opacity: 0;
         transition: 0.2s;
       }

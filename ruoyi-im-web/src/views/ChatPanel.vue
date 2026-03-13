@@ -16,14 +16,17 @@
       <div class="chat-main-canvas">
         <div class="chat-main-canvas__body">
           <!-- 头部 (强制 Key 刷新，解决重构失效) -->
-          <ChatHeader 
+          <ChatHeader
             :key="session.id"
-            :session="session" 
+            :session="session"
             :is-typing="isTyping"
             @toggle-sidebar="handleHeaderClick"
+            @show-profile="handleShowProfile"
             @voice-call="handleVoiceCall"
             @video-call="handleVideoCall"
             @search="handleOpenSearch"
+            @files="handleOpenFiles"
+            @pin="handlePinSession"
             @clear="handleClearMessages"
           />
 
@@ -93,6 +96,7 @@ import { initiateCall } from '@/api/im/videoCall'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const props = defineProps({ session: Object })
+const emit = defineEmits(['show-user', 'create-group'])
 const store = useStore()
 const currentUser = computed(() => store.getters['user/currentUser'])
 const messages = ref([])
@@ -227,6 +231,11 @@ const handleHeaderClick = () => {
   }
 }
 
+const handleShowProfile = () => {
+  // 点击头像同样打开详情，与点击名称区域一致
+  handleHeaderClick()
+}
+
 const handleShowUserProfile = (userId) => {
   activeUserId.value = userId
   showUserDetail.value = true
@@ -344,7 +353,23 @@ const handleClearMessages = () => {
   })
 }
 
-const handleOpenCreateGroup = () => ElMessage.info('请通过通讯录发起')
+const handleOpenFiles = () => {
+  showGlobalSearch.value = true
+}
+
+const handlePinSession = () => {
+  const newPinnedState = !props.session?.isPinned
+  store.dispatch('im/session/pinSession', {
+    sessionId: props.session.id,
+    pinned: newPinnedState
+  }).then(() => {
+    ElMessage.success(newPinnedState ? '已置顶会话' : '已取消置顶')
+  })
+}
+
+const handleOpenCreateGroup = () => {
+  emit('create-group')
+}
 
 /**
  * 加载更多历史消息（分页）
@@ -602,7 +627,7 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .chat-panel-container { height: 100%; flex: 1; min-width: 0; background: var(--dt-bg-card); display: flex; flex-direction: column; overflow: hidden; position: relative; }
-.welcome-logo-box { width: 64px; height: 64px; background: var(--dt-brand-color); border-radius: var(--dt-radius-xl); color: #ffffff; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--dt-spacing-xl); box-shadow: var(--dt-shadow-3); }
+.welcome-logo-box { width: 64px; height: 64px; background: var(--dt-brand-color); border-radius: var(--dt-radius-xl); color: var(--dt-text-primary); font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--dt-spacing-xl); box-shadow: var(--dt-shadow-3); }
 .chat-main-canvas { height: 100%; width: 100%; display: flex; flex-direction: column; overflow: hidden; &__body { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--dt-bg-chat); overflow: hidden; } }
 .chat-input-area { flex-shrink: 0; background: var(--dt-bg-card); border-top: 1px solid var(--dt-border-light); min-height: 140px; z-index: 10; display: flex; flex-direction: column; }
 </style>

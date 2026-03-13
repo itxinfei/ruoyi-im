@@ -422,7 +422,7 @@ loadHotKeywords()
 
     &.active {
       background: var(--dt-brand-color);
-      color: #fff;
+      color: var(--dt-text-primary);
     }
   }
 }

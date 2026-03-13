@@ -115,6 +115,12 @@
         </div>
       </div>
     </main>
+    <!-- 文档编辑器弹窗 -->
+    <DocumentEditorDialog
+      v-model="showEditor"
+      :document="selectedFile"
+      @saved="handleFileSaved"
+    />
   </div>
 </template>
 
@@ -123,12 +129,15 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDocuments, searchDocuments, deleteDocument, toggleStar, restoreDocument, permanentlyDeleteDocument } from '@/api/im/document'
 import { formatFileSize, formatTime } from '@/utils/format'
+import DocumentEditorDialog from '@/components/Documents/DocumentEditorDialog.vue'
 
 const activeNav = ref('recent')
 const viewMode = ref('list')
 const searchQuery = ref('')
 const loading = ref(false)
 const files = ref([])
+const selectedFile = ref(null)
+const showEditor = ref(false)
 
 const mainNavItems = ref([
   { id: 'my', label: '我的文件', icon: 'folder' },
@@ -238,8 +247,19 @@ const getIconClass = (type) => {
 
 // 处理文件点击
 const handleFileClick = (file) => {
-  // TODO: 打开文档预览/编辑器
-  ElMessage.info(`打开文档: ${file.name}`)
+  selectedFile.value = file
+  showEditor.value = true
+}
+
+// 处理菜单关闭
+const handleEditorClose = () => {
+  showEditor.value = false
+  selectedFile.value = null
+}
+
+// 处理文件保存
+const handleFileSaved = () => {
+  loadDocuments()
 }
 
 // 处理新建命令
@@ -251,25 +271,42 @@ const handleNewCommand = (command) => {
   }
 }
 
-// 处理文件操作
-const handleFileMenu = async (file) => {
-  const actions = [
-    { label: '查看', value: 'view' },
-    { label: '编辑', value: 'edit' },
-    { label: '分享', value: 'share' },
-    { label: file.isStarred ? '取消收藏' : '收藏', value: 'star' },
-    { label: '删除', value: 'delete' }
-  ]
-  
-  // 回收站的操作不同
-  if (activeNav.value === 'trash') {
-    actions.splice(3, 1)
-    actions.push({ label: '恢复', value: 'restore' })
-    actions.push({ label: '永久删除', value: 'permanent' })
+// 处理文件操作菜单
+const handleFileMenu = async (file, event) => {
+  // 阻止事件冒泡
+  if (event) {
+    event.stopPropagation()
   }
-  
-  // TODO: 显示操作菜单
-  ElMessage.info(`操作: ${file.name}`)
+
+  const isTrash = activeNav.value === 'trash'
+
+  // 定义菜单项
+  const menuItems = [
+    { label: '查看', value: 'view', icon: 'visibility' },
+    { label: '编辑', value: 'edit', icon: 'edit', hide: file.documentType !== 'TEXT' || isTrash },
+    { label: '分享', value: 'share', icon: 'share', hide: isTrash },
+    { label: file.isStarred ? '取消收藏' : '收藏', value: 'star', icon: file.isStarred ? 'star' : 'star_border', hide: isTrash },
+    { label: '删除', value: 'delete', icon: 'delete', hide: isTrash },
+    { label: '恢复', value: 'restore', icon: 'restore', hide: !isTrash },
+    { label: '永久删除', value: 'permanent', icon: 'delete_forever', hide: !isTrash }
+  ].filter(item => !item.hide)
+
+  // 使用 Element Plus 的 ElMessageBox 或自定义菜单
+  // 这里简化处理，使用 ElMessageBox.prompt 风格的菜单
+  const { value: action } = await ElMessageBox.prompt(
+    '',
+    `操作: ${file.name}`,
+    {
+      confirmButtonText: '关闭',
+      showCancelButton: false,
+      showInput: false,
+      distinguishCancelAndClose: true,
+      message: menuItems.map((item, index) => `${index + 1}. ${item.label}`).join('\n'),
+      beforeClose: (action, instance, done) => {
+        done()
+      }
+    }
+  ).catch(() => {})
 }
 
 // 切换收藏状态
@@ -387,7 +424,7 @@ onMounted(() => {
     .view-toggle { display: flex; background: var(--dt-bg-body); padding: 2px; border-radius: 4px;
       .toggle-btn { padding: 4px; border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); &.active { background: var(--dt-bg-card); color: var(--dt-brand-color); border-radius: 3px; box-shadow: var(--dt-shadow-1); } }
     }
-    .new-btn { padding: 6px 16px; background: var(--dt-brand-color); color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .new-btn { padding: 6px 16px; background: var(--dt-brand-color); color: var(--dt-text-primary); border: none; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
   }
 }
 .docs-content { flex: 1; padding: 20px; overflow-y: auto; }

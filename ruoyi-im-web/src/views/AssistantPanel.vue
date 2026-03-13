@@ -216,12 +216,12 @@ const chatHistory = ref([])
 
 // 快捷功能
 const quickActions = [
-  { id: 1, label: '写文案', icon: 'Edit', color: '#1677ff', prompt: '帮我写一段关于' },
-  { id: 2, label: '翻译', icon: 'Compass', color: '#52c41a', prompt: '请翻译以下内容：' },
-  { id: 3, label: '总结', icon: 'Document', color: '#fa8c16', prompt: '请帮我总结以下内容：' },
-  { id: 4, label: '代码', icon: 'DataAnalysis', color: '#722ed1', prompt: '请帮我写一段代码：' },
-  { id: 5, label: '分析', icon: 'DataAnalysis', color: '#eb2f96', prompt: '请帮我分析：' },
-  { id: 6, label: '创意', icon: 'Sunny', color: '#13c2c2', prompt: '请给我一些创意想法：' }
+  { id: 1, label: '写文案', icon: 'Edit', color: 'var(--dt-brand-color)', prompt: '帮我写一段关于' },
+  { id: 2, label: '翻译', icon: 'Compass', color: 'var(--dt-success-color)', prompt: '请翻译以下内容：' },
+  { id: 3, label: '总结', icon: 'Document', color: 'var(--dt-warning-color)', prompt: '请帮我总结以下内容：' },
+  { id: 4, label: '代码', icon: 'DataAnalysis', color: 'var(--dt-info-color)', prompt: '请帮我写一段代码：' },
+  { id: 5, label: '分析', icon: 'DataAnalysis', color: 'var(--dt-error-color)', prompt: '请帮我分析：' },
+  { id: 6, label: '创意', icon: 'Sunny', color: 'var(--dt-brand-secondary)', prompt: '请给我一些创意想法：' }
 ]
 
 // 加载对话历史
@@ -447,8 +447,8 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: #fff;
+  background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
+  color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -534,13 +534,13 @@ onMounted(() => {
   font-size: 14px;
 
   &.ai {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff;
+    background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
+    color: var(--dt-text-primary);
   }
 
   &.user {
     background: var(--dt-brand-color);
-    color: #fff;
+    color: var(--dt-text-primary);
     font-weight: 600;
   }
 }
@@ -560,7 +560,7 @@ onMounted(() => {
 
   &.user {
     background: var(--dt-brand-color);
-    color: #fff;
+    color: var(--dt-text-primary);
     border-top-right-radius: 4px;
   }
 
@@ -708,8 +708,8 @@ onMounted(() => {
   height: 80px;
   margin: 0 auto 20px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: #fff;
+  background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
+  color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -773,7 +773,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  color: #fff;
+  color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;

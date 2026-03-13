@@ -132,8 +132,8 @@ const logout = () => {
 }
 
 .admin-aside {
-  background: linear-gradient(180deg, #0d1b2a 0%, #142740 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, var(--dt-bg-body-dark) 0%, var(--dt-bg-card-dark) 100%);
+  border-right: 1px solid var(--dt-border-light);
 }
 
 .admin-logo {
@@ -149,8 +149,8 @@ const logout = () => {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #2f7bff 0%, #5aa0ff 100%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-light) 100%);
+  color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;

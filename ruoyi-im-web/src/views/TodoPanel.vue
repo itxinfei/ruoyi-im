@@ -177,11 +177,11 @@ onMounted(() => loadTodos())
     &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
     .nav-icon { font-size: 18px; }
     .nav-label { flex: 1; font-size: 13px; }
-    .nav-badge { background: var(--dt-error-color); color: #fff; padding: 0 6px; border-radius: 10px; font-size: 10px; transform: scale(0.85); }
+    .nav-badge { background: var(--dt-error-color); color: var(--dt-text-primary); padding: 0 6px; border-radius: 10px; font-size: 10px; transform: scale(0.85); }
   }
 }
 .sidebar-footer { padding: 16px; border-top: 1px solid var(--dt-border-light);
-  .add-todo-btn { width: 100%; height: 36px; background: var(--dt-brand-color); color: #fff; border: none; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  .add-todo-btn { width: 100%; height: 36px; background: var(--dt-brand-color); color: var(--dt-text-primary); border: none; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
     &:hover { background: var(--dt-brand-hover); box-shadow: var(--dt-shadow-2); }
   }
 }
@@ -199,7 +199,7 @@ onMounted(() => loadTodos())
   &.completed { opacity: 0.6; .title-text { text-decoration: line-through; } }
 }
 .todo-checkbox { flex-shrink: 0; .checkbox-inner { width: 20px; height: 20px; border: 2px solid var(--dt-border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center;
-  &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: #fff; .material-icons-outlined { font-size: 14px; } } }
+  &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-primary); .material-icons-outlined { font-size: 14px; } } }
 }
 .todo-main-info { flex: 1; min-width: 0;
   .todo-title-row { display: flex; align-items: center; gap: 8px; .title-text { font-size: 14px; font-weight: 500; color: var(--dt-text-primary); }

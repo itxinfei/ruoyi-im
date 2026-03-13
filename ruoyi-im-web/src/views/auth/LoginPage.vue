@@ -875,7 +875,7 @@ onMounted(() => {
   &:hover:not(:disabled) {
     background: var(--dt-brand-hover);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(22, 119, 255, 0.35);
+    box-shadow: var(--dt-shadow-float);
   }
 
   &:active:not(:disabled) {
