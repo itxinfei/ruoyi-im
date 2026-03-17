@@ -711,7 +711,7 @@ onMounted(() => {
 
     &:hover:not(.active) {
       color: var(--dt-text-primary);
-      background: rgba(0, 0, 0, 0.03);
+      background: var(--dt-bg-hover);
     }
 
     &:active:not(.active) {
@@ -863,7 +863,7 @@ onMounted(() => {
   border-radius: var(--dt-radius-lg);
   background: var(--dt-brand-color);
   border: none;
-  color: #ffffff;
+  color: var(--dt-text-white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -946,8 +946,8 @@ onMounted(() => {
       }
 
       &.wechat:hover {
-        border-color: #07c160;
-        color: #07c160;
+        border-color: var(--dt-wechat-color);
+        color: var(--dt-wechat-color);
         background: var(--dt-success-bg);
       }
 
@@ -958,9 +958,9 @@ onMounted(() => {
       }
 
       &.feishu:hover {
-        border-color: #00d6b9;
-        color: #00d6b9;
-        background: #e6fffb;
+        border-color: var(--dt-feishu-color);
+        color: var(--dt-feishu-color);
+        background: var(--dt-info-bg);
       }
 
       &:active {
@@ -1045,7 +1045,7 @@ onMounted(() => {
 
     .tab-btn {
       &:hover:not(.active) {
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--dt-bg-active-dark);
       }
 
       &.active {
@@ -1122,7 +1122,7 @@ onMounted(() => {
       border-color: var(--dt-border-dark);
 
       &.wechat:hover {
-        background: rgba(7, 193, 96, 0.15);
+        background: var(--dt-wechat-bg-dark);
       }
 
       &.dingtalk:hover {
@@ -1130,7 +1130,7 @@ onMounted(() => {
       }
 
       &.feishu:hover {
-        background: rgba(0, 214, 185, 0.15);
+        background: var(--dt-feishu-bg-dark);
       }
     }
   }

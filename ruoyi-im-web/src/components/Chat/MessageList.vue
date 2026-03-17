@@ -113,7 +113,7 @@ defineExpose({ scrollToBottom, listRef })
   flex: 1;
   overflow-y: auto;
   background: var(--dt-bg-chat);
-  padding: 20px 0;
+  padding: 20px 16px;  // 添加左右padding
   position: relative;
 }
 

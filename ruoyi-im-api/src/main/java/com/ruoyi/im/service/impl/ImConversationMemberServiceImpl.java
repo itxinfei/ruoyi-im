@@ -5,6 +5,7 @@ import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.service.ImConversationMemberService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
     public ImConversationMemberVO getConversationMember(Long conversationId, Long userId) {
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
-            throw new BusinessException("会话成员不存在");
+            BusinessExceptionHelper.throwConversationMemberNotFound();
         }
         ImConversationMemberVO vo = new ImConversationMemberVO();
         BeanUtils.copyProperties(member, vo);
@@ -55,7 +56,7 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
     public void updateConversationMember(Long conversationId, Long userId, ImConversationMemberUpdateRequest request) {
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
-            throw new BusinessException("会话成员不存在");
+            BusinessExceptionHelper.throwConversationMemberNotFound();
         }
         if (request.getIsPinned() != null) {
             conversationMemberMapper.updatePinned(conversationId, userId, request.getIsPinned());
@@ -70,10 +71,10 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
     public void deleteConversationMember(Long conversationId, Long userId) {
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
-            throw new BusinessException("会话成员不存在");
+            BusinessExceptionHelper.throwConversationMemberNotFound();
         }
         if (!member.getUserId().equals(userId)) {
-            throw new BusinessException("无权删除该会话成员");
+            BusinessExceptionHelper.throwNoPermission("无权删除该会话成员");
         }
         conversationMemberMapper.markAsDeleted(conversationId, userId);
     }
@@ -83,7 +84,7 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
     public void clearUnread(Long conversationId, Long userId) {
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
-            throw new BusinessException("会话成员不存在");
+            BusinessExceptionHelper.throwConversationMemberNotFound();
         }
         conversationMemberMapper.updateUnreadCount(conversationId, userId, 0);
     }
@@ -93,7 +94,7 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
     public void togglePin(Long conversationId, Long userId, Integer pinned) {
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
-            throw new BusinessException("会话成员不存在");
+            BusinessExceptionHelper.throwConversationMemberNotFound();
         }
         conversationMemberMapper.updatePinned(conversationId, userId, pinned);
     }
@@ -127,7 +128,7 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
     public void updateLastReadMessageId(Long conversationId, Long userId, Long messageId) {
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
-            throw new BusinessException("会话成员不存在");
+            BusinessExceptionHelper.throwConversationMemberNotFound();
         }
         conversationMemberMapper.updateLastReadMessageId(conversationId, userId, messageId);
     }

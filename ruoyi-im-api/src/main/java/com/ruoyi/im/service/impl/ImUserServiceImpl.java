@@ -11,6 +11,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
 
+import com.ruoyi.im.util.BeanCopyUtil;
 import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.JwtUtils;
@@ -32,8 +33,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 用户服务实现
@@ -230,23 +234,24 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public List<ImUserVO> getUserList(BasePageRequest request) {
-        int pageNum = request.getPageNum() != null && request.getPageNum() > 0 ? request.getPageNum() : 1;
-        int pageSize = request.getPageSize() != null && request.getPageSize() > 0 ? request.getPageSize() : 10;
-        if (pageSize > SystemConstants.MAX_PAGE_SIZE) {
-            pageSize = SystemConstants.MAX_PAGE_SIZE;
-        }
+        // 使用Optional优化分页参数默认值设置
+        int pageNum = Optional.ofNullable(request.getPageNum())
+                .filter(p -> p > 0)
+                .orElse(1);
+
+        int pageSize = Optional.ofNullable(request.getPageSize())
+                .filter(p -> p > 0)
+                .map(p -> Math.min(p, SystemConstants.MAX_PAGE_SIZE))
+                .orElse(10);
+
         int offset = (pageNum - 1) * pageSize;
 
         ImUser queryUser = new ImUser();
         List<ImUser> users = imUserMapper.selectImUserListWithPagination(queryUser, offset, pageSize);
-        List<ImUserVO> voList = new ArrayList<>();
-        for (ImUser user : users) {
-            ImUserVO vo = new ImUserVO();
-            BeanUtils.copyProperties(user, vo);
-            vo.setOnline(imRedisUtil.isOnlineUser(user.getId()));
-            voList.add(vo);
-        }
-        return voList;
+        return users.stream()
+                .map(user -> BeanCopyUtil.copyAndSet(user, ImUserVO.class,
+                        vo -> vo.setOnline(imRedisUtil.isOnlineUser(user.getId()))))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -299,9 +304,10 @@ public class ImUserServiceImpl implements ImUserService {
             throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         }
 
-        // 重置为默认密码，从配置读取或使用随机密码
-        String pwd = (defaultPassword != null && !defaultPassword.isEmpty())
-                ? defaultPassword : UUID.randomUUID().toString().substring(0, 8);
+        // 重置为默认密码，从配置读取或使用随机密码（使用Optional优化）
+        String pwd = Optional.ofNullable(defaultPassword)
+                .filter(p -> !p.isEmpty())
+                .orElseGet(() -> UUID.randomUUID().toString().substring(0, 8));
         user.setPassword(passwordEncoder.encode(pwd));
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
@@ -309,26 +315,20 @@ public class ImUserServiceImpl implements ImUserService {
 
     @Override
     public List<ImUserVO> getOnlineUsers() {
-        // 通过ImRedisUtil获取在线用户列表
         Set<String> onlineUserIds = imRedisUtil.getOnlineUsers();
-        List<ImUserVO> onlineUsers = new ArrayList<>();
-
-        for (String userIdStr : onlineUserIds) {
-            try {
-                Long userId = Long.parseLong(userIdStr);
-                ImUser user = imUserMapper.selectImUserById(userId);
-                if (user != null) {
-                    ImUserVO vo = new ImUserVO();
-                    BeanUtils.copyProperties(user, vo);
-                    vo.setOnline(true);
-                    onlineUsers.add(vo);
-                }
-            } catch (NumberFormatException e) {
-                // 忽略无效的用户ID
-            }
-        }
-
-        return onlineUsers;
+        return onlineUserIds.stream()
+                .map(userIdStr -> {
+                    try {
+                        return Long.parseLong(userIdStr);
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .map(imUserMapper::selectImUserById)
+                .filter(Objects::nonNull)
+                .map(user -> BeanCopyUtil.copyAndSet(user, ImUserVO.class, vo -> vo.setOnline(true)))
+                .collect(Collectors.toList());
     }
 
     @Override

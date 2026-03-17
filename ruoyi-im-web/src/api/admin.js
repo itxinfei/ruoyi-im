@@ -373,7 +373,7 @@ export function updateSystemConfig(configKey, configValue) {
  */
 export function getAuditLogList(params) {
   return request({
-    url: '/api/im/audit/list',
+    url: '/api/admin/audit/list',
     method: 'get',
     params
   })
@@ -386,7 +386,7 @@ export function getAuditLogList(params) {
  */
 export function getAuditLogDetail(id) {
   return request({
-    url: `/api/im/audit/${id}`,
+    url: `/api/admin/audit/${id}`,
     method: 'get'
   })
 }
@@ -398,7 +398,7 @@ export function getAuditLogDetail(id) {
  */
 export function getAuditStatistics(params) {
   return request({
-    url: '/api/im/audit/statistics',
+    url: '/api/admin/audit/statistics',
     method: 'get',
     params
   })
@@ -412,7 +412,7 @@ export function getAuditStatistics(params) {
  */
 export function getUserAuditLogs(userId, params) {
   return request({
-    url: `/api/im/audit/user/${userId}`,
+    url: `/api/admin/audit/user/${userId}`,
     method: 'get',
     params
   })
@@ -425,7 +425,7 @@ export function getUserAuditLogs(userId, params) {
  */
 export function deleteExpiredAuditLogs(beforeDate) {
   return request({
-    url: '/api/im/audit/clean',
+    url: '/api/admin/audit/clean',
     method: 'delete',
     params: { beforeDate }
   })

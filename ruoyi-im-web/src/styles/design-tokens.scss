@@ -11,6 +11,7 @@
   --dt-bg-session-list: #ffffff;
   --dt-bg-session-hover: #f5f6f7;
   --dt-bg-session-active: #e8f4ff; 
+  --dt-bg-hover: rgba(0, 0, 0, 0.03);
   --dt-bg-input: #f9fafb;
   --dt-bg-mask: rgba(0, 0, 0, 0.45);
   --dt-bg-card-dark: #1e293b;
@@ -21,18 +22,28 @@
   --dt-brand-hover: #4096ff;
   --dt-brand-active: #0958d9;
   --dt-brand-light: #91caff;
-  --dt-brand-lighter: #e6f4ff; 
+  --dt-brand-lighter: #e6f4ff;
   --dt-brand-bg: #f0f7ff;
+  --dt-brand-bg-dark: rgba(22, 119, 255, 0.15);
 
   // === Status Colors (状态色系) ===
   --dt-success-color: #52c41a;
   --dt-success-bg: #f6ffed;
+  --dt-success-bg-dark: rgba(82, 196, 26, 0.15);
   --dt-warning-color: #faad14;
   --dt-warning-bg: #fffbe6;
   --dt-error-color: #f54a45;
   --dt-error-bg: #fff1f0;
   --dt-info-color: #1677ff;
+  --dt-info-bg: #e6f4ff;
+  --dt-info-bg-dark: rgba(22, 119, 255, 0.15);
   --dt-unread-color: #f54a45;
+
+  // === Third-party Brand Colors (第三方品牌色) ===
+  --dt-wechat-color: #07c160;
+  --dt-wechat-bg-dark: rgba(7, 193, 96, 0.15);
+  --dt-feishu-color: #00d6b9;
+  --dt-feishu-bg-dark: rgba(0, 214, 185, 0.15);
 
   // === Border & Shadows (极细边框) ===
   --dt-border-light: rgba(31, 35, 41, 0.08); 
@@ -55,6 +66,7 @@
   --dt-text-quaternary: #bbbfc4;
   --dt-text-link: #1677ff;
   --dt-text-link-hover: #4096ff;
+  --dt-text-white: #ffffff;
 
   // === Font Sizes ===
   --dt-font-size-xs: 11px;
@@ -150,3 +162,18 @@ $breakpoint-md: 768px;
 $breakpoint-lg: 1024px;
 $breakpoint-xl: 1280px;
 $breakpoint-2xl: 1536px;
+
+// 响应式断点混合宏
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'sm' {
+    @media (max-width: $breakpoint-sm) { @content; }
+  } @else if $breakpoint == 'md' {
+    @media (max-width: $breakpoint-md) { @content; }
+  } @else if $breakpoint == 'lg' {
+    @media (max-width: $breakpoint-lg) { @content; }
+  } @else if $breakpoint == 'xl' {
+    @media (max-width: $breakpoint-xl) { @content; }
+  } @else if $breakpoint == '2xl' {
+    @media (max-width: $breakpoint-2xl) { @content; }
+  }
+}

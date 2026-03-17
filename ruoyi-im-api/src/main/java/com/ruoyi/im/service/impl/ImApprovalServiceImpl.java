@@ -15,6 +15,7 @@ import com.ruoyi.im.mapper.ImApprovalRecordMapper;
 import com.ruoyi.im.mapper.ImApprovalTemplateMapper;
 import com.ruoyi.im.service.ImApprovalService;
 import com.ruoyi.im.util.ApprovalConditionEngine;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         // 1. 获取模板信息
         ImApprovalTemplate template = templateMapper.selectImApprovalTemplateById(templateId);
         if (template == null) {
-            throw new BusinessException("审批模板不存在");
+            BusinessExceptionHelper.throwTemplateNotFound();
         }
         if (!"ACTIVE".equals(template.getStatus())) {
             throw new BusinessException("审批模板已停用");
@@ -108,7 +109,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         // 1. 查询审批实例
         ImApproval approval = approvalMapper.selectImApprovalById(approvalId);
         if (approval == null) {
-            throw new BusinessException("审批不存在");
+            BusinessExceptionHelper.throwApprovalNotFound();
         }
 
         if (!"PENDING".equals(approval.getStatus())) {
@@ -197,10 +198,10 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     public void cancelApproval(Long approvalId, Long applicantId) {
         ImApproval approval = approvalMapper.selectImApprovalById(approvalId);
         if (approval == null) {
-            throw new BusinessException("审批不存在");
+            BusinessExceptionHelper.throwApprovalNotFound();
         }
         if (!approval.getApplicantId().equals(applicantId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         if (!"PENDING".equals(approval.getStatus())) {
             throw new BusinessException("审批已处理，无法撤回");
@@ -235,7 +236,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     public void transferApproval(Long approvalId, Long toUserId, Long fromUserId) {
         ImApproval approval = approvalMapper.selectImApprovalById(approvalId);
         if (approval == null) {
-            throw new BusinessException("审批不存在");
+            BusinessExceptionHelper.throwApprovalNotFound();
         }
 
         // 查询当前待处理节点
@@ -243,7 +244,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         ImApprovalNode currentNode = findCurrentNode(pendingNodes, fromUserId);
 
         if (currentNode == null) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         // 更新节点审批人（移除当前用户，添加目标用户）
@@ -281,7 +282,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     public void delegateApproval(Long approvalId, Long toUserId, Long fromUserId) {
         ImApproval approval = approvalMapper.selectImApprovalById(approvalId);
         if (approval == null) {
-            throw new BusinessException("审批不存在");
+            BusinessExceptionHelper.throwApprovalNotFound();
         }
 
         // 查询当前待处理节点
@@ -289,7 +290,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         ImApprovalNode currentNode = findCurrentNode(pendingNodes, fromUserId);
 
         if (currentNode == null) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         // 添加委托审批人

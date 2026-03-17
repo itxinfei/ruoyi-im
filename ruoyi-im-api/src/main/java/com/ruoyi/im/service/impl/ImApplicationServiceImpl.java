@@ -4,6 +4,7 @@ import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImApplicationMapper;
 import com.ruoyi.im.service.ImApplicationService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +47,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     public ImApplication getApplicationById(Long appId) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
         if (app == null) {
-            throw new BusinessException("应用不存在");
+            BusinessExceptionHelper.throwApplicationNotFound();
         }
         return app;
     }
@@ -56,7 +57,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         // 检查编码是否已存在
         ImApplication existApp = applicationMapper.selectImApplicationByCode(code);
         if (existApp != null) {
-            throw new BusinessException("应用编码已存在");
+            BusinessExceptionHelper.throwApplicationCodeExists();
         }
 
         ImApplication app = new ImApplication();
@@ -78,7 +79,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     public void updateApplication(Long appId, String name, String description, String icon) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
         if (app == null) {
-            throw new BusinessException("应用不存在");
+            BusinessExceptionHelper.throwApplicationNotFound();
         }
         app.setName(name);
         app.setDescription(description);
@@ -90,10 +91,10 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     public void deleteApplication(Long appId) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
         if (app == null) {
-            throw new BusinessException("应用不存在");
+            BusinessExceptionHelper.throwApplicationNotFound();
         }
         if (app.getIsSystem() == 1) {
-            throw new BusinessException("系统应用不能删除");
+            BusinessExceptionHelper.throwNotAllowed("系统应用不能删除");
         }
         applicationMapper.deleteImApplicationById(appId);
     }
@@ -102,7 +103,7 @@ public class ImApplicationServiceImpl implements ImApplicationService {
     public void setVisibility(Long appId, Boolean isVisible) {
         ImApplication app = applicationMapper.selectImApplicationById(appId);
         if (app == null) {
-            throw new BusinessException("应用不存在");
+            BusinessExceptionHelper.throwApplicationNotFound();
         }
         app.setIsVisible(isVisible ? 1 : 0);
         applicationMapper.updateImApplication(app);

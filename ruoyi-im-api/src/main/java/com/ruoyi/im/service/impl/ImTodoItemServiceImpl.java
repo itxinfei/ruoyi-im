@@ -4,6 +4,7 @@ import com.ruoyi.im.domain.ImTodoItem;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImTodoItemMapper;
 import com.ruoyi.im.service.ImTodoItemService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,10 +64,10 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
     public void markAsCompleted(Long todoId, Long userId) {
         ImTodoItem todo = todoItemMapper.selectImTodoItemById(todoId);
         if (todo == null) {
-            throw new BusinessException("待办事项不存在");
+            BusinessExceptionHelper.throwTodoItemNotFound();
         }
         if (!todo.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         todoItemMapper.markAsCompleted(todoId);
     }
@@ -75,10 +76,10 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
     public void deleteTodo(Long todoId, Long userId) {
         ImTodoItem todo = todoItemMapper.selectImTodoItemById(todoId);
         if (todo == null) {
-            throw new BusinessException("待办事项不存在");
+            BusinessExceptionHelper.throwTodoItemNotFound();
         }
         if (!todo.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         todoItemMapper.deleteImTodoItemById(todoId);
     }

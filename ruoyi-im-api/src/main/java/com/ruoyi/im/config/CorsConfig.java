@@ -20,8 +20,8 @@ public class CorsConfig implements WebMvcConfigurer {
     private List<String> allowedOrigins;
 
     private static final String[] ALLOWED_HEADERS = {
-            "Authorization", "Content-Type", "X-Requested-With", 
-            "X-CSRF-Token", "Accept", "Origin"
+            "Authorization", "Content-Type", "X-Requested-With",
+            "X-CSRF-Token", "Accept", "Origin", "Cache-Control", "UserId"
     };
 
     @Override

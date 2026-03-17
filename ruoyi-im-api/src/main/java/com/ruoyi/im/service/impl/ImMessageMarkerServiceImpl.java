@@ -12,6 +12,7 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageMarkerService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.marker.ImMessageMarkerVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         // 检查消息是否存在
         ImMessage message = messageMapper.selectById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         // 检查是否已标记
@@ -105,7 +106,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         // 检查消息是否存在
         ImMessage message = messageMapper.selectById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         // 检查是否已有待办标记
@@ -142,12 +143,11 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
     public void completeTodo(Long markerId, Long userId) {
         ImMessageMarker marker = messageMarkerMapper.selectById(markerId);
         if (marker == null) {
-            throw new BusinessException("标记不存在");
-        }
-
-        if (!marker.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作此待办");
-        }
+                    BusinessExceptionHelper.throwMarkerNotFound();
+                }
+                if (!marker.getUserId().equals(userId)) {
+                    BusinessExceptionHelper.throwNoPermission("无权限操作此待办");
+                }
 
         marker.setTodoStatus("DONE");
         marker.setDoneTime(LocalDateTime.now());

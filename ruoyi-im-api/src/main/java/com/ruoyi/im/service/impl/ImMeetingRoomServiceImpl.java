@@ -15,6 +15,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImMeetingBookingMapper;
 import com.ruoyi.im.mapper.ImMeetingRoomMapper;
 import com.ruoyi.im.service.ImMeetingRoomService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.meeting.ImMeetingBookingVO;
 import com.ruoyi.im.vo.meeting.ImMeetingRoomScheduleVO;
 import com.ruoyi.im.vo.meeting.ImMeetingRoomVO;
@@ -56,7 +57,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
                             .eq(ImMeetingRoom::getRoomNumber, request.getRoomNumber())
             );
             if (existing != null) {
-                throw new BusinessException("会议室编号已存在");
+                BusinessExceptionHelper.throwMeetingRoomCodeExists();
             }
         }
 
@@ -88,7 +89,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public void updateRoom(ImMeetingRoomUpdateRequest request, Long userId) {
         ImMeetingRoom room = roomMapper.selectById(request.getId());
         if (room == null) {
-            throw new BusinessException("会议室不存在");
+            BusinessExceptionHelper.throwMeetingRoomNotFound();
         }
 
         // 检查编号是否重复
@@ -99,7 +100,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
                             .ne(ImMeetingRoom::getId, request.getId())
             );
             if (existing != null) {
-                throw new BusinessException("会议室编号已存在");
+                BusinessExceptionHelper.throwMeetingRoomCodeExists();
             }
         }
 
@@ -162,7 +163,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public void deleteRoom(Long roomId, Long userId) {
         ImMeetingRoom room = roomMapper.selectById(roomId);
         if (room == null) {
-            throw new BusinessException("会议室不存在");
+            BusinessExceptionHelper.throwMeetingRoomNotFound();
         }
 
         // 检查是否有未完成的预订
@@ -173,7 +174,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
                         .gt(ImMeetingBooking::getEndTime, LocalDateTime.now())
         );
         if (bookingCount != null && bookingCount > 0) {
-            throw new BusinessException("会议室存在未完成的预订，无法删除");
+            BusinessExceptionHelper.throwMeetingRoomHasActiveBookings();
         }
 
         roomMapper.deleteById(roomId);
@@ -184,7 +185,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public ImMeetingRoomVO getRoomDetail(Long roomId) {
         ImMeetingRoom room = roomMapper.selectById(roomId);
         if (room == null) {
-            throw new BusinessException("会议室不存在");
+            BusinessExceptionHelper.throwMeetingRoomNotFound();
         }
         return convertToVO(room);
     }
@@ -217,34 +218,34 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         // 检查会议室是否存在
         ImMeetingRoom room = roomMapper.selectById(request.getRoomId());
         if (room == null) {
-            throw new BusinessException("会议室不存在");
+            BusinessExceptionHelper.throwMeetingRoomNotFound();
         }
 
         if (!room.getIsBookable()) {
-            throw new BusinessException("该会议室暂不可预订");
+            BusinessExceptionHelper.throwMeetingRoomNotAvailable();
         }
 
         if (!"AVAILABLE".equals(room.getStatus())) {
-            throw new BusinessException("该会议室当前不可用");
+            BusinessExceptionHelper.throwMeetingRoomUnavailable();
         }
 
         // 检查时间范围
         if (request.getStartTime().isAfter(request.getEndTime())) {
-            throw new BusinessException("开始时间不能晚于结束时间");
+            BusinessExceptionHelper.throwInvalidTimeRange();
         }
 
         if (request.getStartTime().isBefore(LocalDateTime.now())) {
-            throw new BusinessException("不能预订过去的时间");
+            BusinessExceptionHelper.throwCannotBookPastTime();
         }
 
         // 检查容纳人数
         if (request.getAttendeeCount() > room.getCapacity()) {
-            throw new BusinessException("参会人数超过会议室容纳人数");
+            BusinessExceptionHelper.throwExceedCapacity();
         }
 
         // 检查时间冲突
         if (!checkAvailability(request.getRoomId(), request.getStartTime(), request.getEndTime())) {
-            throw new BusinessException("该时间段已被预订");
+            BusinessExceptionHelper.throwTimeSlotBooked();
         }
 
         // 创建预订
@@ -279,15 +280,15 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public void cancelBooking(Long bookingId, Long userId) {
         ImMeetingBooking booking = bookingMapper.selectById(bookingId);
         if (booking == null) {
-            throw new BusinessException("预订不存在");
+            BusinessExceptionHelper.throwBookingNotFound();
         }
 
         if (!booking.getBookingUserId().equals(userId)) {
-            throw new BusinessException("只有预订人可以取消预订");
+            BusinessExceptionHelper.throwOnlyBookerCanCancel();
         }
 
         if ("CANCELLED".equals(booking.getStatus()) || "COMPLETED".equals(booking.getStatus())) {
-            throw new BusinessException("该预订无法取消");
+            BusinessExceptionHelper.throwBookingCannotCancel();
         }
 
         booking.setStatus("CANCELLED");
@@ -301,11 +302,11 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public void confirmBooking(Long bookingId, Long userId) {
         ImMeetingBooking booking = bookingMapper.selectById(bookingId);
         if (booking == null) {
-            throw new BusinessException("预订不存在");
+            BusinessExceptionHelper.throwBookingNotFound();
         }
 
         if (!"PENDING".equals(booking.getStatus())) {
-            throw new BusinessException("该预订不需要确认");
+            BusinessExceptionHelper.throwBookingNoNeedConfirm();
         }
 
         booking.setStatus("CONFIRMED");
@@ -319,19 +320,19 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public void checkIn(Long bookingId, Long userId) {
         ImMeetingBooking booking = bookingMapper.selectById(bookingId);
         if (booking == null) {
-            throw new BusinessException("预订不存在");
+            BusinessExceptionHelper.throwBookingNotFound();
         }
 
         if (!booking.getBookingUserId().equals(userId)) {
-            throw new BusinessException("只有预订人可以签到");
+            BusinessExceptionHelper.throwOnlyBookerCanCheckIn();
         }
 
         if (!"CONFIRMED".equals(booking.getStatus())) {
-            throw new BusinessException("预订状态不正确");
+            BusinessExceptionHelper.throwBookingStatusError();
         }
 
         if (booking.getCheckInTime() != null) {
-            throw new BusinessException("已经签过到了");
+            BusinessExceptionHelper.throwAlreadyCheckedIn();
         }
 
         booking.setCheckInTime(LocalDateTime.now());
@@ -345,19 +346,19 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public void checkOut(Long bookingId, Long userId) {
         ImMeetingBooking booking = bookingMapper.selectById(bookingId);
         if (booking == null) {
-            throw new BusinessException("预订不存在");
+            BusinessExceptionHelper.throwBookingNotFound();
         }
 
         if (!booking.getBookingUserId().equals(userId)) {
-            throw new BusinessException("只有预订人可以签退");
+            BusinessExceptionHelper.throwOnlyBookerCanCheckOut();
         }
 
         if (booking.getCheckInTime() == null) {
-            throw new BusinessException("请先签到");
+            BusinessExceptionHelper.throwPleaseCheckInFirst();
         }
 
         if (booking.getCheckOutTime() != null) {
-            throw new BusinessException("已经签退过了");
+            BusinessExceptionHelper.throwAlreadyCheckedOut();
         }
 
         booking.setCheckOutTime(LocalDateTime.now());
@@ -371,7 +372,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public ImMeetingBookingVO getBookingDetail(Long bookingId, Long userId) {
         ImMeetingBooking booking = bookingMapper.selectById(bookingId);
         if (booking == null) {
-            throw new BusinessException("预订不存在");
+            BusinessExceptionHelper.throwBookingNotFound();
         }
 
         return convertToBookingVO(booking);
@@ -389,7 +390,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public ImMeetingRoomScheduleVO getRoomSchedule(Long roomId, String date) {
         ImMeetingRoom room = roomMapper.selectById(roomId);
         if (room == null) {
-            throw new BusinessException("会议室不存在");
+            BusinessExceptionHelper.throwMeetingRoomNotFound();
         }
 
         // 解析日期
@@ -441,15 +442,15 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     public void submitFeedback(Long bookingId, String feedback, Integer rating, Long userId) {
         ImMeetingBooking booking = bookingMapper.selectById(bookingId);
         if (booking == null) {
-            throw new BusinessException("预订不存在");
+            BusinessExceptionHelper.throwBookingNotFound();
         }
 
         if (!booking.getBookingUserId().equals(userId)) {
-            throw new BusinessException("只有预订人可以提交反馈");
+            BusinessExceptionHelper.throwOnlyBookerCanSubmitFeedback();
         }
 
         if (!"COMPLETED".equals(booking.getStatus())) {
-            throw new BusinessException("会议结束后才能提交反馈");
+            BusinessExceptionHelper.throwCanSubmitFeedbackAfterMeeting();
         }
 
         booking.setFeedback(feedback);

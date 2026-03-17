@@ -239,13 +239,34 @@ const handleEscKey = (e) => {
 
 const handleFilterChange = (key) => { 
   activeFilter.value = key
-  store.dispatch('im/session/loadSessions', key).then(() => {
-    // 切换到"全部"时更新 allSessions 以保持计数准确
-    if (key === 'all') {
+  // 始终保持 allSessions 为完整的会话列表用于计数
+  if (key === 'all') {
+    // 切换到"全部"时重新加载以确保最新
+    store.dispatch('im/session/loadSessions', 'all').then(() => {
+      allSessions.value = store.state.im.session.sessions
+      updateFilterCounts()
+    })
+  } else {
+    // 切换到其他筛选时，也保持 allSessions 不变用于计数显示
+    // 这样用户切换筛选再切回"全部"时，计数不会丢失
+    if (allSessions.value.length === 0) {
       allSessions.value = store.state.im.session.sessions
     }
-    updateFilterCounts()
-  })
+    // 前端筛选显示
+    store.dispatch('im/session/loadSessions', 'all').then(() => {
+      // 前端筛选逻辑
+      const allSess = store.state.im.session.sessions
+      let filteredSess = allSess
+      if (key === 'unread') {
+        filteredSess = allSess.filter(s => s.unreadCount > 0)
+      } else if (key === 'pinned') {
+        filteredSess = allSess.filter(s => s.isPinned)
+      }
+      // 临时更新sessions用于显示
+      store.commit('im/session/SET_SESSIONS', filteredSess)
+      updateFilterCounts()
+    })
+  }
 }
 
 const handleCreateGroup = () => {

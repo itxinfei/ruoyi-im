@@ -187,7 +187,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .dingtalk-app {
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   overflow: hidden;
   background: var(--dt-bg-body);
@@ -205,7 +205,7 @@ onUnmounted(() => {
   display: flex;
   height: 100%;
   min-width: 0; // 防崩红线
-  background: #ffffff;
+  background: var(--dt-bg-card);
   position: relative;
   overflow: hidden;
 }

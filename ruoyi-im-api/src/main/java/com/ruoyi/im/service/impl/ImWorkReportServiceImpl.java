@@ -17,6 +17,7 @@ import com.ruoyi.im.mapper.ImWorkReportCommentMapper;
 import com.ruoyi.im.mapper.ImWorkReportLikeMapper;
 import com.ruoyi.im.mapper.ImWorkReportMapper;
 import com.ruoyi.im.service.ImWorkReportService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.workreport.WorkReportCommentVO;
 import com.ruoyi.im.vo.workreport.WorkReportDetailVO;
 import com.ruoyi.im.vo.workreport.WorkReportLikeUserVO;
@@ -69,13 +70,13 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     public void updateReport(Long reportId, WorkReportCreateRequest request, Long userId) {
         ImWorkReport report = workReportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException("工作日志不存在");
+            BusinessExceptionHelper.throwWorkReportNotFound();
         }
         if (!report.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         if ("SUBMITTED".equals(report.getStatus())) {
-            throw new BusinessException("已提交的日志不能修改");
+            BusinessExceptionHelper.throwCannotModifySubmitted();
         }
 
         BeanUtils.copyProperties(request, report);
@@ -87,13 +88,13 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     public void deleteReport(Long reportId, Long userId) {
         ImWorkReport report = workReportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException("工作日志不存在");
+            BusinessExceptionHelper.throwWorkReportNotFound();
         }
         if (!report.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         if ("SUBMITTED".equals(report.getStatus())) {
-            throw new BusinessException("已提交的日志不能删除");
+            BusinessExceptionHelper.throwCannotDeleteSubmitted();
         }
         workReportMapper.deleteById(reportId);
     }
@@ -103,10 +104,10 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     public void submitReport(Long reportId, Long userId) {
         ImWorkReport report = workReportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException("工作日志不存在");
+            BusinessExceptionHelper.throwWorkReportNotFound();
         }
         if (!report.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         report.setStatus("SUBMITTED");
         report.setSubmitTime(LocalDateTime.now());
@@ -117,7 +118,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     public WorkReportDetailVO getReportDetail(Long reportId, Long userId) {
         ImWorkReport report = workReportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException("工作日志不存在");
+            BusinessExceptionHelper.throwWorkReportNotFound();
         }
 
         WorkReportDetailVO vo = new WorkReportDetailVO();
@@ -207,7 +208,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     public Long addComment(Long reportId, String content, Long parentId, Long userId) {
         ImWorkReport report = workReportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException("工作日志不存在");
+            BusinessExceptionHelper.throwWorkReportNotFound();
         }
 
         ImWorkReportComment comment = new ImWorkReportComment();
@@ -225,10 +226,10 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     public void deleteComment(Long commentId, Long userId) {
         ImWorkReportComment comment = commentMapper.selectById(commentId);
         if (comment == null) {
-            throw new BusinessException("评论不存在");
+            BusinessExceptionHelper.throwCommentNotFound();
         }
         if (!comment.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         commentMapper.deleteById(commentId);
     }
@@ -244,7 +245,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     public boolean toggleLike(Long reportId, Long userId) {
         ImWorkReport report = workReportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException("工作日志不存在");
+            BusinessExceptionHelper.throwWorkReportNotFound();
         }
 
         ImWorkReportLike existingLike = likeMapper.selectByReportAndUser(reportId, userId);
@@ -285,10 +286,10 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     public void approveReport(Long reportId, Long userId, Boolean approved, String remark) {
         ImWorkReport report = workReportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException("工作日志不存在");
+            BusinessExceptionHelper.throwWorkReportNotFound();
         }
         if (!"SUBMITTED".equals(report.getStatus())) {
-            throw new BusinessException("只能审批已提交的日志");
+            BusinessExceptionHelper.throwOnlySubmittedCanApprove();
         }
 
         report.setApproverId(userId);

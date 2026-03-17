@@ -12,6 +12,7 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.mapper.ImVideoMeetingMapper;
 import com.ruoyi.im.mapper.ImVideoMeetingParticipantMapper;
 import com.ruoyi.im.service.ImVideoMeetingService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.vo.meeting.ImVideoMeetingDetailVO;
 import com.ruoyi.im.vo.meeting.ImVideoMeetingVO;
@@ -63,7 +64,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         // 获取用户信息
         ImUser host = userMapper.selectImUserById(userId);
         if (host == null) {
-            throw new BusinessException("用户不存在");
+            BusinessExceptionHelper.throwUserNotFound();
         }
 
         // 创建会议
@@ -130,17 +131,17 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     public void updateMeeting(Long meetingId, ImVideoMeetingUpdateRequest request, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
-            throw new BusinessException("会议不存在");
+            BusinessExceptionHelper.throwVideoMeetingNotFound();
         }
 
         // 只有主持人可以修改会议
         if (!meeting.getHostId().equals(userId)) {
-            throw new BusinessException("只有主持人可以修改会议");
+            BusinessExceptionHelper.throwOnlyHostCanModify();
         }
 
         // 已开始或已结束的会议不能修改
         if (SystemConstants.MEETING_STATUS_IN_PROGRESS.equals(meeting.getStatus()) || SystemConstants.MEETING_STATUS_ENDED.equals(meeting.getStatus())) {
-            throw new BusinessException("会议已开始或已结束，无法修改");
+            BusinessExceptionHelper.throwMeetingCannotModify();
         }
 
         // 更新字段
@@ -191,17 +192,17 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     public void cancelMeeting(Long meetingId, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
-            throw new BusinessException("会议不存在");
+            BusinessExceptionHelper.throwVideoMeetingNotFound();
         }
 
         // 只有主持人可以取消会议
         if (!meeting.getHostId().equals(userId)) {
-            throw new BusinessException("只有主持人可以取消会议");
+            BusinessExceptionHelper.throwOnlyHostCanCancel();
         }
 
         // 只有预定状态的会议可以取消
         if (!"SCHEDULED".equals(meeting.getStatus())) {
-            throw new BusinessException("只有预定状态的会议可以取消");
+            BusinessExceptionHelper.throwOnlyScheduledCanCancel();
         }
 
         meeting.setStatus("CANCELLED");
@@ -222,17 +223,17 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     public void deleteMeeting(Long meetingId, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
-            throw new BusinessException("会议不存在");
+            BusinessExceptionHelper.throwVideoMeetingNotFound();
         }
 
         // 只有主持人可以删除会议
         if (!meeting.getHostId().equals(userId)) {
-            throw new BusinessException("只有主持人可以删除会议");
+            BusinessExceptionHelper.throwOnlyHostCanDelete();
         }
 
         // 只有已结束或已取消的会议可以删除
         if (!SystemConstants.MEETING_STATUS_ENDED.equals(meeting.getStatus()) && !"CANCELLED".equals(meeting.getStatus())) {
-            throw new BusinessException("只有已结束或已取消的会议可以删除");
+            BusinessExceptionHelper.throwOnlyEndedOrCancelledCanDelete();
         }
 
         meeting.setDelFlag(1);
@@ -246,15 +247,15 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     public void startMeeting(Long meetingId, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
-            throw new BusinessException("会议不存在");
+            BusinessExceptionHelper.throwVideoMeetingNotFound();
         }
 
         if (!meeting.getHostId().equals(userId)) {
-            throw new BusinessException("只有主持人可以开始会议");
+            BusinessExceptionHelper.throwOnlyHostCanStart();
         }
 
         if (!"SCHEDULED".equals(meeting.getStatus())) {
-            throw new BusinessException("会议状态不正确");
+            BusinessExceptionHelper.throwVideoMeetingStatusError();
         }
 
         meeting.setStatus(SystemConstants.MEETING_STATUS_IN_PROGRESS);
@@ -275,7 +276,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     public void endMeeting(Long meetingId, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
-            throw new BusinessException("会议不存在");
+            BusinessExceptionHelper.throwMeetingNotFound();
         }
 
         if (!SystemConstants.MEETING_STATUS_IN_PROGRESS.equals(meeting.getStatus())) {
@@ -307,25 +308,25 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     public ImVideoMeetingDetailVO joinMeeting(Long meetingId, String password, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
-            throw new BusinessException("会议不存在");
+            BusinessExceptionHelper.throwMeetingNotFound();
         }
 
         // 检查会议状态
         if ("CANCELLED".equals(meeting.getStatus())) {
-            throw new BusinessException("会议已被取消");
+            BusinessExceptionHelper.throwMeetingCancelled();
         }
 
         // 检查密码
         if (Boolean.TRUE.equals(meeting.getRequirePassword())) {
             if (password == null || !password.equals(meeting.getMeetingPassword())) {
-                throw new BusinessException("会议密码错误");
+                BusinessExceptionHelper.throwMeetingPasswordError();
             }
         }
 
         // 获取用户信息
         ImUser user = userMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException("用户不存在");
+            BusinessExceptionHelper.throwUserNotFound();
         }
 
         // 检查或创建参与者记录
@@ -334,7 +335,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             // 检查人数限制
             Integer currentCount = participantMapper.countJoinedByMeetingId(meetingId);
             if (currentCount >= meeting.getMaxParticipants()) {
-                throw new BusinessException("会议人数已满");
+                BusinessExceptionHelper.throwMeetingFull();
             }
 
             // 创建参与者记录
@@ -464,7 +465,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     public void inviteUsers(Long meetingId, List<Long> userIds, Long inviterId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
-            throw new BusinessException("会议不存在");
+            BusinessExceptionHelper.throwMeetingNotFound();
         }
 
         // 获取邀请者信息
@@ -504,22 +505,22 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     public void removeParticipant(Long meetingId, Long userId, Long operatorId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
-            throw new BusinessException("会议不存在");
+            BusinessExceptionHelper.throwMeetingNotFound();
         }
 
         // 只有主持人可以移除参与者
         if (!meeting.getHostId().equals(operatorId)) {
-            throw new BusinessException("只有主持人可以移除参与者");
+            BusinessExceptionHelper.throwOnlyHostCanRemoveParticipant();
         }
 
         ImVideoMeetingParticipant participant = participantMapper.selectByMeetingAndUser(meetingId, userId);
         if (participant == null) {
-            throw new BusinessException("用户不在会议中");
+            BusinessExceptionHelper.throwParticipantNotInMeeting();
         }
 
         // 不能移除主持人
         if ("HOST".equals(participant.getRole())) {
-            throw new BusinessException("不能移除主持人");
+            BusinessExceptionHelper.throwCannotRemoveHost();
         }
 
         participant.setStatus("LEFT");

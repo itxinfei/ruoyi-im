@@ -99,13 +99,11 @@ export function getApprovals(params) {
  * @param {string} data.action - 操作 APPROVE/REJECT
  * @param {string} data.comment - 审批意见
  * @returns {Promise}
+ * @deprecated 请使用 approval.js 中的 approve/reject 方法
  */
 export function handleApproval(data) {
-    return request({
-        url: '/api/im/approval/handle',
-        method: 'post',
-        data
-    })
+    console.warn('handleApproval: 请使用 approval.js 中的 approve/reject 方法')
+    return Promise.reject(new Error('请使用 approval.js 中的 approve/reject 方法'))
 }
 
 /**
@@ -113,25 +111,31 @@ export function handleApproval(data) {
  * @param {Object} data - 打卡数据
  * @param {string} data.type - 类型 CHECK_IN/CHECK_OUT
  * @param {string} data.location - 位置
+ * @param {string} data.deviceInfo - 设备信息
  * @returns {Promise}
  */
 export function checkIn(data) {
+    const isCheckOut = data.type === 'CHECK_OUT'
     return request({
-        url: '/api/im/attendance/checkIn',
+        url: `/api/im/attendance/${isCheckOut ? 'checkOut' : 'checkIn'}`,
         method: 'post',
-        data
+        params: {
+            location: data.location,
+            deviceInfo: data.deviceInfo
+        }
     })
 }
 
 /**
  * 获取考勤记录
  * @param {Object} params - 查询参数
- * @param {string} params.date - 日期
+ * @param {string} params.startDate - 开始日期 (yyyy-MM-dd)
+ * @param {string} params.endDate - 结束日期 (yyyy-MM-dd)
  * @returns {Promise}
  */
 export function getAttendance(params) {
     return request({
-        url: '/api/im/attendance/records',
+        url: '/api/im/attendance/list',
         method: 'get',
         params
     })

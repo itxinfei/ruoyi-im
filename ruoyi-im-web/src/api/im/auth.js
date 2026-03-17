@@ -39,11 +39,13 @@ export function refreshToken() {
 
 /**
  * 验证 Token
+ * @param {string} token - JWT Token
  * @returns {Promise}
  */
-export function validateToken() {
+export function validateToken(token) {
   return request({
     url: '/api/im/auth/validateToken',
-    method: 'post'
+    method: 'post',
+    params: { token }
   })
 }

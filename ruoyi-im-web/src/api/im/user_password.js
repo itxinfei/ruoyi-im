@@ -82,10 +82,12 @@ export function uploadAvatar(data) {
  * @returns {Promise}
  */
 export function updateUserPassword(oldPassword, newPassword) {
+  // 获取当前用户ID，从本地存储或状态中获取
+  const userId = JSON.parse(localStorage.getItem('userInfo') || '{}').id
   return request({
-    url: '/api/im/user/password',
+    url: `/api/im/user/${userId}/password`,
     method: 'put',
-    data: {
+    params: {
       oldPassword,
       newPassword
     }

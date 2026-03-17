@@ -6,6 +6,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImGroupAnnouncementMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupAnnouncementService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,12 +35,12 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         // 验证用户是否为群主或管理员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, senderId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String role = member.getRole();
         if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
-            throw new BusinessException("只有群主和管理员可以发布公告");
+            BusinessExceptionHelper.throwOnlyOwnerOrAdminCanPublishAnnouncement();
         }
 
         // 创建公告
@@ -64,7 +65,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         return announcementMapper.selectByGroupId(groupId);
@@ -75,7 +76,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         return announcementMapper.selectValidByGroupId(groupId);
@@ -86,7 +87,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         return announcementMapper.selectPinnedByGroupId(groupId);
@@ -97,7 +98,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         return announcementMapper.selectLatestByGroupId(groupId);
@@ -108,13 +109,13 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     public void updateAnnouncement(Long announcementId, String content, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 只有公告发送者或群主可以编辑
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(announcement.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String role = member.getRole();
@@ -123,7 +124,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         boolean isSender = announcement.getSenderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isSender) {
-            throw new BusinessException("只有群主、管理员或发送者可以编辑公告");
+            BusinessExceptionHelper.throwOnlyOwnerAdminOrSenderCanEditAnnouncement();
         }
 
         // 更新公告
@@ -137,13 +138,13 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     public void deleteAnnouncement(Long announcementId, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 只有公告发送者或群主可以删除
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(announcement.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String role = member.getRole();
@@ -152,7 +153,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         boolean isSender = announcement.getSenderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isSender) {
-            throw new BusinessException("只有群主、管理员或发送者可以删除公告");
+            BusinessExceptionHelper.throwNoPermission("只有群主、管理员或发送者可以删除公告");
         }
 
         announcementMapper.deleteById(announcementId);
@@ -163,13 +164,13 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     public void recallAnnouncement(Long announcementId, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 只有公告发送者或群主可以撤回
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(announcement.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String role = member.getRole();
@@ -177,7 +178,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         boolean isSender = announcement.getSenderId().equals(userId);
 
         if (!isOwner && !isSender) {
-            throw new BusinessException("只有群主或发送者可以撤回公告");
+            BusinessExceptionHelper.throwOnlyOwnerOrSenderCanRecallAnnouncement();
         }
 
         // 撤回公告
@@ -191,18 +192,18 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     public void setPinned(Long announcementId, Integer isPinned, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 只有群主和管理员可以置顶/取消置顶
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(announcement.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String role = member.getRole();
         if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
-            throw new BusinessException("只有群主和管理员可以置顶公告");
+            BusinessExceptionHelper.throwOnlyOwnerOrAdminCanPinAnnouncement();
         }
 
         announcement.setIsPinned(isPinned);

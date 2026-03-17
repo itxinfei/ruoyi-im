@@ -9,6 +9,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImExternalContactGroupMapper;
 import com.ruoyi.im.mapper.ImExternalContactMapper;
 import com.ruoyi.im.service.ImExternalContactService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
         if (request.getGroupId() != null) {
             ImExternalContactGroup group = groupMapper.selectById(request.getGroupId());
             if (group == null || !group.getUserId().equals(userId)) {
-                throw new BusinessException("分组不存在");
+                BusinessExceptionHelper.throwContactGroupNotFound();
             }
         }
 
@@ -55,17 +56,17 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
     public void updateContact(Long contactId, ExternalContactCreateRequest request, Long userId) {
         ImExternalContact contact = contactMapper.selectById(contactId);
         if (contact == null) {
-            throw new BusinessException("联系人不存在");
+            BusinessExceptionHelper.throwExternalContactNotFound();
         }
         if (!contact.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         // 验证分组
         if (request.getGroupId() != null) {
             ImExternalContactGroup group = groupMapper.selectById(request.getGroupId());
             if (group == null || !group.getUserId().equals(userId)) {
-                throw new BusinessException("分组不存在");
+                BusinessExceptionHelper.throwContactGroupNotFound();
             }
         }
 
@@ -81,10 +82,10 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
     public void deleteContact(Long contactId, Long userId) {
         ImExternalContact contact = contactMapper.selectById(contactId);
         if (contact == null) {
-            throw new BusinessException("联系人不存在");
+            BusinessExceptionHelper.throwExternalContactNotFound();
         }
         if (!contact.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         contactMapper.deleteById(contactId);
     }
@@ -93,10 +94,10 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
     public ImExternalContact getContactDetail(Long contactId, Long userId) {
         ImExternalContact contact = contactMapper.selectById(contactId);
         if (contact == null) {
-            throw new BusinessException("联系人不存在");
+            BusinessExceptionHelper.throwExternalContactNotFound();
         }
         if (!contact.getUserId().equals(userId)) {
-            throw new BusinessException("无权限查看");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         // 设置标签列表
@@ -123,7 +124,7 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
         // 验证分组
         ImExternalContactGroup group = groupMapper.selectById(groupId);
         if (group == null || !group.getUserId().equals(userId)) {
-            throw new BusinessException("分组不存在");
+            BusinessExceptionHelper.throwContactGroupNotFound();
         }
 
         List<ImExternalContact> contacts = contactMapper.selectByGroupId(userId, groupId);
@@ -162,10 +163,10 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
     public void toggleStarred(Long contactId, Long userId) {
         ImExternalContact contact = contactMapper.selectById(contactId);
         if (contact == null) {
-            throw new BusinessException("联系人不存在");
+            BusinessExceptionHelper.throwExternalContactNotFound();
         }
         if (!contact.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         contact.setIsStarred(contact.getIsStarred() == 0 ? 1 : 0);
@@ -176,7 +177,7 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
     @Transactional(rollbackFor = Exception.class)
     public Long createGroup(String name, Long userId) {
         if (StrUtil.isBlank(name)) {
-            throw new BusinessException("分组名称不能为空");
+            BusinessExceptionHelper.throwNameEmpty();
         }
 
         // 检查名称是否重复
@@ -186,7 +187,7 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
                         .eq(ImExternalContactGroup::getName, name)
         );
         if (count > 0) {
-            throw new BusinessException("分组名称已存在");
+            BusinessExceptionHelper.throwGroupNameExists();
         }
 
         ImExternalContactGroup group = new ImExternalContactGroup();
@@ -202,10 +203,10 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
     public void updateGroup(Long groupId, String name, Long userId) {
         ImExternalContactGroup group = groupMapper.selectById(groupId);
         if (group == null) {
-            throw new BusinessException("分组不存在");
+            BusinessExceptionHelper.throwContactGroupNotFound();
         }
         if (!group.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         if (StrUtil.isNotBlank(name) && !name.equals(group.getName())) {
@@ -217,7 +218,7 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
                             .ne(ImExternalContactGroup::getId, groupId)
             );
             if (count > 0) {
-                throw new BusinessException("分组名称已存在");
+                BusinessExceptionHelper.throwGroupNameExists();
             }
             group.setName(name);
         }
@@ -230,10 +231,10 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
     public void deleteGroup(Long groupId, Long userId) {
         ImExternalContactGroup group = groupMapper.selectById(groupId);
         if (group == null) {
-            throw new BusinessException("分组不存在");
+            BusinessExceptionHelper.throwContactGroupNotFound();
         }
         if (!group.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         // 检查分组下是否有联系人
@@ -242,7 +243,7 @@ public class ImExternalContactServiceImpl implements ImExternalContactService {
                         .eq(ImExternalContact::getGroupId, groupId)
         );
         if (count > 0) {
-            throw new BusinessException("分组下还有联系人，无法删除");
+            BusinessExceptionHelper.throwGroupHasContacts();
         }
 
         groupMapper.deleteById(groupId);

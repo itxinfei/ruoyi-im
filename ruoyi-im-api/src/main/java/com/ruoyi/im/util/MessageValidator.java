@@ -79,15 +79,15 @@ public class MessageValidator {
         try {
             InputStream is = this.getClass().getClassLoader().getResourceAsStream("sensitive-words.txt");
             if (is != null) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    line = line.trim();
-                    if (!line.isEmpty() && !line.startsWith("#")) {
-                        addSensitiveWord(line);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        line = line.trim();
+                        if (!line.isEmpty() && !line.startsWith("#")) {
+                            addSensitiveWord(line);
+                        }
                     }
                 }
-                reader.close();
                 log.info("从配置文件加载敏感词成功");
             } else {
                 log.info("未找到敏感词配置文件，使用默认敏感词库");

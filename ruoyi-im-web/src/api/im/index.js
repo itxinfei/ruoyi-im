@@ -59,20 +59,22 @@ export {
   transferGroupOwner,
   updateGroup,
   getGroupMembers,
-  setGroupMute,
-  muteGroupMember
+  muteGroupMember,
+  unmuteGroupMember
 } from './group'
 
 // DING强提醒相关API
 export {
   sendDing,
-  queryDings,
+  getReceivedDings,
+  getSentDings,
   getDingDetail,
   markDingAsRead,
-  batchMarkDingAsRead,
+  confirmDing,
+  getDingReceipts,
   cancelDing,
-  getUnreadDingCount,
-  getDingReadStatus
+  getDingTemplates,
+  sendDingWithTemplate
 } from './ding'
 
 // 群机器人相关API

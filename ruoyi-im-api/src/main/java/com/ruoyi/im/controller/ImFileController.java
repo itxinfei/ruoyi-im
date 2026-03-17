@@ -115,9 +115,24 @@ public class ImFileController {
             return;
         }
 
-        // 构建文件完整路径
+        // 构建文件完整路径并进行路径安全检查
         String filePath = uploadPath + fileVO.getFilePath();
         File file = new File(filePath);
+        
+        // 防止路径遍历攻击：获取规范化的绝对路径并验证
+        try {
+            File canonicalFile = file.getCanonicalFile();
+            File canonicalUploadPath = new File(uploadPath).getCanonicalFile();
+            if (!canonicalFile.getPath().startsWith(canonicalUploadPath.getPath())) {
+                LOGGER.warn("路径遍历攻击尝试: filePath={}", filePath);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+        } catch (IOException e) {
+            LOGGER.error("路径验证失败", e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
 
         if (!file.exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -181,10 +196,25 @@ public class ImFileController {
             }
         }
 
-        // 构建文件路径
+        // 构建文件路径并进行路径安全检查
         String relativePath = "/" + fileType + "/" + year + "/" + month + "/" + day + "/" + fileName;
         String filePath = uploadPath + relativePath;
         File file = new File(filePath);
+        
+        // 防止路径遍历攻击
+        try {
+            File canonicalFile = file.getCanonicalFile();
+            File canonicalUploadPath = new File(uploadPath).getCanonicalFile();
+            if (!canonicalFile.getPath().startsWith(canonicalUploadPath.getPath())) {
+                LOGGER.warn("路径遍历攻击尝试: filePath={}", filePath);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+        } catch (IOException e) {
+            LOGGER.error("路径验证失败", e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
 
         if (!file.exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);

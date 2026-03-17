@@ -5,6 +5,7 @@ import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
 import com.ruoyi.im.service.ImFileService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
@@ -46,7 +47,7 @@ public class ImFileServiceImpl implements ImFileService {
     @Override
     public ImFileVO uploadFile(MultipartFile file, Long userId) {
         if (file == null || file.isEmpty()) {
-            throw new BusinessException("文件不能为空");
+            BusinessExceptionHelper.throwFileEmpty();
         }
 
         String originalFilename = file.getOriginalFilename();
@@ -63,7 +64,7 @@ public class ImFileServiceImpl implements ImFileService {
             
             String canonicalPath = targetFile.getCanonicalPath();
             if (!canonicalPath.startsWith(canonicalUploadPath.getCanonicalPath() + File.separator)) {
-                throw new BusinessException("无效的文件路径");
+                BusinessExceptionHelper.throwInvalidFilePath();
             }
 
             File parentDir = targetFile.getParentFile();
@@ -106,7 +107,7 @@ public class ImFileServiceImpl implements ImFileService {
     public void downloadFile(Long fileId, Long userId) {
         ImFileAsset fileAsset = imFileAssetMapper.selectById(fileId);
         if (fileAsset == null) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwFileNotFound();
         }
 
         fileAsset.setDownloadCount(fileAsset.getDownloadCount() + 1);
@@ -117,7 +118,7 @@ public class ImFileServiceImpl implements ImFileService {
     public void deleteFile(Long fileId, Long userId) {
         ImFileAsset fileAsset = imFileAssetMapper.selectById(fileId);
         if (fileAsset == null) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwFileNotFound();
         }
 
         fileAsset.setStatus("DELETED");

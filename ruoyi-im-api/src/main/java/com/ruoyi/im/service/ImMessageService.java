@@ -86,8 +86,9 @@ public interface ImMessageService {
      * @param conversationId 会话ID
      * @param userId         当前用户ID
      * @param messageIds     消息ID列表
+     * @param broadcast      是否广播已读回执
      */
-    void markAsRead(Long conversationId, Long userId, List<Long> messageIds);
+    void markAsRead(Long conversationId, Long userId, List<Long> messageIds, boolean broadcast);
 
     /**
      * 搜索消息

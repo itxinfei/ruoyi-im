@@ -84,7 +84,7 @@ public class ImDingServiceImpl implements ImDingService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DingMessageVO sendDing(DingSendRequest request, Long userId) {
-        log.info("发送DING消息: userId={}, conversationId={}, content={}",
+        log.debug("发送DING消息: userId={}, conversationId={}, content={}",
                 userId, request.getConversationId(), request.getContent());
 
         // 1. 验证会话是否存在
@@ -145,7 +145,7 @@ public class ImDingServiceImpl implements ImDingService {
 
         // 保存到数据库
         dingMapper.insert(ding);
-        log.info("DING消息已保存: dingId={}", ding.getId());
+        log.debug("DING消息已保存: dingId={}", ding.getId());
 
         // 5. 通过WebSocket推送DING消息给目标用户
         broadcastDingMessage(ding, targetUserIds, userId);
@@ -156,7 +156,7 @@ public class ImDingServiceImpl implements ImDingService {
 
     @Override
     public List<DingMessageVO> queryDings(DingQueryRequest request, Long userId) {
-        log.info("查询DING消息: userId={}, request={}", userId, request);
+        log.debug("查询DING消息: userId={}, request={}", userId, request);
 
         // 构建查询条件
         LambdaQueryWrapper<ImDingMessage> wrapper = new LambdaQueryWrapper<>();
@@ -217,7 +217,7 @@ public class ImDingServiceImpl implements ImDingService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long dingId, Long userId) {
-        log.info("标记DING已读: dingId={}, userId={}", dingId, userId);
+        log.debug("标记DING已读: dingId={}, userId={}", dingId, userId);
 
         // 检查DING是否存在
         ImDingMessage ding = dingMapper.selectById(dingId);
@@ -228,7 +228,7 @@ public class ImDingServiceImpl implements ImDingService {
         // 检查是否已读
         ImDingRead existing = dingReadMapper.selectByDingIdAndUserId(dingId, userId);
         if (existing != null) {
-            log.info("DING已读记录已存在，跳过: dingId={}, userId={}", dingId, userId);
+            log.debug("DING已读记录已存在，跳过: dingId={}, userId={}", dingId, userId);
             return;
         }
 
@@ -243,13 +243,13 @@ public class ImDingServiceImpl implements ImDingService {
         // 增加已读人数
         dingMapper.incrementReadCount(dingId);
 
-        log.info("DING已读记录已创建: dingId={}, userId={}", dingId, userId);
+        log.debug("DING已读记录已创建: dingId={}, userId={}", dingId, userId);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancelDing(Long dingId, Long userId) {
-        log.info("取消DING消息: dingId={}, userId={}", dingId, userId);
+        log.debug("取消DING消息: dingId={}, userId={}", dingId, userId);
 
         ImDingMessage ding = dingMapper.selectById(dingId);
         if (ding == null) {
@@ -264,7 +264,7 @@ public class ImDingServiceImpl implements ImDingService {
         // 更新状态为已取消
         dingMapper.updateStatus(dingId, STATUS_CANCELLED);
 
-        log.info("DING消息已取消: dingId={}", dingId);
+        log.debug("DING消息已取消: dingId={}", dingId);
     }
 
     @Override
@@ -290,15 +290,15 @@ public class ImDingServiceImpl implements ImDingService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void processExpiredDings() {
-        log.info("处理过期的DING消息");
+        log.debug("处理过期的DING消息");
 
         List<ImDingMessage> expiredDings = dingMapper.selectExpiredDings();
         for (ImDingMessage ding : expiredDings) {
             dingMapper.updateStatus(ding.getId(), STATUS_EXPIRED);
-            log.info("DING消息已过期: dingId={}", ding.getId());
+            log.debug("DING消息已过期: dingId={}", ding.getId());
         }
 
-        log.info("处理过期DING消息完成，共{}条", expiredDings.size());
+        log.debug("处理过期DING消息完成，共{}条", expiredDings.size());
     }
 
     /**
@@ -325,7 +325,7 @@ public class ImDingServiceImpl implements ImDingService {
                 broadcastService.broadcastDingMessage(vo, targetUserIds);
             }
 
-            log.info("DING消息已推送给{}个用户", targetUserIds.size());
+            log.debug("DING消息已推送给{}个用户", targetUserIds.size());
         } catch (Exception e) {
             log.error("广播DING消息失败: dingId={}", ding.getId(), e);
         }

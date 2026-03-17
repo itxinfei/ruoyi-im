@@ -23,22 +23,28 @@ export function sendDing(data) {
 }
 
 /**
- * 查询DING消息列表
- * @param {Object} data - 查询参数
- * @param {number} data.conversationId - 会话ID
- * @param {string} data.dingType - DING类型
- * @param {string} data.priority - 优先级
- * @param {string} data.status - 状态
- * @param {boolean} data.unreadOnly - 是否只查询未读
- * @param {number} data.pageNum - 页码
- * @param {number} data.pageSize - 每页数量
+ * 获取接收的DING消息列表
+ * @param {Object} params - 查询参数
  * @returns {Promise}
  */
-export function queryDings(data) {
+export function getReceivedDings(params = {}) {
   return request({
-    url: '/api/im/ding/list',
-    method: 'post',
-    data
+    url: '/api/im/ding/received',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取发送的DING消息列表
+ * @param {Object} params - 查询参数
+ * @returns {Promise}
+ */
+export function getSentDings(params = {}) {
+  return request({
+    url: '/api/im/ding/sent',
+    method: 'get',
+    params
   })
 }
 
@@ -67,15 +73,26 @@ export function markDingAsRead(dingId) {
 }
 
 /**
- * 批量标记DING消息为已读
- * @param {Array<number>} dingIds - DING消息ID列表
+ * 确认DING消息
+ * @param {number} dingId - DING消息ID
  * @returns {Promise}
  */
-export function batchMarkDingAsRead(dingIds) {
+export function confirmDing(dingId) {
   return request({
-    url: '/api/im/ding/read/batch',
-    method: 'put',
-    data: dingIds
+    url: `/api/im/ding/${dingId}/confirm`,
+    method: 'put'
+  })
+}
+
+/**
+ * 获取DING消息回执列表
+ * @param {number} dingId - DING消息ID
+ * @returns {Promise}
+ */
+export function getDingReceipts(dingId) {
+  return request({
+    url: `/api/im/ding/${dingId}/receipts`,
+    method: 'get'
   })
 }
 
@@ -92,24 +109,26 @@ export function cancelDing(dingId) {
 }
 
 /**
- * 获取未读DING消息数量
+ * 获取DING模板列表
  * @returns {Promise}
  */
-export function getUnreadDingCount() {
+export function getDingTemplates() {
   return request({
-    url: '/api/im/ding/unread/count',
+    url: '/api/im/ding/templates',
     method: 'get'
   })
 }
 
 /**
- * 获取DING消息已读状态
- * @param {number} dingId - DING消息ID
+ * 使用模板发送DING
+ * @param {number} templateId - 模板ID
+ * @param {Object} data - 发送数据
  * @returns {Promise}
  */
-export function getDingReadStatus(dingId) {
+export function sendDingWithTemplate(templateId, data) {
   return request({
-    url: `/api/im/ding/${dingId}/status`,
-    method: 'get'
+    url: `/api/im/ding/template/${templateId}`,
+    method: 'post',
+    data
   })
 }

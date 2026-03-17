@@ -4,6 +4,7 @@ import com.ruoyi.im.domain.ImSystemNotification;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImSystemNotificationMapper;
 import com.ruoyi.im.service.ImSystemNotificationService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

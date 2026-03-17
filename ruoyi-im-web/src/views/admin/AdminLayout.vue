@@ -142,7 +142,7 @@ const logout = () => {
   align-items: center;
   gap: 10px;
   padding: 0 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--dt-border-dark);
 }
 
 .logo-mark {
@@ -158,14 +158,14 @@ const logout = () => {
 }
 
 .logo-text .title {
-  color: #fff;
+  color: var(--dt-text-primary-dark);
   font-size: 16px;
   font-weight: 600;
   line-height: 1.1;
 }
 
 .logo-text .subtitle {
-  color: #8fa8cf;
+  color: var(--dt-text-secondary-dark);
   font-size: 11px;
   margin-top: 2px;
 }
@@ -183,11 +183,11 @@ const logout = () => {
 }
 
 :deep(.admin-menu .el-menu-item:hover) {
-  background: rgba(82, 130, 255, 0.16);
+  background: var(--dt-brand-bg-dark);
 }
 
 :deep(.admin-menu .el-menu-item.is-active) {
-  background: linear-gradient(90deg, rgba(48, 112, 255, 0.88) 0%, rgba(63, 151, 255, 0.88) 100%);
+  background: linear-gradient(90deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
 }
 
 .admin-header {

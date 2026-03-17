@@ -13,6 +13,7 @@ import com.ruoyi.im.mapper.ImScheduleEventMapper;
 import com.ruoyi.im.mapper.ImScheduleParticipantMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImScheduleEventService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.schedule.ScheduleEventDetailVO;
 import com.ruoyi.im.vo.schedule.ScheduleParticipantVO;
 import org.springframework.beans.BeanUtils;
@@ -73,10 +74,10 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     public void updateEvent(Long eventId, ScheduleEventCreateRequest request, Long userId) {
         ImScheduleEvent event = eventMapper.selectById(eventId);
         if (event == null) {
-            throw new BusinessException("日程不存在");
+            BusinessExceptionHelper.throwScheduleEventNotFound();
         }
         if (!event.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         BeanUtils.copyProperties(request, event);
@@ -109,10 +110,10 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     public void deleteEvent(Long eventId, Long userId) {
         ImScheduleEvent event = eventMapper.selectById(eventId);
         if (event == null) {
-            throw new BusinessException("日程不存在");
+            BusinessExceptionHelper.throwScheduleEventNotFound();
         }
         if (!event.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         eventMapper.deleteById(eventId);
     }
@@ -121,7 +122,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     public ScheduleEventDetailVO getEventDetail(Long eventId, Long userId) {
         ImScheduleEvent event = eventMapper.selectById(eventId);
         if (event == null) {
-            throw new BusinessException("日程不存在");
+            BusinessExceptionHelper.throwScheduleEventNotFound();
         }
 
         ScheduleEventDetailVO vo = new ScheduleEventDetailVO();
@@ -184,12 +185,12 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     public void respondToInvite(Long eventId, Long userId, Boolean accepted) {
         ImScheduleEvent event = eventMapper.selectById(eventId);
         if (event == null) {
-            throw new BusinessException("日程不存在");
+            BusinessExceptionHelper.throwScheduleEventNotFound();
         }
 
         ImScheduleParticipant participant = participantMapper.selectByEventAndUser(eventId, userId);
         if (participant == null) {
-            throw new BusinessException("您不是该日程的参与人");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         participant.setStatus(accepted ? "ACCEPTED" : "DECLINED");
@@ -208,10 +209,10 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     public void cancelEvent(Long eventId, Long userId) {
         ImScheduleEvent event = eventMapper.selectById(eventId);
         if (event == null) {
-            throw new BusinessException("日程不存在");
+            BusinessExceptionHelper.throwScheduleEventNotFound();
         }
         if (!event.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         event.setStatus("CANCELLED");

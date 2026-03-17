@@ -13,6 +13,7 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageReadMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageReadService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import com.ruoyi.im.vo.message.ImMessageReadDetailVO;
@@ -108,7 +109,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         // 广播已读状态给发送者
         broadcastReadStatus(messageId, userId, message.getSenderId());
 
-        log.info("标记消息已读: messageId={}, userId={}, senderId={}", messageId, userId, message.getSenderId());
+        log.debug("标记消息已读: messageId={}, userId={}, senderId={}", messageId, userId, message.getSenderId());
     }
 
     @Override
@@ -133,13 +134,13 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         // 验证会话是否存在
         ImConversation conversation = conversationMapper.selectById(conversationId);
         if (conversation == null) {
-            throw new BusinessException("会话不存在");
+            BusinessExceptionHelper.throwConversationNotFound();
         }
 
         // 验证用户是否是该会话的成员
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
-            throw new BusinessException("用户不是会话成员");
+            BusinessExceptionHelper.throwNotAllowed("用户不是会话成员");
         }
 
         // 如果未指定消息ID，获取会话最新消息ID
@@ -171,7 +172,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         conversationMemberMapper.updateUnreadCount(conversationId, userId, 0);
         conversationMemberMapper.updateLastReadMessageId(conversationId, userId, upToMessageId);
 
-        log.info("标记会话所有消息已读: conversationId={}, userId={}, count={}",
+        log.debug("标记会话所有消息已读: conversationId={}, userId={}, count={}",
             conversationId, userId, messagesToMark.size());
     }
 
@@ -180,7 +181,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         // 验证权限
         ImMessage message = messageMapper.selectImMessageById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         if (!message.getSenderId().equals(senderId)) {
@@ -195,7 +196,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         // 获取会话信息以确定总人数
         ImConversation conversation = conversationMapper.selectById(message.getConversationId());
         if (conversation == null) {
-            throw new BusinessException("会话不存在");
+            BusinessExceptionHelper.throwConversationNotFound();
         }
 
         int totalCount;
@@ -271,7 +272,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         // 验证权限
         ImMessage message = messageMapper.selectImMessageById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         if (!message.getSenderId().equals(senderId)) {
@@ -381,7 +382,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         ImMessageRead existing = messageReadMapper.selectByMessageIdAndUserId(messageId, userId);
         if (existing != null) {
             messageReadMapper.deleteImMessageReadById(existing.getId());
-            log.info("撤回已读回执: messageId={}, userId={}", messageId, userId);
+            log.debug("撤回已读回执: messageId={}, userId={}", messageId, userId);
         }
     }
 

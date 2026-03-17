@@ -20,6 +20,7 @@ import com.ruoyi.im.mapper.ImCloudFolderMapper;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImCloudDriveService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.vo.cloud.ImCloudFileShareVO;
 import com.ruoyi.im.vo.cloud.ImCloudFileVO;
@@ -97,7 +98,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         if (request.getParentId() != 0) {
             ImCloudFolder parentFolder = cloudFolderMapper.selectById(request.getParentId());
             if (parentFolder == null) {
-                throw new BusinessException("父文件夹不存在");
+                BusinessExceptionHelper.throwFolderNotFound();
             }
         }
 
@@ -105,7 +106,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         ImCloudFolder existFolder = cloudFolderMapper.selectByNameAndOwner(
                 request.getParentId(), request.getFolderName(), userId);
         if (existFolder != null) {
-            throw new BusinessException("同名文件夹已存在");
+            BusinessExceptionHelper.throwFolderNameExists();
         }
 
         ImCloudFolder folder = new ImCloudFolder();
@@ -141,11 +142,11 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public void renameFolder(Long folderId, String newName, Long userId) {
         ImCloudFolder folder = cloudFolderMapper.selectById(folderId);
         if (folder == null) {
-            throw new BusinessException("文件夹不存在");
+            BusinessExceptionHelper.throwFolderNotFound();
         }
 
         if (!folder.getOwnerId().equals(userId)) {
-            throw new BusinessException("无权限操作此文件夹");
+            BusinessExceptionHelper.throwNoPermission("无权限操作此文件夹");
         }
 
         folder.setFolderName(newName);
@@ -160,11 +161,11 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public void deleteFolder(Long folderId, Long userId) {
         ImCloudFolder folder = cloudFolderMapper.selectById(folderId);
         if (folder == null) {
-            throw new BusinessException("文件夹不存在");
+            BusinessExceptionHelper.throwFolderNotFound();
         }
 
         if (!folder.getOwnerId().equals(userId)) {
-            throw new BusinessException("无权限操作此文件夹");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         folder.setIsDeleted(true);
@@ -219,11 +220,11 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public void permanentlyDeleteFolder(Long folderId, Long userId) {
         ImCloudFolder folder = cloudFolderMapper.selectById(folderId);
         if (folder == null || !folder.getIsDeleted()) {
-            throw new BusinessException("文件夹不存在或未在回收站");
+            BusinessExceptionHelper.throwFolderNotInTrash();
         }
 
         if (!folder.getOwnerId().equals(userId)) {
-            throw new BusinessException("无权限操作此文件夹");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         cloudFolderMapper.deleteById(folderId);
@@ -235,11 +236,11 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public void restoreFolder(Long folderId, Long userId) {
         ImCloudFolder folder = cloudFolderMapper.selectById(folderId);
         if (folder == null) {
-            throw new BusinessException("文件夹不存在");
+            BusinessExceptionHelper.throwFolderNotFound();
         }
 
         if (!folder.getOwnerId().equals(userId)) {
-            throw new BusinessException("无权限操作此文件夹");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         folder.setIsDeleted(false);
@@ -322,20 +323,23 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ImCloudFileVO uploadFile(Long folderId, MultipartFile file, Long userId) {
-        // 检查文件夹是否存在
-        if (folderId != 0) {
-            ImCloudFolder folder = cloudFolderMapper.selectById(folderId);
-            if (folder == null) {
-                throw new BusinessException("文件夹不存在");
-            }
-        }
-
-        // 检查存储配额
-        Long usedSize = cloudFileMapper.sumUserFileSize(userId);
-        Long totalQuota = PERSONAL_QUOTA;
-        if (usedSize + file.getSize() > totalQuota) {
-            throw new BusinessException("存储空间不足");
-        }
+                // 检查文件夹是否存在
+                if (folderId != 0) {
+                    ImCloudFolder folder = cloudFolderMapper.selectById(folderId);
+                    if (folder == null) {
+                        BusinessExceptionHelper.throwFolderNotFound();
+                    }
+                }
+        
+                // 检查存储配额
+                Long usedSize = cloudFileMapper.sumUserFileSize(userId);
+                Long totalQuota = PERSONAL_QUOTA;
+                if (usedSize + file.getSize() > totalQuota) {
+                    BusinessExceptionHelper.throwStorageInsufficient();
+                }
+        
+        
+        
 
         String originalFilename = file.getOriginalFilename();
         String fileExtension = FileUtils.getFileExtension(originalFilename);
@@ -402,17 +406,33 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         return convertToVO(cloudFile, userId);
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void renameFile(Long fileId, String newName, Long userId) {
-        ImCloudFile cloudFile = cloudFileMapper.selectById(fileId);
-        if (cloudFile == null) {
-            throw new BusinessException("文件不存在");
-        }
+        @Override
 
-        if (!cloudFile.getUploaderId().equals(userId)) {
-            throw new BusinessException("无权限操作此文件");
-        }
+        @Transactional(rollbackFor = Exception.class)
+
+        public void renameFile(Long fileId, String newName, Long userId) {
+
+            ImCloudFile cloudFile = cloudFileMapper.selectById(fileId);
+
+            if (cloudFile == null) {
+
+                BusinessExceptionHelper.throwCloudFileNotFound();
+
+            }
+
+    
+
+            if (!cloudFile.getUploaderId().equals(userId)) {
+
+                BusinessExceptionHelper.throwNoPermission("无权限操作此文件");
+
+            }
+
+    
+
+    
+
+    
 
         cloudFile.setFileName(newName);
         cloudFile.setUpdateTime(LocalDateTime.now());
@@ -426,11 +446,11 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public void deleteFile(Long fileId, Long userId) {
         ImCloudFile cloudFile = cloudFileMapper.selectById(fileId);
         if (cloudFile == null) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwCloudFileNotFound();
         }
 
         if (!cloudFile.getUploaderId().equals(userId)) {
-            throw new BusinessException("无权限操作此文件");
+            BusinessExceptionHelper.throwNoPermission("无权限操作此文件");
         }
 
         cloudFile.setIsDeleted(true);
@@ -446,11 +466,11 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public void permanentlyDeleteFile(Long fileId, Long userId) {
         ImCloudFile cloudFile = cloudFileMapper.selectById(fileId);
         if (cloudFile == null || !cloudFile.getIsDeleted()) {
-            throw new BusinessException("文件不存在或未在回收站");
+            BusinessExceptionHelper.throwCloudFileNotInTrash();
         }
 
         if (!cloudFile.getUploaderId().equals(userId)) {
-            throw new BusinessException("无权限操作此文件");
+            BusinessExceptionHelper.throwNoPermission("无权限操作此文件");
         }
 
         // 删除物理文件
@@ -471,11 +491,11 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public void restoreFile(Long fileId, Long userId) {
         ImCloudFile cloudFile = cloudFileMapper.selectById(fileId);
         if (cloudFile == null) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwCloudFileNotFound();
         }
 
         if (!cloudFile.getUploaderId().equals(userId)) {
-            throw new BusinessException("无权限操作此文件");
+            BusinessExceptionHelper.throwNoPermission("无权限操作此文件");
         }
 
         cloudFile.setIsDeleted(false);
@@ -493,7 +513,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         if (request.getTargetFolderId() != 0) {
             ImCloudFolder targetFolder = cloudFolderMapper.selectById(request.getTargetFolderId());
             if (targetFolder == null) {
-                throw new BusinessException("目标文件夹不存在");
+                BusinessExceptionHelper.throwFolderNotFound();
             }
         }
 
@@ -594,11 +614,11 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public void cancelShare(Long shareId, Long userId) {
         ImCloudFileShare share = cloudFileShareMapper.selectById(shareId);
         if (share == null) {
-            throw new BusinessException("分享不存在");
+            BusinessExceptionHelper.throwShareNotFound();
         }
 
         if (!share.getSharerId().equals(userId)) {
-            throw new BusinessException("无权限操作此分享");
+            BusinessExceptionHelper.throwNoPermission("无权限操作此分享");
         }
 
         share.setStatus("CANCELLED");
@@ -640,21 +660,21 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     public ImCloudFileShareVO accessShare(String shareCode, String accessPassword) {
         ImCloudFileShare share = cloudFileShareMapper.selectByShareCode(shareCode);
         if (share == null) {
-            throw new BusinessException("分享不存在或已失效");
+            BusinessExceptionHelper.throwShareNotFound();
         }
 
         if ("CANCELLED".equals(share.getStatus())) {
-            throw new BusinessException("分享已取消");
+            BusinessExceptionHelper.throwShareCancelled();
         }
 
         if (share.getExpireTime() != null && share.getExpireTime().isBefore(LocalDateTime.now())) {
-            throw new BusinessException("分享已过期");
+            BusinessExceptionHelper.throwShareExpired();
         }
 
         // 验证密码
         if (share.getAccessPassword() != null && !share.getAccessPassword().isEmpty()) {
             if (!share.getAccessPassword().equals(accessPassword)) {
-                throw new BusinessException("密码错误");
+                BusinessExceptionHelper.throwPasswordError();
             }
         }
 

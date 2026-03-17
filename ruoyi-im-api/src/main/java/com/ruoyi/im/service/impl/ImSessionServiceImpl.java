@@ -5,6 +5,7 @@ import com.ruoyi.im.dto.session.ImSessionUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImSessionMapper;
 import com.ruoyi.im.service.ImSessionService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.session.ImSessionVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class ImSessionServiceImpl implements ImSessionService {
     public ImSessionVO getSessionById(Long sessionId) {
         ImSession session = imSessionMapper.selectImSessionById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            BusinessExceptionHelper.throwConversationNotFound();
         }
         ImSessionVO vo = new ImSessionVO();
         BeanUtils.copyProperties(session, vo);
@@ -56,7 +57,7 @@ public class ImSessionServiceImpl implements ImSessionService {
     public void updateSession(Long sessionId, ImSessionUpdateRequest request) {
         ImSession session = imSessionMapper.selectImSessionById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            BusinessExceptionHelper.throwConversationNotFound();
         }
         if (request.getName() != null) {
             session.setName(request.getName());
@@ -74,10 +75,10 @@ public class ImSessionServiceImpl implements ImSessionService {
     public void deleteSession(Long sessionId, Long userId) {
         ImSession session = imSessionMapper.selectImSessionById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            BusinessExceptionHelper.throwConversationNotFound();
         }
         if (!session.getUserId().equals(userId)) {
-            throw new BusinessException("无权删除该会话");
+            BusinessExceptionHelper.throwNoPermission("无权删除该会话");
         }
         imSessionMapper.deleteImSessionById(sessionId);
     }
@@ -86,10 +87,10 @@ public class ImSessionServiceImpl implements ImSessionService {
     public void clearUnread(Long sessionId, Long userId) {
         ImSession session = imSessionMapper.selectImSessionById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            BusinessExceptionHelper.throwConversationNotFound();
         }
         if (!session.getUserId().equals(userId)) {
-            throw new BusinessException("无权操作该会话");
+            BusinessExceptionHelper.throwNoPermission("无权操作该会话");
         }
         session.setUnreadCount(0);
         imSessionMapper.updateImSession(session);
@@ -99,7 +100,7 @@ public class ImSessionServiceImpl implements ImSessionService {
     public void togglePin(Long sessionId, Integer pinned) {
         ImSession session = imSessionMapper.selectImSessionById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            BusinessExceptionHelper.throwConversationNotFound();
         }
         session.setIsPinned(pinned);
         imSessionMapper.updateImSession(session);
@@ -109,7 +110,7 @@ public class ImSessionServiceImpl implements ImSessionService {
     public void toggleMute(Long sessionId, Integer muted) {
         ImSession session = imSessionMapper.selectImSessionById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            BusinessExceptionHelper.throwConversationNotFound();
         }
         session.setIsMuted(muted);
         imSessionMapper.updateImSession(session);

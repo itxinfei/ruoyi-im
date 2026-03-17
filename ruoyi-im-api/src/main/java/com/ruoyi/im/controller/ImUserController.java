@@ -79,6 +79,15 @@ public class ImUserController {
     @Operation(summary = "删除用户", description = "管理员删除指定用户账户及其关联数据")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
+        // 权限检查：只有管理员可以删除用户
+        String role = SecurityUtils.getLoginUserRole();
+        if (!"ADMIN".equals(role) && !"SUPER_ADMIN".equals(role)) {
+            throw new BusinessException(403, "只有管理员可以删除用户");
+        }
+        // 禁止删除管理员账户
+        if (id == 1L) {
+            throw new BusinessException(400, "禁止删除超级管理员账户");
+        }
         imUserService.deleteUser(id);
         return Result.success("删除成功");
     }
@@ -219,6 +228,13 @@ public class ImUserController {
     @Operation(summary = "更新用户信息", description = "更新用户的昵称、头像、个性签名等信息")
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody ImUserUpdateRequest request) {
+        // 权限检查：只有当前用户本人可以修改自己的信息，管理员除外
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        String role = SecurityUtils.getLoginUserRole();
+        boolean isAdmin = "ADMIN".equals(role) || "SUPER_ADMIN".equals(role);
+        if (!isAdmin && !id.equals(currentUserId)) {
+            throw new BusinessException(403, "只能修改自己的信息");
+        }
         imUserService.updateUser(id, request);
         return Result.success("更新成功");
     }
@@ -240,6 +256,13 @@ public class ImUserController {
             @PathVariable Long id,
             @RequestParam String oldPassword,
             @RequestParam String newPassword) {
+        // 权限检查：只有当前用户本人可以修改密码，管理员除外
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        String role = SecurityUtils.getLoginUserRole();
+        boolean isAdmin = "ADMIN".equals(role) || "SUPER_ADMIN".equals(role);
+        if (!isAdmin && !id.equals(currentUserId)) {
+            throw new BusinessException(403, "只能修改自己的密码");
+        }
         boolean success = imUserService.changePassword(id, oldPassword, newPassword);
         return success ? Result.success("密码修改成功") : Result.fail("旧密码错误");
     }

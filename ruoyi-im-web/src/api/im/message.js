@@ -130,16 +130,17 @@ export function searchMessages(data) {
  * 标记消息已读
  * @param {Object} data - 已读数据
  * @param {number} data.conversationId - 会话ID
- * @param {number} data.messageId - 消息ID
+ * @param {number|Array} data.messageId - 消息ID或消息ID数组
  * @returns {Promise}
  */
 export function markAsRead(data) {
+  const messageIds = Array.isArray(data.messageId) ? data.messageId : [data.messageId]
   return request({
-    url: '/api/im/message/read',
+    url: '/api/im/message/mark-read',
     method: 'put',
-    params: {
+    data: {
       conversationId: data.conversationId,
-      lastReadMessageId: data.messageId
+      messageIds: messageIds
     }
   })
 }
@@ -178,37 +179,33 @@ export function replyMessage(data) {
  * @param {Object} data - 反应数据
  * @param {string} data.emoji - 表情符号
  * @returns {Promise}
+ * @deprecated 后端暂未实现此接口
  */
 export function addReaction(messageId, data) {
-  return request({
-    url: `/api/im/message/${messageId}/reaction`,
-    method: 'post',
-    data
-  })
+  console.warn('addReaction: 后端暂未实现此接口')
+  return Promise.reject(new Error('后端暂未实现此接口'))
 }
 
 /**
  * 删除消息表情反应
  * @param {number} messageId - 消息ID
  * @returns {Promise}
+ * @deprecated 后端暂未实现此接口
  */
 export function removeReaction(messageId) {
-  return request({
-    url: `/api/im/message/${messageId}/reaction`,
-    method: 'delete'
-  })
+  console.warn('removeReaction: 后端暂未实现此接口')
+  return Promise.reject(new Error('后端暂未实现此接口'))
 }
 
 /**
  * 获取消息的表情反应列表
  * @param {number} messageId - 消息ID
  * @returns {Promise}
+ * @deprecated 后端暂未实现此接口
  */
 export function getMessageReactions(messageId) {
-  return request({
-    url: `/api/im/message/${messageId}/reactions`,
-    method: 'get'
-  })
+  console.warn('getMessageReactions: 后端暂未实现此接口')
+  return Promise.resolve({ data: [] })
 }
 
 /**
@@ -217,7 +214,7 @@ export function getMessageReactions(messageId) {
  */
 export function getUnreadMentions() {
   return request({
-    url: '/api/im/message/mention/unread',
+    url: '/api/im/mention/unread',
     method: 'get'
   })
 }
@@ -228,7 +225,7 @@ export function getUnreadMentions() {
  */
 export function getUnreadMentionCount() {
   return request({
-    url: '/api/im/message/mention/unread/count',
+    url: '/api/im/mention/unread/count',
     method: 'get'
   })
 }
@@ -240,7 +237,7 @@ export function getUnreadMentionCount() {
  */
 export function markMentionAsRead(messageId) {
   return request({
-    url: `/api/im/message/${messageId}/mention/read`,
+    url: `/api/im/mention/${messageId}/read`,
     method: 'put'
   })
 }
@@ -249,10 +246,12 @@ export function markMentionAsRead(messageId) {
  * 获取会话未读消息数
  * @param {number} conversationId - 会话ID
  * @returns {Promise}
+ * @deprecated 请使用 conversation.getUnreadCount 替代
  */
 export function getUnreadCount(conversationId) {
+  console.warn('getUnreadCount: 请使用 conversation.getUnreadCount 替代')
   return request({
-    url: `/api/im/message/unread/count/${conversationId}`,
+    url: `/api/im/conversation/unreadCount`,
     method: 'get'
   })
 }

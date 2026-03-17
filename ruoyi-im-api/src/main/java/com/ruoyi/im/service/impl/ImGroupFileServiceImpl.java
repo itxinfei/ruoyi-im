@@ -12,6 +12,7 @@ import com.ruoyi.im.mapper.ImGroupFileMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImGroupFileService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 
 import java.util.stream.Collectors;
 import com.ruoyi.im.dto.group.ImGroupFileQueryRequest;
@@ -52,18 +53,18 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(request.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         // 验证文件资产是否存在
         ImFileAsset fileAsset = fileAssetMapper.selectById(request.getFileId());
         if (fileAsset == null || "DELETED".equals(fileAsset.getStatus())) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwFileNotFound();
         }
 
         // 验证文件是否属于当前用户
         if (!fileAsset.getUploaderId().equals(userId)) {
-            throw new BusinessException("只能上传自己的文件");
+            BusinessExceptionHelper.throwOnlyUploadOwnFile();
         }
 
         // 创建群组文件记录
@@ -95,7 +96,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         if (request.getGroupId() != null) {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(request.getGroupId(), userId);
             if (member == null) {
-                throw new BusinessException("您不是该群组成员");
+                BusinessExceptionHelper.throwNotGroupMember();
             }
         }
 
@@ -137,7 +138,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         ImGroupFileStatisticsVO statistics = groupFileMapper.selectStatisticsByGroupId(groupId);
@@ -155,7 +156,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         return groupFileMapper.selectCategoriesByGroupId(groupId);
@@ -166,13 +167,13 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     public void updateFile(Long groupFileId, ImGroupFileUpdateRequest request, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
         if (groupFile == null || groupFile.getStatus() == 0) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwFileNotFound();
         }
 
         // 验证权限：只有上传者、群主、管理员可以编辑
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupFile.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String role = member.getRole();
@@ -181,7 +182,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         boolean isUploader = groupFile.getUploaderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isUploader) {
-            throw new BusinessException("只有群主、管理员或上传者可以编辑文件信息");
+            BusinessExceptionHelper.throwOnlyOwnerAdminOrUploaderCanEditFile();
         }
 
         // 更新文件信息
@@ -203,13 +204,13 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     public void deleteFile(Long groupFileId, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
         if (groupFile == null || groupFile.getStatus() == 0) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwFileNotFound();
         }
 
         // 验证权限：只有上传者、群主、管理员可以删除
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupFile.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String role = member.getRole();
@@ -218,7 +219,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         boolean isUploader = groupFile.getUploaderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isUploader) {
-            throw new BusinessException("只有群主、管理员或上传者可以删除文件");
+            BusinessExceptionHelper.throwOnlyOwnerAdminOrUploaderCanDeleteFile();
         }
 
         // 软删除
@@ -231,13 +232,13 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     public String downloadFile(Long groupFileId, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
         if (groupFile == null || groupFile.getStatus() == 0) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwFileNotFound();
         }
 
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupFile.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         // 验证下载权限
@@ -247,7 +248,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         boolean isUploader = groupFile.getUploaderId().equals(userId);
 
         if (!"ALL".equals(groupFile.getPermission()) && !isOwner && !isAdmin && !isUploader) {
-            throw new BusinessException("您没有权限下载此文件");
+            BusinessExceptionHelper.throwNoPermissionToDownload();
         }
 
         // 获取文件URL
@@ -281,13 +282,13 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     public void moveFile(Long groupFileId, String category, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
         if (groupFile == null || groupFile.getStatus() == 0) {
-            throw new BusinessException("文件不存在");
+            BusinessExceptionHelper.throwFileNotFound();
         }
 
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupFile.getGroupId(), userId);
         if (member == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         // 任何成员都可以移动文件

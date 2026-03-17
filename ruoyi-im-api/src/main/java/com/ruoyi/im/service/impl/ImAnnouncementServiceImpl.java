@@ -17,6 +17,7 @@ import com.ruoyi.im.mapper.ImAnnouncementLikeMapper;
 import com.ruoyi.im.mapper.ImAnnouncementMapper;
 import com.ruoyi.im.mapper.ImAnnouncementReadMapper;
 import com.ruoyi.im.service.ImAnnouncementService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.announcement.ImAnnouncementDetailVO;
 import com.ruoyi.im.vo.announcement.ImAnnouncementVO;
 import org.slf4j.Logger;
@@ -89,12 +90,12 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public void updateAnnouncement(ImAnnouncementUpdateRequest request, Long userId) {
         ImAnnouncement announcement = announcementMapper.selectById(request.getId());
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 只有草稿或已撤回的公告才能修改
         if (!"DRAFT".equals(announcement.getStatus()) && !"WITHDRAWN".equals(announcement.getStatus())) {
-            throw new BusinessException("只能修改草稿或已撤回的公告");
+            BusinessExceptionHelper.throwNotAllowed("只能修改草稿或已撤回的公告");
         }
 
         if (request.getTitle() != null) {
@@ -129,12 +130,12 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public void deleteAnnouncement(Long announcementId, Long userId) {
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 只有发布人可以删除
         if (!announcement.getPublisherId().equals(userId)) {
-            throw new BusinessException("只有发布人可以删除公告");
+            BusinessExceptionHelper.throwOnlyPublisherCanDelete();
         }
 
         announcementMapper.deleteById(announcementId);
@@ -145,7 +146,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public ImAnnouncementDetailVO getAnnouncementDetail(Long announcementId, Long userId) {
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 增加浏览次数
@@ -204,11 +205,11 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public void publishAnnouncement(Long announcementId, Long userId) {
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         if (!"DRAFT".equals(announcement.getStatus())) {
-            throw new BusinessException("只能发布草稿状态的公告");
+            BusinessExceptionHelper.throwNotAllowed("只能发布草稿状态的公告");
         }
 
         announcement.setStatus("PUBLISHED");
@@ -226,11 +227,11 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public void withdrawAnnouncement(Long announcementId, Long userId) {
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         if (!announcement.getPublisherId().equals(userId)) {
-            throw new BusinessException("只有发布人可以撤回公告");
+            BusinessExceptionHelper.throwOnlyPublisherCanWithdraw();
         }
 
         announcement.setStatus("WITHDRAWN");
@@ -295,7 +296,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public void toggleLike(Long announcementId, Long userId) {
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 检查是否已点赞
@@ -326,12 +327,12 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         // 检查公告是否存在
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         // 检查是否允许评论
         if (announcement.getAllowComment() != null && !announcement.getAllowComment()) {
-            throw new BusinessException("该公告不允许评论");
+            BusinessExceptionHelper.throwAnnouncementNoComment();
         }
 
         // 创建评论
@@ -358,17 +359,17 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         // 查询评论
         ImAnnouncementComment comment = announcementCommentMapper.selectById(commentId);
         if (comment == null) {
-            throw new BusinessException("评论不存在");
+            BusinessExceptionHelper.throwCommentNotFound();
         }
 
         // 只有评论作者或公告发布人可以删除评论
         ImAnnouncement announcement = announcementMapper.selectById(comment.getAnnouncementId());
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         if (!comment.getUserId().equals(userId) && !announcement.getPublisherId().equals(userId)) {
-            throw new BusinessException("只有评论作者或公告发布人可以删除评论");
+            BusinessExceptionHelper.throwOnlyCommentAuthorOrPublisherCanDelete();
         }
 
         // 软删除评论
@@ -444,7 +445,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public void setPinned(Long announcementId, Boolean pinned, Long userId) {
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
-            throw new BusinessException("公告不存在");
+            BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
         announcement.setIsPinned(pinned);

@@ -10,6 +10,7 @@ import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImMessageFavoriteMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.ImMessageFavoriteService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.vo.favorite.FavoriteMessageVO;
 import org.springframework.beans.BeanUtils;
@@ -47,13 +48,13 @@ public class ImMessageFavoriteServiceImpl implements ImMessageFavoriteService {
         // 检查消息是否存在
         ImMessage message = messageMapper.selectImMessageById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         // 检查是否已收藏
         ImMessageFavorite existing = favoriteMapper.selectByUserAndMessage(userId, messageId);
         if (existing != null) {
-            throw new BusinessException("该消息已收藏");
+            BusinessExceptionHelper.throwAlreadyFavorited();
         }
 
         ImMessageFavorite favorite = new ImMessageFavorite();

@@ -256,7 +256,9 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
                 data.put("senderName", sender.getNickname());
                 data.put("senderAvatar", sender.getAvatar());
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            log.warn("获取发送者信息失败: messageId={}, senderId={}", message.getId(), message.getSenderId(), e);
+        }
 
         long timestamp = message.getCreateTime() != null 
             ? message.getCreateTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli() 

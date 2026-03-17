@@ -130,6 +130,10 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
       .header-avatar {
         border-radius: var(--dt-radius-md);
         background: var(--dt-brand-bg);
+        // 暗色模式适配
+        .dark & {
+          background: var(--dt-brand-bg-dark);
+        }
         font-size: var(--dt-font-size-lg);
         font-weight: var(--dt-font-weight-semibold);
         color: var(--dt-brand-color);

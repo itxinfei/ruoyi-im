@@ -17,6 +17,8 @@ import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImGroupService;
+import com.ruoyi.im.util.BeanCopyUtil;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.group.ImGroupMemberVO;
 import com.ruoyi.im.vo.group.ImGroupVO;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -69,7 +72,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     public Long createGroup(ImGroupCreateRequest request, Long userId) {
         ImUser owner = imUserMapper.selectImUserById(userId);
         if (owner == null) {
-            throw new BusinessException("用户不存在");
+            BusinessExceptionHelper.throwUserNotFound();
         }
 
         ImGroup group = new ImGroup();
@@ -77,8 +80,10 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setOwnerId(userId);
         group.setAvatar(request.getAvatar());
         group.setDescription(request.getDescription());
-        group.setType(request.getType() != null ? request.getType() : "PRIVATE");
-        group.setMaxMembers(request.getMemberLimit() != null ? request.getMemberLimit() : SystemConstants.DEFAULT_GROUP_MEMBER_LIMIT);
+        // 使用Optional优化参数默认值设置
+        group.setType(Optional.ofNullable(request.getType()).orElse("PRIVATE"));
+        group.setMaxMembers(Optional.ofNullable(request.getMemberLimit())
+                .orElse(SystemConstants.DEFAULT_GROUP_MEMBER_LIMIT));
         group.setMemberCount(1);
         group.setStatus("NORMAL");
         group.setCreateTime(LocalDateTime.now());
@@ -135,12 +140,12 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void updateGroup(Long groupId, ImGroupUpdateRequest request, Long userId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
-            throw new BusinessException("无权限修改群组信息");
+            BusinessExceptionHelper.throwNoPermission("无权限修改群组信息");
         }
 
         if (request.getName() != null) {
@@ -169,11 +174,11 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void dismissGroup(Long groupId, Long userId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         if (!group.getOwnerId().equals(userId)) {
-            throw new BusinessException("只有群主可以解散群组");
+            BusinessExceptionHelper.throwOwnerOnly();
         }
 
         group.setIsDeleted(1);
@@ -193,7 +198,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         ImGroupVO vo = imRedisUtil.getOrLoadGroupInfo(groupId, ImGroupVO.class, () -> {
             ImGroup group = imGroupMapper.selectImGroupById(groupId);
             if (group == null) {
-                throw new BusinessException("群组不存在");
+                BusinessExceptionHelper.throwGroupNotFound();
             }
             ImGroupVO groupVO = new ImGroupVO();
             BeanUtils.copyProperties(group, groupVO);
@@ -217,13 +222,10 @@ public class ImGroupServiceImpl implements ImGroupService {
 
     @Override
     public List<ImGroupVO> getUserGroups(Long userId) {
-        List<ImGroupVO> voList = new ArrayList<>();
-
         ImGroupMember query = new ImGroupMember();
         query.setUserId(userId);
         List<ImGroupMember> memberList = imGroupMemberMapper.selectImGroupMemberList(query);
 
-        // 批量查询群组信息，避免N+1查询
         List<Long> groupIds = memberList.stream()
                 .map(ImGroupMember::getGroupId)
                 .filter(Objects::nonNull)
@@ -232,32 +234,29 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         Map<Long, ImGroup> groupMap = new HashMap<>();
         if (!groupIds.isEmpty()) {
-            // 使用BaseMapper的selectBatchIds方法
             List<ImGroup> groups = imGroupMapper.selectBatchIds(groupIds);
             groups.forEach(group -> groupMap.put(group.getId(), group));
         }
 
-        for (ImGroupMember member : memberList) {
-            ImGroup group = groupMap.get(member.getGroupId());
-            if (group != null && group.getIsDeleted() == 0) {
-                ImGroupVO vo = new ImGroupVO();
-                BeanUtils.copyProperties(group, vo);
-                vo.setMyRole(member.getRole());
-                vo.setIsMuted(member.getMuteEndTime() != null && member.getMuteEndTime().isAfter(LocalDateTime.now()));
-                voList.add(vo);
-            }
-        }
-
-        return voList;
+        return memberList.stream()
+                .map(member -> {
+                    ImGroup group = groupMap.get(member.getGroupId());
+                    if (group == null || group.getIsDeleted() != 0) {
+                        return null;
+                    }
+                    return BeanCopyUtil.copyAndSet(group, ImGroupVO.class, vo -> {
+                        vo.setMyRole(member.getRole());
+                        vo.setIsMuted(member.getMuteEndTime() != null && member.getMuteEndTime().isAfter(LocalDateTime.now()));
+                    });
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ImGroupMemberVO> getGroupMembers(Long groupId, Long userId) {
-        List<ImGroupMemberVO> voList = new ArrayList<>();
-
         List<ImGroupMember> memberList = imGroupMemberMapper.selectImGroupMemberListByGroupId(groupId);
 
-        // 批量查询用户信息，避免N+1查询
         List<Long> userIds = memberList.stream()
                 .map(ImGroupMember::getUserId)
                 .filter(Objects::nonNull)
@@ -270,21 +269,21 @@ public class ImGroupServiceImpl implements ImGroupService {
             users.forEach(user -> userMap.put(user.getId(), user));
         }
 
-        for (ImGroupMember member : memberList) {
-            ImGroupMemberVO vo = new ImGroupMemberVO();
-            BeanUtils.copyProperties(member, vo);
-
-            ImUser user = userMap.get(member.getUserId());
-            if (user != null) {
-                vo.setUserName(user.getNickname());
-                vo.setUserAvatar(user.getAvatar());
-            }
-
-            vo.setIsMuted(member.getMuteEndTime() != null && member.getMuteEndTime().isAfter(LocalDateTime.now()));
-            voList.add(vo);
-        }
-
-        return voList;
+        return memberList.stream()
+                .map(member -> {
+                    ImUser user = userMap.get(member.getUserId());
+                    return BeanCopyUtil.copyAndSet(member, ImGroupMemberVO.class, vo -> {
+                        // 使用Optional优化用户信息设置
+                        Optional.ofNullable(user).ifPresent(u -> {
+                            vo.setUserName(u.getNickname());
+                            vo.setUserAvatar(u.getAvatar());
+                        });
+                        vo.setIsMuted(Optional.ofNullable(member.getMuteEndTime())
+                                .map(endTime -> endTime.isAfter(LocalDateTime.now()))
+                                .orElse(false));
+                    });
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -292,12 +291,12 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void addMembers(Long groupId, List<Long> userIds, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
         if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
-            throw new BusinessException("无权限添加成员");
+            BusinessExceptionHelper.throwNoPermission("无权限添加成员");
         }
 
         // 查找群组对应的会话
@@ -348,28 +347,27 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void removeMembers(Long groupId, List<Long> userIds, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
         if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
-            throw new BusinessException("无权限移除成员");
+            BusinessExceptionHelper.throwNoPermission("无权限移除成员");
         }
 
         for (Long userId : userIds) {
             if (userId.equals(group.getOwnerId())) {
-                throw new BusinessException("不能移除群主");
+                BusinessExceptionHelper.throwCannotRemoveOwner();
             }
 
             ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
             if (member != null) {
                 if ("OWNER".equals(member.getRole())) {
-                    throw new BusinessException("不能移除群主");
+                    BusinessExceptionHelper.throwCannotRemoveOwner();
                 }
                 if ("ADMIN".equals(member.getRole()) && !"OWNER".equals(operator.getRole())) {
-                    throw new BusinessException("管理员不能移除其他管理员");
-                }
-                imGroupMemberMapper.deleteImGroupMemberById(member.getId());
+                            BusinessExceptionHelper.throwNotAllowed("管理员不能移除其他管理员");
+                        }                imGroupMemberMapper.deleteImGroupMemberById(member.getId());
             }
         }
 
@@ -385,16 +383,16 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void quitGroup(Long groupId, Long userId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         if (group.getOwnerId().equals(userId)) {
-            throw new BusinessException("群主不能退出群组，请先转让群主或解散群组");
+            BusinessExceptionHelper.throwNotAllowed("群主不能退出群组，请先转让群主或解散群组");
         }
 
         ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("您不在该群组中");
+            BusinessExceptionHelper.throwNotInGroup();
         }
 
         imGroupMemberMapper.deleteImGroupMemberById(member.getId());
@@ -411,20 +409,20 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void setAdmin(Long groupId, Long userId, Boolean isAdmin, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         if (!group.getOwnerId().equals(operatorId)) {
-            throw new BusinessException("只有群主可以设置管理员");
+            BusinessExceptionHelper.throwOwnerOnly();
         }
 
         ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("用户不在群组中");
+            BusinessExceptionHelper.throwNotInGroup();
         }
 
         if (userId.equals(operatorId)) {
-            throw new BusinessException("不能修改自己的角色");
+            BusinessExceptionHelper.throwNotAllowed("不能修改自己的角色");
         }
 
         if (isAdmin) {
@@ -444,32 +442,32 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void muteMember(Long groupId, Long userId, Long duration, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
         if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
-            throw new BusinessException("无权限禁言成员");
+            BusinessExceptionHelper.throwNoPermission("无权限禁言成员");
         }
 
         ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("用户不在群组中");
+            BusinessExceptionHelper.throwNotInGroup();
         }
 
         if ("OWNER".equals(member.getRole())) {
-            throw new BusinessException("不能禁言群主");
+            BusinessExceptionHelper.throwNotAllowed("不能禁言群主");
         }
 
         if ("ADMIN".equals(member.getRole()) && !"OWNER".equals(operator.getRole())) {
-            throw new BusinessException("管理员不能禁言其他管理员");
+            BusinessExceptionHelper.throwNotAllowed("管理员不能禁言其他管理员");
         }
 
-        if (duration == null || duration <= 0) {
-            member.setMuteEndTime(null);
-        } else {
-            member.setMuteEndTime(LocalDateTime.now().plusMinutes(duration));
-        }
+        // 使用Optional优化禁言时长处理
+        member.setMuteEndTime(Optional.ofNullable(duration)
+                .filter(d -> d > 0)
+                .map(d -> LocalDateTime.now().plusMinutes(d))
+                .orElse(null));
         member.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(member);
 
@@ -480,20 +478,20 @@ public class ImGroupServiceImpl implements ImGroupService {
     public void transferOwner(Long groupId, Long newOwnerId, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         if (!group.getOwnerId().equals(operatorId)) {
-            throw new BusinessException("只有群主可以转让群主");
+            BusinessExceptionHelper.throwOwnerOnly();
         }
 
         if (newOwnerId.equals(operatorId)) {
-            throw new BusinessException("不能转让给自己");
+            BusinessExceptionHelper.throwNotAllowed("不能转让给自己");
         }
 
         ImGroupMember newOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, newOwnerId);
         if (newOwner == null) {
-            throw new BusinessException("新群主不在群组中");
+            BusinessExceptionHelper.throwNotAllowed("新群主不在群组中");
         }
 
         ImGroupMember oldOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);

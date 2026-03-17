@@ -156,32 +156,29 @@ export function getGroupMembers(groupId) {
 }
 
 /**
- * 设置群禁言
- * @param {Object} data - 禁言数据
- * @param {number} data.groupId - 群组ID
- * @param {boolean} data.isAllMuted - 是否全员禁言
+ * 设置成员禁言
+ * @param {number} groupId - 群组ID
+ * @param {number} userId - 用户ID
+ * @param {number} duration - 禁言时长（秒），不传或传null表示取消禁言
  * @returns {Promise}
  */
-export function setGroupMute(data) {
+export function muteGroupMember(groupId, userId, duration) {
   return request({
-    url: '/api/im/group/mute/set',
+    url: `/api/im/group/${groupId}/mute/${userId}`,
     method: 'put',
-    data
+    params: duration !== undefined && duration !== null ? { duration } : {}
   })
 }
 
 /**
- * 设置成员禁言
- * @param {Object} data - 禁言数据
- * @param {number} data.groupId - 群组ID
- * @param {number} data.userId - 用户ID
- * @param {number} data.duration - 禁言时长（秒）
+ * 取消成员禁言
+ * @param {number} groupId - 群组ID
+ * @param {number} userId - 用户ID
  * @returns {Promise}
  */
-export function muteGroupMember(groupId, targetUserId, duration) {
+export function unmuteGroupMember(groupId, userId) {
   return request({
-    url: `/api/im/group/${groupId}/mute/${targetUserId}`,
-    method: 'put',
-    params: { duration }
+    url: `/api/im/group/${groupId}/mute/${userId}`,
+    method: 'put'
   })
 }

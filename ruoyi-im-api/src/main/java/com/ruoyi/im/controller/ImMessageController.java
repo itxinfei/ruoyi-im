@@ -54,7 +54,6 @@ public class ImMessageController {
     private final ImMessageService imMessageService;
     private final ImMessageReactionService reactionService;
     private final ImMessageMentionService mentionService;
-    private final ImWebSocketBroadcastService broadcastService;
     private final ImMessageReadService messageReadService;
     private final ImMessageMapper imMessageMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
@@ -63,12 +62,10 @@ public class ImMessageController {
             ImMessageService imMessageService,
             ImMessageReactionService reactionService,
             ImMessageMentionService mentionService,
-            ImWebSocketBroadcastService broadcastService,
             ImMessageReadService messageReadService, ImMessageMapper imMessageMapper, ImConversationMemberMapper imConversationMemberMapper) {
         this.imMessageService = imMessageService;
         this.reactionService = reactionService;
         this.mentionService = mentionService;
-        this.broadcastService = broadcastService;
         this.messageReadService = messageReadService;
         this.imMessageMapper = imMessageMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
@@ -139,18 +136,8 @@ public class ImMessageController {
                 : null;
         @SuppressWarnings("unchecked")
         List<Long> messageIds = (List<Long>) data.get("messageIds");
-        imMessageService.markAsRead(conversationId, userId, messageIds);
-
-        // [分层对齐] 广播已读通知（取最大的消息ID作为标记位）
-        if (messageIds != null && !messageIds.isEmpty()) {
-            messageIds.stream().max(Long::compare).ifPresent(maxId -> {
-                try {
-                    broadcastService.broadcastReadReceipt(conversationId, maxId, userId);
-                } catch (Exception e) {
-                    log.error("广播已读回执失败", e);
-                }
-            });
-        }
+        // 传递broadcast=true，由Service层统一处理广播逻辑
+        imMessageService.markAsRead(conversationId, userId, messageIds, true);
 
         return Result.success("已标记为已读");
     }

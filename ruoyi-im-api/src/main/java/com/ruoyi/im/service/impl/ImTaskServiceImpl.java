@@ -16,6 +16,7 @@ import com.ruoyi.im.mapper.ImTaskMapper;
 import com.ruoyi.im.mapper.ImTaskCommentMapper;
 import com.ruoyi.im.mapper.ImTaskAttachmentMapper;
 import com.ruoyi.im.service.ImTaskService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.task.ImTaskDetailVO;
 import com.ruoyi.im.vo.task.ImTaskVO;
 import org.slf4j.Logger;
@@ -97,7 +98,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public void updateTask(ImTaskUpdateRequest request, Long userId) {
         ImTask task = taskMapper.selectById(request.getId());
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         // 更新字段
@@ -171,7 +172,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public void deleteTask(Long taskId, Long userId) {
         ImTask task = taskMapper.selectById(taskId);
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         // 检查权限
@@ -195,7 +196,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public ImTaskDetailVO getTaskDetail(Long taskId, Long userId) {
         ImTask task = taskMapper.selectById(taskId);
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         ImTaskDetailVO detailVO = convertToDetailVO(task);
@@ -255,7 +256,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public void assignTask(Long taskId, Long assigneeId, Long userId) {
         ImTask task = taskMapper.selectById(taskId);
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         task.setAssigneeId(assigneeId);
@@ -269,7 +270,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public void updateTaskStatus(Long taskId, String status, Long userId) {
         ImTask task = taskMapper.selectById(taskId);
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         task.setStatus(status);
@@ -287,7 +288,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public void updateProgress(Long taskId, Integer percent, Long userId) {
         ImTask task = taskMapper.selectById(taskId);
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         task.setCompletionPercent(percent);
@@ -305,7 +306,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public void toggleFollow(Long taskId, Long userId) {
         ImTask task = taskMapper.selectById(taskId);
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         Set<Long> followers = new HashSet<>();
@@ -334,7 +335,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public Long addComment(Long taskId, String content, Long replyToId, Long userId) {
         ImTask task = taskMapper.selectById(taskId);
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         ImTaskComment comment = new ImTaskComment();
@@ -355,7 +356,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public void deleteComment(Long commentId, Long userId) {
         ImTaskComment comment = taskCommentMapper.selectById(commentId);
         if (comment == null) {
-            throw new BusinessException("评论不存在");
+            BusinessExceptionHelper.throwCommentNotFound();
         }
 
         // 只有评论作者可以删除
@@ -391,7 +392,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public Long addAttachment(Long taskId, String fileName, String fileUrl, Long fileSize, Long userId) {
         ImTask task = taskMapper.selectById(taskId);
         if (task == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         ImTaskAttachment attachment = new ImTaskAttachment();
@@ -412,7 +413,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public void deleteAttachment(Long attachmentId, Long userId) {
         ImTaskAttachment attachment = taskAttachmentMapper.selectById(attachmentId);
         if (attachment == null) {
-            throw new BusinessException("附件不存在");
+            BusinessExceptionHelper.throwAttachmentNotFound();
         }
 
         // 只有上传者可以删除
@@ -495,7 +496,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     public Long copyTask(Long taskId, Long userId) {
         ImTask sourceTask = taskMapper.selectById(taskId);
         if (sourceTask == null) {
-            throw new BusinessException("任务不存在");
+            BusinessExceptionHelper.throwTaskNotFound();
         }
 
         ImTask newTask = new ImTask();

@@ -21,6 +21,7 @@ import com.ruoyi.im.service.ImMessageMentionService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.AuditLogUtil;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.listener.BotMessageListener;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -101,7 +103,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         if (clientMsgId != null && !clientMsgId.isEmpty()) {
             Long existingMessageId = redisUtil.checkAndRecordClientMsgId(clientMsgId);
             if (existingMessageId != null) {
-                log.info("消息已存在，跳过重复发送: clientMsgId={}, messageId={}", clientMsgId, existingMessageId);
+                log.debug("消息已存在，跳过重复发送: clientMsgId={}, messageId={}", clientMsgId, existingMessageId);
                 ImMessage existingMessage = imMessageMapper.selectImMessageById(existingMessageId);
                 if (existingMessage != null) {
                     ImMessageVO vo = new ImMessageVO();
@@ -120,14 +122,14 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         ImUser sender = imUserMapper.selectImUserById(userId);
         if (sender == null) {
-            throw new BusinessException("发送者不存在");
+            BusinessExceptionHelper.throwUserNotFound();
         }
 
         Long conversationId = request.getConversationId();
 
         if (conversationId == null || conversationId == 0) {
             if (request.getReceiverId() == null || request.getReceiverId() == 0) {
-                throw new BusinessException("会话ID和接收者ID不能同时为空");
+                BusinessExceptionHelper.throwNotAllowed("会话ID和接收者ID不能同时为空");
             }
 
             ImPrivateConversationCreateRequest createRequest = new ImPrivateConversationCreateRequest();
@@ -136,7 +138,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         } else {
             ImConversation conversation = imConversationMapper.selectById(conversationId);
             if (conversation == null) {
-                throw new BusinessException("会话不存在");
+                BusinessExceptionHelper.throwConversationNotFound();
             }
         }
 
@@ -256,18 +258,16 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Override
     public List<ImMessageVO> getMessages(Long conversationId, Long userId, Long lastId, Integer limit) {
         // 调试日志：记录接收到的 userId
-        log.info("getMessages 被调用 - conversationId={}, userId={}, lastId={}, limit={}",
+        log.debug("getMessages 被调用 - conversationId={}, userId={}, lastId={}, limit={}",
                 conversationId, userId, lastId, limit);
 
         List<ImMessageVO> voList = new ArrayList<>();
 
-        // 参数校验和默认值
-        if (limit == null || limit <= 0) {
-            limit = SystemConstants.DEFAULT_PAGE_SIZE;
-        }
-        if (limit > SystemConstants.MAX_PAGE_SIZE) {
-            limit = SystemConstants.MAX_PAGE_SIZE; // 限制最大返回数量
-        }
+        // 参数校验和默认值（使用Optional优化）
+        limit = Optional.ofNullable(limit)
+                .filter(l -> l > 0)
+                .map(l -> Math.min(l, SystemConstants.MAX_PAGE_SIZE))
+                .orElse(SystemConstants.DEFAULT_PAGE_SIZE);
 
         // 构建查询条件
         ImMessage query = new ImMessage();
@@ -331,12 +331,12 @@ public class ImMessageServiceImpl implements ImMessageService {
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
             vo.setContent(decryptedContent);
 
-            // 从Map中获取发送者信息（避免重复查询）
-            ImUser sender = userMap.get(message.getSenderId());
-            if (sender != null) {
-                vo.setSenderName(sender.getNickname());
-                vo.setSenderAvatar(sender.getAvatar());
-            }
+            // 从Map中获取发送者信息（避免重复查询），使用Optional优化
+            Optional.ofNullable(userMap.get(message.getSenderId()))
+                    .ifPresent(sender -> {
+                        vo.setSenderName(sender.getNickname());
+                        vo.setSenderAvatar(sender.getAvatar());
+                    });
 
             // 设置 isSelf 并记录调试日志
             boolean isSelf = message.getSenderId().equals(userId);
@@ -375,53 +375,51 @@ public class ImMessageServiceImpl implements ImMessageService {
             java.util.Map<Long, ImMessage> replyToMessageMap,
             java.util.Map<Long, ImUser> userMap) {
 
-        ImMessage originalMessage = replyToMessageMap.get(messageId);
-        if (originalMessage == null) {
-            return null;
-        }
+        // 使用Optional优化：从Map中获取消息，若不存在则返回null
+        return Optional.ofNullable(replyToMessageMap.get(messageId))
+                .map(originalMessage -> {
+                    ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
+                    quotedMessage.setId(originalMessage.getId());
+                    quotedMessage.setType(originalMessage.getMessageType());
+                    quotedMessage.setSendTime(originalMessage.getCreateTime());
 
-        ImMessageVO.QuotedMessageVO quotedMessage = new ImMessageVO.QuotedMessageVO();
-        quotedMessage.setId(originalMessage.getId());
-        quotedMessage.setType(originalMessage.getMessageType());
-        quotedMessage.setSendTime(originalMessage.getCreateTime());
+                    // 从预加载的Map中获取发送者信息
+                    String senderName = Optional.ofNullable(userMap.get(originalMessage.getSenderId()))
+                            .map(ImUser::getNickname)
+                            .orElse("未知用户");
+                    quotedMessage.setSenderName(senderName);
 
-        // 从预加载的Map中获取发送者信息
-        ImUser sender = userMap.get(originalMessage.getSenderId());
-        if (sender != null) {
-            quotedMessage.setSenderName(sender.getNickname());
-        } else {
-            quotedMessage.setSenderName("未知用户");
-        }
+                    // 解密并截取消息内容
+                    String content = encryptionUtil.decryptMessage(originalMessage.getContent());
 
-        // 解密并截取消息内容
-        String content = encryptionUtil.decryptMessage(originalMessage.getContent());
+                    // 根据消息类型处理内容
+                    String messageType = originalMessage.getMessageType();
+                    if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
+                            || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
+                        quotedMessage.setIsFile(true);
+                        // 文件类型消息显示文件名或类型标识
+                        if ("IMAGE".equalsIgnoreCase(messageType)) {
+                            quotedMessage.setContent("[图片]");
+                        } else if ("VIDEO".equalsIgnoreCase(messageType)) {
+                            quotedMessage.setContent("[视频]");
+                        } else if ("VOICE".equalsIgnoreCase(messageType)) {
+                            quotedMessage.setContent("[语音]");
+                        } else {
+                            quotedMessage.setContent("[文件]");
+                        }
+                    } else {
+                        // 文本消息截取前50个字符
+                        quotedMessage.setIsFile(false);
+                        if (content != null && content.length() > 50) {
+                            quotedMessage.setContent(content.substring(0, 50) + "...");
+                        } else {
+                            quotedMessage.setContent(content);
+                        }
+                    }
 
-        // 根据消息类型处理内容
-        String messageType = originalMessage.getMessageType();
-        if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
-                || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
-            quotedMessage.setIsFile(true);
-            // 文件类型消息显示文件名或类型标识
-            if ("IMAGE".equalsIgnoreCase(messageType)) {
-                quotedMessage.setContent("[图片]");
-            } else if ("VIDEO".equalsIgnoreCase(messageType)) {
-                quotedMessage.setContent("[视频]");
-            } else if ("VOICE".equalsIgnoreCase(messageType)) {
-                quotedMessage.setContent("[语音]");
-            } else {
-                quotedMessage.setContent("[文件]");
-            }
-        } else {
-            // 文本消息截取前50个字符
-            quotedMessage.setIsFile(false);
-            if (content != null && content.length() > 50) {
-                quotedMessage.setContent(content.substring(0, 50) + "...");
-            } else {
-                quotedMessage.setContent(content);
-            }
-        }
-
-        return quotedMessage;
+                    return quotedMessage;
+                })
+                .orElse(null);
     }
 
     @Override
@@ -429,15 +427,15 @@ public class ImMessageServiceImpl implements ImMessageService {
     public void recallMessage(Long messageId, Long userId) {
         ImMessage message = imMessageMapper.selectImMessageById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         if (!message.getSenderId().equals(userId)) {
-            throw new BusinessException("无权撤回该消息");
+            BusinessExceptionHelper.throwNoPermission("无权撤回该消息");
         }
 
         if (message.getIsRevoked() == 1) {
-            throw new BusinessException("消息已撤回");
+            BusinessExceptionHelper.throwNotAllowed("消息已撤回");
         }
 
         // 从系统配置获取撤回时间限制
@@ -445,7 +443,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         LocalDateTime now = LocalDateTime.now();
 
         if (timeLimit > 0 && message.getCreateTime().plusMinutes(timeLimit).isBefore(now)) {
-            throw new BusinessException("消息发送超过" + timeLimit + "分钟，无法撤回");
+            BusinessExceptionHelper.throwNotAllowed("消息发送超过" + timeLimit + "分钟，无法撤回");
         }
 
         message.setIsRevoked(1);
@@ -468,25 +466,25 @@ public class ImMessageServiceImpl implements ImMessageService {
     public void editMessage(Long messageId, String newContent, Long userId) {
         ImMessage message = imMessageMapper.selectImMessageById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         if (!message.getSenderId().equals(userId)) {
-            throw new BusinessException("无权编辑该消息");
+            BusinessExceptionHelper.throwNoPermission("无权编辑该消息");
         }
 
         if (!"TEXT".equals(message.getMessageType())) {
-            throw new BusinessException("只能编辑文本消息");
+            BusinessExceptionHelper.throwNotAllowed("只能编辑文本消息");
         }
 
         if (message.getIsRevoked() == 1) {
-            throw new BusinessException("已撤回的消息不能编辑");
+            BusinessExceptionHelper.throwNotAllowed("已撤回的消息不能编辑");
         }
 
         LocalDateTime now = LocalDateTime.now();
         // 限制：消息发送超过指定时间不能编辑
         if (message.getCreateTime().plusMinutes(SystemConstants.MESSAGE_EDIT_TIME_LIMIT).isBefore(now)) {
-            throw new BusinessException("消息发送超过" + SystemConstants.MESSAGE_EDIT_TIME_LIMIT + "分钟，无法编辑");
+            BusinessExceptionHelper.throwNotAllowed("消息发送超过" + SystemConstants.MESSAGE_EDIT_TIME_LIMIT + "分钟，无法编辑");
         }
 
         // 保存编辑历史
@@ -513,7 +511,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     public void deleteMessage(Long messageId, Long userId) {
         ImMessage message = imMessageMapper.selectImMessageById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         // 软删除，设置is_deleted = 1
@@ -522,7 +520,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         // 如果是单向删除（仅自己不可见），需要另外的表来记录删除状态
         // 这里简化实现，假设是双向删除，且只能删除自己的消息
         if (!message.getSenderId().equals(userId)) {
-            throw new BusinessException("无权删除该消息");
+            BusinessExceptionHelper.throwNoPermission("无权删除该消息");
         }
 
         message.setIsDeleted(1);
@@ -532,7 +530,7 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void markAsRead(Long conversationId, Long userId, List<Long> messageIds) {
+    public void markAsRead(Long conversationId, Long userId, List<Long> messageIds, boolean broadcast) {
         if (messageIds == null || messageIds.isEmpty()) {
             return;
         }
@@ -556,11 +554,14 @@ public class ImMessageServiceImpl implements ImMessageService {
             if (maxMessageId != null) {
                 updateSessionLastRead(conversationId, userId, maxMessageId);
                 imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, maxMessageId);
-                
-                try {
-                    broadcastService.broadcastReadReceipt(conversationId, maxMessageId, userId);
-                } catch (Exception e) {
-                    log.error("广播已读同步失败: userId={}, conversationId={}", userId, conversationId, e);
+
+                // 根据broadcast参数决定是否广播已读回执
+                if (broadcast) {
+                    try {
+                        broadcastService.broadcastReadReceipt(conversationId, maxMessageId, userId);
+                    } catch (Exception e) {
+                        log.error("广播已读同步失败: userId={}, conversationId={}", userId, conversationId, e);
+                    }
                 }
             }
         }
@@ -570,7 +571,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     public Long forwardMessage(Long messageId, Long toConversationId, Long toUserId, String content, Long userId) {
         ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
         if (originalMessage == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         // 解密原消息内容
@@ -604,11 +605,11 @@ public class ImMessageServiceImpl implements ImMessageService {
     public Long replyMessage(Long messageId, String content, Long userId) {
         ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
         if (originalMessage == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         if (content == null || content.trim().isEmpty()) {
-            throw new BusinessException("回复内容不能为空");
+            BusinessExceptionHelper.throwNotAllowed("回复内容不能为空");
         }
 
         ImMessage replyMessage = new ImMessage();
@@ -630,19 +631,18 @@ public class ImMessageServiceImpl implements ImMessageService {
             Long senderId, LocalDateTime startTime, LocalDateTime endTime,
             Integer pageNum, Integer pageSize, Boolean includeRevoked,
             Boolean exactMatch, Long userId) {
-        // 参数校验和默认值设置
-        if (pageNum == null || pageNum < 1) {
-            pageNum = 1;
-        }
-        if (pageSize == null || pageSize < 1 || pageSize > SystemConstants.MAX_PAGE_SIZE) {
-            pageSize = SystemConstants.DEFAULT_PAGE_SIZE;
-        }
-        if (includeRevoked == null) {
-            includeRevoked = false;
-        }
-        if (exactMatch == null) {
-            exactMatch = false;
-        }
+        // 参数校验和默认值设置（使用Optional优化）
+        pageNum = Optional.ofNullable(pageNum)
+                .filter(p -> p >= 1)
+                .orElse(1);
+
+        pageSize = Optional.ofNullable(pageSize)
+                .filter(p -> p > 0)
+                .map(p -> Math.min(p, SystemConstants.MAX_PAGE_SIZE))
+                .orElse(SystemConstants.DEFAULT_PAGE_SIZE);
+
+        includeRevoked = Optional.ofNullable(includeRevoked).orElse(false);
+        exactMatch = Optional.ofNullable(exactMatch).orElse(false);
 
         // 计算偏移量
         int offset = (pageNum - 1) * pageSize;

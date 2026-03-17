@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.domain.ImVideoCall;
@@ -10,6 +11,7 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.mapper.ImVideoCallMapper;
 import com.ruoyi.im.mapper.ImVideoCallParticipantMapper;
 import com.ruoyi.im.service.ImVideoCallService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
@@ -59,14 +61,14 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         Boolean isOnline = redisTemplate.hasKey(onlineKey);
 
         if (Boolean.FALSE.equals(isOnline)) {
-            throw new BusinessException("对方不在线");
+            throw new BusinessException(ImErrorCode.CALL_USER_OFFLINE, "对方不在线");
         }
 
         // 检查接收者是否正在通话中
         String userCallKey = USER_CALL_KEY + calleeId;
         Boolean isInCall = redisTemplate.hasKey(userCallKey);
         if (Boolean.TRUE.equals(isInCall)) {
-            throw new BusinessException("对方正在通话中");
+            throw new BusinessException(ImErrorCode.CALL_USER_BUSY, "对方正在通话中");
         }
 
         // 创建通话记录
@@ -99,16 +101,16 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     public void acceptCall(Long callId, Long userId) {
         ImVideoCall call = getCallEntity(callId);
         if (call == null) {
-            throw new BusinessException("通话不存在或已过期");
+            BusinessExceptionHelper.throwVideoCallNotFound();
         }
 
         // 只有接收者可以接听
         if (!call.getCalleeId().equals(userId)) {
-            throw new BusinessException("无权限接听此通话");
+            BusinessExceptionHelper.throwNoPermissionToAnswer();
         }
 
         if (!"CALLING".equals(call.getStatus())) {
-            throw new BusinessException("通话状态不正确");
+            BusinessExceptionHelper.throwVideoCallStatusError();
         }
 
         // 更新状态
@@ -134,16 +136,16 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     public void rejectCall(Long callId, Long userId, String reason) {
         ImVideoCall call = getCallEntity(callId);
         if (call == null) {
-            throw new BusinessException("通话不存在或已过期");
+            BusinessExceptionHelper.throwVideoCallNotFound();
         }
 
         // 只有接收者可以拒绝
         if (!call.getCalleeId().equals(userId)) {
-            throw new BusinessException("无权限拒绝此通话");
+            BusinessExceptionHelper.throwNoPermissionToReject();
         }
 
         if (!"CALLING".equals(call.getStatus())) {
-            throw new BusinessException("通话状态不正确");
+            BusinessExceptionHelper.throwVideoCallStatusError();
         }
 
         // 更新状态
@@ -165,12 +167,12 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     public void endCall(Long callId, Long userId) {
         ImVideoCall call = getCallEntity(callId);
         if (call == null) {
-            throw new BusinessException("通话不存在或已过期");
+            BusinessExceptionHelper.throwVideoCallNotFound();
         }
 
         // 只有通话参与者可以结束
         if (!call.getCallerId().equals(userId) && !call.getCalleeId().equals(userId)) {
-            throw new BusinessException("无权限结束此通话");
+            BusinessExceptionHelper.throwNoPermissionToEnd();
         }
 
         if ("ENDED".equals(call.getStatus()) || "REJECTED".equals(call.getStatus()) || "TIMEOUT".equals(call.getStatus())) {
@@ -328,23 +330,23 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             maxParticipants = SystemConstants.VIDEO_CALL_MAX_PARTICIPANTS;
         }
         if (maxParticipants > SystemConstants.VIDEO_CALL_MAX_PARTICIPANTS) {
-            throw new BusinessException("最多支持" + SystemConstants.VIDEO_CALL_MAX_PARTICIPANTS + "人同时通话");
+            BusinessExceptionHelper.throwMaxParticipantsExceeded(SystemConstants.VIDEO_CALL_MAX_PARTICIPANTS);
         }
 
         if (invitedUserIds == null || invitedUserIds.isEmpty()) {
-            throw new BusinessException("请邀请至少一人参与通话");
+            BusinessExceptionHelper.throwInviteAtLeastOne();
         }
 
         // 检查邀请人数
         if (invitedUserIds.size() + 1 > maxParticipants) {
-            throw new BusinessException("邀请人数超过最大参与者数限制");
+            BusinessExceptionHelper.throwInviteExceedsLimit();
         }
 
         // 检查发起者是否正在通话
         String callerCallKey = USER_CALL_KEY + callerId;
         Boolean callerInCall = redisTemplate.hasKey(callerCallKey);
         if (Boolean.TRUE.equals(callerInCall)) {
-            throw new BusinessException("您正在通话中，请先结束当前通话");
+            BusinessExceptionHelper.throwAlreadyInCall();
         }
 
         // 创建通话记录
@@ -389,28 +391,28 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     public void joinGroupCall(Long callId, Long userId) {
         ImVideoCall call = getCallEntity(callId);
         if (call == null) {
-            throw new BusinessException("通话不存在或已过期");
+            BusinessExceptionHelper.throwVideoCallNotFound();
         }
 
         if (!"GROUP".equals(call.getCallMode())) {
-            throw new BusinessException("该通话不是群组通话");
+            BusinessExceptionHelper.throwNotGroupCall();
         }
 
         // 检查是否已参与
         ImVideoCallParticipant existing = participantMapper.selectByCallIdAndUserId(callId, userId);
         if (existing != null) {
             if ("JOINED".equals(existing.getStatus())) {
-                throw new BusinessException("您已在通话中");
+                BusinessExceptionHelper.throwAlreadyJoinedCall();
             }
             if ("LEFT".equals(existing.getStatus())) {
-                throw new BusinessException("您已离开该通话");
+                BusinessExceptionHelper.throwAlreadyLeftCall();
             }
         }
 
         // 检查人数限制
         Integer currentCount = participantMapper.countJoinedByCallId(callId);
         if (currentCount >= call.getMaxParticipants()) {
-            throw new BusinessException("通话人数已满");
+            BusinessExceptionHelper.throwCallFull();
         }
 
         // 更新或创建参与者记录
@@ -437,11 +439,11 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     public void leaveGroupCall(Long callId, Long userId) {
         ImVideoCall call = getCallEntity(callId);
         if (call == null) {
-            throw new BusinessException("通话不存在或已过期");
+            BusinessExceptionHelper.throwVideoCallNotFound();
         }
 
         if (!"GROUP".equals(call.getCallMode())) {
-            throw new BusinessException("该通话不是群组通话");
+            BusinessExceptionHelper.throwNotGroupCall();
         }
 
         // 更新参与者状态
@@ -469,7 +471,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     public void toggleMute(Long callId, Long userId, Boolean muted) {
         ImVideoCallParticipant participant = participantMapper.selectByCallIdAndUserId(callId, userId);
         if (participant == null) {
-            throw new BusinessException("您不在此通话中");
+            BusinessExceptionHelper.throwNotInCall();
         }
 
         participant.setIsMuted(muted);
@@ -482,7 +484,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     public void toggleCamera(Long callId, Long userId, Boolean cameraOff) {
         ImVideoCallParticipant participant = participantMapper.selectByCallIdAndUserId(callId, userId);
         if (participant == null) {
-            throw new BusinessException("您不在此通话中");
+            BusinessExceptionHelper.throwNotInCall();
         }
 
         participant.setIsCameraOff(cameraOff);

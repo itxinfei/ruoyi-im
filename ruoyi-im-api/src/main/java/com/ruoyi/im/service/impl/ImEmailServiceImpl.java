@@ -5,6 +5,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImEmailMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImEmailService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class ImEmailServiceImpl implements ImEmailService {
     public ImEmail getEmailDetail(Long emailId, Long userId) {
         ImEmail email = emailMapper.selectEmailById(emailId);
         if (email == null) {
-            throw new BusinessException("邮件不存在");
+            BusinessExceptionHelper.throwEmailNotFound();
         }
         // 验证权限：只有发送者或接收者可以查看
         if (!email.getSenderId().equals(userId) && !email.getReceiverId().equals(userId)) {
@@ -117,7 +118,7 @@ public class ImEmailServiceImpl implements ImEmailService {
     public void markAsRead(Long emailId, Long userId) {
         ImEmail email = emailMapper.selectEmailById(emailId);
         if (email == null) {
-            throw new BusinessException("邮件不存在");
+            BusinessExceptionHelper.throwEmailNotFound();
         }
         if (!email.getReceiverId().equals(userId)) {
             throw new BusinessException("无权限操作此邮件");
@@ -133,7 +134,7 @@ public class ImEmailServiceImpl implements ImEmailService {
     public void markAsStarred(Long emailId, Long userId, boolean starred) {
         ImEmail email = emailMapper.selectEmailById(emailId);
         if (email == null) {
-            throw new BusinessException("邮件不存在");
+            BusinessExceptionHelper.throwEmailNotFound();
         }
         // 验证权限：只有发送者或接收者可以操作
         if (!email.getSenderId().equals(userId) && !email.getReceiverId().equals(userId)) {
@@ -150,7 +151,7 @@ public class ImEmailServiceImpl implements ImEmailService {
     public void moveToTrash(Long emailId, Long userId) {
         ImEmail email = emailMapper.selectEmailById(emailId);
         if (email == null) {
-            throw new BusinessException("邮件不存在");
+            BusinessExceptionHelper.throwEmailNotFound();
         }
         // 验证权限：只有发送者或接收者可以操作
         if (!email.getSenderId().equals(userId) && !email.getReceiverId().equals(userId)) {
@@ -168,7 +169,7 @@ public class ImEmailServiceImpl implements ImEmailService {
     public void permanentlyDelete(Long emailId, Long userId) {
         ImEmail email = emailMapper.selectEmailById(emailId);
         if (email == null) {
-            throw new BusinessException("邮件不存在");
+            BusinessExceptionHelper.throwEmailNotFound();
         }
         // 验证权限：只有发送者或接收者可以删除
         if (!email.getSenderId().equals(userId) && !email.getReceiverId().equals(userId)) {
@@ -226,7 +227,7 @@ public class ImEmailServiceImpl implements ImEmailService {
     public void moveToFolder(Long emailId, String folder, Long userId) {
         ImEmail email = emailMapper.selectEmailById(emailId);
         if (email == null) {
-            throw new BusinessException("邮件不存在");
+            BusinessExceptionHelper.throwEmailNotFound();
         }
         // 验证权限
         if (!email.getSenderId().equals(userId) && !email.getReceiverId().equals(userId)) {

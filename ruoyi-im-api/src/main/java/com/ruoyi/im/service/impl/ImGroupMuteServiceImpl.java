@@ -6,6 +6,7 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupMuteService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,16 +34,16 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         // 验证操作者权限：只有群主可以设置全员禁言
         ImGroup group = groupMapper.selectImGroupById(groupId);
         if (group == null) {
-            throw new BusinessException("群组不存在");
+            BusinessExceptionHelper.throwGroupNotFound();
         }
 
         ImGroupMember operator = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
         if (operator == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         if (!"OWNER".equals(operator.getRole())) {
-            throw new BusinessException("只有群主可以设置全员禁言");
+            BusinessExceptionHelper.throwOnlyOwnerCanMuteAll();
         }
 
         // 设置全员禁言
@@ -56,7 +57,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         // 验证操作者权限：只有群主和管理员可以禁言成员
         ImGroupMember operator = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
         if (operator == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String operatorRole = operator.getRole();
@@ -64,19 +65,19 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         boolean isAdmin = "ADMIN".equals(operatorRole);
 
         if (!isOwner && !isAdmin) {
-            throw new BusinessException("只有群主和管理员可以禁言成员");
+            BusinessExceptionHelper.throwOnlyAdminCanMute();
         }
 
         // 获取被禁言成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("成员不存在");
+            BusinessExceptionHelper.throwGroupMemberNotFound();
         }
 
         // 管理员不能禁言群主和其他管理员
         String memberRole = member.getRole();
         if (isAdmin && ("OWNER".equals(memberRole) || "ADMIN".equals(memberRole))) {
-            throw new BusinessException("管理员不能禁言群主和其他管理员");
+            BusinessExceptionHelper.throwCannotMuteAdmin();
         }
 
         // 计算禁言结束时间
@@ -91,7 +92,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         // 验证操作者权限：只有群主和管理员可以解除禁言
         ImGroupMember operator = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
         if (operator == null) {
-            throw new BusinessException("您不是该群组成员");
+            BusinessExceptionHelper.throwNotGroupMember();
         }
 
         String operatorRole = operator.getRole();
@@ -99,13 +100,13 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         boolean isAdmin = "ADMIN".equals(operatorRole);
 
         if (!isOwner && !isAdmin) {
-            throw new BusinessException("只有群主和管理员可以解除禁言");
+            BusinessExceptionHelper.throwOnlyAdminCanUnmute();
         }
 
         // 获取被解除禁言成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
         if (member == null) {
-            throw new BusinessException("成员不存在");
+            BusinessExceptionHelper.throwGroupMemberNotFound();
         }
 
         // 解除禁言

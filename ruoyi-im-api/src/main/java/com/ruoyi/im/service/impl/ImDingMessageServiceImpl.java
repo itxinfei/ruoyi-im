@@ -13,6 +13,7 @@ import com.ruoyi.im.mapper.ImDingReceiptMapper;
 import com.ruoyi.im.mapper.ImDingTemplateMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImDingMessageService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.ding.DingDetailVO;
 import com.ruoyi.im.vo.ding.DingReceiptVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
@@ -128,7 +129,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
     public DingDetailVO getDingDetail(Long dingId, Long userId) {
         ImDingMessage ding = dingMessageMapper.selectById(dingId);
         if (ding == null) {
-            throw new BusinessException("DING消息不存在");
+            BusinessExceptionHelper.throwDingMessageNotFound();
         }
 
         // 检查权限（发送者或接收者可以查看）
@@ -139,7 +140,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
                             .eq(ImDingReceipt::getReceiverId, userId)
             );
             if (receipt == null) {
-                throw new BusinessException("无权限查看此DING");
+                BusinessExceptionHelper.throwNoPermission("无权限查看此DING");
             }
         }
 
@@ -169,7 +170,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
                         .eq(ImDingReceipt::getReceiverId, userId)
         );
         if (receipt == null) {
-            throw new BusinessException("DING消息不存在");
+            BusinessExceptionHelper.throwDingMessageNotFound();
         }
 
         if (receipt.getReadTime() == null) {
@@ -192,7 +193,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
                         .eq(ImDingReceipt::getReceiverId, userId)
         );
         if (receipt == null) {
-            throw new BusinessException("DING消息不存在");
+            BusinessExceptionHelper.throwDingMessageNotFound();
         }
 
         if (receipt.getConfirmed() == 0) {
@@ -208,7 +209,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
         ImDingMessage ding = dingMessageMapper.selectById(dingId);
         if (ding == null || !ding.getSenderId().equals(userId)) {
             // 只有发送者可以查看所有回执
-            throw new BusinessException("无权限查看回执");
+            BusinessExceptionHelper.throwNoPermission("无权限查看回执");
         }
 
         List<ImDingReceipt> receipts = dingReceiptMapper.selectList(
@@ -238,10 +239,10 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
     public void cancelScheduledDing(Long dingId, Long userId) {
         ImDingMessage ding = dingMessageMapper.selectById(dingId);
         if (ding == null) {
-            throw new BusinessException("DING消息不存在");
+            BusinessExceptionHelper.throwDingMessageNotFound();
         }
         if (!ding.getSenderId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
         if (!"DRAFT".equals(ding.getStatus())) {
             throw new BusinessException("只能取消定时的DING");
@@ -267,7 +268,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
     public Long createFromTemplate(Long templateId, String params, Long userId) {
         ImDingTemplate template = dingTemplateMapper.selectById(templateId);
         if (template == null) {
-            throw new BusinessException("模板不存在");
+            BusinessExceptionHelper.throwTemplateNotFound();
         }
 
         // 解析参数并替换模板内容中的占位符

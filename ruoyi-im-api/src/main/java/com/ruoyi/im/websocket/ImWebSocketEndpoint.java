@@ -760,18 +760,9 @@ public class ImWebSocketEndpoint {
             @SuppressWarnings("unchecked")
             List<Long> messageIds = (List<Long>) readData.get("messageIds");
 
-            // 更新消息状态为已读
+            // 更新消息状态为已读，broadcast=true由Service层统一处理广播逻辑
             if (messageIds != null && !messageIds.isEmpty()) {
-                staticImMessageService.markAsRead(conversationId, userId, messageIds);
-
-                // 广播已读回执
-                if (staticBroadcastService != null) {
-                    // 这里注意：Service目前的方法是 broadcastReadReceipt(Long conversationId, Long
-                    // lastReadMessageId, Long userId)
-                    // 而这里是 messageIds。为了简化，我们取最后一个ID
-                    Long lastId = messageIds.get(messageIds.size() - 1);
-                    staticBroadcastService.broadcastReadReceipt(conversationId, lastId, userId);
-                }
+                staticImMessageService.markAsRead(conversationId, userId, messageIds, true);
             }
 
             log.info("消息已读: conversationId={}, userId={}", conversationId, userId);

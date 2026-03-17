@@ -10,6 +10,7 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageReactionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageReactionService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
         // 验证消息是否存在
         ImMessage message = messageMapper.selectImMessageById(request.getMessageId());
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            BusinessExceptionHelper.throwMessageNotFound();
         }
 
         // 检查用户是否已对该消息使用过表情
@@ -89,7 +90,7 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
     public void removeReaction(Long messageId, Long userId) {
         int rows = reactionMapper.deleteUserReaction(messageId, userId);
         if (rows == 0) {
-            throw new BusinessException("反应不存在或已删除");
+            BusinessExceptionHelper.throwReactionNotFound();
         }
     }
 

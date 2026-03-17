@@ -490,7 +490,7 @@ onMounted(() => {
 .new-chat-btn {
   background: var(--dt-brand-color);
   border-color: var(--dt-brand-color);
-  color: #fff;
+  color: var(--dt-text-white);
   
   &:hover {
     background: var(--dt-brand-hover);

@@ -12,6 +12,8 @@ import com.ruoyi.im.mapper.ImFriendRequestMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImFriendService;
+import com.ruoyi.im.util.BeanCopyUtil;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
 import com.ruoyi.im.vo.contact.ImFriendVO;
 import com.ruoyi.im.vo.user.ImUserVO;
@@ -70,13 +72,13 @@ public class ImFriendServiceImpl implements ImFriendService {
     public Long sendFriendRequest(ImFriendAddRequest request, Long userId) {
         // 检查是否添加自己为好友
         if (userId.equals(request.getTargetUserId())) {
-            throw new BusinessException("不能添加自己为好友");
+            BusinessExceptionHelper.throwCannotAddSelf();
         }
 
         // 查询目标用户是否存在
         ImUser toUser = imUserMapper.selectImUserById(request.getTargetUserId());
         if (toUser == null) {
-            throw new BusinessException("目标用户不存在");
+            BusinessExceptionHelper.throwUserNotFound();
         }
 
         // 检查是否已经是好友
@@ -100,7 +102,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
                 return existingFriend.getId();
             } else {
-                throw new BusinessException("已经是好友关系");
+                BusinessExceptionHelper.throwAlreadyFriends();
             }
         }
 
@@ -143,12 +145,12 @@ public class ImFriendServiceImpl implements ImFriendService {
     public void updateFriend(Long friendId, ImFriendUpdateRequest request, Long userId) {
         ImFriend friend = imFriendMapper.selectImFriendById(friendId);
         if (friend == null) {
-            throw new BusinessException("好友关系不存在");
+            BusinessExceptionHelper.throwFriendNotFound();
         }
 
         // 只能修改自己的好友关系
         if (!friend.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         // 只能修改备注、分组
@@ -170,12 +172,12 @@ public class ImFriendServiceImpl implements ImFriendService {
     public void deleteFriend(Long friendId, Long userId) {
         ImFriend friend = imFriendMapper.selectImFriendById(friendId);
         if (friend == null) {
-            throw new BusinessException("好友关系不存在");
+            BusinessExceptionHelper.throwFriendNotFound();
         }
 
         // 只能删除自己的好友关系
         if (!friend.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         // 软删除：设置is_deleted标记
@@ -232,36 +234,30 @@ public class ImFriendServiceImpl implements ImFriendService {
         // 批量查询好友用户信息，避免N+1查询问题
         List<ImFriendVO> voList = new ArrayList<>();
         if (!uniqueFriendMap.isEmpty()) {
-            // 获取所有好友ID
             List<Long> friendIds = new ArrayList<>(uniqueFriendMap.keySet());
-            // 批量查询用户信息（需要在ImUserMapper中添加selectImUserByIds方法）
             Map<Long, ImUser> userMap = batchGetUsers(friendIds);
 
-            for (ImFriend friend : uniqueFriendMap.values()) {
-                ImFriendVO vo = new ImFriendVO();
-                BeanUtils.copyProperties(friend, vo);
-
-                // 从批量查询结果中获取用户信息
-                ImUser friendUser = userMap.get(friend.getFriendId());
-                if (friendUser != null) {
-                    vo.setFriendName(
-                            friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
-                    vo.setFriendAvatar(friendUser.getAvatar());
-                    vo.setUsername(friendUser.getUsername());
-                    vo.setEmail(friendUser.getEmail());
-                    vo.setPhone(friendUser.getMobile());
-                    vo.setSignature(friendUser.getSignature());
-                    vo.setDepartment(friendUser.getDepartment());
-                    vo.setPosition(friendUser.getPosition());
-
-                    // 如果用户状态是ACTIVE，可以认为是在线的（这只是一个简化判断）
-                    // 实际在线状态应从Redis获取
-                    vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
-                } else {
-                    vo.setOnline(false);
-                }
-                voList.add(vo);
-            }
+            voList = uniqueFriendMap.values().stream()
+                    .map(friend -> {
+                        ImFriendVO vo = BeanCopyUtil.copyToObject(friend, ImFriendVO.class);
+                        ImUser friendUser = userMap.get(friend.getFriendId());
+                        if (friendUser != null) {
+                            vo.setFriendName(
+                                    friendUser.getNickname() != null ? friendUser.getNickname() : friendUser.getUsername());
+                            vo.setFriendAvatar(friendUser.getAvatar());
+                            vo.setUsername(friendUser.getUsername());
+                            vo.setEmail(friendUser.getEmail());
+                            vo.setPhone(friendUser.getMobile());
+                            vo.setSignature(friendUser.getSignature());
+                            vo.setDepartment(friendUser.getDepartment());
+                            vo.setPosition(friendUser.getPosition());
+                            vo.setOnline(imRedisUtil.isOnlineUser(friend.getFriendId()));
+                        } else {
+                            vo.setOnline(false);
+                        }
+                        return vo;
+                    })
+                    .collect(java.util.stream.Collectors.toList());
         }
 
         // 存入缓存，过期时间30分钟
@@ -347,11 +343,11 @@ public class ImFriendServiceImpl implements ImFriendService {
     public void handleFriendRequest(Long requestId, Boolean approved, Long userId) {
         ImFriendRequest request = imFriendRequestMapper.selectImFriendRequestById(requestId);
         if (request == null) {
-            throw new BusinessException("好友申请不存在");
+            BusinessExceptionHelper.throwFriendRequestNotFound();
         }
 
         if (!request.getToUserId().equals(userId)) {
-            throw new BusinessException("无权限操作该申请");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         if (approved) {
@@ -488,11 +484,11 @@ public class ImFriendServiceImpl implements ImFriendService {
     public ImFriendVO getFriendById(Long friendId, Long userId) {
         ImFriend friend = imFriendMapper.selectImFriendById(friendId);
         if (friend == null) {
-            throw new BusinessException("好友关系不存在");
+            BusinessExceptionHelper.throwFriendNotFound();
         }
 
         if (!friend.getUserId().equals(userId)) {
-            throw new BusinessException("无权限查看");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         ImFriendVO vo = new ImFriendVO();
@@ -519,7 +515,7 @@ public class ImFriendServiceImpl implements ImFriendService {
     public void blockFriend(Long friendId, Boolean blocked, Long userId) {
         ImFriend friend = imFriendMapper.selectImFriendById(friendId);
         if (friend == null) {
-            throw new BusinessException("好友关系不存在");
+            BusinessExceptionHelper.throwFriendNotFound();
         }
 
         if (!friend.getUserId().equals(userId)) {
@@ -607,10 +603,10 @@ public class ImFriendServiceImpl implements ImFriendService {
     @Transactional(rollbackFor = Exception.class)
     public void renameGroup(Long userId, String oldName, String newName) {
         if (oldName == null || oldName.isEmpty()) {
-            throw new BusinessException("分组名称不能为空");
+            BusinessExceptionHelper.throwGroupNameEmpty();
         }
         if (newName == null || newName.isEmpty()) {
-            throw new BusinessException("新分组名称不能为空");
+            BusinessExceptionHelper.throwNewGroupNameEmpty();
         }
 
         ImFriend query = new ImFriend();
@@ -619,7 +615,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         List<ImFriend> friendList = imFriendMapper.selectImFriendList(query);
 
         if (friendList.isEmpty()) {
-            throw new BusinessException("分组不存在");
+            BusinessExceptionHelper.throwFriendGroupNotFound();
         }
 
         for (ImFriend friend : friendList) {
@@ -636,7 +632,7 @@ public class ImFriendServiceImpl implements ImFriendService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteGroup(Long userId, String groupName) {
         if (groupName == null || groupName.isEmpty()) {
-            throw new BusinessException("分组名称不能为空");
+            BusinessExceptionHelper.throwGroupNameEmpty();
         }
 
         ImFriend query = new ImFriend();
@@ -658,7 +654,7 @@ public class ImFriendServiceImpl implements ImFriendService {
     @Transactional(rollbackFor = Exception.class)
     public void moveFriendsToGroup(Long userId, List<Long> friendIds, String groupName) {
         if (friendIds == null || friendIds.isEmpty()) {
-            throw new BusinessException("好友ID列表不能为空");
+            BusinessExceptionHelper.throwFriendIdListEmpty();
         }
 
         for (Long friendId : friendIds) {

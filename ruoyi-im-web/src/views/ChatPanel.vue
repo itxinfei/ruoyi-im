@@ -629,5 +629,5 @@ onUnmounted(() => {
 .chat-panel-container { height: 100%; flex: 1; min-width: 0; background: var(--dt-bg-card); display: flex; flex-direction: column; overflow: hidden; position: relative; }
 .welcome-logo-box { width: 64px; height: 64px; background: var(--dt-brand-color); border-radius: var(--dt-radius-xl); color: var(--dt-text-primary); font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--dt-spacing-xl); box-shadow: var(--dt-shadow-3); }
 .chat-main-canvas { height: 100%; width: 100%; display: flex; flex-direction: column; overflow: hidden; &__body { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--dt-bg-chat); overflow: hidden; } }
-.chat-input-area { flex-shrink: 0; background: var(--dt-bg-card); border-top: 1px solid var(--dt-border-light); min-height: 140px; z-index: 10; display: flex; flex-direction: column; }
+.chat-input-area { flex-shrink: 0; background: var(--dt-bg-card); border-top: 1px solid var(--dt-border-light); min-height: var(--dt-chat-input-height); z-index: 10; display: flex; flex-direction: column; }
 </style>

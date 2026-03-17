@@ -5,13 +5,17 @@ import request from '../request'
 
 /**
  * 发起审批
- * @param {Object} data - 审批数据
+ * @param {Object} params - URL查询参数
+ * @param {number} params.templateId - 审批模板ID
+ * @param {string} params.title - 审批标题
+ * @param {Object} data - 审批表单数据（请求体）
+ * @returns {Promise}
  */
 export function createApproval(params, data) {
     return request({
         url: '/api/im/approval/create',
         method: 'post',
-        params, // templateId, title
+        params,
         data
     })
 }

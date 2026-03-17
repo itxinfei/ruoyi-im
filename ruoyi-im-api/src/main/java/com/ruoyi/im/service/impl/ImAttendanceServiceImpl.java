@@ -4,6 +4,7 @@ import com.ruoyi.im.domain.ImAttendance;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImAttendanceMapper;
 import com.ruoyi.im.service.ImAttendanceService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,7 +89,7 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
 
             attendanceMapper.updateImAttendance(attendance);
         } else {
-            throw new BusinessException("今日已上班打卡，请勿重复打卡");
+            BusinessExceptionHelper.throwAlreadyExists("今日已上班打卡");
         }
 
         return attendance;
@@ -104,11 +105,11 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
         ImAttendance attendance = attendanceMapper.selectTodayAttendance(userId, today);
 
         if (attendance == null) {
-            throw new BusinessException("请先进行上班打卡");
+            BusinessExceptionHelper.throwNotAllowed("请先进行上班打卡");
         }
 
         if (attendance.getCheckOutTime() != null) {
-            throw new BusinessException("今日已下班打卡，请勿重复打卡");
+            BusinessExceptionHelper.throwAlreadyExists("今日已下班打卡");
         }
 
         // 更新下班打卡信息
@@ -172,15 +173,13 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
     public boolean applySupplement(Long attendanceId, String reason, Long userId) {
         ImAttendance attendance = attendanceMapper.selectImAttendanceById(attendanceId);
         if (attendance == null) {
-            throw new BusinessException("打卡记录不存在");
+            BusinessExceptionHelper.throwAttendanceNotFound();
         }
-
         if (!attendance.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
-
         if ("PENDING".equals(attendance.getApproveStatus())) {
-            throw new BusinessException("已有审批中的申请");
+            BusinessExceptionHelper.throwAlreadyExists("已有审批中的申请");
         }
 
         attendance.setApproveStatus("PENDING");
@@ -195,11 +194,11 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
     public boolean approveSupplement(Long attendanceId, Long approverId, boolean approved, String comment) {
         ImAttendance attendance = attendanceMapper.selectImAttendanceById(attendanceId);
         if (attendance == null) {
-            throw new BusinessException("打卡记录不存在");
+            BusinessExceptionHelper.throwAttendanceNotFound();
         }
 
         if (!"PENDING".equals(attendance.getApproveStatus())) {
-            throw new BusinessException("该申请已被处理");
+            BusinessExceptionHelper.throwStatusError("该申请");
         }
 
         attendance.setApproverId(approverId);
@@ -242,11 +241,11 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
     public int deleteAttendance(Long id, Long userId) {
         ImAttendance attendance = attendanceMapper.selectImAttendanceById(id);
         if (attendance == null) {
-            throw new BusinessException("打卡记录不存在");
+            BusinessExceptionHelper.throwAttendanceNotFound();
         }
 
         if (!attendance.getUserId().equals(userId)) {
-            throw new BusinessException("无权限操作");
+            BusinessExceptionHelper.throwNoPermission();
         }
 
         return attendanceMapper.deleteImAttendanceById(id);

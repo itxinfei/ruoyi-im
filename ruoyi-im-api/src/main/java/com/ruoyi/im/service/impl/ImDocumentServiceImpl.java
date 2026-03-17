@@ -18,6 +18,7 @@ import com.ruoyi.im.mapper.ImDocumentShareMapper;
 import com.ruoyi.im.mapper.ImDocumentVersionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImDocumentService;
+import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.document.ImDocumentCommentVO;
 import com.ruoyi.im.vo.document.ImDocumentVersionVO;
 import com.ruoyi.im.vo.document.ImDocumentVO;
@@ -97,7 +98,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     public Boolean updateDocument(ImDocumentUpdateRequest request, Long userId) {
         ImDocument document = documentMapper.selectById(request.getId());
         if (document == null) {
-            throw new BusinessException("文档不存在");
+            BusinessExceptionHelper.throwDocumentNotFound();
         }
 
         // 检查权限（只有所有者或被授权用户可以编辑）
@@ -135,7 +136,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     public Boolean deleteDocument(Long documentId, Long userId) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
-            throw new BusinessException("文档不存在");
+            BusinessExceptionHelper.throwDocumentNotFound();
         }
 
         // 检查权限
@@ -158,7 +159,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     public Boolean permanentlyDeleteDocument(Long documentId, Long userId) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
-            throw new BusinessException("文档不存在");
+            BusinessExceptionHelper.throwDocumentNotFound();
         }
 
         // 检查权限
@@ -184,16 +185,15 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     @Override
     @Transactional
     public Boolean restoreDocument(Long documentId, Long userId) {
-        ImDocument document = documentMapper.selectById(documentId);
-        if (document == null) {
-            throw new BusinessException("文档不存在");
-        }
-
-        // 检查权限
-        if (!document.getOwnerId().equals(userId)) {
-            throw new BusinessException("无权限恢复此文档");
-        }
-
+            ImDocument document = documentMapper.selectById(documentId);
+            if (document == null) {
+                BusinessExceptionHelper.throwDocumentNotFound();
+            }
+    
+            // 检查权限
+            if (!document.getOwnerId().equals(userId)) {
+                throw new BusinessException("无权限恢复此文档");
+            }
         // 恢复文档
         document.setIsDeleted(false);
         document.setDeletedTime(null);
@@ -208,7 +208,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     public ImDocumentVO getDocument(Long documentId, Long userId) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
-            throw new BusinessException("文档不存在");
+            BusinessExceptionHelper.throwDocumentNotFound();
         }
 
         // 检查权限
@@ -297,7 +297,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     public Boolean toggleStar(Long documentId, Long userId, Boolean starred) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
-            throw new BusinessException("文档不存在");
+            BusinessExceptionHelper.throwDocumentNotFound();
         }
 
         // 只能收藏自己的文档或共享文档
@@ -317,14 +317,13 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     public Boolean shareDocument(ImDocumentShareRequest request, Long userId) {
         ImDocument document = documentMapper.selectById(request.getDocumentId());
         if (document == null) {
-            throw new BusinessException("文档不存在");
+            BusinessExceptionHelper.throwDocumentNotFound();
         }
-
+    
         // 检查权限（只有所有者可以分享）
         if (!document.getOwnerId().equals(userId)) {
             throw new BusinessException("只有文档所有者可以分享文档");
         }
-
         LocalDateTime expireTime = null;
         if (request.getExpireDays() != null) {
             expireTime = LocalDateTime.now().plusDays(request.getExpireDays());
@@ -497,7 +496,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     public Boolean restoreVersion(Long documentId, Long versionId, Long userId) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
-            throw new BusinessException("文档不存在");
+            BusinessExceptionHelper.throwDocumentNotFound();
         }
 
         // 检查权限
