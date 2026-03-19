@@ -21,8 +21,8 @@
           router
           class="admin-menu"
           background-color="transparent"
-          text-color="#cfd8ea"
-          active-text-color="#ffffff"
+          text-color="var(--dt-text-secondary-dark)"
+          active-text-color="var(--dt-text-primary-dark)"
         >
           <el-menu-item index="/admin/dashboard">
             <el-icon><Monitor /></el-icon>
@@ -153,49 +153,49 @@ const logout = () => {
 }
 
 .admin-logo {
-  height: 72px;
+  height: var(--dt-header-height, 72px);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
+  gap: var(--dt-spacing-md, 10px);
+  padding: 0 var(--dt-spacing-md, 16px);
   border-bottom: 1px solid var(--dt-border-dark);
 }
 
 .logo-mark {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: var(--dt-avatar-size-md, 34px);
+  height: var(--dt-avatar-size-md, 34px);
+  border-radius: var(--dt-radius-md);
   background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-light) 100%);
   color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: var(--dt-font-weight-bold);
 }
 
 .logo-text .title {
   color: var(--dt-text-primary-dark);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-semibold);
   line-height: 1.1;
 }
 
 .logo-text .subtitle {
   color: var(--dt-text-secondary-dark);
-  font-size: 11px;
-  margin-top: 2px;
+  font-size: var(--dt-font-size-xs);
+  margin-top: var(--dt-spacing-xs, 2px);
 }
 
 .admin-menu {
   border-right: none;
-  padding: 12px 8px;
+  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-xs, 8px);
 }
 
 :deep(.admin-menu .el-menu-item) {
-  margin: 6px 8px;
-  border-radius: 10px;
-  height: 42px;
-  line-height: 42px;
+  margin: var(--dt-spacing-xs, 6px) var(--dt-spacing-xs, 8px);
+  border-radius: var(--dt-radius-md);
+  height: var(--dt-btn-height-lg, 42px);
+  line-height: var(--dt-btn-height-lg, 42px);
 }
 
 :deep(.admin-menu .el-menu-item:hover) {
@@ -212,42 +212,42 @@ const logout = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 22px;
-  height: 72px;
+  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-lg, 22px);
+  height: var(--dt-header-height, 72px);
 }
 
 .title-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dt-spacing-xs, 8px);
 }
 
 .page-title {
   margin: 0;
-  font-size: 20px;
+  font-size: var(--dt-font-size-lg, 20px);
   color: var(--dt-text-primary);
 }
 
 .page-desc {
-  margin: 2px 0 0;
+  margin: var(--dt-spacing-xs, 2px) 0 0;
   color: var(--dt-text-secondary);
-  font-size: 12px;
+  font-size: var(--dt-font-size-xs);
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--dt-spacing-sm, 10px);
 }
 
 .admin-user {
   color: var(--dt-text-secondary);
-  font-weight: 500;
+  font-weight: var(--dt-font-weight-medium);
 }
 
 .admin-main {
   background: var(--dt-bg-body);
-  padding: 16px;
+  padding: var(--dt-spacing-md, 16px);
 }
 
 @media (max-width: 1024px) {
