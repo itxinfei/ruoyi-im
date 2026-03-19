@@ -3,7 +3,6 @@ package com.ruoyi.im.common;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -16,7 +15,6 @@ import java.util.Map;
  * @author ruoyi
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Data
 public class BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -39,10 +37,39 @@ public class BaseEntity implements Serializable {
     @TableField(exist = false)
     private Map<String, Object> params;
 
+    // Manual getters and setters for BaseEntity fields
+    public String getSearchValue() {
+        return searchValue;
+    }
+
+    public void setSearchValue(String searchValue) {
+        this.searchValue = searchValue;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
     public Map<String, Object> getParams() {
         if (params == null) {
             params = new HashMap<>();
         }
         return params;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
     }
 }

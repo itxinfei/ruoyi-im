@@ -72,7 +72,8 @@ public class ConfigValidator {
             String multipartMaxFileSize = env.getProperty("spring.servlet.multipart.max-file-size");
             
             log.info("[OK] Spring配置");
-            log.info("  - 数据源URL: {}", datasourceUrl != null ? datasourceUrl.substring(0, Math.min(50, datasourceUrl.length())) + "..." : "null");
+            String dbUrlPreview = datasourceUrl != null ? datasourceUrl.substring(0, Math.min(50, datasourceUrl.length())) + "..." : "null";
+            log.info("  - 数据源URL: {}", dbUrlPreview);
             log.info("  - Redis: {}:{}", redisHost, redisPort);
             log.info("  - Jackson时区: {}, 格式: {}", jacksonTimezone, jacksonDateFormat);
             log.info("  - 文件上传大小: {}", multipartMaxFileSize);

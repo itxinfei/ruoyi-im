@@ -32,6 +32,20 @@ public final class BusinessExceptionHelper {
     }
 
     /**
+     * 抛出会议不存在异常
+     */
+    public static void throwMeetingNotFound() {
+        throw new BusinessException(ImErrorCode.NOT_EXIST, "会议不存在");
+    }
+
+    /**
+     * 抛出参与者不在会议中异常
+     */
+    public static void throwParticipantNotInMeeting() {
+        throw new BusinessException(ImErrorCode.NOT_EXIST, "参与者不在会议中");
+    }
+
+    /**
      * 抛出名称已存在异常
      */
     public static void throwNameExists(String resourceName) {

@@ -1,5 +1,6 @@
 package com.ruoyi.im.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.im.domain.ImMessageRead;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-public interface ImMessageReadMapper {
+public interface ImMessageReadMapper extends BaseMapper<ImMessageRead> {
 
     /**
      * 查询消息已读回执

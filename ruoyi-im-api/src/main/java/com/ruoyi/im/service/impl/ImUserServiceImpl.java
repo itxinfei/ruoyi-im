@@ -1,6 +1,6 @@
 package com.ruoyi.im.service.impl;
 
-import com.ruoyi.im.constant.ImErrorCode;
+import com.ruoyi.im.constant.ApiErrorCode;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.BasePageRequest;
@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -151,10 +153,11 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Cacheable(value = "user_local_cache", key = "#userId", unless = "#result == null")
     public ImUserVO getUserById(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
         }
 
         ImUserVO vo = new ImUserVO();
@@ -164,10 +167,11 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     public void updateUser(Long userId, ImUserUpdateRequest request) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
         }
 
         BeanUtils.copyProperties(request, user);
@@ -176,10 +180,11 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     public void updateStatus(Long userId, Integer status) { // 0=禁用, 1=启用
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
         }
 
         user.setStatus(status);
@@ -188,14 +193,15 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     public boolean changePassword(Long userId, String oldPassword, String newPassword) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
         }
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new BusinessException(ImErrorCode.PASSWORD_ERROR, "密码错误");
+            throw new BusinessException(ApiErrorCode.PASSWORD_ERROR);
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -258,7 +264,7 @@ public class ImUserServiceImpl implements ImUserService {
     public Long createUser(ImRegisterRequest request) {
         ImUser existingUser = imUserMapper.selectImUserByUsername(request.getUsername());
         if (existingUser != null) {
-            throw new BusinessException(ImErrorCode.USER_ALREADY_EXIST, "用户名已存在");
+            throw new BusinessException(ApiErrorCode.USER_ALREADY_EXIST);
         }
 
         ImUser user = new ImUser();
@@ -274,16 +280,17 @@ public class ImUserServiceImpl implements ImUserService {
 
         int result = imUserMapper.insertImUser(user);
         if (result <= 0) {
-            throw new BusinessException(ImErrorCode.REGISTER_FAILED, "创建用户失败");
+            throw new BusinessException(ApiErrorCode.REGISTER_FAILED);
         }
         return user.getId();
     }
 
     @Override
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     public void deleteUser(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
         }
         imUserMapper.deleteImUserById(userId);
     }
@@ -298,10 +305,11 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     public void resetPassword(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "用户不存在");
+            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
         }
 
         // 重置为默认密码，从配置读取或使用随机密码（使用Optional优化）
@@ -332,21 +340,22 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     public String uploadAvatar(Long userId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new BusinessException("FILE_EMPTY", "头像文件不能为空");
+            throw new BusinessException(ApiErrorCode.FILE_EMPTY);
         }
 
         String originalFilename = file.getOriginalFilename();
         String fileExtension = FileUtils.getFileExtension(originalFilename);
 
         if (!FileUtils.isImage(originalFilename)) {
-            throw new BusinessException("FILE_TYPE_ERROR", "只支持图片格式的头像");
+            throw new BusinessException(ApiErrorCode.FILE_TYPE_NOT_SUPPORTED);
         }
 
         long maxSize = SystemConstants.MAX_AVATAR_SIZE_MB * 1024 * 1024;
         if (file.getSize() > maxSize) {
-            throw new BusinessException("FILE_SIZE_ERROR", "头像文件大小不能超过" + SystemConstants.MAX_AVATAR_SIZE_MB + "MB");
+            throw new BusinessException(ApiErrorCode.FILE_SIZE_EXCEEDED);
         }
 
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
@@ -356,7 +365,7 @@ public class ImUserServiceImpl implements ImUserService {
         try {
             File canonicalUploadPath = new File(uploadPath).getCanonicalFile();
             File targetFile = new File(canonicalUploadPath, relativePath);
-            
+
             String canonicalPath = targetFile.getCanonicalPath();
             if (!canonicalPath.startsWith(canonicalUploadPath.getCanonicalPath() + File.separator)) {
                 throw new BusinessException("FILE_PATH_ERROR", "无效的文件路径");
@@ -377,7 +386,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException("USER_NOT_EXIST", "用户不存在");
+            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
         }
 
         user.setAvatar(avatarUrl);

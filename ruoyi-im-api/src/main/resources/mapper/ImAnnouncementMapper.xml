@@ -79,10 +79,18 @@
         </where>
         <choose>
             <when test="req.orderBy == 'publishTime'">
-                ORDER BY a.publish_time ${req.orderDirection}
+                ORDER BY a.publish_time
+                <choose>
+                    <when test="req.orderDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
             </when>
             <when test="req.orderBy == 'viewCount'">
-                ORDER BY a.view_count ${req.orderDirection}
+                ORDER BY a.view_count
+                <choose>
+                    <when test="req.orderDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
             </when>
             <when test="req.orderBy == 'priority'">
                 ORDER BY a.priority DESC, a.publish_time DESC

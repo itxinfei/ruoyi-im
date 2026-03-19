@@ -3,6 +3,9 @@ package com.ruoyi.im.util;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
+import java.beans.PropertyDescriptor;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,10 +25,10 @@ public class BeanCopyUtil {
      */
     public static String[] getNullPropertyNames(Object source) {
         final BeanWrapper src = new BeanWrapperImpl(source);
-        org.springframework.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+        PropertyDescriptor[] pds = src.getPropertyDescriptors();
 
         Set<String> emptyNames = new HashSet<>();
-        for (org.springframework.beans.PropertyDescriptor pd : pds) {
+        for (PropertyDescriptor pd : pds) {
             Object srcValue = src.getPropertyValue(pd.getName());
             if (srcValue == null) {
                 emptyNames.add(pd.getName());
@@ -48,7 +51,7 @@ public class BeanCopyUtil {
      */
     public static <S, T> List<T> copyList(List<S> sourceList, Class<T> targetClass) {
         if (sourceList == null || sourceList.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         return sourceList.stream()
                 .map(source -> copyToObject(source, targetClass))
@@ -61,7 +64,7 @@ public class BeanCopyUtil {
     public static <S, T> List<T> copyList(List<S> sourceList, Class<T> targetClass,
                                             Consumer<S> customizer) {
         if (sourceList == null || sourceList.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         return sourceList.stream()
                 .map(source -> {

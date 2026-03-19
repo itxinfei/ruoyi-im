@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+
 /**
  * 安全工具类
  *
@@ -162,5 +164,64 @@ public class SecurityUtils {
     public static String getLoginUserRole() {
         ImUser user = getCurrentUser();
         return user != null ? user.getRole() : null;
+    }
+
+    /**
+     * 检查当前用户是否是管理员
+     *
+     * @return true 如果是管理员角色
+     */
+    public static boolean isAdmin() {
+        String role = getLoginUserRole();
+        return "ADMIN".equalsIgnoreCase(role) || "SUPER_ADMIN".equalsIgnoreCase(role);
+    }
+
+    /**
+     * 校验资源操作权限
+     * 检查当前用户是否有权操作指定资源
+     *
+     * @param ownerId 资源所有者ID
+     * @param operation 操作类型（删除、修改等）
+     * @throws BusinessException 如果无权限
+     */
+    public static void checkOwnership(Long ownerId, String operation) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            throw new com.ruoyi.im.exception.BusinessException(401, "未登录");
+        }
+        // 所有者本人可操作
+        if (currentUserId.equals(ownerId)) {
+            return;
+        }
+        // 管理员可操作
+        if (isAdmin()) {
+            return;
+        }
+        throw new com.ruoyi.im.exception.BusinessException(403, "无权限" + operation + "该资源");
+    }
+
+    /**
+     * 校验资源操作权限（批量）
+     * 检查当前用户是否有权操作指定资源列表
+     *
+     * @param ownerIds 资源所有者ID列表
+     * @param operation 操作类型
+     * @throws BusinessException 如果无权限
+     */
+    public static void checkOwnership(Collection<Long> ownerIds, String operation) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            throw new com.ruoyi.im.exception.BusinessException(401, "未登录");
+        }
+        // 管理员不受限制
+        if (isAdmin()) {
+            return;
+        }
+        // 检查是否所有资源都属于当前用户
+        for (Long ownerId : ownerIds) {
+            if (!currentUserId.equals(ownerId)) {
+                throw new com.ruoyi.im.exception.BusinessException(403, "无权限" + operation + "部分资源");
+            }
+        }
     }
 }

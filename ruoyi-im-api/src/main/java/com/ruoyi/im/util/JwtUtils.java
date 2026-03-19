@@ -1,6 +1,6 @@
 package com.ruoyi.im.util;
 
-import com.ruoyi.im.config.ImConfig;
+import com.ruoyi.im.config.SecurityProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -11,7 +11,6 @@ import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +21,7 @@ import java.util.Date;
 /**
  * JWT工具类
  * 提供JWT令牌的生成、解析和验证功能
+ * 从SecurityProperties获取配置，支持外部化配置管理
  *
  * @author ruoyi
  */
@@ -31,22 +31,33 @@ public class JwtUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtUtils.class);
 
     @Autowired
-    private ImConfig imConfig;
+    private SecurityProperties securityProperties;
 
     private String secret;
     private long expiration;
+    private long refreshExpiration;
     private SecretKey signingKey;
 
     @PostConstruct
     public void init() {
-        if (imConfig != null && imConfig.getJwt() != null && imConfig.getJwt().getSecret() != null) {
-            this.secret = imConfig.getJwt().getSecret();
-            this.expiration = imConfig.getJwt().getExpiration();
-            this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-            LOGGER.info("JWT配置已加载 - 过期时间: {}ms", expiration);
+        // 从SecurityProperties获取JWT配置
+        if (securityProperties != null && securityProperties.getJwt() != null) {
+            this.secret = securityProperties.getJwt().getSecret();
+            this.expiration = securityProperties.getJwt().getExpiration();
+            this.refreshExpiration = securityProperties.getJwt().getRefreshExpiration();
+            
+            // 检查密钥是否已配置
+            if (this.secret == null || this.secret.trim().isEmpty()) {
+                LOGGER.error("JWT密钥未配置，请设置环境变量或配置中心中的JWT密钥");
+                throw new IllegalStateException("JWT secret must be configured. Please set 'im.security.jwt.secret' in environment variables or configuration center");
+            }
+            
+            // 使用配置的密钥初始化签名密钥
+            this.signingKey = Keys.hmacShaKeyFor(this.secret.getBytes(StandardCharsets.UTF_8));
+            LOGGER.info("JWT配置已加载 - 过期时间: {}ms, 刷新过期时间: {}ms", expiration, refreshExpiration);
         } else {
             LOGGER.error("JWT配置未正确加载，请配置JWT密钥");
-            throw new IllegalStateException("JWT secret must be configured. Please set 'jwt.secret' in application.yml");
+            throw new IllegalStateException("JWT configuration not loaded properly. Please configure 'im.security.jwt' properties.");
         }
     }
 
@@ -96,6 +107,29 @@ public class JwtUtils {
                 .setSubject(username)
                 .claim("userId", userId)
                 .claim("role", role != null ? role : "USER")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    /**
+     * 生成刷新令牌（7天有效期）
+     *
+     * @param username 用户名
+     * @param userId 用户ID
+     * @param role 用户角色
+     * @return 刷新令牌
+     */
+    public String generateRefreshToken(String username, Long userId, String role) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + refreshExpiration);
+
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("userId", userId)
+                .claim("role", role != null ? role : "USER")
+                .claim("tokenType", "refresh")
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey())
@@ -225,5 +259,23 @@ public class JwtUtils {
             LOGGER.error("检查token过期状态失败: {}", e.getMessage());
             return true;
         }
+    }
+    
+    /**
+     * 获取JWT过期时间（毫秒）
+     * 
+     * @return 过期时间
+     */
+    public long getExpiration() {
+        return expiration;
+    }
+    
+    /**
+     * 获取刷新令牌过期时间（毫秒）
+     * 
+     * @return 刷新过期时间
+     */
+    public long getRefreshExpiration() {
+        return refreshExpiration;
     }
 }

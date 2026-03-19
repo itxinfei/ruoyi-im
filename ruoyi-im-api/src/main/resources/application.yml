@@ -11,6 +11,26 @@ app:
   dev:
     user-id: 1
 
+# Spring Boot Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        all: true
+      sla:
+        http.server.requests: 100ms, 500ms, 1000ms
+        db.query: 50ms, 100ms, 200ms
+
 # Spring框架配置
 spring:
   profiles:
@@ -76,6 +96,39 @@ spring:
 swagger:
   enabled: true
 
+# Resilience4j配置
+resilience4j:
+  circuit-breaker:
+    instances:
+      message-service:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        wait-duration-in-open-state: 30s
+        failure-rate-threshold: 50
+        event-consumer-buffer-size: 10
+      user-service:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        wait-duration-in-open-state: 30s
+        failure-rate-threshold: 50
+        event-consumer-buffer-size: 10
+  timelimiter:
+    instances:
+      message-service:
+        timeout-duration: 10s
+      user-service:
+        timeout-duration: 10s
+  bulkhead:
+    instances:
+      message-service:
+        max-concurrent-calls: 20
+        max-wait-duration: 100ms
+      user-service:
+        max-concurrent-calls: 20
+        max-wait-duration: 100ms
+
 # SpringDoc配置（OpenAPI 3.0）
 springdoc:
   api-docs:
@@ -105,10 +158,15 @@ mybatis-plus:
 
 # IM模块配置
 im:
-  # JWT配置
-  jwt:
-    secret: "aW1fc2VjcmV0X2tleV8yMDI0X2Zvcl9pbV9zeXN0ZW1fdGhhdF9pc19sb25nX2Vub3VnaF9mb3JfSFMyNTZfYWxnb3JpdGhtX2FuZF9pc19zZWN1cmVfZW5vdWdoX2Zvcl9IUzUxMl9hbGdvcml0aG1fY2hhbmdlZF9mb3Jfc2VjdXJpdHlfcHVycG9zZQ=="
-    expiration: 86400000
+  # 安全配置
+  security:
+    jwt:
+      # JWT密钥 - 建议从环境变量获取
+      secret: ${JWT_SECRET:aW1fc2VjcmV0X2tleV8yMDI0X2Zvcl9pbV9zeXN0ZW1fdGhhdF9pc19sb25nX2Vub3VnaF9mb3JfSFMyNTZfYWxnb3JpdGhtX2FuZF9pc19zZWN1cmVfZW5vdWdoX2Zvcl9IUzUxMl9hbGdvcml0aG1fY2hhbmdlZF9mb3Jfc2VjdXJpdHlfcHVycG9zZQ==}
+      # JWT过期时间（毫秒）- 默认15分钟
+      expiration: ${JWT_EXPIRATION:900000}
+      # 刷新Token过期时间（毫秒）- 默认7天
+      refreshExpiration: ${JWT_REFRESH_EXPIRATION:604800000}
   # 消息配置
   message:
     maxLength: 2000

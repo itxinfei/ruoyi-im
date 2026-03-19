@@ -101,16 +101,32 @@
         </where>
         <choose>
             <when test="req.orderBy == 'dueDate'">
-                ORDER BY t.due_date ${req.orderDirection}
+                ORDER BY t.due_date
+                <choose>
+                    <when test="req.orderDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
             </when>
             <when test="req.orderBy == 'priority'">
-                ORDER BY t.priority ${req.orderDirection}
+                ORDER BY t.priority
+                <choose>
+                    <when test="req.orderDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
             </when>
             <when test="req.orderBy == 'completionPercent'">
-                ORDER BY t.completion_percent ${req.orderDirection}
+                ORDER BY t.completion_percent
+                <choose>
+                    <when test="req.orderDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
             </when>
             <otherwise>
-                ORDER BY t.create_time ${req.orderDirection}
+                ORDER BY t.create_time
+                <choose>
+                    <when test="req.orderDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
             </otherwise>
         </choose>
     </select>

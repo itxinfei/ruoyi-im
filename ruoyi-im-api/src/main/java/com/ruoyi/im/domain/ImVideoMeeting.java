@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -17,7 +16,6 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 @TableName("im_video_meeting")
-@Data
 public class ImVideoMeeting implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -177,4 +175,206 @@ public class ImVideoMeeting implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("update_time")
     private LocalDateTime updateTime;
+
+    // ==================== Getter and Setter ====================
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getHostId() {
+        return hostId;
+    }
+
+    public void setHostId(Long hostId) {
+        this.hostId = hostId;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+    public String getMeetingType() {
+        return meetingType;
+    }
+
+    public void setMeetingType(String meetingType) {
+        this.meetingType = meetingType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getScheduledStartTime() {
+        return scheduledStartTime;
+    }
+
+    public void setScheduledStartTime(LocalDateTime scheduledStartTime) {
+        this.scheduledStartTime = scheduledStartTime;
+    }
+
+    public LocalDateTime getScheduledEndTime() {
+        return scheduledEndTime;
+    }
+
+    public void setScheduledEndTime(LocalDateTime scheduledEndTime) {
+        this.scheduledEndTime = scheduledEndTime;
+    }
+
+    public LocalDateTime getActualStartTime() {
+        return actualStartTime;
+    }
+
+    public void setActualStartTime(LocalDateTime actualStartTime) {
+        this.actualStartTime = actualStartTime;
+    }
+
+    public LocalDateTime getActualEndTime() {
+        return actualEndTime;
+    }
+
+    public void setActualEndTime(LocalDateTime actualEndTime) {
+        this.actualEndTime = actualEndTime;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public Integer getMaxParticipants() {
+        return maxParticipants;
+    }
+
+    public void setMaxParticipants(Integer maxParticipants) {
+        this.maxParticipants = maxParticipants;
+    }
+
+    public Integer getCurrentParticipants() {
+        return currentParticipants;
+    }
+
+    public void setCurrentParticipants(Integer currentParticipants) {
+        this.currentParticipants = currentParticipants;
+    }
+
+    public Boolean getRequirePassword() {
+        return requirePassword;
+    }
+
+    public void setRequirePassword(Boolean requirePassword) {
+        this.requirePassword = requirePassword;
+    }
+
+    public String getMeetingPassword() {
+        return meetingPassword;
+    }
+
+    public void setMeetingPassword(String meetingPassword) {
+        this.meetingPassword = meetingPassword;
+    }
+
+    public Boolean getMuteOnJoin() {
+        return muteOnJoin;
+    }
+
+    public void setMuteOnJoin(Boolean muteOnJoin) {
+        this.muteOnJoin = muteOnJoin;
+    }
+
+    public Boolean getAllowScreenShare() {
+        return allowScreenShare;
+    }
+
+    public void setAllowScreenShare(Boolean allowScreenShare) {
+        this.allowScreenShare = allowScreenShare;
+    }
+
+    public Boolean getAllowRecord() {
+        return allowRecord;
+    }
+
+    public void setAllowRecord(Boolean allowRecord) {
+        this.allowRecord = allowRecord;
+    }
+
+    public String getRecordFilePath() {
+        return recordFilePath;
+    }
+
+    public void setRecordFilePath(String recordFilePath) {
+        this.recordFilePath = recordFilePath;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
+    public String getMeetingLink() {
+        return meetingLink;
+    }
+
+    public void setMeetingLink(String meetingLink) {
+        this.meetingLink = meetingLink;
+    }
+
+    public Integer getDelFlag() {
+        return delFlag;
+    }
+
+    public void setDelFlag(Integer delFlag) {
+        this.delFlag = delFlag;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
 }

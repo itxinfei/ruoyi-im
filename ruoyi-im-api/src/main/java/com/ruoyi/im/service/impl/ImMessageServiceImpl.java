@@ -440,9 +440,12 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 从系统配置获取撤回时间限制
         Integer timeLimit = systemConfigService.getMessageRecallTimeLimit();
+        if (timeLimit == null) {
+            timeLimit = 2; // 默认2分钟
+        }
         LocalDateTime now = LocalDateTime.now();
 
-        if (timeLimit > 0 && message.getCreateTime().plusMinutes(timeLimit).isBefore(now)) {
+        if (message.getCreateTime().plusMinutes(timeLimit).isBefore(now)) {
             BusinessExceptionHelper.throwNotAllowed("消息发送超过" + timeLimit + "分钟，无法撤回");
         }
 
@@ -483,8 +486,12 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         LocalDateTime now = LocalDateTime.now();
         // 限制：消息发送超过指定时间不能编辑
-        if (message.getCreateTime().plusMinutes(SystemConstants.MESSAGE_EDIT_TIME_LIMIT).isBefore(now)) {
-            BusinessExceptionHelper.throwNotAllowed("消息发送超过" + SystemConstants.MESSAGE_EDIT_TIME_LIMIT + "分钟，无法编辑");
+        Integer editTimeLimit = systemConfigService.getMessageRecallTimeLimit();
+        if (editTimeLimit == null) {
+            editTimeLimit = SystemConstants.MESSAGE_EDIT_TIME_LIMIT; // 默认值
+        }
+        if (message.getCreateTime().plusMinutes(editTimeLimit).isBefore(now)) {
+            BusinessExceptionHelper.throwNotAllowed("消息发送超过" + editTimeLimit + "分钟，无法编辑");
         }
 
         // 保存编辑历史
@@ -578,10 +585,11 @@ public class ImMessageServiceImpl implements ImMessageService {
         String decryptedContent = encryptionUtil.decryptMessage(originalMessage.getContent());
 
         ImMessage forwardMessage = new ImMessage();
-        forwardMessage
-                .setConversationId(toConversationId != null ? toConversationId : originalMessage.getConversationId());
+        forwardMessage.setConversationId(
+            Optional.ofNullable(toConversationId).orElse(originalMessage.getConversationId()));
         forwardMessage.setSenderId(userId);
-        forwardMessage.setReceiverId(toUserId != null ? toUserId : originalMessage.getReceiverId());
+        forwardMessage.setReceiverId(
+            Optional.ofNullable(toUserId).orElse(originalMessage.getReceiverId()));
         forwardMessage.setMessageType(originalMessage.getMessageType()); // 转发时保留原消息类型
 
         // 构建转发消息内容，包含原消息信息
@@ -624,6 +632,14 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         imMessageMapper.insertImMessage(replyMessage);
         return replyMessage.getId();
+    }
+
+    @Override
+    public int getTodayMessageCount(Long userId) {
+        LocalDateTime todayStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime todayEnd = todayStart.plusDays(1);
+
+        return imMessageMapper.countBySenderIdAndTimeRange(userId, todayStart, todayEnd);
     }
 
     @Override
@@ -755,17 +771,6 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
 
         return snippet;
-    }
-
-    @Override
-    public int getTodayMessageCount(Long userId) {
-        // 获取今日开始时间
-        LocalDateTime todayStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        // 获取今日结束时间
-        LocalDateTime todayEnd = todayStart.plusDays(1);
-
-        // 统计用户今日发送的消息数量
-        return imMessageMapper.countBySenderIdAndTimeRange(userId, todayStart, todayEnd);
     }
 
     private void incrementSessionUnread(Long conversationId, Long userId, int delta) {

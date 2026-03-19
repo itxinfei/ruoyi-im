@@ -1,6 +1,5 @@
 package com.ruoyi.im.domain;
 
-import lombok.Data;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -15,7 +14,6 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 @TableName("im_group")
-@Data
 public class ImGroup implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -97,4 +95,166 @@ public class ImGroup implements Serializable {
     /** 群主名称 */
     @TableField(exist = false)
     private String ownerName;
+
+    // ==================== Getter and Setter ====================
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getMaxMembers() {
+        return maxMembers;
+    }
+
+    public void setMaxMembers(Integer maxMembers) {
+        this.maxMembers = maxMembers;
+    }
+
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getDeletedTime() {
+        return deletedTime;
+    }
+
+    public void setDeletedTime(LocalDateTime deletedTime) {
+        this.deletedTime = deletedTime;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public String getQrcodeUrl() {
+        return qrcodeUrl;
+    }
+
+    public void setQrcodeUrl(String qrcodeUrl) {
+        this.qrcodeUrl = qrcodeUrl;
+    }
+
+    public LocalDateTime getQrcodeExpireTime() {
+        return qrcodeExpireTime;
+    }
+
+    public void setQrcodeExpireTime(LocalDateTime qrcodeExpireTime) {
+        this.qrcodeExpireTime = qrcodeExpireTime;
+    }
+
+    public Integer getAllowUpload() {
+        return allowUpload;
+    }
+
+    public void setAllowUpload(Integer allowUpload) {
+        this.allowUpload = allowUpload;
+    }
+
+    public Integer getShowMemberList() {
+        return showMemberList;
+    }
+
+    public void setShowMemberList(Integer showMemberList) {
+        this.showMemberList = showMemberList;
+    }
+
+    public String getNotice() {
+        return notice;
+    }
+
+    public void setNotice(String notice) {
+        this.notice = notice;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Integer getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(Integer memberCount) {
+        this.memberCount = memberCount;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Integer getAllMuted() {
+        return allMuted;
+    }
+
+    public void setAllMuted(Integer allMuted) {
+        this.allMuted = allMuted;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
 }

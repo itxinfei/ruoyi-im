@@ -27,8 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 /**
@@ -119,13 +122,77 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
             return;
         }
 
-        for (Long messageId : messageIds) {
-            try {
-                markMessageAsRead(conversationId, messageId, userId);
-            } catch (Exception e) {
-                log.error("标记消息已读失败: messageId={}, userId={}", messageId, userId, e);
+        // 验证用户是否是该会话的成员
+        ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (member == null) {
+            log.warn("用户不是会话成员: conversationId={}, userId={}", conversationId, userId);
+            return;
+        }
+
+        // 批量查询需要标记的消息，排除自己发送的和已标记的
+        List<ImMessage> messagesToMark = messageMapper.selectList(
+            new LambdaQueryWrapper<ImMessage>()
+                .in(ImMessage::getId, messageIds)
+                .ne(ImMessage::getSenderId, userId)  // 排除自己发送的
+        );
+
+        if (messagesToMark.isEmpty()) {
+            log.debug("没有需要标记为已读的消息");
+            return;
+        }
+
+        // 批量查询已标记的消息ID
+        List<Long> messageIdList = messagesToMark.stream()
+            .map(ImMessage::getId)
+            .collect(Collectors.toList());
+
+        List<ImMessageRead> existingReads = messageReadMapper.selectList(
+            new LambdaQueryWrapper<ImMessageRead>()
+                .in(ImMessageRead::getMessageId, messageIdList)
+                .eq(ImMessageRead::getUserId, userId)
+        );
+
+        Set<Long> alreadyReadMessageIds = existingReads.stream()
+            .map(ImMessageRead::getMessageId)
+            .collect(Collectors.toSet());
+
+        // 过滤出未标记的消息
+        LocalDateTime now = LocalDateTime.now();
+        List<ImMessageRead> newReadRecords = messagesToMark.stream()
+            .filter(msg -> !alreadyReadMessageIds.contains(msg.getId()))
+            .map(msg -> {
+                ImMessageRead read = new ImMessageRead();
+                read.setMessageId(msg.getId());
+                read.setUserId(userId);
+                read.setConversationId(conversationId);
+                read.setReadTime(now);
+                read.setReadType("MANUAL");
+                read.setDeviceType("WEB");
+                read.setCreateTime(now);
+                return read;
+            })
+            .collect(Collectors.toList());
+
+        if (!newReadRecords.isEmpty()) {
+            // 批量插入
+            messageReadMapper.batchInsertImMessageRead(newReadRecords);
+
+            // 批量更新会话成员的未读数
+            int unreadDecrement = newReadRecords.size();
+            if (member.getUnreadCount() != null && member.getUnreadCount() > 0) {
+                conversationMemberMapper.decrementUnreadCount(conversationId, userId, unreadDecrement);
+            }
+
+            // 广播已读状态（异步）
+            for (ImMessage message : messagesToMark) {
+                if (!alreadyReadMessageIds.contains(message.getId())) {
+                    broadcastReadStatus(message.getId(), userId, message.getSenderId());
+                }
             }
         }
+
+        log.debug("批量标记消息已读完成: conversationId={}, userId={}, count={}",
+            conversationId, userId, newReadRecords.size());
     }
 
     @Override

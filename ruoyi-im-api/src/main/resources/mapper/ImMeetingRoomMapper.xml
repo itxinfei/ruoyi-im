@@ -62,10 +62,18 @@
         </where>
         <choose>
             <when test="req.orderBy == 'capacity'">
-                ORDER BY r.capacity ${req.orderDirection}
+                ORDER BY r.capacity
+                <choose>
+                    <when test="req.orderDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
             </when>
             <otherwise>
-                ORDER BY r.create_time ${req.orderDirection}
+                ORDER BY r.create_time
+                <choose>
+                    <when test="req.orderDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
             </otherwise>
         </choose>
     </select>

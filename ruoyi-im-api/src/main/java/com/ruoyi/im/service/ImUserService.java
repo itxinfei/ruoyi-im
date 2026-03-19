@@ -7,7 +7,10 @@ import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Set;
 
@@ -36,18 +39,22 @@ public interface ImUserService {
 
     /**
      * 根据ID获取用户信息
+     * 使用缓存提高查询性能
      *
      * @param userId 用户ID
      * @return 用户信息
      */
+    @Cacheable(value = "user_local_cache", key = "#userId", unless = "#result == null")
     ImUserVO getUserById(Long userId);
 
     /**
      * 更新用户信息
+     * 更新缓存中的用户信息
      *
      * @param userId 用户ID
      * @param request 更新请求
      */
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     void updateUser(Long userId, ImUserUpdateRequest request);
 
     /**
@@ -72,6 +79,7 @@ public interface ImUserService {
      * @param userId 用户ID
      * @param status 状态
      */
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     void updateStatus(Long userId, Integer status); // 0=禁用, 1=启用
 
     /**
@@ -82,6 +90,7 @@ public interface ImUserService {
      * @param newPassword 新密码
      * @return 是否成功
      */
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     boolean changePassword(Long userId, String oldPassword, String newPassword);
 
     /**
@@ -112,6 +121,7 @@ public interface ImUserService {
      *
      * @param userId 用户ID
      */
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     void deleteUser(Long userId);
 
     /**
@@ -119,6 +129,7 @@ public interface ImUserService {
      *
      * @param userIds 用户ID列表
      */
+    @CacheEvict(value = "user_local_cache", allEntries = true)
     void batchDeleteUsers(List<Long> userIds);
 
     /**
@@ -126,6 +137,7 @@ public interface ImUserService {
      *
      * @param userId 用户ID
      */
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     void resetPassword(Long userId);
 
     /**
@@ -143,6 +155,7 @@ public interface ImUserService {
      * @param file 头像文件
      * @return 头像URL
      */
+    @CacheEvict(value = "user_local_cache", key = "#userId")
     String uploadAvatar(Long userId, MultipartFile file);
 
     /**

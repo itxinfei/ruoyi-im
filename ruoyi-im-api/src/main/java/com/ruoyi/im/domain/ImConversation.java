@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import com.ruoyi.im.common.BaseEntity;
 
 import java.io.Serializable;
@@ -18,8 +16,6 @@ import java.time.LocalDateTime;
  * @author ruoyi
  */
 @TableName("im_conversation")
-@Data
-@EqualsAndHashCode(callSuper = true)
 public class ImConversation extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -74,4 +70,110 @@ public class ImConversation extends BaseEntity implements Serializable {
     /** 禁止复制：0=允许, 1=禁止 */
     @TableField("no_copy")
     private Integer noCopy;
+
+    // ==================== Getter and Setter ====================
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Long getLastMessageId() {
+        return lastMessageId;
+    }
+
+    public void setLastMessageId(Long lastMessageId) {
+        this.lastMessageId = lastMessageId;
+    }
+
+    public LocalDateTime getLastMessageTime() {
+        return lastMessageTime;
+    }
+
+    public void setLastMessageTime(LocalDateTime lastMessageTime) {
+        this.lastMessageTime = lastMessageTime;
+    }
+
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public LocalDateTime getDeletedTime() {
+        return deletedTime;
+    }
+
+    public void setDeletedTime(LocalDateTime deletedTime) {
+        this.deletedTime = deletedTime;
+    }
+
+    public Integer getIsSensitive() {
+        return isSensitive;
+    }
+
+    public void setIsSensitive(Integer isSensitive) {
+        this.isSensitive = isSensitive;
+    }
+
+    public String getSensitiveLevel() {
+        return sensitiveLevel;
+    }
+
+    public void setSensitiveLevel(String sensitiveLevel) {
+        this.sensitiveLevel = sensitiveLevel;
+    }
+
+    public Integer getNoForward() {
+        return noForward;
+    }
+
+    public void setNoForward(Integer noForward) {
+        this.noForward = noForward;
+    }
+
+    public Integer getNoCopy() {
+        return noCopy;
+    }
+
+    public void setNoCopy(Integer noCopy) {
+        this.noCopy = noCopy;
+    }
 }
