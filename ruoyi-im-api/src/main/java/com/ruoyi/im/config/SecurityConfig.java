@@ -106,6 +106,9 @@ public class SecurityConfig {
                         "/api/im/auth/login", "/api/im/auth/register", "/ws/**", "/websocket/**", "/public/**",
                         "/error", "/test/**")
                 .permitAll()
+                // Swagger相关接口
+                .antMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", 
+                        "/swagger-resources/**", "/webjars/**", "/doc.html").permitAll()
                 // 管理员接口需要 ADMIN 或 SUPER_ADMIN 角色
                 .antMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPER_ADMIN")
                 // 用户接口需要认证后的任意角色

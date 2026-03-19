@@ -52,7 +52,7 @@
             :user-id="session.targetId"
             :is-group="session.type === 'GROUP'"
             :members="session.members || []"
-            :size="40"
+            :size="var(--dt-avatar-size-lg, 40)"
             shape="square"
           />
           <span v-if="session.unreadCount > 0" class="unread-count-badge">

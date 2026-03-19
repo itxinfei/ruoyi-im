@@ -5,7 +5,7 @@
       <div class="avatar-wrapper" @click="$emit('show-profile')">
         <el-avatar
           shape="square"
-          :size="44"
+          :size="var(--dt-avatar-size-lg, 44)"
           :src="session?.avatar"
           class="header-avatar"
         >
@@ -101,7 +101,7 @@ const props = defineProps({
 defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'search', 'files', 'pin', 'clear'])
 
 // Avatar size from Design Token (44px)
-const avatarSize = computed(() => 44)
+// 已改为使用 CSS 变量，此计算属性已废弃
 </script>
 
 <style scoped lang="scss">

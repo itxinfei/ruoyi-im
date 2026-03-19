@@ -66,7 +66,7 @@
                 class="result-item"
                 @click="goToMessage(msg)"
               >
-                <DingtalkAvatar :src="msg.senderAvatar" :name="msg.senderName" :size="36" />
+                <DingtalkAvatar :src="msg.senderAvatar" :name="msg.senderName" :size="var(--dt-avatar-size-md, 36)" />
                 <div class="item-content">
                   <div class="item-title">
                     {{ msg.senderName }}
@@ -96,7 +96,7 @@
                 class="result-item"
                 @click="goToContact(contact)"
               >
-                <DingtalkAvatar :src="contact.avatar" :name="contact.nickname" :size="36" />
+                <DingtalkAvatar :src="contact.avatar" :name="contact.nickname" :size="var(--dt-avatar-size-md, 36)" />
                 <div class="item-content">
                   <div class="item-title">
                     {{ contact.nickname }}
@@ -184,7 +184,7 @@
               @click="handleItemClick(item)"
             >
               <template v-if="searchType === 'message'">
-                <DingtalkAvatar :src="item.senderAvatar" :name="item.senderName" :size="36" />
+                <DingtalkAvatar :src="item.senderAvatar" :name="item.senderName" :size="var(--dt-avatar-size-md, 36)" />
                 <div class="item-content">
                   <div class="item-title">
                     {{ item.senderName }}
@@ -198,7 +198,7 @@
                 </div>
               </template>
               <template v-else-if="searchType === 'contact'">
-                <DingtalkAvatar :src="item.avatar" :name="item.nickname" :size="36" />
+                <DingtalkAvatar :src="item.avatar" :name="item.nickname" :size="var(--dt-avatar-size-md, 36)" />
                 <div class="item-content">
                   <div class="item-title">
                     {{ item.nickname }}

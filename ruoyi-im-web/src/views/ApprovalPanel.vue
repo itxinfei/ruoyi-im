@@ -231,7 +231,7 @@ onMounted(() => {
 
 .add-btn:hover {
   background: var(--dt-brand-hover);
-  transform: translateY(-1px);
+  transform: translateY(var(--dt-transform-y, -1px));
   box-shadow: var(--dt-shadow-float);
 }
 
@@ -329,7 +329,7 @@ onMounted(() => {
 
 .approval-item:hover {
   box-shadow: var(--dt-shadow-float);
-  transform: translateY(-1px);
+  transform: translateY(var(--dt-transform-y, -1px));
   border-color: var(--dt-brand-color);
 }
 

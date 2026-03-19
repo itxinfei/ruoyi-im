@@ -48,7 +48,7 @@
             :src="currentUser.avatar"
             :name="currentUser.nickname"
             :user-id="currentUser.id"
-            :size="36"
+            :size="var(--dt-avatar-size-md, 36)"
             shape="square"
           />
         </div>
@@ -282,10 +282,10 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: var(--dt-spacing-lg, 28px);
+    width: var(--dt-spacing-lg, 32px);
     height: 1px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: var(--dt-radius-xs, 1px);
+    border-radius: var(--dt-radius-xs);
   }
 
   .footer-btn {

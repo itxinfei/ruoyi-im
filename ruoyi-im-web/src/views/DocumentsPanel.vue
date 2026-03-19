@@ -460,11 +460,11 @@ onMounted(() => {
   }
 }
 .docs-content { flex: 1; padding: var(--dt-spacing-lg, 20px); overflow-y: auto; }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--dt-empty-state-height, 300px); color: var(--dt-text-tertiary);
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--dt-empty-state-height, 200px); color: var(--dt-text-tertiary);
   .empty-icon { font-size: var(--dt-icon-size-xl, 64px); margin-bottom: var(--dt-spacing-md, 16px); opacity: 0.5; color: var(--dt-border-color); }
   .empty-text { margin: 0; font-size: var(--dt-font-size-sm); }
 }
-.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--dt-empty-state-height, 300px); color: var(--dt-text-tertiary);
+.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--dt-empty-state-height, 200px); color: var(--dt-text-tertiary);
   .is-loading { font-size: var(--dt-icon-size-xl, 32px); margin-bottom: var(--dt-spacing-md, 16px); }
   p { margin: 0; font-size: var(--dt-font-size-sm); }
 }
@@ -473,7 +473,7 @@ onMounted(() => {
   td { padding: var(--dt-spacing-sm, 10px) var(--dt-spacing-md, 16px); border-bottom: 1px solid var(--dt-border-light); vertical-align: middle; }
   .file-row { cursor: pointer; &:hover { background: var(--dt-bg-body); .action-btn { opacity: 1; } } }
   .file-info { display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px);
-    .file-icon { width: var(--dt-avatar-size-md, 32px); height: var(--dt-avatar-size-md, 32px); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--dt-icon-size-lg, 18px);
+    .file-icon { width: var(--dt-avatar-size-md, 36px); height: var(--dt-avatar-size-md, 36px); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--dt-icon-size-lg, 18px);
       &.icon-folder { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
       &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
       &.icon-sheet { background: var(--dt-success-bg); color: var(--dt-success-color); }

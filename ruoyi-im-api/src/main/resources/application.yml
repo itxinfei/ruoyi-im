@@ -88,6 +88,26 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
 
+# Swagger配置
+swagger:
+  enabled: true
+  title: 若依IM即时通讯系统API
+  description: 若依IM即时通讯系统API文档
+  version: 1.0.0
+  author: ruoyi
+  license: Apache 2.0
+
+# SpringDoc配置（OpenAPI 3.0）
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
 # IM模块配置
 im:
   # 安全配置

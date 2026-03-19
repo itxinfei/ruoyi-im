@@ -67,7 +67,7 @@
             <el-select
               v-model="generalSettings.theme"
               size="default"
-              style="width: 140px"
+              style="width: var(--dt-input-width-md, 140px)"
               @change="handleThemeChange"
             >
               <el-option label="跟随系统" value="auto" />
@@ -82,7 +82,7 @@
             <el-select
               v-model="generalSettings.language"
               size="default"
-              style="width: 140px"
+              style="width: var(--dt-input-width-md, 140px)"
               @change="saveGeneralSettings"
             >
               <el-option label="简体中文" value="zh_CN" />
@@ -256,13 +256,13 @@ onMounted(loadSettings)
     width: var(--dt-avatar-size-lg, 48px);
     height: var(--dt-avatar-size-lg, 48px);
     background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
-    border-radius: var(--dt-radius-lg, 12px);
+    border-radius: var(--dt-radius-lg);
     color: var(--dt-text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: var(--dt-font-weight-black, 800);
-    font-size: var(--dt-font-size-lg, 18px);
+    font-weight: var(--dt-font-weight-black);
+    font-size: var(--dt-font-size-lg);
     box-shadow: var(--dt-shadow-2);
   }
 

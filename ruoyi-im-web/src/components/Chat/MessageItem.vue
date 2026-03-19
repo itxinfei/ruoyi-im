@@ -5,7 +5,7 @@
       :src="message.senderAvatar"
       :name="message.senderName"
       :user-id="message.senderId"
-      :size="36"
+      :size="var(--dt-avatar-size-md, 36)"
       shape="square"
       class="avatar"
       @click="$emit('show-user', message.senderId)"

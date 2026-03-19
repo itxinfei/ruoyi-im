@@ -8,7 +8,7 @@
           <DingtalkAvatar
             :src="userInfo.avatar"
             :name="userInfo.nickname"
-            :size="80"
+            :size="var(--dt-avatar-size-xl, 80)"
             shape="square"
           />
           <div class="avatar-mask">
@@ -200,14 +200,14 @@ onMounted(loadUser)
 
 .profile-hero-card {
   position: relative;
-  height: 180px;
+  height: var(--dt-profile-hero-height, 180px);
   background: var(--dt-bg-card);
   flex-shrink: 0;
   border-bottom: 1px solid var(--dt-border-light);
   overflow: hidden;
 
   .hero-bg {
-    height: 120px;
+    height: var(--dt-profile-bg-height, 120px);
     background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 50%, var(--dt-brand-light) 100%);
     position: relative;
 
@@ -217,22 +217,22 @@ onMounted(loadUser)
       bottom: 0;
       left: 0;
       right: 0;
-      height: 40px;
+      height: var(--dt-gradient-overlay-height, 40px);
       background: linear-gradient(to bottom, transparent, var(--dt-bg-card));
     }
   }
 
   .hero-content {
     position: absolute;
-    bottom: 16px;
-    left: 24px;
+    bottom: var(--dt-spacing-md, 16px);
+    left: var(--dt-spacing-lg, 24px);
     display: flex;
     align-items: flex-end;
-    gap: 16px;
+    gap: var(--dt-spacing-md, 16px);
 
     .avatar-container {
       position: relative;
-      border: 4px solid var(--dt-bg-card);
+      border: var(--dt-avatar-border, 4px) solid var(--dt-bg-card);
       border-radius: var(--dt-radius-lg);
       cursor: pointer;
       overflow: hidden;
@@ -256,19 +256,19 @@ onMounted(loadUser)
         transition: all var(--dt-transition-base);
 
         .material-icons-outlined {
-          font-size: 24px;
+          font-size: var(--dt-icon-size-xl, 24px);
         }
       }
       &:hover .avatar-mask { opacity: 1; }
     }
 
     .user-basic {
-      padding-bottom: 2px;
+      padding-bottom: var(--dt-spacing-xs, 2px);
       .nickname-row {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 2px;
+        gap: var(--dt-spacing-sm, 8px);
+        margin-bottom: var(--dt-spacing-xs, 2px);
 
         .nickname {
           font-size: var(--dt-font-size-xl);
@@ -308,7 +308,7 @@ onMounted(loadUser)
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-light);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-sm, 4px);
 
     &:hover {
       background: var(--dt-border-color);
@@ -364,7 +364,7 @@ onMounted(loadUser)
         left: 0;
         top: 0;
         bottom: 0;
-        width: 3px;
+        width: var(--dt-indicator-width, 3px);
         background: var(--dt-brand-color);
         transform: scaleY(0);
         transition: transform var(--dt-transition-fast);
@@ -379,7 +379,7 @@ onMounted(loadUser)
 
         .arrow {
           color: var(--dt-brand-color);
-          transform: translateX(2px);
+          transform: translateX(var(--dt-transform-x, 2px));
         }
       }
     }
@@ -414,7 +414,7 @@ onMounted(loadUser)
       color: var(--dt-text-quaternary);
       margin-left: auto;
       transition: all var(--dt-transition-fast);
-      font-size: 20px;
+      font-size: var(--dt-icon-size-lg, 20px);
     }
   }
 }

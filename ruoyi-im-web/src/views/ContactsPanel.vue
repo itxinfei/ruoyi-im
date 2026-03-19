@@ -115,7 +115,7 @@
                 :src="m.avatar"
                 :name="m.name || m.userName"
                 :user-id="m.id"
-                :size="44"
+                :size="var(--dt-avatar-size-lg, 44)"
                 shape="square"
               />
               <div class="m-body">
@@ -153,7 +153,7 @@
                 :src="f.friendAvatar"
                 :name="f.friendName"
                 :user-id="f.friendId"
-                :size="44"
+                :size="var(--dt-avatar-size-lg, 44)"
                 shape="square"
               />
               <div class="m-body">
@@ -335,7 +335,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .dept-folder-card {
   background: var(--dt-bg-body); padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px); border-radius: var(--dt-radius-md);
   display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px); cursor: pointer; transition: all var(--dt-transition-fast);
-  &:hover { background: var(--dt-bg-session-hover); transform: translateY(-1px); box-shadow: var(--dt-shadow-1); }
+  &:hover { background: var(--dt-bg-session-hover); transform: translateY(var(--dt-transform-y, -1px)); box-shadow: var(--dt-shadow-1); }
 
   .folder-icon { font-size: var(--dt-icon-size-lg, 24px); color: var(--dt-brand-color); }
   .folder-info { flex: 1; display: flex; flex-direction: column;
