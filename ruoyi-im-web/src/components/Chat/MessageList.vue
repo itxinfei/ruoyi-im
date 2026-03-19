@@ -59,8 +59,8 @@ const newMessageCount = ref(0)
 let lastMessageLength = 0
 
 // 虚拟滚动相关状态
-const containerHeight = ref(500) // 容器高度
-const itemHeight = ref(80) // 默认消息项高度
+const containerHeight = ref(500) // 容器高度 (固定值，用于初始化)
+const itemHeight = ref(80) // 默认消息项高度 (参考 Design Token: --dt-message-item-height)
 const visibleCount = ref(10) // 可见消息数量
 const startIndex = ref(0)
 const endIndex = ref(0)

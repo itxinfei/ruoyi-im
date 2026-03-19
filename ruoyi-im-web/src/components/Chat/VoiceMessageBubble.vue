@@ -148,16 +148,16 @@ const getBarHeight = (index) => {
 .voice-message {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  min-width: 180px;
-  max-width: 280px;
+  gap: var(--dt-spacing-md, 10px);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-md);
+  min-width: var(--dt-voice-bubble-min-width, 180px);
+  max-width: var(--dt-voice-bubble-max-width, 280px);
   position: relative;
 
   // 播放按钮
   .play-btn {
-    width: 36px;
-    height: 36px;
+    width: var(--dt-btn-size-lg, 36px);
+    height: var(--dt-btn-size-lg, 36px);
     border-radius: 50%;
     border: none;
     background: var(--dt-brand-color);
@@ -167,10 +167,10 @@ const getBarHeight = (index) => {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all 0.2s;
+    transition: all var(--dt-transition-fast);
 
     .material-icons-outlined {
-      font-size: 22px;
+      font-size: var(--dt-font-size-md, 22px);
     }
 
     &:hover {
@@ -186,17 +186,17 @@ const getBarHeight = (index) => {
   // 波形图容器
   .waveform-container {
     flex: 1;
-    height: 30px;
+    height: var(--dt-icon-size-lg, 30px);
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--dt-spacing-xs, 2px);
     overflow: hidden;
 
     .waveform-bar {
-      width: 2px;
+      width: var(--dt-spacing-xs, 2px);
       background: currentColor;
-      border-radius: 1px;
-      transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
+      border-radius: var(--dt-radius-sm, 1px);
+      transition: height var(--dt-transition-base) cubic-bezier(0.4, 0, 0.2, 1), opacity var(--dt-transition-base);
     }
   }
 
@@ -219,9 +219,9 @@ const getBarHeight = (index) => {
 
   // 时长
   .duration {
-    font-size: 12px;
+    font-size: var(--dt-font-size-xs, 12px);
     color: var(--dt-text-tertiary);
-    min-width: 35px;
+    min-width: var(--dt-voice-duration-min-width, 35px);
     text-align: right;
   }
 
@@ -231,10 +231,10 @@ const getBarHeight = (index) => {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: var(--dt-spacing-xs, 3px);
     background: rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 var(--dt-radius-md) var(--dt-radius-md);
     overflow: hidden;
 
     .progress-fill {
@@ -247,9 +247,9 @@ const getBarHeight = (index) => {
   // 发送中图标
   .sending-icon {
     position: absolute;
-    right: -24px;
-    bottom: 8px;
-    font-size: 12px;
+    right: calc(-1 * var(--dt-spacing-md, 24px));
+    bottom: var(--dt-spacing-sm, 8px);
+    font-size: var(--dt-font-size-xs, 12px);
     color: var(--dt-text-tertiary);
   }
 

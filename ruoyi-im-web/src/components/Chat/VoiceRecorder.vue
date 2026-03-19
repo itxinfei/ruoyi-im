@@ -2,7 +2,7 @@
   <el-dialog
     v-model="visible"
     title="语音消息"
-    width="400px"
+    :width="var(--dt-dialog-width-md, 400)"
     :close-on-click-modal="false"
     :show-close="true"
     class="voice-recorder-dialog"
@@ -367,7 +367,7 @@ defineExpose({ open })
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: var(--dt-spacing-lg, 20px);
 }
 
 .recorder-status {
@@ -377,8 +377,8 @@ defineExpose({ open })
   gap: 8px;
 
   .status-icon {
-    width: 80px;
-    height: 80px;
+    width: var(--dt-avatar-size-xl, 80px);
+    height: var(--dt-avatar-size-xl, 80px);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -398,7 +398,7 @@ defineExpose({ open })
     }
 
     .material-icons-outlined {
-      font-size: 40px;
+      font-size: var(--dt-font-size-xl, 40px);
     }
 
     .recording-icon {
@@ -413,7 +413,7 @@ defineExpose({ open })
   }
 
   .duration {
-    font-size: 24px;
+    font-size: var(--dt-font-size-lg, 24px);
     font-weight: 600;
     color: var(--dt-text-primary);
     font-variant-numeric: tabular-nums;
@@ -429,14 +429,14 @@ defineExpose({ open })
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  height: 40px;
+  gap: var(--dt-spacing-xs, 3px);
+  height: var(--dt-icon-size-xl, 40px);
   width: 100%;
 
   .wave-bar {
-    width: 4px;
+    width: var(--dt-spacing-xs, 4px);
     background: var(--dt-brand-color);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-sm, 2px);
     transition: height 0.05s ease;
   }
 }
@@ -447,14 +447,14 @@ defineExpose({ open })
   .audio-preview {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
+    gap: var(--dt-spacing-md, 12px);
+    padding: var(--dt-spacing-md, 12px);
     background: var(--dt-bg-body);
-    border-radius: 8px;
+    border-radius: var(--dt-radius-md, 8px);
 
     .preview-play-btn {
-      width: 36px;
-      height: 36px;
+      width: var(--dt-btn-size-lg, 36px);
+      height: var(--dt-btn-size-lg, 36px);
       border-radius: 50%;
       border: none;
       background: var(--dt-brand-color);
@@ -465,7 +465,7 @@ defineExpose({ open })
       justify-content: center;
 
       .material-icons-outlined {
-        font-size: 20px;
+        font-size: var(--dt-icon-size-lg, 20px);
       }
 
       &:hover {
@@ -477,17 +477,17 @@ defineExpose({ open })
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: var(--dt-spacing-xs, 6px);
 
       .preview-duration {
-        font-size: 12px;
+        font-size: var(--dt-font-size-xs, 12px);
         color: var(--dt-text-secondary);
       }
 
       .preview-progress {
-        height: 4px;
+        height: var(--dt-spacing-xs, 4px);
         background: var(--dt-border-color);
-        border-radius: 2px;
+        border-radius: var(--dt-radius-sm, 2px);
         overflow: hidden;
 
         .progress-fill {
@@ -502,21 +502,21 @@ defineExpose({ open })
 
 .recorder-actions {
   display: flex;
-  gap: 12px;
+  gap: var(--dt-spacing-md, 12px);
 
   .el-button {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dt-spacing-xs, 6px);
 
     .material-icons-outlined {
-      font-size: 18px;
+      font-size: var(--dt-font-size-sm, 18px);
     }
   }
 }
 
 .recorder-tips {
-  font-size: 12px;
+  font-size: var(--dt-font-size-xs, 12px);
   color: var(--dt-text-quaternary);
 }
 </style>
