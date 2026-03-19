@@ -49,7 +49,9 @@
           :multiple="true"
           :limit="5"
         >
-          <el-button size="small" type="primary">选择文件</el-button>
+          <el-button size="small" type="primary">
+            选择文件
+          </el-button>
           <template #tip>
             <div class="upload-tip">
               最多上传5个文件，单个文件不超过10MB

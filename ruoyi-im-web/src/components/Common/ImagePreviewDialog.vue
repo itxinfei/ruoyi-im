@@ -47,9 +47,9 @@
         </div>
 
         <!-- 图片容器 -->
-        <div 
-          class="preview-container"
+        <div
           ref="containerRef"
+          class="preview-container"
           @wheel.prevent="handleWheel"
           @mousedown="startDrag"
         >
@@ -58,24 +58,24 @@
             :src="currentImage"
             :style="imageStyle"
             class="preview-image"
+            draggable="false"
             @load="onImageLoad"
             @error="onImageError"
-            draggable="false"
-          />
+          >
         </div>
 
         <!-- 左右切换按钮 -->
-        <button 
+        <button
           v-if="imageList.length > 1"
-          class="nav-btn prev-btn" 
+          class="nav-btn prev-btn"
           :class="{ disabled: currentIndex === 0 }"
           @click="prevImage"
         >
           <el-icon><ArrowLeft /></el-icon>
         </button>
-        <button 
+        <button
           v-if="imageList.length > 1"
-          class="nav-btn next-btn" 
+          class="nav-btn next-btn"
           :class="{ disabled: currentIndex === imageList.length - 1 }"
           @click="nextImage"
         >
@@ -87,24 +87,28 @@
           <div class="thumbnail-list">
             <div
               v-for="(img, index) in imageList"
-              :key="index"
+              :key="img || `img-${index}`"
               class="thumbnail-item"
               :class="{ active: index === currentIndex }"
               @click="goToImage(index)"
             >
-              <img :src="img" class="thumbnail-img" />
+              <img :src="img" class="thumbnail-img">
             </div>
           </div>
         </div>
 
         <!-- 加载状态 -->
         <div v-if="loading" class="loading-overlay">
-          <el-icon class="is-loading loading-icon"><Loading /></el-icon>
+          <el-icon class="is-loading loading-icon">
+            <Loading />
+          </el-icon>
         </div>
 
         <!-- 错误状态 -->
         <div v-if="error" class="error-overlay">
-          <el-icon class="error-icon"><PictureFilled /></el-icon>
+          <el-icon class="error-icon">
+            <PictureFilled />
+          </el-icon>
           <span>图片加载失败</span>
         </div>
       </div>
@@ -114,9 +118,9 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { 
-  Close, Download, ZoomIn, ZoomOut, RefreshRight, 
-  FullScreen, ArrowLeft, ArrowRight, Loading, PictureFilled 
+import {
+  Close, Download, ZoomIn, ZoomOut, RefreshRight,
+  FullScreen, ArrowLeft, ArrowRight, Loading, PictureFilled
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -188,15 +192,15 @@ const resetZoom = () => {
 
 const fitToWindow = () => {
   if (!imageRef.value || !containerRef.value) return
-  
+
   const containerWidth = containerRef.value.clientWidth
   const containerHeight = containerRef.value.clientHeight
   const imgWidth = imageRef.value.naturalWidth
   const imgHeight = imageRef.value.naturalHeight
-  
+
   const scaleX = (containerWidth * 0.9) / imgWidth
   const scaleY = (containerHeight * 0.9) / imgHeight
-  
+
   scale.value = Math.min(scaleX, scaleY, 1)
   translateX.value = 0
   translateY.value = 0
@@ -245,17 +249,17 @@ const startDrag = (e) => {
   dragStartY.value = e.clientY
   dragStartTranslateX.value = translateX.value
   dragStartTranslateY.value = translateY.value
-  
+
   document.addEventListener('mousemove', handleDrag)
   document.addEventListener('mouseup', stopDrag)
 }
 
 const handleDrag = (e) => {
   if (!isDragging.value) return
-  
+
   const deltaX = e.clientX - dragStartX.value
   const deltaY = e.clientY - dragStartY.value
-  
+
   translateX.value = dragStartTranslateX.value + deltaX
   translateY.value = dragStartTranslateY.value + deltaY
 }
@@ -268,12 +272,12 @@ const stopDrag = () => {
 
 const downloadImage = async () => {
   if (!currentImage.value) return
-  
+
   try {
     const response = await fetch(currentImage.value)
     const blob = await response.blob()
     const url = URL.createObjectURL(blob)
-    
+
     const link = document.createElement('a')
     link.href = url
     link.download = `image_${Date.now()}.jpg`
@@ -304,7 +308,7 @@ const onImageError = () => {
 // 键盘事件
 const handleKeydown = (e) => {
   if (!props.visible) return
-  
+
   switch (e.key) {
     case 'Escape':
       handleClose()

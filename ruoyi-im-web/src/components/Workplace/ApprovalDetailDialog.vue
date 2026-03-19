@@ -1,7 +1,7 @@
 <template>
   <el-dialog
-    title="审批详情"
     v-model="visible"
+    title="审批详情"
     width="600px"
     destroy-on-close
     @close="handleClose"
@@ -15,8 +15,12 @@
               {{ detail.applicantName?.charAt(0) }}
             </el-avatar>
             <div class="name-box">
-              <div class="applicant-name">{{ detail.applicantName }}</div>
-              <div class="apply-time">{{ detail.applyTime }}</div>
+              <div class="applicant-name">
+                {{ detail.applicantName }}
+              </div>
+              <div class="apply-time">
+                {{ detail.applyTime }}
+              </div>
             </div>
           </div>
           <div class="status-tag">
@@ -30,24 +34,34 @@
 
         <!-- 详情内容 -->
         <div class="content-section">
-          <h3 class="title">{{ detail.title }}</h3>
-          
+          <h3 class="title">
+            {{ detail.title }}
+          </h3>
+
           <div class="form-data">
-            <div 
-              v-for="(value, key) in parsedFormData" 
-              :key="key" 
+            <div
+              v-for="(value, key) in parsedFormData"
+              :key="key"
               class="form-item"
             >
-              <div class="label">{{ translateKey(key) }}</div>
-              <div class="value">{{ formatValue(value) }}</div>
+              <div class="label">
+                {{ translateKey(key) }}
+              </div>
+              <div class="value">
+                {{ formatValue(value) }}
+              </div>
             </div>
           </div>
         </div>
 
         <el-divider v-if="detail.remark" />
         <div v-if="detail.remark" class="remark-section">
-          <div class="label">备注/审批意见</div>
-          <div class="value">{{ detail.remark }}</div>
+          <div class="label">
+            备注/审批意见
+          </div>
+          <div class="value">
+            {{ detail.remark }}
+          </div>
         </div>
 
         <!-- 操作区域 -->
@@ -60,9 +74,15 @@
             class="comment-input"
           />
           <div class="buttons">
-            <el-button @click="visible = false">取消</el-button>
-            <el-button type="danger" :loading="processing" @click="handleReject">驳回</el-button>
-            <el-button type="primary" :loading="processing" @click="handleApprove">通过</el-button>
+            <el-button @click="visible = false">
+              取消
+            </el-button>
+            <el-button type="danger" :loading="processing" @click="handleReject">
+              驳回
+            </el-button>
+            <el-button type="primary" :loading="processing" @click="handleApprove">
+              通过
+            </el-button>
           </div>
         </div>
       </div>
@@ -91,8 +111,8 @@ const comment = ref('')
 const parsedFormData = computed(() => {
   if (!detail.value || !detail.value.formData) return {}
   try {
-    return typeof detail.value.formData === 'string' 
-      ? JSON.parse(detail.value.formData) 
+    return typeof detail.value.formData === 'string'
+      ? JSON.parse(detail.value.formData)
       : detail.value.formData
   } catch (e) {
     return {}
@@ -217,7 +237,7 @@ watch(visible, (val) => {
     display: flex;
     align-items: center;
     gap: 12px;
-    
+
     .name-box {
       .applicant-name {
         font-size: 16px;

@@ -9,8 +9,8 @@
   >
     <div class="settings-container">
       <div class="tabs-header">
-        <div 
-          v-for="item in menuItems" 
+        <div
+          v-for="item in menuItems"
           :key="item.id"
           class="tab-item"
           :class="{ active: activeMenu === item.id }"
@@ -24,7 +24,9 @@
       <div class="content-area scrollbar-thin">
         <template v-if="activeMenu === 'account'">
           <div class="account-section">
-            <h2 class="section-title">账号安全</h2>
+            <h2 class="section-title">
+              账号安全
+            </h2>
             <div class="account-card">
               <div class="user-info">
                 <div class="avatar-wrapper">
@@ -32,13 +34,19 @@
                     {{ currentUser.nickname?.charAt(0) || currentUser.username?.charAt(0) }}
                   </el-avatar>
                   <el-tooltip :content="currentUser.status === 'online' ? '在线' : '离线'" placement="bottom">
-                    <span class="status-dot" :class="{ 'status-online': currentUser.status === 'online', 'status-offline': currentUser.status === 'offline' }"></span>
+                    <span class="status-dot" :class="{ 'status-online': currentUser.status === 'online', 'status-offline': currentUser.status === 'offline' }" />
                   </el-tooltip>
                 </div>
                 <div class="user-details">
-                  <h3 class="username">{{ currentUser.nickname || currentUser.username }}</h3>
-                  <p class="user-id">UID: {{ currentUser.id }}</p>
-                  <p class="user-email">{{ currentUser.email || '未设置邮箱' }}</p>
+                  <h3 class="username">
+                    {{ currentUser.nickname || currentUser.username }}
+                  </h3>
+                  <p class="user-id">
+                    UID: {{ currentUser.id }}
+                  </p>
+                  <p class="user-email">
+                    {{ currentUser.email || '未设置邮箱' }}
+                  </p>
                 </div>
               </div>
               <div class="action-buttons">
@@ -57,7 +65,9 @@
 
         <template v-else-if="activeMenu === 'notification'">
           <div class="notification-section">
-            <h2 class="section-title">消息通知</h2>
+            <h2 class="section-title">
+              消息通知
+            </h2>
             <div class="settings-grid">
               <div class="setting-card">
                 <div class="setting-header">
@@ -82,7 +92,13 @@
                   </div>
                 </div>
                 <div class="setting-controls">
-                  <el-button link type="primary" size="small" @click="testSound" v-if="localSettings.notifications.sound">
+                  <el-button
+                    v-if="localSettings.notifications.sound"
+                    link
+                    type="primary"
+                    size="small"
+                    @click="testSound"
+                  >
                     <el-icon><VideoPlay /></el-icon>
                     测试音效
                   </el-button>
@@ -91,7 +107,9 @@
               </div>
             </div>
 
-            <h2 class="section-title mt-6">快捷键</h2>
+            <h2 class="section-title mt-6">
+              快捷键
+            </h2>
             <div class="settings-grid">
               <div class="setting-card">
                 <div class="setting-header">
@@ -138,7 +156,9 @@
 
         <template v-else-if="activeMenu === 'privacy'">
           <div class="privacy-section">
-            <h2 class="section-title">隐私与安全</h2>
+            <h2 class="section-title">
+              隐私与安全
+            </h2>
             <div class="settings-grid">
               <div class="setting-card">
                 <div class="setting-header">
@@ -170,7 +190,9 @@
 
         <template v-else-if="activeMenu === 'general'">
           <div class="general-section">
-            <h2 class="section-title">通用设置</h2>
+            <h2 class="section-title">
+              通用设置
+            </h2>
             <div class="settings-grid">
               <div class="setting-card">
                 <div class="setting-header">
@@ -218,10 +240,14 @@
 
         <template v-else-if="activeMenu === 'about'">
           <div class="about-section">
-            <h2 class="section-title">关于 IM</h2>
+            <h2 class="section-title">
+              关于 IM
+            </h2>
             <div class="about-card">
               <div class="app-logo">
-                <div class="logo-inner">IM</div>
+                <div class="logo-inner">
+                  IM
+                </div>
               </div>
               <div class="version-info">
                 <div class="version-row">
@@ -274,7 +300,7 @@ const visible = ref(false)
 const showChangePassword = ref(false)
 const showEditProfile = ref(false)
 const activeMenu = ref('account')
-const { isDark, themeMode, setThemeMode } = useTheme()
+const { themeMode, setThemeMode } = useTheme()
 
 const menuItems = [
   { id: 'account', label: '账号安全', icon: 'manage_accounts' },

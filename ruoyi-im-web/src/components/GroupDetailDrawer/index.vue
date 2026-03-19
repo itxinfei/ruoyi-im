@@ -19,12 +19,21 @@
             custom-class="group-hero-avatar"
           />
           <div class="hero-info">
-            <h3 class="group-name-text">{{ groupInfo.name }}</h3>
+            <h3 class="group-name-text">
+              {{ groupInfo.name }}
+            </h3>
             <span class="member-tag">{{ members.length }} 人</span>
           </div>
         </div>
         <div class="hero-right">
-          <el-button v-if="isOwnerOrAdmin" text :icon="Edit" @click="handleEditGroupName">修改名称</el-button>
+          <el-button
+            v-if="isOwnerOrAdmin"
+            text
+            :icon="Edit"
+            @click="handleEditGroupName"
+          >
+            修改名称
+          </el-button>
         </div>
       </div>
 
@@ -33,7 +42,15 @@
         <div class="section-label">
           <el-icon><Bell /></el-icon>
           <span>群公告</span>
-          <el-button v-if="isOwnerOrAdmin" text type="primary" size="small" @click="handleEditAnnouncement">编辑</el-button>
+          <el-button
+            v-if="isOwnerOrAdmin"
+            text
+            type="primary"
+            size="small"
+            @click="handleEditAnnouncement"
+          >
+            编辑
+          </el-button>
         </div>
         <div class="announcement-card" :class="{ empty: !groupInfo.announcement }">
           {{ groupInfo.announcement || '暂无公告...' }}
@@ -47,11 +64,13 @@
           <span>群成员</span>
           <span class="count">{{ members.length }}</span>
         </div>
-        
+
         <div class="members-grid-new scrollbar-thin">
           <!-- 添加新成员按钮 -->
           <div v-if="isOwnerOrAdmin" class="member-cell add-btn" @click="handleAddMembers">
-            <div class="cell-icon-wrap"><el-icon><Plus /></el-icon></div>
+            <div class="cell-icon-wrap">
+              <el-icon><Plus /></el-icon>
+            </div>
             <span>邀请</span>
           </div>
 
@@ -64,8 +83,12 @@
               custom-class="member-avatar-cell"
             />
             <span class="cell-name">{{ member.name }}</span>
-            <div v-if="member.role === 'OWNER'" class="role-flag owner">群主</div>
-            <div v-else-if="member.role === 'ADMIN'" class="role-flag admin">管理</div>
+            <div v-if="member.role === 'OWNER'" class="role-flag owner">
+              群主
+            </div>
+            <div v-else-if="member.role === 'ADMIN'" class="role-flag admin">
+              管理
+            </div>
           </div>
         </div>
       </div>
@@ -92,8 +115,24 @@
 
       <!-- 底部危险操作 -->
       <div class="danger-actions">
-        <el-button v-if="isOwner" type="danger" plain class="wide-btn" @click="handleDismiss">解散群聊</el-button>
-        <el-button v-else type="danger" plain class="wide-btn" @click="handleLeave">退出群聊</el-button>
+        <el-button
+          v-if="isOwner"
+          type="danger"
+          plain
+          class="wide-btn"
+          @click="handleDismiss"
+        >
+          解散群聊
+        </el-button>
+        <el-button
+          v-else
+          type="danger"
+          plain
+          class="wide-btn"
+          @click="handleLeave"
+        >
+          退出群聊
+        </el-button>
       </div>
     </div>
 
@@ -113,7 +152,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Bell, User, Setting, MoreFilled, Edit, Plus, ArrowRight } from '@element-plus/icons-vue'
+import { Bell, User, Edit, Plus, ArrowRight } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GroupFilePanel from './GroupFilePanel.vue'
 import {
@@ -151,7 +190,9 @@ const loadCurrentUser = () => {
     try {
       const u = JSON.parse(info)
       currentUserId.value = u.userId || u.id
-    } catch (e) {}
+    } catch {
+      // ignore parse error
+    }
   }
 }
 
@@ -201,7 +242,9 @@ const handleEditAnnouncement = async () => {
     await updateGroup({ groupId: props.groupId, announcement: value })
     groupInfo.value.announcement = value
     ElMessage.success('已更新公告')
-  } catch (e) {}
+  } catch {
+    // ignore error
+  }
 }
 
 const handleEditGroupName = async () => {
@@ -215,7 +258,9 @@ const handleEditGroupName = async () => {
     groupInfo.value.name = value
     ElMessage.success('已重命名')
     emit('refresh')
-  } catch (e) {}
+  } catch {
+    // ignore error
+  }
 }
 
 const handleMuteChange = async (v) => {
@@ -235,7 +280,7 @@ const handleAllMuteChange = async (v) => {
 }
 
 const handleDismiss = () => {
-   ElMessageBox.confirm('确定要解散群组吗？此操作不可逆。', '警告', { type: 'error' }).then(async () => {
+  ElMessageBox.confirm('确定要解散群组吗？此操作不可逆。', '警告', { type: 'error' }).then(async () => {
     await dismissGroup(props.groupId)
     ElMessage.success('群聊已解散')
     emit('refresh'); visible.value = false
@@ -281,7 +326,7 @@ const handleOpenFiles = () => {
   display: flex; justify-content: space-between; align-items: center;
   padding: 24px 20px; border-bottom: 1px solid #f2f3f5;
   .dark & { border-color: #334155; }
-  
+
   .hero-left {
     display: flex; align-items: center; gap: 16px;
     :deep(.group-hero-avatar) { border-radius: 12px; }
@@ -293,7 +338,7 @@ const handleOpenFiles = () => {
 }
 
 .section-label {
-  display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; 
+  display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600;
   color: #1f2329; margin-bottom: 12px; .dark & { color: #e2e8f0; }
   .el-icon { color: #8f959e; }
   .count { color: #8f959e; font-weight: normal; font-size: 12px; }
@@ -321,7 +366,7 @@ const handleOpenFiles = () => {
       :deep(.member-avatar-cell) { border-radius: 12px; transition: opacity 0.2s; }
       &:hover :deep(.member-avatar-cell) { opacity: 0.8; }
       .cell-name { font-size: 12px; color: #1f2329; text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; .dark & { color: #94a3b8; } }
-      
+
       &.add-btn {
         .cell-icon-wrap {
           width: 40px; height: 40px; border: 1px dashed #dcdfe6; border-radius: 12px;

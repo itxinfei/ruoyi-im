@@ -12,7 +12,9 @@
           <span class="material-icons-outlined">{{ file.icon }}</span>
         </div>
         <div class="file-info">
-          <div class="file-name">{{ file.name }}</div>
+          <div class="file-name">
+            {{ file.name }}
+          </div>
           <div class="file-meta">
             <span>{{ file.meta }}</span>
             <span>{{ file.modifiedTime }}</span>
@@ -26,7 +28,9 @@
           <div class="preview-placeholder">
             <span class="material-icons-outlined">image</span>
             <p>图片预览</p>
-            <p class="preview-hint">{{ file.name }}</p>
+            <p class="preview-hint">
+              {{ file.name }}
+            </p>
           </div>
         </div>
 
@@ -34,7 +38,9 @@
           <div class="preview-placeholder">
             <span class="material-icons-outlined">picture_as_pdf</span>
             <p>PDF 文件预览</p>
-            <p class="preview-hint">{{ file.name }}</p>
+            <p class="preview-hint">
+              {{ file.name }}
+            </p>
           </div>
         </div>
 
@@ -42,7 +48,9 @@
           <div class="preview-placeholder">
             <span class="material-icons-outlined">description</span>
             <p>Word 文档预览</p>
-            <p class="preview-hint">{{ file.name }}</p>
+            <p class="preview-hint">
+              {{ file.name }}
+            </p>
           </div>
         </div>
 
@@ -50,7 +58,9 @@
           <div class="preview-placeholder">
             <span class="material-icons-outlined">table_view</span>
             <p>Excel 表格预览</p>
-            <p class="preview-hint">{{ file.name }}</p>
+            <p class="preview-hint">
+              {{ file.name }}
+            </p>
           </div>
         </div>
 
@@ -58,7 +68,9 @@
           <div class="preview-placeholder">
             <span class="material-icons-outlined">insert_drive_file</span>
             <p>该文件类型暂不支持预览</p>
-            <p class="preview-hint">您可以下载文件后使用本地程序打开</p>
+            <p class="preview-hint">
+              您可以下载文件后使用本地程序打开
+            </p>
           </div>
         </div>
       </div>
@@ -78,7 +90,6 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   modelValue: {

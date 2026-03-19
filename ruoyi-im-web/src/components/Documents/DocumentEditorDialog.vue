@@ -36,12 +36,14 @@
             <pre>{{ documentContent }}</pre>
           </div>
           <div v-else-if="document?.documentType === 'IMAGE'" class="image-preview">
-            <img :src="documentUrl" alt="预览" />
+            <img :src="documentUrl" alt="预览">
           </div>
           <div v-else class="unsupported-preview">
             <span class="material-icons-outlined">description</span>
             <p>该文件类型暂不支持预览</p>
-            <el-button type="primary" @click="downloadDocument">下载文件</el-button>
+            <el-button type="primary" @click="downloadDocument">
+              下载文件
+            </el-button>
           </div>
         </div>
       </div>
@@ -65,12 +67,16 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">关闭</el-button>
+        <el-button @click="visible = false">
+          关闭
+        </el-button>
         <el-button v-if="!isEditing" type="primary" @click="enterEditMode">
           <el-icon><Edit /></el-icon>编辑
         </el-button>
         <template v-else>
-          <el-button @click="cancelEdit">取消</el-button>
+          <el-button @click="cancelEdit">
+            取消
+          </el-button>
           <el-button type="primary" :loading="saving" @click="saveDocument">
             <el-icon><Check /></el-icon>保存
           </el-button>

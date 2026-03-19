@@ -16,13 +16,19 @@
 
       <!-- 内容描述 -->
       <div v-if="todo.content" class="detail-section">
-        <div class="section-label">描述</div>
-        <div class="section-content">{{ todo.content }}</div>
+        <div class="section-label">
+          描述
+        </div>
+        <div class="section-content">
+          {{ todo.content }}
+        </div>
       </div>
 
       <!-- 截止时间 -->
       <div class="detail-section">
-        <div class="section-label">截止时间</div>
+        <div class="section-label">
+          截止时间
+        </div>
         <div class="section-content" :class="{ overdue: isOverdue(todo.dueDate) }">
           <span class="material-icons-outlined">schedule</span>
           {{ formatDate(todo.dueDate) }}
@@ -32,7 +38,9 @@
 
       <!-- 创建时间 -->
       <div v-if="todo.createdAt" class="detail-section">
-        <div class="section-label">创建时间</div>
+        <div class="section-label">
+          创建时间
+        </div>
         <div class="section-content">
           <span class="material-icons-outlined">create</span>
           {{ todo.createdAt }}
@@ -42,7 +50,12 @@
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button v-if="todo && !todo.completed" type="success" :icon="Check" @click="handleComplete">
+        <el-button
+          v-if="todo && !todo.completed"
+          type="success"
+          :icon="Check"
+          @click="handleComplete"
+        >
           标记完成
         </el-button>
         <el-button v-if="todo && todo.completed" :icon="Refresh" @click="handleComplete">
@@ -56,9 +69,8 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { Check, Refresh, Edit, Delete } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   modelValue: {

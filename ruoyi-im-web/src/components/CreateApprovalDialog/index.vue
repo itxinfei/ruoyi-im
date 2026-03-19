@@ -20,8 +20,12 @@
             <span class="material-icons-outlined">{{ template.icon }}</span>
           </div>
           <div class="template-info">
-            <div class="template-name">{{ template.name }}</div>
-            <div class="template-desc">{{ template.description }}</div>
+            <div class="template-name">
+              {{ template.name }}
+            </div>
+            <div class="template-desc">
+              {{ template.description }}
+            </div>
           </div>
         </div>
       </div>
@@ -130,7 +134,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getTemplates, createApproval } from '@/api/im/approval'
 

@@ -2,10 +2,10 @@
   <div class="org-tree-premium custom-scrollbar">
     <!-- 递归组件渲染部门树 -->
     <div class="tree-root">
-      <OrgTreeNode 
-        v-for="dept in treeData" 
-        :key="dept.id" 
-        :node="dept" 
+      <OrgTreeNode
+        v-for="dept in treeData"
+        :key="dept.id"
+        :node="dept"
         :active-id="selectedDept?.id"
         @select="onSelect"
       />
@@ -18,7 +18,7 @@ import { ref, onMounted } from 'vue'
 import { getOrgTree } from '@/api/im/organization'
 import OrgTreeNode from './OrgTreeNode.vue' // 抽离递归子组件
 
-const props = defineProps({ selectedDept: Object })
+defineProps({ selectedDept: Object })
 const emit = defineEmits(['update:selectedDept', 'select'])
 
 const treeData = ref([])

@@ -1,23 +1,27 @@
 <template>
   <el-dialog
-    title="发起审批"
     v-model="visible"
+    title="发起审批"
     width="600px"
     @close="handleClose"
   >
     <!-- 第一步：选择模板 -->
     <div v-if="step === 1" class="template-grid">
-      <div 
-        v-for="tpl in templates" 
-        :key="tpl.id" 
+      <div
+        v-for="tpl in templates"
+        :key="tpl.id"
         class="template-card"
         @click="selectTemplate(tpl)"
       >
         <div class="tpl-icon">
-          <img v-if="tpl.icon" :src="tpl.icon" />
-          <el-icon v-else><Document /></el-icon>
+          <img v-if="tpl.icon" :src="tpl.icon">
+          <el-icon v-else>
+            <Document />
+          </el-icon>
         </div>
-        <div class="tpl-name">{{ tpl.name }}</div>
+        <div class="tpl-name">
+          {{ tpl.name }}
+        </div>
       </div>
       <el-empty v-if="templates.length === 0" description="暂无可用模板" />
     </div>
@@ -25,31 +29,33 @@
     <!-- 第二步：填写表单 -->
     <div v-if="step === 2" class="form-section">
       <div class="form-header">
-        <el-button link :icon="ArrowLeft" @click="step = 1">返回重选</el-button>
+        <el-button link :icon="ArrowLeft" @click="step = 1">
+          返回重选
+        </el-button>
         <span class="selected-name">{{ selectedTemplate?.name }}</span>
       </div>
 
       <el-form :model="formData" label-width="100px" class="mt-20">
         <el-form-item label="审批标题">
-           <el-input v-model="title" placeholder="请输入标题 (如: 张三的请假申请)" />
+          <el-input v-model="title" placeholder="请输入标题 (如: 张三的请假申请)" />
         </el-form-item>
 
         <template v-for="field in formSchema" :key="field.key">
           <el-form-item :label="field.label">
-            <el-input 
-              v-if="field.type === 'text'" 
-              v-model="formData[field.key]" 
-              :placeholder="'请输入' + field.label" 
+            <el-input
+              v-if="field.type === 'text'"
+              v-model="formData[field.key]"
+              :placeholder="'请输入' + field.label"
             />
-            <el-input 
-              v-else-if="field.type === 'textarea'" 
-              v-model="formData[field.key]" 
-              type="textarea" 
+            <el-input
+              v-else-if="field.type === 'textarea'"
+              v-model="formData[field.key]"
+              type="textarea"
               :rows="3"
             />
-            <el-input-number 
-              v-else-if="field.type === 'number'" 
-              v-model="formData[field.key]" 
+            <el-input-number
+              v-else-if="field.type === 'number'"
+              v-model="formData[field.key]"
               style="width: 100%"
             />
             <el-date-picker
@@ -73,8 +79,12 @@
 
     <template #footer>
       <div v-if="step === 2">
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">提交申请</el-button>
+        <el-button @click="visible = false">
+          取消
+        </el-button>
+        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+          提交申请
+        </el-button>
       </div>
     </template>
   </el-dialog>

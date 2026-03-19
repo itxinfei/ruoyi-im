@@ -4,18 +4,24 @@
       <button class="back-btn" @click="$emit('back')">
         <span class="material-icons-outlined">arrow_back</span>
       </button>
-      <h1 class="view-title">新的朋友</h1>
+      <h1 class="view-title">
+        新的朋友
+      </h1>
     </header>
 
     <div class="view-content">
       <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>加载中...</span>
       </div>
 
       <div v-else-if="requests.length === 0" class="empty-state">
         <span class="material-icons-outlined empty-icon">person_add</span>
-        <p class="empty-text">暂无新的好友申请</p>
+        <p class="empty-text">
+          暂无新的好友申请
+        </p>
       </div>
 
       <div v-else class="requests-list">
@@ -25,17 +31,25 @@
           class="request-item"
         >
           <div class="request-avatar">
-            <img v-if="request.avatar" :src="addTokenToUrl(request.avatar)" :alt="`${request.nickname || request.username} 的头像`" />
+            <img v-if="request.avatar" :src="addTokenToUrl(request.avatar)" :alt="`${request.nickname || request.username} 的头像`">
             <span v-else>{{ (request.nickname || request.username || '?').charAt(0).toUpperCase() }}</span>
           </div>
           <div class="request-info">
-            <div class="request-name">{{ request.nickname || request.username }}</div>
-            <div class="request-message">{{ request.message || '请求添加你为好友' }}</div>
+            <div class="request-name">
+              {{ request.nickname || request.username }}
+            </div>
+            <div class="request-message">
+              {{ request.message || '请求添加你为好友' }}
+            </div>
           </div>
           <div class="request-actions">
             <template v-if="request.status === 'PENDING'">
-              <el-button size="small" @click="handleReject(request)">拒绝</el-button>
-              <el-button type="primary" size="small" @click="handleAccept(request)">同意</el-button>
+              <el-button size="small" @click="handleReject(request)">
+                拒绝
+              </el-button>
+              <el-button type="primary" size="small" @click="handleAccept(request)">
+                同意
+              </el-button>
             </template>
             <span v-else class="status-text">
               {{ request.status === 'ACCEPTED' ? '已添加' : '已拒绝' }}
@@ -54,7 +68,7 @@ import { getFriendRequests, handleFriendRequest } from '@/api/im/contact'
 import { ElMessage } from 'element-plus'
 import { addTokenToUrl } from '@/utils/file'
 
-const emit = defineEmits(['back'])
+defineEmits(['back'])
 
 const loading = ref(false)
 const requests = ref([])

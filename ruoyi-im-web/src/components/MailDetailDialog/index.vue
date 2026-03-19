@@ -16,17 +16,27 @@
             shape="circle"
           />
           <div class="sender-detail">
-            <div class="sender-name">{{ email.sender }}</div>
-            <div class="send-time">{{ email.time }}</div>
+            <div class="sender-name">
+              {{ email.sender }}
+            </div>
+            <div class="send-time">
+              {{ email.time }}
+            </div>
           </div>
         </div>
         <div class="mail-actions">
-          <el-button :icon="ChatLineSquare" @click="handleReply">回复</el-button>
-          <el-button :icon="Share" @click="handleForward">转发</el-button>
+          <el-button :icon="ChatLineSquare" @click="handleReply">
+            回复
+          </el-button>
+          <el-button :icon="Share" @click="handleForward">
+            转发
+          </el-button>
           <el-button :icon="Star" :type="email.starred ? 'primary' : ''" @click="toggleStar">
             {{ email.starred ? '已收藏' : '收藏' }}
           </el-button>
-          <el-button :icon="Delete" type="danger" @click="handleDelete">删除</el-button>
+          <el-button :icon="Delete" type="danger" @click="handleDelete">
+            删除
+          </el-button>
         </div>
       </div>
 
@@ -45,7 +55,7 @@
           <div class="attachment-list">
             <div
               v-for="(file, index) in email.attachments"
-              :key="index"
+              :key="file.name || `file-${index}`"
               class="attachment-item"
             >
               <span class="material-icons-outlined file-icon">description</span>
@@ -111,8 +121,8 @@ const handleForward = () => {
 
 const toggleStar = () => {
   if (props.email) {
-    props.email.starred = !props.email.starred
-    ElMessage.success(props.email.starred ? '已收藏' : '已取消收藏')
+    emit('update:starred', !props.email.starred)
+    ElMessage.success(!props.email.starred ? '已收藏' : '已取消收藏')
   }
 }
 

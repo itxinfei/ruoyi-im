@@ -6,7 +6,7 @@
           <ChatDotRound />
         </el-icon>
       </div>
-      <div class="header-divider"></div>
+      <div class="header-divider" />
       <div class="header-search">
         <el-input
           v-model="searchKeyword"
@@ -44,7 +44,9 @@
             <el-dropdown-item>主题切换</el-dropdown-item>
             <el-dropdown-item>消息通知</el-dropdown-item>
             <el-dropdown-item>隐私与安全</el-dropdown-item>
-            <el-dropdown-item divided>关于系统</el-dropdown-item>
+            <el-dropdown-item divided>
+              关于系统
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -61,8 +63,12 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="profile">个人设置</el-dropdown-item>
-            <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+            <el-dropdown-item command="profile">
+              个人设置
+            </el-dropdown-item>
+            <el-dropdown-item command="logout" divided>
+              退出登录
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>

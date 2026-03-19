@@ -31,10 +31,16 @@
     >
       <div class="upload-progress">
         <div class="file-info">
-          <el-icon class="file-icon"><Document /></el-icon>
+          <el-icon class="file-icon">
+            <Document />
+          </el-icon>
           <div class="file-details">
-            <div class="file-name">{{ currentFile?.name }}</div>
-            <div class="file-size">{{ formatFileSize(currentFile?.size) }}</div>
+            <div class="file-name">
+              {{ currentFile?.name }}
+            </div>
+            <div class="file-size">
+              {{ formatFileSize(currentFile?.size) }}
+            </div>
           </div>
         </div>
         <el-progress
@@ -166,7 +172,7 @@ const handleProgress = (event, file) => {
   uploadPercentage.value = Math.floor(event.percent)
   emit('progress', {
     percentage: uploadPercentage.value,
-    file: file
+    file
   })
 }
 
@@ -183,14 +189,14 @@ const handleSuccess = (response, file) => {
   if (response.code === 200) {
     ElMessage.success('上传成功')
     emit('success', {
-      file: file,
+      file,
       data: response.data
     })
   } else {
     uploadStatus.value = 'exception'
     ElMessage.error(response.msg || '上传失败')
     emit('error', {
-      file: file,
+      file,
       error: response.msg
     })
   }
@@ -200,15 +206,15 @@ const handleSuccess = (response, file) => {
 const handleError = (error, file) => {
   uploading.value = false
   uploadStatus.value = 'exception'
-  
+
   setTimeout(() => {
     showProgress.value = false
   }, 2000)
 
   ElMessage.error('上传失败')
   emit('error', {
-    file: file,
-    error: error
+    file,
+    error
   })
 }
 

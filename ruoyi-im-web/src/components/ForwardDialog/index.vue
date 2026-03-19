@@ -3,8 +3,8 @@
     v-model="visible"
     :title="dialogTitle"
     width="600px"
-    @close="handleClose"
     destroy-on-close
+    @close="handleClose"
   >
     <div class="forward-dialog">
       <!-- 消息预览区 -->
@@ -16,9 +16,9 @@
           <!-- 多条消息预览 -->
           <template v-if="isMultiple">
             <div class="multi-message-preview">
-              <div 
-                v-for="(msg, index) in previewMessages" 
-                :key="index" 
+              <div
+                v-for="(msg, index) in previewMessages"
+                :key="msg.id || `preview-${index}`"
                 class="preview-item"
               >
                 <span class="preview-sender">{{ msg.senderName }}:</span>
@@ -32,7 +32,7 @@
           <!-- 单条消息预览 -->
           <template v-else-if="singleMessage">
             <div v-if="singleMessage.type === 'IMAGE'" class="msg-image">
-              <img :src="getImageUrl(singleMessage)" class="msg-img" />
+              <img :src="getImageUrl(singleMessage)" class="msg-img">
             </div>
             <div v-else-if="singleMessage.type === 'VIDEO'" class="msg-video">
               <video :src="getVideoUrl(singleMessage)" class="msg-video-player" controls />
@@ -77,7 +77,9 @@
               shape="square"
             />
             <div class="session-info">
-              <div class="session-name">{{ session.name }}</div>
+              <div class="session-name">
+                {{ session.name }}
+              </div>
               <div class="session-meta">
                 <span v-if="session.type === 'GROUP'" class="session-type">群聊</span>
                 <span v-else class="session-type">私聊</span>
@@ -105,10 +107,12 @@
           </el-radio-group>
         </span>
         <div class="footer-actions">
-          <el-button @click="handleClose">取消</el-button>
-          <el-button 
-            type="primary" 
-            :disabled="selectedSessionIds.length === 0 || forwarding" 
+          <el-button @click="handleClose">
+            取消
+          </el-button>
+          <el-button
+            type="primary"
+            :disabled="selectedSessionIds.length === 0 || forwarding"
             :loading="forwarding"
             @click="handleForward"
           >
@@ -250,8 +254,6 @@ const handleForward = async () => {
   forwarding.value = true
 
   try {
-    const totalMessages = messages.value.length
-    const totalSessions = selectedSessionIds.value.length
     let successCount = 0
 
     // 逐条转发模式：每条消息单独转发到每个会话
@@ -269,7 +271,7 @@ const handleForward = async () => {
           }
         }
       }
-    } 
+    }
     // 合并转发模式：所有消息合并成一条转发
     else if (forwardMode.value === 'combine') {
       // 构建合并转发内容
@@ -284,7 +286,7 @@ const handleForward = async () => {
       for (const sessionId of selectedSessionIds.value) {
         try {
           await store.dispatch('im/message/sendMessage', {
-            sessionId: sessionId,
+            sessionId,
             type: 'COMBINE',
             content: JSON.stringify({
               title: `聊天记录 (${messages.value.length}条)`,
@@ -301,7 +303,7 @@ const handleForward = async () => {
     const action = forwardMode.value === 'combine' ? '合并转发' : '转发'
     ElMessage.success(`${action}成功！共 ${successCount} 条消息`)
     handleClose()
-    
+
     emit('forwarded', { count: successCount })
   } catch (e) {
     console.error('转发失败', e)

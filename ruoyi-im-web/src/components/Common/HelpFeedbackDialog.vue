@@ -10,8 +10,8 @@
     <div class="help-container">
       <!-- 顶部标签导航 -->
       <div class="tabs-header">
-        <div 
-          v-for="item in menuItems" 
+        <div
+          v-for="item in menuItems"
           :key="item.id"
           class="tab-item"
           :class="{ active: activeMenu === item.id }"
@@ -28,7 +28,9 @@
         <template v-if="activeMenu === 'faq'">
           <div class="faq-section">
             <div class="section-header">
-              <h2 class="section-title">常见问题</h2>
+              <h2 class="section-title">
+                常见问题
+              </h2>
               <el-input
                 v-model="faqSearchQuery"
                 placeholder="搜索您遇到的问题..."
@@ -38,9 +40,9 @@
               />
             </div>
             <div class="faq-list">
-              <div 
-                v-for="(faq, index) in filteredFaqs" 
-                :key="index" 
+              <div
+                v-for="(faq, index) in filteredFaqs"
+                :key="index"
                 class="faq-item"
                 @click="toggleFaq(index)"
               >
@@ -69,7 +71,9 @@
         <!-- 功能介绍 -->
         <template v-else-if="activeMenu === 'features'">
           <div class="features-section">
-            <h2 class="section-title">功能介绍</h2>
+            <h2 class="section-title">
+              功能介绍
+            </h2>
             <div class="feature-grid">
               <div class="feature-card">
                 <div class="feature-icon-wrapper chat-bg">
@@ -132,9 +136,16 @@
         <!-- 意见反馈 -->
         <template v-else-if="activeMenu === 'feedback'">
           <div class="feedback-section">
-            <h2 class="section-title">意见反馈</h2>
+            <h2 class="section-title">
+              意见反馈
+            </h2>
             <div class="feedback-card">
-              <el-form :model="feedbackForm" label-position="top" :rules="feedbackRules" ref="feedbackFormRef">
+              <el-form
+                ref="feedbackFormRef"
+                :model="feedbackForm"
+                label-position="top"
+                :rules="feedbackRules"
+              >
                 <el-form-item label="反馈类型" prop="type">
                   <el-radio-group v-model="feedbackForm.type" size="large">
                     <el-radio-button label="bug">
@@ -152,38 +163,47 @@
                   </el-radio-group>
                 </el-form-item>
                 <el-form-item label="问题描述" prop="content">
-                  <el-input 
-                    v-model="feedbackForm.content" 
-                    type="textarea" 
-                    :rows="5" 
-                    placeholder="请详细描述您遇到的问题或建议，我们会认真对待每一份反馈..." 
+                  <el-input
+                    v-model="feedbackForm.content"
+                    type="textarea"
+                    :rows="5"
+                    placeholder="请详细描述您遇到的问题或建议，我们会认真对待每一份反馈..."
                     show-word-limit
                     maxlength="500"
                   />
                 </el-form-item>
                 <el-form-item label="图片证据 (选填)">
                   <el-upload
+                    v-model:file-list="fileList"
                     action="#"
                     list-type="picture-card"
                     :auto-upload="false"
                     :limit="3"
-                    v-model:file-list="fileList"
                     class="feedback-upload"
                   >
                     <el-icon><Plus /></el-icon>
                   </el-upload>
-                  <div class="upload-tip">最多上传 3 张图片，每张不超过 5MB</div>
+                  <div class="upload-tip">
+                    最多上传 3 张图片，每张不超过 5MB
+                  </div>
                 </el-form-item>
                 <el-form-item label="联系方式 (选填)" prop="contact">
-                  <el-input 
-                    v-model="feedbackForm.contact" 
-                    placeholder="留下您的手机号或邮箱，方便我们回访" 
+                  <el-input
+                    v-model="feedbackForm.contact"
+                    placeholder="留下您的手机号或邮箱，方便我们回访"
                     prefix-icon="Message"
                   />
                 </el-form-item>
                 <div class="form-footer">
-                  <el-button type="primary" class="submit-btn" :loading="submitting" @click="submitFeedback">
-                    <el-icon v-if="!submitting"><Position /></el-icon>
+                  <el-button
+                    type="primary"
+                    class="submit-btn"
+                    :loading="submitting"
+                    @click="submitFeedback"
+                  >
+                    <el-icon v-if="!submitting">
+                      <Position />
+                    </el-icon>
                     {{ submitting ? '提交中...' : '提交反馈' }}
                   </el-button>
                 </div>
@@ -202,7 +222,6 @@ import {
   ChatDotRound,
   Files,
   VideoCamera,
-  Search,
   Plus,
   ArrowDown,
   Service,
@@ -210,7 +229,6 @@ import {
   User,
   Cloudy,
   Warning,
-  Message,
   Position,
   Sunny
 } from '@element-plus/icons-vue'
@@ -262,8 +280,8 @@ const faqs = [
 const filteredFaqs = computed(() => {
   if (!faqSearchQuery.value) return faqs
   const query = faqSearchQuery.value.toLowerCase()
-  return faqs.filter(f => 
-    f.question.toLowerCase().includes(query) || 
+  return faqs.filter(f =>
+    f.question.toLowerCase().includes(query) ||
     f.answer.toLowerCase().includes(query)
   )
 })
@@ -295,7 +313,7 @@ const feedbackRules = {
 
 const submitFeedback = async () => {
   if (!feedbackFormRef.value) return
-  
+
   await feedbackFormRef.value.validate((valid) => {
     if (valid) {
       submitting.value = true

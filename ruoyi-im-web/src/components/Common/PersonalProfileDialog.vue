@@ -7,10 +7,10 @@
     destroy-on-close
     append-to-body
   >
-    <div v-if="loading" v-loading="loading" class="loading-state"></div>
+    <div v-if="loading" v-loading="loading" class="loading-state" />
     <div v-else class="profile-container">
       <div class="profile-cover">
-        <div class="cover-pattern"></div>
+        <div class="cover-pattern" />
         <el-button class="circle-btn close-btn" circle @click="handleClose">
           <el-icon><Close /></el-icon>
         </el-button>
@@ -28,17 +28,27 @@
               custom-class="user-avatar"
             />
           </div>
-          <span class="status-dot" aria-hidden="true"></span>
+          <span class="status-dot" aria-hidden="true" />
         </div>
         <div class="profile-info">
           <div class="name-row">
-            <h2 class="nickname">{{ currentUser.nickname || currentUser.username }}</h2>
-            <el-icon v-if="currentUser.gender === 1" class="gender-icon male"><Male /></el-icon>
-            <el-icon v-else-if="currentUser.gender === 2" class="gender-icon female"><Female /></el-icon>
-            <el-tag size="small" type="success" class="status-tag">在线</el-tag>
+            <h2 class="nickname">
+              {{ currentUser.nickname || currentUser.username }}
+            </h2>
+            <el-icon v-if="currentUser.gender === 1" class="gender-icon male">
+              <Male />
+            </el-icon>
+            <el-icon v-else-if="currentUser.gender === 2" class="gender-icon female">
+              <Female />
+            </el-icon>
+            <el-tag size="small" type="success" class="status-tag">
+              在线
+            </el-tag>
           </div>
-          <p class="account">账号：{{ currentUser.username }}</p>
-          <button class="edit-profile-btn" @click="showEditDialog = true" aria-label="编辑资料">
+          <p class="account">
+            账号：{{ currentUser.username }}
+          </p>
+          <button class="edit-profile-btn" aria-label="编辑资料" @click="showEditDialog = true">
             <el-icon><Edit /></el-icon>
             编辑资料
           </button>
@@ -126,7 +136,7 @@
       </div>
     </div>
 
-    <EditProfileDialog 
+    <EditProfileDialog
       v-model:visible="showEditDialog"
       :user-info="currentUser"
       @save="handleSaveProfile"
@@ -162,16 +172,6 @@ const userStatus = ref('online')
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
-const statusLabel = computed(() => {
-  const map = { online: '在线', busy: '忙碌', away: '离开', meeting: '会议中' }
-  return map[userStatus.value]
-})
-
-const statusType = computed(() => {
-  const map = { online: 'success', busy: 'danger', away: 'warning', meeting: 'info' }
-  return map[userStatus.value]
-})
-
 const handleStatusToggle = () => {
   const statusOptions = [
     { label: '在线', value: 'online' },
@@ -179,7 +179,7 @@ const handleStatusToggle = () => {
     { label: '离开', value: 'away' },
     { label: '会议中', value: 'meeting' }
   ]
-  
+
   const currentIndex = statusOptions.findIndex(s => s.value === userStatus.value)
   const nextIndex = (currentIndex + 1) % statusOptions.length
   userStatus.value = statusOptions[nextIndex].value

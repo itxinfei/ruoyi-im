@@ -28,7 +28,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-const props = defineProps({
+defineProps({
   visible: {
     type: Boolean,
     default: false
@@ -742,7 +742,7 @@ const selectEmoji = (char) => {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     gap: 8px;
-    
+
     &::-webkit-scrollbar { width: 4px; }
     &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
@@ -762,7 +762,7 @@ const selectEmoji = (char) => {
         transform: scale(1.25);
         z-index: 10;
       }
-      
+
       &:active {
         transform: scale(0.9);
       }

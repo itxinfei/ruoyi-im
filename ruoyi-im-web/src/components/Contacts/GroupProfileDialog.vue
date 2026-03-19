@@ -7,11 +7,13 @@
     append-to-body
     destroy-on-close
   >
-    <div v-if="loading" class="loading-wrap" v-loading="loading"></div>
+    <div v-if="loading" v-loading="loading" class="loading-wrap" />
     <div v-else-if="groupDetail" class="group-container">
       <!-- 头部 -->
       <header class="dialog-header">
-        <h3 class="title">群聊信息</h3>
+        <h3 class="title">
+          群聊信息
+        </h3>
         <button class="close-btn" @click="handleClose">
           <el-icon><Close /></el-icon>
         </button>
@@ -30,7 +32,9 @@
               shape="square"
             />
             <div class="meta-info">
-              <h2 class="group-name">{{ groupDetail.name }}</h2>
+              <h2 class="group-name">
+                {{ groupDetail.name }}
+              </h2>
               <p class="group-desc">
                 <span>{{ groupDetail.memberCount || 0 }} 人</span>
                 <span class="divider">·</span>
@@ -75,15 +79,19 @@
 
         <!-- 群设置 -->
         <section class="settings-section">
-          <div class="section-title">群设置</div>
-          
+          <div class="section-title">
+            群设置
+          </div>
+
           <div class="setting-item">
             <div class="setting-left">
               <span class="setting-label">群聊名称</span>
             </div>
             <div class="setting-right">
               <span class="setting-value">{{ groupDetail.name }}</span>
-              <el-icon v-if="canEdit" class="edit-icon" @click="handleEditName"><EditPen /></el-icon>
+              <el-icon v-if="canEdit" class="edit-icon" @click="handleEditName">
+                <EditPen />
+              </el-icon>
             </div>
           </div>
 
@@ -93,7 +101,9 @@
             </div>
             <div class="setting-right clickable" @click="handleViewAnnouncement">
               <span class="setting-value ellipsis">{{ groupDetail.announcement || '暂无公告' }}</span>
-              <el-icon class="arrow-icon"><ArrowRight /></el-icon>
+              <el-icon class="arrow-icon">
+                <ArrowRight />
+              </el-icon>
             </div>
           </div>
 
@@ -103,29 +113,35 @@
             </div>
             <div class="setting-right clickable" @click="handleEditNickname">
               <span class="setting-value">{{ groupDetail.myNickname || '未设置' }}</span>
-              <el-icon class="arrow-icon"><ArrowRight /></el-icon>
+              <el-icon class="arrow-icon">
+                <ArrowRight />
+              </el-icon>
             </div>
           </div>
         </section>
 
         <!-- 消息设置 -->
         <section class="message-settings">
-          <div class="section-title">消息设置</div>
-          
+          <div class="section-title">
+            消息设置
+          </div>
+
           <div class="switch-item">
             <span class="switch-label">置顶聊天</span>
-            <el-switch v-model="groupDetail.isPinned" @change="handleTogglePin" size="default" />
+            <el-switch v-model="groupDetail.isPinned" size="default" @change="handleTogglePin" />
           </div>
 
           <div class="switch-item">
             <span class="switch-label">消息免打扰</span>
-            <el-switch v-model="groupDetail.isMuted" @change="handleToggleMute" size="default" />
+            <el-switch v-model="groupDetail.isMuted" size="default" @change="handleToggleMute" />
           </div>
         </section>
 
         <!-- 管理员功能 -->
         <section v-if="isAdmin" class="admin-section">
-          <div class="section-title">群管理</div>
+          <div class="section-title">
+            群管理
+          </div>
           <div class="admin-actions">
             <div class="admin-item" @click="handleGroupManage">
               <el-icon><Setting /></el-icon>
@@ -239,7 +255,7 @@ const handleMemberManage = () => {
 
 const handleExitGroup = async () => {
   try {
-    await ElMessageBox.confirm('退出后将不再接收此群消息，确定退出吗？', '退出群聊', { 
+    await ElMessageBox.confirm('退出后将不再接收此群消息，确定退出吗？', '退出群聊', {
       type: 'warning',
       confirmButtonText: '确定退出',
       cancelButtonText: '取消'
@@ -259,9 +275,9 @@ const handleExitGroup = async () => {
   }
 }
 
-watch(() => props.modelValue, (val) => { 
+watch(() => props.modelValue, (val) => {
   visible.value = val
-  if (val && props.groupId) loadGroupDetail() 
+  if (val && props.groupId) loadGroupDetail()
 })
 watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 </script>

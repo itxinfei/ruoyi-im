@@ -31,7 +31,9 @@
       <!-- 分类筛选 -->
       <div class="filter-bar">
         <el-radio-group v-model="currentCategory" @change="handleCategoryChange">
-          <el-radio-button label="">全部</el-radio-button>
+          <el-radio-button label="">
+            全部
+          </el-radio-button>
           <el-radio-button
             v-for="cat in categories"
             :key="cat"
@@ -55,7 +57,7 @@
       </div>
 
       <!-- 文件列表 -->
-      <div class="file-list scrollbar-thin" v-loading="loading">
+      <div v-loading="loading" class="file-list scrollbar-thin">
         <el-empty v-if="files.length === 0 && !loading" description="暂无文件" />
 
         <div
@@ -70,7 +72,9 @@
             </span>
           </div>
           <div class="file-info">
-            <div class="file-name">{{ file.fileName }}</div>
+            <div class="file-name">
+              {{ file.fileName }}
+            </div>
             <div class="file-meta">
               <span>{{ formatSize(file.fileSize) }}</span>
               <span>{{ file.uploaderName || '未知' }}</span>
@@ -89,9 +93,15 @@
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="rename">重命名</el-dropdown-item>
-                  <el-dropdown-item command="move">移动到</el-dropdown-item>
-                  <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
+                  <el-dropdown-item command="rename">
+                    重命名
+                  </el-dropdown-item>
+                  <el-dropdown-item command="move">
+                    移动到
+                  </el-dropdown-item>
+                  <el-dropdown-item command="delete" divided>
+                    删除
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -100,7 +110,7 @@
       </div>
 
       <!-- 分页 -->
-      <div class="pagination-bar" v-if="total > 0">
+      <div v-if="total > 0" class="pagination-bar">
         <el-pagination
           v-model:current-page="pageNum"
           v-model:page-size="pageSize"
@@ -129,12 +139,21 @@
             :on-change="handleFileChange"
             drag
           >
-            <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
-            <div class="el-upload__text">拖拽文件到此处或<em>点击上传</em></div>
+            <el-icon class="el-icon--upload">
+              <UploadFilled />
+            </el-icon>
+            <div class="el-upload__text">
+              拖拽文件到此处或<em>点击上传</em>
+            </div>
           </el-upload>
         </el-form-item>
         <el-form-item label="分类">
-          <el-select v-model="uploadForm.category" placeholder="选择分类" allow-create filterable>
+          <el-select
+            v-model="uploadForm.category"
+            placeholder="选择分类"
+            allow-create
+            filterable
+          >
             <el-option label="文档" value="文档" />
             <el-option label="图片" value="图片" />
             <el-option label="视频" value="视频" />
@@ -144,8 +163,12 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="uploadDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmUpload" :loading="uploading">上传</el-button>
+        <el-button @click="uploadDialogVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" :loading="uploading" @click="confirmUpload">
+          上传
+        </el-button>
       </template>
     </el-dialog>
 
@@ -158,8 +181,12 @@
     >
       <el-input v-model="newFileName" placeholder="请输入新文件名" />
       <template #footer>
-        <el-button @click="renameDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmRename">确定</el-button>
+        <el-button @click="renameDialogVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="confirmRename">
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -170,7 +197,13 @@
       width="400px"
       append-to-body
     >
-      <el-select v-model="moveCategory" placeholder="选择分类" allow-create filterable style="width: 100%">
+      <el-select
+        v-model="moveCategory"
+        placeholder="选择分类"
+        allow-create
+        filterable
+        style="width: 100%"
+      >
         <el-option
           v-for="cat in categories"
           :key="cat"
@@ -179,8 +212,12 @@
         />
       </el-select>
       <template #footer>
-        <el-button @click="moveDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmMove">确定</el-button>
+        <el-button @click="moveDialogVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="confirmMove">
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -190,12 +227,12 @@
       type="file"
       style="display: none"
       @change="handleFileSelect"
-    />
+    >
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, Download, Search, MoreFilled, UploadFilled } from '@element-plus/icons-vue'
 import {
@@ -320,6 +357,14 @@ const handleSearch = () => {
     loadFiles()
   }, 300)
 }
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+})
 
 // 上传文件
 const handleUpload = () => {

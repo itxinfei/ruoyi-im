@@ -24,7 +24,9 @@
 
       <!-- 已选成员 -->
       <div v-if="selectedUsers.length > 0" class="selected-section">
-        <div class="section-title">已选择 {{ selectedUsers.length }} 人</div>
+        <div class="section-title">
+          已选择 {{ selectedUsers.length }} 人
+        </div>
         <div class="selected-list">
           <el-tag
             v-for="user in selectedUsers"
@@ -39,9 +41,13 @@
 
       <!-- 用户列表 -->
       <div class="users-section">
-        <div class="section-title">用户列表</div>
+        <div class="section-title">
+          用户列表
+        </div>
         <div v-if="loading" class="loading-state">
-          <el-icon class="is-loading"><Loading /></el-icon>
+          <el-icon class="is-loading">
+            <Loading />
+          </el-icon>
           <span>加载中...</span>
         </div>
         <div v-else-if="userList.length === 0" class="empty-state">
@@ -64,10 +70,16 @@
               shape="circle"
             />
             <div class="user-info">
-              <div class="user-name">{{ user.name }}</div>
-              <div class="user-dept">{{ user.department || '未知部门' }}</div>
+              <div class="user-name">
+                {{ user.name }}
+              </div>
+              <div class="user-dept">
+                {{ user.department || '未知部门' }}
+              </div>
             </div>
-            <el-tag v-if="isMember(user)" size="small" type="info">已在群</el-tag>
+            <el-tag v-if="isMember(user)" size="small" type="info">
+              已在群
+            </el-tag>
           </div>
         </div>
       </div>
@@ -75,7 +87,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">取消</el-button>
+        <el-button @click="visible = false">
+          取消
+        </el-button>
         <el-button
           type="primary"
           :disabled="selectedUsers.length === 0"
@@ -90,7 +104,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Loading } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -126,6 +140,14 @@ const handleSearch = () => {
     loadUsers()
   }, 300)
 }
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+})
 
 const loadUsers = async () => {
   if (!searchQuery.value.trim()) {

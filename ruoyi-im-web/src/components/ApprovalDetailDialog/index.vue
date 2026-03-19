@@ -8,7 +8,9 @@
     <div v-if="approval" class="approval-detail">
       <!-- 状态标签 -->
       <div class="detail-header">
-        <h3 class="detail-title">{{ approval.title }}</h3>
+        <h3 class="detail-title">
+          {{ approval.title }}
+        </h3>
         <span class="status-badge" :class="approval.status">
           {{ statusText(approval.status) }}
         </span>
@@ -16,7 +18,9 @@
 
       <!-- 审批类型 -->
       <div class="detail-section">
-        <div class="section-label">审批类型</div>
+        <div class="section-label">
+          审批类型
+        </div>
         <div class="section-content">
           <span class="type-tag">{{ approval.type || '通用审批' }}</span>
         </div>
@@ -24,7 +28,9 @@
 
       <!-- 申请人信息 -->
       <div class="detail-section">
-        <div class="section-label">申请人</div>
+        <div class="section-label">
+          申请人
+        </div>
         <div class="section-content">
           <DingtalkAvatar
             :src="approval.applicantAvatar"
@@ -39,13 +45,19 @@
 
       <!-- 申请事由 -->
       <div v-if="approval.reason" class="detail-section">
-        <div class="section-label">申请事由</div>
-        <div class="section-content reason-content">{{ approval.reason }}</div>
+        <div class="section-label">
+          申请事由
+        </div>
+        <div class="section-content reason-content">
+          {{ approval.reason }}
+        </div>
       </div>
 
       <!-- 审批详情数据 -->
       <div v-if="approval.details" class="detail-section">
-        <div class="section-label">详细信息</div>
+        <div class="section-label">
+          详细信息
+        </div>
         <div class="detail-grid">
           <div v-for="(value, key) in approval.details" :key="key" class="detail-item">
             <span class="item-label">{{ key }}:</span>
@@ -56,19 +68,27 @@
 
       <!-- 审批流程 -->
       <div class="detail-section">
-        <div class="section-label">审批流程</div>
+        <div class="section-label">
+          审批流程
+        </div>
         <div class="flow-list">
           <div
             v-for="(step, index) in approvalFlow"
-            :key="index"
+            :key="step.name || `step-${index}`"
             class="flow-item"
             :class="{ active: step.status === 'current', done: step.status === 'done' }"
           >
-            <div class="flow-dot"></div>
+            <div class="flow-dot" />
             <div class="flow-content">
-              <div class="flow-name">{{ step.name }}</div>
-              <div class="flow-time">{{ step.time || '待处理' }}</div>
-              <div v-if="step.comment" class="flow-comment">{{ step.comment }}</div>
+              <div class="flow-name">
+                {{ step.name }}
+              </div>
+              <div class="flow-time">
+                {{ step.time || '待处理' }}
+              </div>
+              <div v-if="step.comment" class="flow-comment">
+                {{ step.comment }}
+              </div>
             </div>
           </div>
         </div>
@@ -77,10 +97,20 @@
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button v-if="canApprove" type="success" :loading="submitting" @click="handleApprove">
+        <el-button
+          v-if="canApprove"
+          type="success"
+          :loading="submitting"
+          @click="handleApprove"
+        >
           通过
         </el-button>
-        <el-button v-if="canApprove" type="danger" :loading="submitting" @click="handleReject">
+        <el-button
+          v-if="canApprove"
+          type="danger"
+          :loading="submitting"
+          @click="handleReject"
+        >
           拒绝
         </el-button>
         <el-button @click="handleClose">关闭</el-button>
@@ -103,7 +133,9 @@
         show-word-limit
       />
       <template #footer>
-        <el-button @click="showCommentDialog = false">取消</el-button>
+        <el-button @click="showCommentDialog = false">
+          取消
+        </el-button>
         <el-button type="primary" :loading="submitting" @click="confirmAction">
           确定
         </el-button>

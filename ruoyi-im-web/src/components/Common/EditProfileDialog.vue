@@ -24,13 +24,26 @@
             <el-icon><Camera /></el-icon>
           </div>
         </div>
-        <p class="avatar-tip">点击更换头像</p>
-        <input ref="avatarInput" type="file" hidden accept="image/*" @change="handleAvatarChange" />
+        <p class="avatar-tip">
+          点击更换头像
+        </p>
+        <input
+          ref="avatarInput"
+          type="file"
+          hidden
+          accept="image/*"
+          @change="handleAvatarChange"
+        >
       </div>
 
       <!-- 基本信息 -->
       <el-form-item label="昵称" prop="nickname">
-        <el-input v-model="form.nickname" placeholder="请输入昵称" maxlength="20" show-word-limit />
+        <el-input
+          v-model="form.nickname"
+          placeholder="请输入昵称"
+          maxlength="20"
+          show-word-limit
+        />
       </el-form-item>
 
       <el-form-item label="用户名">
@@ -39,9 +52,15 @@
 
       <el-form-item label="性别" prop="gender">
         <el-radio-group v-model="form.gender">
-          <el-radio :label="1">男</el-radio>
-          <el-radio :label="2">女</el-radio>
-          <el-radio :label="0">保密</el-radio>
+          <el-radio :label="1">
+            男
+          </el-radio>
+          <el-radio :label="2">
+            女
+          </el-radio>
+          <el-radio :label="0">
+            保密
+          </el-radio>
         </el-radio-group>
       </el-form-item>
 
@@ -71,7 +90,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">取消</el-button>
+        <el-button @click="visible = false">
+          取消
+        </el-button>
         <el-button type="primary" :loading="saving" @click="handleSubmit">
           保存
         </el-button>

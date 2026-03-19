@@ -42,7 +42,9 @@
 
     <template #footer>
       <div class="flex justify-end gap-2 px-4 pb-4">
-        <el-button @click="visible = false">取消</el-button>
+        <el-button @click="visible = false">
+          取消
+        </el-button>
         <el-button type="primary" :loading="loading" @click="handleSubmit">
           提交修改
         </el-button>
@@ -53,7 +55,7 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { updateUserPassword } from '@/api/im/user_password'
@@ -104,7 +106,7 @@ const rules = {
 
 const handleSubmit = async () => {
   if (!formRef.value) return
-  
+
   await formRef.value.validate(async (valid) => {
     if (valid) {
       loading.value = true
@@ -114,7 +116,7 @@ const handleSubmit = async () => {
         if (res.code === 200) {
           ElMessage.success('密码修改成功，请重新登录')
           visible.value = false
-          
+
           // 强制重新登录
           setTimeout(async () => {
             await store.dispatch('user/logout')

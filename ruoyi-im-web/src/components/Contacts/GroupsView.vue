@@ -4,18 +4,24 @@
       <button class="back-btn" @click="$emit('back')">
         <span class="material-icons-outlined">arrow_back</span>
       </button>
-      <h1 class="view-title">我的群组</h1>
+      <h1 class="view-title">
+        我的群组
+      </h1>
     </header>
 
     <div class="view-content">
       <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>加载中...</span>
       </div>
 
       <div v-else-if="groups.length === 0" class="empty-state">
         <span class="material-icons-outlined empty-icon">groups</span>
-        <p class="empty-text">暂无群组</p>
+        <p class="empty-text">
+          暂无群组
+        </p>
       </div>
 
       <div v-else class="groups-list">
@@ -34,11 +40,13 @@
             shape="square"
           />
           <div class="group-info">
-            <div class="group-name">{{ group.name }}</div>
+            <div class="group-name">
+              {{ group.name }}
+            </div>
             <div class="group-desc">
-                <span v-if="group.memberCount">{{ group.memberCount }} 人</span> 
-                <span v-if="group.description">{{ group.description }}</span>     
-              </div>
+              <span v-if="group.memberCount">{{ group.memberCount }} 人</span>
+              <span v-if="group.description">{{ group.description }}</span>
+            </div>
           </div>
           <div class="group-action">
             <span class="material-icons-outlined">chevron_right</span>
@@ -53,7 +61,6 @@
 import { ref, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { getGroups } from '@/api/im/group'
-import { addTokenToUrl } from '@/utils/file'
 
 const emit = defineEmits(['back', 'select-group'])
 

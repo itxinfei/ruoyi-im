@@ -4,23 +4,34 @@
       <!-- 1. 图标区 -->
       <div class="im-empty__icon-wrapper">
         <slot name="icon">
-          <el-icon class="default-icon"><component :is="icon" /></el-icon>
+          <el-icon class="default-icon">
+            <component :is="icon" />
+          </el-icon>
         </slot>
       </div>
 
       <!-- 2. 文本区 -->
       <div class="im-empty__content">
-        <h4 class="im-empty__title">{{ title }}</h4>
-        <p v-if="description" class="im-empty__desc">{{ description }}</p>
+        <h4 class="im-empty__title">
+          {{ title }}
+        </h4>
+        <p v-if="description" class="im-empty__desc">
+          {{ description }}
+        </p>
       </div>
 
       <!-- 3. 引导动作区 -->
       <div v-if="actionText" class="im-empty__footer">
-        <el-button type="primary" plain round @click="$emit('action')">
+        <el-button
+          type="primary"
+          plain
+          round
+          @click="$emit('action')"
+        >
           {{ actionText }}
         </el-button>
       </div>
-      <slot name="extra"></slot>
+      <slot name="extra" />
     </div>
   </div>
 </template>
@@ -43,7 +54,7 @@ defineEmits(['action'])
 .im-empty {
   display: flex; align-items: center; justify-content: center;
   padding: var(--dt-spacing-2xl); width: 100%;
-  
+
   &.is-full { height: 100%; }
 
   &__container {

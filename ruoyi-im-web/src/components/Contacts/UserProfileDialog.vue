@@ -7,23 +7,28 @@
     append-to-body
     destroy-on-close
   >
-    <div v-if="loading" class="loading-state" v-loading="loading"></div>
+    <div v-if="loading" v-loading="loading" class="loading-state" />
     <div v-else-if="userDetail" class="profile-container">
       <!-- 顶部背景 -->
-      <div class="profile-header-bg"></div>
+      <div class="profile-header-bg" />
 
       <!-- 主体内容 -->
       <div class="profile-body">
         <!-- 左侧头像 -->
         <div class="profile-left">
           <div class="avatar-wrapper">
-            <img v-if="userDetail.avatar" :src="userDetail.avatar" alt="avatar" class="avatar-img" />
+            <img
+              v-if="userDetail.avatar"
+              :src="userDetail.avatar"
+              alt="avatar"
+              class="avatar-img"
+            >
             <div v-else class="avatar-placeholder">
               {{ (userDetail.nickname || userDetail.username || '?').charAt(0) }}
             </div>
           </div>
           <div class="user-status">
-            <span class="status-dot online"></span>
+            <span class="status-dot online" />
             <span class="status-text">在线</span>
           </div>
         </div>
@@ -31,9 +36,15 @@
         <!-- 右侧信息 -->
         <div class="profile-right">
           <div class="user-base-info">
-            <h2 class="user-name">{{ userDetail.nickname || userDetail.username }}</h2>
-            <div class="user-dept">{{ userDetail.departmentName || userDetail.department || '公司组织' }}</div>
-            <div class="user-position">{{ userDetail.position || '成员' }}</div>
+            <h2 class="user-name">
+              {{ userDetail.nickname || userDetail.username }}
+            </h2>
+            <div class="user-dept">
+              {{ userDetail.departmentName || userDetail.department || '公司组织' }}
+            </div>
+            <div class="user-position">
+              {{ userDetail.position || '成员' }}
+            </div>
           </div>
 
           <div class="user-detail-list">
@@ -49,7 +60,7 @@
               <span class="label">邮箱</span>
               <span class="value">{{ userDetail.email || '未设置' }}</span>
             </div>
-            <div class="detail-row" v-if="userDetail.signature">
+            <div v-if="userDetail.signature" class="detail-row">
               <span class="label">签名</span>
               <span class="value signature">{{ userDetail.signature }}</span>
             </div>

@@ -20,7 +20,7 @@
           @keydown.down="moveNext"
           @keydown.up="movePrev"
           @keydown.enter="handleSelect"
-        />
+        >
         <div class="search-kbd">
           <kbd>ESC</kbd>
         </div>
@@ -30,7 +30,9 @@
       <div v-if="query" class="search-results custom-scrollbar">
         <!-- 分类：联系人 -->
         <div v-if="results.contacts.length" class="result-group">
-          <div class="group-title">联系人</div>
+          <div class="group-title">
+            联系人
+          </div>
           <div
             v-for="(item, idx) in results.contacts"
             :key="item.id"
@@ -38,9 +40,14 @@
             :class="{ active: currentIdx === idx }"
             @click="goToContact(item)"
           >
-            <DingtalkAvatar :src="item.avatar" :name="item.nickname" :size="32" shape="square" />
+            <DingtalkAvatar
+              :src="item.avatar"
+              :name="item.nickname"
+              :size="32"
+              shape="square"
+            />
             <div class="item-info">
-              <span class="name" v-html="highlight(item.nickname)"></span>
+              <span class="name" v-html="highlight(item.nickname)" />
               <span class="dept">{{ item.department || '研发部' }}</span>
             </div>
           </div>
@@ -48,7 +55,9 @@
 
         <!-- 分类：群组 -->
         <div v-if="results.groups.length" class="result-group">
-          <div class="group-title">群组</div>
+          <div class="group-title">
+            群组
+          </div>
           <div
             v-for="(item, idx) in results.groups"
             :key="item.id"
@@ -56,9 +65,14 @@
             :class="{ active: currentIdx === (results.contacts.length + idx) }"
             @click="goToGroup(item)"
           >
-            <DingtalkAvatar :src="item.avatar" :name="item.name" :size="32" shape="square" />
+            <DingtalkAvatar
+              :src="item.avatar"
+              :name="item.name"
+              :size="32"
+              shape="square"
+            />
             <div class="item-info">
-              <span class="name" v-html="highlight(item.name)"></span>
+              <span class="name" v-html="highlight(item.name)" />
               <span class="count">{{ item.memberCount }} 人</span>
             </div>
           </div>
@@ -132,10 +146,10 @@ const onOpen = () => {
 const handleSearch = () => {
   if (!query.value) return
   // 这里模拟搜索，实际应调用 store 或 API
-  results.value.contacts = store.getters['im/contact/allContacts'].filter(c => 
+  results.value.contacts = store.getters['im/contact/allContacts'].filter(c =>
     c.nickname.includes(query.value)
   ).slice(0, 5)
-  results.value.groups = store.getters['im/session/allGroups']?.filter(g => 
+  results.value.groups = store.getters['im/session/allGroups']?.filter(g =>
     g.name.includes(query.value)
   ).slice(0, 5) || []
 }
@@ -152,8 +166,8 @@ const handleSelect = () => {
   // 执行跳转逻辑
 }
 
-const goToContact = (c) => { visible.value = false; /* 跳转 */ }
-const goToGroup = (g) => { visible.value = false; /* 跳转 */ }
+const goToContact = (_c) => { visible.value = false /* 跳转 */ }
+const goToGroup = (_g) => { visible.value = false /* 跳转 */ }
 </script>
 
 <style lang="scss">
@@ -179,7 +193,7 @@ const goToGroup = (g) => { visible.value = false; /* 跳转 */ }
 
   .search-results {
     max-height: 450px; overflow-y: auto; padding: 8px 0;
-    
+
     .result-group {
       .group-title { padding: 12px 20px 4px; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
       .result-item {

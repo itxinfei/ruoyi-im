@@ -31,9 +31,11 @@
               :show-file-list="false"
               :before-upload="beforeAvatarUpload"
             >
-              <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar" />
+              <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar">
               <div v-else class="avatar-placeholder">
-                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+                <el-icon class="avatar-uploader-icon">
+                  <Plus />
+                </el-icon>
                 <span>上传头像</span>
               </div>
             </el-upload>
@@ -67,19 +69,28 @@
                 :value="contact.id"
               >
                 <div class="contact-option">
-                  <DingtalkAvatar :name="contact.name" :user-id="contact.id" :size="24" shape="square" />
+                  <DingtalkAvatar
+                    :name="contact.name"
+                    :user-id="contact.id"
+                    :size="24"
+                    shape="square"
+                  />
                   <span>{{ contact.name }}</span>
                 </div>
               </el-option>
             </el-select>
-            <div class="member-count">当前选择: <b>{{ form.members.length }}</b> 人</div>
+            <div class="member-count">
+              当前选择: <b>{{ form.members.length }}</b> 人
+            </div>
           </el-form-item>
         </el-form>
       </div>
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="handleClose">取消</el-button>
+          <el-button @click="handleClose">
+            取消
+          </el-button>
           <el-button type="primary" :loading="loading" @click="handleSubmit">
             立即创建
           </el-button>
@@ -164,14 +175,14 @@ const beforeAvatarUpload = (file) => {
   // Upload image
   const formData = new FormData()
   formData.append('avatarfile', file)
-  
+
   uploadAvatar(formData).then(res => {
-     if(res.code === 200) {
-        form.avatar = res.data
-        ElMessage.success('上传成功')
-     }
-  }).catch(err => {
-     ElMessage.error('上传失败')
+    if (res.code === 200) {
+      form.avatar = res.data
+      ElMessage.success('上传成功')
+    }
+  }).catch(() => {
+    ElMessage.error('上传失败')
   })
 
   return false // Stop auto upload by element

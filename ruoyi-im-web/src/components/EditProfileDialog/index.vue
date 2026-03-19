@@ -5,22 +5,29 @@
     width="500px"
     @update:model-value="$emit('update:visible', $event)"
   >
-    <el-form :model="form" label-width="80px" :rules="rules" ref="formRef">
+    <el-form
+      ref="formRef"
+      :model="form"
+      label-width="80px"
+      :rules="rules"
+    >
       <el-form-item label="头像">
         <div class="avatar-uploader" @click="triggerFileUpload">
-          <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar" />
-          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          <img v-if="form.avatar" :src="addTokenToUrl(form.avatar)" class="avatar">
+          <el-icon v-else class="avatar-uploader-icon">
+            <Plus />
+          </el-icon>
           <div class="upload-mask">
             <el-icon><Camera /></el-icon>
           </div>
         </div>
         <input
-          type="file"
           ref="fileInput"
+          type="file"
           style="display: none"
           accept="image/*"
           @change="handleFileChange"
-        />
+        >
       </el-form-item>
 
       <el-form-item label="昵称" prop="nickname">
@@ -143,7 +150,7 @@ const handleFileChange = async (e) => {
 
 const handleSave = async () => {
   if (!formRef.value) return
-  
+
   await formRef.value.validate((valid) => {
     if (valid) {
       loading.value = true
