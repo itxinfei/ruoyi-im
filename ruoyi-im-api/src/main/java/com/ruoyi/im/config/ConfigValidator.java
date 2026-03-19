@@ -33,7 +33,6 @@ public class ConfigValidator {
         validateAppConfig();
         validateSpringConfig();
         validateImConfig();
-        validateSwaggerConfig();
         validateMyBatisPlusConfig();
         validateFileUploadConfig();
         validateLoggingConfig();
@@ -121,23 +120,6 @@ public class ConfigValidator {
             log.info("  - Security配置: {}", imConfig.getSecurity() != null ? "已注入" : "未注入");
         } catch (Exception e) {
             log.error("[FAIL] IM模块配置验证失败", e);
-        }
-    }
-
-    private void validateSwaggerConfig() {
-        try {
-            Boolean swaggerEnabled = env.getProperty("swagger.enabled", Boolean.class);
-            Boolean apiDocsEnabled = env.getProperty("springdoc.api-docs.enabled", Boolean.class);
-            Boolean swaggerUiEnabled = env.getProperty("springdoc.swagger-ui.enabled", Boolean.class);
-            String swaggerUiPath = env.getProperty("springdoc.swagger-ui.path");
-            
-            log.info("[OK] Swagger配置");
-            log.info("  - Swagger启用: {}", swaggerEnabled);
-            log.info("  - API文档启用: {}", apiDocsEnabled);
-            log.info("  - SwaggerUI启用: {}", swaggerUiEnabled);
-            log.info("  - SwaggerUI路径: {}", swaggerUiPath);
-        } catch (Exception e) {
-            log.error("[FAIL] Swagger配置验证失败", e);
         }
     }
 

@@ -403,7 +403,7 @@ onMounted(async () => {
       width: 100%;
       border: none;
       background: transparent;
-      padding: 0 32px;
+      padding: 0 var(--dt-spacing-lg, 32px);
       font-size: var(--dt-font-size-sm);
       outline: none;
       color: var(--dt-text-primary);
@@ -524,8 +524,8 @@ onMounted(async () => {
       content: '\e6a1'; // Element Plus 置顶图标
       font-family: 'element-icons';
       position: absolute;
-      top: 4px;
-      right: 4px;
+      top: var(--dt-spacing-xs, 4px);
+      right: var(--dt-spacing-xs, 4px);
       font-size: var(--dt-font-size-xs);
       color: var(--dt-brand-color);
       opacity: 0.7;
@@ -545,13 +545,13 @@ onMounted(async () => {
 
     .unread-count-badge {
       position: absolute;
-      top: -2px;
-      right: -2px;
+      top: calc(-1 * var(--dt-spacing-xs, 2px));
+      right: calc(-1 * var(--dt-spacing-xs, 2px));
       background: var(--dt-error-color);
       color: var(--dt-bg-card);
       font-size: var(--dt-font-size-xs);
-      min-width: 16px;
-      height: 16px;
+      min-width: var(--dt-spacing-md, 16px);
+      height: var(--dt-spacing-md, 16px);
       padding: 0 var(--dt-spacing-xs);
       border-radius: var(--dt-radius-full);
       @include flex-center;
@@ -569,7 +569,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 2px;
+    gap: var(--dt-spacing-xs, 2px);
 
     .content-top {
       display: flex;
@@ -596,7 +596,7 @@ onMounted(async () => {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 2px;
+      margin-top: var(--dt-spacing-xs, 2px);
 
       .preview-wrapper {
         display: flex;
@@ -622,6 +622,11 @@ onMounted(async () => {
   }
 }
 
+// 会话项底部内容间距
+.session-item .item-content .content-bottom {
+  margin-top: var(--dt-spacing-xs, 2px);
+}
+
 // ============================================================================
 // 右键菜单
 // ============================================================================
@@ -631,7 +636,7 @@ onMounted(async () => {
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
   padding: var(--dt-spacing-xs);
-  min-width: 160px;
+  min-width: var(--dt-menu-width-md, 160px);
   z-index: var(--dt-z-max);
   box-shadow: var(--dt-shadow-modal);
 

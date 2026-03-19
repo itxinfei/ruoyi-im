@@ -292,7 +292,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: var(--dt-empty-state-height, 200px);
   color: var(--dt-text-tertiary);
 }
 

@@ -440,7 +440,7 @@ onMounted(() => {
 .sidebar-footer { padding: var(--dt-spacing-md, 16px); border-top: 1px solid var(--dt-border-light);
   .storage-info { background: var(--dt-bg-body); padding: var(--dt-spacing-sm, 12px); border-radius: var(--dt-radius-md);
     .storage-header { display: flex; justify-content: space-between; font-size: var(--dt-font-size-xs); margin-bottom: var(--dt-spacing-xs, 6px); color: var(--dt-text-tertiary); }
-    .storage-bar { height: 4px; background: var(--dt-border-color); border-radius: var(--dt-radius-full, 2px); overflow: hidden; .storage-fill { height: 100%; background: var(--dt-brand-color); } }
+    .storage-bar { height: var(--dt-spacing-xs, 4px); background: var(--dt-border-color); border-radius: var(--dt-radius-full, 2px); overflow: hidden; .storage-fill { height: 100%; background: var(--dt-brand-color); } }
     .storage-text { font-size: var(--dt-font-size-xs); color: var(--dt-text-quaternary); margin-top: var(--dt-spacing-xs, 6px); text-align: right; }
   }
 }

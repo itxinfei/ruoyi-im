@@ -388,7 +388,7 @@ onUnmounted(() => {
 // 左侧二级导航栏
 // ============================================================================
 .wb-sidebar {
-  width: 200px;
+  width: var(--dt-contact-panel-width, 200px);
   background: var(--dt-bg-card);
   border-right: 1px solid var(--dt-border-light);
   display: flex;
@@ -437,7 +437,7 @@ onUnmounted(() => {
       left: 0;
       top: 0;
       bottom: 0;
-      width: 3px;
+      width: var(--dt-spacing-xs, 3px);
       background: var(--dt-brand-color);
     }
 
@@ -512,7 +512,7 @@ onUnmounted(() => {
 // 常用应用视图
 // ============================================================================
 .apps-view {
-  padding: var(--dt-spacing-2xl) 40px;
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl, 40px);
 }
 
 .wb-header {
@@ -540,7 +540,7 @@ onUnmounted(() => {
 
 .wb-search {
   position: relative;
-  width: 320px;
+  width: var(--dt-search-width-lg, 320px);
 
   &__icon {
     position: absolute;
@@ -622,8 +622,8 @@ onUnmounted(() => {
   }
 
   &__icon {
-    width: 52px;
-    height: 52px;
+    width: var(--dt-icon-size-2xl, 52px);
+    height: var(--dt-icon-size-2xl, 52px);
     border-radius: var(--dt-radius-lg, 12px);
     @include flex-center;
     font-size: var(--dt-icon-size-xl, 24px);
@@ -632,8 +632,8 @@ onUnmounted(() => {
     transition: all var(--dt-transition-base);
 
     &--sm {
-      width: 44px;
-      height: 44px;
+      width: var(--dt-icon-size-xl, 44px);
+      height: var(--dt-icon-size-xl, 44px);
       font-size: var(--dt-icon-size-lg, 20px);
     }
 
@@ -734,7 +734,7 @@ onUnmounted(() => {
 // 考勤视图
 // ============================================================================
 .attendance-view {
-  padding: var(--dt-spacing-2xl) 40px;
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl, 40px);
 }
 
 .attendance-card {
@@ -751,9 +751,9 @@ onUnmounted(() => {
 }
 
 .status-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  width: var(--dt-avatar-size-xl, 80px);
+  height: var(--dt-avatar-size-xl, 80px);
+  border-radius: var(--dt-radius-full);
   background: var(--dt-brand-lighter);
   @include flex-center;
   margin: 0 auto var(--dt-spacing-md);
@@ -819,8 +819,8 @@ onUnmounted(() => {
   }
 
   &__status {
-    width: 4px;
-    height: 32px;
+    width: var(--dt-spacing-xs, 4px);
+    height: var(--dt-btn-height-sm, 32px);
     border-radius: var(--dt-radius-xs, 2px);
     flex-shrink: 0;
 
@@ -854,7 +854,7 @@ onUnmounted(() => {
 // 日程视图
 // ============================================================================
 .schedule-view {
-  padding: var(--dt-spacing-2xl) 40px;
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl, 40px);
 }
 
 .schedule-content {

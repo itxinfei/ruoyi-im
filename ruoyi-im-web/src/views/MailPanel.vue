@@ -300,7 +300,7 @@ onMounted(() => {
 }
 
 .mail-folders {
-  width: 180px;
+  width: var(--dt-folder-panel-width, 180px);
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
   padding: var(--dt-spacing-xs, 8px);
@@ -363,7 +363,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: var(--dt-empty-state-height, 200px);
   color: var(--dt-text-tertiary);
 }
 
@@ -455,13 +455,13 @@ onMounted(() => {
 }
 
 .unread-dot {
-  width: 8px;
-  height: 8px;
+  width: var(--dt-dot-size, 8px);
+  height: var(--dt-dot-size, 8px);
   background: var(--dt-brand-color);
   border-radius: 50%;
   position: absolute;
   right: var(--dt-spacing-md, 16px);
-  box-shadow: 0 0 0 3px var(--dt-brand-bg);
+  box-shadow: 0 0 0 var(--dt-border-thick, 3px) var(--dt-brand-bg);
 }
 
 /* 暗色模式 */

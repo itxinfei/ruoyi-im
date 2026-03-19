@@ -208,7 +208,7 @@ onMounted(() => loadTodos())
 .todo-header { height: var(--dt-toolbar-height, 56px); padding: 0 var(--dt-spacing-lg, 24px); border-bottom: 1px solid var(--dt-border-light); display: flex; align-items: center; justify-content: space-between;
   .header-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); }
   .search-box { position: relative; .search-icon { position: absolute; left: var(--dt-spacing-xs, 8px); top: 50%; transform: translateY(-50%); font-size: var(--dt-icon-size-lg, 16px); color: var(--dt-text-tertiary); }
-    .search-input { width: 200px; height: var(--dt-btn-height-sm, 32px); background: var(--dt-bg-body); border: none; border-radius: var(--dt-radius-sm); padding: 0 var(--dt-spacing-lg, 32px); font-size: var(--dt-font-size-sm); outline: none; &:focus { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); } }
+    .search-input { width: var(--dt-search-width-md, 200px); height: var(--dt-btn-height-sm, 32px); background: var(--dt-bg-body); border: none; border-radius: var(--dt-radius-sm); padding: 0 var(--dt-spacing-lg, 32px); font-size: var(--dt-font-size-sm); outline: none; &:focus { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); } }
   }
 }
 .todo-content-scroller { flex: 1; padding: var(--dt-spacing-lg, 20px) var(--dt-spacing-lg, 24px); overflow-y: auto; background: var(--dt-bg-body); }
@@ -217,7 +217,7 @@ onMounted(() => loadTodos())
   &:hover { transform: translateY(var(--dt-transform-y, -1px)); box-shadow: var(--dt-shadow-2); .todo-actions { opacity: 1; } }
   &.completed { opacity: 0.6; .title-text { text-decoration: line-through; } }
 }
-.todo-checkbox { flex-shrink: 0; .checkbox-inner { width: 20px; height: 20px; border: 2px solid var(--dt-border-color); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center;
+.todo-checkbox { flex-shrink: 0; .checkbox-inner { width: var(--dt-checkbox-size, 20px); height: var(--dt-checkbox-size, 20px); border: 2px solid var(--dt-border-color); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center;
   &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-primary); .material-icons-outlined { font-size: var(--dt-font-size-xs); } } }
 }
 .todo-main-info { flex: 1; min-width: 0;

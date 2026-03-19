@@ -291,7 +291,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .sidebar-scroll { flex: 1; overflow-y: auto; padding: var(--dt-spacing-md) var(--dt-spacing-sm); }
 
 .nav-list {
-  display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--dt-spacing-lg);
+  display: flex; flex-direction: column; gap: var(--dt-spacing-xs, 2px); margin-bottom: var(--dt-spacing-lg);
   .nav-item {
     display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px); padding: var(--dt-spacing-sm, 10px) var(--dt-spacing-sm, 12px);
     border-radius: var(--dt-radius-md); cursor: pointer; transition: all var(--dt-transition-base);
@@ -308,7 +308,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 
 .tree-divider {
   padding: 0 var(--dt-spacing-md) var(--dt-spacing-sm); font-size: var(--dt-font-size-xs, 12px); color: var(--dt-text-tertiary);
-  text-transform: uppercase; letter-spacing: 1px;
+  text-transform: uppercase; letter-spacing: var(--dt-letter-spacing-wide, 1px);
 }
 
 // ============================================================================
@@ -334,7 +334,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 
 .dept-folder-card {
   background: var(--dt-bg-body); padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px); border-radius: var(--dt-radius-md);
-  display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px); cursor: pointer; transition: all var(--dt-transition-fast);
   &:hover { background: var(--dt-bg-session-hover); transform: translateY(-1px); box-shadow: var(--dt-shadow-1); }
 
   .folder-icon { font-size: var(--dt-icon-size-lg, 24px); color: var(--dt-brand-color); }
@@ -357,7 +357,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 
 .member-card-ding {
   background: var(--dt-bg-card); padding: var(--dt-spacing-md, 16px); border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light);
-  display: flex; align-items: center; gap: var(--dt-spacing-md, 14px); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: var(--dt-spacing-md, 14px); cursor: pointer; transition: all var(--dt-transition-fast);
   &:hover {
     box-shadow: var(--dt-shadow-card-hover); border-color: var(--dt-brand-light);
     .chat-shortcut { opacity: 1; transform: scale(1); }
@@ -371,7 +371,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
   .chat-shortcut {
     @include button-reset; width: var(--dt-btn-height-sm, 32px); height: var(--dt-btn-height-sm, 32px); border-radius: 50%; background: var(--dt-brand-bg);
     color: var(--dt-brand-color); @include flex-center; opacity: 0; transform: scale(0.8);
-    transition: all 0.2s; &:hover { background: var(--dt-brand-color); color: var(--dt-text-primary); }
+    transition: all var(--dt-transition-fast); &:hover { background: var(--dt-brand-color); color: var(--dt-text-primary); }
   }
 }
 

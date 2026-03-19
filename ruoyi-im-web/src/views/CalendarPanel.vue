@@ -76,7 +76,7 @@ const dateRangeString = computed(() => {
   background: var(--dt-bg-body);
 }
 .calendar-sidebar {
-  width: 200px;
+  width: var(--dt-contact-panel-width, 200px);
   background: var(--dt-bg-card);
   border-right: 1px solid var(--dt-border-light);
 }

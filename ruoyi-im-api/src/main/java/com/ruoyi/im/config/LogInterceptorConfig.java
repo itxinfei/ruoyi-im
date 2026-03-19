@@ -25,14 +25,8 @@ public class LogInterceptorConfig implements WebMvcConfigurer
         registry.addInterceptor(new RequestLogInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/swagger-ui/**",
-                        "/swagger-resources/**",
-                        "/v3/api-docs/**",
-                        "/doc.html",
-                        "/webjars/**",
                         "/favicon.ico",
-                        "/health",
-                        "/actuator/**"
+                        "/health"
                 );
     }
 

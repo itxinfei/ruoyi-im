@@ -257,8 +257,8 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
       position: absolute;
       top: var(--dt-spacing-xs, 4px);
       right: var(--dt-spacing-xs, 4px);
-      width: 8px;
-      height: 8px;
+      width: var(--dt-spacing-xs, 8px);
+      height: var(--dt-spacing-xs, 8px);
       background: var(--dt-error-color);
       border-radius: 50%;
       border: 1.5px solid var(--dt-brand-color);
@@ -282,7 +282,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 28px;
+    width: var(--dt-spacing-lg, 28px);
     height: 1px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: var(--dt-radius-xs, 1px);
@@ -320,7 +320,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     &:hover {
       background: rgba(255, 255, 255, 0.18);
       color: var(--dt-text-white);
-      transform: translateY(-2px) scale(1.02);
+      transform: translateY(var(--dt-spacing-xs, -2px)) scale(1.02);
       box-shadow: var(--dt-shadow-float, 0 4px 12px rgba(0, 0, 0, 0.15));
 
       span {
