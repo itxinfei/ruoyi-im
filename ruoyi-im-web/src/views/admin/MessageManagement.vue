@@ -8,22 +8,48 @@
             <p>按类型、时间与关键字检索并治理消息</p>
           </div>
           <el-space>
-            <el-button @click="handleReset">重置</el-button>
-            <el-button type="primary" @click="loadMessages">刷新</el-button>
+            <el-button @click="handleReset">
+              重置
+            </el-button>
+            <el-button type="primary" @click="loadMessages">
+              刷新
+            </el-button>
           </el-space>
         </div>
       </template>
 
       <el-row :gutter="12" class="toolbar-row">
-        <el-col :xs="24" :sm="10" :md="8" :lg="6">
-          <el-input v-model="searchKeyword" placeholder="搜索消息内容" clearable @keyup.enter="handleSearch" @clear="handleSearch">
+        <el-col
+          :xs="24"
+          :sm="10"
+          :md="8"
+          :lg="6"
+        >
+          <el-input
+            v-model="searchKeyword"
+            placeholder="搜索消息内容"
+            clearable
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
+          >
             <template #append>
               <el-button :icon="Search" @click="handleSearch" />
             </template>
           </el-input>
         </el-col>
-        <el-col :xs="24" :sm="8" :md="6" :lg="4">
-          <el-select v-model="searchMessageType" placeholder="消息类型" clearable style="width: 100%" @change="handleSearch">
+        <el-col
+          :xs="24"
+          :sm="8"
+          :md="6"
+          :lg="4"
+        >
+          <el-select
+            v-model="searchMessageType"
+            placeholder="消息类型"
+            clearable
+            style="width: 100%"
+            @change="handleSearch"
+          >
             <el-option label="文本" value="TEXT" />
             <el-option label="图片" value="IMAGE" />
             <el-option label="文件" value="FILE" />
@@ -31,7 +57,12 @@
             <el-option label="视频" value="VIDEO" />
           </el-select>
         </el-col>
-        <el-col :xs="24" :sm="24" :md="10" :lg="8">
+        <el-col
+          :xs="24"
+          :sm="24"
+          :md="10"
+          :lg="8"
+        >
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -49,70 +80,115 @@
       <div v-if="selectedMessages.length" class="batch-actions">
         <span>已选择 {{ selectedMessages.length }} 条消息</span>
         <el-space>
-          <el-button size="small" type="danger" @click="handleBatchDelete">批量删除</el-button>
-          <el-button v-if="failedItems.length" size="small" @click="failedDialogVisible = true">查看失败项</el-button>
+          <el-button size="small" type="danger" @click="handleBatchDelete">
+            批量删除
+          </el-button>
+          <el-button v-if="failedItems.length" size="small" @click="failedDialogVisible = true">
+            查看失败项
+          </el-button>
         </el-space>
       </div>
 
-      <el-table :data="messageList" v-loading="loading" border @selection-change="handleSelectionChange">
+      <el-table
+        v-loading="loading"
+        :data="messageList"
+        border
+        @selection-change="handleSelectionChange"
+      >
         <el-table-column type="selection" width="48" />
         <el-table-column prop="id" label="消息ID" width="88" />
         <el-table-column prop="senderId" label="发送者ID" width="98" />
         <el-table-column prop="messageType" label="类型" width="90">
           <template #default="{ row }">
-            <el-tag :type="getTypeTag(row.messageType)">{{ getTypeLabel(row.messageType) }}</el-tag>
+            <el-tag :type="getTypeTag(row.messageType)">
+              {{ getTypeLabel(row.messageType) }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="content" label="消息内容" min-width="280" show-overflow-tooltip>
-          <template #default="{ row }">{{ renderPreview(row) }}</template>
+        <el-table-column
+          prop="content"
+          label="消息内容"
+          min-width="280"
+          show-overflow-tooltip
+        >
+          <template #default="{ row }">
+            {{ renderPreview(row) }}
+          </template>
         </el-table-column>
         <el-table-column prop="conversationId" label="会话ID" width="98" />
         <el-table-column prop="createTime" label="发送时间" width="180" />
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
-            <el-tag v-if="row.isRevoked === 1" type="info">已撤回</el-tag>
-            <el-tag v-else-if="row.isDeleted === 1" type="danger">已删除</el-tag>
-            <el-tag v-else type="success">正常</el-tag>
+            <el-tag v-if="row.isRevoked === 1" type="info">
+              已撤回
+            </el-tag>
+            <el-tag v-else-if="row.isDeleted === 1" type="danger">
+              已删除
+            </el-tag>
+            <el-tag v-else type="success">
+              正常
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="130">
           <template #default="{ row }">
-            <el-button size="small" type="primary" link @click="handleViewDetail(row)">详情</el-button>
+            <el-button
+              size="small"
+              type="primary"
+              link
+              @click="handleViewDetail(row)"
+            >
+              详情
+            </el-button>
             <el-button
               v-if="row.isRevoked !== 1 && row.isDeleted !== 1"
               size="small"
               type="danger"
               link
               @click="handleDelete(row)"
-            >删除</el-button>
+            >
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pager-wrap">
         <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
           :current-page="pageNum"
           :page-sizes="[10, 20, 50, 100]"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
 
     <el-dialog v-model="detailDialogVisible" title="消息详情" width="640px">
-      <el-descriptions :column="2" border v-if="currentMessage">
-        <el-descriptions-item label="消息ID">{{ currentMessage.id }}</el-descriptions-item>
-        <el-descriptions-item label="会话ID">{{ currentMessage.conversationId }}</el-descriptions-item>
-        <el-descriptions-item label="发送者ID">{{ currentMessage.senderId }}</el-descriptions-item>
-        <el-descriptions-item label="消息类型">
-          <el-tag :type="getTypeTag(currentMessage.messageType)">{{ getTypeLabel(currentMessage.messageType) }}</el-tag>
+      <el-descriptions v-if="currentMessage" :column="2" border>
+        <el-descriptions-item label="消息ID">
+          {{ currentMessage.id }}
         </el-descriptions-item>
-        <el-descriptions-item label="发送时间" :span="2">{{ currentMessage.createTime }}</el-descriptions-item>
+        <el-descriptions-item label="会话ID">
+          {{ currentMessage.conversationId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="发送者ID">
+          {{ currentMessage.senderId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="消息类型">
+          <el-tag :type="getTypeTag(currentMessage.messageType)">
+            {{ getTypeLabel(currentMessage.messageType) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="发送时间" :span="2">
+          {{ currentMessage.createTime }}
+        </el-descriptions-item>
         <el-descriptions-item label="消息内容" :span="2">
-          <div class="message-content">{{ currentMessage.content || renderPreview(currentMessage) }}</div>
+          <div class="message-content">
+            {{ currentMessage.content || renderPreview(currentMessage) }}
+          </div>
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>

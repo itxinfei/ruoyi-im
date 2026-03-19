@@ -1,7 +1,9 @@
 <template>
   <div class="approval-panel">
     <div class="panel-header">
-      <h2 class="panel-title">审批流程</h2>
+      <h2 class="panel-title">
+        审批流程
+      </h2>
       <button class="add-btn" @click="showCreateDialog = true">
         <span class="material-icons-outlined">add</span>
         发起审批
@@ -23,13 +25,17 @@
       </div>
 
       <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>加载中...</span>
       </div>
 
       <div v-else-if="approvals.length === 0" class="empty-state">
         <span class="material-icons-outlined empty-icon">assignment</span>
-        <p class="empty-text">暂无审批事项</p>
+        <p class="empty-text">
+          暂无审批事项
+        </p>
       </div>
 
       <div v-else class="approval-list">
@@ -43,7 +49,9 @@
             {{ approval.title.charAt(0) }}
           </div>
           <div class="approval-content">
-            <div class="approval-title">{{ approval.title }}</div>
+            <div class="approval-title">
+              {{ approval.title }}
+            </div>
             <div class="approval-meta">
               <span class="approval-type">{{ approval.type }}</span>
               <span class="approval-time">{{ approval.time }}</span>
@@ -72,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CreateApprovalDialog from '@/components/CreateApprovalDialog/index.vue'

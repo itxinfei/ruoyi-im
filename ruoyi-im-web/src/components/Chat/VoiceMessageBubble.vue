@@ -7,16 +7,16 @@
     </button>
 
     <!-- 动态波形图 -->
-    <div class="waveform-container" ref="waveformRef">
-      <div 
-        class="waveform-bar" 
-        v-for="i in 24" 
+    <div ref="waveformRef" class="waveform-container">
+      <div
+        v-for="i in 24"
         :key="i"
-        :style="{ 
+        class="waveform-bar"
+        :style="{
           height: getBarHeight(i) + '%',
           opacity: progress >= (i/24)*100 ? 1 : 0.4
         }"
-      ></div>
+      />
     </div>
 
     <!-- 时长 -->
@@ -24,7 +24,7 @@
 
     <!-- 播放进度 -->
     <div class="progress-bar" @click="seekTo">
-      <div class="progress-fill" :style="{ width: progress + '%' }"></div>
+      <div class="progress-fill" :style="{ width: progress + '%' }" />
     </div>
 
     <!-- 发送状态 -->
@@ -72,21 +72,21 @@ onMounted(() => {
   if (parsedContent.value.duration) {
     duration.value = parsedContent.value.duration
   }
-  
+
   // 创建音频对象
   if (parsedContent.value.url) {
     audioRef.value = new Audio(parsedContent.value.url)
-    
+
     audioRef.value.addEventListener('loadedmetadata', () => {
       duration.value = audioRef.value.duration
     })
-    
+
     audioRef.value.addEventListener('timeupdate', () => {
       if (audioRef.value.duration) {
         progress.value = (audioRef.value.currentTime / audioRef.value.duration) * 100
       }
     })
-    
+
     audioRef.value.addEventListener('ended', () => {
       isPlaying.value = false
       progress.value = 0
@@ -107,7 +107,7 @@ const togglePlay = () => {
     emit('command', 'play-voice', props.message)
     return
   }
-  
+
   if (isPlaying.value) {
     audioRef.value.pause()
   } else {
@@ -119,7 +119,7 @@ const togglePlay = () => {
 // 跳转到指定位置
 const seekTo = (e) => {
   if (!audioRef.value || !duration.value) return
-  
+
   const rect = e.target.getBoundingClientRect()
   const x = e.clientX - rect.left
   const percent = x / rect.width
@@ -203,7 +203,7 @@ const getBarHeight = (index) => {
   // 播放时波形动画 (钉钉风格：非对称随机跳动)
   &.playing .waveform-bar {
     animation: waveform-jump 0.6s ease-in-out infinite alternate;
-    
+
     @for $i from 1 through 24 {
       &:nth-child(#{$i}) {
         animation-delay: #{$i * 0.03}s;

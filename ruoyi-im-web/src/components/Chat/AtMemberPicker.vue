@@ -16,13 +16,15 @@
         size="small"
       />
     </div>
-    
+
     <div v-loading="loading" class="member-list">
       <div class="member-item all" @click="handleSelect({ id: 'all', name: '所有人' })">
-        <div class="avatar-all">@</div>
+        <div class="avatar-all">
+          @
+        </div>
         <span class="name">所有人</span>
       </div>
-      
+
       <div
         v-for="member in filteredMembers"
         :key="member.id"
@@ -38,7 +40,7 @@
         />
         <span class="name">{{ member.nickname || member.username }}</span>
       </div>
-      
+
       <el-empty v-if="!loading && filteredMembers.length === 0" description="未找到成员" />
     </div>
   </el-dialog>
@@ -79,7 +81,7 @@ const loadMembers = async () => {
 const filteredMembers = computed(() => {
   const keyword = searchKeyword.value.toLowerCase()
   if (!keyword) return members.value
-  return members.value.filter(m => 
+  return members.value.filter(m =>
     (m.nickname && m.nickname.toLowerCase().includes(keyword)) ||
     (m.username && m.username.toLowerCase().includes(keyword))
   )
@@ -111,7 +113,7 @@ defineExpose({ open })
 .member-list {
   max-height: 400px;
   overflow-y: auto;
-  
+
   .member-item {
     display: flex;
     align-items: center;
@@ -119,11 +121,11 @@ defineExpose({ open })
     padding: 10px 16px;
     cursor: pointer;
     transition: background 0.2s;
-    
+
     &:hover {
       background-color: var(--dt-bg-hover);
     }
-    
+
     .avatar-all {
       width: 32px;
       height: 32px;
@@ -135,7 +137,7 @@ defineExpose({ open })
       justify-content: center;
       font-weight: bold;
     }
-    
+
     .name {
       font-size: var(--dt-font-size-base);
       color: var(--dt-text-primary);

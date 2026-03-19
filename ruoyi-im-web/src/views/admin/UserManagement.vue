@@ -8,22 +8,48 @@
             <p>筛选、启停用与批量治理</p>
           </div>
           <el-space>
-            <el-button @click="handleReset">重置</el-button>
-            <el-button type="primary" @click="loadUsers">刷新</el-button>
+            <el-button @click="handleReset">
+              重置
+            </el-button>
+            <el-button type="primary" @click="loadUsers">
+              刷新
+            </el-button>
           </el-space>
         </div>
       </template>
 
       <el-row :gutter="12" class="toolbar-row">
-        <el-col :xs="24" :sm="10" :md="8" :lg="6">
-          <el-input v-model="searchKeyword" placeholder="搜索用户名/昵称/手机号" clearable @keyup.enter="handleSearch" @clear="handleSearch">
+        <el-col
+          :xs="24"
+          :sm="10"
+          :md="8"
+          :lg="6"
+        >
+          <el-input
+            v-model="searchKeyword"
+            placeholder="搜索用户名/昵称/手机号"
+            clearable
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
+          >
             <template #append>
               <el-button :icon="Search" @click="handleSearch" />
             </template>
           </el-input>
         </el-col>
-        <el-col :xs="24" :sm="8" :md="6" :lg="4">
-          <el-select v-model="searchRole" placeholder="选择角色" clearable style="width: 100%" @change="handleSearch">
+        <el-col
+          :xs="24"
+          :sm="8"
+          :md="6"
+          :lg="4"
+        >
+          <el-select
+            v-model="searchRole"
+            placeholder="选择角色"
+            clearable
+            style="width: 100%"
+            @change="handleSearch"
+          >
             <el-option label="普通用户" value="USER" />
             <el-option label="管理员" value="ADMIN" />
             <el-option label="超级管理员" value="SUPER_ADMIN" />
@@ -34,14 +60,27 @@
       <div v-if="selectedUsers.length" class="batch-actions">
         <span>已选择 {{ selectedUsers.length }} 个用户</span>
         <el-space>
-          <el-button size="small" @click="handleBatchStatus(1)">批量启用</el-button>
-          <el-button size="small" type="warning" @click="handleBatchStatus(0)">批量禁用</el-button>
-          <el-button size="small" type="danger" @click="handleBatchDelete">批量删除</el-button>
-          <el-button v-if="failedItems.length" size="small" @click="failedDialogVisible = true">查看失败项</el-button>
+          <el-button size="small" @click="handleBatchStatus(1)">
+            批量启用
+          </el-button>
+          <el-button size="small" type="warning" @click="handleBatchStatus(0)">
+            批量禁用
+          </el-button>
+          <el-button size="small" type="danger" @click="handleBatchDelete">
+            批量删除
+          </el-button>
+          <el-button v-if="failedItems.length" size="small" @click="failedDialogVisible = true">
+            查看失败项
+          </el-button>
         </el-space>
       </div>
 
-      <el-table :data="userList" v-loading="loading" border @selection-change="onSelectionChange">
+      <el-table
+        v-loading="loading"
+        :data="userList"
+        border
+        @selection-change="onSelectionChange"
+      >
         <el-table-column type="selection" width="48" />
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" min-width="120" />
@@ -49,36 +88,52 @@
         <el-table-column prop="mobile" label="手机号" min-width="130" />
         <el-table-column prop="role" label="角色" width="120">
           <template #default="{ row }">
-            <el-tag v-if="row.role === 'SUPER_ADMIN'" type="danger">超级管理员</el-tag>
-            <el-tag v-else-if="row.role === 'ADMIN'" type="warning">管理员</el-tag>
-            <el-tag v-else type="info">普通用户</el-tag>
+            <el-tag v-if="row.role === 'SUPER_ADMIN'" type="danger">
+              超级管理员
+            </el-tag>
+            <el-tag v-else-if="row.role === 'ADMIN'" type="warning">
+              管理员
+            </el-tag>
+            <el-tag v-else type="info">
+              普通用户
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</el-tag>
+            <el-tag :type="row.status === 1 ? 'success' : 'danger'">
+              {{ row.status === 1 ? '启用' : '禁用' }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="180" />
         <el-table-column label="操作" fixed="right" width="280">
           <template #default="{ row }">
-            <el-button size="small" @click="handleViewDetail(row)">详情</el-button>
-            <el-button v-if="isSuperAdmin" size="small" @click="handleToggleRole(row)">角色</el-button>
-            <el-button size="small" @click="handleToggleStatus(row)">{{ row.status === 1 ? '禁用' : '启用' }}</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button size="small" @click="handleViewDetail(row)">
+              详情
+            </el-button>
+            <el-button v-if="isSuperAdmin" size="small" @click="handleToggleRole(row)">
+              角色
+            </el-button>
+            <el-button size="small" @click="handleToggleStatus(row)">
+              {{ row.status === 1 ? '禁用' : '启用' }}
+            </el-button>
+            <el-button size="small" type="danger" @click="handleDelete(row)">
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pager-wrap">
         <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
           :current-page="pageNum"
           :page-sizes="[10, 20, 50, 100]"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
@@ -93,11 +148,15 @@
     <!-- 角色变更对话框（仅 SUPER_ADMIN 可用） -->
     <el-dialog v-model="roleDialogVisible" title="修改用户角色" width="420px">
       <el-alert type="warning" :closable="false" style="margin-bottom: 16px">
-        <template #title>仅超级管理员可修改用户角色</template>
+        <template #title>
+          仅超级管理员可修改用户角色
+        </template>
       </el-alert>
       <el-form :model="roleForm" label-width="80px">
         <el-form-item label="当前角色">
-          <el-tag :type="getRoleTagType(currentRoleData.role)">{{ getRoleLabel(currentRoleData.role) }}</el-tag>
+          <el-tag :type="getRoleTagType(currentRoleData.role)">
+            {{ getRoleLabel(currentRoleData.role) }}
+          </el-tag>
         </el-form-item>
         <el-form-item label="目标角色">
           <el-select v-model="roleForm.targetRole" placeholder="请选择角色" style="width: 100%">
@@ -108,8 +167,12 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="roleDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="roleChanging" @click="confirmRoleChange">确定</el-button>
+        <el-button @click="roleDialogVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" :loading="roleChanging" @click="confirmRoleChange">
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -118,13 +181,25 @@
       <template #default>
         <div v-if="currentDetail" class="detail-content">
           <el-descriptions title="基本信息" :column="1" border>
-            <el-descriptions-item label="用户 ID">{{ currentDetail.id }}</el-descriptions-item>
-            <el-descriptions-item label="用户名">{{ currentDetail.username }}</el-descriptions-item>
-            <el-descriptions-item label="昵称">{{ currentDetail.nickname || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="手机号">{{ currentDetail.mobile || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="邮箱">{{ currentDetail.email || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="用户 ID">
+              {{ currentDetail.id }}
+            </el-descriptions-item>
+            <el-descriptions-item label="用户名">
+              {{ currentDetail.username }}
+            </el-descriptions-item>
+            <el-descriptions-item label="昵称">
+              {{ currentDetail.nickname || '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="手机号">
+              {{ currentDetail.mobile || '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="邮箱">
+              {{ currentDetail.email || '-' }}
+            </el-descriptions-item>
             <el-descriptions-item label="角色">
-              <el-tag :type="getRoleTagType(currentDetail.role)">{{ getRoleLabel(currentDetail.role) }}</el-tag>
+              <el-tag :type="getRoleTagType(currentDetail.role)">
+                {{ getRoleLabel(currentDetail.role) }}
+              </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag :type="currentDetail.status === 1 ? 'success' : 'danger'">
@@ -133,7 +208,12 @@
             </el-descriptions-item>
           </el-descriptions>
 
-          <el-descriptions title="扩展信息" :column="1" border style="margin-top: 16px">
+          <el-descriptions
+            title="扩展信息"
+            :column="1"
+            border
+            style="margin-top: 16px"
+          >
             <el-descriptions-item label="头像">
               <el-avatar v-if="currentDetail.avatar" :size="64" :src="currentDetail.avatar" />
               <span v-else class="text-secondary">未设置</span>
@@ -141,22 +221,52 @@
             <el-descriptions-item label="性别">
               {{ getGenderLabel(currentDetail.gender) }}
             </el-descriptions-item>
-            <el-descriptions-item label="生日">{{ currentDetail.birthday || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="签名">{{ currentDetail.signature || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="生日">
+              {{ currentDetail.birthday || '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="签名">
+              {{ currentDetail.signature || '-' }}
+            </el-descriptions-item>
           </el-descriptions>
 
-          <el-descriptions title="最近活动" :column="1" border style="margin-top: 16px">
-            <el-descriptions-item label="会话数">{{ currentDetail.sessionCount ?? '-' }}</el-descriptions-item>
-            <el-descriptions-item label="好友数">{{ currentDetail.friendCount ?? '-' }}</el-descriptions-item>
-            <el-descriptions-item label="群组数">{{ currentDetail.groupCount ?? '-' }}</el-descriptions-item>
-            <el-descriptions-item label="消息数">{{ currentDetail.messageCount ?? '-' }}</el-descriptions-item>
+          <el-descriptions
+            title="最近活动"
+            :column="1"
+            border
+            style="margin-top: 16px"
+          >
+            <el-descriptions-item label="会话数">
+              {{ currentDetail.sessionCount ?? '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="好友数">
+              {{ currentDetail.friendCount ?? '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="群组数">
+              {{ currentDetail.groupCount ?? '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="消息数">
+              {{ currentDetail.messageCount ?? '-' }}
+            </el-descriptions-item>
           </el-descriptions>
 
-          <el-descriptions title="时间信息" :column="1" border style="margin-top: 16px">
-            <el-descriptions-item label="创建时间">{{ currentDetail.createTime }}</el-descriptions-item>
-            <el-descriptions-item label="更新时间">{{ currentDetail.updateTime }}</el-descriptions-item>
-            <el-descriptions-item label="最后登录时间">{{ currentDetail.lastLoginTime || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="登录IP">{{ currentDetail.lastLoginIp || '-' }}</el-descriptions-item>
+          <el-descriptions
+            title="时间信息"
+            :column="1"
+            border
+            style="margin-top: 16px"
+          >
+            <el-descriptions-item label="创建时间">
+              {{ currentDetail.createTime }}
+            </el-descriptions-item>
+            <el-descriptions-item label="更新时间">
+              {{ currentDetail.updateTime }}
+            </el-descriptions-item>
+            <el-descriptions-item label="最后登录时间">
+              {{ currentDetail.lastLoginTime || '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="登录IP">
+              {{ currentDetail.lastLoginIp || '-' }}
+            </el-descriptions-item>
           </el-descriptions>
         </div>
       </template>
@@ -170,8 +280,6 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { getUserList, getUserDetail, updateUserStatus, updateUserRole, deleteUser, batchDeleteUsers } from '@/api/admin'
 import tokenManager from '@/utils/tokenManager'
-
-const store = useStore()
 
 const loading = ref(false)
 const userList = ref([])

@@ -4,8 +4,10 @@
     <aside class="contacts-sidebar">
       <div class="sidebar-header">
         <div class="search-wrap">
-          <el-icon class="search-icon"><Search /></el-icon>
-          <input v-model="sidebarSearch" placeholder="搜索联系人/部门" class="inner-input" />
+          <el-icon class="search-icon">
+            <Search />
+          </el-icon>
+          <input v-model="sidebarSearch" placeholder="搜索联系人/部门" class="inner-input">
         </div>
       </div>
 
@@ -13,21 +15,29 @@
         <!-- 固定分类 -->
         <div class="nav-list">
           <div class="nav-item" :class="{ active: view === 'new' }" @click="switchView('new')">
-            <div class="icon-box orange"><el-icon><UserFilled /></el-icon></div>
+            <div class="icon-box orange">
+              <el-icon><UserFilled /></el-icon>
+            </div>
             <span>新的联系人</span>
           </div>
           <div class="nav-item" :class="{ active: view === 'groups' }" @click="switchView('groups')">
-            <div class="icon-box blue"><el-icon><Menu /></el-icon></div>
+            <div class="icon-box blue">
+              <el-icon><Menu /></el-icon>
+            </div>
             <span>我的群组</span>
           </div>
           <div class="nav-item" :class="{ active: view === 'friends' }" @click="switchView('friends')">
-            <div class="icon-box green"><el-icon><StarFilled /></el-icon></div>
+            <div class="icon-box green">
+              <el-icon><StarFilled /></el-icon>
+            </div>
             <span>我的好友</span>
           </div>
         </div>
 
-        <div class="tree-divider">组织架构</div>
-        
+        <div class="tree-divider">
+          组织架构
+        </div>
+
         <!-- 组织树组件 -->
         <div class="org-tree-wrap">
           <OrganizationTree @select="handleDeptSelect" />
@@ -41,9 +51,11 @@
       <header v-if="view === 'dept'" class="main-header">
         <div class="breadcrumb-container">
           <el-breadcrumb separator-icon="ArrowRight">
-            <el-breadcrumb-item @click="handleBreadcrumbClick(null)">公司通讯录</el-breadcrumb-item>
-            <el-breadcrumb-item 
-              v-for="(node, index) in breadcrumbs" 
+            <el-breadcrumb-item @click="handleBreadcrumbClick(null)">
+              公司通讯录
+            </el-breadcrumb-item>
+            <el-breadcrumb-item
+              v-for="node in breadcrumbs"
               :key="node.id"
               @click="handleBreadcrumbClick(node)"
             >
@@ -52,7 +64,14 @@
           </el-breadcrumb>
         </div>
         <div class="header-actions">
-          <el-button :icon="Plus" type="primary" plain size="small">邀请成员</el-button>
+          <el-button
+            :icon="Plus"
+            type="primary"
+            plain
+            size="small"
+          >
+            邀请成员
+          </el-button>
         </div>
       </header>
 
@@ -61,37 +80,51 @@
         <template v-if="view === 'dept'">
           <!-- 下级部门列表 (文件夹样式) -->
           <div v-if="subDepartments.length > 0" class="sub-dept-list">
-            <div 
-              v-for="dept in subDepartments" 
-              :key="dept.id" 
+            <div
+              v-for="dept in subDepartments"
+              :key="dept.id"
               class="dept-folder-card"
               @click="handleDeptSelect(dept)"
             >
-              <div class="folder-icon"><el-icon><FolderOpened /></el-icon></div>
+              <div class="folder-icon">
+                <el-icon><FolderOpened /></el-icon>
+              </div>
               <div class="folder-info">
                 <span class="folder-name">{{ dept.name }}</span>
                 <span class="folder-count">{{ dept.memberCount || 0 }}人</span>
               </div>
-              <el-icon class="arrow"><ArrowRight /></el-icon>
+              <el-icon class="arrow">
+                <ArrowRight />
+              </el-icon>
             </div>
           </div>
 
           <!-- 成员列表 (网格卡片样式) -->
-          <div class="section-divider" v-if="subDepartments.length > 0 && deptMembers.length > 0">
+          <div v-if="subDepartments.length > 0 && deptMembers.length > 0" class="section-divider">
             <span>直属成员</span>
           </div>
 
           <div v-if="deptMembers.length > 0" class="members-grid">
-            <div 
-              v-for="m in deptMembers" 
-              :key="m.id" 
+            <div
+              v-for="m in deptMembers"
+              :key="m.id"
               class="member-card-ding"
               @click="handleMemberClick(m)"
             >
-              <DingtalkAvatar :src="m.avatar" :name="m.name || m.userName" :user-id="m.id" :size="44" shape="square" />
+              <DingtalkAvatar
+                :src="m.avatar"
+                :name="m.name || m.userName"
+                :user-id="m.id"
+                :size="44"
+                shape="square"
+              />
               <div class="m-body">
-                <div class="m-name">{{ m.name || m.userName }}</div>
-                <div class="m-position">{{ m.position || '成员' }}</div>
+                <div class="m-name">
+                  {{ m.name || m.userName }}
+                </div>
+                <div class="m-position">
+                  {{ m.position || '成员' }}
+                </div>
               </div>
               <button class="chat-shortcut" @click.stop="handleChat(m)">
                 <el-icon><ChatDotRound /></el-icon>
@@ -106,17 +139,36 @@
         <NewFriendsView v-else-if="view === 'new'" />
         <GroupsView v-else-if="view === 'groups'" @select-group="handleGroupSelect" />
         <div v-else-if="view === 'friends'" class="friends-panel">
-           <div class="view-title">我的好友 ({{ friends.length }})</div>
-           <div class="members-grid">
-              <div v-for="f in friends" :key="f.id" class="member-card-ding" @click="handleMemberClick(f)">
-                <DingtalkAvatar :src="f.friendAvatar" :name="f.friendName" :user-id="f.friendId" :size="44" shape="square" />
-                <div class="m-body">
-                  <div class="m-name">{{ f.friendName }}</div>
-                  <div class="m-position">在线好友</div>
+          <div class="view-title">
+            我的好友 ({{ friends.length }})
+          </div>
+          <div class="members-grid">
+            <div
+              v-for="f in friends"
+              :key="f.id"
+              class="member-card-ding"
+              @click="handleMemberClick(f)"
+            >
+              <DingtalkAvatar
+                :src="f.friendAvatar"
+                :name="f.friendName"
+                :user-id="f.friendId"
+                :size="44"
+                shape="square"
+              />
+              <div class="m-body">
+                <div class="m-name">
+                  {{ f.friendName }}
                 </div>
-                <button class="chat-shortcut" @click.stop="handleChat(f)"><el-icon><ChatDotRound /></el-icon></button>
+                <div class="m-position">
+                  在线好友
+                </div>
               </div>
-           </div>
+              <button class="chat-shortcut" @click.stop="handleChat(f)">
+                <el-icon><ChatDotRound /></el-icon>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -127,11 +179,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { 
-  Search, Plus, UserFilled, Menu, StarFilled, 
-  FolderOpened, ArrowRight, ChatDotRound 
+import {
+  Search, Plus, UserFilled, Menu, StarFilled,
+  FolderOpened, ArrowRight, ChatDotRound
 } from '@element-plus/icons-vue'
 import { getDepartment, getDepartmentMembers } from '@/api/im/organization'
 import { getContacts } from '@/api/im/contact'
@@ -162,7 +214,7 @@ const handleDeptSelect = async (dept) => {
   view.value = 'dept'
   currentDeptId.value = dept.id
   selectedDept.value = dept
-  
+
   // 更新面包屑逻辑
   updateBreadcrumbs(dept)
 
@@ -245,7 +297,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
     border-radius: var(--dt-radius-md); cursor: pointer; transition: all var(--dt-transition-base);
     &:hover { background: var(--dt-bg-session-hover); }
     &.active { background: var(--dt-bg-session-active); color: var(--dt-brand-color); font-weight: 600; }
-    
+
     .icon-box {
       width: 32px; height: 32px; border-radius: 8px; @include flex-center; color: var(--dt-text-primary); font-size: 18px;
       &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); } &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); } &.green { background: var(--dt-success-bg); color: var(--dt-success-color); }
@@ -284,9 +336,9 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
   background: var(--dt-bg-body); padding: 12px 16px; border-radius: var(--dt-radius-md);
   display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;
   &:hover { background: var(--dt-bg-session-hover); transform: translateY(-1px); box-shadow: var(--dt-shadow-1); }
-  
+
   .folder-icon { font-size: 24px; color: var(--dt-brand-color); }
-  .folder-info { flex: 1; display: flex; flex-direction: column; 
+  .folder-info { flex: 1; display: flex; flex-direction: column;
     .folder-name { font-size: 14px; font-weight: 500; color: var(--dt-text-primary); }
     .folder-count { font-size: 12px; color: var(--dt-text-tertiary); }
   }
@@ -306,7 +358,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .member-card-ding {
   background: var(--dt-bg-card); padding: 16px; border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light);
   display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s;
-  &:hover { 
+  &:hover {
     box-shadow: var(--dt-shadow-card-hover); border-color: var(--dt-brand-light);
     .chat-shortcut { opacity: 1; transform: scale(1); }
   }

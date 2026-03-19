@@ -12,17 +12,35 @@
       <!-- 1. 视频流容器 (沉浸式全屏) -->
       <div v-if="type === 'video'" class="video-canvas">
         <div class="remote-track">
-          <video ref="remoteVideoRef" autoplay playsinline class="video-element"></video>
+          <video
+            ref="remoteVideoRef"
+            autoplay
+            playsinline
+            class="video-element"
+          />
           <!-- 未接通/对端关闭摄像头 占位 -->
           <div v-if="status !== 'talking' || remoteVideoOff" class="video-mask">
-            <DingtalkAvatar :src="peerAvatar" :name="peerName" :size="120" shape="circle" />
-            <p class="mask-status">{{ statusText }}</p>
+            <DingtalkAvatar
+              :src="peerAvatar"
+              :name="peerName"
+              :size="120"
+              shape="circle"
+            />
+            <p class="mask-status">
+              {{ statusText }}
+            </p>
           </div>
         </div>
-        
+
         <!-- 本地预览 (小窗) -->
-        <div class="local-track" v-show="!localVideoOff">
-          <video ref="localVideoRef" autoplay playsinline muted class="video-element mirror"></video>
+        <div v-show="!localVideoOff" class="local-track">
+          <video
+            ref="localVideoRef"
+            autoplay
+            playsinline
+            muted
+            class="video-element mirror"
+          />
         </div>
       </div>
 
@@ -38,9 +56,15 @@
             custom-class="main-avatar"
           />
         </div>
-        <h2 class="peer-name">{{ peerName }}</h2>
-        <p class="call-status-tag">{{ statusText }}</p>
-        <div v-if="status === 'talking'" class="call-timer">{{ formattedDuration }}</div>
+        <h2 class="peer-name">
+          {{ peerName }}
+        </h2>
+        <p class="call-status-tag">
+          {{ statusText }}
+        </p>
+        <div v-if="status === 'talking'" class="call-timer">
+          {{ formattedDuration }}
+        </div>
       </div>
 
       <!-- 3. 控制控制台 (底栏) -->
@@ -48,11 +72,15 @@
         <!-- 呼入状态 -->
         <div v-if="status === 'incoming'" class="console-group">
           <button class="console-btn accept" @click="handleAccept">
-            <div class="icon-circle"><el-icon><PhoneFilled /></el-icon></div>
+            <div class="icon-circle">
+              <el-icon><PhoneFilled /></el-icon>
+            </div>
             <span>接听</span>
           </button>
           <button class="console-btn hangup" @click="handleReject">
-            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
+            <div class="icon-circle">
+              <el-icon><CloseBold /></el-icon>
+            </div>
             <span>拒绝</span>
           </button>
         </div>
@@ -60,7 +88,9 @@
         <!-- 呼出状态 -->
         <div v-else-if="status === 'calling'" class="console-group">
           <button class="console-btn hangup" @click="handleCancel">
-            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
+            <div class="icon-circle">
+              <el-icon><CloseBold /></el-icon>
+            </div>
             <span>取消</span>
           </button>
         </div>
@@ -68,17 +98,28 @@
         <!-- 通话中状态 -->
         <div v-else-if="status === 'talking'" class="console-group talking">
           <button class="console-btn" :class="{ active: isMuted }" @click="toggleMute">
-            <div class="icon-circle"><el-icon><Microphone v-if="!isMuted" /><Mute v-else /></el-icon></div>
+            <div class="icon-circle">
+              <el-icon><Microphone v-if="!isMuted" /><Mute v-else /></el-icon>
+            </div>
             <span>{{ isMuted ? '取消静音' : '静音' }}</span>
           </button>
-          
-          <button v-if="type === 'video'" class="console-btn" :class="{ active: localVideoOff }" @click="toggleVideo">
-            <div class="icon-circle"><el-icon><VideoCamera v-if="!localVideoOff" /><VideoCameraFilled v-else /></el-icon></div>
+
+          <button
+            v-if="type === 'video'"
+            class="console-btn"
+            :class="{ active: localVideoOff }"
+            @click="toggleVideo"
+          >
+            <div class="icon-circle">
+              <el-icon><VideoCamera v-if="!localVideoOff" /><VideoCameraFilled v-else /></el-icon>
+            </div>
             <span>摄像头</span>
           </button>
 
           <button class="console-btn hangup" @click="handleHangup">
-            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
+            <div class="icon-circle">
+              <el-icon><CloseBold /></el-icon>
+            </div>
             <span>挂断</span>
           </button>
         </div>
@@ -86,22 +127,25 @@
         <!-- 结束/超时 -->
         <div v-else class="console-group">
           <button class="console-btn" @click="close">
-            <div class="icon-circle gray"><el-icon><Close /></el-icon></div>
+            <div class="icon-circle gray">
+              <el-icon><Close /></el-icon>
+            </div>
             <span>关闭</span>
           </button>
         </div>
       </div>
     </div>
-    
-    <audio ref="remoteAudioRef" autoplay></audio>
+
+    <audio ref="remoteAudioRef" autoplay />
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted, nextTick } from 'vue'
-import { 
-  PhoneFilled, CloseBold, Microphone, VideoCamera, 
-  VideoCameraFilled, Close, Mute 
+import { ref, computed, onUnmounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import {
+  PhoneFilled, CloseBold, Microphone, VideoCamera,
+  VideoCameraFilled, Close, Mute
 } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { useWebRTC } from '@/composables/useWebRTC'
@@ -109,9 +153,9 @@ import { useImWebSocket } from '@/composables/useImWebSocket'
 import { acceptCall, rejectCall, endCall } from '@/api/im/videoCall'
 
 const props = defineProps({ session: Object })
-const emit = defineEmits(['accept', 'reject', 'cancel', 'hangup', 'closed'])
+defineEmits(['accept', 'reject', 'cancel', 'hangup', 'closed'])
 
-const { sendMessage, onCall } = useImWebSocket()
+const { sendMessage } = useImWebSocket()
 const visible = ref(false)
 const status = ref('calling')
 const type = ref('voice')
@@ -171,13 +215,13 @@ const open = async (callType, options = {}) => {
   type.value = callType; status.value = options.status || 'calling'; callId.value = options.callId || `call-${Date.now()}`
   peerId.value = options.peerId ?? props.session?.targetId; peerName.value = options.peerName || props.session?.name; peerAvatar.value = options.peerAvatar || props.session?.avatar
   visible.value = true; duration.value = 0
-  
+
   // 保存 pending offer（如果有）
   if (options.pendingOffer) {
     pendingOffer.value = options.pendingOffer
   }
-  
-  if (status.value === 'calling') { 
+
+  if (status.value === 'calling') {
     if (await getMediaStream(callType === 'video')) {
       await createOffer(callId.value, peerId.value, localStream)
       // 设置超时
@@ -186,7 +230,7 @@ const open = async (callType, options = {}) => {
       close()
     }
   }
-  
+
   if (status.value === 'talking') startTimer()
 }
 
@@ -200,7 +244,7 @@ const handleWebRTCSignal = async (action, data) => {
     case 'offer':
       // 收到对方 offer（已通过 handleCallEvent 处理）
       break
-      
+
     case 'answer':
       // 收到对方应答
       if (data.sdp) {
@@ -209,7 +253,7 @@ const handleWebRTCSignal = async (action, data) => {
         clearTimeout(timeoutTimer)
       }
       break
-      
+
     case 'candidate':
       // 收到 ICE 候选者
       if (data.candidate) {
@@ -298,10 +342,10 @@ const startTimer = () => { timer = setInterval(() => { duration.value++ }, 1000)
 const end = () => { clearInterval(timer); if (localStream) localStream.getTracks().forEach(t => t.stop()); closePeerConnection(); status.value = 'hanging_up'; setTimeout(() => { visible.value = false }, 1500) }
 const close = () => { visible.value = false }
 
-onUnmounted(() => { 
-  clearInterval(timer); 
+onUnmounted(() => {
+  clearInterval(timer)
   clearTimeout(timeoutTimer)
-  if (localStream) localStream.getTracks().forEach(t => t.stop()) 
+  if (localStream) localStream.getTracks().forEach(t => t.stop())
 })
 defineExpose({ open, end, handleWebRTCSignal, callId })
 </script>
@@ -337,8 +381,8 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
 
 .video-canvas {
   position: absolute; inset: 0; background: #000; z-index: 1;
-  .remote-track { 
-    width: 100%; height: 100%; position: relative; 
+  .remote-track {
+    width: 100%; height: 100%; position: relative;
     .video-element { width: 100%; height: 100%; object-fit: cover; }
     .video-mask { position: absolute; inset: 0; @include flex-center; flex-direction: column; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); }
   }
@@ -365,7 +409,7 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
 
 .call-console {
   position: relative; z-index: 2; width: 100%; padding: 0 var(--dt-spacing-2xl);
-  .console-group { display: flex; justify-content: center; gap: 40px; 
+  .console-group { display: flex; justify-content: center; gap: 40px;
     &.talking { gap: 32px; }
   }
 }
@@ -378,7 +422,7 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
     &:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
   }
   span { font-size: 13px; color: rgba(255,255,255,0.8); }
-  
+
   &.accept .icon-circle { background: var(--dt-success-color); &:hover { background: var(--dt-brand-hover); } }
   &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: #ff7875; } .el-icon { transform: rotate(135deg); } }
   &.active .icon-circle { background: #fff; color: var(--dt-text-primary); }

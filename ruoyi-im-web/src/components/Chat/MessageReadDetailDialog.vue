@@ -12,18 +12,43 @@
         <el-tab-pane :label="`未读 (${unreadList.length})`" name="unread">
           <div class="user-list custom-scrollbar">
             <div v-for="u in unreadList" :key="u.userId" class="user-row">
-              <DingtalkAvatar :src="u.avatar" :name="u.nickname" :user-id="u.userId" :size="32" shape="square" />
+              <DingtalkAvatar
+                :src="u.avatar"
+                :name="u.nickname"
+                :user-id="u.userId"
+                :size="32"
+                shape="square"
+              />
               <span class="user-name">{{ u.nickname || u.username }}</span>
-              <el-button v-if="isAdmin" size="small" link type="primary" @click="handleDing(u)">DING一下</el-button>
+              <el-button
+                v-if="isAdmin"
+                size="small"
+                link
+                type="primary"
+                @click="handleDing(u)"
+              >
+                DING一下
+              </el-button>
             </div>
-            <ImEmpty v-if="unreadList.length === 0" title="全部已读" :full="false" description="看来大家都收到了消息" />
+            <ImEmpty
+              v-if="unreadList.length === 0"
+              title="全部已读"
+              :full="false"
+              description="看来大家都收到了消息"
+            />
           </div>
         </el-tab-pane>
-        
+
         <el-tab-pane :label="`已读 (${readList.length})`" name="read">
           <div class="user-list custom-scrollbar">
             <div v-for="u in readList" :key="u.userId" class="user-row">
-              <DingtalkAvatar :src="u.avatar" :name="u.nickname" :user-id="u.userId" :size="32" shape="square" />
+              <DingtalkAvatar
+                :src="u.avatar"
+                :name="u.nickname"
+                :user-id="u.userId"
+                :size="32"
+                shape="square"
+              />
               <div class="user-info-col">
                 <span class="user-name">{{ u.nickname || u.username }}</span>
                 <span class="read-time">{{ formatReadTime(u.readTime) }}</span>
@@ -102,7 +127,7 @@ watch(visible, (val) => {
 
 .read-detail-container {
   height: 480px; display: flex; flex-direction: column;
-  
+
   .read-tabs {
     :deep(.el-tabs__header) { margin: 0; padding: 0 20px; border-bottom: 1px solid var(--dt-border-light); }
     :deep(.el-tabs__nav-wrap::after) { display: none; }
@@ -121,7 +146,7 @@ watch(visible, (val) => {
   &:hover { background: var(--dt-bg-session-hover); }
 
   .user-name { font-size: 14px; color: var(--dt-text-primary); flex: 1; @include text-ellipsis; }
-  
+
   .user-info-col {
     flex: 1; display: flex; flex-direction: column; gap: 2px;
     .read-time { font-size: 11px; color: var(--dt-text-tertiary); }

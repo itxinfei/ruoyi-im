@@ -4,16 +4,18 @@
     <div class="panel-header">
       <div class="header-action-row">
         <div class="search-box-unified">
-          <el-icon class="search-icon"><Search /></el-icon>
+          <el-icon class="search-icon">
+            <Search />
+          </el-icon>
           <input
             v-model="searchKeyword"
             class="search-input"
             placeholder="搜索"
             type="text"
             @focus="showGlobalSearch = true"
-          />
+          >
         </div>
-        <button class="icon-add-btn" @click="handleCreateGroup" title="发起群聊">
+        <button class="icon-add-btn" title="发起群聊" @click="handleCreateGroup">
           <el-icon><Plus /></el-icon>
         </button>
       </div>
@@ -44,14 +46,14 @@
         @contextmenu.prevent="handleContextMenu($event, session)"
       >
         <div class="item-avatar-wrapper">
-          <DingtalkAvatar 
-            :src="session.avatar" 
-            :name="session.name" 
-            :user-id="session.targetId" 
+          <DingtalkAvatar
+            :src="session.avatar"
+            :name="session.name"
+            :user-id="session.targetId"
             :is-group="session.type === 'GROUP'"
             :members="session.members || []"
-            :size="40" 
-            shape="square" 
+            :size="40"
+            shape="square"
           />
           <span v-if="session.unreadCount > 0" class="unread-count-badge">
             {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
@@ -60,7 +62,9 @@
 
         <div class="item-content">
           <div class="content-top">
-            <h3 class="session-name">{{ session.name }}</h3>
+            <h3 class="session-name">
+              {{ session.name }}
+            </h3>
             <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
           </div>
           <div class="content-bottom">
@@ -70,18 +74,24 @@
               <span class="preview-msg">{{ session.lastMessage || '暂无消息' }}</span>
             </div>
             <div class="status-icons">
-              <el-icon v-if="session.isMuted" class="mute-icon"><BellFilled /></el-icon>
+              <el-icon v-if="session.isMuted" class="mute-icon">
+                <BellFilled />
+              </el-icon>
             </div>
           </div>
         </div>
-        <div v-if="session.isPinned" class="pin-tag"></div>
+        <div v-if="session.isPinned" class="pin-tag" />
       </div>
 
       <!-- 空状态 -->
       <div v-if="!loading && sortedSessions.length === 0" class="empty-state">
         <span class="material-icons-outlined empty-icon">chat_bubble_outline</span>
-        <p class="empty-text">暂无会话</p>
-        <p class="empty-hint">开始对话或创建群聊吧</p>
+        <p class="empty-text">
+          暂无会话
+        </p>
+        <p class="empty-hint">
+          开始对话或创建群聊吧
+        </p>
       </div>
     </div>
 
@@ -98,10 +108,10 @@
     <teleport to="body">
       <div
         v-if="contextMenu.show"
+        v-click-outside="closeContextMenu"
         class="context-menu-layer"
         :style="contextMenuStyle"
         @click.stop
-        v-click-outside="closeContextMenu"
         @keydown.esc="closeContextMenu"
       >
         <div class="menu-item" @click="doAction('mark-read')">
@@ -112,7 +122,7 @@
           <el-icon><Top /></el-icon>
           <span>{{ contextMenu.session?.isPinned ? '取消置顶' : '置顶会话' }}</span>
         </div>
-        <div class="menu-divider"></div>
+        <div class="menu-divider" />
         <div class="menu-item danger" @click="doAction('delete')">
           <el-icon><Delete /></el-icon>
           <span>删除会话</span>
@@ -123,17 +133,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useStore } from 'vuex'
-import { ElMessage, ElDialog } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, BellFilled, Check, Top, Delete } from '@element-plus/icons-vue'
 import { ClickOutside as vClickOutside } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import CreateGroupDialog from '@/components/Chat/CreateGroupDialog.vue'
 
-const props = defineProps({ currentSession: Object })
-const emit = defineEmits(['select-session', 'show-user'])
+defineProps({ currentSession: Object })
+defineEmits(['select-session', 'show-user'])
 const store = useStore()
 
 const loading = ref(false)
@@ -237,7 +247,7 @@ const handleEscKey = (e) => {
   }
 }
 
-const handleFilterChange = (key) => { 
+const handleFilterChange = (key) => {
   activeFilter.value = key
   // 始终保持 allSessions 为完整的会话列表用于计数
   if (key === 'all') {
@@ -290,18 +300,18 @@ const handleSearchSelect = (result) => {
   }
 }
 
-const doAction = (cmd) => { 
+const doAction = (cmd) => {
   contextMenu.show = false
   if (!contextMenu.session) return
-  
-  switch(cmd) {
+
+  switch (cmd) {
     case 'mark-read':
       store.dispatch('im/session/markSessionAsRead', contextMenu.session.id)
       break
     case 'toggle-pin':
-      store.dispatch('im/session/pinSession', { 
-        sessionId: contextMenu.session.id, 
-        pinned: !contextMenu.session.isPinned 
+      store.dispatch('im/session/pinSession', {
+        sessionId: contextMenu.session.id,
+        pinned: !contextMenu.session.isPinned
       })
       break
     case 'delete':
@@ -438,10 +448,10 @@ onMounted(async () => {
     transition: all var(--dt-transition-fast);
 
     &:hover { background: var(--dt-bg-session-hover); }
-    &.active { 
-      background: var(--dt-brand-lighter); 
-      color: var(--dt-brand-color); 
-      font-weight: var(--dt-font-weight-medium); 
+    &.active {
+      background: var(--dt-brand-lighter);
+      color: var(--dt-brand-color);
+      font-weight: var(--dt-font-weight-medium);
     }
 
     .tab-badge {

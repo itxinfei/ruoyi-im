@@ -18,9 +18,15 @@
 
       <el-form-item label="摘要类型">
         <el-radio-group v-model="form.summaryType">
-          <el-radio label="brief">简要摘要</el-radio>
-          <el-radio label="normal">标准摘要</el-radio>
-          <el-radio label="detailed">详细摘要</el-radio>
+          <el-radio label="brief">
+            简要摘要
+          </el-radio>
+          <el-radio label="normal">
+            标准摘要
+          </el-radio>
+          <el-radio label="detailed">
+            详细摘要
+          </el-radio>
         </el-radio-group>
       </el-form-item>
 
@@ -36,11 +42,13 @@
     <div v-if="summaryResult" class="summary-result">
       <el-divider>摘要结果</el-divider>
       <div class="summary-content">
-        <p class="summary-text">{{ summaryResult.summary }}</p>
+        <p class="summary-text">
+          {{ summaryResult.summary }}
+        </p>
         <div v-if="summaryResult.keyPoints && summaryResult.keyPoints.length" class="key-points">
           <h4>关键要点：</h4>
           <ul>
-            <li v-for="(point, index) in summaryResult.keyPoints" :key="index">
+            <li v-for="(point, index) in summaryResult.keyPoints" :key="`point-${index}`">
               {{ point }}
             </li>
           </ul>
@@ -54,7 +62,9 @@
     </div>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
+      <el-button @click="handleClose">
+        取消
+      </el-button>
       <el-button
         type="primary"
         :loading="loading"

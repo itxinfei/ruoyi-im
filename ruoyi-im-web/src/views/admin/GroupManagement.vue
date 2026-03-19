@@ -8,15 +8,30 @@
             <p>统一处理群组治理、成员维护与批量操作</p>
           </div>
           <el-space>
-            <el-button @click="handleReset">重置</el-button>
-            <el-button type="primary" @click="loadGroups">刷新</el-button>
+            <el-button @click="handleReset">
+              重置
+            </el-button>
+            <el-button type="primary" @click="loadGroups">
+              刷新
+            </el-button>
           </el-space>
         </div>
       </template>
 
       <el-row :gutter="12" class="toolbar-row">
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-input v-model="searchKeyword" placeholder="搜索群名称" clearable @keyup.enter="handleSearch" @clear="handleSearch">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-input
+            v-model="searchKeyword"
+            placeholder="搜索群名称"
+            clearable
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
+          >
             <template #append>
               <el-button :icon="Search" @click="handleSearch" />
             </template>
@@ -27,14 +42,18 @@
       <div v-if="selectedGroups.length" class="batch-actions">
         <span>已选择 {{ selectedGroups.length }} 个群组</span>
         <el-space>
-          <el-button size="small" type="danger" @click="handleBatchDelete">批量解散</el-button>
-          <el-button v-if="failedItems.length" size="small" @click="failedDialogVisible = true">查看失败项</el-button>
+          <el-button size="small" type="danger" @click="handleBatchDelete">
+            批量解散
+          </el-button>
+          <el-button v-if="failedItems.length" size="small" @click="failedDialogVisible = true">
+            查看失败项
+          </el-button>
         </el-space>
       </div>
 
       <el-table
-        :data="groupList"
         v-loading="loading"
+        :data="groupList"
         border
         @selection-change="handleSelectionChange"
       >
@@ -42,58 +61,96 @@
         <el-table-column prop="id" label="群组ID" width="90" />
         <el-table-column label="群头像" width="86">
           <template #default="{ row }">
-            <el-avatar :src="row.avatar" :size="42">{{ row.name?.charAt(0) }}</el-avatar>
+            <el-avatar :src="row.avatar" :size="42">
+              {{ row.name?.charAt(0) }}
+            </el-avatar>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="群名称" min-width="180" />
         <el-table-column prop="ownerName" label="群主" min-width="110" />
         <el-table-column prop="memberCount" label="成员数" width="100">
-          <template #default="{ row }"><el-tag type="info">{{ row.memberCount || 0 }}</el-tag></template>
+          <template #default="{ row }">
+            <el-tag type="info">
+              {{ row.memberCount || 0 }}
+            </el-tag>
+          </template>
         </el-table-column>
         <el-table-column prop="maxMembers" label="成员上限" width="100" />
-        <el-table-column prop="description" label="群描述" min-width="220" show-overflow-tooltip />
+        <el-table-column
+          prop="description"
+          label="群描述"
+          min-width="220"
+          show-overflow-tooltip
+        />
         <el-table-column prop="createTime" label="创建时间" width="180" />
         <el-table-column label="操作" fixed="right" width="230">
           <template #default="{ row }">
-            <el-button size="small" @click="handleViewMembers(row)">成员</el-button>
-            <el-button size="small" type="primary" @click="handleEdit(row)">编辑</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(row)">解散</el-button>
+            <el-button size="small" @click="handleViewMembers(row)">
+              成员
+            </el-button>
+            <el-button size="small" type="primary" @click="handleEdit(row)">
+              编辑
+            </el-button>
+            <el-button size="small" type="danger" @click="handleDelete(row)">
+              解散
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pager-wrap">
         <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
           :current-page="pageNum"
           :page-sizes="[10, 20, 50, 100]"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
 
     <el-dialog v-model="memberDialogVisible" title="群组成员" width="640px">
-      <el-table :data="memberList" v-loading="memberLoading" border max-height="420">
+      <el-table
+        v-loading="memberLoading"
+        :data="memberList"
+        border
+        max-height="420"
+      >
         <el-table-column prop="userId" label="用户ID" width="90" />
         <el-table-column label="头像" width="70">
           <template #default="{ row }">
-            <el-avatar :src="row.avatar" :size="38">{{ row.nickname?.charAt(0) }}</el-avatar>
+            <el-avatar :src="row.avatar" :size="38">
+              {{ row.nickname?.charAt(0) }}
+            </el-avatar>
           </template>
         </el-table-column>
         <el-table-column prop="nickname" label="昵称" min-width="130" />
         <el-table-column prop="roleDisplay" label="角色" width="110">
           <template #default="{ row }">
-            <el-tag v-if="row.role === 'OWNER'" type="danger">群主</el-tag>
-            <el-tag v-else-if="row.role === 'ADMIN'" type="warning">管理员</el-tag>
-            <el-tag v-else type="info">成员</el-tag>
+            <el-tag v-if="row.role === 'OWNER'" type="danger">
+              群主
+            </el-tag>
+            <el-tag v-else-if="row.role === 'ADMIN'" type="warning">
+              管理员
+            </el-tag>
+            <el-tag v-else type="info">
+              成员
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="100">
           <template #default="{ row }">
-            <el-button v-if="row.role !== 'OWNER'" size="small" type="danger" link @click="handleRemoveMember(row)">移除</el-button>
+            <el-button
+              v-if="row.role !== 'OWNER'"
+              size="small"
+              type="danger"
+              link
+              @click="handleRemoveMember(row)"
+            >
+              移除
+            </el-button>
             <span v-else class="muted">群主</span>
           </template>
         </el-table-column>
@@ -116,8 +173,12 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveEdit">保存</el-button>
+        <el-button @click="editDialogVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="handleSaveEdit">
+          保存
+        </el-button>
       </template>
     </el-dialog>
 

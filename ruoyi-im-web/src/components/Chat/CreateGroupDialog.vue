@@ -73,8 +73,12 @@
                 shape="circle"
               />
               <div class="member-info">
-                <div class="name">{{ member.nickname || member.username }}</div>
-                <div class="department">{{ member.department || '' }}</div>
+                <div class="name">
+                  {{ member.nickname || member.username }}
+                </div>
+                <div class="department">
+                  {{ member.department || '' }}
+                </div>
               </div>
             </div>
             <el-empty v-if="!loading && filteredMembers.length === 0" description="未找到联系人" />
@@ -98,8 +102,15 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" :loading="submitting" :disabled="!canSubmit" @click="handleSubmit">
+        <el-button @click="handleClose">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          :disabled="!canSubmit"
+          @click="handleSubmit"
+        >
           确定
         </el-button>
       </div>
@@ -117,6 +128,13 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const emit = defineEmits(['update:modelValue', 'created'])
 
+defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  }
+})
+
 const visible = ref(false)
 const loading = ref(false)
 const submitting = ref(false)
@@ -132,7 +150,7 @@ const groupForm = ref({
 const filteredMembers = computed(() => {
   const keyword = searchKeyword.value.toLowerCase()
   if (!keyword) return members.value
-  return members.value.filter(m => 
+  return members.value.filter(m =>
     (m.nickname && m.nickname.toLowerCase().includes(keyword)) ||
     (m.username && m.username.toLowerCase().includes(keyword)) ||
     (m.department && m.department.toLowerCase().includes(keyword))
@@ -220,18 +238,6 @@ const open = () => {
   visible.value = true
   loadContacts()
 }
-
-// 监听外部 modelValue 变化
-watch(() => props.modelValue, (newVal) => {
-  visible.value = newVal
-})
-
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  }
-})
 
 watch(visible, (newVal) => {
   emit('update:modelValue', newVal)

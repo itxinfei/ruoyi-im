@@ -9,8 +9,12 @@
     <div class="edit-history-container">
       <!-- 消息预览 -->
       <div class="message-preview">
-        <div class="preview-label">当前内容</div>
-        <div class="preview-content">{{ currentContent }}</div>
+        <div class="preview-label">
+          当前内容
+        </div>
+        <div class="preview-content">
+          {{ currentContent }}
+        </div>
         <div class="preview-meta">
           <span>编辑次数：{{ editCount }} 次</span>
         </div>
@@ -31,24 +35,36 @@
             :class="{ 'first': index === 0 }"
           >
             <div class="history-info">
-              <img :src="item.editorAvatar || '/default-avatar.png'" class="editor-avatar" @error="handleAvatarError" />
+              <img :src="item.editorAvatar || '/default-avatar.png'" class="editor-avatar" @error="handleAvatarError">
               <div class="editor-detail">
-                <div class="editor-name">{{ item.editorName }}</div>
-                <div class="edit-time">{{ formatEditTime(item.editTime) }}</div>
+                <div class="editor-name">
+                  {{ item.editorName }}
+                </div>
+                <div class="edit-time">
+                  {{ formatEditTime(item.editTime) }}
+                </div>
               </div>
             </div>
 
             <div class="content-compare">
               <div class="content-before">
-                <div class="content-label">编辑前</div>
-                <div class="content-text">{{ item.oldContent }}</div>
+                <div class="content-label">
+                  编辑前
+                </div>
+                <div class="content-text">
+                  {{ item.oldContent }}
+                </div>
               </div>
               <div class="content-arrow">
                 <span class="material-icons-outlined">arrow_downward</span>
               </div>
               <div class="content-after">
-                <div class="content-label">编辑后</div>
-                <div class="content-text">{{ item.newContent }}</div>
+                <div class="content-label">
+                  编辑后
+                </div>
+                <div class="content-text">
+                  {{ item.newContent }}
+                </div>
               </div>
             </div>
           </div>
@@ -59,7 +75,9 @@
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">关闭</el-button>
+      <el-button @click="visible = false">
+        关闭
+      </el-button>
     </template>
   </el-dialog>
 </template>

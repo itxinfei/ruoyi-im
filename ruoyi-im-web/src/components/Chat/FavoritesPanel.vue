@@ -26,7 +26,7 @@
     </div>
 
     <!-- 收藏列表 -->
-    <div class="favorites-list scrollbar-thin" v-loading="loading">
+    <div v-loading="loading" class="favorites-list scrollbar-thin">
       <el-empty v-if="filteredFavorites.length === 0 && !loading" description="暂无收藏" />
 
       <div
@@ -48,10 +48,18 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="editRemark">编辑备注</el-dropdown-item>
-                    <el-dropdown-item command="editTags">编辑标签</el-dropdown-item>
-                    <el-dropdown-item command="jump">跳转到消息</el-dropdown-item>
-                    <el-dropdown-item command="remove" divided>取消收藏</el-dropdown-item>
+                    <el-dropdown-item command="editRemark">
+                      编辑备注
+                    </el-dropdown-item>
+                    <el-dropdown-item command="editTags">
+                      编辑标签
+                    </el-dropdown-item>
+                    <el-dropdown-item command="jump">
+                      跳转到消息
+                    </el-dropdown-item>
+                    <el-dropdown-item command="remove" divided>
+                      取消收藏
+                    </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -70,7 +78,12 @@
           </div>
 
           <div v-if="item.remark || item.tags" class="favorite-remark-tags">
-            <el-tag v-if="item.remark" size="small" type="info" class="remark-tag">
+            <el-tag
+              v-if="item.remark"
+              size="small"
+              type="info"
+              class="remark-tag"
+            >
               <el-icon><Star /></el-icon> {{ item.remark }}
             </el-tag>
             <el-tag
@@ -105,8 +118,12 @@
         show-word-limit
       />
       <template #footer>
-        <el-button @click="remarkDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmEditRemark">确定</el-button>
+        <el-button @click="remarkDialogVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="confirmEditRemark">
+          确定
+        </el-button>
       </template>
     </el-dialog>
 
@@ -133,15 +150,19 @@
         />
       </el-select>
       <template #footer>
-        <el-button @click="tagsDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmEditTags">确定</el-button>
+        <el-button @click="tagsDialogVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="confirmEditTags">
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, MoreFilled, Star, ChatLineSquare } from '@element-plus/icons-vue'
 import {
@@ -205,6 +226,14 @@ const handleSearch = () => {
     // 实时过滤，无需重新加载
   }, 300)
 }
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+})
 
 // 跳转到消息
 const handleJumpToMessage = (item) => {

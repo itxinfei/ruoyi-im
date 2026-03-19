@@ -4,26 +4,42 @@
     <el-row :gutter="16" class="kpi-row">
       <el-col :xs="24" :sm="12" :lg="6">
         <el-card class="kpi-card" shadow="never">
-          <div class="kpi-title">总操作数</div>
-          <div class="kpi-value">{{ stats.totalOperations || 0 }}</div>
+          <div class="kpi-title">
+            总操作数
+          </div>
+          <div class="kpi-value">
+            {{ stats.totalOperations || 0 }}
+          </div>
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <el-card class="kpi-card" shadow="never">
-          <div class="kpi-title">成功数</div>
-          <div class="kpi-value success">{{ stats.successOperations || 0 }}</div>
+          <div class="kpi-title">
+            成功数
+          </div>
+          <div class="kpi-value success">
+            {{ stats.successOperations || 0 }}
+          </div>
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <el-card class="kpi-card" shadow="never">
-          <div class="kpi-title">失败数</div>
-          <div class="kpi-value danger">{{ stats.failedOperations || 0 }}</div>
+          <div class="kpi-title">
+            失败数
+          </div>
+          <div class="kpi-value danger">
+            {{ stats.failedOperations || 0 }}
+          </div>
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <el-card class="kpi-card" shadow="never">
-          <div class="kpi-title">成功率</div>
-          <div class="kpi-value small">{{ successRate }}%</div>
+          <div class="kpi-title">
+            成功率
+          </div>
+          <div class="kpi-value small">
+            {{ successRate }}%
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -37,22 +53,37 @@
             <p>记录用户操作行为，支持追溯与审计</p>
           </div>
           <el-space>
-            <el-button @click="handleReset">重置</el-button>
-            <el-button type="primary" @click="loadLogs">刷新</el-button>
+            <el-button @click="handleReset">
+              重置
+            </el-button>
+            <el-button type="primary" @click="loadLogs">
+              刷新
+            </el-button>
           </el-space>
         </div>
       </template>
 
       <el-row :gutter="16" class="filter-row">
         <el-col :xs="24" :sm="12" :md="6">
-          <el-input v-model="filters.userId" placeholder="用户 ID" clearable @keyup.enter="loadLogs" @clear="loadLogs">
+          <el-input
+            v-model="filters.userId"
+            placeholder="用户 ID"
+            clearable
+            @keyup.enter="loadLogs"
+            @clear="loadLogs"
+          >
             <template #prefix>
               <el-icon><User /></el-icon>
             </template>
           </el-input>
         </el-col>
         <el-col :xs="24" :sm="12" :md="6">
-          <el-select v-model="filters.operationType" placeholder="操作类型" clearable @change="loadLogs">
+          <el-select
+            v-model="filters.operationType"
+            placeholder="操作类型"
+            clearable
+            @change="loadLogs"
+          >
             <el-option label="登录" value="LOGIN" />
             <el-option label="登出" value="LOGOUT" />
             <el-option label="发送消息" value="SEND_MESSAGE" />
@@ -65,7 +96,12 @@
           </el-select>
         </el-col>
         <el-col :xs="24" :sm="12" :md="6">
-          <el-select v-model="filters.operationResult" placeholder="操作结果" clearable @change="loadLogs">
+          <el-select
+            v-model="filters.operationResult"
+            placeholder="操作结果"
+            clearable
+            @change="loadLogs"
+          >
             <el-option label="成功" value="SUCCESS" />
             <el-option label="失败" value="FAILED" />
           </el-select>
@@ -87,10 +123,12 @@
 
     <!-- 日志表格 -->
     <el-card class="panel" shadow="never">
-      <el-table :data="logList" v-loading="loading" border>
+      <el-table v-loading="loading" :data="logList" border>
         <template #empty>
           <el-empty description="暂无审计日志">
-            <el-button type="primary" @click="handleReset">重置筛选</el-button>
+            <el-button type="primary" @click="handleReset">
+              重置筛选
+            </el-button>
           </el-empty>
         </template>
         <el-table-column prop="id" label="ID" width="80" />
@@ -101,12 +139,16 @@
         </el-table-column>
         <el-table-column prop="operationType" label="操作类型" width="140">
           <template #default="{ row }">
-            <el-tag size="small" :type="getOperationTypeTag(row.operationType)">{{ getOperationTypeLabel(row.operationType) }}</el-tag>
+            <el-tag size="small" :type="getOperationTypeTag(row.operationType)">
+              {{ getOperationTypeLabel(row.operationType) }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="targetType" label="目标类型" width="100">
           <template #default="{ row }">
-            <el-tag size="small" effect="plain">{{ getTargetTypeLabel(row.targetType) }}</el-tag>
+            <el-tag size="small" effect="plain">
+              {{ getTargetTypeLabel(row.targetType) }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="targetId" label="目标 ID" width="100" />
@@ -117,25 +159,32 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="errorMessage" label="错误信息" min-width="180" show-overflow-tooltip />
+        <el-table-column
+          prop="errorMessage"
+          label="错误信息"
+          min-width="180"
+          show-overflow-tooltip
+        />
         <el-table-column prop="ipAddress" label="IP 地址" width="140" />
         <el-table-column prop="createTime" label="操作时间" width="180" />
         <el-table-column label="操作" width="80" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleViewDetail(row)">详情</el-button>
+            <el-button size="small" @click="handleViewDetail(row)">
+              详情
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pager-wrap">
         <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
           :current-page="pageNum"
           :page-sizes="[10, 20, 50, 100]"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         />
       </div>
     </el-card>
@@ -143,25 +192,48 @@
     <!-- 日志详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="审计日志详情" width="600px">
       <el-descriptions v-if="currentLog" :column="1" border>
-        <el-descriptions-item label="日志 ID">{{ currentLog.id }}</el-descriptions-item>
-        <el-descriptions-item label="用户 ID">{{ currentLog.userId }}</el-descriptions-item>
-        <el-descriptions-item label="用户名称">{{ currentLog.userName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="操作类型">
-          <el-tag :type="getOperationTypeTag(currentLog.operationType)">{{ getOperationTypeLabel(currentLog.operationType) }}</el-tag>
+        <el-descriptions-item label="日志 ID">
+          {{ currentLog.id }}
         </el-descriptions-item>
-        <el-descriptions-item label="目标类型">{{ getTargetTypeLabel(currentLog.targetType) }}</el-descriptions-item>
-        <el-descriptions-item label="目标 ID">{{ currentLog.targetId }}</el-descriptions-item>
+        <el-descriptions-item label="用户 ID">
+          {{ currentLog.userId }}
+        </el-descriptions-item>
+        <el-descriptions-item label="用户名称">
+          {{ currentLog.userName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="操作类型">
+          <el-tag :type="getOperationTypeTag(currentLog.operationType)">
+            {{ getOperationTypeLabel(currentLog.operationType) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="目标类型">
+          {{ getTargetTypeLabel(currentLog.targetType) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="目标 ID">
+          {{ currentLog.targetId }}
+        </el-descriptions-item>
         <el-descriptions-item label="操作结果">
           <el-tag :type="currentLog.operationResult === 'SUCCESS' ? 'success' : 'danger'">
             {{ currentLog.operationResult === 'SUCCESS' ? '成功' : '失败' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="错误信息" v-if="currentLog.errorMessage">{{ currentLog.errorMessage }}</el-descriptions-item>
-        <el-descriptions-item label="IP 地址">{{ currentLog.ipAddress || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="User Agent" v-if="currentLog.userAgent">
-          <el-input type="textarea" :model-value="currentLog.userAgent" :rows="2" readonly />
+        <el-descriptions-item v-if="currentLog.errorMessage" label="错误信息">
+          {{ currentLog.errorMessage }}
         </el-descriptions-item>
-        <el-descriptions-item label="操作时间">{{ currentLog.createTime }}</el-descriptions-item>
+        <el-descriptions-item label="IP 地址">
+          {{ currentLog.ipAddress || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item v-if="currentLog.userAgent" label="User Agent">
+          <el-input
+            type="textarea"
+            :model-value="currentLog.userAgent"
+            :rows="2"
+            readonly
+          />
+        </el-descriptions-item>
+        <el-descriptions-item label="操作时间">
+          {{ currentLog.createTime }}
+        </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>

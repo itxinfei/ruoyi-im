@@ -1,18 +1,20 @@
 <template>
   <div class="global-search-container">
-    <div class="search-overlay" v-if="visible" @click="close"></div>
+    <div v-if="visible" class="search-overlay" @click="close" />
     <div v-show="visible" class="search-results-panel shadow-xl">
       <!-- 搜索历史 -->
       <div v-if="!keyword" class="search-initial">
         <div v-if="history.length > 0" class="search-section">
           <div class="section-header">
             <span>搜索历史</span>
-            <button @click="clearHistory" class="clear-btn">清空</button>
+            <button class="clear-btn" @click="clearHistory">
+              清空
+            </button>
           </div>
           <div class="history-list">
-            <div 
-              v-for="item in history" 
-              :key="item" 
+            <div
+              v-for="item in history"
+              :key="item"
               class="history-item"
               @click="handleSelect(item)"
             >
@@ -31,24 +33,30 @@
       <div v-else class="search-results scrollbar-thin">
         <!-- 联系人 -->
         <div v-if="filteredContacts.length > 0" class="search-section">
-          <div class="section-header">联系人</div>
-          <div 
-            v-for="user in filteredContacts" 
-            :key="user.id" 
+          <div class="section-header">
+            联系人
+          </div>
+          <div
+            v-for="user in filteredContacts"
+            :key="user.id"
             class="result-item"
             @click="handleUserClick(user)"
           >
-            <div class="avatar bg-blue-500">{{ user.nickname?.charAt(0) || user.username?.charAt(0) }}</div>
+            <div class="avatar bg-blue-500">
+              {{ user.nickname?.charAt(0) || user.username?.charAt(0) }}
+            </div>
             <span class="name">{{ user.nickname || user.username }}</span>
           </div>
         </div>
 
         <!-- 群组 -->
         <div v-if="filteredGroups.length > 0" class="search-section">
-          <div class="section-header">群组</div>
-          <div 
-            v-for="group in filteredGroups" 
-            :key="group.id" 
+          <div class="section-header">
+            群组
+          </div>
+          <div
+            v-for="group in filteredGroups"
+            :key="group.id"
             class="result-item"
             @click="handleGroupClick(group)"
           >
@@ -61,10 +69,12 @@
 
         <!-- 聊天记录 -->
         <div v-if="messageResults.length > 0" class="search-section">
-          <div class="section-header">聊天记录</div>
-          <div 
-            v-for="msg in messageResults" 
-            :key="msg.id" 
+          <div class="section-header">
+            聊天记录
+          </div>
+          <div
+            v-for="msg in messageResults"
+            :key="msg.id"
             class="message-item"
             @click="handleMessageClick(msg)"
           >
@@ -72,12 +82,14 @@
               <span class="msg-name">{{ msg.senderName }}</span>
               <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
             </div>
-            <div class="msg-content" v-html="highlight(msg.content)"></div>
+            <div class="msg-content" v-html="highlight(msg.content)" />
           </div>
         </div>
 
         <div v-if="loading" class="search-loading">
-          <el-icon class="is-loading"><Loading /></el-icon>
+          <el-icon class="is-loading">
+            <Loading />
+          </el-icon>
           <span>正在搜索...</span>
         </div>
 
@@ -90,8 +102,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { searchMessages } from '@/api/im/message'
 import { createConversation } from '@/api/im/conversation'
@@ -114,21 +127,21 @@ const groups = computed(() => store.state.im.contact?.groups || [])
 
 const filteredContacts = computed(() => {
   if (!props.keyword) return []
-  return contacts.value.filter(c => 
+  return contacts.value.filter(c =>
     (c.nickname || '').includes(props.keyword) || (c.username || '').includes(props.keyword)
   ).slice(0, 5)
 })
 
 const filteredGroups = computed(() => {
   if (!props.keyword) return []
-  return groups.value.filter(g => 
+  return groups.value.filter(g =>
     (g.name || '').includes(props.keyword)
   ).slice(0, 5)
 })
 
 const noResults = computed(() => {
-  return filteredContacts.value.length === 0 && 
-         filteredGroups.value.length === 0 && 
+  return filteredContacts.value.length === 0 &&
+         filteredGroups.value.length === 0 &&
          messageResults.value.length === 0
 })
 
@@ -176,6 +189,14 @@ watch(() => props.keyword, (val) => {
   }, 500)
 })
 
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (timer) {
+    clearTimeout(timer)
+    timer = null
+  }
+})
+
 const close = () => {
   emit('update:visible', false)
 }
@@ -213,12 +234,6 @@ const handleGroupClick = async (group) => {
 
 const handleMessageClick = (msg) => {
   saveToHistory(props.keyword)
-  // 获取对应会话并跳转
-  const session = {
-    id: msg.conversationId,
-    type: msg.sessionType || 'GROUP', // 这需要后端或API提供sessionType，此处先做假设或匹配
-    name: msg.sessionName || '搜索结果'
-  }
   emit('select', msg)
   ElMessage.success('正在定位消息...')
   close()
@@ -365,7 +380,7 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     margin-bottom: 4px;
-    
+
     .msg-name { font-size: var(--dt-font-size-xs); color: var(--dt-text-secondary); }
     .msg-time { font-size: 11px; color: var(--dt-text-tertiary); }
   }
@@ -374,7 +389,7 @@ onMounted(() => {
     font-size: var(--dt-font-size-sm);
     color: var(--dt-text-primary);
     .dark & { color: var(--dt-text-primary-dark); }
-    
+
     :deep(.highlight) {
       color: var(--dt-brand-color);
       font-weight: 600;

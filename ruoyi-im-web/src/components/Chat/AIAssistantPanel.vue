@@ -1,18 +1,22 @@
 <template>
   <div class="ai-assistant-panel">
     <!-- 聊天消息区域 -->
-    <div class="chat-messages" ref="messagesContainer">
+    <div ref="messagesContainer" class="chat-messages">
       <div
         v-for="(msg, index) in messages"
-        :key="index"
+        :key="msg.time || `msg-${index}`"
         :class="['message', msg.role]"
       >
         <div class="message-avatar">
           <el-avatar :size="32" :src="msg.role === 'user' ? userAvatar : aiAvatar" />
         </div>
         <div class="message-content">
-          <div class="message-text">{{ msg.content }}</div>
-          <div class="message-time">{{ msg.time }}</div>
+          <div class="message-text">
+            {{ msg.content }}
+          </div>
+          <div class="message-time">
+            {{ msg.time }}
+          </div>
         </div>
       </div>
       <div v-if="isTyping" class="message assistant typing">
@@ -21,9 +25,9 @@
         </div>
         <div class="message-content">
           <div class="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span />
+            <span />
+            <span />
           </div>
         </div>
       </div>
@@ -36,9 +40,9 @@
         type="textarea"
         :rows="2"
         placeholder="输入消息与AI助手对话..."
+        :disabled="isTyping"
         @keydown.enter.exact="sendMessage"
         @keydown.enter.shift.prevent
-        :disabled="isTyping"
       />
       <div class="input-actions">
         <div class="input-tips">

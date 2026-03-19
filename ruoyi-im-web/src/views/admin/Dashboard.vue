@@ -1,15 +1,25 @@
 <template>
   <div class="admin-page dashboard-page">
     <el-row :gutter="16" class="metrics-row">
-      <el-col :xs="24" :sm="12" :xl="6" v-for="item in metrics" :key="item.key">
+      <el-col
+        v-for="item in metrics"
+        :key="item.key"
+        :xs="24"
+        :sm="12"
+        :xl="6"
+      >
         <el-card class="metric-card" shadow="never">
           <div class="metric-inner">
             <div class="metric-icon" :class="item.iconClass">
               <el-icon><component :is="item.icon" /></el-icon>
             </div>
             <div class="metric-content">
-              <div class="metric-label">{{ item.label }}</div>
-              <div class="metric-value">{{ item.value }}</div>
+              <div class="metric-label">
+                {{ item.label }}
+              </div>
+              <div class="metric-value">
+                {{ item.value }}
+              </div>
             </div>
           </div>
         </el-card>
@@ -25,7 +35,9 @@
                 <h3>消息统计（近7天）</h3>
                 <p>按消息类型查看结构占比</p>
               </div>
-              <el-button type="primary" link @click="loadMessageStats">刷新</el-button>
+              <el-button type="primary" link @click="loadMessageStats">
+                刷新
+              </el-button>
             </div>
           </template>
 
@@ -36,10 +48,10 @@
                 <strong>{{ messageStats.totalMessages }}</strong>
               </div>
               <div class="bars">
-                <div class="bar-item" v-for="item in messageBars" :key="item.key">
+                <div v-for="item in messageBars" :key="item.key" class="bar-item">
                   <span class="bar-name">{{ item.label }}</span>
                   <div class="bar-track">
-                    <div class="bar-fill" :class="item.className" :style="{ width: item.percent + '%' }"></div>
+                    <div class="bar-fill" :class="item.className" :style="{ width: item.percent + '%' }" />
                   </div>
                   <span class="bar-value">{{ item.value }}</span>
                 </div>
@@ -58,7 +70,9 @@
                 <h3>角色分布</h3>
                 <p>超级管理员 / 管理员 / 普通用户</p>
               </div>
-              <el-button type="primary" link @click="loadUserStats">刷新</el-button>
+              <el-button type="primary" link @click="loadUserStats">
+                刷新
+              </el-button>
             </div>
           </template>
 
@@ -66,17 +80,17 @@
             <template v-if="userStats.total > 0">
               <div class="legend-list">
                 <div class="legend-item">
-                  <span class="dot super"></span>
+                  <span class="dot super" />
                   <span>超级管理员</span>
                   <strong>{{ userStats.superAdminCount || 0 }}</strong>
                 </div>
                 <div class="legend-item">
-                  <span class="dot admin"></span>
+                  <span class="dot admin" />
                   <span>管理员</span>
                   <strong>{{ userStats.adminCount || 0 }}</strong>
                 </div>
                 <div class="legend-item">
-                  <span class="dot user"></span>
+                  <span class="dot user" />
                   <span>普通用户</span>
                   <strong>{{ userStats.userCount || 0 }}</strong>
                 </div>

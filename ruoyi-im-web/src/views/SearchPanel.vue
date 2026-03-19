@@ -4,19 +4,19 @@
     <div class="search-header">
       <div class="search-input-wrapper">
         <span class="material-icons-outlined search-icon">search</span>
-        <input 
-          v-model="keyword" 
-          type="text" 
-          class="search-input" 
+        <input
+          v-model="keyword"
+          type="text"
+          class="search-input"
           placeholder="搜索消息、联系人、群组、文件..."
-          @keyup.enter="handleSearch"
           autofocus
-        />
+          @keyup.enter="handleSearch"
+        >
         <span v-if="keyword" class="material-icons-outlined clear-icon" @click="clearSearch">close</span>
       </div>
       <div class="search-type-tabs">
-        <div 
-          v-for="tab in searchTabs" 
+        <div
+          v-for="tab in searchTabs"
           :key="tab.value"
           class="type-tab"
           :class="{ active: searchType === tab.value }"
@@ -28,20 +28,24 @@
     </div>
 
     <!-- 搜索结果 -->
-    <div class="search-content" v-loading="loading">
+    <div v-loading="loading" class="search-content">
       <!-- 热门搜索 -->
       <div v-if="!keyword && !searched" class="hot-searches">
-        <div class="section-title">热门搜索</div>
+        <div class="section-title">
+          热门搜索
+        </div>
         <div class="hot-keyword-list">
-          <div 
-            v-for="(kw, index) in hotKeywords" 
-            :key="index"
+          <div
+            v-for="(kw, index) in hotKeywords"
+            :key="`hot-${index}`"
             class="hot-keyword"
             @click="searchWithKeyword(kw)"
           >
             {{ kw }}
           </div>
-          <div v-if="!hotKeywords.length" class="empty-tip">暂无热门搜索</div>
+          <div v-if="!hotKeywords.length" class="empty-tip">
+            暂无热门搜索
+          </div>
         </div>
       </div>
 
@@ -56,17 +60,23 @@
               <span class="count">({{ results.messages.length }})</span>
             </div>
             <div class="result-list">
-              <div 
-                v-for="msg in results.messages.slice(0, 5)" 
+              <div
+                v-for="msg in results.messages.slice(0, 5)"
                 :key="msg.id"
                 class="result-item"
                 @click="goToMessage(msg)"
               >
                 <DingtalkAvatar :src="msg.senderAvatar" :name="msg.senderName" :size="36" />
                 <div class="item-content">
-                  <div class="item-title">{{ msg.senderName }}</div>
-                  <div class="item-desc">{{ msg.content }}</div>
-                  <div class="item-time">{{ formatTime(msg.createTime) }}</div>
+                  <div class="item-title">
+                    {{ msg.senderName }}
+                  </div>
+                  <div class="item-desc">
+                    {{ msg.content }}
+                  </div>
+                  <div class="item-time">
+                    {{ formatTime(msg.createTime) }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -80,16 +90,20 @@
               <span class="count">({{ results.contacts.length }})</span>
             </div>
             <div class="result-list">
-              <div 
-                v-for="contact in results.contacts.slice(0, 5)" 
+              <div
+                v-for="contact in results.contacts.slice(0, 5)"
                 :key="contact.userId"
                 class="result-item"
                 @click="goToContact(contact)"
               >
                 <DingtalkAvatar :src="contact.avatar" :name="contact.nickname" :size="36" />
                 <div class="item-content">
-                  <div class="item-title">{{ contact.nickname }}</div>
-                  <div class="item-desc">{{ contact.department || '暂无部门' }}</div>
+                  <div class="item-title">
+                    {{ contact.nickname }}
+                  </div>
+                  <div class="item-desc">
+                    {{ contact.department || '暂无部门' }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -103,8 +117,8 @@
               <span class="count">({{ results.groups.length }})</span>
             </div>
             <div class="result-list">
-              <div 
-                v-for="group in results.groups.slice(0, 5)" 
+              <div
+                v-for="group in results.groups.slice(0, 5)"
                 :key="group.groupId"
                 class="result-item"
                 @click="goToGroup(group)"
@@ -113,8 +127,12 @@
                   <span class="material-icons-outlined">group</span>
                 </div>
                 <div class="item-content">
-                  <div class="item-title">{{ group.groupName }}</div>
-                  <div class="item-desc">{{ group.memberCount }}人</div>
+                  <div class="item-title">
+                    {{ group.groupName }}
+                  </div>
+                  <div class="item-desc">
+                    {{ group.memberCount }}人
+                  </div>
                 </div>
               </div>
             </div>
@@ -128,8 +146,8 @@
               <span class="count">({{ results.files.length }})</span>
             </div>
             <div class="result-list">
-              <div 
-                v-for="file in results.files.slice(0, 5)" 
+              <div
+                v-for="file in results.files.slice(0, 5)"
                 :key="file.id"
                 class="result-item"
                 @click="downloadFile(file)"
@@ -138,8 +156,12 @@
                   <span class="material-icons-outlined">description</span>
                 </div>
                 <div class="item-content">
-                  <div class="item-title">{{ file.fileName }}</div>
-                  <div class="item-desc">{{ formatFileSize(file.fileSize) }}</div>
+                  <div class="item-title">
+                    {{ file.fileName }}
+                  </div>
+                  <div class="item-desc">
+                    {{ formatFileSize(file.fileSize) }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -155,8 +177,8 @@
         <!-- 单类型搜索结果 -->
         <template v-else>
           <div v-if="currentResults.length" class="result-list">
-            <div 
-              v-for="item in currentResults" 
+            <div
+              v-for="item in currentResults"
               :key="item.id || item.userId || item.groupId"
               class="result-item"
               @click="handleItemClick(item)"
@@ -164,16 +186,26 @@
               <template v-if="searchType === 'message'">
                 <DingtalkAvatar :src="item.senderAvatar" :name="item.senderName" :size="36" />
                 <div class="item-content">
-                  <div class="item-title">{{ item.senderName }}</div>
-                  <div class="item-desc">{{ item.content }}</div>
-                  <div class="item-time">{{ formatTime(item.createTime) }}</div>
+                  <div class="item-title">
+                    {{ item.senderName }}
+                  </div>
+                  <div class="item-desc">
+                    {{ item.content }}
+                  </div>
+                  <div class="item-time">
+                    {{ formatTime(item.createTime) }}
+                  </div>
                 </div>
               </template>
               <template v-else-if="searchType === 'contact'">
                 <DingtalkAvatar :src="item.avatar" :name="item.nickname" :size="36" />
                 <div class="item-content">
-                  <div class="item-title">{{ item.nickname }}</div>
-                  <div class="item-desc">{{ item.department || '暂无部门' }}</div>
+                  <div class="item-title">
+                    {{ item.nickname }}
+                  </div>
+                  <div class="item-desc">
+                    {{ item.department || '暂无部门' }}
+                  </div>
                 </div>
               </template>
               <template v-else-if="searchType === 'group'">
@@ -181,8 +213,12 @@
                   <span class="material-icons-outlined">group</span>
                 </div>
                 <div class="item-content">
-                  <div class="item-title">{{ item.groupName }}</div>
-                  <div class="item-desc">{{ item.memberCount }}人</div>
+                  <div class="item-title">
+                    {{ item.groupName }}
+                  </div>
+                  <div class="item-desc">
+                    {{ item.memberCount }}人
+                  </div>
                 </div>
               </template>
               <template v-else-if="searchType === 'file'">
@@ -190,8 +226,12 @@
                   <span class="material-icons-outlined">description</span>
                 </div>
                 <div class="item-content">
-                  <div class="item-title">{{ item.fileName }}</div>
-                  <div class="item-desc">{{ formatFileSize(item.fileSize) }}</div>
+                  <div class="item-title">
+                    {{ item.fileName }}
+                  </div>
+                  <div class="item-desc">
+                    {{ formatFileSize(item.fileSize) }}
+                  </div>
                 </div>
               </template>
             </div>
@@ -208,7 +248,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { globalSearch, getHotKeywords, searchMessages, searchContacts, searchGroups, searchFiles, searchWorkbench } from '@/api/im/search'
+import { globalSearch, getHotKeywords } from '@/api/im/search'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
 
@@ -258,10 +298,10 @@ const loadHotKeywords = async () => {
 
 const handleSearch = async () => {
   if (!keyword.value.trim()) return
-  
+
   loading.value = true
   searched.value = true
-  
+
   try {
     const res = await globalSearch({
       keyword: keyword.value.trim(),
@@ -329,12 +369,12 @@ const formatTime = (time) => {
   const date = new Date(time)
   const now = new Date()
   const diff = now - date
-  
+
   if (diff < 60000) return '刚刚'
   if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
   if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
   if (diff < 604800000) return Math.floor(diff / 86400000) + '天前'
-  
+
   return date.toLocaleDateString()
 }
 

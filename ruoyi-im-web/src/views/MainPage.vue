@@ -35,7 +35,12 @@
             <MailPanel v-if="activeModule === 'mail'" />
             <AssistantPanel v-if="activeModule === 'assistant'" />
             <AdminLayout v-if="activeModule === 'admin'" />
-            <SearchPanel v-if="activeModule === 'search'" @show-user="handleShowUser" @go-to-session="handleGoToSession" @go-to-group="handleGoToGroup" />
+            <SearchPanel
+              v-if="activeModule === 'search'"
+              @show-user="handleShowUser"
+              @go-to-session="handleGoToSession"
+              @go-to-group="handleGoToGroup"
+            />
             <SettingsPanel v-if="activeModule === 'settings'" />
             <ProfilePanel v-if="activeModule === 'profile'" />
           </div>
@@ -55,7 +60,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { ElMessage } from 'element-plus'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import ImSideNavNew from '@/components/ImSideNavNew/index.vue'
 import SessionPanel from './SessionPanel.vue'
@@ -127,9 +131,9 @@ const handleCreateGroupFromChat = () => {
 const handleStartCall = (payload) => {
   if (payload?.user?.userId) {
     activeModule.value = 'chat'
-    store.dispatch('im/session/findSession', { 
-      targetId: payload.user.userId, 
-      type: 'PRIVATE' 
+    store.dispatch('im/session/findSession', {
+      targetId: payload.user.userId,
+      type: 'PRIVATE'
     }).then(session => {
       if (session) {
         store.commit('im/session/SET_CURRENT_SESSION', session)

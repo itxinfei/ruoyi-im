@@ -1,29 +1,39 @@
 <template>
-  <div
-    class="dingtalk-avatar"
-    :class="avatarClass"
-    :style="{ width: size + 'px', height: size + 'px', fontSize: fontSize + 'px', backgroundColor: isGroup ? 'var(--dt-bg-body)' : bgColor }"
-  >
+  <div class="dingtalk-avatar" :class="avatarClass" :style="{ width: size + 'px', height: size + 'px', fontSize: fontSize + 'px', backgroundColor: isGroup ? 'var(--dt-bg-body)' : bgColor }">
     <!-- 群组聚合头像 -->
     <div v-if="isGroup" class="group-avatar-grid" :class="'grid-' + displayMembers.length">
-      <div 
-        v-for="(m, index) in displayMembers" 
+      <div
+        v-for="(m, index) in displayMembers"
         :key="m.userId || index"
         class="grid-item"
         :style="{ backgroundColor: getMemberBgColor(m) }"
       >
-        <img v-if="m.avatar && !m.error" :src="addTokenToUrl(m.avatar)" @error="m.error = true" class="grid-img" />
+        <img
+          v-if="m.avatar && !m.error"
+          :src="addTokenToUrl(m.avatar)"
+          class="grid-img"
+          @error="m.error = true"
+        >
         <span v-else class="grid-text">{{ getMemberName(m) }}</span>
+      </div>
+      <!-- overflow 指示：显示未显示的额外成员数量 -->
+      <div v-if="overflowCount > 0" class="grid-item overflow-indicator">
+        +{{ overflowCount }}
       </div>
     </div>
 
     <!-- 普通单人头像 -->
     <template v-else>
-      <img v-if="imageUrl && !imageError" :src="imageUrl" @error="handleImageError" class="avatar-img" />
+      <img
+        v-if="imageUrl && !imageError"
+        :src="imageUrl"
+        class="avatar-img"
+        @error="handleImageError"
+      >
       <span v-else class="avatar-text">{{ displayName }}</span>
     </template>
   </div>
-</template>
+  </template>
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
@@ -55,16 +65,27 @@ const props = defineProps({
   members: {
     type: Array,
     default: () => []
+  },
+  // 最大可视成员数（聚合头像显示上限）
+  maxVisible: {
+    type: Number,
+    default: 9
   }
 })
 
 const imageError = ref(false)
 const imageUrl = computed(() => addTokenToUrl(props.src))
 
-// 处理聚合头像的成员显示 (最多9个)
+// 处理聚合头像的成员显示
 const displayMembers = computed(() => {
   if (!props.isGroup) return []
-  return props.members.slice(0, 9).map(m => reactive({ ...m, error: false }))
+  return props.members.slice(0, props.maxVisible).map(m => reactive({ ...m, error: false }))
+})
+
+// 溢出成员数量
+const overflowCount = computed(() => {
+  if (!props.isGroup || !props.members) return 0
+  return Math.max(0, props.members.length - props.maxVisible)
 })
 
 const getMemberName = (m) => {
@@ -77,7 +98,7 @@ const displayName = computed(() => {
   return name.charAt(0).toUpperCase()
 })
 
-// 字体大小为头像尺寸的 40%
+// 字体大小比例（头像尺寸下的 40%）
 const fontSize = computed(() => Math.max(12, Math.floor(props.size * (props.isGroup ? 0.25 : 0.4))))
 
 const colorPalette = [
@@ -136,7 +157,7 @@ const handleImageError = () => {
   line-height: 1;
   box-sizing: border-box;
   background-color: var(--dt-border-light);
-
+  
   &.is-group {
     padding: 2px;
     background-color: var(--dt-bg-body);
@@ -148,12 +169,12 @@ const handleImageError = () => {
 
 .avatar-img { width: 100%; height: 100%; object-fit: cover; }
 
-// 群组网格布局
+/* 群组网格布局 */
 .group-avatar-grid {
   display: grid;
   width: 100%;
   height: 100%;
-  gap: 1px;
+  gap: var(--dt-group-avatar-gap, 1px);
   background: var(--dt-bg-body);
 
   .grid-item {
@@ -161,7 +182,7 @@ const handleImageError = () => {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    color: #fff;
+    color: var(--dt-text-white);
     font-size: 10px;
     line-height: 1;
     font-weight: 600;
@@ -169,7 +190,7 @@ const handleImageError = () => {
 
   .grid-img { width: 100%; height: 100%; object-fit: cover; }
 
-  // 不同人数的网格分布
+  /* 不同人数的网格分布 */
   &.grid-0 { background-color: var(--dt-brand-color); display: flex; align-items: center; justify-content: center;
     &::after { content: 'G'; color: #fff; font-size: 20px; }
   }
@@ -183,5 +204,11 @@ const handleImageError = () => {
   &.grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
   &.grid-5, &.grid-6 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; .grid-item { font-size: 9px; } }
   &.grid-7, &.grid-8, &.grid-9 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; .grid-item { font-size: 8px; } }
+}
+
+.overflow-indicator {
+  font-weight: 700;
+  color: var(--dt-group-avatar-overflow-color, var(--dt-text-white));
+  background-color: var(--dt-group-avatar-overflow-bg, var(--dt-brand-color));
 }
 </style>

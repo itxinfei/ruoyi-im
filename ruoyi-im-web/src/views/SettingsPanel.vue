@@ -2,10 +2,11 @@
   <div class="desktop-settings-panel">
     <!-- 分组设置列表 (Desktop Optimized) -->
     <div class="settings-scroll-area custom-scrollbar">
-      
       <!-- 1. 通知设置组 -->
       <div class="settings-group">
-        <div class="group-title">通知提醒</div>
+        <div class="group-title">
+          通知提醒
+        </div>
         <div class="settings-card">
           <div class="setting-row">
             <div class="label-box">
@@ -32,7 +33,9 @@
 
       <!-- 2. 隐私设置组 -->
       <div class="settings-group">
-        <div class="group-title">隐私与安全</div>
+        <div class="group-title">
+          隐私与安全
+        </div>
         <div class="settings-card">
           <div class="setting-row">
             <div class="label-box">
@@ -53,13 +56,20 @@
 
       <!-- 3. 常规设置组 -->
       <div class="settings-group">
-        <div class="group-title">常规</div>
+        <div class="group-title">
+          常规
+        </div>
         <div class="settings-card">
           <div class="setting-row">
             <div class="label-box">
               <span class="title">外观主题</span>
             </div>
-            <el-select v-model="generalSettings.theme" size="default" style="width: 140px" @change="handleThemeChange">
+            <el-select
+              v-model="generalSettings.theme"
+              size="default"
+              style="width: 140px"
+              @change="handleThemeChange"
+            >
               <el-option label="跟随系统" value="auto" />
               <el-option label="亮色模式" value="light" />
               <el-option label="深色模式" value="dark" />
@@ -69,7 +79,12 @@
             <div class="label-box">
               <span class="title">语言选择</span>
             </div>
-            <el-select v-model="generalSettings.language" size="default" style="width: 140px" @change="saveGeneralSettings">
+            <el-select
+              v-model="generalSettings.language"
+              size="default"
+              style="width: 140px"
+              @change="saveGeneralSettings"
+            >
               <el-option label="简体中文" value="zh_CN" />
               <el-option label="English" value="en_US" />
             </el-select>
@@ -79,7 +94,9 @@
 
       <!-- 4. 黑名单 -->
       <div class="settings-group">
-        <div class="group-title">名单管理</div>
+        <div class="group-title">
+          名单管理
+        </div>
         <div class="settings-card">
           <div class="setting-row clickable" @click="activeMenu = 'blocked'">
             <div class="label-box">
@@ -93,9 +110,15 @@
 
       <!-- 关于信息 -->
       <div class="about-footer">
-        <div class="app-brand">IM</div>
-        <div class="app-version">Version 1.2.0 (Stable)</div>
-        <div class="copyright">© 2026 XINLIU. All Rights Reserved.</div>
+        <div class="app-brand">
+          IM
+        </div>
+        <div class="app-version">
+          Version 1.2.0 (Stable)
+        </div>
+        <div class="copyright">
+          © 2026 XINLIU. All Rights Reserved.
+        </div>
       </div>
     </div>
   </div>
@@ -103,7 +126,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { 
+import {
   getNotificationSettings, updateNotificationSettings,
   getPrivacySettings, updatePrivacySettings,
   getGeneralSettings, updateGeneralSettings,

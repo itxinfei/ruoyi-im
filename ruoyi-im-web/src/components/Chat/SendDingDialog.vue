@@ -26,17 +26,27 @@
 
         <el-form-item label="提醒类型" prop="dingType">
           <el-radio-group v-model="form.dingType">
-            <el-radio label="APP">应用内提醒</el-radio>
+            <el-radio label="APP">
+              应用内提醒
+            </el-radio>
             <!-- 短信和电话提醒需要第三方服务支持，暂时禁用 -->
-            <el-radio label="SMS" disabled>短信提醒</el-radio>
-            <el-radio label="CALL" disabled>电话提醒</el-radio>
+            <el-radio label="SMS" disabled>
+              短信提醒
+            </el-radio>
+            <el-radio label="CALL" disabled>
+              电话提醒
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
         <el-form-item label="优先级" prop="priority">
           <el-radio-group v-model="form.priority">
-            <el-radio label="NORMAL">普通</el-radio>
-            <el-radio label="URGENT">紧急</el-radio>
+            <el-radio label="NORMAL">
+              普通
+            </el-radio>
+            <el-radio label="URGENT">
+              紧急
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -64,7 +74,9 @@
                 </el-checkbox>
               </el-checkbox-group>
             </div>
-            <div v-else class="empty-tip">暂无可选成员</div>
+            <div v-else class="empty-tip">
+              暂无可选成员
+            </div>
           </div>
         </el-form-item>
 
@@ -85,7 +97,9 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="handleClose">取消</el-button>
+        <el-button @click="handleClose">
+          取消
+        </el-button>
         <el-button type="danger" :loading="loading" @click="handleSubmit">
           发送DING
         </el-button>

@@ -2,10 +2,15 @@
   <div class="desktop-profile-panel">
     <!-- 1. 精致顶部卡片 -->
     <div class="profile-hero-card">
-      <div class="hero-bg"></div>
+      <div class="hero-bg" />
       <div class="hero-content">
         <div class="avatar-container" @click="triggerAvatarUpload">
-          <DingtalkAvatar :src="userInfo.avatar" :name="userInfo.nickname" :size="80" shape="square" />
+          <DingtalkAvatar
+            :src="userInfo.avatar"
+            :name="userInfo.nickname"
+            :size="80"
+            shape="square"
+          />
           <div class="avatar-mask">
             <span class="material-icons-outlined">photo_camera</span>
           </div>
@@ -13,18 +18,35 @@
         <div class="user-basic">
           <div class="nickname-row">
             <span class="nickname">{{ userInfo.nickname || '未设置昵称' }}</span>
-            <el-tag size="small" type="success" effect="dark" round>在线</el-tag>
+            <el-tag
+              size="small"
+              type="success"
+              effect="dark"
+              round
+            >
+              在线
+            </el-tag>
           </div>
-          <div class="username-id">账号: {{ userInfo.username }} | ID: {{ userInfo.id }}</div>
+          <div class="username-id">
+            账号: {{ userInfo.username }} | ID: {{ userInfo.id }}
+          </div>
         </div>
       </div>
-      <input ref="avatarInput" type="file" hidden accept="image/*" @change="handleAvatarChange" />
+      <input
+        ref="avatarInput"
+        type="file"
+        hidden
+        accept="image/*"
+        @change="handleAvatarChange"
+      >
     </div>
 
     <!-- 2. 信息列表 (Desktop Card Style) -->
     <div class="profile-scroll-area custom-scrollbar">
       <div class="info-group">
-        <div class="group-header">详细信息</div>
+        <div class="group-header">
+          详细信息
+        </div>
         <div class="info-card">
           <!-- 昵称 -->
           <div class="info-row">
@@ -38,9 +60,15 @@
             <span class="label">性别</span>
             <div class="value-box">
               <el-radio-group v-model="userInfo.gender" @change="updateField('gender')">
-                <el-radio :label="1">男</el-radio>
-                <el-radio :label="2">女</el-radio>
-                <el-radio :label="0">保密</el-radio>
+                <el-radio :label="1">
+                  男
+                </el-radio>
+                <el-radio :label="2">
+                  女
+                </el-radio>
+                <el-radio :label="0">
+                  保密
+                </el-radio>
               </el-radio-group>
             </div>
           </div>
@@ -60,7 +88,9 @@
       </div>
 
       <div class="info-group">
-        <div class="group-header">联系方式</div>
+        <div class="group-header">
+          联系方式
+        </div>
         <div class="info-card">
           <div class="info-row">
             <span class="label">手机号码</span>
@@ -76,7 +106,9 @@
       </div>
 
       <div class="info-group">
-        <div class="group-header">安全与密码</div>
+        <div class="group-header">
+          安全与密码
+        </div>
         <div class="info-card">
           <div class="info-row clickable" @click="showPasswordDialog = true">
             <span class="label">修改登录密码</span>
@@ -87,7 +119,12 @@
     </div>
 
     <!-- 3. 修改密码弹窗 (Keep it clean) -->
-    <el-dialog v-model="showPasswordDialog" title="安全重置密码" width="400px" append-to-body>
+    <el-dialog
+      v-model="showPasswordDialog"
+      title="安全重置密码"
+      width="400px"
+      append-to-body
+    >
       <el-form label-position="top">
         <el-form-item label="当前旧密码">
           <el-input type="password" show-password />
@@ -97,8 +134,12 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showPasswordDialog = false">取消</el-button>
-        <el-button type="primary" @click="handlePasswordUpdate">确认修改</el-button>
+        <el-button @click="showPasswordDialog = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="handlePasswordUpdate">
+          确认修改
+        </el-button>
       </template>
     </el-dialog>
   </div>

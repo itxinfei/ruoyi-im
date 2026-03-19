@@ -2,13 +2,17 @@
   <div class="link-card" :class="{ 'is-own': message.isOwn }" @click="openLink">
     <!-- 缩略图 -->
     <div v-if="linkInfo.imageUrl" class="link-image">
-      <img :src="linkInfo.imageUrl" alt="" @error="handleImageError" />
+      <img :src="linkInfo.imageUrl" alt="" @error="handleImageError">
     </div>
-    
+
     <!-- 链接信息 -->
     <div class="link-content">
-      <div class="link-title">{{ linkInfo.title || '链接预览' }}</div>
-      <div v-if="linkInfo.description" class="link-desc">{{ linkInfo.description }}</div>
+      <div class="link-title">
+        {{ linkInfo.title || '链接预览' }}
+      </div>
+      <div v-if="linkInfo.description" class="link-desc">
+        {{ linkInfo.description }}
+      </div>
       <div class="link-url">
         <span class="material-icons-outlined">link</span>
         <span>{{ displayUrl }}</span>
@@ -27,7 +31,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['command'])
+defineEmits(['command'])
 
 // 图片加载错误标志
 const imageError = ref(false)
@@ -55,7 +59,7 @@ const linkInfo = computed(() => ({
 // 显示的URL（缩短）
 const displayUrl = computed(() => {
   try {
-    const url = linkInfo.value.url
+    const { url } = linkInfo.value
     const urlObj = new URL(url)
     return urlObj.host + (urlObj.pathname.length > 20 ? urlObj.pathname.substring(0, 20) + '...' : urlObj.pathname)
   } catch {

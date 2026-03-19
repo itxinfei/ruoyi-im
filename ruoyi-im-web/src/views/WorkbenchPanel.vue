@@ -3,7 +3,9 @@
     <!-- 左侧二级导航 -->
     <aside class="wb-sidebar">
       <div class="sidebar-header">
-        <h2 class="sidebar-title">工作台</h2>
+        <h2 class="sidebar-title">
+          工作台
+        </h2>
       </div>
       <nav class="sidebar-nav">
         <div
@@ -13,7 +15,9 @@
           :class="{ active: activeMenu === menu.key }"
           @click="handleMenuChange(menu.key)"
         >
-          <el-icon class="nav-icon"><component :is="menu.icon" /></el-icon>
+          <el-icon class="nav-icon">
+            <component :is="menu.icon" />
+          </el-icon>
           <span class="nav-label">{{ menu.label }}</span>
           <span v-if="menu.badge > 0" class="nav-badge">{{ menu.badge }}</span>
         </div>
@@ -27,23 +31,38 @@
         <!-- 欢迎区 -->
         <header class="wb-header">
           <div class="greeting-box">
-            <h1 class="greeting-box__title">{{ greetingText }}，{{ displayName }}</h1>
-            <p class="greeting-box__date">{{ currentDateText }}</p>
+            <h1 class="greeting-box__title">
+              {{ greetingText }}，{{ displayName }}
+            </h1>
+            <p class="greeting-box__date">
+              {{ currentDateText }}
+            </p>
           </div>
           <div class="wb-search">
-            <el-icon class="wb-search__icon"><Search /></el-icon>
-            <input v-model="searchQuery" class="wb-search__input" placeholder="搜索应用..." />
+            <el-icon class="wb-search__icon">
+              <Search />
+            </el-icon>
+            <input v-model="searchQuery" class="wb-search__input" placeholder="搜索应用...">
           </div>
         </header>
 
         <!-- 常用应用 -->
         <section class="wb-section">
           <div class="wb-section__header">
-            <h3 class="wb-section__title">常用应用</h3>
-            <el-button link type="primary">管理</el-button>
+            <h3 class="wb-section__title">
+              常用应用
+            </h3>
+            <el-button link type="primary">
+              管理
+            </el-button>
           </div>
           <div class="app-grid">
-            <div v-for="app in commonApps" :key="app.key" class="app-item" @click="handleAppClick(app)">
+            <div
+              v-for="app in commonApps"
+              :key="app.key"
+              class="app-item"
+              @click="handleAppClick(app)"
+            >
               <div class="app-item__icon" :class="app.iconClass">
                 <el-icon><component :is="app.elIcon" /></el-icon>
               </div>
@@ -56,10 +75,17 @@
         <!-- 全量应用 -->
         <section class="wb-section">
           <div class="wb-section__header">
-            <h3 class="wb-section__title">全量中心</h3>
+            <h3 class="wb-section__title">
+              全量中心
+            </h3>
           </div>
           <div class="app-grid app-grid--sm">
-            <div v-for="app in otherApps" :key="app.key" class="app-item app-item--sm" @click="handleAppClick(app)">
+            <div
+              v-for="app in otherApps"
+              :key="app.key"
+              class="app-item app-item--sm"
+              @click="handleAppClick(app)"
+            >
               <div class="app-item__icon app-item__icon--sm" :class="app.iconClass">
                 <el-icon><component :is="app.elIcon" /></el-icon>
               </div>
@@ -72,9 +98,13 @@
       <!-- 2. 审批视图 -->
       <div v-if="activeMenu === 'approval'" class="content-view approval-view">
         <header class="view-header">
-          <h2 class="view-title">审批中心</h2>
+          <h2 class="view-title">
+            审批中心
+          </h2>
           <div class="view-actions">
-            <el-button type="primary">发起审批</el-button>
+            <el-button type="primary">
+              发起审批
+            </el-button>
           </div>
         </header>
         <div class="approval-tabs">
@@ -97,23 +127,37 @@
       <!-- 3. 考勤视图 -->
       <div v-if="activeMenu === 'attendance'" class="content-view attendance-view">
         <header class="view-header">
-          <h2 class="view-title">考勤打卡</h2>
+          <h2 class="view-title">
+            考勤打卡
+          </h2>
         </header>
         <div class="attendance-card">
           <div class="attendance-status">
             <div class="status-circle">
-              <el-icon class="status-icon"><Timer /></el-icon>
+              <el-icon class="status-icon">
+                <Timer />
+              </el-icon>
             </div>
-            <p class="status-text">今日未打卡</p>
-            <p class="status-time">{{ currentTime }}</p>
+            <p class="status-text">
+              今日未打卡
+            </p>
+            <p class="status-time">
+              {{ currentTime }}
+            </p>
           </div>
           <div class="attendance-actions">
-            <el-button type="primary" size="large" @click="handlePunch('in')">上班打卡</el-button>
-            <el-button type="success" size="large" @click="handlePunch('out')">下班打卡</el-button>
+            <el-button type="primary" size="large" @click="handlePunch('in')">
+              上班打卡
+            </el-button>
+            <el-button type="success" size="large" @click="handlePunch('out')">
+              下班打卡
+            </el-button>
           </div>
         </div>
         <section class="wb-section">
-          <h3 class="wb-section__title">本月考勤记录</h3>
+          <h3 class="wb-section__title">
+            本月考勤记录
+          </h3>
           <el-empty :image-size="60" description="暂无考勤记录" />
         </section>
       </div>
@@ -121,17 +165,28 @@
       <!-- 4. 待办视图 -->
       <div v-if="activeMenu === 'todo'" class="content-view todo-view">
         <header class="view-header">
-          <h2 class="view-title">待办事项</h2>
+          <h2 class="view-title">
+            待办事项
+          </h2>
           <div class="view-actions">
-            <el-button type="primary">新建待办</el-button>
+            <el-button type="primary">
+              新建待办
+            </el-button>
           </div>
         </header>
         <div class="todo-list">
           <div v-if="todos.length > 0" class="todo-stack">
-            <div v-for="todo in todos" :key="todo.id" class="todo-tile" @click="handleTodoClick(todo)">
-              <div class="todo-tile__status" :class="todo.priorityClass"></div>
+            <div
+              v-for="todo in todos"
+              :key="todo.id"
+              class="todo-tile"
+              @click="handleTodoClick(todo)"
+            >
+              <div class="todo-tile__status" :class="todo.priorityClass" />
               <div class="todo-tile__info">
-                <p class="todo-tile__title">{{ todo.title }}</p>
+                <p class="todo-tile__title">
+                  {{ todo.title }}
+                </p>
                 <span class="todo-tile__meta">{{ formatDate(todo.deadline) }}</span>
               </div>
               <el-checkbox size="large" @click.stop="handleTodoComplete(todo)" />
@@ -144,9 +199,13 @@
       <!-- 5. 日程视图 -->
       <div v-if="activeMenu === 'schedule'" class="content-view schedule-view">
         <header class="view-header">
-          <h2 class="view-title">日程安排</h2>
+          <h2 class="view-title">
+            日程安排
+          </h2>
           <div class="view-actions">
-            <el-button type="primary">新建日程</el-button>
+            <el-button type="primary">
+              新建日程
+            </el-button>
           </div>
         </header>
         <div class="schedule-content">
@@ -157,9 +216,13 @@
       <!-- 6. 工作报告视图 -->
       <div v-if="activeMenu === 'report'" class="content-view report-view">
         <header class="view-header">
-          <h2 class="view-title">工作报告</h2>
+          <h2 class="view-title">
+            工作报告
+          </h2>
           <div class="view-actions">
-            <el-button type="primary">写周报</el-button>
+            <el-button type="primary">
+              写周报
+            </el-button>
           </div>
         </header>
         <div class="report-list">
@@ -173,8 +236,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { 
-  Search, Plus, Timer, Tickets, Management, Finished, 
+import {
+  Search, Timer, Tickets, Management, Finished,
   Money, FolderOpened, ChatLineRound, VideoPlay, Calendar,
   DocumentCopy, Clock, Notebook, Files
 } from '@element-plus/icons-vue'
@@ -199,11 +262,11 @@ const greetingText = computed(() => {
 
 // 当前日期文本
 const currentDateText = computed(() => {
-  return new Date().toLocaleDateString('zh-CN', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric', 
-    weekday: 'long' 
+  return new Date().toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long'
   })
 })
 

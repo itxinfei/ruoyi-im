@@ -14,8 +14,8 @@
         <div class="status-icon" :class="recordingState">
           <span v-if="recordingState === 'idle'" class="material-icons-outlined">mic</span>
           <div v-else-if="recordingState === 'recording'" class="recording-animation">
-            <div class="pulse-ring"></div>
-            <div class="pulse-ring delay"></div>
+            <div class="pulse-ring" />
+            <div class="pulse-ring delay" />
             <span class="material-icons-outlined">mic</span>
           </div>
           <span v-else class="material-icons-outlined">check_circle</span>
@@ -34,13 +34,13 @@
 
       <!-- 波形可视化 -->
       <div v-if="recordingState === 'recording'" class="waveform-visual">
-        <div class="waveform-bg"></div>
+        <div class="waveform-bg" />
         <div
           v-for="(bar, index) in waveformBars"
-          :key="index"
+          :key="`wave-${index}`"
           class="wave-bar"
           :style="{ height: bar + '%' }"
-        ></div>
+        />
       </div>
 
       <!-- 预览播放 -->
@@ -56,12 +56,12 @@
               :key="i"
               class="preview-bar"
               :style="{ height: getPreviewBarHeight(i) + '%' }"
-            ></div>
+            />
           </div>
           <span class="preview-duration">{{ formattedDuration }}</span>
         </div>
         <div class="preview-progress-bar" @click="seekPreview">
-          <div class="progress-fill" :style="{ width: previewProgress + '%' }"></div>
+          <div class="progress-fill" :style="{ width: previewProgress + '%' }" />
         </div>
       </div>
 

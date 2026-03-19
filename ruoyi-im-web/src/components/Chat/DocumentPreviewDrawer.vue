@@ -9,7 +9,9 @@
   >
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-wrapper">
-      <el-icon class="is-loading"><loading /></el-icon>
+      <el-icon class="is-loading">
+        <loading />
+      </el-icon>
       <p>加载中...</p>
     </div>
 
@@ -22,7 +24,9 @@
             <span class="material-icons-outlined">{{ getFileIcon(document.type) }}</span>
           </span>
           <div class="doc-meta">
-            <h3 class="doc-title">{{ document.title }}</h3>
+            <h3 class="doc-title">
+              {{ document.title }}
+            </h3>
             <div class="doc-meta-text">
               <span>{{ document.creatorName || '我' }}</span>
               <span>·</span>
@@ -31,9 +35,9 @@
           </div>
         </div>
         <div class="doc-actions">
-          <el-button @click="handleEdit" :icon="Edit" circle />
-          <el-button @click="handleShare" :icon="Share" circle />
-          <el-button @click="handleDownload" :icon="Download" circle />
+          <el-button :icon="Edit" circle @click="handleEdit" />
+          <el-button :icon="Share" circle @click="handleShare" />
+          <el-button :icon="Download" circle @click="handleDownload" />
         </div>
       </div>
 
@@ -41,14 +45,21 @@
 
       <!-- 文档内容区 -->
       <div class="doc-content">
-        <div class="doc-text">{{ document.content || '暂无内容' }}</div>
+        <div class="doc-text">
+          {{ document.content || '暂无内容' }}
+        </div>
       </div>
 
       <!-- 评论区域 -->
       <div class="comments-section">
         <div class="comments-header">
           <h4>评论 ({{ comments.length }})</h4>
-          <el-button @click="showAddComment = true" :icon="ChatDotRound" circle size="small" />
+          <el-button
+            :icon="ChatDotRound"
+            circle
+            size="small"
+            @click="showAddComment = true"
+          />
         </div>
 
         <!-- 评论列表 -->
@@ -64,7 +75,9 @@
                 <span class="comment-author">{{ comment.creatorName }}</span>
                 <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
               </div>
-              <div class="comment-text">{{ comment.content }}</div>
+              <div class="comment-text">
+                {{ comment.content }}
+              </div>
             </div>
           </div>
         </div>
@@ -83,8 +96,10 @@
             placeholder="输入评论内容..."
           />
           <template #footer>
-            <el-button @click="showAddComment = false">取消</el-button>
-            <el-button type="primary" @click="handleAddComment" :loading="submitting">
+            <el-button @click="showAddComment = false">
+              取消
+            </el-button>
+            <el-button type="primary" :loading="submitting" @click="handleAddComment">
               发送
             </el-button>
           </template>
@@ -161,7 +176,7 @@ const handleAddComment = async () => {
     ElMessage.warning('请输入评论内容')
     return
   }
-  
+
   submitting.value = true
   try {
     const res = await addComment({
@@ -250,7 +265,7 @@ defineExpose({
   justify-content: center;
   height: 100%;
   color: #8f959e;
-  
+
   .is-loading {
     font-size: 32px;
     margin-bottom: 16px;
@@ -268,12 +283,12 @@ defineExpose({
   align-items: center;
   justify-content: space-between;
   padding: 16px 0;
-  
+
   .doc-info {
     display: flex;
     align-items: center;
     gap: 12px;
-    
+
     .doc-icon {
       width: 40px;
       height: 40px;
@@ -282,13 +297,13 @@ defineExpose({
       align-items: center;
       justify-content: center;
       font-size: 20px;
-      
+
       &.icon-doc { background: #e6f4ff; color: #1677ff; }
       &.icon-image { background: #f0f5ff; color: #1890ff; }
       &.icon-video { background: #fff0f6; color: #eb2f96; }
       &.icon-voice { background: #fffbe6; color: #fa8c16; }
     }
-    
+
     .doc-meta {
       .doc-title {
         margin: 0 0 4px 0;
@@ -296,14 +311,14 @@ defineExpose({
         font-weight: 600;
         color: #1f2329;
       }
-      
+
       .doc-meta-text {
         font-size: 12px;
         color: #8f959e;
       }
     }
   }
-  
+
   .doc-actions {
     display: flex;
     gap: 8px;
@@ -314,7 +329,7 @@ defineExpose({
   flex: 1;
   padding: 20px 0;
   overflow-y: auto;
-  
+
   .doc-text {
     line-height: 1.8;
     color: #303133;
@@ -325,13 +340,13 @@ defineExpose({
 .comments-section {
   border-top: 1px solid #f2f3f5;
   padding-top: 16px;
-  
+
   .comments-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
-    
+
     h4 {
       margin: 0;
       font-size: 14px;
@@ -339,41 +354,41 @@ defineExpose({
       color: #1f2329;
     }
   }
-  
+
   .comments-list {
     max-height: 300px;
     overflow-y: auto;
-    
+
     .comment-item {
       display: flex;
       gap: 12px;
       margin-bottom: 16px;
-      
+
       &:last-child {
         margin-bottom: 0;
       }
-      
+
       .comment-content {
         flex: 1;
-        
+
         .comment-header {
           display: flex;
           align-items: center;
           gap: 8px;
           margin-bottom: 4px;
-          
+
           .comment-author {
             font-size: 13px;
             font-weight: 500;
             color: #1f2329;
           }
-          
+
           .comment-time {
             font-size: 12px;
             color: #8f959e;
           }
         }
-        
+
         .comment-text {
           font-size: 13px;
           color: #303133;

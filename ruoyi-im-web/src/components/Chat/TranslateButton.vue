@@ -38,8 +38,12 @@
       </el-radio>
     </el-radio-group>
     <template #footer>
-      <el-button @click="showMoreLanguages = false">取消</el-button>
-      <el-button type="primary" @click="translateSelected">翻译</el-button>
+      <el-button @click="showMoreLanguages = false">
+        取消
+      </el-button>
+      <el-button type="primary" @click="translateSelected">
+        翻译
+      </el-button>
     </template>
   </el-dialog>
 </template>

@@ -4,10 +4,33 @@
       <div class="header-left">
         <div class="bot-icon">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
-            <circle cx="9" cy="10" r="1.5" fill="currentColor"/>
-            <circle cx="15" cy="10" r="1.5" fill="currentColor"/>
-            <path d="M9 15C9 15 10.5 16 12 16C13.5 16 15 15 15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <rect
+              x="3"
+              y="3"
+              width="18"
+              height="18"
+              rx="2"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <circle
+              cx="9"
+              cy="10"
+              r="1.5"
+              fill="currentColor"
+            />
+            <circle
+              cx="15"
+              cy="10"
+              r="1.5"
+              fill="currentColor"
+            />
+            <path
+              d="M9 15C9 15 10.5 16 12 16C13.5 16 15 15 15 15"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </div>
         <span class="panel-title">群机器人</span>
@@ -27,8 +50,14 @@
       <div v-if="bots.length === 0" class="empty-state">
         <div class="empty-icon">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#e5e7eb"/>
-            <circle cx="12" cy="16" r="6" stroke="#e5e7eb" stroke-width="2"/>
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#e5e7eb" />
+            <circle
+              cx="12"
+              cy="16"
+              r="6"
+              stroke="#e5e7eb"
+              stroke-width="2"
+            />
           </svg>
         </div>
         <p>暂无机器人，点击"添加机器人"创建</p>
@@ -62,7 +91,9 @@
                   @change="handleToggleBot(bot)"
                 />
               </div>
-              <p v-if="bot.description" class="bot-description">{{ bot.description }}</p>
+              <p v-if="bot.description" class="bot-description">
+                {{ bot.description }}
+              </p>
               <div class="bot-stats">
                 <span>{{ bot.ruleCount || 0 }} 条规则</span>
               </div>
@@ -113,9 +144,15 @@
 
         <el-form-item label="机器人类型" prop="botType">
           <el-radio-group v-model="botForm.botType">
-            <el-radio label="SERVICE">客服机器人</el-radio>
-            <el-radio label="NOTIFY">通知机器人</el-radio>
-            <el-radio label="MANAGE">管理机器人</el-radio>
+            <el-radio label="SERVICE">
+              客服机器人
+            </el-radio>
+            <el-radio label="NOTIFY">
+              通知机器人
+            </el-radio>
+            <el-radio label="MANAGE">
+              管理机器人
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -125,8 +162,10 @@
             :show-file-list="false"
             :before-upload="beforeAvatarUpload"
           >
-            <img v-if="botForm.avatar" :src="botForm.avatar" class="avatar-preview" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            <img v-if="botForm.avatar" :src="botForm.avatar" class="avatar-preview">
+            <el-icon v-else class="avatar-uploader-icon">
+              <Plus />
+            </el-icon>
           </el-upload>
         </el-form-item>
 
@@ -142,12 +181,14 @@
         </el-form-item>
 
         <!-- 规则列表 -->
-        <el-divider content-position="left">触发规则</el-divider>
+        <el-divider content-position="left">
+          触发规则
+        </el-divider>
 
         <div class="rules-list">
           <div
             v-for="(rule, index) in botForm.rules"
-            :key="index"
+            :key="rule.id || `rule-${index}`"
             class="rule-item"
           >
             <div class="rule-header">
@@ -183,9 +224,15 @@
             </el-form-item>
             <el-form-item label="匹配模式">
               <el-radio-group v-model="rule.matchMode" size="small">
-                <el-radio label="EXACT">精确匹配</el-radio>
-                <el-radio label="CONTAINS">包含匹配</el-radio>
-                <el-radio label="REGEX">正则表达式</el-radio>
+                <el-radio label="EXACT">
+                  精确匹配
+                </el-radio>
+                <el-radio label="CONTAINS">
+                  包含匹配
+                </el-radio>
+                <el-radio label="REGEX">
+                  正则表达式
+                </el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="回复内容">
@@ -209,14 +256,16 @@
           </div>
         </div>
 
-        <el-button @click="addRule" style="width: 100%">
+        <el-button style="width: 100%" @click="addRule">
           <el-icon><Plus /></el-icon>
           添加规则
         </el-button>
       </el-form>
 
       <template #footer>
-        <el-button @click="handleCloseBotDialog">取消</el-button>
+        <el-button @click="handleCloseBotDialog">
+          取消
+        </el-button>
         <el-button type="primary" :loading="submitting" @click="handleSubmitBot">
           {{ editingBot ? '保存' : '创建' }}
         </el-button>
@@ -281,7 +330,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import {
@@ -289,10 +338,7 @@ import {
   createBot,
   updateBot,
   deleteBot,
-  setBotEnabled,
-  addBotRule,
-  updateBotRule,
-  deleteBotRule
+  setBotEnabled
 } from '@/api/im/bot'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -392,7 +438,7 @@ const handleSubmitBot = async () => {
       })
       ElMessage.success('机器人更新成功')
     } else {
-      const botId = await createBot({
+      await createBot({
         groupId: props.groupId,
         botName: botForm.botName,
         botType: botForm.botType,

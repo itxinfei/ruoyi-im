@@ -2,7 +2,9 @@
   <div class="calendar-panel">
     <aside class="calendar-sidebar">
       <div class="sidebar-header">
-        <h2 class="sidebar-title">日历</h2>
+        <h2 class="sidebar-title">
+          日历
+        </h2>
       </div>
       <nav class="sidebar-nav">
         <div
@@ -12,7 +14,9 @@
           :class="{ active: currentView === menu.key }"
           @click="currentView = menu.key"
         >
-          <el-icon class="nav-icon"><component :is="menu.icon" /></el-icon>
+          <el-icon class="nav-icon">
+            <component :is="menu.icon" />
+          </el-icon>
           <span class="nav-label">{{ menu.label }}</span>
         </div>
       </nav>
@@ -22,7 +26,9 @@
         <header class="calendar-header">
           <div class="header-left">
             <div class="date-range">
-              <h2 class="range-title">{{ dateRangeString }}</h2>
+              <h2 class="range-title">
+                {{ dateRangeString }}
+              </h2>
             </div>
           </div>
         </header>
@@ -31,11 +37,11 @@
         </div>
         <div v-if="currentView === 'week'" class="week-view">
           <div class="week-header">
-            <div class="time-column-header"></div>
+            <div class="time-column-header" />
           </div>
         </div>
         <div v-if="currentView === 'month'" class="month-view">
-          <div class="month-grid"></div>
+          <div class="month-grid" />
         </div>
       </div>
     </main>

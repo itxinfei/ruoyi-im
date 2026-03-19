@@ -3,19 +3,23 @@
     <!-- 左侧分类导航 (240px 黄金中轴线) -->
     <aside class="todo-sidebar">
       <div class="sidebar-header">
-        <h1 class="sidebar-title">待办事项</h1>
+        <h1 class="sidebar-title">
+          待办事项
+        </h1>
       </div>
       <div class="sidebar-content">
-        <div 
-          v-for="tab in filterTabs" 
-          :key="tab.key" 
-          class="nav-item" 
+        <div
+          v-for="tab in filterTabs"
+          :key="tab.key"
+          class="nav-item"
           :class="{ active: activeFilter === tab.key }"
           @click="activeFilter = tab.key"
         >
           <span class="material-icons-outlined nav-icon">{{ tab.icon }}</span>
           <span class="nav-label">{{ tab.label }}</span>
-          <div v-if="getCount(tab.key) > 0" class="nav-badge">{{ getCount(tab.key) }}</div>
+          <div v-if="getCount(tab.key) > 0" class="nav-badge">
+            {{ getCount(tab.key) }}
+          </div>
         </div>
       </div>
       <div class="sidebar-footer">
@@ -30,28 +34,39 @@
     <main class="todo-main">
       <header class="todo-header">
         <div class="header-left">
-          <h2 class="header-title">{{ currentTabLabel }}</h2>
+          <h2 class="header-title">
+            {{ currentTabLabel }}
+          </h2>
         </div>
         <div class="header-right">
           <div class="search-box">
             <span class="material-icons-outlined search-icon">search</span>
-            <input v-model="searchQuery" class="search-input" placeholder="搜索任务" type="text" />
+            <input
+              v-model="searchQuery"
+              class="search-input"
+              placeholder="搜索任务"
+              type="text"
+            >
           </div>
         </div>
       </header>
 
       <div class="todo-content-scroller custom-scrollbar">
-        <div v-if="loading" class="loading-state"><el-icon class="is-loading"><Loading /></el-icon> 正在同步...</div>
-        
+        <div v-if="loading" class="loading-state">
+          <el-icon class="is-loading">
+            <Loading />
+          </el-icon> 正在同步...
+        </div>
+
         <div v-else-if="filteredTodos.length === 0" class="empty-state">
           <span class="material-icons-outlined">task_alt</span>
           <p>暂无待办任务</p>
         </div>
 
         <div v-else class="todo-list">
-          <div 
-            v-for="todo in filteredTodos" 
-            :key="todo.id" 
+          <div
+            v-for="todo in filteredTodos"
+            :key="todo.id"
             class="todo-card"
             :class="{ completed: todo.completed }"
             @click="handleViewDetail(todo)"
@@ -74,8 +89,12 @@
               </div>
             </div>
             <div class="todo-actions">
-              <button class="action-icon" @click.stop="handleEdit(todo)"><span class="material-icons-outlined">edit</span></button>
-              <button class="action-icon danger" @click.stop="handleDelete(todo)"><span class="material-icons-outlined">delete</span></button>
+              <button class="action-icon" @click.stop="handleEdit(todo)">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+              <button class="action-icon danger" @click.stop="handleDelete(todo)">
+                <span class="material-icons-outlined">delete</span>
+              </button>
             </div>
           </div>
         </div>

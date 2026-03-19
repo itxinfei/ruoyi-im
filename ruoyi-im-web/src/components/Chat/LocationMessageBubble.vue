@@ -9,8 +9,12 @@
 
     <!-- 位置信息 -->
     <div class="location-info">
-      <div class="location-name">{{ locationName || '位置共享' }}</div>
-      <div class="location-address">{{ address || '点击查看地图' }}</div>
+      <div class="location-name">
+        {{ locationName || '位置共享' }}
+      </div>
+      <div class="location-address">
+        {{ address || '点击查看地图' }}
+      </div>
     </div>
 
     <!-- 导航图标 -->
@@ -30,7 +34,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['command'])
+defineEmits(['command'])
 
 // 解析位置内容
 const parsedContent = computed(() => {
@@ -58,10 +62,11 @@ const longitude = computed(() => parsedContent.value.longitude || parsedContent.
 const mapStyle = computed(() => {
   const lat = latitude.value
   const lng = longitude.value
-  if (lat && lng) {
+  const mapKey = import.meta.env.VITE_MAP_API_KEY || ''
+  if (lat && lng && mapKey) {
     // 使用高德/腾讯静态地图
     return {
-      backgroundImage: `url(https://apis.map.qq.com/ws/staticmap/v2/?center=${lat},${lng}&zoom=15&size=200x120&markers=${lat},${lng}&key=YOUR_KEY)`
+      backgroundImage: `url(https://apis.map.qq.com/ws/staticmap/v2/?center=${lat},${lng}&zoom=15&size=200x120&markers=${lat},${lng}&key=${mapKey})`
     }
   }
   return {}

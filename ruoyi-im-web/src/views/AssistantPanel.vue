@@ -7,8 +7,10 @@
           <el-icon><Promotion /></el-icon>
         </div>
         <div class="header-info">
-          <h2 class="panel-title">AI 助理</h2>
-          <span class="model-tag" v-if="selectedModel">{{ selectedModel }}</span>
+          <h2 class="panel-title">
+            AI 助理
+          </h2>
+          <span v-if="selectedModel" class="model-tag">{{ selectedModel }}</span>
         </div>
       </div>
       <div class="header-actions">
@@ -19,9 +21,9 @@
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item 
-                v-for="model in availableModels" 
-                :key="model" 
+              <el-dropdown-item
+                v-for="model in availableModels"
+                :key="model"
                 :command="model"
                 :class="{ 'is-active': selectedModel === model }"
               >
@@ -41,19 +43,19 @@
     <div class="panel-body">
       <!-- 对话模式 -->
       <template v-if="messages.length > 0">
-        <div class="messages-area" ref="messagesContainer">
+        <div ref="messagesContainer" class="messages-area">
           <div
             v-for="(msg, index) in messages"
-            :key="index"
+            :key="msg.timestamp || `msg-${index}`"
             class="message-row"
             :class="msg.role"
           >
             <div v-if="msg.role === 'assistant'" class="avatar ai">
               <el-icon><Promotion /></el-icon>
             </div>
-            
+
             <div class="message-bubble" :class="msg.role">
-              <div class="message-text" v-html="formatMessage(msg.content)"></div>
+              <div class="message-text" v-html="formatMessage(msg.content)" />
               <div v-if="msg.role === 'assistant'" class="message-meta">
                 <span class="time">{{ formatTime(msg.timestamp) }}</span>
                 <div class="actions">
@@ -70,7 +72,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div v-if="msg.role === 'user'" class="avatar user">
               {{ userInitial }}
             </div>
@@ -79,11 +81,13 @@
           <!-- 输入中状态 -->
           <div v-if="isTyping" class="message-row assistant">
             <div class="avatar ai">
-              <el-icon class="pulse"><Promotion /></el-icon>
+              <el-icon class="pulse">
+                <Promotion />
+              </el-icon>
             </div>
             <div class="message-bubble assistant typing">
               <div class="typing-dots">
-                <span></span><span></span><span></span>
+                <span /><span /><span />
               </div>
             </div>
           </div>
@@ -100,8 +104,8 @@
               placeholder="输入消息，按 Enter 发送..."
               @keydown.enter.exact.prevent="sendMessage"
             />
-            <el-button 
-              type="primary" 
+            <el-button
+              type="primary"
               :disabled="!inputMessage.trim() || isSending"
               :loading="isSending"
               @click="sendMessage"
@@ -121,13 +125,19 @@
             <div class="hero-icon">
               <el-icon><Promotion /></el-icon>
             </div>
-            <h1 class="hero-title">你好，我是 AI 助理</h1>
-            <p class="hero-desc">我可以帮你写文案、翻译、总结、写代码等，有什么可以帮你的？</p>
+            <h1 class="hero-title">
+              你好，我是 AI 助理
+            </h1>
+            <p class="hero-desc">
+              我可以帮你写文案、翻译、总结、写代码等，有什么可以帮你的？
+            </p>
           </div>
 
           <!-- 快捷功能 -->
           <div class="quick-section">
-            <h3 class="section-title">快捷功能</h3>
+            <h3 class="section-title">
+              快捷功能
+            </h3>
             <div class="quick-grid">
               <div
                 v-for="action in quickActions"
@@ -146,8 +156,12 @@
           <!-- 历史对话 -->
           <div v-if="chatHistory.length > 0" class="history-section">
             <div class="section-header">
-              <h3 class="section-title">最近对话</h3>
-              <el-button link type="primary" @click="clearAllHistory">清空</el-button>
+              <h3 class="section-title">
+                最近对话
+              </h3>
+              <el-button link type="primary" @click="clearAllHistory">
+                清空
+              </el-button>
             </div>
             <div class="history-list">
               <div
@@ -156,14 +170,20 @@
                 class="history-item"
                 @click="loadChat(chat)"
               >
-                <el-icon class="history-icon"><ChatDotRound /></el-icon>
+                <el-icon class="history-icon">
+                  <ChatDotRound />
+                </el-icon>
                 <div class="history-content">
-                  <div class="history-title">{{ chat.title }}</div>
-                  <div class="history-time">{{ chat.time }}</div>
+                  <div class="history-title">
+                    {{ chat.title }}
+                  </div>
+                  <div class="history-time">
+                    {{ chat.time }}
+                  </div>
                 </div>
-                <el-button 
-                  class="delete-btn" 
-                  circle 
+                <el-button
+                  class="delete-btn"
+                  circle
                   size="small"
                   @click.stop="deleteChat(chat)"
                 >
@@ -184,8 +204,7 @@ import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import {
   Promotion, Plus, Setting, DocumentCopy, Refresh,
-  ChatDotRound, Delete, Edit, Document, DataAnalysis,
-  Sunny, Compass
+  ChatDotRound, Delete
 } from '@element-plus/icons-vue'
 import { chat, getSupportedModels } from '@/api/im/ai'
 import { formatAIMessage } from '@/utils/htmlSanitizer'
@@ -306,10 +325,10 @@ const sendMessage = async () => {
   if (!content || isSending.value) return
 
   // 添加用户消息
-  messages.value.push({ 
-    role: 'user', 
-    content, 
-    timestamp: Date.now() 
+  messages.value.push({
+    role: 'user',
+    content,
+    timestamp: Date.now()
   })
   inputMessage.value = ''
   isSending.value = true
@@ -321,7 +340,7 @@ const sendMessage = async () => {
   isTyping.value = true
   try {
     const res = await chat({
-      content: content,
+      content,
       conversationId: conversationId.value || `conv_${Date.now()}`,
       userId: currentUserId.value,
       model: selectedModel.value
@@ -491,7 +510,7 @@ onMounted(() => {
   background: var(--dt-brand-color);
   border-color: var(--dt-brand-color);
   color: var(--dt-text-white);
-  
+
   &:hover {
     background: var(--dt-brand-hover);
     border-color: var(--dt-brand-hover);
@@ -848,7 +867,7 @@ onMounted(() => {
 .delete-btn {
   opacity: 0;
   transition: opacity 0.2s;
-  
+
   &:hover {
     color: var(--dt-error-color);
   }

@@ -3,20 +3,36 @@
     <!-- 左侧边栏 (240px 黄金宽度) -->
     <aside class="docs-sidebar">
       <div class="sidebar-header">
-        <h1 class="sidebar-title">云文档</h1>
+        <h1 class="sidebar-title">
+          云文档
+        </h1>
       </div>
 
       <div class="sidebar-content">
         <div class="nav-section">
-          <div v-for="nav in mainNavItems" :key="nav.id" class="nav-item" :class="{ active: activeNav === nav.id }" @click="activeNav = nav.id">
+          <div
+            v-for="nav in mainNavItems"
+            :key="nav.id"
+            class="nav-item"
+            :class="{ active: activeNav === nav.id }"
+            @click="activeNav = nav.id"
+          >
             <span class="material-icons-outlined nav-icon">{{ nav.icon }}</span>
             <span class="nav-label">{{ nav.label }}</span>
           </div>
         </div>
-        <div class="nav-divider"></div>
-        <div class="nav-section-label">存储位置</div>
+        <div class="nav-divider" />
+        <div class="nav-section-label">
+          存储位置
+        </div>
         <div class="nav-section">
-          <div v-for="nav in storageNavItems" :key="nav.id" class="nav-item" :class="{ active: activeNav === nav.id }" @click="activeNav = nav.id">
+          <div
+            v-for="nav in storageNavItems"
+            :key="nav.id"
+            class="nav-item"
+            :class="{ active: activeNav === nav.id }"
+            @click="activeNav = nav.id"
+          >
             <span class="material-icons-outlined nav-icon">{{ nav.icon }}</span>
             <span class="nav-label">{{ nav.label }}</span>
           </div>
@@ -25,9 +41,15 @@
 
       <div class="sidebar-footer">
         <div class="storage-info">
-          <div class="storage-header"><span class="storage-label">存储空间</span><span class="storage-percent">85%</span></div>
-          <div class="storage-bar"><div class="storage-fill" style="width: 85%"></div></div>
-          <div class="storage-text">85GB / 100GB</div>
+          <div class="storage-header">
+            <span class="storage-label">存储空间</span><span class="storage-percent">85%</span>
+          </div>
+          <div class="storage-bar">
+            <div class="storage-fill" style="width: 85%" />
+          </div>
+          <div class="storage-text">
+            85GB / 100GB
+          </div>
         </div>
       </div>
     </aside>
@@ -36,24 +58,41 @@
     <main class="docs-main">
       <header class="docs-header">
         <div class="header-left">
-          <h2 class="header-title">{{ currentViewTitle }}</h2>
-          <div class="header-divider"></div>
+          <h2 class="header-title">
+            {{ currentViewTitle }}
+          </h2>
+          <div class="header-divider" />
           <div class="search-box">
             <span class="material-icons-outlined search-icon">search</span>
-            <input v-model="searchQuery" class="search-input" placeholder="搜索文件" type="text" />
+            <input
+              v-model="searchQuery"
+              class="search-input"
+              placeholder="搜索文件"
+              type="text"
+            >
           </div>
         </div>
         <div class="header-right">
           <div class="view-toggle">
-            <button class="toggle-btn" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'"><span class="material-icons-outlined">list</span></button>
-            <button class="toggle-btn" :class="{ active: viewMode === 'grid' }" @click="viewMode = 'grid'"><span class="material-icons-outlined">grid_view</span></button>
+            <button class="toggle-btn" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">
+              <span class="material-icons-outlined">list</span>
+            </button>
+            <button class="toggle-btn" :class="{ active: viewMode === 'grid' }" @click="viewMode = 'grid'">
+              <span class="material-icons-outlined">grid_view</span>
+            </button>
           </div>
           <el-dropdown trigger="click" @command="handleNewCommand">
-            <button class="new-btn"><span class="material-icons-outlined">add</span>新建</button>
+            <button class="new-btn">
+              <span class="material-icons-outlined">add</span>新建
+            </button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="folder"><span class="material-icons-outlined">folder</span> 新建文件夹</el-dropdown-item>
-                <el-dropdown-item command="upload"><span class="material-icons-outlined">upload</span> 上传文件</el-dropdown-item>
+                <el-dropdown-item command="folder">
+                  <span class="material-icons-outlined">folder</span> 新建文件夹
+                </el-dropdown-item>
+                <el-dropdown-item command="upload">
+                  <span class="material-icons-outlined">upload</span> 上传文件
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -64,28 +103,39 @@
         <!-- 空状态 -->
         <div v-if="!loading && files.length === 0" class="empty-state">
           <span class="material-icons-outlined empty-icon">folder_open</span>
-          <p class="empty-text">{{ searchQuery ? '没有找到匹配的文档' : '暂无文档' }}</p>
+          <p class="empty-text">
+            {{ searchQuery ? '没有找到匹配的文档' : '暂无文档' }}
+          </p>
         </div>
-        
+
         <!-- 加载状态 -->
         <div v-if="loading" class="loading-state">
-          <el-icon class="is-loading"><loading /></el-icon>
+          <el-icon class="is-loading">
+            <loading />
+          </el-icon>
           <p>加载中...</p>
         </div>
-        
+
         <!-- 文件列表 -->
         <div v-else class="files-table-wrapper">
           <table class="files-table">
             <thead>
               <tr>
-                <th class="name-col">名称</th>
+                <th class="name-col">
+                  名称
+                </th>
                 <th>所有者</th>
                 <th>修改时间</th>
-                <th class="actions-col"></th>
+                <th class="actions-col" />
               </tr>
             </thead>
             <tbody>
-              <tr v-for="file in files" :key="file.id" class="file-row" @click="handleFileClick(file)">
+              <tr
+                v-for="file in files"
+                :key="file.id"
+                class="file-row"
+                @click="handleFileClick(file)"
+              >
                 <td class="name-col">
                   <div class="file-info">
                     <div class="file-icon" :class="file.iconClass">
@@ -98,7 +148,9 @@
                           <span class="material-icons-outlined">star</span>
                         </span>
                       </div>
-                      <div class="file-meta">{{ file.meta }}</div>
+                      <div class="file-meta">
+                        {{ file.meta }}
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -127,14 +179,14 @@
       type="file"
       style="display: none"
       @change="handleFileSelect"
-    />
+    >
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getDocuments, searchDocuments, deleteDocument, toggleStar, restoreDocument, permanentlyDeleteDocument } from '@/api/im/document'
+import { getDocuments, searchDocuments } from '@/api/im/document'
 import { formatFileSize, formatTime } from '@/utils/format'
 import DocumentEditorDialog from '@/components/Documents/DocumentEditorDialog.vue'
 
@@ -258,12 +310,6 @@ const handleFileClick = (file) => {
   showEditor.value = true
 }
 
-// 处理菜单关闭
-const handleEditorClose = () => {
-  showEditor.value = false
-  selectedFile.value = null
-}
-
 // 处理文件保存
 const handleFileSaved = () => {
   loadDocuments()
@@ -299,10 +345,10 @@ const handleNewCommand = async (command) => {
 const handleFileSelect = async (event) => {
   const file = event.target.files?.[0]
   if (!file) return
-  
+
   ElMessage.success(`文件 "${file.name}" 上传成功`)
   loadDocuments()
-  
+
   // 清空 input 以便重复选择同一文件
   event.target.value = ''
 }
@@ -329,7 +375,7 @@ const handleFileMenu = async (file, event) => {
 
   // 使用 Element Plus 的 ElMessageBox 或自定义菜单
   // 这里简化处理，使用 ElMessageBox.prompt 风格的菜单
-  const { value: action } = await ElMessageBox.prompt(
+  await ElMessageBox.prompt(
     '',
     `操作: ${file.name}`,
     {
@@ -338,69 +384,11 @@ const handleFileMenu = async (file, event) => {
       showInput: false,
       distinguishCancelAndClose: true,
       message: menuItems.map((item, index) => `${index + 1}. ${item.label}`).join('\n'),
-      beforeClose: (action, instance, done) => {
+      beforeClose: (_action, _instance, done) => {
         done()
       }
     }
   ).catch(() => {})
-}
-
-// 切换收藏状态
-const handleToggleStar = async (file) => {
-  try {
-    await toggleStar(file.id, !file.isStarred)
-    file.isStarred = !file.isStarred
-    ElMessage.success(file.isStarred ? '收藏成功' : '取消收藏成功')
-  } catch (error) {
-    console.error('操作失败:', error)
-    ElMessage.error('操作失败')
-  }
-}
-
-// 删除文档
-const handleDelete = async (file) => {
-  try {
-    await ElMessageBox.confirm(`确定要删除"${file.name}"吗？`, '确认删除', {
-      type: 'warning'
-    })
-    await deleteDocument(file.id)
-    ElMessage.success('删除成功')
-    loadDocuments()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('删除失败:', error)
-      ElMessage.error('删除失败')
-    }
-  }
-}
-
-// 恢复文档
-const handleRestore = async (file) => {
-  try {
-    await restoreDocument(file.id)
-    ElMessage.success('恢复成功')
-    loadDocuments()
-  } catch (error) {
-    console.error('恢复失败:', error)
-    ElMessage.error('恢复失败')
-  }
-}
-
-// 永久删除
-const handlePermanentDelete = async (file) => {
-  try {
-    await ElMessageBox.confirm(`确定要永久删除"${file.name}"吗？此操作无法撤销。`, '永久删除', {
-      type: 'error'
-    })
-    await permanentlyDeleteDocument(file.id)
-    ElMessage.success('删除成功')
-    loadDocuments()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('删除失败:', error)
-      ElMessage.error('删除失败')
-    }
-  }
 }
 
 // 监听导航变化
@@ -415,6 +403,14 @@ watch(searchQuery, () => {
   searchTimer = setTimeout(() => {
     handleSearch()
   }, 300)
+})
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
 })
 
 // 初始化加载

@@ -1,7 +1,9 @@
 <template>
   <div class="mail-panel">
     <div class="panel-header">
-      <h2 class="panel-title">邮箱</h2>
+      <h2 class="panel-title">
+        邮箱
+      </h2>
       <button class="compose-btn" @click="showComposeDialog = true">
         <span class="material-icons-outlined">edit</span>
         写邮件
@@ -28,13 +30,17 @@
         <!-- 邮件列表 -->
         <div class="mail-list">
           <div v-if="loading" class="loading-state">
-            <el-icon class="is-loading"><Loading /></el-icon>
+            <el-icon class="is-loading">
+              <Loading />
+            </el-icon>
             <span>加载中...</span>
           </div>
 
           <div v-else-if="emails.length === 0" class="empty-state">
             <span class="material-icons-outlined empty-icon">email</span>
-            <p class="empty-text">暂无邮件</p>
+            <p class="empty-text">
+              暂无邮件
+            </p>
           </div>
 
           <div v-else class="email-list">
@@ -49,14 +55,18 @@
                 {{ email.sender.charAt(0) }}
               </div>
               <div class="email-content">
-                <div class="email-subject">{{ email.subject }}</div>
-                <div class="email-preview">{{ email.preview }}</div>
+                <div class="email-subject">
+                  {{ email.subject }}
+                </div>
+                <div class="email-preview">
+                  {{ email.preview }}
+                </div>
                 <div class="email-meta">
                   <span class="email-sender">{{ email.sender }}</span>
                   <span class="email-time">{{ email.time }}</span>
                 </div>
               </div>
-              <div v-if="!email.read" class="unread-dot"></div>
+              <div v-if="!email.read" class="unread-dot" />
             </div>
           </div>
         </div>
@@ -82,7 +92,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ComposeMailDialog from '@/components/ComposeMailDialog/index.vue'

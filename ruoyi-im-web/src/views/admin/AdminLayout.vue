@@ -3,10 +3,16 @@
     <el-container class="layout-shell">
       <el-aside width="232px" class="admin-aside">
         <div class="admin-logo">
-          <div class="logo-mark">IM</div>
+          <div class="logo-mark">
+            IM
+          </div>
           <div class="logo-text">
-            <div class="title">管理后台</div>
-            <div class="subtitle">Operations Console</div>
+            <div class="title">
+              管理后台
+            </div>
+            <div class="subtitle">
+              Operations Console
+            </div>
           </div>
         </div>
 
@@ -49,16 +55,26 @@
         <el-header class="admin-header">
           <div class="header-left">
             <div class="title-row">
-              <h1 class="page-title">{{ pageTitle }}</h1>
-              <el-tag size="small" :type="roleTagType" effect="plain">{{ roleLabel }}</el-tag>
+              <h1 class="page-title">
+                {{ pageTitle }}
+              </h1>
+              <el-tag size="small" :type="roleTagType" effect="plain">
+                {{ roleLabel }}
+              </el-tag>
             </div>
-            <p class="page-desc">统一管理用户、群组、消息与系统配置</p>
+            <p class="page-desc">
+              统一管理用户、群组、消息与系统配置
+            </p>
           </div>
 
           <div class="header-right">
             <span class="admin-user">{{ adminName }}</span>
-            <el-button type="primary" plain @click="goToChat">返回聊天</el-button>
-            <el-button type="danger" plain @click="logout">退出登录</el-button>
+            <el-button type="primary" plain @click="goToChat">
+              返回聊天
+            </el-button>
+            <el-button type="danger" plain @click="logout">
+              退出登录
+            </el-button>
           </div>
         </el-header>
 

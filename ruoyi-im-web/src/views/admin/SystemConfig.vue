@@ -4,26 +4,42 @@
     <el-row :gutter="16" class="kpi-row">
       <el-col :xs="24" :sm="12" :lg="6">
         <el-card class="kpi-card" shadow="never">
-          <div class="kpi-title">配置总数</div>
-          <div class="kpi-value">{{ configEntries.length }}</div>
+          <div class="kpi-title">
+            配置总数
+          </div>
+          <div class="kpi-value">
+            {{ configEntries.length }}
+          </div>
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <el-card class="kpi-card" shadow="never">
-          <div class="kpi-title">上次刷新</div>
-          <div class="kpi-value small">{{ lastRefreshText }}</div>
+          <div class="kpi-title">
+            上次刷新
+          </div>
+          <div class="kpi-value small">
+            {{ lastRefreshText }}
+          </div>
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <el-card class="kpi-card" shadow="never">
-          <div class="kpi-title">撤回时限 (分钟)</div>
-          <div class="kpi-value">{{ recallLimit }}</div>
+          <div class="kpi-title">
+            撤回时限 (分钟)
+          </div>
+          <div class="kpi-value">
+            {{ recallLimit }}
+          </div>
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <el-card class="kpi-card" shadow="never">
-          <div class="kpi-title">变更状态</div>
-          <div class="kpi-value small">{{ saveStateText }}</div>
+          <div class="kpi-title">
+            变更状态
+          </div>
+          <div class="kpi-value small">
+            {{ saveStateText }}
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -37,8 +53,12 @@
             <p>高频参数可直接编辑并保存</p>
           </div>
           <el-space>
-            <el-button @click="loadConfigs">刷新</el-button>
-            <el-button type="primary" :loading="saving" @click="saveQuickConfigs">保存快捷参数</el-button>
+            <el-button @click="loadConfigs">
+              刷新
+            </el-button>
+            <el-button type="primary" :loading="saving" @click="saveQuickConfigs">
+              保存快捷参数
+            </el-button>
           </el-space>
         </div>
       </template>
@@ -46,17 +66,34 @@
       <el-row :gutter="16">
         <el-col :xs="24" :md="8">
           <el-form-item label="消息撤回时限 (分钟)">
-            <el-input-number v-model="quickForm.recallMinutes" :min="0" :max="10080" :step="5" style="width: 100%" />
+            <el-input-number
+              v-model="quickForm.recallMinutes"
+              :min="0"
+              :max="10080"
+              :step="5"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :xs="24" :md="8">
           <el-form-item label="单文件上限 (MB)">
-            <el-input-number v-model="quickForm.maxFileMb" :min="1" :max="2048" style="width: 100%" />
+            <el-input-number
+              v-model="quickForm.maxFileMb"
+              :min="1"
+              :max="2048"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :xs="24" :md="8">
           <el-form-item label="会话过期时长 (分钟)">
-            <el-input-number v-model="quickForm.sessionExpireMinutes" :min="10" :max="43200" :step="10" style="width: 100%" />
+            <el-input-number
+              v-model="quickForm.sessionExpireMinutes"
+              :min="10"
+              :max="43200"
+              :step="10"
+              style="width: 100%"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -73,7 +110,13 @@
 
       <el-form :model="configForm" label-width="200px">
         <el-form-item label="最大消息长度">
-          <el-input-number v-model="configForm.maxMessageLength" :min="100" :max="10000" :step="100" style="width: 200px" />
+          <el-input-number
+            v-model="configForm.maxMessageLength"
+            :min="100"
+            :max="10000"
+            :step="100"
+            style="width: 200px"
+          />
           <span class="form-tip">单条消息允许的最大字符数</span>
         </el-form-item>
       </el-form>
@@ -90,11 +133,23 @@
 
       <el-form :model="configForm" label-width="200px">
         <el-form-item label="单文件上限 (MB)">
-          <el-input-number v-model="configForm.uploadMaxFileMb" :min="1" :max="2048" :step="10" style="width: 200px" />
+          <el-input-number
+            v-model="configForm.uploadMaxFileMb"
+            :min="1"
+            :max="2048"
+            :step="10"
+            style="width: 200px"
+          />
           <span class="form-tip">单个文件允许的最大大小</span>
         </el-form-item>
         <el-form-item label="会话过期时长 (分钟)">
-          <el-input-number v-model="configForm.sessionExpireMinutes" :min="10" :max="43200" :step="10" style="width: 200px" />
+          <el-input-number
+            v-model="configForm.sessionExpireMinutes"
+            :min="10"
+            :max="43200"
+            :step="10"
+            style="width: 200px"
+          />
           <span class="form-tip">用户会话的过期时间</span>
         </el-form-item>
       </el-form>
@@ -106,14 +161,21 @@
         <div class="panel-header">
           <h3>安全策略</h3>
           <p>
-            <el-tag type="warning" size="small">仅 SUPER_ADMIN 可修改</el-tag>
+            <el-tag type="warning" size="small">
+              仅 SUPER_ADMIN 可修改
+            </el-tag>
           </p>
         </div>
       </template>
 
       <el-form :model="configForm" label-width="200px">
         <el-form-item label="登录失败阈值">
-          <el-input-number v-model="configForm.loginFailureThreshold" :min="1" :max="20" style="width: 200px" />
+          <el-input-number
+            v-model="configForm.loginFailureThreshold"
+            :min="1"
+            :max="20"
+            style="width: 200px"
+          />
           <span class="form-tip">连续登录失败触发锁定的次数</span>
         </el-form-item>
         <el-form-item label="密码复杂度级别">
@@ -125,7 +187,9 @@
           <span class="form-tip">密码强度要求级别</span>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="savingSecurity" @click="saveSecurityConfigs">保存安全策略</el-button>
+          <el-button type="primary" :loading="savingSecurity" @click="saveSecurityConfigs">
+            保存安全策略
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -141,20 +205,31 @@
         </div>
       </template>
 
-      <el-table :data="configEntries" v-loading="loading" border>
-        <el-table-column prop="key" label="配置键" min-width="260" show-overflow-tooltip />
+      <el-table v-loading="loading" :data="configEntries" border>
+        <el-table-column
+          prop="key"
+          label="配置键"
+          min-width="260"
+          show-overflow-tooltip
+        />
         <el-table-column label="当前值" min-width="300">
           <template #default="{ row }">
             <el-input v-model="row.editedValue" :disabled="row.superAdminOnly && !isSuperAdmin" />
           </template>
         </el-table-column>
         <el-table-column label="原始值" min-width="220" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.rawValue }}</template>
+          <template #default="{ row }">
+            {{ row.rawValue }}
+          </template>
         </el-table-column>
         <el-table-column label="权限" min-width="100">
           <template #default="{ row }">
-            <el-tag v-if="row.superAdminOnly" type="warning" size="small">SUPER_ADMIN</el-tag>
-            <el-tag v-else type="info" size="small">ADMIN</el-tag>
+            <el-tag v-if="row.superAdminOnly" type="warning" size="small">
+              SUPER_ADMIN
+            </el-tag>
+            <el-tag v-else type="info" size="small">
+              ADMIN
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="120" fixed="right">
@@ -185,8 +260,6 @@ import {
   updateSystemConfig
 } from '@/api/admin'
 import tokenManager from '@/utils/tokenManager'
-
-const store = useStore()
 
 // 配置键常量
 const CONFIG_KEYS = {
