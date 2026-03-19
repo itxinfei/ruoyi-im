@@ -8,10 +8,10 @@ import request from '../request'
  * @returns {Promise}
  */
 export function getVisibleApplications() {
-    return request({
-        url: '/api/im/app/visible',
-        method: 'get'
-    })
+  return request({
+    url: '/api/im/app/visible',
+    method: 'get'
+  })
 }
 
 /**
@@ -19,10 +19,10 @@ export function getVisibleApplications() {
  * @returns {Promise}
  */
 export function getApplicationsByCategory() {
-    return request({
-        url: '/api/im/app/category',
-        method: 'get'
-    })
+  return request({
+    url: '/api/im/app/category',
+    method: 'get'
+  })
 }
 
 /**
@@ -31,8 +31,8 @@ export function getApplicationsByCategory() {
  * @returns {Promise}
  */
 export function getApplicationById(id) {
-    return request({
-        url: `/api/im/app/${id}`,
-        method: 'get'
-    })
+  return request({
+    url: `/api/im/app/${id}`,
+    method: 'get'
+  })
 }

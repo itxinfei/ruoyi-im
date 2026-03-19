@@ -7,7 +7,7 @@
 import request from '@/api/request'
 
 // 内存缓存（用于快速访问）
-let memoryCache = {
+const memoryCache = {
   token: '',
   expiresAt: 0,
   isFetching: false

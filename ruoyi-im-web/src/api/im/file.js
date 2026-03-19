@@ -9,14 +9,14 @@ import request from '../request'
  * @returns {Promise}
  */
 export function uploadImage(formData) {
-    return request({
-        url: '/api/im/file/upload',
-        method: 'post',
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    })
+  return request({
+    url: '/api/im/file/upload',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
 }
 
 /**
@@ -25,14 +25,30 @@ export function uploadImage(formData) {
  * @returns {Promise}
  */
 export function uploadFile(formData) {
-    return request({
-        url: '/api/im/file/upload',
-        method: 'post',
-        data: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    })
+  return request({
+    url: '/api/im/file/upload',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+/**
+ * 批量上传文件
+ * @param {FormData} formData - 包含文件列表的表单数据
+ * @returns {Promise}
+ */
+export function batchUploadFiles(formData) {
+  return request({
+    url: '/api/im/file/upload/batch',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
 }
 
 /**
@@ -41,11 +57,11 @@ export function uploadFile(formData) {
  * @returns {Promise}
  */
 export function downloadFile(fileId) {
-    return request({
-        url: `/api/im/file/download/${fileId}`,
-        method: 'get',
-        responseType: 'blob'
-    })
+  return request({
+    url: `/api/im/file/download/${fileId}`,
+    method: 'get',
+    responseType: 'blob'
+  })
 }
 
 /**
@@ -54,10 +70,10 @@ export function downloadFile(fileId) {
  * @returns {Promise}
  */
 export function getFileInfo(fileId) {
-    return request({
-        url: `/api/im/file/${fileId}`,
-        method: 'get'
-    })
+  return request({
+    url: `/api/im/file/${fileId}`,
+    method: 'get'
+  })
 }
 
 /**
@@ -66,8 +82,8 @@ export function getFileInfo(fileId) {
  * @returns {Promise}
  */
 export function deleteFile(fileId) {
-    return request({
-        url: `/api/im/file/${fileId}`,
-        method: 'delete'
-    })
+  return request({
+    url: `/api/im/file/${fileId}`,
+    method: 'delete'
+  })
 }

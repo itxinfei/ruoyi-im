@@ -16,13 +16,13 @@ const { setThemeMode } = useTheme()
 onMounted(() => {
   // 加载本地设置
   store.commit('im/LOAD_SETTINGS')
-  
+
   // 同步主题设置
-  const theme = store.state.im.settings.general.theme
+  const { theme } = store.state.im.settings.general
   if (theme) {
     setThemeMode(theme)
   }
-  
+
   // 方法1: 使用 document.fonts API
   if ('fonts' in document) {
     document.fonts.ready.then(() => {
@@ -32,12 +32,12 @@ onMounted(() => {
       })
     })
   }
-  
+
   // 方法2: 定期检查（后备方案）
   let checkCount = 0
   const checkInterval = setInterval(() => {
     checkCount++
-    
+
     // 创建测试元素
     const testEl = document.createElement('span')
     testEl.style.fontFamily = 'Material Icons Outlined'
@@ -45,11 +45,11 @@ onMounted(() => {
     testEl.style.visibility = 'hidden'
     testEl.innerHTML = 'chat'
     testEl.style.fontSize = '20px'
-    
+
     document.body.appendChild(testEl)
     const width = testEl.offsetWidth
     document.body.removeChild(testEl)
-    
+
     // 如果字体已加载（宽度不为0）或超时
     if (width > 0 || checkCount > 30) {
       clearInterval(checkInterval)
@@ -58,7 +58,7 @@ onMounted(() => {
       })
     }
   }, 100)
-  
+
   // 清理函数
   setTimeout(() => {
     clearInterval(checkInterval)
@@ -71,7 +71,7 @@ onMounted(() => {
 .material-icons-outlined {
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
-  
+
   /* 使用默认符号作为占位，避免布局跳动 */
   &::before {
     content: "•";
@@ -85,7 +85,7 @@ onMounted(() => {
 /* 字体加载完成后 */
 .material-icons-outlined.loaded {
   opacity: 1;
-  
+
   &::before {
     display: none;
   }

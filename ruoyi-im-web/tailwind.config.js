@@ -2,8 +2,8 @@
 module.exports = {
   darkMode: 'class',
   content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{vue,js,ts,jsx,tsx}'
   ],
   theme: {
     extend: {
@@ -14,12 +14,12 @@ module.exports = {
           hover: '#4096ff',
           active: '#0958d9',
           light: 'rgba(22, 119, 255, 0.1)',
-          bg: '#e6f4ff',
+          bg: '#e6f4ff'
         },
         // 背景色
         background: {
           light: '#f4f7f9',
-          dark: '#0f172a',
+          dark: '#0f172a'
         },
         // 语义颜色
         success: '#52c41a',
@@ -38,8 +38,8 @@ module.exports = {
           700: '#334155',
           800: '#1e293b',
           900: '#0f172a',
-          950: '#020617',
-        },
+          950: '#020617'
+        }
       },
       borderRadius: {
         DEFAULT: '8px',
@@ -48,12 +48,12 @@ module.exports = {
         lg: '12px',
         xl: '16px',
         '2xl': '20px',
-        full: '50%',
+        full: '50%'
       },
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
-        '128': '32rem',
+        '128': '32rem'
       },
       zIndex: {
         'dropdown': 1000,
@@ -62,12 +62,12 @@ module.exports = {
         'modal': 1040,
         'popover': 1050,
         'tooltip': 1060,
-        'notification': 1070,
+        'notification': 1070
       },
       transitionDuration: {
-        '250': '250ms',
-      },
-    },
+        '250': '250ms'
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 }

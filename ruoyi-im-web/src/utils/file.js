@@ -33,37 +33,37 @@ import tokenManager from '@/utils/tokenManager'
  * @returns {String} 带token的URL（不安全）
  */
 export function addTokenToUrl(url) {
-    // 触发控制台警告
-    console.warn(
-        '[安全警告] addTokenToUrl 已弃用！Token 在 URL 中传递存在安全风险。\n' +
+  // 触发控制台警告
+  console.warn(
+    '[安全警告] addTokenToUrl 已弃用！Token 在 URL 中传递存在安全风险。\n' +
         '请使用以下安全方法替代：\n' +
         '- 图片显示：useSecureImage (src/composables/useSecureImage.js)\n' +
         '- 文件下载：fetchSecureFile\n' +
         '- Blob URL：getSecureBlobUrl'
-    )
+  )
 
-    if (!url) return ''
+  if (!url) return ''
 
-    // 如果不是文件下载API，直接返回
-    if (!url.includes('/api/im/file/download')) {
-        return url
-    }
+  // 如果不是文件下载API，直接返回
+  if (!url.includes('/api/im/file/download')) {
+    return url
+  }
 
-    // 如果已经有token参数，直接返回
-    if (url.includes('token=')) {
-        return url
-    }
+  // 如果已经有token参数，直接返回
+  if (url.includes('token=')) {
+    return url
+  }
 
-    // 获取token
-    const token = tokenManager.getToken()
-    if (!token) {
-        console.warn('未找到token，无法添加到URL')
-        return url
-    }
+  // 获取token
+  const token = tokenManager.getToken()
+  if (!token) {
+    console.warn('未找到token，无法添加到URL')
+    return url
+  }
 
-    // 添加token参数
-    const separator = url.includes('?') ? '&' : '?'
-    return `${url}${separator}token=${token}`
+  // 添加token参数
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}token=${token}`
 }
 
 /**
@@ -73,8 +73,8 @@ export function addTokenToUrl(url) {
  * @returns {Array} 带token的URL数组
  */
 export function addTokenToUrls(urls) {
-    if (!Array.isArray(urls)) return []
-    return urls.map(url => addTokenToUrl(url))
+  if (!Array.isArray(urls)) return []
+  return urls.map(url => addTokenToUrl(url))
 }
 
 /**
@@ -84,7 +84,7 @@ export function addTokenToUrls(urls) {
  * @returns {String} 安全的头像URL
  */
 export function getSecureAvatarUrl(avatarUrl) {
-    return addTokenToUrl(avatarUrl)
+  return addTokenToUrl(avatarUrl)
 }
 
 /**
@@ -94,7 +94,7 @@ export function getSecureAvatarUrl(avatarUrl) {
  * @returns {String} 带token的文件URL
  */
 export function getSecureFileUrl(fileUrl) {
-    return addTokenToUrl(fileUrl)
+  return addTokenToUrl(fileUrl)
 }
 
 /**
@@ -104,59 +104,59 @@ export function getSecureFileUrl(fileUrl) {
  * @returns {Promise<void>} 下载完成Promise
  */
 export async function fetchSecureFile(url, filename = null) {
-    try {
-        const token = tokenManager.getToken()
-        if (!token) {
-            throw new Error('未找到认证令牌')
-        }
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-
-        if (!response.ok) {
-            throw new Error(`下载失败: ${response.status}`)
-        }
-
-        // 从响应头或 URL 中获取文件名
-        let downloadFilename = filename
-        if (!downloadFilename) {
-            const contentDisposition = response.headers.get('Content-Disposition')
-            if (contentDisposition) {
-                const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
-                if (match && match[1]) {
-                    downloadFilename = match[1].replace(/['"]/g, '')
-                }
-            }
-        }
-
-        if (!downloadFilename) {
-            // 从 URL 中提取文件名
-            const urlParts = url.split('/')
-            downloadFilename = urlParts[urlParts.length - 1] || 'download'
-        }
-
-        // 获取文件内容
-        const blob = await response.blob()
-
-        // 创建下载链接
-        const downloadUrl = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = downloadUrl
-        link.download = downloadFilename
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-
-        // 释放内存
-        window.URL.revokeObjectURL(downloadUrl)
-    } catch (error) {
-        console.error('文件下载失败:', error)
-        throw error
+  try {
+    const token = tokenManager.getToken()
+    if (!token) {
+      throw new Error('未找到认证令牌')
     }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`下载失败: ${response.status}`)
+    }
+
+    // 从响应头或 URL 中获取文件名
+    let downloadFilename = filename
+    if (!downloadFilename) {
+      const contentDisposition = response.headers.get('Content-Disposition')
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+        if (match && match[1]) {
+          downloadFilename = match[1].replace(/['"]/g, '')
+        }
+      }
+    }
+
+    if (!downloadFilename) {
+      // 从 URL 中提取文件名
+      const urlParts = url.split('/')
+      downloadFilename = urlParts[urlParts.length - 1] || 'download'
+    }
+
+    // 获取文件内容
+    const blob = await response.blob()
+
+    // 创建下载链接
+    const downloadUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = downloadFilename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    // 释放内存
+    window.URL.revokeObjectURL(downloadUrl)
+  } catch (error) {
+    console.error('文件下载失败:', error)
+    throw error
+  }
 }
 
 /**
@@ -168,38 +168,38 @@ export async function fetchSecureFile(url, filename = null) {
  * @returns {Promise<String>} Blob URL
  */
 export async function getSecureBlobUrl(url, options = {}) {
-    const { maxAge = 60000 } = options
+  const { maxAge = 60000 } = options
 
-    try {
-        const token = tokenManager.getToken()
-        if (!token) {
-            throw new Error('未找到认证令牌')
-        }
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-
-        if (!response.ok) {
-            throw new Error(`获取文件失败: ${response.status}`)
-        }
-
-        const blob = await response.blob()
-        const blobUrl = window.URL.createObjectURL(blob)
-
-        // 设置自动清理，避免内存泄漏
-        setTimeout(() => {
-            window.URL.revokeObjectURL(blobUrl)
-        }, maxAge)
-
-        return blobUrl
-    } catch (error) {
-        console.error('获取 Blob URL 失败:', error)
-        throw error
+  try {
+    const token = tokenManager.getToken()
+    if (!token) {
+      throw new Error('未找到认证令牌')
     }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`获取文件失败: ${response.status}`)
+    }
+
+    const blob = await response.blob()
+    const blobUrl = window.URL.createObjectURL(blob)
+
+    // 设置自动清理，避免内存泄漏
+    setTimeout(() => {
+      window.URL.revokeObjectURL(blobUrl)
+    }, maxAge)
+
+    return blobUrl
+  } catch (error) {
+    console.error('获取 Blob URL 失败:', error)
+    throw error
+  }
 }
 
 /**
@@ -209,8 +209,8 @@ export async function getSecureBlobUrl(url, options = {}) {
  * @returns {Promise<Array<String>>} Blob URL数组
  */
 export async function getSecureBlobUrls(urls, options = {}) {
-    if (!Array.isArray(urls)) return []
+  if (!Array.isArray(urls)) return []
 
-    const promises = urls.map(url => getSecureBlobUrl(url, options))
-    return Promise.all(promises)
+  const promises = urls.map(url => getSecureBlobUrl(url, options))
+  return Promise.all(promises)
 }

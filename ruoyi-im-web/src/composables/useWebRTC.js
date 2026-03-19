@@ -9,10 +9,10 @@ import { ElMessage } from 'element-plus'
  * @param {HTMLVideoElement} options.remoteVideo 远端视频元素
  * @param {HTMLAudioElement} options.remoteAudio 远端音频元素
  */
-export function useWebRTC({ sendSignal, localVideo, remoteVideo, remoteAudio }) {
+export function useWebRTC({ sendSignal, remoteVideo, remoteAudio }) {
   const peerConnection = ref(null)
   const isConnected = ref(false)
-  
+
   // ICE 服务器配置（建议生产环境使用 STUN/TURN 服务器）
   const rtcConfig = {
     iceServers: [
@@ -30,7 +30,7 @@ export function useWebRTC({ sendSignal, localVideo, remoteVideo, remoteAudio }) 
     }
 
     const pc = new RTCPeerConnection(rtcConfig)
-    
+
     // 监听 ICE 候选者
     pc.onicecandidate = (event) => {
       if (event.candidate) {
@@ -73,7 +73,7 @@ export function useWebRTC({ sendSignal, localVideo, remoteVideo, remoteAudio }) 
    */
   const createOffer = async (callId, peerId, localStream) => {
     const pc = initPeerConnection(callId, peerId)
-    
+
     // 添加本地轨道
     localStream.getTracks().forEach(track => {
       pc.addTrack(track, localStream)
@@ -82,7 +82,7 @@ export function useWebRTC({ sendSignal, localVideo, remoteVideo, remoteAudio }) 
     try {
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
-      
+
       sendSignal('offer', {
         callId,
         toUserId: peerId,
@@ -99,7 +99,7 @@ export function useWebRTC({ sendSignal, localVideo, remoteVideo, remoteAudio }) 
    */
   const createAnswer = async (callId, peerId, offerSdp, localStream) => {
     const pc = initPeerConnection(callId, peerId)
-    
+
     // 添加本地轨道
     localStream.getTracks().forEach(track => {
       pc.addTrack(track, localStream)
@@ -109,7 +109,7 @@ export function useWebRTC({ sendSignal, localVideo, remoteVideo, remoteAudio }) 
       await pc.setRemoteDescription(new RTCSessionDescription(offerSdp))
       const answer = await pc.createAnswer()
       await pc.setLocalDescription(answer)
-      
+
       sendSignal('answer', {
         callId,
         toUserId: peerId,

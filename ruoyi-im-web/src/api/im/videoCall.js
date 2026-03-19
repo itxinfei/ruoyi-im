@@ -12,15 +12,15 @@ import request from '../request'
  * @returns {Promise}
  */
 export function initiateCall(data) {
-    return request({
-        url: '/api/im/video-call/initiate',
-        method: 'post',
-        params: {
-            calleeId: data.calleeId,
-            conversationId: data.conversationId,
-            callType: data.callType || 'VIDEO'
-        }
-    })
+  return request({
+    url: '/api/im/video-call/initiate',
+    method: 'post',
+    params: {
+      calleeId: data.calleeId,
+      conversationId: data.conversationId,
+      callType: data.callType || 'VIDEO'
+    }
+  })
 }
 
 /**
@@ -29,10 +29,10 @@ export function initiateCall(data) {
  * @returns {Promise}
  */
 export function acceptCall(callId) {
-    return request({
-        url: `/api/im/video-call/${callId}/accept`,
-        method: 'post'
-    })
+  return request({
+    url: `/api/im/video-call/${callId}/accept`,
+    method: 'post'
+  })
 }
 
 /**
@@ -42,11 +42,11 @@ export function acceptCall(callId) {
  * @returns {Promise}
  */
 export function rejectCall(callId, reason) {
-    return request({
-        url: `/api/im/video-call/${callId}/reject`,
-        method: 'post',
-        params: { reason }
-    })
+  return request({
+    url: `/api/im/video-call/${callId}/reject`,
+    method: 'post',
+    params: { reason }
+  })
 }
 
 /**
@@ -55,10 +55,10 @@ export function rejectCall(callId, reason) {
  * @returns {Promise}
  */
 export function endCall(callId) {
-    return request({
-        url: `/api/im/video-call/${callId}/end`,
-        method: 'post'
-    })
+  return request({
+    url: `/api/im/video-call/${callId}/end`,
+    method: 'post'
+  })
 }
 
 /**
@@ -67,10 +67,10 @@ export function endCall(callId) {
  * @returns {Promise}
  */
 export function getCallInfo(callId) {
-    return request({
-        url: `/api/im/video-call/${callId}`,
-        method: 'get'
-    })
+  return request({
+    url: `/api/im/video-call/${callId}`,
+    method: 'get'
+  })
 }
 
 /**
@@ -78,10 +78,10 @@ export function getCallInfo(callId) {
  * @returns {Promise}
  */
 export function getActiveCall() {
-    return request({
-        url: '/api/im/video-call/active',
-        method: 'get'
-    })
+  return request({
+    url: '/api/im/video-call/active',
+    method: 'get'
+  })
 }
 
 /**
@@ -93,15 +93,15 @@ export function getActiveCall() {
  * @returns {Promise}
  */
 export function sendSignal(data) {
-    return request({
-        url: '/api/im/video-call/signal',
-        method: 'post',
-        params: {
-            callId: data.callId,
-            signalType: data.signalType
-        },
-        data: data.signalData
-    })
+  return request({
+    url: '/api/im/video-call/signal',
+    method: 'post',
+    params: {
+      callId: data.callId,
+      signalType: data.signalType
+    },
+    data: data.signalData
+  })
 }
 
 /**
@@ -110,11 +110,11 @@ export function sendSignal(data) {
  * @returns {Promise}
  */
 export function getCallHistory(limit = 20) {
-    return request({
-        url: '/api/im/video-call/history',
-        method: 'get',
-        params: { limit }
-    })
+  return request({
+    url: '/api/im/video-call/history',
+    method: 'get',
+    params: { limit }
+  })
 }
 
 // ==================== 群组多人通话接口 ====================
@@ -129,16 +129,16 @@ export function getCallHistory(limit = 20) {
  * @returns {Promise}
  */
 export function initiateGroupCall(data) {
-    return request({
-        url: '/api/im/video-call/group/initiate',
-        method: 'post',
-        params: {
-            conversationId: data.conversationId,
-            callType: data.callType || 'VIDEO',
-            maxParticipants: data.maxParticipants || 9
-        },
-        data: data.invitedUserIds
-    })
+  return request({
+    url: '/api/im/video-call/group/initiate',
+    method: 'post',
+    params: {
+      conversationId: data.conversationId,
+      callType: data.callType || 'VIDEO',
+      maxParticipants: data.maxParticipants || 9
+    },
+    data: data.invitedUserIds
+  })
 }
 
 /**
@@ -147,10 +147,10 @@ export function initiateGroupCall(data) {
  * @returns {Promise}
  */
 export function joinGroupCall(callId) {
-    return request({
-        url: `/api/im/video-call/group/${callId}/join`,
-        method: 'post'
-    })
+  return request({
+    url: `/api/im/video-call/group/${callId}/join`,
+    method: 'post'
+  })
 }
 
 /**
@@ -159,10 +159,10 @@ export function joinGroupCall(callId) {
  * @returns {Promise}
  */
 export function leaveGroupCall(callId) {
-    return request({
-        url: `/api/im/video-call/group/${callId}/leave`,
-        method: 'post'
-    })
+  return request({
+    url: `/api/im/video-call/group/${callId}/leave`,
+    method: 'post'
+  })
 }
 
 /**
@@ -171,10 +171,10 @@ export function leaveGroupCall(callId) {
  * @returns {Promise}
  */
 export function getCallParticipants(callId) {
-    return request({
-        url: `/api/im/video-call/group/${callId}/participants`,
-        method: 'get'
-    })
+  return request({
+    url: `/api/im/video-call/group/${callId}/participants`,
+    method: 'get'
+  })
 }
 
 /**
@@ -184,11 +184,11 @@ export function getCallParticipants(callId) {
  * @returns {Promise}
  */
 export function toggleMute(callId, muted) {
-    return request({
-        url: `/api/im/video-call/group/${callId}/mute`,
-        method: 'post',
-        params: { muted }
-    })
+  return request({
+    url: `/api/im/video-call/group/${callId}/mute`,
+    method: 'post',
+    params: { muted }
+  })
 }
 
 /**
@@ -198,9 +198,9 @@ export function toggleMute(callId, muted) {
  * @returns {Promise}
  */
 export function toggleCamera(callId, cameraOff) {
-    return request({
-        url: `/api/im/video-call/group/${callId}/camera`,
-        method: 'post',
-        params: { cameraOff }
-    })
+  return request({
+    url: `/api/im/video-call/group/${callId}/camera`,
+    method: 'post',
+    params: { cameraOff }
+  })
 }

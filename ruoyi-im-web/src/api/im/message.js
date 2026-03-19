@@ -140,7 +140,7 @@ export function markAsRead(data) {
     method: 'put',
     data: {
       conversationId: data.conversationId,
-      messageIds: messageIds
+      messageIds
     }
   })
 }
@@ -181,7 +181,7 @@ export function replyMessage(data) {
  * @returns {Promise}
  * @deprecated 后端暂未实现此接口
  */
-export function addReaction(messageId, data) {
+export function addReaction(_messageId, _data) {
   console.warn('addReaction: 后端暂未实现此接口')
   return Promise.reject(new Error('后端暂未实现此接口'))
 }
@@ -192,7 +192,7 @@ export function addReaction(messageId, data) {
  * @returns {Promise}
  * @deprecated 后端暂未实现此接口
  */
-export function removeReaction(messageId) {
+export function removeReaction(_messageId) {
   console.warn('removeReaction: 后端暂未实现此接口')
   return Promise.reject(new Error('后端暂未实现此接口'))
 }
@@ -203,7 +203,7 @@ export function removeReaction(messageId) {
  * @returns {Promise}
  * @deprecated 后端暂未实现此接口
  */
-export function getMessageReactions(messageId) {
+export function getMessageReactions(_messageId) {
   console.warn('getMessageReactions: 后端暂未实现此接口')
   return Promise.resolve({ data: [] })
 }
@@ -248,7 +248,7 @@ export function markMentionAsRead(messageId) {
  * @returns {Promise}
  * @deprecated 请使用 conversation.getUnreadCount 替代
  */
-export function getUnreadCount(conversationId) {
+export function getUnreadCount(_conversationId) {
   console.warn('getUnreadCount: 请使用 conversation.getUnreadCount 替代')
   return request({
     url: `/api/im/conversation/unreadCount`,
@@ -269,7 +269,7 @@ export function getUnreadCount(conversationId) {
  */
 export function addMessageFavorite(data) {
   return request({
-    url: '/api/im/message/favorite/add',
+    url: `/api/im/message/favorite/${data.messageId}`,
     method: 'post',
     data
   })
@@ -282,7 +282,7 @@ export function addMessageFavorite(data) {
  */
 export function removeMessageFavorite(messageId) {
   return request({
-    url: `/api/im/message/favorite/remove/${messageId}`,
+    url: `/api/im/message/favorite/${messageId}`,
     method: 'delete'
   })
 }
@@ -294,7 +294,7 @@ export function removeMessageFavorite(messageId) {
  */
 export function checkMessageFavorited(messageId) {
   return request({
-    url: `/api/im/message/favorite/check/${messageId}`,
+    url: `/api/im/message/favorite/${messageId}/check`,
     method: 'get'
   })
 }

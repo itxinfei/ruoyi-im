@@ -1,6 +1,6 @@
 /**
  * HTML Sanitizer - 安全的 HTML 过滤工具
- * 
+ *
  * 用于过滤用户输入的 HTML 内容，防止 XSS 攻击
  * 支持高亮显示功能，同时确保安全性
  */
@@ -11,40 +11,40 @@ import DOMPurify from 'dompurify'
 const SANITIZE_CONFIG = {
   // 允许的标签（用于高亮显示）
   ALLOWED_TAGS: ['span', 'mark', 'br', 'b', 'strong', 'i', 'em', 'u', 'code', 'pre', 'p', 'div'],
-  
+
   // 允许的属性（仅用于样式和高亮）
   ALLOWED_ATTR: ['class'],
-  
+
   // 允许的样式
   ALLOWED_STYLE: [],
-  
+
   // 强制移除所有 JavaScript 事件处理器
   FORCE_BODY: false,
-  
+
   // 移除 HTML 注释
   REMOVE_COMMENTS: true,
-  
+
   // 移除所有脚本
   REMOVE_SCRIPT: true,
-  
+
   // 移除所有样式标签（除非在允许范围内）
   REMOVE_STYLES: true,
-  
+
   // 移除所有 iframe
   REMOVE_IFRAME: true,
-  
+
   // 移除所有对象和 embed
   REMOVE_OBJECT: true,
-  
+
   // 移除所有 form 元素
   REMOVE_FORM: true,
-  
+
   // 移除所有 input 和 button
   REMOVE_INPUT: true,
-  
+
   // 移除所有链接的 onclick 等事件
   REMOVE_ONCLICK: true,
-  
+
   // 移除所有带有 JavaScript 的链接
   REMOVE_JS_LINKS: true
 }
@@ -63,7 +63,7 @@ export function sanitizeHTML(html, config = {}) {
   try {
     // 合并配置
     const finalConfig = { ...SANITIZE_CONFIG, ...config }
-    
+
     // 使用 DOMPurify 进行过滤
     return DOMPurify.sanitize(html, finalConfig)
   } catch (error) {
@@ -80,9 +80,9 @@ export function sanitizeHTML(html, config = {}) {
  */
 function fallbackSanitize(html) {
   if (!html) return ''
-  
+
   // 移除危险的标签和属性
-  let sanitized = html
+  const sanitized = html
     // 移除 script 标签及其内容
     .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, '')
     // 移除 style 标签及其内容
@@ -114,7 +114,7 @@ function fallbackSanitize(html) {
     // 移除危险的 HTML 实体编码
     .replace(/&#x[\da-fA-F]+;?/g, '')
     .replace(/&#\d+;?/g, '')
-  
+
   return sanitized
 }
 
@@ -134,14 +134,14 @@ export function highlightText(text, keyword, tag = 'mark', className = 'highligh
   try {
     // 先转义原始文本中的 HTML
     const escapedText = escapeHTML(text)
-    
+
     // 创建安全的高亮 HTML
     const escapedKeyword = escapeHTML(keyword)
     const regex = new RegExp(`(${escapedKeyword})`, 'gi')
-    
+
     // 使用 span 标签进行高亮
     const highlighted = escapedText.replace(regex, `<${tag} class="${className}">$1</${tag}>`)
-    
+
     // 再次过滤确保安全
     return sanitizeHTML(highlighted)
   } catch (error) {
@@ -157,7 +157,7 @@ export function highlightText(text, keyword, tag = 'mark', className = 'highligh
  */
 export function escapeHTML(text) {
   if (!text) return ''
-  
+
   const div = document.createElement('div')
   div.textContent = text
   return div.innerHTML
@@ -171,26 +171,26 @@ export function escapeHTML(text) {
  */
 export function formatAIMessage(content) {
   if (!content) return ''
-  
+
   try {
     // 先转义 HTML
     let formatted = escapeHTML(content)
-    
+
     // 安全地处理换行
     formatted = formatted.replace(/\n/g, '<br>')
-    
+
     // 安全地处理代码块
     formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
       const escapedCode = escapeHTML(code).trim()
       return `<pre><code>${escapedCode}</code></pre>`
     })
-    
+
     // 安全地处理行内代码
     formatted = formatted.replace(/`([^`]+)`/g, (match, code) => {
       const escapedCode = escapeHTML(code)
       return `<code>${escapedCode}</code>`
     })
-    
+
     // 最后过滤确保安全
     return sanitizeHTML(formatted)
   } catch (error) {

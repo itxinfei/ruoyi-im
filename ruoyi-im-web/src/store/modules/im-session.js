@@ -71,7 +71,7 @@ export default {
         // 新会话，插入到列表首部
         state.sessions.unshift(session)
       }
-      
+
       // 更新未读总数
       state.totalUnreadCount = state.sessions.reduce((sum, s) => sum + (Number(s.unreadCount) || 0), 0)
     },
@@ -114,7 +114,7 @@ export default {
 
   actions: {
     // 加载会话列表
-    async loadSessions({ commit, rootState }, filter = 'all') {
+    async loadSessions({ commit }, filter = 'all') {
       commit('SET_LOADING', true)
       try {
         const res = await getConversations(filter)
@@ -168,7 +168,7 @@ export default {
     },
 
     // 选择会话
-    async selectSession({ commit, dispatch }, session) {
+    async selectSession({ commit }, session) {
       commit('SET_CURRENT_SESSION', session)
       commit('UPDATE_SESSION', {
         id: session.id,

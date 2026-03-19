@@ -11,11 +11,11 @@ import request from '../request'
  * @returns {Promise}
  */
 export function getTodos(params) {
-    return request({
-        url: '/api/im/workbench/todos',
-        method: 'get',
-        params
-    })
+  return request({
+    url: '/api/im/workbench/todos',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -28,11 +28,11 @@ export function getTodos(params) {
  * @returns {Promise}
  */
 export function createTodo(data) {
-    return request({
-        url: '/api/im/workbench/todos',
-        method: 'post',
-        data
-    })
+  return request({
+    url: '/api/im/workbench/todos',
+    method: 'post',
+    data
+  })
 }
 
 /**
@@ -41,10 +41,10 @@ export function createTodo(data) {
  * @returns {Promise}
  */
 export function completeTodo(todoId) {
-    return request({
-        url: `/api/im/workbench/todos/${todoId}/complete`,
-        method: 'put'
-    })
+  return request({
+    url: `/api/im/workbench/todos/${todoId}/complete`,
+    method: 'put'
+  })
 }
 
 /**
@@ -56,14 +56,14 @@ export function completeTodo(todoId) {
  * @returns {Promise}
  */
 export function updateTodo(todoId, data) {
-    return request({
-        url: `/api/im/workbench/todos/${todoId}`,
-        method: 'put',
-        params: {
-            title: data.title,
-            description: data.description
-        }
-    })
+  return request({
+    url: `/api/im/workbench/todos/${todoId}`,
+    method: 'put',
+    params: {
+      title: data.title,
+      description: data.description
+    }
+  })
 }
 
 /**
@@ -72,10 +72,10 @@ export function updateTodo(todoId, data) {
  * @returns {Promise}
  */
 export function deleteTodo(todoId) {
-    return request({
-        url: `/api/im/workbench/todos/${todoId}`,
-        method: 'delete'
-    })
+  return request({
+    url: `/api/im/workbench/todos/${todoId}`,
+    method: 'delete'
+  })
 }
 
 /**
@@ -85,11 +85,11 @@ export function deleteTodo(todoId) {
  * @returns {Promise}
  */
 export function getApprovals(params) {
-    return request({
-        url: '/api/im/approval/pending',
-        method: 'get',
-        params
-    })
+  return request({
+    url: '/api/im/approval/pending',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -101,9 +101,9 @@ export function getApprovals(params) {
  * @returns {Promise}
  * @deprecated 请使用 approval.js 中的 approve/reject 方法
  */
-export function handleApproval(data) {
-    console.warn('handleApproval: 请使用 approval.js 中的 approve/reject 方法')
-    return Promise.reject(new Error('请使用 approval.js 中的 approve/reject 方法'))
+export function handleApproval(_data) {
+  console.warn('handleApproval: 请使用 approval.js 中的 approve/reject 方法')
+  return Promise.reject(new Error('请使用 approval.js 中的 approve/reject 方法'))
 }
 
 /**
@@ -115,15 +115,15 @@ export function handleApproval(data) {
  * @returns {Promise}
  */
 export function checkIn(data) {
-    const isCheckOut = data.type === 'CHECK_OUT'
-    return request({
-        url: `/api/im/attendance/${isCheckOut ? 'checkOut' : 'checkIn'}`,
-        method: 'post',
-        params: {
-            location: data.location,
-            deviceInfo: data.deviceInfo
-        }
-    })
+  const isCheckOut = data.type === 'CHECK_OUT'
+  return request({
+    url: `/api/im/attendance/${isCheckOut ? 'checkOut' : 'checkIn'}`,
+    method: 'post',
+    params: {
+      location: data.location,
+      deviceInfo: data.deviceInfo
+    }
+  })
 }
 
 /**
@@ -134,11 +134,11 @@ export function checkIn(data) {
  * @returns {Promise}
  */
 export function getAttendance(params) {
-    return request({
-        url: '/api/im/attendance/list',
-        method: 'get',
-        params
-    })
+  return request({
+    url: '/api/im/attendance/list',
+    method: 'get',
+    params
+  })
 }
 
 /**
@@ -146,10 +146,10 @@ export function getAttendance(params) {
  * @returns {Promise}
  */
 export function getAnnouncements() {
-    return request({
-        url: '/api/im/announcement/latest',
-        method: 'get'
-    })
+  return request({
+    url: '/api/im/announcement/latest',
+    method: 'get'
+  })
 }
 
 /**
@@ -157,8 +157,8 @@ export function getAnnouncements() {
  * @returns {Promise}
  */
 export function getStatistics() {
-    return request({
-        url: '/api/im/workbench/statistics',
-        method: 'get'
-    })
+  return request({
+    url: '/api/im/workbench/statistics',
+    method: 'get'
+  })
 }

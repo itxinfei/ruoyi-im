@@ -8,10 +8,10 @@ import request from '../request'
  * @returns {Promise}
  */
 export function getOrgTree() {
-    return request({
-        url: '/api/im/organization/department/tree',
-        method: 'get'
-    })
+  return request({
+    url: '/api/im/organization/department/tree',
+    method: 'get'
+  })
 }
 
 /**
@@ -20,10 +20,10 @@ export function getOrgTree() {
  * @returns {Promise}
  */
 export function getDepartment(deptId) {
-    return request({
-        url: `/api/im/organization/department/${deptId}`,
-        method: 'get'
-    })
+  return request({
+    url: `/api/im/organization/department/${deptId}`,
+    method: 'get'
+  })
 }
 
 /**
@@ -32,22 +32,8 @@ export function getDepartment(deptId) {
  * @returns {Promise}
  */
 export function getDepartmentMembers(deptId) {
-    return request({
-        url: `/api/im/organization/department/${deptId}/members`,
-        method: 'get'
-    })
-}
-
-/**
- * 搜索组织成员
- * @param {Object} params - 查询参数
- * @param {string} params.keyword - 搜索关键词
- * @returns {Promise}
- */
-export function searchOrgMembers(params) {
-    return request({
-        url: '/api/im/organization/search',
-        method: 'get',
-        params
-    })
+  return request({
+    url: `/api/im/organization/department/${deptId}/members`,
+    method: 'get'
+  })
 }

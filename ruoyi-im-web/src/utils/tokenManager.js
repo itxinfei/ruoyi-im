@@ -5,7 +5,7 @@
  */
 
 // 内存缓存（用于快速访问）
-let memoryCache = {
+const memoryCache = {
   token: '',
   userInfo: {},
   role: 'USER',
@@ -65,7 +65,11 @@ function loadFromStorage() {
     }
   } catch (error) {
     console.error('从 sessionStorage 加载数据失败:', error)
-    clearAll()
+    // 清除缓存数据
+    memoryCache.token = null
+    memoryCache.userInfo = {}
+    memoryCache.role = 'USER'
+    memoryCache.expiresAt = null
   }
 }
 
