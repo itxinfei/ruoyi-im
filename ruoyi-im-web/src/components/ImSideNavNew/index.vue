@@ -2,7 +2,9 @@
   <nav class="premium-nav-bar">
     <!-- 顶部 Logo -->
     <div class="nav-brand-cell">
-      <div class="logo-text">IM</div>
+      <div class="logo-text">
+        IM
+      </div>
     </div>
 
     <!-- 功能导航 -->
@@ -16,7 +18,7 @@
       >
         <div class="icon-frame">
           <span class="material-icons-outlined">{{ item.icon }}</span>
-          <div v-if="item.badge" class="red-dot"></div>
+          <div v-if="item.badge" class="red-dot" />
         </div>
         <span class="icon-label">{{ item.label }}</span>
       </div>
@@ -42,12 +44,12 @@
       <!-- 4. 个人中心页面 -->
       <div class="user-avatar-trigger" title="管理个人信息" @click="showProfilePage = true">
         <div class="avatar-hover-wrapper">
-          <DingtalkAvatar 
-            :src="currentUser.avatar" 
-            :name="currentUser.nickname" 
-            :user-id="currentUser.id" 
-            :size="36" 
-            shape="square" 
+          <DingtalkAvatar
+            :src="currentUser.avatar"
+            :name="currentUser.nickname"
+            :user-id="currentUser.id"
+            :size="36"
+            shape="square"
           />
         </div>
       </div>
@@ -91,8 +93,8 @@ import GlobalSearchDialog from '@/components/Common/GlobalSearchDialog.vue'
 import SettingsPanel from '@/views/SettingsPanel.vue'
 import ProfilePanel from '@/views/ProfilePanel.vue'
 
-const props = defineProps({ activeModule: String })
-const emit = defineEmits(['switch-module', 'go-conversation'])
+defineProps({ activeModule: String })
+defineEmits(['switch-module', 'go-conversation'])
 const store = useStore()
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 
@@ -141,58 +143,166 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 
 <style scoped lang="scss">
 .premium-nav-bar {
-  width: 64px; height: 100vh;
-  background: linear-gradient(180deg, #1a88ff 0%, #1565d8 100%);
-  display: flex; flex-direction: column; align-items: center;
-  padding: 8px 0; flex-shrink: 0; z-index: 100;
+  width: var(--dt-nav-sidebar-width, 64px);
+  height: 100vh;
+  background: linear-gradient(180deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--dt-spacing-sm) 0;
+  flex-shrink: 0;
+  z-index: var(--dt-z-fixed);
 }
 
 .nav-brand-cell {
-  margin-bottom: 8px;
+  margin-bottom: var(--dt-spacing-sm);
+  
   .logo-text {
-    width: 36px; height: 36px; background: rgba(255, 255, 255, 0.2);
-    border-radius: 8px; display: flex; align-items: center; justify-content: center;
-    color: #fff; font-weight: 900; font-size: 16px; border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--dt-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dt-text-white);
+    font-weight: var(--dt-font-weight-bold);
+    font-size: var(--dt-font-size-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all var(--dt-transition-fast);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
+    }
   }
 }
 
 .nav-menu-list {
-  flex: 1; width: 100%; display: flex; flex-direction: column; gap: 2px; align-items: center;
-  
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacing-xs);
+  align-items: center;
+  padding: var(--dt-spacing-xs) 0;
+
   .nav-icon-cell {
-    width: 100%; cursor: pointer; display: flex; flex-direction: column; align-items: center;
-    
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--dt-spacing-xs) 0;
+
     .icon-frame {
-      width: 38px; height: 36px; display: flex; align-items: center; justify-content: center;
-      border-radius: 8px; transition: all 0.2s;
-      span { color: rgba(255, 255, 255, 0.8); font-size: 22px; }
+      width: 40px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--dt-radius-md);
+      transition: all var(--dt-transition-fast);
+      position: relative;
+      
+      span {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 22px;
+        line-height: 1;
+      }
+    }
+
+    .icon-label {
+      font-size: var(--dt-font-size-xs);
+      color: var(--dt-text-white);
+      margin-top: 2px;
+      opacity: 0.85;
+      font-weight: var(--dt-font-weight-normal);
+      transition: all var(--dt-transition-fast);
+    }
+
+    &:hover .icon-frame {
+      background: rgba(255, 255, 255, 0.15);
+      span { color: var(--dt-text-white); }
     }
     
-    .icon-label { font-size: 10px; color: #fff; margin-top: 1px; opacity: 0.9; }
-
-    &:hover .icon-frame { background: rgba(255, 255, 255, 0.15); span { color: #fff; } }
+    &:hover .icon-label {
+      opacity: 1;
+    }
+    
     &.active {
-      .icon-frame { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); span { color: #1677ff; } }
-      .icon-label { font-weight: 700; opacity: 1; }
+      .icon-frame {
+        background: var(--dt-text-white);
+        box-shadow: var(--dt-shadow-2);
+        span {
+          color: var(--dt-brand-color);
+        }
+      }
+      .icon-label {
+        font-weight: var(--dt-font-weight-semibold);
+        opacity: 1;
+      }
+    }
+    
+    // 徽标红点
+    .red-dot {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      background: var(--dt-error-color);
+      border-radius: 50%;
+      border: 1.5px solid var(--dt-brand-color);
     }
   }
 }
 
 .nav-footer-cell {
-  margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-bottom: 6px;
-  
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dt-spacing-sm);
+  padding-bottom: var(--dt-spacing-sm);
+
   .footer-btn {
-    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-    color: rgba(255, 255, 255, 0.8); cursor: pointer; border-radius: 8px; transition: all 0.2s;
-    span { font-size: 20px; }
-    &:hover { background: rgba(255, 255, 255, 0.2); color: #fff; transform: translateY(-1px); }
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    border-radius: var(--dt-radius-md);
+    transition: all var(--dt-transition-fast);
+    
+    span {
+      font-size: 20px;
+      line-height: 1;
+    }
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--dt-text-white);
+      transform: translateY(-1px);
+    }
   }
 
   .user-avatar-trigger {
     cursor: pointer;
+    margin-top: var(--dt-spacing-xs);
+    
     .avatar-hover-wrapper {
-      padding: 2px; border-radius: 10px; transition: all 0.2s;
-      &:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.05); }
+      padding: 2px;
+      border-radius: var(--dt-radius-md);
+      transition: all var(--dt-transition-fast);
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(1.05);
+      }
     }
   }
 }

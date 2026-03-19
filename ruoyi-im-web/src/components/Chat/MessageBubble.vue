@@ -2,8 +2,13 @@
   <div class="message-bubble" :class="{ 'is-own': message.isOwn }">
     <!-- 文本消息 -->
     <div v-if="message.type === 'TEXT'" class="text-content">
-      <template v-for="(part, index) in parsedTextParts" :key="index">
-        <a v-if="part.isLink" :href="part.text" target="_blank" class="text-link">{{ part.text }}</a>
+      <template v-for="(part, index) in parsedTextParts" :key="part.text + '-' + index">
+        <a
+          v-if="part.isLink"
+          :href="part.text"
+          target="_blank"
+          class="text-link"
+        >{{ part.text }}</a>
         <span v-else>{{ part.text }}</span>
       </template>
     </div>
@@ -15,7 +20,9 @@
     <div v-else-if="message.type === 'IMAGE'" class="image-content">
       <!-- 上传中 -->
       <div v-if="message.status === 'uploading'" class="upload-progress">
-        <el-icon class="is-loading"><Loading /></el-icon>
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>上传中... {{ message.progress || 0 }}%</span>
       </div>
       <!-- 上传失败 -->
@@ -39,7 +46,9 @@
       <div v-if="message.status === 'uploading'" class="file-uploading">
         <el-icon><Document /></el-icon>
         <div class="file-info">
-          <div class="file-name">{{ message.fileName || '未知文件' }}</div>
+          <div class="file-name">
+            {{ message.fileName || '未知文件' }}
+          </div>
           <div class="file-meta">
             <el-progress :percentage="message.progress || 0" :show-text="false" :stroke-width="2" />
             <span class="file-size">{{ message.fileSize || '0 B' }}</span>
@@ -50,17 +59,25 @@
       <div v-else-if="message.status === 'failed'" class="file-failed">
         <el-icon><WarningFilled /></el-icon>
         <div class="file-info">
-          <div class="file-name">{{ message.fileName || '未知文件' }}</div>
-          <div class="file-meta">上传失败</div>
+          <div class="file-name">
+            {{ message.fileName || '未知文件' }}
+          </div>
+          <div class="file-meta">
+            上传失败
+          </div>
         </div>
       </div>
       <!-- 正常显示 -->
       <div v-else class="file-normal" @click="handleFileDownload">
         <div class="file-icon" :class="getFileIconClass(getFileName(message))">
-          <el-icon :size="24"><component :is="getFileIcon(getFileName(message))" /></el-icon>
+          <el-icon :size="24">
+            <component :is="getFileIcon(getFileName(message))" />
+          </el-icon>
         </div>
         <div class="file-info">
-          <div class="file-name">{{ getFileName(message) }}</div>
+          <div class="file-name">
+            {{ getFileName(message) }}
+          </div>
           <div class="file-meta">
             <span class="file-size">{{ getFileSize(message) }}</span>
             <span class="file-divider">·</span>
@@ -77,7 +94,9 @@
           <span class="material-icons-outlined">{{ getDocumentIcon(message.documentType) }}</span>
         </div>
         <div class="doc-info">
-          <div class="doc-title">{{ message.documentTitle || '未知文档' }}</div>
+          <div class="doc-title">
+            {{ message.documentTitle || '未知文档' }}
+          </div>
           <div class="doc-meta">
             <span>{{ message.documentCreator || '我' }}</span>
             <span>·</span>
@@ -105,6 +124,18 @@
       ref="documentPreviewRef"
       @close="handlePreviewClose"
     />
+    <!-- 消息状态指示（右下角） -->
+    <div 
+      v-if="message?.status" 
+      class="message-status" 
+      :class="'status-' + message.status"
+      aria-label="消息状态"
+    >
+      <span v-if="message.status === 'sending'" class="status-sending">...</span>
+      <span v-else-if="message.status === 'sent'" class="status-sent">✓</span>
+      <span v-else-if="message.status === 'delivered'" class="status-delivered">✓✓</span>
+      <span v-else-if="message.status === 'read'" class="status-read">已读</span>
+    </div>
   </div>
 </template>
 
@@ -138,9 +169,18 @@ const parsedTextParts = computed(() => {
     if (match.index > lastIndex) {
       parts.push({ text: content.slice(lastIndex, match.index), isLink: false })
     }
-    // 添加链接
-    parts.push({ text: match[0], isLink: true })
-    lastIndex = match.index + match[0].length
+  // 添加链接（拆分末尾标点，提升鲁棒性）
+  let link = match[0]
+  let core = link
+  let tail = ''
+  const punct = link.match(/[.,!?;:)\]]+$/)
+  if (punct) {
+    core = link.substring(0, link.length - punct[0].length)
+    tail = punct[0]
+  }
+  if (core.length > 0) parts.push({ text: core, isLink: true })
+  if (tail) parts.push({ text: tail, isLink: false })
+  lastIndex = match.index + match[0].length
   }
 
   // 添加剩余文本
@@ -281,6 +321,7 @@ const handleFileDownload = () => {
   color: var(--dt-text-primary);
   transition: all var(--dt-transition-fast);
   max-width: 520px;
+  position: relative;
 
   &.is-own {
     background: var(--dt-bubble-right-bg);
@@ -291,7 +332,7 @@ const handleFileDownload = () => {
     box-shadow: var(--dt-shadow-1);
   }
 
-  .text-link {
+.text-link {
     color: var(--dt-brand-color);
     text-decoration: none;
     word-break: break-all;
@@ -485,6 +526,40 @@ const handleFileDownload = () => {
 .recalled {
   color: var(--dt-text-tertiary);
   font-size: var(--dt-font-size-sm);
+}
+
+// 消息状态指示器
+.message-status {
+  position: absolute;
+  right: var(--dt-spacing-sm);
+  bottom: var(--dt-spacing-sm);
+  font-size: var(--dt-message-status-icon-size, 12px);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  
+  .status-sending {
+    color: var(--dt-text-quaternary);
+    animation: pulse 1s infinite;
+  }
+  
+  .status-sent {
+    color: var(--dt-text-quaternary);
+  }
+  
+  .status-delivered {
+    color: var(--dt-text-quaternary);
+  }
+  
+  .status-read {
+    color: var(--dt-message-status-read-color, var(--dt-success-color));
+    font-size: 10px;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
 
 // 暗色模式适配

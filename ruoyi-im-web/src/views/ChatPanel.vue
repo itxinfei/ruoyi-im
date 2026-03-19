@@ -1,14 +1,18 @@
 <template>
   <div class="chat-panel-container">
     <!-- 1. 精致欢迎页 -->
-    <ImEmpty 
+    <ImEmpty
       v-if="!session"
       title="高效办公，即时协同"
       description="对标钉钉 8.2 的企业级通讯体验"
       action-text="发起群聊"
       @action="handleOpenCreateGroup"
     >
-      <template #icon><div class="welcome-logo-box">IM</div></template>
+      <template #icon>
+        <div class="welcome-logo-box">
+          IM
+        </div>
+      </template>
     </ImEmpty>
 
     <!-- 2. 聊天主体 -->
@@ -52,6 +56,7 @@
               @send="handleSend"
               @upload-file="handleUploadFile"
               @upload-image="handleUploadImage"
+              @upload-batch="handleBatchUpload"
               @typing="handleInputTyping"
             />
           </footer>
@@ -60,15 +65,15 @@
     </template>
 
     <!-- 3. 弹窗群 (严格身份校验) -->
-    <UserProfileDialog 
-      v-model="showUserDetail" 
-      :user-id="activeUserId" 
-      @start-call="handleStartCallFromProfile" 
+    <UserProfileDialog
+      v-model="showUserDetail"
+      :user-id="activeUserId"
+      @start-call="handleStartCallFromProfile"
     />
-    
-    <GroupProfileDialog 
-      v-model="showGroupDetail" 
-      :group-id="session?.type === 'GROUP' ? session?.targetId : null" 
+
+    <GroupProfileDialog
+      v-model="showGroupDetail"
+      :group-id="session?.type === 'GROUP' ? session?.targetId : null"
       @show-user="handleShowUserProfile"
     />
 
@@ -91,7 +96,7 @@ import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import ImEmpty from '@/components/Common/ImEmpty.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
-import { uploadImage, uploadFile } from '@/api/im/file'
+import { uploadImage, uploadFile, batchUploadFiles } from '@/api/im/file'
 import { initiateCall } from '@/api/im/videoCall'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
@@ -122,7 +127,13 @@ const loadHistory = async () => {
   try {
     const res = await store.dispatch('im/message/loadMessages', { sessionId: props.session.id, pageSize: 50 })
     messages.value = (res || []).map(m => ({ ...m, isOwn: m.senderId === currentUser.value?.id || m.isSelf }))
-  } finally { loading.value = false; nextTick(() => msgListRef.value?.scrollToBottom()) }
+  } catch (error) {
+    console.error('加载历史消息失败:', error)
+    ElMessage.error('加载历史消息失败，请重试')
+  } finally {
+    loading.value = false
+    nextTick(() => msgListRef.value?.scrollToBottom())
+  }
 }
 
 /**
@@ -132,12 +143,12 @@ const handleTypingEvent = (data) => {
   // 检查是否是当前会话
   if (data.conversationId === props.session?.id) {
     isTyping.value = true
-    
+
     // 清除之前的超时
     if (typingTimeout) {
       clearTimeout(typingTimeout)
     }
-    
+
     // 设置 3 秒后自动消退
     typingTimeout = setTimeout(() => {
       isTyping.value = false
@@ -150,7 +161,7 @@ const handleTypingEvent = (data) => {
  */
 const handleInputTyping = () => {
   if (!props.session?.id) return
-  
+
   // 通过 WebSocket 发送正在输入信号
   sendMessage({
     type: 'typing',
@@ -261,7 +272,7 @@ const handleVoiceCall = async (s) => {
       callDialogRef.value?.open('voice', {
         status: 'calling',
         callId: res.data.callId,
-        peerId: peerId,
+        peerId,
         peerName: s.name,
         peerAvatar: s.avatar
       })
@@ -294,7 +305,7 @@ const handleVideoCall = async (s) => {
       callDialogRef.value?.open('video', {
         status: 'calling',
         callId: res.data.callId,
-        peerId: peerId,
+        peerId,
         peerName: s.name,
         peerAvatar: s.avatar
       })
@@ -376,11 +387,11 @@ const handleOpenCreateGroup = () => {
  */
 const handleLoadMore = async () => {
   if (loading.value || !props.session?.id) return
-  
+
   // 获取当前消息列表中最早的消息ID
   const lastMessage = messages.value.length > 0 ? messages.value[0] : null
   const lastMessageId = lastMessage?.id || lastMessage?.messageId
-  
+
   // 如果没有消息ID，说明没有更多可加载
   if (!lastMessageId) {
     ElMessage.info('没有更多消息了')
@@ -391,24 +402,24 @@ const handleLoadMore = async () => {
   try {
     // 保存当前滚动高度，以便加载后保持位置
     const scrollHeight = msgListRef.value?.listRef?.scrollHeight || 0
-    
-    const res = await store.dispatch('im/message/loadMessages', { 
-      sessionId: props.session.id, 
-      lastMessageId: lastMessageId,
+
+    const res = await store.dispatch('im/message/loadMessages', {
+      sessionId: props.session.id,
+      lastMessageId,
       pageSize: 20,
       isLoadMore: true
     })
-    
+
     if (res && res.length > 0) {
       // 更新本地消息列表（保持原有的 isOwn 标记）
-      const newMessages = (res || []).map(m => ({ 
-        ...m, 
-        isOwn: m.senderId === currentUser.value?.id || m.isSelf 
+      const newMessages = (res || []).map(m => ({
+        ...m,
+        isOwn: m.senderId === currentUser.value?.id || m.isSelf
       }))
-      
+
       // 将新消息添加到列表开头
       messages.value = [...newMessages, ...messages.value]
-      
+
       // 恢复滚动位置
       nextTick(() => {
         if (msgListRef.value?.listRef) {
@@ -469,19 +480,19 @@ const handleUploadFile = async (file) => {
         }),
         type: 'FILE'
       })
-      
+
       // 移除临时消息，添加实际消息
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
         messages.value.splice(index, 1)
       }
-      
+
       if (msg) {
         msg.isOwn = true
         messages.value.push(msg)
         nextTick(() => msgListRef.value?.scrollToBottom())
       }
-      
+
       ElMessage.success('文件上传成功')
     } else {
       throw new Error(res.message || '上传失败')
@@ -540,19 +551,19 @@ const handleUploadImage = async (file) => {
         }),
         type: 'IMAGE'
       })
-      
+
       // 移除临时消息，添加实际消息
       const index = messages.value.findIndex(m => m.id === tempId)
       if (index !== -1) {
         messages.value.splice(index, 1)
       }
-      
+
       if (msg) {
         msg.isOwn = true
         messages.value.push(msg)
         nextTick(() => msgListRef.value?.scrollToBottom())
       }
-      
+
       ElMessage.success('图片上传成功')
     } else {
       throw new Error(res.message || '上传失败')
@@ -565,6 +576,47 @@ const handleUploadImage = async (file) => {
       messages.value[index].status = 'failed'
     }
     ElMessage.error(error.message || '图片上传失败')
+  }
+}
+
+/**
+ * 批量上传文件
+ */
+const handleBatchUpload = async (formData) => {
+  if (!props.session?.id) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+
+  try {
+    const res = await batchUploadFiles(formData)
+    if (res.code === 200) {
+      // 批量上传成功，为每个文件创建消息
+      for (const fileData of res.data || []) {
+        const msg = await store.dispatch('im/message/sendMessage', {
+          sessionId: props.session.id,
+          content: JSON.stringify({
+            fileId: fileData.fileId,
+            fileName: fileData.fileName,
+            fileSize: fileData.fileSize,
+            fileUrl: fileData.fileUrl
+          }),
+          type: 'FILE'
+        })
+
+        if (msg) {
+          msg.isOwn = true
+          messages.value.push(msg)
+        }
+      }
+      nextTick(() => msgListRef.value?.scrollToBottom())
+      ElMessage.success(`批量上传成功，共${res.data?.length || 0}个文件`)
+    } else {
+      throw new Error(res.message || '批量上传失败')
+    }
+  } catch (error) {
+    console.error('批量上传失败:', error)
+    ElMessage.error(error.message || '批量上传失败')
   }
 }
 

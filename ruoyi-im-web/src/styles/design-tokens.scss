@@ -126,6 +126,29 @@
   --dt-spacing-xl: 24px;
   --dt-spacing-2xl: 32px;
 
+  // === Group Avatar (群组头像) ===
+  --dt-group-avatar-gap: 1px;
+  --dt-group-avatar-size-sm: 20px;
+  --dt-group-avatar-size-md: 28px;
+  --dt-group-avatar-size-lg: 32px;
+  --dt-group-avatar-max-visible: 9;
+  --dt-group-avatar-overflow-bg: var(--dt-brand-color);
+  --dt-group-avatar-overflow-color: var(--dt-text-white);
+
+  // === Message Status (消息状态) ===
+  --dt-message-status-color: #1677ff;
+  --dt-message-status-read-color: #4CAF50;
+  --dt-message-status-icon-size: 12px;
+  --dt-message-status-gap: 4px;
+  --dt-bubble-status-position: bottom-right;
+
+  // === Text Links (链接文字) ===
+  --dt-text-link-color: var(--dt-brand-color);
+  --dt-text-link-hover-color: #0b63e6;
+
+  // === Bubble Compact (气泡紧凑模式) ===
+  --dt-bubble-compact-padding: 6px;
+
   // === Component Specific ===
   --dt-bubble-padding-v: 10px;
   --dt-bubble-padding-h: 14px;
