@@ -61,6 +61,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { useImWebSocket } from '@/composables/useImWebSocket'
+import { useTheme } from '@/composables/useTheme'
 import ImSideNavNew from '@/components/ImSideNavNew/index.vue'
 import SessionPanel from './SessionPanel.vue'
 import ChatPanel from './ChatPanel.vue'
@@ -84,10 +85,11 @@ const showUserDetail = ref(false)
 const detailUserId = ref(null)
 
 const { connect, disconnect, onMessage, onRead, onOnline, onOffline } = useImWebSocket()
+const theme = useTheme()
 
 const currentSession = computed(() => store.state.im?.session?.currentSession || null)
-// 从 localStorage 读取主题状态
-const isDark = computed(() => localStorage.getItem('im_theme_dark') === 'true')
+// 使用 useTheme composable 获取主题状态
+const isDark = computed(() => theme.isDark.value)
 
 const handleSwitchModule = (m) => {
   activeModule.value = m

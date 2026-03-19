@@ -111,6 +111,10 @@
 
   // === Layout Dimensions (黄金比例) ===
   --dt-nav-sidebar-width: 64px;
+  --dt-logo-size: 64px;
+  --dt-avatar-size-sm: 24px;
+  --dt-avatar-size-md: 36px;
+  --dt-avatar-size-lg: 44px;
   --dt-session-panel-width: 240px;
   --dt-contact-panel-width: 240px;
   --dt-chat-min-width: 400px;
@@ -158,6 +162,10 @@
   --dt-btn-height-sm: 32px;
   --dt-btn-height-md: 36px;
   --dt-btn-height-lg: 40px;
+  --dt-btn-min-width: 80px;
+  --dt-toolbar-height: 40px;
+  --dt-input-min-height: 60px;
+  --dt-input-max-height: 200px;
 
   // === Dark Mode Variables (暗色模式专用) ===
   --dt-text-primary-dark: #f1f5f9;

@@ -320,7 +320,7 @@ const handleFileDownload = () => {
   border: 1px solid var(--dt-border-light);
   color: var(--dt-text-primary);
   transition: all var(--dt-transition-fast);
-  max-width: 520px;
+  max-width: var(--dt-bubble-max-width, 520px);
   position: relative;
 
   &.is-own {
@@ -346,7 +346,7 @@ const handleFileDownload = () => {
 .image-content {
   border-radius: var(--dt-radius-md);
   overflow: hidden;
-  .img { max-width: 240px; display: block; }
+  .img { max-width: var(--dt-image-max-width, 240px); display: block; }
 }
 
 .upload-progress {
@@ -355,7 +355,7 @@ const handleFileDownload = () => {
   gap: var(--dt-spacing-sm);
   padding: var(--dt-spacing-md);
   color: var(--dt-text-secondary);
-  .el-icon { font-size: 16px; }
+  .el-icon { font-size: var(--dt-icon-size-sm, 16px); }
 }
 
 .upload-failed {
@@ -364,7 +364,7 @@ const handleFileDownload = () => {
   gap: var(--dt-spacing-sm);
   padding: var(--dt-spacing-md);
   color: var(--dt-error-color);
-  .el-icon { font-size: 16px; }
+  .el-icon { font-size: var(--dt-icon-size-sm, 16px); }
 }
 
 .file-content {
@@ -397,15 +397,15 @@ const handleFileDownload = () => {
 
 .file-normal {
   cursor: pointer;
-  min-width: 200px;
+  min-width: var(--dt-file-card-min-width, 200px);
 
   &:hover {
     background: var(--dt-bg-session-hover);
   }
 
   .file-icon {
-    width: 44px;
-    height: 44px;
+    width: var(--dt-icon-size-xl, 44px);
+    height: var(--dt-icon-size-xl, 44px);
     border-radius: var(--dt-radius-md);
     display: flex;
     align-items: center;
@@ -427,7 +427,7 @@ const handleFileDownload = () => {
 .file-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--dt-spacing-xs);
 }
 
 .file-name {
@@ -473,7 +473,7 @@ const handleFileDownload = () => {
   transition: all var(--dt-transition-base);
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(var(--dt-transform-y, -1px));
     box-shadow: var(--dt-shadow-2);
   }
 
@@ -484,16 +484,16 @@ const handleFileDownload = () => {
     padding: var(--dt-spacing-md);
     background: var(--dt-bg-body);
     border-radius: var(--dt-radius-md);
-    min-width: 240px;
+    min-width: var(--dt-document-card-min-width, 240px);
 
     .doc-icon {
-      width: 40px;
-      height: 40px;
+      width: var(--dt-icon-size-lg, 40px);
+      height: var(--dt-icon-size-lg, 40px);
       border-radius: var(--dt-radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: var(--dt-icon-size-md, 20px);
 
       &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
       &.icon-image { background: var(--dt-brand-lighter); color: var(--dt-brand-color); }
@@ -508,7 +508,7 @@ const handleFileDownload = () => {
         font-size: var(--dt-font-size-base);
         font-weight: var(--dt-font-weight-medium);
         color: var(--dt-text-primary);
-        margin-bottom: 4px;
+        margin-bottom: var(--dt-spacing-xs);
       }
 
       .doc-meta {
@@ -536,7 +536,7 @@ const handleFileDownload = () => {
   font-size: var(--dt-message-status-icon-size, 12px);
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--dt-spacing-xs);
   
   .status-sending {
     color: var(--dt-text-quaternary);
@@ -553,7 +553,7 @@ const handleFileDownload = () => {
   
   .status-read {
     color: var(--dt-message-status-read-color, var(--dt-success-color));
-    font-size: 10px;
+    font-size: var(--dt-font-size-xs);
   }
 }
 

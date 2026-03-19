@@ -125,7 +125,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import {
   getNotificationSettings, updateNotificationSettings,
   getPrivacySettings, updatePrivacySettings,
@@ -133,11 +133,15 @@ import {
   getBlockedUsers
 } from '@/api/im/config'
 import { ElMessage } from 'element-plus'
+import { useTheme } from '@/composables/useTheme'
 
 const notificationSettings = ref({ messageNotify: true, soundNotify: true, vibrateNotify: false })
 const privacySettings = ref({ showOnlineStatus: true, allowStrangerMsg: false })
 const generalSettings = ref({ language: 'zh_CN', theme: 'light' })
 const blockedUsers = ref([])
+
+// 主题管理
+const theme = useTheme()
 
 // 加载逻辑 (保持接口闭环)
 const loadSettings = async () => {
@@ -159,9 +163,7 @@ const savePrivacySettings = () => updatePrivacySettings(privacySettings.value).t
 const saveGeneralSettings = () => updateGeneralSettings(generalSettings.value).then(() => ElMessage.success('已保存配置'))
 
 const handleThemeChange = (val) => {
-  const isDark = val === 'dark' || (val === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  document.documentElement.classList.toggle('dark', isDark)
-  localStorage.setItem('im_theme_dark', String(isDark))
+  theme.setThemeMode(val)
   saveGeneralSettings()
 }
 

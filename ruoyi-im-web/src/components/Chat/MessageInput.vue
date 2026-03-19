@@ -301,7 +301,7 @@ const onFileChange = (e) => {
 }
 
 .toolbar {
-  height: 40px;
+  height: var(--dt-toolbar-height, 40px);
   display: flex;
   align-items: center;
   gap: var(--dt-spacing-xs);
@@ -320,10 +320,10 @@ const onFileChange = (e) => {
     cursor: pointer;
     color: var(--dt-text-secondary);
     transition: all var(--dt-transition-fast);
-    height: 32px;
+    height: var(--dt-btn-height-sm, 32px);
 
     .el-icon {
-      font-size: 18px;
+      font-size: var(--dt-icon-size-md, 18px);
       line-height: 1;
     }
 
@@ -355,12 +355,12 @@ const onFileChange = (e) => {
 .text-area {
   flex: 1;
   padding: var(--dt-spacing-sm) 0;
-  min-height: 60px;
-  
+  min-height: var(--dt-input-min-height, 60px);
+
   textarea {
     width: 100%;
-    min-height: 60px;
-    max-height: 200px;
+    min-height: var(--dt-input-min-height, 60px);
+    max-height: var(--dt-input-max-height, 200px);
     border: none;
     outline: none;
     resize: vertical;
@@ -382,7 +382,7 @@ const onFileChange = (e) => {
   padding-top: var(--dt-spacing-sm);
 
   .el-button {
-    min-width: 80px;
+    min-width: var(--dt-btn-min-width, 80px);
     height: var(--dt-btn-height-md, 36px);
     font-size: var(--dt-font-size-base);
     font-weight: var(--dt-font-weight-medium);

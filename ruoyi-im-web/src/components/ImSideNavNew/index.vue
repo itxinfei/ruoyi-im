@@ -92,6 +92,7 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GlobalSearchDialog from '@/components/Common/GlobalSearchDialog.vue'
 import SettingsPanel from '@/views/SettingsPanel.vue'
 import ProfilePanel from '@/views/ProfilePanel.vue'
+import { useTheme } from '@/composables/useTheme'
 
 defineProps({ activeModule: String })
 defineEmits(['switch-module', 'go-conversation'])
@@ -104,16 +105,22 @@ const showSettingsPage = ref(false)
 const showProfilePage = ref(false)
 
 // 主题一键切换
-const isDark = ref(localStorage.getItem('im_theme_dark') === 'true')
+const theme = useTheme()
+const isDark = computed(() => theme.isDark.value)
 const toggleTheme = () => {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-  localStorage.setItem('im_theme_dark', String(isDark.value))
-  ElMessage({
-    message: isDark.value ? '已进入深色模式' : '已进入亮色模式',
-    type: 'success',
-    duration: 1000
-  })
+  const wasDark = theme.isDark.value
+  theme.toggleTheme()
+  // 显示切换提示（等待下一帧以获取更新后的状态）
+  setTimeout(() => {
+    const nowDark = theme.isDark.value
+    if (wasDark !== nowDark) {
+      ElMessage({
+        message: nowDark ? '已进入深色模式' : '已进入亮色模式',
+        type: 'success',
+        duration: 1000
+      })
+    }
+  }, 50)
 }
 
 // 模块配置
@@ -264,45 +271,132 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--dt-spacing-sm);
-  padding-bottom: var(--dt-spacing-sm);
+  gap: var(--dt-spacing-xs);
+  padding-bottom: var(--dt-spacing-md);
+  position: relative;
+
+  // 装饰分隔线
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 1px;
+  }
 
   .footer-btn {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.75);
     cursor: pointer;
-    border-radius: var(--dt-radius-md);
-    transition: all var(--dt-transition-fast);
-    
+    border-radius: var(--dt-radius-lg);
+    transition: all var(--dt-transition-base);
+    position: relative;
+
     span {
-      font-size: 20px;
+      font-size: 22px;
       line-height: 1;
+      transition: all var(--dt-transition-base);
     }
-    
+
+    // 微光效果
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--dt-radius-lg);
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity var(--dt-transition-base);
+    }
+
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.18);
       color: var(--dt-text-white);
-      transform: translateY(-1px);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+      span {
+        transform: scale(1.1);
+      }
+
+      &::after {
+        opacity: 1;
+      }
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
+      background: rgba(255, 255, 255, 0.25);
     }
   }
 
   .user-avatar-trigger {
     cursor: pointer;
-    margin-top: var(--dt-spacing-xs);
-    
+    margin-top: var(--dt-spacing-sm);
+    position: relative;
+
     .avatar-hover-wrapper {
-      padding: 2px;
-      border-radius: var(--dt-radius-md);
-      transition: all var(--dt-transition-fast);
-      
+      padding: 3px;
+      border-radius: var(--dt-radius-lg);
+      background: rgba(255, 255, 255, 0.1);
+      transition: all var(--dt-transition-base);
+      position: relative;
+
+      // 状态指示器环
+      &::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: var(--dt-radius-lg);
+        background: linear-gradient(135deg, var(--dt-brand-light) 0%, var(--dt-brand-color) 100%);
+        opacity: 0;
+        transition: opacity var(--dt-transition-base);
+        z-index: -1;
+      }
+
       &:hover {
         background: rgba(255, 255, 255, 0.25);
-        transform: scale(1.05);
+        transform: scale(1.08);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+
+        &::before {
+          opacity: 1;
+        }
       }
+    }
+
+    // 个人中心提示文字
+    &::after {
+      content: '个人中心';
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      transform: translateX(-50%);
+      background: var(--dt-bg-card-dark);
+      color: var(--dt-text-white);
+      padding: 4px 10px;
+      border-radius: var(--dt-radius-sm);
+      font-size: var(--dt-font-size-xs);
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--dt-transition-base);
+      box-shadow: var(--dt-shadow-2);
+      z-index: 100;
+    }
+
+    &:hover::after {
+      opacity: 1;
+      visibility: visible;
+      bottom: calc(100% + 12px);
     }
   }
 }
@@ -311,10 +405,37 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 <style lang="scss">
 // 全局专业对话框样式 (Pro Desktop)
 .pro-desktop-dialog {
-  border-radius: 16px !important;
+  border-radius: var(--dt-radius-2xl) !important;
   overflow: hidden;
-  .el-dialog__header { margin: 0; padding: 20px 24px; border-bottom: 1px solid #f1f5f9; }
-  .el-dialog__title { font-weight: 700; font-size: 16px; color: #1e293b; }
-  .el-dialog__body { padding: 0; height: 600px; overflow: hidden; }
+  box-shadow: var(--dt-shadow-modal) !important;
+
+  .el-dialog__header {
+    margin: 0;
+    padding: var(--dt-spacing-lg) var(--dt-spacing-xl);
+    border-bottom: 1px solid var(--dt-border-light);
+    background: var(--dt-bg-card);
+  }
+
+  .el-dialog__title {
+    font-weight: var(--dt-font-weight-semibold);
+    font-size: var(--dt-font-size-lg);
+    color: var(--dt-text-primary);
+  }
+
+  .el-dialog__body {
+    padding: 0;
+    height: 600px;
+    overflow: hidden;
+    background: var(--dt-bg-card);
+  }
+
+  .el-dialog__close {
+    color: var(--dt-text-secondary);
+    font-size: 20px;
+
+    &:hover {
+      color: var(--dt-brand-color);
+    }
+  }
 }
 </style>

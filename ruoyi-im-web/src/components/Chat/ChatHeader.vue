@@ -87,10 +87,11 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Phone, VideoCamera, Search, MoreFilled, Folder, Top, Delete } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
-defineProps({
+const props = defineProps({
   session: Object,
   isTyping: {
     type: Boolean,
@@ -98,6 +99,9 @@ defineProps({
   }
 })
 defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'search', 'files', 'pin', 'clear'])
+
+// Avatar size from Design Token (44px)
+const avatarSize = computed(() => 44)
 </script>
 
 <style scoped lang="scss">
@@ -144,12 +148,12 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
 
       .online-indicator {
         position: absolute;
-        bottom: 2px;
-        right: 2px;
-        width: 10px;
-        height: 10px;
+        bottom: var(--dt-spacing-xxs, 2px);
+        right: var(--dt-spacing-xxs, 2px);
+        width: var(--dt-status-dot-size, 10px);
+        height: var(--dt-status-dot-size, 10px);
         background: var(--dt-success-color);
-        border: 2px solid var(--dt-bg-card);
+        border: var(--dt-border-thin, 2px) solid var(--dt-bg-card);
         border-radius: 50%;
       }
     }
@@ -175,7 +179,7 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 180px;
+        max-width: var(--dt-session-name-max-width, 180px);
         line-height: 1.3;
       }
 
@@ -185,11 +189,11 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
         gap: var(--dt-spacing-xs);
         font-size: var(--dt-font-size-sm);
         color: var(--dt-text-tertiary);
-        margin-top: 2px;
+        margin-top: var(--dt-spacing-xxs, 2px);
 
         .status-dot {
-          width: 6px;
-          height: 6px;
+          width: var(--dt-status-dot-size-sm, 6px);
+          height: var(--dt-status-dot-size-sm, 6px);
           border-radius: 50%;
           &.online { background: var(--dt-success-color); }
           &.offline { background: var(--dt-text-quaternary); }
@@ -208,12 +212,12 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
         .typing-indicator {
           display: flex;
           align-items: center;
-          gap: 3px;
-          margin-right: 4px;
+          gap: var(--dt-spacing-xxs, 3px);
+          margin-right: var(--dt-spacing-xs, 4px);
 
           .typing-dot {
-            width: 4px;
-            height: 4px;
+            width: var(--dt-typing-dot-size, 4px);
+            height: var(--dt-typing-dot-size, 4px);
             background: var(--dt-brand-color);
             border-radius: 50%;
             animation: typing-bounce 1.4s infinite ease-in-out both;
@@ -225,8 +229,8 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
         }
 
         .status-dot {
-          width: 8px;
-          height: 8px;
+          width: var(--dt-status-dot-size, 10px);
+          height: var(--dt-status-dot-size, 10px);
           border-radius: 50%;
           flex-shrink: 0;
 
@@ -244,7 +248,7 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
         }
 
         .el-icon {
-          font-size: 12px;
+          font-size: var(--dt-icon-size-xs, 12px);
         }
       }
     }
@@ -253,13 +257,13 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
   .header-right {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--dt-spacing-xxs);
 
     .header-btn {
-      width: 36px;
-      height: 36px;
+      width: var(--dt-icon-size-xl, 36px);
+      height: var(--dt-icon-size-xl, 36px);
       padding: 0;
-      font-size: 18px;
+      font-size: var(--dt-icon-size-md, 18px);
       color: var(--dt-text-secondary);
       border-radius: var(--dt-radius-md);
       transition: all var(--dt-transition-fast);
@@ -277,13 +281,13 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
     :deep(.el-dropdown-menu__item) {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
+      gap: var(--dt-spacing-sm);
+      padding: var(--dt-spacing-sm) var(--dt-spacing-md);
       font-size: var(--dt-font-size-base);
       color: var(--dt-text-primary);
 
       .el-icon {
-        font-size: 16px;
+        font-size: var(--dt-icon-size-md, 16px);
         color: var(--dt-text-secondary);
       }
 

@@ -251,7 +251,7 @@ defineExpose({ scrollToBottom, listRef })
   &::after {
     content: '';
     flex: 1;
-    max-width: 60px;
+    max-width: var(--dt-divider-max-width, 60px);
     height: 1px;
     background: linear-gradient(
       90deg,
@@ -284,7 +284,7 @@ defineExpose({ scrollToBottom, listRef })
   transition: all var(--dt-transition-fast);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--dt-spacing-xs);
 
   &:hover {
     background: var(--dt-brand-hover);
@@ -293,7 +293,7 @@ defineExpose({ scrollToBottom, listRef })
   }
 
   .el-icon {
-    font-size: 14px;
+    font-size: var(--dt-icon-size-sm, 14px);
   }
 }
 </style>

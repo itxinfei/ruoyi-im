@@ -148,7 +148,7 @@ const handleImageError = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--dt-text-white);
   font-weight: 500;
   flex-shrink: 0;
   overflow: hidden;
@@ -157,9 +157,9 @@ const handleImageError = () => {
   line-height: 1;
   box-sizing: border-box;
   background-color: var(--dt-border-light);
-  
+
   &.is-group {
-    padding: 2px;
+    padding: var(--dt-spacing-xxs);
     background-color: var(--dt-bg-body);
   }
 }

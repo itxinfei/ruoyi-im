@@ -2,7 +2,7 @@
   <el-dialog
     v-model="visible"
     title="选择提醒的人"
-    width="400px"
+    width="var(--dt-dialog-width-sm, 400px)"
     class="at-member-picker"
     append-to-body
     @open="loadMembers"
@@ -102,23 +102,23 @@ defineExpose({ open })
 <style scoped lang="scss">
 .at-member-picker {
   :deep(.el-dialog__body) {
-    padding: 10px 0;
+    padding: var(--dt-spacing-md) 0;
   }
 }
 
 .search-box {
-  padding: 0 16px 10px;
+  padding: 0 var(--dt-spacing-lg) var(--dt-spacing-md);
 }
 
 .member-list {
-  max-height: 400px;
+  max-height: var(--dt-list-max-height, 400px);
   overflow-y: auto;
 
   .member-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
+    gap: var(--dt-spacing-md);
+    padding: var(--dt-spacing-md) var(--dt-spacing-lg);
     cursor: pointer;
     transition: background 0.2s;
 
@@ -127,10 +127,10 @@ defineExpose({ open })
     }
 
     .avatar-all {
-      width: 32px;
-      height: 32px;
+      width: var(--dt-avatar-size-sm, 32px);
+      height: var(--dt-avatar-size-sm, 32px);
       background-color: var(--dt-brand-color);
-      color: #fff;
+      color: var(--dt-text-white);
       border-radius: 50%;
       display: flex;
       align-items: center;

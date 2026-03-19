@@ -5,7 +5,7 @@
       :src="message.senderAvatar"
       :name="message.senderName"
       :user-id="message.senderId"
-      :size="40"
+      :size="36"
       shape="square"
       class="avatar"
       @click="$emit('show-user', message.senderId)"
@@ -15,12 +15,14 @@
       <!-- 昵称和时间 (对方才显示) -->
       <div v-if="!message.isOwn" class="message-header">
         <span class="nickname">{{ message.senderName }}</span>
-        <span class="time">{{ formatTime(message.timestamp) }}</span>
       </div>
 
       <!-- 消息主区 (气泡) -->
       <div class="bubble-wrapper">
         <slot name="bubble" />
+
+        <!-- 接收方时间戳 -->
+        <span v-if="!message.isOwn" class="time-received">{{ formatTime(message.timestamp) }}</span>
 
         <!-- 状态标识 (己方才显示) - 移至气泡内右下角 -->
         <div v-if="message.isOwn" class="status-badge">
@@ -111,9 +113,11 @@ const formatTime = (timestamp) => {
   }
 }
 
-.avatar { 
-  cursor: pointer; 
-  flex-shrink: 0; 
+.avatar {
+  cursor: pointer;
+  flex-shrink: 0;
+  width: var(--dt-avatar-size-md, 36px);
+  height: var(--dt-avatar-size-md, 36px);
   border-radius: var(--dt-radius-sm);
 }
 
@@ -121,7 +125,7 @@ const formatTime = (timestamp) => {
   display: flex;
   flex-direction: column;
   gap: var(--dt-spacing-xs);
-  max-width: 70%;
+  max-width: calc(100% - var(--dt-avatar-size-md, 36px) - var(--dt-spacing-md));
   min-width: 0;
 }
 
@@ -129,16 +133,11 @@ const formatTime = (timestamp) => {
   display: flex;
   align-items: center;
   gap: var(--dt-spacing-sm);
-  
+
   .nickname {
     font-size: var(--dt-font-size-sm);
     font-weight: var(--dt-font-weight-medium);
     color: var(--dt-text-primary);
-  }
-  
-  .time {
-    font-size: var(--dt-font-size-xs);
-    color: var(--dt-text-quaternary);
   }
 }
 
@@ -147,6 +146,14 @@ const formatTime = (timestamp) => {
   align-items: flex-end;
   position: relative;
   min-width: 0;
+}
+
+.time-received {
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-quaternary);
+  margin-left: var(--dt-spacing-xs);
+  align-self: flex-end;
+  margin-bottom: var(--dt-spacing-xs);
 }
 
 .time-self {
@@ -159,11 +166,11 @@ const formatTime = (timestamp) => {
 .status-badge {
   position: absolute;
   bottom: var(--dt-spacing-xs);
-  right: calc(-1 * var(--dt-spacing-lg));
+  right: calc(-1 * var(--dt-spacing-md));
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
+  min-width: 16px;
 
   .is-loading {
     font-size: 12px;
@@ -215,6 +222,10 @@ const formatTime = (timestamp) => {
 :global(.dark) {
   .message-header .nickname {
     color: var(--dt-text-primary-dark);
+  }
+
+  .time-received {
+    color: var(--dt-text-quaternary-dark);
   }
 }
 </style>

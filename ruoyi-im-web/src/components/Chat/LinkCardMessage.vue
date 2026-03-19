@@ -84,7 +84,7 @@ const openLink = () => {
 .link-card {
   display: flex;
   flex-direction: column;
-  max-width: 280px;
+  max-width: var(--dt-link-card-max-width, 280px);
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-md);
   overflow: hidden;
@@ -98,7 +98,7 @@ const openLink = () => {
   }
 
   &.is-own {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--dt-bubble-right-bg);
     border-color: var(--dt-brand-light);
 
     .link-title {
@@ -112,7 +112,7 @@ const openLink = () => {
 
   .link-image {
     width: 100%;
-    height: 120px;
+    height: var(--dt-link-card-image-height, 120px);
     overflow: hidden;
     background: var(--dt-border-lighter);
 
@@ -124,14 +124,14 @@ const openLink = () => {
   }
 
   .link-content {
-    padding: 10px 12px;
+    padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   }
 
   .link-title {
     font-size: var(--dt-font-size-base);
     font-weight: var(--dt-font-weight-medium);
     color: var(--dt-text-primary);
-    margin-bottom: 4px;
+    margin-bottom: var(--dt-spacing-xs);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -141,7 +141,7 @@ const openLink = () => {
     font-size: var(--dt-font-size-sm);
     color: var(--dt-text-secondary);
     line-height: 1.4;
-    margin-bottom: 6px;
+    margin-bottom: var(--dt-spacing-sm);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -151,12 +151,12 @@ const openLink = () => {
   .link-url {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dt-spacing-xs);
     font-size: var(--dt-font-size-xs);
     color: var(--dt-text-tertiary);
 
     .material-icons-outlined {
-      font-size: 14px;
+      font-size: var(--dt-icon-size-sm);
     }
 
     span:last-child {
