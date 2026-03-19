@@ -1,8 +1,6 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +15,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "系统首页", description = "系统首页信息展示接口")
+
 @RestController
 @RequestMapping("/")
 public class HomeController {
@@ -37,7 +35,7 @@ public class HomeController {
      *
      * @return 系统首页信息
      */
-    @Operation(summary = "获取系统首页信息", description = "返回系统基本信息、环境配置等")
+    
     @GetMapping
     public Result<Map<String, Object>> getHomeInfo() {
         Map<String, Object> homeInfo = new HashMap<>();
@@ -58,7 +56,7 @@ public class HomeController {
      *
      * @return 健康状态
      */
-    @Operation(summary = "健康检查", description = "用于系统健康状态检查")
+    
     @GetMapping("/health")
     public Result<Map<String, String>> healthCheck() {
         Map<String, String> healthInfo = new HashMap<>();
@@ -69,3 +67,4 @@ public class HomeController {
         return Result.success(healthInfo);
     }
 }
+

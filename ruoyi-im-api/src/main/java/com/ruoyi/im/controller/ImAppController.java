@@ -3,8 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.service.ImApplicationService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +15,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "应用中心", description = "应用列表、详情、可见性设置等接口")
+
 @RestController
 @RequestMapping("/api/im/app")
 public class ImAppController {
@@ -32,7 +30,7 @@ public class ImAppController {
      * @param category 应用分类
      * @return 应用列表
      */
-    @Operation(summary = "获取应用列表", description = "获取所有应用列表，可按分类筛选")
+    
     @GetMapping("/list")
     public Result<List<ImApplication>> getApplications(@RequestParam(required = false) String category) {
         List<ImApplication> list = applicationService.getApplications(category);
@@ -45,7 +43,7 @@ public class ImAppController {
      *
      * @return 可见应用列表
      */
-    @Operation(summary = "获取可见应用列表", description = "获取当前用户可见的应用列表")
+    
     @GetMapping("/visible")
     public Result<List<ImApplication>> getVisibleApplications() {
         List<ImApplication> list = applicationService.getVisibleApplications();
@@ -58,7 +56,7 @@ public class ImAppController {
      *
      * @return 按分类分组的应用列表
      */
-    @Operation(summary = "按分类获取应用", description = "按分类分组获取应用")
+    
     @GetMapping("/category")
     public Result<Map<String, List<ImApplication>>> getApplicationsByCategory() {
         Map<String, List<ImApplication>> map = applicationService.getApplicationsByCategory();
@@ -72,7 +70,7 @@ public class ImAppController {
      * @param id 应用ID
      * @return 应用详情
      */
-    @Operation(summary = "获取应用详情", description = "获取应用详细信息")
+    
     @GetMapping("/{id}")
     public Result<ImApplication> getApplicationById(@PathVariable Long id) {
         ImApplication app = applicationService.getApplicationById(id);
@@ -91,7 +89,7 @@ public class ImAppController {
      * @param icon 应用图标
      * @return 创建结果，包含应用ID
      */
-    @Operation(summary = "创建应用", description = "创建新的应用")
+    
     @PostMapping("/create")
     public Result<Long> createApplication(@RequestParam String name,
                                          @RequestParam String code,
@@ -113,7 +111,7 @@ public class ImAppController {
      * @param icon 应用图标
      * @return 更新结果
      */
-    @Operation(summary = "更新应用", description = "更新应用信息")
+    
     @PutMapping("/{id}")
     public Result<Void> updateApplication(@PathVariable Long id,
                                          @RequestParam String name,
@@ -130,7 +128,7 @@ public class ImAppController {
      * @param id 应用ID
      * @return 删除结果
      */
-    @Operation(summary = "删除应用", description = "删除指定的应用")
+    
     @DeleteMapping("/{id}")
     public Result<Void> deleteApplication(@PathVariable Long id) {
         applicationService.deleteApplication(id);
@@ -145,7 +143,7 @@ public class ImAppController {
      * @param isVisible 是否可见
      * @return 操作结果
      */
-    @Operation(summary = "设置应用可见性", description = "设置应用的可见性状态")
+    
     @PutMapping("/{id}/visibility")
     public Result<Void> setVisibility(@PathVariable Long id,
                                      @RequestParam Boolean isVisible) {

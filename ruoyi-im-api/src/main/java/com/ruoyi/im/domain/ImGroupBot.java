@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.im.common.BaseEntity;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -23,23 +22,23 @@ import java.util.List;
 @TableName("im_group_bot")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Schema(description = "群机器人")
+
 public class ImGroupBot extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /** 机器人ID，主键 */
     @TableId(type = IdType.AUTO)
-    @Schema(description = "机器人ID")
+    
     private Long id;
 
     /** 群组ID，关联到im_group表 */
-    @Schema(description = "群组ID")
+    
     @TableField("group_id")
     private Long groupId;
 
     /** 机器人名称 */
-    @Schema(description = "机器人名称")
+    
     private String botName;
 
     /**
@@ -48,16 +47,16 @@ public class ImGroupBot extends BaseEntity implements Serializable {
      * NOTIFY：通知机器人（定时推送消息）
      * MANAGE：管理机器人（群管理操作）
      */
-    @Schema(description = "机器人类型：SERVICE客服/NOTIFY通知/MANAGE管理")
+    
     @TableField("bot_type")
     private String botType;
 
     /** 机器人头像 */
-    @Schema(description = "机器人头像")
+    
     private String avatar;
 
     /** 机器人描述 */
-    @Schema(description = "机器人描述")
+    
     private String description;
 
     /**
@@ -65,7 +64,7 @@ public class ImGroupBot extends BaseEntity implements Serializable {
      * 0：禁用
      * 1：启用
      */
-    @Schema(description = "是否启用：0禁用/1启用")
+    
     @TableField("is_enabled")
     private Integer isEnabled;
 
@@ -83,3 +82,4 @@ public class ImGroupBot extends BaseEntity implements Serializable {
     @TableField(exist = false)
     private String groupName;
 }
+

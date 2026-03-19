@@ -165,8 +165,8 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
   margin-bottom: var(--dt-spacing-sm);
   
   .logo-text {
-    width: 36px;
-    height: 36px;
+    width: var(--dt-avatar-size-md, 36px);
+    height: var(--dt-avatar-size-md, 36px);
     background: rgba(255, 255, 255, 0.2);
     border-radius: var(--dt-radius-lg);
     display: flex;
@@ -204,18 +204,18 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     padding: var(--dt-spacing-xs) 0;
 
     .icon-frame {
-      width: 40px;
-      height: 36px;
+      width: var(--dt-btn-size-lg, 40px);
+      height: var(--dt-btn-height-md, 36px);
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: var(--dt-radius-md);
       transition: all var(--dt-transition-fast);
       position: relative;
-      
+
       span {
         color: rgba(255, 255, 255, 0.85);
-        font-size: 22px;
+        font-size: var(--dt-icon-size-xl, 22px);
         line-height: 1;
       }
     }
@@ -223,7 +223,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     .icon-label {
       font-size: var(--dt-font-size-xs);
       color: var(--dt-text-white);
-      margin-top: 2px;
+      margin-top: var(--dt-spacing-xs, 2px);
       opacity: 0.85;
       font-weight: var(--dt-font-weight-normal);
       transition: all var(--dt-transition-fast);
@@ -255,8 +255,8 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     // 徽标红点
     .red-dot {
       position: absolute;
-      top: 4px;
-      right: 4px;
+      top: var(--dt-spacing-xs, 4px);
+      right: var(--dt-spacing-xs, 4px);
       width: 8px;
       height: 8px;
       background: var(--dt-error-color);
@@ -285,12 +285,12 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     width: 28px;
     height: 1px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 1px;
+    border-radius: var(--dt-radius-xs, 1px);
   }
 
   .footer-btn {
-    width: 40px;
-    height: 40px;
+    width: var(--dt-btn-size-lg, 40px);
+    height: var(--dt-btn-size-lg, 40px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -301,7 +301,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     position: relative;
 
     span {
-      font-size: 22px;
+      font-size: var(--dt-icon-size-xl, 22px);
       line-height: 1;
       transition: all var(--dt-transition-base);
     }
@@ -321,7 +321,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
       background: rgba(255, 255, 255, 0.18);
       color: var(--dt-text-white);
       transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--dt-shadow-float, 0 4px 12px rgba(0, 0, 0, 0.15));
 
       span {
         transform: scale(1.1);
@@ -344,7 +344,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     position: relative;
 
     .avatar-hover-wrapper {
-      padding: 3px;
+      padding: var(--dt-spacing-xs, 3px);
       border-radius: var(--dt-radius-lg);
       background: rgba(255, 255, 255, 0.1);
       transition: all var(--dt-transition-base);
@@ -354,7 +354,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
       &::before {
         content: '';
         position: absolute;
-        inset: -2px;
+        inset: calc(var(--dt-spacing-xs, 2px) * -1);
         border-radius: var(--dt-radius-lg);
         background: linear-gradient(135deg, var(--dt-brand-light) 0%, var(--dt-brand-color) 100%);
         opacity: 0;
@@ -365,7 +365,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
       &:hover {
         background: rgba(255, 255, 255, 0.25);
         transform: scale(1.08);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--dt-shadow-float, 0 4px 16px rgba(0, 0, 0, 0.2));
 
         &::before {
           opacity: 1;
@@ -378,11 +378,11 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
       content: '个人中心';
       position: absolute;
       left: 50%;
-      bottom: calc(100% + 8px);
+      bottom: calc(100% + var(--dt-spacing-sm, 8px));
       transform: translateX(-50%);
       background: var(--dt-bg-card-dark);
       color: var(--dt-text-white);
-      padding: 4px 10px;
+      padding: var(--dt-spacing-xs, 4px) var(--dt-spacing-sm, 10px);
       border-radius: var(--dt-radius-sm);
       font-size: var(--dt-font-size-xs);
       white-space: nowrap;
@@ -396,7 +396,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     &:hover::after {
       opacity: 1;
       visibility: visible;
-      bottom: calc(100% + 12px);
+      bottom: calc(100% + var(--dt-spacing-md, 12px));
     }
   }
 }
@@ -424,14 +424,14 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 
   .el-dialog__body {
     padding: 0;
-    height: 600px;
+    height: var(--dt-dialog-height, 600px);
     overflow: hidden;
     background: var(--dt-bg-card);
   }
 
   .el-dialog__close {
     color: var(--dt-text-secondary);
-    font-size: 20px;
+    font-size: var(--dt-icon-size-xl, 20px);
 
     &:hover {
       color: var(--dt-brand-color);

@@ -7,8 +7,6 @@ import com.ruoyi.im.dto.groupbot.BotRuleRequest;
 import com.ruoyi.im.dto.groupbot.BotUpdateRequest;
 import com.ruoyi.im.service.ImGroupBotService;
 import com.ruoyi.im.util.SecurityUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +21,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Tag(name = "群机器人", description = "群机器人管理接口")
+
 @RestController
 @RequestMapping("/api/im/group/bot")
 public class ImGroupBotController {
@@ -42,7 +40,7 @@ public class ImGroupBotController {
      * @param request 创建请求
      * @return 机器人ID
      */
-    @Operation(summary = "创建群机器人", description = "创建新的群机器人")
+    
     @PostMapping("/create")
     public Result<Long> create(@Valid @RequestBody BotCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -58,7 +56,7 @@ public class ImGroupBotController {
      * @param request 更新请求
      * @return 操作结果
      */
-    @Operation(summary = "更新群机器人", description = "更新群机器人信息")
+    
     @PutMapping("/update")
     public Result<Void> update(@Valid @RequestBody BotUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -72,7 +70,7 @@ public class ImGroupBotController {
      * @param botId 机器人ID
      * @return 操作结果
      */
-    @Operation(summary = "删除群机器人", description = "删除群机器人")
+    
     @DeleteMapping("/{botId}")
     public Result<Void> delete(@PathVariable Long botId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -86,7 +84,7 @@ public class ImGroupBotController {
      * @param groupId 群组ID
      * @return 机器人列表
      */
-    @Operation(summary = "获取群组机器人列表", description = "获取指定群组的机器人列表")
+    
     @GetMapping("/list/{groupId}")
     public Result<List<ImGroupBot>> list(@PathVariable Long groupId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -100,7 +98,7 @@ public class ImGroupBotController {
      * @param botId 机器人ID
      * @return 机器人详情
      */
-    @Operation(summary = "获取机器人详情", description = "获取机器人详细信息")
+    
     @GetMapping("/{botId}")
     public Result<ImGroupBot> getDetail(@PathVariable Long botId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -115,7 +113,7 @@ public class ImGroupBotController {
      * @param request 规则请求
      * @return 规则ID
      */
-    @Operation(summary = "添加机器人规则", description = "为机器人添加新的触发规则")
+    
     @PostMapping("/{botId}/rule")
     public Result<Long> addRule(@PathVariable Long botId, @Valid @RequestBody BotRuleRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -130,7 +128,7 @@ public class ImGroupBotController {
      * @param request 规则请求
      * @return 操作结果
      */
-    @Operation(summary = "更新机器人规则", description = "更新机器人规则")
+    
     @PutMapping("/rule/{ruleId}")
     public Result<Void> updateRule(@PathVariable Long ruleId, @Valid @RequestBody BotRuleRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -144,7 +142,7 @@ public class ImGroupBotController {
      * @param ruleId 规则ID
      * @return 操作结果
      */
-    @Operation(summary = "删除机器人规则", description = "删除机器人规则")
+    
     @DeleteMapping("/rule/{ruleId}")
     public Result<Void> deleteRule(@PathVariable Long ruleId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -159,7 +157,7 @@ public class ImGroupBotController {
      * @param enabled 是否启用
      * @return 操作结果
      */
-    @Operation(summary = "设置机器人状态", description = "启用或禁用机器人")
+    
     @PutMapping("/{botId}/enabled")
     public Result<Void> setEnabled(@PathVariable Long botId, @RequestParam Boolean enabled) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -167,3 +165,4 @@ public class ImGroupBotController {
         return Result.success("机器人状态已更新");
     }
 }
+

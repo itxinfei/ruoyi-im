@@ -4,8 +4,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImMessageFavoriteService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.favorite.FavoriteMessageVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
@@ -17,7 +15,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Tag(name = "消息收藏", description = "消息收藏管理接口")
+
 @RestController
 @RequestMapping("/api/im/message/favorite")
 public class ImMessageFavoriteController {
@@ -36,7 +34,7 @@ public class ImMessageFavoriteController {
     /**
      * 收藏消息
      */
-    @Operation(summary = "收藏消息")
+    
     @PostMapping("/{messageId}")
     public Result<Long> addFavorite(
             @PathVariable Long messageId,
@@ -51,7 +49,7 @@ public class ImMessageFavoriteController {
     /**
      * 取消收藏
      */
-    @Operation(summary = "取消收藏")
+    
     @DeleteMapping("/{messageId}")
     public Result<Void> removeFavorite(
             @PathVariable Long messageId) {
@@ -63,7 +61,7 @@ public class ImMessageFavoriteController {
     /**
      * 检查消息是否已收藏
      */
-    @Operation(summary = "检查消息是否已收藏")
+    
     @GetMapping("/{messageId}/check")
     public Result<Boolean> isFavorited(
             @PathVariable Long messageId) {
@@ -75,7 +73,7 @@ public class ImMessageFavoriteController {
     /**
      * 获取用户收藏的消息列表
      */
-    @Operation(summary = "获取用户收藏的消息列表")
+    
     @GetMapping("/list")
     public Result<List<FavoriteMessageVO>> getUserFavorites() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -86,7 +84,7 @@ public class ImMessageFavoriteController {
     /**
      * 获取会话中收藏的消息列表
      */
-    @Operation(summary = "获取会话中收藏的消息列表")
+    
     @GetMapping("/conversation/{conversationId}")
     public Result<List<FavoriteMessageVO>> getConversationFavorites(
             @PathVariable Long conversationId) {
@@ -98,7 +96,7 @@ public class ImMessageFavoriteController {
     /**
      * 根据标签获取收藏消息
      */
-    @Operation(summary = "根据标签获取收藏消息")
+    
     @GetMapping("/tag/{tag}")
     public Result<List<FavoriteMessageVO>> getFavoritesByTag(
             @PathVariable String tag) {
@@ -110,7 +108,7 @@ public class ImMessageFavoriteController {
     /**
      * 更新收藏备注和标签
      */
-    @Operation(summary = "更新收藏备注和标签")
+    
     @PutMapping("/{messageId}")
     public Result<Void> updateFavorite(
             @PathVariable Long messageId,
@@ -121,3 +119,4 @@ public class ImMessageFavoriteController {
         return Result.success("更新成功");
     }
 }
+

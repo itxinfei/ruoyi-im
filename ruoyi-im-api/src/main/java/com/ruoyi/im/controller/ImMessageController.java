@@ -20,8 +20,6 @@ import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
 import com.ruoyi.im.vo.reaction.ImMessageReactionVO;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Operation;
-
 /**
  * 消息控制器
  * 提供消息发送、消息列表查询、消息撤回、消息已读标记、表情反应等功能
  *
  * @author ruoyi
  */
-@Tag(name = "消息管理", description = "消息发送、查询、撤回、转发、回复、表情反应等接口")
+
 @Validated
 @RestController
 @RequestMapping("/api/im/message")
@@ -128,7 +123,7 @@ public class ImMessageController {
      * @apiNote 标记已读后会更新会话的未读消息数，并通过WebSocket推送已读回执给发送方
      * @throws BusinessException 当消息不存在或会话不存在时抛出业务异常
      */
-    @Operation(summary = "标记消息已读", description = "批量标记指定消息为已读状态")
+    
     @PutMapping("/mark-read")
     public Result<Void> markAsRead(@RequestBody java.util.Map<String, Object> data) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -142,3 +137,4 @@ public class ImMessageController {
         return Result.success("已标记为已读");
     }
 }
+

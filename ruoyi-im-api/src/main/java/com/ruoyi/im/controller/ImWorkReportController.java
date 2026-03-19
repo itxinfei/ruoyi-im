@@ -9,8 +9,6 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.workreport.WorkReportCommentVO;
 import com.ruoyi.im.vo.workreport.WorkReportDetailVO;
 import com.ruoyi.im.vo.workreport.WorkReportLikeUserVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -19,7 +17,7 @@ import java.util.List;
 /**
  * 工作日志控制器
  */
-@Tag(name = "工作日志", description = "工作日志管理接口")
+
 @RestController
 @RequestMapping("/api/im/work-report")
 public class ImWorkReportController {
@@ -38,7 +36,7 @@ public class ImWorkReportController {
     /**
      * 创建工作日志
      */
-    @Operation(summary = "创建工作日志")
+    
     @PostMapping
     public Result<Long> createReport(
             @Valid @RequestBody WorkReportCreateRequest request) {
@@ -50,7 +48,7 @@ public class ImWorkReportController {
     /**
      * 更新工作日志
      */
-    @Operation(summary = "更新工作日志")
+    
     @PutMapping("/{reportId}")
     public Result<Void> updateReport(
             @PathVariable Long reportId,
@@ -63,7 +61,7 @@ public class ImWorkReportController {
     /**
      * 删除工作日志
      */
-    @Operation(summary = "删除工作日志")
+    
     @DeleteMapping("/{reportId}")
     public Result<Void> deleteReport(
             @PathVariable Long reportId) {
@@ -75,7 +73,7 @@ public class ImWorkReportController {
     /**
      * 提交工作日志
      */
-    @Operation(summary = "提交工作日志")
+    
     @PutMapping("/{reportId}/submit")
     public Result<Void> submitReport(
             @PathVariable Long reportId) {
@@ -87,7 +85,7 @@ public class ImWorkReportController {
     /**
      * 获取工作日志详情
      */
-    @Operation(summary = "获取工作日志详情")
+    
     @GetMapping("/{reportId}")
     public Result<WorkReportDetailVO> getReportDetail(
             @PathVariable Long reportId) {
@@ -99,7 +97,7 @@ public class ImWorkReportController {
     /**
      * 分页查询工作日志列表
      */
-    @Operation(summary = "分页查询工作日志列表")
+    
     @PostMapping("/page")
     public Result<IPage<WorkReportDetailVO>> getReportPage(
             @RequestBody WorkReportQueryRequest request) {
@@ -111,7 +109,7 @@ public class ImWorkReportController {
     /**
      * 获取我的日志列表
      */
-    @Operation(summary = "获取我的日志列表")
+    
     @GetMapping("/my")
     public Result<List<WorkReportDetailVO>> getMyReports() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -122,7 +120,7 @@ public class ImWorkReportController {
     /**
      * 添加评论
      */
-    @Operation(summary = "添加评论")
+    
     @PostMapping("/{reportId}/comment")
     public Result<Long> addComment(
             @PathVariable Long reportId,
@@ -136,7 +134,7 @@ public class ImWorkReportController {
     /**
      * 删除评论
      */
-    @Operation(summary = "删除评论")
+    
     @DeleteMapping("/comment/{commentId}")
     public Result<Void> deleteComment(
             @PathVariable Long commentId) {
@@ -148,7 +146,7 @@ public class ImWorkReportController {
     /**
      * 获取评论列表
      */
-    @Operation(summary = "获取评论列表")
+    
     @GetMapping("/{reportId}/comments")
     public Result<List<WorkReportCommentVO>> getComments(@PathVariable Long reportId) {
         List<WorkReportCommentVO> comments = workReportService.getComments(reportId);
@@ -158,7 +156,7 @@ public class ImWorkReportController {
     /**
      * 点赞/取消点赞
      */
-    @Operation(summary = "点赞/取消点赞")
+    
     @PostMapping("/{reportId}/like")
     public Result<Boolean> toggleLike(
             @PathVariable Long reportId) {
@@ -170,7 +168,7 @@ public class ImWorkReportController {
     /**
      * 获取点赞用户列表
      */
-    @Operation(summary = "获取点赞用户列表")
+    
     @GetMapping("/{reportId}/likes")
     public Result<List<WorkReportLikeUserVO>> getLikeUsers(@PathVariable Long reportId) {
         List<WorkReportLikeUserVO> likeUsers = workReportService.getLikeUsers(reportId);
@@ -180,7 +178,7 @@ public class ImWorkReportController {
     /**
      * 审批工作日志
      */
-    @Operation(summary = "审批工作日志")
+    
     @PutMapping("/{reportId}/approve")
     public Result<Void> approveReport(
             @PathVariable Long reportId,
@@ -194,7 +192,7 @@ public class ImWorkReportController {
     /**
      * 获取统计信息
      */
-    @Operation(summary = "获取统计信息")
+    
     @GetMapping("/statistics")
     public Result<Object> getStatistics() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -202,3 +200,4 @@ public class ImWorkReportController {
         return Result.success(stats);
     }
 }
+

@@ -5,8 +5,6 @@ import com.ruoyi.im.service.ImMessageReadService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.ImMessageReadDetailVO;
 import com.ruoyi.im.vo.message.ImMessageReadStatusVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +16,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Tag(name = "消息已读回执", description = "消息已读状态查询、标记已读等接口")
+
 @RestController
 @RequestMapping("/api/im/message/read")
 public class ImMessageReadController {
@@ -43,7 +41,7 @@ public class ImMessageReadController {
      * @param messageId      消息ID
      * @return 操作结果
      */
-    @Operation(summary = "标记消息已读", description = "标记单条消息为已读状态")
+    
     @PostMapping("/{messageId}")
     public Result<Void> markAsRead(
             @PathVariable Long messageId,
@@ -59,7 +57,7 @@ public class ImMessageReadController {
      * @param data 请求数据
      * @return 操作结果
      */
-    @Operation(summary = "批量标记已读", description = "批量标记多条消息为已读状态")
+    
     @PostMapping("/batch")
     public Result<Void> markBatchAsRead(
             @RequestBody java.util.Map<String, Object> data) {
@@ -80,7 +78,7 @@ public class ImMessageReadController {
      * @param upToMessageId  标记到此消息ID为止
      * @return 操作结果
      */
-    @Operation(summary = "标记会话已读", description = "将会话中所有消息标记为已读")
+    
     @PostMapping("/conversation/{conversationId}")
     public Result<Void> markConversationAsRead(
             @PathVariable Long conversationId,
@@ -96,7 +94,7 @@ public class ImMessageReadController {
      * @param messageId 消息ID
      * @return 已读状态
      */
-    @Operation(summary = "获取消息已读状态", description = "获取消息的已读人数和百分比")
+    
     @GetMapping("/status/{messageId}")
     public Result<ImMessageReadStatusVO> getReadStatus(
             @PathVariable Long messageId) {
@@ -111,7 +109,7 @@ public class ImMessageReadController {
      * @param messageId 消息ID
      * @return 已读详情
      */
-    @Operation(summary = "获取消息已读详情", description = "获取消息的已读和未读用户列表")
+    
     @GetMapping("/detail/{messageId}")
     public Result<ImMessageReadDetailVO> getReadDetail(
             @PathVariable Long messageId) {
@@ -126,7 +124,7 @@ public class ImMessageReadController {
      * @param conversationId 会话ID
      * @return 已读状态列表
      */
-    @Operation(summary = "获取会话消息已读状态", description = "获取会话中当前用户发送的消息的已读状态")
+    
     @GetMapping("/conversation/{conversationId}")
     public Result<List<ImMessageReadStatusVO>> getConversationReadStatus(
             @PathVariable Long conversationId) {
@@ -142,7 +140,7 @@ public class ImMessageReadController {
      * @param conversationId 会话ID
      * @return 操作结果
      */
-    @Operation(summary = "标记会话已读", description = "将会话中所有消息标记为已读（PUT接口）")
+    
     @PutMapping("/conversation")
     public Result<Void> markConversationRead(
             @RequestParam Long conversationId) {
@@ -162,7 +160,7 @@ public class ImMessageReadController {
      * @param messageId 消息ID
      * @return 操作结果
      */
-    @Operation(summary = "撤回已读回执", description = "删除某条消息的已读记录")
+    
     @DeleteMapping("/{messageId}")
     public Result<Void> revokeReadReceipt(
             @PathVariable Long messageId) {
@@ -171,3 +169,4 @@ public class ImMessageReadController {
         return Result.success("已撤回已读回执");
     }
 }
+

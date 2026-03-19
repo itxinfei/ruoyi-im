@@ -3,8 +3,6 @@ package com.ruoyi.im.controller.admin;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.SecurityUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "系统配置管理", description = "系统配置管理接口（管理员）")
+
 @RestController
 @RequestMapping("/api/admin/system-config")
 public class ImSystemConfigAdminController {
@@ -37,7 +35,7 @@ public class ImSystemConfigAdminController {
      *
      * @return 系统配置 Map
      */
-    @Operation(summary = "获取系统配置", description = "获取所有系统配置")
+    
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public Result<Map<String, Object>> getSystemConfigs() {
@@ -50,7 +48,7 @@ public class ImSystemConfigAdminController {
      *
      * @return 撤回时间限制（分钟）
      */
-    @Operation(summary = "获取撤回时间限制", description = "获取消息撤回时间限制")
+    
     @GetMapping("/recall-time-limit")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public Result<Integer> getRecallTimeLimit() {
@@ -64,7 +62,7 @@ public class ImSystemConfigAdminController {
      * @param minutes 时间限制（分钟），0 表示不限制
      * @return 操作结果
      */
-    @Operation(summary = "设置撤回时间限制", description = "设置消息撤回时间限制")
+    
     @PutMapping("/recall-time-limit")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public Result<Void> setRecallTimeLimit(@RequestParam Integer minutes) {
@@ -83,7 +81,7 @@ public class ImSystemConfigAdminController {
      * @param configValue 配置值
      * @return 操作结果
      */
-    @Operation(summary = "更新系统配置", description = "更新指定的系统配置，安全策略相关配置仅 SUPER_ADMIN 可修改")
+    
     @PutMapping("/{configKey}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public Result<Void> updateConfig(
@@ -107,3 +105,4 @@ public class ImSystemConfigAdminController {
         return Result.success("更新成功");
     }
 }
+

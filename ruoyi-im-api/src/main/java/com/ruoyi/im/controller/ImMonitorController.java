@@ -1,8 +1,6 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +24,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "系统监控", description = "系统运行状态和性能指标接口")
+
 @RestController
 @RequestMapping("/api/im/monitor")
 public class ImMonitorController {
@@ -38,7 +36,7 @@ public class ImMonitorController {
     /**
      * 获取系统概览
      */
-    @Operation(summary = "系统概览", description = "获取系统整体运行状态概览")
+    
     @GetMapping("/overview")
     public Result<Map<String, Object>> getOverview() {
         Map<String, Object> overview = new HashMap<>();
@@ -62,7 +60,7 @@ public class ImMonitorController {
     /**
      * 获取JVM信息
      */
-    @Operation(summary = "JVM信息", description = "获取JVM运行时信息")
+    
     @GetMapping("/jvm")
     public Result<Map<String, Object>> getJvmMetrics() {
         Map<String, Object> jvm = new HashMap<>();
@@ -91,7 +89,7 @@ public class ImMonitorController {
     /**
      * 获取内存信息
      */
-    @Operation(summary = "内存信息", description = "获取JVM内存使用情况")
+    
     @GetMapping("/memory")
     public Result<Map<String, Object>> getMemoryMetrics() {
         Map<String, Object> memory = new HashMap<>();
@@ -125,7 +123,7 @@ public class ImMonitorController {
     /**
      * 获取线程信息
      */
-    @Operation(summary = "线程信息", description = "获取JVM线程使用情况")
+    
     @GetMapping("/thread")
     public Result<Map<String, Object>> getThreadMetrics() {
         Map<String, Object> thread = new HashMap<>();
@@ -143,7 +141,7 @@ public class ImMonitorController {
     /**
      * 获取类加载信息
      */
-    @Operation(summary = "类加载信息", description = "获取JVM类加载情况")
+    
     @GetMapping("/classloading")
     public Result<Map<String, Object>> getClassLoadingMetrics() {
         Map<String, Object> classLoading = new HashMap<>();
@@ -158,7 +156,7 @@ public class ImMonitorController {
     /**
      * 获取编译信息
      */
-    @Operation(summary = "编译信息", description = "获取JIT编译信息")
+    
     @GetMapping("/compilation")
     public Result<Map<String, Object>> getCompilationMetrics() {
         Map<String, Object> compilation = new HashMap<>();
@@ -172,7 +170,7 @@ public class ImMonitorController {
     /**
      * 获取运行时信息
      */
-    @Operation(summary = "运行时信息", description = "获取JVM运行时详细信息")
+    
     @GetMapping("/runtime")
     public Result<Map<String, Object>> getRuntimeMetrics() {
         Map<String, Object> runtime = new HashMap<>();
@@ -190,7 +188,7 @@ public class ImMonitorController {
     /**
      * 健康状态检查
      */
-    @Operation(summary = "健康检查", description = "检查系统健康状态")
+    
     @GetMapping("/health")
     public Result<Map<String, Object>> healthCheck() {
         Map<String, Object> health = new HashMap<>();
@@ -291,3 +289,4 @@ public class ImMonitorController {
         }
     }
 }
+

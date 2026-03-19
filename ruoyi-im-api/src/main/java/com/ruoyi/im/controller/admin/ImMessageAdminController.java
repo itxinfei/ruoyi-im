@@ -4,8 +4,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.vo.admin.BatchOperationResult;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +19,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "管理员 - 消息管理", description = "管理员消息管理接口")
+
 @RestController
 @RequestMapping("/api/admin/messages")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
@@ -51,7 +49,7 @@ public class ImMessageAdminController {
      * @param pageSize 每页大小
      * @return 消息列表
      */
-    @Operation(summary = "搜索消息", description = "管理员搜索消息，支持多条件筛选")
+    
     @GetMapping
     public Result<Map<String, Object>> search(
             @RequestParam(required = false) String keyword,
@@ -109,7 +107,7 @@ public class ImMessageAdminController {
      * @param id 消息 ID
      * @return 消息详情
      */
-    @Operation(summary = "获取消息详情", description = "管理员获取指定消息的详细信息")
+    
     @GetMapping("/{id}")
     public Result<ImMessage> getById(@PathVariable Long id) {
         ImMessage message = imMessageMapper.selectImMessageById(id);
@@ -125,7 +123,7 @@ public class ImMessageAdminController {
      * @param id 消息 ID
      * @return 操作结果
      */
-    @Operation(summary = "删除消息", description = "管理员删除指定消息")
+    
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         ImMessage message = imMessageMapper.selectImMessageById(id);
@@ -143,7 +141,7 @@ public class ImMessageAdminController {
      * @param ids 消息 ID 列表
      * @return 批量操作结果
      */
-    @Operation(summary = "批量删除消息", description = "管理员批量删除消息，返回成功/失败数量及失败明细")
+    
     @DeleteMapping("/batch")
     public Result<BatchOperationResult> batchDelete(@RequestBody List<Long> ids) {
         BatchOperationResult result = new BatchOperationResult();
@@ -168,7 +166,7 @@ public class ImMessageAdminController {
      * @param endTime 结束时间
      * @return 统计数据
      */
-    @Operation(summary = "获取消息统计", description = "获取指定时间范围内的消息统计")
+    
     @GetMapping("/stats")
     public Result<Map<String, Object>> getStats(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
@@ -207,3 +205,4 @@ public class ImMessageAdminController {
         return Result.success(stats);
     }
 }
+

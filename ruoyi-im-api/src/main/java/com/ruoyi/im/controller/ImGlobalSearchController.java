@@ -5,8 +5,6 @@ import com.ruoyi.im.dto.search.GlobalSearchRequest;
 import com.ruoyi.im.service.ImGlobalSearchService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.search.GlobalSearchResultVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,7 @@ import javax.validation.Valid;
  *
  * @author ruoyi
  */
-@Tag(name = "全局搜索", description = "全局搜索接口，支持消息、联系人、群组、文件、工作台内容搜索")
+
 @RestController
 @RequestMapping("/api/im/search")
 public class ImGlobalSearchController {
@@ -44,7 +42,7 @@ public class ImGlobalSearchController {
      * @param request 搜索请求
      * @return 搜索结果
      */
-    @Operation(summary = "全局搜索", description = "根据关键词搜索所有内容")
+    
     @PostMapping("/global")
     public Result<GlobalSearchResultVO> globalSearch(
             @Valid @RequestBody GlobalSearchRequest request) {
@@ -69,7 +67,7 @@ public class ImGlobalSearchController {
      * @param keyword 搜索关键词
      * @return 消息搜索结果
      */
-    @Operation(summary = "搜索消息", description = "搜索聊天消息")
+    
     @GetMapping("/messages")
     public Result<GlobalSearchResultVO> searchMessages(
             @RequestParam String keyword) {
@@ -90,7 +88,7 @@ public class ImGlobalSearchController {
      * @param keyword 搜索关键词
      * @return 联系人搜索结果
      */
-    @Operation(summary = "搜索联系人", description = "搜索联系人")
+    
     @GetMapping("/contacts")
     public Result<GlobalSearchResultVO> searchContacts(
             @RequestParam String keyword) {
@@ -111,7 +109,7 @@ public class ImGlobalSearchController {
      * @param keyword 搜索关键词
      * @return 群组搜索结果
      */
-    @Operation(summary = "搜索群组", description = "搜索群组")
+    
     @GetMapping("/groups")
     public Result<GlobalSearchResultVO> searchGroups(
             @RequestParam String keyword) {
@@ -132,7 +130,7 @@ public class ImGlobalSearchController {
      * @param keyword 搜索关键词
      * @return 文件搜索结果
      */
-    @Operation(summary = "搜索文件", description = "搜索文件")
+    
     @GetMapping("/files")
     public Result<GlobalSearchResultVO> searchFiles(
             @RequestParam String keyword) {
@@ -153,7 +151,7 @@ public class ImGlobalSearchController {
      * @param keyword 搜索关键词
      * @return 工作台内容搜索结果
      */
-    @Operation(summary = "搜索工作台", description = "搜索工作台内容（任务、文档、日程等）")
+    
     @GetMapping("/workbench")
     public Result<GlobalSearchResultVO> searchWorkbench(
             @RequestParam String keyword) {
@@ -174,7 +172,7 @@ public class ImGlobalSearchController {
      *
      * @return 热门搜索关键词列表
      */
-    @Operation(summary = "获取热门搜索", description = "获取用户最近搜索的关键词")
+    
     @GetMapping("/hot-keywords")
     public Result<java.util.List<String>> getHotKeywords() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -188,3 +186,4 @@ public class ImGlobalSearchController {
         }
     }
 }
+

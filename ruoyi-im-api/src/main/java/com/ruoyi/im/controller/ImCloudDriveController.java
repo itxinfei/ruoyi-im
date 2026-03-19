@@ -10,9 +10,6 @@ import com.ruoyi.im.vo.cloud.ImCloudFileShareVO;
 import com.ruoyi.im.vo.cloud.ImCloudFileVO;
 import com.ruoyi.im.vo.cloud.ImCloudFolderVO;
 import com.ruoyi.im.vo.cloud.ImCloudStorageQuotaVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +24,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Tag(name = "企业云盘", description = "企业云盘管理接口")
+
 @RestController
 @RequestMapping("/api/im/cloud")
 public class ImCloudDriveController {
@@ -50,10 +47,10 @@ public class ImCloudDriveController {
     /**
      * 创建文件夹
      */
-    @Operation(summary = "创建文件夹", description = "创建新的文件夹")
+    
     @PostMapping("/folder/create")
     public Result<Long> createFolder(
-            @Parameter(description = "创建文件夹请求") @Valid @RequestBody ImCloudFolderCreateRequest request) {
+             @Valid @RequestBody ImCloudFolderCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -68,11 +65,11 @@ public class ImCloudDriveController {
     /**
      * 重命名文件夹
      */
-    @Operation(summary = "重命名文件夹", description = "重命名文件夹")
+    
     @PutMapping("/folder/{folderId}/rename")
     public Result<Void> renameFolder(
-            @Parameter(description = "文件夹ID") @PathVariable Long folderId,
-            @Parameter(description = "新文件夹名称") @RequestParam String newName) {
+             @PathVariable Long folderId,
+             @RequestParam String newName) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -87,10 +84,10 @@ public class ImCloudDriveController {
     /**
      * 删除文件夹
      */
-    @Operation(summary = "删除文件夹", description = "将文件夹移入回收站")
+    
     @DeleteMapping("/folder/{folderId}")
     public Result<Void> deleteFolder(
-            @Parameter(description = "文件夹ID") @PathVariable Long folderId) {
+             @PathVariable Long folderId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -105,10 +102,10 @@ public class ImCloudDriveController {
     /**
      * 永久删除文件夹
      */
-    @Operation(summary = "永久删除文件夹", description = "永久删除文件夹（无法恢复）")
+    
     @DeleteMapping("/folder/{folderId}/permanent")
     public Result<Void> permanentlyDeleteFolder(
-            @Parameter(description = "文件夹ID") @PathVariable Long folderId) {
+             @PathVariable Long folderId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -123,10 +120,10 @@ public class ImCloudDriveController {
     /**
      * 恢复文件夹
      */
-    @Operation(summary = "恢复文件夹", description = "从回收站恢复文件夹")
+    
     @PostMapping("/folder/{folderId}/restore")
     public Result<Void> restoreFolder(
-            @Parameter(description = "文件夹ID") @PathVariable Long folderId) {
+             @PathVariable Long folderId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -141,11 +138,11 @@ public class ImCloudDriveController {
     /**
      * 获取文件夹列表
      */
-    @Operation(summary = "获取文件夹列表", description = "获取指定目录下的文件夹列表")
+    
     @GetMapping("/folder/list")
     public Result<List<ImCloudFolderVO>> getFolderList(
-            @Parameter(description = "父文件夹ID，0表示根目录") @RequestParam(defaultValue = "0") Long parentId,
-            @Parameter(description = "所有者类型：USER个人, DEPARTMENT部门, COMPANY公司") @RequestParam(defaultValue = "USER") String ownerType) {
+             @RequestParam(defaultValue = "0") Long parentId,
+             @RequestParam(defaultValue = "USER") String ownerType) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -160,10 +157,10 @@ public class ImCloudDriveController {
     /**
      * 获取文件夹路径
      */
-    @Operation(summary = "获取文件夹路径", description = "获取文件夹的完整路径")
+    
     @GetMapping("/folder/{folderId}/path")
     public Result<List<ImCloudFolderVO>> getFolderPath(
-            @Parameter(description = "文件夹ID") @PathVariable Long folderId) {
+             @PathVariable Long folderId) {
         try {
             List<ImCloudFolderVO> path = cloudDriveService.getFolderPath(folderId);
             return Result.success(path);
@@ -178,11 +175,11 @@ public class ImCloudDriveController {
     /**
      * 上传文件
      */
-    @Operation(summary = "上传文件", description = "上传文件到指定文件夹")
+    
     @PostMapping("/file/upload")
     public Result<ImCloudFileVO> uploadFile(
-            @Parameter(description = "目标文件夹ID，0表示根目录") @RequestParam(required = false, defaultValue = "0") Long folderId,
-            @Parameter(description = "上传的文件") @RequestParam("file") MultipartFile file) {
+             @RequestParam(required = false, defaultValue = "0") Long folderId,
+             @RequestParam("file") MultipartFile file) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -197,11 +194,11 @@ public class ImCloudDriveController {
     /**
      * 批量上传文件
      */
-    @Operation(summary = "批量上传文件", description = "批量上传文件到指定文件夹")
+    
     @PostMapping("/file/batch-upload")
     public Result<List<ImCloudFileVO>> uploadFiles(
-            @Parameter(description = "目标文件夹ID，0表示根目录") @RequestParam(required = false, defaultValue = "0") Long folderId,
-            @Parameter(description = "上传的文件列表") @RequestParam("files") MultipartFile[] files) {
+             @RequestParam(required = false, defaultValue = "0") Long folderId,
+             @RequestParam("files") MultipartFile[] files) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -219,11 +216,11 @@ public class ImCloudDriveController {
     /**
      * 重命名文件
      */
-    @Operation(summary = "重命名文件", description = "重命名文件")
+    
     @PutMapping("/file/{fileId}/rename")
     public Result<Void> renameFile(
-            @Parameter(description = "文件ID") @PathVariable Long fileId,
-            @Parameter(description = "新文件名称") @RequestParam String newName) {
+             @PathVariable Long fileId,
+             @RequestParam String newName) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -238,10 +235,10 @@ public class ImCloudDriveController {
     /**
      * 删除文件
      */
-    @Operation(summary = "删除文件", description = "将文件移入回收站")
+    
     @DeleteMapping("/file/{fileId}")
     public Result<Void> deleteFile(
-            @Parameter(description = "文件ID") @PathVariable Long fileId) {
+             @PathVariable Long fileId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -256,10 +253,10 @@ public class ImCloudDriveController {
     /**
      * 永久删除文件
      */
-    @Operation(summary = "永久删除文件", description = "永久删除文件（无法恢复）")
+    
     @DeleteMapping("/file/{fileId}/permanent")
     public Result<Void> permanentlyDeleteFile(
-            @Parameter(description = "文件ID") @PathVariable Long fileId) {
+             @PathVariable Long fileId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -274,10 +271,10 @@ public class ImCloudDriveController {
     /**
      * 恢复文件
      */
-    @Operation(summary = "恢复文件", description = "从回收站恢复文件")
+    
     @PostMapping("/file/{fileId}/restore")
     public Result<Void> restoreFile(
-            @Parameter(description = "文件ID") @PathVariable Long fileId) {
+             @PathVariable Long fileId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -292,10 +289,10 @@ public class ImCloudDriveController {
     /**
      * 移动文件
      */
-    @Operation(summary = "移动文件", description = "移动文件到指定文件夹")
+    
     @PostMapping("/file/move")
     public Result<Void> moveFiles(
-            @Parameter(description = "移动文件请求") @Valid @RequestBody ImCloudFileMoveRequest request) {
+             @Valid @RequestBody ImCloudFileMoveRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -310,10 +307,10 @@ public class ImCloudDriveController {
     /**
      * 获取文件列表
      */
-    @Operation(summary = "获取文件列表", description = "获取文件夹内的文件列表")
+    
     @GetMapping("/file/list")
     public Result<List<ImCloudFileVO>> getFileList(
-            @Parameter(description = "文件夹ID") @RequestParam Long folderId) {
+             @RequestParam Long folderId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -328,11 +325,11 @@ public class ImCloudDriveController {
     /**
      * 搜索文件
      */
-    @Operation(summary = "搜索文件", description = "搜索文件")
+    
     @GetMapping("/file/search")
     public Result<List<ImCloudFileVO>> searchFiles(
-            @Parameter(description = "搜索关键词") @RequestParam String keyword,
-            @Parameter(description = "文件类型筛选：DOCUMENT文档, IMAGE图片, VIDEO视频, AUDIO音频") @RequestParam(required = false) String fileType) {
+             @RequestParam String keyword,
+             @RequestParam(required = false) String fileType) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -347,10 +344,10 @@ public class ImCloudDriveController {
     /**
      * 获取最近上传的文件
      */
-    @Operation(summary = "最近上传", description = "获取最近上传的文件")
+    
     @GetMapping("/file/recent")
     public Result<List<ImCloudFileVO>> getRecentFiles(
-            @Parameter(description = "返回数量限制") @RequestParam(defaultValue = "10") Integer limit) {
+             @RequestParam(defaultValue = "10") Integer limit) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -365,7 +362,7 @@ public class ImCloudDriveController {
     /**
      * 获取回收站
      */
-    @Operation(summary = "回收站", description = "获取回收站的文件列表")
+    
     @GetMapping("/recycle-bin")
     public Result<List<ImCloudFileVO>> getRecycleBin() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -384,10 +381,10 @@ public class ImCloudDriveController {
     /**
      * 创建分享链接
      */
-    @Operation(summary = "创建分享", description = "创建文件或文件夹分享链接")
+    
     @PostMapping("/share/create")
     public Result<ImCloudFileShareVO> createShare(
-            @Parameter(description = "文件分享请求") @Valid @RequestBody ImCloudFileShareRequest request) {
+             @Valid @RequestBody ImCloudFileShareRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -402,10 +399,10 @@ public class ImCloudDriveController {
     /**
      * 取消分享
      */
-    @Operation(summary = "取消分享", description = "取消分享链接")
+    
     @DeleteMapping("/share/{shareId}")
     public Result<Void> cancelShare(
-            @Parameter(description = "分享ID") @PathVariable Long shareId) {
+             @PathVariable Long shareId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -420,7 +417,7 @@ public class ImCloudDriveController {
     /**
      * 获取分享列表
      */
-    @Operation(summary = "分享列表", description = "获取我的分享列表")
+    
     @GetMapping("/share/list")
     public Result<List<ImCloudFileShareVO>> getShareList() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -437,11 +434,11 @@ public class ImCloudDriveController {
     /**
      * 访问分享
      */
-    @Operation(summary = "访问分享", description = "通过分享码访问分享内容")
+    
     @GetMapping("/share/access")
     public Result<ImCloudFileShareVO> accessShare(
-            @Parameter(description = "分享码") @RequestParam String shareCode,
-            @Parameter(description = "访问密码（如需要）") @RequestParam(required = false) String password) {
+             @RequestParam String shareCode,
+             @RequestParam(required = false) String password) {
         try {
             ImCloudFileShareVO shareVO = cloudDriveService.accessShare(shareCode, password);
             return Result.success(shareVO);
@@ -456,7 +453,7 @@ public class ImCloudDriveController {
     /**
      * 获取存储配额
      */
-    @Operation(summary = "存储配额", description = "获取存储空间使用情况")
+    
     @GetMapping("/quota")
     public Result<ImCloudStorageQuotaVO> getStorageQuota() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -470,3 +467,4 @@ public class ImCloudDriveController {
         }
     }
 }
+

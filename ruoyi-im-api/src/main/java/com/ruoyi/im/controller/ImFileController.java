@@ -6,8 +6,6 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
 import com.ruoyi.im.vo.file.ImFileVO;
 import com.ruoyi.im.util.JwtUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +24,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Tag(name = "文件管理", description = "文件上传、下载、分享等接口")
+
 @RestController
 @RequestMapping("/api/im/file")
 public class ImFileController {
@@ -58,7 +56,7 @@ public class ImFileController {
      * @param file 上传的文件
      * @return 上传结果，包含文件信息
      */
-    @Operation(summary = "上传文件", description = "上传文件到服务器")
+    
     @PostMapping("/upload")
     public Result<ImFileVO> uploadFile(@RequestParam("file") MultipartFile file) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -77,7 +75,7 @@ public class ImFileController {
      * @param files 上传的文件列表
      * @return 上传结果，包含文件信息列表
      */
-    @Operation(summary = "批量上传文件", description = "批量上传多个文件")
+    
     @PostMapping("/upload/batch")
     public Result<List<ImFileVO>> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -96,7 +94,7 @@ public class ImFileController {
      * @param fileId   文件ID
      * @param response HTTP响应对象
      */
-    @Operation(summary = "下载文件", description = "根据文件ID下载文件")
+    
     @GetMapping("/download/{fileId}")
     public void downloadFile(@PathVariable Long fileId,
             @RequestParam(required = false) String token,
@@ -174,7 +172,7 @@ public class ImFileController {
      * @param token    JWT token用于认证
      * @param response HTTP响应对象
      */
-    @Operation(summary = "按路径下载文件", description = "支持头像等直接路径访问")
+    
     @GetMapping("/download/{fileType}/{year}/{month}/{day}/{fileName}")
     public void downloadFileByPath(@PathVariable String fileType,
             @PathVariable String year,
@@ -256,7 +254,7 @@ public class ImFileController {
      * @param fileId 文件ID
      * @return 文件预览URL
      */
-    @Operation(summary = "获取文件预览URL", description = "获取文件预览URL")
+    
     @GetMapping("/preview/{fileId}")
     public Result<String> getFilePreviewUrl(@PathVariable Long fileId) {
         // 验证登录但不使用ID
@@ -277,7 +275,7 @@ public class ImFileController {
      * @param fileId 文件ID
      * @return 文件详细信息
      */
-    @Operation(summary = "获取文件详情", description = "根据文件ID获取文件详细信息")
+    
     @GetMapping("/{fileId}")
     public Result<ImFileVO> getFileById(@PathVariable Long fileId) {
         ImFileVO fileVO = imFileService.getFileById(fileId);
@@ -291,7 +289,7 @@ public class ImFileController {
      * @param fileId 文件ID
      * @return 删除结果
      */
-    @Operation(summary = "删除文件", description = "删除指定的文件")
+    
     @DeleteMapping("/{fileId}")
     public Result<Void> deleteFile(@PathVariable Long fileId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -307,7 +305,7 @@ public class ImFileController {
      * @param fileIds 文件ID列表
      * @return 删除结果
      */
-    @Operation(summary = "批量删除文件", description = "批量删除多个文件")
+    
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteFiles(@RequestBody List<Long> fileIds) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -325,7 +323,7 @@ public class ImFileController {
      * @param fileType 文件类型
      * @return 文件列表
      */
-    @Operation(summary = "获取用户文件列表", description = "获取当前用户的文件列表")
+    
     @GetMapping("/list")
     public Result<List<ImFileVO>> getFileList(@RequestParam(required = false) String fileType) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -340,7 +338,7 @@ public class ImFileController {
      *
      * @return 文件统计信息
      */
-    @Operation(summary = "获取文件统计信息", description = "获取文件存储统计信息")
+    
     @GetMapping("/statistics")
     public Result<ImFileStatisticsVO> getStatistics() {
         ImFileStatisticsVO statistics = imFileService.getStorageStatistics();
@@ -436,3 +434,4 @@ public class ImFileController {
                 || extension.equals("webp") || extension.equals("bmp");
     }
 }
+

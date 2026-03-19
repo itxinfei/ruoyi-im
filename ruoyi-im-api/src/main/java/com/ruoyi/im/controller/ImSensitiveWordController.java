@@ -3,8 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImSensitiveWord;
 import com.ruoyi.im.service.ISensitiveWordService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +16,7 @@ import java.util.Set;
  *
  * @author ruoyi
  */
-@Tag(name = "敏感词管理", description = "敏感词管理、检测、过滤等接口")
+
 @RestController
 @RequestMapping("/api/im/sensitiveWord")
 public class ImSensitiveWordController {
@@ -32,7 +30,7 @@ public class ImSensitiveWordController {
      * @param text 待检测文本
      * @return 检测结果，包含是否包含敏感词和敏感词列表
      */
-    @Operation(summary = "检测敏感词", description = "检测文本中是否包含敏感词")
+    
     @PostMapping("/detect")
     public Result<Map<String, Object>> detect(@RequestBody Map<String, String> request) {
         String text = request.get("text");
@@ -50,7 +48,7 @@ public class ImSensitiveWordController {
      * @param request 请求体，包含text和replacement（可选）
      * @return 过滤后的文本
      */
-    @Operation(summary = "过滤敏感词", description = "将文本中的敏感词替换为***")
+    
     @PostMapping("/filter")
     public Result<Map<String, Object>> filter(@RequestBody Map<String, String> request) {
         String text = request.get("text");
@@ -69,7 +67,7 @@ public class ImSensitiveWordController {
      *
      * @return 敏感词数量
      */
-    @Operation(summary = "获取敏感词数量", description = "获取当前加载的敏感词数量")
+    
     @GetMapping("/count")
     public Result<Integer> getCount() {
         int count = sensitiveWordService.getSensitiveWordCount();
@@ -81,10 +79,11 @@ public class ImSensitiveWordController {
      *
      * @return 操作结果
      */
-    @Operation(summary = "重新加载敏感词库", description = "从数据库重新加载敏感词配置")
+    
     @PostMapping("/reload")
     public Result<Void> reload() {
         sensitiveWordService.reload();
         return Result.success("敏感词库已重新加载");
     }
 }
+

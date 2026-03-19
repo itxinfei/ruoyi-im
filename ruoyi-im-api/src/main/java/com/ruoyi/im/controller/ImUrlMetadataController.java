@@ -3,8 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImUrlMetadata;
 import com.ruoyi.im.service.ImUrlMetadataService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -16,7 +14,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "URL 元数据", description = "URL 元数据解析、链接预览接口")
+
 @RestController
 @RequestMapping("/api/im/url")
 public class ImUrlMetadataController {
@@ -34,7 +32,7 @@ public class ImUrlMetadataController {
      * @param url 待解析的 URL 地址
      * @return URL 元数据
      */
-    @Operation(summary = "解析 URL 元数据", description = "根据 URL 解析网页的标题、描述、缩略图等元数据，支持 Open Graph 协议")
+    
     @GetMapping("/parse")
     public Result<Map<String, Object>> parseUrl(@RequestParam String url) {
         try {
@@ -72,7 +70,7 @@ public class ImUrlMetadataController {
      * @param url 待刷新的 URL 地址
      * @return URL 元数据
      */
-    @Operation(summary = "刷新 URL 元数据", description = "强制重新抓取网页内容，更新缓存")
+    
     @PostMapping("/refresh")
     public Result<Map<String, Object>> refreshUrl(@RequestParam String url) {
         try {
@@ -113,3 +111,4 @@ public class ImUrlMetadataController {
         }
     }
 }
+

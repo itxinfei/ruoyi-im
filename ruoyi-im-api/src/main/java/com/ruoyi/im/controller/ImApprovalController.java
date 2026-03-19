@@ -5,8 +5,6 @@ import com.ruoyi.im.domain.ImApproval;
 import com.ruoyi.im.domain.ImApprovalTemplate;
 import com.ruoyi.im.service.ImApprovalService;
 import com.ruoyi.im.util.SecurityUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +16,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "审批中心", description = "审批发起、查询、处理等接口")
+
 @RestController
 @RequestMapping("/api/im/approval")
 public class ImApprovalController {
@@ -43,7 +41,7 @@ public class ImApprovalController {
      * @param formData 表单数据
      * @return 创建结果，包含审批ID
      */
-    @Operation(summary = "发起审批", description = "创建新的审批申请")
+    
     @PostMapping("/create")
     public Result<Long> createApproval(@RequestParam Long templateId,
                                       @RequestParam String title,
@@ -60,7 +58,7 @@ public class ImApprovalController {
      * @param id 审批ID
      * @return 审批详情
      */
-    @Operation(summary = "获取审批详情", description = "获取审批详细信息")
+    
     @GetMapping("/{id}")
     public Result<Map<String, Object>> getDetail(@PathVariable Long id) {
         Map<String, Object> detail = approvalService.getApprovalDetail(id);
@@ -73,7 +71,7 @@ public class ImApprovalController {
      *
      * @return 待审批列表
      */
-    @Operation(summary = "获取待我审批列表", description = "获取需要当前用户审批的审批列表")
+    
     @GetMapping("/pending")
     public Result<List<ImApproval>> getPendingApprovals() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -87,7 +85,7 @@ public class ImApprovalController {
      *
      * @return 我发起的审批列表
      */
-    @Operation(summary = "获取我发起的审批列表", description = "获取当前用户发起的审批列表")
+    
     @GetMapping("/my")
     public Result<List<ImApproval>> getMyApprovals() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -101,7 +99,7 @@ public class ImApprovalController {
      *
      * @return 我已审批的审批列表
      */
-    @Operation(summary = "获取我已审批列表", description = "获取当前用户已经审批的审批列表")
+    
     @GetMapping("/processed")
     public Result<List<ImApproval>> getProcessedApprovals() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -117,7 +115,7 @@ public class ImApprovalController {
      * @param comment 审批意见
      * @return 操作结果
      */
-    @Operation(summary = "通过审批", description = "批准指定的审批申请")
+    
     @PostMapping("/{id}/approve")
     public Result<Void> approve(@PathVariable Long id,
                                @RequestParam(required = false) String comment) {
@@ -134,7 +132,7 @@ public class ImApprovalController {
      * @param comment 审批意见
      * @return 操作结果
      */
-    @Operation(summary = "驳回审批", description = "驳回指定的审批申请")
+    
     @PostMapping("/{id}/reject")
     public Result<Void> reject(@PathVariable Long id,
                               @RequestParam String comment) {
@@ -150,7 +148,7 @@ public class ImApprovalController {
      * @param id 审批ID
      * @return 操作结果
      */
-    @Operation(summary = "撤回审批", description = "撤回当前用户发起的审批申请")
+    
     @PostMapping("/{id}/cancel")
     public Result<Void> cancel(@PathVariable Long id) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -166,7 +164,7 @@ public class ImApprovalController {
      * @param toUserId 转交给的用户ID
      * @return 操作结果
      */
-    @Operation(summary = "转交审批", description = "将当前审批转交给其他用户处理")
+    
     @PostMapping("/{id}/transfer")
     public Result<Void> transfer(@PathVariable Long id,
                                  @RequestParam Long toUserId) {
@@ -183,7 +181,7 @@ public class ImApprovalController {
      * @param toUserId 委托给的用户ID
      * @return 操作结果
      */
-    @Operation(summary = "委托审批", description = "将当前审批委托给其他用户协助处理")
+    
     @PostMapping("/{id}/delegate")
     public Result<Void> delegate(@PathVariable Long id,
                                 @RequestParam Long toUserId) {
@@ -198,7 +196,7 @@ public class ImApprovalController {
      *
      * @return 审批模板列表
      */
-    @Operation(summary = "获取审批模板列表", description = "获取所有审批模板")
+    
     @GetMapping("/templates")
     public Result<List<ImApprovalTemplate>> getTemplates() {
         List<ImApprovalTemplate> list = approvalService.getTemplates();
@@ -211,10 +209,11 @@ public class ImApprovalController {
      *
      * @return 启用的审批模板列表
      */
-    @Operation(summary = "获取启用的审批模板列表", description = "获取所有启用状态的审批模板")
+    
     @GetMapping("/templates/active")
     public Result<List<ImApprovalTemplate>> getActiveTemplates() {
         List<ImApprovalTemplate> list = approvalService.getActiveTemplates();
         return Result.success(list);
     }
 }
+

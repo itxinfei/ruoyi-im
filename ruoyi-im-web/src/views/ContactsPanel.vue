@@ -280,10 +280,10 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
     height: var(--dt-chat-header-height); padding: 0 var(--dt-spacing-md);
     @include flex-center; border-bottom: 1px solid var(--dt-border-lighter);
     .search-wrap {
-      width: 100%; height: 32px; background: var(--dt-bg-body); border-radius: 6px;
-      display: flex; align-items: center; padding: 0 10px; gap: 8px;
-      .search-icon { color: var(--dt-text-tertiary); font-size: 14px; }
-      .inner-input { border: none; background: transparent; outline: none; font-size: 13px; width: 100%; }
+      width: 100%; height: var(--dt-btn-height-sm, 32px); background: var(--dt-bg-body); border-radius: var(--dt-radius-sm, 6px);
+      display: flex; align-items: center; padding: 0 var(--dt-spacing-sm, 10px); gap: var(--dt-spacing-sm, 8px);
+      .search-icon { color: var(--dt-text-tertiary); font-size: var(--dt-icon-size-md, 14px); }
+      .inner-input { border: none; background: transparent; outline: none; font-size: var(--dt-font-size-sm, 13px); width: 100%; }
     }
   }
 }
@@ -293,21 +293,21 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .nav-list {
   display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--dt-spacing-lg);
   .nav-item {
-    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px); padding: var(--dt-spacing-sm, 10px) var(--dt-spacing-sm, 12px);
     border-radius: var(--dt-radius-md); cursor: pointer; transition: all var(--dt-transition-base);
     &:hover { background: var(--dt-bg-session-hover); }
-    &.active { background: var(--dt-bg-session-active); color: var(--dt-brand-color); font-weight: 600; }
+    &.active { background: var(--dt-bg-session-active); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold, 600); }
 
     .icon-box {
-      width: 32px; height: 32px; border-radius: 8px; @include flex-center; color: var(--dt-text-primary); font-size: 18px;
+      width: var(--dt-avatar-size-md, 32px); height: var(--dt-avatar-size-md, 32px); border-radius: var(--dt-radius-md, 8px); @include flex-center; color: var(--dt-text-primary); font-size: var(--dt-icon-size-lg, 18px);
       &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); } &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); } &.green { background: var(--dt-success-bg); color: var(--dt-success-color); }
     }
-    span { font-size: 14px; color: var(--dt-text-primary); }
+    span { font-size: var(--dt-font-size-sm, 14px); color: var(--dt-text-primary); }
   }
 }
 
 .tree-divider {
-  padding: 0 var(--dt-spacing-md) var(--dt-spacing-sm); font-size: 12px; color: var(--dt-text-tertiary);
+  padding: 0 var(--dt-spacing-md) var(--dt-spacing-sm); font-size: var(--dt-font-size-xs, 12px); color: var(--dt-text-tertiary);
   text-transform: uppercase; letter-spacing: 1px;
 }
 
@@ -333,21 +333,21 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 }
 
 .dept-folder-card {
-  background: var(--dt-bg-body); padding: 12px 16px; border-radius: var(--dt-radius-md);
-  display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;
+  background: var(--dt-bg-body); padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px); border-radius: var(--dt-radius-md);
+  display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px); cursor: pointer; transition: all 0.2s;
   &:hover { background: var(--dt-bg-session-hover); transform: translateY(-1px); box-shadow: var(--dt-shadow-1); }
 
-  .folder-icon { font-size: 24px; color: var(--dt-brand-color); }
+  .folder-icon { font-size: var(--dt-icon-size-lg, 24px); color: var(--dt-brand-color); }
   .folder-info { flex: 1; display: flex; flex-direction: column;
-    .folder-name { font-size: 14px; font-weight: 500; color: var(--dt-text-primary); }
-    .folder-count { font-size: 12px; color: var(--dt-text-tertiary); }
+    .folder-name { font-size: var(--dt-font-size-sm, 14px); font-weight: var(--dt-font-weight-medium, 500); color: var(--dt-text-primary); }
+    .folder-count { font-size: var(--dt-font-size-xs, 12px); color: var(--dt-text-tertiary); }
   }
-  .arrow { font-size: 14px; color: var(--dt-text-quaternary); }
+  .arrow { font-size: var(--dt-icon-size-md, 14px); color: var(--dt-text-quaternary); }
 }
 
 .section-divider {
   padding: var(--dt-spacing-md) 0; border-bottom: 1px solid var(--dt-border-lighter);
-  margin-bottom: var(--dt-spacing-lg); span { font-size: 13px; color: var(--dt-text-tertiary); font-weight: 600; }
+  margin-bottom: var(--dt-spacing-lg); span { font-size: var(--dt-font-size-sm, 13px); color: var(--dt-text-tertiary); font-weight: var(--dt-font-weight-semibold, 600); }
 }
 
 // 成员卡片对标
@@ -356,24 +356,24 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 }
 
 .member-card-ding {
-  background: var(--dt-bg-card); padding: 16px; border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light);
-  display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s;
+  background: var(--dt-bg-card); padding: var(--dt-spacing-md, 16px); border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light);
+  display: flex; align-items: center; gap: var(--dt-spacing-md, 14px); cursor: pointer; transition: all 0.2s;
   &:hover {
     box-shadow: var(--dt-shadow-card-hover); border-color: var(--dt-brand-light);
     .chat-shortcut { opacity: 1; transform: scale(1); }
   }
 
   .m-body { flex: 1; min-width: 0;
-    .m-name { font-size: 15px; font-weight: 600; color: var(--dt-text-primary); }
-    .m-position { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 2px; }
+    .m-name { font-size: var(--dt-font-size-md, 15px); font-weight: var(--dt-font-weight-semibold, 600); color: var(--dt-text-primary); }
+    .m-position { font-size: var(--dt-font-size-xs, 12px); color: var(--dt-text-tertiary); margin-top: var(--dt-spacing-xs, 2px); }
   }
 
   .chat-shortcut {
-    @include button-reset; width: 32px; height: 32px; border-radius: 50%; background: var(--dt-brand-bg);
+    @include button-reset; width: var(--dt-btn-height-sm, 32px); height: var(--dt-btn-height-sm, 32px); border-radius: 50%; background: var(--dt-brand-bg);
     color: var(--dt-brand-color); @include flex-center; opacity: 0; transform: scale(0.8);
     transition: all 0.2s; &:hover { background: var(--dt-brand-color); color: var(--dt-text-primary); }
   }
 }
 
-.view-title { font-size: 18px; font-weight: 700; color: var(--dt-text-primary); margin-bottom: var(--dt-spacing-xl); }
+.view-title { font-size: var(--dt-font-size-lg, 18px); font-weight: var(--dt-font-weight-bold, 700); color: var(--dt-text-primary); margin-bottom: var(--dt-spacing-xl); }
 </style>

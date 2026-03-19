@@ -9,9 +9,6 @@ import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupService;
 import com.ruoyi.im.vo.admin.BatchOperationResult;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +24,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "管理员 - 群组管理", description = "管理员群组管理接口")
+
 @RestController
 @RequestMapping("/api/admin/groups")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
@@ -60,7 +57,7 @@ public class ImGroupAdminController {
      * @param pageSize 每页大小
      * @return 群组列表
      */
-    @Operation(summary = "获取群组列表", description = "管理员获取群组列表，支持分页和关键词搜索")
+    
     @GetMapping
     public Result<Map<String, Object>> list(
             @RequestParam(required = false) String keyword,
@@ -90,7 +87,7 @@ public class ImGroupAdminController {
      * @param id 群组 ID
      * @return 群组详情
      */
-    @Operation(summary = "获取群组详情", description = "管理员获取指定群组的详细信息")
+    
     @GetMapping("/{id}")
     public Result<ImGroup> getById(@PathVariable Long id) {
         ImGroup group = imGroupMapper.selectImGroupById(id);
@@ -111,7 +108,7 @@ public class ImGroupAdminController {
      * @param id 群组 ID
      * @return 操作结果
      */
-    @Operation(summary = "解散群组", description = "管理员解散指定群组")
+    
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         ImGroup group = imGroupMapper.selectImGroupById(id);
@@ -137,7 +134,7 @@ public class ImGroupAdminController {
      * @param ids 群组 ID 列表
      * @return 批量操作结果
      */
-    @Operation(summary = "批量解散群组", description = "管理员批量解散群组，返回成功/失败数量及失败明细")
+    
     @DeleteMapping("/batch")
     public Result<BatchOperationResult> batchDelete(@RequestBody List<Long> ids) {
         BatchOperationResult result = new BatchOperationResult();
@@ -171,7 +168,7 @@ public class ImGroupAdminController {
      * @param request 群组更新请求
      * @return 操作结果
      */
-    @Operation(summary = "更新群组信息", description = "管理员更新群组信息")
+    
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable Long id, @RequestBody ImGroupUpdateRequest request) {
         ImGroup existGroup = imGroupMapper.selectImGroupById(id);
@@ -193,7 +190,7 @@ public class ImGroupAdminController {
      *
      * @return 统计数据
      */
-    @Operation(summary = "获取群组统计", description = "获取群组总数、活跃群组等统计信息")
+    
     @GetMapping("/stats")
     public Result<Map<String, Object>> getStats() {
         // 查询所有群组
@@ -214,7 +211,7 @@ public class ImGroupAdminController {
      * @param id 群组 ID
      * @return 成员列表
      */
-    @Operation(summary = "获取群组成员列表", description = "管理员获取群组成员列表")
+    
     @GetMapping("/{id}/members")
     public Result<List<Map<String, Object>>> getMembers(@PathVariable Long id) {
         List<Map<String, Object>> members = imGroupMemberMapper.selectMembersByGroupId(id);
@@ -241,10 +238,11 @@ public class ImGroupAdminController {
      * @param userId 用户 ID
      * @return 操作结果
      */
-    @Operation(summary = "移除群组成员", description = "管理员移除群组成员")
+    
     @DeleteMapping("/{groupId}/members/{userId}")
     public Result<Void> removeMember(@PathVariable Long groupId, @PathVariable Long userId) {
         imGroupMemberMapper.deleteByGroupIdAndUserId(groupId, userId);
         return Result.success("成员已移除");
     }
 }
+

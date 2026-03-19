@@ -4,8 +4,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImVideoCallService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +16,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "视频通话", description = "视频通话管理接口")
+
 @RestController
 @RequestMapping("/api/im/video-call")
 public class ImVideoCallController {
@@ -39,7 +37,7 @@ public class ImVideoCallController {
     /**
      * 发起通话
      */
-    @Operation(summary = "发起通话", description = "发起视频或语音通话")
+    
     @PostMapping("/initiate")
     public Result<Long> initiateCall(
             @RequestParam Long calleeId,
@@ -63,7 +61,7 @@ public class ImVideoCallController {
     /**
      * 接听通话
      */
-    @Operation(summary = "接听通话", description = "接听来电")
+    
     @PostMapping("/{callId}/accept")
     public Result<Void> acceptCall(
             @PathVariable Long callId) {
@@ -81,7 +79,7 @@ public class ImVideoCallController {
     /**
      * 拒绝通话
      */
-    @Operation(summary = "拒绝通话", description = "拒绝来电")
+    
     @PostMapping("/{callId}/reject")
     public Result<Void> rejectCall(
             @PathVariable Long callId,
@@ -100,7 +98,7 @@ public class ImVideoCallController {
     /**
      * 结束通话
      */
-    @Operation(summary = "结束通话", description = "结束当前通话")
+    
     @PostMapping("/{callId}/end")
     public Result<Void> endCall(
             @PathVariable Long callId) {
@@ -118,7 +116,7 @@ public class ImVideoCallController {
     /**
      * 获取通话信息
      */
-    @Operation(summary = "获取通话信息", description = "获取通话详情")
+    
     @GetMapping("/{callId}")
     public Result<Object> getCallInfo(@PathVariable Long callId) {
         try {
@@ -136,7 +134,7 @@ public class ImVideoCallController {
     /**
      * 获取用户当前通话状态
      */
-    @Operation(summary = "获取用户通话状态", description = "获取用户当前正在进行的通话")
+    
     @GetMapping("/active")
     public Result<Object> getUserActiveCall() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -154,7 +152,7 @@ public class ImVideoCallController {
      * 发送WebRTC信令
      * 客户端通过此接口发送offer/answer/ice-candidate
      */
-    @Operation(summary = "发送WebRTC信令", description = "转发WebRTC信令消息给对端")
+    
     @PostMapping("/signal")
     public Result<Void> sendSignal(
             @RequestParam Long callId,
@@ -175,7 +173,7 @@ public class ImVideoCallController {
     /**
      * 获取通话历史
      */
-    @Operation(summary = "获取通话历史", description = "获取用户通话历史记录")
+    
     @GetMapping("/history")
     public Result<?> getCallHistory(
             @RequestParam(defaultValue = "20") Integer limit) {
@@ -194,7 +192,7 @@ public class ImVideoCallController {
     /**
      * 发起群组多人通话
      */
-    @Operation(summary = "发起群组通话", description = "发起群组多人视频/语音通话（最多9人）")
+    
     @PostMapping("/group/initiate")
     public Result<Map<String, Object>> initiateGroupCall(
             @RequestParam Long conversationId,
@@ -240,7 +238,7 @@ public class ImVideoCallController {
     /**
      * 加入群组通话
      */
-    @Operation(summary = "加入群组通话", description = "加入已发起的群组通话")
+    
     @PostMapping("/group/{callId}/join")
     public Result<Void> joinGroupCall(
             @PathVariable Long callId) {
@@ -258,7 +256,7 @@ public class ImVideoCallController {
     /**
      * 离开群组通话
      */
-    @Operation(summary = "离开群组通话", description = "离开群组通话（不结束通话）")
+    
     @PostMapping("/group/{callId}/leave")
     public Result<Void> leaveGroupCall(
             @PathVariable Long callId) {
@@ -276,7 +274,7 @@ public class ImVideoCallController {
     /**
      * 获取通话参与者列表
      */
-    @Operation(summary = "获取参与者列表", description = "获取群组通话的参与者列表")
+    
     @GetMapping("/group/{callId}/participants")
     public Result<List<?>> getParticipants(
             @PathVariable Long callId) {
@@ -292,7 +290,7 @@ public class ImVideoCallController {
     /**
      * 切换麦克风状态
      */
-    @Operation(summary = "切换麦克风", description = "开启/关闭麦克风")
+    
     @PostMapping("/group/{callId}/mute")
     public Result<Void> toggleMute(
             @PathVariable Long callId,
@@ -311,7 +309,7 @@ public class ImVideoCallController {
     /**
      * 切换摄像头状态
      */
-    @Operation(summary = "切换摄像头", description = "开启/关闭摄像头")
+    
     @PostMapping("/group/{callId}/camera")
     public Result<Void> toggleCamera(
             @PathVariable Long callId,
@@ -327,3 +325,4 @@ public class ImVideoCallController {
         }
     }
 }
+

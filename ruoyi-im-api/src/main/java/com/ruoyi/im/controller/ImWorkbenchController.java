@@ -8,8 +8,6 @@ import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImNoticeService;
 import com.ruoyi.im.service.ImTodoItemService;
 import com.ruoyi.im.util.SecurityUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,7 +21,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "工作台管理", description = "工作台数据概览、待办事项管理等接口")
+
 @RestController
 @RequestMapping("/api/im/workbench")
 public class ImWorkbenchController {
@@ -57,7 +55,7 @@ public class ImWorkbenchController {
      *
      * @return 工作台概览数据
      */
-    @Operation(summary = "获取工作台数据概览", description = "获取用户相关的统计数据，如待办数量、消息数量等")
+    
     @GetMapping("/overview")
     public Result<Map<String, Object>> getOverview() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -133,7 +131,7 @@ public class ImWorkbenchController {
      *
      * @return 待办事项列表
      */
-    @Operation(summary = "获取待办列表", description = "获取用户的待办事项列表")
+    
     @GetMapping("/todos")
     public Result<List<ImTodoItem>> getTodos() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -148,7 +146,7 @@ public class ImWorkbenchController {
      * @param request 待办创建请求
      * @return 创建结果，包含待办ID
      */
-    @Operation(summary = "创建待办", description = "创建新的待办事项，支持优先级")
+    
     @PostMapping("/todos")
     public Result<Long> createTodo(@Valid @RequestBody ImTodoCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -177,7 +175,7 @@ public class ImWorkbenchController {
      * @param id 待办ID
      * @return 操作结果
      */
-    @Operation(summary = "完成待办", description = "将待办事项标记为已完成")
+    
     @PutMapping("/todos/{id}/complete")
     public Result<Void> completeTodo(@PathVariable Long id) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -192,7 +190,7 @@ public class ImWorkbenchController {
      * @param id 待办ID
      * @return 操作结果
      */
-    @Operation(summary = "删除待办", description = "删除指定的待办事项")
+    
     @DeleteMapping("/todos/{id}")
     public Result<Void> deleteTodo(@PathVariable Long id) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -209,7 +207,7 @@ public class ImWorkbenchController {
      * @param description 待办描述
      * @return 操作结果
      */
-    @Operation(summary = "更新待办", description = "更新待办事项的标题和描述")
+    
     @PutMapping("/todos/{id}")
     public Result<Void> updateTodo(@PathVariable Long id,
                                   @RequestParam String title,

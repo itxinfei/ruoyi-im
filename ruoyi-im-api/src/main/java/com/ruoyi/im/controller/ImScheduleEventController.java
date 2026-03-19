@@ -8,8 +8,6 @@ import com.ruoyi.im.service.ImScheduleEventService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.schedule.ScheduleEventDetailVO;
 import com.ruoyi.im.vo.schedule.ScheduleParticipantVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +18,7 @@ import java.util.List;
 /**
  * 日程管理控制器
  */
-@Tag(name = "日程管理", description = "日程管理接口")
+
 @RestController
 @RequestMapping("/api/im/schedule")
 public class ImScheduleEventController {
@@ -39,7 +37,7 @@ public class ImScheduleEventController {
     /**
      * 创建日程
      */
-    @Operation(summary = "创建日程")
+    
     @PostMapping
     public Result<Long> createEvent(
             @Valid @RequestBody ScheduleEventCreateRequest request) {
@@ -51,7 +49,7 @@ public class ImScheduleEventController {
     /**
      * 更新日程
      */
-    @Operation(summary = "更新日程")
+    
     @PutMapping("/{eventId}")
     public Result<Void> updateEvent(
             @PathVariable Long eventId,
@@ -64,7 +62,7 @@ public class ImScheduleEventController {
     /**
      * 删除日程
      */
-    @Operation(summary = "删除日程")
+    
     @DeleteMapping("/{eventId}")
     public Result<Void> deleteEvent(
             @PathVariable Long eventId) {
@@ -76,7 +74,7 @@ public class ImScheduleEventController {
     /**
      * 获取日程详情
      */
-    @Operation(summary = "获取日程详情")
+    
     @GetMapping("/{eventId}")
     public Result<ScheduleEventDetailVO> getEventDetail(
             @PathVariable Long eventId) {
@@ -88,7 +86,7 @@ public class ImScheduleEventController {
     /**
      * 分页查询日程列表
      */
-    @Operation(summary = "分页查询日程列表")
+    
     @PostMapping("/page")
     public Result<IPage<ScheduleEventDetailVO>> getEventPage(
             @RequestBody ScheduleEventQueryRequest request) {
@@ -100,7 +98,7 @@ public class ImScheduleEventController {
     /**
      * 获取指定时间范围内的日程
      */
-    @Operation(summary = "获取指定时间范围内的日程")
+    
     @GetMapping("/range")
     public Result<List<ScheduleEventDetailVO>> getEventsByTimeRange(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
@@ -113,7 +111,7 @@ public class ImScheduleEventController {
     /**
      * 回复参与邀请
      */
-    @Operation(summary = "回复参与邀请")
+    
     @PutMapping("/{eventId}/respond")
     public Result<Void> respondToInvite(
             @PathVariable Long eventId,
@@ -126,7 +124,7 @@ public class ImScheduleEventController {
     /**
      * 获取参与人列表
      */
-    @Operation(summary = "获取参与人列表")
+    
     @GetMapping("/{eventId}/participants")
     public Result<List<ScheduleParticipantVO>> getParticipants(@PathVariable Long eventId) {
         List<ScheduleParticipantVO> participants = scheduleEventService.getParticipants(eventId);
@@ -136,7 +134,7 @@ public class ImScheduleEventController {
     /**
      * 取消日程
      */
-    @Operation(summary = "取消日程")
+    
     @PutMapping("/{eventId}/cancel")
     public Result<Void> cancelEvent(
             @PathVariable Long eventId) {
@@ -145,3 +143,4 @@ public class ImScheduleEventController {
         return Result.success("已取消");
     }
 }
+

@@ -4,9 +4,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImVoiceTranscriptService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.transcript.ImVoiceTranscriptVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +16,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "语音转文字", description = "语音消息转文字接口")
+
 @RestController
 @RequestMapping("/api/im/voice/transcript")
 public class ImVoiceTranscriptController {
@@ -40,13 +37,13 @@ public class ImVoiceTranscriptController {
     /**
      * 创建语音转文字任务
      */
-    @Operation(summary = "创建转写任务", description = "将语音消息转换为文字")
+    
     @PostMapping("/create")
     public Result<Long> createTranscriptTask(
-            @Parameter(description = "消息ID") @RequestParam Long messageId,
-            @Parameter(description = "语音文件URL") @RequestParam String voiceUrl,
-            @Parameter(description = "语音时长（秒）") @RequestParam(required = false) Integer duration,
-            @Parameter(description = "语言类型：zh-CN中文, en-US英文") @RequestParam(required = false, defaultValue = "zh-CN") String language) {
+             @RequestParam Long messageId,
+             @RequestParam String voiceUrl,
+             @RequestParam(required = false) Integer duration,
+             @RequestParam(required = false, defaultValue = "zh-CN") String language) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -61,10 +58,10 @@ public class ImVoiceTranscriptController {
     /**
      * 获取转写结果
      */
-    @Operation(summary = "获取转写结果", description = "获取语音转文字的结果")
+    
     @GetMapping("/result/{messageId}")
     public Result<ImVoiceTranscriptVO> getTranscript(
-            @Parameter(description = "消息ID") @PathVariable Long messageId) {
+             @PathVariable Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -82,10 +79,10 @@ public class ImVoiceTranscriptController {
     /**
      * 重新转写
      */
-    @Operation(summary = "重新转写", description = "重新执行语音转文字")
+    
     @PostMapping("/retranscribe/{messageId}")
     public Result<Long> reTranscribe(
-            @Parameter(description = "消息ID") @PathVariable Long messageId) {
+             @PathVariable Long messageId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -100,7 +97,7 @@ public class ImVoiceTranscriptController {
     /**
      * 获取用户转写列表
      */
-    @Operation(summary = "获取转写列表", description = "获取用户的语音转文字记录列表")
+    
     @GetMapping("/list")
     public Result<List<ImVoiceTranscriptVO>> getUserTranscripts() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -117,7 +114,7 @@ public class ImVoiceTranscriptController {
     /**
      * 获取转写统计
      */
-    @Operation(summary = "获取转写统计", description = "获取用户的语音转文字统计信息")
+    
     @GetMapping("/stats")
     public Result<Map<String, Object>> getTranscriptStats() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -131,3 +128,4 @@ public class ImVoiceTranscriptController {
         }
     }
 }
+

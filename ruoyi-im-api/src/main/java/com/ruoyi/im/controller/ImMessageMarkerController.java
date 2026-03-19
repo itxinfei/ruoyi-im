@@ -4,9 +4,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImMessageMarkerService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.marker.ImMessageMarkerVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +17,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Tag(name = "消息标记", description = "消息标记管理接口")
+
 @RestController
 @RequestMapping("/api/im/message/marker")
 public class ImMessageMarkerController {
@@ -41,12 +38,12 @@ public class ImMessageMarkerController {
     /**
      * 标记消息
      */
-    @Operation(summary = "标记消息", description = "标记消息（FLAG标记/IMPORTANT重要）")
+    
     @PostMapping("/mark")
     public Result<Long> markMessage(
-            @Parameter(description = "消息ID") @RequestParam Long messageId,
-            @Parameter(description = "标记类型：FLAG标记, IMPORTANT重要") @RequestParam(defaultValue = "FLAG") String markerType,
-            @Parameter(description = "标记颜色（可选）") @RequestParam(required = false) String color) {
+             @RequestParam Long messageId,
+             @RequestParam(defaultValue = "FLAG") String markerType,
+             @RequestParam(required = false) String color) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -61,11 +58,11 @@ public class ImMessageMarkerController {
     /**
      * 取消标记
      */
-    @Operation(summary = "取消标记", description = "取消消息标记")
+    
     @DeleteMapping("/unmark")
     public Result<Void> unmarkMessage(
-            @Parameter(description = "消息ID") @RequestParam Long messageId,
-            @Parameter(description = "标记类型（不传则取消所有标记）") @RequestParam(required = false) String markerType) {
+             @RequestParam Long messageId,
+             @RequestParam(required = false) String markerType) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -80,12 +77,12 @@ public class ImMessageMarkerController {
     /**
      * 设置待办提醒
      */
-    @Operation(summary = "设置待办", description = "设置消息为待办并设置提醒时间")
+    
     @PostMapping("/todo")
     public Result<Long> setTodoReminder(
-            @Parameter(description = "消息ID") @RequestParam Long messageId,
-            @Parameter(description = "提醒时间") @RequestParam LocalDateTime remindTime,
-            @Parameter(description = "备注（可选）") @RequestParam(required = false) String remark) {
+             @RequestParam Long messageId,
+             @RequestParam LocalDateTime remindTime,
+             @RequestParam(required = false) String remark) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -100,10 +97,10 @@ public class ImMessageMarkerController {
     /**
      * 完成待办
      */
-    @Operation(summary = "完成待办", description = "标记待办为已完成")
+    
     @PostMapping("/todo/{markerId}/complete")
     public Result<Void> completeTodo(
-            @Parameter(description = "标记ID") @PathVariable Long markerId) {
+             @PathVariable Long markerId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -118,10 +115,10 @@ public class ImMessageMarkerController {
     /**
      * 重启待办
      */
-    @Operation(summary = "重启待办", description = "将已完成的待办重新设为待办")
+    
     @PostMapping("/todo/{markerId}/reopen")
     public Result<Void> reopenTodo(
-            @Parameter(description = "标记ID") @PathVariable Long markerId) {
+             @PathVariable Long markerId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -136,10 +133,10 @@ public class ImMessageMarkerController {
     /**
      * 获取用户的标记列表
      */
-    @Operation(summary = "获取标记列表", description = "获取用户的标记/待办列表")
+    
     @GetMapping("/list")
     public Result<List<ImMessageMarkerVO>> getUserMarkers(
-            @Parameter(description = "标记类型筛选：FLAG标记, TODO待办, IMPORTANT重要") @RequestParam(required = false) String markerType) {
+             @RequestParam(required = false) String markerType) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
@@ -154,10 +151,10 @@ public class ImMessageMarkerController {
     /**
      * 获取消息的标记列表
      */
-    @Operation(summary = "获取消息标记", description = "获取消息的所有标记")
+    
     @GetMapping("/message/{messageId}")
     public Result<List<ImMessageMarkerVO>> getMessageMarkers(
-            @Parameter(description = "消息ID") @PathVariable Long messageId) {
+             @PathVariable Long messageId) {
         try {
             List<ImMessageMarkerVO> markers = messageMarkerService.getMessageMarkers(messageId);
             return Result.success(markers);
@@ -170,7 +167,7 @@ public class ImMessageMarkerController {
     /**
      * 获取待办数量
      */
-    @Operation(summary = "待办数量", description = "获取用户待办消息数量")
+    
     @GetMapping("/todo/count")
     public Result<Integer> getUserTodoCount() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -184,3 +181,4 @@ public class ImMessageMarkerController {
         }
     }
 }
+

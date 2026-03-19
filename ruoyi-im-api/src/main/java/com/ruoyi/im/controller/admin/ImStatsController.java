@@ -10,8 +10,6 @@ import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImGroupMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +27,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "管理员-数据统计", description = "管理员数据统计接口")
+
 @RestController
 @RequestMapping("/api/admin/stats")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
@@ -63,7 +61,7 @@ public class ImStatsController {
      *
      * @return 概览统计数据
      */
-    @Operation(summary = "获取系统概览", description = "获取用户数、群组数、消息数等概览数据")
+    
     @GetMapping("/overview")
     public Result<Map<String, Object>> getOverview() {
         Map<String, Object> overview = new HashMap<>();
@@ -105,7 +103,7 @@ public class ImStatsController {
      * @param days 统计天数，默认7天
      * @return 活跃度数据
      */
-    @Operation(summary = "获取用户活跃度", description = "获取指定天数内的用户活跃度统计")
+    
     @GetMapping("/users/active")
     public Result<Map<String, Object>> getUserActiveStats(
             @RequestParam(required = false, defaultValue = "7") Integer days) {
@@ -137,7 +135,7 @@ public class ImStatsController {
      * @param days 统计天数，默认7天
      * @return 活跃度数据
      */
-    @Operation(summary = "获取群组活跃度", description = "获取指定天数内的群组活跃度统计")
+    
     @GetMapping("/groups/active")
     public Result<Map<String, Object>> getGroupActiveStats(
             @RequestParam(required = false, defaultValue = "7") Integer days) {
@@ -172,7 +170,7 @@ public class ImStatsController {
      * @param endDate   结束日期
      * @return 消息统计数据
      */
-    @Operation(summary = "获取消息统计", description = "获取指定日期范围内的消息统计")
+    
     @GetMapping("/messages")
     public Result<Map<String, Object>> getMessageStats(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -204,3 +202,4 @@ public class ImStatsController {
         return Result.success(stats);
     }
 }
+

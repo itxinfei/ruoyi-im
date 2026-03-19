@@ -8,8 +8,6 @@ import com.ruoyi.im.service.ImDingMessageService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.ding.DingDetailVO;
 import com.ruoyi.im.vo.ding.DingReceiptVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -18,7 +16,7 @@ import java.util.List;
 /**
  * DING消息控制器
  */
-@Tag(name = "DING消息", description = "DING消息管理接口")
+
 @RestController
 @RequestMapping("/api/im/ding")
 public class ImDingMessageController {
@@ -37,7 +35,7 @@ public class ImDingMessageController {
     /**
      * 发送DING消息
      */
-    @Operation(summary = "发送DING消息")
+    
     @PostMapping("/send")
     public Result<Long> sendDing(
             @Valid @RequestBody DingSendRequest request) {
@@ -49,7 +47,7 @@ public class ImDingMessageController {
     /**
      * 获取接收的DING列表
      */
-    @Operation(summary = "获取接收的DING列表")
+    
     @GetMapping("/received")
     public Result<List<ImDingMessage>> getReceivedDingList() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -60,7 +58,7 @@ public class ImDingMessageController {
     /**
      * 获取发送的DING列表
      */
-    @Operation(summary = "获取发送的DING列表")
+    
     @GetMapping("/sent")
     public Result<List<ImDingMessage>> getSentDingList() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -71,7 +69,7 @@ public class ImDingMessageController {
     /**
      * 获取DING详情
      */
-    @Operation(summary = "获取DING详情")
+    
     @GetMapping("/{dingId}")
     public Result<DingDetailVO> getDingDetail(
             @PathVariable Long dingId) {
@@ -83,7 +81,7 @@ public class ImDingMessageController {
     /**
      * 阅读DING
      */
-    @Operation(summary = "阅读DING")
+    
     @PutMapping("/{dingId}/read")
     public Result<Void> readDing(
             @PathVariable Long dingId) {
@@ -95,7 +93,7 @@ public class ImDingMessageController {
     /**
      * 确认DING
      */
-    @Operation(summary = "确认DING")
+    
     @PutMapping("/{dingId}/confirm")
     public Result<Void> confirmDing(
             @PathVariable Long dingId,
@@ -108,7 +106,7 @@ public class ImDingMessageController {
     /**
      * 获取DING回执列表
      */
-    @Operation(summary = "获取DING回执列表")
+    
     @GetMapping("/{dingId}/receipts")
     public Result<List<DingReceiptVO>> getDingReceipts(
             @PathVariable Long dingId) {
@@ -120,7 +118,7 @@ public class ImDingMessageController {
     /**
      * 取消定时DING
      */
-    @Operation(summary = "取消定时DING")
+    
     @PutMapping("/{dingId}/cancel")
     public Result<Void> cancelScheduledDing(
             @PathVariable Long dingId) {
@@ -132,7 +130,7 @@ public class ImDingMessageController {
     /**
      * 获取DING模板列表
      */
-    @Operation(summary = "获取DING模板列表")
+    
     @GetMapping("/templates")
     public Result<List<ImDingTemplate>> getTemplates(
             @RequestParam(required = false) String category) {
@@ -143,7 +141,7 @@ public class ImDingMessageController {
     /**
      * 使用模板创建DING
      */
-    @Operation(summary = "使用模板创建DING")
+    
     @PostMapping("/template/{templateId}")
     public Result<Long> createFromTemplate(
             @PathVariable Long templateId,
@@ -153,3 +151,4 @@ public class ImDingMessageController {
         return Result.success("创建成功", dingId);
     }
 }
+

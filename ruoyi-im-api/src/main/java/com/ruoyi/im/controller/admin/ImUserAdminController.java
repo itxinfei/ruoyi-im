@@ -7,8 +7,6 @@ import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.vo.admin.BatchOperationResult;
 import com.ruoyi.im.vo.user.ImUserVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +21,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "管理员 - 用户管理", description = "管理员用户管理接口")
+
 @RestController
 @RequestMapping("/api/admin/users")
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
@@ -52,7 +50,7 @@ public class ImUserAdminController {
      * @param pageSize 每页大小
      * @return 用户列表
      */
-    @Operation(summary = "获取用户列表", description = "管理员获取用户列表，支持分页和关键词搜索")
+    
     @GetMapping
     public Result<Map<String, Object>> list(
             @RequestParam(required = false) String keyword,
@@ -101,7 +99,7 @@ public class ImUserAdminController {
      * @param id 用户 ID
      * @return 用户详情
      */
-    @Operation(summary = "获取用户详情", description = "管理员获取指定用户的详细信息")
+    
     @GetMapping("/{id}")
     public Result<ImUserVO> getById(@PathVariable Long id) {
         ImUser user = imUserMapper.selectImUserById(id);
@@ -120,7 +118,7 @@ public class ImUserAdminController {
      * @param status 状态：0=禁用，1=启用
      * @return 操作结果
      */
-    @Operation(summary = "修改用户状态", description = "管理员启用或禁用用户")
+    
     @PutMapping("/{id}/status")
     public Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
         ImUser user = imUserMapper.selectImUserById(id);
@@ -139,7 +137,7 @@ public class ImUserAdminController {
      * @param role 角色：USER/ADMIN/SUPER_ADMIN
      * @return 操作结果
      */
-    @Operation(summary = "修改用户角色", description = "超级管理员修改用户角色")
+    
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
     @PutMapping("/{id}/role")
     public Result<Void> updateRole(@PathVariable Long id, @RequestParam String role) {
@@ -161,7 +159,7 @@ public class ImUserAdminController {
      * @param id 用户 ID
      * @return 操作结果
      */
-    @Operation(summary = "删除用户", description = "管理员删除指定用户")
+    
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         ImUser user = imUserMapper.selectImUserById(id);
@@ -178,7 +176,7 @@ public class ImUserAdminController {
      * @param ids 用户 ID 列表
      * @return 批量操作结果
      */
-    @Operation(summary = "批量删除用户", description = "管理员批量删除用户，返回成功/失败数量及失败明细")
+    
     @DeleteMapping("/batch")
     public Result<BatchOperationResult> batchDelete(@RequestBody List<Long> ids) {
         BatchOperationResult result = new BatchOperationResult();
@@ -201,7 +199,7 @@ public class ImUserAdminController {
      *
      * @return 统计数据
      */
-    @Operation(summary = "获取用户统计", description = "获取用户总数、在线人数等统计信息")
+    
     @GetMapping("/stats")
     public Result<Map<String, Object>> getStats() {
         long total = imUserMapper.countImUsers();
@@ -218,3 +216,4 @@ public class ImUserAdminController {
         return Result.success(stats);
     }
 }
+

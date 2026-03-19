@@ -2,8 +2,6 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +25,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "健康检查", description = "系统健康状态检查接口")
+
 @RestController
 @RequestMapping("/api/im/health")
 public class ImHealthCheckController {
@@ -53,7 +51,7 @@ public class ImHealthCheckController {
      * 详细健康检查
      * 返回各组件的详细状态
      */
-    @Operation(summary = "健康检查详情", description = "获取系统各组件的详细健康状态")
+    
     @GetMapping("/detail")
     public Result<Map<String, Object>> healthDetail() {
         Map<String, Object> health = new HashMap<>();
@@ -228,3 +226,4 @@ public class ImHealthCheckController {
         return Result.success(liveness);
     }
 }
+

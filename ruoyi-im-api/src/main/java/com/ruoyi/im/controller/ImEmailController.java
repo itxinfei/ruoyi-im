@@ -3,8 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImEmailService;
 import com.ruoyi.im.util.SecurityUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,7 +13,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "邮件管理", description = "邮件收发、管理等接口")
+
 @RestController
 @RequestMapping("/api/im/email")
 public class ImEmailController {
@@ -34,7 +32,7 @@ public class ImEmailController {
     /**
      * 获取邮件列表
      */
-    @Operation(summary = "获取邮件列表", description = "获取指定文件夹的邮件列表")
+    
     @GetMapping("/list")
     public Result<List<?>> getEmailList(
             @RequestParam(defaultValue = "INBOX") String folder) {
@@ -49,7 +47,7 @@ public class ImEmailController {
     /**
      * 获取邮件详情
      */
-    @Operation(summary = "获取邮件详情", description = "获取邮件详细内容")
+    
     @GetMapping("/{emailId}")
     public Result<?> getEmailDetail(
             @PathVariable Long emailId) {
@@ -64,7 +62,7 @@ public class ImEmailController {
     /**
      * 发送邮件
      */
-    @Operation(summary = "发送邮件", description = "发送邮件给指定用户")
+    
     @PostMapping("/send")
     public Result<Long> sendEmail(
             @RequestBody Map<String, Object> params) {
@@ -85,7 +83,7 @@ public class ImEmailController {
     /**
      * 保存草稿
      */
-    @Operation(summary = "保存草稿", description = "保存邮件草稿")
+    
     @PostMapping("/draft")
     public Result<Long> saveDraft(
             @RequestBody Map<String, String> params) {
@@ -104,7 +102,7 @@ public class ImEmailController {
     /**
      * 标记已读
      */
-    @Operation(summary = "标记已读", description = "将邮件标记为已读")
+    
     @PutMapping("/{emailId}/read")
     public Result<Void> markAsRead(
             @PathVariable Long emailId) {
@@ -120,7 +118,7 @@ public class ImEmailController {
     /**
      * 标记星标
      */
-    @Operation(summary = "标记星标", description = "将邮件标记为星标")
+    
     @PutMapping("/{emailId}/star")
     public Result<Void> markAsStarred(
             @PathVariable Long emailId,
@@ -137,7 +135,7 @@ public class ImEmailController {
     /**
      * 移至垃圾箱
      */
-    @Operation(summary = "移至垃圾箱", description = "将邮件移至垃圾箱")
+    
     @PutMapping("/{emailId}/trash")
     public Result<Void> moveToTrash(
             @PathVariable Long emailId) {
@@ -153,7 +151,7 @@ public class ImEmailController {
     /**
      * 永久删除
      */
-    @Operation(summary = "永久删除", description = "永久删除邮件")
+    
     @DeleteMapping("/{emailId}")
     public Result<Void> permanentlyDelete(
             @PathVariable Long emailId) {
@@ -169,7 +167,7 @@ public class ImEmailController {
     /**
      * 获取未读邮件数量
      */
-    @Operation(summary = "获取未读数量", description = "获取未读邮件数量")
+    
     @GetMapping("/unread/count")
     public Result<Integer> getUnreadCount() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -184,7 +182,7 @@ public class ImEmailController {
     /**
      * 回复邮件
      */
-    @Operation(summary = "回复邮件", description = "回复指定邮件")
+    
     @PostMapping("/{emailId}/reply")
     public Result<Long> replyEmail(
             @PathVariable Long emailId,
@@ -202,7 +200,7 @@ public class ImEmailController {
     /**
      * 转发邮件
      */
-    @Operation(summary = "转发邮件", description = "转发指定邮件")
+    
     @PostMapping("/{emailId}/forward")
     public Result<Long> forwardEmail(
             @PathVariable Long emailId,
@@ -223,7 +221,7 @@ public class ImEmailController {
     /**
      * 移动邮件到指定文件夹
      */
-    @Operation(summary = "移动邮件", description = "移动邮件到指定文件夹")
+    
     @PutMapping("/{emailId}/move")
     public Result<Void> moveToFolder(
             @PathVariable Long emailId,
@@ -240,7 +238,7 @@ public class ImEmailController {
     /**
      * 批量标记已读
      */
-    @Operation(summary = "批量标记已读", description = "批量将邮件标记为已读")
+    
     @PutMapping("/batch/read")
     public Result<Integer> batchMarkAsRead(
             @RequestBody Map<String, List<Long>> params) {
@@ -257,7 +255,7 @@ public class ImEmailController {
     /**
      * 批量删除（移至垃圾箱）
      */
-    @Operation(summary = "批量删除", description = "批量将邮件移至垃圾箱")
+    
     @PutMapping("/batch/trash")
     public Result<Integer> batchMoveToTrash(
             @RequestBody Map<String, List<Long>> params) {
@@ -274,7 +272,7 @@ public class ImEmailController {
     /**
      * 搜索邮件
      */
-    @Operation(summary = "搜索邮件", description = "根据关键词搜索邮件")
+    
     @GetMapping("/search")
     public Result<List<?>> searchEmails(
             @RequestParam String keyword) {
@@ -286,3 +284,4 @@ public class ImEmailController {
         }
     }
 }
+

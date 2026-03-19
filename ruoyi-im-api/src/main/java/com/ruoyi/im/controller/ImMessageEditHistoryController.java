@@ -4,8 +4,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImMessageEditHistoryService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.MessageEditHistoryVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "消息编辑历史", description = "消息编辑历史查询接口")
+
 @RestController
 @RequestMapping("/api/im/message/edit-history")
 public class ImMessageEditHistoryController {
@@ -38,7 +36,7 @@ public class ImMessageEditHistoryController {
      * @param messageId 消息 ID
      * @return 编辑历史列表
      */
-    @Operation(summary = "获取消息编辑历史", description = "查看消息的所有编辑记录，包括编辑前后的内容、编辑人和编辑时间")
+    
     @GetMapping("/{messageId}")
     public Result<List<MessageEditHistoryVO>> getEditHistory(@PathVariable Long messageId) {
         try {
@@ -62,7 +60,7 @@ public class ImMessageEditHistoryController {
      * @param messageId 消息 ID
      * @return 编辑统计信息
      */
-    @Operation(summary = "获取消息编辑统计", description = "获取消息的编辑次数")
+    
     @GetMapping("/stats/{messageId}")
     public Result<Map<String, Object>> getEditStats(@PathVariable Long messageId) {
         try {
@@ -80,3 +78,4 @@ public class ImMessageEditHistoryController {
         }
     }
 }
+

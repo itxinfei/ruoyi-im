@@ -402,8 +402,8 @@ onUnmounted(() => {
 }
 
 .sidebar-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-base, 16px);
+  font-weight: var(--dt-font-weight-semibold, 600);
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -448,26 +448,26 @@ onUnmounted(() => {
 }
 
 .nav-icon {
-  font-size: 18px;
+  font-size: var(--dt-icon-size-lg, 18px);
   flex-shrink: 0;
 }
 
 .nav-label {
   flex: 1;
-  font-size: 14px;
+  font-size: var(--dt-font-size-sm, 14px);
   color: var(--dt-text-primary);
 }
 
 .nav-badge {
   background: var(--dt-error-color);
   color: var(--dt-bg-card);
-  font-size: 11px;
+  font-size: var(--dt-font-size-xs, 11px);
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
+  padding: 0 var(--dt-spacing-xs, 5px);
+  border-radius: var(--dt-radius-full, 9px);
   @include flex-center;
-  font-weight: 500;
+  font-weight: var(--dt-font-weight-medium, 500);
 }
 
 // ============================================================================
@@ -497,8 +497,8 @@ onUnmounted(() => {
 }
 
 .view-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-base, 18px);
+  font-weight: var(--dt-font-weight-semibold, 600);
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -524,17 +524,17 @@ onUnmounted(() => {
 
 .greeting-box {
   &__title {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: var(--dt-font-size-lg, 24px);
+    font-weight: var(--dt-font-weight-bold, 700);
     color: var(--dt-text-primary);
     margin: 0;
     letter-spacing: -0.5px;
   }
 
   &__date {
-    font-size: 14px;
+    font-size: var(--dt-font-size-sm, 14px);
     color: var(--dt-text-tertiary);
-    margin-top: 8px;
+    margin-top: var(--dt-spacing-md, 8px);
   }
 }
 
@@ -544,22 +544,22 @@ onUnmounted(() => {
 
   &__icon {
     position: absolute;
-    left: 12px;
+    left: var(--dt-spacing-md, 12px);
     top: 50%;
     transform: translateY(-50%);
     color: var(--dt-text-tertiary);
-    font-size: 16px;
+    font-size: var(--dt-icon-size-lg, 16px);
   }
 
   &__input {
     width: 100%;
-    height: 36px;
-    padding: 0 16px 0 36px;
+    height: var(--dt-btn-height-md, 36px);
+    padding: 0 var(--dt-spacing-md, 16px) 0 var(--dt-spacing-md, 36px);
     background: var(--dt-bg-body);
     border: 1px solid var(--dt-border-light);
     border-radius: var(--dt-radius-md);
     outline: none;
-    font-size: 14px;
+    font-size: var(--dt-font-size-sm, 14px);
     transition: all var(--dt-transition-base);
 
     &:focus {
@@ -583,8 +583,8 @@ onUnmounted(() => {
   }
 
   &__title {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--dt-font-size-base, 16px);
+    font-weight: var(--dt-font-weight-semibold, 600);
     color: var(--dt-text-primary);
     margin: 0;
   }
@@ -604,7 +604,7 @@ onUnmounted(() => {
 .app-item {
   @include flex-center;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--dt-spacing-md, 10px);
   cursor: pointer;
   padding: var(--dt-spacing-md) 0;
   border-radius: var(--dt-radius-md);
@@ -613,7 +613,7 @@ onUnmounted(() => {
 
   &:hover {
     background: var(--dt-bg-session-hover);
-    transform: translateY(-2px);
+    transform: translateY(var(--dt-transform-y, -2px));
 
     .app-item__icon {
       box-shadow: var(--dt-shadow-3);
@@ -624,9 +624,9 @@ onUnmounted(() => {
   &__icon {
     width: 52px;
     height: 52px;
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg, 12px);
     @include flex-center;
-    font-size: 24px;
+    font-size: var(--dt-icon-size-xl, 24px);
     background: var(--dt-bg-card);
     box-shadow: var(--dt-shadow-1);
     transition: all var(--dt-transition-base);
@@ -634,7 +634,7 @@ onUnmounted(() => {
     &--sm {
       width: 44px;
       height: 44px;
-      font-size: 20px;
+      font-size: var(--dt-icon-size-lg, 20px);
     }
 
     &.icon-orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
@@ -650,22 +650,22 @@ onUnmounted(() => {
   &__label {
     font-size: var(--dt-font-size-sm);
     color: var(--dt-text-primary);
-    font-weight: 500;
+    font-weight: var(--dt-font-weight-medium, 500);
   }
 
   &__badge {
     position: absolute;
-    top: 10px;
-    right: 20px;
+    top: var(--dt-spacing-md, 10px);
+    right: var(--dt-spacing-lg, 20px);
     background: var(--dt-error-color);
     color: var(--dt-bg-card);
-    font-size: 10px;
+    font-size: var(--dt-font-size-xs, 10px);
     min-width: 16px;
     height: 16px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-full, 8px);
     @include flex-center;
-    border: 1.5px solid var(--dt-bg-card);
-    font-weight: 600;
+    border: var(--dt-border-thick, 1.5px) solid var(--dt-bg-card);
+    font-weight: var(--dt-font-weight-semibold, 600);
   }
 }
 
@@ -687,7 +687,7 @@ onUnmounted(() => {
   padding: var(--dt-spacing-md) var(--dt-spacing-xl);
   cursor: pointer;
   color: var(--dt-text-secondary);
-  font-size: 14px;
+  font-size: var(--dt-font-size-sm, 14px);
   position: relative;
   transition: color var(--dt-transition-fast);
 
@@ -697,7 +697,7 @@ onUnmounted(() => {
 
   &.active {
     color: var(--dt-brand-color);
-    font-weight: 500;
+    font-weight: var(--dt-font-weight-medium, 500);
 
     &::after {
       content: '';
@@ -713,14 +713,14 @@ onUnmounted(() => {
   .tab-count {
     background: var(--dt-error-color);
     color: var(--dt-bg-card);
-    font-size: 10px;
+    font-size: var(--dt-font-size-xs, 10px);
     min-width: 16px;
     height: 16px;
-    padding: 0 4px;
-    border-radius: 8px;
+    padding: 0 var(--dt-spacing-xs, 4px);
+    border-radius: var(--dt-radius-full, 8px);
     @include flex-center;
-    margin-left: 6px;
-    font-weight: 500;
+    margin-left: var(--dt-spacing-sm, 6px);
+    font-weight: var(--dt-font-weight-medium, 500);
   }
 }
 
@@ -760,19 +760,19 @@ onUnmounted(() => {
 }
 
 .status-icon {
-  font-size: 36px;
+  font-size: var(--dt-icon-size-2xl, 36px);
   color: var(--dt-brand-color);
 }
 
 .status-text {
-  font-size: 16px;
+  font-size: var(--dt-font-size-base, 16px);
   color: var(--dt-text-primary);
   margin: 0 0 var(--dt-spacing-xs);
 }
 
 .status-time {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-xl, 24px);
+  font-weight: var(--dt-font-weight-semibold, 600);
   color: var(--dt-brand-color);
   margin: 0;
 }
@@ -815,13 +815,13 @@ onUnmounted(() => {
 
   &:hover {
     box-shadow: var(--dt-shadow-card);
-    transform: translateX(2px);
+    transform: translateX(var(--dt-transform-x, 2px));
   }
 
   &__status {
     width: 4px;
     height: 32px;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-xs, 2px);
     flex-shrink: 0;
 
     &.high { background: var(--dt-error-color); }
@@ -835,17 +835,17 @@ onUnmounted(() => {
   }
 
   &__title {
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--dt-font-size-sm, 14px);
+    font-weight: var(--dt-font-weight-medium, 500);
     color: var(--dt-text-primary);
     margin: 0;
     @include text-ellipsis;
   }
 
   &__meta {
-    font-size: 12px;
+    font-size: var(--dt-font-size-xs, 12px);
     color: var(--dt-text-tertiary);
-    margin-top: 4px;
+    margin-top: var(--dt-spacing-xs, 4px);
     display: block;
   }
 }

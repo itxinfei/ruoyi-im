@@ -3,8 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImGroupMuteService;
 import com.ruoyi.im.util.SecurityUtils;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +14,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Tag(name = "群组禁言管理", description = "群组禁言相关接口")
+
 @RestController
 @RequestMapping("/api/im/group/mute")
 public class ImGroupMuteController {
@@ -31,7 +29,7 @@ public class ImGroupMuteController {
      * @param allMuted 是否全员禁言
      * @return 操作结果
      */
-    @Operation(summary = "设置全员禁言", description = "开启或关闭全员禁言（仅群主）")
+    
     @PutMapping("/all/{groupId}")
     public Result<Void> setAllMuted(
             @PathVariable Long groupId,
@@ -49,7 +47,7 @@ public class ImGroupMuteController {
      * @param muteDuration 禁言时长（分钟）
      * @return 操作结果
      */
-    @Operation(summary = "禁言成员", description = "禁言指定成员（仅群主和管理员）")
+    
     @PostMapping("/member/{groupId}/{targetUserId}")
     public Result<Void> muteMember(
             @PathVariable Long groupId,
@@ -67,7 +65,7 @@ public class ImGroupMuteController {
      * @param targetUserId 被解除禁言成员ID
      * @return 操作结果
      */
-    @Operation(summary = "解除成员禁言", description = "解除成员禁言（仅群主和管理员）")
+    
     @DeleteMapping("/member/{groupId}/{targetUserId}")
     public Result<Void> unmuteMember(
             @PathVariable Long groupId,
@@ -85,7 +83,7 @@ public class ImGroupMuteController {
      * @param muteDuration 禁言时长（分钟）
      * @return 操作结果
      */
-    @Operation(summary = "批量禁言成员", description = "批量禁言多个成员（仅群主和管理员）")
+    
     @PostMapping("/batch/{groupId}")
     public Result<Void> batchMuteMembers(
             @PathVariable Long groupId,
@@ -103,7 +101,7 @@ public class ImGroupMuteController {
      * @param checkUserId 要检查的用户ID
      * @return 是否被禁言
      */
-    @Operation(summary = "检查禁言状态", description = "检查指定用户是否被禁言")
+    
     @GetMapping("/check/{groupId}/{checkUserId}")
     public Result<Boolean> isUserMuted(
             @PathVariable Long groupId,
@@ -119,7 +117,7 @@ public class ImGroupMuteController {
      * @param checkUserId 要检查的用户ID
      * @return 禁言到期时间
      */
-    @Operation(summary = "获取禁言到期时间", description = "获取用户禁言到期时间")
+    
     @GetMapping("/endTime/{groupId}/{checkUserId}")
     public Result<LocalDateTime> getMuteEndTime(
             @PathVariable Long groupId,
@@ -134,7 +132,7 @@ public class ImGroupMuteController {
      * @param groupId 群组ID
      * @return 是否全员禁言
      */
-    @Operation(summary = "检查全员禁言状态", description = "检查群组是否开启全员禁言")
+    
     @GetMapping("/all/{groupId}")
     public Result<Boolean> isAllMuted(
             @PathVariable Long groupId) {
@@ -142,3 +140,4 @@ public class ImGroupMuteController {
         return Result.success(allMuted);
     }
 }
+

@@ -201,15 +201,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-color);
   flex-shrink: 0;
 }
 
 .panel-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-lg, 18px);
+  font-weight: var(--dt-font-weight-semibold, 600);
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -217,14 +217,14 @@ onMounted(() => {
 .add-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: var(--dt-spacing-xs, 6px);
+  padding: var(--dt-spacing-sm, 8px) var(--dt-spacing-md, 16px);
   background: var(--dt-brand-color);
   color: var(--dt-text-primary);
   border: none;
   border-radius: var(--dt-radius-lg);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-sm, 14px);
+  font-weight: var(--dt-font-weight-medium, 500);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
 }
@@ -248,7 +248,7 @@ onMounted(() => {
 
 .tabs {
   display: flex;
-  padding: 0 24px;
+  padding: 0 var(--dt-spacing-lg, 24px);
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-color);
   flex-shrink: 0;
@@ -256,11 +256,11 @@ onMounted(() => {
 
 .tab-item {
   position: relative;
-  padding: 14px 16px;
+  padding: var(--dt-spacing-md, 14px) var(--dt-spacing-md, 16px);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  font-size: 14px;
+  font-size: var(--dt-font-size-sm, 14px);
   color: var(--dt-text-secondary);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
@@ -277,13 +277,13 @@ onMounted(() => {
 }
 
 .tab-count {
-  margin-left: 4px;
-  padding: 2px 8px;
+  margin-left: var(--dt-spacing-xs, 4px);
+  padding: var(--dt-spacing-xs, 2px) var(--dt-spacing-sm, 8px);
   background: var(--dt-brand-color);
   color: var(--dt-bg-card);
   border-radius: var(--dt-radius-full);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-xs, 11px);
+  font-weight: var(--dt-font-weight-medium, 500);
 }
 
 .loading-state,
@@ -297,19 +297,19 @@ onMounted(() => {
 }
 
 .empty-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
+  font-size: var(--dt-icon-size-2xl, 64px);
+  margin-bottom: var(--dt-spacing-md, 16px);
   color: var(--dt-border-color);
 }
 
 .empty-text {
-  font-size: 14px;
+  font-size: var(--dt-font-size-sm, 14px);
   margin: 0;
   color: var(--dt-text-secondary);
 }
 
 .approval-list {
-  padding: 16px 24px;
+  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
   overflow-y: auto;
   flex: 1;
 }
@@ -317,13 +317,13 @@ onMounted(() => {
 .approval-item {
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
-  padding: 16px;
+  padding: var(--dt-spacing-md, 16px);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--dt-spacing-md, 12px);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
-  margin-bottom: 8px;
+  margin-bottom: var(--dt-spacing-sm, 8px);
   border: 1px solid var(--dt-border-light);
 }
 
@@ -334,15 +334,15 @@ onMounted(() => {
 }
 
 .approval-avatar {
-  width: 44px;
-  height: 44px;
+  width: var(--dt-avatar-size-lg, 44px);
+  height: var(--dt-avatar-size-lg, 44px);
   border-radius: var(--dt-radius-lg);
   color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-lg, 16px);
+  font-weight: var(--dt-font-weight-semibold, 600);
   flex-shrink: 0;
 }
 
@@ -352,34 +352,34 @@ onMounted(() => {
 }
 
 .approval-title {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-md, 15px);
+  font-weight: var(--dt-font-weight-medium, 500);
   color: var(--dt-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: var(--dt-spacing-xs, 4px);
 }
 
 .approval-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 12px;
+  gap: var(--dt-spacing-md, 12px);
+  font-size: var(--dt-font-size-xs, 12px);
   color: var(--dt-text-tertiary);
 }
 
 .approval-type {
-  padding: 3px 8px;
+  padding: var(--dt-spacing-xs, 3px) var(--dt-spacing-sm, 8px);
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-sm);
   color: var(--dt-text-secondary);
-  font-weight: 500;
+  font-weight: var(--dt-font-weight-medium, 500);
 }
 
 .approval-status {
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: var(--dt-font-size-xs, 12px);
+  padding: var(--dt-spacing-xs, 4px) var(--dt-spacing-md, 10px);
   border-radius: var(--dt-radius-md);
   white-space: nowrap;
-  font-weight: 500;
+  font-weight: var(--dt-font-weight-medium, 500);
 }
 
 .approval-status.pending {

@@ -395,7 +395,7 @@ onMounted(async () => {
     .search-icon {
       position: absolute;
       left: var(--dt-spacing-sm);
-      font-size: 14px;
+      font-size: var(--dt-icon-size-md, 14px);
       color: var(--dt-text-tertiary);
     }
 
@@ -437,14 +437,14 @@ onMounted(async () => {
   border-bottom: 1px solid var(--dt-border-lighter);
 
   .tab-pill {
-    padding: 4px var(--dt-spacing-sm);
+    padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
     font-size: var(--dt-font-size-xs);
     color: var(--dt-text-secondary);
     border-radius: var(--dt-radius-full);
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--dt-spacing-xs);
     transition: all var(--dt-transition-fast);
 
     &:hover { background: var(--dt-bg-session-hover); }
@@ -457,9 +457,9 @@ onMounted(async () => {
     .tab-badge {
       background: var(--dt-error-color);
       color: var(--dt-bg-card);
-      padding: 0 4px;
+      padding: 0 var(--dt-spacing-xs);
       border-radius: var(--dt-radius-full);
-      font-size: 10px;
+      font-size: var(--dt-font-size-xs);
       transform: scale(0.85);
     }
   }
@@ -482,7 +482,7 @@ onMounted(async () => {
   color: var(--dt-text-tertiary);
 
   .empty-icon {
-    font-size: 48px;
+    font-size: var(--dt-icon-size-xl, 48px);
     margin-bottom: var(--dt-spacing-md);
     opacity: 0.5;
   }
@@ -526,7 +526,7 @@ onMounted(async () => {
       position: absolute;
       top: 4px;
       right: 4px;
-      font-size: 10px;
+      font-size: var(--dt-font-size-xs);
       color: var(--dt-brand-color);
       opacity: 0.7;
     }
@@ -535,7 +535,7 @@ onMounted(async () => {
       content: '[置顶] ';
       color: var(--dt-brand-color);
       font-weight: 600;
-      font-size: 12px;
+      font-size: var(--dt-font-size-sm);
     }
   }
 
@@ -549,10 +549,10 @@ onMounted(async () => {
       right: -2px;
       background: var(--dt-error-color);
       color: var(--dt-bg-card);
-      font-size: 10px;
+      font-size: var(--dt-font-size-xs);
       min-width: 16px;
       height: 16px;
-      padding: 0 4px;
+      padding: 0 var(--dt-spacing-xs);
       border-radius: var(--dt-radius-full);
       @include flex-center;
       border: 2px solid var(--dt-bg-session-list);
@@ -588,7 +588,7 @@ onMounted(async () => {
         font-size: var(--dt-font-size-xs);
         color: var(--dt-text-tertiary);
         flex-shrink: 0;
-        margin-left: 8px;
+        margin-left: var(--dt-spacing-xs);
       }
     }
 
@@ -601,7 +601,7 @@ onMounted(async () => {
       .preview-wrapper {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: var(--dt-spacing-xs);
         min-width: 0;
         flex: 1;
         font-size: var(--dt-font-size-sm);
@@ -609,14 +609,14 @@ onMounted(async () => {
         line-height: 1.4;
         @include text-ellipsis;
 
-        .mention-text { color: var(--dt-error-color); font-weight: 500; font-size: 12px; }
+        .mention-text { color: var(--dt-error-color); font-weight: 500; font-size: var(--dt-font-size-sm); }
         .sender-prefix { color: var(--dt-text-secondary); }
       }
 
       .mute-icon {
-        font-size: 12px;
+        font-size: var(--dt-icon-size-sm, 12px);
         color: var(--dt-text-quaternary);
-        margin-left: 4px;
+        margin-left: var(--dt-spacing-xs);
       }
     }
   }
@@ -630,7 +630,7 @@ onMounted(async () => {
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
-  padding: 4px;
+  padding: var(--dt-spacing-xs);
   min-width: 160px;
   z-index: var(--dt-z-max);
   box-shadow: var(--dt-shadow-modal);
@@ -639,7 +639,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: var(--dt-spacing-sm);
-    padding: 8px var(--dt-spacing-md);
+    padding: var(--dt-spacing-sm) var(--dt-spacing-md);
     font-size: var(--dt-font-size-sm);
     color: var(--dt-text-primary);
     cursor: pointer;
@@ -656,14 +656,14 @@ onMounted(async () => {
       &:hover { background: var(--dt-error-bg); color: var(--dt-error-color); }
     }
 
-    .el-icon { font-size: 16px; }
+    .el-icon { font-size: var(--dt-icon-size-lg, 16px); }
 
     span {
       flex: 1;
     }
 
     .shortcut {
-      font-size: 11px;
+      font-size: var(--dt-font-size-xs);
       color: var(--dt-text-quaternary);
       margin-left: auto;
       padding-left: var(--dt-spacing-md);
@@ -673,7 +673,7 @@ onMounted(async () => {
   .menu-divider {
     height: 1px;
     background: var(--dt-border-lighter);
-    margin: 4px 0;
+    margin: var(--dt-spacing-xs) 0;
   }
 }
 </style>

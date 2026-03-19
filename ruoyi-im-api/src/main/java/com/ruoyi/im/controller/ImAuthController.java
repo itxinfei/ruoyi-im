@@ -10,8 +10,6 @@ import com.ruoyi.im.util.JwtUtils;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +22,7 @@ import javax.validation.Valid;
  *
  * @author ruoyi
  */
-@Tag(name = "认证管理", description = "用户登录、注册、获取信息等接口")
+
 @RestController
 @RequestMapping("/api/im/auth")
 public class ImAuthController {
@@ -54,7 +52,7 @@ public class ImAuthController {
      * @apiNote 使用 @Valid 注解进行参数校验，确保用户名和密码不为空
      * @throws BusinessException 当用户不存在或密码错误时抛出业务异常
      */
-    @Operation(summary = "用户登录", description = "验证用户名和密码，返回JWT Token")
+    
     @PostMapping("/login")
     public Result<ImLoginVO> login(@Valid @RequestBody ImLoginRequest request) {
         logger.info("收到登录请求 - 用户名: {}, 客户端: {}", request.getUsername(), request.getClientType());
@@ -80,7 +78,7 @@ public class ImAuthController {
      * @apiNote 使用 @Valid 注解进行参数校验，确保必填字段不为空
      * @throws BusinessException 当用户名已存在时抛出业务异常
      */
-    @Operation(summary = "用户注册", description = "创建新用户账号")
+    
     @PostMapping("/register")
     public Result<Long> register(@Valid @RequestBody ImRegisterRequest request) {
         Long userId = imUserService.register(request);
@@ -96,7 +94,7 @@ public class ImAuthController {
      * @apiNote 需要有效的JWT Token进行身份验证
      * @throws BusinessException 当用户不存在时抛出业务异常
      */
-    @Operation(summary = "获取用户信息", description = "获取当前登录用户的信息")
+    
     @GetMapping("/getInfo")
     public Result<ImLoginVO> getInfo() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -131,7 +129,7 @@ public class ImAuthController {
      * @return 退出结果
      * @apiNote 退出后用户需要重新登录才能访问受保护的资源
      */
-    @Operation(summary = "退出登录", description = "用户退出登录")
+    
     @PostMapping("/logout")
     public Result<Void> logout() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -150,7 +148,7 @@ public class ImAuthController {
      * @return 新的登录信息，包含新的JWT Token
      * @apiNote 当access token过期时，使用此接口获取新token
      */
-    @Operation(summary = "刷新Token", description = "使用refresh token获取新的access token")
+    
     @PostMapping("/refresh")
     public Result<ImLoginVO> refreshToken(@RequestParam String refreshToken) {
         try {
@@ -196,7 +194,7 @@ public class ImAuthController {
      * @return 验证结果，true表示有效，false表示无效
      * @apiNote 用于前端检查token是否仍然有效
      */
-    @Operation(summary = "验证Token", description = "验证token是否有效")
+    
     @PostMapping("/validateToken")
     public Result<Boolean> validateToken(@RequestParam String token) {
         try {

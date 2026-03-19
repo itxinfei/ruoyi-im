@@ -9,8 +9,6 @@ import com.ruoyi.im.service.ImTaskService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.task.ImTaskDetailVO;
 import com.ruoyi.im.vo.task.ImTaskVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,7 +21,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
-@Tag(name = "任务管理", description = "任务创建、分配、跟踪、统计等接口")
+
 @RestController
 @RequestMapping("/api/im/task")
 public class ImTaskController {
@@ -48,7 +46,7 @@ public class ImTaskController {
      * @return 创建结果，包含任务ID
      * @apiNote 支持创建子任务，通过parentId指定父任务
      */
-    @Operation(summary = "创建任务", description = "创建新的任务，可分配给指定成员")
+    
     @PostMapping("/create")
     public Result<Long> createTask(@Valid @RequestBody ImTaskCreateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -65,7 +63,7 @@ public class ImTaskController {
      * @return 更新结果
      * @apiNote 任务负责人和创建人可更新任务信息
      */
-    @Operation(summary = "更新任务", description = "更新任务的基本信息和状态")
+    
     @PutMapping
     public Result<Void> updateTask(@Valid @RequestBody ImTaskUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -82,7 +80,7 @@ public class ImTaskController {
      * @return 删除结果
      * @apiNote 删除任务时同时删除其子任务
      */
-    @Operation(summary = "删除任务", description = "删除指定任务及其子任务")
+    
     @DeleteMapping("/{taskId}")
     public Result<Void> deleteTask(@PathVariable Long taskId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -99,7 +97,7 @@ public class ImTaskController {
      * @return 任务详情
      * @apiDetail 包含任务基本信息、子任务、评论、附件等
      */
-    @Operation(summary = "获取任务详情", description = "查询指定任务的详细信息")
+    
     @GetMapping("/{taskId}")
     public Result<ImTaskDetailVO> getTaskDetail(@PathVariable Long taskId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -116,7 +114,7 @@ public class ImTaskController {
      * @return 分页结果
      * @apiNote 支持按关键词、状态、优先级、负责人等条件筛选
      */
-    @Operation(summary = "分页查询任务列表", description = "按条件分页查询任务列表")
+    
     @PostMapping("/page")
     public Result<IPage<ImTaskVO>> getTaskPage(@RequestBody ImTaskQueryRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -133,7 +131,7 @@ public class ImTaskController {
      * @return 任务列表
      * @apiNote status可选值：PENDING待办、IN_PROGRESS进行中、COMPLETED已完成
      */
-    @Operation(summary = "获取我的任务列表", description = "查询分配给当前用户的任务列表")
+    
     @GetMapping("/my")
     public Result<List<ImTaskVO>> getMyTasks(@RequestParam(required = false) String status) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -148,7 +146,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 任务列表
      */
-    @Operation(summary = "获取我创建的任务列表", description = "查询当前用户创建的任务列表")
+    
     @GetMapping("/created")
     public Result<List<ImTaskVO>> getMyCreatedTasks() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -166,7 +164,7 @@ public class ImTaskController {
      * @return 操作结果
      * @apiNote 只有任务创建人可以分配任务
      */
-    @Operation(summary = "分配任务", description = "将任务分配给指定成员")
+    
     @PutMapping("/{taskId}/assign")
     public Result<Void> assignTask(@PathVariable Long taskId,
                                    @RequestParam Long assigneeId) {
@@ -184,7 +182,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
-    @Operation(summary = "更新任务状态", description = "更新任务的状态")
+    
     @PutMapping("/{taskId}/status")
     public Result<Void> updateStatus(@PathVariable Long taskId,
                                     @RequestParam String status) {
@@ -202,7 +200,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
-    @Operation(summary = "更新任务进度", description = "更新任务的完成进度")
+    
     @PutMapping("/{taskId}/progress")
     public Result<Void> updateProgress(@PathVariable Long taskId,
                                       @RequestParam Integer percent) {
@@ -219,7 +217,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
-    @Operation(summary = "关注/取消关注任务", description = "切换任务的关注状态")
+    
     @PutMapping("/{taskId}/follow")
     public Result<Void> toggleFollow(@PathVariable Long taskId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -237,7 +235,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 评论ID
      */
-    @Operation(summary = "添加任务评论", description = "为指定任务添加评论")
+    
     @PostMapping("/{taskId}/comment")
     public Result<Long> addComment(@PathVariable Long taskId,
                                   @RequestParam String content,
@@ -254,7 +252,7 @@ public class ImTaskController {
      * @param taskId 任务ID
      * @return 评论列表
      */
-    @Operation(summary = "获取任务评论列表", description = "查询指定任务的评论列表")
+    
     @GetMapping("/{taskId}/comments")
     public Result<List<Map<String, Object>>> getComments(@PathVariable Long taskId) {
         List<Map<String, Object>> comments = taskService.getComments(taskId);
@@ -269,7 +267,7 @@ public class ImTaskController {
      * @return 统计信息
      * @apiNote 包含待办、进行中、已完成、逾期等任务数量
      */
-    @Operation(summary = "获取任务统计信息", description = "获取当前用户的任务统计数据")
+    
     @GetMapping("/statistics")
     public Result<Map<String, Object>> getStatistics() {
         Long userId = SecurityUtils.getLoginUserId();
@@ -285,7 +283,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
-    @Operation(summary = "批量删除任务", description = "批量删除多个任务")
+    
     @DeleteMapping("/batch")
     public Result<Void> batchDelete(@RequestBody List<Long> taskIds) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -302,7 +300,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 操作结果
      */
-    @Operation(summary = "批量更新任务状态", description = "批量更新多个任务的状态")
+    
     @PutMapping("/batch/status")
     public Result<Void> batchUpdateStatus(@RequestBody List<Long> taskIds,
                                          @RequestParam String status) {
@@ -319,7 +317,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 子任务列表
      */
-    @Operation(summary = "获取子任务列表", description = "查询指定任务的子任务列表")
+    
     @GetMapping("/subtasks/{parentId}")
     public Result<List<ImTaskVO>> getSubtasks(@PathVariable Long parentId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -335,7 +333,7 @@ public class ImTaskController {
      * @param userId 当前登录用户ID，从请求头中获取
      * @return 新任务ID
      */
-    @Operation(summary = "复制任务", description = "复制指定任务创建副本")
+    
     @PostMapping("/{taskId}/copy")
     public Result<Long> copyTask(@PathVariable Long taskId) {
         Long userId = SecurityUtils.getLoginUserId();
@@ -343,3 +341,4 @@ public class ImTaskController {
         return Result.success("复制成功", newTaskId);
     }
 }
+
