@@ -249,15 +249,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
   background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-color);
+  border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
 }
 
 .panel-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-lg, 18px);
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -265,21 +265,21 @@ onMounted(() => {
 .compose-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: var(--dt-spacing-xs, 6px);
+  padding: var(--dt-spacing-xs, 8px) var(--dt-spacing-md, 16px);
   background: var(--dt-brand-color);
   color: var(--dt-text-primary);
   border: none;
   border-radius: var(--dt-radius-lg);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
 }
 
 .compose-btn:hover {
   background: var(--dt-brand-hover);
-  transform: translateY(-1px);
+  transform: translateY(var(--dt-transform-y, -1px));
   box-shadow: var(--dt-shadow-2);
 }
 
@@ -289,21 +289,21 @@ onMounted(() => {
 
 .panel-content {
   flex: 1;
-  padding: 16px 24px;
+  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
   overflow: hidden;
 }
 
 .mail-layout {
   display: flex;
   height: 100%;
-  gap: 16px;
+  gap: var(--dt-spacing-md, 16px);
 }
 
 .mail-folders {
   width: 180px;
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
-  padding: 8px;
+  padding: var(--dt-spacing-xs, 8px);
   flex-shrink: 0;
   border: 1px solid var(--dt-border-light);
 }
@@ -311,8 +311,8 @@ onMounted(() => {
 .folder-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: var(--dt-spacing-sm, 10px);
+  padding: var(--dt-spacing-sm, 10px) var(--dt-spacing-xs, 12px);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
@@ -325,21 +325,21 @@ onMounted(() => {
 .folder-item.active {
   background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
-  font-weight: 500;
+  font-weight: var(--dt-font-weight-medium);
 }
 
 .folder-icon {
-  font-size: 20px;
+  font-size: var(--dt-icon-size-lg, 20px);
   color: var(--dt-text-tertiary);
 }
 
 .folder-label {
   flex: 1;
-  font-size: 14px;
+  font-size: var(--dt-font-size-sm);
 }
 
 .folder-count {
-  font-size: 12px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-tertiary);
 }
 
@@ -368,13 +368,13 @@ onMounted(() => {
 }
 
 .empty-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
+  font-size: var(--dt-icon-size-xl, 64px);
+  margin-bottom: var(--dt-spacing-md, 16px);
   color: var(--dt-border-color);
 }
 
 .empty-text {
-  font-size: 14px;
+  font-size: var(--dt-font-size-sm);
   margin: 0;
   color: var(--dt-text-secondary);
 }
@@ -387,7 +387,7 @@ onMounted(() => {
 .email-item {
   display: flex;
   align-items: center;
-  padding: 14px 16px;
+  padding: var(--dt-spacing-md, 14px) var(--dt-spacing-md, 16px);
   cursor: pointer;
   position: relative;
   border-bottom: 1px solid var(--dt-border-light);
@@ -408,15 +408,15 @@ onMounted(() => {
 }
 
 .email-avatar {
-  width: 40px;
-  height: 40px;
+  width: var(--dt-avatar-size-lg, 40px);
+  height: var(--dt-avatar-size-lg, 40px);
   border-radius: var(--dt-radius-lg);
   color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-semibold);
   flex-shrink: 0;
 }
 
@@ -426,21 +426,21 @@ onMounted(() => {
 }
 
 .email-subject {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: var(--dt-spacing-xs, 4px);
 }
 
 .email-item.unread .email-subject {
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-brand-color);
 }
 
 .email-preview {
-  font-size: 12px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-tertiary);
-  margin-bottom: 4px;
+  margin-bottom: var(--dt-spacing-xs, 4px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -449,8 +449,8 @@ onMounted(() => {
 .email-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 12px;
+  gap: var(--dt-spacing-sm, 12px);
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-tertiary);
 }
 
@@ -460,7 +460,7 @@ onMounted(() => {
   background: var(--dt-brand-color);
   border-radius: 50%;
   position: absolute;
-  right: 16px;
+  right: var(--dt-spacing-md, 16px);
   box-shadow: 0 0 0 3px var(--dt-brand-bg);
 }
 

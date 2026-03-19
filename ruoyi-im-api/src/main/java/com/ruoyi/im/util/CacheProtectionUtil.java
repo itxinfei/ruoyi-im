@@ -114,9 +114,14 @@ public class CacheProtectionUtil {
                        "return redis.call('del', KEYS[1]) " +
                        "else return 0 end";
         redisTemplate.execute(
-            (connection) -> connection.eval(script.getBytes(), 1, 
-                lockKey.getBytes(), lockValue.getBytes()),
-            null
+            (org.springframework.data.redis.connection.RedisConnection connection) -> {
+                connection.eval(script.getBytes(),
+                    org.springframework.data.redis.connection.ReturnType.INTEGER,
+                    1,
+                    lockKey.getBytes(),
+                    lockValue.getBytes());
+                return null;
+            }
         );
     }
 

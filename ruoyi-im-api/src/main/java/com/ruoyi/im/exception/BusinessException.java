@@ -40,7 +40,18 @@ public class BusinessException extends RuntimeException {
         this.code = code;
         this.errorCode = String.valueOf(code);
     }
-    
+
+    /**
+     * 构造一个带ApiErrorCode枚举的异常
+     *
+     * @param errorCode 错误码枚举
+     */
+    public BusinessException(Enum<?> errorCode) {
+        super(getMessageFromEnum(errorCode));
+        this.code = getCodeFromEnum(errorCode);
+        this.errorCode = errorCode.name();
+    }
+
     /**
      * 根据错误码获取默认消息
      *
@@ -89,6 +100,30 @@ public class BusinessException extends RuntimeException {
                 return "消息发送失败";
             default:
                 return "未知错误";
+        }
+    }
+
+    /**
+     * 从枚举获取错误码
+     */
+    private static int getCodeFromEnum(Enum<?> errorCode) {
+        try {
+            // 尝试调用getCode()方法
+            return (int) errorCode.getClass().getMethod("getCode").invoke(errorCode);
+        } catch (Exception e) {
+            return 500;
+        }
+    }
+
+    /**
+     * 从枚举获取错误消息
+     */
+    private static String getMessageFromEnum(Enum<?> errorCode) {
+        try {
+            // 尝试调用getMsg()方法
+            return (String) errorCode.getClass().getMethod("getMsg").invoke(errorCode);
+        } catch (Exception e) {
+            return errorCode.name();
         }
     }
 

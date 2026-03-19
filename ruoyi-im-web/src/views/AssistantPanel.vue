@@ -450,7 +450,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
@@ -459,19 +459,19 @@ onMounted(() => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--dt-spacing-sm, 12px);
 }
 
 .ai-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: var(--dt-avatar-size-lg, 40px);
+  height: var(--dt-avatar-size-lg, 40px);
+  border-radius: var(--dt-radius-lg);
   background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
   color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--dt-icon-size-lg, 20px);
 }
 
 .header-info {
@@ -481,24 +481,24 @@ onMounted(() => {
 }
 
 .panel-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-lg);
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   margin: 0;
 }
 
 .model-tag {
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: var(--dt-font-size-xs);
+  padding: var(--dt-spacing-xs, 2px) var(--dt-spacing-sm, 8px);
   background: var(--dt-brand-lighter);
   color: var(--dt-brand-color);
-  border-radius: 10px;
-  font-weight: 500;
+  border-radius: var(--dt-radius-full, 10px);
+  font-weight: var(--dt-font-weight-medium);
 }
 
 .header-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--dt-spacing-xs, 8px);
 }
 
 .model-btn {
@@ -543,14 +543,14 @@ onMounted(() => {
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: var(--dt-avatar-size-md, 36px);
+  height: var(--dt-avatar-size-md, 36px);
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 14px;
+  font-size: var(--dt-font-size-sm);
 
   &.ai {
     background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
@@ -560,31 +560,31 @@ onMounted(() => {
   &.user {
     background: var(--dt-brand-color);
     color: var(--dt-text-primary);
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
   }
 }
 
 .message-bubble {
   max-width: 70%;
-  padding: 12px 16px;
-  border-radius: 16px;
-  font-size: 14px;
+  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px);
+  border-radius: var(--dt-radius-lg);
+  font-size: var(--dt-font-size-sm);
   line-height: 1.6;
 
   &.assistant {
     background: var(--dt-bg-card);
     border: 1px solid var(--dt-border-light);
-    border-top-left-radius: 4px;
+    border-top-left-radius: var(--dt-radius-sm);
   }
 
   &.user {
     background: var(--dt-brand-color);
     color: var(--dt-text-primary);
-    border-top-right-radius: 4px;
+    border-top-right-radius: var(--dt-radius-sm);
   }
 
   &.typing {
-    padding: 16px 20px;
+    padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 20px);
   }
 }
 
@@ -632,12 +632,12 @@ onMounted(() => {
   border: none;
   background: transparent;
   color: var(--dt-text-tertiary);
-  border-radius: 6px;
+  border-radius: var(--dt-radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
 
   &:hover {
     background: var(--dt-bg-session-hover);
@@ -679,14 +679,14 @@ onMounted(() => {
 
 // 输入区
 .input-area {
-  padding: 16px 24px;
+  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
   background: var(--dt-bg-card);
   border-top: 1px solid var(--dt-border-light);
 }
 
 .input-box {
   display: flex;
-  gap: 12px;
+  gap: var(--dt-spacing-sm, 12px);
   align-items: flex-end;
 
   :deep(.el-textarea) {
@@ -694,10 +694,10 @@ onMounted(() => {
   }
 
   :deep(.el-textarea__inner) {
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg);
     border: 1.5px solid var(--dt-border-color);
-    padding: 12px 16px;
-    font-size: 14px;
+    padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px);
+    font-size: var(--dt-font-size-sm);
     resize: none;
 
     &:focus {
@@ -710,7 +710,7 @@ onMounted(() => {
 // 欢迎页
 .welcome-page {
   flex: 1;
-  padding: 40px 24px;
+  padding: var(--dt-spacing-2xl, 40px) var(--dt-spacing-lg, 24px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -719,32 +719,32 @@ onMounted(() => {
 
 .welcome-hero {
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: var(--dt-spacing-2xl, 48px);
 }
 
 .hero-icon {
   width: 80px;
   height: 80px;
-  margin: 0 auto 20px;
-  border-radius: 24px;
+  margin: 0 auto var(--dt-spacing-xl, 20px);
+  border-radius: var(--dt-radius-xl);
   background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
   color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
+  font-size: var(--dt-icon-size-xl, 36px);
   box-shadow: var(--dt-shadow-2);
 }
 
 .hero-title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: var(--dt-font-size-xl);
+  font-weight: var(--dt-font-weight-bold);
   color: var(--dt-text-primary);
-  margin: 0 0 12px;
+  margin: 0 0 var(--dt-spacing-sm, 12px);
 }
 
 .hero-desc {
-  font-size: 15px;
+  font-size: var(--dt-font-size-base);
   color: var(--dt-text-secondary);
   margin: 0;
   max-width: 400px;
@@ -753,56 +753,56 @@ onMounted(() => {
 .quick-section {
   width: 100%;
   max-width: 600px;
-  margin-bottom: 32px;
+  margin-bottom: var(--dt-spacing-2xl, 32px);
 }
 
 .section-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-secondary);
-  margin: 0 0 16px;
+  margin: 0 0 var(--dt-spacing-md, 16px);
 }
 
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: var(--dt-spacing-sm, 12px);
 }
 
 .quick-card {
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-radius: 12px;
-  padding: 20px 16px;
+  border-radius: var(--dt-radius-lg);
+  padding: var(--dt-spacing-lg, 20px) var(--dt-spacing-md, 16px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--dt-spacing-sm, 12px);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-color);
     box-shadow: var(--dt-shadow-2);
-    transform: translateY(-2px);
+    transform: translateY(var(--dt-transform-y, -2px));
   }
 }
 
 .card-icon {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg);
   color: var(--dt-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: var(--dt-icon-size-lg, 22px);
 }
 
 .card-label {
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-primary);
-  font-weight: 500;
+  font-weight: var(--dt-font-weight-medium);
 }
 
 .history-section {
@@ -814,25 +814,25 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--dt-spacing-sm, 12px);
 }
 
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--dt-spacing-xs, 8px);
 }
 
 .history-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: var(--dt-spacing-sm, 12px);
+  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px);
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
-  border-radius: 10px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-color);
@@ -842,7 +842,7 @@ onMounted(() => {
 
 .history-icon {
   color: var(--dt-brand-color);
-  font-size: 20px;
+  font-size: var(--dt-icon-size-lg, 20px);
 }
 
 .history-content {
@@ -851,8 +851,8 @@ onMounted(() => {
 }
 
 .history-title {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -860,13 +860,13 @@ onMounted(() => {
 }
 
 .history-time {
-  font-size: 12px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-tertiary);
 }
 
 .delete-btn {
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity var(--dt-transition-fast);
 
   &:hover {
     color: var(--dt-error-color);

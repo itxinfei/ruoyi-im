@@ -421,27 +421,27 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .documents-panel { display: flex; height: 100%; flex: 1; background: var(--dt-bg-card); }
-.docs-sidebar { width: 200px; border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; background: var(--dt-bg-card); }
+.docs-sidebar { width: var(--dt-contact-panel-width, 200px); border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; background: var(--dt-bg-card); }
 .sidebar-header { padding: var(--dt-spacing-lg) var(--dt-spacing-md); border-bottom: 1px solid var(--dt-border-lighter);
-  .sidebar-title { font-size: 16px; font-weight: 600; color: var(--dt-text-primary); margin: 0; }
+  .sidebar-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); margin: 0; }
 }
 .sidebar-content { flex: 1; padding: var(--dt-spacing-md) 0; overflow-y: auto;
-  .nav-item { display: flex; align-items: center; gap: var(--dt-spacing-md); padding: var(--dt-spacing-md) var(--dt-spacing-lg); margin: 2px 0; border-radius: var(--dt-radius-sm); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-fast); position: relative;
+  .nav-item { display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px); padding: var(--dt-spacing-md) var(--dt-spacing-lg); margin: var(--dt-spacing-xs, 2px) 0; border-radius: var(--dt-radius-sm); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-fast); position: relative;
     &:hover { background: var(--dt-bg-session-hover); }
-    &.active { background: var(--dt-brand-lighter); color: var(--dt-brand-color); font-weight: 500;
+    &.active { background: var(--dt-brand-lighter); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-medium);
       &::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--dt-brand-color); }
     }
-    .nav-icon { font-size: 18px; flex-shrink: 0; }
-    .nav-label { font-size: 14px; flex: 1; }
+    .nav-icon { font-size: var(--dt-icon-size-lg, 18px); flex-shrink: 0; }
+    .nav-label { font-size: var(--dt-font-size-sm); flex: 1; }
   }
   .nav-divider { height: 1px; background: var(--dt-border-light); margin: var(--dt-spacing-md) var(--dt-spacing-md); }
-  .nav-section-label { padding: var(--dt-spacing-sm) var(--dt-spacing-lg); font-size: 11px; color: var(--dt-text-tertiary); text-transform: uppercase; font-weight: 500; }
+  .nav-section-label { padding: var(--dt-spacing-sm) var(--dt-spacing-lg); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); text-transform: uppercase; font-weight: var(--dt-font-weight-medium); }
 }
-.sidebar-footer { padding: 16px; border-top: 1px solid var(--dt-border-light);
-  .storage-info { background: var(--dt-bg-body); padding: 12px; border-radius: 8px;
-    .storage-header { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: var(--dt-text-tertiary); }
-    .storage-bar { height: 4px; background: var(--dt-border-color); border-radius: 2px; overflow: hidden; .storage-fill { height: 100%; background: var(--dt-brand-color); } }
-    .storage-text { font-size: 10px; color: var(--dt-text-quaternary); margin-top: 6px; text-align: right; }
+.sidebar-footer { padding: var(--dt-spacing-md, 16px); border-top: 1px solid var(--dt-border-light);
+  .storage-info { background: var(--dt-bg-body); padding: var(--dt-spacing-sm, 12px); border-radius: var(--dt-radius-md);
+    .storage-header { display: flex; justify-content: space-between; font-size: var(--dt-font-size-xs); margin-bottom: var(--dt-spacing-xs, 6px); color: var(--dt-text-tertiary); }
+    .storage-bar { height: 4px; background: var(--dt-border-color); border-radius: var(--dt-radius-full, 2px); overflow: hidden; .storage-fill { height: 100%; background: var(--dt-brand-color); } }
+    .storage-text { font-size: var(--dt-font-size-xs); color: var(--dt-text-quaternary); margin-top: var(--dt-spacing-xs, 6px); text-align: right; }
   }
 }
 .docs-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }

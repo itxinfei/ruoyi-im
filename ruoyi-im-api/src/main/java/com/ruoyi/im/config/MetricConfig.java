@@ -7,7 +7,6 @@ import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.binder.system.UptimeMetrics;
-import org.springframework.boot.actuator.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,14 +18,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class MetricConfig {
-
-    /**
-     * 自定义MeterRegistry，为所有指标添加公共标签
-     */
-    @Bean
-    public MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
-        return registry -> registry.config().commonTags("application", "ruoyi-im");
-    }
 
     /**
      * 启用@Timed注解支持

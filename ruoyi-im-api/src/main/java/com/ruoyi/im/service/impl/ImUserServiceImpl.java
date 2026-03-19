@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.constant.ApiErrorCode;
+import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.BasePageRequest;
