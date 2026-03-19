@@ -81,16 +81,16 @@ const dateRangeString = computed(() => {
   border-right: 1px solid var(--dt-border-light);
 }
 .sidebar-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-semibold);
   margin: 0;
-  padding: 20px;
+  padding: var(--dt-spacing-lg) var(--dt-spacing-md);
 }
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
+  gap: var(--dt-spacing-sm, 12px);
+  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 20px);
   cursor: pointer;
   &:hover { background: var(--dt-bg-session-hover); }
   &.active { background: var(--dt-brand-lighter); }
@@ -107,16 +107,16 @@ const dateRangeString = computed(() => {
   overflow: hidden;
 }
 .calendar-header {
-  height: 64px;
-  padding: 0 24px;
+  height: var(--dt-toolbar-height, 64px);
+  padding: 0 var(--dt-spacing-lg, 24px);
   border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   background-color: var(--dt-bg-card);
 }
 .range-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-lg, 18px);
+  font-weight: var(--dt-font-weight-semibold);
   margin: 0;
 }
 .day-view, .week-view, .month-view {
