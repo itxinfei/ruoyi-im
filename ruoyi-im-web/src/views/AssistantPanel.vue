@@ -477,7 +477,7 @@ onMounted(() => {
 .header-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dt-spacing-sm, 8px);
 }
 
 .panel-title {
@@ -528,14 +528,14 @@ onMounted(() => {
 // 消息区域
 .messages-area {
   flex: 1;
-  padding: 20px 24px;
+  padding: var(--dt-spacing-lg, 20px) var(--dt-spacing-xl, 24px);
   overflow-y: auto;
 }
 
 .message-row {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: var(--dt-spacing-md, 12px);
+  margin-bottom: var(--dt-spacing-lg, 20px);
 
   &.user {
     flex-direction: row-reverse;
@@ -593,16 +593,16 @@ onMounted(() => {
 
   :deep(pre) {
     background: var(--dt-bg-body);
-    padding: 12px;
-    border-radius: 8px;
+    padding: var(--dt-spacing-sm, 12px);
+    border-radius: var(--dt-radius-md, 8px);
     overflow-x: auto;
-    margin: 8px 0;
+    margin: var(--dt-spacing-sm, 8px) 0;
   }
 
   :deep(code) {
     background: var(--dt-bg-body);
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: var(--dt-spacing-xs, 2px) var(--dt-spacing-xs, 6px);
+    border-radius: var(--dt-radius-sm, 4px);
     font-family: monospace;
   }
 }
@@ -611,24 +611,24 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
-  padding-top: 8px;
+  margin-top: var(--dt-spacing-sm, 8px);
+  padding-top: var(--dt-spacing-sm, 8px);
   border-top: 1px solid var(--dt-border-lighter);
 
   .time {
-    font-size: 11px;
+    font-size: var(--dt-font-size-xs, 11px);
     color: var(--dt-text-quaternary);
   }
 
   .actions {
     display: flex;
-    gap: 4px;
+    gap: var(--dt-spacing-xs, 4px);
   }
 }
 
 .action-btn {
-  width: 28px;
-  height: 28px;
+  width: var(--dt-btn-size-sm, 28px);
+  height: var(--dt-btn-size-sm, 28px);
   border: none;
   background: transparent;
   color: var(--dt-text-tertiary);
@@ -648,11 +648,11 @@ onMounted(() => {
 // 输入中动画
 .typing-dots {
   display: flex;
-  gap: 4px;
+  gap: var(--dt-spacing-xs, 4px);
 
   span {
-    width: 8px;
-    height: 8px;
+    width: var(--dt-spacing-xs, 8px);
+    height: var(--dt-spacing-xs, 8px);
     background: var(--dt-text-quaternary);
     border-radius: 50%;
     animation: bounce 1.4s infinite ease-in-out;
@@ -723,9 +723,9 @@ onMounted(() => {
 }
 
 .hero-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto var(--dt-spacing-xl, 20px);
+  width: var(--dt-icon-size-2xl, 80px);
+  height: var(--dt-icon-size-2xl, 80px);
+  margin: 0 auto var(--dt-spacing-lg, 20px);
   border-radius: var(--dt-radius-xl);
   background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
   color: var(--dt-text-primary);

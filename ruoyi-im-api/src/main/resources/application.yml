@@ -11,26 +11,6 @@ app:
   dev:
     user-id: 1
 
-# Spring Boot Actuator配置
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: when-authorized
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-    distribution:
-      percentiles-histogram:
-        all: true
-      sla:
-        http.server.requests: 100ms, 500ms, 1000ms
-        db.query: 50ms, 100ms, 200ms
-
 # Spring框架配置
 spring:
   profiles:
@@ -92,56 +72,8 @@ spring:
       max-file-size: 20MB
       max-request-size: 50MB
 
-# Swagger配置
-swagger:
-  enabled: true
-
-# Resilience4j配置
-resilience4j:
-  circuit-breaker:
-    instances:
-      message-service:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        permitted-number-of-calls-in-half-open-state: 3
-        wait-duration-in-open-state: 30s
-        failure-rate-threshold: 50
-        event-consumer-buffer-size: 10
-      user-service:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        permitted-number-of-calls-in-half-open-state: 3
-        wait-duration-in-open-state: 30s
-        failure-rate-threshold: 50
-        event-consumer-buffer-size: 10
-  timelimiter:
-    instances:
-      message-service:
-        timeout-duration: 10s
-      user-service:
-        timeout-duration: 10s
-  bulkhead:
-    instances:
-      message-service:
-        max-concurrent-calls: 20
-        max-wait-duration: 100ms
-      user-service:
-        max-concurrent-calls: 20
-        max-wait-duration: 100ms
-
-# SpringDoc配置（OpenAPI 3.0）
-springdoc:
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-  show-actuator: false
-
-# MyBatis-Plus配置
+# 文件上传配置
+spring:
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*Mapper.xml
   type-aliases-package: com.ruoyi.im.domain

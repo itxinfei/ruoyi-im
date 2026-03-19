@@ -188,11 +188,11 @@ onMounted(loadSettings)
   margin-bottom: var(--dt-spacing-xl);
 
   .group-title {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--dt-font-size-sm, 13px);
+    font-weight: var(--dt-font-weight-semibold, 600);
     color: var(--dt-text-secondary);
-    margin-bottom: 8px;
-    padding-left: 4px;
+    margin-bottom: var(--dt-spacing-sm, 8px);
+    padding-left: var(--dt-spacing-xs, 4px);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -200,7 +200,7 @@ onMounted(loadSettings)
 
 .settings-card {
   background: var(--dt-bg-card);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-lg, 12px);
   border: 1px solid var(--dt-border-light);
   overflow: hidden;
   box-shadow: var(--dt-shadow-1);
@@ -209,7 +209,7 @@ onMounted(loadSettings)
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
+    padding: var(--dt-spacing-md, 16px);
     border-bottom: 1px solid var(--dt-border-lighter);
     transition: background 0.2s;
 
@@ -223,57 +223,57 @@ onMounted(loadSettings)
     .label-box {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: var(--dt-spacing-xs, 2px);
 
       .title {
-        font-size: 14px;
-        font-weight: 600;
+        font-size: var(--dt-font-size-sm, 14px);
+        font-weight: var(--dt-font-weight-semibold, 600);
         color: var(--dt-text-primary);
       }
 
       .desc {
-        font-size: 12px;
+        font-size: var(--dt-font-size-xs, 12px);
         color: var(--dt-text-tertiary);
       }
     }
 
     .arrow {
       color: var(--dt-border-color);
-      font-size: 20px;
+      font-size: var(--dt-icon-size-lg, 20px);
     }
   }
 }
 
 .about-footer {
-  margin-top: 40px;
-  padding-bottom: 40px;
+  margin-top: var(--dt-spacing-2xl, 40px);
+  padding-bottom: var(--dt-spacing-2xl, 40px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--dt-spacing-sm, 8px);
 
   .app-brand {
-    width: 48px;
-    height: 48px;
+    width: var(--dt-avatar-size-lg, 48px);
+    height: var(--dt-avatar-size-lg, 48px);
     background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
-    border-radius: 12px;
+    border-radius: var(--dt-radius-lg, 12px);
     color: var(--dt-text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 18px;
+    font-weight: var(--dt-font-weight-black, 800);
+    font-size: var(--dt-font-size-lg, 18px);
     box-shadow: var(--dt-shadow-2);
   }
 
   .app-version {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--dt-font-size-sm, 13px);
+    font-weight: var(--dt-font-weight-semibold, 600);
     color: var(--dt-text-secondary);
   }
 
   .copyright {
-    font-size: 11px;
+    font-size: var(--dt-font-size-xs, 11px);
     color: var(--dt-text-tertiary);
   }
 }
