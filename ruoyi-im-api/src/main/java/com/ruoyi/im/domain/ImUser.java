@@ -54,6 +54,15 @@ public class ImUser extends BaseEntity implements Serializable {
     /** 签名,用户个人简介或个性签名 */
     private String signature;
 
+    /** 用户工作状态: WORKING=工作中, BUSY=忙碌, MEETING=会议中, LEAVE=请假中, ONLINE=在线 */
+    @TableField("user_status")
+    private String userStatus;
+
+    /** 状态更新时间 */
+    @TableField("status_update_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime statusUpdateTime;
+
     /** 部门 */
     private String department;
 
@@ -200,5 +209,21 @@ public class ImUser extends BaseEntity implements Serializable {
 
     public void setBirthday(java.time.LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    public String getUserStatus() {
+        return userStatus;
+    }
+
+    public void setUserStatus(String userStatus) {
+        this.userStatus = userStatus;
+    }
+
+    public LocalDateTime getStatusUpdateTime() {
+        return statusUpdateTime;
+    }
+
+    public void setStatusUpdateTime(LocalDateTime statusUpdateTime) {
+        this.statusUpdateTime = statusUpdateTime;
     }
 }

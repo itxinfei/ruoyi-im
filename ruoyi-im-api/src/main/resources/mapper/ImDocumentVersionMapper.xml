@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImDocumentVersionMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImDocumentVersion" id="ImDocumentVersionResult">
+        <id property="id" column="id"/>
+        <result property="documentId" column="document_id"/>
+        <result property="version" column="version"/>
+        <result property="content" column="content"/>
+        <result property="titleSnapshot" column="title_snapshot"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modifiedByName" column="modified_by_name"/>
+        <result property="changeDescription" column="change_description"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImDocumentVersionVo">
+        select id, document_id, version, content, title_snapshot, modified_by,
+               modified_by_name, change_description, file_size, create_time
+        from im_document_version
+    </sql>
+
+    <select id="selectVersionsByDocumentId" resultMap="ImDocumentVersionResult">
+        <include refid="selectImDocumentVersionVo"/>
+        where document_id = #{documentId}
+        order by version desc
+    </select>
+
+    <select id="selectLatestVersion" resultType="java.lang.Integer">
+        select max(version)
+        from im_document_version
+        where document_id = #{documentId}
+    </select>
+
+</mapper>

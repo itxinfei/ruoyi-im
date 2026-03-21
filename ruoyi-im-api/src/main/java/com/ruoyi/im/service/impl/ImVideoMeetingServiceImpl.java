@@ -58,6 +58,9 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     @Autowired
     private ImRedisUtil redisUtil;
 
+    @Autowired
+    private com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createMeeting(ImVideoMeetingCreateRequest request, Long userId) {
@@ -493,9 +496,24 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
 
                 participantMapper.insert(participant);
 
-                // 发送邀请通知
-                // 通过WebSocket或系统通知发送邀请
-                log.info("会议邀请: meetingId={}, invited={}, inviter={}", meetingId, userId, inviterName);
+                // 发送邀请通知：通过 WebSocket 实时推送到目标用户
+                Map<String, Object> inviteMsg = new HashMap<>();
+                inviteMsg.put("type", "meeting_invite");
+                Map<String, Object> data = new HashMap<>();
+                data.put("meetingId", meetingId);
+                data.put("title", meeting.getTitle());
+                data.put("hostName", inviterName);
+                data.put("scheduledStartTime", meeting.getScheduledStartTime());
+                data.put("roomId", meeting.getRoomId());
+                inviteMsg.put("data", data);
+
+                try {
+                    broadcastService.sendToUser(userId, inviteMsg);
+                } catch (Exception e) {
+                    log.error("发送会议邀请通知失败: userId={}, error={}", userId, e.getMessage());
+                }
+
+                log.info("会议邀请已发送: meetingId={}, invited={}, inviter={}", meetingId, userId, inviterName);
             }
         }
     }

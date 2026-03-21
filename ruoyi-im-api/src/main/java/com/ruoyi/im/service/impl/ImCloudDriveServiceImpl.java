@@ -8,6 +8,7 @@ import com.ruoyi.im.domain.ImCloudFileShare;
 import com.ruoyi.im.domain.ImCloudFileVersion;
 import com.ruoyi.im.domain.ImCloudFolder;
 import com.ruoyi.im.domain.ImFileAsset;
+import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.cloud.ImCloudFileMoveRequest;
 import com.ruoyi.im.dto.cloud.ImCloudFileShareRequest;
@@ -18,6 +19,7 @@ import com.ruoyi.im.mapper.ImCloudFileShareMapper;
 import com.ruoyi.im.mapper.ImCloudFileVersionMapper;
 import com.ruoyi.im.mapper.ImCloudFolderMapper;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
+import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImCloudDriveService;
 import com.ruoyi.im.util.BusinessExceptionHelper;
@@ -84,6 +86,12 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
 
     @Autowired
     private ImUserMapper userMapper;
+
+    @Autowired
+    private ImMessageMapper messageMapper;
+
+    @Autowired
+    private com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
 
     @Value("${file.upload.path}")
     private String uploadPath;
@@ -798,5 +806,72 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         }
 
         return String.format("%.2f %s", fileSize, units[unitIndex]);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ImCloudFileVO saveFromMessage(Long messageId, Long folderId, Long userId) {
+        // 1. 获取消息内容
+        ImMessage message = messageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            BusinessExceptionHelper.throwMessageNotFound();
+        }
+
+        // 2. 校验类型
+        String type = message.getMessageType();
+        if (!"FILE".equalsIgnoreCase(type) && !"IMAGE".equalsIgnoreCase(type)) {
+            throw new BusinessException("只能保存文件或图片消息");
+        }
+
+        // 3. 解析消息内容获取资产ID
+        String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
+        Long fileAssetId = null;
+        String fileName = "未命名文件";
+        Long fileSize = 0L;
+
+        try {
+            com.alibaba.fastjson.JSONObject json = com.alibaba.fastjson.JSON.parseObject(decryptedContent);
+            fileAssetId = json.getLong("fileAssetId");
+            fileName = json.getString("name");
+            fileSize = json.getLong("size");
+        } catch (Exception e) {
+            logger.warn("解析文件消息内容失败，尝试降级处理: {}", e.getMessage());
+        }
+
+        if (fileAssetId == null) {
+            throw new BusinessException("消息中不包含有效的文件资产信息");
+        }
+
+        // 4. 获取原始资产
+        ImFileAsset asset = fileAssetMapper.selectById(fileAssetId);
+        if (asset == null) {
+            throw new BusinessException("原始文件资产已失效");
+        }
+
+        // 5. 创建云盘文件记录 (关联同一个 AssetID，实现零拷贝保存)
+        ImCloudFile cloudFile = new ImCloudFile();
+        cloudFile.setFileAssetId(fileAssetId);
+        cloudFile.setFolderId(folderId);
+        cloudFile.setFileName(fileName != null ? fileName : asset.getFileName());
+        cloudFile.setFileSize(fileSize != null && fileSize > 0 ? fileSize : asset.getFileSize());
+        cloudFile.setFileType(asset.getFileType());
+        cloudFile.setFileExt(asset.getFileExt());
+        cloudFile.setUploaderId(userId);
+        cloudFile.setDownloadCount(0);
+        cloudFile.setPreviewCount(0);
+        cloudFile.setAccessPermission("PRIVATE");
+        cloudFile.setIsDeleted(false);
+        cloudFile.setCreateTime(LocalDateTime.now());
+        cloudFile.setUpdateTime(LocalDateTime.now());
+
+        ImUser uploader = userMapper.selectImUserById(userId);
+        if (uploader != null) {
+            cloudFile.setUploaderName(uploader.getNickname());
+        }
+
+        cloudFileMapper.insert(cloudFile);
+
+        logger.info("聊天文件保存到云盘成功: messageId={}, cloudFileId={}, userId={}", messageId, cloudFile.getId(), userId);
+        return convertToVO(cloudFile, userId);
     }
 }

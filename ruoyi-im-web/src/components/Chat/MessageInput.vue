@@ -1,5 +1,5 @@
 <template>
-  <div class="message-input">
+  <div class="message-input" :class="{ focused: isFocused }">
     <!-- 工具栏 -->
     <div class="toolbar">
       <button class="toolbar-btn" @click="insertEmoji('😀')">
@@ -31,11 +31,23 @@
 
     <!-- 输入区 -->
     <div class="text-area">
+      <div v-if="replyingMessage" class="reply-bar">
+        <div class="reply-info">
+          <span class="reply-label">回复</span>
+          <span class="reply-name">{{ replyingMessage.senderName || '对方' }}</span>
+          <span class="reply-text">{{ getReplyPreview(replyingMessage) }}</span>
+        </div>
+        <button class="reply-close" @click="clearReply">×</button>
+      </div>
       <textarea
+        ref="textareaRef"
         v-model="content"
         placeholder="请输入消息..."
         @keydown="handleKeydown"
         @input="handleInput"
+        @paste="handlePaste"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
       />
     </div>
 
@@ -70,7 +82,8 @@
 </template>
 
 <script setup>
-import { ref, nextTick, computed } from 'vue'
+import { ref, nextTick, computed, watch } from 'vue'
+import { useStore } from 'vuex'
 import { ChatDotRound, Picture, Files, UserFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { parseUrlMetadata } from '@/api/im/urlMetadata'
@@ -82,16 +95,36 @@ const props = defineProps({
 })
 const emit = defineEmits(['send', 'upload-file', 'upload-image', 'upload-batch', 'typing'])
 
+const store = useStore()
 const content = ref('')
+const textareaRef = ref(null)
 const fileRef = ref(null)
 const atMemberPickerRef = ref(null)
 const uploadType = ref(null) // 记录当前上传类型
+const isFocused = ref(false) // 输入框焦点状态
 
 const _typingDebounceTimer = null // 输入防抖定时器
+const replyingMessage = computed(() => store.state.im?.message?.replyingMessage || null)
 
 // 判断是否为群聊会话
 const isGroupSession = computed(() => {
   return props.session?.type === 'GROUP' || props.session?.sessionType === 'GROUP'
+})
+
+watch(() => props.session?.id, (id) => {
+  if (!id) return
+  const session = store.state.im?.session?.sessions?.find(s => s.id === id)
+  content.value = session?.draftContent || ''
+})
+
+let draftTimer = null
+watch(content, (val) => {
+  const sessionId = props.session?.id
+  if (!sessionId) return
+  if (draftTimer) clearTimeout(draftTimer)
+  draftTimer = setTimeout(() => {
+    store.dispatch('im/session/saveDraft', { sessionId, content: val })
+  }, 300)
 })
 
 // URL 正则匹配
@@ -173,7 +206,7 @@ const handleAtMemberSelect = (member) => {
 
   // 重新聚焦到输入框
   nextTick(() => {
-    const textarea = document.querySelector('.text-area textarea')
+    const textarea = textareaRef.value
     if (textarea) {
       textarea.focus()
       // 将光标移到末尾
@@ -190,6 +223,7 @@ const handleSend = async () => {
   if (!content.value.trim()) return
 
   const text = content.value.trim()
+  const replyToMessageId = replyingMessage.value?.messageId || replyingMessage.value?.id || null
   const url = extractFirstUrl(text)
 
   // 如果文本只包含 URL（或主要是 URL），尝试获取元数据并发送链接卡片
@@ -205,9 +239,11 @@ const handleSend = async () => {
             description: res.data.description || '',
             imageUrl: res.data.imageUrl || res.data.thumbnail || ''
           }),
-          type: 'LINK'
+          type: 'LINK',
+          replyToMessageId
         })
         content.value = ''
+        clearReply()
         return
       }
     } catch (e) {
@@ -217,8 +253,9 @@ const handleSend = async () => {
   }
 
   // 普通文本消息
-  emit('send', { content: text, type: 'TEXT' })
+  emit('send', { content: text, type: 'TEXT', replyToMessageId })
   content.value = ''
+  clearReply()
 }
 
 const insertEmoji = (emoji) => {
@@ -264,29 +301,81 @@ const onFileChange = (e) => {
     // 验证文件类型
     if (uploadType.value === 'image') {
       // 检查是否为图片
-      if (!file.type.startsWith('image/')) {
-        ElMessage.warning('请选择图片文件')
-        return
-      }
-      // 检查文件大小（限制 10MB）
-      if (file.size > 10 * 1024 * 1024) {
-        ElMessage.warning('图片大小不能超过 10MB')
-        return
-      }
+      if (!validateImageFile(file)) return
       emit('upload-image', file)
     } else {
       // 文件上传
-      // 检查文件大小（限制 100MB）
-      if (file.size > 100 * 1024 * 1024) {
-        ElMessage.warning('文件大小不能超过 100MB')
-        return
-      }
+      if (!validateFile(file)) return
       emit('upload-file', file)
     }
   }
 
   // 重置 input 以便重复选择同一文件
   fileRef.value.value = ''
+}
+
+const handlePaste = (e) => {
+  const items = e.clipboardData?.items || []
+  if (!items.length) return
+
+  // 优先处理图片粘贴
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile()
+      if (file) {
+        if (!validateImageFile(file)) return
+        emit('upload-image', file)
+        e.preventDefault()
+        return
+      }
+    }
+  }
+
+  // 处理文件粘贴（非图片）
+  for (const item of items) {
+    if (item.kind === 'file') {
+      const file = item.getAsFile()
+      if (file) {
+        if (!validateFile(file)) return
+        emit('upload-file', file)
+        e.preventDefault()
+        return
+      }
+    }
+  }
+}
+
+const validateImageFile = (file) => {
+  if (!file.type.startsWith('image/')) {
+    ElMessage.warning('请选择图片文件')
+    return false
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    ElMessage.warning('图片大小不能超过 10MB')
+    return false
+  }
+  return true
+}
+
+const validateFile = (file) => {
+  if (file.size > 100 * 1024 * 1024) {
+    ElMessage.warning('文件大小不能超过 100MB')
+    return false
+  }
+  return true
+}
+
+const clearReply = () => {
+  store.dispatch('im/message/clearReplyingMessage')
+}
+
+const getReplyPreview = (msg) => {
+  if (!msg) return ''
+  if (msg.type === 'TEXT') return (msg.content || '').slice(0, 60)
+  if (msg.type === 'IMAGE') return '[图片]'
+  if (msg.type === 'FILE') return '[文件]'
+  if (msg.type === 'LINK') return '[链接]'
+  return '[消息]'
 }
 </script>
 
@@ -297,7 +386,15 @@ const onFileChange = (e) => {
   padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
   display: flex;
   flex-direction: column;
-  min-height: var(--dt-chat-input-height, 160px);
+  min-height: var(--dt-chat-input-height, 96px);
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+  transition: border-color var(--dt-transition-fast);
+
+  &.focused {
+    border-color: var(--dt-brand-color);
+    border-top-color: var(--dt-brand-color);
+  }
 }
 
 .toolbar {
@@ -357,13 +454,59 @@ const onFileChange = (e) => {
   padding: var(--dt-spacing-sm) 0;
   min-height: var(--dt-input-min-height, 60px);
 
+  .reply-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--dt-brand-lighter);
+    color: var(--dt-text-primary);
+    border-radius: var(--dt-radius-sm);
+    padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
+    margin-bottom: var(--dt-spacing-sm);
+    font-size: var(--dt-font-size-sm);
+  }
+
+  .reply-info {
+    display: flex;
+    align-items: center;
+    gap: var(--dt-spacing-xs);
+    min-width: 0;
+  }
+
+  .reply-label {
+    color: var(--dt-brand-color);
+    font-weight: var(--dt-font-weight-medium);
+  }
+
+  .reply-name {
+    color: var(--dt-text-secondary);
+  }
+
+  .reply-text {
+    color: var(--dt-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 260px;
+  }
+
+  .reply-close {
+    border: none;
+    background: transparent;
+    color: var(--dt-text-secondary);
+    cursor: pointer;
+    font-size: var(--dt-font-size-base);
+    line-height: 1;
+    padding: 0 4px;
+  }
+
   textarea {
     width: 100%;
     min-height: var(--dt-input-min-height, 60px);
-    max-height: var(--dt-input-max-height, 200px);
+    max-height: var(--dt-input-max-height, 300px);
     border: none;
     outline: none;
-    resize: vertical;
+    resize: none;
     font-size: var(--dt-font-size-base);
     line-height: 1.6;
     color: var(--dt-text-primary);
@@ -399,6 +542,11 @@ const onFileChange = (e) => {
 
   .toolbar {
     border-color: var(--dt-border-dark);
+  }
+
+  .text-area .reply-bar {
+    background: var(--dt-bg-hover-dark);
+    color: var(--dt-text-primary-dark);
   }
 
   .text-area textarea {

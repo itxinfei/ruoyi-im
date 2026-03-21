@@ -95,6 +95,11 @@ public class SecurityConfig {
                 .csrf().disable()
                 // 使用自定义CORS配置
                 .cors().and()
+                // 配置响应头：解决浏览器 CSP 警告并增强安全性
+                .headers()
+                    .contentSecurityPolicy("default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*; connect-src 'self' ws: wss: http: https:; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none';")
+                    .and()
+                .and()
                 // 禁用默认的Session管理
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 // 设置未认证访问的处理类
@@ -104,6 +109,7 @@ public class SecurityConfig {
                 // 对于登录接口允许匿名访问
                 .antMatchers("/", "/health", "/auth/login", "/auth/register", "/api/auth/login", "/api/auth/register",
                         "/api/im/auth/login", "/api/im/auth/register", "/ws/**", "/websocket/**", "/public/**",
+                        "/api/im/bot/webhook/**", "/csrf/token",
                         "/error", "/test/**")
                 .permitAll()
                 // Swagger相关接口

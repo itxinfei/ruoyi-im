@@ -48,7 +48,7 @@
             :src="currentUser.avatar"
             :name="currentUser.nickname"
             :user-id="currentUser.id"
-            :size="var(--dt-avatar-size-md, 36)"
+            :size="36"
             shape="square"
           />
         </div>
@@ -130,8 +130,7 @@ const navModules = computed(() => {
     { key: 'chat', label: '消息', icon: 'chat', badge: true },
     { key: 'contacts', label: '通讯录', icon: 'people_alt', badge: false },
     { key: 'workbench', label: '工作台', icon: 'apps', badge: false },
-    { key: 'todo', label: '待办', icon: 'task_alt', badge: false },
-    { key: 'approval', label: '审批', icon: 'approval', badge: false }
+    { key: 'profile', label: '我的', icon: 'person_outline', badge: false }
   ]
   if (isAdmin.value) base.push({ key: 'admin', label: '管理', icon: 'admin_panel_settings', badge: false })
   return base

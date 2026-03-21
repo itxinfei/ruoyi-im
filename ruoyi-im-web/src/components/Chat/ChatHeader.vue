@@ -5,7 +5,7 @@
       <div class="avatar-wrapper" @click="$emit('show-profile')">
         <el-avatar
           shape="square"
-          :size="var(--dt-avatar-size-lg, 44)"
+          :size="44"
           :src="session?.avatar"
           class="header-avatar"
         >
@@ -55,19 +55,27 @@
           @click="$emit('search', session)"
         />
       </el-tooltip>
+      <el-tooltip content="语音通话" placement="bottom">
+        <el-button
+          :icon="Phone"
+          link
+          class="header-btn"
+          @click="$emit('voice-call', session)"
+        />
+      </el-tooltip>
+      <el-tooltip content="视频通话" placement="bottom">
+        <el-button
+          :icon="VideoCamera"
+          link
+          class="header-btn"
+          @click="$emit('video-call', session)"
+        />
+      </el-tooltip>
       <el-dropdown trigger="click" @command="(c) => $emit(c, session)">
         <el-button :icon="MoreFilled" link class="header-btn" />
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="voice-call">
-              <el-icon><Phone /></el-icon>
-              语音通话
-            </el-dropdown-item>
-            <el-dropdown-item command="video-call">
-              <el-icon><VideoCamera /></el-icon>
-              视频通话
-            </el-dropdown-item>
-            <el-dropdown-item command="files" divided>
+            <el-dropdown-item command="files">
               <el-icon><Folder /></el-icon>
               聊天文件
             </el-dropdown-item>
@@ -257,13 +265,13 @@ defineEmits(['toggle-sidebar', 'show-profile', 'voice-call', 'video-call', 'sear
   .header-right {
     display: flex;
     align-items: center;
-    gap: var(--dt-spacing-xxs);
+    gap: 4px;
 
     .header-btn {
-      width: var(--dt-icon-size-xl, 36px);
-      height: var(--dt-icon-size-xl, 36px);
+      width: 32px;
+      height: 32px;
       padding: 0;
-      font-size: var(--dt-icon-size-md, 18px);
+      font-size: 18px;
       color: var(--dt-text-secondary);
       border-radius: var(--dt-radius-md);
       transition: all var(--dt-transition-fast);

@@ -5,11 +5,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageMention;
-import com.ruoyi.im.dto.message.ImMessageForwardRequest;
-import com.ruoyi.im.dto.message.ImMessageReplyRequest;
-import com.ruoyi.im.dto.message.ImMessageSendRequest;
-import com.ruoyi.im.dto.message.ImMessageSearchRequest;
-import com.ruoyi.im.dto.message.MessageEditRequest;
+import com.ruoyi.im.dto.message.*;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
@@ -50,6 +46,7 @@ public class ImMessageController {
     private final ImMessageReactionService reactionService;
     private final ImMessageMentionService mentionService;
     private final ImMessageReadService messageReadService;
+    private final ImWebSocketBroadcastService broadcastService;
     private final ImMessageMapper imMessageMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
 
@@ -57,11 +54,15 @@ public class ImMessageController {
             ImMessageService imMessageService,
             ImMessageReactionService reactionService,
             ImMessageMentionService mentionService,
-            ImMessageReadService messageReadService, ImMessageMapper imMessageMapper, ImConversationMemberMapper imConversationMemberMapper) {
+            ImMessageReadService messageReadService,
+            ImWebSocketBroadcastService broadcastService,
+            ImMessageMapper imMessageMapper,
+            ImConversationMemberMapper imConversationMemberMapper) {
         this.imMessageService = imMessageService;
         this.reactionService = reactionService;
         this.mentionService = mentionService;
         this.messageReadService = messageReadService;
+        this.broadcastService = broadcastService;
         this.imMessageMapper = imMessageMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
     }
@@ -135,6 +136,48 @@ public class ImMessageController {
         imMessageService.markAsRead(conversationId, userId, messageIds, true);
 
         return Result.success("已标记为已读");
+    }
+
+    /**
+     * 转发消息
+     */
+    @PostMapping("/forward")
+    public Result<Void> forward(@Valid @RequestBody ImMessageForwardRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imMessageService.forwardMessage(request.getMessageId(), request.getToConversationId(),
+                request.getToUserId(), request.getContent(), userId);
+        return Result.success("转发成功");
+    }
+
+    /**
+     * 批量/合并转发消息
+     */
+    @PostMapping("/batch-forward")
+    public Result<Void> batchForward(@Valid @RequestBody ImMessageBatchForwardRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imMessageService.batchForward(request, userId);
+        return Result.success("转发成功");
+    }
+
+    /**
+     * 引用/回复消息
+     */
+    @PostMapping("/reply")
+    public Result<Long> reply(@Valid @RequestBody ImMessageReplyRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        Long replyId = imMessageService.replyMessage(request.getMessageId(), request.getContent(), userId);
+        return Result.success("回复成功", replyId);
+    }
+
+    /**
+     * 更新正在输入状态
+     */
+    @PostMapping("/typing/{conversationId}")
+    public Result<Void> setTyping(@PathVariable Long conversationId, @RequestParam boolean typing) {
+        Long userId = SecurityUtils.getLoginUserId();
+        // 直接调用广播服务通知其他成员
+        broadcastService.broadcastTypingStatus(conversationId, userId, typing);
+        return Result.success();
     }
 }
 

@@ -2,6 +2,7 @@ package com.ruoyi.im.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.im.domain.ImMessageRead;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -101,4 +102,12 @@ public interface ImMessageReadMapper extends BaseMapper<ImMessageRead> {
      * @return 已读人数
      */
     int countReadUsersByMessageId(Long messageId);
+
+    /**
+     * 批量统计消息已读人数
+     *
+     * @param messageIds 消息ID列表
+     * @return 包含 message_id 和 read_count 的 Map 列表
+     */
+    List<java.util.Map<String, Object>> batchCountReadUsersByMessageIds(@Param("messageIds") List<Long> messageIds);
 }

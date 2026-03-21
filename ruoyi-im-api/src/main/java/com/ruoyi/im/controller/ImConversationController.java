@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.conversation.ImConversationCreateRequest;
+import com.ruoyi.im.dto.conversation.ImConversationDraftRequest;
 import com.ruoyi.im.dto.conversation.ImConversationUpdateRequest;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.util.SecurityUtils;
@@ -205,5 +206,47 @@ public class ImConversationController {
         Long userId = SecurityUtils.getLoginUserId();
         Integer count = imConversationService.getTotalUnreadCount(userId);
         return Result.success(count);
+    }
+
+    /**
+     * 设置会话草稿
+     *
+     * @param id 会话ID
+     * @param request 草稿内容请求
+     * @return 操作结果
+     */
+    @PutMapping("/{id}/draft")
+    public Result<Void> setDraft(@PathVariable Long id,
+                                 @Valid @RequestBody ImConversationDraftRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imConversationService.updateDraft(userId, id, request.getDraft());
+        return Result.success("草稿保存成功");
+    }
+
+    /**
+     * 置顶消息（PIN）
+     *
+     * @param id 会话ID
+     * @param messageId 消息ID
+     * @return 操作结果
+     */
+    @PostMapping("/{id}/pin/{messageId}")
+    public Result<Void> pinMessage(@PathVariable Long id, @PathVariable Long messageId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imConversationService.pinMessage(id, messageId, userId);
+        return Result.success("置顶成功");
+    }
+
+    /**
+     * 取消置顶消息
+     *
+     * @param id 会话ID
+     * @return 操作结果
+     */
+    @DeleteMapping("/{id}/unpin")
+    public Result<Void> unpinMessage(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imConversationService.unpinMessage(id, userId);
+        return Result.success("取消置顶成功");
     }
 }

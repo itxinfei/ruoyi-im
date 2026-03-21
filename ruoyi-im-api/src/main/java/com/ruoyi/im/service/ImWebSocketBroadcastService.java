@@ -13,9 +13,13 @@ public interface ImWebSocketBroadcastService {
 
     void broadcastRecallNotification(Long conversationId, Long messageId, Long userId);
 
+    void broadcastMessageUpdate(Long conversationId, Long messageId, Long userId);
+
     void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping);
 
     void broadcastOnlineStatus(Long userId, boolean online);
+
+    void broadcastUserStatusChange(Long userId, String presenceStatus);
 
     /**
      * 发送通话信令给目标用户 (支持分布式)

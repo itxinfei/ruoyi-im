@@ -122,6 +122,10 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         bot.setDescription(request.getDescription());
         bot.setIsEnabled(1);
 
+        // 生成 Webhook 相关信息
+        bot.setWebhookToken(cn.hutool.core.util.IdUtil.fastSimpleUUID());
+        bot.setSecretKey(cn.hutool.core.util.RandomUtil.randomString(32));
+
         groupBotMapper.insert(bot);
         log.info("群机器人已创建: botId={}", bot.getId());
 
@@ -328,6 +332,65 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         bot.setIsEnabled(enabled ? 1 : 0);
         groupBotMapper.updateById(bot);
         log.info("机器人状态已更新: botId={}, enabled={}", botId, enabled);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void handleWebhook(String token, String timestamp, String sign, com.alibaba.fastjson.JSONObject payload) {
+        // 1. 查找机器人
+        ImGroupBot bot = groupBotMapper.selectOne(new LambdaQueryWrapper<ImGroupBot>()
+                .eq(ImGroupBot::getWebhookToken, token)
+                .eq(ImGroupBot::getIsEnabled, 1));
+        if (bot == null) {
+            throw new BusinessException("无效或已禁用的机器人Token");
+        }
+
+        // 2. 签名校验 (如果配置了 Secret)
+        if (StrUtil.isNotBlank(bot.getSecretKey())) {
+            if (StrUtil.isBlank(timestamp) || StrUtil.isBlank(sign)) {
+                throw new BusinessException("缺失安全校验参数");
+            }
+            // 校验时间戳 (5分钟内有效)
+            long now = System.currentTimeMillis();
+            long pushTime = Long.parseLong(timestamp);
+            if (Math.abs(now - pushTime) > 300000) {
+                throw new BusinessException("Webhook请求已过期");
+            }
+            // 计算签名
+            String stringToSign = timestamp + "\n" + bot.getSecretKey();
+            try {
+                javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+                mac.init(new javax.crypto.spec.SecretKeySpec(bot.getSecretKey().getBytes("UTF-8"), "HmacSHA256"));
+                byte[] signData = mac.doFinal(stringToSign.getBytes("UTF-8"));
+                String calculatedSign = cn.hutool.core.codec.Base64.encode(signData);
+                if (!calculatedSign.equals(sign)) {
+                    throw new BusinessException("签名验证失败");
+                }
+            } catch (Exception e) {
+                log.error("签名计算异常", e);
+                throw new BusinessException("安全校验失败");
+            }
+        }
+
+        // 3. 解析并发送消息
+        String msgType = payload.getString("msgtype");
+        String content = "";
+        if ("text".equals(msgType)) {
+            content = payload.getJSONObject("text").getString("content");
+        } else if ("markdown".equals(msgType)) {
+            content = payload.getJSONObject("markdown").getString("text");
+        } else if ("link".equals(msgType)) {
+            content = payload.getJSONObject("link").getString("title") + "\n" + payload.getJSONObject("link").getString("messageUrl");
+        } else {
+            content = payload.toJSONString(); // 兜底：直接发 JSON 文本
+        }
+
+        if (StrUtil.isNotBlank(content)) {
+            // 发送消息到群组
+            sendBotReply(bot.getGroupId(), bot, content);
+            // 记录日志
+            logBotMessage(bot.getId(), bot.getGroupId(), 0L, "WEBHOOK_PUSH", content);
+        }
     }
 
     @Override

@@ -32,7 +32,7 @@
   --dt-success-bg-dark: rgba(82, 196, 26, 0.15);
   --dt-warning-color: #faad14;
   --dt-warning-bg: #fffbe6;
-  --dt-error-color: #f54a45;
+  --dt-error-color: #ff4d4f;
   --dt-error-bg: #fff1f0;
   --dt-info-color: #1677ff;
   --dt-info-bg: #e6f4ff;
@@ -120,7 +120,7 @@
   --dt-chat-min-width: 400px;
   --dt-header-height: 56px;
   --dt-chat-header-height: 60px;
-  --dt-chat-input-height: 160px;
+  --dt-chat-input-height: 96px;
 
   // === Spacing System (8px 栅格) ===
   --dt-spacing-xs: 4px;
@@ -154,18 +154,19 @@
   --dt-bubble-compact-padding: 6px;
 
   // === Component Specific ===
-  --dt-bubble-padding-v: 10px;
-  --dt-bubble-padding-h: 14px;
-  --dt-bubble-left-bg: #ffffff;
-  --dt-bubble-right-bg: #e8f4ff;
+  --dt-bubble-padding-v: 12px;
+  --dt-bubble-padding-h: 12px;
+  --dt-bubble-left-bg: #f5f5f5;
+  --dt-bubble-right-bg: #1677ff;
+  --dt-bubble-max-width: 70%;
   --dt-bubble-right-bg-hover: #d1e9ff;
   --dt-btn-height-sm: 32px;
   --dt-btn-height-md: 36px;
   --dt-btn-height-lg: 40px;
   --dt-btn-min-width: 80px;
   --dt-toolbar-height: 40px;
-  --dt-input-min-height: 60px;
-  --dt-input-max-height: 200px;
+  --dt-input-min-height: 96px;
+  --dt-input-max-height: 300px;
 
   // === Dark Mode Variables (暗色模式专用) ===
   --dt-text-primary-dark: #f1f5f9;
@@ -179,6 +180,42 @@
 
   // === Font Family ===
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+// Dark Mode Overrides
+html.dark {
+  // === Brand Colors (暗色模式品牌色) ===
+  --dt-brand-color: #3b82f6;
+  --dt-brand-hover: #60a5fa;
+  --dt-brand-active: #2563eb;
+  --dt-brand-light: #1e40af;
+  --dt-brand-lighter: #1e3a5f;
+  --dt-brand-bg: rgba(59, 130, 246, 0.15);
+  --dt-brand-bg-dark: rgba(59, 130, 246, 0.25);
+
+  // === Background Colors (暗色模式背景) ===
+  --dt-bg-body: var(--dt-bg-body-dark);
+  --dt-bg-card: var(--dt-bg-card-dark);
+  --dt-bg-chat: #0f172a;
+  --dt-bg-session-list: #1e293b;
+  --dt-bg-session-hover: #334155;
+  --dt-bg-session-active: #1e3a5f;
+  --dt-bg-hover: rgba(255, 255, 255, 0.05);
+  --dt-bg-input: #0f172a;
+
+  // === Border Colors (暗色模式边框) ===
+  --dt-border-light: rgba(255, 255, 255, 0.1);
+  --dt-border-color: rgba(255, 255, 255, 0.15);
+
+  // === Text Colors (暗色模式文字) ===
+  --dt-text-primary: var(--dt-text-primary-dark);
+  --dt-text-secondary: var(--dt-text-secondary-dark);
+  --dt-text-tertiary: var(--dt-text-tertiary-dark);
+
+  // === Bubble Colors (暗色模式气泡) ===
+  --dt-bubble-left-bg: #1e293b;
+  --dt-bubble-right-bg: #2563eb;
+  --dt-bubble-right-bg-hover: #3b82f6;
 }
 
 // SCSS 辅助 Mixins

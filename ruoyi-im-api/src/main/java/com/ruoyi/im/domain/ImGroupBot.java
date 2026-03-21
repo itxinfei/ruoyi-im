@@ -68,6 +68,14 @@ public class ImGroupBot extends BaseEntity implements Serializable {
     @TableField("is_enabled")
     private Integer isEnabled;
 
+    /** Webhook Token (用于外部推送识别) */
+    @TableField("webhook_token")
+    private String webhookToken;
+
+    /** Webhook 密钥 (用于安全签名) */
+    @TableField("secret_key")
+    private String secretKey;
+
     // ==================== 以下字段为非数据库字段 ====================
 
     /** 机器人规则列表（非数据库字段） */

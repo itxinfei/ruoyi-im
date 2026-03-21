@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImDocumentCommentMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImDocumentComment" id="ImDocumentCommentResult">
+        <id property="id" column="id"/>
+        <result property="documentId" column="document_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="selectedText" column="selected_text"/>
+        <result property="selectionOffset" column="selection_offset"/>
+        <result property="isResolved" column="is_resolved"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImDocumentCommentVo">
+        select id, document_id, user_id, content, parent_id, selected_text,
+               selection_offset, is_resolved, create_time, update_time
+        from im_document_comment
+    </sql>
+
+</mapper>

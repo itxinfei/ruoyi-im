@@ -128,7 +128,7 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const emit = defineEmits(['update:modelValue', 'created'])
 
-defineProps({
+const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false
@@ -242,6 +242,13 @@ const open = () => {
 watch(visible, (newVal) => {
   emit('update:modelValue', newVal)
   if (newVal) {
+    loadContacts()
+  }
+})
+
+watch(() => props.modelValue, (val) => {
+  visible.value = val
+  if (val) {
     loadContacts()
   }
 })

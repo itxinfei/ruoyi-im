@@ -2,14 +2,8 @@ package com.ruoyi.im.websocket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
-import com.ruoyi.im.service.ImConversationMemberService;
-import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
-import com.ruoyi.im.service.ImUserService;
-
-import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.JwtUtils;
@@ -24,8 +18,8 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * WebSocket 实时通信端点

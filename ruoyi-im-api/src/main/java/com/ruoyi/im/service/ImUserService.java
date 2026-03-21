@@ -74,13 +74,22 @@ public interface ImUserService {
     Set<String> getUserPermissions(Long userId);
 
     /**
-     * 更新用户状态
+     * 更新用户账号状态（禁用/启用）
      *
      * @param userId 用户ID
      * @param status 状态
      */
     @CacheEvict(value = "user_local_cache", key = "#userId")
     void updateStatus(Long userId, Integer status); // 0=禁用, 1=启用
+
+    /**
+     * 更新用户工作状态（如：工作中、会议中、在线等）
+     *
+     * @param userId 用户ID
+     * @param presenceStatus 工作状态字符串
+     */
+    @CacheEvict(value = "user_local_cache", key = "#userId")
+    void updateUserPresenceStatus(Long userId, String presenceStatus);
 
     /**
      * 修改密码

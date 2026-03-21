@@ -214,4 +214,14 @@ public interface ImCloudDriveService {
      * @return 存储配额VO
      */
     ImCloudStorageQuotaVO getStorageQuota(Long userId);
+
+    /**
+     * 从聊天消息中转存文件到云盘
+     *
+     * @param messageId 消息ID
+     * @param folderId  目标文件夹ID (0为根目录)
+     * @param userId    用户ID
+     * @return 转存后的文件VO
+     */
+    ImCloudFileVO saveFromMessage(Long messageId, Long folderId, Long userId);
 }

@@ -1,5 +1,14 @@
 <template>
   <div class="message-bubble" :class="{ 'is-own': message.isOwn }">
+    <div
+      v-if="replyInfo"
+      class="reply-preview"
+      :class="{ 'is-own': message.isOwn }"
+      @click.stop="handleJump"
+    >
+      <div class="reply-name">{{ replyInfo.name }}</div>
+      <div class="reply-text">{{ replyInfo.text }}</div>
+    </div>
     <!-- 文本消息 -->
     <div v-if="message.type === 'TEXT'" class="text-content">
       <template v-for="(part, index) in parsedTextParts" :key="part.text + '-' + index">
@@ -9,6 +18,7 @@
           target="_blank"
           class="text-link"
         >{{ part.text }}</a>
+        <span v-else-if="part.isMention" class="text-mention" :class="{ 'is-me': part.isMe }">{{ part.text }}</span>
         <span v-else>{{ part.text }}</span>
       </template>
     </div>
@@ -124,23 +134,12 @@
       ref="documentPreviewRef"
       @close="handlePreviewClose"
     />
-    <!-- 消息状态指示（右下角） -->
-    <div 
-      v-if="message?.status" 
-      class="message-status" 
-      :class="'status-' + message.status"
-      aria-label="消息状态"
-    >
-      <span v-if="message.status === 'sending'" class="status-sending">...</span>
-      <span v-else-if="message.status === 'sent'" class="status-sent">✓</span>
-      <span v-else-if="message.status === 'delivered'" class="status-delivered">✓✓</span>
-      <span v-else-if="message.status === 'read'" class="status-read">已读</span>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useStore } from 'vuex'
 import { Document, Loading, WarningFilled, DocumentCopy, Picture, VideoCamera, Headset, Grid, Tickets } from '@element-plus/icons-vue'
 import DocumentPreviewDrawer from './DocumentPreviewDrawer.vue'
 import LinkCardMessage from './LinkCardMessage.vue'
@@ -149,13 +148,19 @@ import { formatTime, formatFileSize } from '@/utils/format'
 const props = defineProps({
   message: Object
 })
+const emit = defineEmits(['jump'])
+
+const store = useStore()
+const currentUser = computed(() => store.getters['user/currentUser'])
 
 const documentPreviewRef = ref(null)
 
 // URL 正则匹配
 const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g
+// @提及 正则匹配（简单模式，边界在 splitMentions 里判断）
+const mentionPattern = /@[\w\u4e00-\u9fa5-]{1,20}/g
 
-// 解析文本中的链接
+// 解析文本中的链接与@提及
 const parsedTextParts = computed(() => {
   const content = props.message?.content || ''
   if (!content) return []
@@ -165,31 +170,95 @@ const parsedTextParts = computed(() => {
   let match
 
   while ((match = urlPattern.exec(content)) !== null) {
-    // 添加链接前的文本
     if (match.index > lastIndex) {
-      parts.push({ text: content.slice(lastIndex, match.index), isLink: false })
+      parts.push(...splitMentions(content.slice(lastIndex, match.index)))
     }
-  // 添加链接（拆分末尾标点，提升鲁棒性）
-  let link = match[0]
-  let core = link
-  let tail = ''
-  const punct = link.match(/[.,!?;:)\]]+$/)
-  if (punct) {
-    core = link.substring(0, link.length - punct[0].length)
-    tail = punct[0]
-  }
-  if (core.length > 0) parts.push({ text: core, isLink: true })
-  if (tail) parts.push({ text: tail, isLink: false })
-  lastIndex = match.index + match[0].length
+    // 添加链接（拆分末尾标点，提升鲁棒性）
+    let link = match[0]
+    let core = link
+    let tail = ''
+    const punct = link.match(/[.,!?;:)\]]+$/)
+    if (punct) {
+      core = link.substring(0, link.length - punct[0].length)
+      tail = punct[0]
+    }
+    if (core.length > 0) parts.push({ text: core, isLink: true, isMention: false })
+    if (tail) parts.push({ text: tail, isLink: false, isMention: false })
+    lastIndex = match.index + match[0].length
   }
 
-  // 添加剩余文本
   if (lastIndex < content.length) {
-    parts.push({ text: content.slice(lastIndex), isLink: false })
+    parts.push(...splitMentions(content.slice(lastIndex)))
   }
 
   return parts
 })
+
+const splitMentions = (text) => {
+  if (!text) return []
+  const res = []
+  let last = 0
+  let m
+  while ((m = mentionPattern.exec(text)) !== null) {
+    const start = m.index
+    const end = start + m[0].length
+    const prev = start > 0 ? text[start - 1] : ''
+    const next = end < text.length ? text[end] : ''
+    const isBoundary = (ch) => !ch || /\s|[.,!?;:，。！？、]/.test(ch)
+
+    if (!isBoundary(prev) || !isBoundary(next)) {
+      // 不是合法 @ 提及边界，按普通文本处理
+      continue
+    }
+
+    if (start > last) {
+      res.push({ text: text.slice(last, m.index), isLink: false, isMention: false })
+    }
+    res.push({ text: m[0], isLink: false, isMention: true, isMe: isMeMention(m[0]) })
+    last = end
+  }
+  if (last < text.length) {
+    res.push({ text: text.slice(last), isLink: false, isMention: false })
+  }
+  return res
+}
+
+const isMeMention = (token) => {
+  if (token === '@我') return true
+  const user = currentUser.value || {}
+  const candidates = [user.nickname, user.username].filter(Boolean)
+  return candidates.some(name => token === `@${name}`)
+}
+
+const replyInfo = computed(() => {
+  const reply = props.message?.replyToMessage
+  if (reply) {
+    return {
+      name: reply.senderName || '对方',
+      text: getReplyPreview(reply)
+    }
+  }
+  if (props.message?.replyToMessageId) {
+    return { name: '回复', text: '[引用消息]' }
+  }
+  return null
+})
+
+const getReplyPreview = (msg) => {
+  if (!msg) return ''
+  if (msg.type === 'TEXT') return String(msg.content || '').slice(0, 60)
+  if (msg.type === 'IMAGE') return '[图片]'
+  if (msg.type === 'FILE') return '[文件]'
+  if (msg.type === 'LINK') return '[链接]'
+  if (msg.type === 'RECALLED') return '[已撤回]'
+  return '[消息]'
+}
+
+const handleJump = () => {
+  const reply = props.message?.replyToMessage
+  const id = reply?.messageId || reply?.id || props.message?.replyToMessageId
+  if (id) emit('jump', id)
+}
 
 // 获取文档图标
 const getDocumentIcon = (type) => {
@@ -312,24 +381,23 @@ const handleFileDownload = () => {
 <style scoped lang="scss">
 .message-bubble {
   padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
-  border-radius: var(--dt-bubble-radius);
+  border-radius: 4px 12px 12px 12px;
   font-size: var(--dt-font-size-base);
   line-height: 1.5;
   word-break: break-all;
   background: var(--dt-bubble-left-bg);
-  border: 1px solid var(--dt-border-light);
+  border: none;
   color: var(--dt-text-primary);
   transition: all var(--dt-transition-fast);
-  max-width: var(--dt-bubble-max-width, 520px);
+  max-width: 70%;
   position: relative;
+  overflow: visible;
 
   &.is-own {
     background: var(--dt-bubble-right-bg);
-    border-color: var(--dt-border-light);
-  }
-
-  &:hover {
-    box-shadow: var(--dt-shadow-1);
+    color: var(--dt-text-white);
+    border: none;
+    border-radius: 12px 4px 12px 12px;
   }
 
 .text-link {
@@ -341,6 +409,88 @@ const handleFileDownload = () => {
       text-decoration: underline;
     }
   }
+}
+
+.message-bubble::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 14px;
+  width: 6px;
+  height: 6px;
+  background: var(--dt-bubble-left-bg);
+  transform: rotate(45deg);
+  border-radius: 1px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.message-bubble.is-own::before {
+  left: auto;
+  right: -3px;
+  background: var(--dt-bubble-right-bg);
+  opacity: 0.6;
+}
+
+.message-bubble.is-own .text-link {
+  color: var(--dt-text-white);
+  text-decoration: underline;
+}
+
+.text-mention {
+  color: var(--dt-brand-color);
+  font-weight: var(--dt-font-weight-medium);
+}
+
+.text-mention.is-me {
+  color: var(--dt-error-color);
+}
+
+.message-bubble.is-own .text-mention {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.message-bubble.is-own .text-mention.is-me {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.reply-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  margin-bottom: var(--dt-spacing-xs);
+  border-left: 2px solid var(--dt-brand-color);
+  background: rgba(22, 119, 255, 0.08);
+  border-radius: var(--dt-radius-sm);
+  font-size: var(--dt-font-size-sm);
+  cursor: pointer;
+}
+
+.reply-preview.is-own {
+  border-left-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--dt-text-white);
+}
+
+.reply-name {
+  color: var(--dt-text-secondary);
+  font-weight: var(--dt-font-weight-medium);
+}
+
+.reply-preview.is-own .reply-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.reply-text {
+  color: var(--dt-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-preview.is-own .reply-text {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .image-content {
@@ -528,40 +678,6 @@ const handleFileDownload = () => {
   font-size: var(--dt-font-size-sm);
 }
 
-// 消息状态指示器
-.message-status {
-  position: absolute;
-  right: var(--dt-spacing-sm);
-  bottom: var(--dt-spacing-sm);
-  font-size: var(--dt-message-status-icon-size, 12px);
-  display: flex;
-  align-items: center;
-  gap: var(--dt-spacing-xs);
-  
-  .status-sending {
-    color: var(--dt-text-quaternary);
-    animation: pulse 1s infinite;
-  }
-  
-  .status-sent {
-    color: var(--dt-text-quaternary);
-  }
-  
-  .status-delivered {
-    color: var(--dt-text-quaternary);
-  }
-  
-  .status-read {
-    color: var(--dt-message-status-read-color, var(--dt-success-color));
-    font-size: var(--dt-font-size-xs);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
 // 暗色模式适配
 :global(.dark) {
   .message-bubble {
@@ -590,5 +706,15 @@ const handleFileDownload = () => {
       color: var(--dt-text-tertiary-dark);
     }
   }
+}
+
+:global(.dark) .message-bubble::before {
+  background: var(--dt-bg-hover-dark);
+  opacity: 0.5;
+}
+
+:global(.dark) .message-bubble.is-own::before {
+  background: var(--dt-brand-active);
+  opacity: 0.6;
 }
 </style>

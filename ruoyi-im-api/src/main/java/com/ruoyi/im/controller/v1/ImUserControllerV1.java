@@ -4,6 +4,7 @@ import com.ruoyi.im.annotation.ApiVersion;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
+import com.ruoyi.im.dto.user.ImUserPresenceUpdateRequest;
 import com.ruoyi.im.dto.user.ImUserStatusUpdateRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
 import com.ruoyi.im.exception.BusinessException;
@@ -114,6 +115,17 @@ public class ImUserControllerV1 {
         }
         imUserService.updateUser(id, request);
         return Result.success("更新成功");
+    }
+
+    /**
+     * 更新用户工作状态
+     * 设置：工作中、忙碌、会议中等
+     */
+    @PutMapping("/status")
+    public Result<Void> updatePresenceStatus(@Valid @RequestBody ImUserPresenceUpdateRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imUserService.updateUserPresenceStatus(userId, request.getPresenceStatus());
+        return Result.success("状态更新成功");
     }
 
     /**

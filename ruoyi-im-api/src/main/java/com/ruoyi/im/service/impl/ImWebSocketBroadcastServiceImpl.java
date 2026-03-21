@@ -120,6 +120,31 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     }
 
     @Override
+    public void broadcastMessageUpdate(Long conversationId, Long messageId, Long userId) {
+        try {
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            if (members == null || members.isEmpty()) return;
+
+            ImMessage message = messageMapper.selectImMessageById(messageId);
+            if (message == null) return;
+
+            Map<String, Object> updateMap = new HashMap<>();
+            updateMap.put("type", "message_update");
+            Map<String, Object> data = new HashMap<>();
+            data.put("conversationId", conversationId);
+            data.put("messageId", messageId);
+            data.put("content", encryptionUtil.decryptMessage(message.getContent()));
+            data.put("isEdited", 1);
+            data.put("timestamp", System.currentTimeMillis());
+            updateMap.put("data", data);
+
+            publishToMembers(members, updateMap, userId);
+        } catch (Exception e) {
+            log.error("广播消息更新异常: conversationId={}, messageId={}", conversationId, messageId, e);
+        }
+    }
+
+    @Override
     public void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
@@ -164,6 +189,32 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
         } catch (Exception e) {
             log.error("广播在线状态异常: userId={}", userId, e);
+        }
+    }
+
+    @Override
+    public void broadcastUserStatusChange(Long userId, String presenceStatus) {
+        try {
+            Map<String, Object> statusMap = new HashMap<>();
+            statusMap.put("type", "user_status_change");
+            Map<String, Object> data = new HashMap<>();
+            data.put("userId", userId);
+            data.put("status", presenceStatus);
+            data.put("timestamp", System.currentTimeMillis());
+            statusMap.put("data", data);
+
+            String messageJson = objectMapper.writeValueAsString(statusMap);
+
+            // 1. 本地全量发送
+            ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
+
+            // 2. Redis 全量广播 (让其他节点也执行本地全量发送)
+            Map<String, Object> redisPayload = new HashMap<>();
+            redisPayload.put("broadcastAll", true);
+            redisPayload.put("messageJson", messageJson);
+            redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
+        } catch (Exception e) {
+            log.error("广播工作状态变更异常: userId={}", userId, e);
         }
     }
 

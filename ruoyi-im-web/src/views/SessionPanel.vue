@@ -10,9 +10,9 @@
           <input
             v-model="searchKeyword"
             class="search-input"
-            placeholder="搜索"
+            placeholder="搜索会话"
             type="text"
-            @focus="showGlobalSearch = true"
+            @keyup.enter="handleSearchEnter"
           >
         </div>
         <button class="icon-add-btn" title="发起群聊" @click="handleCreateGroup">
@@ -20,7 +20,7 @@
         </button>
       </div>
 
-      <!-- 紧凑页签 (补齐样式) -->
+      <!-- 二级筛选（DingTalk 风格） -->
       <div class="sub-tabs-compact">
         <div
           v-for="tab in subMenuTabs"
@@ -30,18 +30,28 @@
           @click="handleFilterChange(tab.key)"
         >
           <span class="tab-label">{{ tab.label }}</span>
-          <span v-if="tab.count > 0" class="tab-badge">{{ tab.count }}</span>
+          <span v-if="tab.count > 0 || tab.key === 'all'" class="tab-badge">{{ tab.count }}</span>
         </div>
+      </div>
+
+      <div class="sub-stats">
+        <span>会话 {{ filterCounts.all }}</span>
+        <span>·</span>
+        <span>未读 {{ filterCounts.unread }}</span>
+        <span>·</span>
+        <span>@我 {{ filterCounts.mention }}</span>
+        <span>·</span>
+        <span>置顶 {{ filterCounts.pinned }}</span>
       </div>
     </div>
 
     <!-- 2. 会话列表 (极致流畅滚动) -->
     <div v-loading="loading" class="session-list custom-scrollbar">
       <div
-        v-for="session in sortedSessions"
+        v-for="session in filteredSessions"
         :key="session.id"
         class="session-item"
-        :class="{ active: currentSession?.id === session.id, pinned: session.isPinned }"
+        :class="{ active: currentSession?.id === session.id }"
         @click="$emit('select-session', session)"
         @contextmenu.prevent="handleContextMenu($event, session)"
       >
@@ -52,45 +62,45 @@
             :user-id="session.targetId"
             :is-group="session.type === 'GROUP'"
             :members="session.members || []"
-            :size="var(--dt-avatar-size-lg, 40)"
+            :size="sessionAvatarSize"
             shape="square"
           />
-          <span v-if="session.unreadCount > 0" class="unread-count-badge">
-            {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
+          <span
+            v-if="session.unreadCount > 0"
+            class="unread-count-badge"
+            :class="{ dot: session.unreadCount === 1 }"
+          >
+            <template v-if="session.unreadCount > 1">
+              {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
+            </template>
           </span>
         </div>
 
         <div class="item-content">
-          <div class="content-top">
-            <h3 class="session-name">
-              {{ session.name }}
-            </h3>
-            <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
-          </div>
-          <div class="content-bottom">
-            <div class="preview-wrapper">
-              <span v-if="session.hasMention" class="mention-text">[@提及]</span>
-              <span v-if="session.lastSenderNickname && session.type === 'GROUP'" class="sender-prefix">{{ session.lastSenderNickname }}: </span>
-              <span class="preview-msg">{{ session.lastMessage || '暂无消息' }}</span>
+        <div class="content-top">
+            <div class="session-name-row">
+              <h3 class="session-name">
+                {{ session.name }}
+              </h3>
             </div>
-            <div class="status-icons">
-              <el-icon v-if="session.isMuted" class="mute-icon">
-                <BellFilled />
-              </el-icon>
-            </div>
+          <span class="session-time">{{ formatTime(session.draftTime || session.lastMessageTime) }}</span>
+        </div>
+        <div class="content-bottom">
+          <div class="preview-wrapper">
+            <span class="preview-msg">{{ session.draftContent || session.lastMessage || '暂无消息' }}</span>
           </div>
         </div>
-        <div v-if="session.isPinned" class="pin-tag" />
+        </div>
       </div>
 
       <!-- 空状态 -->
-      <div v-if="!loading && sortedSessions.length === 0" class="empty-state">
+      <div v-if="!loading && filteredSessions.length === 0" class="empty-state">
         <span class="material-icons-outlined empty-icon">chat_bubble_outline</span>
         <p class="empty-text">
-          暂无会话
+          未找到会话
         </p>
         <p class="empty-hint">
-          开始对话或创建群聊吧
+          尝试更换关键词
         </p>
       </div>
     </div>
@@ -136,14 +146,14 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Plus, BellFilled, Check, Top, Delete } from '@element-plus/icons-vue'
+import { Search, Plus, Check, Top, Delete } from '@element-plus/icons-vue'
 import { ClickOutside as vClickOutside } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import CreateGroupDialog from '@/components/Chat/CreateGroupDialog.vue'
 
 defineProps({ currentSession: Object })
-defineEmits(['select-session', 'show-user'])
+const emit = defineEmits(['select-session', 'show-user'])
 const store = useStore()
 
 const loading = ref(false)
@@ -155,10 +165,12 @@ const showCreateGroupDialog = ref(false)
 const subMenuTabs = ref([
   { key: 'all', label: '全部', count: 0 },
   { key: 'unread', label: '未读', count: 0 },
+  { key: 'mention', label: '@me', count: 0 },
   { key: 'pinned', label: '置顶', count: 0 }
 ])
 
 const sessions = computed(() => store.state.im.session.sessions)
+const sessionAvatarSize = 40
 
 // 保存全部会话（用于统计各筛选类型的数量）
 const allSessions = ref([])
@@ -166,10 +178,16 @@ const allSessions = ref([])
 // 各筛选类型的数量
 const filterCounts = computed(() => {
   const all = allSessions.value
+  const unreadMessages = all.reduce((sum, s) => sum + (Number(s.unreadCount) || 0), 0)
   return {
     all: all.length,
     unread: all.filter(s => s.unreadCount > 0).length,
-    pinned: all.filter(s => s.isPinned).length
+    mention: all.filter(s => s.hasMention).length,
+    group: all.filter(s => s.type === 'GROUP').length,
+    private: all.filter(s => s.type === 'PRIVATE').length,
+    pinned: all.filter(s => s.isPinned).length,
+    muted: all.filter(s => s.isMuted).length,
+    unreadMessages
   }
 })
 
@@ -188,6 +206,17 @@ const sortedSessions = computed(() => {
     const timeA = new Date(a.lastMessageTime || 0).getTime()
     const timeB = new Date(b.lastMessageTime || 0).getTime()
     return timeB - timeA
+  })
+})
+
+const filteredSessions = computed(() => {
+  const keyword = searchKeyword.value.trim().toLowerCase()
+  if (!keyword) return sortedSessions.value
+  return sortedSessions.value.filter(s => {
+    const name = String(s.name || '').toLowerCase()
+    const last = String(s.lastMessage || '').toLowerCase()
+    const draft = String(s.draftContent || '').toLowerCase()
+    return name.includes(keyword) || last.includes(keyword) || draft.includes(keyword)
   })
 })
 
@@ -249,6 +278,7 @@ const handleEscKey = (e) => {
 
 const handleFilterChange = (key) => {
   activeFilter.value = key
+  localStorage.setItem('im_session_filter', key)
   // 始终保持 allSessions 为完整的会话列表用于计数
   if (key === 'all') {
     // 切换到"全部"时重新加载以确保最新
@@ -269,8 +299,16 @@ const handleFilterChange = (key) => {
       let filteredSess = allSess
       if (key === 'unread') {
         filteredSess = allSess.filter(s => s.unreadCount > 0)
+      } else if (key === 'mention') {
+        filteredSess = allSess.filter(s => s.hasMention)
+      } else if (key === 'group') {
+        filteredSess = allSess.filter(s => s.type === 'GROUP')
+      } else if (key === 'private') {
+        filteredSess = allSess.filter(s => s.type === 'PRIVATE')
       } else if (key === 'pinned') {
         filteredSess = allSess.filter(s => s.isPinned)
+      } else if (key === 'muted') {
+        filteredSess = allSess.filter(s => s.isMuted)
       }
       // 临时更新sessions用于显示
       store.commit('im/session/SET_SESSIONS', filteredSess)
@@ -298,6 +336,11 @@ const handleSearchSelect = (result) => {
     const session = sessions.value.find(s => s.id === result.sessionId)
     if (session) emit('select-session', session)
   }
+}
+
+const handleSearchEnter = () => {
+  if (!searchKeyword.value.trim()) return
+  showGlobalSearch.value = true
 }
 
 const doAction = (cmd) => {
@@ -332,6 +375,11 @@ onMounted(async () => {
     allSessions.value = store.state.im.session.sessions
     // 更新筛选计数
     updateFilterCounts()
+
+    const savedFilter = localStorage.getItem('im_session_filter')
+    if (savedFilter && subMenuTabs.value.some(t => t.key === savedFilter)) {
+      handleFilterChange(savedFilter)
+    }
   }
 })
 </script>
@@ -430,39 +478,75 @@ onMounted(async () => {
 // ============================================================================
 // 导航页签
 // ============================================================================
-.sub-tabs-compact {
-  display: flex;
-  gap: var(--dt-spacing-xs);
-  padding-bottom: var(--dt-spacing-xs);
-  border-bottom: 1px solid var(--dt-border-lighter);
-
-  .tab-pill {
-    padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
-    font-size: var(--dt-font-size-xs);
-    color: var(--dt-text-secondary);
-    border-radius: var(--dt-radius-full);
-    cursor: pointer;
+  .sub-tabs-compact {
     display: flex;
-    align-items: center;
-    gap: var(--dt-spacing-xs);
-    transition: all var(--dt-transition-fast);
+    gap: var(--dt-spacing-md);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--dt-border-lighter);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
 
-    &:hover { background: var(--dt-bg-session-hover); }
+    .tab-pill {
+      position: relative;
+      padding: 6px 0;
+      font-size: 13px;
+      color: var(--dt-text-secondary);
+      border-radius: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--dt-spacing-xs);
+      transition: all var(--dt-transition-fast);
+
+    &:hover { color: var(--dt-text-primary); }
     &.active {
-      background: var(--dt-brand-lighter);
       color: var(--dt-brand-color);
       font-weight: var(--dt-font-weight-medium);
     }
+    &.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 3px;
+      background: var(--dt-brand-color);
+      border-radius: 2px;
+    }
 
     .tab-badge {
-      background: var(--dt-error-color);
-      color: var(--dt-bg-card);
-      padding: 0 var(--dt-spacing-xs);
-      border-radius: var(--dt-radius-full);
-      font-size: var(--dt-font-size-xs);
-      transform: scale(0.85);
+      background: #f2f3f5;
+      color: var(--dt-text-tertiary);
+      padding: 0 6px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 16px;
+      height: 16px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    &.active .tab-badge {
+      background: var(--dt-brand-lighter);
+      color: var(--dt-brand-color);
     }
   }
+}
+
+.sub-tabs-compact::-webkit-scrollbar {
+  display: none;
+}
+
+.sub-stats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  row-gap: 4px;
+  margin-top: 6px;
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-tertiary);
 }
 
 // ============================================================================
@@ -499,90 +583,89 @@ onMounted(async () => {
   }
 }
 
-.session-item {
-  display: flex;
-  padding: var(--dt-spacing-md);
-  cursor: pointer;
-  position: relative;
-  transition: all var(--dt-transition-base);
-  border-bottom: 1px solid transparent;
+  .session-item {
+    display: flex;
+    height: 64px;
+    padding: 10px var(--dt-spacing-md);
+    cursor: pointer;
+    position: relative;
+    transition: all var(--dt-transition-base);
+    border-bottom: 1px solid transparent;
 
-  &:hover {
-    background: var(--dt-bg-session-hover);
-  }
-
-  &.active {
-    background: var(--dt-bg-session-active);
-    .session-name { color: var(--dt-brand-color); }
-  }
-
-  &.pinned {
-    background: var(--dt-bg-body);
-    border-left: 3px solid var(--dt-brand-color);
-
-    &::before {
-      content: '\e6a1'; // Element Plus 置顶图标
-      font-family: 'element-icons';
-      position: absolute;
-      top: var(--dt-spacing-xs, 4px);
-      right: var(--dt-spacing-xs, 4px);
-      font-size: var(--dt-font-size-xs);
-      color: var(--dt-brand-color);
-      opacity: 0.7;
+    &:hover {
+      background: #f6f7f9;
     }
 
-    .session-name::before {
-      content: '[置顶] ';
-      color: var(--dt-brand-color);
-      font-weight: 600;
-      font-size: var(--dt-font-size-sm);
+    &.active {
+      background: #E6F7FF;
+      border-left: 2px solid var(--dt-brand-color);
+      padding-left: calc(var(--dt-spacing-md) - 2px);
+      .session-name { color: var(--dt-brand-color); }
     }
-  }
+
 
   .item-avatar-wrapper {
     position: relative;
     flex-shrink: 0;
 
-    .unread-count-badge {
-      position: absolute;
-      top: calc(-1 * var(--dt-spacing-xs, 2px));
-      right: calc(-1 * var(--dt-spacing-xs, 2px));
-      background: var(--dt-error-color);
-      color: var(--dt-bg-card);
-      font-size: var(--dt-font-size-xs);
-      min-width: var(--dt-spacing-md, 16px);
-      height: var(--dt-spacing-md, 16px);
-      padding: 0 var(--dt-spacing-xs);
-      border-radius: var(--dt-radius-full);
-      @include flex-center;
-      border: 2px solid var(--dt-bg-session-list);
-      box-shadow: 0 2px 4px rgba(245, 74, 69, 0.2);
-      font-weight: 600;
-      z-index: 1;
-    }
+  .unread-count-badge {
+    position: absolute;
+    top: calc(-1 * var(--dt-spacing-xs, 2px));
+    right: calc(-1 * var(--dt-spacing-xs, 2px));
+    background: var(--dt-error-color);
+    color: var(--dt-bg-card);
+    font-size: var(--dt-font-size-xs);
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: var(--dt-radius-full);
+    @include flex-center;
+    border: 2px solid var(--dt-bg-session-list);
+    box-shadow: 0 2px 4px rgba(245, 74, 69, 0.2);
+    font-weight: 600;
+    z-index: 1;
+  }
+
+  .unread-count-badge.dot {
+    width: 8px;
+    min-width: 8px;
+    height: 8px;
+    padding: 0;
+    font-size: 0;
+    border: none;
+    box-shadow: none;
+  }
   }
 
   .item-content {
     flex: 1;
-    margin-left: var(--dt-spacing-md);
+    margin-left: var(--dt-spacing-sm);
     min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: var(--dt-spacing-xs, 2px);
+    gap: 2px;
 
-    .content-top {
+  .content-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    .session-name-row {
       display: flex;
-      justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
 
-      .session-name {
-        font-size: var(--dt-font-size-md);
-        font-weight: var(--dt-font-weight-medium);
-        color: var(--dt-text-primary);
-        margin: 0;
-        @include text-ellipsis;
-      }
+
+    .session-name {
+      font-size: var(--dt-font-size-base);
+      font-weight: var(--dt-font-weight-medium);
+      color: var(--dt-text-primary);
+      margin: 0;
+      @include text-ellipsis;
+    }
 
       .session-time {
         font-size: var(--dt-font-size-xs);
@@ -592,32 +675,27 @@ onMounted(async () => {
       }
     }
 
-    .content-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: var(--dt-spacing-xs, 2px);
-
-      .preview-wrapper {
+      .content-bottom {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: var(--dt-spacing-xs);
-        min-width: 0;
-        flex: 1;
-        font-size: var(--dt-font-size-sm);
-        color: var(--dt-text-tertiary);
-        line-height: 1.4;
-        @include text-ellipsis;
+        margin-top: 2px;
 
-        .mention-text { color: var(--dt-error-color); font-weight: 500; font-size: var(--dt-font-size-sm); }
-        .sender-prefix { color: var(--dt-text-secondary); }
-      }
+        .preview-wrapper {
+          display: flex;
+          align-items: center;
+          gap: var(--dt-spacing-xs);
+          min-width: 0;
+          flex: 1;
+          font-size: var(--dt-font-size-sm);
+          color: var(--dt-text-tertiary);
+          line-height: 1.3;
+          @include text-ellipsis;
 
-      .mute-icon {
-        font-size: var(--dt-icon-size-sm, 12px);
-        color: var(--dt-text-quaternary);
-        margin-left: var(--dt-spacing-xs);
-      }
+          .mention-text { color: var(--dt-error-color); font-weight: 500; font-size: var(--dt-font-size-sm); }
+          .draft-text { color: var(--dt-error-color); font-weight: 500; }
+          .sender-prefix { color: var(--dt-text-secondary); }
+        }
     }
   }
 }

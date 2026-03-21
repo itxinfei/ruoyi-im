@@ -14,6 +14,17 @@
         >
         <span v-if="keyword" class="material-icons-outlined clear-icon" @click="clearSearch">close</span>
       </div>
+      <div class="search-scope">
+        <div class="scope-tabs">
+          <button :class="{ active: scopeMode === 'global' }" @click="setScopeMode('global')">全局</button>
+          <button :class="{ active: scopeMode === 'session' }" @click="setScopeMode('session')">会话内</button>
+        </div>
+        <div v-if="scopeMode === 'session'" class="scope-tip">
+          <span>当前会话</span>
+          <span v-if="scopeSession?.name" class="scope-name">{{ scopeSession.name }}</span>
+          <button class="scope-clear" @click="clearScope">清除</button>
+        </div>
+      </div>
       <div class="search-type-tabs">
         <div
           v-for="tab in searchTabs"
@@ -66,7 +77,7 @@
                 class="result-item"
                 @click="goToMessage(msg)"
               >
-                <DingtalkAvatar :src="msg.senderAvatar" :name="msg.senderName" :size="var(--dt-avatar-size-md, 36)" />
+                <DingtalkAvatar :src="msg.senderAvatar" :name="msg.senderName" :size="36" />
                 <div class="item-content">
                   <div class="item-title">
                     {{ msg.senderName }}
@@ -78,6 +89,11 @@
                     {{ formatTime(msg.createTime) }}
                   </div>
                 </div>
+                <button
+                  v-if="scopeMode === 'session'"
+                  class="locate-btn"
+                  @click.stop="locateMessage(msg)"
+                >定位</button>
               </div>
             </div>
           </div>
@@ -96,7 +112,7 @@
                 class="result-item"
                 @click="goToContact(contact)"
               >
-                <DingtalkAvatar :src="contact.avatar" :name="contact.nickname" :size="var(--dt-avatar-size-md, 36)" />
+                <DingtalkAvatar :src="contact.avatar" :name="contact.nickname" :size="36" />
                 <div class="item-content">
                   <div class="item-title">
                     {{ contact.nickname }}
@@ -184,7 +200,7 @@
               @click="handleItemClick(item)"
             >
               <template v-if="searchType === 'message'">
-                <DingtalkAvatar :src="item.senderAvatar" :name="item.senderName" :size="var(--dt-avatar-size-md, 36)" />
+                <DingtalkAvatar :src="item.senderAvatar" :name="item.senderName" :size="36" />
                 <div class="item-content">
                   <div class="item-title">
                     {{ item.senderName }}
@@ -198,7 +214,7 @@
                 </div>
               </template>
               <template v-else-if="searchType === 'contact'">
-                <DingtalkAvatar :src="item.avatar" :name="item.nickname" :size="var(--dt-avatar-size-md, 36)" />
+                <DingtalkAvatar :src="item.avatar" :name="item.nickname" :size="36" />
                 <div class="item-content">
                   <div class="item-title">
                     {{ item.nickname }}
@@ -247,7 +263,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { globalSearch, getHotKeywords } from '@/api/im/search'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
@@ -260,6 +276,8 @@ const loading = ref(false)
 const searched = ref(false)
 const hotKeywords = ref([])
 const results = ref({})
+const scopeSession = ref(null)
+const scopeMode = ref('global')
 
 const searchTabs = [
   { label: '全部', value: 'all' },
@@ -305,10 +323,15 @@ const handleSearch = async () => {
   try {
     const res = await globalSearch({
       keyword: keyword.value.trim(),
-      searchType: searchType.value
+      searchType: searchType.value,
+      conversationId: scopeMode.value === 'session' ? (scopeSession.value?.sessionId || undefined) : undefined
     })
     if (res.code === 200) {
-      results.value = res.data || {}
+      const data = res.data || {}
+      if (scopeMode.value === 'session' && scopeSession.value?.sessionId && Array.isArray(data.messages)) {
+        data.messages = data.messages.filter(m => String(m.conversationId || m.sessionId || '') === String(scopeSession.value.sessionId))
+      }
+      results.value = data
     } else {
       ElMessage.error(res.msg || '搜索失败')
     }
@@ -338,6 +361,33 @@ const clearSearch = () => {
   results.value = {}
 }
 
+const loadScope = () => {
+  try {
+    const raw = localStorage.getItem('im_search_scope_session')
+    if (raw) scopeSession.value = JSON.parse(raw)
+  } catch {}
+}
+
+const loadKeyword = () => {
+  try {
+    const raw = localStorage.getItem('im_search_keyword')
+    if (raw) keyword.value = raw
+  } catch {}
+}
+
+const clearScope = () => {
+  scopeSession.value = null
+  localStorage.removeItem('im_search_scope_session')
+}
+
+const setScopeMode = (mode) => {
+  scopeMode.value = mode
+  if (mode === 'session' && !scopeSession.value) {
+    ElMessage.info('请从会话详情进入以限定范围')
+  }
+  if (keyword.value.trim()) handleSearch()
+}
+
 const handleItemClick = (item) => {
   if (searchType.value === 'message') {
     emit('go-to-session', { targetId: item.senderId, type: 'PRIVATE' })
@@ -352,6 +402,11 @@ const goToMessage = (msg) => {
   emit('go-to-session', { targetId: msg.senderId, type: 'PRIVATE' })
 }
 
+const locateMessage = (msg) => {
+  if (!scopeSession.value?.sessionId) return
+  emit('go-to-session', { targetId: scopeSession.value.sessionId, type: 'SESSION', messageId: msg.id || msg.messageId })
+}
+
 const goToContact = (contact) => {
   emit('show-user', contact.userId)
 }
@@ -359,6 +414,13 @@ const goToContact = (contact) => {
 const goToGroup = (group) => {
   emit('go-to-group', group.groupId)
 }
+
+onMounted(() => {
+  loadScope()
+  loadKeyword()
+  if (scopeSession.value?.sessionId) scopeMode.value = 'session'
+  if (keyword.value.trim()) handleSearch()
+})
 
 const downloadFile = (file) => {
   window.open(file.fileUrl)
@@ -465,6 +527,56 @@ loadHotKeywords()
       color: var(--dt-text-primary);
     }
   }
+}
+
+.search-scope {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scope-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.scope-tabs button {
+  border: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-body);
+  color: var(--dt-text-secondary);
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.scope-tabs button.active {
+  background: var(--dt-brand-lighter);
+  color: var(--dt-brand-color);
+  border-color: var(--dt-brand-light);
+}
+
+.scope-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scope-name {
+  color: var(--dt-text-secondary);
+}
+
+.scope-clear {
+  border: none;
+  background: var(--dt-brand-lighter);
+  color: var(--dt-brand-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
 }
 
 .search-content {
@@ -588,6 +700,17 @@ loadHotKeywords()
       }
     }
   }
+}
+
+.locate-btn {
+  margin-left: auto;
+  border: none;
+  background: var(--dt-brand-lighter);
+  color: var(--dt-brand-color);
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 .empty-results {

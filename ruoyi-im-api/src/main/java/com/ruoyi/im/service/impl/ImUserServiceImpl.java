@@ -57,6 +57,7 @@ public class ImUserServiceImpl implements ImUserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final ImRedisUtil imRedisUtil;
+    private final com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
 
     @Value("${file.upload.path}")
     private String uploadPath;
@@ -78,11 +79,13 @@ public class ImUserServiceImpl implements ImUserService {
     public ImUserServiceImpl(ImUserMapper imUserMapper,
                               PasswordEncoder passwordEncoder,
                               JwtUtils jwtUtils,
-                              ImRedisUtil imRedisUtil) {
+                              ImRedisUtil imRedisUtil,
+                              com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService) {
         this.imUserMapper = imUserMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.imRedisUtil = imRedisUtil;
+        this.broadcastService = broadcastService;
     }
 
     @Override
@@ -437,5 +440,21 @@ public class ImUserServiceImpl implements ImUserService {
         }
 
         return voList;
+    }
+
+    @Override
+    public void updateUserPresenceStatus(Long userId, String presenceStatus) {
+        ImUser user = imUserMapper.selectImUserById(userId);
+        if (user == null) return;
+
+        user.setUserStatus(presenceStatus);
+        user.setStatusUpdateTime(LocalDateTime.now());
+        imUserMapper.updateImUser(user);
+
+        // 触发 WebSocket 广播，告知其他用户状态变更
+        broadcastService.broadcastUserStatusChange(userId, presenceStatus);
+
+        // 清除缓存，确保下次获取的是最新状态
+        imRedisUtil.evictUserInfo(userId);
     }
 }

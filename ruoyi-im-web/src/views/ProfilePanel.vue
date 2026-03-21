@@ -8,7 +8,7 @@
           <DingtalkAvatar
             :src="userInfo.avatar"
             :name="userInfo.nickname"
-            :size="var(--dt-avatar-size-xl, 80)"
+            :size="80"
             shape="square"
           />
           <div class="avatar-mask">

@@ -11,7 +11,10 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
 import com.ruoyi.im.mapper.ImGroupMapper;
+import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.mapper.ImMessageMarkerMapper;
+import com.ruoyi.im.mapper.ImMessageMentionMapper;
 import com.ruoyi.im.mapper.ImUserSessionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
@@ -41,9 +44,12 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     private final ImConversationMapper imConversationMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
+    private final ImGroupMemberMapper imGroupMemberMapper;
     private final ImUserSessionMapper imUserSessionMapper;
     private final ImUserMapper imUserMapper;
     private final ImMessageMapper imMessageMapper;
+    private final ImMessageMentionMapper imMessageMentionMapper;
+    private final ImMessageMarkerMapper imMessageMarkerMapper;
     private final ImRedisUtil imRedisUtil;
     private final ImGroupMapper imGroupMapper;
     private final com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
@@ -53,17 +59,23 @@ public class ImConversationServiceImpl implements ImConversationService {
      */
     public ImConversationServiceImpl(ImConversationMapper imConversationMapper,
             ImConversationMemberMapper imConversationMemberMapper,
+            ImGroupMemberMapper imGroupMemberMapper,
             ImUserSessionMapper imUserSessionMapper,
             ImUserMapper imUserMapper,
             ImMessageMapper imMessageMapper,
+            ImMessageMentionMapper imMessageMentionMapper,
+            ImMessageMarkerMapper imMessageMarkerMapper,
             ImRedisUtil imRedisUtil,
             ImGroupMapper imGroupMapper,
             com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
         this.imConversationMapper = imConversationMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
+        this.imGroupMemberMapper = imGroupMemberMapper;
         this.imUserSessionMapper = imUserSessionMapper;
         this.imUserMapper = imUserMapper;
         this.imMessageMapper = imMessageMapper;
+        this.imMessageMentionMapper = imMessageMentionMapper;
+        this.imMessageMarkerMapper = imMessageMarkerMapper;
         this.imRedisUtil = imRedisUtil;
         this.imGroupMapper = imGroupMapper;
         this.encryptionUtil = encryptionUtil;
@@ -97,13 +109,18 @@ public class ImConversationServiceImpl implements ImConversationService {
                 case "muted":
                     match = Boolean.TRUE.equals(vo.getIsMuted());
                     break;
+                case "mention":
+                case "@me":
+                    match = Boolean.TRUE.equals(vo.getHasMention());
+                    break;
                 case "group":
                     match = "GROUP".equalsIgnoreCase(vo.getType());
                     break;
                 case "file":
-                    // 文件筛选：最后消息类型为FILE或IMAGE
-                    String lastMsgType = vo.getLastMessageType();
-                    match = "FILE".equalsIgnoreCase(lastMsgType) || "IMAGE".equalsIgnoreCase(lastMsgType);
+                    // 文件筛选：最后消息类型包含文件、图片、视频、语音
+                    String type = vo.getLastMessageType();
+                    match = "FILE".equalsIgnoreCase(type) || "IMAGE".equalsIgnoreCase(type)
+                            || "VIDEO".equalsIgnoreCase(type) || "VOICE".equalsIgnoreCase(type);
                     break;
                 default:
                     match = true;
@@ -183,11 +200,75 @@ public class ImConversationServiceImpl implements ImConversationService {
             }
         }
 
+        // 批量查询：获取用户所有未读的 @ 提及会话ID
+        List<Long> unreadMentionConvIds = imMessageMentionMapper.selectUnreadMentionConversationIds(userId);
+        if (unreadMentionConvIds == null) {
+            unreadMentionConvIds = new java.util.ArrayList<>();
+        }
+
+        // 批量查询：获取当前用户的所有会话状态（置顶、免打扰、草稿等）
+        List<ImUserSession> userSessions = imUserSessionMapper.selectByUserId(userId);
+        java.util.Map<Long, ImUserSession> sessionMap = new java.util.HashMap<>();
+        if (userSessions != null) {
+            for (ImUserSession session : userSessions) {
+                sessionMap.put(session.getConversationId(), session);
+            }
+        }
+
+        // 批量查询：获取所有会话的置顶消息（PIN）标记
+        java.util.List<ImMessageMarker> pinMarkers = imMessageMarkerMapper.selectList(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImMessageMarker>()
+                        .eq(ImMessageMarker::getMarkerType, "CONV_PIN")
+                        .in(ImMessageMarker::getConversationId, conversationIds)
+        );
+        java.util.Map<Long, Long> convPinnedMsgIdMap = new java.util.HashMap<>();
+        java.util.Set<Long> pinnedMessageIds = new java.util.HashSet<>();
+        if (pinMarkers != null) {
+            for (ImMessageMarker marker : pinMarkers) {
+                convPinnedMsgIdMap.put(marker.getConversationId(), marker.getMessageId());
+                pinnedMessageIds.add(marker.getMessageId());
+            }
+        }
+
+        // 批量查询：获取置顶消息的具体内容
+        java.util.Map<Long, ImMessage> pinnedMessageMap = new java.util.HashMap<>();
+        if (!pinnedMessageIds.isEmpty()) {
+            List<ImMessage> pinnedMessages = imMessageMapper.selectBatchIds(new java.util.ArrayList<>(pinnedMessageIds));
+            for (ImMessage msg : pinnedMessages) {
+                pinnedMessageMap.put(msg.getId(), msg);
+            }
+        }
+
         // 组装VO数据
         List<ImConversationVO> voList = new ArrayList<>();
         java.util.Map<Long, ImConversationVO> privateConversationMap = new java.util.HashMap<>();
 
         for (ImConversationVO vo : conversations) {
+            // 设置是否有未读 @ 提及
+            vo.setHasMention(unreadMentionConvIds.contains(vo.getId()));
+
+            // 设置草稿内容
+            ImUserSession session = sessionMap.get(vo.getId());
+            if (session != null) {
+                vo.setDraft(session.getDraftContent());
+                // 同时同步下置顶和免打扰状态，确保以 user_session 表为准
+                vo.setIsPinned(session.getIsPinned());
+                vo.setIsMuted(session.getIsMuted());
+            }
+
+            // 设置置顶消息（PIN）
+            Long pinnedMsgId = convPinnedMsgIdMap.get(vo.getId());
+            if (pinnedMsgId != null) {
+                ImMessage pinnedMsg = pinnedMessageMap.get(pinnedMsgId);
+                if (pinnedMsg != null) {
+                    com.ruoyi.im.vo.message.ImMessageVO pinnedVO = new com.ruoyi.im.vo.message.ImMessageVO();
+                    BeanUtils.copyProperties(pinnedMsg, pinnedVO);
+                    // 解密
+                    pinnedVO.setContent(encryptionUtil.decryptMessage(pinnedMsg.getContent()));
+                    vo.setPinnedMessage(pinnedVO);
+                }
+            }
+
             // 设置最后消息
             ImMessage lastMessage = lastMessageMap.get(vo.getId());
             if (lastMessage != null) {
@@ -353,8 +434,74 @@ public class ImConversationServiceImpl implements ImConversationService {
             imConversationMemberMapper.updateLastReadMessageId(conversationId, userId, lastMessage.getId());
         }
 
+        // 同时标记会话中的所有针对该用户的@提及为已读
+        imMessageMentionMapper.markAsReadByConversation(conversationId, userId);
+
         // 清除缓存
         clearConversationListCache(userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDraft(Long userId, Long conversationId, String draftContent) {
+        imUserSessionMapper.updateDraft(userId, conversationId, draftContent);
+        // 清除列表缓存，确保下次加载能看到草稿
+        clearConversationListCache(userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void pinMessage(Long conversationId, Long messageId, Long userId) {
+        // 权限校验：如果是群聊，只有群主或管理员可以置顶
+        assertConversationAdmin(conversationId, userId);
+
+        // 删除该会话原有的置顶记录
+        imMessageMarkerMapper.delete(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImMessageMarker>()
+                        .eq(ImMessageMarker::getConversationId, conversationId)
+                        .eq(ImMessageMarker::getMarkerType, "CONV_PIN")
+        );
+
+        // 插入新的置顶记录
+        ImMessageMarker marker = new ImMessageMarker();
+        marker.setConversationId(conversationId);
+        marker.setMessageId(messageId);
+        marker.setUserId(userId);
+        marker.setMarkerType("CONV_PIN");
+        marker.setCreateTime(java.time.LocalDateTime.now());
+        imMessageMarkerMapper.insert(marker);
+
+        // 清除缓存
+        clearConversationListCache(userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void unpinMessage(Long conversationId, Long userId) {
+        assertConversationAdmin(conversationId, userId);
+
+        imMessageMarkerMapper.delete(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImMessageMarker>()
+                        .eq(ImMessageMarker::getConversationId, conversationId)
+                        .eq(ImMessageMarker::getMarkerType, "CONV_PIN")
+        );
+
+        clearConversationListCache(userId);
+    }
+
+    /**
+     * 校验用户是否有权操作会话（管理权限）
+     */
+    private void assertConversationAdmin(Long conversationId, Long userId) {
+        ImConversation conv = imConversationMapper.selectById(conversationId);
+        if (conv == null) return;
+
+        if ("GROUP".equalsIgnoreCase(conv.getType())) {
+            com.ruoyi.im.domain.ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(conv.getTargetId(), userId);
+            if (member == null || (!"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole()))) {
+                throw new com.ruoyi.im.exception.BusinessException("只有群主或管理员可以置顶消息");
+            }
+        }
     }
 
     @Override
@@ -407,6 +554,9 @@ public class ImConversationServiceImpl implements ImConversationService {
         // 将未读消息数设为0（新表 + 旧表）
         imUserSessionMapper.updateUnreadCount(userId, conversationId, 0);
         imConversationMemberMapper.updateUnreadCount(conversationId, userId, 0);
+
+        // 同时标记会话中的所有针对该用户的@提及为已读
+        imMessageMentionMapper.markAsReadByConversation(conversationId, userId);
 
         // 清除缓存
         clearConversationListCache(userId);

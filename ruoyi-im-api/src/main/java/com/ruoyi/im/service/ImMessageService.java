@@ -71,6 +71,14 @@ public interface ImMessageService {
     Long forwardMessage(Long messageId, Long toConversationId, Long toUserId, String content, Long userId);
 
     /**
+     * 批量/合并转发消息
+     *
+     * @param request 批量转发请求
+     * @param userId  操作用户ID
+     */
+    void batchForward(com.ruoyi.im.dto.message.ImMessageBatchForwardRequest request, Long userId);
+
+    /**
      * 引用/回复消息
      *
      * @param messageId 原消息ID

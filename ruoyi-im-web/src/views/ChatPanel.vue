@@ -41,10 +41,13 @@
             :loading="loading"
             :session-type="session?.type"
             :conversation-id="session?.id"
+            :jumping="jumpLoading"
+            :highlighted-id="highlightedId"
             @command="handleMessageCommand"
             @load-more="handleLoadMore"
             @show-user="handleShowUserProfile"
             @retry="handleRetryMessage"
+            @jump="handleJumpToMessage"
           />
 
           <!-- 输入框 -->
@@ -101,7 +104,7 @@ import { initiateCall } from '@/api/im/videoCall'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const props = defineProps({ session: Object })
-const emit = defineEmits(['show-user', 'create-group'])
+const emit = defineEmits(['show-user', 'create-group', 'toggle-detail'])
 const store = useStore()
 const currentUser = computed(() => store.getters['user/currentUser'])
 const messages = ref([])
@@ -112,8 +115,11 @@ const showUserDetail = ref(false)
 const showGroupDetail = ref(false)
 const activeUserId = ref(null)
 const showGlobalSearch = ref(false)
+const jumpLoading = ref(false)
+const highlightedId = ref(null)
 
 const msgListRef = ref(null)
+const messageInputRef = ref(null)
 const callDialogRef = ref(null)
 const forwardDialogRef = ref(null)
 const isTyping = ref(false) // 对方正在输入状态
@@ -132,7 +138,16 @@ const loadHistory = async () => {
     ElMessage.error('加载历史消息失败，请重试')
   } finally {
     loading.value = false
-    nextTick(() => msgListRef.value?.scrollToBottom())
+    nextTick(() => {
+      const jumpId = getPendingJump(props.session.id)
+      if (jumpId) {
+        msgListRef.value?.scrollToMessage(jumpId)
+        highlightedId.value = jumpId
+        setTimeout(() => { highlightedId.value = null }, 2000)
+      } else {
+        msgListRef.value?.scrollToBottom()
+      }
+    })
   }
 }
 
@@ -232,19 +247,11 @@ const handleCallEvent = (data) => {
 
 const handleHeaderClick = () => {
   if (!props.session) return
-
-  if (props.session.type === 'GROUP') {
-    showGroupDetail.value = true
-  } else {
-    // 优先使用 peerUserId，其次使用 targetId
-    activeUserId.value = props.session.peerUserId || props.session.targetId
-    showUserDetail.value = true
-  }
+  emit('toggle-detail')
 }
 
 const handleShowProfile = () => {
-  // 点击头像同样打开详情，与点击名称区域一致
-  handleHeaderClick()
+  emit('toggle-detail')
 }
 
 const handleShowUserProfile = (userId) => {
@@ -347,14 +354,127 @@ const handleStartCallFromProfile = async (p) => {
 const handleOpenSearch = () => { showGlobalSearch.value = true }
 const handleSearchSelect = (res) => { if (res.messageId) msgListRef.value?.scrollToMessage(res.messageId) }
 
+const findMessageIndex = (messageId) => {
+  const idStr = String(messageId)
+  return messages.value.findIndex(m => String(m.messageId || m.id) === idStr)
+}
+
+const loadMoreForJump = async () => {
+  if (loading.value || !props.session?.id) return []
+  const lastMessage = messages.value.length > 0 ? messages.value[0] : null
+  const lastMessageId = lastMessage?.id || lastMessage?.messageId
+  if (!lastMessageId) return []
+
+  loading.value = true
+  try {
+    const res = await store.dispatch('im/message/loadMessages', {
+      sessionId: props.session.id,
+      lastMessageId,
+      pageSize: 50,
+      isLoadMore: true
+    })
+
+    if (res && res.length > 0) {
+      const newMessages = (res || []).map(m => ({
+        ...m,
+        isOwn: m.senderId === currentUser.value?.id || m.isSelf
+      }))
+      messages.value = [...newMessages, ...messages.value]
+    }
+    return res || []
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleJumpToMessage = async (messageId) => {
+  if (!messageId || jumpLoading.value) return
+  jumpLoading.value = true
+
+  try {
+    let idx = findMessageIndex(messageId)
+    if (idx !== -1) {
+      msgListRef.value?.scrollToMessage(messageId)
+      highlightedId.value = messageId
+      setTimeout(() => { highlightedId.value = null }, 2000)
+      return
+    }
+
+    // 逐页加载历史消息直到找到或无更多
+    const maxTries = 8
+    for (let i = 0; i < maxTries; i++) {
+      const batch = await loadMoreForJump()
+      if (!batch || batch.length === 0) break
+      idx = findMessageIndex(messageId)
+      if (idx !== -1) {
+        msgListRef.value?.scrollToMessage(messageId)
+        highlightedId.value = messageId
+        setTimeout(() => { highlightedId.value = null }, 2000)
+        return
+      }
+    }
+
+    ElMessage.info('未找到引用消息，可能已被清理')
+  } finally {
+    jumpLoading.value = false
+  }
+}
+
+const getPendingJump = (sessionId) => {
+  try {
+    const raw = localStorage.getItem('im_jump_message')
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (String(data.sessionId) === String(sessionId)) {
+      localStorage.removeItem('im_jump_message')
+      return data.messageId
+    }
+  } catch {}
+  return null
+}
+
 const handleSend = async (payload) => {
   const msg = await store.dispatch('im/message/sendMessage', { sessionId: props.session.id, ...payload })
-  if (msg) { msg.isOwn = true; messages.value.push(msg); nextTick(() => msgListRef.value?.scrollToBottom()) }
+  if (msg) {
+    msg.isOwn = true
+    messages.value.push(msg)
+    store.dispatch('im/session/clearDraft', props.session.id)
+    nextTick(() => msgListRef.value?.scrollToBottom())
+  }
 }
 
 const handleMessageCommand = (c, m) => {
-  if (c === 'forward') forwardDialogRef.value?.open(m)
-  else if (c === 'recall') store.dispatch('im/message/recallMessage', { sessionId: props.session.id, messageId: m.id })
+  if (c === 'reply') {
+    store.dispatch('im/message/setReplyingMessage', m)
+  } else if (c === 'copy') {
+    let text = ''
+    if (m?.type === 'TEXT') {
+      text = m?.content || ''
+    } else if (m?.type === 'LINK') {
+      try {
+        const data = JSON.parse(m?.content || '{}')
+        text = data.url || ''
+      } catch (e) {
+        text = ''
+      }
+    } else {
+      ElMessage.info('仅支持复制文本/链接')
+      return
+    }
+    if (!text) {
+      ElMessage.info('无可复制内容')
+      return
+    }
+    navigator.clipboard?.writeText(text).then(() => {
+      ElMessage.success('已复制')
+    }).catch(() => {
+      ElMessage.error('复制失败')
+    })
+  } else if (c === 'forward') {
+    forwardDialogRef.value?.open(m)
+  } else if (c === 'recall') {
+    store.dispatch('im/message/recallMessage', { sessionId: props.session.id, messageId: m.id })
+  }
 }
 
 const handleClearMessages = () => {
@@ -678,7 +798,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-.chat-panel-container { height: 100%; flex: 1; min-width: 0; background: var(--dt-bg-card); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+.chat-panel-container { height: 100%; flex: 1; min-width: var(--dt-chat-min-width, 400px); background: var(--dt-bg-card); display: flex; flex-direction: column; overflow: hidden; position: relative; }
 .welcome-logo-box { width: var(--dt-logo-size); height: var(--dt-logo-size); background: var(--dt-brand-color); border-radius: var(--dt-radius-xl); color: var(--dt-text-primary); font-size: var(--dt-font-size-2xl); font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--dt-spacing-xl); box-shadow: var(--dt-shadow-3); }
 .chat-main-canvas { height: 100%; width: 100%; display: flex; flex-direction: column; overflow: hidden; &__body { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; background: var(--dt-bg-chat); overflow: hidden; } }
 .chat-input-area { flex-shrink: 0; background: var(--dt-bg-card); border-top: 1px solid var(--dt-border-light); min-height: var(--dt-chat-input-height); z-index: 10; display: flex; flex-direction: column; }

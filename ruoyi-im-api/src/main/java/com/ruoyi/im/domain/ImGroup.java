@@ -70,6 +70,10 @@ public class ImGroup implements Serializable {
     @TableField("show_member_list")
     private Integer showMemberList;
 
+    /** 全员禁言：0=否 1=是 */
+    @TableField("all_muted")
+    private Integer allMuted;
+
     // ==================== 非数据库字段 ====================
 
     /** 群公告 */
@@ -87,10 +91,6 @@ public class ImGroup implements Serializable {
     /** 群组类型 */
     @TableField(exist = false)
     private String type;
-
-    /** 全员禁言：0=否 1=是 */
-    @TableField("all_muted")
-    private Integer allMuted;
 
     /** 群主名称 */
     @TableField(exist = false)

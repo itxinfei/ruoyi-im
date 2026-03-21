@@ -1,5 +1,8 @@
 <template>
   <div ref="listRef" class="message-list" @scroll="handleScroll">
+    <div v-if="jumping" class="jumping-status">
+      正在定位消息...
+    </div>
     <div v-if="loading" class="loading-status">
       加载中...
     </div>
@@ -12,6 +15,7 @@
           v-for="(msg, index) in visibleMessages"
           :key="msg.id || msg.timestamp"
           class="message-item-wrapper"
+          :class="getSpacingClass(getActualIndex(index))"
         >
           <!-- 时间分割线 -->
           <div v-if="showTimeDivider(msg, getActualIndex(index))" class="time-divider">
@@ -20,11 +24,15 @@
 
           <MessageItem
             :message="msg"
+            :session-type="sessionType"
+            :highlighted="highlightedId === (msg.messageId || msg.id)"
             @show-user="(uid) => $emit('show-user', uid)"
             @retry="(msg) => $emit('retry', msg)"
+            @command="(c, m) => $emit('command', c, m)"
+            @context="handleContextMenu"
           >
             <template #bubble>
-              <MessageBubble :message="msg" />
+              <MessageBubble :message="msg" @jump="(id) => $emit('jump', id)" />
             </template>
           </MessageItem>
         </div>
@@ -40,17 +48,36 @@
       <el-icon><ArrowDown /></el-icon>
       <span>回到底部</span>
     </div>
+
+    <!-- 右键菜单 -->
+    <teleport to="body">
+      <div
+        v-if="contextMenu.show"
+        class="msg-context-menu"
+        :style="contextMenuStyle"
+        @click.stop
+      >
+        <div class="menu-item" @click="emitMenuCommand('reply')">回复</div>
+        <div class="menu-item" @click="emitMenuCommand('copy')">复制</div>
+        <div class="menu-item" @click="emitMenuCommand('forward')">转发</div>
+        <div
+          v-if="contextMenu.message?.isOwn"
+          class="menu-item danger"
+          @click="emitMenuCommand('recall')"
+        >撤回</div>
+      </div>
+    </teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick, watch, reactive, computed, onUnmounted } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import MessageItem from './MessageItem.vue'
 import MessageBubble from './MessageBubble.vue'
 
-const props = defineProps({ messages: Array, loading: Boolean })
-const emit = defineEmits(['load-more', 'show-user', 'retry'])
+const props = defineProps({ messages: Array, loading: Boolean, sessionType: String, jumping: Boolean, highlightedId: [String, Number] })
+const emit = defineEmits(['load-more', 'show-user', 'retry', 'command', 'jump'])
 
 const listRef = ref(null)
 const showScrollBottom = ref(false)
@@ -141,6 +168,14 @@ const getActualIndex = (relativeIndex) => {
   return startIndex.value + relativeIndex
 }
 
+const getSpacingClass = (absoluteIndex) => {
+  if (absoluteIndex <= 0) return 'spacing-none'
+  const prev = props.messages?.[absoluteIndex - 1]
+  const curr = props.messages?.[absoluteIndex]
+  if (!prev || !curr) return 'spacing-none'
+  return prev.isOwn === curr.isOwn ? 'spacing-small' : 'spacing-large'
+}
+
 const getItemHeight = (index) => {
   const actualIndex = getActualIndex(index)
   if (actualIndex >= 0 && actualIndex < props.messages.length) {
@@ -190,6 +225,17 @@ const scrollToBottom = () => {
   })
 }
 
+const scrollToMessage = (messageId) => {
+  if (!listRef.value || !props.messages?.length) return
+  const index = props.messages.findIndex(m => (m.messageId || m.id) === messageId)
+  if (index === -1) return
+  const top = props.messages.slice(0, index).reduce((total, msg) => {
+    return total + calculateMessageHeight(msg)
+  }, 0)
+  listRef.value.scrollTop = top
+  updateVirtualScroll()
+}
+
 const handleScroll = (e) => {
   const { scrollTop, scrollHeight, clientHeight } = e.target
   showScrollBottom.value = scrollHeight - scrollTop - clientHeight > 300
@@ -197,6 +243,44 @@ const handleScroll = (e) => {
 
   // 更新虚拟滚动
   updateVirtualScroll()
+}
+
+const contextMenu = reactive({ show: false, x: 0, y: 0, message: null })
+const contextMenuStyle = computed(() => ({ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }))
+
+const handleContextMenu = ({ x, y, message }) => {
+  const menuWidth = 120
+  const menuHeight = message?.isOwn ? 120 : 80
+  const windowWidth = window.innerWidth
+  const windowHeight = window.innerHeight
+
+  let posX = x
+  let posY = y
+  if (posX + menuWidth > windowWidth) posX = windowWidth - menuWidth - 8
+  if (posY + menuHeight > windowHeight) posY = windowHeight - menuHeight - 8
+
+  contextMenu.show = true
+  contextMenu.x = posX
+  contextMenu.y = posY
+  contextMenu.message = message
+
+  document.addEventListener('click', closeContextMenu, { once: true })
+  document.addEventListener('keydown', handleEsc)
+}
+
+const closeContextMenu = () => {
+  contextMenu.show = false
+  document.removeEventListener('keydown', handleEsc)
+}
+
+const handleEsc = (e) => {
+  if (e.key === 'Escape') closeContextMenu()
+}
+
+const emitMenuCommand = (cmd) => {
+  const msg = contextMenu.message
+  closeContextMenu()
+  if (msg) emit('command', cmd, msg)
 }
 
 watch(() => props.messages?.length, (newLength, oldLength) => {
@@ -220,7 +304,11 @@ onMounted(() => {
   updateVirtualScroll()
   scrollToBottom()
 })
-defineExpose({ scrollToBottom, listRef })
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEsc)
+})
+defineExpose({ scrollToBottom, scrollToMessage, listRef })
 </script>
 
 <style scoped lang="scss">
@@ -228,9 +316,13 @@ defineExpose({ scrollToBottom, listRef })
   flex: 1;
   overflow-y: auto;
   background: var(--dt-bg-chat);
-  padding: var(--dt-spacing-lg) var(--dt-spacing-md);
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   position: relative;
 }
+
+.message-item-wrapper.spacing-none { margin-top: 0; }
+.message-item-wrapper.spacing-small { margin-top: 4px; }
+.message-item-wrapper.spacing-large { margin-top: 16px; }
 
 .message-flow {
   display: flex;
@@ -243,9 +335,9 @@ defineExpose({ scrollToBottom, listRef })
   align-items: center;
   justify-content: center;
   gap: var(--dt-spacing-md);
-  margin: var(--dt-spacing-lg) 0;
-  font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-quaternary);
+  margin: var(--dt-spacing-md) 0;
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-tertiary);
 
   &::before,
   &::after {
@@ -268,6 +360,15 @@ defineExpose({ scrollToBottom, listRef })
   padding: var(--dt-spacing-md);
   font-size: var(--dt-font-size-sm);
   color: var(--dt-text-tertiary);
+}
+
+.jumping-status {
+  text-align: center;
+  padding: var(--dt-spacing-sm);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-brand-color);
+  background: var(--dt-brand-lighter);
+  border-bottom: 1px solid var(--dt-border-light);
 }
 
 .new-msg-tip {
@@ -295,5 +396,38 @@ defineExpose({ scrollToBottom, listRef })
   .el-icon {
     font-size: var(--dt-icon-size-sm, 14px);
   }
+}
+
+.msg-context-menu {
+  position: fixed;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-sm);
+  min-width: 120px;
+  padding: 4px;
+  z-index: var(--dt-z-popover);
+  box-shadow: var(--dt-shadow-2);
+}
+
+.msg-context-menu .menu-item {
+  padding: 6px 10px;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-primary);
+  border-radius: var(--dt-radius-xs);
+  cursor: pointer;
+}
+
+.msg-context-menu .menu-item:hover {
+  background: var(--dt-brand-lighter);
+  color: var(--dt-brand-color);
+}
+
+.msg-context-menu .menu-item.danger {
+  color: var(--dt-error-color);
+}
+
+.msg-context-menu .menu-item.danger:hover {
+  background: var(--dt-error-bg);
+  color: var(--dt-error-color);
 }
 </style>

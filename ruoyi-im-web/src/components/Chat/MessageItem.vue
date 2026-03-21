@@ -1,19 +1,24 @@
 <template>
-  <div class="message-item" :class="{ 'is-own': message.isOwn, 'is-failed': message.status === 'failed' }">
+  <div
+    class="message-item"
+    :class="{ 'is-own': message.isOwn, 'is-failed': message.status === 'failed', 'is-highlighted': highlighted }"
+    @contextmenu.prevent="handleContextMenu"
+  >
     <!-- 头像 - 使用 DingtalkAvatar 组件 -->
     <DingtalkAvatar
       :src="message.senderAvatar"
       :name="message.senderName"
       :user-id="message.senderId"
-      :size="var(--dt-avatar-size-md, 36)"
+      :size="avatarSize"
       shape="square"
       class="avatar"
+      :class="{ 'avatar-shift': isGroupSession }"
       @click="$emit('show-user', message.senderId)"
     />
 
     <div class="content">
       <!-- 昵称和时间 (对方才显示) -->
-      <div v-if="!message.isOwn" class="message-header">
+      <div v-if="!message.isOwn && isGroupSession" class="message-header">
         <span class="nickname">{{ message.senderName }}</span>
       </div>
 
@@ -21,47 +26,63 @@
       <div class="bubble-wrapper">
         <slot name="bubble" />
 
+        <div class="message-actions">
+          <button class="action-btn" @click.stop="emitCommand('reply')">回复</button>
+          <button class="action-btn" @click.stop="emitCommand('forward')">转发</button>
+          <button v-if="message.isOwn" class="action-btn danger" @click.stop="emitCommand('recall')">撤回</button>
+        </div>
+
         <!-- 接收方时间戳 -->
         <span v-if="!message.isOwn" class="time-received">{{ formatTime(message.timestamp) }}</span>
 
-        <!-- 状态标识 (己方才显示) - 移至气泡内右下角 -->
-        <div v-if="message.isOwn" class="status-badge">
-          <template v-if="message.status === 'sending'">
-            <el-icon class="is-loading">
-              <Loading />
-            </el-icon>
-          </template>
-          <template v-else-if="message.status === 'failed'">
-            <span class="failed-indicator" @click.stop="handleRetry">
-              <el-icon><WarningFilled /></el-icon>
-            </span>
-          </template>
-          <template v-else>
-            <span class="read-indicator" :class="{ 'is-read': message.readCount > 0 }">
-              <svg viewBox="0 0 24 24" class="check-icon">
-                <path v-if="message.readCount > 0" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                <path v-else d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-              </svg>
-            </span>
-          </template>
-        </div>
-        
-        <!-- 己方消息时间 -->
-        <span v-if="message.isOwn" class="time-self">{{ formatTime(message.timestamp) }}</span>
       </div>
     </div>
+
+    <!-- 己方消息时间与状态：放在头像之后更贴钉钉 -->
+    <span v-if="message.isOwn" class="meta-after-avatar-root">
+      <span class="time-self">{{ formatTime(message.timestamp) }}</span>
+      <span class="status-inline">
+        <template v-if="message.status === 'sending'">
+          <el-icon class="is-loading">
+            <Loading />
+          </el-icon>
+        </template>
+        <template v-else-if="message.status === 'failed'">
+          <span class="failed-indicator" title="点击重试" @click.stop="handleRetry">
+            <el-icon><WarningFilled /></el-icon>
+          </span>
+        </template>
+        <template v-else>
+          <span class="status-text" :class="{ 'is-read': message.readCount > 0 }">
+            {{ message.readCount > 0 ? '已读' : '送达' }}
+          </span>
+        </template>
+      </span>
+    </span>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Loading, WarningFilled } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
-const props = defineProps({ message: Object })
-const emit = defineEmits(['show-user', 'retry'])
+const props = defineProps({ message: Object, sessionType: String, highlighted: Boolean })
+const emit = defineEmits(['show-user', 'retry', 'command', 'context'])
+
+const isGroupSession = computed(() => props.sessionType === 'GROUP')
+const avatarSize = computed(() => (isGroupSession.value ? 32 : 36))
 
 const handleRetry = () => {
   emit('retry', props.message)
+}
+
+const emitCommand = (cmd) => {
+  emit('command', cmd, props.message)
+}
+
+const handleContextMenu = (e) => {
+  emit('context', { x: e.clientX, y: e.clientY, message: props.message })
 }
 
 // 格式化时间
@@ -87,24 +108,29 @@ const formatTime = (timestamp) => {
 <style scoped lang="scss">
 .message-item {
   display: flex;
-  padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
-  gap: var(--dt-spacing-md);
+  padding: var(--dt-spacing-xs) var(--dt-spacing-lg);
+  gap: var(--dt-spacing-sm);
   min-width: 0;
+  align-items: flex-start;
 
   &.is-own {
-    flex-direction: row-reverse;
+    justify-content: flex-end;
     .content {
+      order: 1;
       align-items: flex-end;
     }
+    .avatar {
+      order: 2;
+      margin-left: 0;
+    }
     .bubble-wrapper {
-      flex-direction: row-reverse;
+      flex-direction: row;
     }
     .time-self {
-      margin-left: var(--dt-spacing-sm);
-      margin-right: var(--dt-spacing-xs);
+      margin-left: var(--dt-spacing-xs);
+      margin-right: 0;
     }
   }
-
   &.is-failed {
     .message-bubble {
       border-color: var(--dt-error-color);
@@ -113,12 +139,20 @@ const formatTime = (timestamp) => {
   }
 }
 
+.message-item.is-highlighted .message-bubble {
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.25);
+}
+
 .avatar {
   cursor: pointer;
   flex-shrink: 0;
   width: var(--dt-avatar-size-md, 36px);
   height: var(--dt-avatar-size-md, 36px);
   border-radius: var(--dt-radius-sm);
+}
+
+.avatar.avatar-shift {
+  margin-top: 2px;
 }
 
 .content {
@@ -133,19 +167,85 @@ const formatTime = (timestamp) => {
   display: flex;
   align-items: center;
   gap: var(--dt-spacing-sm);
+  margin-bottom: 2px;
 
   .nickname {
     font-size: var(--dt-font-size-sm);
     font-weight: var(--dt-font-weight-medium);
-    color: var(--dt-text-primary);
+    color: var(--dt-text-secondary);
   }
 }
 
 .bubble-wrapper {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   position: relative;
   min-width: 0;
+  gap: 6px;
+}
+
+.meta-after-avatar-root {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity var(--dt-transition-fast);
+}
+
+.meta-after-avatar-root .time-self {
+  margin: 0;
+}
+
+.message-actions {
+  position: absolute;
+  top: calc(-1 * var(--dt-spacing-lg, 16px));
+  right: 0;
+  display: flex;
+  gap: var(--dt-spacing-xs);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dt-transition-fast);
+}
+
+.action-btn {
+  border: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card);
+  color: var(--dt-text-secondary);
+  font-size: var(--dt-font-size-xs);
+  padding: 2px 6px;
+  border-radius: var(--dt-radius-sm);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+}
+
+.action-btn:hover {
+  color: var(--dt-brand-color);
+  border-color: var(--dt-brand-color);
+  background: var(--dt-brand-bg);
+}
+
+.action-btn.danger:hover {
+  color: var(--dt-error-color);
+  border-color: var(--dt-error-color);
+  background: var(--dt-error-bg);
+}
+
+.message-item:hover .message-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.message-item.is-own .meta-after-avatar-root {
+  order: 3;
+  align-self: flex-end;
+}
+
+.message-item:hover .meta-after-avatar-root {
+  opacity: 1;
+}
+
+.message-item:not(.is-own) .meta-after-avatar-root {
+  display: none;
 }
 
 .time-received {
@@ -163,14 +263,10 @@ const formatTime = (timestamp) => {
   margin-bottom: var(--dt-spacing-xs);
 }
 
-.status-badge {
-  position: absolute;
-  bottom: var(--dt-spacing-xs);
-  right: calc(-1 * var(--dt-spacing-md));
-  display: flex;
+.status-inline {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 16px;
+  margin-left: var(--dt-spacing-xs);
 
   .is-loading {
     font-size: 12px;
@@ -178,43 +274,28 @@ const formatTime = (timestamp) => {
   }
 
   .failed-indicator {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     background: var(--dt-error-color);
     border-radius: 50%;
     cursor: pointer;
 
     .el-icon {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--dt-text-white);
-    }
-
-    &:hover {
-      transform: scale(1.1);
     }
   }
 
-  .read-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .status-text {
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-quaternary);
+  }
 
-    .check-icon {
-      width: 14px;
-      height: 14px;
-      fill: var(--dt-text-quaternary);
-
-      &.is-read {
-        fill: var(--dt-brand-color);
-      }
-    }
-
-    &.is-read .check-icon {
-      fill: var(--dt-brand-color);
-    }
+  .status-text.is-read {
+    color: var(--dt-brand-color);
   }
 }
 

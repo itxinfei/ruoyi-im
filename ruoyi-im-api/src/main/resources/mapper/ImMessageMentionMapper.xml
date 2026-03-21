@@ -60,6 +60,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </update>
 
+    <!-- 查询用户未读@提及所在的会话ID列表 -->
+    <select id="selectUnreadMentionConversationIds" resultType="Long">
+        select distinct msg.conversation_id
+        from im_message_mention m
+        inner join im_message msg on m.message_id = msg.id
+        where m.mentioned_user_id = #{userId}
+          and m.is_read = 0
+    </select>
+
+    <!-- 将会话中用户的所有@提及标记为已读 -->
+    <update id="markAsReadByConversation">
+        update im_message_mention m
+        inner join im_message msg on m.message_id = msg.id
+        set m.is_read = 1
+        where msg.conversation_id = #{conversationId}
+          and m.mentioned_user_id = #{userId}
+          and m.is_read = 0
+    </update>
+
     <!-- 查询会话中的@提及 -->
     <select id="selectMentionsByConversation" resultMap="ImMessageMentionResult">
         select m.*

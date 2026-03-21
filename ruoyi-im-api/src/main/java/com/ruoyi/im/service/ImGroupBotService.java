@@ -94,6 +94,16 @@ public interface ImGroupBotService {
     void setBotEnabled(Long botId, Boolean enabled, Long userId);
 
     /**
+     * 处理外部 Webhook 推送
+     *
+     * @param token     机器人 Token
+     * @param timestamp 时间戳
+     * @param sign      签名
+     * @param payload   消息负载 (FastJSON)
+     */
+    void handleWebhook(String token, String timestamp, String sign, com.alibaba.fastjson.JSONObject payload);
+
+    /**
      * 处理群消息，触发机器人自动回复
      *
      * @param groupId       群组ID

@@ -73,7 +73,6 @@ spring:
       max-request-size: 50MB
 
 # 文件上传配置
-spring:
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*Mapper.xml
   type-aliases-package: com.ruoyi.im.domain
@@ -143,7 +142,6 @@ im:
     enabled: true
     onBlock: REJECT
   # 安全配置
-  security:
     corsAllowOrigins: []
     heartbeatInterval: 30
     maxConnections: 10000

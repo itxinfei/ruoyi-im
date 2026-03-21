@@ -32,6 +32,18 @@
             </div>
             <span>我的好友</span>
           </div>
+          <div class="nav-item" :class="{ active: view === 'external' }" @click="switchView('external')">
+            <div class="icon-box purple">
+              <el-icon><Link /></el-icon>
+            </div>
+            <span>外部联系人</span>
+          </div>
+          <div class="nav-item" :class="{ active: view === 'frequent' }" @click="switchView('frequent')">
+            <div class="icon-box cyan">
+              <el-icon><Clock /></el-icon>
+            </div>
+            <span>常用联系人</span>
+          </div>
         </div>
 
         <div class="tree-divider">
@@ -115,7 +127,7 @@
                 :src="m.avatar"
                 :name="m.name || m.userName"
                 :user-id="m.id"
-                :size="var(--dt-avatar-size-lg, 44)"
+                :size="44"
                 shape="square"
               />
               <div class="m-body">
@@ -138,6 +150,8 @@
         <!-- B. 其他视图 (复用统一逻辑) -->
         <NewFriendsView v-else-if="view === 'new'" />
         <GroupsView v-else-if="view === 'groups'" @select-group="handleGroupSelect" />
+        <ExternalContactsView v-else-if="view === 'external'" />
+        <FrequentContactsView v-else-if="view === 'frequent'" @select-member="handleMemberClick" />
         <div v-else-if="view === 'friends'" class="friends-panel">
           <div class="view-title">
             我的好友 ({{ friends.length }})
@@ -153,7 +167,7 @@
                 :src="f.friendAvatar"
                 :name="f.friendName"
                 :user-id="f.friendId"
-                :size="var(--dt-avatar-size-lg, 44)"
+                :size="44"
                 shape="square"
               />
               <div class="m-body">

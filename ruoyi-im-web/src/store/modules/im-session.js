@@ -119,10 +119,27 @@ export default {
       try {
         const res = await getConversations(filter)
         if (res.code === 200 && res.data) {
+          const drafts = getDraftMap()
           const sessions = res.data.map(session => ({
             ...session,
-            lastMessage: session.lastMessage ? formatMessagePreviewFromObject(session.lastMessage) : '[暂无消息]'
-          }))
+            lastMessage: session.lastMessage ? formatMessagePreviewFromObject(session.lastMessage) : '[暂无消息]',
+            draftContent: drafts[session.id]?.content || '',
+            draftTime: drafts[session.id]?.time || ''
+          })).sort((a, b) => {
+            // 置顶优先
+            if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1
+            // 草稿优先
+            const aDraft = a.draftContent ? 1 : 0
+            const bDraft = b.draftContent ? 1 : 0
+            if (aDraft !== bDraft) return bDraft - aDraft
+            // 未读优先
+            const aUnread = a.unreadCount ? 1 : 0
+            const bUnread = b.unreadCount ? 1 : 0
+            if (aUnread !== bUnread) return bUnread - aUnread
+            const timeA = new Date(a.lastMessageTime || a.draftTime || 0).getTime()
+            const timeB = new Date(b.lastMessageTime || b.draftTime || 0).getTime()
+            return timeB - timeA
+          })
           commit('SET_SESSIONS', sessions)
           commit('SET_FILTER', filter)
 
@@ -141,6 +158,30 @@ export default {
       } finally {
         commit('SET_LOADING', false)
       }
+    },
+
+    // 保存草稿
+    saveDraft({ commit }, { sessionId, content }) {
+      if (!sessionId) return
+      const drafts = getDraftMap()
+      if (content && content.trim()) {
+        drafts[sessionId] = { content, time: Date.now() }
+        setDraftMap(drafts)
+        commit('UPDATE_SESSION', { id: sessionId, draftContent: content, draftTime: drafts[sessionId].time })
+      } else {
+        delete drafts[sessionId]
+        setDraftMap(drafts)
+        commit('UPDATE_SESSION', { id: sessionId, draftContent: '', draftTime: '' })
+      }
+    },
+
+    // 清除草稿
+    clearDraft({ commit }, sessionId) {
+      if (!sessionId) return
+      const drafts = getDraftMap()
+      delete drafts[sessionId]
+      setDraftMap(drafts)
+      commit('UPDATE_SESSION', { id: sessionId, draftContent: '', draftTime: '' })
     },
 
     // 置顶/取消置顶会话
@@ -181,4 +222,16 @@ export default {
       }
     }
   }
+}
+
+function getDraftMap() {
+  try {
+    return JSON.parse(localStorage.getItem('im_session_drafts') || '{}')
+  } catch {
+    return {}
+  }
+}
+
+function setDraftMap(map) {
+  localStorage.setItem('im_session_drafts', JSON.stringify(map || {}))
 }

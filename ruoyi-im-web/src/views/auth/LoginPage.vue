@@ -76,11 +76,13 @@
             账号密码
           </button>
           <button
-            :class="['tab-btn', { active: loginType === 'sms' }]"
-            @click="switchLoginType('sms')"
+            :class="['tab-btn', { active: loginType === 'sms', disabled: true }]"
+            disabled
+            title="暂未开放"
           >
             <span class="material-icons-outlined">sms</span>
             短信验证
+            <span class="coming-soon">（暂未开放）</span>
           </button>
         </div>
 
@@ -187,29 +189,7 @@
             <span v-else>登录中...</span>
           </el-button>
 
-          <!-- 第三方登录 -->
-          <div class="third-party-login">
-            <div class="divider">
-              <span>其他登录方式</span>
-            </div>
-            <div class="third-party-icons">
-              <button class="third-party-btn wechat" title="微信登录">
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 01.598.082l1.584.926a.272.272 0 00.14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 01-.023-.156.49.49 0 01.201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.969-.982z" />
-                </svg>
-              </button>
-              <button class="third-party-btn dingtalk" title="钉钉登录">
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 01.598.082l1.584.926a.272.272 0 00.14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 01-.023-.156.49.49 0 01.201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.969-.982z" />
-                </svg>
-              </button>
-              <button class="third-party-btn feishu" title="飞书登录">
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M19.6 2.16l-4.08-1.36a1.85 1.85 0 00-2.32 1.1l-.75 1.88H9.6l-.75-1.88a1.85 1.85 0 00-2.32-1.1L2.45 2.16a1.85 1.85 0 00-1.1 2.4l2.42 6.04a1.85 1.85 0 001.73 1.12h12a1.85 1.85 0 001.73-1.12l2.42-6.04a1.85 1.85 0 00-1.1-2.4zM12 12a2 2 0 110-4 2 2 0 010 4z" />
-                </svg>
-              </button>
-            </div>
-          </div>
+
         </div>
 
         <!-- 登录页脚 -->
@@ -237,6 +217,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useTheme } from '@/composables/useTheme'
+import { resetValidationTime } from '@/router'
 
 const store = useStore()
 const router = useRouter()
@@ -356,6 +337,7 @@ const handleLogin = async () => {
     }
 
     ElMessage.success('登录成功')
+    resetValidationTime()
 
     const redirectUrl = router.currentRoute.value.query.redirect || '/'
     router.push(redirectUrl)
@@ -733,6 +715,16 @@ onUnmounted(() => {
     &:active:not(.active) {
       transform: scale(0.98);
     }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      
+      .coming-soon {
+        font-size: 11px;
+        opacity: 0.7;
+      }
+    }
   }
 }
 
@@ -901,89 +893,6 @@ onUnmounted(() => {
   &:disabled {
     opacity: 0.7;
   }
-
-  .material-icons-outlined {
-    font-size: 20px;
-  }
-}
-
-// 第三方登录
-.third-party-login {
-  .divider {
-    text-align: center;
-    position: relative;
-    margin-bottom: 24px;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: var(--dt-border-light);
-    }
-
-    span {
-      background: var(--dt-bg-card);
-      padding: 0 16px;
-      color: var(--dt-text-quaternary);
-      font-size: 13px;
-      position: relative;
-    }
-  }
-
-  .third-party-icons {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-
-    .third-party-btn {
-      width: 48px;
-      height: 48px;
-      border: 1.5px solid var(--dt-border-color);
-      background: var(--dt-bg-card);
-      color: var(--dt-text-secondary);
-      transition: all var(--dt-transition-fast);
-      border-radius: var(--dt-radius-lg);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      .icon {
-        width: 24px;
-        height: 24px;
-      }
-
-      &:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--dt-shadow-3);
-      }
-
-      &.wechat:hover {
-        border-color: var(--dt-wechat-color);
-        color: var(--dt-wechat-color);
-        background: var(--dt-success-bg);
-      }
-
-      &.dingtalk:hover {
-        border-color: var(--dt-brand-color);
-        color: var(--dt-brand-color);
-        background: var(--dt-brand-bg);
-      }
-
-      &.feishu:hover {
-        border-color: var(--dt-feishu-color);
-        color: var(--dt-feishu-color);
-        background: var(--dt-info-bg);
-      }
-
-      &:active {
-        transform: translateY(-1px);
-      }
-    }
-  }
 }
 
 // 登录页脚
@@ -1020,7 +929,10 @@ onUnmounted(() => {
   .material-icons-outlined {
     font-size: 22px;
     transition: all var(--dt-transition-base);
-
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    font-family: 'Material Icons Outlined', sans-serif;
+    
     &.hidden {
       opacity: 0;
       transform: rotate(180deg) scale(0);
@@ -1046,6 +958,26 @@ onUnmounted(() => {
   .login-card {
     background: var(--dt-bg-card-dark);
     border-color: var(--dt-border-dark);
+  }
+
+  .login-decoration {
+    background: linear-gradient(160deg, #1e3a5f 0%, #0f172a 100%);
+
+    &::before {
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
+    }
+
+    &::after {
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+    }
+  }
+
+  .mobile-logo {
+    span:not(.material-icons-outlined) {
+      color: var(--dt-text-primary-dark);
+    }
   }
 
   .welcome-title {
@@ -1121,33 +1053,6 @@ onUnmounted(() => {
 
     :deep(.el-checkbox__label) {
       color: var(--dt-text-secondary-dark);
-    }
-  }
-
-  .third-party-login {
-    .divider::before {
-      background: var(--dt-border-dark);
-    }
-
-    .divider span {
-      background: var(--dt-bg-card-dark);
-    }
-
-    .third-party-btn {
-      background: var(--dt-bg-hover-dark);
-      border-color: var(--dt-border-dark);
-
-      &.wechat:hover {
-        background: var(--dt-wechat-bg-dark);
-      }
-
-      &.dingtalk:hover {
-        background: var(--dt-bg-active-dark);
-      }
-
-      &.feishu:hover {
-        background: var(--dt-feishu-bg-dark);
-      }
     }
   }
 

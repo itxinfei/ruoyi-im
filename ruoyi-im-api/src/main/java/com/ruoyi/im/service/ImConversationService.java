@@ -33,11 +33,37 @@ public interface ImConversationService {
     List<ImConversationVO> getUserConversations(Long userId, String filter);
 
     /**
+     * 更新会话草稿内容
+     *
+     * @param userId 用户ID
+     * @param conversationId 会话ID
+     * @param draftContent 草稿内容（为null表示清除草稿）
+     */
+    void updateDraft(Long userId, Long conversationId, String draftContent);
+
+    /**
+     * 置顶消息（PIN）
+     *
+     * @param conversationId 会话ID
+     * @param messageId 消息ID
+     * @param userId 操作用户ID
+     */
+    void pinMessage(Long conversationId, Long messageId, Long userId);
+
+    /**
+     * 取消置顶消息
+     *
+     * @param conversationId 会话ID
+     * @param userId 操作用户ID
+     */
+    void unpinMessage(Long conversationId, Long userId);
+
+    /**
      * 获取会话详情
      *
      * @param conversationId 会话ID
      * @param userId 用户ID
-     * @return 会话信息
+     * @return 会话VO
      */
     ImConversationVO getConversationById(Long conversationId, Long userId);
 

@@ -376,6 +376,24 @@ public class ImCloudDriveController {
         }
     }
 
+    /**
+     * 从消息保存文件到云盘
+     */
+    @PostMapping("/file/save-from-message")
+    public Result<ImCloudFileVO> saveFromMessage(
+            @RequestParam Long messageId,
+            @RequestParam(required = false, defaultValue = "0") Long folderId) {
+        Long userId = SecurityUtils.getLoginUserId();
+
+        try {
+            ImCloudFileVO vo = cloudDriveService.saveFromMessage(messageId, folderId, userId);
+            return Result.success("保存成功", vo);
+        } catch (Exception e) {
+            log.error("从消息保存文件失败: messageId={}, userId={}", messageId, userId, e);
+            return Result.fail("保存失败: " + e.getMessage());
+        }
+    }
+
     // ==================== 文件分享 ====================
 
     /**

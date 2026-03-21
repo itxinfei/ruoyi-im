@@ -35,7 +35,7 @@
           :src="member.avatar"
           :name="member.nickname || member.username"
           :user-id="member.userId || member.id"
-          :size="var(--dt-avatar-size-sm, 32)"
+          :size="32"
           shape="circle"
         />
         <span class="name">{{ member.nickname || member.username }}</span>

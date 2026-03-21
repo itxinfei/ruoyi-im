@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImDocumentShareMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImDocumentShare" id="ImDocumentShareResult">
+        <id property="id" column="id"/>
+        <result property="documentId" column="document_id"/>
+        <result property="sharedToUserId" column="shared_to_user_id"/>
+        <result property="sharedByUserId" column="shared_by_user_id"/>
+        <result property="permission" column="permission"/>
+        <result property="isExpired" column="is_expired"/>
+        <result property="expireTime" column="expire_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectImDocumentShareVo">
+        select id, document_id, shared_to_user_id, shared_by_user_id,
+               permission, is_expired, expire_time, create_time
+        from im_document_share
+    </sql>
+
+</mapper>

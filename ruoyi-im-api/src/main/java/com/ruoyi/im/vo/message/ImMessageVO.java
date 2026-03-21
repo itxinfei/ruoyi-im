@@ -98,6 +98,30 @@ public class ImMessageVO implements Serializable {
     private MessageReadStatus readStatus;
 
     /**
+     * URL元数据预览（如果消息包含链接）
+     */
+    private UrlMetadataVO urlMetadata;
+
+    /**
+     * 消息表情表态列表
+     */
+    private java.util.List<com.ruoyi.im.vo.reaction.ImMessageReactionVO> reactions;
+
+    /**
+     * URL元数据VO
+     */
+    @Data
+    public static class UrlMetadataVO implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String url;
+        private String title;
+        private String description;
+        private String imageUrl;
+        private String siteName;
+        private String faviconUrl;
+    }
+
+    /**
      * 消息已读状态内部类
      * 用于展示群消息已读/未读情况
      */

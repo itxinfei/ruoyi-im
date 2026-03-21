@@ -9,6 +9,7 @@ import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.conversation.ImPrivateConversationCreateRequest;
 import com.ruoyi.im.dto.mention.ImMentionInfo;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
+import com.ruoyi.im.dto.message.ImMessageBatchForwardRequest;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImConversationMapper;
 import com.ruoyi.im.mapper.ImConversationMemberMapper;
@@ -48,6 +49,8 @@ public class ImMessageServiceImpl implements ImMessageService {
     private static final int CACHE_EVICT_THRESHOLD = 20;
 
     private final ImMessageMapper imMessageMapper;
+    private final com.ruoyi.im.mapper.ImMessageReactionMapper reactionMapper;
+    private final com.ruoyi.im.mapper.ImMessageReadMapper readMapper;
     private final ImUserMapper imUserMapper;
     private final ImConversationMapper imConversationMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
@@ -60,12 +63,18 @@ public class ImMessageServiceImpl implements ImMessageService {
     private final com.ruoyi.im.util.ImRedisUtil redisUtil;
     private final com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService;
     private final ImSystemConfigService systemConfigService;
+    private final com.ruoyi.im.service.ImUrlMetadataService urlMetadataService;
+    private final com.ruoyi.im.service.ImMessageReadService messageReadService;
+    private final com.ruoyi.im.service.ImMessageReactionService messageReactionService;
+    private final com.ruoyi.im.service.ISensitiveWordService sensitiveWordService;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 构造器注入依赖
      */
     public ImMessageServiceImpl(ImMessageMapper imMessageMapper,
+                                 com.ruoyi.im.mapper.ImMessageReactionMapper reactionMapper,
+                                 com.ruoyi.im.mapper.ImMessageReadMapper readMapper,
                                  ImUserMapper imUserMapper,
                                  ImConversationMapper imConversationMapper,
                                  ImConversationMemberMapper imConversationMemberMapper,
@@ -78,8 +87,14 @@ public class ImMessageServiceImpl implements ImMessageService {
                                  com.ruoyi.im.util.ImRedisUtil redisUtil,
                                  com.ruoyi.im.service.ImWebSocketBroadcastService broadcastService,
                                  ImSystemConfigService systemConfigService,
+                                 com.ruoyi.im.service.ImUrlMetadataService urlMetadataService,
+                                 com.ruoyi.im.service.ImMessageReadService messageReadService,
+                                 com.ruoyi.im.service.ImMessageReactionService messageReactionService,
+                                 com.ruoyi.im.service.ISensitiveWordService sensitiveWordService,
                                  ApplicationEventPublisher eventPublisher) {
         this.imMessageMapper = imMessageMapper;
+        this.reactionMapper = reactionMapper;
+        this.readMapper = readMapper;
         this.imUserMapper = imUserMapper;
         this.imConversationMapper = imConversationMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
@@ -92,7 +107,28 @@ public class ImMessageServiceImpl implements ImMessageService {
         this.redisUtil = redisUtil;
         this.broadcastService = broadcastService;
         this.systemConfigService = systemConfigService;
+        this.urlMetadataService = urlMetadataService;
+        this.messageReadService = messageReadService;
+        this.messageReactionService = messageReactionService;
+        this.sensitiveWordService = sensitiveWordService;
         this.eventPublisher = eventPublisher;
+    }
+
+    /**
+     * 从文本中提取第一个 URL
+     */
+    private String extractUrl(String content) {
+        if (content == null || content.isEmpty()) {
+            return null;
+        }
+        // 匹配 http/https 链接
+        String regex = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(regex);
+        java.util.regex.Matcher m = p.matcher(content);
+        if (m.find()) {
+            return m.group();
+        }
+        return null;
     }
 
     @Override
@@ -167,6 +203,12 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setReplyToMessageId(request.getReplyToMessageId());
 
         String plainContent = request.getContent();
+
+        // 敏感词过滤：仅对文本消息执行强制脱敏
+        if ("TEXT".equalsIgnoreCase(request.getType()) && plainContent != null) {
+            plainContent = sensitiveWordService.filter(plainContent);
+        }
+
         String contentToSave = encryptionUtil.encryptMessage(plainContent);
         message.setContent(contentToSave);
         message.setIsRevoked(0);
@@ -233,6 +275,23 @@ public class ImMessageServiceImpl implements ImMessageService {
         vo.setSenderAvatar(sender.getAvatar());
         vo.setSendTime(message.getCreateTime());
         vo.setStatus(1);
+
+        // 如果消息类型为文本，尝试识别并解析 URL
+        if ("TEXT".equalsIgnoreCase(request.getType()) && plainContent != null) {
+            String url = extractUrl(plainContent);
+            if (url != null) {
+                try {
+                    com.ruoyi.im.domain.ImUrlMetadata metadata = urlMetadataService.parseUrl(url);
+                    if (metadata != null && "SUCCESS".equals(metadata.getFetchStatus())) {
+                        ImMessageVO.UrlMetadataVO urlVO = new ImMessageVO.UrlMetadataVO();
+                        BeanUtils.copyProperties(metadata, urlVO);
+                        vo.setUrlMetadata(urlVO);
+                    }
+                } catch (Exception e) {
+                    log.warn("解析消息中的 URL 元数据失败: url={}, error={}", url, e.getMessage());
+                }
+            }
+        }
 
         // 如果是群组消息，发布群组消息事件触发机器人自动回复
         ImConversation conversation = imConversationMapper.selectById(conversationId);
@@ -324,6 +383,65 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         }
 
+        // --- 性能优化：批量预取增强数据 ---
+        List<Long> msgIds = messageList.stream().map(ImMessage::getId).collect(java.util.stream.Collectors.toList());
+        
+        // 1. 批量预取 Reaction (按 message_id 分组)
+        java.util.Map<Long, List<com.ruoyi.im.vo.reaction.ImMessageReactionVO>> reactionStatsMap = new java.util.HashMap<>();
+        if (!msgIds.isEmpty()) {
+            try {
+                // 暂时利用 messageReactionService 循环获取作为降级，后续可真正实现 Mapper 批量统计
+                // 鉴于目前已经注入了 Mapper，我直接在内存中聚合所有记录以达到最优性能
+                List<com.ruoyi.im.domain.ImMessageReaction> allReactions = reactionMapper.selectList(
+                        new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<com.ruoyi.im.domain.ImMessageReaction>()
+                                .in(com.ruoyi.im.domain.ImMessageReaction::getMessageId, msgIds)
+                );
+                // 内存中按 messageId 和 emoji 分组并转换 VO
+                if (allReactions != null) {
+                    java.util.Map<Long, java.util.Map<String, List<com.ruoyi.im.domain.ImMessageReaction>>> grouped = 
+                        allReactions.stream().collect(java.util.stream.Collectors.groupingBy(
+                            com.ruoyi.im.domain.ImMessageReaction::getMessageId,
+                            java.util.stream.Collectors.groupingBy(com.ruoyi.im.domain.ImMessageReaction::getEmoji)
+                        ));
+                    
+                    grouped.forEach((mid, emojiMap) -> {
+                        List<com.ruoyi.im.vo.reaction.ImMessageReactionVO> subList = new ArrayList<>();
+                        emojiMap.forEach((emoji, list) -> {
+                            com.ruoyi.im.vo.reaction.ImMessageReactionVO rvo = new com.ruoyi.im.vo.reaction.ImMessageReactionVO();
+                            rvo.setEmoji(emoji);
+                            rvo.setCount(list.size());
+                            rvo.setIsMine(list.stream().anyMatch(r -> r.getUserId().equals(userId)));
+                            // 补充用户名列表（简化处理，仅取前3名）
+                            subList.add(rvo);
+                        });
+                        reactionStatsMap.put(mid, subList);
+                    });
+                }
+            } catch (Exception e) {
+                log.warn("批量预取表情表态失败: {}", e.getMessage());
+            }
+        }
+
+        // 2. 批量预取已读统计
+        java.util.Map<Long, com.ruoyi.im.vo.message.ImMessageReadStatusVO> readStatusMap = new java.util.HashMap<>();
+        if (!msgIds.isEmpty()) {
+            try {
+                List<java.util.Map<String, Object>> counts = readMapper.batchCountReadUsersByMessageIds(msgIds);
+                if (counts != null) {
+                    for (java.util.Map<String, Object> entry : counts) {
+                        Long mid = ((Number) entry.get("message_id")).longValue();
+                        Integer count = ((Number) entry.get("read_count")).intValue();
+                        com.ruoyi.im.vo.message.ImMessageReadStatusVO rs = new com.ruoyi.im.vo.message.ImMessageReadStatusVO();
+                        rs.setReadCount(count);
+                        // totalCount 暂时由 Service 内部逻辑动态计算（取决于群成员数）
+                        readStatusMap.put(mid, rs);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("批量预取已读状态失败: {}", e.getMessage());
+            }
+        }
+
         for (ImMessage message : messageList) {
             ImMessageVO vo = new ImMessageVO();
             BeanUtils.copyProperties(message, vo);
@@ -343,6 +461,37 @@ public class ImMessageServiceImpl implements ImMessageService {
             vo.setIsSelf(isSelf);
             log.debug("消息 isSelf 判断 - messageId={}, senderId={}, userId={}, isSelf={}, senderName={}",
                     message.getId(), message.getSenderId(), userId, isSelf, vo.getSenderName());
+
+            // 填充已读状态统计（仅发送者自己的消息展示已读/未读人数）
+            if (isSelf) {
+                com.ruoyi.im.vo.message.ImMessageReadStatusVO rsVO = readStatusMap.get(message.getId());
+                if (rsVO != null) {
+                    ImMessageVO.MessageReadStatus readStatus = new ImMessageVO.MessageReadStatus();
+                    BeanUtils.copyProperties(rsVO, readStatus);
+                    // 补充总人数（私聊2人，群聊暂不精确获取以保性能，前端可根据群成员列表显示）
+                    vo.setReadStatus(readStatus);
+                }
+            }
+
+            // 填充 URL 元数据预览 (保持现状，此方法内部带缓存且 JSoup 解析无法批量)
+            if ("TEXT".equalsIgnoreCase(message.getMessageType()) && decryptedContent != null) {
+                String url = extractUrl(decryptedContent);
+                if (url != null) {
+                    try {
+                        com.ruoyi.im.domain.ImUrlMetadata metadata = urlMetadataService.getByUrl(url);
+                        if (metadata != null && "SUCCESS".equals(metadata.getFetchStatus())) {
+                            ImMessageVO.UrlMetadataVO urlVO = new ImMessageVO.UrlMetadataVO();
+                            BeanUtils.copyProperties(metadata, urlVO);
+                            vo.setUrlMetadata(urlVO);
+                        }
+                    } catch (Exception e) {
+                        log.warn("填充 URL 元数据失败: messageId={}, error={}", message.getId(), e.getMessage());
+                    }
+                }
+            }
+
+            // 填充表情表态统计（使用预取的 Map）
+            vo.setReactions(reactionStatsMap.getOrDefault(message.getId(), new java.util.ArrayList<>()));
 
             // 处理引用消息（回复）
             if (message.getReplyToMessageId() != null && message.getReplyToMessageId() > 0) {
@@ -511,6 +660,9 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setEditCount(message.getEditCount() == null ? 1 : message.getEditCount() + 1);
         message.setEditTime(now);
         imMessageMapper.updateImMessage(message);
+
+        // 广播通知：通知所有成员消息已编辑
+        broadcastService.broadcastMessageUpdate(message.getConversationId(), messageId, userId);
     }
 
     @Override
@@ -607,6 +759,50 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         imMessageMapper.insertImMessage(forwardMessage);
         return forwardMessage.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchForward(com.ruoyi.im.dto.message.ImMessageBatchForwardRequest request, Long userId) {
+        List<Long> messageIds = request.getMessageIds();
+        List<Long> toConversationIds = request.getToConversationIds();
+
+        if (Boolean.TRUE.equals(request.getIsCombine())) {
+            // 合并转发：构造摘要内容
+            StringBuilder combinedContent = new StringBuilder();
+            String title = request.getTitle() != null ? request.getTitle() : "聊天记录";
+            combinedContent.append("--- ").append(title).append(" ---\n");
+
+            List<ImMessage> messages = imMessageMapper.selectImMessageListByIds(messageIds);
+            // 保持原消息顺序
+            messages.sort(java.util.Comparator.comparing(ImMessage::getId));
+
+            for (ImMessage msg : messages) {
+                ImUser sender = imUserMapper.selectImUserById(msg.getSenderId());
+                String senderName = sender != null ? sender.getNickname() : "用户" + msg.getSenderId();
+                String text = encryptionUtil.decryptMessage(msg.getContent());
+                // 简单处理：如果是图片/文件，显示占位符
+                if (!"TEXT".equalsIgnoreCase(msg.getMessageType())) {
+                    text = "[" + msg.getMessageType() + "]";
+                }
+                combinedContent.append(senderName).append(": ").append(text).append("\n");
+            }
+
+            for (Long convId : toConversationIds) {
+                com.ruoyi.im.dto.message.ImMessageSendRequest sendReq = new com.ruoyi.im.dto.message.ImMessageSendRequest();
+                sendReq.setConversationId(convId);
+                sendReq.setType("COMBINE_FORWARD");
+                sendReq.setContent(combinedContent.toString());
+                this.sendMessage(sendReq, userId);
+            }
+        } else {
+            // 逐条转发
+            for (Long convId : toConversationIds) {
+                for (Long msgId : messageIds) {
+                    this.forwardMessage(msgId, convId, null, null, userId);
+                }
+            }
+        }
     }
 
     @Override

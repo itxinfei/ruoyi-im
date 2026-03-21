@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import store from '@/store'
 
+// Token 验证间隔（5分钟）
+const TOKEN_VALIDATION_INTERVAL = 5 * 60 * 1000
+let lastValidationTime = 0
+
 const routes = [
   {
     path: '/login',
@@ -89,27 +93,45 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  // 验证 token 有效性
-  try {
-    const isTokenValid = await store.dispatch('user/validateToken')
-    if (!isTokenValid) {
-      // Token 无效，清除用户信息并跳转到登录页
-      await store.dispatch('user/logout')
-      next({
-        path: '/login',
-        query: { redirect: to.fullPath }
+  // 检查是否需要验证 token（距离上次验证超过5分钟才验证）
+  const now = Date.now()
+  const shouldValidate = now - lastValidationTime > TOKEN_VALIDATION_INTERVAL
+
+  if (shouldValidate) {
+    try {
+      const res = await fetch(import.meta.env.VITE_API_BASE_URL + '/api/im/auth/validateToken', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${store.state.user.token}`
+        },
+        credentials: 'include'
       })
-      return
+      if (!res.ok) {
+        // Token 无效，清除用户信息并跳转到登录页
+        await store.dispatch('user/logout')
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
+        return
+      }
+      const data = await res.json()
+      if (data.code !== 200 || !data.data) {
+        // Token 无效，清除用户信息并跳转到登录页
+        await store.dispatch('user/logout')
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
+        return
+      }
+      // 验证成功，更新时间戳
+      lastValidationTime = now
+    } catch (error) {
+      console.error('Token validation error:', error)
+      // 网络错误时不强制登出，允许继续访问
+      // 只在明确返回401时才登出
     }
-  } catch (error) {
-    console.error('Token validation error:', error)
-    // Token 验证失败，清除用户信息并跳转到登录页
-    await store.dispatch('user/logout')
-    next({
-      path: '/login',
-      query: { redirect: to.fullPath }
-    })
-    return
   }
 
   // 检查角色权限（如果路由定义了需要的角色）
@@ -128,6 +150,11 @@ router.beforeEach(async (to, from, next) => {
     next()
   }
 })
+
+// 导出重置验证时间的方法（登录成功后调用）
+export function resetValidationTime() {
+  lastValidationTime = Date.now()
+}
 
 export default router
 

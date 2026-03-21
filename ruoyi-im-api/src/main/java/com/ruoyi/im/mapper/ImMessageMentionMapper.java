@@ -57,6 +57,23 @@ public interface ImMessageMentionMapper extends BaseMapper<ImMessageMention> {
     int batchMarkAsRead(@Param("mentionIds") List<Long> mentionIds);
 
     /**
+     * 查询用户未读@提及所在的会话ID列表
+     *
+     * @param userId 用户ID
+     * @return 会话ID列表
+     */
+    List<Long> selectUnreadMentionConversationIds(@Param("userId") Long userId);
+
+    /**
+     * 将会话中用户的所有@提及标记为已读
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @return 更新行数
+     */
+    int markAsReadByConversation(@Param("conversationId") Long conversationId, @Param("userId") Long userId);
+
+    /**
      * 查询会话中的@提及
      *
      * @param conversationId 会话ID

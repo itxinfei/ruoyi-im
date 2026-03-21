@@ -11,39 +11,47 @@
     <div v-else-if="groupDetail" class="group-container">
       <!-- 头部 -->
       <header class="dialog-header">
-        <h3 class="title">
-          群聊信息
-        </h3>
-        <button class="close-btn" @click="handleClose">
-          <el-icon><Close /></el-icon>
-        </button>
+        <div class="header-left">
+          <DingtalkAvatar
+            :src="groupDetail.avatar"
+            :name="groupDetail.name"
+            :is-group="true"
+            :size="40"
+            shape="square"
+          />
+          <div class="header-info">
+            <div class="group-name">{{ groupDetail.name }}</div>
+            <div class="group-sub">
+              <span>{{ groupDetail.memberCount || 0 }} 人</span>
+              <span class="divider">·</span>
+              <span>创建于 {{ formatDate(groupDetail.createTime) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <el-button size="small" @click="handleTogglePin(!groupDetail.isPinned)">
+            {{ groupDetail.isPinned ? '取消置顶' : '置顶' }}
+          </el-button>
+          <el-button size="small" @click="handleToggleMute(!groupDetail.isMuted)">
+            {{ groupDetail.isMuted ? '取消静音' : '静音' }}
+          </el-button>
+          <el-dropdown trigger="click" @command="handleMoreCommand">
+            <el-button size="small">更多</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="qrcode">群二维码</el-dropdown-item>
+                <el-dropdown-item command="clear">清空聊天记录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <el-button class="close-btn" @click="handleClose">
+            <el-icon><Close /></el-icon>
+          </el-button>
+        </div>
       </header>
 
       <!-- 主体内容 -->
       <div class="group-body custom-scrollbar">
-        <!-- 群基本信息 -->
-        <section class="info-section">
-          <div class="group-meta">
-            <DingtalkAvatar
-              :src="groupDetail.avatar"
-              :name="groupDetail.name"
-              :is-group="true"
-              :size="56"
-              shape="square"
-            />
-            <div class="meta-info">
-              <h2 class="group-name">
-                {{ groupDetail.name }}
-              </h2>
-              <p class="group-desc">
-                <span>{{ groupDetail.memberCount || 0 }} 人</span>
-                <span class="divider">·</span>
-                <span>创建于 {{ formatDate(groupDetail.createTime) }}</span>
-              </p>
-            </div>
-          </div>
-        </section>
-
         <!-- 群成员 -->
         <section class="member-section">
           <div class="section-header">
@@ -63,7 +71,7 @@
                 :src="m.avatar"
                 :name="m.nickname"
                 :user-id="m.userId"
-                :size="36"
+                :size="32"
                 shape="square"
               />
               <span class="member-name">{{ m.nickname }}</span>
@@ -104,6 +112,9 @@
               <el-icon class="arrow-icon">
                 <ArrowRight />
               </el-icon>
+              <el-icon v-if="canEdit" class="edit-icon" @click.stop="handleEditAnnouncement">
+                <EditPen />
+              </el-icon>
             </div>
           </div>
 
@@ -128,12 +139,12 @@
 
           <div class="switch-item">
             <span class="switch-label">置顶聊天</span>
-            <el-switch v-model="groupDetail.isPinned" size="default" @change="handleTogglePin" />
+            <el-switch v-model="groupDetail.isPinned" size="small" @change="handleTogglePin" />
           </div>
 
           <div class="switch-item">
             <span class="switch-label">消息免打扰</span>
-            <el-switch v-model="groupDetail.isMuted" size="default" @change="handleToggleMute" />
+            <el-switch v-model="groupDetail.isMuted" size="small" @change="handleToggleMute" />
           </div>
         </section>
 
@@ -155,6 +166,19 @@
         </section>
       </div>
 
+      <!-- 群二维码弹窗 -->
+      <el-dialog v-model="showQr" width="360px" append-to-body>
+        <div class="qr-wrap">
+          <img v-if="groupDetail?.qrcodeUrl" :src="groupDetail.qrcodeUrl" class="qr-img">
+          <div v-else class="qr-empty">暂无二维码</div>
+          <div class="qr-text">使用钉钉扫码加入群聊</div>
+          <div class="qr-actions">
+            <button class="qr-btn" @click="copyQrLink">复制链接</button>
+            <button class="qr-btn" @click="downloadQr">下载二维码</button>
+          </div>
+        </div>
+      </el-dialog>
+
       <!-- 底部操作 -->
       <footer class="dialog-footer">
         <button class="exit-btn" @click="handleExitGroup">
@@ -169,7 +193,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Close, ArrowRight, Plus, EditPen, Setting, User, SwitchButton } from '@element-plus/icons-vue'
-import { getGroup, leaveGroup } from '@/api/im/group'
+import { getGroup, leaveGroup, updateGroup } from '@/api/im/group'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useStore } from 'vuex'
@@ -182,6 +206,7 @@ const visible = ref(false)
 const loading = ref(false)
 const groupDetail = ref(null)
 const showAllMembers = ref(false)
+const showQr = ref(false)
 
 const isAdmin = computed(() => groupDetail.value?.role === 'ADMIN' || groupDetail.value?.role === 'OWNER')
 const canEdit = computed(() => isAdmin.value)
@@ -222,6 +247,45 @@ const handleToggleMute = async (val) => {
     ElMessage.error('设置失败')
     groupDetail.value.isMuted = !val
   }
+}
+
+const handleEditAnnouncement = () => {
+  ElMessageBox.prompt('编辑群公告', '群公告', {
+    inputValue: groupDetail.value?.announcement || '',
+    confirmButtonText: '保存',
+    cancelButtonText: '取消'
+  }).then(async ({ value }) => {
+    await updateGroup(props.groupId, { notice: value })
+    groupDetail.value.announcement = value
+    ElMessage.success('群公告已更新')
+  }).catch(() => {})
+}
+
+const handleMoreCommand = (cmd) => {
+  if (cmd === 'qrcode') {
+    showQr.value = true
+  } else if (cmd === 'clear') {
+    ElMessage.info('清空聊天记录功能待接入')
+  }
+}
+
+const copyQrLink = () => {
+  const url = groupDetail.value?.qrcodeUrl
+  if (!url) return ElMessage.info('暂无二维码')
+  navigator.clipboard?.writeText(url).then(() => {
+    ElMessage.success('已复制')
+  }).catch(() => {
+    ElMessage.error('复制失败')
+  })
+}
+
+const downloadQr = () => {
+  const url = groupDetail.value?.qrcodeUrl
+  if (!url) return ElMessage.info('暂无二维码')
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `group-${props.groupId}-qrcode.png`
+  a.click()
 }
 
 const handleMemberClick = (m) => { emit('show-user', m.userId) }
@@ -285,108 +349,94 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 <style scoped lang="scss">
 .group-profile-dialog {
   :deep(.el-dialog) {
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
     padding: 0;
+    box-shadow: var(--dt-shadow-3);
   }
   :deep(.el-dialog__header) { display: none; }
   :deep(.el-dialog__body) { padding: 0; }
 }
 
 .group-container {
-  background: #fff;
+  background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
   max-height: 70vh;
 }
 
 .dialog-header {
-  height: 52px;
-  padding: 0 20px;
+  padding: var(--dt-spacing-lg);
   border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+}
 
-  .title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--dt-text-primary);
-    margin: 0;
-  }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-md);
+  min-width: 0;
+}
 
-  .close-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--dt-text-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+.header-info {
+  min-width: 0;
+}
 
-    &:hover {
-      background: var(--dt-bg-session-hover);
-      color: var(--dt-brand-color);
-    }
-  }
+.group-name {
+  font-size: var(--dt-font-size-lg);
+  font-weight: 600;
+  color: var(--dt-text-primary);
+}
+
+.group-sub {
+  margin-top: 4px;
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-actions .el-button {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.header-actions .close-btn {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid var(--dt-border-light);
 }
 
 .group-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
-}
-
-.info-section {
-  margin-bottom: 20px;
-
-  .group-meta {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-
-    .meta-info {
-      flex: 1;
-      min-width: 0;
-
-      .group-name {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--dt-text-primary);
-        margin: 0 0 6px;
-      }
-
-      .group-desc {
-        font-size: 13px;
-        color: var(--dt-text-tertiary);
-        margin: 0;
-
-        .divider {
-          margin: 0 6px;
-        }
-      }
-    }
-  }
+  padding: var(--dt-spacing-lg);
 }
 
 .member-section {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 
   .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 
     .section-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--dt-text-primary);
+      color: var(--dt-text-secondary);
     }
 
     .more-btn {
@@ -410,16 +460,17 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   }
 
   .member-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
 
     .member-item {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: var(--dt-bg-body);
+      gap: 6px;
+      padding: 6px 0;
+      background: transparent;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
@@ -429,9 +480,9 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
       }
 
       .member-name {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--dt-text-primary);
-        max-width: 80px;
+        max-width: 72px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -457,19 +508,20 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 
     .add-member-btn {
       display: flex;
+      flex-direction: column;
       align-items: center;
       gap: 6px;
-      padding: 8px 16px;
-      background: var(--dt-brand-lighter);
-      border: 1px dashed var(--dt-brand-color);
+      padding: 6px 0;
+      background: transparent;
+      border: 1px dashed var(--dt-border-light);
       border-radius: 8px;
-      color: var(--dt-brand-color);
-      font-size: 13px;
+      color: var(--dt-text-tertiary);
+      font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
 
       &:hover {
-        background: var(--dt-brand-bg);
+        background: var(--dt-bg-session-hover);
       }
     }
   }
@@ -478,13 +530,17 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 .settings-section,
 .message-settings,
 .admin-section {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+  border: 1px solid var(--dt-border-light);
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: var(--dt-bg-card);
 
   .section-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--dt-text-primary);
-    margin-bottom: 12px;
+    color: var(--dt-text-secondary);
+    margin-bottom: 10px;
   }
 }
 
@@ -492,7 +548,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--dt-border-lighter);
 
   &:last-child {
@@ -500,8 +556,8 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   }
 
   .setting-label {
-    font-size: 14px;
-    color: var(--dt-text-primary);
+    font-size: 13px;
+    color: var(--dt-text-secondary);
   }
 
   .setting-right {
@@ -522,7 +578,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     }
 
     .setting-value {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--dt-text-tertiary);
 
       &.ellipsis {
@@ -550,7 +606,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--dt-border-lighter);
 
   &:last-child {
@@ -558,8 +614,8 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   }
 
   .switch-label {
-    font-size: 14px;
-    color: var(--dt-text-primary);
+    font-size: 13px;
+    color: var(--dt-text-secondary);
   }
 }
 
@@ -595,7 +651,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 }
 
 .dialog-footer {
-  padding: 16px 20px;
+  padding: 12px var(--dt-spacing-lg);
   border-top: 1px solid var(--dt-border-light);
   flex-shrink: 0;
 
@@ -621,6 +677,61 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
   }
 }
 
+.qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.qr-img {
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border: 1px solid var(--dt-border-light);
+  border-radius: 8px;
+}
+
+.qr-empty {
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dt-text-tertiary);
+  border: 1px dashed var(--dt-border-light);
+  border-radius: 8px;
+}
+
+.qr-text {
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
+}
+
+.qr-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.qr-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-body);
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.qr-btn:hover {
+  background: var(--dt-brand-lighter);
+  color: var(--dt-brand-color);
+  border-color: var(--dt-brand-light);
+}
 // 暗色模式
 .dark {
   .group-container {
@@ -638,6 +749,12 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 
   .dialog-footer {
     border-top-color: var(--dt-border-dark);
+  }
+
+  .qr-btn {
+    background: var(--dt-bg-body-dark);
+    color: var(--dt-text-primary-dark);
+    border-color: var(--dt-border-dark);
   }
 }
 </style>

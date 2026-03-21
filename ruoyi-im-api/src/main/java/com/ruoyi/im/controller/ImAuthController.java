@@ -195,12 +195,35 @@ public class ImAuthController {
      * @apiNote 用于前端检查token是否仍然有效
      */
     
+    /**
+     * 验证Token
+     * 验证token是否有效
+     *
+     * @return 验证结果，true表示有效，false表示无效
+     */
     @PostMapping("/validateToken")
-    public Result<Boolean> validateToken(@RequestParam String token) {
+    public Result<Boolean> validateToken(javax.servlet.http.HttpServletRequest request) {
         try {
+            // 尝试从参数中获取（兼容老版本传参）
+            String token = request.getParameter("token");
+            
+            // 如果参数中没有，从 Header 获取（现代标准）
+            if (token == null || token.isEmpty()) {
+                String bearerToken = request.getHeader("Authorization");
+                if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                    token = bearerToken.substring(7);
+                }
+            }
+
+            if (token == null || token.isEmpty()) {
+                logger.warn("validateToken 失败：未提供 Token");
+                return Result.success(false);
+            }
+
             boolean valid = jwtUtils.validateToken(token);
             return Result.success(valid);
         } catch (Exception e) {
+            logger.error("validateToken 异常: {}", e.getMessage());
             return Result.success(false);
         }
     }

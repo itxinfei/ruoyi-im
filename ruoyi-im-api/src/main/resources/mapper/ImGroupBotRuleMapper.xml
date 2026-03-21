@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImGroupBotRuleMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImGroupBotRule" id="ImGroupBotRuleResult">
+        <id property="id" column="id"/>
+        <result property="botId" column="bot_id"/>
+        <result property="ruleName" column="rule_name"/>
+        <result property="triggerType" column="trigger_type"/>
+        <result property="triggerContent" column="trigger_content"/>
+        <result property="replyType" column="reply_type"/>
+        <result property="replyContent" column="reply_content"/>
+        <result property="priority" column="priority"/>
+        <result property="isEnabled" column="is_enabled"/>
+        <result property="matchMode" column="match_mode"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectImGroupBotRuleVo">
+        select id, bot_id, rule_name, trigger_type, trigger_content, reply_type,
+               reply_content, priority, is_enabled, match_mode, create_time, update_time
+        from im_group_bot_rule
+    </sql>
+
+    <select id="selectByBotId" resultMap="ImGroupBotRuleResult">
+        <include refid="selectImGroupBotRuleVo"/>
+        where bot_id = #{botId}
+    </select>
+
+    <select id="selectEnabledByBotId" resultMap="ImGroupBotRuleResult">
+        <include refid="selectImGroupBotRuleVo"/>
+        where bot_id = #{botId}
+        and is_enabled = 1
+        order by priority desc
+    </select>
+
+    <delete id="deleteByBotId">
+        delete from im_group_bot_rule
+        where bot_id = #{botId}
+    </delete>
+
+    <select id="selectByBotIds" resultMap="ImGroupBotRuleResult">
+        <include refid="selectImGroupBotRuleVo"/>
+        where bot_id in
+        <foreach collection="botIds" item="botId" open="(" separator="," close=")">
+            #{botId}
+        </foreach>
+        order by priority desc
+    </select>
+
+    <select id="selectByTriggerType" resultMap="ImGroupBotRuleResult">
+        <include refid="selectImGroupBotRuleVo"/>
+        where trigger_type = #{triggerType}
+        and is_enabled = 1
+        order by priority desc
+    </select>
+
+</mapper>

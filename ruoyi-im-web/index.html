@@ -7,33 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IM即时通讯</title>
   
-  <!-- Content Security Policy (CSP) - 防止 XSS 攻击 -->
-  <!-- 
-    CSP 策略说明：
-    - default-src 'self': 默认只允许同源资源
-    - script-src 'self' 'unsafe-inline': 允许内联脚本（Vite 开发模式需要）
-    - style-src 'self' 'unsafe-inline' https://fonts.googleapis.com: 允许内联样式和 Google Fonts
-    - img-src 'self' data: blob: https://*: 允许数据 URL、Blob URL 和外部图片
-    - connect-src 'self' http://localhost:* https://*: 允许 API 连接和 WebSocket
-    - font-src 'self' https://fonts.gstatic.com: 允许 Google Fonts
-    - object-src 'none': 禁止加载对象（防止 XSS）
-    - base-uri 'self': 限制 base URL
-    - form-action 'self': 限制表单提交目标
-    - frame-ancestors 'none': 防止被嵌入 iframe
-    - report-uri /api/security/csp-report: CSP 违规报告端点（可选）
-  -->
-  <meta http-equiv="Content-Security-Policy" 
-        content="default-src 'self'; 
-               script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:*; 
-               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
-               img-src 'self' data: blob: https://* http://localhost:*; 
-               connect-src 'self' http://localhost:* https://* ws://localhost:* wss://*; 
-               font-src 'self' https://fonts.gstatic.com; 
-               object-src 'none'; 
-               base-uri 'self'; 
-               form-action 'self'; 
-               frame-ancestors 'none';">
-  
   <!-- Material Icons Outlined 核心加载 -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
   
