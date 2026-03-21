@@ -133,32 +133,61 @@
         </header>
         <div class="attendance-card">
           <div class="attendance-status">
-            <div class="status-circle">
+            <div class="status-circle" :class="{ 'status-done': attendanceStatus.checkedIn && attendanceStatus.checkedOut }">
               <el-icon class="status-icon">
                 <Timer />
               </el-icon>
             </div>
             <p class="status-text">
-              今日未打卡
+              {{ attendanceStatus.text }}
             </p>
             <p class="status-time">
               {{ currentTime }}
             </p>
+            <div v-if="todayAttendance && todayAttendance.checkInTime" class="attendance-times">
+              <span v-if="todayAttendance.checkInTime" class="time-item">
+                上班: {{ todayAttendance.checkInTime.substring(11, 16) }}
+              </span>
+              <span v-if="todayAttendance.checkOutTime" class="time-item">
+                下班: {{ todayAttendance.checkOutTime.substring(11, 16) }}
+              </span>
+            </div>
           </div>
           <div class="attendance-actions">
-            <el-button type="primary" size="large" @click="handlePunch('in')">
+            <el-button 
+              type="primary" 
+              size="large" 
+              :disabled="attendanceStatus.checkedIn"
+              :loading="loading"
+              @click="handlePunch('in')"
+            >
               上班打卡
             </el-button>
-            <el-button type="success" size="large" @click="handlePunch('out')">
+            <el-button 
+              type="success" 
+              size="large" 
+              :disabled="!attendanceStatus.checkedIn || attendanceStatus.checkedOut"
+              :loading="loading"
+              @click="handlePunch('out')"
+            >
               下班打卡
             </el-button>
           </div>
         </div>
         <section class="wb-section">
           <h3 class="wb-section__title">
-            本月考勤记录
+            本月考勤记录 ({{ attendanceRecords.length }}条)
           </h3>
-          <el-empty :image-size="60" description="暂无考勤记录" />
+          <div v-if="attendanceRecords.length > 0" class="attendance-list">
+            <div v-for="record in attendanceRecords.slice(0, 10)" :key="record.id" class="attendance-item">
+              <span class="attendance-date">{{ record.attendanceDate }}</span>
+              <span class="attendance-time">{{ record.checkInTime?.substring(11, 16) || '--:--' }} - {{ record.checkOutTime?.substring(11, 16) || '--:--' }}</span>
+              <el-tag :type="record.status === 'NORMAL' ? 'success' : 'warning'" size="small">
+                {{ record.status === 'NORMAL' ? '正常' : '异常' }}
+              </el-tag>
+            </div>
+          </div>
+          <el-empty v-else :image-size="60" description="暂无考勤记录" />
         </section>
       </div>
 
@@ -169,7 +198,7 @@
             待办事项
           </h2>
           <div class="view-actions">
-            <el-button type="primary">
+            <el-button type="primary" @click="router.push('/todo')">
               新建待办
             </el-button>
           </div>
@@ -177,7 +206,7 @@
         <div class="todo-list">
           <div v-if="todos.length > 0" class="todo-stack">
             <div
-              v-for="todo in todos"
+              v-for="todo in todos.slice(0, 5)"
               :key="todo.id"
               class="todo-tile"
               @click="handleTodoClick(todo)"
@@ -191,6 +220,11 @@
               </div>
               <el-checkbox size="large" @click.stop="handleTodoComplete(todo)" />
             </div>
+            <div v-if="todos.length > 5" class="todo-more">
+              <el-button link type="primary" @click="router.push('/todo')">
+                查看全部 {{ todos.length }} 条待办
+              </el-button>
+            </div>
           </div>
           <el-empty v-else :image-size="80" description="没有待办事项" />
         </div>
@@ -203,13 +237,29 @@
             日程安排
           </h2>
           <div class="view-actions">
-            <el-button type="primary">
+            <el-button type="primary" @click="router.push('/calendar')">
               新建日程
             </el-button>
           </div>
         </header>
         <div class="schedule-content">
-          <el-empty :image-size="80" description="暂无日程安排" />
+          <div v-if="scheduleList.length > 0" class="schedule-list">
+            <div v-for="schedule in scheduleList.slice(0, 5)" :key="schedule.id" class="schedule-item">
+              <div class="schedule-time">
+                {{ schedule.startTime?.substring(5, 16) || '' }}
+              </div>
+              <div class="schedule-info">
+                <p class="schedule-title">{{ schedule.title }}</p>
+                <span v-if="schedule.location" class="schedule-location">{{ schedule.location }}</span>
+              </div>
+            </div>
+            <div v-if="scheduleList.length > 5" class="schedule-more">
+              <el-button link type="primary" @click="router.push('/calendar')">
+                查看全部日程
+              </el-button>
+            </div>
+          </div>
+          <el-empty v-else :image-size="80" description="暂无日程安排" />
         </div>
       </div>
 
@@ -236,18 +286,32 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import {
   Search, Timer, Tickets, Management, Finished,
   Money, FolderOpened, ChatLineRound, VideoPlay, Calendar,
   DocumentCopy, Clock, Notebook, Files
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { getOverview } from '@/api/im/workbench'
+import { getTodayStatus, checkIn as apiCheckIn, checkOut as apiCheckOut, getAttendanceList } from '@/api/im/attendance'
+import { getMyTasks } from '@/api/im/task'
+import { getPendingApprovals } from '@/api/im/approval'
+import { getSchedulesByRange } from '@/api/im/schedule'
 
 const store = useStore()
+const router = useRouter()
 const activeMenu = ref('apps')
 const activeApprovalTab = ref('pending')
 const searchQuery = ref('')
 const currentTime = ref('')
+const loading = ref(false)
+const overview = ref({})
+const todayAttendance = ref(null)
+const attendanceRecords = ref([])
+const todos = ref([])
+const approvalList = ref([])
+const scheduleList = ref([])
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const displayName = computed(() => currentUser.value.nickname || currentUser.value.username || '成员')
@@ -273,9 +337,9 @@ const currentDateText = computed(() => {
 // 二级菜单配置
 const subMenus = computed(() => [
   { key: 'apps', label: '常用应用', icon: Files, badge: 0 },
-  { key: 'approval', label: '审批', icon: Finished, badge: 0 },
+  { key: 'approval', label: '审批', icon: Finished, badge: overview.value.approvalCount || 0 },
   { key: 'attendance', label: '考勤', icon: Clock, badge: 0 },
-  { key: 'todo', label: '待办', icon: Notebook, badge: todos.value.length },
+  { key: 'todo', label: '待办', icon: Notebook, badge: overview.value.todoCount || todos.value.length },
   { key: 'schedule', label: '日程', icon: Calendar, badge: 0 },
   { key: 'report', label: '工作报告', icon: DocumentCopy, badge: 0 }
 ])
@@ -289,24 +353,18 @@ const approvalTabs = ref([
 
 // 常用应用
 const commonApps = ref([
-  { key: 'punch', label: '签到打卡', elIcon: Timer, iconClass: 'icon-orange' },
-  { key: 'flow', label: '审批流', elIcon: Finished, iconClass: 'icon-blue' },
-  { key: 'report', label: '周报/日报', elIcon: Tickets, iconClass: 'icon-green' },
-  { key: 'task', label: '协作待办', elIcon: Management, iconClass: 'icon-purple' },
-  { key: 'meeting', label: '视频会议', elIcon: VideoPlay, iconClass: 'icon-pink' }
+  { key: 'punch', label: '签到打卡', elIcon: Timer, iconClass: 'icon-orange', route: null, action: 'attendance' },
+  { key: 'flow', label: '审批流', elIcon: Finished, iconClass: 'icon-blue', route: '/approval' },
+  { key: 'report', label: '周报/日报', elIcon: Tickets, iconClass: 'icon-green', action: 'report' },
+  { key: 'task', label: '协作待办', elIcon: Management, iconClass: 'icon-purple', route: '/todo' },
+  { key: 'meeting', label: '视频会议', elIcon: VideoPlay, iconClass: 'icon-pink', action: 'meeting' }
 ])
 
 // 全量应用
 const otherApps = ref([
-  { key: 'finance', label: '财务报销', elIcon: Money, iconClass: 'icon-teal' },
-  { key: 'disk', label: '企业网盘', elIcon: FolderOpened, iconClass: 'icon-indigo' },
-  { key: 'assistant', label: 'AI助手', elIcon: ChatLineRound, iconClass: 'icon-cyan' }
-])
-
-// 待办事项
-const todos = ref([
-  { id: 1, title: '审核 Q4 前端架构方案', deadline: '今天 18:00', priorityClass: 'high' },
-  { id: 2, title: '部门周例会 - 302 会议室', deadline: '明天 10:00', priorityClass: 'medium' }
+  { key: 'finance', label: '财务报销', elIcon: Money, iconClass: 'icon-teal', action: 'finance' },
+  { key: 'disk', label: '企业网盘', elIcon: FolderOpened, iconClass: 'icon-indigo', route: '/documents' },
+  { key: 'assistant', label: 'AI助手', elIcon: ChatLineRound, iconClass: 'icon-cyan', route: '/assistant' }
 ])
 
 // 方法
@@ -315,6 +373,22 @@ const handleMenuChange = (key) => {
 }
 
 const handleAppClick = (app) => {
+  // 如果有路由，跳转到对应页面
+  if (app.route) {
+    router.push(app.route)
+    return
+  }
+  // 如果有action，切换到对应视图
+  if (app.action) {
+    if (app.action === 'attendance') {
+      activeMenu.value = 'attendance'
+    } else if (app.action === 'report') {
+      activeMenu.value = 'report'
+    } else {
+      ElMessage.info(`${app.label}功能开发中`)
+    }
+    return
+  }
   ElMessage.success(`正在进入: ${app.label}`)
 }
 
@@ -327,12 +401,122 @@ const handleTodoComplete = (todo) => {
   todos.value = todos.value.filter(t => t.id !== todo.id)
 }
 
-const handlePunch = (type) => {
-  const action = type === 'in' ? '上班' : '下班'
-  ElMessage.success(`${action}打卡成功`)
+const handlePunch = async (type) => {
+  try {
+    loading.value = true
+    const action = type === 'in' ? '上班' : '下班'
+    const apiCall = type === 'in' ? apiCheckIn : apiCheckOut
+    const res = await apiCall({})
+    if (res.code === 200) {
+      ElMessage.success(`${action}打卡成功`)
+      await loadTodayAttendance()
+    } else {
+      ElMessage.error(res.msg || `${action}打卡失败`)
+    }
+  } catch (error) {
+    console.error('打卡失败:', error)
+    ElMessage.error('打卡失败，请重试')
+  } finally {
+    loading.value = false
+  }
 }
 
 const formatDate = (d) => d
+
+// 加载数据方法
+const loadOverview = async () => {
+  try {
+    const res = await getOverview()
+    if (res.code === 200) {
+      overview.value = res.data || {}
+    }
+  } catch (error) {
+    console.error('加载概览数据失败:', error)
+  }
+}
+
+const loadTodayAttendance = async () => {
+  try {
+    const res = await getTodayStatus()
+    if (res.code === 200) {
+      todayAttendance.value = res.data || null
+    }
+  } catch (error) {
+    console.error('加载今日考勤失败:', error)
+  }
+}
+
+const loadAttendanceRecords = async () => {
+  try {
+    const now = new Date()
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    const formatDateStr = (d) => d.toISOString().split('T')[0]
+    const res = await getAttendanceList(formatDateStr(startDate), formatDateStr(endDate))
+    if (res.code === 200) {
+      attendanceRecords.value = res.data || []
+    }
+  } catch (error) {
+    console.error('加载考勤记录失败:', error)
+  }
+}
+
+const loadTodos = async () => {
+  try {
+    const res = await getMyTasks({ status: 'PENDING' })
+    if (res.code === 200) {
+      todos.value = (res.data || res.rows || []).map(t => ({
+        id: t.id,
+        title: t.title,
+        deadline: t.dueDate || t.deadline || '无截止日期',
+        priorityClass: t.priority === 'HIGH' ? 'high' : t.priority === 'MEDIUM' ? 'medium' : 'low'
+      }))
+    }
+  } catch (error) {
+    console.error('加载待办失败:', error)
+  }
+}
+
+const loadApprovals = async () => {
+  try {
+    const res = await getPendingApprovals()
+    if (res.code === 200) {
+      approvalList.value = res.data || res.rows || []
+      approvalTabs.value[0].count = approvalList.value.length
+    }
+  } catch (error) {
+    console.error('加载审批失败:', error)
+  }
+}
+
+const loadSchedules = async () => {
+  try {
+    const today = new Date()
+    const start = today.toISOString().split('T')[0]
+    const end = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const res = await getSchedulesByRange(start, end)
+    if (res.code === 200) {
+      scheduleList.value = res.data || []
+    }
+  } catch (error) {
+    console.error('加载日程失败:', error)
+  }
+}
+
+// 考勤状态计算
+const attendanceStatus = computed(() => {
+  if (!todayAttendance.value || !todayAttendance.value.id) {
+    return { text: '今日未打卡', checkedIn: false, checkedOut: false }
+  }
+  const att = todayAttendance.value
+  if (att.checkInTime && att.checkOutTime) {
+    return { text: '今日已完成打卡', checkedIn: true, checkedOut: true }
+  }
+  if (att.checkInTime) {
+    return { text: '已上班打卡', checkedIn: true, checkedOut: false }
+  }
+  return { text: '今日未打卡', checkedIn: false, checkedOut: false }
+})
 
 // 更新当前时间
 const updateTime = () => {
@@ -345,6 +529,13 @@ let timeInterval = null
 onMounted(() => {
   updateTime()
   timeInterval = setInterval(updateTime, 1000)
+  // 加载数据
+  loadOverview()
+  loadTodayAttendance()
+  loadAttendanceRecords()
+  loadTodos()
+  loadApprovals()
+  loadSchedules()
 })
 
 onUnmounted(() => {
@@ -757,6 +948,14 @@ onUnmounted(() => {
   background: var(--dt-brand-lighter);
   @include flex-center;
   margin: 0 auto var(--dt-spacing-md);
+
+  &.status-done {
+    background: var(--dt-success-bg);
+    
+    .status-icon {
+      color: var(--dt-success-color);
+    }
+  }
 }
 
 .status-icon {
@@ -777,10 +976,50 @@ onUnmounted(() => {
   margin: 0;
 }
 
+.attendance-times {
+  margin-top: var(--dt-spacing-md);
+  display: flex;
+  justify-content: center;
+  gap: var(--dt-spacing-xl);
+
+  .time-item {
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+  }
+}
+
 .attendance-actions {
   display: flex;
   gap: var(--dt-spacing-lg);
   justify-content: center;
+}
+
+.attendance-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacing-sm);
+}
+
+.attendance-item {
+  display: flex;
+  align-items: center;
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-md);
+  gap: var(--dt-spacing-lg);
+
+  .attendance-date {
+    min-width: 100px;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-primary);
+    font-weight: var(--dt-font-weight-medium);
+  }
+
+  .attendance-time {
+    flex: 1;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+  }
 }
 
 // ============================================================================
@@ -800,6 +1039,11 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--dt-spacing-md);
+}
+
+.todo-more {
+  text-align: center;
+  padding: var(--dt-spacing-md);
 }
 
 .todo-tile {
@@ -859,9 +1103,59 @@ onUnmounted(() => {
 
 .schedule-content {
   flex: 1;
+}
+
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacing-md);
+}
+
+.schedule-item {
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-md);
+  gap: var(--dt-spacing-lg);
+  cursor: pointer;
+  transition: all var(--dt-transition-base);
+
+  &:hover {
+    box-shadow: var(--dt-shadow-card);
+    transform: translateX(2px);
+  }
+
+  .schedule-time {
+    min-width: 100px;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-brand-color);
+    font-weight: var(--dt-font-weight-medium);
+  }
+
+  .schedule-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .schedule-title {
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-primary);
+    margin: 0;
+    @include text-ellipsis;
+  }
+
+  .schedule-location {
+    font-size: var(--dt-font-size-xs);
+    color: var(--dt-text-tertiary);
+    margin-top: var(--dt-spacing-xs);
+    display: block;
+  }
+}
+
+.schedule-more {
+  text-align: center;
+  padding: var(--dt-spacing-md);
 }
 
 // ============================================================================

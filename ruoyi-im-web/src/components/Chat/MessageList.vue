@@ -57,14 +57,60 @@
         :style="contextMenuStyle"
         @click.stop
       >
-        <div class="menu-item" @click="emitMenuCommand('reply')">回复</div>
-        <div class="menu-item" @click="emitMenuCommand('copy')">复制</div>
-        <div class="menu-item" @click="emitMenuCommand('forward')">转发</div>
+        <!-- 表情回应 -->
+        <div class="menu-item emoji-row">
+          <span
+            v-for="emoji in quickEmojis"
+            :key="emoji"
+            class="emoji-btn"
+            @click="handleQuickReaction(emoji)"
+          >{{ emoji }}</span>
+          <el-popover
+            placement="top"
+            :width="200"
+            trigger="click"
+            popper-class="emoji-picker-popper"
+          >
+            <template #reference>
+              <span class="emoji-btn more">+</span>
+            </template>
+            <div class="emoji-grid">
+              <span
+                v-for="e in allEmojis"
+                :key="e"
+                class="emoji-option"
+                @click="handleQuickReaction(e)"
+              >{{ e }}</span>
+            </div>
+          </el-popover>
+        </div>
+        <div class="menu-divider" />
+        <div class="menu-item" @click="emitMenuCommand('reply')">
+          回复
+        </div>
+        <div class="menu-item" @click="emitMenuCommand('copy')">
+          复制
+        </div>
+        <div class="menu-item" @click="emitMenuCommand('forward')">
+          转发
+        </div>
+        <div v-if="sessionType === 'GROUP'" class="menu-item" @click="emitMenuCommand('readDetail')">
+          查看已读详情
+        </div>
+        <div
+          v-if="contextMenu.message?.isOwn && contextMenu.message?.type === 'TEXT'"
+          class="menu-item"
+          @click="emitMenuCommand('edit')"
+        >
+          编辑
+        </div>
         <div
           v-if="contextMenu.message?.isOwn"
           class="menu-item danger"
           @click="emitMenuCommand('recall')"
-        >撤回</div>
+        >
+          撤回
+        </div>
       </div>
     </teleport>
   </div>
@@ -176,6 +222,7 @@ const getSpacingClass = (absoluteIndex) => {
   return prev.isOwn === curr.isOwn ? 'spacing-small' : 'spacing-large'
 }
 
+// eslint-disable-next-line no-unused-vars
 const getItemHeight = (index) => {
   const actualIndex = getActualIndex(index)
   if (actualIndex >= 0 && actualIndex < props.messages.length) {
@@ -245,12 +292,21 @@ const handleScroll = (e) => {
   updateVirtualScroll()
 }
 
+// 表情回应相关
+const quickEmojis = ['👍', '❤️', '😮', '😂', '😢', '🔥']
+const allEmojis = ['👍', '❤️', '😮', '😂', '😢', '🔥', '👏', '🎉', '🤔', '🙄', '😍', '🆗', '🙏', '💪', '👎']
+const handleQuickReaction = (emoji) => {
+  const msg = contextMenu.message
+  closeContextMenu()
+  if (msg) emit('command', 'reaction', { ...msg, emoji })
+}
+
 const contextMenu = reactive({ show: false, x: 0, y: 0, message: null })
 const contextMenuStyle = computed(() => ({ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }))
 
 const handleContextMenu = ({ x, y, message }) => {
-  const menuWidth = 120
-  const menuHeight = message?.isOwn ? 120 : 80
+  const menuWidth = 180
+  const menuHeight = message?.isOwn ? 200 : 160
   const windowWidth = window.innerWidth
   const windowHeight = window.innerHeight
 
@@ -403,7 +459,7 @@ defineExpose({ scrollToBottom, scrollToMessage, listRef })
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-sm);
-  min-width: 120px;
+  min-width: 180px;
   padding: 4px;
   z-index: var(--dt-z-popover);
   box-shadow: var(--dt-shadow-2);
@@ -429,5 +485,55 @@ defineExpose({ scrollToBottom, scrollToMessage, listRef })
 .msg-context-menu .menu-item.danger:hover {
   background: var(--dt-error-bg);
   color: var(--dt-error-color);
+}
+
+.msg-context-menu .emoji-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+}
+
+.msg-context-menu .emoji-btn {
+  font-size: 18px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.msg-context-menu .emoji-btn:hover {
+  background: var(--dt-brand-lighter);
+  transform: scale(1.2);
+}
+
+.msg-context-menu .emoji-btn.more {
+  font-size: 14px;
+  color: var(--dt-text-tertiary);
+  font-weight: 500;
+}
+
+.msg-context-menu .menu-divider {
+  height: 1px;
+  background: var(--dt-border-light);
+  margin: 4px 8px;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.emoji-option {
+  font-size: 20px;
+  cursor: pointer;
+  text-align: center;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.emoji-option:hover {
+  background: var(--dt-bg-hover);
 }
 </style>

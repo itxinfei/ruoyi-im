@@ -127,17 +127,20 @@
     >
       <el-form label-position="top">
         <el-form-item label="当前旧密码">
-          <el-input type="password" show-password />
+          <el-input v-model="passwordForm.oldPassword" type="password" show-password placeholder="请输入当前密码" />
         </el-form-item>
         <el-form-item label="新密码">
-          <el-input type="password" show-password />
+          <el-input v-model="passwordForm.newPassword" type="password" show-password placeholder="请输入新密码（至少6位）" />
+        </el-form-item>
+        <el-form-item label="确认新密码">
+          <el-input v-model="passwordForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showPasswordDialog = false">
           取消
         </el-button>
-        <el-button type="primary" @click="handlePasswordUpdate">
+        <el-button type="primary" :loading="passwordLoading" @click="handlePasswordUpdate">
           确认修改
         </el-button>
       </template>
@@ -147,13 +150,19 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getUserInfo, updateUser, uploadAvatar } from '@/api/im/user'
+import { getUserInfo, updateUser, uploadAvatar, changePassword } from '@/api/im/user'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
 
 const userInfo = ref({ id: '', username: '', nickname: '', avatar: '', gender: 0, position: '', department: '', email: '', phone: '' })
 const showPasswordDialog = ref(false)
 const avatarInput = ref(null)
+const passwordForm = ref({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+const passwordLoading = ref(false)
 
 const loadUser = async () => {
   const res = await getUserInfo()
@@ -174,7 +183,7 @@ const handleAvatarChange = async (e) => {
   const file = e.target.files[0]
   if (!file) return
   const formData = new FormData()
-  formData.append('avatar', file)
+  formData.append('avatarfile', file)
   const res = await uploadAvatar(formData)
   if (res.code === 200) {
     userInfo.value.avatar = res.data
@@ -182,9 +191,40 @@ const handleAvatarChange = async (e) => {
   }
 }
 
-const handlePasswordUpdate = () => {
-  ElMessage.warning('密码修改服务正在维护中')
-  showPasswordDialog.value = false
+const handlePasswordUpdate = async () => {
+  if (!passwordForm.value.oldPassword || !passwordForm.value.newPassword) {
+    ElMessage.warning('请填写完整信息')
+    return
+  }
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    ElMessage.warning('两次输入的新密码不一致')
+    return
+  }
+  if (passwordForm.value.newPassword.length < 6) {
+    ElMessage.warning('新密码长度不能少于6位')
+    return
+  }
+  
+  try {
+    passwordLoading.value = true
+    const res = await changePassword(
+      userInfo.value.id,
+      passwordForm.value.oldPassword,
+      passwordForm.value.newPassword
+    )
+    if (res.code === 200) {
+      ElMessage.success('密码修改成功')
+      showPasswordDialog.value = false
+      passwordForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
+    } else {
+      ElMessage.error(res.msg || '密码修改失败')
+    }
+  } catch (error) {
+    console.error('密码修改失败:', error)
+    ElMessage.error('密码修改失败，请重试')
+  } finally {
+    passwordLoading.value = false
+  }
 }
 
 onMounted(loadUser)

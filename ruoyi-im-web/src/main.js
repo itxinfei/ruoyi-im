@@ -8,35 +8,18 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-// 预加载 Material Icons 字体，避免闪烁
-const preloadMaterialIcons = () => {
-  const link = document.createElement('link')
-  link.rel = 'preload'
-  link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined'
-  link.as = 'style'
-  link.onload = function () {
-    this.onload = null
-    this.rel = 'stylesheet'
-
-    // 字体加载完成后的处理
-    setTimeout(() => {
-      document.querySelectorAll('.material-icons-outlined').forEach(el => {
-        el.classList.add('loaded')
-      })
-    }, 100)
-  }
-  document.head.appendChild(link)
-}
-
-// 立即执行预加载
-preloadMaterialIcons()
-
+/**
+ * RuoYi-IM 启动入口 (加固版)
+ * 1. 移除了阻塞渲染的外部 CDN 字体加载逻辑
+ * 2. 优化了插件挂载顺序
+ */
 const app = createApp(App)
 
-app.use(router)
 app.use(store)
+app.use(router)
 app.use(ElementPlus)
 
+// 注册全量 Element Icons
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }

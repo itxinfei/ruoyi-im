@@ -163,6 +163,15 @@ service.interceptors.response.use(
        * 401: Token 过期或无效，尝试刷新 token 并重试
        */
       if (status === 401 && !error.config._retry) {
+        // 如果是登出或刷新接口本身报 401，严禁重试，直接清理跳转
+        const isAuthService = error.config.url.includes('/auth/logout') || error.config.url.includes('/auth/refresh');
+        if (isAuthService) {
+          tokenManager.clearAll();
+          csrfManager.clearToken();
+          window.location.href = '/login';
+          return Promise.reject(error);
+        }
+
         // 标记为已重试过，防止无限循环
         error.config._retry = true
 

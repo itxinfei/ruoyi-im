@@ -217,7 +217,6 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useTheme } from '@/composables/useTheme'
-import { resetValidationTime } from '@/router'
 
 const store = useStore()
 const router = useRouter()
@@ -337,7 +336,6 @@ const handleLogin = async () => {
     }
 
     ElMessage.success('登录成功')
-    resetValidationTime()
 
     const redirectUrl = router.currentRoute.value.query.redirect || '/'
     router.push(redirectUrl)

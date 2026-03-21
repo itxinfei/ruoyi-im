@@ -27,14 +27,19 @@
         <slot name="bubble" />
 
         <div class="message-actions">
-          <button class="action-btn" @click.stop="emitCommand('reply')">回复</button>
-          <button class="action-btn" @click.stop="emitCommand('forward')">转发</button>
-          <button v-if="message.isOwn" class="action-btn danger" @click.stop="emitCommand('recall')">撤回</button>
+          <button class="action-btn" @click.stop="emitCommand('reply')">
+            回复
+          </button>
+          <button class="action-btn" @click.stop="emitCommand('forward')">
+            转发
+          </button>
+          <button v-if="message.isOwn" class="action-btn danger" @click.stop="emitCommand('recall')">
+            撤回
+          </button>
         </div>
 
         <!-- 接收方时间戳 -->
         <span v-if="!message.isOwn" class="time-received">{{ formatTime(message.timestamp) }}</span>
-
       </div>
     </div>
 
@@ -91,14 +96,14 @@ const formatTime = (timestamp) => {
   const date = new Date(timestamp)
   const now = new Date()
   const isToday = date.toDateString() === now.toDateString()
-  
+
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
-  
+
   if (isToday) {
     return `${hours}:${minutes}`
   }
-  
+
   const month = date.getMonth() + 1
   const day = date.getDate()
   return `${month}-${day} ${hours}:${minutes}`
@@ -140,7 +145,7 @@ const formatTime = (timestamp) => {
 }
 
 .message-item.is-highlighted .message-bubble {
-  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.25);
 }
 
 .avatar {

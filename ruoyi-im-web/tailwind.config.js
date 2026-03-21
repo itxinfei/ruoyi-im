@@ -8,24 +8,24 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // 品牌颜色
+        // 品牌颜色 - 钉钉风格
         primary: {
-          DEFAULT: '#1677ff',
-          hover: '#4096ff',
-          active: '#0958d9',
-          light: 'rgba(22, 119, 255, 0.1)',
-          bg: '#e6f4ff'
+          DEFAULT: '#0089ff',
+          hover: '#33a1ff',
+          active: '#006ed6',
+          light: 'rgba(0, 137, 255, 0.1)',
+          bg: '#f0f7ff'
         },
-        // 背景色
+        // 背景色 - 钉钉风格
         background: {
-          light: '#f4f7f9',
+          light: '#f5f6f7',
           dark: '#0f172a'
         },
-        // 语义颜色
-        success: '#52c41a',
-        warning: '#faad14',
-        error: '#ff4d4f',
-        danger: '#f5222d',
+        // 语义颜色 - 钉钉风格
+        success: '#00b578',
+        warning: '#ff8f1f',
+        error: '#f54a45',
+        danger: '#f54a45',
         // Slate 色系（用于暗色模式）
         slate: {
           50: '#f8fafc',

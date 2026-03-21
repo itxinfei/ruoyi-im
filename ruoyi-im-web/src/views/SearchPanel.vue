@@ -16,13 +16,19 @@
       </div>
       <div class="search-scope">
         <div class="scope-tabs">
-          <button :class="{ active: scopeMode === 'global' }" @click="setScopeMode('global')">全局</button>
-          <button :class="{ active: scopeMode === 'session' }" @click="setScopeMode('session')">会话内</button>
+          <button :class="{ active: scopeMode === 'global' }" @click="setScopeMode('global')">
+            全局
+          </button>
+          <button :class="{ active: scopeMode === 'session' }" @click="setScopeMode('session')">
+            会话内
+          </button>
         </div>
         <div v-if="scopeMode === 'session'" class="scope-tip">
           <span>当前会话</span>
           <span v-if="scopeSession?.name" class="scope-name">{{ scopeSession.name }}</span>
-          <button class="scope-clear" @click="clearScope">清除</button>
+          <button class="scope-clear" @click="clearScope">
+            清除
+          </button>
         </div>
       </div>
       <div class="search-type-tabs">
@@ -40,22 +46,45 @@
 
     <!-- 搜索结果 -->
     <div v-loading="loading" class="search-content">
-      <!-- 热门搜索 -->
-      <div v-if="!keyword && !searched" class="hot-searches">
-        <div class="section-title">
-          热门搜索
-        </div>
-        <div class="hot-keyword-list">
-          <div
-            v-for="(kw, index) in hotKeywords"
-            :key="`hot-${index}`"
-            class="hot-keyword"
-            @click="searchWithKeyword(kw)"
-          >
-            {{ kw }}
+      <!-- 搜索历史与热门搜索 -->
+      <div v-if="!keyword && !searched" class="initial-section">
+        <!-- 搜索历史 -->
+        <div v-if="searchHistory.length > 0" class="history-section">
+          <div class="section-title">
+            <span>搜索历史</span>
+            <button class="clear-btn" @click="clearSearchHistory">
+              清空
+            </button>
           </div>
-          <div v-if="!hotKeywords.length" class="empty-tip">
-            暂无热门搜索
+          <div class="history-list">
+            <div
+              v-for="(item, index) in searchHistory"
+              :key="`history-${index}`"
+              class="history-item"
+              @click="searchWithKeyword(item)"
+            >
+              <span class="material-icons-outlined history-icon">history</span>
+              <span class="history-text">{{ item }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- 热门搜索 -->
+        <div class="hot-searches">
+          <div class="section-title">
+            热门搜索
+          </div>
+          <div class="hot-keyword-list">
+            <div
+              v-for="(kw, index) in hotKeywords"
+              :key="`hot-${index}`"
+              class="hot-keyword"
+              @click="searchWithKeyword(kw)"
+            >
+              {{ kw }}
+            </div>
+            <div v-if="!hotKeywords.length" class="empty-tip">
+              暂无热门搜索
+            </div>
           </div>
         </div>
       </div>
@@ -93,7 +122,9 @@
                   v-if="scopeMode === 'session'"
                   class="locate-btn"
                   @click.stop="locateMessage(msg)"
-                >定位</button>
+                >
+                  定位
+                </button>
               </div>
             </div>
           </div>
@@ -275,6 +306,7 @@ const searchType = ref('all')
 const loading = ref(false)
 const searched = ref(false)
 const hotKeywords = ref([])
+const searchHistory = ref([])
 const results = ref({})
 const scopeSession = ref(null)
 const scopeMode = ref('global')
@@ -314,11 +346,41 @@ const loadHotKeywords = async () => {
   }
 }
 
+// 加载搜索历史
+const loadSearchHistory = () => {
+  try {
+    const saved = localStorage.getItem('im_search_history')
+    if (saved) searchHistory.value = JSON.parse(saved)
+  } catch (e) {
+    console.error('加载搜索历史失败', e)
+  }
+}
+
+// 保存到搜索历史
+const saveToHistory = (kw) => {
+  if (!kw || !kw.trim()) return
+  const trimmed = kw.trim()
+  const index = searchHistory.value.indexOf(trimmed)
+  if (index !== -1) searchHistory.value.splice(index, 1)
+  searchHistory.value.unshift(trimmed)
+  searchHistory.value = searchHistory.value.slice(0, 10)
+  localStorage.setItem('im_search_history', JSON.stringify(searchHistory.value))
+}
+
+// 清空搜索历史
+const clearSearchHistory = () => {
+  searchHistory.value = []
+  localStorage.removeItem('im_search_history')
+}
+
 const handleSearch = async () => {
   if (!keyword.value.trim()) return
 
   loading.value = true
   searched.value = true
+
+  // 保存到搜索历史
+  saveToHistory(keyword.value.trim())
 
   try {
     const res = await globalSearch({
@@ -365,14 +427,18 @@ const loadScope = () => {
   try {
     const raw = localStorage.getItem('im_search_scope_session')
     if (raw) scopeSession.value = JSON.parse(raw)
-  } catch {}
+  } catch {
+    // 忽略解析错误
+  }
 }
 
 const loadKeyword = () => {
   try {
     const raw = localStorage.getItem('im_search_keyword')
     if (raw) keyword.value = raw
-  } catch {}
+  } catch {
+    // 忽略解析错误
+  }
 }
 
 const clearScope = () => {
@@ -418,6 +484,7 @@ const goToGroup = (group) => {
 onMounted(() => {
   loadScope()
   loadKeyword()
+  loadSearchHistory()
   if (scopeSession.value?.sessionId) scopeMode.value = 'session'
   if (keyword.value.trim()) handleSearch()
 })
@@ -583,6 +650,70 @@ loadHotKeywords()
   flex: 1;
   overflow-y: auto;
   padding: var(--dt-spacing-md, 16px);
+}
+
+.initial-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-spacing-lg, 24px);
+}
+
+.history-section {
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-tertiary);
+    margin-bottom: var(--dt-spacing-sm, 12px);
+
+    .clear-btn {
+      border: none;
+      background: transparent;
+      color: var(--dt-brand-color);
+      font-size: var(--dt-font-size-xs);
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .history-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dt-spacing-xs, 8px);
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: var(--dt-spacing-xs, 4px);
+    padding: var(--dt-spacing-xs, 6px) var(--dt-spacing-sm, 12px);
+    background: var(--dt-bg-body);
+    border-radius: var(--dt-radius-full, 16px);
+    font-size: var(--dt-font-size-xs);
+    cursor: pointer;
+    transition: all var(--dt-transition-fast);
+    max-width: 150px;
+
+    &:hover {
+      background: var(--dt-brand-bg);
+      color: var(--dt-brand-color);
+    }
+
+    .history-icon {
+      font-size: var(--dt-icon-size-sm, 14px);
+      color: var(--dt-text-tertiary);
+    }
+
+    .history-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 }
 
 .hot-searches {

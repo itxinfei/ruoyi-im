@@ -220,6 +220,11 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setSendRetryCount(0);
         message.setDeliveredTime(LocalDateTime.now());
 
+        // 生成递增 Seq (Doc-34 §2.1)
+        String seqKey = "im:seq:" + conversationId;
+        Long nextSeq = redisUtil.increment(seqKey);
+        message.setSeq(nextSeq);
+
         imMessageMapper.insertImMessage(message);
 
         if (clientMsgId != null && !clientMsgId.isEmpty()) {
@@ -308,8 +313,26 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
         }
 
-        // 异步广播消息
-        broadcastService.broadcastMessageToConversation(conversationId, message.getId(), userId);
+        // 异步解耦分发与 ACK 回执 (Doc-01 §3.2 & Doc-34 §2.2)
+        List<Long> targetUserIds = new ArrayList<>();
+        if (members != null) {
+            for (com.ruoyi.im.domain.ImConversationMember member : members) {
+                targetUserIds.add(member.getUserId());
+            }
+        } else {
+            targetUserIds.add(userId);
+            if (request.getReceiverId() != null) {
+                targetUserIds.add(request.getReceiverId());
+            }
+        }
+
+        com.ruoyi.im.listener.MessageSendEvent sendEvent = new com.ruoyi.im.listener.MessageSendEvent(
+            this, 
+            vo, 
+            targetUserIds, 
+            clientMsgId
+        );
+        eventPublisher.publishEvent(sendEvent);
 
         return vo;
     }
@@ -828,6 +851,30 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         imMessageMapper.insertImMessage(replyMessage);
         return replyMessage.getId();
+    }
+
+    @Override
+    public List<ImMessageVO> getMessagesBySeqRange(Long conversationId, Long startSeq, Long endSeq) {
+        log.info("Gap filling: fetching messages for conversation {} from seq {} to {}", 
+                 conversationId, startSeq, endSeq);
+        
+        List<ImMessage> messageList = imMessageMapper.selectList(
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImMessage>()
+                .eq(ImMessage::getConversationId, conversationId)
+                .gt(ImMessage::getSeq, startSeq)
+                .le(ImMessage::getSeq, endSeq)
+                .orderByAsc(ImMessage::getSeq)
+        );
+
+        List<ImMessageVO> voList = new ArrayList<>();
+        // 简化版转换逻辑，仅针对同步包优化性能
+        for (ImMessage message : messageList) {
+            ImMessageVO vo = new ImMessageVO();
+            BeanUtils.copyProperties(message, vo);
+            vo.setContent(encryptionUtil.decryptMessage(message.getContent()));
+            voList.add(vo);
+        }
+        return voList;
     }
 
     @Override

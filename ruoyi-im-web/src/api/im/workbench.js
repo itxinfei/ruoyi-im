@@ -4,6 +4,17 @@
 import request from '../request'
 
 /**
+ * 获取工作台概览数据
+ * @returns {Promise}
+ */
+export function getOverview() {
+  return request({
+    url: '/api/im/workbench/overview',
+    method: 'get'
+  })
+}
+
+/**
  * 获取待办列表
  * @param {Object} params - 查询参数
  * @param {number} params.pageNum - 页码

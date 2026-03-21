@@ -55,6 +55,10 @@ route_or_entry:
   - 用户从哪里进入该功能
 api_contract:
   - 已知接口或接口来源；未知则触发停机阻断 (HALT)
+ui_tokens:
+  - 必须采用的 CSS 变量标准，绝对禁止私自硬编码调色
+anti_conflict_scan:
+  - 承诺在写代码前执行全工作区 Grep 查重
 state_changes:
   - 需要变更的前端或后端状态
 acceptance:
@@ -87,3 +91,5 @@ notes:
 10. 任务卡只描述一个可交付闭环，不要把多个模块目标混成一个任务
 11. 如果任务目标是"钉钉 UI 复刻"，`ui_detail`、`gap`、`plan` 必须填写，且 `acceptance` 要包含视觉和交互对齐条目
 12. 任何任务执行前必须强制声明遵守《02-大模型研发规范.md》中的代码质量红线（如禁用TypeScript和特定Java9+语法）。
+13. 建类或写逻辑前，强制挂载前置搜查 (Pre-creation Scan) 约束点，绝不允许制造冗余工具类或覆写框架原有同名 Bean。
+14. 前端验收条件必须涵盖：内存回收已完成 (onUnmounted)，以及 100% UI 由 CSS Tokens 变量代跑。

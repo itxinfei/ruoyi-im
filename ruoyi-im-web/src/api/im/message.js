@@ -174,38 +174,50 @@ export function replyMessage(data) {
 }
 
 /**
+ * 切换消息表情反应（添加/取消）
+ * @param {number} messageId - 消息ID
+ * @param {string} emoji - 表情符号
+ * @returns {Promise}
+ */
+export function toggleMessageReaction(messageId, emoji) {
+  return request({
+    url: '/api/im/message/reaction/toggle',
+    method: 'post',
+    data: { messageId, emoji }
+  })
+}
+
+/**
  * 添加消息表情反应
  * @param {number} messageId - 消息ID
  * @param {Object} data - 反应数据
  * @param {string} data.emoji - 表情符号
  * @returns {Promise}
- * @deprecated 后端暂未实现此接口
  */
-export function addReaction(_messageId, _data) {
-  console.warn('addReaction: 后端暂未实现此接口')
-  return Promise.reject(new Error('后端暂未实现此接口'))
+export function addReaction(messageId, data) {
+  return toggleMessageReaction(messageId, data.emoji)
 }
 
 /**
  * 删除消息表情反应
  * @param {number} messageId - 消息ID
+ * @param {string} emoji - 表情符号
  * @returns {Promise}
- * @deprecated 后端暂未实现此接口
  */
-export function removeReaction(_messageId) {
-  console.warn('removeReaction: 后端暂未实现此接口')
-  return Promise.reject(new Error('后端暂未实现此接口'))
+export function removeReaction(messageId, emoji) {
+  return toggleMessageReaction(messageId, emoji)
 }
 
 /**
  * 获取消息的表情反应列表
  * @param {number} messageId - 消息ID
  * @returns {Promise}
- * @deprecated 后端暂未实现此接口
  */
-export function getMessageReactions(_messageId) {
-  console.warn('getMessageReactions: 后端暂未实现此接口')
-  return Promise.resolve({ data: [] })
+export function getMessageReactions(messageId) {
+  return request({
+    url: `/api/im/message/reaction/${messageId}`,
+    method: 'get'
+  })
 }
 
 /**

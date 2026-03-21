@@ -197,13 +197,15 @@ import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import {
   Search, Plus, UserFilled, Menu, StarFilled,
-  FolderOpened, ArrowRight, ChatDotRound
+  FolderOpened, ArrowRight, ChatDotRound, Link, Clock
 } from '@element-plus/icons-vue'
 import { getDepartment, getDepartmentMembers } from '@/api/im/organization'
 import { getContacts } from '@/api/im/contact'
 import OrganizationTree from '@/components/Contacts/OrganizationTree.vue'
 import NewFriendsView from '@/components/Contacts/NewFriendsView.vue'
 import GroupsView from '@/components/Contacts/GroupsView.vue'
+import ExternalContactsView from '@/components/Contacts/ExternalContactsView.vue'
+import FrequentContactsView from '@/components/Contacts/FrequentContactsView.vue'
 import UserProfileDialog from '@/components/Contacts/UserProfileDialog.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
@@ -314,7 +316,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 
     .icon-box {
       width: var(--dt-avatar-size-md, 32px); height: var(--dt-avatar-size-md, 32px); border-radius: var(--dt-radius-md, 8px); @include flex-center; color: var(--dt-text-primary); font-size: var(--dt-icon-size-lg, 18px);
-      &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); } &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); } &.green { background: var(--dt-success-bg); color: var(--dt-success-color); }
+      &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); } &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); } &.green { background: var(--dt-success-bg); color: var(--dt-success-color); } &.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; } &.cyan { background: rgba(6, 182, 212, 0.1); color: #06b6d4; }
     }
     span { font-size: var(--dt-font-size-sm, 14px); color: var(--dt-text-primary); }
   }

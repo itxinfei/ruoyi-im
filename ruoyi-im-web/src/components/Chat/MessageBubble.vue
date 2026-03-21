@@ -6,8 +6,12 @@
       :class="{ 'is-own': message.isOwn }"
       @click.stop="handleJump"
     >
-      <div class="reply-name">{{ replyInfo.name }}</div>
-      <div class="reply-text">{{ replyInfo.text }}</div>
+      <div class="reply-name">
+        {{ replyInfo.name }}
+      </div>
+      <div class="reply-text">
+        {{ replyInfo.text }}
+      </div>
     </div>
     <!-- 文本消息 -->
     <div v-if="message.type === 'TEXT'" class="text-content">
@@ -174,7 +178,7 @@ const parsedTextParts = computed(() => {
       parts.push(...splitMentions(content.slice(lastIndex, match.index)))
     }
     // 添加链接（拆分末尾标点，提升鲁棒性）
-    let link = match[0]
+    const link = match[0]
     let core = link
     let tail = ''
     const punct = link.match(/[.,!?;:)\]]+$/)
@@ -381,12 +385,12 @@ const handleFileDownload = () => {
 <style scoped lang="scss">
 .message-bubble {
   padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
-  border-radius: 4px 12px 12px 12px;
+  border-radius: 8px;
   font-size: var(--dt-font-size-base);
   line-height: 1.5;
   word-break: break-all;
   background: var(--dt-bubble-left-bg);
-  border: none;
+  border: 1px solid var(--dt-border-light);
   color: var(--dt-text-primary);
   transition: all var(--dt-transition-fast);
   max-width: 70%;
@@ -395,12 +399,11 @@ const handleFileDownload = () => {
 
   &.is-own {
     background: var(--dt-bubble-right-bg);
-    color: var(--dt-text-white);
+    color: var(--dt-text-primary);
     border: none;
-    border-radius: 12px 4px 12px 12px;
   }
 
-.text-link {
+  .text-link {
     color: var(--dt-brand-color);
     text-decoration: none;
     word-break: break-all;
@@ -409,32 +412,6 @@ const handleFileDownload = () => {
       text-decoration: underline;
     }
   }
-}
-
-.message-bubble::before {
-  content: '';
-  position: absolute;
-  left: -3px;
-  top: 14px;
-  width: 6px;
-  height: 6px;
-  background: var(--dt-bubble-left-bg);
-  transform: rotate(45deg);
-  border-radius: 1px;
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.message-bubble.is-own::before {
-  left: auto;
-  right: -3px;
-  background: var(--dt-bubble-right-bg);
-  opacity: 0.6;
-}
-
-.message-bubble.is-own .text-link {
-  color: var(--dt-text-white);
-  text-decoration: underline;
 }
 
 .text-mention {
@@ -446,14 +423,17 @@ const handleFileDownload = () => {
   color: var(--dt-error-color);
 }
 
+.message-bubble.is-own .text-link {
+  color: var(--dt-brand-active);
+}
+
 .message-bubble.is-own .text-mention {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--dt-brand-active);
 }
 
 .message-bubble.is-own .text-mention.is-me {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--dt-error-color);
 }
-
 .reply-preview {
   display: flex;
   flex-direction: column;
@@ -686,8 +666,8 @@ const handleFileDownload = () => {
     color: var(--dt-text-primary-dark);
 
     &.is-own {
-      background: var(--dt-brand-active);
-      color: var(--dt-text-primary);
+      background: var(--dt-bubble-right-bg);
+      color: var(--dt-text-primary-dark);
     }
   }
 
@@ -706,15 +686,5 @@ const handleFileDownload = () => {
       color: var(--dt-text-tertiary-dark);
     }
   }
-}
-
-:global(.dark) .message-bubble::before {
-  background: var(--dt-bg-hover-dark);
-  opacity: 0.5;
-}
-
-:global(.dark) .message-bubble.is-own::before {
-  background: var(--dt-brand-active);
-  opacity: 0.6;
 }
 </style>

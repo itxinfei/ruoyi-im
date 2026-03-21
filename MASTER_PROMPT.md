@@ -5,7 +5,7 @@
 ---
 
 ## 1. 项目背景与技术栈
-我是 RuoYi-IM 项目的开发者。本项目要求完美复刻 **Windows 版钉钉** 的 UI/UX。
+我是 RuoYi-IM 项目的开发者。本项目要求完美复刻 **Windows 版钉钉 8.2.0** 的 UI/UX。
 - **后端**：Java 1.8 (Spring Boot + MyBatis-Plus + MySQL 5.7)
 - **前端**：Vue 3 (Composition API + `<script setup lang="js">`)
 - **实时**：原生 WebSocket (带 Seq 序列号机制)

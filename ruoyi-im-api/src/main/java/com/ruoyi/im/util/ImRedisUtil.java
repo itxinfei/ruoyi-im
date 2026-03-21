@@ -513,6 +513,16 @@ public class ImRedisUtil {
         return loaded;
     }
 
+    /**
+     * 原子递增
+     */
+    public Long increment(String key) {
+        if (redisTemplate == null) {
+            return null;
+        }
+        return redisTemplate.opsForValue().increment(buildSimpleKey(key));
+    }
+
     // ==================== 私有方法 ====================
     /**
      * 构建简单缓存Key

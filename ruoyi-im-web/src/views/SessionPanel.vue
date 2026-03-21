@@ -77,19 +77,19 @@
         </div>
 
         <div class="item-content">
-        <div class="content-top">
+          <div class="content-top">
             <div class="session-name-row">
               <h3 class="session-name">
                 {{ session.name }}
               </h3>
             </div>
-          <span class="session-time">{{ formatTime(session.draftTime || session.lastMessageTime) }}</span>
-        </div>
-        <div class="content-bottom">
-          <div class="preview-wrapper">
-            <span class="preview-msg">{{ session.draftContent || session.lastMessage || '暂无消息' }}</span>
+            <span class="session-time">{{ formatTime(session.draftTime || session.lastMessageTime) }}</span>
           </div>
-        </div>
+          <div class="content-bottom">
+            <div class="preview-wrapper">
+              <span class="preview-msg">{{ session.draftContent || session.lastMessage || '暂无消息' }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -516,7 +516,7 @@ onMounted(async () => {
     }
 
     .tab-badge {
-      background: #f2f3f5;
+      background: var(--dt-bg-hover);
       color: var(--dt-text-tertiary);
       padding: 0 6px;
       border-radius: 10px;
@@ -593,11 +593,11 @@ onMounted(async () => {
     border-bottom: 1px solid transparent;
 
     &:hover {
-      background: #f6f7f9;
+      background: var(--dt-bg-session-hover);
     }
 
     &.active {
-      background: #E6F7FF;
+      background: var(--dt-bg-session-active);
       border-left: 2px solid var(--dt-brand-color);
       padding-left: calc(var(--dt-spacing-md) - 2px);
       .session-name { color: var(--dt-brand-color); }

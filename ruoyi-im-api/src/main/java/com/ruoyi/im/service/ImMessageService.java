@@ -121,6 +121,15 @@ public interface ImMessageService {
             Boolean includeRevoked, Boolean exactMatch, Long userId);
 
     /**
+     * 根据序列号范围获取增量消息 (用于 Seq 空隙填充)
+     * @param conversationId 会话ID
+     * @param startSeq 起始序列号 (exclusive)
+     * @param endSeq 结束序列号 (inclusive)
+     * @return 消息列表
+     */
+    List<ImMessageVO> getMessagesBySeqRange(Long conversationId, Long startSeq, Long endSeq);
+
+    /**
      * 获取用户今日发送的消息数量
      *
      * @param userId 用户ID

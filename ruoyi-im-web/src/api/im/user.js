@@ -74,3 +74,48 @@ export function uploadAvatar(data) {
     }
   })
 }
+
+/**
+ * 修改密码
+ * @param {string|number} userId - 用户ID
+ * @param {string} oldPassword - 旧密码
+ * @param {string} newPassword - 新密码
+ * @returns {Promise}
+ */
+export function changePassword(userId, oldPassword, newPassword) {
+  return request({
+    url: `/api/im/user/${userId}/password`,
+    method: 'put',
+    params: {
+      oldPassword,
+      newPassword
+    }
+  })
+}
+
+/**
+ * 获取用户好友列表
+ * @param {string|number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function getUserFriends(userId) {
+  return request({
+    url: `/api/im/user/friends/${userId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 批量获取用户信息
+ * @param {Array} userIds - 用户ID数组
+ * @returns {Promise}
+ */
+export function getUsersBatch(userIds) {
+  return request({
+    url: '/api/im/user/batch',
+    method: 'get',
+    params: {
+      ids: userIds.join(',')
+    }
+  })
+}

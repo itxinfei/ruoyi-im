@@ -37,6 +37,21 @@ public class ImMessageVO implements Serializable {
     /** 消息内容 */
     private String content;
 
+    /** 会话序列号 (Sequence ID) */
+    private Long seq;
+
+    /** 客户端消息ID */
+    private String clientMsgId;
+
+    /** 语音转文字结果 */
+    private String voiceText;
+
+    /** @提醒用户ID列表(JSON数组) */
+    private String atUserIds;
+
+    /** 被回复消息的内容快照 */
+    private String replySnapshot;
+
     /** 状态: 0=发送中, 1=已发送, 2=已送达, 3=已读, 4=发送失败, 5=已撤回 */
     private Integer status;
 

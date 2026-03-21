@@ -1,42 +1,43 @@
 // ============================================================================
 // Design Tokens - DingTalk 8.2 Premium Style
 // 钉钉风格设计系统令牌 - 2025 工业级版本
+// 颜色对齐钉钉 Windows 客户端
 // ============================================================================
 
 :root {
-  // === Background Colors (呼吸感背景) ===
-  --dt-bg-body: #f4f6f8;
+  // === Background Colors (呼吸感背景 - 钉钉风格) ===
+  --dt-bg-body: #f5f6f7;
   --dt-bg-card: #ffffff;
-  --dt-bg-chat: #f4f6f8;
+  --dt-bg-chat: #f5f6f7;
   --dt-bg-session-list: #ffffff;
-  --dt-bg-session-hover: #f5f6f7;
-  --dt-bg-session-active: #e8f4ff; 
-  --dt-bg-hover: rgba(0, 0, 0, 0.03);
-  --dt-bg-input: #f9fafb;
+  --dt-bg-session-hover: #f0f1f2;
+  --dt-bg-session-active: #e8f4ff;
+  --dt-bg-hover: rgba(0, 0, 0, 0.04);
+  --dt-bg-input: #fafbfc;
   --dt-bg-mask: rgba(0, 0, 0, 0.45);
   --dt-bg-card-dark: #1e293b;
   --dt-bg-input-dark: #0f172a;
 
-  // === Brand Colors (品牌色系) ===
-  --dt-brand-color: #1677ff;
-  --dt-brand-hover: #4096ff;
-  --dt-brand-active: #0958d9;
-  --dt-brand-light: #91caff;
-  --dt-brand-lighter: #e6f4ff;
+  // === Brand Colors (钉钉品牌蓝) ===
+  --dt-brand-color: #0089ff;
+  --dt-brand-hover: #33a1ff;
+  --dt-brand-active: #006ed6;
+  --dt-brand-light: #66b3ff;
+  --dt-brand-lighter: #e8f4ff;
   --dt-brand-bg: #f0f7ff;
-  --dt-brand-bg-dark: rgba(22, 119, 255, 0.15);
+  --dt-brand-bg-dark: rgba(0, 137, 255, 0.15);
 
-  // === Status Colors (状态色系) ===
-  --dt-success-color: #52c41a;
-  --dt-success-bg: #f6ffed;
-  --dt-success-bg-dark: rgba(82, 196, 26, 0.15);
-  --dt-warning-color: #faad14;
-  --dt-warning-bg: #fffbe6;
-  --dt-error-color: #ff4d4f;
-  --dt-error-bg: #fff1f0;
-  --dt-info-color: #1677ff;
-  --dt-info-bg: #e6f4ff;
-  --dt-info-bg-dark: rgba(22, 119, 255, 0.15);
+  // === Status Colors (状态色系 - 钉钉风格) ===
+  --dt-success-color: #00b578;
+  --dt-success-bg: #e8f8f1;
+  --dt-success-bg-dark: rgba(0, 181, 120, 0.15);
+  --dt-warning-color: #ff8f1f;
+  --dt-warning-bg: #fff5e6;
+  --dt-error-color: #f54a45;
+  --dt-error-bg: #fee;
+  --dt-info-color: #0089ff;
+  --dt-info-bg: #e8f4ff;
+  --dt-info-bg-dark: rgba(0, 137, 255, 0.15);
   --dt-unread-color: #f54a45;
 
   // === Third-party Brand Colors (第三方品牌色) ===
@@ -59,13 +60,13 @@
   --dt-shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
   --dt-shadow-modal: 0 12px 48px rgba(0, 0, 0, 0.2);
 
-  // === Typography (文本层级) ===
-  --dt-text-primary: #1f2329;
-  --dt-text-secondary: #646a73;
-  --dt-text-tertiary: #8f959e;
-  --dt-text-quaternary: #bbbfc4;
-  --dt-text-link: #1677ff;
-  --dt-text-link-hover: #4096ff;
+  // === Typography (文本层级 - 钉钉风格) ===
+  --dt-text-primary: #171a1d;
+  --dt-text-secondary: #5f6670;
+  --dt-text-tertiary: #8a9099;
+  --dt-text-quaternary: #b1b6bd;
+  --dt-text-link: #0089ff;
+  --dt-text-link-hover: #33a1ff;
   --dt-text-white: #ffffff;
 
   // === Font Sizes ===
@@ -153,13 +154,13 @@
   // === Bubble Compact (气泡紧凑模式) ===
   --dt-bubble-compact-padding: 6px;
 
-  // === Component Specific ===
-  --dt-bubble-padding-v: 12px;
+  // === Component Specific (钉钉风格) ===
+  --dt-bubble-padding-v: 10px;
   --dt-bubble-padding-h: 12px;
-  --dt-bubble-left-bg: #f5f5f5;
-  --dt-bubble-right-bg: #1677ff;
+  --dt-bubble-left-bg: #ffffff;
+  --dt-bubble-right-bg: #e8f4ff;
   --dt-bubble-max-width: 70%;
-  --dt-bubble-right-bg-hover: #d1e9ff;
+  --dt-bubble-right-bg-hover: #d6edff;
   --dt-btn-height-sm: 32px;
   --dt-btn-height-md: 36px;
   --dt-btn-height-lg: 40px;
@@ -182,16 +183,16 @@
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-// Dark Mode Overrides
+// Dark Mode Overrides (钉钉暗色模式)
 html.dark {
   // === Brand Colors (暗色模式品牌色) ===
-  --dt-brand-color: #3b82f6;
-  --dt-brand-hover: #60a5fa;
-  --dt-brand-active: #2563eb;
-  --dt-brand-light: #1e40af;
-  --dt-brand-lighter: #1e3a5f;
-  --dt-brand-bg: rgba(59, 130, 246, 0.15);
-  --dt-brand-bg-dark: rgba(59, 130, 246, 0.25);
+  --dt-brand-color: #33a1ff;
+  --dt-brand-hover: #66b3ff;
+  --dt-brand-active: #0089ff;
+  --dt-brand-light: #1a6bb8;
+  --dt-brand-lighter: #1a3a5c;
+  --dt-brand-bg: rgba(51, 161, 255, 0.15);
+  --dt-brand-bg-dark: rgba(51, 161, 255, 0.25);
 
   // === Background Colors (暗色模式背景) ===
   --dt-bg-body: var(--dt-bg-body-dark);
@@ -214,8 +215,8 @@ html.dark {
 
   // === Bubble Colors (暗色模式气泡) ===
   --dt-bubble-left-bg: #1e293b;
-  --dt-bubble-right-bg: #2563eb;
-  --dt-bubble-right-bg-hover: #3b82f6;
+  --dt-bubble-right-bg: #1a3a5c;
+  --dt-bubble-right-bg-hover: #234b73;
 }
 
 // SCSS 辅助 Mixins

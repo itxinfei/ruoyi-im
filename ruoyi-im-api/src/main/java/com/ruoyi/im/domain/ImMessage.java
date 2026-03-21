@@ -49,6 +49,22 @@ public class ImMessage extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime deliveredTime;
 
+    /** 会话序列号 (Sequence ID) */
+    @TableField("seq")
+    private Long seq;
+
+    /** 语音转文字结果 */
+    @TableField("voice_text")
+    private String voiceText;
+
+    /** @提醒用户ID列表(JSON数组) */
+    @TableField("at_user_ids")
+    private String atUserIds;
+
+    /** 被回复消息的内容快照 */
+    @TableField("reply_snapshot")
+    private String replySnapshot;
+
     /** 会话ID */
     private Long conversationId;
 
@@ -221,6 +237,38 @@ public class ImMessage extends BaseEntity {
 
     public void setDeliveredTime(LocalDateTime deliveredTime) {
         this.deliveredTime = deliveredTime;
+    }
+
+    public Long getSeq() {
+        return seq;
+    }
+
+    public void setSeq(Long seq) {
+        this.seq = seq;
+    }
+
+    public String getVoiceText() {
+        return voiceText;
+    }
+
+    public void setVoiceText(String voiceText) {
+        this.voiceText = voiceText;
+    }
+
+    public String getAtUserIds() {
+        return atUserIds;
+    }
+
+    public void setAtUserIds(String atUserIds) {
+        this.atUserIds = atUserIds;
+    }
+
+    public String getReplySnapshot() {
+        return replySnapshot;
+    }
+
+    public void setReplySnapshot(String replySnapshot) {
+        this.replySnapshot = replySnapshot;
     }
 
     public Long getConversationId() {

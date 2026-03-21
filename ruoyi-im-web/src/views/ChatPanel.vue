@@ -56,11 +56,14 @@
               ref="messageInputRef"
               :session="session"
               :sending="sending"
+              :editing-message="editingMessage"
               @send="handleSend"
               @upload-file="handleUploadFile"
               @upload-image="handleUploadImage"
               @upload-batch="handleBatchUpload"
               @typing="handleInputTyping"
+              @edit-save="handleEditSave"
+              @edit-cancel="handleEditCancel"
             />
           </footer>
         </div>
@@ -83,6 +86,7 @@
     <CallDialog ref="callDialogRef" :session="session" />
     <GlobalSearch v-model:visible="showGlobalSearch" @select="handleSearchSelect" />
     <ForwardDialog ref="forwardDialogRef" />
+    <ReadStatusDrawer v-model="showReadDrawer" :message-id="readDetailMessageId" />
   </div>
 </template>
 
@@ -99,8 +103,10 @@ import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import ImEmpty from '@/components/Common/ImEmpty.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
+import ReadStatusDrawer from '@/components/im/ReadStatusDrawer.vue'
 import { uploadImage, uploadFile, batchUploadFiles } from '@/api/im/file'
 import { initiateCall } from '@/api/im/videoCall'
+import { toggleMessageReaction, editMessage } from '@/api/im/message'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const props = defineProps({ session: Object })
@@ -113,8 +119,11 @@ const sending = ref(false)
 
 const showUserDetail = ref(false)
 const showGroupDetail = ref(false)
+const showReadDrawer = ref(false)
+const readDetailMessageId = ref(null)
 const activeUserId = ref(null)
 const showGlobalSearch = ref(false)
+const editingMessage = ref(null)
 const jumpLoading = ref(false)
 const highlightedId = ref(null)
 
@@ -474,6 +483,15 @@ const handleMessageCommand = (c, m) => {
     forwardDialogRef.value?.open(m)
   } else if (c === 'recall') {
     store.dispatch('im/message/recallMessage', { sessionId: props.session.id, messageId: m.id })
+  } else if (c === 'reaction') {
+    // 表情回应
+    toggleMessageReaction(m.id || m.messageId, m.emoji)
+  } else if (c === 'readDetail') {
+    // 查看已读详情
+    showReadDetail(m.id || m.messageId)
+  } else if (c === 'edit') {
+    // 编辑消息
+    startEditMessage(m)
   }
 }
 
@@ -500,6 +518,65 @@ const handlePinSession = () => {
 
 const handleOpenCreateGroup = () => {
   emit('create-group')
+}
+
+// 表情回应
+const handleToggleReaction = async (messageId, emoji) => {
+  try {
+    const res = await toggleMessageReaction(messageId, emoji)
+    if (res.code === 200) {
+      ElMessage.success('表情已添加')
+    }
+  } catch (e) {
+    ElMessage.error('操作失败')
+  }
+}
+
+// 查看已读详情
+const showReadDetail = (messageId) => {
+  readDetailMessageId.value = messageId
+  showReadDrawer.value = true
+}
+
+// 开始编辑消息
+const startEditMessage = (message) => {
+  if (!message || message.type !== 'TEXT') {
+    ElMessage.warning('只能编辑文本消息')
+    return
+  }
+  editingMessage.value = message
+}
+
+// 保存编辑的消息
+const handleEditSave = async (data) => {
+  if (!data.messageId || !data.content?.trim()) {
+    ElMessage.warning('消息内容不能为空')
+    return
+  }
+
+  try {
+    const res = await editMessage(data.messageId, { newContent: data.content })
+    if (res.code === 200) {
+      // 更新本地消息列表
+      const msgIndex = messages.value.findIndex(m => (m.id || m.messageId) === data.messageId)
+      if (msgIndex !== -1) {
+        messages.value[msgIndex].content = data.content
+        messages.value[msgIndex].edited = true
+      }
+      ElMessage.success('消息已编辑')
+    } else {
+      throw new Error(res.msg || '编辑失败')
+    }
+  } catch (e) {
+    ElMessage.error(e.message || '编辑失败')
+  } finally {
+    editingMessage.value = null
+  }
+}
+
+// 取消编辑
+const handleEditCancel = () => {
+  editingMessage.value = null
 }
 
 /**
