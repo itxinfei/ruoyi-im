@@ -10,8 +10,12 @@ import {
   deleteMessage,
   recallMessage,
   editMessage as apiEditMessage,
-  forwardMessage as apiForwardMessage
-} from '@/api/im/index'
+  forwardMessage as apiForwardMessage,
+  toggleMessageReaction,
+  getMessageReactions,
+  addMessageFavorite,
+  removeMessageFavorite
+} from '@/api/im/message'
 import { formatMessagePreview, formatMessagePreviewFromObject } from '@/utils/message'
 
 // ==================== 消息状态定义 ====================
@@ -206,6 +210,31 @@ export default {
     CLEAR_STATE(state) {
       state.messages = {}
       state.replyingMessage = null
+    },
+
+    // 更新消息表情反应
+    UPDATE_MESSAGE_REACTIONS(state, { sessionId, messageId, reactions }) {
+      if (!state.messages[sessionId]) return
+      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === messageId)
+      if (index !== -1) {
+        state.messages[sessionId][index] = {
+          ...state.messages[sessionId][index],
+          reactions: reactions || []
+        }
+      }
+    },
+
+    // 更新消息收藏状态
+    UPDATE_MESSAGE_FAVORITE(state, { sessionId, messageId, isFavorited, favoriteId }) {
+      if (!state.messages[sessionId]) return
+      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === messageId)
+      if (index !== -1) {
+        state.messages[sessionId][index] = {
+          ...state.messages[sessionId][index],
+          isFavorited,
+          favoriteId
+        }
+      }
     }
   },
 
@@ -402,6 +431,66 @@ export default {
     // 清除回复消息
     clearReplyingMessage({ commit }) {
       commit('SET_REPLYING_MESSAGE', null)
+    },
+
+    // 切换消息表情反应
+    async toggleReaction({ commit, rootState }, { messageId, emoji }) {
+      try {
+        const res = await toggleMessageReaction(messageId, emoji)
+        if (res.code === 200) {
+          // 重新获取最新的 reactions
+          const reactionsRes = await getMessageReactions(messageId)
+          const sessionId = rootState.session.currentSession?.id
+          if (sessionId && reactionsRes.code === 200) {
+            commit('UPDATE_MESSAGE_REACTIONS', {
+              sessionId,
+              messageId,
+              reactions: reactionsRes.data || []
+            })
+          }
+          return res.data
+        }
+        throw new Error('操作失败')
+      } catch (error) {
+        console.error('切换表情失败:', error)
+        throw error
+      }
+    },
+
+    // 添加收藏
+    async addFavorite({ commit, rootState }, { messageId, conversationId }) {
+      const res = await addMessageFavorite({ messageId, conversationId })
+      if (res.code === 200) {
+        const sessionId = rootState.session.currentSession?.id
+        if (sessionId) {
+          commit('UPDATE_MESSAGE_FAVORITE', {
+            sessionId,
+            messageId,
+            isFavorited: true,
+            favoriteId: res.data?.id
+          })
+        }
+        return res.data
+      }
+      throw new Error('添加收藏失败')
+    },
+
+    // 移除收藏
+    async removeFavorite({ commit, rootState }, { messageId, conversationId }) {
+      const res = await removeMessageFavorite(messageId)
+      if (res.code === 200) {
+        const sessionId = rootState.session.currentSession?.id
+        if (sessionId) {
+          commit('UPDATE_MESSAGE_FAVORITE', {
+            sessionId,
+            messageId,
+            isFavorited: false,
+            favoriteId: null
+          })
+        }
+        return res.data
+      }
+      throw new Error('移除收藏失败')
     }
   }
 }

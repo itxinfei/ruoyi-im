@@ -26,10 +26,33 @@ const props = defineProps({
 
 const store = useStore();
 
-const groupedReactions = computed(() => props.reactions || []);
+const groupedReactions = computed(() => {
+  if (!props.reactions || props.reactions.length === 0) return [];
+
+  const groups = {};
+  const currentUserId = store.state.im?.currentUser?.id;
+
+  props.reactions.forEach(reaction => {
+    const key = reaction.emoji;
+    if (!groups[key]) {
+      groups[key] = {
+        emoji: key,
+        count: 0,
+        users: [],
+        isMine: false
+      };
+    }
+    groups[key].count++;
+    if (reaction.userId === currentUserId) {
+      groups[key].isMine = true;
+    }
+  });
+
+  return Object.values(groups);
+});
 
 const toggleReaction = (emoji) => {
-  store.dispatch('imMessage/toggleReaction', {
+  store.dispatch('im-message/toggleReaction', {
     messageId: props.messageId,
     emoji: emoji
   });
