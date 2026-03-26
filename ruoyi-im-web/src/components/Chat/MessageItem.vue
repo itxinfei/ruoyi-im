@@ -145,7 +145,7 @@ const formatTime = (timestamp) => {
 }
 
 .message-item.is-highlighted .message-bubble {
-  box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.25);
+  box-shadow: 0 0 0 2px var(--dt-brand-bg-dark);
 }
 
 .avatar {
@@ -229,6 +229,10 @@ const formatTime = (timestamp) => {
   background: var(--dt-brand-bg);
 }
 
+.action-btn:active {
+  transform: scale(0.96);
+}
+
 .action-btn.danger:hover {
   color: var(--dt-error-color);
   border-color: var(--dt-error-color);
@@ -287,11 +291,20 @@ const formatTime = (timestamp) => {
     background: var(--dt-error-color);
     border-radius: 50%;
     cursor: pointer;
+    transition: all var(--dt-transition-fast);
 
     .el-icon {
       font-size: 9px;
       color: var(--dt-text-white);
     }
+  }
+
+  .failed-indicator:hover {
+    transform: scale(1.1);
+  }
+
+  .failed-indicator:active {
+    transform: scale(0.95);
   }
 
   .status-text {

@@ -302,7 +302,17 @@ const scrollToBottom = () => {
 .title { font-size: 16px; font-weight: 600; color: var(--dt-text-main); }
 .member-count { font-size: 14px; color: var(--dt-text-desc); }
 .header-right { display: flex; gap: 20px; color: var(--dt-text-desc); }
-.header-right i { cursor: pointer; font-size: 18px; }
+.header-right i {
+  cursor: pointer;
+  font-size: 18px;
+  transition: all var(--dt-transition-fast);
+}
+.header-right i:hover {
+  color: var(--dt-brand-color);
+}
+.header-right i:active {
+  transform: scale(0.95);
+}
 .message-list-viewport { flex: 1; overflow-y: auto; background-color: var(--dt-bg-chat); padding: 20px 0; }
 
 /* 对齐钉钉输入区高度约束: 最低 130px，最高不超过聊天区的 40% */

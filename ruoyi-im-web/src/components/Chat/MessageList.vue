@@ -497,14 +497,18 @@ defineExpose({ scrollToBottom, scrollToMessage, listRef })
 .msg-context-menu .emoji-btn {
   font-size: 18px;
   padding: 2px 4px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-xs);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--dt-transition-fast);
 }
 
 .msg-context-menu .emoji-btn:hover {
   background: var(--dt-brand-lighter);
   transform: scale(1.2);
+}
+
+.msg-context-menu .emoji-btn:active {
+  transform: scale(0.95);
 }
 
 .msg-context-menu .emoji-btn.more {
@@ -530,10 +534,15 @@ defineExpose({ scrollToBottom, scrollToMessage, listRef })
   cursor: pointer;
   text-align: center;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-xs);
+  transition: background-color var(--dt-transition-fast);
 }
 
 .emoji-option:hover {
   background: var(--dt-bg-hover);
+}
+
+.emoji-option:active {
+  background: var(--dt-brand-bg);
 }
 </style>
