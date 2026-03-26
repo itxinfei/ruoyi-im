@@ -253,10 +253,10 @@ watch(visible, (val) => {
 
 .avatar-uploader {
   .avatar-placeholder {
-    width: 100px; height: 100px; border: 1px dashed #d9d9d9; border-radius: 8px;
+    width: 100px; height: 100px; border: 1px dashed var(--dt-border-color); border-radius: 8px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 8px; color: #8f959e; font-size: 12px; transition: all 0.2s;
-    &:hover { border-color: #1677ff; color: #1677ff; background: #f9fbff; }
+    gap: 8px; color: var(--dt-text-desc); font-size: 12px; transition: all 0.2s;
+    &:hover { border-color: var(--dt-brand-color); color: var(--dt-brand-color); background: var(--dt-bg-hover); }
     .avatar-uploader-icon { font-size: 24px; margin: 0; }
   }
 }
@@ -266,6 +266,6 @@ watch(visible, (val) => {
 }
 
 .member-count {
-  margin-top: 10px; font-size: 13px; color: #646a73; b { color: #1677ff; }
+  margin-top: 10px; font-size: 13px; color: var(--dt-text-secondary); b { color: var(--dt-brand-color); }
 }
 </style>

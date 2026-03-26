@@ -121,13 +121,13 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f4f7f9;
+  background: var(--dt-bg-body);
 }
 
 .view-header {
   height: 56px;
-  background: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -140,19 +140,19 @@ onMounted(() => {
   padding: 4px;
   margin-right: 8px;
   cursor: pointer;
-  color: #595959;
+  color: var(--dt-text-secondary);
   display: flex;
   align-items: center;
 }
 
 .back-btn:hover {
-  color: #1677ff;
+  color: var(--dt-brand-color);
 }
 
 .view-title {
   font-size: 18px;
   font-weight: 600;
-  color: #262626;
+  color: var(--dt-text-main);
   margin: 0;
 }
 
@@ -198,7 +198,7 @@ onMounted(() => {
 }
 
 .request-item {
-  background: #fff;
+  background: var(--dt-bg-card);
   border-radius: 8px;
   padding: 12px 16px;
   display: flex;
@@ -236,7 +236,7 @@ onMounted(() => {
 .request-name {
   font-size: 15px;
   font-weight: 500;
-  color: #262626;
+  color: var(--dt-text-main);
   margin-bottom: 4px;
 }
 

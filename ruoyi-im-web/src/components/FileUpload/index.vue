@@ -254,7 +254,7 @@ defineExpose({
 
     .file-icon {
       font-size: 40px;
-      color: #0089ff;
+      color: var(--dt-brand-color);
     }
 
     .file-details {
@@ -263,14 +263,14 @@ defineExpose({
       .file-name {
         font-size: 14px;
         font-weight: 500;
-        color: #262626;
+        color: var(--dt-text-primary);
         margin-bottom: 4px;
         word-break: break-all;
       }
 
       .file-size {
         font-size: 12px;
-        color: #8c8c8c;
+        color: var(--dt-text-tertiary);
       }
     }
   }
@@ -279,7 +279,7 @@ defineExpose({
     margin-top: 12px;
     text-align: center;
     font-size: 12px;
-    color: #595959;
+    color: var(--dt-text-secondary);
   }
 }
 </style>

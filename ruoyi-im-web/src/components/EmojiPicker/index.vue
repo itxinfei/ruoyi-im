@@ -744,7 +744,7 @@ const selectEmoji = (char) => {
     gap: 8px;
 
     &::-webkit-scrollbar { width: 4px; }
-    &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    &::-webkit-scrollbar-thumb { background: var(--dt-border-color); border-radius: 10px; }
 
     .emoji-item {
       aspect-ratio: 1;
@@ -772,8 +772,8 @@ const selectEmoji = (char) => {
 
 .dark .emoji-picker {
   .emoji-tabs {
-    background-color: #1e293b;
-    .emoji-tab.active { background-color: #334155; }
+    background-color: var(--dt-bg-session-list);
+    .emoji-tab.active { background-color: var(--dt-bg-session-hover); }
   }
 }
 </style>
