@@ -393,8 +393,8 @@ const formatDate = (timestamp) => {
 .file-icon {
   width: 40px;
   height: 40px;
-  background-color: #F2F3F5;
-  border-radius: var(--dt-radius-s);
+  background-color: var(--dt-bg-hover);
+  border-radius: var(--dt-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
