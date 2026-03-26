@@ -451,13 +451,13 @@ const confirmAction = async () => {
 
 /* 暗色模式 */
 :deep(.dark) .detail-title {
-  color: #f1f5f9;
+  color: var(--dt-text-primary-dark);
 }
 
 :deep(.dark) .section-content,
 :deep(.dark) .item-value,
 :deep(.dark) .flow-name {
-  color: #e2e8f0;
+  color: var(--dt-text-secondary-dark);
 }
 
 :deep(.dark) .reason-content,
