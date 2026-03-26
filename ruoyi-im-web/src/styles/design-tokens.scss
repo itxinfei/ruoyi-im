@@ -111,6 +111,9 @@
   --dt-z-popover: 1500;
   --dt-z-max: 9999;
 
+  // === Overlay ===
+  --dt-overlay-bg: rgba(0, 0, 0, 0.5);
+
   // === Transition ===
   --dt-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --dt-transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);

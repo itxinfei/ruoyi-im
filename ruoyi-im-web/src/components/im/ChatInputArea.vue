@@ -426,7 +426,7 @@ onMounted(() => {
   right: 2px;
   width: 18px;
   height: 18px;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--dt-overlay-bg);
   color: var(--dt-text-white);
   border-radius: 50%;
   display: flex;
