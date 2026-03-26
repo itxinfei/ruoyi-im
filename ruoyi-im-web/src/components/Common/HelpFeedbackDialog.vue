@@ -569,7 +569,7 @@ watch(visible, (val) => {
       justify-content: center;
       font-size: 26px;
       flex-shrink: 0;
-      color: #fff;
+      color: var(--dt-bg-card);
       box-shadow: var(--dt-shadow-3);
 
       &.chat-bg {

@@ -150,7 +150,7 @@ const handleDownload = () => {
   align-items: center;
   gap: 16px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--dt-border-light);
   margin-bottom: 20px;
 }
 
@@ -168,11 +168,11 @@ const handleDownload = () => {
   font-size: 32px;
 }
 
-.icon-folder { background: #fef3c7; color: #f59e0b; }
-.icon-doc { background: #dbeafe; color: #2563eb; }
-.icon-sheet { background: #d1fae5; color: #059669; }
-.icon-pdf { background: #fee2e2; color: #ef4444; }
-.icon-image { background: #f3e8ff; color: #a855f7; }
+.icon-folder { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+.icon-doc { background: var(--dt-info-bg); color: var(--dt-info-color); }
+.icon-sheet { background: var(--dt-success-bg); color: var(--dt-success-color); }
+.icon-pdf { background: var(--dt-error-bg); color: var(--dt-error-color); }
+.icon-image { background: var(--dt-purple-bg); color: var(--dt-purple-color); }
 
 .file-info {
   flex: 1;
@@ -181,7 +181,7 @@ const handleDownload = () => {
 .file-name {
   font-size: 16px;
   font-weight: 500;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
@@ -189,7 +189,7 @@ const handleDownload = () => {
   display: flex;
   gap: 16px;
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .preview-content {
@@ -202,26 +202,26 @@ const handleDownload = () => {
 .preview-placeholder {
   text-align: center;
   padding: 40px;
-  background: #f9f9f9;
+  background: var(--dt-bg-hover);
   border-radius: 12px;
   width: 100%;
 }
 
 .preview-placeholder .material-icons-outlined {
   font-size: 64px;
-  color: #1677ff;
+  color: var(--dt-brand-color);
   margin-bottom: 16px;
 }
 
 .preview-placeholder p {
   font-size: 14px;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin: 4px 0 0 0;
 }
 
 .preview-hint {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .dialog-footer {
@@ -239,14 +239,14 @@ const handleDownload = () => {
 
 /* 暗色模式 */
 :deep(.dark) .file-name {
-  color: #f1f5f9;
+  color: var(--dt-text-primary-dark);
 }
 
 :deep(.dark) .preview-placeholder {
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--dt-bg-card-dark);
 }
 
 :deep(.dark) .preview-placeholder p {
-  color: #e2e8f0;
+  color: var(--dt-text-secondary-dark);
 }
 </style>

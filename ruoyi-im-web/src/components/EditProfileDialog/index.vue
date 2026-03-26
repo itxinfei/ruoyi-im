@@ -165,7 +165,7 @@ const handleSave = async () => {
 .avatar-uploader {
   width: 100px;
   height: 100px;
-  border: 1px dashed #d9d9d9;
+  border: 1px dashed var(--dt-border-color);
   border-radius: 50%;
   cursor: pointer;
   position: relative;
@@ -176,7 +176,7 @@ const handleSave = async () => {
 }
 
 .avatar-uploader:hover {
-  border-color: #409eff;
+  border-color: var(--dt-brand-color);
 }
 
 .avatar-uploader:hover .upload-mask {
@@ -191,7 +191,7 @@ const handleSave = async () => {
 
 .avatar-uploader-icon {
   font-size: 28px;
-  color: #8c939d;
+  color: var(--dt-text-tertiary);
 }
 
 .upload-mask {
@@ -200,11 +200,11 @@ const handleSave = async () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--dt-bg-mask);
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #fff;
+  color: var(--dt-text-white);
   opacity: 0;
   transition: opacity 0.3s;
 }

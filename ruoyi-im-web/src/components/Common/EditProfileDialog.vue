@@ -291,7 +291,7 @@ watch(() => props.modelValue, (val) => {
 
         .el-icon {
           font-size: 24px;
-          color: #fff;
+          color: var(--dt-bg-card);
         }
       }
 

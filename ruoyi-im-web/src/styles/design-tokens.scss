@@ -19,13 +19,13 @@
   --dt-bg-input-dark: #0f172a;
 
   // === Brand Colors (钉钉品牌蓝) ===
-  --dt-brand-color: #0089ff;
-  --dt-brand-hover: #33a1ff;
-  --dt-brand-active: #006ed6;
-  --dt-brand-light: #66b3ff;
-  --dt-brand-lighter: #e8f4ff;
+  --dt-brand-color: #0066CC;
+  --dt-brand-hover: #007FFF;
+  --dt-brand-active: #0059B3;
+  --dt-brand-light: #3388DD;
+  --dt-brand-lighter: #e6f2ff;
   --dt-brand-bg: #f0f7ff;
-  --dt-brand-bg-dark: rgba(0, 137, 255, 0.15);
+  --dt-brand-bg-dark: rgba(0, 102, 204, 0.15);
 
   // === Status Colors (状态色系 - 钉钉风格) ===
   --dt-success-color: #00b578;
@@ -35,9 +35,9 @@
   --dt-warning-bg: #fff5e6;
   --dt-error-color: #f54a45;
   --dt-error-bg: #fee;
-  --dt-info-color: #0089ff;
-  --dt-info-bg: #e8f4ff;
-  --dt-info-bg-dark: rgba(0, 137, 255, 0.15);
+  --dt-info-color: #0066CC;
+  --dt-info-bg: #e6f2ff;
+  --dt-info-bg-dark: rgba(0, 102, 204, 0.15);
   --dt-unread-color: #f54a45;
 
   // === Third-party Brand Colors (第三方品牌色) ===
@@ -45,6 +45,10 @@
   --dt-wechat-bg-dark: rgba(7, 193, 96, 0.15);
   --dt-feishu-color: #00d6b9;
   --dt-feishu-bg-dark: rgba(0, 214, 185, 0.15);
+
+  // === File Type Colors (文件类型语义色) ===
+  --dt-purple-color: #a855f7;
+  --dt-purple-bg: #f3e8ff;
 
   // === Border & Shadows (极细边框) ===
   --dt-border-light: rgba(31, 35, 41, 0.08); 
@@ -154,13 +158,13 @@
   // === Bubble Compact (气泡紧凑模式) ===
   --dt-bubble-compact-padding: 6px;
 
-  // === Component Specific (钉钉风格) ===
+  // === Component Specific (钉钉风格 - 对齐21文档) ===
   --dt-bubble-padding-v: 10px;
   --dt-bubble-padding-h: 12px;
   --dt-bubble-left-bg: #ffffff;
-  --dt-bubble-right-bg: #e8f4ff;
+  --dt-bubble-right-bg: #007fff;
   --dt-bubble-max-width: 70%;
-  --dt-bubble-right-bg-hover: #d6edff;
+  --dt-bubble-right-bg-hover: #006ed6;
   --dt-btn-height-sm: 32px;
   --dt-btn-height-md: 36px;
   --dt-btn-height-lg: 40px;
