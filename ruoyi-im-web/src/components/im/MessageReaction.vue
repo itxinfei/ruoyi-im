@@ -61,8 +61,26 @@ const toggleReaction = (emoji) => {
 
 <style scoped>
 .reaction-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.reaction-item { display: flex; align-items: center; gap: 4px; background: var(--dt-bg-hover); padding: 2px 6px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
-.reaction-item.is-mine { background: #e6f7ff; border-color: var(--dt-brand-color); }
+.reaction-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--dt-bg-hover);
+  padding: 2px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--dt-transition-fast);
+}
+.reaction-item:hover {
+  background: var(--dt-bg-session-hover);
+  transform: scale(1.02);
+}
+.reaction-item:active {
+  transform: scale(0.98);
+}
+.reaction-item.is-mine { background: var(--dt-brand-bg); border-color: var(--dt-brand-color); }
+.reaction-item.is-mine:hover { background: var(--dt-brand-bg-dark); }
 .emoji { font-size: 14px; }
-.count { font-size: 11px; color: var(--dt-text-desc); }
+.count { font-size: var(--dt-font-size-xs); color: var(--dt-text-secondary); }
 </style>

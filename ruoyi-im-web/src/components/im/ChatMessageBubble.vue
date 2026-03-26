@@ -252,14 +252,19 @@ const formatDisplayUrl = (url) => {
 .system-notice {
   align-self: center;
   margin: 16px 0;
-  font-size: 12px;
-  color: rgba(23, 26, 29, 0.4);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
 }
 
 .re-edit-link {
-  color: #007FFF;
+  color: var(--dt-brand-color);
   cursor: pointer;
   margin-left: 4px;
+  transition: color var(--dt-transition-fast);
+}
+
+.re-edit-link:hover {
+  color: var(--dt-brand-hover);
 }
 
 .message-container {
@@ -300,20 +305,20 @@ const formatDisplayUrl = (url) => {
 }
 
 .sender-name {
-  font-size: 12px;
-  color: rgba(23, 26, 29, 0.4);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
   margin-bottom: 4px;
   margin-left: 2px;
 }
 
 /* 引用回复预览 */
 .quoted-message-preview {
-  background-color: rgba(23, 26, 29, 0.04);
-  border-left: 2px solid #007FFF;
+  background-color: var(--dt-bg-hover);
+  border-left: 2px solid var(--dt-brand-color);
   padding: 4px 8px;
   margin-bottom: 4px;
-  border-radius: 0 4px 4px 0;
-  font-size: 12px;
+  border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
+  font-size: var(--dt-font-size-sm);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -321,12 +326,12 @@ const formatDisplayUrl = (url) => {
 }
 
 .quoted-author {
-  color: rgba(23, 26, 29, 0.6);
+  color: var(--dt-text-secondary);
   margin-right: 4px;
 }
 
 .quoted-content {
-  color: rgba(23, 26, 29, 0.4);
+  color: var(--dt-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -343,32 +348,32 @@ const formatDisplayUrl = (url) => {
 
 /* 核心气泡规范 */
 .message-bubble {
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
+  font-size: var(--dt-font-size-base);
   line-height: 1.5;
   word-break: break-word;
   white-space: pre-wrap;
   position: relative;
 }
 
-/* 接收方 (左侧) */
+/* 接收方 (左侧) - 钉钉 8px 对称圆角 */
 .is-other .message-bubble {
-  background-color: #FFFFFF;
-  color: #171A1D;
-  border: 1px solid rgba(23, 26, 29, 0.08);
-  border-radius: 4px 8px 8px 8px; /* 左上角尖 */
+  background-color: var(--dt-bubble-left-bg);
+  color: var(--dt-text-primary);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-bubble-radius);
 }
 
-/* 发送方 (右侧) */
+/* 发送方 (右侧) - 钉钉 8px 对称圆角 */
 .is-me .message-bubble {
-  background-color: #007FFF;
-  color: #FFFFFF;
-  border-radius: 8px 4px 8px 8px; /* 右上角尖 */
+  background-color: var(--dt-bubble-right-bg);
+  color: var(--dt-text-white);
+  border-radius: var(--dt-bubble-radius);
 }
 
 .content-img {
   max-width: 240px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   display: block;
 }
 
@@ -486,12 +491,12 @@ const formatDisplayUrl = (url) => {
 }
 
 .status-icon.is-loading {
-  color: #ADB1B8;
+  color: var(--dt-text-tertiary);
   animation: rotate 2s linear infinite;
 }
 
 .status-icon.is-failed {
-  color: #FF4D4F;
+  color: var(--dt-error-color);
   cursor: pointer;
 }
 
@@ -501,20 +506,20 @@ const formatDisplayUrl = (url) => {
 }
 
 .read-status.is-read {
-  color: rgba(23, 26, 29, 0.4);
+  color: var(--dt-text-tertiary);
 }
 
 .read-status.is-unread {
-  color: #007FFF;
+  color: var(--dt-brand-color);
 }
 
 /* 操作悬浮条 (Action Bar) */
 .action-bar {
   display: flex;
   align-items: center;
-  background-color: #FFFFFF;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background-color: var(--dt-bg-card);
+  border-radius: var(--dt-radius-sm);
+  box-shadow: var(--dt-shadow-2);
   padding: 4px;
   gap: 4px;
   position: absolute;
@@ -536,15 +541,15 @@ const formatDisplayUrl = (url) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   cursor: pointer;
-  color: rgba(23, 26, 29, 0.6);
-  transition: all 0.2s;
+  color: var(--dt-text-secondary);
+  transition: all var(--dt-transition-fast);
 }
 
 .action-item:hover {
-  background-color: rgba(23, 26, 29, 0.04);
-  color: #007FFF;
+  background-color: var(--dt-bg-hover);
+  color: var(--dt-brand-color);
 }
 
 @keyframes rotate {
