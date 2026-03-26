@@ -108,20 +108,36 @@
 /**
  * ChatInputArea.vue (对齐钉钉无边框沉浸式输入 & 状态驱动发送按钮 + 表情选择器 + 图片预览)
  */
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { Close, Star, Picture, Folder, Upload } from '@element-plus/icons-vue';
 
 const props = defineProps({
-  replyingMessage: Object
+  replyingMessage: Object,
+  modelValue: {
+    type: String,
+    default: ''
+  }
 });
 
-const emit = defineEmits(['send', 'clear-reply']);
+const emit = defineEmits(['send', 'clear-reply', 'update:modelValue']);
 
 const editorRef = ref(null);
 const hasContent = ref(false);
 const emojiPickerVisible = ref(false);
 const pendingImages = ref([]);
 const isDragover = ref(false);
+let isInternalSet = false; // 防止 watch 设置时触发 handleInput 冒泡
+
+// 监听外部 draft 变化（会话切换时恢复草稿）
+watch(() => props.modelValue, (newVal) => {
+  if (!editorRef.value) return;
+  const currentText = editorRef.value.innerText;
+  if (currentText !== newVal) {
+    isInternalSet = true;
+    editorRef.value.innerText = newVal || '';
+    hasContent.value = !!newVal;
+  }
+});
 
 // 常用表情列表
 const emojiList = [
@@ -138,7 +154,13 @@ const canSend = computed(() => {
 });
 
 const handleInput = () => {
-  hasContent.value = !!editorRef.value.innerText.trim();
+  if (isInternalSet) {
+    isInternalSet = false;
+    return;
+  }
+  const text = editorRef.value.innerText;
+  hasContent.value = !!text.trim();
+  emit('update:modelValue', text);
 };
 
 // 插入表情
@@ -148,6 +170,7 @@ const insertEmoji = (emoji) => {
   editorRef.value.focus();
   hasContent.value = true;
   emojiPickerVisible.value = false;
+  emit('update:modelValue', editorRef.value.innerText);
 };
 
 // 插入换行符
@@ -184,6 +207,7 @@ const executeSendMessage = () => {
   }
 
   hasContent.value = false;
+  emit('update:modelValue', '');
 };
 
 // 处理图片选择

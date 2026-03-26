@@ -33,7 +33,8 @@
     </div>
 
     <!-- 3. 输入区 -->
-    <ChatInputArea 
+    <ChatInputArea
+      v-model="currentDraft"
       :replying-message="replyingMessage"
       @send="processSendMessage"
       @clear-reply="replyingMessage = null"
@@ -71,6 +72,7 @@ const listRef = ref(null);
 const detailDrawerVisible = ref(false);
 const replyingMessage = ref(null);
 const isLoadingMore = ref(false); // 是否正在加载更多
+const currentDraft = ref(''); // 当前会话草稿
 
 // 3. 数据联动
 const currentUserId = computed(() => store.state.im?.currentUser?.id || 1);
@@ -142,10 +144,21 @@ onMounted(() => {
   scrollToBottom();
 });
 
-// 8. 监听当前会话变化
-watch(() => currentSession.value?.id, (newSessionId) => {
+// 8. 监听当前会话变化（保存旧草稿 + 恢复新草稿）
+watch(() => currentSession.value?.id, async (newSessionId, oldSessionId) => {
+  // 保存旧会话草稿（仅在切换到新会话时保存）
+  if (oldSessionId && newSessionId && oldSessionId !== newSessionId && currentDraft.value) {
+    await store.dispatch('im/session/saveDraft', {
+      sessionId: oldSessionId,
+      content: currentDraft.value
+    });
+  }
+
   if (newSessionId) {
     store.dispatch('im/message/loadMessages', { sessionId: newSessionId });
+    // 恢复新会话草稿
+    const session = store.state.im?.session?.sessions?.find(s => s.id === newSessionId);
+    currentDraft.value = session?.draftContent || '';
     nextTick(() => scrollToBottom());
   }
 }, { immediate: true });
@@ -277,6 +290,12 @@ const processSendMessage = async (payload) => {
   replyingMessage.value = null;
   try {
     await store.dispatch('im/message/sendMessage', messageData);
+    // 发送成功后清除草稿
+    currentDraft.value = '';
+    await store.dispatch('im/session/saveDraft', {
+      sessionId: currentSession.value.id,
+      content: ''
+    });
     scrollToBottom();
   } catch (error) {
     console.error('消息发送失败:', error);
