@@ -4,6 +4,7 @@ import { getGroup } from '@/api/im/group'
 import { getUserInfo } from '@/api/im/user'
 import { getGroupFileStatistics } from '@/api/im/groupFile'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -19,6 +20,7 @@ const loading = ref(false)
 const members = ref([])
 const fileStats = ref(null)
 const userInfo = ref(null)
+const groupFilePanelRef = ref(null)
 
 const loadData = async () => {
   if (!props.session?.id) return
@@ -48,6 +50,12 @@ watch(() => props.modelValue, (val) => {
 })
 
 const handleClose = () => emit('update:modelValue', false)
+
+const handleFileClick = () => {
+  if (groupFilePanelRef.value) {
+    groupFilePanelRef.value.open()
+  }
+}
 </script>
 
 <template>
@@ -120,13 +128,16 @@ const handleClose = () => emit('update:modelValue', false)
       </div>
 
       <!-- 文件入口 -->
-      <div v-if="session.type === 'GROUP'" class="section menu-item" @click="emit('switch-module', 'drive')">
+      <div class="section menu-item" @click="handleFileClick">
         <div class="menu-left">
           <el-icon><FolderOpened /></el-icon>
-          <span>群文件</span>
+          <span>{{ session.type === 'GROUP' ? '群文件' : '聊天文件' }}</span>
         </div>
         <el-icon><ArrowRight /></el-icon>
       </div>
+
+      <!-- 文件面板 -->
+      <GroupFilePanel ref="groupFilePanelRef" :group-id="session.type === 'GROUP' ? session.targetId : null" />
 
       <div class="bottom-actions">
         <el-button v-if="session.type === 'GROUP'" type="danger" plain class="w-full">退出群聊</el-button>
