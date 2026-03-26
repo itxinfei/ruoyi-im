@@ -576,7 +576,7 @@ onMounted(() => {
         width: 32px;
         height: 32px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 6px;
+        border-radius: var(--dt-radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -595,10 +595,10 @@ onMounted(() => {
 
       .bot-count {
         font-size: 12px;
-        color: #909399;
-        background: #f5f7fa;
+        color: var(--dt-text-tertiary);
+        background: var(--dt-bg-body);
         padding: 2px 8px;
-        border-radius: 10px;
+        border-radius: var(--dt-radius-lg);
       }
     }
   }
@@ -620,7 +620,7 @@ onMounted(() => {
       }
 
       p {
-        color: #909399;
+        color: var(--dt-text-tertiary);
         font-size: 14px;
       }
     }
@@ -631,8 +631,8 @@ onMounted(() => {
       gap: 12px;
 
       .bot-item {
-        border: 1px solid #e4e7ed;
-        border-radius: 8px;
+        border: 1px solid var(--dt-border-color);
+        border-radius: var(--dt-radius-lg);
         padding: 16px;
         transition: all 0.3s;
 
@@ -666,13 +666,13 @@ onMounted(() => {
 
             .bot-description {
               font-size: 13px;
-              color: #606266;
+              color: var(--dt-text-secondary);
               margin: 4px 0;
             }
 
             .bot-stats {
               font-size: 12px;
-              color: #909399;
+              color: var(--dt-text-tertiary);
             }
           }
         }
@@ -690,8 +690,8 @@ onMounted(() => {
     overflow-y: auto;
 
     .rule-item {
-      border: 1px solid #e4e7ed;
-      border-radius: 6px;
+      border: 1px solid var(--dt-border-color);
+      border-radius: var(--dt-radius-md);
       padding: 12px;
       margin-bottom: 12px;
 
@@ -703,7 +703,7 @@ onMounted(() => {
 
         .rule-index {
           font-weight: 500;
-          color: #409eff;
+          color: var(--dt-brand-color);
         }
       }
     }
@@ -711,21 +711,21 @@ onMounted(() => {
 
   .avatar-uploader {
     :deep(.el-upload) {
-      border: 1px dashed #d9d9d9;
-      border-radius: 6px;
+      border: 1px dashed var(--dt-border-color);
+      border-radius: var(--dt-radius-md);
       cursor: pointer;
       position: relative;
       overflow: hidden;
       transition: all 0.3s;
 
       &:hover {
-        border-color: #409eff;
+        border-color: var(--dt-brand-color);
       }
     }
 
     .avatar-uploader-icon {
       font-size: 28px;
-      color: #8c939d;
+      color: var(--dt-text-tertiary);
       width: 80px;
       height: 80px;
       display: flex;
@@ -737,7 +737,7 @@ onMounted(() => {
       width: 80px;
       height: 80px;
       display: block;
-      border-radius: 6px;
+      border-radius: var(--dt-radius-md);
     }
   }
 }

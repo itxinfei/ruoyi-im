@@ -368,19 +368,19 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
 }
 
 .call-dialog-immersive {
-  background: #1a1d21 !important;
-  :deep(.el-dialog) { background: #1a1d21; border-radius: var(--dt-radius-xl); overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+  background: var(--dt-bg-card-dark) !important;
+  :deep(.el-dialog) { background: var(--dt-bg-card-dark); border-radius: var(--dt-radius-xl); overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
   :deep(.el-dialog__header) { display: none; }
   :deep(.el-dialog__body) { padding: 0 !important; }
 }
 
 .call-stage {
   position: relative; width: 100%; height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: var(--dt-spacing-2xl) 0; color: #fff;
+  padding: var(--dt-spacing-2xl) 0; color: var(--dt-text-white);
 }
 
 .video-canvas {
-  position: absolute; inset: 0; background: #000; z-index: 1;
+  position: absolute; inset: 0; background: var(--dt-bg-card-dark); z-index: 1;
   .remote-track {
     width: 100%; height: 100%; position: relative;
     .video-element { width: 100%; height: 100%; object-fit: cover; }
@@ -398,7 +398,7 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
   .avatar-ripple {
     position: relative; margin-bottom: var(--dt-spacing-xl);
     &.animating::after {
-      content: ''; position: absolute; inset: -15px; border-radius: 50%; border: 2px solid var(--dt-brand-color);
+      content: ''; position: absolute; inset: -15px; border-radius: var(--dt-radius-full); border: 2px solid var(--dt-brand-color);
       animation: ripple 2s infinite; opacity: 0;
     }
   }
@@ -417,16 +417,16 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
 .console-btn {
   @include button-reset; display: flex; flex-direction: column; align-items: center; gap: 8px;
   .icon-circle {
-    width: 64px; height: 64px; border-radius: 50%; @include flex-center; font-size: 28px;
+    width: 64px; height: 64px; border-radius: var(--dt-radius-full); @include flex-center; font-size: 28px;
     background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); transition: all 0.2s;
     &:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
   }
   span { font-size: 13px; color: rgba(255,255,255,0.8); }
 
   &.accept .icon-circle { background: var(--dt-success-color); &:hover { background: var(--dt-brand-hover); } }
-  &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: #ff7875; } .el-icon { transform: rotate(135deg); } }
-  &.active .icon-circle { background: #fff; color: var(--dt-text-primary); }
-  .icon-circle.gray { background: #434343; }
+  &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: var(--dt-error-color); filter: brightness(1.2); } .el-icon { transform: rotate(135deg); } }
+  &.active .icon-circle { background: var(--dt-text-white); color: var(--dt-text-primary); }
+  .icon-circle.gray { background: var(--dt-text-tertiary-dark); }
 }
 
 @keyframes ripple {

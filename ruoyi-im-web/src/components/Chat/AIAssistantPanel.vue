@@ -229,15 +229,15 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #fff;
-  border-radius: 8px;
+  background-color: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
 }
 
 .chat-messages {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
-  background-color: #f5f5f5;
+  background-color: var(--dt-bg-body);
 }
 
 .message {
@@ -266,24 +266,24 @@ export default {
 
 .message-text {
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   line-height: 1.5;
   word-wrap: break-word;
 }
 
 .message.assistant .message-text {
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
+  background-color: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-color);
 }
 
 .message.user .message-text {
-  background-color: #007aff;
-  color: #fff;
+  background-color: var(--dt-brand-color);
+  color: var(--dt-text-white);
 }
 
 .message-time {
   font-size: 11px;
-  color: #999;
+  color: var(--dt-text-tertiary);
   margin-top: 4px;
 }
 
@@ -295,15 +295,15 @@ export default {
   display: flex;
   gap: 4px;
   padding: 12px 16px;
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  background-color: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-lg);
 }
 
 .typing-indicator span {
   width: 8px;
   height: 8px;
-  background-color: #999;
+  background-color: var(--dt-text-tertiary);
   border-radius: 50%;
   animation: typing 1.4s infinite;
 }
@@ -327,7 +327,7 @@ export default {
 
 .chat-input {
   padding: 12px 16px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--dt-border-color);
 }
 
 .input-actions {
@@ -339,14 +339,14 @@ export default {
 
 .tip-text {
   font-size: 12px;
-  color: #999;
+  color: var(--dt-text-tertiary);
 }
 
 .quick-actions {
   display: flex;
   gap: 8px;
   padding: 8px 16px;
-  border-top: 1px solid #f0f0f0;
-  background-color: #fafafa;
+  border-top: 1px solid var(--dt-border-light);
+  background-color: var(--dt-bg-card);
 }
 </style>
