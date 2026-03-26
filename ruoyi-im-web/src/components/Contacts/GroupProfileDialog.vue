@@ -495,8 +495,8 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
         font-weight: 500;
 
         &.owner {
-          background: #fff7e6;
-          color: #fa8c16;
+          background: var(--dt-warning-bg);
+          color: var(--dt-warning-color);
         }
 
         &.admin {

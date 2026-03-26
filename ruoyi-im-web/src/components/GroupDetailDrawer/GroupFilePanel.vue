@@ -681,14 +681,14 @@ defineExpose({ open })
         font-size: 24px;
         color: var(--dt-brand-color);
 
-        &.icon-image { color: #22c55e; }
-        &.icon-video { color: #ef4444; }
-        &.icon-audio { color: #f97316; }
-        &.icon-doc { color: #3b82f6; }
-        &.icon-pdf { color: #ef4444; }
-        &.icon-excel { color: #22c55e; }
-        &.icon-word { color: #3b82f6; }
-        &.icon-ppt { color: #f97316; }
+        &.icon-image { color: var(--dt-success-color); }
+        &.icon-video { color: var(--dt-error-color); }
+        &.icon-audio { color: var(--dt-warning-color); }
+        &.icon-doc { color: var(--dt-brand-color); }
+        &.icon-pdf { color: var(--dt-error-color); }
+        &.icon-excel { color: var(--dt-success-color); }
+        &.icon-word { color: var(--dt-brand-color); }
+        &.icon-ppt { color: var(--dt-warning-color); }
       }
     }
 

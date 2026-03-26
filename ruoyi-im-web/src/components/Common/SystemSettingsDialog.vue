@@ -411,24 +411,24 @@ watch(visible, (val) => {
 
     &:hover {
       background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
-      color: #fff;
+      color: var(--dt-text-white);
       transform: translateY(-2px);
       box-shadow: var(--dt-shadow-3);
 
       .tab-icon {
-        color: #fff;
+        color: var(--dt-text-white);
       }
     }
 
     &.active {
       background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
-      color: #fff;
+      color: var(--dt-text-white);
       font-weight: 600;
       box-shadow: var(--dt-shadow-4);
       transform: translateY(-2px);
 
       .tab-icon {
-        color: #fff;
+        color: var(--dt-text-white);
       }
     }
   }
@@ -535,7 +535,7 @@ watch(visible, (val) => {
         &.primary-btn {
           background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
           border: none;
-          color: #fff;
+          color: var(--dt-text-white);
           box-shadow: var(--dt-shadow-4);
 
           &:hover {
@@ -603,7 +603,7 @@ watch(visible, (val) => {
       align-items: center;
       justify-content: center;
       font-size: 26px;
-      color: #fff;
+      color: var(--dt-text-white);
       flex-shrink: 0;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
@@ -665,7 +665,7 @@ watch(visible, (val) => {
       .logo-inner {
         font-size: 36px;
         font-weight: 800;
-        color: #fff;
+        color: var(--dt-text-white);
       }
     }
 
@@ -701,7 +701,7 @@ watch(visible, (val) => {
     .check-update-btn {
       background: var(--dt-brand-color);
       border: none;
-      color: #fff;
+      color: var(--dt-text-white);
       height: 44px;
       padding: 0 32px;
       border-radius: var(--dt-radius-lg);

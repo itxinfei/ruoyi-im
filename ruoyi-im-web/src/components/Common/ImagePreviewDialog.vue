@@ -471,7 +471,7 @@ onUnmounted(() => {
   border: none;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  color: #fff;
+  color: var(--dt-text-white);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -554,7 +554,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: #fff;
+  color: var(--dt-text-white);
   z-index: 5;
 }
 

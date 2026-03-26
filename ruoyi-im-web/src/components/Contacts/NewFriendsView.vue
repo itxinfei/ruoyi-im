@@ -211,8 +211,8 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff;
+  background: linear-gradient(135deg, var(--dt-brand-color), #2563eb);
+  color: var(--dt-text-white);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -114,7 +114,7 @@ const handleToggleTheme = () => {
 .side-nav {
   width: 64px;
   height: 100%;
-  background: #0066CC;
+  background: var(--dt-brand-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -140,7 +140,7 @@ const handleToggleTheme = () => {
 .logo-text {
   font-size: 16px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--dt-text-white);
   letter-spacing: 1px;
 }
 
@@ -159,14 +159,14 @@ const handleToggleTheme = () => {
 }
 
 .nav-item:hover { background-color: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.95); }
-.nav-item.active { background-color: rgba(255, 255, 255, 0.12); color: #FFFFFF; }
+.nav-item.active { background-color: rgba(255, 255, 255, 0.12); color: var(--dt-text-white); }
 
 .nav-item.active::before {
-  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; background-color: #007FFF; border-radius: 0 2px 2px 0;
+  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; background-color: var(--dt-brand-color); border-radius: 0 2px 2px 0;
 }
 
 .nav-badge {
-  position: absolute; top: 2px; right: 2px; background-color: #FF4D4F; color: #FFFFFF;
+  position: absolute; top: 2px; right: 2px; background-color: var(--dt-error-color); color: var(--dt-text-white);
   font-size: 10px; height: 14px; min-width: 14px; padding: 0 3px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center; font-weight: 600;
 }
@@ -176,5 +176,5 @@ const handleToggleTheme = () => {
 .user-avatar-wrapper { position: relative; padding: 2px; cursor: pointer; transition: transform 0.2s; margin-top: 8px; }
 .user-avatar-wrapper:hover { transform: scale(1.05); }
 .user-avatar { width: 36px; height: 36px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.15); }
-.online-status-dot { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background-color: #52C41A; border: 2px solid #2B2D33; border-radius: 50%; }
+.online-status-dot { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background-color: var(--dt-success-color); border: 2px solid var(--dt-bg-sidebar); border-radius: 50%; }
 </style>

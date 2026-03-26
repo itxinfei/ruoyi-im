@@ -2,7 +2,7 @@
   <header class="ding-header">
     <div class="header-left">
       <div class="header-logo">
-        <el-icon :size="24" color="#0089FF">
+        <el-icon :size="24" color="var(--dt-brand-color)">
           <ChatDotRound />
         </el-icon>
       </div>

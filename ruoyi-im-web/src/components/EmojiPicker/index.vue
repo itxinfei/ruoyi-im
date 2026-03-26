@@ -728,7 +728,7 @@ const selectEmoji = (char) => {
       }
 
       &.active {
-        background: #fff;
+        background: var(--dt-bg-card);
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         color: var(--dt-brand-color);
       }
