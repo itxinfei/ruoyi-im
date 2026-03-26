@@ -41,10 +41,10 @@
     />
 
     <!-- 业务侧边栏池 -->
-    <GroupDetailDrawer 
-      v-if="currentSession"
-      v-model="detailDrawerVisible" 
-      :group-id="currentSession.id" 
+    <GroupDetailDrawer
+      v-if="currentSession && currentSession.type === 'GROUP'"
+      v-model="detailDrawerVisible"
+      :group-id="currentSession.targetId"
     />
   </div>
 </template>
