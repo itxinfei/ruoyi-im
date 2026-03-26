@@ -266,18 +266,18 @@ watch(() => props.messageId, (val) => {
         }
 
         .content-before {
-          background: #fef0f0;
-          border: 1px solid #fde2e2;
+          background: var(--dt-error-bg);
+          border: 1px solid var(--dt-error-bg);
 
           .content-text {
-            color: #f56c6c;
+            color: var(--dt-error-color);
             text-decoration: line-through;
           }
         }
 
         .content-after {
-          background: #f0f9ff;
-          border: 1px solid #e1f3fd;
+          background: var(--dt-brand-bg);
+          border: 1px solid var(--dt-brand-bg);
 
           .content-text {
             color: var(--dt-brand-color);

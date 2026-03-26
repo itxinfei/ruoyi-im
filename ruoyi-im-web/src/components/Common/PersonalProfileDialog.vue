@@ -282,7 +282,7 @@ watch(visible, (val) => {
     z-index: 10;
     background: rgba(255, 255, 255, 0.15);
     border: none;
-    color: #fff;
+    color: var(--dt-text-white);
     width: 36px;
     height: 36px;
     transition: all var(--dt-transition-base);
@@ -375,7 +375,7 @@ watch(visible, (val) => {
       .status-tag {
         background: var(--dt-success-color);
         border: none;
-        color: #fff;
+        color: var(--dt-text-white);
         font-weight: 500;
       }
     }
@@ -444,7 +444,7 @@ watch(visible, (val) => {
       align-items: center;
       justify-content: center;
       font-size: 18px;
-      color: #fff;
+      color: var(--dt-text-white);
       flex-shrink: 0;
       transition: all var(--dt-transition-fast);
 
@@ -562,7 +562,7 @@ watch(visible, (val) => {
 
       .el-icon {
         font-size: 24px;
-        color: #fff;
+        color: var(--dt-text-white);
       }
 
       &.edit-bg {

@@ -335,7 +335,7 @@ onMounted(() => {
   width: 18px;
   height: 18px;
   background-color: rgba(0, 0, 0, 0.5);
-  color: #fff;
+  color: var(--dt-text-white);
   border-radius: 50%;
   display: flex;
   align-items: center;

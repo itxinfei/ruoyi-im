@@ -124,7 +124,7 @@ const openMap = () => {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: var(--dt-text-white);
       box-shadow: 0 2px 6px rgba(22, 119, 255, 0.3);
 
       .material-icons-outlined {
@@ -191,7 +191,7 @@ const openMap = () => {
 
     .nav-icon {
       background: var(--dt-brand-color);
-      color: #fff;
+      color: var(--dt-text-white);
     }
   }
 }

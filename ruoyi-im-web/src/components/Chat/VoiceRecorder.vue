@@ -458,7 +458,7 @@ defineExpose({ open })
       border-radius: 50%;
       border: none;
       background: var(--dt-brand-color);
-      color: #fff;
+      color: var(--dt-text-white);
       cursor: pointer;
       display: flex;
       align-items: center;

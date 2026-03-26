@@ -433,7 +433,7 @@ const handleFileDownload = () => {
 }
 
 .message-bubble.is-own .text-mention.is-me {
-  color: #ffcccc;
+  color: var(--dt-error-color);
 }
 .reply-preview {
   display: flex;
