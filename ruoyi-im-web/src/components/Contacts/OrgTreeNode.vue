@@ -56,18 +56,18 @@ const handleClick = () => {
 <style scoped lang="scss">
 .node-item {
   display: flex; align-items: center; height: 32px; padding: 0 8px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
-  &:hover { background: #f5f6f7; }
-  &.active { background: #e8f4ff; .node-name { color: #1677ff; font-weight: 600; } .type-icon { color: #1677ff; } }
+  &:hover { background: var(--dt-bg-hover-light); }
+  &.active { background: var(--dt-brand-lighter); .node-name { color: var(--dt-brand-color); font-weight: 600; } .type-icon { color: var(--dt-brand-color); } }
 
-  .expand-icon { font-size: 16px; color: #8f959e; transition: transform 0.2s; margin-right: 4px; &.rotated { transform: rotate(90deg); } }
+  .expand-icon { font-size: 16px; color: var(--dt-text-tertiary); transition: transform 0.2s; margin-right: 4px; &.rotated { transform: rotate(90deg); } }
   .expand-placeholder { width: 20px; }
 
-  .type-icon { font-size: 18px; margin-right: 8px; color: #8f959e;
-    &.COMPANY { color: #1677ff; }
+  .type-icon { font-size: 18px; margin-right: 8px; color: var(--dt-text-tertiary);
+    &.COMPANY { color: var(--dt-brand-color); }
   }
 
-  .node-name { font-size: 13px; color: #1f2329; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .node-count { font-size: 11px; color: #c9cdd4; margin-left: 8px; }
+  .node-name { font-size: 13px; color: var(--dt-text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .node-count { font-size: 11px; color: var(--dt-text-tertiary); margin-left: 8px; }
 }
 .node-children { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
 </style>

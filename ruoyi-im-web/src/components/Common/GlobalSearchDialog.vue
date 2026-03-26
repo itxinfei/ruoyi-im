@@ -174,11 +174,11 @@ const goToGroup = (_g) => { visible.value = false /* 跳转 */ }
 .spotlight-search-dialog {
   .el-dialog__header { display: none; }
   .el-dialog__body { padding: 0 !important; background: transparent; }
-  border-radius: 12px !important; overflow: hidden;
+  border-radius: var(--dt-radius-xl) !important; overflow: hidden;
 }
 
 .spotlight-container {
-  background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  background: var(--dt-bg-card); border-radius: var(--dt-radius-xl); box-shadow: var(--dt-shadow-float);
   display: flex; flex-direction: column; overflow: hidden;
 
   .search-input-wrapper {
@@ -229,7 +229,7 @@ const goToGroup = (_g) => { visible.value = false /* 跳转 */ }
 }
 
 .dark .spotlight-container {
-  background: #1e293b; border: 1px solid #334155;
+  background: var(--dt-bg-card-dark); border: 1px solid var(--dt-border-dark);
   .search-input-wrapper { border-color: #334155; input { background: transparent; color: #f1f5f9; } }
   .search-results .result-item { &:hover, &.active { background: #334155; } .item-info .name { color: #f1f5f9; } }
   .search-footer { background: #0f172a; border-color: #334155; }

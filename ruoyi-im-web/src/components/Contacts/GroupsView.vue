@@ -217,8 +217,8 @@ onMounted(() => {
 /* 暗色模式 */
 :deep(.dark) .view-header,
 :deep(.dark) .group-item {
-  background: #1e293b;
-  border-color: #334155;
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-bg-hover-dark);
 }
 
 :deep(.dark) .view-title,

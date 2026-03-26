@@ -349,7 +349,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 <style scoped lang="scss">
 .group-profile-dialog {
   :deep(.el-dialog) {
-    border-radius: 8px;
+    border-radius: var(--dt-radius-lg);
     overflow: hidden;
     padding: 0;
     box-shadow: var(--dt-shadow-3);
@@ -672,7 +672,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     transition: all 0.2s;
 
     &:hover {
-      background: #ffccc7;
+      background: var(--dt-error-bg);
     }
   }
 }
