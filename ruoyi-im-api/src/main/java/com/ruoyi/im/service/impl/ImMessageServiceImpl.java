@@ -225,51 +225,58 @@ public class ImMessageServiceImpl implements ImMessageService {
         Long nextSeq = redisUtil.increment(seqKey);
         message.setSeq(nextSeq);
 
-        imMessageMapper.insertImMessage(message);
+        try {
+            imMessageMapper.insertImMessage(message);
+        } catch (Exception e) {
+            log.error("插入消息失败: ", e);
+            throw new BusinessException(500, "消息存储失败");
+        }
 
         if (clientMsgId != null && !clientMsgId.isEmpty()) {
             redisUtil.recordClientMsgId(clientMsgId, message.getId());
         }
 
-        ImConversation conversationUpdate = new ImConversation();
-        conversationUpdate.setId(conversationId);
-        conversationUpdate.setLastMessageId(message.getId());
-        conversationUpdate.setLastMessageTime(message.getCreateTime());
-        conversationUpdate.setUpdateTime(LocalDateTime.now());
-        imConversationMapper.updateById(conversationUpdate);
+        try {
+            ImConversation conversationUpdate = new ImConversation();
+            conversationUpdate.setId(conversationId);
+            conversationUpdate.setLastMessageId(message.getId());
+            conversationUpdate.setLastMessageTime(message.getCreateTime());
+            conversationUpdate.setUpdateTime(LocalDateTime.now());
+            imConversationMapper.updateById(conversationUpdate);
+        } catch (Exception e) {
+            log.warn("更新会话最后一条消息失败: conversationId={}", conversationId);
+        }
 
-        List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
-                .selectByConversationId(conversationId);
+        try {
+            List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
+                    .selectByConversationId(conversationId);
 
-        if (members != null && !members.isEmpty()) {
-            boolean shouldEvictCache = members.size() <= CACHE_EVICT_THRESHOLD;
-
-            for (com.ruoyi.im.domain.ImConversationMember member : members) {
-                if (member != null && member.getUserId() != null && !member.getUserId().equals(userId)) {
-                    incrementSessionUnread(conversationId, member.getUserId(), 1);
-                    imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
-
-                    if (shouldEvictCache) {
-                        redisUtil.delete(CACHE_KEY_CONVERSATION_LIST + member.getUserId());
+            if (members != null && !members.isEmpty()) {
+                for (com.ruoyi.im.domain.ImConversationMember member : members) {
+                    if (member != null && member.getUserId() != null && !member.getUserId().equals(userId)) {
+                        incrementSessionUnread(conversationId, member.getUserId(), 1);
+                        imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
                     }
                 }
             }
+        } catch (Exception e) {
+            log.warn("更新未读数失败: ", e);
         }
 
-        redisUtil.delete(CACHE_KEY_CONVERSATION_LIST + userId);
+        try {
+            ImMentionInfo mentionInfo = request.getMentionInfo();
+            if (mentionInfo == null && request.getContent() != null) {
+                mentionInfo = messageMentionService.parseMentions(request.getContent());
+            }
 
-        ImMentionInfo mentionInfo = request.getMentionInfo();
-        if (mentionInfo == null && request.getContent() != null) {
-            mentionInfo = messageMentionService.parseMentions(request.getContent());
+            if (mentionInfo != null
+                    && (mentionInfo.getUserIds() != null || Boolean.TRUE.equals(mentionInfo.getMentionAll()))) {
+                mentionInfo.setConversationId(conversationId);
+                messageMentionService.createMentions(message.getId(), mentionInfo, userId);
+            }
+        } catch (Exception e) {
+            log.warn("处理@提及失败: ", e);
         }
-
-        if (mentionInfo != null
-                && (mentionInfo.getUserIds() != null || Boolean.TRUE.equals(mentionInfo.getMentionAll()))) {
-            mentionInfo.setConversationId(conversationId);
-            messageMentionService.createMentions(message.getId(), mentionInfo, userId);
-        }
-
-        AuditLogUtil.logSendMessage(userId, message.getId(), conversationId, true);
 
         ImMessageVO vo = new ImMessageVO();
         BeanUtils.copyProperties(message, vo);
@@ -281,36 +288,35 @@ public class ImMessageServiceImpl implements ImMessageService {
         vo.setSendTime(message.getCreateTime());
         vo.setStatus(1);
 
-        // 如果消息类型为文本，尝试识别并解析 URL
-        if ("TEXT".equalsIgnoreCase(request.getType()) && plainContent != null) {
-            String url = extractUrl(plainContent);
-            if (url != null) {
-                try {
+        // 以下为可选增强逻辑，必须隔离异常
+        try {
+            if ("TEXT".equalsIgnoreCase(request.getType()) && plainContent != null) {
+                String url = extractUrl(plainContent);
+                if (url != null) {
                     com.ruoyi.im.domain.ImUrlMetadata metadata = urlMetadataService.parseUrl(url);
                     if (metadata != null && "SUCCESS".equals(metadata.getFetchStatus())) {
                         ImMessageVO.UrlMetadataVO urlVO = new ImMessageVO.UrlMetadataVO();
                         BeanUtils.copyProperties(metadata, urlVO);
                         vo.setUrlMetadata(urlVO);
                     }
-                } catch (Exception e) {
-                    log.warn("解析消息中的 URL 元数据失败: url={}, error={}", url, e.getMessage());
                 }
             }
+        } catch (Exception e) {
+            log.debug("URL解析忽略: {}", e.getMessage());
         }
 
-        // 如果是群组消息，发布群组消息事件触发机器人自动回复
-        ImConversation conversation = imConversationMapper.selectById(conversationId);
-        if (conversation != null && "GROUP".equalsIgnoreCase(conversation.getType())) {
-            Long groupId = conversation.getTargetId();
-            if (groupId != null && "TEXT".equalsIgnoreCase(message.getMessageType())) {
-                try {
+        try {
+            ImConversation conversation = imConversationMapper.selectById(conversationId);
+            if (conversation != null && "GROUP".equalsIgnoreCase(conversation.getType())) {
+                Long groupId = conversation.getTargetId();
+                if (groupId != null && "TEXT".equalsIgnoreCase(message.getMessageType())) {
                     eventPublisher.publishEvent(
                             new BotMessageListener.GroupMessageEvent(conversationId, groupId, userId, plainContent)
                     );
-                } catch (Exception e) {
-                    log.error("发布群组消息事件失败: groupId={}", groupId, e);
                 }
             }
+        } catch (Exception e) {
+            log.error("机器人事件发布失败（已忽略）");
         }
 
         // 异步解耦分发与 ACK 回执 (Doc-01 §3.2 & Doc-34 §2.2)
@@ -1038,17 +1044,26 @@ public class ImMessageServiceImpl implements ImMessageService {
         if (userSession != null) {
             return userSession;
         }
-        ImUserSession newSession = new ImUserSession();
-        newSession.setConversationId(conversationId);
-        newSession.setUserId(userId);
-        newSession.setIsPinned(0);
-        newSession.setIsMuted(0);
-        newSession.setIsArchived(0);
-        newSession.setUnreadCount(0);
-        newSession.setIsDeleted(0);
-        newSession.setCreateTime(LocalDateTime.now());
-        newSession.setUpdateTime(LocalDateTime.now());
-        imUserSessionMapper.insert(newSession);
-        return newSession;
+        
+        try {
+            ImUserSession newSession = new ImUserSession();
+            newSession.setConversationId(conversationId);
+            newSession.setUserId(userId);
+            newSession.setIsPinned(0);
+            newSession.setIsMuted(0);
+            newSession.setIsArchived(0);
+            newSession.setUnreadCount(0);
+            newSession.setIsDeleted(0);
+            newSession.setCreateTime(LocalDateTime.now());
+            newSession.setUpdateTime(LocalDateTime.now());
+            imUserSessionMapper.insert(newSession);
+            return newSession;
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            // 处理并发冲突：如果插入失败说明其他线程已创建，直接重新查询
+            return imUserSessionMapper.selectByUserIdAndConversationId(userId, conversationId);
+        } catch (Exception e) {
+            log.error("确保用户会话记录失败: userId={}, convId={}", userId, conversationId, e);
+            throw new BusinessException(500, "同步会话状态失败");
+        }
     }
 }

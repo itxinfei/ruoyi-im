@@ -16,6 +16,29 @@
 - **清理垃圾**：重构必删旧代码。
 - **自检模板**：每次任务必须输出 `[规范自检]` 结果。
 
+## 代码检查修复记录 (2026-03-21)
+
+### P0 优先级 (已修复)
+**问题**: LoginPage.vue 引用不存在的 resetValidationTime 函数导致编译错误
+- 修复文件：`ruoyi-im-web/src/views/auth/LoginPage.vue`
+- 改动：移除 import 和调用 resetValidationTime
+
+**问题**: ChatWindow.vue 聊天窗口头部存在多余的搜索按钮
+- 修复文件：`ruoyi-im-web/src/components/im/ChatWindow.vue`
+- 改动：移除 el-icon-search 搜索按钮
+
+**问题**: 侧边栏缺少主题切换功能
+- 修复文件：`ruoyi-im-web/src/components/ImSideNavNew/index.vue`
+- 改动：
+  - 添加主题切换按钮（Sunny/Moon 图标）
+  - 搜索按钮移至底部导航区，设置按钮下方
+  - 从顶部导航移除搜索（避免重复）
+  - 设置按钮改为个人设置（profile），非管理系统
+
+**问题**: 个人资料头像显示问题
+- 修复文件：创建 `ruoyi-im-web/public/avatars/me.svg`
+- 改动：添加默认头像文件，修复侧边栏头像引用路径
+
 ## 代码检查修复记录 (2026-03-09)
 
 ### P0 优先级 (已修复)
