@@ -46,6 +46,11 @@
       v-model="detailDrawerVisible"
       :group-id="currentSession.targetId"
     />
+    <ChatDetailDrawer
+      v-else-if="currentSession && currentSession.type === 'PRIVATE'"
+      v-model="detailDrawerVisible"
+      :session="currentSession"
+    />
   </div>
 </template>
 
@@ -60,6 +65,7 @@ import { useImWebSocket } from '@/composables/useImWebSocket';
 import { uploadImage, uploadFile } from '@/api/im/file';
 import ChatMessageBubble from './ChatMessageBubble.vue';
 import GroupDetailDrawer from './GroupDetailDrawer.vue';
+import ChatDetailDrawer from '@/components/Chat/ChatDetailDrawer.vue';
 import ChatInputArea from './ChatInputArea.vue';
 
 const store = useStore();
