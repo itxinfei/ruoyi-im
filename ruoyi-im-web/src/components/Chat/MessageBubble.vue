@@ -385,12 +385,12 @@ const handleFileDownload = () => {
 <style scoped lang="scss">
 .message-bubble {
   padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
-  border-radius: 8px;
+  border-radius: 4px 8px 8px 8px;
   font-size: var(--dt-font-size-base);
   line-height: 1.5;
   word-break: break-all;
   background: var(--dt-bubble-left-bg);
-  border: 1px solid var(--dt-border-light);
+  border: none;
   color: var(--dt-text-primary);
   transition: all var(--dt-transition-fast);
   max-width: 70%;
@@ -399,8 +399,8 @@ const handleFileDownload = () => {
 
   &.is-own {
     background: var(--dt-bubble-right-bg);
-    color: var(--dt-text-primary);
-    border: none;
+    color: var(--dt-text-white);
+    border-radius: 8px 4px 8px 8px;
   }
 
   .text-link {
@@ -424,15 +424,16 @@ const handleFileDownload = () => {
 }
 
 .message-bubble.is-own .text-link {
-  color: var(--dt-brand-active);
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: underline;
 }
 
 .message-bubble.is-own .text-mention {
-  color: var(--dt-brand-active);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .message-bubble.is-own .text-mention.is-me {
-  color: var(--dt-error-color);
+  color: #ffcccc;
 }
 .reply-preview {
   display: flex;
@@ -441,13 +442,17 @@ const handleFileDownload = () => {
   padding: 6px 8px;
   margin-bottom: var(--dt-spacing-xs);
   border-left: 2px solid var(--dt-brand-color);
-  background: rgba(22, 119, 255, 0.08);
+  background: rgba(0, 127, 255, 0.08);
   border-radius: var(--dt-radius-sm);
   font-size: var(--dt-font-size-sm);
   cursor: pointer;
 }
 
 .reply-preview.is-own {
+  border-left-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--dt-text-white);
+}
   border-left-color: rgba(255, 255, 255, 0.7);
   background: rgba(255, 255, 255, 0.15);
   color: var(--dt-text-white);
