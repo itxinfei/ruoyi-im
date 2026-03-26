@@ -486,7 +486,7 @@ defineExpose({
           height: 20px;
           border-radius: 50%;
           background: var(--dt-brand-color);
-          color: #fff;
+          color: var(--dt-text-white);
           display: flex;
           align-items: center;
           justify-content: center;

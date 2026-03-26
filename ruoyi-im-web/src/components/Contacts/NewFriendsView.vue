@@ -168,7 +168,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: #8c8c8c;
+  color: var(--dt-text-desc);
   gap: 12px;
 }
 
@@ -178,7 +178,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: #bfbfbf;
+  color: var(--dt-text-secondary);
 }
 
 .empty-icon {
@@ -242,7 +242,7 @@ onMounted(() => {
 
 .request-message {
   font-size: 13px;
-  color: #8c8c8c;
+  color: var(--dt-text-desc);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -256,7 +256,7 @@ onMounted(() => {
 
 .status-text {
   font-size: 13px;
-  color: #8c8c8c;
+  color: var(--dt-text-desc);
 }
 
 /* 暗色模式 */
@@ -268,11 +268,11 @@ onMounted(() => {
 
 :deep(.dark) .view-title,
 :deep(.dark) .request-name {
-  color: #f1f5f9;
+  color: var(--dt-text-main-dark);
 }
 
 :deep(.dark) .request-message,
 :deep(.dark) .status-text {
-  color: #94a3b8;
+  color: var(--dt-text-desc-dark);
 }
 </style>

@@ -302,7 +302,7 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     font-size: 12px;
-    color: #8f959e;
+    color: var(--dt-text-desc);
     margin-bottom: 8px;
     padding: 0 4px;
   }
@@ -354,7 +354,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--dt-text-white);
     margin-right: 10px;
     font-size: var(--dt-font-size-base);
   }

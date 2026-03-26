@@ -264,7 +264,7 @@ defineExpose({
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #8f959e;
+  color: var(--dt-text-desc);
 
   .is-loading {
     font-size: 32px;
@@ -292,16 +292,16 @@ defineExpose({
     .doc-icon {
       width: 40px;
       height: 40px;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 20px;
 
-      &.icon-doc { background: #e6f4ff; color: #1677ff; }
-      &.icon-image { background: #f0f5ff; color: #1890ff; }
-      &.icon-video { background: #fff0f6; color: #eb2f96; }
-      &.icon-voice { background: #fffbe6; color: #fa8c16; }
+      &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+      &.icon-image { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+      &.icon-video { background: var(--dt-error-bg); color: var(--dt-error-color); }
+      &.icon-voice { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
     }
 
     .doc-meta {
@@ -309,12 +309,12 @@ defineExpose({
         margin: 0 0 4px 0;
         font-size: 16px;
         font-weight: 600;
-        color: #1f2329;
+        color: var(--dt-text-main);
       }
 
       .doc-meta-text {
         font-size: 12px;
-        color: #8f959e;
+        color: var(--dt-text-desc);
       }
     }
   }
@@ -332,13 +332,13 @@ defineExpose({
 
   .doc-text {
     line-height: 1.8;
-    color: #303133;
+    color: var(--dt-text-main);
     white-space: pre-wrap;
   }
 }
 
 .comments-section {
-  border-top: 1px solid #f2f3f5;
+  border-top: 1px solid var(--dt-border-light);
   padding-top: 16px;
 
   .comments-header {
@@ -351,7 +351,7 @@ defineExpose({
       margin: 0;
       font-size: 14px;
       font-weight: 600;
-      color: #1f2329;
+      color: var(--dt-text-main);
     }
   }
 
@@ -380,18 +380,18 @@ defineExpose({
           .comment-author {
             font-size: 13px;
             font-weight: 500;
-            color: #1f2329;
+            color: var(--dt-text-main);
           }
 
           .comment-time {
             font-size: 12px;
-            color: #8f959e;
+            color: var(--dt-text-desc);
           }
         }
 
         .comment-text {
           font-size: 13px;
-          color: #303133;
+          color: var(--dt-text-main);
           line-height: 1.6;
         }
       }

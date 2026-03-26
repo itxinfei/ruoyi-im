@@ -152,13 +152,13 @@ const handleDelete = () => {
 }
 
 .status-badge.pending {
-  background: #fff7e6;
-  color: #fa8c16;
+  background: var(--dt-warning-bg);
+  color: var(--dt-warning-color);
 }
 
 .status-badge.completed {
-  background: #f6ffed;
-  color: #52c41a;
+  background: var(--dt-success-bg);
+  color: var(--dt-success-color);
 }
 
 .priority-badge {
@@ -169,18 +169,18 @@ const handleDelete = () => {
 }
 
 .priority-badge.high {
-  background: #fff1f0;
-  color: #f5222d;
+  background: var(--dt-error-bg);
+  color: var(--dt-error-color);
 }
 
 .priority-badge.medium {
-  background: #fff7e6;
-  color: #fa8c16;
+  background: var(--dt-warning-bg);
+  color: var(--dt-warning-color);
 }
 
 .priority-badge.low {
-  background: #f6ffed;
-  color: #52c41a;
+  background: var(--dt-success-bg);
+  color: var(--dt-success-color);
 }
 
 .detail-section {
@@ -189,7 +189,7 @@ const handleDelete = () => {
 
 .section-label {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
   margin-bottom: 8px;
 }
 
@@ -198,23 +198,23 @@ const handleDelete = () => {
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #262626;
+  color: var(--dt-text-primary);
 }
 
 .section-content .material-icons-outlined {
   font-size: 18px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .section-content.overdue {
-  color: #ff4d4f;
+  color: var(--dt-error-color);
 }
 
 .overdue-tag {
   margin-left: 8px;
   padding: 2px 8px;
-  background: #fff1f0;
-  color: #ff4d4f;
+  background: var(--dt-error-bg);
+  color: var(--dt-error-color);
   border-radius: 4px;
   font-size: 12px;
 }
@@ -228,14 +228,14 @@ const handleDelete = () => {
 
 /* 暗色模式 */
 :deep(.dark) .section-label {
-  color: #64748b;
+  color: var(--dt-text-tertiary-dark);
 }
 
 :deep(.dark) .section-content {
-  color: #e2e8f0;
+  color: var(--dt-text-secondary-dark);
 }
 
 :deep(.dark) .section-content .material-icons-outlined {
-  color: #64748b;
+  color: var(--dt-text-tertiary-dark);
 }
 </style>

@@ -154,7 +154,7 @@ const formatFileSize = (bytes) => {
 
 .mail-header {
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--dt-border-light);
   margin-bottom: 20px;
 }
 
@@ -172,13 +172,13 @@ const formatFileSize = (bytes) => {
 .sender-name {
   font-size: 16px;
   font-weight: 600;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
 .send-time {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .mail-actions {
@@ -194,14 +194,14 @@ const formatFileSize = (bytes) => {
 .mail-content {
   font-size: 14px;
   line-height: 1.8;
-  color: #262626;
+  color: var(--dt-text-primary);
   white-space: pre-wrap;
 }
 
 .attachments {
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--dt-border-light);
 }
 
 .section-title {
@@ -210,13 +210,13 @@ const formatFileSize = (bytes) => {
   gap: 6px;
   font-size: 14px;
   font-weight: 500;
-  color: #262626;
+  color: var(--dt-text-primary);
   margin-bottom: 12px;
 }
 
 .section-title .material-icons-outlined {
   font-size: 18px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .attachment-list {
@@ -230,29 +230,29 @@ const formatFileSize = (bytes) => {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f9f9f9;
+  background: var(--dt-bg-hover);
   border-radius: 8px;
   transition: background 0.2s;
 }
 
 .attachment-item:hover {
-  background: #f0f0f0;
+  background: var(--dt-border-light);
 }
 
 .file-icon {
   font-size: 24px;
-  color: #1677ff;
+  color: var(--dt-brand-color);
 }
 
 .file-name {
   flex: 1;
   font-size: 14px;
-  color: #262626;
+  color: var(--dt-text-primary);
 }
 
 .file-size {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 
 .dialog-footer {
@@ -263,12 +263,12 @@ const formatFileSize = (bytes) => {
 /* 暗色模式 */
 :deep(.dark) .sender-name,
 :deep(.dark) .section-title {
-  color: #f1f5f9;
+  color: var(--dt-text-primary-dark);
 }
 
 :deep(.dark) .mail-content,
 :deep(.dark) .file-name {
-  color: #e2e8f0;
+  color: var(--dt-text-secondary-dark);
 }
 
 :deep(.dark) .attachment-item,

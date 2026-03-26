@@ -381,7 +381,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 12px 24px;
   background: rgba(0, 0, 0, 0.5);
-  color: #fff;
+  color: var(--dt-text-white);
   z-index: 10;
 
   .toolbar-left,

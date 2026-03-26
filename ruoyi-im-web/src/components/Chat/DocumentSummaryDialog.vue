@@ -161,14 +161,14 @@ export default {
 }
 
 .summary-content {
-  background-color: #f5f7fa;
+  background-color: var(--dt-bg-body);
   border-radius: 8px;
   padding: 16px;
 }
 
 .summary-text {
   line-height: 1.8;
-  color: #303133;
+  color: var(--dt-text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -179,7 +179,7 @@ export default {
 .key-points h4 {
   margin: 0 0 8px 0;
   font-size: 14px;
-  color: #606266;
+  color: var(--dt-text-secondary);
 }
 
 .key-points ul {
@@ -189,7 +189,7 @@ export default {
 
 .key-points li {
   line-height: 1.6;
-  color: #606266;
+  color: var(--dt-text-secondary);
   margin-bottom: 4px;
 }
 
@@ -198,8 +198,8 @@ export default {
   gap: 16px;
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--dt-border-light);
   font-size: 12px;
-  color: #909399;
+  color: var(--dt-text-tertiary);
 }
 </style>
