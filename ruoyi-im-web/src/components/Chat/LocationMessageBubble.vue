@@ -99,7 +99,7 @@ const openMap = () => {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 2px 8px rgba(22, 119, 255, 0.15);
+    box-shadow: var(--dt-shadow-brand);
   }
 
   // 地图缩略图
@@ -125,7 +125,7 @@ const openMap = () => {
       align-items: center;
       justify-content: center;
       color: var(--dt-text-white);
-      box-shadow: 0 2px 6px rgba(22, 119, 255, 0.3);
+      box-shadow: var(--dt-shadow-brand-strong);
 
       .material-icons-outlined {
         font-size: 18px;

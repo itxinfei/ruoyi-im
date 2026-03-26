@@ -232,7 +232,7 @@ const getBarHeight = (index) => {
     left: 0;
     right: 0;
     height: var(--dt-spacing-xs, 3px);
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--dt-border-light);
     cursor: pointer;
     border-radius: 0 0 var(--dt-radius-md) var(--dt-radius-md);
     overflow: hidden;

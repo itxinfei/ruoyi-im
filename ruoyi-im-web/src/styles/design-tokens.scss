@@ -62,6 +62,8 @@
   --dt-shadow-4: 0 8px 32px rgba(0, 0, 0, 0.16);
   --dt-shadow-float: 0 6px 24px rgba(0, 0, 0, 0.15);
   --dt-shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --dt-shadow-brand: 0 2px 8px rgba(0, 102, 204, 0.15);
+  --dt-shadow-brand-strong: 0 2px 6px rgba(0, 102, 204, 0.3);
   --dt-shadow-modal: 0 12px 48px rgba(0, 0, 0, 0.2);
 
   // === Typography (文本层级 - 钉钉风格) ===
@@ -211,6 +213,10 @@ html.dark {
   // === Border Colors (暗色模式边框) ===
   --dt-border-light: rgba(255, 255, 255, 0.1);
   --dt-border-color: rgba(255, 255, 255, 0.15);
+
+  // === Brand Shadows (暗色模式品牌阴影) ===
+  --dt-shadow-brand: 0 2px 8px rgba(51, 138, 255, 0.25);
+  --dt-shadow-brand-strong: 0 2px 6px rgba(51, 138, 255, 0.4);
 
   // === Text Colors (暗色模式文字) ===
   --dt-text-primary: var(--dt-text-primary-dark);
