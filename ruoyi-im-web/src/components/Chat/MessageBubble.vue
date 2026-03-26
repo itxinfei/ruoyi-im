@@ -442,7 +442,7 @@ const handleFileDownload = () => {
   padding: 6px 8px;
   margin-bottom: var(--dt-spacing-xs);
   border-left: 2px solid var(--dt-brand-color);
-  background: rgba(0, 127, 255, 0.08);
+  background: var(--dt-brand-bg);
   border-radius: var(--dt-radius-sm);
   font-size: var(--dt-font-size-sm);
   cursor: pointer;

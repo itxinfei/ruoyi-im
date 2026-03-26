@@ -728,7 +728,7 @@ const getReplyPreview = (msg) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(24, 144, 255, 0.1);
+  background: var(--dt-brand-bg);
   display: flex;
   align-items: center;
   justify-content: center;

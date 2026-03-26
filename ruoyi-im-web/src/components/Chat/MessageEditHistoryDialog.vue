@@ -211,7 +211,7 @@ watch(() => props.messageId, (val) => {
 
       &.first {
         border-color: var(--dt-brand-color);
-        background: rgba(22, 119, 255, 0.02);
+        background: var(--dt-brand-bg);
       }
 
       .history-info {

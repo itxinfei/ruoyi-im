@@ -47,7 +47,7 @@
 
       <!-- 空状态 -->
       <div v-if="!loading && filteredSessions.length === 0" class="empty-list">
-        <el-icon :size="48" color="rgba(23, 26, 29, 0.1)"><ChatLineRound /></el-icon>
+        <el-icon :size="48" color="var(--dt-border-lighter)"><ChatLineRound /></el-icon>
         <p>暂无消息会话</p>
       </div>
     </div>
