@@ -288,28 +288,28 @@ const resetForm = () => {
   align-items: center;
   gap: 16px;
   padding: 16px;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md, 8px);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .template-item:hover {
-  border-color: #1677ff;
-  background: #f0f7ff;
+  border-color: var(--dt-brand-color);
+  background: var(--dt-brand-bg, #f0f7ff);
 }
 
 .template-item.active {
-  border-color: #1677ff;
-  background: #e6f7ff;
+  border-color: var(--dt-brand-color);
+  background: var(--dt-brand-bg-light, #e6f7ff);
 }
 
 .template-icon {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
-  background: #f0f7ff;
-  color: #1677ff;
+  border-radius: var(--dt-radius-lg, 12px);
+  background: var(--dt-brand-bg, #f0f7ff);
+  color: var(--dt-brand-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -327,13 +327,13 @@ const resetForm = () => {
 .template-name {
   font-size: 15px;
   font-weight: 500;
-  color: #262626;
+  color: var(--dt-text-main);
   margin-bottom: 4px;
 }
 
 .template-desc {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-desc);
 }
 
 .dialog-footer {

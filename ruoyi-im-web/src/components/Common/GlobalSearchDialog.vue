@@ -182,27 +182,27 @@ const goToGroup = (_g) => { visible.value = false /* 跳转 */ }
   display: flex; flex-direction: column; overflow: hidden;
 
   .search-input-wrapper {
-    display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f1f5f9;
-    .search-icon { font-size: 24px; color: #64748b; margin-right: 12px; }
+    display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--dt-border-light);
+    .search-icon { font-size: 24px; color: var(--dt-text-tertiary); margin-right: 12px; }
     input {
-      flex: 1; border: none; outline: none; font-size: 18px; color: #1e293b;
-      &::placeholder { color: #cbd5e1; }
+      flex: 1; border: none; outline: none; font-size: 18px; color: var(--dt-text-primary);
+      &::placeholder { color: var(--dt-text-quaternary); }
     }
-    .search-kbd { kbd { padding: 2px 6px; background: #f1f5f9; border-radius: 4px; color: #94a3b8; font-size: 12px; } }
+    .search-kbd { kbd { padding: 2px 6px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm); color: var(--dt-text-secondary); font-size: 12px; } }
   }
 
   .search-results {
     max-height: 450px; overflow-y: auto; padding: 8px 0;
 
     .result-group {
-      .group-title { padding: 12px 20px 4px; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+      .group-title { padding: 12px 20px 4px; font-size: 12px; font-weight: 700; color: var(--dt-text-secondary); text-transform: uppercase; }
       .result-item {
         display: flex; align-items: center; gap: 12px; padding: 10px 20px; cursor: pointer;
-        &:hover, &.active { background: #eff6ff; }
+        &:hover, &.active { background: var(--dt-brand-bg); }
         .item-info {
           display: flex; flex-direction: column;
-          .name { font-size: 14px; font-weight: 600; color: #1e293b; mark { background: #ffeb3b; padding: 0 2px; border-radius: 2px; } }
-          .dept, .count { font-size: 12px; color: #64748b; }
+          .name { font-size: 14px; font-weight: 600; color: var(--dt-text-primary); mark { background: #ffeb3b; padding: 0 2px; border-radius: var(--dt-radius-xs); } }
+          .dept, .count { font-size: 12px; color: var(--dt-text-tertiary); }
         }
       }
     }
@@ -213,25 +213,25 @@ const goToGroup = (_g) => { visible.value = false /* 跳转 */ }
     .guide-tips {
       display: flex; justify-content: center; gap: 40px;
       .guide-item {
-        display: flex; flex-direction: column; align-items: center; gap: 8px; color: #94a3b8;
+        display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--dt-text-secondary);
         span { font-size: 32px; }
       }
     }
   }
 
   .search-footer {
-    padding: 12px 20px; background: #f8fafc; border-top: 1px solid #f1f5f9;
+    padding: 12px 20px; background: var(--dt-bg-body); border-top: 1px solid var(--dt-border-light);
     .shortcuts {
-      display: flex; gap: 16px; font-size: 12px; color: #94a3b8;
-      kbd { padding: 1px 4px; background: #fff; border: 1px solid #e2e8f0; border-radius: 3px; font-family: inherit; }
+      display: flex; gap: 16px; font-size: 12px; color: var(--dt-text-secondary);
+      kbd { padding: 1px 4px; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-sm); font-family: inherit; }
     }
   }
 }
 
 .dark .spotlight-container {
-  background: var(--dt-bg-card-dark); border: 1px solid var(--dt-border-dark);
-  .search-input-wrapper { border-color: #334155; input { background: transparent; color: #f1f5f9; } }
-  .search-results .result-item { &:hover, &.active { background: #334155; } .item-info .name { color: #f1f5f9; } }
-  .search-footer { background: #0f172a; border-color: #334155; }
+  background: var(--dt-bg-card); border: 1px solid var(--dt-border-color);
+  .search-input-wrapper { border-color: var(--dt-border-color); input { background: transparent; color: var(--dt-text-primary); } }
+  .search-results .result-item { &:hover, &.active { background: var(--dt-bg-hover); } .item-info .name { color: var(--dt-text-primary); } }
+  .search-footer { background: var(--dt-bg-body); border-color: var(--dt-border-color); }
 }
 </style>

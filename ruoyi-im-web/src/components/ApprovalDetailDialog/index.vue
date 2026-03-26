@@ -275,13 +275,13 @@ const confirmAction = async () => {
   justify-content: space-between;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--dt-border-light);
 }
 
 .detail-title {
   font-size: 18px;
   font-weight: 600;
-  color: #262626;
+  color: var(--dt-text-main);
   margin: 0;
 }
 
@@ -294,18 +294,18 @@ const confirmAction = async () => {
 }
 
 .status-badge.pending {
-  background: #fff7e6;
-  color: #fa8c16;
+  background: var(--dt-warning-bg, #fff7e6);
+  color: var(--dt-warning-color);
 }
 
 .status-badge.approved {
-  background: #f6ffed;
-  color: #52c41a;
+  background: var(--dt-success-bg, #f6ffed);
+  color: var(--dt-success-color);
 }
 
 .status-badge.rejected {
-  background: #fff1f0;
-  color: #ff4d4f;
+  background: var(--dt-error-bg, #fff1f0);
+  color: var(--dt-error-color);
 }
 
 .detail-section {
@@ -314,7 +314,7 @@ const confirmAction = async () => {
 
 .section-label {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-desc);
   margin-bottom: 8px;
 }
 
@@ -323,26 +323,26 @@ const confirmAction = async () => {
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #262626;
+  color: var(--dt-text-main);
 }
 
 .type-tag {
   padding: 4px 12px;
-  background: #f0f0f0;
-  border-radius: 4px;
+  background: var(--dt-bg-hover);
+  border-radius: var(--dt-radius-sm, 4px);
   font-size: 13px;
 }
 
 .apply-time {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-desc);
   margin-left: auto;
 }
 
 .reason-content {
   padding: 12px;
-  background: #f9f9f9;
-  border-radius: 8px;
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-md, 8px);
   line-height: 1.6;
 }
 
@@ -351,8 +351,8 @@ const confirmAction = async () => {
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   padding: 12px;
-  background: #f9f9f9;
-  border-radius: 8px;
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-md, 8px);
 }
 
 .detail-item {
@@ -363,12 +363,12 @@ const confirmAction = async () => {
 
 .item-label {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-desc);
 }
 
 .item-value {
   font-size: 14px;
-  color: #262626;
+  color: var(--dt-text-main);
 }
 
 .flow-list {
@@ -389,18 +389,18 @@ const confirmAction = async () => {
   top: 24px;
   bottom: 0;
   width: 2px;
-  background: #e6e6e6;
+  background: var(--dt-border-light);
 }
 
 .flow-item.done:not(:last-child)::before {
-  background: #52c41a;
+  background: var(--dt-success-color);
 }
 
 .flow-dot {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #e6e6e6;
+  background: var(--dt-border-light);
   flex-shrink: 0;
   margin-top: 4px;
   position: relative;
@@ -408,12 +408,12 @@ const confirmAction = async () => {
 }
 
 .flow-item.done .flow-dot {
-  background: #52c41a;
+  background: var(--dt-success-color);
 }
 
 .flow-item.active .flow-dot {
-  background: #1677ff;
-  box-shadow: 0 0 0 4px rgba(22, 119, 255, 0.2);
+  background: var(--dt-brand-color);
+  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.2);
 }
 
 .flow-content {
@@ -424,22 +424,22 @@ const confirmAction = async () => {
 .flow-name {
   font-size: 14px;
   font-weight: 500;
-  color: #262626;
+  color: var(--dt-text-main);
   margin-bottom: 4px;
 }
 
 .flow-time {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-desc);
 }
 
 .flow-comment {
   margin-top: 8px;
   padding: 8px 12px;
-  background: #f9f9f9;
-  border-radius: 6px;
+  background: var(--dt-bg-body);
+  border-radius: var(--dt-radius-sm, 6px);
   font-size: 13px;
-  color: #595959;
+  color: var(--dt-text-desc);
 }
 
 .dialog-footer {

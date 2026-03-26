@@ -139,7 +139,7 @@ const handleClose = () => emit('update:modelValue', false)
 .im-detail-drawer {
   :deep(.el-drawer__body) {
     padding: 0;
-    background-color: #f7f7f7;
+    background-color: var(--dt-bg-body);
   }
 }
 
@@ -149,7 +149,7 @@ const handleClose = () => emit('update:modelValue', false)
   flex-direction: column;
   
   .section {
-    background: #fff;
+    background: var(--dt-bg-card);
     margin-bottom: 8px;
     padding: 16px;
     
@@ -162,12 +162,12 @@ const handleClose = () => emit('update:modelValue', false)
         .name {
           margin: 0;
           font-size: 16px;
-          color: #1f1f1f;
+          color: var(--dt-text-main);
         }
         .sub {
           margin: 4px 0 0;
           font-size: 12px;
-          color: #8c8c8c;
+          color: var(--dt-text-desc);
         }
       }
     }
@@ -178,8 +178,8 @@ const handleClose = () => emit('update:modelValue', false)
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-    .title { font-weight: 500; color: #1f1f1f; }
-    .count { font-size: 12px; color: #8c8c8c; }
+    .title { font-weight: 500; color: var(--dt-text-main); }
+    .count { font-size: 12px; color: var(--dt-text-desc); }
   }
 
   .member-grid {
@@ -194,7 +194,7 @@ const handleClose = () => emit('update:modelValue', false)
       cursor: pointer;
       .nickname {
         font-size: 11px;
-        color: #8c8c8c;
+        color: var(--dt-text-desc);
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -204,12 +204,12 @@ const handleClose = () => emit('update:modelValue', false)
         .icon-box {
           width: 32px;
           height: 32px;
-          border: 1px dashed #d9d9d9;
+          border: 1px dashed var(--dt-border-light);
           border-radius: 4px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #8c8c8c;
+          color: var(--dt-text-desc);
         }
       }
     }
@@ -222,8 +222,8 @@ const handleClose = () => emit('update:modelValue', false)
       margin-bottom: 12px;
       font-size: 14px;
       &:last-child { margin-bottom: 0; }
-      label { color: #8c8c8c; }
-      span { color: #1f1f1f; }
+      label { color: var(--dt-text-desc); }
+      span { color: var(--dt-text-main); }
     }
   }
 
@@ -234,7 +234,7 @@ const handleClose = () => emit('update:modelValue', false)
       align-items: center;
       padding: 8px 0;
       font-size: 14px;
-      color: #1f1f1f;
+      color: var(--dt-text-main);
     }
   }
 
@@ -243,20 +243,20 @@ const handleClose = () => emit('update:modelValue', false)
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    &:hover { background: #fafafa; }
+    &:hover { background: var(--dt-bg-hover); }
     .menu-left {
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 14px;
-      color: #1f1f1f;
+      color: var(--dt-text-main);
     }
   }
 
   .bottom-actions {
     margin-top: auto;
     padding: 16px;
-    background: #fff;
+    background: var(--dt-bg-card);
   }
 }
 </style>
