@@ -1,5 +1,17 @@
 <template>
-  <div class="chat-input-wrapper">
+  <div
+    class="chat-input-wrapper"
+    :class="{ 'is-dragover': isDragover }"
+    @dragover.prevent="handleDragOver"
+    @dragleave.prevent="handleDragLeave"
+    @drop.prevent="handleDrop"
+  >
+    <!-- 拖拽上传遮罩 -->
+    <div v-if="isDragover" class="dragover-mask">
+      <el-icon class="drag-icon"><Upload /></el-icon>
+      <span>拖拽文件到此处上传</span>
+    </div>
+
     <!-- 引用消息预览区 -->
     <div v-if="replyingMessage" class="reply-preview-bar">
       <div class="reply-content">
@@ -97,7 +109,7 @@
  * ChatInputArea.vue (对齐钉钉无边框沉浸式输入 & 状态驱动发送按钮 + 表情选择器 + 图片预览)
  */
 import { ref, computed, onMounted } from 'vue';
-import { Close, Star, Picture, Folder } from '@element-plus/icons-vue';
+import { Close, Star, Picture, Folder, Upload } from '@element-plus/icons-vue';
 
 const props = defineProps({
   replyingMessage: Object
@@ -109,6 +121,7 @@ const editorRef = ref(null);
 const hasContent = ref(false);
 const emojiPickerVisible = ref(false);
 const pendingImages = ref([]);
+const isDragover = ref(false);
 
 // 常用表情列表
 const emojiList = [
@@ -197,6 +210,35 @@ const removeImage = (index) => {
 
 const clearReply = () => emit('clear-reply');
 
+// 拖拽上传
+const handleDragOver = (e) => {
+  const hasFiles = e.dataTransfer?.types.includes('Files');
+  if (hasFiles) {
+    isDragover.value = true;
+  }
+};
+
+const handleDragLeave = (e) => {
+  // 仅当离开整个输入区时才隐藏遮罩，防止子元素触发闪烁
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    isDragover.value = false;
+  }
+};
+
+const handleDrop = (e) => {
+  isDragover.value = false;
+  const files = e.dataTransfer?.files;
+  if (!files || files.length === 0) return;
+
+  for (const file of files) {
+    if (file.type.startsWith('image/')) {
+      addPendingImage(file);
+    } else {
+      emit('send', { type: 'FILE', file, fileName: file.name });
+    }
+  }
+};
+
 onMounted(() => {
   editorRef.value?.focus();
 });
@@ -209,6 +251,32 @@ onMounted(() => {
   background-color: var(--dt-bg-chat);
   border-top: 1px solid var(--dt-border-light);
   position: relative;
+}
+
+/* 拖拽上传遮罩 */
+.dragover-mask {
+  position: absolute;
+  inset: 0;
+  background: var(--dt-bg-hover);
+  border: 2px dashed var(--dt-brand-color);
+  border-radius: var(--dt-radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 10;
+  color: var(--dt-brand-color);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.drag-icon {
+  font-size: 32px;
+}
+
+.chat-input-wrapper.is-dragover {
+  border-color: var(--dt-brand-color);
 }
 
 /* 引用回复栏 */
@@ -309,7 +377,7 @@ onMounted(() => {
   display: flex;
   gap: 8px;
   padding: 8px 20px;
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: var(--dt-bg-body);
   overflow-x: auto;
 }
 
