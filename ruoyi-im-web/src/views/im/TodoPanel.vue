@@ -233,7 +233,7 @@ onMounted(fetchTodos);
   border-color: var(--dt-brand-color);
 }
 
-.icon-check { color: #fff; font-size: 12px; }
+.icon-check { color: var(--dt-text-white); font-size: 12px; }
 
 .todo-content { flex: 1; min-width: 0; }
 
@@ -257,7 +257,7 @@ onMounted(fetchTodos);
 }
 
 .deadline { color: var(--dt-text-desc); display: flex; align-items: center; gap: 4px; }
-.deadline.is-overdue { color: #FF4D4F; }
+.deadline.is-overdue { color: var(--dt-error-color); }
 
 .source { color: var(--dt-brand-color); background: var(--dt-brand-bg); padding: 0 4px; border-radius: 2px; }
 
@@ -267,7 +267,7 @@ onMounted(fetchTodos);
   color: var(--dt-text-desc);
 }
 
-.todo-actions i:hover { color: #FF4D4F; }
+.todo-actions i:hover { color: var(--dt-error-color); }
 
 .empty-state {
   display: flex;

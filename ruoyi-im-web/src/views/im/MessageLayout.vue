@@ -17,7 +17,7 @@
       <div v-else class="empty-placeholder">
         <div class="welcome-card">
           <div class="welcome-logo">
-            <el-icon :size="48" color="#FFFFFF"><ChatDotRound /></el-icon>
+            <el-icon :size="48" color="var(--dt-text-white)"><ChatDotRound /></el-icon>
           </div>
           <h2 class="welcome-title">欢迎使用 IM</h2>
           <p class="welcome-subtitle">选择左侧会话，开始高效协同</p>
