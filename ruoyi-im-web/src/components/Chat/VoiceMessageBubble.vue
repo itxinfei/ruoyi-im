@@ -161,7 +161,7 @@ const getBarHeight = (index) => {
     border-radius: 50%;
     border: none;
     background: var(--dt-brand-color);
-    color: #fff;
+    color: var(--dt-bg-card);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -175,7 +175,7 @@ const getBarHeight = (index) => {
 
     &:hover {
       transform: scale(1.08);
-      box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+      box-shadow: 0 2px 8px var(--dt-shadow-brand);
     }
 
     &:active {
@@ -258,7 +258,7 @@ const getBarHeight = (index) => {
     flex-direction: row-reverse;
 
     .play-btn {
-      background: #fff;
+      background: var(--dt-bg-card);
       color: var(--dt-brand-color);
     }
 
@@ -272,7 +272,7 @@ const getBarHeight = (index) => {
 
     .progress-bar {
       .progress-fill {
-        background: #fff;
+        background: var(--dt-bg-card);
       }
     }
   }

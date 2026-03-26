@@ -473,7 +473,7 @@ onMounted(() => {
     color: var(--dt-text-tertiary);
     background: var(--dt-bg-body);
     padding: 2px 8px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
   }
 }
 

@@ -254,8 +254,8 @@ watch(visible, (val) => {
 
   .target-users-selector {
     width: 100%;
-    border: 1px solid #dcdfe6;
-    border-radius: 4px;
+    border: 1px solid var(--dt-border-light);
+    border-radius: var(--dt-radius-md);
     padding: 10px;
 
     .el-divider {
@@ -284,7 +284,7 @@ watch(visible, (val) => {
     }
 
     .empty-tip {
-      color: #999;
+      color: var(--dt-text-tertiary);
       text-align: center;
       padding: 20px 0;
     }

@@ -179,7 +179,7 @@ onMounted(() => {
     color: var(--dt-text-tertiary);
     background: var(--dt-bg-body);
     padding: 2px 8px;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
   }
 
   .search-input {
@@ -301,7 +301,7 @@ onMounted(() => {
     color: var(--dt-text-quaternary);
     background: var(--dt-bg-body);
     padding: 2px 6px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-lg);
   }
 }
 </style>
