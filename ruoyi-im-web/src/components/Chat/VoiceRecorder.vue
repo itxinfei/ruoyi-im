@@ -387,14 +387,14 @@ defineExpose({ open })
     color: var(--dt-brand-color);
 
     &.recording {
-      background: #fef2f2;
-      color: #ef4444;
+      background: var(--dt-error-bg);
+      color: var(--dt-error-color);
       animation: pulse 1.5s infinite;
     }
 
     &.recorded {
-      background: #f0fdf4;
-      color: #22c55e;
+      background: var(--dt-success-bg);
+      color: var(--dt-success-color);
     }
 
     .material-icons-outlined {
@@ -403,7 +403,7 @@ defineExpose({ open })
 
     .recording-icon {
       font-size: 32px;
-      color: #ef4444;
+      color: var(--dt-error-color);
     }
   }
 

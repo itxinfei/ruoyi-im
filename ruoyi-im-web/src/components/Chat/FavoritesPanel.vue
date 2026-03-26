@@ -460,23 +460,23 @@ defineExpose({ refresh: loadFavorites })
         }
 
         &.type-image {
-          background: #f0f9eb;
-          color: #67c23a;
+          background: var(--dt-success-bg);
+          color: var(--dt-success-color);
         }
 
         &.type-file {
-          background: #e6f7ff;
-          color: #1890ff;
+          background: var(--dt-info-bg);
+          color: var(--dt-info-color);
         }
 
         &.type-voice {
-          background: #fff7e6;
-          color: #fa8c16;
+          background: var(--dt-warning-bg);
+          color: var(--dt-warning-color);
         }
 
         &.type-video {
-          background: #fff1f0;
-          color: #f5222d;
+          background: var(--dt-error-bg);
+          color: var(--dt-error-color);
         }
       }
     }
@@ -487,14 +487,14 @@ defineExpose({ refresh: loadFavorites })
       gap: 6px;
 
       .remark-tag {
-        background: #f6f8fa;
-        border-color: #e1e4e8;
+        background: var(--dt-bg-hover);
+        border-color: var(--dt-border-color);
       }
 
       .tag-item {
-        background: #f0f9ff;
-        border-color: #bae7ff;
-        color: #096dd9;
+        background: var(--dt-info-bg);
+        border-color: var(--dt-info-border);
+        color: var(--dt-info-color);
       }
     }
 

@@ -828,13 +828,13 @@ const getReplyPreview = (msg) => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--dt-warning-bg, #fffbe6);
+    background: var(--dt-warning-bg);
     color: var(--dt-text-primary);
     border-radius: var(--dt-radius-sm);
     padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
     margin-bottom: var(--dt-spacing-sm);
     font-size: var(--dt-font-size-sm);
-    border-left: 3px solid var(--dt-warning-color, #faad14);
+    border-left: 3px solid var(--dt-warning-color);
   }
 
   .edit-info,
@@ -846,7 +846,7 @@ const getReplyPreview = (msg) => {
   }
 
   .edit-label {
-    color: var(--dt-warning-color, #faad14);
+    color: var(--dt-warning-color);
     font-weight: var(--dt-font-weight-medium);
   }
 

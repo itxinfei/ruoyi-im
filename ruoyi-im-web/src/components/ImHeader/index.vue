@@ -187,8 +187,8 @@ onMounted(() => {
   justify-content: space-between;
   height: 48px;
   padding: 0 24px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e8e8e8;
+  background-color: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-light);
 }
 
 .header-left {
@@ -210,7 +210,7 @@ onMounted(() => {
   width: 1px;
   height: 24px;
   margin: 0 20px;
-  background-color: #f0f0f0;
+  background-color: var(--dt-border-light);
 }
 
 .header-search {
@@ -221,31 +221,31 @@ onMounted(() => {
 .global-search-input {
   :deep(.el-input__wrapper) {
     border-radius: 8px;
-    background-color: #f5f5f5;
+    background-color: var(--dt-bg-body);
     box-shadow: none;
     border: 1px solid transparent;
 
     &:hover {
-      background-color: #f0f0f0;
-      border-color: #d9d9d9;
+      background-color: var(--dt-bg-body);
+      border-color: var(--dt-border-light);
     }
 
     &.is-focus {
-      background-color: #ffffff;
-      border-color: #0089ff;
+      background-color: var(--dt-bg-card);
+      border-color: var(--dt-brand-color);
       box-shadow: 0 0 0 2px rgba(0, 137, 255, 0.1);
     }
   }
 
   :deep(.el-input__inner) {
     font-size: 14px;
-    color: #262626;
+    color: var(--dt-text-primary);
   }
 
   .search-shortcut {
     font-size: 12px;
-    color: #8c8c8c;
-    background: rgba(0, 0, 0, 0.04);
+    color: var(--dt-text-tertiary);
+    background: var(--dt-hover-overlay);
     padding: 2px 6px;
     border-radius: 4px;
   }
@@ -268,12 +268,12 @@ onMounted(() => {
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--dt-hover-overlay);
   }
 
   :deep(.el-icon) {
     font-size: 18px;
-    color: #8c8c8c;
+    color: var(--dt-text-tertiary);
   }
 }
 
@@ -292,18 +292,18 @@ onMounted(() => {
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--dt-hover-overlay);
   }
 }
 
 .header-username {
   font-size: 14px;
   font-weight: 500;
-  color: #262626;
+  color: var(--dt-text-primary);
 }
 
 .dropdown-arrow {
   font-size: 12px;
-  color: #8c8c8c;
+  color: var(--dt-text-tertiary);
 }
 </style>

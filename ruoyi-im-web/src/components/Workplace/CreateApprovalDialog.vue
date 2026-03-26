@@ -194,32 +194,32 @@ watch(visible, (val) => {
   gap: 12px;
   padding: 20px;
   border-radius: 12px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--dt-border-light);
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    border-color: #0089ff;
-    background: #f0f7ff;
+    border-color: var(--dt-brand-color);
+    background: var(--dt-brand-color-light);
     transform: translateY(-2px);
   }
 
   .tpl-icon {
     width: 48px;
     height: 48px;
-    background: #e6f7ff;
+    background: var(--dt-brand-color-light);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1890ff;
+    color: var(--dt-brand-color);
     font-size: 24px;
     img { width: 100%; height: 100%; border-radius: 10px; object-fit: cover; }
   }
 
   .tpl-name {
     font-size: 14px;
-    color: #333;
+    color: var(--dt-text-primary);
     font-weight: 500;
   }
 }
@@ -229,7 +229,7 @@ watch(visible, (val) => {
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--dt-border-light);
   padding-bottom: 12px;
   .selected-name {
     font-size: 16px;

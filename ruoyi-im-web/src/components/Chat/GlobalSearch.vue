@@ -319,7 +319,7 @@ onMounted(() => {
   align-items: center;
   padding: 4px 12px;
   background: var(--dt-bg-body);
-  border-radius: 14px;
+  border-radius: var(--dt-radius-xl);
   font-size: var(--dt-font-size-sm);
   color: var(--dt-text-primary);
   max-width: 150px;

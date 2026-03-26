@@ -89,9 +89,9 @@ const openMap = () => {
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  border: 1px solid var(--dt-border-light);
   cursor: pointer;
   min-width: 220px;
   max-width: 280px;
@@ -106,8 +106,8 @@ const openMap = () => {
   .map-thumbnail {
     width: 80px;
     height: 60px;
-    border-radius: 6px;
-    background: linear-gradient(135deg, #e8f4ff 0%, #d4ecff 100%);
+    border-radius: var(--dt-radius-md);
+    background: var(--dt-brand-lighter);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -176,11 +176,11 @@ const openMap = () => {
 
   // 自己的消息样式
   &.is-own {
-    background: rgba(22, 119, 255, 0.08);
-    border-color: rgba(22, 119, 255, 0.2);
+    background: var(--dt-brand-lighter);
+    border-color: var(--dt-brand-lighter);
 
     .map-thumbnail {
-      background: linear-gradient(135deg, #d4ecff 0%, #b8e0ff 100%);
+      background: var(--dt-brand-bg);
     }
 
     .location-info {
@@ -198,8 +198,8 @@ const openMap = () => {
 
 // 暗色模式
 .dark .location-message {
-  background: rgba(30, 41, 59, 0.8);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--dt-bg-card-dark);
+  border-color: var(--dt-border-dark);
 
   .location-info {
     .location-name {
@@ -208,8 +208,8 @@ const openMap = () => {
   }
 
   &.is-own {
-    background: rgba(22, 119, 255, 0.15);
-    border-color: rgba(22, 119, 255, 0.3);
+    background: var(--dt-brand-bg);
+    border-color: var(--dt-brand-bg);
   }
 }
 </style>

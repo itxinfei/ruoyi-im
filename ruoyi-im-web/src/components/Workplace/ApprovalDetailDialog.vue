@@ -242,11 +242,11 @@ watch(visible, (val) => {
       .applicant-name {
         font-size: 16px;
         font-weight: 600;
-        color: #262626;
+        color: var(--dt-text-primary);
       }
       .apply-time {
         font-size: 12px;
-        color: #8c8c8c;
+        color: var(--dt-text-tertiary);
         margin-top: 4px;
       }
     }
@@ -258,7 +258,7 @@ watch(visible, (val) => {
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 20px;
-    color: #000;
+    color: var(--dt-text-primary);
   }
 
   .form-data {
@@ -269,12 +269,12 @@ watch(visible, (val) => {
     .form-item {
       .label {
         font-size: 13px;
-        color: #8c8c8c;
+        color: var(--dt-text-tertiary);
         margin-bottom: 4px;
       }
       .value {
         font-size: 14px;
-        color: #262626;
+        color: var(--dt-text-primary);
         word-break: break-all;
       }
     }
@@ -284,19 +284,19 @@ watch(visible, (val) => {
 .remark-section {
   .label {
     font-size: 13px;
-    color: #8c8c8c;
+    color: var(--dt-text-tertiary);
     margin-bottom: 4px;
   }
   .value {
     font-size: 14px;
-    color: #262626;
+    color: var(--dt-text-primary);
     font-style: italic;
   }
 }
 
 .action-footer {
   margin-top: 30px;
-  background: #f9f9f9;
+  background: var(--dt-bg-body);
   padding: 16px;
   border-radius: 8px;
 
