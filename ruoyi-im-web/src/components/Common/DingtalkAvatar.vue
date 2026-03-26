@@ -192,7 +192,7 @@ const handleImageError = () => {
 
   /* 不同人数的网格分布 */
   &.grid-0 { background-color: var(--dt-brand-color); display: flex; align-items: center; justify-content: center;
-    &::after { content: 'G'; color: #fff; font-size: 20px; }
+    &::after { content: 'G'; color: var(--dt-text-white); font-size: 20px; }
   }
   &.grid-1 { grid-template-columns: 1fr; .grid-item { font-size: 16px; } }
   &.grid-2 { grid-template-columns: 1fr 1fr; .grid-item { height: 100%; font-size: 14px; } }

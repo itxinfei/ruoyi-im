@@ -480,17 +480,17 @@ watch(visible, (val) => {
           right: 4px;
           width: 16px;
           height: 16px;
-          background: #22c55e;
-          border: 3px solid #fff;
+          background: var(--dt-success-color);
+          border: 3px solid var(--dt-bg-card);
           border-radius: 50%;
           box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
 
           &.status-online {
-            background: #22c55e;
+            background: var(--dt-success-color);
           }
 
           &.status-offline {
-            background: #6b7280;
+            background: var(--dt-text-secondary);
           }
 
           .dark & {
