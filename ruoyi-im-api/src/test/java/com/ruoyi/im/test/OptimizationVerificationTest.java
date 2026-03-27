@@ -73,7 +73,7 @@ public class OptimizationVerificationTest {
     @Test
     void testResultClassEnhancements() {
         // 测试使用错误码枚举的成功响应
-        Result<String> successResult = Result.success("测试数据");
+        Result<String> successResult = Result.success(null, "测试数据");
         assertTrue(successResult.isSuccess());
         assertEquals(ApiErrorCode.SUCCESS.getCode(), successResult.getCode());
         assertEquals("测试数据", successResult.getData());

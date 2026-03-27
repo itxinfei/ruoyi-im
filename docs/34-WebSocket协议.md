@@ -66,6 +66,23 @@
 }
 ```
 
+4. **送达确认 (DELIVERED_ACK)**：消息成功推送到接收方后，服务端通知发送方消息已送达。
+```json
+{
+  "type": "MESSAGE",
+  "action": "DELIVERED_ACK",
+  "data": {
+    "msgId": "12345",
+    "deliveredTime": 1710921600000
+  }
+}
+```
+
+> **消息状态与 WS 帧对应关系**：
+> - `SEND_ACK`：对应 `SENT` 状态（消息已存储）
+> - `DELIVERED_ACK`：对应 `DELIVERED` 状态（消息已推送到接收方）
+> - `READ_RECEIPT`：对应已读状态
+
 ---
 
 ## 3. 消息撤回与编辑 (Update Logic)
