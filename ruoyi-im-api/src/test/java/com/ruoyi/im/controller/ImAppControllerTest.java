@@ -240,4 +240,49 @@ class ImAppControllerTest {
         assertTrue(result.isSuccess());
         verify(applicationService).setVisibility(TEST_APP_ID, false);
     }
+
+    @Test
+    void searchApplications_Success() {
+        ImApplication app1 = new ImApplication();
+        app1.setId(1L);
+        app1.setName("审批应用");
+        app1.setCode("approval");
+        ImApplication app2 = new ImApplication();
+        app2.setId(2L);
+        app2.setName("审批流程");
+        app2.setCode("approval_flow");
+
+        when(applicationService.searchApplications("审批")).thenReturn(Arrays.asList(app1, app2));
+
+        Result<List<ImApplication>> result = controller.searchApplications("审批");
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getData().size());
+        verify(applicationService).searchApplications("审批");
+    }
+
+    @Test
+    void searchApplications_EmptyKeyword() {
+        when(applicationService.searchApplications("")).thenReturn(Arrays.asList());
+
+        Result<List<ImApplication>> result = controller.searchApplications("");
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertTrue(result.getData().isEmpty());
+        verify(applicationService).searchApplications("");
+    }
+
+    @Test
+    void searchApplications_NoResults() {
+        when(applicationService.searchApplications("不存在的应用")).thenReturn(Arrays.asList());
+
+        Result<List<ImApplication>> result = controller.searchApplications("不存在的应用");
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertTrue(result.getData().isEmpty());
+        verify(applicationService).searchApplications("不存在的应用");
+    }
 }

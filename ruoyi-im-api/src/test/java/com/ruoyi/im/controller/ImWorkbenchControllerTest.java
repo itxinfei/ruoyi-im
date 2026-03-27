@@ -1,13 +1,17 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.domain.ImTodoItem;
 import com.ruoyi.im.dto.todo.ImTodoCreateRequest;
 import com.ruoyi.im.exception.BusinessException;
+import com.ruoyi.im.service.ImAppUsageService;
+import com.ruoyi.im.service.ImApplicationService;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImNoticeService;
 import com.ruoyi.im.service.ImTodoItemService;
+import com.ruoyi.im.service.ImUserLayoutService;
 import com.ruoyi.im.util.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,11 +25,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -50,6 +50,15 @@ public class ImWorkbenchControllerTest {
 
     @Mock
     private ImNoticeService noticeService;
+
+    @Mock
+    private ImApplicationService applicationService;
+
+    @Mock
+    private ImAppUsageService appUsageService;
+
+    @Mock
+    private ImUserLayoutService userLayoutService;
 
     @InjectMocks
     private ImWorkbenchController imWorkbenchController;
@@ -461,5 +470,275 @@ public class ImWorkbenchControllerTest {
         item.setStatus("PENDING");
         item.setUserId(TEST_USER_ID);
         return item;
+    }
+
+    /**
+     * 创建测试用 ImApplication
+     */
+    private ImApplication createTestApplication(Long id, String name, String category) {
+        ImApplication app = new ImApplication();
+        app.setId(id);
+        app.setName(name);
+        app.setCode("APP_" + id);
+        app.setCategory(category);
+        app.setAppType("ROUTE");
+        app.setAppUrl("/" + name.toLowerCase());
+        app.setIsVisible(1);
+        app.setIsSystem(0);
+        app.setSortOrder(0);
+        return app;
+    }
+
+    /**
+     * 测试获取常用应用 - 成功场景
+     */
+    @Test
+    void testGetCommonApps_Success() {
+        List<ImApplication> apps = Arrays.asList(
+                createTestApplication(1L, "审批", "OFFICE"),
+                createTestApplication(2L, "考勤", "OFFICE")
+        );
+        when(applicationService.getVisibleApplications()).thenReturn(apps);
+
+        Result<List<ImApplication>> result = imWorkbenchController.getCommonApps();
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getData().size());
+        verify(applicationService).getVisibleApplications();
+    }
+
+    /**
+     * 测试获取常用应用 - 空列表
+     */
+    @Test
+    void testGetCommonApps_EmptyList() {
+        when(applicationService.getVisibleApplications()).thenReturn(Arrays.asList());
+
+        Result<List<ImApplication>> result = imWorkbenchController.getCommonApps();
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertTrue(result.getData().isEmpty());
+    }
+
+    /**
+     * 测试获取应用分类 - 成功场景
+     */
+    @Test
+    void testGetAppsByCategory_Success() {
+        ImApplication app1 = createTestApplication(1L, "审批", "OFFICE");
+        ImApplication app2 = createTestApplication(2L, "考勤", "OFFICE");
+        ImApplication app3 = createTestApplication(3L, "报表", "DATA");
+
+        Map<String, List<ImApplication>> appsByCategory = new HashMap<>();
+        appsByCategory.put("OFFICE", Arrays.asList(app1, app2));
+        appsByCategory.put("DATA", Arrays.asList(app3));
+
+        when(applicationService.getApplicationsByCategory()).thenReturn(appsByCategory);
+
+        Result<Map<String, List<ImApplication>>> result = imWorkbenchController.getAppsByCategory();
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getData().size());
+        assertEquals(2, result.getData().get("OFFICE").size());
+        assertEquals(1, result.getData().get("DATA").size());
+        verify(applicationService).getApplicationsByCategory();
+    }
+
+    /**
+     * 测试搜索应用 - 成功场景
+     */
+    @Test
+    void testSearchApps_Success() {
+        String keyword = "审批";
+        List<ImApplication> apps = Arrays.asList(
+                createTestApplication(1L, "审批申请", "OFFICE"),
+                createTestApplication(2L, "审批历史", "OFFICE")
+        );
+        when(applicationService.searchApplications(keyword)).thenReturn(apps);
+
+        Result<List<ImApplication>> result = imWorkbenchController.searchApps(keyword);
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertEquals(2, result.getData().size());
+        verify(applicationService).searchApplications(keyword);
+    }
+
+    /**
+     * 测试搜索应用 - 空关键词返回全部可见应用
+     */
+    @Test
+    void testSearchApps_EmptyKeyword() {
+        List<ImApplication> apps = Arrays.asList(
+                createTestApplication(1L, "审批", "OFFICE")
+        );
+        when(applicationService.getVisibleApplications()).thenReturn(apps);
+
+        Result<List<ImApplication>> result = imWorkbenchController.searchApps("");
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getData().size());
+        verify(applicationService).getVisibleApplications();
+        verify(applicationService, never()).searchApplications(anyString());
+    }
+
+    /**
+     * 测试搜索应用 - 无匹配结果
+     */
+    @Test
+    void testSearchApps_NoResults() {
+        String keyword = "不存在的应用";
+        when(applicationService.searchApplications(keyword)).thenReturn(Arrays.asList());
+
+        Result<List<ImApplication>> result = imWorkbenchController.searchApps(keyword);
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertTrue(result.getData().isEmpty());
+        verify(applicationService).searchApplications(keyword);
+    }
+
+    /**
+     * 测试获取最近使用的应用 - 成功场景
+     */
+    @Test
+    void testGetRecentApps_Success() {
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
+
+            List<ImApplication> recentApps = Arrays.asList(
+                    createTestApplication(1L, "审批", "OFFICE"),
+                    createTestApplication(2L, "考勤", "OFFICE")
+            );
+            when(appUsageService.getRecentApps(TEST_USER_ID)).thenReturn(recentApps);
+
+            Result<List<ImApplication>> result = imWorkbenchController.getRecentApps();
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertEquals(2, result.getData().size());
+            verify(appUsageService).getRecentApps(TEST_USER_ID);
+        }
+    }
+
+    /**
+     * 测试获取最近使用的应用 - 空列表
+     */
+    @Test
+    void testGetRecentApps_EmptyList() {
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
+
+            when(appUsageService.getRecentApps(TEST_USER_ID)).thenReturn(Arrays.asList());
+
+            Result<List<ImApplication>> result = imWorkbenchController.getRecentApps();
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertTrue(result.getData().isEmpty());
+            verify(appUsageService).getRecentApps(TEST_USER_ID);
+        }
+    }
+
+    /**
+     * 测试记录应用使用 - 成功场景
+     */
+    @Test
+    void testRecordAppUsage_Success() {
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
+
+            Long appId = 1L;
+            doNothing().when(appUsageService).recordAppUsage(TEST_USER_ID, appId);
+
+            Result<Void> result = imWorkbenchController.recordAppUsage(appId);
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertEquals("记录成功", result.getMsg());
+            verify(appUsageService).recordAppUsage(TEST_USER_ID, appId);
+        }
+    }
+
+    /**
+     * 测试获取布局配置 - 成功场景
+     */
+    @Test
+    void testGetLayoutConfig_Success() {
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
+
+            String layoutConfig = "{\"commonAppIds\":[1,2,3]}";
+            // Using lenient stubbing to handle potential mismatch
+            lenient().when(userLayoutService.getLayoutConfig(any(), any())).thenReturn(layoutConfig);
+
+            Result<String> result = imWorkbenchController.getLayoutConfig();
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            // Verify mock was called
+            verify(userLayoutService).getLayoutConfig(any(), any());
+        }
+    }
+
+    /**
+     * 测试获取布局配置 - 无保存的配置
+     */
+    @Test
+    void testGetLayoutConfig_Empty() {
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
+
+            lenient().when(userLayoutService.getLayoutConfig(any(), any())).thenReturn(null);
+
+            Result<String> result = imWorkbenchController.getLayoutConfig();
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            verify(userLayoutService).getLayoutConfig(any(), any());
+        }
+    }
+
+    /**
+     * 测试保存布局配置 - 成功场景
+     */
+    @Test
+    void testSaveLayoutConfig_Success() {
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
+
+            String layoutConfig = "{\"commonAppIds\":[1,2,3]}";
+            lenient().doNothing().when(userLayoutService).saveLayoutConfig(any(), any(), any());
+
+            Result<Void> result = imWorkbenchController.saveLayoutConfig(layoutConfig);
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertEquals("保存成功", result.getMsg());
+            verify(userLayoutService).saveLayoutConfig(any(), any(), any());
+        }
+    }
+
+    /**
+     * 测试重置布局配置 - 成功场景
+     */
+    @Test
+    void testResetLayoutConfig_Success() {
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
+
+            lenient().doNothing().when(userLayoutService).deleteLayoutConfig(any(), any());
+
+            Result<Void> result = imWorkbenchController.resetLayoutConfig();
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertEquals("重置成功", result.getMsg());
+            verify(userLayoutService).deleteLayoutConfig(any(), any());
+        }
     }
 }
