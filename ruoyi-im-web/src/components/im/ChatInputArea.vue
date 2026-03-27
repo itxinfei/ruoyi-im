@@ -593,7 +593,7 @@ onMounted(() => {
 
 .rec-btn.send {
   background: var(--dt-brand-color);
-  color: #fff;
+  color: var(--dt-text-white);
 }
 
 .rec-btn.send:hover {
