@@ -150,12 +150,12 @@
     
     <!-- 批量插入用户 - 性能优化 -->
     <insert id="batchInsertImUser" parameterType="java.util.List">
-        insert into im_user (username, password, nickname, email, mobile, avatar, status, gender, signature, department, position, role, birthday, last_online_time, create_time, update_time)
+        insert into im_user (username, password, nickname, email, mobile, avatar, status, gender, signature, department, position, role, birthday, last_online_time, user_status, status_update_time, create_time, update_time)
         values
         <foreach collection="list" item="user" separator=",">
             (#{user.username}, #{user.password}, #{user.nickname}, #{user.email}, #{user.mobile},
              #{user.avatar}, #{user.status}, #{user.gender}, #{user.signature}, #{user.department}, #{user.position}, #{user.role}, #{user.birthday}, #{user.lastOnlineTime},
-             #{user.createTime}, #{user.updateTime})
+             #{user.userStatus}, #{user.statusUpdateTime}, #{user.createTime}, #{user.updateTime})
         </foreach>
     </insert>
     
