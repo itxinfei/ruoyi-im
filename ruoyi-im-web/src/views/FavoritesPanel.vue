@@ -5,6 +5,17 @@
         我的收藏
       </h2>
       <div class="header-actions">
+        <div class="category-tabs">
+          <span
+            v-for="cat in categories"
+            :key="cat.value"
+            class="category-tab"
+            :class="{ active: activeCategory === cat.value }"
+            @click="activeCategory = cat.value"
+          >
+            {{ cat.label }}
+          </span>
+        </div>
         <el-input
           v-model="searchKeyword"
           placeholder="搜索收藏"
@@ -101,18 +112,36 @@ const emit = defineEmits(['switch-module'])
 const loading = ref(false)
 const favorites = ref([])
 const searchKeyword = ref('')
+const activeCategory = ref('all')
 const forwardDialogRef = ref(null)
 
+const categories = [
+  { label: '全部', value: 'all' },
+  { label: '文本', value: 'TEXT' },
+  { label: '图片', value: 'IMAGE' },
+  { label: '文件', value: 'FILE' },
+  { label: '语音', value: 'VOICE' },
+  { label: '视频', value: 'VIDEO' }
+]
+
 const filteredFavorites = computed(() => {
-  if (!searchKeyword.value.trim()) {
-    return favorites.value
+  let result = favorites.value
+
+  // 按分类过滤
+  if (activeCategory.value !== 'all') {
+    result = result.filter(item => item.messageType === activeCategory.value)
   }
-  const keyword = searchKeyword.value.toLowerCase()
-  return favorites.value.filter(item => {
-    const preview = item.contentPreview || getMessagePreview(item)
-    const source = item.conversationName || ''
-    return preview.toLowerCase().includes(keyword) || source.toLowerCase().includes(keyword)
-  })
+
+  // 按关键词过滤
+  if (searchKeyword.value.trim()) {
+    const keyword = searchKeyword.value.toLowerCase()
+    result = result.filter(item => {
+      const preview = item.contentPreview || getMessagePreview(item)
+      const source = item.conversationName || ''
+      return preview.toLowerCase().includes(keyword) || source.toLowerCase().includes(keyword)
+    })
+  }
+  return result
 })
 
 const getTypeIcon = (type) => {
@@ -286,10 +315,37 @@ onMounted(() => {
 
 .header-actions {
   display: flex;
-  gap: var(--dt-spacing-sm, 12px);
+  align-items: center;
+  gap: var(--dt-spacing-md, 16px);
 
   .search-input {
     width: var(--dt-search-width-md, 200px);
+  }
+}
+
+.category-tabs {
+  display: flex;
+  gap: var(--dt-spacing-xs, 4px);
+}
+
+.category-tab {
+  padding: var(--dt-spacing-xs, 6px) var(--dt-spacing-sm, 10px);
+  font-size: var(--dt-font-size-xs, 12px);
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  border-radius: var(--dt-radius-sm, 4px);
+  transition: all var(--dt-transition-fast);
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--dt-brand-color);
+    background: var(--dt-bg-hover);
+  }
+
+  &.active {
+    color: var(--dt-brand-color);
+    background: var(--dt-brand-lighter);
+    font-weight: var(--dt-font-weight-medium, 500);
   }
 }
 
