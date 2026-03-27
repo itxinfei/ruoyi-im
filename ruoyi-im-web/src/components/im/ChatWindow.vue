@@ -475,13 +475,13 @@ const scrollToMessage = (messageId) => {
 <style scoped>
 .chat-window { display: flex; flex-direction: column; height: 100%; background-color: var(--dt-bg-chat); position: relative; }
 .chat-header {
-  height: 60px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--dt-border-color); flex-shrink: 0;
+  height: var(--dt-chat-header-height); padding: 0 var(--dt-spacing-xl); display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--dt-border-light); flex-shrink: 0;
 }
-.header-left { display: flex; align-items: center; gap: 8px; }
-.title { font-size: 16px; font-weight: 600; color: var(--dt-text-main); }
-.member-count { font-size: 14px; color: var(--dt-text-desc); }
-.header-right { display: flex; gap: 20px; color: var(--dt-text-desc); }
+.header-left { display: flex; align-items: center; gap: var(--dt-spacing-sm); }
+.title { font-size: var(--dt-font-size-lg); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); }
+.member-count { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); }
+.header-right { display: flex; gap: var(--dt-spacing-xl); color: var(--dt-text-tertiary); }
 .header-right .el-icon {
   cursor: pointer;
   font-size: 18px;

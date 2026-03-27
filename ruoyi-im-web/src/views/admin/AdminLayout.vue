@@ -153,20 +153,20 @@ const logout = () => {
 }
 
 .admin-logo {
-  height: var(--dt-header-height, 72px);
+  height: var(--dt-header-height);
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-md, 10px);
-  padding: 0 var(--dt-spacing-md, 16px);
+  gap: var(--dt-spacing-md);
+  padding: 0 var(--dt-spacing-md);
   border-bottom: 1px solid var(--dt-border-dark);
 }
 
 .logo-mark {
-  width: var(--dt-avatar-size-md, 34px);
-  height: var(--dt-avatar-size-md, 34px);
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
   border-radius: var(--dt-radius-md);
   background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-light) 100%);
-  color: var(--dt-text-primary);
+  color: var(--dt-text-white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,19 +183,19 @@ const logout = () => {
 .logo-text .subtitle {
   color: var(--dt-text-secondary-dark);
   font-size: var(--dt-font-size-xs);
-  margin-top: var(--dt-spacing-xs, 2px);
+  margin-top: var(--dt-spacing-xs);
 }
 
 .admin-menu {
   border-right: none;
-  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-xs, 8px);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-xs);
 }
 
 :deep(.admin-menu .el-menu-item) {
-  margin: var(--dt-spacing-xs, 6px) var(--dt-spacing-xs, 8px);
+  margin: var(--dt-spacing-xs) var(--dt-spacing-xs);
   border-radius: var(--dt-radius-md);
-  height: var(--dt-btn-height-lg, 42px);
-  line-height: var(--dt-btn-height-lg, 42px);
+  height: var(--dt-btn-height-lg);
+  line-height: var(--dt-btn-height-lg);
 }
 
 :deep(.admin-menu .el-menu-item:hover) {
@@ -212,24 +212,24 @@ const logout = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-lg, 22px);
-  height: var(--dt-header-height, 72px);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
+  height: var(--dt-header-height);
 }
 
 .title-row {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-xs, 8px);
+  gap: var(--dt-spacing-xs);
 }
 
 .page-title {
   margin: 0;
-  font-size: var(--dt-font-size-lg, 20px);
+  font-size: var(--dt-font-size-lg);
   color: var(--dt-text-primary);
 }
 
 .page-desc {
-  margin: var(--dt-spacing-xs, 2px) 0 0;
+  margin: var(--dt-spacing-xs) 0 0;
   color: var(--dt-text-secondary);
   font-size: var(--dt-font-size-xs);
 }
@@ -237,7 +237,7 @@ const logout = () => {
 .header-right {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm, 10px);
+  gap: var(--dt-spacing-sm);
 }
 
 .admin-user {
@@ -247,7 +247,7 @@ const logout = () => {
 
 .admin-main {
   background: var(--dt-bg-body);
-  padding: var(--dt-spacing-md, 16px);
+  padding: var(--dt-spacing-lg);
 }
 
 @media (max-width: 1024px) {

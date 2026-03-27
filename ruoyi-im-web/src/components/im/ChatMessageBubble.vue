@@ -267,18 +267,18 @@ const formatDisplayUrl = (url) => {
 .message-item {
   display: flex;
   flex-direction: column;
-  padding: 0 20px;
-  margin-bottom: 16px;
+  padding: 0 var(--dt-spacing-xl);
+  margin-bottom: var(--dt-spacing-lg);
 }
 
 /* 连续消息压缩间距 */
 .message-item.is-grouped {
-  margin-top: -12px;
+  margin-top: calc(-1 * var(--dt-spacing-md));
 }
 
 .system-notice {
   align-self: center;
-  margin: 16px 0;
+  margin: var(--dt-spacing-lg) 0;
   font-size: var(--dt-font-size-sm);
   color: var(--dt-text-tertiary);
 }
@@ -286,7 +286,7 @@ const formatDisplayUrl = (url) => {
 .re-edit-link {
   color: var(--dt-brand-color);
   cursor: pointer;
-  margin-left: 4px;
+  margin-left: var(--dt-spacing-xs);
   transition: color var(--dt-transition-fast);
 }
 
@@ -309,20 +309,20 @@ const formatDisplayUrl = (url) => {
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 4px; /* 钉钉方圆 */
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
+  border-radius: var(--dt-radius-sm);
   object-fit: cover;
 }
 
 .avatar-placeholder {
-  width: 36px;
+  width: var(--dt-avatar-size-md);
   flex-shrink: 0;
 }
 
 .message-content-wrapper {
   max-width: var(--dt-bubble-max-width, 70%);
-  margin: 0 12px;
+  margin: 0 var(--dt-spacing-lg);
   display: flex;
   flex-direction: column;
 }

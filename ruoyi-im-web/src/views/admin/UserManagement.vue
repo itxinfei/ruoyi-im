@@ -82,11 +82,11 @@
         @selection-change="onSelectionChange"
       >
         <el-table-column type="selection" width="48" />
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="username" label="用户名" min-width="120" />
-        <el-table-column prop="nickname" label="昵称" min-width="120" />
-        <el-table-column prop="mobile" label="手机号" min-width="130" />
-        <el-table-column prop="role" label="角色" width="120">
+        <el-table-column prop="id" label="ID" width="80" sortable />
+        <el-table-column prop="username" label="用户名" min-width="120" sortable />
+        <el-table-column prop="nickname" label="昵称" min-width="120" sortable />
+        <el-table-column prop="mobile" label="手机号" min-width="130" sortable />
+        <el-table-column prop="role" label="角色" width="120" sortable>
           <template #default="{ row }">
             <el-tag v-if="row.role === 'SUPER_ADMIN'" type="danger">
               超级管理员
@@ -473,6 +473,7 @@ const handleBatchStatus = async (status) => {
       type: 'warning'
     })
 
+    loading.value = true
     let success = 0
     let failed = 0
     failedItems.value = []
@@ -496,6 +497,8 @@ const handleBatchStatus = async (status) => {
     loadUsers()
   } catch (error) {
     if (error !== 'cancel') ElMessage.error(`批量${action}失败`)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -525,6 +528,7 @@ const handleBatchDelete = async () => {
       type: 'warning'
     })
 
+    loading.value = true
     const ids = selectedUsers.value.map(u => u.id)
     const res = await batchDeleteUsers(ids)
 
@@ -543,6 +547,8 @@ const handleBatchDelete = async () => {
     loadUsers()
   } catch (error) {
     if (error !== 'cancel') ElMessage.error('批量删除失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -566,8 +572,8 @@ onMounted(() => {
 }
 
 .panel {
-  border-radius: 12px;
-  border: 1px solid #e6ebf3;
+  border-radius: var(--dt-radius-xl);
+  border: 1px solid var(--dt-border-light);
 }
 
 .panel-header {
@@ -578,32 +584,33 @@ onMounted(() => {
 
 .panel-header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--dt-font-size-lg);
+  color: var(--dt-text-primary);
 }
 
 .panel-header p {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 12px;
+  margin: var(--dt-spacing-xs) 0 0;
+  color: var(--dt-text-tertiary);
+  font-size: var(--dt-font-size-sm);
 }
 
 .toolbar-row {
-  margin-bottom: 12px;
+  margin-bottom: var(--dt-spacing-md);
 }
 
 .batch-actions {
-  margin-bottom: 12px;
-  background: #f8fafc;
-  border: 1px solid #e6ebf3;
-  border-radius: 8px;
-  padding: 10px 12px;
+  margin-bottom: var(--dt-spacing-md);
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .pager-wrap {
-  margin-top: 14px;
+  margin-top: var(--dt-spacing-md);
   display: flex;
   justify-content: flex-end;
 }
@@ -611,10 +618,10 @@ onMounted(() => {
 .detail-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--dt-spacing-lg);
 }
 
 .text-secondary {
-  color: #94a3b8;
+  color: var(--dt-text-tertiary);
 }
 </style>

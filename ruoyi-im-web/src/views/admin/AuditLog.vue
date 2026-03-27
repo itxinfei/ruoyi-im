@@ -131,28 +131,28 @@
             </el-button>
           </el-empty>
         </template>
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="userName" label="用户" min-width="120">
+        <el-table-column prop="id" label="ID" width="80" sortable />
+        <el-table-column prop="userName" label="用户" min-width="120" sortable>
           <template #default="{ row }">
             <span>{{ row.userName || `用户${row.userId}` }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="operationType" label="操作类型" width="140">
+        <el-table-column prop="operationType" label="操作类型" width="140" sortable>
           <template #default="{ row }">
             <el-tag size="small" :type="getOperationTypeTag(row.operationType)">
               {{ getOperationTypeLabel(row.operationType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="targetType" label="目标类型" width="100">
+        <el-table-column prop="targetType" label="目标类型" width="100" sortable>
           <template #default="{ row }">
             <el-tag size="small" effect="plain">
               {{ getTargetTypeLabel(row.targetType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="targetId" label="目标 ID" width="100" />
-        <el-table-column prop="operationResult" label="结果" width="80">
+        <el-table-column prop="targetId" label="目标 ID" width="100" sortable />
+        <el-table-column prop="operationResult" label="结果" width="80" sortable>
           <template #default="{ row }">
             <el-tag :type="row.operationResult === 'SUCCESS' ? 'success' : 'danger'" size="small">
               {{ row.operationResult === 'SUCCESS' ? '成功' : '失败' }}
@@ -166,7 +166,7 @@
           show-overflow-tooltip
         />
         <el-table-column prop="ipAddress" label="IP 地址" width="140" />
-        <el-table-column prop="createTime" label="操作时间" width="180" />
+        <el-table-column prop="createTime" label="操作时间" width="180" sortable />
         <el-table-column label="操作" width="80" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="handleViewDetail(row)">

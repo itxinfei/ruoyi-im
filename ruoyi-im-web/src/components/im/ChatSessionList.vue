@@ -166,8 +166,8 @@ const formatTime = (time) => {
 .session-item {
   display: flex;
   align-items: center;
-  height: 56px;
-  padding: 0 12px;
+  height: var(--dt-header-height); /* 64px */
+  padding: 0 var(--dt-spacing-lg);
   cursor: pointer;
   position: relative;
   transition: background-color var(--dt-transition-fast);
@@ -199,9 +199,9 @@ const formatTime = (time) => {
 
 .avatar-wrapper {
   position: relative;
-  width: 40px;
-  height: 40px;
-  margin-right: 12px;
+  width: var(--dt-avatar-size-md); /* 36px */
+  height: var(--dt-avatar-size-md); /* 36px */
+  margin-right: var(--dt-spacing-lg);
   flex-shrink: 0;
 }
 

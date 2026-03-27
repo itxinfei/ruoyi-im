@@ -205,30 +205,30 @@ onMounted(async () => {
 .admin-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--dt-spacing-lg);
 }
 
 .metric-card,
 .panel {
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   border: 1px solid var(--dt-border-light);
 }
 
 .metric-inner {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--dt-spacing-lg);
 }
 
 .metric-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--dt-text-primary);
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .metric-icon.users { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
@@ -238,14 +238,14 @@ onMounted(async () => {
 
 .metric-label {
   color: var(--dt-text-tertiary);
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
 }
 
 .metric-value {
-  margin-top: 4px;
+  margin-top: var(--dt-spacing-xs);
   color: var(--dt-text-primary);
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: var(--dt-font-weight-bold);
 }
 
 .panel-header {
@@ -257,24 +257,24 @@ onMounted(async () => {
 .panel-header h3 {
   margin: 0;
   color: var(--dt-text-primary);
-  font-size: 16px;
+  font-size: var(--dt-font-size-lg);
 }
 
 .panel-header p {
-  margin: 4px 0 0;
+  margin: var(--dt-spacing-xs) 0 0;
   color: var(--dt-text-tertiary);
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
 }
 
 .panel-body {
-  min-height: 220px;
+  min-height: 240px;
 }
 
 .total-line {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
+  margin-bottom: var(--dt-spacing-lg);
+  padding-bottom: var(--dt-spacing-sm);
   border-bottom: 1px solid var(--dt-border-light);
   color: var(--dt-text-secondary);
 }
@@ -286,26 +286,26 @@ onMounted(async () => {
 .bars {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--dt-spacing-md);
 }
 
 .bar-item {
   display: grid;
   grid-template-columns: 48px 1fr 56px;
   align-items: center;
-  gap: 10px;
+  gap: var(--dt-spacing-sm);
 }
 
 .bar-track {
   height: 12px;
-  border-radius: 99px;
+  border-radius: var(--dt-radius-full);
   background: var(--dt-bg-body);
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  border-radius: 99px;
+  border-radius: var(--dt-radius-full);
 }
 
 .bar-fill.text { background: var(--dt-brand-color); }
@@ -315,21 +315,21 @@ onMounted(async () => {
 .bar-name,
 .bar-value {
   color: var(--dt-text-tertiary);
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
 }
 
 .legend-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--dt-spacing-md);
 }
 
 .legend-item {
   display: grid;
   grid-template-columns: 12px 1fr auto;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
+  gap: var(--dt-spacing-sm);
+  padding: var(--dt-spacing-md);
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-md);
 }

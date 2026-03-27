@@ -58,7 +58,7 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="48" />
-        <el-table-column prop="id" label="群组ID" width="90" />
+        <el-table-column prop="id" label="群组ID" width="90" sortable />
         <el-table-column label="群头像" width="86">
           <template #default="{ row }">
             <el-avatar :src="row.avatar" :size="42">
@@ -66,23 +66,23 @@
             </el-avatar>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="群名称" min-width="180" />
-        <el-table-column prop="ownerName" label="群主" min-width="110" />
-        <el-table-column prop="memberCount" label="成员数" width="100">
+        <el-table-column prop="name" label="群名称" min-width="180" sortable />
+        <el-table-column prop="ownerName" label="群主" min-width="110" sortable />
+        <el-table-column prop="memberCount" label="成员数" width="100" sortable>
           <template #default="{ row }">
             <el-tag type="info">
               {{ row.memberCount || 0 }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="maxMembers" label="成员上限" width="100" />
+        <el-table-column prop="maxMembers" label="成员上限" width="100" sortable />
         <el-table-column
           prop="description"
           label="群描述"
           min-width="220"
           show-overflow-tooltip
         />
-        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column prop="createTime" label="创建时间" width="180" sortable />
         <el-table-column label="操作" fixed="right" width="230">
           <template #default="{ row }">
             <el-button size="small" @click="handleViewMembers(row)">
@@ -288,6 +288,7 @@ const handleBatchDelete = async () => {
       type: 'warning'
     })
 
+    loading.value = true
     const ids = selectedGroups.value.map(g => g.id)
     const res = await batchDeleteGroups(ids)
     if (res.code === 200) {
@@ -304,6 +305,8 @@ const handleBatchDelete = async () => {
     }
   } catch (error) {
     if (error !== 'cancel') ElMessage.error('批量解散失败')
+  } finally {
+    loading.value = false
   }
 }
 
