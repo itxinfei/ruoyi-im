@@ -31,7 +31,6 @@ import com.ruoyi.im.vo.cloud.ImCloudStorageQuotaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,35 +68,38 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
      */
     private static final long COMPANY_QUOTA = 500L * 1024 * 1024 * 1024;
 
-    @Autowired
-    private ImCloudFolderMapper cloudFolderMapper;
-
-    @Autowired
-    private ImCloudFileMapper cloudFileMapper;
-
-    @Autowired
-    private ImCloudFileShareMapper cloudFileShareMapper;
-
-    @Autowired
-    private ImCloudFileVersionMapper cloudFileVersionMapper;
-
-    @Autowired
-    private ImFileAssetMapper fileAssetMapper;
-
-    @Autowired
-    private ImUserMapper userMapper;
-
-    @Autowired
-    private ImMessageMapper messageMapper;
-
-    @Autowired
-    private com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
+    private final ImCloudFolderMapper cloudFolderMapper;
+    private final ImCloudFileMapper cloudFileMapper;
+    private final ImCloudFileShareMapper cloudFileShareMapper;
+    private final ImCloudFileVersionMapper cloudFileVersionMapper;
+    private final ImFileAssetMapper fileAssetMapper;
+    private final ImUserMapper userMapper;
+    private final ImMessageMapper messageMapper;
+    private final com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
 
     @Value("${file.upload.path}")
     private String uploadPath;
 
     @Value("${file.upload.url-prefix}")
     private String urlPrefix;
+
+    public ImCloudDriveServiceImpl(ImCloudFolderMapper cloudFolderMapper,
+                                   ImCloudFileMapper cloudFileMapper,
+                                   ImCloudFileShareMapper cloudFileShareMapper,
+                                   ImCloudFileVersionMapper cloudFileVersionMapper,
+                                   ImFileAssetMapper fileAssetMapper,
+                                   ImUserMapper userMapper,
+                                   ImMessageMapper messageMapper,
+                                   com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
+        this.cloudFolderMapper = cloudFolderMapper;
+        this.cloudFileMapper = cloudFileMapper;
+        this.cloudFileShareMapper = cloudFileShareMapper;
+        this.cloudFileVersionMapper = cloudFileVersionMapper;
+        this.fileAssetMapper = fileAssetMapper;
+        this.userMapper = userMapper;
+        this.messageMapper = messageMapper;
+        this.encryptionUtil = encryptionUtil;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

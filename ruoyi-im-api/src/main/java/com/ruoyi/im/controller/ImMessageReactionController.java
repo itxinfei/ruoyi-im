@@ -37,7 +37,7 @@ public class ImMessageReactionController {
      * 切换表情回应（添加/移除）
      */
     @PostMapping("/toggle")
-    public Result<Void> toggleReaction(@RequestBody ImMessageReactionAddRequest request) {
+    public Result<Void> toggleReaction(@Valid @RequestBody ImMessageReactionAddRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         reactionService.addReaction(request, userId);
         return Result.success();

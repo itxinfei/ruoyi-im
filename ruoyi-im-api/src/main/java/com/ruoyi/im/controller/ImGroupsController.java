@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -93,7 +94,7 @@ public class ImGroupsController {
     public Result<Void> updateMemberRole(
             @PathVariable Long id,
             @PathVariable Long memberId,
-            @RequestBody RoleUpdateRequest request) {
+            @Valid @RequestBody RoleUpdateRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         boolean isAdmin = "admin".equalsIgnoreCase(request.getRole());
         imGroupService.setAdmin(id, memberId, isAdmin, userId);

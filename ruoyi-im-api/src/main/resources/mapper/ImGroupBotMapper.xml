@@ -10,12 +10,14 @@
         <result property="avatar" column="avatar"/>
         <result property="description" column="description"/>
         <result property="isEnabled" column="is_enabled"/>
+        <result property="webhookToken" column="webhook_token"/>
+        <result property="secretKey" column="secret_key"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImGroupBotVo">
-        select id, group_id, bot_name, bot_type, avatar, description, is_enabled, create_time, update_time
+        select id, group_id, bot_name, bot_type, avatar, description, is_enabled, webhook_token, secret_key, create_time, update_time
         from im_group_bot
     </sql>
 

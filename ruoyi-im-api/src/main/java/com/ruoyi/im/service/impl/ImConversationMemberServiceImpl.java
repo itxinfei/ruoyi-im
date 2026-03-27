@@ -8,7 +8,6 @@ import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.conversation.ImConversationMemberVO;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +24,11 @@ import java.util.List;
 @Service
 public class ImConversationMemberServiceImpl implements ImConversationMemberService {
 
-    @Autowired
-    private ImConversationMemberMapper conversationMemberMapper;
+    private final ImConversationMemberMapper conversationMemberMapper;
+
+    public ImConversationMemberServiceImpl(ImConversationMemberMapper conversationMemberMapper) {
+        this.conversationMemberMapper = conversationMemberMapper;
+    }
 
     @Override
     public List<ImConversationMemberVO> getConversationMemberList(Long userId) {

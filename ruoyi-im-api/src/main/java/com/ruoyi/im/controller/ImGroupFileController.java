@@ -59,7 +59,7 @@ public class ImGroupFileController {
     
     @PostMapping("/list")
     public Result<IPage<ImGroupFileVO>> getFileList(
-            @RequestBody ImGroupFileQueryRequest request) {
+            @Valid @RequestBody ImGroupFileQueryRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         IPage<ImGroupFileVO> page = groupFileService.getFileList(request, userId);
         return Result.success(page);

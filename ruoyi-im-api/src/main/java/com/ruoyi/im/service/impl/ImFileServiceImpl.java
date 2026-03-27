@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImFileAsset;
 import com.ruoyi.im.exception.BusinessException;
@@ -109,6 +110,10 @@ public class ImFileServiceImpl implements ImFileService {
         if (fileAsset == null) {
             BusinessExceptionHelper.throwFileNotFound();
         }
+        // 授权校验：验证文件是否属于当前用户
+        if (!userId.equals(fileAsset.getUploaderId())) {
+            throw new BusinessException("无权下载此文件");
+        }
 
         fileAsset.setDownloadCount(fileAsset.getDownloadCount() + 1);
         imFileAssetMapper.updateById(fileAsset);
@@ -120,6 +125,10 @@ public class ImFileServiceImpl implements ImFileService {
         if (fileAsset == null) {
             BusinessExceptionHelper.throwFileNotFound();
         }
+        // 授权校验：验证文件是否属于当前用户
+        if (!userId.equals(fileAsset.getUploaderId())) {
+            throw new BusinessException("无权删除此文件");
+        }
 
         fileAsset.setStatus("DELETED");
         imFileAssetMapper.updateById(fileAsset);
@@ -127,14 +136,16 @@ public class ImFileServiceImpl implements ImFileService {
 
     @Override
     public List<ImFileVO> getFileList(Long userId, String fileType) {
-        List<ImFileAsset> list = imFileAssetMapper.selectList(null);
+        LambdaQueryWrapper<ImFileAsset> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ImFileAsset::getUploaderId, userId)
+               .eq(ImFileAsset::getStatus, "ACTIVE");
+        if (fileType != null && !fileType.isEmpty()) {
+            wrapper.eq(ImFileAsset::getFileType, fileType);
+        }
+        List<ImFileAsset> list = imFileAssetMapper.selectList(wrapper);
         List<ImFileVO> result = new ArrayList<>();
         for (ImFileAsset asset : list) {
-            if ("ACTIVE".equals(asset.getStatus())) {
-                if (fileType == null || fileType.isEmpty() || fileType.equals(asset.getFileType())) {
-                    result.add(convertToVO(asset));
-                }
-            }
+            result.add(convertToVO(asset));
         }
         return result;
     }

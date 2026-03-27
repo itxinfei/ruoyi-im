@@ -179,7 +179,7 @@ public class ImMessageController {
      * @param request 搜索请求参数
      */
     @PostMapping("/search")
-    public Result<ImMessageSearchResultVO> searchMessages(@RequestBody ImMessageSearchRequest request) {
+    public Result<ImMessageSearchResultVO> searchMessages(@Valid @RequestBody ImMessageSearchRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         ImMessageSearchResultVO result = imMessageService.searchMessages(
                 request.getConversationId(),

@@ -12,6 +12,8 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -262,7 +264,7 @@ public class ImContactController {
     
     @PutMapping("/group/{oldName}")
     public Result<Void> renameGroup(@PathVariable String oldName,
-                                     @RequestBody GroupRenameRequest request) {
+                                     @Valid @RequestBody GroupRenameRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         try {
             String decodedName = java.net.URLDecoder.decode(oldName, "UTF-8");
@@ -310,7 +312,7 @@ public class ImContactController {
      */
     
     @PutMapping("/group/move")
-    public Result<Void> moveFriendToGroup(@RequestBody MoveToGroupRequest request) {
+    public Result<Void> moveFriendToGroup(@Valid @RequestBody MoveToGroupRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         imFriendService.moveFriendsToGroup(userId, request.getFriendIds(), request.getGroupName());
         return Result.success("移动成功");
@@ -320,6 +322,7 @@ public class ImContactController {
      * 重命名分组请求体
      */
     public static class GroupRenameRequest {
+        @NotBlank(message = "新名称不能为空")
         private String newName;
 
         public String getNewName() {
@@ -335,6 +338,7 @@ public class ImContactController {
      * 移动到分组请求体
      */
     public static class MoveToGroupRequest {
+        @NotNull(message = "好友ID列表不能为空")
         private java.util.List<Long> friendIds;
         private String groupName;
 
