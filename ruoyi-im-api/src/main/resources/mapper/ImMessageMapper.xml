@@ -10,6 +10,10 @@
         <result property="sendErrorCode" column="send_error_code"/>
         <result property="sendErrorMsg" column="send_error_msg"/>
         <result property="deliveredTime" column="delivered_time"/>
+        <result property="seq" column="seq"/>
+        <result property="voiceText" column="voice_text"/>
+        <result property="atUserIds" column="at_user_ids"/>
+        <result property="replySnapshot" column="reply_snapshot"/>
         <result property="conversationId" column="conversation_id"/>
         <result property="senderId" column="sender_id"/>
         <result property="messageType" column="message_type"/>
@@ -38,6 +42,7 @@
 
     <sql id="selectImMessageVo">
         select id, client_msg_id, send_status, send_retry_count, send_error_code, send_error_msg, delivered_time,
+               seq, voice_text, at_user_ids, reply_snapshot,
                conversation_id, sender_id, message_type, content,
                reply_to_message_id, forward_from_message_id,
                file_url, file_name, file_size,
@@ -79,6 +84,10 @@
             <if test="sendErrorCode != null">send_error_code,</if>
             <if test="sendErrorMsg != null">send_error_msg,</if>
             <if test="deliveredTime != null">delivered_time,</if>
+            <if test="seq != null">seq,</if>
+            <if test="voiceText != null">voice_text,</if>
+            <if test="atUserIds != null">at_user_ids,</if>
+            <if test="replySnapshot != null">reply_snapshot,</if>
             <if test="conversationId != null">conversation_id,</if>
             <if test="senderId != null">sender_id,</if>
             <if test="messageType != null">message_type,</if>
@@ -111,6 +120,10 @@
             <if test="sendErrorCode != null">#{sendErrorCode},</if>
             <if test="sendErrorMsg != null">#{sendErrorMsg},</if>
             <if test="deliveredTime != null">#{deliveredTime},</if>
+            <if test="seq != null">#{seq},</if>
+            <if test="voiceText != null">#{voiceText},</if>
+            <if test="atUserIds != null">#{atUserIds},</if>
+            <if test="replySnapshot != null">#{replySnapshot},</if>
             <if test="conversationId != null">#{conversationId},</if>
             <if test="senderId != null">#{senderId},</if>
             <if test="messageType != null">#{messageType},</if>
@@ -147,6 +160,10 @@
             <if test="sendErrorCode != null">send_error_code = #{sendErrorCode},</if>
             <if test="sendErrorMsg != null">send_error_msg = #{sendErrorMsg},</if>
             <if test="deliveredTime != null">delivered_time = #{deliveredTime},</if>
+            <if test="seq != null">seq = #{seq},</if>
+            <if test="voiceText != null">voice_text = #{voiceText},</if>
+            <if test="atUserIds != null">at_user_ids = #{atUserIds},</if>
+            <if test="replySnapshot != null">reply_snapshot = #{replySnapshot},</if>
             <if test="conversationId != null">conversation_id = #{conversationId},</if>
             <if test="senderId != null">sender_id = #{senderId},</if>
             <if test="messageType != null and messageType != ''">message_type = #{messageType},</if>
@@ -230,6 +247,7 @@
     <!-- 批量插入消息 - 性能优化 -->
     <insert id="batchInsertImMessage" parameterType="java.util.List">
         insert into im_message (client_msg_id, send_status, send_retry_count, send_error_code, send_error_msg, delivered_time,
+                               seq, voice_text, at_user_ids, reply_snapshot,
                                conversation_id, sender_id, message_type, content,
                                reply_to_message_id, forward_from_message_id,
                                file_url, file_name, file_size,
@@ -242,6 +260,7 @@
         values
         <foreach collection="list" item="message" separator=",">
             (#{message.clientMsgId}, #{message.sendStatus}, #{message.sendRetryCount}, #{message.sendErrorCode}, #{message.sendErrorMsg}, #{message.deliveredTime},
+             #{message.seq}, #{message.voiceText}, #{message.atUserIds}, #{message.replySnapshot},
              #{message.conversationId}, #{message.senderId}, #{message.messageType}, #{message.content},
              #{message.replyToMessageId}, #{message.forwardFromMessageId},
              #{message.fileUrl}, #{message.fileName}, #{message.fileSize},
