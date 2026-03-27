@@ -52,7 +52,7 @@ const groupedReactions = computed(() => {
 });
 
 const toggleReaction = (emoji) => {
-  store.dispatch('im-message/toggleReaction', {
+  store.dispatch('im/message/toggleReaction', {
     messageId: props.messageId,
     emoji: emoji
   });
