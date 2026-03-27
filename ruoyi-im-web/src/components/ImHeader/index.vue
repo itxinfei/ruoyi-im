@@ -164,7 +164,6 @@ const handleCommand = (command) => {
   switch (command) {
     case 'profile':
       // 跳转到个人设置页面
-      console.log('打开个人设置')
       break
     case 'logout':
       handleLogout()
