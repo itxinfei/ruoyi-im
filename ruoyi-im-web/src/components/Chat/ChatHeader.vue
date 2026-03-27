@@ -95,7 +95,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import { Phone, VideoCamera, Search, MoreFilled, Folder, Top, Delete } from '@element-plus/icons-vue'
 
 const props = defineProps({
