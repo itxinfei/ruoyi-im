@@ -119,12 +119,33 @@
 - CalendarPanel.vue - 日历事件分类色 (2026-03-27)
 - TodoPanel.vue - 待办分类标签色 (2026-03-27)
 
-### P3 优先级 (剩余待修复)
-以下文件存在少量第三方品牌色/渐变 (低优先级，视情况修复)：
-- AdminLayout.vue, AssistantPanel.vue, DocumentsPanel.vue
-- MailPanel.vue, ProfilePanel.vue, SearchPanel.vue
-- SettingsPanel.vue
-- LoginPage.vue 登录页渐变背景 (品牌视觉，保留)
+### P3 优先级 (已修复)
+扫描确认以下文件均无硬编码颜色，全部使用 Design Tokens：
+- AdminLayout.vue ✓
+- AssistantPanel.vue ✓
+- DocumentsPanel.vue ✓
+- MailPanel.vue ✓
+- ProfilePanel.vue ✓
+- SearchPanel.vue ✓
+- LoginPage.vue 渐变背景（品牌视觉，保留）
+
+### 死代码清理 (2026-03-27 补充)
+- 删除：`components/GroupDetailDrawer/` 目录（含 index.vue、InviteMemberDialog.vue）
+- 删除：`components/GroupDetailDrawer/index.vue`（未被任何组件引用）
+- 删除：`views/im/MessageLayout.vue`（未使用的聊天布局副本）
+- 删除：`views/im/TodoPanel.vue`（views/TodoPanel.vue 的重复文件）
+- 删除：`views/SettingsPanel.vue`（未被任何路由或组件引用）
+
+### Bug 修复
+**MessageReaction.vue**: Vuex 命名空间错误 `im-message` → `im/message`
+- 影响：`store.dispatch('im-message/toggleReaction')` 一直静默失败
+- 修复：`im/message/toggleReaction`（slash 而非 dash）
+
+**ChatMessageBubble.vue**: "重新编辑"链接缺少@click 事件
+- 修复：添加 `@click="$emit('edit', message)"`
+
+**FavoritesPanel.vue**: 转发功能为占位 stub
+- 修复：对接 ForwardDialog，实现真实转发逻辑
 
 ### 设计规范验证
 - [x] 气泡圆角统一为 12px (`var(--dt-radius-lg)`)
