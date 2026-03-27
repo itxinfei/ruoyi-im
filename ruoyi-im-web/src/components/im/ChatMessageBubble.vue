@@ -109,7 +109,7 @@
             </div>
             <el-dropdown trigger="click" @command="(emoji) => $emit('reaction', { message, emoji })">
               <div class="action-item" title="表情">
-                <span class="material-icons-outlined" style="font-size: 18px;">feeling</span>
+                <el-icon style="font-size: 18px;"><Star /></el-icon>
               </div>
               <template #dropdown>
                 <el-dropdown-menu>
