@@ -26,6 +26,7 @@
   --dt-brand-lighter: #e6f2ff;
   --dt-brand-bg: #f0f7ff;
   --dt-brand-bg-dark: rgba(0, 102, 204, 0.15);
+  --dt-brand-gradient: linear-gradient(160deg, #007FFF 0%, #0066CC 100%);
 
   // === Status Colors (状态色系 - 钉钉风格) ===
   --dt-success-color: #00b578;
@@ -234,6 +235,7 @@ html.dark {
   --dt-brand-lighter: #1a3a5c;
   --dt-brand-bg: rgba(51, 161, 255, 0.15);
   --dt-brand-bg-dark: rgba(51, 161, 255, 0.25);
+  --dt-brand-gradient: linear-gradient(160deg, #33a1ff 0%, #1a6bb8 100%);
 
   // === Background Colors (暗色模式背景) ===
   --dt-bg-body: var(--dt-bg-body-dark);

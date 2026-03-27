@@ -130,7 +130,7 @@ const handleToggleTheme = () => {
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: linear-gradient(160deg, #007FFF 0%, #0066CC 100%);
+  background: var(--dt-brand-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
