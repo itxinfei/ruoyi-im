@@ -42,7 +42,18 @@
       <div
         :class="['nav-item', { active: activeModule === 'profile' }]"
         @click="switchModule('profile')"
-        title="个人设置"
+        title="个人资料"
+      >
+        <el-icon :size="20">
+          <User />
+        </el-icon>
+      </div>
+
+      <!-- 应用设置 -->
+      <div
+        :class="['nav-item', { active: activeModule === 'settings' }]"
+        @click="switchModule('settings')"
+        title="设置"
       >
         <el-icon :size="20">
           <Setting />

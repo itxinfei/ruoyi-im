@@ -101,6 +101,13 @@
         </div>
       </template>
 
+      <!-- 设置模块 -->
+      <template v-else-if="activeModule === 'settings'">
+        <div class="single-panel-wrapper">
+          <SettingsPanel />
+        </div>
+      </template>
+
       <!-- 管理后台模块 -->
       <template v-else-if="activeModule === 'admin'">
         <div class="single-panel-wrapper">
@@ -141,8 +148,10 @@ import ApprovalPanel from '@/views/ApprovalPanel.vue'
 import MailPanel from '@/views/MailPanel.vue'
 import AssistantPanel from '@/views/AssistantPanel.vue'
 import ProfilePanel from '@/views/ProfilePanel.vue'
+import SettingsPanel from '@/views/SettingsPanel.vue'
 import AdminLayout from '@/views/admin/AdminLayout.vue'
 import FavoritesPanel from '@/views/FavoritesPanel.vue'
+import DingPanel from '@/views/DingPanel.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
@@ -167,6 +176,7 @@ const getModuleName = (id) => {
     'mail': '邮箱',
     'assistant': 'AI助手',
     'profile': '个人资料',
+    'settings': '设置',
     'admin': '管理后台',
     'favorites': '收藏'
   }
