@@ -59,6 +59,15 @@
         order by sort_order, id
     </select>
 
+    <select id="selectApplicationsByKeyword" parameterType="String" resultMap="ImApplicationResult">
+        <include refid="selectImApplicationVo"/>
+        where is_visible = 1
+        and (name like concat('%', #{keyword}, '%')
+             or description like concat('%', #{keyword}, '%')
+             or code like concat('%', #{keyword}, '%'))
+        order by sort_order, id
+    </select>
+
     <insert id="insertImApplication" parameterType="com.ruoyi.im.domain.ImApplication" useGeneratedKeys="true" keyProperty="id">
         insert into im_application
         <trim prefix="(" suffix=")" suffixOverrides=",">

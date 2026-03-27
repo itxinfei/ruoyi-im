@@ -145,11 +145,24 @@ public class ImAppController {
      * @param isVisible 是否可见
      * @return 操作结果
      */
-    
+
     @PutMapping("/{id}/visibility")
     public Result<Void> setVisibility(@PathVariable Long id,
                                      @RequestParam Boolean isVisible) {
         applicationService.setVisibility(id, isVisible);
         return Result.success("设置成功");
+    }
+
+    /**
+     * 搜索应用
+     * 根据关键词搜索应用（支持名称、描述、编码模糊匹配）
+     *
+     * @param keyword 搜索关键词
+     * @return 匹配的应用列表
+     */
+    @GetMapping("/search")
+    public Result<List<ImApplication>> searchApplications(@RequestParam String keyword) {
+        List<ImApplication> list = applicationService.searchApplications(keyword);
+        return Result.success(list);
     }
 }

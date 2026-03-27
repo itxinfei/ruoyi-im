@@ -84,4 +84,14 @@ public class ImGroupVO implements Serializable {
      * 当前用户是否被禁言
      */
     private Boolean isMuted;
+
+    /**
+     * 群二维码URL
+     */
+    private String qrcodeUrl;
+
+    /**
+     * 二维码过期时间
+     */
+    private LocalDateTime qrcodeExpireTime;
 }

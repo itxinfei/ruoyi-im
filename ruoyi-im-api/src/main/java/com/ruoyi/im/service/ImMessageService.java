@@ -50,6 +50,14 @@ public interface ImMessageService {
     void deleteMessage(Long messageId, Long userId);
 
     /**
+     * 批量删除消息
+     *
+     * @param messageIds 消息ID列表
+     * @param userId    当前用户ID
+     */
+    void batchDeleteMessages(List<Long> messageIds, Long userId);
+
+    /**
      * 编辑消息
      *
      * @param messageId  消息ID
@@ -136,4 +144,12 @@ public interface ImMessageService {
      * @return 今日消息数量
      */
     int getTodayMessageCount(Long userId);
+
+    /**
+     * 清空会话的所有消息（软删除，仅删除当前用户的消息）
+     *
+     * @param conversationId 会话ID
+     * @param userId         当前用户ID
+     */
+    void clearConversationMessages(Long conversationId, Long userId);
 }

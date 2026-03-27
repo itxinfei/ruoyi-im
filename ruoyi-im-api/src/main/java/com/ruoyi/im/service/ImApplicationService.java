@@ -79,4 +79,12 @@ public interface ImApplicationService {
      * @param isVisible 是否可见
      */
     void setVisibility(Long appId, Boolean isVisible);
+
+    /**
+     * 搜索应用
+     *
+     * @param keyword 关键词
+     * @return 匹配的应用列表
+     */
+    List<ImApplication> searchApplications(String keyword);
 }

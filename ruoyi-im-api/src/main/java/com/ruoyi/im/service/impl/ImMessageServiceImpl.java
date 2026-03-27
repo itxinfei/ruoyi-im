@@ -725,6 +725,33 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void batchDeleteMessages(List<Long> messageIds, Long userId) {
+        if (messageIds == null || messageIds.isEmpty()) {
+            return;
+        }
+        for (Long messageId : messageIds) {
+            try {
+                deleteMessage(messageId, userId);
+            } catch (Exception e) {
+                log.warn("批量删除消息失败, messageId={}, error={}", messageId, e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void clearConversationMessages(Long conversationId, Long userId) {
+        // 查询当前用户在指定会话中的所有消息ID
+        List<Long> messageIds = imMessageMapper.selectMessageIdsByConversationIdAndSenderId(conversationId, userId);
+        if (messageIds == null || messageIds.isEmpty()) {
+            return;
+        }
+        // 批量软删除
+        imMessageMapper.batchSoftDeleteMessages(messageIds);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long conversationId, Long userId, List<Long> messageIds, boolean broadcast) {
         if (messageIds == null || messageIds.isEmpty()) {
             return;

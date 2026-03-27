@@ -108,4 +108,12 @@ public class ImApplicationServiceImpl implements ImApplicationService {
         app.setIsVisible(isVisible ? 1 : 0);
         applicationMapper.updateImApplication(app);
     }
+
+    @Override
+    public List<ImApplication> searchApplications(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return applicationMapper.selectApplicationsByKeyword(keyword.trim());
+    }
 }

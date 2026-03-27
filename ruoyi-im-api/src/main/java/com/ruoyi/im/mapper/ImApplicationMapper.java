@@ -81,4 +81,12 @@ public interface ImApplicationMapper {
      * @return 结果
      */
     int deleteImApplicationByIds(Long[] ids);
+
+    /**
+     * 关键词搜索应用
+     *
+     * @param keyword 关键词
+     * @return 应用集合
+     */
+    List<ImApplication> selectApplicationsByKeyword(String keyword);
 }

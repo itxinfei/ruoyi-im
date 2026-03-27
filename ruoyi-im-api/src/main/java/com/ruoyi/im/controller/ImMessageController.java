@@ -106,6 +106,32 @@ public class ImMessageController {
         return Result.success("消息已删除");
     }
 
+    /**
+     * 批量删除消息
+     *
+     * @param messageIds 消息ID列表
+     * @return 操作结果
+     */
+    @DeleteMapping("/batch")
+    public Result<Void> batchDeleteMessages(@RequestBody List<Long> messageIds) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imMessageService.batchDeleteMessages(messageIds, userId);
+        return Result.success("批量删除成功");
+    }
+
+    /**
+     * 清空会话的所有消息（仅删除当前用户发送的消息）
+     *
+     * @param conversationId 会话ID
+     * @return 操作结果
+     */
+    @DeleteMapping("/conversation/{conversationId}/clear")
+    public Result<Void> clearConversationMessages(@PathVariable Long conversationId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imMessageService.clearConversationMessages(conversationId, userId);
+        return Result.success("聊天记录已清空");
+    }
+
     @PutMapping("/{messageId}/edit")
     public Result<Void> edit(
             @PathVariable Long messageId,

@@ -1,12 +1,16 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.domain.ImTodoItem;
 import com.ruoyi.im.dto.todo.ImTodoCreateRequest;
+import com.ruoyi.im.service.ImAppUsageService;
+import com.ruoyi.im.service.ImApplicationService;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImNoticeService;
 import com.ruoyi.im.service.ImTodoItemService;
+import com.ruoyi.im.service.ImUserLayoutService;
 import com.ruoyi.im.util.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +38,9 @@ public class ImWorkbenchController {
     private final ImMessageService messageService;
     private final ImConversationService conversationService;
     private final ImNoticeService noticeService;
+    private final ImApplicationService applicationService;
+    private final ImAppUsageService appUsageService;
+    private final ImUserLayoutService userLayoutService;
 
     /**
      * 构造器注入依赖
@@ -42,15 +49,24 @@ public class ImWorkbenchController {
      * @param messageService 消息服务
      * @param conversationService 会话服务
      * @param noticeService 通知服务
+     * @param applicationService 应用服务
+     * @param appUsageService 应用使用记录服务
+     * @param userLayoutService 用户布局配置服务
      */
     public ImWorkbenchController(ImTodoItemService todoItemService,
                                   ImMessageService messageService,
                                   ImConversationService conversationService,
-                                  ImNoticeService noticeService) {
+                                  ImNoticeService noticeService,
+                                  ImApplicationService applicationService,
+                                  ImAppUsageService appUsageService,
+                                  ImUserLayoutService userLayoutService) {
         this.todoItemService = todoItemService;
         this.messageService = messageService;
         this.conversationService = conversationService;
         this.noticeService = noticeService;
+        this.applicationService = applicationService;
+        this.appUsageService = appUsageService;
+        this.userLayoutService = userLayoutService;
     }
 
     /**
@@ -264,5 +280,112 @@ public class ImWorkbenchController {
         statistics.put("conversationCount", conversationCount);
 
         return Result.success(statistics);
+    }
+
+    /**
+     * 获取工作台常用应用
+     * 返回当前用户可见的常用应用列表
+     *
+     * @return 常用应用列表
+     */
+    @GetMapping("/apps")
+    public Result<List<ImApplication>> getCommonApps() {
+        List<ImApplication> apps = applicationService.getVisibleApplications();
+        return Result.success(apps);
+    }
+
+    /**
+     * 获取工作台应用分类
+     * 返回按分类分组的所有可见应用
+     *
+     * @return 按分类分组的应用列表
+     */
+    @GetMapping("/apps/category")
+    public Result<Map<String, List<ImApplication>>> getAppsByCategory() {
+        Map<String, List<ImApplication>> appsByCategory = applicationService.getApplicationsByCategory();
+        return Result.success(appsByCategory);
+    }
+
+    /**
+     * 搜索工作台应用
+     * 根据关键词搜索可见应用
+     *
+     * @param keyword 搜索关键词
+     * @return 匹配的应用列表
+     */
+    @GetMapping("/apps/search")
+    public Result<List<ImApplication>> searchApps(@RequestParam String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return Result.success(applicationService.getVisibleApplications());
+        }
+        List<ImApplication> apps = applicationService.searchApplications(keyword);
+        return Result.success(apps);
+    }
+
+    /**
+     * 获取最近使用的应用
+     * 返回当前用户最近访问的应用列表
+     *
+     * @return 最近使用的应用列表
+     */
+    @GetMapping("/apps/recent")
+    public Result<List<ImApplication>> getRecentApps() {
+        Long userId = SecurityUtils.getLoginUserId();
+        List<ImApplication> recentApps = appUsageService.getRecentApps(userId);
+        return Result.success(recentApps);
+    }
+
+    /**
+     * 记录应用使用
+     * 当用户访问某个应用时调用，用于更新使用历史
+     *
+     * @param appId 应用ID
+     * @return 操作结果
+     */
+    @PostMapping("/apps/record")
+    public Result<Void> recordAppUsage(@RequestParam Long appId) {
+        Long userId = SecurityUtils.getLoginUserId();
+        appUsageService.recordAppUsage(userId, appId);
+        return Result.success("记录成功");
+    }
+
+    /**
+     * 获取工作台布局配置
+     * 返回用户保存的自定义布局配置
+     *
+     * @return 布局配置JSON
+     */
+    @GetMapping("/layout")
+    public Result<String> getLayoutConfig() {
+        Long userId = SecurityUtils.getLoginUserId();
+        String config = userLayoutService.getLayoutConfig(userId, ImUserLayoutService.LAYOUT_TYPE_WORKBENCH);
+        return Result.success(config);
+    }
+
+    /**
+     * 保存工作台布局配置
+     * 保存用户自定义的工作台布局配置
+     *
+     * @param layoutConfig 布局配置JSON
+     * @return 操作结果
+     */
+    @PostMapping("/layout")
+    public Result<Void> saveLayoutConfig(@RequestBody String layoutConfig) {
+        Long userId = SecurityUtils.getLoginUserId();
+        userLayoutService.saveLayoutConfig(userId, ImUserLayoutService.LAYOUT_TYPE_WORKBENCH, layoutConfig);
+        return Result.success("保存成功");
+    }
+
+    /**
+     * 重置工作台布局配置
+     * 删除用户保存的自定义布局，恢复默认
+     *
+     * @return 操作结果
+     */
+    @DeleteMapping("/layout")
+    public Result<Void> resetLayoutConfig() {
+        Long userId = SecurityUtils.getLoginUserId();
+        userLayoutService.deleteLayoutConfig(userId, ImUserLayoutService.LAYOUT_TYPE_WORKBENCH);
+        return Result.success("重置成功");
     }
 }
