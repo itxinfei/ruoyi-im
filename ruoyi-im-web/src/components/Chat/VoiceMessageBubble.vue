@@ -2,8 +2,8 @@
   <div class="voice-message" :class="{ 'is-own': message.isOwn, 'playing': isPlaying }">
     <!-- 播放按钮 -->
     <button class="play-btn" @click="togglePlay">
-      <span v-if="!isPlaying" class="material-icons-outlined">play_arrow</span>
-      <span v-else class="material-icons-outlined">pause</span>
+      <el-icon v-if="!isPlaying" class="play-icon"><VideoPlay /></el-icon>
+      <el-icon v-else class="play-icon"><VideoPause /></el-icon>
     </button>
 
     <!-- 动态波形图 -->
@@ -36,7 +36,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, VideoPlay, VideoPause } from '@element-plus/icons-vue'
 
 const props = defineProps({
   message: {
@@ -169,7 +169,7 @@ const getBarHeight = (index) => {
     flex-shrink: 0;
     transition: all var(--dt-transition-fast);
 
-    .material-icons-outlined {
+    .play-icon {
       font-size: var(--dt-font-size-md, 22px);
     }
 

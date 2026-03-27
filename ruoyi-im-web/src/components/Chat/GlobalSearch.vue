@@ -18,13 +18,13 @@
               class="history-item"
               @click="handleSelect(item)"
             >
-              <span class="material-icons-outlined text-sm mr-2">history</span>
+              <el-icon class="text-sm mr-2"><Clock /></el-icon>
               <span class="truncate">{{ item }}</span>
             </div>
           </div>
         </div>
         <div class="search-placeholder">
-          <span class="material-icons-outlined text-4xl mb-2 text-slate-300">search</span>
+          <el-icon class="text-4xl mb-2 text-slate-300"><Search /></el-icon>
           <p>搜索联系人、群组或聊天记录</p>
         </div>
       </div>
@@ -61,7 +61,7 @@
             @click="handleGroupClick(group)"
           >
             <div class="avatar bg-primary">
-              <span class="material-icons-outlined text-sm">groups</span>
+              <el-icon class="text-sm"><ChatDotRound /></el-icon>
             </div>
             <span class="name">{{ group.name }}</span>
           </div>
@@ -105,7 +105,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, Clock, Search, ChatDotRound } from '@element-plus/icons-vue'
 import { searchMessages } from '@/api/im/message'
 import { createConversation } from '@/api/im/conversation'
 import { highlightText } from '@/utils/htmlSanitizer'
