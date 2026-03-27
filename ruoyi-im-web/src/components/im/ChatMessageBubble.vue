@@ -111,7 +111,7 @@
 
         <!-- 撤回/系统提示 -->
         <div v-if="message.status === 'recalled'" class="system-notice">
-          你撤回了一条消息 <span class="re-edit-link">重新编辑</span>
+          你撤回了一条消息 <span class="re-edit-link" @click="$emit('edit', message)">重新编辑</span>
         </div>
       </div>
     </div>
