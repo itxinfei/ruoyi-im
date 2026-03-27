@@ -90,6 +90,19 @@ export function deleteMessage(messageId) {
 }
 
 /**
+ * 批量删除消息
+ * @param {number[]} messageIds - 消息ID数组
+ * @returns {Promise}
+ */
+export function batchDeleteMessages(messageIds) {
+  return request({
+    url: `/api/im/message/batch`,
+    method: 'delete',
+    data: messageIds
+  })
+}
+
+/**
  * 转发消息
  * @param {Object} data - 转发数据
  * @param {number} data.messageId - 原消息ID

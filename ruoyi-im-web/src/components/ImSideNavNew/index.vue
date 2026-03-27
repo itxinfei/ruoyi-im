@@ -84,7 +84,7 @@
 import { ref } from 'vue'
 import {
   ChatDotRound, Search, User, Menu, FolderOpened, Calendar,
-  Tickets, Setting, Sunny, Moon, Star
+  Tickets, Setting, Sunny, Moon, Star, Bell
 } from '@element-plus/icons-vue'
 import { useTheme } from '@/composables/useTheme'
 
@@ -102,6 +102,7 @@ const userAvatar = ref('/avatars/me.svg')
 const topNavs = [
   { id: 'chat', name: '消息', icon: ChatDotRound, badge: 5 },
   { id: 'contacts', name: '通讯录', icon: User, badge: 0 },
+  { id: 'ding', name: 'DING', icon: Bell, badge: 0 },
   { id: 'workbench', name: '工作台', icon: Menu, badge: 0 },
   { id: 'todo', name: '待办', icon: Tickets, badge: 2 },
   { id: 'calendar', name: '日历', icon: Calendar, badge: 0 },

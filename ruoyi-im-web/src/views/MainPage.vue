@@ -59,6 +59,13 @@
         </div>
       </template>
 
+      <!-- DING 模块 -->
+      <template v-else-if="activeModule === 'ding'">
+        <div class="single-panel-wrapper">
+          <DingPanel />
+        </div>
+      </template>
+
       <!-- 日历模块 -->
       <template v-else-if="activeModule === 'calendar'">
         <div class="single-panel-wrapper">
@@ -178,7 +185,8 @@ const getModuleName = (id) => {
     'profile': '个人资料',
     'settings': '设置',
     'admin': '管理后台',
-    'favorites': '收藏'
+    'favorites': '收藏',
+    'ding': 'DING'
   }
   return map[id] || id
 }

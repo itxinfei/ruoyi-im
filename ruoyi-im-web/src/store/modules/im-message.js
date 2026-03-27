@@ -8,6 +8,7 @@ import {
   sendMessage as apiSendMessage,
   markAsRead,
   deleteMessage,
+  batchDeleteMessages,
   recallMessage,
   editMessage as apiEditMessage,
   forwardMessage as apiForwardMessage,
@@ -383,6 +384,17 @@ export default {
       const sessionId = rootState.session.currentSession?.id
       if (sessionId) {
         commit('DELETE_MESSAGE', { sessionId, messageId })
+      }
+    },
+
+    // 批量删除消息
+    async batchDeleteMessagesAction({ commit, rootState }, messageIds) {
+      await batchDeleteMessages(messageIds)
+      const sessionId = rootState.session.currentSession?.id
+      if (sessionId) {
+        messageIds.forEach(messageId => {
+          commit('DELETE_MESSAGE', { sessionId, messageId })
+        })
       }
     },
 

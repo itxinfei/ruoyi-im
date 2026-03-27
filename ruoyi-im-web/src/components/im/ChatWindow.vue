@@ -7,12 +7,26 @@
         <span v-if="currentSession?.memberCount" class="member-count">({{ currentSession.memberCount }})</span>
       </div>
       <div class="header-right">
+        <el-icon title="多选" @click="toggleSelectionMode"><Operation /></el-icon>
         <el-icon title="搜索聊天记录" @click="showGlobalSearch = true"><Search /></el-icon>
         <el-icon title="语音通话" @click="handleVoiceCall"><Phone /></el-icon>
         <el-icon title="视频通话" @click="handleVideoCall"><VideoCamera /></el-icon>
         <el-icon title="详情" @click="detailDrawerVisible = true"><MoreFilled /></el-icon>
       </div>
     </header>
+
+    <!-- 1.5 多选模式顶部栏 -->
+    <div v-if="isSelectionMode" class="selection-header">
+      <div class="selection-info">
+        <span>已选择 {{ selectedMessages.size }} 条消息</span>
+      </div>
+      <div class="selection-actions">
+        <el-button size="small" @click="selectAll">全选</el-button>
+        <el-button size="small" @click="cancelSelection">取消</el-button>
+        <el-button type="primary" size="small" @click="batchForward">转发</el-button>
+        <el-button type="danger" size="small" @click="batchDelete">删除</el-button>
+      </div>
+    </div>
 
     <!-- 2. 消息列表区 -->
     <div class="message-list-viewport" ref="listRef" @scroll="handleScroll">
@@ -21,7 +35,12 @@
           v-for="(msg, index) in messages"
           :key="msg.clientMsgId || msg.id"
           :data-message-id="msg.messageId || msg.id"
+          :class="['message-item-wrapper', { 'is-selected': isMessageSelected(msg) }]"
+          @click="handleMessageClick(msg)"
         >
+          <div v-if="isSelectionMode" class="message-checkbox">
+            <el-checkbox :model-value="isMessageSelected(msg)" />
+          </div>
           <ChatMessageBubble
             :message="msg"
             :is-me="msg.senderId === currentUserId"
@@ -80,7 +99,7 @@
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
-import { Search, Phone, VideoCamera, MoreFilled } from '@element-plus/icons-vue';
+import { Search, Phone, VideoCamera, MoreFilled, Operation } from '@element-plus/icons-vue';
 import { useImWebSocket } from '@/composables/useImWebSocket';
 import { uploadImage, uploadFile } from '@/api/im/file';
 import { initiateCall } from '@/api/im/videoCall';
@@ -109,6 +128,8 @@ const showGlobalSearch = ref(false);
 const isLoadingMore = ref(false); // 是否正在加载更多
 const currentDraft = ref(''); // 当前会话草稿
 const editingMessage = ref(null); // 正在编辑的消息
+const isSelectionMode = ref(false); // 多选模式
+const selectedMessages = ref(new Set()); // 已选中的消息ID集合
 
 // 3. 数据联动
 const currentUserId = computed(() => store.state.im?.currentUser?.id || 1);
@@ -460,6 +481,74 @@ const handleReadDetail = (messageId) => {
   showReadDrawer.value = true;
 };
 
+// ========== 多选模式 ==========
+const toggleSelectionMode = () => {
+  if (isSelectionMode.value) {
+    cancelSelection()
+  } else {
+    isSelectionMode.value = true
+  }
+}
+
+const cancelSelection = () => {
+  isSelectionMode.value = false
+  selectedMessages.value.clear()
+}
+
+const isMessageSelected = (msg) => {
+  const id = msg.messageId || msg.id
+  return selectedMessages.value.has(id)
+}
+
+const handleMessageClick = (msg) => {
+  if (!isSelectionMode.value) return
+  const id = msg.messageId || msg.id
+  if (selectedMessages.value.has(id)) {
+    selectedMessages.value.delete(id)
+  } else {
+    selectedMessages.value.add(id)
+  }
+}
+
+const selectAll = () => {
+  messages.value.forEach(msg => {
+    const id = msg.messageId || msg.id
+    selectedMessages.value.add(id)
+  })
+}
+
+const batchForward = () => {
+  if (selectedMessages.value.size === 0) {
+    ElMessage.warning('请先选择消息')
+    return
+  }
+  const selectedMsgs = messages.value.filter(msg => selectedMessages.value.has(msg.messageId || msg.id))
+  forwardDialogRef.value?.openMultiple(selectedMsgs)
+  cancelSelection()
+}
+
+const batchDelete = async () => {
+  if (selectedMessages.value.size === 0) {
+    ElMessage.warning('请先选择消息')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`确定要删除选中的 ${selectedMessages.value.size} 条消息吗？`, '批量删除', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const ids = Array.from(selectedMessages.value)
+    await store.dispatch('im/message/batchDeleteMessagesAction', ids)
+    ElMessage.success('批量删除成功')
+    cancelSelection()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量删除失败')
+    }
+  }
+}
+
 // 搜索结果跳转
 const handleSearchSelect = (res) => {
   showGlobalSearch.value = false;
@@ -509,6 +598,46 @@ const scrollToMessage = (messageId) => {
 .header-right .el-icon:active {
   transform: scale(0.95);
 }
+
+/* 多选模式顶部栏 */
+.selection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background-color: var(--dt-brand-color);
+  color: var(--dt-text-white);
+  flex-shrink: 0;
+}
+
+.selection-info {
+  font-size: 14px;
+}
+
+.selection-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 消息多选样式 */
+.message-item-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.message-item-wrapper.is-selected {
+  background-color: var(--dt-bg-hover);
+  border-radius: var(--dt-radius-sm);
+}
+
+.message-checkbox {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
 .message-list-viewport { flex: 1; overflow-y: auto; background-color: var(--dt-bg-chat); padding: 20px 0; }
 
 /* 对齐钉钉输入区高度约束: 最低 130px，最高不超过聊天区的 40% */
