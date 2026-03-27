@@ -214,8 +214,8 @@ import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useStore } from 'vuex'
 
-const props = defineProps({ modelValue: Boolean, groupId: [String, Number] })
-const emit = defineEmits(['update:modelValue', 'show-user', 'add-member'])
+const props = defineProps({ modelValue: Boolean, groupId: [String, Number], conversationId: [String, Number] })
+const emit = defineEmits(['update:modelValue', 'show-user', 'add-member', 'clear-chat'])
 
 const store = useStore()
 const visible = ref(false)
@@ -282,7 +282,7 @@ const handleMoreCommand = (cmd) => {
   if (cmd === 'qrcode') {
     showQr.value = true
   } else if (cmd === 'clear') {
-    ElMessage.info('清空聊天记录功能待接入')
+    emit('clear-chat', props.conversationId)
   }
 }
 

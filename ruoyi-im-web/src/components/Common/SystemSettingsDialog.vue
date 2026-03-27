@@ -16,7 +16,7 @@
           :class="{ active: activeMenu === item.id }"
           @click="activeMenu = item.id"
         >
-          <span class="material-icons-outlined tab-icon">{{ item.icon }}</span>
+          <el-icon class="tab-icon"><component :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
         </div>
       </div>
@@ -303,11 +303,11 @@ const activeMenu = ref('account')
 const { themeMode, setThemeMode } = useTheme()
 
 const menuItems = [
-  { id: 'account', label: '账号安全', icon: 'manage_accounts' },
-  { id: 'notification', label: '通知设置', icon: 'notifications' },
-  { id: 'privacy', label: '隐私安全', icon: 'security' },
-  { id: 'general', label: '通用设置', icon: 'settings' },
-  { id: 'about', label: '关于应用', icon: 'info' }
+  { id: 'account', label: '账号安全', icon: 'User' },
+  { id: 'notification', label: '通知设置', icon: 'Bell' },
+  { id: 'privacy', label: '隐私安全', icon: 'Key' },
+  { id: 'general', label: '通用设置', icon: 'Setting' },
+  { id: 'about', label: '关于应用', icon: 'InfoFilled' }
 ]
 
 const currentUser = computed(() => store.getters['user/currentUser'] || { status: 'online' })

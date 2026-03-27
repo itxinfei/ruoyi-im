@@ -209,6 +209,18 @@ export function removeReaction(messageId, emoji) {
 }
 
 /**
+ * 清空会话的所有消息（仅删除当前用户发送的消息）
+ * @param {number} conversationId - 会话ID
+ * @returns {Promise}
+ */
+export function clearConversationMessages(conversationId) {
+  return request({
+    url: `/api/im/message/conversation/${conversationId}/clear`,
+    method: 'delete'
+  })
+}
+
+/**
  * 获取消息的表情反应列表
  * @param {number} messageId - 消息ID
  * @returns {Promise}

@@ -115,3 +115,17 @@ export function getTotalUnreadCount() {
     method: 'get'
   })
 }
+
+/**
+ * 保存草稿
+ * @param {number} conversationId - 会话ID
+ * @param {string} draft - 草稿内容
+ * @returns {Promise}
+ */
+export function saveDraft(conversationId, draft) {
+  return request({
+    url: `/api/im/conversation/${conversationId}/draft`,
+    method: 'put',
+    data: { draft }
+  })
+}

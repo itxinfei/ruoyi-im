@@ -206,6 +206,13 @@ export default {
       state.loading = value
     },
 
+    // 清空指定会话的消息
+    CLEAR_SESSION_MESSAGES(state, sessionId) {
+      if (sessionId && state.messages[sessionId]) {
+        state.messages[sessionId] = []
+      }
+    },
+
     // 清空消息状态
     CLEAR_STATE(state) {
       state.messages = {}
@@ -377,6 +384,12 @@ export default {
       if (sessionId) {
         commit('DELETE_MESSAGE', { sessionId, messageId })
       }
+    },
+
+    // 清空指定会话的所有消息
+    async clearMessages({ commit }, sessionId) {
+      if (!sessionId) return
+      commit('CLEAR_SESSION_MESSAGES', sessionId)
     },
 
     // 撤回消息

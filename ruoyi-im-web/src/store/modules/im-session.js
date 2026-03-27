@@ -7,7 +7,8 @@ import {
   pinConversation,
   muteConversation,
   deleteConversation as apiDeleteConversation,
-  markConversationAsRead
+  markConversationAsRead,
+  saveDraft as apiSaveDraft
 } from '@/api/im'
 import { formatMessagePreviewFromObject } from '@/utils/message'
 
@@ -161,17 +162,29 @@ export default {
     },
 
     // 保存草稿
-    saveDraft({ commit }, { sessionId, content }) {
+    async saveDraft({ commit }, { sessionId, content }) {
       if (!sessionId) return
       const drafts = getDraftMap()
       if (content && content.trim()) {
         drafts[sessionId] = { content, time: Date.now() }
         setDraftMap(drafts)
         commit('UPDATE_SESSION', { id: sessionId, draftContent: content, draftTime: drafts[sessionId].time })
+        // 同步到后端
+        try {
+          await apiSaveDraft(sessionId, content)
+        } catch (e) {
+          console.error('保存草稿到服务器失败', e)
+        }
       } else {
         delete drafts[sessionId]
         setDraftMap(drafts)
         commit('UPDATE_SESSION', { id: sessionId, draftContent: '', draftTime: '' })
+        // 同步到后台
+        try {
+          await apiSaveDraft(sessionId, '')
+        } catch (e) {
+          console.error('保存草稿到服务器失败', e)
+        }
       }
     },
 

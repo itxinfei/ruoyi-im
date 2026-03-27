@@ -22,7 +22,8 @@ export {
   forwardMessage,
   searchMessages,
   markAsRead,
-  getMessageReadUsers
+  getMessageReadUsers,
+  clearConversationMessages
 } from './message'
 
 export {
@@ -32,7 +33,8 @@ export {
   deleteConversation,
   pinConversation,
   muteConversation,
-  markConversationAsRead
+  markConversationAsRead,
+  saveDraft
 } from './conversation'
 
 export {

@@ -33,6 +33,7 @@
             @recall="processRecall"
             @delete="processDelete"
             @favorite="processFavorite"
+            @reaction="processReaction"
             @read-detail="handleReadDetail"
             @edit="handleEdit"
           />
@@ -276,6 +277,21 @@ const processFavorite = async (message) => {
     }
   } catch (error) {
     console.error('收藏操作失败:', error);
+    ElMessage.error('操作失败，请重试');
+  }
+};
+
+// 处理表情回应
+const processReaction = async ({ message, emoji }) => {
+  const messageId = message.messageId || message.id;
+  if (!messageId) {
+    console.error('消息ID不存在');
+    return;
+  }
+  try {
+    await store.dispatch('im/message/toggleReaction', { messageId, emoji });
+  } catch (error) {
+    console.error('表情回应失败:', error);
     ElMessage.error('操作失败，请重试');
   }
 };

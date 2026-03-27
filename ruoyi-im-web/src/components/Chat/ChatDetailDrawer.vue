@@ -4,7 +4,8 @@ import { getGroup } from '@/api/im/group'
 import { getUserInfo } from '@/api/im/user'
 import { getGroupFileStatistics } from '@/api/im/groupFile'
 import { initiateCall } from '@/api/im/videoCall'
-import { ElMessage } from 'element-plus'
+import { clearConversationMessages } from '@/api/im/message'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Phone, VideoCamera } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
@@ -119,6 +120,29 @@ const handleVideoCall = async () => {
     ElMessage.error(error.message || '发起视频通话失败')
   }
 }
+
+// 清空聊天记录
+const handleClearChat = async () => {
+  try {
+    await ElMessageBox.confirm('确定要清空此会话的所有消息吗？此操作不可恢复。', '清空聊天记录', {
+      confirmButtonText: '确定清空',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const res = await clearConversationMessages(props.session.id)
+    if (res.code === 200) {
+      // 清空前端消息缓存
+      store.dispatch('im/message/clearMessages', props.session.id)
+      ElMessage.success('聊天记录已清空')
+    } else {
+      throw new Error(res.message || '清空失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error(error.message || '清空聊天记录失败')
+    }
+  }
+}
 </script>
 
 <template>
@@ -214,6 +238,7 @@ const handleVideoCall = async () => {
       <GroupFilePanel ref="groupFilePanelRef" :group-id="session.type === 'GROUP' ? session.targetId : null" />
 
       <div class="bottom-actions">
+        <el-button type="danger" plain class="w-full" @click="handleClearChat">清空聊天记录</el-button>
         <el-button v-if="session.type === 'GROUP'" type="danger" plain class="w-full">退出群聊</el-button>
       </div>
     </div>

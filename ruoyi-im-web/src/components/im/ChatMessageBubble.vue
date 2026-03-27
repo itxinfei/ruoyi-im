@@ -54,7 +54,7 @@
                 <el-image :src="message.fileUrl" :preview-src-list="[message.fileUrl]" fit="cover" class="content-img" />
               </div>
               <!-- 文件 -->
-              <div v-else-if="message.type === 'FILE'" class="file-content">
+              <div v-else-if="message.type === 'FILE'" class="file-content" @click="handleFileClick">
                 <el-icon><Document /></el-icon>
                 <span class="file-name">{{ message.fileName || '文件' }}</span>
               </div>
@@ -268,6 +268,16 @@ const handleImageError = (e) => {
 
 const openLink = (url) => {
   if (url) window.open(url, '_blank');
+};
+
+// 处理文件点击（下载/预览）
+const handleFileClick = () => {
+  const fileUrl = props.message.fileUrl
+  if (!fileUrl) {
+    ElMessage.info('文件地址无效')
+    return
+  }
+  window.open(fileUrl, '_blank')
 };
 
 const formatDisplayUrl = (url) => {
