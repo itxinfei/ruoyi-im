@@ -198,7 +198,7 @@
             待办事项
           </h2>
           <div class="view-actions">
-            <el-button type="primary" @click="router.push('/todo')">
+            <el-button type="primary" @click="emit('switch-module', 'todo')">
               新建待办
             </el-button>
           </div>
@@ -221,7 +221,7 @@
               <el-checkbox size="large" @click.stop="handleTodoComplete(todo)" />
             </div>
             <div v-if="todos.length > 5" class="todo-more">
-              <el-button link type="primary" @click="router.push('/todo')">
+              <el-button link type="primary" @click="emit('switch-module', 'todo')">
                 查看全部 {{ todos.length }} 条待办
               </el-button>
             </div>
@@ -237,7 +237,7 @@
             日程安排
           </h2>
           <div class="view-actions">
-            <el-button type="primary" @click="router.push('/calendar')">
+            <el-button type="primary" @click="emit('switch-module', 'calendar')">
               新建日程
             </el-button>
           </div>
@@ -254,7 +254,7 @@
               </div>
             </div>
             <div v-if="scheduleList.length > 5" class="schedule-more">
-              <el-button link type="primary" @click="router.push('/calendar')">
+              <el-button link type="primary" @click="emit('switch-module', 'calendar')">
                 查看全部日程
               </el-button>
             </div>
@@ -286,7 +286,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 import {
   Search, Timer, Tickets, Management, Finished,
   Money, FolderOpened, ChatLineRound, VideoPlay, Calendar,
@@ -300,7 +299,6 @@ import { getPendingApprovals } from '@/api/im/approval'
 import { getSchedulesByRange } from '@/api/im/schedule'
 
 const store = useStore()
-const router = useRouter()
 const emit = defineEmits(['switch-module'])
 const activeMenu = ref('apps')
 const activeApprovalTab = ref('pending')
