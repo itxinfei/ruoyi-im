@@ -371,17 +371,12 @@ public class ImFileController {
      * @return Content-Type
      */
     private String getContentType(String fileName) {
-        try {
-            String contentType = Files.probeContentType(Paths.get(fileName));
-            if (contentType != null) {
-                return contentType;
-            }
-        } catch (IOException e) {
-            LOGGER.warn("无法识别文件类型: {}", fileName);
+        // 仅根据扩展名判断，避免 Files.probeContentType 的路径遍历风险
+        String extension = "";
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+            extension = fileName.substring(dotIndex + 1).toLowerCase();
         }
-
-        // 默认根据扩展名判断
-        String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
         switch (extension) {
             case "jpg":
             case "jpeg":
@@ -392,6 +387,8 @@ public class ImFileController {
                 return "image/gif";
             case "webp":
                 return "image/webp";
+            case "bmp":
+                return "image/bmp";
             case "pdf":
                 return "application/pdf";
             case "doc":
@@ -408,14 +405,38 @@ public class ImFileController {
                 return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
             case "txt":
                 return "text/plain";
+            case "csv":
+                return "text/csv";
             case "zip":
                 return "application/zip";
             case "rar":
                 return "application/x-rar-compressed";
+            case "7z":
+                return "application/x-7z-compressed";
             case "mp4":
                 return "video/mp4";
+            case "avi":
+                return "video/x-msvideo";
+            case "mov":
+                return "video/quicktime";
+            case "wmv":
+                return "video/x-ms-wmv";
             case "mp3":
                 return "audio/mpeg";
+            case "wav":
+                return "audio/wav";
+            case "ogg":
+                return "audio/ogg";
+            case "html":
+                return "text/html";
+            case "css":
+                return "text/css";
+            case "js":
+                return "application/javascript";
+            case "json":
+                return "application/json";
+            case "xml":
+                return "application/xml";
             default:
                 return "application/octet-stream";
         }
