@@ -19,7 +19,7 @@
   --dt-bg-input-dark: #0f172a;
 
   // === Brand Colors (钉钉品牌蓝) ===
-  --dt-brand-color: #0066CC;
+  --dt-brand-color: #0089FF;
   --dt-brand-hover: #007FFF;
   --dt-brand-active: #0059B3;
   --dt-brand-light: #3388DD;
@@ -100,6 +100,8 @@
   --dt-radius-2xl: 16px;
   --dt-radius-full: 9999px;
   --dt-bubble-radius: 8px;
+  --dt-bubble-radius-sent: 8px 4px 8px 8px;
+  --dt-bubble-radius-received: 4px 8px 8px 8px;
 
   // === Z-Index (层级协议) ===
   --dt-z-deep: -1;
@@ -125,9 +127,9 @@
   --dt-avatar-size-sm: 24px;
   --dt-avatar-size-md: 36px;
   --dt-avatar-size-lg: 44px;
-  --dt-session-panel-width: 240px;
+  --dt-session-panel-width: 250px;
   --dt-contact-panel-width: 240px;
-  --dt-chat-min-width: 400px;
+  --dt-chat-min-width: 480px;
   --dt-header-height: 56px;
   --dt-chat-header-height: 60px;
   --dt-chat-input-height: 96px;
@@ -167,14 +169,14 @@
   --dt-bubble-padding-v: 10px;
   --dt-bubble-padding-h: 12px;
   --dt-bubble-left-bg: #ffffff;
-  --dt-bubble-right-bg: #007fff;
+  --dt-bubble-right-bg: #0089FF;
   --dt-bubble-max-width: 70%;
   --dt-bubble-right-bg-hover: #006ed6;
   --dt-btn-height-sm: 32px;
   --dt-btn-height-md: 36px;
   --dt-btn-height-lg: 40px;
   --dt-btn-min-width: 80px;
-  --dt-toolbar-height: 40px;
+  --dt-toolbar-height: 32px;
   --dt-input-min-height: 96px;
   --dt-input-max-height: 300px;
 

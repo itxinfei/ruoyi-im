@@ -73,7 +73,7 @@
 import { ref } from 'vue'
 import {
   ChatDotRound, Search, User, Menu, FolderOpened, Calendar,
-  Tickets, Setting, Sunny, Moon
+  Tickets, Setting, Sunny, Moon, Star
 } from '@element-plus/icons-vue'
 import { useTheme } from '@/composables/useTheme'
 
@@ -94,7 +94,8 @@ const topNavs = [
   { id: 'workbench', name: '工作台', icon: Menu, badge: 0 },
   { id: 'todo', name: '待办', icon: Tickets, badge: 2 },
   { id: 'calendar', name: '日历', icon: Calendar, badge: 0 },
-  { id: 'documents', name: '云盘', icon: FolderOpened, badge: 0 }
+  { id: 'documents', name: '云盘', icon: FolderOpened, badge: 0 },
+  { id: 'favorites', name: '收藏', icon: Star, badge: 0 }
 ]
 
 const switchModule = (moduleId) => {

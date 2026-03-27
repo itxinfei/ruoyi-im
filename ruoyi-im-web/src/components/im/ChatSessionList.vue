@@ -105,7 +105,7 @@ const formatTime = (time) => {
 
 <style scoped>
 .session-panel {
-  width: 250px;
+  width: var(--dt-session-panel-width, 250px);
   height: 100%;
   display: flex;
   flex-direction: column;

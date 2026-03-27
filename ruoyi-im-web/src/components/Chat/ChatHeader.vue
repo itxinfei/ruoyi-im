@@ -97,7 +97,6 @@
 <script setup>
 import { computed } from 'vue'
 import { Phone, VideoCamera, Search, MoreFilled, Folder, Top, Delete } from '@element-plus/icons-vue'
-import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
 const props = defineProps({
   session: Object,

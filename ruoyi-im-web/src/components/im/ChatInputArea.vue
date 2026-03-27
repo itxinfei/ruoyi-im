@@ -21,6 +21,13 @@
       <el-icon class="icon-close" @click="clearReply"><Close /></el-icon>
     </div>
 
+    <!-- 编辑模式提示条 -->
+    <div v-if="isEditMode" class="edit-mode-bar">
+      <span class="edit-mode-text">编辑消息</span>
+      <span class="edit-mode-hint">Enter 保存 · ESC 取消</span>
+      <el-icon class="icon-close" @click="cancelEdit"><Close /></el-icon>
+    </div>
+
     <!-- 工具栏 -->
     <div class="toolbar">
       <!-- 表情选择器 -->
@@ -67,6 +74,23 @@
       >
         <el-icon class="tool-icon" title="文件"><Folder /></el-icon>
       </el-upload>
+
+      <!-- 语音录制 -->
+      <el-icon class="tool-icon" :class="{ 'is-recording': isRecording }" title="语音" @click="toggleRecording">
+        <Microphone />
+      </el-icon>
+    </div>
+
+    <!-- 录音状态区 -->
+    <div v-if="isRecording" class="recording-bar">
+      <div class="recording-info">
+        <span class="recording-dot"></span>
+        <span class="recording-text">录音中 {{ formatDuration(recordingDuration) }}</span>
+      </div>
+      <div class="recording-actions">
+        <button class="rec-btn cancel" @click="cancelRecording">取消</button>
+        <button class="rec-btn send" @click="sendRecording">发送</button>
+      </div>
     </div>
 
     <!-- 图片预览区 -->
@@ -83,8 +107,9 @@
         ref="editorRef"
         class="rich-editor"
         contenteditable="true"
-        placeholder="请输入消息..."
+        :placeholder="isEditMode ? '修改消息...' : '请输入消息...'"
         @keydown.enter.exact.prevent="executeSendMessage"
+        @keydown.esc.stop="cancelEdit"
         @keydown.ctrl.enter.stop="insertNewLine"
         @paste="processPaste"
         @input="handleInput"
@@ -93,7 +118,7 @@
 
     <!-- 底部发送栏 -->
     <div class="input-footer">
-      <span class="tip">Enter 发送，Ctrl+Enter 换行</span>
+      <span class="tip">{{ isEditMode ? 'Enter 保存，ESC 取消' : 'Enter 发送，Ctrl+Enter 换行' }}</span>
       <button
         :class="['send-btn', { 'is-active': canSend }]"
         @click="executeSendMessage"
@@ -108,18 +133,19 @@
 /**
  * ChatInputArea.vue (对齐钉钉无边框沉浸式输入 & 状态驱动发送按钮 + 表情选择器 + 图片预览)
  */
-import { ref, computed, watch, onMounted } from 'vue';
-import { Close, Star, Picture, Folder, Upload } from '@element-plus/icons-vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { Close, Star, Picture, Folder, Upload, Microphone } from '@element-plus/icons-vue';
 
 const props = defineProps({
   replyingMessage: Object,
+  editingMessage: Object,
   modelValue: {
     type: String,
     default: ''
   }
 });
 
-const emit = defineEmits(['send', 'clear-reply', 'update:modelValue']);
+const emit = defineEmits(['send', 'clear-reply', 'update:modelValue', 'edit-save', 'edit-cancel']);
 
 const editorRef = ref(null);
 const hasContent = ref(false);
@@ -127,8 +153,16 @@ const emojiPickerVisible = ref(false);
 const pendingImages = ref([]);
 const isDragover = ref(false);
 let isInternalSet = false; // 防止 watch 设置时触发 handleInput 冒泡
+const isEditMode = ref(false); // 编辑模式标识
 
-// 监听外部 draft 变化（会话切换时恢复草稿）
+// 录音状态
+const isRecording = ref(false);
+const recordingDuration = ref(0);
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingTimer = null;
+
+// 监听外部草稿变化（会话切换时恢复草稿）
 watch(() => props.modelValue, (newVal) => {
   if (!editorRef.value) return;
   const currentText = editorRef.value.innerText;
@@ -136,6 +170,21 @@ watch(() => props.modelValue, (newVal) => {
     isInternalSet = true;
     editorRef.value.innerText = newVal || '';
     hasContent.value = !!newVal;
+  }
+});
+
+// 监听编辑消息变化（进入/退出编辑模式）
+watch(() => props.editingMessage, (newVal) => {
+  if (newVal) {
+    isEditMode.value = true;
+    isInternalSet = true;
+    if (editorRef.value) {
+      editorRef.value.innerText = newVal.content || '';
+      hasContent.value = !!newVal.content;
+    }
+    nextTick(() => editorRef.value?.focus());
+  } else {
+    isEditMode.value = false;
   }
 });
 
@@ -191,6 +240,15 @@ const processPaste = async (e) => {
 };
 
 const executeSendMessage = () => {
+  // 编辑模式：直接触发保存
+  if (isEditMode.value) {
+    const content = editorRef.value.innerText.trim();
+    if (content) {
+      emit('edit-save', { content });
+    }
+    return;
+  }
+
   // 发送图片
   if (pendingImages.value.length > 0) {
     pendingImages.value.forEach(img => {
@@ -208,6 +266,11 @@ const executeSendMessage = () => {
 
   hasContent.value = false;
   emit('update:modelValue', '');
+};
+
+// 取消编辑
+const cancelEdit = () => {
+  emit('edit-cancel');
 };
 
 // 处理图片选择
@@ -261,6 +324,67 @@ const handleDrop = (e) => {
       emit('send', { type: 'FILE', file, fileName: file.name });
     }
   }
+};
+
+// 录音
+const toggleRecording = async () => {
+  if (isRecording.value) {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+};
+
+const startRecording = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    recordedChunks = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    mediaRecorder.start();
+    isRecording.value = true;
+    recordingDuration.value = 0;
+
+    recordingTimer = setInterval(() => {
+      recordingDuration.value++;
+    }, 1000);
+  } catch (e) {
+    console.error('无法访问麦克风', e);
+  }
+};
+
+const stopRecording = () => {
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+  mediaRecorder.stop();
+  mediaRecorder.stream.getTracks().forEach(t => t.stop());
+  clearInterval(recordingTimer);
+  isRecording.value = false;
+};
+
+const cancelRecording = () => {
+  stopRecording();
+  recordedChunks = [];
+  recordingDuration.value = 0;
+};
+
+const sendRecording = () => {
+  if (recordedChunks.length === 0) return;
+  const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+  const file = new File([blob], `录音_${formatDuration(recordingDuration.value)}.webm`, { type: 'audio/webm' });
+  emit('send', { type: 'VOICE', file });
+  recordedChunks = [];
+  recordingDuration.value = 0;
+  stopRecording();
+};
+
+const formatDuration = (seconds) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
 onMounted(() => {
@@ -317,6 +441,30 @@ onMounted(() => {
   border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
 }
 
+/* 编辑模式提示条 */
+.edit-mode-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  margin: 8px 20px 0;
+  background: var(--dt-warning-bg);
+  border-left: 2px solid var(--dt-warning-color);
+  border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
+}
+
+.edit-mode-text {
+  font-size: var(--dt-font-size-sm);
+  font-weight: 500;
+  color: var(--dt-warning-color);
+}
+
+.edit-mode-hint {
+  flex: 1;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+}
+
 .reply-content {
   font-size: var(--dt-font-size-sm);
   overflow: hidden;
@@ -345,7 +493,7 @@ onMounted(() => {
 
 /* 工具栏 */
 .toolbar {
-  height: 40px;
+  height: var(--dt-toolbar-height, 32px);
   padding: 0 20px;
   display: flex;
   align-items: center;
@@ -367,6 +515,89 @@ onMounted(() => {
 .upload-wrapper {
   display: flex;
   align-items: center;
+}
+
+.tool-icon.is-recording {
+  color: var(--dt-error-color);
+  animation: pulse-recording 1s ease-in-out infinite;
+}
+
+@keyframes pulse-recording {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* 录音状态栏 */
+.recording-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 20px;
+  background: var(--dt-bg-body);
+  border-top: 1px solid var(--dt-border-light);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { height: 0; opacity: 0; }
+  to { height: 44px; opacity: 1; }
+}
+
+.recording-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recording-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dt-error-color);
+  animation: blink 0.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.recording-text {
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-secondary);
+}
+
+.recording-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.rec-btn {
+  border: none;
+  border-radius: var(--dt-radius-sm);
+  padding: 4px 16px;
+  font-size: var(--dt-font-size-sm);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+}
+
+.rec-btn.cancel {
+  background: var(--dt-bg-hover);
+  color: var(--dt-text-secondary);
+}
+
+.rec-btn.cancel:hover {
+  background: var(--dt-border-light);
+}
+
+.rec-btn.send {
+  background: var(--dt-brand-color);
+  color: #fff;
+}
+
+.rec-btn.send:hover {
+  background: var(--dt-brand-hover);
 }
 
 /* 表情选择器 */

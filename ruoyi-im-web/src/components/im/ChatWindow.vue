@@ -7,7 +7,9 @@
         <span v-if="currentSession?.memberCount" class="member-count">({{ currentSession.memberCount }})</span>
       </div>
       <div class="header-right">
-        <i class="el-icon-phone" title="语音通话"></i>
+        <i class="el-icon-search" title="搜索聊天记录" @click="showGlobalSearch = true"></i>
+        <i class="el-icon-phone" title="语音通话" @click="handleVoiceCall"></i>
+        <i class="el-icon-video-camera" title="视频通话" @click="handleVideoCall"></i>
         <i class="el-icon-more" title="详情" @click="detailDrawerVisible = true"></i>
       </div>
     </header>
@@ -15,20 +17,26 @@
     <!-- 2. 消息列表区 -->
     <div class="message-list-viewport" ref="listRef" @scroll="handleScroll">
       <div class="message-list-content">
-        <ChatMessageBubble
+        <div
           v-for="(msg, index) in messages"
           :key="msg.clientMsgId || msg.id"
-          :message="msg"
-          :is-me="msg.senderId === currentUserId"
-          :is-grouped="checkIsGrouped(msg, index)"
-          :show-time="checkShowTime(msg, index)"
-          :quoted-message="msg.quotedMessage || getQuotedMessage(msg)"
-          @reply="processReply"
-          @forward="processForward"
-          @recall="processRecall"
-          @delete="processDelete"
-          @favorite="processFavorite"
-        />
+          :data-message-id="msg.messageId || msg.id"
+        >
+          <ChatMessageBubble
+            :message="msg"
+            :is-me="msg.senderId === currentUserId"
+            :is-grouped="checkIsGrouped(msg, index)"
+            :show-time="checkShowTime(msg, index)"
+            :quoted-message="msg.quotedMessage || getQuotedMessage(msg)"
+            @reply="processReply"
+            @forward="processForward"
+            @recall="processRecall"
+            @delete="processDelete"
+            @favorite="processFavorite"
+            @read-detail="handleReadDetail"
+            @edit="handleEdit"
+          />
+        </div>
       </div>
     </div>
 
@@ -36,21 +44,31 @@
     <ChatInputArea
       v-model="currentDraft"
       :replying-message="replyingMessage"
+      :editing-message="editingMessage"
       @send="processSendMessage"
       @clear-reply="replyingMessage = null"
+      @edit-save="handleEditSave"
+      @edit-cancel="handleEditCancel"
     />
 
-    <!-- 业务侧边栏池 -->
-    <GroupDetailDrawer
-      v-if="currentSession && currentSession.type === 'GROUP'"
-      v-model="detailDrawerVisible"
-      :group-id="currentSession.targetId"
-    />
+    <!-- 业务侧边栏池：统一使用 ChatDetailDrawer (支持 GROUP 和 PRIVATE) -->
     <ChatDetailDrawer
-      v-else-if="currentSession && currentSession.type === 'PRIVATE'"
+      v-if="currentSession"
       v-model="detailDrawerVisible"
       :session="currentSession"
     />
+
+    <!-- 通话弹窗 -->
+    <CallDialog ref="callDialogRef" :session="currentSession" />
+
+    <!-- 已读详情 -->
+    <ReadStatusDrawer v-model="showReadDrawer" :message-id="readDetailMessageId" />
+
+    <!-- 全局搜索 -->
+    <GlobalSearch v-model:visible="showGlobalSearch" @select="handleSearchSelect" />
+
+    <!-- 转发对话框 -->
+    <ForwardDialog ref="forwardDialogRef" />
   </div>
 </template>
 
@@ -63,10 +81,14 @@ import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
 import { useImWebSocket } from '@/composables/useImWebSocket';
 import { uploadImage, uploadFile } from '@/api/im/file';
+import { initiateCall } from '@/api/im/videoCall';
 import ChatMessageBubble from './ChatMessageBubble.vue';
-import GroupDetailDrawer from './GroupDetailDrawer.vue';
 import ChatDetailDrawer from '@/components/Chat/ChatDetailDrawer.vue';
 import ChatInputArea from './ChatInputArea.vue';
+import CallDialog from '@/components/Chat/CallDialog.vue';
+import ReadStatusDrawer from '@/components/im/ReadStatusDrawer.vue';
+import GlobalSearch from '@/components/Chat/GlobalSearch.vue';
+import ForwardDialog from '@/components/ForwardDialog/index.vue';
 
 const store = useStore();
 
@@ -75,10 +97,16 @@ const { onMessage, onRead, connect, cleanup } = useImWebSocket();
 
 // 2. 基础状态
 const listRef = ref(null);
+const callDialogRef = ref(null);
+const forwardDialogRef = ref(null);
 const detailDrawerVisible = ref(false);
+const showReadDrawer = ref(false);
+const readDetailMessageId = ref(null);
 const replyingMessage = ref(null);
+const showGlobalSearch = ref(false);
 const isLoadingMore = ref(false); // 是否正在加载更多
 const currentDraft = ref(''); // 当前会话草稿
+const editingMessage = ref(null); // 正在编辑的消息
 
 // 3. 数据联动
 const currentUserId = computed(() => store.state.im?.currentUser?.id || 1);
@@ -204,8 +232,7 @@ const getQuotedMessage = (msg) => {
 
 // 处理转发
 const processForward = (message) => {
-  // TODO: 打开转发选择对话框
-  console.log('转发消息:', message);
+  forwardDialogRef.value?.open(message);
 };
 
 // 处理撤回
@@ -239,17 +266,48 @@ const processFavorite = async (message) => {
   try {
     if (message.isFavorited) {
       // 取消收藏
-      await store.dispatch('im-message/removeFavorite', { messageId, conversationId });
+      await store.dispatch('im/message/removeFavorite', { messageId, conversationId });
       ElMessage.success('已取消收藏');
     } else {
       // 添加收藏
-      await store.dispatch('im-message/addFavorite', { messageId, conversationId });
+      await store.dispatch('im/message/addFavorite', { messageId, conversationId });
       ElMessage.success('已添加收藏');
     }
   } catch (error) {
     console.error('收藏操作失败:', error);
     ElMessage.error('操作失败，请重试');
   }
+};
+
+// 处理编辑消息
+const handleEdit = (message) => {
+  editingMessage.value = message;
+  currentDraft.value = message.content || '';
+  ElMessage.info('编辑模式：修改内容后 Enter 发送，ESC 取消');
+};
+
+// 保存编辑
+const handleEditSave = async () => {
+  if (!editingMessage.value || !currentDraft.value.trim()) return;
+  const messageId = editingMessage.value.messageId || editingMessage.value.id;
+  try {
+    await store.dispatch('im/message/editMessage', {
+      messageId,
+      content: currentDraft.value.trim()
+    });
+    ElMessage.success('消息已更新');
+    editingMessage.value = null;
+    currentDraft.value = '';
+  } catch (error) {
+    console.error('编辑消息失败:', error);
+    ElMessage.error('编辑失败，请重试');
+  }
+};
+
+// 取消编辑
+const handleEditCancel = () => {
+  editingMessage.value = null;
+  currentDraft.value = '';
 };
 
 const processSendMessage = async (payload) => {
@@ -259,7 +317,7 @@ const processSendMessage = async (payload) => {
   let messageType = payload.type || 'TEXT';
 
   // 如果是图片或文件，先上传获取URL
-  if (payload.type === 'IMAGE' || payload.type === 'FILE') {
+  if (payload.type === 'IMAGE' || payload.type === 'FILE' || payload.type === 'VOICE') {
     const formData = new FormData();
     formData.append('file', payload.file);
     if (payload.fileName) {
@@ -274,7 +332,8 @@ const processSendMessage = async (payload) => {
         content = JSON.stringify({
           fileUrl: res.data.url,
           fileName: payload.fileName || res.data.fileName || payload.file?.name,
-          fileSize: payload.file?.size
+          fileSize: payload.file?.size,
+          duration: payload.duration || null
         });
       } else {
         throw new Error('上传失败');
@@ -314,6 +373,101 @@ const scrollToBottom = () => {
       listRef.value.scrollTop = listRef.value.scrollHeight;
     }
   });
+};
+
+// 语音通话
+const handleVoiceCall = async () => {
+  if (!currentSession.value) return;
+  const peerId = currentSession.value.peerUserId || currentSession.value.targetId;
+  if (!peerId) {
+    ElMessage.warning('无法获取对方ID');
+    return;
+  }
+  try {
+    const res = await initiateCall({
+      calleeId: peerId,
+      conversationId: currentSession.value.id,
+      callType: 'VOICE'
+    });
+    if (res.code === 200) {
+      callDialogRef.value?.open('voice', {
+        status: 'calling',
+        callId: res.data.callId,
+        peerId,
+        peerName: currentSession.value.name,
+        peerAvatar: currentSession.value.avatar
+      });
+    } else {
+      throw new Error(res.message || '发起通话失败');
+    }
+  } catch (error) {
+    console.error('发起语音通话失败:', error);
+    ElMessage.error(error.message || '发起语音通话失败');
+  }
+};
+
+// 视频通话
+const handleVideoCall = async () => {
+  if (!currentSession.value) return;
+  const peerId = currentSession.value.peerUserId || currentSession.value.targetId;
+  if (!peerId) {
+    ElMessage.warning('无法获取对方ID');
+    return;
+  }
+  try {
+    const res = await initiateCall({
+      calleeId: peerId,
+      conversationId: currentSession.value.id,
+      callType: 'VIDEO'
+    });
+    if (res.code === 200) {
+      callDialogRef.value?.open('video', {
+        status: 'calling',
+        callId: res.data.callId,
+        peerId,
+        peerName: currentSession.value.name,
+        peerAvatar: currentSession.value.avatar
+      });
+    } else {
+      throw new Error(res.message || '发起通话失败');
+    }
+  } catch (error) {
+    console.error('发起视频通话失败:', error);
+    ElMessage.error(error.message || '发起视频通话失败');
+  }
+};
+
+// 已读详情
+const handleReadDetail = (messageId) => {
+  readDetailMessageId.value = messageId;
+  showReadDrawer.value = true;
+};
+
+// 搜索结果跳转
+const handleSearchSelect = (res) => {
+  showGlobalSearch.value = false;
+  if (res?.messageId) {
+    nextTick(() => scrollToMessage(res.messageId));
+  }
+};
+
+// 滚动到指定消息
+const scrollToMessage = (messageId) => {
+  if (!listRef.value) return;
+  // Try both id field names used by the backend
+  const el = listRef.value.querySelector(`[data-message-id="${messageId}"]`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    // Fallback: find by index in messages array
+    const index = messages.value.findIndex(m => (m.messageId || m.id) === messageId);
+    if (index !== -1) {
+      const allItems = listRef.value.querySelectorAll('[data-message-id]');
+      if (allItems[index]) {
+        allItems[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
 };
 </script>
 

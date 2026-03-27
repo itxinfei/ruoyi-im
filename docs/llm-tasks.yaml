@@ -7,7 +7,7 @@ tasks:
   - task_id: IM-UI-001
     title: 消息主页面三栏布局复刻钉钉Windows
     priority: P0
-    status: todo
+    status: done
     goal: 将消息主页面布局、密度、层级对齐钉钉 Windows 客户端
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -48,7 +48,7 @@ tasks:
   - task_id: IM-UI-002
     title: 消息气泡与头像对齐复刻钉钉Windows
     priority: P0
-    status: todo
+    status: done
     goal: 修正消息气泡、头像、时间线，使发送方气泡在前头像在后并严格同线
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -88,7 +88,7 @@ tasks:
   - task_id: IM-UI-003
     title: 输入区和聊天头部复刻钉钉Windows
     priority: P0
-    status: todo
+    status: done
     goal: 精简聊天头部和输入区，确保工具入口真实可用并对齐钉钉桌面端交互
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -132,7 +132,7 @@ tasks:
   - task_id: IM-UI-004
     title: 群详情与个人详情页面重设计并统一入口
     priority: P0
-    status: todo
+    status: done
     goal: 重做群详情/个人详情页面结构与样式，并统一为单一主入口，贴近钉钉 Windows 体验
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -176,7 +176,7 @@ tasks:
   - task_id: IM-FIX-001
     title: 清理消息模块空入口与不可用按钮
     priority: P0
-    status: todo
+    status: done
     goal: 消除消息模块中所有“点了没反应/开发中”的入口，保证按钮可达可用
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -217,7 +217,7 @@ tasks:
   - task_id: IM-FIX-002
     title: 搜索链路统一与结果跳转修复
     priority: P0
-    status: todo
+    status: done
     goal: 打通会话过滤、全局搜索、会话内搜索的统一体验并修复跳转失败
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -259,7 +259,7 @@ tasks:
   - task_id: IM-FIX-003
     title: 群详情与群文件功能闭环修复
     priority: P0
-    status: todo
+    status: done
     goal: 统一群详情入口并修复群文件上传/筛选/下载链路中的断点
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -302,7 +302,7 @@ tasks:
   - task_id: IM-A-001
     title: 打通语音通话完整链路
     priority: P0
-    status: todo
+    status: done
     goal: 让头部和用户详情入口都能发起语音通话，并完成接听、拒绝、挂断闭环
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -345,7 +345,7 @@ tasks:
   - task_id: IM-A-002
     title: 打通视频通话完整链路
     priority: P0
-    status: todo
+    status: done
     goal: 完成视频通话发起、接听、挂断和异常提示闭环
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -386,7 +386,7 @@ tasks:
   - task_id: IM-B-001
     title: 实现语音消息录制与发送
     priority: P0
-    status: todo
+    status: done
     goal: 完成录音、发送、播放、失败重试闭环
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -424,7 +424,7 @@ tasks:
   - task_id: IM-E-001
     title: 完善消息已读回执功能
     priority: P0
-    status: todo
+    status: done
     goal: 实现消息已读/未读状态显示，支持查看已读详情
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -464,7 +464,7 @@ tasks:
   - task_id: IM-C-001
     title: 完成群文件面板与入口
     priority: P1
-    status: todo
+    status: done
     goal: 提供群文件查看、上传、下载和筛选能力
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -503,7 +503,7 @@ tasks:
   - task_id: IM-D-001
     title: 完成消息收藏全链路
     priority: P1
-    status: todo
+    status: done
     goal: 完成收藏、取消收藏、查询收藏列表的完整闭环
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -543,7 +543,7 @@ tasks:
   - task_id: IM-D-002
     title: 实现链接卡片自动识别与预览
     priority: P1
-    status: todo
+    status: done
     goal: 当消息包含 URL 时自动识别并展示链接卡片，失败时降级为普通链接
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -581,7 +581,7 @@ tasks:
   - task_id: IM-F-001
     title: 实现拖拽上传功能
     priority: P1
-    status: todo
+    status: done
     goal: 支持拖拽文件到聊天区直接上传发送
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -617,7 +617,7 @@ tasks:
   - task_id: IM-G-001
     title: 统一群详情入口
     priority: P1
-    status: todo
+    status: done
     goal: 统一 GroupProfileDialog 和 GroupDetailDrawer 为单一标准入口
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -654,7 +654,7 @@ tasks:
   - task_id: IM-H-001
     title: 实现消息编辑功能
     priority: P1
-    status: todo
+    status: done
     goal: 支持编辑已发送的消息，显示编辑标记
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -692,7 +692,7 @@ tasks:
   - task_id: PL-W-001
     title: 完善工作台应用入口
     priority: P2
-    status: todo
+    status: done
     goal: 工作台展示真实可用的应用入口，点击可跳转对应模块
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -726,7 +726,7 @@ tasks:
   - task_id: PL-D-001
     title: 完善云盘文档模块
     priority: P2
-    status: todo
+    status: done
     goal: 实现云盘文件列表、上传、下载、搜索基本功能
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -761,7 +761,7 @@ tasks:
   - task_id: PL-CA-001
     title: 完善日历模块
     priority: P2
-    status: todo
+    status: done
     goal: 实现日历视图、创建/编辑/删除日程基本功能
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -795,7 +795,7 @@ tasks:
   - task_id: PL-T-001
     title: 完善待办模块
     priority: P2
-    status: todo
+    status: done
     goal: 实现待办列表、创建、完成、筛选基本功能
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -831,7 +831,7 @@ tasks:
   - task_id: PL-A-001
     title: 完善审批模块
     priority: P2
-    status: todo
+    status: done
     goal: 实现审批首页、发起审批、待我审批、我发起的基本功能
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -866,7 +866,7 @@ tasks:
   - task_id: PL-M-001
     title: 完善邮箱模块
     priority: P2
-    status: todo
+    status: done
     goal: 实现收件箱、邮件详情、基础操作功能
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -901,7 +901,7 @@ tasks:
   - task_id: PL-AI-001
     title: 完善AI助手模块
     priority: P2
-    status: todo
+    status: done
     goal: 实现AI对话界面，支持问答功能
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -937,7 +937,7 @@ tasks:
   - task_id: AD-M-001
     title: 完善消息审计功能
     priority: P3
-    status: todo
+    status: done
     goal: 实现消息审计查看、搜索、导出功能
     doc_refs:
       product: [docs/10-产品需求总纲.md]
@@ -970,7 +970,7 @@ tasks:
   - task_id: AD-S-001
     title: 完善系统配置功能
     priority: P3
-    status: todo
+    status: done
     goal: 实现系统配置的查看和修改功能
     doc_refs:
       product: [docs/10-产品需求总纲.md]

@@ -16,6 +16,7 @@ const routes = [
   },
   {
     path: '/admin',
+    redirect: '/admin/dashboard',
     component: () => import('../views/admin/AdminLayout.vue'),
     meta: { requiresAuth: true, roles: ['ADMIN', 'SUPER_ADMIN'] },
     children: [
@@ -24,6 +25,36 @@ const routes = [
         name: 'AdminDashboard',
         component: () => import('../views/admin/Dashboard.vue'),
         meta: { title: '数据概览' }
+      },
+      {
+        path: 'users',
+        name: 'AdminUsers',
+        component: () => import('../views/admin/UserManagement.vue'),
+        meta: { title: '用户管理' }
+      },
+      {
+        path: 'groups',
+        name: 'AdminGroups',
+        component: () => import('../views/admin/GroupManagement.vue'),
+        meta: { title: '群组管理' }
+      },
+      {
+        path: 'messages',
+        name: 'AdminMessages',
+        component: () => import('../views/admin/MessageManagement.vue'),
+        meta: { title: '消息管理' }
+      },
+      {
+        path: 'audit-log',
+        name: 'AdminAuditLog',
+        component: () => import('../views/admin/AuditLog.vue'),
+        meta: { title: '审计日志' }
+      },
+      {
+        path: 'system-config',
+        name: 'AdminSystemConfig',
+        component: () => import('../views/admin/SystemConfig.vue'),
+        meta: { title: '系统配置', roles: ['SUPER_ADMIN'] }
       }
     ]
   },

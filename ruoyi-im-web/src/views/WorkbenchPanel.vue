@@ -301,6 +301,7 @@ import { getSchedulesByRange } from '@/api/im/schedule'
 
 const store = useStore()
 const router = useRouter()
+const emit = defineEmits(['switch-module'])
 const activeMenu = ref('apps')
 const activeApprovalTab = ref('pending')
 const searchQuery = ref('')
@@ -373,17 +374,29 @@ const handleMenuChange = (key) => {
 }
 
 const handleAppClick = (app) => {
-  // 如果有路由，跳转到对应页面
+  // 如果有 route，跳转到对应模块（通过 emit 切换 activeModule）
   if (app.route) {
-    router.push(app.route)
+    const moduleMap = {
+      '/approval': 'approval',
+      '/todo': 'todo',
+      '/documents': 'documents',
+      '/calendar': 'calendar',
+      '/assistant': 'assistant'
+    }
+    const module = moduleMap[app.route]
+    if (module) {
+      emit('switch-module', module)
+    }
     return
   }
-  // 如果有action，切换到对应视图
+  // 如果有 action，切换到对应视图
   if (app.action) {
     if (app.action === 'attendance') {
       activeMenu.value = 'attendance'
     } else if (app.action === 'report') {
       activeMenu.value = 'report'
+    } else if (app.action === 'meeting') {
+      ElMessage.info('视频会议功能开发中')
     } else {
       ElMessage.info(`${app.label}功能开发中`)
     }

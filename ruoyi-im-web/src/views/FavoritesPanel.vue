@@ -94,6 +94,7 @@ import { getUserFavorites, removeMessageFavorite } from '@/api/im/message'
 
 const store = useStore()
 const router = useRouter()
+const emit = defineEmits(['switch-module'])
 
 const loading = ref(false)
 const favorites = ref([])
@@ -192,6 +193,7 @@ const handleJumpToMessage = (item) => {
     })
     // 切换到消息模块
     store.dispatch('im/session/selectSession', { id: item.conversationId })
+    emit('switch-module', 'chat')
   }
 }
 

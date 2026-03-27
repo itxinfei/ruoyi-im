@@ -16,6 +16,28 @@
 - **清理垃圾**：重构必删旧代码。
 - **自检模板**：每次任务必须输出 `[规范自检]` 结果。
 
+## 代码检查修复记录 (2026-03-27)
+
+### 功能实现完成
+**IM-H-001**: 消息编辑功能完整实现
+- 修复文件：`ChatWindow.vue`, `ChatInputArea.vue`, `ChatMessageBubble.vue`
+- 改动：
+  - `ChatMessageBubble` 添加编辑按钮（5分钟内 TEXT 消息显示）
+  - `ChatWindow` 处理 `@edit` 事件，调用 `im/message/editMessage` API
+  - `ChatInputArea` 添加编辑模式 UI（黄色提示条、ESC 取消、Enter 保存）
+  - 已编辑消息显示"已编辑"标记
+
+**PL-W-001**: 工作台应用入口修复
+- 修复文件：`WorkbenchPanel.vue`, `MainPage.vue`
+- 改动：`router.push()` 改为 `emit('switch-module')` 实现内部模块切换
+
+**管理后台**: 路由补全
+- 修复文件：`router/index.js`
+- 改动：添加 `/admin/users`, `/admin/groups`, `/admin/messages`, `/admin/audit-log`, `/admin/system-config` 路由
+
+**YAML 任务池**: 所有任务已标记完成
+- 状态：`llm-tasks.yaml` 中全部 P0/P1/P2/P3 任务已标记 `status: done`
+
 ## 代码检查修复记录 (2026-03-21)
 
 ### P0 优先级 (已修复)

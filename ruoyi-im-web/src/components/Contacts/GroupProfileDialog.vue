@@ -164,6 +164,18 @@
             </div>
           </div>
         </section>
+
+        <!-- 群文件入口 -->
+        <section class="file-section">
+          <div class="section-title">群文件</div>
+          <div class="file-entry-item" @click="handleOpenFiles">
+            <div class="entry-left">
+              <el-icon><FolderOpened /></el-icon>
+              <span>聊天文件</span>
+            </div>
+            <el-icon class="arrow-icon"><ArrowRight /></el-icon>
+          </div>
+        </section>
       </div>
 
       <!-- 群二维码弹窗 -->
@@ -187,14 +199,18 @@
         </button>
       </footer>
     </div>
+
+    <!-- 群文件面板 -->
+    <GroupFilePanel ref="groupFilePanelRef" :group-id="groupId" />
   </el-dialog>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { Close, ArrowRight, Plus, EditPen, Setting, User, SwitchButton } from '@element-plus/icons-vue'
+import { Close, ArrowRight, Plus, EditPen, Setting, User, SwitchButton, FolderOpened } from '@element-plus/icons-vue'
 import { getGroup, leaveGroup, updateGroup } from '@/api/im/group'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useStore } from 'vuex'
 
@@ -207,6 +223,7 @@ const loading = ref(false)
 const groupDetail = ref(null)
 const showAllMembers = ref(false)
 const showQr = ref(false)
+const groupFilePanelRef = ref(null)
 
 const isAdmin = computed(() => groupDetail.value?.role === 'ADMIN' || groupDetail.value?.role === 'OWNER')
 const canEdit = computed(() => isAdmin.value)
@@ -315,6 +332,10 @@ const handleGroupManage = () => {
 
 const handleMemberManage = () => {
   ElMessage.info('成员管理：点击上方成员列表进行管理')
+}
+
+const handleOpenFiles = () => {
+  groupFilePanelRef.value?.open()
 }
 
 const handleExitGroup = async () => {
@@ -646,6 +667,53 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
     span {
       font-size: 13px;
       color: var(--dt-text-secondary);
+    }
+  }
+}
+
+.file-section {
+  margin-bottom: 12px;
+  border: 1px solid var(--dt-border-light);
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: var(--dt-bg-card);
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dt-text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .file-entry-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: var(--dt-bg-session-hover);
+    }
+
+    .entry-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--dt-text-primary);
+
+      .el-icon {
+        font-size: 16px;
+        color: var(--dt-text-secondary);
+      }
+    }
+
+    .arrow-icon {
+      font-size: 14px;
+      color: var(--dt-text-quaternary);
     }
   }
 }

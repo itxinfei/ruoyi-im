@@ -34,12 +34,19 @@
 
           <!-- 气泡本体 -->
           <div :class="['message-bubble', `type-${(message.type || 'text').toLowerCase()}`]">
-            <!-- 文本 -->
-            <div v-if="!message.type || message.type === 'TEXT'" class="text-content">
+            <!-- 文本（非纯URL） -->
+            <div v-if="(!message.type || message.type === 'TEXT') && !isPureUrlMessage" class="text-content">
               <template v-for="(part, index) in parsedTextParts" :key="index">
                 <a v-if="part.isLink" :href="part.text" target="_blank" class="text-link" @click.stop>{{ part.text }}</a>
                 <span v-else>{{ part.text }}</span>
               </template>
+            </div>
+            <!-- 纯URL消息：渲染为链接卡片 -->
+            <div v-else-if="isPureUrlMessage" class="link-card" @click="openLink(getPureUrl)">
+              <div class="link-content">
+                <div class="link-title">{{ getPureUrl }}</div>
+                <div class="link-url">{{ formatDisplayUrl(getPureUrl) }}</div>
+              </div>
             </div>
             <!-- 图片 -->
             <div v-else-if="message.type === 'IMAGE'" class="image-content">
@@ -51,11 +58,8 @@
               <span class="file-name">{{ message.fileName || '文件' }}</span>
             </div>
             <!-- 语音 -->
-            <div v-else-if="message.type === 'VOICE'" class="voice-content">
-              <el-icon><Microphone /></el-icon>
-              <span class="voice-duration">{{ message.duration || '0' }}"</span>
-            </div>
-            <!-- 链接卡片 -->
+            <VoiceMessageBubble v-else-if="message.type === 'VOICE'" :message="message" />
+            <!-- 链接卡片（LINK类型，后端返回元数据） -->
             <div v-else-if="message.type === 'LINK' && linkInfo" class="link-card" @click="openLink(linkInfo.url)">
               <div v-if="linkInfo.imageUrl" class="link-image">
                 <img :src="linkInfo.imageUrl" alt="" @error="handleImageError">
@@ -72,7 +76,8 @@
           <div v-if="isMe" class="message-status-sidebar">
             <el-icon v-if="message.status === 'sending'" class="status-icon is-loading"><Loading /></el-icon>
             <el-icon v-else-if="message.status === 'failed'" class="status-icon is-failed" title="发送失败，点击重试"><WarningFilled /></el-icon>
-            <span v-else-if="message.isRead !== undefined" :class="['read-status', message.isRead ? 'is-read' : 'is-unread']">
+            <span v-else-if="message.isEdited" class="edited-tag">已编辑</span>
+            <span v-else-if="message.isRead !== undefined" :class="['read-status', message.isRead ? 'is-read' : 'is-unread']" @click="$emit('read-detail', message.messageId || message.id)">
               {{ message.isRead ? '已读' : '未读' }}
             </span>
           </div>
@@ -90,6 +95,9 @@
             </div>
             <div v-if="isMe && canRecall" class="action-item" title="撤回" @click="$emit('recall', message)">
               <el-icon><RefreshLeft /></el-icon>
+            </div>
+            <div v-if="isMe && canEdit" class="action-item" title="编辑" @click="$emit('edit', message)">
+              <el-icon><Edit /></el-icon>
             </div>
             <div v-if="isMe" class="action-item" title="删除" @click="$emit('delete', message)">
               <el-icon><Delete /></el-icon>
@@ -116,7 +124,8 @@
  */
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Loading, WarningFilled, ChatLineRound, DocumentCopy, Position, MoreFilled, RefreshLeft, Delete, Star, Document, Microphone } from '@element-plus/icons-vue';
+import { Loading, WarningFilled, ChatLineRound, DocumentCopy, Position, MoreFilled, RefreshLeft, Delete, Star, Document, Microphone, Edit } from '@element-plus/icons-vue';
+import VoiceMessageBubble from '@/components/Chat/VoiceMessageBubble.vue';
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -126,7 +135,7 @@ const props = defineProps({
   quotedMessage: { type: Object, default: null }
 });
 
-const emit = defineEmits(['reply', 'forward', 'recall', 'delete', 'favorite']);
+const emit = defineEmits(['reply', 'forward', 'recall', 'delete', 'favorite', 'read-detail', 'edit']);
 
 const isHovered = ref(false);
 
@@ -140,6 +149,14 @@ const isPureUrlMessage = computed(() => {
   if (!content) return false;
   const urlMatches = content.match(urlPattern);
   return urlMatches && urlMatches.length === 1 && urlMatches[0] === content;
+});
+
+// 获取纯URL消息的URL
+const getPureUrl = computed(() => {
+  if (!isPureUrlMessage.value) return '';
+  const content = props.message.content?.trim() || '';
+  const match = content.match(urlPattern);
+  return match ? match[0] : '';
 });
 
 // 解析 LINK 类型消息
@@ -207,6 +224,16 @@ const canRecall = computed(() => {
   const now = Date.now();
   const diffMinutes = (now - createTime) / (1000 * 60);
   return diffMinutes <= 2 && props.message.status !== 'recalled';
+});
+
+// 检查是否可以编辑（发送后5分钟内，仅文本消息）
+const canEdit = computed(() => {
+  if (!props.message.createTime || !props.isMe) return false;
+  if (props.message.type && props.message.type !== 'TEXT') return false;
+  const createTime = new Date(props.message.createTime).getTime();
+  const now = Date.now();
+  const diffMinutes = (now - createTime) / (1000 * 60);
+  return diffMinutes <= 5 && props.message.status !== 'recalled';
 });
 
 // 复制文本
@@ -294,7 +321,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .message-content-wrapper {
-  max-width: 65%;
+  max-width: var(--dt-bubble-max-width, 70%);
   margin: 0 12px;
   display: flex;
   flex-direction: column;
@@ -356,19 +383,19 @@ const formatDisplayUrl = (url) => {
   position: relative;
 }
 
-/* 接收方 (左侧) - 钉钉 8px 对称圆角 */
+/* 接收方 (左侧) - 钉钉非对称圆角: 左上尖 */
 .is-other .message-bubble {
   background-color: var(--dt-bubble-left-bg);
   color: var(--dt-text-primary);
   border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-bubble-radius);
+  border-radius: var(--dt-bubble-radius-received);
 }
 
-/* 发送方 (右侧) - 钉钉 8px 对称圆角 */
+/* 发送方 (右侧) - 钉钉非对称圆角: 右上尖 */
 .is-me .message-bubble {
   background-color: var(--dt-bubble-right-bg);
   color: var(--dt-text-white);
-  border-radius: var(--dt-bubble-radius);
+  border-radius: var(--dt-bubble-radius-sent);
 }
 
 .content-img {
@@ -511,6 +538,12 @@ const formatDisplayUrl = (url) => {
 
 .read-status.is-unread {
   color: var(--dt-brand-color);
+}
+
+.edited-tag {
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
+  white-space: nowrap;
 }
 
 /* 操作悬浮条 (Action Bar) */

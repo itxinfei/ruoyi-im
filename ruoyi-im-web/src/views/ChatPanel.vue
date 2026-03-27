@@ -503,7 +503,11 @@ const handleClearMessages = () => {
 }
 
 const handleOpenFiles = () => {
-  showGlobalSearch.value = true
+  if (props.session?.type === 'GROUP') {
+    showGroupDetail.value = true
+  } else {
+    showGlobalSearch.value = true
+  }
 }
 
 const handlePinSession = () => {

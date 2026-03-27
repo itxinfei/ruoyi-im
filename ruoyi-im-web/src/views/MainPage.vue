@@ -41,7 +41,7 @@
       <!-- 工作台模块 -->
       <template v-else-if="activeModule === 'workbench'">
         <div class="single-panel-wrapper">
-          <WorkbenchPanel />
+          <WorkbenchPanel @switch-module="processSwitchModule" />
         </div>
       </template>
 
@@ -49,6 +49,13 @@
       <template v-else-if="activeModule === 'documents'">
         <div class="single-panel-wrapper">
           <DocumentsPanel />
+        </div>
+      </template>
+
+      <!-- 收藏模块 -->
+      <template v-else-if="activeModule === 'favorites'">
+        <div class="single-panel-wrapper">
+          <FavoritesPanel @switch-module="processSwitchModule" />
         </div>
       </template>
 
@@ -135,6 +142,7 @@ import MailPanel from '@/views/MailPanel.vue'
 import AssistantPanel from '@/views/AssistantPanel.vue'
 import ProfilePanel from '@/views/ProfilePanel.vue'
 import AdminLayout from '@/views/admin/AdminLayout.vue'
+import FavoritesPanel from '@/views/FavoritesPanel.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
@@ -159,7 +167,8 @@ const getModuleName = (id) => {
     'mail': '邮箱',
     'assistant': 'AI助手',
     'profile': '个人资料',
-    'admin': '管理后台'
+    'admin': '管理后台',
+    'favorites': '收藏'
   }
   return map[id] || id
 }
@@ -204,7 +213,7 @@ const getModuleName = (id) => {
 
 .content-container { flex: 1; height: 100%; min-width: 0; overflow: hidden; }
 .chat-module-wrapper { display: flex; width: 100%; height: 100%; }
-.chat-main-view { flex: 1; height: 100%; min-width: 0; background-color: var(--dt-bg-chat); }
+.chat-main-view { flex: 1; height: 100%; min-width: 480px; background-color: var(--dt-bg-chat); }
 .empty-view, .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--dt-text-desc); }
 .empty-icon { font-size: 64px; margin-bottom: 24px; opacity: 0.5; }
 .single-panel-wrapper { width: 100%; height: 100%; }

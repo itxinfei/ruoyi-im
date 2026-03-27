@@ -3,8 +3,12 @@ import { ref, watch } from 'vue'
 import { getGroup } from '@/api/im/group'
 import { getUserInfo } from '@/api/im/user'
 import { getGroupFileStatistics } from '@/api/im/groupFile'
+import { initiateCall } from '@/api/im/videoCall'
+import { ElMessage } from 'element-plus'
+import { Phone, VideoCamera } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
+import CallDialog from '@/components/Chat/CallDialog.vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -21,6 +25,7 @@ const members = ref([])
 const fileStats = ref(null)
 const userInfo = ref(null)
 const groupFilePanelRef = ref(null)
+const callDialogRef = ref(null)
 
 const loadData = async () => {
   if (!props.session?.id) return
@@ -54,6 +59,64 @@ const handleClose = () => emit('update:modelValue', false)
 const handleFileClick = () => {
   if (groupFilePanelRef.value) {
     groupFilePanelRef.value.open()
+  }
+}
+
+// 语音通话
+const handleVoiceCall = async () => {
+  const peerId = props.session.peerUserId || props.session.targetId
+  if (!peerId) {
+    ElMessage.warning('无法获取对方ID')
+    return
+  }
+  try {
+    const res = await initiateCall({
+      calleeId: peerId,
+      conversationId: props.session.id,
+      callType: 'VOICE'
+    })
+    if (res.code === 200) {
+      callDialogRef.value?.open('voice', {
+        status: 'calling',
+        callId: res.data.callId,
+        peerId,
+        peerName: props.session.name,
+        peerAvatar: props.session.avatar
+      })
+    } else {
+      throw new Error(res.message || '发起通话失败')
+    }
+  } catch (error) {
+    ElMessage.error(error.message || '发起语音通话失败')
+  }
+}
+
+// 视频通话
+const handleVideoCall = async () => {
+  const peerId = props.session.peerUserId || props.session.targetId
+  if (!peerId) {
+    ElMessage.warning('无法获取对方ID')
+    return
+  }
+  try {
+    const res = await initiateCall({
+      calleeId: peerId,
+      conversationId: props.session.id,
+      callType: 'VIDEO'
+    })
+    if (res.code === 200) {
+      callDialogRef.value?.open('video', {
+        status: 'calling',
+        callId: res.data.callId,
+        peerId,
+        peerName: props.session.name,
+        peerAvatar: props.session.avatar
+      })
+    } else {
+      throw new Error(res.message || '发起通话失败')
+    }
+  } catch (error) {
+    ElMessage.error(error.message || '发起视频通话失败')
   }
 }
 </script>
@@ -113,6 +176,17 @@ const handleFileClick = () => {
           <label>职位</label>
           <span>{{ userInfo.position || '—' }}</span>
         </div>
+        <!-- 快捷操作 -->
+        <div class="info-actions">
+          <el-button type="primary" plain size="small" @click="handleVoiceCall">
+            <el-icon><Phone /></el-icon>
+            语音通话
+          </el-button>
+          <el-button type="primary" plain size="small" @click="handleVideoCall">
+            <el-icon><VideoCamera /></el-icon>
+            视频通话
+          </el-button>
+        </div>
       </div>
 
       <!-- 设置开关区 -->
@@ -143,6 +217,9 @@ const handleFileClick = () => {
         <el-button v-if="session.type === 'GROUP'" type="danger" plain class="w-full">退出群聊</el-button>
       </div>
     </div>
+
+    <!-- 通话弹窗 -->
+    <CallDialog ref="callDialogRef" :session="session" />
   </el-drawer>
 </template>
 
@@ -235,6 +312,14 @@ const handleFileClick = () => {
       &:last-child { margin-bottom: 0; }
       label { color: var(--dt-text-desc); }
       span { color: var(--dt-text-main); }
+    }
+    .info-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      .el-button {
+        flex: 1;
+      }
     }
   }
 
