@@ -49,7 +49,7 @@
         <!-- 附件列表 -->
         <div v-if="email.attachments && email.attachments.length > 0" class="attachments">
           <div class="section-title">
-            <span class="material-icons-outlined">attach_file</span>
+            <el-icon><Paperclip /></el-icon>
             附件 ({{ email.attachments.length }})
           </div>
           <div class="attachment-list">
@@ -58,11 +58,11 @@
               :key="file.name || `file-${index}`"
               class="attachment-item"
             >
-              <span class="material-icons-outlined file-icon">description</span>
+              <el-icon class="file-icon"><Document /></el-icon>
               <span class="file-name">{{ file.name }}</span>
               <span class="file-size">{{ formatFileSize(file.size) }}</span>
               <el-button size="small" link @click="downloadAttachment(file)">
-                <span class="material-icons-outlined">download</span>
+                <el-icon><Download /></el-icon>
               </el-button>
             </div>
           </div>
@@ -80,7 +80,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { ChatLineSquare, Share, Star, Delete } from '@element-plus/icons-vue'
+import { ChatLineSquare, Share, Star, Delete, Paperclip, Document, Download } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -212,11 +212,11 @@ const formatFileSize = (bytes) => {
   font-weight: 500;
   color: var(--dt-text-primary);
   margin-bottom: 12px;
-}
 
-.section-title .material-icons-outlined {
-  font-size: 18px;
-  color: var(--dt-text-tertiary);
+  .el-icon {
+    font-size: 18px;
+    color: var(--dt-text-tertiary);
+  }
 }
 
 .attachment-list {

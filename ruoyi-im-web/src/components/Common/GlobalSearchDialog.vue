@@ -10,7 +10,7 @@
     <div class="spotlight-container">
       <!-- 搜索输入区 -->
       <div class="search-input-wrapper">
-        <span class="material-icons-outlined search-icon">search</span>
+        <el-icon class="search-icon"><Search /></el-icon>
         <input
           ref="inputRef"
           v-model="query"
@@ -80,7 +80,7 @@
 
         <!-- 无结果 -->
         <div v-if="!hasResults" class="search-empty">
-          <span class="material-icons-outlined">search_off</span>
+          <el-icon><Search /></el-icon>
           <p>未找到与 "{{ query }}" 相关的结果</p>
         </div>
       </div>
@@ -89,15 +89,15 @@
       <div v-else class="search-guide">
         <div class="guide-tips">
           <div class="guide-item">
-            <span class="material-icons-outlined">person_search</span>
+            <el-icon><Search /></el-icon>
             <span>找人</span>
           </div>
           <div class="guide-item">
-            <span class="material-icons-outlined">groups</span>
+            <el-icon><ChatDotRound /></el-icon>
             <span>找群</span>
           </div>
           <div class="guide-item">
-            <span class="material-icons-outlined">history</span>
+            <el-icon><Clock /></el-icon>
             <span>搜历史</span>
           </div>
         </div>
@@ -120,6 +120,7 @@ import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { highlightText } from '@/utils/htmlSanitizer'
+import { Search, ChatDotRound, Clock } from '@element-plus/icons-vue'
 
 const props = defineProps({ modelValue: Boolean })
 const emit = defineEmits(['update:modelValue'])
@@ -214,7 +215,7 @@ const goToGroup = (_g) => { visible.value = false /* 跳转 */ }
       display: flex; justify-content: center; gap: 40px;
       .guide-item {
         display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--dt-text-secondary);
-        span { font-size: 32px; }
+        .el-icon { font-size: 32px; }
       }
     }
   }

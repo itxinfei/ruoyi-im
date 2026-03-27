@@ -24,7 +24,7 @@
       <div v-if="!isEditing" class="preview-mode">
         <div class="doc-info">
           <div class="doc-icon" :class="iconClass">
-            <span class="material-icons-outlined">{{ fileIcon }}</span>
+            <el-icon><component :is="fileIcon" /></el-icon>
           </div>
           <div class="doc-meta">
             <h3>{{ document?.name }}</h3>
@@ -39,7 +39,7 @@
             <img :src="documentUrl" alt="预览">
           </div>
           <div v-else class="unsupported-preview">
-            <span class="material-icons-outlined">description</span>
+            <el-icon><Document /></el-icon>
             <p>该文件类型暂不支持预览</p>
             <el-button type="primary" @click="downloadDocument">
               下载文件
@@ -89,7 +89,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { FullScreen, Edit, Check } from '@element-plus/icons-vue'
+import { FullScreen, Edit, Check, Picture, VideoCamera, Microphone, Folder, Document } from '@element-plus/icons-vue'
 import { getDocument, updateDocument } from '@/api/im/document'
 
 const props = defineProps({
@@ -117,14 +117,14 @@ const editForm = ref({
 
 const fileIcon = computed(() => {
   const icons = {
-    'TEXT': 'description',
-    'FILE': 'description',
-    'IMAGE': 'image',
-    'VIDEO': 'video_library',
-    'VOICE': 'mic',
-    'FOLDER': 'folder'
+    'TEXT': Document,
+    'FILE': Document,
+    'IMAGE': Picture,
+    'VIDEO': VideoCamera,
+    'VOICE': Microphone,
+    'FOLDER': Folder
   }
-  return icons[props.document?.documentType] || 'description'
+  return icons[props.document?.documentType] || Document
 })
 
 const iconClass = computed(() => {
@@ -264,7 +264,8 @@ watch(() => props.modelValue, (val) => {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+
+      .el-icon { font-size: 24px; }
 
       &.icon-doc {
         background: var(--dt-brand-bg);
@@ -325,7 +326,7 @@ watch(() => props.modelValue, (val) => {
       text-align: center;
       padding: 60px 20px;
 
-      .material-icons-outlined {
+      .el-icon {
         font-size: 64px;
         color: var(--dt-text-tertiary);
         margin-bottom: 16px;

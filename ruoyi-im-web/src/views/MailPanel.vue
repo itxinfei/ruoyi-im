@@ -5,7 +5,7 @@
         邮箱
       </h2>
       <button class="compose-btn" @click="showComposeDialog = true">
-        <span class="material-icons-outlined">edit</span>
+        <el-icon><Edit /></el-icon>
         写邮件
       </button>
     </div>
@@ -21,7 +21,7 @@
             :class="{ active: activeFolder === folder.key }"
             @click="activeFolder = folder.key"
           >
-            <span class="material-icons-outlined folder-icon">{{ folder.icon }}</span>
+            <el-icon class="folder-icon"><component :is="folder.iconEl" /></el-icon>
             <span class="folder-label">{{ folder.label }}</span>
             <span v-if="folder.count > 0" class="folder-count">{{ folder.count }}</span>
           </div>
@@ -37,7 +37,7 @@
           </div>
 
           <div v-else-if="emails.length === 0" class="empty-state">
-            <span class="material-icons-outlined empty-icon">email</span>
+            <el-icon class="empty-icon"><Message /></el-icon>
             <p class="empty-text">
               暂无邮件
             </p>
@@ -93,7 +93,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, Edit, Box, Promotion, Document, Star, Delete, Message } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ComposeMailDialog from '@/components/ComposeMailDialog/index.vue'
 import MailDetailDialog from '@/components/MailDetailDialog/index.vue'
@@ -109,11 +109,11 @@ const emails = ref([])
 
 
 const folders = ref([
-  { key: 'inbox', label: '收件箱', icon: 'inbox', count: 0 },
-  { key: 'sent', label: '已发送', icon: 'send', count: 0 },
-  { key: 'draft', label: '草稿箱', icon: 'draft', count: 0 },
-  { key: 'starred', label: '星标邮件', icon: 'star', count: 0 },
-  { key: 'trash', label: '已删除', icon: 'delete', count: 0 }
+  { key: 'inbox', label: '收件箱', icon: 'Box', iconEl: Box, count: 0 },
+  { key: 'sent', label: '已发送', icon: 'Promotion', iconEl: Promotion, count: 0 },
+  { key: 'draft', label: '草稿箱', icon: 'Document', iconEl: Document, count: 0 },
+  { key: 'starred', label: '星标邮件', icon: 'Star', iconEl: Star, count: 0 },
+  { key: 'trash', label: '已删除', icon: 'Delete', iconEl: Delete, count: 0 }
 ])
 
 // 监听文件夹切换

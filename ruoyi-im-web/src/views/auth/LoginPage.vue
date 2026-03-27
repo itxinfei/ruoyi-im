@@ -16,7 +16,7 @@
         <div class="decoration-content">
           <div class="logo-wrapper">
             <div class="logo">
-              <span class="material-icons-outlined logo-icon">forum</span>
+              <el-icon class="logo-icon"><ChatDotRound /></el-icon>
             </div>
             <h1 class="app-name">
               IM
@@ -27,19 +27,19 @@
           </div>
           <div class="features">
             <div class="feature-item">
-              <span class="material-icons-outlined">chat_bubble_outline</span>
+              <el-icon><ChatLineRound /></el-icon>
               <span>即时通讯</span>
             </div>
             <div class="feature-item">
-              <span class="material-icons-outlined">diversity_3</span>
+              <el-icon><UserFilled /></el-icon>
               <span>群组协作</span>
             </div>
             <div class="feature-item">
-              <span class="material-icons-outlined">cloud_sync</span>
+              <el-icon><Cloudy /></el-icon>
               <span>云端同步</span>
             </div>
             <div class="feature-item">
-              <span class="material-icons-outlined">verified_user</span>
+              <el-icon><CircleCheck /></el-icon>
               <span>安全可靠</span>
             </div>
           </div>
@@ -53,7 +53,7 @@
       <div class="login-form-section">
         <!-- Logo移动端显示 -->
         <div class="mobile-logo">
-          <span class="material-icons-outlined">forum</span>
+          <el-icon><ChatDotRound /></el-icon>
           <span>IM</span>
         </div>
 
@@ -72,7 +72,7 @@
             :class="['tab-btn', { active: loginType === 'password' }]"
             @click="switchLoginType('password')"
           >
-            <span class="material-icons-outlined">lock</span>
+            <el-icon><Lock /></el-icon>
             账号密码
           </button>
           <button
@@ -80,7 +80,7 @@
             disabled
             title="暂未开放"
           >
-            <span class="material-icons-outlined">sms</span>
+            <el-icon><Message /></el-icon>
             短信验证
             <span class="coming-soon">（暂未开放）</span>
           </button>
@@ -98,7 +98,7 @@
           >
             <el-form-item prop="username">
               <div class="input-wrapper">
-                <span class="material-icons-outlined input-icon">person</span>
+                <el-icon class="input-icon"><User /></el-icon>
                 <el-input
                   v-model="loginForm.username"
                   placeholder="请输入用户名或手机号"
@@ -110,7 +110,7 @@
 
             <el-form-item prop="password">
               <div class="input-wrapper">
-                <span class="material-icons-outlined input-icon">lock</span>
+                <el-icon class="input-icon"><Lock /></el-icon>
                 <el-input
                   v-model="loginForm.password"
                   type="password"
@@ -143,7 +143,7 @@
           >
             <el-form-item prop="phone">
               <div class="input-wrapper">
-                <span class="material-icons-outlined input-icon">smartphone</span>
+                <el-icon class="input-icon"><Iphone /></el-icon>
                 <el-input
                   v-model="smsForm.phone"
                   placeholder="请输入手机号"
@@ -155,7 +155,7 @@
 
             <el-form-item prop="code">
               <div class="input-wrapper code-input-wrapper">
-                <span class="material-icons-outlined input-icon">verified</span>
+                <el-icon class="input-icon"><CircleCheck /></el-icon>
                 <el-input
                   v-model="smsForm.code"
                   placeholder="请输入验证码"
@@ -205,8 +205,8 @@
       :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
       @click="toggleTheme"
     >
-      <span class="material-icons-outlined sun-icon" :class="{ hidden: isDark }">light_mode</span>
-      <span class="material-icons-outlined moon-icon" :class="{ hidden: !isDark }">dark_mode</span>
+      <el-icon class="sun-icon" :class="{ hidden: isDark }"><Sunny /></el-icon>
+      <el-icon class="moon-icon" :class="{ hidden: !isDark }"><Moon /></el-icon>
     </button>
   </div>
 </template>
@@ -216,6 +216,7 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { ChatDotRound, ChatLineRound, User, UserFilled, Cloudy, CircleCheck, Lock, Message, Sunny, Moon, List, Grid, Folder, Upload, Star, MoreFilled, Close, Iphone } from '@element-plus/icons-vue'
 import { useTheme } from '@/composables/useTheme'
 
 const store = useStore()

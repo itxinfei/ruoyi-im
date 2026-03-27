@@ -12,7 +12,7 @@
             shape="square"
           />
           <div class="avatar-mask">
-            <span class="material-icons-outlined">photo_camera</span>
+            <el-icon><Camera /></el-icon>
           </div>
         </div>
         <div class="user-basic">
@@ -112,7 +112,7 @@
         <div class="info-card">
           <div class="info-row clickable" @click="showPasswordDialog = true">
             <span class="label">修改登录密码</span>
-            <span class="material-icons-outlined arrow">lock_reset</span>
+            <el-icon class="arrow"><Refresh /></el-icon>
           </div>
         </div>
       </div>
@@ -153,6 +153,7 @@ import { ref, onMounted } from 'vue'
 import { getUserInfo, updateUser, uploadAvatar, changePassword } from '@/api/im/user'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
+import { Camera, Refresh } from '@element-plus/icons-vue'
 
 const userInfo = ref({ id: '', username: '', nickname: '', avatar: '', gender: 0, position: '', department: '', email: '', phone: '' })
 const showPasswordDialog = ref(false)

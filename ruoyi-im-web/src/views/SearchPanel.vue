@@ -3,7 +3,7 @@
     <!-- 搜索头部 -->
     <div class="search-header">
       <div class="search-input-wrapper">
-        <span class="material-icons-outlined search-icon">search</span>
+        <el-icon class="search-icon"><Search /></el-icon>
         <input
           v-model="keyword"
           type="text"
@@ -12,7 +12,7 @@
           autofocus
           @keyup.enter="handleSearch"
         >
-        <span v-if="keyword" class="material-icons-outlined clear-icon" @click="clearSearch">close</span>
+        <el-icon v-if="keyword" class="clear-icon" @click="clearSearch"><Close /></el-icon>
       </div>
       <div class="search-scope">
         <div class="scope-tabs">
@@ -63,7 +63,7 @@
               class="history-item"
               @click="searchWithKeyword(item)"
             >
-              <span class="material-icons-outlined history-icon">history</span>
+              <el-icon class="history-icon"><Clock /></el-icon>
               <span class="history-text">{{ item }}</span>
             </div>
           </div>
@@ -95,7 +95,7 @@
           <!-- 消息结果 -->
           <div v-if="results.messages?.length" class="result-section">
             <div class="section-title">
-              <span class="material-icons-outlined">chat</span>
+              <el-icon><ChatDotRound /></el-icon>
               消息
               <span class="count">({{ results.messages.length }})</span>
             </div>
@@ -132,7 +132,7 @@
           <!-- 联系人结果 -->
           <div v-if="results.contacts?.length" class="result-section">
             <div class="section-title">
-              <span class="material-icons-outlined">person</span>
+              <el-icon><User /></el-icon>
               联系人
               <span class="count">({{ results.contacts.length }})</span>
             </div>
@@ -159,7 +159,7 @@
           <!-- 群组结果 -->
           <div v-if="results.groups?.length" class="result-section">
             <div class="section-title">
-              <span class="material-icons-outlined">group</span>
+              <el-icon><ChatDotRound /></el-icon>
               群组
               <span class="count">({{ results.groups.length }})</span>
             </div>
@@ -171,7 +171,7 @@
                 @click="goToGroup(group)"
               >
                 <div class="group-avatar">
-                  <span class="material-icons-outlined">group</span>
+                  <el-icon><ChatDotRound /></el-icon>
                 </div>
                 <div class="item-content">
                   <div class="item-title">
@@ -188,7 +188,7 @@
           <!-- 文件结果 -->
           <div v-if="results.files?.length" class="result-section">
             <div class="section-title">
-              <span class="material-icons-outlined">insert_drive_file</span>
+              <el-icon><Document /></el-icon>
               文件
               <span class="count">({{ results.files.length }})</span>
             </div>
@@ -200,7 +200,7 @@
                 @click="downloadFile(file)"
               >
                 <div class="file-icon">
-                  <span class="material-icons-outlined">description</span>
+                  <el-icon><Document /></el-icon>
                 </div>
                 <div class="item-content">
                   <div class="item-title">
@@ -216,7 +216,7 @@
 
           <!-- 空结果 -->
           <div v-if="isEmptyResults" class="empty-results">
-            <span class="material-icons-outlined">search_off</span>
+            <el-icon><Search /></el-icon>
             <p>未找到相关结果</p>
           </div>
         </template>
@@ -257,7 +257,7 @@
               </template>
               <template v-else-if="searchType === 'group'">
                 <div class="group-avatar">
-                  <span class="material-icons-outlined">group</span>
+                  <el-icon><ChatDotRound /></el-icon>
                 </div>
                 <div class="item-content">
                   <div class="item-title">
@@ -270,7 +270,7 @@
               </template>
               <template v-else-if="searchType === 'file'">
                 <div class="file-icon">
-                  <span class="material-icons-outlined">description</span>
+                  <el-icon><Document /></el-icon>
                 </div>
                 <div class="item-content">
                   <div class="item-title">
@@ -284,7 +284,7 @@
             </div>
           </div>
           <div v-else class="empty-results">
-            <span class="material-icons-outlined">search_off</span>
+            <el-icon><Search /></el-icon>
             <p>未找到相关结果</p>
           </div>
         </template>
@@ -298,6 +298,7 @@ import { ref, computed, onMounted } from 'vue'
 import { globalSearch, getHotKeywords } from '@/api/im/search'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
+import { Search, Close, Clock, ChatDotRound, User, Document } from '@element-plus/icons-vue'
 
 const emit = defineEmits(['show-user', 'go-to-session', 'go-to-group'])
 
@@ -761,7 +762,7 @@ loadHotKeywords()
     color: var(--dt-text-primary);
     margin-bottom: var(--dt-spacing-sm, 12px);
 
-    .material-icons-outlined {
+    .el-icon {
       font-size: var(--dt-icon-size-lg, 18px);
       color: var(--dt-brand-color);
     }
@@ -826,7 +827,7 @@ loadHotKeywords()
       align-items: center;
       justify-content: center;
 
-      .material-icons-outlined {
+      .el-icon {
         color: var(--dt-brand-color);
       }
     }
@@ -849,7 +850,7 @@ loadHotKeywords()
   padding: var(--dt-spacing-2xl, 60px) 0;
   color: var(--dt-text-tertiary);
 
-  .material-icons-outlined {
+  .el-icon {
     font-size: var(--dt-icon-size-xl, 48px);
     opacity: 0.5;
   }

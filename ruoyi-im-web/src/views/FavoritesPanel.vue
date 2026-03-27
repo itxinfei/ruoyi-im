@@ -35,7 +35,7 @@
       </div>
 
       <div v-else-if="filteredFavorites.length === 0" class="empty-state">
-        <span class="material-icons-outlined empty-icon">star_outline</span>
+        <el-icon class="empty-icon"><Star /></el-icon>
         <p class="empty-text">
           {{ searchKeyword ? '没有找到匹配的收藏' : '暂无收藏消息' }}
         </p>
@@ -52,7 +52,7 @@
           @click="handleJumpToMessage(item)"
         >
           <div class="favorite-icon" :class="getTypeClass(item.messageType)">
-            <span class="material-icons-outlined">{{ getTypeIcon(item.messageType) }}</span>
+            <el-icon>{{ getTypeIconEl(item.messageType) }}</el-icon>
           </div>
           <div class="favorite-content">
             <div class="favorite-title">
@@ -67,12 +67,12 @@
           <div class="favorite-actions">
             <el-tooltip content="取消收藏">
               <button class="action-btn" @click.stop="handleRemoveFavorite(item)">
-                <span class="material-icons-outlined">star</span>
+                <el-icon><Star /></el-icon>
               </button>
             </el-tooltip>
             <el-dropdown trigger="click" @command="(cmd) => handleCommand(cmd, item)">
               <button class="action-btn">
-                <span class="material-icons-outlined">more_horiz</span>
+                <el-icon><MoreFilled /></el-icon>
               </button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -101,7 +101,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, Star, ChatDotRound, Picture, Document, Microphone, VideoCamera, Link, MoreFilled } from '@element-plus/icons-vue'
 import { getUserFavorites, removeMessageFavorite } from '@/api/im/message'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 
@@ -146,14 +146,27 @@ const filteredFavorites = computed(() => {
 
 const getTypeIcon = (type) => {
   const icons = {
-    'TEXT': 'chat_bubble',
-    'IMAGE': 'image',
-    'FILE': 'description',
-    'VOICE': 'mic',
-    'VIDEO': 'videocam',
-    'LINK': 'link'
+    'TEXT': 'ChatDotRound',
+    'IMAGE': 'Picture',
+    'FILE': 'Document',
+    'VOICE': 'Microphone',
+    'VIDEO': 'VideoCamera',
+    'LINK': 'Link'
   }
-  return icons[type] || 'chat_bubble'
+  return icons[type] || 'ChatDotRound'
+}
+
+// Element Plus 图标组件
+const getTypeIconEl = (type) => {
+  const icons = {
+    'TEXT': ChatDotRound,
+    'IMAGE': Picture,
+    'FILE': Document,
+    'VOICE': Microphone,
+    'VIDEO': VideoCamera,
+    'LINK': Link
+  }
+  return icons[type] || ChatDotRound
 }
 
 const getTypeClass = (type) => {
@@ -416,7 +429,7 @@ onMounted(() => {
   justify-content: center;
   flex-shrink: 0;
 
-  .material-icons-outlined {
+  .el-icon {
     font-size: var(--dt-icon-size-lg, 22px);
   }
 
@@ -504,7 +517,7 @@ onMounted(() => {
   cursor: pointer;
   transition: all var(--dt-transition-fast);
 
-  .material-icons-outlined {
+  .el-icon {
     font-size: var(--dt-icon-size-md, 18px);
   }
 

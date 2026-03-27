@@ -6,14 +6,14 @@
       :style="{ paddingLeft: level * 16 + 'px' }"
       @click="handleClick"
     >
-      <span v-if="node.children && node.children.length" class="material-icons-outlined expand-icon" :class="{ rotated: isExpanded }">
-        chevron_right
-      </span>
+      <el-icon v-if="node.children && node.children.length" class="expand-icon" :class="{ rotated: isExpanded }">
+        <ArrowRight />
+      </el-icon>
       <span v-else class="expand-placeholder" />
 
-      <span class="material-icons-outlined type-icon" :class="node.type">
-        {{ node.type === 'COMPANY' ? 'corporate_fare' : (isExpanded ? 'folder_open' : 'folder') }}
-      </span>
+      <el-icon class="type-icon" :class="node.type">
+        <component :is="getNodeIcon(node.type, isExpanded)" />
+      </el-icon>
 
       <span class="node-name">{{ node.name }}</span>
       <span v-if="node.memberCount" class="node-count">{{ node.memberCount }}</span>
@@ -35,6 +35,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { ArrowRight, OfficeBuilding, FolderOpened, Folder } from '@element-plus/icons-vue'
 
 const props = defineProps({
   node: Object,
@@ -44,6 +45,11 @@ const props = defineProps({
 
 const emit = defineEmits(['select'])
 const isExpanded = ref(props.level === 0) // 默认展开第一级
+
+const getNodeIcon = (type, expanded) => {
+  if (type === 'COMPANY') return OfficeBuilding
+  return expanded ? FolderOpened : Folder
+}
 
 const handleClick = () => {
   if (props.node.children?.length) {

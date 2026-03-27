@@ -18,7 +18,7 @@
             :class="{ active: activeFilter === tab.key }"
             @click="activeFilter = tab.key"
           >
-            <span class="material-icons-outlined nav-icon">{{ tab.icon }}</span>
+            <el-icon class="nav-icon"><component :is="tab.iconEl" /></el-icon>
             <span class="nav-label">{{ tab.label }}</span>
             <div v-if="getCount(tab.key) > 0" class="nav-badge">
               {{ getCount(tab.key) }}
@@ -36,7 +36,7 @@
             :class="{ active: activeFilter === cat.key }"
             @click="activeFilter = cat.key"
           >
-            <span class="material-icons-outlined nav-icon">{{ cat.icon }}</span>
+            <el-icon class="nav-icon"><component :is="cat.iconEl" /></el-icon>
             <span class="nav-label">{{ cat.label }}</span>
             <div v-if="getCategoryCount(cat.key) > 0" class="nav-badge cat">
               {{ getCategoryCount(cat.key) }}
@@ -46,7 +46,7 @@
       </div>
       <div class="sidebar-footer">
         <button class="add-todo-btn" @click="showAddDialog = true">
-          <span class="material-icons-outlined">add</span>
+          <el-icon><Plus /></el-icon>
           <span>新建待办</span>
         </button>
       </div>
@@ -62,7 +62,7 @@
         </div>
         <div class="header-right">
           <div class="search-box">
-            <span class="material-icons-outlined search-icon">search</span>
+            <el-icon class="search-icon"><Search /></el-icon>
             <input
               v-model="searchQuery"
               class="search-input"
@@ -81,7 +81,7 @@
         </div>
 
         <div v-else-if="filteredTodos.length === 0" class="empty-state">
-          <span class="material-icons-outlined">task_alt</span>
+          <el-icon><CircleCheck /></el-icon>
           <p>{{ searchQuery ? '未找到匹配的任务' : '暂无待办任务' }}</p>
         </div>
 
@@ -95,7 +95,7 @@
           >
             <div class="todo-checkbox" @click.stop="handleToggle(todo)">
               <div class="checkbox-inner" :class="{ checked: todo.status === 'COMPLETED' }">
-                <span v-if="todo.status === 'COMPLETED'" class="material-icons-outlined">check</span>
+                <el-icon v-if="todo.status === 'COMPLETED'"><Check /></el-icon>
               </div>
             </div>
             <div class="todo-main-info">
@@ -108,21 +108,21 @@
               </div>
               <div class="todo-meta-row">
                 <span class="meta-date" :class="{ overdue: isOverdue(todo.dueDate) }">
-                  <span class="material-icons-outlined">event</span>
+                  <el-icon><Calendar /></el-icon>
                   {{ formatDate(todo.dueDate) }}
                 </span>
                 <span v-if="todo.remindTime" class="meta-remind">
-                  <span class="material-icons-outlined">notifications</span>
+                  <el-icon><Bell /></el-icon>
                   {{ formatDateTime(todo.remindTime) }}
                 </span>
               </div>
             </div>
             <div class="todo-actions">
               <button class="action-icon" @click.stop="handleEdit(todo)">
-                <span class="material-icons-outlined">edit</span>
+                <el-icon><Edit /></el-icon>
               </button>
               <button class="action-icon danger" @click.stop="handleDelete(todo)">
-                <span class="material-icons-outlined">delete</span>
+                <el-icon><Delete /></el-icon>
               </button>
             </div>
           </div>
@@ -136,7 +136,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, List, Clock, Check, Calendar, Bell, Edit, Delete, CircleCheck, MoreFilled, ArrowUp, WarnTriangleFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMyTasks, updateTaskStatus, deleteTask, getTaskStatistics } from '@/api/im/task'
 import CreateTodoDialog from '@/components/CreateTodoDialog/index.vue'
@@ -150,18 +150,18 @@ const editingTodo = ref(null)
 
 // 状态筛选标签
 const statusTabs = [
-  { key: 'all', label: '全部待办', icon: 'list' },
-  { key: 'pending', label: '进行中', icon: 'schedule' },
-  { key: 'high', label: '紧急任务', icon: 'priority_high' },
-  { key: 'completed', label: '已完成', icon: 'check_circle' }
+  { key: 'all', label: '全部待办', icon: 'List', iconEl: List },
+  { key: 'pending', label: '进行中', icon: 'Clock', iconEl: Clock },
+  { key: 'high', label: '紧急任务', icon: 'ArrowUp', iconEl: ArrowUp },
+  { key: 'completed', label: '已完成', icon: 'CircleCheck', iconEl: CircleCheck }
 ]
 
 // 分类筛选标签
 const categoryTabs = [
-  { key: 'WORK', label: '工作', icon: 'work' },
-  { key: 'PERSONAL', label: '个人', icon: 'person' },
-  { key: 'STUDY', label: '学习', icon: 'school' },
-  { key: 'OTHER', label: '其他', icon: 'more_horiz' }
+  { key: 'WORK', label: '工作', icon: 'Box', iconEl: 'Box' },
+  { key: 'PERSONAL', label: '个人', icon: 'User', iconEl: 'User' },
+  { key: 'STUDY', label: '学习', icon: 'Reading', iconEl: 'Reading' },
+  { key: 'OTHER', label: '其他', icon: 'MoreFilled', iconEl: MoreFilled }
 ]
 
 const currentTabLabel = computed(() => {
@@ -308,7 +308,7 @@ onMounted(() => loadTodos())
   &.completed { opacity: 0.6; .title-text { text-decoration: line-through; } }
 }
 .todo-checkbox { flex-shrink: 0; .checkbox-inner { width: var(--dt-checkbox-size, 20px); height: var(--dt-checkbox-size, 20px); border: 2px solid var(--dt-border-color); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center;
-  &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-white); .material-icons-outlined { font-size: var(--dt-font-size-xs); } } }
+  &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-white); .el-icon { font-size: var(--dt-font-size-xs); } } }
 }
 .todo-main-info { flex: 1; min-width: 0;
   .todo-title-row { display: flex; align-items: center; gap: var(--dt-spacing-xs, 8px); flex-wrap: wrap; .title-text { font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); color: var(--dt-text-primary); }
@@ -323,9 +323,9 @@ onMounted(() => loadTodos())
     }
   }
   .todo-meta-row { margin-top: var(--dt-spacing-xs, 6px); display: flex; align-items: center; gap: var(--dt-spacing-md, 12px);
-    .meta-date, .meta-remind { display: flex; align-items: center; gap: var(--dt-spacing-xs, 4px); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); .material-icons-outlined { font-size: var(--dt-icon-size-sm, 14px); } &.overdue { color: var(--dt-error-color); } }
+    .meta-date, .meta-remind { display: flex; align-items: center; gap: var(--dt-spacing-xs, 4px); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-sm, 14px); } &.overdue { color: var(--dt-error-color); } }
   }
 }
 .todo-actions { opacity: 0; display: flex; gap: var(--dt-spacing-xs, 4px); transition: all var(--dt-transition-fast); .action-icon { border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); padding: 4px; &:hover { color: var(--dt-brand-color); } &.danger:hover { color: var(--dt-error-color); } } }
-.empty-state, .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--dt-spacing-3xl, 100px) 0; color: var(--dt-text-tertiary); .material-icons-outlined { font-size: var(--dt-icon-size-xl, 48px); margin-bottom: var(--dt-spacing-md, 12px); opacity: 0.3; } }
+.empty-state, .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--dt-spacing-3xl, 100px) 0; color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-xl, 48px); margin-bottom: var(--dt-spacing-md, 12px); opacity: 0.3; } }
 </style>

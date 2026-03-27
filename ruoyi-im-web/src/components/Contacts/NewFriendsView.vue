@@ -2,7 +2,7 @@
   <div class="new-friends-view">
     <header class="view-header">
       <button class="back-btn" @click="$emit('back')">
-        <span class="material-icons-outlined">arrow_back</span>
+        <el-icon><ArrowLeft /></el-icon>
       </button>
       <h1 class="view-title">
         新的朋友
@@ -18,7 +18,7 @@
       </div>
 
       <div v-else-if="requests.length === 0" class="empty-state">
-        <span class="material-icons-outlined empty-icon">person_add</span>
+        <el-icon class="empty-icon"><Plus /></el-icon>
         <p class="empty-text">
           暂无新的好友申请
         </p>
@@ -63,7 +63,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, ArrowLeft, Plus } from '@element-plus/icons-vue'
 import { getFriendRequests, handleFriendRequest } from '@/api/im/contact'
 import { ElMessage } from 'element-plus'
 import { addTokenToUrl } from '@/utils/file'

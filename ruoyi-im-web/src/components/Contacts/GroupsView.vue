@@ -2,7 +2,7 @@
   <div class="groups-view">
     <header class="view-header">
       <button class="back-btn" @click="$emit('back')">
-        <span class="material-icons-outlined">arrow_back</span>
+        <el-icon><ArrowLeft /></el-icon>
       </button>
       <h1 class="view-title">
         我的群组
@@ -18,7 +18,7 @@
       </div>
 
       <div v-else-if="groups.length === 0" class="empty-state">
-        <span class="material-icons-outlined empty-icon">groups</span>
+        <el-icon class="empty-icon"><UserFilled /></el-icon>
         <p class="empty-text">
           暂无群组
         </p>
@@ -49,7 +49,7 @@
             </div>
           </div>
           <div class="group-action">
-            <span class="material-icons-outlined">chevron_right</span>
+            <el-icon><ArrowRight /></el-icon>
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, ArrowLeft, UserFilled, ArrowRight } from '@element-plus/icons-vue'
 import { getGroups } from '@/api/im/group'
 
 const emit = defineEmits(['back', 'select-group'])

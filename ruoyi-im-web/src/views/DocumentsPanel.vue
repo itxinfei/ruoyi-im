@@ -17,7 +17,7 @@
             :class="{ active: activeNav === nav.id }"
             @click="activeNav = nav.id"
           >
-            <span class="material-icons-outlined nav-icon">{{ nav.icon }}</span>
+            <el-icon class="nav-icon"><component :is="getNavIcon(nav.icon)" /></el-icon>
             <span class="nav-label">{{ nav.label }}</span>
           </div>
         </div>
@@ -33,7 +33,7 @@
             :class="{ active: activeNav === nav.id }"
             @click="activeNav = nav.id"
           >
-            <span class="material-icons-outlined nav-icon">{{ nav.icon }}</span>
+            <el-icon class="nav-icon"><component :is="getNavIcon(nav.icon)" /></el-icon>
             <span class="nav-label">{{ nav.label }}</span>
           </div>
         </div>
@@ -63,7 +63,7 @@
           </h2>
           <div class="header-divider" />
           <div class="search-box">
-            <span class="material-icons-outlined search-icon">search</span>
+            <el-icon class="search-icon"><Search /></el-icon>
             <input
               v-model="searchQuery"
               class="search-input"
@@ -75,23 +75,23 @@
         <div class="header-right">
           <div class="view-toggle">
             <button class="toggle-btn" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">
-              <span class="material-icons-outlined">list</span>
+              <el-icon><List /></el-icon>
             </button>
             <button class="toggle-btn" :class="{ active: viewMode === 'grid' }" @click="viewMode = 'grid'">
-              <span class="material-icons-outlined">grid_view</span>
+              <el-icon><Grid /></el-icon>
             </button>
           </div>
           <el-dropdown trigger="click" @command="handleNewCommand">
             <button class="new-btn">
-              <span class="material-icons-outlined">add</span>新建
+              <el-icon><Plus /></el-icon>新建
             </button>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="folder">
-                  <span class="material-icons-outlined">folder</span> 新建文件夹
+                  <el-icon><Folder /></el-icon> 新建文件夹
                 </el-dropdown-item>
                 <el-dropdown-item command="upload">
-                  <span class="material-icons-outlined">upload</span> 上传文件
+                  <el-icon><Upload /></el-icon> 上传文件
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -102,7 +102,7 @@
       <div class="docs-content">
         <!-- 空状态 -->
         <div v-if="!loading && files.length === 0" class="empty-state">
-          <span class="material-icons-outlined empty-icon">folder_open</span>
+          <el-icon class="empty-icon"><FolderOpened /></el-icon>
           <p class="empty-text">
             {{ searchQuery ? '没有找到匹配的文档' : '暂无文档' }}
           </p>
@@ -139,13 +139,13 @@
                 <td class="name-col">
                   <div class="file-info">
                     <div class="file-icon" :class="file.iconClass">
-                      <span class="material-icons-outlined">{{ file.icon }}</span>
+                      <el-icon>{{ getFileIconEl(file.icon) }}</el-icon>
                     </div>
                     <div class="file-text">
                       <div class="file-name">
                         {{ file.name }}
                         <span v-if="file.isStarred" class="star-icon">
-                          <span class="material-icons-outlined">star</span>
+                          <el-icon><Star /></el-icon>
                         </span>
                       </div>
                       <div class="file-meta">
@@ -158,7 +158,7 @@
                 <td><span class="file-time">{{ file.modifiedTime }}</span></td>
                 <td class="actions-col">
                   <button class="action-btn" @click.stop="handleFileMenu(file)">
-                    <span class="material-icons-outlined">more_horiz</span>
+                    <el-icon><MoreFilled /></el-icon>
                   </button>
                 </td>
               </tr>
@@ -189,6 +189,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDocuments, searchDocuments } from '@/api/im/document'
 import { formatFileSize, formatTime } from '@/utils/format'
 import DocumentEditorDialog from '@/components/Documents/DocumentEditorDialog.vue'
+import { Folder, UserFilled, Clock, Delete, Search, List, Grid, Plus, FolderOpened, Star, MoreFilled, Document, Picture, VideoCamera, Microphone } from '@element-plus/icons-vue'
 
 const activeNav = ref('recent')
 const viewMode = ref('list')
@@ -199,10 +200,10 @@ const selectedFile = ref(null)
 const showEditor = ref(false)
 
 const mainNavItems = ref([
-  { id: 'my', label: '我的文件', icon: 'folder' },
-  { id: 'shared', label: '共享文件', icon: 'people' },
-  { id: 'recent', label: '最近访问', icon: 'schedule' },
-  { id: 'trash', label: '回收站', icon: 'delete_outline' }
+  { id: 'my', label: '我的文件', icon: 'Folder' },
+  { id: 'shared', label: '共享文件', icon: 'UserFilled' },
+  { id: 'recent', label: '最近访问', icon: 'Clock' },
+  { id: 'trash', label: '回收站', icon: 'Delete' }
 ])
 const storageNavItems = ref([])
 
@@ -281,14 +282,37 @@ const handleSearch = async () => {
 // 获取文件图标
 const getFileIcon = (type) => {
   const icons = {
-    'TEXT': 'description',
-    'FILE': 'description',
-    'IMAGE': 'image',
-    'VIDEO': 'video_library',
-    'VOICE': 'mic',
-    'FOLDER': 'folder'
+    'TEXT': 'Document',
+    'FILE': 'Document',
+    'IMAGE': 'Picture',
+    'VIDEO': 'VideoCamera',
+    'VOICE': 'Microphone',
+    'FOLDER': 'Folder'
   }
-  return icons[type] || 'description'
+  return icons[type] || 'Document'
+}
+
+// Element Plus 图标名（用于模板动态组件）
+const getNavIcon = (icon) => {
+  const map = {
+    'folder': 'Folder',
+    'people': 'UserFilled',
+    'schedule': 'Clock',
+    'delete_outline': 'Delete'
+  }
+  return map[icon] || 'Folder'
+}
+
+// 文件图标 Element Plus 组件名
+const getFileIconEl = (icon) => {
+  const map = {
+    'Document': Document,
+    'Picture': Picture,
+    'VideoCamera': VideoCamera,
+    'Microphone': Microphone,
+    'Folder': Folder
+  }
+  return map[icon] || Document
 }
 
 // 获取图标样式
@@ -474,6 +498,7 @@ onMounted(() => {
   .file-row { cursor: pointer; &:hover { background: var(--dt-bg-body); .action-btn { opacity: 1; } } }
   .file-info { display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px);
     .file-icon { width: var(--dt-avatar-size-md, 36px); height: var(--dt-avatar-size-md, 36px); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--dt-icon-size-lg, 18px);
+      .el-icon { font-size: var(--dt-icon-size-lg, 18px); }
       &.icon-folder { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
       &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
       &.icon-sheet { background: var(--dt-success-bg); color: var(--dt-success-color); }

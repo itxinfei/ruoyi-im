@@ -5,7 +5,7 @@
         审批流程
       </h2>
       <button class="add-btn" @click="showCreateDialog = true">
-        <span class="material-icons-outlined">add</span>
+        <el-icon><Plus /></el-icon>
         发起审批
       </button>
     </div>
@@ -32,7 +32,7 @@
       </div>
 
       <div v-else-if="approvals.length === 0" class="empty-state">
-        <span class="material-icons-outlined empty-icon">assignment</span>
+        <el-icon class="empty-icon"><Document /></el-icon>
         <p class="empty-text">
           暂无审批事项
         </p>
@@ -81,7 +81,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { Loading } from '@element-plus/icons-vue'
+import { Loading, Plus, Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CreateApprovalDialog from '@/components/CreateApprovalDialog/index.vue'
 import ApprovalDetailDialog from '@/components/ApprovalDetailDialog/index.vue'

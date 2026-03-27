@@ -67,9 +67,9 @@
           @click="handleFileClick(file)"
         >
           <div class="file-icon">
-            <span class="material-icons-outlined" :class="getFileIconClass(file.fileType)">
-              {{ getFileIcon(file.fileType) }}
-            </span>
+            <el-icon :class="getFileIconClass(file.fileType)">
+              <component :is="getFileIconEl(file.fileType)" />
+            </el-icon>
           </div>
           <div class="file-info">
             <div class="file-name">
@@ -234,7 +234,7 @@
 <script setup>
 import { ref, watch, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Upload, Download, Search, MoreFilled, UploadFilled } from '@element-plus/icons-vue'
+import { Upload, Download, Search, MoreFilled, UploadFilled, Picture, VideoCamera, Microphone, FolderOpened, Grid, Folder, Document, Cpu } from '@element-plus/icons-vue'
 import {
   getGroupFiles,
   getGroupFileStatistics,
@@ -532,22 +532,40 @@ const handleFileSelect = (e) => {
   }
 }
 
-// 获取文件图标
+// 获取文件图标 Element Plus 组件名
 const getFileIcon = (fileType) => {
   const iconMap = {
-    'image': 'image',
-    'video': 'videocam',
-    'audio': 'audiotrack',
-    'document': 'description',
-    'pdf': 'picture_as_pdf',
-    'excel': 'table_chart',
-    'word': 'article',
-    'ppt': 'slideshow',
-    'zip': 'folder_zip',
-    'code': 'code',
-    'other': 'insert_drive_file'
+    'image': 'Picture',
+    'video': 'VideoCamera',
+    'audio': 'Microphone',
+    'document': 'Document',
+    'pdf': 'FolderOpened',
+    'excel': 'Grid',
+    'word': 'Document',
+    'ppt': 'VideoCamera',
+    'zip': 'Folder',
+    'code': 'Cpu',
+    'other': 'Document'
   }
   return iconMap[fileType?.toLowerCase()] || iconMap.other
+}
+
+// 获取文件图标组件（用于动态 component :is）
+const getFileIconEl = (fileType) => {
+  const iconMap = {
+    'image': Picture,
+    'video': VideoCamera,
+    'audio': Microphone,
+    'document': Document,
+    'pdf': FolderOpened,
+    'excel': Grid,
+    'word': Document,
+    'ppt': VideoCamera,
+    'zip': Folder,
+    'code': Cpu,
+    'other': Document
+  }
+  return iconMap[fileType?.toLowerCase()] || Document
 }
 
 const getFileIconClass = (fileType) => {
@@ -677,19 +695,19 @@ defineExpose({ open })
       border-radius: 8px;
       margin-right: 12px;
 
-      .material-icons-outlined {
+      .el-icon {
         font-size: 24px;
         color: var(--dt-brand-color);
-
-        &.icon-image { color: var(--dt-success-color); }
-        &.icon-video { color: var(--dt-error-color); }
-        &.icon-audio { color: var(--dt-warning-color); }
-        &.icon-doc { color: var(--dt-brand-color); }
-        &.icon-pdf { color: var(--dt-error-color); }
-        &.icon-excel { color: var(--dt-success-color); }
-        &.icon-word { color: var(--dt-brand-color); }
-        &.icon-ppt { color: var(--dt-warning-color); }
       }
+
+      &.icon-image .el-icon { color: var(--dt-success-color); }
+      &.icon-video .el-icon { color: var(--dt-error-color); }
+      &.icon-audio .el-icon { color: var(--dt-warning-color); }
+      &.icon-doc .el-icon { color: var(--dt-brand-color); }
+      &.icon-pdf .el-icon { color: var(--dt-error-color); }
+      &.icon-excel .el-icon { color: var(--dt-success-color); }
+      &.icon-word .el-icon { color: var(--dt-brand-color); }
+      &.icon-ppt .el-icon { color: var(--dt-warning-color); }
     }
 
     .file-info {
