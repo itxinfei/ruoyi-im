@@ -38,6 +38,25 @@
 **YAML 任务池**: 所有任务已标记完成
 - 状态：`llm-tasks.yaml` 中全部 P0/P1/P2/P3 任务已标记 `status: done`
 
+### 死代码清理
+**旧 Chat 架构移除**: 已删除从未被引用的旧消息 UI 堆栈
+- 删除文件：`views/ChatPanel.vue`, `Chat/MessageList.vue`, `Chat/MessageBubble.vue`, `Chat/MessageInput.vue`, `Chat/ChatHeader.vue`
+- 影响：共删除 3408 行无用代码
+- 活跃组件未受影响：`im/ChatWindow`, `im/ChatMessageBubble`, `ChatDetailDrawer`, `VoiceMessageBubble`
+
+### P2 Design Token 完善
+**日历事件分类色**: 添加 `--dt-event-work/meeting/personal/reminder` 等 token
+- 修复文件：`CalendarPanel.vue`
+- 改动：替换所有事件类型 #hex 颜色为 CSS 变量，新增渐变 token
+
+**待办分类色**: 添加 `--dt-todo-work/personal/study/other` token
+- 修复文件：`TodoPanel.vue`
+- 改动：替换分类标签硬编码颜色
+
+**通讯录分类色**: 添加 `--dt-contacts-purple/cyan` token
+- 修复文件：`ContactsPanel.vue`
+- 改动：替换紫色/青色图标硬编码颜色
+
 ## 代码检查修复记录 (2026-03-21)
 
 ### P0 优先级 (已修复)
@@ -97,12 +116,15 @@
 - ApprovalPanel.vue - 按钮颜色/计数badge
 - ContactsPanel.vue - 侧边栏背景/图标颜色
 - admin/Dashboard.vue - 卡片边框/指标颜色/图表颜色
+- CalendarPanel.vue - 日历事件分类色 (2026-03-27)
+- TodoPanel.vue - 待办分类标签色 (2026-03-27)
 
-### P2 优先级 (剩余待修复)
-以下文件仍存在少量硬编码色值 (第三方品牌色/渐变)，待后续修复：
-- AdminLayout.vue, AssistantPanel.vue, CalendarPanel.vue
-- DocumentsPanel.vue, MailPanel.vue, ProfilePanel.vue
-- SearchPanel.vue, SettingsPanel.vue, TodoPanel.vue
+### P3 优先级 (剩余待修复)
+以下文件存在少量第三方品牌色/渐变 (低优先级，视情况修复)：
+- AdminLayout.vue, AssistantPanel.vue, DocumentsPanel.vue
+- MailPanel.vue, ProfilePanel.vue, SearchPanel.vue
+- SettingsPanel.vue
+- LoginPage.vue 登录页渐变背景 (品牌视觉，保留)
 
 ### 设计规范验证
 - [x] 气泡圆角统一为 12px (`var(--dt-radius-lg)`)
