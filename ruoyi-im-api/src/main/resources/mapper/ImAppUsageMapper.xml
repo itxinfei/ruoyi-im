@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImAppUsageMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImAppUsage" id="ImAppUsageResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="appId" column="app_id"/>
+        <result property="usageTime" column="usage_time"/>
+    </resultMap>
+
+    <insert id="insertImAppUsage" parameterType="com.ruoyi.im.domain.ImAppUsage" useGeneratedKeys="true" keyProperty="id">
+        insert into im_app_usage (user_id, app_id, usage_time)
+        values (#{userId}, #{appId}, #{usageTime})
+    </insert>
+
+    <select id="selectRecentAppIdsByUserId" resultType="Long">
+        select app_id from im_app_usage
+        where user_id = #{userId}
+        order by usage_time desc
+        limit #{limit}
+    </select>
+
+    <delete id="deleteByUserIdAndAppId">
+        delete from im_app_usage
+        where user_id = #{userId} and app_id = #{appId}
+    </delete>
+
+    <delete id="deleteOldRecordsByUserId">
+        delete from im_app_usage
+        where user_id = #{userId}
+        and id not in (
+            select id from (
+                select id from im_app_usage
+                where user_id = #{userId}
+                order by usage_time desc
+                limit #{keepCount}
+            ) as tmp
+        )
+    </delete>
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImUserLayoutMapper">
+
+    <resultMap type="com.ruoyi.im.domain.ImUserLayout" id="ImUserLayoutResult">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="layoutType" column="layout_type"/>
+        <result property="layoutConfig" column="layout_config"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectByUserIdAndType" resultMap="ImUserLayoutResult">
+        select id, user_id, layout_type, layout_config, create_time, update_time
+        from im_user_layout
+        where user_id = #{userId} and layout_type = #{layoutType}
+    </select>
+
+    <insert id="insertOrUpdate" parameterType="com.ruoyi.im.domain.ImUserLayout">
+        insert into im_user_layout (user_id, layout_type, layout_config, create_time, update_time)
+        values (#{userId}, #{layoutType}, #{layoutConfig}, NOW(), NOW())
+        on duplicate key update
+            layout_config = #{layoutConfig},
+            update_time = NOW()
+    </insert>
+
+    <delete id="deleteByUserIdAndType">
+        delete from im_user_layout
+        where user_id = #{userId} and layout_type = #{layoutType}
+    </delete>
+</mapper>
