@@ -52,9 +52,17 @@
             <h3 class="wb-section__title">
               常用应用
             </h3>
-            <el-button link type="primary">
-              管理
-            </el-button>
+            <el-dropdown trigger="click" @command="handleLayoutCommand">
+              <el-button link type="primary">
+                管理
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="save">保存当前布局</el-dropdown-item>
+                  <el-dropdown-item command="reset">重置布局</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
           <div class="app-grid">
             <div
@@ -292,7 +300,7 @@ import {
   DocumentCopy, Clock, Notebook, Files
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getOverview, getAppsByCategory, getRecentApps, recordAppUsage } from '@/api/im/workbench'
+import { getOverview, getAppsByCategory, getRecentApps, recordAppUsage, getLayoutConfig, saveLayoutConfig, resetLayoutConfig } from '@/api/im/workbench'
 import { getTodayStatus, checkIn as apiCheckIn, checkOut as apiCheckOut, getAttendanceList } from '@/api/im/attendance'
 import { getMyTasks } from '@/api/im/task'
 import { getPendingApprovals } from '@/api/im/approval'
@@ -314,6 +322,7 @@ const scheduleList = ref([])
 const allApps = ref([])
 const recentApps = ref([])
 const appsLoading = ref(false)
+const savedLayout = ref(null) // 保存的布局配置
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const displayName = computed(() => currentUser.value.nickname || currentUser.value.username || '成员')
@@ -426,6 +435,15 @@ const handleMenuChange = (key) => {
   activeMenu.value = key
 }
 
+// 处理布局操作
+const handleLayoutCommand = (command) => {
+  if (command === 'save') {
+    handleSaveLayout()
+  } else if (command === 'reset') {
+    handleResetLayout()
+  }
+}
+
 const handleAppClick = async (app) => {
   // 记录应用使用
   if (app.id) {
@@ -530,6 +548,46 @@ const loadRecentApps = async () => {
     }
   } catch (error) {
     console.error('加载最近使用失败:', error)
+  }
+}
+
+// 加载布局配置
+const loadLayout = async () => {
+  try {
+    const res = await getLayoutConfig()
+    if (res.code === 200 && res.data) {
+      savedLayout.value = JSON.parse(res.data)
+    }
+  } catch (error) {
+    console.error('加载布局配置失败:', error)
+  }
+}
+
+// 保存布局配置
+const handleSaveLayout = async () => {
+  try {
+    // 保存当前常用应用配置
+    const layoutData = {
+      commonAppIds: commonApps.value.slice(0, 5).map(app => app.id),
+      recentApps: recentApps.value.map(app => app.id)
+    }
+    await saveLayoutConfig(JSON.stringify(layoutData))
+    ElMessage.success('布局已保存')
+  } catch (error) {
+    console.error('保存布局失败:', error)
+    ElMessage.error('保存布局失败')
+  }
+}
+
+// 重置布局配置
+const handleResetLayout = async () => {
+  try {
+    await resetLayoutConfig()
+    savedLayout.value = null
+    ElMessage.success('布局已重置为默认')
+  } catch (error) {
+    console.error('重置布局失败:', error)
+    ElMessage.error('重置布局失败')
   }
 }
 
@@ -643,6 +701,7 @@ onMounted(() => {
   loadOverview()
   loadApps()
   loadRecentApps()
+  loadLayout()
   loadTodayAttendance()
   loadAttendanceRecords()
   loadTodos()

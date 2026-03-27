@@ -232,3 +232,38 @@ export function recordAppUsage(appId) {
     params: { appId }
   })
 }
+
+/**
+ * 获取工作台布局配置
+ * @returns {Promise}
+ */
+export function getLayoutConfig() {
+  return request({
+    url: '/api/im/workbench/layout',
+    method: 'get'
+  })
+}
+
+/**
+ * 保存工作台布局配置
+ * @param {string} layoutConfig - 布局配置JSON
+ * @returns {Promise}
+ */
+export function saveLayoutConfig(layoutConfig) {
+  return request({
+    url: '/api/im/workbench/layout',
+    method: 'post',
+    data: layoutConfig
+  })
+}
+
+/**
+ * 重置工作台布局配置
+ * @returns {Promise}
+ */
+export function resetLayoutConfig() {
+  return request({
+    url: '/api/im/workbench/layout',
+    method: 'delete'
+  })
+}
