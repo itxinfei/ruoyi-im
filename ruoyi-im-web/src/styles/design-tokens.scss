@@ -46,9 +46,39 @@
   --dt-feishu-color: #00d6b9;
   --dt-feishu-bg-dark: rgba(0, 214, 185, 0.15);
 
+  // === Calendar Event Category Colors (日历事件分类色) ===
+  --dt-event-work: #3b82f6;
+  --dt-event-meeting: #f59e0b;
+  --dt-event-personal: #10b981;
+  --dt-event-reminder: #ef4444;
+  --dt-event-work-bg: rgba(59, 130, 246, 0.1);
+  --dt-event-meeting-bg: rgba(245, 158, 11, 0.1);
+  --dt-event-personal-bg: rgba(16, 185, 129, 0.1);
+  --dt-event-reminder-bg: rgba(239, 68, 68, 0.1);
+  --dt-event-work-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
+  --dt-event-meeting-gradient: linear-gradient(135deg, #f59e0b, #d97706);
+  --dt-event-personal-gradient: linear-gradient(135deg, #10b981, #059669);
+  --dt-event-reminder-gradient: linear-gradient(135deg, #ef4444, #dc2626);
+
+  // === Todo Category Colors (待办分类色) ===
+  --dt-todo-work-bg: #e3f2fd;
+  --dt-todo-work-color: #1976d2;
+  --dt-todo-personal-bg: #f3e5f5;
+  --dt-todo-personal-color: #7b1fa2;
+  --dt-todo-study-bg: #e8f5e9;
+  --dt-todo-study-color: #388e3c;
+  --dt-todo-other-bg: #fafafa;
+  --dt-todo-other-color: #616161;
+
   // === File Type Colors (文件类型语义色) ===
   --dt-purple-color: #a855f7;
   --dt-purple-bg: #f3e8ff;
+
+  // === Contacts Category Colors (通讯录分类色) ===
+  --dt-contacts-purple-bg: rgba(139, 92, 246, 0.1);
+  --dt-contacts-purple-color: #8b5cf6;
+  --dt-contacts-cyan-bg: rgba(6, 182, 212, 0.1);
+  --dt-contacts-cyan-color: #06b6d4;
 
   // === Border & Shadows (极细边框) ===
   --dt-border-light: rgba(31, 35, 41, 0.08); 

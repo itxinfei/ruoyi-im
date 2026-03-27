@@ -284,13 +284,13 @@ onMounted(() => loadTodos())
     &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
     .nav-icon { font-size: var(--dt-icon-size-lg, 18px); }
     .nav-label { flex: 1; font-size: var(--dt-font-size-sm); }
-    .nav-badge { background: var(--dt-error-color); color: #fff; padding: 0 var(--dt-spacing-xs, 6px); border-radius: var(--dt-radius-full, 10px); font-size: var(--dt-font-size-xs); transform: scale(0.85); min-width: 18px; text-align: center;
+    .nav-badge { background: var(--dt-error-color); color: var(--dt-text-white); padding: 0 var(--dt-spacing-xs, 6px); border-radius: var(--dt-radius-full, 10px); font-size: var(--dt-font-size-xs); transform: scale(0.85); min-width: 18px; text-align: center;
       &.cat { background: var(--dt-brand-color); }
     }
   }
 }
 .sidebar-footer { padding: var(--dt-spacing-md, 16px); border-top: 1px solid var(--dt-border-light);
-  .add-todo-btn { width: 100%; height: var(--dt-btn-height-md, 36px); background: var(--dt-brand-color); color: #fff; border: none; border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; gap: var(--dt-spacing-xs, 8px); font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); cursor: pointer; transition: all var(--dt-transition-fast);
+  .add-todo-btn { width: 100%; height: var(--dt-btn-height-md, 36px); background: var(--dt-brand-color); color: var(--dt-text-white); border: none; border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; gap: var(--dt-spacing-xs, 8px); font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); cursor: pointer; transition: all var(--dt-transition-fast);
     &:hover { background: var(--dt-brand-hover); box-shadow: var(--dt-shadow-2); }
   }
 }
@@ -308,7 +308,7 @@ onMounted(() => loadTodos())
   &.completed { opacity: 0.6; .title-text { text-decoration: line-through; } }
 }
 .todo-checkbox { flex-shrink: 0; .checkbox-inner { width: var(--dt-checkbox-size, 20px); height: var(--dt-checkbox-size, 20px); border: 2px solid var(--dt-border-color); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center;
-  &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: #fff; .material-icons-outlined { font-size: var(--dt-font-size-xs); } } }
+  &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-white); .material-icons-outlined { font-size: var(--dt-font-size-xs); } } }
 }
 .todo-main-info { flex: 1; min-width: 0;
   .todo-title-row { display: flex; align-items: center; gap: var(--dt-spacing-xs, 8px); flex-wrap: wrap; .title-text { font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); color: var(--dt-text-primary); }
@@ -316,10 +316,10 @@ onMounted(() => loadTodos())
       &.high { background: var(--dt-error-bg); color: var(--dt-error-color); }
     }
     .category-tag { padding: 0 var(--dt-spacing-xs, 6px); border-radius: var(--dt-radius-sm); font-size: var(--dt-font-size-xs);
-      &.work { background: #e3f2fd; color: #1976d2; }
-      &.personal { background: #f3e5f5; color: #7b1fa2; }
-      &.study { background: #e8f5e9; color: #388e3c; }
-      &.other { background: #fafafa; color: #616161; }
+      &.work { background: var(--dt-todo-work-bg); color: var(--dt-todo-work-color); }
+      &.personal { background: var(--dt-todo-personal-bg); color: var(--dt-todo-personal-color); }
+      &.study { background: var(--dt-todo-study-bg); color: var(--dt-todo-study-color); }
+      &.other { background: var(--dt-todo-other-bg); color: var(--dt-todo-other-color); }
     }
   }
   .todo-meta-row { margin-top: var(--dt-spacing-xs, 6px); display: flex; align-items: center; gap: var(--dt-spacing-md, 12px);

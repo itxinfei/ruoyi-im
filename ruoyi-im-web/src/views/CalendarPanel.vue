@@ -930,7 +930,7 @@ onMounted(() => {
 
     &.today {
       background: var(--dt-brand-color);
-      color: #fff;
+      color: var(--dt-text-white);
     }
 
     &.selected:not(.today) {
@@ -949,7 +949,7 @@ onMounted(() => {
     }
 
     &.today.has-event::after {
-      background: #fff;
+      background: var(--dt-text-white);
     }
   }
 }
@@ -1003,10 +1003,10 @@ onMounted(() => {
   border-radius: 50%;
   flex-shrink: 0;
 
-  &.work { background: #3b82f6; }
-  &.meeting { background: #f59e0b; }
-  &.personal { background: #10b981; }
-  &.reminder { background: #ef4444; }
+  &.work { background: var(--dt-event-work); }
+  &.meeting { background: var(--dt-event-meeting); }
+  &.personal { background: var(--dt-event-personal); }
+  &.reminder { background: var(--dt-event-reminder); }
 }
 
 // 主内容区
@@ -1133,7 +1133,7 @@ onMounted(() => {
 
 .today .day-number {
   background: var(--dt-brand-color);
-  color: #fff;
+  color: var(--dt-text-white);
 }
 
 .day-events {
@@ -1149,12 +1149,12 @@ onMounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #fff;
+  color: var(--dt-text-white);
 
-  &.work { background: #3b82f6; }
-  &.meeting { background: #f59e0b; }
-  &.personal { background: #10b981; }
-  &.reminder { background: #ef4444; }
+  &.work { background: var(--dt-event-work); }
+  &.meeting { background: var(--dt-event-meeting); }
+  &.personal { background: var(--dt-event-personal); }
+  &.reminder { background: var(--dt-event-reminder); }
 }
 
 .more-events {
@@ -1260,14 +1260,14 @@ onMounted(() => {
   border-radius: 4px;
   padding: 4px;
   font-size: 11px;
-  color: #fff;
+  color: var(--dt-text-white);
   cursor: pointer;
   overflow: hidden;
 
-  &.work { background: #3b82f6; }
-  &.meeting { background: #f59e0b; }
-  &.personal { background: #10b981; }
-  &.reminder { background: #ef4444; }
+  &.work { background: var(--dt-event-work); }
+  &.meeting { background: var(--dt-event-meeting); }
+  &.personal { background: var(--dt-event-personal); }
+  &.reminder { background: var(--dt-event-reminder); }
 
   .event-time {
     font-size: 10px;
@@ -1335,13 +1335,13 @@ onMounted(() => {
   right: var(--dt-spacing-lg);
   border-radius: 8px;
   padding: var(--dt-spacing-sm);
-  color: #fff;
+  color: var(--dt-text-white);
   cursor: pointer;
 
-  &.work { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-  &.meeting { background: linear-gradient(135deg, #f59e0b, #d97706); }
-  &.personal { background: linear-gradient(135deg, #10b981, #059669); }
-  &.reminder { background: linear-gradient(135deg, #ef4444, #dc2626); }
+  &.work { background: var(--dt-event-work-gradient); }
+  &.meeting { background: var(--dt-event-meeting-gradient); }
+  &.personal { background: var(--dt-event-personal-gradient); }
+  &.reminder { background: var(--dt-event-reminder-gradient); }
 
   .event-time {
     font-size: 12px;
@@ -1377,10 +1377,10 @@ onMounted(() => {
     height: 24px;
     border-radius: 2px;
 
-    &.work { background: #3b82f6; }
-    &.meeting { background: #f59e0b; }
-    &.personal { background: #10b981; }
-    &.reminder { background: #ef4444; }
+    &.work { background: var(--dt-event-work); }
+    &.meeting { background: var(--dt-event-meeting); }
+    &.personal { background: var(--dt-event-personal); }
+    &.reminder { background: var(--dt-event-reminder); }
   }
 
   .detail-title {
