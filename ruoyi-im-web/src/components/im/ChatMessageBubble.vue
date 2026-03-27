@@ -31,55 +31,57 @@
         </div>
 
         <div class="bubble-and-actions" @mouseenter="isHovered = true" @mouseleave="isHovered = false">
+          <!-- 气泡行：气泡 + 状态栏（底部对齐） -->
+          <div class="bubble-row">
+            <!-- 气泡本体 -->
+            <div :class="['message-bubble', `type-${(message.type || 'text').toLowerCase()}`]">
+              <!-- 文本（非纯URL） -->
+              <div v-if="(!message.type || message.type === 'TEXT') && !isPureUrlMessage" class="text-content">
+                <template v-for="(part, index) in parsedTextParts" :key="index">
+                  <a v-if="part.isLink" :href="part.text" target="_blank" class="text-link" @click.stop>{{ part.text }}</a>
+                  <span v-else>{{ part.text }}</span>
+                </template>
+              </div>
+              <!-- 纯URL消息：渲染为链接卡片 -->
+              <div v-else-if="isPureUrlMessage" class="link-card" @click="openLink(getPureUrl)">
+                <div class="link-content">
+                  <div class="link-title">{{ getPureUrl }}</div>
+                  <div class="link-url">{{ formatDisplayUrl(getPureUrl) }}</div>
+                </div>
+              </div>
+              <!-- 图片 -->
+              <div v-else-if="message.type === 'IMAGE'" class="image-content">
+                <el-image :src="message.fileUrl" :preview-src-list="[message.fileUrl]" fit="cover" class="content-img" />
+              </div>
+              <!-- 文件 -->
+              <div v-else-if="message.type === 'FILE'" class="file-content">
+                <el-icon><Document /></el-icon>
+                <span class="file-name">{{ message.fileName || '文件' }}</span>
+              </div>
+              <!-- 语音 -->
+              <VoiceMessageBubble v-else-if="message.type === 'VOICE'" :message="message" />
+              <!-- 链接卡片（LINK类型，后端返回元数据） -->
+              <div v-else-if="message.type === 'LINK' && linkInfo" class="link-card" @click="openLink(linkInfo.url)">
+                <div v-if="linkInfo.imageUrl" class="link-image">
+                  <img :src="linkInfo.imageUrl" alt="" @error="handleImageError">
+                </div>
+                <div class="link-content">
+                  <div class="link-title">{{ linkInfo.title }}</div>
+                  <div v-if="linkInfo.description" class="link-desc">{{ linkInfo.description }}</div>
+                  <div class="link-url">{{ formatDisplayUrl(linkInfo.url) }}</div>
+                </div>
+              </div>
+            </div>
 
-          <!-- 气泡本体 -->
-          <div :class="['message-bubble', `type-${(message.type || 'text').toLowerCase()}`]">
-            <!-- 文本（非纯URL） -->
-            <div v-if="(!message.type || message.type === 'TEXT') && !isPureUrlMessage" class="text-content">
-              <template v-for="(part, index) in parsedTextParts" :key="index">
-                <a v-if="part.isLink" :href="part.text" target="_blank" class="text-link" @click.stop>{{ part.text }}</a>
-                <span v-else>{{ part.text }}</span>
-              </template>
+            <!-- 发送方：状态与已读 -->
+            <div v-if="isMe" class="message-status-sidebar">
+              <el-icon v-if="message.status === 'sending'" class="status-icon is-loading"><Loading /></el-icon>
+              <el-icon v-else-if="message.status === 'failed'" class="status-icon is-failed" title="发送失败，点击重试"><WarningFilled /></el-icon>
+              <span v-else-if="message.isEdited" class="edited-tag">已编辑</span>
+              <span v-else-if="message.isRead !== undefined" :class="['read-status', message.isRead ? 'is-read' : 'is-unread']" @click="$emit('read-detail', message.messageId || message.id)">
+                {{ message.isRead ? '已读' : '未读' }}
+              </span>
             </div>
-            <!-- 纯URL消息：渲染为链接卡片 -->
-            <div v-else-if="isPureUrlMessage" class="link-card" @click="openLink(getPureUrl)">
-              <div class="link-content">
-                <div class="link-title">{{ getPureUrl }}</div>
-                <div class="link-url">{{ formatDisplayUrl(getPureUrl) }}</div>
-              </div>
-            </div>
-            <!-- 图片 -->
-            <div v-else-if="message.type === 'IMAGE'" class="image-content">
-              <el-image :src="message.fileUrl" :preview-src-list="[message.fileUrl]" fit="cover" class="content-img" />
-            </div>
-            <!-- 文件 -->
-            <div v-else-if="message.type === 'FILE'" class="file-content">
-              <el-icon><Document /></el-icon>
-              <span class="file-name">{{ message.fileName || '文件' }}</span>
-            </div>
-            <!-- 语音 -->
-            <VoiceMessageBubble v-else-if="message.type === 'VOICE'" :message="message" />
-            <!-- 链接卡片（LINK类型，后端返回元数据） -->
-            <div v-else-if="message.type === 'LINK' && linkInfo" class="link-card" @click="openLink(linkInfo.url)">
-              <div v-if="linkInfo.imageUrl" class="link-image">
-                <img :src="linkInfo.imageUrl" alt="" @error="handleImageError">
-              </div>
-              <div class="link-content">
-                <div class="link-title">{{ linkInfo.title }}</div>
-                <div v-if="linkInfo.description" class="link-desc">{{ linkInfo.description }}</div>
-                <div class="link-url">{{ formatDisplayUrl(linkInfo.url) }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 发送方：状态与已读 -->
-          <div v-if="isMe" class="message-status-sidebar">
-            <el-icon v-if="message.status === 'sending'" class="status-icon is-loading"><Loading /></el-icon>
-            <el-icon v-else-if="message.status === 'failed'" class="status-icon is-failed" title="发送失败，点击重试"><WarningFilled /></el-icon>
-            <span v-else-if="message.isEdited" class="edited-tag">已编辑</span>
-            <span v-else-if="message.isRead !== undefined" :class="['read-status', message.isRead ? 'is-read' : 'is-unread']" @click="$emit('read-detail', message.messageId || message.id)">
-              {{ message.isRead ? '已读' : '未读' }}
-            </span>
           </div>
 
           <!-- 悬停操作条 (Action Bar) -->
@@ -105,6 +107,21 @@
             <div class="action-item" title="收藏" @click="$emit('favorite', message)">
               <el-icon><Star /></el-icon>
             </div>
+            <el-dropdown trigger="click" @command="(emoji) => $emit('reaction', { message, emoji })">
+              <div class="action-item" title="表情">
+                <span class="material-icons-outlined" style="font-size: 18px;">feeling</span>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="👍">👍 点赞</el-dropdown-item>
+                  <el-dropdown-item command="❤️">❤️ 爱心</el-dropdown-item>
+                  <el-dropdown-item command="😂">😂 笑哭</el-dropdown-item>
+                  <el-dropdown-item command="😮">😮 惊讶</el-dropdown-item>
+                  <el-dropdown-item command="😢">😢 悲伤</el-dropdown-item>
+                  <el-dropdown-item command="👏">👏 鼓掌</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
 
         </div>
@@ -135,7 +152,7 @@ const props = defineProps({
   quotedMessage: { type: Object, default: null }
 });
 
-const emit = defineEmits(['reply', 'forward', 'recall', 'delete', 'favorite', 'read-detail', 'edit']);
+const emit = defineEmits(['reply', 'forward', 'recall', 'delete', 'favorite', 'read-detail', 'edit', 'reaction']);
 
 const isHovered = ref(false);
 
@@ -364,12 +381,17 @@ const formatDisplayUrl = (url) => {
 }
 
 .bubble-and-actions {
-  display: flex;
-  align-items: flex-start;
+  /* 外层定位容器：承载气泡行和绝对定位的操作条 */
   position: relative;
+  width: 100%;
 }
 
-.is-me .bubble-and-actions {
+.bubble-row {
+  display: flex;
+  align-items: flex-end;
+}
+
+.is-me .bubble-row {
   flex-direction: row-reverse;
 }
 
@@ -509,8 +531,8 @@ const formatDisplayUrl = (url) => {
   display: flex;
   align-items: flex-end;
   margin-right: 8px;
-  height: 100%;
   padding-bottom: 2px;
+  flex-shrink: 0;
 }
 
 .status-icon {
