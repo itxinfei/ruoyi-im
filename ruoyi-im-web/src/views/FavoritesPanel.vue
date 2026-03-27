@@ -81,6 +81,7 @@
         </div>
       </div>
     </div>
+    <ForwardDialog ref="forwardDialogRef" />
   </div>
 </template>
 
@@ -91,6 +92,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { getUserFavorites, removeMessageFavorite } from '@/api/im/message'
+import ForwardDialog from '@/components/ForwardDialog/index.vue'
 
 const store = useStore()
 const router = useRouter()
@@ -99,6 +101,7 @@ const emit = defineEmits(['switch-module'])
 const loading = ref(false)
 const favorites = ref([])
 const searchKeyword = ref('')
+const forwardDialogRef = ref(null)
 
 const filteredFavorites = computed(() => {
   if (!searchKeyword.value.trim()) {
@@ -197,6 +200,26 @@ const handleJumpToMessage = (item) => {
   }
 }
 
+const handleForward = (item) => {
+  // 将收藏消息转换为普通消息格式（适配 ForwardDialog）
+  const message = {
+    id: item.messageId,
+    messageId: item.messageId,
+    conversationId: item.conversationId,
+    type: item.messageType,
+    content: item.content || item.contentPreview || '',
+    senderId: item.senderId,
+    senderName: item.senderName,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
+    fileUrl: item.fileUrl,
+    thumbnailUrl: item.thumbnailUrl,
+    duration: item.duration,
+    createTime: item.createTime
+  }
+  forwardDialogRef.value?.open(message)
+}
+
 const handleRemoveFavorite = async (item) => {
   try {
     await ElMessageBox.confirm('确定要取消收藏这条消息吗？', '取消收藏', {
@@ -221,7 +244,7 @@ const handleCommand = (command, item) => {
       ElMessage.success('已复制到剪贴板')
       break
     case 'forward':
-      ElMessage.info('转发功能开发中')
+      handleForward(item)
       break
     case 'remove':
       handleRemoveFavorite(item)
