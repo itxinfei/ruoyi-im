@@ -25,7 +25,20 @@ public class ImMessageReadController {
     @GetMapping("/detail/{messageId}")
     public Result<ImMessageReadDetailVO> getReadDetail(@PathVariable Long messageId) {
         Long currentUserId = SecurityUtils.getLoginUserId();
-        // 严格对齐接口：getMessageReadDetail(Long messageId, Long senderId)
+        ImMessageReadDetailVO detail = messageReadService.getMessageReadDetail(messageId, currentUserId);
+        return Result.success(detail);
+    }
+
+    /**
+     * 获取消息已读用户列表
+     * @param conversationId 会话ID
+     * @param messageId 消息ID
+     */
+    @GetMapping("/status/{conversationId}/{messageId}")
+    public Result<ImMessageReadDetailVO> getMessageReadUsers(
+            @PathVariable Long conversationId,
+            @PathVariable Long messageId) {
+        Long currentUserId = SecurityUtils.getLoginUserId();
         ImMessageReadDetailVO detail = messageReadService.getMessageReadDetail(messageId, currentUserId);
         return Result.success(detail);
     }

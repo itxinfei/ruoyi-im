@@ -3,7 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.service.ImAuditService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -21,8 +20,11 @@ import java.util.Map;
 @RequestMapping("/api/im/audit")
 public class ImAuditController {
 
-    @Autowired
-    private ImAuditService imAuditService;
+    private final ImAuditService imAuditService;
+
+    public ImAuditController(ImAuditService imAuditService) {
+        this.imAuditService = imAuditService;
+    }
 
     /**
      * 获取审计日志列表

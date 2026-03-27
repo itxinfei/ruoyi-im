@@ -1,8 +1,9 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImBackupService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ruoyi.im.util.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +20,11 @@ import java.util.Map;
 @RequestMapping("/api/im/backup")
 public class ImBackupController {
 
-    @Autowired
-    private ImBackupService imBackupService;
+    private final ImBackupService imBackupService;
+
+    public ImBackupController(ImBackupService imBackupService) {
+        this.imBackupService = imBackupService;
+    }
 
     /**
      * 获取备份列表
@@ -107,6 +111,12 @@ public class ImBackupController {
     
     @GetMapping("/export/user/{userId}")
     public Result<Map<String, Object>> exportUserData(@PathVariable Long userId) {
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        String role = SecurityUtils.getLoginUserRole();
+        boolean isAdmin = "ADMIN".equals(role) || "SUPER_ADMIN".equals(role);
+        if (!isAdmin && !userId.equals(currentUserId)) {
+            throw new BusinessException("无权限导出其他用户数据");
+        }
         Map<String, Object> result = imBackupService.exportUserData(userId);
         return Result.success("导出成功", result);
     }

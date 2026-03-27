@@ -247,9 +247,9 @@ public class ImMessageServiceImpl implements ImMessageService {
             log.warn("更新会话最后一条消息失败: conversationId={}", conversationId);
         }
 
+        List<com.ruoyi.im.domain.ImConversationMember> members = null;
         try {
-            List<com.ruoyi.im.domain.ImConversationMember> members = imConversationMemberMapper
-                    .selectByConversationId(conversationId);
+            members = imConversationMemberMapper.selectByConversationId(conversationId);
 
             if (members != null && !members.isEmpty()) {
                 for (com.ruoyi.im.domain.ImConversationMember member : members) {
@@ -348,6 +348,13 @@ public class ImMessageServiceImpl implements ImMessageService {
         // 调试日志：记录接收到的 userId
         log.debug("getMessages 被调用 - conversationId={}, userId={}, lastId={}, limit={}",
                 conversationId, userId, lastId, limit);
+
+        // 权限校验：验证用户是否是会话成员
+        com.ruoyi.im.domain.ImConversationMember member = imConversationMemberMapper
+                .selectByConversationIdAndUserId(conversationId, userId);
+        if (member == null) {
+            throw new BusinessException("无权访问该会话的消息");
+        }
 
         List<ImMessageVO> voList = new ArrayList<>();
 

@@ -51,7 +51,6 @@ public class DingMessageScheduledTask {
 
             if (!expiredDings.isEmpty()) {
                 log.info("发现 {} 条过期DING消息", expiredDings.size());
-                // 可以在这里将过期消息状态更新为EXPIRED
                 for (ImDingMessage ding : expiredDings) {
                     ding.setStatus("EXPIRED");
                     dingMessageMapper.updateById(ding);

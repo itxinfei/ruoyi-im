@@ -8,7 +8,6 @@ import com.ruoyi.im.dto.organization.ImDepartmentUpdateRequest;
 import com.ruoyi.im.service.ImOrganizationService;
 import com.ruoyi.im.vo.organization.ImDepartmentMemberVO;
 import com.ruoyi.im.vo.organization.ImDepartmentTreeVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +26,11 @@ import java.util.List;
 @Validated
 public class ImOrganizationController {
 
-    @Autowired
-    private ImOrganizationService imOrganizationService;
+    private final ImOrganizationService imOrganizationService;
+
+    public ImOrganizationController(ImOrganizationService imOrganizationService) {
+        this.imOrganizationService = imOrganizationService;
+    }
 
     /**
      * 获取部门树形结构

@@ -8,6 +8,8 @@ import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.service.ImNoticeService;
 import com.ruoyi.im.service.ImTodoItemService;
 import com.ruoyi.im.util.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,6 +27,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/im/workbench")
 public class ImWorkbenchController {
+
+    private static final Logger log = LoggerFactory.getLogger(ImWorkbenchController.class);
 
     private final ImTodoItemService todoItemService;
     private final ImMessageService messageService;
@@ -70,7 +74,7 @@ public class ImWorkbenchController {
         try {
             unreadMessageCount = conversationService.getTotalUnreadCount(userId);
         } catch (Exception e) {
-            // 如果获取失败，使用0
+            log.warn("获取未读消息数量失败，userId={}, error={}", userId, e.getMessage());
         }
         overview.put("unreadMessageCount", unreadMessageCount);
 
@@ -79,7 +83,7 @@ public class ImWorkbenchController {
         try {
             todayMessageCount = messageService.getTodayMessageCount(userId);
         } catch (Exception e) {
-            // 如果获取失败，使用0
+            log.warn("获取未读消息数量失败，userId={}, error={}", userId, e.getMessage());
         }
         overview.put("todayMessageCount", todayMessageCount);
 
@@ -88,7 +92,7 @@ public class ImWorkbenchController {
         try {
             conversationCount = conversationService.getUserConversationCount(userId);
         } catch (Exception e) {
-            // 如果获取失败，使用0
+            log.warn("获取会话数量失败，userId={}, error={}", userId, e.getMessage());
         }
         overview.put("conversationCount", conversationCount);
 
@@ -97,7 +101,7 @@ public class ImWorkbenchController {
         try {
             noticeCount = noticeService.getUnreadCount(userId);
         } catch (Exception e) {
-            // 如果获取失败，使用0
+            log.warn("获取通知数量失败，userId={}, error={}", userId, e.getMessage());
         }
         overview.put("noticeCount", noticeCount);
 
@@ -106,7 +110,7 @@ public class ImWorkbenchController {
         try {
             approvalCount = todoItemService.getUncompletedCountByType(userId, "APPROVAL");
         } catch (Exception e) {
-            // 如果获取失败，使用0
+            log.warn("获取审批数量失败，userId={}, error={}", userId, e.getMessage());
         }
         overview.put("approvalCount", approvalCount);
 
@@ -115,7 +119,7 @@ public class ImWorkbenchController {
         try {
             dingCount = todoItemService.getUncompletedCountByType(userId, "DING");
         } catch (Exception e) {
-            // 如果获取失败，使用0
+            log.warn("获取DING消息数量失败，userId={}, error={}", userId, e.getMessage());
         }
         overview.put("dingCount", dingCount);
 
@@ -215,5 +219,50 @@ public class ImWorkbenchController {
         Long userId = SecurityUtils.getLoginUserId();
         todoItemService.updateTodo(id, title, description, userId);
         return Result.success("更新成功");
+    }
+
+    /**
+     * 获取工作台统计数据
+     * 返回工作台相关的统计数据
+     *
+     * @return 统计数据
+     */
+    @GetMapping("/statistics")
+    public Result<Map<String, Object>> getStatistics() {
+        Long userId = SecurityUtils.getLoginUserId();
+        Map<String, Object> statistics = new HashMap<>();
+
+        // 待办数量
+        int todoCount = todoItemService.getUncompletedCount(userId);
+        statistics.put("todoCount", todoCount);
+
+        // 未读消息数量
+        int unreadMessageCount = 0;
+        try {
+            unreadMessageCount = conversationService.getTotalUnreadCount(userId);
+        } catch (Exception e) {
+            log.warn("获取未读消息数量失败，userId={}, error={}", userId, e.getMessage());
+        }
+        statistics.put("unreadMessageCount", unreadMessageCount);
+
+        // 今日消息数量
+        int todayMessageCount = 0;
+        try {
+            todayMessageCount = messageService.getTodayMessageCount(userId);
+        } catch (Exception e) {
+            log.warn("获取今日消息数量失败，userId={}, error={}", userId, e.getMessage());
+        }
+        statistics.put("todayMessageCount", todayMessageCount);
+
+        // 会话数量
+        int conversationCount = 0;
+        try {
+            conversationCount = conversationService.getUserConversationCount(userId);
+        } catch (Exception e) {
+            log.warn("获取会话数量失败，userId={}, error={}", userId, e.getMessage());
+        }
+        statistics.put("conversationCount", conversationCount);
+
+        return Result.success(statistics);
     }
 }

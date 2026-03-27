@@ -6,6 +6,8 @@ import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImFileAssetMapper;
 import com.ruoyi.im.service.ImFilePreviewService;
 import com.ruoyi.im.vo.file.ImFilePreviewInfoVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,8 @@ import java.util.List;
  */
 @Service
 public class ImFilePreviewServiceImpl implements ImFilePreviewService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImFilePreviewServiceImpl.class);
 
     @Autowired
     private ImFileAssetMapper fileAssetMapper;
@@ -241,7 +245,7 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
                 vo.setHeight(image.getHeight());
             }
         } catch (IOException e) {
-            // 忽略错误
+            log.warn("获取图片尺寸失败: filePath={}", filePath, e);
         }
     }
 }

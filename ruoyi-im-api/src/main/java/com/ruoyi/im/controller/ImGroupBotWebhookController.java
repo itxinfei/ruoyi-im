@@ -5,7 +5,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImGroupBotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -20,8 +19,11 @@ public class ImGroupBotWebhookController {
 
     private static final Logger log = LoggerFactory.getLogger(ImGroupBotWebhookController.class);
 
-    @Autowired
-    private ImGroupBotService groupBotService;
+    private final ImGroupBotService groupBotService;
+
+    public ImGroupBotWebhookController(ImGroupBotService groupBotService) {
+        this.groupBotService = groupBotService;
+    }
 
     /**
      * 接收外部 Webhook 推送

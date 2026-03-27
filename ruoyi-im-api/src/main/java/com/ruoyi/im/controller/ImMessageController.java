@@ -109,7 +109,7 @@ public class ImMessageController {
     @PutMapping("/{messageId}/edit")
     public Result<Void> edit(
             @PathVariable Long messageId,
-            @RequestBody MessageEditRequest request) {
+            @Valid @RequestBody MessageEditRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
         imMessageService.editMessage(messageId, request.getNewContent(), userId);
         return Result.success("消息已编辑");
@@ -126,15 +126,9 @@ public class ImMessageController {
      */
     
     @PutMapping("/mark-read")
-    public Result<Void> markAsRead(@RequestBody java.util.Map<String, Object> data) {
+    public Result<Void> markAsRead(@Valid @RequestBody MarkAsReadRequest request) {
         Long userId = SecurityUtils.getLoginUserId();
-        Long conversationId = data.get("conversationId") != null ? Long.valueOf(data.get("conversationId").toString())
-                : null;
-        @SuppressWarnings("unchecked")
-        List<Long> messageIds = (List<Long>) data.get("messageIds");
-        // 传递broadcast=true，由Service层统一处理广播逻辑
-        imMessageService.markAsRead(conversationId, userId, messageIds, true);
-
+        imMessageService.markAsRead(request.getConversationId(), userId, request.getMessageIds(), true);
         return Result.success("已标记为已读");
     }
 
@@ -178,6 +172,28 @@ public class ImMessageController {
         // 直接调用广播服务通知其他成员
         broadcastService.broadcastTypingStatus(conversationId, userId, typing);
         return Result.success();
+    }
+
+    /**
+     * 搜索消息
+     * @param request 搜索请求参数
+     */
+    @PostMapping("/search")
+    public Result<ImMessageSearchResultVO> searchMessages(@RequestBody ImMessageSearchRequest request) {
+        Long userId = SecurityUtils.getLoginUserId();
+        ImMessageSearchResultVO result = imMessageService.searchMessages(
+                request.getConversationId(),
+                request.getKeyword(),
+                request.getMessageType(),
+                request.getSenderId(),
+                request.getStartTime(),
+                request.getEndTime(),
+                request.getPageNum(),
+                request.getPageSize(),
+                request.getIncludeRevoked(),
+                request.getExactMatch(),
+                userId);
+        return Result.success(result);
     }
 }
 

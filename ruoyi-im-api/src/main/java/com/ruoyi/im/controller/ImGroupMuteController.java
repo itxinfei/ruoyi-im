@@ -3,7 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImGroupMuteService;
 import com.ruoyi.im.util.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -19,8 +18,11 @@ import java.util.List;
 @RequestMapping("/api/im/group/mute")
 public class ImGroupMuteController {
 
-    @Autowired
-    private ImGroupMuteService groupMuteService;
+    private final ImGroupMuteService groupMuteService;
+
+    public ImGroupMuteController(ImGroupMuteService groupMuteService) {
+        this.groupMuteService = groupMuteService;
+    }
 
     /**
      * 设置全员禁言

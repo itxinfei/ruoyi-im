@@ -4,7 +4,6 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,11 +31,13 @@ public class ImHealthCheckController {
 
     private static final Logger log = LoggerFactory.getLogger(ImHealthCheckController.class);
 
-    @Autowired
-    private DataSource dataSource;
+    private final DataSource dataSource;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    public ImHealthCheckController(DataSource dataSource, RedisTemplate<String, Object> redisTemplate) {
+        this.dataSource = dataSource;
+        this.redisTemplate = redisTemplate;
+    }
 
     /**
      * 基础健康检查

@@ -4,9 +4,14 @@ import com.ruoyi.im.domain.ImTodoItem;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImTodoItemMapper;
 import com.ruoyi.im.service.ImTodoItemService;
+import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.BusinessExceptionHelper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ruoyi.im.websocket.WsFrame;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +24,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ImTodoItemServiceImpl implements ImTodoItemService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImTodoItemServiceImpl.class);
 
     private final ImTodoItemMapper todoItemMapper;
     private final ImWebSocketBroadcastService broadcastService;
@@ -115,6 +122,9 @@ public class ImTodoItemServiceImpl implements ImTodoItemService {
 
     @Override
     public int getUncompletedCountByType(Long userId, String type) {
+        // 注意：ImTodoItem 实体没有 type 字段，无法按类型筛选
+        // 当前返回全部未完成数量，后续如需类型筛选需扩展实体和Mapper
+        log.warn("getUncompletedCountByType 调用时忽略了 type 参数={}，因为 ImTodoItem 实体不支持类型字段", type);
         return todoItemMapper.countUncompletedByUserId(userId);
     }
 }

@@ -65,6 +65,16 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
             
         } catch (Exception e) {
             log.error("Error processing websocket message", e);
+            try {
+                WsFrame errorFrame = new WsFrame();
+                errorFrame.setType("ERROR");
+                errorFrame.setAction("PARSE_ERROR");
+                errorFrame.setData("消息格式错误");
+                errorFrame.setTimestamp(System.currentTimeMillis());
+                session.sendMessage(new TextMessage(JSON.toJSONString(errorFrame)));
+            } catch (Exception sendError) {
+                log.warn("发送错误消息失败", sendError);
+            }
         }
     }
 

@@ -32,7 +32,7 @@ public class BotMessageListener {
      *
      * @param event 群组消息事件
      */
-    @Async
+    @Async("asyncExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleGroupMessageEvent(GroupMessageEvent event) {
         try {

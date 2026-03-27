@@ -3,7 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImApplication;
 import com.ruoyi.im.service.ImApplicationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +19,11 @@ import java.util.Map;
 @RequestMapping("/api/im/app")
 public class ImAppController {
 
-    @Autowired
-    private ImApplicationService applicationService;
+    private final ImApplicationService applicationService;
+
+    public ImAppController(ImApplicationService applicationService) {
+        this.applicationService = applicationService;
+    }
 
     /**
      * 获取应用列表

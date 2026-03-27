@@ -5,7 +5,6 @@ import com.ruoyi.im.dto.search.GlobalSearchRequest;
 import com.ruoyi.im.service.ImSearchService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.search.GlobalSearchResultVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -18,8 +17,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/im/search")
 public class ImSearchController {
 
-    @Autowired
-    private ImSearchService searchService;
+    private final ImSearchService searchService;
+
+    public ImSearchController(ImSearchService searchService) {
+        this.searchService = searchService;
+    }
 
     /**
      * 全局搜索

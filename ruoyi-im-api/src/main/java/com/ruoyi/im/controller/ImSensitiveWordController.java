@@ -3,7 +3,6 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImSensitiveWord;
 import com.ruoyi.im.service.ISensitiveWordService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -21,8 +20,11 @@ import java.util.Set;
 @RequestMapping("/api/im/sensitiveWord")
 public class ImSensitiveWordController {
 
-    @Autowired
-    private ISensitiveWordService sensitiveWordService;
+    private final ISensitiveWordService sensitiveWordService;
+
+    public ImSensitiveWordController(ISensitiveWordService sensitiveWordService) {
+        this.sensitiveWordService = sensitiveWordService;
+    }
 
     /**
      * 检测敏感词

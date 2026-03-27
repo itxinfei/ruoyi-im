@@ -5,7 +5,6 @@ import com.ruoyi.im.service.ImSystemConfigService;
 import com.ruoyi.im.util.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +26,11 @@ public class ImSystemConfigAdminController {
 
     private static final Logger log = LoggerFactory.getLogger(ImSystemConfigAdminController.class);
 
-    @Autowired
-    private ImSystemConfigService systemConfigService;
+    private final ImSystemConfigService systemConfigService;
+
+    public ImSystemConfigAdminController(ImSystemConfigService systemConfigService) {
+        this.systemConfigService = systemConfigService;
+    }
 
     /**
      * 获取所有系统配置
