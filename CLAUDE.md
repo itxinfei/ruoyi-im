@@ -38,6 +38,17 @@
 **YAML 任务池**: 所有任务已标记完成
 - 状态：`llm-tasks.yaml` 中全部 P0/P1/P2/P3 任务已标记 `status: done`
 
+### 死代码清理 (2026-03-27 补充)
+**SessionPanel.vue**: 完全未使用（无 import/路由引用），已删除
+
+**Chat/ 目录清理 (14个文件)**: AIAssistantPanel, AtMemberPicker, BotConfigPanel, CreateGroupDialog, DocumentPreviewDrawer, DocumentSummaryDialog, FavoritesPanel, LinkCardMessage, LocationMessageBubble, MessageEditHistoryDialog, MessageItem, SendDingDialog, TranslateButton, VoiceRecorder
+
+**im/ 目录清理 (2个文件)**: GroupFilesDrawer, MessageReaction（已构建但从未集成）
+
+**通用组件清理 (6个文件)**: EmojiPicker, FilePreviewDialog, FileUpload, TodoDetailDialog, HelpFeedbackDialog, ImagePreviewDialog
+
+累计删除：约 9000 行无用代码
+
 ### 死代码清理
 **旧 Chat 架构移除**: 已删除从未被引用的旧消息 UI 堆栈
 - 删除文件：`views/ChatPanel.vue`, `Chat/MessageList.vue`, `Chat/MessageBubble.vue`, `Chat/MessageInput.vue`, `Chat/ChatHeader.vue`
