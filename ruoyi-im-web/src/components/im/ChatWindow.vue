@@ -7,10 +7,10 @@
         <span v-if="currentSession?.memberCount" class="member-count">({{ currentSession.memberCount }})</span>
       </div>
       <div class="header-right">
-        <i class="el-icon-search" title="搜索聊天记录" @click="showGlobalSearch = true"></i>
-        <i class="el-icon-phone" title="语音通话" @click="handleVoiceCall"></i>
-        <i class="el-icon-video-camera" title="视频通话" @click="handleVideoCall"></i>
-        <i class="el-icon-more" title="详情" @click="detailDrawerVisible = true"></i>
+        <el-icon title="搜索聊天记录" @click="showGlobalSearch = true"><Search /></el-icon>
+        <el-icon title="语音通话" @click="handleVoiceCall"><Phone /></el-icon>
+        <el-icon title="视频通话" @click="handleVideoCall"><VideoCamera /></el-icon>
+        <el-icon title="详情" @click="detailDrawerVisible = true"><MoreFilled /></el-icon>
       </div>
     </header>
 
@@ -79,6 +79,7 @@
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
+import { Search, Phone, VideoCamera, MoreFilled } from '@element-plus/icons-vue';
 import { useImWebSocket } from '@/composables/useImWebSocket';
 import { uploadImage, uploadFile } from '@/api/im/file';
 import { initiateCall } from '@/api/im/videoCall';
@@ -481,15 +482,15 @@ const scrollToMessage = (messageId) => {
 .title { font-size: 16px; font-weight: 600; color: var(--dt-text-main); }
 .member-count { font-size: 14px; color: var(--dt-text-desc); }
 .header-right { display: flex; gap: 20px; color: var(--dt-text-desc); }
-.header-right i {
+.header-right .el-icon {
   cursor: pointer;
   font-size: 18px;
   transition: all var(--dt-transition-fast);
 }
-.header-right i:hover {
+.header-right .el-icon:hover {
   color: var(--dt-brand-color);
 }
-.header-right i:active {
+.header-right .el-icon:active {
   transform: scale(0.95);
 }
 .message-list-viewport { flex: 1; overflow-y: auto; background-color: var(--dt-bg-chat); padding: 20px 0; }
