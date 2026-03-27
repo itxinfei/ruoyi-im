@@ -3,7 +3,6 @@ package com.ruoyi.im.service.impl;
 import com.ruoyi.im.domain.ImGroupMember;
 import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupMemberService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,8 +13,11 @@ import java.util.List;
 @Service
 public class ImGroupMemberServiceImpl implements ImGroupMemberService {
 
-    @Autowired
-    private ImGroupMemberMapper imGroupMemberMapper;
+    private final ImGroupMemberMapper imGroupMemberMapper;
+
+    public ImGroupMemberServiceImpl(ImGroupMemberMapper imGroupMemberMapper) {
+        this.imGroupMemberMapper = imGroupMemberMapper;
+    }
 
     @Override
     public ImGroupMember selectImGroupMemberById(Long id) {

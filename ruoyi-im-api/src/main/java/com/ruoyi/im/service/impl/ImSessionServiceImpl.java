@@ -8,7 +8,6 @@ import com.ruoyi.im.service.ImSessionService;
 import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.session.ImSessionVO;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,8 +26,11 @@ import java.util.List;
 @Service
 public class ImSessionServiceImpl implements ImSessionService {
 
-    @Autowired
-    private ImSessionMapper imSessionMapper;
+    private final ImSessionMapper imSessionMapper;
+
+    public ImSessionServiceImpl(ImSessionMapper imSessionMapper) {
+        this.imSessionMapper = imSessionMapper;
+    }
 
     @Override
     public List<ImSessionVO> getSessionList(Long userId) {
