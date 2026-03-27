@@ -292,7 +292,7 @@ import {
   DocumentCopy, Clock, Notebook, Files
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getOverview } from '@/api/im/workbench'
+import { getOverview, getAppsByCategory, getRecentApps, recordAppUsage } from '@/api/im/workbench'
 import { getTodayStatus, checkIn as apiCheckIn, checkOut as apiCheckOut, getAttendanceList } from '@/api/im/attendance'
 import { getMyTasks } from '@/api/im/task'
 import { getPendingApprovals } from '@/api/im/approval'
@@ -311,6 +311,9 @@ const attendanceRecords = ref([])
 const todos = ref([])
 const approvalList = ref([])
 const scheduleList = ref([])
+const allApps = ref([])
+const recentApps = ref([])
+const appsLoading = ref(false)
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const displayName = computed(() => currentUser.value.nickname || currentUser.value.username || '成员')
@@ -350,28 +353,89 @@ const approvalTabs = ref([
   { key: 'initiated', label: '我发起的', count: 0 }
 ])
 
-// 常用应用
-const commonApps = ref([
-  { key: 'punch', label: '签到打卡', elIcon: Timer, iconClass: 'icon-orange', route: null, action: 'attendance' },
-  { key: 'flow', label: '审批流', elIcon: Finished, iconClass: 'icon-blue', route: '/approval' },
-  { key: 'report', label: '周报/日报', elIcon: Tickets, iconClass: 'icon-green', action: 'report' },
-  { key: 'task', label: '协作待办', elIcon: Management, iconClass: 'icon-purple', route: '/todo' },
-  { key: 'meeting', label: '视频会议', elIcon: VideoPlay, iconClass: 'icon-pink', action: 'meeting' }
-])
+// 图标映射表
+const iconMap = {
+  OFFICE: { component: Tickets, class: 'icon-blue' },
+  DATA: { component: Management, class: 'icon-purple' },
+  TOOLS: { component: FolderOpened, class: 'icon-teal' },
+  CUSTOM: { component: Files, class: 'icon-cyan' },
+  default: { component: Files, class: 'icon-indigo' }
+}
 
-// 全量应用
-const otherApps = ref([
-  { key: 'finance', label: '财务报销', elIcon: Money, iconClass: 'icon-teal', action: 'finance' },
-  { key: 'disk', label: '企业网盘', elIcon: FolderOpened, iconClass: 'icon-indigo', route: '/documents' },
-  { key: 'assistant', label: 'AI助手', elIcon: ChatLineRound, iconClass: 'icon-cyan', route: '/assistant' }
-])
+// 分类到模块的映射
+const categoryRouteMap = {
+  OFFICE: '/approval',
+  DATA: '/documents',
+  TOOLS: '/documents',
+  CUSTOM: null
+}
+
+// 将后端应用数据转换为前端格式
+const transformApp = (app) => {
+  const iconInfo = iconMap[app.category] || iconMap.default
+  const route = categoryRouteMap[app.category] || app.appUrl
+  return {
+    id: app.id,
+    key: app.code || app.id,
+    label: app.name,
+    elIcon: iconInfo.component,
+    iconClass: iconInfo.class,
+    route: route,
+    action: route ? null : 'custom',
+    appUrl: app.appUrl,
+    appType: app.appType,
+    badge: 0
+  }
+}
+
+// 常用应用 - 优先显示最近使用的应用，最多5个
+const commonApps = computed(() => {
+  if (searchQuery.value) {
+    return filteredApps.value.slice(0, 5)
+  }
+  // 如果有最近使用的应用，优先显示
+  if (recentApps.value.length > 0) {
+    return recentApps.value.slice(0, 5).map(transformApp)
+  }
+  return allApps.value.slice(0, 5).map(transformApp)
+})
+
+// 全量应用 - 搜索模式下显示所有匹配结果
+const otherApps = computed(() => {
+  if (searchQuery.value) {
+    return filteredApps.value.slice(5)
+  }
+  return allApps.value.slice(5).map(transformApp)
+})
+
+// 过滤后的应用（用于搜索）
+const filteredApps = computed(() => {
+  if (!searchQuery.value) {
+    return []
+  }
+  const query = searchQuery.value.toLowerCase()
+  return allApps.value
+    .filter(app => app.name.toLowerCase().includes(query) ||
+                   (app.description && app.description.toLowerCase().includes(query)) ||
+                   app.code.toLowerCase().includes(query))
+    .map(transformApp)
+})
 
 // 方法
 const handleMenuChange = (key) => {
   activeMenu.value = key
 }
 
-const handleAppClick = (app) => {
+const handleAppClick = async (app) => {
+  // 记录应用使用
+  if (app.id) {
+    try {
+      await recordAppUsage(app.id)
+    } catch (e) {
+      console.error('记录应用使用失败:', e)
+    }
+  }
+
   // 如果有 route，跳转到对应模块（通过 emit 切换 activeModule）
   if (app.route) {
     const moduleMap = {
@@ -433,6 +497,41 @@ const handlePunch = async (type) => {
 }
 
 const formatDate = (d) => d
+
+// 加载应用数据
+const loadApps = async () => {
+  try {
+    appsLoading.value = true
+    const res = await getAppsByCategory()
+    if (res.code === 200) {
+      // 将分类后的数据展平为数组
+      const apps = []
+      const categoryData = res.data || {}
+      Object.keys(categoryData).forEach(category => {
+        if (categoryData[category] && Array.isArray(categoryData[category])) {
+          apps.push(...categoryData[category])
+        }
+      })
+      allApps.value = apps
+    }
+  } catch (error) {
+    console.error('加载应用失败:', error)
+  } finally {
+    appsLoading.value = false
+  }
+}
+
+// 加载最近使用的应用
+const loadRecentApps = async () => {
+  try {
+    const res = await getRecentApps()
+    if (res.code === 200) {
+      recentApps.value = res.data || []
+    }
+  } catch (error) {
+    console.error('加载最近使用失败:', error)
+  }
+}
 
 // 加载数据方法
 const loadOverview = async () => {
@@ -542,6 +641,8 @@ onMounted(() => {
   timeInterval = setInterval(updateTime, 1000)
   // 加载数据
   loadOverview()
+  loadApps()
+  loadRecentApps()
   loadTodayAttendance()
   loadAttendanceRecords()
   loadTodos()

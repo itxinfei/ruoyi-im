@@ -173,3 +173,62 @@ export function getStatistics() {
     method: 'get'
   })
 }
+
+/**
+ * 获取工作台常用应用
+ * @returns {Promise}
+ */
+export function getCommonApps() {
+  return request({
+    url: '/api/im/workbench/apps',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取工作台应用分类
+ * @returns {Promise}
+ */
+export function getAppsByCategory() {
+  return request({
+    url: '/api/im/workbench/apps/category',
+    method: 'get'
+  })
+}
+
+/**
+ * 搜索工作台应用
+ * @param {string} keyword - 搜索关键词
+ * @returns {Promise}
+ */
+export function searchApps(keyword) {
+  return request({
+    url: '/api/im/workbench/apps/search',
+    method: 'get',
+    params: { keyword }
+  })
+}
+
+/**
+ * 获取最近使用的应用
+ * @returns {Promise}
+ */
+export function getRecentApps() {
+  return request({
+    url: '/api/im/workbench/apps/recent',
+    method: 'get'
+  })
+}
+
+/**
+ * 记录应用使用
+ * @param {number} appId - 应用ID
+ * @returns {Promise}
+ */
+export function recordAppUsage(appId) {
+  return request({
+    url: '/api/im/workbench/apps/record',
+    method: 'post',
+    params: { appId }
+  })
+}
