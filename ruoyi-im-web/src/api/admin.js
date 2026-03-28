@@ -110,18 +110,6 @@ export function getGroupList(params) {
 }
 
 /**
- * 获取群组详情
- * @param {Number} id - 群组ID
- * @returns {Promise}
- */
-export function getGroupDetail(id) {
-  return request({
-    url: `/api/admin/groups/${id}`,
-    method: 'get'
-  })
-}
-
-/**
  * 更新群组信息
  * @param {Number} id - 群组ID
  * @param {Object} data - 群组信息
@@ -157,17 +145,6 @@ export function batchDeleteGroups(ids) {
     url: '/api/admin/groups/batch',
     method: 'delete',
     data: ids
-  })
-}
-
-/**
- * 获取群组统计
- * @returns {Promise}
- */
-export function getGroupStats() {
-  return request({
-    url: '/api/admin/groups/stats',
-    method: 'get'
   })
 }
 
