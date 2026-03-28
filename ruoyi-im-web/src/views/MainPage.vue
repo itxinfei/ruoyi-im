@@ -140,8 +140,9 @@
  * MainPage.vue (完整版 - 对齐需求文档)
  * 支持所有导航模块的面板渲染
  */
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 import ImSideNavNew from '@/components/ImSideNavNew/index.vue'
 import ChatSessionList from '@/components/im/ChatSessionList.vue'
 import ChatWindow from '@/components/im/ChatWindow.vue'
@@ -190,6 +191,43 @@ const getModuleName = (id) => {
   }
   return map[id] || id
 }
+
+// 全局快捷键事件处理
+const handleGlobalSearch = () => {
+  activeModule.value = 'search'
+}
+
+const handleNewChat = () => {
+  activeModule.value = 'chat'
+  // 触发创建新会话事件
+  window.dispatchEvent(new CustomEvent('main:new-chat'))
+}
+
+const handleScreenshot = () => {
+  // 触发截图事件（通知截图组件）
+  window.dispatchEvent(new CustomEvent('main:screenshot'))
+  ElMessage.info('截图功能已触发')
+}
+
+const handleScrollToTop = () => {
+  // 触发滚动到顶部事件（通知聊天窗口）
+  window.dispatchEvent(new CustomEvent('main:scroll-to-top'))
+}
+
+// 快捷键事件监听
+onMounted(() => {
+  window.addEventListener('shortcut:global-search', handleGlobalSearch)
+  window.addEventListener('shortcut:new-chat', handleNewChat)
+  window.addEventListener('shortcut:screenshot', handleScreenshot)
+  window.addEventListener('shortcut:scroll-to-top', handleScrollToTop)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('shortcut:global-search', handleGlobalSearch)
+  window.removeEventListener('shortcut:new-chat', handleNewChat)
+  window.removeEventListener('shortcut:screenshot', handleScreenshot)
+  window.removeEventListener('shortcut:scroll-to-top', handleScrollToTop)
+})
 </script>
 
 <style scoped>

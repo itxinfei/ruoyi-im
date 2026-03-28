@@ -199,6 +199,8 @@ onMounted(() => {
   onMessage(handleNewMessage);
   onRead(handleReadReceipt);
   scrollToBottom();
+  // 监听滚动到顶部快捷键
+  window.addEventListener('main:scroll-to-top', scrollToTop);
 });
 
 // 8. 监听当前会话变化（保存旧草稿 + 恢复新草稿）
@@ -223,6 +225,7 @@ watch(() => currentSession.value?.id, async (newSessionId, oldSessionId) => {
 // 9. 组件卸载时清理
 onUnmounted(() => {
   cleanup();
+  window.removeEventListener('main:scroll-to-top', scrollToTop);
 });
 
 const checkIsGrouped = (msg, index) => {
@@ -419,6 +422,15 @@ const scrollToBottom = () => {
   nextTick(() => {
     if (listRef.value) {
       listRef.value.scrollTop = listRef.value.scrollHeight;
+    }
+  });
+};
+
+// 滚动到顶部
+const scrollToTop = () => {
+  nextTick(() => {
+    if (listRef.value) {
+      listRef.value.scrollTop = 0;
     }
   });
 };
