@@ -153,6 +153,23 @@
             </div>
           </div>
 
+          <!-- 热门问题推荐 -->
+          <div class="quick-section">
+            <h3 class="section-title">
+              试试这样问我
+            </h3>
+            <div class="hot-questions">
+              <div
+                v-for="q in hotQuestions"
+                :key="q.text"
+                class="hot-question"
+                @click="inputMessage = q.text"
+              >
+                {{ q.text }}
+              </div>
+            </div>
+          </div>
+
           <!-- 历史对话 -->
           <div v-if="chatHistory.length > 0" class="history-section">
             <div class="section-header">
@@ -241,6 +258,16 @@ const quickActions = [
   { id: 4, label: '代码', icon: 'DataAnalysis', color: 'var(--dt-info-color)', prompt: '请帮我写一段代码：' },
   { id: 5, label: '分析', icon: 'DataAnalysis', color: 'var(--dt-error-color)', prompt: '请帮我分析：' },
   { id: 6, label: '创意', icon: 'Sunny', color: 'var(--dt-brand-secondary)', prompt: '请给我一些创意想法：' }
+]
+
+// 热门问题推荐
+const hotQuestions = [
+  { text: '帮我写一封商务邮件' },
+  { text: '把这段中文翻译成英文' },
+  { text: '总结一下这个文档的主要内容' },
+  { text: '用Python写一个快速排序算法' },
+  { text: '分析一下今年的市场趋势' },
+  { text: '给我一些团队建设的创意' }
 ]
 
 // 加载对话历史
@@ -803,6 +830,29 @@ onMounted(() => {
   font-size: var(--dt-font-size-sm);
   color: var(--dt-text-primary);
   font-weight: var(--dt-font-weight-medium);
+}
+
+.hot-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dt-spacing-sm, 12px);
+}
+
+.hot-question {
+  background: var(--dt-bg-hover);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-xl);
+  padding: var(--dt-spacing-sm, 10px) var(--dt-spacing-md, 16px);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-brand-bg);
+    border-color: var(--dt-brand-color);
+    color: var(--dt-brand-color);
+  }
 }
 
 .history-section {
