@@ -88,6 +88,19 @@
                 </div>
                 <div class="card-tag">{{ cardInfo.cardType === 'group' ? '群聊名片' : '个人名片' }}</div>
               </div>
+              <!-- 位置 -->
+              <div v-else-if="message.type === 'LOCATION' && locationInfo" class="location-content" @click="openLocation">
+                <div class="location-map">
+                  <img :src="locationMapUrl" alt="位置" class="map-image" />
+                  <div class="location-overlay">
+                    <el-icon class="location-icon"><Location /></el-icon>
+                  </div>
+                </div>
+                <div class="location-info">
+                  <div class="location-name">{{ locationInfo.name }}</div>
+                  <div v-if="locationInfo.address" class="location-address">{{ locationInfo.address }}</div>
+                </div>
+              </div>
             </div>
 
             <!-- 发送方：状态与已读 -->
@@ -158,7 +171,7 @@
  */
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Loading, WarningFilled, ChatLineRound, DocumentCopy, Position, MoreFilled, RefreshLeft, Delete, Star, Document, Microphone, Edit, VideoPlay } from '@element-plus/icons-vue';
+import { Loading, WarningFilled, ChatLineRound, DocumentCopy, Position, MoreFilled, RefreshLeft, Delete, Star, Document, Microphone, Edit, VideoPlay, Location } from '@element-plus/icons-vue';
 import VoiceMessageBubble from '@/components/Chat/VoiceMessageBubble.vue';
 
 const props = defineProps({
@@ -229,6 +242,40 @@ const cardInfo = computed(() => {
     return null;
   }
 });
+
+// 解析 LOCATION 类型消息
+const locationInfo = computed(() => {
+  if (props.message.type !== 'LOCATION') return null;
+  try {
+    const content = typeof props.message.content === 'string'
+      ? JSON.parse(props.message.content)
+      : props.message.content;
+    return {
+      name: content.name || '位置',
+      address: content.address || '',
+      latitude: content.latitude || 0,
+      longitude: content.longitude || 0
+    };
+  } catch (e) {
+    return null;
+  }
+});
+
+// 位置地图 URL（使用 OpenStreetMap 静态图）
+const locationMapUrl = computed(() => {
+  if (!locationInfo.value) return '';
+  const { latitude, longitude } = locationInfo.value;
+  return `https://static-maps.yandex.ru/1.x/?ll=${longitude},${latitude}&z=15&l=map&size=300,150`;
+});
+
+// 点击位置消息
+const openLocation = () => {
+  if (locationInfo.value) {
+    // 打开地图查看位置
+    const { latitude, longitude } = locationInfo.value;
+    window.open(`https://maps.google.com/maps?q=${latitude},${longitude}`, '_blank');
+  }
+};
 
 // 点击名片消息
 const handleCardClick = () => {
@@ -632,6 +679,77 @@ const formatDisplayUrl = (url) => {
   padding: 2px 6px;
   border-radius: 2px;
   flex-shrink: 0;
+}
+
+/* 位置消息 */
+.location-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: 280px;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.location-content:hover {
+  background: var(--dt-bg-hover);
+}
+
+.location-map {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  background: var(--dt-bg-body);
+}
+
+.map-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.location-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  background: var(--dt-brand-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.location-icon {
+  font-size: 20px;
+  color: white;
+}
+
+.location-info {
+  padding: 10px 12px;
+}
+
+.location-name {
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-primary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.location-address {
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 链接卡片 */

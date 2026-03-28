@@ -92,6 +92,11 @@
         <User />
       </el-icon>
 
+      <!-- 位置 -->
+      <el-icon class="tool-icon" title="位置" @click="openLocationPicker">
+        <LocationInformation />
+      </el-icon>
+
       <!-- 语音录制 -->
       <el-icon class="tool-icon" :class="{ 'is-recording': isRecording }" title="语音" @click="toggleRecording">
         <Microphone />
@@ -186,6 +191,33 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 位置选择对话框 -->
+    <el-dialog
+      v-model="locationPickerVisible"
+      title="发送位置"
+      width="420px"
+      append-to-body
+    >
+      <el-form :model="locationForm" label-width="80px">
+        <el-form-item label="位置名称" required>
+          <el-input v-model="locationForm.name" placeholder="如：公司、家里" maxlength="50" />
+        </el-form-item>
+        <el-form-item label="详细地址">
+          <el-input v-model="locationForm.address" placeholder="如：北京市朝阳区xxx路" maxlength="100" />
+        </el-form-item>
+        <el-form-item label="经度">
+          <el-input-number v-model="locationForm.latitude" :precision="6" :step="0.000001" placeholder="纬度" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="纬度">
+          <el-input-number v-model="locationForm.longitude" :precision="6" :step="0.000001" placeholder="经度" style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="locationPickerVisible = false">取消</el-button>
+        <el-button type="primary" @click="sendLocation">发送</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -194,7 +226,7 @@
  * ChatInputArea.vue (对齐钉钉无边框沉浸式输入 & 状态驱动发送按钮 + 表情选择器 + 图片预览)
  */
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
-import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search } from '@element-plus/icons-vue';
+import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search, LocationInformation } from '@element-plus/icons-vue';
 
 const props = defineProps({
   replyingMessage: Object,
@@ -227,6 +259,15 @@ let recordingTimer = null;
 const cardPickerVisible = ref(false);
 const cardSearchKeyword = ref('');
 const contactList = ref([]);
+
+// 位置选择状态
+const locationPickerVisible = ref(false);
+const locationForm = ref({
+  name: '',
+  address: '',
+  latitude: 39.9042,
+  longitude: 116.4074
+});
 
 // 监听外部草稿变化（会话切换时恢复草稿）
 watch(() => props.modelValue, (newVal) => {
@@ -437,6 +478,34 @@ const selectCardContact = (contact) => {
       userName: contact.name,
       userAvatar: contact.avatar,
       department: contact.department || ''
+    }
+  });
+};
+
+// 打开位置选择器
+const openLocationPicker = () => {
+  locationForm.value = {
+    name: '',
+    address: '',
+    latitude: 39.9042,
+    longitude: 116.4074
+  };
+  locationPickerVisible.value = true;
+};
+
+// 发送位置
+const sendLocation = () => {
+  if (!locationForm.value.name.trim()) {
+    return;
+  }
+  locationPickerVisible.value = false;
+  emit('send', {
+    type: 'LOCATION',
+    location: {
+      name: locationForm.value.name,
+      address: locationForm.value.address || '',
+      latitude: locationForm.value.latitude,
+      longitude: locationForm.value.longitude
     }
   });
 };

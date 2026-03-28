@@ -388,6 +388,11 @@ const processSendMessage = async (payload) => {
     content = JSON.stringify(payload.card);
   }
 
+  // 如果是位置消息，将 location 对象序列化为 JSON
+  if (payload.type === 'LOCATION' && payload.location) {
+    content = JSON.stringify(payload.location);
+  }
+
   const messageData = {
     sessionId: currentSession.value.id,
     content: content,
