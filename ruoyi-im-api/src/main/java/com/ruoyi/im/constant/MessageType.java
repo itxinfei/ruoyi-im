@@ -25,6 +25,9 @@ public class MessageType {
     /** 位置消息 */
     public static final String LOCATION = "location";
 
+    /** 名片消息 */
+    public static final String CARD = "card";
+
     /** 系统消息 */
     public static final String SYSTEM = "system";
 }

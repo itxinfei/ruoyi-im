@@ -75,6 +75,23 @@
         <el-icon class="tool-icon" title="文件"><Folder /></el-icon>
       </el-upload>
 
+      <!-- 视频上传 -->
+      <el-upload
+        action="#"
+        :show-file-list="false"
+        :auto-upload="false"
+        :on-change="processVideoSelect"
+        accept="video/*"
+        class="upload-wrapper"
+      >
+        <el-icon class="tool-icon" title="视频"><VideoCamera /></el-icon>
+      </el-upload>
+
+      <!-- 名片 -->
+      <el-icon class="tool-icon" title="名片" @click="openCardPicker">
+        <User />
+      </el-icon>
+
       <!-- 语音录制 -->
       <el-icon class="tool-icon" :class="{ 'is-recording': isRecording }" title="语音" @click="toggleRecording">
         <Microphone />
@@ -98,6 +115,16 @@
       <div v-for="(img, index) in pendingImages" :key="index" class="preview-item">
         <el-image :src="img.url" fit="cover" class="preview-img" />
         <el-icon class="preview-remove" @click="removeImage(index)"><Close /></el-icon>
+      </div>
+    </div>
+
+    <!-- 视频预览区 -->
+    <div v-if="pendingVideos.length > 0" class="video-preview-bar">
+      <div v-for="(video, index) in pendingVideos" :key="index" class="preview-item video-preview-item">
+        <video :src="video.url" class="preview-video" />
+        <el-icon class="preview-duration"><Clock /></el-icon>
+        <span class="preview-duration-text">{{ formatDuration(video.duration) }}</span>
+        <el-icon class="preview-remove" @click="removeVideo(index)"><Close /></el-icon>
       </div>
     </div>
 
@@ -126,6 +153,39 @@
         发送
       </button>
     </div>
+
+    <!-- 名片选择对话框 -->
+    <el-dialog
+      v-model="cardPickerVisible"
+      title="选择联系人"
+      width="400px"
+      append-to-body
+    >
+      <div class="card-picker-search">
+        <el-input v-model="cardSearchKeyword" placeholder="搜索联系人" clearable>
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+      </div>
+      <div class="card-picker-list">
+        <div
+          v-for="contact in filteredContacts"
+          :key="contact.id"
+          class="card-picker-item"
+          @click="selectCardContact(contact)"
+        >
+          <img :src="contact.avatar || '/avatars/default.png'" class="card-avatar" />
+          <div class="card-info">
+            <div class="card-name">{{ contact.name }}</div>
+            <div class="card-dept">{{ contact.department || '' }}</div>
+          </div>
+        </div>
+        <div v-if="filteredContacts.length === 0" class="card-empty">
+          暂无联系人
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -134,7 +194,7 @@
  * ChatInputArea.vue (对齐钉钉无边框沉浸式输入 & 状态驱动发送按钮 + 表情选择器 + 图片预览)
  */
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
-import { Close, Star, Picture, Folder, Upload, Microphone } from '@element-plus/icons-vue';
+import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search } from '@element-plus/icons-vue';
 
 const props = defineProps({
   replyingMessage: Object,
@@ -151,6 +211,7 @@ const editorRef = ref(null);
 const hasContent = ref(false);
 const emojiPickerVisible = ref(false);
 const pendingImages = ref([]);
+const pendingVideos = ref([]);
 const isDragover = ref(false);
 let isInternalSet = false; // 防止 watch 设置时触发 handleInput 冒泡
 const isEditMode = ref(false); // 编辑模式标识
@@ -161,6 +222,11 @@ const recordingDuration = ref(0);
 let mediaRecorder = null;
 let recordedChunks = [];
 let recordingTimer = null;
+
+// 名片选择状态
+const cardPickerVisible = ref(false);
+const cardSearchKeyword = ref('');
+const contactList = ref([]);
 
 // 监听外部草稿变化（会话切换时恢复草稿）
 watch(() => props.modelValue, (newVal) => {
@@ -197,9 +263,9 @@ const emojiList = [
   '😤', '😢', '😭', '😦', '😧', '😨', '😩', '🤯', '😬', '😰', '😱', '👍', '👎'
 ];
 
-// 是否可以发送（有文字或有图片）
+// 是否可以发送（有文字或有图片或有视频）
 const canSend = computed(() => {
-  return hasContent.value || pendingImages.value.length > 0;
+  return hasContent.value || pendingImages.value.length > 0 || pendingVideos.value.length > 0;
 });
 
 const handleInput = () => {
@@ -257,6 +323,14 @@ const executeSendMessage = () => {
     pendingImages.value = [];
   }
 
+  // 发送视频
+  if (pendingVideos.value.length > 0) {
+    pendingVideos.value.forEach(video => {
+      emit('send', { type: 'VIDEO', file: video.file, duration: video.duration });
+    });
+    pendingVideos.value = [];
+  }
+
   // 发送文字
   const content = editorRef.value.innerText.trim();
   if (content) {
@@ -283,6 +357,34 @@ const processFileSelect = (file) => {
   emit('send', { type: 'FILE', file: file.raw, fileName: file.name });
 };
 
+// 处理视频选择
+const processVideoSelect = (file) => {
+  addPendingVideo(file.raw);
+};
+
+// 添加待发送视频
+const addPendingVideo = (file) => {
+  const url = URL.createObjectURL(file);
+  // 获取视频时长
+  const video = document.createElement('video');
+  video.preload = 'metadata';
+  video.onloadedmetadata = () => {
+    const duration = Math.floor(video.duration);
+    pendingVideos.value.push({ file, url, duration });
+    URL.revokeObjectURL(url);
+  };
+  video.onerror = () => {
+    pendingVideos.value.push({ file, url, duration: 0 });
+  };
+  video.src = url;
+};
+
+// 移除待发送视频
+const removeVideo = (index) => {
+  URL.revokeObjectURL(pendingVideos.value[index].url);
+  pendingVideos.value.splice(index, 1);
+};
+
 // 添加待发送图片
 const addPendingImage = (file) => {
   const url = URL.createObjectURL(file);
@@ -293,6 +395,50 @@ const addPendingImage = (file) => {
 const removeImage = (index) => {
   URL.revokeObjectURL(pendingImages.value[index].url);
   pendingImages.value.splice(index, 1);
+};
+
+// 过滤联系人
+const filteredContacts = computed(() => {
+  if (!cardSearchKeyword.value) return contactList.value;
+  const keyword = cardSearchKeyword.value.toLowerCase();
+  return contactList.value.filter(c =>
+    c.name?.toLowerCase().includes(keyword) ||
+    c.department?.toLowerCase().includes(keyword)
+  );
+});
+
+// 打开名片选择器
+const openCardPicker = async () => {
+  cardSearchKeyword.value = '';
+  cardPickerVisible.value = true;
+  // 获取联系人列表
+  try {
+    const res = await fetch('/api/im/contact/list', {
+      headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      contactList.value = data.data || [];
+    }
+  } catch (e) {
+    console.error('获取联系人失败', e);
+    contactList.value = [];
+  }
+};
+
+// 选择联系人发送名片
+const selectCardContact = (contact) => {
+  cardPickerVisible.value = false;
+  emit('send', {
+    type: 'CARD',
+    card: {
+      cardType: 'user',
+      userId: contact.id,
+      userName: contact.name,
+      userAvatar: contact.avatar,
+      department: contact.department || ''
+    }
+  });
 };
 
 const clearReply = () => emit('clear-reply');
@@ -320,6 +466,8 @@ const handleDrop = (e) => {
   for (const file of files) {
     if (file.type.startsWith('image/')) {
       addPendingImage(file);
+    } else if (file.type.startsWith('video/')) {
+      addPendingVideo(file);
     } else {
       emit('send', { type: 'FILE', file, fileName: file.name });
     }
@@ -665,6 +813,112 @@ onMounted(() => {
   justify-content: center;
   cursor: pointer;
   font-size: 12px;
+}
+
+/* 视频预览区 */
+.video-preview-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 20px;
+  background-color: var(--dt-bg-body);
+  overflow-x: auto;
+}
+
+.video-preview-item {
+  position: relative;
+  width: 96px;
+  height: 64px;
+  border-radius: var(--dt-radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: var(--dt-bg-card);
+}
+
+.preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-duration {
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+  font-size: 10px;
+  color: var(--dt-text-white);
+  background-color: var(--dt-overlay-bg);
+  border-radius: 2px;
+  padding: 1px 3px;
+}
+
+.preview-duration-text {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 10px;
+  color: var(--dt-text-white);
+  background-color: var(--dt-overlay-bg);
+  border-radius: 2px;
+  padding: 1px 3px;
+}
+
+/* 名片选择器 */
+.card-picker-search {
+  margin-bottom: 16px;
+}
+
+.card-picker-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.card-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--dt-radius-sm);
+  cursor: pointer;
+  transition: background-color var(--dt-transition-fast);
+}
+
+.card-picker-item:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+.card-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--dt-radius-sm);
+  object-fit: cover;
+}
+
+.card-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.card-name {
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-dept {
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-empty {
+  text-align: center;
+  padding: 24px;
+  color: var(--dt-text-tertiary);
+  font-size: var(--dt-font-size-sm);
 }
 
 /* 主输入区 */

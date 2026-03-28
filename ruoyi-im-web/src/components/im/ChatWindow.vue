@@ -355,7 +355,7 @@ const processSendMessage = async (payload) => {
   let messageType = payload.type || 'TEXT';
 
   // 如果是图片或文件，先上传获取URL
-  if (payload.type === 'IMAGE' || payload.type === 'FILE' || payload.type === 'VOICE') {
+  if (payload.type === 'IMAGE' || payload.type === 'FILE' || payload.type === 'VOICE' || payload.type === 'VIDEO') {
     const formData = new FormData();
     formData.append('file', payload.file);
     if (payload.fileName) {
@@ -371,7 +371,7 @@ const processSendMessage = async (payload) => {
           fileUrl: res.data.url,
           fileName: payload.fileName || res.data.fileName || payload.file?.name,
           fileSize: payload.file?.size,
-          duration: payload.duration || null
+          duration: payload.duration || res.data.duration || null
         });
       } else {
         throw new Error('上传失败');
@@ -381,6 +381,11 @@ const processSendMessage = async (payload) => {
       ElMessage.error('文件上传失败');
       return;
     }
+  }
+
+  // 如果是名片消息，将 card 对象序列化为 JSON
+  if (payload.type === 'CARD' && payload.card) {
+    content = JSON.stringify(payload.card);
   }
 
   const messageData = {

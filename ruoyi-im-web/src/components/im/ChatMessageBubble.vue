@@ -53,6 +53,14 @@
               <div v-else-if="message.type === 'IMAGE'" class="image-content">
                 <el-image :src="message.fileUrl" :preview-src-list="[message.fileUrl]" fit="cover" class="content-img" />
               </div>
+              <!-- 视频 -->
+              <div v-else-if="message.type === 'VIDEO'" class="video-content" @click="openVideoPlayer">
+                <video :src="message.fileUrl" class="content-video" />
+                <div class="video-overlay">
+                  <el-icon class="play-icon"><VideoPlay /></el-icon>
+                </div>
+                <span v-if="message.duration" class="video-duration">{{ formatVideoDuration(message.duration) }}</span>
+              </div>
               <!-- 文件 -->
               <div v-else-if="message.type === 'FILE'" class="file-content" @click="handleFileClick">
                 <el-icon><Document /></el-icon>
@@ -70,6 +78,15 @@
                   <div v-if="linkInfo.description" class="link-desc">{{ linkInfo.description }}</div>
                   <div class="link-url">{{ formatDisplayUrl(linkInfo.url) }}</div>
                 </div>
+              </div>
+              <!-- 名片 -->
+              <div v-else-if="message.type === 'CARD' && cardInfo" class="card-content" @click="handleCardClick">
+                <img :src="cardInfo.userAvatar || '/avatars/default.png'" class="card-avatar" />
+                <div class="card-info">
+                  <div class="card-name">{{ cardInfo.userName }}</div>
+                  <div class="card-dept">{{ cardInfo.department || '' }}</div>
+                </div>
+                <div class="card-tag">{{ cardInfo.cardType === 'group' ? '群聊名片' : '个人名片' }}</div>
               </div>
             </div>
 
@@ -141,7 +158,7 @@
  */
 import { ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Loading, WarningFilled, ChatLineRound, DocumentCopy, Position, MoreFilled, RefreshLeft, Delete, Star, Document, Microphone, Edit } from '@element-plus/icons-vue';
+import { Loading, WarningFilled, ChatLineRound, DocumentCopy, Position, MoreFilled, RefreshLeft, Delete, Star, Document, Microphone, Edit, VideoPlay } from '@element-plus/icons-vue';
 import VoiceMessageBubble from '@/components/Chat/VoiceMessageBubble.vue';
 
 const props = defineProps({
@@ -193,6 +210,37 @@ const linkInfo = computed(() => {
     return { url: props.message.content, title: '链接预览', description: '', imageUrl: '' };
   }
 });
+
+// 解析 CARD 类型消息
+const cardInfo = computed(() => {
+  if (props.message.type !== 'CARD') return null;
+  try {
+    const content = typeof props.message.content === 'string'
+      ? JSON.parse(props.message.content)
+      : props.message.content;
+    return {
+      cardType: content.cardType || 'user',
+      userId: content.userId || content.groupId,
+      userName: content.userName || content.groupName || '未知',
+      userAvatar: content.userAvatar || content.groupAvatar || '/avatars/default.png',
+      department: content.department || (content.memberCount ? `群成员 ${content.memberCount} 人` : '')
+    };
+  } catch (e) {
+    return null;
+  }
+});
+
+// 点击名片消息
+const handleCardClick = () => {
+  if (cardInfo.value) {
+    // 根据名片类型跳转：用户详情或群聊
+    if (cardInfo.value.cardType === 'group') {
+      // TODO: 跳转到群聊
+    } else {
+      // TODO: 跳转到用户详情
+    }
+  }
+};
 
 // 解析 TEXT 消息中的 URL 和纯文本
 const parsedTextParts = computed(() => {
@@ -278,6 +326,24 @@ const handleFileClick = () => {
     return
   }
   window.open(fileUrl, '_blank')
+};
+
+// 打开视频播放器
+const openVideoPlayer = () => {
+  const fileUrl = props.message.fileUrl
+  if (!fileUrl) {
+    ElMessage.info('视频地址无效')
+    return
+  }
+  window.open(fileUrl, '_blank')
+};
+
+// 格式化视频时长
+const formatVideoDuration = (seconds) => {
+  if (!seconds) return ''
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
 };
 
 const formatDisplayUrl = (url) => {
@@ -436,6 +502,53 @@ const formatDisplayUrl = (url) => {
   display: block;
 }
 
+/* 视频消息 */
+.video-content {
+  position: relative;
+  max-width: 280px;
+  border-radius: var(--dt-radius-md);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.content-video {
+  width: 100%;
+  max-height: 200px;
+  display: block;
+  background-color: var(--dt-bg-card);
+}
+
+.video-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity var(--dt-transition-fast);
+}
+
+.video-content:hover .video-overlay {
+  opacity: 1;
+}
+
+.play-icon {
+  font-size: 48px;
+  color: var(--dt-text-white);
+}
+
+.video-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 12px;
+  color: var(--dt-text-white);
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 2px 6px;
+  border-radius: var(--dt-radius-sm);
+}
+
 /* 文件消息 */
 .file-content {
   display: flex;
@@ -461,6 +574,64 @@ const formatDisplayUrl = (url) => {
 
 .voice-duration {
   font-size: 12px;
+}
+
+/* 名片消息 */
+.card-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+  max-width: 240px;
+  padding: 8px 12px;
+  background-color: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
+  cursor: pointer;
+}
+
+.card-content:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+.card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--dt-radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.card-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.card-name {
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-primary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-dept {
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.card-tag {
+  font-size: 10px;
+  color: var(--dt-brand-color);
+  background-color: var(--dt-brand-bg);
+  padding: 2px 6px;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 /* 链接卡片 */
