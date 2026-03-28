@@ -207,7 +207,7 @@ const getBarHeight = (index) => {
     @for $i from 1 through 24 {
       &:nth-child(#{$i}) {
         animation-delay: #{$i * 0.03}s;
-        animation-duration: #{0.4 + math.div(random(4), 10)}s;
+        animation-duration: calc(0.4s + #{random(4)} * 0.1s);
       }
     }
   }
