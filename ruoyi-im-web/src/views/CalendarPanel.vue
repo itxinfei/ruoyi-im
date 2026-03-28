@@ -359,8 +359,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import {
   Plus, ArrowLeft, ArrowRight, Clock, Location, Document, User
 } from '@element-plus/icons-vue'
@@ -385,8 +385,11 @@ const submitting = ref(false)
 const searchKeyword = ref('')
 const selectedCategories = ref(['work', 'meeting', 'personal', 'reminder'])
 const formRef = ref(null)
-
 const weekDays = ['日', '一', '二', '三', '四', '五', '六']
+
+// 日程提醒状态
+const remindedEvents = ref(new Set()) // 已提醒的日程ID集合
+let reminderTimer = null
 
 // 可用用户列表（模拟数据）
 const availableUsers = ref([
@@ -846,7 +849,66 @@ watch(currentView, () => {
 
 onMounted(() => {
   loadEvents()
+  // 启动日程提醒检查定时器
+  startReminderChecker()
 })
+
+onUnmounted(() => {
+  // 清理定时器
+  if (reminderTimer) {
+    clearInterval(reminderTimer)
+    reminderTimer = null
+  }
+})
+
+// 检查日程提醒
+function startReminderChecker() {
+  // 每分钟检查一次
+  reminderTimer = setInterval(() => {
+    checkUpcomingReminders()
+  }, 60000)
+}
+
+// 检查即将到来的日程并发送提醒
+function checkUpcomingReminders() {
+  const now = Date.now()
+  events.value.forEach(event => {
+    if (!event.startTime || remindedEvents.value.has(event.id)) return
+    // 计算提醒时间
+    const reminderMinutes = parseInt(event.reminder) || 0
+    if (reminderMinutes === 0) return // 不提醒
+    const startTime = new Date(event.startTime).getTime()
+    const reminderTime = startTime - reminderMinutes * 60 * 1000
+    // 如果当前时间在提醒时间前后30秒内
+    if (Math.abs(now - reminderTime) < 30000) {
+      remindedEvents.value.add(event.id)
+      showReminderNotification(event)
+    }
+  })
+}
+
+// 显示日程提醒通知
+function showReminderNotification(event) {
+  const reminderText = getReminderText(event.reminder)
+  // 使用 Element Plus 的 Notification
+  ElNotification({
+    title: '日程提醒',
+    message: `${event.title} 将在${reminderText}开始`,
+    type: 'info',
+    duration: 5000
+  })
+}
+
+// 获取提醒时间文本
+function getReminderText(minutes) {
+  if (!minutes || minutes === 'none') return '不提醒'
+  const m = parseInt(minutes)
+  if (m === 0) return '现在'
+  if (m < 60) return `${m}分钟`
+  if (m === 60) return '1小时'
+  if (m === 1440) return '1天'
+  return `${m}分钟`
+}
 </script>
 
 <style scoped lang="scss">
