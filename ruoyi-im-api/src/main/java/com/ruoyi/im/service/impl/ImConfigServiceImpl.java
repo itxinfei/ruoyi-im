@@ -63,6 +63,16 @@ public class ImConfigServiceImpl implements ImConfigService {
         DEFAULT_GENERAL_SETTINGS.put("enterToSend", true);
     }
 
+    // 默认快捷键设置
+    private static final Map<String, Object> DEFAULT_SHORTCUT_SETTINGS = new HashMap<>();
+    static {
+        DEFAULT_SHORTCUT_SETTINGS.put("enterToSend", true);
+        DEFAULT_SHORTCUT_SETTINGS.put("globalSearch", "Ctrl+K");
+        DEFAULT_SHORTCUT_SETTINGS.put("newChat", "Ctrl+N");
+        DEFAULT_SHORTCUT_SETTINGS.put("screenshot", "");
+        DEFAULT_SHORTCUT_SETTINGS.put("scrollToTop", "Home");
+    }
+
     @Override
     public Map<String, Object> getNotificationSettings(Long userId) {
         return getUserSettings(userId, "NOTIFICATION", DEFAULT_NOTIFICATION_SETTINGS);
@@ -94,6 +104,17 @@ public class ImConfigServiceImpl implements ImConfigService {
     @Transactional(rollbackFor = Exception.class)
     public void updateGeneralSettings(Long userId, Map<String, Object> settings) {
         updateUserSettings(userId, "DISPLAY", settings);
+    }
+
+    @Override
+    public Map<String, Object> getShortcutSettings(Long userId) {
+        return getUserSettings(userId, "SHORTCUT", DEFAULT_SHORTCUT_SETTINGS);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateShortcutSettings(Long userId, Map<String, Object> settings) {
+        updateUserSettings(userId, "SHORTCUT", settings);
     }
 
     @Override

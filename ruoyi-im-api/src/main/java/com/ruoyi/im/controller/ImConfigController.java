@@ -165,13 +165,45 @@ public class ImConfigController {
      * @return 操作结果
      * @apiNote 解除拉黑后可以正常接收该用户的消息
      */
-    
+
     @DeleteMapping("/blocked/{targetUserId}")
     public Result<Void> unblockUser(
             @PathVariable Long targetUserId) {
         Long userId = SecurityUtils.getLoginUserId();
         imConfigService.unblockUser(userId, targetUserId);
         return Result.success("已解除拉黑");
+    }
+
+    /**
+     * 获取快捷键设置
+     * 获取当前用户的快捷键配置
+     *
+     * @return 快捷键设置
+     * @apiNote 包含发送消息、全局搜索、新建会话等快捷键配置
+     */
+
+    @GetMapping("/shortcut")
+    public Result<Map<String, Object>> getShortcutSettings() {
+        Long userId = SecurityUtils.getLoginUserId();
+        Map<String, Object> settings = imConfigService.getShortcutSettings(userId);
+        return Result.success(settings);
+    }
+
+    /**
+     * 更新快捷键设置
+     * 更新当前用户的快捷键配置
+     *
+     * @param settings 设置项
+     * @return 更新结果
+     * @apiNote 支持部分更新，只修改传入的设置项
+     */
+
+    @PutMapping("/shortcut")
+    public Result<Void> updateShortcutSettings(
+            @RequestBody Map<String, Object> settings) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imConfigService.updateShortcutSettings(userId, settings);
+        return Result.success("更新成功");
     }
 }
 

@@ -81,4 +81,20 @@ public interface ImConfigService {
      * @param targetUserId 目标用户ID
      */
     void unblockUser(Long userId, Long targetUserId);
+
+    /**
+     * 获取快捷键设置
+     *
+     * @param userId 用户ID
+     * @return 快捷键设置
+     */
+    Map<String, Object> getShortcutSettings(Long userId);
+
+    /**
+     * 更新快捷键设置
+     *
+     * @param userId 用户ID
+     * @param settings 设置项
+     */
+    void updateShortcutSettings(Long userId, Map<String, Object> settings);
 }
