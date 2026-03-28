@@ -4,6 +4,19 @@
       <h2 class="panel-title">
         邮箱
       </h2>
+      <div class="mail-search">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索邮件主题/发件人"
+          clearable
+          @keyup.enter="handleSearch"
+          @clear="handleSearchClear"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+      </div>
       <button class="compose-btn" @click="showComposeDialog = true">
         <el-icon><Edit /></el-icon>
         写邮件
@@ -29,6 +42,12 @@
 
         <!-- 邮件列表 -->
         <div class="mail-list">
+          <!-- 搜索结果提示 -->
+          <div v-if="isSearchMode" class="search-result-tip">
+            <span>搜索"{{ searchKeyword }}"的结果 ({{ searchResults.length }} 封邮件)</span>
+            <el-button text size="small" @click="handleSearchClear">清除搜索</el-button>
+          </div>
+
           <div v-if="loading" class="loading-state">
             <el-icon class="is-loading">
               <Loading />
@@ -36,16 +55,16 @@
             <span>加载中...</span>
           </div>
 
-          <div v-else-if="emails.length === 0" class="empty-state">
+          <div v-else-if="displayEmails.length === 0" class="empty-state">
             <el-icon class="empty-icon"><Message /></el-icon>
             <p class="empty-text">
-              暂无邮件
+              {{ isSearchMode ? '未找到匹配的邮件' : '暂无邮件' }}
             </p>
           </div>
 
           <div v-else class="email-list">
             <div
-              v-for="email in emails"
+              v-for="email in displayEmails"
               :key="email.id"
               class="email-item"
               :class="{ unread: !email.read }"
@@ -92,12 +111,12 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { Loading, Edit, Box, Promotion, Document, Star, Delete, Message } from '@element-plus/icons-vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { Loading, Edit, Box, Promotion, Document, Star, Delete, Message, Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ComposeMailDialog from '@/components/ComposeMailDialog/index.vue'
 import MailDetailDialog from '@/components/MailDetailDialog/index.vue'
-import { getMailList, markAsRead, deleteMail } from '@/api/im/mail'
+import { getMailList, markAsRead, deleteMail, searchMail } from '@/api/im/mail'
 
 const loading = ref(false)
 const showComposeDialog = ref(false)
@@ -106,6 +125,16 @@ const selectedEmail = ref(null)
 const replyToEmail = ref(null)
 const activeFolder = ref('inbox')
 const emails = ref([])
+
+// 搜索相关状态
+const searchKeyword = ref('')
+const isSearchMode = ref(false)
+const searchResults = ref([])
+
+// 计算属性：显示的邮件列表
+const displayEmails = computed(() => {
+  return isSearchMode.value ? searchResults.value : emails.value
+})
 
 
 const folders = ref([
@@ -119,7 +148,44 @@ const folders = ref([
 // 监听文件夹切换
 watch(activeFolder, () => {
   loadMails()
+  // 切换文件夹时退出搜索模式
+  if (isSearchMode.value) {
+    handleSearchClear()
+  }
 })
+
+// 搜索邮件
+const handleSearch = async () => {
+  if (!searchKeyword.value.trim()) {
+    handleSearchClear()
+    return
+  }
+  loading.value = true
+  isSearchMode.value = true
+  try {
+    const res = await searchMail(searchKeyword.value.trim())
+    if (res.code === 200) {
+      searchResults.value = (res.data || []).map(email => ({
+        ...email,
+        avatarColor: getRandomColor()
+      }))
+    } else {
+      ElMessage.error(res.msg || '搜索失败')
+    }
+  } catch (error) {
+    console.error('搜索邮件失败', error)
+    ElMessage.error('搜索失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 清除搜索
+const handleSearchClear = () => {
+  searchKeyword.value = ''
+  isSearchMode.value = false
+  searchResults.value = []
+}
 
 // 加载邮件列表
 const loadMails = async () => {
@@ -262,6 +328,12 @@ onMounted(() => {
   margin: 0;
 }
 
+.mail-search {
+  flex: 1;
+  max-width: 320px;
+  margin: 0 var(--dt-spacing-md, 16px);
+}
+
 .compose-btn {
   display: flex;
   align-items: center;
@@ -355,6 +427,17 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--dt-border-light);
+}
+
+.search-result-tip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--dt-bg-hover);
+  border-bottom: 1px solid var(--dt-border-light);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-secondary);
 }
 
 .loading-state,

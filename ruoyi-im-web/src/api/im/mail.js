@@ -90,3 +90,16 @@ export function starMail(id, starred) {
     params: { starred }
   })
 }
+
+/**
+ * 搜索邮件
+ * @param {string} keyword - 搜索关键词
+ * @returns {Promise}
+ */
+export function searchMail(keyword) {
+  return request({
+    url: '/api/im/email/search',
+    method: 'get',
+    params: { keyword }
+  })
+}
