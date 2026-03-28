@@ -39,6 +39,43 @@
         </el-col>
       </el-row>
 
+      <!-- 群组统计卡片 -->
+      <el-row :gutter="12" class="stats-row">
+        <el-col :xs="24" :sm="8">
+          <div class="stat-card">
+            <div class="stat-icon groups">
+              <el-icon><ChatDotRound /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ stats.totalGroups || 0 }}</div>
+              <div class="stat-label">群组总数</div>
+            </div>
+          </div>
+        </el-col>
+        <el-col :xs="24" :sm="8">
+          <div class="stat-card">
+            <div class="stat-icon active">
+              <el-icon><ChatLineSquare /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ stats.activeGroups || 0 }}</div>
+              <div class="stat-label">活跃群组(近7天)</div>
+            </div>
+          </div>
+        </el-col>
+        <el-col :xs="24" :sm="8">
+          <div class="stat-card">
+            <div class="stat-icon new">
+              <el-icon><Plus /></el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ stats.newGroups || 0 }}</div>
+              <div class="stat-label">新增群组(近7天)</div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+
       <div v-if="selectedGroups.length" class="batch-actions">
         <span>已选择 {{ selectedGroups.length }} 个群组</span>
         <el-space>
@@ -197,6 +234,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import {
   getGroupList,
+  getGroupActiveStats,
   deleteGroup,
   batchDeleteGroups,
   getGroupMembers,
@@ -211,6 +249,7 @@ const pageNum = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const selectedGroups = ref([])
+const stats = ref({ totalGroups: 0, activeGroups: 0, newGroups: 0 })
 
 const memberDialogVisible = ref(false)
 const memberLoading = ref(false)
@@ -229,11 +268,24 @@ const loadGroups = async () => {
     if (res.code === 200) {
       groupList.value = res.data.list || []
       total.value = res.data.total || 0
+      stats.value.totalGroups = res.data.total || 0
     }
   } catch (error) {
     ElMessage.error('加载群组列表失败')
   } finally {
     loading.value = false
+  }
+}
+
+const loadStats = async () => {
+  try {
+    const res = await getGroupActiveStats(7)
+    if (res.code === 200) {
+      stats.value.activeGroups = res.data?.activeGroups || 0
+      stats.value.newGroups = res.data?.newGroups || 0
+    }
+  } catch (error) {
+    // 静默失败，不影响主流程
   }
 }
 
@@ -372,7 +424,10 @@ const handleSaveEdit = async () => {
   }
 }
 
-onMounted(loadGroups)
+onMounted(() => {
+  loadGroups()
+  loadStats()
+})
 </script>
 
 <style scoped>
@@ -406,6 +461,48 @@ onMounted(loadGroups)
 
 .toolbar-row {
   margin-bottom: 12px;
+}
+
+.stats-row {
+  margin-bottom: 12px;
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e6ebf3;
+    border-radius: 8px;
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+
+      &.groups { background: #ede9fe; color: #7c3aed; }
+      &.active { background: #dbeafe; color: #2563eb; }
+      &.new { background: #dcfce7; color: #16a34a; }
+    }
+
+    .stat-info {
+      .stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.2;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 2px;
+      }
+    }
+  }
 }
 
 .batch-actions {
