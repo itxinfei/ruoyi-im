@@ -282,9 +282,15 @@ const handleCardClick = () => {
   if (cardInfo.value) {
     // 根据名片类型跳转：用户详情或群聊
     if (cardInfo.value.cardType === 'group') {
-      // TODO: 跳转到群聊
+      // 跳转到群聊
+      window.dispatchEvent(new CustomEvent('main:navigate-chat', {
+        detail: { type: 'group', id: cardInfo.value.userId }
+      }));
     } else {
-      // TODO: 跳转到用户详情
+      // 跳转到用户详情
+      window.dispatchEvent(new CustomEvent('main:navigate-contact', {
+        detail: { id: cardInfo.value.userId }
+      }));
     }
   }
 };

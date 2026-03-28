@@ -214,12 +214,34 @@ const handleScrollToTop = () => {
   window.dispatchEvent(new CustomEvent('main:scroll-to-top'))
 }
 
+// 导航到用户详情
+const handleNavigateContact = (e) => {
+  const { id } = e.detail || {}
+  if (id) {
+    activeModule.value = 'contacts'
+    // 派发事件让通讯录显示用户详情
+    window.dispatchEvent(new CustomEvent('main:show-contact', { detail: { userId: id } }))
+  }
+}
+
+// 导航到聊天会话
+const handleNavigateChat = (e) => {
+  const { type, id } = e.detail || {}
+  if (id) {
+    activeModule.value = 'chat'
+    // 派发事件让会话列表选择对应会话
+    window.dispatchEvent(new CustomEvent('main:select-session', { detail: { type, id } }))
+  }
+}
+
 // 快捷键事件监听
 onMounted(() => {
   window.addEventListener('shortcut:global-search', handleGlobalSearch)
   window.addEventListener('shortcut:new-chat', handleNewChat)
   window.addEventListener('shortcut:screenshot', handleScreenshot)
   window.addEventListener('shortcut:scroll-to-top', handleScrollToTop)
+  window.addEventListener('main:navigate-contact', handleNavigateContact)
+  window.addEventListener('main:navigate-chat', handleNavigateChat)
 })
 
 onUnmounted(() => {
@@ -227,6 +249,8 @@ onUnmounted(() => {
   window.removeEventListener('shortcut:new-chat', handleNewChat)
   window.removeEventListener('shortcut:screenshot', handleScreenshot)
   window.removeEventListener('shortcut:scroll-to-top', handleScrollToTop)
+  window.removeEventListener('main:navigate-contact', handleNavigateContact)
+  window.removeEventListener('main:navigate-chat', handleNavigateChat)
 })
 </script>
 
