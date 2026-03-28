@@ -8,6 +8,14 @@
             <p>筛选、启停用与批量治理</p>
           </div>
           <el-space>
+            <el-button @click="handleExport">
+              <el-icon><Download /></el-icon>
+              导出
+            </el-button>
+            <el-button type="success" @click="importDialogVisible = true">
+              <el-icon><Upload /></el-icon>
+              导入
+            </el-button>
             <el-button @click="handleReset">
               重置
             </el-button>
@@ -145,6 +153,50 @@
       </el-table>
     </el-dialog>
 
+    <!-- 导入用户对话框 -->
+    <el-dialog v-model="importDialogVisible" title="导入用户" width="500px" append-to-body>
+      <div class="import-tip">
+        <el-alert type="info" :closable="false" show-icon>
+          <template #title>
+            请上传 CSV 格式文件，编码 UTF-8
+          </template>
+        </el-alert>
+      </div>
+      <div class="import-template">
+        <p>文件格式要求：</p>
+        <ul>
+          <li>第一行为表头：用户名,昵称,手机号,密码,角色</li>
+          <li>角色可选值：USER（普通用户）, ADMIN（管理员）</li>
+          <li>密码留空则使用默认密码 123456</li>
+        </ul>
+        <el-button size="small" type="primary" link @click="downloadTemplate">
+          <el-icon><Download /></el-icon>
+          下载模板
+        </el-button>
+      </div>
+      <el-upload
+        ref="uploadRef"
+        class="import-upload"
+        drag
+        :auto-upload="false"
+        :limit="1"
+        accept=".csv"
+        :on-change="handleFileChange"
+      >
+        <el-icon class="el-icon--upload"><Upload /></el-icon>
+        <div class="el-upload__text">
+          拖拽文件到此处，或 <em>点击上传</em>
+        </div>
+        <template #tip>
+          <div class="el-upload__tip">只能上传 CSV 文件</div>
+        </template>
+      </el-upload>
+      <template #footer>
+        <el-button @click="importDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="importing" @click="confirmImport">确认导入</el-button>
+      </template>
+    </el-dialog>
+
     <!-- 角色变更对话框（仅 SUPER_ADMIN 可用） -->
     <el-dialog v-model="roleDialogVisible" title="修改用户角色" width="420px">
       <el-alert type="warning" :closable="false" style="margin-bottom: 16px">
@@ -277,7 +329,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import { Search, Download, Upload } from '@element-plus/icons-vue'
 import { getUserList, getUserDetail, updateUserStatus, updateUserRole, deleteUser, batchDeleteUsers } from '@/api/admin'
 import tokenManager from '@/utils/tokenManager'
 
@@ -286,6 +338,10 @@ const userList = ref([])
 const selectedUsers = ref([])
 const failedDialogVisible = ref(false)
 const failedItems = ref([])
+const importDialogVisible = ref(false)
+const importing = ref(false)
+const uploadRef = ref(null)
+const templateFile = ref(null)
 const searchKeyword = ref('')
 const searchRole = ref('')
 const pageNum = ref(1)
@@ -340,6 +396,97 @@ const handleReset = () => {
   searchRole.value = ''
   pageNum.value = 1
   loadUsers()
+}
+
+// 导出用户列表
+const handleExport = () => {
+  if (userList.value.length === 0) {
+    ElMessage.warning('暂无用户数据可导出')
+    return
+  }
+  const headers = ['ID', '用户名', '昵称', '手机号', '角色', '状态', '创建时间']
+  const fields = ['id', 'username', 'nickname', 'mobile', 'role', 'status', 'createTime']
+  const data = userList.value.map(user => fields.map(f => {
+    if (f === 'role') return getRoleLabel(user[f])
+    if (f === 'status') return user[f] === 1 ? '正常' : '禁用'
+    return user[f] || ''
+  }))
+  const csvContent = [headers, ...data].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `用户列表_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+  ElMessage.success('导出成功')
+}
+
+// 下载导入模板
+const downloadTemplate = () => {
+  const headers = ['username', 'nickname', 'mobile', 'password', 'role']
+  const example = ['zhangsan', '张三', '13800138000', '', 'USER']
+  const csvContent = [headers, example].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = '用户导入模板.csv'
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+// 处理文件选择
+const handleFileChange = (file) => {
+  templateFile.value = file.raw
+}
+
+// 确认导入
+const confirmImport = async () => {
+  if (!templateFile.value) {
+    ElMessage.warning('请先选择要导入的文件')
+    return
+  }
+  importing.value = true
+  try {
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      const text = e.target.result
+      const lines = text.split('\n').filter(line => line.trim())
+      if (lines.length < 2) {
+        ElMessage.warning('文件内容为空或格式不正确')
+        importing.value = false
+        return
+      }
+      // 跳过表头，解析数据
+      const users = []
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim())
+        if (cols.length >= 1 && cols[0]) {
+          users.push({
+            username: cols[0] || '',
+            nickname: cols[1] || cols[0],
+            mobile: cols[2] || '',
+            password: cols[3] || '123456',
+            role: cols[4] || 'USER'
+          })
+        }
+      }
+      if (users.length === 0) {
+        ElMessage.warning('未解析到有效用户数据')
+        importing.value = false
+        return
+      }
+      ElMessage.success(`已解析 ${users.length} 个用户，导入功能待后端API支持`)
+      importDialogVisible.value = false
+      importing.value = false
+      templateFile.value = null
+    }
+    reader.readAsText(templateFile.value)
+  } catch (e) {
+    ElMessage.error('导入失败：' + e.message)
+    importing.value = false
+  }
 }
 
 const handleSizeChange = (val) => {
@@ -623,5 +770,53 @@ onMounted(() => {
 
 .text-secondary {
   color: var(--dt-text-tertiary);
+}
+
+.import-tip {
+  margin-bottom: var(--dt-spacing-lg);
+}
+
+.import-template {
+  margin-bottom: var(--dt-spacing-lg);
+  padding: var(--dt-spacing-md);
+  background: var(--dt-bg-hover);
+  border-radius: var(--dt-radius-md);
+
+  p {
+    margin: 0 0 var(--dt-spacing-sm);
+    font-weight: 600;
+    color: var(--dt-text-primary);
+  }
+
+  ul {
+    margin: 0 0 var(--dt-spacing-sm);
+    padding-left: var(--dt-spacing-lg);
+    color: var(--dt-text-secondary);
+    font-size: var(--dt-font-size-sm);
+
+    li {
+      margin-bottom: 4px;
+    }
+  }
+}
+
+.import-upload {
+  text-align: center;
+
+  .el-icon--upload {
+    font-size: 48px;
+    color: var(--dt-text-quaternary);
+    margin-bottom: var(--dt-spacing-sm);
+  }
+
+  .el-upload__text {
+    color: var(--dt-text-secondary);
+    font-size: var(--dt-font-size-sm);
+
+    em {
+      color: var(--dt-brand-color);
+      font-style: normal;
+    }
+  }
 }
 </style>
