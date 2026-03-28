@@ -106,3 +106,27 @@ export function unblockUser(targetUserId) {
     method: 'delete'
   })
 }
+
+/**
+ * 获取快捷键设置
+ * @returns {Promise}
+ */
+export function getShortcutSettings() {
+  return request({
+    url: '/api/im/config/shortcut',
+    method: 'get'
+  })
+}
+
+/**
+ * 更新快捷键设置
+ * @param {Object} settings - 快捷键设置
+ * @returns {Promise}
+ */
+export function updateShortcutSettings(settings) {
+  return request({
+    url: '/api/im/config/shortcut',
+    method: 'put',
+    data: settings
+  })
+}

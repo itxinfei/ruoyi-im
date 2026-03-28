@@ -133,6 +133,65 @@
         </div>
       </div>
 
+      <!-- 快捷键设置 -->
+      <div class="settings-section">
+        <div class="section-title">快捷键设置</div>
+        <div class="settings-card">
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">发送消息</span>
+              <span class="setting-desc">Enter 发送，Ctrl+Enter 换行</span>
+            </div>
+            <el-switch v-model="shortcutSettings.enterToSend" @change="saveShortcutSettings" />
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">全局搜索</span>
+              <span class="setting-desc">快速打开搜索面板</span>
+            </div>
+            <el-select v-model="shortcutSettings.globalSearch" style="width: 120px" @change="saveShortcutSettings">
+              <el-option label="Ctrl+K" value="Ctrl+K" />
+              <el-option label="Ctrl+F" value="Ctrl+F" />
+              <el-option label="Ctrl+S" value="Ctrl+S" />
+              <el-option label="无" value="" />
+            </el-select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">新建会话</span>
+              <span class="setting-desc">快速发起新会话</span>
+            </div>
+            <el-select v-model="shortcutSettings.newChat" style="width: 120px" @change="saveShortcutSettings">
+              <el-option label="Ctrl+N" value="Ctrl+N" />
+              <el-option label="Ctrl+T" value="Ctrl+T" />
+              <el-option label="无" value="" />
+            </el-select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">截屏快捷键</span>
+              <span class="setting-desc">快速截屏并发送</span>
+            </div>
+            <el-select v-model="shortcutSettings.screenshot" style="width: 120px" @change="saveShortcutSettings">
+              <el-option label="Ctrl+Alt+S" value="Ctrl+Alt+S" />
+              <el-option label="Ctrl+Shift+S" value="Ctrl+Shift+S" />
+              <el-option label="无" value="" />
+            </el-select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">一键回到顶部</span>
+              <span class="setting-desc">消息列表快速回到顶部</span>
+            </div>
+            <el-select v-model="shortcutSettings.scrollToTop" style="width: 120px" @change="saveShortcutSettings">
+              <el-option label="Ctrl+Home" value="Ctrl+Home" />
+              <el-option label="Home" value="Home" />
+              <el-option label="无" value="" />
+            </el-select>
+          </div>
+        </div>
+      </div>
+
       <!-- 黑名单管理 -->
       <div class="settings-section">
         <div class="section-title">黑名单</div>
@@ -156,7 +215,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   getGeneralSettings,
@@ -166,7 +225,9 @@ import {
   getPrivacySettings,
   updatePrivacySettings,
   getBlockedUsers,
-  unblockUser
+  unblockUser,
+  getShortcutSettings,
+  updateShortcutSettings
 } from '@/api/im/config'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -199,15 +260,24 @@ const privacySettings = ref({
 
 const blockedUsers = ref([])
 
+const shortcutSettings = ref({
+  enterToSend: true,
+  globalSearch: 'Ctrl+K',
+  newChat: 'Ctrl+N',
+  screenshot: '',
+  scrollToTop: 'Home'
+})
+
 // 加载所有设置
 const loadSettings = async () => {
   loading.value = true
   try {
-    const [generalRes, notificationRes, privacyRes, blockedRes] = await Promise.all([
+    const [generalRes, notificationRes, privacyRes, blockedRes, shortcutRes] = await Promise.all([
       getGeneralSettings(),
       getNotificationSettings(),
       getPrivacySettings(),
-      getBlockedUsers()
+      getBlockedUsers(),
+      getShortcutSettings()
     ])
 
     if (generalRes.code === 200) {
@@ -221,6 +291,9 @@ const loadSettings = async () => {
     }
     if (blockedRes.code === 200) {
       blockedUsers.value = blockedRes.data || []
+    }
+    if (shortcutRes.code === 200) {
+      shortcutSettings.value = { ...shortcutSettings.value, ...shortcutRes.data }
     }
   } catch (e) {
     console.error('加载设置失败', e)
@@ -265,6 +338,18 @@ const savePrivacySettings = async () => {
   }
 }
 
+// 保存快捷键设置
+const saveShortcutSettings = async () => {
+  try {
+    const res = await updateShortcutSettings(shortcutSettings.value)
+    if (res.code === 200) {
+      ElMessage.success('设置已保存')
+    }
+  } catch (e) {
+    console.error('保存快捷键设置失败', e)
+  }
+}
+
 // 解除拉黑
 const handleUnblock = async (userId) => {
   try {
@@ -280,7 +365,58 @@ const handleUnblock = async (userId) => {
 
 onMounted(() => {
   loadSettings()
+  // 注册全局键盘快捷键
+  document.addEventListener('keydown', handleGlobalKeydown)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+// 全局键盘快捷键处理
+const handleGlobalKeydown = (e) => {
+  const ctrl = e.ctrlKey || e.metaKey
+  const key = e.key
+
+  // 全局搜索 Ctrl+K / Ctrl+F / Ctrl+S
+  if (ctrl && shortcutSettings.value.globalSearch) {
+    const searchMap = { 'K': 'Ctrl+K', 'F': 'Ctrl+F', 'S': 'Ctrl+S' }
+    if (searchMap[key] === shortcutSettings.value.globalSearch) {
+      e.preventDefault()
+      // 触发全局搜索事件
+      window.dispatchEvent(new CustomEvent('shortcut:global-search'))
+    }
+  }
+
+  // 新建会话 Ctrl+N / Ctrl+T
+  if (ctrl && shortcutSettings.value.newChat) {
+    const chatMap = { 'N': 'Ctrl+N', 'T': 'Ctrl+T' }
+    if (chatMap[key] === shortcutSettings.value.newChat) {
+      e.preventDefault()
+      window.dispatchEvent(new CustomEvent('shortcut:new-chat'))
+    }
+  }
+
+  // 截屏快捷键
+  if (ctrl && e.altKey && shortcutSettings.value.screenshot === 'Ctrl+Alt+S') {
+    e.preventDefault()
+    window.dispatchEvent(new CustomEvent('shortcut:screenshot'))
+  }
+  if (ctrl && e.shiftKey && shortcutSettings.value.screenshot === 'Ctrl+Shift+S') {
+    e.preventDefault()
+    window.dispatchEvent(new CustomEvent('shortcut:screenshot'))
+  }
+
+  // 一键回到顶部
+  if (shortcutSettings.value.scrollToTop === 'Ctrl+Home' && ctrl && key === 'Home') {
+    e.preventDefault()
+    window.dispatchEvent(new CustomEvent('shortcut:scroll-to-top'))
+  }
+  if (shortcutSettings.value.scrollToTop === 'Home' && key === 'Home') {
+    e.preventDefault()
+    window.dispatchEvent(new CustomEvent('shortcut:scroll-to-top'))
+  }
+}
 </script>
 
 <style lang="scss" scoped>
