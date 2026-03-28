@@ -381,29 +381,3 @@ export function getAuditStatistics(params) {
   })
 }
 
-/**
- * 获取用户操作日志
- * @param {Number} userId - 用户 ID
- * @param {Object} params - { startTime, endTime }
- * @returns {Promise}
- */
-export function getUserAuditLogs(userId, params) {
-  return request({
-    url: `/api/admin/audit/user/${userId}`,
-    method: 'get',
-    params
-  })
-}
-
-/**
- * 删除过期日志
- * @param {string} beforeDate - 删除此日期之前的日志
- * @returns {Promise}
- */
-export function deleteExpiredAuditLogs(beforeDate) {
-  return request({
-    url: '/api/admin/audit/clean',
-    method: 'delete',
-    params: { beforeDate }
-  })
-}

@@ -4,13 +4,25 @@
     <div class="panel-header">
       <div class="search-bar" :class="{ 'is-focused': isSearchFocused }">
         <el-icon class="search-icon"><Search /></el-icon>
-        <input 
-          type="text" 
-          v-model="searchKeyword" 
-          placeholder="搜索" 
+        <input
+          type="text"
+          v-model="searchKeyword"
+          placeholder="搜索"
           @focus="isSearchFocused = true"
           @blur="isSearchFocused = false"
         />
+      </div>
+      <!-- 会话类型过滤 tabs -->
+      <div class="session-tabs">
+        <button
+          v-for="tab in sessionTabs"
+          :key="tab.value"
+          class="session-tab"
+          :class="{ active: filterType === tab.value }"
+          @click="filterType = tab.value"
+        >
+          {{ tab.label }}
+        </button>
       </div>
     </div>
 
@@ -68,6 +80,14 @@ const store = useStore();
 // 内部状态
 const isSearchFocused = ref(false);
 const searchKeyword = ref('');
+const filterType = ref('all');
+
+// 会话类型过滤 tabs
+const sessionTabs = [
+  { label: '全部', value: 'all' },
+  { label: '单聊', value: 'PRIVATE' },
+  { label: '群聊', value: 'GROUP' }
+];
 
 // 数据绑定 (对齐 Store 路径 im/session)
 const loading = computed(() => store.state.im?.session?.loading);
@@ -75,9 +95,16 @@ const currentSession = computed(() => store.state.im?.session?.currentSession);
 const sessions = computed(() => store.getters['im/session/sortedSessions']);
 
 const filteredSessions = computed(() => {
-  const list = sessions.value || [];
-  if (!searchKeyword.value) return list;
-  return list.filter(s => s.name?.toLowerCase().includes(searchKeyword.value.toLowerCase()));
+  let list = sessions.value || [];
+  // 按类型过滤
+  if (filterType.value !== 'all') {
+    list = list.filter(s => s.type === filterType.value);
+  }
+  // 按关键词过滤
+  if (searchKeyword.value) {
+    list = list.filter(s => s.name?.toLowerCase().includes(searchKeyword.value.toLowerCase()));
+  }
+  return list;
 });
 
 // 初始化加载
@@ -115,8 +142,41 @@ const formatTime = (time) => {
 }
 
 .panel-header {
-  padding: 12px;
+  padding: 12px 12px 8px;
   background-color: var(--dt-bg-session-list);
+}
+
+.session-tabs {
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+  background: var(--dt-bg-hover);
+  border-radius: var(--dt-radius-sm);
+  padding: 2px;
+}
+
+.session-tab {
+  flex: 1;
+  height: 26px;
+  border: none;
+  background: transparent;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dt-text-secondary);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+}
+
+.session-tab:hover {
+  color: var(--dt-text-primary);
+}
+
+.session-tab.active {
+  background-color: var(--dt-bg-card);
+  color: var(--dt-brand-color);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .search-bar {
