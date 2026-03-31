@@ -210,6 +210,67 @@
           </div>
         </div>
       </div>
+
+      <!-- 通话记录 -->
+      <div class="settings-section">
+        <div class="section-title">通话记录</div>
+        <div class="settings-card">
+          <div v-if="callHistoryLoading" class="call-history-loading">
+            <span>加载中...</span>
+          </div>
+          <div v-else-if="callHistory.length === 0" class="call-history-empty">
+            <el-icon><Phone /></el-icon>
+            <span>暂无通话记录</span>
+          </div>
+          <div v-else class="call-history-list">
+            <div
+              v-for="call in callHistory"
+              :key="call.callId"
+              class="call-history-item"
+            >
+              <div class="call-avatar">
+                <DingtalkAvatar
+                  :src="call.callerAvatar"
+                  :name="call.callerName"
+                  :size="40"
+                  shape="circle"
+                />
+                <div class="call-type-icon">
+                  <el-icon v-if="call.callType === 'VOICE'" class="call-icon voice">
+                    <PhoneFilled />
+                  </el-icon>
+                  <el-icon v-else class="call-icon video">
+                    <VideoCamera />
+                  </el-icon>
+                </div>
+              </div>
+              <div class="call-info">
+                <div class="call-peer">
+                  与 <span class="peer-name">{{ call.callerName }}</span> 的通话
+                </div>
+                <div class="call-meta">
+                  <el-tag v-if="call.status === 'COMPLETED'" type="success" size="small">
+                    已接通
+                  </el-tag>
+                  <el-tag v-else-if="call.status === 'MISSED'" type="danger" size="small">
+                    未接
+                  </el-tag>
+                  <el-tag v-else-if="call.status === 'REJECTED'" type="warning" size="small">
+                    已拒绝
+                  </el-tag>
+                  <el-tag v-else type="info" size="small">
+                    {{ call.status }}
+                  </el-tag>
+                  <span class="call-time">{{ formatTime(call.startTime) }}</span>
+                  <span v-if="call.duration" class="call-duration">
+                    {{ formatDuration(call.duration) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -229,7 +290,10 @@ import {
   getShortcutSettings,
   updateShortcutSettings
 } from '@/api/im/config'
+import { getCallHistory } from '@/api/im/videoCall'
+import { getUsersBatch } from '@/api/im/user'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { Phone, VideoCamera, PhoneFilled } from '@element-plus/icons-vue'
 
 const loading = ref(false)
 
@@ -259,6 +323,8 @@ const privacySettings = ref({
 })
 
 const blockedUsers = ref([])
+const callHistory = ref([])
+const callHistoryLoading = ref(false)
 
 const shortcutSettings = ref({
   enterToSend: true,
@@ -300,6 +366,39 @@ const loadSettings = async () => {
     ElMessage.error('加载设置失败')
   } finally {
     loading.value = false
+  }
+}
+
+// 加载通话记录
+const loadCallHistory = async () => {
+  callHistoryLoading.value = true
+  try {
+    const res = await getCallHistory(20)
+    if (res.code === 200) {
+      const history = res.data || []
+      // 获取涉及的用户信息
+      const userIds = [...new Set(history.flatMap(c => [c.callerId, c.calleeId]))]
+      if (userIds.length > 0) {
+        const userRes = await getUsersBatch(userIds)
+        const userMap = new Map()
+        if (userRes.code === 200) {
+          (userRes.data || []).forEach(u => userMap.set(u.id, u))
+        }
+        callHistory.value = history.map(c => ({
+          ...c,
+          callerName: userMap.get(c.callerId)?.nickname || '用户' + c.callerId,
+          callerAvatar: userMap.get(c.callerId)?.avatar || '',
+          calleeName: userMap.get(c.calleeId)?.nickname || '用户' + c.calleeId,
+          calleeAvatar: userMap.get(c.calleeId)?.avatar || ''
+        }))
+      } else {
+        callHistory.value = history
+      }
+    }
+  } catch (e) {
+    console.error('加载通话记录失败', e)
+  } finally {
+    callHistoryLoading.value = false
   }
 }
 
@@ -371,6 +470,7 @@ const handleUnblock = async (userId) => {
 
 onMounted(() => {
   loadSettings()
+  loadCallHistory()
   // 注册全局键盘快捷键
   document.addEventListener('keydown', handleGlobalKeydown)
 })
@@ -422,6 +522,33 @@ const handleGlobalKeydown = (e) => {
     e.preventDefault()
     window.dispatchEvent(new CustomEvent('shortcut:scroll-to-top'))
   }
+}
+
+// 格式化时间
+const formatTime = (time) => {
+  if (!time) return ''
+  const date = new Date(time)
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today.getTime() - 86400000)
+  const callDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+  if (callDate.getTime() === today.getTime()) {
+    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  } else if (callDate.getTime() === yesterday.getTime()) {
+    return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  } else {
+    return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) + ' ' +
+           date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  }
+}
+
+// 格式化通话时长
+const formatDuration = (seconds) => {
+  if (!seconds) return ''
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
 }
 </script>
 
@@ -526,6 +653,97 @@ const handleGlobalKeydown = (e) => {
     .username {
       font-size: 14px;
       color: var(--dt-text-primary);
+    }
+  }
+}
+
+.call-history-loading,
+.call-history-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--dt-text-tertiary);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.call-history-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.call-history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  transition: background-color var(--dt-transition-fast);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--dt-bg-hover);
+  }
+}
+
+.call-avatar {
+  position: relative;
+
+  .call-type-icon {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--dt-bg-card);
+
+    .call-icon {
+      font-size: 10px;
+      color: #fff;
+
+      &.voice {
+        background: var(--dt-success-color);
+      }
+
+      &.video {
+        background: var(--dt-brand-color);
+      }
+    }
+  }
+}
+
+.call-info {
+  flex: 1;
+  min-width: 0;
+
+  .call-peer {
+    font-size: 14px;
+    color: var(--dt-text-primary);
+    margin-bottom: 4px;
+
+    .peer-name {
+      font-weight: 500;
+    }
+  }
+
+  .call-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+
+    .call-time {
+      color: var(--dt-text-tertiary);
+    }
+
+    .call-duration {
+      color: var(--dt-text-secondary);
     }
   }
 }
