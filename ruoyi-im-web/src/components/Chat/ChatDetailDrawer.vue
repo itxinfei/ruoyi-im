@@ -722,7 +722,7 @@ const handleShowAnnouncement = async () => {
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dt-shadow-2);
   padding: 4px 0;
   min-width: 140px;
   .menu-item {

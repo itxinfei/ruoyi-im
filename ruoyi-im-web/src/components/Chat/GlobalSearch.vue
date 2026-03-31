@@ -404,7 +404,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 0;
+  padding: var(--dt-spacing-2xl) 0;
   color: var(--dt-text-tertiary);
   font-size: var(--dt-font-size-sm);
 }

@@ -148,7 +148,7 @@ const getBarHeight = (index) => {
 .voice-message {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-md, 10px);
+  gap: var(--dt-spacing-md);
   padding: var(--dt-spacing-sm) var(--dt-spacing-md);
   min-width: var(--dt-voice-bubble-min-width, 180px);
   max-width: var(--dt-voice-bubble-max-width, 280px);
@@ -156,8 +156,8 @@ const getBarHeight = (index) => {
 
   // 播放按钮
   .play-btn {
-    width: var(--dt-btn-size-lg, 36px);
-    height: var(--dt-btn-size-lg, 36px);
+    width: var(--dt-btn-size-lg);
+    height: var(--dt-btn-size-lg);
     border-radius: 50%;
     border: none;
     background: var(--dt-brand-color);
@@ -170,7 +170,7 @@ const getBarHeight = (index) => {
     transition: all var(--dt-transition-fast);
 
     .play-icon {
-      font-size: var(--dt-font-size-md, 22px);
+      font-size: var(--dt-font-size-md);
     }
 
     &:hover {
@@ -219,7 +219,7 @@ const getBarHeight = (index) => {
 
   // 时长
   .duration {
-    font-size: var(--dt-font-size-xs, 12px);
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-tertiary);
     min-width: var(--dt-voice-duration-min-width, 35px);
     text-align: right;
@@ -247,9 +247,9 @@ const getBarHeight = (index) => {
   // 发送中图标
   .sending-icon {
     position: absolute;
-    right: calc(-1 * var(--dt-spacing-md, 24px));
-    bottom: var(--dt-spacing-sm, 8px);
-    font-size: var(--dt-font-size-xs, 12px);
+    right: calc(-1 * var(--dt-spacing-xl));
+    bottom: var(--dt-spacing-sm);
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-tertiary);
   }
 
@@ -263,7 +263,8 @@ const getBarHeight = (index) => {
     }
 
     .waveform-bar {
-      background: rgba(255, 255, 255, 0.7);
+      background: var(--dt-text-white);
+      opacity: 0.7;
     }
 
     .duration {
@@ -272,7 +273,7 @@ const getBarHeight = (index) => {
 
     .progress-bar {
       .progress-fill {
-        background: var(--dt-bg-card);
+        background: var(--dt-text-white);
       }
     }
   }
@@ -281,11 +282,13 @@ const getBarHeight = (index) => {
 // 暗色模式
 .dark .voice-message {
   .waveform-bar {
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--dt-text-white);
+    opacity: 0.5;
   }
 
   &.is-own .waveform-bar {
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--dt-text-white);
+    opacity: 0.7;
   }
 }
 </style>

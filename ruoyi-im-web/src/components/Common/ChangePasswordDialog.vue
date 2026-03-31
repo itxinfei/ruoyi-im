@@ -188,7 +188,7 @@ const handleSubmit = async () => {
   :deep(.el-button) {
     border-radius: var(--dt-radius-lg);
     font-weight: 500;
-    padding: 10px 20px;
+    padding: var(--dt-spacing-md) var(--dt-spacing-xl);
     height: 40px;
     transition: all var(--dt-transition-fast);
 
@@ -211,7 +211,7 @@ const handleSubmit = async () => {
         background: var(--dt-brand-hover);
         border-color: var(--dt-brand-hover);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+        box-shadow: var(--dt-shadow-brand-strong);
       }
 
       &:active {

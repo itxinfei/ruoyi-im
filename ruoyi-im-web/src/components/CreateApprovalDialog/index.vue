@@ -274,7 +274,7 @@ const resetForm = () => {
 
 <style scoped>
 .step-select-template {
-  padding: 10px 0;
+  padding: var(--dt-spacing-md) 0;
 }
 
 .template-list {
@@ -289,7 +289,7 @@ const resetForm = () => {
   gap: 16px;
   padding: 16px;
   border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-md, 8px);
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: all 0.2s;
 }

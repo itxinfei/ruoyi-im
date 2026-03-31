@@ -436,7 +436,7 @@ watch(visible, (val) => {
 
 .content-area {
   flex: 1;
-  padding: 36px;
+  padding: var(--dt-spacing-2xl);
   background: var(--dt-bg-card);
   overflow-y: auto;
   scroll-behavior: smooth;
@@ -457,7 +457,7 @@ watch(visible, (val) => {
   .account-card {
     background: linear-gradient(135deg, var(--dt-bg-body) 0%, var(--dt-bg-card) 100%);
     border-radius: var(--dt-radius-2xl);
-    padding: 40px;
+    padding: var(--dt-spacing-2xl);
     border: 1.5px solid var(--dt-border-light);
     box-shadow: var(--dt-shadow-3);
 
@@ -472,7 +472,7 @@ watch(visible, (val) => {
         padding: 4px;
         background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
         border-radius: 50%;
-        box-shadow: 0 8px 24px rgba(0, 137, 255, 0.3);
+        box-shadow: var(--dt-shadow-brand-strong);
 
         .status-dot {
           position: absolute;
@@ -483,7 +483,7 @@ watch(visible, (val) => {
           background: var(--dt-success-color);
           border: 3px solid var(--dt-bg-card);
           border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+          box-shadow: 0 2px 8px var(--dt-success-bg-dark);
 
           &.status-online {
             background: var(--dt-success-color);
@@ -564,13 +564,7 @@ watch(visible, (val) => {
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 20px;
-}
-
-@media (max-width: 768px) {
-  .settings-grid {
-    grid-template-columns: 1fr;
-  }
+  gap: var(--dt-spacing-xl);
 }
 
 .setting-card {
@@ -592,7 +586,7 @@ watch(visible, (val) => {
   .setting-header {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: var(--dt-spacing-xl);
     flex: 1;
 
     .icon-wrapper {
@@ -605,7 +599,7 @@ watch(visible, (val) => {
       font-size: 26px;
       color: var(--dt-text-white);
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--dt-shadow-2);
 
       &.bell-bg { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
       &.sound-bg { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
@@ -647,7 +641,7 @@ watch(visible, (val) => {
   .about-card {
     background: var(--dt-bg-body);
     border-radius: var(--dt-radius-2xl);
-    padding: 48px;
+    padding: var(--dt-spacing-2xl);
     text-align: center;
     border: 1.5px solid var(--dt-border-light);
 
@@ -660,7 +654,7 @@ watch(visible, (val) => {
       background: linear-gradient(160deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
       border-radius: var(--dt-radius-2xl);
       margin-bottom: 24px;
-      box-shadow: 0 12px 32px rgba(22, 119, 255, 0.3);
+      box-shadow: var(--dt-shadow-brand-strong);
 
       .logo-inner {
         font-size: 36px;
@@ -707,12 +701,12 @@ watch(visible, (val) => {
       border-radius: var(--dt-radius-lg);
       font-size: 15px;
       font-weight: 600;
-      box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+      box-shadow: var(--dt-shadow-brand-strong);
       transition: all var(--dt-transition-fast);
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(22, 119, 255, 0.4);
+        box-shadow: var(--dt-shadow-brand-strong);
       }
     }
   }

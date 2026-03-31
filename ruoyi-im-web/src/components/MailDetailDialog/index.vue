@@ -149,7 +149,7 @@ const formatFileSize = (bytes) => {
 
 <style scoped>
 .mail-detail {
-  padding: 10px 0;
+  padding: var(--dt-spacing-md) 0;
 }
 
 .mail-header {

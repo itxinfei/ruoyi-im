@@ -180,13 +180,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--dt-shadow-1);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .group-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--dt-shadow-2);
 }
 
 .group-info {

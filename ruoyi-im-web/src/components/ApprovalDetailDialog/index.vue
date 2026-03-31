@@ -266,7 +266,7 @@ const confirmAction = async () => {
 
 <style scoped>
 .approval-detail {
-  padding: 10px 0;
+  padding: var(--dt-spacing-md) 0;
 }
 
 .detail-header {
@@ -329,7 +329,7 @@ const confirmAction = async () => {
 .type-tag {
   padding: 4px 12px;
   background: var(--dt-bg-hover);
-  border-radius: var(--dt-radius-sm, 4px);
+  border-radius: var(--dt-radius-sm);
   font-size: 13px;
 }
 
@@ -342,7 +342,7 @@ const confirmAction = async () => {
 .reason-content {
   padding: 12px;
   background: var(--dt-bg-body);
-  border-radius: var(--dt-radius-md, 8px);
+  border-radius: var(--dt-radius-lg);
   line-height: 1.6;
 }
 
@@ -352,7 +352,7 @@ const confirmAction = async () => {
   gap: 12px;
   padding: 12px;
   background: var(--dt-bg-body);
-  border-radius: var(--dt-radius-md, 8px);
+  border-radius: var(--dt-radius-lg);
 }
 
 .detail-item {
@@ -372,7 +372,7 @@ const confirmAction = async () => {
 }
 
 .flow-list {
-  padding-left: 10px;
+  padding-left: var(--dt-spacing-md);
 }
 
 .flow-item {
@@ -437,7 +437,7 @@ const confirmAction = async () => {
   margin-top: 8px;
   padding: 8px 12px;
   background: var(--dt-bg-body);
-  border-radius: var(--dt-radius-sm, 6px);
+  border-radius: var(--dt-radius-md);
   font-size: 13px;
   color: var(--dt-text-desc);
 }

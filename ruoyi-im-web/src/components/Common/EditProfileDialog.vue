@@ -282,7 +282,7 @@ watch(() => props.modelValue, (val) => {
       .avatar-mask {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.4);
+        background: var(--dt-overlay-bg);
         display: flex;
         align-items: center;
         justify-content: center;
