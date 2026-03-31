@@ -11,8 +11,8 @@
     <!-- 标签页 -->
     <el-tabs v-model="activeTab" class="ding-tabs">
       <el-tab-pane label="收到的 DING" name="received">
-        <div class="ding-list custom-scrollbar">
-          <div v-if="receivedDings.length === 0" class="empty-state">
+        <div v-loading="receivedLoading" class="ding-list custom-scrollbar">
+          <div v-if="!receivedLoading && receivedDings.length === 0" class="empty-state">
             <el-icon :size="48"><Bell /></el-icon>
             <span>暂无收到的 DING</span>
           </div>
@@ -50,8 +50,8 @@
       </el-tab-pane>
 
       <el-tab-pane label="发出的 DING" name="sent">
-        <div class="ding-list custom-scrollbar">
-          <div v-if="sentDings.length === 0" class="empty-state">
+        <div v-loading="sentLoading" class="ding-list custom-scrollbar">
+          <div v-if="!sentLoading && sentDings.length === 0" class="empty-state">
             <el-icon :size="48"><Promotion /></el-icon>
             <span>暂无发出的 DING</span>
           </div>
@@ -151,7 +151,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, onMounted, computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Bell, Promotion, View, SuccessFilled
@@ -173,6 +173,10 @@ const store = useStore()
 const activeTab = ref('received')
 const showSendDialog = ref(false)
 const showReceiptDialog = ref(false)
+const receivedLoading = ref(false)
+const sentLoading = ref(false)
+const receivedDingsLoaded = ref(false)
+const sentDingsLoaded = ref(false)
 
 const receivedDings = ref([])
 const sentDings = ref([])
@@ -188,29 +192,48 @@ const sessions = computed(() => store.state.im?.session?.sessions || [])
 
 // 加载收到的 DING
 const loadReceivedDings = async () => {
+  if (receivedDingsLoaded.value) return
+  receivedLoading.value = true
   try {
     const res = await getReceivedDings()
     if (res.code === 200) {
       receivedDings.value = res.data || []
+      receivedDingsLoaded.value = true
     }
   } catch (e) {
     console.error('加载收到的 DING 失败', e)
     ElMessage.error('加载收到的 DING 失败')
+  } finally {
+    receivedLoading.value = false
   }
 }
 
 // 加载发出的 DING
 const loadSentDings = async () => {
+  if (sentDingsLoaded.value) return
+  sentLoading.value = true
   try {
     const res = await getSentDings()
     if (res.code === 200) {
       sentDings.value = res.data || []
+      sentDingsLoaded.value = true
     }
   } catch (e) {
     console.error('加载发出的 DING 失败', e)
     ElMessage.error('加载发出的 DING 失败')
+  } finally {
+    sentLoading.value = false
   }
 }
+
+// Tab 切换时懒加载数据
+watch(activeTab, (tab) => {
+  if (tab === 'received') {
+    loadReceivedDings()
+  } else if (tab === 'sent') {
+    loadSentDings()
+  }
+}, { immediate: true })
 
 // 格式化时间
 const formatTime = (time) => {
