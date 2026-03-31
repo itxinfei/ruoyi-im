@@ -16,7 +16,32 @@
 - **清理垃圾**：重构必删旧代码。
 - **自检模板**：每次任务必须输出 `[规范自检]` 结果。
 
-## 代码检查修复记录 (2026-03-27)
+## 代码检查修复记录 (2026-03-31)
+
+### API 对齐修复
+**前后端 API 修复**:
+- `search.js`: HTTP 方法 POST→GET 对齐后端 GET 接口
+- `organization.js`: 新增 8 个缺失 API（部门 CRUD、成员管理）
+- `attendance.js`: 新增 2 个缺失 API（审批补卡、删除记录）
+- `user.js`: 新增 4 个缺失 API（创建、删除、列表、状态修改）
+- `conversation.js`: 新增 3 个缺失 API（更新会话、置顶消息）
+
+**新增 API 文件**:
+- `group.js`: 群组 API（20 个端点）
+- `approval.js`: 审批 API（12 个端点）
+- `cloudDrive.js`: 云盘 API（24 个端点）
+- `workReport.js`: 工作报告 API（14 个端点）
+
+### Design Token 统一
+**管理后台硬编码颜色修复**:
+- `GroupManagement.vue`: 面板、统计卡片、批量操作背景
+- `SystemConfig.vue`: KPI 卡片、面板头部、表单提示
+- `MessageManagement.vue`: 面板、批量操作样式
+
+**组件颜色修复**:
+- `ChatDetailDrawer.vue`: 群主/管理员角标颜色 (#FFD700→warning, #409EFF→brand)
+
+### 代码检查修复记录 (2026-03-27)
 
 ### 功能实现完成
 **IM-H-001**: 消息编辑功能完整实现
