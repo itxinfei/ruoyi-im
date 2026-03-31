@@ -166,8 +166,16 @@ const passwordForm = ref({
 const passwordLoading = ref(false)
 
 const loadUser = async () => {
-  const res = await getUserInfo()
-  if (res.code === 200) userInfo.value = res.data
+  try {
+    const res = await getUserInfo()
+    if (res.code === 200) {
+      userInfo.value = res.data
+    } else {
+      throw new Error(res.message || '加载失败')
+    }
+  } catch (e) {
+    ElMessage.error('加载用户信息失败')
+  }
 }
 
 const updateField = async (field) => {
@@ -185,10 +193,16 @@ const handleAvatarChange = async (e) => {
   if (!file) return
   const formData = new FormData()
   formData.append('avatarfile', file)
-  const res = await uploadAvatar(formData)
-  if (res.code === 200) {
-    userInfo.value.avatar = res.data
-    ElMessage.success('头像上传成功')
+  try {
+    const res = await uploadAvatar(formData)
+    if (res.code === 200) {
+      userInfo.value.avatar = res.data
+      ElMessage.success('头像上传成功')
+    } else {
+      throw new Error(res.message || '上传失败')
+    }
+  } catch (error) {
+    ElMessage.error(error.message || '头像上传失败')
   }
 }
 

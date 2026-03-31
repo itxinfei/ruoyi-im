@@ -3,6 +3,7 @@ package com.ruoyi.im.controller.admin;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.constant.UserRole;
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.dto.admin.ImUserBatchImportRequest;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
 import com.ruoyi.im.vo.admin.BatchOperationResult;
@@ -10,6 +11,8 @@ import com.ruoyi.im.vo.user.ImUserVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 import java.util.HashMap;
 import java.util.List;
@@ -186,7 +189,7 @@ public class ImUserAdminController {
             if (user == null) {
                 result.addFailedItem(id, "用户不存在");
             } else {
-                imUserMapper.deleteImUserById(id);
+                imUserService.deleteUser(id);
                 result.setSuccessCount(result.getSuccessCount() + 1);
             }
         }
@@ -199,7 +202,7 @@ public class ImUserAdminController {
      *
      * @return 统计数据
      */
-    
+
     @GetMapping("/stats")
     public Result<Map<String, Object>> getStats() {
         long total = imUserMapper.countImUsers();
@@ -214,6 +217,18 @@ public class ImUserAdminController {
         stats.put("offline", total - online);
 
         return Result.success(stats);
+    }
+
+    /**
+     * 批量导入用户
+     *
+     * @param request 批量导入请求
+     * @return 导入结果
+     */
+    @PostMapping("/import")
+    public Result<BatchOperationResult> batchImport(@Valid @RequestBody ImUserBatchImportRequest request) {
+        BatchOperationResult result = imUserService.batchImportUsers(request);
+        return Result.success(result);
     }
 }
 

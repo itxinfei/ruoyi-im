@@ -226,7 +226,9 @@
  * ChatInputArea.vue (对齐钉钉无边框沉浸式输入 & 状态驱动发送按钮 + 表情选择器 + 图片预览)
  */
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ElMessage } from 'element-plus';
 import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search, LocationInformation } from '@element-plus/icons-vue';
+import { getContacts } from '@/api/im/contact';
 
 const props = defineProps({
   replyingMessage: Object,
@@ -452,18 +454,16 @@ const filteredContacts = computed(() => {
 const openCardPicker = async () => {
   cardSearchKeyword.value = '';
   cardPickerVisible.value = true;
-  // 获取联系人列表
   try {
-    const res = await fetch('/api/im/contact/list', {
-      headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      contactList.value = data.data || [];
+    const res = await getContacts()
+    if (res.code === 200) {
+      contactList.value = res.data || []
+    } else {
+      throw new Error(res.message)
     }
   } catch (e) {
-    console.error('获取联系人失败', e);
-    contactList.value = [];
+    ElMessage.error('获取联系人失败')
+    contactList.value = []
   }
 };
 
@@ -571,6 +571,7 @@ const startRecording = async () => {
     }, 1000);
   } catch (e) {
     console.error('无法访问麦克风', e);
+    ElMessage.error('无法访问麦克风，请检查权限设置')
   }
 };
 

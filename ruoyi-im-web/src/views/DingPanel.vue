@@ -195,6 +195,7 @@ const loadReceivedDings = async () => {
     }
   } catch (e) {
     console.error('加载收到的 DING 失败', e)
+    ElMessage.error('加载收到的 DING 失败')
   }
 }
 
@@ -207,6 +208,7 @@ const loadSentDings = async () => {
     }
   } catch (e) {
     console.error('加载发出的 DING 失败', e)
+    ElMessage.error('加载发出的 DING 失败')
   }
 }
 
@@ -232,6 +234,7 @@ const handleRead = async (ding) => {
     }
   } catch (e) {
     console.error('标记已读失败', e)
+    ElMessage.error('标记已读失败')
   }
 }
 
@@ -245,6 +248,7 @@ const handleConfirm = async (ding) => {
     }
   } catch (e) {
     console.error('确认失败', e)
+    ElMessage.error('确认失败')
   }
 }
 
@@ -258,6 +262,7 @@ const viewReceipts = async (ding) => {
     }
   } catch (e) {
     console.error('获取回执失败', e)
+    ElMessage.error('获取回执失败')
   }
 }
 
@@ -271,6 +276,7 @@ const handleCancel = async (ding) => {
     }
   } catch (e) {
     console.error('取消失败', e)
+    ElMessage.error('取消 DING 失败')
   }
 }
 
@@ -290,6 +296,7 @@ const handleSendDing = async () => {
     }
   } catch (e) {
     console.error('发送失败', e)
+    ElMessage.error('DING 发送失败')
   }
 }
 

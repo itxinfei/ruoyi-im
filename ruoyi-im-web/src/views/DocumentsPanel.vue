@@ -42,13 +42,13 @@
       <div class="sidebar-footer">
         <div class="storage-info">
           <div class="storage-header">
-            <span class="storage-label">存储空间</span><span class="storage-percent">85%</span>
+            <span class="storage-label">存储空间</span><span class="storage-percent">{{ quota.usageRate }}%</span>
           </div>
           <div class="storage-bar">
-            <div class="storage-fill" style="width: 85%" />
+            <div class="storage-fill" :style="{ width: Math.min(quota.usageRate, 100) + '%' }" />
           </div>
           <div class="storage-text">
-            85GB / 100GB
+            {{ quota.usedCapacityFormat }} / {{ quota.totalCapacityFormat }}
           </div>
         </div>
       </div>
@@ -58,7 +58,23 @@
     <main class="docs-main">
       <header class="docs-header">
         <div class="header-left">
-          <h2 class="header-title">
+          <!-- 返回上级按钮（仅我的文件显示） -->
+          <button v-if="isInSubFolder && activeNav === 'my'" class="back-btn" @click="goBack">
+            <el-icon><ArrowLeft /></el-icon>
+          </button>
+          <!-- 面包屑导航（仅我的文件显示） -->
+          <div v-if="activeNav === 'my'" class="breadcrumb-nav">
+            <span class="breadcrumb-item" @click="navigateToFolder(null)">全部文件</span>
+            <template v-for="(folder, idx) in folderPath" :key="folder.id">
+              <span class="breadcrumb-sep">/</span>
+              <span
+                class="breadcrumb-item"
+                :class="{ active: idx === folderPath.length - 1 }"
+                @click="idx < folderPath.length - 1 && navigateToFolder(folder)"
+              >{{ folder.name }}</span>
+            </template>
+          </div>
+          <h2 v-else class="header-title">
             {{ currentViewTitle }}
           </h2>
           <div class="header-divider" />
@@ -135,6 +151,7 @@
                 :key="file.id"
                 class="file-row"
                 @click="handleFileClick(file)"
+                @dblclick="handleDoubleClick(file)"
               >
                 <td class="name-col">
                   <div class="file-info">
@@ -157,9 +174,53 @@
                 <td><span class="owner-name">{{ file.owner }}</span></td>
                 <td><span class="file-time">{{ file.modifiedTime }}</span></td>
                 <td class="actions-col">
-                  <button class="action-btn" @click.stop="handleFileMenu(file)">
-                    <el-icon><MoreFilled /></el-icon>
-                  </button>
+                  <el-dropdown trigger="click" @command="(cmd) => handleDropdownCommand(cmd, file)">
+                    <button class="action-btn" @click.stop>
+                      <el-icon><MoreFilled /></el-icon>
+                    </button>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item command="view" :icon="View">查看</el-dropdown-item>
+                        <el-dropdown-item
+                          v-if="file.documentType === 'TEXT' && activeNav !== 'trash'"
+                          command="edit"
+                          :icon="Edit"
+                        >编辑</el-dropdown-item>
+                        <el-dropdown-item
+                          v-if="activeNav !== 'trash' && !file.cloudFileId"
+                          command="share"
+                          :icon="Share"
+                        >分享</el-dropdown-item>
+                        <el-dropdown-item
+                          v-if="activeNav !== 'trash' && file.documentType !== 'FOLDER' && !file.cloudFileId"
+                          :command="file.isStarred ? 'unstar' : 'star'"
+                          :icon="file.isStarred ? StarFilled : Star"
+                        >{{ file.isStarred ? '取消收藏' : '收藏' }}</el-dropdown-item>
+                        <el-dropdown-item
+                          v-if="activeNav !== 'trash'"
+                          command="rename"
+                          :icon="EditPen"
+                        >重命名</el-dropdown-item>
+                        <el-dropdown-item
+                          v-if="activeNav !== 'trash'"
+                          command="delete"
+                          :icon="Delete"
+                          divided
+                        >删除</el-dropdown-item>
+                        <el-dropdown-item
+                          v-if="activeNav === 'trash'"
+                          command="restore"
+                          :icon="Refresh"
+                        >恢复</el-dropdown-item>
+                        <el-dropdown-item
+                          v-if="activeNav === 'trash'"
+                          command="permanent"
+                          :icon="Delete"
+                          divided
+                        >永久删除</el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
                 </td>
               </tr>
             </tbody>
@@ -173,10 +234,29 @@
       :document="selectedFile"
       @saved="handleFileSaved"
     />
+    <!-- 分享文档弹窗 -->
+    <el-dialog v-model="showShareDialog" title="分享文档" width="440px" append-to-body>
+      <el-form label-position="top">
+        <el-form-item label="分享给用户">
+          <el-input v-model="shareForm.targetUserId" placeholder="请输入用户ID" clearable />
+        </el-form-item>
+        <el-form-item label="权限">
+          <el-select v-model="shareForm.permission" style="width: 100%">
+            <el-option value="VIEW" label="只读" />
+            <el-option value="EDIT" label="可编辑" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showShareDialog = false">取消</el-button>
+        <el-button type="primary" :loading="shareLoading" @click="handleShareConfirm">分享</el-button>
+      </template>
+    </el-dialog>
     <!-- 隐藏的文件上传输入框 -->
     <input
       ref="fileInputRef"
       type="file"
+      multiple
       style="display: none"
       @change="handleFileSelect"
     >
@@ -186,10 +266,11 @@
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getDocuments, searchDocuments } from '@/api/im/document'
+import { getDocuments, searchDocuments, toggleStar, updateDocument, deleteDocument, permanentlyDeleteDocument, restoreDocument, shareDocument } from '@/api/im/document'
+import { createFolder, getQuota, uploadFile, getFileList, renameFolder, deleteFolder, deleteFile, renameFile } from '@/api/im/cloudDrive'
 import { formatFileSize, formatTime } from '@/utils/format'
 import DocumentEditorDialog from '@/components/Documents/DocumentEditorDialog.vue'
-import { Folder, UserFilled, Clock, Delete, Search, List, Grid, Plus, FolderOpened, Star, MoreFilled, Document, Picture, VideoCamera, Microphone } from '@element-plus/icons-vue'
+import { Folder, UserFilled, Clock, Delete, Search, List, Grid, Plus, FolderOpened, Star, MoreFilled, Document, Picture, VideoCamera, Microphone, View, Edit, Share, StarFilled, EditPen, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 
 const activeNav = ref('recent')
 const viewMode = ref('list')
@@ -198,6 +279,13 @@ const loading = ref(false)
 const files = ref([])
 const selectedFile = ref(null)
 const showEditor = ref(false)
+const currentFolderId = ref(0) // 0表示根目录
+const folderPath = ref([]) // 文件夹导航路径 [{id, name}]
+const quota = ref({ usedCapacityFormat: '0B', totalCapacityFormat: '100GB', usageRate: 0 })
+const showShareDialog = ref(false)
+const shareForm = ref({ targetUserId: '', permission: 'VIEW' })
+const shareLoading = ref(false)
+const sharingFile = ref(null)
 
 const mainNavItems = ref([
   { id: 'my', label: '我的文件', icon: 'Folder' },
@@ -223,29 +311,97 @@ const getApiType = () => {
   return map[activeNav.value] || 'my'
 }
 
+// 是否在子文件夹中
+const isInSubFolder = computed(() => folderPath.value.length > 0)
+
+// 导航到指定文件夹
+const navigateToFolder = (targetFolder) => {
+  if (!targetFolder) {
+    // 返回根目录
+    currentFolderId.value = 0
+    folderPath.value = []
+  } else {
+    const idx = folderPath.value.findIndex(p => p.id === targetFolder.id)
+    if (idx >= 0) {
+      // 点击面包屑中的某一级
+      folderPath.value = folderPath.value.slice(0, idx + 1)
+    } else {
+      // 进入子文件夹
+      folderPath.value.push(targetFolder)
+    }
+    currentFolderId.value = targetFolder.id
+  }
+  loadDocuments()
+}
+
+// 返回上级文件夹
+const goBack = () => {
+  if (folderPath.value.length > 0) {
+    folderPath.value.pop()
+    currentFolderId.value = folderPath.value.length > 0 ? folderPath.value[folderPath.value.length - 1].id : 0
+    loadDocuments()
+  }
+}
+
 // 加载文档列表
 const loadDocuments = async () => {
   loading.value = true
   try {
-    const res = await getDocuments(getApiType())
-    if (res.code === 200) {
-      files.value = res.data.map(doc => ({
-        id: doc.id,
-        name: doc.title,
-        icon: getFileIcon(doc.type),
-        iconClass: getIconClass(doc.type),
-        meta: formatFileSize(doc.content?.length || 0),
-        owner: doc.creatorName || '我',
-        modifiedTime: formatTime(doc.updateTime),
-        isStarred: doc.isStarred,
-        documentType: doc.type
-      }))
+    let res
+    if (activeNav.value === 'my') {
+      // 我的文件：优先使用云盘API支持文件夹层级
+      res = await getFileList(currentFolderId.value)
+      if (res.code === 200) {
+        files.value = (res.data || []).map(doc => ({
+          id: doc.id,
+          name: doc.name || doc.title,
+          icon: getFileIcon(doc.type),
+          iconClass: getIconClass(doc.type),
+          meta: doc.type === 'FOLDER' ? '' : formatFileSize(doc.size || 0),
+          owner: doc.creatorName || '我',
+          modifiedTime: formatTime(doc.updateTime),
+          isStarred: doc.isStarred,
+          documentType: doc.type,
+          cloudFileId: doc.id
+        }))
+      }
+    } else {
+      res = await getDocuments(getApiType())
+      if (res.code === 200) {
+        files.value = res.data.map(doc => ({
+          id: doc.id,
+          name: doc.title,
+          icon: getFileIcon(doc.type),
+          iconClass: getIconClass(doc.type),
+          meta: formatFileSize(doc.content?.length || 0),
+          owner: doc.creatorName || '我',
+          modifiedTime: formatTime(doc.updateTime),
+          isStarred: doc.isStarred,
+          documentType: doc.type
+        }))
+      }
     }
   } catch (error) {
     console.error('加载文档失败:', error)
     ElMessage.error('加载文档失败')
   } finally {
     loading.value = false
+  }
+}
+
+// 加载存储配额
+const loadQuota = async () => {
+  try {
+    const res = await getQuota()
+    if (res.code === 200 && res.data) {
+      quota.value = {
+        usedCapacityFormat: res.data.usedCapacityFormat || '0B',
+        totalCapacityFormat: res.data.totalCapacityFormat || '100GB',
+        usageRate: res.data.usageRate || 0
+      }
+    }
+  } catch (error) {
+    // 静默失败，使用默认值
   }
 }
 
@@ -330,13 +486,73 @@ const getIconClass = (type) => {
 
 // 处理文件点击
 const handleFileClick = (file) => {
+  if (file.documentType === 'FOLDER') {
+    // 文件夹：进入子文件夹
+    navigateToFolder({ id: file.cloudFileId || file.id, name: file.name })
+    return
+  }
   selectedFile.value = file
   showEditor.value = true
+}
+
+// 双击处理：文件夹进入，文件重命名
+const handleDoubleClick = async (file) => {
+  if (activeNav.value === 'trash') return
+  if (file.documentType === 'FOLDER') {
+    // 文件夹：进入子文件夹
+    navigateToFolder({ id: file.cloudFileId || file.id, name: file.name })
+    return
+  }
+  // 文件：重命名
+  const { value: newName } = await ElMessageBox.prompt('请输入新名称', '重命名', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputValue: file.name,
+    inputValidator: (val) => val && val.trim() !== '' ? true : '名称不能为空'
+  })
+  if (newName) {
+    try {
+      const res = await updateDocument({ id: file.id, title: newName.trim() })
+      if (res.code === 200) {
+        ElMessage.success('重命名成功')
+        loadDocuments()
+      }
+    } catch (error) {
+      ElMessage.error('重命名失败')
+    }
+  }
 }
 
 // 处理文件保存
 const handleFileSaved = () => {
   loadDocuments()
+}
+
+// 确认分享
+const handleShareConfirm = async () => {
+  if (!sharingFile.value) return
+  if (!shareForm.value.targetUserId.trim()) {
+    ElMessage.warning('请输入用户ID')
+    return
+  }
+  shareLoading.value = true
+  try {
+    const res = await shareDocument({
+      documentId: sharingFile.value.id,
+      targetUserId: Number(shareForm.value.targetUserId),
+      permission: shareForm.value.permission
+    })
+    if (res.code === 200) {
+      ElMessage.success('分享成功')
+      showShareDialog.value = false
+    } else {
+      ElMessage.error(res.msg || '分享失败')
+    }
+  } catch (error) {
+    ElMessage.error('分享失败')
+  } finally {
+    shareLoading.value = false
+  }
 }
 
 // 文件上传输入框引用
@@ -357,8 +573,21 @@ const handleNewCommand = async (command) => {
       }
     })
     if (folderName) {
-      ElMessage.success(`文件夹 "${folderName}" 创建成功`)
-      loadDocuments()
+      try {
+        const res = await createFolder({
+          folderName: folderName.trim(),
+          parentId: currentFolderId.value,
+          ownerType: 'USER',
+          accessPermission: 'PRIVATE'
+        })
+        if (res.code === 200) {
+          ElMessage.success('文件夹创建成功')
+          loadDocuments()
+          loadQuota()
+        }
+      } catch (error) {
+        ElMessage.error('创建文件夹失败')
+      }
     }
   } else if (command === 'upload') {
     fileInputRef.value?.click()
@@ -367,56 +596,147 @@ const handleNewCommand = async (command) => {
 
 // 处理文件选择上传
 const handleFileSelect = async (event) => {
-  const file = event.target.files?.[0]
-  if (!file) return
+  const files = Array.from(event.target.files || [])
+  if (!files.length) return
 
-  ElMessage.success(`文件 "${file.name}" 上传成功`)
-  loadDocuments()
-
-  // 清空 input 以便重复选择同一文件
-  event.target.value = ''
+  try {
+    for (const file of files) {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folderId', String(currentFolderId.value))
+      await uploadFile(formData)
+    }
+    ElMessage.success(`${files.length} 个文件上传成功`)
+    loadDocuments()
+    loadQuota()
+  } catch (error) {
+    ElMessage.error('文件上传失败')
+  } finally {
+    // 清空 input 以便重复选择同一文件
+    event.target.value = ''
+  }
 }
 
 // 处理文件操作菜单
-const handleFileMenu = async (file, event) => {
-  // 阻止事件冒泡
-  if (event) {
-    event.stopPropagation()
-  }
-
-  const isTrash = activeNav.value === 'trash'
-
-  // 定义菜单项
-  const menuItems = [
-    { label: '查看', value: 'view', icon: 'visibility' },
-    { label: '编辑', value: 'edit', icon: 'edit', hide: file.documentType !== 'TEXT' || isTrash },
-    { label: '分享', value: 'share', icon: 'share', hide: isTrash },
-    { label: file.isStarred ? '取消收藏' : '收藏', value: 'star', icon: file.isStarred ? 'star' : 'star_border', hide: isTrash },
-    { label: '删除', value: 'delete', icon: 'delete', hide: isTrash },
-    { label: '恢复', value: 'restore', icon: 'restore', hide: !isTrash },
-    { label: '永久删除', value: 'permanent', icon: 'delete_forever', hide: !isTrash }
-  ].filter(item => !item.hide)
-
-  // 使用 Element Plus 的 ElMessageBox 或自定义菜单
-  // 这里简化处理，使用 ElMessageBox.prompt 风格的菜单
-  await ElMessageBox.prompt(
-    '',
-    `操作: ${file.name}`,
-    {
-      confirmButtonText: '关闭',
-      showCancelButton: false,
-      showInput: false,
-      distinguishCancelAndClose: true,
-      message: menuItems.map((item, index) => `${index + 1}. ${item.label}`).join('\n'),
-      beforeClose: (_action, _instance, done) => {
-        done()
+const handleDropdownCommand = async (command, file) => {
+  switch (command) {
+    case 'view':
+      handleFileClick(file)
+      break
+    case 'edit':
+      handleFileClick(file)
+      break
+    case 'share':
+      sharingFile.value = file
+      shareForm.value = { targetUserId: '', permission: 'VIEW' }
+      showShareDialog.value = true
+      break
+    case 'star':
+    case 'unstar': {
+      try {
+        const res = await toggleStar(file.id, command === 'star')
+        if (res.code === 200) {
+          ElMessage.success(command === 'star' ? '已收藏' : '已取消收藏')
+          loadDocuments()
+        }
+      } catch (error) {
+        ElMessage.error('操作失败')
       }
+      break
     }
-  ).catch(() => {})
+    case 'rename': {
+      const { value: newName } = await ElMessageBox.prompt('请输入新名称', '重命名', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputValue: file.name,
+        inputValidator: (val) => val && val.trim() !== '' ? true : '名称不能为空'
+      })
+      if (newName) {
+        try {
+          let res
+          if (file.documentType === 'FOLDER') {
+            res = await renameFolder(file.cloudFileId || file.id, newName.trim())
+          } else if (file.cloudFileId) {
+            // 云盘文件
+            res = await renameFile(file.cloudFileId, newName.trim())
+          } else {
+            // 文档系统文件
+            res = await updateDocument({ id: file.id, title: newName.trim() })
+          }
+          if (res.code === 200) {
+            ElMessage.success('重命名成功')
+            loadDocuments()
+          }
+        } catch (error) {
+          ElMessage.error('重命名失败')
+        }
+      }
+      break
+    }
+    case 'delete': {
+      try {
+        await ElMessageBox.confirm(`确定要删除 "${file.name}" 吗？`, '删除文档', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        let res
+        if (file.documentType === 'FOLDER') {
+          res = await deleteFolder(file.cloudFileId || file.id)
+        } else if (file.cloudFileId) {
+          // 云盘文件
+          res = await deleteFile(file.cloudFileId)
+        } else {
+          // 文档系统文件
+          res = await deleteDocument(file.id)
+        }
+        if (res.code === 200) {
+          ElMessage.success('已删除')
+          loadDocuments()
+          loadQuota()
+        }
+      } catch (error) {
+        if (error !== 'cancel') ElMessage.error('删除失败')
+      }
+      break
+    }
+    case 'restore': {
+      try {
+        const res = await restoreDocument(file.id)
+        if (res.code === 200) {
+          ElMessage.success('已恢复')
+          loadDocuments()
+        }
+      } catch (error) {
+        ElMessage.error('恢复失败')
+      }
+      break
+    }
+    case 'permanent': {
+      try {
+        await ElMessageBox.confirm(`确定要永久删除 "${file.name}" 吗？此操作不可恢复！`, '永久删除', {
+          confirmButtonText: '永久删除',
+          cancelButtonText: '取消',
+          type: 'error'
+        })
+        const res = await permanentlyDeleteDocument(file.id)
+        if (res.code === 200) {
+          ElMessage.success('已永久删除')
+          loadDocuments()
+          loadQuota()
+        }
+      } catch (error) {
+        if (error !== 'cancel') ElMessage.error('永久删除失败')
+      }
+      break
+    }
+  }
 }
 
 // 监听导航变化
 watch(activeNav, () => {
+  currentFolderId.value = 0
+  folderPath.value = []
   loadDocuments()
 })
 
@@ -440,6 +760,7 @@ onUnmounted(() => {
 // 初始化加载
 onMounted(() => {
   loadDocuments()
+  loadQuota()
 })
 </script>
 
@@ -470,7 +791,14 @@ onMounted(() => {
 }
 .docs-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .docs-header { height: var(--dt-header-height, 56px); padding: 0 var(--dt-spacing-lg, 24px); border-bottom: 1px solid var(--dt-border-light); display: flex; align-items: center; justify-content: space-between;
-  .header-left { display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px); .header-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); margin: 0; }
+  .header-left { display: flex; align-items: center; gap: var(--dt-spacing-sm, 12px);
+    .back-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; background: var(--dt-bg-body); border-radius: var(--dt-radius-sm); cursor: pointer; color: var(--dt-text-secondary); &:hover { background: var(--dt-bg-session-hover); color: var(--dt-text-primary); } }
+    .breadcrumb-nav { display: flex; align-items: center; gap: 4px; font-size: var(--dt-font-size-sm);
+      .breadcrumb-sep { color: var(--dt-text-quaternary); }
+      .breadcrumb-item { color: var(--dt-text-secondary); cursor: pointer; padding: 2px 4px; border-radius: var(--dt-radius-xs); &:hover { color: var(--dt-brand-color); background: var(--dt-brand-lighter); }
+        &.active { color: var(--dt-text-primary); font-weight: var(--dt-font-weight-medium); cursor: default; &:hover { background: transparent; color: var(--dt-text-primary); } }
+      }
+    }
     .header-divider { width: 1px; height: var(--dt-spacing-md, 14px); background: var(--dt-border-light); }
     .search-box { position: relative; .search-icon { position: absolute; left: var(--dt-spacing-sm, 8px); top: 50%; transform: translateY(-50%); font-size: var(--dt-icon-size-lg, 16px); color: var(--dt-text-tertiary); }
       .search-input { width: var(--dt-search-width-md, 200px); height: var(--dt-btn-height-sm, 32px); background: var(--dt-bg-body); border: none; border-radius: var(--dt-radius-sm); padding: 0 var(--dt-spacing-lg, 32px); font-size: var(--dt-font-size-sm); outline: none; &:focus { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); } }

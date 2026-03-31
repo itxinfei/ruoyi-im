@@ -267,6 +267,7 @@ const processRecall = async (message) => {
     await store.dispatch('im/message/recallMessage', message.messageId || message.id);
   } catch (error) {
     console.error('撤回消息失败:', error);
+    ElMessage.error('撤回消息失败');
   }
 };
 
@@ -276,6 +277,7 @@ const processDelete = async (message) => {
     await store.dispatch('im/message/deleteMessage', message.messageId || message.id);
   } catch (error) {
     console.error('删除消息失败:', error);
+    ElMessage.error('删除消息失败');
   }
 };
 
@@ -415,6 +417,7 @@ const processSendMessage = async (payload) => {
     scrollToBottom();
   } catch (error) {
     console.error('消息发送失败:', error);
+    ElMessage.error('消息发送失败，请重试');
   }
 };
 

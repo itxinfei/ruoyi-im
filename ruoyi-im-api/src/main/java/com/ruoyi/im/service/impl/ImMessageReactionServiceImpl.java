@@ -82,11 +82,31 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
 
     @Override
     public List<ImMessageReactionVO> getMessageReactions(Long messageId, Long userId) {
-        return new ArrayList<>();
+        List<ImMessageReaction> reactions = reactionMapper.selectReactionsByMessageId(messageId);
+        List<ImMessageReactionVO> voList = new ArrayList<>();
+        for (ImMessageReaction reaction : reactions) {
+            ImMessageReactionVO vo = new ImMessageReactionVO();
+            vo.setId(reaction.getId());
+            vo.setMessageId(reaction.getMessageId());
+            vo.setUserId(reaction.getUserId());
+            vo.setEmoji(reaction.getEmoji());
+            vo.setCreateTime(reaction.getCreateTime());
+            voList.add(vo);
+        }
+        return voList;
     }
 
     @Override
     public List<ImMessageReactionVO> getReactionStats(Long messageId, Long userId) {
-        return new ArrayList<>();
+        List<ImMessageReaction> stats = reactionMapper.selectReactionStats(messageId);
+        List<ImMessageReactionVO> voList = new ArrayList<>();
+        for (ImMessageReaction reaction : stats) {
+            ImMessageReactionVO vo = new ImMessageReactionVO();
+            vo.setMessageId(reaction.getMessageId());
+            vo.setEmoji(reaction.getEmoji());
+            vo.setCount(reaction.getId() != null ? reaction.getId().intValue() : 0); // count(*) aliased to id
+            voList.add(vo);
+        }
+        return voList;
     }
 }

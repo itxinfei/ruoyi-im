@@ -330,7 +330,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Download, Upload } from '@element-plus/icons-vue'
-import { getUserList, getUserDetail, updateUserStatus, updateUserRole, deleteUser, batchDeleteUsers } from '@/api/admin'
+import { getUserList, getUserDetail, updateUserStatus, updateUserRole, deleteUser, batchDeleteUsers, batchImportUsers } from '@/api/admin'
 import tokenManager from '@/utils/tokenManager'
 
 const loading = ref(false)
@@ -449,42 +449,56 @@ const confirmImport = async () => {
   }
   importing.value = true
   try {
-    const reader = new FileReader()
-    reader.onload = async (e) => {
-      const text = e.target.result
-      const lines = text.split('\n').filter(line => line.trim())
-      if (lines.length < 2) {
-        ElMessage.warning('文件内容为空或格式不正确')
-        importing.value = false
-        return
-      }
-      // 跳过表头，解析数据
-      const users = []
-      for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim())
-        if (cols.length >= 1 && cols[0]) {
-          users.push({
-            username: cols[0] || '',
-            nickname: cols[1] || cols[0],
-            mobile: cols[2] || '',
-            password: cols[3] || '123456',
-            role: cols[4] || 'USER'
-          })
-        }
-      }
-      if (users.length === 0) {
-        ElMessage.warning('未解析到有效用户数据')
-        importing.value = false
-        return
-      }
-      ElMessage.success(`已解析 ${users.length} 个用户，导入功能待后端API支持`)
-      importDialogVisible.value = false
+    const text = await templateFile.value.text()
+    const lines = text.split('\n').filter(line => line.trim())
+    if (lines.length < 2) {
+      ElMessage.warning('文件内容为空或格式不正确')
       importing.value = false
-      templateFile.value = null
+      return
     }
-    reader.readAsText(templateFile.value)
+    // 跳过表头，解析数据
+    const users = []
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim())
+      if (cols.length >= 1 && cols[0]) {
+        users.push({
+          username: cols[0] || '',
+          nickname: cols[1] || cols[0],
+          mobile: cols[2] || '',
+          password: cols[3] || '123456',
+          role: cols[4] || 'USER'
+        })
+      }
+    }
+    if (users.length === 0) {
+      ElMessage.warning('未解析到有效用户数据')
+      importing.value = false
+      return
+    }
+    const res = await batchImportUsers(users)
+    if (res.code === 200) {
+      const result = res.data
+      if (result.failCount > 0) {
+        ElMessage.warning(`成功导入 ${result.successCount} 个用户，${result.failCount} 个失败`)
+        if (result.failedItems && result.failedItems.length > 0) {
+          failedItems.value = result.failedItems.map(item => ({
+            username: item.id || '未知',
+            reason: item.reason
+          }))
+          failedDialogVisible.value = true
+        }
+      } else {
+        ElMessage.success(`成功导入 ${result.successCount} 个用户`)
+      }
+      importDialogVisible.value = false
+      templateFile.value = null
+      loadUsers()
+    } else {
+      throw new Error(res.message || '导入失败')
+    }
   } catch (e) {
     ElMessage.error('导入失败：' + e.message)
+  } finally {
     importing.value = false
   }
 }

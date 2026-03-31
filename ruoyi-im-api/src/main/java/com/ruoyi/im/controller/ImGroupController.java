@@ -1,5 +1,10 @@
 package com.ruoyi.im.controller;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.dto.group.ImGroupCreateRequest;
 import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
@@ -10,7 +15,10 @@ import com.ruoyi.im.vo.group.ImGroupVO;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 群组控制器
@@ -250,6 +258,34 @@ public class ImGroupController {
         Long userId = SecurityUtils.getLoginUserId();
         imGroupService.transferOwner(id, newOwnerId, userId);
         return Result.success("转让成功");
+    }
+
+    /**
+     * 获取群二维码
+     * 生成群组的二维码图片，用于扫码加入群聊
+     *
+     * @param id 群组ID
+     * @return 二维码图片 Base64 字符串
+     * @apiNote 返回 PNG 格式的二维码图片，扫码后可加入该群组
+     */
+    @GetMapping("/{id}/qrcode")
+    public Result<String> getGroupQrCode(@PathVariable Long id) {
+        Long userId = SecurityUtils.getLoginUserId();
+        imGroupService.getGroupById(id, userId); // 校验群组是否存在
+        String qrContent = "ruoyi-im://join-group?" + id;
+        try {
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            Map<EncodeHintType, Object> hints = new HashMap<>();
+            hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            hints.put(EncodeHintType.MARGIN, 2);
+            BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 300, 300, hints);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
+            byte[] imageBytes = outputStream.toByteArray();
+            return Result.success("获取成功", "data:image/png;base64," + java.util.Base64.getEncoder().encodeToString(imageBytes));
+        } catch (Exception e) {
+            throw new RuntimeException("生成二维码失败", e);
+        }
     }
 }
 

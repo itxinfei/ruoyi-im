@@ -54,6 +54,7 @@
 import { ref, computed, watch } from 'vue'
 import { Close, Select, ChatLineSquare } from '@element-plus/icons-vue'
 import { getMessageReadDetail } from '@/api/im/message'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -83,6 +84,7 @@ const fetchData = async () => {
     }
   } catch (e) {
     console.error('获取已读详情失败', e)
+    ElMessage.error('获取已读详情失败')
   } finally {
     loading.value = false
   }

@@ -138,24 +138,20 @@ public class ImGroupAdminController {
     @DeleteMapping("/batch")
     public Result<BatchOperationResult> batchDelete(@RequestBody List<Long> ids) {
         BatchOperationResult result = new BatchOperationResult();
-        List<Long> successIds = new java.util.ArrayList<>();
 
         for (Long id : ids) {
             ImGroup group = imGroupMapper.selectImGroupById(id);
             if (group == null) {
                 result.addFailedItem(id, "群组不存在");
             } else {
+                // 软删除群组
                 group.setIsDeleted(1);
                 group.setDeletedTime(LocalDateTime.now());
                 imGroupMapper.updateImGroup(group);
-                successIds.add(id);
+                // 删除群组成员关系
+                imGroupMemberMapper.deleteByGroupIds(java.util.Collections.singletonList(id));
                 result.setSuccessCount(result.getSuccessCount() + 1);
             }
-        }
-
-        // 删除成功群组的成员关系
-        if (!successIds.isEmpty()) {
-            imGroupMemberMapper.deleteByGroupIds(successIds);
         }
 
         return Result.success(result);

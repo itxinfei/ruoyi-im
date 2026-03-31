@@ -265,7 +265,10 @@ const loadFriends = async () => {
   try {
     const res = await getContacts()
     if (res.code === 200) friends.value = res.data || []
-  } catch (e) { console.error(e) }
+  } catch (e) {
+    console.error(e)
+    ElMessage.error('加载好友列表失败')
+  }
 }
 
 const handleMemberClick = (m) => { activeUserId.value = m.userId || m.friendId || m.id; showProfile.value = true }

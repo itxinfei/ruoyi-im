@@ -30,14 +30,11 @@ public class ImMessageReadController {
     }
 
     /**
-     * 获取消息已读用户列表
-     * @param conversationId 会话ID
+     * 获取消息已读状态（已读人数和百分比）
      * @param messageId 消息ID
      */
-    @GetMapping("/status/{conversationId}/{messageId}")
-    public Result<ImMessageReadDetailVO> getMessageReadUsers(
-            @PathVariable Long conversationId,
-            @PathVariable Long messageId) {
+    @GetMapping("/status/{messageId}")
+    public Result<ImMessageReadDetailVO> getMessageReadStatus(@PathVariable Long messageId) {
         Long currentUserId = SecurityUtils.getLoginUserId();
         ImMessageReadDetailVO detail = messageReadService.getMessageReadDetail(messageId, currentUserId);
         return Result.success(detail);

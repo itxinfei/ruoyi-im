@@ -32,6 +32,9 @@ public class BatchOperationResult {
     private Integer totalCount;
 
     public BatchOperationResult() {
+        this.successCount = 0;
+        this.failCount = 0;
+        this.totalCount = 0;
         this.failedItems = new ArrayList<>();
     }
 

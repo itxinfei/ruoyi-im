@@ -216,6 +216,7 @@ const handleUserClick = async (user) => {
     }
   } catch (e) {
     console.error('打开私聊平台失败', e)
+    ElMessage.error('打开私聊失败')
   }
 }
 
@@ -229,6 +230,7 @@ const handleGroupClick = async (group) => {
     }
   } catch (e) {
     console.error('打开群聊失败', e)
+    ElMessage.error('打开群聊失败')
   }
 }
 

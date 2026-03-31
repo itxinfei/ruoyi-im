@@ -82,6 +82,7 @@ const loadRequests = async () => {
     }
   } catch (e) {
     console.error(e)
+    ElMessage.error('加载好友请求失败')
   } finally {
     loading.value = false
   }

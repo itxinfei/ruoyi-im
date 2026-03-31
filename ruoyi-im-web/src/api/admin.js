@@ -94,6 +94,19 @@ export function batchDeleteUsers(ids) {
   })
 }
 
+/**
+ * 批量导入用户
+ * @param {Array} users - 用户列表 [{ username, nickname, mobile, password, role }]
+ * @returns {Promise}
+ */
+export function batchImportUsers(users) {
+  return request({
+    url: '/api/admin/users/import',
+    method: 'post',
+    data: { users }
+  })
+}
+
 // ==================== 群组管理 ====================
 
 /**

@@ -344,6 +344,7 @@ const loadHotKeywords = async () => {
     }
   } catch (e) {
     console.error('获取热门搜索失败', e)
+    ElMessage.error('获取热门搜索失败')
   }
 }
 
@@ -354,6 +355,7 @@ const loadSearchHistory = () => {
     if (saved) searchHistory.value = JSON.parse(saved)
   } catch (e) {
     console.error('加载搜索历史失败', e)
+    ElMessage.error('加载搜索历史失败')
   }
 }
 

@@ -276,6 +276,7 @@ const loadGroups = async () => {
     }
   } catch (e) {
     console.error('加载分组失败', e)
+    ElMessage.error('加载分组失败')
   }
 }
 
@@ -314,6 +315,7 @@ const handleSearch = async () => {
     }
   } catch (e) {
     console.error('搜索失败', e)
+    ElMessage.error('搜索失败')
   } finally {
     loading.value = false
   }

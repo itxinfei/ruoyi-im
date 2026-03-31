@@ -2,9 +2,11 @@ package com.ruoyi.im.service;
 
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.BasePageRequest;
+import com.ruoyi.im.dto.admin.ImUserBatchImportRequest;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
+import com.ruoyi.im.vo.admin.BatchOperationResult;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.springframework.cache.annotation.CacheEvict;
@@ -184,4 +186,12 @@ public interface ImUserService {
      * @return 用户列表
      */
     List<ImUserVO> getUsersByIds(List<Long> userIds);
+
+    /**
+     * 批量导入用户
+     *
+     * @param request 批量导入请求
+     * @return 导入结果
+     */
+    BatchOperationResult batchImportUsers(ImUserBatchImportRequest request);
 }

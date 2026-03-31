@@ -182,3 +182,98 @@ export function unmuteGroupMember(groupId, userId) {
     method: 'put'
   })
 }
+
+/**
+ * 获取群二维码
+ * @param {Number} groupId - 群组ID
+ * @returns {Promise} - 返回二维码图片 Base64 字符串
+ */
+export function getGroupQrCode(groupId) {
+  return request({
+    url: `/api/im/group/${groupId}/qrcode`,
+    method: 'get'
+  })
+}
+
+// ==================== 群公告 API ====================
+
+/**
+ * 获取群公告列表
+ * @param {number} groupId - 群组ID
+ * @returns {Promise}
+ */
+export function getGroupAnnouncements(groupId) {
+  return request({
+    url: `/api/im/group/announcement/list/${groupId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取群最新公告
+ * @param {number} groupId - 群组ID
+ * @returns {Promise}
+ */
+export function getLatestAnnouncement(groupId) {
+  return request({
+    url: `/api/im/group/announcement/latest/${groupId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 创建群公告
+ * @param {Object} data - 公告数据
+ * @param {number} data.groupId - 群组ID
+ * @param {string} data.content - 公告内容
+ * @param {string} data.type - 公告类型
+ * @param {boolean} data.isPinned - 是否置顶
+ * @returns {Promise}
+ */
+export function createGroupAnnouncement(data) {
+  return request({
+    url: '/api/im/group/announcement',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新群公告
+ * @param {number} announcementId - 公告ID
+ * @param {string} content - 新内容
+ * @returns {Promise}
+ */
+export function updateGroupAnnouncement(announcementId, content) {
+  return request({
+    url: `/api/im/group/announcement/${announcementId}`,
+    method: 'put',
+    params: { content }
+  })
+}
+
+/**
+ * 删除群公告
+ * @param {number} announcementId - 公告ID
+ * @returns {Promise}
+ */
+export function deleteGroupAnnouncement(announcementId) {
+  return request({
+    url: `/api/im/group/announcement/${announcementId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 置顶/取消置顶群公告
+ * @param {number} announcementId - 公告ID
+ * @param {boolean} isPinned - 是否置顶
+ * @returns {Promise}
+ */
+export function setAnnouncementPinned(announcementId, isPinned) {
+  return request({
+    url: `/api/im/group/announcement/pin/${announcementId}`,
+    method: 'put',
+    params: { isPinned: isPinned ? 1 : 0 }
+  })
+}

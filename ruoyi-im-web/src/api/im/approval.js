@@ -88,6 +88,43 @@ export function reject(id, comment) {
 }
 
 /**
+ * 撤回审批
+ * @param {number} id - 审批ID
+ */
+export function cancelApproval(id) {
+  return request({
+    url: `/api/im/approval/${id}/cancel`,
+    method: 'post'
+  })
+}
+
+/**
+ * 转交审批
+ * @param {number} id - 审批ID
+ * @param {number} toUserId - 转交给的用户ID
+ */
+export function transferApproval(id, toUserId) {
+  return request({
+    url: `/api/im/approval/${id}/transfer`,
+    method: 'post',
+    params: { toUserId }
+  })
+}
+
+/**
+ * 委托审批
+ * @param {number} id - 审批ID
+ * @param {number} toUserId - 委托给的用户ID
+ */
+export function delegateApproval(id, toUserId) {
+  return request({
+    url: `/api/im/approval/${id}/delegate`,
+    method: 'post',
+    params: { toUserId }
+  })
+}
+
+/**
  * 获取审批模板
  */
 export function getTemplates() {

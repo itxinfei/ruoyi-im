@@ -159,14 +159,15 @@ export function markAsRead(data) {
 }
 
 /**
- * 获取消息已读用户列表
- * @param {number} conversationId - 会话ID
+ * 获取消息已读用户列表（已废弃，请使用 getMessageReadDetail）
  * @param {number} messageId - 消息ID
  * @returns {Promise}
+ * @deprecated 请使用 getMessageReadDetail(messageId) 替代
  */
-export function getMessageReadUsers(conversationId, messageId) {
+export function getMessageReadUsers(messageId) {
+  console.warn('getMessageReadUsers 已废弃，请使用 getMessageReadDetail')
   return request({
-    url: `/api/im/message/read/status/${conversationId}/${messageId}`,
+    url: `/api/im/message/read/status/${messageId}`,
     method: 'get'
   })
 }

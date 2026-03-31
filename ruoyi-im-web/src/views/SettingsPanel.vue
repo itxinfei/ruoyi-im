@@ -297,6 +297,7 @@ const loadSettings = async () => {
     }
   } catch (e) {
     console.error('加载设置失败', e)
+    ElMessage.error('加载设置失败')
   } finally {
     loading.value = false
   }
@@ -311,6 +312,7 @@ const saveGeneralSettings = async () => {
     }
   } catch (e) {
     console.error('保存通用设置失败', e)
+    ElMessage.error('保存通用设置失败')
   }
 }
 
@@ -323,6 +325,7 @@ const saveNotificationSettings = async () => {
     }
   } catch (e) {
     console.error('保存通知设置失败', e)
+    ElMessage.error('保存通知设置失败')
   }
 }
 
@@ -335,6 +338,7 @@ const savePrivacySettings = async () => {
     }
   } catch (e) {
     console.error('保存隐私设置失败', e)
+    ElMessage.error('保存隐私设置失败')
   }
 }
 
@@ -347,6 +351,7 @@ const saveShortcutSettings = async () => {
     }
   } catch (e) {
     console.error('保存快捷键设置失败', e)
+    ElMessage.error('保存快捷键设置失败')
   }
 }
 
@@ -360,6 +365,7 @@ const handleUnblock = async (userId) => {
     }
   } catch (e) {
     console.error('解除拉黑失败', e)
+    ElMessage.error('解除拉黑失败')
   }
 }
 

@@ -110,7 +110,7 @@
             审批中心
           </h2>
           <div class="view-actions">
-            <el-button type="primary">
+            <el-button type="primary" @click="showApprovalDialog = true">
               发起审批
             </el-button>
           </div>
@@ -252,7 +252,7 @@
         </header>
         <div class="schedule-content">
           <div v-if="scheduleList.length > 0" class="schedule-list">
-            <div v-for="schedule in scheduleList.slice(0, 5)" :key="schedule.id" class="schedule-item">
+            <div v-for="schedule in scheduleList.slice(0, 5)" :key="schedule.id" class="schedule-item" @click="handleScheduleClick(schedule)">
               <div class="schedule-time">
                 {{ schedule.startTime?.substring(5, 16) || '' }}
               </div>
@@ -278,7 +278,7 @@
             工作报告
           </h2>
           <div class="view-actions">
-            <el-button type="primary">
+            <el-button type="primary" @click="showReportDialog = true">
               写周报
             </el-button>
           </div>
@@ -288,6 +288,53 @@
         </div>
       </div>
     </main>
+    <!-- 发起审批对话框 -->
+    <CreateApprovalDialog v-model="showApprovalDialog" @success="loadApprovals" />
+
+    <!-- 周报对话框 -->
+    <el-dialog v-model="showReportDialog" title="写周报" width="520px" append-to-body>
+      <el-form label-position="top">
+        <el-form-item label="周期">
+          <el-date-picker
+            v-model="reportForm.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="YYYY-MM-DD"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="本周工作总结">
+          <el-input
+            v-model="reportForm.summary"
+            type="textarea"
+            :rows="4"
+            placeholder="请简要描述本周完成的工作内容"
+          />
+        </el-form-item>
+        <el-form-item label="下周工作计划">
+          <el-input
+            v-model="reportForm.nextWeekPlan"
+            type="textarea"
+            :rows="3"
+            placeholder="请简要描述下周工作计划"
+          />
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input
+            v-model="reportForm.remark"
+            type="textarea"
+            :rows="2"
+            placeholder="其他需要说明的情况（可选）"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showReportDialog = false">取消</el-button>
+        <el-button type="primary" :loading="reportLoading" @click="handleSubmitReport">提交周报</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -302,9 +349,11 @@ import {
 import { ElMessage } from 'element-plus'
 import { getOverview, getAppsByCategory, getRecentApps, recordAppUsage, getLayoutConfig, saveLayoutConfig, resetLayoutConfig } from '@/api/im/workbench'
 import { getTodayStatus, checkIn as apiCheckIn, checkOut as apiCheckOut, getAttendanceList } from '@/api/im/attendance'
-import { getMyTasks } from '@/api/im/task'
+import { getMyTasks, updateTaskStatus } from '@/api/im/task'
 import { getPendingApprovals } from '@/api/im/approval'
 import { getSchedulesByRange } from '@/api/im/schedule'
+import { createWorkReport } from '@/api/im/workReport'
+import CreateApprovalDialog from '@/components/CreateApprovalDialog/index.vue'
 
 const store = useStore()
 const emit = defineEmits(['switch-module'])
@@ -323,6 +372,10 @@ const allApps = ref([])
 const recentApps = ref([])
 const appsLoading = ref(false)
 const savedLayout = ref(null) // 保存的布局配置
+const showApprovalDialog = ref(false)
+const showReportDialog = ref(false)
+const reportLoading = ref(false)
+const reportForm = ref({ dateRange: [], summary: '', nextWeekPlan: '', remark: '' })
 
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const displayName = computed(() => currentUser.value.nickname || currentUser.value.username || '成员')
@@ -451,6 +504,7 @@ const handleAppClick = async (app) => {
       await recordAppUsage(app.id)
     } catch (e) {
       console.error('记录应用使用失败:', e)
+      ElMessage.error('记录应用使用失败')
     }
   }
 
@@ -476,7 +530,7 @@ const handleAppClick = async (app) => {
     } else if (app.action === 'report') {
       activeMenu.value = 'report'
     } else if (app.action === 'meeting') {
-      ElMessage.info('视频会议功能开发中')
+      emit('switch-module', 'chat')
     } else {
       ElMessage.info(`${app.label}功能开发中`)
     }
@@ -486,12 +540,60 @@ const handleAppClick = async (app) => {
 }
 
 const handleTodoClick = (todo) => {
-  ElMessage.info(`待办详情: ${todo.title}`)
+  emit('switch-module', 'todo')
 }
 
-const handleTodoComplete = (todo) => {
-  ElMessage.success('待办已完成')
-  todos.value = todos.value.filter(t => t.id !== todo.id)
+const handleScheduleClick = (schedule) => {
+  emit('switch-module', 'calendar')
+}
+
+// 提交周报
+const handleSubmitReport = async () => {
+  if (!reportForm.value.dateRange || reportForm.value.dateRange.length !== 2) {
+    ElMessage.warning('请选择周报周期')
+    return
+  }
+  if (!reportForm.value.summary.trim()) {
+    ElMessage.warning('请填写本周工作总结')
+    return
+  }
+  reportLoading.value = true
+  try {
+    const [startDate, endDate] = reportForm.value.dateRange
+    const formatDate = (d) => d instanceof Date ? d.toISOString().split('T')[0] : d
+    const res = await createWorkReport({
+      reportType: 'WEEKLY',
+      reportDate: formatDate(endDate), // 周报日期为周期结束日
+      workContent: reportForm.value.summary,
+      tomorrowPlan: reportForm.value.nextWeekPlan,
+      issues: reportForm.value.remark,
+      completionStatus: 'COMPLETED',
+      isDraft: false
+    })
+    if (res.code === 200) {
+      ElMessage.success('周报已提交')
+      showReportDialog.value = false
+      reportForm.value = { dateRange: [], summary: '', nextWeekPlan: '', remark: '' }
+    } else {
+      throw new Error(res.message || '提交失败')
+    }
+  } catch (error) {
+    ElMessage.error(error.message || '提交失败，请重试')
+  } finally {
+    reportLoading.value = false
+  }
+}
+
+const handleTodoComplete = async (todo) => {
+  try {
+    const res = await updateTaskStatus(todo.id, 'COMPLETED')
+    if (res.code === 200) {
+      ElMessage.success('待办已完成')
+      todos.value = todos.value.filter(t => t.id !== todo.id)
+    }
+  } catch (error) {
+    ElMessage.error('操作失败')
+  }
 }
 
 const handlePunch = async (type) => {

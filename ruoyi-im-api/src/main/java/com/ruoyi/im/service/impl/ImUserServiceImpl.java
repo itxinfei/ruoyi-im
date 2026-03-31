@@ -5,6 +5,7 @@ import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.BasePageRequest;
+import com.ruoyi.im.dto.admin.ImUserBatchImportRequest;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
@@ -16,6 +17,7 @@ import com.ruoyi.im.util.BeanCopyUtil;
 import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.JwtUtils;
+import com.ruoyi.im.vo.admin.BatchOperationResult;
 import com.ruoyi.im.vo.user.ImLoginVO;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.slf4j.Logger;
@@ -133,6 +135,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @CacheEvict(value = "user_local_cache", allEntries = true)
     public Long register(ImRegisterRequest request) {
         ImUser existingUser = imUserMapper.selectImUserByUsername(request.getUsername());
         if (existingUser != null) {
@@ -456,5 +459,43 @@ public class ImUserServiceImpl implements ImUserService {
 
         // 清除缓存，确保下次获取的是最新状态
         imRedisUtil.evictUserInfo(userId);
+    }
+
+    @Override
+    public BatchOperationResult batchImportUsers(ImUserBatchImportRequest request) {
+        BatchOperationResult result = new BatchOperationResult();
+        int successCount = 0;
+        for (ImUserBatchImportRequest.UserItem item : request.getUsers()) {
+            try {
+                // 检查用户名是否已存在
+                ImUser existing = imUserMapper.selectImUserByUsername(item.getUsername());
+                if (existing != null) {
+                    result.addFailedItem(null, "用户名 " + item.getUsername() + " 已存在");
+                    continue;
+                }
+                // 构建注册请求
+                ImRegisterRequest regRequest = new ImRegisterRequest();
+                regRequest.setUsername(item.getUsername());
+                regRequest.setNickname(item.getNickname() != null ? item.getNickname() : item.getUsername());
+                regRequest.setMobile(item.getMobile());
+                regRequest.setPassword(item.getPassword() != null ? item.getPassword() : "123456");
+                createUser(regRequest);
+                // 设置角色（如果不同默认角色）
+                if (item.getRole() != null && !"USER".equals(item.getRole())) {
+                    ImUser newUser = imUserMapper.selectImUserByUsername(item.getUsername());
+                    if (newUser != null) {
+                        newUser.setRole(item.getRole());
+                        imUserMapper.updateImUser(newUser);
+                    }
+                }
+                successCount++;
+            } catch (Exception e) {
+                result.addFailedItem(null, "用户 " + item.getUsername() + " 导入失败: " + e.getMessage());
+            }
+        }
+        result.setSuccessCount(successCount);
+        result.setFailCount(result.getFailedItems().size());
+        result.setTotalCount(request.getUsers().size());
+        return result;
     }
 }
