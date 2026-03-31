@@ -474,6 +474,18 @@ function formatDateTime(date) {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+function formatDateTimeFull(date) {
+  if (!date) return ''
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hours = String(d.getHours()).padStart(2, '0')
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  const seconds = String(d.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
 function isToday(date) {
   const today = new Date()
   return formatDate(date) === formatDate(today)
@@ -775,8 +787,8 @@ async function loadEvents() {
     const endTime = new Date(year, month + 2, 0)
 
     const res = await getSchedulesByRange(
-      startTime.toISOString(),
-      endTime.toISOString()
+      formatDateTimeFull(startTime),
+      formatDateTimeFull(endTime)
     )
 
     if (res.code === 200) {

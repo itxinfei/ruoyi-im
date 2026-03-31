@@ -101,13 +101,13 @@
             <div class="todo-main-info">
               <div class="todo-title-row">
                 <span class="title-text">{{ todo.title }}</span>
-                <span v-if="todo.priority === 'HIGH'" class="priority-tag high">紧急</span>
+                <span v-if="todo.priority === 3 || todo.priority === 4" class="priority-tag high">紧急</span>
                 <span v-if="todo.taskType" class="category-tag" :class="todo.taskType.toLowerCase()">
                   {{ getTypeLabel(todo.taskType) }}
                 </span>
               </div>
               <div class="todo-meta-row">
-                <span class="meta-date" :class="{ overdue: isOverdue(todo.dueDate) }">
+                <span class="meta-date" :class="{ overdue: isOverdue(todo) }">
                   <el-icon><Calendar /></el-icon>
                   {{ formatDate(todo.dueDate) }}
                 </span>
@@ -180,7 +180,7 @@ const filteredTodos = computed(() => {
   } else if (activeFilter.value === 'completed') {
     list = list.filter(t => t.status === 'COMPLETED')
   } else if (activeFilter.value === 'high') {
-    list = list.filter(t => t.priority === 'HIGH' && t.status !== 'COMPLETED')
+    list = list.filter(t => (t.priority === 3 || t.priority === 4) && t.status !== 'COMPLETED')
   }
 
   // 分类筛选
@@ -203,7 +203,7 @@ const filteredTodos = computed(() => {
 
 const getCount = (key) => {
   if (key === 'pending') return todos.value.filter(t => t.status !== 'COMPLETED').length
-  if (key === 'high') return todos.value.filter(t => t.priority === 'HIGH' && t.status !== 'COMPLETED').length
+  if (key === 'high') return todos.value.filter(t => (t.priority === 3 || t.priority === 4) && t.status !== 'COMPLETED').length
   if (key === 'completed') return todos.value.filter(t => t.status === 'COMPLETED').length
   return 0
 }
@@ -256,9 +256,9 @@ const handleViewDetail = (todo) => {
   showAddDialog.value = true
 }
 
-const isOverdue = (date) => {
-  if (!date || todos.value.find(t => t.id === arguments[0]?.id)?.status === 'COMPLETED') return false
-  return new Date(date) < new Date()
+const isOverdue = (todo) => {
+  if (!todo.dueDate || todo.status === 'COMPLETED') return false
+  return new Date(todo.dueDate) < new Date()
 }
 
 const formatDate = (date) => date ? new Date(date).toLocaleDateString() : '暂无截止日期'
@@ -274,36 +274,36 @@ onMounted(() => loadTodos())
 <style scoped lang="scss">
 .todo-panel { display: flex; height: 100%; flex: 1; background: var(--dt-bg-card); }
 .todo-sidebar { width: var(--dt-contact-panel-width, 240px); border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; }
-.sidebar-header { padding: var(--dt-spacing-md, 16px) var(--dt-spacing-md, 20px); .sidebar-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); } }
-.sidebar-content { flex: 1; padding: var(--dt-spacing-xs, 8px) var(--dt-spacing-sm, 12px); overflow-y: auto;
-  .nav-section { margin-bottom: var(--dt-spacing-md, 16px);
-    .nav-section-title { font-size: var(--dt-font-size-xs, 12px); color: var(--dt-text-tertiary); padding: var(--dt-spacing-xs, 8px); font-weight: var(--dt-font-weight-medium); }
+.sidebar-header { padding: var(--dt-spacing-lg) var(--dt-spacing-xl); .sidebar-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); } }
+.sidebar-content { flex: 1; padding: var(--dt-spacing-sm) var(--dt-spacing-md); overflow-y: auto;
+  .nav-section { margin-bottom: var(--dt-spacing-lg);
+    .nav-section-title { font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); padding: var(--dt-spacing-xs); font-weight: var(--dt-font-weight-medium); }
   }
-  .nav-item { display: flex; align-items: center; gap: var(--dt-spacing-sm, 10px); padding: var(--dt-spacing-sm, 10px) var(--dt-spacing-xs, 12px); margin: var(--dt-spacing-xs, 2px) 0; border-radius: var(--dt-radius-sm); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-fast);
+  .nav-item { display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 40px; box-sizing: border-box; border-radius: var(--dt-radius-md); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-base);
     &:hover { background: var(--dt-bg-session-hover); }
-    &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
-    .nav-icon { font-size: var(--dt-icon-size-lg, 18px); }
-    .nav-label { flex: 1; font-size: var(--dt-font-size-sm); }
-    .nav-badge { background: var(--dt-error-color); color: var(--dt-text-white); padding: 0 var(--dt-spacing-xs, 6px); border-radius: var(--dt-radius-full, 10px); font-size: var(--dt-font-size-xs); transform: scale(0.85); min-width: 18px; text-align: center;
+    &.active { background: var(--dt-bg-session-active); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
+    .nav-icon { font-size: var(--dt-icon-size-lg); }
+    .nav-label { flex: 1; font-size: var(--dt-font-size-base); }
+    .nav-badge { background: var(--dt-error-color); color: var(--dt-text-white); padding: 0 var(--dt-spacing-xs); border-radius: var(--dt-radius-full); font-size: var(--dt-font-size-xs); transform: scale(0.85); min-width: 18px; text-align: center;
       &.cat { background: var(--dt-brand-color); }
     }
   }
 }
-.sidebar-footer { padding: var(--dt-spacing-md, 16px); border-top: 1px solid var(--dt-border-light);
-  .add-todo-btn { width: 100%; height: var(--dt-btn-height-md, 36px); background: var(--dt-brand-color); color: var(--dt-text-white); border: none; border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; gap: var(--dt-spacing-xs, 8px); font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); cursor: pointer; transition: all var(--dt-transition-fast);
+.sidebar-footer { padding: var(--dt-spacing-lg); border-top: 1px solid var(--dt-border-light);
+  .add-todo-btn { width: 100%; height: var(--dt-btn-height-md); background: var(--dt-brand-color); color: var(--dt-text-white); border: none; border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; gap: var(--dt-spacing-sm); font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); cursor: pointer; transition: all var(--dt-transition-fast);
     &:hover { background: var(--dt-brand-hover); box-shadow: var(--dt-shadow-2); }
   }
 }
 .todo-main { flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); overflow: hidden; }
-.todo-header { height: var(--dt-toolbar-height, 56px); padding: 0 var(--dt-spacing-lg, 24px); border-bottom: 1px solid var(--dt-border-light); display: flex; align-items: center; justify-content: space-between;
+.todo-header { height: var(--dt-toolbar-height, 56px); padding: 0 var(--dt-spacing-xl); border-bottom: 1px solid var(--dt-border-light); display: flex; align-items: center; justify-content: space-between;
   .header-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); }
-  .search-box { position: relative; .search-icon { position: absolute; left: var(--dt-spacing-xs, 8px); top: 50%; transform: translateY(-50%); font-size: var(--dt-icon-size-lg, 16px); color: var(--dt-text-tertiary); }
-    .search-input { width: 240px; height: var(--dt-btn-height-sm, 32px); background: var(--dt-bg-body); border: none; border-radius: var(--dt-radius-sm); padding: 0 var(--dt-spacing-lg, 32px); font-size: var(--dt-font-size-sm); outline: none; &:focus { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); } }
+  .search-box { position: relative; .search-icon { position: absolute; left: var(--dt-spacing-sm); top: 50%; transform: translateY(-50%); font-size: var(--dt-icon-size-md); color: var(--dt-text-tertiary); }
+    .search-input { width: 240px; height: var(--dt-btn-height-sm); background: var(--dt-bg-body); border: none; border-radius: var(--dt-radius-sm); padding: 0 var(--dt-spacing-2xl); font-size: var(--dt-font-size-sm); outline: none; &:focus { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); } }
   }
 }
-.todo-content-scroller { flex: 1; padding: var(--dt-spacing-lg, 20px) var(--dt-spacing-lg, 24px); overflow-y: auto; background: var(--dt-bg-body); }
-.todo-list { display: flex; flex-direction: column; gap: var(--dt-spacing-sm, 12px); }
-.todo-card { background: var(--dt-bg-card); border-radius: var(--dt-radius-md); padding: var(--dt-spacing-md, 16px); display: flex; align-items: flex-start; gap: var(--dt-spacing-md, 14px); border: 1px solid var(--dt-border-lighter); box-shadow: var(--dt-shadow-1); cursor: pointer; transition: all var(--dt-transition-fast);
+.todo-content-scroller { flex: 1; padding: var(--dt-spacing-lg) var(--dt-spacing-xl); overflow-y: auto; background: var(--dt-bg-body); }
+.todo-list { display: flex; flex-direction: column; gap: var(--dt-spacing-md); }
+.todo-card { background: var(--dt-bg-card); border-radius: var(--dt-radius-md); padding: var(--dt-spacing-lg); display: flex; align-items: flex-start; gap: var(--dt-spacing-lg); border: 1px solid var(--dt-border-lighter); box-shadow: var(--dt-shadow-1); cursor: pointer; transition: all var(--dt-transition-fast);
   &:hover { transform: translateY(var(--dt-transform-y, -1px)); box-shadow: var(--dt-shadow-2); .todo-actions { opacity: 1; } }
   &.completed { opacity: 0.6; .title-text { text-decoration: line-through; } }
 }
@@ -311,21 +311,21 @@ onMounted(() => loadTodos())
   &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-white); .el-icon { font-size: var(--dt-font-size-xs); } } }
 }
 .todo-main-info { flex: 1; min-width: 0;
-  .todo-title-row { display: flex; align-items: center; gap: var(--dt-spacing-xs, 8px); flex-wrap: wrap; .title-text { font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); color: var(--dt-text-primary); }
-    .priority-tag { padding: 0 var(--dt-spacing-xs, 6px); border-radius: var(--dt-radius-sm); font-size: var(--dt-font-size-xs);
+  .todo-title-row { display: flex; align-items: center; gap: var(--dt-spacing-xs); flex-wrap: wrap; .title-text { font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); color: var(--dt-text-primary); }
+    .priority-tag { padding: 0 var(--dt-spacing-xs); border-radius: var(--dt-radius-sm); font-size: var(--dt-font-size-xs);
       &.high { background: var(--dt-error-bg); color: var(--dt-error-color); }
     }
-    .category-tag { padding: 0 var(--dt-spacing-xs, 6px); border-radius: var(--dt-radius-sm); font-size: var(--dt-font-size-xs);
+    .category-tag { padding: 0 var(--dt-spacing-xs); border-radius: var(--dt-radius-sm); font-size: var(--dt-font-size-xs);
       &.work { background: var(--dt-todo-work-bg); color: var(--dt-todo-work-color); }
       &.personal { background: var(--dt-todo-personal-bg); color: var(--dt-todo-personal-color); }
       &.study { background: var(--dt-todo-study-bg); color: var(--dt-todo-study-color); }
       &.other { background: var(--dt-todo-other-bg); color: var(--dt-todo-other-color); }
     }
   }
-  .todo-meta-row { margin-top: var(--dt-spacing-xs, 6px); display: flex; align-items: center; gap: var(--dt-spacing-md, 12px);
-    .meta-date, .meta-remind { display: flex; align-items: center; gap: var(--dt-spacing-xs, 4px); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-sm, 14px); } &.overdue { color: var(--dt-error-color); } }
+  .todo-meta-row { margin-top: var(--dt-spacing-sm); display: flex; align-items: center; gap: var(--dt-spacing-md);
+    .meta-date, .meta-remind { display: flex; align-items: center; gap: var(--dt-spacing-xs); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-md); } &.overdue { color: var(--dt-error-color); } }
   }
 }
-.todo-actions { opacity: 0; display: flex; gap: var(--dt-spacing-xs, 4px); transition: all var(--dt-transition-fast); .action-icon { border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); padding: 4px; &:hover { color: var(--dt-brand-color); } &.danger:hover { color: var(--dt-error-color); } } }
-.empty-state, .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--dt-spacing-3xl, 100px) 0; color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-xl, 48px); margin-bottom: var(--dt-spacing-md, 12px); opacity: 0.3; } }
+.todo-actions { opacity: 0; display: flex; gap: var(--dt-spacing-xs); transition: all var(--dt-transition-fast); .action-icon { border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); padding: 4px; &:hover { color: var(--dt-brand-color); } &.danger:hover { color: var(--dt-error-color); } } }
+.empty-state, .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--dt-spacing-3xl, 100px) 0; color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-xl, 48px); margin-bottom: var(--dt-spacing-md); opacity: 0.3; } }
 </style>

@@ -151,7 +151,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Bell, Promotion, View, SuccessFilled
@@ -412,7 +412,7 @@ onMounted(() => {
   .sender-info {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--dt-spacing-sm);
 
     .sender-detail {
       display: flex;

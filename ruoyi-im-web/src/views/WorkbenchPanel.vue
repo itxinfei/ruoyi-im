@@ -733,7 +733,7 @@ const loadAttendanceRecords = async () => {
 
 const loadTodos = async () => {
   try {
-    const res = await getMyTasks({ status: 'PENDING' })
+    const res = await getMyTasks('PENDING')
     if (res.code === 200) {
       todos.value = (res.data || res.rows || []).map(t => ({
         id: t.id,
@@ -762,8 +762,15 @@ const loadApprovals = async () => {
 const loadSchedules = async () => {
   try {
     const today = new Date()
-    const start = today.toISOString().split('T')[0]
-    const end = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const fmt = (d) => {
+      const year = d.getFullYear()
+      const month = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day} 00:00:00`
+    }
+    const start = fmt(today)
+    const endDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
+    const end = fmt(endDate)
     const res = await getSchedulesByRange(start, end)
     if (res.code === 200) {
       scheduleList.value = res.data || []
@@ -866,8 +873,8 @@ onUnmounted(() => {
 }
 
 .sidebar-title {
-  font-size: var(--dt-font-size-base, 16px);
-  font-weight: var(--dt-font-weight-semibold, 600);
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -880,19 +887,22 @@ onUnmounted(() => {
 
 .nav-item {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: var(--dt-spacing-md);
-  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
+  gap: var(--dt-spacing-sm);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-md);
+  height: 40px;
+  box-sizing: border-box;
   cursor: pointer;
   position: relative;
-  transition: all var(--dt-transition-fast);
+  transition: all var(--dt-transition-base);
 
   &:hover {
     background: var(--dt-bg-session-hover);
   }
 
   &.active {
-    background: var(--dt-brand-lighter);
+    background: var(--dt-bg-session-active);
     color: var(--dt-brand-color);
 
     &::before {
@@ -901,37 +911,38 @@ onUnmounted(() => {
       left: 0;
       top: 0;
       bottom: 0;
-      width: var(--dt-spacing-xs, 3px);
+      width: var(--dt-spacing-xs);
       background: var(--dt-brand-color);
+      border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
     }
 
     .nav-label {
-      font-weight: 500;
+      font-weight: var(--dt-font-weight-semibold);
     }
   }
 }
 
 .nav-icon {
-  font-size: var(--dt-icon-size-lg, 18px);
+  font-size: var(--dt-icon-size-md);
   flex-shrink: 0;
 }
 
 .nav-label {
   flex: 1;
-  font-size: var(--dt-font-size-sm, 14px);
+  font-size: var(--dt-font-size-base);
   color: var(--dt-text-primary);
 }
 
 .nav-badge {
   background: var(--dt-error-color);
   color: var(--dt-bg-card);
-  font-size: var(--dt-font-size-xs, 11px);
+  font-size: var(--dt-font-size-xs);
   min-width: 18px;
   height: 18px;
-  padding: 0 var(--dt-spacing-xs, 5px);
-  border-radius: var(--dt-radius-full, 9px);
+  padding: 0 var(--dt-spacing-xs);
+  border-radius: var(--dt-radius-full);
   @include flex-center;
-  font-weight: var(--dt-font-weight-medium, 500);
+  font-weight: var(--dt-font-weight-medium);
 }
 
 // ============================================================================
@@ -961,8 +972,8 @@ onUnmounted(() => {
 }
 
 .view-title {
-  font-size: var(--dt-font-size-base, 18px);
-  font-weight: var(--dt-font-weight-semibold, 600);
+  font-size: var(--dt-font-size-sm);
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -976,7 +987,7 @@ onUnmounted(() => {
 // 常用应用视图
 // ============================================================================
 .apps-view {
-  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl, 40px);
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
 }
 
 .wb-header {
@@ -988,42 +999,42 @@ onUnmounted(() => {
 
 .greeting-box {
   &__title {
-    font-size: var(--dt-font-size-lg, 24px);
-    font-weight: var(--dt-font-weight-bold, 700);
+    font-size: var(--dt-font-size-lg);
+    font-weight: var(--dt-font-weight-bold);
     color: var(--dt-text-primary);
     margin: 0;
     letter-spacing: -0.5px;
   }
 
   &__date {
-    font-size: var(--dt-font-size-sm, 14px);
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-tertiary);
-    margin-top: var(--dt-spacing-md, 8px);
+    margin-top: var(--dt-spacing-md);
   }
 }
 
 .wb-search {
   position: relative;
-  width: var(--dt-search-width-lg, 320px);
+  width: var(--dt-search-width-lg);
 
   &__icon {
     position: absolute;
-    left: var(--dt-spacing-md, 12px);
+    left: var(--dt-spacing-md);
     top: 50%;
     transform: translateY(-50%);
     color: var(--dt-text-tertiary);
-    font-size: var(--dt-icon-size-lg, 16px);
+    font-size: var(--dt-icon-size-lg);
   }
 
   &__input {
     width: 100%;
-    height: var(--dt-btn-height-md, 36px);
-    padding: 0 var(--dt-spacing-md, 16px) 0 var(--dt-spacing-md, 36px);
+    height: var(--dt-btn-height-md);
+    padding: 0 var(--dt-spacing-md) 0 var(--dt-spacing-2xl);
     background: var(--dt-bg-body);
     border: 1px solid var(--dt-border-light);
     border-radius: var(--dt-radius-md);
     outline: none;
-    font-size: var(--dt-font-size-sm, 14px);
+    font-size: var(--dt-font-size-sm);
     transition: all var(--dt-transition-base);
 
     &:focus {
@@ -1047,8 +1058,8 @@ onUnmounted(() => {
   }
 
   &__title {
-    font-size: var(--dt-font-size-base, 16px);
-    font-weight: var(--dt-font-weight-semibold, 600);
+    font-size: var(--dt-font-size-base);
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
     margin: 0;
   }
@@ -1068,7 +1079,7 @@ onUnmounted(() => {
 .app-item {
   @include flex-center;
   flex-direction: column;
-  gap: var(--dt-spacing-md, 10px);
+  gap: var(--dt-spacing-md);
   cursor: pointer;
   padding: var(--dt-spacing-md) 0;
   border-radius: var(--dt-radius-md);
@@ -1086,19 +1097,19 @@ onUnmounted(() => {
   }
 
   &__icon {
-    width: var(--dt-icon-size-2xl, 52px);
-    height: var(--dt-icon-size-2xl, 52px);
-    border-radius: var(--dt-radius-lg, 12px);
+    width: var(--dt-icon-size-2xl);
+    height: var(--dt-icon-size-2xl);
+    border-radius: var(--dt-radius-lg);
     @include flex-center;
-    font-size: var(--dt-icon-size-xl, 24px);
+    font-size: var(--dt-icon-size-xl);
     background: var(--dt-bg-card);
     box-shadow: var(--dt-shadow-1);
     transition: all var(--dt-transition-base);
 
     &--sm {
-      width: var(--dt-icon-size-xl, 44px);
-      height: var(--dt-icon-size-xl, 44px);
-      font-size: var(--dt-icon-size-lg, 20px);
+      width: var(--dt-icon-size-xl);
+      height: var(--dt-icon-size-xl);
+      font-size: var(--dt-icon-size-lg);
     }
 
     &.icon-orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
@@ -1114,22 +1125,22 @@ onUnmounted(() => {
   &__label {
     font-size: var(--dt-font-size-sm);
     color: var(--dt-text-primary);
-    font-weight: var(--dt-font-weight-medium, 500);
+    font-weight: var(--dt-font-weight-medium);
   }
 
   &__badge {
     position: absolute;
-    top: var(--dt-spacing-md, 10px);
-    right: var(--dt-spacing-lg, 20px);
+    top: var(--dt-spacing-md);
+    right: var(--dt-spacing-lg);
     background: var(--dt-error-color);
     color: var(--dt-bg-card);
-    font-size: var(--dt-font-size-xs, 10px);
+    font-size: var(--dt-font-size-xs);
     min-width: 16px;
     height: 16px;
-    border-radius: var(--dt-radius-full, 8px);
+    border-radius: var(--dt-radius-full);
     @include flex-center;
-    border: var(--dt-border-thick, 1.5px) solid var(--dt-bg-card);
-    font-weight: var(--dt-font-weight-semibold, 600);
+    border: var(--dt-border-thick) solid var(--dt-bg-card);
+    font-weight: var(--dt-font-weight-semibold);
   }
 }
 
@@ -1151,7 +1162,7 @@ onUnmounted(() => {
   padding: var(--dt-spacing-md) var(--dt-spacing-xl);
   cursor: pointer;
   color: var(--dt-text-secondary);
-  font-size: var(--dt-font-size-sm, 14px);
+  font-size: var(--dt-font-size-sm);
   position: relative;
   transition: color var(--dt-transition-fast);
 
@@ -1161,7 +1172,7 @@ onUnmounted(() => {
 
   &.active {
     color: var(--dt-brand-color);
-    font-weight: var(--dt-font-weight-medium, 500);
+    font-weight: var(--dt-font-weight-medium);
 
     &::after {
       content: '';
@@ -1177,14 +1188,14 @@ onUnmounted(() => {
   .tab-count {
     background: var(--dt-error-color);
     color: var(--dt-bg-card);
-    font-size: var(--dt-font-size-xs, 10px);
+    font-size: var(--dt-font-size-xs);
     min-width: 16px;
     height: 16px;
-    padding: 0 var(--dt-spacing-xs, 4px);
-    border-radius: var(--dt-radius-full, 8px);
+    padding: 0 var(--dt-spacing-xs);
+    border-radius: var(--dt-radius-full);
     @include flex-center;
-    margin-left: var(--dt-spacing-sm, 6px);
-    font-weight: var(--dt-font-weight-medium, 500);
+    margin-left: var(--dt-spacing-sm);
+    font-weight: var(--dt-font-weight-medium);
   }
 }
 
@@ -1198,7 +1209,7 @@ onUnmounted(() => {
 // 考勤视图
 // ============================================================================
 .attendance-view {
-  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl, 40px);
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
 }
 
 .attendance-card {
@@ -1215,8 +1226,8 @@ onUnmounted(() => {
 }
 
 .status-circle {
-  width: var(--dt-avatar-size-xl, 80px);
-  height: var(--dt-avatar-size-xl, 80px);
+  width: var(--dt-avatar-size-xl);
+  height: var(--dt-avatar-size-xl);
   border-radius: var(--dt-radius-full);
   background: var(--dt-brand-lighter);
   @include flex-center;
@@ -1232,19 +1243,19 @@ onUnmounted(() => {
 }
 
 .status-icon {
-  font-size: var(--dt-icon-size-2xl, 36px);
+  font-size: var(--dt-icon-size-2xl);
   color: var(--dt-brand-color);
 }
 
 .status-text {
-  font-size: var(--dt-font-size-base, 16px);
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-primary);
   margin: 0 0 var(--dt-spacing-xs);
 }
 
 .status-time {
-  font-size: var(--dt-font-size-xl, 24px);
-  font-weight: var(--dt-font-weight-semibold, 600);
+  font-size: var(--dt-font-size-xl);
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-brand-color);
   margin: 0;
 }
@@ -1332,13 +1343,13 @@ onUnmounted(() => {
 
   &:hover {
     box-shadow: var(--dt-shadow-card);
-    transform: translateX(var(--dt-transform-x, 2px));
+    transform: translateX(var(--dt-transform-x));
   }
 
   &__status {
-    width: var(--dt-spacing-xs, 4px);
-    height: var(--dt-btn-height-sm, 32px);
-    border-radius: var(--dt-radius-xs, 2px);
+    width: var(--dt-spacing-xs);
+    height: var(--dt-btn-height-sm);
+    border-radius: var(--dt-radius-xs);
     flex-shrink: 0;
 
     &.high { background: var(--dt-error-color); }
@@ -1352,17 +1363,17 @@ onUnmounted(() => {
   }
 
   &__title {
-    font-size: var(--dt-font-size-sm, 14px);
-    font-weight: var(--dt-font-weight-medium, 500);
+    font-size: var(--dt-font-size-sm);
+    font-weight: var(--dt-font-weight-medium);
     color: var(--dt-text-primary);
     margin: 0;
     @include text-ellipsis;
   }
 
   &__meta {
-    font-size: var(--dt-font-size-xs, 12px);
+    font-size: var(--dt-font-size-xs);
     color: var(--dt-text-tertiary);
-    margin-top: var(--dt-spacing-xs, 4px);
+    margin-top: var(--dt-spacing-xs);
     display: block;
   }
 }
@@ -1371,7 +1382,7 @@ onUnmounted(() => {
 // 日程视图
 // ============================================================================
 .schedule-view {
-  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl, 40px);
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
 }
 
 .schedule-content {
