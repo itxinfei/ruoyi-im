@@ -3,8 +3,9 @@
 ## 核心法则 (The Constitution)
 **所有 AI 行为必须强制遵守：**
 1. `docs/大模型研发规范.md` (全站研发总纲)
-2. `.agent/rules/ui-standards.md` (前端视觉红线)
-3. `.agent/rules/backend-standards.md` (后端架构红线)
+2. `.agent/rules/ui-standards.md` (前端视觉红线 - 钉钉 8.2 Token 体系)
+3. `.claude/rules/dingtalk-ui-prompt.md` (UI 生成 Prompt 规范 - 强制约束大模型)
+4. `.agent/rules/backend-standards.md` (后端架构红线)
 
 ## 常用命令
 - 前端：`cd ruoyi-im-web && npm run dev`
@@ -40,6 +41,15 @@
 
 **组件颜色修复**:
 - `ChatDetailDrawer.vue`: 群主/管理员角标颜色 (#FFD700→warning, #409EFF→brand)
+
+**钉钉官方色对齐 (2026-03-31)**:
+- `design-tokens.scss`: 全面对齐钉钉官方色标
+  - 品牌蓝: #0089FF → #277EFB
+  - 成功绿: #00b578 → #00B42A
+  - 警告黄: #ff8f1f → #FF7D00
+  - 危险红: #f54a45 → #F53F3F
+- `.claude/rules/dingtalk-ui-prompt.md`: 新增 UI 开发规范 Prompt
+- `.agent/rules/ui-standards.md`: 升级为钉钉 8.2 Token 完整规范
 
 ### 代码检查修复记录 (2026-03-27)
 
