@@ -11,6 +11,7 @@ import { Phone, VideoCamera, Link, Bell, Microphone, StarFilled, Mute } from '@e
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
+import GroupCallPanel from '@/components/Chat/GroupCallPanel.vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -28,6 +29,7 @@ const members = ref([])
 const fileStats = ref(null)
 const userInfo = ref(null)
 const groupFilePanelRef = ref(null)
+const groupCallPanelRef = ref(null)
 const callDialogRef = ref(null)
 const qrCodeDialogVisible = ref(false)
 const qrCodeUrl = ref('')
@@ -148,6 +150,22 @@ const handleVideoCall = async () => {
     }
   } catch (error) {
     ElMessage.error(error.message || '发起视频通话失败')
+  }
+}
+
+// 群组通话
+const handleGroupCall = async (callType = 'VIDEO') => {
+  if (!props.session.targetId) {
+    ElMessage.warning('无法获取群ID')
+    return
+  }
+  // 加载群成员用于选择邀请
+  try {
+    const memberIds = members.value.map(m => m.userId)
+    groupCallPanelRef.value?.loadGroupMembers(memberIds)
+    groupCallPanelRef.value?.openAsInitiator(callType, memberIds)
+  } catch (error) {
+    ElMessage.error('发起群组通话失败')
   }
 }
 
@@ -388,6 +406,18 @@ const handleShowAnnouncement = async () => {
         </div>
       </div>
 
+      <!-- 群组通话入口 -->
+      <div v-if="session.type === 'GROUP'" class="section info-actions">
+        <el-button type="primary" plain size="small" @click="handleGroupCall('VOICE')">
+          <el-icon><Phone /></el-icon>
+          语音通话
+        </el-button>
+        <el-button type="primary" plain size="small" @click="handleGroupCall('VIDEO')">
+          <el-icon><VideoCamera /></el-icon>
+          视频通话
+        </el-button>
+      </div>
+
       <!-- 设置开关区 -->
       <div class="section settings-list">
         <div class="setting-row">
@@ -438,6 +468,9 @@ const handleShowAnnouncement = async () => {
 
     <!-- 通话弹窗 -->
     <CallDialog ref="callDialogRef" :session="session" />
+
+    <!-- 群组通话面板 -->
+    <GroupCallPanel ref="groupCallPanelRef" :session="session" :conversation-id="session.type === 'GROUP' ? session.id : null" />
 
     <!-- 群二维码弹窗 -->
     <el-dialog
