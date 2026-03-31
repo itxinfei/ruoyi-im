@@ -131,6 +131,22 @@
         </choose>
     </select>
 
+    <select id="selectByAssigneeId" resultMap="BaseResultMap">
+        SELECT t.*,
+               c.nickname as creator_name,
+               c.avatar as creator_avatar,
+               a.nickname as assignee_name,
+               a.avatar as assignee_avatar
+        FROM im_task t
+        LEFT JOIN im_user c ON t.creator_id = c.id
+        LEFT JOIN im_user a ON t.assignee_id = a.id
+        WHERE t.assignee_id = #{userId}
+        <if test="status != null and status != ''">
+            AND t.status = #{status}
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
     <select id="countOverdueByAssignee" resultType="java.lang.Integer">
         SELECT COUNT(*)
         FROM im_task
