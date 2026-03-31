@@ -654,8 +654,8 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 8px 12px;
-  margin: 8px 20px 0;
+  padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
+  margin: var(--dt-spacing-sm) var(--dt-spacing-xl) 0;
   border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
 }
 
@@ -663,9 +663,9 @@ onMounted(() => {
 .edit-mode-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  margin: 8px 20px 0;
+  gap: var(--dt-spacing-sm);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
+  margin: var(--dt-spacing-sm) var(--dt-spacing-xl) 0;
   background: var(--dt-warning-bg);
   border-left: 2px solid var(--dt-warning-color);
   border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
@@ -711,11 +711,12 @@ onMounted(() => {
 
 /* 工具栏 */
 .toolbar {
-  height: var(--dt-toolbar-height, 32px);
-  padding: 0 20px;
+  height: var(--dt-toolbar-height);
+  padding: 0 var(--dt-spacing-lg);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--dt-spacing-sm);
+  border-bottom: 1px solid var(--dt-border-lighter);
 }
 
 .tool-icon {
@@ -723,11 +724,19 @@ onMounted(() => {
   color: var(--dt-text-tertiary);
   cursor: pointer;
   outline: none;
-  transition: color var(--dt-transition-fast);
+  padding: var(--dt-spacing-sm);
+  border-radius: var(--dt-radius-md);
+  transition: all var(--dt-transition-fast);
 }
 
 .tool-icon:hover {
-  color: var(--dt-text-primary);
+  color: var(--dt-brand-color);
+  background-color: var(--dt-brand-bg);
+}
+
+.tool-icon:active {
+  transform: scale(0.92);
+  background-color: var(--dt-brand-bg-dark);
 }
 
 .upload-wrapper {
@@ -751,7 +760,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   height: 44px;
-  padding: 0 20px;
+  padding: 0 var(--dt-spacing-xl);
   background: var(--dt-bg-body);
   border-top: 1px solid var(--dt-border-light);
   animation: slideDown 0.2s ease-out;
@@ -788,7 +797,7 @@ onMounted(() => {
 
 .recording-actions {
   display: flex;
-  gap: 12px;
+  gap: var(--dt-spacing-lg);
 }
 
 .rec-btn {
@@ -994,7 +1003,7 @@ onMounted(() => {
 /* 主输入区 */
 .input-main {
   flex: 1;
-  padding: 0 20px;
+  padding: 0 var(--dt-spacing-xl);
   min-height: 60px;
   max-height: 240px;
   overflow-y: auto;
@@ -1021,7 +1030,7 @@ onMounted(() => {
 /* 底部发送栏 */
 .input-footer {
   height: 48px;
-  padding: 0 20px 12px;
+  padding: 0 var(--dt-spacing-xl) var(--dt-spacing-md);
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -1034,27 +1043,32 @@ onMounted(() => {
 
 .send-btn {
   background-color: var(--dt-bg-hover);
-  color: var(--dt-text-white);
+  color: var(--dt-text-tertiary);
   border: none;
   padding: 0 20px;
   height: 32px;
-  border-radius: var(--dt-radius-sm);
+  border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
   cursor: not-allowed;
   transition: all var(--dt-transition-fast);
 }
 
 .send-btn.is-active {
   background-color: var(--dt-brand-color);
+  color: var(--dt-text-white);
   cursor: pointer;
+  box-shadow: var(--dt-shadow-brand);
 }
 
 .send-btn.is-active:hover {
   background-color: var(--dt-brand-hover);
+  box-shadow: var(--dt-shadow-brand-strong);
 }
 
 .send-btn.is-active:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
+  background-color: var(--dt-brand-active);
 }
 
 /* 滚动条美化 */

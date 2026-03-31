@@ -442,7 +442,7 @@ const formatDisplayUrl = (url) => {
 
 .message-container {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   width: 100%;
 }
 
@@ -532,6 +532,7 @@ const formatDisplayUrl = (url) => {
   word-break: break-word;
   white-space: pre-wrap;
   position: relative;
+  transition: box-shadow var(--dt-transition-fast), transform var(--dt-transition-fast);
 }
 
 /* 接收方 (左侧) - 钉钉非对称圆角: 左上尖 */
@@ -540,6 +541,10 @@ const formatDisplayUrl = (url) => {
   color: var(--dt-text-primary);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-bubble-radius-received);
+  box-shadow: var(--dt-shadow-1);
+}
+.is-other .message-bubble:hover {
+  box-shadow: var(--dt-shadow-2);
 }
 
 /* 发送方 (右侧) - 钉钉非对称圆角: 右上尖 */
@@ -547,6 +552,10 @@ const formatDisplayUrl = (url) => {
   background-color: var(--dt-bubble-right-bg);
   color: var(--dt-text-white);
   border-radius: var(--dt-bubble-radius-sent);
+  box-shadow: 0 1px 2px rgba(39, 126, 251, 0.15);
+}
+.is-me .message-bubble:hover {
+  box-shadow: 0 2px 8px rgba(39, 126, 251, 0.25);
 }
 
 .content-img {
@@ -577,7 +586,7 @@ const formatDisplayUrl = (url) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--dt-overlay-bg);
   opacity: 0;
   transition: opacity var(--dt-transition-fast);
 }
@@ -587,7 +596,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .play-icon {
-  font-size: 48px;
+  font-size: var(--dt-font-size-2xl);
   color: var(--dt-text-white);
 }
 
@@ -597,7 +606,7 @@ const formatDisplayUrl = (url) => {
   right: 8px;
   font-size: 12px;
   color: var(--dt-text-white);
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--dt-overlay-bg);
   padding: 2px 6px;
   border-radius: var(--dt-radius-sm);
 }
@@ -633,7 +642,7 @@ const formatDisplayUrl = (url) => {
 .card-content {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--dt-spacing-sm);
   min-width: 180px;
   max-width: 240px;
   padding: 8px 12px;
@@ -733,11 +742,11 @@ const formatDisplayUrl = (url) => {
 
 .location-icon {
   font-size: 20px;
-  color: white;
+  color: var(--dt-text-white);
 }
 
 .location-info {
-  padding: 10px 12px;
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
 }
 
 .location-name {
@@ -878,13 +887,23 @@ const formatDisplayUrl = (url) => {
   display: flex;
   align-items: center;
   background-color: var(--dt-bg-card);
-  border-radius: var(--dt-radius-sm);
-  box-shadow: var(--dt-shadow-2);
-  padding: 4px;
-  gap: 4px;
+  border-radius: var(--dt-radius-md);
+  box-shadow: var(--dt-shadow-float);
+  padding: var(--dt-spacing-xs);
+  gap: 2px;
   position: absolute;
-  top: -16px;
+  top: -20px;
   z-index: 10;
+  opacity: 0;
+  transform: translateY(4px) scale(0.95);
+  transition: opacity var(--dt-transition-fast), transform var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
+  pointer-events: none;
+}
+
+.bubble-and-actions:hover .action-bar {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 .is-me .action-bar {
@@ -896,20 +915,26 @@ const formatDisplayUrl = (url) => {
 }
 
 .action-item {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--dt-radius-sm);
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   color: var(--dt-text-secondary);
   transition: all var(--dt-transition-fast);
 }
 
 .action-item:hover {
-  background-color: var(--dt-bg-hover);
+  background-color: var(--dt-brand-bg);
   color: var(--dt-brand-color);
+  transform: scale(1.08);
+}
+
+.action-item:active {
+  transform: scale(0.95);
+  background-color: var(--dt-brand-bg-dark);
 }
 
 @keyframes rotate {

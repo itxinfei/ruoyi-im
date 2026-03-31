@@ -579,8 +579,8 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   }
 
   :deep(.el-dialog__header) {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 12px 16px;
+    background: var(--dt-overlay-bg);
+    padding: var(--dt-spacing-lg) var(--dt-spacing-xl);
     margin: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
@@ -663,9 +663,9 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 .participant-cell {
   position: relative;
   aspect-ratio: 16 / 9;
-  border-radius: var(--dt-radius-lg, 12px);
+  border-radius: var(--dt-radius-xl);
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--dt-overlay-bg);
   border: 2px solid transparent;
   transition: all 0.3s;
 
@@ -724,11 +724,11 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
         font-size: 14px;
         padding: 2px;
         border-radius: 4px;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--dt-overlay-bg);
 
-        &.muted { color: var(--dt-error-color, #F53F3F); }
-        &.camera { color: var(--dt-text-tertiary, #8A9099); }
-        &.screen { color: var(--dt-brand-color, #277EFB); }
+        &.muted { color: var(--dt-error-color); }
+        &.camera { color: var(--dt-text-tertiary); }
+        &.screen { color: var(--dt-brand-color); }
       }
     }
   }
@@ -772,10 +772,10 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   right: 24px;
   width: 140px;
   height: 90px;
-  border-radius: var(--dt-radius-md, 8px);
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--dt-shadow-4);
   z-index: 10;
 
   .local-video {
@@ -791,8 +791,9 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     left: 50%;
     transform: translateX(-50%);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(0, 0, 0, 0.5);
+    color: var(--dt-text-white);
+    opacity: 0.7;
+    background: var(--dt-overlay-bg);
     padding: 1px 6px;
     border-radius: 4px;
   }
@@ -856,8 +857,8 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 .invite-section {
   display: flex;
   justify-content: center;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.15);
+  padding: var(--dt-spacing-lg);
+  background: var(--dt-bg-card-dark);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -870,7 +871,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 .member-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--dt-spacing-sm);
   padding: 4px 0;
 }
 

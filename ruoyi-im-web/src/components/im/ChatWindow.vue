@@ -2,7 +2,7 @@
   <div class="chat-window">
     <!-- 1. 聊天头部 -->
     <header class="chat-header">
-      <div class="header-left">
+      <div class="header-left" @click="showGroupInfo">
         <h3 class="title">{{ currentSession?.name || '聊天' }}</h3>
         <span v-if="currentSession?.memberCount" class="member-count">({{ currentSession.memberCount }})</span>
       </div>
@@ -121,6 +121,9 @@ const listRef = ref(null);
 const callDialogRef = ref(null);
 const forwardDialogRef = ref(null);
 const detailDrawerVisible = ref(false);
+const showGroupInfo = () => {
+  detailDrawerVisible.value = true;
+};
 const showReadDrawer = ref(false);
 const readDetailMessageId = ref(null);
 const replyingMessage = ref(null);
@@ -134,7 +137,11 @@ const selectedMessages = ref(new Set()); // 已选中的消息ID集合
 // 3. 数据联动
 const currentUserId = computed(() => store.state.im?.currentUser?.id || 1);
 const currentSession = computed(() => store.state.im?.session?.currentSession);
-const messages = computed(() => store.state.im?.message?.messages || []);
+const messages = computed(() => {
+  const sessionId = currentSession.value?.id;
+  if (!sessionId) return [];
+  return store.state.im?.message?.messages?.[sessionId] || [];
+});
 
 // 4. WebSocket 消息处理
 const handleNewMessage = (payload) => {
@@ -608,7 +615,7 @@ const scrollToMessage = (messageId) => {
   height: var(--dt-chat-header-height); padding: 0 var(--dt-spacing-xl); display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid var(--dt-border-light); flex-shrink: 0;
 }
-.header-left { display: flex; align-items: center; gap: var(--dt-spacing-sm); }
+.header-left { display: flex; align-items: center; gap: var(--dt-spacing-sm); cursor: pointer; }
 .title { font-size: var(--dt-font-size-lg); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); }
 .member-count { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); }
 .header-right { display: flex; gap: var(--dt-spacing-xl); color: var(--dt-text-tertiary); }
@@ -663,11 +670,11 @@ const scrollToMessage = (messageId) => {
   z-index: 5;
 }
 
-.message-list-viewport { flex: 1; overflow-y: auto; background-color: var(--dt-bg-chat); padding: 20px 0; }
+.message-list-viewport { flex: 1; overflow-y: auto; background-color: var(--dt-bg-chat); padding: var(--dt-spacing-xl) 0; }
 
-/* 对齐钉钉输入区高度约束: 最低 130px，最高不超过聊天区的 40% */
-:deep(.chat-input-wrapper) {
-  min-height: 130px;
+/* 对齐钉钉输入区高度约束: 最低 180px，最高不超过聊天区的 40% */
+::deep(.chat-input-wrapper) {
+  min-height: 180px;
   max-height: 40%;
 }
 </style>

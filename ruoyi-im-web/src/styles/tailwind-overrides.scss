@@ -55,18 +55,12 @@
     background: rgba(255, 255, 255, 0.3);
   }
 
-  /* 消息气泡样式 */
-  .message-bubble {
-    @apply max-w-[70%] rounded-lg px-4 py-2 break-words;
-  }
+  /* 消息气泡样式 - 已由 ChatMessageBubble 组件接管 */
+  /* .message-bubble { @apply max-w-[70%] rounded-lg px-4 py-2 break-words; } */
 
-  .message-bubble-mine {
-    @apply bg-primary text-white ml-auto;
-  }
+  /* .message-bubble-mine { @apply bg-primary text-white ml-auto; } */
 
-  .message-bubble-other {
-    @apply bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700;
-  }
+  /* .message-bubble-other { @apply bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700; } */
 
   /* 会话列表项样式 */
   .session-item {

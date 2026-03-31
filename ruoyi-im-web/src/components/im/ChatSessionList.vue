@@ -132,7 +132,7 @@ const formatTime = (time) => {
 
 <style scoped>
 .session-panel {
-  width: var(--dt-session-panel-width, 250px);
+  width: var(--dt-session-panel-width);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -142,7 +142,7 @@ const formatTime = (time) => {
 }
 
 .panel-header {
-  padding: 12px 12px 8px;
+  padding: var(--dt-spacing-lg) var(--dt-spacing-lg) var(--dt-spacing-sm);
   background-color: var(--dt-bg-session-list);
 }
 
@@ -176,7 +176,7 @@ const formatTime = (time) => {
   background-color: var(--dt-bg-card);
   color: var(--dt-brand-color);
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--dt-shadow-1);
 }
 
 .search-bar {
@@ -193,7 +193,7 @@ const formatTime = (time) => {
 .search-bar.is-focused {
   background-color: var(--dt-bg-card);
   border-color: var(--dt-brand-color);
-  box-shadow: 0 0 0 2px var(--dt-brand-bg-dark);
+  box-shadow: 0 0 0 2px var(--dt-brand-bg);
 }
 
 .search-icon {
@@ -230,11 +230,12 @@ const formatTime = (time) => {
   padding: 0 var(--dt-spacing-lg);
   cursor: pointer;
   position: relative;
-  transition: background-color var(--dt-transition-fast);
+  transition: all var(--dt-transition-fast);
 }
 
 .session-item:hover {
   background-color: var(--dt-bg-session-hover);
+  transform: translateX(2px);
 }
 
 .session-item.is-active {
@@ -250,6 +251,7 @@ const formatTime = (time) => {
   bottom: 0;
   width: 3px;
   background-color: var(--dt-brand-color);
+  border-radius: 0 2px 2px 0;
 }
 
 /* 置顶背景色 */
@@ -280,13 +282,14 @@ const formatTime = (time) => {
   background-color: var(--dt-unread-color);
   color: var(--dt-text-white);
   font-size: 10px;
-  line-height: 14px;
-  min-width: 14px;
+  font-weight: var(--dt-font-weight-semibold);
+  line-height: 16px;
+  min-width: 16px;
+  height: 16px;
   padding: 0 4px;
-  border-radius: var(--dt-radius-sm);
+  border-radius: var(--dt-radius-full);
   text-align: center;
-  font-weight: 600;
-  border: 1.5px solid var(--dt-bg-session-list);
+  box-shadow: 0 1px 3px rgba(255, 77, 79, 0.3);
 }
 
 .content-wrapper {

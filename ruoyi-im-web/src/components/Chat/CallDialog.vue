@@ -369,7 +369,7 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
 
 .call-dialog-immersive {
   background: var(--dt-bg-card-dark) !important;
-  :deep(.el-dialog) { background: var(--dt-bg-card-dark); border-radius: var(--dt-radius-xl); overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+  :deep(.el-dialog) { background: var(--dt-bg-card-dark); border-radius: var(--dt-radius-xl); overflow: hidden; box-shadow: var(--dt-shadow-modal); }
   :deep(.el-dialog__header) { display: none; }
   :deep(.el-dialog__body) { padding: 0 !important; }
 }
@@ -384,7 +384,7 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
   .remote-track {
     width: 100%; height: 100%; position: relative;
     .video-element { width: 100%; height: 100%; object-fit: cover; }
-    .video-mask { position: absolute; inset: 0; @include flex-center; flex-direction: column; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); }
+    .video-mask { position: absolute; inset: 0; @include flex-center; flex-direction: column; background: var(--dt-overlay-bg); backdrop-filter: blur(10px); }
   }
   .local-track {
     position: absolute; top: var(--dt-spacing-lg); right: var(--dt-spacing-lg); width: 140px; height: 180px;
@@ -403,13 +403,13 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
     }
   }
   .peer-name { font-size: 24px; font-weight: 600; margin: var(--dt-spacing-md) 0; }
-  .call-status-tag { font-size: 14px; color: rgba(255,255,255,0.7); }
+  .call-status-tag { font-size: 14px; color: var(--dt-text-white); opacity: 0.7; }
   .call-timer { font-size: 20px; font-family: monospace; margin-top: var(--dt-spacing-md); color: var(--dt-brand-color); }
 }
 
 .call-console {
   position: relative; z-index: 2; width: 100%; padding: 0 var(--dt-spacing-2xl);
-  .console-group { display: flex; justify-content: center; gap: 40px;
+  .console-group { display: flex; justify-content: center; gap: var(--dt-spacing-2xl);
     &.talking { gap: 32px; }
   }
 }
@@ -421,7 +421,7 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
     background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); transition: all 0.2s;
     &:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
   }
-  span { font-size: 13px; color: rgba(255,255,255,0.8); }
+  span { font-size: 13px; color: var(--dt-text-white); opacity: 0.8; }
 
   &.accept .icon-circle { background: var(--dt-success-color); &:hover { background: var(--dt-brand-hover); } }
   &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: var(--dt-error-color); filter: brightness(1.2); } .el-icon { transform: rotate(135deg); } }
