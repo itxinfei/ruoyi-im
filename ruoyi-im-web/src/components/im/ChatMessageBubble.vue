@@ -535,24 +535,73 @@ const formatDisplayUrl = (url) => {
   transition: box-shadow var(--dt-transition-fast), transform var(--dt-transition-fast);
 }
 
-/* 接收方 (左侧) - 钉钉非对称圆角: 左上尖 */
+/* 接收方 (左侧) - 白色气泡，钉钉风格：左上小尖，底右圆角 */
 .is-other .message-bubble {
   background-color: var(--dt-bubble-left-bg);
   color: var(--dt-text-primary);
   border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-bubble-radius-received);
+  border-radius: 12px 12px 12px 4px;
   box-shadow: var(--dt-shadow-1);
+  position: relative;
+}
+/* 左侧气泡左上小三角伪元素 */
+.is-other .message-bubble::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 10px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid var(--dt-border-light);
+}
+.is-other .message-bubble::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 11px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 5px solid var(--dt-bubble-left-bg);
 }
 .is-other .message-bubble:hover {
   box-shadow: var(--dt-shadow-2);
 }
 
-/* 发送方 (右侧) - 钉钉非对称圆角: 右上尖 */
+/* 发送方 (右侧) - 蓝色气泡，钉钉风格：底右小尖，顶左圆角 */
 .is-me .message-bubble {
   background-color: var(--dt-bubble-right-bg);
   color: var(--dt-text-white);
-  border-radius: var(--dt-bubble-radius-sent);
+  border-radius: 12px 4px 12px 12px;
   box-shadow: 0 1px 2px rgba(39, 126, 251, 0.15);
+  position: relative;
+}
+/* 右侧气泡底右小三角伪元素 */
+.is-me .message-bubble::before {
+  content: '';
+  position: absolute;
+  right: -6px;
+  bottom: 10px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid var(--dt-brand-color);
+  opacity: 0.3;
+}
+.is-me .message-bubble::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  bottom: 11px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid var(--dt-bubble-right-bg);
 }
 .is-me .message-bubble:hover {
   box-shadow: 0 2px 8px rgba(39, 126, 251, 0.25);
