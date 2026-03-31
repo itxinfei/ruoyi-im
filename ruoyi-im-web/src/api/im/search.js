@@ -10,8 +10,8 @@ import request from '../request'
 export function globalSearch(data) {
   return request({
     url: '/api/im/search/global',
-    method: 'post',
-    data
+    method: 'get',
+    params: data
   })
 }
 

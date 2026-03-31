@@ -504,20 +504,20 @@ onMounted(() => {
 }
 
 .kpi-card {
-  border-radius: 12px;
-  border: 1px solid #e6ebf3;
+  border-radius: var(--dt-radius-xl);
+  border: 1px solid var(--dt-border-light);
 }
 
 .kpi-title {
-  color: #64748b;
-  font-size: 12px;
+  color: var(--dt-text-secondary);
+  font-size: var(--dt-font-size-sm);
 }
 
 .kpi-value {
   margin-top: 8px;
   font-size: 24px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--dt-text-primary);
 }
 
 .kpi-value.small {
@@ -526,8 +526,8 @@ onMounted(() => {
 }
 
 .panel {
-  border-radius: 12px;
-  border: 1px solid #e6ebf3;
+  border-radius: var(--dt-radius-xl);
+  border: 1px solid var(--dt-border-light);
 }
 
 .panel-header {
@@ -539,18 +539,18 @@ onMounted(() => {
 .panel-header h3 {
   margin: 0;
   font-size: 16px;
-  color: #0f172a;
+  color: var(--dt-text-primary);
 }
 
 .panel-header p {
   margin: 4px 0 0;
-  color: #64748b;
-  font-size: 12px;
+  color: var(--dt-text-secondary);
+  font-size: var(--dt-font-size-sm);
 }
 
 .form-tip {
   margin-left: 12px;
-  color: #94a3b8;
-  font-size: 12px;
+  color: var(--dt-text-quaternary);
+  font-size: var(--dt-font-size-sm);
 }
 </style>

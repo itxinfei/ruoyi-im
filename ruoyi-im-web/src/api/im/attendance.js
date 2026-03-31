@@ -97,3 +97,30 @@ export function applySupplement(id, reason) {
     params: { reason }
   })
 }
+
+/**
+ * 审批补卡申请
+ * @param {number} id - 打卡ID
+ * @param {boolean} approved - 是否通过
+ * @param {string} comment - 审批意见
+ * @returns {Promise}
+ */
+export function approveSupplement(id, approved, comment) {
+  return request({
+    url: `/api/im/attendance/${id}/approve`,
+    method: 'post',
+    params: { approved, comment }
+  })
+}
+
+/**
+ * 删除打卡记录
+ * @param {number} id - 打卡ID
+ * @returns {Promise}
+ */
+export function deleteAttendance(id) {
+  return request({
+    url: `/api/im/attendance/${id}`,
+    method: 'delete'
+  })
+}

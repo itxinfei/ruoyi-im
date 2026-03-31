@@ -129,3 +129,45 @@ export function saveDraft(conversationId, draft) {
     data: { draft }
   })
 }
+
+/**
+ * 更新会话设置
+ * @param {number} conversationId - 会话ID
+ * @param {Object} data - 会话数据
+ * @param {boolean} data.pinned - 是否置顶
+ * @param {boolean} data.muted - 是否免打扰
+ * @param {string} data.draft - 草稿
+ * @returns {Promise}
+ */
+export function updateConversation(conversationId, data) {
+  return request({
+    url: `/api/im/conversation/${conversationId}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 置顶消息
+ * @param {number} conversationId - 会话ID
+ * @param {number} messageId - 消息ID
+ * @returns {Promise}
+ */
+export function pinMessage(conversationId, messageId) {
+  return request({
+    url: `/api/im/conversation/${conversationId}/pin/${messageId}`,
+    method: 'post'
+  })
+}
+
+/**
+ * 取消置顶消息
+ * @param {number} conversationId - 会话ID
+ * @returns {Promise}
+ */
+export function unpinMessage(conversationId) {
+  return request({
+    url: `/api/im/conversation/${conversationId}/unpin`,
+    method: 'delete'
+  })
+}

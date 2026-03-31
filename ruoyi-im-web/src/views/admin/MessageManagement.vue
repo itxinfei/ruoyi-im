@@ -368,8 +368,8 @@ onMounted(loadMessages)
 }
 
 .panel {
-  border-radius: 12px;
-  border: 1px solid #e6ebf3;
+  border-radius: var(--dt-radius-xl);
+  border: 1px solid var(--dt-border-light);
 }
 
 .panel-header {
@@ -385,8 +385,8 @@ onMounted(loadMessages)
 
 .panel-header p {
   margin: 4px 0 0;
-  color: #64748b;
-  font-size: 12px;
+  color: var(--dt-text-secondary);
+  font-size: var(--dt-font-size-sm);
 }
 
 .toolbar-row {
@@ -395,9 +395,9 @@ onMounted(loadMessages)
 
 .batch-actions {
   margin-bottom: 12px;
-  background: #f8fafc;
-  border: 1px solid #e6ebf3;
-  border-radius: 8px;
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
   padding: 10px 12px;
   display: flex;
   align-items: center;

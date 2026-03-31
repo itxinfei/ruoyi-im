@@ -119,3 +119,61 @@ export function getUsersBatch(userIds) {
     }
   })
 }
+
+/**
+ * 创建用户
+ * @param {Object} data - 用户数据
+ * @param {string} data.username - 用户名
+ * @param {string} data.password - 密码
+ * @param {string} data.nickname - 昵称
+ * @param {string} data.email - 邮箱
+ * @param {string} data.phone - 手机号
+ * @returns {Promise}
+ */
+export function createUser(data) {
+  return request({
+    url: '/api/im/user',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 删除用户
+ * @param {string|number} userId - 用户ID
+ * @returns {Promise}
+ */
+export function deleteUser(userId) {
+  return request({
+    url: `/api/im/user/${userId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取用户列表
+ * @param {string} keyword - 搜索关键词（可选）
+ * @returns {Promise}
+ */
+export function getUserList(keyword) {
+  return request({
+    url: '/api/im/user/list',
+    method: 'get',
+    params: { keyword }
+  })
+}
+
+/**
+ * 修改用户状态
+ * @param {Object} data - 状态数据
+ * @param {number} data.id - 用户ID
+ * @param {string} data.status - 状态 ENABLED/DISABLED
+ * @returns {Promise}
+ */
+export function changeUserStatus(data) {
+  return request({
+    url: '/api/im/user/changeStatus',
+    method: 'put',
+    data
+  })
+}

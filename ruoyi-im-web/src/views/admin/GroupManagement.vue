@@ -438,8 +438,8 @@ onMounted(() => {
 }
 
 .panel {
-  border-radius: 12px;
-  border: 1px solid #e6ebf3;
+  border-radius: var(--dt-radius-xl);
+  border: 1px solid var(--dt-border-light);
 }
 
 .panel-header {
@@ -455,8 +455,8 @@ onMounted(() => {
 
 .panel-header p {
   margin: 4px 0 0;
-  color: #64748b;
-  font-size: 12px;
+  color: var(--dt-text-secondary);
+  font-size: var(--dt-font-size-sm);
 }
 
 .toolbar-row {
@@ -471,9 +471,9 @@ onMounted(() => {
     align-items: center;
     gap: 14px;
     padding: 16px;
-    background: #f8fafc;
-    border: 1px solid #e6ebf3;
-    border-radius: 8px;
+    background: var(--dt-bg-body);
+    border: 1px solid var(--dt-border-light);
+    border-radius: var(--dt-radius-md);
 
     .stat-icon {
       width: 44px;
@@ -484,21 +484,21 @@ onMounted(() => {
       justify-content: center;
       font-size: 22px;
 
-      &.groups { background: #ede9fe; color: #7c3aed; }
-      &.active { background: #dbeafe; color: #2563eb; }
-      &.new { background: #dcfce7; color: #16a34a; }
+      &.groups { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+      &.active { background: var(--dt-info-bg); color: var(--dt-info-color); }
+      &.new { background: var(--dt-success-bg); color: var(--dt-success-color); }
     }
 
     .stat-info {
       .stat-value {
         font-size: 22px;
         font-weight: 700;
-        color: #1e293b;
+        color: var(--dt-text-primary);
         line-height: 1.2;
       }
       .stat-label {
         font-size: 12px;
-        color: #64748b;
+        color: var(--dt-text-secondary);
         margin-top: 2px;
       }
     }
@@ -507,9 +507,9 @@ onMounted(() => {
 
 .batch-actions {
   margin-bottom: 12px;
-  background: #f8fafc;
-  border: 1px solid #e6ebf3;
-  border-radius: 8px;
+  background: var(--dt-bg-body);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
   padding: 10px 12px;
   display: flex;
   align-items: center;
@@ -523,6 +523,6 @@ onMounted(() => {
 }
 
 .muted {
-  color: #9ca3af;
+  color: var(--dt-text-quaternary);
 }
 </style>
