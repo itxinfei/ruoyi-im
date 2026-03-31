@@ -489,8 +489,8 @@ onUnmounted(() => {
 .login-decoration {
   flex: 0 0 380px;
   background: linear-gradient(160deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
-  padding: 48px 40px;
-  color: #ffffff;
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
+  color: var(--dt-text-white);
   position: relative;
   overflow: hidden;
 
@@ -563,7 +563,7 @@ onUnmounted(() => {
     .feature-item {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: var(--dt-spacing-md);
       margin-bottom: 28px;
       opacity: 0.9;
       transition: all var(--dt-transition-base);
@@ -609,7 +609,7 @@ onUnmounted(() => {
 // ============================================================================
 .login-form-section {
   flex: 1;
-  padding: 48px 56px;
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -758,7 +758,7 @@ onUnmounted(() => {
     }
 
     :deep(.el-input__wrapper) {
-      padding-left: 48px;
+      padding-left: var(--dt-spacing-2xl);
       border-radius: var(--dt-radius-lg);
       border: 1.5px solid var(--dt-border-color);
       background: var(--dt-bg-input);

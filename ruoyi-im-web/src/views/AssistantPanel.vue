@@ -477,7 +477,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
+  padding: var(--dt-spacing-lg) var(--dt-spacing-xl);
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
@@ -486,7 +486,7 @@ onMounted(() => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm, 12px);
+  gap: var(--dt-spacing-md);
 }
 
 .ai-logo {
@@ -504,7 +504,7 @@ onMounted(() => {
 .header-info {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm, 8px);
+  gap: var(--dt-spacing-sm);
 }
 
 .panel-title {
@@ -516,16 +516,16 @@ onMounted(() => {
 
 .model-tag {
   font-size: var(--dt-font-size-xs);
-  padding: var(--dt-spacing-xs, 2px) var(--dt-spacing-sm, 8px);
+  padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
   background: var(--dt-brand-lighter);
   color: var(--dt-brand-color);
-  border-radius: var(--dt-radius-full, 10px);
+  border-radius: var(--dt-radius-full);
   font-weight: var(--dt-font-weight-medium);
 }
 
 .header-actions {
   display: flex;
-  gap: var(--dt-spacing-xs, 8px);
+  gap: var(--dt-spacing-sm);
 }
 
 .model-btn {
@@ -555,14 +555,14 @@ onMounted(() => {
 // 消息区域
 .messages-area {
   flex: 1;
-  padding: var(--dt-spacing-lg, 20px) var(--dt-spacing-xl, 24px);
+  padding: var(--dt-spacing-lg) var(--dt-spacing-xl);
   overflow-y: auto;
 }
 
 .message-row {
   display: flex;
-  gap: var(--dt-spacing-md, 12px);
-  margin-bottom: var(--dt-spacing-lg, 20px);
+  gap: var(--dt-spacing-md);
+  margin-bottom: var(--dt-spacing-lg);
 
   &.user {
     flex-direction: row-reverse;
@@ -570,8 +570,8 @@ onMounted(() => {
 }
 
 .avatar {
-  width: var(--dt-avatar-size-md, 36px);
-  height: var(--dt-avatar-size-md, 36px);
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
   border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
@@ -593,7 +593,7 @@ onMounted(() => {
 
 .message-bubble {
   max-width: 70%;
-  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px);
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   border-radius: var(--dt-radius-lg);
   font-size: var(--dt-font-size-sm);
   line-height: 1.6;
@@ -611,7 +611,7 @@ onMounted(() => {
   }
 
   &.typing {
-    padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 20px);
+    padding: var(--dt-spacing-lg) var(--dt-spacing-xl);
   }
 }
 
@@ -620,16 +620,16 @@ onMounted(() => {
 
   :deep(pre) {
     background: var(--dt-bg-body);
-    padding: var(--dt-spacing-sm, 12px);
-    border-radius: var(--dt-radius-md, 8px);
+    padding: var(--dt-spacing-md);
+    border-radius: var(--dt-radius-lg);
     overflow-x: auto;
-    margin: var(--dt-spacing-sm, 8px) 0;
+    margin: var(--dt-spacing-sm) 0;
   }
 
   :deep(code) {
     background: var(--dt-bg-body);
-    padding: var(--dt-spacing-xs, 2px) var(--dt-spacing-xs, 6px);
-    border-radius: var(--dt-radius-sm, 4px);
+    padding: var(--dt-spacing-xs) var(--dt-spacing-xs);
+    border-radius: var(--dt-radius-sm);
     font-family: monospace;
   }
 }
@@ -638,18 +638,18 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: var(--dt-spacing-sm, 8px);
-  padding-top: var(--dt-spacing-sm, 8px);
+  margin-top: var(--dt-spacing-sm);
+  padding-top: var(--dt-spacing-sm);
   border-top: 1px solid var(--dt-border-lighter);
 
   .time {
-    font-size: var(--dt-font-size-xs, 11px);
+    font-size: var(--dt-font-size-xs);
     color: var(--dt-text-quaternary);
   }
 
   .actions {
     display: flex;
-    gap: var(--dt-spacing-xs, 4px);
+    gap: var(--dt-spacing-xs);
   }
 }
 
@@ -675,11 +675,11 @@ onMounted(() => {
 // 输入中动画
 .typing-dots {
   display: flex;
-  gap: var(--dt-spacing-xs, 4px);
+  gap: var(--dt-spacing-xs);
 
   span {
-    width: var(--dt-spacing-xs, 8px);
-    height: var(--dt-spacing-xs, 8px);
+    width: var(--dt-spacing-sm);
+    height: var(--dt-spacing-sm);
     background: var(--dt-text-quaternary);
     border-radius: 50%;
     animation: bounce 1.4s infinite ease-in-out;
@@ -706,14 +706,14 @@ onMounted(() => {
 
 // 输入区
 .input-area {
-  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
+  padding: var(--dt-spacing-lg) var(--dt-spacing-xl);
   background: var(--dt-bg-card);
   border-top: 1px solid var(--dt-border-light);
 }
 
 .input-box {
   display: flex;
-  gap: var(--dt-spacing-sm, 12px);
+  gap: var(--dt-spacing-md);
   align-items: flex-end;
 
   :deep(.el-textarea) {
@@ -723,7 +723,7 @@ onMounted(() => {
   :deep(.el-textarea__inner) {
     border-radius: var(--dt-radius-lg);
     border: 1.5px solid var(--dt-border-color);
-    padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px);
+    padding: var(--dt-spacing-md) var(--dt-spacing-lg);
     font-size: var(--dt-font-size-sm);
     resize: none;
 
@@ -737,7 +737,7 @@ onMounted(() => {
 // 欢迎页
 .welcome-page {
   flex: 1;
-  padding: var(--dt-spacing-2xl, 40px) var(--dt-spacing-lg, 24px);
+  padding: var(--dt-spacing-2xl) var(--dt-spacing-lg);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -746,13 +746,13 @@ onMounted(() => {
 
 .welcome-hero {
   text-align: center;
-  margin-bottom: var(--dt-spacing-2xl, 48px);
+  margin-bottom: var(--dt-spacing-2xl);
 }
 
 .hero-icon {
   width: var(--dt-icon-size-2xl, 80px);
   height: var(--dt-icon-size-2xl, 80px);
-  margin: 0 auto var(--dt-spacing-lg, 20px);
+  margin: 0 auto var(--dt-spacing-xl);
   border-radius: var(--dt-radius-xl);
   background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
   color: var(--dt-text-primary);
@@ -767,7 +767,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-xl);
   font-weight: var(--dt-font-weight-bold);
   color: var(--dt-text-primary);
-  margin: 0 0 var(--dt-spacing-sm, 12px);
+  margin: 0 0 var(--dt-spacing-md);
 }
 
 .hero-desc {
@@ -780,31 +780,31 @@ onMounted(() => {
 .quick-section {
   width: 100%;
   max-width: 600px;
-  margin-bottom: var(--dt-spacing-2xl, 32px);
+  margin-bottom: var(--dt-spacing-2xl);
 }
 
 .section-title {
   font-size: var(--dt-font-size-sm);
   font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-secondary);
-  margin: 0 0 var(--dt-spacing-md, 16px);
+  margin: 0 0 var(--dt-spacing-lg);
 }
 
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--dt-spacing-sm, 12px);
+  gap: var(--dt-spacing-md);
 }
 
 .quick-card {
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-lg);
-  padding: var(--dt-spacing-lg, 20px) var(--dt-spacing-md, 16px);
+  padding: var(--dt-spacing-lg) var(--dt-spacing-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--dt-spacing-sm, 12px);
+  gap: var(--dt-spacing-md);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
 
@@ -835,14 +835,14 @@ onMounted(() => {
 .hot-questions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--dt-spacing-sm, 12px);
+  gap: var(--dt-spacing-md);
 }
 
 .hot-question {
   background: var(--dt-bg-hover);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-xl);
-  padding: var(--dt-spacing-sm, 10px) var(--dt-spacing-md, 16px);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-md);
   font-size: var(--dt-font-size-sm);
   color: var(--dt-text-secondary);
   cursor: pointer;
@@ -864,20 +864,20 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--dt-spacing-sm, 12px);
+  margin-bottom: var(--dt-spacing-md);
 }
 
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: var(--dt-spacing-xs, 8px);
+  gap: var(--dt-spacing-sm);
 }
 
 .history-item {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm, 12px);
-  padding: var(--dt-spacing-sm, 12px) var(--dt-spacing-md, 16px);
+  gap: var(--dt-spacing-md);
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);

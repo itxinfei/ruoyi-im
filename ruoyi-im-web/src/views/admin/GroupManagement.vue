@@ -469,7 +469,7 @@ onMounted(() => {
   .stat-card {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: var(--dt-spacing-md);
     padding: 16px;
     background: var(--dt-bg-body);
     border: 1px solid var(--dt-border-light);
@@ -478,7 +478,7 @@ onMounted(() => {
     .stat-icon {
       width: 44px;
       height: 44px;
-      border-radius: 10px;
+      border-radius: var(--dt-radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -506,11 +506,11 @@ onMounted(() => {
 }
 
 .batch-actions {
-  margin-bottom: 12px;
+  margin-bottom: var(--dt-spacing-lg);
   background: var(--dt-bg-body);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
-  padding: 10px 12px;
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   display: flex;
   align-items: center;
   justify-content: space-between;

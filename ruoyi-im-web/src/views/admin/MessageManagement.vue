@@ -394,11 +394,11 @@ onMounted(loadMessages)
 }
 
 .batch-actions {
-  margin-bottom: 12px;
+  margin-bottom: var(--dt-spacing-lg);
   background: var(--dt-bg-body);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
-  padding: 10px 12px;
+  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   display: flex;
   align-items: center;
   justify-content: space-between;

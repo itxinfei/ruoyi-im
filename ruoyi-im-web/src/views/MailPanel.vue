@@ -315,14 +315,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
+  padding: var(--dt-spacing-lg) var(--dt-spacing-xl);
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
 }
 
 .panel-title {
-  font-size: var(--dt-font-size-lg, 18px);
+  font-size: var(--dt-font-size-xl);
   font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   margin: 0;
@@ -331,14 +331,14 @@ onMounted(() => {
 .mail-search {
   flex: 1;
   max-width: 320px;
-  margin: 0 var(--dt-spacing-md, 16px);
+  margin: 0 var(--dt-spacing-lg);
 }
 
 .compose-btn {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-xs, 6px);
-  padding: var(--dt-spacing-xs, 8px) var(--dt-spacing-md, 16px);
+  gap: var(--dt-spacing-sm);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
   background: var(--dt-brand-color);
   color: var(--dt-text-primary);
   border: none;
@@ -361,21 +361,21 @@ onMounted(() => {
 
 .panel-content {
   flex: 1;
-  padding: var(--dt-spacing-md, 16px) var(--dt-spacing-lg, 24px);
+  padding: var(--dt-spacing-lg) var(--dt-spacing-xl);
   overflow: hidden;
 }
 
 .mail-layout {
   display: flex;
   height: 100%;
-  gap: var(--dt-spacing-md, 16px);
+  gap: var(--dt-spacing-lg);
 }
 
 .mail-folders {
   width: var(--dt-folder-panel-width, 180px);
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
-  padding: var(--dt-spacing-xs, 8px);
+  padding: var(--dt-spacing-sm);
   flex-shrink: 0;
   border: 1px solid var(--dt-border-light);
 }
@@ -383,8 +383,8 @@ onMounted(() => {
 .folder-item {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm, 10px);
-  padding: var(--dt-spacing-sm, 10px) var(--dt-spacing-xs, 12px);
+  gap: var(--dt-spacing-sm);
+  padding: var(--dt-spacing-sm) var(--dt-spacing-xs);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: all var(--dt-transition-fast);
@@ -401,7 +401,7 @@ onMounted(() => {
 }
 
 .folder-icon {
-  font-size: var(--dt-icon-size-lg, 20px);
+  font-size: var(--dt-icon-size-lg);
   color: var(--dt-text-tertiary);
 }
 
@@ -452,7 +452,7 @@ onMounted(() => {
 
 .empty-icon {
   font-size: var(--dt-icon-size-xl, 64px);
-  margin-bottom: var(--dt-spacing-md, 16px);
+  margin-bottom: var(--dt-spacing-lg);
   color: var(--dt-border-color);
 }
 
@@ -470,7 +470,7 @@ onMounted(() => {
 .email-item {
   display: flex;
   align-items: center;
-  padding: var(--dt-spacing-md, 14px) var(--dt-spacing-md, 16px);
+  padding: var(--dt-spacing-md) var(--dt-spacing-md);
   cursor: pointer;
   position: relative;
   border-bottom: 1px solid var(--dt-border-light);
@@ -512,7 +512,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-sm);
   font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-primary);
-  margin-bottom: var(--dt-spacing-xs, 4px);
+  margin-bottom: var(--dt-spacing-xs);
 }
 
 .email-item.unread .email-subject {
@@ -523,7 +523,7 @@ onMounted(() => {
 .email-preview {
   font-size: var(--dt-font-size-xs);
   color: var(--dt-text-tertiary);
-  margin-bottom: var(--dt-spacing-xs, 4px);
+  margin-bottom: var(--dt-spacing-xs);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -532,7 +532,7 @@ onMounted(() => {
 .email-meta {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm, 12px);
+  gap: var(--dt-spacing-md);
   font-size: var(--dt-font-size-xs);
   color: var(--dt-text-tertiary);
 }
@@ -543,7 +543,7 @@ onMounted(() => {
   background: var(--dt-brand-color);
   border-radius: 50%;
   position: absolute;
-  right: var(--dt-spacing-md, 16px);
+  right: var(--dt-spacing-lg);
   box-shadow: 0 0 0 var(--dt-border-thick, 3px) var(--dt-brand-bg);
 }
 

@@ -285,11 +285,11 @@ onMounted(loadUser)
 
   .hero-content {
     position: absolute;
-    bottom: var(--dt-spacing-md, 16px);
-    left: var(--dt-spacing-lg, 24px);
+    bottom: var(--dt-spacing-lg);
+    left: var(--dt-spacing-xl);
     display: flex;
     align-items: flex-end;
-    gap: var(--dt-spacing-md, 16px);
+    gap: var(--dt-spacing-lg);
 
     .avatar-container {
       position: relative;
@@ -317,19 +317,19 @@ onMounted(loadUser)
         transition: all var(--dt-transition-base);
 
         .material-icons-outlined {
-          font-size: var(--dt-icon-size-xl, 24px);
+          font-size: var(--dt-icon-size-xl);
         }
       }
       &:hover .avatar-mask { opacity: 1; }
     }
 
     .user-basic {
-      padding-bottom: var(--dt-spacing-xs, 2px);
+      padding-bottom: var(--dt-spacing-xs);
       .nickname-row {
         display: flex;
         align-items: center;
-        gap: var(--dt-spacing-sm, 8px);
-        margin-bottom: var(--dt-spacing-xs, 2px);
+        gap: var(--dt-spacing-sm);
+        margin-bottom: var(--dt-spacing-xs);
 
         .nickname {
           font-size: var(--dt-font-size-xl);
@@ -369,7 +369,7 @@ onMounted(loadUser)
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-border-light);
-    border-radius: var(--dt-radius-sm, 4px);
+    border-radius: var(--dt-radius-sm);
 
     &:hover {
       background: var(--dt-border-color);

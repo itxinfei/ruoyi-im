@@ -936,9 +936,9 @@ onMounted(() => {
       }
 
       .report-status {
-        font-size: 12px;
-        padding: 1px 8px;
-        border-radius: 10px;
+        font-size: var(--dt-font-size-xs);
+        padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
+        border-radius: var(--dt-radius-lg);
         font-weight: 500;
 
         &.status-DRAFT { background: var(--dt-bg-body); color: var(--dt-text-secondary); }
@@ -1151,7 +1151,7 @@ onMounted(() => {
 
     .comment-item {
       display: flex;
-      gap: 10px;
+      gap: var(--dt-spacing-sm);
       margin-bottom: var(--dt-spacing-md);
 
       .comment-body {

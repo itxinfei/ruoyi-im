@@ -4,6 +4,8 @@
     <ImSideNavNew
       :active-module="activeModule"
       @switch-module="processSwitchModule"
+      @open-edit-profile="openEditProfile"
+      @open-system-settings="openSystemSettings"
     />
 
     <!-- 2. 动态内容区 -->
@@ -139,6 +141,10 @@
         </div>
       </template>
     </main>
+
+    <!-- 弹窗 -->
+    <EditProfileDialog v-model="showEditProfileDialog" />
+    <SystemSettingsDialog v-model="showSystemSettingsDialog" />
   </div>
 </template>
 
@@ -164,6 +170,8 @@ import MailPanel from '@/views/MailPanel.vue'
 import AssistantPanel from '@/views/AssistantPanel.vue'
 import ProfilePanel from '@/views/ProfilePanel.vue'
 import SettingsPanel from '@/views/SettingsPanel.vue'
+import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
+import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
 import AdminLayout from '@/views/admin/AdminLayout.vue'
 import FavoritesPanel from '@/views/FavoritesPanel.vue'
 import DingPanel from '@/views/DingPanel.vue'
@@ -171,12 +179,22 @@ import WorkReportPanel from '@/views/WorkReportPanel.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
+const showEditProfileDialog = ref(false)
+const showSystemSettingsDialog = ref(false)
 
 // 修正：嵌套访问路径 im -> session (增加可选链防护)
 const currentSession = computed(() => store.state.im?.session?.currentSession)
 
 const processSwitchModule = (moduleId) => {
   activeModule.value = moduleId
+}
+
+const openEditProfile = () => {
+  showEditProfileDialog.value = true
+}
+
+const openSystemSettings = () => {
+  showSystemSettingsDialog.value = true
 }
 
 const getModuleName = (id) => {

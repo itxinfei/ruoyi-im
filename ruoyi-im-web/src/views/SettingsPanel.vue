@@ -704,7 +704,7 @@ const formatDuration = (seconds) => {
 
     .call-icon {
       font-size: 10px;
-      color: #fff;
+      color: var(--dt-text-white);
 
       &.voice {
         background: var(--dt-success-color);
