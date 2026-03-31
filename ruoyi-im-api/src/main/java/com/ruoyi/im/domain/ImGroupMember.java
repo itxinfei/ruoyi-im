@@ -51,10 +51,6 @@ public class ImGroupMember extends BaseEntity implements Serializable {
     @TableField("deleted_time")
     private LocalDateTime deletedTime;
 
-    /** 回复消息ID */
-    @TableField("reply_to_message_id")
-    private Long replyToMessageId;
-
     // createTime、updateTime 继承自 BaseEntity
 
     // ==================== 非数据库字段 ====================

@@ -19,6 +19,18 @@
 
 ## 代码检查修复记录 (2026-03-31)
 
+### 侧边栏导航样式统一
+**`.nav-item` 导航项样式规范化**:
+- 统一所有面板的侧边栏导航项样式（ContactsPanel, TodoPanel, DocumentsPanel, WorkbenchPanel）
+- 改动：
+  - `flex-direction: row` 确保图标在前、文字在后
+  - `height: 40px` 固定高度
+  - 图标大小 `16px`，文字大小 `14px`
+  - 使用 Design Token 变量（`var(--dt-spacing-*)`, `var(--dt-font-size-*)` 等）
+  - 统一激活态背景 `var(--dt-bg-session-active)`
+- 更新的文件：`ContactsPanel.vue`, `TodoPanel.vue`, `DocumentsPanel.vue`, `WorkbenchPanel.vue`
+- 文档同步：`docs/35-前端全局样式与主题配置.md` 新增"导航项样式规范"章节
+
 ### API 对齐修复
 **前后端 API 修复**:
 - `search.js`: HTTP 方法 POST→GET 对齐后端 GET 接口

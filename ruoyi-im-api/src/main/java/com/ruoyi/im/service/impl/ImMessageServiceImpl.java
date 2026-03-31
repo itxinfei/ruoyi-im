@@ -145,6 +145,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                     ImMessageVO vo = new ImMessageVO();
                     BeanUtils.copyProperties(existingMessage, vo);
                     vo.setContent(encryptionUtil.decryptMessage(existingMessage.getContent())); // 解密
+                    vo.setType(existingMessage.getMessageType()); // 明确设置 type
                     vo.setIsSelf(existingMessage.getSenderId().equals(userId));
                     ImUser sender = imUserMapper.selectImUserById(existingMessage.getSenderId());
                     if (sender != null) {
@@ -481,6 +482,9 @@ public class ImMessageServiceImpl implements ImMessageService {
         for (ImMessage message : messageList) {
             ImMessageVO vo = new ImMessageVO();
             BeanUtils.copyProperties(message, vo);
+
+            // 明确设置 type 字段（ImMessage.messageType → ImMessageVO.type）
+            vo.setType(message.getMessageType());
 
             String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
             vo.setContent(decryptedContent);

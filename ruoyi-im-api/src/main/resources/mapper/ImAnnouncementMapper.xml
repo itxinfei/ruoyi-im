@@ -8,7 +8,7 @@
         <id column="id" property="id"/>
         <result column="title" property="title"/>
         <result column="content" property="content"/>
-        <result column="announcement_type" property="announcementType"/>
+        <result column="type" property="announcementType"/>
         <result column="priority" property="priority"/>
         <result column="status" property="status"/>
         <result column="publisher_id" property="publisherId"/>
@@ -47,7 +47,7 @@
                 OR a.content LIKE CONCAT('%', #{req.keyword}, '%')
             </if>
             <if test="req.announcementType != null and req.announcementType != ''">
-                AND a.announcement_type = #{req.announcementType}
+                AND a.type = #{req.announcementType}
             </if>
             <if test="req.priority != null">
                 AND a.priority = #{req.priority}

@@ -53,18 +53,24 @@ public class WebSocketRedisListenerConfig {
                 // 1. 全量广播: {"broadcastAll": true, "messageJson": "..."}
                 // 2. 单用户发送: {"targetUserId": Long, "messageJson": "..."}
 
-                if (body.contains("broadcastAll")) {
+                // 确保是有效的JSON对象格式
+                if (body == null || !body.trim().startsWith("{")) {
+                    listenerLog.warn("非JSON对象格式消息，跳过处理: {}", body);
+                    return;
+                }
+
+                com.alibaba.fastjson.JSONObject obj = com.alibaba.fastjson.JSON.parseObject(body);
+
+                if (obj.containsKey("broadcastAll")) {
                     // 全量广播消息
-                    com.alibaba.fastjson.JSONObject obj = com.alibaba.fastjson.JSON.parseObject(body);
                     String messageJson = obj.getString("messageJson");
                     if (obj.getBoolean("broadcastAll")) {
                         // 广播给所有在线用户
                         ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
                         listenerLog.debug("全量广播消息已分发到本地用户");
                     }
-                } else if (body.contains("targetUserId")) {
+                } else if (obj.containsKey("targetUserId")) {
                     // 单用户消息
-                    com.alibaba.fastjson.JSONObject obj = com.alibaba.fastjson.JSON.parseObject(body);
                     Long targetUserId = obj.getLong("targetUserId");
                     String messageJson = obj.getString("messageJson");
 

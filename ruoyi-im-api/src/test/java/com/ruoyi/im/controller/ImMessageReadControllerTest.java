@@ -100,10 +100,10 @@ public class ImMessageReadControllerTest {
     }
 
     /**
-     * 测试获取消息已读用户列表 - 成功场景
+     * 测试获取消息已读状态 - 成功场景
      */
     @Test
-    void testGetMessageReadUsers_Success() {
+    void testGetMessageReadStatus_Success() {
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
             mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
 
@@ -111,7 +111,7 @@ public class ImMessageReadControllerTest {
             when(messageReadService.getMessageReadDetail(eq(TEST_MESSAGE_ID), eq(TEST_USER_ID)))
                     .thenReturn(expectedDetail);
 
-            Result<ImMessageReadDetailVO> result = readController.getMessageReadUsers(TEST_CONVERSATION_ID, TEST_MESSAGE_ID);
+            Result<ImMessageReadDetailVO> result = readController.getMessageReadStatus(TEST_MESSAGE_ID);
 
             assertNotNull(result);
             assertTrue(result.isSuccess());
@@ -122,10 +122,10 @@ public class ImMessageReadControllerTest {
     }
 
     /**
-     * 测试获取消息已读用户列表 - 全部已读
+     * 测试获取消息已读状态 - 全部已读
      */
     @Test
-    void testGetMessageReadUsers_AllRead() {
+    void testGetMessageReadStatus_AllRead() {
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
             mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
 
@@ -141,7 +141,7 @@ public class ImMessageReadControllerTest {
             when(messageReadService.getMessageReadDetail(eq(TEST_MESSAGE_ID), eq(TEST_USER_ID)))
                     .thenReturn(detailVO);
 
-            Result<ImMessageReadDetailVO> result = readController.getMessageReadUsers(TEST_CONVERSATION_ID, TEST_MESSAGE_ID);
+            Result<ImMessageReadDetailVO> result = readController.getMessageReadStatus(TEST_MESSAGE_ID);
 
             assertNotNull(result);
             assertTrue(result.isSuccess());
@@ -151,10 +151,10 @@ public class ImMessageReadControllerTest {
     }
 
     /**
-     * 测试获取消息已读用户列表 - 全部未读
+     * 测试获取消息已读状态 - 全部未读
      */
     @Test
-    void testGetMessageReadUsers_AllUnread() {
+    void testGetMessageReadStatus_AllUnread() {
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
             mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
 
@@ -170,7 +170,7 @@ public class ImMessageReadControllerTest {
             when(messageReadService.getMessageReadDetail(eq(TEST_MESSAGE_ID), eq(TEST_USER_ID)))
                     .thenReturn(detailVO);
 
-            Result<ImMessageReadDetailVO> result = readController.getMessageReadUsers(TEST_CONVERSATION_ID, TEST_MESSAGE_ID);
+            Result<ImMessageReadDetailVO> result = readController.getMessageReadStatus(TEST_MESSAGE_ID);
 
             assertNotNull(result);
             assertTrue(result.isSuccess());

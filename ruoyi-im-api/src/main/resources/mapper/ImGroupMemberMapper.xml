@@ -11,13 +11,12 @@
         <result property="isMuted" column="is_muted"/>
         <result property="isDeleted" column="is_deleted"/>
         <result property="deletedTime" column="deleted_time"/>
-        <result property="replyToMessageId" column="reply_to_message_id"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectImGroupMemberVo">
-        select id, group_id, user_id, nickname, role, is_muted, is_deleted, deleted_time, reply_to_message_id, create_time, update_time
+        select id, group_id, user_id, nickname, role, is_muted, is_deleted, deleted_time, create_time, update_time
         from im_group_member
     </sql>
 
@@ -46,7 +45,6 @@
             <if test="isMuted != null">is_muted,</if>
             <if test="isDeleted != null">is_deleted,</if>
             <if test="deletedTime != null">deleted_time,</if>
-            <if test="replyToMessageId != null">reply_to_message_id,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -58,7 +56,6 @@
             <if test="isMuted != null">#{isMuted},</if>
             <if test="isDeleted != null">#{isDeleted},</if>
             <if test="deletedTime != null">#{deletedTime},</if>
-            <if test="replyToMessageId != null">#{replyToMessageId},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -74,7 +71,6 @@
             <if test="isMuted != null">is_muted = #{isMuted},</if>
             <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
             <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
-            <if test="replyToMessageId != null">reply_to_message_id = #{replyToMessageId},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}

@@ -62,6 +62,44 @@ public class ThreadPoolConfig {
     }
 
     /**
+     * 配置消息发送执行器
+     *
+     * @return 消息发送线程池执行器
+     */
+    @Bean("messageTaskExecutor")
+    public Executor messageTaskExecutor() {
+        log.info("初始化消息发送线程池");
+
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        // 核心线程数
+        executor.setCorePoolSize(10);
+
+        // 最大线程数
+        executor.setMaxPoolSize(50);
+
+        // 队列容量
+        executor.setQueueCapacity(500);
+
+        // 线程空闲时间（秒）
+        executor.setKeepAliveSeconds(30);
+
+        // 线程名称前缀
+        executor.setThreadNamePrefix("im-message-send-");
+
+        // 拒绝策略：丢弃最老的任务
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
+
+        // 初始化
+        executor.initialize();
+
+        log.info("消息发送线程池初始化完成：核心线程数={}, 最大线程数={}, 队列容量={}",
+                executor.getCorePoolSize(), executor.getMaxPoolSize(), executor.getQueueCapacity());
+
+        return executor;
+    }
+
+    /**
      * 配置消息推送执行器
      * 
      * @return 消息推送线程池执行器
