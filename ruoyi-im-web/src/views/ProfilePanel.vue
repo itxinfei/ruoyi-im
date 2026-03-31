@@ -94,7 +94,13 @@
         <div class="info-card">
           <div class="info-row">
             <span class="label">手机号码</span>
-            <span class="readonly-value">{{ userInfo.phone || '未绑定' }}</span>
+            <div class="value-box">
+              <el-input
+                v-model="userInfo.mobile"
+                placeholder="输入手机号"
+                @blur="updateField('mobile')"
+              />
+            </div>
           </div>
           <div class="info-row">
             <span class="label">电子邮箱</span>
@@ -155,7 +161,7 @@ import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
 import { Camera, Refresh } from '@element-plus/icons-vue'
 
-const userInfo = ref({ id: '', username: '', nickname: '', avatar: '', gender: 0, position: '', department: '', email: '', phone: '' })
+const userInfo = ref({ id: '', username: '', nickname: '', avatar: '', gender: 0, position: '', department: '', email: '', mobile: '' })
 const showPasswordDialog = ref(false)
 const avatarInput = ref(null)
 const passwordForm = ref({

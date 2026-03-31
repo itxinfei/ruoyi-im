@@ -267,7 +267,7 @@
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDocuments, searchDocuments, toggleStar, updateDocument, deleteDocument, permanentlyDeleteDocument, restoreDocument, shareDocument } from '@/api/im/document'
-import { createFolder, getQuota, uploadFile, getFileList, renameFolder, deleteFolder, deleteFile, renameFile } from '@/api/im/cloudDrive'
+import { createFolder, getQuota, uploadFile, getFileList, getFolderList, renameFolder, deleteFolder, deleteFile, renameFile } from '@/api/im/cloudDrive'
 import { formatFileSize, formatTime } from '@/utils/format'
 import DocumentEditorDialog from '@/components/Documents/DocumentEditorDialog.vue'
 import { Folder, UserFilled, Clock, Delete, Search, List, Grid, Plus, FolderOpened, Star, MoreFilled, Document, Picture, VideoCamera, Microphone, View, Edit, Share, StarFilled, EditPen, Refresh, ArrowLeft } from '@element-plus/icons-vue'
@@ -347,26 +347,47 @@ const goBack = () => {
 const loadDocuments = async () => {
   loading.value = true
   try {
-    let res
     if (activeNav.value === 'my') {
-      // 我的文件：优先使用云盘API支持文件夹层级
-      res = await getFileList(currentFolderId.value)
-      if (res.code === 200) {
-        files.value = (res.data || []).map(doc => ({
-          id: doc.id,
-          name: doc.name || doc.title,
-          icon: getFileIcon(doc.type),
-          iconClass: getIconClass(doc.type),
-          meta: doc.type === 'FOLDER' ? '' : formatFileSize(doc.size || 0),
-          owner: doc.creatorName || '我',
-          modifiedTime: formatTime(doc.updateTime),
-          isStarred: doc.isStarred,
-          documentType: doc.type,
-          cloudFileId: doc.id
-        }))
-      }
+      // 我的文件：获取文件夹和文件列表
+      const [folderRes, fileRes] = await Promise.all([
+        getFolderList({ parentId: currentFolderId.value, ownerType: 'USER' }),
+        getFileList(currentFolderId.value)
+      ])
+
+      // 转换文件夹
+      const folders = (folderRes.data || []).map(folder => ({
+        id: `folder_${folder.id}`,
+        name: folder.folderName,
+        icon: 'Folder',
+        iconClass: 'icon-folder',
+        meta: folder.fileCount != null ? `${folder.fileCount} 个文件` : '',
+        owner: folder.ownerName || '我',
+        modifiedTime: formatTime(folder.updateTime),
+        isStarred: false,
+        documentType: 'FOLDER',
+        cloudFileId: folder.id,
+        isFolder: true
+      }))
+
+      // 转换文件
+      const filesList = (fileRes.data || []).map(doc => ({
+        id: doc.id,
+        name: doc.fileName || doc.name || doc.title,
+        icon: getFileIcon(doc.fileType),
+        iconClass: getIconClass(doc.fileType),
+        meta: formatFileSize(doc.fileSize || 0),
+        owner: doc.uploaderName || '我',
+        modifiedTime: formatTime(doc.updateTime),
+        isStarred: doc.isStarred,
+        documentType: doc.fileType,
+        cloudFileId: doc.id,
+        isFolder: false
+      }))
+
+      // 文件夹在前，文件在后
+      files.value = [...folders, ...filesList]
     } else {
-      res = await getDocuments(getApiType())
+      const res = await getDocuments(getApiType())
       if (res.code === 200) {
         files.value = res.data.map(doc => ({
           id: doc.id,
@@ -377,7 +398,8 @@ const loadDocuments = async () => {
           owner: doc.creatorName || '我',
           modifiedTime: formatTime(doc.updateTime),
           isStarred: doc.isStarred,
-          documentType: doc.type
+          documentType: doc.type,
+          isFolder: false
         }))
       }
     }
