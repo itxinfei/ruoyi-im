@@ -25,53 +25,31 @@
       </div>
     </div>
 
-    <!-- 底部功能区 -->
+    <!-- 分割线 -->
+    <div class="nav-divider" />
+
+    <!-- 底部功能区 - 直接显示 -->
     <div class="nav-bottom">
-      <!-- 搜索 -->
-      <div
-        :class="['nav-item', { active: activeModule === 'search' }]"
-        @click="switchModule('search')"
-        title="搜索"
-      >
-        <el-icon :size="20">
-          <Search />
-        </el-icon>
+      <div class="nav-item" title="搜索" @click="switchModule('search')">
+        <el-icon :size="18"><Search /></el-icon>
       </div>
-
-      <!-- 个人设置 -->
-      <div
-        :class="['nav-item', { active: activeModule === 'profile' }]"
-        @click="switchModule('profile')"
-        title="个人资料"
-      >
-        <el-icon :size="20">
-          <User />
-        </el-icon>
+      <div class="nav-item" title="个人资料" @click="openEditProfile">
+        <el-icon :size="18"><User /></el-icon>
       </div>
-
-      <!-- 应用设置 -->
-      <div
-        :class="['nav-item', { active: activeModule === 'settings' }]"
-        @click="switchModule('settings')"
-        title="设置"
-      >
-        <el-icon :size="20">
-          <Setting />
-        </el-icon>
+      <div class="nav-item" title="设置" @click="openSystemSettings">
+        <el-icon :size="18"><Setting /></el-icon>
       </div>
-
-      <!-- 主题切换 -->
-      <div class="nav-item" @click="handleToggleTheme" title="切换模式">
-        <el-icon :size="20">
-          <Sunny v-if="isDark" />
-          <Moon v-else />
-        </el-icon>
+      <div class="nav-item" title="切换主题" @click="handleToggleTheme">
+        <el-icon :size="18"><Sunny v-if="isDark" /><Moon v-else /></el-icon>
       </div>
+    </div>
 
-      <!-- 用户头像 -->
-      <div class="user-avatar-wrapper" @click="openProfile" title="个人资料">
-        <img :src="userAvatar" class="user-avatar" alt="me">
-        <div class="online-status-dot" />
+    <!-- 用户头像 - 点击打开个人资料 -->
+    <div class="user-avatar-wrapper" @click="openEditProfile" title="个人资料">
+      <div class="avatar-ring" />
+      <img :src="userAvatar" class="user-avatar" alt="me">
+      <div class="online-status-dot">
+        <span class="status-pulse" />
       </div>
     </div>
   </aside>
@@ -84,7 +62,7 @@
 import { ref } from 'vue'
 import {
   ChatDotRound, Search, User, Menu, FolderOpened, Calendar,
-  Tickets, Setting, Sunny, Moon, Star, Bell, Document
+  Tickets, Setting, Sunny, Moon, Star, Bell, Document, MoreFilled
 } from '@element-plus/icons-vue'
 import { useTheme } from '@/composables/useTheme'
 
@@ -92,7 +70,7 @@ defineProps({
   activeModule: { type: String, default: 'chat' }
 })
 
-const emit = defineEmits(['switch-module'])
+const emit = defineEmits(['switch-module', 'open-edit-profile', 'open-system-settings'])
 const { isDark, toggleTheme } = useTheme()
 
 // 状态
@@ -115,8 +93,12 @@ const switchModule = (moduleId) => {
   emit('switch-module', moduleId)
 }
 
-const openProfile = () => {
-  emit('switch-module', 'profile')
+const openEditProfile = () => {
+  emit('open-edit-profile')
+}
+
+const openSystemSettings = () => {
+  emit('open-system-settings')
 }
 
 const handleToggleTheme = () => {
@@ -173,22 +155,180 @@ const handleToggleTheme = () => {
 }
 
 .nav-item:hover { background-color: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.95); }
-.nav-item.active { background-color: rgba(255, 255, 255, 0.12); color: var(--dt-text-white); }
+.nav-item.active { background-color: var(--dt-brand-color); color: var(--dt-text-white); }
 
 .nav-item.active::before {
-  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; background-color: var(--dt-brand-color); border-radius: 0 2px 2px 0;
+  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; background-color: var(--dt-text-white); border-radius: 0 2px 2px 0;
 }
 
 .nav-badge {
   position: absolute; top: 2px; right: 2px; background-color: var(--dt-error-color); color: var(--dt-text-white);
-  font-size: 10px; height: 14px; min-width: 14px; padding: 0 3px; border-radius: 7px;
+  font-size: 10px; height: 14px; min-width: 14px; padding: 0 var(--dt-spacing-xs); border-radius: var(--dt-radius-md);
   display: flex; align-items: center; justify-content: center; font-weight: 600;
 }
 
-.nav-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+/* 分割线 */
+.nav-divider {
+  width: 32px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 30%,
+    rgba(255, 255, 255, 0.3) 70%,
+    transparent 100%
+  );
+  margin: 0 auto var(--dt-spacing-lg);
+  flex-shrink: 0;
+}
 
-.user-avatar-wrapper { position: relative; padding: 2px; cursor: pointer; transition: transform 0.2s; margin-top: 8px; }
-.user-avatar-wrapper:hover { transform: scale(1.05); }
-.user-avatar { width: 36px; height: 36px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.15); }
-.online-status-dot { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background-color: var(--dt-success-color); border: 2px solid var(--dt-bg-sidebar); border-radius: 50%; }
+/* 底部工具栏 */
+.nav-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dt-spacing-xs);
+  padding: var(--dt-spacing-sm) 0;
+  width: 100%;
+}
+
+.toolbar-btn {
+  position: relative;
+  width: 40px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--dt-radius-lg);
+  color: rgba(255, 255, 255, 0.55);
+  transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 工具提示 - 改为按钮下方显示 */
+.toolbar-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: var(--dt-bg-card);
+  color: var(--dt-text-primary);
+  font-size: var(--dt-font-size-sm);
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: var(--dt-radius-sm);
+  white-space: nowrap;
+  box-shadow: var(--dt-shadow-float);
+  border: 1px solid var(--dt-border-light);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 999;
+}
+
+.toolbar-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--dt-bg-card);
+}
+
+.toolbar-btn:hover .toolbar-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* 用户头像 */
+.user-avatar-wrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  margin-top: var(--dt-spacing-md);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.avatar-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: var(--dt-radius-sm);
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.user-avatar-wrapper:hover .avatar-ring {
+  opacity: 1;
+  inset: -4px;
+  border-radius: calc(var(--dt-radius-sm) + 1px);
+  background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--dt-radius-sm);
+  border: none;
+  position: relative;
+  z-index: 1;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.user-avatar-wrapper:hover .user-avatar {
+  transform: scale(1.08);
+}
+
+.online-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  background-color: var(--dt-success-color);
+  border: 2px solid var(--dt-brand-color);
+  border-radius: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--dt-success-color);
+  animation: statusPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.nav-popover-content { display: flex; flex-direction: column; gap: 2px; }
+.nav-popover-item {
+  display: flex; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md);
+  border-radius: var(--dt-radius-sm); cursor: pointer; color: var(--dt-text-primary); font-size: var(--dt-font-size-sm);
+  &:hover { background: var(--dt-bg-session-hover); }
+}
+.nav-popover-label { flex: 1; }
+.nav-popover-divider { height: 1px; background: var(--dt-border-light); margin: var(--dt-spacing-xs) 0; }
 </style>
