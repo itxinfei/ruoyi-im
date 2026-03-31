@@ -52,6 +52,13 @@
         </div>
       </template>
 
+      <!-- 工作日志模块 -->
+      <template v-else-if="activeModule === 'workreport'">
+        <div class="single-panel-wrapper">
+          <WorkReportPanel />
+        </div>
+      </template>
+
       <!-- 收藏模块 -->
       <template v-else-if="activeModule === 'favorites'">
         <div class="single-panel-wrapper">
@@ -160,6 +167,7 @@ import SettingsPanel from '@/views/SettingsPanel.vue'
 import AdminLayout from '@/views/admin/AdminLayout.vue'
 import FavoritesPanel from '@/views/FavoritesPanel.vue'
 import DingPanel from '@/views/DingPanel.vue'
+import WorkReportPanel from '@/views/WorkReportPanel.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
