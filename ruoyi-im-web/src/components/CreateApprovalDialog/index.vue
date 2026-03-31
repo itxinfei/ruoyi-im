@@ -296,19 +296,19 @@ const resetForm = () => {
 
 .template-item:hover {
   border-color: var(--dt-brand-color);
-  background: var(--dt-brand-bg, #f0f7ff);
+  background: var(--dt-brand-bg);
 }
 
 .template-item.active {
   border-color: var(--dt-brand-color);
-  background: var(--dt-brand-bg-light, #e6f7ff);
+  background: var(--dt-brand-lighter);
 }
 
 .template-icon {
   width: 48px;
   height: 48px;
-  border-radius: var(--dt-radius-lg, 12px);
-  background: var(--dt-brand-bg, #f0f7ff);
+  border-radius: var(--dt-radius-lg);
+  background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
   display: flex;
   align-items: center;

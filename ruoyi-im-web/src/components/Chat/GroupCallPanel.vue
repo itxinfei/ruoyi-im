@@ -726,9 +726,9 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
         border-radius: 4px;
         background: rgba(0, 0, 0, 0.5);
 
-        &.muted { color: var(--dt-error-color, #f56c6c); }
-        &.camera { color: var(--dt-text-tertiary, #909399); }
-        &.screen { color: var(--dt-brand-color, #409eff); }
+        &.muted { color: var(--dt-error-color, #F53F3F); }
+        &.camera { color: var(--dt-text-tertiary, #8A9099); }
+        &.screen { color: var(--dt-brand-color, #277EFB); }
       }
     }
   }
@@ -844,7 +844,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   }
 
   &.active .icon-circle {
-    background: var(--dt-error-color, #f56c6c);
+    background: var(--dt-error-color, #F53F3F);
     color: white;
   }
 

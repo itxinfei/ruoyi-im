@@ -604,11 +604,11 @@ const handleShowAnnouncement = async () => {
           justify-content: center;
           font-size: 8px;
           &.owner {
-            background: var(--dt-warning-color, #FFD700);
+            background: var(--dt-warning-color, #FF7D00);
             color: var(--dt-text-white);
           }
           &.admin {
-            background: var(--dt-brand-color, #409EFF);
+            background: var(--dt-brand-color, #277EFB);
             color: var(--dt-text-white);
           }
         }

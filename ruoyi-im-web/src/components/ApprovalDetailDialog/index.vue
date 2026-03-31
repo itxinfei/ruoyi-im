@@ -294,17 +294,17 @@ const confirmAction = async () => {
 }
 
 .status-badge.pending {
-  background: var(--dt-warning-bg, #fff7e6);
+  background: var(--dt-warning-bg);
   color: var(--dt-warning-color);
 }
 
 .status-badge.approved {
-  background: var(--dt-success-bg, #f6ffed);
+  background: var(--dt-success-bg);
   color: var(--dt-success-color);
 }
 
 .status-badge.rejected {
-  background: var(--dt-error-bg, #fff1f0);
+  background: var(--dt-error-bg);
   color: var(--dt-error-color);
 }
 
