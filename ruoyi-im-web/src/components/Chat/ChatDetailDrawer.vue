@@ -535,9 +535,22 @@ const handleShowAnnouncement = async () => {
 
 <style lang="scss" scoped>
 .im-detail-drawer {
+  :deep(.el-drawer) {
+    background: var(--dt-bg-body);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);  /* 抽屉阴影 */
+    transition: transform 250ms ease-out;  /* 钉钉规范：250ms ease-out */
+  }
+
+  // 钉钉规范：遮罩 rgba(0,0,0,0.1)
+  :deep(.el-drawer__overlay) {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  // 钉钉规范：左侧8px圆角，右侧无
   :deep(.el-drawer__body) {
     padding: 0;
     background-color: var(--dt-bg-body);
+    border-radius: 8px 0 0 8px;
   }
 }
 
@@ -549,10 +562,10 @@ const handleShowAnnouncement = async () => {
   .section {
     background: var(--dt-bg-card);
     margin-bottom: 8px;
-    padding: 16px;
-    
+    padding: 20px;  /* 钉钉规范：内边距20px */
+
     &.hero-section {
-      padding: 24px 16px;
+      padding: 24px 20px;
       .hero-main {
         display: flex;
         align-items: center;

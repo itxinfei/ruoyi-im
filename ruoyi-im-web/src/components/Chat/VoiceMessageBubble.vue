@@ -157,6 +157,7 @@ const getBarHeight = (index) => {
   max-width: 200px;  /* 钉钉规范：最长200px */
   height: 40px;  /* 钉钉规范：固定40px高度 */
   position: relative;
+  color: var(--dt-brand-color);  /* 钉钉规范：接收方品牌蓝色波形 */
 
   // 未读标识：红色小圆点 6px
   .unread-dot {
@@ -170,10 +171,10 @@ const getBarHeight = (index) => {
     z-index: 1;
   }
 
-  // 播放按钮
+  // 播放按钮 - 钉钉规范：20x20图标
   .play-btn {
-    width: var(--dt-btn-size-lg);
-    height: var(--dt-btn-size-lg);
+    width: 36px;  /* 容器36px，图标20x20居中 */
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: var(--dt-brand-color);
@@ -186,7 +187,7 @@ const getBarHeight = (index) => {
     transition: all var(--dt-transition-fast);
 
     .play-icon {
-      font-size: var(--dt-font-size-md);
+      font-size: 20px;  /* 钉钉规范：20x20播放图标 */
     }
 
     &:hover {
@@ -279,8 +280,7 @@ const getBarHeight = (index) => {
     }
 
     .waveform-bar {
-      background: var(--dt-text-white);
-      opacity: 0.7;
+      background: rgba(255, 255, 255, 0.8);  /* 钉钉规范：白色波形 rgba(255,255,255,0.8) */
     }
 
     .duration {
@@ -303,8 +303,7 @@ const getBarHeight = (index) => {
   }
 
   &.is-own .waveform-bar {
-    background: var(--dt-text-white);
-    opacity: 0.7;
+    background: rgba(255, 255, 255, 0.8);  /* 钉钉规范：白色波形 rgba(255,255,255,0.8) */
   }
 }
 </style>

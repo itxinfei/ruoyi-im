@@ -243,7 +243,6 @@ const formatTime = (time) => {
 
 .session-item:hover {
   background-color: var(--dt-bg-session-hover);
-  transform: translateX(2px);
 }
 
 .session-item.is-active {

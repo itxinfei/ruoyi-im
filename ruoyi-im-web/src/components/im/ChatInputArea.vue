@@ -688,7 +688,7 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;  /* 钉钉规范：单行截断 */
   -webkit-box-orient: vertical;
   color: var(--dt-text-secondary);
 }
@@ -721,7 +721,7 @@ onMounted(() => {
 
 .tool-icon {
   font-size: 20px;
-  color: var(--dt-text-tertiary);
+  color: var(--dt-text-icon, #ADB1B8);  /* 钉钉规范：图标默认色 #ADB1B8 */
   cursor: pointer;
   outline: none;
   padding: var(--dt-spacing-sm);
@@ -1000,11 +1000,11 @@ onMounted(() => {
   font-size: var(--dt-font-size-sm);
 }
 
-/* 主输入区 */
+/* 主输入区 - 钉钉规范：初始高度96px */
 .input-main {
   flex: 1;
   padding: 0 var(--dt-spacing-xl);
-  min-height: 60px;
+  min-height: 96px;  /* 钉钉规范：初始高度96px */
   max-height: 240px;
   overflow-y: auto;
 }
@@ -1042,8 +1042,8 @@ onMounted(() => {
 }
 
 .send-btn {
-  background-color: var(--dt-bg-hover);
-  color: var(--dt-text-tertiary);
+  background-color: #E5E7EB;  /* 钉钉规范：空状态背景 #E5E7EB */
+  color: #FFFFFF;  /* 钉钉规范：空状态文字 #FFFFFF */
   border: none;
   width: 64px;  /* 钉钉规范：固定64px宽度 */
   height: 32px;
@@ -1051,7 +1051,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-base);
   font-weight: var(--dt-font-weight-medium);
   cursor: not-allowed;
-  transition: all var(--dt-transition-fast);
+  transition: all 200ms ease-out;  /* 钉钉规范：200ms ease-out */
 }
 
 .send-btn.is-active {

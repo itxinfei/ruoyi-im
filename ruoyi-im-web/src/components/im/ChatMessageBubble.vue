@@ -34,7 +34,7 @@
           <!-- 气泡行：气泡 + 状态栏（底部对齐） -->
           <div class="bubble-row">
             <!-- 气泡本体 -->
-            <div :class="['message-bubble', `type-${(message.type || 'text').toLowerCase()}`]">
+            <div :class="['message-bubble', `type-${(message.type || 'text').toLowerCase()}`, { 'is-pending': message.status === 'pending' }]">
               <!-- 文本（非纯URL） -->
               <div v-if="(!message.type || message.type === 'TEXT') && !isPureUrlMessage" class="text-content">
                 <template v-for="(part, index) in parsedTextParts" :key="index">
@@ -450,7 +450,7 @@ const formatDisplayUrl = (url) => {
   align-self: center;
   margin: var(--dt-spacing-lg) 0;
   font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-tertiary);
+  color: rgba(23, 26, 29, 0.4);  /* 钉钉规范：12px, rgba(23,26,29,0.4) */
 }
 
 .re-edit-link {
@@ -466,7 +466,7 @@ const formatDisplayUrl = (url) => {
 
 .message-container {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;  /* 钉钉规范：头像顶部与气泡第一行文字顶部对齐 */
   width: 100%;
 }
 
@@ -557,6 +557,11 @@ const formatDisplayUrl = (url) => {
   white-space: pre-wrap;
   position: relative;
   transition: box-shadow var(--dt-transition-fast), transform var(--dt-transition-fast);
+}
+
+/* 待发送状态 - 钉钉规范：opacity 0.6 */
+.message-bubble.is-pending {
+  opacity: 0.6;
 }
 
 /* 接收方 (左侧) - 白色气泡，钉钉风格：左上小尖，底右圆角 */
@@ -905,7 +910,7 @@ const formatDisplayUrl = (url) => {
 
 .link-title {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;  /* 钉钉规范：粗体 */
   color: var(--dt-text-primary);
   margin-bottom: 4px;
   overflow: hidden;
@@ -957,12 +962,12 @@ const formatDisplayUrl = (url) => {
 }
 
 .status-icon.is-loading {
-  color: var(--dt-text-tertiary);
-  animation: rotate 2s linear infinite;
+  color: var(--dt-text-icon, #ADB1B8);
+  animation: rotate 1s linear infinite;  /* 钉钉规范：1s旋转 */
 }
 
 .status-icon.is-failed {
-  color: var(--dt-error-color);
+  color: #FF4D4F;  /* 钉钉规范：红色感叹号 #FF4D4F */
   cursor: pointer;
 }
 
@@ -972,7 +977,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .read-status.is-read {
-  color: var(--dt-text-tertiary);
+  color: rgba(23, 26, 29, 0.4);  /* 钉钉规范：已读灰色 */
 }
 
 .read-status.is-unread {
@@ -990,8 +995,8 @@ const formatDisplayUrl = (url) => {
   display: flex;
   align-items: center;
   background-color: var(--dt-bg-card);
-  border-radius: var(--dt-radius-md);
-  box-shadow: var(--dt-shadow-float);
+  border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px圆角 */
+  box-shadow: var(--dt-shadow-action-bar);  /* 钉钉规范：0 2px 8px rgba(0,0,0,0.08) */
   padding: 4px;
   gap: 8px;  /* 钉钉规范：图标间距8px */
   position: absolute;
@@ -1018,20 +1023,24 @@ const formatDisplayUrl = (url) => {
 }
 
 .action-item {
-  width: 24px;  /* 钉钉规范：16x16图标，24px容器 */
-  height: 24px;
+  width: 20px;  /* 钉钉规范：16x16图标容器 */
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px圆角 */
   cursor: pointer;
-  color: var(--dt-text-secondary);
+  color: var(--dt-text-icon, #ADB1B8);  /* 钉钉规范：图标默认色 */
   transition: all var(--dt-transition-fast);
+
+  :deep(.el-icon) {
+    font-size: 16px;  /* 钉钉规范：16x16图标 */
+  }
 }
 
 .action-item:hover {
   background-color: var(--dt-bg-hover);
-  color: var(--dt-text-primary);  /* 钉钉规范：悬停变深色 */
+  color: var(--dt-brand-color);  /* 钉钉规范：悬停变 #277EFB */
 }
 
 .action-item:active {
