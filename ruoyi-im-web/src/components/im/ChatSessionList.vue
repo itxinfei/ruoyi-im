@@ -235,7 +235,7 @@ const formatTime = (time) => {
   display: flex;
   align-items: center;
   height: 64px; /* 对齐钉钉 Windows 客户端规范 */
-  padding: 0 var(--dt-spacing-lg);
+  padding: 0 var(--dt-spacing-md); /* 钉钉规范：左右12px */
   cursor: pointer;
   position: relative;
   transition: all var(--dt-transition-fast);

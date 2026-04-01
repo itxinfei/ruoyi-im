@@ -730,8 +730,8 @@ onMounted(() => {
 }
 
 .tool-icon:hover {
-  color: var(--dt-brand-color);
-  background-color: var(--dt-brand-bg);
+  color: var(--dt-text-primary);  /* 钉钉规范：悬停变深色 #171A1D */
+  background-color: var(--dt-bg-hover);
 }
 
 .tool-icon:active {
@@ -1045,7 +1045,7 @@ onMounted(() => {
   background-color: var(--dt-bg-hover);
   color: var(--dt-text-tertiary);
   border: none;
-  padding: 0 20px;
+  width: 64px;  /* 钉钉规范：固定64px宽度 */
   height: 32px;
   border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px 圆角 */
   font-size: var(--dt-font-size-base);

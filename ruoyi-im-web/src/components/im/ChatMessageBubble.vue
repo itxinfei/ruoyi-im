@@ -607,7 +607,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .content-img {
-  max-width: 240px;
+  max-width: 280px;  /* 钉钉规范：图片最大280px */
   border-radius: var(--dt-radius-sm);
   display: block;
 }
@@ -615,7 +615,7 @@ const formatDisplayUrl = (url) => {
 /* 视频消息 */
 .video-content {
   position: relative;
-  max-width: 280px;
+  max-width: 320px;  /* 钉钉规范：视频最大320px */
   border-radius: var(--dt-radius-md);
   overflow: hidden;
   cursor: pointer;
@@ -888,11 +888,11 @@ const formatDisplayUrl = (url) => {
   text-decoration: underline;
 }
 
-/* 状态与已读侧边栏 */
+/* 状态与已读侧边栏 - 钉钉规范：距气泡边缘4px */
 .message-status-sidebar {
   display: flex;
   align-items: flex-end;
-  margin-right: 8px;
+  margin-right: 4px;  /* 钉钉规范：4px间距 */
   padding-bottom: 2px;
   flex-shrink: 0;
 }
@@ -930,17 +930,17 @@ const formatDisplayUrl = (url) => {
   white-space: nowrap;
 }
 
-/* 操作悬浮条 (Action Bar) */
+/* 操作悬浮条 (Action Bar) - 钉钉规范：16x16图标，间距8px，距离气泡8px */
 .action-bar {
   display: flex;
   align-items: center;
   background-color: var(--dt-bg-card);
   border-radius: var(--dt-radius-md);
   box-shadow: var(--dt-shadow-float);
-  padding: var(--dt-spacing-xs);
-  gap: 2px;
+  padding: 4px;
+  gap: 8px;  /* 钉钉规范：图标间距8px */
   position: absolute;
-  top: -20px;
+  top: -8px;  /* 钉钉规范：距气泡顶部8px */
   z-index: 10;
   opacity: 0;
   transform: translateY(4px) scale(0.95);
@@ -963,21 +963,20 @@ const formatDisplayUrl = (url) => {
 }
 
 .action-item {
-  width: 30px;
-  height: 30px;
+  width: 24px;  /* 钉钉规范：16x16图标，24px容器 */
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px圆角 */
   cursor: pointer;
   color: var(--dt-text-secondary);
   transition: all var(--dt-transition-fast);
 }
 
 .action-item:hover {
-  background-color: var(--dt-brand-bg);
-  color: var(--dt-brand-color);
-  transform: scale(1.08);
+  background-color: var(--dt-bg-hover);
+  color: var(--dt-text-primary);  /* 钉钉规范：悬停变深色 */
 }
 
 .action-item:active {
