@@ -166,7 +166,7 @@ const getBarHeight = (index) => {
     right: -3px;
     width: 6px;
     height: 6px;
-    background: var(--dt-unread-color, #FF4D4F);
+    background: var(--dt-unread-color);
     border-radius: 50%;
     z-index: 1;
   }

@@ -109,6 +109,14 @@
   --dt-text-link-hover: #33a1ff;
   --dt-text-white: #ffffff;
 
+  // === Component Colors (组件专用色) ===
+  --dt-send-btn-empty-bg: #E5E7EB;  /* 钉钉规范：发送按钮空状态背景 */
+  --dt-file-pdf: #FF4D4F;    /* 钉钉规范：PDF文件图标色 */
+  --dt-file-word: #2B7DFF;    /* 钉钉规范：Word文件图标色 */
+  --dt-file-excel: #22AB5C;   /* 钉钉规范：Excel文件图标色 */
+  --dt-file-ppt: #FF7A00;     /* 钉钉规范：PPT文件图标色 */
+  --dt-file-other: #ADB1B8;   /* 钉钉规范：其他文件图标色 */
+
   // === Font Sizes ===
   --dt-font-size-xs: 11px;
   --dt-font-size-sm: 12px;
@@ -273,6 +281,9 @@ html.dark {
   // === Overlay & Placeholder (暗色模式) ===
   --dt-overlay-bg: rgba(255, 255, 255, 0.2);  /* 暗色模式视频时长背景 */
   --dt-bg-placeholder: #374151;  /* 暗色模式图片加载占位背景 */
+
+  // === Component Colors (暗色模式组件专用色) ===
+  --dt-send-btn-empty-bg: #3b4252;  /* 暗色模式发送按钮空状态背景 */
 }
 
 // SCSS 辅助 Mixins

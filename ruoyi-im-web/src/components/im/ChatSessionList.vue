@@ -156,11 +156,11 @@ const formatTime = (time) => {
 
 .session-tabs {
   display: flex;
-  gap: 2px;
+  gap: var(--dt-spacing-xs);  /* 钉钉规范：4px间距 */
   margin-top: 8px;
   background: var(--dt-bg-hover);
   border-radius: var(--dt-radius-sm);
-  padding: 2px;
+  padding: var(--dt-spacing-xs);  /* 钉钉规范：4px内边距 */
 }
 
 .session-tab {
@@ -168,7 +168,7 @@ const formatTime = (time) => {
   height: 26px;
   border: none;
   background: transparent;
-  border-radius: 3px;
+  border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px圆角 */
   font-size: 12px;
   font-weight: 500;
   color: var(--dt-text-secondary);
@@ -212,7 +212,7 @@ const formatTime = (time) => {
   border: none;
   background: transparent;
   outline: none;
-  margin-left: 6px;
+  margin-left: var(--dt-spacing-sm);  /* 钉钉规范：8px */
   width: 100%;
   font-size: 13px;
   color: var(--dt-text-primary);

@@ -617,11 +617,11 @@ const handleShowAnnouncement = async () => {
           justify-content: center;
           font-size: 8px;
           &.owner {
-            background: var(--dt-warning-color, #FF7D00);
+            background: var(--dt-warning-color);
             color: var(--dt-text-white);
           }
           &.admin {
-            background: var(--dt-brand-color, #277EFB);
+            background: var(--dt-brand-color);
             color: var(--dt-text-white);
           }
         }

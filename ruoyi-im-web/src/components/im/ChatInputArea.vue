@@ -1042,8 +1042,8 @@ onMounted(() => {
 }
 
 .send-btn {
-  background-color: #E5E7EB;  /* 钉钉规范：空状态背景 #E5E7EB */
-  color: #FFFFFF;  /* 钉钉规范：空状态文字 #FFFFFF */
+  background-color: var(--dt-send-btn-empty-bg);  /* 钉钉规范：空状态背景 */
+  color: var(--dt-text-white);  /* 钉钉规范：空状态文字 */
   border: none;
   width: 64px;  /* 钉钉规范：固定64px宽度 */
   height: 32px;

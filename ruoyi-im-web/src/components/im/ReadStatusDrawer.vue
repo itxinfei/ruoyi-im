@@ -189,7 +189,7 @@ const formatTime = (ts) => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
+  gap: var(--dt-spacing-xs);  /* 钉钉规范：4px间距 */
   flex: 1;
   overflow: hidden;
 }

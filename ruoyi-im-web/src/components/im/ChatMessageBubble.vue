@@ -378,12 +378,12 @@ const fileTypeColor = computed(() => {
   const fileName = props.message.fileName || '';
   const ext = fileName.split('.').pop()?.toLowerCase();
   const colorMap = {
-    pdf: '#FF4D4F',
-    doc: '#2B7DFF', docx: '#2B7DFF',
-    xls: '#22AB5C', xlsx: '#22AB5C',
-    ppt: '#FF7A00', pptx: '#FF7A00',
+    pdf: 'var(--dt-file-pdf)',
+    doc: 'var(--dt-file-word)', docx: 'var(--dt-file-word)',
+    xls: 'var(--dt-file-excel)', xlsx: 'var(--dt-file-excel)',
+    ppt: 'var(--dt-file-ppt)', pptx: 'var(--dt-file-ppt)',
   };
-  return colorMap[ext] || '#ADB1B8';
+  return colorMap[ext] || 'var(--dt-file-other)';
 });
 
 // 复制文本
@@ -663,7 +663,7 @@ const formatDisplayUrl = (url) => {
   height: 0;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
-  border-left: 5px solid rgba(0, 0, 0, 0.1);
+  border-left: 5px solid var(--dt-bubble-right-bg);  /* 钉钉规范：右侧气泡色 */
 }
 .is-me .message-bubble::after {
   content: '';
@@ -1058,7 +1058,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .read-status.is-read {
-  color: rgba(23, 26, 29, 0.4);  /* 钉钉规范：已读灰色 */
+  color: var(--dt-text-quaternary);  /* 钉钉规范：已读灰色 */
 }
 
 .read-status.is-unread {
