@@ -625,9 +625,10 @@ const scrollToMessage = (messageId) => {
   transition: all var(--dt-transition-fast);
 }
 .header-right .el-icon:hover {
-  color: var(--dt-brand-color);
+  color: var(--dt-brand-hover);  /* 钉钉规范：hover #1169E0 */
 }
 .header-right .el-icon:active {
+  color: var(--dt-brand-active);  /* 钉钉规范：active #0656C6 */
   transform: scale(0.95);
 }
 

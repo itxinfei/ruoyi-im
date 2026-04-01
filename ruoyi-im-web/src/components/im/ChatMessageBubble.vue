@@ -495,7 +495,7 @@ const formatDisplayUrl = (url) => {
   align-self: center;
   margin: var(--dt-spacing-lg) 0;
   font-size: var(--dt-font-size-sm);
-  color: rgba(23, 26, 29, 0.4);  /* 钉钉规范：12px, rgba(23,26,29,0.4) */
+  color: var(--dt-text-quaternary);  /* 钉钉规范：rgba(23,26,29,0.4) */
 }
 
 .re-edit-link {
@@ -697,7 +697,7 @@ const formatDisplayUrl = (url) => {
 .image-placeholder {
   position: absolute;
   inset: 0;
-  background-color: #F2F4F5;
+  background-color: var(--dt-bg-placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1048,7 +1048,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .status-icon.is-failed {
-  color: #FF4D4F;  /* 钉钉规范：红色感叹号 #FF4D4F */
+  color: var(--dt-error-color);  /* 钉钉规范：红色感叹号 */
   cursor: pointer;
 }
 

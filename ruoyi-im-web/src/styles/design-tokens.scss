@@ -148,7 +148,8 @@
   --dt-z-max: 9999;
 
   // === Overlay ===
-  --dt-overlay-bg: rgba(0, 0, 0, 0.5);
+  --dt-overlay-bg: rgba(0, 0, 0, 0.6);  /* 钉钉规范：视频时长背景 rgba(0,0,0,0.6) */
+  --dt-bg-placeholder: #F2F4F5;  /* 钉钉规范：图片加载占位背景 */
 
   // === Transition ===
   --dt-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -268,6 +269,10 @@ html.dark {
   --dt-bubble-left-bg: #1e293b;
   --dt-bubble-right-bg: #277EFB;
   --dt-bubble-right-bg-hover: #4493FA;
+
+  // === Overlay & Placeholder (暗色模式) ===
+  --dt-overlay-bg: rgba(255, 255, 255, 0.2);  /* 暗色模式视频时长背景 */
+  --dt-bg-placeholder: #374151;  /* 暗色模式图片加载占位背景 */
 }
 
 // SCSS 辅助 Mixins

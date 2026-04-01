@@ -405,7 +405,7 @@ onMounted(loadMessages)
 }
 
 .pager-wrap {
-  margin-top: 14px;
+  margin-top: var(--dt-spacing-lg);  /* 钉钉规范：8px栅格 16px */
   display: flex;
   justify-content: flex-end;
 }
