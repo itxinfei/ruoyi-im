@@ -63,8 +63,11 @@
               </div>
               <!-- 文件 -->
               <div v-else-if="message.type === 'FILE'" class="file-content" @click="handleFileClick">
-                <el-icon class="file-icon"><Document /></el-icon>
-                <span class="file-name">{{ message.fileName || '文件' }}</span>
+                <el-icon class="file-icon" :style="{ color: fileTypeColor }"><Document /></el-icon>
+                <div class="file-info">
+                  <span class="file-name">{{ message.fileName || '文件' }}</span>
+                  <span v-if="message.fileSize" class="file-size">{{ formatFileSize(message.fileSize) }}</span>
+                </div>
               </div>
               <!-- 语音 -->
               <VoiceMessageBubble v-else-if="message.type === 'VOICE'" :message="message" />
@@ -354,6 +357,19 @@ const canEdit = computed(() => {
   return diffMinutes <= 5 && props.message.status !== 'recalled';
 });
 
+// 文件类型颜色 - 钉钉规范：PDF:#FF4D4F, Word:#2B7DFF, Excel:#22AB5C, PPT:#FF7A00, 其他:#ADB1B8
+const fileTypeColor = computed(() => {
+  const fileName = props.message.fileName || '';
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  const colorMap = {
+    pdf: '#FF4D4F',
+    doc: '#2B7DFF', docx: '#2B7DFF',
+    xls: '#22AB5C', xlsx: '#22AB5C',
+    ppt: '#FF7A00', pptx: '#FF7A00',
+  };
+  return colorMap[ext] || '#ADB1B8';
+});
+
 // 复制文本
 const copyText = () => {
   if (props.message.content) {
@@ -397,6 +413,14 @@ const formatVideoDuration = (seconds) => {
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
   return `${m}:${s.toString().padStart(2, '0')}`
+};
+
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+  if (!bytes) return ''
+  if (bytes < 1024) return bytes + 'B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + 'MB'
 };
 
 const formatDisplayUrl = (url) => {
@@ -677,11 +701,24 @@ const formatDisplayUrl = (url) => {
   flex-shrink: 0;
 }
 
+.file-content .file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  flex: 1;
+}
+
 .file-content .file-name {
-  max-width: 200px;
+  font-size: var(--dt-font-size-base);  /* 14px */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.file-content .file-size {
+  font-size: var(--dt-font-size-sm);  /* 12px 灰色 */
+  color: var(--dt-text-tertiary);
 }
 
 /* 语音消息 */

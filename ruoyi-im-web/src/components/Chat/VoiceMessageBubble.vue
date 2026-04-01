@@ -1,5 +1,8 @@
 <template>
   <div class="voice-message" :class="{ 'is-own': message.isOwn, 'playing': isPlaying }">
+    <!-- 未读标识：红色小圆点 -->
+    <span v-if="!message.isOwn && !message.isRead" class="unread-dot" />
+
     <!-- 播放按钮 -->
     <button class="play-btn" @click="togglePlay">
       <el-icon v-if="!isPlaying" class="play-icon"><VideoPlay /></el-icon>
@@ -154,6 +157,18 @@ const getBarHeight = (index) => {
   max-width: 200px;  /* 钉钉规范：最长200px */
   height: 40px;  /* 钉钉规范：固定40px高度 */
   position: relative;
+
+  // 未读标识：红色小圆点 6px
+  .unread-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 6px;
+    height: 6px;
+    background: var(--dt-unread-color, #FF4D4F);
+    border-radius: 50%;
+    z-index: 1;
+  }
 
   // 播放按钮
   .play-btn {
