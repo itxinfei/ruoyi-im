@@ -150,8 +150,9 @@ const getBarHeight = (index) => {
   align-items: center;
   gap: var(--dt-spacing-md);
   padding: var(--dt-spacing-sm) var(--dt-spacing-md);
-  min-width: var(--dt-voice-bubble-min-width, 180px);
-  max-width: var(--dt-voice-bubble-max-width, 280px);
+  min-width: 80px;  /* 钉钉规范：最短80px */
+  max-width: 200px;  /* 钉钉规范：最长200px */
+  height: 40px;  /* 钉钉规范：固定40px高度 */
   position: relative;
 
   // 播放按钮

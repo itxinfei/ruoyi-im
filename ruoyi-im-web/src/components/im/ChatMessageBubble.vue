@@ -63,7 +63,7 @@
               </div>
               <!-- 文件 -->
               <div v-else-if="message.type === 'FILE'" class="file-content" @click="handleFileClick">
-                <el-icon><Document /></el-icon>
+                <el-icon class="file-icon"><Document /></el-icon>
                 <span class="file-name">{{ message.fileName || '文件' }}</span>
               </div>
               <!-- 语音 -->
@@ -607,7 +607,9 @@ const formatDisplayUrl = (url) => {
 }
 
 .content-img {
-  max-width: 280px;  /* 钉钉规范：图片最大280px */
+  min-width: 120px;  /* 钉钉规范：最小120px */
+  max-width: 280px;  /* 钉钉规范：最大280px */
+  max-height: 400px;  /* 钉钉规范：最大400px */
   border-radius: var(--dt-radius-sm);
   display: block;
 }
@@ -615,7 +617,8 @@ const formatDisplayUrl = (url) => {
 /* 视频消息 */
 .video-content {
   position: relative;
-  max-width: 320px;  /* 钉钉规范：视频最大320px */
+  min-width: 200px;  /* 钉钉规范：最小200px */
+  max-width: 320px;  /* 钉钉规范：最大320px */
   border-radius: var(--dt-radius-md);
   overflow: hidden;
   cursor: pointer;
@@ -623,7 +626,7 @@ const formatDisplayUrl = (url) => {
 
 .content-video {
   width: 100%;
-  max-height: 200px;
+  max-height: 240px;  /* 钉钉规范：最大240px */
   display: block;
   background-color: var(--dt-bg-card);
 }
@@ -659,12 +662,19 @@ const formatDisplayUrl = (url) => {
   border-radius: var(--dt-radius-sm);
 }
 
-/* 文件消息 */
+/* 文件消息 - 钉钉规范：宽度260px，高度64px，图标40x40 */
 .file-content {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 120px;
+  gap: var(--dt-spacing-md);
+  width: 260px;  /* 钉钉规范：固定260px */
+  height: 64px;  /* 钉钉规范：固定64px */
+  padding: var(--dt-spacing-sm) var(--dt-spacing-md);
+}
+
+.file-content .file-icon {
+  font-size: 40px;  /* 钉钉规范：40x40图标 */
+  flex-shrink: 0;
 }
 
 .file-content .file-name {
@@ -815,11 +825,12 @@ const formatDisplayUrl = (url) => {
   white-space: nowrap;
 }
 
-/* 链接卡片 */
+/* 链接卡片 - 钉钉规范：宽度280px，高度最大120px */
 .link-card {
   display: flex;
   flex-direction: column;
-  max-width: 280px;
+  width: 280px;  /* 钉钉规范：固定280px */
+  max-height: 120px;  /* 钉钉规范：最大120px */
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-md);
   overflow: hidden;
