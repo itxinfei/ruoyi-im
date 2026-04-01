@@ -661,7 +661,7 @@ const formatDisplayUrl = (url) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--dt-overlay-bg);
+  background-color: rgba(255, 255, 255, 0.2);  /* 白色半透明背景 */
   opacity: 0;
   transition: opacity var(--dt-transition-fast);
 }
@@ -671,8 +671,15 @@ const formatDisplayUrl = (url) => {
 }
 
 .play-icon {
-  font-size: var(--dt-font-size-2xl);
-  color: var(--dt-text-white);
+  width: 32px;  /* 钉钉规范：32x32 */
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.8);  /* 白色半透明背景 */
+  border-radius: 50%;
+  font-size: 16px;
+  color: var(--dt-text-primary);
 }
 
 .video-duration {
