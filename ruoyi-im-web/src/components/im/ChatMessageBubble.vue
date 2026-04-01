@@ -49,9 +49,19 @@
                   <div class="link-url">{{ formatDisplayUrl(getPureUrl) }}</div>
                 </div>
               </div>
-              <!-- 图片 -->
+              <!-- 图片 - 钉钉规范：加载态灰色占位图 -->
               <div v-else-if="message.type === 'IMAGE'" class="image-content">
-                <el-image :src="message.fileUrl" :preview-src-list="[message.fileUrl]" fit="cover" class="content-img" />
+                <div v-if="imageLoading" class="image-placeholder">
+                  <el-icon class="is-loading"><Loading /></el-icon>
+                </div>
+                <el-image
+                  :src="message.fileUrl"
+                  :preview-src-list="[message.fileUrl]"
+                  fit="cover"
+                  class="content-img"
+                  @load="imageLoading = false"
+                  @error="imageLoading = false"
+                />
               </div>
               <!-- 视频 -->
               <div v-else-if="message.type === 'VIDEO'" class="video-content" @click="openVideoPlayer">
@@ -67,6 +77,10 @@
                 <div class="file-info">
                   <span class="file-name">{{ message.fileName || '文件' }}</span>
                   <span v-if="message.fileSize" class="file-size">{{ formatFileSize(message.fileSize) }}</span>
+                </div>
+                <!-- 钉钉规范：下载进度条 3px 品牌蓝色 -->
+                <div v-if="downloadProgress > 0 && downloadProgress < 100" class="file-download-progress">
+                  <div class="file-download-fill" :style="{ width: downloadProgress + '%' }" />
                 </div>
               </div>
               <!-- 语音 -->
@@ -188,6 +202,8 @@ const props = defineProps({
 const emit = defineEmits(['reply', 'forward', 'recall', 'delete', 'favorite', 'read-detail', 'edit', 'reaction']);
 
 const isHovered = ref(false);
+const downloadProgress = ref(0);  // 文件下载进度
+const imageLoading = ref(true);  // 图片加载状态
 
 // URL 正则
 const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
@@ -387,14 +403,43 @@ const openLink = (url) => {
   if (url) window.open(url, '_blank');
 };
 
-// 处理文件点击（下载/预览）
+// 处理文件点击（下载/预览）- 钉钉规范：显示下载进度条
 const handleFileClick = () => {
   const fileUrl = props.message.fileUrl
   if (!fileUrl) {
     ElMessage.info('文件地址无效')
     return
   }
-  window.open(fileUrl, '_blank')
+  // 钉钉规范：使用 XMLHttpRequest 追踪下载进度
+  const xhr = new XMLHttpRequest()
+  xhr.open('GET', fileUrl, true)
+  xhr.responseType = 'blob'
+
+  xhr.onprogress = (event) => {
+    if (event.lengthComputable) {
+      downloadProgress.value = Math.round((event.loaded / event.total) * 100)
+    }
+  }
+
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      downloadProgress.value = 100
+      // 下载完成，触发浏览器下载
+      const blob = xhr.response
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = props.message.fileName || '文件'
+      link.click()
+      setTimeout(() => { downloadProgress.value = 0 }, 1000)
+    }
+  }
+
+  xhr.onerror = () => {
+    downloadProgress.value = 0
+    ElMessage.error('文件下载失败')
+  }
+
+  xhr.send()
 };
 
 // 打开视频播放器
@@ -643,6 +688,24 @@ const formatDisplayUrl = (url) => {
   display: block;
 }
 
+/* 图片容器需要relative定位用于占位符 */
+.image-content {
+  position: relative;
+}
+
+/* 钉钉规范：图片加载占位符 灰色#F2F4F5 + Loading */
+.image-placeholder {
+  position: absolute;
+  inset: 0;
+  background-color: #F2F4F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--dt-radius-sm);
+  color: var(--dt-text-tertiary);
+  font-size: 24px;
+}
+
 /* 视频消息 */
 .video-content {
   position: relative;
@@ -706,6 +769,7 @@ const formatDisplayUrl = (url) => {
   width: 260px;  /* 钉钉规范：固定260px */
   height: 64px;  /* 钉钉规范：固定64px */
   padding: var(--dt-spacing-sm) var(--dt-spacing-md);
+  position: relative;  /* 用于下载进度条定位 */
 }
 
 .file-content .file-icon {
@@ -731,6 +795,23 @@ const formatDisplayUrl = (url) => {
 .file-content .file-size {
   font-size: var(--dt-font-size-sm);  /* 12px 灰色 */
   color: var(--dt-text-tertiary);
+}
+
+/* 钉钉规范：下载进度条 3px 品牌蓝色 */
+.file-download-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--dt-border-light);
+  overflow: hidden;
+}
+
+.file-download-fill {
+  height: 100%;
+  background: var(--dt-brand-color);  /* 钉钉规范：品牌蓝色 */
+  transition: width 0.1s linear;
 }
 
 /* 语音消息 */
