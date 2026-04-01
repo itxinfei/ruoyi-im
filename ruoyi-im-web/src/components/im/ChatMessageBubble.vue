@@ -330,27 +330,27 @@ const parsedTextParts = computed(() => {
 
 // 格式化时间
 const formattedTime = computed(() => {
-  if (!props.message.createTime) return '';
-  const d = new Date(props.message.createTime);
+  if (!props.message.sendTime) return '';
+  const d = new Date(props.message.sendTime);
   return `${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
 });
 
 // 检查是否可以撤回（发送后2分钟内）
 const canRecall = computed(() => {
-  if (!props.message.createTime || !props.isMe) return false;
-  const createTime = new Date(props.message.createTime).getTime();
+  if (!props.message.sendTime || !props.isMe) return false;
+  const sendTime = new Date(props.message.sendTime).getTime();
   const now = Date.now();
-  const diffMinutes = (now - createTime) / (1000 * 60);
+  const diffMinutes = (now - sendTime) / (1000 * 60);
   return diffMinutes <= 2 && props.message.status !== 'recalled';
 });
 
 // 检查是否可以编辑（发送后5分钟内，仅文本消息）
 const canEdit = computed(() => {
-  if (!props.message.createTime || !props.isMe) return false;
+  if (!props.message.sendTime || !props.isMe) return false;
   if (props.message.type && props.message.type !== 'TEXT') return false;
-  const createTime = new Date(props.message.createTime).getTime();
+  const sendTime = new Date(props.message.sendTime).getTime();
   const now = Date.now();
-  const diffMinutes = (now - createTime) / (1000 * 60);
+  const diffMinutes = (now - sendTime) / (1000 * 60);
   return diffMinutes <= 5 && props.message.status !== 'recalled';
 });
 
@@ -414,12 +414,12 @@ const formatDisplayUrl = (url) => {
   display: flex;
   flex-direction: column;
   padding: 0 var(--dt-spacing-xl);
-  margin-bottom: var(--dt-spacing-lg);
+  margin-bottom: var(--dt-spacing-md);
 }
 
-/* 连续消息压缩间距 */
+/* 连续消息压缩间距（同一人1分钟内：4px） */
 .message-item.is-grouped {
-  margin-top: calc(-1 * var(--dt-spacing-md));
+  margin-top: -4px;
 }
 
 .system-notice {
@@ -540,7 +540,7 @@ const formatDisplayUrl = (url) => {
   background-color: var(--dt-bubble-left-bg);
   color: var(--dt-text-primary);
   border: 1px solid var(--dt-border-light);
-  border-radius: 12px 12px 12px 4px;
+  border-radius: var(--dt-bubble-radius-received);
   box-shadow: var(--dt-shadow-1);
   position: relative;
 }
@@ -548,13 +548,13 @@ const formatDisplayUrl = (url) => {
 .is-other .message-bubble::before {
   content: '';
   position: absolute;
-  left: -6px;
+  left: -5px;
   top: 10px;
   width: 0;
   height: 0;
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-right: 6px solid var(--dt-border-light);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 5px solid var(--dt-border-light);
 }
 .is-other .message-bubble::after {
   content: '';
@@ -563,48 +563,47 @@ const formatDisplayUrl = (url) => {
   top: 11px;
   width: 0;
   height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-right: 5px solid var(--dt-bubble-left-bg);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 4px solid var(--dt-bubble-left-bg);
 }
 .is-other .message-bubble:hover {
   box-shadow: var(--dt-shadow-2);
 }
 
-/* 发送方 (右侧) - 蓝色气泡，钉钉风格：底右小尖，顶左圆角 */
+/* 发送方 (右侧) - 蓝色气泡，钉钉风格：右上小尖，底左圆角 */
 .is-me .message-bubble {
   background-color: var(--dt-bubble-right-bg);
   color: var(--dt-text-white);
-  border-radius: 12px 4px 12px 12px;
-  box-shadow: 0 1px 2px rgba(39, 126, 251, 0.15);
+  border-radius: var(--dt-bubble-radius-sent);
+  box-shadow: var(--dt-shadow-brand);
   position: relative;
 }
-/* 右侧气泡底右小三角伪元素 */
+/* 右侧气泡右上小三角伪元素 */
 .is-me .message-bubble::before {
   content: '';
   position: absolute;
-  right: -6px;
-  bottom: 10px;
+  right: -5px;
+  top: 10px;
   width: 0;
   height: 0;
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-left: 6px solid var(--dt-brand-color);
-  opacity: 0.3;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid rgba(0, 0, 0, 0.1);
 }
 .is-me .message-bubble::after {
   content: '';
   position: absolute;
   right: -4px;
-  bottom: 11px;
+  top: 11px;
   width: 0;
   height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 5px solid var(--dt-bubble-right-bg);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 4px solid var(--dt-bubble-right-bg);
 }
 .is-me .message-bubble:hover {
-  box-shadow: 0 2px 8px rgba(39, 126, 251, 0.25);
+  background-color: var(--dt-bubble-right-bg-hover);
 }
 
 .content-img {

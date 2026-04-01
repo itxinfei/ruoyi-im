@@ -291,7 +291,8 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 // ============================================================================
 .contacts-sidebar {
   width: var(--dt-session-panel-width);
-  height: 100%; background: var(--dt-bg-card);
+  height: 100%;
+  background: linear-gradient(180deg, var(--dt-bg-card) 0%, rgba(39, 126, 251, 0.03) 100%);
   border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column; flex-shrink: 0;
 
@@ -312,10 +313,26 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .nav-list {
   display: flex; flex-direction: column; gap: var(--dt-spacing-xs); margin-bottom: var(--dt-spacing-lg);
   .nav-item {
-    display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 40px; box-sizing: border-box;
-    border-radius: var(--dt-radius-md); cursor: pointer; transition: all var(--dt-transition-base);
+    display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 44px; box-sizing: border-box;
+    border-radius: var(--dt-radius-md); cursor: pointer; transition: all var(--dt-transition-base); margin: 2px var(--dt-spacing-xs);
     &:hover { background: var(--dt-bg-session-hover); }
-    &.active { background: var(--dt-bg-session-active); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
+    &.active {
+      background: linear-gradient(90deg, var(--dt-brand-lighter) 0%, transparent 100%);
+      color: var(--dt-brand-color);
+      font-weight: var(--dt-font-weight-semibold);
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 20px;
+        background: var(--dt-brand-color);
+        border-radius: 0 2px 2px 0;
+      }
+    }
 
     .icon-box {
       width: 28px; height: 28px; border-radius: var(--dt-radius-sm); @include flex-center; color: var(--dt-text-primary); font-size: var(--dt-icon-size-lg);
@@ -375,10 +392,12 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 }
 
 .member-card-ding {
-  background: var(--dt-bg-card); padding: var(--dt-spacing-lg); border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card); padding: var(--dt-spacing-lg); border-radius: var(--dt-radius-lg); border: 1px solid transparent;
   display: flex; align-items: center; gap: var(--dt-spacing-lg); cursor: pointer; transition: all var(--dt-transition-fast);
   &:hover {
-    box-shadow: var(--dt-shadow-card-hover); border-color: var(--dt-brand-light);
+    border-color: var(--dt-brand-light);
+    box-shadow: 0 4px 12px rgba(39, 126, 251, 0.1);
+    transform: translateY(-2px);
     .chat-shortcut { opacity: 1; transform: scale(1); }
   }
 

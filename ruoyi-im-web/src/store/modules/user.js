@@ -53,7 +53,7 @@ export default {
 
   actions: {
     // 登录
-    async login({ commit }, loginForm) {
+    async login({ commit, dispatch }, loginForm) {
       try {
         const res = await login(loginForm)
         if (res.code === 200) {
@@ -61,6 +61,8 @@ export default {
           commit('SET_USER_INFO', res.data.userInfo)
           commit('SET_ONLINE_STATUS', true)
           commit('SET_ROLE_VALIDATED_AT', Date.now())
+          // 同步当前用户到 im 模块，确保消息气泡 is-me 判断正确
+          dispatch('im/setCurrentUser', res.data.userInfo, { root: true })
           return res
         }
         return Promise.reject(new Error(res.msg || '登录失败'))

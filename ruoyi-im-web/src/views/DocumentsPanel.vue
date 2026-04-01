@@ -787,16 +787,19 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.documents-panel { display: flex; height: 100%; flex: 1; background: var(--dt-bg-card); }
-.docs-sidebar { width: var(--dt-contact-panel-width, 200px); border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; background: var(--dt-bg-card); }
+.documents-panel { display: flex; height: 100%; flex: 1; background: var(--dt-bg-body); }
+.docs-sidebar { width: var(--dt-contact-panel-width, 220px); background: linear-gradient(180deg, var(--dt-bg-card) 0%, rgba(39, 126, 251, 0.03) 100%); border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; }
 .sidebar-header { padding: var(--dt-spacing-lg) var(--dt-spacing-md); border-bottom: 1px solid var(--dt-border-lighter);
   .sidebar-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); margin: 0; }
 }
 .sidebar-content { flex: 1; padding: var(--dt-spacing-md) 0; overflow-y: auto;
-  .nav-item { display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 40px; box-sizing: border-box; margin: var(--dt-spacing-xs) 0; border-radius: var(--dt-radius-md); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-base); position: relative;
+  .nav-item { display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 44px; box-sizing: border-box; margin: 2px var(--dt-spacing-xs); border-radius: var(--dt-radius-md); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-base); position: relative;
     &:hover { background: var(--dt-bg-session-hover); }
-    &.active { background: var(--dt-bg-session-active); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold);
-      &::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: var(--dt-spacing-xs); background: var(--dt-brand-color); border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0; }
+    &.active {
+      background: linear-gradient(90deg, var(--dt-brand-lighter) 0%, transparent 100%);
+      color: var(--dt-brand-color);
+      font-weight: var(--dt-font-weight-semibold);
+      &::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--dt-brand-color); border-radius: 0 2px 2px 0; }
     }
     .nav-icon { font-size: var(--dt-icon-size-lg); flex-shrink: 0; }
     .nav-label { font-size: var(--dt-font-size-base); flex: 1; }
@@ -845,7 +848,9 @@ onMounted(() => {
 .files-table { width: 100%; border-collapse: collapse;
   th { text-align: left; padding: var(--dt-spacing-sm) var(--dt-spacing-md); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); border-bottom: 1px solid var(--dt-border-light); font-weight: var(--dt-font-weight-normal); }
   td { padding: var(--dt-spacing-sm) var(--dt-spacing-md); border-bottom: 1px solid var(--dt-border-light); vertical-align: middle; }
-  .file-row { cursor: pointer; &:hover { background: var(--dt-bg-body); .action-btn { opacity: 1; } } }
+  .file-row { cursor: pointer; transition: all var(--dt-transition-fast); border-radius: var(--dt-radius-md);
+    &:hover { background: var(--dt-bg-session-hover); transform: translateX(4px); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); .action-btn { opacity: 1; } }
+  }
   .file-info { display: flex; align-items: center; gap: var(--dt-spacing-sm);
     .file-icon { width: var(--dt-avatar-size-md); height: var(--dt-avatar-size-md); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--dt-icon-size-lg);
       .el-icon { font-size: var(--dt-icon-size-lg); }
@@ -862,6 +867,6 @@ onMounted(() => {
     .file-meta { font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); margin-top: var(--dt-spacing-xs); }
   }
   .owner-name, .file-time { font-size: var(--dt-font-size-sm); color: var(--dt-text-secondary); }
-  .actions-col { text-align: right; .action-btn { opacity: 0; background: transparent; border: none; color: var(--dt-text-tertiary); cursor: pointer; } }
+  .actions-col { text-align: right; .action-btn { opacity: 0; background: transparent; border: none; color: var(--dt-text-tertiary); cursor: pointer; transition: all var(--dt-transition-fast); &:hover { color: var(--dt-brand-color); } } }
 }
 </style>

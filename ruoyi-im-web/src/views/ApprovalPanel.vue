@@ -316,7 +316,7 @@ onMounted(() => {
 
 .approval-item {
   background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-xl);
+  border-radius: var(--dt-radius-lg);
   padding: var(--dt-spacing-lg);
   display: flex;
   align-items: center;
@@ -324,13 +324,13 @@ onMounted(() => {
   cursor: pointer;
   transition: all var(--dt-transition-fast);
   margin-bottom: var(--dt-spacing-sm);
-  border: 1px solid var(--dt-border-light);
+  border: 1px solid transparent;
 }
 
 .approval-item:hover {
-  box-shadow: var(--dt-shadow-float);
-  transform: translateY(var(--dt-transform-y, -1px));
-  border-color: var(--dt-brand-color);
+  transform: translateX(4px);
+  border-color: var(--dt-brand-light);
+  box-shadow: 0 4px 12px rgba(39, 126, 251, 0.1);
 }
 
 .approval-avatar {

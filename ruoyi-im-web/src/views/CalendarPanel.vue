@@ -933,7 +933,7 @@ function getReminderText(minutes) {
 // 侧边栏
 .calendar-sidebar {
   width: 240px;
-  background: var(--dt-bg-card);
+  background: linear-gradient(180deg, var(--dt-bg-card) 0%, rgba(39, 126, 251, 0.03) 100%);
   border-right: 1px solid var(--dt-border-light);
   display: flex;
   flex-direction: column;
@@ -993,9 +993,11 @@ function getReminderText(minutes) {
     border-radius: 50%;
     cursor: pointer;
     position: relative;
+    transition: all var(--dt-transition-fast);
 
     &:hover {
       background: var(--dt-bg-session-hover);
+      transform: scale(1.1);
     }
 
     &.other-month {
@@ -1005,11 +1007,14 @@ function getReminderText(minutes) {
     &.today {
       background: var(--dt-brand-color);
       color: var(--dt-text-white);
+      font-weight: var(--dt-font-weight-semibold);
+      box-shadow: 0 2px 8px rgba(39, 126, 251, 0.3);
     }
 
     &.selected:not(.today) {
       background: var(--dt-brand-bg);
       color: var(--dt-brand-color);
+      font-weight: var(--dt-font-weight-medium);
     }
 
     &.has-event::after {
@@ -1224,6 +1229,13 @@ function getReminderText(minutes) {
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--dt-text-white);
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    opacity: 0.85;
+    transform: translateX(2px);
+  }
 
   &.work { background: var(--dt-event-work); }
   &.meeting { background: var(--dt-event-meeting); }

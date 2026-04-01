@@ -21,8 +21,8 @@ public interface ImMessageFavoriteMapper extends BaseMapper<ImMessageFavorite> {
      * @return 收藏消息列表
      */
     @Select("SELECT f.*, m.content as messageContent, m.sender_id as senderId, " +
-            "m.send_time as messageTime, m.type as messageType, " +
-            "u.nick_name as senderName, u.avatar as senderAvatar " +
+            "m.create_time as messageTime, m.message_type as messageType, " +
+            "u.nickname as senderName, u.avatar as senderAvatar " +
             "FROM im_message_favorite f " +
             "LEFT JOIN im_message m ON f.message_id = m.id " +
             "LEFT JOIN im_user u ON m.sender_id = u.id " +

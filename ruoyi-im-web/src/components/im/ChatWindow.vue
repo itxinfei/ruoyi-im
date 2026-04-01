@@ -43,7 +43,7 @@
           </div>
           <ChatMessageBubble
             :message="msg"
-            :is-me="msg.senderId === currentUserId"
+            :is-me="msg.isSelf"
             :is-grouped="checkIsGrouped(msg, index)"
             :show-time="checkShowTime(msg, index)"
             :quoted-message="msg.quotedMessage || getQuotedMessage(msg)"
@@ -238,18 +238,18 @@ onUnmounted(() => {
 const checkIsGrouped = (msg, index) => {
   if (index === 0 || !msg) return false;
   const prevMsg = messages.value[index - 1];
-  if (!prevMsg || !msg.createTime || !prevMsg.createTime) return false;
-  
-  const timeDiff = (new Date(msg.createTime).getTime() - new Date(prevMsg.createTime).getTime()) / 1000;
+  if (!prevMsg || !msg.sendTime || !prevMsg.sendTime) return false;
+
+  const timeDiff = (new Date(msg.sendTime).getTime() - new Date(prevMsg.sendTime).getTime()) / 1000;
   return msg.senderId === prevMsg.senderId && timeDiff < 60; // 钉钉通常为 1 分钟内收纳
 };
 
 const checkShowTime = (msg, index) => {
   if (index === 0 || !msg) return true;
   const prevMsg = messages.value[index - 1];
-  if (!prevMsg || !msg.createTime || !prevMsg.createTime) return true;
-  
-  const timeDiff = (new Date(msg.createTime).getTime() - new Date(prevMsg.createTime).getTime()) / 1000;
+  if (!prevMsg || !msg.sendTime || !prevMsg.sendTime) return true;
+
+  const timeDiff = (new Date(msg.sendTime).getTime() - new Date(prevMsg.sendTime).getTime()) / 1000;
   return timeDiff > 300; // 5 分钟显示一次时间线
 };
 

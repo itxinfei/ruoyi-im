@@ -645,11 +645,11 @@ onMounted(() => {
   border-color: var(--dt-brand-color);
 }
 
-/* 引用回复栏 */
+/* 引用回复栏 - 钉钉规范：浅蓝背景 + 左侧 2px 蓝线 */
 .reply-preview-bar {
   height: auto;
   max-height: 60px;
-  background: var(--dt-info-bg);
+  background: var(--dt-brand-bg);   /* 浅蓝色背景 #E8F2FE */
   border-left: 2px solid var(--dt-brand-color);
   display: flex;
   align-items: flex-start;
@@ -715,7 +715,7 @@ onMounted(() => {
   padding: 0 var(--dt-spacing-lg);
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm);
+  gap: var(--dt-spacing-lg);
   border-bottom: 1px solid var(--dt-border-lighter);
 }
 
@@ -1047,7 +1047,7 @@ onMounted(() => {
   border: none;
   padding: 0 20px;
   height: 32px;
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px 圆角 */
   font-size: var(--dt-font-size-base);
   font-weight: var(--dt-font-weight-medium);
   cursor: not-allowed;

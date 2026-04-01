@@ -38,7 +38,7 @@
         <!-- 头像区 (对齐钉钉 4px 圆角) -->
         <div class="avatar-wrapper">
           <img :src="session.avatar || '/avatars/default.png'" class="avatar" alt="avatar" />
-          <div v-if="session.unreadCount > 0" class="unread-badge">
+          <div v-if="session.unreadCount > 0" class="unread-badge" :class="getUnreadBadgeClass(session.unreadCount)">
             {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
           </div>
         </div>
@@ -114,6 +114,14 @@ onMounted(() => {
 
 const selectSession = (session) => {
   store.dispatch('im/session/selectSession', session);
+};
+
+// 未读角标圆角：1-9 圆形，10+ 胶囊
+const getUnreadBadgeClass = (count) => {
+  if (count >= 10) {
+    return 'unread-badge-capsule';
+  }
+  return 'unread-badge-circle';
 };
 
 const formatTime = (time) => {
@@ -226,7 +234,7 @@ const formatTime = (time) => {
 .session-item {
   display: flex;
   align-items: center;
-  height: var(--dt-header-height); /* 64px */
+  height: 64px; /* 对齐钉钉 Windows 客户端规范 */
   padding: 0 var(--dt-spacing-lg);
   cursor: pointer;
   position: relative;
@@ -287,9 +295,17 @@ const formatTime = (time) => {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  border-radius: var(--dt-radius-full);
   text-align: center;
   box-shadow: 0 1px 3px rgba(255, 77, 79, 0.3);
+}
+
+/* 钉钉规范：1-9 数字圆形，10+ 数字胶囊 */
+.unread-badge-circle {
+  border-radius: var(--dt-radius-full); /* 50% 当 width=height=16px 时为正圆 */
+}
+
+.unread-badge-capsule {
+  border-radius: 8px; /* 高度 16px 的一半，圆角为 8px */
 }
 
 .content-wrapper {
