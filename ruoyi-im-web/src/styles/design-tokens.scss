@@ -229,7 +229,7 @@
 html.dark {
   // === Brand Colors (暗色模式品牌色) ===
   --dt-brand-color: #4493FA;
-  --dt-brand-hover: #5CA5FC;
+  --dt-brand-hover: #3A82E8;  /* 暗色 hover 应比主色更深，而非更亮 */
   --dt-brand-active: #277EFB;
   --dt-brand-light: #82B5FC;
   --dt-brand-lighter: #1A3A5C;
