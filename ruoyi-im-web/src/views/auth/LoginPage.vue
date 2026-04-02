@@ -1,49 +1,19 @@
 <template>
   <div class="login-container" :class="{ 'dark': isDark }">
-    <!-- 登录卡片 -->
+    <!-- javafx: 居中卡片，参考钉钉极简风格 -->
     <div class="login-card">
-      <!-- 左侧装饰区 -->
-      <div class="login-decoration">
-        <div class="decoration-content">
-          <div class="logo-wrapper">
-            <div class="logo">
-              <el-icon class="logo-icon"><ChatDotRound /></el-icon>
-            </div>
-            <h1 class="app-name">
-              IM
-            </h1>
-            <p class="app-desc">
-              企业即时通讯
-            </p>
-          </div>
-          <div class="hero-feature">
-            <div class="hero-icon">
-              <el-icon><ChatDotRound /></el-icon>
-            </div>
-            <span class="hero-text">即时沟通</span>
-          </div>
-          <div class="decoration-footer">
-            <p>© 2026 IM</p>
-          </div>
+      <!-- 顶部品牌区 -->
+      <div class="brand-area">
+        <div class="brand-logo">
+          <el-icon class="logo-icon"><ChatDotRound /></el-icon>
         </div>
+        <span class="brand-name">IM</span>
       </div>
 
-      <!-- 右侧登录表单区 -->
-      <div class="login-form-section">
-        <!-- Logo移动端显示 -->
-        <div class="mobile-logo">
-          <el-icon><ChatDotRound /></el-icon>
-          <span>IM</span>
-        </div>
-
-        <div class="login-header">
-          <h2 class="welcome-title">
-            登录
-          </h2>
-          <p class="welcome-subtitle">
-            开始沟通
-          </p>
-        </div>
+      <!-- 表单区 -->
+      <div class="form-area">
+        <h1 class="form-title">登录</h1>
+        <p class="form-subtitle">开始沟通</p>
 
         <!-- 登录方式切换 -->
         <div class="login-tabs">
@@ -51,7 +21,6 @@
             :class="['tab-btn', { active: loginType === 'password' }]"
             @click="switchLoginType('password')"
           >
-            <el-icon><Lock /></el-icon>
             账号密码
           </button>
           <button
@@ -59,92 +28,48 @@
             disabled
             title="暂未开放"
           >
-            <el-icon><Message /></el-icon>
             短信验证
-            <span class="coming-soon">（暂未开放）</span>
           </button>
         </div>
 
-        <!-- 登录表单 -->
-        <div class="form-content-wrapper">
-          <el-form
-            v-if="loginType === 'password'"
-            ref="loginFormRef"
-            :model="loginForm"
-            :rules="loginRules"
-            class="login-form"
-            @keyup.enter="handleLogin"
-          >
-            <el-form-item prop="username">
-              <el-input
-                v-model="loginForm.username"
-                placeholder="用户名或手机号"
-                size="large"
-                clearable
-              />
-            </el-form-item>
+        <!-- 账号密码登录 -->
+        <el-form
+          v-if="loginType === 'password'"
+          ref="loginFormRef"
+          :model="loginForm"
+          :rules="loginRules"
+          class="login-form"
+          @keyup.enter="handleLogin"
+        >
+          <el-form-item prop="username">
+            <el-input
+              v-model="loginForm.username"
+              placeholder="用户名或手机号"
+              size="large"
+              clearable
+            />
+          </el-form-item>
 
-            <el-form-item prop="password">
-              <el-input
-                v-model="loginForm.password"
-                type="password"
-                placeholder="密码"
-                size="large"
-                show-password
-                clearable
-              />
-            </el-form-item>
+          <el-form-item prop="password">
+            <el-input
+              v-model="loginForm.password"
+              type="password"
+              placeholder="密码"
+              size="large"
+              show-password
+              clearable
+            />
+          </el-form-item>
 
-            <div class="form-options">
-              <el-checkbox v-model="loginForm.rememberMe">
-                <span class="checkbox-label">记住我</span>
-              </el-checkbox>
-              <el-link type="primary" :underline="false" @click="handleForgotPassword">
-                忘记密码？
-              </el-link>
-            </div>
-          </el-form>
+          <div class="form-options">
+            <el-checkbox v-model="loginForm.rememberMe">
+              <span class="checkbox-label">记住我</span>
+            </el-checkbox>
+            <el-link type="primary" :underline="false" @click="handleForgotPassword">
+              忘记密码
+            </el-link>
+          </div>
 
-          <!-- 短信验证登录 -->
-          <el-form
-            v-else
-            ref="smsFormRef"
-            :model="smsForm"
-            :rules="smsRules"
-            class="login-form"
-            @keyup.enter="handleSMSLogin"
-          >
-            <el-form-item prop="phone">
-              <el-input
-                v-model="smsForm.phone"
-                placeholder="手机号"
-                size="large"
-                clearable
-              />
-            </el-form-item>
-
-            <el-form-item prop="code">
-              <div class="code-input-row">
-                <el-input
-                  v-model="smsForm.code"
-                  placeholder="验证码"
-                  size="large"
-                  clearable
-                  class="code-input"
-                />
-                <el-button
-                  :disabled="smsCountdown > 0"
-                  class="code-btn"
-                  :class="{ counting: smsCountdown > 0 }"
-                  @click="sendSMSCode"
-                >
-                  {{ smsCountdown > 0 ? `${smsCountdown}s` : '获取验证码' }}
-                </el-button>
-              </div>
-            </el-form-item>
-          </el-form>
-
-          <!-- 登录按钮 -->
           <el-button
             type="primary"
             size="large"
@@ -152,31 +77,71 @@
             class="login-button"
             @click="handleLogin"
           >
-            <template v-if="!loading">
-              登录
-            </template>
+            <template v-if="!loading">登录</template>
             <span v-else>登录中...</span>
           </el-button>
+        </el-form>
 
+        <!-- 短信验证登录 -->
+        <el-form
+          v-else
+          ref="smsFormRef"
+          :model="smsForm"
+          :rules="smsRules"
+          class="login-form"
+          @keyup.enter="handleSMSLogin"
+        >
+          <el-form-item prop="phone">
+            <el-input
+              v-model="smsForm.phone"
+              placeholder="手机号"
+              size="large"
+              clearable
+            />
+          </el-form-item>
 
-        </div>
+          <el-form-item prop="code">
+            <div class="code-row">
+              <el-input
+                v-model="smsForm.code"
+                placeholder="验证码"
+                size="large"
+                clearable
+                class="code-input"
+              />
+              <el-button
+                :disabled="smsCountdown > 0"
+                class="code-btn"
+                :class="{ counting: smsCountdown > 0 }"
+                @click="sendSMSCode"
+              >
+                {{ smsCountdown > 0 ? `${smsCountdown}s` : '获取验证码' }}
+              </el-button>
+            </div>
+          </el-form-item>
 
-        <!-- 登录页脚 -->
-        <div class="login-footer">
-          <p>© 2026 IM</p>
-        </div>
+          <el-button
+            type="primary"
+            size="large"
+            :loading="loading"
+            class="login-button"
+            @click="handleLogin"
+          >
+            <template v-if="!loading">登录</template>
+            <span v-else>登录中...</span>
+          </el-button>
+        </el-form>
       </div>
-    </div>
 
-    <!-- 主题切换按钮 -->
-    <button
-      class="theme-toggle"
-      :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
-      @click="toggleTheme"
-    >
-      <el-icon class="sun-icon" :class="{ hidden: isDark }"><Sunny /></el-icon>
-      <el-icon class="moon-icon" :class="{ hidden: !isDark }"><Moon /></el-icon>
-    </button>
+      <!-- 主题切换 -->
+      <button
+        class="theme-toggle"
+        :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
+        @click="toggleTheme"
+      >
+        <el-icon><Sunny v-if="!isDark" /><Moon v-else /></el-icon>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -185,39 +150,32 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ChatDotRound, ChatLineRound, User, UserFilled, Cloudy, CircleCheck, Lock, Message, Sunny, Moon, List, Grid, Folder, Upload, Star, MoreFilled, Close, Iphone } from '@element-plus/icons-vue'
+import { ChatDotRound, Sunny, Moon } from '@element-plus/icons-vue'
 import { useTheme } from '@/composables/useTheme'
 
 const store = useStore()
 const router = useRouter()
 const { isDark, toggleTheme } = useTheme()
 
-// 表单引用
 const loginFormRef = ref(null)
 const smsFormRef = ref(null)
 const loading = ref(false)
-
-// 登录类型
 const loginType = ref('password')
 
-// 账号密码登录表单
 const loginForm = reactive({
   username: '',
   password: '',
   rememberMe: false
 })
 
-// 短信登录表单
 const smsForm = reactive({
   phone: '',
   code: ''
 })
 
-// 短信倒计时
 const smsCountdown = ref(0)
 let smsTimer = null
 
-// 表单验证规则
 const loginRules = {
   username: [
     { required: true, message: '请输入用户名或手机号', trigger: 'blur' }
@@ -239,7 +197,6 @@ const smsRules = {
   ]
 }
 
-// 切换登录类型
 const switchLoginType = (type) => {
   loginType.value = type
   if (type === 'password') {
@@ -249,7 +206,6 @@ const switchLoginType = (type) => {
   }
 }
 
-// 发送短信验证码
 const sendSMSCode = async () => {
   if (!smsForm.phone) {
     ElMessage.warning('请输入手机号')
@@ -273,12 +229,10 @@ const sendSMSCode = async () => {
   }
 }
 
-// 忘记密码
 const handleForgotPassword = () => {
   ElMessage.info('请联系管理员重置密码')
 }
 
-// 处理登录
 const handleLogin = async () => {
   const formRef = loginType.value === 'password' ? loginFormRef.value : smsFormRef.value
   const formData = loginType.value === 'password' ? loginForm : smsForm
@@ -319,12 +273,10 @@ const handleLogin = async () => {
   }
 }
 
-// 处理短信登录
 const handleSMSLogin = () => {
   handleLogin()
 }
 
-// 初始化
 onMounted(() => {
   const rememberedUsername = localStorage.getItem('remembered_username')
   if (rememberedUsername) {
@@ -333,7 +285,6 @@ onMounted(() => {
   }
 })
 
-// 清理定时器
 onUnmounted(() => {
   if (smsTimer) {
     clearInterval(smsTimer)
@@ -343,188 +294,117 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-// ============================================================================
-// 容器
-// ============================================================================
 .login-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--dt-bg-body);
-  padding: 24px;
-  position: relative;
+  padding: var(--dt-spacing-lg);
 
   &.dark {
     background: var(--dt-bg-body-dark);
   }
 }
 
-// ============================================================================
-// 登录卡片
-// ============================================================================
 .login-card {
   width: 100%;
-  max-width: 960px;
+  max-width: 360px;
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-lg);
-  display: flex;
-  overflow: hidden;
-  border: 1px solid var(--dt-border-light);
-}
-
-// ============================================================================
-// 左侧装饰区
-// ============================================================================
-.login-decoration {
-  flex: 0 0 280px;
-  background: var(--dt-brand-color);
-  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
-  color: var(--dt-text-white);
-}
-
-.decoration-content {
+  padding: var(--dt-spacing-xl);
   position: relative;
-  z-index: 2;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
 
-  .logo-wrapper {
-    text-align: center;
-    margin-bottom: 48px;
-
-    .logo {
-      width: 56px;
-      height: 56px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: var(--dt-radius-lg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-
-      .logo-icon {
-        font-size: 28px;
-      }
-    }
-
-    .app-name {
-      font-size: 24px;
-      font-weight: 600;
-      margin: 0 0 4px 0;
-      letter-spacing: 2px;
-    }
-
-    .app-desc {
-      font-size: 13px;
-      opacity: 0.75;
-      margin: 0;
-    }
-  }
-
-  .hero-feature {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dt-spacing-md);
-
-    .hero-icon {
-      font-size: 48px;
-      opacity: 0.9;
-    }
-
-    .hero-text {
-      font-size: 18px;
-      font-weight: 500;
-      opacity: 0.9;
-    }
-  }
-
-  .decoration-footer {
-    margin-top: auto;
-    text-align: center;
-
-    p {
-      font-size: 12px;
-      opacity: 0.6;
-      margin: 0;
-    }
+  .dark & {
+    background: var(--dt-bg-card-dark);
   }
 }
 
-// ============================================================================
-// 右侧表单区
-// ============================================================================
-.login-form-section {
-  flex: 1;
-  padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
+.brand-area {
   display: flex;
-  flex-direction: column;
-}
-
-.mobile-logo {
-  display: none;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: var(--dt-spacing-sm);
+  margin-bottom: var(--dt-spacing-xl);
 
-  .material-icons-outlined {
-    font-size: 32px;
-    color: var(--dt-brand-color);
+  .brand-logo {
+    width: 40px;
+    height: 40px;
+    background: var(--dt-brand-color);
+    border-radius: var(--dt-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .logo-icon {
+      font-size: 22px;
+      color: var(--dt-text-white);
+    }
   }
 
-  span:not(.material-icons-outlined) {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--dt-text-primary);
-  }
-}
-
-.login-header {
-  margin-bottom: 24px;
-
-  .welcome-title {
+  .brand-name {
     font-size: 20px;
     font-weight: 600;
     color: var(--dt-text-primary);
-    margin: 0 0 4px 0;
-  }
 
-  .welcome-subtitle {
-    font-size: 14px;
-    color: var(--dt-text-tertiary);
-    margin: 0;
+    .dark & {
+      color: var(--dt-text-primary-dark);
+    }
   }
 }
 
-.form-content-wrapper {
+.form-area {
   width: 100%;
 }
 
-// 切换标签
+.form-title {
+  font-size: var(--dt-font-size-xl);
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  margin: 0 0 var(--dt-spacing-xs) 0;
+  text-align: center;
+
+  .dark & {
+    color: var(--dt-text-primary-dark);
+  }
+}
+
+.form-subtitle {
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+  margin: 0 0 var(--dt-spacing-lg) 0;
+  text-align: center;
+
+  .dark & {
+    color: var(--dt-text-tertiary-dark);
+  }
+}
+
 .login-tabs {
   display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: var(--dt-spacing-md);
+  margin-bottom: var(--dt-spacing-lg);
+  padding-bottom: var(--dt-spacing-sm);
   border-bottom: 1px solid var(--dt-border-light);
 
+  .dark & {
+    border-bottom-color: var(--dt-border-dark);
+  }
+
   .tab-btn {
-    padding: 8px 0;
+    flex: 1;
+    padding: var(--dt-spacing-sm) 0;
     border: none;
     background: transparent;
     color: var(--dt-text-tertiary);
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
     cursor: pointer;
     position: relative;
 
     &::after {
       content: '';
       position: absolute;
-      bottom: -1px;
+      bottom: -9px;
       left: 0;
       right: 0;
       height: 2px;
@@ -547,21 +427,17 @@ onUnmounted(() => {
   }
 }
 
-// 表单
 .login-form {
-  margin-bottom: 24px;
-  width: 100%;
-
   :deep(.el-form-item) {
-    margin-bottom: 16px;
-    width: 100%;
+    margin-bottom: var(--dt-spacing-md);
   }
 
   :deep(.el-input__wrapper) {
     border-radius: var(--dt-radius-sm);
-    border: 1px solid var(--dt-border-light);
+    border: 1px solid var(--dt-border-color);
     background: var(--dt-bg-card);
-    box-shadow: none !important;
+    box-shadow: none;
+    padding: 0 12px;
     transition: border-color var(--dt-transition-fast);
 
     &:hover {
@@ -571,75 +447,105 @@ onUnmounted(() => {
     &.is-focus {
       border-color: var(--dt-brand-color);
     }
+
+    .dark & {
+      background: var(--dt-bg-input-dark);
+      border-color: var(--dt-border-color);
+
+      &:hover {
+        border-color: var(--dt-border-input-hover);
+      }
+    }
   }
 
   :deep(.el-input__inner) {
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
     color: var(--dt-text-primary);
+    height: 40px;
 
     &::placeholder {
       color: var(--dt-text-tertiary);
     }
-  }
 
-  .code-input-row {
-    display: flex;
-    gap: 8px;
+    .dark & {
+      color: var(--dt-text-primary-dark);
 
-    .code-input {
-      flex: 1;
-    }
-
-    .code-btn {
-      flex-shrink: 0;
-      padding: 0 12px;
-      height: 40px;
-      border: 1px solid var(--dt-border-light);
-      border-radius: var(--dt-radius-sm);
-      background: var(--dt-bg-card);
-      color: var(--dt-brand-color);
-      font-size: 13px;
-      cursor: pointer;
-      transition: border-color var(--dt-transition-fast);
-
-      &:hover:not(:disabled) {
-        border-color: var(--dt-brand-color);
+      &::placeholder {
+        color: var(--dt-text-tertiary-dark);
       }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      &.counting {
-        color: var(--dt-text-tertiary);
-      }
-    }
-  }
-
-  .form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-
-    .checkbox-label {
-      font-size: 13px;
-      color: var(--dt-text-secondary);
-    }
-
-    :deep(.el-checkbox__label) {
-      color: var(--dt-text-secondary);
-      font-size: 13px;
     }
   }
 }
 
-// 登录按钮
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--dt-spacing-lg);
+
+  .checkbox-label {
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+
+    .dark & {
+      color: var(--dt-text-secondary-dark);
+    }
+  }
+
+  :deep(.el-checkbox__label) {
+    font-size: var(--dt-font-size-sm);
+    color: var(--dt-text-secondary);
+
+    .dark & {
+      color: var(--dt-text-secondary-dark);
+    }
+  }
+}
+
+.code-row {
+  display: flex;
+  gap: var(--dt-spacing-sm);
+
+  .code-input {
+    flex: 1;
+  }
+
+  .code-btn {
+    flex-shrink: 0;
+    padding: 0 var(--dt-spacing-md);
+    height: 40px;
+    border: 1px solid var(--dt-border-color);
+    border-radius: var(--dt-radius-sm);
+    background: var(--dt-bg-card);
+    color: var(--dt-brand-color);
+    font-size: var(--dt-font-size-sm);
+    cursor: pointer;
+    transition: border-color var(--dt-transition-fast);
+
+    &:hover:not(:disabled) {
+      border-color: var(--dt-brand-color);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.counting {
+      color: var(--dt-text-tertiary);
+    }
+
+    .dark & {
+      background: var(--dt-bg-input-dark);
+      border-color: var(--dt-border-color);
+    }
+  }
+}
+
 .login-button {
   width: 100%;
   height: 44px;
-  font-size: 15px;
+  font-size: var(--dt-font-size-base);
   font-weight: 500;
   border-radius: var(--dt-radius-sm);
   background: var(--dt-brand-color);
@@ -655,58 +561,24 @@ onUnmounted(() => {
   }
 }
 
-// 登录页脚
-.login-footer {
-  text-align: center;
-  margin-top: auto;
-
-  p {
-    font-size: 12px;
-    color: var(--dt-text-quaternary);
-    margin: 0;
-  }
-}
-
-// 主题切换按钮
 .theme-toggle {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  background: transparent;
+  position: absolute;
+  top: var(--dt-spacing-md);
+  right: var(--dt-spacing-md);
+  width: 28px;
+  height: 28px;
   border: none;
-  z-index: 100;
+  background: transparent;
   color: var(--dt-text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--dt-radius-sm);
+  transition: color var(--dt-transition-fast);
 
   &:hover {
     color: var(--dt-brand-color);
-  }
-}
-
-// ============================================================================
-// 暗色模式
-// ============================================================================
-.dark {
-  .login-card {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
-  }
-
-  .login-decoration {
-    background: #1e3a5f;
-  }
-
-  .welcome-title {
-    color: var(--dt-text-primary-dark);
-  }
-
-  .login-tabs {
-    border-bottom-color: var(--dt-border-dark);
   }
 }
 </style>
