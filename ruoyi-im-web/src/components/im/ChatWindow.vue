@@ -11,7 +11,33 @@
         <el-icon title="搜索聊天记录" @click="showGlobalSearch = true"><Search /></el-icon>
         <el-icon title="语音通话" @click="handleVoiceCall"><Phone /></el-icon>
         <el-icon title="视频通话" @click="handleVideoCall"><VideoCamera /></el-icon>
-        <el-icon title="详情" @click="detailDrawerVisible = true"><MoreFilled /></el-icon>
+        <el-dropdown trigger="click" @command="handleHeaderCommand">
+          <el-icon title="更多"><MoreFilled /></el-icon>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="pin">
+                <el-icon><Top /></el-icon>
+                置顶会话
+              </el-dropdown-item>
+              <el-dropdown-item command="mute">
+                <el-icon><Bell /></el-icon>
+                消息免打扰
+              </el-dropdown-item>
+              <el-dropdown-item command="clear">
+                <el-icon><Delete /></el-icon>
+                清空聊天记录
+              </el-dropdown-item>
+              <el-dropdown-item command="mention">
+                <el-icon><User /></el-icon>
+                艾特我的消息
+              </el-dropdown-item>
+              <el-dropdown-item command="detail">
+                <el-icon><MoreFilled /></el-icon>
+                会话详情
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </header>
 
@@ -63,6 +89,7 @@
     <!-- 3. 输入区 -->
     <ChatInputArea
       v-model="currentDraft"
+      :session="currentSession"
       :replying-message="replyingMessage"
       :editing-message="editingMessage"
       @send="processSendMessage"
@@ -99,7 +126,7 @@
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
-import { Search, Phone, VideoCamera, MoreFilled, Operation } from '@element-plus/icons-vue';
+import { Search, Phone, VideoCamera, MoreFilled, Operation, Top, Bell, Delete, User } from '@element-plus/icons-vue';
 import { useImWebSocket } from '@/composables/useImWebSocket';
 import { uploadImage, uploadFile } from '@/api/im/file';
 import { initiateCall } from '@/api/im/videoCall';
@@ -511,6 +538,67 @@ const handleVideoCall = async () => {
 const handleReadDetail = (messageId) => {
   readDetailMessageId.value = messageId;
   showReadDrawer.value = true;
+};
+
+// ========== 头部更多菜单 ==========
+const handleHeaderCommand = async (command) => {
+  if (!currentSession.value) return;
+
+  switch (command) {
+    case 'pin':
+      // 置顶会话
+      await store.dispatch('im/session/togglePinSession', currentSession.value.id);
+      ElMessage.success(currentSession.value.isPinned ? '已取消置顶' : '已置顶');
+      break;
+
+    case 'mute':
+      // 消息免打扰
+      await store.dispatch('im/session/toggleMuteSession', currentSession.value.id);
+      ElMessage.success(currentSession.value.isMuted ? '已开启免打扰' : '已关闭免打扰');
+      break;
+
+    case 'clear':
+      // 清空聊天记录
+      try {
+        await ElMessageBox.confirm('确定要清空此会话的所有消息吗？此操作不可恢复。', '清空聊天记录', {
+          confirmButtonText: '确定清空',
+          cancelButtonText: '取消',
+          type: 'warning'
+        });
+        await store.dispatch('im/message/clearMessages', currentSession.value.id);
+        ElMessage.success('聊天记录已清空');
+      } catch (e) {
+        if (e !== 'cancel') console.error('清空失败', e);
+      }
+      break;
+
+    case 'mention':
+      // 艾特我的消息 - 滚动到第一条 @ 我的消息
+      scrollToMentionMe();
+      break;
+
+    case 'detail':
+      // 会话详情
+      detailDrawerVisible.value = true;
+      break;
+  }
+};
+
+// 滚动到艾特我的消息
+const scrollToMentionMe = () => {
+  if (!listRef.value) return;
+  const mentionMsg = messages.value.find(msg =>
+    msg.content && msg.content.includes(`@${store.state.im?.currentUser?.name || store.state.im?.currentUser?.nickname || ''}`)
+  );
+  if (mentionMsg) {
+    const el = listRef.value.querySelector(`[data-message-id="${mentionMsg.messageId || mentionMsg.id}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      ElMessage.success('已定位到艾特消息');
+    }
+  } else {
+    ElMessage.info('没有找到艾特消息');
+  }
 };
 
 // ========== 多选模式 ==========

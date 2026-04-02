@@ -154,21 +154,19 @@
             <div class="action-item" title="收藏" @click="$emit('favorite', message)">
               <el-icon><Star /></el-icon>
             </div>
-            <el-dropdown trigger="click" @command="(emoji) => $emit('reaction', { message, emoji })">
-              <div class="action-item" title="表情">
-                <el-icon style="font-size: 18px;"><Star /></el-icon>
-              </div>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="👍">👍 点赞</el-dropdown-item>
-                  <el-dropdown-item command="❤️">❤️ 爱心</el-dropdown-item>
-                  <el-dropdown-item command="😂">😂 笑哭</el-dropdown-item>
-                  <el-dropdown-item command="😮">😮 惊讶</el-dropdown-item>
-                  <el-dropdown-item command="😢">😢 悲伤</el-dropdown-item>
-                  <el-dropdown-item command="👏">👏 鼓掌</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            <!-- 钉钉规范：hover 直接显示6个常用表情 -->
+            <div class="reaction-trigger" title="表情">
+              <el-icon style="font-size: 16px;"><Star /></el-icon>
+            </div>
+            <div class="reaction-panel" @mouseenter="showReactionPanel = true" @mouseleave="showReactionPanel = false">
+              <span
+                v-for="emoji in quickReactions"
+                :key="emoji"
+                class="quick-emoji"
+                :class="{ 'is-active': hasReacted(emoji) }"
+                @click="handleQuickReaction(emoji)"
+              >{{ emoji }}</span>
+            </div>
           </div>
 
         </div>
@@ -204,6 +202,22 @@ const emit = defineEmits(['reply', 'forward', 'recall', 'delete', 'favorite', 'r
 const isHovered = ref(false);
 const downloadProgress = ref(0);  // 文件下载进度
 const imageLoading = ref(true);  // 图片加载状态
+const showReactionPanel = ref(false);  // 表情面板显示状态
+
+// 钉钉规范：6个常用表情
+const quickReactions = ['👍', '❤️', '😂', '😮', '😢', '👏'];
+
+// 检查是否已添加该表情回应
+const hasReacted = (emoji) => {
+  if (!props.message.reactions) return false;
+  return props.message.reactions.some(r => r.emoji === emoji && r.userId === props.message.senderId);
+};
+
+// 快速添加表情回应
+const handleQuickReaction = (emoji) => {
+  emit('reaction', { message: props.message, emoji });
+  showReactionPanel.value = false;
+};
 
 // URL 正则
 const urlPattern = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
@@ -1127,6 +1141,87 @@ const formatDisplayUrl = (url) => {
 .action-item:active {
   transform: scale(0.95);
   background-color: var(--dt-brand-bg-dark);
+}
+
+/* 表情触发器和面板 */
+.reaction-trigger {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--dt-text-icon, #ADB1B8);
+  transition: all var(--dt-transition-fast);
+  position: relative;
+
+  &:hover {
+    background-color: var(--dt-bg-hover);
+    color: var(--dt-brand-color);
+  }
+}
+
+/* 钉钉规范：表情面板悬浮在触发器上方（相对于触发器定位） */
+.reaction-panel {
+  position: absolute;
+  bottom: 24px;  /* 面板在触发器下方 */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  background-color: var(--dt-bg-card);
+  border-radius: var(--dt-radius-sm);
+  box-shadow: var(--dt-shadow-float);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px) scale(0.95);
+  transition: all var(--dt-transition-fast);
+  z-index: 20;
+
+  .is-me & {
+    right: 0;
+  }
+
+  .is-other & {
+    left: 0;
+  }
+
+  /* 面板小箭头 - 指向下方触发器 */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;  /* 箭头在面板底部 */
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid var(--dt-bg-card);
+  }
+}
+
+/* 悬浮在触发器上时显示面板 - 使用 ~ 选择器因为是兄弟元素 */
+.reaction-trigger:hover ~ .reaction-panel,
+.reaction-panel:hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.quick-emoji {
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform var(--dt-transition-fast);
+  padding: 2px;
+  border-radius: var(--dt-radius-xs);
+
+  &:hover {
+    transform: scale(1.3);
+    background-color: var(--dt-bg-hover);
+  }
+
+  &.is-active {
+    background-color: var(--dt-brand-bg);
+  }
 }
 
 @keyframes rotate {

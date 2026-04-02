@@ -97,6 +97,11 @@
         <LocationInformation />
       </el-icon>
 
+      <!-- @成员 -->
+      <el-icon class="tool-icon" title="@成员" @click="openAtMemberPicker">
+        <User />
+      </el-icon>
+
       <!-- 语音录制 -->
       <el-icon class="tool-icon" :class="{ 'is-recording': isRecording }" title="语音" @click="toggleRecording">
         <Microphone />
@@ -134,7 +139,7 @@
     </div>
 
     <!-- 高级输入区 -->
-    <div class="input-main">
+    <div class="input-main" style="position: relative;">
       <div
         ref="editorRef"
         class="rich-editor"
@@ -143,9 +148,19 @@
         @keydown.enter.exact.prevent="executeSendMessage"
         @keydown.esc.stop="cancelEdit"
         @keydown.ctrl.enter.stop="insertNewLine"
+        @keydown.@stop="openAtMemberPicker"
         @paste="processPaste"
         @input="handleInput"
       ></div>
+
+      <!-- @成员选择器 -->
+      <AtMemberPicker
+        v-model:visible="atMemberPickerVisible"
+        :members="groupMembers"
+        :position="atPickerPosition"
+        @select="handleAtMemberSelect"
+        @close="atMemberPickerVisible = false"
+      />
     </div>
 
     <!-- 底部发送栏 -->
@@ -229,10 +244,13 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search, LocationInformation } from '@element-plus/icons-vue';
 import { getContacts } from '@/api/im/contact';
+import { getGroupMembers } from '@/api/im/group';
+import AtMemberPicker from './AtMemberPicker.vue';
 
 const props = defineProps({
   replyingMessage: Object,
   editingMessage: Object,
+  session: Object,  // 当前会话信息，用于@成员功能
   modelValue: {
     type: String,
     default: ''
@@ -270,6 +288,12 @@ const locationForm = ref({
   latitude: 39.9042,
   longitude: 116.4074
 });
+
+// @成员选择状态
+const atMemberPickerVisible = ref(false);
+const atPickerPosition = ref({ top: 0, left: 0 });
+const groupMembers = ref([]);
+const currentSessionId = ref(null);
 
 // 监听外部草稿变化（会话切换时恢复草稿）
 watch(() => props.modelValue, (newVal) => {
@@ -335,6 +359,100 @@ const insertEmoji = (emoji) => {
 const insertNewLine = () => {
   if (!editorRef.value) return;
   document.execCommand('insertHTML', false, '<br>');
+};
+
+// ========== @成员功能 ==========
+// 打开@成员选择器
+const openAtMemberPicker = async () => {
+  // 获取当前会话的群成员
+  try {
+    const session = await getCurrentSession();
+    if (!session) return;
+
+    const sessionId = session.id;
+    const isGroup = session.type === 'GROUP';
+
+    if (isGroup && session.targetId) {
+      // 加载群成员
+      const res = await getGroupMembers(session.targetId);
+      if (res.code === 200) {
+        groupMembers.value = (res.data || []).map(m => ({
+          userId: m.userId,
+          nickname: m.groupNickname || m.userName,
+          avatar: m.userAvatar,
+          role: m.role
+        }));
+      }
+    }
+
+    // 计算选择器位置
+    calculateAtPickerPosition();
+    atMemberPickerVisible.value = true;
+  } catch (e) {
+    console.error('获取群成员失败', e);
+    ElMessage.error('获取成员列表失败');
+  }
+};
+
+// 获取当前会话
+const getCurrentSession = () => {
+  return Promise.resolve(props.session || null);
+};
+
+// 计算@选择器位置
+const calculateAtPickerPosition = () => {
+  if (!editorRef.value) {
+    atPickerPosition.value = { top: -300, left: 0 };
+    return;
+  }
+
+  const rect = editorRef.value.getBoundingClientRect();
+  const wrapperRect = editorRef.value.closest('.chat-input-wrapper').getBoundingClientRect();
+
+  atPickerPosition.value = {
+    top: -290,  // 固定高度 300px，减去一些边距
+    left: 16     // 与输入框左边距对齐
+  };
+};
+
+// 处理@成员选择
+const handleAtMemberSelect = (member) => {
+  if (!editorRef.value) return;
+
+  // 获取当前光标位置之前的文本
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+  const textBeforeCursor = range.startContainer.textContent?.slice(0, range.startOffset) || '';
+
+  // 查找最后一个 @ 位置
+  const atIndex = textBeforeCursor.lastIndexOf('@');
+  if (atIndex === -1) return;
+
+  // 删除 @ 及其后面的内容，并插入 @昵称
+  const textAfterAt = textBeforeCursor.slice(atIndex);
+  const textNode = range.startContainer;
+
+  // 创建新文本：@昵称 + 空格
+  const mentionText = `@${member.nickname} `;
+
+  // 使用 DOM 操作替换
+  textNode.textContent = textBeforeCursor.slice(0, atIndex) + mentionText;
+
+  // 移动光标到插入文本之后
+  const newRange = document.createRange();
+  newRange.setStart(textNode, textNode.textContent.length);
+  newRange.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(newRange);
+
+  // 更新内容
+  hasContent.value = true;
+  emit('update:modelValue', editorRef.value.innerText);
+
+  // 关闭选择器
+  atMemberPickerVisible.value = false;
 };
 
 const processPaste = async (e) => {
