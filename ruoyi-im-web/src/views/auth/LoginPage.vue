@@ -1,14 +1,5 @@
 <template>
   <div class="login-container" :class="{ 'dark': isDark }">
-    <!-- 背景装饰 -->
-    <div class="bg-decoration">
-      <div class="bg-shapes">
-        <div class="shape shape-1" />
-        <div class="shape shape-2" />
-        <div class="shape shape-3" />
-      </div>
-    </div>
-
     <!-- 登录卡片 -->
     <div class="login-card">
       <!-- 左侧装饰区 -->
@@ -385,85 +376,9 @@ onUnmounted(() => {
   background: var(--dt-bg-body);
   padding: 24px;
   position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--dt-brand-color), transparent);
-    opacity: 0.3;
-  }
 
   &.dark {
-    background: linear-gradient(135deg, var(--dt-bg-body-dark) 0%, var(--dt-bg-card-dark) 100%);
-  }
-}
-
-// ============================================================================
-// 背景装饰
-// ============================================================================
-.bg-decoration {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  opacity: 0.6;
-}
-
-.bg-shapes {
-  position: absolute;
-  inset: 0;
-
-  .shape {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(60px);
-    animation: float 12s ease-in-out infinite;
-
-    &.shape-1 {
-      width: 350px;
-      height: 350px;
-      top: -80px;
-      left: -80px;
-      background: var(--dt-brand-light);
-      animation-delay: 0s;
-    }
-
-    &.shape-2 {
-      width: 280px;
-      height: 280px;
-      bottom: -80px;
-      right: -80px;
-      background: var(--dt-brand-bg);
-      opacity: 0.5;
-      animation-delay: 3s;
-    }
-
-    &.shape-3 {
-      width: 200px;
-      height: 200px;
-      top: 50%;
-      right: 15%;
-      background: var(--dt-info-bg);
-      opacity: 0.4;
-      animation-delay: 6s;
-    }
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(20px, -20px) scale(1.05);
-  }
-  66% {
-    transform: translate(-10px, 15px) scale(0.95);
+    background: var(--dt-bg-body-dark);
   }
 }
 
@@ -474,12 +389,9 @@ onUnmounted(() => {
   width: 100%;
   max-width: 960px;
   background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-2xl);
-  box-shadow: var(--dt-shadow-modal);
+  border-radius: var(--dt-radius-lg);
   display: flex;
   overflow: hidden;
-  position: relative;
-  z-index: 10;
   border: 1px solid var(--dt-border-light);
 }
 
@@ -488,30 +400,9 @@ onUnmounted(() => {
 // ============================================================================
 .login-decoration {
   flex: 0 0 380px;
-  background: linear-gradient(160deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+  background: var(--dt-brand-color);
   padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
   color: var(--dt-text-white);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 120px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
-  }
 }
 
 .decoration-content {
@@ -565,26 +456,7 @@ onUnmounted(() => {
       align-items: center;
       gap: var(--dt-spacing-md);
       margin-bottom: 28px;
-      opacity: 0.9;
-      transition: all var(--dt-transition-base);
-      padding: 12px 16px;
-      border-radius: var(--dt-radius-lg);
-
-      &:hover {
-        opacity: 1;
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateX(8px);
-      }
-
-      .material-icons-outlined {
-        font-size: 22px;
-        opacity: 0.9;
-      }
-
-      span:not(.material-icons-outlined) {
-        font-size: 15px;
-        font-weight: 400;
-      }
+      padding: 8px 0;
     }
   }
 
@@ -612,17 +484,6 @@ onUnmounted(() => {
   padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
   display: flex;
   flex-direction: column;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--dt-border-light), transparent);
-  }
 }
 
 .mobile-logo {
@@ -771,8 +632,6 @@ onUnmounted(() => {
 
       &.is-focus {
         border-color: var(--dt-brand-color);
-        background: var(--dt-bg-card);
-        box-shadow: 0 0 0 3px var(--dt-brand-lighter) !important;
       }
     }
 
@@ -867,7 +726,7 @@ onUnmounted(() => {
   height: 48px;
   font-size: 16px;
   font-weight: 600;
-  border-radius: var(--dt-radius-lg);
+  border-radius: var(--dt-radius-sm);
   background: var(--dt-brand-color);
   border: none;
   color: var(--dt-text-white);
@@ -875,18 +734,10 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all var(--dt-transition-fast);
   margin-bottom: 28px;
-  box-shadow: var(--dt-shadow-float);
 
   &:hover:not(:disabled) {
     background: var(--dt-brand-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--dt-shadow-float);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
   }
 
   &:disabled {
@@ -911,42 +762,24 @@ onUnmounted(() => {
   position: fixed;
   top: 24px;
   right: 24px;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   background: var(--dt-bg-card);
-  border: 1.5px solid var(--dt-border-color);
-  box-shadow: var(--dt-shadow-float);
+  border: 1px solid var(--dt-border-light);
   z-index: 100;
-  transition: all var(--dt-transition-fast);
   color: var(--dt-text-secondary);
-  border-radius: var(--dt-radius-full);
+  border-radius: var(--dt-radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
   .material-icons-outlined {
-    font-size: 22px;
-    transition: all var(--dt-transition-base);
-    font-feature-settings: 'liga';
-    -webkit-font-feature-settings: 'liga';
-    font-family: 'Material Icons Outlined', sans-serif;
-    
+    font-size: 20px;
+
     &.hidden {
-      opacity: 0;
-      transform: rotate(180deg) scale(0);
-      position: absolute;
+      display: none;
     }
-  }
-
-  &:hover {
-    transform: scale(1.05);
-    color: var(--dt-brand-color);
-    border-color: var(--dt-brand-color);
-  }
-
-  &:active {
-    transform: scale(0.98);
   }
 }
 
@@ -960,23 +793,7 @@ onUnmounted(() => {
   }
 
   .login-decoration {
-    background: linear-gradient(160deg, #1e3a5f 0%, #0f172a 100%);
-
-    &::before {
-      background-image:
-        radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
-    }
-
-    &::after {
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
-    }
-  }
-
-  .mobile-logo {
-    span:not(.material-icons-outlined) {
-      color: var(--dt-text-primary-dark);
-    }
+    background: #1e3a5f;
   }
 
   .welcome-title {
@@ -987,36 +804,10 @@ onUnmounted(() => {
     color: var(--dt-text-tertiary-dark);
   }
 
-  .login-tabs {
-    background: var(--dt-bg-hover-dark);
-
-    .tab-btn {
-      &:hover:not(.active) {
-        background: var(--dt-bg-active-dark);
-      }
-
-      &.active {
-        background: var(--dt-bg-hover-dark);
-      }
-    }
-  }
-
   .input-wrapper {
-    .input-icon {
-      color: var(--dt-text-quaternary-dark);
-    }
-
     :deep(.el-input__wrapper) {
       background: var(--dt-bg-input-dark);
       border-color: var(--dt-border-dark);
-
-      &:hover {
-        border-color: var(--dt-border-input-hover);
-      }
-
-      &.is-focus {
-        background: var(--dt-bg-hover-dark);
-      }
     }
 
     :deep(.el-input__inner) {
@@ -1026,37 +817,6 @@ onUnmounted(() => {
         color: var(--dt-text-quaternary-dark);
       }
     }
-
-    &.code-input-wrapper {
-      .code-btn {
-        background: var(--dt-bg-hover-dark);
-        border-color: var(--dt-border-dark);
-        color: var(--dt-brand-color);
-
-        &:hover:not(:disabled) {
-          border-color: var(--dt-brand-color);
-          background: var(--dt-bg-active-dark);
-        }
-
-        &.counting {
-          color: var(--dt-text-tertiary-dark);
-        }
-      }
-    }
-  }
-
-  .form-options {
-    .checkbox-label {
-      color: var(--dt-text-secondary-dark);
-    }
-
-    :deep(.el-checkbox__label) {
-      color: var(--dt-text-secondary-dark);
-    }
-  }
-
-  .login-footer p {
-    color: var(--dt-text-quaternary-dark);
   }
 
   .theme-toggle {
