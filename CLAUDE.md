@@ -45,6 +45,12 @@
 - `cloudDrive.js`: 云盘 API（24 个端点）
 - `workReport.js`: 工作报告 API（14 个端点）
 
+### 设计原则 (2026-04-02)
+**禁止复杂特效**：所有前端组件必须克制使用动画和阴影
+- 禁止：复杂阴影、渐变背景、CSS动画、filter模糊、backdrop-filter、悬浮位移缩放
+- 允许：简单transition状态变化、边框/背景色变化
+- 规范文档：`.claude/rules/dingtalk-ui-prompt.md` 第六章
+
 ### Design Token 统一
 **管理后台硬编码颜色修复**:
 - `GroupManagement.vue`: 面板、统计卡片、批量操作背景

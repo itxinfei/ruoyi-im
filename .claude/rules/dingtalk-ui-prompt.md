@@ -88,9 +88,9 @@ justify-content: space-between;
 
 ## 五、阴影规范
 
-### 钉钉标准阴影
+### 钉钉标准阴影（尽量避免使用）
 ```scss
-// 卡片悬浮
+// 仅在必要时使用卡片悬浮阴影
 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
 // 弹窗
@@ -103,8 +103,67 @@ box-shadow: var(--dt-shadow-brand);
 ### 禁止行为
 - ❌ 禁止使用 `box-shadow: 0 0 10px rgba(0,0,0,0.5)` 等大阴影
 - ❌ 禁止使用彩色阴影
+- ❌ 禁止使用复杂多层阴影
 
-## 六、字体规范
+## 六、动画与特效规范（禁止复杂特效）
+
+### 原则：克制即是美
+- ❌ 禁止使用复杂阴影投影（modal 级别的大阴影）
+- ❌ 禁止使用 CSS 动画（`@keyframes`）除非必要
+- ❌ 禁止使用 `filter: blur()` 模糊效果
+- ❌ 禁止使用 `backdrop-filter` 背景模糊
+- ❌ 禁止使用渐变背景（除品牌按钮外）
+- ❌ 禁止使用悬浮位移效果（`transform: translate`）
+- ❌ 禁止使用悬浮缩放效果（`transform: scale`）
+
+### 允许的简单效果
+- ✅ `transition: all var(--dt-transition-fast)` 用于状态变化（如 hover 颜色）
+- ✅ 边框颜色变化
+- ✅ 背景色轻微变化
+- ✅ 透明度变化（仅 0→1 等简单场景）
+
+### 登录页面示例（无特效）
+```scss
+// ✅ 正确：简洁无特效
+.login-card {
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  border: 1px solid var(--dt-border-light);
+}
+
+// ❌ 错误：复杂阴影 + 渐变 + 动画
+.login-card {
+  background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
+  box-shadow: var(--dt-shadow-modal);
+  animation: float 12s ease-in-out infinite;
+}
+```
+
+### 按钮示例（无特效）
+```scss
+// ✅ 正确：简洁
+.login-button {
+  background: var(--dt-brand-color);
+  border-radius: var(--dt-radius-sm);
+
+  &:hover {
+    background: var(--dt-brand-hover);
+  }
+}
+
+// ❌ 错误：悬浮阴影 + 位移 + 缩放
+.login-button {
+  background: var(--dt-brand-color);
+  box-shadow: var(--dt-shadow-float);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--dt-shadow-float);
+  }
+}
+```
+
+## 七、字体规范
 
 ### 字体栈
 ```scss
@@ -119,7 +178,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC
 | 正文/表单 | 14px | 400 | `var(--dt-font-size-base)` |
 | 辅助/备注 | 12px | 400 | `var(--dt-font-size-sm)` |
 
-## 七、组件开发规范
+## 八、组件开发规范
 
 ### 按钮
 ```vue
@@ -174,7 +233,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC
 </style>
 ```
 
-## 八、校验检查清单
+## 九、校验检查清单
 
 生成代码后，必须检查以下项目：
 
@@ -197,7 +256,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC
 - [ ] 卡片圆角是否为 8px
 - [ ] 输入框圆角是否为 4px
 
-## 九、复用优先原则
+## 十、复用优先原则
 
 开发新功能时，**必须**按以下顺序复用：
 
