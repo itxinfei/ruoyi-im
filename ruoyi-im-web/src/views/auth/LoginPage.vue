@@ -16,26 +16,14 @@
               企业即时通讯
             </p>
           </div>
-          <div class="features">
-            <div class="feature-item">
-              <el-icon><ChatLineRound /></el-icon>
-              <span>即时通讯</span>
+          <div class="hero-feature">
+            <div class="hero-icon">
+              <el-icon><ChatDotRound /></el-icon>
             </div>
-            <div class="feature-item">
-              <el-icon><UserFilled /></el-icon>
-              <span>群组协作</span>
-            </div>
-            <div class="feature-item">
-              <el-icon><Cloudy /></el-icon>
-              <span>云端同步</span>
-            </div>
-            <div class="feature-item">
-              <el-icon><CircleCheck /></el-icon>
-              <span>安全可靠</span>
-            </div>
+            <span class="hero-text">即时沟通</span>
           </div>
           <div class="decoration-footer">
-            <p>高效沟通 · 智能协作</p>
+            <p>© 2026 IM</p>
           </div>
         </div>
       </div>
@@ -53,7 +41,7 @@
             登录
           </h2>
           <p class="welcome-subtitle">
-            欢迎回到企业即时通讯平台
+            开始沟通
           </p>
         </div>
 
@@ -88,29 +76,23 @@
             @keyup.enter="handleLogin"
           >
             <el-form-item prop="username">
-              <div class="input-wrapper">
-                <el-icon class="input-icon"><User /></el-icon>
-                <el-input
-                  v-model="loginForm.username"
-                  placeholder="请输入用户名或手机号"
-                  size="large"
-                  clearable
-                />
-              </div>
+              <el-input
+                v-model="loginForm.username"
+                placeholder="用户名或手机号"
+                size="large"
+                clearable
+              />
             </el-form-item>
 
             <el-form-item prop="password">
-              <div class="input-wrapper">
-                <el-icon class="input-icon"><Lock /></el-icon>
-                <el-input
-                  v-model="loginForm.password"
-                  type="password"
-                  placeholder="请输入密码"
-                  size="large"
-                  show-password
-                  clearable
-                />
-              </div>
+              <el-input
+                v-model="loginForm.password"
+                type="password"
+                placeholder="密码"
+                size="large"
+                show-password
+                clearable
+              />
             </el-form-item>
 
             <div class="form-options">
@@ -133,23 +115,19 @@
             @keyup.enter="handleSMSLogin"
           >
             <el-form-item prop="phone">
-              <div class="input-wrapper">
-                <el-icon class="input-icon"><Iphone /></el-icon>
-                <el-input
-                  v-model="smsForm.phone"
-                  placeholder="请输入手机号"
-                  size="large"
-                  clearable
-                />
-              </div>
+              <el-input
+                v-model="smsForm.phone"
+                placeholder="手机号"
+                size="large"
+                clearable
+              />
             </el-form-item>
 
             <el-form-item prop="code">
-              <div class="input-wrapper code-input-wrapper">
-                <el-icon class="input-icon"><CircleCheck /></el-icon>
+              <div class="code-input-row">
                 <el-input
                   v-model="smsForm.code"
-                  placeholder="请输入验证码"
+                  placeholder="验证码"
                   size="large"
                   clearable
                   class="code-input"
@@ -160,7 +138,7 @@
                   :class="{ counting: smsCountdown > 0 }"
                   @click="sendSMSCode"
                 >
-                  {{ smsCountdown > 0 ? `${smsCountdown}s 后重新获取` : '获取验证码' }}
+                  {{ smsCountdown > 0 ? `${smsCountdown}s` : '获取验证码' }}
                 </el-button>
               </div>
             </el-form-item>
@@ -185,7 +163,7 @@
 
         <!-- 登录页脚 -->
         <div class="login-footer">
-          <p>© 2026 IM 即时通讯 · 企业级通信平台</p>
+          <p>© 2026 IM</p>
         </div>
       </div>
     </div>
@@ -399,7 +377,7 @@ onUnmounted(() => {
 // 左侧装饰区
 // ============================================================================
 .login-decoration {
-  flex: 0 0 380px;
+  flex: 0 0 280px;
   background: var(--dt-brand-color);
   padding: var(--dt-spacing-2xl) var(--dt-spacing-xl);
   color: var(--dt-text-white);
@@ -417,61 +395,62 @@ onUnmounted(() => {
     margin-bottom: 48px;
 
     .logo {
-      width: 72px;
-      height: 72px;
+      width: 56px;
+      height: 56px;
       background: rgba(255, 255, 255, 0.15);
-      border-radius: var(--dt-radius-xl);
+      border-radius: var(--dt-radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 20px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin: 0 auto 16px;
 
       .logo-icon {
-        font-size: 36px;
+        font-size: 28px;
       }
     }
 
     .app-name {
-      font-size: 28px;
-      font-weight: 700;
-      margin: 0 0 8px 0;
-      letter-spacing: 4px;
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      letter-spacing: 2px;
     }
 
     .app-desc {
-      font-size: 14px;
-      opacity: 0.85;
+      font-size: 13px;
+      opacity: 0.75;
       margin: 0;
-      font-weight: 300;
     }
   }
 
-  .features {
+  .hero-feature {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dt-spacing-md);
 
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: var(--dt-spacing-md);
-      margin-bottom: 28px;
-      padding: 8px 0;
+    .hero-icon {
+      font-size: 48px;
+      opacity: 0.9;
+    }
+
+    .hero-text {
+      font-size: 18px;
+      font-weight: 500;
+      opacity: 0.9;
     }
   }
 
   .decoration-footer {
     margin-top: auto;
     text-align: center;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
 
     p {
-      font-size: 13px;
-      opacity: 0.75;
+      font-size: 12px;
+      opacity: 0.6;
       margin: 0;
-      font-weight: 300;
-      letter-spacing: 2px;
     }
   }
 }
@@ -506,84 +485,64 @@ onUnmounted(() => {
 }
 
 .login-header {
-  text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 
   .welcome-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--dt-brand-color);
-    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin: 0 0 4px 0;
   }
 
   .welcome-subtitle {
     font-size: 14px;
-    color: var(--dt-text-secondary);
+    color: var(--dt-text-tertiary);
     margin: 0;
   }
 }
 
 .form-content-wrapper {
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
 }
 
 // 切换标签
 .login-tabs {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto 28px;
   display: flex;
-  gap: 8px;
-  padding: 4px;
-  background: var(--dt-bg-body);
-  border-radius: var(--dt-radius-lg);
+  gap: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--dt-border-light);
 
   .tab-btn {
-    flex: 1;
-    padding: 12px 16px;
+    padding: 8px 0;
     border: none;
     background: transparent;
-    color: var(--dt-text-secondary);
+    color: var(--dt-text-tertiary);
     font-size: 14px;
-    font-weight: 500;
-    border-radius: var(--dt-radius-md);
     cursor: pointer;
-    transition: all var(--dt-transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+    position: relative;
 
-    .material-icons-outlined {
-      font-size: 18px;
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
     }
 
     &.active {
-      background: var(--dt-bg-card);
       color: var(--dt-brand-color);
-      box-shadow: var(--dt-shadow-2);
-      font-weight: 600;
-    }
+      font-weight: 500;
 
-    &:hover:not(.active) {
-      color: var(--dt-text-primary);
-      background: var(--dt-bg-hover);
-    }
-
-    &:active:not(.active) {
-      transform: scale(0.98);
+      &::after {
+        background: var(--dt-brand-color);
+      }
     }
 
     &.disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
-      
-      .coming-soon {
-        font-size: 11px;
-        opacity: 0.7;
-      }
     }
   }
 }
@@ -594,106 +553,66 @@ onUnmounted(() => {
   width: 100%;
 
   :deep(.el-form-item) {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     width: 100%;
   }
 
-  .input-wrapper {
-    position: relative;
-    width: 100%;
+  :deep(.el-input__wrapper) {
+    border-radius: var(--dt-radius-sm);
+    border: 1px solid var(--dt-border-light);
+    background: var(--dt-bg-card);
+    box-shadow: none !important;
+    transition: border-color var(--dt-transition-fast);
 
-    .input-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--dt-text-quaternary);
-      font-size: 20px;
-      z-index: 10;
-      pointer-events: none;
-      transition: color var(--dt-transition-fast);
+    &:hover {
+      border-color: var(--dt-border-input-hover);
     }
 
-    :deep(.el-input) {
-      width: 100%;
+    &.is-focus {
+      border-color: var(--dt-brand-color);
+    }
+  }
+
+  :deep(.el-input__inner) {
+    font-size: 14px;
+    color: var(--dt-text-primary);
+
+    &::placeholder {
+      color: var(--dt-text-tertiary);
+    }
+  }
+
+  .code-input-row {
+    display: flex;
+    gap: 8px;
+
+    .code-input {
+      flex: 1;
     }
 
-    :deep(.el-input__wrapper) {
-      padding-left: var(--dt-spacing-2xl);
-      border-radius: var(--dt-radius-lg);
-      border: 1.5px solid var(--dt-border-color);
-      background: var(--dt-bg-input);
-      box-shadow: none !important;
-      transition: all var(--dt-transition-fast);
+    .code-btn {
+      flex-shrink: 0;
+      padding: 0 12px;
+      height: 40px;
+      border: 1px solid var(--dt-border-light);
+      border-radius: var(--dt-radius-sm);
+      background: var(--dt-bg-card);
+      color: var(--dt-brand-color);
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color var(--dt-transition-fast);
 
-      &:hover {
-        border-color: var(--dt-border-input-hover);
-      }
-
-      &.is-focus {
+      &:hover:not(:disabled) {
         border-color: var(--dt-brand-color);
       }
-    }
 
-    :deep(.el-input__inner) {
-      font-size: 15px;
-      color: var(--dt-text-primary);
-      font-weight: 400;
-
-      &::placeholder {
-        color: var(--dt-text-quaternary);
-        font-weight: 400;
-      }
-    }
-
-    &.code-input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .code-input {
-        flex: 1;
-
-        :deep(.el-input__wrapper) {
-          padding-right: 16px;
-        }
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
-      .code-btn {
-        flex-shrink: 0;
-        padding: 0 16px;
-        height: 40px;
-        border: 1.5px solid var(--dt-border-color);
-        border-radius: var(--dt-radius-md);
-        background: var(--dt-bg-card);
-        color: var(--dt-brand-color);
-        font-size: 13px;
-        font-weight: 500;
-        white-space: nowrap;
-        transition: all var(--dt-transition-fast);
-
-        &:hover:not(:disabled) {
-          border-color: var(--dt-brand-color);
-          background: var(--dt-brand-bg);
-        }
-
-        &:active:not(:disabled) {
-          transform: scale(0.96);
-        }
-
-        &:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        &.counting {
-          color: var(--dt-text-secondary);
-          border-color: var(--dt-border-light);
-        }
-      }
-
-      .input-icon {
-        left: 16px;
+      &.counting {
+        color: var(--dt-text-tertiary);
       }
     }
   }
@@ -702,7 +621,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
 
     .checkbox-label {
       font-size: 13px;
@@ -713,35 +632,26 @@ onUnmounted(() => {
       color: var(--dt-text-secondary);
       font-size: 13px;
     }
-
-    :deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
-      color: var(--dt-brand-color);
-    }
   }
 }
 
 // 登录按钮
 .login-button {
   width: 100%;
-  height: 48px;
-  font-size: 16px;
-  font-weight: 600;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 500;
   border-radius: var(--dt-radius-sm);
   background: var(--dt-brand-color);
   border: none;
   color: var(--dt-text-white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 28px;
 
   &:hover:not(:disabled) {
     background: var(--dt-brand-hover);
   }
 
   &:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
   }
 }
 
@@ -760,26 +670,21 @@ onUnmounted(() => {
 // 主题切换按钮
 .theme-toggle {
   position: fixed;
-  top: 24px;
-  right: 24px;
-  width: 40px;
-  height: 40px;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
   z-index: 100;
-  color: var(--dt-text-secondary);
-  border-radius: var(--dt-radius-sm);
+  color: var(--dt-text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  .material-icons-outlined {
-    font-size: 20px;
-
-    &.hidden {
-      display: none;
-    }
+  &:hover {
+    color: var(--dt-brand-color);
   }
 }
 
@@ -800,28 +705,8 @@ onUnmounted(() => {
     color: var(--dt-text-primary-dark);
   }
 
-  .welcome-subtitle {
-    color: var(--dt-text-tertiary-dark);
-  }
-
-  .input-wrapper {
-    :deep(.el-input__wrapper) {
-      background: var(--dt-bg-input-dark);
-      border-color: var(--dt-border-dark);
-    }
-
-    :deep(.el-input__inner) {
-      color: var(--dt-text-primary-dark);
-
-      &::placeholder {
-        color: var(--dt-text-quaternary-dark);
-      }
-    }
-  }
-
-  .theme-toggle {
-    background: var(--dt-bg-card-dark);
-    border-color: var(--dt-border-dark);
+  .login-tabs {
+    border-bottom-color: var(--dt-border-dark);
   }
 }
 </style>
