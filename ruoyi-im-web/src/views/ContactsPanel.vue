@@ -314,7 +314,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
   display: flex; flex-direction: column; gap: var(--dt-spacing-xs); margin-bottom: var(--dt-spacing-lg);
   .nav-item {
     display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 44px; box-sizing: border-box;
-    border-radius: var(--dt-radius-md); cursor: pointer; transition: all var(--dt-transition-base); margin: 2px var(--dt-spacing-xs);
+    border-radius: var(--dt-radius-md); cursor: pointer; transition: background-color var(--dt-transition-base); margin: 2px var(--dt-spacing-xs);
     &:hover { background: var(--dt-bg-session-hover); }
     &.active {
       background: var(--dt-brand-bg);
@@ -377,7 +377,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
   align-items: center;
   gap: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 
   &:hover {
     border-color: var(--dt-brand-color);

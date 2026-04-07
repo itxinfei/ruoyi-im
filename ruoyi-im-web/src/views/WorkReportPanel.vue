@@ -890,7 +890,7 @@ onMounted(() => {
   padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   margin-bottom: var(--dt-spacing-sm);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
   gap: var(--dt-spacing-md);
 
   &:hover {

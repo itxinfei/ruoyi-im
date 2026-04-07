@@ -346,7 +346,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-sm);
   font-weight: var(--dt-font-weight-medium);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast);
 }
 
 .compose-btn:hover {
@@ -385,7 +385,7 @@ onMounted(() => {
   padding: var(--dt-spacing-sm) var(--dt-spacing-xs);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast);
 }
 
 .folder-item:hover {
@@ -472,7 +472,7 @@ onMounted(() => {
   cursor: pointer;
   position: relative;
   border-bottom: 1px solid var(--dt-border-light);
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast);
 }
 
 .email-item:hover {

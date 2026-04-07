@@ -164,7 +164,7 @@ const handleSubmit = async () => {
   :deep(.el-input__wrapper) {
     border-radius: var(--dt-radius-lg);
     border: 1.5px solid var(--dt-border-color);
-    transition: all var(--dt-transition-fast);
+    transition: border-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
 
     &:hover {
       border-color: var(--dt-border-input-hover);
@@ -190,7 +190,7 @@ const handleSubmit = async () => {
     font-weight: 500;
     padding: var(--dt-spacing-md) var(--dt-spacing-xl);
     height: 40px;
-    transition: all var(--dt-transition-fast);
+    transition: border-color var(--dt-transition-fast), color var(--dt-transition-fast), background-color var(--dt-transition-fast);
 
     &:not(.el-button--primary) {
       border-color: var(--dt-border-color);

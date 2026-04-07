@@ -347,7 +347,7 @@ onMounted(() => {
   color: var(--dt-text-secondary);
   cursor: pointer;
   border-radius: var(--dt-radius-sm);
-  transition: all var(--dt-transition-fast);
+  transition: color var(--dt-transition-fast), background-color var(--dt-transition-fast);
   white-space: nowrap;
 
   &:hover {
@@ -410,7 +410,7 @@ onMounted(() => {
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast);
   border: 1px solid var(--dt-border-light);
 }
 
@@ -513,7 +513,7 @@ onMounted(() => {
   color: var(--dt-text-tertiary);
   border-radius: var(--dt-radius-lg);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: color var(--dt-transition-fast);
 
   .el-icon {
     font-size: var(--dt-icon-size-lg);

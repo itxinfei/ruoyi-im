@@ -693,7 +693,7 @@ const handleShowAnnouncement = async () => {
           justify-content: center;
           color: var(--dt-brand-color);
           font-size: 18px;
-          transition: all var(--dt-transition-fast);
+          transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
         }
         &:hover .more-icon {
           background: var(--dt-brand-color);
@@ -714,7 +714,7 @@ const handleShowAnnouncement = async () => {
           align-items: center;
           justify-content: center;
           color: var(--dt-text-secondary);
-          transition: all var(--dt-transition-fast);
+          transition: background-color var(--dt-transition-fast);
         }
         &:hover .icon-box {
           background: var(--dt-border-light);

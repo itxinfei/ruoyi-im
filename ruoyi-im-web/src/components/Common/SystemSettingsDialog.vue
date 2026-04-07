@@ -399,14 +399,14 @@ watch(visible, (val) => {
     font-size: 15px;
     color: var(--dt-text-secondary);
     cursor: pointer;
-    transition: all var(--dt-transition-fast);
+    transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
     border-radius: var(--dt-radius-xl);
     position: relative;
     font-weight: 500;
 
     .tab-icon {
       font-size: 22px;
-      transition: all var(--dt-transition-fast);
+      transition: color var(--dt-transition-fast);
     }
 
     &:hover {
@@ -527,7 +527,7 @@ watch(visible, (val) => {
         height: 48px;
         font-size: 15px;
         border-radius: var(--dt-radius-xl);
-        transition: all var(--dt-transition-fast);
+        transition: box-shadow var(--dt-transition-fast);
         font-weight: 600;
 
         &.primary-btn {
@@ -568,7 +568,7 @@ watch(visible, (val) => {
   border-radius: var(--dt-radius-xl);
   padding: 24px;
   border: 1.5px solid var(--dt-border-light);
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -697,7 +697,7 @@ watch(visible, (val) => {
       font-size: 15px;
       font-weight: 600;
       box-shadow: var(--dt-shadow-brand-strong);
-      transition: all var(--dt-transition-fast);
+      transition: box-shadow var(--dt-transition-fast);
 
       &:hover {
         box-shadow: var(--dt-shadow-brand-strong);

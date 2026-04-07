@@ -745,7 +745,7 @@ const scrollToMessage = (messageId) => {
   font-size: 18px;
   padding: var(--dt-spacing-sm);
   border-radius: var(--dt-radius-lg);
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 }
 
 .header-right .el-icon:hover {

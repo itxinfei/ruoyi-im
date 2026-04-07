@@ -226,7 +226,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-base);
   font-weight: var(--dt-font-weight-medium);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast);
 }
 
 .add-btn:hover {
@@ -261,7 +261,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-base);
   color: var(--dt-text-secondary);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: color var(--dt-transition-fast);
 }
 
 .tab-item:hover {
@@ -320,13 +320,12 @@ onMounted(() => {
   align-items: center;
   gap: var(--dt-spacing-md);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
   margin-bottom: var(--dt-spacing-sm);
   border: 1px solid transparent;
 }
 
 .approval-item:hover {
-  transform: translateX(4px);
   border-color: var(--dt-brand-light);
   box-shadow: 0 4px 12px rgba(39, 126, 251, 0.1);
 }

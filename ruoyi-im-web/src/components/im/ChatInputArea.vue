@@ -853,7 +853,7 @@ onMounted(() => {
   outline: none;
   padding: var(--dt-spacing-sm);
   border-radius: var(--dt-radius-lg);
-  transition: all var(--dt-transition-fast);
+  transition: color var(--dt-transition-fast);
   position: relative;
 }
 
@@ -920,7 +920,7 @@ onMounted(() => {
   padding: 4px 16px;
   font-size: var(--dt-font-size-sm);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 }
 
 .rec-btn.cancel {
@@ -1014,7 +1014,7 @@ onMounted(() => {
   justify-content: center;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .preview-remove:hover {
@@ -1184,7 +1184,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-base);
   font-weight: var(--dt-font-weight-medium);
   cursor: not-allowed;
-  transition: all 200ms ease-out;  /* 钉钉规范：200ms ease-out */
+  transition: background-color 200ms ease-out, color 200ms ease-out;  /* 钉钉规范：200ms ease-out */
 }
 
 .send-btn.is-active {

@@ -177,7 +177,7 @@ textarea {
 
 .el-input__wrapper {
   border-radius: var(--dt-radius-sm);
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-border-dark);
@@ -186,16 +186,18 @@ textarea {
   &.is-focus {
     border-color: var(--dt-brand-color);
     box-shadow: 0 0 0 2px var(--dt-brand-light);
+    transition: border-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
   }
 }
 
 .el-textarea__inner {
   border-radius: var(--dt-radius-sm);
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast);
 
   &:focus {
     border-color: var(--dt-brand-color);
     box-shadow: 0 0 0 2px var(--dt-brand-light);
+    transition: border-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
   }
 }
 

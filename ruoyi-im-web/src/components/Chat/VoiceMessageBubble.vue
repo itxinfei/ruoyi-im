@@ -184,7 +184,7 @@ const getBarHeight = (index) => {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all var(--dt-transition-fast);
+    transition: box-shadow var(--dt-transition-fast);
 
     .play-icon {
       font-size: 20px;  /* 钉钉规范：20x20播放图标 */

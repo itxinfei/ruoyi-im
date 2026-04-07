@@ -153,7 +153,7 @@ const handleImageError = () => {
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
-  transition: all var(--dt-transition-fast);
+  transition: opacity var(--dt-transition-fast);
   line-height: 1;
   box-sizing: border-box;
   background-color: var(--dt-border-light);

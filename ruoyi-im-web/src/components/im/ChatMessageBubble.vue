@@ -846,7 +846,7 @@ const formatDisplayUrl = (url) => {
   border-radius: 8px;
   border: 1px solid var(--dt-border-light);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .card-content:hover {
@@ -903,7 +903,7 @@ const formatDisplayUrl = (url) => {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .location-content:hover {
@@ -1129,7 +1129,7 @@ const formatDisplayUrl = (url) => {
   border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px圆角 */
   cursor: pointer;
   color: var(--dt-text-icon, #ADB1B8);  /* 钉钉规范：图标默认色 */
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
   :deep(.el-icon) {
     font-size: 16px;  /* 钉钉规范：16x16图标 */
@@ -1154,7 +1154,7 @@ const formatDisplayUrl = (url) => {
   justify-content: center;
   cursor: pointer;
   color: var(--dt-text-icon, #ADB1B8);
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
   position: relative;
 
   &:hover {

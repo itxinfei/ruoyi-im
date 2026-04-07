@@ -312,7 +312,7 @@ onMounted(loadUser)
         justify-content: center;
         color: var(--dt-text-white);
         opacity: 0;
-        transition: all var(--dt-transition-base);
+        transition: opacity var(--dt-transition-base);
 
         .material-icons-outlined {
           font-size: var(--dt-icon-size-xl);
@@ -395,7 +395,7 @@ onMounted(loadUser)
   border: 1px solid var(--dt-border-light);
   overflow: hidden;
   box-shadow: var(--dt-shadow-1);
-  transition: all var(--dt-transition-base);
+  transition: box-shadow var(--dt-transition-base);
 
   &:hover {
     box-shadow: var(--dt-shadow-2);
@@ -407,7 +407,7 @@ onMounted(loadUser)
     padding: var(--dt-spacing-md) var(--dt-spacing-lg);
     border-bottom: 1px solid var(--dt-border-lighter);
     min-height: 56px;
-    transition: all var(--dt-transition-fast);
+    transition: background-color var(--dt-transition-fast);
 
     &:last-child {
       border-bottom: none;
@@ -438,7 +438,6 @@ onMounted(loadUser)
 
         .arrow {
           color: var(--dt-brand-color);
-          transform: translateX(var(--dt-transform-x, 2px));
         }
       }
     }
@@ -472,7 +471,7 @@ onMounted(loadUser)
     .arrow {
       color: var(--dt-text-quaternary);
       margin-left: auto;
-      transition: all var(--dt-transition-fast);
+      transition: color var(--dt-transition-fast);
       font-size: var(--dt-icon-size-lg, 20px);
     }
   }

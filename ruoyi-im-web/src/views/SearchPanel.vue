@@ -585,7 +585,7 @@ loadHotKeywords()
     font-size: var(--dt-font-size-xs);
     cursor: pointer;
     color: var(--dt-text-secondary);
-    transition: all var(--dt-transition-fast);
+    transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
     &:hover {
       background: var(--dt-brand-bg);
@@ -698,7 +698,7 @@ loadHotKeywords()
     border-radius: var(--dt-radius-full);
     font-size: var(--dt-font-size-xs);
     cursor: pointer;
-    transition: all var(--dt-transition-fast);
+    transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
     max-width: 150px;
 
     &:hover {
@@ -737,7 +737,7 @@ loadHotKeywords()
       border-radius: var(--dt-radius-full, 16px);
       font-size: var(--dt-font-size-xs);
       cursor: pointer;
-      transition: all var(--dt-transition-fast);
+      transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
       &:hover {
         background: var(--dt-brand-bg);

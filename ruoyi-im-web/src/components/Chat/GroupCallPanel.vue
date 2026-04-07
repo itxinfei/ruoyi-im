@@ -667,7 +667,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   overflow: hidden;
   background: var(--dt-overlay-bg);
   border: 2px solid transparent;
-  transition: all 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 
   &.is-speaking {
     border-color: var(--dt-brand-color);
@@ -821,7 +821,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   border: none;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.7);
-  transition: all 0.2s;
+  transition: color 0.2s;
 
   .icon-circle {
     width: 52px;
@@ -832,7 +832,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     align-items: center;
     justify-content: center;
     font-size: 22px;
-    transition: all 0.2s;
+    transition: background 0.2s;
 
     &:hover {
       background: rgba(255, 255, 255, 0.2);

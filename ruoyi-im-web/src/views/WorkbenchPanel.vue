@@ -904,7 +904,7 @@ onUnmounted(() => {
   box-sizing: border-box;
   cursor: pointer;
   position: relative;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   border-radius: 8px;
   margin: 0;
 
@@ -1053,7 +1053,7 @@ onUnmounted(() => {
     border-radius: var(--dt-radius-md);
     outline: none;
     font-size: var(--dt-font-size-sm);
-    transition: all var(--dt-transition-base);
+    transition: background-color var(--dt-transition-base), border-color var(--dt-transition-base), box-shadow var(--dt-transition-base);
 
     &:focus {
       background: var(--dt-bg-card);
@@ -1101,7 +1101,7 @@ onUnmounted(() => {
   cursor: pointer;
   padding: var(--dt-spacing-lg) var(--dt-spacing-sm);
   border-radius: var(--dt-radius-lg);
-  transition: all var(--dt-transition-base);
+  transition: background-color var(--dt-transition-base), border-color var(--dt-transition-base);
   position: relative;
   background: var(--dt-bg-card);
   border: 1px solid transparent;
@@ -1319,7 +1319,7 @@ onUnmounted(() => {
   border-radius: var(--dt-radius-md);
   gap: var(--dt-spacing-lg);
   border: 1px solid var(--dt-border-lighter);
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-light);
@@ -1369,7 +1369,7 @@ onUnmounted(() => {
   padding: var(--dt-spacing-md) var(--dt-spacing-lg);
   border-radius: var(--dt-radius-lg);
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: border-color var(--dt-transition-base), box-shadow var(--dt-transition-base);
   display: flex;
   align-items: center;
   gap: var(--dt-spacing-md);
@@ -1378,7 +1378,6 @@ onUnmounted(() => {
   &:hover {
     border-color: var(--dt-brand-light);
     box-shadow: var(--dt-shadow-2);
-    transform: translateX(4px);
   }
 
   &__status {
@@ -1439,13 +1438,12 @@ onUnmounted(() => {
   border-radius: var(--dt-radius-lg);
   gap: var(--dt-spacing-lg);
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: border-color var(--dt-transition-base), box-shadow var(--dt-transition-base);
   border: 1px solid var(--dt-border-lighter);
 
   &:hover {
     border-color: var(--dt-brand-light);
     box-shadow: var(--dt-shadow-2);
-    transform: translateX(4px);
   }
 
   .schedule-time {

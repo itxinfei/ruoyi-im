@@ -186,7 +186,7 @@ const formatTime = (time) => {
   font-weight: 500;
   color: var(--dt-text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .session-tab:hover {
@@ -209,7 +209,7 @@ const formatTime = (time) => {
   border-radius: 8px;
   padding: 0 12px;
   border: 1.5px solid transparent;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .search-bar:hover {
@@ -259,7 +259,7 @@ const formatTime = (time) => {
   padding: 0 var(--dt-spacing-lg);
   cursor: pointer;
   position: relative;
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast);
 }
 
 .session-item:hover {

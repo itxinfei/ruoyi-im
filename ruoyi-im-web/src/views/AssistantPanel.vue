@@ -664,7 +664,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
   &:hover {
     background: var(--dt-bg-session-hover);
@@ -834,7 +834,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-sm);
   color: var(--dt-text-secondary);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast), border-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
   &:hover {
     background: var(--dt-brand-bg);
@@ -870,7 +870,7 @@ onMounted(() => {
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast), background-color var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-color);

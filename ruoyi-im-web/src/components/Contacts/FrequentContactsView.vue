@@ -233,7 +233,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: box-shadow var(--dt-transition-fast), border-color var(--dt-transition-fast);
   border: 1px solid var(--dt-border-lighter);
   position: relative;
 

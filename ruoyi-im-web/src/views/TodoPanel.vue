@@ -279,7 +279,7 @@ onMounted(() => loadTodos())
   .nav-section { margin-bottom: var(--dt-spacing-lg);
     .nav-section-title { font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); padding: var(--dt-spacing-xs); font-weight: var(--dt-font-weight-medium); }
   }
-  .nav-item { display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 44px; box-sizing: border-box; border-radius: var(--dt-radius-md); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-base); margin: 2px var(--dt-spacing-xs);
+  .nav-item { display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 44px; box-sizing: border-box; border-radius: var(--dt-radius-md); cursor: pointer; color: var(--dt-text-primary); transition: background-color var(--dt-transition-base); margin: 2px var(--dt-spacing-xs);
     &:hover { background: var(--dt-bg-session-hover); }
     &.active {
       background: var(--dt-brand-bg);
@@ -319,8 +319,8 @@ onMounted(() => loadTodos())
 }
 .todo-content-scroller { flex: 1; padding: var(--dt-spacing-lg) var(--dt-spacing-xl); overflow-y: auto; background: var(--dt-bg-body); }
 .todo-list { display: flex; flex-direction: column; gap: var(--dt-spacing-md); }
-.todo-card { background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: var(--dt-spacing-lg); display: flex; align-items: flex-start; gap: var(--dt-spacing-lg); border: 1px solid transparent; box-shadow: var(--dt-shadow-1); cursor: pointer; transition: all var(--dt-transition-fast);
-  &:hover { transform: translateX(4px); border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-2); .todo-actions { opacity: 1; } }
+.todo-card { background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: var(--dt-spacing-lg); display: flex; align-items: flex-start; gap: var(--dt-spacing-lg); border: 1px solid transparent; box-shadow: var(--dt-shadow-1); cursor: pointer; transition: border-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
+  &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-2); .todo-actions { opacity: 1; } }
   &.completed { opacity: 0.6; .title-text { text-decoration: line-through; } }
 }
 .todo-checkbox { flex-shrink: 0; .checkbox-inner { width: var(--dt-checkbox-size, 20px); height: var(--dt-checkbox-size, 20px); border: 2px solid var(--dt-border-color); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center;
@@ -342,6 +342,6 @@ onMounted(() => loadTodos())
     .meta-date, .meta-remind { display: flex; align-items: center; gap: var(--dt-spacing-xs); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-md); } &.overdue { color: var(--dt-error-color); } }
   }
 }
-.todo-actions { opacity: 0; display: flex; gap: var(--dt-spacing-xs); transition: all var(--dt-transition-fast); .action-icon { border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); padding: 4px; &:hover { color: var(--dt-brand-color); } &.danger:hover { color: var(--dt-error-color); } } }
+.todo-actions { opacity: 0; display: flex; gap: var(--dt-spacing-xs); transition: color var(--dt-transition-fast); .action-icon { border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); padding: 4px; &:hover { color: var(--dt-brand-color); } &.danger:hover { color: var(--dt-error-color); } } }
 .empty-state, .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--dt-spacing-3xl, 100px) 0; color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-xl, 48px); margin-bottom: var(--dt-spacing-md); opacity: 0.3; } }
 </style>

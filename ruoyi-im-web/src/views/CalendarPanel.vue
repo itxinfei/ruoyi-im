@@ -1229,11 +1229,10 @@ function getReminderText(minutes) {
   text-overflow: ellipsis;
   color: var(--dt-text-white);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: opacity var(--dt-transition-fast);
 
   &:hover {
     opacity: 0.85;
-    transform: translateX(2px);
   }
 
   &.work { background: var(--dt-event-work); }

@@ -404,7 +404,7 @@ h1 {
     border: 2px solid transparent;
     border-radius: 10px;
     outline: none;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
 
     &::placeholder {
       color: #9ca3af;
@@ -470,7 +470,7 @@ h1 {
     border: 2px solid #d1d5db;
     border-radius: 5px;
     position: relative;
-    transition: all 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
 
     &::after {
       content: '';

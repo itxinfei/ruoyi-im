@@ -170,7 +170,7 @@ const handleToggleTheme = () => {
   cursor: pointer;
   border-radius: 0;
   color: rgba(255, 255, 255, 0.7);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   margin: 0;
 }
 
@@ -243,7 +243,7 @@ const handleToggleTheme = () => {
   cursor: pointer;
   border-radius: 0;
   color: rgba(255, 255, 255, 0.7);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .nav-bottom .nav-item:hover {
@@ -271,7 +271,7 @@ const handleToggleTheme = () => {
   border-radius: var(--dt-radius-lg);
   background: rgba(255,255,255,0.2);
   border: 2px solid rgba(255,255,255,0.15);
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .user-avatar-wrapper:hover .avatar-ring {
