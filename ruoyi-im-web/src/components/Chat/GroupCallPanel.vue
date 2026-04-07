@@ -671,7 +671,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 
   &.is-speaking {
     border-color: var(--dt-brand-color);
-    box-shadow: 0 0 16px rgba(var(--dt-brand-color-rgb, 64, 158, 255), 0.5);
+    box-shadow: 0 0 16px rgba(39, 126, 251, 0.5);
   }
 
   &.is-muted .participant-overlay .participant-name {

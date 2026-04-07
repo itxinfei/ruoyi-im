@@ -700,54 +700,154 @@ const scrollToMessage = (messageId) => {
 <style scoped>
 .chat-window { display: flex; flex-direction: column; height: 100%; background-color: var(--dt-bg-chat); position: relative; }
 .chat-header {
-  height: var(--dt-chat-header-height); padding: 0 var(--dt-spacing-xl); display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--dt-border-light); flex-shrink: 0;
+  height: 56px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--dt-border-light);
+  flex-shrink: 0;
 }
-.header-left { display: flex; align-items: center; gap: var(--dt-spacing-sm); cursor: pointer; }
-.title { font-size: var(--dt-font-size-lg); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); }
-.member-count { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); }
-.header-right { display: flex; gap: var(--dt-spacing-xl); color: var(--dt-text-tertiary); }
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-sm);
+  cursor: pointer;
+  padding: var(--dt-spacing-sm) 0;
+  border-radius: var(--dt-radius-lg);
+  transition: background-color var(--dt-transition-fast);
+}
+
+.header-left:hover {
+  background: var(--dt-bg-hover);
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+}
+
+.member-count {
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-secondary);
+}
+
+.header-right {
+  display: flex;
+  gap: var(--dt-spacing-xs);
+  color: var(--dt-text-tertiary);
+}
+
 .header-right .el-icon {
   cursor: pointer;
   font-size: 18px;
+  padding: var(--dt-spacing-sm);
+  border-radius: var(--dt-radius-lg);
   transition: all var(--dt-transition-fast);
 }
+
 .header-right .el-icon:hover {
-  color: var(--dt-brand-hover);  /* 钉钉规范：hover #1169E0 */
-}
-.header-right .el-icon:active {
-  color: var(--dt-brand-active);  /* 钉钉规范：active #0656C6 */
-  transform: scale(0.95);
+  background-color: var(--dt-bg-hover);
+  color: var(--dt-brand-color);
 }
 
-/* 多选模式顶部栏 */
+.header-right .el-icon:active {
+  background-color: var(--dt-brand-bg);
+}
+
+/* 下拉菜单 - 钉钉风格 */
+.header-right :deep(.el-dropdown-menu) {
+  padding: var(--dt-spacing-xs);
+  border-radius: var(--dt-radius-xl);
+  border: 1px solid var(--dt-border-light);
+  box-shadow: var(--dt-shadow-3);
+}
+
+.header-right :deep(.el-dropdown-menu__item) {
+  padding: 10px 14px;
+  border-radius: var(--dt-radius-lg);
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-sm);
+}
+
+.header-right :deep(.el-dropdown-menu__item:hover) {
+  background-color: var(--dt-bg-hover);
+  color: var(--dt-brand-color);
+}
+
+.header-right :deep(.el-dropdown-menu__item .el-icon) {
+  font-size: 16px;
+  color: var(--dt-text-secondary);
+}
+
+.header-right :deep(.el-dropdown-menu__item:hover .el-icon) {
+  color: var(--dt-brand-color);
+}
+
+/* 多选模式顶部栏 - 钉钉风格 */
 .selection-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: var(--dt-spacing-md) var(--dt-spacing-xl);
   background-color: var(--dt-brand-color);
   color: var(--dt-text-white);
   flex-shrink: 0;
+  box-shadow: var(--dt-shadow-brand);
 }
 
 .selection-info {
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-medium);
 }
 
 .selection-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--dt-spacing-sm);
+}
+
+.selection-actions :deep(.el-button) {
+  padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-font-size-sm);
+}
+
+.selection-actions :deep(.el-button--small) {
+  height: var(--dt-btn-height-sm);
+}
+
+.selection-actions :deep(.el-button:not(.el-button--primary):not(.el-button--danger)) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--dt-text-white);
+}
+
+.selection-actions :deep(.el-button:not(.el-button--primary):not(.el-button--danger)):hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* 消息多选样式 */
 .message-item-wrapper {
   position: relative;
   cursor: pointer;
+  padding: 6px var(--dt-spacing-lg);
+  margin: 4px 0;
+  border-radius: var(--dt-radius-sm);
+  transition: background-color var(--dt-transition-fast);
+}
+
+.message-item-wrapper:hover {
+  background-color: var(--dt-bg-hover);
 }
 
 .message-item-wrapper.is-selected {
-  background-color: var(--dt-bg-hover);
+  background-color: var(--dt-brand-bg);
   border-radius: var(--dt-radius-sm);
 }
 
@@ -759,10 +859,10 @@ const scrollToMessage = (messageId) => {
   z-index: 5;
 }
 
-.message-list-viewport { flex: 1; overflow-y: auto; background-color: var(--dt-bg-chat); padding: var(--dt-spacing-xl) 0; }
+.message-list-viewport { flex: 1; overflow-y: auto; background-color: var(--dt-bg-chat); padding: var(--dt-spacing-md) var(--dt-spacing-xl); }
 
 /* 对齐钉钉输入区高度约束: 最低 180px，最高不超过聊天区的 40% */
-::deep(.chat-input-wrapper) {
+:deep(.chat-input-wrapper) {
   min-height: 180px;
   max-height: 40%;
 }

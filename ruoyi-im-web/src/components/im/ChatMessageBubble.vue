@@ -508,8 +508,12 @@ const formatDisplayUrl = (url) => {
 .system-notice {
   align-self: center;
   margin: var(--dt-spacing-lg) 0;
-  font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-quaternary);  /* 钉钉规范：rgba(23,26,29,0.4) */
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
+  background: var(--dt-bg-hover);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
 }
 
 .re-edit-link {
@@ -525,15 +529,22 @@ const formatDisplayUrl = (url) => {
 
 .message-container {
   display: flex;
-  align-items: flex-start;  /* 钉钉规范：头像顶部与气泡第一行文字顶部对齐 */
+  align-items: flex-start;
   width: 100%;
 }
 
+/* 我的消息：头像在右边 */
 .is-me .message-container {
   flex-direction: row-reverse;
 }
 
+/* 对方消息：头像在左边 */
+.is-other .message-container {
+  flex-direction: row;
+}
+
 .avatar-wrapper {
+  position: relative;
   flex-shrink: 0;
 }
 
@@ -542,8 +553,14 @@ const formatDisplayUrl = (url) => {
   height: var(--dt-avatar-size-md);
   border-radius: var(--dt-radius-sm);
   object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: var(--dt-shadow-2);
+}
 .avatar-placeholder {
   width: var(--dt-avatar-size-md);
   flex-shrink: 0;
@@ -556,25 +573,34 @@ const formatDisplayUrl = (url) => {
   flex-direction: column;
 }
 
+/* 我的消息：内容右对齐 */
 .is-me .message-content-wrapper {
   align-items: flex-end;
+  text-align: right;
+}
+
+/* 对方消息：内容左对齐 */
+.is-other .message-content-wrapper {
+  align-items: flex-start;
+  text-align: left;
 }
 
 .sender-name {
   font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-tertiary);
+  color: var(--dt-text-secondary);
   margin-bottom: 4px;
   margin-left: 2px;
+  font-weight: 500;
 }
 
-/* 引用回复预览 */
+/* 引用回复预览 - 钉钉风格 */
 .quoted-message-preview {
   background-color: var(--dt-bg-hover);
-  border-left: 2px solid var(--dt-brand-color);
-  padding: 4px 8px;
-  margin-bottom: 4px;
-  border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
-  font-size: var(--dt-font-size-sm);
+  border-left: 3px solid var(--dt-brand-color);
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  font-size: 13px;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -583,6 +609,7 @@ const formatDisplayUrl = (url) => {
 
 .quoted-author {
   color: var(--dt-text-secondary);
+  font-weight: 500;
   margin-right: 4px;
 }
 
@@ -607,99 +634,48 @@ const formatDisplayUrl = (url) => {
   flex-direction: row-reverse;
 }
 
-/* 核心气泡规范 */
+/* 核心气泡规范 - 钉钉风格：简洁圆角气泡 */
 .message-bubble {
   padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
-  font-size: var(--dt-font-size-base);
+  font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
   white-space: pre-wrap;
   position: relative;
-  transition: box-shadow var(--dt-transition-fast), transform var(--dt-transition-fast);
+  max-width: var(--dt-bubble-max-width);
+  transition: background-color 0.2s ease;
 }
 
-/* 待发送状态 - 钉钉规范：opacity 0.6 */
+/* 待发送状态 */
 .message-bubble.is-pending {
   opacity: 0.6;
 }
 
-/* 接收方 (左侧) - 白色气泡，钉钉风格：左上小尖，底右圆角 */
+/* 接收方 (左侧) - 钉钉纯白气泡：无边框无阴影 */
 .is-other .message-bubble {
   background-color: var(--dt-bubble-left-bg);
   color: var(--dt-text-primary);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-bubble-radius-received);
-  box-shadow: var(--dt-shadow-1);
-  position: relative;
-}
-/* 左侧气泡左上小三角伪元素 */
-.is-other .message-bubble::before {
-  content: '';
-  position: absolute;
-  left: -5px;
-  top: 10px;
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-right: 5px solid var(--dt-border-light);
-}
-.is-other .message-bubble::after {
-  content: '';
-  position: absolute;
-  left: -4px;
-  top: 11px;
-  width: 0;
-  height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-right: 4px solid var(--dt-bubble-left-bg);
-}
-.is-other .message-bubble:hover {
-  box-shadow: var(--dt-shadow-2);
+  border-radius: 8px 4px 8px 8px;
 }
 
-/* 发送方 (右侧) - 蓝色气泡，钉钉风格：右上小尖，底左圆角 */
+/* 发送方 (右侧) - 钉钉蓝色气泡 */
 .is-me .message-bubble {
   background-color: var(--dt-bubble-right-bg);
   color: var(--dt-text-white);
-  border-radius: var(--dt-bubble-radius-sent);
-  box-shadow: var(--dt-shadow-brand);
-  position: relative;
+  border-radius: 4px 8px 8px 8px;
 }
-/* 右侧气泡右上小三角伪元素 */
-.is-me .message-bubble::before {
-  content: '';
-  position: absolute;
-  right: -5px;
-  top: 10px;
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 5px solid var(--dt-bubble-right-bg);  /* 钉钉规范：右侧气泡色 */
-}
-.is-me .message-bubble::after {
-  content: '';
-  position: absolute;
-  right: -4px;
-  top: 11px;
-  width: 0;
-  height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 4px solid var(--dt-bubble-right-bg);
-}
+
 .is-me .message-bubble:hover {
   background-color: var(--dt-bubble-right-bg-hover);
 }
 
 .content-img {
-  min-width: 120px;  /* 钉钉规范：最小120px */
-  max-width: 280px;  /* 钉钉规范：最大280px */
-  max-height: 400px;  /* 钉钉规范：最大400px */
-  border-radius: var(--dt-radius-sm);
+  min-width: 120px;
+  max-width: 280px;
+  max-height: 400px;
+  border-radius: 8px;
   display: block;
+  object-fit: cover;
 }
 
 /* 图片容器需要relative定位用于占位符 */
@@ -775,40 +751,48 @@ const formatDisplayUrl = (url) => {
   border-radius: var(--dt-radius-sm);
 }
 
-/* 文件消息 - 钉钉规范：宽度260px，高度64px，图标40x40 */
+/* 文件消息 - 钉钉风格 */
 .file-content {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-md);
-  width: 260px;  /* 钉钉规范：固定260px */
-  height: 64px;  /* 钉钉规范：固定64px */
-  padding: var(--dt-spacing-sm) var(--dt-spacing-md);
-  position: relative;  /* 用于下载进度条定位 */
+  gap: 12px;
+  width: 260px;
+  height: 64px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.file-content:hover {
+  background-color: var(--dt-bg-hover);
 }
 
 .file-content .file-icon {
-  font-size: 40px;  /* 钉钉规范：40x40图标 */
+  font-size: 36px;
   flex-shrink: 0;
 }
 
 .file-content .file-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   overflow: hidden;
   flex: 1;
 }
 
 .file-content .file-name {
-  font-size: var(--dt-font-size-base);  /* 14px */
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dt-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .file-content .file-size {
-  font-size: var(--dt-font-size-sm);  /* 12px 灰色 */
-  color: var(--dt-text-tertiary);
+  font-size: 12px;
+  color: var(--dt-text-secondary);
 }
 
 /* 钉钉规范：下载进度条 3px 品牌蓝色 */
@@ -828,34 +812,53 @@ const formatDisplayUrl = (url) => {
   transition: width 0.1s linear;
 }
 
-/* 语音消息 */
+/* 语音消息 - 钉钉风格 */
 .voice-content {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 80px;
+  gap: 10px;
+  min-width: 100px;
+  padding: 4px 0;
+}
+
+.voice-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 20px;
+}
+
+.voice-wave.active {
+  animation: voice-wave-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes voice-wave-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
 
 .voice-duration {
   font-size: 12px;
+  font-weight: 500;
 }
 
-/* 名片消息 */
+/* 名片消息 - 钉钉风格 */
 .card-content {
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-sm);
-  min-width: 180px;
+  gap: 12px;
+  min-width: 200px;
   max-width: 240px;
-  padding: 8px 12px;
-  background-color: var(--dt-bg-card);
+  padding: 12px;
+  border-radius: 8px;
   border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-md);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .card-content:hover {
   background-color: var(--dt-bg-hover);
+  border-color: var(--dt-brand-color);
 }
 
 .card-avatar {
@@ -904,15 +907,14 @@ const formatDisplayUrl = (url) => {
   flex-direction: column;
   min-width: 200px;
   max-width: 280px;
-  background: var(--dt-bg-card);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-radius-md);
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .location-content:hover {
-  background: var(--dt-bg-hover);
+  opacity: 0.9;
 }
 
 .location-map {
@@ -999,15 +1001,18 @@ const formatDisplayUrl = (url) => {
   object-fit: cover;
 }
 
+/* 链接卡片 - 钉钉风格 */
 .link-content {
   padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--dt-border-light);
 }
 
 .link-title {
   font-size: 14px;
-  font-weight: 700;  /* 钉钉规范：粗体 */
+  font-weight: 600;
   color: var(--dt-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1016,7 +1021,7 @@ const formatDisplayUrl = (url) => {
 .link-desc {
   font-size: 12px;
   color: var(--dt-text-secondary);
-  line-height: 1.4;
+  line-height: 1.5;
   margin-bottom: 8px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1043,63 +1048,68 @@ const formatDisplayUrl = (url) => {
   text-decoration: underline;
 }
 
-/* 状态与已读侧边栏 - 钉钉规范：距气泡边缘4px */
+/* 消息状态侧边栏 */
 .message-status-sidebar {
   display: flex;
   align-items: flex-end;
-  margin-right: 4px;  /* 钉钉规范：4px间距 */
+  margin-right: 6px;
   padding-bottom: 2px;
   flex-shrink: 0;
 }
 
 .status-icon {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .status-icon.is-loading {
-  color: var(--dt-text-icon, #ADB1B8);
-  animation: rotate 1s linear infinite;  /* 钉钉规范：1s旋转 */
+  color: var(--dt-text-icon);
+  animation: rotate 1s linear infinite;
 }
 
 .status-icon.is-failed {
-  color: var(--dt-error-color);  /* 钉钉规范：红色感叹号 */
+  color: var(--dt-error-color);
   cursor: pointer;
 }
 
+.status-icon.is-failed:hover {
+  transform: scale(1.1);
+}
+
 .read-status {
-  font-size: 12px;
+  font-size: 11px;
   white-space: nowrap;
 }
 
 .read-status.is-read {
-  color: var(--dt-text-quaternary);  /* 钉钉规范：已读灰色 */
+  color: var(--dt-text-quaternary);
 }
 
 .read-status.is-unread {
   color: var(--dt-brand-color);
+  font-weight: 500;
 }
 
 .edited-tag {
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
-  white-space: nowrap;
+  font-size: 11px;
+  color: var(--dt-text-quaternary);
+  margin-left: 4px;
 }
 
-/* 操作悬浮条 (Action Bar) - 钉钉规范：16x16图标，间距8px，距离气泡8px */
+/* 操作悬浮条 - 钉钉风格 */
 .action-bar {
   display: flex;
   align-items: center;
   background-color: var(--dt-bg-card);
-  border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px圆角 */
-  box-shadow: var(--dt-shadow-action-bar);  /* 钉钉规范：0 2px 8px rgba(0,0,0,0.08) */
-  padding: 4px;
-  gap: 8px;  /* 钉钉规范：图标间距8px */
+  border-radius: 6px;
+  box-shadow: var(--dt-shadow-2);
+  padding: 4px 6px;
+  gap: 2px;
   position: absolute;
-  top: -8px;  /* 钉钉规范：距气泡顶部8px */
+  top: -36px;
   z-index: 10;
   opacity: 0;
   transform: translateY(4px) scale(0.95);
-  transition: opacity var(--dt-transition-fast), transform var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
+  transition: all 0.15s ease;
   pointer-events: none;
 }
 
@@ -1110,11 +1120,11 @@ const formatDisplayUrl = (url) => {
 }
 
 .is-me .action-bar {
-  right: 0;
+  right: 8px;
 }
 
 .is-other .action-bar {
-  left: 0;
+  left: 8px;
 }
 
 .action-item {

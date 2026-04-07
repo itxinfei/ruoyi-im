@@ -7,7 +7,7 @@ import { getGroupFileStatistics } from '@/api/im/groupFile'
 import { initiateCall } from '@/api/im/videoCall'
 import { clearConversationMessages } from '@/api/im/message'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Phone, VideoCamera, Link, Bell, Microphone, StarFilled, Mute } from '@element-plus/icons-vue'
+import { Phone, VideoCamera, Link, Bell, Microphone, StarFilled, Mute, More, ArrowUp } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
@@ -26,6 +26,7 @@ const store = useStore()
 
 const loading = ref(false)
 const members = ref([])
+const allMembers = ref([])  // 保存完整成员列表
 const fileStats = ref(null)
 const userInfo = ref(null)
 const groupFilePanelRef = ref(null)
@@ -37,9 +38,14 @@ const qrCodeLoading = ref(false)
 const announcementDialogVisible = ref(false)
 const announcementContent = ref('')
 const announcements = ref([])
+const showAllMembers = ref(false)  // 是否显示全部成员
 const currentUserId = computed(() => store.getters['user/currentUser']?.id)
 const isGroupOwner = computed(() => members.value.some(m => m.role === 'OWNER' && m.userId === currentUserId.value))
 const isGroupAdmin = computed(() => members.value.some(m => m.role === 'ADMIN' && m.userId === currentUserId.value))
+// 是否有更多成员可显示
+const hasMoreMembers = computed(() => {
+  return allMembers.value.length > 12 && !showAllMembers.value
+})
 
 // 成员右键菜单
 const memberContextMenu = ref({
@@ -59,13 +65,18 @@ const loadData = async () => {
         // 群组成员单独获取
         const membersRes = await getGroupMembers(props.session.targetId)
         if (membersRes.code === 200) {
-          members.value = (membersRes.data || []).slice(0, 12).map(m => ({
+          // 保存全部成员
+          allMembers.value = (membersRes.data || []).map(m => ({
             userId: m.userId,
             nickname: m.groupNickname || m.userName,
             avatar: m.userAvatar,
             role: m.role,
             isMuted: m.isMuted
           }))
+          // 默认显示前12个
+          members.value = allMembers.value.slice(0, 12)
+          // 重置查看更多状态
+          showAllMembers.value = false
         }
       }
       const statsRes = await getGroupFileStatistics(props.session.targetId)
@@ -235,6 +246,17 @@ const handleShowQrCode = async () => {
   }
 }
 
+// 切换显示全部成员
+const toggleShowAllMembers = () => {
+  if (showAllMembers.value) {
+    members.value = allMembers.value.slice(0, 12)
+    showAllMembers.value = false
+  } else {
+    members.value = allMembers.value
+    showAllMembers.value = true
+  }
+}
+
 // 成员右键菜单
 const handleMemberRightClick = (event, member) => {
   event.preventDefault()
@@ -375,6 +397,16 @@ const handleShowAnnouncement = async () => {
               <span v-else-if="m.role === 'ADMIN'" class="role-badge admin"><el-icon><Microphone /></el-icon></span>
             </div>
             <span class="nickname">{{ m.nickname }}</span>
+          </div>
+          <!-- 查看更多 -->
+          <div v-if="hasMoreMembers" class="member-item more-btn" @click="toggleShowAllMembers">
+            <div class="icon-box more-icon"><el-icon><More /></el-icon></div>
+            <span class="nickname">查看更多</span>
+          </div>
+          <!-- 收起 -->
+          <div v-else-if="showAllMembers && allMembers.length > 12" class="member-item collapse-btn" @click="showAllMembers = false">
+            <div class="icon-box"><el-icon><ArrowUp /></el-icon></div>
+            <span class="nickname">收起</span>
           </div>
           <div class="member-item add-btn">
             <div class="icon-box"><el-icon><Plus /></el-icon></div>
@@ -644,6 +676,48 @@ const handleShowAnnouncement = async () => {
           align-items: center;
           justify-content: center;
           color: var(--dt-text-desc);
+        }
+      }
+
+      // 查看更多样式
+      &.more-btn {
+        cursor: pointer;
+        .more-icon {
+          width: 32px;
+          height: 32px;
+          background: var(--dt-brand-bg);
+          border: none;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--dt-brand-color);
+          font-size: 18px;
+          transition: all var(--dt-transition-fast);
+        }
+        &:hover .more-icon {
+          background: var(--dt-brand-color);
+          color: var(--dt-text-white);
+        }
+      }
+
+      // 收起样式
+      &.collapse-btn {
+        cursor: pointer;
+        .icon-box {
+          width: 32px;
+          height: 32px;
+          background: var(--dt-bg-hover);
+          border: none;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--dt-text-secondary);
+          transition: all var(--dt-transition-fast);
+        }
+        &:hover .icon-box {
+          background: var(--dt-border-light);
         }
       }
     }

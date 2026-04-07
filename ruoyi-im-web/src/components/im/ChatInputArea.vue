@@ -732,7 +732,7 @@ onMounted(() => {
 .chat-input-wrapper {
   display: flex;
   flex-direction: column;
-  background-color: var(--dt-bg-chat);
+  background-color: var(--dt-bg-card);
   border-top: 1px solid var(--dt-border-light);
   position: relative;
 }
@@ -827,34 +827,48 @@ onMounted(() => {
   color: var(--dt-text-primary);
 }
 
-/* 工具栏 */
+/* 工具栏 - 钉钉风格 */
 .toolbar {
-  height: var(--dt-toolbar-height);
-  padding: 0 var(--dt-spacing-lg);
+  height: 48px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
-  gap: var(--dt-spacing-lg);
-  border-bottom: 1px solid var(--dt-border-lighter);
+  gap: 4px;
+  border-bottom: 1px solid var(--dt-border-light);
+}
+
+/* 工具栏分隔符 */
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--dt-border-light);
+  margin: 0 6px;
+  flex-shrink: 0;
 }
 
 .tool-icon {
   font-size: 20px;
-  color: var(--dt-text-icon, #ADB1B8);  /* 钉钉规范：图标默认色 #ADB1B8 */
+  color: var(--dt-text-icon);
   cursor: pointer;
   outline: none;
   padding: var(--dt-spacing-sm);
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-lg);
   transition: all var(--dt-transition-fast);
+  position: relative;
 }
 
 .tool-icon:hover {
-  color: var(--dt-text-primary);  /* 钉钉规范：悬停变深色 #171A1D */
+  color: var(--dt-text-primary);
   background-color: var(--dt-bg-hover);
 }
 
 .tool-icon:active {
-  transform: scale(0.92);
-  background-color: var(--dt-brand-bg-dark);
+  background-color: var(--dt-brand-bg);
+}
+
+.tool-icon.is-active {
+  color: var(--dt-brand-color);
+  background-color: var(--dt-brand-bg);
 }
 
 .upload-wrapper {
@@ -864,12 +878,6 @@ onMounted(() => {
 
 .tool-icon.is-recording {
   color: var(--dt-error-color);
-  animation: pulse-recording 1s ease-in-out infinite;
-}
-
-@keyframes pulse-recording {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }
 
 /* 录音状态栏 */
@@ -881,12 +889,6 @@ onMounted(() => {
   padding: 0 var(--dt-spacing-xl);
   background: var(--dt-bg-body);
   border-top: 1px solid var(--dt-border-light);
-  animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-  from { height: 0; opacity: 0; }
-  to { height: 44px; opacity: 1; }
 }
 
 .recording-info {
@@ -900,12 +902,6 @@ onMounted(() => {
   height: 8px;
   border-radius: 50%;
   background: var(--dt-error-color);
-  animation: blink 0.8s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
 }
 
 .recording-text {
@@ -945,26 +941,29 @@ onMounted(() => {
   background: var(--dt-brand-hover);
 }
 
-/* 表情选择器 */
+/* 表情选择器 - 钉钉风格 */
 .emoji-picker {
-  padding: 8px;
+  padding: 12px;
+  background: var(--dt-bg-card);
+  border-radius: 12px 12px 0 0;
+  border-top: 1px solid var(--dt-border-light);
 }
 
 .emoji-grid {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 4px;
+  gap: 6px;
 }
 
 .emoji-item {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
-  border-radius: var(--dt-radius-sm);
+  border-radius: var(--dt-radius-lg);
   transition: background-color var(--dt-transition-fast);
 }
 
@@ -972,22 +971,27 @@ onMounted(() => {
   background-color: var(--dt-bg-hover);
 }
 
-/* 图片预览区 */
+.emoji-item:active {
+  background-color: var(--dt-brand-bg);
+}
+
+/* 图片预览区 - 钉钉风格 */
 .image-preview-bar {
   display: flex;
-  gap: 8px;
-  padding: 8px 20px;
+  gap: 10px;
+  padding: 12px 20px;
   background-color: var(--dt-bg-body);
   overflow-x: auto;
 }
 
 .preview-item {
   position: relative;
-  width: 64px;
-  height: 64px;
-  border-radius: var(--dt-radius-sm);
+  width: 72px;
+  height: 72px;
+  border-radius: var(--dt-radius-xl);
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: var(--dt-shadow-1);
 }
 
 .preview-img {
@@ -998,10 +1002,10 @@ onMounted(() => {
 
 .preview-remove {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
   background-color: var(--dt-overlay-bg);
   color: var(--dt-text-white);
   border-radius: 50%;
@@ -1009,7 +1013,12 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.preview-remove:hover {
+  background-color: var(--dt-error-color);
 }
 
 /* 视频预览区 */
@@ -1061,7 +1070,7 @@ onMounted(() => {
 
 /* 名片选择器 */
 .card-picker-search {
-  margin-bottom: 16px;
+  margin-bottom: var(--dt-spacing-lg);
 }
 
 .card-picker-list {
@@ -1118,12 +1127,12 @@ onMounted(() => {
   font-size: var(--dt-font-size-sm);
 }
 
-/* 主输入区 - 钉钉规范：初始高度96px */
+/* 主输入区 - 钉钉规范优化：初始高度120px */
 .input-main {
   flex: 1;
-  padding: 0 var(--dt-spacing-xl);
-  min-height: 96px;  /* 钉钉规范：初始高度96px */
-  max-height: 240px;
+  padding: 8px var(--dt-spacing-xl);
+  min-height: 120px;
+  max-height: 320px;
   overflow-y: auto;
 }
 
@@ -1133,16 +1142,22 @@ onMounted(() => {
   height: 100%;
   outline: none;
   border: none;
-  font-size: var(--dt-font-size-base);
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.7;
   color: var(--dt-text-primary);
   white-space: pre-wrap;
   word-break: break-all;
+  caret-color: var(--dt-brand-color);
+}
+
+.rich-editor:focus {
+  outline: none;
 }
 
 .rich-editor:empty:before {
   content: attr(placeholder);
   color: var(--dt-text-tertiary);
+  pointer-events: none;
 }
 
 /* 底部发送栏 */
@@ -1185,7 +1200,6 @@ onMounted(() => {
 }
 
 .send-btn.is-active:active {
-  transform: scale(0.96);
   background-color: var(--dt-brand-active);
 }
 

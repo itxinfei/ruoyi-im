@@ -483,7 +483,7 @@ watch(visible, (val) => {
           background: var(--dt-success-color);
           border: 3px solid var(--dt-bg-card);
           border-radius: 50%;
-          box-shadow: 0 2px 8px var(--dt-success-bg-dark);
+          box-shadow: 0 2px 8px rgba(0, 180, 42, 0.3);
 
           &.status-online {
             background: var(--dt-success-color);

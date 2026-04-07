@@ -61,19 +61,74 @@ const handleClick = () => {
 
 <style scoped lang="scss">
 .node-item {
-  display: flex; align-items: center; height: 32px; padding: 0 8px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
-  &:hover { background: var(--dt-bg-hover-light); }
-  &.active { background: var(--dt-brand-lighter); .node-name { color: var(--dt-brand-color); font-weight: 600; } .type-icon { color: var(--dt-brand-color); } }
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
-  .expand-icon { font-size: 16px; color: var(--dt-text-tertiary); transition: transform 0.2s; margin-right: 4px; &.rotated { transform: rotate(90deg); } }
-  .expand-placeholder { width: 20px; }
-
-  .type-icon { font-size: 18px; margin-right: 8px; color: var(--dt-text-tertiary);
-    &.COMPANY { color: var(--dt-brand-color); }
+  &:hover {
+    background: var(--dt-bg-hover);
   }
 
-  .node-name { font-size: 13px; color: var(--dt-text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .node-count { font-size: 11px; color: var(--dt-text-tertiary); margin-left: 8px; }
+  &.active {
+    background: var(--dt-brand-lighter);
+    .node-name {
+      color: var(--dt-brand-color);
+      font-weight: 600;
+    }
+    .type-icon {
+      color: var(--dt-brand-color);
+    }
+  }
+
+  .expand-icon {
+    font-size: 14px;
+    color: var(--dt-text-tertiary);
+    transition: transform 0.2s ease;
+    margin-right: 6px;
+    &.rotated {
+      transform: rotate(90deg);
+    }
+  }
+  .expand-placeholder {
+    width: 20px;
+  }
+
+  .type-icon {
+    font-size: 18px;
+    margin-right: 10px;
+    color: var(--dt-text-secondary);
+    &.COMPANY {
+      color: var(--dt-brand-color);
+    }
+  }
+
+  .node-name {
+    font-size: 14px;
+    color: var(--dt-text-primary);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .node-count {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+    margin-left: 8px;
+    background: var(--dt-bg-hover);
+    padding: 2px 8px;
+    border-radius: var(--dt-radius-sm);
+  }
 }
-.node-children { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+
+.node-children {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
 </style>

@@ -1,0 +1,195 @@
+# START - 5分钟快速上手
+
+> **目标**：让新开发者在 5 分钟内跑通项目
+> **适用**：首次克隆项目 / 久未更新想快速回顾 / 想快速验证环境
+
+---
+
+## 环境检查清单
+
+在你开始之前，确保以下工具已安装：
+
+| 工具 | 最低版本 | 检查命令 |
+|------|---------|---------|
+| Node.js | 18+ | `node -v` |
+| npm | 9+ | `npm -v` |
+| Java | 1.8+ | `java -version` |
+| Maven | 3.6+ | `mvn -v` |
+| MySQL | 5.7+ | `mysql --version` |
+| Redis | 6.x+ | `redis-cli ping` |
+
+> 如果某项缺失 → 跳到「常见问题」找安装指引
+
+---
+
+## 第一步：克隆项目
+
+```bash
+git clone <项目地址>
+cd RuoYi-IM
+```
+
+---
+
+## 第二步：初始化数据库
+
+### 2.1 创建 MySQL 数据库
+
+```sql
+CREATE DATABASE IF NOT EXISTS im DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 2.2 导入数据库脚本
+
+```bash
+# 脚本位置：ruoyi-im-api/sql/im_db.sql
+mysql -u root -p im < ruoyi-im-api/sql/im_db.sql
+```
+
+**验证成功**：
+```bash
+mysql -u root -p im -e "SHOW TABLES;" | wc -l
+# 输出应该 > 50（表示表已创建）
+```
+
+---
+
+## 第三步：配置后端
+
+### 3.1 修改数据库连接
+
+编辑 `ruoyi-im-api/src/main/resources/application.yml`：
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/im?useUnicode=true&characterEncoding=UTF-8
+    username: your_username    # 改这里
+    password: your_password    # 改这里
+  redis:
+    host: localhost
+    port: 6379
+    password: your_redis_password  # 如果有的话
+```
+
+### 3.2 启动后端
+
+```bash
+cd ruoyi-im-api
+mvn spring-boot:run
+```
+
+**验证成功**：
+```bash
+curl http://localhost:8080/api/user/info/1
+# 应返回用户 JSON 数据
+```
+
+---
+
+## 第四步：配置前端
+
+### 4.1 安装依赖
+
+```bash
+cd ruoyi-im-web
+npm install
+```
+
+### 4.2 配置 API 地址
+
+编辑 `ruoyi-im-web/.env.development`：
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+VITE_WS_BASE_URL=ws://localhost:8080
+```
+
+### 4.3 启动前端
+
+```bash
+npm run dev
+```
+
+**验证成功**：
+- 浏览器自动打开 `http://localhost:5173`
+- 看到登录页面
+
+---
+
+## 第五步：登录验证
+
+### 默认测试账号
+
+| 角色 | 用户名 | 密码 |
+|------|--------|------|
+| 管理员 | admin | 123456 |
+| 测试用户 | user1 | 123456 |
+
+### 验证完整链路
+
+1. 使用 admin / 123456 登录
+2. 左侧出现「消息」导航
+3. 点击「消息」→「新建会话」
+4. 搜索并添加 user1
+5. 发送一条消息
+
+**如果你完成了以上步骤 → 🎉 项目跑通了！**
+
+---
+
+## 常见问题
+
+### Q1: `npm install` 报错 network
+
+```bash
+# 设置国内镜像
+npm config set registry https://registry.npmmirror.com
+npm install
+```
+
+### Q2: `mvn spring-boot:run` 报错 port already used
+
+```bash
+# 杀掉占用 8080 端口的进程
+# Windows
+netstat -ano | findstr :8080
+taskkill /PID <PID> /F
+
+# Mac/Linux
+lsof -i :8080
+kill -9 <PID>
+```
+
+### Q3: Redis 连接失败
+
+确认 Redis 已启动：
+```bash
+redis-cli ping
+# 返回 PONG 表示正常
+```
+
+### Q4: 前端一直 loading
+
+1. 检查后端是否正常运行（curl 测试）
+2. 检查 `.env.development` 配置是否正确
+3. 浏览器按 F12 打开控制台，查看网络请求错误
+
+---
+
+## 下一步
+
+项目跑通后，按你的角色选择阅读路径：
+
+| 角色 | 推荐阅读 |
+|------|---------|
+| AI 执行者 | 01 → 02 → 30 → 13 |
+| 前端开发 | 01 → 21 → 35(前端全局样式) → 33(API) |
+| 后端开发 | 01 → 32 → 33 → 34(WebSocket) |
+| 产品/设计 | 10 → 12 → 21 → 26 |
+
+完整文档索引 → [00-文档索引总纲](docs/00-文档索引总纲.md)
+
+---
+
+*最后更新：2026-04-07*

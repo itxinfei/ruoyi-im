@@ -192,7 +192,7 @@ const getBarHeight = (index) => {
 
     &:hover {
       transform: scale(1.08);
-      box-shadow: 0 2px 8px var(--dt-shadow-brand);
+      box-shadow: var(--dt-shadow-brand);
     }
 
     &:active {
@@ -224,7 +224,7 @@ const getBarHeight = (index) => {
     @for $i from 1 through 24 {
       &:nth-child(#{$i}) {
         animation-delay: #{$i * 0.03}s;
-        animation-duration: calc(0.4s + #{random(4)} * 0.1s);
+        animation-duration: calc(0.4s + #{math.random(4)} * 0.1s);
       }
     }
   }

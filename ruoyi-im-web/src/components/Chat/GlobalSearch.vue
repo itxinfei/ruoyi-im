@@ -342,7 +342,7 @@ onMounted(() => {
   align-items: center;
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-sm);
 
   &:hover {
     background: var(--dt-bg-hover);
@@ -352,7 +352,7 @@ onMounted(() => {
   .avatar {
     width: 32px;
     height: 32px;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-sm); /* 钉钉规范：4px 圆角 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -371,7 +371,7 @@ onMounted(() => {
 .message-item {
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-sm);
 
   &:hover {
     background: var(--dt-bg-hover);

@@ -287,7 +287,7 @@ const confirmAction = async () => {
 
 .status-badge {
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;

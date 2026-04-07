@@ -1,6 +1,6 @@
 <template>
   <aside class="side-nav">
-    <!-- 顶部 Logo 区 (钉钉规范：40x40，圆角8px) -->
+    <!-- 顶部 Logo 区 -->
     <div class="nav-logo-wrapper">
       <div class="nav-logo">
         <span class="logo-text">IM</span>
@@ -14,11 +14,11 @@
         :key="item.id"
         :class="['nav-item', { active: activeModule === item.id }]"
         @click="switchModule(item.id)"
-        :title="item.name"
       >
         <el-icon :size="20">
           <component :is="item.icon" />
         </el-icon>
+        <span class="nav-label">{{ item.name }}</span>
         <div v-if="item.badge > 0" class="nav-badge">
           {{ item.badge > 99 ? '99+' : item.badge }}
         </div>
@@ -28,24 +28,24 @@
     <!-- 分割线 -->
     <div class="nav-divider" />
 
-    <!-- 底部功能区 - 直接显示 -->
+    <!-- 底部功能区 -->
     <div class="nav-bottom">
-      <div class="nav-item" title="搜索" @click="switchModule('search')">
-        <el-icon :size="18"><Search /></el-icon>
+      <div class="nav-item" @click="switchModule('search')">
+        <el-icon :size="20"><Search /></el-icon>
+        <span class="nav-label">搜索</span>
       </div>
-      <div class="nav-item" title="个人资料" @click="openEditProfile">
-        <el-icon :size="18"><User /></el-icon>
+      <div class="nav-item" @click="openSystemSettings">
+        <el-icon :size="20"><Setting /></el-icon>
+        <span class="nav-label">设置</span>
       </div>
-      <div class="nav-item" title="设置" @click="openSystemSettings">
-        <el-icon :size="18"><Setting /></el-icon>
-      </div>
-      <div class="nav-item" title="切换主题" @click="handleToggleTheme">
-        <el-icon :size="18"><Sunny v-if="isDark" /><Moon v-else /></el-icon>
+      <div class="nav-item" @click="handleToggleTheme">
+        <el-icon :size="20"><Sunny v-if="isDark" /><Moon v-else /></el-icon>
+        <span class="nav-label">{{ isDark ? '亮色' : '暗黑' }}</span>
       </div>
     </div>
 
-    <!-- 用户头像 - 点击打开个人资料 -->
-    <div class="user-avatar-wrapper" @click="openEditProfile" title="个人资料">
+    <!-- 用户头像 -->
+    <div class="user-avatar-wrapper" @click="openEditProfile">
       <div class="avatar-ring" />
       <img :src="userAvatar" class="user-avatar" alt="me">
       <div class="online-status-dot">
@@ -84,9 +84,7 @@ const topNavs = [
   { id: 'workbench', name: '工作台', icon: Menu, badge: 0 },
   { id: 'todo', name: '待办', icon: Tickets, badge: 2 },
   { id: 'calendar', name: '日历', icon: Calendar, badge: 0 },
-  { id: 'documents', name: '云盘', icon: FolderOpened, badge: 0 },
-  { id: 'workreport', name: '日志', icon: Document, badge: 0 },
-  { id: 'favorites', name: '收藏', icon: Star, badge: 0 }
+  { id: 'documents', name: '云盘', icon: FolderOpened, badge: 0 }
 ]
 
 const switchModule = (moduleId) => {
@@ -107,6 +105,7 @@ const handleToggleTheme = () => {
 </script>
 
 <style scoped>
+/* 导航栏容器 */
 .side-nav {
   width: 64px;
   height: 100%;
@@ -114,62 +113,110 @@ const handleToggleTheme = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px 0;
+  padding: 4px 0;
   flex-shrink: 0;
   z-index: 100;
 }
 
-/* Logo区域：40x40，圆角8px，渐变背景 */
-.nav-logo-wrapper { margin-bottom: 24px; }
+/* Logo区域 */
+.nav-logo-wrapper {
+  margin-bottom: 4px;
+  padding-top: 0;
+}
+
 .nav-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
   background: var(--dt-brand-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(39, 126, 251, 0.25);
 }
-.nav-logo:hover { transform: scale(1.05); }
+
+.nav-logo:hover {
+  transform: scale(1.08);
+}
+
 .logo-text {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--dt-text-white);
   letter-spacing: 1px;
 }
 
-.nav-top { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.nav-item {
-  position: relative;
-  width: 40px;
-  height: 40px;
+/* 顶部导航区 */
+.nav-top {
+  flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.65);
-  transition: all 0.2s ease;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  width: 100%;
 }
 
-.nav-item:hover { background-color: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.95); }
-.nav-item.active { background-color: var(--dt-brand-color); color: var(--dt-text-white); }
+/* 导航项 - 紧凑矩形按钮 */
+.nav-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 1px 0;
+  cursor: pointer;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+  margin: 0;
+}
 
-.nav-item.active::before {
-  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; background-color: var(--dt-text-white); border-radius: 0 2px 2px 0;
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.nav-item.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--dt-text-white);
+}
+
+.nav-item .el-icon {
+  font-size: 22px;
+}
+
+.nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .nav-badge {
-  position: absolute; top: 2px; right: 2px; background-color: var(--dt-error-color); color: var(--dt-text-white);
-  font-size: 10px; height: 14px; min-width: 14px; padding: 0 var(--dt-spacing-xs); border-radius: var(--dt-radius-md);
-  display: flex; align-items: center; justify-content: center; font-weight: 600;
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  background-color: var(--dt-error-color);
+  color: var(--dt-text-white);
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
 }
 
 /* 分割线 */
 .nav-divider {
-  width: 32px;
+  width: 48px;
   height: 1px;
   background: linear-gradient(
     90deg,
@@ -178,7 +225,7 @@ const handleToggleTheme = () => {
     rgba(255, 255, 255, 0.3) 70%,
     transparent 100%
   );
-  margin: 0 auto var(--dt-spacing-lg);
+  margin: 4px auto;
   flex-shrink: 0;
 }
 
@@ -187,148 +234,88 @@ const handleToggleTheme = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--dt-spacing-xs);
-  padding: var(--dt-spacing-sm) 0;
+  gap: 0;
+  padding: 0;
   width: 100%;
 }
 
-.toolbar-btn {
-  position: relative;
-  width: 40px;
-  height: 36px;
+.nav-bottom .nav-item {
+  width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0;
+  padding: 1px 0;
   cursor: pointer;
-  border-radius: var(--dt-radius-lg);
-  color: rgba(255, 255, 255, 0.55);
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.7);
   transition: all 0.2s ease;
 }
 
-.toolbar-btn:hover {
+.nav-bottom .nav-item:hover {
   color: rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.toolbar-btn:active {
+.nav-bottom .nav-item:active {
   transform: scale(0.95);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
 }
 
-/* 工具提示 - 改为按钮下方显示 */
-.toolbar-tooltip {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  transform: translateX(-50%);
-  background: var(--dt-bg-card);
-  color: var(--dt-text-primary);
-  font-size: var(--dt-font-size-sm);
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: var(--dt-radius-sm);
-  white-space: nowrap;
-  box-shadow: var(--dt-shadow-float);
-  border: 1px solid var(--dt-border-light);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  z-index: 999;
-}
-
-.toolbar-tooltip::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 100%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: var(--dt-bg-card);
-}
-
-.toolbar-btn:hover .toolbar-tooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(-4px);
-}
-
-/* 用户头像 */
+/* 用户头像 - 钉钉风格 */
 .user-avatar-wrapper {
   position: relative;
-  width: 40px;
-  height: 40px;
-  margin-top: var(--dt-spacing-md);
+  width: 44px;
+  height: 44px;
+  margin-top: 8px;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .avatar-ring {
   position: absolute;
-  inset: -3px;
-  border-radius: var(--dt-radius-sm);
-  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
-  opacity: 0.6;
+  inset: 0;
+  border-radius: var(--dt-radius-lg);
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+  border: 2px solid rgba(255,255,255,0.15);
   transition: all 0.3s ease;
 }
 
 .user-avatar-wrapper:hover .avatar-ring {
-  opacity: 1;
-  inset: -4px;
-  border-radius: calc(var(--dt-radius-sm) + 1px);
-  background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%);
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
+  border-color: rgba(255,255,255,0.3);
+  box-shadow: 0 0 12px rgba(255,255,255,0.2);
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--dt-radius-sm);
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   border: none;
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1;
   display: block;
   transition: transform 0.2s ease;
+  object-fit: cover;
 }
 
 .user-avatar-wrapper:hover .user-avatar {
-  transform: scale(1.08);
+  transform: translate(-50%, -50%) scale(1.02);
 }
 
 .online-status-dot {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: -2px;
+  right: -2px;
   width: 11px;
   height: 11px;
-  background-color: var(--dt-success-color);
+  background-color: #00D26A;
   border: 2px solid var(--dt-brand-color);
   border-radius: 50%;
   z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
-.status-pulse {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: var(--dt-success-color);
-  animation: statusPulse 2.5s ease-in-out infinite;
-}
-
-@keyframes statusPulse {
-  0% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(2); opacity: 0; }
-  100% { transform: scale(1); opacity: 0; }
-}
-
-.nav-popover-content { display: flex; flex-direction: column; gap: 2px; }
-.nav-popover-item {
-  display: flex; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md);
-  border-radius: var(--dt-radius-sm); cursor: pointer; color: var(--dt-text-primary); font-size: var(--dt-font-size-sm);
-  &:hover { background: var(--dt-bg-session-hover); }
-}
-.nav-popover-label { flex: 1; }
-.nav-popover-divider { height: 1px; background: var(--dt-border-light); margin: var(--dt-spacing-xs) 0; }
 </style>

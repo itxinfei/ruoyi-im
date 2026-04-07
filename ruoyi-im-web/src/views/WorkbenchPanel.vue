@@ -882,68 +882,68 @@ onUnmounted(() => {
   letter-spacing: -0.3px;
 }
 
+// 左侧二级导航 - 钉钉风格：图标在上文字在下
 .sidebar-nav {
   flex: 1;
-  padding: var(--dt-spacing-md) 0;
+  padding: 12px 8px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
+// 导航项 - 紧凑矩形按钮
 .nav-item {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: var(--dt-spacing-md);
-  padding: var(--dt-spacing-md) var(--dt-spacing-lg);
-  height: 44px;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 8px;
+  height: auto;
   box-sizing: border-box;
   cursor: pointer;
   position: relative;
-  transition: all var(--dt-transition-base);
-  margin: 2px var(--dt-spacing-sm);
-  border-radius: var(--dt-radius-md);
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin: 0;
 
   &:hover {
-    background: var(--dt-bg-session-hover);
+    background: var(--dt-bg-hover);
   }
 
   &.active {
-    background: linear-gradient(90deg, var(--dt-brand-lighter) 0%, transparent 100%);
-    color: var(--dt-brand-color);
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 20px;
-      background: var(--dt-brand-color);
-      border-radius: 0 2px 2px 0;
-    }
-
-    .nav-label {
-      font-weight: var(--dt-font-weight-semibold);
-    }
+    background: var(--dt-brand-bg);
 
     .nav-icon {
       color: var(--dt-brand-color);
+    }
+
+    .nav-label {
+      color: var(--dt-brand-color);
+      font-weight: 600;
     }
   }
 }
 
 .nav-icon {
-  font-size: var(--dt-icon-size-lg);
+  font-size: 20px;
   flex-shrink: 0;
   color: var(--dt-text-secondary);
-  transition: color var(--dt-transition-fast);
+  transition: color 0.2s ease;
 }
 
 .nav-label {
-  flex: 1;
-  font-size: var(--dt-font-size-base);
-  color: var(--dt-text-primary);
-  font-weight: var(--dt-font-weight-medium);
+  flex: none;
+  font-size: 11px;
+  color: var(--dt-text-secondary);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav-badge {
@@ -977,24 +977,26 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-// 视图头部
+// 视图头部 - 钉钉风格
 .view-header {
-  padding: var(--dt-spacing-lg) var(--dt-spacing-2xl);
+  padding: 16px 24px;
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
-  @include flex-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .view-title {
-  font-size: var(--dt-font-size-sm);
-  font-weight: var(--dt-font-weight-semibold);
+  font-size: 18px;
+  font-weight: 600;
   color: var(--dt-text-primary);
   margin: 0;
 }
 
 .view-actions {
   display: flex;
-  gap: var(--dt-spacing-md);
+  gap: 12px;
 }
 
 // ============================================================================

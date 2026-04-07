@@ -254,114 +254,57 @@ textarea {
     border-color var(--dt-transition-fast);
 }
 
-// Animation utilities
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
+// Note: Complex animations (@keyframes) are discouraged per DingTalk UI guidelines.
+// Only simple transitions for state changes (hover, focus) are allowed.
+// If you need animations, use component-scoped styles with explicit justification.
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+// Standard spacing utilities (8px grid only)
+.mt-8 { margin-top: var(--dt-spacing-sm); }
+.mt-12 { margin-top: var(--dt-spacing-md); }
+.mt-16 { margin-top: var(--dt-spacing-lg); }
+.mt-24 { margin-top: var(--dt-spacing-xl); }
+.mt-32 { margin-top: var(--dt-spacing-2xl); }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
+.mb-8 { margin-bottom: var(--dt-spacing-sm); }
+.mb-12 { margin-bottom: var(--dt-spacing-md); }
+.mb-16 { margin-bottom: var(--dt-spacing-lg); }
+.mb-24 { margin-bottom: var(--dt-spacing-xl); }
+.mb-32 { margin-bottom: var(--dt-spacing-2xl); }
 
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+.ml-8 { margin-left: var(--dt-spacing-sm); }
+.ml-16 { margin-left: var(--dt-spacing-lg); }
 
-@keyframes typing {
+.mr-8 { margin-right: var(--dt-spacing-sm); }
+.mr-16 { margin-right: var(--dt-spacing-lg); }
 
-  0%,
-  80%,
-  100% {
-    transform: scale(0);
-    opacity: 0.5;
-  }
+.p-8 { padding: var(--dt-spacing-sm); }
+.p-12 { padding: var(--dt-spacing-md); }
+.p-16 { padding: var(--dt-spacing-lg); }
+.p-24 { padding: var(--dt-spacing-xl); }
 
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
+.px-8 { padding-left: var(--dt-spacing-sm); padding-right: var(--dt-spacing-sm); }
+.px-16 { padding-left: var(--dt-spacing-lg); padding-right: var(--dt-spacing-lg); }
+.px-24 { padding-left: var(--dt-spacing-xl); padding-right: var(--dt-spacing-xl); }
 
-.u-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
+.py-8 { padding-top: var(--dt-spacing-sm); padding-bottom: var(--dt-spacing-sm); }
+.py-12 { padding-top: var(--dt-spacing-md); padding-bottom: var(--dt-spacing-md); }
+.py-16 { padding-top: var(--dt-spacing-lg); padding-bottom: var(--dt-spacing-lg); }
+.py-24 { padding-top: var(--dt-spacing-xl); padding-bottom: var(--dt-spacing-xl); }
 
-.u-slide-in {
-  animation: slideIn 0.3s ease-out;
-}
-
-// Spacing Utilities
-.mr-5 {
-  margin-right: 5px;
-}
-
-.mr-10 {
-  margin-right: 10px;
-}
-
-.mr-15 {
-  margin-right: 15px;
-}
-
-.mr-20 {
-  margin-right: 20px;
-}
-
-.ml-5 {
-  margin-left: 5px;
-}
-
-.ml-10 {
-  margin-left: 10px;
-}
-
-.mt-5 {
-  margin-top: 5px;
-}
-
-.mt-10 {
-  margin-top: 10px;
-}
-
-.mt-15 {
-  margin-top: 15px;
-}
-
-.mt-20 {
-  margin-top: 20px;
-}
-
-.mb-5 {
-  margin-bottom: 5px;
-}
-
-.mb-10 {
-  margin-bottom: 10px;
-}
-
-.mb-20 {
-  margin-bottom: 20px;
-}
+.gap-4 { gap: var(--dt-spacing-xs); }
+.gap-8 { gap: var(--dt-spacing-sm); }
+.gap-12 { gap: var(--dt-spacing-md); }
+.gap-16 { gap: var(--dt-spacing-lg); }
+.gap-24 { gap: var(--dt-spacing-xl); }
 
 // ============================================================================
 // Element Plus 组件全局样式覆盖 (钉钉风格)
 // ============================================================================
 
-// Dialog 样式
+// Dialog 弹窗样式 - 钉钉风格
 .el-dialog {
-  border-radius: 16px !important;
+  border-radius: var(--dt-radius-xl) !important; // 12px
+  box-shadow: var(--dt-shadow-modal) !important;
   
   .el-dialog__header {
     padding: 20px 24px 16px !important;
@@ -369,8 +312,8 @@ textarea {
   }
   
   .el-dialog__title {
-    font-size: 18px !important;
-    font-weight: 600 !important;
+    font-size: var(--dt-font-size-xl) !important; // 18px
+    font-weight: var(--dt-font-weight-semibold) !important;
     color: var(--dt-text-primary) !important;
   }
   
@@ -403,17 +346,17 @@ textarea {
   }
 }
 
-// Dropdown 菜单样式
+// Dropdown 菜单样式 - 钉钉风格
 .el-dropdown-menu {
-  border-radius: 12px !important;
+  border-radius: var(--dt-radius-xl) !important; // 12px
   padding: 4px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--dt-shadow-3) !important; // 0 4px 16px rgba(0,0,0,0.12)
   border: 1px solid var(--dt-border-light) !important;
   
   .el-dropdown-menu__item {
-    border-radius: 8px !important;
+    border-radius: var(--dt-radius-lg) !important; // 8px
     padding: 10px 16px !important;
-    font-size: 14px !important;
+    font-size: var(--dt-font-size-base) !important;
     color: var(--dt-text-primary) !important;
     
     &:hover {
@@ -429,47 +372,47 @@ textarea {
   }
 }
 
-// Popover 样式
+// Popover 气泡卡片样式 - 钉钉风格
 .el-popover.el-popper {
-  border-radius: 12px !important;
+  border-radius: var(--dt-radius-xl) !important; // 12px
   padding: 8px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--dt-shadow-3) !important;
   border: 1px solid var(--dt-border-light) !important;
 }
 
-// Tooltip 样式
+// Tooltip 文字提示样式 - 钉钉风格
 .el-tooltip__popper {
-  border-radius: 8px !important;
+  border-radius: var(--dt-radius-lg) !important; // 8px
   padding: 8px 12px !important;
   font-size: 13px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: var(--dt-shadow-2) !important;
   
   .el-tooltip__arrow::before {
     background: #fff !important;
   }
 }
 
-// Message 消息提示样式
+// Message 消息提示样式 - 钉钉风格
 .el-message {
   border-radius: 10px !important;
   padding: 12px 20px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: var(--dt-shadow-2) !important;
   
   .el-message__content {
-    font-size: 14px !important;
+    font-size: var(--dt-font-size-base) !important;
   }
 }
 
-// Select 下拉选择器样式
+// Select 下拉选择器样式 - 钉钉风格
 .el-select-dropdown {
-  border-radius: 12px !important;
+  border-radius: var(--dt-radius-xl) !important; // 12px
   padding: 8px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--dt-shadow-3) !important;
   
   .el-select-dropdown__item {
-    border-radius: 8px !important;
+    border-radius: var(--dt-radius-lg) !important; // 8px
     padding: 10px 16px !important;
-    font-size: 14px !important;
+    font-size: var(--dt-font-size-base) !important;
     
     &:hover {
       background-color: var(--dt-brand-bg) !important;
@@ -477,14 +420,14 @@ textarea {
     
     &.selected {
       color: var(--dt-brand-color) !important;
-      font-weight: 500 !important;
+      font-weight: var(--dt-font-weight-medium) !important;
     }
   }
 }
 
-// DatePicker 日期选择器样式
+// DatePicker 日期选择器样式 - 钉钉风格
 .el-date-picker {
-  border-radius: 12px !important;
+  border-radius: var(--dt-radius-xl) !important; // 12px
   
   .el-date-picker__header {
     margin: 12px 16px 8px !important;
@@ -493,5 +436,618 @@ textarea {
   .el-picker-panel__icon-btn {
     width: 28px !important;
     height: 28px !important;
+  }
+}
+
+// ============================================================================
+// Element Plus 补充覆盖（钉钉风格）
+// ============================================================================
+
+// Table 表格样式 - 钉钉风格
+.el-table {
+  border-radius: var(--dt-radius-lg) !important;
+  
+  th.el-table__cell {
+    background-color: var(--dt-bg-body) !important;
+    font-size: var(--dt-font-size-base) !important;
+    font-weight: var(--dt-font-weight-medium) !important;
+    color: var(--dt-text-primary) !important;
+    height: 48px !important;
+    border-color: var(--dt-border-light) !important;
+  }
+  
+  td.el-table__cell {
+    height: 48px !important;
+    border-color: var(--dt-border-light) !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+  }
+  
+  .el-table__body tr:hover > td {
+    background-color: var(--dt-bg-session-hover) !important;
+  }
+  
+  &--striped .el-table__body tr.el-table__row--striped td {
+    background-color: var(--dt-bg-input) !important;
+  }
+  
+  .el-table__empty-text {
+    color: var(--dt-text-tertiary) !important;
+    font-size: var(--dt-font-size-base) !important;
+  }
+}
+
+// Tabs 标签页样式 - 钉钉风格
+.el-tabs {
+  .el-tabs__header {
+    margin-bottom: 0 !important;
+  }
+  
+  .el-tabs__item {
+    height: 40px !important;
+    line-height: 40px !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+    
+    &:hover {
+      color: var(--dt-brand-color) !important;
+    }
+    
+    &.is-active {
+      color: var(--dt-brand-color) !important;
+      font-weight: var(--dt-font-weight-medium) !important;
+    }
+  }
+  
+  .el-tabs__active-bar {
+    height: 2px !important;
+    background-color: var(--dt-brand-color) !important;
+  }
+  
+  .el-tabs__content {
+    padding: var(--dt-spacing-xl) 0 !important;
+  }
+}
+
+// Switch 开关样式 - 钉钉风格
+.el-switch {
+  &.is-checked .el-switch__core {
+    background-color: var(--dt-brand-color) !important;
+    border-color: var(--dt-brand-color) !important;
+  }
+  
+  .el-switch__core {
+    background-color: var(--dt-border-color) !important;
+    border-color: var(--dt-border-color) !important;
+    height: 20px !important;
+  }
+}
+
+// Tag 标签样式 - 钉钉风格
+.el-tag {
+  border-radius: var(--dt-radius-sm) !important; // 4px
+  font-size: var(--dt-font-size-sm) !important; // 12px
+  padding: 2px 8px !important;
+  border: 1px solid;
+  
+  &--plain {
+    border-color: var(--dt-border-light) !important;
+  }
+  
+  &--primary {
+    background-color: var(--dt-brand-bg) !important;
+    border-color: var(--dt-brand-lighter) !important;
+    color: var(--dt-brand-color) !important;
+  }
+  
+  &--success {
+    background-color: var(--dt-success-bg) !important;
+    border-color: var(--dt-success-color) !important;
+    color: var(--dt-success-color) !important;
+  }
+  
+  &--warning {
+    background-color: var(--dt-warning-bg) !important;
+    border-color: var(--dt-warning-color) !important;
+    color: var(--dt-warning-color) !important;
+  }
+  
+  &--danger {
+    background-color: var(--dt-error-bg) !important;
+    border-color: var(--dt-error-color) !important;
+    color: var(--dt-error-color) !important;
+  }
+}
+
+// Pagination 分页样式 - 钉钉风格
+.el-pagination {
+  font-size: var(--dt-font-size-base) !important;
+  color: var(--dt-text-secondary) !important;
+  
+  .btn-prev,
+  .btn-next,
+  .el-pager li {
+    border-radius: var(--dt-radius-sm) !important; // 4px
+    min-width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    
+    &:hover {
+      color: var(--dt-brand-color) !important;
+    }
+  }
+  
+  .el-pager li.is-active {
+    background-color: var(--dt-brand-color) !important;
+    color: var(--dt-text-white) !important;
+  }
+  
+  .el-pagination__total,
+  .el-pagination__jump {
+    color: var(--dt-text-secondary) !important;
+  }
+}
+
+// Upload 上传样式 - 钉钉风格
+.el-upload {
+  border: 1px dashed var(--dt-border-color) !important;
+  border-radius: var(--dt-radius-lg) !important; // 8px
+  background-color: var(--dt-bg-input) !important;
+  transition: border-color var(--dt-transition-fast) !important;
+  
+  &:hover {
+    border-color: var(--dt-brand-color) !important;
+  }
+}
+
+.el-upload-dragger {
+  border: none !important;
+  background: transparent !important;
+}
+
+// Badge 徽标样式 - 钉钉风格
+.el-badge__content {
+  background-color: var(--dt-error-color) !important; // #F53F3F
+  border: none !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+  border-radius: 9px !important; // 完全圆形
+  font-size: var(--dt-font-size-xs) !important; // 11px
+  padding: 0 5px !important;
+}
+
+// Radio 单选框样式 - 钉钉风格
+.el-radio {
+  .el-radio__input.is-checked .el-radio__inner {
+    background-color: var(--dt-brand-color) !important;
+    border-color: var(--dt-brand-color) !important;
+  }
+  
+  .el-radio__input.is-checked + .el-radio__label {
+    color: var(--dt-brand-color) !important;
+  }
+  
+  .el-radio__inner {
+    border-color: var(--dt-border-color) !important;
+  }
+  
+  .el-radio__label {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+  }
+}
+
+// Checkbox 复选框样式 - 钉钉风格
+.el-checkbox {
+  .el-checkbox__input.is-checked .el-checkbox__inner {
+    background-color: var(--dt-brand-color) !important;
+    border-color: var(--dt-brand-color) !important;
+  }
+  
+  .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: var(--dt-brand-color) !important;
+  }
+  
+  .el-checkbox__inner {
+    border-radius: var(--dt-radius-sm) !important; // 4px
+    border-color: var(--dt-border-color) !important;
+  }
+  
+  .el-checkbox__label {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+  }
+}
+
+// Form 表单样式 - 钉钉风格
+.el-form {
+  .el-form-item__label {
+    font-size: var(--dt-font-size-base) !important; // 14px
+    color: var(--dt-text-primary) !important;
+    font-weight: var(--dt-font-weight-normal) !important;
+  }
+  
+  .el-form-item {
+    margin-bottom: var(--dt-spacing-xl) !important; // 24px
+  }
+  
+  .el-form-item__error {
+    font-size: var(--dt-font-size-sm) !important; // 12px
+    color: var(--dt-error-color) !important;
+    padding-top: 4px !important;
+  }
+}
+
+// Popconfirm 气泡确认框 - 钉钉风格
+.el-popconfirm {
+  .el-popconfirm__main {
+    padding: 16px !important;
+  }
+  
+  .el-popconfirm__action {
+    padding: 8px 16px 16px !important;
+  }
+}
+
+// Empty 空状态 - 钉钉风格
+.el-empty {
+  .el-empty__description {
+    color: var(--dt-text-tertiary) !important;
+    font-size: var(--dt-font-size-base) !important;
+  }
+  
+  .el-empty__image {
+    width: 160px !important;
+  }
+}
+
+// Descriptions 描述列表 - 钉钉风格
+.el-descriptions {
+  .el-descriptions__label {
+    color: var(--dt-text-secondary) !important;
+    font-size: var(--dt-font-size-base) !important;
+  }
+  
+  .el-descriptions__content {
+    color: var(--dt-text-primary) !important;
+    font-size: var(--dt-font-size-base) !important;
+  }
+  
+  .el-descriptions-item__cell {
+    padding: var(--dt-spacing-lg) !important; // 16px
+  }
+}
+
+// InputNumber 数字输入框 - 钉钉风格
+.el-input-number {
+  .el-input__wrapper {
+    border-radius: var(--dt-radius-sm) !important; // 4px
+  }
+}
+
+// Progress 进度条 - 钉钉风格
+.el-progress {
+  .el-progress-bar__outer {
+    background-color: var(--dt-border-lighter) !important;
+    border-radius: 4px !important;
+  }
+  
+  .el-progress-bar__inner {
+    background-color: var(--dt-brand-color) !important;
+    border-radius: 4px !important;
+  }
+  
+  &--line .el-progress-bar {
+    height: 6px !important;
+  }
+}
+
+// Divider 分割线 - 钉钉风格
+.el-divider {
+  border-color: var(--dt-border-light) !important;
+  
+  .el-divider__text {
+    color: var(--dt-text-tertiary) !important;
+    font-size: var(--dt-font-size-sm) !important; // 12px
+    background-color: var(--dt-bg-body) !important;
+  }
+}
+
+// Card 卡片样式 - 钉钉风格
+.el-card {
+  border-radius: var(--dt-radius-lg) !important; // 8px
+  border: 1px solid var(--dt-border-light) !important;
+  box-shadow: none !important;
+  
+  .el-card__header {
+    padding: 16px 24px !important;
+    border-bottom: 1px solid var(--dt-border-light) !important;
+    font-size: var(--dt-font-size-lg) !important; // 16px
+    font-weight: var(--dt-font-weight-medium) !important;
+    color: var(--dt-text-primary) !important;
+  }
+  
+  .el-card__body {
+    padding: var(--dt-spacing-lg) !important; // 16px
+  }
+}
+
+// Notification 通知样式 - 钉钉风格
+.el-notification {
+  border-radius: var(--dt-radius-lg) !important; // 8px
+  box-shadow: var(--dt-shadow-3) !important;
+  border: 1px solid var(--dt-border-light) !important;
+  
+  .el-notification__title {
+    font-size: var(--dt-font-size-base) !important;
+    font-weight: var(--dt-font-weight-medium) !important;
+    color: var(--dt-text-primary) !important;
+  }
+  
+  .el-notification__content {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+  }
+}
+
+// Loading 加载样式 - 钉钉风格
+.el-loading-mask {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+// Avatar 头像 - 补充覆盖
+.el-avatar {
+  border-radius: var(--dt-radius-sm) !important; // 4px
+}
+
+// Breadcrumb 面包屑 - 钉钉风格
+.el-breadcrumb {
+  .el-breadcrumb__inner {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+    
+    &.is-link:hover {
+      color: var(--dt-brand-color) !important;
+    }
+  }
+  
+  .el-breadcrumb__separator {
+    color: var(--dt-text-quaternary) !important;
+  }
+}
+
+// Alert 警告提示 - 钉钉风格
+.el-alert {
+  border-radius: var(--dt-radius-sm) !important; // 4px
+  padding: 12px 16px !important;
+  
+  .el-alert__title {
+    font-size: var(--dt-font-size-base) !important;
+  }
+  
+  .el-alert__description {
+    font-size: var(--dt-font-size-sm) !important;
+  }
+}
+
+// Collapse 折叠面板 - 钉钉风格
+.el-collapse {
+  border: none !important;
+  
+  .el-collapse-item__header {
+    height: 48px !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+    border-bottom: 1px solid var(--dt-border-light) !important;
+    
+    &:hover {
+      color: var(--dt-brand-color) !important;
+    }
+  }
+  
+  .el-collapse-item__content {
+    padding: var(--dt-spacing-lg) 0 !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+  }
+}
+
+// Tree 树形控件 - 钉钉风格
+.el-tree {
+  .el-tree-node__content {
+    height: 36px !important;
+    border-radius: var(--dt-radius-sm) !important;
+    
+    &:hover {
+      background-color: var(--dt-bg-session-hover) !important;
+    }
+  }
+  
+  .el-tree-node.is-current > .el-tree-node__content {
+    background-color: var(--dt-brand-bg) !important;
+    color: var(--dt-brand-color) !important;
+  }
+}
+
+// Transfer 穿梭框 - 钉钉风格
+.el-transfer {
+  .el-transfer-panel {
+    border-radius: var(--dt-radius-lg) !important;
+    border: 1px solid var(--dt-border-light) !important;
+    
+    .el-transfer-panel__header {
+      height: 48px !important;
+      line-height: 48px !important;
+      padding: 0 16px !important;
+      border-bottom: 1px solid var(--dt-border-light) !important;
+    }
+  }
+}
+
+// Cascader 级联选择器 - 钉钉风格
+.el-cascader-menu {
+  .el-cascader-node {
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: var(--dt-font-size-base) !important;
+    
+    &:hover {
+      background-color: var(--dt-bg-session-hover) !important;
+    }
+    
+    &.in-active-path,
+    &.is-active {
+      color: var(--dt-brand-color) !important;
+      font-weight: var(--dt-font-weight-medium) !important;
+    }
+  }
+}
+
+// Steps 步骤条 - 钉钉风格
+.el-steps {
+  .el-step__head.is-process {
+    color: var(--dt-brand-color) !important;
+    border-color: var(--dt-brand-color) !important;
+  }
+  
+  .el-step__title.is-process {
+    color: var(--dt-brand-color) !important;
+    font-weight: var(--dt-font-weight-medium) !important;
+  }
+  
+  .el-step__description.is-process {
+    color: var(--dt-text-primary) !important;
+  }
+}
+
+// Rate 评分 - 钉钉风格
+.el-rate {
+  .el-rate__icon {
+    color: var(--dt-border-color) !important;
+  }
+  
+  .el-rate__item.is-active .el-rate__icon {
+    color: var(--dt-warning-color) !important;
+  }
+}
+
+// Slider 滑块 - 钉钉风格
+.el-slider {
+  .el-slider__runway {
+    background-color: var(--dt-border-lighter) !important;
+    height: 4px !important;
+  }
+  
+  .el-slider__bar {
+    background-color: var(--dt-brand-color) !important;
+    height: 4px !important;
+  }
+  
+  .el-slider__button-wrapper {
+    top: -16px !important;
+  }
+  
+  .el-slider__button {
+    border: 2px solid var(--dt-brand-color) !important;
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
+
+// Skeleton 骨架屏 - 钉钉风格
+.el-skeleton {
+  .el-skeleton__item {
+    background-color: var(--dt-bg-session-hover) !important;
+    border-radius: var(--dt-radius-sm) !important;
+  }
+}
+
+// Result 结果页 - 钉钉风格
+.el-result {
+  .el-result__title {
+    font-size: var(--dt-font-size-xl) !important;
+    color: var(--dt-text-primary) !important;
+  }
+  
+  .el-result__subtitle {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+  }
+}
+
+// Backtop 回到顶部 - 钉钉风格
+.el-backtop {
+  border-radius: var(--dt-radius-lg) !important; // 8px
+  box-shadow: var(--dt-shadow-2) !important;
+  
+  &:hover {
+    background-color: var(--dt-brand-color) !important;
+  }
+}
+
+// Space 间距 - 钉钉风格 (使用 Token)
+.el-space {
+  // 默认使用 gap，已通过 design tokens 控制
+}
+
+// TimePicker 时间选择器 - 钉钉风格
+.el-time-panel {
+  border-radius: var(--dt-radius-xl) !important; // 12px
+  box-shadow: var(--dt-shadow-3) !important;
+}
+
+// ColorPicker 颜色选择器 - 钉钉风格
+.el-color-picker {
+  .el-color-picker__trigger {
+    border-radius: var(--dt-radius-sm) !important; // 4px
+  }
+}
+
+// Mention 提及组件 - 钉钉风格
+.el-mention-popper {
+  border-radius: var(--dt-radius-xl) !important; // 12px
+  box-shadow: var(--dt-shadow-3) !important;
+}
+
+// Segmented 分段控制器 - 钉钉风格
+.el-segmented {
+  .el-segmented__item {
+    border-radius: var(--dt-radius-sm) !important; // 4px
+    
+    &.is-selected {
+      background-color: var(--dt-brand-color) !important;
+      color: var(--dt-text-white) !important;
+    }
+  }
+}
+
+// Watermark 水印 - 钉钉风格 (默认即可)
+
+// QRCode 二维码 - 钉钉风格
+.el-qrcode {
+  border-radius: var(--dt-radius-sm) !important; // 4px
+}
+
+// Anchor 锚点 - 钉钉风格
+.el-anchor {
+  .el-anchor__link {
+    .el-anchor__link-title {
+      color: var(--dt-text-secondary) !important;
+      font-size: var(--dt-font-size-base) !important;
+      
+      &:hover {
+        color: var(--dt-brand-color) !important;
+      }
+      
+      &.is-active {
+        color: var(--dt-brand-color) !important;
+        font-weight: var(--dt-font-weight-medium) !important;
+      }
+    }
+  }
+  
+  .el-anchor__indicator {
+    background-color: var(--dt-brand-color) !important;
   }
 }

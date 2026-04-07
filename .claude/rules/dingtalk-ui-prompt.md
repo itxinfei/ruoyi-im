@@ -1,6 +1,101 @@
 # 钉钉 UI 开发规范 Prompt
 
 > 本规范为 RuoYi-IM 项目强制执行的 UI 设计标准，所有前端代码生成必须严格遵守。
+> 版本：v2.0 - 像素级约束版（2026-04-07）
+
+## 〇、IM 核心组件像素级约束（钉钉 8.2 精确值）
+
+### 聊天窗口 (ChatWindow)
+| 元素 | 精确值 | CSS 变量 |
+|------|--------|----------|
+| 头部高度 | 56px | `var(--dt-header-height)` |
+| 头部 padding 左右 | 20px | `var(--dt-spacing-xl)` |
+| 头部标题字号 | 17px | - |
+| 头部标题字重 | 600 | `var(--dt-font-weight-semibold)` |
+| 头部图标大小 | 18px | - |
+| 头部图标 padding | 10px | - |
+| 头部图标圆角 | 8px | `var(--dt-radius-lg)` |
+| 消息列表 padding 上下 | 12px | `var(--dt-spacing-md)` |
+| 消息列表 padding 左右 | 24px | `var(--dt-spacing-xl)` |
+
+### 消息气泡 (ChatMessageBubble)
+| 元素 | 精确值 | CSS 变量 |
+|------|--------|----------|
+| 气泡 padding 上下 | 8px | `var(--dt-bubble-padding-v)` |
+| 气泡 padding 左右 | 12px | `var(--dt-bubble-padding-h)` |
+| 气泡最大宽度 | 70% | `var(--dt-bubble-max-width)` |
+| 气泡字号 | 14px | `var(--dt-font-size-base)` |
+| 气泡行高 | 1.5 | - |
+| 发送方气泡圆角 | 4px 8px 8px 8px | 右上小角 |
+| 接收方气泡圆角 | 8px 4px 8px 8px | 左上小角 |
+| 发送方气泡背景 | #277EFB | `var(--dt-bubble-right-bg)` |
+| 接收方气泡背景 | #ffffff | `var(--dt-bubble-left-bg)` |
+| 头像尺寸 | 36px | `var(--dt-avatar-size-md)` |
+| 头像圆角 | 4px | `var(--dt-radius-sm)` |
+| 头像与气泡间距 | 16px | `var(--dt-spacing-lg)` |
+| 连续消息压缩间距 | -4px | - |
+| 操作条圆角 | 6px | `var(--dt-radius-md)` |
+| 操作条阴影 | `var(--dt-shadow-action-bar)` | - |
+| 操作条图标尺寸 | 16px | - |
+| 操作条图标容器 | 20px × 20px | - |
+
+### 输入区 (ChatInputArea)
+| 元素 | 精确值 | CSS 变量 |
+|------|--------|----------|
+| 工具栏高度 | 48px | - |
+| 工具栏图标大小 | 20px | - |
+| 工具栏图标 padding | 10px | - |
+| 工具栏图标圆角 | 8px | `var(--dt-radius-lg)` |
+| 输入区最小高度 | 120px | `var(--dt-input-min-height)` |
+| 输入区最大高度 | 320px | `var(--dt-input-max-height)` |
+| 输入区字号 | 15px | `var(--dt-font-size-md)` |
+| 输入区行高 | 1.7 | - |
+| 输入区 padding 上下 | 8px | `var(--dt-spacing-sm)` |
+| 输入区 padding 左右 | 24px | `var(--dt-spacing-xl)` |
+| 底部发送栏高度 | 48px | - |
+| 发送按钮宽度 | 64px | - |
+| 发送按钮高度 | 32px | `var(--dt-btn-height-sm)` |
+| 发送按钮圆角 | 4px | `var(--dt-radius-sm)` |
+| 空状态发送按钮背景 | `var(--dt-send-btn-empty-bg)` | #E5E7EB |
+| 表情网格列数 | 8 列 | - |
+| 表情尺寸 | 22px | - |
+| 图片预览缩略图 | 72px × 72px | - |
+| 图片预览圆角 | 10px | `var(--dt-radius-xl)` |
+
+### 侧边导航 (ImSideNavNew)
+| 元素 | 精确值 | CSS 变量 |
+|------|--------|----------|
+| 导航栏宽度 | 64px | `var(--dt-nav-sidebar-width)` |
+| Logo 尺寸 | 64px × 64px | `var(--dt-logo-size)` |
+| 导航项高度 | 48px | - |
+| 导航项图标大小 | 20px | - |
+| 导航项圆角 | 8px | `var(--dt-radius-lg)` |
+| 导航项激活背景 | `var(--dt-brand-bg)` | #E6F2FF |
+| 导航项激活图标色 | `var(--dt-brand-color)` | #277EFB |
+| 底部头像尺寸 | 36px | `var(--dt-avatar-size-md)` |
+
+### 会话列表 (SessionList)
+| 元素 | 精确值 | CSS 变量 |
+|------|--------|----------|
+| 会话项高度 | 56px | - |
+| 会话项 padding | 12px 16px | `var(--dt-spacing-md) var(--dt-spacing-lg)` |
+| 会话项头像 | 40px × 40px | - |
+| 会话项头像圆角 | 4px | `var(--dt-radius-sm)` |
+| 会话项 hover 背景 | `var(--dt-bg-session-hover)` | - |
+| 会话项 active 背景 | `var(--dt-bg-session-active)` | #E6F2FF |
+| 未读数角标最小宽 | 18px | - |
+| 未读数角标高度 | 18px | - |
+| 未读数角标圆角 | 9px | `var(--dt-radius-full)` |
+| 未读数角标字号 | 11px | `var(--dt-font-size-xs)` |
+
+### 滚动条 (全局)
+| 元素 | 精确值 |
+|------|--------|
+| 滚动条宽度 | 6px |
+| 滚动条轨道 | 透明 |
+| 滚动条滑块背景 | rgba(0,0,0,0.2) |
+| 滚动条滑块圆角 | 3px |
+| 滚动条 hover 背景 | rgba(0,0,0,0.3) |
 
 ## 一、配色系统（强制约束）
 
@@ -264,6 +359,99 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC
 2. **Mixins**：`src/styles/_mixins.scss` 中的辅助宏
 3. **通用组件**：`src/components/Common/` 下的组件
 4. **Element Plus**：使用 `el-` 前缀组件，主题变量已映射
+
+## 十一、Element Plus 组件覆盖规范（钉钉风格）
+
+> 以下所有覆盖已在 `src/styles/global.scss` 中实现，生成新组件时如需自定义 Element Plus 样式，必须遵循以下规范。
+
+### Table 表格
+- 表头背景：`var(--dt-bg-body)`，字号 14px，字重 500
+- 行高：48px（默认），紧凑模式 40px
+- 斑马纹背景：`var(--dt-bg-input)`
+- hover 行背景：`var(--dt-bg-session-hover)`
+- 边框：`var(--dt-border-light)`
+- 圆角：外层容器 `var(--dt-radius-lg)`
+
+### Tabs 标签页
+- 标签高度：40px
+- 标签字号：14px
+- 激活态下划线：2px solid `var(--dt-brand-color)`
+- 激活态文字色：`var(--dt-brand-color)`
+- 未激活文字色：`var(--dt-text-secondary)`
+- 内容区 padding：24px
+
+### Switch 开关
+- 开启背景：`var(--dt-brand-color)`
+- 关闭背景：`var(--dt-border-color)`
+- 尺寸：默认 20px 高
+
+### Tag 标签
+- 圆角：`var(--dt-radius-sm)` (4px)
+- 字号：12px
+- padding：2px 8px
+- Plain 模式边框：`var(--dt-border-light)`
+
+### Pagination 分页
+- 按钮圆角：`var(--dt-radius-sm)` (4px)
+- 当前页背景：`var(--dt-brand-color)`，文字白色
+- 当前页圆角：`var(--dt-radius-sm)` (4px)
+- 字号：14px
+
+### Upload 上传
+- 上传区域边框：1px dashed `var(--dt-border-color)`
+- 上传区域圆角：`var(--dt-radius-lg)` (8px)
+- 上传区域背景：`var(--dt-bg-input)`
+- hover 边框：`var(--dt-brand-color)`
+
+### Badge 徽标
+- 未读数背景：`var(--dt-error-color)` (#F53F3F)
+- 未读数文字：白色
+- 最小宽度：18px
+- 圆角：9px（完全圆形）
+
+### Radio 单选框 / Checkbox 复选框
+- 选中色：`var(--dt-brand-color)`
+- 边框：`var(--dt-border-color)`
+- 圆角：Checkbox 为 `var(--dt-radius-sm)` (4px)
+
+### Form 表单
+- label 对齐：左对齐
+- label 字号：14px
+- label 颜色：`var(--dt-text-primary)`
+- 表单项间距：24px
+- 错误提示色：`var(--dt-error-color)`
+- 错误提示字号：12px
+
+### Popconfirm 气泡确认框
+- 圆角：`var(--dt-radius-lg)` (8px)
+- 阴影：`var(--dt-shadow-2)`
+- padding：16px
+
+### Empty 空状态
+- 图标颜色：`var(--dt-text-quaternary)`
+- 描述文字颜色：`var(--dt-text-tertiary)`
+- 描述文字字号：14px
+
+### Descriptions 描述列表
+- label 颜色：`var(--dt-text-secondary)`
+- content 颜色：`var(--dt-text-primary)`
+- 字号：14px
+- 间距：16px
+
+### InputNumber 数字输入框
+- 圆角：`var(--dt-radius-sm)` (4px)
+- 高度：32px (small) / 40px (default)
+
+### Progress 进度条
+- 轨道背景：`var(--dt-border-lighter)`
+- 填充色：`var(--dt-brand-color)`
+- 圆角：4px
+- 高度：6px
+
+### Divider 分割线
+- 颜色：`var(--dt-border-light)`
+- 文字颜色：`var(--dt-text-tertiary)`
+- 文字字号：12px
 
 ### Design Token 快速查询
 

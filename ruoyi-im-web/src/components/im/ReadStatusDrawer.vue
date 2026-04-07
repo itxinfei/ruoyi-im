@@ -101,7 +101,7 @@ const formatTime = (ts) => {
 
 <style scoped>
 .drawer-header {
-  height: 60px;
+  height: 56px;
   padding: 0 20px;
   display: flex;
   align-items: center;
