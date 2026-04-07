@@ -114,15 +114,17 @@ public class ImConversationMemberServiceImpl implements ImConversationMemberServ
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void incrementUnread(Long conversationId, Long userId, Integer increment) {
+        // 先检查会话成员是否存在
         ImConversationMember member = conversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
         if (member == null) {
             throw new BusinessException("会话成员不存在");
         }
-        Integer newUnreadCount = member.getUnreadCount() + increment;
-        if (newUnreadCount < 0) {
-            newUnreadCount = 0;
+        // 使用原子操作避免竞态条件：正数用 incrementUnreadCount，负数用 decrementUnreadCount
+        if (increment >= 0) {
+            conversationMemberMapper.incrementUnreadCount(conversationId, userId, increment);
+        } else {
+            conversationMemberMapper.decrementUnreadCount(conversationId, userId, Math.abs(increment));
         }
-        conversationMemberMapper.updateUnreadCount(conversationId, userId, newUnreadCount);
     }
 
     @Override

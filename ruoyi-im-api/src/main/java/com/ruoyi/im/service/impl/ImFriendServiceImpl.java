@@ -528,6 +528,10 @@ public class ImFriendServiceImpl implements ImFriendService {
             // 拉黑 = 删除好友
             friend.setIsDeleted(1);
             friend.setDeletedTime(LocalDateTime.now());
+        } else {
+            // 解除拉黑 = 恢复好友关系
+            friend.setIsDeleted(0);
+            friend.setDeletedTime(null);
         }
         friend.setUpdateTime(LocalDateTime.now());
         imFriendMapper.updateImFriend(friend);

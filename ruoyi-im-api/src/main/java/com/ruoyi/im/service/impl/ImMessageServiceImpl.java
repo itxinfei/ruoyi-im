@@ -794,6 +794,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long forwardMessage(Long messageId, Long toConversationId, Long toUserId, String content, Long userId) {
         ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
         if (originalMessage == null) {

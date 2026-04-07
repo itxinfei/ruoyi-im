@@ -23,6 +23,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -407,8 +409,25 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
      * @throws IOException IO异常
      */
     private String calculateFileMd5(File file) throws IOException {
-        // 简化实现，实际应使用MessageDigest
-        return UUID.randomUUID().toString().replace("-", "");
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            try (FileInputStream fis = new FileInputStream(file)) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = fis.read(buffer)) != -1) {
+                    md.update(buffer, 0, bytesRead);
+                }
+            }
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            // MD5应该始终可用，如果不可用则抛出运行时异常
+            throw new RuntimeException("MD5 algorithm not available", e);
+        }
     }
 
     /**

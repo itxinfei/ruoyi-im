@@ -237,8 +237,42 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             BusinessExceptionHelper.throwNoPermission();
         }
 
+        // 先递归永久删除子文件夹和文件，避免孤儿记录
+        permanentlyDeleteChildFiles(folderId);
+        permanentlyDeleteChildFolders(folderId);
+
         cloudFolderMapper.deleteById(folderId);
         logger.info("永久删除文件夹成功: folderId={}", folderId);
+    }
+
+    /**
+     * 递归永久删除子文件
+     */
+    private void permanentlyDeleteChildFiles(Long folderId) {
+        List<ImCloudFile> files = cloudFileMapper.selectList(
+                new LambdaQueryWrapper<ImCloudFile>()
+                        .eq(ImCloudFile::getFolderId, folderId)
+                        .eq(ImCloudFile::getIsDeleted, true)
+        );
+        for (ImCloudFile file : files) {
+            cloudFileMapper.deleteById(file.getId());
+        }
+    }
+
+    /**
+     * 递归永久删除子文件夹
+     */
+    private void permanentlyDeleteChildFolders(Long parentId) {
+        List<ImCloudFolder> children = cloudFolderMapper.selectList(
+                new LambdaQueryWrapper<ImCloudFolder>()
+                        .eq(ImCloudFolder::getParentId, parentId)
+                        .eq(ImCloudFolder::getIsDeleted, true)
+        );
+        for (ImCloudFolder child : children) {
+            permanentlyDeleteChildFiles(child.getId());
+            permanentlyDeleteChildFolders(child.getId());
+            cloudFolderMapper.deleteById(child.getId());
+        }
     }
 
     @Override
