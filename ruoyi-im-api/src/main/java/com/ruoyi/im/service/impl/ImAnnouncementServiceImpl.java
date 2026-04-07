@@ -143,6 +143,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ImAnnouncementDetailVO getAnnouncementDetail(Long announcementId, Long userId) {
         ImAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {

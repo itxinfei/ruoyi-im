@@ -171,6 +171,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void dismissGroup(Long groupId, Long userId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -344,6 +345,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void removeMembers(Long groupId, List<Long> userIds, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -380,6 +382,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void quitGroup(Long groupId, Long userId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {
@@ -475,6 +478,7 @@ public class ImGroupServiceImpl implements ImGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void transferOwner(Long groupId, Long newOwnerId, Long operatorId) {
         ImGroup group = imGroupMapper.selectImGroupById(groupId);
         if (group == null) {

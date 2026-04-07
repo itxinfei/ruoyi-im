@@ -308,6 +308,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ImVideoMeetingDetailVO joinMeeting(Long meetingId, String password, Long userId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting == null) {
