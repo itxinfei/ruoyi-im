@@ -596,15 +596,15 @@ watch(visible, (val) => {
       flex-shrink: 0;
       box-shadow: var(--dt-shadow-2);
 
-      &.bell-bg { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
-      &.sound-bg { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
-      &.keyboard-bg { background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); }
-      &.screenshot-bg { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
-      &.quick-bg { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
-      &.status-bg { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
-      &.receipt-bg { background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%); }
-      &.theme-bg { background: linear-gradient(135deg, #f97316 0%, #fb923c 100%); }
-      &.language-bg { background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%); }
+      &.bell-bg { background: var(--dt-warning-color); }
+      &.sound-bg { background: var(--dt-brand-color); }
+      &.keyboard-bg { background: var(--dt-info-color); }
+      &.screenshot-bg { background: var(--dt-error-color); }
+      &.quick-bg { background: var(--dt-success-color); }
+      &.status-bg { background: var(--dt-brand-color); }
+      &.receipt-bg { background: var(--dt-brand-color); }
+      &.theme-bg { background: var(--dt-warning-color); }
+      &.language-bg { background: var(--dt-success-color); }
     }
 
     .setting-info {

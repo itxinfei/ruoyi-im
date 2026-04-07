@@ -304,7 +304,7 @@ const handleToggleTheme = () => {
   right: -2px;
   width: 11px;
   height: 11px;
-  background-color: #00D26A;
+  background-color: var(--dt-success-color);
   border: 2px solid var(--dt-brand-color);
   border-radius: 50%;
   z-index: 2;

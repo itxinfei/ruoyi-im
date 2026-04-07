@@ -1135,9 +1135,9 @@ onUnmounted(() => {
     &.icon-green { background: var(--dt-success-bg); color: var(--dt-success-color); }
     &.icon-purple { background: var(--dt-info-bg); color: var(--dt-info-color); }
     &.icon-pink { background: var(--dt-error-bg); color: var(--dt-error-color); }
-    &.icon-teal { background: rgba(0, 180, 180, 0.1); color: #00B4B4; }
+    &.icon-teal { background: var(--dt-contacts-cyan-bg); color: var(--dt-contacts-cyan-color); }
     &.icon-indigo { background: var(--dt-brand-lighter); color: var(--dt-brand-color); }
-    &.icon-cyan { background: rgba(0, 180, 216, 0.1); color: #00B4D8; }
+    &.icon-cyan { background: var(--dt-contacts-cyan-bg); color: var(--dt-contacts-cyan-color); }
   }
 
   &__label {
