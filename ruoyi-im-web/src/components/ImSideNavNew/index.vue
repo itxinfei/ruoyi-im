@@ -133,12 +133,11 @@ const handleToggleTheme = () => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(39, 126, 251, 0.25);
+  transition: opacity 0.3s ease;
 }
 
 .nav-logo:hover {
-  transform: scale(1.08);
+  opacity: 0.9;
 }
 
 .logo-text {
@@ -218,13 +217,7 @@ const handleToggleTheme = () => {
 .nav-divider {
   width: 48px;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.3) 30%,
-    rgba(255, 255, 255, 0.3) 70%,
-    transparent 100%
-  );
+  background: rgba(255, 255, 255, 0.3);
   margin: 4px auto;
   flex-shrink: 0;
 }
@@ -259,7 +252,6 @@ const handleToggleTheme = () => {
 }
 
 .nav-bottom .nav-item:active {
-  transform: scale(0.95);
   background: rgba(255, 255, 255, 0.18);
 }
 
@@ -277,13 +269,13 @@ const handleToggleTheme = () => {
   position: absolute;
   inset: 0;
   border-radius: var(--dt-radius-lg);
-  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+  background: rgba(255,255,255,0.2);
   border: 2px solid rgba(255,255,255,0.15);
   transition: all 0.3s ease;
 }
 
 .user-avatar-wrapper:hover .avatar-ring {
-  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
+  background: rgba(255,255,255,0.3);
   border-color: rgba(255,255,255,0.3);
   box-shadow: 0 0 12px rgba(255,255,255,0.2);
 }
@@ -299,12 +291,11 @@ const handleToggleTheme = () => {
   transform: translate(-50%, -50%);
   z-index: 1;
   display: block;
-  transition: transform 0.2s ease;
   object-fit: cover;
 }
 
 .user-avatar-wrapper:hover .user-avatar {
-  transform: translate(-50%, -50%) scale(1.02);
+  opacity: 0.9;
 }
 
 .online-status-dot {

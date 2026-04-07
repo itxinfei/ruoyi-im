@@ -933,7 +933,7 @@ function getReminderText(minutes) {
 // 侧边栏
 .calendar-sidebar {
   width: 240px;
-  background: linear-gradient(180deg, var(--dt-bg-card) 0%, rgba(39, 126, 251, 0.03) 100%);
+  background: var(--dt-bg-card);
   border-right: 1px solid var(--dt-border-light);
   display: flex;
   flex-direction: column;
@@ -993,11 +993,10 @@ function getReminderText(minutes) {
     border-radius: 50%;
     cursor: pointer;
     position: relative;
-    transition: all var(--dt-transition-fast);
+    transition: background-color var(--dt-transition-fast);
 
     &:hover {
       background: var(--dt-bg-session-hover);
-      transform: scale(1.1);
     }
 
     &.other-month {
@@ -1008,7 +1007,7 @@ function getReminderText(minutes) {
       background: var(--dt-brand-color);
       color: var(--dt-text-white);
       font-weight: var(--dt-font-weight-semibold);
-      box-shadow: 0 2px 8px rgba(39, 126, 251, 0.3);
+      box-shadow: var(--dt-shadow-brand);
     }
 
     &.selected:not(.today) {
@@ -1424,10 +1423,10 @@ function getReminderText(minutes) {
   color: var(--dt-text-white);
   cursor: pointer;
 
-  &.work { background: var(--dt-event-work-gradient); }
-  &.meeting { background: var(--dt-event-meeting-gradient); }
-  &.personal { background: var(--dt-event-personal-gradient); }
-  &.reminder { background: var(--dt-event-reminder-gradient); }
+  &.work { background: var(--dt-event-work); }
+  &.meeting { background: var(--dt-event-meeting); }
+  &.personal { background: var(--dt-event-personal); }
+  &.reminder { background: var(--dt-event-reminder); }
 
   .event-time {
     font-size: 12px;

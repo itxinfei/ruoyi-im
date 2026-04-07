@@ -394,7 +394,7 @@ textarea {
 
 // Message 消息提示样式 - 钉钉风格
 .el-message {
-  border-radius: 10px !important;
+  border-radius: var(--dt-radius-lg) !important;
   padding: 12px 20px !important;
   box-shadow: var(--dt-shadow-2) !important;
   

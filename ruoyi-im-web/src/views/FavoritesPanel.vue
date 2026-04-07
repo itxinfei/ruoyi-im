@@ -415,8 +415,6 @@ onMounted(() => {
 }
 
 .favorite-item:hover {
-  box-shadow: var(--dt-shadow-card);
-  transform: translateY(var(--dt-transform-y, -1px));
   border-color: var(--dt-brand-color);
 }
 

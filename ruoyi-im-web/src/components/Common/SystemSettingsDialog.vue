@@ -412,7 +412,6 @@ watch(visible, (val) => {
     &:hover {
       background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
       color: var(--dt-text-white);
-      transform: translateY(-2px);
       box-shadow: var(--dt-shadow-3);
 
       .tab-icon {
@@ -425,7 +424,6 @@ watch(visible, (val) => {
       color: var(--dt-text-white);
       font-weight: 600;
       box-shadow: var(--dt-shadow-4);
-      transform: translateY(-2px);
 
       .tab-icon {
         color: var(--dt-text-white);
@@ -539,7 +537,6 @@ watch(visible, (val) => {
           box-shadow: var(--dt-shadow-4);
 
           &:hover {
-            transform: translateY(-3px);
             box-shadow: var(--dt-shadow-5);
           }
         }
@@ -552,7 +549,6 @@ watch(visible, (val) => {
           &:hover {
             border-color: var(--dt-brand-color);
             color: var(--dt-brand-color);
-            transform: translateY(-2px);
             box-shadow: var(--dt-shadow-3);
           }
         }
@@ -579,7 +575,6 @@ watch(visible, (val) => {
 
   &:hover {
     border-color: var(--dt-brand-color);
-    transform: translateY(-2px);
     box-shadow: var(--dt-shadow-3);
   }
 
@@ -705,7 +700,6 @@ watch(visible, (val) => {
       transition: all var(--dt-transition-fast);
 
       &:hover {
-        transform: translateY(-2px);
         box-shadow: var(--dt-shadow-brand-strong);
       }
     }

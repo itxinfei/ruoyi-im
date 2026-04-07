@@ -493,7 +493,7 @@ onMounted(() => {
   width: var(--dt-avatar-size-lg, 40px);
   height: var(--dt-avatar-size-lg, 40px);
   border-radius: var(--dt-radius-lg);
-  background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
+  background: var(--dt-brand-color);
   color: var(--dt-text-primary);
   display: flex;
   align-items: center;
@@ -580,7 +580,7 @@ onMounted(() => {
   font-size: var(--dt-font-size-sm);
 
   &.ai {
-    background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
+    background: var(--dt-brand-color);
     color: var(--dt-text-primary);
   }
 
@@ -682,26 +682,16 @@ onMounted(() => {
     height: var(--dt-spacing-sm);
     background: var(--dt-text-quaternary);
     border-radius: 50%;
-    animation: bounce 1.4s infinite ease-in-out;
+    opacity: 0.6;
 
-    &:nth-child(1) { animation-delay: 0s; }
-    &:nth-child(2) { animation-delay: 0.2s; }
-    &:nth-child(3) { animation-delay: 0.4s; }
+    &:nth-child(1) { opacity: 0.4; }
+    &:nth-child(2) { opacity: 0.8; }
+    &:nth-child(3) { opacity: 0.6; }
   }
 }
 
-@keyframes bounce {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-6px); }
-}
-
 .pulse {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  opacity: 0.7;
 }
 
 // 输入区
@@ -754,7 +744,7 @@ onMounted(() => {
   height: var(--dt-icon-size-2xl, 80px);
   margin: 0 auto var(--dt-spacing-xl);
   border-radius: var(--dt-radius-xl);
-  background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-info-color));
+  background: var(--dt-brand-color);
   color: var(--dt-text-primary);
   display: flex;
   align-items: center;
@@ -806,12 +796,10 @@ onMounted(() => {
   align-items: center;
   gap: var(--dt-spacing-md);
   cursor: pointer;
-  transition: all var(--dt-transition-fast);
+  transition: border-color var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: var(--dt-shadow-2);
-    transform: translateY(var(--dt-transform-y, -2px));
   }
 }
 

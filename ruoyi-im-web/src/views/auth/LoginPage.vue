@@ -239,7 +239,7 @@ onMounted(() => {
 .bg-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #277EFB 0%, #0066FF 100%);
+  background: var(--dt-brand-color);
   opacity: 0.06;
 }
 
@@ -255,13 +255,12 @@ onMounted(() => {
 .bg-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
+  opacity: 0.3;
 
   &.bg-orb-1 {
     width: 400px;
     height: 400px;
-    background: linear-gradient(135deg, #277EFB 0%, #0066FF 100%);
+    background: var(--dt-brand-color);
     top: -100px;
     right: -100px;
     opacity: 0.2;
@@ -270,7 +269,7 @@ onMounted(() => {
   &.bg-orb-2 {
     width: 300px;
     height: 300px;
-    background: linear-gradient(135deg, #00B42A 0%, #165DFF 100%);
+    background: var(--dt-brand-color);
     bottom: -50px;
     left: -50px;
     opacity: 0.15;
@@ -279,7 +278,7 @@ onMounted(() => {
   &.bg-orb-3 {
     width: 200px;
     height: 200px;
-    background: linear-gradient(135deg, #722ED1 0%, #D91AD9 100%);
+    background: var(--dt-brand-color);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -295,7 +294,7 @@ onMounted(() => {
   min-height: 560px;
   background: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--dt-shadow-2);
   overflow: hidden;
   position: relative;
   z-index: 1;
@@ -326,14 +325,14 @@ onMounted(() => {
 .logo {
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, #277EFB 0%, #165DFF 100%);
+  background: var(--dt-brand-color);
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 1;
-  box-shadow: 0 8px 24px rgba(39, 126, 251, 0.35);
+  box-shadow: var(--dt-shadow-brand);
 
   .el-icon {
     font-size: 28px;
@@ -344,10 +343,9 @@ onMounted(() => {
 .logo-glow {
   position: absolute;
   inset: -4px;
-  background: linear-gradient(135deg, #277EFB 0%, #165DFF 100%);
+  background: var(--dt-brand-color);
   border-radius: 18px;
-  filter: blur(12px);
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 h1 {
@@ -445,7 +443,7 @@ h1 {
   input {
     background: #fff;
     border-color: #277EFB;
-    box-shadow: 0 0 0 3px rgba(39, 126, 251, 0.1);
+    box-shadow: var(--dt-shadow-brand);
   }
 }
 
@@ -459,7 +457,7 @@ h1 {
 .checkbox-wrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--dt-spacing-sm);
   cursor: pointer;
 
   input {
@@ -490,7 +488,7 @@ h1 {
   }
 
   input:checked + .checkbox-custom {
-    background: linear-gradient(135deg, #277EFB 0%, #165DFF 100%);
+    background: var(--dt-brand-color);
     border-color: #277EFB;
 
     &::after {
@@ -531,8 +529,7 @@ h1 {
   border-radius: 10px;
   cursor: pointer;
   margin-top: 8px;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 14px rgba(39, 126, 251, 0.35);
+  transition: background-color 0.25s, opacity 0.25s;
   overflow: hidden;
   position: relative;
 
@@ -546,22 +543,14 @@ h1 {
   }
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(39, 126, 251, 0.45);
-
     &::before {
       opacity: 1;
     }
   }
 
-  &:active {
-    transform: translateY(0);
-  }
-
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
-    transform: none;
   }
 
   .btn-text {
@@ -579,7 +568,7 @@ h1 {
   }
 
   &:hover .btn-arrow {
-    transform: translateX(3px);
+    opacity: 0.8;
   }
 
   .btn-loading {
@@ -596,19 +585,10 @@ h1 {
     height: 8px;
     background: #fff;
     border-radius: 50%;
-    animation: loadingBounce 1.4s ease-in-out infinite both;
+    opacity: 0.6;
 
-    &:nth-child(1) { animation-delay: -0.32s; }
-    &:nth-child(2) { animation-delay: -0.16s; }
-  }
-}
-
-@keyframes loadingBounce {
-  0%, 80%, 100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
+    &:nth-child(1) { opacity: 0.4; }
+    &:nth-child(2) { opacity: 0.9; }
   }
 }
 
@@ -623,7 +603,7 @@ h1 {
 /* 品牌展示区 */
 .brand-showcase {
   width: 380px;
-  background: linear-gradient(135deg, #277EFB 0%, #165DFF 100%);
+  background: var(--dt-brand-color);
   padding: 48px 40px;
   display: flex;
   align-items: center;
@@ -672,12 +652,10 @@ h1 {
   padding: 14px 20px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  backdrop-filter: blur(10px);
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 
   &:hover {
     background: rgba(255, 255, 255, 0.15);
-    transform: translateX(4px);
   }
 
   .el-icon {
@@ -705,8 +683,7 @@ h1 {
   border-radius: 12px;
   cursor: pointer;
   color: #6b7280;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s;
+  transition: background-color 0.2s;
   z-index: 10;
 
   .el-icon {
@@ -714,8 +691,7 @@ h1 {
   }
 
   &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    background: #f5f5f5;
   }
 }
 
@@ -748,7 +724,7 @@ h1 {
 
   .login-container {
     background: #1a1a2e;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--dt-shadow-2);
   }
 
   .login-card {
@@ -794,7 +770,7 @@ h1 {
   }
 
   .brand-showcase {
-    background: linear-gradient(135deg, #1a3a6e 0%, #0f2557 100%);
+    background: var(--dt-brand-color);
   }
 
   .theme-toggle {

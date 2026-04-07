@@ -255,8 +255,8 @@ const formatTime = (time) => {
 .session-item {
   display: flex;
   align-items: center;
-  height: 72px; /* 增大高度增加呼吸感 */
-  padding: 0 var(--dt-spacing-lg); /* 增加左右padding */
+  height: 64px; /* 钉钉规范：会话列表项高度 64px */
+  padding: 0 var(--dt-spacing-lg);
   cursor: pointer;
   position: relative;
   transition: all var(--dt-transition-fast);

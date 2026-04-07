@@ -860,7 +860,7 @@ onUnmounted(() => {
 // ============================================================================
 .wb-sidebar {
   width: 220px;
-  background: linear-gradient(180deg, var(--dt-bg-card) 0%, var(--dt-bg-body) 100%);
+  background: var(--dt-bg-card);
   border-right: 1px solid var(--dt-border-light);
   display: flex;
   flex-direction: column;
@@ -1022,10 +1022,6 @@ onUnmounted(() => {
     color: var(--dt-text-primary);
     margin: 0;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--dt-text-primary) 0%, var(--dt-brand-color) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
   &__date {
@@ -1113,12 +1109,9 @@ onUnmounted(() => {
   &:hover {
     background: var(--dt-bg-card);
     border-color: var(--dt-brand-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(39, 126, 251, 0.1);
 
     .app-item__icon {
-      box-shadow: 0 4px 12px rgba(39, 126, 251, 0.25);
-      transform: scale(1.08);
+      opacity: 0.9;
     }
   }
 
@@ -1129,8 +1122,7 @@ onUnmounted(() => {
     @include flex-center;
     font-size: var(--dt-icon-size-xl);
     background: var(--dt-bg-body);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    transition: all var(--dt-transition-base);
+    transition: opacity var(--dt-transition-base);
 
     &--sm {
       width: 40px;
@@ -1246,11 +1238,11 @@ onUnmounted(() => {
 }
 
 .attendance-card {
-  background: linear-gradient(135deg, var(--dt-bg-card) 0%, var(--dt-brand-lighter) 100%);
+  background: var(--dt-bg-card);
   border-radius: var(--dt-radius-xl);
   padding: var(--dt-spacing-2xl);
   text-align: center;
-  box-shadow: 0 4px 16px rgba(39, 126, 251, 0.1);
+  box-shadow: var(--dt-shadow-2);
   margin-bottom: var(--dt-spacing-xl);
   border: 1px solid var(--dt-border-light);
 }
@@ -1266,7 +1258,7 @@ onUnmounted(() => {
   background: var(--dt-bg-card);
   @include flex-center;
   margin: 0 auto var(--dt-spacing-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--dt-shadow-2);
 
   &.status-done {
     background: var(--dt-success-bg);
@@ -1331,7 +1323,7 @@ onUnmounted(() => {
 
   &:hover {
     border-color: var(--dt-brand-light);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--dt-shadow-2);
   }
 
   .attendance-date {
@@ -1385,7 +1377,7 @@ onUnmounted(() => {
 
   &:hover {
     border-color: var(--dt-brand-light);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--dt-shadow-2);
     transform: translateX(4px);
   }
 
@@ -1452,7 +1444,7 @@ onUnmounted(() => {
 
   &:hover {
     border-color: var(--dt-brand-light);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--dt-shadow-2);
     transform: translateX(4px);
   }
 

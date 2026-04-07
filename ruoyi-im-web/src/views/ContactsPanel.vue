@@ -292,7 +292,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .contacts-sidebar {
   width: var(--dt-session-panel-width);
   height: 100%;
-  background: linear-gradient(180deg, var(--dt-bg-card) 0%, rgba(39, 126, 251, 0.03) 100%);
+  background: var(--dt-bg-card);
   border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column; flex-shrink: 0;
 
@@ -317,7 +317,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
     border-radius: var(--dt-radius-md); cursor: pointer; transition: all var(--dt-transition-base); margin: 2px var(--dt-spacing-xs);
     &:hover { background: var(--dt-bg-session-hover); }
     &.active {
-      background: linear-gradient(90deg, var(--dt-brand-lighter) 0%, transparent 100%);
+      background: var(--dt-brand-bg);
       color: var(--dt-brand-color);
       font-weight: var(--dt-font-weight-semibold);
       position: relative;
@@ -441,15 +441,12 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
   align-items: center;
   gap: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
 
   &:hover {
     border-color: var(--dt-brand-color);
-    box-shadow: var(--dt-shadow-2);
-    transform: translateY(-2px);
     .chat-shortcut {
       opacity: 1;
-      transform: scale(1);
     }
   }
 
@@ -487,8 +484,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transform: scale(0.8);
-    transition: all 0.2s ease;
+    transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
     border: none;
     cursor: pointer;
 

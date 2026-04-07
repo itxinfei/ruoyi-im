@@ -833,7 +833,7 @@ onMounted(() => {
   padding: 0 16px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   border-bottom: 1px solid var(--dt-border-light);
 }
 
@@ -978,7 +978,7 @@ onMounted(() => {
 /* 图片预览区 - 钉钉风格 */
 .image-preview-bar {
   display: flex;
-  gap: 10px;
+  gap: var(--dt-spacing-sm);
   padding: 12px 20px;
   background-color: var(--dt-bg-body);
   overflow-x: auto;

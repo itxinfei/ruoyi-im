@@ -210,12 +210,11 @@ const handleSubmit = async () => {
       &:hover {
         background: var(--dt-brand-hover);
         border-color: var(--dt-brand-hover);
-        transform: translateY(-1px);
         box-shadow: var(--dt-shadow-brand-strong);
       }
 
       &:active {
-        transform: translateY(0);
+        background: var(--dt-brand-active);
       }
     }
   }

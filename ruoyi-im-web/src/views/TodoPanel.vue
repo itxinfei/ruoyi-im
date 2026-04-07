@@ -273,7 +273,7 @@ onMounted(() => loadTodos())
 
 <style scoped lang="scss">
 .todo-panel { display: flex; height: 100%; flex: 1; background: var(--dt-bg-body); }
-.todo-sidebar { width: var(--dt-contact-panel-width, 240px); background: linear-gradient(180deg, var(--dt-bg-card) 0%, rgba(39, 126, 251, 0.03) 100%); border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; }
+.todo-sidebar { width: var(--dt-contact-panel-width, 240px); background: var(--dt-bg-card); border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; }
 .sidebar-header { padding: var(--dt-spacing-lg) var(--dt-spacing-xl); .sidebar-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); } }
 .sidebar-content { flex: 1; padding: var(--dt-spacing-sm) var(--dt-spacing-md); overflow-y: auto;
   .nav-section { margin-bottom: var(--dt-spacing-lg);
@@ -282,7 +282,7 @@ onMounted(() => loadTodos())
   .nav-item { display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 44px; box-sizing: border-box; border-radius: var(--dt-radius-md); cursor: pointer; color: var(--dt-text-primary); transition: all var(--dt-transition-base); margin: 2px var(--dt-spacing-xs);
     &:hover { background: var(--dt-bg-session-hover); }
     &.active {
-      background: linear-gradient(90deg, var(--dt-brand-lighter) 0%, transparent 100%);
+      background: var(--dt-brand-bg);
       color: var(--dt-brand-color);
       font-weight: var(--dt-font-weight-semibold);
       position: relative;
@@ -300,14 +300,14 @@ onMounted(() => loadTodos())
     }
     .nav-icon { font-size: var(--dt-icon-size-lg); }
     .nav-label { flex: 1; font-size: var(--dt-font-size-base); }
-    .nav-badge { background: var(--dt-error-color); color: var(--dt-text-white); padding: 0 var(--dt-spacing-xs); border-radius: var(--dt-radius-full); font-size: var(--dt-font-size-xs); transform: scale(0.85); min-width: 18px; text-align: center;
+    .nav-badge { background: var(--dt-error-color); color: var(--dt-text-white); padding: 0 var(--dt-spacing-xs); border-radius: var(--dt-radius-full); font-size: var(--dt-font-size-xs); min-width: 18px; text-align: center;
       &.cat { background: var(--dt-brand-color); }
     }
   }
 }
 .sidebar-footer { padding: var(--dt-spacing-lg); border-top: 1px solid var(--dt-border-light);
-  .add-todo-btn { width: 100%; height: var(--dt-btn-height-md); background: var(--dt-brand-color); color: var(--dt-text-white); border: none; border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; gap: var(--dt-spacing-sm); font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); cursor: pointer; transition: all var(--dt-transition-fast);
-    &:hover { background: var(--dt-brand-hover); box-shadow: var(--dt-shadow-2); }
+  .add-todo-btn { width: 100%; height: var(--dt-btn-height-md); background: var(--dt-brand-color); color: var(--dt-text-white); border: none; border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; gap: var(--dt-spacing-sm); font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); cursor: pointer; transition: background-color var(--dt-transition-fast);
+    &:hover { background: var(--dt-brand-hover); }
   }
 }
 .todo-main { flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); overflow: hidden; }
@@ -319,8 +319,8 @@ onMounted(() => loadTodos())
 }
 .todo-content-scroller { flex: 1; padding: var(--dt-spacing-lg) var(--dt-spacing-xl); overflow-y: auto; background: var(--dt-bg-body); }
 .todo-list { display: flex; flex-direction: column; gap: var(--dt-spacing-md); }
-.todo-card { background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: var(--dt-spacing-lg); display: flex; align-items: flex-start; gap: var(--dt-spacing-lg); border: 1px solid transparent; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); cursor: pointer; transition: all var(--dt-transition-fast);
-  &:hover { transform: translateX(4px); border-color: var(--dt-brand-light); box-shadow: 0 4px 12px rgba(39, 126, 251, 0.1); .todo-actions { opacity: 1; } }
+.todo-card { background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: var(--dt-spacing-lg); display: flex; align-items: flex-start; gap: var(--dt-spacing-lg); border: 1px solid transparent; box-shadow: var(--dt-shadow-1); cursor: pointer; transition: all var(--dt-transition-fast);
+  &:hover { transform: translateX(4px); border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-2); .todo-actions { opacity: 1; } }
   &.completed { opacity: 0.6; .title-text { text-decoration: line-through; } }
 }
 .todo-checkbox { flex-shrink: 0; .checkbox-inner { width: var(--dt-checkbox-size, 20px); height: var(--dt-checkbox-size, 20px); border: 2px solid var(--dt-border-color); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center;

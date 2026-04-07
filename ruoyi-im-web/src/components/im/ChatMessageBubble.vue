@@ -554,12 +554,10 @@ const formatDisplayUrl = (url) => {
   border-radius: var(--dt-radius-sm);
   object-fit: cover;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .avatar:hover {
-  transform: scale(1.05);
-  box-shadow: var(--dt-shadow-2);
+  opacity: 0.9;
 }
 .avatar-placeholder {
   width: var(--dt-avatar-size-md);
@@ -597,10 +595,10 @@ const formatDisplayUrl = (url) => {
 .quoted-message-preview {
   background-color: var(--dt-bg-hover);
   border-left: 3px solid var(--dt-brand-color);
-  padding: 6px 10px;
+  padding: 6px 12px;
   margin-bottom: 6px;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -829,12 +827,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .voice-wave.active {
-  animation: voice-wave-pulse 0.8s ease-in-out infinite;
-}
-
-@keyframes voice-wave-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  opacity: 0.9;
 }
 
 .voice-duration {
@@ -1063,7 +1056,7 @@ const formatDisplayUrl = (url) => {
 
 .status-icon.is-loading {
   color: var(--dt-text-icon);
-  animation: rotate 1s linear infinite;
+  opacity: 0.7;
 }
 
 .status-icon.is-failed {
@@ -1072,7 +1065,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .status-icon.is-failed:hover {
-  transform: scale(1.1);
+  opacity: 0.7;
 }
 
 .read-status {
@@ -1108,14 +1101,14 @@ const formatDisplayUrl = (url) => {
   top: -36px;
   z-index: 10;
   opacity: 0;
-  transform: translateY(4px) scale(0.95);
-  transition: all 0.15s ease;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
   pointer-events: none;
 }
 
 .bubble-and-actions:hover .action-bar {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
   pointer-events: auto;
 }
 
@@ -1149,7 +1142,6 @@ const formatDisplayUrl = (url) => {
 }
 
 .action-item:active {
-  transform: scale(0.95);
   background-color: var(--dt-brand-bg-dark);
 }
 
@@ -1184,8 +1176,8 @@ const formatDisplayUrl = (url) => {
   box-shadow: var(--dt-shadow-float);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(4px) scale(0.95);
-  transition: all var(--dt-transition-fast);
+  transform: translateY(4px);
+  transition: opacity var(--dt-transition-fast), transform var(--dt-transition-fast);
   z-index: 20;
 
   .is-me & {
@@ -1202,7 +1194,7 @@ const formatDisplayUrl = (url) => {
     position: absolute;
     top: 100%;  /* 箭头在面板底部 */
     left: 50%;
-    transform: translateX(-50%);
+    margin-left: -4px;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
     border-top: 4px solid var(--dt-bg-card);
@@ -1214,27 +1206,22 @@ const formatDisplayUrl = (url) => {
 .reaction-panel:hover {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
 }
 
 .quick-emoji {
   font-size: 18px;
   cursor: pointer;
-  transition: transform var(--dt-transition-fast);
+  transition: background-color var(--dt-transition-fast);
   padding: 2px;
   border-radius: var(--dt-radius-xs);
 
   &:hover {
-    transform: scale(1.3);
     background-color: var(--dt-bg-hover);
   }
 
   &.is-active {
     background-color: var(--dt-brand-bg);
   }
-}
-
-@keyframes rotate {
-  100% { transform: rotate(360deg); }
 }
 </style>

@@ -269,7 +269,7 @@ onMounted(loadUser)
 
   .hero-bg {
     height: var(--dt-profile-bg-height, 120px);
-    background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 50%, var(--dt-brand-light) 100%);
+    background: var(--dt-brand-color);
     position: relative;
 
     &::after {
@@ -279,7 +279,7 @@ onMounted(loadUser)
       left: 0;
       right: 0;
       height: var(--dt-gradient-overlay-height, 40px);
-      background: linear-gradient(to bottom, transparent, var(--dt-bg-card));
+      background: var(--dt-bg-card);
     }
   }
 
@@ -297,12 +297,10 @@ onMounted(loadUser)
       border-radius: var(--dt-radius-lg);
       cursor: pointer;
       overflow: hidden;
-      box-shadow: var(--dt-shadow-3);
-      transition: all var(--dt-transition-base);
+      transition: opacity var(--dt-transition-base);
 
       &:hover {
-        transform: scale(1.05);
-        box-shadow: var(--dt-shadow-4);
+        opacity: 0.9;
       }
 
       .avatar-mask {
@@ -489,7 +487,7 @@ onMounted(loadUser)
     border-color: var(--dt-border-dark);
 
     .hero-bg {
-      background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 50%, var(--dt-brand-light) 100%);
+      background: var(--dt-brand-color);
     }
 
     .user-basic .nickname-row .nickname {

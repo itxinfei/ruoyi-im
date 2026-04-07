@@ -738,7 +738,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     inset: 0;
     border-radius: inherit;
     border: 2px solid var(--dt-brand-color);
-    animation: speakingPulse 1.5s ease-in-out infinite;
+    opacity: 0.8;
   }
 
   &.empty-slot {
@@ -836,7 +836,6 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 
     &:hover {
       background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
     }
   }
 
@@ -873,10 +872,5 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   align-items: center;
   gap: var(--dt-spacing-sm);
   padding: 4px 0;
-}
-
-@keyframes speakingPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }
 </style>

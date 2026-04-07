@@ -64,10 +64,10 @@ const handleClick = () => {
   display: flex;
   align-items: center;
   height: 36px;
-  padding: 0 10px;
+  padding: 0 var(--dt-spacing-sm);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 
   &:hover {
     background: var(--dt-bg-hover);
@@ -99,7 +99,7 @@ const handleClick = () => {
 
   .type-icon {
     font-size: 18px;
-    margin-right: 10px;
+    margin-right: var(--dt-spacing-sm);
     color: var(--dt-text-secondary);
     &.COMPANY {
       color: var(--dt-brand-color);

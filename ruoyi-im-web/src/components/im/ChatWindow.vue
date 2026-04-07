@@ -700,7 +700,7 @@ const scrollToMessage = (messageId) => {
 <style scoped>
 .chat-window { display: flex; flex-direction: column; height: 100%; background-color: var(--dt-bg-chat); position: relative; }
 .chat-header {
-  height: 56px;
+  height: var(--dt-chat-header-height); /* 钉钉规范：60px */
   padding: 0 20px;
   display: flex;
   align-items: center;
@@ -766,7 +766,7 @@ const scrollToMessage = (messageId) => {
 }
 
 .header-right :deep(.el-dropdown-menu__item) {
-  padding: 10px 14px;
+  padding: var(--dt-spacing-sm) var(--dt-spacing-md);
   border-radius: var(--dt-radius-lg);
   font-size: var(--dt-font-size-base);
   color: var(--dt-text-primary);
@@ -863,7 +863,7 @@ const scrollToMessage = (messageId) => {
 
 /* 对齐钉钉输入区高度约束: 最低 180px，最高不超过聊天区的 40% */
 :deep(.chat-input-wrapper) {
-  min-height: 180px;
+  min-height: var(--dt-input-min-height);
   max-height: 40%;
 }
 </style>

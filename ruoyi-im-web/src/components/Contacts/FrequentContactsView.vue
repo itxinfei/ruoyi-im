@@ -240,7 +240,6 @@ onMounted(() => {
   &:hover {
     box-shadow: var(--dt-shadow-card-hover);
     border-color: var(--dt-brand-light);
-    transform: translateY(-2px);
 
     .action-section {
       opacity: 1;

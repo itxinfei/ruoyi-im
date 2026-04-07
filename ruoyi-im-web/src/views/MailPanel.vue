@@ -351,12 +351,10 @@ onMounted(() => {
 
 .compose-btn:hover {
   background: var(--dt-brand-hover);
-  transform: translateY(var(--dt-transform-y, -1px));
-  box-shadow: var(--dt-shadow-2);
 }
 
 .compose-btn:active {
-  transform: translateY(0);
+  opacity: 0.9;
 }
 
 .panel-content {

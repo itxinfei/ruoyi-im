@@ -40,7 +40,7 @@
 
 @mixin interactive {
   cursor: pointer;
-  transition: all var(--dt-transition-base);
+  transition: opacity var(--dt-transition-base);
 
   &:hover {
     opacity: 0.85;
@@ -48,7 +48,6 @@
 
   &:active {
     opacity: 0.7;
-    transform: scale(0.98);
   }
 }
 

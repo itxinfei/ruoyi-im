@@ -191,12 +191,7 @@ const getBarHeight = (index) => {
     }
 
     &:hover {
-      transform: scale(1.08);
       box-shadow: var(--dt-shadow-brand);
-    }
-
-    &:active {
-      transform: scale(0.95);
     }
   }
 
@@ -217,21 +212,15 @@ const getBarHeight = (index) => {
     }
   }
 
-  // 播放时波形动画 (钉钉风格：非对称随机跳动)
+  // 播放时波形动画 (使用 opacity 变化，符合规范)
   &.playing .waveform-bar {
-    animation: waveform-jump 0.6s ease-in-out infinite alternate;
+    transition: opacity 0.3s ease;
 
     @for $i from 1 through 24 {
       &:nth-child(#{$i}) {
-        animation-delay: #{$i * 0.03}s;
-        animation-duration: calc(0.4s + #{math.random(4)} * 0.1s);
+        opacity: #{0.4 + math.random(6) * 0.1};
       }
     }
-  }
-
-  @keyframes waveform-jump {
-    from { transform: scaleY(0.5); }
-    to { transform: scaleY(1.2); }
   }
 
   // 时长

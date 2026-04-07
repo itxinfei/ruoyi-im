@@ -384,7 +384,7 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
   .remote-track {
     width: 100%; height: 100%; position: relative;
     .video-element { width: 100%; height: 100%; object-fit: cover; }
-    .video-mask { position: absolute; inset: 0; @include flex-center; flex-direction: column; background: var(--dt-overlay-bg); backdrop-filter: blur(10px); }
+    .video-mask { position: absolute; inset: 0; @include flex-center; flex-direction: column; background: var(--dt-overlay-bg); }
   }
   .local-track {
     position: absolute; top: var(--dt-spacing-lg); right: var(--dt-spacing-lg); width: 140px; height: 180px;
@@ -399,7 +399,7 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
     position: relative; margin-bottom: var(--dt-spacing-xl);
     &.animating::after {
       content: ''; position: absolute; inset: -15px; border-radius: var(--dt-radius-full); border: 2px solid var(--dt-brand-color);
-      animation: ripple 2s infinite; opacity: 0;
+      opacity: 0;
     }
   }
   .peer-name { font-size: 24px; font-weight: 600; margin: var(--dt-spacing-md) 0; }
@@ -418,19 +418,14 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
   @include button-reset; display: flex; flex-direction: column; align-items: center; gap: 8px;
   .icon-circle {
     width: 64px; height: 64px; border-radius: var(--dt-radius-full); @include flex-center; font-size: 28px;
-    background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); transition: all 0.2s;
-    &:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+    background: rgba(255,255,255,0.1); transition: background-color 0.2s;
+    &:hover { background: rgba(255,255,255,0.2); }
   }
   span { font-size: 13px; color: var(--dt-text-white); opacity: 0.8; }
 
   &.accept .icon-circle { background: var(--dt-success-color); &:hover { background: var(--dt-brand-hover); } }
-  &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: var(--dt-error-color); filter: brightness(1.2); } .el-icon { transform: rotate(135deg); } }
+  &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: var(--dt-error-color); } .el-icon { transform: rotate(135deg); } }
   &.active .icon-circle { background: var(--dt-text-white); color: var(--dt-text-primary); }
   .icon-circle.gray { background: var(--dt-text-tertiary-dark); }
-}
-
-@keyframes ripple {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.5); opacity: 0; }
 }
 </style>

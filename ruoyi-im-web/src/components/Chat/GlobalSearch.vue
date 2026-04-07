@@ -357,7 +357,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     color: var(--dt-text-white);
-    margin-right: 10px;
+    margin-right: var(--dt-spacing-sm);
     font-size: var(--dt-font-size-base);
   }
 
