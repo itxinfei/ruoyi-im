@@ -291,7 +291,16 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
             BusinessExceptionHelper.throwNotGroupMember();
         }
 
-        // 任何成员都可以移动文件
+        // 验证权限：只有上传者、群主、管理员可以移动文件
+        String role = member.getRole();
+        boolean isOwner = "OWNER".equals(role);
+        boolean isAdmin = "ADMIN".equals(role);
+        boolean isUploader = groupFile.getUploaderId().equals(userId);
+
+        if (!isOwner && !isAdmin && !isUploader) {
+            BusinessExceptionHelper.throwOnlyOwnerAdminOrUploaderCanEditFile();
+        }
+
         groupFile.setCategory(category);
         groupFileMapper.updateById(groupFile);
     }

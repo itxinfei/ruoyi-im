@@ -561,6 +561,17 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             }
         }
 
+        // 验证文件归属：只有文件所有者才能移动文件
+        for (Long fileId : request.getFileIds()) {
+            ImCloudFile file = cloudFileMapper.selectById(fileId);
+            if (file == null) {
+                BusinessExceptionHelper.throwFileNotFound();
+            }
+            if (!file.getUploaderId().equals(userId)) {
+                BusinessExceptionHelper.throwNoPermission("无权移动该文件");
+            }
+        }
+
         cloudFileMapper.batchUpdateFolder(request.getFileIds(), request.getTargetFolderId());
         logger.info("移动文件成功: fileCount={}, targetFolderId={}",
                 request.getFileIds().size(), request.getTargetFolderId());
